@@ -1,0 +1,173 @@
+{
+  "$schema": "./schema-v0.json",
+  "schemaVersion": "fairyc.result-fixtures/v0",
+  "deferred": [
+    "Ok and Err construction until variant-constructor syntax is accepted",
+    "resource payload move and drop traces until MIR fixtures exist",
+    "match handling until the typed pattern contract is executable"
+  ],
+  "contracts": [
+    "docs/product/02-spec.md",
+    "docs/adr/0012-stage-0-region-and-result-fixture-contracts.md",
+    "docs/language/0004-results-traps-and-control-flow.md",
+    "docs/mir/drop-elaboration-v0.md",
+    "docs/diagnostics/catalog-v0.md"
+  ],
+  "cases": [
+    {
+      "id": "pass.flow.return-result",
+      "sourceRoot": "cases/pass/return-result/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow",
+        "handling": [
+          {
+            "expression": {
+              "source": "main.fy",
+              "startByte": 108,
+              "endByte": 113
+            },
+            "mode": "return",
+            "resultType": "Result<i32, Error>",
+            "successType": "i32",
+            "errorType": "Error",
+            "evaluationCount": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.flow.discard-result",
+      "sourceRoot": "cases/pass/discard-result/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow",
+        "handling": [
+          {
+            "expression": {
+              "source": "main.fy",
+              "startByte": 100,
+              "endByte": 105
+            },
+            "mode": "discard",
+            "resultType": "Result<i32, Error>",
+            "successType": "i32",
+            "errorType": "Error",
+            "evaluationCount": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.flow.propagate-result",
+      "sourceRoot": "cases/pass/propagate-result/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow",
+        "handling": [
+          {
+            "expression": {
+              "source": "main.fy",
+              "startByte": 168,
+              "endByte": 174
+            },
+            "mode": "propagate",
+            "resultType": "Result<i32, Error>",
+            "successType": "i32",
+            "errorType": "Error",
+            "evaluationCount": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.unused-result",
+      "sourceRoot": "cases/fail/unused-result/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "flow",
+        "diagnostics": [
+          {
+            "code": "E4101",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 93,
+              "endByte": 98
+            },
+            "related": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.question-non-result",
+      "sourceRoot": "cases/fail/question-non-result/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          {
+            "code": "E4102",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 55,
+              "endByte": 56
+            },
+            "related": [
+              {
+                "role": "result-expression",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 50,
+                  "endByte": 55
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.incompatible-error",
+      "sourceRoot": "cases/fail/incompatible-error/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          {
+            "code": "E4103",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 229,
+              "endByte": 230
+            },
+            "related": [
+              {
+                "role": "actual-error",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 117,
+                  "endByte": 128
+                }
+              },
+              {
+                "role": "expected-error",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 188,
+                  "endByte": 199
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

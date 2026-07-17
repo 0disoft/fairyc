@@ -2,10 +2,10 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Semantic sources: `spec/grammar/stage0.ebnf`, `spec/fixtures/parser/manifest-v0.json`, `spec/fixtures/semantic/manifest-v0.json`, `spec/fixtures/resource/manifest-v0.json`, `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/catalog-v0.md`, `docs/atlas/`
+- Semantic sources: `spec/grammar/stage0.ebnf`, `spec/fixtures/parser/manifest-v0.json`, `spec/fixtures/semantic/manifest-v0.json`, `spec/fixtures/resource/manifest-v0.json`, `spec/fixtures/region/manifest-v0.json`, `spec/fixtures/result/manifest-v0.json`, `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/catalog-v0.md`, `docs/atlas/`
 - Merge-blocking validation: `VALIDATION.md`
 
-The parser, semantic, and resource fixture directories exist as versioned test data, but no parser runner or compiler implementation exists. The remaining fixture classes are future evidence requirements; this document does not claim any executable language test currently passes.
+The parser, semantic, resource, Region, and Result fixture directories exist as versioned test data, but no parser runner or compiler implementation exists. The remaining fixture classes are future evidence requirements; this document does not claim any executable language test currently passes.
 
 ## Oracle order
 
@@ -26,8 +26,8 @@ The parser, semantic, and resource fixture directories exist as versioned test d
 | Type and initialization fail | Inert/resource separation and initialized-local rules |
 | Resource flow pass and fail | `spec/fixtures/resource/` proves whole-root moves, scope obligations, branch and loop states, and deterministic `E11xx` spans once a runner exists; consuming close and double-drop execution remain future groups |
 | Borrow-origin pass and fail | Local last-use loans, conflicts, single-origin return, and storage bans |
-| Region pass and fail | Escape prevention, capability storage ban, and no `NeedsDrop` allocation |
-| Result pass and fail | Must-use behavior, `?` lowering, payload moves, and cleanup on propagation |
+| Region pass and fail | `spec/fixtures/region/` proves parameter origins, permitted returns, capability restrictions, and no `NeedsDrop` placement once a runner exists; lexical local escape is deferred pending stdlib fixture identity |
+| Result pass and fail | `spec/fixtures/result/` proves return, discard, must-use behavior, `?` classification, exactly-once evaluation, and error compatibility once a runner exists; constructors and payload traces remain deferred |
 | Built-in tagged resources | `Ok`, `Err`, `Some`, discard, match, propagation, early return, and nested active-payload drop traces |
 | MIR verifier mutation | Every `Vxxxx` invariant rejects a deliberately malformed graph |
 | MIR interpreter run and trap | Scalar results, branches, moves, drop traces, region reset, and trap categories |
@@ -50,6 +50,8 @@ Semantic fail fixtures list every independent diagnostic after cascade suppressi
 
 Resource fixtures sample complete-root state immediately before or after a source span. They assert that `Live` owns one cleanup obligation, `Dead` owns zero, and a source-visible `MaybeLive` join is rejected. MIR drop flags and executable drop order remain separate fixture contracts.
 
+Region fixtures expose hidden origins and capability failures without pretending a user-declared `Arena` is the standard-library arena. Result fixtures accept typed parameters so they can test handling without choosing `Ok` or `Err` constructor syntax. Each manifest lists its deferred coverage explicitly.
+
 ## Differential matrix
 
 The first planned matrix targets `x86_64-linux-gnu`, uses the MIR interpreter plus generated C, and compares Clang with GCC at low and optimized profiles. Exact compiler and glibc baselines remain UNDECIDED. Fairy-to-C and C-to-Fairy fixture directions are both mandatory. A new target or backend cannot replace the interpreter and reference-C oracles merely because its outputs agree with itself.
@@ -66,6 +68,7 @@ Parser, type, Flow CFG, MIR verifier, and schema fuzzing are later configured va
 - A grammar, literal, precedence, or recovery change updates prose without changing `spec/grammar/stage0.ebnf` and the parser manifest in the same review.
 - A resolution, typing, or Flow rule changes without a schema-compatible semantic pass or fail fixture and synchronized diagnostic meaning.
 - A whole-root ownership rule changes without synchronized resource-state assertions, `E11xx` spans, and drop-elaboration review.
+- A Region or Result rule changes without its dedicated manifest, deferred-coverage review, `E31xx` or `E41xx` spans, and MIR-lowering review.
 - A backend test compares only generated text instead of executable behavior where execution is available.
 - A diagnostic code changes meaning without the catalog and compile-fail fixtures changing together.
 - A trap, move, or cleanup result differs by optimization profile.

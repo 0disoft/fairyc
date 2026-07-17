@@ -14,6 +14,8 @@
 - Parser fixture route: spec/fixtures/parser/manifest-v0.json
 - Semantic fixture route: spec/fixtures/semantic/manifest-v0.json
 - Resource Flow fixture route: spec/fixtures/resource/manifest-v0.json
+- Region fixture route: spec/fixtures/region/manifest-v0.json
+- Result fixture route: spec/fixtures/result/manifest-v0.json
 - MIR and C backend route: docs/mir/
 - Target and C ABI route: docs/abi/
 - Runtime and standard-library route: docs/runtime/

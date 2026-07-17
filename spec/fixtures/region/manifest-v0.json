@@ -1,0 +1,142 @@
+{
+  "$schema": "./schema-v0.json",
+  "schemaVersion": "fairyc.region-fixtures/v0",
+  "deferred": [
+    "E3101 lexical local-region escape until stdlib package fixture identity is fixed",
+    "cross-thread transfer until a Stage 0 concurrency model exists"
+  ],
+  "contracts": [
+    "docs/product/02-spec.md",
+    "docs/adr/0012-stage-0-region-and-result-fixture-contracts.md",
+    "docs/language/0003-regions-and-arenas.md",
+    "docs/runtime/runtime-stdlib-v0.md",
+    "docs/diagnostics/catalog-v0.md"
+  ],
+  "cases": [
+    {
+      "id": "pass.flow.param-local-use",
+      "sourceRoot": "cases/pass/param-local-use/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow",
+        "origins": [
+          {
+            "operation": "place",
+            "allocation": {
+              "source": "main.fy",
+              "startByte": 83,
+              "endByte": 103
+            },
+            "origin": "RegionParam(0)",
+            "lastUse": {
+              "source": "main.fy",
+              "startByte": 110,
+              "endByte": 116
+            },
+            "escapes": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.flow.param-return",
+      "sourceRoot": "cases/pass/param-return/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow",
+        "origins": [
+          {
+            "operation": "place",
+            "allocation": {
+              "source": "main.fy",
+              "startByte": 66,
+              "endByte": 86
+            },
+            "origin": "RegionParam(0)",
+            "escapes": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.resource-placement",
+      "sourceRoot": "cases/fail/resource-placement/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "flow",
+        "diagnostics": [
+          {
+            "code": "E3102",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 159,
+              "endByte": 179
+            },
+            "related": [
+              {
+                "role": "type",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 23,
+                  "endByte": 28
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.capability-storage",
+      "sourceRoot": "cases/fail/capability-storage/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          {
+            "code": "E3103",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 43,
+              "endByte": 49
+            },
+            "related": [
+              {
+                "role": "capability",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 34,
+                  "endByte": 41
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.direct-construction",
+      "sourceRoot": "cases/fail/direct-construction/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          {
+            "code": "E3104",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 62,
+              "endByte": 71
+            },
+            "related": []
+          }
+        ]
+      }
+    }
+  ]
+}

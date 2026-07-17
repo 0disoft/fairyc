@@ -3,6 +3,7 @@
 - Status: Draft Stage 0 contract
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0003-stage-0-safety-boundary.md`
+- Result fixtures: `spec/fixtures/result/manifest-v0.json`
 
 ## Evaluation order
 
@@ -19,6 +20,8 @@ The explicit discard spelling is `discard expression;`. Discarding `Option` or `
 ## Propagation
 
 `expr?` evaluates `expr` once, branches on the result tag, moves the success payload into the continuation, and moves the error payload into the function return path. Normal cleanup for every exited scope runs before that return. No backend receives a `?` operator.
+
+Result fixtures classify an expression as returned, discarded, or propagated, record canonical success and error types, and assert exactly-once evaluation. They accept typed `Result` parameters so no fixture invents `Ok` or `Err` constructor syntax. Active resource-payload moves and cleanup order remain MIR and runtime assertions.
 
 ## Normal exits
 

@@ -18,5 +18,9 @@ This directory contains versioned normative data that future compiler tests can 
 - `fixtures/resource/schema-v0.json`: whole-root resource-state expectation schema;
 - `fixtures/resource/manifest-v0.json`: move, cleanup-obligation, join, and loop case index;
 - `fixtures/resource/cases/`: parser-, resolver-, and type-valid resource Flow mini-packages.
+- `fixtures/region/schema-v0.json`: Region origin and capability expectation schema;
+- `fixtures/region/manifest-v0.json`: parameter-origin and Region restriction cases plus explicit deferrals;
+- `fixtures/result/schema-v0.json`: Result handling and propagation expectation schema;
+- `fixtures/result/manifest-v0.json`: return, discard, `?`, and must-use cases plus explicit deferrals.
 
 Explanatory language documents may summarize these files but cannot silently change spelling, grouping, module identity, semantic phase ownership, canonical facts, spans, or recovery acceptance. A contract change updates the normative data, ADR, diagnostics, and affected fixtures together.

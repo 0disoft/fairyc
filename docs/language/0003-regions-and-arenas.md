@@ -3,6 +3,7 @@
 - Status: Draft Stage 0 contract
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0003-stage-0-safety-boundary.md`
+- Region fixtures: `spec/fixtures/region/manifest-v0.json`
 
 ## Region capability
 
@@ -23,6 +24,8 @@ The Stage 0 allocation surface is limited to zero-initialized bytes, copied byte
 Allocation returns a safe borrow whose origin is the region. The referent cannot be moved out as an owned value unless the type and operation explicitly copy it. A region-derived borrow cannot be stored anywhere that outlives the region or returned unless the region is itself a declared input origin of the current function.
 
 The compiler reports both the allocation span and the attempted escape span.
+
+Region fixtures expose the compiler-known allocation operation, hidden origin, optional last use, and return escape decision. They do not expose addresses, arena offsets, Flow block numbers, or MIR locals. The first suite uses `Region` parameters; a lexical local-region escape case waits for a non-invented standard-library package dependency contract.
 
 ## Plain-region element rule
 

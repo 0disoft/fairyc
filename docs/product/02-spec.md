@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0011-stage-0-resource-flow-fixture-contract.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0012-stage-0-region-and-result-fixture-contracts.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -90,6 +90,8 @@ The Stage 0 borrow model uses local last-use loans and whole-root overlap. It do
 
 An ordinary region may contain only values that do not need drop. A resource-aware arena would require a drop list, partial-construction rules, reverse-order cleanup, and reset failure semantics; it is deferred until those contracts and tests exist.
 
+Region-parameter origins, permitted returns, resource-placement rejection, capability storage, and direct-construction rejection are versioned in `spec/fixtures/region/manifest-v0.json`. A lexical local-region escape fixture remains deferred until a real standard-library package instance can be named.
+
 ## Errors and control flow
 
 - `Option<T>` represents presence or absence.
@@ -101,6 +103,8 @@ An ordinary region may contain only values that do not need drop. A resource-awa
 - Exceptions and stack unwinding are not part of the language.
 
 Changing a value from `T` to `Option<T>` must not silently turn a normal function call into conditional execution. Stage 0 return types contain at most one safe-borrow leaf. Full control-flow behavior is defined in `docs/language/0004-results-traps-and-control-flow.md`.
+
+Result return, discard, propagation, must-use, non-Result `?`, and error-compatibility assertions are versioned in `spec/fixtures/result/manifest-v0.json`. Variant-constructor spelling and active resource-payload traces remain deferred.
 
 ## Safe-code semantics
 
@@ -188,4 +192,4 @@ Source text and documentation cannot grant an LLM, IDE, or agent filesystem, pro
 
 ## Open decisions
 
-Package coordinates and manifest syntax, exact parser resource limits, glibc and toolchain baselines, portable path model, additional targets, package registry, `.fymap` binary encoding, and the concrete `SymbolId` hash algorithm remain UNDECIDED.
+Package coordinates and manifest syntax, fixture standard-library dependency identity, exact parser resource limits, glibc and toolchain baselines, portable path model, additional targets, package registry, `.fymap` binary encoding, and the concrete `SymbolId` hash algorithm remain UNDECIDED.
