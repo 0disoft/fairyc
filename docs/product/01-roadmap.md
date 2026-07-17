@@ -11,7 +11,7 @@ This roadmap defines capability gates, not calendar promises. Exact durations, f
 - Freeze Stage 0 surface syntax through `spec/grammar/stage0.ebnf`, parser fixtures, semantic fixtures, resource, Region, Result Flow, verified-MIR, and resolved-package-graph fixtures, one-file modules, alias imports, restricted enums, ownership, borrow origins, regions, `Result`, evaluation order, traps, unsafe boundaries, and exclusions.
 - Freeze the first planned conformance target, `TargetSpec`, `ToolchainSpec`, C ABI v0, runtime and standard-library layer ownership, and the compatibility vector.
 - Reserve diagnostic categories and codes for rejected syntax, ownership, region, FFI, ABI, and compatibility paths.
-- Define Flow CFG, MIR v0, drop elaboration, the MIR verifier, generated-C safety rules, and compile-pass, compile-fail, run, trap, drop-trace, runtime, and bidirectional C ABI fixture formats.
+- Define Flow CFG, MIR v0, drop elaboration, the MIR verifier, isolated verifier-mutation recipes, generated-C safety rules, and compile-pass, compile-fail, run, trap, drop-trace, runtime, and bidirectional C ABI fixture formats.
 
 Exit gate: the written contracts have no contradictory syntax, initialization, ownership, cleanup, package identity, visibility, target, runtime, or compatibility rule, and every mandatory rule has an observable fixture class or an explicit dependency-gated deferral. Parser, semantic, resource, Region, Result, MIR, and package manifest cases must pass their future full runners with no unlisted independent diagnostics or observation drift.
 
@@ -22,7 +22,7 @@ Exit gate: the written contracts have no contradictory syntax, initialization, o
 - Implement Flow CFG, mutable-local MIR, drop elaboration, the verifier, target-independent layouts, and the compatibility-vector metadata model.
 - Build a small MIR interpreter covering scalar and tagged behavior, resource payloads, drop traces, region allocation, partial I/O test intrinsics, and traps.
 
-Exit gate: positive and negative fixtures agree with the source contracts, resource-bearing built-in variants have correct active-payload traces, and mutation tests demonstrate every MIR verifier invariant.
+Exit gate: positive and negative fixtures agree with the source contracts, resource-bearing built-in variants have correct active-payload traces, and every named verifier seed passes before its isolated mutation demonstrates the intended single `Vxxxx` rejection.
 
 ## Phase 2: first hosted executable slice
 

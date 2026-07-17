@@ -29,6 +29,7 @@ This scaffold does not generate implementation source code; any existing source 
 - Region fixtures: spec/fixtures/region/manifest-v0.json
 - Result fixtures: spec/fixtures/result/manifest-v0.json
 - MIR normalization fixtures: spec/fixtures/mir/manifest-v0.json
+- MIR verifier mutation fixtures: spec/fixtures/mir-verifier/manifest-v0.json
 - Resolved package graph fixtures: spec/fixtures/package/manifest-v0.json
 - Executable MIR semantics: docs/mir/*.md
 - Package identity and visibility: docs/package/*.md

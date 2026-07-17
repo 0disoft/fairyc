@@ -93,7 +93,7 @@ A `Vxxxx` failure is a compiler defect, not a user diagnostic. Release builds mu
 
 `spec/fixtures/mir/manifest-v0.json` records source-linked observations after MIR verification. It freezes ordered evaluation, non-unwinding calls, explicit moves, cleanup action order, `Result` branching, trap paths, and eliminated source-only forms without freezing block numbers, local numbers, temporary names, or textual MIR.
 
-The initial source cases do not test malformed graphs. Negative `Vxxxx` mutation coverage requires a separate serializable MIR test-input contract and cannot be inferred from parser-valid Fairy C source.
+The source cases do not test malformed graphs. `spec/fixtures/mir-verifier/manifest-v0.json` covers every current `Vxxxx` invariant through verified named seeds and one isolated mutation per case, without defining arbitrary serialized MIR.
 
 ## Interpreter
 

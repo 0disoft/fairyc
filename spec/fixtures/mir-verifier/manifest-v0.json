@@ -1,0 +1,208 @@
+{
+  "$schema": "./schema-v0.json",
+  "schemaVersion": "fairyc.mir-verifier-fixtures/v0",
+  "deferred": [
+    "arbitrary serialized MIR graph input",
+    "multiple simultaneous mutations and verifier cascade ordering",
+    "fuzz corpus encoding and minimization protocol",
+    "internal compiler error excerpt and crash-bundle rendering",
+    "backend-specific verification after MIR handoff"
+  ],
+  "contracts": [
+    "docs/product/02-spec.md",
+    "docs/adr/0015-mir-verifier-mutation-fixture-contract.md",
+    "docs/mir/mir-v0.md",
+    "docs/mir/verifier-mutation-v0.md",
+    "docs/mir/drop-elaboration-v0.md",
+    "docs/language/0003-regions-and-arenas.md"
+  ],
+  "seeds": [
+    {
+      "id": "scalar-return",
+      "baseline": "verify",
+      "entities": [
+        "block:entry",
+        "local:value",
+        "operation:return-value-use",
+        "statement:init-value",
+        "terminator:return"
+      ]
+    },
+    {
+      "id": "resource-return",
+      "baseline": "verify",
+      "entities": [
+        "block:cleanup",
+        "block:entry",
+        "flag:token-live",
+        "local:token",
+        "place:token-field",
+        "statement:clear-token-flag",
+        "statement:drop-token",
+        "statement:init-token-flag",
+        "terminator:return"
+      ]
+    },
+    {
+      "id": "borrow-return",
+      "baseline": "verify",
+      "entities": [
+        "loan:param-a",
+        "local:param-a",
+        "local:param-b",
+        "origin:param-a",
+        "origin:param-b",
+        "terminator:return"
+      ]
+    },
+    {
+      "id": "plain-region",
+      "baseline": "verify",
+      "entities": [
+        "local:inert-value",
+        "local:resource-value",
+        "operation:place-inert",
+        "region:scratch",
+        "terminator:return"
+      ]
+    },
+    {
+      "id": "checked-division",
+      "baseline": "verify",
+      "entities": [
+        "block:continuation",
+        "block:trap",
+        "operation:division",
+        "operation:min-neg-one-check",
+        "operation:zero-check",
+        "terminator:trap"
+      ]
+    },
+    {
+      "id": "normal-call",
+      "baseline": "verify",
+      "entities": [
+        "block:continuation",
+        "terminator:call"
+      ]
+    },
+    {
+      "id": "normalized-control",
+      "baseline": "verify",
+      "entities": [
+        "operation:result-switch",
+        "terminator:return"
+      ]
+    },
+    {
+      "id": "unsafe-operation",
+      "baseline": "verify",
+      "entities": [
+        "scope:unsafe-block",
+        "span:unsafe-source",
+        "terminator:return",
+        "unsafe:raw-address"
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "id": "fail.mir-verify.v1001.missing-terminator",
+      "seed": "scalar-return",
+      "mutation": { "kind": "remove-terminator", "target": "terminator:return" },
+      "expect": { "status": "reject", "codes": ["V1001"], "primaryEntity": "block:entry" }
+    },
+    {
+      "id": "fail.mir-verify.v1002.use-before-initialize",
+      "seed": "scalar-return",
+      "mutation": { "kind": "use-before-initialize", "target": "operation:return-value-use" },
+      "expect": { "status": "reject", "codes": ["V1002"], "primaryEntity": "operation:return-value-use" }
+    },
+    {
+      "id": "fail.mir-verify.v1101.duplicate-resource-discharge",
+      "seed": "resource-return",
+      "mutation": { "kind": "duplicate-resource-discharge", "target": "local:token" },
+      "expect": { "status": "reject", "codes": ["V1101"], "primaryEntity": "local:token" }
+    },
+    {
+      "id": "fail.mir-verify.v1102.missing-exit-cleanup",
+      "seed": "resource-return",
+      "mutation": { "kind": "remove-exit-cleanup", "target": "statement:drop-token" },
+      "expect": { "status": "reject", "codes": ["V1102"], "primaryEntity": "block:cleanup" }
+    },
+    {
+      "id": "fail.mir-verify.v1103.projected-resource-move",
+      "seed": "resource-return",
+      "mutation": { "kind": "move-resource-projection", "target": "place:token-field" },
+      "expect": { "status": "reject", "codes": ["V1103"], "primaryEntity": "place:token-field" }
+    },
+    {
+      "id": "fail.mir-verify.v1201.uninitialized-drop-flag",
+      "seed": "resource-return",
+      "mutation": { "kind": "remove-flag-initialization", "target": "statement:init-token-flag" },
+      "expect": { "status": "reject", "codes": ["V1201"], "primaryEntity": "flag:token-live" }
+    },
+    {
+      "id": "fail.mir-verify.v1202.drop-before-flag-clear",
+      "seed": "resource-return",
+      "mutation": { "kind": "drop-before-flag-clear", "target": "statement:clear-token-flag" },
+      "expect": { "status": "reject", "codes": ["V1202"], "primaryEntity": "statement:drop-token" }
+    },
+    {
+      "id": "fail.mir-verify.v1301.borrow-outlives-origin",
+      "seed": "borrow-return",
+      "mutation": { "kind": "extend-loan-past-origin", "target": "loan:param-a" },
+      "expect": { "status": "reject", "codes": ["V1301"], "primaryEntity": "loan:param-a" }
+    },
+    {
+      "id": "fail.mir-verify.v1302.multiple-return-origins",
+      "seed": "borrow-return",
+      "mutation": { "kind": "add-return-origin", "target": "origin:param-b" },
+      "expect": { "status": "reject", "codes": ["V1302"], "primaryEntity": "terminator:return" }
+    },
+    {
+      "id": "fail.mir-verify.v1401.region-value-escapes",
+      "seed": "plain-region",
+      "mutation": { "kind": "escape-region-value", "target": "local:inert-value" },
+      "expect": { "status": "reject", "codes": ["V1401"], "primaryEntity": "local:inert-value" }
+    },
+    {
+      "id": "fail.mir-verify.v1402.needs-drop-in-plain-region",
+      "seed": "plain-region",
+      "mutation": {
+        "kind": "allocate-needs-drop-in-plain-region",
+        "target": "operation:place-inert",
+        "supportingEntity": "local:resource-value"
+      },
+      "expect": { "status": "reject", "codes": ["V1402"], "primaryEntity": "operation:place-inert" }
+    },
+    {
+      "id": "fail.mir-verify.v1501.missing-trap-check",
+      "seed": "checked-division",
+      "mutation": {
+        "kind": "remove-required-trap-check",
+        "target": "operation:division",
+        "supportingEntity": "operation:zero-check"
+      },
+      "expect": { "status": "reject", "codes": ["V1501"], "primaryEntity": "operation:division" }
+    },
+    {
+      "id": "fail.mir-verify.v1502.call-has-unwind-successor",
+      "seed": "normal-call",
+      "mutation": { "kind": "add-unwind-successor", "target": "terminator:call" },
+      "expect": { "status": "reject", "codes": ["V1502"], "primaryEntity": "terminator:call" }
+    },
+    {
+      "id": "fail.mir-verify.v1601.source-form-remains",
+      "seed": "normalized-control",
+      "mutation": { "kind": "insert-source-form", "target": "operation:result-switch" },
+      "expect": { "status": "reject", "codes": ["V1601"], "primaryEntity": "operation:result-switch" }
+    },
+    {
+      "id": "fail.mir-verify.v1701.unsafe-provenance-missing",
+      "seed": "unsafe-operation",
+      "mutation": { "kind": "remove-unsafe-provenance", "target": "unsafe:raw-address" },
+      "expect": { "status": "reject", "codes": ["V1701"], "primaryEntity": "unsafe:raw-address" }
+    }
+  ]
+}

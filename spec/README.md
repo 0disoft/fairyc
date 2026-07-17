@@ -24,6 +24,8 @@ This directory contains versioned normative data that future compiler tests can 
 - `fixtures/result/manifest-v0.json`: return, discard, `?`, and must-use cases plus explicit deferrals.
 - `fixtures/mir/schema-v0.json`: source-linked MIR normalization expectation schema;
 - `fixtures/mir/manifest-v0.json`: ordered evaluation, moves, cleanup, Result branching, calls, and trap-path cases plus explicit deferrals.
+- `fixtures/mir-verifier/schema-v0.json`: named valid-seed and one-mutation verifier expectation schema;
+- `fixtures/mir-verifier/manifest-v0.json`: one isolated negative recipe for every current `Vxxxx` invariant.
 - `fixtures/package/schema-v0.json`: already-resolved package graph expectation schema;
 - `fixtures/package/manifest-v0.json`: package-instance equality, direct visibility, module ownership, and explicit standard-library injection cases.
 

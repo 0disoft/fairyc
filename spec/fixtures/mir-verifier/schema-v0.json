@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fairyc:mir-verifier-fixtures:v0",
+  "title": "Fairy C MIR verifier mutation fixture manifest v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "deferred", "contracts", "seeds", "cases"],
+  "properties": {
+    "$schema": { "type": "string", "minLength": 1 },
+    "schemaVersion": { "const": "fairyc.mir-verifier-fixtures/v0" },
+    "deferred": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "contracts": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "seeds": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/seed" }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/case" }
+    }
+  },
+  "$defs": {
+    "seedId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+    },
+    "entityLabel": {
+      "type": "string",
+      "pattern": "^(block|flag|form|loan|local|operation|origin|place|region|scope|span|statement|terminator|unsafe):[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+    },
+    "seed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "baseline", "entities"],
+      "properties": {
+        "id": { "$ref": "#/$defs/seedId" },
+        "baseline": { "const": "verify" },
+        "entities": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/entityLabel" }
+        }
+      }
+    },
+    "mutation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "target"],
+      "properties": {
+        "kind": {
+          "enum": [
+            "add-return-origin",
+            "add-unwind-successor",
+            "allocate-needs-drop-in-plain-region",
+            "drop-before-flag-clear",
+            "duplicate-resource-discharge",
+            "escape-region-value",
+            "extend-loan-past-origin",
+            "insert-source-form",
+            "move-resource-projection",
+            "remove-exit-cleanup",
+            "remove-flag-initialization",
+            "remove-required-trap-check",
+            "remove-terminator",
+            "remove-unsafe-provenance",
+            "use-before-initialize"
+          ]
+        },
+        "target": { "$ref": "#/$defs/entityLabel" },
+        "supportingEntity": { "$ref": "#/$defs/entityLabel" }
+      }
+    },
+    "expectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "codes", "primaryEntity"],
+      "properties": {
+        "status": { "const": "reject" },
+        "codes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^V[0-9]{4}$" }
+        },
+        "primaryEntity": { "$ref": "#/$defs/entityLabel" }
+      }
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "seed", "mutation", "expect"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^fail\\.mir-verify\\.v[0-9]{4}\\.[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "seed": { "$ref": "#/$defs/seedId" },
+        "mutation": { "$ref": "#/$defs/mutation" },
+        "expect": { "$ref": "#/$defs/expectation" }
+      }
+    }
+  }
+}

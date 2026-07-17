@@ -9,7 +9,7 @@
 
 MIR is the only executable semantic form shared by the interpreter and backends, but a whole textual MIR snapshot would freeze block numbering, temporary names, cleanup-block layout, and other implementation choices that do not affect Fairy C behavior. The opposite extreme, checking only final program output, would miss incorrect evaluation order, double cleanup, dropped cleanup, surviving `?` syntax, and trap edges that accidentally unwind.
 
-Malformed-MIR mutation tests also need a serializable MIR test-input format. No such format is accepted yet, so pretending that source files can directly exercise every `Vxxxx` rejection would mix source acceptance with compiler-defect testing.
+Valid source cannot directly exercise missing terminators, invalid drop flags, unwind successors, or absent unsafe provenance. Those compiler-defect paths are isolated in the separate named-seed mutation contract rather than being mixed into source acceptance or forcing a general serialized MIR format.
 
 ## Decision
 
@@ -23,11 +23,11 @@ Malformed-MIR mutation tests also need a serializable MIR test-input format. No 
 8. Trap-path assertions use canonical semantic categories, have no successor, and contain no cleanup action. Normal completion of the same checked operation remains a separate cleanup path.
 9. Eliminated-form assertions prove that source-only `?`, implicit drop, nested side effects, or short-circuit syntax does not survive verified MIR.
 10. The first cases cover ordered nested calls, a resource call move, reverse lexical cleanup, `Result` error cleanup, and division trap paths.
-11. Malformed-MIR verifier mutation, partial construction, reassignment, Region reset, resource-bearing tagged payloads, and cleanup-suffix identity remain explicit deferrals.
+11. Partial construction, reassignment, Region reset, resource-bearing tagged payloads, and cleanup-suffix identity remain explicit deferrals. Verifier mutation coverage belongs to `spec/fixtures/mir-verifier/manifest-v0.json`.
 
 ## Rationale
 
-Source-linked events are stable enough to compare across a Go reference compiler, an interpreter, and later backends without turning the first internal graph layout into a compatibility promise. Separate negative verifier data can be added once the project chooses a bounded serializable MIR input that cannot be confused with a public interchange format.
+Source-linked events are stable enough to compare across a Go reference compiler, an interpreter, and later backends without turning the first internal graph layout into a compatibility promise. Separate named-seed mutation recipes cover verifier defects while keeping arbitrary MIR serialization outside this contract.
 
 ## Consequences
 
@@ -38,4 +38,4 @@ Source-linked events are stable enough to compare across a Go reference compiler
 
 ## Revisit conditions
 
-Version the schema before exposing graph identity, serialized instructions, drop flags, unsafe provenance payloads, interpreter outputs, or backend-specific representation. Add a separate mutation-input contract before claiming coverage of `Vxxxx` rejection paths.
+Version the schema before exposing graph identity, serialized instructions, drop flags, unsafe provenance payloads, interpreter outputs, or backend-specific representation. Verifier mutation recipes evolve under their separate schema and do not broaden this source-observation contract.
