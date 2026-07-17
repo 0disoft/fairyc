@@ -2,10 +2,10 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Semantic sources: `spec/grammar/stage0.ebnf`, `spec/fixtures/parser/manifest-v0.json`, `spec/fixtures/semantic/manifest-v0.json`, `spec/fixtures/resource/manifest-v0.json`, `spec/fixtures/region/manifest-v0.json`, `spec/fixtures/result/manifest-v0.json`, `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/catalog-v0.md`, `docs/atlas/`
+- Semantic sources: `spec/grammar/stage0.ebnf`, `spec/fixtures/parser/manifest-v0.json`, `spec/fixtures/semantic/manifest-v0.json`, `spec/fixtures/resource/manifest-v0.json`, `spec/fixtures/region/manifest-v0.json`, `spec/fixtures/result/manifest-v0.json`, `spec/fixtures/mir/manifest-v0.json`, `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/catalog-v0.md`, `docs/atlas/`
 - Merge-blocking validation: `VALIDATION.md`
 
-The parser, semantic, resource, Region, and Result fixture directories exist as versioned test data, but no parser runner or compiler implementation exists. The remaining fixture classes are future evidence requirements; this document does not claim any executable language test currently passes.
+The parser, semantic, resource, Region, Result, and MIR fixture directories exist as versioned test data, but no parser runner or compiler implementation exists. The remaining fixture classes are future evidence requirements; this document does not claim any executable language test currently passes.
 
 ## Oracle order
 
@@ -28,6 +28,7 @@ The parser, semantic, resource, Region, and Result fixture directories exist as 
 | Borrow-origin pass and fail | Local last-use loans, conflicts, single-origin return, and storage bans |
 | Region pass and fail | `spec/fixtures/region/` proves parameter origins, permitted returns, capability restrictions, and no `NeedsDrop` placement once a runner exists; lexical local escape is deferred pending stdlib fixture identity |
 | Result pass and fail | `spec/fixtures/result/` proves return, discard, must-use behavior, `?` classification, exactly-once evaluation, and error compatibility once a runner exists; constructors and payload traces remain deferred |
+| MIR normalization | `spec/fixtures/mir/` proves source-linked evaluation order, call successors, ownership transfer, cleanup order, Result branching, trap paths, and eliminated source forms once a runner exists; graph identity and malformed-MIR inputs remain deferred |
 | Built-in tagged resources | `Ok`, `Err`, `Some`, discard, match, propagation, early return, and nested active-payload drop traces |
 | MIR verifier mutation | Every `Vxxxx` invariant rejects a deliberately malformed graph |
 | MIR interpreter run and trap | Scalar results, branches, moves, drop traces, region reset, and trap categories |
@@ -52,6 +53,8 @@ Resource fixtures sample complete-root state immediately before or after a sourc
 
 Region fixtures expose hidden origins and capability failures without pretending a user-declared `Arena` is the standard-library arena. Result fixtures accept typed parameters so they can test handling without choosing `Ok` or `Err` constructor syntax. Each manifest lists its deferred coverage explicitly.
 
+MIR fixtures compare source-linked observations after verification. They do not compare textual dumps, block or local numbers, temporary names, or generated C. Malformed-graph mutation data must use a separate accepted input contract before it can claim `Vxxxx` coverage.
+
 ## Differential matrix
 
 The first planned matrix targets `x86_64-linux-gnu`, uses the MIR interpreter plus generated C, and compares Clang with GCC at low and optimized profiles. Exact compiler and glibc baselines remain UNDECIDED. Fairy-to-C and C-to-Fairy fixture directions are both mandatory. A new target or backend cannot replace the interpreter and reference-C oracles merely because its outputs agree with itself.
@@ -69,6 +72,7 @@ Parser, type, Flow CFG, MIR verifier, and schema fuzzing are later configured va
 - A resolution, typing, or Flow rule changes without a schema-compatible semantic pass or fail fixture and synchronized diagnostic meaning.
 - A whole-root ownership rule changes without synchronized resource-state assertions, `E11xx` spans, and drop-elaboration review.
 - A Region or Result rule changes without its dedicated manifest, deferred-coverage review, `E31xx` or `E41xx` spans, and MIR-lowering review.
+- A MIR rule changes without synchronized source-linked observations, deferred-coverage review, verifier impact, and interpreter or enabled-backend impact.
 - A backend test compares only generated text instead of executable behavior where execution is available.
 - A diagnostic code changes meaning without the catalog and compile-fail fixtures changing together.
 - A trap, move, or cleanup result differs by optimization profile.

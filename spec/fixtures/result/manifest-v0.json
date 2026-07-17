@@ -3,7 +3,7 @@
   "schemaVersion": "fairyc.result-fixtures/v0",
   "deferred": [
     "Ok and Err construction until variant-constructor syntax is accepted",
-    "resource payload move and drop traces until MIR fixtures exist",
+    "resource payload construction and runtime drop traces until variant constructors and MIR execution exist",
     "match handling until the typed pattern contract is executable"
   ],
   "contracts": [

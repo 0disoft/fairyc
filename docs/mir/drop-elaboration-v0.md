@@ -48,4 +48,4 @@ The error branch of `?` moves the error payload into the return value, then trav
 
 ## Verification cases
 
-Executable fixtures must eventually cover nested early returns, loop `break` and `continue`, failed aggregate fields, resource arguments evaluated before a failing later argument, reassignment failure, active `Option` and `Result` payloads, consuming close success and failure, region exit ordering, and cleanup-suffix merging.
+`spec/fixtures/mir/manifest-v0.json` now covers a resource call move, reverse lexical cleanup, `Result` error-path cleanup, and the absence of cleanup on a trap path. Nested early returns, loop `break` and `continue`, failed aggregate fields, resource arguments evaluated before a failing later argument, reassignment failure, active `Option` and `Result` resource payloads, consuming close success and failure, region exit ordering, and cleanup-suffix merging remain explicit deferred groups.

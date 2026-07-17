@@ -22,7 +22,7 @@ Contract ownership is layered as follows:
 | Resource Flow behavior | `docs/language/0001-values-and-resources.md` and `spec/fixtures/resource/manifest-v0.json` | Flow CFG state, cleanup elaboration, MIR moves, and drop traces |
 | Region behavior | `docs/language/0003-regions-and-arenas.md` and `spec/fixtures/region/manifest-v0.json` | Flow origins, escape facts, reset lowering, and MIR region markers |
 | Result handling | `docs/language/0004-results-traps-and-control-flow.md` and `spec/fixtures/result/manifest-v0.json` | Flow handling facts, `?` branches, payload moves, and cleanup paths |
-| Executable control flow | `docs/mir/mir-v0.md`, then versioned MIR fixtures | Interpreter, C, later native, object, and assembly output |
+| Executable control flow | `docs/mir/mir-v0.md` and `spec/fixtures/mir/manifest-v0.json` | Interpreter, C, later native, object, and assembly output |
 | Target layout and C ABI | `docs/abi/*.md`, then versioned target descriptions and ABI fixtures | Backend attributes, generated headers, and toolchain receipts |
 | Runtime and standard library | `docs/runtime/*.md`, then versioned runtime and library contracts | Target runtime bundles, headers, and executable fixtures |
 | Compatibility and artifact identity | `docs/compatibility/*.md` | Build receipts, cache keys, package metadata, and compatibility diagnostics |
@@ -42,6 +42,7 @@ Build caches, generated C, LLVM IR, object files, assembly, semantic maps, bench
 - A resolution, typing, or Flow rule change updates the owning language contract, semantic schema-compatible fixtures, diagnostic catalog, and typed-HIR or Flow implementation together.
 - A whole-root resource-state change updates the resource manifest, cleanup-obligation contract, `E11xx` meaning, Flow analysis, and drop elaboration together.
 - A Region or Result rule change updates its dedicated manifest, owning language contract, `E31xx` or `E41xx` meaning, Flow analysis, and MIR lowering together.
+- A MIR normalization change updates the MIR manifest, owning MIR contract, affected source semantics, verifier, interpreter, and enabled backend tests together.
 - A target or support-status change updates the ABI profile, toolchain requirements, runtime and standard-library surface, CLI target report, and fixture matrix together.
 - A compatibility change names the affected vector member instead of using the compiler release as a catch-all version.
 - A backend optimization cannot change observable language behavior.

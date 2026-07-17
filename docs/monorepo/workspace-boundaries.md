@@ -13,12 +13,12 @@ cmd/fairyc/        Go executable assembly
 internal/          Go compiler implementation packages
 runtime/           Fairy C runtime sources and target adapters
 std/               Fairy C standard library
-spec/              normative grammar plus parser, semantic, resource, Region, and Result fixtures; later ABI contracts
+spec/              normative grammar plus parser, semantic, resource, Region, Result, and MIR fixtures; later ABI contracts
 tests/             future compile, run, trap, runtime, differential, compatibility, and ABI fixtures
 docs/              product and engineering rationale
 ```
 
-The `spec/` grammar plus parser, semantic, resource, Region, and Result fixtures now exist as design-owned executable data. Implementation directories remain planned and are created only when their phase starts.
+The `spec/` grammar plus parser, semantic, resource, Region, Result, and MIR fixtures now exist as design-owned executable data. Implementation directories remain planned and are created only when their phase starts.
 
 ## Dependency direction
 
@@ -40,7 +40,7 @@ The Stage 0 compiler is one Go module unless measurement proves a need for multi
 
 ## Change coordination
 
-A syntax change coordinates EBNF, parser fixtures, diagnostics, and language docs. A resolver, type, or borrow change coordinates the semantic manifest, diagnostics, owning language contract, and future implementation. Whole-root ownership, Region, and Result changes additionally coordinate their dedicated manifests and MIR contracts. A later executable semantic change may additionally coordinate affected backends, runtime or standard library, and Atlas schema. Documentation-only rationale does not force machine-code regeneration.
+A syntax change coordinates EBNF, parser fixtures, diagnostics, and language docs. A resolver, type, or borrow change coordinates the semantic manifest, diagnostics, owning language contract, and future implementation. Whole-root ownership, Region, and Result changes additionally coordinate their dedicated manifests and MIR contracts. A MIR normalization change coordinates the MIR manifest, verifier, interpreter, and enabled backends. A later executable semantic change may additionally coordinate runtime or standard library and Atlas schema. Documentation-only rationale does not force machine-code regeneration.
 
 ## Deferred boundaries
 

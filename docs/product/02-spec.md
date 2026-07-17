@@ -104,7 +104,7 @@ Region-parameter origins, permitted returns, resource-placement rejection, capab
 
 Changing a value from `T` to `Option<T>` must not silently turn a normal function call into conditional execution. Stage 0 return types contain at most one safe-borrow leaf. Full control-flow behavior is defined in `docs/language/0004-results-traps-and-control-flow.md`.
 
-Result return, discard, propagation, must-use, non-Result `?`, and error-compatibility assertions are versioned in `spec/fixtures/result/manifest-v0.json`. Variant-constructor spelling and active resource-payload traces remain deferred.
+Result return, discard, propagation, must-use, non-Result `?`, and error-compatibility assertions are versioned in `spec/fixtures/result/manifest-v0.json`. The MIR fixture suite covers a parameter-driven resource-error propagation move; variant construction and runtime drop traces remain deferred.
 
 ## Safe-code semantics
 
@@ -160,6 +160,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - QBE or another fast backend and LLVM require separate measured adoption decisions after MIR stability.
 - Early caching is whole-package and bounded. Function-level caching requires measured invalidation or latency pressure.
 - Development output contains intentional deliverables and small state, not an unbounded copy of every intermediate.
+
+Source-linked MIR normalization assertions are versioned in `spec/fixtures/mir/manifest-v0.json`. They freeze ordered evaluation, move and cleanup behavior, `Result` branching, call successors, trap paths, and eliminated source-only forms without making textual MIR or internal graph identity public.
 
 Formatting, checking, testing, documentation, vendoring, binding generation, and ABI inspection are planned tool surfaces, not claims of current implementation.
 

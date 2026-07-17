@@ -1,0 +1,230 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fairyc:mir-fixtures:v0",
+  "title": "Fairy C MIR fixture manifest v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "deferred", "contracts", "cases"],
+  "properties": {
+    "$schema": { "type": "string", "minLength": 1 },
+    "schemaVersion": { "const": "fairyc.mir-fixtures/v0" },
+    "deferred": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "contracts": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/case" }
+    }
+  },
+  "$defs": {
+    "sourcePath": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+(?:/[A-Za-z0-9_-]+)*\\.fy$"
+    },
+    "span": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "startByte", "endByte"],
+      "properties": {
+        "source": { "$ref": "#/$defs/sourcePath" },
+        "startByte": { "type": "integer", "minimum": 0 },
+        "endByte": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "functionName": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]*(?:::[A-Za-z_][A-Za-z0-9_]*)+$"
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "sourceRoot", "sources", "expect"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^pass\\.mir\\.[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "sourceRoot": { "type": "string", "minLength": 1 },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/sourcePath" }
+        },
+        "expect": { "$ref": "#/$defs/passExpectation" }
+      }
+    },
+    "passExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "completedThrough", "observations"],
+      "properties": {
+        "status": { "const": "pass" },
+        "completedThrough": { "const": "mir-verify" },
+        "observations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "oneOf": [
+              { "$ref": "#/$defs/orderedEvaluation" },
+              { "$ref": "#/$defs/call" },
+              { "$ref": "#/$defs/move" },
+              { "$ref": "#/$defs/cleanupPath" },
+              { "$ref": "#/$defs/resultBranch" },
+              { "$ref": "#/$defs/trapPath" },
+              { "$ref": "#/$defs/eliminatedForm" }
+            ]
+          }
+        }
+      }
+    },
+    "orderedEvaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "function", "expression", "sequence", "materializedBeforeParent"],
+      "properties": {
+        "kind": { "const": "ordered-evaluation" },
+        "function": { "$ref": "#/$defs/functionName" },
+        "expression": { "$ref": "#/$defs/span" },
+        "sequence": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "$ref": "#/$defs/span" }
+        },
+        "materializedBeforeParent": { "const": true }
+      }
+    },
+    "call": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "function", "call", "argumentOrder", "normalSuccessor", "unwindSuccessor"],
+      "properties": {
+        "kind": { "const": "call" },
+        "function": { "$ref": "#/$defs/functionName" },
+        "call": { "$ref": "#/$defs/span" },
+        "argumentOrder": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/span" }
+        },
+        "normalSuccessor": { "const": true },
+        "unwindSuccessor": { "const": false }
+      }
+    },
+    "move": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "function", "binding", "operand", "destination", "cleanupObligationTransferred"],
+      "properties": {
+        "kind": { "const": "move" },
+        "function": { "$ref": "#/$defs/functionName" },
+        "binding": { "$ref": "#/$defs/span" },
+        "operand": { "$ref": "#/$defs/span" },
+        "destination": {
+          "enum": ["call-argument", "return-value", "result-success-payload", "result-error-payload"]
+        },
+        "cleanupObligationTransferred": { "const": true }
+      }
+    },
+    "cleanupAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "binding"],
+      "properties": {
+        "kind": { "enum": ["drop", "region-reset"] },
+        "binding": { "$ref": "#/$defs/span" }
+      }
+    },
+    "cleanupPath": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "function", "exit", "exitKind", "actions"],
+      "properties": {
+        "kind": { "const": "cleanup-path" },
+        "function": { "$ref": "#/$defs/functionName" },
+        "exit": { "$ref": "#/$defs/span" },
+        "exitKind": { "enum": ["return", "fallthrough", "question-error", "break", "continue"] },
+        "actions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/cleanupAction" }
+        }
+      }
+    },
+    "resultBranch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "function",
+        "question",
+        "resultExpression",
+        "evaluationCount",
+        "successPayload",
+        "errorPayload",
+        "resultTemporaryDeadOn",
+        "errorCleanupActions"
+      ],
+      "properties": {
+        "kind": { "const": "result-branch" },
+        "function": { "$ref": "#/$defs/functionName" },
+        "question": { "$ref": "#/$defs/span" },
+        "resultExpression": { "$ref": "#/$defs/span" },
+        "evaluationCount": { "const": 1 },
+        "successPayload": { "const": "Move" },
+        "errorPayload": { "const": "Move" },
+        "resultTemporaryDeadOn": { "const": ["success", "error"] },
+        "errorCleanupActions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/cleanupAction" }
+        }
+      }
+    },
+    "trapPath": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "function", "operation", "categories", "cleanupActions", "hasSuccessor"],
+      "properties": {
+        "kind": { "const": "trap-path" },
+        "function": { "$ref": "#/$defs/functionName" },
+        "operation": { "$ref": "#/$defs/span" },
+        "categories": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "assertion-failed",
+              "bounds",
+              "division-by-zero",
+              "integer-overflow",
+              "invalid-shift",
+              "signed-division-overflow",
+              "unreachable"
+            ]
+          }
+        },
+        "cleanupActions": { "type": "array", "maxItems": 0 },
+        "hasSuccessor": { "const": false }
+      }
+    },
+    "eliminatedForm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "function", "form", "remainingCount"],
+      "properties": {
+        "kind": { "const": "eliminated-form" },
+        "function": { "$ref": "#/$defs/functionName" },
+        "form": { "enum": ["implicit-drop", "nested-side-effect", "question", "source-short-circuit"] },
+        "remainingCount": { "const": 0 }
+      }
+    }
+  }
+}

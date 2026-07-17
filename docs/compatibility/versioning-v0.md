@@ -37,7 +37,7 @@ Grammar spelling, keyword status, literal cooking, precedence, module-path ident
 
 ## MIR and cache
 
-Internal MIR accepts an exact version only. It is mutable compiler state, not a plugin or interchange ABI. Old MIR fixtures and caches are regenerated from source rather than migrated. A future stable backend exchange format, if needed, is a separate contract.
+Internal MIR accepts an exact version only. It is mutable compiler state, not a plugin or interchange ABI. Serialized MIR and caches are regenerated from source rather than migrated. The source-based MIR fixture manifest versions repository observations separately and deliberately excludes serialized graph identity. A future stable backend exchange format, if needed, is a separate contract.
 
 A cache key includes the full compiler build identity, language and MIR versions, target schema and ABI profile, toolchain fingerprint, backend and profile flags, runtime ABI, standard-library instance, source digest, dependency interface digests, feature set, and interface-hash algorithm. Incompatibility is a cache miss followed by lazy collection.
 
@@ -53,7 +53,7 @@ The diagnostic catalog versions rule identities. Once a code appears in a releas
 
 Machine-readable diagnostic JSON has its own schema. Stable fields are code, severity, primary span, and rule identity. Exact prose and layout are not stable machine contracts.
 
-Semantic, resource, Region, and Result fixture manifests are repository test contracts, not the released diagnostic JSON schema. Their related-span roles and canonical fact shapes may change only through a new fixture schema version plus synchronized cases.
+Semantic, resource, Region, Result, and MIR fixture manifests are repository test contracts, not the released diagnostic JSON schema or a stable MIR exchange format. Their related-span roles and canonical fact shapes may change only through a new fixture schema version plus synchronized cases.
 
 ## Runtime and standard library
 

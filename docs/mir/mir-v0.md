@@ -57,6 +57,8 @@ Statements include local storage markers, assignment, drop-flag update, `Drop`, 
 
 Terminators include `Goto`, integer or discriminant switch, `Call`, `Return`, `Trap`, and `Unreachable`. Stage 0 calls have normal successors only. There is no unwind successor.
 
+Fixture-visible trap categories use the canonical identities `bounds`, `integer-overflow`, `division-by-zero`, `signed-division-overflow`, `invalid-shift`, `assertion-failed`, and `unreachable`. A backend may choose a target-specific termination mechanism, but it cannot rename or merge the semantic outcome reported by the interpreter and differential harness.
+
 ## Calls
 
 Arguments are fully evaluated into temporaries from left to right before the call terminator. A call records its destination, normal continuation, source span, unsafe scope when applicable, and foreign ABI when applicable.
@@ -86,6 +88,12 @@ The verifier runs before every interpreter or backend handoff.
 | `V1701` | Every unsafe instruction carries a source span and unsafe-scope identity. |
 
 A `Vxxxx` failure is a compiler defect, not a user diagnostic. Release builds must report an internal compiler error with a bounded MIR excerpt and reproducible input reference; exact crash-bundle behavior remains UNDECIDED.
+
+## Fixture contract
+
+`spec/fixtures/mir/manifest-v0.json` records source-linked observations after MIR verification. It freezes ordered evaluation, non-unwinding calls, explicit moves, cleanup action order, `Result` branching, trap paths, and eliminated source-only forms without freezing block numbers, local numbers, temporary names, or textual MIR.
+
+The initial source cases do not test malformed graphs. Negative `Vxxxx` mutation coverage requires a separate serializable MIR test-input contract and cannot be inferred from parser-valid Fairy C source.
 
 ## Interpreter
 

@@ -30,6 +30,7 @@ The repository is in the design and Stage 0 planning phase. No compiler implemen
 - Resource Flow fixtures: `spec/fixtures/resource/manifest-v0.json`
 - Region fixtures: `spec/fixtures/region/manifest-v0.json`
 - Result fixtures: `spec/fixtures/result/manifest-v0.json`
+- MIR normalization fixtures: `spec/fixtures/mir/manifest-v0.json`
 - MIR and C backend contracts: `docs/mir/`
 - Target and C ABI: `docs/abi/c-abi-v0.md`
 - Runtime and standard library: `docs/runtime/runtime-stdlib-v0.md`

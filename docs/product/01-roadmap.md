@@ -8,12 +8,12 @@ This roadmap defines capability gates, not calendar promises. Exact durations, f
 
 ## Phase 0: freeze the executable contracts
 
-- Freeze Stage 0 surface syntax through `spec/grammar/stage0.ebnf`, parser fixtures, semantic fixtures, resource, Region, and Result Flow fixtures, one-file modules, alias imports, restricted enums, ownership, borrow origins, regions, `Result`, evaluation order, traps, unsafe boundaries, and exclusions.
+- Freeze Stage 0 surface syntax through `spec/grammar/stage0.ebnf`, parser fixtures, semantic fixtures, resource, Region, Result Flow, and verified-MIR fixtures, one-file modules, alias imports, restricted enums, ownership, borrow origins, regions, `Result`, evaluation order, traps, unsafe boundaries, and exclusions.
 - Freeze the first planned conformance target, `TargetSpec`, `ToolchainSpec`, C ABI v0, runtime and standard-library layer ownership, and the compatibility vector.
 - Reserve diagnostic categories and codes for rejected syntax, ownership, region, FFI, ABI, and compatibility paths.
 - Define Flow CFG, MIR v0, drop elaboration, the MIR verifier, generated-C safety rules, and compile-pass, compile-fail, run, trap, drop-trace, runtime, and bidirectional C ABI fixture formats.
 
-Exit gate: the written contracts have no contradictory syntax, initialization, ownership, cleanup, target, runtime, or compatibility rule, and every mandatory rule has an observable fixture class or an explicit dependency-gated deferral. Parser, semantic, resource, Region, and Result manifest cases must pass their future full runners with no unlisted independent diagnostics.
+Exit gate: the written contracts have no contradictory syntax, initialization, ownership, cleanup, target, runtime, or compatibility rule, and every mandatory rule has an observable fixture class or an explicit dependency-gated deferral. Parser, semantic, resource, Region, Result, and MIR manifest cases must pass their future full runners with no unlisted independent diagnostics or observation drift.
 
 ## Phase 1: first interpreted semantic slice
 

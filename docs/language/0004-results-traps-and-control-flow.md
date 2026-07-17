@@ -21,7 +21,7 @@ The explicit discard spelling is `discard expression;`. Discarding `Option` or `
 
 `expr?` evaluates `expr` once, branches on the result tag, moves the success payload into the continuation, and moves the error payload into the function return path. Normal cleanup for every exited scope runs before that return. No backend receives a `?` operator.
 
-Result fixtures classify an expression as returned, discarded, or propagated, record canonical success and error types, and assert exactly-once evaluation. They accept typed `Result` parameters so no fixture invents `Ok` or `Err` constructor syntax. Active resource-payload moves and cleanup order remain MIR and runtime assertions.
+Result fixtures classify an expression as returned, discarded, or propagated, record canonical success and error types, and assert exactly-once evaluation. They accept typed `Result` parameters so no fixture invents `Ok` or `Err` constructor syntax. The MIR fixture suite uses the same parameter-driven boundary to assert a resource-error payload move and enclosing cleanup; construction and runtime drop traces remain deferred.
 
 ## Normal exits
 

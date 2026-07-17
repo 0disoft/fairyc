@@ -28,6 +28,7 @@ This scaffold does not generate implementation source code; any existing source 
 - Resource Flow fixtures: spec/fixtures/resource/manifest-v0.json
 - Region fixtures: spec/fixtures/region/manifest-v0.json
 - Result fixtures: spec/fixtures/result/manifest-v0.json
+- MIR normalization fixtures: spec/fixtures/mir/manifest-v0.json
 - Executable MIR semantics: docs/mir/*.md
 - Target and C ABI: docs/abi/*.md
 - Runtime and standard library: docs/runtime/*.md
