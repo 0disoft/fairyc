@@ -33,7 +33,7 @@ The compiler release uses SemVer. A patch may fix crashes, performance, diagnost
 
 Pre-1 language revisions are exact pins. A compiler may implement several revisions, but a newer pre-1 revision does not imply source compatibility.
 
-Grammar spelling, keyword status, literal cooking, precedence, module-path identity, recovery acceptance, and whether a diagnostic blocks HIR are language-revision semantics. The parser-fixture schema versions the expectation file shape; it does not make two different language revisions source-compatible.
+Grammar spelling, keyword status, literal cooking, precedence, module-path identity, recovery acceptance, resolution, canonical typing, Flow rejection, and whether a diagnostic blocks HIR are language-revision semantics. Parser- and semantic-fixture schemas version their expectation-file shapes; they do not make two different language revisions source-compatible.
 
 ## MIR and cache
 
@@ -52,6 +52,8 @@ Local SDK or compiler paths never participate in target semantic identity. Toolc
 The diagnostic catalog versions rule identities. Once a code appears in a released compiler, it is not reused for another rule. Wording, related notes, and repair hints may improve without changing the code; severity or rule meaning changes require a new compatibility decision.
 
 Machine-readable diagnostic JSON has its own schema. Stable fields are code, severity, primary span, and rule identity. Exact prose and layout are not stable machine contracts.
+
+Semantic fixture manifests are repository test contracts, not the released diagnostic JSON schema. Their related-span roles and canonical fact shapes may change only through a new fixture schema version plus synchronized cases.
 
 ## Runtime and standard library
 

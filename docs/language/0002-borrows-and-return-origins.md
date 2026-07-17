@@ -3,6 +3,7 @@
 - Status: Draft Stage 0 contract
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0003-stage-0-safety-boundary.md`
+- Semantic fixtures: `spec/fixtures/semantic/manifest-v0.json`
 
 ## Borrow kinds
 

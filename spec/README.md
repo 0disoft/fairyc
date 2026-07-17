@@ -12,5 +12,8 @@ This directory contains versioned normative data that future compiler tests can 
 - `fixtures/parser/schema-v0.json`: parser-manifest schema;
 - `fixtures/parser/manifest-v0.json`: parser case index and expectations;
 - `fixtures/parser/cases/`: source-root-aware positive and negative mini-packages.
+- `fixtures/semantic/schema-v0.json`: resolver, type, and Flow expectation schema;
+- `fixtures/semantic/manifest-v0.json`: semantic case index and canonical assertions;
+- `fixtures/semantic/cases/`: parser-valid multi-file compile-pass and compile-fail mini-packages.
 
-Explanatory language documents may summarize these files but cannot silently change spelling, grouping, module identity, spans, or recovery acceptance. A contract change updates the normative data, ADR, diagnostics, and affected fixtures together.
+Explanatory language documents may summarize these files but cannot silently change spelling, grouping, module identity, semantic phase ownership, canonical facts, spans, or recovery acceptance. A contract change updates the normative data, ADR, diagnostics, and affected fixtures together.

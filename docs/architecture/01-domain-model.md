@@ -30,6 +30,7 @@ Generics, interfaces, dynamic dispatch, captured closures, async, self-reference
 | Trivia token stream | Preserved lexical, comment, invalid-input, and repair provenance |
 | Compact lossless CST | Arena-backed structure accounting for every source byte and zero-width missing token |
 | AST | Error-free semantic syntax lowered separately from CST recovery nodes |
+| Resolver | Module, import, item, parameter, and lexical binding lookup with canonical declaration coordinates |
 | Typed HIR | Resolved names, types, values, resources, borrows, regions, results, and effects |
 | Flow CFG | Analysis-only graph for initialization, ownership, loan, origin, escape, and cleanup fixed points |
 | MIR | Mutable-local backend-independent executable semantics |
@@ -54,6 +55,7 @@ Compiler arenas use typed integer IDs. These IDs are build-local unless a contra
 - Every live resource has exactly one cleanup obligation on a normal exit.
 - Every source local has an initializer; partial construction is compiler-controlled.
 - Every parser result consumes the complete source or reports a bounded failure; any lexer or parser diagnostic blocks HIR construction.
+- Resolver, type, and Flow failures retain source-byte spans and do not expose build-local IDs as language contracts.
 - Safe borrows are non-null and cannot outlive their one proven owner or region origin.
 - Backends receive explicit evaluation, failure, and cleanup control flow.
 - Target layout is never calculated from the host Go runtime or host C defaults.

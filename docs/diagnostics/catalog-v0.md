@@ -10,6 +10,7 @@ Diagnostic codes are stable identifiers for a semantic category. Exact wording a
 | Range | Category |
 | --- | --- |
 | `E00xx` | Syntax, modules, and imports |
+| `E01xx` | Name resolution and source visibility |
 | `E10xx` | Type and initialization |
 | `E11xx` | Resource ownership and drop |
 | `E21xx` | Borrowing and return origins |
@@ -35,11 +36,19 @@ Diagnostic codes are stable identifiers for a semantic category. Exact wording a
 | `E0008` | Parser skipped an unexpected real token into an error node. |
 | `E0009` | Comparison operators are chained without explicit parentheses. |
 | `E0010` | Shared parser budget is exhausted before a complete bounded result is available. |
+| `E0101` | Name or qualified path cannot be resolved in its owning scope. |
+| `E0102` | Declaration duplicates a name in the same owning scope. |
+| `E0103` | Resolved item is not source-visible from the use module. |
 | `E1001` | Source local declaration has no initializer. |
 | `E1002` | Inert struct contains a resource. |
 | `E1003` | Named aggregate contains a safe borrow. |
 | `E1004` | Restricted user enum contains a resource or safe-borrow payload. |
 | `E1005` | Byte view is used as text without explicit validation. |
+| `E1006` | Expression type is incompatible with its expected type. |
+| `E1007` | Condition or logical operand is not `bool`. |
+| `E1008` | Assignment target is not a mutable place. |
+| `E1009` | Return expression is incompatible with the declared return type. |
+| `E1010` | Call argument count does not match the resolved declaration. |
 | `E1101` | Resource used after move or consumption. |
 | `E1102` | Operation would create or execute a second cleanup obligation. |
 | `E1103` | Resource field move is not supported. |
@@ -83,8 +92,9 @@ The MIR verifier codes are defined in `docs/mir/mir-v0.md`.
 - A compatibility diagnostic names every mismatched vector member without replacing it with a generic compiler-version error.
 - An Atlas warning reports relation-specific completeness and never upgrades unavailable evidence to complete.
 - A syntax diagnostic uses a half-open source-byte span, records insertion or skipped-token provenance, and does not claim a recovered file is valid.
+- A semantic diagnostic uses a half-open source-byte span, names role-labelled declaration, type, loan, origin, or last-use spans when required, and suppresses errors caused only by a poisoned earlier fact.
 - Unsupported Stage 0 features should suggest a handle, index, copy, region, split API, or unsafe wrapper only when that alternative actually fits the rejected operation.
 
 ## Compatibility
 
-Codes become release-stable only with an implemented diagnostic and compile-fail fixture. Until then, this catalog reserves meanings for the prototype and may be revised through an ADR plus synchronized fixture plan.
+Codes become release-stable only with an implemented diagnostic and compile-fail fixture. Until then, this catalog reserves meanings for the prototype and may be revised through an ADR plus synchronized fixture plan. The current semantic fixtures are prototype acceptance data and do not claim an implementation exists.

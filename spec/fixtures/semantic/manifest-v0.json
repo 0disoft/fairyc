@@ -1,0 +1,321 @@
+{
+  "$schema": "./schema-v0.json",
+  "schemaVersion": "fairyc.semantic-fixtures/v0",
+  "contracts": [
+    "docs/product/02-spec.md",
+    "docs/language/0001-values-and-resources.md",
+    "docs/language/0002-borrows-and-return-origins.md",
+    "docs/language/0007-name-resolution-and-typing-v0.md",
+    "docs/diagnostics/catalog-v0.md"
+  ],
+  "cases": [
+    {
+      "id": "pass.resolve.qualified-import",
+      "sourceRoot": "cases/pass/qualified-import/src",
+      "sources": ["main.fy", "math.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "resolve",
+        "resolutions": [
+          {
+            "use": {
+              "source": "main.fy",
+              "startByte": 58,
+              "endByte": 70
+            },
+            "target": {
+              "module": "math",
+              "name": "forty_two",
+              "kind": "function",
+              "declaration": {
+                "source": "math.fy",
+                "startByte": 21,
+                "endByte": 30
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.type.explicit-types",
+      "sourceRoot": "cases/pass/explicit-types/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "type",
+        "types": [
+          {
+            "expression": {
+              "source": "main.fy",
+              "startByte": 24,
+              "endByte": 28
+            },
+            "canonicalType": "bool"
+          },
+          {
+            "expression": {
+              "source": "main.fy",
+              "startByte": 73,
+              "endByte": 101
+            },
+            "canonicalType": "i32"
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.flow.borrow-last-use",
+      "sourceRoot": "cases/pass/borrow-last-use/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow",
+        "borrows": [
+          {
+            "borrow": {
+              "source": "main.fy",
+              "startByte": 124,
+              "endByte": 130
+            },
+            "kind": "shared",
+            "origin": "Local(value)",
+            "lastUse": {
+              "source": "main.fy",
+              "startByte": 159,
+              "endByte": 163
+            },
+            "escapes": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.flow.return-param-borrow",
+      "sourceRoot": "cases/pass/return-param-borrow/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow",
+        "borrows": [
+          {
+            "borrow": {
+              "source": "main.fy",
+              "startByte": 53,
+              "endByte": 58
+            },
+            "kind": "shared",
+            "origin": "Param(0)",
+            "lastUse": {
+              "source": "main.fy",
+              "startByte": 53,
+              "endByte": 58
+            },
+            "escapes": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.resolve.unresolved-name",
+      "sourceRoot": "cases/fail/unresolved-name/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "resolve",
+        "diagnostics": [
+          {
+            "code": "E0101",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 39,
+              "endByte": 46
+            },
+            "related": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.resolve.duplicate-declaration",
+      "sourceRoot": "cases/fail/duplicate-declaration/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "resolve",
+        "diagnostics": [
+          {
+            "code": "E0102",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 46,
+              "endByte": 51
+            },
+            "related": [
+              {
+                "role": "previous-declaration",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 17,
+                  "endByte": 22
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.type-mismatch",
+      "sourceRoot": "cases/fail/type-mismatch/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          {
+            "code": "E1006",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 57,
+              "endByte": 58
+            },
+            "related": [
+              {
+                "role": "expected-type",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 50,
+                  "endByte": 54
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.non-bool-condition",
+      "sourceRoot": "cases/fail/non-bool-condition/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          {
+            "code": "E1007",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 42,
+              "endByte": 43
+            },
+            "related": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.borrow-conflict",
+      "sourceRoot": "cases/fail/borrow-conflict/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "flow",
+        "diagnostics": [
+          {
+            "code": "E2101",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 94,
+              "endByte": 99
+            },
+            "related": [
+              {
+                "role": "last-use",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 110,
+                  "endByte": 114
+                }
+              },
+              {
+                "role": "loan",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 82,
+                  "endByte": 88
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.return-local-borrow",
+      "sourceRoot": "cases/fail/return-local-borrow/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "flow",
+        "diagnostics": [
+          {
+            "code": "E2102",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 65,
+              "endByte": 71
+            },
+            "related": [
+              {
+                "role": "origin",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 45,
+                  "endByte": 50
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.multiple-return-origins",
+      "sourceRoot": "cases/fail/multiple-return-origins/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "flow",
+        "diagnostics": [
+          {
+            "code": "E2103",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 75,
+              "endByte": 106
+            },
+            "related": [
+              {
+                "role": "candidate-origin",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 36,
+                  "endByte": 40
+                }
+              },
+              {
+                "role": "candidate-origin",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 48,
+                  "endByte": 53
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
