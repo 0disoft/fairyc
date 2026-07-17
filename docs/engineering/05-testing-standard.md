@@ -2,10 +2,10 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Semantic sources: `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/catalog-v0.md`, `docs/atlas/`
+- Semantic sources: `spec/grammar/stage0.ebnf`, `spec/fixtures/parser/manifest-v0.json`, `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/catalog-v0.md`, `docs/atlas/`
 - Merge-blocking validation: `VALIDATION.md`
 
-No implementation or fixture directories exist yet. This document defines the evidence classes that a future implementation must create; it does not claim any test currently passes.
+The parser fixture directory exists as versioned test data, but no parser runner or compiler implementation exists. The remaining fixture classes are future evidence requirements; this document does not claim any executable test currently passes.
 
 ## Oracle order
 
@@ -20,7 +20,7 @@ No implementation or fixture directories exist yet. This document defines the ev
 
 | Class | Proves |
 | --- | --- |
-| Parse pass and fail | Grammar acceptance, recovery boundary, source spans, and deterministic diagnostics |
+| Parse pass and fail | `spec/fixtures/parser/` proves grammar acceptance, precedence trees, literal cooking, recovery provenance, byte spans, and deterministic diagnostics once a runner exists |
 | Module pass and fail | File-to-module identity, explicit aliases, forbidden import forms, cycles, and source visibility |
 | Type and initialization fail | Inert/resource separation and initialized-local rules |
 | Resource flow pass and fail | Whole-root moves, branch and loop states, consuming close, and no double drop |
@@ -43,6 +43,8 @@ No implementation or fixture directories exist yet. This document defines the ev
 
 Compile-fail fixtures assert the stable diagnostic code, primary failure category, and required related spans. They do not freeze full prose unless wording itself is the contract. A single malformed input may produce recovery diagnostics, but the fixture names which diagnostic is primary.
 
+Parser fail fixtures are stricter: they list every `E00xx` result, use half-open byte spans, and record whether recovery inserted, skipped, synchronized, or exited. Parser pass fixtures assert syntax only and may intentionally fail later name or type analysis. Operator fixtures compare normalized tree shape rather than only evaluation results.
+
 ## Differential matrix
 
 The first planned matrix targets `x86_64-linux-gnu`, uses the MIR interpreter plus generated C, and compares Clang with GCC at low and optimized profiles. Exact compiler and glibc baselines remain UNDECIDED. Fairy-to-C and C-to-Fairy fixture directions are both mandatory. A new target or backend cannot replace the interpreter and reference-C oracles merely because its outputs agree with itself.
@@ -56,6 +58,7 @@ Parser, type, Flow CFG, MIR verifier, and schema fuzzing are later configured va
 ## Review blockers
 
 - A semantic rule has no positive or negative observable fixture class.
+- A grammar, literal, precedence, or recovery change updates prose without changing `spec/grammar/stage0.ebnf` and the parser manifest in the same review.
 - A backend test compares only generated text instead of executable behavior where execution is available.
 - A diagnostic code changes meaning without the catalog and compile-fail fixtures changing together.
 - A trap, move, or cleanup result differs by optimization profile.

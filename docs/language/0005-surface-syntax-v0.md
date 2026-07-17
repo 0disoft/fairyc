@@ -3,10 +3,12 @@
 - Status: Draft Stage 0 contract
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0005-stage-0-surface-and-module-boundary.md`
+- Grammar decision: `docs/adr/0009-stage-0-grammar-and-parser-contract.md`
+- Normative grammar: `spec/grammar/stage0.ebnf`
 
 ## Lexical and declaration rules
 
-- Source encoding is UTF-8. Stage 0 identifiers are ASCII letters, digits, and underscore and cannot start with a digit.
+- Source files use `.fy` and UTF-8. Stage 0 identifiers are ASCII letters, digits, and underscore and cannot start with a digit.
 - Statements end with explicit semicolons. There is no automatic insertion.
 - A declaration is written `name: Type`; C declarators and `typedef`-dependent parsing do not exist.
 - Every function return type is explicit. No return value is `void`.
@@ -26,7 +28,7 @@ import std::fs as fs;
 import std::text as text;
 ```
 
-The module path must match the package-relative file mapping defined by the future package manifest. Every import has an alias and names remain qualified through that alias. Wildcard imports, selective imports, re-exports, implicit prelude imports, and import cycles are excluded.
+The driver supplies one package source root. Removing `.fy` from a source-root-relative path and joining its valid identifier segments with `::` produces the required module declaration. `src/net/http.fy` therefore declares `module net::http;`. Package coordinates do not participate in this path. Every import has an alias and names remain qualified through that alias. Wildcard imports, selective imports, re-exports, implicit prelude imports, and import cycles are excluded.
 
 `pub` grants source-module visibility only. It does not export a stable binary symbol, layout, mangling, or calling convention.
 
@@ -110,6 +112,8 @@ let file =
 
 Assignment is a statement. Comma expressions, `++`, `--`, C ternary syntax, and integer truthiness are excluded. Ordinary arithmetic traps as defined by the product specification; wrapping, saturating, and checked behavior uses methods rather than additional operator tokens.
 
+The fixed precedence and associativity table is in `docs/language/0006-lexing-parsing-and-recovery-v0.md`. Comparisons do not chain. Parentheses remain explicit group nodes through AST lowering.
+
 `Result` propagation uses postfix `?`. Explicit discard is:
 
 ```fy
@@ -146,35 +150,12 @@ unsafe extern C fn c_read(
 
 There is no parallel `extern C {}` block syntax. C-layout types use `@repr(C)`. Pointer casts and raw dereferences require unsafe code. `as` is limited to value-preserving conversions; narrowing uses an explicit fallible conversion.
 
-## Compact grammar skeleton
+## Grammar and recovery authority
 
-```ebnf
-source      ::= module_decl import_decl* item* EOF ;
-module_decl ::= "module" path ";" ;
-import_decl ::= "import" path "as" IDENT ";" ;
-path        ::= IDENT ("::" IDENT)* ;
+`spec/grammar/stage0.ebnf` is the complete normative prototype grammar. `docs/language/0006-lexing-parsing-and-recovery-v0.md` owns source-byte handling, literal cooking, the Pratt binding-power table, module identity, recovery, and canonical byte spans. `spec/fixtures/parser/manifest-v0.json` owns positive and negative acceptance evidence.
 
-item ::= attribute* "pub"?
-         (const_decl | struct_decl | resource_decl | enum_decl |
-          impl_decl | function_decl) ;
-
-binding ::= ("let" | "var") IDENT (":" type)? "=" expression ";" ;
-function_decl ::= "unsafe"? ("extern" "C")? "fn" IDENT
-                  "(" parameters? ")" "->" type (block | ";") ;
-
-type ::= primitive | path type_args? | "&" "mut"? type |
-         "*" "mut"? type | "[" type "]" |
-         "[" type ";" const_expression "]" |
-         "unsafe"? "extern" "C" "fn" "(" type_list? ")" "->" type ;
-
-statement ::= binding | assignment | return_stmt | discard_stmt |
-              while_stmt | break_stmt | continue_stmt | region_stmt |
-              expression_stmt ;
-expression ::= if_expression | match_expression | logical_expression ;
-```
-
-Exact operator precedence, literal escapes, package-to-file mapping, and recovery productions must be fixed with parser fixtures before implementation. They cannot introduce a second spelling for an accepted Stage 0 operation.
+A recovered syntax tree is retained for diagnostics only. It cannot silently legalize a missing semicolon, delimiter, import alias, invalid escape, chained comparison, or module mismatch.
 
 ## Explicit exclusions
 
-Function overloading, default and named arguments, operator overloading, user implicit conversions, C declarators and casts, preprocessing, textual includes, mutable globals, macros, user generics, dynamic dispatch, closures, async, rich patterns, resource-bearing user enums, and source-level uninitialized storage remain outside Stage 0.
+Function overloading, default and named arguments, operator overloading, user implicit conversions, C declarators and casts, preprocessing, textual includes, mutable globals, macros, user generics, dynamic dispatch, closures, async, rich patterns, resource-bearing user enums, source-level uninitialized storage, character literals, raw strings, interpolation, octal literals, numeric suffixes, and hexadecimal floats remain outside Stage 0.

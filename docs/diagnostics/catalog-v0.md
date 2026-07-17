@@ -28,6 +28,13 @@ Diagnostic codes are stable identifiers for a semantic category. Exact wording a
 | `E0001` | Source is not valid UTF-8 or identifier syntax is unsupported. |
 | `E0002` | Module declaration does not match its package-relative file identity. |
 | `E0003` | Import lacks an alias or uses a forbidden wildcard, selective, cyclic, or re-export form. |
+| `E0004` | Integer or floating literal has an invalid radix digit, separator, or excluded spelling. |
+| `E0005` | String-family literal has an unknown, truncated, out-of-range, or disallowed escape. |
+| `E0006` | C-string literal contains a decoded interior NUL. |
+| `E0007` | Parser inserted one required missing token at a zero-width byte span. |
+| `E0008` | Parser skipped an unexpected real token into an error node. |
+| `E0009` | Comparison operators are chained without explicit parentheses. |
+| `E0010` | Shared parser budget is exhausted before a complete bounded result is available. |
 | `E1001` | Source local declaration has no initializer. |
 | `E1002` | Inert struct contains a resource. |
 | `E1003` | Named aggregate contains a safe borrow. |
@@ -75,6 +82,7 @@ The MIR verifier codes are defined in `docs/mir/mir-v0.md`.
 - An FFI error names the boundary contract that must contain the unsafe proof.
 - A compatibility diagnostic names every mismatched vector member without replacing it with a generic compiler-version error.
 - An Atlas warning reports relation-specific completeness and never upgrades unavailable evidence to complete.
+- A syntax diagnostic uses a half-open source-byte span, records insertion or skipped-token provenance, and does not claim a recovered file is valid.
 - Unsupported Stage 0 features should suggest a handle, index, copy, region, split API, or unsafe wrapper only when that alternative actually fits the rejected operation.
 
 ## Compatibility

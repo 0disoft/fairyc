@@ -22,6 +22,8 @@ The compiler tracks a `BorrowOrigin` that is not part of source syntax:
 
 `Static` may be shortened to an expected parameter or region origin. Origins are never lengthened.
 
+UTF-8 string, byte-string, and C-string literals produce immutable compiler-owned storage with `Static` origin. The source language has no explicit lifetime spelling for that origin; it is tracked as the same hidden fact used for other program-static storage.
+
 ## Local loans
 
 Stage 0 loans are local and end after the last proven use in the current function. A shared loan prevents mutation or move of the borrowed root. A mutable loan prevents every competing access to that root.

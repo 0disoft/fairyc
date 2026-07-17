@@ -1,0 +1,278 @@
+{
+  "$schema": "./schema-v0.json",
+  "schemaVersion": "fairyc.parser-fixtures/v0",
+  "grammar": "../../grammar/stage0.ebnf",
+  "cases": [
+    {
+      "id": "pass.precedence",
+      "sourceRoot": "cases/pass/precedence/src",
+      "source": "precedence.fy",
+      "expect": {
+        "status": "pass",
+        "module": "precedence",
+        "expressions": [
+          {
+            "binding": "a",
+            "tree": "(+ 1 (* 2 3))"
+          },
+          {
+            "binding": "b",
+            "tree": "(* (group (+ 1 2)) 3)"
+          },
+          {
+            "binding": "c",
+            "tree": "(>> 8 (+ 1 1))"
+          },
+          {
+            "binding": "d",
+            "tree": "(| 1 (^ 2 (& 3 4)))"
+          },
+          {
+            "binding": "e",
+            "tree": "(|| true (&& false false))"
+          },
+          {
+            "binding": "f",
+            "tree": "(? input)"
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.literals",
+      "sourceRoot": "cases/pass/literals/src",
+      "source": "literals.fy",
+      "expect": {
+        "status": "pass",
+        "module": "literals",
+        "literals": [
+          {
+            "raw": "1_000",
+            "kind": "integer",
+            "cooked": "1000"
+          },
+          {
+            "raw": "0xDEAD_BEEF",
+            "kind": "integer",
+            "cooked": "3735928559"
+          },
+          {
+            "raw": "0b1010_0101",
+            "kind": "integer",
+            "cooked": "165"
+          },
+          {
+            "raw": "1_024.5e-2",
+            "kind": "float",
+            "cooked": "10.245"
+          },
+          {
+            "raw": "\"line\\n\\u{03BB}\"",
+            "kind": "string",
+            "cooked": "6c696e650acebb"
+          },
+          {
+            "raw": "b\"\\x00A\"",
+            "kind": "byte-string",
+            "cooked": "0041"
+          },
+          {
+            "raw": "c\"fairy\"",
+            "kind": "c-string",
+            "cooked": "666169727900"
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.module-path",
+      "sourceRoot": "cases/pass/module-path/src",
+      "source": "net/http.fy",
+      "expect": {
+        "status": "pass",
+        "module": "net::http"
+      }
+    },
+    {
+      "id": "pass.postfix-chain",
+      "sourceRoot": "cases/pass/postfix-chain/src",
+      "source": "postfix_chain.fy",
+      "expect": {
+        "status": "pass",
+        "module": "postfix_chain",
+        "expressions": [
+          {
+            "binding": "value",
+            "tree": "(? (field (index (field (call (field source fetch) 1 2) items) 0) value))"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.invalid-numeric-separator",
+      "sourceRoot": "cases/fail/invalid-numeric-separator/src",
+      "source": "main.fy",
+      "expect": {
+        "status": "fail",
+        "diagnostics": [
+          {
+            "code": "E0004",
+            "span": {
+              "startByte": 47,
+              "endByte": 51
+            },
+            "repair": "none"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.invalid-escape",
+      "sourceRoot": "cases/fail/invalid-escape/src",
+      "source": "main.fy",
+      "expect": {
+        "status": "fail",
+        "diagnostics": [
+          {
+            "code": "E0005",
+            "span": {
+              "startByte": 51,
+              "endByte": 53
+            },
+            "repair": "none"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.c-string-interior-nul",
+      "sourceRoot": "cases/fail/c-string-interior-nul/src",
+      "source": "main.fy",
+      "expect": {
+        "status": "fail",
+        "diagnostics": [
+          {
+            "code": "E0006",
+            "span": {
+              "startByte": 55,
+              "endByte": 57
+            },
+            "repair": "none"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.missing-semicolon",
+      "sourceRoot": "cases/fail/missing-semicolon/src",
+      "source": "main.fy",
+      "expect": {
+        "status": "fail",
+        "diagnostics": [
+          {
+            "code": "E0007",
+            "span": {
+              "startByte": 48,
+              "endByte": 48
+            },
+            "repair": "insert",
+            "token": ";"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.comparison-chain",
+      "sourceRoot": "cases/fail/comparison-chain/src",
+      "source": "main.fy",
+      "expect": {
+        "status": "fail",
+        "diagnostics": [
+          {
+            "code": "E0009",
+            "span": {
+              "startByte": 56,
+              "endByte": 57
+            },
+            "repair": "none"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.module-mismatch",
+      "sourceRoot": "cases/fail/module-mismatch/src",
+      "source": "net/http.fy",
+      "expect": {
+        "status": "fail",
+        "diagnostics": [
+          {
+            "code": "E0002",
+            "span": {
+              "startByte": 7,
+              "endByte": 17
+            },
+            "repair": "none"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.import-without-alias",
+      "sourceRoot": "cases/fail/import-without-alias/src",
+      "source": "main.fy",
+      "expect": {
+        "status": "fail",
+        "diagnostics": [
+          {
+            "code": "E0003",
+            "span": {
+              "startByte": 14,
+              "endByte": 31
+            },
+            "repair": "synchronize",
+            "token": ";"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.missing-delimiter",
+      "sourceRoot": "cases/fail/missing-delimiter/src",
+      "source": "main.fy",
+      "expect": {
+        "status": "fail",
+        "diagnostics": [
+          {
+            "code": "E0007",
+            "span": {
+              "startByte": 53,
+              "endByte": 53
+            },
+            "repair": "insert",
+            "token": ")"
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.unexpected-token",
+      "sourceRoot": "cases/fail/unexpected-token/src",
+      "source": "main.fy",
+      "expect": {
+        "status": "fail",
+        "diagnostics": [
+          {
+            "code": "E0008",
+            "span": {
+              "startByte": 49,
+              "endByte": 50
+            },
+            "repair": "skip",
+            "token": "@"
+          }
+        ]
+      }
+    }
+  ]
+}

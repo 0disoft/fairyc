@@ -17,7 +17,7 @@ Contract ownership is layered as follows:
 | Product scope and non-goals | `docs/product/02-spec.md` | README and roadmap summaries |
 | Accepted design decisions | `docs/adr/*.md` | Architecture explanations |
 | Product language semantics | `docs/product/02-spec.md` and accepted ADRs | Detailed `docs/language/*.md` contracts |
-| Versioned grammar and detailed semantics | Future `spec/` contracts | Parser tables, HIR, examples, diagnostics |
+| Versioned grammar and parser acceptance | `spec/grammar/stage0.ebnf` and `spec/fixtures/parser/manifest-v0.json` | Pratt tables, CST and AST structures, examples, and parser diagnostics |
 | Typed behavior | Typed HIR contracts and semantic fixtures | `SemanticSnapshot` and Atlas type and ownership facts |
 | Executable control flow | `docs/mir/mir-v0.md`, then versioned MIR fixtures | Interpreter, C, later native, object, and assembly output |
 | Target layout and C ABI | `docs/abi/*.md`, then versioned target descriptions and ABI fixtures | Backend attributes, generated headers, and toolchain receipts |
@@ -35,6 +35,7 @@ Build caches, generated C, LLVM IR, object files, assembly, semantic maps, bench
 ## Change rules
 
 - A semantic change updates the owning specification, fixtures, HIR or MIR contract, affected backends, diagnostics, and tests together.
+- A syntax, precedence, literal, or recovery change updates the normative EBNF, parser fixtures, diagnostic catalog, explanatory language docs, and language revision decision together.
 - A target or support-status change updates the ABI profile, toolchain requirements, runtime and standard-library surface, CLI target report, and fixture matrix together.
 - A compatibility change names the affected vector member instead of using the compiler release as a catch-all version.
 - A backend optimization cannot change observable language behavior.

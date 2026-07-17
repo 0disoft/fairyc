@@ -1,0 +1,280 @@
+(* Fairy C Stage 0 prototype grammar.
+   Normative decisions and recovery rules live in
+   docs/language/0006-lexing-parsing-and-recovery-v0.md.
+
+   Notation:
+   X?       optional X
+   X*       zero or more X
+   X+       one or more X
+   (A | B)  choice
+   "text"   literal token
+
+   Trivia may appear between tokens. EOF is the end-of-file token.
+   CODE_POINT_0022, CODE_POINT_005C, VALID_TEXT_LITERAL_SCALAR,
+   VALID_BYTE_LITERAL_SOURCE_SCALAR, and END_OF_FILE_TOKEN are external lexer
+   terminals defined by the source-byte contract rather than expanded Unicode
+   range tables.
+*)
+
+source = module_decl import_decl* item* EOF ;
+
+module_decl = "module" path ";" ;
+import_decl = "import" path "as" IDENT ";" ;
+
+item = attribute* "pub"? item_body ;
+item_body = const_decl
+          | struct_decl
+          | resource_decl
+          | enum_decl
+          | impl_decl
+          | fairy_function_decl
+          | foreign_function_decl
+          ;
+
+attribute = "@" path attribute_arguments? ;
+attribute_arguments = "(" attribute_argument_list? ")" ;
+attribute_argument_list = attribute_argument ("," attribute_argument)* ","? ;
+attribute_argument = path | integer_literal | string_literal ;
+
+const_decl = "const" IDENT ":" type "=" expression ";" ;
+
+struct_decl = "struct" IDENT "{" field_decl* "}" ;
+field_decl = "pub"? IDENT ":" type ";" ;
+
+resource_decl = "resource" IDENT "{" field_decl* drop_decl? "}" ;
+drop_decl = "drop" "fn" "(" drop_receiver_parameter ")" block ;
+drop_receiver_parameter = "self" ":" "&" "mut" CONTEXT_SELF ;
+
+enum_decl = "enum" IDENT "{" enum_variant* "}" ;
+enum_variant = IDENT enum_payload? ";" ;
+enum_payload = "{" enum_field_decl* "}" ;
+enum_field_decl = IDENT ":" type ";" ;
+
+impl_decl = "impl" type_path "{" impl_function_decl* "}" ;
+impl_function_decl = attribute* "pub"? "unsafe"? "fn" IDENT
+                     "(" method_parameter_list? ")"
+                     "->" type block
+                     ;
+
+fairy_function_decl = "unsafe"? "fn" IDENT
+                      "(" ordinary_parameter_list? ")"
+                      "->" type block
+                      ;
+
+foreign_function_decl = "unsafe" "extern" CONTEXT_C "fn" IDENT
+                        "(" ordinary_parameter_list? ")"
+                        "->" type ";"
+                        ;
+
+ordinary_parameter_list = ordinary_parameter ("," ordinary_parameter)* ","? ;
+ordinary_parameter = IDENT ":" type ;
+method_parameter_list = receiver_parameter ("," ordinary_parameter)* ","?
+                      | ordinary_parameter_list
+                      ;
+receiver_parameter = "self" ":" receiver_type ;
+receiver_type = "&" CONTEXT_SELF
+              | "&" "mut" CONTEXT_SELF
+              | CONTEXT_SELF
+              ;
+
+type = reference_type
+     | raw_pointer_type
+     | slice_or_array_type
+     | foreign_function_type
+     | type_path
+     ;
+
+reference_type = "&" "mut"? type ;
+raw_pointer_type = "*" "mut"? type ;
+slice_or_array_type = "[" type (";" const_expression)? "]" ;
+foreign_function_type = "unsafe" "extern" CONTEXT_C "fn"
+                        "(" type_list? ")" "->" type
+                        ;
+type_list = type ("," type)* ","? ;
+type_path = path type_arguments? ;
+type_arguments = "<" type ("," type)* ","? ">" ;
+
+block = "{" statement* tail_expression? "}" ;
+
+statement = binding_stmt
+          | assignment_stmt
+          | return_stmt
+          | discard_stmt
+          | while_stmt
+          | break_stmt
+          | continue_stmt
+          | region_stmt
+          | expression_stmt
+          ;
+
+binding_stmt = binding_kind IDENT type_annotation? "=" expression ";" ;
+binding_kind = "let" | "var" ;
+type_annotation = ":" type ;
+
+(* The parser first reads the left expression. If '=' follows, it forms an
+   assignment statement; otherwise the expression statement requires ';'.
+   Place validity is a semantic check. *)
+assignment_stmt = expression "=" expression ";" ;
+expression_stmt = expression ";" ;
+
+return_stmt = "return" expression? ";" ;
+discard_stmt = "discard" expression ";" ;
+while_stmt = "while" control_expression block ;
+break_stmt = "break" ";" ;
+continue_stmt = "continue" ";" ;
+region_stmt = "region" IDENT "in" expression block ;
+tail_expression = expression ;
+
+expression = logical_or_expression ;
+control_expression = logical_or_expression ;
+
+logical_or_expression = logical_and_expression ("||" logical_and_expression)* ;
+logical_and_expression = comparison_expression ("&&" comparison_expression)* ;
+
+(* Comparisons are deliberately non-associative. *)
+comparison_expression = bit_or_expression (comparison_operator bit_or_expression)? ;
+comparison_operator = "==" | "!=" | "<" | "<=" | ">" | ">=" ;
+
+bit_or_expression = bit_xor_expression ("|" bit_xor_expression)* ;
+bit_xor_expression = bit_and_expression ("^" bit_and_expression)* ;
+bit_and_expression = shift_expression ("&" shift_expression)* ;
+shift_expression = additive_expression (("<<" | ">>") additive_expression)* ;
+additive_expression = multiplicative_expression (("+" | "-") multiplicative_expression)* ;
+multiplicative_expression = cast_expression (("*" | "/" | "%") cast_expression)* ;
+
+cast_expression = prefix_expression ("as" type)* ;
+prefix_expression = prefix_operator prefix_expression | postfix_expression ;
+prefix_operator = "-" | "+" | "!" | "~" | "&" | "&" "mut" | "*" ;
+
+postfix_expression = primary_expression postfix_suffix* ;
+postfix_suffix = call_suffix | index_suffix | field_suffix | "?" ;
+call_suffix = "(" argument_list? ")" ;
+argument_list = expression ("," expression)* ","? ;
+index_suffix = "[" expression "]" ;
+field_suffix = "." IDENT ;
+
+primary_expression = literal
+                   | "self"
+                   | path_expression
+                   | grouped_expression
+                   | array_expression
+                   | record_expression
+                   | block
+                   | if_expression
+                   | match_expression
+                   | unsafe_expression
+                   ;
+
+path_expression = path ;
+grouped_expression = "(" expression ")" ;
+
+array_expression = "[" array_contents? "]" ;
+array_contents = expression (";" const_expression | ("," expression)* ","?) ;
+
+record_expression = path "{" record_field_list? "}" ;
+record_field_list = record_field ("," record_field)* ","? ;
+record_field = IDENT ":" expression ;
+
+if_expression = "if" control_expression block
+                ("else" (block | if_expression))?
+                ;
+
+match_expression = "match" control_expression "{" match_arm* "}" ;
+match_arm = pattern "=>" expression "," ;
+
+pattern = "_"
+        | path
+        | path "(" IDENT ")"
+        | path "{" pattern_field_list? "}"
+        ;
+pattern_field_list = pattern_field ("," pattern_field)* ","? ;
+pattern_field = IDENT ":" IDENT ;
+
+unsafe_expression = "unsafe" block ;
+
+literal = boolean_literal
+        | null_literal
+        | integer_literal
+        | floating_literal
+        | string_literal
+        | byte_string_literal
+        | c_string_literal
+        ;
+
+boolean_literal = "true" | "false" ;
+null_literal = "null" ;
+integer_literal = DEC_INTEGER | HEX_INTEGER | BIN_INTEGER ;
+floating_literal = DEC_FLOAT ;
+string_literal = STRING_TOKEN ;
+byte_string_literal = BYTE_STRING_TOKEN ;
+c_string_literal = C_STRING_TOKEN ;
+
+const_expression = integer_literal | path ;
+
+path = IDENT ("::" IDENT)* ;
+
+(* Lexical productions. TEXT_SAFE_SCALAR and BYTE_SAFE_SCALAR are lexer
+   character classes defined by the source-byte and literal rules in
+   docs/language/0006-lexing-parsing-and-recovery-v0.md. *)
+
+DEC_INTEGER = DEC_DIGITS ;
+HEX_INTEGER = "0x" HEX_DIGITS ;
+BIN_INTEGER = "0b" BIN_DIGITS ;
+
+DEC_FLOAT = DEC_DIGITS "." DEC_DIGITS EXPONENT?
+          | DEC_DIGITS EXPONENT
+          ;
+EXPONENT = ("e" | "E") ("+" | "-")? DEC_DIGITS ;
+
+DEC_DIGITS = DEC_DIGIT ("_"? DEC_DIGIT)* ;
+HEX_DIGITS = HEX_DIGIT ("_"? HEX_DIGIT)* ;
+BIN_DIGITS = BIN_DIGIT ("_"? BIN_DIGIT)* ;
+
+IDENT = IDENT_START IDENT_CONTINUE* ;
+IDENT_START = ASCII_LETTER | "_" ;
+IDENT_CONTINUE = ASCII_LETTER | DEC_DIGIT | "_" ;
+
+DEC_DIGIT = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
+BIN_DIGIT = "0" | "1" ;
+HEX_DIGIT = DEC_DIGIT | "a" | "b" | "c" | "d" | "e" | "f"
+                      | "A" | "B" | "C" | "D" | "E" | "F" ;
+ASCII_LETTER = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i"
+             | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r"
+             | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
+             | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I"
+             | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R"
+             | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
+             ;
+
+CONTEXT_C = IDENT ;     (* raw spelling must be C *)
+CONTEXT_SELF = IDENT ;  (* raw spelling must be Self *)
+
+STRING_TOKEN = QUOTE TEXT_STRING_UNIT* QUOTE ;
+BYTE_STRING_TOKEN = "b" QUOTE BYTE_STRING_UNIT* QUOTE ;
+C_STRING_TOKEN = "c" QUOTE BYTE_STRING_UNIT* QUOTE ;
+
+TEXT_STRING_UNIT = TEXT_SAFE_SCALAR | SIMPLE_ESCAPE | BYTE_ESCAPE | UNICODE_ESCAPE ;
+BYTE_STRING_UNIT = BYTE_SAFE_SCALAR | SIMPLE_ESCAPE | BYTE_ESCAPE ;
+
+SIMPLE_ESCAPE = ESCAPE_BACKSLASH
+              | ESCAPE_QUOTE
+              | ESCAPE_NEWLINE
+              | ESCAPE_CARRIAGE_RETURN
+              | ESCAPE_TAB
+              | ESCAPE_NUL
+              ;
+ESCAPE_BACKSLASH = BACKSLASH BACKSLASH ;
+ESCAPE_QUOTE = BACKSLASH QUOTE ;
+ESCAPE_NEWLINE = BACKSLASH "n" ;
+ESCAPE_CARRIAGE_RETURN = BACKSLASH "r" ;
+ESCAPE_TAB = BACKSLASH "t" ;
+ESCAPE_NUL = BACKSLASH "0" ;
+BYTE_ESCAPE = BACKSLASH "x" HEX_DIGIT HEX_DIGIT ;
+UNICODE_ESCAPE = BACKSLASH "u" "{" UNICODE_HEX "}" ;
+UNICODE_HEX = HEX_DIGIT HEX_DIGIT? HEX_DIGIT? HEX_DIGIT? HEX_DIGIT? HEX_DIGIT? ;
+
+QUOTE = CODE_POINT_0022 ;
+BACKSLASH = CODE_POINT_005C ;
+TEXT_SAFE_SCALAR = VALID_TEXT_LITERAL_SCALAR ;
+BYTE_SAFE_SCALAR = VALID_BYTE_LITERAL_SOURCE_SCALAR ;
+EOF = END_OF_FILE_TOKEN ;

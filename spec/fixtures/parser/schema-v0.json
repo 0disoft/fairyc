@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fairyc:parser-fixtures:v0",
+  "title": "Fairy C parser fixture manifest v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "grammar", "cases"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schemaVersion": {
+      "const": "fairyc.parser-fixtures/v0"
+    },
+    "grammar": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/case"
+      }
+    }
+  },
+  "$defs": {
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "sourceRoot", "source", "expect"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(pass|fail)\\.[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "sourceRoot": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string",
+          "pattern": "\\.fy$"
+        },
+        "expect": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/passExpectation"
+            },
+            {
+              "$ref": "#/$defs/failExpectation"
+            }
+          ]
+        }
+      }
+    },
+    "passExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "module"],
+      "properties": {
+        "status": {
+          "const": "pass"
+        },
+        "module": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expressions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/expressionAssertion"
+          }
+        },
+        "literals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/literalAssertion"
+          }
+        }
+      }
+    },
+    "expressionAssertion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["binding", "tree"],
+      "properties": {
+        "binding": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tree": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "literalAssertion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["raw", "kind", "cooked"],
+      "properties": {
+        "raw": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": ["integer", "float", "string", "byte-string", "c-string", "boolean", "null"]
+        },
+        "cooked": {
+          "type": "string"
+        }
+      }
+    },
+    "failExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "diagnostics"],
+      "properties": {
+        "status": {
+          "const": "fail"
+        },
+        "diagnostics": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/diagnostic"
+          }
+        }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "span", "repair"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^E00[0-9]{2}$"
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        },
+        "repair": {
+          "enum": ["none", "insert", "skip", "synchronize", "exit"]
+        },
+        "token": {
+          "type": "string"
+        }
+      }
+    },
+    "span": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startByte", "endByte"],
+      "properties": {
+        "startByte": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "endByte": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

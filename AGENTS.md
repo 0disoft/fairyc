@@ -22,6 +22,8 @@ This scaffold does not generate implementation source code; any existing source 
 - Product scope: docs/product/02-spec.md
 - Architecture decisions: docs/adr/*.md
 - Stage 0 language semantics: docs/language/*.md
+- Normative Stage 0 grammar: spec/grammar/stage0.ebnf
+- Parser acceptance fixtures: spec/fixtures/parser/manifest-v0.json
 - Executable MIR semantics: docs/mir/*.md
 - Target and C ABI: docs/abi/*.md
 - Runtime and standard library: docs/runtime/*.md

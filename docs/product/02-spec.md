@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0008-versioned-contract-boundaries.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0009-stage-0-grammar-and-parser-contract.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -31,7 +31,7 @@ The detailed rules are in `docs/language/0001-values-and-resources.md`, `docs/la
 
 ## Stage 0 surface
 
-- Source is UTF-8 and Stage 0 identifiers are ASCII.
+- Source files use `.fy`, source is UTF-8, and Stage 0 identifiers are ASCII.
 - Declarations use `name: Type`; C declarators, C casts, preprocessing, and textual includes are absent.
 - Statements use explicit semicolons. Assignment is a statement, and integer values are not implicit booleans.
 - Every file declares one module. Imports require aliases and cannot be wildcard, selective, cyclic, or re-exported.
@@ -41,8 +41,12 @@ The detailed rules are in `docs/language/0001-values-and-resources.md`, `docs/la
 - `if` is an expression. `match` is limited to shallow variants and inert fields.
 - `discard` explicitly ignores a must-use value and drops its active payload.
 - Unsafe operations and C declarations use `unsafe`, `unsafe extern C fn`, `@repr(C)`, and `@link_name`.
+- Decimal, hexadecimal, binary, floating, UTF-8 string, byte-string, C-string, boolean, and raw-pointer null literals use the exact spellings and escape rules in the parser contract.
+- Expressions follow one fixed Pratt binding-power table; comparisons are non-associative and assignment is never an expression.
+- File identity maps source-root-relative `path/name.fy` directly to `module path::name;` with no special root filename.
+- Parser recovery preserves byte spans and error nodes but never permits a recovered file to reach HIR.
 
-The normative prototype spelling is in `docs/language/0005-surface-syntax-v0.md`.
+The explanatory surface is in `docs/language/0005-surface-syntax-v0.md`; exact spelling is owned by `spec/grammar/stage0.ebnf`, and lexing, precedence, module identity, and recovery are defined in `docs/language/0006-lexing-parsing-and-recovery-v0.md`.
 
 ## Value categories
 
@@ -140,7 +144,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 
 - The Stage 0 compiler is implemented in Go.
 - Modules follow the one-file, explicit-alias import contract and do not use textual include expansion.
-- Parsing starts with a trivia-preserving token stream and compact arena-backed syntax structures; an immutable green tree and incremental reparse are deferred until formatter or IDE work requires them.
+- Parsing starts from original source bytes, preserves trivia and error provenance in compact lossless syntax, and lowers to AST only after an error-free batch parse. An immutable green tree and incremental reparse are deferred until formatter or IDE work requires them.
 - Typed HIR lowers through an analysis-only Flow CFG into mutable-local, backend-independent MIR.
 - The C backend is the only committed Stage 0 product backend and emits a constrained target/toolchain profile rather than universally portable C.
 - A small MIR interpreter is the semantic oracle before any second native backend.
@@ -179,4 +183,4 @@ Source text and documentation cannot grant an LLM, IDE, or agent filesystem, pro
 
 ## Open decisions
 
-Exact operator precedence and recovery grammar, source extension, package coordinates and manifest syntax, glibc and toolchain baselines, portable path model, additional targets, package registry, `.fymap` binary encoding, and the concrete `SymbolId` hash algorithm remain UNDECIDED.
+Package coordinates and manifest syntax, exact parser resource limits, glibc and toolchain baselines, portable path model, additional targets, package registry, `.fymap` binary encoding, and the concrete `SymbolId` hash algorithm remain UNDECIDED.

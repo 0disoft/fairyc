@@ -10,6 +10,8 @@
 - Product scope route: docs/product/02-spec.md
 - Architecture route: docs/architecture/ and docs/adr/
 - Stage 0 language route: docs/language/
+- Normative grammar route: spec/grammar/stage0.ebnf
+- Parser fixture route: spec/fixtures/parser/manifest-v0.json
 - MIR and C backend route: docs/mir/
 - Target and C ABI route: docs/abi/
 - Runtime and standard-library route: docs/runtime/

@@ -22,7 +22,7 @@ source bytes
   -> MIR verifier
 ```
 
-Parsing recovers enough structure for deterministic diagnostics without accepting malformed programs as valid. Type checking operates on Fairy C target types, not Go host types. Arbitrary-size literals remain exact until their target type and overflow behavior are known.
+Parsing consumes original UTF-8 source bytes, preserves trivia and invalid-input provenance in compact lossless syntax, and recovers enough structure for deterministic diagnostics without accepting malformed programs as valid. Canonical spans remain half-open byte ranges. Only an error-free batch parse lowers to AST and HIR. Type checking operates on Fairy C target types, not Go host types. Arbitrary-size integer and exact-decimal literals remain exact until their target type and overflow behavior are known.
 
 An immutable green tree and incremental reparse are deferred. The parser boundary preserves trivia so those features can be added without making them a prerequisite for executable semantics.
 

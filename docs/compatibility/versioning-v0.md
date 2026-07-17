@@ -33,6 +33,8 @@ The compiler release uses SemVer. A patch may fix crashes, performance, diagnost
 
 Pre-1 language revisions are exact pins. A compiler may implement several revisions, but a newer pre-1 revision does not imply source compatibility.
 
+Grammar spelling, keyword status, literal cooking, precedence, module-path identity, recovery acceptance, and whether a diagnostic blocks HIR are language-revision semantics. The parser-fixture schema versions the expectation file shape; it does not make two different language revisions source-compatible.
+
 ## MIR and cache
 
 Internal MIR accepts an exact version only. It is mutable compiler state, not a plugin or interchange ABI. Old MIR fixtures and caches are regenerated from source rather than migrated. A future stable backend exchange format, if needed, is a separate contract.

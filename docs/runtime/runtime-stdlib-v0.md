@@ -70,6 +70,8 @@ There is no safe uninitialized byte allocation, generic `alloc<T>` syntax, resou
 
 `CStr` is an unsized borrowed NUL-terminated byte sequence with no interior NUL and no UTF-8 promise. `CString` is the owned resource form. Conversion from `&str` copies bytes, rejects interior NUL, appends one terminator, and performs no locale conversion.
 
+A `c"..."` literal provides allocation-free immutable `&CStr` storage with one compiler-appended trailing NUL and rejects a decoded interior NUL. It is source syntax, not a runtime constructor. `b"..."` similarly provides immutable static bytes without claiming UTF-8.
+
 ## Linux `File` v0
 
 The initial API is explicitly tied to the `x86_64-linux-gnu` target and accepts `&CStr`, not a purported portable UTF-8 path.

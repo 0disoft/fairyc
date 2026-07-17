@@ -13,6 +13,7 @@ Measure these dimensions independently:
 
 - process startup and manifest loading;
 - lex, parse, resolution, type, Flow CFG, MIR, and verifier time;
+- parser decoded bytes, tokens, nodes, maximum depth, repairs, diagnostics, work units, and peak retained source/CST bytes;
 - `check` latency without backend work;
 - generated-C emission, C compilation, and link time;
 - clean, no-op, private-edit, public-interface-edit, and dependency-edit paths;

@@ -24,6 +24,8 @@ The repository is in the design and Stage 0 planning phase. No compiler implemen
 - Contract ownership decision: `docs/adr/0002-contract-source-of-truth.md`
 - Stage 0 safety boundary: `docs/adr/0003-stage-0-safety-boundary.md`
 - Language semantics: `docs/language/`
+- Normative Stage 0 grammar: `spec/grammar/stage0.ebnf`
+- Parser acceptance fixtures: `spec/fixtures/parser/manifest-v0.json`
 - MIR and C backend contracts: `docs/mir/`
 - Target and C ABI: `docs/abi/c-abi-v0.md`
 - Runtime and standard library: `docs/runtime/runtime-stdlib-v0.md`
@@ -38,7 +40,7 @@ The repository is in the design and Stage 0 planning phase. No compiler implemen
 - Language name: Fairy C
 - Compiler command: `fairyc`
 - Short alias: `fyc` is reserved but not committed
-- Source extension: `.fy` is proposed and remains subject to a language revision decision
+- Source extension: `.fy`
 - `fc` is not used as the executable name
 
 Repository hygiene and generated design-document ownership are governed by `AGENTS.md`, `VALIDATION.md`, and `.ssealed/manifest.json`.
