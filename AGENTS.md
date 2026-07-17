@@ -25,6 +25,7 @@ This scaffold does not generate implementation source code; any existing source 
 - Normative Stage 0 grammar: spec/grammar/stage0.ebnf
 - Parser acceptance fixtures: spec/fixtures/parser/manifest-v0.json
 - Semantic acceptance fixtures: spec/fixtures/semantic/manifest-v0.json
+- Resource Flow fixtures: spec/fixtures/resource/manifest-v0.json
 - Executable MIR semantics: docs/mir/*.md
 - Target and C ABI: docs/abi/*.md
 - Runtime and standard library: docs/runtime/*.md

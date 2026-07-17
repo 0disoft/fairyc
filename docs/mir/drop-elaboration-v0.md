@@ -10,7 +10,7 @@ Drop elaboration consumes verified Flow CFG ownership states, lexical scope-exit
 
 ## Obligations
 
-Every transition to `Live` creates one cleanup obligation. A move, consuming call, successful ownership transfer, or drop removes it. `Dead` has none. `MaybeLive` requires a drop flag only when control flow cannot be restructured into equal states.
+Every transition to `Live` creates one cleanup obligation. A move, consuming call, successful ownership transfer, or drop removes it. `Dead` has none. A source-visible complete resource root that becomes `MaybeLive` is rejected during Flow analysis. Drop flags are reserved for compiler-owned partial construction or later explicitly specified conditional obligations, not for silently accepting a path-dependent source local.
 
 Drop flags are not attached to every resource automatically. They are introduced only for genuinely conditional obligations.
 

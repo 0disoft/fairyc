@@ -20,6 +20,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0008-versioned-contract-boundaries.md`: independent compatibility vector and fail-closed mismatch behavior.
 - `0009-stage-0-grammar-and-parser-contract.md`: `.fy`, literal spelling, precedence, module identity, parser architecture, and bounded recovery.
 - `0010-stage-0-semantic-fixture-contract.md`: phase-owned semantic fixtures, canonical assertions, byte spans, and diagnostic cascade policy.
+- `0011-stage-0-resource-flow-fixture-contract.md`: whole-root resource states, cleanup obligations, moves, joins, and loop mismatch fixtures.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

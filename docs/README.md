@@ -10,6 +10,7 @@
 - Normative Stage 0 grammar: spec/grammar/stage0.ebnf
 - Parser fixture manifest: spec/fixtures/parser/manifest-v0.json
 - Semantic fixture manifest: spec/fixtures/semantic/manifest-v0.json
+- Resource Flow fixture manifest: spec/fixtures/resource/manifest-v0.json
 - Executable semantics and C transport: docs/mir/*.md
 - Target and C ABI contract: docs/abi/*.md
 - Runtime and standard-library contract: docs/runtime/*.md
@@ -27,4 +28,4 @@
 
 ## Authority order
 
-Product scope is set by `docs/product/02-spec.md`. Accepted ADRs constrain that scope. `spec/grammar/stage0.ebnf` owns exact prototype spelling and precedence; parser fixtures own syntax acceptance, while semantic fixtures own stable name, type, and Flow assertions. Detailed language, MIR, ABI, runtime, compatibility, diagnostics, and Atlas documents refine those decisions. Generated output, compiler caches, benchmark reports, external AI responses, and emitted maps are evidence only and cannot override these sources.
+Product scope is set by `docs/product/02-spec.md`. Accepted ADRs constrain that scope. `spec/grammar/stage0.ebnf` owns exact prototype spelling and precedence; parser fixtures own syntax acceptance, semantic fixtures own stable name, type, and borrow assertions, and resource fixtures own whole-root state transitions. Detailed language, MIR, ABI, runtime, compatibility, diagnostics, and Atlas documents refine those decisions. Generated output, compiler caches, benchmark reports, external AI responses, and emitted maps are evidence only and cannot override these sources.

@@ -26,7 +26,7 @@
 | `internal/atlas` | versioned semantic-map export and bounded queries over snapshots | frontend dependencies, LLM execution authority, embeddings, or source reparsing |
 | `runtime` | traps, process entry, empty storage, and required low-level memory helpers | allocators, files, strings, collections, logging, unwinding, or garbage collection |
 | `std` | `SystemHeap`, `Arena`, `Buffer`, text, Linux file, and safe C wrappers | compiler internals, hidden allocation, deferred generic collections, or portable-path claims |
-| `spec` | versioned normative grammar, parser and semantic fixture schemas, and executable contract data | generated compiler output, build-local IDs, or implementation-owned snapshots |
+| `spec` | versioned normative grammar, parser, semantic, and resource fixture schemas, and executable contract data | generated compiler output, build-local IDs, or implementation-owned snapshots |
 | `tests` | executable language, backend, ABI, and diagnostic contracts | production implementation logic |
 
 ## Public-contract policy
@@ -38,6 +38,7 @@ Before a stable language revision, internal Go packages are not public APIs. The
 - A frontend change that affects MIR requires semantic and diagnostic fixtures.
 - A lexer or parser change requires the normative grammar, parser manifest, byte-span expectations, and diagnostic catalog to remain synchronized.
 - A resolver, type, or Flow change requires the semantic manifest, canonical assertions, diagnostic catalog, and owning language contract to remain synchronized.
+- A whole-root resource-state change requires the resource manifest, cleanup-obligation assertions, `E11xx` spans, and drop-elaboration contract to remain synchronized.
 - A MIR change requires every enabled backend and differential fixture to be reviewed.
 - A target-layout change requires ABI fixtures and generated-header review.
 - A standard-library ownership change requires drop, allocation, and unsafe-wrapper review.

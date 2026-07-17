@@ -1,0 +1,245 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fairyc:resource-fixtures:v0",
+  "title": "Fairy C resource flow fixture manifest v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "contracts", "cases"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schemaVersion": {
+      "const": "fairyc.resource-fixtures/v0"
+    },
+    "contracts": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/case"
+      }
+    }
+  },
+  "$defs": {
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "sourceRoot", "sources", "expect"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(pass|fail)\\.flow\\.[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "sourceRoot": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/sourcePath"
+          }
+        },
+        "expect": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/passExpectation"
+            },
+            {
+              "$ref": "#/$defs/failExpectation"
+            }
+          ]
+        }
+      }
+    },
+    "sourcePath": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+(?:/[A-Za-z0-9_-]+)*\\.fy$"
+    },
+    "passExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "states"],
+      "properties": {
+        "status": {
+          "const": "pass"
+        },
+        "states": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/stateAssertion"
+          }
+        }
+      }
+    },
+    "failExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "states", "diagnostics"],
+      "properties": {
+        "status": {
+          "const": "fail"
+        },
+        "states": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/stateAssertion"
+          }
+        },
+        "diagnostics": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/diagnostic"
+          }
+        }
+      }
+    },
+    "stateAssertion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["binding", "at", "observation", "state", "cleanupObligations"],
+      "properties": {
+        "binding": {
+          "$ref": "#/$defs/span"
+        },
+        "at": {
+          "$ref": "#/$defs/span"
+        },
+        "observation": {
+          "enum": ["before", "after"]
+        },
+        "state": {
+          "enum": ["Live", "Dead", "MaybeLive"]
+        },
+        "cleanupObligations": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "Live"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "cleanupObligations": {
+                "const": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "Dead"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "cleanupObligations": {
+                "const": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "MaybeLive"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "cleanupObligations": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "primary", "related"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^E11[0-9]{2}$"
+        },
+        "primary": {
+          "$ref": "#/$defs/span"
+        },
+        "related": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/relatedSpan"
+          }
+        }
+      }
+    },
+    "relatedSpan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "span"],
+      "properties": {
+        "role": {
+          "enum": [
+            "declaration",
+            "field",
+            "join",
+            "loop-header",
+            "move",
+            "owner",
+            "previous-state"
+          ]
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        }
+      }
+    },
+    "span": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "startByte", "endByte"],
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/sourcePath"
+        },
+        "startByte": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "endByte": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

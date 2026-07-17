@@ -23,7 +23,7 @@ The required order is:
 7. check borrows, return origins, regions, escapes, and must-use results;
 8. compute cleanup obligations;
 9. elaborate aggregate partial initialization and call-argument temporaries;
-10. introduce drop flags only where a join creates `MaybeLive` state;
+10. reject source-visible complete roots that remain `MaybeLive`, then introduce drop flags only for compiler-owned partial construction or another explicitly specified conditional obligation;
 11. create cleanup paths for normal exits;
 12. merge only identical cleanup suffixes;
 13. verify MIR invariants;

@@ -15,5 +15,8 @@ This directory contains versioned normative data that future compiler tests can 
 - `fixtures/semantic/schema-v0.json`: resolver, type, and Flow expectation schema;
 - `fixtures/semantic/manifest-v0.json`: semantic case index and canonical assertions;
 - `fixtures/semantic/cases/`: parser-valid multi-file compile-pass and compile-fail mini-packages.
+- `fixtures/resource/schema-v0.json`: whole-root resource-state expectation schema;
+- `fixtures/resource/manifest-v0.json`: move, cleanup-obligation, join, and loop case index;
+- `fixtures/resource/cases/`: parser-, resolver-, and type-valid resource Flow mini-packages.
 
 Explanatory language documents may summarize these files but cannot silently change spelling, grouping, module identity, semantic phase ownership, canonical facts, spans, or recovery acceptance. A contract change updates the normative data, ADR, diagnostics, and affected fixtures together.

@@ -3,6 +3,7 @@
 - Status: Draft Stage 0 contract
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0003-stage-0-safety-boundary.md`
+- Resource fixtures: `spec/fixtures/resource/manifest-v0.json`
 
 ## Type properties
 
@@ -51,6 +52,12 @@ A resource local has one of three flow states at a program point:
 Reading a copyable value copies it. Passing, returning, assigning, or otherwise reading a resource by value moves the complete resource root. Moving `r.field` when `r` is a resource is rejected even when the field itself is a resource.
 
 At a control-flow join, equal states remain equal. `Live` joined with `Dead` becomes `MaybeLive`. A loop back edge must reproduce the ownership state expected at the loop header; Stage 0 does not synthesize a conditional ownership protocol for mismatched iterations.
+
+For source-visible complete resource roots, `MaybeLive` is a rejection state rather than a usable value guarded by an implicit drop flag. Compiler-owned partial construction may require internal flags, but those flags do not make a path-dependent source local valid.
+
+## Fixture observables
+
+Resource Flow fixtures identify a binding declaration and sample its state immediately before or after one source expression. `Live` carries one complete-root cleanup obligation, `Dead` carries zero, and rejected `MaybeLive` has no single unconditional obligation count. The fixture contract does not expose Flow block numbers, MIR locals, backend drop flags, or generated cleanup text.
 
 ## Construction and destruction
 

@@ -13,12 +13,12 @@ cmd/fairyc/        Go executable assembly
 internal/          Go compiler implementation packages
 runtime/           Fairy C runtime sources and target adapters
 std/               Fairy C standard library
-spec/              normative grammar plus parser and semantic fixtures; later ABI and diagnostic contracts
+spec/              normative grammar plus parser, semantic, and resource fixtures; later ABI and diagnostic contracts
 tests/             future compile, run, trap, runtime, differential, compatibility, and ABI fixtures
 docs/              product and engineering rationale
 ```
 
-The `spec/` grammar, parser fixtures, and semantic fixtures now exist as design-owned executable data. Implementation directories remain planned and are created only when their phase starts.
+The `spec/` grammar, parser fixtures, semantic fixtures, and resource Flow fixtures now exist as design-owned executable data. Implementation directories remain planned and are created only when their phase starts.
 
 ## Dependency direction
 
@@ -40,7 +40,7 @@ The Stage 0 compiler is one Go module unless measurement proves a need for multi
 
 ## Change coordination
 
-A syntax change coordinates EBNF, parser fixtures, diagnostics, and language docs. A resolver, type, or Flow change coordinates the semantic manifest, diagnostics, owning language contract, and future implementation. A later executable semantic change may additionally coordinate HIR or MIR, affected backends, runtime or standard library, and Atlas schema. Documentation-only rationale does not force machine-code regeneration.
+A syntax change coordinates EBNF, parser fixtures, diagnostics, and language docs. A resolver, type, or borrow change coordinates the semantic manifest, diagnostics, owning language contract, and future implementation. A whole-root ownership change additionally coordinates the resource manifest and drop-elaboration contract. A later executable semantic change may additionally coordinate HIR or MIR, affected backends, runtime or standard library, and Atlas schema. Documentation-only rationale does not force machine-code regeneration.
 
 ## Deferred boundaries
 

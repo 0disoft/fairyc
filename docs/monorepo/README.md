@@ -15,7 +15,7 @@ This repository type owns workspace boundaries, package ownership, dependency po
 
 ## Current boundary
 
-- `cmd/fairyc` owns command assembly; `internal/` packages own compiler stages; `runtime/` and `stdlib/` own target-visible code; `spec/` owns the normative grammar, parser and semantic fixture data, and later versioned executable contracts.
+- `cmd/fairyc` owns command assembly; `internal/` packages own compiler stages; `runtime/` and `stdlib/` own target-visible code; `spec/` owns the normative grammar, parser, semantic, and resource fixture data, and later versioned executable contracts.
 - Detailed ownership and import direction live in `docs/monorepo/package-ownership.md` and `docs/monorepo/workspace-boundaries.md`.
 - Internal Go packages are not public APIs before a stable language revision. Public contracts are the documented CLI, language revision, explicit C ABI, runtime ABI, standard-library APIs, and emitted schema families.
 - Internal MIR and caches use exact compatibility and are discarded rather than migrated. Runtime, standard-library, package, target, and Atlas formats follow `docs/compatibility/versioning-v0.md`.

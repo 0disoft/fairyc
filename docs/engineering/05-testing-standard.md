@@ -2,10 +2,10 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Semantic sources: `spec/grammar/stage0.ebnf`, `spec/fixtures/parser/manifest-v0.json`, `spec/fixtures/semantic/manifest-v0.json`, `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/catalog-v0.md`, `docs/atlas/`
+- Semantic sources: `spec/grammar/stage0.ebnf`, `spec/fixtures/parser/manifest-v0.json`, `spec/fixtures/semantic/manifest-v0.json`, `spec/fixtures/resource/manifest-v0.json`, `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/catalog-v0.md`, `docs/atlas/`
 - Merge-blocking validation: `VALIDATION.md`
 
-The parser and semantic fixture directories exist as versioned test data, but no parser runner or compiler implementation exists. The remaining fixture classes are future evidence requirements; this document does not claim any executable language test currently passes.
+The parser, semantic, and resource fixture directories exist as versioned test data, but no parser runner or compiler implementation exists. The remaining fixture classes are future evidence requirements; this document does not claim any executable language test currently passes.
 
 ## Oracle order
 
@@ -24,7 +24,7 @@ The parser and semantic fixture directories exist as versioned test data, but no
 | Semantic pass and fail | `spec/fixtures/semantic/` proves resolution coordinates, canonical types, borrow origins, phase ownership, related spans, and deterministic cascade suppression once a runner exists |
 | Module pass and fail | File-to-module identity, explicit aliases, forbidden import forms, cycles, and source visibility |
 | Type and initialization fail | Inert/resource separation and initialized-local rules |
-| Resource flow pass and fail | Whole-root moves, branch and loop states, consuming close, and no double drop |
+| Resource flow pass and fail | `spec/fixtures/resource/` proves whole-root moves, scope obligations, branch and loop states, and deterministic `E11xx` spans once a runner exists; consuming close and double-drop execution remain future groups |
 | Borrow-origin pass and fail | Local last-use loans, conflicts, single-origin return, and storage bans |
 | Region pass and fail | Escape prevention, capability storage ban, and no `NeedsDrop` allocation |
 | Result pass and fail | Must-use behavior, `?` lowering, payload moves, and cleanup on propagation |
@@ -48,6 +48,8 @@ Parser fail fixtures are stricter: they list every `E00xx` result, use half-open
 
 Semantic fail fixtures list every independent diagnostic after cascade suppression, identify the owning resolver, type, or Flow phase, and use role-labelled related spans. Semantic pass fixtures may assert declaration coordinates, canonical types, and borrow origins, but never whole AST or HIR dumps or build-local IDs.
 
+Resource fixtures sample complete-root state immediately before or after a source span. They assert that `Live` owns one cleanup obligation, `Dead` owns zero, and a source-visible `MaybeLive` join is rejected. MIR drop flags and executable drop order remain separate fixture contracts.
+
 ## Differential matrix
 
 The first planned matrix targets `x86_64-linux-gnu`, uses the MIR interpreter plus generated C, and compares Clang with GCC at low and optimized profiles. Exact compiler and glibc baselines remain UNDECIDED. Fairy-to-C and C-to-Fairy fixture directions are both mandatory. A new target or backend cannot replace the interpreter and reference-C oracles merely because its outputs agree with itself.
@@ -63,6 +65,7 @@ Parser, type, Flow CFG, MIR verifier, and schema fuzzing are later configured va
 - A semantic rule has no positive or negative observable fixture class.
 - A grammar, literal, precedence, or recovery change updates prose without changing `spec/grammar/stage0.ebnf` and the parser manifest in the same review.
 - A resolution, typing, or Flow rule changes without a schema-compatible semantic pass or fail fixture and synchronized diagnostic meaning.
+- A whole-root ownership rule changes without synchronized resource-state assertions, `E11xx` spans, and drop-elaboration review.
 - A backend test compares only generated text instead of executable behavior where execution is available.
 - A diagnostic code changes meaning without the catalog and compile-fail fixtures changing together.
 - A trap, move, or cleanup result differs by optimization profile.

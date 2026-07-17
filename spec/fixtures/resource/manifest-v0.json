@@ -1,0 +1,337 @@
+{
+  "$schema": "./schema-v0.json",
+  "schemaVersion": "fairyc.resource-fixtures/v0",
+  "contracts": [
+    "docs/product/02-spec.md",
+    "docs/adr/0011-stage-0-resource-flow-fixture-contract.md",
+    "docs/language/0001-values-and-resources.md",
+    "docs/mir/drop-elaboration-v0.md",
+    "docs/diagnostics/catalog-v0.md"
+  ],
+  "cases": [
+    {
+      "id": "pass.flow.whole-move",
+      "sourceRoot": "cases/pass/whole-move/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "states": [
+          {
+            "binding": {
+              "source": "main.fy",
+              "startByte": 162,
+              "endByte": 167
+            },
+            "at": {
+              "source": "main.fy",
+              "startByte": 209,
+              "endByte": 214
+            },
+            "observation": "before",
+            "state": "Live",
+            "cleanupObligations": 1
+          },
+          {
+            "binding": {
+              "source": "main.fy",
+              "startByte": 162,
+              "endByte": 167
+            },
+            "at": {
+              "source": "main.fy",
+              "startByte": 209,
+              "endByte": 214
+            },
+            "observation": "after",
+            "state": "Dead",
+            "cleanupObligations": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.flow.scope-cleanup",
+      "sourceRoot": "cases/pass/scope-cleanup/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "states": [
+          {
+            "binding": {
+              "source": "main.fy",
+              "startByte": 160,
+              "endByte": 165
+            },
+            "at": {
+              "source": "main.fy",
+              "startByte": 205,
+              "endByte": 210
+            },
+            "observation": "after",
+            "state": "Live",
+            "cleanupObligations": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.flow.balanced-branch",
+      "sourceRoot": "cases/pass/balanced-branch/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "states": [
+          {
+            "binding": {
+              "source": "main.fy",
+              "startByte": 172,
+              "endByte": 177
+            },
+            "at": {
+              "source": "main.fy",
+              "startByte": 285,
+              "endByte": 291
+            },
+            "observation": "before",
+            "state": "Dead",
+            "cleanupObligations": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.use-after-move",
+      "sourceRoot": "cases/fail/use-after-move/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "states": [
+          {
+            "binding": {
+              "source": "main.fy",
+              "startByte": 166,
+              "endByte": 171
+            },
+            "at": {
+              "source": "main.fy",
+              "startByte": 230,
+              "endByte": 235
+            },
+            "observation": "before",
+            "state": "Live",
+            "cleanupObligations": 1
+          },
+          {
+            "binding": {
+              "source": "main.fy",
+              "startByte": 166,
+              "endByte": 171
+            },
+            "at": {
+              "source": "main.fy",
+              "startByte": 230,
+              "endByte": 235
+            },
+            "observation": "after",
+            "state": "Dead",
+            "cleanupObligations": 0
+          }
+        ],
+        "diagnostics": [
+          {
+            "code": "E1101",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 250,
+              "endByte": 255
+            },
+            "related": [
+              {
+                "role": "declaration",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 166,
+                  "endByte": 171
+                }
+              },
+              {
+                "role": "move",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 230,
+                  "endByte": 235
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.partial-field-move",
+      "sourceRoot": "cases/fail/partial-field-move/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "states": [],
+        "diagnostics": [
+          {
+            "code": "E1103",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 323,
+              "endByte": 332
+            },
+            "related": [
+              {
+                "role": "field",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 103,
+                  "endByte": 107
+                }
+              },
+              {
+                "role": "owner",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 200,
+                  "endByte": 204
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.branch-maybe-live",
+      "sourceRoot": "cases/fail/branch-maybe-live/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "states": [
+          {
+            "binding": {
+              "source": "main.fy",
+              "startByte": 176,
+              "endByte": 181
+            },
+            "at": {
+              "source": "main.fy",
+              "startByte": 233,
+              "endByte": 270
+            },
+            "observation": "after",
+            "state": "MaybeLive",
+            "cleanupObligations": null
+          }
+        ],
+        "diagnostics": [
+          {
+            "code": "E1104",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 233,
+              "endByte": 270
+            },
+            "related": [
+              {
+                "role": "declaration",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 176,
+                  "endByte": 181
+                }
+              },
+              {
+                "role": "move",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 251,
+                  "endByte": 256
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.loop-state-mismatch",
+      "sourceRoot": "cases/fail/loop-state-mismatch/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "states": [
+          {
+            "binding": {
+              "source": "main.fy",
+              "startByte": 176,
+              "endByte": 181
+            },
+            "at": {
+              "source": "main.fy",
+              "startByte": 215,
+              "endByte": 225
+            },
+            "observation": "before",
+            "state": "Live",
+            "cleanupObligations": 1
+          },
+          {
+            "binding": {
+              "source": "main.fy",
+              "startByte": 176,
+              "endByte": 181
+            },
+            "at": {
+              "source": "main.fy",
+              "startByte": 244,
+              "endByte": 249
+            },
+            "observation": "after",
+            "state": "Dead",
+            "cleanupObligations": 0
+          }
+        ],
+        "diagnostics": [
+          {
+            "code": "E1105",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 215,
+              "endByte": 257
+            },
+            "related": [
+              {
+                "role": "declaration",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 176,
+                  "endByte": 181
+                }
+              },
+              {
+                "role": "loop-header",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 215,
+                  "endByte": 225
+                }
+              },
+              {
+                "role": "move",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 244,
+                  "endByte": 249
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

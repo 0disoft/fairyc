@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0010-stage-0-semantic-fixture-contract.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0011-stage-0-resource-flow-fixture-contract.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -72,6 +72,8 @@ A restricted user `enum` may contain only inert copyable payload fields. Built-i
 - Resource partial moves, implicit forgetting, and source-level uninitialized resource slots are rejected.
 
 Construction is performed by ordinary explicit functions such as `File.open`; there is no implicit constructor call. Lifecycle details are defined in `docs/language/0001-values-and-resources.md` and `docs/mir/drop-elaboration-v0.md`.
+
+Whole-root `Live`, `Dead`, and rejected `MaybeLive` transitions plus cleanup-obligation assertions are versioned in `spec/fixtures/resource/manifest-v0.json`.
 
 ### Borrows and raw pointers
 
