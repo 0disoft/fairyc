@@ -1,0 +1,28 @@
+# Risk Register
+
+- Status: Draft
+- Owner: UNASSIGNED
+- Review source: `VALIDATION.md`
+
+| Risk | Failure mode | Current control | Decision trigger |
+| --- | --- | --- | --- |
+| Rust-lite complexity | Stored borrows, multiple return origins, function values, partial moves, traits, regions, and closures expand into a full lifetime calculus | Whole-root resources, single-origin returns, named-aggregate borrow ban, compiler-known Region, and explicit Stage 0 exclusions | Real programs cannot expose safe APIs without pervasive unsafe code |
+| False memory-safety claim | Marketing implies the raw-pointer and FFI surface cannot violate memory safety | Promise stable safe-subset semantics only; document unsafe reachability | The compiler cannot reliably identify unsafe boundaries |
+| Backend semantic drift | C, fast, and LLVM backends disagree on evaluation order, traps, or drops | Lower behavior into explicit MIR and run differential tests | A backend requires semantics not representable in MIR |
+| C-backend undefined behavior | Generated C accidentally inherits signed overflow, alias, shift, or evaluation-order UB | Emit temporaries and runtime helpers; treat C as a reference transport | Generated C cannot preserve a required semantic without target-specific extensions |
+| Resource model edge cases | Partial initialization, reassignment, early return, loops, callbacks, or foreign unwinding skip cleanup | Flow states, compiler-controlled partial construction, drop elaboration, consuming close, and no-unwind Stage 0 calls | A required API cannot express unambiguous ownership under the current rules |
+| Build-system overreach | Incremental compilation, packed caches, direct object emission, and LTO delay the language core | Stage package-level caching first and measure before finer granularity | Measured rebuild or disk budgets fail after the language core works |
+| Generic code growth | Generics arrive before the non-generic resource and MIR core is stable, then monomorphization inflates compile time and code size | Defer generics; evaluate shape sharing only after measured code-growth evidence | Representative non-generic core is stable and generic fixtures expose a real need |
+| Premature self-hosting | Immature decisions become impossible to remove because the compiler depends on them | Keep Go Stage 0 as bootstrap and reference compiler | Required self-hosting libraries and diagnostics meet the documented gate |
+| Atlas scope explosion | Code maps, semantic diff, MCP, embeddings, and structural edits become a second product | One-way `SemanticSnapshot`, logical `.fymap`, deterministic overview/show/around, explicit incompleteness, no embeddings or model calls | Usage and map measurements prove one narrower next feature |
+| Atlas false certainty | Indirect, foreign, or missing-dependency edges are presented as a complete impact graph | Resolved/external/candidate/unknown targets, certainty classes, completeness and omission reporting | A consumer cannot preserve uncertainty without becoming unusable |
+| Premature backend multiplication | C, QBE, and LLVM evolve while MIR semantics still move | MIR interpreter and C backend first; later backends require stability and measured benefit | C transport or build latency fails a representative accepted budget |
+| Host-target fantasy | Windows-hosted compiler planning assumes Linux conformance is free | Treat WSL or Linux CI, glibc, sysroot, Clang, GCC, runtime, and linker driver as explicit dependencies | The team cannot reproduce the target fixture matrix outside one machine |
+| False platform support | C emission or hello world is advertised as target support | Separate emittable, conformant, and supported; require no skipped fixtures in the claimed subset | A maintained target cannot satisfy its declared toolchain and runtime matrix |
+| Runtime scope creep | Allocation, strings, files, formatting, logging, or scheduling migrate into the hidden runtime | Keep compiler intrinsic, thin runtime, and standard library ownership separate | A helper cannot be expressed safely without becoming a genuine public runtime contract |
+| Unsafe wrapper dishonesty | FFI retains a pointer even though a safe wrapper accepts a temporary borrow | Retained APIs consume owned storage or remain unsafe; audit provenance and boundary fixtures | Foreign retention or unregister behavior cannot be proved synchronously |
+| Stored-borrow usability cliff | Parser, zero-copy frame, row-view, iterator, or callback APIs become impractical | Measure representative APIs before relaxing the aggregate-borrow ban; use handles, indices, copying, or regions | Safe APIs require pervasive raw-pointer wrappers |
+| Compatibility-vector drift | Compiler version is used as a proxy for language, runtime, map, and ABI compatibility | Record independent versions and fail closed per contract | Two artifacts with the same compiler release still disagree semantically |
+| Prompt injection through docs | Dependency or workspace comments are treated as agent instructions | Separate compiler facts from untrusted text; permissions stay outside source metadata | An adapter cannot preserve provenance and trust classes |
+| Benchmark theater | Optimized Fairy C is compared against weak C baselines or mixed composite scores | Publish workload, flags, hardware, cold/warm state, distribution, and counters | A performance claim lacks a reproducible peer baseline |
+| Solo-maintainer overload | Compiler, runtime, stdlib, package manager, LSP, debugger, and Atlas advance at once | Capability-gated roadmap and one primary implementation path per phase | Parallel surfaces block completion of the current phase |

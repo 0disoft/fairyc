@@ -1,0 +1,28 @@
+# Architecture Decisions
+
+- Status: Draft
+- Owner: UNASSIGNED
+
+## Purpose
+
+This document captures the durable design contract for Architecture Decisions.
+It is intentionally a scaffold and should be filled with project-specific decisions as they become known.
+
+## Current decisions
+
+- `0001-initial-architecture-boundaries.md`: Go Stage 0 compiler, explicit MIR, C reference backend, and deferred native backends.
+- `0002-contract-source-of-truth.md`: authority of product, specification, MIR, target, CLI, and generated surfaces.
+- `0003-stage-0-safety-boundary.md`: deliberately restricted ownership, borrowing, regions, traps, and FFI.
+- `0004-atlas-semantic-snapshot-boundary.md`: one-way compiler-fact export and trust separation.
+- `0005-stage-0-surface-and-module-boundary.md`: minimal syntax, one-file modules, alias imports, and restricted enums.
+- `0006-c-abi-v0-and-first-conformance-target.md`: no native Fairy ABI and `x86_64-linux-gnu` as the first planned conformance target.
+- `0007-runtime-stdlib-and-allocator-boundary.md`: compiler, thin-runtime, standard-library, and allocation ownership.
+- `0008-versioned-contract-boundaries.md`: independent compatibility vector and fail-closed mismatch behavior.
+
+Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
+
+## Review Blockers
+
+- The change invents a product domain without a source.
+- The change weakens validation or skips required evidence.
+- The change relies on generated, cache, or build output as source truth.

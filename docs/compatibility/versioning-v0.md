@@ -1,0 +1,94 @@
+# Compatibility and Versioning v0
+
+- Status: Draft Stage 0 contract
+- Product source: `docs/product/02-spec.md`
+- Decision source: `docs/adr/0008-versioned-contract-boundaries.md`
+
+## Compatibility vector
+
+Build receipts, caches, emitted objects, diagnostics, and maps record the applicable members of this vector:
+
+```text
+compiler release and full build identity
+language revision
+internal MIR version
+target schema
+ABI profile
+diagnostic catalog
+diagnostic JSON schema
+runtime ABI
+standard-library version and package instance
+manifest schema
+lockfile schema
+.fymap schema
+SymbolId algorithm
+interface-hash algorithm
+```
+
+No concrete current values exist because no compiler or released schema exists. Examples use families such as `L0.n`, `M0.n`, `RT0.n`, and algorithm IDs such as `SID1`; they are formats, not release claims.
+
+## Compiler and language
+
+The compiler release uses SemVer. A patch may fix crashes, performance, diagnostics wording, or implementation behavior that contradicted the current specification. It cannot intentionally add syntax, change overflow or ownership semantics, or make a valid program invalid without a language revision change.
+
+Pre-1 language revisions are exact pins. A compiler may implement several revisions, but a newer pre-1 revision does not imply source compatibility.
+
+## MIR and cache
+
+Internal MIR accepts an exact version only. It is mutable compiler state, not a plugin or interchange ABI. Old MIR fixtures and caches are regenerated from source rather than migrated. A future stable backend exchange format, if needed, is a separate contract.
+
+A cache key includes the full compiler build identity, language and MIR versions, target schema and ABI profile, toolchain fingerprint, backend and profile flags, runtime ABI, standard-library instance, source digest, dependency interface digests, feature set, and interface-hash algorithm. Incompatibility is a cache miss followed by lazy collection.
+
+## Target and ABI
+
+Target schema versions the structure of target descriptions. ABI profile versions the meaning of layout, calling convention, return classification, and target-visible representation. Fixing an implementation to match an unchanged profile changes the compiler build and invalidates cache; changing the specified meaning creates a new ABI profile major.
+
+Local SDK or compiler paths never participate in target semantic identity. Toolchain family, baseline, and capability fingerprint do.
+
+## Diagnostics
+
+The diagnostic catalog versions rule identities. Once a code appears in a released compiler, it is not reused for another rule. Wording, related notes, and repair hints may improve without changing the code; severity or rule meaning changes require a new compatibility decision.
+
+Machine-readable diagnostic JSON has its own schema. Stable fields are code, severity, primary span, and rule identity. Exact prose and layout are not stable machine contracts.
+
+## Runtime and standard library
+
+Pre-1 runtime ABI uses an exact match. Runtime helper symbols carry an ABI-major suffix. The driver diagnoses an incompatibility before invoking the linker.
+
+The standard library has an independent version and declares required language revision, runtime ABI, target profile, and package instance. Language and standard-library numbers do not move in lockstep.
+
+## Package formats
+
+Manifest schema, lockfile schema, source archive schema, and any future binary artifact schema are independent. Stage 0 needs manifest and lockfile schemas only. A stable binary package format would falsely imply a stable native Fairy ABI and is deferred.
+
+## `.fymap` compatibility
+
+The map header records schema, compiler build, language revision, package UID, package instance, source-graph digest, target scope, feature flags, `SymbolId` algorithm, and interface-hash algorithm.
+
+Before schema 1, readers require an exact match. A future major or minor policy may skip unknown optional sections, but every skipped semantic section lowers relation-specific completeness. A source digest mismatch or corrupt checksum rejects the map. Atlas failure never fails compilation.
+
+Dependency handling is relation-specific:
+
+| Condition | Atlas behavior |
+| --- | --- |
+| Missing dependency map | Local facts remain; transitive relations are partial. |
+| Newer optional schema in same compatible family | Known sections may be used; affected relations are partial. |
+| Incompatible schema major | Dependency semantic facts are unavailable. |
+| Incompatible language semantics | Names and spans may remain; ownership and effects are unavailable. |
+| Incompatible `SymbolId` algorithm | Package-local display remains; cross-package joins are unavailable. |
+| Target mismatch | Target-independent facts remain; layout and ABI facts are unavailable. |
+| Stale source or corrupt map | Entire map is rejected. |
+
+## `SymbolId`
+
+Canonical identity includes package UID, module path, declaration kind, canonical declaration path, generic arity when it later exists, and a canonical signature fingerprint. It excludes absolute paths, source positions, compiler release, body digest, and language revision. Language compatibility is checked by the map header; a canonical type encoding change creates a new `SymbolId` algorithm.
+
+Graph edges identify a package instance plus symbol. `PackageUid` names the long-lived project; `PackageInstanceId` distinguishes resolved source, version, and feature instances.
+
+The provisional representation uses a compact 128-bit visible identifier plus a stored 256-bit full identity digest. Different full digests under the same visible identifier are a hard collision error. Random salt is forbidden because it would destroy deterministic identity.
+
+Different `SymbolId` algorithms do not exact-join. Future cross-version matching may use a stable anchor, canonical declaration comparison, or explicitly heuristic similarity, never silent equality.
+
+## Deferred stability
+
+Language 1.0 compatibility, stable native ABI and mangling, stable MIR exchange, binary package ABI, stable `SymbolId`, stable anchors, exact diagnostic-span guarantees, stable debugger formats, and cross-version `.fymap` migration are not Stage 0 promises.
