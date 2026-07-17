@@ -5,7 +5,11 @@
 - Semantic sources: `spec/grammar/stage0.ebnf`, `spec/fixtures/parser/manifest-v0.json`, `spec/fixtures/semantic/manifest-v0.json`, `spec/fixtures/resource/manifest-v0.json`, `spec/fixtures/region/manifest-v1.json`, `spec/fixtures/result/manifest-v0.json`, `spec/fixtures/mir/manifest-v0.json`, `spec/fixtures/mir-verifier/manifest-v0.json`, `spec/fixtures/package/manifest-v0.json`, `docs/language/`, `docs/mir/`, `docs/package/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/catalog-v0.md`, `docs/atlas/`
 - Merge-blocking validation: `VALIDATION.md`
 
-The parser, semantic, resource, Region, Result, MIR, MIR-verifier, and resolved-package-graph fixture directories exist as versioned test data, but no parser runner or compiler implementation exists. The remaining fixture classes are future evidence requirements; this document does not claim any executable language test currently passes.
+The Go frontend executes every case in `spec/fixtures/parser/manifest-v0.json` through
+`internal/parserfixture`. Source, lexer, syntax, AST, budget, containment, and manifest behavior
+also have focused unit tests. Semantic, resource, Region, Result, MIR, MIR-verifier,
+resolved-package-graph, interpreter, backend, ABI, runtime, and Atlas runners do not exist yet;
+their fixtures remain future evidence requirements.
 
 ## Oracle order
 
@@ -20,7 +24,7 @@ The parser, semantic, resource, Region, Result, MIR, MIR-verifier, and resolved-
 
 | Class | Proves |
 | --- | --- |
-| Parse pass and fail | `spec/fixtures/parser/` proves grammar acceptance, precedence trees, literal cooking, recovery provenance, byte spans, and deterministic diagnostics once a runner exists |
+| Parse pass and fail | `spec/fixtures/parser/` currently proves grammar acceptance, precedence trees, literal cooking, lossless reconstruction, recovery provenance, byte spans, and deterministic diagnostics through the Go parser runner |
 | Semantic pass and fail | `spec/fixtures/semantic/` proves resolution coordinates, canonical types, borrow origins, phase ownership, related spans, and deterministic cascade suppression once a runner exists |
 | Module pass and fail | File-to-module identity, explicit aliases, forbidden import forms, cycles, and source visibility |
 | Type and initialization fail | Inert/resource separation and initialized-local rules |

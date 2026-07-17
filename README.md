@@ -1,6 +1,6 @@
 # Fairy C
 
-- Status: Design draft
+- Status: Stage 0 implementation prototype
 - Scope: general
 - Repository type: cli-tool
 - Addon: monorepo
@@ -11,7 +11,11 @@ The project is not trying to beat every hand-tuned C program or make every C own
 
 ## Current phase
 
-The repository is in the design and Stage 0 planning phase. No compiler implementation, standard library, runtime, package manager, or stable language revision exists yet.
+The first Stage 0 frontend slice now exists in Go: immutable source bytes, a lossless lexer,
+compact recoverable syntax, error-free AST lowering, deterministic `E00xx` diagnostics, and a
+runner for all parser v0 fixtures. There is no `fairyc` CLI, name resolver, typed HIR, MIR,
+interpreter, backend, standard library, runtime, package manager, supported target, or stable
+language revision yet.
 
 ## Design anchors
 

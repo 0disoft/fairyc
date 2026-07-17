@@ -5,6 +5,8 @@
 *.yaml text eol=lf
 *.json text eol=lf
 *.toml text eol=lf
+*.go text eol=lf
+go.mod text eol=lf
 *.ts text eol=lf
 *.tsx text eol=lf
 *.js text eol=lf

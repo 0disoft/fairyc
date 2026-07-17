@@ -4,9 +4,11 @@
 
 Scope: general
 
-This repository owns product, architecture, ADR, engineering, and operational design scaffolds.
+This repository owns the Fairy C product contracts, language and architecture specifications,
+acceptance fixtures, and the Stage 0 compiler implementation.
 
-This scaffold does not generate implementation source code; any existing source remains project-owned.
+The current implementation is a project-owned Go frontend slice. Scaffold metadata does not own,
+regenerate, or override compiler source.
 
 ## Repository Shape
 
@@ -24,6 +26,8 @@ This scaffold does not generate implementation source code; any existing source 
 - Stage 0 language semantics: docs/language/*.md
 - Normative Stage 0 grammar: spec/grammar/stage0.ebnf
 - Parser acceptance fixtures: spec/fixtures/parser/manifest-v0.json
+- Stage 0 frontend implementation: internal/source/, internal/lexer/, internal/syntax/, internal/ast/
+- Parser fixture runner: internal/parserfixture/
 - Semantic acceptance fixtures: spec/fixtures/semantic/manifest-v0.json
 - Resource Flow fixtures: spec/fixtures/resource/manifest-v0.json
 - Region fixtures: spec/fixtures/region/manifest-v1.json
@@ -44,7 +48,8 @@ This scaffold does not generate implementation source code; any existing source 
 
 ## Hard Rules
 
-- Do not generate or infer application source code from this scaffold.
+- Do not infer language behavior from scaffold prose or implementation accidents. Compiler source
+  must implement the owning grammar, language, diagnostic, and fixture contracts.
 - Do not invent technology choices. Use UNDECIDED when a decision is not known.
 - Do not create fake credentials, tokens, secrets, or private values.
 - Do not rely on generated, cache, or build output as source truth.
@@ -65,7 +70,7 @@ This scaffold does not generate implementation source code; any existing source 
 
 ## Out of Scope
 
-- Application source scaffolding.
+- Unrelated application or framework scaffolding.
 - Runtime infrastructure such as Docker, Kubernetes, Terraform, or framework apps.
 - Project-specific credentials or deployment secrets.
 

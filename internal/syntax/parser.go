@@ -1,0 +1,235 @@
+package syntax
+
+import (
+	"strings"
+
+	"github.com/0disoft/fairyc/internal/diagnostic"
+	"github.com/0disoft/fairyc/internal/lexer"
+	"github.com/0disoft/fairyc/internal/source"
+)
+
+// Parse performs UTF-8-aware lexing, lossless CST construction, recovery, and module validation.
+func Parse(file source.File, limits source.Limits) *Tree {
+	budget := source.NewBudget(limits, len(file.Bytes))
+	lexed := lexer.Lex(file, budget)
+	tree := &Tree{
+		Source:      lexed.Source,
+		Tokens:      lexed.Tokens,
+		Root:        NoNode,
+		Diagnostics: append([]diagnostic.Diagnostic(nil), lexed.Diagnostics...),
+	}
+	parser := newParser(file, tree, budget)
+	if !budget.Exhausted() {
+		tree.Root = parser.parseSource()
+	}
+	if budget.Exhausted() {
+		parser.emitExhausted()
+	}
+	tree.Diagnostics = sortAndDedupeDiagnostics(tree.Diagnostics)
+	return tree
+}
+
+type parser struct {
+	file          source.File
+	tree          *Tree
+	budget        *source.Budget
+	significant   []int
+	position      int
+	lastFullIndex int
+	hasExhausted  bool
+}
+
+func newParser(file source.File, tree *Tree, budget *source.Budget) *parser {
+	significant := make([]int, 0, len(tree.Tokens))
+	for index, token := range tree.Tokens {
+		if token.Kind != lexer.Trivia {
+			significant = append(significant, index)
+		}
+	}
+	return &parser{
+		file:          file,
+		tree:          tree,
+		budget:        budget,
+		significant:   significant,
+		lastFullIndex: -1,
+	}
+}
+
+func (p *parser) current() lexer.Token {
+	if p.position >= len(p.significant) {
+		position := len(p.tree.Source)
+		return lexer.Token{Kind: lexer.EOF, Span: diagnostic.Span{StartByte: position, EndByte: position}}
+	}
+	return p.tree.Tokens[p.significant[p.position]]
+}
+
+func (p *parser) currentFullIndex() int {
+	if p.position >= len(p.significant) {
+		return len(p.tree.Tokens) - 1
+	}
+	return p.significant[p.position]
+}
+
+func (p *parser) currentText() string {
+	return p.current().Text(p.tree.Source)
+}
+
+func (p *parser) at(text string) bool {
+	return p.currentText() == text
+}
+
+func (p *parser) atKind(kind lexer.Kind) bool {
+	return p.current().Kind == kind
+}
+
+func (p *parser) advance() lexer.Token {
+	token := p.current()
+	if token.Kind != lexer.EOF {
+		p.lastFullIndex = p.currentFullIndex()
+		p.position++
+		p.budget.ChargeWork(1)
+	}
+	return token
+}
+
+func (p *parser) match(text string) bool {
+	if !p.at(text) {
+		return false
+	}
+	p.advance()
+	return true
+}
+
+func (p *parser) expect(text string) bool {
+	if p.match(text) {
+		return true
+	}
+	position := p.current().Span.StartByte
+	p.emit("E0007", diagnostic.Span{StartByte: position, EndByte: position}, diagnostic.RepairInsert, text)
+	return false
+}
+
+func (p *parser) expectStatementTerminator() bool {
+	if p.match(";") {
+		return true
+	}
+	position := p.current().Span.StartByte
+	if p.lastFullIndex >= 0 && p.lastFullIndex < len(p.tree.Tokens) {
+		position = p.tree.Tokens[p.lastFullIndex].Span.EndByte
+	}
+	p.emit("E0007", diagnostic.Span{StartByte: position, EndByte: position}, diagnostic.RepairInsert, ";")
+	return false
+}
+
+func (p *parser) emit(code string, span diagnostic.Span, repair diagnostic.Repair, token string) {
+	if repair != diagnostic.RepairNone && !p.budget.ChargeRepair() {
+		p.emitExhausted()
+		return
+	}
+	if !p.budget.ChargeDiagnostic() {
+		p.emitExhausted()
+		return
+	}
+	p.tree.Diagnostics = append(p.tree.Diagnostics, diagnostic.Diagnostic{
+		Code:   code,
+		Span:   span,
+		Repair: repair,
+		Token:  token,
+	})
+}
+
+func (p *parser) emitExhausted() {
+	if p.hasExhausted {
+		return
+	}
+	p.hasExhausted = true
+	for _, existing := range p.tree.Diagnostics {
+		if existing.Code == "E0010" {
+			return
+		}
+	}
+	p.tree.Diagnostics = append(p.tree.Diagnostics, source.ExhaustionDiagnostic(p.current().Span.StartByte))
+}
+
+func (p *parser) unexpected() NodeID {
+	token := p.current()
+	text := token.Text(p.tree.Source)
+	start := p.currentFullIndex()
+	p.emit("E0008", token.Span, diagnostic.RepairSkip, text)
+	if token.Kind != lexer.EOF {
+		p.advance()
+	}
+	return p.addNode(KindError, start, nil, text, "")
+}
+
+func (p *parser) addNode(kind Kind, startFull int, children []NodeID, text, cooked string) NodeID {
+	if !p.budget.ChargeNode() {
+		p.emitExhausted()
+		return NoNode
+	}
+	startByte := p.current().Span.StartByte
+	if startFull >= 0 && startFull < len(p.tree.Tokens) {
+		startByte = p.tree.Tokens[startFull].Span.StartByte
+	}
+	endByte := startByte
+	endFull := startFull
+	if p.lastFullIndex >= startFull && p.lastFullIndex >= 0 && p.lastFullIndex < len(p.tree.Tokens) {
+		endFull = p.lastFullIndex + 1
+		endByte = p.tree.Tokens[p.lastFullIndex].Span.EndByte
+	}
+	node := Node{
+		Kind:       kind,
+		Span:       diagnostic.Span{StartByte: startByte, EndByte: endByte},
+		TokenStart: startFull,
+		TokenEnd:   endFull,
+		Text:       text,
+		Cooked:     cooked,
+		Children:   append([]NodeID(nil), children...),
+	}
+	p.tree.Nodes = append(p.tree.Nodes, node)
+	return NodeID(len(p.tree.Nodes) - 1)
+}
+
+func (p *parser) enter() bool {
+	if p.budget.Enter() {
+		return true
+	}
+	p.emitExhausted()
+	return false
+}
+
+func (p *parser) leave() {
+	p.budget.Leave()
+}
+
+func (p *parser) pathNode() (NodeID, string, bool) {
+	start := p.currentFullIndex()
+	if !p.atKind(lexer.Identifier) {
+		return p.unexpected(), "", false
+	}
+	parts := []string{p.currentText()}
+	p.advance()
+	for p.match("::") {
+		if !p.atKind(lexer.Identifier) {
+			p.expect("identifier")
+			return p.addNode(KindPath, start, nil, strings.Join(parts, "::"), ""), strings.Join(parts, "::"), false
+		}
+		parts = append(parts, p.currentText())
+		p.advance()
+	}
+	value := strings.Join(parts, "::")
+	return p.addNode(KindPath, start, nil, value, ""), value, true
+}
+
+func (p *parser) synchronize(boundaries ...string) {
+	boundarySet := make(map[string]struct{}, len(boundaries))
+	for _, boundary := range boundaries {
+		boundarySet[boundary] = struct{}{}
+	}
+	for p.current().Kind != lexer.EOF {
+		if _, found := boundarySet[p.currentText()]; found {
+			return
+		}
+		p.advance()
+	}
+}

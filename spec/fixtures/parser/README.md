@@ -4,6 +4,10 @@ This directory is the executable-data companion to `spec/grammar/stage0.ebnf` an
 
 `manifest-v0.json` is the fixture index. `schema-v0.json` defines its machine-readable shape. Every case is a mini-package with exactly one `src/` source root so file-to-module identity is tested rather than mocked.
 
+The Go runner lives in `internal/parserfixture`. It rejects unknown manifest fields and paths that
+escape their declared roots, requires lossless source reconstruction for passing cases, lowers an
+AST only after an error-free parse, and compares every listed diagnostic exactly.
+
 ## Result boundary
 
 - `pass` means UTF-8 validation, lexing, full parsing, recovery accounting, and module-path validation produce no `E00xx` diagnostic.

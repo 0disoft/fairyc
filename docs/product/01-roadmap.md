@@ -17,6 +17,10 @@ Exit gate: the written contracts have no contradictory syntax, initialization, o
 
 ## Phase 1: first interpreted semantic slice
 
+Current implementation status: the source, lexer, recoverable-syntax, parser-diagnostic, AST
+lowering, and parser-fixture-runner portion of the first item exists. Typed HIR and every later
+Phase 1 capability remain unimplemented.
+
 - Implement source management, lexer, trivia-preserving tokens and spans, compact recoverable syntax, deterministic diagnostics, one-file modules, alias imports, and non-generic typed HIR in Go.
 - Implement restricted inert enums, whole-resource moves, local last-use loans, call-bounded mutable reborrows, single-origin borrow returns, plain regions, `Option`, `Result`, shallow `match`, and explicit `?` and `discard`.
 - Implement Flow CFG, mutable-local MIR, drop elaboration, the verifier, target-independent layouts, and the compatibility-vector metadata model.

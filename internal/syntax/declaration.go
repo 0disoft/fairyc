@@ -1,0 +1,399 @@
+package syntax
+
+import (
+	"github.com/0disoft/fairyc/internal/diagnostic"
+	"github.com/0disoft/fairyc/internal/lexer"
+)
+
+func (p *parser) parseSource() NodeID {
+	if !p.enter() {
+		return NoNode
+	}
+	defer p.leave()
+	start := p.currentFullIndex()
+	children := []NodeID{p.parseModule()}
+	for p.at("import") {
+		children = append(children, p.parseImport())
+	}
+	for p.current().Kind != lexer.EOF {
+		children = append(children, p.parseItem())
+	}
+	return p.addNode(KindSource, start, children, "", "")
+}
+
+func (p *parser) parseModule() NodeID {
+	start := p.currentFullIndex()
+	p.expect("module")
+	pathID, modulePath, ok := p.pathNode()
+	p.expect(";")
+	p.tree.Module = modulePath
+	if ok {
+		expected, err := p.file.ExpectedModule()
+		if err != nil || expected != modulePath {
+			span := diagnostic.Span{}
+			if node, found := p.tree.Node(pathID); found {
+				span = node.Span
+			}
+			p.emit("E0002", span, diagnostic.RepairNone, "")
+		}
+	}
+	return p.addNode(KindModule, start, []NodeID{pathID}, modulePath, "")
+}
+
+func (p *parser) parseImport() NodeID {
+	start := p.currentFullIndex()
+	startByte := p.current().Span.StartByte
+	p.advance()
+	pathID, importedPath, _ := p.pathNode()
+	children := []NodeID{pathID}
+	alias := ""
+	if !p.match("as") {
+		p.synchronize(";", "}")
+		endByte := p.current().Span.EndByte
+		if p.current().Kind == lexer.EOF {
+			endByte = p.current().Span.StartByte
+		}
+		p.emit("E0003", diagnostic.Span{StartByte: startByte, EndByte: endByte}, diagnostic.RepairSynchronize, ";")
+		p.match(";")
+		return p.addNode(KindImport, start, children, importedPath, "")
+	}
+	if p.atKind(lexer.Identifier) {
+		alias = p.currentText()
+		p.advance()
+	} else {
+		children = append(children, p.unexpected())
+	}
+	p.expect(";")
+	return p.addNode(KindImport, start, children, importedPath, alias)
+}
+
+func (p *parser) parseItem() NodeID {
+	start := p.currentFullIndex()
+	children := make([]NodeID, 0, 4)
+	for p.at("@") {
+		children = append(children, p.parseAttribute())
+	}
+	p.match("pub")
+	unsafeItem := p.match("unsafe")
+	switch p.currentText() {
+	case "const":
+		return p.parseConst(start, children)
+	case "struct":
+		return p.parseStruct(start, children)
+	case "resource":
+		return p.parseResource(start, children)
+	case "enum":
+		return p.parseEnum(start, children)
+	case "impl":
+		return p.parseImpl(start, children)
+	case "fn":
+		return p.parseFunction(start, children, false)
+	case "extern":
+		if unsafeItem {
+			return p.parseForeignFunction(start, children)
+		}
+	}
+	children = append(children, p.unexpected())
+	p.synchronize(";", "}")
+	p.match(";")
+	return p.addNode(KindError, start, children, "item", "")
+}
+
+func (p *parser) parseAttribute() NodeID {
+	start := p.currentFullIndex()
+	p.advance()
+	pathID, value, _ := p.pathNode()
+	children := []NodeID{pathID}
+	if p.match("(") {
+		for !p.at(")") && p.current().Kind != lexer.EOF {
+			if isLiteralToken(p.current(), p.currentText()) {
+				children = append(children, p.parseLiteral())
+			} else {
+				argument, _, _ := p.pathNode()
+				children = append(children, argument)
+			}
+			if !p.match(",") {
+				break
+			}
+		}
+		p.expect(")")
+	}
+	return p.addNode(KindAttribute, start, children, value, "")
+}
+
+func (p *parser) parseConst(start int, leading []NodeID) NodeID {
+	p.advance()
+	name := p.parseName()
+	p.expect(":")
+	typeID := p.parseType()
+	p.expect("=")
+	expression := p.parseExpression(0, true)
+	p.expect(";")
+	children := append(append([]NodeID(nil), leading...), typeID, expression)
+	return p.addNode(KindConst, start, children, name, "")
+}
+
+func (p *parser) parseStruct(start int, leading []NodeID) NodeID {
+	p.advance()
+	name := p.parseName()
+	p.expect("{")
+	children := append([]NodeID(nil), leading...)
+	for !p.at("}") && p.current().Kind != lexer.EOF {
+		children = append(children, p.parseField())
+	}
+	p.expect("}")
+	return p.addNode(KindStruct, start, children, name, "")
+}
+
+func (p *parser) parseResource(start int, leading []NodeID) NodeID {
+	p.advance()
+	name := p.parseName()
+	p.expect("{")
+	children := append([]NodeID(nil), leading...)
+	for !p.at("}") && p.current().Kind != lexer.EOF {
+		if p.at("drop") {
+			children = append(children, p.parseDrop())
+			break
+		}
+		children = append(children, p.parseField())
+	}
+	p.expect("}")
+	return p.addNode(KindResource, start, children, name, "")
+}
+
+func (p *parser) parseDrop() NodeID {
+	start := p.currentFullIndex()
+	p.advance()
+	p.expect("fn")
+	p.expect("(")
+	p.expect("self")
+	p.expect(":")
+	p.expect("&")
+	p.expect("mut")
+	if !p.at("Self") {
+		p.expect("Self")
+	} else {
+		p.advance()
+	}
+	p.expect(")")
+	block := p.parseBlock()
+	return p.addNode(KindFunction, start, []NodeID{block}, "drop", "")
+}
+
+func (p *parser) parseEnum(start int, leading []NodeID) NodeID {
+	p.advance()
+	name := p.parseName()
+	p.expect("{")
+	children := append([]NodeID(nil), leading...)
+	for !p.at("}") && p.current().Kind != lexer.EOF {
+		variantStart := p.currentFullIndex()
+		variantName := p.parseName()
+		variantChildren := make([]NodeID, 0, 2)
+		if p.match("{") {
+			for !p.at("}") && p.current().Kind != lexer.EOF {
+				variantChildren = append(variantChildren, p.parseEnumField())
+			}
+			p.expect("}")
+		}
+		p.expect(";")
+		children = append(children, p.addNode(KindVariant, variantStart, variantChildren, variantName, ""))
+	}
+	p.expect("}")
+	return p.addNode(KindEnum, start, children, name, "")
+}
+
+func (p *parser) parseEnumField() NodeID {
+	start := p.currentFullIndex()
+	name := p.parseName()
+	p.expect(":")
+	typeID := p.parseType()
+	p.expect(";")
+	return p.addNode(KindField, start, []NodeID{typeID}, name, "")
+}
+
+func (p *parser) parseImpl(start int, leading []NodeID) NodeID {
+	p.advance()
+	typeID := p.parseType()
+	p.expect("{")
+	children := append(append([]NodeID(nil), leading...), typeID)
+	for !p.at("}") && p.current().Kind != lexer.EOF {
+		methodStart := p.currentFullIndex()
+		methodLeading := make([]NodeID, 0, 2)
+		for p.at("@") {
+			methodLeading = append(methodLeading, p.parseAttribute())
+		}
+		p.match("pub")
+		p.match("unsafe")
+		children = append(children, p.parseFunction(methodStart, methodLeading, true))
+	}
+	p.expect("}")
+	return p.addNode(KindImpl, start, children, "", "")
+}
+
+func (p *parser) parseFunction(start int, leading []NodeID, method bool) NodeID {
+	p.expect("fn")
+	name := p.parseName()
+	parameters := p.parseParameters(method)
+	p.expect("->")
+	resultType := p.parseType()
+	body := p.parseBlock()
+	children := append(append([]NodeID(nil), leading...), parameters...)
+	children = append(children, resultType, body)
+	return p.addNode(KindFunction, start, children, name, "")
+}
+
+func (p *parser) parseForeignFunction(start int, leading []NodeID) NodeID {
+	p.expect("extern")
+	if !p.at("C") {
+		p.expect("C")
+	} else {
+		p.advance()
+	}
+	p.expect("fn")
+	name := p.parseName()
+	parameters := p.parseParameters(false)
+	p.expect("->")
+	resultType := p.parseType()
+	p.expect(";")
+	children := append(append([]NodeID(nil), leading...), parameters...)
+	children = append(children, resultType)
+	return p.addNode(KindForeign, start, children, name, "")
+}
+
+func (p *parser) parseParameters(method bool) []NodeID {
+	p.expect("(")
+	parameters := make([]NodeID, 0, 4)
+	if method && p.at("self") {
+		parameters = append(parameters, p.parseReceiver())
+		if !p.match(",") {
+			p.expect(")")
+			return parameters
+		}
+	}
+	for !p.at(")") && p.current().Kind != lexer.EOF {
+		start := p.currentFullIndex()
+		name := p.parseName()
+		p.expect(":")
+		typeID := p.parseType()
+		parameters = append(parameters, p.addNode(KindParameter, start, []NodeID{typeID}, name, ""))
+		if !p.match(",") {
+			break
+		}
+	}
+	p.expect(")")
+	return parameters
+}
+
+func (p *parser) parseReceiver() NodeID {
+	start := p.currentFullIndex()
+	p.advance()
+	p.expect(":")
+	if p.match("&") {
+		p.match("mut")
+	}
+	if !p.at("Self") {
+		p.expect("Self")
+	} else {
+		p.advance()
+	}
+	return p.addNode(KindParameter, start, nil, "self", "")
+}
+
+func (p *parser) parseField() NodeID {
+	start := p.currentFullIndex()
+	p.match("pub")
+	name := p.parseName()
+	p.expect(":")
+	typeID := p.parseType()
+	p.expect(";")
+	return p.addNode(KindField, start, []NodeID{typeID}, name, "")
+}
+
+func (p *parser) parseType() NodeID {
+	if !p.enter() {
+		return NoNode
+	}
+	defer p.leave()
+	start := p.currentFullIndex()
+	switch {
+	case p.match("&"):
+		p.match("mut")
+		child := p.parseType()
+		return p.addTypeNode(start, []NodeID{child})
+	case p.match("*"):
+		p.match("mut")
+		child := p.parseType()
+		return p.addTypeNode(start, []NodeID{child})
+	case p.match("["):
+		children := []NodeID{p.parseType()}
+		if p.match(";") {
+			children = append(children, p.parseConstExpression())
+		}
+		p.expect("]")
+		return p.addTypeNode(start, children)
+	case p.match("unsafe"):
+		p.expect("extern")
+		if p.at("C") {
+			p.advance()
+		} else {
+			p.expect("C")
+		}
+		p.expect("fn")
+		p.expect("(")
+		children := make([]NodeID, 0, 4)
+		for !p.at(")") && p.current().Kind != lexer.EOF {
+			children = append(children, p.parseType())
+			if !p.match(",") {
+				break
+			}
+		}
+		p.expect(")")
+		p.expect("->")
+		children = append(children, p.parseType())
+		return p.addTypeNode(start, children)
+	default:
+		pathID, _, _ := p.pathNode()
+		children := []NodeID{pathID}
+		if p.match("<") {
+			for !p.at(">") && p.current().Kind != lexer.EOF {
+				children = append(children, p.parseType())
+				if !p.match(",") {
+					break
+				}
+			}
+			p.expect(">")
+		}
+		return p.addTypeNode(start, children)
+	}
+}
+
+func (p *parser) parseConstExpression() NodeID {
+	if p.atKind(lexer.Integer) {
+		return p.parseLiteral()
+	}
+	pathID, _, _ := p.pathNode()
+	return pathID
+}
+
+func (p *parser) addTypeNode(start int, children []NodeID) NodeID {
+	return p.addNode(KindType, start, children, p.rawFrom(start), "")
+}
+
+func (p *parser) rawFrom(startFull int) string {
+	if startFull < 0 || startFull >= len(p.tree.Tokens) || p.lastFullIndex < startFull || p.lastFullIndex >= len(p.tree.Tokens) {
+		return ""
+	}
+	start := p.tree.Tokens[startFull].Span.StartByte
+	end := p.tree.Tokens[p.lastFullIndex].Span.EndByte
+	return string(p.tree.Source[start:end])
+}
+
+func (p *parser) parseName() string {
+	if p.atKind(lexer.Identifier) {
+		name := p.currentText()
+		p.advance()
+		return name
+	}
+	p.unexpected()
+	return ""
+}

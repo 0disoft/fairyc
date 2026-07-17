@@ -4,13 +4,15 @@
 - Repository type: monorepo
 - Architecture source: `docs/architecture/00-system-boundary.md`
 
-## Planned owners
+## Package owners
 
 | Boundary | Owns | Must not own |
 | --- | --- | --- |
 | `cmd/fairyc` | argument parsing, command dispatch, process exit, user-facing assembly | language semantics, target layout, backend-specific lowering |
 | `internal/source` | files, spans, line maps, source identity | syntax or semantic decisions |
 | `internal/lexer` and `internal/syntax` | tokens, trivia, parsing, recovery, and compact arena-backed syntax | type checking, immutable editor trees, or code generation |
+| `internal/ast` | error-free lowering and implementation-private parser assertions | accepting recovered syntax, type checking, or public serialization |
+| `internal/parserfixture` | strict parser-manifest execution and exact contract comparison | language rules, fixture rewriting, or production compiler orchestration |
 | `internal/resolve` and `internal/types` | names, modules, types, constants, and Stage 0 type properties | backend attributes or deferred generic dispatch |
 | `internal/hir` | resolved user-facing semantic representation | machine instruction choices |
 | `internal/flow` | initialization, move, borrow, region, escape, effect, and drop facts | source parsing or target instruction selection |
