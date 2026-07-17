@@ -63,6 +63,50 @@
       }
     },
     {
+      "id": "pass.package.stdlib-arena-region",
+      "caseRoot": "cases/pass/stdlib-arena-region",
+      "packages": [
+        {
+          "node": "app",
+          "role": "root",
+          "packageUid": "fixture.app.stdlib-arena",
+          "sourceIdentity": "fixture-source:app-stdlib-arena",
+          "versionIdentity": "fixture-version:workspace",
+          "features": [],
+          "sourceRoot": "packages/app/src",
+          "sources": ["main.fy"]
+        },
+        {
+          "node": "stdlib",
+          "role": "standard-library",
+          "packageUid": "fixture.fairyc.std",
+          "sourceIdentity": "fixture-source:stdlib-arena-v0",
+          "versionIdentity": "fixture-version:stdlib-v0",
+          "features": [],
+          "sourceRoot": "packages/stdlib/src",
+          "sources": ["std/alloc.fy"]
+        }
+      ],
+      "dependencies": [
+        { "owner": "app", "binding": "stdlib", "target": "stdlib" }
+      ],
+      "expect": {
+        "status": "pass",
+        "instanceClasses": [
+          { "label": "app-instance", "members": ["app"] },
+          { "label": "stdlib-instance", "members": ["stdlib"] }
+        ],
+        "lookups": [
+          {
+            "from": "app",
+            "importPath": "std::alloc",
+            "providerClass": "stdlib-instance",
+            "modulePath": "std::alloc"
+          }
+        ]
+      }
+    },
+    {
       "id": "pass.package.identical-instance-dedup",
       "caseRoot": "cases/pass/identical-instance-dedup",
       "packages": [

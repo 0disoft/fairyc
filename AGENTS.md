@@ -26,7 +26,7 @@ This scaffold does not generate implementation source code; any existing source 
 - Parser acceptance fixtures: spec/fixtures/parser/manifest-v0.json
 - Semantic acceptance fixtures: spec/fixtures/semantic/manifest-v0.json
 - Resource Flow fixtures: spec/fixtures/resource/manifest-v0.json
-- Region fixtures: spec/fixtures/region/manifest-v0.json
+- Region fixtures: spec/fixtures/region/manifest-v1.json
 - Result fixtures: spec/fixtures/result/manifest-v0.json
 - MIR normalization fixtures: spec/fixtures/mir/manifest-v0.json
 - MIR verifier mutation fixtures: spec/fixtures/mir-verifier/manifest-v0.json

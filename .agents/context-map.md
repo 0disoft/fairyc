@@ -14,7 +14,7 @@
 - Parser fixture route: spec/fixtures/parser/manifest-v0.json
 - Semantic fixture route: spec/fixtures/semantic/manifest-v0.json
 - Resource Flow fixture route: spec/fixtures/resource/manifest-v0.json
-- Region fixture route: spec/fixtures/region/manifest-v0.json
+- Region fixture route: spec/fixtures/region/manifest-v1.json
 - Result fixture route: spec/fixtures/result/manifest-v0.json
 - MIR fixture route: spec/fixtures/mir/manifest-v0.json
 - MIR verifier mutation fixture route: spec/fixtures/mir-verifier/manifest-v0.json

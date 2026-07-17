@@ -36,7 +36,7 @@ Transitive dependency modules are not visible. Direct edges that resolve to the 
 
 The standard library is a normal explicit package instance with the fixture role `standard-library`. It is injected as a direct dependency when a fixture needs `std::*`. There is no implicit prelude, magical host installation lookup, or type created merely because a user package declares the same name.
 
-The initial package fixture proves that `std::alloc` belongs to the declared standard-library instance. It does not yet define the complete `Arena` fixture API or public standard-library package metadata.
+The initial package fixture proves that `std::alloc` belongs to the declared standard-library instance. The dedicated `pass.package.stdlib-arena-region` case additionally exports an opaque `Arena` resource used as `&mut std::alloc::Arena` by Region v1. It deliberately defines no constructor, capacity operation, representation promise, or public standard-library package metadata. A package-graph pass says resolution succeeds even when a later Flow-owned Region assertion intentionally rejects the source.
 
 ## Graph validation
 

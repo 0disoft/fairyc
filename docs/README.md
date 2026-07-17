@@ -11,7 +11,7 @@
 - Parser fixture manifest: spec/fixtures/parser/manifest-v0.json
 - Semantic fixture manifest: spec/fixtures/semantic/manifest-v0.json
 - Resource Flow fixture manifest: spec/fixtures/resource/manifest-v0.json
-- Region fixture manifest: spec/fixtures/region/manifest-v0.json
+- Region fixture manifest: spec/fixtures/region/manifest-v1.json
 - Result fixture manifest: spec/fixtures/result/manifest-v0.json
 - MIR fixture manifest: spec/fixtures/mir/manifest-v0.json
 - MIR verifier mutation manifest: spec/fixtures/mir-verifier/manifest-v0.json

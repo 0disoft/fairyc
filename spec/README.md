@@ -18,8 +18,9 @@ This directory contains versioned normative data that future compiler tests can 
 - `fixtures/resource/schema-v0.json`: whole-root resource-state expectation schema;
 - `fixtures/resource/manifest-v0.json`: move, cleanup-obligation, join, and loop case index;
 - `fixtures/resource/cases/`: parser-, resolver-, and type-valid resource Flow mini-packages.
-- `fixtures/region/schema-v0.json`: Region origin and capability expectation schema;
-- `fixtures/region/manifest-v0.json`: parameter-origin and Region restriction cases plus explicit deferrals;
+- `fixtures/region/schema-v0.json` and `manifest-v0.json`: historical parameter-origin Region contract;
+- `fixtures/region/schema-v1.json`: Region expectations with an optional resolved-package-graph reference;
+- `fixtures/region/manifest-v1.json`: current parameter and local origins, `E3101` escape, and Region restriction cases;
 - `fixtures/result/schema-v0.json`: Result handling and propagation expectation schema;
 - `fixtures/result/manifest-v0.json`: return, discard, `?`, and must-use cases plus explicit deferrals.
 - `fixtures/mir/schema-v0.json`: source-linked MIR normalization expectation schema;

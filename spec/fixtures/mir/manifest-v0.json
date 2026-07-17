@@ -3,7 +3,7 @@
   "schemaVersion": "fairyc.mir-fixtures/v0",
   "deferred": [
     "partial aggregate construction and reassignment until fallible construction syntax is executable",
-    "Region mark and reset ordering until a bounded fixture std::alloc::Arena API is accepted",
+    "Region mark and reset ordering until a source-linked MIR observation case is accepted",
     "resource-bearing Option and Result payload traces until variant-constructor syntax is accepted",
     "cleanup-suffix merging until canonical path identity can be asserted without freezing block numbers"
   ],

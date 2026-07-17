@@ -90,7 +90,7 @@ The Stage 0 borrow model uses local last-use loans and whole-root overlap. It do
 
 An ordinary region may contain only values that do not need drop. A resource-aware arena would require a drop list, partial-construction rules, reverse-order cleanup, and reset failure semantics; it is deferred until those contracts and tests exist.
 
-Region-parameter origins, permitted returns, resource-placement rejection, capability storage, and direct-construction rejection are versioned in `spec/fixtures/region/manifest-v0.json`. A lexical local-region escape fixture remains deferred until a real standard-library package instance can be named.
+Region-parameter origins, permitted returns, package-resolved local-region escape, resource-placement rejection, capability storage, and direct-construction rejection are versioned in `spec/fixtures/region/manifest-v1.json`. The lexical escape case names the explicit standard-library package instance that owns the opaque fixture `Arena` type.
 
 ## Errors and control flow
 
@@ -198,4 +198,4 @@ Source text and documentation cannot grant an LLM, IDE, or agent filesystem, pro
 
 ## Open decisions
 
-Package coordinates and manifest syntax, concrete standard-library fixture APIs, exact parser resource limits, glibc and toolchain baselines, portable path model, additional targets, package registry, `.fymap` binary encoding, and the concrete `SymbolId` hash algorithm remain UNDECIDED.
+Package coordinates and manifest syntax, public `Arena` construction and capacity APIs, exact parser resource limits, glibc and toolchain baselines, portable path model, additional targets, package registry, `.fymap` binary encoding, and the concrete `SymbolId` hash algorithm remain UNDECIDED.

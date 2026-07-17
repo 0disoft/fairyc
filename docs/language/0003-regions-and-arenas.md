@@ -3,7 +3,7 @@
 - Status: Draft Stage 0 contract
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0003-stage-0-safety-boundary.md`
-- Region fixtures: `spec/fixtures/region/manifest-v0.json`
+- Region fixtures: `spec/fixtures/region/manifest-v1.json`
 
 ## Region capability
 
@@ -17,6 +17,8 @@ A region capability:
 - resets when the lexical region exits normally;
 - assigns `RegionParam(i)` or the corresponding local region origin to derived borrows.
 
+`region scratch in arena { ... }` requires `arena` to have type `&mut std::alloc::Arena`. The exclusive borrow covers the lexical block, while `scratch` is a distinct compiler-owned capability so repeated allocations do not create overlapping ordinary borrows.
+
 The Stage 0 allocation surface is limited to zero-initialized bytes, copied bytes, and `place(value)` for a fully initialized inert value whose type is inferred from the expression. There is no user generic `alloc<T>` syntax, safe uninitialized byte view, or resource placement.
 
 ## Allocation and escape
@@ -25,7 +27,9 @@ Allocation returns a safe borrow whose origin is the region. The referent cannot
 
 The compiler reports both the allocation span and the attempted escape span.
 
-Region fixtures expose the compiler-known allocation operation, hidden origin, optional last use, and return escape decision. They do not expose addresses, arena offsets, Flow block numbers, or MIR locals. The resolved package graph can now name an explicit standard-library instance; a lexical local-region escape case still waits for a bounded fixture-owned `std::alloc::Arena` API instead of inventing a user type with the same name.
+When the attempted escape is a return, `E3101` owns the rejection because the decisive fact is `LocalRegion(name)`. A generic `E2102` for the same returned expression is a cascade and is suppressed rather than reported as a second independent error.
+
+Region fixtures expose the compiler-known allocation operation, hidden origin, optional last use, and return escape decision. They do not expose addresses, arena offsets, Flow block numbers, or MIR locals. Region v1 resolves the lexical escape source through `pass.package.stdlib-arena-region`, whose explicit standard-library instance owns an opaque `std::alloc::Arena` resource. The fixture does not choose a constructor, capacity model, or public representation.
 
 ## Plain-region element rule
 

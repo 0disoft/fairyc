@@ -21,15 +21,16 @@ Module paths also contain no package coordinate. If dependency visibility is lef
 6. Imports see the current package plus direct dependencies only. Equal-instance edges are deduplicated first. Transitive modules are hidden; zero instance providers is missing and multiple distinct instance providers are ambiguous.
 7. Dependency bindings are unique per owner but do not rewrite source module paths.
 8. The standard library is an explicit package instance and direct dependency, never an implicit prelude or host-discovered magical namespace.
-9. Pass cases assert instance-equivalence classes and successful module lookups. Reject cases use fixture-rule reasons rather than reserving user diagnostic codes prematurely.
-10. The first cases cover explicit standard-library injection, identical-instance deduplication, feature-split instances, isolated equal module paths, ambiguous direct providers, hidden transitive modules, and duplicate dependency bindings.
+9. The dedicated `pass.package.stdlib-arena-region` graph owns the bounded opaque `std::alloc::Arena` fixture type used by Region v1. Package pass means resolution succeeds; later Flow rejection remains owned by the Region fixture.
+10. Pass cases assert instance-equivalence classes and successful module lookups. Reject cases use fixture-rule reasons rather than reserving user diagnostic codes prematurely.
+11. The first cases cover explicit standard-library injection, bounded Arena resolution, identical-instance deduplication, feature-split instances, isolated equal module paths, ambiguous direct providers, hidden transitive modules, and duplicate dependency bindings.
 
 ## Consequences
 
 - Compiler package-graph tests can begin before public package-manager syntax is chosen.
 - A future resolver cannot search transitive dependencies as a fallback.
 - `PackageUid` and `PackageInstanceId` remain separate concepts in Atlas, caches, and diagnostics.
-- The package fixture can name the standard-library instance, but the Region lexical-escape fixture still needs a bounded `Arena` fixture API before it is added.
+- The package fixture names the standard-library instance and opaque Arena type; Region v1 owns the later lexical-escape assertion.
 
 ## Revisit conditions
 

@@ -20,7 +20,7 @@ Contract ownership is layered as follows:
 | Versioned grammar and parser acceptance | `spec/grammar/stage0.ebnf` and `spec/fixtures/parser/manifest-v0.json` | Pratt tables, CST and AST structures, examples, and parser diagnostics |
 | Typed behavior | `docs/language/*.md` and `spec/fixtures/semantic/manifest-v0.json` | Typed HIR, `SemanticSnapshot`, and Atlas type and ownership facts |
 | Resource Flow behavior | `docs/language/0001-values-and-resources.md` and `spec/fixtures/resource/manifest-v0.json` | Flow CFG state, cleanup elaboration, MIR moves, and drop traces |
-| Region behavior | `docs/language/0003-regions-and-arenas.md` and `spec/fixtures/region/manifest-v0.json` | Flow origins, escape facts, reset lowering, and MIR region markers |
+| Region behavior | `docs/language/0003-regions-and-arenas.md` and `spec/fixtures/region/manifest-v1.json` | Flow origins, escape facts, resolved Arena ownership, reset lowering, and MIR region markers |
 | Result handling | `docs/language/0004-results-traps-and-control-flow.md` and `spec/fixtures/result/manifest-v0.json` | Flow handling facts, `?` branches, payload moves, and cleanup paths |
 | Executable control flow | `docs/mir/mir-v0.md` and `spec/fixtures/mir/manifest-v0.json` | Interpreter, C, later native, object, and assembly output |
 | MIR verifier defects | `docs/mir/verifier-mutation-v0.md` and `spec/fixtures/mir-verifier/manifest-v0.json` | Go seed constructors, mutation application, internal compiler error evidence, and fuzz seeds |

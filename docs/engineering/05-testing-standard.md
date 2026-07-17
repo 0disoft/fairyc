@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Semantic sources: `spec/grammar/stage0.ebnf`, `spec/fixtures/parser/manifest-v0.json`, `spec/fixtures/semantic/manifest-v0.json`, `spec/fixtures/resource/manifest-v0.json`, `spec/fixtures/region/manifest-v0.json`, `spec/fixtures/result/manifest-v0.json`, `spec/fixtures/mir/manifest-v0.json`, `spec/fixtures/mir-verifier/manifest-v0.json`, `spec/fixtures/package/manifest-v0.json`, `docs/language/`, `docs/mir/`, `docs/package/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/catalog-v0.md`, `docs/atlas/`
+- Semantic sources: `spec/grammar/stage0.ebnf`, `spec/fixtures/parser/manifest-v0.json`, `spec/fixtures/semantic/manifest-v0.json`, `spec/fixtures/resource/manifest-v0.json`, `spec/fixtures/region/manifest-v1.json`, `spec/fixtures/result/manifest-v0.json`, `spec/fixtures/mir/manifest-v0.json`, `spec/fixtures/mir-verifier/manifest-v0.json`, `spec/fixtures/package/manifest-v0.json`, `docs/language/`, `docs/mir/`, `docs/package/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/catalog-v0.md`, `docs/atlas/`
 - Merge-blocking validation: `VALIDATION.md`
 
 The parser, semantic, resource, Region, Result, MIR, MIR-verifier, and resolved-package-graph fixture directories exist as versioned test data, but no parser runner or compiler implementation exists. The remaining fixture classes are future evidence requirements; this document does not claim any executable language test currently passes.
@@ -26,7 +26,7 @@ The parser, semantic, resource, Region, Result, MIR, MIR-verifier, and resolved-
 | Type and initialization fail | Inert/resource separation and initialized-local rules |
 | Resource flow pass and fail | `spec/fixtures/resource/` proves whole-root moves, scope obligations, branch and loop states, and deterministic `E11xx` spans once a runner exists; consuming close and double-drop execution remain future groups |
 | Borrow-origin pass and fail | Local last-use loans, conflicts, single-origin return, and storage bans |
-| Region pass and fail | `spec/fixtures/region/` proves parameter origins, permitted returns, capability restrictions, and no `NeedsDrop` placement once a runner exists; lexical local escape is deferred pending a bounded fixture `std::alloc::Arena` API |
+| Region pass and fail | `spec/fixtures/region/manifest-v1.json` proves parameter and local origins, permitted parameter-origin returns, `E3101` local escape, capability restrictions, and no `NeedsDrop` placement once a runner exists |
 | Result pass and fail | `spec/fixtures/result/` proves return, discard, must-use behavior, `?` classification, exactly-once evaluation, and error compatibility once a runner exists; constructors and payload traces remain deferred |
 | MIR normalization | `spec/fixtures/mir/` proves source-linked evaluation order, call successors, ownership transfer, cleanup order, Result branching, trap paths, and eliminated source forms once a runner exists; graph identity remains excluded |
 | Resolved package graph | `spec/fixtures/package/` proves instance equality, feature splits, direct visibility, module isolation, ambiguity, transitive hiding, and explicit standard-library injection without choosing public package-manager syntax |
@@ -52,7 +52,7 @@ Semantic fail fixtures list every independent diagnostic after cascade suppressi
 
 Resource fixtures sample complete-root state immediately before or after a source span. They assert that `Live` owns one cleanup obligation, `Dead` owns zero, and a source-visible `MaybeLive` join is rejected. MIR drop flags and executable drop order remain separate fixture contracts.
 
-Region fixtures expose hidden origins and capability failures without pretending a user-declared `Arena` is the standard-library arena. Result fixtures accept typed parameters so they can test handling without choosing `Ok` or `Err` constructor syntax. Each manifest lists its deferred coverage explicitly.
+Region v1 resolves its lexical escape source through the explicit standard-library package instance and opaque fixture `Arena`; it does not pretend a user-declared type is the standard-library arena. Result fixtures accept typed parameters so they can test handling without choosing `Ok` or `Err` constructor syntax. Each manifest lists its deferred coverage explicitly.
 
 MIR fixtures compare source-linked observations after verification. They do not compare textual dumps, block or local numbers, temporary names, or generated C. MIR-verifier fixtures separately require each named baseline to verify, apply one typed mutation, and return the complete one-code result; arbitrary malformed graph input remains deferred.
 

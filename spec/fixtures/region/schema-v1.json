@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fairyc:region-fixtures:v1",
+  "title": "Fairy C Region fixture manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "deferred", "contracts", "cases"],
+  "properties": {
+    "$schema": { "type": "string", "minLength": 1 },
+    "schemaVersion": { "const": "fairyc.region-fixtures/v1" },
+    "deferred": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "contracts": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/case" }
+    }
+  },
+  "$defs": {
+    "sourcePath": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+(?:/[A-Za-z0-9_-]+)*\\.fy$"
+    },
+    "span": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "startByte", "endByte"],
+      "properties": {
+        "source": { "$ref": "#/$defs/sourcePath" },
+        "startByte": { "type": "integer", "minimum": 0 },
+        "endByte": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "packageGraph": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["manifest", "caseId", "rootNode"],
+      "properties": {
+        "manifest": {
+          "type": "string",
+          "pattern": "^\\.\\./package/manifest-v[0-9]+\\.json$"
+        },
+        "caseId": {
+          "type": "string",
+          "pattern": "^pass\\.package\\.[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "rootNode": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+        }
+      }
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "sourceRoot", "sources", "expect"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^(pass|fail)\\.(type|flow)\\.[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "sourceRoot": { "type": "string", "minLength": 1 },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/sourcePath" }
+        },
+        "packageGraph": { "$ref": "#/$defs/packageGraph" },
+        "expect": {
+          "oneOf": [
+            { "$ref": "#/$defs/passExpectation" },
+            { "$ref": "#/$defs/failExpectation" }
+          ]
+        }
+      }
+    },
+    "passExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "completedThrough", "origins"],
+      "properties": {
+        "status": { "const": "pass" },
+        "completedThrough": { "const": "flow" },
+        "origins": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/originAssertion" }
+        }
+      }
+    },
+    "originAssertion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["operation", "allocation", "origin", "escapes"],
+      "properties": {
+        "operation": { "enum": ["alloc-zeroed-bytes", "copy-bytes", "place"] },
+        "allocation": { "$ref": "#/$defs/span" },
+        "origin": { "type": "string", "pattern": "^(RegionParam\\([0-9]+\\)|LocalRegion\\([A-Za-z_][A-Za-z0-9_]*\\))$" },
+        "lastUse": { "$ref": "#/$defs/span" },
+        "escapes": { "type": "boolean" }
+      }
+    },
+    "failExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "phase", "diagnostics"],
+      "properties": {
+        "status": { "const": "fail" },
+        "phase": { "enum": ["type", "flow"] },
+        "diagnostics": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/diagnostic" }
+        }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "primary", "related"],
+      "properties": {
+        "code": { "type": "string", "pattern": "^E31[0-9]{2}$" },
+        "primary": { "$ref": "#/$defs/span" },
+        "related": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/relatedSpan" }
+        }
+      }
+    },
+    "relatedSpan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "span"],
+      "properties": {
+        "role": { "enum": ["allocation", "capability", "declaration", "escape", "return", "type"] },
+        "span": { "$ref": "#/$defs/span" }
+      }
+    }
+  }
+}

@@ -64,6 +64,8 @@ The minimum operations are construction with capacity, copy from a byte slice, l
 
 There is no safe uninitialized byte allocation, generic `alloc<T>` syntax, resource placement, resource-aware reset, or fallible reset.
 
+The bounded Stage 0 fixture surface exports `std::alloc::Arena` as an opaque resource. `region name in expression` accepts an expression of type `&mut std::alloc::Arena` and holds that exclusive borrow for the lexical block. The fixture defines no constructor, capacity query, growth policy, ordinary allocation method, or representation guarantee; those remain public-library decisions.
+
 ## Text types
 
 `str` is an unsized, immutable, valid-UTF-8 language type used as `&str`. UTF-8 validation of `&[u8]` returns a borrow with the input's origin and performs no copy or allocation. Byte slices never convert implicitly to text.
