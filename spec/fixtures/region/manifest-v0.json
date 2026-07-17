@@ -2,7 +2,7 @@
   "$schema": "./schema-v0.json",
   "schemaVersion": "fairyc.region-fixtures/v0",
   "deferred": [
-    "E3101 lexical local-region escape until stdlib package fixture identity is fixed",
+    "E3101 lexical local-region escape until a bounded fixture std::alloc::Arena API is accepted",
     "cross-thread transfer until a Stage 0 concurrency model exists"
   ],
   "contracts": [

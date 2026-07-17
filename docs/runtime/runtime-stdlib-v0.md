@@ -36,6 +36,8 @@ std::fs     Linux File and open options
 std::c      C scalar types and raw wrapper helpers
 ```
 
+The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
+
 Built-in `Option`, `Result`, slices, `str`, and `CStr` get compiler-known view semantics; library modules provide operations over them.
 
 ## Allocation v0

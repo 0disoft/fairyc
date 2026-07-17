@@ -24,5 +24,7 @@ This directory contains versioned normative data that future compiler tests can 
 - `fixtures/result/manifest-v0.json`: return, discard, `?`, and must-use cases plus explicit deferrals.
 - `fixtures/mir/schema-v0.json`: source-linked MIR normalization expectation schema;
 - `fixtures/mir/manifest-v0.json`: ordered evaluation, moves, cleanup, Result branching, calls, and trap-path cases plus explicit deferrals.
+- `fixtures/package/schema-v0.json`: already-resolved package graph expectation schema;
+- `fixtures/package/manifest-v0.json`: package-instance equality, direct visibility, module ownership, and explicit standard-library injection cases.
 
 Explanatory language documents may summarize these files but cannot silently change spelling, grouping, module identity, semantic phase ownership, canonical facts, spans, recovery acceptance, or verified MIR observations. A contract change updates the normative data, ADR, diagnostics when applicable, and affected fixtures together.

@@ -6,4 +6,4 @@ This directory accompanies `docs/language/0003-regions-and-arenas.md` and `docs/
 
 Pass assertions expose only the compiler-known operation, source span, hidden origin, optional last use, and return escape decision. Fail cases list every independent `E31xx` diagnostic with role-labelled byte spans. AST, HIR, Flow block, MIR local, raw address, and backend allocation details are not contracts.
 
-The initial suite uses declared `Region` parameters. Local lexical-region escape remains deferred because it needs a real `std::alloc::Arena` dependency, while package-manifest and fixture-stdlib injection contracts are still UNDECIDED. Do not replace that missing dependency with a user-declared type merely named `Arena`.
+The initial suite uses declared `Region` parameters. `spec/fixtures/package/manifest-v0.json` now provides explicit standard-library package identity and injection, but local lexical-region escape still needs a bounded fixture-owned `std::alloc::Arena` API. Do not replace that missing API with a user-declared type merely named `Arena`.

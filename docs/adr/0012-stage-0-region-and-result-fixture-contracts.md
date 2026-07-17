@@ -9,7 +9,7 @@
 
 Region safety and `Result` handling are both Flow concerns, but they expose different stable facts. Region checks need hidden origins, escape decisions, and capability restrictions. `Result` checks need handling mode, single evaluation, payload types, and propagation compatibility. Folding both into the general semantic schema would weaken validation and silently broaden an existing v0 contract.
 
-The local lexical-region escape case also depends on a real `std::alloc::Arena` package instance. Package manifests, dependency injection for fixtures, and standard-library fixture identity remain undecided, so inventing a magical local `Arena` would test a language that has not been specified.
+The local lexical-region escape case also depends on a real `std::alloc::Arena` package instance. The resolved package graph now provides explicit standard-library instance identity and injection, but a bounded fixture-owned `Arena` API remains undecided. Inventing a magical local `Arena` would still test a language that has not been specified.
 
 ## Decision
 
@@ -18,7 +18,7 @@ The local lexical-region escape case also depends on a real `std::alloc::Arena` 
 3. Every case declares whether it completes through Flow or fails in `type` or `flow`. Parsing and resolution must always succeed; an unlisted earlier-phase diagnostic is a fixture setup failure.
 4. Region pass assertions record the allocation operation, source span, hidden origin, last use when local, and whether the derived borrow escapes through the return value.
 5. Region fail assertions use complete independent `E31xx` diagnostics. The initial cases cover a local use from `RegionParam(0)`, a permitted single-origin return, resource placement rejection, capability storage rejection, and direct capability construction rejection.
-6. A lexical local-region escape fixture is deferred until the fixture contract can name a real standard-library package instance and `Arena` dependency without an implicit prelude or invented constructor.
+6. A lexical local-region escape fixture is deferred until a bounded standard-library fixture defines the `Arena` surface without an implicit prelude or invented constructor.
 7. Result pass assertions record the expression, handling mode (`return`, `discard`, or `propagate`), canonical result, success, and error types, and exactly-once evaluation.
 8. Result fail assertions use complete independent `E41xx` diagnostics. The initial cases cover an unused result, `?` on a non-result, and incompatible propagated error types.
 9. `Ok` and `Err` construction syntax is not added by these fixtures. Cases use typed parameters so the suite does not choose a constructor spelling ahead of the language contract.
@@ -37,4 +37,4 @@ Separate schemas keep a Region origin from being confused with a `Result` payloa
 
 ## Revisit conditions
 
-Add or version fixtures when package and stdlib dependency identity is fixed, `Ok` and `Err` construction spelling is accepted, resource-bearing tagged payload traces become executable, or a required assertion depends on MIR control-flow identity.
+Add or version fixtures when the bounded standard-library `Arena` surface is accepted, `Ok` and `Err` construction spelling is accepted, resource-bearing tagged payload traces become executable, or a required assertion depends on MIR control-flow identity.

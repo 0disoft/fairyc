@@ -14,7 +14,9 @@
 - Region fixture manifest: spec/fixtures/region/manifest-v0.json
 - Result fixture manifest: spec/fixtures/result/manifest-v0.json
 - MIR fixture manifest: spec/fixtures/mir/manifest-v0.json
+- Resolved package graph fixture manifest: spec/fixtures/package/manifest-v0.json
 - Executable semantics and C transport: docs/mir/*.md
+- Package identity and visibility: docs/package/*.md
 - Target and C ABI contract: docs/abi/*.md
 - Runtime and standard-library contract: docs/runtime/*.md
 - Compatibility and versioning contract: docs/compatibility/*.md
@@ -31,4 +33,4 @@
 
 ## Authority order
 
-Product scope is set by `docs/product/02-spec.md`. Accepted ADRs constrain that scope. `spec/grammar/stage0.ebnf` owns exact prototype spelling and precedence; parser fixtures own syntax acceptance, semantic fixtures own stable name, type, and borrow assertions, resource fixtures own whole-root state transitions, Region fixtures own capability origins, Result fixtures own handling and propagation, and MIR fixtures own source-linked normalization events after verification. Detailed language, MIR, ABI, runtime, compatibility, diagnostics, and Atlas documents refine those decisions. Generated output, compiler caches, benchmark reports, external AI responses, and emitted maps are evidence only and cannot override these sources.
+Product scope is set by `docs/product/02-spec.md`. Accepted ADRs constrain that scope. `spec/grammar/stage0.ebnf` owns exact prototype spelling and precedence; parser fixtures own syntax acceptance, semantic fixtures own stable name, type, and borrow assertions, resource fixtures own whole-root state transitions, Region fixtures own capability origins, Result fixtures own handling and propagation, MIR fixtures own source-linked normalization events after verification, and package fixtures own resolved instance and direct-visibility facts. Detailed language, MIR, package, ABI, runtime, compatibility, diagnostics, and Atlas documents refine those decisions. Generated output, compiler caches, benchmark reports, external AI responses, and emitted maps are evidence only and cannot override these sources.

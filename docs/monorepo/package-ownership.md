@@ -26,7 +26,7 @@
 | `internal/atlas` | versioned semantic-map export and bounded queries over snapshots | frontend dependencies, LLM execution authority, embeddings, or source reparsing |
 | `runtime` | traps, process entry, empty storage, and required low-level memory helpers | allocators, files, strings, collections, logging, unwinding, or garbage collection |
 | `std` | `SystemHeap`, `Arena`, `Buffer`, text, Linux file, and safe C wrappers | compiler internals, hidden allocation, deferred generic collections, or portable-path claims |
-| `spec` | versioned normative grammar, parser, semantic, resource, Region, Result, and MIR fixture schemas, and executable contract data | generated compiler output, build-local IDs, textual MIR snapshots, or implementation-owned snapshots |
+| `spec` | versioned normative grammar plus parser, semantic, resource, Region, Result, MIR, and resolved-package-graph fixture schemas and executable contract data | generated compiler output, build-local IDs, textual MIR snapshots, public package-manager syntax, or implementation-owned snapshots |
 | `tests` | executable language, backend, ABI, and diagnostic contracts | production implementation logic |
 
 ## Public-contract policy
@@ -41,6 +41,7 @@ Before a stable language revision, internal Go packages are not public APIs. The
 - A whole-root resource-state change requires the resource manifest, cleanup-obligation assertions, `E11xx` spans, and drop-elaboration contract to remain synchronized.
 - A Region or Result change requires its dedicated manifest, deferred ledger, `E31xx` or `E41xx` spans, and owning language and MIR contracts to remain synchronized.
 - A MIR change requires its source-linked fixture observations, verifier, interpreter, every enabled backend, and differential fixtures to be reviewed.
+- A package identity or visibility change requires resolved-graph fixtures, direct module lookup, compatibility, cache identity, and Atlas package-edge review.
 - A target-layout change requires ABI fixtures and generated-header review.
 - A standard-library ownership change requires drop, allocation, and unsafe-wrapper review.
 - An Atlas schema change requires provenance, compatibility, size, and stale-map checks.

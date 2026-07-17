@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fairyc:package-fixtures:v0",
+  "title": "Fairy C resolved package graph fixture manifest v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "deferred", "contracts", "cases"],
+  "properties": {
+    "$schema": { "type": "string", "minLength": 1 },
+    "schemaVersion": { "const": "fairyc.package-fixtures/v0" },
+    "deferred": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "contracts": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/case" }
+    }
+  },
+  "$defs": {
+    "nodeId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+    },
+    "modulePath": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]*(?:::[A-Za-z_][A-Za-z0-9_]*)*$"
+    },
+    "sourcePath": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+(?:/[A-Za-z0-9_-]+)*\\.fy$"
+    },
+    "relativeDirectory": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+(?:/[A-Za-z0-9_-]+)*$"
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "caseRoot", "packages", "dependencies", "expect"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(pass|fail)\\.package\\.[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "caseRoot": { "$ref": "#/$defs/relativeDirectory" },
+        "packages": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/packageNode" }
+        },
+        "dependencies": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/dependency" }
+        },
+        "expect": {
+          "oneOf": [
+            { "$ref": "#/$defs/passExpectation" },
+            { "$ref": "#/$defs/failExpectation" }
+          ]
+        }
+      }
+    },
+    "packageNode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "node",
+        "role",
+        "packageUid",
+        "sourceIdentity",
+        "versionIdentity",
+        "features",
+        "sourceRoot",
+        "sources"
+      ],
+      "properties": {
+        "node": { "$ref": "#/$defs/nodeId" },
+        "role": { "enum": ["root", "dependency", "standard-library"] },
+        "packageUid": { "type": "string", "minLength": 1 },
+        "sourceIdentity": { "type": "string", "minLength": 1 },
+        "versionIdentity": { "type": "string", "minLength": 1 },
+        "features": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$" }
+        },
+        "sourceRoot": { "$ref": "#/$defs/relativeDirectory" },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/sourcePath" }
+        }
+      }
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["owner", "binding", "target"],
+      "properties": {
+        "owner": { "$ref": "#/$defs/nodeId" },
+        "binding": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$" },
+        "target": { "$ref": "#/$defs/nodeId" }
+      }
+    },
+    "instanceClass": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "members"],
+      "properties": {
+        "label": { "$ref": "#/$defs/nodeId" },
+        "members": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nodeId" }
+        }
+      }
+    },
+    "lookup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "importPath", "providerClass", "modulePath"],
+      "properties": {
+        "from": { "$ref": "#/$defs/nodeId" },
+        "importPath": { "$ref": "#/$defs/modulePath" },
+        "providerClass": { "$ref": "#/$defs/nodeId" },
+        "modulePath": { "$ref": "#/$defs/modulePath" }
+      }
+    },
+    "passExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "instanceClasses", "lookups"],
+      "properties": {
+        "status": { "const": "pass" },
+        "instanceClasses": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/instanceClass" }
+        },
+        "lookups": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/lookup" }
+        }
+      }
+    },
+    "failExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reason", "subjects"],
+      "properties": {
+        "status": { "const": "reject" },
+        "reason": {
+          "enum": [
+            "ambiguous-visible-module",
+            "duplicate-dependency-binding",
+            "missing-visible-module"
+          ]
+        },
+        "subjects": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nodeId" }
+        },
+        "importPath": { "$ref": "#/$defs/modulePath" }
+      }
+    }
+  }
+}

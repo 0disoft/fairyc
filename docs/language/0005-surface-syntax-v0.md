@@ -28,7 +28,9 @@ import std::fs as fs;
 import std::text as text;
 ```
 
-The driver supplies one package source root. Removing `.fy` from a source-root-relative path and joining its valid identifier segments with `::` produces the required module declaration. `src/net/http.fy` therefore declares `module net::http;`. Package coordinates do not participate in this path. Every import has an alias and names remain qualified through that alias. Wildcard imports, selective imports, re-exports, implicit prelude imports, and import cycles are excluded.
+The driver supplies one source root for each resolved package instance. Removing `.fy` from a source-root-relative path and joining its valid identifier segments with `::` produces the required module declaration. `src/net/http.fy` therefore declares `module net::http;`. Package coordinates and instance identities do not participate in this path.
+
+Every import has an alias and names remain qualified through that alias. A module path may resolve in the current package or exactly one direct dependency instance. Transitive dependency modules are not visible; zero providers is missing and multiple visible providers is ambiguous. The standard library follows the same explicit dependency rule and creates no implicit prelude. Wildcard imports, selective imports, re-exports, and import cycles are excluded.
 
 `pub` grants source-module visibility only. It does not export a stable binary symbol, layout, mangling, or calling convention.
 

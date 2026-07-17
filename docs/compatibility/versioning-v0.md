@@ -53,7 +53,7 @@ The diagnostic catalog versions rule identities. Once a code appears in a releas
 
 Machine-readable diagnostic JSON has its own schema. Stable fields are code, severity, primary span, and rule identity. Exact prose and layout are not stable machine contracts.
 
-Semantic, resource, Region, Result, and MIR fixture manifests are repository test contracts, not the released diagnostic JSON schema or a stable MIR exchange format. Their related-span roles and canonical fact shapes may change only through a new fixture schema version plus synchronized cases.
+Semantic, resource, Region, Result, MIR, and package fixture manifests are repository test contracts, not the released diagnostic JSON schema, a stable MIR exchange format, or a public package-manager format. Their related-span roles and canonical fact shapes may change only through a new fixture schema version plus synchronized cases.
 
 ## Runtime and standard library
 
@@ -64,6 +64,8 @@ The standard library has an independent version and declares required language r
 ## Package formats
 
 Manifest schema, lockfile schema, source archive schema, and any future binary artifact schema are independent. Stage 0 needs manifest and lockfile schemas only. A stable binary package format would falsely imply a stable native Fairy ABI and is deferred.
+
+`fairyc.package-fixtures/v0` versions repository input and expectation data for an already-resolved graph. It is not the public manifest schema, lockfile schema, solver protocol, or concrete `PackageInstanceId` encoding, and compatibility with it does not imply compatibility with any future package-manager format.
 
 ## `.fymap` compatibility
 

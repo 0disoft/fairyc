@@ -21,6 +21,8 @@ Each file is one module and each import introduces its explicit alias into that 
 
 Qualified `alias::name` first resolves the alias, then resolves a source-visible item in the imported module. Unqualified names resolve from the innermost lexical block through parameters and enclosing blocks, then the current module. There is no implicit prelude, wildcard import, overload set, or fallback search through imported modules.
 
+When the driver supplies a resolved package graph, import-module lookup follows `docs/package/package-graph-v0.md`: the current package and direct dependencies are visible, transitive dependencies are not, and equal module paths from multiple visible package instances are ambiguous. Public manifest parsing and dependency solving remain outside this frontend phase.
+
 Fixture coordinates identify a declaration by module path, declaration name, declaration kind, and its source-root-relative declaration span. They deliberately exclude build-local symbol IDs and absolute filesystem paths.
 
 ## Visibility
@@ -79,4 +81,4 @@ Ownership and borrow diagnostics retain their `E11xx` and `E21xx` meanings from 
 
 ## Deferred rules
 
-Overloading, user generics, type classes or interfaces, implicit numeric promotion, user conversion protocols, trait lookup, extension methods, closure capture, separate type/value namespaces, multi-package dependency lookup, and stable public symbol encoding remain outside this v0 contract.
+Overloading, user generics, type classes or interfaces, implicit numeric promotion, user conversion protocols, trait lookup, extension methods, closure capture, separate type/value namespaces, public manifest-driven dependency resolution, and stable public symbol encoding remain outside this v0 contract.

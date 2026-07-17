@@ -1,0 +1,384 @@
+{
+  "$schema": "./schema-v0.json",
+  "schemaVersion": "fairyc.package-fixtures/v0",
+  "deferred": [
+    "public package coordinate and manifest syntax",
+    "version-range solving and feature-unification policy",
+    "lockfile encoding and concrete PackageInstanceId algorithm",
+    "registry, path, Git, archive, and network source acquisition",
+    "package dependency cycles and workspace member discovery",
+    "public-interface hash inputs and module-interface serialization"
+  ],
+  "contracts": [
+    "docs/product/02-spec.md",
+    "docs/adr/0014-resolved-package-graph-fixture-contract.md",
+    "docs/package/package-graph-v0.md",
+    "docs/language/0005-surface-syntax-v0.md",
+    "docs/compatibility/versioning-v0.md",
+    "docs/atlas/fymap-v1.md"
+  ],
+  "cases": [
+    {
+      "id": "pass.package.explicit-stdlib-instance",
+      "caseRoot": "cases/pass/explicit-stdlib-instance",
+      "packages": [
+        {
+          "node": "app",
+          "role": "root",
+          "packageUid": "fixture.app.stdlib",
+          "sourceIdentity": "fixture-source:app-stdlib",
+          "versionIdentity": "fixture-version:workspace",
+          "features": [],
+          "sourceRoot": "packages/app/src",
+          "sources": ["main.fy"]
+        },
+        {
+          "node": "stdlib",
+          "role": "standard-library",
+          "packageUid": "fixture.fairyc.std",
+          "sourceIdentity": "fixture-source:stdlib-v0",
+          "versionIdentity": "fixture-version:stdlib-v0",
+          "features": [],
+          "sourceRoot": "packages/stdlib/src",
+          "sources": ["std/alloc.fy"]
+        }
+      ],
+      "dependencies": [
+        { "owner": "app", "binding": "stdlib", "target": "stdlib" }
+      ],
+      "expect": {
+        "status": "pass",
+        "instanceClasses": [
+          { "label": "app-instance", "members": ["app"] },
+          { "label": "stdlib-instance", "members": ["stdlib"] }
+        ],
+        "lookups": [
+          {
+            "from": "app",
+            "importPath": "std::alloc",
+            "providerClass": "stdlib-instance",
+            "modulePath": "std::alloc"
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.package.identical-instance-dedup",
+      "caseRoot": "cases/pass/identical-instance-dedup",
+      "packages": [
+        {
+          "node": "app",
+          "role": "root",
+          "packageUid": "fixture.app.dedup",
+          "sourceIdentity": "fixture-source:app-dedup",
+          "versionIdentity": "fixture-version:workspace",
+          "features": [],
+          "sourceRoot": "packages/app/src",
+          "sources": ["main.fy"]
+        },
+        {
+          "node": "shared-left",
+          "role": "dependency",
+          "packageUid": "fixture.shared",
+          "sourceIdentity": "fixture-source:shared-1",
+          "versionIdentity": "fixture-version:1",
+          "features": ["base"],
+          "sourceRoot": "packages/shared/src",
+          "sources": ["shared.fy"]
+        },
+        {
+          "node": "shared-right",
+          "role": "dependency",
+          "packageUid": "fixture.shared",
+          "sourceIdentity": "fixture-source:shared-1",
+          "versionIdentity": "fixture-version:1",
+          "features": ["base"],
+          "sourceRoot": "packages/shared/src",
+          "sources": ["shared.fy"]
+        }
+      ],
+      "dependencies": [
+        { "owner": "app", "binding": "left", "target": "shared-left" },
+        { "owner": "app", "binding": "right", "target": "shared-right" }
+      ],
+      "expect": {
+        "status": "pass",
+        "instanceClasses": [
+          { "label": "app-instance", "members": ["app"] },
+          { "label": "shared-instance", "members": ["shared-left", "shared-right"] }
+        ],
+        "lookups": [
+          {
+            "from": "app",
+            "importPath": "shared",
+            "providerClass": "shared-instance",
+            "modulePath": "shared"
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.package.feature-split",
+      "caseRoot": "cases/pass/feature-split",
+      "packages": [
+        {
+          "node": "app-base",
+          "role": "root",
+          "packageUid": "fixture.app.base",
+          "sourceIdentity": "fixture-source:app-base",
+          "versionIdentity": "fixture-version:workspace",
+          "features": [],
+          "sourceRoot": "packages/app-base/src",
+          "sources": ["app_base.fy"]
+        },
+        {
+          "node": "app-tls",
+          "role": "root",
+          "packageUid": "fixture.app.tls",
+          "sourceIdentity": "fixture-source:app-tls",
+          "versionIdentity": "fixture-version:workspace",
+          "features": [],
+          "sourceRoot": "packages/app-tls/src",
+          "sources": ["app_tls.fy"]
+        },
+        {
+          "node": "codec-base",
+          "role": "dependency",
+          "packageUid": "fixture.codec",
+          "sourceIdentity": "fixture-source:codec-1",
+          "versionIdentity": "fixture-version:1",
+          "features": [],
+          "sourceRoot": "packages/codec/src",
+          "sources": ["codec.fy"]
+        },
+        {
+          "node": "codec-tls",
+          "role": "dependency",
+          "packageUid": "fixture.codec",
+          "sourceIdentity": "fixture-source:codec-1",
+          "versionIdentity": "fixture-version:1",
+          "features": ["tls"],
+          "sourceRoot": "packages/codec/src",
+          "sources": ["codec.fy"]
+        }
+      ],
+      "dependencies": [
+        { "owner": "app-base", "binding": "codec", "target": "codec-base" },
+        { "owner": "app-tls", "binding": "codec", "target": "codec-tls" }
+      ],
+      "expect": {
+        "status": "pass",
+        "instanceClasses": [
+          { "label": "app-base-instance", "members": ["app-base"] },
+          { "label": "app-tls-instance", "members": ["app-tls"] },
+          { "label": "codec-base-instance", "members": ["codec-base"] },
+          { "label": "codec-tls-instance", "members": ["codec-tls"] }
+        ],
+        "lookups": [
+          { "from": "app-base", "importPath": "codec", "providerClass": "codec-base-instance", "modulePath": "codec" },
+          { "from": "app-tls", "importPath": "codec", "providerClass": "codec-tls-instance", "modulePath": "codec" }
+        ]
+      }
+    },
+    {
+      "id": "pass.package.module-path-isolation",
+      "caseRoot": "cases/pass/module-path-isolation",
+      "packages": [
+        {
+          "node": "app-a",
+          "role": "root",
+          "packageUid": "fixture.app.a",
+          "sourceIdentity": "fixture-source:app-a",
+          "versionIdentity": "fixture-version:workspace",
+          "features": [],
+          "sourceRoot": "packages/app-a/src",
+          "sources": ["app_a.fy"]
+        },
+        {
+          "node": "app-b",
+          "role": "root",
+          "packageUid": "fixture.app.b",
+          "sourceIdentity": "fixture-source:app-b",
+          "versionIdentity": "fixture-version:workspace",
+          "features": [],
+          "sourceRoot": "packages/app-b/src",
+          "sources": ["app_b.fy"]
+        },
+        {
+          "node": "util-a",
+          "role": "dependency",
+          "packageUid": "fixture.util.a",
+          "sourceIdentity": "fixture-source:util-a",
+          "versionIdentity": "fixture-version:1",
+          "features": [],
+          "sourceRoot": "packages/util-a/src",
+          "sources": ["util.fy"]
+        },
+        {
+          "node": "util-b",
+          "role": "dependency",
+          "packageUid": "fixture.util.b",
+          "sourceIdentity": "fixture-source:util-b",
+          "versionIdentity": "fixture-version:1",
+          "features": [],
+          "sourceRoot": "packages/util-b/src",
+          "sources": ["util.fy"]
+        }
+      ],
+      "dependencies": [
+        { "owner": "app-a", "binding": "util", "target": "util-a" },
+        { "owner": "app-b", "binding": "util", "target": "util-b" }
+      ],
+      "expect": {
+        "status": "pass",
+        "instanceClasses": [
+          { "label": "app-a-instance", "members": ["app-a"] },
+          { "label": "app-b-instance", "members": ["app-b"] },
+          { "label": "util-a-instance", "members": ["util-a"] },
+          { "label": "util-b-instance", "members": ["util-b"] }
+        ],
+        "lookups": [
+          { "from": "app-a", "importPath": "util", "providerClass": "util-a-instance", "modulePath": "util" },
+          { "from": "app-b", "importPath": "util", "providerClass": "util-b-instance", "modulePath": "util" }
+        ]
+      }
+    },
+    {
+      "id": "fail.package.ambiguous-visible-module",
+      "caseRoot": "cases/fail/ambiguous-visible-module",
+      "packages": [
+        {
+          "node": "app",
+          "role": "root",
+          "packageUid": "fixture.app.ambiguous",
+          "sourceIdentity": "fixture-source:app-ambiguous",
+          "versionIdentity": "fixture-version:workspace",
+          "features": [],
+          "sourceRoot": "packages/app/src",
+          "sources": ["main.fy"]
+        },
+        {
+          "node": "shared-a",
+          "role": "dependency",
+          "packageUid": "fixture.shared.a",
+          "sourceIdentity": "fixture-source:shared-a",
+          "versionIdentity": "fixture-version:1",
+          "features": [],
+          "sourceRoot": "packages/shared-a/src",
+          "sources": ["shared.fy"]
+        },
+        {
+          "node": "shared-b",
+          "role": "dependency",
+          "packageUid": "fixture.shared.b",
+          "sourceIdentity": "fixture-source:shared-b",
+          "versionIdentity": "fixture-version:1",
+          "features": [],
+          "sourceRoot": "packages/shared-b/src",
+          "sources": ["shared.fy"]
+        }
+      ],
+      "dependencies": [
+        { "owner": "app", "binding": "shared-a", "target": "shared-a" },
+        { "owner": "app", "binding": "shared-b", "target": "shared-b" }
+      ],
+      "expect": {
+        "status": "reject",
+        "reason": "ambiguous-visible-module",
+        "subjects": ["shared-a", "shared-b"],
+        "importPath": "shared"
+      }
+    },
+    {
+      "id": "fail.package.transitive-module-hidden",
+      "caseRoot": "cases/fail/transitive-module-hidden",
+      "packages": [
+        {
+          "node": "app",
+          "role": "root",
+          "packageUid": "fixture.app.transitive",
+          "sourceIdentity": "fixture-source:app-transitive",
+          "versionIdentity": "fixture-version:workspace",
+          "features": [],
+          "sourceRoot": "packages/app/src",
+          "sources": ["main.fy"]
+        },
+        {
+          "node": "middle",
+          "role": "dependency",
+          "packageUid": "fixture.middle",
+          "sourceIdentity": "fixture-source:middle",
+          "versionIdentity": "fixture-version:1",
+          "features": [],
+          "sourceRoot": "packages/middle/src",
+          "sources": ["middle.fy"]
+        },
+        {
+          "node": "leaf",
+          "role": "dependency",
+          "packageUid": "fixture.leaf",
+          "sourceIdentity": "fixture-source:leaf",
+          "versionIdentity": "fixture-version:1",
+          "features": [],
+          "sourceRoot": "packages/leaf/src",
+          "sources": ["leaf.fy"]
+        }
+      ],
+      "dependencies": [
+        { "owner": "app", "binding": "middle", "target": "middle" },
+        { "owner": "middle", "binding": "leaf", "target": "leaf" }
+      ],
+      "expect": {
+        "status": "reject",
+        "reason": "missing-visible-module",
+        "subjects": ["app", "leaf"],
+        "importPath": "leaf"
+      }
+    },
+    {
+      "id": "fail.package.duplicate-dependency-binding",
+      "caseRoot": "cases/fail/duplicate-dependency-binding",
+      "packages": [
+        {
+          "node": "app",
+          "role": "root",
+          "packageUid": "fixture.app.binding",
+          "sourceIdentity": "fixture-source:app-binding",
+          "versionIdentity": "fixture-version:workspace",
+          "features": [],
+          "sourceRoot": "packages/app/src",
+          "sources": ["main.fy"]
+        },
+        {
+          "node": "left",
+          "role": "dependency",
+          "packageUid": "fixture.left",
+          "sourceIdentity": "fixture-source:left",
+          "versionIdentity": "fixture-version:1",
+          "features": [],
+          "sourceRoot": "packages/left/src",
+          "sources": ["left.fy"]
+        },
+        {
+          "node": "right",
+          "role": "dependency",
+          "packageUid": "fixture.right",
+          "sourceIdentity": "fixture-source:right",
+          "versionIdentity": "fixture-version:1",
+          "features": [],
+          "sourceRoot": "packages/right/src",
+          "sources": ["right.fy"]
+        }
+      ],
+      "dependencies": [
+        { "owner": "app", "binding": "dep", "target": "left" },
+        { "owner": "app", "binding": "dep", "target": "right" }
+      ],
+      "expect": {
+        "status": "reject",
+        "reason": "duplicate-dependency-binding",
+        "subjects": ["app", "left", "right"]
+      }
+    }
+  ]
+}

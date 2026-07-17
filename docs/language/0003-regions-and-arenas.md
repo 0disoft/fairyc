@@ -25,7 +25,7 @@ Allocation returns a safe borrow whose origin is the region. The referent cannot
 
 The compiler reports both the allocation span and the attempted escape span.
 
-Region fixtures expose the compiler-known allocation operation, hidden origin, optional last use, and return escape decision. They do not expose addresses, arena offsets, Flow block numbers, or MIR locals. The first suite uses `Region` parameters; a lexical local-region escape case waits for a non-invented standard-library package dependency contract.
+Region fixtures expose the compiler-known allocation operation, hidden origin, optional last use, and return escape decision. They do not expose addresses, arena offsets, Flow block numbers, or MIR locals. The resolved package graph can now name an explicit standard-library instance; a lexical local-region escape case still waits for a bounded fixture-owned `std::alloc::Arena` API instead of inventing a user type with the same name.
 
 ## Plain-region element rule
 

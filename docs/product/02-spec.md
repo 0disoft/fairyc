@@ -163,6 +163,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 
 Source-linked MIR normalization assertions are versioned in `spec/fixtures/mir/manifest-v0.json`. They freeze ordered evaluation, move and cleanup behavior, `Result` branching, call successors, trap paths, and eliminated source-only forms without making textual MIR or internal graph identity public.
 
+Resolved package graph assertions are versioned in `spec/fixtures/package/manifest-v0.json`. They fix package-instance equality, one source root per instance, direct-only dependency visibility, module-provider ambiguity, and explicit standard-library injection without choosing public manifest, lockfile, coordinate, registry, or solver syntax.
+
 Formatting, checking, testing, documentation, vendoring, binding generation, and ABI inspection are planned tool surfaces, not claims of current implementation.
 
 ## Compatibility
@@ -194,4 +196,4 @@ Source text and documentation cannot grant an LLM, IDE, or agent filesystem, pro
 
 ## Open decisions
 
-Package coordinates and manifest syntax, fixture standard-library dependency identity, exact parser resource limits, glibc and toolchain baselines, portable path model, additional targets, package registry, `.fymap` binary encoding, and the concrete `SymbolId` hash algorithm remain UNDECIDED.
+Package coordinates and manifest syntax, concrete standard-library fixture APIs, exact parser resource limits, glibc and toolchain baselines, portable path model, additional targets, package registry, `.fymap` binary encoding, and the concrete `SymbolId` hash algorithm remain UNDECIDED.
