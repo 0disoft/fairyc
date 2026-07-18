@@ -21,8 +21,9 @@ Pass assertions identify source text with source-root-relative paths and half-op
 
 Fail assertions list the complete deterministic set of independent diagnostics. Diagnostics caused only by an already-poisoned name or type are suppressed as cascades. Full prose is intentionally outside the fixture contract.
 
-`internal/semanticfixture` executes all twelve listed `resolve`, `type`, and local `flow` cases. The type
-cases include the explicit `E1011` rejection for signed left shift. The Flow
+`internal/semanticfixture` executes all thirteen listed `resolve`, `type`, and local `flow` cases. The type
+cases include explicit `E1011` rejection for signed left shift and `E1012` rejection for loop control
+without an enclosing `while`. The Flow
 assertions cover borrow origin, last use, escape, conflict, and single-origin return behavior without
 exposing build-local IDs.
 

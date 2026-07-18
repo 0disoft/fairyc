@@ -25,6 +25,8 @@ func constructSeed(id string) (mir.Program, error) {
 		function = borrowReturnSeed()
 	case "plain-region":
 		function = plainRegionSeed()
+	case "break-region-control":
+		function = breakRegionControlSeed()
 	case "checked-division":
 		function = checkedDivisionSeed()
 	case "checked-arithmetic":
@@ -124,6 +126,37 @@ func plainRegionSeed() mir.Function {
 			},
 			Terminator: mir.Terminator{Kind: mir.TerminatorReturn, Entity: "terminator:return", UnwindSuccessor: mir.NoBlock, ReturnValue: mir.Operand{Kind: mir.OperandI32, I32: 0}},
 		}},
+	}
+}
+
+func breakRegionControlSeed() mir.Function {
+	return mir.Function{
+		Name:       "seed::break-region-control",
+		ResultType: hir.TypeI32,
+		Entry:      0,
+		Entities: []string{
+			"block:break-body", "block:loop-exit", "local:placed", "operation:discard-placement",
+			"operation:place-inert", "operation:region-reset", "region:scratch", "terminator:return",
+		},
+		RegionValues: []mir.RegionValue{{
+			Entity: "local:placed", OperationEntity: "operation:place-inert", RegionEntity: "region:scratch",
+		}},
+		Blocks: []mir.Block{
+			{
+				ID: 0, Entity: "block:break-body",
+				Operations: []mir.Operation{
+					{Kind: mir.OperationRegionEnter, Entity: "region:scratch", Symbol: regionSymbol, DestinationLocal: mir.NoLocal},
+					{Kind: mir.OperationRegionPlace, Entity: "operation:place-inert", Symbol: regionSymbol, DestinationLocal: mir.LocalID(valueSymbol), Operands: []mir.Operand{{Kind: mir.OperandI32, I32: 1}}, Type: hir.TypeI32},
+					{Kind: mir.OperationMove, Entity: "operation:discard-placement", Symbol: valueSymbol},
+					{Kind: mir.OperationRegionReset, Entity: "operation:region-reset", Symbol: regionSymbol, DestinationLocal: mir.NoLocal, ExitKind: "break"},
+				},
+				Terminator: mir.Terminator{Kind: mir.TerminatorGoto, Successors: []mir.BlockID{1}, UnwindSuccessor: mir.NoBlock},
+			},
+			{
+				ID: 1, Entity: "block:loop-exit",
+				Terminator: mir.Terminator{Kind: mir.TerminatorReturn, Entity: "terminator:return", UnwindSuccessor: mir.NoBlock, ReturnValue: mir.Operand{Kind: mir.OperandI32, I32: 0}},
+			},
+		},
 	}
 }
 

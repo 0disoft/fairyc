@@ -46,6 +46,14 @@ type activeRegion struct {
 	factIndex int
 }
 
+type activeLoop struct {
+	header      BlockID
+	exit        BlockID
+	body        hir.Span
+	regionDepth int
+	headerLive  map[hir.SymbolID]bool
+}
+
 type functionLowerer struct {
 	module      string
 	source      *hir.Function
@@ -56,6 +64,7 @@ type functionLowerer struct {
 	live        map[hir.SymbolID]bool
 	regions     map[hir.SymbolID]int
 	regionStack []activeRegion
+	loopStack   []activeLoop
 	nextLocal   LocalID
 }
 
@@ -194,6 +203,11 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 			if _, err := l.lowerWhile(statement.Expression); err != nil {
 				return false, err
 			}
+		case "break", "continue":
+			if err := l.lowerLoopControl(statement.Kind, statement.Span); err != nil {
+				return false, err
+			}
+			return true, nil
 		case "region":
 			if _, err := l.lowerExpression(statement.Expression); err != nil {
 				return false, err
@@ -639,11 +653,21 @@ func (l *functionLowerer) lowerWhile(expression *hir.Expression) (Operand, error
 
 	l.current = bodyBlock
 	l.live = cloneLive(headerLive)
+	l.loopStack = append(l.loopStack, activeLoop{
+		header: headerBlock, exit: exitBlock, body: expression.Children[1].Span,
+		regionDepth: len(l.regionStack), headerLive: cloneLive(headerLive),
+	})
 	if _, err := l.lowerExpression(&expression.Children[1]); err != nil {
+		l.loopStack = l.loopStack[:len(l.loopStack)-1]
 		return Operand{}, err
 	}
+	l.loopStack = l.loopStack[:len(l.loopStack)-1]
 	if !l.blockTerminated(l.current) {
-		if !sameLiveState(headerLive, l.live) {
+		cleanup := l.emitCleanupDeclaredWithin(l.live, expression.Children[1].Span)
+		if cleanupContainsDrop(cleanup) {
+			l.result.EliminatedForms = append(l.result.EliminatedForms, EliminatedFormFact{Form: "implicit-drop", RemainingCount: 0})
+		}
+		if !matchesLoopHeader(headerLive, l.live) {
 			return Operand{}, fmt.Errorf("while back-edge changes resource state after Flow validation")
 		}
 		l.terminate(Terminator{Kind: TerminatorGoto, Span: expression.Children[1].Span, Successors: []BlockID{headerBlock}, UnwindSuccessor: NoBlock})
@@ -652,6 +676,27 @@ func (l *functionLowerer) lowerWhile(expression *hir.Expression) (Operand, error
 	l.current = exitBlock
 	l.live = cloneLive(headerLive)
 	return Operand{}, nil
+}
+
+func (l *functionLowerer) lowerLoopControl(kind string, exit hir.Span) error {
+	if len(l.loopStack) == 0 {
+		return fmt.Errorf("%s has no enclosing loop after type validation", kind)
+	}
+	loop := l.loopStack[len(l.loopStack)-1]
+	actions := l.emitLoopControlCleanup(l.live, loop, exit, kind)
+	if !matchesLoopHeader(loop.headerLive, l.live) {
+		return fmt.Errorf("%s edge changes resource state after Flow validation", kind)
+	}
+	l.result.CleanupPaths = append(l.result.CleanupPaths, CleanupPathFact{Exit: exit, ExitKind: kind, Actions: actions})
+	if cleanupContainsDrop(actions) {
+		l.result.EliminatedForms = append(l.result.EliminatedForms, EliminatedFormFact{Form: "implicit-drop", RemainingCount: 0})
+	}
+	target := loop.header
+	if kind == "break" {
+		target = loop.exit
+	}
+	l.terminate(Terminator{Kind: TerminatorGoto, Span: exit, Successors: []BlockID{target}, UnwindSuccessor: NoBlock})
+	return nil
 }
 
 func (l *functionLowerer) lowerIf(expression *hir.Expression) (Operand, error) {
@@ -1004,6 +1049,23 @@ func (l *functionLowerer) emitFunctionExitCleanup(live map[hir.SymbolID]bool, ex
 	return actions
 }
 
+func (l *functionLowerer) emitLoopControlCleanup(live map[hir.SymbolID]bool, loop activeLoop, exit hir.Span, exitKind string) []CleanupAction {
+	actions := make([]CleanupAction, 0)
+	for index := len(l.regionStack) - 1; index >= loop.regionDepth; index-- {
+		region := l.regionStack[index]
+		cleanup := l.emitCleanupDeclaredWithin(live, region.span)
+		actions = append(actions, cleanup...)
+		l.appendOperation(Operation{Kind: OperationRegionReset, Span: region.span, Symbol: region.symbol, DestinationLocal: NoLocal, ExitKind: exitKind})
+		actions = append(actions, CleanupAction{Kind: "region-reset", Binding: region.span})
+		fact := &l.result.RegionScopes[region.factIndex]
+		fact.EarlyResets = append(fact.EarlyResets, RegionResetFact{
+			Exit: exit, ExitKind: exitKind, CleanupBeforeReset: cleanup, Reset: region.span,
+		})
+	}
+	actions = append(actions, l.emitCleanupDeclaredWithin(live, loop.body)...)
+	return actions
+}
+
 func cleanupContainsDrop(actions []CleanupAction) bool {
 	for _, action := range actions {
 		if action.Kind == "drop" {
@@ -1067,6 +1129,20 @@ func cloneLive(input map[hir.SymbolID]bool) map[hir.SymbolID]bool {
 		result[symbol] = live
 	}
 	return result
+}
+
+func matchesLoopHeader(header, actual map[hir.SymbolID]bool) bool {
+	for symbol, live := range header {
+		if actual[symbol] != live {
+			return false
+		}
+	}
+	for symbol, live := range actual {
+		if _, existed := header[symbol]; !existed && live {
+			return false
+		}
+	}
+	return true
 }
 
 func containsCall(expression *hir.Expression) bool {

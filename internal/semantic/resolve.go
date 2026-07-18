@@ -67,6 +67,8 @@ type analyzer struct {
 	expressionTypes map[*ast.Expression]hir.Type
 	regionOrigins   []RegionOriginFact
 	resultHandling  []ResultHandlingFact
+	resourceLoops   []resourceLoopFrame
+	resultLoops     []resultLoopFrame
 }
 
 func newAnalyzer(files []File) *analyzer {

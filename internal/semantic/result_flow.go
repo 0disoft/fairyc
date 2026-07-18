@@ -35,6 +35,15 @@ type resultBranch struct {
 	reachable   bool
 }
 
+type resultLoopEdge struct {
+	kind        syntax.Kind
+	environment resultEnvironment
+}
+
+type resultLoopFrame struct {
+	edges []resultLoopEdge
+}
+
 func (a *analyzer) resultFlowFunction(module *moduleScope, function *ast.Function) {
 	if function.Body == nil {
 		return
@@ -82,6 +91,9 @@ func (a *analyzer) resultFlowBlock(module *moduleScope, block *ast.Block, enviro
 			a.resultFlowExpression(module, statement.Expression, environment, resultUse{kind: resultUseHandled, mode: "return"})
 			a.reportPendingResults(environment)
 			reachable = false
+		case syntax.KindBreak, syntax.KindContinue:
+			a.captureResultLoopEdge(statement.Kind, environment)
+			reachable = false
 		case syntax.KindDiscard:
 			a.resultFlowExpression(module, statement.Expression, environment, resultUse{kind: resultUseHandled, mode: "discard"})
 		case syntax.KindExprStmt:
@@ -108,10 +120,12 @@ func (a *analyzer) resultFlowBlock(module *moduleScope, block *ast.Block, enviro
 	if reachable && block.Tail != nil {
 		reachable = a.resultFlowExpression(module, block.Tail, environment, tailUse)
 	}
-	if functionBody && reachable {
-		a.reportPendingResults(environment)
-		reachable = false
-	} else if reachable {
+	if functionBody {
+		if reachable {
+			a.reportPendingResults(environment)
+			reachable = false
+		}
+	} else {
 		for _, local := range locals {
 			a.reportResultObligation(environment[local])
 		}
@@ -242,18 +256,53 @@ func (a *analyzer) resultFlowWhile(module *moduleScope, expression *ast.Expressi
 	a.resultFlowExpression(module, expression.Children[0], environment, resultUse{kind: resultUseIgnore})
 	baseline := cloneResultEnvironment(environment)
 	bodyEnvironment := cloneResultEnvironment(baseline)
+	a.resultLoops = append(a.resultLoops, resultLoopFrame{})
 	bodyReachable := a.resultFlowExpression(module, expression.Children[1], bodyEnvironment, resultUse{kind: resultUseIgnore})
-	branches := []resultBranch{{environment: cloneResultEnvironment(baseline), reachable: true}}
+	firstFrame := a.resultLoops[len(a.resultLoops)-1]
+	a.resultLoops = a.resultLoops[:len(a.resultLoops)-1]
+	exitBranches := []resultBranch{{environment: cloneResultEnvironment(baseline), reachable: true}}
+	backBranches := make([]resultBranch, 0, len(firstFrame.edges)+1)
 	if bodyReachable {
-		branches = append(branches, resultBranch{environment: bodyEnvironment, reachable: true})
-		secondEnvironment := cloneResultEnvironment(bodyEnvironment)
-		secondReachable := a.resultFlowExpression(module, expression.Children[1], secondEnvironment, resultUse{kind: resultUseIgnore})
-		if secondReachable {
-			branches = append(branches, resultBranch{environment: secondEnvironment, reachable: true})
+		backBranches = append(backBranches, resultBranch{environment: bodyEnvironment, reachable: true})
+	}
+	for _, edge := range firstFrame.edges {
+		branch := resultBranch{environment: edge.environment, reachable: true}
+		if edge.kind == syntax.KindBreak {
+			exitBranches = append(exitBranches, branch)
+		} else {
+			backBranches = append(backBranches, branch)
 		}
 	}
-	mergeResultBranches(environment, baseline, branches)
+	for _, branch := range backBranches {
+		exitBranches = append(exitBranches, branch)
+	}
+	if len(backBranches) > 0 {
+		backEnvironment := cloneResultEnvironment(baseline)
+		mergeResultBranches(backEnvironment, baseline, backBranches)
+		secondEnvironment := cloneResultEnvironment(backEnvironment)
+		a.resultLoops = append(a.resultLoops, resultLoopFrame{})
+		secondReachable := a.resultFlowExpression(module, expression.Children[1], secondEnvironment, resultUse{kind: resultUseIgnore})
+		secondFrame := a.resultLoops[len(a.resultLoops)-1]
+		a.resultLoops = a.resultLoops[:len(a.resultLoops)-1]
+		if secondReachable {
+			exitBranches = append(exitBranches, resultBranch{environment: secondEnvironment, reachable: true})
+		}
+		for _, edge := range secondFrame.edges {
+			exitBranches = append(exitBranches, resultBranch{environment: edge.environment, reachable: true})
+		}
+	}
+	mergeResultBranches(environment, baseline, exitBranches)
 	return true
+}
+
+func (a *analyzer) captureResultLoopEdge(kind syntax.Kind, environment resultEnvironment) {
+	if len(a.resultLoops) == 0 {
+		return
+	}
+	index := len(a.resultLoops) - 1
+	a.resultLoops[index].edges = append(a.resultLoops[index].edges, resultLoopEdge{
+		kind: kind, environment: cloneResultEnvironment(environment),
+	})
 }
 
 func (a *analyzer) resultFlowRegion(module *moduleScope, expression *ast.Expression, environment resultEnvironment) bool {

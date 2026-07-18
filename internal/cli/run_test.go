@@ -372,6 +372,48 @@ func TestExperimentalRunInterpretsBoundedLoop(t *testing.T) {
 	}
 }
 
+func TestExperimentalRunInterpretsLoopControl(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name   string
+		source string
+		value  string
+	}{
+		{
+			name:   "break",
+			source: "module main;\nfn main() -> i32 { var count: i32 = 0; while count < 5 { count = count + 1; if count == 2 { break; }; } count }\n",
+			value:  "result: 2\n",
+		},
+		{
+			name:   "continue",
+			source: "module main;\nfn main() -> i32 { var count: i32 = 0; var total: i32 = 0; while count < 5 { count = count + 1; if count < 3 { continue; }; total = total + count; } total + 30 }\n",
+			value:  "result: 42\n",
+		},
+	}
+	for _, fixture := range cases {
+		fixture := fixture
+		t.Run(fixture.name, func(t *testing.T) {
+			t.Parallel()
+			root := t.TempDir()
+			writeTestSource(t, root, "main.fy", fixture.source)
+			code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
+			if code != ExitSuccess || stdout != fixture.value || stderr != "" {
+				t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+			}
+		})
+	}
+}
+
+func TestExperimentalRunRejectsLoopControlOutsideLoop(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { break; 0 }\n")
+	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
+	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "E1012: break and continue require an enclosing while loop") {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
 func TestExperimentalRunReportsStepLimitAsCapability(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()

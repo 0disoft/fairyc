@@ -13,6 +13,7 @@
     "docs/adr/0015-mir-verifier-mutation-fixture-contract.md",
     "docs/adr/0020-stage-0-region-mir-and-interpreter.md",
     "docs/adr/0023-explicit-checked-arithmetic-mir.md",
+    "docs/adr/0024-stage-0-loop-control-and-cleanup.md",
     "docs/mir/mir-v0.md",
     "docs/mir/verifier-mutation-v0.md",
     "docs/mir/drop-elaboration-v0.md",
@@ -63,6 +64,20 @@
       "entities": [
         "local:inert-value",
         "local:resource-value",
+        "operation:place-inert",
+        "operation:region-reset",
+        "region:scratch",
+        "terminator:return"
+      ]
+    },
+    {
+      "id": "break-region-control",
+      "baseline": "verify",
+      "entities": [
+        "block:break-body",
+        "block:loop-exit",
+        "local:placed",
+        "operation:discard-placement",
         "operation:place-inert",
         "operation:region-reset",
         "region:scratch",
@@ -204,6 +219,12 @@
       "seed": "plain-region",
       "mutation": { "kind": "invalidate-region-reset-exit-kind", "target": "operation:region-reset" },
       "expect": { "status": "reject", "codes": ["V1403"], "primaryEntity": "operation:region-reset" }
+    },
+    {
+      "id": "fail.mir-verify.v1403.break-region-reset-missing",
+      "seed": "break-region-control",
+      "mutation": { "kind": "remove-region-reset", "target": "operation:region-reset" },
+      "expect": { "status": "reject", "codes": ["V1403"], "primaryEntity": "region:scratch" }
     },
     {
       "id": "fail.mir-verify.v1501.missing-trap-check",

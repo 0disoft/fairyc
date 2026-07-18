@@ -162,7 +162,7 @@ func applyMutation(program *mir.Program, mutation mutation) (int, error) {
 		}
 	case "invalidate-region-reset-exit-kind":
 		if block, index := findOperation(function, mutation.Target); block != nil {
-			block.Operations[index].ExitKind = "break"
+			block.Operations[index].ExitKind = "invalid"
 			return 1, nil
 		}
 	case "use-before-initialize":

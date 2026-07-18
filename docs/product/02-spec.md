@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0023-explicit-checked-arithmetic-mir.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0024-stage-0-loop-control-and-cleanup.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -94,8 +94,8 @@ Region-parameter origins, permitted returns, package-resolved local-region escap
 
 Verified MIR and interpreter fixtures additionally execute lexical Region entry, inert placement,
 inner-resource cleanup, and reset on fallthrough, direct `return`, Result `?` propagation, and
-nested Region exits. `break` and `continue` remain deferred with their unimplemented control-flow
-forms.
+nested Region exits. `break` and `continue` target the nearest `while` and execute scope-indexed
+resource cleanup and Region reset before their MIR goto; use outside a loop is `E1012`.
 
 ## Errors and control flow
 
@@ -113,10 +113,12 @@ forms.
   Option match contains exactly one `Option::Some(binding)` arm and one bare `Option::None` arm;
   both arms produce one compatible type.
 - Exceptions and stack unwinding are not part of the language.
+- `break` and `continue` target only the nearest enclosing `while`; labelled or value-producing
+  loop control is not part of Stage 0.
 
 Changing a value from `T` to `Option<T>` must not silently turn a normal function call into conditional execution. Stage 0 return types contain at most one safe-borrow leaf. Full control-flow behavior is defined in `docs/language/0004-results-traps-and-control-flow.md`.
 
-Result return, discard, propagation, local and parameter transfer, branch and loop must-use dataflow, non-Result `?`, and error-compatibility assertions are versioned in `spec/fixtures/result/manifest-v0.json`. Qualified Result syntax is fixed by ADR 0017, qualified Option syntax by ADR 0018, and complete Stage 0 Result obligations by ADR 0019. Scalar and resource-bearing built-in constructors and shallow matches execute through the MIR interpreter. Whole resources execute construction, field reads, call moves, tagged-payload ownership transfer, active-variant cleanup, and source-linked drop events. User-defined resource-bearing enums remain excluded.
+Result return, discard, propagation, local and parameter transfer, branch and loop must-use dataflow, `break` and `continue` edge obligations, non-Result `?`, and error-compatibility assertions are versioned in `spec/fixtures/result/manifest-v0.json`. Qualified Result syntax is fixed by ADR 0017, qualified Option syntax by ADR 0018, complete Stage 0 Result obligations by ADR 0019, and loop-control cleanup by ADR 0024. Scalar and resource-bearing built-in constructors and shallow matches execute through the MIR interpreter. Whole resources execute construction, field reads, call moves, tagged-payload ownership transfer, active-variant cleanup, and source-linked drop events. User-defined resource-bearing enums remain excluded.
 
 ## Safe-code semantics
 

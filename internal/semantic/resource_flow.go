@@ -23,6 +23,21 @@ type resourceValueState struct {
 
 type resourceEnvironment map[*symbol]resourceValueState
 
+type resourceBranch struct {
+	environment resourceEnvironment
+	reachable   bool
+}
+
+type resourceLoopEdge struct {
+	environment resourceEnvironment
+}
+
+type resourceLoopFrame struct {
+	header   hir.Span
+	baseline resourceEnvironment
+	edges    []resourceLoopEdge
+}
+
 func (a *analyzer) resourceFlowFunction(module *moduleScope, function *ast.Function) {
 	if function.Body == nil {
 		return
@@ -45,9 +60,9 @@ func (a *analyzer) resourceFlowFunction(module *moduleScope, function *ast.Funct
 	a.resourceBlock(module, function.Body, environment, false, tailMode)
 }
 
-func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environment resourceEnvironment, scoped bool, tailMode resourceUse) {
+func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environment resourceEnvironment, scoped bool, tailMode resourceUse) bool {
 	if block == nil {
-		return
+		return true
 	}
 	var existing map[*symbol]struct{}
 	if scoped {
@@ -56,7 +71,11 @@ func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environm
 			existing[value] = struct{}{}
 		}
 	}
+	reachable := true
 	for index := range block.Statements {
+		if !reachable {
+			break
+		}
 		statement := &block.Statements[index]
 		switch {
 		case statement.Binding != nil:
@@ -79,11 +98,15 @@ func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environm
 			a.resourceWhile(module, statement.Expression, environment)
 		case statement.Kind == syntax.KindReturn:
 			a.resourceExpression(module, statement.Expression, environment, resourceMove)
+			reachable = false
+		case statement.Kind == syntax.KindBreak || statement.Kind == syntax.KindContinue:
+			a.captureResourceLoopEdge(environment)
+			reachable = false
 		default:
 			a.resourceExpression(module, statement.Expression, environment, resourceRead)
 		}
 	}
-	if block.Tail != nil {
+	if reachable && block.Tail != nil {
 		a.resourceExpression(module, block.Tail, environment, tailMode)
 	}
 	if scoped {
@@ -93,6 +116,7 @@ func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environm
 			}
 		}
 	}
+	return reachable
 }
 
 func (a *analyzer) resourceAssignment(module *moduleScope, statement *ast.Statement, environment resourceEnvironment) {
@@ -119,18 +143,19 @@ func (a *analyzer) resourceAssignment(module *moduleScope, statement *ast.Statem
 	a.recordResourceStates(environment, at, "after")
 }
 
-func (a *analyzer) resourceExpression(module *moduleScope, expression *ast.Expression, environment resourceEnvironment, mode resourceUse) {
+func (a *analyzer) resourceExpression(module *moduleScope, expression *ast.Expression, environment resourceEnvironment, mode resourceUse) bool {
 	if expression == nil {
-		return
+		return true
 	}
 	at := span(module.file.Path, expression.Span)
 	a.recordResourceStates(environment, at, "before")
+	reachable := true
 	switch expression.Kind {
 	case syntax.KindPath:
 		a.resourcePath(expression, environment, mode)
 	case syntax.KindGroup:
 		if len(expression.Children) == 1 {
-			a.resourceExpression(module, expression.Children[0], environment, mode)
+			reachable = a.resourceExpression(module, expression.Children[0], environment, mode)
 		}
 	case syntax.KindPrefix:
 		childMode := resourceRead
@@ -147,19 +172,25 @@ func (a *analyzer) resourceExpression(module *moduleScope, expression *ast.Expre
 	case syntax.KindFieldExpr:
 		a.resourceField(module, expression, environment, mode)
 	case syntax.KindIf:
-		a.resourceIf(module, expression, environment, mode)
+		reachable = a.resourceIf(module, expression, environment, mode)
 	case syntax.KindWhile:
 		a.resourceWhile(module, expression, environment)
 	case syntax.KindMatch:
-		a.resourceMatch(module, expression, environment, mode)
+		reachable = a.resourceMatch(module, expression, environment, mode)
 	case syntax.KindBlock:
-		a.resourceBlock(module, expression.Block, environment, true, mode)
+		reachable = a.resourceBlock(module, expression.Block, environment, true, mode)
+	case syntax.KindRegion:
+		if len(expression.Children) == 2 {
+			a.resourceExpression(module, expression.Children[0], environment, resourceRead)
+			reachable = a.resourceExpression(module, expression.Children[1], environment, mode)
+		}
 	default:
 		for _, child := range expression.Children {
 			a.resourceExpression(module, child, environment, resourceRead)
 		}
 	}
 	a.recordResourceStates(environment, at, "after")
+	return reachable
 }
 
 func (a *analyzer) resourcePath(expression *ast.Expression, environment resourceEnvironment, mode resourceUse) {
@@ -205,9 +236,9 @@ func (a *analyzer) resourceCall(module *moduleScope, expression *ast.Expression,
 	}
 }
 
-func (a *analyzer) resourceMatch(module *moduleScope, expression *ast.Expression, environment resourceEnvironment, mode resourceUse) {
+func (a *analyzer) resourceMatch(module *moduleScope, expression *ast.Expression, environment resourceEnvironment, mode resourceUse) bool {
 	if len(expression.Children) != 3 {
-		return
+		return true
 	}
 	scrutinee := expression.Children[0]
 	scrutineeMode := resourceRead
@@ -216,7 +247,7 @@ func (a *analyzer) resourceMatch(module *moduleScope, expression *ast.Expression
 	}
 	a.resourceExpression(module, scrutinee, environment, scrutineeMode)
 	baseline := cloneResourceEnvironment(environment)
-	branches := make([]resourceEnvironment, 0, 2)
+	branches := make([]resourceBranch, 0, 2)
 	for _, arm := range expression.Children[1:] {
 		branch := cloneResourceEnvironment(baseline)
 		var binding *symbol
@@ -231,34 +262,19 @@ func (a *analyzer) resourceMatch(module *moduleScope, expression *ast.Expression
 					}
 				}
 			}
-			a.resourceExpression(module, arm.Children[1], branch, mode)
+			reachable := a.resourceExpression(module, arm.Children[1], branch, mode)
+			if binding != nil {
+				delete(branch, binding)
+			}
+			branches = append(branches, resourceBranch{environment: branch, reachable: reachable})
+			continue
 		}
 		if binding != nil {
 			delete(branch, binding)
 		}
-		branches = append(branches, branch)
+		branches = append(branches, resourceBranch{environment: branch, reachable: true})
 	}
-	if len(branches) != 2 {
-		return
-	}
-	for value, before := range baseline {
-		left := branches[0][value]
-		right := branches[1][value]
-		joined := joinResourceState(left, right)
-		environment[value] = joined
-		if joined.state != ResourceMaybeLive || before.state == ResourceMaybeLive {
-			continue
-		}
-		move := left.move
-		if move == nil {
-			move = right.move
-		}
-		related := []RelatedSpan{{Role: "declaration", Span: before.declaration}}
-		if move != nil {
-			related = append(related, RelatedSpan{Role: "move", Span: *move})
-		}
-		a.addDiagnostic("E1104", span(module.file.Path, expression.Span), related...)
-	}
+	return a.mergeResourceBranches(span(module.file.Path, expression.Span), environment, baseline, branches)
 }
 
 func (a *analyzer) resourceRecord(module *moduleScope, expression *ast.Expression, environment resourceEnvironment) {
@@ -313,36 +329,23 @@ func (a *analyzer) resourceField(module *moduleScope, expression *ast.Expression
 	a.resourceExpression(module, receiver, environment, resourceRead)
 }
 
-func (a *analyzer) resourceIf(module *moduleScope, expression *ast.Expression, environment resourceEnvironment, mode resourceUse) {
+func (a *analyzer) resourceIf(module *moduleScope, expression *ast.Expression, environment resourceEnvironment, mode resourceUse) bool {
 	if len(expression.Children) < 2 {
-		return
+		return true
 	}
 	a.resourceExpression(module, expression.Children[0], environment, resourceRead)
 	baseline := cloneResourceEnvironment(environment)
 	thenEnvironment := cloneResourceEnvironment(baseline)
-	a.resourceExpression(module, expression.Children[1], thenEnvironment, mode)
+	thenReachable := a.resourceExpression(module, expression.Children[1], thenEnvironment, mode)
 	elseEnvironment := cloneResourceEnvironment(baseline)
+	elseReachable := true
 	if len(expression.Children) > 2 {
-		a.resourceExpression(module, expression.Children[2], elseEnvironment, mode)
+		elseReachable = a.resourceExpression(module, expression.Children[2], elseEnvironment, mode)
 	}
-	for value, before := range baseline {
-		thenState := thenEnvironment[value]
-		elseState := elseEnvironment[value]
-		joined := joinResourceState(thenState, elseState)
-		environment[value] = joined
-		if joined.state != ResourceMaybeLive || before.state == ResourceMaybeLive {
-			continue
-		}
-		move := thenState.move
-		if move == nil {
-			move = elseState.move
-		}
-		related := []RelatedSpan{{Role: "declaration", Span: before.declaration}}
-		if move != nil {
-			related = append(related, RelatedSpan{Role: "move", Span: *move})
-		}
-		a.addDiagnostic("E1104", span(module.file.Path, expression.Span), related...)
-	}
+	return a.mergeResourceBranches(span(module.file.Path, expression.Span), environment, baseline, []resourceBranch{
+		{environment: thenEnvironment, reachable: thenReachable},
+		{environment: elseEnvironment, reachable: elseReachable},
+	})
 }
 
 func (a *analyzer) resourceWhile(module *moduleScope, expression *ast.Expression, environment resourceEnvironment) {
@@ -355,22 +358,79 @@ func (a *analyzer) resourceWhile(module *moduleScope, expression *ast.Expression
 	a.resourceExpression(module, condition, environment, resourceRead)
 	baseline := cloneResourceEnvironment(environment)
 	bodyEnvironment := cloneResourceEnvironment(baseline)
-	a.resourceExpression(module, expression.Children[1], bodyEnvironment, resourceRead)
-	for value, before := range baseline {
-		after := bodyEnvironment[value]
+	a.resourceLoops = append(a.resourceLoops, resourceLoopFrame{header: header, baseline: cloneResourceEnvironment(baseline)})
+	bodyReachable := a.resourceExpression(module, expression.Children[1], bodyEnvironment, resourceRead)
+	frame := a.resourceLoops[len(a.resourceLoops)-1]
+	a.resourceLoops = a.resourceLoops[:len(a.resourceLoops)-1]
+	if bodyReachable {
+		a.validateResourceLoopEdge(span(module.file.Path, expression.Span), frame, bodyEnvironment)
+	}
+	for _, edge := range frame.edges {
+		a.validateResourceLoopEdge(span(module.file.Path, expression.Span), frame, edge.environment)
+	}
+}
+
+func (a *analyzer) captureResourceLoopEdge(environment resourceEnvironment) {
+	if len(a.resourceLoops) == 0 {
+		return
+	}
+	index := len(a.resourceLoops) - 1
+	a.resourceLoops[index].edges = append(a.resourceLoops[index].edges, resourceLoopEdge{environment: cloneResourceEnvironment(environment)})
+}
+
+func (a *analyzer) validateResourceLoopEdge(loopSpan hir.Span, frame resourceLoopFrame, actual resourceEnvironment) {
+	for value, before := range frame.baseline {
+		after, found := actual[value]
+		if !found {
+			after = before
+		}
 		if before.state == after.state {
 			continue
 		}
 		related := []RelatedSpan{
 			{Role: "declaration", Span: before.declaration},
-			{Role: "loop-header", Span: header},
+			{Role: "loop-header", Span: frame.header},
 		}
 		if after.move != nil {
 			related = append(related, RelatedSpan{Role: "move", Span: *after.move})
 		}
-		a.addDiagnostic("E1105", span(module.file.Path, expression.Span), related...)
-		_ = value
+		a.addDiagnostic("E1105", loopSpan, related...)
 	}
+}
+
+func (a *analyzer) mergeResourceBranches(at hir.Span, environment, baseline resourceEnvironment, branches []resourceBranch) bool {
+	reachable := make([]resourceEnvironment, 0, len(branches))
+	for _, branch := range branches {
+		if branch.reachable {
+			reachable = append(reachable, branch.environment)
+		}
+	}
+	if len(reachable) == 0 {
+		return false
+	}
+	for value, before := range baseline {
+		joined, found := reachable[0][value]
+		if !found {
+			joined = before
+		}
+		for _, branch := range reachable[1:] {
+			actual, found := branch[value]
+			if !found {
+				actual = before
+			}
+			joined = joinResourceState(joined, actual)
+		}
+		environment[value] = joined
+		if joined.state != ResourceMaybeLive || before.state == ResourceMaybeLive {
+			continue
+		}
+		related := []RelatedSpan{{Role: "declaration", Span: before.declaration}}
+		if joined.move != nil {
+			related = append(related, RelatedSpan{Role: "move", Span: *joined.move})
+		}
+		a.addDiagnostic("E1104", at, related...)
+	}
+	return true
 }
 
 func (a *analyzer) recordResourceStates(environment resourceEnvironment, at hir.Span, observation string) {

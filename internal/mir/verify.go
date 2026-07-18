@@ -303,7 +303,7 @@ func verifyFunction(function *Function) []VerificationError {
 }
 
 func validRegionExitKind(value string) bool {
-	return value == "fallthrough" || value == "return" || value == "propagate"
+	return value == "fallthrough" || value == "return" || value == "propagate" || value == "break" || value == "continue"
 }
 
 func validSwitchShape(terminator Terminator) bool {

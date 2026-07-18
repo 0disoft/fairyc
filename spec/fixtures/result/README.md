@@ -12,6 +12,8 @@ later code-generation contract.
 
 The expanded v0 set treats Result locals and parameters as pending obligations. It proves transfer
 into locals and callees, all-branch handling, branch-produced values, rejection at scope and early
-return exits, rejection before overwrite, and repeated-loop overwrite detection. These observations
+return, break, and continue exits, rejection before overwrite, and repeated-loop overwrite detection
+through both body fallthrough and continue edges. These observations
 remain source spans and terminal handling facts; internal Flow block or state identities are not
-serialized.
+serialized. The break- and continue-pending cases place an unreachable `discard` after the control
+transfer to prove dead source cannot retroactively satisfy the exiting edge.

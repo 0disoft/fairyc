@@ -21,15 +21,16 @@ then one `region-reset`; after all Region layers close, it drops the remaining f
 
 An explicit `return` and the error edge of Result `?` use the same scope-indexed cleanup routine.
 The success edge of `?` keeps every enclosing Region active. A reset operation records one closed
-exit kind: `fallthrough`, `return`, or `propagate`. The MIR verifier rejects a reset with any other
-kind and still requires every normal return to have no active Region.
+exit kind. This decision introduced `fallthrough`, `return`, and `propagate`; ADR 0024 extends the
+closed set with `break` and `continue`. The MIR verifier rejects any other kind and still requires
+every normal return to have no active Region.
 
 Source-linked MIR observations record each early reset, its exit span and kind, and the resources
 dropped immediately before it. Interpreter traces expose the same exit kind without exposing an
 Arena address, offset, capacity, or representation.
 
-`break` and `continue` remain deferred because the current HIR/MIR slice does not yet implement
-those control transfers. Traps remain non-unwinding and do not run Region cleanup.
+ADR 0024 later applies the same scope-indexed machinery to nearest-loop `break` and `continue`.
+Traps remain non-unwinding and do not run Region cleanup.
 
 ## Consequences
 

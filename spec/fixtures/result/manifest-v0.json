@@ -10,6 +10,7 @@
     "docs/adr/0012-stage-0-region-and-result-fixture-contracts.md",
     "docs/adr/0017-stage-0-result-constructors-and-match.md",
     "docs/adr/0019-stage-0-result-must-use-dataflow.md",
+    "docs/adr/0024-stage-0-loop-control-and-cleanup.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/drop-elaboration-v0.md",
     "docs/diagnostics/catalog-v0.md"
@@ -494,6 +495,81 @@
                 }
               }
             ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.flow.loop-control-handled",
+      "sourceRoot": "cases/pass/loop-control-handled/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow",
+        "handling": [
+          {
+            "expression": { "source": "main.fy", "startByte": 204, "endByte": 211 },
+            "mode": "discard",
+            "resultType": "Result<i32, i32>",
+            "successType": "i32",
+            "errorType": "i32",
+            "evaluationCount": 1
+          },
+          {
+            "expression": { "source": "main.fy", "startByte": 398, "endByte": 405 },
+            "mode": "discard",
+            "resultType": "Result<i32, i32>",
+            "successType": "i32",
+            "errorType": "i32",
+            "evaluationCount": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.break-pending",
+      "sourceRoot": "cases/fail/break-pending/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "flow",
+        "diagnostics": [
+          {
+            "code": "E4101",
+            "primary": { "source": "main.fy", "startByte": 103, "endByte": 116 },
+            "related": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.continue-pending",
+      "sourceRoot": "cases/fail/continue-pending/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "flow",
+        "diagnostics": [
+          {
+            "code": "E4101",
+            "primary": { "source": "main.fy", "startByte": 103, "endByte": 116 },
+            "related": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.continue-overwrite",
+      "sourceRoot": "cases/fail/continue-overwrite/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "flow",
+        "diagnostics": [
+          {
+            "code": "E4101",
+            "primary": { "source": "main.fy", "startByte": 153, "endByte": 166 },
+            "related": []
           }
         ]
       }

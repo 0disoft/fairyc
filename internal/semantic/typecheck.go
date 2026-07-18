@@ -9,10 +9,11 @@ import (
 )
 
 type typeChecker struct {
-	analyzer *analyzer
-	module   *moduleScope
-	function *ast.Function
-	hir      *hir.Function
+	analyzer  *analyzer
+	module    *moduleScope
+	function  *ast.Function
+	hir       *hir.Function
+	loopDepth int
 }
 
 func (a *analyzer) typeCheck() Result {
@@ -173,6 +174,10 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 		case statement.Kind == syntax.KindWhile:
 			expression, _ := c.checkExpression(statement.Expression, hir.TypeVoid)
 			hirStatement.Expression = expression
+		case statement.Kind == syntax.KindBreak || statement.Kind == syntax.KindContinue:
+			if c.loopDepth == 0 {
+				c.analyzer.addDiagnostic("E1012", span(c.module.file.Path, statement.Span))
+			}
 		case statement.Kind == syntax.KindRegion:
 			expression, nestedReturn := c.checkRegion(statement.Expression, expectedTail)
 			hirStatement.Expression = expression
@@ -279,7 +284,9 @@ func (c *typeChecker) checkWhile(expression *ast.Expression, result *hir.Express
 	if conditionType != hir.TypeInvalid && conditionType != hir.TypeBool {
 		c.analyzer.addDiagnostic("E1007", span(c.module.file.Path, expression.Children[0].Span))
 	}
+	c.loopDepth++
 	body, _ := c.checkExpression(expression.Children[1], hir.TypeVoid)
+	c.loopDepth--
 	result.Children = appendExpression(result.Children, body)
 	return hir.TypeVoid
 }

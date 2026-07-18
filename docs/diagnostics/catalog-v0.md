@@ -50,6 +50,7 @@ Diagnostic codes are stable identifiers for a semantic category. Exact wording a
 | `E1009` | Return expression is incompatible with the declared return type. |
 | `E1010` | Call argument count does not match the resolved declaration. |
 | `E1011` | Signed left shift is not supported in Stage 0. |
+| `E1012` | `break` or `continue` has no enclosing `while` loop. |
 | `E1101` | Resource used after move or consumption. |
 | `E1102` | Operation would create or execute a second cleanup obligation. |
 | `E1103` | Resource field move is not supported. |

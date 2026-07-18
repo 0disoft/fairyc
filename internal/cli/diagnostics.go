@@ -141,6 +141,8 @@ func semanticDiagnosticSummary(code string) string {
 		return "call argument count does not match the declaration"
 	case "E1011":
 		return "signed left shift is not supported in Stage 0"
+	case "E1012":
+		return "break and continue require an enclosing while loop"
 	case "E1101":
 		return "resource is used after ownership was moved"
 	case "E1103":

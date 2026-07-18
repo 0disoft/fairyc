@@ -30,7 +30,8 @@ The before-or-after observation makes a move transition testable without seriali
   across every v0 case.
 - A pass case may assert multiple states at one operand span to prove the transition caused by that operand.
 - A fail case may expose `MaybeLive` as the rejected computed state, but no later source operation may treat that state as usable.
-- All 10 current cases execute against the Go Stage 0 implementation. MIR and interpreter fixtures
+- All 12 current cases execute against the Go Stage 0 implementation, including mismatched resource
+  state on explicit break and continue edges. MIR and interpreter fixtures
   separately prove replacement ordering, consuming-close ownership, tagged payload moves, and drop
   traces without widening this source-state contract.
 

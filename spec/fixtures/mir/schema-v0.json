@@ -185,7 +185,7 @@
           "items": { "$ref": "#/$defs/span" }
         },
         "exit": { "$ref": "#/$defs/span" },
-        "exitKind": { "enum": ["return", "propagate"] },
+        "exitKind": { "enum": ["return", "propagate", "break", "continue"] },
         "cleanupBeforeReset": {
           "type": "array",
           "items": { "$ref": "#/$defs/cleanupAction" }

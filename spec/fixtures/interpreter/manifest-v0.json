@@ -14,6 +14,7 @@
     "docs/adr/0021-stage-0-region-early-exit-cleanup.md",
     "docs/adr/0022-controlled-interpreter-io-harness.md",
     "docs/adr/0023-explicit-checked-arithmetic-mir.md",
+    "docs/adr/0024-stage-0-loop-control-and-cleanup.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/mir-v0.md",
     "docs/engineering/05-testing-standard.md"
@@ -892,6 +893,78 @@
           { "stream": "stdout", "byte": 50 },
           { "stream": "stderr", "byte": 10 }
         ]
+      }
+    },
+    {
+      "id": "pass.interpreter.loop-break-region-cleanup",
+      "sourceRoot": "cases/pass/loop-control-cleanup/src",
+      "sources": ["std/alloc.fy"],
+      "entry": "std::alloc::break_from_region",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 41,
+        "drops": [
+          { "resourceType": "std::alloc::Token", "binding": { "source": "std/alloc.fy", "startByte": 432, "endByte": 437 } },
+          { "resourceType": "std::alloc::Token", "binding": { "source": "std/alloc.fy", "startByte": 343, "endByte": 347 } },
+          { "resourceType": "std::alloc::Token", "binding": { "source": "std/alloc.fy", "startByte": 247, "endByte": 254 } },
+          { "resourceType": "std::alloc::Arena", "binding": { "source": "std/alloc.fy", "startByte": 203, "endByte": 208 } }
+        ],
+        "regions": [
+          {
+            "region": { "source": "std/alloc.fy", "startByte": 385, "endByte": 626 },
+            "exitKind": "break",
+            "placements": 1,
+            "dropCountBeforeReset": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.interpreter.loop-continue-region-cleanup",
+      "sourceRoot": "cases/pass/loop-control-cleanup/src",
+      "sources": ["std/alloc.fy"],
+      "entry": "std::alloc::continue_from_region",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42,
+        "drops": [
+          { "resourceType": "std::alloc::Token", "binding": { "source": "std/alloc.fy", "startByte": 934, "endByte": 939 } },
+          { "resourceType": "std::alloc::Token", "binding": { "source": "std/alloc.fy", "startByte": 845, "endByte": 849 } },
+          { "resourceType": "std::alloc::Token", "binding": { "source": "std/alloc.fy", "startByte": 934, "endByte": 939 } },
+          { "resourceType": "std::alloc::Token", "binding": { "source": "std/alloc.fy", "startByte": 845, "endByte": 849 } },
+          { "resourceType": "std::alloc::Token", "binding": { "source": "std/alloc.fy", "startByte": 749, "endByte": 756 } },
+          { "resourceType": "std::alloc::Arena", "binding": { "source": "std/alloc.fy", "startByte": 705, "endByte": 710 } }
+        ],
+        "regions": [
+          {
+            "region": { "source": "std/alloc.fy", "startByte": 887, "endByte": 1084 },
+            "exitKind": "continue",
+            "placements": 1,
+            "dropCountBeforeReset": 1
+          },
+          {
+            "region": { "source": "std/alloc.fy", "startByte": 887, "endByte": 1084 },
+            "exitKind": "continue",
+            "placements": 1,
+            "dropCountBeforeReset": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.interpreter.loop-control-targets-nearest",
+      "sourceRoot": "cases/pass/loop-control-cleanup/src",
+      "sources": ["std/alloc.fy"],
+      "entry": "std::alloc::nested_loop_targets_nearest",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42
       }
     },
     {

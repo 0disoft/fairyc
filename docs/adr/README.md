@@ -33,6 +33,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0021-stage-0-region-early-exit-cleanup.md`: scope-indexed Region reset for `return`, Result `?`, and nested exits.
 - `0022-controlled-interpreter-io-harness.md`: opt-in in-memory stdout/stderr byte hooks with a shared output limit.
 - `0023-explicit-checked-arithmetic-mir.md`: verified overflow and right-shift checks, exact trap edges, and Stage 0 left-shift rejection.
+- `0024-stage-0-loop-control-and-cleanup.md`: nearest-loop `break` and `continue`, Flow obligations, and scope-indexed Region cleanup.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

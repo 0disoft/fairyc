@@ -18,29 +18,29 @@ Experimental semantic CLI coverage also verifies explicit multi-file module sets
 determinism, cross-file visibility diagnostics, duplicate rejection, bounded file counts, and a
 repository-owned qualified-import example.
 
-`internal/semanticfixture` executes all 12 cases in `spec/fixtures/semantic/manifest-v0.json`
+`internal/semanticfixture` executes all 13 cases in `spec/fixtures/semantic/manifest-v0.json`
 against name resolution, typed HIR, and local safe-borrow Flow. It verifies exact failure phase,
 complete diagnostic set, related spans, selected resolution coordinates, selected canonical type
-facts, borrow origins, last uses, and escape facts. `internal/resourcefixture` executes all 10 cases
+facts, borrow origins, last uses, escape facts, and loop-context diagnostics. `internal/resourcefixture` executes all 12 cases
 in `spec/fixtures/resource/manifest-v0.json`, comparing complete-root states, cleanup obligations,
 and the complete deterministic `E11xx` set after parser, resolver, and type setup.
 `internal/regionfixture` executes all 6 cases in `spec/fixtures/region/manifest-v1.json`, compares
 hidden allocation origins and complete `E31xx` diagnostics, and admits the lexical Arena case only
 after proving its root, dependency, lookup, instance class, provider role, source root, and exported
-`std::alloc::Arena` against the referenced package graph. `internal/resultfixture` executes all 20
+`std::alloc::Arena` against the referenced package graph. `internal/resultfixture` executes all 24
 cases in `spec/fixtures/result/manifest-v0.json`, comparing qualified construction, exhaustive
 shallow matching, handling modes, canonical payloads,
-single-evaluation facts, and complete `E41xx` diagnostics. `internal/mirfixture` executes all 10
+single-evaluation facts, and complete `E41xx` diagnostics. `internal/mirfixture` executes all 11
 cases in `spec/fixtures/mir/manifest-v0.json` after Flow, mutable-local MIR lowering, and MIR
-verification, comparing source-linked evaluation, call, move, Region, cleanup, Result-branch, trap, and
-eliminated-form facts. `internal/mirverifyfixture` constructs all 9 named verifier seeds, requires
-each baseline to pass, clones it, applies exactly one typed mutation, and proves all 18 cases return
-the complete expected one-code result. `internal/interpreterfixture` executes all 53 interpreter
+verification, comparing source-linked evaluation, call, move, Region, loop-control cleanup, Result-branch, trap, and
+eliminated-form facts. `internal/mirverifyfixture` constructs all 10 named verifier seeds, requires
+each baseline to pass, clones it, applies exactly one typed mutation, and proves all 19 cases return
+the complete expected one-code result. `internal/interpreterfixture` executes all 56 interpreter
 v0 cases through source loading, Flow, verified MIR, and the bounded interpreter, comparing exact
 `i32` returns, scalar and resource-bearing `Option` and `Result` construction, every built-in match
 variant, both Result `?` paths, canonical trap categories, resource construction, whole-root call
 moves, ordered resource reassignment, consuming-close ownership, active-variant cleanup,
-Region fallthrough, direct-return, Result-propagation, and nested reset ordering, source-linked drop traces, checked arithmetic and right-shift outcomes, exact fixture-only output bytes and order, or the stable interpreter step/output limits
+Region fallthrough, direct-return, Result-propagation, nested, break, and continue reset ordering, source-linked drop traces, checked arithmetic and right-shift outcomes, exact fixture-only output bytes and order, or the stable interpreter step/output limits
 category. Backend, ABI, runtime, and Atlas runners do not exist yet; their fixtures remain future
 evidence requirements.
 
@@ -58,19 +58,19 @@ evidence requirements.
 | Class | Proves |
 | --- | --- |
 | Parse pass and fail | `spec/fixtures/parser/` currently proves grammar acceptance, precedence trees, literal cooking, lossless reconstruction, recovery provenance, byte spans, and deterministic diagnostics through the Go parser runner |
-| Semantic pass and fail | `spec/fixtures/semantic/` currently proves all 12 v0 cases: resolution coordinates, canonical types, local last-use loans, borrow return origins, Stage 0 signed-left-shift rejection, phase ownership, related spans, and deterministic cascade suppression |
+| Semantic pass and fail | `spec/fixtures/semantic/` currently proves all 13 v0 cases: resolution coordinates, canonical types, local last-use loans, borrow return origins, Stage 0 signed-left-shift rejection, loop-control context rejection, phase ownership, related spans, and deterministic cascade suppression |
 | Module pass and fail | File-to-module identity, explicit aliases, forbidden import forms, cycles, and source visibility |
 | Type and initialization fail | Inert/resource separation and initialized-local rules |
-| Resource flow pass and fail | `spec/fixtures/resource/` currently proves all 10 v0 cases: whole-root moves, consuming tagged matches, live replacement, dead-slot reinstallation, scope obligations, branch and loop states, and deterministic `E11xx` spans; conditional close ownership stays a runtime/MIR concern |
+| Resource flow pass and fail | `spec/fixtures/resource/` currently proves all 12 v0 cases: whole-root moves, consuming tagged matches, live replacement, dead-slot reinstallation, scope obligations, branch, normal-loop, break-edge, and continue-edge states, and deterministic `E11xx` spans; conditional close ownership stays a runtime/MIR concern |
 | Borrow-origin pass and fail | Local last-use loans, conflicts, single-origin return, and storage bans |
 | Region pass and fail | `spec/fixtures/region/manifest-v1.json` currently proves all 6 v1 cases: parameter and package-resolved local origins, permitted parameter-origin returns, `E3101` local escape, capability restrictions, and no `NeedsDrop` placement |
-| Result pass and fail | `spec/fixtures/result/` currently proves all 20 v0 cases: qualified scalar construction, exhaustive shallow matching, return, discard, propagation, local and parameter transfer, handled reassignment, all-branch handling, partial-branch rejection, loop back-edge and overwrite rejection, early-return obligations, exactly-once evaluation, and error compatibility; active resource payload traces are covered by MIR and interpreter fixtures |
-| MIR normalization | `spec/fixtures/mir/` currently proves all 10 v0 cases through the Go MIR runner: source-linked evaluation order, call successors, ownership transfer including a resource-bearing Option match, RHS-before-drop resource reassignment with live/dead destinations, Region placement and reset ordering on fallthrough, direct return, Result propagation, and nested exits, cleanup order, Result branching, division and checked-arithmetic trap paths, and eliminated source forms; graph identity remains excluded |
+| Result pass and fail | `spec/fixtures/result/` currently proves all 24 v0 cases: qualified scalar construction, exhaustive shallow matching, return, discard, propagation, local and parameter transfer, handled reassignment, all-branch handling, partial-branch rejection, loop back-edge, break, continue, and overwrite rejection, early-return obligations, exactly-once evaluation, and error compatibility; active resource payload traces are covered by MIR and interpreter fixtures |
+| MIR normalization | `spec/fixtures/mir/` currently proves all 11 v0 cases through the Go MIR runner: source-linked evaluation order, call successors, ownership transfer including a resource-bearing Option match, RHS-before-drop resource reassignment with live/dead destinations, Region placement and reset ordering on fallthrough, direct return, Result propagation, nested, break, and continue exits, cleanup order, Result branching, division and checked-arithmetic trap paths, and eliminated source forms; graph identity remains excluded |
 | Resolved package graph | `spec/fixtures/package/` proves instance equality, feature splits, direct visibility, module isolation, ambiguity, transitive hiding, and explicit standard-library injection without choosing public package-manager syntax |
 | Built-in tagged resources | `Ok`, `Err`, `Some`, discard, match, propagation, early return, and nested active-payload drop traces |
-| MIR verifier mutation | `spec/fixtures/mir-verifier/` currently proves all 9 named baselines and 18 isolated mutation cases, including missing Region reset and invalid reset-exit kind `V1403` plus missing checked-arithmetic `V1501`, through the Go verifier runner without serializing arbitrary MIR |
-| MIR interpreter run, trap, and limit | `spec/fixtures/interpreter/` currently proves all 53 v0 cases: literal return, scalar call arithmetic, checked negation/addition/subtraction/multiplication, division/remainder, and right shift across trapping and non-trapping boundaries, boolean branching and logical not, source `&&` and `||` short-circuiting, scalar `while`, scalar and resource-bearing `Option` and `Result` construction, every built-in match variant, scalar and resource-bearing Result `?` paths, resource construction and field reads, whole-root and tagged-payload moves, resource returns, ordered live/dead/self reassignment, consuming-close success/failure ownership, nested active-variant cleanup, deterministic drop traces, lexical Region placement and reset on fallthrough, conditional fallthrough, direct return, Result propagation, and nested exits, exact manifest-authorized in-memory stdout/stderr bytes, order, and retained limit prefix, exact division-by-zero, signed-division-overflow, integer-overflow, and invalid-shift trap identity, and bounded step/output-limit termination; user drop-body effects, Region `break` and `continue`, signed left shift, and host I/O remain deferred |
-| Drop elaboration | Partial construction, loop `break` and `continue`, and cleanup-suffix merging |
+| MIR verifier mutation | `spec/fixtures/mir-verifier/` currently proves all 10 named baselines and 19 isolated mutation cases, including fallthrough and break Region reset `V1403` plus missing checked-arithmetic `V1501`, through the Go verifier runner without serializing arbitrary MIR |
+| MIR interpreter run, trap, and limit | `spec/fixtures/interpreter/` currently proves all 56 v0 cases: literal return, scalar call arithmetic, checked negation/addition/subtraction/multiplication, division/remainder, and right shift across trapping and non-trapping boundaries, boolean branching and logical not, source `&&` and `||` short-circuiting, scalar `while`, nearest-loop break and continue, scalar and resource-bearing `Option` and `Result` construction, every built-in match variant, scalar and resource-bearing Result `?` paths, resource construction and field reads, whole-root and tagged-payload moves, resource returns, ordered live/dead/self reassignment, consuming-close success/failure ownership, nested active-variant cleanup, deterministic drop traces, lexical Region placement and reset on fallthrough, conditional fallthrough, direct return, Result propagation, nested, break, and continue exits, exact manifest-authorized in-memory stdout/stderr bytes, order, and retained limit prefix, exact division-by-zero, signed-division-overflow, integer-overflow, and invalid-shift trap identity, and bounded step/output-limit termination; user drop-body effects, signed left shift, and host I/O remain deferred |
+| Drop elaboration | Partial construction and cleanup-suffix merging; loop `break` and `continue` are fixture-backed |
 | C differential | Interpreter parity for output, status, trap category, and drop trace across declared compilers and profiles |
 | C safety | Overflow, division, shifts, evaluation order, aliasing, alignment, inactive payload, and sanitizer-assisted checks |
 | ABI | Target layout, calls, callbacks, raw bindings, and boundary shims for candidate target profiles |

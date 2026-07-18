@@ -4,6 +4,7 @@
   "contracts": [
     "docs/product/02-spec.md",
     "docs/adr/0011-stage-0-resource-flow-fixture-contract.md",
+    "docs/adr/0024-stage-0-loop-control-and-cleanup.md",
     "docs/language/0001-values-and-resources.md",
     "docs/mir/drop-elaboration-v0.md",
     "docs/diagnostics/catalog-v0.md"
@@ -476,6 +477,46 @@
                   "endByte": 249
                 }
               }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.break-state-mismatch",
+      "sourceRoot": "cases/fail/break-state-mismatch/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "states": [],
+        "diagnostics": [
+          {
+            "code": "E1105",
+            "primary": { "source": "main.fy", "startByte": 215, "endByte": 272 },
+            "related": [
+              { "role": "declaration", "span": { "source": "main.fy", "startByte": 176, "endByte": 181 } },
+              { "role": "loop-header", "span": { "source": "main.fy", "startByte": 215, "endByte": 225 } },
+              { "role": "move", "span": { "source": "main.fy", "startByte": 244, "endByte": 249 } }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.continue-state-mismatch",
+      "sourceRoot": "cases/fail/continue-state-mismatch/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "states": [],
+        "diagnostics": [
+          {
+            "code": "E1105",
+            "primary": { "source": "main.fy", "startByte": 215, "endByte": 275 },
+            "related": [
+              { "role": "declaration", "span": { "source": "main.fy", "startByte": 176, "endByte": 181 } },
+              { "role": "loop-header", "span": { "source": "main.fy", "startByte": 215, "endByte": 225 } },
+              { "role": "move", "span": { "source": "main.fy", "startByte": 244, "endByte": 249 } }
             ]
           }
         ]

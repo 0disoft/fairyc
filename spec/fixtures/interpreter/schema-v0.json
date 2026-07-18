@@ -55,7 +55,7 @@
       "required": ["region", "exitKind", "placements", "dropCountBeforeReset"],
       "properties": {
         "region": { "$ref": "#/$defs/span" },
-        "exitKind": { "enum": ["fallthrough", "return", "propagate"] },
+        "exitKind": { "enum": ["fallthrough", "return", "propagate", "break", "continue"] },
         "placements": { "type": "integer", "minimum": 0 },
         "dropCountBeforeReset": { "type": "integer", "minimum": 0 }
       }

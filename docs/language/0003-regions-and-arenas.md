@@ -14,7 +14,7 @@ A region capability:
 - is created only by a lexical region construct;
 - can be used repeatedly for allocation within that scope;
 - cannot be copied, stored in an aggregate, returned, or captured;
-- resets when fallthrough, `return`, or Result `?` propagation exits the lexical region;
+- resets when fallthrough, `return`, Result `?` propagation, `break`, or `continue` exits the lexical region;
 - assigns `RegionParam(i)` or the corresponding local region origin to derived borrows.
 
 `region scratch in arena { ... }` requires `arena` to have type `&mut std::alloc::Arena`. The exclusive borrow covers the lexical block, while `scratch` is a distinct compiler-owned capability so repeated allocations do not create overlapping ordinary borrows.
@@ -55,11 +55,10 @@ It is deferred rather than being treated as a hidden mode of `Region`.
 
 Normal lexical exit resets the region after ordinary inner-scope resource cleanup has completed. A trap is non-unwinding and performs no region reset as an observable language action; the process terminates. Foreign `longjmp` or exception transfer across the region scope is forbidden.
 
-The current executable prototype proves fallthrough, direct `return`, Result `?` propagation, and
-nested Region exits with explicit MIR enter, place, drop, and reset operations. Its trace records
-the exit kind, placement count, and how many resource drops completed before reset without exposing
-addresses or offsets. `break` and `continue` across the Region boundary remain explicit lowering
-capability gaps rather than silently skipping reset. Executable lowering currently requires the Arena source to be a direct `&mut` local; a
+The current executable prototype proves fallthrough, direct `return`, Result `?` propagation,
+nearest-loop `break` and `continue`, and nested Region exits with explicit MIR enter, place, drop,
+and reset operations. Its trace records the exit kind, placement count, and how many resource drops
+completed before reset without exposing addresses or offsets. Executable lowering currently requires the Arena source to be a direct `&mut` local; a
 side-effecting borrow-producing expression is rejected rather than skipped.
 
 ## Concurrency

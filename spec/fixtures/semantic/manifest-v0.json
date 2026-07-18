@@ -7,6 +7,7 @@
     "docs/language/0002-borrows-and-return-origins.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/language/0007-name-resolution-and-typing-v0.md",
+    "docs/adr/0024-stage-0-loop-control-and-cleanup.md",
     "docs/diagnostics/catalog-v0.md"
   ],
   "cases": [
@@ -230,6 +231,27 @@
               "startByte": 61,
               "endByte": 76
             },
+            "related": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.loop-control-outside-loop",
+      "sourceRoot": "cases/fail/loop-control-outside-loop/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          {
+            "code": "E1012",
+            "primary": { "source": "main.fy", "startByte": 40, "endByte": 46 },
+            "related": []
+          },
+          {
+            "code": "E1012",
+            "primary": { "source": "main.fy", "startByte": 51, "endByte": 60 },
             "related": []
           }
         ]

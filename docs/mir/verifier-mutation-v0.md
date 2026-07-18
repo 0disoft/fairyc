@@ -23,7 +23,7 @@ For every case, the runner must:
 
 A seed-construction failure, baseline verifier failure, missing target, ignored mutation, more than one applied mutation, extra verifier code, or verifier crash is a harness failure. It cannot be counted as successful rejection.
 
-`internal/mirverifyfixture` implements this protocol for all nine seeds and eighteen mutations. It deep-clones each verified baseline before mutation and compares the complete verifier result rather than searching for an expected code inside a larger cascade. The plain-region seed includes enter, place, and reset operations; removing reset or replacing its closed exit kind isolates `V1403`. The checked-arithmetic seed has a complete addition check edge; removing its marker isolates `V1501` at the continuation operation.
+`internal/mirverifyfixture` implements this protocol for all ten seeds and nineteen mutations. It deep-clones each verified baseline before mutation and compares the complete verifier result rather than searching for an expected code inside a larger cascade. The plain-region seed includes enter, place, and reset operations; removing reset or replacing its closed exit kind isolates `V1403`. The break-region-control seed carries a `break` reset followed by its loop-exit goto; removing that reset isolates `V1403` before return. The checked-arithmetic seed has a complete addition check edge; removing its marker isolates `V1501` at the continuation operation.
 
 ## Seed families
 
@@ -31,6 +31,7 @@ A seed-construction failure, baseline verifier failure, missing target, ignored 
 - `resource-return`: one resource obligation, initialized drop flag, flag clear before drop, and clean return;
 - `borrow-return`: one valid parameter origin and bounded loan;
 - `plain-region`: inert placement that remains within one plain region;
+- `break-region-control`: inert placement, a `break`-kind reset, and a goto to the loop exit;
 - `checked-division`: explicit zero and signed-minimum checks with a non-returning trap block;
 - `checked-arithmetic`: checked addition with an exact overflow marker, switch, continuation, and trap block;
 - `normal-call`: one call with only a normal continuation;
