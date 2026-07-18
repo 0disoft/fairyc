@@ -51,6 +51,8 @@ description and is tested through an independent versioned manifest.
    calls, source semantic lowering, resource representation, and backend consumption remain
    separate gates. `TargetSpec` therefore replaces its broad missing `layout-fixtures` marker with
    the narrower `c-layout-probes` marker.
+   ADR 0036 later configures native probes for the nine valid cases while retaining the marker until
+   a clean hosted report is observed.
 
 ## Consequences
 

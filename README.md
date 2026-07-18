@@ -60,6 +60,10 @@ The host-independent layout engine now executes all 14 target-layout v0 cases fo
 scalars, data and function pointers, explicitly based C enums, fixed arrays, nested structs, field
 offsets, internal and tail padding, and fail-closed malformed or overflowing inputs. These are
 target-mechanics fixtures, not source-language aggregate support or native C ABI proof.
+A deterministic native C11 probe now translates the nine valid layout cases into private numeric
+types and is configured for Clang/GCC at `-O0` and `-O2`. This Windows host cannot execute those
+four probe runs, and no hosted success receipt has been observed, so `c-layout-probes` remains a
+missing target evidence marker.
 A separate fail-closed Linux/amd64 command is now present to compile those cases with Clang and GCC
 at `-O0` and `-O2`, link a closed conformance runtime, and compare process outcomes plus exact
 source-linked resource-drop sequences. Product emission and product builds contain no trace observer. It cannot run on

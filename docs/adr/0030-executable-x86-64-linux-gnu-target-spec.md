@@ -44,6 +44,8 @@ eligible glibc, Clang, and GCC installation before it can produce native evidenc
    target maturity.
    It lists missing C layout probes and bidirectional ABI fixtures, complete runtime and standard library,
    hosted Linux receipt, toolchain baseline, and provisioning evidence.
+   ADR 0036 later configures C layout probes for the nine valid layout cases, but the missing marker
+   remains until a clean hosted Linux report is observed.
    A scalar layout or `@repr(C)` vocabulary entry does not by itself make the corresponding Fairy C
    source type, aggregate, foreign call, or ABI fixture implemented.
 7. This target description is a prototype compatibility member. Changing its layout or classifier

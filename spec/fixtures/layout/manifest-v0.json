@@ -7,13 +7,14 @@
     "docs/adr/0006-c-abi-v0-and-first-conformance-target.md",
     "docs/adr/0030-executable-x86-64-linux-gnu-target-spec.md",
     "docs/adr/0031-target-layout-engine-and-fixtures.md",
+    "docs/adr/0036-native-c-layout-probe.md",
     "docs/abi/c-abi-v0.md",
     "docs/compatibility/versioning-v0.md"
   ],
   "deferred": [
     "source-level fixed arrays, inert structs, explicit C enums, raw pointers, and @repr(C) semantic lowering",
     "SysV AMD64 eightbyte argument and return class execution, register exhaustion, and hidden aggregate returns",
-    "Clang and GCC layout probes, bidirectional C ABI calls, object metadata, and hosted conformance receipts",
+    "hosted success receipts for the configured Clang and GCC layout probes, bidirectional C ABI calls, and object metadata",
     "resources, tagged values, safe borrows, slices, strings, packed layout, unions, bit fields, atomics, vectors, and additional targets"
   ],
   "cases": [

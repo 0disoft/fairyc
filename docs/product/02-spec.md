@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0035-native-drop-trace-differential.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0036-native-c-layout-probe.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -183,6 +183,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   offset, and top-level padding facts. `fairyc.layout-fixtures/v0` currently executes 14 pass/fail
   cases. This target-mechanics path does not implement the corresponding source syntax or SysV
   call classification.
+- The nine valid layout cases additionally generate one deterministic private C11 probe. The Linux
+  native runner compiles, links, and executes it with Clang/GCC and low/optimized profiles, checking
+  recursive size, alignment, field size, and offset assertions. Failure cases remain Go-owned input
+  rejections. No hosted success receipt follows from the configured path.
 - A small MIR interpreter is the semantic oracle before any second native backend.
 - Its fixture-only output hooks require explicit manifest bindings, capture bytes in memory under a
   shared limit, and never authorize source names, the CLI, or host streams.

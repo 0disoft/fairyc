@@ -47,6 +47,7 @@ text would not prove which control-flow path actually executed.
 8. The native JSON report advances from `fairyc.native-c-report/v1` to
    `fairyc.native-c-report/v2` and records `dropTraceExecutions` separately from total fixture and
    product build executions. A configured lane or counter is not a hosted success receipt.
+   ADR 0036 later advances the same report to v3 for native layout-probe counts.
 9. This evidence covers compiler-owned cleanup for the currently admitted direct all-`i32`
    resources and built-in resource-bearing tags with empty user drop bodies. It does not execute
    user drop-body effects, prove reverse cleanup of resource fields, define a public trace format,

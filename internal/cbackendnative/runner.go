@@ -20,11 +20,12 @@ import (
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/cli"
 	"github.com/0disoft/fairyc/internal/cruntime"
+	"github.com/0disoft/fairyc/internal/layoutfixture"
 	"github.com/0disoft/fairyc/internal/target"
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v2"
+	reportSchemaVersion = "fairyc.native-c-report/v3"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -65,15 +66,17 @@ type Compiler struct {
 
 // Report is the deterministic success record emitted by the native fixture command.
 type Report struct {
-	SchemaVersion        string     `json:"schemaVersion"`
-	Target               string     `json:"target"`
-	Libc                 string     `json:"libc"`
-	Compilers            []Compiler `json:"compilers"`
-	Profiles             []string   `json:"profiles"`
-	Cases                []string   `json:"cases"`
-	Executions           int        `json:"executions"`
-	DropTraceExecutions  int        `json:"dropTraceExecutions"`
-	BuildSmokeExecutions int        `json:"buildSmokeExecutions"`
+	SchemaVersion         string     `json:"schemaVersion"`
+	Target                string     `json:"target"`
+	Libc                  string     `json:"libc"`
+	Compilers             []Compiler `json:"compilers"`
+	Profiles              []string   `json:"profiles"`
+	Cases                 []string   `json:"cases"`
+	Executions            int        `json:"executions"`
+	DropTraceExecutions   int        `json:"dropTraceExecutions"`
+	LayoutCases           []string   `json:"layoutCases"`
+	LayoutProbeExecutions int        `json:"layoutProbeExecutions"`
+	BuildSmokeExecutions  int        `json:"buildSmokeExecutions"`
 }
 
 // Run compiles every emission fixture with Clang and GCC at low and optimized profiles, compares
@@ -122,6 +125,24 @@ func Run(manifestPath string) (Report, error) {
 	for _, profile := range nativeProfiles {
 		report.Profiles = append(report.Profiles, profile.Name)
 	}
+	layoutManifest := filepath.Clean(filepath.Join(filepath.Dir(absoluteManifest), "..", "layout", "manifest-v0.json"))
+	layoutTarget, layoutCases, err := layoutfixture.NativeProbeCases(layoutManifest)
+	if err != nil {
+		return Report{}, fmt.Errorf("load native layout probe cases: %w", err)
+	}
+	if layoutTarget != target.X8664LinuxGNU {
+		return Report{}, fmt.Errorf("native layout probe target is %q, want %q", layoutTarget, target.X8664LinuxGNU)
+	}
+	layoutProbe, err := generateLayoutProbe(layoutTarget, layoutCases)
+	if err != nil {
+		return Report{}, fmt.Errorf("generate native layout probe: %w", err)
+	}
+	report.LayoutCases = slices.Clone(layoutProbe.Cases)
+	layoutExecutions, err := runLayoutProbe(temporaryRoot, toolchains, layoutProbe)
+	if err != nil {
+		return Report{}, err
+	}
+	report.LayoutProbeExecutions = layoutExecutions
 	for caseIndex, fixture := range fixtureReport.Emitted {
 		if fixture.Unit.Target != string(target.X8664LinuxGNU) || fixture.Unit.Dialect != cbackend.DialectC11 {
 			return Report{}, fmt.Errorf("case %s emitted unexpected profile %s/%s", fixture.ID, fixture.Unit.Target, fixture.Unit.Dialect)
@@ -159,6 +180,27 @@ func Run(manifestPath string) (Report, error) {
 	}
 	report.BuildSmokeExecutions = buildSmoke
 	return report, nil
+}
+
+func runLayoutProbe(temporaryRoot string, toolchains []cdriver.Toolchain, probe layoutProbeUnit) (int, error) {
+	executions := 0
+	for compilerIndex, toolchain := range toolchains {
+		for profileIndex, profile := range nativeProfiles {
+			artifact, err := cdriver.Build(toolchain, profile, probe.Source, layoutProbeRuntimeSource)
+			if err != nil {
+				return 0, fmt.Errorf("layout probe with %s/%s: %w", toolchain.Name, profile.Name, err)
+			}
+			executablePath := filepath.Join(temporaryRoot, fmt.Sprintf("layout-probe-%d-%d", compilerIndex, profileIndex))
+			if err := os.WriteFile(executablePath, artifact.Bytes, 0o700); err != nil {
+				return 0, fmt.Errorf("materialize layout probe with %s/%s: %w", toolchain.Name, profile.Name, err)
+			}
+			if err := execute("layout-probe", executablePath, 0, nil); err != nil {
+				return 0, fmt.Errorf("layout probe with %s/%s: %w", toolchain.Name, profile.Name, err)
+			}
+			executions++
+		}
+	}
+	return executions, nil
 }
 
 func runBuildSmoke(temporaryRoot string) (int, error) {

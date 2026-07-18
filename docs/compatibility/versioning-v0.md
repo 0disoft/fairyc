@@ -72,7 +72,8 @@ Semantic, resource, Region, Result, MIR, MIR-verifier, and package fixture manif
 
 The native differential report is also a repository evidence contract rather than released compiler
 output. `fairyc.native-c-report/v2` supersedes v1 by adding the required
-`dropTraceExecutions` count; the runner emits one exact version and does not pretend the two report
+`dropTraceExecutions` count. V3 supersedes v2 by adding the required sorted `layoutCases` identity
+list and `layoutProbeExecutions` count. The runner emits one exact version and does not pretend the report
 shapes are interchangeable.
 
 ## Runtime and standard library

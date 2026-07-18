@@ -78,8 +78,10 @@ pointer layouts, SysV AMD64 calling and stack identities, ELF/DWARF identities, 
 vocabulary, and explicit missing maturity evidence. The C backend and driver share its typed target
 ID, while local toolchain paths remain outside the target contract. Host-independent scalar,
 array, explicit-C-enum, pointer, and nested-aggregate layout execution now runs through 14 versioned
-v0 cases. Native C layout probes, SysV call classification, bidirectional ABI fixtures, and hosted
-evidence remain incomplete.
+v0 cases. The nine valid cases now also generate one deterministic C11 layout probe configured for
+four Clang/GCC and low/optimized executions. Those native runs remain unobserved on this Windows
+host, so SysV call classification, bidirectional ABI fixtures, and hosted evidence remain
+incomplete.
 
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.

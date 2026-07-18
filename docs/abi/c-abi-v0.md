@@ -91,12 +91,14 @@ frontend or C backend.
 positive fixed arrays, and nonempty nested structs. Its versioned v0 manifest records exact size,
 natural alignment, declaration-order field offsets, top-level internal padding, tail padding, and
 closed rejection codes across 14 cases. This proves the internal target-layout algorithm against
-repository expectations only. Clang/GCC `sizeof`, `_Alignof`, `offsetof`, call, return, object, and
-bidirectional ABI probes remain required native evidence.
+repository expectations only. The nine valid cases now also generate a private recursive C11 probe
+with `sizeof`, `_Alignof`, field `sizeof`, and `offsetof` assertions configured for four
+Clang/GCC low/optimized executions. Those executions are not yet observed on a hosted Linux runner;
+call, return, object, and bidirectional ABI probes remain required native evidence.
 
 This executable description is target data, not conformance evidence. Its evidence block names the
 existing `scalar-and-flat-i32-resource-tagged-c11` subset, keeps `emittable`, `conformant`, and `supported` false, and
-lists the missing native C layout-probe, bidirectional ABI, runtime, standard-library, hosted-Linux, toolchain
+lists the missing hosted native C layout-probe receipt, bidirectional ABI, runtime, standard-library, hosted-Linux, toolchain
 baseline, and provisioning gates. `fairyc experimental target-spec x86_64-linux-gnu` exposes that
 same immutable data without probing the host.
 

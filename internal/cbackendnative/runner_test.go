@@ -15,6 +15,8 @@ import (
 	"github.com/0disoft/fairyc/internal/cli"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/interpreter"
+	"github.com/0disoft/fairyc/internal/layoutfixture"
+	"github.com/0disoft/fairyc/internal/target"
 )
 
 func TestBuildSmokeSourceReachesCEmission(t *testing.T) {
@@ -41,16 +43,59 @@ func TestBuildSmokeSourceReachesCEmission(t *testing.T) {
 
 func TestNativeReportSchemaTracksDropTraceShape(t *testing.T) {
 	t.Parallel()
-	if reportSchemaVersion != "fairyc.native-c-report/v2" {
+	if reportSchemaVersion != "fairyc.native-c-report/v3" {
 		t.Fatalf("report schema = %q", reportSchemaVersion)
 	}
-	encoded, err := json.Marshal(Report{SchemaVersion: reportSchemaVersion, Executions: 68, DropTraceExecutions: 68})
+	encoded, err := json.Marshal(Report{
+		SchemaVersion: reportSchemaVersion, Executions: 68, DropTraceExecutions: 68,
+		LayoutCases: []string{"pass.array-i32-three", "pass.pointer"}, LayoutProbeExecutions: 4,
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v2"`) ||
-		!strings.Contains(string(encoded), `"dropTraceExecutions":68`) {
+	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v3"`) ||
+		!strings.Contains(string(encoded), `"dropTraceExecutions":68`) ||
+		!strings.Contains(string(encoded), `"layoutCases":["pass.array-i32-three","pass.pointer"]`) ||
+		!strings.Contains(string(encoded), `"layoutProbeExecutions":4`) {
 		t.Fatalf("report JSON = %s", encoded)
+	}
+}
+
+func TestGenerateLayoutProbeFromRepositoryFixtures(t *testing.T) {
+	t.Parallel()
+	manifest := filepath.Join("..", "..", "spec", "fixtures", "layout", "manifest-v0.json")
+	targetID, cases, err := layoutfixture.NativeProbeCases(manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	unit, err := generateLayoutProbe(targetID, cases)
+	if err != nil {
+		t.Fatal(err)
+	}
+	repeated, err := generateLayoutProbe(targetID, cases)
+	if err != nil || repeated.Source != unit.Source || !slices.Equal(repeated.Cases, unit.Cases) {
+		t.Fatalf("repeated layout probe drifted: %v", err)
+	}
+	if unit.Target != target.X8664LinuxGNU || len(unit.Cases) != 9 || !strings.HasSuffix(unit.Source, "int main(void) { return 0; }\n") {
+		t.Fatalf("layout probe unit = %+v", unit)
+	}
+	for _, required := range []string{
+		"typedef int32_t",
+		"typedef long",
+		"typedef void *",
+		"typedef void (*",
+		"_Static_assert(sizeof(",
+		"_Static_assert(_Alignof(",
+		"_Static_assert(offsetof(",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("layout probe is missing %q", required)
+		}
+	}
+	for _, probeCase := range unit.Cases {
+		if strings.Contains(unit.Source, probeCase) {
+			t.Errorf("layout probe source leaks fixture case ID %q", probeCase)
+		}
 	}
 }
 

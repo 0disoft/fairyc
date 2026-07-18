@@ -13,5 +13,8 @@ strictly sorted so manifest order cannot become an accidental precedence rule.
 
 This runner is host independent. It does not ask Go, Clang, GCC, libc, or the operating system for
 layout facts. It also does not prove source syntax, semantic acceptance, SysV argument/return
-classification, generated C, object metadata, or bidirectional C ABI behavior; those remain named
-in the manifest's deferred ledger.
+classification, generated product C, object metadata, or bidirectional C ABI behavior. The separate
+Linux native runner consumes isolated copies of the 9 validated pass cases, generates private
+numeric C11 types with recursive layout assertions, and is configured for Clang/GCC at low and
+optimized profiles. The 5 rejection cases remain Go-owned; a configured native path is not a hosted
+success receipt.

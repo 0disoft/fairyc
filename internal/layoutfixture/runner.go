@@ -34,6 +34,13 @@ type Report struct {
 	Failures []Failure
 }
 
+// NativeProbeCase is one validated pass case safe to translate into a target C layout probe.
+type NativeProbeCase struct {
+	ID     string
+	Type   layout.Type
+	Layout layout.Result
+}
+
 type manifest struct {
 	Schema        string        `json:"$schema"`
 	SchemaVersion string        `json:"schemaVersion"`
@@ -61,16 +68,42 @@ func Run(manifestPath string) (Report, error) {
 	if err != nil {
 		return Report{}, err
 	}
+	report, _, err := executeManifest(definition)
+	return report, err
+}
+
+// NativeProbeCases returns isolated copies of every validated pass case in canonical manifest order.
+func NativeProbeCases(manifestPath string) (target.ID, []NativeProbeCase, error) {
+	definition, err := loadManifest(manifestPath)
+	if err != nil {
+		return "", nil, err
+	}
+	report, cases, err := executeManifest(definition)
+	if err != nil {
+		return "", nil, err
+	}
+	if len(report.Failures) != 0 || report.Passed != report.CasesRun {
+		first := "case count mismatch"
+		if len(report.Failures) != 0 {
+			first = report.Failures[0].CaseID + ": " + report.Failures[0].Detail
+		}
+		return "", nil, fmt.Errorf("layout fixture manifest is not clean: %s", first)
+	}
+	return report.Target, cases, nil
+}
+
+func executeManifest(definition manifest) (Report, []NativeProbeCase, error) {
 	targetID := target.ID(definition.Target)
 	spec, found := target.Lookup(targetID)
 	if !found {
-		return Report{}, fmt.Errorf("layout fixture target %q is unknown", definition.Target)
+		return Report{}, nil, fmt.Errorf("layout fixture target %q is unknown", definition.Target)
 	}
 	engine, err := layout.New(spec)
 	if err != nil {
-		return Report{}, err
+		return Report{}, nil, err
 	}
 	report := Report{Target: targetID, CasesRun: len(definition.Cases), Failures: []Failure{}}
+	probeCases := make([]NativeProbeCase, 0, len(definition.Cases))
 	seen := make(map[string]struct{}, len(definition.Cases))
 	previousID := ""
 	for _, fixture := range definition.Cases {
@@ -93,8 +126,32 @@ func Run(manifestPath string) (Report, error) {
 			continue
 		}
 		report.Passed++
+		if fixture.Expect.Status == "pass" {
+			probeCases = append(probeCases, NativeProbeCase{
+				ID: fixture.ID, Type: cloneType(fixture.Type), Layout: cloneResult(*fixture.Expect.Layout),
+			})
+		}
 	}
-	return report, nil
+	return report, probeCases, nil
+}
+
+func cloneType(value layout.Type) layout.Type {
+	result := value
+	if value.Element != nil {
+		element := cloneType(*value.Element)
+		result.Element = &element
+	}
+	result.Fields = make([]layout.Field, len(value.Fields))
+	for index, field := range value.Fields {
+		result.Fields[index] = layout.Field{Name: field.Name, Type: cloneType(field.Type)}
+	}
+	return result
+}
+
+func cloneResult(value layout.Result) layout.Result {
+	value.Fields = slices.Clone(value.Fields)
+	value.Padding = slices.Clone(value.Padding)
+	return value
 }
 
 func executeCase(engine *layout.Engine, fixture fixtureCase) *Failure {
