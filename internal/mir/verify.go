@@ -166,13 +166,28 @@ func verifyFunction(function *Function) []VerificationError {
 			case OperationAssign, OperationUnary, OperationBinary:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
-			case OperationResultConstruct, OperationResultPayload:
+			case OperationResultConstruct:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				if len(operation.Operands) != 1 || operation.DestinationLocal == NoLocal {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "Result operation must have one operand and one destination"})
 				}
 				if operation.Variant != "ok" && operation.Variant != "err" {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "Result operation has an invalid variant"})
+				}
+				if _, _, ok := hir.ResultElements(operation.Type); !ok {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "Result construction has no concrete Result type"})
+				}
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationResultPayload:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if len(operation.Operands) != 1 || operation.DestinationLocal == NoLocal {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "Result operation must have one operand and one destination"})
+				}
+				if operation.Variant != "ok" && operation.Variant != "err" {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "Result operation has an invalid variant"})
+				}
+				if operation.Type == hir.TypeInvalid || operation.Type == "" {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "Result payload has no concrete payload type"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationOptionConstruct:
@@ -182,11 +197,17 @@ func verifyFunction(function *Function) []VerificationError {
 				if !validShape {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "Option construction shape does not match its variant"})
 				}
+				if _, ok := hir.OptionElement(operation.Type); !ok {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "Option construction has no concrete Option type"})
+				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationOptionPayload:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				if operation.DestinationLocal == NoLocal || operation.Variant != "some" || len(operation.Operands) != 1 {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "Option payload extraction must target Some"})
+				}
+				if operation.Type == hir.TypeInvalid || operation.Type == "" {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "Option payload has no concrete payload type"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationResourceConstruct:

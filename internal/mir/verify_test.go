@@ -129,6 +129,35 @@ func TestVerifyRejectsOptionNoneWithPayload(t *testing.T) {
 	}
 }
 
+func TestVerifyRejectsTaggedOperationsWithoutConcreteTypes(t *testing.T) {
+	t.Parallel()
+	operations := []Operation{
+		{Kind: OperationResultConstruct, DestinationLocal: 1, Variant: "ok", Operands: []Operand{{Kind: OperandI32, I32: 42}}},
+		{Kind: OperationOptionConstruct, DestinationLocal: 1, Variant: "some", Operands: []Operand{{Kind: OperandI32, I32: 42}}},
+		{Kind: OperationResultPayload, DestinationLocal: 1, Variant: "ok", Operands: []Operand{{Kind: OperandI32, I32: 42}}},
+		{Kind: OperationOptionPayload, DestinationLocal: 1, Variant: "some", Operands: []Operand{{Kind: OperandI32, I32: 42}}},
+	}
+	for _, operation := range operations {
+		operation := operation
+		t.Run(string(operation.Kind), func(t *testing.T) {
+			t.Parallel()
+			program := Program{Functions: []Function{{
+				Name:  "main::main",
+				Entry: 0,
+				Blocks: []Block{{
+					ID:         0,
+					Operations: []Operation{operation},
+					Terminator: Terminator{Kind: TerminatorReturn, UnwindSuccessor: NoBlock, ReturnValue: Operand{Kind: OperandI32, I32: 0}},
+				}},
+			}}}
+			failures := Verify(program)
+			if len(failures) != 1 || failures[0].Code != "V1001" {
+				t.Fatalf("Verify() failures = %+v, want one V1001", failures)
+			}
+		})
+	}
+}
+
 func TestVerifyRejectsResourceConstructionFieldMismatch(t *testing.T) {
 	t.Parallel()
 	program := Program{Functions: []Function{{

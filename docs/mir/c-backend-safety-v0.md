@@ -11,19 +11,21 @@ Generated C is a reference and differential-test transport for a declared `Targe
 
 The first planned profile is `x86_64-linux-gnu` compiled and linked through declared Clang and GCC drivers. Emission alone is not conformance or support evidence.
 
-## Current scalar emission slice
+## Current scalar-payload emission slice
 
 `internal/cbackend` currently emits one deterministic ISO C11 translation unit from verified MIR
-for a deliberately narrow scalar subset. It accepts `i32` and `bool` parameters, `i32`, `bool`, or
-`void` internal results, a zero-argument `main() -> i32` entry, scalar calls and control flow,
-comparisons, bitwise operations, and the implemented checked arithmetic families. Private numeric
-C function names prevent source identifiers from becoming ABI or injection surfaces.
+for a deliberately narrow scalar-payload subset. It accepts `i32`, `bool`, `Option<i32>`, and
+`Result<i32, i32>` parameters and internal results, `void` internal results, a zero-argument
+`main() -> i32` entry, calls and control flow, scalar tag construction, match and Result `?`,
+comparisons, bitwise operations, and the implemented checked arithmetic families. Private numeric C
+function names prevent source identifiers from becoming ABI or injection surfaces.
 
-The emitter rejects resources, tagged values, Region operations, safe borrows, unsafe operations,
-FFI, runtime and standard-library lowering, non-scalar signatures, malformed scalar destinations,
-and non-canonical block shapes. `spec/fixtures/c-emission/manifest-v0.json` currently proves four
-source-to-emission cases and repeated byte identity. No C parser, compiler, object writer, assembler,
-linker, executable, sanitizer, layout probe, or ABI probe runs in that fixture lane.
+The emitter rejects resources, resource-bearing or nested tagged values, other tagged payload
+combinations, Region operations, safe borrows, unsafe operations, FFI, complete runtime and
+standard-library lowering, malformed destinations, and non-canonical block shapes.
+`spec/fixtures/c-emission/manifest-v0.json` currently proves eight source-to-emission cases and
+repeated byte identity. No C parser, compiler, object writer, assembler, linker, executable,
+sanitizer, layout probe, or ABI probe runs in that fixture lane.
 
 ## Ordered evaluation
 
@@ -46,7 +48,9 @@ The backend cannot add C or LLVM overflow, exactness, alignment, or alias promis
 
 - Target descriptions, not host `sizeof(long)` or Go layout, determine widths and alignment.
 - Bit reinterpretation and potentially unaligned access use a `memcpy`-style transport rather than incompatible lvalue access.
-- `Option` and `Result` use a tag plus active payload representation; generated C never reads an inactive payload.
+- `Option<i32>` and `Result<i32, i32>` currently use distinct private structs with a `uint32_t` tag
+  and `int32_t` payload. Generated C extracts payload only in the selected variant block and traps
+  on an invalid tag. This private shape is not `@repr(C)` or a public Fairy ABI.
 - Type punning through incompatible C lvalues is forbidden.
 - Stage 0 emits no `restrict` and makes no speculative `noalias` promise.
 - Padding bytes are never treated as initialized semantic data.
@@ -69,14 +73,15 @@ A C `longjmp` or C++ exception crossing generated Fairy C frames is forbidden. I
 
 ## Differential verification
 
-`internal/cbackendnative` implements the first scalar-only matrix shape for Linux/amd64 with glibc,
-Clang and GCC, and low and optimized profiles. Its current process-status oracle compares small
-non-negative returns and canonical trap category. Output, negative or larger `i32` returns, drop
-traces, sanitizers, layout, ABI, and broader runtime behavior remain unimplemented. Sanitizers are
-useful backend checks but are not the language-semantics oracle.
+`internal/cbackendnative` implements the first scalar-payload matrix shape for Linux/amd64 with
+glibc, Clang and GCC, and low and optimized profiles. Its eight cases plan 32 process-status
+comparisons for small non-negative returns and canonical trap category, including both scalar tag
+families. Output, negative or larger `i32` returns, drop traces, sanitizers, public layout, ABI, and
+broader runtime behavior remain unimplemented. Sanitizers are useful backend checks but are not the
+language-semantics oracle.
 
 `internal/cdriver` and `internal/cruntime` are the one implementation path for both that matrix and
-the experimental scalar executable builder. The driver fixes the C dialect, warning policy,
+the experimental scalar-payload executable builder. The driver fixes the C dialect, warning policy,
 optimization profiles, time and output bounds, and linked-artifact size limit; the embedded runtime
 fixes trap dispatch before binding a caller-specific reserved process-status base. Sharing this
 plumbing prevents test and product compiler flags from silently diverging, but does not promote the

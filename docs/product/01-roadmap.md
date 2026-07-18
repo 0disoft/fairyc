@@ -26,7 +26,7 @@ now cover the semantic fixture's scalar and safe-borrow subset. Local last-use l
 exhaustive shallow matching, and local, parameter, branch, loop, overwrite, and early-return
 must-use obligations. Mutable-local MIR lowering and verification
   execute all 11 MIR normalization v0 cases for the current scalar, resource, tagged-payload, Result, Region, loop-control cleanup, call,
-  division, and checked-arithmetic trap subset. All 10 verifier baselines and 19 isolated mutation cases execute through
+  division, and checked-arithmetic trap subset. All 10 verifier baselines and 20 isolated mutation cases execute through
   the same MIR verifier. The first MIR interpreter executes all 56 interpreter v0 cases, including
 scalar `Option` and `Result` construction, exhaustive matching, and both Result `?` paths, and is
 exposed by the unstable `experimental run` command. Resource construction, field reads, whole-root
@@ -38,11 +38,12 @@ and bounded failure without granting host access. Checked `i32` addition, subtra
 multiplication, negation, division, remainder, and signed right shift execute across trapping and
   non-trapping boundaries with exact overflow, division-by-zero, or invalid-shift
   categories; signed left shift is rejected as `E1011`. Nearest-loop `break` and `continue` now execute
-  with resource and Region cleanup. The first C backend slice emits deterministic ISO C11 for 4
-  verified scalar cases under the provisional `x86_64-linux-gnu` profile. The unstable
+  with resource and Region cleanup. The first C backend slice emits deterministic ISO C11 for 8
+  verified scalar-payload cases under the provisional `x86_64-linux-gnu` profile, including
+  `Option<i32>` and `Result<i32, i32>` construction, match, calls, and propagation. The unstable
   `experimental emit-c` command exposes that exact verified scalar translation unit on stdout
   without writing an artifact. On an eligible Linux/amd64 glibc host, `experimental build` can now
-  compile and link that scalar subset with explicit Clang or GCC and low or optimized profiles into
+  compile and link that scalar-payload subset with explicit Clang or GCC and low or optimized profiles into
   a no-overwrite `build/` artifact. Real file and console I/O, effects, and every later Phase 1
   capability remain unimplemented.
 
@@ -56,9 +57,10 @@ Exit gate: positive and negative fixtures agree with the source contracts, resou
 ## Phase 2: first hosted executable slice
 
 Current implementation status: a fail-closed Linux/amd64 scalar differential command now requires
-glibc, Clang, and GCC and is wired into a separate hosted Ubuntu CI job. It is designed to run all 4
-emission cases at low and optimized profiles for 16 process-status comparisons, then drive the
-actual experimental build CLI through 4 compiler/profile executable smokes. The current Windows
+glibc, Clang, and GCC and is wired into a separate hosted Ubuntu CI job. It is designed to run all 8
+emission cases at low and optimized profiles for 32 process-status comparisons, then drive the
+actual experimental build CLI with scalar Option and Result through 4 compiler/profile executable
+smokes. The current Windows
 host has no eligible Linux toolchain, and no hosted run receipt has been observed, so this is a
 configured lane rather than native conformance evidence. A shared bounded C driver and embedded
 scalar runtime now serve both that lane and the experimental single-file build command. This proves

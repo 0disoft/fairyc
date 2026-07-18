@@ -16,14 +16,15 @@ default output beside the source would risk overwriting or tracking generated bi
 
 The stable package build, target selection, cache, object, linker, and install contracts remain
 unfinished. The first user-visible native build therefore needs to stay explicitly experimental,
-single-file, scalar-only, and fail closed outside the one declared host profile.
+single-file, scalar-payload-only, and fail closed outside the one declared host profile.
 
 ## Decision
 
 1. `fairyc experimental build <file.fy> --cc <clang|gcc> --profile <low|optimized> --output <build/path>`
    is the sixth unstable developer command. Compiler, profile, and output have no implicit default.
 2. The source file follows the same bounded source-root-relative loading, syntax, semantics, Flow,
-   MIR-lowering, verifier, `main() -> i32`, and scalar C-emission gates as `experimental emit-c`.
+   MIR-lowering, verifier, `main() -> i32`, and scalar-payload C-emission gates as
+   `experimental emit-c`.
 3. The command is host-native only. It requires Linux on amd64, glibc reported by `getconf`, and the
    explicitly selected `clang` or `gcc` executable from `PATH`. It does not claim cross-compilation.
 4. `internal/cdriver` owns the shared compiler invocation used by both the CLI and native
@@ -50,12 +51,13 @@ single-file, scalar-only, and fail closed outside the one declared host profile.
 
 ## Consequences
 
-- A scalar `.fy` program can now reach an actual native executable through the canonical Go Stage 0
+- A scalar-payload `.fy` program can now reach an actual native executable through the canonical Go Stage 0
   compiler on an eligible Linux host.
 - Native differential fixtures and user builds cannot silently drift to different compiler flags or
   trap-runtime implementations.
-- Resource, tagged, Region, unsafe, FFI, standard-library, and broader runtime programs still fail at
-  the C-emission capability boundary.
+- ADR 0029 admits `Option<i32>` and `Result<i32, i32>`; resources, resource-bearing or nested tags,
+  Region, unsafe, FFI, standard-library, and broader runtime programs still fail at the C-emission
+  capability boundary.
 - The current Windows development host proves parsing, path safety, artifact promotion, and
   platform rejection, but cannot supply native build or execution evidence. The Linux CI lane owns
   that evidence until a compatible local toolchain is available.

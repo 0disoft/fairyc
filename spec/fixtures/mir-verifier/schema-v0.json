@@ -76,6 +76,7 @@
             "remove-flag-initialization",
             "remove-required-trap-check",
             "remove-region-reset",
+            "remove-tagged-operation-type",
             "remove-terminator",
             "remove-unsafe-provenance",
             "use-before-initialize"

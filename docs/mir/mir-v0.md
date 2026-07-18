@@ -10,7 +10,7 @@ MIR is the only executable semantic contract consumed by backends. It records ev
 
 MIR v0 is a mutable-local control-flow graph rather than SSA. SSA conversion is a backend or optimization concern after the semantic form is verified.
 
-The current Go prototype implements the source-linked subset exercised by all eleven MIR v0 normalization fixtures: ordered calls, complete-root and tagged-payload moves, RHS-before-drop resource reassignment, explicit normal-exit cleanup, lexical Region placement and reset on fallthrough, direct return, Result propagation, nested exits, nearest-loop `break` and `continue`, `Result` propagation branches, checked division, remainder, and arithmetic traps, and non-unwinding successors. The same verifier passes all ten named baselines and rejects all nineteen isolated v0 mutations with their single expected `Vxxxx` result. The bounded interpreter executes all fifty-six interpreter v0 cases for scalar and tagged control, resource construction and field reads, whole-root and active-payload moves, resource returns and propagation, live/dead/self reassignment, consuming-close ownership, nested and loop-control cleanup, source-linked drop traces, Region reset paths, controlled in-memory test output, exact arithmetic, division, remainder, and right-shift trap and boundary outcomes, and the step and output limits; user drop-body effects, signed left shift, and later runtime behavior remain unfinished gates.
+The current Go prototype implements the source-linked subset exercised by all eleven MIR v0 normalization fixtures: ordered calls, complete-root and tagged-payload moves, RHS-before-drop resource reassignment, explicit normal-exit cleanup, lexical Region placement and reset on fallthrough, direct return, Result propagation, nested exits, nearest-loop `break` and `continue`, `Result` propagation branches, checked division, remainder, and arithmetic traps, and non-unwinding successors. The same verifier passes all ten named baselines and rejects all twenty isolated v0 mutations with their single expected `Vxxxx` result. The bounded interpreter executes all fifty-six interpreter v0 cases for scalar and tagged control, resource construction and field reads, whole-root and active-payload moves, resource returns and propagation, live/dead/self reassignment, consuming-close ownership, nested and loop-control cleanup, source-linked drop traces, Region reset paths, controlled in-memory test output, exact arithmetic, division, remainder, and right-shift trap and boundary outcomes, and the step and output limits; user drop-body effects, signed left shift, and later runtime behavior remain unfinished gates.
 
 ## Lowering pipeline
 
@@ -53,6 +53,10 @@ representation from how a local happens to be used.
 
 MIR v0 requires rvalues for use, unary operations, checked arithmetic, wrapping arithmetic, saturating arithmetic, comparisons, casts, aggregate construction, discriminant read, safe borrow, raw address, region allocation, and explicit unsafe operations.
 
+Built-in `Option` and `Result` construction records the concrete constructed type. Payload extraction
+records the concrete extracted type. Missing type identity is `V1001`; an interpreter or backend
+cannot infer it from source syntax, local numbering, or use sites.
+
 Each arithmetic family has distinct operations. Backends cannot infer trapping or wrapping from a build profile.
 
 Ordinary `i32` negation, addition, subtraction, multiplication, division, remainder, and signed
@@ -84,7 +88,7 @@ The verifier runs before every interpreter or backend handoff.
 
 | Code | Invariant |
 | --- | --- |
-| `V1001` | Every reachable block ends in exactly one terminator. |
+| `V1001` | Every reachable block ends in exactly one terminator, and each operation has its required shape and concrete type identity. |
 | `V1002` | Every use is dominated by an initialized assignment on all incoming paths. |
 | `V1101` | A resource root is moved or dropped at most once. |
 | `V1102` | A live resource on a normal exiting edge has exactly one cleanup obligation. |
@@ -115,6 +119,8 @@ The first semantic oracle is a small MIR interpreter supporting scalars, tagged 
 
 The interpreter precedes a second native backend. Differential fixtures compare interpreter outcomes with generated C compiled at multiple optimization levels and, where the target fixture declares them, more than one independent C compiler.
 
-The current Go prototype also emits deterministic ISO C11 for the verified scalar subset in
-`spec/fixtures/c-emission/manifest-v0.json`. That runner stops at C text and therefore is backend
-emission evidence, not native differential evidence.
+The current Go prototype also emits deterministic ISO C11 for the verified scalar-payload subset in
+`spec/fixtures/c-emission/manifest-v0.json`, including private `Option<i32>` and
+`Result<i32, i32>` construction, calls, matching, and propagation. Tagged construction and payload
+operations carry their concrete MIR type into the backend. That runner stops at C text and therefore
+is backend emission evidence, not native differential evidence.

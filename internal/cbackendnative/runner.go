@@ -135,7 +135,23 @@ func runBuildSmoke(temporaryRoot string) (int, error) {
 	if err := os.Mkdir(sourceRoot, 0o700); err != nil {
 		return 0, fmt.Errorf("create product build smoke root: %w", err)
 	}
-	const source = "module main;\nfn add(left: i32, right: i32) -> i32 { left + right }\nfn main() -> i32 { add(20, 22) }\n"
+	const source = `module main;
+fn choose() -> Option<i32> { Option::Some(41) }
+fn increment(input: Result<i32, i32>) -> Result<i32, i32> {
+    let value: i32 = input?;
+    Result::Ok(value + 1)
+}
+fn main() -> i32 {
+    let base: i32 = match choose() {
+        Option::Some(value) => value,
+        Option::None => 0,
+    };
+    match increment(Result::Ok(base)) {
+        Result::Ok(value) => value,
+        Result::Err(error) => -error,
+    }
+}
+`
 	if err := os.WriteFile(filepath.Join(sourceRoot, "main.fy"), []byte(source), 0o600); err != nil {
 		return 0, fmt.Errorf("write product build smoke source: %w", err)
 	}

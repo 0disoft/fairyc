@@ -110,6 +110,77 @@ func TestEmitAcceptsBoolFunctionResult(t *testing.T) {
 	}
 }
 
+func TestEmitScalarOptionAndResult(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn choose(present: bool) -> Option<i32> {
+    if present { Option::Some(41) } else { Option::None }
+}
+fn increment(input: Result<i32, i32>) -> Result<i32, i32> {
+    let value: i32 = input?;
+    Result::Ok(value + 1)
+}
+fn main() -> i32 {
+    let base: i32 = match choose(true) {
+        Option::Some(value) => value,
+        Option::None => 0,
+    };
+    match increment(Result::Ok(base)) {
+        Result::Ok(value) => value,
+        Result::Err(error) => -error,
+    }
+}
+`)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("interpreter = %+v, %v", outcome, err)
+	}
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0ScalarProfile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	wantFeatures := []string{"checked-arithmetic", "scalar-call", "scalar-control-flow", "scalar-option", "scalar-result", "trap"}
+	if !slices.Equal(unit.Features, wantFeatures) {
+		t.Fatalf("Emit() features = %v, want %v", unit.Features, wantFeatures)
+	}
+	for _, required := range []string{
+		"typedef struct { uint32_t tag; int32_t payload; } fy_option_i32;",
+		"typedef struct { uint32_t tag; int32_t payload; } fy_result_i32_i32;",
+		"static fy_option_i32",
+		"static fy_result_i32_i32",
+		"(fy_option_i32){ .tag = FY_OPTION_SOME, .payload = INT32_C(41) }",
+		"(fy_result_i32_i32){ .tag = FY_RESULT_OK",
+		".tag == FY_OPTION_SOME",
+		".tag == FY_RESULT_OK",
+		"fy_runtime_trap(FY_TRAP_UNREACHABLE)",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q", required)
+		}
+	}
+}
+
+func TestEmitRejectsNestedScalarTag(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn main() -> i32 {
+    let nested: Option<Option<i32>> = Option::Some(Option::Some(42));
+    match nested {
+        Option::Some(value) => match value {
+            Option::Some(inner) => inner,
+            Option::None => 0,
+        },
+        Option::None => 0,
+    }
+}
+`)
+	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0ScalarProfile())
+	var capability cbackend.CapabilityError
+	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "Option construction type") {
+		t.Fatalf("Emit() error = %v", err)
+	}
+}
+
 func TestEmitRejectsMalformedScalarDestination(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main;\nfn main() -> i32 { let unused: i32 = 1; 42 }\n")

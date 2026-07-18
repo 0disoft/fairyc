@@ -15,8 +15,8 @@ compilers accept the emitted translation unit, link it with a bounded runtime su
 the MIR interpreter's process outcome at different optimization levels. Silently skipping this gate
 on a Windows host with no Linux toolchain would turn a missing dependency into a false green check.
 
-The current scalar fixtures return small non-negative values and produce no host output. One fixture
-traps. A temporary process-status protocol can therefore observe both return values and canonical
+The current scalar-payload fixtures return small non-negative values and produce no host output. One
+fixture traps. A temporary process-status protocol can therefore observe both return values and canonical
 trap categories without pretending to be the final runtime ABI or console contract.
 
 ## Decision
@@ -40,9 +40,11 @@ trap categories without pretending to be the final runtime ABI or console contra
    invocation owns temporary generated C, runtime source, and linked output; the runner separately
    owns executable materialization. Ordinary cleanup removes both classes after the run. Compiler-
    internal scratch remains toolchain-owned, and no repository artifact is retained.
-7. After the 16 fixture comparisons, the same command invokes the actual experimental build CLI for
-   Clang and GCC under both profiles and executes each temporary product, requiring exit `42` and
-   the exact relative-path build receipt.
+7. The initial four cases produced 16 fixture comparisons. ADR 0029 expands the same matrix to eight
+   scalar-payload cases and 32 comparisons, including Option and Result success and failure paths.
+   After those comparisons, the same command invokes the actual experimental build CLI for Clang
+   and GCC under both profiles and executes each temporary product, requiring exit `42` and the
+   exact relative-path build receipt.
 8. A successful command prints a deterministic `fairyc.native-c-report/v1` JSON report containing
    target, glibc fingerprint, first-line compiler fingerprints, profile names, case identifiers,
    fixture execution count, and product-build smoke count. It contains no temporary or absolute
@@ -56,7 +58,7 @@ trap categories without pretending to be the final runtime ABI or console contra
 ## Consequences
 
 - The repository now has a concrete `.fy -> verified MIR -> C11 -> Clang/GCC -> ELF -> process`
-  path for the scalar fixtures on an eligible Linux host.
+  path for the scalar-payload fixtures on an eligible Linux host.
 - The current Windows development host cannot run the native command because it has no registered
   WSL distribution or C compiler. Ordinary Go validation remains useful but is not substituted for
   native evidence.

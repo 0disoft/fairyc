@@ -4,7 +4,7 @@
   "deferred": [
     "C parsing, compilation, object emission, linking, and native execution inside this emission-only runner; the separate Linux runner owns that evidence",
     "output, negative and larger i32 returns, cleanup traces, and sanitizer observations beyond the native process-status oracle",
-    "resource, tagged-value, Region, borrow, unsafe, FFI, runtime, and standard-library C lowering",
+    "resource and resource-bearing tagged-value, Region, borrow, unsafe, FFI, complete runtime, and standard-library C lowering",
     "target layout, C ABI classification, object metadata, symbol, relocation, and sanitizer evidence"
   ],
   "contracts": [
@@ -13,6 +13,7 @@
     "docs/adr/0006-c-abi-v0-and-first-conformance-target.md",
     "docs/adr/0025-verified-scalar-c-emission.md",
     "docs/adr/0026-linux-scalar-c-differential-lane.md",
+    "docs/adr/0029-scalar-option-result-c-transport.md",
     "docs/mir/mir-v0.md",
     "docs/mir/c-backend-safety-v0.md",
     "docs/runtime/runtime-stdlib-v0.md",
@@ -82,6 +83,70 @@
         "dialect": "c11",
         "functions": ["main::main"],
         "features": ["checked-arithmetic", "scalar-control-flow", "trap"]
+      }
+    },
+    {
+      "id": "pass.c-emission.option-some",
+      "sourceRoot": "cases/pass/option-some/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::choose", "main::main"],
+        "features": ["scalar-call", "scalar-control-flow", "scalar-option", "trap"]
+      }
+    },
+    {
+      "id": "pass.c-emission.option-none",
+      "sourceRoot": "cases/pass/option-none/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::choose", "main::main"],
+        "features": ["scalar-call", "scalar-control-flow", "scalar-option", "trap"]
+      }
+    },
+    {
+      "id": "pass.c-emission.result-propagate-ok",
+      "sourceRoot": "cases/pass/result-propagate-ok/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::increment", "main::main"],
+        "features": ["checked-arithmetic", "scalar-call", "scalar-control-flow", "scalar-result", "trap"]
+      }
+    },
+    {
+      "id": "pass.c-emission.result-propagate-err",
+      "sourceRoot": "cases/pass/result-propagate-err/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::increment", "main::main"],
+        "features": ["checked-arithmetic", "scalar-call", "scalar-control-flow", "scalar-result", "trap"]
       }
     }
   ]

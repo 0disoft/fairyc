@@ -27,7 +27,7 @@ error compatibility. The MIR runner executes all
   11 v0 normalization cases through mutable-local block lowering and the MIR verifier, covering
 left-to-right call evaluation, complete-root moves, normal-exit cleanup order, `Result` error
   cleanup, nearest-loop control, explicit checked arithmetic, and non-unwinding trap paths. The verifier mutation runner constructs all 10 named
-  baselines and proves all 19 isolated `V1001` through `V1701` rejection recipes. The first MIR
+  baselines and proves all 20 isolated `V1001` through `V1701` rejection recipes. The first MIR
   interpreter slice executes all 56 v0 cases for literal return, function-call arithmetic,
 boolean branches and logical not, source `&&` and `||` short-circuiting, scalar `while`, scalar
 `Option` construction/matching, scalar `Result` construction/matching/propagation,
@@ -38,16 +38,17 @@ nested active-variant cleanup, deterministic drop traces,
 division/remainder zero and signed-overflow, ordinary integer-overflow, and invalid-shift traps, and bounded step-limit
 termination. Fixture-only, manifest-authorized byte sinks additionally prove exact in-memory
 stdout/stderr bytes, cross-stream order, and a shared output limit without granting host I/O.
-The first constrained C backend slice emits deterministic ISO C11 for 4 verified scalar fixtures,
-covering calls and control flow, bitwise operations, checked division and shift, and overflow
-trapping. This lane only produces C text; no C compiler, linker, native executable, runtime, target
+The first constrained C backend slice emits deterministic ISO C11 for 8 verified scalar-payload
+fixtures, covering calls and control flow, bitwise operations, checked division and shift, overflow
+trapping, scalar `Option` Some and None, and scalar `Result` propagation success and failure. This
+lane only produces C text; no C compiler, linker, native executable, complete runtime, target
 conformance, or self-hosting is implied.
 A separate fail-closed Linux/amd64 command is now present to compile those cases with Clang and GCC
 at `-O0` and `-O2`, link the embedded scalar trap runtime, and compare process outcomes. It cannot run on
 this Windows host because no WSL distribution or C compiler is installed, and its hosted CI result
 has not yet been observed. The target therefore remains unsupported.
 An unstable `fairyc experimental` CLI can inspect syntax, syntax-check, semantic-check, emit the
-scalar C11 translation unit, build that scalar subset into a Linux executable on an eligible host,
+scalar-payload C11 translation unit, build that subset into a Linux executable on an eligible host,
 or interpret one source-root-relative `.fy` file, while semantic checking also
 accepts an explicit module set. There is no stable CLI, user drop-body execution, native execution
 command, complete runtime, standard library, package manager, supported target, or stable language
@@ -65,7 +66,8 @@ go run ./cmd/fairyc experimental check-semantics examples/resources/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/regions/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/results/main.fy
 go run ./cmd/fairyc experimental emit-c examples/c/main.fy
-go run ./cmd/fairyc experimental build examples/c/main.fy --cc clang --profile optimized --output build/fairyc-example
+go run ./cmd/fairyc experimental emit-c examples/c/tagged.fy
+go run ./cmd/fairyc experimental build examples/c/tagged.fy --cc clang --profile optimized --output build/fairyc-example
 go run ./cmd/fairyc experimental run examples/run/main.fy
 go run ./cmd/fairyc experimental run examples/run/resource_option.fy
 go run ./cmd/fairyc experimental parse examples/syntax/main.fy
@@ -86,16 +88,17 @@ trap. The official
 `fairyc check` command remains unavailable until effects and the
 remaining semantic groups exist.
 
-`experimental emit-c` accepts the same single-file entry shape and prints the verified scalar
+`experimental emit-c` accepts the same single-file entry shape and prints the verified scalar-payload
 ISO C11 translation unit directly to stdout. It does not write a `.c` file or invoke a native
 toolchain.
 
 On Linux/amd64 with glibc and the explicitly selected Clang or GCC installed, `experimental build`
-uses that same verified scalar unit and the embedded runtime to produce a no-overwrite executable
+uses that same verified scalar-payload unit and the embedded runtime to produce a no-overwrite executable
 below the ignored `build/` directory. Compiler, `low` or `optimized` profile, and output path are
 mandatory. This Windows host cannot execute that command, and the command remains narrower than the
-interpreter: resources, built-in tagged payloads, Region, unsafe, FFI, and standard-library programs
-still fail closed before native compilation.
+interpreter: scalar `Option<i32>` and `Result<i32, i32>` work, while resources, resource-bearing or
+nested tags, Region, unsafe, FFI, and standard-library programs still fail closed before native
+compilation.
 
 ## Design anchors
 

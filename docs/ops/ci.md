@@ -17,11 +17,12 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
 - Ordinary tests execute the fixed lexer and parser fuzz seeds. Timed fuzz campaigns remain
   unconfigured rather than pretending a short CI sample proves coverage.
 - A separate Ubuntu native-C job invokes `cmd/fairyc-native-fixtures`. The command requires
-  Linux/amd64, glibc, Clang, and GCC; compiles every current C-emission case at `-O0` and `-O2` with
-  pedantic warnings as errors; links the shared embedded scalar trap runtime; and compares process
-  status. It then drives `experimental build` through Clang/GCC and low/optimized, executes all four
-  resulting temporary products, and requires exit `42`. A missing compiler or libc identity fails
-  the job instead of producing a skip.
+  Linux/amd64, glibc, Clang, and GCC; compiles all eight current C-emission cases at `-O0` and `-O2`
+  with pedantic warnings as errors; links the shared embedded scalar trap runtime; and performs 32
+  process-status comparisons. It then drives a scalar Option-and-Result program through
+  `experimental build` with Clang/GCC and low/optimized, executes all four resulting temporary
+  products, and requires exit `42`. A missing compiler or libc identity fails the job instead of
+  producing a skip.
 - The native job retains no generated C, object, executable, cache, or report artifact. Its bounded
   `fairyc.native-c-report/v1` JSON report is written only to the job log and contains toolchain
   fingerprints plus fixture and product-build execution counts but no temporary path.

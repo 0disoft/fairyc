@@ -466,7 +466,7 @@ func (l *functionLowerer) lowerResultVariant(expression *hir.Expression) (Operan
 	destination := l.newTemporary()
 	l.appendOperation(Operation{
 		Kind: OperationResultConstruct, Span: expression.Span, DestinationLocal: destination,
-		Operands: []Operand{payload}, Variant: expression.Variant,
+		Operands: []Operand{payload}, Variant: expression.Variant, Type: expression.Type,
 	})
 	return Operand{Kind: OperandLocal, Local: destination}, nil
 }
@@ -497,7 +497,7 @@ func (l *functionLowerer) lowerOptionVariant(expression *hir.Expression) (Operan
 	destination := l.newTemporary()
 	l.appendOperation(Operation{
 		Kind: OperationOptionConstruct, Span: expression.Span, DestinationLocal: destination,
-		Operands: operands, Variant: expression.Variant,
+		Operands: operands, Variant: expression.Variant, Type: expression.Type,
 	})
 	return Operand{Kind: OperandLocal, Local: destination}, nil
 }
@@ -565,7 +565,7 @@ func (l *functionLowerer) lowerMatch(expression *hir.Expression) (Operand, error
 				payload := l.newTemporary()
 				l.appendOperation(Operation{
 					Kind: payloadOperation, Span: arm.BindingSpan, DestinationLocal: payload,
-					Operands: []Operand{scrutinee}, Variant: arm.Variant, MovePayload: true,
+					Operands: []Operand{scrutinee}, Variant: arm.Variant, MovePayload: true, Type: binding.typ,
 				})
 				l.appendOperation(Operation{
 					Kind: OperationInitialize, Span: arm.BindingSpan, Symbol: arm.Binding,
@@ -575,7 +575,7 @@ func (l *functionLowerer) lowerMatch(expression *hir.Expression) (Operand, error
 			} else {
 				l.appendOperation(Operation{
 					Kind: payloadOperation, Span: arm.BindingSpan, DestinationLocal: LocalID(arm.Binding),
-					Operands: []Operand{scrutinee}, Variant: arm.Variant,
+					Operands: []Operand{scrutinee}, Variant: arm.Variant, Type: binding.typ,
 				})
 			}
 		} else if family != "option" || arm.Variant != "none" {
@@ -960,12 +960,13 @@ func (l *functionLowerer) lowerPropagate(expression *hir.Expression) (Operand, e
 	l.current = success
 	payload := l.newTemporary()
 	movePayload := false
-	if successType, _, ok := hir.ResultElements(operand.Type); ok {
+	successType, _, resultType := hir.ResultElements(operand.Type)
+	if resultType {
 		movePayload = l.properties.NeedsDrop(successType)
 	}
 	l.appendOperation(Operation{
 		Kind: OperationResultPayload, Span: expression.Span, DestinationLocal: payload,
-		Operands: []Operand{resultValue}, Variant: "ok", MovePayload: movePayload,
+		Operands: []Operand{resultValue}, Variant: "ok", MovePayload: movePayload, Type: successType,
 	})
 	return Operand{Kind: OperandLocal, Local: payload}, nil
 }

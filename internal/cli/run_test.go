@@ -659,6 +659,17 @@ func TestRepositoryCEmissionExampleStaysRunnable(t *testing.T) {
 	}
 }
 
+func TestRepositoryTaggedCEmissionExampleStaysRunnable(t *testing.T) {
+	root := filepath.Clean(filepath.Join("..", ".."))
+	code, stdout, stderr := runForTest(
+		[]string{"experimental", "emit-c", "examples/c/tagged.fy"},
+		root,
+	)
+	if code != ExitSuccess || stderr != "" || !strings.Contains(stdout, "fy_option_i32") || !strings.Contains(stdout, "fy_result_i32_i32") {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
 func TestRepositoryResourceOptionExampleStaysRunnable(t *testing.T) {
 	root := filepath.Clean(filepath.Join("..", ".."))
 	code, stdout, stderr := runForTest(

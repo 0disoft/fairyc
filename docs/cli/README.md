@@ -22,9 +22,9 @@ Only `check`, a minimal `build`, compiler inspection, and semantic test executio
 The Go frontend currently exposes `fairyc experimental parse <file.fy>`,
 `fairyc experimental check-syntax <file.fy>`, and
 `fairyc experimental check-semantics <file.fy> [<file.fy>...]`. The compiler prototype also exposes
-`fairyc experimental emit-c <file.fy>` for deterministic scalar C11 inspection and
+`fairyc experimental emit-c <file.fy>` for deterministic scalar-payload C11 inspection and
 `fairyc experimental build <file.fy> --cc <clang|gcc> --profile <low|optimized> --output <build/path>`
-for an explicit host-Linux scalar executable, and
+for an explicit host-Linux scalar-payload executable, and
 `fairyc experimental run <file.fy>` for the fixture-backed scalar MIR interpreter subset. These are developer commands whose
 spelling and numeric exit codes may change. `check-semantics` resolves names and creates typed HIR
 for an explicit bounded module set in the implemented scalar, safe-borrow, whole-resource, Region, and Result subset.
@@ -44,12 +44,12 @@ It does not discover files, execute user drop bodies, implement effects, or prov
 `experimental emit-c` runs the same verified-MIR entry pipeline and writes one raw constrained C11
 translation unit to stdout. It does not write an artifact, invoke a C toolchain, link, or run native
 code.
-`experimental build` sends that exact scalar unit through the shared bounded C driver and embedded
+`experimental build` sends that exact scalar-payload unit through the shared bounded C driver and embedded
 runtime. It has no implicit compiler, optimization, or output choice; requires Linux/amd64 with
 glibc; accepts only Clang or GCC and the closed `low` or `optimized` profiles; and creates a new
 executable only under the source root's ignored `build/` directory. It neither overwrites an
-existing path nor implements the broader interpreter subset, native execution, package builds,
-cross-compilation, installation, or a supported target.
+existing path nor implements resources, nested or resource-bearing tags, the broader interpreter
+subset, native execution, package builds, cross-compilation, installation, or a supported target.
 The interpreter fixture's in-memory byte hooks require manifest options that this CLI never accepts;
 declaring a similarly named Fairy C function does not grant output authority.
 Infinite execution is stopped by the bounded interpreter and reported as an unsupported-capability result rather than a language trap. In

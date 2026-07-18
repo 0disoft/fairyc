@@ -122,6 +122,7 @@
       "id": "normalized-control",
       "baseline": "verify",
       "entities": [
+        "operation:result-construct",
         "operation:result-switch",
         "terminator:return"
       ]
@@ -138,6 +139,12 @@
     }
   ],
   "cases": [
+    {
+      "id": "fail.mir-verify.v1001.tagged-type-missing",
+      "seed": "normalized-control",
+      "mutation": { "kind": "remove-tagged-operation-type", "target": "operation:result-construct" },
+      "expect": { "status": "reject", "codes": ["V1001"], "primaryEntity": "operation:result-construct" }
+    },
     {
       "id": "fail.mir-verify.v1001.missing-terminator",
       "seed": "scalar-return",

@@ -6,7 +6,9 @@
 
 ## Target status
 
-The first planned conformance target is `x86_64-linux-gnu`. It is not currently supported because no compiler, runtime, sysroot policy, or CI fixture exists.
+The first planned conformance target is `x86_64-linux-gnu`. It is not currently supported because
+the complete runtime, sysroot policy, public layout and ABI fixtures, maintained distribution, and
+observed clean hosted evidence do not exist.
 
 Target claims use three levels:
 
@@ -16,11 +18,12 @@ Target claims use three levels:
 
 The Windows Go compiler host does not define target layout. Proving the first target requires WSL or Linux CI, an explicit glibc baseline, a sysroot or runner image, Clang and GCC, and a target runtime bundle.
 
-The current Go prototype can emit deterministic ISO C11 for a verified scalar-only profile carrying
-this target identity. A separate Linux/amd64 runner is configured to require glibc, Clang, and GCC,
-compile and link a test-only runtime, and compare process status at low and optimized profiles. No
-hosted success receipt has been observed, and the runner does not inspect layout or objects, exercise
-the C ABI, provide the product runtime, or establish the complete target profile. That narrow
+The current Go prototype can emit deterministic ISO C11 for a verified scalar-payload profile
+carrying this target identity, including private `Option<i32>` and `Result<i32, i32>` transport.
+A separate Linux/amd64 runner is configured to require glibc, Clang, and GCC, link the embedded
+scalar runtime, and compare process status at low and optimized profiles. No hosted success receipt
+has been observed, and the runner does not inspect layout or objects, exercise the public C ABI,
+provide the complete product runtime, or establish the complete target profile. That narrow
 capability does not advance the target itself to `emittable`.
 
 ## No native Fairy ABI

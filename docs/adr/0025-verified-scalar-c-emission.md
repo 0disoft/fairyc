@@ -44,13 +44,15 @@ The first slice therefore needs a deliberately closed capability boundary rather
 7. Emission is deterministic: functions, features, declarations, blocks, and helper categories have
    stable ordering; generated text uses LF and contains no absolute source path. Complete C text,
    private identifiers, block labels, and formatting are not compatibility contracts.
-8. Resources, tagged values, Region operations, safe borrows, unsafe operations, FFI, runtime and
-   standard-library calls, target layout, and C ABI lowering fail closed in this slice.
+8. The initial slice rejects resources, tagged values, Region operations, safe borrows, unsafe
+   operations, FFI, runtime and standard-library calls, target layout, and C ABI lowering. ADR 0029
+   later admits only private `Option<i32>` and `Result<i32, i32>` transport while every broader
+   tagged and resource case remains fail-closed.
 9. `internal/cbackendfixture` runs source through syntax, semantics, Flow, verified MIR, the MIR
    interpreter, and C emission twice. Its four initial cases prove scalar control and calls,
    bitwise bit preservation, checked division and shift, overflow trapping, target identity, feature
    identity, and byte-stable emission. They do not parse, compile, assemble, link, or execute the
-   generated C.
+   generated C. ADR 0029 expands the same v0 manifest to eight cases with scalar Option and Result.
 
 ## Consequences
 

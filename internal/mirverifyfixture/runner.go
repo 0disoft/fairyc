@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"slices"
 
+	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/mir"
 )
 
@@ -249,6 +250,11 @@ func applyMutation(program *mir.Program, mutation mutation) (int, error) {
 	case "insert-source-form":
 		if block, index := findOperation(function, mutation.Target); block != nil {
 			block.Operations[index].SourceForm = "question"
+			return 1, nil
+		}
+	case "remove-tagged-operation-type":
+		if block, index := findOperation(function, mutation.Target); block != nil {
+			block.Operations[index].Type = hir.TypeInvalid
 			return 1, nil
 		}
 	case "remove-unsafe-provenance":

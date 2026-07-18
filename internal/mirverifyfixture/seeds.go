@@ -266,11 +266,11 @@ func normalizedControlSeed() mir.Function {
 		Name:         "seed::normalized-control",
 		Entry:        0,
 		ReturnEntity: "terminator:return",
-		Entities:     []string{"operation:result-switch", "terminator:return"},
+		Entities:     []string{"operation:result-construct", "operation:result-switch", "terminator:return"},
 		Blocks: []mir.Block{{
 			ID: 0,
 			Operations: []mir.Operation{
-				{Kind: mir.OperationResultConstruct, DestinationLocal: 1, Operands: []mir.Operand{{Kind: mir.OperandI32, I32: 0}}, Variant: "ok"},
+				{Kind: mir.OperationResultConstruct, Entity: "operation:result-construct", DestinationLocal: 1, Operands: []mir.Operand{{Kind: mir.OperandI32, I32: 0}}, Variant: "ok", Type: hir.Result(hir.TypeI32, hir.TypeI32)},
 				{Kind: mir.OperationResultSwitch, Entity: "operation:result-switch", Operands: []mir.Operand{{Kind: mir.OperandLocal, Local: 1}}},
 			},
 			Terminator: mir.Terminator{Kind: mir.TerminatorReturn, Entity: "terminator:return", UnwindSuccessor: mir.NoBlock},

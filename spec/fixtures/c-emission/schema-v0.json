@@ -44,6 +44,8 @@
         "scalar-call",
         "scalar-comparison",
         "scalar-control-flow",
+        "scalar-option",
+        "scalar-result",
         "trap"
       ]
     },

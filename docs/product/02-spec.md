@@ -174,15 +174,16 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - A small MIR interpreter is the semantic oracle before any second native backend.
 - Its fixture-only output hooks require explicit manifest bindings, capture bytes in memory under a
   shared limit, and never authorize source names, the CLI, or host streams.
-- The current C backend emits deterministic ISO C11 only for verified scalar MIR under the
-  provisional `x86_64-linux-gnu` profile. Its emission fixtures do not compile, link, or execute C
-  and do not establish a target support level.
+- The current C backend emits deterministic ISO C11 only for verified scalar-payload MIR under the
+  provisional `x86_64-linux-gnu` profile. It includes private `Option<i32>` and
+  `Result<i32, i32>` transport but no public tagged ABI. Its emission fixtures do not compile, link,
+  or execute C and do not establish a target support level.
 - A separate Linux/amd64 command requires glibc, Clang, and GCC and is configured to compare the
-  current scalar cases at low and optimized profiles. No hosted success receipt or broader target
+  current scalar-payload cases at low and optimized profiles. No hosted success receipt or broader target
   conformance follows from the command's presence.
 - The experimental single-file build command uses the same bounded C driver and embedded scalar
   runtime to produce a no-overwrite executable below `build/` on an eligible host. This artifact
-  path does not expand the scalar backend subset, establish stable build syntax, or change target
+  path does not expand the scalar-payload backend subset, establish stable build syntax, or change target
   support status.
 - QBE or another fast backend and LLVM require separate measured adoption decisions after MIR stability.
 - Early caching is whole-package and bounded. Function-level caching requires measured invalidation or latency pressure.
