@@ -5,6 +5,7 @@
     "docs/product/02-spec.md",
     "docs/language/0001-values-and-resources.md",
     "docs/language/0002-borrows-and-return-origins.md",
+    "docs/language/0004-results-traps-and-control-flow.md",
     "docs/language/0007-name-resolution-and-typing-v0.md",
     "docs/diagnostics/catalog-v0.md"
   ],
@@ -208,6 +209,26 @@
               "source": "main.fy",
               "startByte": 42,
               "endByte": 43
+            },
+            "related": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.signed-left-shift",
+      "sourceRoot": "cases/fail/signed-left-shift/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          {
+            "code": "E1011",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 61,
+              "endByte": 76
             },
             "related": []
           }

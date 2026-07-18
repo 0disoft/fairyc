@@ -27,6 +27,8 @@ func constructSeed(id string) (mir.Program, error) {
 		function = plainRegionSeed()
 	case "checked-division":
 		function = checkedDivisionSeed()
+	case "checked-arithmetic":
+		function = checkedArithmeticSeed()
 	case "normal-call":
 		function = normalCallSeed()
 	case "normalized-control":
@@ -126,24 +128,89 @@ func plainRegionSeed() mir.Function {
 }
 
 func checkedDivisionSeed() mir.Function {
+	operands := []mir.Operand{{Kind: mir.OperandI32, I32: 4}, {Kind: mir.OperandI32, I32: 2}}
+	categories := []string{"division-by-zero", "signed-division-overflow"}
 	return mir.Function{
-		Name:  "seed::checked-division",
-		Entry: 0,
+		Name:       "seed::checked-division",
+		ResultType: hir.TypeI32,
+		Entry:      0,
 		Entities: []string{
-			"block:continuation", "block:trap", "operation:division", "operation:min-neg-one-check", "operation:zero-check", "terminator:trap",
+			"block:check", "block:continuation", "block:trap", "operation:division", "operation:division-result", "operation:min-neg-one-check", "operation:zero-check", "terminator:trap",
 		},
 		Blocks: []mir.Block{
 			{
-				ID: 0, Entity: "block:continuation",
+				ID: 0, Entity: "block:check",
 				Operations: []mir.Operation{{
 					Kind: mir.OperationCheckedDivision, Entity: "operation:division",
-					TrapCategories: []string{"division-by-zero", "signed-division-overflow"},
+					Operands: operands, Operator: "/", TrapCategories: categories,
 				}},
-				Terminator: mir.Terminator{Kind: mir.TerminatorGoto, Successors: []mir.BlockID{1}, UnwindSuccessor: mir.NoBlock},
+				Terminator: mir.Terminator{
+					Kind: mir.TerminatorSwitch, Successors: []mir.BlockID{1, 2}, UnwindSuccessor: mir.NoBlock,
+					SwitchKind: "checked-division", SwitchOperands: operands, Operator: "/",
+				},
 			},
 			{
-				ID: 1, Entity: "block:trap",
-				Terminator: mir.Terminator{Kind: mir.TerminatorTrap, Entity: "terminator:trap", UnwindSuccessor: mir.NoBlock},
+				ID: 1, Entity: "block:continuation",
+				Operations: []mir.Operation{{
+					Kind: mir.OperationBinary, Entity: "operation:division-result", DestinationLocal: 1,
+					Operands: operands, Operator: "/",
+				}},
+				Terminator: mir.Terminator{
+					Kind: mir.TerminatorReturn, UnwindSuccessor: mir.NoBlock,
+					ReturnValue: mir.Operand{Kind: mir.OperandLocal, Local: 1},
+				},
+			},
+			{
+				ID: 2, Entity: "block:trap",
+				Terminator: mir.Terminator{
+					Kind: mir.TerminatorTrap, Entity: "terminator:trap", UnwindSuccessor: mir.NoBlock,
+					TrapCategories: categories,
+				},
+			},
+		},
+	}
+}
+
+func checkedArithmeticSeed() mir.Function {
+	operands := []mir.Operand{{Kind: mir.OperandI32, I32: 2147483647}, {Kind: mir.OperandI32, I32: 1}}
+	categories := []string{"integer-overflow"}
+	return mir.Function{
+		Name:       "seed::checked-arithmetic",
+		ResultType: hir.TypeI32,
+		Entry:      0,
+		Entities: []string{
+			"block:arithmetic-check", "block:arithmetic-continuation", "block:arithmetic-trap",
+			"operation:add-check", "operation:add-result", "terminator:arithmetic-trap",
+		},
+		Blocks: []mir.Block{
+			{
+				ID: 0, Entity: "block:arithmetic-check",
+				Operations: []mir.Operation{{
+					Kind: mir.OperationArithmeticCheck, Entity: "operation:add-check",
+					Operands: operands, Operator: "+", TrapCategories: categories,
+				}},
+				Terminator: mir.Terminator{
+					Kind: mir.TerminatorSwitch, Successors: []mir.BlockID{1, 2}, UnwindSuccessor: mir.NoBlock,
+					SwitchKind: "checked-arithmetic", SwitchOperands: operands, Operator: "+",
+				},
+			},
+			{
+				ID: 1, Entity: "block:arithmetic-continuation",
+				Operations: []mir.Operation{{
+					Kind: mir.OperationBinary, Entity: "operation:add-result", DestinationLocal: 1,
+					Operands: operands, Operator: "+",
+				}},
+				Terminator: mir.Terminator{
+					Kind: mir.TerminatorReturn, UnwindSuccessor: mir.NoBlock,
+					ReturnValue: mir.Operand{Kind: mir.OperandLocal, Local: 1},
+				},
+			},
+			{
+				ID: 2, Entity: "block:arithmetic-trap",
+				Terminator: mir.Terminator{
+					Kind: mir.TerminatorTrap, Entity: "terminator:arithmetic-trap", UnwindSuccessor: mir.NoBlock,
+					TrapCategories: categories,
+				},
 			},
 		},
 	}

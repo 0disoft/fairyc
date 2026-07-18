@@ -10,7 +10,7 @@ MIR is the only executable semantic contract consumed by backends. It records ev
 
 MIR v0 is a mutable-local control-flow graph rather than SSA. SSA conversion is a backend or optimization concern after the semantic form is verified.
 
-The current Go prototype implements the source-linked subset exercised by all nine MIR v0 normalization fixtures: ordered calls, complete-root and tagged-payload moves, RHS-before-drop resource reassignment, explicit normal-exit cleanup, lexical Region placement and reset on fallthrough, direct return, Result propagation, and nested exits, `Result` propagation branches, checked division traps, and non-unwinding successors. The same verifier passes all eight named baselines and rejects all seventeen isolated v0 mutations with their single expected `Vxxxx` result. The bounded interpreter executes all thirty-nine interpreter v0 cases for scalar and tagged control, resource construction and field reads, whole-root and active-payload moves, resource returns and propagation, live/dead/self reassignment, consuming-close ownership, nested cleanup, source-linked drop traces, Region reset paths, controlled in-memory test output, canonical traps, and the step and output limits; Region `break` and `continue`, user drop-body effects, and later runtime behavior remain unfinished gates.
+The current Go prototype implements the source-linked subset exercised by all ten MIR v0 normalization fixtures: ordered calls, complete-root and tagged-payload moves, RHS-before-drop resource reassignment, explicit normal-exit cleanup, lexical Region placement and reset on fallthrough, direct return, Result propagation, and nested exits, `Result` propagation branches, checked division, remainder, and arithmetic traps, and non-unwinding successors. The same verifier passes all nine named baselines and rejects all eighteen isolated v0 mutations with their single expected `Vxxxx` result. The bounded interpreter executes all fifty-three interpreter v0 cases for scalar and tagged control, resource construction and field reads, whole-root and active-payload moves, resource returns and propagation, live/dead/self reassignment, consuming-close ownership, nested cleanup, source-linked drop traces, Region reset paths, controlled in-memory test output, exact arithmetic, division, remainder, and right-shift trap and boundary outcomes, and the step and output limits; Region `break` and `continue`, user drop-body effects, signed left shift, and later runtime behavior remain unfinished gates.
 
 ## Lowering pipeline
 
@@ -51,6 +51,13 @@ MIR v0 requires rvalues for use, unary operations, checked arithmetic, wrapping 
 
 Each arithmetic family has distinct operations. Backends cannot infer trapping or wrapping from a build profile.
 
+Ordinary `i32` negation, addition, subtraction, multiplication, division, remainder, and signed
+right shift use an explicit check block, a two-successor switch, a non-returning trap block, and a
+fresh continuation containing the operation. The marker and switch carry the same operands and
+operator as the continuation. Addition, subtraction, multiplication, and negation expose
+`integer-overflow`; right shift exposes `invalid-shift`; division and remainder expose
+`division-by-zero` followed by `signed-division-overflow`. Signed left shift is rejected before MIR.
+
 ### Statements
 
 Statements include local storage markers, assignment, drop-flag update, `Drop`, region mark or reset, and explicit provenance markers for unsafe operations. Assignments consume already-evaluated operands; they do not contain nested side effects.
@@ -85,7 +92,7 @@ The verifier runs before every interpreter or backend handoff.
 | `V1401` | A region-derived value does not escape its region. |
 | `V1402` | Plain-region allocation never receives a `NeedsDrop` type. |
 | `V1403` | Normal control flow enters, places into, and resets each lexical Region exactly once. |
-| `V1501` | Every potentially trapping operation has explicit checked control flow or a `Trap`. |
+| `V1501` | Every potentially trapping operation has one complete checked predecessor with matching marker, operands, operator, categories, success edge, and non-returning trap edge. |
 | `V1502` | A Stage 0 call has no unwind successor. |
 | `V1601` | `?`, implicit drop, source short-circuiting, and nested side effects do not remain. |
 | `V1701` | Every unsafe instruction carries a source span and unsafe-scope identity. |

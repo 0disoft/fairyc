@@ -13,6 +13,7 @@
     "docs/adr/0020-stage-0-region-mir-and-interpreter.md",
     "docs/adr/0021-stage-0-region-early-exit-cleanup.md",
     "docs/adr/0022-controlled-interpreter-io-harness.md",
+    "docs/adr/0023-explicit-checked-arithmetic-mir.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/mir-v0.md",
     "docs/engineering/05-testing-standard.md"
@@ -40,6 +41,174 @@
         "completedThrough": "interpret",
         "outcome": "return",
         "value": 42
+      }
+    },
+    {
+      "id": "pass.interpreter.add-overflow-trap",
+      "sourceRoot": "cases/pass/checked-arithmetic/src",
+      "sources": ["main.fy"],
+      "entry": "main::add_overflow",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "trap",
+        "category": "integer-overflow"
+      }
+    },
+    {
+      "id": "pass.interpreter.subtract-overflow-trap",
+      "sourceRoot": "cases/pass/checked-arithmetic/src",
+      "sources": ["main.fy"],
+      "entry": "main::subtract_overflow",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "trap",
+        "category": "integer-overflow"
+      }
+    },
+    {
+      "id": "pass.interpreter.multiply-overflow-trap",
+      "sourceRoot": "cases/pass/checked-arithmetic/src",
+      "sources": ["main.fy"],
+      "entry": "main::multiply_overflow",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "trap",
+        "category": "integer-overflow"
+      }
+    },
+    {
+      "id": "pass.interpreter.negate-overflow-trap",
+      "sourceRoot": "cases/pass/checked-arithmetic/src",
+      "sources": ["main.fy"],
+      "entry": "main::negate_overflow",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "trap",
+        "category": "integer-overflow"
+      }
+    },
+    {
+      "id": "pass.interpreter.subtract-boundary",
+      "sourceRoot": "cases/pass/checked-arithmetic/src",
+      "sources": ["main.fy"],
+      "entry": "main::subtract_boundary",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": -2147483648
+      }
+    },
+    {
+      "id": "pass.interpreter.multiply-boundary",
+      "sourceRoot": "cases/pass/checked-arithmetic/src",
+      "sources": ["main.fy"],
+      "entry": "main::multiply_boundary",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 2147395600
+      }
+    },
+    {
+      "id": "pass.interpreter.negate-boundary",
+      "sourceRoot": "cases/pass/checked-arithmetic/src",
+      "sources": ["main.fy"],
+      "entry": "main::negate_boundary",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": -2147483647
+      }
+    },
+    {
+      "id": "pass.interpreter.right-shift-invalid-trap",
+      "sourceRoot": "cases/pass/checked-arithmetic/src",
+      "sources": ["main.fy"],
+      "entry": "main::right_shift_invalid",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "trap",
+        "category": "invalid-shift"
+      }
+    },
+    {
+      "id": "pass.interpreter.right-shift-negative-trap",
+      "sourceRoot": "cases/pass/checked-arithmetic/src",
+      "sources": ["main.fy"],
+      "entry": "main::right_shift_negative",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "trap",
+        "category": "invalid-shift"
+      }
+    },
+    {
+      "id": "pass.interpreter.right-shift-boundary",
+      "sourceRoot": "cases/pass/checked-arithmetic/src",
+      "sources": ["main.fy"],
+      "entry": "main::right_shift_boundary",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": -2
+      }
+    },
+    {
+      "id": "pass.interpreter.division-overflow-trap",
+      "sourceRoot": "cases/pass/checked-arithmetic/src",
+      "sources": ["main.fy"],
+      "entry": "main::division_overflow",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "trap",
+        "category": "signed-division-overflow"
+      }
+    },
+    {
+      "id": "pass.interpreter.remainder-zero-trap",
+      "sourceRoot": "cases/pass/checked-arithmetic/src",
+      "sources": ["main.fy"],
+      "entry": "main::remainder_zero",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "trap",
+        "category": "division-by-zero"
+      }
+    },
+    {
+      "id": "pass.interpreter.remainder-overflow-trap",
+      "sourceRoot": "cases/pass/checked-arithmetic/src",
+      "sources": ["main.fy"],
+      "entry": "main::remainder_overflow",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "trap",
+        "category": "signed-division-overflow"
+      }
+    },
+    {
+      "id": "pass.interpreter.remainder-boundary",
+      "sourceRoot": "cases/pass/checked-arithmetic/src",
+      "sources": ["main.fy"],
+      "entry": "main::remainder_boundary",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 3
       }
     },
     {

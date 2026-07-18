@@ -423,7 +423,12 @@ func (c *typeChecker) checkBinary(expression *ast.Expression, result *hir.Expres
 		c.requireType("E1006", span(c.module.file.Path, expression.Children[0].Span), leftType, hir.TypeI32, span(c.module.file.Path, expression.Span))
 		c.requireType("E1006", span(c.module.file.Path, expression.Children[1].Span), rightType, hir.TypeI32, span(c.module.file.Path, expression.Span))
 		return hir.TypeBool
-	case "+", "-", "*", "/", "%", "<<", ">>", "&", "^", "|":
+	case "<<":
+		c.requireType("E1006", span(c.module.file.Path, expression.Children[0].Span), leftType, hir.TypeI32, span(c.module.file.Path, expression.Span))
+		c.requireType("E1006", span(c.module.file.Path, expression.Children[1].Span), rightType, hir.TypeI32, span(c.module.file.Path, expression.Span))
+		c.analyzer.addDiagnostic("E1011", span(c.module.file.Path, expression.Span))
+		return hir.TypeI32
+	case "+", "-", "*", "/", "%", ">>", "&", "^", "|":
 		c.requireType("E1006", span(c.module.file.Path, expression.Children[0].Span), leftType, hir.TypeI32, span(c.module.file.Path, expression.Span))
 		c.requireType("E1006", span(c.module.file.Path, expression.Children[1].Span), rightType, hir.TypeI32, span(c.module.file.Path, expression.Span))
 		return hir.TypeI32

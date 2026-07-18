@@ -20,21 +20,24 @@ Exit gate: the written contracts have no contradictory syntax, initialization, o
 Current implementation status: the source, lexer, recoverable-syntax, parser-diagnostic, AST
 lowering, and parser-fixture-runner portion of the first item exists. Name resolution and typed HIR
 now cover the semantic fixture's scalar and safe-borrow subset. Local last-use loans, borrow
-conflicts, and single-origin borrow returns execute across all 11 semantic v0 cases. General
+conflicts, single-origin borrow returns, and Stage 0 signed-left-shift rejection execute across all 12 semantic v0 cases. General
 whole-root resource Flow now executes all 10 resource v0 cases, including branch and loop state
 rejection. Result Flow executes all 20 result v0 cases, including qualified scalar construction,
 exhaustive shallow matching, and local, parameter, branch, loop, overwrite, and early-return
 must-use obligations. Mutable-local MIR lowering and verification
-execute all 9 MIR normalization v0 cases for the current scalar, resource, tagged-payload, Result, Region, cleanup, call,
-and division-trap subset. All 8 verifier baselines and 17 isolated mutation cases execute through
-the same MIR verifier. The first MIR interpreter executes all 39 interpreter v0 cases, including
+execute all 10 MIR normalization v0 cases for the current scalar, resource, tagged-payload, Result, Region, cleanup, call,
+division, and checked-arithmetic trap subset. All 9 verifier baselines and 18 isolated mutation cases execute through
+the same MIR verifier. The first MIR interpreter executes all 53 interpreter v0 cases, including
 scalar `Option` and `Result` construction, exhaustive matching, and both Result `?` paths, and is
 exposed by the unstable `experimental run` command. Resource construction, field reads, whole-root
 call moves, source-linked drop traces, resource-bearing `Option` and `Result` payload moves, ordered
 resource reassignment, explicit consuming-close success/failure ownership, and normal lexical
 Region placement, inner cleanup, normal reset, direct return, Result propagation, and nested
 early-exit reset execute. Manifest-authorized in-memory stdout/stderr byte hooks prove output order
-and bounded failure without granting host access; `break` and `continue` Region exits, real file
+and bounded failure without granting host access. Checked `i32` addition, subtraction,
+multiplication, negation, division, remainder, and signed right shift execute across trapping and
+non-trapping boundaries with exact overflow, division-by-zero, or invalid-shift
+categories; signed left shift is rejected as `E1011`. `break` and `continue` Region exits, real file
 and console I/O, effects, and every later Phase 1 capability
 remain unimplemented.
 

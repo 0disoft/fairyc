@@ -73,7 +73,7 @@ cleanup, and deterministic drop traces are covered by the MIR interpreter fixtur
 
 A trap is a non-returning, non-unwinding termination. It performs no language-level drop or region reset. Trap categories are stable semantic outcomes even when the platform-specific termination mechanism differs.
 
-Stage 0 traps include at least bounds failure, ordinary integer overflow, division by zero, signed minimum divided by negative one, invalid shift amount, failed assertion, and an explicitly invoked unreachable condition.
+Stage 0 traps include at least bounds failure, ordinary integer overflow, division by zero, signed minimum divided by negative one, invalid shift amount, failed assertion, and an explicitly invoked unreachable condition. Ordinary `i32` negation, addition, subtraction, and multiplication trap when their mathematical result is not representable. Signed right shift traps when its amount is negative or at least 32.
 
 Signed left shift is deferred in Stage 0 because its overflow and sign behavior would otherwise need an additional source-level rule. Wrapping, saturating, and checked arithmetic are distinct operations rather than build profiles.
 
@@ -89,4 +89,4 @@ Stage 0 foreign callbacks are raw `unsafe extern C` function pointers plus expli
 
 ## Required diagnostics
 
-The compiler must distinguish an unused `Result`, `?` on a non-`Result`, `?` in an incompatible return context, unsupported signed left shift, and forbidden foreign nonlocal control flow.
+The compiler must distinguish an unused `Result`, `?` on a non-`Result`, `?` in an incompatible return context, unsupported signed left shift (`E1011`), and forbidden foreign nonlocal control flow.

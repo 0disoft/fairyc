@@ -236,6 +236,11 @@ func applyMutation(program *mir.Program, mutation mutation) (int, error) {
 			block.Operations[index].TrapCategories = []string{"signed-division-overflow"}
 			return 1, nil
 		}
+	case "remove-arithmetic-trap-check":
+		if block, index := findOperation(function, mutation.Target); block != nil {
+			block.Operations = append(block.Operations[:index], block.Operations[index+1:]...)
+			return 1, nil
+		}
 	case "add-unwind-successor":
 		if terminator := findTerminator(function, mutation.Target); terminator != nil && len(terminator.Successors) == 1 {
 			terminator.UnwindSuccessor = terminator.Successors[0]

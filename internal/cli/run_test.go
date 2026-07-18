@@ -298,6 +298,40 @@ func TestExperimentalRunReportsCanonicalTrap(t *testing.T) {
 	}
 }
 
+func TestExperimentalRunReportsCheckedArithmeticTraps(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name       string
+		expression string
+		category   string
+	}{
+		{name: "integer overflow", expression: "2147483647 + 1", category: "integer-overflow"},
+		{name: "invalid shift", expression: "1 >> 32", category: "invalid-shift"},
+	}
+	for _, fixture := range cases {
+		fixture := fixture
+		t.Run(fixture.name, func(t *testing.T) {
+			t.Parallel()
+			root := t.TempDir()
+			writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { "+fixture.expression+" }\n")
+			code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
+			if code != ExitProgramTrap || stdout != "" || stderr != "trap: "+fixture.category+"\n" {
+				t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+			}
+		})
+	}
+}
+
+func TestExperimentalRunRejectsSignedLeftShift(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { 1 << 1 }\n")
+	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
+	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "E1011: signed left shift is not supported in Stage 0") {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
 func TestExperimentalRunInterpretsBooleanBranch(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()

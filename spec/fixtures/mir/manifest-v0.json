@@ -11,6 +11,7 @@
     "docs/adr/0013-stage-0-mir-fixture-contract.md",
     "docs/adr/0020-stage-0-region-mir-and-interpreter.md",
     "docs/adr/0021-stage-0-region-early-exit-cleanup.md",
+    "docs/adr/0023-explicit-checked-arithmetic-mir.md",
     "docs/language/0001-values-and-resources.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/mir-v0.md",
@@ -494,6 +495,65 @@
               }
             ],
             "reset": { "source": "std/alloc.fy", "startByte": 1739, "endByte": 1944 }
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.mir.checked-arithmetic",
+      "sourceRoot": "cases/pass/checked-arithmetic/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "mir-verify",
+        "observations": [
+          {
+            "kind": "trap-path",
+            "function": "main::add",
+            "operation": { "source": "main.fy", "startByte": 57, "endByte": 69 },
+            "categories": ["integer-overflow"],
+            "cleanupActions": [],
+            "hasSuccessor": false
+          },
+          {
+            "kind": "trap-path",
+            "function": "main::subtract",
+            "operation": { "source": "main.fy", "startByte": 121, "endByte": 133 },
+            "categories": ["integer-overflow"],
+            "cleanupActions": [],
+            "hasSuccessor": false
+          },
+          {
+            "kind": "trap-path",
+            "function": "main::multiply",
+            "operation": { "source": "main.fy", "startByte": 185, "endByte": 197 },
+            "categories": ["integer-overflow"],
+            "cleanupActions": [],
+            "hasSuccessor": false
+          },
+          {
+            "kind": "trap-path",
+            "function": "main::negate",
+            "operation": { "source": "main.fy", "startByte": 236, "endByte": 242 },
+            "categories": ["integer-overflow"],
+            "cleanupActions": [],
+            "hasSuccessor": false
+          },
+          {
+            "kind": "trap-path",
+            "function": "main::shift_right",
+            "operation": { "source": "main.fy", "startByte": 299, "endByte": 314 },
+            "categories": ["invalid-shift"],
+            "cleanupActions": [],
+            "hasSuccessor": false
+          },
+          {
+            "kind": "trap-path",
+            "function": "main::remainder",
+            "operation": { "source": "main.fy", "startByte": 367, "endByte": 379 },
+            "categories": ["division-by-zero", "signed-division-overflow"],
+            "cleanupActions": [],
+            "hasSuccessor": false
           }
         ]
       }

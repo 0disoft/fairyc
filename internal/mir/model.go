@@ -128,6 +128,7 @@ const (
 	OperationMove              OperationKind = "move"
 	OperationDrop              OperationKind = "drop"
 	OperationCheckedDivision   OperationKind = "checked-division"
+	OperationArithmeticCheck   OperationKind = "arithmetic-check"
 	OperationResultSwitch      OperationKind = "result-switch"
 	OperationUse               OperationKind = "use"
 	OperationDropFlagInit      OperationKind = "drop-flag-init"
@@ -217,6 +218,7 @@ type Terminator struct {
 	ReturnValue      Operand
 	SwitchKind       string
 	SwitchOperands   []Operand
+	Operator         string
 }
 
 // CleanupAction is one explicit normal-exit cleanup operation.

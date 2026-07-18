@@ -154,8 +154,14 @@ func verifyFunction(function *Function) []VerificationError {
 				state.live[operation.Symbol] = false
 			case OperationCheckedDivision:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
-				if !slices.Equal(operation.TrapCategories, []string{"division-by-zero", "signed-division-overflow"}) {
+				if len(operation.Operands) != 2 || (operation.Operator != "/" && operation.Operator != "%") || !slices.Equal(operation.TrapCategories, []string{"division-by-zero", "signed-division-overflow"}) {
 					failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "division is missing required trap checks"})
+				}
+			case OperationArithmeticCheck:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				_, categories, valid := checkedArithmeticSpec(operation.Operator, len(operation.Operands))
+				if !valid || !slices.Equal(operation.TrapCategories, categories) {
+					failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "arithmetic operation is missing required trap checks"})
 				}
 			case OperationAssign, OperationUnary, OperationBinary:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
@@ -262,6 +268,7 @@ func verifyFunction(function *Function) []VerificationError {
 			queue = append(queue, pendingBlock{id: successor, state: cloneVerificationState(state)})
 		}
 	}
+	failures = append(failures, verifyTrapCheckEdges(function)...)
 
 	for _, loan := range function.Loans {
 		if loan.OutlivesOrigin {
@@ -310,10 +317,110 @@ func validSwitchShape(terminator Terminator) bool {
 	case "option":
 		return len(terminator.SwitchOperands) == 1 && len(terminator.Successors) == 2
 	case "checked-division":
-		return len(terminator.SwitchOperands) == 2 && len(terminator.Successors) == 2
+		return len(terminator.SwitchOperands) == 2 && len(terminator.Successors) == 2 && (terminator.Operator == "/" || terminator.Operator == "%")
+	case "checked-unary", "checked-arithmetic", "checked-shift":
+		switchKind, _, valid := checkedArithmeticSpec(terminator.Operator, len(terminator.SwitchOperands))
+		return valid && switchKind == terminator.SwitchKind && len(terminator.Successors) == 2
 	default:
 		return false
 	}
+}
+
+func checkedArithmeticSpec(operator string, operandCount int) (string, []string, bool) {
+	switch {
+	case operator == "-" && operandCount == 1:
+		return "checked-unary", []string{"integer-overflow"}, true
+	case (operator == "+" || operator == "-" || operator == "*") && operandCount == 2:
+		return "checked-arithmetic", []string{"integer-overflow"}, true
+	case operator == ">>" && operandCount == 2:
+		return "checked-shift", []string{"invalid-shift"}, true
+	default:
+		return "", nil, false
+	}
+}
+
+func verifyTrapCheckEdges(function *Function) []VerificationError {
+	blocks := make(map[BlockID]*Block, len(function.Blocks))
+	predecessors := make(map[BlockID][]BlockID, len(function.Blocks))
+	for index := range function.Blocks {
+		block := &function.Blocks[index]
+		blocks[block.ID] = block
+		for _, successor := range block.Terminator.Successors {
+			predecessors[successor] = append(predecessors[successor], block.ID)
+		}
+	}
+	var failures []VerificationError
+	for blockIndex := range function.Blocks {
+		block := &function.Blocks[blockIndex]
+		for operationIndex, operation := range block.Operations {
+			switchKind, markerKind, categories, trapping := trappingOperationSpec(operation)
+			if !trapping {
+				continue
+			}
+			entity := operationEntity(block.ID, operationIndex, operation)
+			incoming := predecessors[block.ID]
+			if len(incoming) != 1 {
+				failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "trapping operation does not have one checked predecessor"})
+				continue
+			}
+			checkBlock := blocks[incoming[0]]
+			if checkBlock == nil {
+				failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "trapping operation is not dominated by its complete checked edge"})
+				continue
+			}
+			markerEntity, markerValid := checkedMarkerStatus(checkBlock, markerKind, operation.Operator, operation.Operands, categories)
+			if !markerValid {
+				if markerEntity == "" {
+					markerEntity = entity
+				}
+				failures = append(failures, VerificationError{Code: "V1501", Entity: markerEntity, Detail: "trapping operation is missing its complete check marker"})
+				continue
+			}
+			if !checkedTerminatorMatches(checkBlock.Terminator, block.ID, switchKind, operation.Operator, operation.Operands) ||
+				!checkedTrapSuccessorMatches(blocks, checkBlock.Terminator, categories) {
+				failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "trapping operation is not dominated by its complete checked edge"})
+			}
+		}
+	}
+	return failures
+}
+
+func trappingOperationSpec(operation Operation) (string, OperationKind, []string, bool) {
+	if operation.Kind == OperationUnary {
+		switchKind, categories, valid := checkedArithmeticSpec(operation.Operator, len(operation.Operands))
+		return switchKind, OperationArithmeticCheck, categories, valid
+	}
+	if operation.Kind != OperationBinary {
+		return "", "", nil, false
+	}
+	if operation.Operator == "/" || operation.Operator == "%" {
+		return "checked-division", OperationCheckedDivision, []string{"division-by-zero", "signed-division-overflow"}, true
+	}
+	switchKind, categories, valid := checkedArithmeticSpec(operation.Operator, len(operation.Operands))
+	return switchKind, OperationArithmeticCheck, categories, valid
+}
+
+func checkedTerminatorMatches(terminator Terminator, continuation BlockID, switchKind, operator string, operands []Operand) bool {
+	return terminator.Kind == TerminatorSwitch && terminator.SwitchKind == switchKind && terminator.Operator == operator &&
+		len(terminator.Successors) == 2 && terminator.Successors[0] == continuation && slices.Equal(terminator.SwitchOperands, operands)
+}
+
+func checkedMarkerStatus(block *Block, markerKind OperationKind, operator string, operands []Operand, categories []string) (string, bool) {
+	for index := len(block.Operations) - 1; index >= 0; index-- {
+		operation := block.Operations[index]
+		if operation.Kind == markerKind && operation.Operator == operator && slices.Equal(operation.Operands, operands) {
+			return operationEntity(block.ID, index, operation), slices.Equal(operation.TrapCategories, categories)
+		}
+	}
+	return "", false
+}
+
+func checkedTrapSuccessorMatches(blocks map[BlockID]*Block, terminator Terminator, categories []string) bool {
+	if len(terminator.Successors) != 2 {
+		return false
+	}
+	trap := blocks[terminator.Successors[1]]
+	return trap != nil && trap.Terminator.Kind == TerminatorTrap && slices.Equal(trap.Terminator.TrapCategories, categories)
 }
 
 func verifyOperands(state verificationState, operands []Operand, entity string) []VerificationError {

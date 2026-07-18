@@ -775,6 +775,32 @@ func evaluateSwitch(locals map[mir.LocalID]runtimeValue, terminator mir.Terminat
 			return mir.NoBlock, "signed-division-overflow", nil
 		}
 		return terminator.Successors[0], "", nil
+	case "checked-unary":
+		value, err := evaluateOneI32(locals, terminator.SwitchOperands)
+		if err != nil {
+			return mir.NoBlock, "", err
+		}
+		_, trap, err := unary(terminator.Operator, value)
+		if err != nil {
+			return mir.NoBlock, "", err
+		}
+		if trap != "" {
+			return mir.NoBlock, trap, nil
+		}
+		return terminator.Successors[0], "", nil
+	case "checked-arithmetic", "checked-shift":
+		left, right, err := evaluateTwoI32(locals, terminator.SwitchOperands)
+		if err != nil {
+			return mir.NoBlock, "", err
+		}
+		_, trap, err := binary(terminator.Operator, left, right)
+		if err != nil {
+			return mir.NoBlock, "", err
+		}
+		if trap != "" {
+			return mir.NoBlock, trap, nil
+		}
+		return terminator.Successors[0], "", nil
 	default:
 		return mir.NoBlock, "", capabilityError("unsupported MIR switch %q", terminator.SwitchKind)
 	}

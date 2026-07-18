@@ -14,7 +14,7 @@ The project is not trying to beat every hand-tuned C program or make every C own
 The first Stage 0 frontend slice now exists in Go: immutable source bytes, a lossless lexer,
 compact recoverable syntax, error-free AST lowering, deterministic `E00xx` diagnostics, and a
 runner for all parser v0 fixtures. The next slice resolves names and produces typed HIR for the
-fixture-backed scalar and safe-borrow subset. Its semantic runner executes all 11 v0 resolve, type,
+fixture-backed scalar and safe-borrow subset. Its semantic runner executes all 12 v0 resolve, type,
 and local Flow cases, including last-use loans and borrow-return origins. Whole-root resource Flow
 also executes all 10 v0 cases for moves, cleanup obligations, branch joins, loop back-edges,
 consuming tagged matches, and live/dead resource reassignment. The
@@ -24,18 +24,18 @@ Result runner executes all 20 v0 cases for qualified construction, exhaustive sh
 must-use return/discard/propagation, local and parameter transfer, branch joins, loop back-edges,
 overwrite and early-return rejection, exactly-once classification, non-Result `?`, and propagated
 error compatibility. The MIR runner executes all
-9 v0 normalization cases through mutable-local block lowering and the MIR verifier, covering
+10 v0 normalization cases through mutable-local block lowering and the MIR verifier, covering
 left-to-right call evaluation, complete-root moves, normal-exit cleanup order, `Result` error
-cleanup, and non-unwinding trap paths. The verifier mutation runner constructs all 8 named
-baselines and proves all 17 isolated `V1001` through `V1701` rejection recipes. The first MIR
-interpreter slice executes all 39 v0 cases for literal return, function-call arithmetic,
+cleanup, explicit checked arithmetic, and non-unwinding trap paths. The verifier mutation runner constructs all 9 named
+baselines and proves all 18 isolated `V1001` through `V1701` rejection recipes. The first MIR
+interpreter slice executes all 53 v0 cases for literal return, function-call arithmetic,
 boolean branches and logical not, source `&&` and `||` short-circuiting, scalar `while`, scalar
 `Option` construction/matching, scalar `Result` construction/matching/propagation,
 resource construction, field reads, call moves, resource-bearing `Option` and `Result` payload moves,
 resource returns and propagation, ordered reassignment, consuming-close success/failure,
 nested active-variant cleanup, deterministic drop traces,
 normal lexical Region placement plus direct-return, Result-propagation, and nested early-exit reset traces,
-division-by-zero traps, and bounded step-limit
+division/remainder zero and signed-overflow, ordinary integer-overflow, and invalid-shift traps, and bounded step-limit
 termination. Fixture-only, manifest-authorized byte sinks additionally prove exact in-memory
 stdout/stderr bytes, cross-stream order, and a shared output limit without granting host I/O.
 An unstable `fairyc experimental` CLI can inspect, syntax-check,
@@ -69,7 +69,7 @@ verified MIR in the bounded interpreter, including boolean `if`, short-circuit c
 resource construction, field reads, whole-root call moves, resource-bearing built-in tagged values,
 ordered resource reassignment, consuming-close ownership patterns, cleanup drop events,
 and Region fallthrough, direct-return, Result-propagation, and nested reset paths,
-and reports either `result: <i32>` or a canonical
+checked addition, subtraction, multiplication, negation, and signed right shift, and reports either `result: <i32>` or a canonical
 trap. The official
 `fairyc check` command remains unavailable until effects and the
 remaining semantic groups exist.

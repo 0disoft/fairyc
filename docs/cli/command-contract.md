@@ -40,11 +40,13 @@ MIR interpreter. The entry is the selected file module's zero-argument `main() -
 values, resource construction and field reads, whole-root and tagged-payload moves, resource-bearing
 built-in `Option` and `Result` values, ordered resource reassignment, consuming-close ownership,
 lexical Region placement and reset on fallthrough, direct return, Result propagation, and nested
-exits from a direct `&mut` Arena local, and cleanup drop events are
+exits from a direct `&mut` Arena local, cleanup drop events, checked `i32` negation, addition,
+subtraction, multiplication, and signed right shift are
 executable. The bounded interpreter reports its stable `step-limit` capability rather than hanging
 or reclassifying it as a language trap. Interpreter-fixture byte hooks are not available from this
 command and matching function names do not activate them. User drop-body effects, Region `break` and `continue`, I/O, arguments, and
-multi-file run input remain outside the current interpreter subset.
+multi-file run input remain outside the current interpreter subset. Signed left shift is rejected
+by semantic analysis as `E1011` rather than reaching the interpreter.
 
 `fairyc check` remains unimplemented. It must not be aliased to `check-syntax`, because the planned
 command below also requires effects and later semantic groups beyond

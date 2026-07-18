@@ -257,6 +257,9 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		if err != nil {
 			return Operand{}, err
 		}
+		if expression.Operator == "-" {
+			l.lowerCheckedArithmetic(expression, []Operand{operand}, "checked-unary", []string{"integer-overflow"})
+		}
 		destination := l.newTemporary()
 		l.appendOperation(Operation{Kind: OperationUnary, Span: expression.Span, DestinationLocal: destination, Operands: []Operand{operand}, Operator: expression.Operator})
 		return Operand{Kind: OperandLocal, Local: destination}, nil
@@ -287,6 +290,13 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		if expression.Operator == "/" || expression.Operator == "%" {
 			if err := l.lowerCheckedDivision(expression, left, right); err != nil {
 				return Operand{}, err
+			}
+		} else {
+			switch expression.Operator {
+			case "+", "-", "*":
+				l.lowerCheckedArithmetic(expression, []Operand{left, right}, "checked-arithmetic", []string{"integer-overflow"})
+			case ">>":
+				l.lowerCheckedArithmetic(expression, []Operand{left, right}, "checked-shift", []string{"invalid-shift"})
 			}
 		}
 		destination := l.newTemporary()
@@ -829,12 +839,15 @@ func (l *functionLowerer) lowerCall(expression *hir.Expression) (Operand, error)
 
 func (l *functionLowerer) lowerCheckedDivision(expression *hir.Expression, left, right Operand) error {
 	categories := []string{"division-by-zero", "signed-division-overflow"}
-	l.appendOperation(Operation{Kind: OperationCheckedDivision, Span: expression.Span, TrapCategories: slices.Clone(categories)})
+	l.appendOperation(Operation{
+		Kind: OperationCheckedDivision, Span: expression.Span, Operands: []Operand{left, right},
+		Operator: expression.Operator, TrapCategories: slices.Clone(categories),
+	})
 	continuation := l.newBlock()
 	trap := l.newBlock()
 	l.terminate(Terminator{
 		Kind: TerminatorSwitch, Span: expression.Span, Successors: []BlockID{continuation, trap}, UnwindSuccessor: NoBlock,
-		SwitchKind: "checked-division", SwitchOperands: []Operand{left, right},
+		SwitchKind: "checked-division", SwitchOperands: []Operand{left, right}, Operator: expression.Operator,
 	})
 	l.current = trap
 	l.terminate(Terminator{Kind: TerminatorTrap, Span: expression.Span, UnwindSuccessor: NoBlock, TrapCategories: slices.Clone(categories)})
@@ -843,6 +856,25 @@ func (l *functionLowerer) lowerCheckedDivision(expression *hir.Expression, left,
 	})
 	l.current = continuation
 	return nil
+}
+
+func (l *functionLowerer) lowerCheckedArithmetic(expression *hir.Expression, operands []Operand, switchKind string, categories []string) {
+	l.appendOperation(Operation{
+		Kind: OperationArithmeticCheck, Span: expression.Span, Operands: slices.Clone(operands),
+		Operator: expression.Operator, TrapCategories: slices.Clone(categories),
+	})
+	continuation := l.newBlock()
+	trap := l.newBlock()
+	l.terminate(Terminator{
+		Kind: TerminatorSwitch, Span: expression.Span, Successors: []BlockID{continuation, trap}, UnwindSuccessor: NoBlock,
+		SwitchKind: switchKind, SwitchOperands: slices.Clone(operands), Operator: expression.Operator,
+	})
+	l.current = trap
+	l.terminate(Terminator{Kind: TerminatorTrap, Span: expression.Span, UnwindSuccessor: NoBlock, TrapCategories: slices.Clone(categories)})
+	l.result.TrapPaths = append(l.result.TrapPaths, TrapPathFact{
+		Operation: expression.Span, Categories: slices.Clone(categories), CleanupActions: []CleanupAction{}, HasSuccessor: false,
+	})
+	l.current = continuation
 }
 
 func (l *functionLowerer) lowerPropagate(expression *hir.Expression) (Operand, error) {

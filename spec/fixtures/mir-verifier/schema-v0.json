@@ -71,6 +71,7 @@
             "insert-source-form",
             "invalidate-region-reset-exit-kind",
             "move-resource-projection",
+			"remove-arithmetic-trap-check",
             "remove-exit-cleanup",
             "remove-flag-initialization",
             "remove-required-trap-check",

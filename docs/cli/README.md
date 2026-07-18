@@ -33,7 +33,9 @@ error compatibility. `experimental run` executes the selected
 module's zero-argument `main() -> i32` through verified MIR, including boolean `if`,
 short-circuit control, scalar `while`, whole resources, resource-bearing built-in tags, ordered
 resource reassignment, consuming-close ownership, Region fallthrough and early-exit reset paths, and source-linked drop traces, and reports an
-exact scalar result or canonical trap. It does not
+exact scalar result or canonical division, integer-overflow, or invalid-shift trap. Checked
+negation, addition, subtraction, multiplication, and signed right shift are executable; signed
+left shift is rejected as `E1011`. It does not
 discover files, execute user drop bodies, lower Region `break` or `continue`, implement effects, host I/O, or native code generation.
 The interpreter fixture's in-memory byte hooks require manifest options that this CLI never accepts;
 declaring a similarly named Fairy C function does not grant output authority.

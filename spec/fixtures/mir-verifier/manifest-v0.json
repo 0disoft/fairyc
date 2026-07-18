@@ -12,6 +12,7 @@
     "docs/product/02-spec.md",
     "docs/adr/0015-mir-verifier-mutation-fixture-contract.md",
     "docs/adr/0020-stage-0-region-mir-and-interpreter.md",
+    "docs/adr/0023-explicit-checked-arithmetic-mir.md",
     "docs/mir/mir-v0.md",
     "docs/mir/verifier-mutation-v0.md",
     "docs/mir/drop-elaboration-v0.md",
@@ -72,12 +73,26 @@
       "id": "checked-division",
       "baseline": "verify",
       "entities": [
+        "block:check",
         "block:continuation",
         "block:trap",
         "operation:division",
+        "operation:division-result",
         "operation:min-neg-one-check",
         "operation:zero-check",
         "terminator:trap"
+      ]
+    },
+    {
+      "id": "checked-arithmetic",
+      "baseline": "verify",
+      "entities": [
+        "block:arithmetic-check",
+        "block:arithmetic-continuation",
+        "block:arithmetic-trap",
+        "operation:add-check",
+        "operation:add-result",
+        "terminator:arithmetic-trap"
       ]
     },
     {
@@ -199,6 +214,12 @@
         "supportingEntity": "operation:zero-check"
       },
       "expect": { "status": "reject", "codes": ["V1501"], "primaryEntity": "operation:division" }
+    },
+    {
+      "id": "fail.mir-verify.v1501.missing-arithmetic-trap-check",
+      "seed": "checked-arithmetic",
+      "mutation": { "kind": "remove-arithmetic-trap-check", "target": "operation:add-check" },
+      "expect": { "status": "reject", "codes": ["V1501"], "primaryEntity": "operation:add-result" }
     },
     {
       "id": "fail.mir-verify.v1502.call-has-unwind-successor",
