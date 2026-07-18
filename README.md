@@ -67,6 +67,12 @@ native evidence by themselves, and the target's C ABI marker stays fail-closed.
 The 14 valid plans now generate separate caller and callee objects for Clang-to-GCC and
 GCC-to-Clang at `-O0` and `-O2`, for 56 configured crossings. This Windows host cannot execute
 them, and C-object interoperability is not yet Fairy source `extern C` support.
+A provisional `x86_64-linux-gnu` SystemHeap implementation now lives in the target standard-library
+boundary rather than the thin runtime. It normalizes empty allocation, admits current fundamental
+alignments, preserves bytes across copy-and-release growth or shrink, and leaves the old block
+unchanged when validation or allocation fails. A closed Clang/GCC low/optimized C probe is wired
+for four executions, but it is not source-callable, not product-linked, and has no observed hosted
+receipt; `Arena`, `Buffer`, owned text, and Linux `File` remain unimplemented.
 A deterministic native C11 probe now translates the nine valid layout cases into private numeric
 types and is configured for Clang/GCC at `-O0` and `-O2`. This Windows host cannot execute those
 four probe runs, and no hosted success receipt has been observed, so `c-layout-probes` remains a
@@ -160,6 +166,7 @@ unsafe, FFI, and standard-library programs still fail closed before native compi
 - MIR interpreter fixtures: `spec/fixtures/interpreter/manifest-v0.json`
 - Constrained C emission fixtures: `spec/fixtures/c-emission/manifest-v0.json`
 - Shared constrained-C driver and embedded scalar runtime: `internal/cdriver/`, `internal/cruntime/`
+- Provisional target standard-library C sources: `internal/cstdlib/`
 - Linux scalar C differential runner: `internal/cbackendnative/`
 - Executable target description: `internal/target/`
 - Experimental target JSON schema: `spec/cli/experimental-target-spec-v0.schema.json`

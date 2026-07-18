@@ -87,6 +87,11 @@ classes, registers, exhaustion rollback, and hidden returns, but bidirectional n
 and hosted evidence remain incomplete. Its 14 pass plans now generate 56 configured separate-object
 Clang/GCC crossings in both compiler directions and profiles; these are not yet hosted evidence or
 source-level Fairy FFI fixtures.
+The first standard-library-owned C storage slice now implements provisional fallible `SystemHeap`
+allocation, copy-and-release resize, zero-size normalization, fundamental-alignment rejection, and
+failure rollback. A closed probe is configured for Clang/GCC at low and optimized profiles. It is
+not source-callable or linked into product builds yet, and its four native executions remain
+unobserved on this Windows host; `Arena`, `Buffer`, text ownership, and Linux `File` are still absent.
 
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.

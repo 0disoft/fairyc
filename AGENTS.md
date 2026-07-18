@@ -47,6 +47,7 @@ regenerate, or override compiler source.
 - Constrained C emission fixtures: spec/fixtures/c-emission/manifest-v0.json
 - Constrained C emission fixture runner: internal/cbackendfixture/
 - Shared constrained-C driver and scalar runtime: internal/cdriver/, internal/cruntime/
+- Provisional target standard-library C sources and native probes: internal/cstdlib/
 - Linux scalar C differential runner: internal/cbackendnative/, cmd/fairyc-native-fixtures/
 - Executable target description: internal/target/
 - Experimental target JSON schema: spec/cli/experimental-target-spec-v0.schema.json

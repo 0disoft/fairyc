@@ -44,7 +44,7 @@ func TestBuildSmokeSourceReachesCEmission(t *testing.T) {
 
 func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 	t.Parallel()
-	if reportSchemaVersion != "fairyc.native-c-report/v5" {
+	if reportSchemaVersion != "fairyc.native-c-report/v6" {
 		t.Fatalf("report schema = %q", reportSchemaVersion)
 	}
 	encoded, err := json.Marshal(Report{
@@ -53,11 +53,12 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		Sanitizer: cdriver.AddressUndefinedSanitizerMode, SanitizerExecutions: 34,
 		ABICases:      []string{"pass.aggregate-rollback", "pass.void-return"},
 		ABIDirections: []string{"clang-caller-gcc-callee", "gcc-caller-clang-callee"}, ABIProbeExecutions: 56,
+		SystemHeapExecutions: 4,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v5"`) ||
+	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v6"`) ||
 		!strings.Contains(string(encoded), `"dropTraceExecutions":68`) ||
 		!strings.Contains(string(encoded), `"layoutCases":["pass.array-i32-three","pass.pointer"]`) ||
 		!strings.Contains(string(encoded), `"layoutProbeExecutions":4`) ||
@@ -65,8 +66,17 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		!strings.Contains(string(encoded), `"sanitizerExecutions":34`) ||
 		!strings.Contains(string(encoded), `"abiCases":["pass.aggregate-rollback","pass.void-return"]`) ||
 		!strings.Contains(string(encoded), `"abiDirections":["clang-caller-gcc-callee","gcc-caller-clang-callee"]`) ||
-		!strings.Contains(string(encoded), `"abiProbeExecutions":56`) {
+		!strings.Contains(string(encoded), `"abiProbeExecutions":56`) ||
+		!strings.Contains(string(encoded), `"systemHeapExecutions":4`) {
 		t.Fatalf("report JSON = %s", encoded)
+	}
+}
+
+func TestSystemHeapProbeRunnerRejectsEmptySourceBeforeToolchainUse(t *testing.T) {
+	t.Parallel()
+	toolchains := []cdriver.Toolchain{{Name: "clang"}, {Name: "gcc"}}
+	if _, err := runSystemHeapProbe(t.TempDir(), toolchains, "", ""); err == nil || !strings.Contains(err.Error(), "must be non-empty") {
+		t.Fatalf("runSystemHeapProbe() error = %v", err)
 	}
 }
 

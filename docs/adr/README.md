@@ -49,6 +49,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0037-sanitizer-assisted-c-backend-checks.md`: closed Clang/GCC ASan+UBSan execution of every admitted production C unit without exposing a product build profile.
 - `0038-sysv-amd64-classifier-fixtures.md`: host-independent INTEGER/SSE/MEMORY classification, hidden returns, register exhaustion, and whole-aggregate rollback fixtures.
 - `0039-bidirectional-cross-compiler-c-abi-probes.md`: separate Clang/GCC caller and callee objects in both directions for 56 low/optimized ABI crossings.
+- `0040-provisional-system-heap-c-slice.md`: standard-library-owned fallible SystemHeap C transport and four-profile native probe without source API claims.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

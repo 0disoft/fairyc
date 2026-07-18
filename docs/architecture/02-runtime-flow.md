@@ -65,6 +65,12 @@ eightbyte and register plans. The Linux runner turns validated pass plans into s
 caller and callee objects in both directions; Fairy source FFI and an observed hosted result remain
 later evidence layers.
 
+`internal/cstdlib` is a separate target-standard-library transport boundary. Its first provisional
+SystemHeap helper normalizes empty allocation, rejects unsupported alignment, and preserves the old
+block when copy-and-release resize fails. A closed C probe reaches the existing Linux compiler
+matrix, but the helper is not linked into product builds or exposed to source yet. This does not
+broaden the thin runtime or complete the standard library.
+
 The implemented slice emits deterministic ISO C11 for verified scalar-payload MIR, including
 private `Option<i32>` and `Result<i32, i32>` transport, plus nonempty all-`i32` resource definitions
 with empty drop bodies and resource-bearing built-in tags whose other payloads are `i32` or another

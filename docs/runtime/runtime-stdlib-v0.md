@@ -71,6 +71,17 @@ Allocation is fallible and reports at least out-of-memory, size overflow, unsupp
 
 Zero-size requests do not call the platform allocator. They produce length and capacity zero; deallocation is a no-op; empty raw pointer identity is unspecified. Public raw `realloc` is excluded. `Buffer.reserve` checks size overflow, leaves the old allocation unchanged on failure, and cannot run with a live borrow into the buffer.
 
+The first provisional `x86_64-linux-gnu` SystemHeap C slice lives in `internal/cstdlib`, not the thin
+runtime. It admits only nonzero power-of-two alignments at or below `_Alignof(max_align_t)`, which
+covers all currently admitted scalar layouts; over-aligned requests fail closed. Zero-size requests
+still validate alignment but never call `malloc`. Growth and shrink use allocate-copy-release rather
+than raw `realloc`, so validation and allocation failures leave the original block unchanged.
+
+This helper is not yet part of generated C, `experimental build`, or a source-visible `std::alloc`
+module. Its closed Linux probe checks empty normalization, alignment, prefix preservation, failure
+rollback, malformed-block rejection, shrink, and release under Clang/GCC at low and optimized profiles. It does not
+deterministically force host OOM, and no hosted success receipt has been observed.
+
 ## `Buffer`
 
 `Buffer` is a resource owning initialized bytes from `SystemHeap`. It starts with length zero, exposes only `[0, len)`, and may grow only through fallible methods.

@@ -18,6 +18,7 @@
 - Constrained C emission manifest: spec/fixtures/c-emission/manifest-v0.json
 - Shared constrained-C driver: internal/cdriver/
 - Embedded scalar C runtime: internal/cruntime/
+- Provisional target standard-library C sources: internal/cstdlib/
 - Linux scalar C differential runner: internal/cbackendnative/
 - Resolved package graph fixture manifest: spec/fixtures/package/manifest-v0.json
 - Executable semantics and C transport: docs/mir/*.md

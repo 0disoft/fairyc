@@ -21,12 +21,13 @@ import (
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/cli"
 	"github.com/0disoft/fairyc/internal/cruntime"
+	"github.com/0disoft/fairyc/internal/cstdlib"
 	"github.com/0disoft/fairyc/internal/layoutfixture"
 	"github.com/0disoft/fairyc/internal/target"
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v5"
+	reportSchemaVersion = "fairyc.native-c-report/v6"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -82,6 +83,7 @@ type Report struct {
 	ABICases              []string   `json:"abiCases"`
 	ABIDirections         []string   `json:"abiDirections"`
 	ABIProbeExecutions    int        `json:"abiProbeExecutions"`
+	SystemHeapExecutions  int        `json:"systemHeapExecutions"`
 	BuildSmokeExecutions  int        `json:"buildSmokeExecutions"`
 }
 
@@ -176,6 +178,19 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.ABIProbeExecutions = abiExecutions
+	systemHeapSource, err := cstdlib.SystemHeapSource()
+	if err != nil {
+		return Report{}, fmt.Errorf("load SystemHeap implementation: %w", err)
+	}
+	systemHeapProbe, err := cstdlib.SystemHeapProbeSource()
+	if err != nil {
+		return Report{}, fmt.Errorf("load SystemHeap probe: %w", err)
+	}
+	systemHeapExecutions, err := runSystemHeapProbe(temporaryRoot, toolchains, systemHeapProbe, systemHeapSource)
+	if err != nil {
+		return Report{}, err
+	}
+	report.SystemHeapExecutions = systemHeapExecutions
 	for caseIndex, fixture := range fixtureReport.Emitted {
 		if fixture.Unit.Target != string(target.X8664LinuxGNU) || fixture.Unit.Dialect != cbackend.DialectC11 {
 			return Report{}, fmt.Errorf("case %s emitted unexpected profile %s/%s", fixture.ID, fixture.Unit.Target, fixture.Unit.Dialect)
@@ -225,6 +240,33 @@ func Run(manifestPath string) (Report, error) {
 	}
 	report.BuildSmokeExecutions = buildSmoke
 	return report, nil
+}
+
+func runSystemHeapProbe(temporaryRoot string, toolchains []cdriver.Toolchain, probeSource, implementationSource string) (int, error) {
+	if len(toolchains) != 2 || toolchains[0].Name != "clang" || toolchains[1].Name != "gcc" {
+		return 0, fmt.Errorf("SystemHeap probe requires resolved Clang then GCC toolchains")
+	}
+	if probeSource == "" || implementationSource == "" {
+		return 0, fmt.Errorf("SystemHeap probe and implementation sources must be non-empty")
+	}
+	executions := 0
+	for compilerIndex, toolchain := range toolchains {
+		for profileIndex, profile := range nativeProfiles {
+			artifact, err := cdriver.Build(toolchain, profile, probeSource, implementationSource)
+			if err != nil {
+				return 0, fmt.Errorf("SystemHeap probe with %s/%s: %w", toolchain.Name, profile.Name, err)
+			}
+			executablePath := filepath.Join(temporaryRoot, fmt.Sprintf("system-heap-probe-%d-%d", compilerIndex, profileIndex))
+			if err := os.WriteFile(executablePath, artifact.Bytes, 0o700); err != nil {
+				return 0, fmt.Errorf("materialize SystemHeap probe with %s/%s: %w", toolchain.Name, profile.Name, err)
+			}
+			if err := execute("SystemHeap probe", executablePath, 0, nil); err != nil {
+				return 0, fmt.Errorf("SystemHeap probe with %s/%s: %w", toolchain.Name, profile.Name, err)
+			}
+			executions++
+		}
+	}
+	return executions, nil
 }
 
 func runABIProbes(temporaryRoot string, toolchains []cdriver.Toolchain, probes []abiProbeCase) (int, error) {

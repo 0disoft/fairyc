@@ -58,6 +58,14 @@ behavior belongs to `internal/cbackendnative`, which consumes the same emitted u
 shared C driver and scalar runtime. ABI, complete-runtime, and Atlas runners remain future
 evidence requirements.
 
+`internal/cstdlib` separately embeds the provisional SystemHeap implementation and its closed C
+probe. Ordinary Go tests prove deterministic, LF-only source ownership and forbid raw `realloc` or
+output. The Linux native runner compiles and executes the probe with Clang and GCC at low and
+optimized profiles, checking zero-size normalization, fundamental alignment, growth and shrink
+prefix preservation, unsupported-alignment rollback, release, and invalid output rejection. These
+four configured executions are not source-level standard-library fixtures, deterministic OOM
+injection, or hosted evidence until a Linux receipt is observed.
+
 ## Oracle order
 
 1. Product specification and accepted ADRs define the intended boundary.
