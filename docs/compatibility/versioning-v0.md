@@ -86,7 +86,8 @@ V5 supersedes v4 by adding the exact sorted `abiCases`, exact `abiDirections`, a
 Clang/GCC low/optimized provisional standard-library allocation probe. V7 supersedes v6 by adding
 `bufferExecutions` for the failure-atomic overlap-safe Buffer probe. V8 supersedes v7 by adding
 `arenaExecutions` for the single-active-Region Arena probe. V9 supersedes v8 by adding
-`textViewExecutions` for canonical UTF-8 validation and boundary slicing. The runner emits one exact version and does not pretend the report
+`textViewExecutions` for canonical UTF-8 validation and boundary slicing. V10 supersedes v9 by
+adding `ownedTextExecutions` for String ownership and CString termination. The runner emits one exact version and does not pretend the report
 shapes are interchangeable.
 
 ## Runtime and standard library

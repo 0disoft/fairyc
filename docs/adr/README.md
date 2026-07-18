@@ -53,6 +53,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0041-failure-atomic-overlap-safe-buffer-c-slice.md`: initialized-byte Buffer growth, overlap append rebinding, overflow rollback, and zeroed resize C probe.
 - `0042-single-active-region-arena-c-slice.md`: single-active Region generations, failure-atomic byte placement, reset invalidation, and Arena drop C probe.
 - `0043-canonical-utf8-text-view-c-slice.md`: allocation-free canonical UTF-8 validation and code-point-boundary text slicing C probe.
+- `0044-owned-string-and-cstring-c-slice.md`: failure-atomic Buffer-to-String ownership, immutable text views, and exact CString NUL invariants.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

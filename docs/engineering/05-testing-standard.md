@@ -82,6 +82,12 @@ valid and invalid byte-boundary slices, empty normalization, invalid pointer/len
 unchanged outputs on failure. It is byte-level UTF-8 evidence, not Unicode normalization or
 grapheme behavior.
 
+The owned-text probe checks String copy, immutable view, ordinary and self-source append, drop,
+failed Buffer conversion with unchanged ownership and destination, successful consuming move, and
+CString construction, bounded CStr view, exact trailing terminator, interior-NUL rejection,
+unchanged failure output, and empty CString. It does not assert source Result layout or locale
+conversion.
+
 ## Oracle order
 
 1. Product specification and accepted ADRs define the intended boundary.

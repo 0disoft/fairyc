@@ -138,7 +138,23 @@ normalization, grapheme segmentation, case conversion, or locale behavior.
 
 `String` is a resource owning a UTF-8 `Buffer`. It can copy from `&str`, consume a `Buffer` after validation, expose `&str`, and append fallibly. A failed consuming UTF-8 conversion returns ownership of the original `Buffer` in its error resource. Mutable raw bytes are not exposed.
 
+The provisional String C slice copies from valid text, appends through overlap-safe Buffer growth,
+and exposes only immutable text. Buffer conversion validates the initialized prefix and moves the
+Buffer only on success; failure leaves both input and destination unchanged so a later source
+wrapper can return the original Buffer in its error resource. The internal operation result keeps
+high-level text failure separate from the underlying allocation status without freezing source
+`Result` representation.
+
 `CStr` is an unsized borrowed NUL-terminated byte sequence with no interior NUL and no UTF-8 promise. `CString` is the owned resource form. Conversion from `&str` copies bytes, rejects interior NUL, appends one terminator, and performs no locale conversion.
+
+The provisional CStr validator consumes a bounded storage length, requires exactly the final byte
+to be NUL, rejects earlier NUL, and reports a view length excluding the terminator. CString creation
+checks length overflow, rejects text containing NUL, and publishes its Buffer only after the copied
+bytes and one terminator are complete. Empty CString therefore owns one terminator byte while its
+CStr view has length zero.
+
+The owned-text four-way native probe is configured for these ownership, rollback, overlap, UTF-8,
+NUL, terminator, and empty-value cases but remains unobserved and source-disconnected.
 
 A `c"..."` literal provides allocation-free immutable `&CStr` storage with one compiler-appended trailing NUL and rejects a decoded interior NUL. It is source syntax, not a runtime constructor. `b"..."` similarly provides immutable static bytes without claiming UTF-8.
 

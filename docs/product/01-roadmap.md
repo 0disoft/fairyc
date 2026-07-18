@@ -102,7 +102,11 @@ native executions are configured but unobserved; source-level `std::alloc` const
 remain missing.
 The allocation-free text-view slice now checks canonical UTF-8 and code-point byte boundaries,
 including overlong, surrogate, out-of-range, truncated, and obsolete forms. Its four native runs
-are configured but unobserved, and owned `String`/`CString` plus source calls remain missing.
+are configured but unobserved, and owned text plus source calls remain missing at that layer.
+Owned String and CString now have provisional Buffer-backed C transport with immutable views,
+successful-only Buffer moves, failure ownership preservation, self-source append, interior-NUL
+rejection, and exact termination. Four native runs are configured but unobserved; source-level
+construction, Result error resources, and calls remain missing.
 
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.

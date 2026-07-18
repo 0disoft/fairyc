@@ -31,6 +31,12 @@ var stage0TextView string
 //go:embed stage0_text_view_probe.c
 var stage0TextViewProbe string
 
+//go:embed stage0_owned_text.c
+var stage0OwnedText string
+
+//go:embed stage0_owned_text_probe.c
+var stage0OwnedTextProbe string
+
 // SystemHeapSource returns the provisional x86_64-linux-gnu SystemHeap implementation.
 func SystemHeapSource() (string, error) {
 	return canonicalSource("SystemHeap", stage0SystemHeap)
@@ -85,6 +91,28 @@ func TextViewSource() (string, error) {
 // TextViewProbeSource returns the closed native conformance probe for UTF-8 text views.
 func TextViewProbeSource() (string, error) {
 	return canonicalSource("text view probe", stage0TextViewProbe)
+}
+
+// OwnedTextSource returns SystemHeap, Buffer, text-view, String, and CString as one C unit.
+func OwnedTextSource() (string, error) {
+	storage, err := StorageSource()
+	if err != nil {
+		return "", err
+	}
+	view, err := TextViewSource()
+	if err != nil {
+		return "", err
+	}
+	owned, err := canonicalSource("owned text", stage0OwnedText)
+	if err != nil {
+		return "", err
+	}
+	return storage + "\n" + view + "\n" + owned, nil
+}
+
+// OwnedTextProbeSource returns the closed native conformance probe for String and CString.
+func OwnedTextProbeSource() (string, error) {
+	return canonicalSource("owned text probe", stage0OwnedTextProbe)
 }
 
 func canonicalSource(name, source string) (string, error) {

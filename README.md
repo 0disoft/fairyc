@@ -84,6 +84,10 @@ lowering.
 The first text slice now validates canonical UTF-8 without allocation and rejects slicing through a
 multibyte sequence. Its native probe includes overlong forms, surrogates, values above U+10FFFF,
 truncation, and obsolete leaders, but remains unobserved and source-disconnected.
+Buffer-backed String and CString C helpers now preserve ownership on failed UTF-8 conversion,
+support overlap-safe String append, expose immutable bounded views, reject interior NUL, and append
+exactly one C terminator. Their native probe is configured but unobserved, and no source API is
+claimed.
 A deterministic native C11 probe now translates the nine valid layout cases into private numeric
 types and is configured for Clang/GCC at `-O0` and `-O2`. This Windows host cannot execute those
 four probe runs, and no hosted success receipt has been observed, so `c-layout-probes` remains a

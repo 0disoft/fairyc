@@ -140,3 +140,36 @@ func TestTextViewSourcesRejectNonCanonicalUTF8AndInteriorBoundaries(t *testing.T
 		t.Fatalf("TextViewSource() is not deterministic canonical C: %v", err)
 	}
 }
+
+func TestOwnedTextSourcesPreserveOwnershipAndNULTermination(t *testing.T) {
+	t.Parallel()
+	implementation, err := OwnedTextSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	probe, err := OwnedTextProbeSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, required := range []string{
+		"fy_std_string_from_buffer_v0",
+		"FY_STD_OWNED_TEXT_INVALID_UTF8_V0",
+		"fy_std_string_append_v0",
+		"fy_std_cstr_validate_v0",
+		"FY_STD_OWNED_TEXT_INTERIOR_NUL_V0",
+		"fy_std_cstring_from_text_v0",
+	} {
+		if !strings.Contains(implementation, required) {
+			t.Errorf("owned text implementation is missing %q", required)
+		}
+	}
+	for _, required := range []string{"invalid_buffer.block.data != invalid_data", "invalid_cstr", "cview.data[cview.length] != 0"} {
+		if !strings.Contains(probe, required) {
+			t.Errorf("owned text probe is missing %q", required)
+		}
+	}
+	repeated, err := OwnedTextSource()
+	if err != nil || repeated != implementation || strings.Contains(implementation, "\r") || !strings.HasSuffix(implementation, "\n") {
+		t.Fatalf("OwnedTextSource() is not deterministic canonical C: %v", err)
+	}
+}
