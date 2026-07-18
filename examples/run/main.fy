@@ -1,9 +1,13 @@
 module examples::run::main;
 
-fn add(left: i32, right: i32) -> i32 {
-    left + right
+fn answer(enabled: bool) -> i32 {
+    if enabled {
+        20 + 22
+    } else {
+        0
+    }
 }
 
 fn main() -> i32 {
-    add(20, 22)
+    answer(true && 20 < 22)
 }

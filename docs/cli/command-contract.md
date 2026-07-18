@@ -35,7 +35,8 @@ returns a capability error and never counts as a successful check.
 
 `experimental run` does not invoke a backend, linker, runtime, or host subprocess. It runs the
 source file through parser, semantic analysis, Flow, MIR lowering, the MIR verifier, and the bounded
-MIR interpreter. The entry is the selected file module's zero-argument `main() -> i32`. Tagged
+MIR interpreter. The entry is the selected file module's zero-argument `main() -> i32`; boolean
+`if`, `!`, comparisons, and source-level `&&` and `||` short-circuiting are executable. Tagged
 values, resource payload execution and drop traces, Region reset, I/O, arguments, loops, and
 multi-file run input remain outside the current interpreter subset.
 

@@ -228,6 +228,36 @@ func TestExperimentalRunReportsCanonicalTrap(t *testing.T) {
 	}
 }
 
+func TestExperimentalRunInterpretsBooleanBranch(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\nfn choose(flag: bool) -> i32 { if flag { 42 } else { 0 } }\nfn main() -> i32 { choose(true) }\n")
+	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
+	if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
+func TestExperimentalRunShortCircuitsTrap(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { if (false && (1 / 0 == 0)) || (true || (1 / 0 == 0)) { 42 } else { 0 } }\n")
+	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
+	if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
+func TestExperimentalRunInterpretsLogicalNot(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { if !false { 42 } else { 0 } }\n")
+	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
+	if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
 func TestExperimentalRunRequiresScalarEntry(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()

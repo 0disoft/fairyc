@@ -2,7 +2,7 @@
   "$schema": "./schema-v0.json",
   "schemaVersion": "fairyc.interpreter-fixtures/v0",
   "deferred": [
-    "boolean branches and shallow tagged Option and Result values",
+    "shallow tagged Option and Result values",
     "resource payload values and active-variant drop traces",
     "Region mark and reset observations",
     "controlled partial I/O test intrinsics",
@@ -51,6 +51,42 @@
         "completedThrough": "interpret",
         "outcome": "trap",
         "category": "division-by-zero"
+      }
+    },
+    {
+      "id": "pass.interpreter.boolean-branch",
+      "sourceRoot": "cases/pass/boolean-branch/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42
+      }
+    },
+    {
+      "id": "pass.interpreter.short-circuit",
+      "sourceRoot": "cases/pass/short-circuit/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42
+      }
+    },
+    {
+      "id": "pass.interpreter.logical-not",
+      "sourceRoot": "cases/pass/logical-not/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42
       }
     }
   ]

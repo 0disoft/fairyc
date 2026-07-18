@@ -78,10 +78,15 @@ func verifyFunction(function *Function) []VerificationError {
 		item := queue[0]
 		queue = queue[1:]
 		if previous, found := seen[item.id]; found {
-			if !sameVerificationState(previous, item.state) {
+			merged, changed, incompatible := mergeVerificationState(previous, item.state, resources)
+			if incompatible {
 				failures = append(failures, VerificationError{Code: "V1002", Entity: blockEntityFor(function, item.id), Detail: "incoming initialization states disagree"})
+				continue
 			}
-			continue
+			if !changed {
+				continue
+			}
+			item.state = merged
 		}
 		seen[item.id] = cloneVerificationState(item.state)
 		if int(item.id) < 0 || int(item.id) >= len(function.Blocks) {
@@ -163,6 +168,9 @@ func verifyFunction(function *Function) []VerificationError {
 		}
 		if terminator.Kind == TerminatorSwitch {
 			failures = append(failures, verifyOperands(state, terminator.SwitchOperands, terminatorEntity(item.id, terminator))...)
+			if !validSwitchShape(terminator) {
+				failures = append(failures, VerificationError{Code: "V1001", Entity: terminatorEntity(item.id, terminator), Detail: "switch shape does not match its kind"})
+			}
 		}
 		if terminator.Kind == TerminatorReturn {
 			failures = append(failures, verifyOperands(state, []Operand{terminator.ReturnValue}, terminatorEntity(item.id, terminator))...)
@@ -173,7 +181,7 @@ func verifyFunction(function *Function) []VerificationError {
 			}
 			continue
 		}
-		if terminator.Kind == TerminatorTrap {
+		if terminator.Kind == TerminatorTrap || terminator.Kind == TerminatorUnreachable {
 			continue
 		}
 		for _, successor := range terminator.Successors {
@@ -213,6 +221,19 @@ func verifyFunction(function *Function) []VerificationError {
 	return failures
 }
 
+func validSwitchShape(terminator Terminator) bool {
+	switch terminator.SwitchKind {
+	case "":
+		return len(terminator.SwitchOperands) == 0 && len(terminator.Successors) == 2
+	case "bool":
+		return len(terminator.SwitchOperands) == 1 && len(terminator.Successors) == 2
+	case "checked-division":
+		return len(terminator.SwitchOperands) == 2 && len(terminator.Successors) == 2
+	default:
+		return false
+	}
+}
+
 func verifyOperands(state verificationState, operands []Operand, entity string) []VerificationError {
 	var failures []VerificationError
 	for _, operand := range operands {
@@ -234,16 +255,40 @@ func cloneVerificationState(input verificationState) verificationState {
 	return result
 }
 
-func sameVerificationState(left, right verificationState) bool {
-	if !sameLiveState(left.live, right.live) || len(left.flags) != len(right.flags) {
-		return false
+func mergeVerificationState(previous, incoming verificationState, resources map[hir.SymbolID]ResourceLocal) (verificationState, bool, bool) {
+	if len(previous.flags) != len(incoming.flags) {
+		return verificationState{}, false, true
 	}
-	for entity, state := range left.flags {
-		if right.flags[entity] != state {
-			return false
+	for entity, state := range previous.flags {
+		if incoming.flags[entity] != state {
+			return verificationState{}, false, true
 		}
 	}
-	return true
+	merged := cloneVerificationState(previous)
+	changed := false
+	keys := make(map[hir.SymbolID]struct{}, len(previous.live)+len(incoming.live))
+	for symbol := range previous.live {
+		keys[symbol] = struct{}{}
+	}
+	for symbol := range incoming.live {
+		keys[symbol] = struct{}{}
+	}
+	for symbol := range keys {
+		left := previous.live[symbol]
+		right := incoming.live[symbol]
+		if _, resource := resources[symbol]; resource {
+			if left != right {
+				return verificationState{}, false, true
+			}
+			continue
+		}
+		value := left && right
+		if merged.live[symbol] != value {
+			merged.live[symbol] = value
+			changed = true
+		}
+	}
+	return merged, changed, false
 }
 
 func sameLiveState(left, right map[hir.SymbolID]bool) bool {

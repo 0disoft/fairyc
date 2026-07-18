@@ -25,8 +25,8 @@ classification, non-Result `?`, and propagated error compatibility. The MIR runn
 left-to-right call evaluation, complete-root moves, normal-exit cleanup order, `Result` error
 cleanup, and non-unwinding trap paths. The verifier mutation runner constructs all 8 named
 baselines and proves all 15 isolated `V1001` through `V1701` rejection recipes. The first MIR
-interpreter slice executes all 3 scalar v0 cases for literal return, function-call arithmetic, and
-division-by-zero traps. An unstable `fairyc experimental` CLI can inspect, syntax-check,
+interpreter slice executes all 6 scalar v0 cases for literal return, function-call arithmetic,
+boolean branches and logical not, source `&&` and `||` short-circuiting, and division-by-zero traps. An unstable `fairyc experimental` CLI can inspect, syntax-check,
 semantic-check, or interpret one source-root-relative `.fy` file, while semantic checking also
 accepts an explicit module set. There is no stable CLI, tagged runtime values, resource drop trace, backend, standard
 library, runtime, package manager, supported target, or stable language revision yet.
@@ -52,7 +52,8 @@ literal values, or absolute paths. `check-semantics` accepts an explicit bounded
 for the currently implemented scalar, safe-borrow, whole-resource, Region-parameter, and Result subset. It rejects duplicate paths, root
 escapes, oversized input sets, and unsupported syntax rather than claiming success. The official
 `experimental run` accepts one file whose declared module contains `main() -> i32`, executes its
-verified MIR in the bounded scalar interpreter, and reports either `result: <i32>` or a canonical
+verified MIR in the bounded scalar interpreter, including boolean `if` and short-circuit control,
+and reports either `result: <i32>` or a canonical
 trap. The official
 `fairyc check` command remains unavailable until tagged resource payloads, reassignment/close rules,
 complete must-use dataflow, and effects exist.

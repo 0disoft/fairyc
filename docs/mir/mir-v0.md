@@ -57,7 +57,7 @@ Statements include local storage markers, assignment, drop-flag update, `Drop`, 
 
 ### Terminators
 
-Terminators include `Goto`, integer or discriminant switch, `Call`, `Return`, `Trap`, and `Unreachable`. Stage 0 calls have normal successors only. There is no unwind successor.
+Terminators include `Goto`, integer, boolean, or discriminant switch, `Call`, `Return`, `Trap`, and `Unreachable`. A boolean switch has exactly two successors ordered true then false. Source `&&` and `||` are lowered to boolean switches and branch-local assignments before verification. Stage 0 calls have normal successors only. There is no unwind successor.
 
 Fixture-visible trap categories use the canonical identities `bounds`, `integer-overflow`, `division-by-zero`, `signed-division-overflow`, `invalid-shift`, `assertion-failed`, and `unreachable`. A backend may choose a target-specific termination mechanism, but it cannot rename or merge the semantic outcome reported by the interpreter and differential harness.
 

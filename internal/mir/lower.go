@@ -105,9 +105,23 @@ func (l *functionLowerer) lower() (Function, error) {
 }
 
 func (l *functionLowerer) lowerBlock(block hir.Block) (bool, error) {
-	for _, statement := range block.Statements {
+	terminated, err := l.lowerStatements(block.Statements)
+	if err != nil || terminated {
+		return terminated, err
+	}
+	if block.Tail != nil {
+		if err := l.lowerReturn(block.Tail, block.Tail.Span); err != nil {
+			return false, err
+		}
+		return true, nil
+	}
+	return false, nil
+}
+
+func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, error) {
+	for _, statement := range statements {
 		if l.blockTerminated(l.current) {
-			break
+			return true, nil
 		}
 		switch statement.Kind {
 		case "binding":
@@ -139,20 +153,25 @@ func (l *functionLowerer) lowerBlock(block hir.Block) (bool, error) {
 			if statement.Target != nil && statement.Target.Kind == "path" && value.Kind != OperandInvalid {
 				l.appendOperation(Operation{Kind: OperationAssign, Span: statement.Span, DestinationLocal: LocalID(statement.Target.Symbol), Operands: []Operand{value}})
 			}
+		case "while":
+			return false, fmt.Errorf("while lowering requires the loop-budget fixture contract")
 		default:
 			return false, fmt.Errorf("unsupported HIR statement %q", statement.Kind)
 		}
 	}
-	if l.blockTerminated(l.current) {
-		return true, nil
+	return l.blockTerminated(l.current), nil
+}
+
+func (l *functionLowerer) lowerNestedBlock(block hir.Block) (Operand, bool, error) {
+	terminated, err := l.lowerStatements(block.Statements)
+	if err != nil || terminated {
+		return Operand{}, terminated, err
 	}
-	if block.Tail != nil {
-		if err := l.lowerReturn(block.Tail, block.Tail.Span); err != nil {
-			return false, err
-		}
-		return true, nil
+	if block.Tail == nil {
+		return Operand{}, false, nil
 	}
-	return false, nil
+	value, err := l.lowerExpression(block.Tail)
+	return value, l.blockTerminated(l.current), err
 }
 
 func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, error) {
@@ -161,6 +180,16 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 	}
 	switch expression.Kind {
 	case "literal":
+		if expression.Type == hir.TypeBool {
+			switch expression.Value {
+			case "true":
+				return Operand{Kind: OperandI32, I32: 1}, nil
+			case "false":
+				return Operand{Kind: OperandI32, I32: 0}, nil
+			default:
+				return Operand{}, fmt.Errorf("invalid bool literal %q", expression.Value)
+			}
+		}
 		value, err := parseI32(expression.Value)
 		if err != nil {
 			return Operand{}, err
@@ -197,6 +226,9 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		if len(expression.Children) != 2 {
 			return Operand{}, fmt.Errorf("binary expression has %d children", len(expression.Children))
 		}
+		if expression.Operator == "&&" || expression.Operator == "||" {
+			return l.lowerShortCircuit(expression)
+		}
 		left, err := l.lowerExpression(&expression.Children[0])
 		if err != nil {
 			return Operand{}, err
@@ -215,15 +247,158 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		return Operand{Kind: OperandLocal, Local: destination}, nil
 	case "propagate":
 		return l.lowerPropagate(expression)
+	case "if":
+		return l.lowerIf(expression)
 	case "block":
 		if expression.Block == nil {
 			return Operand{}, fmt.Errorf("block expression has no block")
 		}
-		_, err := l.lowerBlock(*expression.Block)
-		return Operand{}, err
+		value, _, err := l.lowerNestedBlock(*expression.Block)
+		return value, err
 	default:
 		return Operand{}, fmt.Errorf("unsupported HIR expression %q", expression.Kind)
 	}
+}
+
+func (l *functionLowerer) lowerIf(expression *hir.Expression) (Operand, error) {
+	if len(expression.Children) < 2 || len(expression.Children) > 3 {
+		return Operand{}, fmt.Errorf("if expression has %d children", len(expression.Children))
+	}
+	condition, err := l.lowerExpression(&expression.Children[0])
+	if err != nil {
+		return Operand{}, err
+	}
+	branchLive := cloneLive(l.live)
+	thenBlock := l.newBlock()
+	elseBlock := l.newBlock()
+	joinBlock := l.newBlock()
+	l.terminate(Terminator{
+		Kind: TerminatorSwitch, Span: expression.Children[0].Span,
+		Successors: []BlockID{thenBlock, elseBlock}, UnwindSuccessor: NoBlock,
+		SwitchKind: "bool", SwitchOperands: []Operand{condition},
+	})
+
+	destination := NoLocal
+	if expression.Type != hir.TypeVoid {
+		destination = l.newTemporary()
+	}
+
+	l.current = thenBlock
+	l.live = cloneLive(branchLive)
+	thenValue, err := l.lowerExpression(&expression.Children[1])
+	if err != nil {
+		return Operand{}, err
+	}
+	thenContinues := !l.blockTerminated(l.current)
+	thenLive := cloneLive(l.live)
+	if thenContinues {
+		if destination != NoLocal {
+			if thenValue.Kind == OperandInvalid {
+				return Operand{}, fmt.Errorf("value-producing if has an empty then branch")
+			}
+			l.appendOperation(Operation{Kind: OperationAssign, Span: expression.Children[1].Span, DestinationLocal: destination, Operands: []Operand{thenValue}})
+		}
+		l.terminate(Terminator{Kind: TerminatorGoto, Span: expression.Children[1].Span, Successors: []BlockID{joinBlock}, UnwindSuccessor: NoBlock})
+	}
+
+	l.current = elseBlock
+	l.live = cloneLive(branchLive)
+	elseValue := Operand{}
+	if len(expression.Children) == 3 {
+		elseValue, err = l.lowerExpression(&expression.Children[2])
+		if err != nil {
+			return Operand{}, err
+		}
+	}
+	elseContinues := !l.blockTerminated(l.current)
+	elseLive := cloneLive(l.live)
+	if elseContinues {
+		if destination != NoLocal {
+			if elseValue.Kind == OperandInvalid {
+				return Operand{}, fmt.Errorf("value-producing if has an empty else branch")
+			}
+			l.appendOperation(Operation{Kind: OperationAssign, Span: expressionSpan(&expression.Children[len(expression.Children)-1], expression.Span), DestinationLocal: destination, Operands: []Operand{elseValue}})
+		}
+		l.terminate(Terminator{Kind: TerminatorGoto, Span: expression.Span, Successors: []BlockID{joinBlock}, UnwindSuccessor: NoBlock})
+	}
+
+	l.current = joinBlock
+	switch {
+	case thenContinues && elseContinues:
+		if !sameLiveState(thenLive, elseLive) {
+			return Operand{}, fmt.Errorf("if branches disagree on resource state after Flow validation")
+		}
+		l.live = thenLive
+	case thenContinues:
+		l.live = thenLive
+	case elseContinues:
+		l.live = elseLive
+	default:
+		l.live = cloneLive(branchLive)
+		l.terminate(Terminator{Kind: TerminatorUnreachable, Span: expression.Span, UnwindSuccessor: NoBlock})
+		return Operand{}, nil
+	}
+	if destination == NoLocal {
+		return Operand{}, nil
+	}
+	return Operand{Kind: OperandLocal, Local: destination}, nil
+}
+
+func (l *functionLowerer) lowerShortCircuit(expression *hir.Expression) (Operand, error) {
+	left, err := l.lowerExpression(&expression.Children[0])
+	if err != nil {
+		return Operand{}, err
+	}
+	branchLive := cloneLive(l.live)
+	rightBlock := l.newBlock()
+	shortBlock := l.newBlock()
+	joinBlock := l.newBlock()
+	successors := []BlockID{rightBlock, shortBlock}
+	shortValue := int32(0)
+	if expression.Operator == "||" {
+		successors = []BlockID{shortBlock, rightBlock}
+		shortValue = 1
+	}
+	l.terminate(Terminator{
+		Kind: TerminatorSwitch, Span: expression.Children[0].Span,
+		Successors: successors, UnwindSuccessor: NoBlock,
+		SwitchKind: "bool", SwitchOperands: []Operand{left},
+	})
+
+	destination := l.newTemporary()
+	l.current = shortBlock
+	l.live = cloneLive(branchLive)
+	l.appendOperation(Operation{Kind: OperationAssign, Span: expression.Children[0].Span, DestinationLocal: destination, Operands: []Operand{{Kind: OperandI32, I32: shortValue}}})
+	l.terminate(Terminator{Kind: TerminatorGoto, Span: expression.Span, Successors: []BlockID{joinBlock}, UnwindSuccessor: NoBlock})
+	shortLive := cloneLive(l.live)
+
+	l.current = rightBlock
+	l.live = cloneLive(branchLive)
+	right, err := l.lowerExpression(&expression.Children[1])
+	if err != nil {
+		return Operand{}, err
+	}
+	rightContinues := !l.blockTerminated(l.current)
+	rightLive := cloneLive(l.live)
+	if rightContinues {
+		if right.Kind == OperandInvalid {
+			return Operand{}, fmt.Errorf("short-circuit right operand has no value")
+		}
+		l.appendOperation(Operation{Kind: OperationAssign, Span: expression.Children[1].Span, DestinationLocal: destination, Operands: []Operand{right}})
+		l.terminate(Terminator{Kind: TerminatorGoto, Span: expression.Span, Successors: []BlockID{joinBlock}, UnwindSuccessor: NoBlock})
+	}
+
+	l.current = joinBlock
+	if rightContinues {
+		if !sameLiveState(shortLive, rightLive) {
+			return Operand{}, fmt.Errorf("short-circuit branches disagree on resource state after Flow validation")
+		}
+		l.live = rightLive
+	} else {
+		l.live = shortLive
+	}
+	l.result.EliminatedForms = append(l.result.EliminatedForms, EliminatedFormFact{Form: "source-short-circuit", RemainingCount: 0})
+	return Operand{Kind: OperandLocal, Local: destination}, nil
 }
 
 func (l *functionLowerer) lowerCall(expression *hir.Expression) (Operand, error) {

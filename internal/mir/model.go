@@ -175,11 +175,12 @@ type Operation struct {
 type TerminatorKind string
 
 const (
-	TerminatorGoto   TerminatorKind = "goto"
-	TerminatorCall   TerminatorKind = "call"
-	TerminatorSwitch TerminatorKind = "switch"
-	TerminatorReturn TerminatorKind = "return"
-	TerminatorTrap   TerminatorKind = "trap"
+	TerminatorGoto        TerminatorKind = "goto"
+	TerminatorCall        TerminatorKind = "call"
+	TerminatorSwitch      TerminatorKind = "switch"
+	TerminatorReturn      TerminatorKind = "return"
+	TerminatorTrap        TerminatorKind = "trap"
+	TerminatorUnreachable TerminatorKind = "unreachable"
 )
 
 // Terminator ends one block. Calls never have an unwind successor in Stage 0.

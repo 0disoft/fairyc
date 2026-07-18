@@ -29,7 +29,8 @@ It checks local last-use loans, borrow conflicts, borrow return origins, whole m
 branch joins, loop back-edges, Region parameter origins, `place`, and lexical Region escape when its
 Arena provider is included explicitly. It also checks the fixture-backed Result return, discard,
 propagation, must-use, and error-compatibility boundary. `experimental run` executes the selected
-module's zero-argument `main() -> i32` through verified MIR and reports an exact scalar result or
+module's zero-argument `main() -> i32` through verified MIR, including boolean `if` and
+short-circuit control, and reports an exact scalar result or
 canonical trap. It does not discover files, implement tagged resource payloads, resource drop
 traces, complete must-use dataflow, reassignment/close ownership, effects, host I/O, or native code generation. In
 particular, it does not satisfy the planned `fairyc check` contract.

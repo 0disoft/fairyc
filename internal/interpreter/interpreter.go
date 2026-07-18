@@ -186,6 +186,8 @@ func (r *runtime) call(function *mir.Function, arguments []int32, depth int) (Ou
 				return Outcome{}, fmt.Errorf("trap in %q has no category", function.Name)
 			}
 			return Outcome{Kind: OutcomeTrap, TrapCategory: terminator.TrapCategories[0]}, nil
+		case mir.TerminatorUnreachable:
+			return Outcome{}, fmt.Errorf("function %q reached an unreachable MIR block", function.Name)
 		default:
 			return Outcome{}, fmt.Errorf("function %q has unsupported terminator %q", function.Name, terminator.Kind)
 		}
@@ -234,20 +236,34 @@ func oneSuccessor(terminator mir.Terminator) (mir.BlockID, error) {
 }
 
 func evaluateSwitch(locals map[mir.LocalID]int32, terminator mir.Terminator) (mir.BlockID, string, error) {
-	if terminator.SwitchKind != "checked-division" || len(terminator.Successors) != 2 {
+	switch terminator.SwitchKind {
+	case "bool":
+		value, err := evaluateOne(locals, terminator.SwitchOperands)
+		if err != nil {
+			return mir.NoBlock, "", err
+		}
+		if len(terminator.Successors) != 2 {
+			return mir.NoBlock, "", fmt.Errorf("bool switch has %d successors, want 2", len(terminator.Successors))
+		}
+		if value != 0 && value != 1 {
+			return mir.NoBlock, "", fmt.Errorf("bool switch received non-boolean value %d", value)
+		}
+		return terminator.Successors[value^1], "", nil
+	case "checked-division":
+		left, right, err := evaluateTwo(locals, terminator.SwitchOperands)
+		if err != nil {
+			return mir.NoBlock, "", err
+		}
+		if right == 0 {
+			return mir.NoBlock, "division-by-zero", nil
+		}
+		if left == math.MinInt32 && right == -1 {
+			return mir.NoBlock, "signed-division-overflow", nil
+		}
+		return terminator.Successors[0], "", nil
+	default:
 		return mir.NoBlock, "", capabilityError("unsupported MIR switch %q", terminator.SwitchKind)
 	}
-	left, right, err := evaluateTwo(locals, terminator.SwitchOperands)
-	if err != nil {
-		return mir.NoBlock, "", err
-	}
-	if right == 0 {
-		return mir.NoBlock, "division-by-zero", nil
-	}
-	if left == math.MinInt32 && right == -1 {
-		return mir.NoBlock, "signed-division-overflow", nil
-	}
-	return terminator.Successors[0], "", nil
 }
 
 func unary(operator string, value int32) (int32, string, error) {
@@ -261,6 +277,11 @@ func unary(operator string, value int32) (int32, string, error) {
 		return -value, "", nil
 	case "~":
 		return ^value, "", nil
+	case "!":
+		if value != 0 && value != 1 {
+			return 0, "", fmt.Errorf("logical not received non-boolean value %d", value)
+		}
+		return value ^ 1, "", nil
 	default:
 		return 0, "", capabilityError("unsupported unary operator %q", operator)
 	}
