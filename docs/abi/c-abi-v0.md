@@ -80,9 +80,16 @@ These entries define target facts for later compiler stages. They do not claim t
 source scalar, `c.*` name, aggregate form, or call class is accepted by the current semantic
 frontend or C backend.
 
+`internal/layout` now executes those facts for scalars, pointers, explicitly based C enums,
+positive fixed arrays, and nonempty nested structs. Its versioned v0 manifest records exact size,
+natural alignment, declaration-order field offsets, top-level internal padding, tail padding, and
+closed rejection codes across 14 cases. This proves the internal target-layout algorithm against
+repository expectations only. Clang/GCC `sizeof`, `_Alignof`, `offsetof`, call, return, object, and
+bidirectional ABI probes remain required native evidence.
+
 This executable description is target data, not conformance evidence. Its evidence block names the
 existing `scalar-payload-c11` subset, keeps `emittable`, `conformant`, and `supported` false, and
-lists the missing layout, bidirectional ABI, runtime, standard-library, hosted-Linux, toolchain
+lists the missing native C layout-probe, bidirectional ABI, runtime, standard-library, hosted-Linux, toolchain
 baseline, and provisioning gates. `fairyc experimental target-spec x86_64-linux-gnu` exposes that
 same immutable data without probing the host.
 

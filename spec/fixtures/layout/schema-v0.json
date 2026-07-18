@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fairyc:layout-fixtures:v0",
+  "title": "Fairy C target-layout fixtures v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "target", "contracts", "deferred", "cases"],
+  "properties": {
+    "$schema": { "type": "string", "minLength": 1 },
+    "schemaVersion": { "const": "fairyc.layout-fixtures/v0" },
+    "target": { "const": "x86_64-linux-gnu" },
+    "contracts": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "deferred": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/case" }
+    }
+  },
+  "$defs": {
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "expect"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^(pass|fail)\\.[a-z0-9-]+$" },
+        "type": { "$ref": "#/$defs/type" },
+        "expect": { "$ref": "#/$defs/expect" }
+      }
+    },
+    "type": {
+      "oneOf": [
+        { "$ref": "#/$defs/namedLeaf" },
+        { "$ref": "#/$defs/unnamedLeaf" },
+        { "$ref": "#/$defs/array" },
+        { "$ref": "#/$defs/struct" }
+      ]
+    },
+    "namedLeaf": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "name"],
+      "properties": {
+        "kind": { "enum": ["language-scalar", "c-scalar", "c-enum"] },
+        "name": { "type": "string", "minLength": 1 }
+      }
+    },
+    "unnamedLeaf": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": { "enum": ["pointer", "function-pointer"] }
+      }
+    },
+    "array": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "element", "length"],
+      "properties": {
+        "kind": { "const": "array" },
+        "element": { "$ref": "#/$defs/type" },
+        "length": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "struct": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "fields"],
+      "properties": {
+        "kind": { "const": "struct" },
+        "name": { "type": "string", "minLength": 1 },
+        "fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/field" }
+        }
+      }
+    },
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "type": { "$ref": "#/$defs/type" }
+      }
+    },
+    "expect": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "layout"],
+          "properties": {
+            "status": { "const": "pass" },
+            "layout": { "$ref": "#/$defs/layout" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "errorCode"],
+          "properties": {
+            "status": { "const": "fail" },
+            "errorCode": {
+              "enum": [
+                "invalid-type",
+                "unknown-scalar",
+                "duplicate-field",
+                "empty-aggregate",
+                "invalid-array-length",
+                "overflow",
+                "depth-limit"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sizeBytes", "alignmentBytes", "fields", "padding"],
+      "properties": {
+        "sizeBytes": { "type": "integer", "minimum": 1 },
+        "alignmentBytes": { "type": "integer", "minimum": 1 },
+        "fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/fieldLayout" }
+        },
+        "padding": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/padding" }
+        }
+      }
+    },
+    "fieldLayout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "offsetBytes", "sizeBytes", "alignmentBytes"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "offsetBytes": { "type": "integer", "minimum": 0 },
+        "sizeBytes": { "type": "integer", "minimum": 1 },
+        "alignmentBytes": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "padding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["offsetBytes", "sizeBytes"],
+      "properties": {
+        "offsetBytes": { "type": "integer", "minimum": 0 },
+        "sizeBytes": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}

@@ -48,6 +48,10 @@ The first executable `fairyc.target-spec/v0` description now owns the host-indep
 ELF/DWARF identities, and fail-closed maturity evidence. It deliberately contains no local
 compiler, SDK, or sysroot path and still reports `emittable`, `conformant`, and `supported` as
 false.
+The host-independent layout engine now executes all 14 target-layout v0 cases for language and C
+scalars, data and function pointers, explicitly based C enums, fixed arrays, nested structs, field
+offsets, internal and tail padding, and fail-closed malformed or overflowing inputs. These are
+target-mechanics fixtures, not source-language aggregate support or native C ABI proof.
 A separate fail-closed Linux/amd64 command is now present to compile those cases with Clang and GCC
 at `-O0` and `-O2`, link the embedded scalar trap runtime, and compare process outcomes. It cannot run on
 this Windows host because no WSL distribution or C compiler is installed, and its hosted CI result
@@ -135,6 +139,7 @@ compilation.
 - Linux scalar C differential runner: `internal/cbackendnative/`
 - Executable target description: `internal/target/`
 - Experimental target JSON schema: `spec/cli/experimental-target-spec-v0.schema.json`
+- Target layout engine and fixtures: `internal/layout/`, `spec/fixtures/layout/manifest-v0.json`
 - Resolved package graph fixtures: `spec/fixtures/package/manifest-v0.json`
 - MIR and C backend contracts: `docs/mir/`
 - Package identity and visibility: `docs/package/package-graph-v0.md`

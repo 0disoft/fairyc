@@ -40,7 +40,7 @@ eligible glibc, Clang, and GCC installation before it can produce native evidenc
    failures and emit no JSON.
 6. Target maturity remains fail-closed. The descriptor reports the existing
    `scalar-payload-c11` emission subset but keeps `emittable`, `conformant`, and `supported` false.
-   It lists missing layout and bidirectional ABI fixtures, complete runtime and standard library,
+   It lists missing C layout probes and bidirectional ABI fixtures, complete runtime and standard library,
    hosted Linux receipt, toolchain baseline, and provisioning evidence.
    A scalar layout or `@repr(C)` vocabulary entry does not by itself make the corresponding Fairy C
    source type, aggregate, foreign call, or ABI fixture implemented.

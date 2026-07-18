@@ -53,6 +53,10 @@ The backend cannot add C or LLVM overflow, exactness, alignment, or alias promis
 
 - The `fairyc.target-spec/v0` description, not host `sizeof(long)` or Go layout, determines scalar,
   pointer, stack, classifier, and object-format facts.
+- `internal/layout` now computes checked array and aggregate size, alignment, field offset, and
+  padding from that description. The current scalar-payload C emitter does not yet consume general
+  aggregate results, so resources and `@repr(C)` values remain rejected rather than partially
+  lowered.
 - Bit reinterpretation and potentially unaligned access use a `memcpy`-style transport rather than incompatible lvalue access.
 - `Option<i32>` and `Result<i32, i32>` currently use distinct private structs with a `uint32_t` tag
   and `int32_t` payload. Generated C extracts payload only in the selected variant block and traps

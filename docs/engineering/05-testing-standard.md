@@ -18,6 +18,9 @@ and ineligible-host failure before artifact creation.
 Target-description tests separately cover structural validation, power-of-two layouts, closed and
 sorted scalar and feature sets, immutable lookup copies, unknown-target rejection, deterministic
 host-independent JSON, false maturity claims, and top-level JSON-schema synchronization.
+`internal/layoutfixture` additionally executes all 14 v0 layout cases with strict JSON decoding,
+exact target binding, checked size/alignment arithmetic, declaration-order offsets and padding,
+closed error codes, sorted unique case IDs, and pass/fail expectation-shape validation.
 
 Experimental semantic CLI coverage also verifies explicit multi-file module sets, input-order
 determinism, cross-file visibility diagnostics, duplicate rejection, bounded file counts, and a
@@ -85,6 +88,7 @@ evidence requirements.
 | C emission | `spec/fixtures/c-emission/` currently proves 8 verified scalar-payload source-to-C11 cases, including private `Option<i32>` and `Result<i32, i32>` transport, deterministic target/dialect/function/feature metadata, LF-only path-clean output, and repeated byte identity; it does not prove C syntax acceptance or native behavior |
 | C differential | The configured Linux scalar-payload runner covers all 8 C-emission cases across Clang/GCC and low/optimized profiles for 32 process-status comparisons, then exercises the actual experimental build CLI with both scalar tag families under all 4 compiler/profile pairs; hosted execution is not yet observed, and output, wider returns, drop traces, sanitizers, public layout, ABI, and the complete product runtime remain deferred |
 | Target description | `internal/target` proves the `fairyc.target-spec/v0` structural invariants, canonical x86-64 Linux GNU facts, immutable lookup, absent host paths, and fail-closed maturity evidence; `internal/cli` proves deterministic schema-shaped inspection and unknown-ID rejection, but no layout or ABI probe runs yet |
+| Target layout | `spec/fixtures/layout/` currently proves 14 host-independent v0 cases for language and C scalars, data and function pointers, explicit C-enum bases, arrays, nested aggregates, exact top-level offsets and padding, and malformed or overflowing input rejection; Clang/GCC layout probes and SysV call classification remain deferred |
 | C safety | Overflow, division, shifts, evaluation order, aliasing, alignment, inactive payload, and sanitizer-assisted checks |
 | ABI | Target layout, calls, callbacks, raw bindings, and boundary shims for candidate target profiles |
 | Runtime and stdlib | Zero-size normalization, allocation failure, reserve rollback, UTF-8 invariants, partial I/O, Linux close consumption, and retained-pointer wrappers |

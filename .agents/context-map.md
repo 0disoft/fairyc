@@ -39,6 +39,9 @@
 - Linux scalar C differential route: internal/cbackendnative/, cmd/fairyc-native-fixtures/
 - Executable target-description route: internal/target/
 - Experimental target JSON schema route: spec/cli/experimental-target-spec-v0.schema.json
+- Target layout implementation route: internal/layout/
+- Target layout fixture route: spec/fixtures/layout/manifest-v0.json
+- Target layout fixture runner route: internal/layoutfixture/
 - Resolved package graph fixture route: spec/fixtures/package/manifest-v0.json
 - MIR and C backend route: docs/mir/
 - Package identity and visibility route: docs/package/

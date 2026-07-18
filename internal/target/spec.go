@@ -134,10 +134,10 @@ var x8664LinuxGNUSpec = Spec{
 		EmissionSubset: "scalar-payload-c11",
 		Missing: []string{
 			"bidirectional-c-abi-fixtures",
+			"c-layout-probes",
 			"complete-runtime",
 			"complete-standard-library",
 			"hosted-linux-receipt",
-			"layout-fixtures",
 			"toolchain-baseline",
 			"toolchain-provisioning",
 		},

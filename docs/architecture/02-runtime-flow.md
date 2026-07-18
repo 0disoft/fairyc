@@ -54,6 +54,10 @@ layouts, SysV AMD64 classifier identities, stack facts, ELF/DWARF contracts, and
 The C driver adds local compiler, libc, and path resolution only after selecting that target. A
 target can therefore be inspected on Windows without borrowing Windows layout or claiming that the
 Linux toolchain is locally executable.
+`internal/layout` is the next boundary: it turns those facts into checked array and aggregate size,
+alignment, offset, and padding results before any backend chooses C syntax. The current layout
+fixtures are host-independent expectations; native C probes and SysV call classification remain
+later evidence layers.
 
 The implemented first slice emits deterministic ISO C11 for verified scalar-payload MIR, including
 private `Option<i32>` and `Result<i32, i32>` transport. A separate

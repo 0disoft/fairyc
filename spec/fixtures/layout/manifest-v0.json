@@ -1,0 +1,187 @@
+{
+  "$schema": "./schema-v0.json",
+  "schemaVersion": "fairyc.layout-fixtures/v0",
+  "target": "x86_64-linux-gnu",
+  "contracts": [
+    "docs/product/02-spec.md",
+    "docs/adr/0006-c-abi-v0-and-first-conformance-target.md",
+    "docs/adr/0030-executable-x86-64-linux-gnu-target-spec.md",
+    "docs/adr/0031-target-layout-engine-and-fixtures.md",
+    "docs/abi/c-abi-v0.md",
+    "docs/compatibility/versioning-v0.md"
+  ],
+  "deferred": [
+    "source-level fixed arrays, inert structs, explicit C enums, raw pointers, and @repr(C) semantic lowering",
+    "SysV AMD64 eightbyte argument and return class execution, register exhaustion, and hidden aggregate returns",
+    "Clang and GCC layout probes, bidirectional C ABI calls, object metadata, and hosted conformance receipts",
+    "resources, tagged values, safe borrows, slices, strings, packed layout, unions, bit fields, atomics, vectors, and additional targets"
+  ],
+  "cases": [
+    {
+      "id": "fail.array-overflow",
+      "type": {
+        "kind": "array",
+        "length": 18446744073709551615,
+        "element": { "kind": "language-scalar", "name": "i32" }
+      },
+      "expect": { "status": "fail", "errorCode": "overflow" }
+    },
+    {
+      "id": "fail.array-zero-length",
+      "type": {
+        "kind": "array",
+        "length": 0,
+        "element": { "kind": "language-scalar", "name": "i32" }
+      },
+      "expect": { "status": "fail", "errorCode": "invalid-array-length" }
+    },
+    {
+      "id": "fail.duplicate-field",
+      "type": {
+        "kind": "struct",
+        "name": "Duplicate",
+        "fields": [
+          { "name": "value", "type": { "kind": "language-scalar", "name": "i32" } },
+          { "name": "value", "type": { "kind": "language-scalar", "name": "i32" } }
+        ]
+      },
+      "expect": { "status": "fail", "errorCode": "duplicate-field" }
+    },
+    {
+      "id": "fail.empty-struct",
+      "type": { "kind": "struct", "name": "Empty", "fields": [] },
+      "expect": { "status": "fail", "errorCode": "empty-aggregate" }
+    },
+    {
+      "id": "fail.unknown-scalar",
+      "type": { "kind": "language-scalar", "name": "i128" },
+      "expect": { "status": "fail", "errorCode": "unknown-scalar" }
+    },
+    {
+      "id": "pass.array-i32-three",
+      "type": {
+        "kind": "array",
+        "length": 3,
+        "element": { "kind": "language-scalar", "name": "i32" }
+      },
+      "expect": {
+        "status": "pass",
+        "layout": { "sizeBytes": 12, "alignmentBytes": 4, "fields": [], "padding": [] }
+      }
+    },
+    {
+      "id": "pass.c-enum-uint",
+      "type": { "kind": "c-enum", "name": "c.uint" },
+      "expect": {
+        "status": "pass",
+        "layout": { "sizeBytes": 4, "alignmentBytes": 4, "fields": [], "padding": [] }
+      }
+    },
+    {
+      "id": "pass.c-long",
+      "type": { "kind": "c-scalar", "name": "c.long" },
+      "expect": {
+        "status": "pass",
+        "layout": { "sizeBytes": 8, "alignmentBytes": 8, "fields": [], "padding": [] }
+      }
+    },
+    {
+      "id": "pass.function-pointer",
+      "type": { "kind": "function-pointer" },
+      "expect": {
+        "status": "pass",
+        "layout": { "sizeBytes": 8, "alignmentBytes": 8, "fields": [], "padding": [] }
+      }
+    },
+    {
+      "id": "pass.language-bool",
+      "type": { "kind": "language-scalar", "name": "bool" },
+      "expect": {
+        "status": "pass",
+        "layout": { "sizeBytes": 1, "alignmentBytes": 1, "fields": [], "padding": [] }
+      }
+    },
+    {
+      "id": "pass.language-i32",
+      "type": { "kind": "language-scalar", "name": "i32" },
+      "expect": {
+        "status": "pass",
+        "layout": { "sizeBytes": 4, "alignmentBytes": 4, "fields": [], "padding": [] }
+      }
+    },
+    {
+      "id": "pass.nested-struct",
+      "type": {
+        "kind": "struct",
+        "name": "Outer",
+        "fields": [
+          { "name": "prefix", "type": { "kind": "language-scalar", "name": "u16" } },
+          {
+            "name": "inner",
+            "type": {
+              "kind": "struct",
+              "name": "Inner",
+              "fields": [
+                { "name": "small", "type": { "kind": "language-scalar", "name": "u8" } },
+                { "name": "wide", "type": { "kind": "language-scalar", "name": "i32" } }
+              ]
+            }
+          },
+          { "name": "suffix", "type": { "kind": "language-scalar", "name": "u8" } }
+        ]
+      },
+      "expect": {
+        "status": "pass",
+        "layout": {
+          "sizeBytes": 16,
+          "alignmentBytes": 4,
+          "fields": [
+            { "name": "prefix", "offsetBytes": 0, "sizeBytes": 2, "alignmentBytes": 2 },
+            { "name": "inner", "offsetBytes": 4, "sizeBytes": 8, "alignmentBytes": 4 },
+            { "name": "suffix", "offsetBytes": 12, "sizeBytes": 1, "alignmentBytes": 1 }
+          ],
+          "padding": [
+            { "offsetBytes": 2, "sizeBytes": 2 },
+            { "offsetBytes": 13, "sizeBytes": 3 }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pass.padded-struct",
+      "type": {
+        "kind": "struct",
+        "name": "Padded",
+        "fields": [
+          { "name": "small", "type": { "kind": "language-scalar", "name": "u8" } },
+          { "name": "wide", "type": { "kind": "language-scalar", "name": "i32" } },
+          { "name": "tail", "type": { "kind": "language-scalar", "name": "u16" } }
+        ]
+      },
+      "expect": {
+        "status": "pass",
+        "layout": {
+          "sizeBytes": 12,
+          "alignmentBytes": 4,
+          "fields": [
+            { "name": "small", "offsetBytes": 0, "sizeBytes": 1, "alignmentBytes": 1 },
+            { "name": "wide", "offsetBytes": 4, "sizeBytes": 4, "alignmentBytes": 4 },
+            { "name": "tail", "offsetBytes": 8, "sizeBytes": 2, "alignmentBytes": 2 }
+          ],
+          "padding": [
+            { "offsetBytes": 1, "sizeBytes": 3 },
+            { "offsetBytes": 10, "sizeBytes": 2 }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pass.pointer",
+      "type": { "kind": "pointer" },
+      "expect": {
+        "status": "pass",
+        "layout": { "sizeBytes": 8, "alignmentBytes": 8, "fields": [], "padding": [] }
+      }
+    }
+  ]
+}

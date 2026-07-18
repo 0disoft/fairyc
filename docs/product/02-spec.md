@@ -174,6 +174,11 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - `internal/target` owns the executable `fairyc.target-spec/v0` description for the first target.
   It records host-independent LP64, scalar, pointer, SysV AMD64, ELF, unwind, debug, and C-layout
   feature facts while excluding every local compiler, SDK, and sysroot path.
+- `internal/layout` consumes that description and computes checked scalar, pointer, explicitly
+  based C-enum, positive fixed-array, and nonempty nested-struct size, natural alignment, field
+  offset, and top-level padding facts. `fairyc.layout-fixtures/v0` currently executes 14 pass/fail
+  cases. This target-mechanics path does not implement the corresponding source syntax or SysV
+  call classification.
 - A small MIR interpreter is the semantic oracle before any second native backend.
 - Its fixture-only output hooks require explicit manifest bindings, capture bytes in memory under a
   shared limit, and never authorize source names, the CLI, or host streams.
@@ -200,6 +205,11 @@ Source-linked MIR normalization assertions are versioned in `spec/fixtures/mir/m
 MIR verifier rejection recipes are versioned in `spec/fixtures/mir-verifier/manifest-v0.json`. They require a verified named seed, exactly one typed mutation, and exactly one expected `Vxxxx` result without creating a general serialized MIR or plugin format.
 
 Resolved package graph assertions are versioned in `spec/fixtures/package/manifest-v0.json`. They fix package-instance equality, one source root per instance, direct-only dependency visibility, module-provider ambiguity, and explicit standard-library injection without choosing public manifest, lockfile, coordinate, registry, or solver syntax.
+
+Target layout assertions are versioned in `spec/fixtures/layout/manifest-v0.json`. They fix the
+first target's closed layout input vocabulary, size/alignment arithmetic, declaration-order offsets,
+top-level padding, and failure codes without creating a serialized compiler IR, source-level
+aggregate promise, or native ABI receipt.
 
 Formatting, checking, testing, documentation, vendoring, binding generation, and ABI inspection are planned tool surfaces, not claims of current implementation.
 

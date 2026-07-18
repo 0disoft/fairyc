@@ -56,6 +56,12 @@ evidence is current capability evidence, not an ABI promise; promoting a status 
 fixture and hosted receipts rather than only editing the booleans. The experimental CLI schema at
 `spec/cli/experimental-target-spec-v0.schema.json` must remain synchronized with the Go model.
 
+`fairyc.layout-fixtures/v0` separately versions the repository input and expectation vocabulary for
+the target-layout engine. It is not a public type-description format, native ABI profile, cache
+artifact, or C probe result. Adding a layout family or fixture-visible failure code requires a new
+fixture-contract decision; changing target sizes, alignments, field placement, or classifier
+meaning additionally requires the applicable target-schema or ABI-profile decision.
+
 ## Diagnostics
 
 The diagnostic catalog versions rule identities. Once a code appears in a released compiler, it is not reused for another rule. Wording, related notes, and repair hints may improve without changing the code; severity or rule meaning changes require a new compatibility decision.
