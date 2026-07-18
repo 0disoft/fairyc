@@ -102,9 +102,12 @@ target-laid-out types. It assigns `INTEGER`, `SSE`, or `MEMORY` eightbyte classe
 arguments to the six integer and eight SSE argument registers; maps returns to the two integer and
 two SSE return registers; rolls an aggregate wholly to the stack when either register family is
 insufficient; and reserves `rdi`/returns `rax` for a hidden memory-result pointer. The versioned v0
-C ABI manifest records 17 exact cases, of which 14 are pass cases available to a later native
-probe. This host-independent plan is not a Clang/GCC crossing, does not expose exact stack-area
-offsets, and does not clear the `bidirectional-c-abi-fixtures` target marker.
+C ABI manifest records 17 exact cases, of which 14 pass cases feed the native probe. The Linux
+runner now generates separate caller and callee objects for those pass cases,
+crosses Clang-to-GCC and GCC-to-Clang at low and optimized profiles, and plans 56 zero-output
+executions. That configured cross-compiler path is not an observed hosted receipt or Fairy source
+FFI lowering, does not expose exact stack-area offsets, and does not clear the
+`bidirectional-c-abi-fixtures` target marker.
 
 This executable description is target data, not conformance evidence. Its evidence block names the
 existing `scalar-and-flat-i32-resource-tagged-c11` subset, keeps `emittable`, `conformant`, and `supported` false, and
@@ -124,11 +127,12 @@ requirements remain missing evidence rather than invented values in `TargetSpec`
 
 Layout fixtures cover size, alignment, offsets, padding, nested structs, fixed arrays, explicit C enums, pointer fields, and rejected types. They include small register-sized aggregates and larger aggregates that exercise memory and hidden-return paths.
 
-Native call fixtures are bidirectional: Fairy-to-C and C-to-Fairy. The host-independent v0
+Native source-level call fixtures are eventually bidirectional: Fairy-to-C and C-to-Fairy. The host-independent v0
 classification fixtures already cover integer and floating register exhaustion, mixed arguments,
 pointers, by-value structs, and hidden aggregate returns. Native crossings must additionally cover
 narrow signed and unsigned values, nested aggregates, null raw pointers, and the permitted callback
-form before the target can claim that gate.
+form before the target can claim that source-level gate. The current cross-compiler C-object probe
+checks both compiler directions for the existing plans but does not substitute for Fairy lowering.
 
 The planned transport matrix uses Clang as the primary compiler and GCC as an independent compiler, each at low and optimized profiles. Sanitizers supplement but do not define conformance.
 

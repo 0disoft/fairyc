@@ -84,7 +84,9 @@ v0 cases. The nine valid cases now also generate one deterministic C11 layout pr
 four Clang/GCC and low/optimized executions. Those native runs remain unobserved on this Windows
 host. A host-independent SysV AMD64 classifier now executes 17 versioned cases for eightbyte
 classes, registers, exhaustion rollback, and hidden returns, but bidirectional native ABI fixtures
-and hosted evidence remain incomplete.
+and hosted evidence remain incomplete. Its 14 pass plans now generate 56 configured separate-object
+Clang/GCC crossings in both compiler directions and profiles; these are not yet hosted evidence or
+source-level Fairy FFI fixtures.
 
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.

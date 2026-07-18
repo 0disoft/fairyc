@@ -34,6 +34,14 @@ func TestBuildArgumentsKeepSanitizersOutOfProductProfiles(t *testing.T) {
 	}
 }
 
+func TestCrossCompilerArgumentsStayClosed(t *testing.T) {
+	t.Parallel()
+	arguments := objectArguments(OptimizedProfile, "caller.c", "caller.o")
+	if strings.Join(arguments, " ") != "-std=c11 -pedantic-errors -Wall -Wextra -Werror -fno-common -O2 -c caller.c -o caller.o" {
+		t.Fatalf("object arguments = %v", arguments)
+	}
+}
+
 func TestReadArtifactEnforcesRegularBoundedNonEmptyImage(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
@@ -97,5 +105,13 @@ func TestBuildRejectsIneligibleHost(t *testing.T) {
 	_, err = BuildSanitized(Toolchain{Target: target.X8664LinuxGNU, Name: "clang", Path: "clang"}, "unit", "runtime")
 	if err == nil || !strings.Contains(err.Error(), "requires linux/amd64") {
 		t.Fatalf("BuildSanitized() error = %v", err)
+	}
+	_, err = BuildCrossCompiler(
+		Toolchain{Target: target.X8664LinuxGNU, Name: "clang", Path: "clang", Libc: "glibc test"},
+		Toolchain{Target: target.X8664LinuxGNU, Name: "gcc", Path: "gcc", Libc: "glibc test"},
+		LowProfile, "caller", "callee",
+	)
+	if err == nil || !strings.Contains(err.Error(), "requires linux/amd64") {
+		t.Fatalf("BuildCrossCompiler() error = %v", err)
 	}
 }

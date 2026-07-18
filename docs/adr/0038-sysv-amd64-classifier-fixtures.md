@@ -50,8 +50,10 @@ boundary.
    Direct array parameters and returns fail because C adjusts array parameters to pointers and
    forbids array return types; fixed arrays cross only inside a C-representable struct.
 7. `internal/cabifixture.NativeProbeCases` exposes isolated copies of pass cases only after all
-   sixteen cases match. This is preparation for a separate bidirectional native probe, not proof
+   seventeen cases match. This is preparation for a separate bidirectional native probe, not proof
    that such a probe ran.
+   ADR 0039 later adds the separate-object Clang/GCC probe while keeping hosted and source-FFI
+   evidence distinct.
 8. Exact stack argument-area offsets, call-site padding, assembly/object inspection, source-level
    `@repr(C)` and `extern C` lowering, callbacks, and hosted Clang/GCC crossings remain later gates.
 

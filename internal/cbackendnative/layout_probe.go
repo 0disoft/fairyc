@@ -104,7 +104,7 @@ func (e *layoutProbeEmitter) emitType(value layout.Type) (string, error) {
 			}
 			fieldTypes = append(fieldTypes, fieldType)
 		}
-		e.output.WriteString("typedef struct {\n")
+		fmt.Fprintf(&e.output, "typedef struct fy_layout_tag_%d {\n", id)
 		for index, fieldType := range fieldTypes {
 			fmt.Fprintf(&e.output, "    %s f_%d;\n", fieldType, index)
 		}

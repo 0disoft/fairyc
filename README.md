@@ -63,7 +63,10 @@ target-mechanics fixtures, not source-language aggregate support or native C ABI
 A host-independent SysV AMD64 classifier now executes 17 versioned C ABI plan cases over the same
 type and layout vocabulary, covering INTEGER/SSE/MEMORY classes, mixed and homogeneous returns,
 hidden result pointers, register exhaustion, and whole-aggregate rollback. Those plans are not yet
-bidirectional Clang/GCC call evidence and do not clear the target's C ABI marker.
+native evidence by themselves, and the target's C ABI marker stays fail-closed.
+The 14 valid plans now generate separate caller and callee objects for Clang-to-GCC and
+GCC-to-Clang at `-O0` and `-O2`, for 56 configured crossings. This Windows host cannot execute
+them, and C-object interoperability is not yet Fairy source `extern C` support.
 A deterministic native C11 probe now translates the nine valid layout cases into private numeric
 types and is configured for Clang/GCC at `-O0` and `-O2`. This Windows host cannot execute those
 four probe runs, and no hosted success receipt has been observed, so `c-layout-probes` remains a

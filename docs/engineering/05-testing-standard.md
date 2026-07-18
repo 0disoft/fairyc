@@ -89,7 +89,7 @@ evidence requirements.
 | C differential | The configured Linux runner covers all 17 C-emission cases across Clang/GCC and low/optimized profiles for 68 process-status plus exact source-linked drop-trace comparisons, recompiles and executes every production unit under Clang/GCC ASan+UBSan for 34 fail-closed sanitizer checks, then exercises the uninstrumented experimental build CLI with resource-bearing Option, Result, propagation, and field access under all 4 compiler/profile pairs; hosted execution is not yet observed, and output, wider returns, user drop-body effects, public layout, ABI, and the complete product runtime remain deferred |
 | Target description | `internal/target` proves the `fairyc.target-spec/v0` structural invariants, canonical x86-64 Linux GNU facts, immutable lookup, absent host paths, and fail-closed maturity evidence; `internal/cli` proves deterministic schema-shaped inspection and unknown-ID rejection; host-independent layout fixtures and a configured native C layout probe exist, but no hosted result or call/ABI probe has been observed |
 | Target layout | `spec/fixtures/layout/` currently proves 14 host-independent v0 cases for language and C scalars, data and function pointers, explicit C-enum bases, arrays, nested aggregates, exact top-level offsets and padding, and malformed or overflowing input rejection; the 9 valid cases also generate one recursive C11 probe configured for 4 Clang/GCC low/optimized executions, but hosted results remain deferred and call classification is owned by the separate C ABI fixture contract |
-| C ABI classification | `spec/fixtures/c-abi/` proves 17 host-independent v0 cases for INTEGER/SSE/MEMORY eightbytes, scalar and aggregate return registers, hidden memory results, integer and SSE exhaustion, whole-aggregate rollback, and direct-array signature rejection; its 14 pass cases are isolated for a later native probe, but no bidirectional Clang/GCC crossing has run |
+| C ABI classification | `spec/fixtures/c-abi/` proves 17 host-independent v0 cases for INTEGER/SSE/MEMORY eightbytes, scalar and aggregate return registers, hidden memory results, integer and SSE exhaustion, whole-aggregate rollback, and direct-array signature rejection; its 14 pass cases generate separate Clang/GCC caller/callee objects in both directions and low/optimized profiles for 56 configured crossings, but no hosted result or Fairy source FFI lowering has been observed |
 | C safety | Overflow, division, shifts, evaluation order, aliasing, alignment, inactive payload, and sanitizer-assisted checks |
 | ABI | Target layout, calls, callbacks, raw bindings, and boundary shims for candidate target profiles |
 | Runtime and stdlib | Zero-size normalization, allocation failure, reserve rollback, UTF-8 invariants, partial I/O, Linux close consumption, and retained-pointer wrappers |
@@ -132,7 +132,8 @@ The first planned matrix targets `x86_64-linux-gnu`, uses the MIR interpreter pl
 
 The host-independent C ABI fixtures now cover scalar and pointer classification, fixed arrays,
 register exhaustion, mixed integer and floating arguments, by-value aggregate plans, and hidden
-return storage. Native bidirectional fixtures still need nested and padded `@repr(C)` structs,
+return storage. A separate-object Clang/GCC probe now exercises all 14 pass plans in both compiler
+directions, but native Fairy source fixtures still need nested and padded `@repr(C)` structs,
 explicit C enums, narrow extension rules, actual aggregate calls and returns, null raw pointers,
 and the permitted synchronous callback. Every excluded C ABI feature eventually needs a negative
 source fixture as its semantic surface is implemented.

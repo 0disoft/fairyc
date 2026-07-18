@@ -186,7 +186,9 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   type vocabulary. `fairyc.c-abi-fixtures/v0` executes 17 exact class and register-plan cases,
   including hidden returns and whole-aggregate rollback under integer or SSE register exhaustion.
   Direct array signatures fail because fixed arrays cross C only inside a representable struct.
-  This does not implement source FFI or prove a native compiler crossing.
+  The 14 pass plans generate separate Clang/GCC caller and callee objects in both directions and
+  profiles for 56 configured native crossings. This does not implement source FFI or establish a
+  hosted result.
 - The nine valid layout cases additionally generate one deterministic private C11 probe. The Linux
   native runner compiles, links, and executes it with Clang/GCC and low/optimized profiles, checking
   recursive size, alignment, field size, and offset assertions. Failure cases remain Go-owned input

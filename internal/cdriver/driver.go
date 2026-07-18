@@ -55,6 +55,14 @@ type Artifact struct {
 	Profile   Profile
 }
 
+// CrossArtifact is one executable whose caller and callee objects came from different compilers.
+type CrossArtifact struct {
+	Bytes           []byte
+	CallerToolchain Toolchain
+	CalleeToolchain Toolchain
+	Profile         Profile
+}
+
 // Resolve requires the declared Linux/amd64 glibc host and one closed compiler identity.
 func Resolve(targetID target.ID, name string) (Toolchain, error) {
 	if name != "clang" && name != "gcc" {
@@ -109,6 +117,78 @@ func Build(toolchain Toolchain, profile Profile, unitSource, runtimeSource strin
 // conformance lane. It is deliberately separate from product optimization profiles.
 func BuildSanitized(toolchain Toolchain, unitSource, runtimeSource string) (Artifact, error) {
 	return build(toolchain, sanitizerProfile, sanitizerInstrumentationFlags(), unitSource, runtimeSource)
+}
+
+// BuildCrossCompiler compiles caller and callee translation units with different closed
+// toolchains, then links them through the caller driver for native C ABI conformance checks.
+func BuildCrossCompiler(caller, callee Toolchain, profile Profile, callerSource, calleeSource string) (CrossArtifact, error) {
+	if profile != LowProfile && profile != OptimizedProfile {
+		return CrossArtifact{}, fmt.Errorf("unsupported C profile %q", profile.Name)
+	}
+	if err := validateCrossToolchains(caller, callee); err != nil {
+		return CrossArtifact{}, err
+	}
+	if callerSource == "" || calleeSource == "" {
+		return CrossArtifact{}, fmt.Errorf("C ABI caller and callee sources must be non-empty")
+	}
+	temporaryRoot, err := os.MkdirTemp("", "fairyc-cdriver-cross-")
+	if err != nil {
+		return CrossArtifact{}, fmt.Errorf("create cross-compiler temp root: %w", err)
+	}
+	defer os.RemoveAll(temporaryRoot)
+	callerPath := filepath.Join(temporaryRoot, "caller.c")
+	calleePath := filepath.Join(temporaryRoot, "callee.c")
+	callerObject := filepath.Join(temporaryRoot, "caller.o")
+	calleeObject := filepath.Join(temporaryRoot, "callee.o")
+	executablePath := filepath.Join(temporaryRoot, "program")
+	if err := os.WriteFile(callerPath, []byte(callerSource), 0o600); err != nil {
+		return CrossArtifact{}, fmt.Errorf("write C ABI caller: %w", err)
+	}
+	if err := os.WriteFile(calleePath, []byte(calleeSource), 0o600); err != nil {
+		return CrossArtifact{}, fmt.Errorf("write C ABI callee: %w", err)
+	}
+	if _, err := runBounded(caller.Path, objectArguments(profile, callerPath, callerObject)...); err != nil {
+		return CrossArtifact{}, fmt.Errorf("compile caller with %s: %s", caller.Name, strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
+	}
+	if _, err := runBounded(callee.Path, objectArguments(profile, calleePath, calleeObject)...); err != nil {
+		return CrossArtifact{}, fmt.Errorf("compile callee with %s: %s", callee.Name, strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
+	}
+	if _, err := runBounded(caller.Path, callerObject, calleeObject, "-o", executablePath); err != nil {
+		return CrossArtifact{}, fmt.Errorf("link cross-compiler executable with %s: %s", caller.Name, strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
+	}
+	contents, err := readArtifact(executablePath)
+	if err != nil {
+		return CrossArtifact{}, err
+	}
+	return CrossArtifact{Bytes: contents, CallerToolchain: caller, CalleeToolchain: callee, Profile: profile}, nil
+}
+
+func validateCrossToolchains(caller, callee Toolchain) error {
+	if caller.Target != callee.Target || caller.Target == "" {
+		return fmt.Errorf("C ABI caller and callee targets do not match")
+	}
+	spec, found := target.Lookup(caller.Target)
+	if !found {
+		return fmt.Errorf("C ABI cross build has unsupported target %q", caller.Target)
+	}
+	if runtime.GOOS != spec.OperatingSystem || runtime.GOARCH != "amd64" {
+		return fmt.Errorf("C ABI cross build requires linux/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
+	if caller.Name != "clang" && caller.Name != "gcc" || callee.Name != "clang" && callee.Name != "gcc" ||
+		caller.Name == callee.Name || caller.Path == "" || callee.Path == "" {
+		return fmt.Errorf("C ABI cross build requires distinct resolved Clang and GCC toolchains")
+	}
+	if caller.Libc == "" || caller.Libc != callee.Libc {
+		return fmt.Errorf("C ABI caller and callee libc fingerprints do not match")
+	}
+	return nil
+}
+
+func objectArguments(profile Profile, sourcePath, objectPath string) []string {
+	return []string{
+		"-std=c11", "-pedantic-errors", "-Wall", "-Wextra", "-Werror", "-fno-common",
+		profile.optimizationFlag, "-c", sourcePath, "-o", objectPath,
+	}
 }
 
 func sanitizerInstrumentationFlags() []string {

@@ -48,6 +48,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0036-native-c-layout-probe.md`: deterministic private C11 probes for the nine valid target-layout cases across Clang/GCC and low/optimized profiles.
 - `0037-sanitizer-assisted-c-backend-checks.md`: closed Clang/GCC ASan+UBSan execution of every admitted production C unit without exposing a product build profile.
 - `0038-sysv-amd64-classifier-fixtures.md`: host-independent INTEGER/SSE/MEMORY classification, hidden returns, register exhaustion, and whole-aggregate rollback fixtures.
+- `0039-bidirectional-cross-compiler-c-abi-probes.md`: separate Clang/GCC caller and callee objects in both directions for 56 low/optimized ABI crossings.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

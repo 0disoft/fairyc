@@ -61,7 +61,9 @@ Linux toolchain is locally executable.
 alignment, offset, and padding results before any backend chooses C syntax. The current layout
 fixtures are host-independent expectations; a generated native C probe now checks every valid
 case. `internal/cabi` then turns the same type and layout facts into host-independent SysV AMD64
-eightbyte and register plans; independent bidirectional native calls remain a later evidence layer.
+eightbyte and register plans. The Linux runner turns validated pass plans into separate Clang/GCC
+caller and callee objects in both directions; Fairy source FFI and an observed hosted result remain
+later evidence layers.
 
 The implemented slice emits deterministic ISO C11 for verified scalar-payload MIR, including
 private `Option<i32>` and `Result<i32, i32>` transport, plus nonempty all-`i32` resource definitions

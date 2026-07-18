@@ -81,7 +81,9 @@ output. `fairyc.native-c-report/v2` supersedes v1 by adding the required
 `dropTraceExecutions` count. V3 supersedes v2 by adding the required sorted `layoutCases` identity
 list and `layoutProbeExecutions` count. V4 supersedes v3 by adding the exact `sanitizer` mode
 identity and `sanitizerExecutions` count; the existing `cases` list owns sanitizer case identity.
-The runner emits one exact version and does not pretend the report shapes are interchangeable.
+V5 supersedes v4 by adding the exact sorted `abiCases`, exact `abiDirections`, and
+`abiProbeExecutions` count. The runner emits one exact version and does not pretend the report
+shapes are interchangeable.
 
 ## Runtime and standard library
 

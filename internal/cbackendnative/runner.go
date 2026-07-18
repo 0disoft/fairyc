@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/0disoft/fairyc/internal/cabifixture"
 	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/cbackendfixture"
 	"github.com/0disoft/fairyc/internal/cdriver"
@@ -25,7 +26,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v4"
+	reportSchemaVersion = "fairyc.native-c-report/v5"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -78,6 +79,9 @@ type Report struct {
 	LayoutProbeExecutions int        `json:"layoutProbeExecutions"`
 	Sanitizer             string     `json:"sanitizer"`
 	SanitizerExecutions   int        `json:"sanitizerExecutions"`
+	ABICases              []string   `json:"abiCases"`
+	ABIDirections         []string   `json:"abiDirections"`
+	ABIProbeExecutions    int        `json:"abiProbeExecutions"`
 	BuildSmokeExecutions  int        `json:"buildSmokeExecutions"`
 }
 
@@ -151,6 +155,27 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.LayoutProbeExecutions = layoutExecutions
+	abiManifest := filepath.Clean(filepath.Join(filepath.Dir(absoluteManifest), "..", "c-abi", "manifest-v0.json"))
+	abiTarget, abiCases, err := cabifixture.NativeProbeCases(abiManifest)
+	if err != nil {
+		return Report{}, fmt.Errorf("load native C ABI probe cases: %w", err)
+	}
+	if abiTarget != target.X8664LinuxGNU {
+		return Report{}, fmt.Errorf("native C ABI probe target is %q, want %q", abiTarget, target.X8664LinuxGNU)
+	}
+	abiProbes, err := generateABIProbes(abiTarget, abiCases)
+	if err != nil {
+		return Report{}, fmt.Errorf("generate native C ABI probes: %w", err)
+	}
+	for _, probe := range abiProbes {
+		report.ABICases = append(report.ABICases, probe.ID)
+	}
+	report.ABIDirections = []string{"clang-caller-gcc-callee", "gcc-caller-clang-callee"}
+	abiExecutions, err := runABIProbes(temporaryRoot, toolchains, abiProbes)
+	if err != nil {
+		return Report{}, err
+	}
+	report.ABIProbeExecutions = abiExecutions
 	for caseIndex, fixture := range fixtureReport.Emitted {
 		if fixture.Unit.Target != string(target.X8664LinuxGNU) || fixture.Unit.Dialect != cbackend.DialectC11 {
 			return Report{}, fmt.Errorf("case %s emitted unexpected profile %s/%s", fixture.ID, fixture.Unit.Target, fixture.Unit.Dialect)
@@ -200,6 +225,35 @@ func Run(manifestPath string) (Report, error) {
 	}
 	report.BuildSmokeExecutions = buildSmoke
 	return report, nil
+}
+
+func runABIProbes(temporaryRoot string, toolchains []cdriver.Toolchain, probes []abiProbeCase) (int, error) {
+	if len(toolchains) != 2 || toolchains[0].Name != "clang" || toolchains[1].Name != "gcc" {
+		return 0, fmt.Errorf("native C ABI probes require resolved Clang then GCC toolchains")
+	}
+	directions := [][2]int{{0, 1}, {1, 0}}
+	executions := 0
+	for caseIndex, probe := range probes {
+		for directionIndex, direction := range directions {
+			caller := toolchains[direction[0]]
+			callee := toolchains[direction[1]]
+			for profileIndex, profile := range nativeProfiles {
+				artifact, err := cdriver.BuildCrossCompiler(caller, callee, profile, probe.CallerSource, probe.CalleeSource)
+				if err != nil {
+					return 0, fmt.Errorf("C ABI probe %s with %s caller/%s callee/%s: %w", probe.ID, caller.Name, callee.Name, profile.Name, err)
+				}
+				executablePath := filepath.Join(temporaryRoot, fmt.Sprintf("abi-probe-%02d-%d-%d", caseIndex, directionIndex, profileIndex))
+				if err := os.WriteFile(executablePath, artifact.Bytes, 0o700); err != nil {
+					return 0, fmt.Errorf("materialize C ABI probe %s with %s caller/%s callee/%s: %w", probe.ID, caller.Name, callee.Name, profile.Name, err)
+				}
+				if err := execute("C ABI probe "+probe.ID, executablePath, 0, nil); err != nil {
+					return 0, fmt.Errorf("C ABI probe %s with %s caller/%s callee/%s: %w", probe.ID, caller.Name, callee.Name, profile.Name, err)
+				}
+				executions++
+			}
+		}
+	}
+	return executions, nil
 }
 
 func runLayoutProbe(temporaryRoot string, toolchains []cdriver.Toolchain, probe layoutProbeUnit) (int, error) {

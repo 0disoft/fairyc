@@ -40,6 +40,8 @@ user-facing compiler contract before the build-profile design is settled.
    `fairyc.native-c-report/v4`, adding exact `sanitizer` identity and
    `sanitizerExecutions` fields. The existing `cases` list is the sanitizer case identity set; a
    second duplicate list is intentionally omitted.
+   ADR 0039 later advances the report to v5 for cross-compiler C ABI case, direction, and execution
+   evidence.
 7. Sanitizer success is backend evidence only. The interpreter and versioned fixtures remain the
    semantic oracle, while the ordinary low/optimized differential remains the optimization-
    independence oracle.

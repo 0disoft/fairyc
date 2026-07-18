@@ -19,7 +19,7 @@
 | `internal/mir` | explicit backend-independent executable semantics | C, QBE, LLVM, or object-format details |
 | `internal/interp` | bounded execution of verified MIR for semantic fixtures | operating-system emulation or independent semantics |
 | `internal/target` and `internal/layout` | target IDs, target schemas, ABI facts, size, alignment, and layout | host Go layout assumptions or local toolchain paths |
-| `internal/abi` | C ABI v0 classification, `@repr(C)`, boundary signatures, and conformance facts | native Fairy ABI promises |
+| `internal/cabi` and `internal/cabifixture` | host-independent C ABI v0 classification, fixed-signature plans, and versioned fixture execution | source FFI lowering, local compiler probing, or native Fairy ABI promises |
 | `internal/toolchain` | local C-driver, sysroot, libc, linker, and capability resolution | semantic target layout |
 | `internal/backend/*` | translation from MIR to one backend format | language-policy decisions |
 | `internal/diagnostic` | stable diagnostics, rendering, source relationships | control-flow decisions |
@@ -28,7 +28,7 @@
 | `internal/atlas` | versioned semantic-map export and bounded queries over snapshots | frontend dependencies, LLM execution authority, embeddings, or source reparsing |
 | `runtime` | traps, process entry, empty storage, and required low-level memory helpers | allocators, files, strings, collections, logging, unwinding, or garbage collection |
 | `std` | `SystemHeap`, `Arena`, `Buffer`, text, Linux file, and safe C wrappers | compiler internals, hidden allocation, deferred generic collections, or portable-path claims |
-| `spec` | versioned normative grammar plus parser, semantic, resource, Region, Result, MIR, MIR-verifier, and resolved-package-graph fixture schemas and executable contract data | generated compiler output, build-local IDs, textual MIR snapshots, arbitrary MIR exchange, public package-manager syntax, or implementation-owned snapshots |
+| `spec` | versioned normative grammar plus parser, semantic, resource, Region, Result, MIR, MIR-verifier, interpreter, C-emission, target-layout, C ABI, and resolved-package-graph fixture schemas and executable contract data | generated compiler output, build-local IDs, textual MIR snapshots, arbitrary MIR exchange, public package-manager syntax, or implementation-owned snapshots |
 | `tests` | executable language, backend, ABI, and diagnostic contracts | production implementation logic |
 
 ## Public-contract policy
