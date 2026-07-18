@@ -36,8 +36,9 @@ returns a capability error and never counts as a successful check.
 `experimental run` does not invoke a backend, linker, runtime, or host subprocess. It runs the
 source file through parser, semantic analysis, Flow, MIR lowering, the MIR verifier, and the bounded
 MIR interpreter. The entry is the selected file module's zero-argument `main() -> i32`; boolean
-`if`, `!`, comparisons, and source-level `&&` and `||` short-circuiting are executable. Tagged
-values, resource payload execution and drop traces, Region reset, I/O, arguments, loops, and
+`if`, `!`, comparisons, source-level `&&` and `||` short-circuiting, and scalar `while` are
+executable. The bounded interpreter reports its stable `step-limit` capability rather than hanging
+or reclassifying it as a language trap. Tagged values, resource payload execution and drop traces, Region reset, I/O, arguments, and
 multi-file run input remain outside the current interpreter subset.
 
 `fairyc check` remains unimplemented. It must not be aliased to `check-syntax`, because the planned

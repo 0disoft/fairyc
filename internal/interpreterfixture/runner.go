@@ -3,6 +3,7 @@ package interpreterfixture
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -78,7 +79,10 @@ func runCase(manifestDirectory string, fixture caseDefinition) []Failure {
 	if fixture.Expect.Outcome == interpreter.OutcomeTrap && (fixture.Expect.Category == nil || fixture.Expect.Value != nil) {
 		return []Failure{{CaseID: fixture.ID, Detail: "trap expectation must contain only category"}}
 	}
-	if fixture.Expect.Outcome != interpreter.OutcomeReturn && fixture.Expect.Outcome != interpreter.OutcomeTrap {
+	if fixture.Expect.Outcome == interpreter.OutcomeLimit && (fixture.Expect.Category == nil || fixture.Expect.Value != nil) {
+		return []Failure{{CaseID: fixture.ID, Detail: "limit expectation must contain only category"}}
+	}
+	if fixture.Expect.Outcome != interpreter.OutcomeReturn && fixture.Expect.Outcome != interpreter.OutcomeTrap && fixture.Expect.Outcome != interpreter.OutcomeLimit {
 		return []Failure{{CaseID: fixture.ID, Detail: fmt.Sprintf("unknown interpreter outcome %q", fixture.Expect.Outcome)}}
 	}
 	if !sortedUnique(fixture.Sources) {
@@ -123,6 +127,16 @@ func runCase(manifestDirectory string, fixture caseDefinition) []Failure {
 		return []Failure{{CaseID: fixture.ID, Detail: err.Error()}}
 	}
 	outcome, err := interpreter.Execute(program, fixture.Entry)
+	if fixture.Expect.Outcome == interpreter.OutcomeLimit {
+		var capability interpreter.CapabilityError
+		if !errors.As(err, &capability) {
+			return []Failure{{CaseID: fixture.ID, Detail: fmt.Sprintf("limit outcome: want %q, got outcome=%+v error=%v", *fixture.Expect.Category, outcome, err)}}
+		}
+		if capability.Kind != *fixture.Expect.Category {
+			return []Failure{{CaseID: fixture.ID, Detail: fmt.Sprintf("limit category: want %q, got %q", *fixture.Expect.Category, capability.Kind)}}
+		}
+		return nil
+	}
 	if err != nil {
 		return []Failure{{CaseID: fixture.ID, Detail: err.Error()}}
 	}

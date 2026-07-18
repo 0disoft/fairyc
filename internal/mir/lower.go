@@ -154,7 +154,9 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 				l.appendOperation(Operation{Kind: OperationAssign, Span: statement.Span, DestinationLocal: LocalID(statement.Target.Symbol), Operands: []Operand{value}})
 			}
 		case "while":
-			return false, fmt.Errorf("while lowering requires the loop-budget fixture contract")
+			if _, err := l.lowerWhile(statement.Expression); err != nil {
+				return false, err
+			}
 		default:
 			return false, fmt.Errorf("unsupported HIR statement %q", statement.Kind)
 		}
@@ -249,6 +251,8 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		return l.lowerPropagate(expression)
 	case "if":
 		return l.lowerIf(expression)
+	case "while":
+		return l.lowerWhile(expression)
 	case "block":
 		if expression.Block == nil {
 			return Operand{}, fmt.Errorf("block expression has no block")
@@ -258,6 +262,48 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 	default:
 		return Operand{}, fmt.Errorf("unsupported HIR expression %q", expression.Kind)
 	}
+}
+
+func (l *functionLowerer) lowerWhile(expression *hir.Expression) (Operand, error) {
+	if len(expression.Children) != 2 {
+		return Operand{}, fmt.Errorf("while expression has %d children", len(expression.Children))
+	}
+	headerLive := cloneLive(l.live)
+	headerBlock := l.newBlock()
+	l.terminate(Terminator{Kind: TerminatorGoto, Span: expression.Span, Successors: []BlockID{headerBlock}, UnwindSuccessor: NoBlock})
+
+	l.current = headerBlock
+	l.live = cloneLive(headerLive)
+	condition, err := l.lowerExpression(&expression.Children[0])
+	if err != nil {
+		return Operand{}, err
+	}
+	if !sameLiveState(headerLive, l.live) {
+		return Operand{}, fmt.Errorf("while condition changes resource state after Flow validation")
+	}
+	bodyBlock := l.newBlock()
+	exitBlock := l.newBlock()
+	l.terminate(Terminator{
+		Kind: TerminatorSwitch, Span: expression.Children[0].Span,
+		Successors: []BlockID{bodyBlock, exitBlock}, UnwindSuccessor: NoBlock,
+		SwitchKind: "bool", SwitchOperands: []Operand{condition},
+	})
+
+	l.current = bodyBlock
+	l.live = cloneLive(headerLive)
+	if _, err := l.lowerExpression(&expression.Children[1]); err != nil {
+		return Operand{}, err
+	}
+	if !l.blockTerminated(l.current) {
+		if !sameLiveState(headerLive, l.live) {
+			return Operand{}, fmt.Errorf("while back-edge changes resource state after Flow validation")
+		}
+		l.terminate(Terminator{Kind: TerminatorGoto, Span: expression.Children[1].Span, Successors: []BlockID{headerBlock}, UnwindSuccessor: NoBlock})
+	}
+
+	l.current = exitBlock
+	l.live = cloneLive(headerLive)
+	return Operand{}, nil
 }
 
 func (l *functionLowerer) lowerIf(expression *hir.Expression) (Operand, error) {

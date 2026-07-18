@@ -12,6 +12,8 @@ import (
 const (
 	OutcomeReturn = "return"
 	OutcomeTrap   = "trap"
+	OutcomeLimit  = "limit"
+	LimitStep     = "step-limit"
 	maxCallDepth  = 256
 	maxSteps      = 1_000_000
 )
@@ -25,6 +27,7 @@ type Outcome struct {
 
 // CapabilityError reports a valid verified-MIR program outside the implemented interpreter slice.
 type CapabilityError struct {
+	Kind   string
 	Detail string
 }
 
@@ -34,6 +37,10 @@ func (e CapabilityError) Error() string {
 
 func capabilityError(format string, arguments ...any) error {
 	return CapabilityError{Detail: fmt.Sprintf(format, arguments...)}
+}
+
+func capabilityErrorKind(kind, format string, arguments ...any) error {
+	return CapabilityError{Kind: kind, Detail: fmt.Sprintf(format, arguments...)}
 }
 
 // Execute verifies program and invokes one zero-argument i32 entry function.
@@ -75,7 +82,7 @@ type runtime struct {
 
 func (r *runtime) call(function *mir.Function, arguments []int32, depth int) (Outcome, error) {
 	if depth >= maxCallDepth {
-		return Outcome{}, capabilityError("interpreter call-depth limit exceeded")
+		return Outcome{}, capabilityErrorKind("call-depth-limit", "interpreter call-depth limit exceeded")
 	}
 	if len(arguments) != len(function.Parameters) {
 		return Outcome{}, fmt.Errorf("call %q received %d argument(s), want %d", function.Name, len(arguments), len(function.Parameters))
@@ -87,7 +94,7 @@ func (r *runtime) call(function *mir.Function, arguments []int32, depth int) (Ou
 	current := function.Entry
 	for {
 		if r.steps <= 0 {
-			return Outcome{}, capabilityError("interpreter step limit exceeded")
+			return Outcome{}, capabilityErrorKind(LimitStep, "interpreter step limit exceeded")
 		}
 		r.steps--
 		if int(current) < 0 || int(current) >= len(function.Blocks) {
@@ -96,7 +103,7 @@ func (r *runtime) call(function *mir.Function, arguments []int32, depth int) (Ou
 		block := function.Blocks[current]
 		for _, operation := range block.Operations {
 			if r.steps <= 0 {
-				return Outcome{}, capabilityError("interpreter step limit exceeded")
+				return Outcome{}, capabilityErrorKind(LimitStep, "interpreter step limit exceeded")
 			}
 			r.steps--
 			switch operation.Kind {

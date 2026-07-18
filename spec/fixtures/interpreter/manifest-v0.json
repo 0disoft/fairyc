@@ -6,8 +6,7 @@
     "resource payload values and active-variant drop traces",
     "Region mark and reset observations",
     "controlled partial I/O test intrinsics",
-    "bounded stdout, stderr, process status, and argument fixtures",
-    "loops after executable loop Flow and step-budget fixtures exist"
+    "bounded stdout, stderr, process status, and argument fixtures"
   ],
   "contracts": [
     "docs/product/02-spec.md",
@@ -87,6 +86,30 @@
         "completedThrough": "interpret",
         "outcome": "return",
         "value": 42
+      }
+    },
+    {
+      "id": "pass.interpreter.bounded-loop",
+      "sourceRoot": "cases/pass/bounded-loop/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42
+      }
+    },
+    {
+      "id": "pass.interpreter.step-limit",
+      "sourceRoot": "cases/pass/step-limit/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "limit",
+        "category": "step-limit"
       }
     }
   ]

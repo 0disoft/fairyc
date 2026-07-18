@@ -34,9 +34,10 @@ cases in `spec/fixtures/mir/manifest-v0.json` after Flow, mutable-local MIR lowe
 verification, comparing source-linked evaluation, call, move, cleanup, Result-branch, trap, and
 eliminated-form facts. `internal/mirverifyfixture` constructs all 8 named verifier seeds, requires
 each baseline to pass, clones it, applies exactly one typed mutation, and proves all 15 cases return
-the complete expected one-code result. `internal/interpreterfixture` executes all 6 scalar
+the complete expected one-code result. `internal/interpreterfixture` executes all 8 scalar
 interpreter v0 cases through source loading, Flow, verified MIR, and the bounded interpreter,
-comparing exact `i32` returns or canonical trap categories. Resolved-package-graph, tagged/runtime
+comparing exact `i32` returns, canonical trap categories, or the stable interpreter step-limit
+category. Resolved-package-graph, tagged/runtime
 interpreter groups, backend, ABI, runtime, and Atlas runners do not exist yet; their fixtures remain
 future evidence requirements.
 
@@ -65,7 +66,7 @@ future evidence requirements.
 | Resolved package graph | `spec/fixtures/package/` proves instance equality, feature splits, direct visibility, module isolation, ambiguity, transitive hiding, and explicit standard-library injection without choosing public package-manager syntax |
 | Built-in tagged resources | `Ok`, `Err`, `Some`, discard, match, propagation, early return, and nested active-payload drop traces |
 | MIR verifier mutation | `spec/fixtures/mir-verifier/` currently proves all 8 named baselines and 15 isolated mutation cases through the Go verifier runner without serializing arbitrary MIR |
-| MIR interpreter run and trap | `spec/fixtures/interpreter/` currently proves all 6 scalar v0 cases: literal return, scalar call arithmetic, boolean branching and logical not, source `&&` and `||` short-circuiting, and division-by-zero trap identity; tagged values, moves, drop traces, region reset, I/O, and loops remain deferred |
+| MIR interpreter run, trap, and limit | `spec/fixtures/interpreter/` currently proves all 8 scalar v0 cases: literal return, scalar call arithmetic, boolean branching and logical not, source `&&` and `||` short-circuiting, scalar `while`, division-by-zero trap identity, and bounded step-limit termination; tagged values, moves, drop traces, region reset, and I/O remain deferred |
 | Drop elaboration | Partial construction, reassignment, early exits, loops, and cleanup-suffix merging |
 | C differential | Interpreter parity for output, status, trap category, and drop trace across declared compilers and profiles |
 | C safety | Overflow, division, shifts, evaluation order, aliasing, alignment, inactive payload, and sanitizer-assisted checks |

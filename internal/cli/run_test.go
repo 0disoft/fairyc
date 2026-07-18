@@ -258,6 +258,26 @@ func TestExperimentalRunInterpretsLogicalNot(t *testing.T) {
 	}
 }
 
+func TestExperimentalRunInterpretsBoundedLoop(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { var count: i32 = 0; var total: i32 = 0; while count < 6 { total = total + 7; count = count + 1; } total }\n")
+	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
+	if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
+func TestExperimentalRunReportsStepLimitAsCapability(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { while true {} 0 }\n")
+	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
+	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "outside the experimental interpreter subset: interpreter step limit exceeded") {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
 func TestExperimentalRunRequiresScalarEntry(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()

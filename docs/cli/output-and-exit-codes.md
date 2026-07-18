@@ -29,7 +29,7 @@ automation. They are not the stable exit-code taxonomy:
 | Code | Experimental meaning |
 | ---: | --- |
 | `0` | The requested syntax operation completed without source diagnostics. |
-| `2` | Invocation or bounded input loading failed, or the experimental semantic subset cannot represent the requested syntax. |
+| `2` | Invocation or bounded input loading failed, the experimental semantic subset cannot represent the requested syntax, or an interpreter capability limit was reached. |
 | `3` | One or more source diagnostics were produced. |
 | `4` | An internal invariant or output write failed. |
 | `5` | The experimental MIR interpreter reached a canonical language trap. |
@@ -40,7 +40,8 @@ automation. They are not the stable exit-code taxonomy:
 `experimental check-semantics` writes one success line with typed-HIR module and function counts for
 a multi-file input, semantic diagnostics on stderr, or an explicit unsupported-subset message on stderr.
 `experimental run` writes `result: <i32>` to stdout on return, or `trap: <category>` to stderr with
-provisional code `5` on a language trap. None of these commands
+provisional code `5` on a language trap. Its bounded `step-limit` is a capability result with code
+`2`, not a language trap. None of these commands
 uses ANSI escapes. Human positions are one-based line and byte-column values backed
 by the diagnostic's zero-based half-open byte span.
 

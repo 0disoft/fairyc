@@ -53,7 +53,8 @@
         "expect": {
           "oneOf": [
             { "$ref": "#/$defs/returnExpectation" },
-            { "$ref": "#/$defs/trapExpectation" }
+            { "$ref": "#/$defs/trapExpectation" },
+            { "$ref": "#/$defs/limitExpectation" }
           ]
         }
       }
@@ -88,6 +89,17 @@
             "unreachable"
           ]
         }
+      }
+    },
+    "limitExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "completedThrough", "outcome", "category"],
+      "properties": {
+        "status": { "const": "pass" },
+        "completedThrough": { "const": "interpret" },
+        "outcome": { "const": "limit" },
+        "category": { "const": "step-limit" }
       }
     }
   }
