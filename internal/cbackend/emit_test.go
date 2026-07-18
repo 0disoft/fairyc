@@ -23,7 +23,7 @@ func TestEmitScalarControlUnit(t *testing.T) {
 	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
 		t.Fatalf("interpreter = %+v, %v", outcome, err)
 	}
-	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0ScalarProfile())
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil {
 		t.Fatalf("Emit() error = %v", err)
 	}
@@ -51,7 +51,7 @@ func TestEmitScalarControlUnit(t *testing.T) {
 	if strings.Contains(unit.Source, "abort(") || strings.Contains(unit.Source, "#include <stdlib.h>") {
 		t.Fatalf("generated C owns trap termination instead of delegating to the runtime:\n%s", unit.Source)
 	}
-	second, err := cbackend.Emit(program, "main::main", cbackend.Stage0ScalarProfile())
+	second, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil || second.Source != unit.Source {
 		t.Fatalf("second Emit() differs: error=%v", err)
 	}
@@ -79,12 +79,60 @@ func TestTrapCodesAreStable(t *testing.T) {
 	}
 }
 
-func TestEmitRejectsResourceMIR(t *testing.T) {
+func TestEmitFlatI32Resource(t *testing.T) {
 	t.Parallel()
-	program := lowerSource(t, "module main;\nresource Token { value: i32; drop fn(self: &mut Self) {} }\nfn main() -> i32 { let token: Token = Token { value: 1 }; token.value }\n")
-	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0ScalarProfile())
+	program := lowerSource(t, `module main;
+resource Pair {
+    left: i32;
+    right: i32;
+    drop fn(self: &mut Self) {}
+}
+fn transfer(pair: Pair) -> Pair { pair }
+fn main() -> i32 {
+    let pair: Pair = Pair { left: 1, right: 42 };
+    let moved: Pair = transfer(pair);
+    moved.right
+}
+`)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("interpreter = %+v, %v", outcome, err)
+	}
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	wantFeatures := []string{"flat-i32-resource", "scalar-call"}
+	if !slices.Equal(unit.Features, wantFeatures) {
+		t.Fatalf("Emit() features = %v, want %v", unit.Features, wantFeatures)
+	}
+	for _, required := range []string{
+		"#include <stddef.h>",
+		"} fy_resource_0;",
+		"_Static_assert(sizeof(fy_resource_0) == UINT64_C(8)",
+		"_Static_assert(_Alignof(fy_resource_0) == UINT64_C(4)",
+		"offsetof(fy_resource_0, f_0) == UINT64_C(0)",
+		"offsetof(fy_resource_0, f_1) == UINT64_C(4)",
+		"(fy_resource_0){ .f_0 = INT32_C(1), .f_1 = INT32_C(42) }",
+		".f_1;",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q", required)
+		}
+	}
+	for _, leaked := range []string{"Pair", "left", "right"} {
+		if strings.Contains(unit.Source, leaked) {
+			t.Errorf("generated C leaks source resource identifier %q", leaked)
+		}
+	}
+}
+
+func TestEmitRejectsNonI32ResourceField(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, "module main;\nresource Flag { value: bool; drop fn(self: &mut Self) {} }\nfn main() -> i32 { 0 }\n")
+	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	var capability cbackend.CapabilityError
-	if !errors.As(err, &capability) || capability.Feature != "resource values" || capability.Function != "main::main" {
+	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "field \"value\" of type \"bool\"") || capability.Function != "" {
 		t.Fatalf("Emit() error = %v", err)
 	}
 }
@@ -92,7 +140,7 @@ func TestEmitRejectsResourceMIR(t *testing.T) {
 func TestEmitRejectsNonScalarParameterType(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main;\nfn inspect(value: &i32) -> i32 { 0 }\nfn main() -> i32 { 0 }\n")
-	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0ScalarProfile())
+	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	var capability cbackend.CapabilityError
 	if !errors.As(err, &capability) || capability.Feature != "parameter type \"&i32\"" || capability.Function != "main::inspect" {
 		t.Fatalf("Emit() error = %v", err)
@@ -102,7 +150,7 @@ func TestEmitRejectsNonScalarParameterType(t *testing.T) {
 func TestEmitAcceptsBoolFunctionResult(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main;\nfn positive(value: i32) -> bool { value > 0 }\nfn main() -> i32 { if positive(1) { 42 } else { 0 } }\n")
-	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0ScalarProfile())
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil {
 		t.Fatalf("Emit() error = %v", err)
 	}
@@ -136,7 +184,7 @@ fn main() -> i32 {
 	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
 		t.Fatalf("interpreter = %+v, %v", outcome, err)
 	}
-	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0ScalarProfile())
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil {
 		t.Fatalf("Emit() error = %v", err)
 	}
@@ -175,9 +223,31 @@ fn main() -> i32 {
     }
 }
 `)
-	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0ScalarProfile())
+	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	var capability cbackend.CapabilityError
 	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "Option construction type") {
+		t.Fatalf("Emit() error = %v", err)
+	}
+}
+
+func TestEmitRejectsResourceBearingTag(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+resource Token {
+    value: i32;
+    drop fn(self: &mut Self) {}
+}
+fn main() -> i32 {
+    let wrapped: Option<Token> = Option::Some(Token { value: 42 });
+    match wrapped {
+        Option::Some(token) => token.value,
+        Option::None => 0,
+    }
+}
+`)
+	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	var capability cbackend.CapabilityError
+	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "resource local type \"Option<main::Token>\"") {
 		t.Fatalf("Emit() error = %v", err)
 	}
 }
@@ -205,7 +275,7 @@ func TestEmitRejectsMalformedScalarDestination(t *testing.T) {
 	if failures := mir.Verify(mutated); len(failures) != 0 {
 		t.Fatalf("mutation must reach the C backend shape guard, verifier failures = %+v", failures)
 	}
-	_, err := cbackend.Emit(mutated, "main::main", cbackend.Stage0ScalarProfile())
+	_, err := cbackend.Emit(mutated, "main::main", cbackend.Stage0Profile())
 	if err == nil || !strings.Contains(err.Error(), "no destination local") {
 		t.Fatalf("Emit(malformed destination) error = %v", err)
 	}
@@ -217,7 +287,7 @@ func TestEmitRejectsUnverifiedMIRAndUnknownProfile(t *testing.T) {
 		Name: "main::main", ResultType: hir.TypeI32, Entry: 0,
 		Blocks: []mir.Block{{ID: 0, Terminator: mir.Terminator{UnwindSuccessor: mir.NoBlock}}},
 	}}}
-	if _, err := cbackend.Emit(invalid, "main::main", cbackend.Stage0ScalarProfile()); err == nil || !strings.Contains(err.Error(), "verified MIR") {
+	if _, err := cbackend.Emit(invalid, "main::main", cbackend.Stage0Profile()); err == nil || !strings.Contains(err.Error(), "verified MIR") {
 		t.Fatalf("Emit(unverified) error = %v", err)
 	}
 	program := lowerSource(t, "module main;\nfn main() -> i32 { 0 }\n")

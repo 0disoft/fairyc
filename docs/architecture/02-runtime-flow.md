@@ -62,10 +62,12 @@ alignment, offset, and padding results before any backend chooses C syntax. The 
 fixtures are host-independent expectations; native C probes and SysV call classification remain
 later evidence layers.
 
-The implemented first slice emits deterministic ISO C11 for verified scalar-payload MIR, including
-private `Option<i32>` and `Result<i32, i32>` transport. A separate
+The implemented slice emits deterministic ISO C11 for verified scalar-payload MIR, including
+private `Option<i32>` and `Result<i32, i32>` transport, plus nonempty all-`i32` resource definitions
+with empty drop bodies. Resource layout comes from the declared target engine and is rechecked with
+C11 size, alignment, and field-offset assertions. A separate
 Linux/amd64 runner now drives Clang and GCC at low and optimized profiles, links the embedded scalar
-runtime, executes each scalar-payload fixture, and compares its process outcome. The same bounded C driver
+runtime, executes each emitted fixture, and compares its process outcome. The same bounded C driver
 and runtime feed an explicit experimental single-file build command whose artifact is confined to
 the ignored source-root `build/` directory. The current Windows host cannot execute either native
 path, and no hosted run has been observed yet. Complete runtime, layout, ABI, and supported-target

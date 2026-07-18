@@ -142,7 +142,7 @@ func runEmitC(argument, sourceRoot string, stdout, stderr io.Writer) int {
 	if code != ExitSuccess {
 		return code
 	}
-	unit, err := cbackend.Emit(lowered.program, lowered.entryName, cbackend.Stage0ScalarProfile())
+	unit, err := cbackend.Emit(lowered.program, lowered.entryName, cbackend.Stage0Profile())
 	if err != nil {
 		var capability cbackend.CapabilityError
 		if errors.As(err, &capability) {

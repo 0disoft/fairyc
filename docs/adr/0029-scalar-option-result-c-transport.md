@@ -50,7 +50,8 @@ guess it from local identifiers would create a second semantic path beside typed
 9. The C-emission v0 manifest grows from four to eight cases, adding Option Some and None plus Result
    propagation success and error. The Linux matrix therefore grows from 16 to 32 process-status
    comparisons, and its four product-build smokes now compile and execute a program using both
-   scalar tag families.
+   scalar tag families. ADR 0033 later grows the same matrix to eleven cases and 44 comparisons and
+   adds flat-resource transport to the existing four product-build smokes.
 
 ## Consequences
 

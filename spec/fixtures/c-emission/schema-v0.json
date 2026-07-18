@@ -40,6 +40,7 @@
         "checked-arithmetic",
         "checked-division",
         "checked-shift",
+        "flat-i32-resource",
         "scalar-bitwise",
         "scalar-call",
         "scalar-comparison",

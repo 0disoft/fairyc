@@ -39,7 +39,9 @@ eligible glibc, Clang, and GCC installation before it can produce native evidenc
    `spec/cli/experimental-target-spec-v0.schema.json`. Missing or unknown target IDs are invocation
    failures and emit no JSON.
 6. Target maturity remains fail-closed. The descriptor reports the existing
-   `scalar-payload-c11` emission subset but keeps `emittable`, `conformant`, and `supported` false.
+   `scalar-and-flat-i32-resource-c11` emission subset but keeps `emittable`, `conformant`, and
+   `supported` false. ADR 0033 expands the reported implementation subset without promoting target
+   maturity.
    It lists missing C layout probes and bidirectional ABI fixtures, complete runtime and standard library,
    hosted Linux receipt, toolchain baseline, and provisioning evidence.
    A scalar layout or `@repr(C)` vocabulary entry does not by itself make the corresponding Fairy C

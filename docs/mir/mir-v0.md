@@ -127,8 +127,11 @@ The first semantic oracle is a small MIR interpreter supporting scalars, tagged 
 
 The interpreter precedes a second native backend. Differential fixtures compare interpreter outcomes with generated C compiled at multiple optimization levels and, where the target fixture declares them, more than one independent C compiler.
 
-The current Go prototype also emits deterministic ISO C11 for the verified scalar-payload subset in
-`spec/fixtures/c-emission/manifest-v0.json`, including private `Option<i32>` and
-`Result<i32, i32>` construction, calls, matching, and propagation. Tagged construction and payload
-operations carry their concrete MIR type into the backend. That runner stops at C text and therefore
-is backend emission evidence, not native differential evidence.
+The current Go prototype also emits deterministic ISO C11 for the verified scalar and flat-resource
+subset in `spec/fixtures/c-emission/manifest-v0.json`, including private `Option<i32>` and
+`Result<i32, i32>` construction, calls, matching, and propagation. Direct nonempty all-`i32`
+resources with empty drop bodies may be constructed, read, moved through calls, returned, assigned,
+and discharged. Their private numeric C struct layout is computed from `TargetSpec` and guarded by
+C11 size, alignment, and offset assertions. Tagged construction and payload operations carry their
+concrete MIR type into the backend. That runner stops at C text and therefore is backend emission
+evidence, not native differential or cleanup-trace evidence.

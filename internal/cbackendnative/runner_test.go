@@ -1,12 +1,35 @@
 package cbackendnative
 
 import (
+	"bytes"
+	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/cbackendfixture"
+	"github.com/0disoft/fairyc/internal/cli"
 )
+
+func TestBuildSmokeSourceReachesCEmission(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "main.fy"), []byte(buildSmokeSource), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	code := cli.Run([]string{"experimental", "emit-c", "main.fy"}, root, &stdout, &stderr)
+	if code != cli.ExitSuccess || stderr.Len() != 0 {
+		t.Fatalf("build smoke C emission = code %d, stderr %q", code, stderr.String())
+	}
+	for _, required := range []string{"fy_resource_0", "fy_option_i32", "fy_result_i32_i32"} {
+		if !strings.Contains(stdout.String(), required) {
+			t.Errorf("build smoke C emission is missing %q", required)
+		}
+	}
+}
 
 func TestExpectedExitCode(t *testing.T) {
 	t.Parallel()

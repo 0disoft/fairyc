@@ -47,12 +47,14 @@ The first slice therefore needs a deliberately closed capability boundary rather
 8. The initial slice rejects resources, tagged values, Region operations, safe borrows, unsafe
    operations, FFI, runtime and standard-library calls, target layout, and C ABI lowering. ADR 0029
    later admits only private `Option<i32>` and `Result<i32, i32>` transport while every broader
-   tagged and resource case remains fail-closed.
+   tagged and resource case remains fail-closed at that decision point. ADR 0033 later admits only
+   direct nonempty all-`i32` resources with empty drop bodies.
 9. `internal/cbackendfixture` runs source through syntax, semantics, Flow, verified MIR, the MIR
    interpreter, and C emission twice. Its four initial cases prove scalar control and calls,
    bitwise bit preservation, checked division and shift, overflow trapping, target identity, feature
    identity, and byte-stable emission. They do not parse, compile, assemble, link, or execute the
-   generated C. ADR 0029 expands the same v0 manifest to eight cases with scalar Option and Result.
+   generated C. ADR 0029 expands the same v0 manifest to eight cases with scalar Option and Result;
+   ADR 0033 expands it to eleven with flat-resource transport.
 
 ## Consequences
 

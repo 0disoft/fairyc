@@ -42,7 +42,7 @@ func runBuild(arguments []string, sourceRoot string, stdout, stderr io.Writer) i
 	if code != ExitSuccess {
 		return code
 	}
-	unit, err := cbackend.Emit(lowered.program, lowered.entryName, cbackend.Stage0ScalarProfile())
+	unit, err := cbackend.Emit(lowered.program, lowered.entryName, cbackend.Stage0Profile())
 	if err != nil {
 		var capability cbackend.CapabilityError
 		if errors.As(err, &capability) {

@@ -4,7 +4,7 @@
   "deferred": [
     "C parsing, compilation, object emission, linking, and native execution inside this emission-only runner; the separate Linux runner owns that evidence",
     "output, negative and larger i32 returns, cleanup traces, and sanitizer observations beyond the native process-status oracle",
-    "resource and resource-bearing tagged-value, Region, borrow, unsafe, FFI, complete runtime, and standard-library C lowering",
+    "non-i32, empty, nested, partial-initialization, nonempty-drop, and tagged-payload resource values plus Region, borrow, unsafe, FFI, complete runtime, and standard-library C lowering",
     "target layout, C ABI classification, object metadata, symbol, relocation, and sanitizer evidence"
   ],
   "contracts": [
@@ -14,6 +14,7 @@
     "docs/adr/0025-verified-scalar-c-emission.md",
     "docs/adr/0026-linux-scalar-c-differential-lane.md",
     "docs/adr/0029-scalar-option-result-c-transport.md",
+    "docs/adr/0033-flat-i32-resource-c-transport.md",
     "docs/mir/mir-v0.md",
     "docs/mir/c-backend-safety-v0.md",
     "docs/runtime/runtime-stdlib-v0.md",
@@ -115,6 +116,54 @@
         "dialect": "c11",
         "functions": ["main::choose", "main::main"],
         "features": ["scalar-call", "scalar-control-flow", "scalar-option", "trap"]
+      }
+    },
+    {
+      "id": "pass.c-emission.resource-call-move",
+      "sourceRoot": "cases/pass/resource-call-move/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::consume", "main::main"],
+        "features": ["flat-i32-resource", "scalar-call"]
+      }
+    },
+    {
+      "id": "pass.c-emission.resource-local",
+      "sourceRoot": "cases/pass/resource-local/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main"],
+        "features": ["flat-i32-resource"]
+      }
+    },
+    {
+      "id": "pass.c-emission.resource-reassign-live",
+      "sourceRoot": "cases/pass/resource-reassign-live/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main"],
+        "features": ["flat-i32-resource"]
       }
     },
     {

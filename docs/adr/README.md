@@ -37,11 +37,12 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0025-verified-scalar-c-emission.md`: fail-closed verified-MIR emission for the provisional scalar ISO C11 transport.
 - `0026-linux-scalar-c-differential-lane.md`: fail-closed Clang/GCC low/optimized native execution on Linux/amd64 with glibc.
 - `0027-experimental-c-emission-cli.md`: deterministic raw C11 inspection from the canonical unstable CLI without file or toolchain side effects.
-- `0028-experimental-linux-scalar-build-cli.md`: explicit Linux scalar-payload executable builds through the shared C driver and embedded runtime.
+- `0028-experimental-linux-scalar-build-cli.md`: explicit Linux constrained-C executable builds through the shared C driver and embedded runtime.
 - `0029-scalar-option-result-c-transport.md`: private ISO C11 structs and typed MIR flow for `Option<i32>` and `Result<i32, i32>`.
 - `0030-executable-x86-64-linux-gnu-target-spec.md`: host-independent target facts, fail-closed maturity evidence, and deterministic experimental inspection.
 - `0031-target-layout-engine-and-fixtures.md`: checked scalar, pointer, array, enum, nested-struct, offset, and padding layout execution without host assumptions.
 - `0032-resource-definition-preservation-and-empty-drop-gate.md`: ordered resource definitions across AST, HIR, and MIR with fail-closed empty-drop execution.
+- `0033-flat-i32-resource-c-transport.md`: target-laid-out private C11 transport for nonempty all-`i32` resources with empty drop bodies.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

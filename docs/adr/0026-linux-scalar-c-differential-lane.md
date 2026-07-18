@@ -42,6 +42,7 @@ trap categories without pretending to be the final runtime ABI or console contra
    internal scratch remains toolchain-owned, and no repository artifact is retained.
 7. The initial four cases produced 16 fixture comparisons. ADR 0029 expands the same matrix to eight
    scalar-payload cases and 32 comparisons, including Option and Result success and failure paths.
+   ADR 0033 expands the matrix to eleven cases and 44 comparisons with flat-resource transport.
    After those comparisons, the same command invokes the actual experimental build CLI for Clang
    and GCC under both profiles and executes each temporary product, requiring exit `42` and the
    exact relative-path build receipt.
@@ -58,7 +59,7 @@ trap categories without pretending to be the final runtime ABI or console contra
 ## Consequences
 
 - The repository now has a concrete `.fy -> verified MIR -> C11 -> Clang/GCC -> ELF -> process`
-  path for the scalar-payload fixtures on an eligible Linux host.
+  path for the constrained scalar and flat-resource fixtures on an eligible Linux host.
 - The current Windows development host cannot run the native command because it has no registered
   WSL distribution or C compiler. Ordinary Go validation remains useful but is not substituted for
   native evidence.

@@ -55,7 +55,8 @@ single-file, scalar-payload-only, and fail closed outside the one declared host 
   compiler on an eligible Linux host.
 - Native differential fixtures and user builds cannot silently drift to different compiler flags or
   trap-runtime implementations.
-- ADR 0029 admits `Option<i32>` and `Result<i32, i32>`; resources, resource-bearing or nested tags,
+- ADR 0029 admits `Option<i32>` and `Result<i32, i32>`; ADR 0033 later admits direct nonempty
+  all-`i32` resources with empty drop bodies. Resource-bearing or nested tags, broader resources,
   Region, unsafe, FFI, standard-library, and broader runtime programs still fail at the C-emission
   capability boundary.
 - The current Windows development host proves parsing, path safety, artifact promotion, and

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/layout"
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/target"
 )
@@ -23,8 +24,8 @@ type Profile struct {
 	Dialect string
 }
 
-// Stage0ScalarProfile returns the only currently implemented C emission profile.
-func Stage0ScalarProfile() Profile {
+// Stage0Profile returns the only currently implemented C emission profile.
+func Stage0Profile() Profile {
 	return Profile{Target: target.X8664LinuxGNU, Dialect: DialectC11}
 }
 
@@ -55,6 +56,9 @@ type emitter struct {
 	functions          []mir.Function
 	bySymbol           map[hir.SymbolID]int
 	entryIndex         int
+	resourceTypes      []resourceCType
+	resourceByType     map[hir.Type]int
+	resourceLocals     []map[hir.SymbolID]mir.ResourceLocal
 	features           map[string]struct{}
 	trapCategories     map[string]struct{}
 	dynamicTrapTargets map[int]map[mir.BlockID]struct{}
@@ -63,13 +67,31 @@ type emitter struct {
 	needsShift         bool
 }
 
+type resourceCType struct {
+	definition mir.ResourceType
+	layout     layout.Result
+	fieldIndex map[string]int
+}
+
 // Emit verifies MIR, rejects unsupported semantic families, and emits one deterministic C unit.
 func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
-	if profile != Stage0ScalarProfile() {
+	if profile != Stage0Profile() {
 		return Unit{}, fmt.Errorf("unsupported C emission profile target=%q dialect=%q", profile.Target, profile.Dialect)
 	}
 	if failures := mir.Verify(program); len(failures) != 0 {
 		return Unit{}, fmt.Errorf("C emission requires verified MIR: %s at %s", failures[0].Code, failures[0].Entity)
+	}
+	targetSpec, found := target.Lookup(profile.Target)
+	if !found {
+		return Unit{}, fmt.Errorf("C emission target %q is missing", profile.Target)
+	}
+	layoutEngine, err := layout.New(targetSpec)
+	if err != nil {
+		return Unit{}, fmt.Errorf("create C resource layout engine: %w", err)
+	}
+	resourceTypes, resourceByType, err := prepareResourceTypes(program.ResourceTypes, layoutEngine)
+	if err != nil {
+		return Unit{}, err
 	}
 	functions := slices.Clone(program.Functions)
 	slices.SortFunc(functions, func(left, right mir.Function) int {
@@ -79,10 +101,16 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 		functions:          functions,
 		bySymbol:           make(map[hir.SymbolID]int, len(functions)),
 		entryIndex:         -1,
+		resourceTypes:      resourceTypes,
+		resourceByType:     resourceByType,
+		resourceLocals:     make([]map[hir.SymbolID]mir.ResourceLocal, len(functions)),
 		features:           make(map[string]struct{}),
 		trapCategories:     make(map[string]struct{}),
 		dynamicTrapTargets: make(map[int]map[mir.BlockID]struct{}),
 		localTypes:         make([]map[mir.LocalID]hir.Type, len(functions)),
+	}
+	if len(resourceTypes) != 0 {
+		value.features["flat-i32-resource"] = struct{}{}
 	}
 	for index := range functions {
 		function := &functions[index]
@@ -96,6 +124,14 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 			}
 			value.entryIndex = index
 		}
+		locals := make(map[hir.SymbolID]mir.ResourceLocal, len(function.Resources))
+		for _, resource := range function.Resources {
+			if _, duplicate := locals[resource.Symbol]; duplicate {
+				return Unit{}, fmt.Errorf("duplicate resource local %d in %s", resource.Symbol, function.Name)
+			}
+			locals[resource.Symbol] = resource
+		}
+		value.resourceLocals[index] = locals
 	}
 	if value.entryIndex < 0 {
 		return Unit{}, fmt.Errorf("C entry function %q is missing", entry)
@@ -147,6 +183,48 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	}, nil
 }
 
+func prepareResourceTypes(definitions []mir.ResourceType, engine *layout.Engine) ([]resourceCType, map[hir.Type]int, error) {
+	ordered := slices.Clone(definitions)
+	slices.SortFunc(ordered, func(left, right mir.ResourceType) int {
+		return strings.Compare(string(left.Type), string(right.Type))
+	})
+	result := make([]resourceCType, 0, len(ordered))
+	byType := make(map[hir.Type]int, len(ordered))
+	for _, definition := range ordered {
+		if definition.DropKind != hir.ResourceDropEmpty {
+			return nil, nil, CapabilityError{Feature: "resource type " + strconv.Quote(string(definition.Type)) + " with non-empty drop behavior"}
+		}
+		if len(definition.Fields) == 0 {
+			return nil, nil, CapabilityError{Feature: "empty resource type " + strconv.Quote(string(definition.Type))}
+		}
+		fields := make([]layout.Field, 0, len(definition.Fields))
+		fieldIndex := make(map[string]int, len(definition.Fields))
+		for index, field := range definition.Fields {
+			if field.Type != hir.TypeI32 {
+				return nil, nil, CapabilityError{Feature: "resource type " + strconv.Quote(string(definition.Type)) + " field " + strconv.Quote(field.Name) + " of type " + strconv.Quote(string(field.Type))}
+			}
+			fieldIndex[field.Name] = index
+			fields = append(fields, layout.Field{
+				Name: fmt.Sprintf("f_%d", index),
+				Type: layout.Type{Kind: layout.KindLanguageScalar, Name: string(hir.TypeI32)},
+			})
+		}
+		computed, err := engine.Of(layout.Type{Kind: layout.KindStruct, Fields: fields})
+		if err != nil {
+			return nil, nil, fmt.Errorf("compute C transport layout for resource %q: %w", definition.Type, err)
+		}
+		if len(computed.Fields) != len(definition.Fields) {
+			return nil, nil, fmt.Errorf("resource %q layout returned %d fields for %d definitions", definition.Type, len(computed.Fields), len(definition.Fields))
+		}
+		if _, duplicate := byType[definition.Type]; duplicate {
+			return nil, nil, fmt.Errorf("duplicate C resource type %q", definition.Type)
+		}
+		byType[definition.Type] = len(result)
+		result = append(result, resourceCType{definition: definition, layout: computed, fieldIndex: fieldIndex})
+	}
+	return result, byType, nil
+}
+
 func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, error) {
 	function := &e.functions[functionIndex]
 	localTypes := make(map[mir.LocalID]hir.Type)
@@ -156,6 +234,11 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 		}
 		if _, err := assignLocalType(localTypes, parameter, function.ParameterTypes[index]); err != nil {
 			return nil, fmt.Errorf("parameter type in %s: %w", function.Name, err)
+		}
+	}
+	for _, resource := range function.Resources {
+		if _, err := assignLocalType(localTypes, mir.LocalID(resource.Symbol), resource.Type); err != nil {
+			return nil, fmt.Errorf("resource local type in %s: %w", function.Name, err)
 		}
 	}
 	changed := true
@@ -172,7 +255,8 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 				case mir.OperationUnary, mir.OperationBinary:
 					inferred = hir.TypeI32
 				case mir.OperationResultConstruct, mir.OperationOptionConstruct,
-					mir.OperationResultPayload, mir.OperationOptionPayload:
+					mir.OperationResultPayload, mir.OperationOptionPayload,
+					mir.OperationResourceConstruct, mir.OperationFieldRead:
 					inferred = operation.Type
 				}
 				if operation.DestinationLocal == mir.NoLocal || inferred == hir.TypeInvalid || inferred == "" {
@@ -253,12 +337,16 @@ func isResultI32I32(value hir.Type) bool {
 	return ok && success == hir.TypeI32 && failure == hir.TypeI32
 }
 
-func supportedCValueType(value hir.Type) bool {
+func (e *emitter) supportedCValueType(value hir.Type) bool {
 	value = canonicalCValueType(value)
-	return value == hir.TypeI32 || isOptionI32(value) || isResultI32I32(value)
+	if value == hir.TypeI32 || isOptionI32(value) || isResultI32I32(value) {
+		return true
+	}
+	_, resource := e.resourceByType[value]
+	return resource
 }
 
-func cValueType(value hir.Type) (string, error) {
+func (e *emitter) cValueType(value hir.Type) (string, error) {
 	value = canonicalCValueType(value)
 	switch {
 	case value == hir.TypeI32:
@@ -268,25 +356,34 @@ func cValueType(value hir.Type) (string, error) {
 	case isResultI32I32(value):
 		return "fy_result_i32_i32", nil
 	default:
-		return "", fmt.Errorf("unsupported C value type %q", value)
+		index, found := e.resourceByType[value]
+		if !found {
+			return "", fmt.Errorf("unsupported C value type %q", value)
+		}
+		return fmt.Sprintf("fy_resource_%d", index), nil
 	}
 }
 
 func (e *emitter) inspectFunction(functionIndex int) error {
 	function := &e.functions[functionIndex]
-	if function.ResultType != hir.TypeVoid && !supportedCValueType(function.ResultType) {
+	if function.ResultType != hir.TypeVoid && !e.supportedCValueType(function.ResultType) {
 		return CapabilityError{Function: function.Name, Feature: "result type " + strconv.Quote(string(function.ResultType))}
 	}
 	if len(function.ParameterTypes) != len(function.Parameters) {
 		return fmt.Errorf("MIR function %s has %d parameter types for %d parameters", function.Name, len(function.ParameterTypes), len(function.Parameters))
 	}
 	for _, parameterType := range function.ParameterTypes {
-		if !supportedCValueType(parameterType) {
+		if !e.supportedCValueType(parameterType) {
 			return CapabilityError{Function: function.Name, Feature: "parameter type " + strconv.Quote(string(parameterType))}
 		}
 	}
-	if len(function.Resources) != 0 || len(function.DropFlags) != 0 {
-		return CapabilityError{Function: function.Name, Feature: "resource values"}
+	for _, resource := range function.Resources {
+		if _, supported := e.resourceByType[resource.Type]; !supported {
+			return CapabilityError{Function: function.Name, Feature: "resource local type " + strconv.Quote(string(resource.Type))}
+		}
+	}
+	if len(function.DropFlags) != 0 {
+		return CapabilityError{Function: function.Name, Feature: "partial resource initialization"}
 	}
 	if len(function.Loans) != 0 || len(function.ReturnOrigins) != 0 {
 		return CapabilityError{Function: function.Name, Feature: "safe-borrow values"}
@@ -310,6 +407,18 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 			switch operation.Kind {
 			case mir.OperationAssign:
 				if err := e.inspectAssignment(functionIndex, *operation); err != nil {
+					return err
+				}
+			case mir.OperationInitialize:
+				if err := e.inspectResourceInitialize(functionIndex, *operation); err != nil {
+					return err
+				}
+			case mir.OperationMove, mir.OperationDrop:
+				if err := e.inspectResourceDischarge(functionIndex, *operation); err != nil {
+					return err
+				}
+			case mir.OperationResourceConstruct, mir.OperationFieldRead:
+				if err := e.inspectResourceOperation(functionIndex, *operation); err != nil {
 					return err
 				}
 			case mir.OperationUse:
@@ -430,9 +539,14 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 
 func validateOperationShape(function string, operation mir.Operation) error {
 	switch operation.Kind {
-	case mir.OperationAssign, mir.OperationUnary, mir.OperationBinary:
+	case mir.OperationAssign, mir.OperationInitialize, mir.OperationUnary, mir.OperationBinary,
+		mir.OperationResourceConstruct, mir.OperationFieldRead:
 		if operation.DestinationLocal < 0 {
 			return fmt.Errorf("%s operation in %s has no destination local", operation.Kind, function)
+		}
+	case mir.OperationMove, mir.OperationDrop:
+		if operation.Symbol == hir.NoSymbol {
+			return fmt.Errorf("%s operation in %s has no resource symbol", operation.Kind, function)
 		}
 	}
 	return nil
@@ -469,6 +583,95 @@ func (e *emitter) inspectAssignment(functionIndex int, operation mir.Operation) 
 	}
 	if canonicalCValueType(sourceType) != canonicalCValueType(destinationType) {
 		return fmt.Errorf("assign in %s has source type %q and destination type %q", function.Name, sourceType, destinationType)
+	}
+	return nil
+}
+
+func (e *emitter) inspectResourceInitialize(functionIndex int, operation mir.Operation) error {
+	function := &e.functions[functionIndex]
+	resource, found := e.resourceLocals[functionIndex][operation.Symbol]
+	if !found || operation.DestinationLocal != mir.LocalID(operation.Symbol) {
+		return fmt.Errorf("resource initialization in %s does not name its declared local", function.Name)
+	}
+	if _, supported := e.resourceByType[resource.Type]; !supported {
+		return CapabilityError{Function: function.Name, Feature: "resource initialization type " + strconv.Quote(string(resource.Type))}
+	}
+	operand, err := oneOperand(operation.Operands)
+	if err != nil {
+		return fmt.Errorf("resource initialization in %s: %w", function.Name, err)
+	}
+	valueType, err := e.operandType(functionIndex, operand)
+	if err != nil {
+		return fmt.Errorf("resource initialization in %s: %w", function.Name, err)
+	}
+	if canonicalCValueType(valueType) != canonicalCValueType(resource.Type) {
+		return fmt.Errorf("resource initialization in %s has value type %q, want %q", function.Name, valueType, resource.Type)
+	}
+	return nil
+}
+
+func (e *emitter) inspectResourceDischarge(functionIndex int, operation mir.Operation) error {
+	function := &e.functions[functionIndex]
+	resource, found := e.resourceLocals[functionIndex][operation.Symbol]
+	if !found {
+		return fmt.Errorf("%s in %s names undeclared resource local %d", operation.Kind, function.Name, operation.Symbol)
+	}
+	if _, supported := e.resourceByType[resource.Type]; !supported {
+		return CapabilityError{Function: function.Name, Feature: "resource discharge type " + strconv.Quote(string(resource.Type))}
+	}
+	if operation.Kind == mir.OperationMove && operation.Destination == "" {
+		return fmt.Errorf("resource move in %s has no destination class", function.Name)
+	}
+	if operation.Kind == mir.OperationDrop && (operation.DropFlagEntity != "" || !operation.FlagClearedFirst) {
+		return CapabilityError{Function: function.Name, Feature: "conditional resource drop"}
+	}
+	return nil
+}
+
+func (e *emitter) inspectResourceOperation(functionIndex int, operation mir.Operation) error {
+	function := &e.functions[functionIndex]
+	switch operation.Kind {
+	case mir.OperationResourceConstruct:
+		index, found := e.resourceByType[operation.Type]
+		if !found {
+			return CapabilityError{Function: function.Name, Feature: "resource construction type " + strconv.Quote(string(operation.Type))}
+		}
+		definition := &e.resourceTypes[index]
+		if len(operation.Fields) != len(definition.definition.Fields) || len(operation.Operands) != len(definition.definition.Fields) {
+			return fmt.Errorf("resource construction in %s does not match type %q", function.Name, operation.Type)
+		}
+		for fieldIndex, field := range definition.definition.Fields {
+			if operation.Fields[fieldIndex] != field.Name {
+				return fmt.Errorf("resource construction in %s has field %q at index %d, want %q", function.Name, operation.Fields[fieldIndex], fieldIndex, field.Name)
+			}
+			operandType, err := e.operandType(functionIndex, operation.Operands[fieldIndex])
+			if err != nil {
+				return fmt.Errorf("resource construction field %d in %s: %w", fieldIndex, function.Name, err)
+			}
+			if canonicalCValueType(operandType) != hir.TypeI32 {
+				return CapabilityError{Function: function.Name, Feature: "non-i32 resource construction field"}
+			}
+		}
+	case mir.OperationFieldRead:
+		index, found := e.resourceByType[operation.OwnerType]
+		if !found {
+			return CapabilityError{Function: function.Name, Feature: "field-read owner type " + strconv.Quote(string(operation.OwnerType))}
+		}
+		definition := &e.resourceTypes[index]
+		if _, found := definition.fieldIndex[operation.Field]; !found || operation.Type != hir.TypeI32 {
+			return CapabilityError{Function: function.Name, Feature: "non-i32 resource field read"}
+		}
+		receiver, err := oneOperand(operation.Operands)
+		if err != nil {
+			return fmt.Errorf("resource field read in %s: %w", function.Name, err)
+		}
+		receiverType, err := e.operandType(functionIndex, receiver)
+		if err != nil {
+			return fmt.Errorf("resource field read in %s: %w", function.Name, err)
+		}
+		if canonicalCValueType(receiverType) != canonicalCValueType(operation.OwnerType) {
+			return fmt.Errorf("resource field read in %s has receiver type %q, want %q", function.Name, receiverType, operation.OwnerType)
+		}
 	}
 	return nil
 }
@@ -622,10 +825,26 @@ func (e *emitter) recordTrapCategories(function string, categories []string) err
 func (e *emitter) emitPreamble(output *strings.Builder) {
 	fmt.Fprintf(output, "/* fairyc constrained C transport: %s, ISO C11 */\n", target.X8664LinuxGNU)
 	output.WriteString("#include <stdint.h>\n")
+	if len(e.resourceTypes) != 0 {
+		output.WriteString("#include <stddef.h>\n")
+	}
 	if e.needsBitcast {
 		output.WriteString("#include <string.h>\n")
 	}
 	output.WriteByte('\n')
+	for index, resource := range e.resourceTypes {
+		output.WriteString("typedef struct {\n")
+		for fieldIndex := range resource.definition.Fields {
+			fmt.Fprintf(output, "    int32_t f_%d;\n", fieldIndex)
+		}
+		fmt.Fprintf(output, "} fy_resource_%d;\n", index)
+		fmt.Fprintf(output, "_Static_assert(sizeof(fy_resource_%d) == UINT64_C(%d), \"fairyc resource %d size\");\n", index, resource.layout.SizeBytes, index)
+		fmt.Fprintf(output, "_Static_assert(_Alignof(fy_resource_%d) == UINT64_C(%d), \"fairyc resource %d alignment\");\n", index, resource.layout.AlignmentBytes, index)
+		for fieldIndex, field := range resource.layout.Fields {
+			fmt.Fprintf(output, "_Static_assert(offsetof(fy_resource_%d, f_%d) == UINT64_C(%d), \"fairyc resource %d field %d offset\");\n", index, fieldIndex, field.OffsetBytes, index, fieldIndex)
+		}
+		output.WriteByte('\n')
+	}
 	if _, used := e.features["scalar-option"]; used {
 		output.WriteString("#define FY_OPTION_NONE UINT32_C(0)\n")
 		output.WriteString("#define FY_OPTION_SOME UINT32_C(1)\n")
@@ -662,12 +881,12 @@ func (e *emitter) emitPreamble(output *strings.Builder) {
 
 func (e *emitter) emitPrototype(output *strings.Builder, functionIndex int) error {
 	function := &e.functions[functionIndex]
-	resultType, err := cFunctionResultType(function.ResultType)
+	resultType, err := e.cFunctionResultType(function.ResultType)
 	if err != nil {
 		return fmt.Errorf("prototype for %s: %w", function.Name, err)
 	}
 	fmt.Fprintf(output, "static %s fy_fn_%d(", resultType, functionIndex)
-	if err := emitParameters(output, function.Parameters, function.ParameterTypes); err != nil {
+	if err := e.emitParameters(output, function.Parameters, function.ParameterTypes); err != nil {
 		return fmt.Errorf("prototype for %s: %w", function.Name, err)
 	}
 	output.WriteString(");\n")
@@ -676,12 +895,12 @@ func (e *emitter) emitPrototype(output *strings.Builder, functionIndex int) erro
 
 func (e *emitter) emitFunction(output *strings.Builder, functionIndex int) error {
 	function := &e.functions[functionIndex]
-	resultType, err := cFunctionResultType(function.ResultType)
+	resultType, err := e.cFunctionResultType(function.ResultType)
 	if err != nil {
 		return fmt.Errorf("function %s: %w", function.Name, err)
 	}
 	fmt.Fprintf(output, "static %s fy_fn_%d(", resultType, functionIndex)
-	if err := emitParameters(output, function.Parameters, function.ParameterTypes); err != nil {
+	if err := e.emitParameters(output, function.Parameters, function.ParameterTypes); err != nil {
 		return fmt.Errorf("function %s: %w", function.Name, err)
 	}
 	output.WriteString(") {\n")
@@ -698,7 +917,7 @@ func (e *emitter) emitFunction(output *strings.Builder, functionIndex int) error
 		if !found {
 			return fmt.Errorf("function %s local %d has no C type", function.Name, local)
 		}
-		cType, err := cValueType(localType)
+		cType, err := e.cValueType(localType)
 		if err != nil {
 			return fmt.Errorf("function %s local %d: %w", function.Name, local, err)
 		}
@@ -715,7 +934,7 @@ func (e *emitter) emitFunction(output *strings.Builder, functionIndex int) error
 		block := &blocks[blockIndex]
 		fmt.Fprintf(output, "fy_b_%d:\n", block.ID)
 		for operationIndex := range block.Operations {
-			if err := e.emitOperation(output, function.Name, block.Operations[operationIndex]); err != nil {
+			if err := e.emitOperation(output, functionIndex, block.Operations[operationIndex]); err != nil {
 				return err
 			}
 		}
@@ -727,9 +946,10 @@ func (e *emitter) emitFunction(output *strings.Builder, functionIndex int) error
 	return nil
 }
 
-func (e *emitter) emitOperation(output *strings.Builder, function string, operation mir.Operation) error {
+func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, operation mir.Operation) error {
+	function := e.functions[functionIndex].Name
 	switch operation.Kind {
-	case mir.OperationAssign:
+	case mir.OperationAssign, mir.OperationInitialize:
 		operand, err := oneOperand(operation.Operands)
 		if err != nil {
 			return fmt.Errorf("assign in %s: %w", function, err)
@@ -739,6 +959,43 @@ func (e *emitter) emitOperation(output *strings.Builder, function string, operat
 			return fmt.Errorf("assign in %s: %w", function, err)
 		}
 		fmt.Fprintf(output, "    fy_l_%d = %s;\n", operation.DestinationLocal, value)
+	case mir.OperationResourceConstruct:
+		index, found := e.resourceByType[operation.Type]
+		if !found {
+			return CapabilityError{Function: function, Feature: "resource construction type " + strconv.Quote(string(operation.Type))}
+		}
+		fmt.Fprintf(output, "    fy_l_%d = (fy_resource_%d){ ", operation.DestinationLocal, index)
+		for fieldIndex, operand := range operation.Operands {
+			if fieldIndex != 0 {
+				output.WriteString(", ")
+			}
+			value, err := cOperand(operand)
+			if err != nil {
+				return fmt.Errorf("resource construction field %d in %s: %w", fieldIndex, function, err)
+			}
+			fmt.Fprintf(output, ".f_%d = %s", fieldIndex, value)
+		}
+		output.WriteString(" };\n")
+	case mir.OperationFieldRead:
+		index, found := e.resourceByType[operation.OwnerType]
+		if !found {
+			return CapabilityError{Function: function, Feature: "field-read owner type " + strconv.Quote(string(operation.OwnerType))}
+		}
+		fieldIndex, found := e.resourceTypes[index].fieldIndex[operation.Field]
+		if !found {
+			return fmt.Errorf("resource field read in %s names missing field %q", function, operation.Field)
+		}
+		receiver, err := oneOperand(operation.Operands)
+		if err != nil {
+			return fmt.Errorf("resource field read in %s: %w", function, err)
+		}
+		value, err := cOperand(receiver)
+		if err != nil {
+			return fmt.Errorf("resource field read in %s: %w", function, err)
+		}
+		fmt.Fprintf(output, "    fy_l_%d = (%s).f_%d;\n", operation.DestinationLocal, value, fieldIndex)
+	case mir.OperationMove, mir.OperationDrop:
+		fmt.Fprintf(output, "    (void)fy_l_%d;\n", operation.Symbol)
 	case mir.OperationUnary:
 		operand, err := oneOperand(operation.Operands)
 		if err != nil {
@@ -1016,7 +1273,7 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 	return nil
 }
 
-func emitParameters(output *strings.Builder, parameters []mir.LocalID, parameterTypes []hir.Type) error {
+func (e *emitter) emitParameters(output *strings.Builder, parameters []mir.LocalID, parameterTypes []hir.Type) error {
 	if len(parameters) != len(parameterTypes) {
 		return fmt.Errorf("parameter type count %d does not match parameter count %d", len(parameterTypes), len(parameters))
 	}
@@ -1028,7 +1285,7 @@ func emitParameters(output *strings.Builder, parameters []mir.LocalID, parameter
 		if index != 0 {
 			output.WriteString(", ")
 		}
-		cType, err := cValueType(parameterTypes[index])
+		cType, err := e.cValueType(parameterTypes[index])
 		if err != nil {
 			return err
 		}
@@ -1078,11 +1335,11 @@ func collectLocals(function mir.Function) []mir.LocalID {
 	return result
 }
 
-func cFunctionResultType(value hir.Type) (string, error) {
+func (e *emitter) cFunctionResultType(value hir.Type) (string, error) {
 	if value == hir.TypeVoid {
 		return "void", nil
 	}
-	return cValueType(value)
+	return e.cValueType(value)
 }
 
 func cOperand(operand mir.Operand) (string, error) {

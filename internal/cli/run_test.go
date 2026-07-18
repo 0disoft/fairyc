@@ -260,7 +260,7 @@ func TestExperimentalEmitCWritesDeterministicTranslationUnit(t *testing.T) {
 	}
 }
 
-func TestExperimentalEmitCRejectsUnsupportedBackendSubset(t *testing.T) {
+func TestExperimentalEmitCEmitsFlatI32Resource(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
 	writeTestSource(t, root, "main.fy", `module main;
@@ -274,7 +274,26 @@ fn main() -> i32 {
 }
 `)
 	code, stdout, stderr := runForTest([]string{"experimental", "emit-c", "main.fy"}, root)
-	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "experimental C-emission subset") || !strings.Contains(stderr, "resource values") {
+	if code != ExitSuccess || stderr != "" || !strings.Contains(stdout, "} fy_resource_0;") || !strings.Contains(stdout, ".f_0;") {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+	if strings.Contains(stdout, "Token") || strings.Contains(stdout, "value") {
+		t.Fatalf("emit-c leaked resource source identifiers:\n%s", stdout)
+	}
+}
+
+func TestExperimentalEmitCRejectsUnsupportedBackendSubset(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", `module main;
+resource Flag {
+    value: bool;
+    drop fn(self: &mut Self) {}
+}
+fn main() -> i32 { 0 }
+`)
+	code, stdout, stderr := runForTest([]string{"experimental", "emit-c", "main.fy"}, root)
+	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "experimental C-emission subset") || !strings.Contains(stderr, "field \"value\" of type \"bool\"") {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
 	}
 }

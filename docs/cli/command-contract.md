@@ -16,8 +16,8 @@ The current Go prototype implements seven deliberately unstable developer comman
 | `fairyc experimental check-syntax <file.fy>` | Check lexing, parsing, recovery, module identity, lossless reconstruction, and error-free AST lowering | Success line on stdout or human diagnostics on stderr |
 | `fairyc experimental check-semantics <file.fy> [<file.fy>...]` | Resolve names, type-check, and analyze local safe-borrow, whole-resource, Region, and complete Stage 0 Result must-use Flow for an explicit module set in the implemented subset | Typed-HIR module and function counts on stdout, human source diagnostics on stderr, or an explicit unsupported-subset error |
 | `fairyc experimental target-spec x86_64-linux-gnu` | Inspect the first host-independent target description without resolving a local toolchain | Deterministic `fairyc.target-spec/v0` JSON on stdout, defined by `spec/cli/experimental-target-spec-v0.schema.json` |
-| `fairyc experimental emit-c <file.fy>` | Lower one scalar-payload program through verified MIR and emit the provisional constrained C transport without invoking a toolchain | Exactly one deterministic ISO C11 translation unit on stdout, source diagnostics or capability errors on stderr |
-| `fairyc experimental build <file.fy> --cc <clang\|gcc> --profile <low\|optimized> --output <build/path>` | Compile and link one verified scalar-payload program for the host `x86_64-linux-gnu` profile with an explicit C compiler, optimization profile, and ignored output path | A no-overwrite executable below `build/` plus one relative-path receipt, or source, capability, toolchain, link, or artifact diagnostics |
+| `fairyc experimental emit-c <file.fy>` | Lower one scalar or flat all-`i32` resource program through verified MIR and emit the provisional constrained C transport without invoking a toolchain | Exactly one deterministic ISO C11 translation unit on stdout, source diagnostics or capability errors on stderr |
+| `fairyc experimental build <file.fy> --cc <clang\|gcc> --profile <low\|optimized> --output <build/path>` | Compile and link one verified scalar or flat all-`i32` resource program for the host `x86_64-linux-gnu` profile with an explicit C compiler, optimization profile, and ignored output path | A no-overwrite executable below `build/` plus one relative-path receipt, or source, capability, toolchain, link, or artifact diagnostics |
 | `fairyc experimental run <file.fy>` | Run one verified-MIR program in the scalar, tagged, whole-resource, and implemented Region subset whose selected module declares `main() -> i32` | `result: <i32>` on stdout, a canonical trap category on stderr, source diagnostics, or an explicit unsupported-subset error |
 
 These commands treat the current directory as their temporary source root. `parse` and
@@ -35,7 +35,7 @@ claimed full-file size.
 directory scan, executable lookup, SDK discovery, sysroot probing, or network request. Its JSON
 contains target-semantic identity, layouts and classifier identities plus explicit maturity
 evidence. It contains no local tool path. Unknown, missing, or extra IDs are invocation failures
-and emit no partial JSON. The reported scalar C emission subset does not make the target
+and emit no partial JSON. The reported constrained-C emission subset does not make the target
 `emittable`, `conformant`, or `supported`.
 
 `check-semantics` never scans directories or follows an import to discover another source file. Each
@@ -63,14 +63,17 @@ multi-file run input remain outside the current interpreter subset. Signed left 
 by semantic analysis as `E1011` rather than reaching the interpreter.
 
 `experimental emit-c` shares the same single-file syntax, semantics, Flow, MIR-lowering, verifier,
-and zero-argument `main() -> i32` entry path, then invokes only the constrained scalar-payload C emitter.
+    and zero-argument `main() -> i32` entry path, then invokes only the constrained C emitter.
 It writes raw C11 to stdout with no banner or metadata and writes no repository file. It does not
 parse the generated C, invoke Clang or GCC, link the test runtime, execute a program, or establish an
 `emittable`, `conformant`, or `supported` target. `Option<i32>` and `Result<i32, i32>` use private
-tagged structs; unsupported resources, nested or other tagged payloads, Region, borrow, unsafe, FFI,
-complete runtime, and standard-library lowering fail with the provisional capability code.
+tagged structs. Direct nonempty all-`i32` resources with empty drop bodies use private numeric
+structs whose size, alignment, and field offsets are asserted against target-layout results.
+Resource-bearing or nested tags, empty or non-`i32` resources, partial initialization, user drop
+effects, Region, borrow, unsafe, FFI, complete runtime, and standard-library lowering fail with the
+provisional capability code.
 
-`experimental build` consumes that same scalar-payload C unit, binds the embedded scalar runtime, and uses
+`experimental build` consumes that same C unit, binds the embedded scalar runtime, and uses
 the shared constrained-C driver. It requires Linux/amd64 with glibc and the explicitly selected
 `clang` or `gcc` from `PATH`; `low` fixes `-O0` and `optimized` fixes `-O2`. There is no compiler,
 profile, target, or output default. The output must be a canonical forward-slash path below the
