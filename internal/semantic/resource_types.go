@@ -18,8 +18,14 @@ type resourceField struct {
 	declaration hir.Span
 }
 
-func (a *analyzer) prepareResourceTypes() {
+func (a *analyzer) prepareAggregateIdentities() {
 	for _, module := range a.moduleOrder {
+		for index := range module.file.Module.Structs {
+			structure := &module.file.Module.Structs[index]
+			if value := a.structs[structure]; value != nil {
+				value.typ = hir.Type(module.file.Module.Path + "::" + structure.Name)
+			}
+		}
 		for index := range module.file.Module.Resources {
 			resource := &module.file.Module.Resources[index]
 			value := a.resources[resource]
@@ -30,6 +36,9 @@ func (a *analyzer) prepareResourceTypes() {
 			a.resourceTypes[value.typ] = &resourceInfo{symbol: value, fields: make(map[string]resourceField)}
 		}
 	}
+}
+
+func (a *analyzer) prepareResourceTypes() {
 	for _, module := range a.moduleOrder {
 		for index := range module.file.Module.Resources {
 			resource := &module.file.Module.Resources[index]
@@ -48,6 +57,12 @@ func (a *analyzer) prepareResourceTypes() {
 					continue
 				}
 				fieldType := a.canonicalType(module, field.Type)
+				if fieldType == hir.TypeRegion {
+					a.addDiagnostic("E3103", span(module.file.Path, field.Type.Span), RelatedSpan{
+						Role: "capability",
+						Span: span(module.file.Path, field.NameSpan),
+					})
+				}
 				if _, _, borrow := hir.BorrowElement(fieldType); borrow {
 					a.addDiagnostic("E1003", span(module.file.Path, field.Type.Span))
 				}
@@ -55,6 +70,33 @@ func (a *analyzer) prepareResourceTypes() {
 					name:        field.Name,
 					typ:         fieldType,
 					declaration: span(module.file.Path, field.NameSpan),
+				}
+			}
+		}
+	}
+}
+
+func (a *analyzer) prepareStructTypes() {
+	for _, module := range a.moduleOrder {
+		for index := range module.file.Module.Structs {
+			structure := &module.file.Module.Structs[index]
+			value := a.structs[structure]
+			if value == nil {
+				continue
+			}
+			seen := make(map[string]hir.Span, len(structure.Fields))
+			for fieldIndex := range structure.Fields {
+				field := &structure.Fields[fieldIndex]
+				if previous, duplicate := seen[field.Name]; duplicate {
+					a.addDiagnostic("E0102", span(module.file.Path, field.NameSpan), RelatedSpan{Role: "previous-declaration", Span: previous})
+					continue
+				}
+				seen[field.Name] = span(module.file.Path, field.NameSpan)
+				if a.canonicalType(module, field.Type) == hir.TypeRegion {
+					a.addDiagnostic("E3103", span(module.file.Path, field.Type.Span), RelatedSpan{
+						Role: "capability",
+						Span: span(module.file.Path, field.NameSpan),
+					})
 				}
 			}
 		}
@@ -77,6 +119,8 @@ func (a *analyzer) canonicalTypeText(module *moduleScope, text string) (hir.Type
 		return hir.TypeBool, true
 	case "i32":
 		return hir.TypeI32, true
+	case "Region":
+		return hir.TypeRegion, true
 	}
 	if strings.HasPrefix(trimmed, "&") {
 		remainder := strings.TrimSpace(trimmed[1:])
@@ -98,13 +142,13 @@ func (a *analyzer) canonicalTypeText(module *moduleScope, text string) (hir.Type
 	var target *symbol
 	switch len(parts) {
 	case 1:
-		target = module.resources[parts[0]]
+		target = module.item(parts[0])
 	case 2:
 		if imported := module.imports[parts[0]]; imported != nil {
-			target = imported.resources[parts[1]]
+			target = imported.item(parts[1])
 		}
 	}
-	if target == nil || target.resource == nil {
+	if target == nil || (target.resource == nil && target.structure == nil) {
 		return hir.TypeInvalid, false
 	}
 	return target.typ, true

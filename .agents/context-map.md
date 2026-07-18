@@ -19,6 +19,7 @@
 - Resource Flow fixture route: spec/fixtures/resource/manifest-v0.json
 - Resource Flow runner route: internal/resourcefixture/
 - Region fixture route: spec/fixtures/region/manifest-v1.json
+- Region runner route: internal/regionfixture/
 - Result fixture route: spec/fixtures/result/manifest-v0.json
 - MIR fixture route: spec/fixtures/mir/manifest-v0.json
 - MIR verifier mutation fixture route: spec/fixtures/mir-verifier/manifest-v0.json

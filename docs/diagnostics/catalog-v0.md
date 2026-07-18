@@ -97,4 +97,4 @@ The MIR verifier codes are defined in `docs/mir/mir-v0.md`.
 
 ## Compatibility
 
-Codes become release-stable only with an implemented diagnostic and compile-fail fixture. Until then, this catalog reserves meanings for the prototype and may be revised through an ADR plus synchronized fixture plan. The semantic v0 resolver, type, local-borrow, and whole-resource diagnostics are implemented as prototype acceptance behavior; Region and Result fixtures do not yet claim an implementation exists.
+Codes become release-stable only with an implemented diagnostic and compile-fail fixture. Until then, this catalog reserves meanings for the prototype and may be revised through an ADR plus synchronized fixture plan. The semantic v0 resolver, type, local-borrow, whole-resource, and Region v1 diagnostics are implemented as prototype acceptance behavior; Result fixtures do not yet claim an implementation exists.

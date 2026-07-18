@@ -33,6 +33,7 @@ regenerate, or override compiler source.
 - Resource Flow fixtures: spec/fixtures/resource/manifest-v0.json
 - Resource Flow fixture runner: internal/resourcefixture/
 - Region fixtures: spec/fixtures/region/manifest-v1.json
+- Region fixture runner: internal/regionfixture/
 - Result fixtures: spec/fixtures/result/manifest-v0.json
 - MIR normalization fixtures: spec/fixtures/mir/manifest-v0.json
 - MIR verifier mutation fixtures: spec/fixtures/mir-verifier/manifest-v0.json

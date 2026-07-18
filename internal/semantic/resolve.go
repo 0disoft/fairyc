@@ -21,12 +21,14 @@ type symbol struct {
 	mutable     bool
 	public      bool
 	function    *ast.Function
+	structure   *ast.Struct
 	resource    *ast.Resource
 }
 
 type moduleScope struct {
 	file      File
 	functions map[string]*symbol
+	structs   map[string]*symbol
 	resources map[string]*symbol
 	imports   map[string]*moduleScope
 }
@@ -37,42 +39,52 @@ type lexicalScope struct {
 }
 
 type analyzer struct {
-	files          []File
-	modules        map[string]*moduleScope
-	moduleOrder    []*moduleScope
-	nextSymbol     hir.SymbolID
-	resolved       map[*ast.Expression]*symbol
-	bindingSymbols map[*ast.Binding]*symbol
-	parameter      map[*ast.Parameter]*symbol
-	parameterIndex map[*symbol]int
-	functions      map[*ast.Function]*symbol
-	resources      map[*ast.Resource]*symbol
-	diagnostics    []Diagnostic
-	resolutions    []Resolution
-	types          []TypeFact
-	borrows        []BorrowFact
-	unsupported    []Unsupported
-	flowStarted    bool
-	resourceTypes  map[hir.Type]*resourceInfo
-	resourceStates []ResourceStateFact
+	files           []File
+	modules         map[string]*moduleScope
+	moduleOrder     []*moduleScope
+	nextSymbol      hir.SymbolID
+	resolved        map[*ast.Expression]*symbol
+	bindingSymbols  map[*ast.Binding]*symbol
+	parameter       map[*ast.Parameter]*symbol
+	parameterIndex  map[*symbol]int
+	functions       map[*ast.Function]*symbol
+	structs         map[*ast.Struct]*symbol
+	resources       map[*ast.Resource]*symbol
+	regions         map[*ast.Expression]*symbol
+	regionType      *symbol
+	diagnostics     []Diagnostic
+	resolutions     []Resolution
+	types           []TypeFact
+	borrows         []BorrowFact
+	unsupported     []Unsupported
+	flowStarted     bool
+	resourceTypes   map[hir.Type]*resourceInfo
+	resourceStates  []ResourceStateFact
+	expressionTypes map[*ast.Expression]hir.Type
+	regionOrigins   []RegionOriginFact
 }
 
 func newAnalyzer(files []File) *analyzer {
 	return &analyzer{
-		files:          files,
-		modules:        make(map[string]*moduleScope, len(files)),
-		resolved:       make(map[*ast.Expression]*symbol),
-		bindingSymbols: make(map[*ast.Binding]*symbol),
-		parameter:      make(map[*ast.Parameter]*symbol),
-		parameterIndex: make(map[*symbol]int),
-		functions:      make(map[*ast.Function]*symbol),
-		resources:      make(map[*ast.Resource]*symbol),
-		resourceTypes:  make(map[hir.Type]*resourceInfo),
+		files:           files,
+		modules:         make(map[string]*moduleScope, len(files)),
+		resolved:        make(map[*ast.Expression]*symbol),
+		bindingSymbols:  make(map[*ast.Binding]*symbol),
+		parameter:       make(map[*ast.Parameter]*symbol),
+		parameterIndex:  make(map[*symbol]int),
+		functions:       make(map[*ast.Function]*symbol),
+		structs:         make(map[*ast.Struct]*symbol),
+		resources:       make(map[*ast.Resource]*symbol),
+		regions:         make(map[*ast.Expression]*symbol),
+		resourceTypes:   make(map[hir.Type]*resourceInfo),
+		expressionTypes: make(map[*ast.Expression]hir.Type),
+		regionType:      &symbol{id: hir.NoSymbol, kind: "capability", name: "Region", typ: hir.TypeRegion},
 	}
 }
 
 func (a *analyzer) resolve() {
 	a.declareModules()
+	a.declareStructs()
 	a.declareResources()
 	a.declareFunctions()
 	a.resolveImports()
@@ -101,11 +113,36 @@ func (a *analyzer) declareModules() {
 		module := &moduleScope{
 			file:      file,
 			functions: make(map[string]*symbol),
+			structs:   make(map[string]*symbol),
 			resources: make(map[string]*symbol),
 			imports:   make(map[string]*moduleScope),
 		}
 		a.modules[file.Module.Path] = module
 		a.moduleOrder = append(a.moduleOrder, module)
+	}
+}
+
+func (a *analyzer) declareStructs() {
+	for _, module := range a.moduleOrder {
+		for index := range module.file.Module.Structs {
+			structure := &module.file.Module.Structs[index]
+			if previous := module.item(structure.Name); previous != nil {
+				a.addDiagnostic("E0102", span(module.file.Path, structure.NameSpan), RelatedSpan{Role: "previous-declaration", Span: span(previous.source, previous.declaration)})
+				continue
+			}
+			value := &symbol{
+				id:          a.allocateSymbol(),
+				kind:        "struct",
+				name:        structure.Name,
+				module:      module.file.Module.Path,
+				source:      module.file.Path,
+				declaration: structure.NameSpan,
+				public:      structure.Public,
+				structure:   structure,
+			}
+			module.structs[structure.Name] = value
+			a.structs[structure] = value
+		}
 	}
 }
 
@@ -257,6 +294,10 @@ func (a *analyzer) resolveExpression(module *moduleScope, scope *lexicalScope, e
 	if expression == nil {
 		return
 	}
+	if expression.Kind == syntax.KindRegion {
+		a.resolveRegion(module, scope, expression)
+		return
+	}
 	if expression.Kind == syntax.KindPath {
 		a.resolvePath(module, scope, expression)
 	}
@@ -268,13 +309,32 @@ func (a *analyzer) resolveExpression(module *moduleScope, scope *lexicalScope, e
 	}
 }
 
+func (a *analyzer) resolveRegion(module *moduleScope, scope *lexicalScope, expression *ast.Expression) {
+	if len(expression.Children) != 2 {
+		return
+	}
+	a.resolveExpression(module, scope, expression.Children[0])
+	regionScope := &lexicalScope{parent: scope, names: make(map[string]*symbol)}
+	value := &symbol{id: a.allocateSymbol(), kind: "region", name: expression.Text, module: module.file.Module.Path, source: module.file.Path, declaration: expression.Span, typ: hir.TypeRegion}
+	regionScope.names[expression.Text] = value
+	a.regions[expression] = value
+	body := expression.Children[1]
+	if body.Block != nil {
+		a.resolveBlock(module, body.Block, regionScope)
+	}
+}
+
 func (a *analyzer) resolvePath(module *moduleScope, scope *lexicalScope, expression *ast.Expression) {
 	parts := strings.Split(expression.Text, "::")
 	var target *symbol
 	if len(parts) == 1 {
-		target = lookupLexical(scope, parts[0])
-		if target == nil {
-			target = module.item(parts[0])
+		if parts[0] == "Region" {
+			target = a.regionType
+		} else {
+			target = lookupLexical(scope, parts[0])
+			if target == nil {
+				target = module.item(parts[0])
+			}
 		}
 	} else if len(parts) == 2 {
 		if imported := module.imports[parts[0]]; imported != nil {
@@ -296,6 +356,9 @@ func (a *analyzer) resolvePath(module *moduleScope, scope *lexicalScope, express
 		return
 	}
 	a.resolved[expression] = target
+	if target == a.regionType {
+		return
+	}
 	a.resolutions = append(a.resolutions, Resolution{
 		Use: span(module.file.Path, expression.Span),
 		Target: SymbolCoordinate{
@@ -309,6 +372,9 @@ func (a *analyzer) resolvePath(module *moduleScope, scope *lexicalScope, express
 
 func (m *moduleScope) item(name string) *symbol {
 	if value := m.functions[name]; value != nil {
+		return value
+	}
+	if value := m.structs[name]; value != nil {
 		return value
 	}
 	return m.resources[name]

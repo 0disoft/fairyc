@@ -3,6 +3,7 @@ package semantic
 import (
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/hir"
@@ -12,6 +13,7 @@ import (
 type flowOrigin struct {
 	name        string
 	declaration hir.Span
+	allocation  *hir.Span
 }
 
 type flowLoan struct {
@@ -66,6 +68,7 @@ func (a *analyzer) flowFunction(module *moduleScope, function *ast.Function) {
 		a.borrows = append(a.borrows, loan.fact)
 	}
 	a.checkLoanConflicts(module.file.Path, loans, inventory.assignments)
+	a.collectRegionOriginFacts(module, &inventory, origins)
 	a.resourceFlowFunction(module, function)
 
 	if _, _, returnsBorrow := hir.BorrowElement(a.functions[function].typ); !returnsBorrow {
@@ -166,6 +169,14 @@ func (a *analyzer) checkBorrowReturn(module *moduleScope, expression *ast.Expres
 		})
 		return
 	}
+	if strings.HasPrefix(origin.name, "LocalRegion(") {
+		related := make([]RelatedSpan, 0, 1)
+		if origin.allocation != nil {
+			related = append(related, RelatedSpan{Role: "allocation", Span: *origin.allocation})
+		}
+		a.addDiagnostic("E3101", span(module.file.Path, expression.Span), related...)
+		return
+	}
 	if expression.Kind == syntax.KindPath {
 		returnedSymbol := a.resolved[expression]
 		for index := range loans {
@@ -227,8 +238,63 @@ func (a *analyzer) expressionOrigins(module *moduleScope, expression *ast.Expres
 			result = append(result, a.expressionOrigins(module, branch, origins)...)
 		}
 		return compactOrigins(result)
+	case syntax.KindCall:
+		if isRegionPlaceCall(expression) {
+			receiver := expression.Children[0].Children[0]
+			value := a.resolved[receiver]
+			allocation := span(module.file.Path, expression.Span)
+			switch {
+			case value != nil && value.kind == "parameter" && value.typ == hir.TypeRegion:
+				return []flowOrigin{{name: fmt.Sprintf("RegionParam(%d)", a.parameterIndex[value]), declaration: span(value.source, value.declaration), allocation: &allocation}}
+			case value != nil && value.kind == "region":
+				return []flowOrigin{{name: "LocalRegion(" + value.name + ")", declaration: span(value.source, value.declaration), allocation: &allocation}}
+			}
+		}
 	}
 	return nil
+}
+
+func (a *analyzer) collectRegionOriginFacts(module *moduleScope, inventory *flowInventory, origins map[*symbol]flowOrigin) {
+	for _, expression := range inventory.expressions {
+		if !isRegionPlaceCall(expression) {
+			continue
+		}
+		candidates := compactOrigins(a.expressionOrigins(module, expression, origins))
+		if len(candidates) != 1 {
+			continue
+		}
+		origin := candidates[0]
+		fact := RegionOriginFact{Operation: "place", Allocation: span(module.file.Path, expression.Span), Origin: origin.name}
+		if binding := a.bindingForExpression(expression); binding != nil {
+			fact.LastUse = lastUseOf(inventory.expressions, a.resolved, binding, expression.Span.EndByte)
+		}
+		for _, returned := range inventory.returns {
+			for _, returnedOrigin := range a.expressionOrigins(module, returned, origins) {
+				if sameFlowOrigin(origin, returnedOrigin) {
+					fact.Escapes = true
+				}
+			}
+		}
+		a.regionOrigins = append(a.regionOrigins, fact)
+		argument := expression.Children[1]
+		argumentType := a.expressionTypes[argument]
+		if info := a.resourceTypes[argumentType]; info != nil && info.symbol != nil {
+			a.addDiagnostic("E3102", fact.Allocation, RelatedSpan{Role: "type", Span: span(info.symbol.source, info.symbol.declaration)})
+		}
+	}
+}
+
+func (a *analyzer) bindingForExpression(expression *ast.Expression) *symbol {
+	for binding, value := range a.bindingSymbols {
+		if binding.Expression == expression {
+			return value
+		}
+	}
+	return nil
+}
+
+func sameFlowOrigin(left, right flowOrigin) bool {
+	return left.name == right.name && compareSpan(left.declaration, right.declaration) == 0
 }
 
 func (a *analyzer) originForSymbol(value *symbol) flowOrigin {
@@ -314,7 +380,7 @@ func compactOrigins(values []flowOrigin) []flowOrigin {
 		return compareSpan(left.declaration, right.declaration)
 	})
 	return slices.CompactFunc(values, func(left, right flowOrigin) bool {
-		return left.name == right.name && compareSpan(left.declaration, right.declaration) == 0
+		return sameFlowOrigin(left, right)
 	})
 }
 

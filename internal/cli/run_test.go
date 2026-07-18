@@ -186,6 +186,17 @@ fn invalid() -> i32 {
 	}
 }
 
+func TestExperimentalCheckSemanticsReportsRegionCapabilityStorage(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\nstruct Holder { scratch: Region; }\n")
+	code, stdout, stderr := runForTest([]string{"experimental", "check-semantics", "main.fy"}, root)
+	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "E3103: compiler-owned Region capability cannot be stored") ||
+		!strings.Contains(stderr, "capability: main.fy") {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
 func TestRepositorySyntaxExampleStaysRunnable(t *testing.T) {
 	root := filepath.Clean(filepath.Join("..", ".."))
 	code, stdout, stderr := runForTest(
@@ -216,6 +227,17 @@ func TestRepositoryResourceExampleStaysRunnable(t *testing.T) {
 		root,
 	)
 	if code != ExitSuccess || stdout != "semantics ok: examples/resources/main.fy (typed HIR: 2 function(s))\n" || stderr != "" {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
+func TestRepositoryRegionExampleStaysRunnable(t *testing.T) {
+	root := filepath.Clean(filepath.Join("..", ".."))
+	code, stdout, stderr := runForTest(
+		[]string{"experimental", "check-semantics", "examples/regions/main.fy"},
+		root,
+	)
+	if code != ExitSuccess || stdout != "semantics ok: examples/regions/main.fy (typed HIR: 1 function(s))\n" || stderr != "" {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
 	}
 }

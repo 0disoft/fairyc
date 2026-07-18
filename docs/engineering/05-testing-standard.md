@@ -23,7 +23,11 @@ against name resolution, typed HIR, and local safe-borrow Flow. It verifies exac
 complete diagnostic set, related spans, selected resolution coordinates, selected canonical type
 facts, borrow origins, last uses, and escape facts. `internal/resourcefixture` executes all 7 cases
 in `spec/fixtures/resource/manifest-v0.json`, comparing complete-root states, cleanup obligations,
-and the complete deterministic `E11xx` set after parser, resolver, and type setup. Region, Result, MIR, MIR-verifier,
+and the complete deterministic `E11xx` set after parser, resolver, and type setup.
+`internal/regionfixture` executes all 6 cases in `spec/fixtures/region/manifest-v1.json`, compares
+hidden allocation origins and complete `E31xx` diagnostics, and admits the lexical Arena case only
+after proving its root, dependency, lookup, instance class, provider role, source root, and exported
+`std::alloc::Arena` against the referenced package graph. Result, MIR, MIR-verifier,
 resolved-package-graph, interpreter, backend, ABI, runtime, and Atlas runners do not exist yet;
 their fixtures remain future evidence requirements.
 
@@ -46,7 +50,7 @@ their fixtures remain future evidence requirements.
 | Type and initialization fail | Inert/resource separation and initialized-local rules |
 | Resource flow pass and fail | `spec/fixtures/resource/` currently proves all 7 v0 cases: whole-root moves, scope obligations, branch and loop states, and deterministic `E11xx` spans; reassignment, consuming close, and concrete drop traces remain future groups |
 | Borrow-origin pass and fail | Local last-use loans, conflicts, single-origin return, and storage bans |
-| Region pass and fail | `spec/fixtures/region/manifest-v1.json` proves parameter and local origins, permitted parameter-origin returns, `E3101` local escape, capability restrictions, and no `NeedsDrop` placement once a runner exists |
+| Region pass and fail | `spec/fixtures/region/manifest-v1.json` currently proves all 6 v1 cases: parameter and package-resolved local origins, permitted parameter-origin returns, `E3101` local escape, capability restrictions, and no `NeedsDrop` placement |
 | Result pass and fail | `spec/fixtures/result/` proves return, discard, must-use behavior, `?` classification, exactly-once evaluation, and error compatibility once a runner exists; constructors and payload traces remain deferred |
 | MIR normalization | `spec/fixtures/mir/` proves source-linked evaluation order, call successors, ownership transfer, cleanup order, Result branching, trap paths, and eliminated source forms once a runner exists; graph identity remains excluded |
 | Resolved package graph | `spec/fixtures/package/` proves instance equality, feature splits, direct visibility, module isolation, ambiguity, transitive hiding, and explicit standard-library injection without choosing public package-manager syntax |

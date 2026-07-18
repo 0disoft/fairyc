@@ -15,10 +15,20 @@ type Module struct {
 	Path      string
 	Span      diagnostic.Span
 	Imports   []Import
+	Structs   []Struct
 	Resources []Resource
 	Functions []Function
 	Bindings  []Binding
 	Literals  []Literal
+}
+
+// Struct is one inert named aggregate without compiler-owned cleanup.
+type Struct struct {
+	Name     string
+	Public   bool
+	Span     diagnostic.Span
+	NameSpan diagnostic.Span
+	Fields   []FieldDeclaration
 }
 
 // Resource is one move-only named aggregate with compiler-owned cleanup.
@@ -136,6 +146,8 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 		switch child.Kind {
 		case syntax.KindImport:
 			module.Imports = append(module.Imports, lowerImport(tree, child))
+		case syntax.KindStruct:
+			module.Structs = append(module.Structs, lowerStruct(tree, child))
 		case syntax.KindResource:
 			module.Resources = append(module.Resources, lowerResource(tree, child))
 		case syntax.KindFunction:
@@ -175,6 +187,17 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 	return module, nil
 }
 
+func lowerStruct(tree *syntax.Tree, node syntax.Node) Struct {
+	value := Struct{
+		Name:     node.Text,
+		Public:   containsKeywordBeforeName(tree, node, "pub", node.Text),
+		Span:     node.Span,
+		NameSpan: findIdentifierSpan(tree, node, node.Text, "struct"),
+	}
+	value.Fields = lowerFields(tree, node)
+	return value
+}
+
 func lowerResource(tree *syntax.Tree, node syntax.Node) Resource {
 	value := Resource{
 		Name:     node.Text,
@@ -182,6 +205,12 @@ func lowerResource(tree *syntax.Tree, node syntax.Node) Resource {
 		Span:     node.Span,
 		NameSpan: findIdentifierSpan(tree, node, node.Text, "resource"),
 	}
+	value.Fields = lowerFields(tree, node)
+	return value
+}
+
+func lowerFields(tree *syntax.Tree, node syntax.Node) []FieldDeclaration {
+	var fields []FieldDeclaration
 	for _, childID := range node.Children {
 		child, found := tree.Node(childID)
 		if !found || child.Kind != syntax.KindField {
@@ -197,9 +226,9 @@ func lowerResource(tree *syntax.Tree, node syntax.Node) Resource {
 				field.Type = lowerType(typeNode)
 			}
 		}
-		value.Fields = append(value.Fields, field)
+		fields = append(fields, field)
 	}
-	return value
+	return fields
 }
 
 func lowerImport(tree *syntax.Tree, node syntax.Node) Import {

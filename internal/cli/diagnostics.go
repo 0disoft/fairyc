@@ -147,6 +147,14 @@ func semanticDiagnosticSummary(code string) string {
 		return "branch join leaves resource ownership path-dependent"
 	case "E1105":
 		return "loop body changes the resource state required by the next iteration"
+	case "E3101":
+		return "Region-derived value escapes its lexical region"
+	case "E3102":
+		return "plain Region placement cannot contain a resource that needs drop"
+	case "E3103":
+		return "compiler-owned Region capability cannot be stored"
+	case "E3104":
+		return "compiler-owned Region capability cannot be constructed directly"
 	default:
 		return "semantic diagnostic"
 	}

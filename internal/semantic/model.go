@@ -34,6 +34,7 @@ type Result struct {
 	Resolutions      []Resolution
 	Types            []TypeFact
 	Borrows          []BorrowFact
+	RegionOrigins    []RegionOriginFact
 	ResourceStates   []ResourceStateFact
 	Unsupported      []Unsupported
 }
@@ -78,6 +79,15 @@ type BorrowFact struct {
 	Origin  string
 	LastUse *hir.Span
 	Escapes bool
+}
+
+// RegionOriginFact records one compiler-known allocation and its hidden lexical origin.
+type RegionOriginFact struct {
+	Operation  string
+	Allocation hir.Span
+	Origin     string
+	LastUse    *hir.Span
+	Escapes    bool
 }
 
 // ResourceState is the source-visible ownership state of one complete resource root.
@@ -128,6 +138,7 @@ func Analyze(files []File) Result {
 	result.Resolutions = analyzer.resolutions
 	result.Types = analyzer.types
 	result.Borrows = analyzer.borrows
+	result.RegionOrigins = analyzer.regionOrigins
 	result.ResourceStates = analyzer.resourceStates
 	result.Unsupported = analyzer.unsupported
 	if len(result.Diagnostics) > 0 {
@@ -173,6 +184,15 @@ func (a *analyzer) finish() {
 		}
 		return cmp.Compare(left.Origin, right.Origin)
 	})
+	slices.SortFunc(a.regionOrigins, func(left, right RegionOriginFact) int {
+		if n := compareSpan(left.Allocation, right.Allocation); n != 0 {
+			return n
+		}
+		return cmp.Compare(left.Origin, right.Origin)
+	})
+	a.regionOrigins = slices.CompactFunc(a.regionOrigins, func(left, right RegionOriginFact) bool {
+		return compareSpan(left.Allocation, right.Allocation) == 0 && left.Operation == right.Operation && left.Origin == right.Origin && left.Escapes == right.Escapes && optionalSpanEqual(left.LastUse, right.LastUse)
+	})
 	slices.SortFunc(a.resourceStates, func(left, right ResourceStateFact) int {
 		if n := compareSpan(left.Binding, right.Binding); n != 0 {
 			return n
@@ -198,6 +218,13 @@ func (a *analyzer) finish() {
 	a.unsupported = slices.CompactFunc(a.unsupported, func(left, right Unsupported) bool {
 		return compareSpan(left.Span, right.Span) == 0 && left.Feature == right.Feature
 	})
+}
+
+func optionalSpanEqual(left, right *hir.Span) bool {
+	if left == nil || right == nil {
+		return left == nil && right == nil
+	}
+	return compareSpan(*left, *right) == 0
 }
 
 func obligationsEqual(left, right *int) bool {

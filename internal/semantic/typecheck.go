@@ -17,7 +17,9 @@ type typeChecker struct {
 
 func (a *analyzer) typeCheck() Result {
 	result := Result{}
+	a.prepareAggregateIdentities()
 	a.prepareResourceTypes()
+	a.prepareStructTypes()
 	for _, module := range a.moduleOrder {
 		hirModule := hir.Module{Path: module.file.Module.Path, SourcePath: module.file.Path}
 		for index := range module.file.Module.Functions {
@@ -165,6 +167,10 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 		case statement.Kind == syntax.KindWhile:
 			expression, _ := c.checkExpression(statement.Expression, hir.TypeVoid)
 			hirStatement.Expression = expression
+		case statement.Kind == syntax.KindRegion:
+			expression, nestedReturn := c.checkRegion(statement.Expression, expectedTail)
+			hirStatement.Expression = expression
+			hasReturn = hasReturn || nestedReturn
 		default:
 			c.analyzer.addUnsupported(c.module.file.Path, statement.Span, "statement "+string(statement.Kind))
 		}
@@ -231,11 +237,17 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 		block, blockType, _ := c.checkBlock(expression.Block, expected)
 		result.Block = &block
 		actual = blockType
+	case syntax.KindRegion:
+		var nestedReturn bool
+		result, nestedReturn = c.checkRegion(expression, expected)
+		_ = nestedReturn
+		actual = hir.TypeVoid
 	default:
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "expression "+string(expression.Kind))
 		actual = hir.TypeInvalid
 	}
 	result.Type = actual
+	c.analyzer.expressionTypes[expression] = actual
 	if actual != hir.TypeInvalid {
 		c.addType(result.Span, actual)
 	}
@@ -261,6 +273,11 @@ func (c *typeChecker) checkRecord(expression *ast.Expression, result *hir.Expres
 		return hir.TypeInvalid
 	}
 	constructor := c.analyzer.resolved[expression.Children[0]]
+	if constructor != nil && constructor.typ == hir.TypeRegion {
+		c.analyzer.addDiagnostic("E3104", span(c.module.file.Path, expression.Span))
+		result.Symbol = constructor.id
+		return hir.TypeInvalid
+	}
 	if constructor == nil || constructor.resource == nil {
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "record constructor that is not a resource")
 		return hir.TypeInvalid
@@ -404,6 +421,9 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 		return hir.TypeInvalid
 	}
 	calleeExpression := expression.Children[0]
+	if isRegionPlaceCall(expression) {
+		return c.checkRegionPlace(expression, result)
+	}
 	callee := c.analyzer.resolved[calleeExpression]
 	if callee == nil || callee.kind != "function" || callee.function == nil {
 		c.analyzer.addUnsupported(c.module.file.Path, calleeExpression.Span, "call target that is not a function")

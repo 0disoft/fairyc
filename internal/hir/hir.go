@@ -9,6 +9,7 @@ const (
 	TypeVoid    Type = "void"
 	TypeBool    Type = "bool"
 	TypeI32     Type = "i32"
+	TypeRegion  Type = "Region"
 )
 
 // SharedBorrow returns the canonical non-null shared-borrow type for element.
