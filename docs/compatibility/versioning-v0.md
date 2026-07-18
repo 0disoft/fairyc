@@ -91,7 +91,9 @@ adding `ownedTextExecutions` for String ownership and CString termination. V11 a
 `linuxFileExecutions` for partial I/O and consuming close. V12 adds `foreignCallExecutions` for the
 closed exact-name scalar Fairy-source caller to hand-written C callee crossings. V13 adds
 `foreignPointerCallExecutions` for the typed-null raw-pointer plus `usize`/`u8` crossing. The runner
-emits one exact version and does not pretend the report shapes are interchangeable.
+V14 adds `textValidationSourceCallExecutions` for a generated Fairy caller linked against the
+actual provisional text-view C unit. The runner emits one exact version and does not pretend the
+report shapes are interchangeable.
 
 ## Runtime and standard library
 

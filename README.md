@@ -87,6 +87,8 @@ lowering.
 The first text slice now validates canonical UTF-8 without allocation and rejects slicing through a
 multibyte sequence. Its native probe includes overlong forms, surrogates, values above U+10FFFF,
 truncation, and obsolete leaders, but remains unobserved and source-disconnected.
+Its empty-input validator now has one exact internal `fy_std_*_v0` symbol and a real FY-to-stdlib-C
+four-way crossing; the public borrowed `str` wrapper and nonempty source pointer path still do not exist.
 Buffer-backed String and CString C helpers now preserve ownership on failed UTF-8 conversion,
 support overlap-safe String append, expose immutable bounded views, reject interior NUL, and append
 exactly one C terminator. Their native probe is configured but unobserved, and no source API is

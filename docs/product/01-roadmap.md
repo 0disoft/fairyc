@@ -106,7 +106,9 @@ native executions are configured but unobserved; source-level `std::alloc` const
 remain missing.
 The allocation-free text-view slice now checks canonical UTF-8 and code-point byte boundaries,
 including overlong, surrogate, out-of-range, truncated, and obsolete forms. Its four native runs
-are configured but unobserved, and owned text plus source calls remain missing at that layer.
+are configured but unobserved. A separate four-way Fairy-source crossing now calls the actual
+empty-input UTF-8 validator in the text-view C unit; the public borrowed text result, nonempty
+source pointer path, and full wrapper remain missing.
 Owned String and CString now have provisional Buffer-backed C transport with immutable views,
 successful-only Buffer moves, failure ownership preservation, self-source append, interior-NUL
 rejection, and exact termination. Four native runs are configured but unobserved; source-level
@@ -120,8 +122,9 @@ The source FFI slice admits exact-name `unsafe extern C fn` declarations using `
 HIR, and MIR verification; the C backend emits an unannotated external prototype and call; and the
 native lane plans four scalar plus four typed-null pointer/target-scalar separate-object Clang/GCC
 crossings. The interpreter refuses foreign execution. `@link_name`, non-null pointer operations,
-callbacks, `c.*` scalars, `@repr(C)` aggregates, exports, and standard-library wrapper calls remain
-Phase 2 work.
+callbacks, `c.*` scalars, `@repr(C)` aggregates, exports, and public standard-library wrappers
+remain Phase 2 work. The internal empty-input UTF-8 validation transport is the first real
+source-to-stdlib-C exception, not a completed wrapper.
 
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.

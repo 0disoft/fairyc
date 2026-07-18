@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v13"
+	reportSchemaVersion = "fairyc.native-c-report/v14"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -99,6 +99,13 @@ uint32_t fairyc_fixture_pointer_scalars(
 }
 `
 
+const textValidationSourceCallSmokeSource = `module main;
+unsafe extern C fn fy_std_text_utf8_valid_v0(data: *u8, length: usize) -> u32;
+fn main() -> i32 {
+    if unsafe { fy_std_text_utf8_valid_v0(null, 0) } == 1 { 42 } else { 1 }
+}
+`
+
 // Compiler records the bounded toolchain fingerprint used by one native run.
 type Compiler struct {
 	Name    string `json:"name"`
@@ -107,30 +114,31 @@ type Compiler struct {
 
 // Report is the deterministic success record emitted by the native fixture command.
 type Report struct {
-	SchemaVersion                string     `json:"schemaVersion"`
-	Target                       string     `json:"target"`
-	Libc                         string     `json:"libc"`
-	Compilers                    []Compiler `json:"compilers"`
-	Profiles                     []string   `json:"profiles"`
-	Cases                        []string   `json:"cases"`
-	Executions                   int        `json:"executions"`
-	DropTraceExecutions          int        `json:"dropTraceExecutions"`
-	LayoutCases                  []string   `json:"layoutCases"`
-	LayoutProbeExecutions        int        `json:"layoutProbeExecutions"`
-	Sanitizer                    string     `json:"sanitizer"`
-	SanitizerExecutions          int        `json:"sanitizerExecutions"`
-	ABICases                     []string   `json:"abiCases"`
-	ABIDirections                []string   `json:"abiDirections"`
-	ABIProbeExecutions           int        `json:"abiProbeExecutions"`
-	SystemHeapExecutions         int        `json:"systemHeapExecutions"`
-	BufferExecutions             int        `json:"bufferExecutions"`
-	ArenaExecutions              int        `json:"arenaExecutions"`
-	TextViewExecutions           int        `json:"textViewExecutions"`
-	OwnedTextExecutions          int        `json:"ownedTextExecutions"`
-	LinuxFileExecutions          int        `json:"linuxFileExecutions"`
-	ForeignCallExecutions        int        `json:"foreignCallExecutions"`
-	ForeignPointerCallExecutions int        `json:"foreignPointerCallExecutions"`
-	BuildSmokeExecutions         int        `json:"buildSmokeExecutions"`
+	SchemaVersion                      string     `json:"schemaVersion"`
+	Target                             string     `json:"target"`
+	Libc                               string     `json:"libc"`
+	Compilers                          []Compiler `json:"compilers"`
+	Profiles                           []string   `json:"profiles"`
+	Cases                              []string   `json:"cases"`
+	Executions                         int        `json:"executions"`
+	DropTraceExecutions                int        `json:"dropTraceExecutions"`
+	LayoutCases                        []string   `json:"layoutCases"`
+	LayoutProbeExecutions              int        `json:"layoutProbeExecutions"`
+	Sanitizer                          string     `json:"sanitizer"`
+	SanitizerExecutions                int        `json:"sanitizerExecutions"`
+	ABICases                           []string   `json:"abiCases"`
+	ABIDirections                      []string   `json:"abiDirections"`
+	ABIProbeExecutions                 int        `json:"abiProbeExecutions"`
+	SystemHeapExecutions               int        `json:"systemHeapExecutions"`
+	BufferExecutions                   int        `json:"bufferExecutions"`
+	ArenaExecutions                    int        `json:"arenaExecutions"`
+	TextViewExecutions                 int        `json:"textViewExecutions"`
+	OwnedTextExecutions                int        `json:"ownedTextExecutions"`
+	LinuxFileExecutions                int        `json:"linuxFileExecutions"`
+	ForeignCallExecutions              int        `json:"foreignCallExecutions"`
+	ForeignPointerCallExecutions       int        `json:"foreignPointerCallExecutions"`
+	TextValidationSourceCallExecutions int        `json:"textValidationSourceCallExecutions"`
+	BuildSmokeExecutions               int        `json:"buildSmokeExecutions"`
 }
 
 // Run compiles every emission fixture with Clang and GCC at low and optimized profiles, compares
@@ -322,6 +330,11 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.ForeignPointerCallExecutions = foreignPointerCallExecutions
+	textValidationSourceCallExecutions, err := runTextValidationSourceCallProbe(temporaryRoot, toolchains, textViewSource)
+	if err != nil {
+		return Report{}, err
+	}
+	report.TextValidationSourceCallExecutions = textValidationSourceCallExecutions
 	for caseIndex, fixture := range fixtureReport.Emitted {
 		if fixture.Unit.Target != string(target.X8664LinuxGNU) || fixture.Unit.Dialect != cbackend.DialectC11 {
 			return Report{}, fmt.Errorf("case %s emitted unexpected profile %s/%s", fixture.ID, fixture.Unit.Target, fixture.Unit.Dialect)
@@ -399,6 +412,21 @@ func runForeignPointerCallProbe(temporaryRoot string, toolchains []cdriver.Toolc
 		[]string{
 			"extern uint32_t fairyc_fixture_pointer_scalars(const uint8_t * fy_a_0, uint32_t * fy_a_1, uintptr_t fy_a_2, uint8_t fy_a_3);",
 			"fairyc_fixture_pointer_scalars(((void *)0), ((void *)0), ((uintptr_t)UINT64_C(0)), UINT8_C(7))",
+		},
+	)
+}
+
+func runTextValidationSourceCallProbe(temporaryRoot string, toolchains []cdriver.Toolchain, textViewSource string) (int, error) {
+	return runForeignSourceProbe(
+		temporaryRoot,
+		toolchains,
+		"text-validation-source-call",
+		textValidationSourceCallSmokeSource,
+		textViewSource,
+		42,
+		[]string{
+			"extern uint32_t fy_std_text_utf8_valid_v0(const uint8_t * fy_a_0, uintptr_t fy_a_1);",
+			"fy_std_text_utf8_valid_v0(((void *)0), ((uintptr_t)UINT64_C(0)))",
 		},
 	)
 }

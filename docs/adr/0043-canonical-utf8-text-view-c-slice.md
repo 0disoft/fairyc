@@ -34,6 +34,8 @@ preserving the input view on failure.
    hosted run. No hosted receipt has been observed.
 9. The helper is not a compiler intrinsic, source-visible API, owned `String`, locale conversion,
    normalization, grapheme operation, or Unicode database.
+10. ADR 0048 later exposes only the canonical validator as an internal ABI-major transport and
+    links its empty-input path from Fairy source. That does not create the public text wrapper.
 
 ## Consequences
 

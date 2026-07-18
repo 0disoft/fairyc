@@ -46,4 +46,6 @@ unsettled language decision.
   pretending a safe reference is nullable.
 - SystemHeap and text-view helpers still need source-level C-layout output records before their
   full safe wrappers can be connected.
+- ADR 0048 subsequently connects the empty-input UTF-8 validator without an output record; this is
+  an internal transport probe, not the full text-view wrapper.
 - The Stage 0 compiler remains implemented in Go; this change expands programs compiled by it.

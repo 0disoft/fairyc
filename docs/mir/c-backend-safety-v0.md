@@ -103,7 +103,9 @@ that bounded scalar set; it emits one plain prototype and an ordinary call witho
 `nothrow`, alias, retention, or visibility promises. Compatible repeated declarations of the same
 external name coalesce; signature conflicts fail closed. A local preprocessor guard undefines an
 included-header macro with that name before the prototype. `main`, generated `fy_`/`FY_` names,
-C11 keywords, and identifiers consumed by the generated preamble are rejected. Typed null is the
+C11 keywords, and identifiers consumed by the generated preamble are rejected. The only current
+exception to the generated `fy_` namespace is the exact allowlisted internal standard-library
+symbol `fy_std_text_utf8_valid_v0`; the rest of the prefix remains closed. Typed null is the
 only source-constructed raw pointer; pointer dereference, arithmetic, and casts remain rejected.
 `@link_name`, `c.*` scalars, callbacks, and `@repr(C)` aggregates remain outside this source slice.
 

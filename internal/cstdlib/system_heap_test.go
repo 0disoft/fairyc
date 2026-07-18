@@ -119,6 +119,7 @@ func TestTextViewSourcesRejectNonCanonicalUTF8AndInteriorBoundaries(t *testing.T
 		t.Fatal(err)
 	}
 	for _, required := range []string{
+		"uint32_t fy_std_text_utf8_valid_v0(const uint8_t *data, size_t length)",
 		"first >= UINT8_C(0xc2)",
 		"first == UINT8_C(0xe0)",
 		"first == UINT8_C(0xed)",
@@ -129,6 +130,9 @@ func TestTextViewSourcesRejectNonCanonicalUTF8AndInteriorBoundaries(t *testing.T
 		if !strings.Contains(implementation, required) {
 			t.Errorf("text view implementation is missing %q", required)
 		}
+	}
+	if strings.Contains(implementation, "static int fy_std_text_utf8_valid_v0") {
+		t.Fatal("text view implementation keeps the source-callable validation transport private")
 	}
 	for _, required := range []string{"overlong_two", "surrogate", "over_maximum", "truncated", "obsolete_five"} {
 		if !strings.Contains(probe, required) {

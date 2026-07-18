@@ -468,8 +468,13 @@ func foreignPointerElementCType(value hir.Type) (string, error) {
 }
 
 func validExternalCIdentifier(value string) bool {
-	if value == "" || value == "main" || strings.HasPrefix(value, "fy_") || strings.HasPrefix(value, "FY_") {
+	if value == "" || value == "main" || strings.HasPrefix(value, "FY_") {
 		return false
+	}
+	if strings.HasPrefix(value, "fy_") {
+		if _, admitted := admittedStandardLibrarySymbols[value]; !admitted {
+			return false
+		}
 	}
 	if _, reserved := generatedCNames[value]; reserved {
 		return false
@@ -481,6 +486,10 @@ func validExternalCIdentifier(value string) bool {
 	}
 	_, keyword := c11Keywords[value]
 	return !keyword
+}
+
+var admittedStandardLibrarySymbols = map[string]struct{}{
+	"fy_std_text_utf8_valid_v0": {},
 }
 
 var generatedCNames = map[string]struct{}{

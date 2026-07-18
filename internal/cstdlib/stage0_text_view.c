@@ -18,7 +18,7 @@ static int fy_std_text_is_continuation_v0(uint8_t byte) {
     return (byte & UINT8_C(0xc0)) == UINT8_C(0x80);
 }
 
-static int fy_std_text_utf8_valid_v0(const uint8_t *data, size_t length) {
+uint32_t fy_std_text_utf8_valid_v0(const uint8_t *data, size_t length) {
     if (data == NULL) {
         return length == 0;
     }

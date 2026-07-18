@@ -117,6 +117,17 @@ func TestEmitRejectsReservedExternalSymbol(t *testing.T) {
 	}
 }
 
+func TestEmitRejectsUnrecognizedStandardLibrarySymbol(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, "module main;\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n")
+	program.ForeignFunctions[0].LinkName = "fy_std_unrecognized_v0"
+	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	var capability cbackend.CapabilityError
+	if !errors.As(err, &capability) || capability.Function != "main::add_one" || capability.Feature != "external C symbol \"fy_std_unrecognized_v0\"" {
+		t.Fatalf("Emit() error = %v", err)
+	}
+}
+
 func TestEmitGuardsExternalSymbolAgainstHeaderMacro(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main;\nunsafe extern C fn INT64_MIN(value: i32) -> i32;\nfn main() -> i32 { unsafe { INT64_MIN(41) } }\n")

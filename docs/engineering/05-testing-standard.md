@@ -164,7 +164,8 @@ The host-independent C ABI fixtures now cover scalar and pointer classification,
 register exhaustion, mixed integer and floating arguments, by-value aggregate plans, and hidden
 return storage. A separate-object Clang/GCC probe now exercises all 14 pass plans in both compiler
 directions. A Fairy-source probe additionally crosses typed null pointers plus `usize` and `u8` in
-both directions, but native source fixtures still need non-null pointers, nested and padded
+both directions. Another four-way probe links the empty-input UTF-8 call against the actual
+standard-library text-view C unit instead of a mock. Native source fixtures still need non-null pointers, nested and padded
 `@repr(C)` structs, explicit C enums, narrow extension rules, actual aggregate calls and returns,
 and the permitted synchronous callback. Every excluded C ABI feature eventually needs a negative
 source fixture as its semantic surface is implemented.
