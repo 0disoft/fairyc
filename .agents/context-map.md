@@ -27,6 +27,9 @@
 - MIR runner route: internal/mirfixture/
 - MIR verifier mutation fixture route: spec/fixtures/mir-verifier/manifest-v0.json
 - MIR verifier mutation runner route: internal/mirverifyfixture/
+- MIR interpreter fixture route: spec/fixtures/interpreter/manifest-v0.json
+- MIR interpreter route: internal/interpreter/
+- MIR interpreter runner route: internal/interpreterfixture/
 - Resolved package graph fixture route: spec/fixtures/package/manifest-v0.json
 - MIR and C backend route: docs/mir/
 - Package identity and visibility route: docs/package/

@@ -39,8 +39,11 @@ type Program struct {
 
 // Function is one mutable-local control-flow graph and its source-linked facts.
 type Function struct {
+	Symbol             hir.SymbolID
 	Name               string
 	Span               hir.Span
+	Parameters         []LocalID
+	ResultType         hir.Type
 	Entry              BlockID
 	Blocks             []Block
 	Resources          []ResourceLocal
@@ -124,7 +127,32 @@ const (
 	OperationUse             OperationKind = "use"
 	OperationDropFlagInit    OperationKind = "drop-flag-init"
 	OperationDropFlagClear   OperationKind = "drop-flag-clear"
+	OperationAssign          OperationKind = "assign"
+	OperationUnary           OperationKind = "unary"
+	OperationBinary          OperationKind = "binary"
 )
+
+// LocalID identifies one source local, parameter, or compiler temporary.
+type LocalID int
+
+// NoLocal denotes an operation without a value destination.
+const NoLocal LocalID = -1
+
+// OperandKind identifies a scalar MIR operand.
+type OperandKind string
+
+const (
+	OperandInvalid OperandKind = ""
+	OperandLocal   OperandKind = "local"
+	OperandI32     OperandKind = "i32"
+)
+
+// Operand is an already-evaluated scalar value source.
+type Operand struct {
+	Kind  OperandKind
+	Local LocalID
+	I32   int32
+}
 
 // Operation carries explicit ownership, trap, and normalization information.
 type Operation struct {
@@ -135,6 +163,9 @@ type Operation struct {
 	Destination      string
 	ProjectionEntity string
 	DropFlagEntity   string
+	DestinationLocal LocalID
+	Operands         []Operand
+	Operator         string
 	TrapCategories   []string
 	FlagClearedFirst bool
 	SourceForm       string
@@ -153,12 +184,18 @@ const (
 
 // Terminator ends one block. Calls never have an unwind successor in Stage 0.
 type Terminator struct {
-	Kind            TerminatorKind
-	Entity          string
-	Span            hir.Span
-	Successors      []BlockID
-	UnwindSuccessor BlockID
-	TrapCategories  []string
+	Kind             TerminatorKind
+	Entity           string
+	Span             hir.Span
+	Successors       []BlockID
+	UnwindSuccessor  BlockID
+	TrapCategories   []string
+	Callee           hir.SymbolID
+	Arguments        []Operand
+	DestinationLocal LocalID
+	ReturnValue      Operand
+	SwitchKind       string
+	SwitchOperands   []Operand
 }
 
 // CleanupAction is one explicit normal-exit cleanup operation.

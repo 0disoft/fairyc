@@ -40,6 +40,8 @@ regenerate, or override compiler source.
 - MIR normalization fixture runner: internal/mirfixture/
 - MIR verifier mutation fixtures: spec/fixtures/mir-verifier/manifest-v0.json
 - MIR verifier mutation fixture runner: internal/mirverifyfixture/
+- MIR interpreter fixtures: spec/fixtures/interpreter/manifest-v0.json
+- MIR interpreter and fixture runner: internal/interpreter/, internal/interpreterfixture/
 - Resolved package graph fixtures: spec/fixtures/package/manifest-v0.json
 - Executable MIR semantics: docs/mir/*.md
 - Package identity and visibility: docs/package/*.md

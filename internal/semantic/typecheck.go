@@ -196,6 +196,7 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 	result := &hir.Expression{
 		Kind:   string(expression.Kind),
 		Span:   span(c.module.file.Path, expression.Span),
+		Value:  expression.Text,
 		Symbol: hir.NoSymbol,
 	}
 	var actual hir.Type

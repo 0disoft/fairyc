@@ -144,6 +144,7 @@ type Expression struct {
 	Kind     string
 	Type     Type
 	Span     Span
+	Value    string
 	Operator string
 	Symbol   SymbolID
 	Children []Expression

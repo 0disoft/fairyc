@@ -6,15 +6,16 @@
 
 This document owns planned `fairyc` command semantics. It does not claim that a command is implemented. Implemented commands must be marked with tests and a language revision before release.
 
-## Implemented experimental frontend surface
+## Implemented experimental compiler surface
 
-The current Go prototype implements three deliberately unstable developer commands:
+The current Go prototype implements four deliberately unstable developer commands:
 
 | Command | Purpose | Output |
 | --- | --- | --- |
 | `fairyc experimental parse <file.fy>` | Parse one source-root-relative file and verify lossless syntax plus error-free AST lowering | `fairyc.experimental.parse/v0` JSON on stdout, defined by `spec/cli/experimental-parse-v0.schema.json` |
 | `fairyc experimental check-syntax <file.fy>` | Check lexing, parsing, recovery, module identity, lossless reconstruction, and error-free AST lowering | Success line on stdout or human diagnostics on stderr |
 | `fairyc experimental check-semantics <file.fy> [<file.fy>...]` | Resolve names, type-check, and analyze local safe-borrow, whole-resource, Region, and initial must-use Result Flow for an explicit module set in the implemented subset | Typed-HIR module and function counts on stdout, human source diagnostics on stderr, or an explicit unsupported-subset error |
+| `fairyc experimental run <file.fy>` | Run one verified-MIR scalar program whose selected module declares `main() -> i32` | `result: <i32>` on stdout, a canonical trap category on stderr, source diagnostics, or an explicit unsupported-subset error |
 
 These commands treat the current directory as their temporary source root. `parse` and
 `check-syntax` accept exactly one relative regular file; `check-semantics` accepts one or more
@@ -31,6 +32,12 @@ claimed full-file size.
 imported module must be included explicitly. Duplicate paths and input sets beyond the prototype
 budgets are rejected before semantic analysis. Syntax outside the implemented semantic subset
 returns a capability error and never counts as a successful check.
+
+`experimental run` does not invoke a backend, linker, runtime, or host subprocess. It runs the
+source file through parser, semantic analysis, Flow, MIR lowering, the MIR verifier, and the bounded
+MIR interpreter. The entry is the selected file module's zero-argument `main() -> i32`. Tagged
+values, resource payload execution and drop traces, Region reset, I/O, arguments, loops, and
+multi-file run input remain outside the current interpreter subset.
 
 `fairyc check` remains unimplemented. It must not be aliased to `check-syntax`, because the planned
 command below also requires tagged resource payloads, reassignment and close ownership, complete

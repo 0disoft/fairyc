@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fairyc:interpreter-fixtures:v0",
+  "title": "Fairy C MIR interpreter fixture manifest v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "deferred", "contracts", "cases"],
+  "properties": {
+    "$schema": { "type": "string", "minLength": 1 },
+    "schemaVersion": { "const": "fairyc.interpreter-fixtures/v0" },
+    "deferred": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "contracts": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/case" }
+    }
+  },
+  "$defs": {
+    "sourcePath": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+(?:/[A-Za-z0-9_-]+)*\\.fy$"
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "sourceRoot", "sources", "entry", "expect"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^pass\\.interpreter\\.[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "sourceRoot": { "type": "string", "minLength": 1 },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/sourcePath" }
+        },
+        "entry": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*(?:::[A-Za-z_][A-Za-z0-9_]*)+$"
+        },
+        "expect": {
+          "oneOf": [
+            { "$ref": "#/$defs/returnExpectation" },
+            { "$ref": "#/$defs/trapExpectation" }
+          ]
+        }
+      }
+    },
+    "returnExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "completedThrough", "outcome", "value"],
+      "properties": {
+        "status": { "const": "pass" },
+        "completedThrough": { "const": "interpret" },
+        "outcome": { "const": "return" },
+        "value": { "type": "integer", "minimum": -2147483648, "maximum": 2147483647 }
+      }
+    },
+    "trapExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "completedThrough", "outcome", "category"],
+      "properties": {
+        "status": { "const": "pass" },
+        "completedThrough": { "const": "interpret" },
+        "outcome": { "const": "trap" },
+        "category": {
+          "enum": [
+            "assertion-failed",
+            "bounds",
+            "division-by-zero",
+            "integer-overflow",
+            "invalid-shift",
+            "signed-division-overflow",
+            "unreachable"
+          ]
+        }
+      }
+    }
+  }
+}

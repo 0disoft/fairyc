@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Semantic sources: `spec/grammar/stage0.ebnf`, `spec/fixtures/parser/manifest-v0.json`, `spec/fixtures/semantic/manifest-v0.json`, `spec/fixtures/resource/manifest-v0.json`, `spec/fixtures/region/manifest-v1.json`, `spec/fixtures/result/manifest-v0.json`, `spec/fixtures/mir/manifest-v0.json`, `spec/fixtures/mir-verifier/manifest-v0.json`, `spec/fixtures/package/manifest-v0.json`, `docs/language/`, `docs/mir/`, `docs/package/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/catalog-v0.md`, `docs/atlas/`
+- Semantic sources: `spec/grammar/stage0.ebnf`, `spec/fixtures/parser/manifest-v0.json`, `spec/fixtures/semantic/manifest-v0.json`, `spec/fixtures/resource/manifest-v0.json`, `spec/fixtures/region/manifest-v1.json`, `spec/fixtures/result/manifest-v0.json`, `spec/fixtures/mir/manifest-v0.json`, `spec/fixtures/mir-verifier/manifest-v0.json`, `spec/fixtures/interpreter/manifest-v0.json`, `spec/fixtures/package/manifest-v0.json`, `docs/language/`, `docs/mir/`, `docs/package/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/catalog-v0.md`, `docs/atlas/`
 - Merge-blocking validation: `VALIDATION.md`
 
 The Go frontend executes every case in `spec/fixtures/parser/manifest-v0.json` through
@@ -34,8 +34,11 @@ cases in `spec/fixtures/mir/manifest-v0.json` after Flow, mutable-local MIR lowe
 verification, comparing source-linked evaluation, call, move, cleanup, Result-branch, trap, and
 eliminated-form facts. `internal/mirverifyfixture` constructs all 8 named verifier seeds, requires
 each baseline to pass, clones it, applies exactly one typed mutation, and proves all 15 cases return
-the complete expected one-code result. Resolved-package-graph, interpreter, backend, ABI, runtime,
-and Atlas runners do not exist yet; their fixtures remain future evidence requirements.
+the complete expected one-code result. `internal/interpreterfixture` executes all 3 scalar
+interpreter v0 cases through source loading, Flow, verified MIR, and the bounded interpreter,
+comparing exact `i32` returns or canonical trap categories. Resolved-package-graph, tagged/runtime
+interpreter groups, backend, ABI, runtime, and Atlas runners do not exist yet; their fixtures remain
+future evidence requirements.
 
 ## Oracle order
 
@@ -62,7 +65,7 @@ and Atlas runners do not exist yet; their fixtures remain future evidence requir
 | Resolved package graph | `spec/fixtures/package/` proves instance equality, feature splits, direct visibility, module isolation, ambiguity, transitive hiding, and explicit standard-library injection without choosing public package-manager syntax |
 | Built-in tagged resources | `Ok`, `Err`, `Some`, discard, match, propagation, early return, and nested active-payload drop traces |
 | MIR verifier mutation | `spec/fixtures/mir-verifier/` currently proves all 8 named baselines and 15 isolated mutation cases through the Go verifier runner without serializing arbitrary MIR |
-| MIR interpreter run and trap | Scalar results, branches, moves, drop traces, region reset, and trap categories |
+| MIR interpreter run and trap | `spec/fixtures/interpreter/` currently proves all 3 scalar v0 cases: literal return, scalar call arithmetic, and division-by-zero trap identity; branches, tagged values, moves, drop traces, region reset, I/O, and loops remain deferred |
 | Drop elaboration | Partial construction, reassignment, early exits, loops, and cleanup-suffix merging |
 | C differential | Interpreter parity for output, status, trap category, and drop trace across declared compilers and profiles |
 | C safety | Overflow, division, shifts, evaluation order, aliasing, alignment, inactive payload, and sanitizer-assisted checks |

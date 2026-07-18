@@ -7,6 +7,7 @@ func Clone(input Program) Program {
 	result := Program{Functions: make([]Function, len(input.Functions))}
 	for functionIndex, function := range input.Functions {
 		cloned := function
+		cloned.Parameters = slices.Clone(function.Parameters)
 		cloned.Resources = slices.Clone(function.Resources)
 		cloned.DropFlags = slices.Clone(function.DropFlags)
 		cloned.Loans = slices.Clone(function.Loans)
@@ -20,9 +21,12 @@ func Clone(input Program) Program {
 			clonedBlock.Operations = slices.Clone(block.Operations)
 			for operationIndex := range clonedBlock.Operations {
 				clonedBlock.Operations[operationIndex].TrapCategories = slices.Clone(block.Operations[operationIndex].TrapCategories)
+				clonedBlock.Operations[operationIndex].Operands = slices.Clone(block.Operations[operationIndex].Operands)
 			}
 			clonedBlock.Terminator.Successors = slices.Clone(block.Terminator.Successors)
 			clonedBlock.Terminator.TrapCategories = slices.Clone(block.Terminator.TrapCategories)
+			clonedBlock.Terminator.Arguments = slices.Clone(block.Terminator.Arguments)
+			clonedBlock.Terminator.SwitchOperands = slices.Clone(block.Terminator.SwitchOperands)
 			cloned.Blocks[blockIndex] = clonedBlock
 		}
 		cloned.OrderedEvaluations = slices.Clone(function.OrderedEvaluations)

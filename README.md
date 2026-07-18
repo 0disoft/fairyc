@@ -24,12 +24,14 @@ classification, non-Result `?`, and propagated error compatibility. The MIR runn
 5 v0 normalization cases through mutable-local block lowering and the MIR verifier, covering
 left-to-right call evaluation, complete-root moves, normal-exit cleanup order, `Result` error
 cleanup, and non-unwinding trap paths. The verifier mutation runner constructs all 8 named
-baselines and proves all 15 isolated `V1001` through `V1701` rejection recipes. An unstable
-`fairyc experimental` CLI can inspect, syntax-check, or semantic-check one source-root-relative
-`.fy` file or explicit module set. There is no stable CLI, tagged-resource Flow, MIR interpreter, backend, standard
+baselines and proves all 15 isolated `V1001` through `V1701` rejection recipes. The first MIR
+interpreter slice executes all 3 scalar v0 cases for literal return, function-call arithmetic, and
+division-by-zero traps. An unstable `fairyc experimental` CLI can inspect, syntax-check,
+semantic-check, or interpret one source-root-relative `.fy` file, while semantic checking also
+accepts an explicit module set. There is no stable CLI, tagged runtime values, resource drop trace, backend, standard
 library, runtime, package manager, supported target, or stable language revision yet.
 
-## Try the parser prototype
+## Try the current prototype
 
 The following commands are manual developer examples, not agent command authority:
 
@@ -40,14 +42,18 @@ go run ./cmd/fairyc experimental check-semantics examples/semantic/main.fy examp
 go run ./cmd/fairyc experimental check-semantics examples/resources/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/regions/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/results/main.fy
+go run ./cmd/fairyc experimental run examples/run/main.fy
 go run ./cmd/fairyc experimental parse examples/syntax/main.fy
 ```
 
-Both commands treat the current directory as the temporary source root. `parse` emits versioned,
+These commands treat the current directory as the temporary source root. `parse` emits versioned,
 deterministic JSON containing token and CST kinds and byte spans, but not source text, token text,
 literal values, or absolute paths. `check-semantics` accepts an explicit bounded list of source files
 for the currently implemented scalar, safe-borrow, whole-resource, Region-parameter, and Result subset. It rejects duplicate paths, root
 escapes, oversized input sets, and unsupported syntax rather than claiming success. The official
+`experimental run` accepts one file whose declared module contains `main() -> i32`, executes its
+verified MIR in the bounded scalar interpreter, and reports either `result: <i32>` or a canonical
+trap. The official
 `fairyc check` command remains unavailable until tagged resource payloads, reassignment/close rules,
 complete must-use dataflow, and effects exist.
 
@@ -70,6 +76,7 @@ complete must-use dataflow, and effects exist.
 - Result fixtures: `spec/fixtures/result/manifest-v0.json`
 - MIR normalization fixtures: `spec/fixtures/mir/manifest-v0.json`
 - MIR verifier mutation fixtures: `spec/fixtures/mir-verifier/manifest-v0.json`
+- MIR interpreter fixtures: `spec/fixtures/interpreter/manifest-v0.json`
 - Resolved package graph fixtures: `spec/fixtures/package/manifest-v0.json`
 - MIR and C backend contracts: `docs/mir/`
 - Package identity and visibility: `docs/package/package-graph-v0.md`

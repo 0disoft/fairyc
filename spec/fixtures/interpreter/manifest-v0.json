@@ -1,0 +1,57 @@
+{
+  "$schema": "./schema-v0.json",
+  "schemaVersion": "fairyc.interpreter-fixtures/v0",
+  "deferred": [
+    "boolean branches and shallow tagged Option and Result values",
+    "resource payload values and active-variant drop traces",
+    "Region mark and reset observations",
+    "controlled partial I/O test intrinsics",
+    "bounded stdout, stderr, process status, and argument fixtures",
+    "loops after executable loop Flow and step-budget fixtures exist"
+  ],
+  "contracts": [
+    "docs/product/02-spec.md",
+    "docs/adr/0016-stage-0-interpreter-fixture-contract.md",
+    "docs/language/0004-results-traps-and-control-flow.md",
+    "docs/mir/mir-v0.md",
+    "docs/engineering/05-testing-standard.md"
+  ],
+  "cases": [
+    {
+      "id": "pass.interpreter.literal-return",
+      "sourceRoot": "cases/pass/literal-return/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42
+      }
+    },
+    {
+      "id": "pass.interpreter.call-arithmetic",
+      "sourceRoot": "cases/pass/call-arithmetic/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42
+      }
+    },
+    {
+      "id": "pass.interpreter.division-by-zero-trap",
+      "sourceRoot": "cases/pass/division-by-zero-trap/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "trap",
+        "category": "division-by-zero"
+      }
+    }
+  ]
+}

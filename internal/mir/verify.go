@@ -59,6 +59,9 @@ func verifyFunction(function *Function) []VerificationError {
 		resources[resource.Symbol] = resource
 		initial.live[resource.Symbol] = resource.Parameter
 	}
+	for _, parameter := range function.Parameters {
+		initial.live[hir.SymbolID(parameter)] = true
+	}
 	flags := make(map[string]DropFlag, len(function.DropFlags))
 	for _, flag := range function.DropFlags {
 		flags[flag.Entity] = flag
@@ -136,9 +139,13 @@ func verifyFunction(function *Function) []VerificationError {
 				}
 				state.live[operation.Symbol] = false
 			case OperationCheckedDivision:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				if !slices.Equal(operation.TrapCategories, []string{"division-by-zero", "signed-division-overflow"}) {
 					failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "division is missing required trap checks"})
 				}
+			case OperationAssign, OperationUnary, OperationBinary:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			}
 		}
 
@@ -150,7 +157,15 @@ func verifyFunction(function *Function) []VerificationError {
 		if terminator.Kind == TerminatorCall && terminator.UnwindSuccessor != NoBlock {
 			failures = append(failures, VerificationError{Code: "V1502", Entity: terminatorEntity(item.id, terminator), Detail: "Stage 0 call has an unwind successor"})
 		}
+		if terminator.Kind == TerminatorCall {
+			failures = append(failures, verifyOperands(state, terminator.Arguments, terminatorEntity(item.id, terminator))...)
+			state.live[hir.SymbolID(terminator.DestinationLocal)] = true
+		}
+		if terminator.Kind == TerminatorSwitch {
+			failures = append(failures, verifyOperands(state, terminator.SwitchOperands, terminatorEntity(item.id, terminator))...)
+		}
 		if terminator.Kind == TerminatorReturn {
+			failures = append(failures, verifyOperands(state, []Operand{terminator.ReturnValue}, terminatorEntity(item.id, terminator))...)
 			for symbol, resource := range resources {
 				if state.live[symbol] {
 					failures = append(failures, VerificationError{Code: "V1102", Entity: blockEntityFor(function, item.id), Detail: "resource " + resourceEntity(resource, fmt.Sprintf("local:%d", symbol)) + " exits without cleanup"})
@@ -193,6 +208,16 @@ func verifyFunction(function *Function) []VerificationError {
 	for _, operation := range function.UnsafeOperations {
 		if operation.SourceSpanEntity == "" || operation.ScopeEntity == "" {
 			failures = append(failures, VerificationError{Code: "V1701", Entity: operation.Entity, Detail: "unsafe instruction lacks source provenance"})
+		}
+	}
+	return failures
+}
+
+func verifyOperands(state verificationState, operands []Operand, entity string) []VerificationError {
+	var failures []VerificationError
+	for _, operand := range operands {
+		if operand.Kind == OperandLocal && !state.live[hir.SymbolID(operand.Local)] {
+			failures = append(failures, VerificationError{Code: "V1002", Entity: entity, Detail: fmt.Sprintf("local %d used before initialization", operand.Local)})
 		}
 	}
 	return failures

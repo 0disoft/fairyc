@@ -9,6 +9,9 @@ import (
 
 	"github.com/0disoft/fairyc/internal/diagnostic"
 	"github.com/0disoft/fairyc/internal/frontend"
+	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/interpreter"
+	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/source"
 )
@@ -18,19 +21,21 @@ const (
 	ExitInvalidInvocation = 2
 	ExitSourceDiagnostics = 3
 	ExitInternalFailure   = 4
+	ExitProgramTrap       = 5
 	maxSemanticInputFiles = 64
 )
 
-const usage = `Fairy C Stage 0 frontend prototype
+const usage = `Fairy C Stage 0 compiler prototype
 
 Usage:
   fairyc experimental parse <file.fy>
   fairyc experimental check-syntax <file.fy>
   fairyc experimental check-semantics <file.fy> [<file.fy>...]
+  fairyc experimental run <file.fy>
   fairyc --help
 
 The experimental commands are unstable. The reserved "fairyc check" command is not implemented
-until resource and effect analysis exist.
+until the remaining tagged-resource, must-use, and effect analysis groups exist.
 `
 
 // Run executes one bounded command without reading global process arguments or exiting the process.
@@ -80,9 +85,110 @@ func runExperimental(args []string, sourceRoot string, stdout, stderr io.Writer)
 			return invocationError(stderr, "experimental command \"check-semantics\" expects one or more source files")
 		}
 		return runCheckSemantics(args[1:], sourceRoot, stdout, stderr)
+	case "run":
+		if len(args) != 2 {
+			return invocationError(stderr, "experimental command \"run\" expects exactly one source file")
+		}
+		return runInterpreter(args[1], sourceRoot, stdout, stderr)
 	default:
 		return invocationError(stderr, fmt.Sprintf("unknown experimental command %q", command))
 	}
+}
+
+func runInterpreter(argument, sourceRoot string, stdout, stderr io.Writer) int {
+	limits := source.DefaultLimits()
+	loaded, err := loadSource(sourceRoot, argument, limits.MaxBytes)
+	if err != nil {
+		var tooLarge sourceTooLargeError
+		if errors.As(err, &tooLarge) {
+			value := source.ExhaustionDiagnostic(0)
+			if writeErr := writeDiagnostics(stderr, tooLarge.relativePath, nil, []diagnostic.Diagnostic{value}); writeErr != nil {
+				return ExitInternalFailure
+			}
+			return ExitSourceDiagnostics
+		}
+		return inputError(stderr, err)
+	}
+	frontendResult, err := frontend.AnalyzeSyntax(loaded.file, limits)
+	if err != nil {
+		return internalError(stderr)
+	}
+	if len(frontendResult.Tree.Diagnostics) > 0 {
+		if err := writeDiagnostics(stderr, loaded.file.RelativePath, frontendResult.Tree.Source, frontendResult.Tree.Diagnostics); err != nil {
+			return ExitInternalFailure
+		}
+		return ExitSourceDiagnostics
+	}
+	semanticResult := semantic.Analyze([]semantic.File{{Path: loaded.file.RelativePath, Module: frontendResult.AST}})
+	if len(semanticResult.Diagnostics) > 0 {
+		if err := writeSemanticDiagnostics(stderr, map[string][]byte{loaded.file.RelativePath: frontendResult.Tree.Source}, semanticResult.Diagnostics); err != nil {
+			return ExitInternalFailure
+		}
+		return ExitSourceDiagnostics
+	}
+	if len(semanticResult.Unsupported) > 0 {
+		if err := writeUnsupportedSemantics(stderr, semanticResult.Unsupported); err != nil {
+			return ExitInternalFailure
+		}
+		return ExitInvalidInvocation
+	}
+	resourceTypes := make([]hir.Type, 0, len(frontendResult.AST.Resources))
+	for _, resource := range frontendResult.AST.Resources {
+		resourceTypes = append(resourceTypes, hir.Type(frontendResult.AST.Path+"::"+resource.Name))
+	}
+	program, err := mir.Lower(semanticResult.HIR, mir.NewTypeProperties(resourceTypes))
+	if err != nil {
+		return interpreterCapabilityError(stderr, err)
+	}
+	if failures := mir.Verify(program); len(failures) != 0 {
+		return internalError(stderr)
+	}
+	entryName := frontendResult.AST.Path + "::main"
+	entry, found := interpreterEntry(program, entryName)
+	if !found || len(entry.Parameters) != 0 || entry.ResultType != hir.TypeI32 {
+		return interpreterCapabilityError(stderr, fmt.Errorf("entry %s must have type fn() -> i32", entryName))
+	}
+	outcome, err := interpreter.Execute(program, entryName)
+	if err != nil {
+		var capability interpreter.CapabilityError
+		if errors.As(err, &capability) {
+			return interpreterCapabilityError(stderr, capability)
+		}
+		return internalError(stderr)
+	}
+	if outcome.Kind == interpreter.OutcomeTrap {
+		if _, err := fmt.Fprintf(stderr, "trap: %s\n", outcome.TrapCategory); err != nil {
+			return ExitInternalFailure
+		}
+		return ExitProgramTrap
+	}
+	if outcome.Kind != interpreter.OutcomeReturn {
+		return internalError(stderr)
+	}
+	if _, err := fmt.Fprintf(stdout, "result: %d\n", outcome.Value); err != nil {
+		return outputError(stderr)
+	}
+	return ExitSuccess
+}
+
+func interpreterEntry(program mir.Program, name string) (mir.Function, bool) {
+	for _, function := range program.Functions {
+		if function.Name == name {
+			return function, true
+		}
+	}
+	return mir.Function{}, false
+}
+
+func interpreterCapabilityError(stderr io.Writer, err error) int {
+	message := "requested program is outside the experimental interpreter subset"
+	if err != nil {
+		message += ": " + strings.TrimSpace(err.Error())
+	}
+	if _, writeErr := fmt.Fprintf(stderr, "fairyc: %s\n", message); writeErr != nil {
+		return ExitInternalFailure
+	}
+	return ExitInvalidInvocation
 }
 
 func runCheckSemantics(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
@@ -255,7 +361,7 @@ func inputError(stderr io.Writer, err error) int {
 }
 
 func internalError(stderr io.Writer) int {
-	if _, err := io.WriteString(stderr, "fairyc: internal frontend invariant failed\n"); err != nil {
+	if _, err := io.WriteString(stderr, "fairyc: internal compiler invariant failed\n"); err != nil {
 		return ExitInternalFailure
 	}
 	return ExitInternalFailure
