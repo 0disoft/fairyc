@@ -2,7 +2,7 @@
   "$schema": "./schema-v0.json",
   "schemaVersion": "fairyc.mir-fixtures/v0",
   "deferred": [
-    "partial aggregate construction and reassignment until fallible construction syntax is executable",
+    "partial aggregate construction until field-level fallibility is executable",
     "Region mark and reset ordering until a source-linked MIR observation case is accepted",
     "backend variant layout and payload-place identity until the first code-generation contract",
     "cleanup-suffix merging until canonical path identity can be asserted without freezing block numbers"
@@ -237,6 +237,37 @@
             "operand": { "source": "main.fy", "startByte": 212, "endByte": 219 },
             "destination": "option-match",
             "cleanupObligationTransferred": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.mir.resource-reassignment",
+      "sourceRoot": "cases/pass/resource-reassignment/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "mir-verify",
+        "observations": [
+          {
+            "kind": "resource-reassignment",
+            "function": "main::replace_live",
+            "binding": { "source": "main.fy", "startByte": 171, "endByte": 176 },
+            "target": { "source": "main.fy", "startByte": 210, "endByte": 215 },
+            "value": { "source": "main.fy", "startByte": 218, "endByte": 237 },
+            "valueBeforeDrop": true,
+            "droppedOld": true,
+            "installedNew": true
+          },
+          {
+            "kind": "resource-reassignment",
+            "function": "main::replace_dead",
+            "binding": { "source": "main.fy", "startByte": 293, "endByte": 298 },
+            "target": { "source": "main.fy", "startByte": 371, "endByte": 376 },
+            "value": { "source": "main.fy", "startByte": 379, "endByte": 398 },
+            "valueBeforeDrop": true,
+            "droppedOld": false,
+            "installedNew": true
           }
         ]
       }

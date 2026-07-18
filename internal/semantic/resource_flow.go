@@ -74,8 +74,7 @@ func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environm
 				}
 			}
 		case statement.Kind == syntax.KindAssignment:
-			a.resourceExpression(module, statement.Expression, environment, resourceMove)
-			a.resourceExpression(module, statement.Target, environment, resourceRead)
+			a.resourceAssignment(module, statement, environment)
 		case statement.Kind == syntax.KindWhile:
 			a.resourceWhile(module, statement.Expression, environment)
 		case statement.Kind == syntax.KindReturn:
@@ -94,6 +93,30 @@ func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environm
 			}
 		}
 	}
+}
+
+func (a *analyzer) resourceAssignment(module *moduleScope, statement *ast.Statement, environment resourceEnvironment) {
+	a.resourceExpression(module, statement.Expression, environment, resourceMove)
+	if statement.Target == nil {
+		return
+	}
+	target := a.resolved[statement.Target]
+	if target == nil || !a.isResource(target.typ) {
+		a.resourceExpression(module, statement.Target, environment, resourceRead)
+		return
+	}
+	state, tracked := environment[target]
+	if !tracked {
+		return
+	}
+	at := span(module.file.Path, statement.Target.Span)
+	a.recordResourceStates(environment, at, "before")
+	if state.state != ResourceMaybeLive {
+		state.state = ResourceLive
+		state.move = nil
+		environment[target] = state
+	}
+	a.recordResourceStates(environment, at, "after")
 }
 
 func (a *analyzer) resourceExpression(module *moduleScope, expression *ast.Expression, environment resourceEnvironment, mode resourceUse) {

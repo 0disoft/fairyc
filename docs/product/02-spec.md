@@ -73,7 +73,7 @@ A restricted user `enum` may contain only inert copyable payload fields. Built-i
 
 Construction is performed by ordinary explicit functions such as `File.open`; there is no implicit constructor call. Lifecycle details are defined in `docs/language/0001-values-and-resources.md` and `docs/mir/drop-elaboration-v0.md`.
 
-Whole-root `Live`, `Dead`, and rejected `MaybeLive` transitions plus cleanup-obligation assertions are versioned in `spec/fixtures/resource/manifest-v0.json`.
+Whole-root `Live`, `Dead`, and rejected `MaybeLive` transitions, live replacement, dead-slot reinstallation, and cleanup-obligation assertions are versioned in `spec/fixtures/resource/manifest-v0.json`.
 
 ### Borrows and raw pointers
 

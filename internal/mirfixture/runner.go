@@ -163,6 +163,14 @@ func hasObservation(function mir.Function, expected observationAssertion) bool {
 				return true
 			}
 		}
+	case "resource-reassignment":
+		for _, actual := range function.Reassignments {
+			if spanEqual(actual.Binding, expected.Binding) && spanEqual(actual.Target, expected.Target) &&
+				spanEqual(actual.Value, expected.Value) && actual.ValueBeforeDrop == expected.ValueBeforeDrop &&
+				actual.DroppedOld == expected.DroppedOld && actual.InstalledNew == expected.InstalledNew {
+				return true
+			}
+		}
 	case "cleanup-path":
 		for _, actual := range function.CleanupPaths {
 			if spanEqual(actual.Exit, expected.Exit) && actual.ExitKind == expected.ExitKind && actionsEqual(actual.Actions, expected.Actions) {

@@ -156,7 +156,29 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 			if err != nil {
 				return false, err
 			}
-			if statement.Target != nil && statement.Target.Kind == "path" && value.Kind != OperandInvalid {
+			if statement.Target == nil || statement.Target.Kind != "path" || value.Kind == OperandInvalid {
+				continue
+			}
+			binding, found := l.bindings[statement.Target.Symbol]
+			if found && l.properties.NeedsDrop(binding.typ) {
+				if l.isLiveResourcePath(statement.Expression) {
+					value = l.materializeMove(statement.Expression, value, "reassignment-value", true)
+				}
+				droppedOld := l.live[statement.Target.Symbol]
+				if droppedOld {
+					l.appendOperation(Operation{Kind: OperationDrop, Span: binding.span, Symbol: statement.Target.Symbol, FlagClearedFirst: true})
+					l.live[statement.Target.Symbol] = false
+				}
+				l.appendOperation(Operation{
+					Kind: OperationInitialize, Span: statement.Target.Span, Symbol: statement.Target.Symbol,
+					DestinationLocal: LocalID(statement.Target.Symbol), Operands: []Operand{value},
+				})
+				l.live[statement.Target.Symbol] = true
+				l.result.Reassignments = append(l.result.Reassignments, ReassignmentFact{
+					Binding: binding.span, Target: statement.Target.Span, Value: statement.Expression.Span,
+					ValueBeforeDrop: true, DroppedOld: droppedOld, InstalledNew: true,
+				})
+			} else {
 				l.appendOperation(Operation{Kind: OperationAssign, Span: statement.Span, DestinationLocal: LocalID(statement.Target.Symbol), Operands: []Operand{value}})
 			}
 		case "while":

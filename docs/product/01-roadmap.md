@@ -21,16 +21,17 @@ Current implementation status: the source, lexer, recoverable-syntax, parser-dia
 lowering, and parser-fixture-runner portion of the first item exists. Name resolution and typed HIR
 now cover the semantic fixture's scalar and safe-borrow subset. Local last-use loans, borrow
 conflicts, and single-origin borrow returns execute across all 11 semantic v0 cases. General
-whole-root resource Flow now executes all 8 resource v0 cases, including branch and loop state
+whole-root resource Flow now executes all 10 resource v0 cases, including branch and loop state
 rejection. Result Flow executes all 8 result v0 cases, including qualified scalar construction and
 exhaustive shallow matching. Mutable-local MIR lowering and verification
-execute all 6 MIR normalization v0 cases for the current scalar, resource, tagged-payload, Result, cleanup, call,
+execute all 7 MIR normalization v0 cases for the current scalar, resource, tagged-payload, Result, cleanup, call,
 and division-trap subset. All 8 verifier baselines and 15 isolated mutation cases execute through
-the same MIR verifier. The first MIR interpreter executes all 25 interpreter v0 cases, including
+the same MIR verifier. The first MIR interpreter executes all 32 interpreter v0 cases, including
 scalar `Option` and `Result` construction, exhaustive matching, and both Result `?` paths, and is
 exposed by the unstable `experimental run` command. Resource construction, field reads, whole-root
-call moves, source-linked drop traces, and resource-bearing `Option` and `Result` payload moves execute;
-Region runtime behavior, I/O intrinsics, reassignment/close rules, and every later Phase 1 capability
+call moves, source-linked drop traces, resource-bearing `Option` and `Result` payload moves, ordered
+resource reassignment, and explicit consuming-close success/failure ownership execute; Region runtime behavior,
+I/O intrinsics, complete must-use dataflow, effects, and every later Phase 1 capability
 remain unimplemented.
 
 - Implement source management, lexer, trivia-preserving tokens and spans, compact recoverable syntax, deterministic diagnostics, one-file modules, alias imports, and non-generic typed HIR in Go.

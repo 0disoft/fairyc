@@ -366,6 +366,152 @@
       }
     },
     {
+      "id": "pass.interpreter.resource-reassign-live",
+      "sourceRoot": "cases/pass/resource-reassign-live/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42,
+        "drops": [
+          {
+            "resourceType": "main::Token",
+            "binding": { "source": "main.fy", "startByte": 110, "endByte": 115 }
+          },
+          {
+            "resourceType": "main::Token",
+            "binding": { "source": "main.fy", "startByte": 110, "endByte": 115 }
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.interpreter.resource-reassign-dead",
+      "sourceRoot": "cases/pass/resource-reassign-dead/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42,
+        "drops": [
+          {
+            "resourceType": "main::Token",
+            "binding": { "source": "main.fy", "startByte": 94, "endByte": 99 }
+          },
+          {
+            "resourceType": "main::Token",
+            "binding": { "source": "main.fy", "startByte": 163, "endByte": 168 }
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.interpreter.resource-reassign-result-ok",
+      "sourceRoot": "cases/pass/resource-reassign-result-ok/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42,
+        "drops": [
+          {
+            "resourceType": "main::Probe",
+            "binding": { "source": "main.fy", "startByte": 211, "endByte": 216 }
+          },
+          {
+            "resourceType": "main::Token",
+            "binding": { "source": "main.fy", "startByte": 397, "endByte": 402 }
+          },
+          {
+            "resourceType": "main::Token",
+            "binding": { "source": "main.fy", "startByte": 397, "endByte": 402 }
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.interpreter.resource-reassign-result-err",
+      "sourceRoot": "cases/pass/resource-reassign-result-err/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 7,
+        "drops": [
+          {
+            "resourceType": "main::Probe",
+            "binding": { "source": "main.fy", "startByte": 211, "endByte": 216 }
+          },
+          {
+            "resourceType": "main::Token",
+            "binding": { "source": "main.fy", "startByte": 397, "endByte": 402 }
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.interpreter.resource-close-success",
+      "sourceRoot": "cases/pass/resource-close-success/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42,
+        "drops": [
+          {
+            "resourceType": "main::Token",
+            "binding": { "source": "main.fy", "startByte": 93, "endByte": 98 }
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.interpreter.resource-close-failure",
+      "sourceRoot": "cases/pass/resource-close-failure/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42,
+        "drops": [
+          {
+            "resourceType": "main::Token",
+            "binding": { "source": "main.fy", "startByte": 441, "endByte": 449 }
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.interpreter.resource-reassign-self",
+      "sourceRoot": "cases/pass/resource-reassign-self/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42,
+        "drops": [
+          {
+            "resourceType": "main::Token",
+            "binding": { "source": "main.fy", "startByte": 110, "endByte": 115 }
+          }
+        ]
+      }
+    },
+    {
       "id": "pass.interpreter.step-limit",
       "sourceRoot": "cases/pass/step-limit/src",
       "sources": ["main.fy"],

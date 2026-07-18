@@ -47,6 +47,11 @@ type observationAssertion struct {
 	Operand                  spanAssertion            `json:"operand"`
 	Destination              string                   `json:"destination"`
 	CleanupTransferred       bool                     `json:"cleanupObligationTransferred"`
+	Target                   spanAssertion            `json:"target"`
+	Value                    spanAssertion            `json:"value"`
+	ValueBeforeDrop          bool                     `json:"valueBeforeDrop"`
+	DroppedOld               bool                     `json:"droppedOld"`
+	InstalledNew             bool                     `json:"installedNew"`
 	Exit                     spanAssertion            `json:"exit"`
 	ExitKind                 string                   `json:"exitKind"`
 	Actions                  []cleanupActionAssertion `json:"actions"`

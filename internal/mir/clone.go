@@ -39,6 +39,7 @@ func Clone(input Program) Program {
 			cloned.Calls[index].ArgumentOrder = slices.Clone(function.Calls[index].ArgumentOrder)
 		}
 		cloned.Moves = slices.Clone(function.Moves)
+		cloned.Reassignments = slices.Clone(function.Reassignments)
 		cloned.CleanupPaths = slices.Clone(function.CleanupPaths)
 		for index := range cloned.CleanupPaths {
 			cloned.CleanupPaths[index].Actions = slices.Clone(function.CleanupPaths[index].Actions)

@@ -100,6 +100,86 @@
       }
     },
     {
+      "id": "pass.flow.reassign-live",
+      "sourceRoot": "cases/pass/reassign-live/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "states": [
+          {
+            "binding": {
+              "source": "main.fy",
+              "startByte": 110,
+              "endByte": 115
+            },
+            "at": {
+              "source": "main.fy",
+              "startByte": 149,
+              "endByte": 154
+            },
+            "observation": "before",
+            "state": "Live",
+            "cleanupObligations": 1
+          },
+          {
+            "binding": {
+              "source": "main.fy",
+              "startByte": 110,
+              "endByte": 115
+            },
+            "at": {
+              "source": "main.fy",
+              "startByte": 149,
+              "endByte": 154
+            },
+            "observation": "after",
+            "state": "Live",
+            "cleanupObligations": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.flow.reassign-dead",
+      "sourceRoot": "cases/pass/reassign-dead/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "states": [
+          {
+            "binding": {
+              "source": "main.fy",
+              "startByte": 163,
+              "endByte": 168
+            },
+            "at": {
+              "source": "main.fy",
+              "startByte": 241,
+              "endByte": 246
+            },
+            "observation": "before",
+            "state": "Dead",
+            "cleanupObligations": 0
+          },
+          {
+            "binding": {
+              "source": "main.fy",
+              "startByte": 163,
+              "endByte": 168
+            },
+            "at": {
+              "source": "main.fy",
+              "startByte": 241,
+              "endByte": 246
+            },
+            "observation": "after",
+            "state": "Live",
+            "cleanupObligations": 1
+          }
+        ]
+      }
+    },
+    {
       "id": "fail.flow.use-after-move",
       "sourceRoot": "cases/fail/use-after-move/src",
       "sources": ["main.fy"],

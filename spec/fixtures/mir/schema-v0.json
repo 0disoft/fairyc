@@ -78,6 +78,7 @@
               { "$ref": "#/$defs/orderedEvaluation" },
               { "$ref": "#/$defs/call" },
               { "$ref": "#/$defs/move" },
+              { "$ref": "#/$defs/resourceReassignment" },
               { "$ref": "#/$defs/cleanupPath" },
               { "$ref": "#/$defs/resultBranch" },
               { "$ref": "#/$defs/trapPath" },
@@ -132,6 +133,21 @@
           "enum": ["call-argument", "return-value", "result-success-payload", "result-error-payload"]
         },
         "cleanupObligationTransferred": { "const": true }
+      }
+    },
+    "resourceReassignment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "function", "binding", "target", "value", "valueBeforeDrop", "droppedOld", "installedNew"],
+      "properties": {
+        "kind": { "const": "resource-reassignment" },
+        "function": { "$ref": "#/$defs/functionName" },
+        "binding": { "$ref": "#/$defs/span" },
+        "target": { "$ref": "#/$defs/span" },
+        "value": { "$ref": "#/$defs/span" },
+        "valueBeforeDrop": { "const": true },
+        "droppedOld": { "type": "boolean" },
+        "installedNew": { "const": true }
       }
     },
     "cleanupAction": {

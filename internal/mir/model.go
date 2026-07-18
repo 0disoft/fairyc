@@ -60,6 +60,7 @@ type Function struct {
 	OrderedEvaluations []OrderedEvaluationFact
 	Calls              []CallFact
 	Moves              []MoveFact
+	Reassignments      []ReassignmentFact
 	CleanupPaths       []CleanupPathFact
 	ResultBranches     []ResultBranchFact
 	TrapPaths          []TrapPathFact
@@ -240,6 +241,16 @@ type MoveFact struct {
 	Operand                      hir.Span
 	Destination                  string
 	CleanupObligationTransferred bool
+}
+
+// ReassignmentFact records the success-path ordering of one whole resource replacement.
+type ReassignmentFact struct {
+	Binding         hir.Span
+	Target          hir.Span
+	Value           hir.Span
+	ValueBeforeDrop bool
+	DroppedOld      bool
+	InstalledNew    bool
 }
 
 // CleanupPathFact records the explicit cleanup chain for one normal exit.

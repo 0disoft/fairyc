@@ -16,7 +16,7 @@ Each state assertion names:
 
 `Live` always has one obligation and `Dead` always has zero. `MaybeLive` is recorded only as a rejected source state and uses `cleanupObligations: null` because one unconditional count does not exist.
 
-`internal/resourcefixture` executes all 8 v0 cases after requiring parser, resolver, and type setup
+`internal/resourcefixture` executes all 10 v0 cases after requiring parser, resolver, and type setup
 to succeed. It compares selected state observations and the complete independent `E11xx` set.
 
 ## Diagnostic assertions
