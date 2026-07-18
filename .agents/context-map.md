@@ -23,6 +23,8 @@
 - Result fixture route: spec/fixtures/result/manifest-v0.json
 - Result runner route: internal/resultfixture/
 - MIR fixture route: spec/fixtures/mir/manifest-v0.json
+- MIR implementation route: internal/mir/
+- MIR runner route: internal/mirfixture/
 - MIR verifier mutation fixture route: spec/fixtures/mir-verifier/manifest-v0.json
 - Resolved package graph fixture route: spec/fixtures/package/manifest-v0.json
 - MIR and C backend route: docs/mir/

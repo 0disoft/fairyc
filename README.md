@@ -20,9 +20,12 @@ also executes all 7 v0 cases for moves, cleanup obligations, branch joins, and l
 Region runner executes all 6 v1 cases, including package-proven `std::alloc::Arena`, hidden
 allocation origins, lexical escape, capability storage, and plain-region resource rejection. The
 Result runner executes all 6 v0 cases for must-use return/discard/propagation, exactly-once
-classification, non-Result `?`, and propagated error compatibility. An unstable
+classification, non-Result `?`, and propagated error compatibility. The MIR runner executes all
+5 v0 normalization cases through mutable-local block lowering and the MIR verifier, covering
+left-to-right call evaluation, complete-root moves, normal-exit cleanup order, `Result` error
+cleanup, and non-unwinding trap paths. An unstable
 `fairyc experimental` CLI can inspect, syntax-check, or semantic-check one source-root-relative
-`.fy` file or explicit module set. There is no stable CLI, tagged-resource Flow, MIR, interpreter, backend, standard
+`.fy` file or explicit module set. There is no stable CLI, tagged-resource Flow, MIR interpreter, backend, standard
 library, runtime, package manager, supported target, or stable language revision yet.
 
 ## Try the parser prototype

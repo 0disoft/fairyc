@@ -22,8 +22,10 @@ lowering, and parser-fixture-runner portion of the first item exists. Name resol
 now cover the semantic fixture's scalar and safe-borrow subset. Local last-use loans, borrow
 conflicts, and single-origin borrow returns execute across all 11 semantic v0 cases. General
 whole-root resource Flow now executes all 7 resource v0 cases, including branch and loop state
-rejection. Tagged resource payloads, reassignment/close rules, and every later Phase 1 capability
-remain unimplemented.
+rejection. Result Flow executes all 6 result v0 cases. Mutable-local MIR lowering and verification
+execute all 5 MIR normalization v0 cases for the current scalar, resource, Result, cleanup, call,
+and division-trap subset. Verifier mutation seeds, the MIR interpreter, tagged resource payloads,
+reassignment/close rules, and every later Phase 1 capability remain unimplemented.
 
 - Implement source management, lexer, trivia-preserving tokens and spans, compact recoverable syntax, deterministic diagnostics, one-file modules, alias imports, and non-generic typed HIR in Go.
 - Implement restricted inert enums, whole-resource moves, local last-use loans, call-bounded mutable reborrows, single-origin borrow returns, plain regions, `Option`, `Result`, shallow `match`, and explicit `?` and `discard`.

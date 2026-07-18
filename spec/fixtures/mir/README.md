@@ -6,4 +6,4 @@ The manifest freezes source-linked semantic events rather than textual MIR, bloc
 
 `schema-v0.json` uses JSON Schema draft 2020-12 and rejects unknown fields. Source paths are case-root-relative, `/`-separated, and paired with half-open UTF-8 byte spans.
 
-No compiler or MIR runner exists yet, so these files are executable contract inputs rather than evidence that an implementation passes.
+`internal/mirfixture` executes all five cases through parser, resolver, typer, Flow, mutable-local MIR lowering, and the MIR verifier. Passing this runner proves only the source-linked v0 subset above; it does not prove the deferred groups, verifier-mutation suite, interpreter, or backend.
