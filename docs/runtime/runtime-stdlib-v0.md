@@ -126,6 +126,16 @@ but no Linux execution receipt has been observed.
 
 `str` is an unsized, immutable, valid-UTF-8 language type used as `&str`. UTF-8 validation of `&[u8]` returns a borrow with the input's origin and performs no copy or allocation. Byte slices never convert implicitly to text.
 
+The provisional text-view C slice performs a complete allocation-free UTF-8 scan. It rejects stray
+continuations, overlong forms, surrogate encodings, values above U+10FFFF, truncated sequences, and
+obsolete leaders. ASCII NUL remains valid text. Slicing accepts only ordered in-range byte offsets
+that land on code-point boundaries and leaves output unchanged on failure. Empty storage identity
+is normalized but not observable; compiler borrow origins remain outside the C record.
+
+The four-way native probe for these validation and slicing cases is configured but unobserved on
+this Windows host. The helper is not source-visible and does not implement owned text, Unicode
+normalization, grapheme segmentation, case conversion, or locale behavior.
+
 `String` is a resource owning a UTF-8 `Buffer`. It can copy from `&str`, consume a `Buffer` after validation, expose `&str`, and append fallibly. A failed consuming UTF-8 conversion returns ownership of the original `Buffer` in its error resource. Mutable raw bytes are not exposed.
 
 `CStr` is an unsized borrowed NUL-terminated byte sequence with no interior NUL and no UTF-8 promise. `CString` is the owned resource form. Conversion from `&str` copies bytes, rejects interior NUL, appends one terminator, and performs no locale conversion.

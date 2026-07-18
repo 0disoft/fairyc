@@ -76,6 +76,12 @@ unsupported-alignment rollback, zero-size normalization, active-drop rejection, 
 advance, stale-use rejection, and final drop. It does not freeze node size, allocation grouping, or
 an Arena growth policy.
 
+The text-view probe validates mixed-width text and rejects stray continuation bytes, two overlong
+families, surrogate encodings, values above U+10FFFF, truncation, and obsolete leaders. It checks
+valid and invalid byte-boundary slices, empty normalization, invalid pointer/length pairs, and
+unchanged outputs on failure. It is byte-level UTF-8 evidence, not Unicode normalization or
+grapheme behavior.
+
 ## Oracle order
 
 1. Product specification and accepted ADRs define the intended boundary.

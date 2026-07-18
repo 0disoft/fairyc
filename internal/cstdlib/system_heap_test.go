@@ -107,3 +107,36 @@ func TestArenaSourcesRejectConcurrentAndStaleRegions(t *testing.T) {
 		t.Fatalf("ArenaSource() is not deterministic canonical C: %v", err)
 	}
 }
+
+func TestTextViewSourcesRejectNonCanonicalUTF8AndInteriorBoundaries(t *testing.T) {
+	t.Parallel()
+	implementation, err := TextViewSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	probe, err := TextViewProbeSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, required := range []string{
+		"first >= UINT8_C(0xc2)",
+		"first == UINT8_C(0xe0)",
+		"first == UINT8_C(0xed)",
+		"first == UINT8_C(0xf4)",
+		"fy_std_text_validate_utf8_v0",
+		"fy_std_text_slice_v0",
+	} {
+		if !strings.Contains(implementation, required) {
+			t.Errorf("text view implementation is missing %q", required)
+		}
+	}
+	for _, required := range []string{"overlong_two", "surrogate", "over_maximum", "truncated", "obsolete_five"} {
+		if !strings.Contains(probe, required) {
+			t.Errorf("text view probe is missing %q", required)
+		}
+	}
+	repeated, err := TextViewSource()
+	if err != nil || repeated != implementation || strings.Contains(implementation, "\r") || !strings.HasSuffix(implementation, "\n") {
+		t.Fatalf("TextViewSource() is not deterministic canonical C: %v", err)
+	}
+}

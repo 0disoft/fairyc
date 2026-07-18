@@ -81,6 +81,9 @@ A third slice implements Arena-owned byte nodes with one active generation-check
 failure-atomic zeroed or copied placement, reset invalidation, stale-use rejection, and active-drop
 rejection. Its native matrix is likewise configured but unobserved and disconnected from source
 lowering.
+The first text slice now validates canonical UTF-8 without allocation and rejects slicing through a
+multibyte sequence. Its native probe includes overlong forms, surrogates, values above U+10FFFF,
+truncation, and obsolete leaders, but remains unobserved and source-disconnected.
 A deterministic native C11 probe now translates the nine valid layout cases into private numeric
 types and is configured for Clang/GCC at `-O0` and `-O2`. This Windows host cannot execute those
 four probe runs, and no hosted success receipt has been observed, so `c-layout-probes` remains a

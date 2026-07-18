@@ -100,6 +100,9 @@ The Arena storage slice now adds a single-active-Region generation check, failur
 copied byte placement, reset invalidation, stale-use rejection, and active-drop rejection. Its four
 native executions are configured but unobserved; source-level `std::alloc` construction and calls
 remain missing.
+The allocation-free text-view slice now checks canonical UTF-8 and code-point byte boundaries,
+including overlong, surrogate, out-of-range, truncated, and obsolete forms. Its four native runs
+are configured but unobserved, and owned `String`/`CString` plus source calls remain missing.
 
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.

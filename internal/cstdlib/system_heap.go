@@ -25,6 +25,12 @@ var stage0Arena string
 //go:embed stage0_arena_probe.c
 var stage0ArenaProbe string
 
+//go:embed stage0_text_view.c
+var stage0TextView string
+
+//go:embed stage0_text_view_probe.c
+var stage0TextViewProbe string
+
 // SystemHeapSource returns the provisional x86_64-linux-gnu SystemHeap implementation.
 func SystemHeapSource() (string, error) {
 	return canonicalSource("SystemHeap", stage0SystemHeap)
@@ -69,6 +75,16 @@ func ArenaSource() (string, error) {
 // ArenaProbeSource returns the closed native conformance probe for Arena and Region.
 func ArenaProbeSource() (string, error) {
 	return canonicalSource("Arena probe", stage0ArenaProbe)
+}
+
+// TextViewSource returns the allocation-free UTF-8 validation and slicing implementation.
+func TextViewSource() (string, error) {
+	return canonicalSource("text view", stage0TextView)
+}
+
+// TextViewProbeSource returns the closed native conformance probe for UTF-8 text views.
+func TextViewProbeSource() (string, error) {
+	return canonicalSource("text view probe", stage0TextViewProbe)
 }
 
 func canonicalSource(name, source string) (string, error) {
