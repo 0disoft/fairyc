@@ -3,7 +3,7 @@
   "schemaVersion": "fairyc.c-emission-fixtures/v0",
   "deferred": [
     "C parsing, compilation, object emission, linking, and native execution inside this emission-only runner; the separate Linux runner owns that evidence",
-    "output, negative and larger i32 returns, cleanup traces, and sanitizer observations beyond the native process-status oracle",
+    "output, negative and larger i32 returns, user drop-body effects, and sanitizer observations beyond the native process-status and compiler-owned drop-trace oracle",
     "non-i32, empty, nested, partial-initialization, nonempty-drop, and nested-tag resource values plus Region, borrow, unsafe, FFI, complete runtime, and standard-library C lowering",
     "target layout, C ABI classification, object metadata, symbol, relocation, and sanitizer evidence"
   ],
@@ -16,6 +16,7 @@
     "docs/adr/0029-scalar-option-result-c-transport.md",
     "docs/adr/0033-flat-i32-resource-c-transport.md",
     "docs/adr/0034-resource-tagged-c-transport.md",
+    "docs/adr/0035-native-drop-trace-differential.md",
     "docs/mir/mir-v0.md",
     "docs/mir/c-backend-safety-v0.md",
     "docs/runtime/runtime-stdlib-v0.md",

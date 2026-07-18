@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0030-executable-x86-64-linux-gnu-target-spec.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0035-native-drop-trace-differential.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -195,7 +195,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   alignment, and offset assertions. Its emission fixtures do not compile, link, or execute C and do
   not establish a target support level.
 - A separate Linux/amd64 command requires glibc, Clang, and GCC and is configured to compare the
-  current scalar, flat-resource, and resource-tagged cases at low and optimized profiles. No hosted success receipt or broader target
+  current scalar, flat-resource, and resource-tagged cases at low and optimized profiles. Its closed
+  `drop-trace-v0` emission profile assigns source/type/span identities to dense site IDs and compares
+  exact four-byte native records with the MIR interpreter trace. This instrumentation is absent from
+  product `emit-c` and `build`. No hosted success receipt or broader target
   conformance follows from the command's presence.
 - The experimental target-inspection command emits that target description without probing the
   host. It reports `scalar-and-flat-i32-resource-tagged-c11` separately while keeping `emittable`,

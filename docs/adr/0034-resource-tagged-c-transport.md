@@ -49,12 +49,14 @@ runtime tag has no static container type, so final values agreed while the MIR t
    None, resource Result Ok and Err, and resource Result propagation success and error. The Linux
    matrix therefore plans 68 process-status comparisons across Clang/GCC and low/optimized profiles.
    Its four product-build smokes now combine resource-bearing Option, Result, propagation, and field
-   access in one source.
+   access in one source. ADR 0035 later adds exact compiler-owned drop-sequence comparison to the
+   same 68 fixture executions without instrumenting those product-build smokes.
 9. `fairyc.target-spec/v0` reports
    `scalar-and-flat-i32-resource-tagged-c11`; `emittable`, `conformant`, and `supported` remain false.
-10. Process status still cannot observe cleanup order or drop traces. This slice is emission and
-    planned differential evidence, not native cleanup, public layout, ABI, sanitizer, or user
-    drop-body conformance.
+10. This transport decision alone cannot observe cleanup order or drop traces. ADR 0035 later adds
+    a separate closed native-conformance profile for compiler-owned empty-drop events without
+    changing production emission. Neither decision proves hosted execution, public layout, ABI,
+    sanitizer, or user drop-body conformance.
 
 ## Consequences
 

@@ -17,15 +17,16 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
 - Ordinary tests execute the fixed lexer and parser fuzz seeds. Timed fuzz campaigns remain
   unconfigured rather than pretending a short CI sample proves coverage.
 - A separate Ubuntu native-C job invokes `cmd/fairyc-native-fixtures`. The command requires
-  Linux/amd64, glibc, Clang, and GCC; compiles all eight current C-emission cases at `-O0` and `-O2`
-  with pedantic warnings as errors; links the shared embedded scalar trap runtime; and performs 32
-  process-status comparisons. It then drives a scalar Option-and-Result program through
+  Linux/amd64, glibc, Clang, and GCC; compiles all seventeen current C-emission cases at `-O0` and
+  `-O2` with pedantic warnings as errors; links the scalar trap runtime plus the closed conformance
+  drop recorder; and plans 68 exact process-status and source-linked drop-sequence comparisons. It
+  then drives a resource-bearing Option-and-Result program through uninstrumented
   `experimental build` with Clang/GCC and low/optimized, executes all four resulting temporary
-  products, and requires exit `42`. A missing compiler or libc identity fails the job instead of
-  producing a skip.
+  products, and requires exit `42` with no output. A missing compiler or libc identity fails the job
+  instead of producing a skip.
 - The native job retains no generated C, object, executable, cache, or report artifact. Its bounded
-  `fairyc.native-c-report/v1` JSON report is written only to the job log and contains toolchain
-  fingerprints plus fixture and product-build execution counts but no temporary path.
+  `fairyc.native-c-report/v2` JSON report is written only to the job log and contains toolchain
+  fingerprints plus fixture, drop-trace, and product-build execution counts but no temporary path.
 
 The containing Mustflow workspace provides local parity through `fairyc_go_vet` and
 `fairyc_go_test`, plus the Linux-only `fairyc_native_c_test` intent. Those intents additionally

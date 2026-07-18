@@ -129,8 +129,30 @@ func runCase(manifestDirectory string, fixture caseDefinition, emitted *EmittedC
 	if err != nil || second.Source != unit.Source {
 		return []Failure{{CaseID: fixture.ID, Detail: fmt.Sprintf("repeated C emission is not deterministic: %v", err)}}
 	}
+	traceUnit, err := cbackend.Emit(program, fixture.Entry, cbackend.Stage0DropTraceProfile())
+	if err != nil {
+		return []Failure{{CaseID: fixture.ID, Detail: fmt.Sprintf("emit drop-trace C: %v", err)}}
+	}
+	if traceUnit.Target != unit.Target || traceUnit.Dialect != unit.Dialect || traceUnit.Entry != unit.Entry ||
+		traceUnit.Instrumentation != cbackend.InstrumentationDropTraceV0 ||
+		!slices.Equal(traceUnit.Functions, unit.Functions) || !slices.Equal(traceUnit.Features, unit.Features) {
+		return []Failure{{CaseID: fixture.ID, Detail: "drop-trace C unit identity drifted from production emission"}}
+	}
+	if traceUnit.Source == "" || traceUnit.Source == unit.Source || strings.Contains(traceUnit.Source, "\r") || strings.Contains(traceUnit.Source, manifestDirectory) {
+		return []Failure{{CaseID: fixture.ID, Detail: "drop-trace C is empty, uninstrumented, non-LF, or leaks an absolute fixture path"}}
+	}
+	for _, event := range outcome.DropTrace {
+		if !dropEventHasSite(event, traceUnit.DropSites) {
+			return []Failure{{CaseID: fixture.ID, Detail: fmt.Sprintf("drop trace has no emitted site for %+v", event)}}
+		}
+	}
+	secondTrace, err := cbackend.Emit(program, fixture.Entry, cbackend.Stage0DropTraceProfile())
+	if err != nil || secondTrace.Source != traceUnit.Source || !slices.Equal(secondTrace.DropSites, traceUnit.DropSites) {
+		return []Failure{{CaseID: fixture.ID, Detail: fmt.Sprintf("repeated drop-trace C emission is not deterministic: %v", err)}}
+	}
 	*emitted = EmittedCase{
-		ID: fixture.ID, Outcome: fixture.Expect.Outcome, Unit: unit,
+		ID: fixture.ID, Outcome: fixture.Expect.Outcome, Unit: unit, TraceUnit: traceUnit,
+		DropTrace: slices.Clone(outcome.DropTrace),
 	}
 	if fixture.Expect.Value != nil {
 		emitted.Value = *fixture.Expect.Value
@@ -139,6 +161,16 @@ func runCase(manifestDirectory string, fixture caseDefinition, emitted *EmittedC
 		emitted.TrapCategory = *fixture.Expect.Category
 	}
 	return nil
+}
+
+func dropEventHasSite(event interpreter.DropEvent, sites []cbackend.DropSite) bool {
+	for _, site := range sites {
+		if site.ResourceType == string(event.ResourceType) && site.Source == event.Binding.Source &&
+			site.StartByte == event.Binding.StartByte && site.EndByte == event.Binding.EndByte {
+			return true
+		}
+	}
+	return false
 }
 
 func lowerFixture(manifestDirectory string, fixture caseDefinition) (mir.Program, *Failure) {

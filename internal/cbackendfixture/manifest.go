@@ -1,7 +1,10 @@
 // Package cbackendfixture executes the versioned source-to-C-emission manifest.
 package cbackendfixture
 
-import "github.com/0disoft/fairyc/internal/cbackend"
+import (
+	"github.com/0disoft/fairyc/internal/cbackend"
+	"github.com/0disoft/fairyc/internal/interpreter"
+)
 
 type manifest struct {
 	Schema        string           `json:"$schema"`
@@ -51,4 +54,6 @@ type EmittedCase struct {
 	Value        int32
 	TrapCategory string
 	Unit         cbackend.Unit
+	TraceUnit    cbackend.Unit
+	DropTrace    []interpreter.DropEvent
 }

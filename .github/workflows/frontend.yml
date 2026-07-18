@@ -36,7 +36,7 @@ jobs:
         run: go test -mod=readonly -count=1 ./...
 
   native-c:
-    name: Scalar C differential (Linux)
+    name: C differential (Linux)
     needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -48,5 +48,5 @@ jobs:
         with:
           go-version-file: go.mod
           cache: false
-      - name: Run scalar C differential and product build smoke
+      - name: Run C differential and product build smoke
         run: go run -mod=readonly ./cmd/fairyc-native-fixtures spec/fixtures/c-emission/manifest-v0.json

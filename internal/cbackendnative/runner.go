@@ -4,6 +4,7 @@ package cbackendnative
 import (
 	"bytes"
 	"context"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"os"
@@ -23,7 +24,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v1"
+	reportSchemaVersion = "fairyc.native-c-report/v2"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -71,11 +72,13 @@ type Report struct {
 	Profiles             []string   `json:"profiles"`
 	Cases                []string   `json:"cases"`
 	Executions           int        `json:"executions"`
+	DropTraceExecutions  int        `json:"dropTraceExecutions"`
 	BuildSmokeExecutions int        `json:"buildSmokeExecutions"`
 }
 
 // Run compiles every emission fixture with Clang and GCC at low and optimized profiles, compares
-// the Linux process outcome with the MIR-interpreter oracle, and exercises the product build CLI.
+// the Linux process outcome and source-linked drop trace with the MIR-interpreter oracle, and
+// exercises the product build CLI.
 func Run(manifestPath string) (Report, error) {
 	if runtime.GOOS != "linux" || runtime.GOARCH != "amd64" {
 		return Report{}, fmt.Errorf("native C differential requires linux/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
@@ -91,7 +94,7 @@ func Run(manifestPath string) (Report, error) {
 	if len(fixtureReport.Failures) != 0 || len(fixtureReport.Emitted) != fixtureReport.CasesRun {
 		return Report{}, fmt.Errorf("C emission fixtures are not clean: %s", summarizeFailures(fixtureReport.Failures))
 	}
-	runtimeSource, err := cruntime.ScalarSource(trapExitBase)
+	runtimeSource, err := cruntime.DropTraceSource(trapExitBase)
 	if err != nil {
 		return Report{}, fmt.Errorf("bind scalar runtime: %w", err)
 	}
@@ -128,9 +131,13 @@ func Run(manifestPath string) (Report, error) {
 		if err != nil {
 			return Report{}, err
 		}
+		expectedDrops, err := expectedDropSiteIDs(fixture)
+		if err != nil {
+			return Report{}, err
+		}
 		for compilerIndex, toolchain := range toolchains {
 			for profileIndex, profile := range nativeProfiles {
-				artifact, err := cdriver.Build(toolchain, profile, fixture.Unit.Source, runtimeSource)
+				artifact, err := cdriver.Build(toolchain, profile, fixture.TraceUnit.Source, runtimeSource)
 				if err != nil {
 					return Report{}, fmt.Errorf("%s with %s/%s: %w", fixture.ID, toolchain.Name, profile.Name, err)
 				}
@@ -138,10 +145,11 @@ func Run(manifestPath string) (Report, error) {
 				if err := os.WriteFile(executablePath, artifact.Bytes, 0o700); err != nil {
 					return Report{}, fmt.Errorf("materialize %s with %s/%s: %w", fixture.ID, toolchain.Name, profile.Name, err)
 				}
-				if err := execute(fixture.ID, executablePath, expectedExit); err != nil {
+				if err := execute(fixture.ID, executablePath, expectedExit, expectedDrops); err != nil {
 					return Report{}, fmt.Errorf("%s with %s/%s: %w", fixture.ID, toolchain.Name, profile.Name, err)
 				}
 				report.Executions++
+				report.DropTraceExecutions++
 			}
 		}
 	}
@@ -180,7 +188,7 @@ func runBuildSmoke(temporaryRoot string) (int, error) {
 			if stdout.String() != expectedReceipt || stderr.Len() != 0 {
 				return 0, fmt.Errorf("product build smoke with %s/%s produced stdout %q and stderr %q", compiler, profile.Name, stdout.String(), stderr.String())
 			}
-			if err := execute("product-build-smoke", filepath.Join(sourceRoot, filepath.FromSlash(output)), 42); err != nil {
+			if err := execute("product-build-smoke", filepath.Join(sourceRoot, filepath.FromSlash(output)), 42, nil); err != nil {
 				return 0, fmt.Errorf("product build smoke with %s/%s: %w", compiler, profile.Name, err)
 			}
 			executions++
@@ -201,15 +209,15 @@ func resolveToolchains() ([]cdriver.Toolchain, error) {
 	return toolchains, nil
 }
 
-func execute(caseID, executablePath string, expectedExit int) error {
+func execute(caseID, executablePath string, expectedExit int, expectedDrops []uint32) error {
 	contextValue, cancel := context.WithTimeout(context.Background(), executionTimeout)
 	defer cancel()
 	command := exec.CommandContext(contextValue, executablePath)
 	command.Stdin = nil
-	var output boundedBuffer
-	output.limit = maxProcessOutput
-	command.Stdout = &output
-	command.Stderr = &output
+	stdout := boundedBuffer{limit: maxProcessOutput}
+	stderr := boundedBuffer{limit: maxProcessOutput}
+	command.Stdout = &stdout
+	command.Stderr = &stderr
 	err := command.Run()
 	if errors.Is(contextValue.Err(), context.DeadlineExceeded) {
 		return fmt.Errorf("native executable exceeded %s", executionTimeout)
@@ -222,16 +230,54 @@ func execute(caseID, executablePath string, expectedExit int) error {
 		}
 		exitCode = exitError.ExitCode()
 	}
-	if output.truncated {
+	if stdout.truncated || stderr.truncated || len(stdout.bytes)+len(stderr.bytes) > maxProcessOutput {
 		return fmt.Errorf("native executable exceeded %d output bytes", maxProcessOutput)
 	}
-	if len(output.bytes) != 0 {
-		return fmt.Errorf("native executable produced unexpected output %q", string(output.bytes))
+	if len(stdout.bytes) != 0 {
+		return fmt.Errorf("native executable produced unexpected stdout %q", string(stdout.bytes))
+	}
+	actualDrops, err := decodeDropTrace(stderr.bytes)
+	if err != nil {
+		return fmt.Errorf("native drop trace for %s: %w", caseID, err)
+	}
+	if !slices.Equal(actualDrops, expectedDrops) {
+		return fmt.Errorf("native drop trace for %s: got %v, want %v", caseID, actualDrops, expectedDrops)
 	}
 	if exitCode != expectedExit {
 		return fmt.Errorf("native exit for %s: got %d, want %d", caseID, exitCode, expectedExit)
 	}
 	return nil
+}
+
+func expectedDropSiteIDs(fixture cbackendfixture.EmittedCase) ([]uint32, error) {
+	result := make([]uint32, 0, len(fixture.DropTrace))
+	for _, event := range fixture.DropTrace {
+		found := false
+		for _, site := range fixture.TraceUnit.DropSites {
+			if site.ResourceType != string(event.ResourceType) || site.Source != event.Binding.Source ||
+				site.StartByte != event.Binding.StartByte || site.EndByte != event.Binding.EndByte {
+				continue
+			}
+			result = append(result, site.ID)
+			found = true
+			break
+		}
+		if !found {
+			return nil, fmt.Errorf("drop trace for %s has no C site for %s at %s:%d-%d", fixture.ID, event.ResourceType, event.Binding.Source, event.Binding.StartByte, event.Binding.EndByte)
+		}
+	}
+	return result, nil
+}
+
+func decodeDropTrace(contents []byte) ([]uint32, error) {
+	if len(contents)%4 != 0 {
+		return nil, fmt.Errorf("record stream has %d bytes, want a multiple of 4", len(contents))
+	}
+	result := make([]uint32, 0, len(contents)/4)
+	for offset := 0; offset < len(contents); offset += 4 {
+		result = append(result, binary.LittleEndian.Uint32(contents[offset:offset+4]))
+	}
+	return result, nil
 }
 
 func expectedExitCode(fixture cbackendfixture.EmittedCase) (int, error) {

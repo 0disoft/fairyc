@@ -8,7 +8,9 @@ outcome, and emit one deterministic C11 translation unit for the provisional
 The manifest freezes target and dialect identity, canonical Fairy C function names, supported
 feature families, and the interpreter outcome. It deliberately does not freeze the complete C text,
 private C identifiers, block labels, or formatting. The runner emits twice and requires byte-identical
-output, LF-only text, and no absolute fixture path.
+output, LF-only text, and no absolute fixture path. It also creates a deterministic internal
+`drop-trace-v0` unit, proves every interpreter-observed drop has a source/type/span site, and keeps
+that unit separate from the production translation unit.
 
 These seventeen cases are emission evidence, not native-code evidence. They cover scalar control,
 checked arithmetic, `Option<i32>` Some and None, and `Result<i32, i32>` propagation success and
@@ -21,8 +23,9 @@ Those boundaries do not become emission evidence even when a separate native com
 same cases.
 
 `internal/cbackendnative` is the separate Linux/amd64 lane. It consumes the interpreter-approved
-units from this runner, requires glibc plus Clang and GCC, links the shared embedded scalar runtime,
-and plans 68 process-status comparisons at low and optimized profiles. Empty resource drops have no
-process-status observation, so this is not native drop-trace or user drop-body evidence. The
+instrumented units from this runner, requires glibc plus Clang and GCC, links the scalar runtime plus
+a closed four-byte recorder, and plans 68 process-status and exact drop-sequence comparisons at low
+and optimized profiles. This observes compiler-owned empty resource cleanup and active built-in
+payload selection; it does not execute user drop bodies. The
 emission runner itself remains
 toolchain-free and does not inherit native evidence from the presence of that separate command.

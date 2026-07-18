@@ -103,16 +103,21 @@ A C `longjmp` or C++ exception crossing generated Fairy C frames is forbidden. I
 
 `internal/cbackendnative` implements the first scalar, flat-resource, and resource-tagged matrix
 shape for Linux/amd64 with glibc, Clang and GCC, and low and optimized profiles. Its seventeen cases plan 68 process-status
-comparisons for small non-negative returns and canonical trap category, including both scalar tag
-families, flat resource transport, and resource-bearing Option/Result paths. Output, negative or larger `i32` returns, drop traces,
-sanitizers, public layout, ABI, and
+and exact source-linked drop-trace comparisons for small non-negative returns and canonical trap
+category, including both scalar tag families, flat resource transport, and resource-bearing
+Option/Result paths. A closed internal instrumentation profile emits conditional active-payload
+observer calls keyed by canonical resource type and binding span; production C contains none of
+those declarations, calls, or site metadata. Output, negative or larger `i32` returns,
+user drop-body effects, sanitizers, public layout, ABI, and
 broader runtime behavior remain unimplemented. Sanitizers are useful backend checks but are not the
 language-semantics oracle.
 
 `internal/cdriver` and `internal/cruntime` are the one implementation path for both that matrix and
 the experimental constrained-C executable builder. The driver fixes the C dialect, warning policy,
 optimization profiles, time and output bounds, and linked-artifact size limit; the embedded runtime
-fixes trap dispatch before binding a caller-specific reserved process-status base. Sharing this
+fixes trap dispatch before binding a caller-specific reserved process-status base. The native lane
+adds a Linux-only four-byte drop recorder whose stderr is decoded as conformance data rather than
+language output. Sharing this
 plumbing prevents test and product compiler flags from silently diverging, but does not promote the
 target beyond the evidence supplied by the differential fixtures.
 

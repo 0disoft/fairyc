@@ -86,7 +86,7 @@ evidence requirements.
 | MIR interpreter run, trap, and limit | `spec/fixtures/interpreter/` currently proves all 56 v0 cases: literal return, scalar call arithmetic, checked negation/addition/subtraction/multiplication, division/remainder, and right shift across trapping and non-trapping boundaries, boolean branching and logical not, source `&&` and `||` short-circuiting, scalar `while`, nearest-loop break and continue, scalar and resource-bearing `Option` and `Result` construction, every built-in match variant, scalar and resource-bearing Result `?` paths, resource construction and field reads, whole-root and tagged-payload moves, resource returns, ordered live/dead/self reassignment, consuming-close success/failure ownership, nested active-variant cleanup, deterministic drop traces, lexical Region placement and reset on fallthrough, conditional fallthrough, direct return, Result propagation, nested, break, and continue exits, exact manifest-authorized in-memory stdout/stderr bytes, order, and retained limit prefix, exact division-by-zero, signed-division-overflow, integer-overflow, and invalid-shift trap identity, and bounded step/output-limit termination; user drop-body effects, signed left shift, and host I/O remain deferred |
 | Drop elaboration | Partial construction and cleanup-suffix merging; loop `break` and `continue` are fixture-backed |
 | C emission | `spec/fixtures/c-emission/` currently proves 17 verified scalar, flat-resource, and resource-tagged source-to-C11 cases, including private scalar and resource-bearing `Option`/`Result` transport, all-`i32` direct resources, typed propagation, deterministic target/dialect/function/feature metadata, target-layout assertions, LF-only path-clean output, and repeated byte identity; it does not prove C syntax acceptance or native behavior |
-| C differential | The configured Linux runner covers all 17 C-emission cases across Clang/GCC and low/optimized profiles for 68 process-status comparisons, then exercises the actual experimental build CLI with resource-bearing Option, Result, propagation, and field access under all 4 compiler/profile pairs; hosted execution is not yet observed, and output, wider returns, drop traces, sanitizers, public layout, ABI, and the complete product runtime remain deferred |
+| C differential | The configured Linux runner covers all 17 C-emission cases across Clang/GCC and low/optimized profiles for 68 process-status plus exact source-linked drop-trace comparisons, then exercises the uninstrumented experimental build CLI with resource-bearing Option, Result, propagation, and field access under all 4 compiler/profile pairs; hosted execution is not yet observed, and output, wider returns, user drop-body effects, sanitizers, public layout, ABI, and the complete product runtime remain deferred |
 | Target description | `internal/target` proves the `fairyc.target-spec/v0` structural invariants, canonical x86-64 Linux GNU facts, immutable lookup, absent host paths, and fail-closed maturity evidence; `internal/cli` proves deterministic schema-shaped inspection and unknown-ID rejection, but no layout or ABI probe runs yet |
 | Target layout | `spec/fixtures/layout/` currently proves 14 host-independent v0 cases for language and C scalars, data and function pointers, explicit C-enum bases, arrays, nested aggregates, exact top-level offsets and padding, and malformed or overflowing input rejection; Clang/GCC layout probes and SysV call classification remain deferred |
 | C safety | Overflow, division, shifts, evaluation order, aliasing, alignment, inactive payload, and sanitizer-assisted checks |
@@ -115,11 +115,13 @@ Package fixtures start from an already-resolved graph. They do not prove public 
 C-emission fixtures compare structured unit facts and deterministic text hygiene without freezing the
 entire generated translation unit. `internal/cbackendnative` separately requires Linux/amd64,
 glibc, Clang, and GCC, then compiles and executes every emitted case at `-O0` and `-O2`. The command
-fails rather than skips when a required toolchain component is absent. Its current status-only oracle
-does not prove output, negative or larger `i32` returns, cleanup traces, sanitizers, layout, ABI, the
-complete product runtime, or target conformance. The experimental build command shares this driver
-and embedded runtime but adds only single-file scalar artifact production; it does not broaden the
-oracle or target evidence.
+fails rather than skips when a required toolchain component is absent. Its current oracle compares
+reserved process status and exact source-linked compiler-owned drop sequences through a closed
+instrumentation profile. It does not prove output, negative or larger `i32` returns, user drop-body
+effects, sanitizers, layout, ABI, the complete product runtime, or target conformance. The
+experimental build command shares this driver and scalar runtime but emits and links only the
+uninstrumented single-file artifact path; it does not inherit the fixture observer or broaden target
+evidence.
 
 ## Differential matrix
 

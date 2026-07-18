@@ -26,3 +26,24 @@ func TestScalarSourceRejectsOverflowingBase(t *testing.T) {
 		t.Fatal("ScalarSource() accepted a base that overflows process status")
 	}
 }
+
+func TestDropTraceSourceAddsOnlyTheClosedRecorder(t *testing.T) {
+	t.Parallel()
+	source, err := DropTraceSource(192)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, required := range []string{
+		"UINT32_C(192)",
+		"void fy_runtime_trace_drop(uint32_t site_id)",
+		"write(STDERR_FILENO, record + offset, sizeof record - offset)",
+		"_Exit(254)",
+	} {
+		if !strings.Contains(source, required) {
+			t.Errorf("DropTraceSource() is missing %q", required)
+		}
+	}
+	if strings.Count(source, "fy_runtime_trace_drop") != 1 || strings.Contains(source, "\r") || !strings.HasSuffix(source, "\n") {
+		t.Fatalf("DropTraceSource() is not deterministic canonical C")
+	}
+}

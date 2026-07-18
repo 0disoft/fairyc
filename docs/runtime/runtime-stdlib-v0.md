@@ -38,6 +38,13 @@ bind base `128`; differential fixtures bind base `192` so their small ordinary-r
 disjoint. The complete product runtime, bounded source-location payload, runtime ABI version suffix,
 and distribution bundle remain unimplemented.
 
+`internal/cruntime/stage0_drop_trace.c` is a separate Linux-only conformance observer appended only
+for the native differential lane. It records one fixed little-endian `uint32_t` site ID to stderr
+for each compiler-owned resource leaf drop and terminates with reserved status 254 if the record
+cannot be written. The ID maps to deterministic source/type/span metadata retained by the Go test
+runner. It is not linked by `experimental build`, emitted by `experimental emit-c`, exposed to Fairy
+C source, or part of a public runtime ABI or output API.
+
 It does not own a general allocator API, collections, files, strings, formatting, unwinding, logging, reflection, garbage collection, scheduling, or async execution. Runtime helpers use a major-suffixed symbol namespace and an exact pre-1 ABI match.
 
 ### Standard library

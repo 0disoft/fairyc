@@ -61,7 +61,8 @@ scalars, data and function pointers, explicitly based C enums, fixed arrays, nes
 offsets, internal and tail padding, and fail-closed malformed or overflowing inputs. These are
 target-mechanics fixtures, not source-language aggregate support or native C ABI proof.
 A separate fail-closed Linux/amd64 command is now present to compile those cases with Clang and GCC
-at `-O0` and `-O2`, link the embedded scalar trap runtime, and compare process outcomes. It cannot run on
+at `-O0` and `-O2`, link a closed conformance runtime, and compare process outcomes plus exact
+source-linked resource-drop sequences. Product emission and product builds contain no trace observer. It cannot run on
 this Windows host because no WSL distribution or C compiler is installed, and its hosted CI result
 has not yet been observed. The target therefore remains unsupported.
 An unstable `fairyc experimental` CLI can inspect syntax, syntax-check, semantic-check, emit the

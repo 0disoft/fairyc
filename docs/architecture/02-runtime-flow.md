@@ -106,4 +106,7 @@ Early versions cache whole-package source fingerprints, interfaces, typed HIR, g
 - Backend or linker errors identify the boundary and preserve intermediates only when requested.
 - Cache entries are disposable and cannot be the only copy of source or specification data.
 - Differential fixtures compare interpreter and C output, status, trap category, and drop trace.
+- Drop comparison uses a closed native-conformance profile with deterministic source/type/span site
+  IDs. Product C emission and product-built artifacts never contain the observer or its binary
+  stderr records.
 - The C reference backend remains the recovery path for a failed experimental native backend.

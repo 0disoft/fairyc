@@ -63,6 +63,10 @@ Fairy source TLS, C TLS symbol import or export, C++ ABI, and foreign unwinding 
 
 The C compiler driver owns compilation, CRT startup objects, default libraries, and linking. The generated program uses a small C entry shim that calls `fn main() -> i32`. Stage 0 does not directly invoke `ld`, `lld`, or a native object writer.
 
+The native differential lane's `drop-trace-v0` observer and four-byte stderr records are
+conformance instrumentation, not a Fairy ABI, C ABI, runtime ABI, source-visible hook, or product
+artifact contract. Product C emission and product builds do not declare or link the observer.
+
 Debugging is delegated to generated-C `#line` directives and the C toolchain's DWARF output. Accurate Fairy local-variable and ownership-state debugging is not promised.
 
 ## `TargetSpec`

@@ -44,6 +44,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0032-resource-definition-preservation-and-empty-drop-gate.md`: ordered resource definitions across AST, HIR, and MIR with fail-closed empty-drop execution.
 - `0033-flat-i32-resource-c-transport.md`: target-laid-out private C11 transport for nonempty all-`i32` resources with empty drop bodies.
 - `0034-resource-tagged-c-transport.md`: private target-laid-out C11 transport for resource-bearing built-in tags and typed Result propagation.
+- `0035-native-drop-trace-differential.md`: closed source-linked drop instrumentation for exact interpreter-to-native C cleanup comparison without product-build observers.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

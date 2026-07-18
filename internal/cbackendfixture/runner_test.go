@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+
+	"github.com/0disoft/fairyc/internal/cbackend"
 )
 
 func TestCEmissionSchemaV0Header(t *testing.T) {
@@ -41,6 +44,19 @@ func TestCEmissionManifestV0(t *testing.T) {
 	}
 	if len(report.Emitted) != 17 {
 		t.Errorf("Run() emitted = %d, want 17", len(report.Emitted))
+	}
+	observedDrops := 0
+	for _, fixture := range report.Emitted {
+		if fixture.Unit.Instrumentation != "" || len(fixture.Unit.DropSites) != 0 || strings.Contains(fixture.Unit.Source, "fy_runtime_trace_drop") {
+			t.Errorf("%s production unit contains conformance instrumentation", fixture.ID)
+		}
+		if fixture.TraceUnit.Instrumentation != cbackend.InstrumentationDropTraceV0 || !strings.Contains(fixture.TraceUnit.Source, "fy_runtime_trace_drop") {
+			t.Errorf("%s has no closed drop-trace unit", fixture.ID)
+		}
+		observedDrops += len(fixture.DropTrace)
+	}
+	if observedDrops == 0 {
+		t.Error("C emission fixtures exercise no interpreter-approved resource drops")
 	}
 }
 

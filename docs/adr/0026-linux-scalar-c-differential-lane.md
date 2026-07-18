@@ -47,10 +47,12 @@ trap categories without pretending to be the final runtime ABI or console contra
    After those comparisons, the same command invokes the actual experimental build CLI for Clang
    and GCC under both profiles and executes each temporary product, requiring exit `42` and the
    exact relative-path build receipt.
-8. A successful command prints a deterministic `fairyc.native-c-report/v1` JSON report containing
+8. The original command prints a deterministic `fairyc.native-c-report/v1` JSON report containing
    target, glibc fingerprint, first-line compiler fingerprints, profile names, case identifiers,
-   fixture execution count, and product-build smoke count. It contains no temporary or absolute
+   fixture execution count, exact drop-trace execution count, and product-build smoke count. It contains no temporary or absolute
    path.
+   ADR 0035 changes the report shape to `fairyc.native-c-report/v2` when it adds the separate
+   `dropTraceExecutions` count.
 9. `.github/workflows/frontend.yml` owns the hosted Ubuntu invocation. The ordinary cross-platform
    Go job still compiles and unit-tests the runner without claiming native execution; the separate
    native job invokes the fail-closed command.
@@ -64,11 +66,12 @@ trap categories without pretending to be the final runtime ABI or console contra
 - The current Windows development host cannot run the native command because it has no registered
   WSL distribution or C compiler. Ordinary Go validation remains useful but is not substituted for
   native evidence.
-- Trap category identity becomes externally testable without mixing test markers into stdout or
-  stderr.
+- Trap category identity becomes externally testable through reserved process status. ADR 0035
+  later adds a closed binary stderr record only to instrumented native fixture units for exact
+  source-linked drop comparison; product emission and product builds remain marker-free.
 - The differential lane and experimental build now share compiler profiles and runtime source, so
   their transport cannot drift through duplicated plumbing.
-- Output comparison, negative and wide return values, resource drop traces, sanitizers, layouts,
+- Output comparison, negative and wide return values, user drop-body effects, sanitizers, layouts,
   bidirectional C ABI calls, and the product runtime remain later gates.
 
 ## Rejected alternatives

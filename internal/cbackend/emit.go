@@ -16,12 +16,15 @@ import (
 const (
 	// DialectC11 identifies the extension-free ISO C11 emission subset.
 	DialectC11 = "c11"
+	// InstrumentationDropTraceV0 identifies the closed native-conformance drop observer.
+	InstrumentationDropTraceV0 = "drop-trace-v0"
 )
 
-// Profile names the target and C dialect accepted by one emission run.
+// Profile names the target, C dialect, and closed instrumentation accepted by one emission run.
 type Profile struct {
-	Target  target.ID
-	Dialect string
+	Target          target.ID
+	Dialect         string
+	Instrumentation string
 }
 
 // Stage0Profile returns the only currently implemented C emission profile.
@@ -29,14 +32,33 @@ func Stage0Profile() Profile {
 	return Profile{Target: target.X8664LinuxGNU, Dialect: DialectC11}
 }
 
+// Stage0DropTraceProfile returns the native-conformance profile that observes compiler-owned drops.
+func Stage0DropTraceProfile() Profile {
+	return Profile{
+		Target: target.X8664LinuxGNU, Dialect: DialectC11,
+		Instrumentation: InstrumentationDropTraceV0,
+	}
+}
+
+// DropSite identifies one source-linked resource leaf that an instrumented drop may observe.
+type DropSite struct {
+	ID           uint32
+	ResourceType string
+	Source       string
+	StartByte    int
+	EndByte      int
+}
+
 // Unit is one deterministic generated-C translation unit plus bounded stage facts.
 type Unit struct {
-	Target    string
-	Dialect   string
-	Entry     string
-	Functions []string
-	Features  []string
-	Source    string
+	Target          string
+	Dialect         string
+	Instrumentation string
+	Entry           string
+	Functions       []string
+	Features        []string
+	DropSites       []DropSite
+	Source          string
 }
 
 // CapabilityError reports verified MIR outside the implemented C transport subset.
@@ -67,6 +89,9 @@ type emitter struct {
 	localTypes         []map[mir.LocalID]hir.Type
 	needsBitcast       bool
 	needsShift         bool
+	instrumentation    string
+	dropSites          []DropSite
+	dropSiteByKey      map[dropSiteKey]uint32
 }
 
 type resourceCType struct {
@@ -78,8 +103,11 @@ type resourceCType struct {
 
 // Emit verifies MIR, rejects unsupported semantic families, and emits one deterministic C unit.
 func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
-	if profile != Stage0Profile() {
-		return Unit{}, fmt.Errorf("unsupported C emission profile target=%q dialect=%q", profile.Target, profile.Dialect)
+	if profile != Stage0Profile() && profile != Stage0DropTraceProfile() {
+		return Unit{}, fmt.Errorf(
+			"unsupported C emission profile target=%q dialect=%q instrumentation=%q",
+			profile.Target, profile.Dialect, profile.Instrumentation,
+		)
 	}
 	if failures := mir.Verify(program); len(failures) != 0 {
 		return Unit{}, fmt.Errorf("C emission requires verified MIR: %s at %s", failures[0].Code, failures[0].Entity)
@@ -117,6 +145,7 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 		trapCategories:     make(map[string]struct{}),
 		dynamicTrapTargets: make(map[int]map[mir.BlockID]struct{}),
 		localTypes:         make([]map[mir.LocalID]hir.Type, len(functions)),
+		instrumentation:    profile.Instrumentation,
 	}
 	if len(resourceTypes) != 0 {
 		value.features["flat-i32-resource"] = struct{}{}
@@ -161,6 +190,9 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 			return Unit{}, err
 		}
 	}
+	if err := value.prepareDropTraceSites(); err != nil {
+		return Unit{}, err
+	}
 
 	var output strings.Builder
 	if err := value.emitPreamble(&output); err != nil {
@@ -189,8 +221,9 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	}
 	slices.Sort(features)
 	return Unit{
-		Target: string(profile.Target), Dialect: profile.Dialect, Entry: entry,
-		Functions: names, Features: features, Source: output.String(),
+		Target: string(profile.Target), Dialect: profile.Dialect, Instrumentation: profile.Instrumentation,
+		Entry: entry, Functions: names, Features: features,
+		DropSites: slices.Clone(value.dropSites), Source: output.String(),
 	}, nil
 }
 
@@ -918,6 +951,9 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 	if err := e.emitResourceTaggedTypes(output); err != nil {
 		return err
 	}
+	if e.instrumentation == InstrumentationDropTraceV0 {
+		output.WriteString("void fy_runtime_trace_drop(uint32_t site_id);\n\n")
+	}
 	if len(e.trapCategories) != 0 {
 		categories := make([]string, 0, len(e.trapCategories))
 		for category := range e.trapCategories {
@@ -1058,8 +1094,15 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			return fmt.Errorf("resource field read in %s: %w", function, err)
 		}
 		fmt.Fprintf(output, "    fy_l_%d = (%s).f_%d;\n", operation.DestinationLocal, value, fieldIndex)
-	case mir.OperationMove, mir.OperationDrop:
+	case mir.OperationMove:
 		fmt.Fprintf(output, "    (void)fy_l_%d;\n", operation.Symbol)
+	case mir.OperationDrop:
+		fmt.Fprintf(output, "    (void)fy_l_%d;\n", operation.Symbol)
+		if e.instrumentation == InstrumentationDropTraceV0 {
+			if err := e.emitDropTrace(output, functionIndex, operation); err != nil {
+				return fmt.Errorf("drop trace in %s: %w", function, err)
+			}
+		}
 	case mir.OperationUnary:
 		operand, err := oneOperand(operation.Operands)
 		if err != nil {

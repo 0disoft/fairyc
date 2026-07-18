@@ -62,13 +62,16 @@ Exit gate: positive and negative fixtures agree with the source contracts, resou
 
 Current implementation status: a fail-closed Linux/amd64 constrained-C differential command now
 requires glibc, Clang, and GCC and is wired into a separate hosted Ubuntu CI job. It is designed to
-run all 17 emission cases at low and optimized profiles for 68 process-status comparisons, then drive
+run all 17 emission cases at low and optimized profiles for 68 process-status and exact
+source-linked drop-trace comparisons, then drive
 the actual experimental build CLI with resource-bearing Option and Result plus a flat all-`i32` resource
 through 4 compiler/profile executable
 smokes. The current Windows
 host has no eligible Linux toolchain, and no hosted run receipt has been observed, so this is a
 configured lane rather than native conformance evidence. A shared bounded C driver and embedded
-scalar runtime now serve both that lane and the experimental single-file build command. This proves
+scalar runtime serve both that lane and the experimental single-file build command, while a separate
+closed conformance runtime records four-byte drop-site IDs only for the native matrix. Product C and
+product-built artifacts contain no observer. This proves
 the product wiring exists, not that runtime, ABI, or target-conformance gates pass.
 The first executable `fairyc.target-spec/v0` now centralizes host-independent LP64 scalar and
 pointer layouts, SysV AMD64 calling and stack identities, ELF/DWARF identities, C-layout feature

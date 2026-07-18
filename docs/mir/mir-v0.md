@@ -138,4 +138,6 @@ and offset assertions. Tagged construction and payload operations carry their co
 the backend. Result propagation extracts the error and reconstructs the enclosing function's
 declared Result type before cleanup; it never returns a differently typed operand container. That
 runner stops at C text and therefore is backend emission evidence, not native differential or
-cleanup-trace evidence.
+cleanup-trace evidence. The separate Linux runner re-emits the same verified MIR with a closed
+`drop-trace-v0` observer profile and compares exact source/type/span site sequences with the
+interpreter; product emission remains uninstrumented and hosted execution is still unobserved.

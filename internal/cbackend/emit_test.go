@@ -322,6 +322,52 @@ fn main() -> i32 {
 	}
 }
 
+func TestEmitDropTraceProfileKeepsInstrumentationClosed(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+resource Token {
+    value: i32;
+    drop fn(self: &mut Self) {}
+}
+fn main() -> i32 {
+    let direct: Token = Token { value: 1 };
+    discard direct;
+    let wrapped: Option<Token> = Option::Some(Token { value: 2 });
+    discard wrapped;
+    42
+}
+`)
+	production, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("production Emit() error = %v", err)
+	}
+	if production.Instrumentation != "" || len(production.DropSites) != 0 || strings.Contains(production.Source, "fy_runtime_trace_drop") {
+		t.Fatalf("production unit contains conformance instrumentation: %+v", production)
+	}
+	instrumented, err := cbackend.Emit(program, "main::main", cbackend.Stage0DropTraceProfile())
+	if err != nil {
+		t.Fatalf("instrumented Emit() error = %v", err)
+	}
+	if instrumented.Instrumentation != cbackend.InstrumentationDropTraceV0 || len(instrumented.DropSites) != 2 {
+		t.Fatalf("instrumented unit = %+v", instrumented)
+	}
+	for index, site := range instrumented.DropSites {
+		if site.ID != uint32(index) || site.ResourceType != "main::Token" || site.Source != "main.fy" || site.StartByte >= site.EndByte {
+			t.Errorf("drop site %d = %+v", index, site)
+		}
+	}
+	for _, required := range []string{
+		"void fy_runtime_trace_drop(uint32_t site_id);",
+		"fy_runtime_trace_drop(UINT32_C(0));",
+		"if (fy_l_",
+		".tag == FY_OPTION_SOME) { fy_runtime_trace_drop(UINT32_C(1)); }",
+	} {
+		if !strings.Contains(instrumented.Source, required) {
+			t.Errorf("instrumented C is missing %q", required)
+		}
+	}
+}
+
 func TestEmitRejectsMalformedScalarDestination(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main;\nfn main() -> i32 { let unused: i32 = 1; 42 }\n")
@@ -363,6 +409,11 @@ func TestEmitRejectsUnverifiedMIRAndUnknownProfile(t *testing.T) {
 	program := lowerSource(t, "module main;\nfn main() -> i32 { 0 }\n")
 	if _, err := cbackend.Emit(program, "main::main", cbackend.Profile{Target: "host", Dialect: cbackend.DialectC11}); err == nil || !strings.Contains(err.Error(), "unsupported C emission profile") {
 		t.Fatalf("Emit(profile) error = %v", err)
+	}
+	invalidInstrumentation := cbackend.Stage0Profile()
+	invalidInstrumentation.Instrumentation = "unbounded-observer"
+	if _, err := cbackend.Emit(program, "main::main", invalidInstrumentation); err == nil || !strings.Contains(err.Error(), "unsupported C emission profile") {
+		t.Fatalf("Emit(instrumentation) error = %v", err)
 	}
 }
 

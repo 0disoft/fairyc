@@ -70,6 +70,11 @@ Machine-readable diagnostic JSON has its own schema. Stable fields are code, sev
 
 Semantic, resource, Region, Result, MIR, MIR-verifier, and package fixture manifests are repository test contracts, not the released diagnostic JSON schema, a stable MIR exchange format, or a public package-manager format. Their related-span roles and canonical fact shapes may change only through a new fixture schema version plus synchronized cases. `fairyc.region-fixtures/v1` adds an optional resolved-package-graph reference while preserving v0 span and expectation shapes; v0 remains readable historical input.
 
+The native differential report is also a repository evidence contract rather than released compiler
+output. `fairyc.native-c-report/v2` supersedes v1 by adding the required
+`dropTraceExecutions` count; the runner emits one exact version and does not pretend the two report
+shapes are interchangeable.
+
 ## Runtime and standard library
 
 Pre-1 runtime ABI uses an exact match. Runtime helper symbols carry an ABI-major suffix. The driver diagnoses an incompatibility before invoking the linker.

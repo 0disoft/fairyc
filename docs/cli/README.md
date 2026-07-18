@@ -45,7 +45,8 @@ left shift is rejected as `E1011`; loop control without an enclosing `while` is 
 It does not discover files, execute user drop bodies, implement effects, or provide host I/O.
 `experimental emit-c` runs the same verified-MIR entry pipeline and writes one raw constrained C11
 translation unit to stdout. It does not write an artifact, invoke a C toolchain, link, or run native
-code.
+code. The native fixture lane's `drop-trace-v0` observer profile is not available through this
+command and never appears in its output.
 `experimental build` sends that exact constrained-C unit through the shared bounded C driver and embedded
 runtime. It has no implicit compiler, optimization, or output choice; requires Linux/amd64 with
 glibc; accepts only Clang or GCC and the closed `low` or `optimized` profiles; and creates a new
@@ -53,6 +54,7 @@ executable only under the source root's ignored `build/` directory. It neither o
 existing path nor implements empty, non-`i32`, nested, partially initialized, or nonempty-drop
 resources; nested tags or resource tags outside the exact `i32`/direct-resource payload gate; the broader interpreter subset; native execution;
 package builds; cross-compilation; installation; or a supported target.
+The resulting product artifact is uninstrumented; the native fixture recorder is not linked.
 `experimental target-spec` emits `fairyc.target-spec/v0` JSON without probing the host or exposing
 local tool paths. Its current scalar, flat-resource, and resource-tagged emission subset is reported separately from the false
 `emittable`, `conformant`, and `supported` target states and their missing evidence.
