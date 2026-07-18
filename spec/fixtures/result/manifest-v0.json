@@ -2,13 +2,14 @@
   "$schema": "./schema-v0.json",
   "schemaVersion": "fairyc.result-fixtures/v0",
   "deferred": [
-    "resource payload construction and runtime drop traces until variant constructors and MIR execution exist",
-    "qualified Result construction and match in the MIR interpreter until tagged execution exists"
+    "cross-package public must-use summaries until package interfaces exist",
+    "backend tagged layout identity until the first code-generation contract"
   ],
   "contracts": [
     "docs/product/02-spec.md",
     "docs/adr/0012-stage-0-region-and-result-fixture-contracts.md",
     "docs/adr/0017-stage-0-result-constructors-and-match.md",
+    "docs/adr/0019-stage-0-result-must-use-dataflow.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/drop-elaboration-v0.md",
     "docs/diagnostics/catalog-v0.md"
@@ -130,6 +131,168 @@
       }
     },
     {
+      "id": "pass.flow.stored-discard",
+      "sourceRoot": "cases/pass/stored-discard/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow",
+        "handling": [
+          {
+            "expression": {
+              "source": "main.fy",
+              "startByte": 98,
+              "endByte": 105
+            },
+            "mode": "discard",
+            "resultType": "Result<i32, i32>",
+            "successType": "i32",
+            "errorType": "i32",
+            "evaluationCount": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.flow.branch-all-handled",
+      "sourceRoot": "cases/pass/branch-all-handled/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow",
+        "handling": [
+          {
+            "expression": {
+              "source": "main.fy",
+              "startByte": 99,
+              "endByte": 104
+            },
+            "mode": "discard",
+            "resultType": "Result<i32, i32>",
+            "successType": "i32",
+            "errorType": "i32",
+            "evaluationCount": 1
+          },
+          {
+            "expression": {
+              "source": "main.fy",
+              "startByte": 135,
+              "endByte": 140
+            },
+            "mode": "discard",
+            "resultType": "Result<i32, i32>",
+            "successType": "i32",
+            "errorType": "i32",
+            "evaluationCount": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.flow.transfer-parameter",
+      "sourceRoot": "cases/pass/transfer-parameter/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow",
+        "handling": [
+          {
+            "expression": {
+              "source": "main.fy",
+              "startByte": 71,
+              "endByte": 76
+            },
+            "mode": "discard",
+            "resultType": "Result<i32, i32>",
+            "successType": "i32",
+            "errorType": "i32",
+            "evaluationCount": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.flow.branch-produced-local",
+      "sourceRoot": "cases/pass/branch-produced-local/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow",
+        "handling": [
+          {
+            "expression": {
+              "source": "main.fy",
+              "startByte": 168,
+              "endByte": 175
+            },
+            "mode": "discard",
+            "resultType": "Result<i32, i32>",
+            "successType": "i32",
+            "errorType": "i32",
+            "evaluationCount": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.flow.local-transfer",
+      "sourceRoot": "cases/pass/local-transfer/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow",
+        "handling": [
+          {
+            "expression": {
+              "source": "main.fy",
+              "startByte": 114,
+              "endByte": 123
+            },
+            "mode": "discard",
+            "resultType": "Result<i32, i32>",
+            "successType": "i32",
+            "errorType": "i32",
+            "evaluationCount": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.flow.handled-reassignment",
+      "sourceRoot": "cases/pass/handled-reassignment/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow",
+        "handling": [
+          {
+            "expression": {
+              "source": "main.fy",
+              "startByte": 97,
+              "endByte": 104
+            },
+            "mode": "discard",
+            "resultType": "Result<i32, i32>",
+            "successType": "i32",
+            "errorType": "i32",
+            "evaluationCount": 1
+          },
+          {
+            "expression": {
+              "source": "main.fy",
+              "startByte": 147,
+              "endByte": 154
+            },
+            "mode": "discard",
+            "resultType": "Result<i32, i32>",
+            "successType": "i32",
+            "errorType": "i32",
+            "evaluationCount": 1
+          }
+        ]
+      }
+    },
+    {
       "id": "fail.flow.unused-result",
       "sourceRoot": "cases/fail/unused-result/src",
       "sources": ["main.fy"],
@@ -143,6 +306,126 @@
               "source": "main.fy",
               "startByte": 93,
               "endByte": 98
+            },
+            "related": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.stored-unhandled",
+      "sourceRoot": "cases/fail/stored-unhandled/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "flow",
+        "diagnostics": [
+          {
+            "code": "E4101",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 72,
+              "endByte": 86
+            },
+            "related": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.parameter-unhandled",
+      "sourceRoot": "cases/fail/parameter-unhandled/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "flow",
+        "diagnostics": [
+          {
+            "code": "E4101",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 25,
+              "endByte": 30
+            },
+            "related": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.overwrite-unhandled",
+      "sourceRoot": "cases/fail/overwrite-unhandled/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "flow",
+        "diagnostics": [
+          {
+            "code": "E4101",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 72,
+              "endByte": 85
+            },
+            "related": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.branch-partial-handle",
+      "sourceRoot": "cases/fail/branch-partial-handle/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "flow",
+        "diagnostics": [
+          {
+            "code": "E4101",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 25,
+              "endByte": 30
+            },
+            "related": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.loop-overwrite",
+      "sourceRoot": "cases/fail/loop-overwrite/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "flow",
+        "diagnostics": [
+          {
+            "code": "E4101",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 153,
+              "endByte": 166
+            },
+            "related": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.early-return-unhandled",
+      "sourceRoot": "cases/fail/early-return-unhandled/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "flow",
+        "diagnostics": [
+          {
+            "code": "E4101",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 82,
+              "endByte": 96
             },
             "related": []
           }

@@ -17,6 +17,17 @@ Fairy C evaluates expression operands, aggregate fields, and call arguments from
 
 The explicit discard spelling is `discard expression;`. Discarding `Option` or `Result` drops only the active payload. A restricted user enum cannot contain a resource payload in Stage 0.
 
+Every evaluated Result carries one must-use obligation. Storing it transfers that obligation to the
+destination local, and passing it by value transfers the obligation to the callee's Result
+parameter. Result parameters therefore begin pending. Return, `discard`, exhaustive Result match,
+and `?` discharge the obligation; assignment cannot silently discharge the previous destination.
+
+Any pending obligation at a normal scope exit, function exit, earlier return edge, or overwrite is
+`E4101`. A branch join is pending when any reachable incoming path is pending. Loop analysis covers
+zero iterations and repeated back edges, so a value produced by one iteration cannot be overwritten
+by the next. These rules do not make every Result move-only: copyability still follows the payload,
+but every new Result evaluation must occupy a handling or transfer position.
+
 Stage 0 constructs Option variants with compiler-known qualified forms:
 
 ```fy

@@ -1,64 +1,362 @@
 package semantic
 
 import (
+	"slices"
+
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/syntax"
 )
 
+type resultUseKind uint8
+
+const (
+	resultUseIgnore resultUseKind = iota
+	resultUseStore
+	resultUseTransfer
+	resultUseUnhandled
+	resultUseHandled
+)
+
+type resultUse struct {
+	kind resultUseKind
+	mode string
+}
+
+type resultObligation struct {
+	pending   bool
+	producers []hir.Span
+}
+
+type resultEnvironment map[*symbol]resultObligation
+
+type resultBranch struct {
+	environment resultEnvironment
+	reachable   bool
+}
+
 func (a *analyzer) resultFlowFunction(module *moduleScope, function *ast.Function) {
 	if function.Body == nil {
 		return
 	}
-	a.resultFlowBlock(module, function.Body, true)
+	environment := make(resultEnvironment)
+	for index := range function.Parameters {
+		parameter := &function.Parameters[index]
+		value := a.parameter[parameter]
+		if value == nil || !isResultType(value.typ) {
+			continue
+		}
+		environment[value] = pendingResult(span(module.file.Path, parameter.NameSpan))
+	}
+	a.resultFlowBlock(module, function.Body, environment, resultUse{kind: resultUseHandled, mode: "return"}, true)
 }
 
-func (a *analyzer) resultFlowBlock(module *moduleScope, block *ast.Block, functionBody bool) {
+func (a *analyzer) resultFlowBlock(module *moduleScope, block *ast.Block, environment resultEnvironment, tailUse resultUse, functionBody bool) bool {
 	if block == nil {
-		return
+		return true
 	}
+	locals := make([]*symbol, 0)
+	reachable := true
 	for index := range block.Statements {
+		if !reachable {
+			break
+		}
 		statement := &block.Statements[index]
 		switch statement.Kind {
+		case syntax.KindBinding:
+			binding := statement.Binding
+			if binding == nil {
+				continue
+			}
+			a.resultFlowExpression(module, binding.Expression, environment, resultUse{kind: resultUseStore})
+			value := a.bindingSymbols[binding]
+			if value != nil && isResultType(value.typ) {
+				producer := span(module.file.Path, binding.NameSpan)
+				if binding.Expression != nil {
+					producer = span(module.file.Path, binding.Expression.Span)
+				}
+				environment[value] = pendingResult(producer)
+				locals = append(locals, value)
+			}
 		case syntax.KindReturn:
-			a.recordResultHandling(module, statement.Expression, "return")
+			a.resultFlowExpression(module, statement.Expression, environment, resultUse{kind: resultUseHandled, mode: "return"})
+			a.reportPendingResults(environment)
+			reachable = false
 		case syntax.KindDiscard:
-			a.recordResultHandling(module, statement.Expression, "discard")
+			a.resultFlowExpression(module, statement.Expression, environment, resultUse{kind: resultUseHandled, mode: "discard"})
 		case syntax.KindExprStmt:
-			if _, _, ok := hir.ResultElements(a.expressionTypes[statement.Expression]); ok {
-				a.addDiagnostic("E4101", span(module.file.Path, statement.Expression.Span))
+			a.resultFlowExpression(module, statement.Expression, environment, resultUse{kind: resultUseUnhandled})
+		case syntax.KindAssignment:
+			a.resultFlowExpression(module, statement.Expression, environment, resultUse{kind: resultUseStore})
+			target := a.resolved[statement.Target]
+			if target != nil && isResultType(target.typ) {
+				a.reportResultObligation(environment[target])
+				producer := span(module.file.Path, statement.Span)
+				if statement.Expression != nil {
+					producer = span(module.file.Path, statement.Expression.Span)
+				}
+				environment[target] = pendingResult(producer)
+			}
+		case syntax.KindWhile:
+			reachable = a.resultFlowWhile(module, statement.Expression, environment)
+		case syntax.KindRegion:
+			reachable = a.resultFlowRegion(module, statement.Expression, environment)
+		default:
+			a.resultFlowExpression(module, statement.Expression, environment, resultUse{kind: resultUseIgnore})
+		}
+	}
+	if reachable && block.Tail != nil {
+		reachable = a.resultFlowExpression(module, block.Tail, environment, tailUse)
+	}
+	if functionBody && reachable {
+		a.reportPendingResults(environment)
+		reachable = false
+	} else if reachable {
+		for _, local := range locals {
+			a.reportResultObligation(environment[local])
+		}
+	}
+	for _, local := range locals {
+		delete(environment, local)
+	}
+	return reachable
+}
+
+func (a *analyzer) resultFlowExpression(module *moduleScope, expression *ast.Expression, environment resultEnvironment, use resultUse) bool {
+	if expression == nil {
+		return true
+	}
+	switch expression.Kind {
+	case syntax.KindPropagate:
+		a.recordPropagateHandling(module, expression)
+		if len(expression.Children) == 1 {
+			a.resultFlowExpression(module, expression.Children[0], environment, resultUse{kind: resultUseTransfer})
+		}
+		return true
+	case syntax.KindIf:
+		return a.resultFlowIf(module, expression, environment, use)
+	case syntax.KindMatch:
+		return a.resultFlowMatch(module, expression, environment, use)
+	case syntax.KindWhile:
+		return a.resultFlowWhile(module, expression, environment)
+	case syntax.KindRegion:
+		return a.resultFlowRegion(module, expression, environment)
+	case syntax.KindBlock:
+		childUse := a.applyResultUse(module, expression, environment, use)
+		return a.resultFlowBlock(module, expression.Block, environment, childUse, false)
+	case syntax.KindGroup:
+		childUse := a.applyResultUse(module, expression, environment, use)
+		if len(expression.Children) == 1 {
+			return a.resultFlowExpression(module, expression.Children[0], environment, childUse)
+		}
+		return true
+	case syntax.KindCall:
+		for _, argument := range expression.Children[1:] {
+			a.resultFlowExpression(module, argument, environment, resultUse{kind: resultUseTransfer})
+		}
+		a.applyResultUse(module, expression, environment, use)
+		return true
+	case syntax.KindRecord:
+		for _, field := range expression.Children[1:] {
+			for _, value := range field.Children {
+				a.resultFlowExpression(module, value, environment, resultUse{kind: resultUseTransfer})
 			}
 		}
-		if statement.Binding != nil {
-			a.scanResultPropagates(module, statement.Binding.Expression)
+		a.applyResultUse(module, expression, environment, use)
+		return true
+	case syntax.KindPath:
+		a.applyResultUse(module, expression, environment, use)
+		return true
+	default:
+		for _, child := range expression.Children {
+			a.resultFlowExpression(module, child, environment, resultUse{kind: resultUseIgnore})
 		}
-		a.scanResultPropagates(module, statement.Target)
-		a.scanResultPropagates(module, statement.Expression)
-	}
-	if block.Tail != nil {
-		if functionBody {
-			a.recordResultHandling(module, block.Tail, "return")
-		}
-		a.scanResultPropagates(module, block.Tail)
+		a.applyResultUse(module, expression, environment, use)
+		return true
 	}
 }
 
-func (a *analyzer) scanResultPropagates(module *moduleScope, expression *ast.Expression) {
-	if expression == nil {
+func (a *analyzer) resultFlowIf(module *moduleScope, expression *ast.Expression, environment resultEnvironment, use resultUse) bool {
+	if len(expression.Children) < 2 {
+		return true
+	}
+	a.resultFlowExpression(module, expression.Children[0], environment, resultUse{kind: resultUseIgnore})
+	branchUse := a.applyResultUse(module, expression, environment, use)
+	baseline := cloneResultEnvironment(environment)
+	branches := make([]resultBranch, 0, 2)
+	thenEnvironment := cloneResultEnvironment(baseline)
+	branches = append(branches, resultBranch{
+		environment: thenEnvironment,
+		reachable:   a.resultFlowExpression(module, expression.Children[1], thenEnvironment, branchUse),
+	})
+	if len(expression.Children) == 2 {
+		branches = append(branches, resultBranch{environment: cloneResultEnvironment(baseline), reachable: true})
+	} else {
+		elseEnvironment := cloneResultEnvironment(baseline)
+		branches = append(branches, resultBranch{
+			environment: elseEnvironment,
+			reachable:   a.resultFlowExpression(module, expression.Children[2], elseEnvironment, branchUse),
+		})
+	}
+	return mergeResultBranches(environment, baseline, branches)
+}
+
+func (a *analyzer) resultFlowMatch(module *moduleScope, expression *ast.Expression, environment resultEnvironment, use resultUse) bool {
+	if len(expression.Children) < 2 {
+		return true
+	}
+	a.resultFlowExpression(module, expression.Children[0], environment, resultUse{kind: resultUseHandled, mode: "match"})
+	branchUse := a.applyResultUse(module, expression, environment, use)
+	baseline := cloneResultEnvironment(environment)
+	branches := make([]resultBranch, 0, len(expression.Children)-1)
+	for _, arm := range expression.Children[1:] {
+		branchEnvironment := cloneResultEnvironment(baseline)
+		var binding *symbol
+		var body *ast.Expression
+		if arm != nil && arm.Kind == syntax.KindPattern && len(arm.Children) == 2 {
+			pattern := arm.Children[0]
+			body = arm.Children[1]
+			if pattern != nil && pattern.Kind == syntax.KindPattern && len(pattern.Children) == 2 {
+				binding = a.resolved[pattern.Children[1]]
+				if binding != nil && isResultType(binding.typ) {
+					branchEnvironment[binding] = pendingResult(span(module.file.Path, pattern.Children[1].Span))
+				}
+			}
+		}
+		reachable := a.resultFlowExpression(module, body, branchEnvironment, branchUse)
+		if binding != nil {
+			if reachable {
+				a.reportResultObligation(branchEnvironment[binding])
+			}
+			delete(branchEnvironment, binding)
+		}
+		branches = append(branches, resultBranch{environment: branchEnvironment, reachable: reachable})
+	}
+	return mergeResultBranches(environment, baseline, branches)
+}
+
+func (a *analyzer) resultFlowWhile(module *moduleScope, expression *ast.Expression, environment resultEnvironment) bool {
+	if expression == nil || len(expression.Children) != 2 {
+		return true
+	}
+	a.resultFlowExpression(module, expression.Children[0], environment, resultUse{kind: resultUseIgnore})
+	baseline := cloneResultEnvironment(environment)
+	bodyEnvironment := cloneResultEnvironment(baseline)
+	bodyReachable := a.resultFlowExpression(module, expression.Children[1], bodyEnvironment, resultUse{kind: resultUseIgnore})
+	branches := []resultBranch{{environment: cloneResultEnvironment(baseline), reachable: true}}
+	if bodyReachable {
+		branches = append(branches, resultBranch{environment: bodyEnvironment, reachable: true})
+		secondEnvironment := cloneResultEnvironment(bodyEnvironment)
+		secondReachable := a.resultFlowExpression(module, expression.Children[1], secondEnvironment, resultUse{kind: resultUseIgnore})
+		if secondReachable {
+			branches = append(branches, resultBranch{environment: secondEnvironment, reachable: true})
+		}
+	}
+	mergeResultBranches(environment, baseline, branches)
+	return true
+}
+
+func (a *analyzer) resultFlowRegion(module *moduleScope, expression *ast.Expression, environment resultEnvironment) bool {
+	if expression == nil || len(expression.Children) != 2 {
+		return true
+	}
+	a.resultFlowExpression(module, expression.Children[0], environment, resultUse{kind: resultUseIgnore})
+	return a.resultFlowExpression(module, expression.Children[1], environment, resultUse{kind: resultUseIgnore})
+}
+
+func (a *analyzer) applyResultUse(module *moduleScope, expression *ast.Expression, environment resultEnvironment, use resultUse) resultUse {
+	if expression == nil || !isResultType(a.expressionTypes[expression]) {
+		return resultUse{kind: resultUseIgnore}
+	}
+	if expression.Kind == syntax.KindPath {
+		if value := a.resolved[expression]; value != nil {
+			obligation := environment[value]
+			obligation.pending = false
+			obligation.producers = nil
+			environment[value] = obligation
+		}
+	}
+	switch use.kind {
+	case resultUseHandled:
+		a.recordResultHandling(module, expression, use.mode)
+	case resultUseUnhandled, resultUseIgnore:
+		a.addDiagnostic("E4101", span(module.file.Path, expression.Span))
+	}
+	return resultUse{kind: resultUseTransfer}
+}
+
+func (a *analyzer) reportPendingResults(environment resultEnvironment) {
+	for _, obligation := range environment {
+		a.reportResultObligation(obligation)
+	}
+}
+
+func (a *analyzer) reportResultObligation(obligation resultObligation) {
+	if !obligation.pending {
 		return
 	}
-	if expression.Kind == syntax.KindPropagate {
-		a.recordPropagateHandling(module, expression)
+	for _, producer := range obligation.producers {
+		a.addDiagnostic("E4101", producer)
 	}
-	if expression.Kind == syntax.KindMatch && len(expression.Children) > 0 {
-		a.recordResultHandling(module, expression.Children[0], "match")
+}
+
+func pendingResult(producer hir.Span) resultObligation {
+	return resultObligation{pending: true, producers: []hir.Span{producer}}
+}
+
+func cloneResultEnvironment(input resultEnvironment) resultEnvironment {
+	result := make(resultEnvironment, len(input))
+	for value, obligation := range input {
+		obligation.producers = slices.Clone(obligation.producers)
+		result[value] = obligation
 	}
-	if expression.Block != nil {
-		a.resultFlowBlock(module, expression.Block, false)
+	return result
+}
+
+func mergeResultBranches(target, baseline resultEnvironment, branches []resultBranch) bool {
+	reachable := false
+	for _, branch := range branches {
+		reachable = reachable || branch.reachable
 	}
-	for _, child := range expression.Children {
-		a.scanResultPropagates(module, child)
+	for value, before := range baseline {
+		merged := resultObligation{}
+		for _, branch := range branches {
+			if !branch.reachable {
+				continue
+			}
+			actual, found := branch.environment[value]
+			if !found {
+				actual = before
+			}
+			if actual.pending {
+				merged.pending = true
+				merged.producers = appendUniqueResultProducers(merged.producers, actual.producers...)
+			}
+		}
+		target[value] = merged
 	}
+	return reachable
+}
+
+func appendUniqueResultProducers(target []hir.Span, values ...hir.Span) []hir.Span {
+	for _, value := range values {
+		duplicate := false
+		for _, existing := range target {
+			if compareSpan(existing, value) == 0 {
+				duplicate = true
+				break
+			}
+		}
+		if !duplicate {
+			target = append(target, value)
+		}
+	}
+	return target
+}
+
+func isResultType(value hir.Type) bool {
+	_, _, ok := hir.ResultElements(value)
+	return ok
 }
 
 func (a *analyzer) recordResultHandling(module *moduleScope, expression *ast.Expression, mode string) {

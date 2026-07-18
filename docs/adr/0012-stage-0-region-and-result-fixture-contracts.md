@@ -38,3 +38,5 @@ Separate schemas keep a Region origin from being confused with a `Result` payloa
 ## Revisit conditions
 
 Add or version these Flow fixtures when public `Arena` construction spelling is accepted or a required ownership assertion cannot be expressed without MIR control-flow identity. Qualified Result syntax and resource-bearing built-in payload traces are now owned by their later ADRs and MIR/interpreter manifests.
+Local, parameter, branch, loop, overwrite, and early-exit Result obligations are extended within the
+same assertion schema by ADR 0019.

@@ -35,7 +35,7 @@ Usage:
   fairyc --help
 
 The experimental commands are unstable. The reserved "fairyc check" command is not implemented
-until the remaining tagged-resource, must-use, and effect analysis groups exist.
+until the remaining Region-runtime, effect, and later semantic analysis groups exist.
 `
 
 // Run executes one bounded command without reading global process arguments or exiting the process.

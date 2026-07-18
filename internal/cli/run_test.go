@@ -208,6 +208,22 @@ func TestExperimentalCheckSemanticsReportsQuestionOnNonResult(t *testing.T) {
 	}
 }
 
+func TestExperimentalCheckSemanticsReportsStoredUnusedResult(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", `module main;
+fn invalid() -> i32 {
+    let pending: Result<i32, i32> = Result::Ok(42);
+    0
+}
+`)
+	code, stdout, stderr := runForTest([]string{"experimental", "check-semantics", "main.fy"}, root)
+	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "main.fy:3:") ||
+		!strings.Contains(stderr, "E4101: Result value must be returned, propagated, matched, or explicitly discarded") {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
 func TestExperimentalRunInterpretsScalarProgram(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()

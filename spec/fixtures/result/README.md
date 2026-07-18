@@ -9,3 +9,9 @@ qualified `Result::Ok(expression)` and `Result::Err(expression)` forms accepted 
 shallow matching assertions without changing this Flow schema. Active resource-payload moves and
 cleanup traces are proved by the MIR and interpreter manifests; backend representation remains a
 later code-generation contract.
+
+The expanded v0 set treats Result locals and parameters as pending obligations. It proves transfer
+into locals and callees, all-branch handling, branch-produced values, rejection at scope and early
+return exits, rejection before overwrite, and repeated-loop overwrite detection. These observations
+remain source spans and terminal handling facts; internal Flow block or state identities are not
+serialized.

@@ -14,7 +14,7 @@ The current Go prototype implements four deliberately unstable developer command
 | --- | --- | --- |
 | `fairyc experimental parse <file.fy>` | Parse one source-root-relative file and verify lossless syntax plus error-free AST lowering | `fairyc.experimental.parse/v0` JSON on stdout, defined by `spec/cli/experimental-parse-v0.schema.json` |
 | `fairyc experimental check-syntax <file.fy>` | Check lexing, parsing, recovery, module identity, lossless reconstruction, and error-free AST lowering | Success line on stdout or human diagnostics on stderr |
-| `fairyc experimental check-semantics <file.fy> [<file.fy>...]` | Resolve names, type-check, and analyze local safe-borrow, whole-resource, Region, and initial must-use Result Flow for an explicit module set in the implemented subset | Typed-HIR module and function counts on stdout, human source diagnostics on stderr, or an explicit unsupported-subset error |
+| `fairyc experimental check-semantics <file.fy> [<file.fy>...]` | Resolve names, type-check, and analyze local safe-borrow, whole-resource, Region, and complete Stage 0 Result must-use Flow for an explicit module set in the implemented subset | Typed-HIR module and function counts on stdout, human source diagnostics on stderr, or an explicit unsupported-subset error |
 | `fairyc experimental run <file.fy>` | Run one verified-MIR program in the scalar, tagged, and whole-resource subset whose selected module declares `main() -> i32` | `result: <i32>` on stdout, a canonical trap category on stderr, source diagnostics, or an explicit unsupported-subset error |
 
 These commands treat the current directory as their temporary source root. `parse` and
@@ -45,7 +45,7 @@ or reclassifying it as a language trap. User drop-body effects, Region reset, I/
 multi-file run input remain outside the current interpreter subset.
 
 `fairyc check` remains unimplemented. It must not be aliased to `check-syntax`, because the planned
-command below also requires complete must-use dataflow, effects, and later semantic groups beyond
+command below also requires effects and later semantic groups beyond
 the current Flow prototype.
 
 ## Stage 0 surface

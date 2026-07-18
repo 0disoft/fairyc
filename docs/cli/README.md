@@ -27,14 +27,15 @@ spelling and numeric exit codes may change. `check-semantics` resolves names and
 for an explicit bounded module set in the implemented scalar, safe-borrow, whole-resource, Region, and Result subset.
 It checks local last-use loans, borrow conflicts, borrow return origins, whole moves, cleanup states,
 branch joins, loop back-edges, Region parameter origins, `place`, and lexical Region escape when its
-Arena provider is included explicitly. It also checks the fixture-backed Result return, discard,
-propagation, must-use, and error-compatibility boundary. `experimental run` executes the selected
+Arena provider is included explicitly. It also checks Result return, discard, propagation, local
+and parameter transfer, branch and loop obligations, overwrite and early-return rejection, and
+error compatibility. `experimental run` executes the selected
 module's zero-argument `main() -> i32` through verified MIR, including boolean `if`,
 short-circuit control, scalar `while`, whole resources, resource-bearing built-in tags, ordered
 resource reassignment, consuming-close ownership, and source-linked drop traces, and reports an
 exact scalar result or canonical trap. It does not
-discover files, execute user drop bodies, implement complete must-use dataflow,
-effects, host I/O, or native code generation. Infinite execution is stopped by the bounded interpreter and reported as an unsupported-capability result rather than a language trap. In
+discover files, execute user drop bodies, implement effects, host I/O, or native code generation.
+Infinite execution is stopped by the bounded interpreter and reported as an unsupported-capability result rather than a language trap. In
 particular, it does not satisfy the planned `fairyc check` contract.
 
 Human developers can run the examples shown in the repository `README.md`. Agent verification uses

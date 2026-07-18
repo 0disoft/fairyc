@@ -20,8 +20,9 @@ also executes all 10 v0 cases for moves, cleanup obligations, branch joins, loop
 consuming tagged matches, and live/dead resource reassignment. The
 Region runner executes all 6 v1 cases, including package-proven `std::alloc::Arena`, hidden
 allocation origins, lexical escape, capability storage, and plain-region resource rejection. The
-Result runner executes all 8 v0 cases for qualified construction, exhaustive shallow matching,
-must-use return/discard/propagation, exactly-once classification, non-Result `?`, and propagated
+Result runner executes all 20 v0 cases for qualified construction, exhaustive shallow matching,
+must-use return/discard/propagation, local and parameter transfer, branch joins, loop back-edges,
+overwrite and early-return rejection, exactly-once classification, non-Result `?`, and propagated
 error compatibility. The MIR runner executes all
 7 v0 normalization cases through mutable-local block lowering and the MIR verifier, covering
 left-to-right call evaluation, complete-root moves, normal-exit cleanup order, `Result` error
@@ -66,7 +67,7 @@ resource construction, field reads, whole-root call moves, resource-bearing buil
 ordered resource reassignment, consuming-close ownership patterns, and cleanup drop events,
 and reports either `result: <i32>` or a canonical
 trap. The official
-`fairyc check` command remains unavailable until complete must-use dataflow, effects, and the
+`fairyc check` command remains unavailable until effects and the
 remaining semantic groups exist.
 
 ## Design anchors
