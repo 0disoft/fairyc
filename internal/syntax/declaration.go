@@ -12,10 +12,10 @@ func (p *parser) parseSource() NodeID {
 	defer p.leave()
 	start := p.currentFullIndex()
 	children := []NodeID{p.parseModule()}
-	for p.at("import") {
+	for !p.budget.Exhausted() && p.at("import") {
 		children = append(children, p.parseImport())
 	}
-	for p.current().Kind != lexer.EOF {
+	for p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 		children = append(children, p.parseItem())
 	}
 	return p.addNode(KindSource, start, children, "", "")
@@ -70,7 +70,7 @@ func (p *parser) parseImport() NodeID {
 func (p *parser) parseItem() NodeID {
 	start := p.currentFullIndex()
 	children := make([]NodeID, 0, 4)
-	for p.at("@") {
+	for !p.budget.Exhausted() && p.at("@") {
 		children = append(children, p.parseAttribute())
 	}
 	p.match("pub")
@@ -105,7 +105,7 @@ func (p *parser) parseAttribute() NodeID {
 	pathID, value, _ := p.pathNode()
 	children := []NodeID{pathID}
 	if p.match("(") {
-		for !p.at(")") && p.current().Kind != lexer.EOF {
+		for !p.at(")") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 			if isLiteralToken(p.current(), p.currentText()) {
 				children = append(children, p.parseLiteral())
 			} else {
@@ -138,7 +138,7 @@ func (p *parser) parseStruct(start int, leading []NodeID) NodeID {
 	name := p.parseName()
 	p.expect("{")
 	children := append([]NodeID(nil), leading...)
-	for !p.at("}") && p.current().Kind != lexer.EOF {
+	for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 		children = append(children, p.parseField())
 	}
 	p.expect("}")
@@ -150,7 +150,7 @@ func (p *parser) parseResource(start int, leading []NodeID) NodeID {
 	name := p.parseName()
 	p.expect("{")
 	children := append([]NodeID(nil), leading...)
-	for !p.at("}") && p.current().Kind != lexer.EOF {
+	for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 		if p.at("drop") {
 			children = append(children, p.parseDrop())
 			break
@@ -185,12 +185,12 @@ func (p *parser) parseEnum(start int, leading []NodeID) NodeID {
 	name := p.parseName()
 	p.expect("{")
 	children := append([]NodeID(nil), leading...)
-	for !p.at("}") && p.current().Kind != lexer.EOF {
+	for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 		variantStart := p.currentFullIndex()
 		variantName := p.parseName()
 		variantChildren := make([]NodeID, 0, 2)
 		if p.match("{") {
-			for !p.at("}") && p.current().Kind != lexer.EOF {
+			for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 				variantChildren = append(variantChildren, p.parseEnumField())
 			}
 			p.expect("}")
@@ -216,10 +216,10 @@ func (p *parser) parseImpl(start int, leading []NodeID) NodeID {
 	typeID := p.parseType()
 	p.expect("{")
 	children := append(append([]NodeID(nil), leading...), typeID)
-	for !p.at("}") && p.current().Kind != lexer.EOF {
+	for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 		methodStart := p.currentFullIndex()
 		methodLeading := make([]NodeID, 0, 2)
-		for p.at("@") {
+		for !p.budget.Exhausted() && p.at("@") {
 			methodLeading = append(methodLeading, p.parseAttribute())
 		}
 		p.match("pub")
@@ -270,7 +270,7 @@ func (p *parser) parseParameters(method bool) []NodeID {
 			return parameters
 		}
 	}
-	for !p.at(")") && p.current().Kind != lexer.EOF {
+	for !p.at(")") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 		start := p.currentFullIndex()
 		name := p.parseName()
 		p.expect(":")
@@ -341,7 +341,7 @@ func (p *parser) parseType() NodeID {
 		p.expect("fn")
 		p.expect("(")
 		children := make([]NodeID, 0, 4)
-		for !p.at(")") && p.current().Kind != lexer.EOF {
+		for !p.at(")") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 			children = append(children, p.parseType())
 			if !p.match(",") {
 				break
@@ -355,7 +355,7 @@ func (p *parser) parseType() NodeID {
 		pathID, _, _ := p.pathNode()
 		children := []NodeID{pathID}
 		if p.match("<") {
-			for !p.at(">") && p.current().Kind != lexer.EOF {
+			for !p.at(">") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 				children = append(children, p.parseType())
 				if !p.match(",") {
 					break

@@ -50,16 +50,29 @@ type scanner struct {
 func (s *scanner) run() {
 	if s.budget == nil || s.budget.Exhausted() {
 		s.emitExhausted()
+		if len(s.source) > 0 {
+			s.emitWithoutBudget(Invalid, 0, len(s.source), "")
+			s.position = len(s.source)
+		}
 		s.emitEOF()
 		return
 	}
 	if len(s.source) >= 3 && s.source[0] == 0xef && s.source[1] == 0xbb && s.source[2] == 0xbf {
+		if !s.budget.ChargeWork(3) {
+			s.emitExhausted()
+			s.emitWithoutBudget(Invalid, 0, len(s.source), "")
+			s.position = len(s.source)
+			s.emitEOF()
+			return
+		}
 		s.emit(Trivia, 0, 3, "")
 		s.position = 3
 	}
 	for s.position < len(s.source) && !s.budget.Exhausted() {
 		start := s.position
-		s.budget.ChargeWork(1)
+		if !s.budget.ChargeWork(1) {
+			break
+		}
 		s.scanOne()
 		if s.position <= start {
 			s.position = start + 1
@@ -115,7 +128,14 @@ func (s *scanner) scanOne() {
 	for _, symbol := range symbols {
 		if s.matchAt(s.position, symbol) {
 			start := s.position
-			s.position += len(symbol)
+			if len(symbol) > 1 && !s.advanceCharged(len(symbol)-1) {
+				return
+			}
+			if len(symbol) == 1 {
+				s.position++
+			} else {
+				s.position++
+			}
 			s.emit(Symbol, start, s.position, "")
 			return
 		}
@@ -132,6 +152,9 @@ func (s *scanner) scanOne() {
 			width = 1
 		}
 		start := s.position
+		if width > 1 && !s.budget.ChargeWork(width-1) {
+			return
+		}
 		s.position += width
 		s.emit(Invalid, start, s.position, "")
 		s.emitDiagnostic("E0001", start, s.position, diagnostic.RepairNone, "")
@@ -145,19 +168,39 @@ func (s *scanner) scanOne() {
 
 func (s *scanner) scanWhitespace() {
 	start := s.position
+	if s.source[s.position] == '\r' && (s.position+1 >= len(s.source) || s.source[s.position+1] != '\n') {
+		s.position++
+		s.emit(Invalid, start, s.position, "")
+		s.emitDiagnostic("E0001", start, s.position, diagnostic.RepairNone, "")
+		return
+	}
+	if s.source[s.position] == '\r' {
+		if !s.advanceCharged(1) {
+			return
+		}
+	}
+	s.position++
 	for s.position < len(s.source) {
 		current := s.source[s.position]
 		switch {
 		case isHorizontalSpace(current) || current == '\n':
-			s.position++
+			if !s.advanceCharged(1) {
+				s.emit(Invalid, start, s.position, "")
+				return
+			}
 		case current == '\r' && s.position+1 < len(s.source) && s.source[s.position+1] == '\n':
-			s.position += 2
+			if !s.advanceCharged(2) {
+				s.emit(Invalid, start, s.position, "")
+				return
+			}
 		case current == '\r':
 			if start < s.position {
 				s.emit(Trivia, start, s.position, "")
 			}
 			invalidStart := s.position
-			s.position++
+			if !s.advanceCharged(1) {
+				return
+			}
 			s.emit(Invalid, invalidStart, s.position, "")
 			s.emitDiagnostic("E0001", invalidStart, s.position, diagnostic.RepairNone, "")
 			return
@@ -173,28 +216,41 @@ func (s *scanner) scanWhitespace() {
 
 func (s *scanner) scanLineComment() {
 	start := s.position
-	s.position += 2
-	for s.position < len(s.source) && s.source[s.position] != '\n' && s.source[s.position] != '\r' {
-		s.position++
+	if !s.advanceCharged(1) {
+		return
+	}
+	s.position++
+	for s.position < len(s.source) && s.source[s.position] != '\n' && s.source[s.position] != '\r' && !s.budget.Exhausted() {
+		if !s.advanceCharged(1) {
+			break
+		}
 	}
 	s.emit(Trivia, start, s.position, "")
 }
 
 func (s *scanner) scanBlockComment() {
 	start := s.position
-	s.position += 2
+	if !s.advanceCharged(1) {
+		return
+	}
+	s.position++
 	depth := 1
-	for s.position < len(s.source) && depth > 0 {
-		s.budget.ChargeWork(1)
+	for s.position < len(s.source) && depth > 0 && !s.budget.Exhausted() {
 		switch {
 		case s.matchAt(s.position, "/*"):
+			if !s.advanceCharged(2) {
+				break
+			}
 			depth++
-			s.position += 2
 		case s.matchAt(s.position, "*/"):
+			if !s.advanceCharged(2) {
+				break
+			}
 			depth--
-			s.position += 2
 		default:
-			s.position++
+			if !s.advanceCharged(1) {
+				break
+			}
 		}
 	}
 	s.emit(Trivia, start, s.position, "")
@@ -206,8 +262,14 @@ func (s *scanner) scanBlockComment() {
 func (s *scanner) scanIdentifier() {
 	start := s.position
 	s.position++
-	for s.position < len(s.source) && isIdentifierContinue(s.source[s.position]) {
-		s.position++
+	for s.position < len(s.source) && isIdentifierContinue(s.source[s.position]) && !s.budget.Exhausted() {
+		if !s.advanceCharged(1) {
+			break
+		}
+	}
+	if s.budget.Exhausted() {
+		s.emit(Invalid, start, s.position, "")
+		return
 	}
 	text := string(s.source[start:s.position])
 	kind := Identifier
@@ -219,6 +281,9 @@ func (s *scanner) scanIdentifier() {
 
 func (s *scanner) emit(kind Kind, start, end int, cooked string) {
 	if !s.budget.ChargeToken() {
+		if start < end {
+			s.emitWithoutBudget(Invalid, start, end, "")
+		}
 		return
 	}
 	s.emitWithoutBudget(kind, start, end, cooked)
@@ -259,6 +324,14 @@ func (s *scanner) emitEOF() {
 
 func (s *scanner) matchAt(position int, value string) bool {
 	return position >= 0 && position+len(value) <= len(s.source) && string(s.source[position:position+len(value)]) == value
+}
+
+func (s *scanner) advanceCharged(count int) bool {
+	if count <= 0 || s.position+count > len(s.source) || !s.budget.ChargeWork(count) {
+		return false
+	}
+	s.position += count
+	return true
 }
 
 func isHorizontalSpace(value byte) bool {

@@ -14,34 +14,62 @@ func (s *scanner) scanNumber() {
 	start := s.position
 	kind := Integer
 	if s.matchAt(start, "0x") || s.matchAt(start, "0b") {
-		s.position += 2
-		for s.position < len(s.source) && isIdentifierContinue(s.source[s.position]) {
-			s.position++
+		s.position++
+		if !s.advanceCharged(1) {
+			s.emit(Invalid, start, s.position, "")
+			return
+		}
+		for s.position < len(s.source) && isIdentifierContinue(s.source[s.position]) && !s.budget.Exhausted() {
+			if !s.advanceCharged(1) {
+				break
+			}
 		}
 	} else {
-		for s.position < len(s.source) && (isDecimalDigit(s.source[s.position]) || s.source[s.position] == '_') {
-			s.position++
-		}
-		if s.position+1 < len(s.source) && s.source[s.position] == '.' && isDecimalDigit(s.source[s.position+1]) {
-			kind = Float
-			s.position += 2
-			for s.position < len(s.source) && (isDecimalDigit(s.source[s.position]) || s.source[s.position] == '_') {
-				s.position++
+		s.position++
+		for s.position < len(s.source) && (isDecimalDigit(s.source[s.position]) || s.source[s.position] == '_') && !s.budget.Exhausted() {
+			if !s.advanceCharged(1) {
+				break
 			}
 		}
-		if s.position < len(s.source) && (s.source[s.position] == 'e' || s.source[s.position] == 'E') {
+		if !s.budget.Exhausted() && s.position+1 < len(s.source) && s.source[s.position] == '.' && isDecimalDigit(s.source[s.position+1]) {
 			kind = Float
-			s.position++
+			if !s.advanceCharged(2) {
+				s.emit(Invalid, start, s.position, "")
+				return
+			}
+			for s.position < len(s.source) && (isDecimalDigit(s.source[s.position]) || s.source[s.position] == '_') && !s.budget.Exhausted() {
+				if !s.advanceCharged(1) {
+					break
+				}
+			}
+		}
+		if !s.budget.Exhausted() && s.position < len(s.source) && (s.source[s.position] == 'e' || s.source[s.position] == 'E') {
+			kind = Float
+			if !s.advanceCharged(1) {
+				s.emit(Invalid, start, s.position, "")
+				return
+			}
 			if s.position < len(s.source) && (s.source[s.position] == '+' || s.source[s.position] == '-') {
-				s.position++
+				if !s.advanceCharged(1) {
+					s.emit(Invalid, start, s.position, "")
+					return
+				}
 			}
-			for s.position < len(s.source) && (isDecimalDigit(s.source[s.position]) || s.source[s.position] == '_') {
-				s.position++
+			for s.position < len(s.source) && (isDecimalDigit(s.source[s.position]) || s.source[s.position] == '_') && !s.budget.Exhausted() {
+				if !s.advanceCharged(1) {
+					break
+				}
 			}
 		}
-		for s.position < len(s.source) && isIdentifierContinue(s.source[s.position]) {
-			s.position++
+		for s.position < len(s.source) && isIdentifierContinue(s.source[s.position]) && !s.budget.Exhausted() {
+			if !s.advanceCharged(1) {
+				break
+			}
 		}
+	}
+	if s.budget.Exhausted() {
+		s.emit(Invalid, start, s.position, "")
+		return
 	}
 	raw := string(s.source[start:s.position])
 	cooked, valid := cookNumber(raw, kind)
@@ -153,13 +181,19 @@ func allDigits(value string) bool {
 
 func (s *scanner) scanString(kind Kind, openerBytes int) {
 	start := s.position
-	s.position += openerBytes
+	s.position++
+	if openerBytes > 1 && !s.advanceCharged(openerBytes-1) {
+		s.emit(Invalid, start, s.position, "")
+		return
+	}
 	cooked := make([]byte, 0, 32)
 	terminated := false
-	for s.position < len(s.source) {
+	for s.position < len(s.source) && !s.budget.Exhausted() {
 		current := s.source[s.position]
 		if current == '"' {
-			s.position++
+			if !s.advanceCharged(1) {
+				break
+			}
 			terminated = true
 			break
 		}
@@ -168,12 +202,16 @@ func (s *scanner) scanString(kind Kind, openerBytes int) {
 			break
 		}
 		if current == '\\' {
-			s.scanEscape(kind, &cooked)
+			if !s.scanEscape(kind, &cooked) {
+				break
+			}
 			continue
 		}
 		if current == 0 {
 			escapeStart := s.position
-			s.position++
+			if !s.advanceCharged(1) {
+				break
+			}
 			if kind == CString {
 				s.emitDiagnostic("E0006", escapeStart, s.position, diagnostic.RepairNone, "")
 			} else {
@@ -186,16 +224,26 @@ func (s *scanner) scanString(kind Kind, openerBytes int) {
 			runeValue, width := utf8.DecodeRune(s.source[s.position:])
 			if runeValue == utf8.RuneError && width == 1 {
 				invalidStart := s.position
-				s.position++
+				if !s.advanceCharged(1) {
+					break
+				}
 				s.emitDiagnostic("E0001", invalidStart, s.position, diagnostic.RepairNone, "")
 				continue
 			}
 			cooked = append(cooked, s.source[s.position:s.position+width]...)
-			s.position += width
+			if !s.advanceCharged(width) {
+				break
+			}
 			continue
 		}
 		cooked = append(cooked, current)
-		s.position++
+		if !s.advanceCharged(1) {
+			break
+		}
+	}
+	if s.budget.Exhausted() {
+		s.emit(Invalid, start, s.position, "")
+		return
 	}
 	if !terminated && s.position >= len(s.source) {
 		s.emitDiagnostic("E0005", start, s.position, diagnostic.RepairExit, "\"")
@@ -206,15 +254,19 @@ func (s *scanner) scanString(kind Kind, openerBytes int) {
 	s.emit(kind, start, s.position, hex.EncodeToString(cooked))
 }
 
-func (s *scanner) scanEscape(kind Kind, cooked *[]byte) {
+func (s *scanner) scanEscape(kind Kind, cooked *[]byte) bool {
 	start := s.position
-	s.position++
+	if !s.advanceCharged(1) {
+		return false
+	}
 	if s.position >= len(s.source) {
 		s.emitDiagnostic("E0005", start, s.position, diagnostic.RepairNone, "")
-		return
+		return true
 	}
 	current := s.source[s.position]
-	s.position++
+	if !s.advanceCharged(1) {
+		return false
+	}
 	switch current {
 	case '\\', '"':
 		*cooked = append(*cooked, current)
@@ -232,13 +284,17 @@ func (s *scanner) scanEscape(kind Kind, cooked *[]byte) {
 	case 'x':
 		if s.position+2 > len(s.source) || !isHexDigit(s.source[s.position]) || !isHexDigit(s.source[s.position+1]) {
 			for s.position < len(s.source) && s.position < start+4 && isHexDigit(s.source[s.position]) {
-				s.position++
+				if !s.advanceCharged(1) {
+					return false
+				}
 			}
 			s.emitDiagnostic("E0005", start, s.position, diagnostic.RepairNone, "")
-			return
+			return true
 		}
 		value, _ := strconv.ParseUint(string(s.source[s.position:s.position+2]), 16, 8)
-		s.position += 2
+		if !s.advanceCharged(2) {
+			return false
+		}
 		*cooked = append(*cooked, byte(value))
 		if kind == CString && value == 0 {
 			s.emitDiagnostic("E0006", start, s.position, diagnostic.RepairNone, "")
@@ -246,29 +302,39 @@ func (s *scanner) scanEscape(kind Kind, cooked *[]byte) {
 	case 'u':
 		if kind != String || s.position >= len(s.source) || s.source[s.position] != '{' {
 			s.emitDiagnostic("E0005", start, s.position, diagnostic.RepairNone, "")
-			return
+			return true
 		}
-		s.position++
+		if !s.advanceCharged(1) {
+			return false
+		}
 		digitsStart := s.position
 		for s.position < len(s.source) && isHexDigit(s.source[s.position]) && s.position-digitsStart < 6 {
-			s.position++
+			if !s.advanceCharged(1) {
+				return false
+			}
 		}
 		if digitsStart == s.position || s.position >= len(s.source) || s.source[s.position] != '}' {
 			for s.position < len(s.source) && s.source[s.position] != '}' && s.source[s.position] != '"' {
-				s.position++
+				if !s.advanceCharged(1) {
+					return false
+				}
 			}
 			if s.position < len(s.source) && s.source[s.position] == '}' {
-				s.position++
+				if !s.advanceCharged(1) {
+					return false
+				}
 			}
 			s.emitDiagnostic("E0005", start, s.position, diagnostic.RepairNone, "")
-			return
+			return true
 		}
 		value, err := strconv.ParseUint(string(s.source[digitsStart:s.position]), 16, 32)
-		s.position++
+		if !s.advanceCharged(1) {
+			return false
+		}
 		runeValue := rune(value)
 		if err != nil || !utf8.ValidRune(runeValue) || runeValue >= 0xd800 && runeValue <= 0xdfff {
 			s.emitDiagnostic("E0005", start, s.position, diagnostic.RepairNone, "")
-			return
+			return true
 		}
 		buffer := make([]byte, utf8.RuneLen(runeValue))
 		utf8.EncodeRune(buffer, runeValue)
@@ -276,6 +342,7 @@ func (s *scanner) scanEscape(kind Kind, cooked *[]byte) {
 	default:
 		s.emitDiagnostic("E0005", start, s.position, diagnostic.RepairNone, "")
 	}
+	return !s.budget.Exhausted()
 }
 
 func isBinaryDigit(value byte) bool {

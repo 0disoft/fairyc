@@ -85,9 +85,11 @@ func (p *parser) atKind(kind lexer.Kind) bool {
 func (p *parser) advance() lexer.Token {
 	token := p.current()
 	if token.Kind != lexer.EOF {
+		if !p.budget.ChargeWork(1) {
+			return token
+		}
 		p.lastFullIndex = p.currentFullIndex()
 		p.position++
-		p.budget.ChargeWork(1)
 	}
 	return token
 }
@@ -209,7 +211,7 @@ func (p *parser) pathNode() (NodeID, string, bool) {
 	}
 	parts := []string{p.currentText()}
 	p.advance()
-	for p.match("::") {
+	for !p.budget.Exhausted() && p.match("::") {
 		if !p.atKind(lexer.Identifier) {
 			p.expect("identifier")
 			return p.addNode(KindPath, start, nil, strings.Join(parts, "::"), ""), strings.Join(parts, "::"), false
@@ -226,7 +228,7 @@ func (p *parser) synchronize(boundaries ...string) {
 	for _, boundary := range boundaries {
 		boundarySet[boundary] = struct{}{}
 	}
-	for p.current().Kind != lexer.EOF {
+	for p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 		if _, found := boundarySet[p.currentText()]; found {
 			return
 		}

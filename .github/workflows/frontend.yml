@@ -1,0 +1,35 @@
+name: Frontend
+
+on:
+  push: {}
+  pull_request: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Go frontend (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Vet
+        run: go vet -mod=readonly ./...
+      - name: Test
+        run: go test -mod=readonly -count=1 ./...

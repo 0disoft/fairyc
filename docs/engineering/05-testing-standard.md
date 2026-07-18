@@ -7,7 +7,9 @@
 
 The Go frontend executes every case in `spec/fixtures/parser/manifest-v0.json` through
 `internal/parserfixture`. Source, lexer, syntax, AST, budget, containment, and manifest behavior
-also have focused unit tests. Semantic, resource, Region, Result, MIR, MIR-verifier,
+also have focused unit tests. Lexer and parser fuzz targets run their deterministic seed corpus
+during ordinary Go tests and assert lossless reconstruction, stable output, valid spans, bounded
+exhaustion, and error-free AST lowering. Semantic, resource, Region, Result, MIR, MIR-verifier,
 resolved-package-graph, interpreter, backend, ABI, runtime, and Atlas runners do not exist yet;
 their fixtures remain future evidence requirements.
 
@@ -70,7 +72,11 @@ ABI fixtures cover scalar and pointer layouts, nested and padded `@repr(C)` stru
 
 ## Fuzzing and sanitizers
 
-Parser, type, Flow CFG, MIR verifier, and schema fuzzing are later configured validation surfaces. Generated-C sanitizer runs are backend evidence, not proof of language semantics. Fuzz duration, corpus size, and coverage thresholds remain uncommitted until a reproducible harness exists.
+Lexer and parser fuzz entry points now exist, and their fixed seed corpus runs under the ordinary
+test command on Windows and Linux CI. A timed or continuous fuzz campaign is not configured yet.
+Type, Flow CFG, MIR verifier, and schema fuzzing remain later validation surfaces. Generated-C
+sanitizer runs are backend evidence, not proof of language semantics. Fuzz duration, retained corpus
+policy, and coverage thresholds remain uncommitted until reproducible campaign evidence exists.
 
 ## Review blockers
 

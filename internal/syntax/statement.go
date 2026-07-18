@@ -10,7 +10,7 @@ func (p *parser) parseBlock() NodeID {
 	start := p.currentFullIndex()
 	p.expect("{")
 	children := make([]NodeID, 0, 8)
-	for !p.at("}") && p.current().Kind != lexer.EOF {
+	for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 		switch p.currentText() {
 		case "let", "var":
 			children = append(children, p.parseBinding())

@@ -39,7 +39,7 @@ func (p *parser) parseExpression(minBindingPower int, allowRecord bool) NodeID {
 	defer p.leave()
 	left := p.parsePrefix(allowRecord)
 	comparisonSeen := false
-	for p.current().Kind != lexer.EOF {
+	for p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 		start := p.nodeStart(left)
 		switch p.currentText() {
 		case "(":
@@ -48,7 +48,7 @@ func (p *parser) parseExpression(minBindingPower int, allowRecord bool) NodeID {
 			}
 			p.advance()
 			children := []NodeID{left}
-			for !p.at(")") && p.current().Kind != lexer.EOF {
+			for !p.at(")") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 				children = append(children, p.parseExpression(0, true))
 				if !p.match(",") {
 					break
@@ -160,7 +160,7 @@ func (p *parser) parsePrimary(allowRecord bool) NodeID {
 		pathID, value, _ := p.pathNode()
 		if allowRecord && p.match("{") {
 			children := []NodeID{pathID}
-			for !p.at("}") && p.current().Kind != lexer.EOF {
+			for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 				fieldStart := p.currentFullIndex()
 				name := p.parseName()
 				p.expect(":")
@@ -213,7 +213,7 @@ func (p *parser) parseArray() NodeID {
 		if p.match(";") {
 			children = append(children, p.parseConstExpression())
 		} else {
-			for p.match(",") && !p.at("]") {
+			for !p.budget.Exhausted() && p.match(",") && !p.at("]") {
 				children = append(children, p.parseExpression(0, true))
 			}
 		}
@@ -244,7 +244,7 @@ func (p *parser) parseMatch() NodeID {
 	scrutinee := p.parseExpression(0, false)
 	p.expect("{")
 	children := []NodeID{scrutinee}
-	for !p.at("}") && p.current().Kind != lexer.EOF {
+	for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 		armStart := p.currentFullIndex()
 		pattern := p.parsePattern()
 		p.expect("=>")
@@ -266,7 +266,7 @@ func (p *parser) parsePattern() NodeID {
 		children = append(children, p.addNode(KindPath, nameStart, nil, name, ""))
 		p.expect(")")
 	} else if p.match("{") {
-		for !p.at("}") && p.current().Kind != lexer.EOF {
+		for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 			fieldStart := p.currentFullIndex()
 			field := p.parseName()
 			p.expect(":")
