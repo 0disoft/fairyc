@@ -89,7 +89,7 @@ Semantic fail fixtures list every independent diagnostic after cascade suppressi
 
 Resource fixtures sample complete-root state immediately before or after a source span. They assert that `Live` owns one cleanup obligation, `Dead` owns zero, and a source-visible `MaybeLive` join is rejected. MIR drop flags and executable drop order remain separate fixture contracts.
 
-Region v1 resolves its lexical escape source through the explicit standard-library package instance and opaque fixture `Arena`; it does not pretend a user-declared type is the standard-library arena. Result fixtures accept typed parameters so they can test handling without choosing `Ok` or `Err` constructor syntax. Each manifest lists its deferred coverage explicitly.
+Region v1 resolves its lexical escape source through the explicit standard-library package instance and opaque fixture `Arena`; it does not pretend a user-declared type is the standard-library arena. Result fixtures retain parameter-driven cases to isolate handling and add the qualified ADR 0017 constructors and shallow matches as separate evidence. Each manifest lists its deferred coverage explicitly.
 
 MIR fixtures compare source-linked observations after verification. They do not compare textual dumps, block or local numbers, temporary names, or generated C. MIR-verifier fixtures separately require each named baseline to verify, apply one typed mutation, and return the complete one-code result; arbitrary malformed graph input remains deferred.
 

@@ -26,14 +26,14 @@ The local lexical-region escape case depends on a real `std::alloc::Arena` packa
 
 ## Rationale
 
-Separate schemas keep a Region origin from being confused with a `Result` payload type and let each runner reject unknown fields. Region v1 makes package resolution explicit only for the case that needs standard-library type identity. The remaining parameter-driven cases and all Result cases avoid smuggling in constructors that are still open decisions.
+Separate schemas keep a Region origin from being confused with a `Result` payload type and let each runner reject unknown fields. Region v1 makes package resolution explicit only for the case that needs standard-library type identity. Parameter-driven Result cases preserve handling-only evidence, while later v0 cases add the qualified constructors accepted by ADR 0017 without changing this Flow schema.
 
 ## Consequences
 
 - A compiler may organize Region and Result analysis however it wants internally, but it must reproduce the declared owning phase, canonical source facts, and diagnostics.
 - Region v1 covers `E3101` without papering over standard-library ownership with a fake local arena.
-- The first Result suite proves handling classification and error compatibility, not concrete tagged representation or cleanup order.
-- `internal/regionfixture` proves the Region v1 contract, including the referenced package-provider boundary. `internal/resultfixture` proves the initial Result v0 handling and compatibility contract; active resource-payload traces remain deferred to MIR and runtime evidence.
+- The Result suite proves handling classification, error compatibility, qualified construction, and shallow matches without freezing concrete tagged representation or cleanup order.
+- `internal/regionfixture` proves the Region v1 contract, including the referenced package-provider boundary. `internal/resultfixture` proves the Result v0 handling and compatibility contract; MIR and interpreter fixtures now own active resource-payload and cleanup-trace evidence.
 
 ## Revisit conditions
 

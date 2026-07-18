@@ -18,7 +18,7 @@ Resource ownership is specified as `Live`, `Dead`, and `MaybeLive`, but a compil
 5. Compiler-owned partial construction and backend cleanup flags are not source resource states. Their later MIR fixtures use separate contracts.
 6. Compile-fail assertions list the complete independent `E11xx` diagnostic set with a primary byte span and role-labelled declaration, move, owner, join, or loop spans. Full prose and internal Flow block IDs are not frozen.
 7. The initial cases cover a whole-value move, a resource that remains live until scope exit, equal dead states across an `if`, use after move, resource-field partial move, a `Live`/`Dead` branch join, and a loop back-edge mismatch.
-8. Reassignment, fallible close, resource-bearing `Option` and `Result`, partial aggregate construction, and concrete drop traces remain required future fixture groups rather than being guessed into this first manifest.
+8. Later v0 cases add live replacement and dead-slot reinstallation. Fallible close, resource-bearing `Option` and `Result`, partial aggregate construction, and concrete drop traces remain MIR or interpreter concerns unless a new source-state assertion requires this Flow schema to change.
 
 ## Rationale
 
@@ -30,8 +30,9 @@ The before-or-after observation makes a move transition testable without seriali
   across every v0 case.
 - A pass case may assert multiple states at one operand span to prove the transition caused by that operand.
 - A fail case may expose `MaybeLive` as the rejected computed state, but no later source operation may treat that state as usable.
-- All 7 current cases execute against the Go Stage 0 implementation; later fixture groups remain
-  unimplemented rather than being inferred from these results.
+- All 10 current cases execute against the Go Stage 0 implementation. MIR and interpreter fixtures
+  separately prove replacement ordering, consuming-close ownership, tagged payload moves, and drop
+  traces without widening this source-state contract.
 
 ## Revisit conditions
 

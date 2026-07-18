@@ -27,8 +27,8 @@ Option::None
 Both forms require one contextual `Option<T>` type. `Option::Some` carries exactly one payload;
 `Option::None` is a bare variant and is not callable. A shallow Option match contains exactly one
 `Option::Some(binding)` arm and one bare `Option::None` arm. The None arm creates no binding and no
-payload extraction. Wildcards, guards, nested patterns, and resource payload execution remain
-outside this slice.
+payload extraction. Wildcards, guards, nested patterns, and reference-style payload bindings remain
+outside this slice. Scalar, inert, and resource-bearing active payloads execute through verified MIR.
 
 Stage 0 constructs Result variants with compiler-known qualified paths:
 
@@ -51,8 +51,8 @@ The Result fixtures classify expressions as returned, discarded, propagated, con
 matched, record canonical success and error types, and assert exactly-once evaluation. Their
 parameter-driven cases remain valid evidence for handling independent of construction, while the
 qualified ADR 0017 constructor and match cases execute through typed HIR. Scalar Result and Option
-variants execute through verified MIR; the parameter-driven resource-error case remains the bridge
-until active resource-payload construction and drop traces are executable.
+variants execute through verified MIR. Resource-bearing construction, propagation, active-variant
+cleanup, and deterministic drop traces are covered by the MIR interpreter fixtures.
 
 ## Normal exits
 
