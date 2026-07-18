@@ -46,8 +46,8 @@ A separate fail-closed Linux/amd64 command is now present to compile those cases
 at `-O0` and `-O2`, link a test-only trap runtime, and compare process outcomes. It cannot run on
 this Windows host because no WSL distribution or C compiler is installed, and its hosted CI result
 has not yet been observed. The target therefore remains unsupported.
-An unstable `fairyc experimental` CLI can inspect, syntax-check,
-semantic-check, or interpret one source-root-relative `.fy` file, while semantic checking also
+An unstable `fairyc experimental` CLI can inspect syntax, syntax-check, semantic-check, emit the
+scalar C11 translation unit, or interpret one source-root-relative `.fy` file, while semantic checking also
 accepts an explicit module set. There is no stable CLI, user drop-body execution, native execution
 lane, standard library, runtime, package manager, supported target, or stable language revision yet.
 
@@ -62,6 +62,7 @@ go run ./cmd/fairyc experimental check-semantics examples/semantic/main.fy examp
 go run ./cmd/fairyc experimental check-semantics examples/resources/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/regions/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/results/main.fy
+go run ./cmd/fairyc experimental emit-c examples/c/main.fy
 go run ./cmd/fairyc experimental run examples/run/main.fy
 go run ./cmd/fairyc experimental run examples/run/resource_option.fy
 go run ./cmd/fairyc experimental parse examples/syntax/main.fy
@@ -81,6 +82,10 @@ checked addition, subtraction, multiplication, negation, and signed right shift,
 trap. The official
 `fairyc check` command remains unavailable until effects and the
 remaining semantic groups exist.
+
+`experimental emit-c` accepts the same single-file entry shape and prints the verified scalar
+ISO C11 translation unit directly to stdout. It does not write a `.c` file or invoke a native
+toolchain.
 
 ## Design anchors
 

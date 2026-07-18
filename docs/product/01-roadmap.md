@@ -40,7 +40,8 @@ multiplication, negation, division, remainder, and signed right shift execute ac
   categories; signed left shift is rejected as `E1011`. Nearest-loop `break` and `continue` now execute
   with resource and Region cleanup. The first C backend slice emits deterministic ISO C11 for 4
   verified scalar cases under the provisional `x86_64-linux-gnu` profile, but it does not parse,
-  compile, link, or execute that C. Real file and console I/O, effects, and every later Phase 1
+  compile, link, or execute that C. The unstable `experimental emit-c` command exposes that exact
+  verified scalar translation unit on stdout without writing an artifact. Real file and console I/O, effects, and every later Phase 1
   capability remain unimplemented.
 
 - Implement source management, lexer, trivia-preserving tokens and spans, compact recoverable syntax, deterministic diagnostics, one-file modules, alias imports, and non-generic typed HIR in Go.

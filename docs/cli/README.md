@@ -22,6 +22,7 @@ Only `check`, a minimal `build`, compiler inspection, and semantic test executio
 The Go frontend currently exposes `fairyc experimental parse <file.fy>`,
 `fairyc experimental check-syntax <file.fy>`, and
 `fairyc experimental check-semantics <file.fy> [<file.fy>...]`. The compiler prototype also exposes
+`fairyc experimental emit-c <file.fy>` for deterministic scalar C11 inspection and
 `fairyc experimental run <file.fy>` for the fixture-backed scalar MIR interpreter subset. These are developer commands whose
 spelling and numeric exit codes may change. `check-semantics` resolves names and creates typed HIR
 for an explicit bounded module set in the implemented scalar, safe-borrow, whole-resource, Region, and Result subset.
@@ -37,7 +38,10 @@ break, and continue reset paths, and source-linked drop traces, and reports an
 exact scalar result or canonical division, integer-overflow, or invalid-shift trap. Checked
 negation, addition, subtraction, multiplication, and signed right shift are executable; signed
 left shift is rejected as `E1011`; loop control without an enclosing `while` is rejected as `E1012`.
-It does not discover files, execute user drop bodies, implement effects, host I/O, or native code generation.
+It does not discover files, execute user drop bodies, implement effects, or provide host I/O.
+`experimental emit-c` runs the same verified-MIR entry pipeline and writes one raw constrained C11
+translation unit to stdout. It does not write an artifact, invoke a C toolchain, link, or run native
+code.
 The interpreter fixture's in-memory byte hooks require manifest options that this CLI never accepts;
 declaring a similarly named Fairy C function does not grant output authority.
 Infinite execution is stopped by the bounded interpreter and reported as an unsupported-capability result rather than a language trap. In

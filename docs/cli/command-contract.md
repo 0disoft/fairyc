@@ -8,13 +8,14 @@ This document owns planned `fairyc` command semantics. It does not claim that a 
 
 ## Implemented experimental compiler surface
 
-The current Go prototype implements four deliberately unstable developer commands:
+The current Go prototype implements five deliberately unstable developer commands:
 
 | Command | Purpose | Output |
 | --- | --- | --- |
 | `fairyc experimental parse <file.fy>` | Parse one source-root-relative file and verify lossless syntax plus error-free AST lowering | `fairyc.experimental.parse/v0` JSON on stdout, defined by `spec/cli/experimental-parse-v0.schema.json` |
 | `fairyc experimental check-syntax <file.fy>` | Check lexing, parsing, recovery, module identity, lossless reconstruction, and error-free AST lowering | Success line on stdout or human diagnostics on stderr |
 | `fairyc experimental check-semantics <file.fy> [<file.fy>...]` | Resolve names, type-check, and analyze local safe-borrow, whole-resource, Region, and complete Stage 0 Result must-use Flow for an explicit module set in the implemented subset | Typed-HIR module and function counts on stdout, human source diagnostics on stderr, or an explicit unsupported-subset error |
+| `fairyc experimental emit-c <file.fy>` | Lower one scalar program through verified MIR and emit the provisional constrained C transport without invoking a toolchain | Exactly one deterministic ISO C11 translation unit on stdout, source diagnostics or capability errors on stderr |
 | `fairyc experimental run <file.fy>` | Run one verified-MIR program in the scalar, tagged, whole-resource, and implemented Region subset whose selected module declares `main() -> i32` | `result: <i32>` on stdout, a canonical trap category on stderr, source diagnostics, or an explicit unsupported-subset error |
 
 These commands treat the current directory as their temporary source root. `parse` and
@@ -48,6 +49,13 @@ or reclassifying it as a language trap. Interpreter-fixture byte hooks are not a
 command and matching function names do not activate them. User drop-body effects, I/O, arguments, and
 multi-file run input remain outside the current interpreter subset. Signed left shift is rejected
 by semantic analysis as `E1011` rather than reaching the interpreter.
+
+`experimental emit-c` shares the same single-file syntax, semantics, Flow, MIR-lowering, verifier,
+and zero-argument `main() -> i32` entry path, then invokes only the constrained scalar C emitter.
+It writes raw C11 to stdout with no banner or metadata and writes no repository file. It does not
+parse the generated C, invoke Clang or GCC, link the test runtime, execute a program, or establish an
+`emittable`, `conformant`, or `supported` target. Unsupported resource, tagged, Region, borrow,
+unsafe, FFI, runtime, and standard-library lowering fails with the provisional capability code.
 
 `fairyc check` remains unimplemented. It must not be aliased to `check-syntax`, because the planned
 command below also requires effects and later semantic groups beyond

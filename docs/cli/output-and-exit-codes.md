@@ -39,6 +39,9 @@ automation. They are not the stable exit-code taxonomy:
 `experimental check-syntax` writes human diagnostics to stderr and does not emit a machine result.
 `experimental check-semantics` writes one success line with typed-HIR module and function counts for
 a multi-file input, semantic diagnostics on stderr, or an explicit unsupported-subset message on stderr.
+`experimental emit-c` writes exactly one deterministic ISO C11 translation unit to stdout on
+success. It adds no banner, JSON envelope, ANSI escape, absolute path, or source text. Source
+diagnostics and capability failures produce no partial C output.
 `experimental run` writes `result: <i32>` to stdout on return, or `trap: <category>` to stderr with
 provisional code `5` on a language trap. Its bounded `step-limit` is a capability result with code
 `2`, not a language trap. None of these commands

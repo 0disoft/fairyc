@@ -224,6 +224,51 @@ fn invalid() -> i32 {
 	}
 }
 
+func TestExperimentalEmitCWritesDeterministicTranslationUnit(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\n// SOURCE_SENTINEL\nfn add(left: i32, right: i32) -> i32 { left + right }\nfn main() -> i32 { add(20, 22) }\n")
+	firstCode, firstOut, firstErr := runForTest([]string{"experimental", "emit-c", "main.fy"}, root)
+	secondCode, secondOut, secondErr := runForTest([]string{"experimental", "emit-c", "main.fy"}, root)
+	if firstCode != ExitSuccess || secondCode != ExitSuccess || firstErr != "" || secondErr != "" {
+		t.Fatalf("Run() first=(%d, %q), second=(%d, %q)", firstCode, firstErr, secondCode, secondErr)
+	}
+	if firstOut != secondOut {
+		t.Fatal("emit-c output is not deterministic")
+	}
+	for _, required := range []string{
+		"/* fairyc constrained C transport: x86_64-linux-gnu, ISO C11 */",
+		"_Noreturn void fy_runtime_trap(uint32_t category);",
+		"int main(void)",
+	} {
+		if !strings.Contains(firstOut, required) {
+			t.Errorf("emit-c output is missing %q", required)
+		}
+	}
+	if strings.Contains(firstOut, "SOURCE_SENTINEL") || strings.Contains(firstOut, filepath.ToSlash(root)) || strings.Contains(firstOut, "main::add") {
+		t.Fatalf("emit-c leaked source text, an absolute path, or a Fairy symbol name:\n%s", firstOut)
+	}
+}
+
+func TestExperimentalEmitCRejectsUnsupportedBackendSubset(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", `module main;
+resource Token {
+    value: i32;
+    drop fn(self: &mut Self) {}
+}
+fn main() -> i32 {
+    let token: Token = Token { value: 42 };
+    token.value
+}
+`)
+	code, stdout, stderr := runForTest([]string{"experimental", "emit-c", "main.fy"}, root)
+	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "experimental C-emission subset") || !strings.Contains(stderr, "resource values") {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
 func TestExperimentalRunInterpretsScalarProgram(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
@@ -603,6 +648,17 @@ func TestRepositoryInterpreterExampleStaysRunnable(t *testing.T) {
 	}
 }
 
+func TestRepositoryCEmissionExampleStaysRunnable(t *testing.T) {
+	root := filepath.Clean(filepath.Join("..", ".."))
+	code, stdout, stderr := runForTest(
+		[]string{"experimental", "emit-c", "examples/c/main.fy"},
+		root,
+	)
+	if code != ExitSuccess || stderr != "" || !strings.Contains(stdout, "int main(void)") {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
 func TestRepositoryResourceOptionExampleStaysRunnable(t *testing.T) {
 	root := filepath.Clean(filepath.Join("..", ".."))
 	code, stdout, stderr := runForTest(
@@ -628,7 +684,7 @@ func TestStableCheckRemainsReserved(t *testing.T) {
 func TestHelpAndInvocationErrorsAreSeparated(t *testing.T) {
 	t.Parallel()
 	helpCode, helpOut, helpErr := runForTest([]string{"--help"}, t.TempDir())
-	if helpCode != ExitSuccess || !strings.Contains(helpOut, "experimental parse") || helpErr != "" {
+	if helpCode != ExitSuccess || !strings.Contains(helpOut, "experimental parse") || !strings.Contains(helpOut, "experimental emit-c") || helpErr != "" {
 		t.Fatalf("help = code %d, stdout %q, stderr %q", helpCode, helpOut, helpErr)
 	}
 	errorCode, errorOut, errorErr := runForTest(nil, t.TempDir())

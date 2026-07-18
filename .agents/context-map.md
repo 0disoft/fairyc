@@ -13,6 +13,7 @@
 - Normative grammar route: spec/grammar/stage0.ebnf
 - Parser fixture route: spec/fixtures/parser/manifest-v0.json
 - Frontend implementation route: internal/source/, internal/lexer/, internal/syntax/, internal/ast/, internal/frontend/, internal/semantic/, internal/hir/
+- Experimental compiler CLI implementation route: cmd/fairyc/, internal/cli/
 - Parser runner route: internal/parserfixture/
 - Semantic fixture route: spec/fixtures/semantic/manifest-v0.json
 - Semantic runner route: internal/semanticfixture/

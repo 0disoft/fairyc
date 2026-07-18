@@ -7,6 +7,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/diagnostic"
 	"github.com/0disoft/fairyc/internal/frontend"
 	"github.com/0disoft/fairyc/internal/hir"
@@ -31,6 +32,7 @@ Usage:
   fairyc experimental parse <file.fy>
   fairyc experimental check-syntax <file.fy>
   fairyc experimental check-semantics <file.fy> [<file.fy>...]
+  fairyc experimental emit-c <file.fy>
   fairyc experimental run <file.fy>
   fairyc --help
 
@@ -90,69 +92,26 @@ func runExperimental(args []string, sourceRoot string, stdout, stderr io.Writer)
 			return invocationError(stderr, "experimental command \"run\" expects exactly one source file")
 		}
 		return runInterpreter(args[1], sourceRoot, stdout, stderr)
+	case "emit-c":
+		if len(args) != 2 {
+			return invocationError(stderr, "experimental command \"emit-c\" expects exactly one source file")
+		}
+		return runEmitC(args[1], sourceRoot, stdout, stderr)
 	default:
 		return invocationError(stderr, fmt.Sprintf("unknown experimental command %q", command))
 	}
 }
 
 func runInterpreter(argument, sourceRoot string, stdout, stderr io.Writer) int {
-	limits := source.DefaultLimits()
-	loaded, err := loadSource(sourceRoot, argument, limits.MaxBytes)
-	if err != nil {
-		var tooLarge sourceTooLargeError
-		if errors.As(err, &tooLarge) {
-			value := source.ExhaustionDiagnostic(0)
-			if writeErr := writeDiagnostics(stderr, tooLarge.relativePath, nil, []diagnostic.Diagnostic{value}); writeErr != nil {
-				return ExitInternalFailure
-			}
-			return ExitSourceDiagnostics
-		}
-		return inputError(stderr, err)
+	lowered, code := lowerSingleProgram(argument, sourceRoot, stderr, "interpreter")
+	if code != ExitSuccess {
+		return code
 	}
-	frontendResult, err := frontend.AnalyzeSyntax(loaded.file, limits)
-	if err != nil {
-		return internalError(stderr)
-	}
-	if len(frontendResult.Tree.Diagnostics) > 0 {
-		if err := writeDiagnostics(stderr, loaded.file.RelativePath, frontendResult.Tree.Source, frontendResult.Tree.Diagnostics); err != nil {
-			return ExitInternalFailure
-		}
-		return ExitSourceDiagnostics
-	}
-	semanticResult := semantic.Analyze([]semantic.File{{Path: loaded.file.RelativePath, Module: frontendResult.AST}})
-	if len(semanticResult.Diagnostics) > 0 {
-		if err := writeSemanticDiagnostics(stderr, map[string][]byte{loaded.file.RelativePath: frontendResult.Tree.Source}, semanticResult.Diagnostics); err != nil {
-			return ExitInternalFailure
-		}
-		return ExitSourceDiagnostics
-	}
-	if len(semanticResult.Unsupported) > 0 {
-		if err := writeUnsupportedSemantics(stderr, semanticResult.Unsupported); err != nil {
-			return ExitInternalFailure
-		}
-		return ExitInvalidInvocation
-	}
-	resourceTypes := make([]hir.Type, 0, len(frontendResult.AST.Resources))
-	for _, resource := range frontendResult.AST.Resources {
-		resourceTypes = append(resourceTypes, hir.Type(frontendResult.AST.Path+"::"+resource.Name))
-	}
-	program, err := mir.Lower(semanticResult.HIR, mir.NewTypeProperties(resourceTypes))
-	if err != nil {
-		return interpreterCapabilityError(stderr, err)
-	}
-	if failures := mir.Verify(program); len(failures) != 0 {
-		return internalError(stderr)
-	}
-	entryName := frontendResult.AST.Path + "::main"
-	entry, found := interpreterEntry(program, entryName)
-	if !found || len(entry.Parameters) != 0 || entry.ResultType != hir.TypeI32 {
-		return interpreterCapabilityError(stderr, fmt.Errorf("entry %s must have type fn() -> i32", entryName))
-	}
-	outcome, err := interpreter.Execute(program, entryName)
+	outcome, err := interpreter.Execute(lowered.program, lowered.entryName)
 	if err != nil {
 		var capability interpreter.CapabilityError
 		if errors.As(err, &capability) {
-			return interpreterCapabilityError(stderr, capability)
+			return subsetCapabilityError(stderr, "interpreter", capability)
 		}
 		return internalError(stderr)
 	}
@@ -171,7 +130,87 @@ func runInterpreter(argument, sourceRoot string, stdout, stderr io.Writer) int {
 	return ExitSuccess
 }
 
-func interpreterEntry(program mir.Program, name string) (mir.Function, bool) {
+func runEmitC(argument, sourceRoot string, stdout, stderr io.Writer) int {
+	lowered, code := lowerSingleProgram(argument, sourceRoot, stderr, "C-emission")
+	if code != ExitSuccess {
+		return code
+	}
+	unit, err := cbackend.Emit(lowered.program, lowered.entryName, cbackend.Stage0ScalarProfile())
+	if err != nil {
+		var capability cbackend.CapabilityError
+		if errors.As(err, &capability) {
+			return subsetCapabilityError(stderr, "C-emission", capability)
+		}
+		return internalError(stderr)
+	}
+	if _, err := io.WriteString(stdout, unit.Source); err != nil {
+		return outputError(stderr)
+	}
+	return ExitSuccess
+}
+
+type loweredProgram struct {
+	program   mir.Program
+	entryName string
+}
+
+func lowerSingleProgram(argument, sourceRoot string, stderr io.Writer, subset string) (loweredProgram, int) {
+	limits := source.DefaultLimits()
+	loaded, err := loadSource(sourceRoot, argument, limits.MaxBytes)
+	if err != nil {
+		var tooLarge sourceTooLargeError
+		if errors.As(err, &tooLarge) {
+			value := source.ExhaustionDiagnostic(0)
+			if writeErr := writeDiagnostics(stderr, tooLarge.relativePath, nil, []diagnostic.Diagnostic{value}); writeErr != nil {
+				return loweredProgram{}, ExitInternalFailure
+			}
+			return loweredProgram{}, ExitSourceDiagnostics
+		}
+		return loweredProgram{}, inputError(stderr, err)
+	}
+	frontendResult, err := frontend.AnalyzeSyntax(loaded.file, limits)
+	if err != nil {
+		return loweredProgram{}, internalError(stderr)
+	}
+	if len(frontendResult.Tree.Diagnostics) > 0 {
+		if err := writeDiagnostics(stderr, loaded.file.RelativePath, frontendResult.Tree.Source, frontendResult.Tree.Diagnostics); err != nil {
+			return loweredProgram{}, ExitInternalFailure
+		}
+		return loweredProgram{}, ExitSourceDiagnostics
+	}
+	semanticResult := semantic.Analyze([]semantic.File{{Path: loaded.file.RelativePath, Module: frontendResult.AST}})
+	if len(semanticResult.Diagnostics) > 0 {
+		if err := writeSemanticDiagnostics(stderr, map[string][]byte{loaded.file.RelativePath: frontendResult.Tree.Source}, semanticResult.Diagnostics); err != nil {
+			return loweredProgram{}, ExitInternalFailure
+		}
+		return loweredProgram{}, ExitSourceDiagnostics
+	}
+	if len(semanticResult.Unsupported) > 0 {
+		if err := writeUnsupportedSemantics(stderr, semanticResult.Unsupported); err != nil {
+			return loweredProgram{}, ExitInternalFailure
+		}
+		return loweredProgram{}, ExitInvalidInvocation
+	}
+	resourceTypes := make([]hir.Type, 0, len(frontendResult.AST.Resources))
+	for _, resource := range frontendResult.AST.Resources {
+		resourceTypes = append(resourceTypes, hir.Type(frontendResult.AST.Path+"::"+resource.Name))
+	}
+	program, err := mir.Lower(semanticResult.HIR, mir.NewTypeProperties(resourceTypes))
+	if err != nil {
+		return loweredProgram{}, subsetCapabilityError(stderr, subset, err)
+	}
+	if failures := mir.Verify(program); len(failures) != 0 {
+		return loweredProgram{}, internalError(stderr)
+	}
+	entryName := frontendResult.AST.Path + "::main"
+	entry, found := programEntry(program, entryName)
+	if !found || len(entry.Parameters) != 0 || entry.ResultType != hir.TypeI32 {
+		return loweredProgram{}, subsetCapabilityError(stderr, subset, fmt.Errorf("entry %s must have type fn() -> i32", entryName))
+	}
+	return loweredProgram{program: program, entryName: entryName}, ExitSuccess
+}
+
+func programEntry(program mir.Program, name string) (mir.Function, bool) {
 	for _, function := range program.Functions {
 		if function.Name == name {
 			return function, true
@@ -180,8 +219,8 @@ func interpreterEntry(program mir.Program, name string) (mir.Function, bool) {
 	return mir.Function{}, false
 }
 
-func interpreterCapabilityError(stderr io.Writer, err error) int {
-	message := "requested program is outside the experimental interpreter subset"
+func subsetCapabilityError(stderr io.Writer, subset string, err error) int {
+	message := fmt.Sprintf("requested program is outside the experimental %s subset", subset)
 	if err != nil {
 		message += ": " + strings.TrimSpace(err.Error())
 	}
