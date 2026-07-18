@@ -23,11 +23,12 @@ The Go frontend currently exposes `fairyc experimental parse <file.fy>`,
 `fairyc experimental check-syntax <file.fy>`, and
 `fairyc experimental check-semantics <file.fy> [<file.fy>...]`. These are developer inspection commands whose
 spelling and numeric exit codes may change. `check-semantics` resolves names and creates typed HIR
-for an explicit bounded module set in the implemented scalar, safe-borrow, whole-resource, and Region subset.
+for an explicit bounded module set in the implemented scalar, safe-borrow, whole-resource, Region, and Result subset.
 It checks local last-use loans, borrow conflicts, borrow return origins, whole moves, cleanup states,
 branch joins, loop back-edges, Region parameter origins, `place`, and lexical Region escape when its
-Arena provider is included explicitly. It does not discover files, implement tagged resource payloads,
-reassignment/close ownership, Result propagation, or effects, generate code, or execute programs. In
+Arena provider is included explicitly. It also checks the fixture-backed Result return, discard,
+propagation, must-use, and error-compatibility boundary. It does not discover files, implement tagged
+resource payloads, complete must-use dataflow, reassignment/close ownership, or effects, generate code, or execute programs. In
 particular, it does not satisfy the planned `fairyc check` contract.
 
 Human developers can run the examples shown in the repository `README.md`. Agent verification uses

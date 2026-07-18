@@ -18,7 +18,9 @@ fixture-backed scalar and safe-borrow subset. Its semantic runner executes all 1
 and local Flow cases, including last-use loans and borrow-return origins. Whole-root resource Flow
 also executes all 7 v0 cases for moves, cleanup obligations, branch joins, and loop back-edges. The
 Region runner executes all 6 v1 cases, including package-proven `std::alloc::Arena`, hidden
-allocation origins, lexical escape, capability storage, and plain-region resource rejection. An unstable
+allocation origins, lexical escape, capability storage, and plain-region resource rejection. The
+Result runner executes all 6 v0 cases for must-use return/discard/propagation, exactly-once
+classification, non-Result `?`, and propagated error compatibility. An unstable
 `fairyc experimental` CLI can inspect, syntax-check, or semantic-check one source-root-relative
 `.fy` file or explicit module set. There is no stable CLI, tagged-resource Flow, MIR, interpreter, backend, standard
 library, runtime, package manager, supported target, or stable language revision yet.
@@ -33,16 +35,17 @@ go run ./cmd/fairyc experimental check-semantics examples/syntax/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/semantic/main.fy examples/semantic/math.fy
 go run ./cmd/fairyc experimental check-semantics examples/resources/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/regions/main.fy
+go run ./cmd/fairyc experimental check-semantics examples/results/main.fy
 go run ./cmd/fairyc experimental parse examples/syntax/main.fy
 ```
 
 Both commands treat the current directory as the temporary source root. `parse` emits versioned,
 deterministic JSON containing token and CST kinds and byte spans, but not source text, token text,
 literal values, or absolute paths. `check-semantics` accepts an explicit bounded list of source files
-for the currently implemented scalar, safe-borrow, whole-resource, and Region-parameter subset. It rejects duplicate paths, root
+for the currently implemented scalar, safe-borrow, whole-resource, Region-parameter, and Result subset. It rejects duplicate paths, root
 escapes, oversized input sets, and unsupported syntax rather than claiming success. The official
 `fairyc check` command remains unavailable until tagged resource payloads, reassignment/close rules,
-Result propagation, and effects exist.
+complete must-use dataflow, and effects exist.
 
 ## Design anchors
 

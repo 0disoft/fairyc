@@ -1,6 +1,8 @@
 // Package hir defines the typed High-level Intermediate Representation used after semantic analysis.
 package hir
 
+import "strings"
+
 // Type is one canonical Fairy C type in the implemented Stage 0 subset.
 type Type string
 
@@ -20,6 +22,40 @@ func SharedBorrow(element Type) Type {
 // MutableBorrow returns the canonical non-null exclusive-borrow type for element.
 func MutableBorrow(element Type) Type {
 	return Type("&mut " + string(element))
+}
+
+// Result returns the canonical compiler-known Result type for two payload types.
+func Result(success, failure Type) Type {
+	return Type("Result<" + string(success) + ", " + string(failure) + ">")
+}
+
+// ResultElements decomposes one canonical compiler-known Result type.
+func ResultElements(value Type) (success Type, failure Type, ok bool) {
+	text := string(value)
+	const prefix = "Result<"
+	if len(text) <= len(prefix)+1 || text[:len(prefix)] != prefix || text[len(text)-1] != '>' {
+		return TypeInvalid, TypeInvalid, false
+	}
+	inside := text[len(prefix) : len(text)-1]
+	depth := 0
+	for index := 0; index < len(inside); index++ {
+		switch inside[index] {
+		case '<':
+			depth++
+		case '>':
+			depth--
+		case ',':
+			if depth == 0 {
+				left := strings.TrimSpace(inside[:index])
+				right := strings.TrimSpace(inside[index+1:])
+				if left == "" || right == "" {
+					return TypeInvalid, TypeInvalid, false
+				}
+				return Type(left), Type(right), true
+			}
+		}
+	}
+	return TypeInvalid, TypeInvalid, false
 }
 
 // BorrowElement decomposes one canonical safe-borrow type.

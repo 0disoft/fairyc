@@ -39,6 +39,9 @@ func (c *typeChecker) checkFunction() hir.Function {
 	functionSymbol := c.analyzer.functions[c.function]
 	resultType := c.canonicalType(c.function.ResultType)
 	functionSymbol.typ = resultType
+	if errorSpan, ok := resultFailureSpan(c.function.ResultType); ok {
+		functionSymbol.resultError = errorSpan
+	}
 	result := hir.Function{
 		Symbol:     functionSymbol.id,
 		Name:       c.function.Name,
@@ -53,6 +56,9 @@ func (c *typeChecker) checkFunction() hir.Function {
 			continue
 		}
 		symbol.typ = c.canonicalType(parameter.Type)
+		if errorSpan, ok := resultFailureSpan(parameter.Type); ok {
+			symbol.resultError = errorSpan
+		}
 		parameterSpan := span(c.module.file.Path, parameter.NameSpan)
 		result.Parameters = append(result.Parameters, hir.Parameter{
 			Symbol: symbol.id,
@@ -242,6 +248,8 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 		result, nestedReturn = c.checkRegion(expression, expected)
 		_ = nestedReturn
 		actual = hir.TypeVoid
+	case syntax.KindPropagate:
+		actual = c.checkPropagate(expression, result)
 	default:
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "expression "+string(expression.Kind))
 		actual = hir.TypeInvalid
@@ -463,6 +471,9 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 		}
 	}
 	callee.typ = c.analyzer.canonicalType(c.analyzer.modules[callee.module], callee.function.ResultType)
+	if errorSpan, ok := resultFailureSpan(callee.function.ResultType); ok {
+		callee.resultError = errorSpan
+	}
 	return callee.typ
 }
 

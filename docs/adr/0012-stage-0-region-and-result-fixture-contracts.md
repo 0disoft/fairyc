@@ -33,7 +33,7 @@ Separate schemas keep a Region origin from being confused with a `Result` payloa
 - A compiler may organize Region and Result analysis however it wants internally, but it must reproduce the declared owning phase, canonical source facts, and diagnostics.
 - Region v1 covers `E3101` without papering over standard-library ownership with a fake local arena.
 - The first Result suite proves handling classification and error compatibility, not concrete tagged representation or cleanup order.
-- `internal/regionfixture` now proves the Region v1 contract, including the referenced package-provider boundary. Result remains fixture-only until its runner exists.
+- `internal/regionfixture` proves the Region v1 contract, including the referenced package-provider boundary. `internal/resultfixture` proves the initial Result v0 handling and compatibility contract; active resource-payload traces remain deferred to MIR and runtime evidence.
 
 ## Revisit conditions
 

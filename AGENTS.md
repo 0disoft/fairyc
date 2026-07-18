@@ -35,6 +35,7 @@ regenerate, or override compiler source.
 - Region fixtures: spec/fixtures/region/manifest-v1.json
 - Region fixture runner: internal/regionfixture/
 - Result fixtures: spec/fixtures/result/manifest-v0.json
+- Result fixture runner: internal/resultfixture/
 - MIR normalization fixtures: spec/fixtures/mir/manifest-v0.json
 - MIR verifier mutation fixtures: spec/fixtures/mir-verifier/manifest-v0.json
 - Resolved package graph fixtures: spec/fixtures/package/manifest-v0.json

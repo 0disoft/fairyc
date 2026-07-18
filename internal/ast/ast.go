@@ -17,9 +17,18 @@ type Module struct {
 	Imports   []Import
 	Structs   []Struct
 	Resources []Resource
+	Enums     []Enum
 	Functions []Function
 	Bindings  []Binding
 	Literals  []Literal
+}
+
+// Enum is one inert tagged type declaration before payload semantics are implemented.
+type Enum struct {
+	Name     string
+	Public   bool
+	Span     diagnostic.Span
+	NameSpan diagnostic.Span
 }
 
 // Struct is one inert named aggregate without compiler-owned cleanup.
@@ -150,6 +159,8 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 			module.Structs = append(module.Structs, lowerStruct(tree, child))
 		case syntax.KindResource:
 			module.Resources = append(module.Resources, lowerResource(tree, child))
+		case syntax.KindEnum:
+			module.Enums = append(module.Enums, lowerEnum(tree, child))
 		case syntax.KindFunction:
 			module.Functions = append(module.Functions, lowerFunction(tree, child))
 		}
@@ -185,6 +196,15 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 	}
 	walk(tree.Root)
 	return module, nil
+}
+
+func lowerEnum(tree *syntax.Tree, node syntax.Node) Enum {
+	return Enum{
+		Name:     node.Text,
+		Public:   containsKeywordBeforeName(tree, node, "pub", node.Text),
+		Span:     node.Span,
+		NameSpan: findIdentifierSpan(tree, node, node.Text, "enum"),
+	}
 }
 
 func lowerStruct(tree *syntax.Tree, node syntax.Node) Struct {

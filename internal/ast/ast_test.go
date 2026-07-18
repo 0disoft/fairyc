@@ -98,3 +98,19 @@ func TestLowerCapturesStructFields(t *testing.T) {
 		t.Fatalf("field = %+v", module.Structs[0].Fields[0])
 	}
 }
+
+func TestLowerCapturesEnumType(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nenum Error { Failed; }\n")
+	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	module, err := Lower(tree)
+	if err != nil {
+		t.Fatalf("Lower() error = %v", err)
+	}
+	if len(module.Enums) != 1 || module.Enums[0].Name != "Error" {
+		t.Fatalf("enums = %+v", module.Enums)
+	}
+}

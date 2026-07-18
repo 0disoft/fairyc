@@ -70,6 +70,7 @@ func (a *analyzer) flowFunction(module *moduleScope, function *ast.Function) {
 	a.checkLoanConflicts(module.file.Path, loans, inventory.assignments)
 	a.collectRegionOriginFacts(module, &inventory, origins)
 	a.resourceFlowFunction(module, function)
+	a.resultFlowFunction(module, function)
 
 	if _, _, returnsBorrow := hir.BorrowElement(a.functions[function].typ); !returnsBorrow {
 		return

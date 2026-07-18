@@ -17,12 +17,14 @@ type symbol struct {
 	source      string
 	declaration diagnostic.Span
 	typeSpan    diagnostic.Span
+	resultError diagnostic.Span
 	typ         hir.Type
 	mutable     bool
 	public      bool
 	function    *ast.Function
 	structure   *ast.Struct
 	resource    *ast.Resource
+	enumeration *ast.Enum
 }
 
 type moduleScope struct {
@@ -30,6 +32,7 @@ type moduleScope struct {
 	functions map[string]*symbol
 	structs   map[string]*symbol
 	resources map[string]*symbol
+	enums     map[string]*symbol
 	imports   map[string]*moduleScope
 }
 
@@ -50,6 +53,7 @@ type analyzer struct {
 	functions       map[*ast.Function]*symbol
 	structs         map[*ast.Struct]*symbol
 	resources       map[*ast.Resource]*symbol
+	enums           map[*ast.Enum]*symbol
 	regions         map[*ast.Expression]*symbol
 	regionType      *symbol
 	diagnostics     []Diagnostic
@@ -62,6 +66,7 @@ type analyzer struct {
 	resourceStates  []ResourceStateFact
 	expressionTypes map[*ast.Expression]hir.Type
 	regionOrigins   []RegionOriginFact
+	resultHandling  []ResultHandlingFact
 }
 
 func newAnalyzer(files []File) *analyzer {
@@ -75,6 +80,7 @@ func newAnalyzer(files []File) *analyzer {
 		functions:       make(map[*ast.Function]*symbol),
 		structs:         make(map[*ast.Struct]*symbol),
 		resources:       make(map[*ast.Resource]*symbol),
+		enums:           make(map[*ast.Enum]*symbol),
 		regions:         make(map[*ast.Expression]*symbol),
 		resourceTypes:   make(map[hir.Type]*resourceInfo),
 		expressionTypes: make(map[*ast.Expression]hir.Type),
@@ -84,6 +90,7 @@ func newAnalyzer(files []File) *analyzer {
 
 func (a *analyzer) resolve() {
 	a.declareModules()
+	a.declareEnums()
 	a.declareStructs()
 	a.declareResources()
 	a.declareFunctions()
@@ -115,10 +122,35 @@ func (a *analyzer) declareModules() {
 			functions: make(map[string]*symbol),
 			structs:   make(map[string]*symbol),
 			resources: make(map[string]*symbol),
+			enums:     make(map[string]*symbol),
 			imports:   make(map[string]*moduleScope),
 		}
 		a.modules[file.Module.Path] = module
 		a.moduleOrder = append(a.moduleOrder, module)
+	}
+}
+
+func (a *analyzer) declareEnums() {
+	for _, module := range a.moduleOrder {
+		for index := range module.file.Module.Enums {
+			enumeration := &module.file.Module.Enums[index]
+			if previous := module.item(enumeration.Name); previous != nil {
+				a.addDiagnostic("E0102", span(module.file.Path, enumeration.NameSpan), RelatedSpan{Role: "previous-declaration", Span: span(previous.source, previous.declaration)})
+				continue
+			}
+			value := &symbol{
+				id:          a.allocateSymbol(),
+				kind:        "enum",
+				name:        enumeration.Name,
+				module:      module.file.Module.Path,
+				source:      module.file.Path,
+				declaration: enumeration.NameSpan,
+				public:      enumeration.Public,
+				enumeration: enumeration,
+			}
+			module.enums[enumeration.Name] = value
+			a.enums[enumeration] = value
+		}
 	}
 }
 
@@ -375,6 +407,9 @@ func (m *moduleScope) item(name string) *symbol {
 		return value
 	}
 	if value := m.structs[name]; value != nil {
+		return value
+	}
+	if value := m.enums[name]; value != nil {
 		return value
 	}
 	return m.resources[name]

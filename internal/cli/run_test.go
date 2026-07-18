@@ -197,6 +197,17 @@ func TestExperimentalCheckSemanticsReportsRegionCapabilityStorage(t *testing.T) 
 	}
 }
 
+func TestExperimentalCheckSemanticsReportsQuestionOnNonResult(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\nfn invalid(input: i32) -> i32 { input? }\n")
+	code, stdout, stderr := runForTest([]string{"experimental", "check-semantics", "main.fy"}, root)
+	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "E4102: postfix ? requires a Result value") ||
+		!strings.Contains(stderr, "result-expression: main.fy") {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
 func TestRepositorySyntaxExampleStaysRunnable(t *testing.T) {
 	root := filepath.Clean(filepath.Join("..", ".."))
 	code, stdout, stderr := runForTest(
@@ -238,6 +249,17 @@ func TestRepositoryRegionExampleStaysRunnable(t *testing.T) {
 		root,
 	)
 	if code != ExitSuccess || stdout != "semantics ok: examples/regions/main.fy (typed HIR: 1 function(s))\n" || stderr != "" {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
+func TestRepositoryResultExampleStaysRunnable(t *testing.T) {
+	root := filepath.Clean(filepath.Join("..", ".."))
+	code, stdout, stderr := runForTest(
+		[]string{"experimental", "check-semantics", "examples/results/main.fy"},
+		root,
+	)
+	if code != ExitSuccess || stdout != "semantics ok: examples/results/main.fy (typed HIR: 3 function(s))\n" || stderr != "" {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
 	}
 }

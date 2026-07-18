@@ -35,6 +35,7 @@ type Result struct {
 	Types            []TypeFact
 	Borrows          []BorrowFact
 	RegionOrigins    []RegionOriginFact
+	ResultHandling   []ResultHandlingFact
 	ResourceStates   []ResourceStateFact
 	Unsupported      []Unsupported
 }
@@ -90,6 +91,16 @@ type RegionOriginFact struct {
 	Escapes    bool
 }
 
+// ResultHandlingFact records one source-visible handling decision for a must-use Result.
+type ResultHandlingFact struct {
+	Expression      hir.Span
+	Mode            string
+	ResultType      string
+	SuccessType     string
+	ErrorType       string
+	EvaluationCount int
+}
+
 // ResourceState is the source-visible ownership state of one complete resource root.
 type ResourceState string
 
@@ -139,6 +150,7 @@ func Analyze(files []File) Result {
 	result.Types = analyzer.types
 	result.Borrows = analyzer.borrows
 	result.RegionOrigins = analyzer.regionOrigins
+	result.ResultHandling = analyzer.resultHandling
 	result.ResourceStates = analyzer.resourceStates
 	result.Unsupported = analyzer.unsupported
 	if len(result.Diagnostics) > 0 {
@@ -192,6 +204,15 @@ func (a *analyzer) finish() {
 	})
 	a.regionOrigins = slices.CompactFunc(a.regionOrigins, func(left, right RegionOriginFact) bool {
 		return compareSpan(left.Allocation, right.Allocation) == 0 && left.Operation == right.Operation && left.Origin == right.Origin && left.Escapes == right.Escapes && optionalSpanEqual(left.LastUse, right.LastUse)
+	})
+	slices.SortFunc(a.resultHandling, func(left, right ResultHandlingFact) int {
+		if n := compareSpan(left.Expression, right.Expression); n != 0 {
+			return n
+		}
+		return cmp.Compare(left.Mode, right.Mode)
+	})
+	a.resultHandling = slices.CompactFunc(a.resultHandling, func(left, right ResultHandlingFact) bool {
+		return compareSpan(left.Expression, right.Expression) == 0 && left.Mode == right.Mode && left.ResultType == right.ResultType && left.SuccessType == right.SuccessType && left.ErrorType == right.ErrorType && left.EvaluationCount == right.EvaluationCount
 	})
 	slices.SortFunc(a.resourceStates, func(left, right ResourceStateFact) int {
 		if n := compareSpan(left.Binding, right.Binding); n != 0 {

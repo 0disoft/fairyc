@@ -155,6 +155,12 @@ func semanticDiagnosticSummary(code string) string {
 		return "compiler-owned Region capability cannot be stored"
 	case "E3104":
 		return "compiler-owned Region capability cannot be constructed directly"
+	case "E4101":
+		return "Result value must be returned, propagated, matched, or explicitly discarded"
+	case "E4102":
+		return "postfix ? requires a Result value"
+	case "E4103":
+		return "propagated Result error type does not match the enclosing return type"
 	default:
 		return "semantic diagnostic"
 	}

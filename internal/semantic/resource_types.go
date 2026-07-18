@@ -20,6 +20,12 @@ type resourceField struct {
 
 func (a *analyzer) prepareAggregateIdentities() {
 	for _, module := range a.moduleOrder {
+		for index := range module.file.Module.Enums {
+			enumeration := &module.file.Module.Enums[index]
+			if value := a.enums[enumeration]; value != nil {
+				value.typ = hir.Type(module.file.Module.Path + "::" + enumeration.Name)
+			}
+		}
 		for index := range module.file.Module.Structs {
 			structure := &module.file.Module.Structs[index]
 			if value := a.structs[structure]; value != nil {
@@ -114,6 +120,14 @@ func (a *analyzer) canonicalType(module *moduleScope, reference ast.TypeReferenc
 
 func (a *analyzer) canonicalTypeText(module *moduleScope, text string) (hir.Type, bool) {
 	trimmed := strings.TrimSpace(text)
+	if result, ok := parseResultType(trimmed); ok {
+		success, successOK := a.canonicalTypeText(module, result.success)
+		failure, failureOK := a.canonicalTypeText(module, result.failure)
+		if !successOK || !failureOK {
+			return hir.TypeInvalid, false
+		}
+		return hir.Result(success, failure), true
+	}
 	switch trimmed {
 	case "bool":
 		return hir.TypeBool, true
@@ -148,7 +162,7 @@ func (a *analyzer) canonicalTypeText(module *moduleScope, text string) (hir.Type
 			target = imported.item(parts[1])
 		}
 	}
-	if target == nil || (target.resource == nil && target.structure == nil) {
+	if target == nil || (target.resource == nil && target.structure == nil && target.enumeration == nil) {
 		return hir.TypeInvalid, false
 	}
 	return target.typ, true
