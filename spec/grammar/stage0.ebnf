@@ -184,8 +184,10 @@ match_arm = pattern "=>" expression "," ;
 
 (* The compiler-known Stage 0 Result spellings are Result::Ok(expression) and
    Result::Err(expression), matched by Result::Ok(binding) and
-   Result::Err(binding). Their arity, contextual type, and exhaustiveness are
-   semantic checks over the general path/call and pattern productions. *)
+   Result::Err(binding). Option uses Option::Some(expression) and the bare path
+   Option::None, matched by Option::Some(binding) and bare Option::None. Their
+   arity, contextual type, and exhaustiveness are semantic checks over the
+   general path/call and pattern productions. *)
 pattern = "_"
         | path
         | path "(" IDENT ")"

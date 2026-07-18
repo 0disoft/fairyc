@@ -334,7 +334,7 @@ func (a *analyzer) resolveExpression(module *moduleScope, scope *lexicalScope, e
 		a.resolveRegion(module, scope, expression)
 		return
 	}
-	if expression.Kind == syntax.KindPath && !isResultVariantPath(expression.Text) {
+	if expression.Kind == syntax.KindPath && !isBuiltinVariantPath(expression.Text) {
 		a.resolvePath(module, scope, expression)
 	}
 	if expression.Block != nil {
@@ -358,8 +358,16 @@ func (a *analyzer) resolveMatch(module *moduleScope, scope *lexicalScope, expres
 		pattern := arm.Children[0]
 		body := arm.Children[1]
 		armScope := &lexicalScope{parent: scope, names: make(map[string]*symbol)}
-		if pattern == nil || pattern.Kind != syntax.KindPattern || !isResultVariantPath(pattern.Text) || len(pattern.Children) != 2 {
+		if pattern == nil || pattern.Kind != syntax.KindPattern || !isBuiltinVariantPath(pattern.Text) {
 			a.resolveExpression(module, armScope, pattern)
+			a.resolveExpression(module, armScope, body)
+			continue
+		}
+		if variant, option := optionVariantPath(pattern.Text); option && variant == optionVariantNone && len(pattern.Children) == 1 {
+			a.resolveExpression(module, armScope, body)
+			continue
+		}
+		if len(pattern.Children) != 2 {
 			a.resolveExpression(module, armScope, body)
 			continue
 		}

@@ -28,6 +28,9 @@ func (p TypeProperties) NeedsDrop(value hir.Type) bool {
 	if _, found := p.resources[value]; found {
 		return true
 	}
+	if element, option := hir.OptionElement(value); option {
+		return p.NeedsDrop(element)
+	}
 	success, failure, result := hir.ResultElements(value)
 	return result && (p.NeedsDrop(success) || p.NeedsDrop(failure))
 }
@@ -132,6 +135,8 @@ const (
 	OperationBinary          OperationKind = "binary"
 	OperationResultConstruct OperationKind = "result-construct"
 	OperationResultPayload   OperationKind = "result-payload"
+	OperationOptionConstruct OperationKind = "option-construct"
+	OperationOptionPayload   OperationKind = "option-payload"
 )
 
 // LocalID identifies one source local, parameter, or compiler temporary.

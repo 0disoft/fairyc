@@ -120,6 +120,13 @@ func (a *analyzer) canonicalType(module *moduleScope, reference ast.TypeReferenc
 
 func (a *analyzer) canonicalTypeText(module *moduleScope, text string) (hir.Type, bool) {
 	trimmed := strings.TrimSpace(text)
+	if option, ok := parseOptionType(trimmed); ok {
+		element, elementOK := a.canonicalTypeText(module, option)
+		if !elementOK {
+			return hir.TypeInvalid, false
+		}
+		return hir.Option(element), true
+	}
 	if result, ok := parseResultType(trimmed); ok {
 		success, successOK := a.canonicalTypeText(module, result.success)
 		failure, failureOK := a.canonicalTypeText(module, result.failure)

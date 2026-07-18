@@ -226,6 +226,8 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		return l.lowerCall(expression)
 	case "result-variant":
 		return l.lowerResultVariant(expression)
+	case "option-variant":
+		return l.lowerOptionVariant(expression)
 	case "binary":
 		if len(expression.Children) != 2 {
 			return Operand{}, fmt.Errorf("binary expression has %d children", len(expression.Children))
@@ -287,32 +289,73 @@ func (l *functionLowerer) lowerResultVariant(expression *hir.Expression) (Operan
 	return Operand{Kind: OperandLocal, Local: destination}, nil
 }
 
+func (l *functionLowerer) lowerOptionVariant(expression *hir.Expression) (Operand, error) {
+	if expression.Variant != "some" && expression.Variant != "none" {
+		return Operand{}, fmt.Errorf("malformed Option variant %q", expression.Variant)
+	}
+	operands := make([]Operand, 0, 1)
+	if expression.Variant == "some" {
+		if len(expression.Children) != 1 {
+			return Operand{}, fmt.Errorf("Option::Some has %d payloads", len(expression.Children))
+		}
+		payload, err := l.lowerExpression(&expression.Children[0])
+		if err != nil {
+			return Operand{}, err
+		}
+		if payload.Kind == OperandInvalid {
+			return Operand{}, fmt.Errorf("Option::Some payload has no value")
+		}
+		operands = append(operands, payload)
+	} else if len(expression.Children) != 0 {
+		return Operand{}, fmt.Errorf("Option::None has %d payloads", len(expression.Children))
+	}
+	destination := l.newTemporary()
+	l.appendOperation(Operation{
+		Kind: OperationOptionConstruct, Span: expression.Span, DestinationLocal: destination,
+		Operands: operands, Variant: expression.Variant,
+	})
+	return Operand{Kind: OperandLocal, Local: destination}, nil
+}
+
 func (l *functionLowerer) lowerMatch(expression *hir.Expression) (Operand, error) {
 	if len(expression.Children) != 1 || len(expression.Arms) != 2 {
-		return Operand{}, fmt.Errorf("Result match has %d scrutinees and %d arms", len(expression.Children), len(expression.Arms))
+		return Operand{}, fmt.Errorf("built-in match has %d scrutinees and %d arms", len(expression.Children), len(expression.Arms))
+	}
+	family := ""
+	firstVariant := ""
+	secondVariant := ""
+	payloadOperation := OperationKind("")
+	if _, _, result := hir.ResultElements(expression.Children[0].Type); result {
+		family, firstVariant, secondVariant = "result", "ok", "err"
+		payloadOperation = OperationResultPayload
+	} else if _, option := hir.OptionElement(expression.Children[0].Type); option {
+		family, firstVariant, secondVariant = "option", "some", "none"
+		payloadOperation = OperationOptionPayload
+	} else {
+		return Operand{}, fmt.Errorf("match scrutinee type %q is not an implemented built-in tag", expression.Children[0].Type)
 	}
 	scrutinee, err := l.lowerExpression(&expression.Children[0])
 	if err != nil {
 		return Operand{}, err
 	}
 	if scrutinee.Kind == OperandInvalid {
-		return Operand{}, fmt.Errorf("Result match scrutinee has no value")
+		return Operand{}, fmt.Errorf("%s match scrutinee has no value", family)
 	}
 	branchLive := cloneLive(l.live)
-	okBlock := l.newBlock()
-	errBlock := l.newBlock()
+	firstBlock := l.newBlock()
+	secondBlock := l.newBlock()
 	joinBlock := l.newBlock()
 	l.terminate(Terminator{
 		Kind: TerminatorSwitch, Span: expression.Children[0].Span,
-		Successors: []BlockID{okBlock, errBlock}, UnwindSuccessor: NoBlock,
-		SwitchKind: "result", SwitchOperands: []Operand{scrutinee},
+		Successors: []BlockID{firstBlock, secondBlock}, UnwindSuccessor: NoBlock,
+		SwitchKind: family, SwitchOperands: []Operand{scrutinee},
 	})
 
 	destination := NoLocal
 	if expression.Type != hir.TypeVoid {
 		destination = l.newTemporary()
 	}
-	blocks := map[string]BlockID{"ok": okBlock, "err": errBlock}
+	blocks := map[string]BlockID{firstVariant: firstBlock, secondVariant: secondBlock}
 	continuing := 0
 	var mergedLive map[hir.SymbolID]bool
 	seen := make(map[string]struct{}, 2)
@@ -320,18 +363,22 @@ func (l *functionLowerer) lowerMatch(expression *hir.Expression) (Operand, error
 		arm := &expression.Arms[index]
 		block, found := blocks[arm.Variant]
 		if !found {
-			return Operand{}, fmt.Errorf("unsupported Result match variant %q", arm.Variant)
+			return Operand{}, fmt.Errorf("unsupported %s match variant %q", family, arm.Variant)
 		}
 		if _, duplicate := seen[arm.Variant]; duplicate {
-			return Operand{}, fmt.Errorf("duplicate Result match variant %q", arm.Variant)
+			return Operand{}, fmt.Errorf("duplicate %s match variant %q", family, arm.Variant)
 		}
 		seen[arm.Variant] = struct{}{}
 		l.current = block
 		l.live = cloneLive(branchLive)
-		l.appendOperation(Operation{
-			Kind: OperationResultPayload, Span: arm.BindingSpan, DestinationLocal: LocalID(arm.Binding),
-			Operands: []Operand{scrutinee}, Variant: arm.Variant,
-		})
+		if arm.Binding != hir.NoSymbol {
+			l.appendOperation(Operation{
+				Kind: payloadOperation, Span: arm.BindingSpan, DestinationLocal: LocalID(arm.Binding),
+				Operands: []Operand{scrutinee}, Variant: arm.Variant,
+			})
+		} else if family != "option" || arm.Variant != "none" {
+			return Operand{}, fmt.Errorf("%s match variant %q is missing its payload binding", family, arm.Variant)
+		}
 		armValue, lowerErr := l.lowerExpression(&arm.Expression)
 		if lowerErr != nil {
 			return Operand{}, lowerErr
@@ -341,7 +388,7 @@ func (l *functionLowerer) lowerMatch(expression *hir.Expression) (Operand, error
 		}
 		if destination != NoLocal {
 			if armValue.Kind == OperandInvalid {
-				return Operand{}, fmt.Errorf("value-producing Result match arm %q has no value", arm.Variant)
+				return Operand{}, fmt.Errorf("value-producing %s match arm %q has no value", family, arm.Variant)
 			}
 			l.appendOperation(Operation{Kind: OperationAssign, Span: arm.Expression.Span, DestinationLocal: destination, Operands: []Operand{armValue}})
 		}
@@ -349,12 +396,12 @@ func (l *functionLowerer) lowerMatch(expression *hir.Expression) (Operand, error
 		if continuing == 0 {
 			mergedLive = cloneLive(l.live)
 		} else if !sameLiveState(mergedLive, l.live) {
-			return Operand{}, fmt.Errorf("Result match arms disagree on resource state after Flow validation")
+			return Operand{}, fmt.Errorf("%s match arms disagree on resource state after Flow validation", family)
 		}
 		continuing++
 	}
 	if len(seen) != 2 {
-		return Operand{}, fmt.Errorf("non-exhaustive Result match")
+		return Operand{}, fmt.Errorf("non-exhaustive %s match", family)
 	}
 	l.current = joinBlock
 	if continuing == 0 {

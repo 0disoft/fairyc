@@ -160,6 +160,20 @@ func verifyFunction(function *Function) []VerificationError {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "Result operation has an invalid variant"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationOptionConstruct:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				validShape := operation.DestinationLocal != NoLocal &&
+					(operation.Variant == "some" && len(operation.Operands) == 1 || operation.Variant == "none" && len(operation.Operands) == 0)
+				if !validShape {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "Option construction shape does not match its variant"})
+				}
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationOptionPayload:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if operation.DestinationLocal == NoLocal || operation.Variant != "some" || len(operation.Operands) != 1 {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "Option payload extraction must target Some"})
+				}
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationResultSwitch:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				if len(operation.Operands) != 1 {
@@ -242,6 +256,8 @@ func validSwitchShape(terminator Terminator) bool {
 	case "bool":
 		return len(terminator.SwitchOperands) == 1 && len(terminator.Successors) == 2
 	case "result":
+		return len(terminator.SwitchOperands) == 1 && len(terminator.Successors) == 2
+	case "option":
 		return len(terminator.SwitchOperands) == 1 && len(terminator.Successors) == 2
 	case "checked-division":
 		return len(terminator.SwitchOperands) == 2 && len(terminator.Successors) == 2

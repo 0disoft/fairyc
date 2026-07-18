@@ -8,6 +8,7 @@
   "contracts": [
     "docs/product/02-spec.md",
     "docs/adr/0012-stage-0-region-and-result-fixture-contracts.md",
+    "docs/adr/0017-stage-0-result-constructors-and-match.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/drop-elaboration-v0.md",
     "docs/diagnostics/catalog-v0.md"

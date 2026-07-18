@@ -24,6 +24,44 @@ func MutableBorrow(element Type) Type {
 	return Type("&mut " + string(element))
 }
 
+// Option returns the canonical compiler-known Option type for one payload type.
+func Option(element Type) Type {
+	return Type("Option<" + string(element) + ">")
+}
+
+// OptionElement decomposes one canonical compiler-known Option type.
+func OptionElement(value Type) (element Type, ok bool) {
+	text := string(value)
+	const prefix = "Option<"
+	if len(text) <= len(prefix)+1 || text[:len(prefix)] != prefix || text[len(text)-1] != '>' {
+		return TypeInvalid, false
+	}
+	inside := strings.TrimSpace(text[len(prefix) : len(text)-1])
+	if inside == "" {
+		return TypeInvalid, false
+	}
+	depth := 0
+	for index := 0; index < len(inside); index++ {
+		switch inside[index] {
+		case '<':
+			depth++
+		case '>':
+			depth--
+			if depth < 0 {
+				return TypeInvalid, false
+			}
+		case ',':
+			if depth == 0 {
+				return TypeInvalid, false
+			}
+		}
+	}
+	if depth != 0 {
+		return TypeInvalid, false
+	}
+	return Type(inside), true
+}
+
 // Result returns the canonical compiler-known Result type for two payload types.
 func Result(success, failure Type) Type {
 	return Type("Result<" + string(success) + ", " + string(failure) + ">")

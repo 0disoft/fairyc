@@ -14,13 +14,13 @@ The MIR interpreter must become the first executable semantics oracle without qu
 
 Version the first interpreter fixture surface as `fairyc.interpreter-fixtures/v0`. Every case starts from Fairy C source and must complete parser, semantic, Flow, MIR lowering, and MIR verification before interpretation. The first closed slice accepts one explicitly named zero-argument module `main() -> i32` entry and observes either an exact `i32` return or one canonical trap category. The experimental CLI selects the input file's declared module and its `main`; this does not settle future package entry selection.
 
-The cases cover literal return, scalar function calls with left-to-right arguments, checked addition, boolean `if` branches, source short-circuiting, scalar `while`, division-by-zero trapping, and the bounded interpreter step limit. The interpreter consumes the same mutable-local MIR handed to later backends. It does not evaluate HIR or reconstruct source operators after MIR lowering.
+The initial cases cover literal return, scalar function calls with left-to-right arguments, checked addition, boolean `if` branches, source short-circuiting, scalar `while`, division-by-zero trapping, and the bounded interpreter step limit. Later v0 cases extend the same manifest with scalar `Result` and `Option` construction, discriminant branches, payload extraction, and Result propagation. The interpreter consumes the same mutable-local MIR handed to later backends. It does not evaluate HIR or reconstruct source operators after MIR lowering.
 
 ## Consequences
 
-- A fixture pass proves the complete source-to-interpreter path for the listed scalar subset.
+- A fixture pass proves the complete source-to-interpreter path for the listed scalar and inert-tagged subset.
 - The CLI may expose the same path under an explicitly unstable `experimental run` command without defining stable `fairyc run` semantics.
-- Tagged values, resource payloads, drop traces, Region reset, controlled I/O, process output, arguments, and host integration remain explicit deferrals.
+- Resource-bearing tagged values, drop traces, Region reset, controlled I/O, process output, arguments, and host integration remain explicit deferrals.
 - A new interpreter behavior requires synchronized MIR representation, verifier coverage, fixture schema or cases, CLI behavior when exposed, and documentation.
 
 ## Rejected alternatives

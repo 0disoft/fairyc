@@ -96,6 +96,7 @@ type valueKind uint8
 const (
 	valueI32 valueKind = iota + 1
 	valueResult
+	valueOption
 )
 
 type runtimeValue struct {
@@ -117,6 +118,24 @@ func resultValue(variant string, payload runtimeValue) (runtimeValue, error) {
 	return runtimeValue{kind: valueResult, variant: variant, payload: &copy}, nil
 }
 
+func optionValue(variant string, payload *runtimeValue) (runtimeValue, error) {
+	switch variant {
+	case "some":
+		if payload == nil {
+			return runtimeValue{}, fmt.Errorf("Option::Some has no payload")
+		}
+		copy := *payload
+		return runtimeValue{kind: valueOption, variant: variant, payload: &copy}, nil
+	case "none":
+		if payload != nil {
+			return runtimeValue{}, fmt.Errorf("Option::None has a payload")
+		}
+		return runtimeValue{kind: valueOption, variant: variant}, nil
+	default:
+		return runtimeValue{}, fmt.Errorf("invalid Option variant %q", variant)
+	}
+}
+
 func (v runtimeValue) asI32() (int32, error) {
 	if v.kind != valueI32 {
 		return 0, capabilityError("value is not an executable i32 scalar")
@@ -130,6 +149,13 @@ func (v runtimeValue) resultPayload(expected string) (runtimeValue, error) {
 	}
 	if v.variant != expected {
 		return runtimeValue{}, fmt.Errorf("Result payload expects %q, got %q", expected, v.variant)
+	}
+	return *v.payload, nil
+}
+
+func (v runtimeValue) optionPayload() (runtimeValue, error) {
+	if v.kind != valueOption || v.variant != "some" || v.payload == nil {
+		return runtimeValue{}, capabilityError("value is not an executable Option::Some")
 	}
 	return *v.payload, nil
 }
@@ -216,6 +242,32 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				payload, err := result.resultPayload(operation.Variant)
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("Result payload in %q: %w", function.Name, err)
+				}
+				locals[operation.DestinationLocal] = payload
+			case mir.OperationOptionConstruct:
+				var payload *runtimeValue
+				if operation.Variant == "some" {
+					value, err := evaluateOne(locals, operation.Operands)
+					if err != nil {
+						return callCompletion{}, fmt.Errorf("Option construction in %q: %w", function.Name, err)
+					}
+					payload = &value
+				} else if len(operation.Operands) != 0 {
+					return callCompletion{}, fmt.Errorf("Option::None construction in %q has a payload", function.Name)
+				}
+				constructed, err := optionValue(operation.Variant, payload)
+				if err != nil {
+					return callCompletion{}, err
+				}
+				locals[operation.DestinationLocal] = constructed
+			case mir.OperationOptionPayload:
+				option, err := evaluateOne(locals, operation.Operands)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("Option payload in %q: %w", function.Name, err)
+				}
+				payload, err := option.optionPayload()
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("Option payload in %q: %w", function.Name, err)
 				}
 				locals[operation.DestinationLocal] = payload
 			}
@@ -369,6 +421,24 @@ func evaluateSwitch(locals map[mir.LocalID]runtimeValue, terminator mir.Terminat
 			return terminator.Successors[1], "", nil
 		}
 		return mir.NoBlock, "", fmt.Errorf("Result switch received invalid variant %q", value.variant)
+	case "option":
+		value, err := evaluateOne(locals, terminator.SwitchOperands)
+		if err != nil {
+			return mir.NoBlock, "", err
+		}
+		if value.kind != valueOption {
+			return mir.NoBlock, "", capabilityError("Option switch received a non-Option value")
+		}
+		if len(terminator.Successors) != 2 {
+			return mir.NoBlock, "", fmt.Errorf("Option switch has %d successors, want 2", len(terminator.Successors))
+		}
+		if value.variant == "some" && value.payload != nil {
+			return terminator.Successors[0], "", nil
+		}
+		if value.variant == "none" && value.payload == nil {
+			return terminator.Successors[1], "", nil
+		}
+		return mir.NoBlock, "", fmt.Errorf("Option switch received invalid variant %q", value.variant)
 	case "checked-division":
 		left, right, err := evaluateTwoI32(locals, terminator.SwitchOperands)
 		if err != nil {

@@ -152,6 +152,40 @@ fn unwrap(input: Result<i32, i32>) -> i32 {
 	}
 }
 
+func TestAnalyzeBuildsQualifiedOptionConstructorsAndMatch(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn choose(present: bool) -> Option<i32> {
+    if present { Option::Some(42) } else { Option::None }
+}
+fn unwrap(input: Option<i32>) -> i32 {
+    match input {
+        Option::Some(value) => value,
+        Option::None => 0,
+    }
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+	if len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].Functions) != 2 {
+		t.Fatalf("HIR modules = %+v", result.HIR.Modules)
+	}
+	choose := result.HIR.Modules[0].Functions[0]
+	if choose.Body.Tail == nil || choose.Body.Tail.Kind != "if" || len(choose.Body.Tail.Children) != 3 ||
+		choose.Body.Tail.Children[1].Block == nil || choose.Body.Tail.Children[1].Block.Tail == nil || choose.Body.Tail.Children[1].Block.Tail.Kind != "option-variant" ||
+		choose.Body.Tail.Children[2].Block == nil || choose.Body.Tail.Children[2].Block.Tail == nil || choose.Body.Tail.Children[2].Block.Tail.Variant != "none" {
+		t.Fatalf("choose tail = %+v", choose.Body.Tail)
+	}
+	unwrap := result.HIR.Modules[0].Functions[1]
+	if unwrap.Body.Tail == nil || unwrap.Body.Tail.Kind != "match" || len(unwrap.Body.Tail.Arms) != 2 {
+		t.Fatalf("unwrap tail = %+v", unwrap.Body.Tail)
+	}
+	if unwrap.Body.Tail.Arms[0].Variant != "some" || unwrap.Body.Tail.Arms[1].Variant != "none" || unwrap.Body.Tail.Arms[1].Binding != hir.NoSymbol {
+		t.Fatalf("Option match arms = %+v", unwrap.Body.Tail.Arms)
+	}
+}
+
 func analyzeText(t *testing.T, files map[string]string) semantic.Result {
 	t.Helper()
 	inputs := make([]semantic.File, 0, len(files))

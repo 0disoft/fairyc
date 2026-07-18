@@ -17,6 +17,19 @@ Fairy C evaluates expression operands, aggregate fields, and call arguments from
 
 The explicit discard spelling is `discard expression;`. Discarding `Option` or `Result` drops only the active payload. A restricted user enum cannot contain a resource payload in Stage 0.
 
+Stage 0 constructs Option variants with compiler-known qualified forms:
+
+```fy
+Option::Some(value)
+Option::None
+```
+
+Both forms require one contextual `Option<T>` type. `Option::Some` carries exactly one payload;
+`Option::None` is a bare variant and is not callable. A shallow Option match contains exactly one
+`Option::Some(binding)` arm and one bare `Option::None` arm. The None arm creates no binding and no
+payload extraction. Wildcards, guards, nested patterns, and resource payload execution remain
+outside this slice.
+
 Stage 0 constructs Result variants with compiler-known qualified paths:
 
 ```fy
@@ -34,7 +47,12 @@ ref-style payload bindings are outside this slice.
 
 `expr?` evaluates `expr` once, branches on the result tag, moves the success payload into the continuation, and moves the error payload into the function return path. Normal cleanup for every exited scope runs before that return. No backend receives a `?` operator.
 
-The initial Result fixtures classify an expression as returned, discarded, or propagated, record canonical success and error types, and assert exactly-once evaluation. Their parameter-driven cases remain valid evidence for handling independent of construction. Constructor and shallow-match cases use the qualified ADR 0017 spellings when their typed runner is enabled. The MIR fixture suite keeps its parameter-driven resource-error payload move until active resource-payload construction and drop traces are executable.
+The Result fixtures classify expressions as returned, discarded, propagated, constructed, or
+matched, record canonical success and error types, and assert exactly-once evaluation. Their
+parameter-driven cases remain valid evidence for handling independent of construction, while the
+qualified ADR 0017 constructor and match cases execute through typed HIR. Scalar Result and Option
+variants execute through verified MIR; the parameter-driven resource-error case remains the bridge
+until active resource-payload construction and drop traces are executable.
 
 ## Normal exits
 

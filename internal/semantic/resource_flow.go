@@ -305,8 +305,14 @@ func (a *analyzer) recordResourceStates(environment resourceEnvironment, at hir.
 }
 
 func (a *analyzer) isResource(value hir.Type) bool {
-	_, found := a.resourceTypes[value]
-	return found
+	if _, found := a.resourceTypes[value]; found {
+		return true
+	}
+	if element, option := hir.OptionElement(value); option {
+		return a.isResource(element)
+	}
+	success, failure, result := hir.ResultElements(value)
+	return result && (a.isResource(success) || a.isResource(failure))
 }
 
 func cloneResourceEnvironment(source resourceEnvironment) resourceEnvironment {

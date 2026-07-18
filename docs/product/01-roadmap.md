@@ -26,9 +26,9 @@ rejection. Result Flow executes all 8 result v0 cases, including qualified scala
 exhaustive shallow matching. Mutable-local MIR lowering and verification
 execute all 5 MIR normalization v0 cases for the current scalar, resource, Result, cleanup, call,
 and division-trap subset. All 8 verifier baselines and 15 isolated mutation cases execute through
-the same MIR verifier. The first MIR interpreter executes all 12 interpreter v0 cases, including
-scalar `Result` construction, exhaustive matching, and both `?` paths, and is exposed by the
-unstable `experimental run` command. Tagged `Option`, resource-bearing payload traces, Region
+the same MIR verifier. The first MIR interpreter executes all 14 interpreter v0 cases, including
+scalar `Option` and `Result` construction, exhaustive matching, and both Result `?` paths, and is
+exposed by the unstable `experimental run` command. Resource-bearing payload traces, Region
 runtime behavior, I/O intrinsics, reassignment/close rules, and every later Phase 1 capability
 remain unimplemented.
 

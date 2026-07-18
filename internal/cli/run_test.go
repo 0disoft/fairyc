@@ -239,6 +239,26 @@ fn main() -> i32 {
 	}
 }
 
+func TestExperimentalRunInterpretsOptionVariants(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", `module main;
+fn choose(present: bool) -> Option<i32> {
+    if present { Option::Some(42) } else { Option::None }
+}
+fn main() -> i32 {
+    match choose(false) {
+        Option::Some(value) => value,
+        Option::None => 42,
+    }
+}
+`)
+	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
+	if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
 func TestExperimentalRunReportsCanonicalTrap(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()

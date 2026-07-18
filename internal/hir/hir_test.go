@@ -17,3 +17,19 @@ func TestResultElementsRejectsNonResult(t *testing.T) {
 		t.Fatal("ResultElements() accepted i32")
 	}
 }
+
+func TestOptionElementPreservesNestedPayload(t *testing.T) {
+	t.Parallel()
+	value := Option(Result(TypeI32, Option(TypeBool)))
+	element, ok := OptionElement(value)
+	if !ok || element != Result(TypeI32, Option(TypeBool)) {
+		t.Fatalf("OptionElement(%q) = %q, %v", value, element, ok)
+	}
+}
+
+func TestOptionElementRejectsMultiplePayloads(t *testing.T) {
+	t.Parallel()
+	if _, ok := OptionElement(Type("Option<i32, bool>")); ok {
+		t.Fatal("OptionElement() accepted two payload types")
+	}
+}

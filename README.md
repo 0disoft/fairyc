@@ -26,12 +26,13 @@ error compatibility. The MIR runner executes all
 left-to-right call evaluation, complete-root moves, normal-exit cleanup order, `Result` error
 cleanup, and non-unwinding trap paths. The verifier mutation runner constructs all 8 named
 baselines and proves all 15 isolated `V1001` through `V1701` rejection recipes. The first MIR
-interpreter slice executes all 12 v0 cases for literal return, function-call arithmetic,
+interpreter slice executes all 14 v0 cases for literal return, function-call arithmetic,
 boolean branches and logical not, source `&&` and `||` short-circuiting, scalar `while`, scalar
-`Result` construction/matching/propagation, division-by-zero traps, and bounded step-limit
+`Option` construction/matching, scalar `Result` construction/matching/propagation,
+division-by-zero traps, and bounded step-limit
 termination. An unstable `fairyc experimental` CLI can inspect, syntax-check,
 semantic-check, or interpret one source-root-relative `.fy` file, while semantic checking also
-accepts an explicit module set. There is no stable CLI, tagged `Option` or resource-bearing `Result` runtime value,
+accepts an explicit module set. There is no stable CLI, resource-bearing `Option` or `Result` runtime value,
 resource drop trace, backend, standard
 library, runtime, package manager, supported target, or stable language revision yet.
 

@@ -104,11 +104,14 @@ Region-parameter origins, permitted returns, package-resolved local-region escap
   `Result::Err(expression)` in a context with one known `Result<T, E>` type.
 - A shallow Result match contains exactly one `Result::Ok(binding)` arm and one
   `Result::Err(binding)` arm; both arms produce one compatible type.
+- Stage 0 constructs Option with `Option::Some(expression)` or bare `Option::None`. A shallow
+  Option match contains exactly one `Option::Some(binding)` arm and one bare `Option::None` arm;
+  both arms produce one compatible type.
 - Exceptions and stack unwinding are not part of the language.
 
 Changing a value from `T` to `Option<T>` must not silently turn a normal function call into conditional execution. Stage 0 return types contain at most one safe-borrow leaf. Full control-flow behavior is defined in `docs/language/0004-results-traps-and-control-flow.md`.
 
-Result return, discard, propagation, must-use, non-Result `?`, and error-compatibility assertions are versioned in `spec/fixtures/result/manifest-v0.json`. Qualified constructor and shallow-match syntax is fixed by ADR 0017. The MIR fixture suite covers a parameter-driven resource-error propagation move; executable constructor, match, and active resource-payload drop traces remain separately gated by fixtures.
+Result return, discard, propagation, must-use, non-Result `?`, and error-compatibility assertions are versioned in `spec/fixtures/result/manifest-v0.json`. Qualified Result syntax is fixed by ADR 0017 and qualified Option syntax by ADR 0018. Scalar constructors and shallow matches execute through the MIR interpreter; active resource-payload move and drop traces remain separately gated by fixtures.
 
 ## Safe-code semantics
 

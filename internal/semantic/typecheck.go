@@ -211,6 +211,8 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 		if symbol := c.analyzer.resolved[expression]; symbol != nil {
 			result.Symbol = symbol.id
 			actual = symbol.typ
+		} else if variant, option := optionVariantPath(expression.Text); option {
+			actual = c.checkOptionPath(expression, result, expected, variant)
 		} else if isResultVariantPath(expression.Text) {
 			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "Result variant used without construction or pattern")
 			actual = hir.TypeInvalid
@@ -439,6 +441,9 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 		if variant, ok := resultVariantPath(calleeExpression.Text); ok {
 			return c.checkResultConstructor(expression, result, expected, variant)
 		}
+		if variant, ok := optionVariantPath(calleeExpression.Text); ok {
+			return c.checkOptionConstructor(expression, result, expected, variant)
+		}
 	}
 	if isRegionPlaceCall(expression) {
 		return c.checkRegionPlace(expression, result)
@@ -488,6 +493,51 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 	return callee.typ
 }
 
+func (c *typeChecker) checkOptionPath(expression *ast.Expression, result *hir.Expression, expected hir.Type, variant string) hir.Type {
+	if variant != optionVariantNone {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "Option::Some used without one payload")
+		return hir.TypeInvalid
+	}
+	payloadType, ok := hir.OptionElement(expected)
+	if !ok {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "Option::None without contextual Option type")
+		return hir.TypeInvalid
+	}
+	if c.analyzer.isResource(payloadType) {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "resource-bearing Option construction")
+		return hir.TypeInvalid
+	}
+	result.Kind = "option-variant"
+	result.Variant = optionVariantNone
+	return expected
+}
+
+func (c *typeChecker) checkOptionConstructor(expression *ast.Expression, result *hir.Expression, expected hir.Type, variant string) hir.Type {
+	if variant != optionVariantSome {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "Option::None is a bare variant, not a call")
+		return hir.TypeInvalid
+	}
+	payloadType, ok := hir.OptionElement(expected)
+	if !ok {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "Option constructor without contextual Option type")
+		return hir.TypeInvalid
+	}
+	if len(expression.Children) != 2 {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "Option::Some arity other than one")
+		return hir.TypeInvalid
+	}
+	if c.analyzer.isResource(payloadType) {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "resource-bearing Option construction")
+		return hir.TypeInvalid
+	}
+	payload, actual := c.checkExpression(expression.Children[1], payloadType)
+	c.requireType("E1006", span(c.module.file.Path, expression.Children[1].Span), actual, payloadType, span(c.module.file.Path, expression.Span))
+	result.Kind = "option-variant"
+	result.Variant = optionVariantSome
+	result.Children = appendExpression(result.Children, payload)
+	return expected
+}
+
 func (c *typeChecker) checkResultConstructor(expression *ast.Expression, result *hir.Expression, expected hir.Type, variant string) hir.Type {
 	success, failure, ok := hir.ResultElements(expected)
 	if !ok {
@@ -516,14 +566,24 @@ func (c *typeChecker) checkResultConstructor(expression *ast.Expression, result 
 
 func (c *typeChecker) checkMatch(expression *ast.Expression, result *hir.Expression, expected hir.Type) hir.Type {
 	if len(expression.Children) != 3 {
-		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "Result match without exactly two arms")
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "built-in match without exactly two arms")
 		return hir.TypeInvalid
 	}
 	scrutinee, scrutineeType := c.checkExpression(expression.Children[0], hir.TypeInvalid)
 	result.Children = appendExpression(result.Children, scrutinee)
+	if _, _, ok := hir.ResultElements(scrutineeType); ok {
+		return c.checkResultMatch(expression, result, expected, scrutineeType)
+	}
+	if payloadType, ok := hir.OptionElement(scrutineeType); ok {
+		return c.checkOptionMatch(expression, result, expected, payloadType)
+	}
+	c.analyzer.addUnsupported(c.module.file.Path, expression.Children[0].Span, "match scrutinee outside the implemented Result and Option subset")
+	return hir.TypeInvalid
+}
+
+func (c *typeChecker) checkResultMatch(expression *ast.Expression, result *hir.Expression, expected, scrutineeType hir.Type) hir.Type {
 	success, failure, ok := hir.ResultElements(scrutineeType)
 	if !ok {
-		c.analyzer.addUnsupported(c.module.file.Path, expression.Children[0].Span, "match scrutinee that is not Result")
 		return hir.TypeInvalid
 	}
 	seen := make(map[string]struct{}, 2)
@@ -576,6 +636,73 @@ func (c *typeChecker) checkMatch(expression *ast.Expression, result *hir.Express
 	}
 	if len(seen) != 2 {
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "non-exhaustive Result match")
+		return hir.TypeInvalid
+	}
+	return actual
+}
+
+func (c *typeChecker) checkOptionMatch(expression *ast.Expression, result *hir.Expression, expected, payloadType hir.Type) hir.Type {
+	if c.analyzer.isResource(payloadType) {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "resource-bearing Option match")
+		return hir.TypeInvalid
+	}
+	seen := make(map[string]struct{}, 2)
+	actual := expected
+	for _, armExpression := range expression.Children[1:] {
+		if armExpression == nil || armExpression.Kind != syntax.KindPattern || armExpression.Text != "arm" || len(armExpression.Children) != 2 {
+			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "malformed Option match arm")
+			return hir.TypeInvalid
+		}
+		pattern := armExpression.Children[0]
+		if pattern == nil || pattern.Kind != syntax.KindPattern {
+			c.analyzer.addUnsupported(c.module.file.Path, armExpression.Span, "malformed Option pattern")
+			return hir.TypeInvalid
+		}
+		variant, variantOK := optionVariantPath(pattern.Text)
+		if !variantOK {
+			c.analyzer.addUnsupported(c.module.file.Path, pattern.Span, "pattern that is not a qualified Option variant")
+			return hir.TypeInvalid
+		}
+		if _, duplicate := seen[variant]; duplicate {
+			c.analyzer.addUnsupported(c.module.file.Path, pattern.Span, "duplicate Option match variant")
+			return hir.TypeInvalid
+		}
+		seen[variant] = struct{}{}
+		arm := hir.MatchArm{Variant: variant, Binding: hir.NoSymbol}
+		switch variant {
+		case optionVariantSome:
+			if len(pattern.Children) != 2 {
+				c.analyzer.addUnsupported(c.module.file.Path, pattern.Span, "Option::Some pattern without one payload binding")
+				return hir.TypeInvalid
+			}
+			bindingExpression := pattern.Children[1]
+			binding := c.analyzer.resolved[bindingExpression]
+			if binding == nil {
+				return hir.TypeInvalid
+			}
+			binding.typ = payloadType
+			bindingSpan := span(c.module.file.Path, bindingExpression.Span)
+			c.hir.Locals = append(c.hir.Locals, hir.Local{Symbol: binding.id, Name: binding.name, Type: payloadType, Span: bindingSpan})
+			c.addType(bindingSpan, payloadType)
+			arm.Binding = binding.id
+			arm.BindingSpan = bindingSpan
+		case optionVariantNone:
+			if len(pattern.Children) != 1 {
+				c.analyzer.addUnsupported(c.module.file.Path, pattern.Span, "Option::None pattern with a payload binding")
+				return hir.TypeInvalid
+			}
+		}
+		body, bodyType := c.checkExpression(armExpression.Children[1], actual)
+		if actual == hir.TypeInvalid {
+			actual = bodyType
+		} else {
+			c.requireType("E1006", span(c.module.file.Path, armExpression.Children[1].Span), bodyType, actual, span(c.module.file.Path, expression.Span))
+		}
+		arm.Expression = *body
+		result.Arms = append(result.Arms, arm)
+	}
+	if len(seen) != 2 {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "non-exhaustive Option match")
 		return hir.TypeInvalid
 	}
 	return actual
