@@ -38,10 +38,14 @@ nested active-variant cleanup, deterministic drop traces,
 division/remainder zero and signed-overflow, ordinary integer-overflow, and invalid-shift traps, and bounded step-limit
 termination. Fixture-only, manifest-authorized byte sinks additionally prove exact in-memory
 stdout/stderr bytes, cross-stream order, and a shared output limit without granting host I/O.
+The first constrained C backend slice emits deterministic ISO C11 for 4 verified scalar fixtures,
+covering calls and control flow, bitwise operations, checked division and shift, and overflow
+trapping. This lane only produces C text; no C compiler, linker, native executable, runtime, target
+conformance, or self-hosting is implied.
 An unstable `fairyc experimental` CLI can inspect, syntax-check,
 semantic-check, or interpret one source-root-relative `.fy` file, while semantic checking also
-accepts an explicit module set. There is no stable CLI, user drop-body execution, backend, standard
-library, runtime, package manager, supported target, or stable language revision yet.
+accepts an explicit module set. There is no stable CLI, user drop-body execution, native execution
+lane, standard library, runtime, package manager, supported target, or stable language revision yet.
 
 ## Try the current prototype
 
@@ -94,6 +98,7 @@ remaining semantic groups exist.
 - MIR normalization fixtures: `spec/fixtures/mir/manifest-v0.json`
 - MIR verifier mutation fixtures: `spec/fixtures/mir-verifier/manifest-v0.json`
 - MIR interpreter fixtures: `spec/fixtures/interpreter/manifest-v0.json`
+- Constrained C emission fixtures: `spec/fixtures/c-emission/manifest-v0.json`
 - Resolved package graph fixtures: `spec/fixtures/package/manifest-v0.json`
 - MIR and C backend contracts: `docs/mir/`
 - Package identity and visibility: `docs/package/package-graph-v0.md`

@@ -8,6 +8,7 @@ func Clone(input Program) Program {
 	for functionIndex, function := range input.Functions {
 		cloned := function
 		cloned.Parameters = slices.Clone(function.Parameters)
+		cloned.ParameterTypes = slices.Clone(function.ParameterTypes)
 		cloned.Resources = slices.Clone(function.Resources)
 		cloned.DropFlags = slices.Clone(function.DropFlags)
 		cloned.Loans = slices.Clone(function.Loans)

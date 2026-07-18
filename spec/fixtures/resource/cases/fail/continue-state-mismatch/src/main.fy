@@ -5,6 +5,7 @@ resource Token {
 
     drop fn(self: &mut Self) {}
 }
+
 fn consume(token: Token) -> i32 {
     token.value
 }

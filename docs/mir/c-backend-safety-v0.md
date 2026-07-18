@@ -11,6 +11,20 @@ Generated C is a reference and differential-test transport for a declared `Targe
 
 The first planned profile is `x86_64-linux-gnu` compiled and linked through declared Clang and GCC drivers. Emission alone is not conformance or support evidence.
 
+## Current scalar emission slice
+
+`internal/cbackend` currently emits one deterministic ISO C11 translation unit from verified MIR
+for a deliberately narrow scalar subset. It accepts `i32` and `bool` parameters, `i32`, `bool`, or
+`void` internal results, a zero-argument `main() -> i32` entry, scalar calls and control flow,
+comparisons, bitwise operations, and the implemented checked arithmetic families. Private numeric
+C function names prevent source identifiers from becoming ABI or injection surfaces.
+
+The emitter rejects resources, tagged values, Region operations, safe borrows, unsafe operations,
+FFI, runtime and standard-library lowering, non-scalar signatures, malformed scalar destinations,
+and non-canonical block shapes. `spec/fixtures/c-emission/manifest-v0.json` currently proves four
+source-to-emission cases and repeated byte identity. No C parser, compiler, object writer, assembler,
+linker, executable, sanitizer, layout probe, or ABI probe runs in that fixture lane.
+
 ## Ordered evaluation
 
 Nested MIR effects are emitted as separate C statements and temporaries. Function designators and arguments are fully materialized in Fairy C's left-to-right order before the C call expression. Generated code never relies on the C implementation to choose a compatible evaluation order.
@@ -39,7 +53,10 @@ The backend cannot add C or LLVM overflow, exactness, alignment, or alias promis
 
 ## Traps and cleanup
 
-Checked MIR branches reach a non-returning runtime trap helper with a stable trap category. A trap does not unwind through generated C and does not run Fairy C cleanup. Normal cleanup is already explicit in MIR.
+Checked MIR branches reach a non-returning runtime trap helper with a stable trap category. The
+current scalar emitter passes that category to a private helper and then aborts; externally observing
+the category remains a differential-harness and runtime gate. A trap does not unwind through
+generated C and does not run Fairy C cleanup. Normal cleanup is already explicit in MIR.
 
 ## Foreign calls
 

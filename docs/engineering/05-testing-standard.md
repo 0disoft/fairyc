@@ -41,8 +41,12 @@ v0 cases through source loading, Flow, verified MIR, and the bounded interpreter
 variant, both Result `?` paths, canonical trap categories, resource construction, whole-root call
 moves, ordered resource reassignment, consuming-close ownership, active-variant cleanup,
 Region fallthrough, direct-return, Result-propagation, nested, break, and continue reset ordering, source-linked drop traces, checked arithmetic and right-shift outcomes, exact fixture-only output bytes and order, or the stable interpreter step/output limits
-category. Backend, ABI, runtime, and Atlas runners do not exist yet; their fixtures remain future
-evidence requirements.
+category. `internal/cbackendfixture` executes all 4 cases in
+`spec/fixtures/c-emission/manifest-v0.json` through source loading, Flow, verified MIR, interpreter
+outcome comparison, and deterministic C11 emission, comparing target, dialect, canonical function
+names, feature families, LF-only path-clean text, and repeated byte identity. It does not invoke a C
+parser, compiler, assembler, linker, executable, sanitizer, layout probe, or ABI probe. Native C
+differential, ABI, runtime, and Atlas runners remain future evidence requirements.
 
 ## Oracle order
 
@@ -71,6 +75,7 @@ evidence requirements.
 | MIR verifier mutation | `spec/fixtures/mir-verifier/` currently proves all 10 named baselines and 19 isolated mutation cases, including fallthrough and break Region reset `V1403` plus missing checked-arithmetic `V1501`, through the Go verifier runner without serializing arbitrary MIR |
 | MIR interpreter run, trap, and limit | `spec/fixtures/interpreter/` currently proves all 56 v0 cases: literal return, scalar call arithmetic, checked negation/addition/subtraction/multiplication, division/remainder, and right shift across trapping and non-trapping boundaries, boolean branching and logical not, source `&&` and `||` short-circuiting, scalar `while`, nearest-loop break and continue, scalar and resource-bearing `Option` and `Result` construction, every built-in match variant, scalar and resource-bearing Result `?` paths, resource construction and field reads, whole-root and tagged-payload moves, resource returns, ordered live/dead/self reassignment, consuming-close success/failure ownership, nested active-variant cleanup, deterministic drop traces, lexical Region placement and reset on fallthrough, conditional fallthrough, direct return, Result propagation, nested, break, and continue exits, exact manifest-authorized in-memory stdout/stderr bytes, order, and retained limit prefix, exact division-by-zero, signed-division-overflow, integer-overflow, and invalid-shift trap identity, and bounded step/output-limit termination; user drop-body effects, signed left shift, and host I/O remain deferred |
 | Drop elaboration | Partial construction and cleanup-suffix merging; loop `break` and `continue` are fixture-backed |
+| C emission | `spec/fixtures/c-emission/` currently proves 4 verified scalar source-to-C11 cases, deterministic target/dialect/function/feature metadata, LF-only path-clean output, and repeated byte identity; it does not prove C syntax acceptance or native behavior |
 | C differential | Interpreter parity for output, status, trap category, and drop trace across declared compilers and profiles |
 | C safety | Overflow, division, shifts, evaluation order, aliasing, alignment, inactive payload, and sanitizer-assisted checks |
 | ABI | Target layout, calls, callbacks, raw bindings, and boundary shims for candidate target profiles |
@@ -94,6 +99,10 @@ Region v1 resolves its lexical escape source through the explicit standard-libra
 MIR fixtures compare source-linked observations after verification. They do not compare textual dumps, block or local numbers, temporary names, or generated C. MIR-verifier fixtures separately require each named baseline to verify, apply one typed mutation, and return the complete one-code result; arbitrary malformed graph input remains deferred.
 
 Package fixtures start from an already-resolved graph. They do not prove public manifest parsing, version solving, registry behavior, source acquisition, lockfile encoding, or a concrete package-instance hash.
+
+C-emission fixtures compare structured unit facts and deterministic text hygiene without freezing the
+entire generated translation unit. Until a configured native lane exists, they must not be reported
+as C syntax, compiler, linker, runtime, optimization, sanitizer, or target conformance evidence.
 
 ## Differential matrix
 

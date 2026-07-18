@@ -1,0 +1,5 @@
+module main;
+
+fn main() -> i32 {
+    2147483647 + 1
+}

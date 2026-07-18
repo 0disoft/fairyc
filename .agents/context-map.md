@@ -30,6 +30,9 @@
 - MIR interpreter fixture route: spec/fixtures/interpreter/manifest-v0.json
 - MIR interpreter route: internal/interpreter/
 - MIR interpreter runner route: internal/interpreterfixture/
+- Constrained C emitter route: internal/cbackend/
+- Constrained C emission fixture route: spec/fixtures/c-emission/manifest-v0.json
+- Constrained C emission runner route: internal/cbackendfixture/
 - Resolved package graph fixture route: spec/fixtures/package/manifest-v0.json
 - MIR and C backend route: docs/mir/
 - Package identity and visibility route: docs/package/

@@ -42,6 +42,9 @@ regenerate, or override compiler source.
 - MIR verifier mutation fixture runner: internal/mirverifyfixture/
 - MIR interpreter fixtures: spec/fixtures/interpreter/manifest-v0.json
 - MIR interpreter and fixture runner: internal/interpreter/, internal/interpreterfixture/
+- Constrained C emitter: internal/cbackend/
+- Constrained C emission fixtures: spec/fixtures/c-emission/manifest-v0.json
+- Constrained C emission fixture runner: internal/cbackendfixture/
 - Resolved package graph fixtures: spec/fixtures/package/manifest-v0.json
 - Executable MIR semantics: docs/mir/*.md
 - Package identity and visibility: docs/package/*.md

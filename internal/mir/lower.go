@@ -93,6 +93,7 @@ func (l *functionLowerer) lower() (Function, error) {
 	for _, parameter := range l.source.Parameters {
 		maximumSymbol = max(maximumSymbol, parameter.Symbol)
 		l.result.Parameters = append(l.result.Parameters, LocalID(parameter.Symbol))
+		l.result.ParameterTypes = append(l.result.ParameterTypes, parameter.Type)
 		l.bindings[parameter.Symbol] = bindingInfo{typ: parameter.Type, span: parameter.Span}
 		if l.properties.NeedsDrop(parameter.Type) {
 			l.live[parameter.Symbol] = true

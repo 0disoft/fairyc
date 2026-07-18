@@ -1,0 +1,86 @@
+{
+  "$schema": "./schema-v0.json",
+  "schemaVersion": "fairyc.c-emission-fixtures/v0",
+  "deferred": [
+    "C parsing, compilation, object emission, linking, and native execution until a configured x86_64-linux-gnu toolchain lane exists",
+    "Clang and GCC low and optimized differential execution",
+    "resource, tagged-value, Region, borrow, unsafe, FFI, runtime, and standard-library C lowering",
+    "target layout, C ABI classification, object metadata, symbol, relocation, and sanitizer evidence"
+  ],
+  "contracts": [
+    "docs/product/02-spec.md",
+    "docs/adr/0001-initial-architecture-boundaries.md",
+    "docs/adr/0006-c-abi-v0-and-first-conformance-target.md",
+    "docs/adr/0025-verified-scalar-c-emission.md",
+    "docs/mir/mir-v0.md",
+    "docs/mir/c-backend-safety-v0.md",
+    "docs/abi/c-abi-v0.md",
+    "docs/engineering/05-testing-standard.md"
+  ],
+  "cases": [
+    {
+      "id": "pass.c-emission.bitwise",
+      "sourceRoot": "cases/pass/bitwise/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main"],
+        "features": ["scalar-bitwise"]
+      }
+    },
+    {
+      "id": "pass.c-emission.scalar-control-call",
+      "sourceRoot": "cases/pass/scalar-control-call/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::add", "main::main"],
+        "features": ["checked-arithmetic", "scalar-call", "scalar-comparison", "scalar-control-flow", "trap"]
+      }
+    },
+    {
+      "id": "pass.c-emission.division-shift",
+      "sourceRoot": "cases/pass/division-shift/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main"],
+        "features": ["checked-arithmetic", "checked-division", "checked-shift", "scalar-control-flow", "trap"]
+      }
+    },
+    {
+      "id": "pass.c-emission.overflow-trap",
+      "sourceRoot": "cases/pass/overflow-trap/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "trap",
+        "category": "integer-overflow",
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main"],
+        "features": ["checked-arithmetic", "scalar-control-flow", "trap"]
+      }
+    }
+  ]
+}

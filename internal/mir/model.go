@@ -46,6 +46,7 @@ type Function struct {
 	Name               string
 	Span               hir.Span
 	Parameters         []LocalID
+	ParameterTypes     []hir.Type
 	ResultType         hir.Type
 	Entry              BlockID
 	Blocks             []Block

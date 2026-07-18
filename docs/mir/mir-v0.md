@@ -45,6 +45,10 @@ Operands are:
 - `Move(local)` for a complete resource root or another non-copy value;
 - `Const(value)` for a typed constant.
 
+Function signatures retain parameter types in the same order as their parameter locals. A backend
+must reject a missing or mismatched type list instead of inferring a scalar, borrow, resource, or ABI
+representation from how a local happens to be used.
+
 ### Rvalues
 
 MIR v0 requires rvalues for use, unary operations, checked arithmetic, wrapping arithmetic, saturating arithmetic, comparisons, casts, aggregate construction, discriminant read, safe borrow, raw address, region allocation, and explicit unsafe operations.
@@ -110,3 +114,7 @@ The source cases do not test malformed graphs. `spec/fixtures/mir-verifier/manif
 The first semantic oracle is a small MIR interpreter supporting scalars, tagged `Option` and `Result`, moves, drop traces, region mark and reset, branches, and traps. Its options-only fixture harness may intercept explicitly bound call symbols as bounded in-memory stdout/stderr byte sinks; those hooks are not MIR operations, source-name conventions, standard-library APIs, or host I/O. The interpreter is not required to emulate a complete operating system or C ABI.
 
 The interpreter precedes a second native backend. Differential fixtures compare interpreter outcomes with generated C compiled at multiple optimization levels and, where the target fixture declares them, more than one independent C compiler.
+
+The current Go prototype also emits deterministic ISO C11 for the verified scalar subset in
+`spec/fixtures/c-emission/manifest-v0.json`. That runner stops at C text and therefore is backend
+emission evidence, not native differential evidence.

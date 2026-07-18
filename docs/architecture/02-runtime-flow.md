@@ -49,6 +49,10 @@ Only the interpreter and `x86_64-linux-gnu` C path are committed before the firs
 
 Generated C uses a declared dialect, compiler family, target profile, statements, ordered temporaries, and helpers to preserve evaluation order, overflow, division, shifts, bit casts, aliasing, and trap semantics. It is a constrained reference transport, not universally portable C or the Fairy C semantic model.
 
+The implemented first slice currently stops after deterministic ISO C11 emission for verified
+scalar MIR. The target toolchain, object, C-driver link, and executable boxes in the flow remain
+unimplemented evidence gates.
+
 ## Atlas flow
 
 ```text

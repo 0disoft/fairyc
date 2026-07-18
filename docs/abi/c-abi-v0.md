@@ -16,6 +16,11 @@ Target claims use three levels:
 
 The Windows Go compiler host does not define target layout. Proving the first target requires WSL or Linux CI, an explicit glibc baseline, a sysroot or runner image, Clang and GCC, and a target runtime bundle.
 
+The current Go prototype can emit deterministic ISO C11 for a verified scalar-only profile carrying
+this target identity. It does not yet parse or compile that C, resolve a toolchain, provide a target
+runtime, inspect layout or objects, link, or execute on Linux. That narrow capability does not advance
+the target itself to `emittable`.
+
 ## No native Fairy ABI
 
 Stage 0 does not stabilize Fairy function mangling, ordinary Fairy calling conventions, `Option` or `Result` layout, resource layout, slice layout, drop symbols, or dynamic-library exports. Calls within one compilation are compiler-private.

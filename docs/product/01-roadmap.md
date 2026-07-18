@@ -38,8 +38,10 @@ and bounded failure without granting host access. Checked `i32` addition, subtra
 multiplication, negation, division, remainder, and signed right shift execute across trapping and
   non-trapping boundaries with exact overflow, division-by-zero, or invalid-shift
   categories; signed left shift is rejected as `E1011`. Nearest-loop `break` and `continue` now execute
-  with resource and Region cleanup. Real file and console I/O, effects, and every later Phase 1 capability
-remain unimplemented.
+  with resource and Region cleanup. The first C backend slice emits deterministic ISO C11 for 4
+  verified scalar cases under the provisional `x86_64-linux-gnu` profile, but it does not parse,
+  compile, link, or execute that C. Real file and console I/O, effects, and every later Phase 1
+  capability remain unimplemented.
 
 - Implement source management, lexer, trivia-preserving tokens and spans, compact recoverable syntax, deterministic diagnostics, one-file modules, alias imports, and non-generic typed HIR in Go.
 - Implement restricted inert enums, whole-resource moves, local last-use loans, call-bounded mutable reborrows, single-origin borrow returns, plain regions, `Option`, `Result`, shallow `match`, and explicit `?` and `discard`.

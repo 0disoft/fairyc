@@ -5,6 +5,7 @@ pub resource Arena {
 
     drop fn(self: &mut Self) {}
 }
+
 resource Token {
     value: i32;
 
