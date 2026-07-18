@@ -23,6 +23,7 @@ const (
 	ExitSourceDiagnostics = 3
 	ExitInternalFailure   = 4
 	ExitProgramTrap       = 5
+	ExitBuildFailure      = 6
 	maxSemanticInputFiles = 64
 )
 
@@ -33,6 +34,7 @@ Usage:
   fairyc experimental check-syntax <file.fy>
   fairyc experimental check-semantics <file.fy> [<file.fy>...]
   fairyc experimental emit-c <file.fy>
+  fairyc experimental build <file.fy> --cc <clang|gcc> --profile <low|optimized> --output <build/path>
   fairyc experimental run <file.fy>
   fairyc --help
 
@@ -97,6 +99,8 @@ func runExperimental(args []string, sourceRoot string, stdout, stderr io.Writer)
 			return invocationError(stderr, "experimental command \"emit-c\" expects exactly one source file")
 		}
 		return runEmitC(args[1], sourceRoot, stdout, stderr)
+	case "build":
+		return runBuild(args[1:], sourceRoot, stdout, stderr)
 	default:
 		return invocationError(stderr, fmt.Sprintf("unknown experimental command %q", command))
 	}

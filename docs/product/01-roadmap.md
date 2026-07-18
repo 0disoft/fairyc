@@ -39,9 +39,11 @@ multiplication, negation, division, remainder, and signed right shift execute ac
   non-trapping boundaries with exact overflow, division-by-zero, or invalid-shift
   categories; signed left shift is rejected as `E1011`. Nearest-loop `break` and `continue` now execute
   with resource and Region cleanup. The first C backend slice emits deterministic ISO C11 for 4
-  verified scalar cases under the provisional `x86_64-linux-gnu` profile, but it does not parse,
-  compile, link, or execute that C. The unstable `experimental emit-c` command exposes that exact
-  verified scalar translation unit on stdout without writing an artifact. Real file and console I/O, effects, and every later Phase 1
+  verified scalar cases under the provisional `x86_64-linux-gnu` profile. The unstable
+  `experimental emit-c` command exposes that exact verified scalar translation unit on stdout
+  without writing an artifact. On an eligible Linux/amd64 glibc host, `experimental build` can now
+  compile and link that scalar subset with explicit Clang or GCC and low or optimized profiles into
+  a no-overwrite `build/` artifact. Real file and console I/O, effects, and every later Phase 1
   capability remain unimplemented.
 
 - Implement source management, lexer, trivia-preserving tokens and spans, compact recoverable syntax, deterministic diagnostics, one-file modules, alias imports, and non-generic typed HIR in Go.
@@ -55,9 +57,12 @@ Exit gate: positive and negative fixtures agree with the source contracts, resou
 
 Current implementation status: a fail-closed Linux/amd64 scalar differential command now requires
 glibc, Clang, and GCC and is wired into a separate hosted Ubuntu CI job. It is designed to run all 4
-emission cases at low and optimized profiles for 16 process-status comparisons. The current Windows
+emission cases at low and optimized profiles for 16 process-status comparisons, then drive the
+actual experimental build CLI through 4 compiler/profile executable smokes. The current Windows
 host has no eligible Linux toolchain, and no hosted run receipt has been observed, so this is a
-configured lane rather than native conformance evidence.
+configured lane rather than native conformance evidence. A shared bounded C driver and embedded
+scalar runtime now serve both that lane and the experimental single-file build command. This proves
+the product wiring exists, not that runtime, ABI, or target-conformance gates pass.
 
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.

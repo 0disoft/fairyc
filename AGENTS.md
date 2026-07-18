@@ -46,8 +46,8 @@ regenerate, or override compiler source.
 - Constrained C emitter: internal/cbackend/
 - Constrained C emission fixtures: spec/fixtures/c-emission/manifest-v0.json
 - Constrained C emission fixture runner: internal/cbackendfixture/
+- Shared constrained-C driver and scalar runtime: internal/cdriver/, internal/cruntime/
 - Linux scalar C differential runner: internal/cbackendnative/, cmd/fairyc-native-fixtures/
-- Native C test runtime: spec/fixtures/c-emission/native/runtime.c
 - Resolved package graph fixtures: spec/fixtures/package/manifest-v0.json
 - Executable MIR semantics: docs/mir/*.md
 - Package identity and visibility: docs/package/*.md

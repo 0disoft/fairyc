@@ -12,7 +12,9 @@ during ordinary Go tests and assert lossless reconstruction, stable output, vali
 exhaustion, and error-free AST lowering. Experimental CLI tests cover argument routing, reserved
 stable commands, deterministic content-safe JSON, schema synchronization, human diagnostics,
 bounded file reads, source-root escape rejection, output failure, clean syntax checks, semantic
-success, semantic diagnostics, and unsupported-subset rejection.
+success, semantic diagnostics, unsupported-subset rejection, closed native-build options,
+cross-platform artifact-path rejection, no-overwrite promotion, symbolic-link escape rejection,
+and ineligible-host failure before artifact creation.
 
 Experimental semantic CLI coverage also verifies explicit multi-file module sets, input-order
 determinism, cross-file visibility diagnostics, duplicate rejection, bounded file counts, and a
@@ -46,7 +48,9 @@ category. `internal/cbackendfixture` executes all 4 cases in
 outcome comparison, and deterministic C11 emission, comparing target, dialect, canonical function
 names, feature families, LF-only path-clean text, and repeated byte identity. It does not invoke a C
 parser, compiler, assembler, linker, executable, sanitizer, layout probe, or ABI probe. Native C
-differential, ABI, runtime, and Atlas runners remain future evidence requirements.
+behavior belongs to `internal/cbackendnative`, which consumes the same emitted units through the
+shared C driver and scalar runtime. ABI, complete-runtime, sanitizer, and Atlas runners remain future
+evidence requirements.
 
 ## Oracle order
 
@@ -76,7 +80,7 @@ differential, ABI, runtime, and Atlas runners remain future evidence requirement
 | MIR interpreter run, trap, and limit | `spec/fixtures/interpreter/` currently proves all 56 v0 cases: literal return, scalar call arithmetic, checked negation/addition/subtraction/multiplication, division/remainder, and right shift across trapping and non-trapping boundaries, boolean branching and logical not, source `&&` and `||` short-circuiting, scalar `while`, nearest-loop break and continue, scalar and resource-bearing `Option` and `Result` construction, every built-in match variant, scalar and resource-bearing Result `?` paths, resource construction and field reads, whole-root and tagged-payload moves, resource returns, ordered live/dead/self reassignment, consuming-close success/failure ownership, nested active-variant cleanup, deterministic drop traces, lexical Region placement and reset on fallthrough, conditional fallthrough, direct return, Result propagation, nested, break, and continue exits, exact manifest-authorized in-memory stdout/stderr bytes, order, and retained limit prefix, exact division-by-zero, signed-division-overflow, integer-overflow, and invalid-shift trap identity, and bounded step/output-limit termination; user drop-body effects, signed left shift, and host I/O remain deferred |
 | Drop elaboration | Partial construction and cleanup-suffix merging; loop `break` and `continue` are fixture-backed |
 | C emission | `spec/fixtures/c-emission/` currently proves 4 verified scalar source-to-C11 cases, deterministic target/dialect/function/feature metadata, LF-only path-clean output, and repeated byte identity; it does not prove C syntax acceptance or native behavior |
-| C differential | The configured Linux scalar runner covers all 4 C-emission cases across Clang/GCC and low/optimized profiles for 16 process-status comparisons; hosted execution is not yet observed, and output, wider returns, drop traces, sanitizers, layout, ABI, and the product runtime remain deferred |
+| C differential | The configured Linux scalar runner covers all 4 C-emission cases across Clang/GCC and low/optimized profiles for 16 process-status comparisons, then exercises the actual experimental build CLI and its executable under all 4 compiler/profile pairs; hosted execution is not yet observed, and output, wider returns, drop traces, sanitizers, layout, ABI, and the complete product runtime remain deferred |
 | C safety | Overflow, division, shifts, evaluation order, aliasing, alignment, inactive payload, and sanitizer-assisted checks |
 | ABI | Target layout, calls, callbacks, raw bindings, and boundary shims for candidate target profiles |
 | Runtime and stdlib | Zero-size normalization, allocation failure, reserve rollback, UTF-8 invariants, partial I/O, Linux close consumption, and retained-pointer wrappers |
@@ -105,7 +109,9 @@ entire generated translation unit. `internal/cbackendnative` separately requires
 glibc, Clang, and GCC, then compiles and executes every emitted case at `-O0` and `-O2`. The command
 fails rather than skips when a required toolchain component is absent. Its current status-only oracle
 does not prove output, negative or larger `i32` returns, cleanup traces, sanitizers, layout, ABI, the
-product runtime, or target conformance.
+complete product runtime, or target conformance. The experimental build command shares this driver
+and embedded runtime but adds only single-file scalar artifact production; it does not broaden the
+oracle or target evidence.
 
 ## Differential matrix
 

@@ -8,7 +8,7 @@ This document owns planned `fairyc` command semantics. It does not claim that a 
 
 ## Implemented experimental compiler surface
 
-The current Go prototype implements five deliberately unstable developer commands:
+The current Go prototype implements six deliberately unstable developer commands:
 
 | Command | Purpose | Output |
 | --- | --- | --- |
@@ -16,6 +16,7 @@ The current Go prototype implements five deliberately unstable developer command
 | `fairyc experimental check-syntax <file.fy>` | Check lexing, parsing, recovery, module identity, lossless reconstruction, and error-free AST lowering | Success line on stdout or human diagnostics on stderr |
 | `fairyc experimental check-semantics <file.fy> [<file.fy>...]` | Resolve names, type-check, and analyze local safe-borrow, whole-resource, Region, and complete Stage 0 Result must-use Flow for an explicit module set in the implemented subset | Typed-HIR module and function counts on stdout, human source diagnostics on stderr, or an explicit unsupported-subset error |
 | `fairyc experimental emit-c <file.fy>` | Lower one scalar program through verified MIR and emit the provisional constrained C transport without invoking a toolchain | Exactly one deterministic ISO C11 translation unit on stdout, source diagnostics or capability errors on stderr |
+| `fairyc experimental build <file.fy> --cc <clang\|gcc> --profile <low\|optimized> --output <build/path>` | Compile and link one verified scalar program for the host `x86_64-linux-gnu` profile with an explicit C compiler, optimization profile, and ignored output path | A no-overwrite executable below `build/` plus one relative-path receipt, or source, capability, toolchain, link, or artifact diagnostics |
 | `fairyc experimental run <file.fy>` | Run one verified-MIR program in the scalar, tagged, whole-resource, and implemented Region subset whose selected module declares `main() -> i32` | `result: <i32>` on stdout, a canonical trap category on stderr, source diagnostics, or an explicit unsupported-subset error |
 
 These commands treat the current directory as their temporary source root. `parse` and
@@ -56,6 +57,17 @@ It writes raw C11 to stdout with no banner or metadata and writes no repository 
 parse the generated C, invoke Clang or GCC, link the test runtime, execute a program, or establish an
 `emittable`, `conformant`, or `supported` target. Unsupported resource, tagged, Region, borrow,
 unsafe, FFI, runtime, and standard-library lowering fails with the provisional capability code.
+
+`experimental build` consumes that same scalar C unit, binds the embedded scalar runtime, and uses
+the shared constrained-C driver. It requires Linux/amd64 with glibc and the explicitly selected
+`clang` or `gcc` from `PATH`; `low` fixes `-O0` and `optimized` fixes `-O2`. There is no compiler,
+profile, target, or output default. The output must be a canonical forward-slash path below the
+ignored source-root `build/` directory. Absolute, drive-relative, UNC, traversal, mixed-separator,
+overlong, platform-reserved, and escaping symbolic-link paths fail closed. The command stages and
+flushes the executable under the destination directory, promotes it without replacing an existing
+path, and removes ordinary staging residue. It emits no `.c` file, object, cache entry, manifest,
+package state, or network request. The provisional executable is not a supported target artifact or
+a stable `fairyc build` result.
 
 `fairyc check` remains unimplemented. It must not be aliased to `check-syntax`, because the planned
 command below also requires effects and later semantic groups beyond

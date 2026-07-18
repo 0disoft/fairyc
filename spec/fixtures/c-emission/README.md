@@ -16,6 +16,6 @@ Those boundaries do not become emission evidence even when a separate native com
 same cases.
 
 `internal/cbackendnative` is the separate Linux/amd64 lane. It consumes the interpreter-approved
-units from this runner, requires glibc plus Clang and GCC, links `native/runtime.c`, and compares
-process status at low and optimized profiles. The emission runner itself remains toolchain-free and
-does not inherit native evidence from the presence of that separate command.
+units from this runner, requires glibc plus Clang and GCC, links the shared embedded scalar runtime,
+and compares process status at low and optimized profiles. The emission runner itself remains
+toolchain-free and does not inherit native evidence from the presence of that separate command.

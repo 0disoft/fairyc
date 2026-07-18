@@ -75,6 +75,13 @@ non-negative returns and canonical trap category. Output, negative or larger `i3
 traces, sanitizers, layout, ABI, and broader runtime behavior remain unimplemented. Sanitizers are
 useful backend checks but are not the language-semantics oracle.
 
+`internal/cdriver` and `internal/cruntime` are the one implementation path for both that matrix and
+the experimental scalar executable builder. The driver fixes the C dialect, warning policy,
+optimization profiles, time and output bounds, and linked-artifact size limit; the embedded runtime
+fixes trap dispatch before binding a caller-specific reserved process-status base. Sharing this
+plumbing prevents test and product compiler flags from silently diverging, but does not promote the
+target beyond the evidence supplied by the differential fixtures.
+
 ## External references
 
 - WG14 C11 draft N1570: <https://www.open-std.org/jtc1/sc22/wg14/www/docs/n1570.pdf>

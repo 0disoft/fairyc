@@ -38,8 +38,9 @@ unfinished.
   while remaining clear that Go still runs the compiler.
 - Resource, tagged-value, Region, borrow, unsafe, FFI, runtime, and standard-library programs fail
   closed at the C-backend capability boundary.
-- A later experimental build command can consume the same verified-MIR and C unit but must separately
-  own toolchain resolution, output paths, receipts, cleanup, and process status.
+- ADR 0028 now lets the separate experimental build command consume the same verified-MIR and C unit
+  while owning toolchain resolution, output paths, receipts, cleanup, and process status outside
+  this inspection-only command.
 
 ## Rejected alternatives
 

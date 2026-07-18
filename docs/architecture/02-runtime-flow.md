@@ -50,10 +50,12 @@ Only the interpreter and `x86_64-linux-gnu` C path are committed before the firs
 Generated C uses a declared dialect, compiler family, target profile, statements, ordered temporaries, and helpers to preserve evaluation order, overflow, division, shifts, bit casts, aliasing, and trap semantics. It is a constrained reference transport, not universally portable C or the Fairy C semantic model.
 
 The implemented first slice emits deterministic ISO C11 for verified scalar MIR. A separate
-Linux/amd64 runner now drives Clang and GCC at low and optimized profiles, links a test-only trap
-runtime, executes each scalar fixture, and compares its process outcome. The current Windows host
-cannot execute that runner, and no hosted run has been observed yet. Product runtime, layout, ABI,
-and supported-target gates remain unimplemented.
+Linux/amd64 runner now drives Clang and GCC at low and optimized profiles, links the embedded scalar
+runtime, executes each scalar fixture, and compares its process outcome. The same bounded C driver
+and runtime feed an explicit experimental single-file build command whose artifact is confined to
+the ignored source-root `build/` directory. The current Windows host cannot execute either native
+path, and no hosted run has been observed yet. Complete runtime, layout, ABI, and supported-target
+gates remain unimplemented.
 
 ## Atlas flow
 

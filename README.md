@@ -43,13 +43,15 @@ covering calls and control flow, bitwise operations, checked division and shift,
 trapping. This lane only produces C text; no C compiler, linker, native executable, runtime, target
 conformance, or self-hosting is implied.
 A separate fail-closed Linux/amd64 command is now present to compile those cases with Clang and GCC
-at `-O0` and `-O2`, link a test-only trap runtime, and compare process outcomes. It cannot run on
+at `-O0` and `-O2`, link the embedded scalar trap runtime, and compare process outcomes. It cannot run on
 this Windows host because no WSL distribution or C compiler is installed, and its hosted CI result
 has not yet been observed. The target therefore remains unsupported.
 An unstable `fairyc experimental` CLI can inspect syntax, syntax-check, semantic-check, emit the
-scalar C11 translation unit, or interpret one source-root-relative `.fy` file, while semantic checking also
+scalar C11 translation unit, build that scalar subset into a Linux executable on an eligible host,
+or interpret one source-root-relative `.fy` file, while semantic checking also
 accepts an explicit module set. There is no stable CLI, user drop-body execution, native execution
-lane, standard library, runtime, package manager, supported target, or stable language revision yet.
+command, complete runtime, standard library, package manager, supported target, or stable language
+revision yet.
 
 ## Try the current prototype
 
@@ -63,6 +65,7 @@ go run ./cmd/fairyc experimental check-semantics examples/resources/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/regions/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/results/main.fy
 go run ./cmd/fairyc experimental emit-c examples/c/main.fy
+go run ./cmd/fairyc experimental build examples/c/main.fy --cc clang --profile optimized --output build/fairyc-example
 go run ./cmd/fairyc experimental run examples/run/main.fy
 go run ./cmd/fairyc experimental run examples/run/resource_option.fy
 go run ./cmd/fairyc experimental parse examples/syntax/main.fy
@@ -87,6 +90,13 @@ remaining semantic groups exist.
 ISO C11 translation unit directly to stdout. It does not write a `.c` file or invoke a native
 toolchain.
 
+On Linux/amd64 with glibc and the explicitly selected Clang or GCC installed, `experimental build`
+uses that same verified scalar unit and the embedded runtime to produce a no-overwrite executable
+below the ignored `build/` directory. Compiler, `low` or `optimized` profile, and output path are
+mandatory. This Windows host cannot execute that command, and the command remains narrower than the
+interpreter: resources, built-in tagged payloads, Region, unsafe, FFI, and standard-library programs
+still fail closed before native compilation.
+
 ## Design anchors
 
 - Product contract: `docs/product/02-spec.md`
@@ -108,6 +118,7 @@ toolchain.
 - MIR verifier mutation fixtures: `spec/fixtures/mir-verifier/manifest-v0.json`
 - MIR interpreter fixtures: `spec/fixtures/interpreter/manifest-v0.json`
 - Constrained C emission fixtures: `spec/fixtures/c-emission/manifest-v0.json`
+- Shared constrained-C driver and embedded scalar runtime: `internal/cdriver/`, `internal/cruntime/`
 - Linux scalar C differential runner: `internal/cbackendnative/`
 - Resolved package graph fixtures: `spec/fixtures/package/manifest-v0.json`
 - MIR and C backend contracts: `docs/mir/`

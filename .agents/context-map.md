@@ -34,8 +34,9 @@
 - Constrained C emitter route: internal/cbackend/
 - Constrained C emission fixture route: spec/fixtures/c-emission/manifest-v0.json
 - Constrained C emission runner route: internal/cbackendfixture/
+- Shared constrained-C driver route: internal/cdriver/
+- Embedded scalar C runtime route: internal/cruntime/
 - Linux scalar C differential route: internal/cbackendnative/, cmd/fairyc-native-fixtures/
-- Native C test-runtime route: spec/fixtures/c-emission/native/
 - Resolved package graph fixture route: spec/fixtures/package/manifest-v0.json
 - MIR and C backend route: docs/mir/
 - Package identity and visibility route: docs/package/

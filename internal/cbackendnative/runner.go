@@ -16,29 +16,21 @@ import (
 
 	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/cbackendfixture"
+	"github.com/0disoft/fairyc/internal/cdriver"
+	"github.com/0disoft/fairyc/internal/cli"
+	"github.com/0disoft/fairyc/internal/cruntime"
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v0"
+	reportSchemaVersion = "fairyc.native-c-report/v1"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
-	compilerTimeout     = 30 * time.Second
 	executionTimeout    = 10 * time.Second
 )
 
-type compilerSpec struct {
-	Name string
-	Path string
-}
-
-type profileSpec struct {
-	Name string
-	Flag string
-}
-
-var nativeProfiles = []profileSpec{
-	{Name: "low", Flag: "-O0"},
-	{Name: "optimized", Flag: "-O2"},
+var nativeProfiles = []cdriver.Profile{
+	cdriver.LowProfile,
+	cdriver.OptimizedProfile,
 }
 
 // Compiler records the bounded toolchain fingerprint used by one native run.
@@ -49,17 +41,18 @@ type Compiler struct {
 
 // Report is the deterministic success record emitted by the native fixture command.
 type Report struct {
-	SchemaVersion string     `json:"schemaVersion"`
-	Target        string     `json:"target"`
-	Libc          string     `json:"libc"`
-	Compilers     []Compiler `json:"compilers"`
-	Profiles      []string   `json:"profiles"`
-	Cases         []string   `json:"cases"`
-	Executions    int        `json:"executions"`
+	SchemaVersion        string     `json:"schemaVersion"`
+	Target               string     `json:"target"`
+	Libc                 string     `json:"libc"`
+	Compilers            []Compiler `json:"compilers"`
+	Profiles             []string   `json:"profiles"`
+	Cases                []string   `json:"cases"`
+	Executions           int        `json:"executions"`
+	BuildSmokeExecutions int        `json:"buildSmokeExecutions"`
 }
 
-// Run compiles every emission fixture with Clang and GCC at low and optimized profiles, then
-// compares the Linux process outcome with the MIR-interpreter outcome captured by the fixture runner.
+// Run compiles every emission fixture with Clang and GCC at low and optimized profiles, compares
+// the Linux process outcome with the MIR-interpreter oracle, and exercises the product build CLI.
 func Run(manifestPath string) (Report, error) {
 	if runtime.GOOS != "linux" || runtime.GOARCH != "amd64" {
 		return Report{}, fmt.Errorf("native C differential requires linux/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
@@ -68,14 +61,6 @@ func Run(manifestPath string) (Report, error) {
 	if err != nil {
 		return Report{}, fmt.Errorf("resolve manifest: %w", err)
 	}
-	runtimeSource := filepath.Join(filepath.Dir(absoluteManifest), "native", "runtime.c")
-	if info, err := os.Stat(runtimeSource); err != nil || !info.Mode().IsRegular() {
-		if err == nil {
-			err = fmt.Errorf("not a regular file")
-		}
-		return Report{}, fmt.Errorf("native test runtime: %w", err)
-	}
-
 	fixtureReport, err := cbackendfixture.Run(absoluteManifest)
 	if err != nil {
 		return Report{}, err
@@ -83,12 +68,11 @@ func Run(manifestPath string) (Report, error) {
 	if len(fixtureReport.Failures) != 0 || len(fixtureReport.Emitted) != fixtureReport.CasesRun {
 		return Report{}, fmt.Errorf("C emission fixtures are not clean: %s", summarizeFailures(fixtureReport.Failures))
 	}
-
-	libc, err := probeLibc()
+	runtimeSource, err := cruntime.ScalarSource(trapExitBase)
 	if err != nil {
-		return Report{}, err
+		return Report{}, fmt.Errorf("bind scalar runtime: %w", err)
 	}
-	compilers, compilerReports, err := probeCompilers()
+	toolchains, err := resolveToolchains()
 	if err != nil {
 		return Report{}, err
 	}
@@ -101,8 +85,13 @@ func Run(manifestPath string) (Report, error) {
 	report := Report{
 		SchemaVersion: reportSchemaVersion,
 		Target:        cbackend.TargetX8664LinuxGNU,
-		Libc:          libc,
-		Compilers:     compilerReports,
+		Libc:          toolchains[0].Libc,
+	}
+	for _, toolchain := range toolchains {
+		if toolchain.Libc != report.Libc {
+			return Report{}, fmt.Errorf("C toolchains disagree on libc: %q and %q", report.Libc, toolchain.Libc)
+		}
+		report.Compilers = append(report.Compilers, Compiler{Name: toolchain.Name, Version: toolchain.Version})
 	}
 	for _, profile := range nativeProfiles {
 		report.Profiles = append(report.Profiles, profile.Name)
@@ -112,89 +101,82 @@ func Run(manifestPath string) (Report, error) {
 			return Report{}, fmt.Errorf("case %s emitted unexpected profile %s/%s", fixture.ID, fixture.Unit.Target, fixture.Unit.Dialect)
 		}
 		report.Cases = append(report.Cases, fixture.ID)
-		caseDirectory := filepath.Join(temporaryRoot, fmt.Sprintf("case-%02d", caseIndex))
-		if err := os.Mkdir(caseDirectory, 0o700); err != nil {
-			return Report{}, fmt.Errorf("create case directory: %w", err)
-		}
-		sourcePath := filepath.Join(caseDirectory, "unit.c")
-		if err := os.WriteFile(sourcePath, []byte(fixture.Unit.Source), 0o600); err != nil {
-			return Report{}, fmt.Errorf("write generated C for %s: %w", fixture.ID, err)
-		}
 		expectedExit, err := expectedExitCode(fixture)
 		if err != nil {
 			return Report{}, err
 		}
-		for compilerIndex, compiler := range compilers {
+		for compilerIndex, toolchain := range toolchains {
 			for profileIndex, profile := range nativeProfiles {
-				executablePath := filepath.Join(caseDirectory, fmt.Sprintf("program-%d-%d", compilerIndex, profileIndex))
-				if err := compile(compiler, profile, sourcePath, runtimeSource, executablePath); err != nil {
-					return Report{}, fmt.Errorf("%s with %s/%s: %w", fixture.ID, compiler.Name, profile.Name, err)
+				artifact, err := cdriver.Build(toolchain, profile, fixture.Unit.Source, runtimeSource)
+				if err != nil {
+					return Report{}, fmt.Errorf("%s with %s/%s: %w", fixture.ID, toolchain.Name, profile.Name, err)
+				}
+				executablePath := filepath.Join(temporaryRoot, fmt.Sprintf("program-%02d-%d-%d", caseIndex, compilerIndex, profileIndex))
+				if err := os.WriteFile(executablePath, artifact.Bytes, 0o700); err != nil {
+					return Report{}, fmt.Errorf("materialize %s with %s/%s: %w", fixture.ID, toolchain.Name, profile.Name, err)
 				}
 				if err := execute(fixture.ID, executablePath, expectedExit); err != nil {
-					return Report{}, fmt.Errorf("%s with %s/%s: %w", fixture.ID, compiler.Name, profile.Name, err)
+					return Report{}, fmt.Errorf("%s with %s/%s: %w", fixture.ID, toolchain.Name, profile.Name, err)
 				}
 				report.Executions++
 			}
 		}
 	}
+	buildSmoke, err := runBuildSmoke(temporaryRoot)
+	if err != nil {
+		return Report{}, err
+	}
+	report.BuildSmokeExecutions = buildSmoke
 	return report, nil
 }
 
-func probeLibc() (string, error) {
-	path, err := exec.LookPath("getconf")
-	if err != nil {
-		return "", fmt.Errorf("x86_64-linux-gnu probe requires getconf: %w", err)
+func runBuildSmoke(temporaryRoot string) (int, error) {
+	sourceRoot := filepath.Join(temporaryRoot, "product-build-smoke")
+	if err := os.Mkdir(sourceRoot, 0o700); err != nil {
+		return 0, fmt.Errorf("create product build smoke root: %w", err)
 	}
-	output, err := runBounded(compilerTimeout, path, "GNU_LIBC_VERSION")
-	if err != nil {
-		return "", fmt.Errorf("probe glibc: %w", err)
+	const source = "module main;\nfn add(left: i32, right: i32) -> i32 { left + right }\nfn main() -> i32 { add(20, 22) }\n"
+	if err := os.WriteFile(filepath.Join(sourceRoot, "main.fy"), []byte(source), 0o600); err != nil {
+		return 0, fmt.Errorf("write product build smoke source: %w", err)
 	}
-	value := strings.TrimSpace(output)
-	if !strings.HasPrefix(value, "glibc ") {
-		return "", fmt.Errorf("target requires glibc, getconf reported %q", value)
+	executions := 0
+	for _, compiler := range []string{"clang", "gcc"} {
+		for _, profile := range nativeProfiles {
+			output := fmt.Sprintf("build/smoke-%s-%s", compiler, profile.Name)
+			var stdout bytes.Buffer
+			var stderr bytes.Buffer
+			code := cli.Run([]string{
+				"experimental", "build", "main.fy",
+				"--cc", compiler,
+				"--profile", profile.Name,
+				"--output", output,
+			}, sourceRoot, &stdout, &stderr)
+			if code != cli.ExitSuccess {
+				return 0, fmt.Errorf("product build smoke with %s/%s failed with code %d: %s", compiler, profile.Name, code, strings.TrimSpace(stderr.String()))
+			}
+			expectedReceipt := fmt.Sprintf("built: %s (%s, %s, %s)\n", output, cbackend.TargetX8664LinuxGNU, compiler, profile.Name)
+			if stdout.String() != expectedReceipt || stderr.Len() != 0 {
+				return 0, fmt.Errorf("product build smoke with %s/%s produced stdout %q and stderr %q", compiler, profile.Name, stdout.String(), stderr.String())
+			}
+			if err := execute("product-build-smoke", filepath.Join(sourceRoot, filepath.FromSlash(output)), 42); err != nil {
+				return 0, fmt.Errorf("product build smoke with %s/%s: %w", compiler, profile.Name, err)
+			}
+			executions++
+		}
 	}
-	return value, nil
+	return executions, nil
 }
 
-func probeCompilers() ([]compilerSpec, []Compiler, error) {
-	var specs []compilerSpec
-	var reports []Compiler
+func resolveToolchains() ([]cdriver.Toolchain, error) {
+	toolchains := make([]cdriver.Toolchain, 0, 2)
 	for _, name := range []string{"clang", "gcc"} {
-		path, err := exec.LookPath(name)
+		toolchain, err := cdriver.Resolve(name)
 		if err != nil {
-			return nil, nil, fmt.Errorf("native C differential requires %s: %w", name, err)
+			return nil, fmt.Errorf("native C differential requires %s: %w", name, err)
 		}
-		output, err := runBounded(compilerTimeout, path, "--version")
-		if err != nil {
-			return nil, nil, fmt.Errorf("probe %s: %w", name, err)
-		}
-		version := firstLine(output)
-		if version == "" {
-			return nil, nil, fmt.Errorf("probe %s returned an empty version", name)
-		}
-		specs = append(specs, compilerSpec{Name: name, Path: path})
-		reports = append(reports, Compiler{Name: name, Version: version})
+		toolchains = append(toolchains, toolchain)
 	}
-	return specs, reports, nil
-}
-
-func compile(compiler compilerSpec, profile profileSpec, sourcePath, runtimeSource, executablePath string) error {
-	arguments := []string{
-		"-std=c11",
-		"-pedantic-errors",
-		"-Wall",
-		"-Wextra",
-		"-Werror",
-		"-fno-common",
-		profile.Flag,
-		fmt.Sprintf("-DFY_TEST_TRAP_EXIT_BASE=%d", trapExitBase),
-		sourcePath,
-		runtimeSource,
-		"-o",
-		executablePath,
-	}
-	_, err := runBounded(compilerTimeout, compiler.Path, arguments...)
-	return err
+	return toolchains, nil
 }
 
 func execute(caseID, executablePath string, expectedExit int) error {
@@ -248,28 +230,6 @@ func expectedExitCode(fixture cbackendfixture.EmittedCase) (int, error) {
 	}
 }
 
-func runBounded(timeout time.Duration, name string, arguments ...string) (string, error) {
-	contextValue, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
-	command := exec.CommandContext(contextValue, name, arguments...)
-	command.Stdin = nil
-	var output boundedBuffer
-	output.limit = maxProcessOutput
-	command.Stdout = &output
-	command.Stderr = &output
-	err := command.Run()
-	if errors.Is(contextValue.Err(), context.DeadlineExceeded) {
-		return string(output.bytes), fmt.Errorf("command exceeded %s", timeout)
-	}
-	if output.truncated {
-		return string(output.bytes), fmt.Errorf("command exceeded %d output bytes", maxProcessOutput)
-	}
-	if err != nil {
-		return string(output.bytes), fmt.Errorf("command failed: %w: %s", err, strings.TrimSpace(string(output.bytes)))
-	}
-	return string(output.bytes), nil
-}
-
 func summarizeFailures(failures []cbackendfixture.Failure) string {
 	if len(failures) == 0 {
 		return "emitted case count mismatch"
@@ -280,11 +240,6 @@ func summarizeFailures(failures []cbackendfixture.Failure) string {
 	}
 	slices.Sort(values)
 	return strings.Join(values, "; ")
-}
-
-func firstLine(value string) string {
-	line, _, _ := strings.Cut(strings.ReplaceAll(value, "\r\n", "\n"), "\n")
-	return strings.TrimSpace(line)
 }
 
 type boundedBuffer struct {

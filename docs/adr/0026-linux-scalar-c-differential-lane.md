@@ -29,22 +29,28 @@ trap categories without pretending to be the final runtime ABI or console contra
    `-fno-common`.
 3. Generated C calls the internal symbol `fy_runtime_trap(uint32_t)`. Canonical trap identities use
    fixed codes 1 through 7 independent of which categories occur in a translation unit.
-4. `spec/fixtures/c-emission/native/runtime.c` is a test-only implementation. The runner supplies a
-   reserved status base of 192; the runtime terminates with `_Exit(base + category)` and emits no
-   output. It is not the product runtime or a stable runtime ABI.
+4. `internal/cruntime/stage0_scalar.c` is the embedded provisional implementation shared with the
+   experimental product-build path. The runner supplies a reserved status base of 192; the runtime
+   terminates with `_Exit(base + category)` and emits no output. It is not the complete product
+   runtime or a stable runtime ABI.
 5. The process-status oracle accepts ordinary returns only in the non-reserved range 0 through 191.
    Negative and larger `i32` returns require a later output or shared-memory observation protocol
    and fail closed in this lane.
-6. Compiler and executable processes have bounded time and captured-output limits. All generated C,
-   object state, and executables live under one owned temporary directory and are removed after the
-   run. No repository artifact is retained.
-7. A successful command prints a deterministic JSON report containing schema identity, target,
-   glibc fingerprint, first-line compiler fingerprints, profile names, case identifiers, and the
-   completed execution count. It contains no temporary or absolute path.
-8. `.github/workflows/frontend.yml` owns the hosted Ubuntu invocation. The ordinary cross-platform
+6. Compiler and executable processes have bounded time and captured-output limits. Each C-driver
+   invocation owns temporary generated C, runtime source, and linked output; the runner separately
+   owns executable materialization. Ordinary cleanup removes both classes after the run. Compiler-
+   internal scratch remains toolchain-owned, and no repository artifact is retained.
+7. After the 16 fixture comparisons, the same command invokes the actual experimental build CLI for
+   Clang and GCC under both profiles and executes each temporary product, requiring exit `42` and
+   the exact relative-path build receipt.
+8. A successful command prints a deterministic `fairyc.native-c-report/v1` JSON report containing
+   target, glibc fingerprint, first-line compiler fingerprints, profile names, case identifiers,
+   fixture execution count, and product-build smoke count. It contains no temporary or absolute
+   path.
+9. `.github/workflows/frontend.yml` owns the hosted Ubuntu invocation. The ordinary cross-platform
    Go job still compiles and unit-tests the runner without claiming native execution; the separate
    native job invokes the fail-closed command.
-9. Adding the runner and workflow does not itself prove a hosted run or advance the target to
+10. Adding the runner and workflow does not itself prove a hosted run or advance the target to
    `emittable`, `conformant`, or `supported`. Current run evidence must be observed separately.
 
 ## Consequences
@@ -56,6 +62,8 @@ trap categories without pretending to be the final runtime ABI or console contra
   native evidence.
 - Trap category identity becomes externally testable without mixing test markers into stdout or
   stderr.
+- The differential lane and experimental build now share compiler profiles and runtime source, so
+  their transport cannot drift through duplicated plumbing.
 - Output comparison, negative and wide return values, resource drop traces, sanitizers, layouts,
   bidirectional C ABI calls, and the product runtime remain later gates.
 

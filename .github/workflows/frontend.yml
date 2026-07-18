@@ -48,5 +48,5 @@ jobs:
         with:
           go-version-file: go.mod
           cache: false
-      - name: Compile and execute scalar C fixtures
+      - name: Run scalar C differential and product build smoke
         run: go run -mod=readonly ./cmd/fairyc-native-fixtures spec/fixtures/c-emission/manifest-v0.json

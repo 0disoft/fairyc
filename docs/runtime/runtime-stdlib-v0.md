@@ -31,10 +31,12 @@ The current scalar C transport names one internal non-returning symbol,
 MIR trap identities and do not depend on which traps a translation unit uses. The symbol is an
 implementation boundary, not a stable public runtime ABI or C header.
 
-`spec/fixtures/c-emission/native/runtime.c` is a test-only implementation that maps those codes to a
-reserved process-status range with `_Exit`. It performs no cleanup and emits no output. The product
-runtime, bounded source-location payload, runtime ABI version suffix, and distribution bundle remain
-unimplemented.
+`internal/cruntime/stage0_scalar.c` is the embedded provisional scalar implementation shared by the
+experimental build and native differential runner. It maps those codes to caller-bound reserved
+process statuses with `_Exit`, performs no cleanup, and emits no output. Product builds currently
+bind base `128`; differential fixtures bind base `192` so their small ordinary-return oracle stays
+disjoint. The complete product runtime, bounded source-location payload, runtime ABI version suffix,
+and distribution bundle remain unimplemented.
 
 It does not own a general allocator API, collections, files, strings, formatting, unwinding, logging, reflection, garbage collection, scheduling, or async execution. Runtime helpers use a major-suffixed symbol namespace and an exact pre-1 ABI match.
 
