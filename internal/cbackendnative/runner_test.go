@@ -12,6 +12,7 @@ import (
 
 	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/cbackendfixture"
+	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/cli"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/interpreter"
@@ -41,23 +42,46 @@ func TestBuildSmokeSourceReachesCEmission(t *testing.T) {
 	}
 }
 
-func TestNativeReportSchemaTracksDropTraceShape(t *testing.T) {
+func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 	t.Parallel()
-	if reportSchemaVersion != "fairyc.native-c-report/v3" {
+	if reportSchemaVersion != "fairyc.native-c-report/v4" {
 		t.Fatalf("report schema = %q", reportSchemaVersion)
 	}
 	encoded, err := json.Marshal(Report{
 		SchemaVersion: reportSchemaVersion, Executions: 68, DropTraceExecutions: 68,
 		LayoutCases: []string{"pass.array-i32-three", "pass.pointer"}, LayoutProbeExecutions: 4,
+		Sanitizer: cdriver.AddressUndefinedSanitizerMode, SanitizerExecutions: 34,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v3"`) ||
+	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v4"`) ||
 		!strings.Contains(string(encoded), `"dropTraceExecutions":68`) ||
 		!strings.Contains(string(encoded), `"layoutCases":["pass.array-i32-three","pass.pointer"]`) ||
-		!strings.Contains(string(encoded), `"layoutProbeExecutions":4`) {
+		!strings.Contains(string(encoded), `"layoutProbeExecutions":4`) ||
+		!strings.Contains(string(encoded), `"sanitizer":"address-undefined-o1"`) ||
+		!strings.Contains(string(encoded), `"sanitizerExecutions":34`) {
 		t.Fatalf("report JSON = %s", encoded)
+	}
+}
+
+func TestSanitizerEnvironmentOverridesAmbientConfiguration(t *testing.T) {
+	t.Parallel()
+	environment := sanitizerEnvironment([]string{
+		"PATH=/bin", "ASAN_OPTIONS=detect_leaks=0", "LSAN_OPTIONS=exitcode=0", "UBSAN_OPTIONS=halt_on_error=0", "HOME=/tmp/home",
+	})
+	if len(environment) != 5 || environment[0] != "PATH=/bin" || environment[1] != "HOME=/tmp/home" {
+		t.Fatalf("sanitizer environment = %v", environment)
+	}
+	joined := strings.Join(environment, "\n")
+	for _, required := range []string{
+		"ASAN_OPTIONS=abort_on_error=1:color=never:detect_leaks=1:halt_on_error=1:symbolize=0",
+		"LSAN_OPTIONS=exitcode=23:report_objects=0",
+		"UBSAN_OPTIONS=color=never:halt_on_error=1:print_stacktrace=0",
+	} {
+		if strings.Count(joined, required) != 1 {
+			t.Errorf("sanitizer environment is missing unique %q: %v", required, environment)
+		}
 	}
 }
 

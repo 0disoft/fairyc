@@ -66,7 +66,9 @@ run all 17 emission cases at low and optimized profiles for 68 process-status an
 source-linked drop-trace comparisons, then drive
 the actual experimental build CLI with resource-bearing Option and Result plus a flat all-`i32` resource
 through 4 compiler/profile executable
-smokes. The current Windows
+smokes. The same job also compiles and executes each production, uninstrumented C unit with Clang
+and GCC under the closed `address-undefined-o1` ASan+UBSan mode for 34 fail-closed sanitizer
+executions. The current Windows
 host has no eligible Linux toolchain, and no hosted run receipt has been observed, so this is a
 configured lane rather than native conformance evidence. A shared bounded C driver and embedded
 scalar runtime serve both that lane and the experimental single-file build command, while a separate
@@ -86,7 +88,8 @@ incomplete.
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.
 - Run interpreter-to-C differential fixtures and bidirectional C ABI fixtures with Clang and GCC at low and optimized profiles.
-- Add sanitizer-assisted backend checks without treating sanitizers as the language oracle.
+- Keep sanitizer-assisted backend checks mandatory for every admitted C-emission case without
+  treating sanitizers as the language oracle or exposing the validation mode as a product profile.
 
 Exit gate: the target reaches `conformant`: interpreter and generated-C runs agree on values, status, trap category, active-payload and drop traces; all declared layout and C ABI fixtures pass in clean Linux CI with no skips. This gate does not by itself make the target `supported`.
 

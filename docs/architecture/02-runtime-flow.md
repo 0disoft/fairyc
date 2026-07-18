@@ -59,8 +59,8 @@ target can therefore be inspected on Windows without borrowing Windows layout or
 Linux toolchain is locally executable.
 `internal/layout` is the next boundary: it turns those facts into checked array and aggregate size,
 alignment, offset, and padding results before any backend chooses C syntax. The current layout
-fixtures are host-independent expectations; native C probes and SysV call classification remain
-later evidence layers.
+fixtures are host-independent expectations; a generated native C probe now checks every valid
+case, while SysV call classification remains a later evidence layer.
 
 The implemented slice emits deterministic ISO C11 for verified scalar-payload MIR, including
 private `Option<i32>` and `Result<i32, i32>` transport, plus nonempty all-`i32` resource definitions
@@ -70,10 +70,11 @@ rechecked with C11 size, alignment, and field-offset assertions. `?` error paths
 enclosing function's declared Result type instead of returning a differently typed operand
 container. A separate
 Linux/amd64 runner now drives Clang and GCC at low and optimized profiles, links the embedded scalar
-runtime, executes each emitted fixture, and compares its process outcome. The same bounded C driver
+runtime, executes each emitted fixture, compares its process outcome and source-linked drop trace,
+and separately runs every production unit under a closed ASan+UBSan mode. The same bounded C driver
 and runtime feed an explicit experimental single-file build command whose artifact is confined to
 the ignored source-root `build/` directory. The current Windows host cannot execute either native
-path, and no hosted run has been observed yet. Complete runtime, layout, ABI, and supported-target
+path, and no hosted run has been observed yet. Complete runtime, public ABI, and supported-target
 gates remain unimplemented.
 
 ## Atlas flow

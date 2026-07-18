@@ -107,14 +107,16 @@ and exact source-linked drop-trace comparisons for small non-negative returns an
 category, including both scalar tag families, flat resource transport, and resource-bearing
 Option/Result paths. A closed internal instrumentation profile emits conditional active-payload
 observer calls keyed by canonical resource type and binding span; production C contains none of
-those declarations, calls, or site metadata. Output, negative or larger `i32` returns,
-user drop-body effects, sanitizers, public layout, ABI, and
-broader runtime behavior remain unimplemented. Sanitizers are useful backend checks but are not the
-language-semantics oracle.
+those declarations, calls, or site metadata. Each production unit also has a separate configured
+Clang and GCC execution at `-O1` with address and undefined-behavior sanitizers, for 34 planned
+sanitizer executions. That path overrides ambient sanitizer options, forbids recovery, requires
+empty stdout/stderr, and is not selectable through the product CLI. Output, negative or larger
+`i32` returns, user drop-body effects, public layout, ABI, and broader runtime behavior remain
+unimplemented. A clean sanitizer run is backend evidence, not the language-semantics oracle.
 
 `internal/cdriver` and `internal/cruntime` are the one implementation path for both that matrix and
 the experimental constrained-C executable builder. The driver fixes the C dialect, warning policy,
-optimization profiles, time and output bounds, and linked-artifact size limit; the embedded runtime
+optimization profiles, a separate closed sanitizer build mode, time and output bounds, and linked-artifact size limit; the embedded runtime
 fixes trap dispatch before binding a caller-specific reserved process-status base. The native lane
 adds a Linux-only four-byte drop recorder whose stderr is decoded as conformance data rather than
 language output. Sharing this

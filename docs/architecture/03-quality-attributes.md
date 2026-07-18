@@ -15,7 +15,8 @@
 
 - `check` avoids code generation.
 - Development builds favor latency over maximum optimization.
-- Release, LTO, PGO, sanitizer, full-debug, and cross-target work remain explicit profiles.
+- Release, LTO, PGO, full-debug, and cross-target work remain explicit product profiles. Sanitizers
+  use a separate validation-only mode and do not become a product profile by accident.
 - No-op and incremental work reuse valid frontend results without retaining unbounded intermediates.
 - Latency, memory, artifact, and cache claims remain measurement fields until a reproducible harness establishes a baseline and adoption threshold.
 

@@ -76,7 +76,8 @@ toolchain, and clean-CI fixtures pass without skips.
 
 - Stage 0 development and release both use the C reference backend with different explicit optimization profiles; `check` uses no backend.
 - A later fast or production backend changes this profile only after a measured adoption decision.
-- ThinLTO, PGO, full debug information, sanitizers, and cross-target builds are explicit requests.
+- ThinLTO, PGO, full debug information, and cross-target builds remain explicit product requests.
+  The current ASan+UBSan mode is validation-only and is deliberately not a CLI profile.
 
 ## Naming
 

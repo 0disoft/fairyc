@@ -48,5 +48,5 @@ jobs:
         with:
           go-version-file: go.mod
           cache: false
-      - name: Run C differential and product build smoke
+      - name: Run C differential, sanitizer, layout, and product build checks
         run: go run -mod=readonly ./cmd/fairyc-native-fixtures spec/fixtures/c-emission/manifest-v0.json

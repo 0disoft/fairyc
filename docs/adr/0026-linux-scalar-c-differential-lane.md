@@ -71,8 +71,9 @@ trap categories without pretending to be the final runtime ABI or console contra
   source-linked drop comparison; product emission and product builds remain marker-free.
 - The differential lane and experimental build now share compiler profiles and runtime source, so
   their transport cannot drift through duplicated plumbing.
-- Output comparison, negative and wide return values, user drop-body effects, sanitizers, layouts,
-  bidirectional C ABI calls, and the product runtime remain later gates.
+- ADR 0036 later adds valid-case native layout probes, and ADR 0037 later adds the closed sanitizer
+  mode. Output comparison, negative and wide return values, user drop-body effects, bidirectional C
+  ABI calls, and the product runtime remain later gates.
 
 ## Rejected alternatives
 

@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v3"
+	reportSchemaVersion = "fairyc.native-c-report/v4"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -76,12 +76,15 @@ type Report struct {
 	DropTraceExecutions   int        `json:"dropTraceExecutions"`
 	LayoutCases           []string   `json:"layoutCases"`
 	LayoutProbeExecutions int        `json:"layoutProbeExecutions"`
+	Sanitizer             string     `json:"sanitizer"`
+	SanitizerExecutions   int        `json:"sanitizerExecutions"`
 	BuildSmokeExecutions  int        `json:"buildSmokeExecutions"`
 }
 
 // Run compiles every emission fixture with Clang and GCC at low and optimized profiles, compares
-// the Linux process outcome and source-linked drop trace with the MIR-interpreter oracle, and
-// exercises the product build CLI.
+// the Linux process outcome and source-linked drop trace with the MIR-interpreter oracle, executes
+// every production unit under the closed address/undefined sanitizer mode, and exercises the
+// product build CLI.
 func Run(manifestPath string) (Report, error) {
 	if runtime.GOOS != "linux" || runtime.GOARCH != "amd64" {
 		return Report{}, fmt.Errorf("native C differential requires linux/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
@@ -97,9 +100,13 @@ func Run(manifestPath string) (Report, error) {
 	if len(fixtureReport.Failures) != 0 || len(fixtureReport.Emitted) != fixtureReport.CasesRun {
 		return Report{}, fmt.Errorf("C emission fixtures are not clean: %s", summarizeFailures(fixtureReport.Failures))
 	}
-	runtimeSource, err := cruntime.DropTraceSource(trapExitBase)
+	traceRuntimeSource, err := cruntime.DropTraceSource(trapExitBase)
 	if err != nil {
 		return Report{}, fmt.Errorf("bind scalar runtime: %w", err)
+	}
+	scalarRuntimeSource, err := cruntime.ScalarSource(trapExitBase)
+	if err != nil {
+		return Report{}, fmt.Errorf("bind uninstrumented scalar runtime: %w", err)
 	}
 	toolchains, err := resolveToolchains()
 	if err != nil {
@@ -115,6 +122,7 @@ func Run(manifestPath string) (Report, error) {
 		SchemaVersion: reportSchemaVersion,
 		Target:        string(target.X8664LinuxGNU),
 		Libc:          toolchains[0].Libc,
+		Sanitizer:     cdriver.AddressUndefinedSanitizerMode,
 	}
 	for _, toolchain := range toolchains {
 		if toolchain.Libc != report.Libc {
@@ -158,7 +166,7 @@ func Run(manifestPath string) (Report, error) {
 		}
 		for compilerIndex, toolchain := range toolchains {
 			for profileIndex, profile := range nativeProfiles {
-				artifact, err := cdriver.Build(toolchain, profile, fixture.TraceUnit.Source, runtimeSource)
+				artifact, err := cdriver.Build(toolchain, profile, fixture.TraceUnit.Source, traceRuntimeSource)
 				if err != nil {
 					return Report{}, fmt.Errorf("%s with %s/%s: %w", fixture.ID, toolchain.Name, profile.Name, err)
 				}
@@ -172,6 +180,18 @@ func Run(manifestPath string) (Report, error) {
 				report.Executions++
 				report.DropTraceExecutions++
 			}
+			sanitizedArtifact, err := cdriver.BuildSanitized(toolchain, fixture.Unit.Source, scalarRuntimeSource)
+			if err != nil {
+				return Report{}, fmt.Errorf("%s with %s/%s: %w", fixture.ID, toolchain.Name, cdriver.AddressUndefinedSanitizerMode, err)
+			}
+			sanitizedPath := filepath.Join(temporaryRoot, fmt.Sprintf("sanitized-%02d-%d", caseIndex, compilerIndex))
+			if err := os.WriteFile(sanitizedPath, sanitizedArtifact.Bytes, 0o700); err != nil {
+				return Report{}, fmt.Errorf("materialize %s with %s/%s: %w", fixture.ID, toolchain.Name, cdriver.AddressUndefinedSanitizerMode, err)
+			}
+			if err := executeSanitized(fixture.ID, sanitizedPath, expectedExit); err != nil {
+				return Report{}, fmt.Errorf("%s with %s/%s: %w", fixture.ID, toolchain.Name, cdriver.AddressUndefinedSanitizerMode, err)
+			}
+			report.SanitizerExecutions++
 		}
 	}
 	buildSmoke, err := runBuildSmoke(temporaryRoot)
@@ -252,43 +272,95 @@ func resolveToolchains() ([]cdriver.Toolchain, error) {
 }
 
 func execute(caseID, executablePath string, expectedExit int, expectedDrops []uint32) error {
-	contextValue, cancel := context.WithTimeout(context.Background(), executionTimeout)
-	defer cancel()
-	command := exec.CommandContext(contextValue, executablePath)
-	command.Stdin = nil
-	stdout := boundedBuffer{limit: maxProcessOutput}
-	stderr := boundedBuffer{limit: maxProcessOutput}
-	command.Stdout = &stdout
-	command.Stderr = &stderr
-	err := command.Run()
-	if errors.Is(contextValue.Err(), context.DeadlineExceeded) {
-		return fmt.Errorf("native executable exceeded %s", executionTimeout)
-	}
-	exitCode := 0
+	result, err := executeProcess(executablePath, nil)
 	if err != nil {
-		var exitError *exec.ExitError
-		if !errors.As(err, &exitError) {
-			return fmt.Errorf("execute native program: %w", err)
-		}
-		exitCode = exitError.ExitCode()
+		return err
 	}
-	if stdout.truncated || stderr.truncated || len(stdout.bytes)+len(stderr.bytes) > maxProcessOutput {
-		return fmt.Errorf("native executable exceeded %d output bytes", maxProcessOutput)
+	if len(result.stdout) != 0 {
+		return fmt.Errorf("native executable produced unexpected stdout %q", string(result.stdout))
 	}
-	if len(stdout.bytes) != 0 {
-		return fmt.Errorf("native executable produced unexpected stdout %q", string(stdout.bytes))
-	}
-	actualDrops, err := decodeDropTrace(stderr.bytes)
+	actualDrops, err := decodeDropTrace(result.stderr)
 	if err != nil {
 		return fmt.Errorf("native drop trace for %s: %w", caseID, err)
 	}
 	if !slices.Equal(actualDrops, expectedDrops) {
 		return fmt.Errorf("native drop trace for %s: got %v, want %v", caseID, actualDrops, expectedDrops)
 	}
-	if exitCode != expectedExit {
-		return fmt.Errorf("native exit for %s: got %d, want %d", caseID, exitCode, expectedExit)
+	if result.exitCode != expectedExit {
+		return fmt.Errorf("native exit for %s: got %d, want %d", caseID, result.exitCode, expectedExit)
 	}
 	return nil
+}
+
+func executeSanitized(caseID, executablePath string, expectedExit int) error {
+	result, err := executeProcess(executablePath, sanitizerEnvironment(os.Environ()))
+	if err != nil {
+		return err
+	}
+	if len(result.stdout) != 0 {
+		return fmt.Errorf("sanitized executable produced unexpected stdout %q", string(result.stdout))
+	}
+	if len(result.stderr) != 0 {
+		diagnostic := strings.ReplaceAll(strings.TrimSpace(string(result.stderr)), filepath.Dir(executablePath), "<temporary>")
+		return fmt.Errorf("sanitizer reported for %s: %s", caseID, diagnostic)
+	}
+	if result.exitCode != expectedExit {
+		return fmt.Errorf("sanitized exit for %s: got %d, want %d", caseID, result.exitCode, expectedExit)
+	}
+	return nil
+}
+
+type processResult struct {
+	exitCode int
+	stdout   []byte
+	stderr   []byte
+}
+
+func executeProcess(executablePath string, environment []string) (processResult, error) {
+	contextValue, cancel := context.WithTimeout(context.Background(), executionTimeout)
+	defer cancel()
+	command := exec.CommandContext(contextValue, executablePath)
+	command.Stdin = nil
+	if environment != nil {
+		command.Env = environment
+	}
+	stdout := boundedBuffer{limit: maxProcessOutput}
+	stderr := boundedBuffer{limit: maxProcessOutput}
+	command.Stdout = &stdout
+	command.Stderr = &stderr
+	err := command.Run()
+	if errors.Is(contextValue.Err(), context.DeadlineExceeded) {
+		return processResult{}, fmt.Errorf("native executable exceeded %s", executionTimeout)
+	}
+	exitCode := 0
+	if err != nil {
+		var exitError *exec.ExitError
+		if !errors.As(err, &exitError) {
+			return processResult{}, fmt.Errorf("execute native program: %w", err)
+		}
+		exitCode = exitError.ExitCode()
+	}
+	if stdout.truncated || stderr.truncated || len(stdout.bytes)+len(stderr.bytes) > maxProcessOutput {
+		return processResult{}, fmt.Errorf("native executable exceeded %d output bytes", maxProcessOutput)
+	}
+	return processResult{exitCode: exitCode, stdout: bytes.Clone(stdout.bytes), stderr: bytes.Clone(stderr.bytes)}, nil
+}
+
+func sanitizerEnvironment(base []string) []string {
+	result := make([]string, 0, len(base)+3)
+	for _, entry := range base {
+		name, _, _ := strings.Cut(entry, "=")
+		if name == "ASAN_OPTIONS" || name == "LSAN_OPTIONS" || name == "UBSAN_OPTIONS" {
+			continue
+		}
+		result = append(result, entry)
+	}
+	return append(
+		result,
+		"ASAN_OPTIONS=abort_on_error=1:color=never:detect_leaks=1:halt_on_error=1:symbolize=0",
+		"LSAN_OPTIONS=exitcode=23:report_objects=0",
+		"UBSAN_OPTIONS=color=never:halt_on_error=1:print_stacktrace=0",
+	)
 }
 
 func expectedDropSiteIDs(fixture cbackendfixture.EmittedCase) ([]uint32, error) {

@@ -73,7 +73,9 @@ numeric structs whose size, alignment, and field offsets are asserted against ta
 Nested tags, empty or non-`i32` resources, partial initialization, user drop effects, Region, borrow,
 unsafe, FFI, complete runtime, and standard-library lowering fail with the provisional capability
 code. The closed native fixture `drop-trace-v0` profile is not selectable through the CLI and its
-observer declaration, calls, site metadata, and stderr protocol never appear in this output.
+observer declaration, calls, site metadata, and stderr protocol never appear in this output. The
+native runner's `address-undefined-o1` sanitizer mode is likewise validation-only and cannot be
+selected by `emit-c` or `build`.
 
 `experimental build` consumes that same C unit, binds the embedded scalar runtime, and uses
 the shared constrained-C driver. It requires Linux/amd64 with glibc and the explicitly selected
@@ -85,7 +87,7 @@ flushes the executable under the destination directory, promotes it without repl
 path, and removes ordinary staging residue. It emits no `.c` file, object, cache entry, manifest,
 package state, or network request. The provisional executable is not a supported target artifact or
 a stable `fairyc build` result. It is uninstrumented and does not link the native differential
-drop recorder.
+drop recorder or sanitizer runtimes.
 
 `fairyc check` remains unimplemented. It must not be aliased to `check-syntax`, because the planned
 command below also requires effects and later semantic groups beyond

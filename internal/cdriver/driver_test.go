@@ -15,6 +15,23 @@ func TestProfilesAreClosedAndDistinct(t *testing.T) {
 	if LowProfile.Name != "low" || LowProfile.optimizationFlag != "-O0" || OptimizedProfile.Name != "optimized" || OptimizedProfile.optimizationFlag != "-O2" || LowProfile == OptimizedProfile {
 		t.Fatalf("profiles = %+v, %+v", LowProfile, OptimizedProfile)
 	}
+	if sanitizerProfile.Name != AddressUndefinedSanitizerMode || sanitizerProfile.optimizationFlag != "-O1" || sanitizerProfile == LowProfile || sanitizerProfile == OptimizedProfile {
+		t.Fatalf("sanitizer profile = %+v", sanitizerProfile)
+	}
+}
+
+func TestBuildArgumentsKeepSanitizersOutOfProductProfiles(t *testing.T) {
+	t.Parallel()
+	product := buildArguments(LowProfile, nil, "unit.c", "runtime.c", "program")
+	sanitized := buildArguments(sanitizerProfile, sanitizerInstrumentationFlags(), "unit.c", "runtime.c", "program")
+	productText := strings.Join(product, " ")
+	sanitizedText := strings.Join(sanitized, " ")
+	if strings.Contains(productText, "sanitize") || !strings.Contains(sanitizedText, "-O1 -fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all") {
+		t.Fatalf("product args = %q; sanitized args = %q", productText, sanitizedText)
+	}
+	if product[len(product)-5] != "-O0" || sanitized[len(sanitized)-8] != "-O1" {
+		t.Fatalf("unexpected argument ordering: product=%v sanitized=%v", product, sanitized)
+	}
 }
 
 func TestReadArtifactEnforcesRegularBoundedNonEmptyImage(t *testing.T) {
@@ -76,5 +93,9 @@ func TestBuildRejectsIneligibleHost(t *testing.T) {
 	_, err := Build(Toolchain{Target: target.X8664LinuxGNU, Name: "clang", Path: "clang"}, LowProfile, "unit", "runtime")
 	if err == nil || !strings.Contains(err.Error(), "requires linux/amd64") {
 		t.Fatalf("Build() error = %v", err)
+	}
+	_, err = BuildSanitized(Toolchain{Target: target.X8664LinuxGNU, Name: "clang", Path: "clang"}, "unit", "runtime")
+	if err == nil || !strings.Contains(err.Error(), "requires linux/amd64") {
+		t.Fatalf("BuildSanitized() error = %v", err)
 	}
 }

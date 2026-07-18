@@ -46,6 +46,7 @@ defined or extension behavior. Only the nine validated pass cases belong in a na
    `fairyc.native-c-report/v3`, adding the sorted `layoutCases` identity list and
    `layoutProbeExecutions`. The expected configured shape is nine named cases and four executions;
    a redundant case count is omitted so identity drift cannot hide behind the same number.
+   ADR 0037 later advances the report to v4 for sanitizer identity and execution count.
 8. The existing `c-layout-probes` and `hosted-linux-receipt` target missing-evidence markers remain
    until a clean hosted Linux report is observed. Implemented code and a configured job are not
    native evidence by themselves.
@@ -60,8 +61,8 @@ defined or extension behavior. Only the nine validated pass cases belong in a na
   extensions.
 - The probe reuses the bounded driver and toolchain fingerprints without adding a second compiler
   resolver or retaining artifacts.
-- Hosted execution, call classification, ABI crossings, sanitizers, and product runtime coverage
-  remain separate Phase 2 gates.
+- ADR 0037 later adds the closed sanitizer mode. Hosted execution, call classification, ABI
+  crossings, and product runtime coverage remain separate Phase 2 gates.
 
 ## Rejected alternatives
 

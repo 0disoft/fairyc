@@ -24,8 +24,9 @@ nonempty all-`i32` resource transport plus built-in resource-bearing tags. Resou
 structs are compiler-private and do not alter the
 rule below that resources are forbidden from `@repr(C)` and the public C ABI.
 A separate Linux/amd64 runner is configured to require glibc, Clang, and GCC, link the embedded
-scalar runtime, and compare process status at low and optimized profiles. No hosted success receipt
-has been observed, and the runner does not inspect layout or objects, exercise the public C ABI,
+scalar runtime, compare process status at low and optimized profiles, probe valid target layouts,
+and run each production unit under a closed ASan+UBSan mode. No hosted success receipt has been
+observed, and the runner does not inspect objects, exercise the public C ABI,
 provide the complete product runtime, or establish the complete target profile. That narrow
 capability does not advance the target itself to `emittable`.
 

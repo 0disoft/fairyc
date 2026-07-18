@@ -61,8 +61,9 @@ text would not prove which control-flow path actually executed.
   the interpreter. Independent language semantics still come from the versioned interpreter
   fixtures; native comparison detects backend and execution divergence rather than proving MIR
   lowering independently.
-- Hosted Linux execution, nonempty user drops, resource fields that need drop, output comparison,
-  wider return transport, sanitizers, layouts, and bidirectional ABI fixtures remain later gates.
+- ADR 0036 later adds valid-case native layout probes, and ADR 0037 later adds the closed sanitizer
+  mode. Hosted Linux execution, nonempty user drops, resource fields that need drop, output
+  comparison, wider return transport, and bidirectional ABI fixtures remain later gates.
 
 ## Rejected alternatives
 

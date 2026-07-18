@@ -20,6 +20,9 @@ const (
 	maxProcessOutput = 64 * 1024
 	maxArtifactBytes = 64 * 1024 * 1024
 	commandTimeout   = 60 * time.Second
+
+	// AddressUndefinedSanitizerMode identifies the validation-only ASan+UBSan build mode.
+	AddressUndefinedSanitizerMode = "address-undefined-o1"
 )
 
 // Profile is one closed Stage 0 C compiler profile.
@@ -33,6 +36,7 @@ var (
 	LowProfile = Profile{Name: "low", optimizationFlag: "-O0"}
 	// OptimizedProfile exercises ordinary optimization without LTO.
 	OptimizedProfile = Profile{Name: "optimized", optimizationFlag: "-O2"}
+	sanitizerProfile = Profile{Name: AddressUndefinedSanitizerMode, optimizationFlag: "-O1"}
 )
 
 // Toolchain is one resolved local C compiler plus its target-libc fingerprint.
@@ -95,6 +99,27 @@ func Resolve(targetID target.ID, name string) (Toolchain, error) {
 
 // Build compiles and links one generated translation unit with one embedded runtime source.
 func Build(toolchain Toolchain, profile Profile, unitSource, runtimeSource string) (Artifact, error) {
+	if profile != LowProfile && profile != OptimizedProfile {
+		return Artifact{}, fmt.Errorf("unsupported C profile %q", profile.Name)
+	}
+	return build(toolchain, profile, nil, unitSource, runtimeSource)
+}
+
+// BuildSanitized compiles and links one generated translation unit for the closed native
+// conformance lane. It is deliberately separate from product optimization profiles.
+func BuildSanitized(toolchain Toolchain, unitSource, runtimeSource string) (Artifact, error) {
+	return build(toolchain, sanitizerProfile, sanitizerInstrumentationFlags(), unitSource, runtimeSource)
+}
+
+func sanitizerInstrumentationFlags() []string {
+	return []string{
+		"-fsanitize=address,undefined",
+		"-fno-omit-frame-pointer",
+		"-fno-sanitize-recover=all",
+	}
+}
+
+func build(toolchain Toolchain, profile Profile, instrumentationFlags []string, unitSource, runtimeSource string) (Artifact, error) {
 	spec, found := target.Lookup(toolchain.Target)
 	if !found {
 		return Artifact{}, fmt.Errorf("C build has unsupported target %q", toolchain.Target)
@@ -104,9 +129,6 @@ func Build(toolchain Toolchain, profile Profile, unitSource, runtimeSource strin
 	}
 	if toolchain.Name != "clang" && toolchain.Name != "gcc" || toolchain.Path == "" {
 		return Artifact{}, fmt.Errorf("invalid resolved C toolchain")
-	}
-	if profile != LowProfile && profile != OptimizedProfile {
-		return Artifact{}, fmt.Errorf("unsupported C profile %q", profile.Name)
 	}
 	if unitSource == "" || runtimeSource == "" {
 		return Artifact{}, fmt.Errorf("C unit and runtime source must be non-empty")
@@ -125,19 +147,7 @@ func Build(toolchain Toolchain, profile Profile, unitSource, runtimeSource strin
 	if err := os.WriteFile(runtimePath, []byte(runtimeSource), 0o600); err != nil {
 		return Artifact{}, fmt.Errorf("write C runtime: %w", err)
 	}
-	arguments := []string{
-		"-std=c11",
-		"-pedantic-errors",
-		"-Wall",
-		"-Wextra",
-		"-Werror",
-		"-fno-common",
-		profile.optimizationFlag,
-		unitPath,
-		runtimePath,
-		"-o",
-		executablePath,
-	}
+	arguments := buildArguments(profile, instrumentationFlags, unitPath, runtimePath, executablePath)
 	if _, err := runBounded(toolchain.Path, arguments...); err != nil {
 		return Artifact{}, fmt.Errorf("%s", strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
 	}
@@ -146,6 +156,20 @@ func Build(toolchain Toolchain, profile Profile, unitSource, runtimeSource strin
 		return Artifact{}, err
 	}
 	return Artifact{Bytes: contents, Toolchain: toolchain, Profile: profile}, nil
+}
+
+func buildArguments(profile Profile, instrumentationFlags []string, unitPath, runtimePath, executablePath string) []string {
+	arguments := []string{
+		"-std=c11",
+		"-pedantic-errors",
+		"-Wall",
+		"-Wextra",
+		"-Werror",
+		"-fno-common",
+		profile.optimizationFlag,
+	}
+	arguments = append(arguments, instrumentationFlags...)
+	return append(arguments, unitPath, runtimePath, "-o", executablePath)
 }
 
 func readArtifact(path string) ([]byte, error) {

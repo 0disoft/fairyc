@@ -40,6 +40,7 @@ func TestParseBuildOptionsRejectsIncompleteOrOpenEndedArguments(t *testing.T) {
 		{name: "missing output", arguments: []string{"main.fy", "--cc", "clang", "--profile", "low"}, contains: "requires --output"},
 		{name: "unknown compiler", arguments: []string{"main.fy", "--cc", "cc", "--profile", "low", "--output", "build/main"}, contains: "clang or --cc gcc"},
 		{name: "unknown profile", arguments: []string{"main.fy", "--cc", "gcc", "--profile", "fast", "--output", "build/main"}, contains: "low or --profile optimized"},
+		{name: "sanitizer profile stays internal", arguments: []string{"main.fy", "--cc", "gcc", "--profile", cdriver.AddressUndefinedSanitizerMode, "--output", "build/main"}, contains: "low or --profile optimized"},
 		{name: "unknown flag", arguments: []string{"main.fy", "--cc", "gcc", "--profile", "low", "--output", "build/main", "--force"}, contains: "does not accept flag"},
 		{name: "duplicate", arguments: []string{"main.fy", "--cc", "gcc", "--cc", "clang", "--profile", "low", "--output", "build/main"}, contains: "more than once"},
 		{name: "missing value", arguments: []string{"main.fy", "--cc", "--profile", "low", "--output", "build/main"}, contains: "requires a value for --cc"},
