@@ -11,6 +11,28 @@ const (
 	TypeI32     Type = "i32"
 )
 
+// SharedBorrow returns the canonical non-null shared-borrow type for element.
+func SharedBorrow(element Type) Type {
+	return Type("&" + string(element))
+}
+
+// MutableBorrow returns the canonical non-null exclusive-borrow type for element.
+func MutableBorrow(element Type) Type {
+	return Type("&mut " + string(element))
+}
+
+// BorrowElement decomposes one canonical safe-borrow type.
+func BorrowElement(value Type) (element Type, mutable bool, ok bool) {
+	text := string(value)
+	if len(text) > len("&mut ") && text[:len("&mut ")] == "&mut " {
+		return Type(text[len("&mut "):]), true, true
+	}
+	if len(text) > 1 && text[0] == '&' {
+		return Type(text[1:]), false, true
+	}
+	return TypeInvalid, false, false
+}
+
 // SymbolID is build-local and must not be serialized as a language compatibility fact.
 type SymbolID int
 

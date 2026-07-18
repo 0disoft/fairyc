@@ -115,9 +115,9 @@ func TestExperimentalCheckSemanticsReportsResolveDiagnostic(t *testing.T) {
 func TestExperimentalCheckSemanticsRejectsUnsupportedSubset(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn borrow(value: i32) -> i32 { *&value }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn text() -> i32 { \"unsupported\" }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "check-semantics", "main.fy"}, root)
-	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "experimental semantic subset does not support prefix operator &") {
+	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "experimental semantic subset does not support literal string") {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
 	}
 }

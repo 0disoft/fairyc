@@ -138,7 +138,7 @@ func analyzeText(t *testing.T, files map[string]string) semantic.Result {
 
 func assertCleanTypeResult(t *testing.T, result semantic.Result) {
 	t.Helper()
-	if result.CompletedThrough != semantic.PhaseType || result.FailedPhase != semantic.PhaseNone || len(result.Diagnostics) != 0 || len(result.Unsupported) != 0 {
+	if result.CompletedThrough != semantic.PhaseFlow || result.FailedPhase != semantic.PhaseNone || len(result.Diagnostics) != 0 || len(result.Unsupported) != 0 {
 		t.Fatalf("semantic result = %+v", result)
 	}
 }

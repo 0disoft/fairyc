@@ -14,11 +14,10 @@ stable commands, deterministic content-safe JSON, schema synchronization, human 
 bounded file reads, source-root escape rejection, output failure, clean syntax checks, semantic
 success, semantic diagnostics, and unsupported-subset rejection.
 
-`internal/semanticfixture` parses all 11 cases in `spec/fixtures/semantic/manifest-v0.json`. It
-executes the 6 `resolve` and `type` cases against name resolution and typed HIR, including exact
-failure phase, complete diagnostic set, related spans, selected resolution coordinates, and
-selected canonical type facts. The 5 `flow` cases are reported as deferred after syntax validation;
-they are not counted as passes. Resource, Region, Result, MIR, MIR-verifier,
+`internal/semanticfixture` executes all 11 cases in `spec/fixtures/semantic/manifest-v0.json`
+against name resolution, typed HIR, and local safe-borrow Flow. It verifies exact failure phase,
+complete diagnostic set, related spans, selected resolution coordinates, selected canonical type
+facts, borrow origins, last uses, and escape facts. Resource, Region, Result, MIR, MIR-verifier,
 resolved-package-graph, interpreter, backend, ABI, runtime, and Atlas runners do not exist yet;
 their fixtures remain future evidence requirements.
 
@@ -36,7 +35,7 @@ their fixtures remain future evidence requirements.
 | Class | Proves |
 | --- | --- |
 | Parse pass and fail | `spec/fixtures/parser/` currently proves grammar acceptance, precedence trees, literal cooking, lossless reconstruction, recovery provenance, byte spans, and deterministic diagnostics through the Go parser runner |
-| Semantic pass and fail | `spec/fixtures/semantic/` currently proves the v0 `resolve` and `type` subset: resolution coordinates, canonical types, phase ownership, related spans, and deterministic cascade suppression; borrow-origin and Flow cases remain explicitly deferred |
+| Semantic pass and fail | `spec/fixtures/semantic/` currently proves all 11 v0 cases: resolution coordinates, canonical types, local last-use loans, borrow return origins, phase ownership, related spans, and deterministic cascade suppression |
 | Module pass and fail | File-to-module identity, explicit aliases, forbidden import forms, cycles, and source visibility |
 | Type and initialization fail | Inert/resource separation and initialized-local rules |
 | Resource flow pass and fail | `spec/fixtures/resource/` proves whole-root moves, scope obligations, branch and loop states, and deterministic `E11xx` spans once a runner exists; consuming close and double-drop execution remain future groups |

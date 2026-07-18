@@ -18,8 +18,7 @@ import (
 
 const semanticFixtureSchema = "fairyc.semantic-fixtures/v0"
 
-// Run loads every source in one semantic manifest, executes the implemented resolve/type cases,
-// and reports later-phase cases as deferred rather than manufacturing a pass.
+// Run loads every source in one semantic manifest and executes its resolve, type, and flow cases.
 func Run(manifestPath string) (Report, error) {
 	absoluteManifest, err := filepath.Abs(manifestPath)
 	if err != nil {
@@ -42,14 +41,6 @@ func Run(manifestPath string) (Report, error) {
 		report.CasesParsed++
 		if len(failures) != 0 {
 			report.Failures = append(report.Failures, failures...)
-			continue
-		}
-		phase := fixture.Expect.CompletedThrough
-		if fixture.Expect.Status == "fail" {
-			phase = fixture.Expect.Phase
-		}
-		if phase == "flow" {
-			report.Deferred = append(report.Deferred, Deferred{CaseID: fixture.ID, Phase: phase})
 			continue
 		}
 		report.CasesRun++
@@ -169,6 +160,11 @@ func comparePass(fixture caseDefinition, actual semantic.Result) []Failure {
 			failures = append(failures, Failure{CaseID: fixture.ID, Detail: fmt.Sprintf("type fact missing: %+v", expected)})
 		}
 	}
+	for _, expected := range fixture.Expect.Borrows {
+		if !hasBorrow(actual.Borrows, expected) {
+			failures = append(failures, Failure{CaseID: fixture.ID, Detail: fmt.Sprintf("borrow fact missing: %+v", expected)})
+		}
+	}
 	return failures
 }
 
@@ -212,6 +208,21 @@ func hasType(actual []semantic.TypeFact, expected typeAssertion) bool {
 	return false
 }
 
+func hasBorrow(actual []semantic.BorrowFact, expected borrowAssertion) bool {
+	for _, value := range actual {
+		if !spanEqual(value.Borrow, expected.Borrow) || value.Kind != expected.Kind || value.Origin != expected.Origin || value.Escapes != expected.Escapes {
+			continue
+		}
+		if value.LastUse == nil && expected.LastUse == nil {
+			return true
+		}
+		if value.LastUse != nil && expected.LastUse != nil && spanEqual(*value.LastUse, *expected.LastUse) {
+			return true
+		}
+	}
+	return false
+}
+
 func relatedEqual(actual []semantic.RelatedSpan, expected []relatedSpanAssertion) bool {
 	if len(actual) != len(expected) {
 		return false
@@ -234,6 +245,8 @@ func phaseRank(phase semantic.Phase) int {
 		return 1
 	case semantic.PhaseType:
 		return 2
+	case semantic.PhaseFlow:
+		return 3
 	default:
 		return 0
 	}

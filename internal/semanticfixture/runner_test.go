@@ -12,17 +12,12 @@ func TestSemanticManifestV0(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Run() error = %v", err)
 	}
-	if report.CasesParsed != 11 || report.CasesRun != 6 || len(report.Deferred) != 5 {
-		t.Fatalf("Run() report = %+v, want parsed=11 run=6 deferred=5", report)
+	if report.CasesParsed != 11 || report.CasesRun != 11 || len(report.Deferred) != 0 {
+		t.Fatalf("Run() report = %+v, want parsed=11 run=11 deferred=0", report)
 	}
 	if len(report.Failures) != 0 {
 		for _, failure := range report.Failures {
 			t.Errorf("%s: %s", failure.CaseID, failure.Detail)
-		}
-	}
-	for _, deferred := range report.Deferred {
-		if deferred.Phase != "flow" {
-			t.Errorf("deferred case = %+v, want flow", deferred)
 		}
 	}
 }

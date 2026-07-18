@@ -14,7 +14,7 @@ The current Go prototype implements three deliberately unstable developer comman
 | --- | --- | --- |
 | `fairyc experimental parse <file.fy>` | Parse one source-root-relative file and verify lossless syntax plus error-free AST lowering | `fairyc.experimental.parse/v0` JSON on stdout, defined by `spec/cli/experimental-parse-v0.schema.json` |
 | `fairyc experimental check-syntax <file.fy>` | Check lexing, parsing, recovery, module identity, lossless reconstruction, and error-free AST lowering | Success line on stdout or human diagnostics on stderr |
-| `fairyc experimental check-semantics <file.fy>` | Resolve names and type-check one module in the implemented scalar `bool`/`i32` subset | Typed-HIR function count on stdout, human source diagnostics on stderr, or an explicit unsupported-subset error |
+| `fairyc experimental check-semantics <file.fy>` | Resolve names, type-check, and analyze local safe-borrow Flow for one module in the implemented subset | Typed-HIR function count on stdout, human source diagnostics on stderr, or an explicit unsupported-subset error |
 
 These commands treat the current directory as their temporary source root, accept exactly one
 relative regular file, reject root escape including escaping symbolic links, and read no more than
@@ -31,7 +31,8 @@ fixture runner, not this command, is the current package-level proof. Syntax out
 semantic subset returns a capability error and never counts as a successful check.
 
 `fairyc check` remains unimplemented. It must not be aliased to `check-syntax`, because the planned
-command below also requires Flow, resource, borrow, region, and effect analysis.
+command below also requires general resource, region, and effect analysis beyond the local borrow
+Flow prototype.
 
 ## Stage 0 surface
 

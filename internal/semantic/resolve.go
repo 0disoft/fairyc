@@ -42,11 +42,14 @@ type analyzer struct {
 	resolved       map[*ast.Expression]*symbol
 	bindingSymbols map[*ast.Binding]*symbol
 	parameter      map[*ast.Parameter]*symbol
+	parameterIndex map[*symbol]int
 	functions      map[*ast.Function]*symbol
 	diagnostics    []Diagnostic
 	resolutions    []Resolution
 	types          []TypeFact
+	borrows        []BorrowFact
 	unsupported    []Unsupported
+	flowStarted    bool
 }
 
 func newAnalyzer(files []File) *analyzer {
@@ -56,6 +59,7 @@ func newAnalyzer(files []File) *analyzer {
 		resolved:       make(map[*ast.Expression]*symbol),
 		bindingSymbols: make(map[*ast.Binding]*symbol),
 		parameter:      make(map[*ast.Parameter]*symbol),
+		parameterIndex: make(map[*symbol]int),
 		functions:      make(map[*ast.Function]*symbol),
 	}
 }
@@ -170,6 +174,7 @@ func (a *analyzer) resolveFunction(module *moduleScope, function *ast.Function) 
 		}
 		parameters.names[parameter.Name] = value
 		a.parameter[parameter] = value
+		a.parameterIndex[value] = index
 	}
 	if function.Body != nil {
 		a.resolveBlock(module, function.Body, parameters)

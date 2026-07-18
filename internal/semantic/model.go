@@ -16,6 +16,7 @@ const (
 	PhaseNone    Phase = ""
 	PhaseResolve Phase = "resolve"
 	PhaseType    Phase = "type"
+	PhaseFlow    Phase = "flow"
 )
 
 // File is one syntax-clean AST with its source-root-relative identity.
@@ -32,6 +33,7 @@ type Result struct {
 	Diagnostics      []Diagnostic
 	Resolutions      []Resolution
 	Types            []TypeFact
+	Borrows          []BorrowFact
 	Unsupported      []Unsupported
 }
 
@@ -68,6 +70,15 @@ type TypeFact struct {
 	CanonicalType hir.Type
 }
 
+// BorrowFact records the hidden origin and local lifetime of one safe borrow.
+type BorrowFact struct {
+	Borrow  hir.Span
+	Kind    string
+	Origin  string
+	LastUse *hir.Span
+	Escapes bool
+}
+
 // Unsupported identifies syntax outside the deliberately narrow implemented semantic subset.
 type Unsupported struct {
 	Feature string
@@ -90,15 +101,26 @@ func Analyze(files []File) Result {
 		}
 	}
 	result := analyzer.typeCheck()
+	if len(analyzer.diagnostics) == 0 && len(analyzer.unsupported) == 0 {
+		analyzer.flowCheck()
+	}
 	analyzer.finish()
 	result.Diagnostics = analyzer.diagnostics
 	result.Resolutions = analyzer.resolutions
 	result.Types = analyzer.types
+	result.Borrows = analyzer.borrows
 	result.Unsupported = analyzer.unsupported
 	if len(result.Diagnostics) > 0 {
-		result.CompletedThrough = PhaseResolve
-		result.FailedPhase = PhaseType
+		if analyzer.flowStarted {
+			result.CompletedThrough = PhaseType
+			result.FailedPhase = PhaseFlow
+		} else {
+			result.CompletedThrough = PhaseResolve
+			result.FailedPhase = PhaseType
+		}
 	} else if len(result.Unsupported) == 0 {
+		result.CompletedThrough = PhaseFlow
+	} else if analyzer.flowStarted {
 		result.CompletedThrough = PhaseType
 	} else {
 		result.CompletedThrough = PhaseResolve
@@ -124,6 +146,12 @@ func (a *analyzer) finish() {
 			return n
 		}
 		return cmp.Compare(left.CanonicalType, right.CanonicalType)
+	})
+	slices.SortFunc(a.borrows, func(left, right BorrowFact) int {
+		if n := compareSpan(left.Borrow, right.Borrow); n != 0 {
+			return n
+		}
+		return cmp.Compare(left.Origin, right.Origin)
 	})
 	a.types = slices.CompactFunc(a.types, func(left, right TypeFact) bool {
 		return compareSpan(left.Expression, right.Expression) == 0 && left.CanonicalType == right.CanonicalType

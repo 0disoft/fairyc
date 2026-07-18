@@ -19,9 +19,9 @@ Exit gate: the written contracts have no contradictory syntax, initialization, o
 
 Current implementation status: the source, lexer, recoverable-syntax, parser-diagnostic, AST
 lowering, and parser-fixture-runner portion of the first item exists. Name resolution and typed HIR
-now cover the semantic fixture's scalar `bool`/`i32` `resolve` and `type` subset. All semantic
-sources parse in the runner, while the 5 `flow` cases and every later Phase 1 capability remain
-explicitly deferred.
+now cover the semantic fixture's scalar and safe-borrow subset. Local last-use loans, borrow
+conflicts, and single-origin borrow returns execute across all 11 semantic v0 cases. General
+resource Flow and every later Phase 1 capability remain unimplemented.
 
 - Implement source management, lexer, trivia-preserving tokens and spans, compact recoverable syntax, deterministic diagnostics, one-file modules, alias imports, and non-generic typed HIR in Go.
 - Implement restricted inert enums, whole-resource moves, local last-use loans, call-bounded mutable reborrows, single-origin borrow returns, plain regions, `Option`, `Result`, shallow `match`, and explicit `?` and `discard`.

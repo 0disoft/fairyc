@@ -254,6 +254,26 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 			span(c.module.file.Path, expression.Span),
 		)
 		return hir.TypeI32
+	case "&":
+		if c.analyzer.resolved[expression.Children[0]] == nil {
+			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "borrow of a non-place expression")
+			return hir.TypeInvalid
+		}
+		return hir.SharedBorrow(childType)
+	case "&mut":
+		target := c.analyzer.resolved[expression.Children[0]]
+		if target == nil || !target.mutable {
+			c.analyzer.addDiagnostic("E1008", span(c.module.file.Path, expression.Children[0].Span))
+			return hir.TypeInvalid
+		}
+		return hir.MutableBorrow(childType)
+	case "*":
+		element, _, ok := hir.BorrowElement(childType)
+		if !ok {
+			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "dereference of a non-borrow value")
+			return hir.TypeInvalid
+		}
+		return element
 	default:
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "prefix operator "+expression.Text)
 		return hir.TypeInvalid
@@ -373,15 +393,39 @@ func (c *typeChecker) checkIf(expression *ast.Expression, result *hir.Expression
 }
 
 func (c *typeChecker) canonicalType(reference ast.TypeReference) hir.Type {
-	switch strings.TrimSpace(reference.Text) {
-	case "bool":
-		return hir.TypeBool
-	case "i32":
-		return hir.TypeI32
-	default:
-		c.analyzer.addUnsupported(c.module.file.Path, reference.Span, "type "+strings.TrimSpace(reference.Text))
-		return hir.TypeInvalid
+	value, ok := canonicalTypeText(reference.Text)
+	if ok {
+		return value
 	}
+	c.analyzer.addUnsupported(c.module.file.Path, reference.Span, "type "+strings.TrimSpace(reference.Text))
+	return hir.TypeInvalid
+}
+
+func canonicalTypeText(text string) (hir.Type, bool) {
+	trimmed := strings.TrimSpace(text)
+	switch trimmed {
+	case "bool":
+		return hir.TypeBool, true
+	case "i32":
+		return hir.TypeI32, true
+	}
+	if strings.HasPrefix(trimmed, "&") {
+		remainder := strings.TrimSpace(trimmed[1:])
+		mutable := strings.HasPrefix(remainder, "mut") &&
+			(len(remainder) == len("mut") || remainder[len("mut")] == ' ' || remainder[len("mut")] == '&')
+		if mutable {
+			remainder = strings.TrimSpace(remainder[len("mut"):])
+		}
+		element, ok := canonicalTypeText(remainder)
+		if !ok {
+			return hir.TypeInvalid, false
+		}
+		if mutable {
+			return hir.MutableBorrow(element), true
+		}
+		return hir.SharedBorrow(element), true
+	}
+	return hir.TypeInvalid, false
 }
 
 func (c *typeChecker) requireType(code string, primary hir.Span, actual, expected hir.Type, expectedSpan hir.Span) {
