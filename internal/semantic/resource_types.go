@@ -143,10 +143,29 @@ func (a *analyzer) canonicalTypeText(module *moduleScope, text string) (hir.Type
 	switch trimmed {
 	case "bool":
 		return hir.TypeBool, true
+	case "u8":
+		return hir.TypeU8, true
 	case "i32":
 		return hir.TypeI32, true
+	case "u32":
+		return hir.TypeU32, true
+	case "usize":
+		return hir.TypeUSize, true
 	case "Region":
 		return hir.TypeRegion, true
+	}
+	if strings.HasPrefix(trimmed, "*") {
+		remainder := strings.TrimSpace(trimmed[1:])
+		mutable := strings.HasPrefix(remainder, "mut") &&
+			(len(remainder) == len("mut") || remainder[len("mut")] == ' ' || remainder[len("mut")] == '&' || remainder[len("mut")] == '*')
+		if mutable {
+			remainder = strings.TrimSpace(remainder[len("mut"):])
+		}
+		element, ok := a.canonicalTypeText(module, remainder)
+		if !ok {
+			return hir.TypeInvalid, false
+		}
+		return hir.RawPointer(element, mutable), true
 	}
 	if strings.HasPrefix(trimmed, "&") {
 		remainder := strings.TrimSpace(trimmed[1:])

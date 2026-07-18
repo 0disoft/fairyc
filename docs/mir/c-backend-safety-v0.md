@@ -98,13 +98,14 @@ Raw foreign signatures contain C ABI scalars, explicitly represented aggregates,
 
 The implemented source slice preserves individual `unsafe extern C fn` declarations and
 `unsafe {}` or `unsafe fn` call provenance through AST, typed HIR, and verified MIR. The C backend
-currently admits only exact-name `C` declarations whose parameters and result are `i32`; it emits
-one plain `extern int32_t` prototype and an ordinary call without `pure`, `const`, `restrict`,
+currently admits exact-name `C` declarations using `i32`, `u8`, `u32`, `usize`, and raw pointers to
+that bounded scalar set; it emits one plain prototype and an ordinary call without `pure`, `const`, `restrict`,
 `nothrow`, alias, retention, or visibility promises. Compatible repeated declarations of the same
 external name coalesce; signature conflicts fail closed. A local preprocessor guard undefines an
 included-header macro with that name before the prototype. `main`, generated `fy_`/`FY_` names,
-C11 keywords, and identifiers consumed by the generated preamble are rejected. `@link_name`, `c.*`
-scalars, raw pointers, callbacks, and `@repr(C)` aggregates remain outside this first source slice.
+C11 keywords, and identifiers consumed by the generated preamble are rejected. Typed null is the
+only source-constructed raw pointer; pointer dereference, arithmetic, and casts remain rejected.
+`@link_name`, `c.*` scalars, callbacks, and `@repr(C)` aggregates remain outside this source slice.
 
 The MIR interpreter deliberately returns a `foreign-call` capability error instead of guessing a
 host binding. A closed native fixture compiles the generated Fairy caller and a hand-written C
@@ -130,10 +131,11 @@ empty stdout/stderr, and is not selectable through the product CLI. Output, nega
 `i32` returns, user drop-body effects, public layout, ABI, and broader runtime behavior remain
 unimplemented. A clean sanitizer run is backend evidence, not the language-semantics oracle.
 
-The same runner additionally plans four scalar Fairy-source foreign-call crossings: Clang-generated
-Fairy caller to GCC C callee and the reverse at low and optimized profiles. Those crossings use the
-existing separate-object driver and are counted as `foreignCallExecutions` in
-`fairyc.native-c-report/v12`; they do not expand the seventeen interpreter-owned differential cases.
+The same runner additionally plans four scalar and four typed-null pointer/target-scalar
+Fairy-source foreign-call crossings: Clang-generated Fairy caller to GCC C callee and the reverse
+at low and optimized profiles. Those crossings use the existing separate-object driver and are
+counted separately as `foreignCallExecutions` and `foreignPointerCallExecutions` in
+`fairyc.native-c-report/v13`; they do not expand the seventeen interpreter-owned differential cases.
 
 `internal/cdriver` and `internal/cruntime` are the one implementation path for both that matrix and
 the experimental constrained-C executable builder. The driver fixes the C dialect, warning policy,

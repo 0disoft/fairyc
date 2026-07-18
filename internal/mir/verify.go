@@ -558,8 +558,28 @@ func checkedTrapSuccessorMatches(blocks map[BlockID]*Block, terminator Terminato
 func verifyOperands(state verificationState, operands []Operand, entity string) []VerificationError {
 	var failures []VerificationError
 	for _, operand := range operands {
-		if operand.Kind == OperandLocal && !state.live[hir.SymbolID(operand.Local)] {
-			failures = append(failures, VerificationError{Code: "V1002", Entity: entity, Detail: fmt.Sprintf("local %d used before initialization", operand.Local)})
+		switch operand.Kind {
+		case OperandInvalid:
+		case OperandLocal:
+			if operand.Local < 0 || !state.live[hir.SymbolID(operand.Local)] {
+				failures = append(failures, VerificationError{Code: "V1002", Entity: entity, Detail: fmt.Sprintf("local %d used before initialization", operand.Local)})
+			}
+		case OperandI32:
+		case OperandU8:
+			if operand.U64 > 255 {
+				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "u8 operand is outside its value range"})
+			}
+		case OperandU32:
+			if operand.U64 > uint64(^uint32(0)) {
+				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "u32 operand is outside its value range"})
+			}
+		case OperandUSize:
+		case OperandNull:
+			if _, _, pointer := hir.RawPointerElement(operand.Type); !pointer {
+				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "null operand has no raw-pointer type"})
+			}
+		default:
+			failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: fmt.Sprintf("operand has unknown kind %q", operand.Kind)})
 		}
 	}
 	return failures

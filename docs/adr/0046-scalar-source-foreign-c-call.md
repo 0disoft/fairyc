@@ -49,6 +49,7 @@ unsafe provenance survive every compiler boundary.
 - A real `.fy` source now reaches an external C symbol through the implemented compiler pipeline.
 - The slice is deliberately too narrow to connect SystemHeap, Buffer, Arena, text, or File because
   those APIs require raw pointers, size types, tagged errors, and resource wrappers.
-- `@link_name`, exports, raw pointers, callbacks, `c.*` scalars, `@repr(C)` aggregates, header
+- ADR 0047 subsequently adds a bounded typed-null raw-pointer and target-scalar slice. `@link_name`,
+  exports, non-null pointer operations, callbacks, `c.*` scalars, `@repr(C)` aggregates, header
   import, arbitrary product link inputs, and foreign nonlocal control remain later gates.
 - Self-hosting is unaffected; the Stage 0 compiler remains Go.

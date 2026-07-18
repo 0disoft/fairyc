@@ -286,7 +286,7 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 	switch expression.Kind {
 	case syntax.KindLiteral:
 		var supported bool
-		actual, supported = literalType(expression.Text)
+		actual, supported = literalType(expression.Text, expected)
 		if !supported {
 			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "literal "+literalClass(expression.Text))
 		}
@@ -890,11 +890,21 @@ func (c *typeChecker) addType(expression hir.Span, value hir.Type) {
 	c.analyzer.types = append(c.analyzer.types, TypeFact{Expression: expression, CanonicalType: value})
 }
 
-func literalType(raw string) (hir.Type, bool) {
+func literalType(raw string, expected hir.Type) (hir.Type, bool) {
 	if raw == "true" || raw == "false" {
 		return hir.TypeBool, true
 	}
+	if raw == "null" {
+		if _, _, pointer := hir.RawPointerElement(expected); pointer {
+			return expected, true
+		}
+		return hir.TypeInvalid, false
+	}
 	if raw != "" && raw[0] >= '0' && raw[0] <= '9' && !strings.ContainsAny(raw, ".eE") {
+		switch expected {
+		case hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
+			return expected, true
+		}
 		return hir.TypeI32, true
 	}
 	return hir.TypeInvalid, false

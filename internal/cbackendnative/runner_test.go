@@ -42,9 +42,31 @@ func TestBuildSmokeSourceReachesCEmission(t *testing.T) {
 	}
 }
 
+func TestForeignPointerCallSmokeSourceReachesCEmission(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "main.fy"), []byte(foreignPointerCallSmokeSource), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	code := cli.Run([]string{"experimental", "emit-c", "main.fy"}, root, &stdout, &stderr)
+	if code != cli.ExitSuccess || stderr.Len() != 0 {
+		t.Fatalf("foreign pointer call C emission = code %d, stderr %q", code, stderr.String())
+	}
+	for _, required := range []string{
+		"extern uint32_t fairyc_fixture_pointer_scalars(const uint8_t * fy_a_0, uint32_t * fy_a_1, uintptr_t fy_a_2, uint8_t fy_a_3);",
+		"fairyc_fixture_pointer_scalars(((void *)0), ((void *)0), ((uintptr_t)UINT64_C(0)), UINT8_C(7))",
+	} {
+		if !strings.Contains(stdout.String(), required) {
+			t.Errorf("foreign pointer call C emission is missing %q", required)
+		}
+	}
+}
+
 func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 	t.Parallel()
-	if reportSchemaVersion != "fairyc.native-c-report/v12" {
+	if reportSchemaVersion != "fairyc.native-c-report/v13" {
 		t.Fatalf("report schema = %q", reportSchemaVersion)
 	}
 	encoded, err := json.Marshal(Report{
@@ -53,18 +75,19 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		Sanitizer: cdriver.AddressUndefinedSanitizerMode, SanitizerExecutions: 34,
 		ABICases:      []string{"pass.aggregate-rollback", "pass.void-return"},
 		ABIDirections: []string{"clang-caller-gcc-callee", "gcc-caller-clang-callee"}, ABIProbeExecutions: 56,
-		SystemHeapExecutions:  4,
-		BufferExecutions:      4,
-		ArenaExecutions:       4,
-		TextViewExecutions:    4,
-		OwnedTextExecutions:   4,
-		LinuxFileExecutions:   4,
-		ForeignCallExecutions: 4,
+		SystemHeapExecutions:         4,
+		BufferExecutions:             4,
+		ArenaExecutions:              4,
+		TextViewExecutions:           4,
+		OwnedTextExecutions:          4,
+		LinuxFileExecutions:          4,
+		ForeignCallExecutions:        4,
+		ForeignPointerCallExecutions: 4,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v12"`) ||
+	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v13"`) ||
 		!strings.Contains(string(encoded), `"dropTraceExecutions":68`) ||
 		!strings.Contains(string(encoded), `"layoutCases":["pass.array-i32-three","pass.pointer"]`) ||
 		!strings.Contains(string(encoded), `"layoutProbeExecutions":4`) ||
@@ -79,7 +102,8 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		!strings.Contains(string(encoded), `"textViewExecutions":4`) ||
 		!strings.Contains(string(encoded), `"ownedTextExecutions":4`) ||
 		!strings.Contains(string(encoded), `"linuxFileExecutions":4`) ||
-		!strings.Contains(string(encoded), `"foreignCallExecutions":4`) {
+		!strings.Contains(string(encoded), `"foreignCallExecutions":4`) ||
+		!strings.Contains(string(encoded), `"foreignPointerCallExecutions":4`) {
 		t.Fatalf("report JSON = %s", encoded)
 	}
 }

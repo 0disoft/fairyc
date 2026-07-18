@@ -10,7 +10,10 @@ const (
 	TypeInvalid Type = "<invalid>"
 	TypeVoid    Type = "void"
 	TypeBool    Type = "bool"
+	TypeU8      Type = "u8"
 	TypeI32     Type = "i32"
+	TypeU32     Type = "u32"
+	TypeUSize   Type = "usize"
 	TypeRegion  Type = "Region"
 )
 
@@ -22,6 +25,26 @@ func SharedBorrow(element Type) Type {
 // MutableBorrow returns the canonical non-null exclusive-borrow type for element.
 func MutableBorrow(element Type) Type {
 	return Type("&mut " + string(element))
+}
+
+// RawPointer returns the canonical nullable raw-pointer type for element.
+func RawPointer(element Type, mutable bool) Type {
+	if mutable {
+		return Type("*mut " + string(element))
+	}
+	return Type("*" + string(element))
+}
+
+// RawPointerElement decomposes one canonical raw-pointer type.
+func RawPointerElement(value Type) (element Type, mutable bool, ok bool) {
+	text := string(value)
+	if len(text) > len("*mut ") && strings.HasPrefix(text, "*mut ") {
+		return Type(text[len("*mut "):]), true, true
+	}
+	if len(text) > 1 && text[0] == '*' {
+		return Type(text[1:]), false, true
+	}
+	return TypeInvalid, false, false
 }
 
 // Option returns the canonical compiler-known Option type for one payload type.

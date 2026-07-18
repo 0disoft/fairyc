@@ -330,11 +330,37 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 				return Operand{}, fmt.Errorf("invalid bool literal %q", expression.Value)
 			}
 		}
-		value, err := parseI32(expression.Value)
-		if err != nil {
-			return Operand{}, err
+		switch expression.Type {
+		case hir.TypeI32:
+			value, err := parseI32(expression.Value)
+			if err != nil {
+				return Operand{}, err
+			}
+			return Operand{Kind: OperandI32, I32: value}, nil
+		case hir.TypeU8:
+			value, err := parseUnsigned(expression.Value, 8, "u8")
+			if err != nil {
+				return Operand{}, err
+			}
+			return Operand{Kind: OperandU8, U64: value}, nil
+		case hir.TypeU32:
+			value, err := parseUnsigned(expression.Value, 32, "u32")
+			if err != nil {
+				return Operand{}, err
+			}
+			return Operand{Kind: OperandU32, U64: value}, nil
+		case hir.TypeUSize:
+			value, err := parseUnsigned(expression.Value, 64, "usize")
+			if err != nil {
+				return Operand{}, err
+			}
+			return Operand{Kind: OperandUSize, U64: value}, nil
+		default:
+			if _, _, pointer := hir.RawPointerElement(expression.Type); pointer && expression.Value == "null" {
+				return Operand{Kind: OperandNull, Type: expression.Type}, nil
+			}
+			return Operand{}, fmt.Errorf("unsupported literal %q of type %q", expression.Value, expression.Type)
 		}
-		return Operand{Kind: OperandI32, I32: value}, nil
 	case "path":
 		return Operand{Kind: OperandLocal, Local: LocalID(expression.Symbol)}, nil
 	case "group":
@@ -1313,4 +1339,20 @@ func parseI32(text string) (int32, error) {
 		return 0, fmt.Errorf("lower i32 literal %q: %w", text, err)
 	}
 	return int32(value), nil
+}
+
+func parseUnsigned(text string, bitSize int, typeName string) (uint64, error) {
+	clean := strings.ReplaceAll(text, "_", "")
+	base := 10
+	digits := clean
+	if strings.HasPrefix(clean, "0x") || strings.HasPrefix(clean, "0X") {
+		base, digits = 16, clean[2:]
+	} else if strings.HasPrefix(clean, "0b") || strings.HasPrefix(clean, "0B") {
+		base, digits = 2, clean[2:]
+	}
+	value, err := strconv.ParseUint(digits, base, bitSize)
+	if err != nil {
+		return 0, fmt.Errorf("lower %s literal %q: %w", typeName, text, err)
+	}
+	return value, nil
 }

@@ -1,6 +1,7 @@
 package semantic_test
 
 import (
+	"slices"
 	"strings"
 	"testing"
 
@@ -253,6 +254,49 @@ func TestAnalyzeTypesForeignCallInsideUnsafeBlock(t *testing.T) {
 	call := tail.Children[0].Block.Tail
 	if call.Kind != "call" || call.ForeignABI != "C" || call.UnsafeScope == nil || call.Symbol != foreign.Symbol {
 		t.Fatalf("foreign call = %+v", call)
+	}
+}
+
+func TestAnalyzeTypesRawPointerAndTargetScalarForeignCall(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\nunsafe extern C fn foreign_probe(data: *u8, output: *mut u32, length: usize, marker: u8) -> u32;\nfn main() -> i32 { if unsafe { foreign_probe(null, null, 0, 7) } == 42 { 0 } else { 1 } }\n",
+	})
+	assertCleanTypeResult(t, result)
+	foreign := result.HIR.Modules[0].ForeignFunctions[0]
+	wantParameters := []hir.Type{
+		hir.RawPointer(hir.TypeU8, false),
+		hir.RawPointer(hir.TypeU32, true),
+		hir.TypeUSize,
+		hir.TypeU8,
+	}
+	actualParameters := make([]hir.Type, len(foreign.Parameters))
+	for index := range foreign.Parameters {
+		actualParameters[index] = foreign.Parameters[index].Type
+	}
+	if foreign.ResultType != hir.TypeU32 || !slices.Equal(actualParameters, wantParameters) {
+		t.Fatalf("foreign signature = %+v", foreign)
+	}
+	tail := result.HIR.Modules[0].Functions[0].Body.Tail
+	if tail == nil || tail.Kind != "if" || len(tail.Children) < 1 {
+		t.Fatalf("main tail = %+v", tail)
+	}
+	condition := &tail.Children[0]
+	if condition.Kind != "binary" || len(condition.Children) != 2 || condition.Children[0].Kind != "unsafe" || len(condition.Children[0].Children) != 1 {
+		t.Fatalf("if condition = %+v", condition)
+	}
+	unsafeBlock := &condition.Children[0].Children[0]
+	if unsafeBlock.Block == nil || unsafeBlock.Block.Tail == nil {
+		t.Fatalf("unsafe block = %+v", unsafeBlock)
+	}
+	call := unsafeBlock.Block.Tail
+	if call.Kind != "call" || call.Type != hir.TypeU32 || len(call.Children) != 5 {
+		t.Fatalf("foreign call = %+v", call)
+	}
+	for index, want := range wantParameters {
+		if call.Children[index+1].Type != want {
+			t.Errorf("argument %d type = %q, want %q", index, call.Children[index+1].Type, want)
+		}
 	}
 }
 

@@ -115,12 +115,13 @@ The Linux File C slice now also covers partial read/write, write-all progress, s
 close including forced close failure. Its four native runs remain configured but unobserved, and
 source-visible File effects and error resources remain missing.
 
-The first source FFI slice admits exact-name `unsafe extern C fn` declarations with only `i32`
-parameters and result. Unsafe call provenance survives AST, typed HIR, and MIR verification; the C
-backend emits an unannotated external prototype and call; and the native lane plans four
-separate-object Clang/GCC crossings. The interpreter refuses foreign execution, and `@link_name`,
-raw pointers, callbacks, `c.*` scalars, `@repr(C)` aggregates, exports, and standard-library wrapper
-calls remain Phase 2 work.
+The source FFI slice admits exact-name `unsafe extern C fn` declarations using `i32`, `u8`, `u32`,
+`usize`, and raw pointers to that bounded scalar set. Unsafe call provenance survives AST, typed
+HIR, and MIR verification; the C backend emits an unannotated external prototype and call; and the
+native lane plans four scalar plus four typed-null pointer/target-scalar separate-object Clang/GCC
+crossings. The interpreter refuses foreign execution. `@link_name`, non-null pointer operations,
+callbacks, `c.*` scalars, `@repr(C)` aggregates, exports, and standard-library wrapper calls remain
+Phase 2 work.
 
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.

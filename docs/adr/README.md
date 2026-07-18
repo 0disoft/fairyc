@@ -55,6 +55,8 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0043-canonical-utf8-text-view-c-slice.md`: allocation-free canonical UTF-8 validation and code-point-boundary text slicing C probe.
 - `0044-owned-string-and-cstring-c-slice.md`: failure-atomic Buffer-to-String ownership, immutable text views, and exact CString NUL invariants.
 - `0045-linux-file-consuming-close-c-slice.md`: partial Linux I/O, write-all progress, sync, and never-retried consuming close.
+- `0046-scalar-source-foreign-c-call.md`: exact-name scalar source FFI with unsafe provenance, fail-closed interpretation, and four-way native crossing.
+- `0047-raw-pointer-target-scalar-foreign-call.md`: typed-null raw-pointer plus fixed-width and pointer-width source FFI transport with a separate four-way native crossing.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

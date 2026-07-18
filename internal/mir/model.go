@@ -195,6 +195,10 @@ const (
 	OperandInvalid OperandKind = ""
 	OperandLocal   OperandKind = "local"
 	OperandI32     OperandKind = "i32"
+	OperandU8      OperandKind = "u8"
+	OperandU32     OperandKind = "u32"
+	OperandUSize   OperandKind = "usize"
+	OperandNull    OperandKind = "null"
 )
 
 // Operand is an already-evaluated scalar value source.
@@ -202,6 +206,8 @@ type Operand struct {
 	Kind  OperandKind
 	Local LocalID
 	I32   int32
+	U64   uint64
+	Type  hir.Type
 }
 
 // Operation carries explicit ownership, trap, and normalization information.

@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v12"
+	reportSchemaVersion = "fairyc.native-c-report/v13"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -76,6 +76,29 @@ int32_t fairyc_fixture_add_one(int32_t value) {
 }
 `
 
+const foreignPointerCallSmokeSource = `module main;
+unsafe extern C fn fairyc_fixture_pointer_scalars(data: *u8, output: *mut u32, length: usize, marker: u8) -> u32;
+fn main() -> i32 {
+    if unsafe { fairyc_fixture_pointer_scalars(null, null, 0, 7) } == 42 { 42 } else { 1 }
+}
+`
+
+const foreignPointerCallCompanionSource = `#include <stddef.h>
+#include <stdint.h>
+
+uint32_t fairyc_fixture_pointer_scalars(
+    const uint8_t *data,
+    uint32_t *output,
+    uintptr_t length,
+    uint8_t marker
+) {
+    if (data != NULL || output != NULL || length != (uintptr_t)0 || marker != UINT8_C(7)) {
+        return UINT32_C(0);
+    }
+    return UINT32_C(42);
+}
+`
+
 // Compiler records the bounded toolchain fingerprint used by one native run.
 type Compiler struct {
 	Name    string `json:"name"`
@@ -84,29 +107,30 @@ type Compiler struct {
 
 // Report is the deterministic success record emitted by the native fixture command.
 type Report struct {
-	SchemaVersion         string     `json:"schemaVersion"`
-	Target                string     `json:"target"`
-	Libc                  string     `json:"libc"`
-	Compilers             []Compiler `json:"compilers"`
-	Profiles              []string   `json:"profiles"`
-	Cases                 []string   `json:"cases"`
-	Executions            int        `json:"executions"`
-	DropTraceExecutions   int        `json:"dropTraceExecutions"`
-	LayoutCases           []string   `json:"layoutCases"`
-	LayoutProbeExecutions int        `json:"layoutProbeExecutions"`
-	Sanitizer             string     `json:"sanitizer"`
-	SanitizerExecutions   int        `json:"sanitizerExecutions"`
-	ABICases              []string   `json:"abiCases"`
-	ABIDirections         []string   `json:"abiDirections"`
-	ABIProbeExecutions    int        `json:"abiProbeExecutions"`
-	SystemHeapExecutions  int        `json:"systemHeapExecutions"`
-	BufferExecutions      int        `json:"bufferExecutions"`
-	ArenaExecutions       int        `json:"arenaExecutions"`
-	TextViewExecutions    int        `json:"textViewExecutions"`
-	OwnedTextExecutions   int        `json:"ownedTextExecutions"`
-	LinuxFileExecutions   int        `json:"linuxFileExecutions"`
-	ForeignCallExecutions int        `json:"foreignCallExecutions"`
-	BuildSmokeExecutions  int        `json:"buildSmokeExecutions"`
+	SchemaVersion                string     `json:"schemaVersion"`
+	Target                       string     `json:"target"`
+	Libc                         string     `json:"libc"`
+	Compilers                    []Compiler `json:"compilers"`
+	Profiles                     []string   `json:"profiles"`
+	Cases                        []string   `json:"cases"`
+	Executions                   int        `json:"executions"`
+	DropTraceExecutions          int        `json:"dropTraceExecutions"`
+	LayoutCases                  []string   `json:"layoutCases"`
+	LayoutProbeExecutions        int        `json:"layoutProbeExecutions"`
+	Sanitizer                    string     `json:"sanitizer"`
+	SanitizerExecutions          int        `json:"sanitizerExecutions"`
+	ABICases                     []string   `json:"abiCases"`
+	ABIDirections                []string   `json:"abiDirections"`
+	ABIProbeExecutions           int        `json:"abiProbeExecutions"`
+	SystemHeapExecutions         int        `json:"systemHeapExecutions"`
+	BufferExecutions             int        `json:"bufferExecutions"`
+	ArenaExecutions              int        `json:"arenaExecutions"`
+	TextViewExecutions           int        `json:"textViewExecutions"`
+	OwnedTextExecutions          int        `json:"ownedTextExecutions"`
+	LinuxFileExecutions          int        `json:"linuxFileExecutions"`
+	ForeignCallExecutions        int        `json:"foreignCallExecutions"`
+	ForeignPointerCallExecutions int        `json:"foreignPointerCallExecutions"`
+	BuildSmokeExecutions         int        `json:"buildSmokeExecutions"`
 }
 
 // Run compiles every emission fixture with Clang and GCC at low and optimized profiles, compares
@@ -293,6 +317,11 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.ForeignCallExecutions = foreignCallExecutions
+	foreignPointerCallExecutions, err := runForeignPointerCallProbe(temporaryRoot, toolchains)
+	if err != nil {
+		return Report{}, err
+	}
+	report.ForeignPointerCallExecutions = foreignPointerCallExecutions
 	for caseIndex, fixture := range fixtureReport.Emitted {
 		if fixture.Unit.Target != string(target.X8664LinuxGNU) || fixture.Unit.Dialect != cbackend.DialectC11 {
 			return Report{}, fmt.Errorf("case %s emitted unexpected profile %s/%s", fixture.ID, fixture.Unit.Target, fixture.Unit.Dialect)
@@ -345,33 +374,77 @@ func Run(manifestPath string) (Report, error) {
 }
 
 func runForeignCallProbe(temporaryRoot string, toolchains []cdriver.Toolchain) (int, error) {
+	return runForeignSourceProbe(
+		temporaryRoot,
+		toolchains,
+		"foreign-call",
+		foreignCallSmokeSource,
+		foreignCallCompanionSource,
+		42,
+		[]string{
+			"extern int32_t fairyc_fixture_add_one(int32_t fy_a_0);",
+			"fairyc_fixture_add_one(INT32_C(41))",
+		},
+	)
+}
+
+func runForeignPointerCallProbe(temporaryRoot string, toolchains []cdriver.Toolchain) (int, error) {
+	return runForeignSourceProbe(
+		temporaryRoot,
+		toolchains,
+		"foreign-pointer-call",
+		foreignPointerCallSmokeSource,
+		foreignPointerCallCompanionSource,
+		42,
+		[]string{
+			"extern uint32_t fairyc_fixture_pointer_scalars(const uint8_t * fy_a_0, uint32_t * fy_a_1, uintptr_t fy_a_2, uint8_t fy_a_3);",
+			"fairyc_fixture_pointer_scalars(((void *)0), ((void *)0), ((uintptr_t)UINT64_C(0)), UINT8_C(7))",
+		},
+	)
+}
+
+func runForeignSourceProbe(
+	temporaryRoot string,
+	toolchains []cdriver.Toolchain,
+	probeID string,
+	fairySource string,
+	companionSource string,
+	expectedExit int,
+	requiredC []string,
+) (int, error) {
 	if len(toolchains) != 2 || toolchains[0].Name != "clang" || toolchains[1].Name != "gcc" {
-		return 0, fmt.Errorf("foreign-call probe requires resolved Clang then GCC toolchains")
+		return 0, fmt.Errorf("%s probe requires resolved Clang then GCC toolchains", probeID)
 	}
-	parsed, err := frontend.AnalyzeSyntax(source.NewFile("foreign-call.fy", []byte(foreignCallSmokeSource)), source.DefaultLimits())
+	if probeID == "" || fairySource == "" || companionSource == "" || len(requiredC) == 0 {
+		return 0, fmt.Errorf("foreign source probe identity, sources, and C expectations must be non-empty")
+	}
+	sourcePath := "main.fy"
+	parsed, err := frontend.AnalyzeSyntax(source.NewFile(sourcePath, []byte(fairySource)), source.DefaultLimits())
 	if err != nil {
-		return 0, fmt.Errorf("parse foreign-call FY source: %w", err)
+		return 0, fmt.Errorf("parse %s FY source: %w", probeID, err)
 	}
 	if parsed.AST == nil || len(parsed.Tree.Diagnostics) != 0 {
-		return 0, fmt.Errorf("foreign-call FY source is not parser-valid: %+v", parsed.Tree.Diagnostics)
+		return 0, fmt.Errorf("%s FY source is not parser-valid: %+v", probeID, parsed.Tree.Diagnostics)
 	}
-	semanticResult := semantic.Analyze([]semantic.File{{Path: "foreign-call.fy", Module: parsed.AST}})
+	semanticResult := semantic.Analyze([]semantic.File{{Path: sourcePath, Module: parsed.AST}})
 	if semanticResult.CompletedThrough != semantic.PhaseFlow || len(semanticResult.Diagnostics) != 0 || len(semanticResult.Unsupported) != 0 {
-		return 0, fmt.Errorf("foreign-call FY source did not complete Flow: phase=%q diagnostics=%+v unsupported=%+v", semanticResult.CompletedThrough, semanticResult.Diagnostics, semanticResult.Unsupported)
+		return 0, fmt.Errorf("%s FY source did not complete Flow: phase=%q diagnostics=%+v unsupported=%+v", probeID, semanticResult.CompletedThrough, semanticResult.Diagnostics, semanticResult.Unsupported)
 	}
 	program, err := mir.Lower(semanticResult.HIR)
 	if err != nil {
-		return 0, fmt.Errorf("lower foreign-call FY source: %w", err)
+		return 0, fmt.Errorf("lower %s FY source: %w", probeID, err)
 	}
 	if failures := mir.Verify(program); len(failures) != 0 {
-		return 0, fmt.Errorf("verify foreign-call MIR: %+v", failures)
+		return 0, fmt.Errorf("verify %s MIR: %+v", probeID, failures)
 	}
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil {
-		return 0, fmt.Errorf("emit foreign-call C: %w", err)
+		return 0, fmt.Errorf("emit %s C: %w", probeID, err)
 	}
-	if !strings.Contains(unit.Source, "extern int32_t fairyc_fixture_add_one(int32_t fy_a_0);") || !strings.Contains(unit.Source, "fairyc_fixture_add_one(INT32_C(41))") {
-		return 0, fmt.Errorf("foreign-call C emission lost its exact declaration or call")
+	for _, required := range requiredC {
+		if !strings.Contains(unit.Source, required) {
+			return 0, fmt.Errorf("%s C emission lost required fragment %q", probeID, required)
+		}
 	}
 	directions := [][2]int{{0, 1}, {1, 0}}
 	executions := 0
@@ -379,16 +452,16 @@ func runForeignCallProbe(temporaryRoot string, toolchains []cdriver.Toolchain) (
 		caller := toolchains[direction[0]]
 		callee := toolchains[direction[1]]
 		for profileIndex, profile := range nativeProfiles {
-			artifact, buildErr := cdriver.BuildCrossCompiler(caller, callee, profile, unit.Source, foreignCallCompanionSource)
+			artifact, buildErr := cdriver.BuildCrossCompiler(caller, callee, profile, unit.Source, companionSource)
 			if buildErr != nil {
-				return 0, fmt.Errorf("foreign-call probe with %s caller/%s callee/%s: %w", caller.Name, callee.Name, profile.Name, buildErr)
+				return 0, fmt.Errorf("%s probe with %s caller/%s callee/%s: %w", probeID, caller.Name, callee.Name, profile.Name, buildErr)
 			}
-			executablePath := filepath.Join(temporaryRoot, fmt.Sprintf("foreign-call-%d-%d", directionIndex, profileIndex))
+			executablePath := filepath.Join(temporaryRoot, fmt.Sprintf("%s-%d-%d", probeID, directionIndex, profileIndex))
 			if writeErr := os.WriteFile(executablePath, artifact.Bytes, 0o700); writeErr != nil {
-				return 0, fmt.Errorf("materialize foreign-call probe with %s caller/%s callee/%s: %w", caller.Name, callee.Name, profile.Name, writeErr)
+				return 0, fmt.Errorf("materialize %s probe with %s caller/%s callee/%s: %w", probeID, caller.Name, callee.Name, profile.Name, writeErr)
 			}
-			if executeErr := execute("foreign-call", executablePath, 42, nil); executeErr != nil {
-				return 0, fmt.Errorf("foreign-call probe with %s caller/%s callee/%s: %w", caller.Name, callee.Name, profile.Name, executeErr)
+			if executeErr := execute(probeID, executablePath, expectedExit, nil); executeErr != nil {
+				return 0, fmt.Errorf("%s probe with %s caller/%s callee/%s: %w", probeID, caller.Name, callee.Name, profile.Name, executeErr)
 			}
 			executions++
 		}

@@ -163,8 +163,9 @@ The first planned matrix targets `x86_64-linux-gnu`, uses the MIR interpreter pl
 The host-independent C ABI fixtures now cover scalar and pointer classification, fixed arrays,
 register exhaustion, mixed integer and floating arguments, by-value aggregate plans, and hidden
 return storage. A separate-object Clang/GCC probe now exercises all 14 pass plans in both compiler
-directions, but native Fairy source fixtures still need nested and padded `@repr(C)` structs,
-explicit C enums, narrow extension rules, actual aggregate calls and returns, null raw pointers,
+directions. A Fairy-source probe additionally crosses typed null pointers plus `usize` and `u8` in
+both directions, but native source fixtures still need non-null pointers, nested and padded
+`@repr(C)` structs, explicit C enums, narrow extension rules, actual aggregate calls and returns,
 and the permitted synchronous callback. Every excluded C ABI feature eventually needs a negative
 source fixture as its semantic surface is implemented.
 

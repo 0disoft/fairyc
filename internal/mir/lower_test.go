@@ -144,6 +144,55 @@ func TestLowerPreservesForeignCallABIAndUnsafeProvenance(t *testing.T) {
 	}
 }
 
+func TestLowerPreservesRawPointerAndTargetScalarForeignOperands(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, "module main;\nunsafe extern C fn foreign_probe(data: *u8, output: *mut u32, length: usize, marker: u8) -> u32;\nfn main() -> i32 { if unsafe { foreign_probe(null, null, 0, 7) } == 42 { 0 } else { 1 } }\n")
+	foreign := program.ForeignFunctions[0]
+	wantParameters := []hir.Type{
+		hir.RawPointer(hir.TypeU8, false),
+		hir.RawPointer(hir.TypeU32, true),
+		hir.TypeUSize,
+		hir.TypeU8,
+	}
+	if foreign.ResultType != hir.TypeU32 || !slices.Equal(foreign.ParameterTypes, wantParameters) {
+		t.Fatalf("foreign signature = %+v", foreign)
+	}
+	var call *Terminator
+	for blockIndex := range program.Functions[0].Blocks {
+		terminator := &program.Functions[0].Blocks[blockIndex].Terminator
+		if terminator.Kind == TerminatorCall {
+			call = terminator
+			break
+		}
+	}
+	if call == nil || len(call.Arguments) != 4 {
+		t.Fatalf("foreign call = %+v", call)
+	}
+	wantArguments := []Operand{
+		{Kind: OperandNull, Type: hir.RawPointer(hir.TypeU8, false)},
+		{Kind: OperandNull, Type: hir.RawPointer(hir.TypeU32, true)},
+		{Kind: OperandUSize, U64: 0},
+		{Kind: OperandU8, U64: 7},
+	}
+	if !slices.Equal(call.Arguments, wantArguments) {
+		t.Fatalf("foreign arguments = %+v, want %+v", call.Arguments, wantArguments)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+	mutated := Clone(program)
+	for blockIndex := range mutated.Functions[0].Blocks {
+		terminator := &mutated.Functions[0].Blocks[blockIndex].Terminator
+		if terminator.Kind == TerminatorCall {
+			terminator.Arguments[0].Type = hir.TypeI32
+			break
+		}
+	}
+	if failures := Verify(mutated); len(failures) != 1 || failures[0].Code != "V1001" {
+		t.Fatalf("Verify() invalid null type = %+v", failures)
+	}
+}
+
 func TestCloneDeepCopiesResourceDefinitions(t *testing.T) {
 	t.Parallel()
 	original := Program{ResourceTypes: []ResourceType{{

@@ -94,12 +94,14 @@ claimed.
 The Linux File C slice now exposes partial I/O, write-all progress, sync, and consuming close that
 is never retried, even after failure. Its four-way probe is configured but unobserved and source
 effects remain unimplemented.
-The first source FFI slice accepts an exact external identifier plus `i32` parameters and result.
+The source FFI slice accepts an exact external identifier plus `i32`, `u8`, `u32`, `usize`, and
+admitted raw-pointer parameters or results.
 Calls require `unsafe {}` or `unsafe fn`; missing unsafe provenance is `E5101` and safe references in
 raw declarations are `E5102`. The interpreter fails closed with a `foreign-call` capability error,
 while C emission produces a plain external prototype with no inferred alias, purity, retention, or
-unwind attributes. `@link_name`, raw pointers, callbacks, `c.*` scalars, aggregates, exports, and
-standard-library wrapper calls remain unimplemented.
+unwind attributes. Typed `null` now crosses a closed pointer/target-scalar native probe.
+`@link_name`, non-null pointer construction or dereference, callbacks, `c.*` scalars, aggregates,
+exports, and standard-library wrapper calls remain unimplemented.
 A deterministic native C11 probe now translates the nine valid layout cases into private numeric
 types and is configured for Clang/GCC at `-O0` and `-O2`. This Windows host cannot execute those
 four probe runs, and no hosted success receipt has been observed, so `c-layout-probes` remains a

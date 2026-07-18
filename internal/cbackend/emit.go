@@ -425,14 +425,46 @@ func foreignCType(value hir.Type, result bool) (string, error) {
 	if result && value == hir.TypeVoid {
 		return "void", nil
 	}
-	if value == hir.TypeI32 {
+	switch value {
+	case hir.TypeU8:
+		return "uint8_t", nil
+	case hir.TypeI32:
 		return "int32_t", nil
+	case hir.TypeU32:
+		return "uint32_t", nil
+	case hir.TypeUSize:
+		return "uintptr_t", nil
+	}
+	if element, mutable, pointer := hir.RawPointerElement(value); pointer {
+		pointee, err := foreignPointerElementCType(element)
+		if err != nil {
+			return "", err
+		}
+		if mutable {
+			return pointee + " *", nil
+		}
+		return "const " + pointee + " *", nil
 	}
 	role := "parameter"
 	if result {
 		role = "result"
 	}
 	return "", fmt.Errorf("foreign %s type %q", role, value)
+}
+
+func foreignPointerElementCType(value hir.Type) (string, error) {
+	switch value {
+	case hir.TypeU8:
+		return "uint8_t", nil
+	case hir.TypeI32:
+		return "int32_t", nil
+	case hir.TypeU32:
+		return "uint32_t", nil
+	case hir.TypeUSize:
+		return "uintptr_t", nil
+	default:
+		return "", fmt.Errorf("foreign raw-pointer element type %q", value)
+	}
 }
 
 func validExternalCIdentifier(value string) bool {
@@ -452,9 +484,9 @@ func validExternalCIdentifier(value string) bool {
 }
 
 var generatedCNames = map[string]struct{}{
-	"int32_t": {}, "uint32_t": {}, "uint64_t": {}, "size_t": {},
-	"INT32_C": {}, "UINT32_C": {}, "UINT64_C": {},
-	"INT32_MIN": {}, "INT32_MAX": {}, "UINT32_MAX": {},
+	"uint8_t": {}, "int32_t": {}, "uint32_t": {}, "uint64_t": {}, "uintptr_t": {}, "size_t": {},
+	"UINT8_C": {}, "INT32_C": {}, "UINT32_C": {}, "UINT64_C": {},
+	"INT32_MIN": {}, "INT32_MAX": {}, "UINT32_MAX": {}, "UINTPTR_MAX": {},
 }
 
 var c11Keywords = map[string]struct{}{
@@ -489,6 +521,17 @@ func inferredOperandType(localTypes map[mir.LocalID]hir.Type, operand mir.Operan
 	switch operand.Kind {
 	case mir.OperandI32:
 		return hir.TypeI32, true
+	case mir.OperandU8:
+		return hir.TypeU8, true
+	case mir.OperandU32:
+		return hir.TypeU32, true
+	case mir.OperandUSize:
+		return hir.TypeUSize, true
+	case mir.OperandNull:
+		if _, _, pointer := hir.RawPointerElement(operand.Type); pointer {
+			return operand.Type, true
+		}
+		return hir.TypeInvalid, false
 	case mir.OperandLocal:
 		value, found := localTypes[operand.Local]
 		return value, found
@@ -516,8 +559,12 @@ func isResultI32I32(value hir.Type) bool {
 
 func (e *emitter) supportedCValueType(value hir.Type) bool {
 	value = canonicalCValueType(value)
-	if value == hir.TypeI32 || isOptionI32(value) || isResultI32I32(value) {
+	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeU32 || value == hir.TypeUSize || isOptionI32(value) || isResultI32I32(value) {
 		return true
+	}
+	if element, _, pointer := hir.RawPointerElement(value); pointer {
+		_, err := foreignPointerElementCType(element)
+		return err == nil
 	}
 	_, resource := e.resourceByType[value]
 	if resource {
@@ -530,8 +577,16 @@ func (e *emitter) supportedCValueType(value hir.Type) bool {
 func (e *emitter) cValueType(value hir.Type) (string, error) {
 	value = canonicalCValueType(value)
 	switch {
+	case value == hir.TypeU8:
+		return "uint8_t", nil
 	case value == hir.TypeI32:
 		return "int32_t", nil
+	case value == hir.TypeU32:
+		return "uint32_t", nil
+	case value == hir.TypeUSize:
+		return "uintptr_t", nil
+	case isRawPointer(value):
+		return foreignCType(value, false)
 	case isOptionI32(value):
 		return "fy_option_i32", nil
 	case isResultI32I32(value):
@@ -762,6 +817,17 @@ func (e *emitter) operandType(functionIndex int, operand mir.Operand) (hir.Type,
 	switch operand.Kind {
 	case mir.OperandI32:
 		return hir.TypeI32, nil
+	case mir.OperandU8:
+		return hir.TypeU8, nil
+	case mir.OperandU32:
+		return hir.TypeU32, nil
+	case mir.OperandUSize:
+		return hir.TypeUSize, nil
+	case mir.OperandNull:
+		if _, _, pointer := hir.RawPointerElement(operand.Type); pointer {
+			return operand.Type, nil
+		}
+		return hir.TypeInvalid, fmt.Errorf("null operand has invalid type %q", operand.Type)
 	case mir.OperandLocal:
 		value, found := e.localTypes[functionIndex][operand.Local]
 		if !found {
@@ -1692,9 +1758,22 @@ func cOperand(operand mir.Operand) (string, error) {
 		return fmt.Sprintf("fy_l_%d", operand.Local), nil
 	case mir.OperandI32:
 		return cI32(operand.I32), nil
+	case mir.OperandU8:
+		return fmt.Sprintf("UINT8_C(%d)", operand.U64), nil
+	case mir.OperandU32:
+		return fmt.Sprintf("UINT32_C(%d)", operand.U64), nil
+	case mir.OperandUSize:
+		return fmt.Sprintf("((uintptr_t)UINT64_C(%d))", operand.U64), nil
+	case mir.OperandNull:
+		return "((void *)0)", nil
 	default:
 		return "", fmt.Errorf("unsupported scalar operand kind %q", operand.Kind)
 	}
+}
+
+func isRawPointer(value hir.Type) bool {
+	_, _, pointer := hir.RawPointerElement(value)
+	return pointer
 }
 
 func cI32(value int32) string {

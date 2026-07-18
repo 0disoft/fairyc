@@ -44,12 +44,13 @@ unsafe extern C fn
 
 `pub` is not an ABI marker.
 
-The current executable source subset implements only exact-name `unsafe extern C fn` imports with
-`i32` parameters and an `i32` result. AST, typed HIR, MIR, unsafe provenance, deterministic C
-prototype emission, separate-object cross-compiler linking, and process-status observation are
-wired. This is not implementation of `@link_name`, export generation, raw pointers, callbacks,
-`c.*` scalars, or `@repr(C)` source aggregates. The interpreter remains fail-closed on every foreign
-call.
+The current executable source subset implements exact-name `unsafe extern C fn` imports with
+`i32`, `u8`, `u32`, `usize`, and raw pointers to that bounded scalar set. AST, typed HIR, MIR,
+unsafe provenance, deterministic C prototype emission, typed null, separate-object cross-compiler
+linking, and process-status observation are wired. Non-null pointer construction, dereference,
+arithmetic, and casts remain unsupported. This is not implementation of `@link_name`, export
+generation, callbacks, `c.*` scalars, or `@repr(C)` source aggregates. The interpreter remains
+fail-closed on every foreign call.
 
 ## C-representable types
 
