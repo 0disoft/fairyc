@@ -16,6 +16,8 @@
 - MIR fixture manifest: spec/fixtures/mir/manifest-v0.json
 - MIR verifier mutation manifest: spec/fixtures/mir-verifier/manifest-v0.json
 - Constrained C emission manifest: spec/fixtures/c-emission/manifest-v0.json
+- Linux scalar C differential runner: internal/cbackendnative/
+- Native C test runtime: spec/fixtures/c-emission/native/runtime.c
 - Resolved package graph fixture manifest: spec/fixtures/package/manifest-v0.json
 - Executable semantics and C transport: docs/mir/*.md
 - Package identity and visibility: docs/package/*.md

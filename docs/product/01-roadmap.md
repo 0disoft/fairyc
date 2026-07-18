@@ -52,6 +52,12 @@ Exit gate: positive and negative fixtures agree with the source contracts, resou
 
 ## Phase 2: first hosted executable slice
 
+Current implementation status: a fail-closed Linux/amd64 scalar differential command now requires
+glibc, Clang, and GCC and is wired into a separate hosted Ubuntu CI job. It is designed to run all 4
+emission cases at low and optimized profiles for 16 process-status comparisons. The current Windows
+host has no eligible Linux toolchain, and no hosted run receipt has been observed, so this is a
+configured lane rather than native conformance evidence.
+
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.
 - Run interpreter-to-C differential fixtures and bidirectional C ABI fixtures with Clang and GCC at low and optimized profiles.

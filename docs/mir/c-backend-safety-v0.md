@@ -53,10 +53,11 @@ The backend cannot add C or LLVM overflow, exactness, alignment, or alias promis
 
 ## Traps and cleanup
 
-Checked MIR branches reach a non-returning runtime trap helper with a stable trap category. The
-current scalar emitter passes that category to a private helper and then aborts; externally observing
-the category remains a differential-harness and runtime gate. A trap does not unwind through
-generated C and does not run Fairy C cleanup. Normal cleanup is already explicit in MIR.
+Checked MIR branches reach the non-returning internal `fy_runtime_trap(uint32_t)` symbol with a fixed
+canonical category code. The emitter does not define the product termination mechanism. The native
+fixture runtime maps the code to a reserved process status solely for differential observation. A
+trap does not unwind through generated C and does not run Fairy C cleanup. Normal cleanup is already
+explicit in MIR.
 
 ## Foreign calls
 
@@ -68,7 +69,11 @@ A C `longjmp` or C++ exception crossing generated Fairy C frames is forbidden. I
 
 ## Differential verification
 
-The planned matrix compares MIR-interpreter results with generated C under the C compilers declared by the target toolchain fixtures and both low and optimized build profiles. It compares output, return status, trap category, and drop trace. Sanitizers are useful backend checks but are not the language-semantics oracle.
+`internal/cbackendnative` implements the first scalar-only matrix shape for Linux/amd64 with glibc,
+Clang and GCC, and low and optimized profiles. Its current process-status oracle compares small
+non-negative returns and canonical trap category. Output, negative or larger `i32` returns, drop
+traces, sanitizers, layout, ABI, and broader runtime behavior remain unimplemented. Sanitizers are
+useful backend checks but are not the language-semantics oracle.
 
 ## External references
 

@@ -76,7 +76,7 @@ differential, ABI, runtime, and Atlas runners remain future evidence requirement
 | MIR interpreter run, trap, and limit | `spec/fixtures/interpreter/` currently proves all 56 v0 cases: literal return, scalar call arithmetic, checked negation/addition/subtraction/multiplication, division/remainder, and right shift across trapping and non-trapping boundaries, boolean branching and logical not, source `&&` and `||` short-circuiting, scalar `while`, nearest-loop break and continue, scalar and resource-bearing `Option` and `Result` construction, every built-in match variant, scalar and resource-bearing Result `?` paths, resource construction and field reads, whole-root and tagged-payload moves, resource returns, ordered live/dead/self reassignment, consuming-close success/failure ownership, nested active-variant cleanup, deterministic drop traces, lexical Region placement and reset on fallthrough, conditional fallthrough, direct return, Result propagation, nested, break, and continue exits, exact manifest-authorized in-memory stdout/stderr bytes, order, and retained limit prefix, exact division-by-zero, signed-division-overflow, integer-overflow, and invalid-shift trap identity, and bounded step/output-limit termination; user drop-body effects, signed left shift, and host I/O remain deferred |
 | Drop elaboration | Partial construction and cleanup-suffix merging; loop `break` and `continue` are fixture-backed |
 | C emission | `spec/fixtures/c-emission/` currently proves 4 verified scalar source-to-C11 cases, deterministic target/dialect/function/feature metadata, LF-only path-clean output, and repeated byte identity; it does not prove C syntax acceptance or native behavior |
-| C differential | Interpreter parity for output, status, trap category, and drop trace across declared compilers and profiles |
+| C differential | The configured Linux scalar runner covers all 4 C-emission cases across Clang/GCC and low/optimized profiles for 16 process-status comparisons; hosted execution is not yet observed, and output, wider returns, drop traces, sanitizers, layout, ABI, and the product runtime remain deferred |
 | C safety | Overflow, division, shifts, evaluation order, aliasing, alignment, inactive payload, and sanitizer-assisted checks |
 | ABI | Target layout, calls, callbacks, raw bindings, and boundary shims for candidate target profiles |
 | Runtime and stdlib | Zero-size normalization, allocation failure, reserve rollback, UTF-8 invariants, partial I/O, Linux close consumption, and retained-pointer wrappers |
@@ -101,8 +101,11 @@ MIR fixtures compare source-linked observations after verification. They do not 
 Package fixtures start from an already-resolved graph. They do not prove public manifest parsing, version solving, registry behavior, source acquisition, lockfile encoding, or a concrete package-instance hash.
 
 C-emission fixtures compare structured unit facts and deterministic text hygiene without freezing the
-entire generated translation unit. Until a configured native lane exists, they must not be reported
-as C syntax, compiler, linker, runtime, optimization, sanitizer, or target conformance evidence.
+entire generated translation unit. `internal/cbackendnative` separately requires Linux/amd64,
+glibc, Clang, and GCC, then compiles and executes every emitted case at `-O0` and `-O2`. The command
+fails rather than skips when a required toolchain component is absent. Its current status-only oracle
+does not prove output, negative or larger `i32` returns, cleanup traces, sanitizers, layout, ABI, the
+product runtime, or target conformance.
 
 ## Differential matrix
 

@@ -38,9 +38,9 @@ The first slice therefore needs a deliberately closed capability boundary rather
    and remainder reject zero and signed-minimum divided by negative one. Right-shift amounts are
    checked, and arithmetic signed right shift plus bitwise results use unsigned operations and
    `memcpy` bit preservation rather than implementation-defined signed conversions.
-6. Canonical trap categories are represented by a private C enum and passed to one non-returning
-   helper. The current helper terminates with `abort`; external trap-category observation remains a
-   native harness and runtime obligation.
+6. Canonical trap categories have fixed `uint32_t` codes and are passed to the non-returning internal
+   `fy_runtime_trap` symbol. The emission layer does not choose a product termination mechanism;
+   external observation belongs to the native harness and runtime boundary.
 7. Emission is deterministic: functions, features, declarations, blocks, and helper categories have
    stable ordering; generated text uses LF and contains no absolute source path. Complete C text,
    private identifiers, block labels, and formatting are not compatibility contracts.
@@ -57,7 +57,7 @@ The first slice therefore needs a deliberately closed capability boundary rather
 - Fairy C now has a real first backend boundary without pretending that a native program ran.
 - The Go compiler remains the bootstrap and reference implementation. No self-hosting claim follows
   from generated C.
-- The next evidence gate is a configured Linux or WSL toolchain lane that compiles and links the
+- The next evidence gate is the Linux toolchain lane in ADR 0026, which compiles and links the
   emitted translation unit and compares its process outcome with the MIR interpreter.
 - The target status cannot advance until the broader target, runtime, layout, ABI, and maintained-CI
   gates in `docs/abi/c-abi-v0.md` pass.

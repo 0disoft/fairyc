@@ -314,7 +314,7 @@ func (e *emitter) recordTrapCategories(function string, categories []string) err
 		return fmt.Errorf("trap in %s has no category", function)
 	}
 	for _, category := range categories {
-		if _, ok := cTrapName(category); !ok {
+		if _, _, ok := cTrapSpec(category); !ok {
 			return CapabilityError{Function: function, Feature: "trap category " + strconv.Quote(category)}
 		}
 		e.trapCategories[category] = struct{}{}
@@ -325,9 +325,6 @@ func (e *emitter) recordTrapCategories(function string, categories []string) err
 func (e *emitter) emitPreamble(output *strings.Builder) {
 	output.WriteString("/* fairyc constrained C transport: x86_64-linux-gnu, ISO C11 */\n")
 	output.WriteString("#include <stdint.h>\n")
-	if len(e.trapCategories) != 0 {
-		output.WriteString("#include <stdlib.h>\n")
-	}
 	if e.needsBitcast {
 		output.WriteString("#include <string.h>\n")
 	}
@@ -338,14 +335,11 @@ func (e *emitter) emitPreamble(output *strings.Builder) {
 			categories = append(categories, category)
 		}
 		slices.Sort(categories)
-		output.WriteString("typedef enum {\n")
-		for index, category := range categories {
-			name, _ := cTrapName(category)
-			fmt.Fprintf(output, "    %s = %d,\n", name, index+1)
+		for _, category := range categories {
+			name, code, _ := cTrapSpec(category)
+			fmt.Fprintf(output, "#define %s UINT32_C(%d)\n", name, code)
 		}
-		output.WriteString("} fy_trap_category;\n\n")
-		output.WriteString("_Noreturn static void fy_trap(fy_trap_category category) {\n")
-		output.WriteString("    (void)category;\n    abort();\n}\n\n")
+		output.WriteString("_Noreturn void fy_runtime_trap(uint32_t category);\n\n")
 	}
 	if e.needsBitcast {
 		output.WriteString("static int32_t fy_bits_to_i32(uint32_t bits) {\n")
@@ -384,7 +378,7 @@ func (e *emitter) emitFunction(output *strings.Builder, functionIndex int) error
 	}
 	dynamicTargets := e.dynamicTrapTargets[functionIndex]
 	if len(dynamicTargets) != 0 {
-		output.WriteString("    fy_trap_category fy_pending_trap = FY_TRAP_UNREACHABLE;\n")
+		output.WriteString("    uint32_t fy_pending_trap = FY_TRAP_UNREACHABLE;\n")
 	}
 	fmt.Fprintf(output, "    goto fy_b_%d;\n", function.Entry)
 	blocks := slices.Clone(function.Blocks)
@@ -519,19 +513,19 @@ func (e *emitter) emitTerminator(output *strings.Builder, functionIndex int, blo
 		fmt.Fprintf(output, "    return %s;\n", value)
 	case mir.TerminatorTrap:
 		if _, dynamic := e.dynamicTrapTargets[functionIndex][blockID]; dynamic {
-			output.WriteString("    fy_trap(fy_pending_trap);\n")
+			output.WriteString("    fy_runtime_trap(fy_pending_trap);\n")
 			return nil
 		}
 		if len(terminator.TrapCategories) == 0 {
 			return fmt.Errorf("trap in %s has no category", function.Name)
 		}
-		name, ok := cTrapName(terminator.TrapCategories[0])
+		name, _, ok := cTrapSpec(terminator.TrapCategories[0])
 		if !ok {
 			return CapabilityError{Function: function.Name, Feature: "trap category " + strconv.Quote(terminator.TrapCategories[0])}
 		}
-		fmt.Fprintf(output, "    fy_trap(%s);\n", name)
+		fmt.Fprintf(output, "    fy_runtime_trap(%s);\n", name)
 	case mir.TerminatorUnreachable:
-		output.WriteString("    fy_trap(FY_TRAP_UNREACHABLE);\n")
+		output.WriteString("    fy_runtime_trap(FY_TRAP_UNREACHABLE);\n")
 	default:
 		return CapabilityError{Function: function.Name, Feature: "MIR terminator " + strconv.Quote(string(terminator.Kind))}
 	}
@@ -707,24 +701,30 @@ func cI32(value int32) string {
 	return fmt.Sprintf("INT32_C(%d)", value)
 }
 
-func cTrapName(category string) (string, bool) {
+// TrapCode returns the fixed Stage 0 runtime code for one canonical trap category.
+func TrapCode(category string) (uint32, bool) {
+	_, code, ok := cTrapSpec(category)
+	return code, ok
+}
+
+func cTrapSpec(category string) (string, uint32, bool) {
 	switch category {
 	case "bounds":
-		return "FY_TRAP_BOUNDS", true
+		return "FY_TRAP_BOUNDS", 1, true
 	case "integer-overflow":
-		return "FY_TRAP_INTEGER_OVERFLOW", true
+		return "FY_TRAP_INTEGER_OVERFLOW", 2, true
 	case "division-by-zero":
-		return "FY_TRAP_DIVISION_BY_ZERO", true
+		return "FY_TRAP_DIVISION_BY_ZERO", 3, true
 	case "signed-division-overflow":
-		return "FY_TRAP_SIGNED_DIVISION_OVERFLOW", true
+		return "FY_TRAP_SIGNED_DIVISION_OVERFLOW", 4, true
 	case "invalid-shift":
-		return "FY_TRAP_INVALID_SHIFT", true
+		return "FY_TRAP_INVALID_SHIFT", 5, true
 	case "assertion-failed":
-		return "FY_TRAP_ASSERTION_FAILED", true
+		return "FY_TRAP_ASSERTION_FAILED", 6, true
 	case "unreachable":
-		return "FY_TRAP_UNREACHABLE", true
+		return "FY_TRAP_UNREACHABLE", 7, true
 	default:
-		return "", false
+		return "", 0, false
 	}
 }
 

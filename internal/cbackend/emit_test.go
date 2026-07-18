@@ -38,8 +38,8 @@ func TestEmitScalarControlUnit(t *testing.T) {
 	}
 	for _, required := range []string{
 		"#include <stdint.h>",
-		"_Noreturn static void fy_trap",
-		"FY_TRAP_INTEGER_OVERFLOW",
+		"#define FY_TRAP_INTEGER_OVERFLOW UINT32_C(2)",
+		"_Noreturn void fy_runtime_trap(uint32_t category);",
 		"static int32_t fy_fn_0(int32_t",
 		"int main(void)",
 	} {
@@ -47,9 +47,34 @@ func TestEmitScalarControlUnit(t *testing.T) {
 			t.Errorf("generated C is missing %q", required)
 		}
 	}
+	if strings.Contains(unit.Source, "abort(") || strings.Contains(unit.Source, "#include <stdlib.h>") {
+		t.Fatalf("generated C owns trap termination instead of delegating to the runtime:\n%s", unit.Source)
+	}
 	second, err := cbackend.Emit(program, "main::main", cbackend.Stage0ScalarProfile())
 	if err != nil || second.Source != unit.Source {
 		t.Fatalf("second Emit() differs: error=%v", err)
+	}
+}
+
+func TestTrapCodesAreStable(t *testing.T) {
+	t.Parallel()
+	want := map[string]uint32{
+		"bounds":                   1,
+		"integer-overflow":         2,
+		"division-by-zero":         3,
+		"signed-division-overflow": 4,
+		"invalid-shift":            5,
+		"assertion-failed":         6,
+		"unreachable":              7,
+	}
+	for category, expected := range want {
+		actual, ok := cbackend.TrapCode(category)
+		if !ok || actual != expected {
+			t.Errorf("TrapCode(%q) = %d, %t; want %d, true", category, actual, ok, expected)
+		}
+	}
+	if code, ok := cbackend.TrapCode("unknown"); ok || code != 0 {
+		t.Fatalf("TrapCode(unknown) = %d, %t", code, ok)
 	}
 }
 

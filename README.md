@@ -42,6 +42,10 @@ The first constrained C backend slice emits deterministic ISO C11 for 4 verified
 covering calls and control flow, bitwise operations, checked division and shift, and overflow
 trapping. This lane only produces C text; no C compiler, linker, native executable, runtime, target
 conformance, or self-hosting is implied.
+A separate fail-closed Linux/amd64 command is now present to compile those cases with Clang and GCC
+at `-O0` and `-O2`, link a test-only trap runtime, and compare process outcomes. It cannot run on
+this Windows host because no WSL distribution or C compiler is installed, and its hosted CI result
+has not yet been observed. The target therefore remains unsupported.
 An unstable `fairyc experimental` CLI can inspect, syntax-check,
 semantic-check, or interpret one source-root-relative `.fy` file, while semantic checking also
 accepts an explicit module set. There is no stable CLI, user drop-body execution, native execution
@@ -99,6 +103,7 @@ remaining semantic groups exist.
 - MIR verifier mutation fixtures: `spec/fixtures/mir-verifier/manifest-v0.json`
 - MIR interpreter fixtures: `spec/fixtures/interpreter/manifest-v0.json`
 - Constrained C emission fixtures: `spec/fixtures/c-emission/manifest-v0.json`
+- Linux scalar C differential runner: `internal/cbackendnative/`
 - Resolved package graph fixtures: `spec/fixtures/package/manifest-v0.json`
 - MIR and C backend contracts: `docs/mir/`
 - Package identity and visibility: `docs/package/package-graph-v0.md`

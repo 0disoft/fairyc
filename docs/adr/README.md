@@ -35,6 +35,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0023-explicit-checked-arithmetic-mir.md`: verified overflow and right-shift checks, exact trap edges, and Stage 0 left-shift rejection.
 - `0024-stage-0-loop-control-and-cleanup.md`: nearest-loop `break` and `continue`, Flow obligations, and scope-indexed Region cleanup.
 - `0025-verified-scalar-c-emission.md`: fail-closed verified-MIR emission for the provisional scalar ISO C11 transport.
+- `0026-linux-scalar-c-differential-lane.md`: fail-closed Clang/GCC low/optimized native execution on Linux/amd64 with glibc.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

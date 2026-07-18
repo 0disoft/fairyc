@@ -41,7 +41,12 @@ func Run(manifestPath string) (Report, error) {
 			continue
 		}
 		seen[fixture.ID] = struct{}{}
-		report.Failures = append(report.Failures, runCase(directory, fixture)...)
+		var emitted EmittedCase
+		failures := runCase(directory, fixture, &emitted)
+		report.Failures = append(report.Failures, failures...)
+		if len(failures) == 0 {
+			report.Emitted = append(report.Emitted, emitted)
+		}
 	}
 	return report, nil
 }
@@ -70,7 +75,7 @@ func loadManifest(path string) (manifest, error) {
 	return definition, nil
 }
 
-func runCase(manifestDirectory string, fixture caseDefinition) []Failure {
+func runCase(manifestDirectory string, fixture caseDefinition, emitted *EmittedCase) []Failure {
 	if fixture.Expect.Status != "pass" || fixture.Expect.CompletedThrough != "c-emission" {
 		return []Failure{{CaseID: fixture.ID, Detail: "case does not declare pass through c-emission"}}
 	}
@@ -123,6 +128,15 @@ func runCase(manifestDirectory string, fixture caseDefinition) []Failure {
 	second, err := cbackend.Emit(program, fixture.Entry, profile)
 	if err != nil || second.Source != unit.Source {
 		return []Failure{{CaseID: fixture.ID, Detail: fmt.Sprintf("repeated C emission is not deterministic: %v", err)}}
+	}
+	*emitted = EmittedCase{
+		ID: fixture.ID, Outcome: fixture.Expect.Outcome, Unit: unit,
+	}
+	if fixture.Expect.Value != nil {
+		emitted.Value = *fixture.Expect.Value
+	}
+	if fixture.Expect.Category != nil {
+		emitted.TrapCategory = *fixture.Expect.Category
 	}
 	return nil
 }

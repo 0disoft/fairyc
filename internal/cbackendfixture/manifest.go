@@ -1,6 +1,8 @@
 // Package cbackendfixture executes the versioned source-to-C-emission manifest.
 package cbackendfixture
 
+import "github.com/0disoft/fairyc/internal/cbackend"
+
 type manifest struct {
 	Schema        string           `json:"$schema"`
 	SchemaVersion string           `json:"schemaVersion"`
@@ -39,4 +41,14 @@ type Failure struct {
 type Report struct {
 	CasesRun int
 	Failures []Failure
+	Emitted  []EmittedCase
+}
+
+// EmittedCase carries one interpreter-approved translation unit into native differential runners.
+type EmittedCase struct {
+	ID           string
+	Outcome      string
+	Value        int32
+	TrapCategory string
+	Unit         cbackend.Unit
 }

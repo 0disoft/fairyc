@@ -17,9 +17,11 @@ Target claims use three levels:
 The Windows Go compiler host does not define target layout. Proving the first target requires WSL or Linux CI, an explicit glibc baseline, a sysroot or runner image, Clang and GCC, and a target runtime bundle.
 
 The current Go prototype can emit deterministic ISO C11 for a verified scalar-only profile carrying
-this target identity. It does not yet parse or compile that C, resolve a toolchain, provide a target
-runtime, inspect layout or objects, link, or execute on Linux. That narrow capability does not advance
-the target itself to `emittable`.
+this target identity. A separate Linux/amd64 runner is configured to require glibc, Clang, and GCC,
+compile and link a test-only runtime, and compare process status at low and optimized profiles. No
+hosted success receipt has been observed, and the runner does not inspect layout or objects, exercise
+the C ABI, provide the product runtime, or establish the complete target profile. That narrow
+capability does not advance the target itself to `emittable`.
 
 ## No native Fairy ABI
 

@@ -16,10 +16,19 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
   repository state.
 - Ordinary tests execute the fixed lexer and parser fuzz seeds. Timed fuzz campaigns remain
   unconfigured rather than pretending a short CI sample proves coverage.
+- A separate Ubuntu native-C job invokes `cmd/fairyc-native-fixtures`. The command requires
+  Linux/amd64, glibc, Clang, and GCC; compiles every current C-emission case at `-O0` and `-O2` with
+  pedantic warnings as errors; links the test-only trap runtime; and compares process status. A
+  missing compiler or libc identity fails the job instead of producing a skip.
+- The native job retains no generated C, object, executable, cache, or report artifact. Its bounded
+  JSON report is written only to the job log and contains toolchain fingerprints but no temporary
+  path.
 
 The containing Mustflow workspace provides local parity through `fairyc_go_vet` and
-`fairyc_go_test`. Those intents additionally isolate ignored Go caches and disable module network
-access for local agent verification.
+`fairyc_go_test`, plus the Linux-only `fairyc_native_c_test` intent. Those intents additionally
+isolate ignored Go caches and disable module network access for local agent verification. The native
+intent is unavailable on the current Windows host because no registered WSL distribution or C
+compiler exists; ordinary Go validation is not native parity.
 
 ## Owners
 
@@ -32,5 +41,5 @@ access for local agent verification.
 - Required validation names: VALIDATION.md
 - Release blocker status: UNDECIDED; branch protection is external repository state and is not
   claimed by this document.
-- Remaining operational risk: remote workflow execution has not been observed yet, and no timed
-  fuzz campaign or coverage threshold exists.
+- Remaining operational risk: remote workflow execution, including the new native job, has not been
+  observed yet, and no timed fuzz campaign or coverage threshold exists.

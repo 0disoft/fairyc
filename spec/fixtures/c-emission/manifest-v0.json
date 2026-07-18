@@ -2,8 +2,8 @@
   "$schema": "./schema-v0.json",
   "schemaVersion": "fairyc.c-emission-fixtures/v0",
   "deferred": [
-    "C parsing, compilation, object emission, linking, and native execution until a configured x86_64-linux-gnu toolchain lane exists",
-    "Clang and GCC low and optimized differential execution",
+    "C parsing, compilation, object emission, linking, and native execution inside this emission-only runner; the separate Linux runner owns that evidence",
+    "output, negative and larger i32 returns, cleanup traces, and sanitizer observations beyond the native process-status oracle",
     "resource, tagged-value, Region, borrow, unsafe, FFI, runtime, and standard-library C lowering",
     "target layout, C ABI classification, object metadata, symbol, relocation, and sanitizer evidence"
   ],
@@ -12,8 +12,10 @@
     "docs/adr/0001-initial-architecture-boundaries.md",
     "docs/adr/0006-c-abi-v0-and-first-conformance-target.md",
     "docs/adr/0025-verified-scalar-c-emission.md",
+    "docs/adr/0026-linux-scalar-c-differential-lane.md",
     "docs/mir/mir-v0.md",
     "docs/mir/c-backend-safety-v0.md",
+    "docs/runtime/runtime-stdlib-v0.md",
     "docs/abi/c-abi-v0.md",
     "docs/engineering/05-testing-standard.md"
   ],

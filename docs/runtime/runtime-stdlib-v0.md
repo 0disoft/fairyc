@@ -26,6 +26,16 @@ The Stage 0 runtime owns only:
 - a canonical empty-storage sentinel whose pointer identity is not a language guarantee;
 - a small set of memory helpers needed to keep generated C defined.
 
+The current scalar C transport names one internal non-returning symbol,
+`fy_runtime_trap(uint32_t category)`. Category codes 1 through 7 correspond exactly to the canonical
+MIR trap identities and do not depend on which traps a translation unit uses. The symbol is an
+implementation boundary, not a stable public runtime ABI or C header.
+
+`spec/fixtures/c-emission/native/runtime.c` is a test-only implementation that maps those codes to a
+reserved process-status range with `_Exit`. It performs no cleanup and emits no output. The product
+runtime, bounded source-location payload, runtime ABI version suffix, and distribution bundle remain
+unimplemented.
+
 It does not own a general allocator API, collections, files, strings, formatting, unwinding, logging, reflection, garbage collection, scheduling, or async execution. Runtime helpers use a major-suffixed symbol namespace and an exact pre-1 ABI match.
 
 ### Standard library

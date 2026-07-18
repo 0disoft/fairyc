@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0025-verified-scalar-c-emission.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0026-linux-scalar-c-differential-lane.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -177,6 +177,9 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - The current C backend emits deterministic ISO C11 only for verified scalar MIR under the
   provisional `x86_64-linux-gnu` profile. Its emission fixtures do not compile, link, or execute C
   and do not establish a target support level.
+- A separate Linux/amd64 command requires glibc, Clang, and GCC and is configured to compare the
+  current scalar cases at low and optimized profiles. No hosted success receipt or broader target
+  conformance follows from the command's presence.
 - QBE or another fast backend and LLVM require separate measured adoption decisions after MIR stability.
 - Early caching is whole-package and bounded. Function-level caching requires measured invalidation or latency pressure.
 - Development output contains intentional deliverables and small state, not an unbounded copy of every intermediate.
