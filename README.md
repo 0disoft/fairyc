@@ -77,6 +77,10 @@ A second provisional slice implements Buffer-owned initialized bytes, failure-at
 relocating self-overlap append, length-overflow rollback, zeroed growth, truncate, clear, and drop.
 Its four-way native C probe is configured but still unobserved and not source-callable; the public
 standard-library package remains absent.
+A third slice implements Arena-owned byte nodes with one active generation-checked Region,
+failure-atomic zeroed or copied placement, reset invalidation, stale-use rejection, and active-drop
+rejection. Its native matrix is likewise configured but unobserved and disconnected from source
+lowering.
 A deterministic native C11 probe now translates the nine valid layout cases into private numeric
 types and is configured for Clang/GCC at `-O0` and `-O2`. This Windows host cannot execute those
 four probe runs, and no hosted success receipt has been observed, so `c-layout-probes` remains a

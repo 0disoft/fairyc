@@ -75,3 +75,35 @@ func TestBufferSourcesOwnFailureAtomicOverlapSafeStorage(t *testing.T) {
 		t.Fatalf("StorageSource() is not deterministic canonical C: %v", err)
 	}
 }
+
+func TestArenaSourcesRejectConcurrentAndStaleRegions(t *testing.T) {
+	t.Parallel()
+	implementation, err := ArenaSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	probe, err := ArenaProbeSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, required := range []string{
+		"fy_std_region_begin_v0",
+		"fy_std_region_allocate_zeroed_v0",
+		"fy_std_region_copy_bytes_v0",
+		"fy_std_region_reset_v0",
+		"region->generation == region->arena->generation",
+		"arena->active_region != 0",
+	} {
+		if !strings.Contains(implementation, required) {
+			t.Errorf("Arena implementation is missing %q", required)
+		}
+	}
+	if !strings.Contains(probe, "fy_std_region_begin_v0(&arena, &second)") ||
+		!strings.Contains(probe, "fy_std_region_allocate_zeroed_v0(&region, 1, 1, &empty)") {
+		t.Fatal("Arena probe does not exercise concurrent and stale Region rejection")
+	}
+	repeated, err := ArenaSource()
+	if err != nil || repeated != implementation || strings.Contains(implementation, "\r") || !strings.HasSuffix(implementation, "\n") {
+		t.Fatalf("ArenaSource() is not deterministic canonical C: %v", err)
+	}
+}

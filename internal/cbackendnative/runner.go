@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v7"
+	reportSchemaVersion = "fairyc.native-c-report/v8"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -85,6 +85,7 @@ type Report struct {
 	ABIProbeExecutions    int        `json:"abiProbeExecutions"`
 	SystemHeapExecutions  int        `json:"systemHeapExecutions"`
 	BufferExecutions      int        `json:"bufferExecutions"`
+	ArenaExecutions       int        `json:"arenaExecutions"`
 	BuildSmokeExecutions  int        `json:"buildSmokeExecutions"`
 }
 
@@ -209,6 +210,21 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.BufferExecutions = bufferExecutions
+	arenaSource, err := cstdlib.ArenaSource()
+	if err != nil {
+		return Report{}, fmt.Errorf("load Arena implementation: %w", err)
+	}
+	arenaProbe, err := cstdlib.ArenaProbeSource()
+	if err != nil {
+		return Report{}, fmt.Errorf("load Arena probe: %w", err)
+	}
+	arenaExecutions, err := runStandardLibraryProbe(
+		temporaryRoot, toolchains, "Arena", "arena-probe", arenaProbe, arenaSource,
+	)
+	if err != nil {
+		return Report{}, err
+	}
+	report.ArenaExecutions = arenaExecutions
 	for caseIndex, fixture := range fixtureReport.Emitted {
 		if fixture.Unit.Target != string(target.X8664LinuxGNU) || fixture.Unit.Dialect != cbackend.DialectC11 {
 			return Report{}, fmt.Errorf("case %s emitted unexpected profile %s/%s", fixture.ID, fixture.Unit.Target, fixture.Unit.Dialect)

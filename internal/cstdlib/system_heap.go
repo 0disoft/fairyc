@@ -19,6 +19,12 @@ var stage0Buffer string
 //go:embed stage0_buffer_probe.c
 var stage0BufferProbe string
 
+//go:embed stage0_arena.c
+var stage0Arena string
+
+//go:embed stage0_arena_probe.c
+var stage0ArenaProbe string
+
 // SystemHeapSource returns the provisional x86_64-linux-gnu SystemHeap implementation.
 func SystemHeapSource() (string, error) {
 	return canonicalSource("SystemHeap", stage0SystemHeap)
@@ -45,6 +51,24 @@ func StorageSource() (string, error) {
 // BufferProbeSource returns the closed native conformance probe for Buffer.
 func BufferProbeSource() (string, error) {
 	return canonicalSource("Buffer probe", stage0BufferProbe)
+}
+
+// ArenaSource returns the provisional SystemHeap and Arena implementation as one C unit.
+func ArenaSource() (string, error) {
+	heap, err := SystemHeapSource()
+	if err != nil {
+		return "", err
+	}
+	arena, err := canonicalSource("Arena", stage0Arena)
+	if err != nil {
+		return "", err
+	}
+	return heap + "\n" + arena, nil
+}
+
+// ArenaProbeSource returns the closed native conformance probe for Arena and Region.
+func ArenaProbeSource() (string, error) {
+	return canonicalSource("Arena probe", stage0ArenaProbe)
 }
 
 func canonicalSource(name, source string) (string, error) {

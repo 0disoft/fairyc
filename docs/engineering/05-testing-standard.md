@@ -71,6 +71,11 @@ self-append, length-overflow rollback, zeroed growth, truncate, clear, malformed
 It verifies observable bytes, length, minimum capacity, and failure-state preservation without
 freezing the geometric capacity choice or reading spare storage.
 
+The Arena probe adds single-active-Region rejection, zero-initialized and copied byte placement,
+unsupported-alignment rollback, zero-size normalization, active-drop rejection, reset generation
+advance, stale-use rejection, and final drop. It does not freeze node size, allocation grouping, or
+an Arena growth policy.
+
 ## Oracle order
 
 1. Product specification and accepted ADRs define the intended boundary.

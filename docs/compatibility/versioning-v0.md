@@ -84,7 +84,8 @@ identity and `sanitizerExecutions` count; the existing `cases` list owns sanitiz
 V5 supersedes v4 by adding the exact sorted `abiCases`, exact `abiDirections`, and
 `abiProbeExecutions` count. V6 supersedes v5 by adding `systemHeapExecutions` for the closed
 Clang/GCC low/optimized provisional standard-library allocation probe. V7 supersedes v6 by adding
-`bufferExecutions` for the failure-atomic overlap-safe Buffer probe. The runner emits one exact version and does not pretend the report
+`bufferExecutions` for the failure-atomic overlap-safe Buffer probe. V8 supersedes v7 by adding
+`arenaExecutions` for the single-active-Region Arena probe. The runner emits one exact version and does not pretend the report
 shapes are interchangeable.
 
 ## Runtime and standard library

@@ -96,6 +96,10 @@ The next storage slice now adds provisional Buffer construction, initialized-pre
 overlap-safe append across relocation, overflow rollback, zeroed growth, truncate, clear, and drop.
 Its four native probe executions are likewise configured but unobserved, and source programs still
 cannot call the helper.
+The Arena storage slice now adds a single-active-Region generation check, failure-atomic zeroed and
+copied byte placement, reset invalidation, stale-use rejection, and active-drop rejection. Its four
+native executions are configured but unobserved; source-level `std::alloc` construction and calls
+remain missing.
 
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.

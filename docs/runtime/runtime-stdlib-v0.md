@@ -111,6 +111,17 @@ There is no safe uninitialized byte allocation, generic `alloc<T>` syntax, resou
 
 The bounded Stage 0 fixture surface exports `std::alloc::Arena` as an opaque resource. `region name in expression` accepts an expression of type `&mut std::alloc::Arena` and holds that exclusive borrow for the lexical block. The fixture defines no constructor, capacity query, growth policy, ordinary allocation method, or representation guarantee; those remain public-library decisions.
 
+The provisional C Arena slice now models one active Region per Arena. Begin captures a private mark
+and generation; allocation publishes a tracking node only after both byte storage and node storage
+succeed; reset frees allocations back to the mark, advances the generation, and invalidates the
+Region. A second simultaneous Region, stale post-reset use, or Arena drop during an active Region
+fails closed. Zero-size placement validates alignment without allocating. Representation, node
+granularity, and growth policy remain private and source construction remains unavailable.
+
+Its four-way native probe is configured for exclusive begin, zeroed allocation, copy, allocation
+rollback, empty normalization, active-drop rejection, reset, stale-use rejection, and final drop,
+but no Linux execution receipt has been observed.
+
 ## Text types
 
 `str` is an unsized, immutable, valid-UTF-8 language type used as `&str`. UTF-8 validation of `&[u8]` returns a borrow with the input's origin and performs no copy or allocation. Byte slices never convert implicitly to text.
