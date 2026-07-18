@@ -145,8 +145,18 @@ type Expression struct {
 	Type     Type
 	Span     Span
 	Value    string
+	Variant  string
 	Operator string
 	Symbol   SymbolID
 	Children []Expression
 	Block    *Block
+	Arms     []MatchArm
+}
+
+// MatchArm is one already-resolved shallow tagged branch.
+type MatchArm struct {
+	Variant     string
+	Binding     SymbolID
+	BindingSpan Span
+	Expression  Expression
 }

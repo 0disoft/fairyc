@@ -50,6 +50,9 @@ func (a *analyzer) scanResultPropagates(module *moduleScope, expression *ast.Exp
 	if expression.Kind == syntax.KindPropagate {
 		a.recordPropagateHandling(module, expression)
 	}
+	if expression.Kind == syntax.KindMatch && len(expression.Children) > 0 {
+		a.recordResultHandling(module, expression.Children[0], "match")
+	}
 	if expression.Block != nil {
 		a.resultFlowBlock(module, expression.Block, false)
 	}

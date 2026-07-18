@@ -27,8 +27,9 @@ and the complete deterministic `E11xx` set after parser, resolver, and type setu
 `internal/regionfixture` executes all 6 cases in `spec/fixtures/region/manifest-v1.json`, compares
 hidden allocation origins and complete `E31xx` diagnostics, and admits the lexical Arena case only
 after proving its root, dependency, lookup, instance class, provider role, source root, and exported
-`std::alloc::Arena` against the referenced package graph. `internal/resultfixture` executes all 6
-cases in `spec/fixtures/result/manifest-v0.json`, comparing handling modes, canonical payloads,
+`std::alloc::Arena` against the referenced package graph. `internal/resultfixture` executes all 8
+cases in `spec/fixtures/result/manifest-v0.json`, comparing qualified construction, exhaustive
+shallow matching, handling modes, canonical payloads,
 single-evaluation facts, and complete `E41xx` diagnostics. `internal/mirfixture` executes all 5
 cases in `spec/fixtures/mir/manifest-v0.json` after Flow, mutable-local MIR lowering, and MIR
 verification, comparing source-linked evaluation, call, move, cleanup, Result-branch, trap, and
@@ -61,7 +62,7 @@ future evidence requirements.
 | Resource flow pass and fail | `spec/fixtures/resource/` currently proves all 7 v0 cases: whole-root moves, scope obligations, branch and loop states, and deterministic `E11xx` spans; reassignment, consuming close, and concrete drop traces remain future groups |
 | Borrow-origin pass and fail | Local last-use loans, conflicts, single-origin return, and storage bans |
 | Region pass and fail | `spec/fixtures/region/manifest-v1.json` currently proves all 6 v1 cases: parameter and package-resolved local origins, permitted parameter-origin returns, `E3101` local escape, capability restrictions, and no `NeedsDrop` placement |
-| Result pass and fail | `spec/fixtures/result/` currently proves all 6 v0 cases: return, discard, must-use behavior, `?` classification, exactly-once evaluation, and error compatibility; constructors and payload traces remain deferred |
+| Result pass and fail | `spec/fixtures/result/` currently proves all 8 v0 cases: qualified scalar construction, exhaustive shallow matching, return, discard, must-use behavior, `?` classification, exactly-once evaluation, and error compatibility; resource payload traces remain deferred |
 | MIR normalization | `spec/fixtures/mir/` currently proves all 5 v0 cases through the Go MIR runner: source-linked evaluation order, call successors, ownership transfer, cleanup order, Result branching, trap paths, and eliminated source forms; graph identity remains excluded |
 | Resolved package graph | `spec/fixtures/package/` proves instance equality, feature splits, direct visibility, module isolation, ambiguity, transitive hiding, and explicit standard-library injection without choosing public package-manager syntax |
 | Built-in tagged resources | `Ok`, `Err`, `Some`, discard, match, propagation, early return, and nested active-payload drop traces |

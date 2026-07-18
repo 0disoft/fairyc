@@ -120,6 +120,38 @@ func TestAnalyzeRejectsUnsupportedLiteralWithoutInventingType(t *testing.T) {
 	}
 }
 
+func TestAnalyzeBuildsQualifiedResultConstructorsAndMatch(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn classify(value: i32) -> Result<i32, i32> {
+    if value >= 0 { Result::Ok(value) } else { Result::Err(-value) }
+}
+fn unwrap(input: Result<i32, i32>) -> i32 {
+    match input {
+        Result::Ok(value) => value,
+        Result::Err(error) => -error,
+    }
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+	if len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].Functions) != 2 {
+		t.Fatalf("HIR modules = %+v", result.HIR.Modules)
+	}
+	classify := result.HIR.Modules[0].Functions[0]
+	if classify.Body.Tail == nil || classify.Body.Tail.Kind != "if" {
+		t.Fatalf("classify tail = %+v", classify.Body.Tail)
+	}
+	unwrap := result.HIR.Modules[0].Functions[1]
+	if unwrap.Body.Tail == nil || unwrap.Body.Tail.Kind != "match" || len(unwrap.Body.Tail.Arms) != 2 {
+		t.Fatalf("unwrap tail = %+v", unwrap.Body.Tail)
+	}
+	if unwrap.Body.Tail.Arms[0].Variant != "ok" || unwrap.Body.Tail.Arms[1].Variant != "err" {
+		t.Fatalf("match arms = %+v", unwrap.Body.Tail.Arms)
+	}
+}
+
 func analyzeText(t *testing.T, files map[string]string) semantic.Result {
 	t.Helper()
 	inputs := make([]semantic.File, 0, len(files))

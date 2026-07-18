@@ -19,8 +19,9 @@ and local Flow cases, including last-use loans and borrow-return origins. Whole-
 also executes all 7 v0 cases for moves, cleanup obligations, branch joins, and loop back-edges. The
 Region runner executes all 6 v1 cases, including package-proven `std::alloc::Arena`, hidden
 allocation origins, lexical escape, capability storage, and plain-region resource rejection. The
-Result runner executes all 6 v0 cases for must-use return/discard/propagation, exactly-once
-classification, non-Result `?`, and propagated error compatibility. The MIR runner executes all
+Result runner executes all 8 v0 cases for qualified construction, exhaustive shallow matching,
+must-use return/discard/propagation, exactly-once classification, non-Result `?`, and propagated
+error compatibility. The MIR runner executes all
 5 v0 normalization cases through mutable-local block lowering and the MIR verifier, covering
 left-to-right call evaluation, complete-root moves, normal-exit cleanup order, `Result` error
 cleanup, and non-unwinding trap paths. The verifier mutation runner constructs all 8 named

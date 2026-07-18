@@ -22,7 +22,8 @@ lowering, and parser-fixture-runner portion of the first item exists. Name resol
 now cover the semantic fixture's scalar and safe-borrow subset. Local last-use loans, borrow
 conflicts, and single-origin borrow returns execute across all 11 semantic v0 cases. General
 whole-root resource Flow now executes all 7 resource v0 cases, including branch and loop state
-rejection. Result Flow executes all 6 result v0 cases. Mutable-local MIR lowering and verification
+rejection. Result Flow executes all 8 result v0 cases, including qualified scalar construction and
+exhaustive shallow matching. Mutable-local MIR lowering and verification
 execute all 5 MIR normalization v0 cases for the current scalar, resource, Result, cleanup, call,
 and division-trap subset. All 8 verifier baselines and 15 isolated mutation cases execute through
 the same MIR verifier. The first scalar MIR interpreter executes all 8 interpreter v0 cases and is

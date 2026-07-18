@@ -13,8 +13,8 @@ func TestResultManifestV0(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Run() error = %v", err)
 	}
-	if report.CasesRun != 6 {
-		t.Fatalf("Run() cases = %d, want 6", report.CasesRun)
+	if report.CasesRun != 8 {
+		t.Fatalf("Run() cases = %d, want 8", report.CasesRun)
 	}
 	for _, failure := range report.Failures {
 		t.Errorf("%s: %s", failure.CaseID, failure.Detail)

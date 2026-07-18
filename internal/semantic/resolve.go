@@ -326,11 +326,15 @@ func (a *analyzer) resolveExpression(module *moduleScope, scope *lexicalScope, e
 	if expression == nil {
 		return
 	}
+	if expression.Kind == syntax.KindMatch {
+		a.resolveMatch(module, scope, expression)
+		return
+	}
 	if expression.Kind == syntax.KindRegion {
 		a.resolveRegion(module, scope, expression)
 		return
 	}
-	if expression.Kind == syntax.KindPath {
+	if expression.Kind == syntax.KindPath && !isResultVariantPath(expression.Text) {
 		a.resolvePath(module, scope, expression)
 	}
 	if expression.Block != nil {
@@ -338,6 +342,43 @@ func (a *analyzer) resolveExpression(module *moduleScope, scope *lexicalScope, e
 	}
 	for _, child := range expression.Children {
 		a.resolveExpression(module, scope, child)
+	}
+}
+
+func (a *analyzer) resolveMatch(module *moduleScope, scope *lexicalScope, expression *ast.Expression) {
+	if len(expression.Children) == 0 {
+		return
+	}
+	a.resolveExpression(module, scope, expression.Children[0])
+	for _, arm := range expression.Children[1:] {
+		if arm == nil || arm.Kind != syntax.KindPattern || arm.Text != "arm" || len(arm.Children) != 2 {
+			a.resolveExpression(module, scope, arm)
+			continue
+		}
+		pattern := arm.Children[0]
+		body := arm.Children[1]
+		armScope := &lexicalScope{parent: scope, names: make(map[string]*symbol)}
+		if pattern == nil || pattern.Kind != syntax.KindPattern || !isResultVariantPath(pattern.Text) || len(pattern.Children) != 2 {
+			a.resolveExpression(module, armScope, pattern)
+			a.resolveExpression(module, armScope, body)
+			continue
+		}
+		binding := pattern.Children[1]
+		if binding == nil || binding.Kind != syntax.KindPath || binding.Text == "" {
+			a.resolveExpression(module, armScope, body)
+			continue
+		}
+		value := &symbol{
+			id:          a.allocateSymbol(),
+			kind:        "match-binding",
+			name:        binding.Text,
+			module:      module.file.Module.Path,
+			source:      module.file.Path,
+			declaration: binding.Span,
+		}
+		armScope.names[binding.Text] = value
+		a.resolved[binding] = value
+		a.resolveExpression(module, armScope, body)
 	}
 }
 

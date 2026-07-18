@@ -2,9 +2,8 @@
   "$schema": "./schema-v0.json",
   "schemaVersion": "fairyc.result-fixtures/v0",
   "deferred": [
-    "Result::Ok and Result::Err construction until typed constructor and MIR fixtures execute",
     "resource payload construction and runtime drop traces until variant constructors and MIR execution exist",
-    "qualified shallow Result match until the typed pattern runner executes"
+    "qualified Result construction and match in the MIR interpreter until tagged execution exists"
   ],
   "contracts": [
     "docs/product/02-spec.md",
@@ -78,6 +77,52 @@
             "resultType": "Result<i32, Error>",
             "successType": "i32",
             "errorType": "Error",
+            "evaluationCount": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.flow.construct-result",
+      "sourceRoot": "cases/pass/construct-result/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow",
+        "handling": [
+          {
+            "expression": {
+              "source": "main.fy",
+              "startByte": 51,
+              "endByte": 65
+            },
+            "mode": "return",
+            "resultType": "Result<i32, i32>",
+            "successType": "i32",
+            "errorType": "i32",
+            "evaluationCount": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.flow.match-result",
+      "sourceRoot": "cases/pass/match-result/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow",
+        "handling": [
+          {
+            "expression": {
+              "source": "main.fy",
+              "startByte": 68,
+              "endByte": 73
+            },
+            "mode": "match",
+            "resultType": "Result<i32, i32>",
+            "successType": "i32",
+            "errorType": "i32",
             "evaluationCount": 1
           }
         ]

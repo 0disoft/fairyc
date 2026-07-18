@@ -81,7 +81,7 @@
       "required": ["expression", "mode", "resultType", "successType", "errorType", "evaluationCount"],
       "properties": {
         "expression": { "$ref": "#/$defs/span" },
-        "mode": { "enum": ["return", "discard", "propagate"] },
+        "mode": { "enum": ["return", "discard", "propagate", "match"] },
         "resultType": { "type": "string", "minLength": 1 },
         "successType": { "type": "string", "minLength": 1 },
         "errorType": { "type": "string", "minLength": 1 },

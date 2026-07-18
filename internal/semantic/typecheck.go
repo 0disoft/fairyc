@@ -211,6 +211,9 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 		if symbol := c.analyzer.resolved[expression]; symbol != nil {
 			result.Symbol = symbol.id
 			actual = symbol.typ
+		} else if isResultVariantPath(expression.Text) {
+			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "Result variant used without construction or pattern")
+			actual = hir.TypeInvalid
 		} else {
 			actual = hir.TypeInvalid
 		}
@@ -227,9 +230,11 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 	case syntax.KindBinary:
 		actual = c.checkBinary(expression, result)
 	case syntax.KindCall:
-		actual = c.checkCall(expression, result)
+		actual = c.checkCall(expression, result, expected)
 	case syntax.KindIf:
 		actual = c.checkIf(expression, result, expected)
+	case syntax.KindMatch:
+		actual = c.checkMatch(expression, result, expected)
 	case syntax.KindWhile:
 		actual = c.checkWhile(expression, result)
 	case syntax.KindRecord:
@@ -425,11 +430,16 @@ func (c *typeChecker) checkBinary(expression *ast.Expression, result *hir.Expres
 	}
 }
 
-func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expression) hir.Type {
+func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expression, expected hir.Type) hir.Type {
 	if len(expression.Children) == 0 {
 		return hir.TypeInvalid
 	}
 	calleeExpression := expression.Children[0]
+	if calleeExpression != nil && calleeExpression.Kind == syntax.KindPath {
+		if variant, ok := resultVariantPath(calleeExpression.Text); ok {
+			return c.checkResultConstructor(expression, result, expected, variant)
+		}
+	}
 	if isRegionPlaceCall(expression) {
 		return c.checkRegionPlace(expression, result)
 	}
@@ -476,6 +486,99 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 		callee.resultError = errorSpan
 	}
 	return callee.typ
+}
+
+func (c *typeChecker) checkResultConstructor(expression *ast.Expression, result *hir.Expression, expected hir.Type, variant string) hir.Type {
+	success, failure, ok := hir.ResultElements(expected)
+	if !ok {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "Result constructor without contextual Result type")
+		return hir.TypeInvalid
+	}
+	if len(expression.Children) != 2 {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "Result constructor arity other than one")
+		return hir.TypeInvalid
+	}
+	payloadType := success
+	if variant == resultVariantErr {
+		payloadType = failure
+	}
+	if c.analyzer.isResource(payloadType) {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "resource-bearing Result construction")
+		return hir.TypeInvalid
+	}
+	payload, actual := c.checkExpression(expression.Children[1], payloadType)
+	c.requireType("E1006", span(c.module.file.Path, expression.Children[1].Span), actual, payloadType, span(c.module.file.Path, expression.Span))
+	result.Kind = "result-variant"
+	result.Variant = variant
+	result.Children = appendExpression(result.Children, payload)
+	return expected
+}
+
+func (c *typeChecker) checkMatch(expression *ast.Expression, result *hir.Expression, expected hir.Type) hir.Type {
+	if len(expression.Children) != 3 {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "Result match without exactly two arms")
+		return hir.TypeInvalid
+	}
+	scrutinee, scrutineeType := c.checkExpression(expression.Children[0], hir.TypeInvalid)
+	result.Children = appendExpression(result.Children, scrutinee)
+	success, failure, ok := hir.ResultElements(scrutineeType)
+	if !ok {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Children[0].Span, "match scrutinee that is not Result")
+		return hir.TypeInvalid
+	}
+	seen := make(map[string]struct{}, 2)
+	actual := expected
+	for _, armExpression := range expression.Children[1:] {
+		if armExpression == nil || armExpression.Kind != syntax.KindPattern || armExpression.Text != "arm" || len(armExpression.Children) != 2 {
+			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "malformed Result match arm")
+			return hir.TypeInvalid
+		}
+		pattern := armExpression.Children[0]
+		if pattern == nil || pattern.Kind != syntax.KindPattern || len(pattern.Children) != 2 {
+			c.analyzer.addUnsupported(c.module.file.Path, armExpression.Span, "Result arm without one payload binding")
+			return hir.TypeInvalid
+		}
+		variant, variantOK := resultVariantPath(pattern.Text)
+		if !variantOK {
+			c.analyzer.addUnsupported(c.module.file.Path, pattern.Span, "pattern that is not a qualified Result variant")
+			return hir.TypeInvalid
+		}
+		if _, duplicate := seen[variant]; duplicate {
+			c.analyzer.addUnsupported(c.module.file.Path, pattern.Span, "duplicate Result match variant")
+			return hir.TypeInvalid
+		}
+		seen[variant] = struct{}{}
+		bindingExpression := pattern.Children[1]
+		binding := c.analyzer.resolved[bindingExpression]
+		if binding == nil {
+			return hir.TypeInvalid
+		}
+		bindingType := success
+		if variant == resultVariantErr {
+			bindingType = failure
+		}
+		if c.analyzer.isResource(bindingType) {
+			c.analyzer.addUnsupported(c.module.file.Path, pattern.Span, "resource-bearing Result match")
+			return hir.TypeInvalid
+		}
+		binding.typ = bindingType
+		bindingSpan := span(c.module.file.Path, bindingExpression.Span)
+		c.hir.Locals = append(c.hir.Locals, hir.Local{Symbol: binding.id, Name: binding.name, Type: bindingType, Span: bindingSpan})
+		c.addType(bindingSpan, bindingType)
+		armExpected := actual
+		body, bodyType := c.checkExpression(armExpression.Children[1], armExpected)
+		if actual == hir.TypeInvalid {
+			actual = bodyType
+		} else {
+			c.requireType("E1006", span(c.module.file.Path, armExpression.Children[1].Span), bodyType, actual, span(c.module.file.Path, expression.Span))
+		}
+		result.Arms = append(result.Arms, hir.MatchArm{Variant: variant, Binding: binding.id, BindingSpan: bindingSpan, Expression: *body})
+	}
+	if len(seen) != 2 {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "non-exhaustive Result match")
+		return hir.TypeInvalid
+	}
+	return actual
 }
 
 func (c *typeChecker) checkIf(expression *ast.Expression, result *hir.Expression, expected hir.Type) hir.Type {
