@@ -10,7 +10,7 @@ MIR is the only executable semantic contract consumed by backends. It records ev
 
 MIR v0 is a mutable-local control-flow graph rather than SSA. SSA conversion is a backend or optimization concern after the semantic form is verified.
 
-The current Go prototype implements the source-linked subset exercised by all five MIR v0 normalization fixtures: ordered calls, complete-root moves, explicit normal-exit cleanup, `Result` propagation branches, checked division traps, and non-unwinding successors. Verifier mutation seeds and the interpreter remain separate unfinished gates.
+The current Go prototype implements the source-linked subset exercised by all five MIR v0 normalization fixtures: ordered calls, complete-root moves, explicit normal-exit cleanup, `Result` propagation branches, checked division traps, and non-unwinding successors. The same verifier passes all eight named baselines and rejects all fifteen isolated v0 mutations with their single expected `Vxxxx` result. The interpreter remains a separate unfinished gate.
 
 ## Lowering pipeline
 

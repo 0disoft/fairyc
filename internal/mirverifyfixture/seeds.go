@@ -1,0 +1,188 @@
+package mirverifyfixture
+
+import (
+	"fmt"
+	"slices"
+
+	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/mir"
+)
+
+const (
+	valueSymbol hir.SymbolID = 1
+	tokenSymbol hir.SymbolID = 2
+)
+
+func constructSeed(id string) (mir.Program, error) {
+	var function mir.Function
+	switch id {
+	case "scalar-return":
+		function = scalarReturnSeed()
+	case "resource-return":
+		function = resourceReturnSeed()
+	case "borrow-return":
+		function = borrowReturnSeed()
+	case "plain-region":
+		function = plainRegionSeed()
+	case "checked-division":
+		function = checkedDivisionSeed()
+	case "normal-call":
+		function = normalCallSeed()
+	case "normalized-control":
+		function = normalizedControlSeed()
+	case "unsafe-operation":
+		function = unsafeOperationSeed()
+	default:
+		return mir.Program{}, fmt.Errorf("unknown seed %q", id)
+	}
+	return mir.Program{Functions: []mir.Function{function}}, nil
+}
+
+func scalarReturnSeed() mir.Function {
+	return mir.Function{
+		Name:         "seed::scalar-return",
+		Entry:        0,
+		ReturnEntity: "terminator:return",
+		Entities: []string{
+			"block:entry", "local:value", "operation:return-value-use", "statement:init-value", "terminator:return",
+		},
+		Blocks: []mir.Block{{
+			ID: 0, Entity: "block:entry",
+			Operations: []mir.Operation{
+				{Kind: mir.OperationInitialize, Entity: "statement:init-value", Symbol: valueSymbol},
+				{Kind: mir.OperationUse, Entity: "operation:return-value-use", Symbol: valueSymbol},
+			},
+			Terminator: mir.Terminator{Kind: mir.TerminatorReturn, Entity: "terminator:return", UnwindSuccessor: mir.NoBlock},
+		}},
+	}
+}
+
+func resourceReturnSeed() mir.Function {
+	return mir.Function{
+		Name:         "seed::resource-return",
+		Entry:        0,
+		ReturnEntity: "terminator:return",
+		Entities: []string{
+			"block:cleanup", "block:entry", "flag:token-live", "local:token", "place:token-field",
+			"statement:clear-token-flag", "statement:drop-token", "statement:init-token-flag", "terminator:return",
+		},
+		Resources: []mir.ResourceLocal{{Symbol: tokenSymbol, Type: hir.Type("seed::Token"), Parameter: true, Entity: "local:token"}},
+		DropFlags: []mir.DropFlag{{Entity: "flag:token-live", Symbol: tokenSymbol}},
+		Blocks: []mir.Block{
+			{
+				ID: 0, Entity: "block:entry",
+				Operations: []mir.Operation{{Kind: mir.OperationDropFlagInit, Entity: "statement:init-token-flag", Symbol: tokenSymbol, DropFlagEntity: "flag:token-live"}},
+				Terminator: mir.Terminator{Kind: mir.TerminatorGoto, Successors: []mir.BlockID{1}, UnwindSuccessor: mir.NoBlock},
+			},
+			{
+				ID: 1, Entity: "block:cleanup",
+				Operations: []mir.Operation{
+					{Kind: mir.OperationDropFlagClear, Entity: "statement:clear-token-flag", Symbol: tokenSymbol, DropFlagEntity: "flag:token-live"},
+					{Kind: mir.OperationDrop, Entity: "statement:drop-token", Symbol: tokenSymbol, DropFlagEntity: "flag:token-live"},
+				},
+				Terminator: mir.Terminator{Kind: mir.TerminatorReturn, Entity: "terminator:return", UnwindSuccessor: mir.NoBlock},
+			},
+		},
+	}
+}
+
+func borrowReturnSeed() mir.Function {
+	return mir.Function{
+		Name:         "seed::borrow-return",
+		Entry:        0,
+		ReturnEntity: "terminator:return",
+		Entities: []string{
+			"loan:param-a", "local:param-a", "local:param-b", "origin:param-a", "origin:param-b", "terminator:return",
+		},
+		Loans:         []mir.Loan{{Entity: "loan:param-a", OriginEntity: "origin:param-a"}},
+		ReturnOrigins: []mir.ReturnOrigin{{Entity: "origin:param-a", Returned: true}, {Entity: "origin:param-b"}},
+		Blocks: []mir.Block{{
+			ID: 0, Terminator: mir.Terminator{Kind: mir.TerminatorReturn, Entity: "terminator:return", UnwindSuccessor: mir.NoBlock},
+		}},
+	}
+}
+
+func plainRegionSeed() mir.Function {
+	return mir.Function{
+		Name:  "seed::plain-region",
+		Entry: 0,
+		Entities: []string{
+			"local:inert-value", "local:resource-value", "operation:place-inert", "region:scratch", "terminator:return",
+		},
+		RegionValues: []mir.RegionValue{{
+			Entity: "local:inert-value", OperationEntity: "operation:place-inert", RegionEntity: "region:scratch",
+		}},
+		Blocks: []mir.Block{{
+			ID: 0, Terminator: mir.Terminator{Kind: mir.TerminatorReturn, Entity: "terminator:return", UnwindSuccessor: mir.NoBlock},
+		}},
+	}
+}
+
+func checkedDivisionSeed() mir.Function {
+	return mir.Function{
+		Name:  "seed::checked-division",
+		Entry: 0,
+		Entities: []string{
+			"block:continuation", "block:trap", "operation:division", "operation:min-neg-one-check", "operation:zero-check", "terminator:trap",
+		},
+		Blocks: []mir.Block{
+			{
+				ID: 0, Entity: "block:continuation",
+				Operations: []mir.Operation{{
+					Kind: mir.OperationCheckedDivision, Entity: "operation:division",
+					TrapCategories: []string{"division-by-zero", "signed-division-overflow"},
+				}},
+				Terminator: mir.Terminator{Kind: mir.TerminatorGoto, Successors: []mir.BlockID{1}, UnwindSuccessor: mir.NoBlock},
+			},
+			{
+				ID: 1, Entity: "block:trap",
+				Terminator: mir.Terminator{Kind: mir.TerminatorTrap, Entity: "terminator:trap", UnwindSuccessor: mir.NoBlock},
+			},
+		},
+	}
+}
+
+func normalCallSeed() mir.Function {
+	return mir.Function{
+		Name:     "seed::normal-call",
+		Entry:    0,
+		Entities: []string{"block:continuation", "terminator:call"},
+		Blocks: []mir.Block{
+			{ID: 0, Terminator: mir.Terminator{Kind: mir.TerminatorCall, Entity: "terminator:call", Successors: []mir.BlockID{1}, UnwindSuccessor: mir.NoBlock}},
+			{ID: 1, Entity: "block:continuation", Terminator: mir.Terminator{Kind: mir.TerminatorReturn, UnwindSuccessor: mir.NoBlock}},
+		},
+	}
+}
+
+func normalizedControlSeed() mir.Function {
+	return mir.Function{
+		Name:         "seed::normalized-control",
+		Entry:        0,
+		ReturnEntity: "terminator:return",
+		Entities:     []string{"operation:result-switch", "terminator:return"},
+		Blocks: []mir.Block{{
+			ID:         0,
+			Operations: []mir.Operation{{Kind: mir.OperationResultSwitch, Entity: "operation:result-switch"}},
+			Terminator: mir.Terminator{Kind: mir.TerminatorReturn, Entity: "terminator:return", UnwindSuccessor: mir.NoBlock},
+		}},
+	}
+}
+
+func unsafeOperationSeed() mir.Function {
+	return mir.Function{
+		Name:     "seed::unsafe-operation",
+		Entry:    0,
+		Entities: []string{"scope:unsafe-block", "span:unsafe-source", "terminator:return", "unsafe:raw-address"},
+		UnsafeOperations: []mir.UnsafeOperation{{
+			Entity: "unsafe:raw-address", SourceSpanEntity: "span:unsafe-source", ScopeEntity: "scope:unsafe-block",
+		}},
+		Blocks: []mir.Block{{ID: 0, Terminator: mir.Terminator{Kind: mir.TerminatorReturn, Entity: "terminator:return", UnwindSuccessor: mir.NoBlock}}},
+	}
+}
+
+func seedEntities(program mir.Program) []string {
+	if len(program.Functions) != 1 {
+		return nil
+	}
+	return slices.Clone(program.Functions[0].Entities)
+}

@@ -23,6 +23,8 @@ For every case, the runner must:
 
 A seed-construction failure, baseline verifier failure, missing target, ignored mutation, more than one applied mutation, extra verifier code, or verifier crash is a harness failure. It cannot be counted as successful rejection.
 
+`internal/mirverifyfixture` implements this protocol for all eight seeds and fifteen mutations. It deep-clones each verified baseline before mutation and compares the complete verifier result rather than searching for an expected code inside a larger cascade.
+
 ## Seed families
 
 - `scalar-return`: initialized scalar return with one reachable terminated block;

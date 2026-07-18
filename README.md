@@ -23,7 +23,8 @@ Result runner executes all 6 v0 cases for must-use return/discard/propagation, e
 classification, non-Result `?`, and propagated error compatibility. The MIR runner executes all
 5 v0 normalization cases through mutable-local block lowering and the MIR verifier, covering
 left-to-right call evaluation, complete-root moves, normal-exit cleanup order, `Result` error
-cleanup, and non-unwinding trap paths. An unstable
+cleanup, and non-unwinding trap paths. The verifier mutation runner constructs all 8 named
+baselines and proves all 15 isolated `V1001` through `V1701` rejection recipes. An unstable
 `fairyc experimental` CLI can inspect, syntax-check, or semantic-check one source-root-relative
 `.fy` file or explicit module set. There is no stable CLI, tagged-resource Flow, MIR interpreter, backend, standard
 library, runtime, package manager, supported target, or stable language revision yet.

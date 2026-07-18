@@ -44,6 +44,13 @@ type Function struct {
 	Entry              BlockID
 	Blocks             []Block
 	Resources          []ResourceLocal
+	DropFlags          []DropFlag
+	Loans              []Loan
+	ReturnOrigins      []ReturnOrigin
+	RegionValues       []RegionValue
+	UnsafeOperations   []UnsafeOperation
+	ReturnEntity       string
+	Entities           []string
 	OrderedEvaluations []OrderedEvaluationFact
 	Calls              []CallFact
 	Moves              []MoveFact
@@ -59,11 +66,48 @@ type ResourceLocal struct {
 	Type      hir.Type
 	Binding   hir.Span
 	Parameter bool
+	Entity    string
+}
+
+// DropFlag is one compiler-owned conditional cleanup flag.
+type DropFlag struct {
+	Entity string
+	Symbol hir.SymbolID
+}
+
+// Loan records the verified origin extent of one safe borrow.
+type Loan struct {
+	Entity         string
+	OriginEntity   string
+	OutlivesOrigin bool
+}
+
+// ReturnOrigin is one candidate origin for a safe-borrow return.
+type ReturnOrigin struct {
+	Entity   string
+	Returned bool
+}
+
+// RegionValue records one value placed in a plain lexical region.
+type RegionValue struct {
+	Entity          string
+	OperationEntity string
+	RegionEntity    string
+	Escapes         bool
+	NeedsDrop       bool
+}
+
+// UnsafeOperation records the provenance required for an unsafe instruction.
+type UnsafeOperation struct {
+	Entity           string
+	SourceSpanEntity string
+	ScopeEntity      string
 }
 
 // Block is a straight-line operation sequence ending in exactly one terminator.
 type Block struct {
 	ID         BlockID
+	Entity     string
 	Operations []Operation
 	Terminator Terminator
 }
@@ -77,14 +121,20 @@ const (
 	OperationDrop            OperationKind = "drop"
 	OperationCheckedDivision OperationKind = "checked-division"
 	OperationResultSwitch    OperationKind = "result-switch"
+	OperationUse             OperationKind = "use"
+	OperationDropFlagInit    OperationKind = "drop-flag-init"
+	OperationDropFlagClear   OperationKind = "drop-flag-clear"
 )
 
 // Operation carries explicit ownership, trap, and normalization information.
 type Operation struct {
 	Kind             OperationKind
+	Entity           string
 	Span             hir.Span
 	Symbol           hir.SymbolID
 	Destination      string
+	ProjectionEntity string
+	DropFlagEntity   string
 	TrapCategories   []string
 	FlagClearedFirst bool
 	SourceForm       string
@@ -104,6 +154,7 @@ const (
 // Terminator ends one block. Calls never have an unwind successor in Stage 0.
 type Terminator struct {
 	Kind            TerminatorKind
+	Entity          string
 	Span            hir.Span
 	Successors      []BlockID
 	UnwindSuccessor BlockID

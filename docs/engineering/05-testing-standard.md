@@ -32,8 +32,10 @@ cases in `spec/fixtures/result/manifest-v0.json`, comparing handling modes, cano
 single-evaluation facts, and complete `E41xx` diagnostics. `internal/mirfixture` executes all 5
 cases in `spec/fixtures/mir/manifest-v0.json` after Flow, mutable-local MIR lowering, and MIR
 verification, comparing source-linked evaluation, call, move, cleanup, Result-branch, trap, and
-eliminated-form facts. MIR-verifier mutation, resolved-package-graph, interpreter, backend, ABI,
-runtime, and Atlas runners do not exist yet; their fixtures remain future evidence requirements.
+eliminated-form facts. `internal/mirverifyfixture` constructs all 8 named verifier seeds, requires
+each baseline to pass, clones it, applies exactly one typed mutation, and proves all 15 cases return
+the complete expected one-code result. Resolved-package-graph, interpreter, backend, ABI, runtime,
+and Atlas runners do not exist yet; their fixtures remain future evidence requirements.
 
 ## Oracle order
 
@@ -59,7 +61,7 @@ runtime, and Atlas runners do not exist yet; their fixtures remain future eviden
 | MIR normalization | `spec/fixtures/mir/` currently proves all 5 v0 cases through the Go MIR runner: source-linked evaluation order, call successors, ownership transfer, cleanup order, Result branching, trap paths, and eliminated source forms; graph identity remains excluded |
 | Resolved package graph | `spec/fixtures/package/` proves instance equality, feature splits, direct visibility, module isolation, ambiguity, transitive hiding, and explicit standard-library injection without choosing public package-manager syntax |
 | Built-in tagged resources | `Ok`, `Err`, `Some`, discard, match, propagation, early return, and nested active-payload drop traces |
-| MIR verifier mutation | `spec/fixtures/mir-verifier/` supplies a verified named seed and one isolated mutation for every current `Vxxxx` invariant without serializing arbitrary MIR |
+| MIR verifier mutation | `spec/fixtures/mir-verifier/` currently proves all 8 named baselines and 15 isolated mutation cases through the Go verifier runner without serializing arbitrary MIR |
 | MIR interpreter run and trap | Scalar results, branches, moves, drop traces, region reset, and trap categories |
 | Drop elaboration | Partial construction, reassignment, early exits, loops, and cleanup-suffix merging |
 | C differential | Interpreter parity for output, status, trap category, and drop trace across declared compilers and profiles |
