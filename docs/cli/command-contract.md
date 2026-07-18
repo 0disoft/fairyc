@@ -8,13 +8,14 @@ This document owns planned `fairyc` command semantics. It does not claim that a 
 
 ## Implemented experimental compiler surface
 
-The current Go prototype implements six deliberately unstable developer commands:
+The current Go prototype implements seven deliberately unstable developer commands:
 
 | Command | Purpose | Output |
 | --- | --- | --- |
 | `fairyc experimental parse <file.fy>` | Parse one source-root-relative file and verify lossless syntax plus error-free AST lowering | `fairyc.experimental.parse/v0` JSON on stdout, defined by `spec/cli/experimental-parse-v0.schema.json` |
 | `fairyc experimental check-syntax <file.fy>` | Check lexing, parsing, recovery, module identity, lossless reconstruction, and error-free AST lowering | Success line on stdout or human diagnostics on stderr |
 | `fairyc experimental check-semantics <file.fy> [<file.fy>...]` | Resolve names, type-check, and analyze local safe-borrow, whole-resource, Region, and complete Stage 0 Result must-use Flow for an explicit module set in the implemented subset | Typed-HIR module and function counts on stdout, human source diagnostics on stderr, or an explicit unsupported-subset error |
+| `fairyc experimental target-spec x86_64-linux-gnu` | Inspect the first host-independent target description without resolving a local toolchain | Deterministic `fairyc.target-spec/v0` JSON on stdout, defined by `spec/cli/experimental-target-spec-v0.schema.json` |
 | `fairyc experimental emit-c <file.fy>` | Lower one scalar-payload program through verified MIR and emit the provisional constrained C transport without invoking a toolchain | Exactly one deterministic ISO C11 translation unit on stdout, source diagnostics or capability errors on stderr |
 | `fairyc experimental build <file.fy> --cc <clang\|gcc> --profile <low\|optimized> --output <build/path>` | Compile and link one verified scalar-payload program for the host `x86_64-linux-gnu` profile with an explicit C compiler, optimization profile, and ignored output path | A no-overwrite executable below `build/` plus one relative-path receipt, or source, capability, toolchain, link, or artifact diagnostics |
 | `fairyc experimental run <file.fy>` | Run one verified-MIR program in the scalar, tagged, whole-resource, and implemented Region subset whose selected module declares `main() -> i32` | `result: <i32>` on stdout, a canonical trap category on stderr, source diagnostics, or an explicit unsupported-subset error |
@@ -29,6 +30,13 @@ half-open byte spans, child indexes, and structured diagnostics. It excludes sou
 text, cooked literal values, and absolute local paths. When bounded loading detects more bytes than
 the implementation limit, `truncated` is true and `byteLength` is a lower bound rather than a
 claimed full-file size.
+
+`experimental target-spec` accepts exactly one known target ID and performs no source loading,
+directory scan, executable lookup, SDK discovery, sysroot probing, or network request. Its JSON
+contains target-semantic identity, layouts and classifier identities plus explicit maturity
+evidence. It contains no local tool path. Unknown, missing, or extra IDs are invocation failures
+and emit no partial JSON. The reported scalar C emission subset does not make the target
+`emittable`, `conformant`, or `supported`.
 
 `check-semantics` never scans directories or follows an import to discover another source file. Each
 imported module must be included explicitly. Duplicate paths and input sets beyond the prototype

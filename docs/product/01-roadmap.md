@@ -65,6 +65,11 @@ host has no eligible Linux toolchain, and no hosted run receipt has been observe
 configured lane rather than native conformance evidence. A shared bounded C driver and embedded
 scalar runtime now serve both that lane and the experimental single-file build command. This proves
 the product wiring exists, not that runtime, ABI, or target-conformance gates pass.
+The first executable `fairyc.target-spec/v0` now centralizes host-independent LP64 scalar and
+pointer layouts, SysV AMD64 calling and stack identities, ELF/DWARF identities, C-layout feature
+vocabulary, and explicit missing maturity evidence. The C backend and driver share its typed target
+ID, while local toolchain paths remain outside the target contract. Aggregate layout execution,
+layout fixtures, bidirectional ABI fixtures, and hosted evidence remain incomplete.
 
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.

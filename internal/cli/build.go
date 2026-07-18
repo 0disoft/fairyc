@@ -17,6 +17,7 @@ import (
 	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/cruntime"
+	"github.com/0disoft/fairyc/internal/target"
 )
 
 const (
@@ -53,7 +54,7 @@ func runBuild(arguments []string, sourceRoot string, stdout, stderr io.Writer) i
 	if err != nil {
 		return internalError(stderr)
 	}
-	toolchain, err := cdriver.Resolve(options.compilerName)
+	toolchain, err := cdriver.Resolve(target.X8664LinuxGNU, options.compilerName)
 	if err != nil {
 		return buildFailure(stderr, err)
 	}
@@ -68,7 +69,7 @@ func runBuild(arguments []string, sourceRoot string, stdout, stderr io.Writer) i
 		stdout,
 		"built: %s (%s, %s, %s)\n",
 		options.output,
-		cbackend.TargetX8664LinuxGNU,
+		target.X8664LinuxGNU,
 		artifact.Toolchain.Name,
 		artifact.Profile.Name,
 	); err != nil {

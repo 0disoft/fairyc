@@ -41,6 +41,9 @@ automation. They are not the stable exit-code taxonomy:
 `experimental check-syntax` writes human diagnostics to stderr and does not emit a machine result.
 `experimental check-semantics` writes one success line with typed-HIR module and function counts for
 a multi-file input, semantic diagnostics on stderr, or an explicit unsupported-subset message on stderr.
+`experimental target-spec` writes one deterministic `fairyc.target-spec/v0` JSON document, defined
+by `spec/cli/experimental-target-spec-v0.schema.json`, to stdout. Missing, extra, or unknown target
+IDs produce code `2`, no JSON, and a bounded invocation diagnostic on stderr.
 `experimental emit-c` writes exactly one deterministic ISO C11 translation unit to stdout on
 success. It adds no banner, JSON envelope, ANSI escape, absolute path, or source text. Source
 diagnostics and capability failures produce no partial C output.
@@ -54,9 +57,10 @@ provisional code `5` on a language trap. Its bounded `step-limit` is a capabilit
 uses ANSI escapes. Human positions are one-based line and byte-column values backed
 by the diagnostic's zero-based half-open byte span.
 
-The JSON schema intentionally excludes source text, token text, cooked literal values, and absolute
-paths. A report can therefore identify structure and spans without becoming a second copy of the
-source file. Stable `--json` behavior remains UNDECIDED.
+The parse JSON schema intentionally excludes source text, token text, cooked literal values, and
+absolute paths. The target JSON schema excludes local compiler, SDK, and sysroot paths. These
+reports can therefore describe structure or target semantics without becoming a second source copy
+or a host inventory. Stable `--json` behavior remains UNDECIDED.
 
 ## Review Blockers
 

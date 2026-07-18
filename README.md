@@ -43,13 +43,18 @@ fixtures, covering calls and control flow, bitwise operations, checked division 
 trapping, scalar `Option` Some and None, and scalar `Result` propagation success and failure. This
 lane only produces C text; no C compiler, linker, native executable, complete runtime, target
 conformance, or self-hosting is implied.
+The first executable `fairyc.target-spec/v0` description now owns the host-independent
+`x86_64-linux-gnu` identity, LP64 scalar and pointer layouts, SysV AMD64 calling and stack facts,
+ELF/DWARF identities, and fail-closed maturity evidence. It deliberately contains no local
+compiler, SDK, or sysroot path and still reports `emittable`, `conformant`, and `supported` as
+false.
 A separate fail-closed Linux/amd64 command is now present to compile those cases with Clang and GCC
 at `-O0` and `-O2`, link the embedded scalar trap runtime, and compare process outcomes. It cannot run on
 this Windows host because no WSL distribution or C compiler is installed, and its hosted CI result
 has not yet been observed. The target therefore remains unsupported.
 An unstable `fairyc experimental` CLI can inspect syntax, syntax-check, semantic-check, emit the
 scalar-payload C11 translation unit, build that subset into a Linux executable on an eligible host,
-or interpret one source-root-relative `.fy` file, while semantic checking also
+inspect the declared target specification, or interpret one source-root-relative `.fy` file, while semantic checking also
 accepts an explicit module set. There is no stable CLI, user drop-body execution, native execution
 command, complete runtime, standard library, package manager, supported target, or stable language
 revision yet.
@@ -65,6 +70,7 @@ go run ./cmd/fairyc experimental check-semantics examples/semantic/main.fy examp
 go run ./cmd/fairyc experimental check-semantics examples/resources/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/regions/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/results/main.fy
+go run ./cmd/fairyc experimental target-spec x86_64-linux-gnu
 go run ./cmd/fairyc experimental emit-c examples/c/main.fy
 go run ./cmd/fairyc experimental emit-c examples/c/tagged.fy
 go run ./cmd/fairyc experimental build examples/c/tagged.fy --cc clang --profile optimized --output build/fairyc-example
@@ -87,6 +93,10 @@ checked addition, subtraction, multiplication, negation, and signed right shift,
 trap. The official
 `fairyc check` command remains unavailable until effects and the
 remaining semantic groups exist.
+
+`experimental target-spec` accepts exactly the known `x86_64-linux-gnu` ID and writes deterministic
+`fairyc.target-spec/v0` JSON. The result separates target semantics from local toolchain discovery
+and lists the missing evidence that keeps all three target maturity claims false.
 
 `experimental emit-c` accepts the same single-file entry shape and prints the verified scalar-payload
 ISO C11 translation unit directly to stdout. It does not write a `.c` file or invoke a native
@@ -123,6 +133,8 @@ compilation.
 - Constrained C emission fixtures: `spec/fixtures/c-emission/manifest-v0.json`
 - Shared constrained-C driver and embedded scalar runtime: `internal/cdriver/`, `internal/cruntime/`
 - Linux scalar C differential runner: `internal/cbackendnative/`
+- Executable target description: `internal/target/`
+- Experimental target JSON schema: `spec/cli/experimental-target-spec-v0.schema.json`
 - Resolved package graph fixtures: `spec/fixtures/package/manifest-v0.json`
 - MIR and C backend contracts: `docs/mir/`
 - Package identity and visibility: `docs/package/package-graph-v0.md`

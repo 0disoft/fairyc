@@ -40,7 +40,7 @@ Cleanup chains are created directly per normal exiting edge, verified, then iden
 
 ```text
 semantic oracle:       verified MIR -> MIR interpreter
-Stage 0 product path:  verified MIR -> constrained C -> target ToolchainSpec -> object -> C-driver link
+Stage 0 product path:  verified MIR -> constrained C -> TargetSpec + resolved ToolchainSpec -> object -> C-driver link
 later fast path:       verified MIR -> measured fast backend -> object -> linker
 later optimized path:  verified/optimized MIR -> LLVM IR -> object -> linker
 ```
@@ -48,6 +48,12 @@ later optimized path:  verified/optimized MIR -> LLVM IR -> object -> linker
 Only the interpreter and `x86_64-linux-gnu` C path are committed before the first hosted executable slice. Later target and backend paths are separate capability decisions.
 
 Generated C uses a declared dialect, compiler family, target profile, statements, ordered temporaries, and helpers to preserve evaluation order, overflow, division, shifts, bit casts, aliasing, and trap semantics. It is a constrained reference transport, not universally portable C or the Fairy C semantic model.
+
+`internal/target` is the host-independent source for the first target ID, scalar and pointer
+layouts, SysV AMD64 classifier identities, stack facts, ELF/DWARF contracts, and maturity evidence.
+The C driver adds local compiler, libc, and path resolution only after selecting that target. A
+target can therefore be inspected on Windows without borrowing Windows layout or claiming that the
+Linux toolchain is locally executable.
 
 The implemented first slice emits deterministic ISO C11 for verified scalar-payload MIR, including
 private `Option<i32>` and `Result<i32, i32>` transport. A separate

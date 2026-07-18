@@ -11,6 +11,11 @@ Generated C is a reference and differential-test transport for a declared `Targe
 
 The first planned profile is `x86_64-linux-gnu` compiled and linked through declared Clang and GCC drivers. Emission alone is not conformance or support evidence.
 
+The profile ID now comes from the validated `fairyc.target-spec/v0` object in `internal/target`.
+The backend does not read Go `unsafe.Sizeof`, local C compiler probes, or SDK paths to decide target
+semantics. The target object reports the existing scalar emission subset while leaving all three
+maturity claims false.
+
 ## Current scalar-payload emission slice
 
 `internal/cbackend` currently emits one deterministic ISO C11 translation unit from verified MIR
@@ -46,7 +51,8 @@ The backend cannot add C or LLVM overflow, exactness, alignment, or alias promis
 
 ## Representation and access
 
-- Target descriptions, not host `sizeof(long)` or Go layout, determine widths and alignment.
+- The `fairyc.target-spec/v0` description, not host `sizeof(long)` or Go layout, determines scalar,
+  pointer, stack, classifier, and object-format facts.
 - Bit reinterpretation and potentially unaligned access use a `memcpy`-style transport rather than incompatible lvalue access.
 - `Option<i32>` and `Result<i32, i32>` currently use distinct private structs with a `uint32_t` tag
   and `int32_t` payload. Generated C extracts payload only in the selected variant block and traps

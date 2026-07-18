@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0027-experimental-c-emission-cli.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0030-executable-x86-64-linux-gnu-target-spec.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -171,6 +171,9 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - Semantic checking proceeds through resolver, type, and Flow phases. Fixtures compare stable source coordinates and canonical facts rather than build-local AST or HIR dumps.
 - Typed HIR lowers through an analysis-only Flow CFG into mutable-local, backend-independent MIR.
 - The C backend is the only committed Stage 0 product backend and emits a constrained target/toolchain profile rather than universally portable C.
+- `internal/target` owns the executable `fairyc.target-spec/v0` description for the first target.
+  It records host-independent LP64, scalar, pointer, SysV AMD64, ELF, unwind, debug, and C-layout
+  feature facts while excluding every local compiler, SDK, and sysroot path.
 - A small MIR interpreter is the semantic oracle before any second native backend.
 - Its fixture-only output hooks require explicit manifest bindings, capture bytes in memory under a
   shared limit, and never authorize source names, the CLI, or host streams.
@@ -181,6 +184,9 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - A separate Linux/amd64 command requires glibc, Clang, and GCC and is configured to compare the
   current scalar-payload cases at low and optimized profiles. No hosted success receipt or broader target
   conformance follows from the command's presence.
+- The experimental target-inspection command emits that target description without probing the
+  host. It reports the scalar C emission subset separately while keeping `emittable`, `conformant`,
+  and `supported` false and listing the evidence still missing.
 - The experimental single-file build command uses the same bounded C driver and embedded scalar
   runtime to produce a no-overwrite executable below `build/` on an eligible host. This artifact
   path does not expand the scalar-payload backend subset, establish stable build syntax, or change target

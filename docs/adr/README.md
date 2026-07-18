@@ -39,6 +39,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0027-experimental-c-emission-cli.md`: deterministic raw C11 inspection from the canonical unstable CLI without file or toolchain side effects.
 - `0028-experimental-linux-scalar-build-cli.md`: explicit Linux scalar-payload executable builds through the shared C driver and embedded runtime.
 - `0029-scalar-option-result-c-transport.md`: private ISO C11 structs and typed MIR flow for `Option<i32>` and `Result<i32, i32>`.
+- `0030-executable-x86-64-linux-gnu-target-spec.md`: host-independent target facts, fail-closed maturity evidence, and deterministic experimental inspection.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

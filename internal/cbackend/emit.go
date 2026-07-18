@@ -9,24 +9,23 @@ import (
 
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/mir"
+	"github.com/0disoft/fairyc/internal/target"
 )
 
 const (
-	// TargetX8664LinuxGNU is the first planned Stage 0 C transport target.
-	TargetX8664LinuxGNU = "x86_64-linux-gnu"
 	// DialectC11 identifies the extension-free ISO C11 emission subset.
 	DialectC11 = "c11"
 )
 
 // Profile names the target and C dialect accepted by one emission run.
 type Profile struct {
-	Target  string
+	Target  target.ID
 	Dialect string
 }
 
 // Stage0ScalarProfile returns the only currently implemented C emission profile.
 func Stage0ScalarProfile() Profile {
-	return Profile{Target: TargetX8664LinuxGNU, Dialect: DialectC11}
+	return Profile{Target: target.X8664LinuxGNU, Dialect: DialectC11}
 }
 
 // Unit is one deterministic generated-C translation unit plus bounded stage facts.
@@ -143,7 +142,7 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	}
 	slices.Sort(features)
 	return Unit{
-		Target: profile.Target, Dialect: profile.Dialect, Entry: entry,
+		Target: string(profile.Target), Dialect: profile.Dialect, Entry: entry,
 		Functions: names, Features: features, Source: output.String(),
 	}, nil
 }
@@ -621,7 +620,7 @@ func (e *emitter) recordTrapCategories(function string, categories []string) err
 }
 
 func (e *emitter) emitPreamble(output *strings.Builder) {
-	output.WriteString("/* fairyc constrained C transport: x86_64-linux-gnu, ISO C11 */\n")
+	fmt.Fprintf(output, "/* fairyc constrained C transport: %s, ISO C11 */\n", target.X8664LinuxGNU)
 	output.WriteString("#include <stdint.h>\n")
 	if e.needsBitcast {
 		output.WriteString("#include <string.h>\n")

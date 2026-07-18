@@ -6,6 +6,8 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/0disoft/fairyc/internal/target"
 )
 
 func TestProfilesAreClosedAndDistinct(t *testing.T) {
@@ -54,13 +56,16 @@ func TestReadArtifactEnforcesRegularBoundedNonEmptyImage(t *testing.T) {
 }
 
 func TestResolveRejectsUnknownCompilerBeforeLookup(t *testing.T) {
-	if _, err := Resolve("arbitrary-compiler"); err == nil || !strings.Contains(err.Error(), "unsupported C compiler") {
+	if _, err := Resolve(target.X8664LinuxGNU, "arbitrary-compiler"); err == nil || !strings.Contains(err.Error(), "unsupported C compiler") {
 		t.Fatalf("Resolve(arbitrary) error = %v", err)
 	}
 	if runtime.GOOS != "linux" || runtime.GOARCH != "amd64" {
-		if _, err := Resolve("clang"); err == nil || !strings.Contains(err.Error(), "requires linux/amd64") {
+		if _, err := Resolve(target.X8664LinuxGNU, "clang"); err == nil || !strings.Contains(err.Error(), "requires linux/amd64") {
 			t.Fatalf("Resolve(clang) error = %v", err)
 		}
+	}
+	if _, err := Resolve("unknown-target", "clang"); err == nil || !strings.Contains(err.Error(), "unsupported C target") {
+		t.Fatalf("Resolve(unknown target) error = %v", err)
 	}
 }
 
@@ -68,7 +73,7 @@ func TestBuildRejectsIneligibleHost(t *testing.T) {
 	if runtime.GOOS == "linux" && runtime.GOARCH == "amd64" {
 		t.Skip("eligible host build execution belongs to the native differential command")
 	}
-	_, err := Build(Toolchain{Name: "clang", Path: "clang"}, LowProfile, "unit", "runtime")
+	_, err := Build(Toolchain{Target: target.X8664LinuxGNU, Name: "clang", Path: "clang"}, LowProfile, "unit", "runtime")
 	if err == nil || !strings.Contains(err.Error(), "requires linux/amd64") {
 		t.Fatalf("Build() error = %v", err)
 	}

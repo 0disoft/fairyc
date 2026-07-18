@@ -13,6 +13,7 @@ import (
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/source"
+	"github.com/0disoft/fairyc/internal/target"
 )
 
 func TestEmitScalarControlUnit(t *testing.T) {
@@ -26,7 +27,7 @@ func TestEmitScalarControlUnit(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Emit() error = %v", err)
 	}
-	if unit.Target != cbackend.TargetX8664LinuxGNU || unit.Dialect != cbackend.DialectC11 || unit.Entry != "main::main" {
+	if unit.Target != string(target.X8664LinuxGNU) || unit.Dialect != cbackend.DialectC11 || unit.Entry != "main::main" {
 		t.Fatalf("Emit() identity = %+v", unit)
 	}
 	if !slices.Equal(unit.Functions, []string{"main::add", "main::main"}) {

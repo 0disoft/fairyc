@@ -33,6 +33,7 @@ Usage:
   fairyc experimental parse <file.fy>
   fairyc experimental check-syntax <file.fy>
   fairyc experimental check-semantics <file.fy> [<file.fy>...]
+  fairyc experimental target-spec <target-id>
   fairyc experimental emit-c <file.fy>
   fairyc experimental build <file.fy> --cc <clang|gcc> --profile <low|optimized> --output <build/path>
   fairyc experimental run <file.fy>
@@ -94,6 +95,8 @@ func runExperimental(args []string, sourceRoot string, stdout, stderr io.Writer)
 			return invocationError(stderr, "experimental command \"run\" expects exactly one source file")
 		}
 		return runInterpreter(args[1], sourceRoot, stdout, stderr)
+	case "target-spec":
+		return runTargetSpec(args[1:], stdout, stderr)
 	case "emit-c":
 		if len(args) != 2 {
 			return invocationError(stderr, "experimental command \"emit-c\" expects exactly one source file")

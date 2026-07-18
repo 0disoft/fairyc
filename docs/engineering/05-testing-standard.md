@@ -15,6 +15,9 @@ bounded file reads, source-root escape rejection, output failure, clean syntax c
 success, semantic diagnostics, unsupported-subset rejection, closed native-build options,
 cross-platform artifact-path rejection, no-overwrite promotion, symbolic-link escape rejection,
 and ineligible-host failure before artifact creation.
+Target-description tests separately cover structural validation, power-of-two layouts, closed and
+sorted scalar and feature sets, immutable lookup copies, unknown-target rejection, deterministic
+host-independent JSON, false maturity claims, and top-level JSON-schema synchronization.
 
 Experimental semantic CLI coverage also verifies explicit multi-file module sets, input-order
 determinism, cross-file visibility diagnostics, duplicate rejection, bounded file counts, and a
@@ -81,6 +84,7 @@ evidence requirements.
 | Drop elaboration | Partial construction and cleanup-suffix merging; loop `break` and `continue` are fixture-backed |
 | C emission | `spec/fixtures/c-emission/` currently proves 8 verified scalar-payload source-to-C11 cases, including private `Option<i32>` and `Result<i32, i32>` transport, deterministic target/dialect/function/feature metadata, LF-only path-clean output, and repeated byte identity; it does not prove C syntax acceptance or native behavior |
 | C differential | The configured Linux scalar-payload runner covers all 8 C-emission cases across Clang/GCC and low/optimized profiles for 32 process-status comparisons, then exercises the actual experimental build CLI with both scalar tag families under all 4 compiler/profile pairs; hosted execution is not yet observed, and output, wider returns, drop traces, sanitizers, public layout, ABI, and the complete product runtime remain deferred |
+| Target description | `internal/target` proves the `fairyc.target-spec/v0` structural invariants, canonical x86-64 Linux GNU facts, immutable lookup, absent host paths, and fail-closed maturity evidence; `internal/cli` proves deterministic schema-shaped inspection and unknown-ID rejection, but no layout or ABI probe runs yet |
 | C safety | Overflow, division, shifts, evaluation order, aliasing, alignment, inactive payload, and sanitizer-assisted checks |
 | ABI | Target layout, calls, callbacks, raw bindings, and boundary shims for candidate target profiles |
 | Runtime and stdlib | Zero-size normalization, allocation failure, reserve rollback, UTF-8 invariants, partial I/O, Linux close consumption, and retained-pointer wrappers |

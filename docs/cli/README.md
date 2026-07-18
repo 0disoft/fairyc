@@ -22,6 +22,8 @@ Only `check`, a minimal `build`, compiler inspection, and semantic test executio
 The Go frontend currently exposes `fairyc experimental parse <file.fy>`,
 `fairyc experimental check-syntax <file.fy>`, and
 `fairyc experimental check-semantics <file.fy> [<file.fy>...]`. The compiler prototype also exposes
+`fairyc experimental target-spec x86_64-linux-gnu` for deterministic host-independent target
+inspection,
 `fairyc experimental emit-c <file.fy>` for deterministic scalar-payload C11 inspection and
 `fairyc experimental build <file.fy> --cc <clang|gcc> --profile <low|optimized> --output <build/path>`
 for an explicit host-Linux scalar-payload executable, and
@@ -50,6 +52,9 @@ glibc; accepts only Clang or GCC and the closed `low` or `optimized` profiles; a
 executable only under the source root's ignored `build/` directory. It neither overwrites an
 existing path nor implements resources, nested or resource-bearing tags, the broader interpreter
 subset, native execution, package builds, cross-compilation, installation, or a supported target.
+`experimental target-spec` emits `fairyc.target-spec/v0` JSON without probing the host or exposing
+local tool paths. Its current scalar-emission subset is reported separately from the false
+`emittable`, `conformant`, and `supported` target states and their missing evidence.
 The interpreter fixture's in-memory byte hooks require manifest options that this CLI never accepts;
 declaring a similarly named Fairy C function does not grant output authority.
 Infinite execution is stopped by the bounded interpreter and reported as an unsupported-capability result rather than a language trap. In
@@ -59,7 +64,10 @@ Human developers can run the examples shown in the repository `README.md`. Agent
 the configured `fairyc_go_build`, `fairyc_go_vet`, and `fairyc_go_test` intents; the manual `go run`
 examples do not grant agent command authority.
 
-`targets` must distinguish `emittable`, `conformant`, and `supported`. The planned `x86_64-linux-gnu` profile cannot be reported as supported before its runtime, standard-library, ABI, toolchain, and clean-CI fixtures pass without skips.
+The future stable `targets` command must distinguish `emittable`, `conformant`, and `supported`.
+The experimental single-target JSON does not settle its stable list or filtering syntax. The
+planned `x86_64-linux-gnu` profile cannot be promoted before its runtime, standard-library, ABI,
+toolchain, and clean-CI fixtures pass without skips.
 
 ## Profile principle
 

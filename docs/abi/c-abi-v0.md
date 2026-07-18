@@ -68,9 +68,31 @@ Semantic target data includes target identity, architecture, OS and environment,
 
 It contains no local executable or SDK paths.
 
+`internal/target` now implements the first host-independent description under
+`fairyc.target-spec/v0`. For `x86_64-linux-gnu` it fixes little-endian LP64, eight-byte pointers and
+function pointers, the Stage 0 language and permitted C scalar size/alignment table, 16-byte SysV
+call alignment, the 128-byte red zone, SysV AMD64 aggregate and return-classifier identities,
+ELF64 symbols, DWARF CFI unwind, generated-C DWARF debugging, and the permitted `@repr(C)` feature
+vocabulary. The scalar tables are ordered by canonical type name and every alignment is validated
+as a nonzero power of two.
+
+These entries define target facts for later compiler stages. They do not claim that every listed
+source scalar, `c.*` name, aggregate form, or call class is accepted by the current semantic
+frontend or C backend.
+
+This executable description is target data, not conformance evidence. Its evidence block names the
+existing `scalar-payload-c11` subset, keeps `emittable`, `conformant`, and `supported` false, and
+lists the missing layout, bidirectional ABI, runtime, standard-library, hosted-Linux, toolchain
+baseline, and provisioning gates. `fairyc experimental target-spec x86_64-linux-gnu` exposes that
+same immutable data without probing the host.
+
 ## `ToolchainSpec`
 
 Toolchain data includes C dialect, compiler and linker driver identities, version fingerprint, sysroot, libc family and baseline, startup objects, default libraries, dynamic loader, sanitizer capabilities, required flags, and local capability resolution. Local installation paths are resolution results, not target semantics.
+
+The current constrained-C driver now binds each resolved Clang or GCC record to a known target ID
+before host or libc probing. It still has no frozen glibc or compiler-version baseline, so those
+requirements remain missing evidence rather than invented values in `TargetSpec`.
 
 ## Conformance fixtures
 

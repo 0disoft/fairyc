@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fairyc:target-spec:v0",
+  "title": "Fairy C target specification v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "architecture",
+    "operatingSystem",
+    "environment",
+    "endianness",
+    "dataModel",
+    "pointer",
+    "functionPointer",
+    "languageScalars",
+    "cScalars",
+    "stack",
+    "callingConvention",
+    "aggregateLayout",
+    "returnClassifier",
+    "objectFormat",
+    "symbolModel",
+    "unwindModel",
+    "debugContract",
+    "reprCFeatures",
+    "evidence"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "fairyc.target-spec/v0" },
+    "id": { "const": "x86_64-linux-gnu" },
+    "architecture": { "const": "x86_64" },
+    "operatingSystem": { "const": "linux" },
+    "environment": { "const": "gnu" },
+    "endianness": { "const": "little" },
+    "dataModel": { "const": "lp64" },
+    "pointer": { "$ref": "#/$defs/layout" },
+    "functionPointer": { "$ref": "#/$defs/layout" },
+    "languageScalars": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/scalar" }
+    },
+    "cScalars": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/scalar" }
+    },
+    "stack": { "$ref": "#/$defs/stack" },
+    "callingConvention": { "const": "sysv-amd64" },
+    "aggregateLayout": { "const": "sysv-amd64-lp64" },
+    "returnClassifier": { "const": "sysv-amd64" },
+    "objectFormat": { "const": "elf64" },
+    "symbolModel": { "const": "elf" },
+    "unwindModel": { "const": "dwarf-cfi" },
+    "debugContract": { "const": "generated-c-dwarf" },
+    "reprCFeatures": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "evidence": { "$ref": "#/$defs/evidence" }
+  },
+  "$defs": {
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sizeBytes", "alignmentBytes"],
+      "properties": {
+        "sizeBytes": { "type": "integer", "minimum": 1 },
+        "alignmentBytes": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "scalar": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "layout", "signedness"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "layout": { "$ref": "#/$defs/layout" },
+        "signedness": { "enum": ["signed", "unsigned", "not-applicable"] }
+      }
+    },
+    "stack": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["callAlignmentBytes", "redZoneBytes"],
+      "properties": {
+        "callAlignmentBytes": { "type": "integer", "minimum": 1 },
+        "redZoneBytes": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["emissionSubset", "emittable", "conformant", "supported", "missing"],
+      "properties": {
+        "emissionSubset": { "const": "scalar-payload-c11" },
+        "emittable": { "const": false },
+        "conformant": { "const": false },
+        "supported": { "const": false },
+        "missing": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

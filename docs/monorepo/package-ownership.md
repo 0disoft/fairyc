@@ -18,7 +18,7 @@
 | `internal/flow` | initialization, move, borrow, region, escape, effect, and drop facts | source parsing or target instruction selection |
 | `internal/mir` | explicit backend-independent executable semantics | C, QBE, LLVM, or object-format details |
 | `internal/interp` | bounded execution of verified MIR for semantic fixtures | operating-system emulation or independent semantics |
-| `internal/target` and `internal/layout` | target triples, ABI facts, size, alignment, and layout | host Go layout assumptions |
+| `internal/target` and `internal/layout` | target IDs, target schemas, ABI facts, size, alignment, and layout | host Go layout assumptions or local toolchain paths |
 | `internal/abi` | C ABI v0 classification, `@repr(C)`, boundary signatures, and conformance facts | native Fairy ABI promises |
 | `internal/toolchain` | local C-driver, sysroot, libc, linker, and capability resolution | semantic target layout |
 | `internal/backend/*` | translation from MIR to one backend format | language-policy decisions |

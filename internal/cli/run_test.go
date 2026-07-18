@@ -695,7 +695,7 @@ func TestStableCheckRemainsReserved(t *testing.T) {
 func TestHelpAndInvocationErrorsAreSeparated(t *testing.T) {
 	t.Parallel()
 	helpCode, helpOut, helpErr := runForTest([]string{"--help"}, t.TempDir())
-	if helpCode != ExitSuccess || !strings.Contains(helpOut, "experimental parse") || !strings.Contains(helpOut, "experimental emit-c") || !strings.Contains(helpOut, "experimental build") || helpErr != "" {
+	if helpCode != ExitSuccess || !strings.Contains(helpOut, "experimental parse") || !strings.Contains(helpOut, "experimental target-spec") || !strings.Contains(helpOut, "experimental emit-c") || !strings.Contains(helpOut, "experimental build") || helpErr != "" {
 		t.Fatalf("help = code %d, stdout %q, stderr %q", helpCode, helpOut, helpErr)
 	}
 	errorCode, errorOut, errorErr := runForTest(nil, t.TempDir())

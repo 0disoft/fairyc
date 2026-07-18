@@ -19,6 +19,7 @@ import (
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/cli"
 	"github.com/0disoft/fairyc/internal/cruntime"
+	"github.com/0disoft/fairyc/internal/target"
 )
 
 const (
@@ -84,7 +85,7 @@ func Run(manifestPath string) (Report, error) {
 
 	report := Report{
 		SchemaVersion: reportSchemaVersion,
-		Target:        cbackend.TargetX8664LinuxGNU,
+		Target:        string(target.X8664LinuxGNU),
 		Libc:          toolchains[0].Libc,
 	}
 	for _, toolchain := range toolchains {
@@ -97,7 +98,7 @@ func Run(manifestPath string) (Report, error) {
 		report.Profiles = append(report.Profiles, profile.Name)
 	}
 	for caseIndex, fixture := range fixtureReport.Emitted {
-		if fixture.Unit.Target != cbackend.TargetX8664LinuxGNU || fixture.Unit.Dialect != cbackend.DialectC11 {
+		if fixture.Unit.Target != string(target.X8664LinuxGNU) || fixture.Unit.Dialect != cbackend.DialectC11 {
 			return Report{}, fmt.Errorf("case %s emitted unexpected profile %s/%s", fixture.ID, fixture.Unit.Target, fixture.Unit.Dialect)
 		}
 		report.Cases = append(report.Cases, fixture.ID)
@@ -170,7 +171,7 @@ fn main() -> i32 {
 			if code != cli.ExitSuccess {
 				return 0, fmt.Errorf("product build smoke with %s/%s failed with code %d: %s", compiler, profile.Name, code, strings.TrimSpace(stderr.String()))
 			}
-			expectedReceipt := fmt.Sprintf("built: %s (%s, %s, %s)\n", output, cbackend.TargetX8664LinuxGNU, compiler, profile.Name)
+			expectedReceipt := fmt.Sprintf("built: %s (%s, %s, %s)\n", output, target.X8664LinuxGNU, compiler, profile.Name)
 			if stdout.String() != expectedReceipt || stderr.Len() != 0 {
 				return 0, fmt.Errorf("product build smoke with %s/%s produced stdout %q and stderr %q", compiler, profile.Name, stdout.String(), stderr.String())
 			}
@@ -186,7 +187,7 @@ fn main() -> i32 {
 func resolveToolchains() ([]cdriver.Toolchain, error) {
 	toolchains := make([]cdriver.Toolchain, 0, 2)
 	for _, name := range []string{"clang", "gcc"} {
-		toolchain, err := cdriver.Resolve(name)
+		toolchain, err := cdriver.Resolve(target.X8664LinuxGNU, name)
 		if err != nil {
 			return nil, fmt.Errorf("native C differential requires %s: %w", name, err)
 		}

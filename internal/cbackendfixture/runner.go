@@ -18,6 +18,7 @@ import (
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/source"
+	"github.com/0disoft/fairyc/internal/target"
 )
 
 const cEmissionFixtureSchema = "fairyc.c-emission-fixtures/v0"
@@ -108,7 +109,7 @@ func runCase(manifestDirectory string, fixture caseDefinition, emitted *EmittedC
 	if failure := compareOutcome(fixture, outcome); failure != "" {
 		return []Failure{{CaseID: fixture.ID, Detail: failure}}
 	}
-	profile := cbackend.Profile{Target: fixture.Expect.Target, Dialect: fixture.Expect.Dialect}
+	profile := cbackend.Profile{Target: target.ID(fixture.Expect.Target), Dialect: fixture.Expect.Dialect}
 	unit, err := cbackend.Emit(program, fixture.Entry, profile)
 	if err != nil {
 		return []Failure{{CaseID: fixture.ID, Detail: fmt.Sprintf("emit C: %v", err)}}

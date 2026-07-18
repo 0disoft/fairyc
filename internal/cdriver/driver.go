@@ -12,6 +12,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/0disoft/fairyc/internal/target"
 )
 
 const (
@@ -35,6 +37,7 @@ var (
 
 // Toolchain is one resolved local C compiler plus its target-libc fingerprint.
 type Toolchain struct {
+	Target  target.ID
 	Name    string
 	Path    string
 	Version string
@@ -49,11 +52,18 @@ type Artifact struct {
 }
 
 // Resolve requires the declared Linux/amd64 glibc host and one closed compiler identity.
-func Resolve(name string) (Toolchain, error) {
+func Resolve(targetID target.ID, name string) (Toolchain, error) {
 	if name != "clang" && name != "gcc" {
 		return Toolchain{}, fmt.Errorf("unsupported C compiler %q; expected clang or gcc", name)
 	}
-	if runtime.GOOS != "linux" || runtime.GOARCH != "amd64" {
+	spec, found := target.Lookup(targetID)
+	if !found {
+		return Toolchain{}, fmt.Errorf("unsupported C target %q", targetID)
+	}
+	if err := target.Validate(spec); err != nil {
+		return Toolchain{}, fmt.Errorf("invalid C target %q: %w", targetID, err)
+	}
+	if runtime.GOOS != spec.OperatingSystem || runtime.GOARCH != "amd64" {
 		return Toolchain{}, fmt.Errorf("C toolchain requires linux/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
 	}
 	getconf, err := exec.LookPath("getconf")
@@ -80,12 +90,16 @@ func Resolve(name string) (Toolchain, error) {
 	if version == "" {
 		return Toolchain{}, fmt.Errorf("probe %s returned an empty version", name)
 	}
-	return Toolchain{Name: name, Path: path, Version: version, Libc: libc}, nil
+	return Toolchain{Target: targetID, Name: name, Path: path, Version: version, Libc: libc}, nil
 }
 
 // Build compiles and links one generated translation unit with one embedded runtime source.
 func Build(toolchain Toolchain, profile Profile, unitSource, runtimeSource string) (Artifact, error) {
-	if runtime.GOOS != "linux" || runtime.GOARCH != "amd64" {
+	spec, found := target.Lookup(toolchain.Target)
+	if !found {
+		return Artifact{}, fmt.Errorf("C build has unsupported target %q", toolchain.Target)
+	}
+	if runtime.GOOS != spec.OperatingSystem || runtime.GOARCH != "amd64" {
 		return Artifact{}, fmt.Errorf("C build requires linux/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
 	}
 	if toolchain.Name != "clang" && toolchain.Name != "gcc" || toolchain.Path == "" {
