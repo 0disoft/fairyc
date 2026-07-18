@@ -47,6 +47,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0035-native-drop-trace-differential.md`: closed source-linked drop instrumentation for exact interpreter-to-native C cleanup comparison without product-build observers.
 - `0036-native-c-layout-probe.md`: deterministic private C11 probes for the nine valid target-layout cases across Clang/GCC and low/optimized profiles.
 - `0037-sanitizer-assisted-c-backend-checks.md`: closed Clang/GCC ASan+UBSan execution of every admitted production C unit without exposing a product build profile.
+- `0038-sysv-amd64-classifier-fixtures.md`: host-independent INTEGER/SSE/MEMORY classification, hidden returns, register exhaustion, and whole-aggregate rollback fixtures.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

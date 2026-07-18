@@ -42,6 +42,9 @@
 - Target layout implementation route: internal/layout/
 - Target layout fixture route: spec/fixtures/layout/manifest-v0.json
 - Target layout fixture runner route: internal/layoutfixture/
+- SysV AMD64 C ABI classifier route: internal/cabi/
+- C ABI classification fixture route: spec/fixtures/c-abi/manifest-v0.json
+- C ABI classification fixture runner route: internal/cabifixture/
 - Resolved package graph fixture route: spec/fixtures/package/manifest-v0.json
 - MIR and C backend route: docs/mir/
 - Package identity and visibility route: docs/package/

@@ -97,6 +97,15 @@ with `sizeof`, `_Alignof`, field `sizeof`, and `offsetof` assertions configured 
 Clang/GCC low/optimized executions. Those executions are not yet observed on a hosted Linux runner;
 call, return, object, and bidirectional ABI probes remain required native evidence.
 
+`internal/cabi` now executes the closed Stage 0 SysV AMD64 classification model over those same
+target-laid-out types. It assigns `INTEGER`, `SSE`, or `MEMORY` eightbyte classes; maps fixed
+arguments to the six integer and eight SSE argument registers; maps returns to the two integer and
+two SSE return registers; rolls an aggregate wholly to the stack when either register family is
+insufficient; and reserves `rdi`/returns `rax` for a hidden memory-result pointer. The versioned v0
+C ABI manifest records 16 exact cases, of which 14 are pass cases available to a later native
+probe. This host-independent plan is not a Clang/GCC crossing, does not expose exact stack-area
+offsets, and does not clear the `bidirectional-c-abi-fixtures` target marker.
+
 This executable description is target data, not conformance evidence. Its evidence block names the
 existing `scalar-and-flat-i32-resource-tagged-c11` subset, keeps `emittable`, `conformant`, and `supported` false, and
 lists the missing hosted native C layout-probe receipt, bidirectional ABI, runtime, standard-library, hosted-Linux, toolchain
@@ -115,7 +124,11 @@ requirements remain missing evidence rather than invented values in `TargetSpec`
 
 Layout fixtures cover size, alignment, offsets, padding, nested structs, fixed arrays, explicit C enums, pointer fields, and rejected types. They include small register-sized aggregates and larger aggregates that exercise memory and hidden-return paths.
 
-Call fixtures are bidirectional: Fairy-to-C and C-to-Fairy. They cover integer and floating register exhaustion, mixed arguments, narrow signed and unsigned values, pointers, by-value structs, hidden aggregate returns, nested aggregates, null raw pointers, and the permitted callback form.
+Native call fixtures are bidirectional: Fairy-to-C and C-to-Fairy. The host-independent v0
+classification fixtures already cover integer and floating register exhaustion, mixed arguments,
+pointers, by-value structs, and hidden aggregate returns. Native crossings must additionally cover
+narrow signed and unsigned values, nested aggregates, null raw pointers, and the permitted callback
+form before the target can claim that gate.
 
 The planned transport matrix uses Clang as the primary compiler and GCC as an independent compiler, each at low and optimized profiles. Sanitizers supplement but do not define conformance.
 

@@ -82,12 +82,14 @@ ID, while local toolchain paths remain outside the target contract. Host-indepen
 array, explicit-C-enum, pointer, and nested-aggregate layout execution now runs through 14 versioned
 v0 cases. The nine valid cases now also generate one deterministic C11 layout probe configured for
 four Clang/GCC and low/optimized executions. Those native runs remain unobserved on this Windows
-host, so SysV call classification, bidirectional ABI fixtures, and hosted evidence remain
-incomplete.
+host. A host-independent SysV AMD64 classifier now executes 16 versioned cases for eightbyte
+classes, registers, exhaustion rollback, and hidden returns, but bidirectional native ABI fixtures
+and hosted evidence remain incomplete.
 
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.
-- Run interpreter-to-C differential fixtures and bidirectional C ABI fixtures with Clang and GCC at low and optimized profiles.
+- Run interpreter-to-C differential fixtures and turn the validated C ABI plans into bidirectional
+  Clang/GCC call fixtures at low and optimized profiles.
 - Keep sanitizer-assisted backend checks mandatory for every admitted C-emission case without
   treating sanitizers as the language oracle or exposing the validation mode as a product profile.
 

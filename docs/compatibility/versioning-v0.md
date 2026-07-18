@@ -62,6 +62,12 @@ artifact, or C probe result. Adding a layout family or fixture-visible failure c
 fixture-contract decision; changing target sizes, alignments, field placement, or classifier
 meaning additionally requires the applicable target-schema or ABI-profile decision.
 
+`fairyc.c-abi-fixtures/v0` versions fixed-signature type inputs and expected SysV AMD64 class,
+register, stack, and hidden-return plans. It reuses the layout fixture's recursive type vocabulary
+but is not a public binding format, stable native Fairy ABI, object contract, or hosted conformance
+receipt. Changing class merge, exhaustion rollback, hidden-result, or register identities requires
+a new fixture-contract and applicable target/ABI-profile decision.
+
 ## Diagnostics
 
 The diagnostic catalog versions rule identities. Once a code appears in a released compiler, it is not reused for another rule. Wording, related notes, and repair hints may improve without changing the code; severity or rule meaning changes require a new compatibility decision.

@@ -60,7 +60,8 @@ Linux toolchain is locally executable.
 `internal/layout` is the next boundary: it turns those facts into checked array and aggregate size,
 alignment, offset, and padding results before any backend chooses C syntax. The current layout
 fixtures are host-independent expectations; a generated native C probe now checks every valid
-case, while SysV call classification remains a later evidence layer.
+case. `internal/cabi` then turns the same type and layout facts into host-independent SysV AMD64
+eightbyte and register plans; independent bidirectional native calls remain a later evidence layer.
 
 The implemented slice emits deterministic ISO C11 for verified scalar-payload MIR, including
 private `Option<i32>` and `Result<i32, i32>` transport, plus nonempty all-`i32` resource definitions

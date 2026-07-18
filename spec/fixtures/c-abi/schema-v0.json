@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fairyc:c-abi-fixtures:v0",
+  "title": "Fairy C SysV AMD64 C ABI fixtures v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "target", "contracts", "deferred", "cases"],
+  "properties": {
+    "$schema": { "type": "string", "minLength": 1 },
+    "schemaVersion": { "const": "fairyc.c-abi-fixtures/v0" },
+    "target": { "const": "x86_64-linux-gnu" },
+    "contracts": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "deferred": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/case" }
+    }
+  },
+  "$defs": {
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "signature", "expect"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^(pass|fail)\\.[a-z0-9-]+$" },
+        "signature": { "$ref": "#/$defs/signature" },
+        "expect": { "$ref": "#/$defs/expect" }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["result", "parameters"],
+      "properties": {
+        "result": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "../layout/schema-v0.json#/$defs/type" }
+          ]
+        },
+        "parameters": {
+          "type": "array",
+          "items": { "$ref": "../layout/schema-v0.json#/$defs/type" }
+        }
+      }
+    },
+    "expect": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "plan"],
+          "properties": {
+            "status": { "const": "pass" },
+            "plan": { "$ref": "#/$defs/plan" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "errorCode"],
+          "properties": {
+            "status": { "const": "fail" },
+            "errorCode": {
+              "enum": [
+                "unsupported-target",
+                "layout-rejected",
+                "invalid-c-enum-base",
+                "depth-limit",
+                "invalid-type"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["return", "arguments"],
+      "properties": {
+        "return": { "$ref": "#/$defs/location" },
+        "arguments": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/location" }
+        }
+      }
+    },
+    "location": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "classes", "registers"],
+      "properties": {
+        "kind": { "enum": ["void", "registers", "stack", "indirect"] },
+        "classes": {
+          "type": "array",
+          "items": { "enum": ["integer", "sse", "memory"] }
+        },
+        "registers": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "rdi", "rsi", "rdx", "rcx", "r8", "r9", "rax",
+              "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7"
+            ]
+          }
+        },
+        "hiddenPointerRegister": { "const": "rdi" },
+        "pointerResultRegister": { "const": "rax" }
+      }
+    }
+  }
+}
