@@ -91,7 +91,11 @@ The first standard-library-owned C storage slice now implements provisional fall
 allocation, copy-and-release resize, zero-size normalization, fundamental-alignment rejection, and
 failure rollback. A closed probe is configured for Clang/GCC at low and optimized profiles. It is
 not source-callable or linked into product builds yet, and its four native executions remain
-unobserved on this Windows host; `Arena`, `Buffer`, text ownership, and Linux `File` are still absent.
+unobserved on this Windows host; `Arena`, text ownership, and Linux `File` are still absent.
+The next storage slice now adds provisional Buffer construction, initialized-prefix-only reserve,
+overlap-safe append across relocation, overflow rollback, zeroed growth, truncate, clear, and drop.
+Its four native probe executions are likewise configured but unobserved, and source programs still
+cannot call the helper.
 
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.

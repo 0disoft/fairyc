@@ -66,6 +66,11 @@ prefix preservation, unsupported-alignment rollback, release, and invalid output
 four configured executions are not source-level standard-library fixtures, deterministic OOM
 injection, or hosted evidence until a Linux receipt is observed.
 
+The Buffer probe adds ordinary append, no-op reserve identity, relocating initialized-prefix
+self-append, length-overflow rollback, zeroed growth, truncate, clear, malformed state, and drop.
+It verifies observable bytes, length, minimum capacity, and failure-state preservation without
+freezing the geometric capacity choice or reading spare storage.
+
 ## Oracle order
 
 1. Product specification and accepted ADRs define the intended boundary.

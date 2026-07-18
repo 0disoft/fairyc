@@ -44,3 +44,34 @@ func TestSystemHeapSourcesAreClosedAndCanonical(t *testing.T) {
 		}
 	}
 }
+
+func TestBufferSourcesOwnFailureAtomicOverlapSafeStorage(t *testing.T) {
+	t.Parallel()
+	implementation, err := StorageSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	probe, err := BufferProbeSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, required := range []string{
+		"fy_std_buffer_reserve_v0",
+		"fy_std_buffer_append_v0",
+		"count > SIZE_MAX - buffer->length",
+		"fy_std_buffer_internal_source_v0",
+		"memmove(",
+		"fy_std_buffer_resize_zeroed_v0",
+	} {
+		if !strings.Contains(implementation, required) {
+			t.Errorf("Buffer implementation is missing %q", required)
+		}
+	}
+	if !strings.Contains(probe, "abcdefbcde") || !strings.Contains(probe, "SIZE_MAX") {
+		t.Fatal("Buffer probe does not exercise overlap and overflow rollback")
+	}
+	repeated, err := StorageSource()
+	if err != nil || repeated != implementation || strings.Contains(implementation, "\r") || !strings.HasSuffix(implementation, "\n") {
+		t.Fatalf("StorageSource() is not deterministic canonical C: %v", err)
+	}
+}

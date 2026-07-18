@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v6"
+	reportSchemaVersion = "fairyc.native-c-report/v7"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -84,6 +84,7 @@ type Report struct {
 	ABIDirections         []string   `json:"abiDirections"`
 	ABIProbeExecutions    int        `json:"abiProbeExecutions"`
 	SystemHeapExecutions  int        `json:"systemHeapExecutions"`
+	BufferExecutions      int        `json:"bufferExecutions"`
 	BuildSmokeExecutions  int        `json:"buildSmokeExecutions"`
 }
 
@@ -186,11 +187,28 @@ func Run(manifestPath string) (Report, error) {
 	if err != nil {
 		return Report{}, fmt.Errorf("load SystemHeap probe: %w", err)
 	}
-	systemHeapExecutions, err := runSystemHeapProbe(temporaryRoot, toolchains, systemHeapProbe, systemHeapSource)
+	systemHeapExecutions, err := runStandardLibraryProbe(
+		temporaryRoot, toolchains, "SystemHeap", "system-heap-probe", systemHeapProbe, systemHeapSource,
+	)
 	if err != nil {
 		return Report{}, err
 	}
 	report.SystemHeapExecutions = systemHeapExecutions
+	storageSource, err := cstdlib.StorageSource()
+	if err != nil {
+		return Report{}, fmt.Errorf("load Buffer storage implementation: %w", err)
+	}
+	bufferProbe, err := cstdlib.BufferProbeSource()
+	if err != nil {
+		return Report{}, fmt.Errorf("load Buffer probe: %w", err)
+	}
+	bufferExecutions, err := runStandardLibraryProbe(
+		temporaryRoot, toolchains, "Buffer", "buffer-probe", bufferProbe, storageSource,
+	)
+	if err != nil {
+		return Report{}, err
+	}
+	report.BufferExecutions = bufferExecutions
 	for caseIndex, fixture := range fixtureReport.Emitted {
 		if fixture.Unit.Target != string(target.X8664LinuxGNU) || fixture.Unit.Dialect != cbackend.DialectC11 {
 			return Report{}, fmt.Errorf("case %s emitted unexpected profile %s/%s", fixture.ID, fixture.Unit.Target, fixture.Unit.Dialect)
@@ -242,26 +260,33 @@ func Run(manifestPath string) (Report, error) {
 	return report, nil
 }
 
-func runSystemHeapProbe(temporaryRoot string, toolchains []cdriver.Toolchain, probeSource, implementationSource string) (int, error) {
+func runStandardLibraryProbe(
+	temporaryRoot string,
+	toolchains []cdriver.Toolchain,
+	name string,
+	filePrefix string,
+	probeSource string,
+	implementationSource string,
+) (int, error) {
 	if len(toolchains) != 2 || toolchains[0].Name != "clang" || toolchains[1].Name != "gcc" {
-		return 0, fmt.Errorf("SystemHeap probe requires resolved Clang then GCC toolchains")
+		return 0, fmt.Errorf("%s probe requires resolved Clang then GCC toolchains", name)
 	}
-	if probeSource == "" || implementationSource == "" {
-		return 0, fmt.Errorf("SystemHeap probe and implementation sources must be non-empty")
+	if name == "" || filePrefix == "" || probeSource == "" || implementationSource == "" {
+		return 0, fmt.Errorf("standard-library probe identity and sources must be non-empty")
 	}
 	executions := 0
 	for compilerIndex, toolchain := range toolchains {
 		for profileIndex, profile := range nativeProfiles {
 			artifact, err := cdriver.Build(toolchain, profile, probeSource, implementationSource)
 			if err != nil {
-				return 0, fmt.Errorf("SystemHeap probe with %s/%s: %w", toolchain.Name, profile.Name, err)
+				return 0, fmt.Errorf("%s probe with %s/%s: %w", name, toolchain.Name, profile.Name, err)
 			}
-			executablePath := filepath.Join(temporaryRoot, fmt.Sprintf("system-heap-probe-%d-%d", compilerIndex, profileIndex))
+			executablePath := filepath.Join(temporaryRoot, fmt.Sprintf("%s-%d-%d", filePrefix, compilerIndex, profileIndex))
 			if err := os.WriteFile(executablePath, artifact.Bytes, 0o700); err != nil {
-				return 0, fmt.Errorf("materialize SystemHeap probe with %s/%s: %w", toolchain.Name, profile.Name, err)
+				return 0, fmt.Errorf("materialize %s probe with %s/%s: %w", name, toolchain.Name, profile.Name, err)
 			}
-			if err := execute("SystemHeap probe", executablePath, 0, nil); err != nil {
-				return 0, fmt.Errorf("SystemHeap probe with %s/%s: %w", toolchain.Name, profile.Name, err)
+			if err := execute(name+" probe", executablePath, 0, nil); err != nil {
+				return 0, fmt.Errorf("%s probe with %s/%s: %w", name, toolchain.Name, profile.Name, err)
 			}
 			executions++
 		}

@@ -27,15 +27,17 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
   callee objects for all 14 C ABI pass plans and crosses Clang-to-GCC plus GCC-to-Clang at both
   profiles for 56 zero-output executions. The same matrix compiles and runs the provisional
   SystemHeap C probe four times, covering empty normalization, supported alignment, growth/shrink
-  byte preservation, unsupported-alignment rollback, and release. It
+  byte preservation, unsupported-alignment rollback, and release. A second four-run Buffer probe
+  covers initialized-prefix growth, relocating self-overlap append, overflow rollback, zeroed
+  resize, truncation, malformed-state rejection, and drop. It
   then drives a resource-bearing Option-and-Result program through uninstrumented
   `experimental build` with Clang/GCC and low/optimized, executes all four resulting temporary
   products, and requires exit `42` with no output. A missing compiler or libc identity fails the job
   instead of producing a skip.
 - The native job retains no generated C, object, executable, cache, or report artifact. Its bounded
-  `fairyc.native-c-report/v6` JSON report is written only to the job log and contains toolchain
+  `fairyc.native-c-report/v7` JSON report is written only to the job log and contains toolchain
   fingerprints, fixture IDs, the sorted layout-case IDs, and drop-trace, layout-probe, and
-  sanitizer, ABI case/direction, SystemHeap, and product-build execution counts but no temporary path.
+  sanitizer, ABI case/direction, SystemHeap, Buffer, and product-build execution counts but no temporary path.
 
 The containing Mustflow workspace provides local parity through `fairyc_go_vet` and
 `fairyc_go_test`, plus the Linux-only `fairyc_native_c_test` intent. Those intents additionally

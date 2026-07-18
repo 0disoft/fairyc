@@ -83,7 +83,8 @@ list and `layoutProbeExecutions` count. V4 supersedes v3 by adding the exact `sa
 identity and `sanitizerExecutions` count; the existing `cases` list owns sanitizer case identity.
 V5 supersedes v4 by adding the exact sorted `abiCases`, exact `abiDirections`, and
 `abiProbeExecutions` count. V6 supersedes v5 by adding `systemHeapExecutions` for the closed
-Clang/GCC low/optimized provisional standard-library allocation probe. The runner emits one exact version and does not pretend the report
+Clang/GCC low/optimized provisional standard-library allocation probe. V7 supersedes v6 by adding
+`bufferExecutions` for the failure-atomic overlap-safe Buffer probe. The runner emits one exact version and does not pretend the report
 shapes are interchangeable.
 
 ## Runtime and standard library

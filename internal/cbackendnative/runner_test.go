@@ -44,7 +44,7 @@ func TestBuildSmokeSourceReachesCEmission(t *testing.T) {
 
 func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 	t.Parallel()
-	if reportSchemaVersion != "fairyc.native-c-report/v6" {
+	if reportSchemaVersion != "fairyc.native-c-report/v7" {
 		t.Fatalf("report schema = %q", reportSchemaVersion)
 	}
 	encoded, err := json.Marshal(Report{
@@ -54,11 +54,12 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		ABICases:      []string{"pass.aggregate-rollback", "pass.void-return"},
 		ABIDirections: []string{"clang-caller-gcc-callee", "gcc-caller-clang-callee"}, ABIProbeExecutions: 56,
 		SystemHeapExecutions: 4,
+		BufferExecutions:     4,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v6"`) ||
+	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v7"`) ||
 		!strings.Contains(string(encoded), `"dropTraceExecutions":68`) ||
 		!strings.Contains(string(encoded), `"layoutCases":["pass.array-i32-three","pass.pointer"]`) ||
 		!strings.Contains(string(encoded), `"layoutProbeExecutions":4`) ||
@@ -67,7 +68,8 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		!strings.Contains(string(encoded), `"abiCases":["pass.aggregate-rollback","pass.void-return"]`) ||
 		!strings.Contains(string(encoded), `"abiDirections":["clang-caller-gcc-callee","gcc-caller-clang-callee"]`) ||
 		!strings.Contains(string(encoded), `"abiProbeExecutions":56`) ||
-		!strings.Contains(string(encoded), `"systemHeapExecutions":4`) {
+		!strings.Contains(string(encoded), `"systemHeapExecutions":4`) ||
+		!strings.Contains(string(encoded), `"bufferExecutions":4`) {
 		t.Fatalf("report JSON = %s", encoded)
 	}
 }
@@ -75,8 +77,8 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 func TestSystemHeapProbeRunnerRejectsEmptySourceBeforeToolchainUse(t *testing.T) {
 	t.Parallel()
 	toolchains := []cdriver.Toolchain{{Name: "clang"}, {Name: "gcc"}}
-	if _, err := runSystemHeapProbe(t.TempDir(), toolchains, "", ""); err == nil || !strings.Contains(err.Error(), "must be non-empty") {
-		t.Fatalf("runSystemHeapProbe() error = %v", err)
+	if _, err := runStandardLibraryProbe(t.TempDir(), toolchains, "SystemHeap", "system-heap", "", ""); err == nil || !strings.Contains(err.Error(), "must be non-empty") {
+		t.Fatalf("runStandardLibraryProbe() error = %v", err)
 	}
 }
 

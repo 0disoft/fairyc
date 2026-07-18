@@ -88,6 +88,17 @@ deterministically force host OOM, and no hosted success receipt has been observe
 
 The minimum operations are construction with capacity, copy from a byte slice, length and capacity inspection, immutable and mutable initialized-byte views, reserve, append, zero-initialized resize, truncate, and clear. Safe code cannot access spare capacity or raw parts. `Vec<T>` is deferred until user generics and element-drop behavior exist.
 
+The provisional C Buffer slice now implements the storage operations behind that surface without
+exposing them to source. Its invariant is `len <= capacity`; reserve copies only initialized bytes
+and publishes replacement storage only after allocation succeeds. Append checks length overflow and
+rebases a source inside the initialized prefix across relocation before an overlap-safe `memmove`.
+A source into spare capacity or past initialized bytes is rejected. Growing resize zeroes every
+newly visible byte. Capacity growth policy, spare bytes, and raw parts remain unobservable.
+
+The closed native probe configures four Clang/GCC low/optimized executions for construction,
+ordinary and self-overlap append, overflow rollback, no-op reserve, zeroed growth, truncate, clear,
+malformed-state rejection, and drop. Those executions remain unobserved on this Windows host.
+
 ## `Arena` and `Region`
 
 `Arena` is created explicitly from `SystemHeap`. Region syntax exposes only:

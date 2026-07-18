@@ -72,7 +72,11 @@ boundary rather than the thin runtime. It normalizes empty allocation, admits cu
 alignments, preserves bytes across copy-and-release growth or shrink, and leaves the old block
 unchanged when validation or allocation fails. A closed Clang/GCC low/optimized C probe is wired
 for four executions, but it is not source-callable, not product-linked, and has no observed hosted
-receipt; `Arena`, `Buffer`, owned text, and Linux `File` remain unimplemented.
+receipt; `Arena`, owned text, and Linux `File` remain unimplemented.
+A second provisional slice implements Buffer-owned initialized bytes, failure-atomic reserve,
+relocating self-overlap append, length-overflow rollback, zeroed growth, truncate, clear, and drop.
+Its four-way native C probe is configured but still unobserved and not source-callable; the public
+standard-library package remains absent.
 A deterministic native C11 probe now translates the nine valid layout cases into private numeric
 types and is configured for Clang/GCC at `-O0` and `-O2`. This Windows host cannot execute those
 four probe runs, and no hosted success receipt has been observed, so `c-layout-probes` remains a
