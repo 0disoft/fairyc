@@ -4,7 +4,7 @@
   "deferred": [
     "partial aggregate construction and reassignment until fallible construction syntax is executable",
     "Region mark and reset ordering until a source-linked MIR observation case is accepted",
-    "resource-bearing Option and Result payload traces until variant-constructor syntax is accepted",
+    "backend variant layout and payload-place identity until the first code-generation contract",
     "cleanup-suffix merging until canonical path identity can be asserted without freezing block numbers"
   ],
   "contracts": [
@@ -210,6 +210,33 @@
             "function": "main::run",
             "form": "question",
             "remainingCount": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.mir.resource-option-match",
+      "sourceRoot": "cases/pass/resource-option-match/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "mir-verify",
+        "observations": [
+          {
+            "kind": "move",
+            "function": "main::main",
+            "binding": { "source": "main.fy", "startByte": 110, "endByte": 116 },
+            "operand": { "source": "main.fy", "startByte": 193, "endByte": 199 },
+            "destination": "option-payload",
+            "cleanupObligationTransferred": true
+          },
+          {
+            "kind": "move",
+            "function": "main::main",
+            "binding": { "source": "main.fy", "startByte": 155, "endByte": 162 },
+            "operand": { "source": "main.fy", "startByte": 212, "endByte": 219 },
+            "destination": "option-match",
+            "cleanupObligationTransferred": true
           }
         ]
       }

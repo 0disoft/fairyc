@@ -179,6 +179,7 @@ type Operation struct {
 	Field            string
 	Operator         string
 	Variant          string
+	MovePayload      bool
 	TrapCategories   []string
 	FlagClearedFirst bool
 	SourceForm       string

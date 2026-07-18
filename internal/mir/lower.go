@@ -286,6 +286,9 @@ func (l *functionLowerer) lowerResourceConstruction(expression *hir.Expression) 
 		if value.Kind == OperandInvalid {
 			return Operand{}, fmt.Errorf("resource field %q has no value", expression.Fields[index])
 		}
+		if l.isLiveResourcePath(&expression.Children[index]) {
+			value = l.materializeMove(&expression.Children[index], value, "resource-field", true)
+		}
 		operands = append(operands, value)
 	}
 	destination := l.newTemporary()
@@ -326,6 +329,9 @@ func (l *functionLowerer) lowerResultVariant(expression *hir.Expression) (Operan
 	if payload.Kind == OperandInvalid {
 		return Operand{}, fmt.Errorf("Result::%s payload has no value", expression.Variant)
 	}
+	if l.isLiveResourcePath(&expression.Children[0]) {
+		payload = l.materializeMove(&expression.Children[0], payload, "result-payload", true)
+	}
 	destination := l.newTemporary()
 	l.appendOperation(Operation{
 		Kind: OperationResultConstruct, Span: expression.Span, DestinationLocal: destination,
@@ -349,6 +355,9 @@ func (l *functionLowerer) lowerOptionVariant(expression *hir.Expression) (Operan
 		}
 		if payload.Kind == OperandInvalid {
 			return Operand{}, fmt.Errorf("Option::Some payload has no value")
+		}
+		if l.isLiveResourcePath(&expression.Children[0]) {
+			payload = l.materializeMove(&expression.Children[0], payload, "option-payload", true)
 		}
 		operands = append(operands, payload)
 	} else if len(expression.Children) != 0 {
@@ -386,6 +395,9 @@ func (l *functionLowerer) lowerMatch(expression *hir.Expression) (Operand, error
 	if scrutinee.Kind == OperandInvalid {
 		return Operand{}, fmt.Errorf("%s match scrutinee has no value", family)
 	}
+	if l.isLiveResourcePath(&expression.Children[0]) {
+		scrutinee = l.materializeMove(&expression.Children[0], scrutinee, family+"-match", true)
+	}
 	branchLive := cloneLive(l.live)
 	firstBlock := l.newBlock()
 	secondBlock := l.newBlock()
@@ -417,10 +429,24 @@ func (l *functionLowerer) lowerMatch(expression *hir.Expression) (Operand, error
 		l.current = block
 		l.live = cloneLive(branchLive)
 		if arm.Binding != hir.NoSymbol {
-			l.appendOperation(Operation{
-				Kind: payloadOperation, Span: arm.BindingSpan, DestinationLocal: LocalID(arm.Binding),
-				Operands: []Operand{scrutinee}, Variant: arm.Variant,
-			})
+			binding := l.bindings[arm.Binding]
+			if l.properties.NeedsDrop(binding.typ) {
+				payload := l.newTemporary()
+				l.appendOperation(Operation{
+					Kind: payloadOperation, Span: arm.BindingSpan, DestinationLocal: payload,
+					Operands: []Operand{scrutinee}, Variant: arm.Variant, MovePayload: true,
+				})
+				l.appendOperation(Operation{
+					Kind: OperationInitialize, Span: arm.BindingSpan, Symbol: arm.Binding,
+					DestinationLocal: LocalID(arm.Binding), Operands: []Operand{{Kind: OperandLocal, Local: payload}},
+				})
+				l.live[arm.Binding] = true
+			} else {
+				l.appendOperation(Operation{
+					Kind: payloadOperation, Span: arm.BindingSpan, DestinationLocal: LocalID(arm.Binding),
+					Operands: []Operand{scrutinee}, Variant: arm.Variant,
+				})
+			}
 		} else if family != "option" || arm.Variant != "none" {
 			return Operand{}, fmt.Errorf("%s match variant %q is missing its payload binding", family, arm.Variant)
 		}
@@ -435,7 +461,16 @@ func (l *functionLowerer) lowerMatch(expression *hir.Expression) (Operand, error
 			if armValue.Kind == OperandInvalid {
 				return Operand{}, fmt.Errorf("value-producing %s match arm %q has no value", family, arm.Variant)
 			}
+			if l.properties.NeedsDrop(expression.Type) && l.isLiveResourcePath(&arm.Expression) {
+				armValue = l.materializeMove(&arm.Expression, armValue, family+"-match-result", true)
+			}
 			l.appendOperation(Operation{Kind: OperationAssign, Span: arm.Expression.Span, DestinationLocal: destination, Operands: []Operand{armValue}})
+		}
+		if arm.Binding != hir.NoSymbol {
+			if l.live[arm.Binding] {
+				l.appendOperation(Operation{Kind: OperationDrop, Span: arm.BindingSpan, Symbol: arm.Binding, FlagClearedFirst: true})
+			}
+			delete(l.live, arm.Binding)
 		}
 		l.terminate(Terminator{Kind: TerminatorGoto, Span: arm.Expression.Span, Successors: []BlockID{joinBlock}, UnwindSuccessor: NoBlock})
 		if continuing == 0 {
@@ -740,9 +775,13 @@ func (l *functionLowerer) lowerPropagate(expression *hir.Expression) (Operand, e
 	l.result.EliminatedForms = append(l.result.EliminatedForms, EliminatedFormFact{Form: "question", RemainingCount: 0})
 	l.current = success
 	payload := l.newTemporary()
+	movePayload := false
+	if successType, _, ok := hir.ResultElements(operand.Type); ok {
+		movePayload = l.properties.NeedsDrop(successType)
+	}
 	l.appendOperation(Operation{
 		Kind: OperationResultPayload, Span: expression.Span, DestinationLocal: payload,
-		Operands: []Operand{resultValue}, Variant: "ok",
+		Operands: []Operand{resultValue}, Variant: "ok", MovePayload: movePayload,
 	})
 	return Operand{Kind: OperandLocal, Local: payload}, nil
 }

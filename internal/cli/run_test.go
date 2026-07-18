@@ -348,6 +348,28 @@ fn main() -> i32 {
 	}
 }
 
+func TestExperimentalRunExecutesResourceBearingOption(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", `module main;
+resource Token {
+    value: i32;
+    drop fn(self: &mut Self) {}
+}
+fn main() -> i32 {
+    let wrapped: Option<Token> = Option::Some(Token { value: 42 });
+    match wrapped {
+        Option::Some(token) => token.value,
+        Option::None => 0,
+    }
+}
+`)
+	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
+	if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
 func TestRepositorySyntaxExampleStaysRunnable(t *testing.T) {
 	root := filepath.Clean(filepath.Join("..", ".."))
 	code, stdout, stderr := runForTest(
@@ -408,6 +430,17 @@ func TestRepositoryInterpreterExampleStaysRunnable(t *testing.T) {
 	root := filepath.Clean(filepath.Join("..", ".."))
 	code, stdout, stderr := runForTest(
 		[]string{"experimental", "run", "examples/run/main.fy"},
+		root,
+	)
+	if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
+func TestRepositoryResourceOptionExampleStaysRunnable(t *testing.T) {
+	root := filepath.Clean(filepath.Join("..", ".."))
+	code, stdout, stderr := runForTest(
+		[]string{"experimental", "run", "examples/run/resource_option.fy"},
 		root,
 	)
 	if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {

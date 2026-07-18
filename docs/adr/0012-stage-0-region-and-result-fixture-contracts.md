@@ -21,8 +21,8 @@ The local lexical-region escape case depends on a real `std::alloc::Arena` packa
 6. A package-aware case names `pass.package.stdlib-arena-region`, its `app` root node, and the `std::alloc` provider. The fixture-owned `Arena` resource is opaque to the app and defines no constructor or ordinary allocation methods.
 7. Result pass assertions record the expression, handling mode (`return`, `discard`, or `propagate`), canonical result, success, and error types, and exactly-once evaluation.
 8. Result fail assertions use complete independent `E41xx` diagnostics. The initial cases cover an unused result, `?` on a non-result, and incompatible propagated error types.
-9. `Ok` and `Err` construction syntax is not added by these fixtures. Cases use typed parameters so the suite does not choose a constructor spelling ahead of the language contract.
-10. Full active-payload move and drop traces remain MIR or runtime fixture concerns rather than Flow-schema fields.
+9. The initial fixtures did not add `Ok` and `Err` construction syntax. ADR 0017 later accepted the qualified spelling without changing this Flow schema.
+10. Full active-payload move and drop traces remain MIR or runtime fixture concerns rather than Flow-schema fields; the interpreter and MIR manifests now provide that evidence.
 
 ## Rationale
 
@@ -37,4 +37,4 @@ Separate schemas keep a Region origin from being confused with a `Result` payloa
 
 ## Revisit conditions
 
-Add or version fixtures when public `Arena` construction spelling is accepted, `Ok` and `Err` construction spelling is accepted, resource-bearing tagged payload traces become executable, or a required assertion depends on MIR control-flow identity.
+Add or version these Flow fixtures when public `Arena` construction spelling is accepted or a required ownership assertion cannot be expressed without MIR control-flow identity. Qualified Result syntax and resource-bearing built-in payload traces are now owned by their later ADRs and MIR/interpreter manifests.

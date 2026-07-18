@@ -16,24 +16,26 @@ compact recoverable syntax, error-free AST lowering, deterministic `E00xx` diagn
 runner for all parser v0 fixtures. The next slice resolves names and produces typed HIR for the
 fixture-backed scalar and safe-borrow subset. Its semantic runner executes all 11 v0 resolve, type,
 and local Flow cases, including last-use loans and borrow-return origins. Whole-root resource Flow
-also executes all 7 v0 cases for moves, cleanup obligations, branch joins, and loop back-edges. The
+also executes all 8 v0 cases for moves, cleanup obligations, branch joins, loop back-edges, and
+consuming tagged matches. The
 Region runner executes all 6 v1 cases, including package-proven `std::alloc::Arena`, hidden
 allocation origins, lexical escape, capability storage, and plain-region resource rejection. The
 Result runner executes all 8 v0 cases for qualified construction, exhaustive shallow matching,
 must-use return/discard/propagation, exactly-once classification, non-Result `?`, and propagated
 error compatibility. The MIR runner executes all
-5 v0 normalization cases through mutable-local block lowering and the MIR verifier, covering
+6 v0 normalization cases through mutable-local block lowering and the MIR verifier, covering
 left-to-right call evaluation, complete-root moves, normal-exit cleanup order, `Result` error
 cleanup, and non-unwinding trap paths. The verifier mutation runner constructs all 8 named
 baselines and proves all 15 isolated `V1001` through `V1701` rejection recipes. The first MIR
-interpreter slice executes all 16 v0 cases for literal return, function-call arithmetic,
+interpreter slice executes all 25 v0 cases for literal return, function-call arithmetic,
 boolean branches and logical not, source `&&` and `||` short-circuiting, scalar `while`, scalar
 `Option` construction/matching, scalar `Result` construction/matching/propagation,
-resource construction, field reads, call moves and deterministic drop traces, division-by-zero traps, and bounded step-limit
+resource construction, field reads, call moves, resource-bearing `Option` and `Result` payload moves,
+resource returns and propagation, nested active-variant cleanup, deterministic drop traces,
+division-by-zero traps, and bounded step-limit
 termination. An unstable `fairyc experimental` CLI can inspect, syntax-check,
 semantic-check, or interpret one source-root-relative `.fy` file, while semantic checking also
-accepts an explicit module set. There is no stable CLI, resource-bearing `Option` or `Result` runtime value,
-user drop-body execution, backend, standard
+accepts an explicit module set. There is no stable CLI, user drop-body execution, backend, standard
 library, runtime, package manager, supported target, or stable language revision yet.
 
 ## Try the current prototype
@@ -48,6 +50,7 @@ go run ./cmd/fairyc experimental check-semantics examples/resources/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/regions/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/results/main.fy
 go run ./cmd/fairyc experimental run examples/run/main.fy
+go run ./cmd/fairyc experimental run examples/run/resource_option.fy
 go run ./cmd/fairyc experimental parse examples/syntax/main.fy
 ```
 
@@ -58,11 +61,12 @@ for the currently implemented scalar, safe-borrow, whole-resource, Region-parame
 escapes, oversized input sets, and unsupported syntax rather than claiming success. The official
 `experimental run` accepts one file whose declared module contains `main() -> i32`, executes its
 verified MIR in the bounded interpreter, including boolean `if`, short-circuit control, scalar `while`,
-resource construction, field reads, whole-root call moves, and cleanup drop events,
+resource construction, field reads, whole-root call moves, resource-bearing built-in tagged values,
+and cleanup drop events,
 and reports either `result: <i32>` or a canonical
 trap. The official
-`fairyc check` command remains unavailable until tagged resource payloads, reassignment/close rules,
-complete must-use dataflow, and effects exist.
+`fairyc check` command remains unavailable until reassignment/close rules, complete must-use dataflow,
+effects, and the remaining semantic groups exist.
 
 ## Design anchors
 

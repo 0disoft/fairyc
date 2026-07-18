@@ -168,6 +168,74 @@
       }
     },
     {
+      "id": "fail.flow.use-after-option-match",
+      "sourceRoot": "cases/fail/use-after-option-match/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "states": [
+          {
+            "binding": {
+              "source": "main.fy",
+              "startByte": 110,
+              "endByte": 117
+            },
+            "at": {
+              "source": "main.fy",
+              "startByte": 197,
+              "endByte": 204
+            },
+            "observation": "before",
+            "state": "Live",
+            "cleanupObligations": 1
+          },
+          {
+            "binding": {
+              "source": "main.fy",
+              "startByte": 110,
+              "endByte": 117
+            },
+            "at": {
+              "source": "main.fy",
+              "startByte": 197,
+              "endByte": 204
+            },
+            "observation": "after",
+            "state": "Dead",
+            "cleanupObligations": 0
+          }
+        ],
+        "diagnostics": [
+          {
+            "code": "E1101",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 289,
+              "endByte": 296
+            },
+            "related": [
+              {
+                "role": "declaration",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 110,
+                  "endByte": 117
+                }
+              },
+              {
+                "role": "move",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 197,
+                  "endByte": 204
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
       "id": "fail.flow.partial-field-move",
       "sourceRoot": "cases/fail/partial-field-move/src",
       "sources": ["main.fy"],

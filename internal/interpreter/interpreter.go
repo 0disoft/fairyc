@@ -116,11 +116,16 @@ type resourceState struct {
 	dropped    bool
 }
 
+type taggedState struct {
+	variant string
+	payload *runtimeValue
+	dropped bool
+}
+
 type runtimeValue struct {
 	kind     valueKind
 	i32      int32
-	variant  string
-	payload  *runtimeValue
+	tagged   *taggedState
 	resource *resourceState
 }
 
@@ -133,7 +138,7 @@ func resultValue(variant string, payload runtimeValue) (runtimeValue, error) {
 		return runtimeValue{}, fmt.Errorf("invalid Result variant %q", variant)
 	}
 	copy := payload
-	return runtimeValue{kind: valueResult, variant: variant, payload: &copy}, nil
+	return runtimeValue{kind: valueResult, tagged: &taggedState{variant: variant, payload: &copy}}, nil
 }
 
 func optionValue(variant string, payload *runtimeValue) (runtimeValue, error) {
@@ -143,12 +148,12 @@ func optionValue(variant string, payload *runtimeValue) (runtimeValue, error) {
 			return runtimeValue{}, fmt.Errorf("Option::Some has no payload")
 		}
 		copy := *payload
-		return runtimeValue{kind: valueOption, variant: variant, payload: &copy}, nil
+		return runtimeValue{kind: valueOption, tagged: &taggedState{variant: variant, payload: &copy}}, nil
 	case "none":
 		if payload != nil {
 			return runtimeValue{}, fmt.Errorf("Option::None has a payload")
 		}
-		return runtimeValue{kind: valueOption, variant: variant}, nil
+		return runtimeValue{kind: valueOption, tagged: &taggedState{variant: variant}}, nil
 	default:
 		return runtimeValue{}, fmt.Errorf("invalid Option variant %q", variant)
 	}
@@ -178,21 +183,29 @@ func (v runtimeValue) asI32() (int32, error) {
 	return v.i32, nil
 }
 
-func (v runtimeValue) resultPayload(expected string) (runtimeValue, error) {
-	if v.kind != valueResult || v.payload == nil {
+func (v runtimeValue) resultPayload(expected string, move bool) (runtimeValue, error) {
+	if v.kind != valueResult || v.tagged == nil || v.tagged.payload == nil || v.tagged.dropped {
 		return runtimeValue{}, capabilityError("value is not an executable Result")
 	}
-	if v.variant != expected {
-		return runtimeValue{}, fmt.Errorf("Result payload expects %q, got %q", expected, v.variant)
+	if v.tagged.variant != expected {
+		return runtimeValue{}, fmt.Errorf("Result payload expects %q, got %q", expected, v.tagged.variant)
 	}
-	return *v.payload, nil
+	payload := *v.tagged.payload
+	if move {
+		v.tagged.payload = nil
+	}
+	return payload, nil
 }
 
-func (v runtimeValue) optionPayload() (runtimeValue, error) {
-	if v.kind != valueOption || v.variant != "some" || v.payload == nil {
+func (v runtimeValue) optionPayload(move bool) (runtimeValue, error) {
+	if v.kind != valueOption || v.tagged == nil || v.tagged.variant != "some" || v.tagged.payload == nil || v.tagged.dropped {
 		return runtimeValue{}, capabilityError("value is not an executable Option::Some")
 	}
-	return *v.payload, nil
+	payload := *v.tagged.payload
+	if move {
+		v.tagged.payload = nil
+	}
+	return payload, nil
 }
 
 func (v runtimeValue) field(name string) (runtimeValue, error) {
@@ -297,7 +310,7 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("Result payload in %q: %w", function.Name, err)
 				}
-				payload, err := result.resultPayload(operation.Variant)
+				payload, err := result.resultPayload(operation.Variant, operation.MovePayload)
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("Result payload in %q: %w", function.Name, err)
 				}
@@ -323,7 +336,7 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("Option payload in %q: %w", function.Name, err)
 				}
-				payload, err := option.optionPayload()
+				payload, err := option.optionPayload(operation.MovePayload)
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("Option payload in %q: %w", function.Name, err)
 				}
@@ -431,10 +444,17 @@ func (r *runtime) dropValue(value runtimeValue, binding hir.Span) error {
 	case valueI32:
 		return nil
 	case valueResult, valueOption:
-		if value.payload == nil {
+		if value.tagged == nil {
+			return fmt.Errorf("tagged value has no state")
+		}
+		if value.tagged.dropped {
+			return fmt.Errorf("%s::%s was dropped twice", taggedFamily(value.kind), value.tagged.variant)
+		}
+		value.tagged.dropped = true
+		if value.tagged.payload == nil {
 			return nil
 		}
-		return r.dropValue(*value.payload, binding)
+		return r.dropValue(*value.tagged.payload, binding)
 	case valueResource:
 		if value.resource == nil {
 			return fmt.Errorf("resource value has no state")
@@ -454,6 +474,13 @@ func (r *runtime) dropValue(value runtimeValue, binding hir.Span) error {
 	default:
 		return capabilityError("value has no executable drop behavior")
 	}
+}
+
+func taggedFamily(kind valueKind) string {
+	if kind == valueResult {
+		return "Result"
+	}
+	return "Option"
 }
 
 func evaluate(locals map[mir.LocalID]runtimeValue, operand mir.Operand) (runtimeValue, error) {
@@ -532,37 +559,37 @@ func evaluateSwitch(locals map[mir.LocalID]runtimeValue, terminator mir.Terminat
 		if err != nil {
 			return mir.NoBlock, "", err
 		}
-		if value.kind != valueResult || value.payload == nil {
+		if value.kind != valueResult || value.tagged == nil || value.tagged.payload == nil || value.tagged.dropped {
 			return mir.NoBlock, "", capabilityError("Result switch received a non-Result value")
 		}
 		if len(terminator.Successors) != 2 {
 			return mir.NoBlock, "", fmt.Errorf("Result switch has %d successors, want 2", len(terminator.Successors))
 		}
-		if value.variant == "ok" {
+		if value.tagged.variant == "ok" {
 			return terminator.Successors[0], "", nil
 		}
-		if value.variant == "err" {
+		if value.tagged.variant == "err" {
 			return terminator.Successors[1], "", nil
 		}
-		return mir.NoBlock, "", fmt.Errorf("Result switch received invalid variant %q", value.variant)
+		return mir.NoBlock, "", fmt.Errorf("Result switch received invalid variant %q", value.tagged.variant)
 	case "option":
 		value, err := evaluateOne(locals, terminator.SwitchOperands)
 		if err != nil {
 			return mir.NoBlock, "", err
 		}
-		if value.kind != valueOption {
+		if value.kind != valueOption || value.tagged == nil || value.tagged.dropped {
 			return mir.NoBlock, "", capabilityError("Option switch received a non-Option value")
 		}
 		if len(terminator.Successors) != 2 {
 			return mir.NoBlock, "", fmt.Errorf("Option switch has %d successors, want 2", len(terminator.Successors))
 		}
-		if value.variant == "some" && value.payload != nil {
+		if value.tagged.variant == "some" && value.tagged.payload != nil {
 			return terminator.Successors[0], "", nil
 		}
-		if value.variant == "none" && value.payload == nil {
+		if value.tagged.variant == "none" && value.tagged.payload == nil {
 			return terminator.Successors[1], "", nil
 		}
-		return mir.NoBlock, "", fmt.Errorf("Option switch received invalid variant %q", value.variant)
+		return mir.NoBlock, "", fmt.Errorf("Option switch received invalid variant %q", value.tagged.variant)
 	case "checked-division":
 		left, right, err := evaluateTwoI32(locals, terminator.SwitchOperands)
 		if err != nil {

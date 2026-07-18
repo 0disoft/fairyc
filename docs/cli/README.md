@@ -30,9 +30,10 @@ branch joins, loop back-edges, Region parameter origins, `place`, and lexical Re
 Arena provider is included explicitly. It also checks the fixture-backed Result return, discard,
 propagation, must-use, and error-compatibility boundary. `experimental run` executes the selected
 module's zero-argument `main() -> i32` through verified MIR, including boolean `if`,
-short-circuit control, and scalar `while`, and reports an exact scalar result or
-canonical trap. It does not discover files, implement tagged resource payloads, resource drop
-traces, complete must-use dataflow, reassignment/close ownership, effects, host I/O, or native code generation. Infinite execution is stopped by the bounded interpreter and reported as an unsupported-capability result rather than a language trap. In
+short-circuit control, scalar `while`, whole resources, resource-bearing built-in tags, and
+source-linked drop traces, and reports an exact scalar result or canonical trap. It does not
+discover files, execute user drop bodies, implement complete must-use dataflow,
+reassignment/close ownership, effects, host I/O, or native code generation. Infinite execution is stopped by the bounded interpreter and reported as an unsupported-capability result rather than a language trap. In
 particular, it does not satisfy the planned `fairyc check` contract.
 
 Human developers can run the examples shown in the repository `README.md`. Agent verification uses

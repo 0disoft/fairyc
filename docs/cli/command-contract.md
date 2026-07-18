@@ -37,13 +37,14 @@ returns a capability error and never counts as a successful check.
 source file through parser, semantic analysis, Flow, MIR lowering, the MIR verifier, and the bounded
 MIR interpreter. The entry is the selected file module's zero-argument `main() -> i32`; boolean
 `if`, `!`, comparisons, source-level `&&` and `||` short-circuiting, scalar `while`, scalar tagged
-values, resource construction and field reads, whole-root call moves, and cleanup drop events are
+values, resource construction and field reads, whole-root and tagged-payload moves, resource-bearing
+built-in `Option` and `Result` values, and cleanup drop events are
 executable. The bounded interpreter reports its stable `step-limit` capability rather than hanging
-or reclassifying it as a language trap. Resource-bearing tagged payloads, user drop-body effects, Region reset, I/O, arguments, and
+or reclassifying it as a language trap. User drop-body effects, Region reset, I/O, arguments, and
 multi-file run input remain outside the current interpreter subset.
 
 `fairyc check` remains unimplemented. It must not be aliased to `check-syntax`, because the planned
-command below also requires tagged resource payloads, reassignment and close ownership, complete
+command below also requires reassignment and close ownership, complete
 must-use dataflow, effects, and later semantic groups beyond the current Flow prototype.
 
 ## Stage 0 surface

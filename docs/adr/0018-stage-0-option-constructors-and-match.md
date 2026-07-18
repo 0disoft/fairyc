@@ -41,8 +41,9 @@ The `None` path never executes a payload extraction. `?` remains Result-only in 
 
 - Resolver and type checking distinguish the two compiler-known Option variants from ordinary paths.
 - The MIR verifier checks variant-specific operand counts before interpretation or backend handoff.
-- Scalar and inert Option values may execute in the Stage 0 interpreter.
-- Resource-bearing Option construction, moves, and active-payload drop traces remain deferred.
+- Scalar, inert, and resource-bearing Option values may execute in the Stage 0 interpreter.
+- Resource-bearing construction, consuming match extraction, `None` cleanup, and active-payload drop
+  traces are fixture-backed; user-defined tagged layouts and drop-body effects remain deferred.
 
 ## Rejected alternatives
 

@@ -38,10 +38,14 @@ func (a *analyzer) resourceFlowFunction(module *moduleScope, function *ast.Funct
 			}
 		}
 	}
-	a.resourceBlock(module, function.Body, environment, false)
+	tailMode := resourceRead
+	if value := a.functions[function]; value != nil && a.isResource(value.typ) {
+		tailMode = resourceMove
+	}
+	a.resourceBlock(module, function.Body, environment, false, tailMode)
 }
 
-func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environment resourceEnvironment, scoped bool) {
+func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environment resourceEnvironment, scoped bool, tailMode resourceUse) {
 	if block == nil {
 		return
 	}
@@ -74,12 +78,14 @@ func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environm
 			a.resourceExpression(module, statement.Target, environment, resourceRead)
 		case statement.Kind == syntax.KindWhile:
 			a.resourceWhile(module, statement.Expression, environment)
+		case statement.Kind == syntax.KindReturn:
+			a.resourceExpression(module, statement.Expression, environment, resourceMove)
 		default:
 			a.resourceExpression(module, statement.Expression, environment, resourceRead)
 		}
 	}
 	if block.Tail != nil {
-		a.resourceExpression(module, block.Tail, environment, resourceRead)
+		a.resourceExpression(module, block.Tail, environment, tailMode)
 	}
 	if scoped {
 		for value := range environment {
@@ -121,8 +127,10 @@ func (a *analyzer) resourceExpression(module *moduleScope, expression *ast.Expre
 		a.resourceIf(module, expression, environment, mode)
 	case syntax.KindWhile:
 		a.resourceWhile(module, expression, environment)
+	case syntax.KindMatch:
+		a.resourceMatch(module, expression, environment, mode)
 	case syntax.KindBlock:
-		a.resourceBlock(module, expression.Block, environment, true)
+		a.resourceBlock(module, expression.Block, environment, true, mode)
 	default:
 		for _, child := range expression.Children {
 			a.resourceExpression(module, child, environment, resourceRead)
@@ -167,8 +175,66 @@ func (a *analyzer) resourceCall(module *moduleScope, expression *ast.Expression,
 			if value := a.parameter[parameter]; value != nil && a.isResource(value.typ) {
 				mode = resourceMove
 			}
+		} else if isBuiltinVariantPath(expression.Children[0].Text) && a.isResource(a.expressionTypes[argument]) {
+			mode = resourceMove
 		}
 		a.resourceExpression(module, argument, environment, mode)
+	}
+}
+
+func (a *analyzer) resourceMatch(module *moduleScope, expression *ast.Expression, environment resourceEnvironment, mode resourceUse) {
+	if len(expression.Children) != 3 {
+		return
+	}
+	scrutinee := expression.Children[0]
+	scrutineeMode := resourceRead
+	if a.isResource(a.expressionTypes[scrutinee]) {
+		scrutineeMode = resourceMove
+	}
+	a.resourceExpression(module, scrutinee, environment, scrutineeMode)
+	baseline := cloneResourceEnvironment(environment)
+	branches := make([]resourceEnvironment, 0, 2)
+	for _, arm := range expression.Children[1:] {
+		branch := cloneResourceEnvironment(baseline)
+		var binding *symbol
+		if arm != nil && arm.Kind == syntax.KindPattern && len(arm.Children) == 2 {
+			pattern := arm.Children[0]
+			if pattern != nil && pattern.Kind == syntax.KindPattern && len(pattern.Children) == 2 {
+				binding = a.resolved[pattern.Children[1]]
+				if binding != nil && a.isResource(binding.typ) {
+					branch[binding] = resourceValueState{
+						state:       ResourceLive,
+						declaration: span(binding.source, binding.declaration),
+					}
+				}
+			}
+			a.resourceExpression(module, arm.Children[1], branch, mode)
+		}
+		if binding != nil {
+			delete(branch, binding)
+		}
+		branches = append(branches, branch)
+	}
+	if len(branches) != 2 {
+		return
+	}
+	for value, before := range baseline {
+		left := branches[0][value]
+		right := branches[1][value]
+		joined := joinResourceState(left, right)
+		environment[value] = joined
+		if joined.state != ResourceMaybeLive || before.state == ResourceMaybeLive {
+			continue
+		}
+		move := left.move
+		if move == nil {
+			move = right.move
+		}
+		related := []RelatedSpan{{Role: "declaration", Span: before.declaration}}
+		if move != nil {
+			related = append(related, RelatedSpan{Role: "move", Span: *move})
+		}
+		a.addDiagnostic("E1104", span(module.file.Path, expression.Span), related...)
 	}
 }
 

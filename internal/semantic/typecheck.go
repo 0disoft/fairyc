@@ -499,13 +499,9 @@ func (c *typeChecker) checkOptionPath(expression *ast.Expression, result *hir.Ex
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "Option::Some used without one payload")
 		return hir.TypeInvalid
 	}
-	payloadType, ok := hir.OptionElement(expected)
+	_, ok := hir.OptionElement(expected)
 	if !ok {
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "Option::None without contextual Option type")
-		return hir.TypeInvalid
-	}
-	if c.analyzer.isResource(payloadType) {
-		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "resource-bearing Option construction")
 		return hir.TypeInvalid
 	}
 	result.Kind = "option-variant"
@@ -525,10 +521,6 @@ func (c *typeChecker) checkOptionConstructor(expression *ast.Expression, result 
 	}
 	if len(expression.Children) != 2 {
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "Option::Some arity other than one")
-		return hir.TypeInvalid
-	}
-	if c.analyzer.isResource(payloadType) {
-		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "resource-bearing Option construction")
 		return hir.TypeInvalid
 	}
 	payload, actual := c.checkExpression(expression.Children[1], payloadType)
@@ -552,10 +544,6 @@ func (c *typeChecker) checkResultConstructor(expression *ast.Expression, result 
 	payloadType := success
 	if variant == resultVariantErr {
 		payloadType = failure
-	}
-	if c.analyzer.isResource(payloadType) {
-		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "resource-bearing Result construction")
-		return hir.TypeInvalid
 	}
 	payload, actual := c.checkExpression(expression.Children[1], payloadType)
 	c.requireType("E1006", span(c.module.file.Path, expression.Children[1].Span), actual, payloadType, span(c.module.file.Path, expression.Span))
@@ -618,10 +606,6 @@ func (c *typeChecker) checkResultMatch(expression *ast.Expression, result *hir.E
 		if variant == resultVariantErr {
 			bindingType = failure
 		}
-		if c.analyzer.isResource(bindingType) {
-			c.analyzer.addUnsupported(c.module.file.Path, pattern.Span, "resource-bearing Result match")
-			return hir.TypeInvalid
-		}
 		binding.typ = bindingType
 		bindingSpan := span(c.module.file.Path, bindingExpression.Span)
 		c.hir.Locals = append(c.hir.Locals, hir.Local{Symbol: binding.id, Name: binding.name, Type: bindingType, Span: bindingSpan})
@@ -643,10 +627,6 @@ func (c *typeChecker) checkResultMatch(expression *ast.Expression, result *hir.E
 }
 
 func (c *typeChecker) checkOptionMatch(expression *ast.Expression, result *hir.Expression, expected, payloadType hir.Type) hir.Type {
-	if c.analyzer.isResource(payloadType) {
-		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "resource-bearing Option match")
-		return hir.TypeInvalid
-	}
 	seen := make(map[string]struct{}, 2)
 	actual := expected
 	for _, armExpression := range expression.Children[1:] {

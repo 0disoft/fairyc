@@ -22,8 +22,8 @@ Valid source cannot directly exercise missing terminators, invalid drop flags, u
 7. Result-branch assertions require exactly-once evaluation, moved success and error payloads, a dead input temporary on both branches, and ordered cleanup on the propagated-error path.
 8. Trap-path assertions use canonical semantic categories, have no successor, and contain no cleanup action. Normal completion of the same checked operation remains a separate cleanup path.
 9. Eliminated-form assertions prove that source-only `?`, implicit drop, nested side effects, or short-circuit syntax does not survive verified MIR.
-10. The first cases cover ordered nested calls, a resource call move, reverse lexical cleanup, `Result` error cleanup, and division trap paths.
-11. Partial construction, reassignment, Region reset, resource-bearing tagged payloads, and cleanup-suffix identity remain explicit deferrals. Verifier mutation coverage belongs to `spec/fixtures/mir-verifier/manifest-v0.json`.
+10. The first cases cover ordered nested calls, a resource call move, reverse lexical cleanup, `Result` error cleanup, and division trap paths. A later v0 case adds source-linked ownership transfer into and out of a resource-bearing `Option` match.
+11. Partial construction, reassignment, Region reset, backend variant-layout identity, and cleanup-suffix identity remain explicit deferrals. Verifier mutation coverage belongs to `spec/fixtures/mir-verifier/manifest-v0.json`.
 
 ## Rationale
 

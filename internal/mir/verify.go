@@ -100,6 +100,9 @@ func verifyFunction(function *Function) []VerificationError {
 			if operation.SourceForm != "" {
 				failures = append(failures, VerificationError{Code: "V1601", Entity: entity, Detail: "source-only form remains: " + operation.SourceForm})
 			}
+			if operation.MovePayload && operation.Kind != OperationResultPayload && operation.Kind != OperationOptionPayload {
+				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "payload move is attached to a non-payload operation"})
+			}
 			switch operation.Kind {
 			case OperationInitialize:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)

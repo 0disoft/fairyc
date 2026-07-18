@@ -51,8 +51,8 @@ separate executable contract when its payload and absence behavior are implement
 - Result constructors without a contextual `Result<T, E>` are rejected instead of guessed.
 - Flow, MIR, verifier, interpreter, fixtures, and CLI examples must agree on the qualified variant
   identities and exactly-once behavior before construction is reported as implemented.
-- Resource-bearing Result payload construction and active-payload drop traces remain deferred even
-  after the scalar and inert tagged slice becomes executable.
+- Resource-bearing Result payload construction, consuming match extraction, and active-payload drop
+  traces execute in the bounded interpreter; user-defined tagged layouts and drop-body effects remain deferred.
 
 ## Rejected alternatives
 

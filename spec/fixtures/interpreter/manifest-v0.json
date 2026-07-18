@@ -2,7 +2,7 @@
   "$schema": "./schema-v0.json",
   "schemaVersion": "fairyc.interpreter-fixtures/v0",
   "deferred": [
-    "resource-bearing Option and Result payload values and active-variant drop traces",
+    "user-defined drop-body execution and observable drop side effects",
     "Region mark and reset observations",
     "controlled partial I/O test intrinsics",
     "bounded stdout, stderr, process status, and argument fixtures"
@@ -205,6 +205,162 @@
           {
             "resourceType": "main::Token",
             "binding": { "source": "main.fy", "startByte": 94, "endByte": 99 }
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.interpreter.resource-option-some-match",
+      "sourceRoot": "cases/pass/resource-option-some-match/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42,
+        "drops": [
+          {
+            "resourceType": "main::Token",
+            "binding": { "source": "main.fy", "startByte": 243, "endByte": 248 }
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.interpreter.resource-option-some-drop",
+      "sourceRoot": "cases/pass/resource-option-some-drop/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42,
+        "drops": [
+          {
+            "resourceType": "main::Token",
+            "binding": { "source": "main.fy", "startByte": 110, "endByte": 117 }
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.interpreter.resource-option-none",
+      "sourceRoot": "cases/pass/resource-option-none/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42
+      }
+    },
+    {
+      "id": "pass.interpreter.resource-result-ok-match",
+      "sourceRoot": "cases/pass/resource-result-ok-match/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42,
+        "drops": [
+          {
+            "resourceType": "main::Token",
+            "binding": { "source": "main.fy", "startByte": 212, "endByte": 217 }
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.interpreter.resource-result-err-match",
+      "sourceRoot": "cases/pass/resource-result-err-match/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42,
+        "drops": [
+          {
+            "resourceType": "main::Token",
+            "binding": { "source": "main.fy", "startByte": 250, "endByte": 255 }
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.interpreter.resource-option-return",
+      "sourceRoot": "cases/pass/resource-option-return/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42,
+        "drops": [
+          {
+            "resourceType": "main::Token",
+            "binding": { "source": "main.fy", "startByte": 262, "endByte": 267 }
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.interpreter.resource-result-propagate-ok",
+      "sourceRoot": "cases/pass/resource-result-propagate-ok/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42,
+        "drops": [
+          {
+            "resourceType": "main::Token",
+            "binding": { "source": "main.fy", "startByte": 148, "endByte": 153 }
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.interpreter.resource-result-propagate-err",
+      "sourceRoot": "cases/pass/resource-result-propagate-err/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42,
+        "drops": [
+          {
+            "resourceType": "main::Token",
+            "binding": { "source": "main.fy", "startByte": 322, "endByte": 327 }
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.interpreter.resource-option-nested-drop",
+      "sourceRoot": "cases/pass/resource-option-nested-drop/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42,
+        "drops": [
+          {
+            "resourceType": "main::Token",
+            "binding": { "source": "main.fy", "startByte": 110, "endByte": 117 }
           }
         ]
       }
