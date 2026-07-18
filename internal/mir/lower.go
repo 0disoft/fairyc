@@ -224,6 +224,8 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		return Operand{Kind: OperandLocal, Local: destination}, nil
 	case "call":
 		return l.lowerCall(expression)
+	case "result-variant":
+		return l.lowerResultVariant(expression)
 	case "binary":
 		if len(expression.Children) != 2 {
 			return Operand{}, fmt.Errorf("binary expression has %d children", len(expression.Children))
@@ -251,6 +253,8 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		return l.lowerPropagate(expression)
 	case "if":
 		return l.lowerIf(expression)
+	case "match":
+		return l.lowerMatch(expression)
 	case "while":
 		return l.lowerWhile(expression)
 	case "block":
@@ -262,6 +266,107 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 	default:
 		return Operand{}, fmt.Errorf("unsupported HIR expression %q", expression.Kind)
 	}
+}
+
+func (l *functionLowerer) lowerResultVariant(expression *hir.Expression) (Operand, error) {
+	if len(expression.Children) != 1 || (expression.Variant != "ok" && expression.Variant != "err") {
+		return Operand{}, fmt.Errorf("malformed Result variant %q with %d payloads", expression.Variant, len(expression.Children))
+	}
+	payload, err := l.lowerExpression(&expression.Children[0])
+	if err != nil {
+		return Operand{}, err
+	}
+	if payload.Kind == OperandInvalid {
+		return Operand{}, fmt.Errorf("Result::%s payload has no value", expression.Variant)
+	}
+	destination := l.newTemporary()
+	l.appendOperation(Operation{
+		Kind: OperationResultConstruct, Span: expression.Span, DestinationLocal: destination,
+		Operands: []Operand{payload}, Variant: expression.Variant,
+	})
+	return Operand{Kind: OperandLocal, Local: destination}, nil
+}
+
+func (l *functionLowerer) lowerMatch(expression *hir.Expression) (Operand, error) {
+	if len(expression.Children) != 1 || len(expression.Arms) != 2 {
+		return Operand{}, fmt.Errorf("Result match has %d scrutinees and %d arms", len(expression.Children), len(expression.Arms))
+	}
+	scrutinee, err := l.lowerExpression(&expression.Children[0])
+	if err != nil {
+		return Operand{}, err
+	}
+	if scrutinee.Kind == OperandInvalid {
+		return Operand{}, fmt.Errorf("Result match scrutinee has no value")
+	}
+	branchLive := cloneLive(l.live)
+	okBlock := l.newBlock()
+	errBlock := l.newBlock()
+	joinBlock := l.newBlock()
+	l.terminate(Terminator{
+		Kind: TerminatorSwitch, Span: expression.Children[0].Span,
+		Successors: []BlockID{okBlock, errBlock}, UnwindSuccessor: NoBlock,
+		SwitchKind: "result", SwitchOperands: []Operand{scrutinee},
+	})
+
+	destination := NoLocal
+	if expression.Type != hir.TypeVoid {
+		destination = l.newTemporary()
+	}
+	blocks := map[string]BlockID{"ok": okBlock, "err": errBlock}
+	continuing := 0
+	var mergedLive map[hir.SymbolID]bool
+	seen := make(map[string]struct{}, 2)
+	for index := range expression.Arms {
+		arm := &expression.Arms[index]
+		block, found := blocks[arm.Variant]
+		if !found {
+			return Operand{}, fmt.Errorf("unsupported Result match variant %q", arm.Variant)
+		}
+		if _, duplicate := seen[arm.Variant]; duplicate {
+			return Operand{}, fmt.Errorf("duplicate Result match variant %q", arm.Variant)
+		}
+		seen[arm.Variant] = struct{}{}
+		l.current = block
+		l.live = cloneLive(branchLive)
+		l.appendOperation(Operation{
+			Kind: OperationResultPayload, Span: arm.BindingSpan, DestinationLocal: LocalID(arm.Binding),
+			Operands: []Operand{scrutinee}, Variant: arm.Variant,
+		})
+		armValue, lowerErr := l.lowerExpression(&arm.Expression)
+		if lowerErr != nil {
+			return Operand{}, lowerErr
+		}
+		if l.blockTerminated(l.current) {
+			continue
+		}
+		if destination != NoLocal {
+			if armValue.Kind == OperandInvalid {
+				return Operand{}, fmt.Errorf("value-producing Result match arm %q has no value", arm.Variant)
+			}
+			l.appendOperation(Operation{Kind: OperationAssign, Span: arm.Expression.Span, DestinationLocal: destination, Operands: []Operand{armValue}})
+		}
+		l.terminate(Terminator{Kind: TerminatorGoto, Span: arm.Expression.Span, Successors: []BlockID{joinBlock}, UnwindSuccessor: NoBlock})
+		if continuing == 0 {
+			mergedLive = cloneLive(l.live)
+		} else if !sameLiveState(mergedLive, l.live) {
+			return Operand{}, fmt.Errorf("Result match arms disagree on resource state after Flow validation")
+		}
+		continuing++
+	}
+	if len(seen) != 2 {
+		return Operand{}, fmt.Errorf("non-exhaustive Result match")
+	}
+	l.current = joinBlock
+	if continuing == 0 {
+		l.live = cloneLive(branchLive)
+		l.terminate(Terminator{Kind: TerminatorUnreachable, Span: expression.Span, UnwindSuccessor: NoBlock})
+		return Operand{}, nil
+	}
+	l.live = mergedLive
+	if destination == NoLocal {
+		return Operand{}, nil
+	}
+	return Operand{Kind: OperandLocal, Local: destination}, nil
 }
 
 func (l *functionLowerer) lowerWhile(expression *hir.Expression) (Operand, error) {
@@ -513,22 +618,32 @@ func (l *functionLowerer) lowerPropagate(expression *hir.Expression) (Operand, e
 		return Operand{}, fmt.Errorf("propagate expression has %d children", len(expression.Children))
 	}
 	operand := &expression.Children[0]
-	if _, err := l.lowerExpression(operand); err != nil {
+	resultValue, err := l.lowerExpression(operand)
+	if err != nil {
 		return Operand{}, err
 	}
+	if resultValue.Kind == OperandInvalid {
+		return Operand{}, fmt.Errorf("propagate operand has no value")
+	}
 	if l.isLiveResourcePath(operand) {
+		movedResult := l.newTemporary()
+		l.appendOperation(Operation{Kind: OperationAssign, Span: operand.Span, DestinationLocal: movedResult, Operands: []Operand{resultValue}})
 		l.appendOperation(Operation{Kind: OperationMove, Span: operand.Span, Symbol: operand.Symbol, Destination: "result-branch"})
 		l.live[operand.Symbol] = false
+		resultValue = Operand{Kind: OperandLocal, Local: movedResult}
 	}
-	l.appendOperation(Operation{Kind: OperationResultSwitch, Span: expression.Span})
+	l.appendOperation(Operation{Kind: OperationResultSwitch, Span: expression.Span, Operands: []Operand{resultValue}})
 	success := l.newBlock()
 	errorBlock := l.newBlock()
-	l.terminate(Terminator{Kind: TerminatorSwitch, Span: expression.Span, Successors: []BlockID{success, errorBlock}, UnwindSuccessor: NoBlock})
+	l.terminate(Terminator{
+		Kind: TerminatorSwitch, Span: expression.Span, Successors: []BlockID{success, errorBlock}, UnwindSuccessor: NoBlock,
+		SwitchKind: "result", SwitchOperands: []Operand{resultValue},
+	})
 
 	errorLive := cloneLive(l.live)
 	l.current = errorBlock
 	errorActions := l.emitCleanup(errorLive)
-	l.terminate(Terminator{Kind: TerminatorReturn, Span: expression.Span, UnwindSuccessor: NoBlock})
+	l.terminate(Terminator{Kind: TerminatorReturn, Span: expression.Span, UnwindSuccessor: NoBlock, ReturnValue: resultValue})
 	question := hir.Span{Source: expression.Span.Source, StartByte: max(expression.Span.StartByte, expression.Span.EndByte-1), EndByte: expression.Span.EndByte}
 	l.result.ResultBranches = append(l.result.ResultBranches, ResultBranchFact{
 		Question: question, ResultExpression: operand.Span, EvaluationCount: 1,
@@ -537,7 +652,12 @@ func (l *functionLowerer) lowerPropagate(expression *hir.Expression) (Operand, e
 	})
 	l.result.EliminatedForms = append(l.result.EliminatedForms, EliminatedFormFact{Form: "question", RemainingCount: 0})
 	l.current = success
-	return Operand{}, nil
+	payload := l.newTemporary()
+	l.appendOperation(Operation{
+		Kind: OperationResultPayload, Span: expression.Span, DestinationLocal: payload,
+		Operands: []Operand{resultValue}, Variant: "ok",
+	})
+	return Operand{Kind: OperandLocal, Local: payload}, nil
 }
 
 func (l *functionLowerer) lowerReturn(expression *hir.Expression, exit hir.Span) error {
@@ -639,6 +759,11 @@ func containsCall(expression *hir.Expression) bool {
 	}
 	for index := range expression.Children {
 		if containsCall(&expression.Children[index]) {
+			return true
+		}
+	}
+	for index := range expression.Arms {
+		if containsCall(&expression.Arms[index].Expression) {
 			return true
 		}
 	}

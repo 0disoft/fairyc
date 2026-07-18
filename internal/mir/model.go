@@ -130,6 +130,8 @@ const (
 	OperationAssign          OperationKind = "assign"
 	OperationUnary           OperationKind = "unary"
 	OperationBinary          OperationKind = "binary"
+	OperationResultConstruct OperationKind = "result-construct"
+	OperationResultPayload   OperationKind = "result-payload"
 )
 
 // LocalID identifies one source local, parameter, or compiler temporary.
@@ -166,6 +168,7 @@ type Operation struct {
 	DestinationLocal LocalID
 	Operands         []Operand
 	Operator         string
+	Variant          string
 	TrapCategories   []string
 	FlagClearedFirst bool
 	SourceForm       string

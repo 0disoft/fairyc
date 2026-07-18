@@ -151,6 +151,20 @@ func verifyFunction(function *Function) []VerificationError {
 			case OperationAssign, OperationUnary, OperationBinary:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationResultConstruct, OperationResultPayload:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if len(operation.Operands) != 1 || operation.DestinationLocal == NoLocal {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "Result operation must have one operand and one destination"})
+				}
+				if operation.Variant != "ok" && operation.Variant != "err" {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "Result operation has an invalid variant"})
+				}
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationResultSwitch:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if len(operation.Operands) != 1 {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "Result switch operation must have one operand"})
+				}
 			}
 		}
 
@@ -226,6 +240,8 @@ func validSwitchShape(terminator Terminator) bool {
 	case "":
 		return len(terminator.SwitchOperands) == 0 && len(terminator.Successors) == 2
 	case "bool":
+		return len(terminator.SwitchOperands) == 1 && len(terminator.Successors) == 2
+	case "result":
 		return len(terminator.SwitchOperands) == 1 && len(terminator.Successors) == 2
 	case "checked-division":
 		return len(terminator.SwitchOperands) == 2 && len(terminator.Successors) == 2

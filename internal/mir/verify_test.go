@@ -66,3 +66,45 @@ func TestVerifyRejectsMalformedBoolSwitch(t *testing.T) {
 		t.Fatalf("Verify() failures = %+v, want one V1001", failures)
 	}
 }
+
+func TestVerifyRejectsMalformedResultOperation(t *testing.T) {
+	t.Parallel()
+	program := Program{Functions: []Function{{
+		Name:  "main::main",
+		Entry: 0,
+		Blocks: []Block{{
+			ID: 0,
+			Operations: []Operation{{
+				Kind: OperationResultConstruct, DestinationLocal: NoLocal, Variant: "unknown",
+			}},
+			Terminator: Terminator{Kind: TerminatorReturn, UnwindSuccessor: NoBlock, ReturnValue: Operand{Kind: OperandI32, I32: 0}},
+		}},
+	}}}
+	failures := Verify(program)
+	if len(failures) != 1 || failures[0].Code != "V1001" {
+		t.Fatalf("Verify() failures = %+v, want one compacted V1001", failures)
+	}
+}
+
+func TestVerifyRejectsMalformedResultSwitch(t *testing.T) {
+	t.Parallel()
+	program := Program{Functions: []Function{{
+		Name:  "main::main",
+		Entry: 0,
+		Blocks: []Block{{
+			ID: 0,
+			Terminator: Terminator{
+				Kind: TerminatorSwitch, Successors: []BlockID{1, 2}, UnwindSuccessor: NoBlock,
+				SwitchKind: "result",
+			},
+		}, {
+			ID: 1, Terminator: Terminator{Kind: TerminatorReturn, UnwindSuccessor: NoBlock, ReturnValue: Operand{Kind: OperandI32, I32: 0}},
+		}, {
+			ID: 2, Terminator: Terminator{Kind: TerminatorReturn, UnwindSuccessor: NoBlock, ReturnValue: Operand{Kind: OperandI32, I32: 0}},
+		}},
+	}}}
+	failures := Verify(program)
+	if len(failures) != 1 || failures[0].Code != "V1001" {
+		t.Fatalf("Verify() failures = %+v, want one V1001", failures)
+	}
+}

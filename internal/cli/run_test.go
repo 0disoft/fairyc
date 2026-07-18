@@ -218,6 +218,27 @@ func TestExperimentalRunInterpretsScalarProgram(t *testing.T) {
 	}
 }
 
+func TestExperimentalRunInterpretsResultMatchAndPropagation(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", `module main;
+fn increment(input: Result<i32, i32>) -> Result<i32, i32> {
+    let value: i32 = input?;
+    Result::Ok(value + 1)
+}
+fn main() -> i32 {
+    match increment(Result::Ok(41)) {
+        Result::Ok(value) => value,
+        Result::Err(error) => -error,
+    }
+}
+`)
+	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
+	if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
 func TestExperimentalRunReportsCanonicalTrap(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()

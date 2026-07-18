@@ -1,13 +1,16 @@
 module examples::run::main;
 
-fn answer(enabled: bool) -> i32 {
+fn answer(enabled: bool) -> Result<i32, i32> {
     if enabled {
-        20 + 22
+        Result::Ok(20 + 22)
     } else {
-        0
+        Result::Err(-1)
     }
 }
 
 fn main() -> i32 {
-    answer(true && 20 < 22)
+    match answer(true && 20 < 22) {
+        Result::Ok(value) => value,
+        Result::Err(error) => error,
+    }
 }

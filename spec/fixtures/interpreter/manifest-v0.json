@@ -2,8 +2,8 @@
   "$schema": "./schema-v0.json",
   "schemaVersion": "fairyc.interpreter-fixtures/v0",
   "deferred": [
-    "shallow tagged Option and Result values",
-    "resource payload values and active-variant drop traces",
+    "shallow tagged Option values",
+    "resource-bearing Result payload values and active-variant drop traces",
     "Region mark and reset observations",
     "controlled partial I/O test intrinsics",
     "bounded stdout, stderr, process status, and argument fixtures"
@@ -91,6 +91,54 @@
     {
       "id": "pass.interpreter.bounded-loop",
       "sourceRoot": "cases/pass/bounded-loop/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42
+      }
+    },
+    {
+      "id": "pass.interpreter.result-match-ok",
+      "sourceRoot": "cases/pass/result-match-ok/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42
+      }
+    },
+    {
+      "id": "pass.interpreter.result-match-err",
+      "sourceRoot": "cases/pass/result-match-err/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42
+      }
+    },
+    {
+      "id": "pass.interpreter.result-propagate-ok",
+      "sourceRoot": "cases/pass/result-propagate-ok/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42
+      }
+    },
+    {
+      "id": "pass.interpreter.result-propagate-err",
+      "sourceRoot": "cases/pass/result-propagate-err/src",
       "sources": ["main.fy"],
       "entry": "main::main",
       "expect": {

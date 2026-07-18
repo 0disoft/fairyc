@@ -71,7 +71,18 @@ func Execute(program mir.Program, entry string) (Outcome, error) {
 	if len(function.Parameters) != 0 || function.ResultType != hir.TypeI32 {
 		return Outcome{}, capabilityError("entry function %q must have type fn() -> i32", entry)
 	}
-	return runtime.call(function, nil, 0)
+	completion, err := runtime.call(function, nil, 0)
+	if err != nil {
+		return Outcome{}, err
+	}
+	if completion.trapCategory != "" {
+		return Outcome{Kind: OutcomeTrap, TrapCategory: completion.trapCategory}, nil
+	}
+	value, err := completion.value.asI32()
+	if err != nil {
+		return Outcome{}, fmt.Errorf("entry function %q: %w", entry, err)
+	}
+	return Outcome{Kind: OutcomeReturn, Value: value}, nil
 }
 
 type runtime struct {
@@ -80,65 +91,133 @@ type runtime struct {
 	steps    int
 }
 
-func (r *runtime) call(function *mir.Function, arguments []int32, depth int) (Outcome, error) {
+type valueKind uint8
+
+const (
+	valueI32 valueKind = iota + 1
+	valueResult
+)
+
+type runtimeValue struct {
+	kind    valueKind
+	i32     int32
+	variant string
+	payload *runtimeValue
+}
+
+func i32Value(value int32) runtimeValue {
+	return runtimeValue{kind: valueI32, i32: value}
+}
+
+func resultValue(variant string, payload runtimeValue) (runtimeValue, error) {
+	if variant != "ok" && variant != "err" {
+		return runtimeValue{}, fmt.Errorf("invalid Result variant %q", variant)
+	}
+	copy := payload
+	return runtimeValue{kind: valueResult, variant: variant, payload: &copy}, nil
+}
+
+func (v runtimeValue) asI32() (int32, error) {
+	if v.kind != valueI32 {
+		return 0, capabilityError("value is not an executable i32 scalar")
+	}
+	return v.i32, nil
+}
+
+func (v runtimeValue) resultPayload(expected string) (runtimeValue, error) {
+	if v.kind != valueResult || v.payload == nil {
+		return runtimeValue{}, capabilityError("value is not an executable Result")
+	}
+	if v.variant != expected {
+		return runtimeValue{}, fmt.Errorf("Result payload expects %q, got %q", expected, v.variant)
+	}
+	return *v.payload, nil
+}
+
+type callCompletion struct {
+	value        runtimeValue
+	trapCategory string
+}
+
+func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth int) (callCompletion, error) {
 	if depth >= maxCallDepth {
-		return Outcome{}, capabilityErrorKind("call-depth-limit", "interpreter call-depth limit exceeded")
+		return callCompletion{}, capabilityErrorKind("call-depth-limit", "interpreter call-depth limit exceeded")
 	}
 	if len(arguments) != len(function.Parameters) {
-		return Outcome{}, fmt.Errorf("call %q received %d argument(s), want %d", function.Name, len(arguments), len(function.Parameters))
+		return callCompletion{}, fmt.Errorf("call %q received %d argument(s), want %d", function.Name, len(arguments), len(function.Parameters))
 	}
-	locals := make(map[mir.LocalID]int32)
+	locals := make(map[mir.LocalID]runtimeValue)
 	for index, parameter := range function.Parameters {
 		locals[parameter] = arguments[index]
 	}
 	current := function.Entry
 	for {
 		if r.steps <= 0 {
-			return Outcome{}, capabilityErrorKind(LimitStep, "interpreter step limit exceeded")
+			return callCompletion{}, capabilityErrorKind(LimitStep, "interpreter step limit exceeded")
 		}
 		r.steps--
 		if int(current) < 0 || int(current) >= len(function.Blocks) {
-			return Outcome{}, fmt.Errorf("function %q jumps to missing block %d", function.Name, current)
+			return callCompletion{}, fmt.Errorf("function %q jumps to missing block %d", function.Name, current)
 		}
 		block := function.Blocks[current]
 		for _, operation := range block.Operations {
 			if r.steps <= 0 {
-				return Outcome{}, capabilityErrorKind(LimitStep, "interpreter step limit exceeded")
+				return callCompletion{}, capabilityErrorKind(LimitStep, "interpreter step limit exceeded")
 			}
 			r.steps--
 			switch operation.Kind {
 			case mir.OperationAssign:
 				value, err := evaluateOne(locals, operation.Operands)
 				if err != nil {
-					return Outcome{}, fmt.Errorf("assign in %q: %w", function.Name, err)
+					return callCompletion{}, fmt.Errorf("assign in %q: %w", function.Name, err)
 				}
 				locals[operation.DestinationLocal] = value
 			case mir.OperationUnary:
-				value, err := evaluateOne(locals, operation.Operands)
+				value, err := evaluateOneI32(locals, operation.Operands)
 				if err != nil {
-					return Outcome{}, fmt.Errorf("unary in %q: %w", function.Name, err)
+					return callCompletion{}, fmt.Errorf("unary in %q: %w", function.Name, err)
 				}
 				result, trap, err := unary(operation.Operator, value)
 				if err != nil {
-					return Outcome{}, err
+					return callCompletion{}, err
 				}
 				if trap != "" {
-					return Outcome{Kind: OutcomeTrap, TrapCategory: trap}, nil
+					return callCompletion{trapCategory: trap}, nil
 				}
-				locals[operation.DestinationLocal] = result
+				locals[operation.DestinationLocal] = i32Value(result)
 			case mir.OperationBinary:
-				left, right, err := evaluateTwo(locals, operation.Operands)
+				left, right, err := evaluateTwoI32(locals, operation.Operands)
 				if err != nil {
-					return Outcome{}, fmt.Errorf("binary in %q: %w", function.Name, err)
+					return callCompletion{}, fmt.Errorf("binary in %q: %w", function.Name, err)
 				}
 				result, trap, err := binary(operation.Operator, left, right)
 				if err != nil {
-					return Outcome{}, err
+					return callCompletion{}, err
 				}
 				if trap != "" {
-					return Outcome{Kind: OutcomeTrap, TrapCategory: trap}, nil
+					return callCompletion{trapCategory: trap}, nil
 				}
-				locals[operation.DestinationLocal] = result
+				locals[operation.DestinationLocal] = i32Value(result)
+			case mir.OperationResultConstruct:
+				payload, err := evaluateOne(locals, operation.Operands)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("Result construction in %q: %w", function.Name, err)
+				}
+				constructed, err := resultValue(operation.Variant, payload)
+				if err != nil {
+					return callCompletion{}, err
+				}
+				locals[operation.DestinationLocal] = constructed
+			case mir.OperationResultPayload:
+				result, err := evaluateOne(locals, operation.Operands)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("Result payload in %q: %w", function.Name, err)
+				}
+				payload, err := result.resultPayload(operation.Variant)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("Result payload in %q: %w", function.Name, err)
+				}
+				locals[operation.DestinationLocal] = payload
 			}
 		}
 
@@ -147,91 +226,107 @@ func (r *runtime) call(function *mir.Function, arguments []int32, depth int) (Ou
 		case mir.TerminatorGoto:
 			next, err := oneSuccessor(terminator)
 			if err != nil {
-				return Outcome{}, err
+				return callCompletion{}, err
 			}
 			current = next
 		case mir.TerminatorCall:
 			callee := r.bySymbol[terminator.Callee]
 			if callee == nil {
-				return Outcome{}, fmt.Errorf("call in %q names missing symbol %d", function.Name, terminator.Callee)
+				return callCompletion{}, fmt.Errorf("call in %q names missing symbol %d", function.Name, terminator.Callee)
 			}
-			values := make([]int32, len(terminator.Arguments))
+			values := make([]runtimeValue, len(terminator.Arguments))
 			for index, operand := range terminator.Arguments {
 				value, err := evaluate(locals, operand)
 				if err != nil {
-					return Outcome{}, fmt.Errorf("call argument in %q: %w", function.Name, err)
+					return callCompletion{}, fmt.Errorf("call argument in %q: %w", function.Name, err)
 				}
 				values[index] = value
 			}
-			outcome, err := r.call(callee, values, depth+1)
-			if err != nil || outcome.Kind == OutcomeTrap {
-				return outcome, err
+			completion, err := r.call(callee, values, depth+1)
+			if err != nil || completion.trapCategory != "" {
+				return completion, err
 			}
-			locals[terminator.DestinationLocal] = outcome.Value
+			locals[terminator.DestinationLocal] = completion.value
 			next, err := oneSuccessor(terminator)
 			if err != nil {
-				return Outcome{}, err
+				return callCompletion{}, err
 			}
 			current = next
 		case mir.TerminatorSwitch:
 			next, trap, err := evaluateSwitch(locals, terminator)
 			if err != nil {
-				return Outcome{}, err
+				return callCompletion{}, err
 			}
 			if trap != "" {
-				return Outcome{Kind: OutcomeTrap, TrapCategory: trap}, nil
+				return callCompletion{trapCategory: trap}, nil
 			}
 			current = next
 		case mir.TerminatorReturn:
 			value, err := evaluate(locals, terminator.ReturnValue)
 			if err != nil {
-				return Outcome{}, fmt.Errorf("return from %q: %w", function.Name, err)
+				return callCompletion{}, fmt.Errorf("return from %q: %w", function.Name, err)
 			}
-			return Outcome{Kind: OutcomeReturn, Value: value}, nil
+			return callCompletion{value: value}, nil
 		case mir.TerminatorTrap:
 			if len(terminator.TrapCategories) == 0 {
-				return Outcome{}, fmt.Errorf("trap in %q has no category", function.Name)
+				return callCompletion{}, fmt.Errorf("trap in %q has no category", function.Name)
 			}
-			return Outcome{Kind: OutcomeTrap, TrapCategory: terminator.TrapCategories[0]}, nil
+			return callCompletion{trapCategory: terminator.TrapCategories[0]}, nil
 		case mir.TerminatorUnreachable:
-			return Outcome{}, fmt.Errorf("function %q reached an unreachable MIR block", function.Name)
+			return callCompletion{}, fmt.Errorf("function %q reached an unreachable MIR block", function.Name)
 		default:
-			return Outcome{}, fmt.Errorf("function %q has unsupported terminator %q", function.Name, terminator.Kind)
+			return callCompletion{}, fmt.Errorf("function %q has unsupported terminator %q", function.Name, terminator.Kind)
 		}
 	}
 }
 
-func evaluate(locals map[mir.LocalID]int32, operand mir.Operand) (int32, error) {
+func evaluate(locals map[mir.LocalID]runtimeValue, operand mir.Operand) (runtimeValue, error) {
 	switch operand.Kind {
 	case mir.OperandI32:
-		return operand.I32, nil
+		return i32Value(operand.I32), nil
 	case mir.OperandLocal:
 		value, found := locals[operand.Local]
 		if !found {
-			return 0, capabilityError("local %d has no scalar value", operand.Local)
+			return runtimeValue{}, capabilityError("local %d has no executable value", operand.Local)
 		}
 		return value, nil
 	default:
-		return 0, capabilityError("operand has no executable scalar value")
+		return runtimeValue{}, capabilityError("operand has no executable value")
 	}
 }
 
-func evaluateOne(locals map[mir.LocalID]int32, operands []mir.Operand) (int32, error) {
+func evaluateOne(locals map[mir.LocalID]runtimeValue, operands []mir.Operand) (runtimeValue, error) {
 	if len(operands) != 1 {
-		return 0, fmt.Errorf("operation has %d operands, want 1", len(operands))
+		return runtimeValue{}, fmt.Errorf("operation has %d operands, want 1", len(operands))
 	}
 	return evaluate(locals, operands[0])
 }
 
-func evaluateTwo(locals map[mir.LocalID]int32, operands []mir.Operand) (int32, int32, error) {
+func evaluateOneI32(locals map[mir.LocalID]runtimeValue, operands []mir.Operand) (int32, error) {
+	value, err := evaluateOne(locals, operands)
+	if err != nil {
+		return 0, err
+	}
+	return value.asI32()
+}
+
+func evaluateTwoI32(locals map[mir.LocalID]runtimeValue, operands []mir.Operand) (int32, int32, error) {
 	if len(operands) != 2 {
 		return 0, 0, fmt.Errorf("operation has %d operands, want 2", len(operands))
 	}
-	left, err := evaluate(locals, operands[0])
+	leftValue, err := evaluate(locals, operands[0])
 	if err != nil {
 		return 0, 0, err
 	}
-	right, err := evaluate(locals, operands[1])
+	left, err := leftValue.asI32()
+	if err != nil {
+		return 0, 0, err
+	}
+	rightValue, err := evaluate(locals, operands[1])
+	if err != nil {
+		return 0, 0, err
+	}
+	right, err := rightValue.asI32()
 	return left, right, err
 }
 
@@ -242,10 +337,10 @@ func oneSuccessor(terminator mir.Terminator) (mir.BlockID, error) {
 	return terminator.Successors[0], nil
 }
 
-func evaluateSwitch(locals map[mir.LocalID]int32, terminator mir.Terminator) (mir.BlockID, string, error) {
+func evaluateSwitch(locals map[mir.LocalID]runtimeValue, terminator mir.Terminator) (mir.BlockID, string, error) {
 	switch terminator.SwitchKind {
 	case "bool":
-		value, err := evaluateOne(locals, terminator.SwitchOperands)
+		value, err := evaluateOneI32(locals, terminator.SwitchOperands)
 		if err != nil {
 			return mir.NoBlock, "", err
 		}
@@ -256,8 +351,26 @@ func evaluateSwitch(locals map[mir.LocalID]int32, terminator mir.Terminator) (mi
 			return mir.NoBlock, "", fmt.Errorf("bool switch received non-boolean value %d", value)
 		}
 		return terminator.Successors[value^1], "", nil
+	case "result":
+		value, err := evaluateOne(locals, terminator.SwitchOperands)
+		if err != nil {
+			return mir.NoBlock, "", err
+		}
+		if value.kind != valueResult || value.payload == nil {
+			return mir.NoBlock, "", capabilityError("Result switch received a non-Result value")
+		}
+		if len(terminator.Successors) != 2 {
+			return mir.NoBlock, "", fmt.Errorf("Result switch has %d successors, want 2", len(terminator.Successors))
+		}
+		if value.variant == "ok" {
+			return terminator.Successors[0], "", nil
+		}
+		if value.variant == "err" {
+			return terminator.Successors[1], "", nil
+		}
+		return mir.NoBlock, "", fmt.Errorf("Result switch received invalid variant %q", value.variant)
 	case "checked-division":
-		left, right, err := evaluateTwo(locals, terminator.SwitchOperands)
+		left, right, err := evaluateTwoI32(locals, terminator.SwitchOperands)
 		if err != nil {
 			return mir.NoBlock, "", err
 		}
