@@ -166,6 +166,12 @@ The minimum operations are fallible open, partial read, partial write, `write_al
 
 On the Linux v0 profile, `close(self)` consumes ownership on success and failure and is never retried automatically. A caller requiring durability uses `sync` before `close`. Automatic drop performs best-effort close, returns no error, allocates nothing, and emits no log.
 
+The provisional Linux C helper now implements bounded C-string paths, closed open options, partial
+read/write counts, progress-reporting `write_all`, `fsync`, consuming close, and silent best-effort
+drop. Close clears ownership before one kernel call, including the failure path. Its native probe
+uses three-byte reads and a forced `EBADF` close failure; four compiler/profile runs are configured
+but unobserved, and no Fairy source API or effect declaration is connected.
+
 This is not a generic POSIX contract. POSIX.1-2024 and Linux differ for interrupted close behavior; other targets must define their own consuming-close rule before claiming support.
 
 ## Foreign pointer retention

@@ -44,7 +44,7 @@ func TestBuildSmokeSourceReachesCEmission(t *testing.T) {
 
 func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 	t.Parallel()
-	if reportSchemaVersion != "fairyc.native-c-report/v10" {
+	if reportSchemaVersion != "fairyc.native-c-report/v11" {
 		t.Fatalf("report schema = %q", reportSchemaVersion)
 	}
 	encoded, err := json.Marshal(Report{
@@ -58,11 +58,12 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		ArenaExecutions:      4,
 		TextViewExecutions:   4,
 		OwnedTextExecutions:  4,
+		LinuxFileExecutions:  4,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v10"`) ||
+	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v11"`) ||
 		!strings.Contains(string(encoded), `"dropTraceExecutions":68`) ||
 		!strings.Contains(string(encoded), `"layoutCases":["pass.array-i32-three","pass.pointer"]`) ||
 		!strings.Contains(string(encoded), `"layoutProbeExecutions":4`) ||
@@ -75,7 +76,8 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		!strings.Contains(string(encoded), `"bufferExecutions":4`) ||
 		!strings.Contains(string(encoded), `"arenaExecutions":4`) ||
 		!strings.Contains(string(encoded), `"textViewExecutions":4`) ||
-		!strings.Contains(string(encoded), `"ownedTextExecutions":4`) {
+		!strings.Contains(string(encoded), `"ownedTextExecutions":4`) ||
+		!strings.Contains(string(encoded), `"linuxFileExecutions":4`) {
 		t.Fatalf("report JSON = %s", encoded)
 	}
 }

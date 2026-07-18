@@ -37,6 +37,12 @@ var stage0OwnedText string
 //go:embed stage0_owned_text_probe.c
 var stage0OwnedTextProbe string
 
+//go:embed stage0_linux_file.c
+var stage0LinuxFile string
+
+//go:embed stage0_linux_file_probe.c
+var stage0LinuxFileProbe string
+
 // SystemHeapSource returns the provisional x86_64-linux-gnu SystemHeap implementation.
 func SystemHeapSource() (string, error) {
 	return canonicalSource("SystemHeap", stage0SystemHeap)
@@ -113,6 +119,16 @@ func OwnedTextSource() (string, error) {
 // OwnedTextProbeSource returns the closed native conformance probe for String and CString.
 func OwnedTextProbeSource() (string, error) {
 	return canonicalSource("owned text probe", stage0OwnedTextProbe)
+}
+
+// LinuxFileSource returns the target-specific partial-I/O and consuming-close implementation.
+func LinuxFileSource() (string, error) {
+	return canonicalSource("Linux File", stage0LinuxFile)
+}
+
+// LinuxFileProbeSource returns the closed native conformance probe for Linux File.
+func LinuxFileProbeSource() (string, error) {
+	return canonicalSource("Linux File probe", stage0LinuxFileProbe)
 }
 
 func canonicalSource(name, source string) (string, error) {

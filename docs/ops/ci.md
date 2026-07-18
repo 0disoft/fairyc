@@ -39,9 +39,9 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
   products, and requires exit `42` with no output. A missing compiler or libc identity fails the job
   instead of producing a skip.
 - The native job retains no generated C, object, executable, cache, or report artifact. Its bounded
-  `fairyc.native-c-report/v10` JSON report is written only to the job log and contains toolchain
+  `fairyc.native-c-report/v11` JSON report is written only to the job log and contains toolchain
   fingerprints, fixture IDs, the sorted layout-case IDs, and drop-trace, layout-probe, and
-  sanitizer, ABI case/direction, SystemHeap, Buffer, Arena, text-view, owned-text, and product-build execution counts but no temporary path.
+  sanitizer, ABI case/direction, SystemHeap, Buffer, Arena, text, Linux File, and product-build execution counts but no temporary path.
 
 The containing Mustflow workspace provides local parity through `fairyc_go_vet` and
 `fairyc_go_test`, plus the Linux-only `fairyc_native_c_test` intent. Those intents additionally

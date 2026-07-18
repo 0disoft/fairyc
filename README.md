@@ -88,6 +88,9 @@ Buffer-backed String and CString C helpers now preserve ownership on failed UTF-
 support overlap-safe String append, expose immutable bounded views, reject interior NUL, and append
 exactly one C terminator. Their native probe is configured but unobserved, and no source API is
 claimed.
+The Linux File C slice now exposes partial I/O, write-all progress, sync, and consuming close that
+is never retried, even after failure. Its four-way probe is configured but unobserved and source
+effects remain unimplemented.
 A deterministic native C11 probe now translates the nine valid layout cases into private numeric
 types and is configured for Clang/GCC at `-O0` and `-O2`. This Windows host cannot execute those
 four probe runs, and no hosted success receipt has been observed, so `c-layout-probes` remains a

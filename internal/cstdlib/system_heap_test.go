@@ -173,3 +173,25 @@ func TestOwnedTextSourcesPreserveOwnershipAndNULTermination(t *testing.T) {
 		t.Fatalf("OwnedTextSource() is not deterministic canonical C: %v", err)
 	}
 }
+
+func TestLinuxFileSourcesConsumeCloseAndExposePartialIO(t *testing.T) {
+	t.Parallel()
+	implementation, err := LinuxFileSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	probe, err := LinuxFileProbeSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, required := range []string{"fy_std_linux_file_read_v0", "fy_std_linux_file_write_v0", "fy_std_linux_file_write_all_v0", "file->descriptor = -1", "(void)close(descriptor)"} {
+		if !strings.Contains(implementation, required) {
+			t.Errorf("Linux File implementation is missing %q", required)
+		}
+	}
+	for _, required := range []string{"mkstemp", "result.error_number != EBADF", "fy_std_linux_file_read_v0(&file, received + total, 3)"} {
+		if !strings.Contains(probe, required) {
+			t.Errorf("Linux File probe is missing %q", required)
+		}
+	}
+}
