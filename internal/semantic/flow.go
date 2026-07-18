@@ -225,7 +225,7 @@ func (a *analyzer) expressionOrigins(module *moduleScope, expression *ast.Expres
 				return []flowOrigin{a.originForSymbol(value)}
 			}
 		}
-	case syntax.KindGroup:
+	case syntax.KindGroup, syntax.KindUnsafe:
 		if len(expression.Children) == 1 {
 			return a.expressionOrigins(module, expression.Children[0], origins)
 		}

@@ -158,7 +158,7 @@ func (a *analyzer) resultFlowExpression(module *moduleScope, expression *ast.Exp
 	case syntax.KindBlock:
 		childUse := a.applyResultUse(module, expression, environment, use)
 		return a.resultFlowBlock(module, expression.Block, environment, childUse, false)
-	case syntax.KindGroup:
+	case syntax.KindGroup, syntax.KindUnsafe:
 		childUse := a.applyResultUse(module, expression, environment, use)
 		if len(expression.Children) == 1 {
 			return a.resultFlowExpression(module, expression.Children[0], environment, childUse)

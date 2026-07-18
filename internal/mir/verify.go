@@ -33,8 +33,10 @@ type verificationState struct {
 // Verify checks the executable invariants required before MIR handoff.
 func Verify(program Program) []VerificationError {
 	resourceTypes, failures := verifyResourceTypes(program.ResourceTypes)
+	foreignFunctions, foreignFailures := verifyForeignFunctions(program.ForeignFunctions)
+	failures = append(failures, foreignFailures...)
 	for index := range program.Functions {
-		failures = append(failures, verifyFunction(&program.Functions[index], resourceTypes)...)
+		failures = append(failures, verifyFunction(&program.Functions[index], resourceTypes, foreignFunctions)...)
 	}
 	slices.SortFunc(failures, func(left, right VerificationError) int {
 		if value := cmp.Compare(left.Code, right.Code); value != 0 {
@@ -45,6 +47,36 @@ func Verify(program Program) []VerificationError {
 	return slices.CompactFunc(failures, func(left, right VerificationError) bool {
 		return left.Code == right.Code && left.Entity == right.Entity
 	})
+}
+
+func verifyForeignFunctions(definitions []ForeignFunction) (map[hir.SymbolID]*ForeignFunction, []VerificationError) {
+	result := make(map[hir.SymbolID]*ForeignFunction, len(definitions))
+	var failures []VerificationError
+	for index := range definitions {
+		definition := &definitions[index]
+		entity := fallbackEntity(definition.Entity, fmt.Sprintf("foreign:%d", definition.Symbol))
+		if definition.Symbol == hir.NoSymbol || definition.Name == "" || definition.LinkName == "" || definition.ABI != "C" || definition.ResultType == "" || definition.ResultType == hir.TypeInvalid {
+			failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "foreign declaration is incomplete or has an unsupported ABI"})
+			continue
+		}
+		if _, duplicate := result[definition.Symbol]; duplicate {
+			failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "foreign symbol is duplicated"})
+			continue
+		}
+		result[definition.Symbol] = definition
+		if _, _, borrow := hir.BorrowElement(definition.ResultType); borrow {
+			failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "foreign result exposes a safe borrow"})
+		}
+		for _, parameterType := range definition.ParameterTypes {
+			if parameterType == "" || parameterType == hir.TypeInvalid {
+				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "foreign parameter has no concrete type"})
+			}
+			if _, _, borrow := hir.BorrowElement(parameterType); borrow {
+				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "foreign parameter exposes a safe borrow"})
+			}
+		}
+	}
+	return result, failures
 }
 
 func verifyResourceTypes(definitions []ResourceType) (map[hir.Type]*ResourceType, []VerificationError) {
@@ -81,7 +113,7 @@ func verifyResourceTypes(definitions []ResourceType) (map[hir.Type]*ResourceType
 	return resources, failures
 }
 
-func verifyFunction(function *Function, resourceTypes map[hir.Type]*ResourceType) []VerificationError {
+func verifyFunction(function *Function, resourceTypes map[hir.Type]*ResourceType, foreignFunctions map[hir.SymbolID]*ForeignFunction) []VerificationError {
 	if int(function.Entry) < 0 || int(function.Entry) >= len(function.Blocks) {
 		return []VerificationError{{Code: "V1001", Entity: function.Name, Detail: "entry block is missing"}}
 	}
@@ -106,6 +138,14 @@ func verifyFunction(function *Function, resourceTypes map[hir.Type]*ResourceType
 	for _, flag := range function.DropFlags {
 		flags[flag.Entity] = flag
 		initial.flags[flag.Entity] = flagState{}
+	}
+	unsafeByEntity := make(map[string]UnsafeOperation, len(function.UnsafeOperations))
+	for _, operation := range function.UnsafeOperations {
+		if operation.Entity == "" {
+			failures = append(failures, VerificationError{Code: "V1701", Entity: function.Name, Detail: "unsafe instruction has no entity identity"})
+			continue
+		}
+		unsafeByEntity[operation.Entity] = operation
 	}
 	type pendingBlock struct {
 		id    BlockID
@@ -316,7 +356,24 @@ func verifyFunction(function *Function, resourceTypes map[hir.Type]*ResourceType
 		}
 		if terminator.Kind == TerminatorCall {
 			failures = append(failures, verifyOperands(state, terminator.Arguments, terminatorEntity(item.id, terminator))...)
-			state.live[hir.SymbolID(terminator.DestinationLocal)] = true
+			foreign := foreignFunctions[terminator.Callee]
+			if terminator.ForeignABI != "" {
+				provenance, hasProvenance := unsafeByEntity[terminatorEntity(item.id, terminator)]
+				callEntity := sourceEntity("call", terminator.Span)
+				sourceSpanEntity := sourceEntity("span", terminator.Span)
+				scopeEntity := sourceEntity("unsafe-scope", terminator.UnsafeScope)
+				scopeContainsCall := terminator.UnsafeScope.Source == terminator.Span.Source &&
+					terminator.UnsafeScope.StartByte <= terminator.Span.StartByte && terminator.UnsafeScope.EndByte >= terminator.Span.EndByte
+				if foreign == nil || terminator.ForeignABI != "C" || terminator.Entity != callEntity || !scopeContainsCall ||
+					!hasProvenance || provenance.SourceSpanEntity != sourceSpanEntity || provenance.ScopeEntity != scopeEntity {
+					failures = append(failures, VerificationError{Code: "V1701", Entity: terminatorEntity(item.id, terminator), Detail: "foreign call lacks a matching declaration or unsafe provenance"})
+				}
+			} else if foreign != nil {
+				failures = append(failures, VerificationError{Code: "V1701", Entity: terminatorEntity(item.id, terminator), Detail: "foreign call is missing its ABI and unsafe provenance"})
+			}
+			if terminator.DestinationLocal != NoLocal {
+				state.live[hir.SymbolID(terminator.DestinationLocal)] = true
+			}
 		}
 		if terminator.Kind == TerminatorSwitch {
 			failures = append(failures, verifyOperands(state, terminator.SwitchOperands, terminatorEntity(item.id, terminator))...)

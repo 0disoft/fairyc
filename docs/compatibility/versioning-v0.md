@@ -88,7 +88,8 @@ Clang/GCC low/optimized provisional standard-library allocation probe. V7 supers
 `arenaExecutions` for the single-active-Region Arena probe. V9 supersedes v8 by adding
 `textViewExecutions` for canonical UTF-8 validation and boundary slicing. V10 supersedes v9 by
 adding `ownedTextExecutions` for String ownership and CString termination. V11 adds
-`linuxFileExecutions` for partial I/O and consuming close. The runner emits one exact version and does not pretend the report
+`linuxFileExecutions` for partial I/O and consuming close. V12 adds `foreignCallExecutions` for the
+closed exact-name scalar Fairy-source caller to hand-written C callee crossings. The runner emits one exact version and does not pretend the report
 shapes are interchangeable.
 
 ## Runtime and standard library

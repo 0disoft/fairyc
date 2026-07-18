@@ -77,6 +77,8 @@ func (e CapabilityError) Error() string {
 type emitter struct {
 	functions          []mir.Function
 	bySymbol           map[hir.SymbolID]int
+	foreignFunctions   []mir.ForeignFunction
+	foreignBySymbol    map[hir.SymbolID]int
 	entryIndex         int
 	resourceTypes      []resourceCType
 	resourceByType     map[hir.Type]int
@@ -132,9 +134,22 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	slices.SortFunc(functions, func(left, right mir.Function) int {
 		return strings.Compare(left.Name, right.Name)
 	})
+	foreignFunctions := slices.Clone(program.ForeignFunctions)
+	slices.SortFunc(foreignFunctions, func(left, right mir.ForeignFunction) int {
+		if value := strings.Compare(left.LinkName, right.LinkName); value != 0 {
+			return value
+		}
+		return int(left.Symbol - right.Symbol)
+	})
+	foreignFunctions, foreignBySymbol, err := normalizeForeignFunctions(foreignFunctions)
+	if err != nil {
+		return Unit{}, err
+	}
 	value := &emitter{
 		functions:          functions,
 		bySymbol:           make(map[hir.SymbolID]int, len(functions)),
+		foreignFunctions:   foreignFunctions,
+		foreignBySymbol:    foreignBySymbol,
 		entryIndex:         -1,
 		resourceTypes:      resourceTypes,
 		resourceByType:     resourceByType,
@@ -152,6 +167,9 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	}
 	for index := range functions {
 		function := &functions[index]
+		if _, collision := value.foreignBySymbol[function.Symbol]; collision {
+			return Unit{}, fmt.Errorf("MIR symbol %d is both internal and foreign", function.Symbol)
+		}
 		if _, duplicate := value.bySymbol[function.Symbol]; duplicate {
 			return Unit{}, fmt.Errorf("duplicate MIR function symbol %d", function.Symbol)
 		}
@@ -173,6 +191,9 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	}
 	if value.entryIndex < 0 {
 		return Unit{}, fmt.Errorf("C entry function %q is missing", entry)
+	}
+	if err := value.inspectForeignFunctions(); err != nil {
+		return Unit{}, err
 	}
 	entryFunction := &functions[value.entryIndex]
 	if len(entryFunction.Parameters) != 0 || entryFunction.ResultType != hir.TypeI32 {
@@ -197,6 +218,17 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	var output strings.Builder
 	if err := value.emitPreamble(&output); err != nil {
 		return Unit{}, err
+	}
+	for index := range foreignFunctions {
+		value.emitForeignMacroGuard(&output, index)
+	}
+	for index := range foreignFunctions {
+		if err := value.emitForeignPrototype(&output, index); err != nil {
+			return Unit{}, err
+		}
+	}
+	if len(foreignFunctions) != 0 {
+		output.WriteByte('\n')
 	}
 	for index := range functions {
 		if err := value.emitPrototype(&output, index); err != nil {
@@ -225,6 +257,30 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 		Entry: entry, Functions: names, Features: features,
 		DropSites: slices.Clone(value.dropSites), Source: output.String(),
 	}, nil
+}
+
+func normalizeForeignFunctions(input []mir.ForeignFunction) ([]mir.ForeignFunction, map[hir.SymbolID]int, error) {
+	result := make([]mir.ForeignFunction, 0, len(input))
+	bySymbol := make(map[hir.SymbolID]int, len(input))
+	byLinkName := make(map[string]int, len(input))
+	for _, function := range input {
+		if _, duplicate := bySymbol[function.Symbol]; duplicate {
+			return nil, nil, fmt.Errorf("duplicate MIR foreign symbol %d", function.Symbol)
+		}
+		if index, duplicateName := byLinkName[function.LinkName]; duplicateName {
+			canonical := &result[index]
+			if canonical.ABI != function.ABI || canonical.ResultType != function.ResultType || !slices.Equal(canonical.ParameterTypes, function.ParameterTypes) {
+				return nil, nil, fmt.Errorf("conflicting external C declarations %s and %s name %q", canonical.Name, function.Name, function.LinkName)
+			}
+			bySymbol[function.Symbol] = index
+			continue
+		}
+		index := len(result)
+		result = append(result, function)
+		byLinkName[function.LinkName] = index
+		bySymbol[function.Symbol] = index
+	}
+	return result, bySymbol, nil
 }
 
 func prepareResourceTypes(definitions []mir.ResourceType, engine *layout.Engine) ([]resourceCType, map[hir.Type]int, error) {
@@ -315,11 +371,11 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 			}
 			terminator := block.Terminator
 			if terminator.Kind == mir.TerminatorCall && terminator.DestinationLocal != mir.NoLocal {
-				calleeIndex, found := e.bySymbol[terminator.Callee]
+				resultType, found := e.callResultType(terminator.Callee)
 				if !found {
 					return nil, fmt.Errorf("C call in %s names missing function symbol %d", function.Name, terminator.Callee)
 				}
-				added, err := assignLocalType(localTypes, terminator.DestinationLocal, e.functions[calleeIndex].ResultType)
+				added, err := assignLocalType(localTypes, terminator.DestinationLocal, resultType)
 				if err != nil {
 					return nil, fmt.Errorf("call result in %s: %w", function.Name, err)
 				}
@@ -333,6 +389,82 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 		}
 	}
 	return localTypes, nil
+}
+
+func (e *emitter) callResultType(symbol hir.SymbolID) (hir.Type, bool) {
+	if index, found := e.bySymbol[symbol]; found {
+		return e.functions[index].ResultType, true
+	}
+	if index, found := e.foreignBySymbol[symbol]; found {
+		return e.foreignFunctions[index].ResultType, true
+	}
+	return hir.TypeInvalid, false
+}
+
+func (e *emitter) inspectForeignFunctions() error {
+	for _, function := range e.foreignFunctions {
+		if function.ABI != "C" {
+			return CapabilityError{Function: function.Name, Feature: "foreign ABI " + strconv.Quote(function.ABI)}
+		}
+		if !validExternalCIdentifier(function.LinkName) {
+			return CapabilityError{Function: function.Name, Feature: "external C symbol " + strconv.Quote(function.LinkName)}
+		}
+		if _, err := foreignCType(function.ResultType, true); err != nil {
+			return CapabilityError{Function: function.Name, Feature: err.Error()}
+		}
+		for _, parameterType := range function.ParameterTypes {
+			if _, err := foreignCType(parameterType, false); err != nil {
+				return CapabilityError{Function: function.Name, Feature: err.Error()}
+			}
+		}
+	}
+	return nil
+}
+
+func foreignCType(value hir.Type, result bool) (string, error) {
+	if result && value == hir.TypeVoid {
+		return "void", nil
+	}
+	if value == hir.TypeI32 {
+		return "int32_t", nil
+	}
+	role := "parameter"
+	if result {
+		role = "result"
+	}
+	return "", fmt.Errorf("foreign %s type %q", role, value)
+}
+
+func validExternalCIdentifier(value string) bool {
+	if value == "" || value == "main" || strings.HasPrefix(value, "fy_") || strings.HasPrefix(value, "FY_") {
+		return false
+	}
+	if _, reserved := generatedCNames[value]; reserved {
+		return false
+	}
+	for index, character := range value {
+		if character > 0x7f || !(character == '_' || character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z' || index > 0 && character >= '0' && character <= '9') {
+			return false
+		}
+	}
+	_, keyword := c11Keywords[value]
+	return !keyword
+}
+
+var generatedCNames = map[string]struct{}{
+	"int32_t": {}, "uint32_t": {}, "uint64_t": {}, "size_t": {},
+	"INT32_C": {}, "UINT32_C": {}, "UINT64_C": {},
+	"INT32_MIN": {}, "INT32_MAX": {}, "UINT32_MAX": {},
+}
+
+var c11Keywords = map[string]struct{}{
+	"auto": {}, "break": {}, "case": {}, "char": {}, "const": {}, "continue": {}, "default": {},
+	"do": {}, "double": {}, "else": {}, "enum": {}, "extern": {}, "float": {}, "for": {}, "goto": {},
+	"if": {}, "inline": {}, "int": {}, "long": {}, "register": {}, "restrict": {}, "return": {},
+	"short": {}, "signed": {}, "sizeof": {}, "static": {}, "struct": {}, "switch": {}, "typedef": {},
+	"union": {}, "unsigned": {}, "void": {}, "volatile": {}, "while": {}, "_Alignas": {}, "_Alignof": {},
+	"_Atomic": {}, "_Bool": {}, "_Complex": {}, "_Generic": {}, "_Imaginary": {}, "_Noreturn": {},
+	"_Static_assert": {}, "_Thread_local": {},
 }
 
 func assignLocalType(localTypes map[mir.LocalID]hir.Type, local mir.LocalID, value hir.Type) (bool, error) {
@@ -442,9 +574,7 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 	if len(function.RegionValues) != 0 {
 		return CapabilityError{Function: function.Name, Feature: "Region values"}
 	}
-	if len(function.UnsafeOperations) != 0 {
-		return CapabilityError{Function: function.Name, Feature: "unsafe operations"}
-	}
+	foreignCallEntities := make(map[string]struct{})
 	for blockIndex := range function.Blocks {
 		block := &function.Blocks[blockIndex]
 		if block.ID != mir.BlockID(blockIndex) {
@@ -520,27 +650,35 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 			e.features["scalar-control-flow"] = struct{}{}
 		case mir.TerminatorCall:
 			e.features["scalar-call"] = struct{}{}
-			calleeIndex, found := e.bySymbol[terminator.Callee]
+			calleeResult, calleeParameters, foreign, found := e.callSignature(terminator.Callee)
 			if !found {
 				return fmt.Errorf("C call in %s names missing function symbol %d", function.Name, terminator.Callee)
 			}
-			callee := &e.functions[calleeIndex]
-			if callee.ResultType == hir.TypeVoid && terminator.DestinationLocal != mir.NoLocal {
+			if foreign {
+				e.features["foreign-c-call"] = struct{}{}
+				foreignCallEntities[terminator.Entity] = struct{}{}
+				if terminator.ForeignABI != "C" || terminator.UnsafeScope.Source == "" {
+					return fmt.Errorf("foreign C call in %s lacks ABI or unsafe provenance", function.Name)
+				}
+			} else if terminator.ForeignABI != "" {
+				return fmt.Errorf("internal call in %s carries foreign ABI %q", function.Name, terminator.ForeignABI)
+			}
+			if calleeResult == hir.TypeVoid && terminator.DestinationLocal != mir.NoLocal {
 				return fmt.Errorf("void C call in %s has destination local %d", function.Name, terminator.DestinationLocal)
 			}
-			if callee.ResultType != hir.TypeVoid && terminator.DestinationLocal < 0 {
+			if calleeResult != hir.TypeVoid && terminator.DestinationLocal < 0 {
 				return fmt.Errorf("value C call in %s has no destination local", function.Name)
 			}
-			if len(terminator.Arguments) != len(callee.ParameterTypes) {
-				return fmt.Errorf("C call in %s passes %d arguments to %s, want %d", function.Name, len(terminator.Arguments), callee.Name, len(callee.ParameterTypes))
+			if len(terminator.Arguments) != len(calleeParameters) {
+				return fmt.Errorf("C call in %s passes %d arguments, want %d", function.Name, len(terminator.Arguments), len(calleeParameters))
 			}
 			for argumentIndex, argument := range terminator.Arguments {
 				argumentType, err := e.operandType(functionIndex, argument)
 				if err != nil {
 					return fmt.Errorf("call argument %d in %s: %w", argumentIndex, function.Name, err)
 				}
-				if canonicalCValueType(argumentType) != canonicalCValueType(callee.ParameterTypes[argumentIndex]) {
-					return fmt.Errorf("call argument %d in %s has type %q, want %q", argumentIndex, function.Name, argumentType, callee.ParameterTypes[argumentIndex])
+				if canonicalCValueType(argumentType) != canonicalCValueType(calleeParameters[argumentIndex]) {
+					return fmt.Errorf("call argument %d in %s has type %q, want %q", argumentIndex, function.Name, argumentType, calleeParameters[argumentIndex])
 				}
 			}
 		case mir.TerminatorSwitch:
@@ -585,7 +723,24 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 			return CapabilityError{Function: function.Name, Feature: "MIR terminator " + strconv.Quote(string(terminator.Kind))}
 		}
 	}
+	for _, operation := range function.UnsafeOperations {
+		if _, foreign := foreignCallEntities[operation.Entity]; !foreign {
+			return CapabilityError{Function: function.Name, Feature: "unsafe operation outside the foreign-call subset"}
+		}
+	}
 	return nil
+}
+
+func (e *emitter) callSignature(symbol hir.SymbolID) (hir.Type, []hir.Type, bool, bool) {
+	if index, found := e.bySymbol[symbol]; found {
+		function := &e.functions[index]
+		return function.ResultType, function.ParameterTypes, false, true
+	}
+	if index, found := e.foreignBySymbol[symbol]; found {
+		function := &e.foreignFunctions[index]
+		return function.ResultType, function.ParameterTypes, true, true
+	}
+	return hir.TypeInvalid, nil, false, false
 }
 
 func validateOperationShape(function string, operation mir.Operation) error {
@@ -993,6 +1148,36 @@ func (e *emitter) emitPrototype(output *strings.Builder, functionIndex int) erro
 	return nil
 }
 
+func (e *emitter) emitForeignPrototype(output *strings.Builder, functionIndex int) error {
+	function := &e.foreignFunctions[functionIndex]
+	resultType, err := foreignCType(function.ResultType, true)
+	if err != nil {
+		return fmt.Errorf("foreign prototype for %s: %w", function.Name, err)
+	}
+	fmt.Fprintf(output, "extern %s %s(", resultType, function.LinkName)
+	if len(function.ParameterTypes) == 0 {
+		output.WriteString("void")
+	} else {
+		for index, parameterType := range function.ParameterTypes {
+			if index != 0 {
+				output.WriteString(", ")
+			}
+			cType, typeErr := foreignCType(parameterType, false)
+			if typeErr != nil {
+				return fmt.Errorf("foreign prototype for %s: %w", function.Name, typeErr)
+			}
+			fmt.Fprintf(output, "%s fy_a_%d", cType, index)
+		}
+	}
+	output.WriteString(");\n")
+	return nil
+}
+
+func (e *emitter) emitForeignMacroGuard(output *strings.Builder, functionIndex int) {
+	linkName := e.foreignFunctions[functionIndex].LinkName
+	fmt.Fprintf(output, "#ifdef %s\n#undef %s\n#endif\n", linkName, linkName)
+}
+
 func (e *emitter) emitFunction(output *strings.Builder, functionIndex int) error {
 	function := &e.functions[functionIndex]
 	resultType, err := e.cFunctionResultType(function.ResultType)
@@ -1248,19 +1433,22 @@ func (e *emitter) emitTerminator(output *strings.Builder, functionIndex int, blo
 		if err != nil {
 			return fmt.Errorf("call in %s: %w", function.Name, err)
 		}
-		calleeIndex, found := e.bySymbol[terminator.Callee]
+		calleeResult, calleeParameters, foreign, found := e.callSignature(terminator.Callee)
 		if !found {
 			return fmt.Errorf("call in %s names missing function symbol %d", function.Name, terminator.Callee)
 		}
-		callee := &e.functions[calleeIndex]
-		if len(terminator.Arguments) != len(callee.Parameters) {
-			return fmt.Errorf("call in %s passes %d arguments to %s, want %d", function.Name, len(terminator.Arguments), callee.Name, len(callee.Parameters))
+		if len(terminator.Arguments) != len(calleeParameters) {
+			return fmt.Errorf("call in %s passes %d arguments, want %d", function.Name, len(terminator.Arguments), len(calleeParameters))
 		}
 		output.WriteString("    ")
-		if callee.ResultType != hir.TypeVoid {
+		if calleeResult != hir.TypeVoid {
 			fmt.Fprintf(output, "fy_l_%d = ", terminator.DestinationLocal)
 		}
-		fmt.Fprintf(output, "fy_fn_%d(", calleeIndex)
+		if foreign {
+			fmt.Fprintf(output, "%s(", e.foreignFunctions[e.foreignBySymbol[terminator.Callee]].LinkName)
+		} else {
+			fmt.Fprintf(output, "fy_fn_%d(", e.bySymbol[terminator.Callee])
+		}
 		for index, argument := range terminator.Arguments {
 			if index != 0 {
 				output.WriteString(", ")
@@ -1447,7 +1635,7 @@ func collectLocals(function mir.Function) []mir.LocalID {
 	}
 	for _, block := range function.Blocks {
 		for _, operation := range block.Operations {
-			if operation.DestinationLocal != mir.NoLocal {
+			if operationHasDestination(operation.Kind) && operation.DestinationLocal != mir.NoLocal {
 				values[operation.DestinationLocal] = struct{}{}
 			}
 			for _, operand := range operation.Operands {
@@ -1455,7 +1643,7 @@ func collectLocals(function mir.Function) []mir.LocalID {
 			}
 		}
 		terminator := block.Terminator
-		if terminator.DestinationLocal != mir.NoLocal {
+		if terminator.Kind == mir.TerminatorCall && terminator.DestinationLocal != mir.NoLocal {
 			values[terminator.DestinationLocal] = struct{}{}
 		}
 		for _, operand := range terminator.Arguments {
@@ -1474,6 +1662,18 @@ func collectLocals(function mir.Function) []mir.LocalID {
 	}
 	slices.Sort(result)
 	return result
+}
+
+func operationHasDestination(kind mir.OperationKind) bool {
+	switch kind {
+	case mir.OperationInitialize, mir.OperationAssign, mir.OperationUnary, mir.OperationBinary,
+		mir.OperationResultConstruct, mir.OperationResultPayload,
+		mir.OperationOptionConstruct, mir.OperationOptionPayload,
+		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationRegionPlace:
+		return true
+	default:
+		return false
+	}
 }
 
 func (e *emitter) cFunctionResultType(value hir.Type) (string, error) {

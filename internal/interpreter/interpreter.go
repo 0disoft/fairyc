@@ -557,6 +557,9 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 			}
 			current = next
 		case mir.TerminatorCall:
+			if terminator.ForeignABI != "" {
+				return callCompletion{}, capabilityErrorKind("foreign-call", "interpreter cannot execute foreign ABI %q call symbol %d", terminator.ForeignABI, terminator.Callee)
+			}
 			callee := r.bySymbol[terminator.Callee]
 			if callee == nil {
 				return callCompletion{}, fmt.Errorf("call in %q names missing symbol %d", function.Name, terminator.Callee)

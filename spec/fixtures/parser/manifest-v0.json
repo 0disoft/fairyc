@@ -118,6 +118,15 @@
       }
     },
     {
+      "id": "pass.foreign-call",
+      "sourceRoot": "cases/pass/foreign-call/src",
+      "source": "main.fy",
+      "expect": {
+        "status": "pass",
+        "module": "main"
+      }
+    },
+    {
       "id": "fail.invalid-numeric-separator",
       "sourceRoot": "cases/fail/invalid-numeric-separator/src",
       "source": "main.fy",

@@ -40,8 +40,21 @@ func (p typeProperties) NeedsDrop(value hir.Type) bool {
 
 // Program is verified before it is handed to an interpreter or backend.
 type Program struct {
-	ResourceTypes []ResourceType
-	Functions     []Function
+	ResourceTypes    []ResourceType
+	ForeignFunctions []ForeignFunction
+	Functions        []Function
+}
+
+// ForeignFunction is one verified raw external declaration consumed by a backend, not the interpreter.
+type ForeignFunction struct {
+	Symbol         hir.SymbolID
+	Name           string
+	LinkName       string
+	ABI            string
+	Span           hir.Span
+	ParameterTypes []hir.Type
+	ResultType     hir.Type
+	Entity         string
 }
 
 // ResourceType is one verified move-only aggregate definition used by executable MIR.
@@ -256,6 +269,8 @@ type Terminator struct {
 	UnwindSuccessor  BlockID
 	TrapCategories   []string
 	Callee           hir.SymbolID
+	ForeignABI       string
+	UnsafeScope      hir.Span
 	Arguments        []Operand
 	DestinationLocal LocalID
 	ReturnValue      Operand
@@ -283,6 +298,8 @@ type CallFact struct {
 	ArgumentOrder   []hir.Span
 	NormalSuccessor bool
 	UnwindSuccessor bool
+	ForeignABI      string
+	UnsafeScope     hir.Span
 }
 
 // MoveFact records a complete-root ownership transfer.

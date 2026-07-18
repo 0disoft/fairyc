@@ -61,6 +61,22 @@ func TestAnalyzeReportsDuplicateFunctionWithPreviousDeclaration(t *testing.T) {
 	assertSpan(t, result.Diagnostics[0].Related[0].Span, "main.fy", first, first+5)
 }
 
+func TestAnalyzeReportsCallableDuplicateInSourceOrder(t *testing.T) {
+	t.Parallel()
+	text := "module main;\n\nunsafe extern C fn value() -> i32;\n\nfn value() -> i32 { 2 }\n"
+	result := analyzeText(t, map[string]string{"main.fy": text})
+	if result.FailedPhase != semantic.PhaseResolve || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E0102" {
+		t.Fatalf("result = %+v", result)
+	}
+	first := strings.Index(text, "value")
+	second := strings.LastIndex(text, "value")
+	assertSpan(t, result.Diagnostics[0].Primary, "main.fy", second, second+5)
+	if len(result.Diagnostics[0].Related) != 1 || result.Diagnostics[0].Related[0].Role != "previous-declaration" {
+		t.Fatalf("related = %+v", result.Diagnostics[0].Related)
+	}
+	assertSpan(t, result.Diagnostics[0].Related[0].Span, "main.fy", first, first+5)
+}
+
 func TestAnalyzeReportsBindingTypeMismatch(t *testing.T) {
 	t.Parallel()
 	text := "module main;\n\nfn answer() -> i32 {\n    let value: bool = 1;\n    0\n}\n"
@@ -215,6 +231,67 @@ func TestAnalyzeRejectsNonEmptyResourceDropBodyAsUnsupported(t *testing.T) {
 	if result.CompletedThrough != semantic.PhaseResolve || len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].Resources) != 1 || result.HIR.Modules[0].Resources[0].DropKind != hir.ResourceDropNonEmpty {
 		t.Fatalf("result = %+v", result)
 	}
+}
+
+func TestAnalyzeTypesForeignCallInsideUnsafeBlock(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n",
+	})
+	assertCleanTypeResult(t, result)
+	if len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].ForeignFunctions) != 1 {
+		t.Fatalf("HIR = %+v", result.HIR)
+	}
+	foreign := result.HIR.Modules[0].ForeignFunctions[0]
+	if foreign.Name != "add_one" || foreign.LinkName != "add_one" || foreign.ABI != "C" || foreign.ResultType != hir.TypeI32 || len(foreign.Parameters) != 1 || foreign.Parameters[0].Type != hir.TypeI32 {
+		t.Fatalf("foreign function = %+v", foreign)
+	}
+	tail := result.HIR.Modules[0].Functions[0].Body.Tail
+	if tail == nil || tail.Kind != "unsafe" || len(tail.Children) != 1 || tail.Children[0].Block == nil || tail.Children[0].Block.Tail == nil {
+		t.Fatalf("main tail = %+v", tail)
+	}
+	call := tail.Children[0].Block.Tail
+	if call.Kind != "call" || call.ForeignABI != "C" || call.UnsafeScope == nil || call.Symbol != foreign.Symbol {
+		t.Fatalf("foreign call = %+v", call)
+	}
+}
+
+func TestAnalyzeRejectsForeignCallOutsideUnsafeBoundary(t *testing.T) {
+	t.Parallel()
+	text := "module main;\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { add_one(41) }\n"
+	result := analyzeText(t, map[string]string{"main.fy": text})
+	if result.FailedPhase != semantic.PhaseType || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E5101" {
+		t.Fatalf("result = %+v", result)
+	}
+	start := strings.LastIndex(text, "add_one")
+	assertSpan(t, result.Diagnostics[0].Primary, "main.fy", start, start+len("add_one(41)"))
+}
+
+func TestAnalyzeRejectsSafeBorrowInForeignSignature(t *testing.T) {
+	t.Parallel()
+	text := "module main;\nunsafe extern C fn inspect(value: &i32) -> i32;\nfn main() -> i32 { 0 }\n"
+	result := analyzeText(t, map[string]string{"main.fy": text})
+	if result.FailedPhase != semantic.PhaseType || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E5102" {
+		t.Fatalf("result = %+v", result)
+	}
+	start := strings.Index(text, "&i32")
+	assertSpan(t, result.Diagnostics[0].Primary, "main.fy", start, start+len("&i32"))
+}
+
+func TestAnalyzeRejectsDuplicateForeignParameterAtResolution(t *testing.T) {
+	t.Parallel()
+	text := "module main;\nunsafe extern C fn combine(value: i32, value: i32) -> i32;\nfn main() -> i32 { 0 }\n"
+	result := analyzeText(t, map[string]string{"main.fy": text})
+	if result.FailedPhase != semantic.PhaseResolve || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E0102" {
+		t.Fatalf("result = %+v", result)
+	}
+	first := strings.Index(text, "value")
+	second := strings.LastIndex(text, "value")
+	assertSpan(t, result.Diagnostics[0].Primary, "main.fy", second, second+len("value"))
+	if len(result.Diagnostics[0].Related) != 1 {
+		t.Fatalf("related = %+v", result.Diagnostics[0].Related)
+	}
+	assertSpan(t, result.Diagnostics[0].Related[0].Span, "main.fy", first, first+len("value"))
 }
 
 func analyzeText(t *testing.T, files map[string]string) semantic.Result {

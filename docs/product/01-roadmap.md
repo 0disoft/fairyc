@@ -20,7 +20,8 @@ Exit gate: the written contracts have no contradictory syntax, initialization, o
 Current implementation status: the source, lexer, recoverable-syntax, parser-diagnostic, AST
 lowering, and parser-fixture-runner portion of the first item exists. Name resolution and typed HIR
 now cover the semantic fixture's scalar and safe-borrow subset. Local last-use loans, borrow
-  conflicts, single-origin borrow returns, Stage 0 signed-left-shift rejection, and loop-context diagnostics execute across all 13 semantic v0 cases. General
+  conflicts, single-origin borrow returns, Stage 0 signed-left-shift rejection, loop-context diagnostics,
+  and scalar foreign-call unsafe/signature boundaries execute across all 16 semantic v0 cases. General
   whole-root resource Flow now executes all 12 resource v0 cases, including branch, normal-loop,
   break-edge, and continue-edge state rejection. Result Flow executes all 24 result v0 cases, including qualified scalar construction,
 exhaustive shallow matching, and local, parameter, branch, loop, overwrite, and early-return
@@ -86,12 +87,15 @@ host. A host-independent SysV AMD64 classifier now executes 17 versioned cases f
 classes, registers, exhaustion rollback, and hidden returns, but bidirectional native ABI fixtures
 and hosted evidence remain incomplete. Its 14 pass plans now generate 56 configured separate-object
 Clang/GCC crossings in both compiler directions and profiles; these are not yet hosted evidence or
-source-level Fairy FFI fixtures.
+ source-level aggregate Fairy FFI fixtures. An exact-name scalar `i32 -> i32` source fixture now
+ traverses AST, HIR, MIR, C emission, separate objects, and both compiler directions, but its four
+ native executions remain unobserved on this Windows host.
 The first standard-library-owned C storage slice now implements provisional fallible `SystemHeap`
 allocation, copy-and-release resize, zero-size normalization, fundamental-alignment rejection, and
 failure rollback. A closed probe is configured for Clang/GCC at low and optimized profiles. It is
 not source-callable or linked into product builds yet, and its four native executions remain
-unobserved on this Windows host; `Arena`, text ownership, and Linux `File` are still absent.
+unobserved on this Windows host; the later Arena, text ownership, and Linux File C slices now exist
+but remain source-disconnected.
 The next storage slice now adds provisional Buffer construction, initialized-prefix-only reserve,
 overlap-safe append across relocation, overflow rollback, zeroed growth, truncate, clear, and drop.
 Its four native probe executions are likewise configured but unobserved, and source programs still
@@ -107,6 +111,16 @@ Owned String and CString now have provisional Buffer-backed C transport with imm
 successful-only Buffer moves, failure ownership preservation, self-source append, interior-NUL
 rejection, and exact termination. Four native runs are configured but unobserved; source-level
 construction, Result error resources, and calls remain missing.
+The Linux File C slice now also covers partial read/write, write-all progress, sync, and consuming
+close including forced close failure. Its four native runs remain configured but unobserved, and
+source-visible File effects and error resources remain missing.
+
+The first source FFI slice admits exact-name `unsafe extern C fn` declarations with only `i32`
+parameters and result. Unsafe call provenance survives AST, typed HIR, and MIR verification; the C
+backend emits an unannotated external prototype and call; and the native lane plans four
+separate-object Clang/GCC crossings. The interpreter refuses foreign execution, and `@link_name`,
+raw pointers, callbacks, `c.*` scalars, `@repr(C)` aggregates, exports, and standard-library wrapper
+calls remain Phase 2 work.
 
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.

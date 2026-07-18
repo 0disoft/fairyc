@@ -44,6 +44,13 @@ unsafe extern C fn
 
 `pub` is not an ABI marker.
 
+The current executable source subset implements only exact-name `unsafe extern C fn` imports with
+`i32` parameters and an `i32` result. AST, typed HIR, MIR, unsafe provenance, deterministic C
+prototype emission, separate-object cross-compiler linking, and process-status observation are
+wired. This is not implementation of `@link_name`, export generation, raw pointers, callbacks,
+`c.*` scalars, or `@repr(C)` source aggregates. The interpreter remains fail-closed on every foreign
+call.
+
 ## C-representable types
 
 `@repr(C)` permits fixed-width integers, `c.*` scalars, `f32`, `f64`, raw pointers, fixed arrays, nested `@repr(C)` structs, and an explicitly based C enum. It rejects resources, safe borrows, slices, `str`, `CStr`, `Option`, `Result`, `Region`, `String`, `Buffer`, payload enums, empty structs, packed or custom alignment, unions, bit fields, long double, atomics, and vector types.
@@ -103,10 +110,10 @@ arguments to the six integer and eight SSE argument registers; maps returns to t
 two SSE return registers; rolls an aggregate wholly to the stack when either register family is
 insufficient; and reserves `rdi`/returns `rax` for a hidden memory-result pointer. The versioned v0
 C ABI manifest records 17 exact cases, of which 14 pass cases feed the native probe. The Linux
-runner now generates separate caller and callee objects for those pass cases,
+    runner now generates separate caller and callee objects for those pass cases,
 crosses Clang-to-GCC and GCC-to-Clang at low and optimized profiles, and plans 56 zero-output
 executions. That configured cross-compiler path is not an observed hosted receipt or Fairy source
-FFI lowering, does not expose exact stack-area offsets, and does not clear the
+aggregate FFI lowering, does not expose exact stack-area offsets, and does not clear the
 `bidirectional-c-abi-fixtures` target marker.
 
 This executable description is target data, not conformance evidence. Its evidence block names the

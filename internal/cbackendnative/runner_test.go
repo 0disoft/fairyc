@@ -44,7 +44,7 @@ func TestBuildSmokeSourceReachesCEmission(t *testing.T) {
 
 func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 	t.Parallel()
-	if reportSchemaVersion != "fairyc.native-c-report/v11" {
+	if reportSchemaVersion != "fairyc.native-c-report/v12" {
 		t.Fatalf("report schema = %q", reportSchemaVersion)
 	}
 	encoded, err := json.Marshal(Report{
@@ -53,17 +53,18 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		Sanitizer: cdriver.AddressUndefinedSanitizerMode, SanitizerExecutions: 34,
 		ABICases:      []string{"pass.aggregate-rollback", "pass.void-return"},
 		ABIDirections: []string{"clang-caller-gcc-callee", "gcc-caller-clang-callee"}, ABIProbeExecutions: 56,
-		SystemHeapExecutions: 4,
-		BufferExecutions:     4,
-		ArenaExecutions:      4,
-		TextViewExecutions:   4,
-		OwnedTextExecutions:  4,
-		LinuxFileExecutions:  4,
+		SystemHeapExecutions:  4,
+		BufferExecutions:      4,
+		ArenaExecutions:       4,
+		TextViewExecutions:    4,
+		OwnedTextExecutions:   4,
+		LinuxFileExecutions:   4,
+		ForeignCallExecutions: 4,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v11"`) ||
+	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v12"`) ||
 		!strings.Contains(string(encoded), `"dropTraceExecutions":68`) ||
 		!strings.Contains(string(encoded), `"layoutCases":["pass.array-i32-three","pass.pointer"]`) ||
 		!strings.Contains(string(encoded), `"layoutProbeExecutions":4`) ||
@@ -77,7 +78,8 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		!strings.Contains(string(encoded), `"arenaExecutions":4`) ||
 		!strings.Contains(string(encoded), `"textViewExecutions":4`) ||
 		!strings.Contains(string(encoded), `"ownedTextExecutions":4`) ||
-		!strings.Contains(string(encoded), `"linuxFileExecutions":4`) {
+		!strings.Contains(string(encoded), `"linuxFileExecutions":4`) ||
+		!strings.Contains(string(encoded), `"foreignCallExecutions":4`) {
 		t.Fatalf("report JSON = %s", encoded)
 	}
 }

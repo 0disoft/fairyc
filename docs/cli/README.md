@@ -24,7 +24,8 @@ The Go frontend currently exposes `fairyc experimental parse <file.fy>`,
 `fairyc experimental check-semantics <file.fy> [<file.fy>...]`. The compiler prototype also exposes
 `fairyc experimental target-spec x86_64-linux-gnu` for deterministic host-independent target
 inspection,
-`fairyc experimental emit-c <file.fy>` for deterministic scalar, flat-resource, and resource-tagged C11 inspection and
+`fairyc experimental emit-c <file.fy>` for deterministic scalar, exact-name scalar foreign-call,
+flat-resource, and resource-tagged C11 inspection and
 `fairyc experimental build <file.fy> --cc <clang|gcc> --profile <low|optimized> --output <build/path>`
 for an explicit host-Linux executable in that subset, and
 `fairyc experimental run <file.fy>` for the fixture-backed scalar MIR interpreter subset. These are developer commands whose
@@ -43,10 +44,15 @@ exact scalar result or canonical division, integer-overflow, or invalid-shift tr
 negation, addition, subtraction, multiplication, and signed right shift are executable; signed
 left shift is rejected as `E1011`; loop control without an enclosing `while` is rejected as `E1012`.
 It does not discover files, execute user drop bodies, implement effects, or provide host I/O.
+It also does not execute foreign calls: those fail with the interpreter capability boundary even
+when the same verified MIR is admissible to `emit-c`.
 `experimental emit-c` runs the same verified-MIR entry pipeline and writes one raw constrained C11
 translation unit to stdout. It does not write an artifact, invoke a C toolchain, link, or run native
 code. The native fixture lane's `drop-trace-v0` observer profile is not available through this
 command and never appears in its output.
+The admitted foreign declaration form currently has only `i32` parameters and result, uses its
+source identifier as the exact C symbol, and requires an explicit unsafe boundary. No `@link_name`,
+raw pointer, callback, `c.*` scalar, aggregate, export, or inferred C attribute is implemented.
 `experimental build` sends that exact constrained-C unit through the shared bounded C driver and embedded
 runtime. It has no implicit compiler, optimization, or output choice; requires Linux/amd64 with
 glibc; accepts only Clang or GCC and the closed `low` or `optimized` profiles; and creates a new
@@ -54,6 +60,9 @@ executable only under the source root's ignored `build/` directory. It neither o
 existing path nor implements empty, non-`i32`, nested, partially initialized, or nonempty-drop
 resources; nested tags or resource tags outside the exact `i32`/direct-resource payload gate; the broader interpreter subset; native execution;
 package builds; cross-compilation; installation; or a supported target.
+It accepts no companion source, object, library, search path, or arbitrary linker argument, so an
+admitted scalar foreign symbol must already resolve through the selected driver's ordinary link
+environment.
 The resulting product artifact is uninstrumented; the native fixture recorder is not linked.
 `experimental target-spec` emits `fairyc.target-spec/v0` JSON without probing the host or exposing
 local tool paths. Its current scalar, flat-resource, and resource-tagged emission subset is reported separately from the false

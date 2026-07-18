@@ -15,7 +15,11 @@ func Lower(input hir.Package) (Program, error) {
 	if err != nil {
 		return Program{}, err
 	}
-	program := Program{ResourceTypes: resourceTypes}
+	foreignFunctions, err := lowerForeignFunctions(input)
+	if err != nil {
+		return Program{}, err
+	}
+	program := Program{ResourceTypes: resourceTypes, ForeignFunctions: foreignFunctions}
 	properties := newTypeProperties(resourceTypes)
 	for _, module := range input.Modules {
 		for index := range module.Functions {
@@ -38,6 +42,39 @@ func Lower(input hir.Package) (Program, error) {
 		return 0
 	})
 	return program, nil
+}
+
+func lowerForeignFunctions(input hir.Package) ([]ForeignFunction, error) {
+	var result []ForeignFunction
+	seen := make(map[hir.SymbolID]struct{})
+	for _, module := range input.Modules {
+		for _, function := range module.ForeignFunctions {
+			if function.Symbol == hir.NoSymbol || function.Name == "" || function.LinkName == "" || function.ABI == "" {
+				return nil, fmt.Errorf("foreign function %s::%s has an incomplete declaration", module.Path, function.Name)
+			}
+			if _, duplicate := seen[function.Symbol]; duplicate {
+				return nil, fmt.Errorf("duplicate foreign function symbol %d", function.Symbol)
+			}
+			seen[function.Symbol] = struct{}{}
+			lowered := ForeignFunction{
+				Symbol: function.Symbol, Name: module.Path + "::" + function.Name,
+				LinkName: function.LinkName, ABI: function.ABI, Span: function.Span,
+				ResultType: function.ResultType,
+				Entity:     sourceEntity("foreign", function.Span),
+			}
+			for _, parameter := range function.Parameters {
+				lowered.ParameterTypes = append(lowered.ParameterTypes, parameter.Type)
+			}
+			result = append(result, lowered)
+		}
+	}
+	slices.SortFunc(result, func(left, right ForeignFunction) int {
+		if value := strings.Compare(left.LinkName, right.LinkName); value != 0 {
+			return value
+		}
+		return int(left.Symbol - right.Symbol)
+	})
+	return result, nil
 }
 
 func lowerResourceTypes(input hir.Package) ([]ResourceType, error) {
@@ -328,6 +365,11 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 			return l.lowerRegionPlace(expression)
 		}
 		return l.lowerCall(expression)
+	case "unsafe":
+		if len(expression.Children) != 1 {
+			return Operand{}, fmt.Errorf("unsafe expression has %d children", len(expression.Children))
+		}
+		return l.lowerExpression(&expression.Children[0])
 	case "result-variant":
 		return l.lowerResultVariant(expression)
 	case "option-variant":
@@ -916,17 +958,43 @@ func (l *functionLowerer) lowerCall(expression *hir.Expression) (Operand, error)
 	if hasNestedSideEffect {
 		l.result.EliminatedForms = append(l.result.EliminatedForms, EliminatedFormFact{Form: "nested-side-effect", RemainingCount: 0})
 	}
-	l.result.Calls = append(l.result.Calls, CallFact{
+	callFact := CallFact{
 		Call: expression.Span, ArgumentOrder: slices.Clone(argumentSpans), NormalSuccessor: true,
-	})
-	destination := l.newTemporary()
+		ForeignABI: expression.ForeignABI,
+	}
+	if expression.UnsafeScope != nil {
+		callFact.UnsafeScope = *expression.UnsafeScope
+	}
+	l.result.Calls = append(l.result.Calls, callFact)
+	destination := NoLocal
+	if expression.Type != hir.TypeVoid {
+		destination = l.newTemporary()
+	}
 	continuation := l.newBlock()
-	l.terminate(Terminator{
+	terminator := Terminator{
 		Kind: TerminatorCall, Span: expression.Span, Successors: []BlockID{continuation}, UnwindSuccessor: NoBlock,
 		Callee: expression.Symbol, Arguments: argumentValues, DestinationLocal: destination,
-	})
+		ForeignABI: expression.ForeignABI,
+	}
+	if expression.UnsafeScope != nil {
+		terminator.UnsafeScope = *expression.UnsafeScope
+		terminator.Entity = sourceEntity("call", expression.Span)
+		l.result.UnsafeOperations = append(l.result.UnsafeOperations, UnsafeOperation{
+			Entity:           terminator.Entity,
+			SourceSpanEntity: sourceEntity("span", expression.Span),
+			ScopeEntity:      sourceEntity("unsafe-scope", *expression.UnsafeScope),
+		})
+	}
+	l.terminate(terminator)
 	l.current = continuation
+	if destination == NoLocal {
+		return Operand{}, nil
+	}
 	return Operand{Kind: OperandLocal, Local: destination}, nil
+}
+
+func sourceEntity(kind string, span hir.Span) string {
+	return fmt.Sprintf("%s:%s:%d:%d", kind, span.Source, span.StartByte, span.EndByte)
 }
 
 func (l *functionLowerer) lowerCheckedDivision(expression *hir.Expression, left, right Operand) error {

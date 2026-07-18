@@ -9,11 +9,12 @@ import (
 )
 
 type typeChecker struct {
-	analyzer  *analyzer
-	module    *moduleScope
-	function  *ast.Function
-	hir       *hir.Function
-	loopDepth int
+	analyzer     *analyzer
+	module       *moduleScope
+	function     *ast.Function
+	hir          *hir.Function
+	loopDepth    int
+	unsafeScopes []hir.Span
 }
 
 func (a *analyzer) typeCheck() Result {
@@ -30,6 +31,13 @@ func (a *analyzer) typeCheck() Result {
 			}
 			hirModule.Resources = append(hirModule.Resources, a.checkResource(module, resource))
 		}
+		for index := range module.file.Module.ForeignFunctions {
+			function := &module.file.Module.ForeignFunctions[index]
+			if a.foreignFunctions[function] == nil {
+				continue
+			}
+			hirModule.ForeignFunctions = append(hirModule.ForeignFunctions, a.checkForeignFunction(module, function))
+		}
 		for index := range module.file.Module.Functions {
 			function := &module.file.Module.Functions[index]
 			if a.functions[function] == nil {
@@ -39,6 +47,34 @@ func (a *analyzer) typeCheck() Result {
 			hirModule.Functions = append(hirModule.Functions, checker.checkFunction())
 		}
 		result.HIR.Modules = append(result.HIR.Modules, hirModule)
+	}
+	return result
+}
+
+func (a *analyzer) checkForeignFunction(module *moduleScope, function *ast.ForeignFunction) hir.ForeignFunction {
+	symbol := a.foreignFunctions[function]
+	result := hir.ForeignFunction{
+		Symbol: symbol.id, Name: function.Name, LinkName: function.Name, ABI: function.ABI,
+		Span: span(module.file.Path, function.Span), ResultType: a.canonicalType(module, function.ResultType),
+	}
+	symbol.typ = result.ResultType
+	if _, _, borrow := hir.BorrowElement(result.ResultType); borrow {
+		a.addDiagnostic("E5102", span(module.file.Path, function.ResultType.Span), RelatedSpan{Role: "declaration", Span: span(module.file.Path, function.NameSpan)})
+	}
+	for index := range function.Parameters {
+		parameter := &function.Parameters[index]
+		parameterType := a.canonicalType(module, parameter.Type)
+		if _, _, borrow := hir.BorrowElement(parameterType); borrow {
+			a.addDiagnostic("E5102", span(module.file.Path, parameter.Type.Span), RelatedSpan{Role: "declaration", Span: span(module.file.Path, function.NameSpan)})
+		}
+		parameterSpan := span(module.file.Path, parameter.NameSpan)
+		result.Parameters = append(result.Parameters, hir.ForeignParameter{Name: parameter.Name, Type: parameterType, Span: parameterSpan})
+		if parameterType != hir.TypeInvalid {
+			a.types = append(a.types, TypeFact{Expression: parameterSpan, CanonicalType: parameterType})
+		}
+	}
+	if result.ResultType != hir.TypeInvalid {
+		a.types = append(a.types, TypeFact{Expression: span(module.file.Path, function.ResultType.Span), CanonicalType: result.ResultType})
 	}
 	return result
 }
@@ -81,6 +117,7 @@ func (c *typeChecker) checkFunction() hir.Function {
 	result := hir.Function{
 		Symbol:     functionSymbol.id,
 		Name:       c.function.Name,
+		Unsafe:     c.function.Unsafe,
 		Span:       span(c.module.file.Path, c.function.Span),
 		ResultType: resultType,
 	}
@@ -108,7 +145,13 @@ func (c *typeChecker) checkFunction() hir.Function {
 		c.analyzer.addUnsupported(c.module.file.Path, c.function.Span, "function without a body")
 		return result
 	}
+	if c.function.Unsafe {
+		c.unsafeScopes = append(c.unsafeScopes, span(c.module.file.Path, c.function.Span))
+	}
 	body, bodyType, hasReturn := c.checkBlock(c.function.Body, resultType)
+	if c.function.Unsafe {
+		c.unsafeScopes = c.unsafeScopes[:len(c.unsafeScopes)-1]
+	}
 	result.Body = body
 	if c.function.Body.Tail != nil {
 		c.requireType(
@@ -298,6 +341,8 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 		actual = hir.TypeVoid
 	case syntax.KindPropagate:
 		actual = c.checkPropagate(expression, result)
+	case syntax.KindUnsafe:
+		actual = c.checkUnsafe(expression, result, expected)
 	default:
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "expression "+string(expression.Kind))
 		actual = hir.TypeInvalid
@@ -308,6 +353,19 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 		c.addType(result.Span, actual)
 	}
 	return result, actual
+}
+
+func (c *typeChecker) checkUnsafe(expression *ast.Expression, result *hir.Expression, expected hir.Type) hir.Type {
+	if len(expression.Children) != 1 || expression.Children[0] == nil || expression.Children[0].Kind != syntax.KindBlock {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "malformed unsafe block")
+		return hir.TypeInvalid
+	}
+	scope := span(c.module.file.Path, expression.Span)
+	c.unsafeScopes = append(c.unsafeScopes, scope)
+	child, actual := c.checkExpression(expression.Children[0], expected)
+	c.unsafeScopes = c.unsafeScopes[:len(c.unsafeScopes)-1]
+	result.Children = appendExpression(result.Children, child)
+	return actual
 }
 
 func (c *typeChecker) checkWhile(expression *ast.Expression, result *hir.Expression) hir.Type {
@@ -497,8 +555,15 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 		return c.checkRegionPlace(expression, result)
 	}
 	callee := c.analyzer.resolved[calleeExpression]
-	if callee == nil || callee.kind != "function" || callee.function == nil {
+	if callee == nil || callee.kind != "function" && callee.kind != "foreign-function" {
 		c.analyzer.addUnsupported(c.module.file.Path, calleeExpression.Span, "call target that is not a function")
+		return hir.TypeInvalid
+	}
+	if callee.foreign != nil {
+		return c.checkForeignCall(expression, result, callee)
+	}
+	if callee.function == nil {
+		c.analyzer.addUnsupported(c.module.file.Path, calleeExpression.Span, "call target without a function declaration")
 		return hir.TypeInvalid
 	}
 	result.Symbol = callee.id
@@ -538,6 +603,45 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 	if errorSpan, ok := resultFailureSpan(callee.function.ResultType); ok {
 		callee.resultError = errorSpan
 	}
+	return callee.typ
+}
+
+func (c *typeChecker) checkForeignCall(expression *ast.Expression, result *hir.Expression, callee *symbol) hir.Type {
+	declaration := callee.foreign
+	result.Symbol = callee.id
+	result.ForeignABI = declaration.ABI
+	result.Children = append(result.Children, hir.Expression{
+		Kind: string(syntax.KindPath), Type: hir.TypeInvalid,
+		Span: span(c.module.file.Path, expression.Children[0].Span), Symbol: callee.id,
+	})
+	if len(c.unsafeScopes) == 0 {
+		c.analyzer.addDiagnostic("E5101", span(c.module.file.Path, expression.Span), RelatedSpan{
+			Role: "declaration", Span: span(callee.source, callee.declaration),
+		})
+	} else {
+		scope := c.unsafeScopes[len(c.unsafeScopes)-1]
+		result.UnsafeScope = &scope
+	}
+	arguments := expression.Children[1:]
+	if len(arguments) != len(declaration.Parameters) {
+		c.analyzer.addDiagnostic("E1010", span(c.module.file.Path, expression.Span), RelatedSpan{
+			Role: "declaration", Span: span(callee.source, callee.declaration),
+		})
+	}
+	for index, argument := range arguments {
+		expected := hir.TypeInvalid
+		expectedSpan := declaration.ResultType.Span
+		if index < len(declaration.Parameters) {
+			expected = c.analyzer.canonicalType(c.analyzer.modules[callee.module], declaration.Parameters[index].Type)
+			expectedSpan = declaration.Parameters[index].Type.Span
+		}
+		child, actual := c.checkExpression(argument, expected)
+		result.Children = appendExpression(result.Children, child)
+		if expected != hir.TypeInvalid {
+			c.requireType("E1006", span(c.module.file.Path, argument.Span), actual, expected, span(callee.source, expectedSpan))
+		}
+	}
+	callee.typ = c.analyzer.canonicalType(c.analyzer.modules[callee.module], declaration.ResultType)
 	return callee.typ
 }
 

@@ -128,10 +128,29 @@ type Package struct {
 
 // Module is one typed source module.
 type Module struct {
-	Path       string
-	SourcePath string
-	Resources  []Resource
-	Functions  []Function
+	Path             string
+	SourcePath       string
+	Resources        []Resource
+	ForeignFunctions []ForeignFunction
+	Functions        []Function
+}
+
+// ForeignFunction is one typed raw C declaration with an exact external symbol name.
+type ForeignFunction struct {
+	Symbol     SymbolID
+	Name       string
+	LinkName   string
+	ABI        string
+	Span       Span
+	Parameters []ForeignParameter
+	ResultType Type
+}
+
+// ForeignParameter is one named C ABI parameter in declaration order.
+type ForeignParameter struct {
+	Name string
+	Type Type
+	Span Span
 }
 
 // ResourceDropKind classifies how much user drop behavior survived semantic lowering.
@@ -164,6 +183,7 @@ type ResourceField struct {
 type Function struct {
 	Symbol     SymbolID
 	Name       string
+	Unsafe     bool
 	Span       Span
 	Parameters []Parameter
 	Locals     []Local
@@ -206,17 +226,19 @@ type Statement struct {
 
 // Expression is one typed HIR expression.
 type Expression struct {
-	Kind     string
-	Type     Type
-	Span     Span
-	Value    string
-	Variant  string
-	Operator string
-	Symbol   SymbolID
-	Children []Expression
-	Fields   []string
-	Block    *Block
-	Arms     []MatchArm
+	Kind        string
+	Type        Type
+	Span        Span
+	Value       string
+	Variant     string
+	Operator    string
+	Symbol      SymbolID
+	ForeignABI  string
+	UnsafeScope *Span
+	Children    []Expression
+	Fields      []string
+	Block       *Block
+	Arms        []MatchArm
 }
 
 // MatchArm is one already-resolved shallow tagged branch.

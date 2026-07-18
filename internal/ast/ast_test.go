@@ -137,3 +137,29 @@ func TestLowerCapturesEnumType(t *testing.T) {
 		t.Fatalf("enums = %+v", module.Enums)
 	}
 }
+
+func TestLowerPreservesForeignDeclarationAndUnsafeBoundaries(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nunsafe extern C fn add_one(value: i32) -> i32;\nunsafe fn wrapper(value: i32) -> i32 { add_one(value) }\nfn main() -> i32 { unsafe { add_one(41) } }\n")
+	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	module, err := Lower(tree)
+	if err != nil {
+		t.Fatalf("Lower() error = %v", err)
+	}
+	if len(module.ForeignFunctions) != 1 {
+		t.Fatalf("foreign functions = %+v", module.ForeignFunctions)
+	}
+	foreign := module.ForeignFunctions[0]
+	if foreign.Name != "add_one" || foreign.ABI != "C" || len(foreign.Parameters) != 1 || foreign.Parameters[0].Type.Text != "i32" || foreign.ResultType.Text != "i32" {
+		t.Fatalf("foreign function = %+v", foreign)
+	}
+	if len(module.Functions) != 2 || !module.Functions[0].Unsafe || module.Functions[1].Unsafe {
+		t.Fatalf("functions = %+v", module.Functions)
+	}
+	if module.Functions[1].Body == nil || module.Functions[1].Body.Tail == nil || module.Functions[1].Body.Tail.Kind != syntax.KindUnsafe {
+		t.Fatalf("main tail = %+v", module.Functions[1].Body)
+	}
+}

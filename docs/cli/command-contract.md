@@ -16,7 +16,7 @@ The current Go prototype implements seven deliberately unstable developer comman
 | `fairyc experimental check-syntax <file.fy>` | Check lexing, parsing, recovery, module identity, lossless reconstruction, and error-free AST lowering | Success line on stdout or human diagnostics on stderr |
 | `fairyc experimental check-semantics <file.fy> [<file.fy>...]` | Resolve names, type-check, and analyze local safe-borrow, whole-resource, Region, and complete Stage 0 Result must-use Flow for an explicit module set in the implemented subset | Typed-HIR module and function counts on stdout, human source diagnostics on stderr, or an explicit unsupported-subset error |
 | `fairyc experimental target-spec x86_64-linux-gnu` | Inspect the first host-independent target description without resolving a local toolchain | Deterministic `fairyc.target-spec/v0` JSON on stdout, defined by `spec/cli/experimental-target-spec-v0.schema.json` |
-| `fairyc experimental emit-c <file.fy>` | Lower one scalar, flat all-`i32` resource, or admitted resource-bearing built-in tag program through verified MIR and emit the provisional constrained C transport without invoking a toolchain | Exactly one deterministic ISO C11 translation unit on stdout, source diagnostics or capability errors on stderr |
+| `fairyc experimental emit-c <file.fy>` | Lower one scalar, exact-name `unsafe extern C fn(i32...) -> i32`, flat all-`i32` resource, or admitted resource-bearing built-in tag program through verified MIR and emit the provisional constrained C transport without invoking a toolchain | Exactly one deterministic ISO C11 translation unit on stdout, source diagnostics or capability errors on stderr |
 | `fairyc experimental build <file.fy> --cc <clang\|gcc> --profile <low\|optimized> --output <build/path>` | Compile and link one verified program in that constrained subset for the host `x86_64-linux-gnu` profile with an explicit C compiler, optimization profile, and ignored output path | A no-overwrite executable below `build/` plus one relative-path receipt, or source, capability, toolchain, link, or artifact diagnostics |
 | `fairyc experimental run <file.fy>` | Run one verified-MIR program in the scalar, tagged, whole-resource, and implemented Region subset whose selected module declares `main() -> i32` | `result: <i32>` on stdout, a canonical trap category on stderr, source diagnostics, or an explicit unsupported-subset error |
 
@@ -71,7 +71,7 @@ tagged structs. Direct nonempty all-`i32` resources with empty drop bodies and b
 resource-bearing tags whose payloads are exactly `i32` or direct admitted resources use private
 numeric structs whose size, alignment, and field offsets are asserted against target-layout results.
 Nested tags, empty or non-`i32` resources, partial initialization, user drop effects, Region, borrow,
-unsafe, FFI, complete runtime, and standard-library lowering fail with the provisional capability
+general unsafe operations, non-scalar FFI, complete runtime, and standard-library lowering fail with the provisional capability
 code. The closed native fixture `drop-trace-v0` profile is not selectable through the CLI and its
 observer declaration, calls, site metadata, and stderr protocol never appear in this output. The
 native runner's `address-undefined-o1` sanitizer mode is likewise validation-only and cannot be
@@ -88,6 +88,11 @@ path, and removes ordinary staging residue. It emits no `.c` file, object, cache
 package state, or network request. The provisional executable is not a supported target artifact or
 a stable `fairyc build` result. It is uninstrumented and does not link the native differential
 drop recorder or sanitizer runtimes.
+
+For the scalar foreign-call slice, `emit-c` writes a plain exact-name external prototype and call.
+`build` supplies no companion source, object, library, search path, or arbitrary linker argument;
+the selected C driver must resolve the symbol from its ordinary closed link environment or the build
+fails. `experimental run` never binds host symbols and reports the interpreter capability boundary.
 
 `fairyc check` remains unimplemented. It must not be aliased to `check-syntax`, because the planned
 command below also requires effects and later semantic groups beyond

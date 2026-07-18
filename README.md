@@ -14,7 +14,7 @@ The project is not trying to beat every hand-tuned C program or make every C own
 The first Stage 0 frontend slice now exists in Go: immutable source bytes, a lossless lexer,
 compact recoverable syntax, error-free AST lowering, deterministic `E00xx` diagnostics, and a
 runner for all parser v0 fixtures. The next slice resolves names and produces typed HIR for the
-  fixture-backed scalar and safe-borrow subset. Its semantic runner executes all 13 v0 resolve, type,
+  fixture-backed scalar, safe-borrow, and scalar foreign-call subset. Its semantic runner executes all 16 v0 resolve, type,
 and local Flow cases, including last-use loans and borrow-return origins. Whole-root resource Flow
   also executes all 12 v0 cases for moves, cleanup obligations, branch joins, normal, break, and continue loop edges,
 consuming tagged matches, and live/dead resource reassignment. The
@@ -49,7 +49,7 @@ built-in `Option` and `Result` values. The cases cover
 resource construction, field reads, whole-root call moves, live reassignment, calls and control
 flow, active-payload moves, Result propagation, bitwise operations, checked division and shift, overflow
 trapping, scalar `Option` Some and None, and scalar `Result` propagation success and failure. This
-lane only produces C text; no C compiler, linker, native executable, complete runtime, target
+fixture lane only produces C text; no C compiler, linker, native executable, complete runtime, target
 conformance, or self-hosting is implied.
 The first executable `fairyc.target-spec/v0` description now owns the host-independent
 `x86_64-linux-gnu` identity, LP64 scalar and pointer layouts, SysV AMD64 calling and stack facts,
@@ -66,13 +66,16 @@ hidden result pointers, register exhaustion, and whole-aggregate rollback. Those
 native evidence by themselves, and the target's C ABI marker stays fail-closed.
 The 14 valid plans now generate separate caller and callee objects for Clang-to-GCC and
 GCC-to-Clang at `-O0` and `-O2`, for 56 configured crossings. This Windows host cannot execute
-them, and C-object interoperability is not yet Fairy source `extern C` support.
+them. A separate scalar source fixture now carries exact-name `unsafe extern C fn(i32) -> i32`
+through AST, typed HIR, verified MIR, C emission, and four planned cross-compiler object crossings;
+none of those native executions has been observed on this Windows host.
 A provisional `x86_64-linux-gnu` SystemHeap implementation now lives in the target standard-library
 boundary rather than the thin runtime. It normalizes empty allocation, admits current fundamental
 alignments, preserves bytes across copy-and-release growth or shrink, and leaves the old block
 unchanged when validation or allocation fails. A closed Clang/GCC low/optimized C probe is wired
 for four executions, but it is not source-callable, not product-linked, and has no observed hosted
-receipt; `Arena`, owned text, and Linux `File` remain unimplemented.
+receipt. Arena, text ownership, and Linux File now have their own C slices below, but they remain
+source-disconnected.
 A second provisional slice implements Buffer-owned initialized bytes, failure-atomic reserve,
 relocating self-overlap append, length-overflow rollback, zeroed growth, truncate, clear, and drop.
 Its four-way native C probe is configured but still unobserved and not source-callable; the public
@@ -91,6 +94,12 @@ claimed.
 The Linux File C slice now exposes partial I/O, write-all progress, sync, and consuming close that
 is never retried, even after failure. Its four-way probe is configured but unobserved and source
 effects remain unimplemented.
+The first source FFI slice accepts an exact external identifier plus `i32` parameters and result.
+Calls require `unsafe {}` or `unsafe fn`; missing unsafe provenance is `E5101` and safe references in
+raw declarations are `E5102`. The interpreter fails closed with a `foreign-call` capability error,
+while C emission produces a plain external prototype with no inferred alias, purity, retention, or
+unwind attributes. `@link_name`, raw pointers, callbacks, `c.*` scalars, aggregates, exports, and
+standard-library wrapper calls remain unimplemented.
 A deterministic native C11 probe now translates the nine valid layout cases into private numeric
 types and is configured for Clang/GCC at `-O0` and `-O2`. This Windows host cannot execute those
 four probe runs, and no hosted success receipt has been observed, so `c-layout-probes` remains a
@@ -160,7 +169,11 @@ mandatory. This Windows host cannot execute that command, and the command remain
 interpreter: scalar tags, direct flat nonempty all-`i32` resources with empty drop bodies, and
 `Option<R>` or `Result<S, E>` where each payload is exactly `i32` or such a direct resource work.
 Nested tags, non-`i32` or nested resource fields, partial initialization, user drop effects, Region,
-unsafe, FFI, and standard-library programs still fail closed before native compilation.
+Region, general unsafe operations, non-scalar FFI, and standard-library programs still fail closed
+before native compilation. Exact-name `unsafe extern C fn` calls are admitted only for `i32`
+parameters and result; `experimental build` succeeds only when the selected C driver can resolve the
+external symbol from its ordinary link environment because the product CLI has no companion-source
+or arbitrary link-input option.
 
 ## Design anchors
 

@@ -8,6 +8,7 @@
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/language/0007-name-resolution-and-typing-v0.md",
     "docs/adr/0024-stage-0-loop-control-and-cleanup.md",
+    "docs/adr/0046-scalar-source-foreign-c-call.md",
     "docs/diagnostics/catalog-v0.md"
   ],
   "cases": [
@@ -114,6 +115,32 @@
               "endByte": 58
             },
             "escapes": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.flow.foreign-call",
+      "sourceRoot": "cases/pass/foreign-call/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow",
+        "resolutions": [
+          {
+            "use": { "source": "main.fy", "startByte": 94, "endByte": 101 },
+            "target": {
+              "module": "main",
+              "name": "add_one",
+              "kind": "foreign-function",
+              "declaration": { "source": "main.fy", "startByte": 33, "endByte": 40 }
+            }
+          }
+        ],
+        "types": [
+          {
+            "expression": { "source": "main.fy", "startByte": 94, "endByte": 105 },
+            "canonicalType": "i32"
           }
         ]
       }
@@ -253,6 +280,48 @@
             "code": "E1012",
             "primary": { "source": "main.fy", "startByte": 51, "endByte": 60 },
             "related": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.foreign-call-outside-unsafe",
+      "sourceRoot": "cases/fail/foreign-call-outside-unsafe/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          {
+            "code": "E5101",
+            "primary": { "source": "main.fy", "startByte": 85, "endByte": 96 },
+            "related": [
+              {
+                "role": "declaration",
+                "span": { "source": "main.fy", "startByte": 33, "endByte": 40 }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.foreign-safe-reference",
+      "sourceRoot": "cases/fail/foreign-safe-reference/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          {
+            "code": "E5102",
+            "primary": { "source": "main.fy", "startByte": 48, "endByte": 52 },
+            "related": [
+              {
+                "role": "declaration",
+                "span": { "source": "main.fy", "startByte": 33, "endByte": 40 }
+              }
+            ]
           }
         ]
       }

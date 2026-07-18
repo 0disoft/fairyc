@@ -153,7 +153,7 @@ func (a *analyzer) resourceExpression(module *moduleScope, expression *ast.Expre
 	switch expression.Kind {
 	case syntax.KindPath:
 		a.resourcePath(expression, environment, mode)
-	case syntax.KindGroup:
+	case syntax.KindGroup, syntax.KindUnsafe:
 		if len(expression.Children) == 1 {
 			reachable = a.resourceExpression(module, expression.Children[0], environment, mode)
 		}

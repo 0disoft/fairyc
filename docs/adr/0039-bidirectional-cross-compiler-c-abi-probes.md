@@ -18,6 +18,10 @@ The source-level Fairy C `extern C` surface is not implemented yet. The next hon
 not “Fairy-to-C works”; it is “independent required C compilers agree on the exact target-laid-out
 types and fixed signatures that future lowering will use.”
 
+ADR 0046 later implements the first exact-name scalar source slice. This context remains the reason
+the broader aggregate matrix was established before source lowering existed; it is no longer a
+statement that every source `extern C` form is absent.
+
 ## Decision
 
 1. The native runner consumes only the fourteen validated pass signatures exposed by

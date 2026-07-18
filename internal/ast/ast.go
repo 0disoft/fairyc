@@ -12,15 +12,16 @@ import (
 
 // Module is one source file after syntax-only lowering.
 type Module struct {
-	Path      string
-	Span      diagnostic.Span
-	Imports   []Import
-	Structs   []Struct
-	Resources []Resource
-	Enums     []Enum
-	Functions []Function
-	Bindings  []Binding
-	Literals  []Literal
+	Path             string
+	Span             diagnostic.Span
+	Imports          []Import
+	Structs          []Struct
+	Resources        []Resource
+	Enums            []Enum
+	ForeignFunctions []ForeignFunction
+	Functions        []Function
+	Bindings         []Binding
+	Literals         []Literal
 }
 
 // Enum is one inert tagged type declaration before payload semantics are implemented.
@@ -77,11 +78,23 @@ type Import struct {
 type Function struct {
 	Name       string
 	Public     bool
+	Unsafe     bool
 	Span       diagnostic.Span
 	NameSpan   diagnostic.Span
 	Parameters []Parameter
 	ResultType TypeReference
 	Body       *Block
+}
+
+// ForeignFunction records one raw C declaration before name resolution and ABI validation.
+type ForeignFunction struct {
+	Name       string
+	Public     bool
+	ABI        string
+	Span       diagnostic.Span
+	NameSpan   diagnostic.Span
+	Parameters []Parameter
+	ResultType TypeReference
 }
 
 // Parameter records one function parameter and its written type.
@@ -170,6 +183,8 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 			module.Enums = append(module.Enums, lowerEnum(tree, child))
 		case syntax.KindFunction:
 			module.Functions = append(module.Functions, lowerFunction(tree, child))
+		case syntax.KindForeign:
+			module.ForeignFunctions = append(module.ForeignFunctions, lowerForeignFunction(tree, child))
 		}
 	}
 
@@ -292,6 +307,7 @@ func lowerFunction(tree *syntax.Tree, node syntax.Node) Function {
 	value := Function{
 		Name:     node.Text,
 		Public:   containsKeywordBeforeName(tree, node, "pub", node.Text),
+		Unsafe:   containsKeywordBeforeName(tree, node, "unsafe", node.Text),
 		Span:     node.Span,
 		NameSpan: findIdentifierSpan(tree, node, node.Text, "fn"),
 	}
@@ -307,6 +323,29 @@ func lowerFunction(tree *syntax.Tree, node syntax.Node) Function {
 			value.ResultType = lowerType(child)
 		case syntax.KindBlock:
 			value.Body = lowerBlock(tree, child)
+		}
+	}
+	return value
+}
+
+func lowerForeignFunction(tree *syntax.Tree, node syntax.Node) ForeignFunction {
+	value := ForeignFunction{
+		Name:     node.Text,
+		Public:   containsKeywordBeforeName(tree, node, "pub", node.Text),
+		ABI:      "C",
+		Span:     node.Span,
+		NameSpan: findIdentifierSpan(tree, node, node.Text, "fn"),
+	}
+	for _, childID := range node.Children {
+		child, found := tree.Node(childID)
+		if !found {
+			continue
+		}
+		switch child.Kind {
+		case syntax.KindParameter:
+			value.Parameters = append(value.Parameters, lowerParameter(tree, child))
+		case syntax.KindType:
+			value.ResultType = lowerType(child)
 		}
 	}
 	return value

@@ -57,6 +57,96 @@ func TestEmitScalarControlUnit(t *testing.T) {
 	}
 }
 
+func TestEmitScalarForeignCall(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, "module main;\nunsafe extern C fn fairyc_fixture_add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { fairyc_fixture_add_one(41) } }\n")
+	_, interpreterErr := interpreter.Execute(program, "main::main")
+	var interpreterCapability interpreter.CapabilityError
+	if !errors.As(interpreterErr, &interpreterCapability) || interpreterCapability.Kind != "foreign-call" {
+		t.Fatalf("interpreter error = %v", interpreterErr)
+	}
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	if !slices.Equal(unit.Features, []string{"foreign-c-call", "scalar-call"}) {
+		t.Fatalf("Emit() features = %v", unit.Features)
+	}
+	for _, required := range []string{
+		"extern int32_t fairyc_fixture_add_one(int32_t fy_a_0);",
+		"fairyc_fixture_add_one(INT32_C(41));",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+	if strings.Contains(unit.Source, "static int32_t fairyc_fixture_add_one") {
+		t.Fatalf("generated C turned an imported symbol into an internal definition:\n%s", unit.Source)
+	}
+	if strings.Contains(unit.Source, "int32_t fy_l_0;") {
+		t.Fatalf("generated C declared a phantom local for the foreign symbol:\n%s", unit.Source)
+	}
+}
+
+func TestEmitRejectsReservedExternalSymbol(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, "module main;\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n")
+	program.ForeignFunctions[0].LinkName = "main"
+	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	var capability cbackend.CapabilityError
+	if !errors.As(err, &capability) || capability.Function != "main::add_one" || capability.Feature != "external C symbol \"main\"" {
+		t.Fatalf("Emit() error = %v", err)
+	}
+}
+
+func TestEmitGuardsExternalSymbolAgainstHeaderMacro(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, "module main;\nunsafe extern C fn INT64_MIN(value: i32) -> i32;\nfn main() -> i32 { unsafe { INT64_MIN(41) } }\n")
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, required := range []string{
+		"#ifdef INT64_MIN\n#undef INT64_MIN\n#endif",
+		"extern int32_t INT64_MIN(int32_t fy_a_0);",
+		"INT64_MIN(INT32_C(41));",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+}
+
+func TestEmitCoalescesCompatibleExternalDeclarations(t *testing.T) {
+	t.Parallel()
+	program := lowerSources(t, map[string]string{
+		"bindingsa.fy": "module bindingsa;\npub unsafe extern C fn shared_add_one(value: i32) -> i32;\n",
+		"bindingsb.fy": "module bindingsb;\npub unsafe extern C fn shared_add_one(value: i32) -> i32;\n",
+		"main.fy":      "module main;\nimport bindingsb as b;\nfn main() -> i32 { unsafe { b::shared_add_one(41) } }\n",
+	})
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	prototype := "extern int32_t shared_add_one(int32_t fy_a_0);"
+	if count := strings.Count(unit.Source, prototype); count != 1 {
+		t.Fatalf("generated C contains %d compatible prototypes, want 1:\n%s", count, unit.Source)
+	}
+}
+
+func TestEmitRejectsConflictingExternalDeclarations(t *testing.T) {
+	t.Parallel()
+	program := lowerSources(t, map[string]string{
+		"bindingsa.fy": "module bindingsa;\npub unsafe extern C fn shared_symbol(value: i32) -> i32;\n",
+		"bindingsb.fy": "module bindingsb;\npub unsafe extern C fn shared_symbol() -> i32;\n",
+		"main.fy":      "module main;\nfn main() -> i32 { 0 }\n",
+	})
+	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err == nil || !strings.Contains(err.Error(), "conflicting external C declarations") || !strings.Contains(err.Error(), "shared_symbol") {
+		t.Fatalf("Emit() error = %v", err)
+	}
+}
+
 func TestTrapCodesAreStable(t *testing.T) {
 	t.Parallel()
 	want := map[string]uint32{
@@ -419,15 +509,29 @@ func TestEmitRejectsUnverifiedMIRAndUnknownProfile(t *testing.T) {
 
 func lowerSource(t *testing.T, contents string) mir.Program {
 	t.Helper()
-	file := source.NewFile("main.fy", []byte(contents))
-	parsed, err := frontend.AnalyzeSyntax(file, source.DefaultLimits())
-	if err != nil {
-		t.Fatalf("AnalyzeSyntax() error = %v", err)
+	return lowerSources(t, map[string]string{"main.fy": contents})
+}
+
+func lowerSources(t *testing.T, contents map[string]string) mir.Program {
+	t.Helper()
+	paths := make([]string, 0, len(contents))
+	for path := range contents {
+		paths = append(paths, path)
 	}
-	if len(parsed.Tree.Diagnostics) != 0 || parsed.AST == nil {
-		t.Fatalf("AnalyzeSyntax() diagnostics = %+v", parsed.Tree.Diagnostics)
+	slices.Sort(paths)
+	files := make([]semantic.File, 0, len(paths))
+	for _, path := range paths {
+		file := source.NewFile(path, []byte(contents[path]))
+		parsed, err := frontend.AnalyzeSyntax(file, source.DefaultLimits())
+		if err != nil {
+			t.Fatalf("AnalyzeSyntax(%s) error = %v", path, err)
+		}
+		if len(parsed.Tree.Diagnostics) != 0 || parsed.AST == nil {
+			t.Fatalf("AnalyzeSyntax(%s) diagnostics = %+v", path, parsed.Tree.Diagnostics)
+		}
+		files = append(files, semantic.File{Path: path, Module: parsed.AST})
 	}
-	semanticResult := semantic.Analyze([]semantic.File{{Path: "main.fy", Module: parsed.AST}})
+	semanticResult := semantic.Analyze(files)
 	if len(semanticResult.Diagnostics) != 0 || len(semanticResult.Unsupported) != 0 {
 		t.Fatalf("Analyze() diagnostics = %+v, unsupported = %+v", semanticResult.Diagnostics, semanticResult.Unsupported)
 	}

@@ -12,8 +12,8 @@ func TestSemanticManifestV0(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Run() error = %v", err)
 	}
-	if report.CasesParsed != 13 || report.CasesRun != 13 || len(report.Deferred) != 0 {
-		t.Fatalf("Run() report = %+v, want parsed=13 run=13 deferred=0", report)
+	if report.CasesParsed != 16 || report.CasesRun != 16 || len(report.Deferred) != 0 {
+		t.Fatalf("Run() report = %+v, want parsed=16 run=16 deferred=0", report)
 	}
 	if len(report.Failures) != 0 {
 		for _, failure := range report.Failures {

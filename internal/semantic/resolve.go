@@ -22,6 +22,7 @@ type symbol struct {
 	mutable     bool
 	public      bool
 	function    *ast.Function
+	foreign     *ast.ForeignFunction
 	structure   *ast.Struct
 	resource    *ast.Resource
 	enumeration *ast.Enum
@@ -42,51 +43,53 @@ type lexicalScope struct {
 }
 
 type analyzer struct {
-	files           []File
-	modules         map[string]*moduleScope
-	moduleOrder     []*moduleScope
-	nextSymbol      hir.SymbolID
-	resolved        map[*ast.Expression]*symbol
-	bindingSymbols  map[*ast.Binding]*symbol
-	parameter       map[*ast.Parameter]*symbol
-	parameterIndex  map[*symbol]int
-	functions       map[*ast.Function]*symbol
-	structs         map[*ast.Struct]*symbol
-	resources       map[*ast.Resource]*symbol
-	enums           map[*ast.Enum]*symbol
-	regions         map[*ast.Expression]*symbol
-	regionType      *symbol
-	diagnostics     []Diagnostic
-	resolutions     []Resolution
-	types           []TypeFact
-	borrows         []BorrowFact
-	unsupported     []Unsupported
-	flowStarted     bool
-	resourceTypes   map[hir.Type]*resourceInfo
-	resourceStates  []ResourceStateFact
-	expressionTypes map[*ast.Expression]hir.Type
-	regionOrigins   []RegionOriginFact
-	resultHandling  []ResultHandlingFact
-	resourceLoops   []resourceLoopFrame
-	resultLoops     []resultLoopFrame
+	files            []File
+	modules          map[string]*moduleScope
+	moduleOrder      []*moduleScope
+	nextSymbol       hir.SymbolID
+	resolved         map[*ast.Expression]*symbol
+	bindingSymbols   map[*ast.Binding]*symbol
+	parameter        map[*ast.Parameter]*symbol
+	parameterIndex   map[*symbol]int
+	functions        map[*ast.Function]*symbol
+	foreignFunctions map[*ast.ForeignFunction]*symbol
+	structs          map[*ast.Struct]*symbol
+	resources        map[*ast.Resource]*symbol
+	enums            map[*ast.Enum]*symbol
+	regions          map[*ast.Expression]*symbol
+	regionType       *symbol
+	diagnostics      []Diagnostic
+	resolutions      []Resolution
+	types            []TypeFact
+	borrows          []BorrowFact
+	unsupported      []Unsupported
+	flowStarted      bool
+	resourceTypes    map[hir.Type]*resourceInfo
+	resourceStates   []ResourceStateFact
+	expressionTypes  map[*ast.Expression]hir.Type
+	regionOrigins    []RegionOriginFact
+	resultHandling   []ResultHandlingFact
+	resourceLoops    []resourceLoopFrame
+	resultLoops      []resultLoopFrame
 }
 
 func newAnalyzer(files []File) *analyzer {
 	return &analyzer{
-		files:           files,
-		modules:         make(map[string]*moduleScope, len(files)),
-		resolved:        make(map[*ast.Expression]*symbol),
-		bindingSymbols:  make(map[*ast.Binding]*symbol),
-		parameter:       make(map[*ast.Parameter]*symbol),
-		parameterIndex:  make(map[*symbol]int),
-		functions:       make(map[*ast.Function]*symbol),
-		structs:         make(map[*ast.Struct]*symbol),
-		resources:       make(map[*ast.Resource]*symbol),
-		enums:           make(map[*ast.Enum]*symbol),
-		regions:         make(map[*ast.Expression]*symbol),
-		resourceTypes:   make(map[hir.Type]*resourceInfo),
-		expressionTypes: make(map[*ast.Expression]hir.Type),
-		regionType:      &symbol{id: hir.NoSymbol, kind: "capability", name: "Region", typ: hir.TypeRegion},
+		files:            files,
+		modules:          make(map[string]*moduleScope, len(files)),
+		resolved:         make(map[*ast.Expression]*symbol),
+		bindingSymbols:   make(map[*ast.Binding]*symbol),
+		parameter:        make(map[*ast.Parameter]*symbol),
+		parameterIndex:   make(map[*symbol]int),
+		functions:        make(map[*ast.Function]*symbol),
+		foreignFunctions: make(map[*ast.ForeignFunction]*symbol),
+		structs:          make(map[*ast.Struct]*symbol),
+		resources:        make(map[*ast.Resource]*symbol),
+		enums:            make(map[*ast.Enum]*symbol),
+		regions:          make(map[*ast.Expression]*symbol),
+		resourceTypes:    make(map[hir.Type]*resourceInfo),
+		expressionTypes:  make(map[*ast.Expression]hir.Type),
+		regionType:       &symbol{id: hir.NoSymbol, kind: "capability", name: "Region", typ: hir.TypeRegion},
 	}
 }
 
@@ -95,7 +98,7 @@ func (a *analyzer) resolve() {
 	a.declareEnums()
 	a.declareStructs()
 	a.declareResources()
-	a.declareFunctions()
+	a.declareCallables()
 	a.resolveImports()
 	if len(a.diagnostics) > 0 {
 		return
@@ -207,31 +210,71 @@ func (a *analyzer) declareResources() {
 	}
 }
 
-func (a *analyzer) declareFunctions() {
+func (a *analyzer) declareCallables() {
 	for _, module := range a.moduleOrder {
-		for index := range module.file.Module.Functions {
-			function := &module.file.Module.Functions[index]
-			if previous := module.item(function.Name); previous != nil {
-				a.addDiagnostic("E0102", span(module.file.Path, function.NameSpan), RelatedSpan{
-					Role: "previous-declaration",
-					Span: span(previous.source, previous.declaration),
-				})
+		functionIndex := 0
+		foreignIndex := 0
+		for functionIndex < len(module.file.Module.Functions) || foreignIndex < len(module.file.Module.ForeignFunctions) {
+			if foreignIndex >= len(module.file.Module.ForeignFunctions) ||
+				functionIndex < len(module.file.Module.Functions) && module.file.Module.Functions[functionIndex].NameSpan.StartByte < module.file.Module.ForeignFunctions[foreignIndex].NameSpan.StartByte {
+				a.declareFunction(module, &module.file.Module.Functions[functionIndex])
+				functionIndex++
 				continue
 			}
-			value := &symbol{
-				id:          a.allocateSymbol(),
-				kind:        "function",
-				name:        function.Name,
-				module:      module.file.Module.Path,
-				source:      module.file.Path,
-				declaration: function.NameSpan,
-				typeSpan:    function.ResultType.Span,
-				public:      function.Public,
-				function:    function,
-			}
-			module.functions[function.Name] = value
-			a.functions[function] = value
+			a.declareForeignFunction(module, &module.file.Module.ForeignFunctions[foreignIndex])
+			foreignIndex++
 		}
+	}
+}
+
+func (a *analyzer) declareFunction(module *moduleScope, function *ast.Function) {
+	if previous := module.item(function.Name); previous != nil {
+		a.addDiagnostic("E0102", span(module.file.Path, function.NameSpan), RelatedSpan{
+			Role: "previous-declaration",
+			Span: span(previous.source, previous.declaration),
+		})
+		return
+	}
+	value := &symbol{
+		id:          a.allocateSymbol(),
+		kind:        "function",
+		name:        function.Name,
+		module:      module.file.Module.Path,
+		source:      module.file.Path,
+		declaration: function.NameSpan,
+		typeSpan:    function.ResultType.Span,
+		public:      function.Public,
+		function:    function,
+	}
+	module.functions[function.Name] = value
+	a.functions[function] = value
+}
+
+func (a *analyzer) declareForeignFunction(module *moduleScope, function *ast.ForeignFunction) {
+	if previous := module.item(function.Name); previous != nil {
+		a.addDiagnostic("E0102", span(module.file.Path, function.NameSpan), RelatedSpan{
+			Role: "previous-declaration", Span: span(previous.source, previous.declaration),
+		})
+		return
+	}
+	value := &symbol{
+		id: a.allocateSymbol(), kind: "foreign-function", name: function.Name,
+		module: module.file.Module.Path, source: module.file.Path,
+		declaration: function.NameSpan, typeSpan: function.ResultType.Span,
+		public: function.Public, foreign: function,
+	}
+	module.functions[function.Name] = value
+	a.foreignFunctions[function] = value
+	parameters := make(map[string]diagnostic.Span, len(function.Parameters))
+	for parameterIndex := range function.Parameters {
+		parameter := &function.Parameters[parameterIndex]
+		if previous, duplicate := parameters[parameter.Name]; duplicate {
+			a.addDiagnostic("E0102", span(module.file.Path, parameter.NameSpan), RelatedSpan{
+				Role: "previous-declaration", Span: span(module.file.Path, previous),
+			})
+			continue
+		}
+		parameters[parameter.Name] = parameter.NameSpan
 	}
 }
 

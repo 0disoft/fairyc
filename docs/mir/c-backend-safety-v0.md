@@ -39,7 +39,8 @@ the enclosing function's declared Result type on the error path.
 
 The emitter rejects empty, non-`i32`, nested, partially initialized, or nonempty-drop resources;
 resource-bearing nested tags and other tagged payload combinations; Region operations;
-safe borrows; unsafe operations; FFI; complete runtime and standard-library lowering; malformed
+safe borrows; unsafe operations outside the admitted scalar foreign-call form; complete runtime and
+standard-library lowering; malformed
 destinations; and non-canonical block shapes. Empty-drop discharge produces no invented cleanup
 call. This is private transport, not public Fairy ABI or user drop-body execution.
 `spec/fixtures/c-emission/manifest-v0.json` currently proves seventeen source-to-emission cases and
@@ -95,6 +96,21 @@ explicit in MIR.
 
 Raw foreign signatures contain C ABI scalars, explicitly represented aggregates, and raw pointers. Safe borrows are constructed only in Fairy C wrappers after validation.
 
+The implemented source slice preserves individual `unsafe extern C fn` declarations and
+`unsafe {}` or `unsafe fn` call provenance through AST, typed HIR, and verified MIR. The C backend
+currently admits only exact-name `C` declarations whose parameters and result are `i32`; it emits
+one plain `extern int32_t` prototype and an ordinary call without `pure`, `const`, `restrict`,
+`nothrow`, alias, retention, or visibility promises. Compatible repeated declarations of the same
+external name coalesce; signature conflicts fail closed. A local preprocessor guard undefines an
+included-header macro with that name before the prototype. `main`, generated `fy_`/`FY_` names,
+C11 keywords, and identifiers consumed by the generated preamble are rejected. `@link_name`, `c.*`
+scalars, raw pointers, callbacks, and `@repr(C)` aggregates remain outside this first source slice.
+
+The MIR interpreter deliberately returns a `foreign-call` capability error instead of guessing a
+host binding. A closed native fixture compiles the generated Fairy caller and a hand-written C
+callee as separate Clang/GCC objects in both directions and both profiles. Its four configured
+executions are source-to-link-to-process evidence only after the Linux lane actually runs.
+
 Foreign functions are assumed capable of reading, writing, retaining pointers, and invoking unknown code unless a versioned binding contract says otherwise. The backend does not infer restrictive attributes from a declaration name or header annotation alone.
 
 A C `longjmp` or C++ exception crossing generated Fairy C frames is forbidden. Integrations use boundary shims that catch or translate nonlocal control before returning a normal tagged status.
@@ -113,6 +129,11 @@ sanitizer executions. That path overrides ambient sanitizer options, forbids rec
 empty stdout/stderr, and is not selectable through the product CLI. Output, negative or larger
 `i32` returns, user drop-body effects, public layout, ABI, and broader runtime behavior remain
 unimplemented. A clean sanitizer run is backend evidence, not the language-semantics oracle.
+
+The same runner additionally plans four scalar Fairy-source foreign-call crossings: Clang-generated
+Fairy caller to GCC C callee and the reverse at low and optimized profiles. Those crossings use the
+existing separate-object driver and are counted as `foreignCallExecutions` in
+`fairyc.native-c-report/v12`; they do not expand the seventeen interpreter-owned differential cases.
 
 `internal/cdriver` and `internal/cruntime` are the one implementation path for both that matrix and
 the experimental constrained-C executable builder. The driver fixes the C dialect, warning policy,

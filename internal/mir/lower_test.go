@@ -75,6 +75,75 @@ func TestLowerRejectsNonEmptyResourceDropKind(t *testing.T) {
 	}
 }
 
+func TestLowerPreservesForeignCallABIAndUnsafeProvenance(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, "module main;\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n")
+	if len(program.ForeignFunctions) != 1 {
+		t.Fatalf("foreign functions = %+v", program.ForeignFunctions)
+	}
+	foreign := program.ForeignFunctions[0]
+	if foreign.Name != "main::add_one" || foreign.LinkName != "add_one" || foreign.ABI != "C" || foreign.ResultType != hir.TypeI32 || !slices.Equal(foreign.ParameterTypes, []hir.Type{hir.TypeI32}) {
+		t.Fatalf("foreign function = %+v", foreign)
+	}
+	function := program.Functions[0]
+	var call *Terminator
+	for blockIndex := range function.Blocks {
+		if function.Blocks[blockIndex].Terminator.Kind == TerminatorCall {
+			call = &function.Blocks[blockIndex].Terminator
+			break
+		}
+	}
+	if call == nil || call.Callee != foreign.Symbol || call.ForeignABI != "C" || call.UnsafeScope.Source != "main.fy" || call.Entity == "" {
+		t.Fatalf("foreign call = %+v", call)
+	}
+	if len(function.UnsafeOperations) != 1 || function.UnsafeOperations[0].Entity != call.Entity || function.UnsafeOperations[0].SourceSpanEntity == "" || function.UnsafeOperations[0].ScopeEntity == "" {
+		t.Fatalf("unsafe operations = %+v", function.UnsafeOperations)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+	wantEntity := call.Entity
+	for _, test := range []struct {
+		name   string
+		mutate func(*Program)
+	}{
+		{
+			name: "missing unsafe operation",
+			mutate: func(mutated *Program) {
+				mutated.Functions[0].UnsafeOperations = nil
+			},
+		},
+		{
+			name: "forged source span entity",
+			mutate: func(mutated *Program) {
+				mutated.Functions[0].UnsafeOperations[0].SourceSpanEntity += "-forged"
+			},
+		},
+		{
+			name: "scope does not contain call",
+			mutate: func(mutated *Program) {
+				for blockIndex := range mutated.Functions[0].Blocks {
+					terminator := &mutated.Functions[0].Blocks[blockIndex].Terminator
+					if terminator.Kind == TerminatorCall {
+						terminator.UnsafeScope.StartByte = terminator.Span.StartByte + 1
+						return
+					}
+				}
+				t.Fatal("cloned fixture has no foreign call")
+			},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			mutated := Clone(program)
+			test.mutate(&mutated)
+			failures := Verify(mutated)
+			if len(failures) != 1 || failures[0].Code != "V1701" || failures[0].Entity != wantEntity {
+				t.Fatalf("Verify() after %s = %+v", test.name, failures)
+			}
+		})
+	}
+}
+
 func TestCloneDeepCopiesResourceDefinitions(t *testing.T) {
 	t.Parallel()
 	original := Program{ResourceTypes: []ResourceType{{
