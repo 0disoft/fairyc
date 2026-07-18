@@ -36,9 +36,10 @@ unfinished.
 
 - A developer can now inspect or redirect the real C produced from a supported scalar `.fy` program
   while remaining clear that Go still runs the compiler.
-- ADR 0029 admits private scalar `Option<i32>` and `Result<i32, i32>` transport. Resources,
-  resource-bearing or nested tags, Region, borrow, unsafe, FFI, complete runtime, and standard-
-  library programs still fail closed at the C-backend capability boundary.
+- ADR 0029 admits private scalar `Option<i32>` and `Result<i32, i32>` transport; ADRs 0033 and 0034
+  later admit direct flat all-`i32` resources and their bounded built-in tag combinations. Nested
+  tags, broader resources, Region, borrow, unsafe, FFI, complete runtime, and standard-library
+  programs still fail closed at the C-backend capability boundary.
 - ADR 0028 now lets the separate experimental build command consume the same verified-MIR and C unit
   while owning toolchain resolution, output paths, receipts, cleanup, and process status outside
   this inspection-only command.

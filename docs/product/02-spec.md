@@ -186,17 +186,19 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - A small MIR interpreter is the semantic oracle before any second native backend.
 - Its fixture-only output hooks require explicit manifest bindings, capture bytes in memory under a
   shared limit, and never authorize source names, the CLI, or host streams.
-- The current C backend emits deterministic ISO C11 only for verified scalar and flat-resource MIR
+- The current C backend emits deterministic ISO C11 only for verified scalar, flat-resource, and
+  resource-tagged MIR
   under the provisional `x86_64-linux-gnu` profile. It includes private `Option<i32>`,
-  `Result<i32, i32>`, and nonempty all-`i32` resource transport but no public tagged or resource ABI.
+  `Result<i32, i32>`, nonempty all-`i32` resource transport, and built-in resource-bearing tags whose
+  payloads are exactly `i32` or direct admitted resources, but no public tagged or resource ABI.
   Resource layout is computed from the target description and guarded by generated C11 size,
   alignment, and offset assertions. Its emission fixtures do not compile, link, or execute C and do
   not establish a target support level.
 - A separate Linux/amd64 command requires glibc, Clang, and GCC and is configured to compare the
-  current scalar-and-flat-resource cases at low and optimized profiles. No hosted success receipt or broader target
+  current scalar, flat-resource, and resource-tagged cases at low and optimized profiles. No hosted success receipt or broader target
   conformance follows from the command's presence.
 - The experimental target-inspection command emits that target description without probing the
-  host. It reports `scalar-and-flat-i32-resource-c11` separately while keeping `emittable`,
+  host. It reports `scalar-and-flat-i32-resource-tagged-c11` separately while keeping `emittable`,
   `conformant`, and `supported` false and listing the evidence still missing.
 - The experimental single-file build command uses the same bounded C driver and embedded scalar
   runtime to produce a no-overwrite executable below `build/` on an eligible host. This artifact

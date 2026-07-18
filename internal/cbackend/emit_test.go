@@ -230,7 +230,7 @@ fn main() -> i32 {
 	}
 }
 
-func TestEmitRejectsResourceBearingTag(t *testing.T) {
+func TestEmitResourceBearingOption(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 resource Token {
@@ -245,10 +245,80 @@ fn main() -> i32 {
     }
 }
 `)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("interpreter = %+v, %v", outcome, err)
+	}
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	wantFeatures := []string{"flat-i32-resource", "resource-option", "scalar-control-flow", "trap"}
+	if !slices.Equal(unit.Features, wantFeatures) {
+		t.Fatalf("Emit() features = %v, want %v", unit.Features, wantFeatures)
+	}
+	for _, required := range []string{
+		"} fy_tagged_0;",
+		"_Static_assert(sizeof(fy_tagged_0) == UINT64_C(8)",
+		"offsetof(fy_tagged_0, p_0) == UINT64_C(4)",
+		"(fy_tagged_0){ .tag = FY_OPTION_SOME, .p_0 =",
+		".p_0;",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q", required)
+		}
+	}
+}
+
+func TestEmitRejectsNestedResourceTag(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+resource Token {
+    value: i32;
+    drop fn(self: &mut Self) {}
+}
+fn main() -> i32 {
+    let wrapped: Option<Option<Token>> = Option::Some(Option::Some(Token { value: 42 }));
+    42
+}
+`)
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	var capability cbackend.CapabilityError
-	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "resource local type \"Option<main::Token>\"") {
+	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "resource local type \"Option<Option<main::Token>>\"") {
 		t.Fatalf("Emit() error = %v", err)
+	}
+}
+
+func TestEmitResourceBearingResultLayout(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+resource Token {
+    value: i32;
+    drop fn(self: &mut Self) {}
+}
+fn main() -> i32 {
+    let wrapped: Result<Token, i32> = Result::Ok(Token { value: 42 });
+    match wrapped {
+        Result::Ok(token) => token.value,
+        Result::Err(error) => -error,
+    }
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, required := range []string{
+		"_Static_assert(sizeof(fy_tagged_0) == UINT64_C(12)",
+		"offsetof(fy_tagged_0, p_0) == UINT64_C(4)",
+		"offsetof(fy_tagged_0, p_1) == UINT64_C(8)",
+		"(fy_tagged_0){ .tag = FY_RESULT_OK, .p_0 =",
+		".p_0;",
+		".p_1;",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q", required)
+		}
 	}
 }
 

@@ -4,7 +4,7 @@
   "deferred": [
     "C parsing, compilation, object emission, linking, and native execution inside this emission-only runner; the separate Linux runner owns that evidence",
     "output, negative and larger i32 returns, cleanup traces, and sanitizer observations beyond the native process-status oracle",
-    "non-i32, empty, nested, partial-initialization, nonempty-drop, and tagged-payload resource values plus Region, borrow, unsafe, FFI, complete runtime, and standard-library C lowering",
+    "non-i32, empty, nested, partial-initialization, nonempty-drop, and nested-tag resource values plus Region, borrow, unsafe, FFI, complete runtime, and standard-library C lowering",
     "target layout, C ABI classification, object metadata, symbol, relocation, and sanitizer evidence"
   ],
   "contracts": [
@@ -15,6 +15,7 @@
     "docs/adr/0026-linux-scalar-c-differential-lane.md",
     "docs/adr/0029-scalar-option-result-c-transport.md",
     "docs/adr/0033-flat-i32-resource-c-transport.md",
+    "docs/adr/0034-resource-tagged-c-transport.md",
     "docs/mir/mir-v0.md",
     "docs/mir/c-backend-safety-v0.md",
     "docs/runtime/runtime-stdlib-v0.md",
@@ -151,6 +152,38 @@
       }
     },
     {
+      "id": "pass.c-emission.resource-option-none",
+      "sourceRoot": "cases/pass/resource-option-none/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main"],
+        "features": ["flat-i32-resource", "resource-option"]
+      }
+    },
+    {
+      "id": "pass.c-emission.resource-option-some",
+      "sourceRoot": "cases/pass/resource-option-some/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main"],
+        "features": ["flat-i32-resource", "resource-option", "scalar-control-flow", "trap"]
+      }
+    },
+    {
       "id": "pass.c-emission.resource-reassign-live",
       "sourceRoot": "cases/pass/resource-reassign-live/src",
       "sources": ["main.fy"],
@@ -164,6 +197,70 @@
         "dialect": "c11",
         "functions": ["main::main"],
         "features": ["flat-i32-resource"]
+      }
+    },
+    {
+      "id": "pass.c-emission.resource-result-err",
+      "sourceRoot": "cases/pass/resource-result-err/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main"],
+        "features": ["flat-i32-resource", "resource-result", "scalar-control-flow", "trap"]
+      }
+    },
+    {
+      "id": "pass.c-emission.resource-result-ok",
+      "sourceRoot": "cases/pass/resource-result-ok/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main"],
+        "features": ["checked-arithmetic", "flat-i32-resource", "resource-result", "scalar-control-flow", "trap"]
+      }
+    },
+    {
+      "id": "pass.c-emission.resource-result-propagate-err",
+      "sourceRoot": "cases/pass/resource-result-propagate-err/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main", "main::pass"],
+        "features": ["flat-i32-resource", "resource-result", "scalar-call", "scalar-control-flow", "trap"]
+      }
+    },
+    {
+      "id": "pass.c-emission.resource-result-propagate-ok",
+      "sourceRoot": "cases/pass/resource-result-propagate-ok/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main", "main::read"],
+        "features": ["checked-arithmetic", "flat-i32-resource", "resource-result", "scalar-call", "scalar-control-flow", "scalar-result", "trap"]
       }
     },
     {

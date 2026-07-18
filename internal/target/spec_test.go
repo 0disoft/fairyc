@@ -18,7 +18,7 @@ func TestX8664LinuxGNUSpecIsValidAndHostIndependent(t *testing.T) {
 	if spec.Pointer != (Layout{SizeBytes: 8, AlignmentBytes: 8}) || spec.Stack.CallAlignmentBytes != 16 || spec.ObjectFormat != "elf64" {
 		t.Fatalf("target core layout = %+v", spec)
 	}
-	if spec.Evidence.EmissionSubset != "scalar-and-flat-i32-resource-c11" {
+	if spec.Evidence.EmissionSubset != "scalar-and-flat-i32-resource-tagged-c11" {
 		t.Fatalf("target emission subset = %q", spec.Evidence.EmissionSubset)
 	}
 	if spec.Evidence.Emittable || spec.Evidence.Conformant || spec.Evidence.Supported || len(spec.Evidence.Missing) == 0 {

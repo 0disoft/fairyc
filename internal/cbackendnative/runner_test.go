@@ -24,7 +24,7 @@ func TestBuildSmokeSourceReachesCEmission(t *testing.T) {
 	if code != cli.ExitSuccess || stderr.Len() != 0 {
 		t.Fatalf("build smoke C emission = code %d, stderr %q", code, stderr.String())
 	}
-	for _, required := range []string{"fy_resource_0", "fy_option_i32", "fy_result_i32_i32"} {
+	for _, required := range []string{"fy_resource_0", "fy_tagged_0", "fy_tagged_1", "FY_OPTION_SOME", "FY_RESULT_OK"} {
 		if !strings.Contains(stdout.String(), required) {
 			t.Errorf("build smoke C emission is missing %q", required)
 		}

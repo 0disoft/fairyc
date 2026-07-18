@@ -51,7 +51,8 @@ guess it from local identifiers would create a second semantic path beside typed
    propagation success and error. The Linux matrix therefore grows from 16 to 32 process-status
    comparisons, and its four product-build smokes now compile and execute a program using both
    scalar tag families. ADR 0033 later grows the same matrix to eleven cases and 44 comparisons and
-   adds flat-resource transport to the existing four product-build smokes.
+   adds flat-resource transport to the existing four product-build smokes. ADR 0034 grows it to
+   seventeen cases and 68 comparisons and carries resources inside both built-in tag families.
 
 ## Consequences
 

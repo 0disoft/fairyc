@@ -43,6 +43,7 @@ trap categories without pretending to be the final runtime ABI or console contra
 7. The initial four cases produced 16 fixture comparisons. ADR 0029 expands the same matrix to eight
    scalar-payload cases and 32 comparisons, including Option and Result success and failure paths.
    ADR 0033 expands the matrix to eleven cases and 44 comparisons with flat-resource transport.
+   ADR 0034 expands it again to seventeen cases and 68 comparisons with resource-bearing tags.
    After those comparisons, the same command invokes the actual experimental build CLI for Clang
    and GCC under both profiles and executes each temporary product, requiring exit `42` and the
    exact relative-path build receipt.

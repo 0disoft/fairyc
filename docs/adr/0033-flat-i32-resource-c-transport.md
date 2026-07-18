@@ -50,8 +50,9 @@ alone would not prove that the C compiler selected the layout computed for
 8. The MIR interpreter remains the semantic oracle. Process status can compare the final return or
    trap but cannot observe an empty drop event, so this slice does not claim native cleanup-trace,
    sanitizer, public ABI, or user drop-body conformance.
-9. `fairyc.target-spec/v0` reports the implemented subset as
-   `scalar-and-flat-i32-resource-c11` while all target maturity booleans remain false.
+9. `fairyc.target-spec/v0` initially reports the implemented subset as
+   `scalar-and-flat-i32-resource-c11`; ADR 0034 later expands it to
+   `scalar-and-flat-i32-resource-tagged-c11` while all target maturity booleans remain false.
 
 ## Consequences
 

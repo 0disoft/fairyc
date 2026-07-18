@@ -13,10 +13,10 @@ The first planned profile is `x86_64-linux-gnu` compiled and linked through decl
 
 The profile ID now comes from the validated `fairyc.target-spec/v0` object in `internal/target`.
 The backend does not read Go `unsafe.Sizeof`, local C compiler probes, or SDK paths to decide target
-semantics. The target object reports the existing scalar-and-flat-resource emission subset while leaving all three
+semantics. The target object reports the existing scalar, flat-resource, and resource-tagged emission subset while leaving all three
 maturity claims false.
 
-## Current scalar and flat-resource emission slice
+## Current scalar, flat-resource, and resource-tagged emission slice
 
 `internal/cbackend` currently emits one deterministic ISO C11 translation unit from verified MIR
 for a deliberately narrow subset. It accepts `i32`, `bool`, `Option<i32>`, and
@@ -30,12 +30,19 @@ nonempty, every declaration-ordered field is exactly `i32`, and the verified use
 empty. Resources may be locals, parameters, private function returns, and by-value call arguments.
 Numeric translation-unit types and fields prevent source identifiers from becoming C symbols.
 
+Resource-bearing `Option` and `Result` values are accepted when every payload is exactly `i32` or a
+direct admitted resource and at least one payload is a resource. Concrete types receive numeric
+private tagged structs. `Option` has one payload field and `Result` has separate success and error
+fields; inactive fields are aggregate-zero-initialized rather than represented with an uncontracted
+C union. Payload extraction must agree with the MIR move marker. Result propagation reconstructs
+the enclosing function's declared Result type on the error path.
+
 The emitter rejects empty, non-`i32`, nested, partially initialized, or nonempty-drop resources;
-resource-bearing or nested tagged values; other tagged payload combinations; Region operations;
+resource-bearing nested tags and other tagged payload combinations; Region operations;
 safe borrows; unsafe operations; FFI; complete runtime and standard-library lowering; malformed
 destinations; and non-canonical block shapes. Empty-drop discharge produces no invented cleanup
 call. This is private transport, not public Fairy ABI or user drop-body execution.
-`spec/fixtures/c-emission/manifest-v0.json` currently proves eleven source-to-emission cases and
+`spec/fixtures/c-emission/manifest-v0.json` currently proves seventeen source-to-emission cases and
 repeated byte identity. No C parser, compiler, object writer, assembler, linker, executable,
 sanitizer, layout probe, or ABI probe runs in that fixture lane.
 
@@ -61,14 +68,17 @@ The backend cannot add C or LLVM overflow, exactness, alignment, or alias promis
 - The `fairyc.target-spec/v0` description, not host `sizeof(long)` or Go layout, determines scalar,
   pointer, stack, classifier, and object-format facts.
 - `internal/layout` now computes checked array and aggregate size, alignment, field offset, and
-  padding from that description. The C emitter consumes those results only for its flat all-`i32`
-  private resource structs and emits `_Static_assert` checks for `sizeof`, `_Alignof`, and every
-  `offsetof`. General nested resources and `@repr(C)` values remain rejected rather than partially
-  lowered.
+  padding from that description. The C emitter consumes those results for flat all-`i32` private
+  resource structs and their permitted resource-bearing built-in tags, and emits `_Static_assert`
+  checks for `sizeof`, `_Alignof`, and every `offsetof`. General nested resources and `@repr(C)`
+  values remain rejected rather than partially lowered.
 - Bit reinterpretation and potentially unaligned access use a `memcpy`-style transport rather than incompatible lvalue access.
 - `Option<i32>` and `Result<i32, i32>` currently use distinct private structs with a `uint32_t` tag
   and `int32_t` payload. Generated C extracts payload only in the selected variant block and traps
   on an invalid tag. This private shape is not `@repr(C)` or a public Fairy ABI.
+- Resource-bearing built-in tags use distinct numeric private structs with explicit payload fields.
+  Their larger inactive-field representation is a transport choice, not a stabilized language
+  layout or ABI promise.
 - Type punning through incompatible C lvalues is forbidden.
 - Stage 0 emits no `restrict` and makes no speculative `noalias` promise.
 - Padding bytes are never treated as initialized semantic data.
@@ -91,10 +101,10 @@ A C `longjmp` or C++ exception crossing generated Fairy C frames is forbidden. I
 
 ## Differential verification
 
-`internal/cbackendnative` implements the first scalar-and-flat-resource matrix shape for Linux/amd64
-with glibc, Clang and GCC, and low and optimized profiles. Its eleven cases plan 44 process-status
+`internal/cbackendnative` implements the first scalar, flat-resource, and resource-tagged matrix
+shape for Linux/amd64 with glibc, Clang and GCC, and low and optimized profiles. Its seventeen cases plan 68 process-status
 comparisons for small non-negative returns and canonical trap category, including both scalar tag
-families and flat resource transport. Output, negative or larger `i32` returns, drop traces,
+families, flat resource transport, and resource-bearing Option/Result paths. Output, negative or larger `i32` returns, drop traces,
 sanitizers, public layout, ABI, and
 broader runtime behavior remain unimplemented. Sanitizers are useful backend checks but are not the
 language-semantics oracle.

@@ -41,6 +41,8 @@
         "checked-division",
         "checked-shift",
         "flat-i32-resource",
+        "resource-option",
+        "resource-result",
         "scalar-bitwise",
         "scalar-call",
         "scalar-comparison",

@@ -43,10 +43,11 @@ through typed HIR and executable MIR. The current executable subset accepts only
 `drop` body; any nonempty body fails explicitly before Flow or MIR instead of being silently ignored.
 The interpreter constructs, reads, and recursively drops resources from the verified MIR definition,
 but still does not execute user drop-body effects.
-The constrained C backend emits deterministic ISO C11 for 11 verified fixtures across the scalar
-payload surface and flat nonempty all-`i32` resources with empty drop bodies. The cases cover
+The constrained C backend emits deterministic ISO C11 for 17 verified fixtures across the scalar
+payload surface, flat nonempty all-`i32` resources with empty drop bodies, and resource-bearing
+built-in `Option` and `Result` values. The cases cover
 resource construction, field reads, whole-root call moves, live reassignment, calls and control
-flow, bitwise operations, checked division and shift, overflow
+flow, active-payload moves, Result propagation, bitwise operations, checked division and shift, overflow
 trapping, scalar `Option` Some and None, and scalar `Result` propagation success and failure. This
 lane only produces C text; no C compiler, linker, native executable, complete runtime, target
 conformance, or self-hosting is implied.
@@ -64,7 +65,7 @@ at `-O0` and `-O2`, link the embedded scalar trap runtime, and compare process o
 this Windows host because no WSL distribution or C compiler is installed, and its hosted CI result
 has not yet been observed. The target therefore remains unsupported.
 An unstable `fairyc experimental` CLI can inspect syntax, syntax-check, semantic-check, emit the
-scalar-and-flat-resource C11 translation unit, build that subset into a Linux executable on an eligible host,
+scalar, flat-resource, and resource-tagged C11 translation unit, build that subset into a Linux executable on an eligible host,
 inspect the declared target specification, or interpret one source-root-relative `.fy` file, while semantic checking also
 accepts an explicit module set. There is no stable CLI, user drop-body execution, native execution
 command, complete runtime, standard library, package manager, supported target, or stable language
@@ -85,6 +86,7 @@ go run ./cmd/fairyc experimental target-spec x86_64-linux-gnu
 go run ./cmd/fairyc experimental emit-c examples/c/main.fy
 go run ./cmd/fairyc experimental emit-c examples/c/tagged.fy
 go run ./cmd/fairyc experimental emit-c examples/c/resource.fy
+go run ./cmd/fairyc experimental emit-c examples/c/resource_tagged.fy
 go run ./cmd/fairyc experimental build examples/c/tagged.fy --cc clang --profile optimized --output build/fairyc-example
 go run ./cmd/fairyc experimental run examples/run/main.fy
 go run ./cmd/fairyc experimental run examples/run/resource_option.fy
@@ -111,7 +113,7 @@ remaining semantic groups exist.
 and lists the missing evidence that keeps all three target maturity claims false.
 
 `experimental emit-c` accepts the same single-file entry shape and prints the verified scalar plus
-flat all-`i32` resource
+flat all-`i32` resource and resource-bearing built-in tag
 ISO C11 translation unit directly to stdout. It does not write a `.c` file or invoke a native
 toolchain.
 
@@ -119,10 +121,10 @@ On Linux/amd64 with glibc and the explicitly selected Clang or GCC installed, `e
 uses that same verified unit and the embedded runtime to produce a no-overwrite executable
 below the ignored `build/` directory. Compiler, `low` or `optimized` profile, and output path are
 mandatory. This Windows host cannot execute that command, and the command remains narrower than the
-interpreter: scalar `Option<i32>`, `Result<i32, i32>`, and direct flat nonempty all-`i32` resources
-with empty drop bodies work. Resource-bearing or nested tags, non-`i32` or nested resource fields,
-partial initialization, user drop effects, Region, unsafe, FFI, and standard-library programs still
-fail closed before native compilation.
+interpreter: scalar tags, direct flat nonempty all-`i32` resources with empty drop bodies, and
+`Option<R>` or `Result<S, E>` where each payload is exactly `i32` or such a direct resource work.
+Nested tags, non-`i32` or nested resource fields, partial initialization, user drop effects, Region,
+unsafe, FFI, and standard-library programs still fail closed before native compilation.
 
 ## Design anchors
 

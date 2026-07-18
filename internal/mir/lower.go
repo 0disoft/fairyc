@@ -994,8 +994,26 @@ func (l *functionLowerer) lowerPropagate(expression *hir.Expression) (Operand, e
 
 	errorLive := cloneLive(l.live)
 	l.current = errorBlock
+	_, errorType, operandIsResult := hir.ResultElements(operand.Type)
+	_, returnErrorType, returnIsResult := hir.ResultElements(l.source.ResultType)
+	if !operandIsResult || !returnIsResult || errorType != returnErrorType {
+		return Operand{}, fmt.Errorf("propagate error type %q does not match function result %q", errorType, l.source.ResultType)
+	}
+	errorPayload := l.newTemporary()
+	l.appendOperation(Operation{
+		Kind: OperationResultPayload, Span: expression.Span, DestinationLocal: errorPayload,
+		Operands: []Operand{resultValue}, Variant: "err", MovePayload: l.properties.NeedsDrop(errorType), Type: errorType,
+	})
+	propagatedResult := l.newTemporary()
+	l.appendOperation(Operation{
+		Kind: OperationResultConstruct, Span: expression.Span, DestinationLocal: propagatedResult,
+		Operands: []Operand{{Kind: OperandLocal, Local: errorPayload}}, Variant: "err", Type: l.source.ResultType,
+	})
 	errorActions := l.emitFunctionExitCleanup(errorLive, expression.Span, "propagate")
-	l.terminate(Terminator{Kind: TerminatorReturn, Span: expression.Span, UnwindSuccessor: NoBlock, ReturnValue: resultValue})
+	l.terminate(Terminator{
+		Kind: TerminatorReturn, Span: expression.Span, UnwindSuccessor: NoBlock,
+		ReturnValue: Operand{Kind: OperandLocal, Local: propagatedResult},
+	})
 	question := hir.Span{Source: expression.Span.Source, StartByte: max(expression.Span.StartByte, expression.Span.EndByte-1), EndByte: expression.Span.EndByte}
 	l.result.ResultBranches = append(l.result.ResultBranches, ResultBranchFact{
 		Question: question, ResultExpression: operand.Span, EvaluationCount: 1,

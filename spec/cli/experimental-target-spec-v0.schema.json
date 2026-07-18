@@ -97,7 +97,7 @@
       "additionalProperties": false,
       "required": ["emissionSubset", "emittable", "conformant", "supported", "missing"],
       "properties": {
-        "emissionSubset": { "const": "scalar-and-flat-i32-resource-c11" },
+        "emissionSubset": { "const": "scalar-and-flat-i32-resource-tagged-c11" },
         "emittable": { "const": false },
         "conformant": { "const": false },
         "supported": { "const": false },

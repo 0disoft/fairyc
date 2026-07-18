@@ -64,8 +64,11 @@ later evidence layers.
 
 The implemented slice emits deterministic ISO C11 for verified scalar-payload MIR, including
 private `Option<i32>` and `Result<i32, i32>` transport, plus nonempty all-`i32` resource definitions
-with empty drop bodies. Resource layout comes from the declared target engine and is rechecked with
-C11 size, alignment, and field-offset assertions. A separate
+with empty drop bodies and resource-bearing built-in tags whose other payloads are `i32` or another
+direct admitted resource. Resource and tagged layout comes from the declared target engine and is
+rechecked with C11 size, alignment, and field-offset assertions. `?` error paths rebuild the
+enclosing function's declared Result type instead of returning a differently typed operand
+container. A separate
 Linux/amd64 runner now drives Clang and GCC at low and optimized profiles, links the embedded scalar
 runtime, executes each emitted fixture, and compares its process outcome. The same bounded C driver
 and runtime feed an explicit experimental single-file build command whose artifact is confined to

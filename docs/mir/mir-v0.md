@@ -131,7 +131,11 @@ The current Go prototype also emits deterministic ISO C11 for the verified scala
 subset in `spec/fixtures/c-emission/manifest-v0.json`, including private `Option<i32>` and
 `Result<i32, i32>` construction, calls, matching, and propagation. Direct nonempty all-`i32`
 resources with empty drop bodies may be constructed, read, moved through calls, returned, assigned,
-and discharged. Their private numeric C struct layout is computed from `TargetSpec` and guarded by
-C11 size, alignment, and offset assertions. Tagged construction and payload operations carry their
-concrete MIR type into the backend. That runner stops at C text and therefore is backend emission
-evidence, not native differential or cleanup-trace evidence.
+and discharged. Resource-bearing `Option` and `Result` values are also accepted when every payload
+is exactly `i32` or one of those direct resources and at least one payload is a resource. Their
+private numeric C struct layout is computed from `TargetSpec` and guarded by C11 size, alignment,
+and offset assertions. Tagged construction and payload operations carry their concrete MIR type into
+the backend. Result propagation extracts the error and reconstructs the enclosing function's
+declared Result type before cleanup; it never returns a differently typed operand container. That
+runner stops at C text and therefore is backend emission evidence, not native differential or
+cleanup-trace evidence.

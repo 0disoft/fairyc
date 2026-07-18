@@ -40,10 +40,11 @@ multiplication, negation, division, remainder, and signed right shift execute ac
   categories; signed left shift is rejected as `E1011`. Nearest-loop `break` and `continue` now execute
   with resource and Region cleanup. Verified resource definitions now preserve ordered fields and
   empty-drop classification from AST through HIR into MIR; nonempty user drop bodies fail as
-  unsupported before executable lowering. The C backend now emits deterministic ISO C11 for 11
-  verified scalar and flat-resource cases under the provisional `x86_64-linux-gnu` profile,
+  unsupported before executable lowering. The C backend now emits deterministic ISO C11 for 17
+  verified scalar, flat-resource, and resource-tagged cases under the provisional `x86_64-linux-gnu` profile,
   including `Option<i32>` and `Result<i32, i32>` construction, match, calls, and propagation plus
-  all-`i32` resource construction, field reads, moves, and reassignment. The unstable
+  all-`i32` resource construction, field reads, moves, reassignment, and resource-bearing built-in
+  tag variants and propagation. The unstable
   `experimental emit-c` command exposes that exact verified translation unit on stdout
   without writing an artifact. On an eligible Linux/amd64 glibc host, `experimental build` can now
   compile and link that subset with explicit Clang or GCC and low or optimized profiles into
@@ -61,8 +62,8 @@ Exit gate: positive and negative fixtures agree with the source contracts, resou
 
 Current implementation status: a fail-closed Linux/amd64 constrained-C differential command now
 requires glibc, Clang, and GCC and is wired into a separate hosted Ubuntu CI job. It is designed to
-run all 11 emission cases at low and optimized profiles for 44 process-status comparisons, then drive
-the actual experimental build CLI with scalar Option and Result plus a flat all-`i32` resource
+run all 17 emission cases at low and optimized profiles for 68 process-status comparisons, then drive
+the actual experimental build CLI with resource-bearing Option and Result plus a flat all-`i32` resource
 through 4 compiler/profile executable
 smokes. The current Windows
 host has no eligible Linux toolchain, and no hosted run receipt has been observed, so this is a

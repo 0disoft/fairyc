@@ -18,9 +18,10 @@ Target claims use three levels:
 
 The Windows Go compiler host does not define target layout. Proving the first target requires WSL or Linux CI, an explicit glibc baseline, a sysroot or runner image, Clang and GCC, and a target runtime bundle.
 
-The current Go prototype can emit deterministic ISO C11 for a verified scalar and flat-resource
+The current Go prototype can emit deterministic ISO C11 for a verified scalar, flat-resource, and resource-tagged
 profile carrying this target identity, including private `Option<i32>`, `Result<i32, i32>`, and
-nonempty all-`i32` resource transport. Resource structs are compiler-private and do not alter the
+nonempty all-`i32` resource transport plus built-in resource-bearing tags. Resource and tagged
+structs are compiler-private and do not alter the
 rule below that resources are forbidden from `@repr(C)` and the public C ABI.
 A separate Linux/amd64 runner is configured to require glibc, Clang, and GCC, link the embedded
 scalar runtime, and compare process status at low and optimized profiles. No hosted success receipt
@@ -90,7 +91,7 @@ repository expectations only. Clang/GCC `sizeof`, `_Alignof`, `offsetof`, call, 
 bidirectional ABI probes remain required native evidence.
 
 This executable description is target data, not conformance evidence. Its evidence block names the
-existing `scalar-and-flat-i32-resource-c11` subset, keeps `emittable`, `conformant`, and `supported` false, and
+existing `scalar-and-flat-i32-resource-tagged-c11` subset, keeps `emittable`, `conformant`, and `supported` false, and
 lists the missing native C layout-probe, bidirectional ABI, runtime, standard-library, hosted-Linux, toolchain
 baseline, and provisioning gates. `fairyc experimental target-spec x86_64-linux-gnu` exposes that
 same immutable data without probing the host.

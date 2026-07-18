@@ -24,7 +24,7 @@ The Go frontend currently exposes `fairyc experimental parse <file.fy>`,
 `fairyc experimental check-semantics <file.fy> [<file.fy>...]`. The compiler prototype also exposes
 `fairyc experimental target-spec x86_64-linux-gnu` for deterministic host-independent target
 inspection,
-`fairyc experimental emit-c <file.fy>` for deterministic scalar and flat-resource C11 inspection and
+`fairyc experimental emit-c <file.fy>` for deterministic scalar, flat-resource, and resource-tagged C11 inspection and
 `fairyc experimental build <file.fy> --cc <clang|gcc> --profile <low|optimized> --output <build/path>`
 for an explicit host-Linux executable in that subset, and
 `fairyc experimental run <file.fy>` for the fixture-backed scalar MIR interpreter subset. These are developer commands whose
@@ -51,10 +51,10 @@ runtime. It has no implicit compiler, optimization, or output choice; requires L
 glibc; accepts only Clang or GCC and the closed `low` or `optimized` profiles; and creates a new
 executable only under the source root's ignored `build/` directory. It neither overwrites an
 existing path nor implements empty, non-`i32`, nested, partially initialized, or nonempty-drop
-resources; nested or resource-bearing tags; the broader interpreter subset; native execution;
+resources; nested tags or resource tags outside the exact `i32`/direct-resource payload gate; the broader interpreter subset; native execution;
 package builds; cross-compilation; installation; or a supported target.
 `experimental target-spec` emits `fairyc.target-spec/v0` JSON without probing the host or exposing
-local tool paths. Its current scalar-and-flat-resource emission subset is reported separately from the false
+local tool paths. Its current scalar, flat-resource, and resource-tagged emission subset is reported separately from the false
 `emittable`, `conformant`, and `supported` target states and their missing evidence.
 The interpreter fixture's in-memory byte hooks require manifest options that this CLI never accepts;
 declaring a similarly named Fairy C function does not grant output authority.

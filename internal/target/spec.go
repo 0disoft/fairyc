@@ -131,7 +131,7 @@ var x8664LinuxGNUSpec = Spec{
 		"raw-pointer",
 	},
 	Evidence: Evidence{
-		EmissionSubset: "scalar-and-flat-i32-resource-c11",
+		EmissionSubset: "scalar-and-flat-i32-resource-tagged-c11",
 		Missing: []string{
 			"bidirectional-c-abi-fixtures",
 			"c-layout-probes",
