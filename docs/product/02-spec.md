@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0016-stage-0-interpreter-fixture-contract.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0017-stage-0-result-constructors-and-match.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -100,11 +100,15 @@ Region-parameter origins, permitted returns, package-resolved local-region escap
 - Error variants may carry payloads.
 - `?` is defined only for `Result` in Stage 0 and lowers to an explicit result branch.
 - Results must be handled, returned, or explicitly discarded.
+- Result variants are constructed only as `Result::Ok(expression)` and
+  `Result::Err(expression)` in a context with one known `Result<T, E>` type.
+- A shallow Result match contains exactly one `Result::Ok(binding)` arm and one
+  `Result::Err(binding)` arm; both arms produce one compatible type.
 - Exceptions and stack unwinding are not part of the language.
 
 Changing a value from `T` to `Option<T>` must not silently turn a normal function call into conditional execution. Stage 0 return types contain at most one safe-borrow leaf. Full control-flow behavior is defined in `docs/language/0004-results-traps-and-control-flow.md`.
 
-Result return, discard, propagation, must-use, non-Result `?`, and error-compatibility assertions are versioned in `spec/fixtures/result/manifest-v0.json`. The MIR fixture suite covers a parameter-driven resource-error propagation move; variant construction and runtime drop traces remain deferred.
+Result return, discard, propagation, must-use, non-Result `?`, and error-compatibility assertions are versioned in `spec/fixtures/result/manifest-v0.json`. Qualified constructor and shallow-match syntax is fixed by ADR 0017. The MIR fixture suite covers a parameter-driven resource-error propagation move; executable constructor, match, and active resource-payload drop traces remain separately gated by fixtures.
 
 ## Safe-code semantics
 

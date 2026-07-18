@@ -17,11 +17,24 @@ Fairy C evaluates expression operands, aggregate fields, and call arguments from
 
 The explicit discard spelling is `discard expression;`. Discarding `Option` or `Result` drops only the active payload. A restricted user enum cannot contain a resource payload in Stage 0.
 
+Stage 0 constructs Result variants with compiler-known qualified paths:
+
+```fy
+Result::Ok(value)
+Result::Err(error)
+```
+
+These forms require one contextual `Result<T, E>` type and do not perform ordinary function
+lookup. Shallow matching uses exactly one `Result::Ok(binding)` arm and one
+`Result::Err(binding)` arm. The binding is local to its arm, the scrutinee is evaluated once, and
+both arms have one compatible result type. Wildcard Result arms, guards, nested patterns, and
+ref-style payload bindings are outside this slice.
+
 ## Propagation
 
 `expr?` evaluates `expr` once, branches on the result tag, moves the success payload into the continuation, and moves the error payload into the function return path. Normal cleanup for every exited scope runs before that return. No backend receives a `?` operator.
 
-Result fixtures classify an expression as returned, discarded, or propagated, record canonical success and error types, and assert exactly-once evaluation. They accept typed `Result` parameters so no fixture invents `Ok` or `Err` constructor syntax. The MIR fixture suite uses the same parameter-driven boundary to assert a resource-error payload move and enclosing cleanup; construction and runtime drop traces remain deferred.
+The initial Result fixtures classify an expression as returned, discarded, or propagated, record canonical success and error types, and assert exactly-once evaluation. Their parameter-driven cases remain valid evidence for handling independent of construction. Constructor and shallow-match cases use the qualified ADR 0017 spellings when their typed runner is enabled. The MIR fixture suite keeps its parameter-driven resource-error payload move until active resource-payload construction and drop traces are executable.
 
 ## Normal exits
 

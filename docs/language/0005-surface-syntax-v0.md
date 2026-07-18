@@ -110,7 +110,12 @@ let file =
     };
 ```
 
-`match` supports shallow built-in or user-enum variants, a single bound payload, shallow named inert fields, and `_`. Nested destructuring, guards, or-patterns, slice patterns, `ref` modifiers, and resource-field extraction are excluded.
+`Result` construction uses `Result::Ok(expression)` and `Result::Err(expression)` only where one
+contextual `Result<T, E>` type is known. A shallow Result match uses exactly one
+`Result::Ok(binding)` arm and one `Result::Err(binding)` arm. General shallow built-in or user-enum
+patterns may later use a single bound payload, shallow named inert fields, or `_`; nested
+destructuring, guards, or-patterns, slice patterns, `ref` modifiers, and resource-field extraction
+are excluded.
 
 Assignment is a statement. Comma expressions, `++`, `--`, C ternary syntax, and integer truthiness are excluded. Ordinary arithmetic traps as defined by the product specification; wrapping, saturating, and checked behavior uses methods rather than additional operator tokens.
 

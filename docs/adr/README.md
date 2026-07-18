@@ -26,6 +26,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0014-resolved-package-graph-fixture-contract.md`: package-instance equality, direct dependency visibility, and explicit standard-library injection without public manifest syntax.
 - `0015-mir-verifier-mutation-fixture-contract.md`: verified named seeds and isolated mutation recipes covering every current `Vxxxx` invariant.
 - `0016-stage-0-interpreter-fixture-contract.md`: verified-MIR scalar returns and canonical traps as the first executable semantics oracle.
+- `0017-stage-0-result-constructors-and-match.md`: qualified compiler-known Result construction and exhaustive shallow Result matching.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 
