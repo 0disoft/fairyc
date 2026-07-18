@@ -30,6 +30,25 @@
       "type": "string",
       "pattern": "^[A-Za-z0-9_-]+(?:/[A-Za-z0-9_-]+)*\\.fy$"
     },
+    "span": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "startByte", "endByte"],
+      "properties": {
+        "source": { "$ref": "#/$defs/sourcePath" },
+        "startByte": { "type": "integer", "minimum": 0 },
+        "endByte": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "dropEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["resourceType", "binding"],
+      "properties": {
+        "resourceType": { "type": "string", "minLength": 1 },
+        "binding": { "$ref": "#/$defs/span" }
+      }
+    },
     "case": {
       "type": "object",
       "additionalProperties": false,
@@ -67,7 +86,11 @@
         "status": { "const": "pass" },
         "completedThrough": { "const": "interpret" },
         "outcome": { "const": "return" },
-        "value": { "type": "integer", "minimum": -2147483648, "maximum": 2147483647 }
+        "value": { "type": "integer", "minimum": -2147483648, "maximum": 2147483647 },
+        "drops": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/dropEvent" }
+        }
       }
     },
     "trapExpectation": {

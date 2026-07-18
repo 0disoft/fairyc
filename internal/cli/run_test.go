@@ -329,7 +329,7 @@ func TestExperimentalRunRequiresScalarEntry(t *testing.T) {
 	}
 }
 
-func TestExperimentalRunRejectsResourceRuntimeAsCapability(t *testing.T) {
+func TestExperimentalRunExecutesResourceAndDrop(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
 	writeTestSource(t, root, "main.fy", `module main;
@@ -343,7 +343,7 @@ fn main() -> i32 {
 }
 `)
 	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
-	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "outside the experimental interpreter subset") || strings.Contains(stderr, "internal") {
+	if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
 	}
 }

@@ -26,14 +26,14 @@ error compatibility. The MIR runner executes all
 left-to-right call evaluation, complete-root moves, normal-exit cleanup order, `Result` error
 cleanup, and non-unwinding trap paths. The verifier mutation runner constructs all 8 named
 baselines and proves all 15 isolated `V1001` through `V1701` rejection recipes. The first MIR
-interpreter slice executes all 14 v0 cases for literal return, function-call arithmetic,
+interpreter slice executes all 16 v0 cases for literal return, function-call arithmetic,
 boolean branches and logical not, source `&&` and `||` short-circuiting, scalar `while`, scalar
 `Option` construction/matching, scalar `Result` construction/matching/propagation,
-division-by-zero traps, and bounded step-limit
+resource construction, field reads, call moves and deterministic drop traces, division-by-zero traps, and bounded step-limit
 termination. An unstable `fairyc experimental` CLI can inspect, syntax-check,
 semantic-check, or interpret one source-root-relative `.fy` file, while semantic checking also
 accepts an explicit module set. There is no stable CLI, resource-bearing `Option` or `Result` runtime value,
-resource drop trace, backend, standard
+user drop-body execution, backend, standard
 library, runtime, package manager, supported target, or stable language revision yet.
 
 ## Try the current prototype
@@ -57,7 +57,8 @@ literal values, or absolute paths. `check-semantics` accepts an explicit bounded
 for the currently implemented scalar, safe-borrow, whole-resource, Region-parameter, and Result subset. It rejects duplicate paths, root
 escapes, oversized input sets, and unsupported syntax rather than claiming success. The official
 `experimental run` accepts one file whose declared module contains `main() -> i32`, executes its
-verified MIR in the bounded scalar interpreter, including boolean `if`, short-circuit control, and scalar `while`,
+verified MIR in the bounded interpreter, including boolean `if`, short-circuit control, scalar `while`,
+resource construction, field reads, whole-root call moves, and cleanup drop events,
 and reports either `result: <i32>` or a canonical
 trap. The official
 `fairyc check` command remains unavailable until tagged resource payloads, reassignment/close rules,

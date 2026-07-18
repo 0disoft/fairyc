@@ -22,6 +22,7 @@ func Clone(input Program) Program {
 			for operationIndex := range clonedBlock.Operations {
 				clonedBlock.Operations[operationIndex].TrapCategories = slices.Clone(block.Operations[operationIndex].TrapCategories)
 				clonedBlock.Operations[operationIndex].Operands = slices.Clone(block.Operations[operationIndex].Operands)
+				clonedBlock.Operations[operationIndex].Fields = slices.Clone(block.Operations[operationIndex].Fields)
 			}
 			clonedBlock.Terminator.Successors = slices.Clone(block.Terminator.Successors)
 			clonedBlock.Terminator.TrapCategories = slices.Clone(block.Terminator.TrapCategories)

@@ -146,10 +146,28 @@ func runCase(manifestDirectory string, fixture caseDefinition) []Failure {
 	if outcome.Kind == interpreter.OutcomeReturn && outcome.Value != *fixture.Expect.Value {
 		return []Failure{{CaseID: fixture.ID, Detail: fmt.Sprintf("return value: want %d, got %d", *fixture.Expect.Value, outcome.Value)}}
 	}
+	if !dropTraceEqual(outcome.DropTrace, fixture.Expect.Drops) {
+		return []Failure{{CaseID: fixture.ID, Detail: fmt.Sprintf("drop trace: want %+v, got %+v", fixture.Expect.Drops, outcome.DropTrace)}}
+	}
 	if outcome.Kind == interpreter.OutcomeTrap && outcome.TrapCategory != *fixture.Expect.Category {
 		return []Failure{{CaseID: fixture.ID, Detail: fmt.Sprintf("trap category: want %q, got %q", *fixture.Expect.Category, outcome.TrapCategory)}}
 	}
 	return nil
+}
+
+func dropTraceEqual(actual []interpreter.DropEvent, expected []dropExpectation) bool {
+	if len(actual) != len(expected) {
+		return false
+	}
+	for index := range actual {
+		if string(actual[index].ResourceType) != expected[index].ResourceType ||
+			actual[index].Binding.Source != expected[index].Binding.Source ||
+			actual[index].Binding.StartByte != expected[index].Binding.StartByte ||
+			actual[index].Binding.EndByte != expected[index].Binding.EndByte {
+			return false
+		}
+	}
+	return true
 }
 
 func sortedUnique(values []string) bool {

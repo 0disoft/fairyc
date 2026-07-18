@@ -4,6 +4,7 @@ package interpreter
 import (
 	"fmt"
 	"math"
+	"slices"
 
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/mir"
@@ -23,6 +24,13 @@ type Outcome struct {
 	Kind         string
 	Value        int32
 	TrapCategory string
+	DropTrace    []DropEvent
+}
+
+// DropEvent is one resource drop-glue invocation in execution order.
+type DropEvent struct {
+	ResourceType hir.Type
+	Binding      hir.Span
 }
 
 // CapabilityError reports a valid verified-MIR program outside the implemented interpreter slice.
@@ -76,19 +84,20 @@ func Execute(program mir.Program, entry string) (Outcome, error) {
 		return Outcome{}, err
 	}
 	if completion.trapCategory != "" {
-		return Outcome{Kind: OutcomeTrap, TrapCategory: completion.trapCategory}, nil
+		return Outcome{Kind: OutcomeTrap, TrapCategory: completion.trapCategory, DropTrace: slices.Clone(runtime.dropTrace)}, nil
 	}
 	value, err := completion.value.asI32()
 	if err != nil {
 		return Outcome{}, fmt.Errorf("entry function %q: %w", entry, err)
 	}
-	return Outcome{Kind: OutcomeReturn, Value: value}, nil
+	return Outcome{Kind: OutcomeReturn, Value: value, DropTrace: slices.Clone(runtime.dropTrace)}, nil
 }
 
 type runtime struct {
-	byName   map[string]*mir.Function
-	bySymbol map[hir.SymbolID]*mir.Function
-	steps    int
+	byName    map[string]*mir.Function
+	bySymbol  map[hir.SymbolID]*mir.Function
+	steps     int
+	dropTrace []DropEvent
 }
 
 type valueKind uint8
@@ -97,13 +106,22 @@ const (
 	valueI32 valueKind = iota + 1
 	valueResult
 	valueOption
+	valueResource
 )
 
+type resourceState struct {
+	typ        hir.Type
+	fields     map[string]runtimeValue
+	fieldOrder []string
+	dropped    bool
+}
+
 type runtimeValue struct {
-	kind    valueKind
-	i32     int32
-	variant string
-	payload *runtimeValue
+	kind     valueKind
+	i32      int32
+	variant  string
+	payload  *runtimeValue
+	resource *resourceState
 }
 
 func i32Value(value int32) runtimeValue {
@@ -136,6 +154,23 @@ func optionValue(variant string, payload *runtimeValue) (runtimeValue, error) {
 	}
 }
 
+func resourceValue(typ hir.Type, fields []string, values []runtimeValue) (runtimeValue, error) {
+	if typ == hir.TypeInvalid || len(fields) == 0 || len(fields) != len(values) {
+		return runtimeValue{}, fmt.Errorf("invalid resource construction for %q", typ)
+	}
+	state := &resourceState{typ: typ, fields: make(map[string]runtimeValue, len(fields)), fieldOrder: slices.Clone(fields)}
+	for index, field := range fields {
+		if field == "" {
+			return runtimeValue{}, fmt.Errorf("resource %q has an empty field name", typ)
+		}
+		if _, duplicate := state.fields[field]; duplicate {
+			return runtimeValue{}, fmt.Errorf("resource %q has duplicate field %q", typ, field)
+		}
+		state.fields[field] = values[index]
+	}
+	return runtimeValue{kind: valueResource, resource: state}, nil
+}
+
 func (v runtimeValue) asI32() (int32, error) {
 	if v.kind != valueI32 {
 		return 0, capabilityError("value is not an executable i32 scalar")
@@ -158,6 +193,20 @@ func (v runtimeValue) optionPayload() (runtimeValue, error) {
 		return runtimeValue{}, capabilityError("value is not an executable Option::Some")
 	}
 	return *v.payload, nil
+}
+
+func (v runtimeValue) field(name string) (runtimeValue, error) {
+	if v.kind != valueResource || v.resource == nil {
+		return runtimeValue{}, capabilityError("field read received a non-resource value")
+	}
+	if v.resource.dropped {
+		return runtimeValue{}, fmt.Errorf("resource %q was read after drop", v.resource.typ)
+	}
+	value, found := v.resource.fields[name]
+	if !found {
+		return runtimeValue{}, fmt.Errorf("resource %q has no field %q", v.resource.typ, name)
+	}
+	return value, nil
 }
 
 type callCompletion struct {
@@ -192,6 +241,15 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 			}
 			r.steps--
 			switch operation.Kind {
+			case mir.OperationInitialize:
+				if len(operation.Operands) != 1 {
+					return callCompletion{}, capabilityError("resource initialization in %q has no executable value", function.Name)
+				}
+				value, err := evaluateOne(locals, operation.Operands)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("resource initialization in %q: %w", function.Name, err)
+				}
+				locals[mir.LocalID(operation.Symbol)] = value
 			case mir.OperationAssign:
 				value, err := evaluateOne(locals, operation.Operands)
 				if err != nil {
@@ -270,6 +328,42 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					return callCompletion{}, fmt.Errorf("Option payload in %q: %w", function.Name, err)
 				}
 				locals[operation.DestinationLocal] = payload
+			case mir.OperationResourceConstruct:
+				values := make([]runtimeValue, len(operation.Operands))
+				for index, operand := range operation.Operands {
+					value, err := evaluate(locals, operand)
+					if err != nil {
+						return callCompletion{}, fmt.Errorf("resource construction in %q: %w", function.Name, err)
+					}
+					values[index] = value
+				}
+				constructed, err := resourceValue(operation.Type, operation.Fields, values)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("resource construction in %q: %w", function.Name, err)
+				}
+				locals[operation.DestinationLocal] = constructed
+			case mir.OperationFieldRead:
+				receiver, err := evaluateOne(locals, operation.Operands)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("field read in %q: %w", function.Name, err)
+				}
+				value, err := receiver.field(operation.Field)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("field read in %q: %w", function.Name, err)
+				}
+				locals[operation.DestinationLocal] = value
+			case mir.OperationMove:
+				delete(locals, mir.LocalID(operation.Symbol))
+			case mir.OperationDrop:
+				local := mir.LocalID(operation.Symbol)
+				value, found := locals[local]
+				if !found {
+					return callCompletion{}, fmt.Errorf("drop in %q names missing local %d", function.Name, local)
+				}
+				if err := r.dropValue(value, operation.Span); err != nil {
+					return callCompletion{}, fmt.Errorf("drop in %q: %w", function.Name, err)
+				}
+				delete(locals, local)
 			}
 		}
 
@@ -329,6 +423,36 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 		default:
 			return callCompletion{}, fmt.Errorf("function %q has unsupported terminator %q", function.Name, terminator.Kind)
 		}
+	}
+}
+
+func (r *runtime) dropValue(value runtimeValue, binding hir.Span) error {
+	switch value.kind {
+	case valueI32:
+		return nil
+	case valueResult, valueOption:
+		if value.payload == nil {
+			return nil
+		}
+		return r.dropValue(*value.payload, binding)
+	case valueResource:
+		if value.resource == nil {
+			return fmt.Errorf("resource value has no state")
+		}
+		if value.resource.dropped {
+			return fmt.Errorf("resource %q was dropped twice", value.resource.typ)
+		}
+		value.resource.dropped = true
+		r.dropTrace = append(r.dropTrace, DropEvent{ResourceType: value.resource.typ, Binding: binding})
+		for index := len(value.resource.fieldOrder) - 1; index >= 0; index-- {
+			field := value.resource.fieldOrder[index]
+			if err := r.dropValue(value.resource.fields[field], binding); err != nil {
+				return err
+			}
+		}
+		return nil
+	default:
+		return capabilityError("value has no executable drop behavior")
 	}
 }
 

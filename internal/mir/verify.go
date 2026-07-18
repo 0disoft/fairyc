@@ -102,6 +102,10 @@ func verifyFunction(function *Function) []VerificationError {
 			}
 			switch operation.Kind {
 			case OperationInitialize:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if len(operation.Operands) > 1 || len(operation.Operands) == 1 && operation.DestinationLocal != LocalID(operation.Symbol) {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "resource initialization shape is invalid"})
+				}
 				if state.live[operation.Symbol] {
 					failures = append(failures, VerificationError{Code: "V1002", Entity: entity, Detail: "resource initialized twice"})
 				}
@@ -172,6 +176,18 @@ func verifyFunction(function *Function) []VerificationError {
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				if operation.DestinationLocal == NoLocal || operation.Variant != "some" || len(operation.Operands) != 1 {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "Option payload extraction must target Some"})
+				}
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationResourceConstruct:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if operation.DestinationLocal == NoLocal || operation.Type == hir.TypeInvalid || len(operation.Fields) == 0 || len(operation.Fields) != len(operation.Operands) || !uniqueNonEmpty(operation.Fields) {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "resource construction shape is invalid"})
+				}
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationFieldRead:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if operation.DestinationLocal == NoLocal || operation.Field == "" || len(operation.Operands) != 1 {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "field read shape is invalid"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationResultSwitch:
@@ -274,6 +290,20 @@ func verifyOperands(state verificationState, operands []Operand, entity string) 
 		}
 	}
 	return failures
+}
+
+func uniqueNonEmpty(values []string) bool {
+	seen := make(map[string]struct{}, len(values))
+	for _, value := range values {
+		if value == "" {
+			return false
+		}
+		if _, duplicate := seen[value]; duplicate {
+			return false
+		}
+		seen[value] = struct{}{}
+	}
+	return true
 }
 
 func cloneVerificationState(input verificationState) verificationState {

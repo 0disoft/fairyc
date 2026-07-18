@@ -317,6 +317,7 @@ func (c *typeChecker) checkRecord(expression *ast.Expression, result *hir.Expres
 		seen[fieldExpression.Text] = struct{}{}
 		value, actual := c.checkExpression(fieldExpression.Children[0], field.typ)
 		result.Children = appendExpression(result.Children, value)
+		result.Fields = append(result.Fields, fieldExpression.Text)
 		c.requireType("E1006", span(c.module.file.Path, fieldExpression.Children[0].Span), actual, field.typ, field.declaration)
 	}
 	if len(seen) != len(info.fields) {

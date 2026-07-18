@@ -129,12 +129,18 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 			if err != nil {
 				return false, err
 			}
-			if value.Kind != OperandInvalid {
-				l.appendOperation(Operation{Kind: OperationAssign, Span: statement.Span, DestinationLocal: LocalID(statement.Binding), Operands: []Operand{value}})
-			}
-			if binding, found := l.bindings[statement.Binding]; found && l.properties.NeedsDrop(binding.typ) {
-				l.appendOperation(Operation{Kind: OperationInitialize, Span: binding.span, Symbol: statement.Binding})
+			binding, found := l.bindings[statement.Binding]
+			if found && l.properties.NeedsDrop(binding.typ) {
+				if value.Kind == OperandInvalid {
+					return false, fmt.Errorf("resource binding %d has no value", statement.Binding)
+				}
+				l.appendOperation(Operation{
+					Kind: OperationInitialize, Span: binding.span, Symbol: statement.Binding,
+					DestinationLocal: LocalID(statement.Binding), Operands: []Operand{value},
+				})
 				l.live[statement.Binding] = true
+			} else if value.Kind != OperandInvalid {
+				l.appendOperation(Operation{Kind: OperationAssign, Span: statement.Span, DestinationLocal: LocalID(statement.Binding), Operands: []Operand{value}})
 			}
 		case "return":
 			if err := l.lowerReturn(statement.Expression, expressionSpan(statement.Expression, statement.Span)); err != nil {
@@ -204,13 +210,10 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 			return Operand{}, fmt.Errorf("group expression has %d children", len(expression.Children))
 		}
 		return l.lowerExpression(&expression.Children[0])
-	case "field-expression", "record":
-		for index := range expression.Children {
-			if _, err := l.lowerExpression(&expression.Children[index]); err != nil {
-				return Operand{}, err
-			}
-		}
-		return Operand{}, nil
+	case "record":
+		return l.lowerResourceConstruction(expression)
+	case "field-expression":
+		return l.lowerFieldRead(expression)
 	case "prefix":
 		if len(expression.Children) != 1 {
 			return Operand{}, fmt.Errorf("prefix expression has %d children", len(expression.Children))
@@ -268,6 +271,48 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 	default:
 		return Operand{}, fmt.Errorf("unsupported HIR expression %q", expression.Kind)
 	}
+}
+
+func (l *functionLowerer) lowerResourceConstruction(expression *hir.Expression) (Operand, error) {
+	if len(expression.Children) == 0 || len(expression.Children) != len(expression.Fields) || expression.Type == hir.TypeInvalid {
+		return Operand{}, fmt.Errorf("malformed resource construction with %d values and %d fields", len(expression.Children), len(expression.Fields))
+	}
+	operands := make([]Operand, 0, len(expression.Children))
+	for index := range expression.Children {
+		value, err := l.lowerExpression(&expression.Children[index])
+		if err != nil {
+			return Operand{}, err
+		}
+		if value.Kind == OperandInvalid {
+			return Operand{}, fmt.Errorf("resource field %q has no value", expression.Fields[index])
+		}
+		operands = append(operands, value)
+	}
+	destination := l.newTemporary()
+	l.appendOperation(Operation{
+		Kind: OperationResourceConstruct, Span: expression.Span, DestinationLocal: destination,
+		Operands: operands, Fields: slices.Clone(expression.Fields), Type: expression.Type,
+	})
+	return Operand{Kind: OperandLocal, Local: destination}, nil
+}
+
+func (l *functionLowerer) lowerFieldRead(expression *hir.Expression) (Operand, error) {
+	if len(expression.Children) != 1 || expression.Operator == "" {
+		return Operand{}, fmt.Errorf("malformed field read %q with %d receivers", expression.Operator, len(expression.Children))
+	}
+	receiver, err := l.lowerExpression(&expression.Children[0])
+	if err != nil {
+		return Operand{}, err
+	}
+	if receiver.Kind == OperandInvalid {
+		return Operand{}, fmt.Errorf("field read %q has no receiver value", expression.Operator)
+	}
+	destination := l.newTemporary()
+	l.appendOperation(Operation{
+		Kind: OperationFieldRead, Span: expression.Span, DestinationLocal: destination,
+		Operands: []Operand{receiver}, Field: expression.Operator,
+	})
+	return Operand{Kind: OperandLocal, Local: destination}, nil
 }
 
 func (l *functionLowerer) lowerResultVariant(expression *hir.Expression) (Operand, error) {
@@ -616,8 +661,7 @@ func (l *functionLowerer) lowerCall(expression *hir.Expression) (Operand, error)
 		}
 		argumentSpans = append(argumentSpans, argument.Span)
 		if l.isLiveResourcePath(argument) {
-			l.movePath(argument, "call-argument", true)
-			value = Operand{}
+			value = l.materializeMove(argument, value, "call-argument", true)
 		}
 		argumentValues = append(argumentValues, value)
 	}
@@ -673,11 +717,7 @@ func (l *functionLowerer) lowerPropagate(expression *hir.Expression) (Operand, e
 		return Operand{}, fmt.Errorf("propagate operand has no value")
 	}
 	if l.isLiveResourcePath(operand) {
-		movedResult := l.newTemporary()
-		l.appendOperation(Operation{Kind: OperationAssign, Span: operand.Span, DestinationLocal: movedResult, Operands: []Operand{resultValue}})
-		l.appendOperation(Operation{Kind: OperationMove, Span: operand.Span, Symbol: operand.Symbol, Destination: "result-branch"})
-		l.live[operand.Symbol] = false
-		resultValue = Operand{Kind: OperandLocal, Local: movedResult}
+		resultValue = l.materializeMove(operand, resultValue, "result-branch", false)
 	}
 	l.appendOperation(Operation{Kind: OperationResultSwitch, Span: expression.Span, Operands: []Operand{resultValue}})
 	success := l.newBlock()
@@ -713,8 +753,7 @@ func (l *functionLowerer) lowerReturn(expression *hir.Expression, exit hir.Span)
 		return err
 	}
 	if l.isLiveResourcePath(expression) {
-		l.movePath(expression, "return-value", true)
-		value = Operand{}
+		value = l.materializeMove(expression, value, "return-value", true)
 	}
 	actions := l.emitCleanup(l.live)
 	l.result.CleanupPaths = append(l.result.CleanupPaths, CleanupPathFact{Exit: exit, ExitKind: "return", Actions: actions})
@@ -734,6 +773,13 @@ func (l *functionLowerer) movePath(expression *hir.Expression, destination strin
 			Binding: binding.span, Operand: expression.Span, Destination: destination, CleanupObligationTransferred: true,
 		})
 	}
+}
+
+func (l *functionLowerer) materializeMove(expression *hir.Expression, value Operand, destination string, record bool) Operand {
+	temporary := l.newTemporary()
+	l.appendOperation(Operation{Kind: OperationAssign, Span: expression.Span, DestinationLocal: temporary, Operands: []Operand{value}})
+	l.movePath(expression, destination, record)
+	return Operand{Kind: OperandLocal, Local: temporary}
 }
 
 func (l *functionLowerer) emitCleanup(live map[hir.SymbolID]bool) []CleanupAction {

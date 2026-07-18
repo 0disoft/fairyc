@@ -111,7 +111,7 @@ Region-parameter origins, permitted returns, package-resolved local-region escap
 
 Changing a value from `T` to `Option<T>` must not silently turn a normal function call into conditional execution. Stage 0 return types contain at most one safe-borrow leaf. Full control-flow behavior is defined in `docs/language/0004-results-traps-and-control-flow.md`.
 
-Result return, discard, propagation, must-use, non-Result `?`, and error-compatibility assertions are versioned in `spec/fixtures/result/manifest-v0.json`. Qualified Result syntax is fixed by ADR 0017 and qualified Option syntax by ADR 0018. Scalar constructors and shallow matches execute through the MIR interpreter; active resource-payload move and drop traces remain separately gated by fixtures.
+Result return, discard, propagation, must-use, non-Result `?`, and error-compatibility assertions are versioned in `spec/fixtures/result/manifest-v0.json`. Qualified Result syntax is fixed by ADR 0017 and qualified Option syntax by ADR 0018. Scalar constructors and shallow matches execute through the MIR interpreter. Whole resources now execute construction, field reads, call moves, and cleanup drop events; active tagged resource-payload move and drop traces remain separately gated by fixtures.
 
 ## Safe-code semantics
 

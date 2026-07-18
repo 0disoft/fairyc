@@ -122,21 +122,23 @@ type Block struct {
 type OperationKind string
 
 const (
-	OperationInitialize      OperationKind = "initialize"
-	OperationMove            OperationKind = "move"
-	OperationDrop            OperationKind = "drop"
-	OperationCheckedDivision OperationKind = "checked-division"
-	OperationResultSwitch    OperationKind = "result-switch"
-	OperationUse             OperationKind = "use"
-	OperationDropFlagInit    OperationKind = "drop-flag-init"
-	OperationDropFlagClear   OperationKind = "drop-flag-clear"
-	OperationAssign          OperationKind = "assign"
-	OperationUnary           OperationKind = "unary"
-	OperationBinary          OperationKind = "binary"
-	OperationResultConstruct OperationKind = "result-construct"
-	OperationResultPayload   OperationKind = "result-payload"
-	OperationOptionConstruct OperationKind = "option-construct"
-	OperationOptionPayload   OperationKind = "option-payload"
+	OperationInitialize        OperationKind = "initialize"
+	OperationMove              OperationKind = "move"
+	OperationDrop              OperationKind = "drop"
+	OperationCheckedDivision   OperationKind = "checked-division"
+	OperationResultSwitch      OperationKind = "result-switch"
+	OperationUse               OperationKind = "use"
+	OperationDropFlagInit      OperationKind = "drop-flag-init"
+	OperationDropFlagClear     OperationKind = "drop-flag-clear"
+	OperationAssign            OperationKind = "assign"
+	OperationUnary             OperationKind = "unary"
+	OperationBinary            OperationKind = "binary"
+	OperationResultConstruct   OperationKind = "result-construct"
+	OperationResultPayload     OperationKind = "result-payload"
+	OperationOptionConstruct   OperationKind = "option-construct"
+	OperationOptionPayload     OperationKind = "option-payload"
+	OperationResourceConstruct OperationKind = "resource-construct"
+	OperationFieldRead         OperationKind = "field-read"
 )
 
 // LocalID identifies one source local, parameter, or compiler temporary.
@@ -172,6 +174,9 @@ type Operation struct {
 	DropFlagEntity   string
 	DestinationLocal LocalID
 	Operands         []Operand
+	Fields           []string
+	Type             hir.Type
+	Field            string
 	Operator         string
 	Variant          string
 	TrapCategories   []string

@@ -187,6 +187,7 @@ type Expression struct {
 	Operator string
 	Symbol   SymbolID
 	Children []Expression
+	Fields   []string
 	Block    *Block
 	Arms     []MatchArm
 }
