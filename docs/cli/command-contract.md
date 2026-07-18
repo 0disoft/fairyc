@@ -42,6 +42,9 @@ and emit no partial JSON. The reported scalar C emission subset does not make th
 imported module must be included explicitly. Duplicate paths and input sets beyond the prototype
 budgets are rejected before semantic analysis. Syntax outside the implemented semantic subset
 returns a capability error and never counts as a successful check.
+Resource declarations with empty user `drop` bodies preserve their ordered resolved fields in typed
+HIR. A nonempty user `drop` body returns the explicit unsupported-subset error before Flow; it is not
+accepted and then ignored by `run`, `emit-c`, or `build`.
 
 `experimental run` does not invoke a backend, linker, runtime, or host subprocess. It runs the
 source file through parser, semantic analysis, Flow, MIR lowering, the MIR verifier, and the bounded

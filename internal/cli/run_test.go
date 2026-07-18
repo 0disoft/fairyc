@@ -164,6 +164,16 @@ func TestExperimentalCheckSemanticsRejectsUnsupportedSubset(t *testing.T) {
 	}
 }
 
+func TestExperimentalCheckSemanticsRejectsNonEmptyResourceDropBody(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\nresource Token { value: i32; drop fn(self: &mut Self) { let marker: i32 = 1; } }\nfn main() -> i32 { 0 }\n")
+	code, stdout, stderr := runForTest([]string{"experimental", "check-semantics", "main.fy"}, root)
+	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "experimental semantic subset does not support non-empty resource drop body") {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
 func TestExperimentalCheckSemanticsChecksResourceFlow(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()

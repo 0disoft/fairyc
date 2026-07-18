@@ -37,7 +37,7 @@
     },
     "entityLabel": {
       "type": "string",
-      "pattern": "^(block|flag|form|loan|local|operation|origin|place|region|scope|span|statement|terminator|unsafe):[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+      "pattern": "^(block|flag|form|loan|local|operation|origin|place|region|resource-type|scope|span|statement|terminator|unsafe):[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
     },
     "seed": {
       "type": "object",
@@ -71,11 +71,12 @@
             "insert-source-form",
             "invalidate-region-reset-exit-kind",
             "move-resource-projection",
-			"remove-arithmetic-trap-check",
+            "remove-arithmetic-trap-check",
             "remove-exit-cleanup",
             "remove-flag-initialization",
             "remove-required-trap-check",
             "remove-region-reset",
+            "remove-resource-type-definition",
             "remove-tagged-operation-type",
             "remove-terminator",
             "remove-unsafe-provenance",

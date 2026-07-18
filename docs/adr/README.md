@@ -41,6 +41,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0029-scalar-option-result-c-transport.md`: private ISO C11 structs and typed MIR flow for `Option<i32>` and `Result<i32, i32>`.
 - `0030-executable-x86-64-linux-gnu-target-spec.md`: host-independent target facts, fail-closed maturity evidence, and deterministic experimental inspection.
 - `0031-target-layout-engine-and-fixtures.md`: checked scalar, pointer, array, enum, nested-struct, offset, and padding layout execution without host assumptions.
+- `0032-resource-definition-preservation-and-empty-drop-gate.md`: ordered resource definitions across AST, HIR, and MIR with fail-closed empty-drop execution.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

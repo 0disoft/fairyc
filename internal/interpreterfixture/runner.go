@@ -97,7 +97,6 @@ func runCase(manifestDirectory string, fixture caseDefinition) []Failure {
 		return []Failure{{CaseID: fixture.ID, Detail: err.Error()}}
 	}
 	files := make([]semantic.File, 0, len(fixture.Sources))
-	resourceTypes := make([]hir.Type, 0)
 	for _, relativePath := range fixture.Sources {
 		path, err := resolveWithin(sourceRoot, sourceRoot, relativePath)
 		if err != nil {
@@ -114,9 +113,6 @@ func runCase(manifestDirectory string, fixture caseDefinition) []Failure {
 		if len(result.Tree.Diagnostics) != 0 || result.AST == nil {
 			return []Failure{{CaseID: fixture.ID, Detail: fmt.Sprintf("source %q is not parser-valid: %+v", relativePath, result.Tree.Diagnostics)}}
 		}
-		for _, resource := range result.AST.Resources {
-			resourceTypes = append(resourceTypes, hir.Type(result.AST.Path+"::"+resource.Name))
-		}
 		files = append(files, semantic.File{Path: relativePath, Module: result.AST})
 	}
 	semanticResult := semantic.Analyze(files)
@@ -129,7 +125,7 @@ func runCase(manifestDirectory string, fixture caseDefinition) []Failure {
 	if err := validateTestIntrinsicSignatures(semanticResult.HIR, fixture.TestIntrinsics); err != nil {
 		return []Failure{{CaseID: fixture.ID, Detail: err.Error()}}
 	}
-	program, err := mir.Lower(semanticResult.HIR, mir.NewTypeProperties(resourceTypes))
+	program, err := mir.Lower(semanticResult.HIR)
 	if err != nil {
 		return []Failure{{CaseID: fixture.ID, Detail: err.Error()}}
 	}

@@ -6,7 +6,7 @@
 
 ## Input
 
-Drop elaboration consumes verified Flow CFG ownership states, lexical scope-exit sets, aggregate initialization progress, and call-argument temporaries. It runs before MIR is handed to an interpreter or backend.
+Drop elaboration consumes verified Flow CFG ownership states, lexical scope-exit sets, aggregate initialization progress, call-argument temporaries, and typed HIR resource definitions with declaration-ordered fields and classified drop bodies. It runs before MIR is handed to an interpreter or backend. The current executable prototype admits only the `empty` user drop classification; a nonempty body is rejected before Flow and cannot disappear during elaboration.
 
 ## Obligations
 
@@ -23,6 +23,11 @@ The compiler first creates a direct cleanup chain for each normal exiting edge. 
 ## Drop operation
 
 When a flagged resource is dropped, MIR clears the flag before invoking the drop glue. This prevents reentrant code or an internal failure path from observing a second live obligation. Stage 0 `drop` is infallible and cannot unwind.
+
+The verified MIR program owns one resource definition per canonical resource type. Construction,
+field reads, interpreter cleanup, and future backends consume that definition rather than inferring
+field order or drop behavior from operations. The current interpreter records the resource drop and
+recursively drops fields in reverse declaration order; it does not execute a nonempty user body.
 
 ## Partial aggregate initialization
 

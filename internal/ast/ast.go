@@ -47,6 +47,13 @@ type Resource struct {
 	Span     diagnostic.Span
 	NameSpan diagnostic.Span
 	Fields   []FieldDeclaration
+	Drop     *ResourceDrop
+}
+
+// ResourceDrop preserves the source declaration and body until semantic support is selected.
+type ResourceDrop struct {
+	Span diagnostic.Span
+	Body *Block
 }
 
 // FieldDeclaration records one named aggregate field and its written type.
@@ -226,6 +233,21 @@ func lowerResource(tree *syntax.Tree, node syntax.Node) Resource {
 		NameSpan: findIdentifierSpan(tree, node, node.Text, "resource"),
 	}
 	value.Fields = lowerFields(tree, node)
+	for _, childID := range node.Children {
+		child, found := tree.Node(childID)
+		if !found || child.Kind != syntax.KindFunction || child.Text != "drop" {
+			continue
+		}
+		value.Drop = &ResourceDrop{Span: child.Span}
+		for _, dropChildID := range child.Children {
+			dropChild, ok := tree.Node(dropChildID)
+			if ok && dropChild.Kind == syntax.KindBlock {
+				value.Drop.Body = lowerBlock(tree, dropChild)
+				break
+			}
+		}
+		break
+	}
 	return value
 }
 

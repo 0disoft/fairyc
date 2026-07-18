@@ -186,6 +186,37 @@ fn unwrap(input: Option<i32>) -> i32 {
 	}
 }
 
+func TestAnalyzePreservesOrderedResourceDefinitionWithEmptyDrop(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\nresource Pair { left: i32; right: bool; drop fn(self: &mut Self) {} }\nfn main() -> i32 { 0 }\n",
+	})
+	assertCleanTypeResult(t, result)
+	if len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].Resources) != 1 {
+		t.Fatalf("HIR modules = %+v", result.HIR.Modules)
+	}
+	resource := result.HIR.Modules[0].Resources[0]
+	if resource.Name != "Pair" || resource.Type != hir.Type("main::Pair") || resource.DropKind != hir.ResourceDropEmpty || len(resource.Fields) != 2 {
+		t.Fatalf("resource = %+v", resource)
+	}
+	if resource.Fields[0].Name != "left" || resource.Fields[0].Type != hir.TypeI32 || resource.Fields[1].Name != "right" || resource.Fields[1].Type != hir.TypeBool {
+		t.Fatalf("resource fields = %+v", resource.Fields)
+	}
+}
+
+func TestAnalyzeRejectsNonEmptyResourceDropBodyAsUnsupported(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\nresource Token { value: i32; drop fn(self: &mut Self) { let marker: i32 = 1; } }\nfn main() -> i32 { 0 }\n",
+	})
+	if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "non-empty resource drop body" {
+		t.Fatalf("unsupported = %+v", result.Unsupported)
+	}
+	if result.CompletedThrough != semantic.PhaseResolve || len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].Resources) != 1 || result.HIR.Modules[0].Resources[0].DropKind != hir.ResourceDropNonEmpty {
+		t.Fatalf("result = %+v", result)
+	}
+}
+
 func analyzeText(t *testing.T, files map[string]string) semantic.Result {
 	t.Helper()
 	inputs := make([]semantic.File, 0, len(files))

@@ -170,6 +170,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - Parsing starts from original source bytes, preserves trivia and error provenance in compact lossless syntax, and lowers to AST only after an error-free batch parse. An immutable green tree and incremental reparse are deferred until formatter or IDE work requires them.
 - Semantic checking proceeds through resolver, type, and Flow phases. Fixtures compare stable source coordinates and canonical facts rather than build-local AST or HIR dumps.
 - Typed HIR lowers through an analysis-only Flow CFG into mutable-local, backend-independent MIR.
+- Resource declarations retain canonical type identity, declaration-ordered resolved fields, source
+  spans, and drop-body classification through typed HIR into MIR. The current executable prototype
+  accepts only an empty user `drop` body and reports a nonempty body as unsupported before Flow;
+  this implementation gate does not remove user drop bodies from the language contract.
 - The C backend is the only committed Stage 0 product backend and emits a constrained target/toolchain profile rather than universally portable C.
 - `internal/target` owns the executable `fairyc.target-spec/v0` description for the first target.
   It records host-independent LP64, scalar, pointer, SysV AMD64, ELF, unwind, debug, and C-layout

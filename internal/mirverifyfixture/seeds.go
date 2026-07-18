@@ -16,11 +16,16 @@ const (
 
 func constructSeed(id string) (mir.Program, error) {
 	var function mir.Function
+	var resourceTypes []mir.ResourceType
 	switch id {
 	case "scalar-return":
 		function = scalarReturnSeed()
 	case "resource-return":
 		function = resourceReturnSeed()
+		resourceTypes = []mir.ResourceType{{
+			Type: hir.Type("seed::Token"), Entity: "resource-type:seed-token",
+			Fields: []mir.ResourceField{{Name: "value", Type: hir.TypeI32}}, DropKind: hir.ResourceDropEmpty,
+		}}
 	case "borrow-return":
 		function = borrowReturnSeed()
 	case "plain-region":
@@ -40,7 +45,7 @@ func constructSeed(id string) (mir.Program, error) {
 	default:
 		return mir.Program{}, fmt.Errorf("unknown seed %q", id)
 	}
-	return mir.Program{Functions: []mir.Function{function}}, nil
+	return mir.Program{ResourceTypes: resourceTypes, Functions: []mir.Function{function}}, nil
 }
 
 func scalarReturnSeed() mir.Function {
@@ -69,6 +74,7 @@ func resourceReturnSeed() mir.Function {
 		ReturnEntity: "terminator:return",
 		Entities: []string{
 			"block:cleanup", "block:entry", "flag:token-live", "local:token", "place:token-field",
+			"resource-type:seed-token",
 			"statement:clear-token-flag", "statement:drop-token", "statement:init-token-flag", "terminator:return",
 		},
 		Resources: []mir.ResourceLocal{{Symbol: tokenSymbol, Type: hir.Type("seed::Token"), Parameter: true, Entity: "local:token"}},

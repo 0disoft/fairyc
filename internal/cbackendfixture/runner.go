@@ -13,7 +13,6 @@ import (
 
 	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/frontend"
-	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/interpreter"
 	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/semantic"
@@ -148,7 +147,6 @@ func lowerFixture(manifestDirectory string, fixture caseDefinition) (mir.Program
 		return mir.Program{}, &Failure{CaseID: fixture.ID, Detail: err.Error()}
 	}
 	files := make([]semantic.File, 0, len(fixture.Sources))
-	resourceTypes := make([]hir.Type, 0)
 	for _, relativePath := range fixture.Sources {
 		path, err := resolveWithin(sourceRoot, sourceRoot, relativePath)
 		if err != nil {
@@ -165,9 +163,6 @@ func lowerFixture(manifestDirectory string, fixture caseDefinition) (mir.Program
 		if len(parsed.Tree.Diagnostics) != 0 || parsed.AST == nil {
 			return mir.Program{}, &Failure{CaseID: fixture.ID, Detail: fmt.Sprintf("source %q is not parser-valid: %+v", relativePath, parsed.Tree.Diagnostics)}
 		}
-		for _, resource := range parsed.AST.Resources {
-			resourceTypes = append(resourceTypes, hir.Type(parsed.AST.Path+"::"+resource.Name))
-		}
 		files = append(files, semantic.File{Path: relativePath, Module: parsed.AST})
 	}
 	semanticResult := semantic.Analyze(files)
@@ -177,7 +172,7 @@ func lowerFixture(manifestDirectory string, fixture caseDefinition) (mir.Program
 	if semanticResult.CompletedThrough != semantic.PhaseFlow || len(semanticResult.Diagnostics) != 0 {
 		return mir.Program{}, &Failure{CaseID: fixture.ID, Detail: fmt.Sprintf("fixture did not complete Flow: phase=%q diagnostics=%+v", semanticResult.CompletedThrough, semanticResult.Diagnostics)}
 	}
-	program, err := mir.Lower(semanticResult.HIR, mir.NewTypeProperties(resourceTypes))
+	program, err := mir.Lower(semanticResult.HIR)
 	if err != nil {
 		return mir.Program{}, &Failure{CaseID: fixture.ID, Detail: err.Error()}
 	}

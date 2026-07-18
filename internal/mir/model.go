@@ -1,7 +1,11 @@
 // Package mir defines and verifies the executable Stage 0 MIR boundary.
 package mir
 
-import "github.com/0disoft/fairyc/internal/hir"
+import (
+	"strings"
+
+	"github.com/0disoft/fairyc/internal/hir"
+)
 
 // BlockID identifies one function-local basic block.
 type BlockID int
@@ -9,22 +13,21 @@ type BlockID int
 // NoBlock denotes the absence of a control-flow successor.
 const NoBlock BlockID = -1
 
-// TypeProperties provides the compiler-known type facts needed during lowering.
-type TypeProperties struct {
+// typeProperties provides the compiler-known type facts needed during lowering.
+type typeProperties struct {
 	resources map[hir.Type]struct{}
 }
 
-// NewTypeProperties constructs an immutable resource-type lookup.
-func NewTypeProperties(resources []hir.Type) TypeProperties {
+func newTypeProperties(resources []ResourceType) typeProperties {
 	values := make(map[hir.Type]struct{}, len(resources))
 	for _, value := range resources {
-		values[value] = struct{}{}
+		values[value.Type] = struct{}{}
 	}
-	return TypeProperties{resources: values}
+	return typeProperties{resources: values}
 }
 
 // NeedsDrop reports whether a value can own an active cleanup obligation.
-func (p TypeProperties) NeedsDrop(value hir.Type) bool {
+func (p typeProperties) NeedsDrop(value hir.Type) bool {
 	if _, found := p.resources[value]; found {
 		return true
 	}
@@ -37,7 +40,25 @@ func (p TypeProperties) NeedsDrop(value hir.Type) bool {
 
 // Program is verified before it is handed to an interpreter or backend.
 type Program struct {
-	Functions []Function
+	ResourceTypes []ResourceType
+	Functions     []Function
+}
+
+// ResourceType is one verified move-only aggregate definition used by executable MIR.
+type ResourceType struct {
+	Type     hir.Type
+	Span     hir.Span
+	Entity   string
+	Fields   []ResourceField
+	DropKind hir.ResourceDropKind
+	DropSpan hir.Span
+}
+
+// ResourceField preserves declaration order and the resolved semantic field type.
+type ResourceField struct {
+	Name string
+	Type hir.Type
+	Span hir.Span
 }
 
 // Function is one mutable-local control-flow graph and its source-linked facts.
@@ -183,6 +204,7 @@ type Operation struct {
 	Operands         []Operand
 	Fields           []string
 	Type             hir.Type
+	OwnerType        hir.Type
 	Field            string
 	Operator         string
 	Variant          string
@@ -191,6 +213,26 @@ type Operation struct {
 	FlagClearedFirst bool
 	SourceForm       string
 	ExitKind         string
+}
+
+func resourceTypeEntity(value hir.Type) string {
+	var name strings.Builder
+	separator := false
+	for _, value := range strings.ToLower(string(value)) {
+		if value >= 'a' && value <= 'z' || value >= '0' && value <= '9' {
+			if separator && name.Len() > 0 {
+				name.WriteByte('-')
+			}
+			name.WriteRune(value)
+			separator = false
+			continue
+		}
+		separator = name.Len() > 0
+	}
+	if name.Len() == 0 {
+		return "resource-type:invalid"
+	}
+	return "resource-type:" + name.String()
 }
 
 // TerminatorKind identifies the only legal block-ending control transfers.

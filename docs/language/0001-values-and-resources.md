@@ -67,6 +67,13 @@ A trap, process abort, or forbidden foreign nonlocal control transfer is not a n
 
 Safe code cannot forget or disarm a resource. A resource implementation may expose a narrow unsafe internal operation that clears its cleanup obligation after ownership has been transferred to an external system; that operation must be represented explicitly in MIR and carry source provenance.
 
+The current Go prototype preserves each resource's ordered resolved field definitions and classifies
+its user drop body through AST, typed HIR, and MIR. Executable lowering currently accepts only an
+empty user drop body; a nonempty body is reported as an unsupported prototype feature before Flow.
+The interpreter's synthetic drop trace and reverse-field recursion are not execution of that body.
+This is an implementation gate, not a change to the Stage 0 language requirement that an implemented
+user drop body be compiler-invoked, infallible, and exactly once on normal cleanup.
+
 ## Fallible close
 
 A fallible close operation must make ownership unambiguous.

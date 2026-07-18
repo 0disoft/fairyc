@@ -15,6 +15,29 @@ import (
 
 const verifierFixtureSchema = "fairyc.mir-verifier-fixtures/v0"
 
+var mutationKinds = []string{
+	"add-return-origin",
+	"add-unwind-successor",
+	"allocate-needs-drop-in-plain-region",
+	"drop-before-flag-clear",
+	"duplicate-resource-discharge",
+	"escape-region-value",
+	"extend-loan-past-origin",
+	"insert-source-form",
+	"invalidate-region-reset-exit-kind",
+	"move-resource-projection",
+	"remove-arithmetic-trap-check",
+	"remove-exit-cleanup",
+	"remove-flag-initialization",
+	"remove-required-trap-check",
+	"remove-region-reset",
+	"remove-resource-type-definition",
+	"remove-tagged-operation-type",
+	"remove-terminator",
+	"remove-unsafe-provenance",
+	"use-before-initialize",
+}
+
 // Run constructs every named seed, verifies its baseline, applies one mutation, and verifies the rejection.
 func Run(manifestPath string) (Report, error) {
 	absoluteManifest, err := filepath.Abs(manifestPath)
@@ -132,6 +155,9 @@ func runCase(fixture caseDefinition, baseline mir.Program) []Failure {
 }
 
 func validateMutationShape(mutation mutation) error {
+	if !slices.Contains(mutationKinds, mutation.Kind) {
+		return fmt.Errorf("unsupported mutation kind %q", mutation.Kind)
+	}
 	expectedSupporting := ""
 	switch mutation.Kind {
 	case "allocate-needs-drop-in-plain-region":
@@ -151,6 +177,13 @@ func applyMutation(program *mir.Program, mutation mutation) (int, error) {
 	}
 	function := &program.Functions[0]
 	switch mutation.Kind {
+	case "remove-resource-type-definition":
+		for index := range program.ResourceTypes {
+			if program.ResourceTypes[index].Entity == mutation.Target {
+				program.ResourceTypes = append(program.ResourceTypes[:index], program.ResourceTypes[index+1:]...)
+				return 1, nil
+			}
+		}
 	case "remove-terminator":
 		if terminator := findTerminator(function, mutation.Target); terminator != nil {
 			*terminator = mir.Terminator{UnwindSuccessor: mir.NoBlock}

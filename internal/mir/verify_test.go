@@ -160,18 +160,23 @@ func TestVerifyRejectsTaggedOperationsWithoutConcreteTypes(t *testing.T) {
 
 func TestVerifyRejectsResourceConstructionFieldMismatch(t *testing.T) {
 	t.Parallel()
-	program := Program{Functions: []Function{{
-		Name:  "main::main",
-		Entry: 0,
-		Blocks: []Block{{
-			ID: 0,
-			Operations: []Operation{{
-				Kind: OperationResourceConstruct, DestinationLocal: 1, Type: hir.Type("main::Token"),
-				Fields: []string{"value"}, Operands: []Operand{{Kind: OperandI32, I32: 1}, {Kind: OperandI32, I32: 2}},
-			}},
-			Terminator: Terminator{Kind: TerminatorReturn, UnwindSuccessor: NoBlock, ReturnValue: Operand{Kind: OperandI32, I32: 0}},
+	program := Program{
+		ResourceTypes: []ResourceType{{
+			Type: hir.Type("main::Token"), Entity: "resource-type:main-token",
+			Fields: []ResourceField{{Name: "value", Type: hir.TypeI32}}, DropKind: hir.ResourceDropEmpty,
 		}},
-	}}}
+		Functions: []Function{{
+			Name:  "main::main",
+			Entry: 0,
+			Blocks: []Block{{
+				ID: 0,
+				Operations: []Operation{{
+					Kind: OperationResourceConstruct, DestinationLocal: 1, Type: hir.Type("main::Token"),
+					Fields: []string{"value"}, Operands: []Operand{{Kind: OperandI32, I32: 1}, {Kind: OperandI32, I32: 2}},
+				}},
+				Terminator: Terminator{Kind: TerminatorReturn, UnwindSuccessor: NoBlock, ReturnValue: Operand{Kind: OperandI32, I32: 0}},
+			}},
+		}}}
 	failures := Verify(program)
 	if len(failures) != 1 || failures[0].Code != "V1001" {
 		t.Fatalf("Verify() failures = %+v, want one V1001", failures)

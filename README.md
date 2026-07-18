@@ -27,7 +27,7 @@ error compatibility. The MIR runner executes all
   11 v0 normalization cases through mutable-local block lowering and the MIR verifier, covering
 left-to-right call evaluation, complete-root moves, normal-exit cleanup order, `Result` error
   cleanup, nearest-loop control, explicit checked arithmetic, and non-unwinding trap paths. The verifier mutation runner constructs all 10 named
-  baselines and proves all 20 isolated `V1001` through `V1701` rejection recipes. The first MIR
+  baselines and proves all 21 isolated `V1001` through `V1701` rejection recipes. The first MIR
   interpreter slice executes all 56 v0 cases for literal return, function-call arithmetic,
 boolean branches and logical not, source `&&` and `||` short-circuiting, scalar `while`, scalar
 `Option` construction/matching, scalar `Result` construction/matching/propagation,
@@ -38,6 +38,11 @@ nested active-variant cleanup, deterministic drop traces,
 division/remainder zero and signed-overflow, ordinary integer-overflow, and invalid-shift traps, and bounded step-limit
 termination. Fixture-only, manifest-authorized byte sinks additionally prove exact in-memory
 stdout/stderr bytes, cross-stream order, and a shared output limit without granting host I/O.
+Resource declarations now retain ordered, resolved fields and drop-body classification from AST
+through typed HIR and executable MIR. The current executable subset accepts only an empty user
+`drop` body; any nonempty body fails explicitly before Flow or MIR instead of being silently ignored.
+The interpreter constructs, reads, and recursively drops resources from the verified MIR definition,
+but still does not execute user drop-body effects.
 The first constrained C backend slice emits deterministic ISO C11 for 8 verified scalar-payload
 fixtures, covering calls and control flow, bitwise operations, checked division and shift, overflow
 trapping, scalar `Option` Some and None, and scalar `Result` propagation success and failure. This

@@ -10,7 +10,7 @@ MIR is the only executable semantic contract consumed by backends. It records ev
 
 MIR v0 is a mutable-local control-flow graph rather than SSA. SSA conversion is a backend or optimization concern after the semantic form is verified.
 
-The current Go prototype implements the source-linked subset exercised by all eleven MIR v0 normalization fixtures: ordered calls, complete-root and tagged-payload moves, RHS-before-drop resource reassignment, explicit normal-exit cleanup, lexical Region placement and reset on fallthrough, direct return, Result propagation, nested exits, nearest-loop `break` and `continue`, `Result` propagation branches, checked division, remainder, and arithmetic traps, and non-unwinding successors. The same verifier passes all ten named baselines and rejects all twenty isolated v0 mutations with their single expected `Vxxxx` result. The bounded interpreter executes all fifty-six interpreter v0 cases for scalar and tagged control, resource construction and field reads, whole-root and active-payload moves, resource returns and propagation, live/dead/self reassignment, consuming-close ownership, nested and loop-control cleanup, source-linked drop traces, Region reset paths, controlled in-memory test output, exact arithmetic, division, remainder, and right-shift trap and boundary outcomes, and the step and output limits; user drop-body effects, signed left shift, and later runtime behavior remain unfinished gates.
+The current Go prototype implements the source-linked subset exercised by all eleven MIR v0 normalization fixtures: ordered calls, complete-root and tagged-payload moves, RHS-before-drop resource reassignment, explicit normal-exit cleanup, lexical Region placement and reset on fallthrough, direct return, Result propagation, nested exits, nearest-loop `break` and `continue`, `Result` propagation branches, checked division, remainder, and arithmetic traps, and non-unwinding successors. The same verifier passes all ten named baselines and rejects all twenty-one isolated v0 mutations with their single expected `Vxxxx` result. The bounded interpreter executes all fifty-six interpreter v0 cases for scalar and tagged control, resource construction and field reads, whole-root and active-payload moves, resource returns and propagation, live/dead/self reassignment, consuming-close ownership, nested and loop-control cleanup, source-linked drop traces, Region reset paths, controlled in-memory test output, exact arithmetic, division, remainder, and right-shift trap and boundary outcomes, and the step and output limits; user drop-body effects, signed left shift, and later runtime behavior remain unfinished gates.
 
 ## Lowering pipeline
 
@@ -57,6 +57,14 @@ Built-in `Option` and `Result` construction records the concrete constructed typ
 records the concrete extracted type. Missing type identity is `V1001`; an interpreter or backend
 cannot infer it from source syntax, local numbering, or use sites.
 
+Every user resource type has one program-level definition containing its canonical type identity,
+source span, declaration-ordered field names and resolved field types, and drop classification.
+Resource construction names that definition and lists exactly its declared fields in order. A field
+read records both the owning resource type and result type. Missing definitions, reordered or unknown
+fields, mismatched result types, duplicate definitions, invalid fields, and a drop classification
+other than the currently executable `empty` kind are `V1001`. The MIR lowering derives `NeedsDrop`
+from these definitions; callers cannot supply a separate AST-built resource-type side channel.
+
 Each arithmetic family has distinct operations. Backends cannot infer trapping or wrapping from a build profile.
 
 Ordinary `i32` negation, addition, subtraction, multiplication, division, remainder, and signed
@@ -88,7 +96,7 @@ The verifier runs before every interpreter or backend handoff.
 
 | Code | Invariant |
 | --- | --- |
-| `V1001` | Every reachable block ends in exactly one terminator, and each operation has its required shape and concrete type identity. |
+| `V1001` | Every reachable block ends in exactly one terminator; each operation has its required shape and concrete type identity; and every executable resource use agrees with one valid program-level resource definition. |
 | `V1002` | Every use is dominated by an initialized assignment on all incoming paths. |
 | `V1101` | A resource root is moved or dropped at most once. |
 | `V1102` | A live resource on a normal exiting edge has exactly one cleanup obligation. |
@@ -115,7 +123,7 @@ The source cases do not test malformed graphs. `spec/fixtures/mir-verifier/manif
 
 ## Interpreter
 
-The first semantic oracle is a small MIR interpreter supporting scalars, tagged `Option` and `Result`, moves, drop traces, region mark and reset, branches, and traps. Its options-only fixture harness may intercept explicitly bound call symbols as bounded in-memory stdout/stderr byte sinks; those hooks are not MIR operations, source-name conventions, standard-library APIs, or host I/O. The interpreter is not required to emulate a complete operating system or C ABI.
+The first semantic oracle is a small MIR interpreter supporting scalars, tagged `Option` and `Result`, moves, drop traces, region mark and reset, branches, and traps. It constructs resources and resolves field reads from the verified program-level resource definition, and uses that definition for reverse-field cleanup. The only executable drop classification is currently `empty`; source user drop-body effects are not interpreted. Its options-only fixture harness may intercept explicitly bound call symbols as bounded in-memory stdout/stderr byte sinks; those hooks are not MIR operations, source-name conventions, standard-library APIs, or host I/O. The interpreter is not required to emulate a complete operating system or C ABI.
 
 The interpreter precedes a second native backend. Differential fixtures compare interpreter outcomes with generated C compiled at multiple optimization levels and, where the target fixture declares them, more than one independent C compiler.
 

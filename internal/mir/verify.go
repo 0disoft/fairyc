@@ -32,9 +32,9 @@ type verificationState struct {
 
 // Verify checks the executable invariants required before MIR handoff.
 func Verify(program Program) []VerificationError {
-	var failures []VerificationError
+	resourceTypes, failures := verifyResourceTypes(program.ResourceTypes)
 	for index := range program.Functions {
-		failures = append(failures, verifyFunction(&program.Functions[index])...)
+		failures = append(failures, verifyFunction(&program.Functions[index], resourceTypes)...)
 	}
 	slices.SortFunc(failures, func(left, right VerificationError) int {
 		if value := cmp.Compare(left.Code, right.Code); value != 0 {
@@ -47,10 +47,45 @@ func Verify(program Program) []VerificationError {
 	})
 }
 
-func verifyFunction(function *Function) []VerificationError {
+func verifyResourceTypes(definitions []ResourceType) (map[hir.Type]*ResourceType, []VerificationError) {
+	resources := make(map[hir.Type]*ResourceType, len(definitions))
+	var failures []VerificationError
+	for index := range definitions {
+		definition := &definitions[index]
+		entity := fallbackEntity(definition.Entity, resourceTypeEntity(definition.Type))
+		if definition.Type == "" || definition.Type == hir.TypeInvalid {
+			failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "resource definition has no concrete type"})
+			continue
+		}
+		if _, duplicate := resources[definition.Type]; duplicate {
+			failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "resource definition is duplicated"})
+			continue
+		}
+		resources[definition.Type] = definition
+		if definition.DropKind != hir.ResourceDropEmpty {
+			failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "resource definition has unsupported drop behavior"})
+		}
+		fieldNames := make(map[string]struct{}, len(definition.Fields))
+		for _, field := range definition.Fields {
+			if field.Name == "" || field.Type == "" || field.Type == hir.TypeInvalid {
+				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "resource definition has an invalid field"})
+				continue
+			}
+			if _, duplicate := fieldNames[field.Name]; duplicate {
+				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "resource definition has a duplicate field"})
+				continue
+			}
+			fieldNames[field.Name] = struct{}{}
+		}
+	}
+	return resources, failures
+}
+
+func verifyFunction(function *Function, resourceTypes map[hir.Type]*ResourceType) []VerificationError {
 	if int(function.Entry) < 0 || int(function.Entry) >= len(function.Blocks) {
 		return []VerificationError{{Code: "V1001", Entity: function.Name, Detail: "entry block is missing"}}
 	}
+	var failures []VerificationError
 	resources := make(map[hir.SymbolID]ResourceLocal, len(function.Resources))
 	initial := verificationState{
 		live:    make(map[hir.SymbolID]bool, len(function.Resources)),
@@ -60,6 +95,9 @@ func verifyFunction(function *Function) []VerificationError {
 	for _, resource := range function.Resources {
 		resources[resource.Symbol] = resource
 		initial.live[resource.Symbol] = resource.Parameter
+		if !containsDefinedResource(resource.Type, resourceTypes) {
+			failures = append(failures, VerificationError{Code: "V1001", Entity: resourceTypeEntity(resource.Type), Detail: "resource local type has no definition"})
+		}
 	}
 	for _, parameter := range function.Parameters {
 		initial.live[hir.SymbolID(parameter)] = true
@@ -75,7 +113,6 @@ func verifyFunction(function *Function) []VerificationError {
 	}
 	queue := []pendingBlock{{id: function.Entry, state: initial}}
 	seen := make(map[BlockID]verificationState)
-	var failures []VerificationError
 	for len(queue) > 0 {
 		item := queue[0]
 		queue = queue[1:]
@@ -212,14 +249,31 @@ func verifyFunction(function *Function) []VerificationError {
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationResourceConstruct:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
-				if operation.DestinationLocal == NoLocal || operation.Type == hir.TypeInvalid || len(operation.Fields) == 0 || len(operation.Fields) != len(operation.Operands) || !uniqueNonEmpty(operation.Fields) {
+				definition := resourceTypes[operation.Type]
+				if definition == nil {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: resourceTypeEntity(operation.Type), Detail: "resource construction type has no definition"})
+				}
+				if operation.DestinationLocal == NoLocal || operation.Type == "" || operation.Type == hir.TypeInvalid || len(operation.Fields) == 0 || len(operation.Fields) != len(operation.Operands) || !uniqueNonEmpty(operation.Fields) {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "resource construction shape is invalid"})
+				}
+				if definition != nil && !slices.Equal(operation.Fields, resourceFieldNames(definition.Fields)) {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "resource construction fields do not match the definition"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationFieldRead:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
-				if operation.DestinationLocal == NoLocal || operation.Field == "" || len(operation.Operands) != 1 {
+				definition := resourceTypes[operation.OwnerType]
+				if definition == nil {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: resourceTypeEntity(operation.OwnerType), Detail: "field-read owner type has no resource definition"})
+				}
+				if operation.DestinationLocal == NoLocal || operation.OwnerType == "" || operation.OwnerType == hir.TypeInvalid || operation.Type == "" || operation.Type == hir.TypeInvalid || operation.Field == "" || len(operation.Operands) != 1 {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "field read shape is invalid"})
+				}
+				if definition != nil {
+					field, found := resourceField(definition.Fields, operation.Field)
+					if !found || field.Type != operation.Type {
+						failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "field read does not match the resource definition"})
+					}
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationRegionEnter:
@@ -466,6 +520,34 @@ func uniqueNonEmpty(values []string) bool {
 		seen[value] = struct{}{}
 	}
 	return true
+}
+
+func containsDefinedResource(value hir.Type, definitions map[hir.Type]*ResourceType) bool {
+	if definitions[value] != nil {
+		return true
+	}
+	if element, option := hir.OptionElement(value); option {
+		return containsDefinedResource(element, definitions)
+	}
+	success, failure, result := hir.ResultElements(value)
+	return result && (containsDefinedResource(success, definitions) || containsDefinedResource(failure, definitions))
+}
+
+func resourceFieldNames(fields []ResourceField) []string {
+	names := make([]string, 0, len(fields))
+	for _, field := range fields {
+		names = append(names, field.Name)
+	}
+	return names
+}
+
+func resourceField(fields []ResourceField, name string) (ResourceField, bool) {
+	for _, field := range fields {
+		if field.Name == name {
+			return field, true
+		}
+	}
+	return ResourceField{}, false
 }
 
 func cloneVerificationState(input verificationState) verificationState {

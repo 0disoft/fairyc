@@ -26,7 +26,7 @@ now cover the semantic fixture's scalar and safe-borrow subset. Local last-use l
 exhaustive shallow matching, and local, parameter, branch, loop, overwrite, and early-return
 must-use obligations. Mutable-local MIR lowering and verification
   execute all 11 MIR normalization v0 cases for the current scalar, resource, tagged-payload, Result, Region, loop-control cleanup, call,
-  division, and checked-arithmetic trap subset. All 10 verifier baselines and 20 isolated mutation cases execute through
+  division, and checked-arithmetic trap subset. All 10 verifier baselines and 21 isolated mutation cases execute through
   the same MIR verifier. The first MIR interpreter executes all 56 interpreter v0 cases, including
 scalar `Option` and `Result` construction, exhaustive matching, and both Result `?` paths, and is
 exposed by the unstable `experimental run` command. Resource construction, field reads, whole-root
@@ -38,7 +38,10 @@ and bounded failure without granting host access. Checked `i32` addition, subtra
 multiplication, negation, division, remainder, and signed right shift execute across trapping and
   non-trapping boundaries with exact overflow, division-by-zero, or invalid-shift
   categories; signed left shift is rejected as `E1011`. Nearest-loop `break` and `continue` now execute
-  with resource and Region cleanup. The first C backend slice emits deterministic ISO C11 for 8
+  with resource and Region cleanup. Verified resource definitions now preserve ordered fields and
+  empty-drop classification from AST through HIR into MIR; nonempty user drop bodies fail as
+  unsupported before executable lowering. This is a prerequisite for resource code generation,
+  not resource C emission itself. The first C backend slice emits deterministic ISO C11 for 8
   verified scalar-payload cases under the provisional `x86_64-linux-gnu` profile, including
   `Option<i32>` and `Result<i32, i32>` construction, match, calls, and propagation. The unstable
   `experimental emit-c` command exposes that exact verified scalar translation unit on stdout

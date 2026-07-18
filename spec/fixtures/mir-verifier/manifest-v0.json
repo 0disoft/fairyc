@@ -14,6 +14,7 @@
     "docs/adr/0020-stage-0-region-mir-and-interpreter.md",
     "docs/adr/0023-explicit-checked-arithmetic-mir.md",
     "docs/adr/0024-stage-0-loop-control-and-cleanup.md",
+    "docs/adr/0032-resource-definition-preservation-and-empty-drop-gate.md",
     "docs/mir/mir-v0.md",
     "docs/mir/verifier-mutation-v0.md",
     "docs/mir/drop-elaboration-v0.md",
@@ -40,6 +41,7 @@
         "flag:token-live",
         "local:token",
         "place:token-field",
+        "resource-type:seed-token",
         "statement:clear-token-flag",
         "statement:drop-token",
         "statement:init-token-flag",
@@ -139,6 +141,12 @@
     }
   ],
   "cases": [
+    {
+      "id": "fail.mir-verify.v1001.resource-type-definition-missing",
+      "seed": "resource-return",
+      "mutation": { "kind": "remove-resource-type-definition", "target": "resource-type:seed-token" },
+      "expect": { "status": "reject", "codes": ["V1001"], "primaryEntity": "resource-type:seed-token" }
+    },
     {
       "id": "fail.mir-verify.v1001.tagged-type-missing",
       "seed": "normalized-control",

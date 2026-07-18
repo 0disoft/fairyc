@@ -23,6 +23,13 @@ func (a *analyzer) typeCheck() Result {
 	a.prepareStructTypes()
 	for _, module := range a.moduleOrder {
 		hirModule := hir.Module{Path: module.file.Module.Path, SourcePath: module.file.Path}
+		for index := range module.file.Module.Resources {
+			resource := &module.file.Module.Resources[index]
+			if a.resources[resource] == nil {
+				continue
+			}
+			hirModule.Resources = append(hirModule.Resources, a.checkResource(module, resource))
+		}
 		for index := range module.file.Module.Functions {
 			function := &module.file.Module.Functions[index]
 			if a.functions[function] == nil {
@@ -33,6 +40,34 @@ func (a *analyzer) typeCheck() Result {
 		}
 		result.HIR.Modules = append(result.HIR.Modules, hirModule)
 	}
+	return result
+}
+
+func (a *analyzer) checkResource(module *moduleScope, resource *ast.Resource) hir.Resource {
+	value := a.resources[resource]
+	result := hir.Resource{
+		Name:     resource.Name,
+		Type:     value.typ,
+		Span:     span(module.file.Path, resource.Span),
+		DropKind: hir.ResourceDropMissing,
+	}
+	if info := a.resourceTypes[value.typ]; info != nil {
+		result.Fields = make([]hir.ResourceField, 0, len(info.orderedFields))
+		for _, field := range info.orderedFields {
+			result.Fields = append(result.Fields, hir.ResourceField{Name: field.name, Type: field.typ, Span: field.span})
+		}
+	}
+	if resource.Drop == nil || resource.Drop.Body == nil {
+		a.addUnsupported(module.file.Path, resource.Span, "resource without a drop body")
+		return result
+	}
+	result.DropSpan = span(module.file.Path, resource.Drop.Span)
+	if len(resource.Drop.Body.Statements) == 0 && resource.Drop.Body.Tail == nil {
+		result.DropKind = hir.ResourceDropEmpty
+		return result
+	}
+	result.DropKind = hir.ResourceDropNonEmpty
+	a.addUnsupported(module.file.Path, resource.Drop.Span, "non-empty resource drop body")
 	return result
 }
 

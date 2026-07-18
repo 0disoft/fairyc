@@ -96,9 +96,14 @@ func ExecuteWithOptions(program mir.Program, entry string, options Options) (Out
 	runtime := runtime{
 		byName:         make(map[string]*mir.Function, len(program.Functions)),
 		bySymbol:       make(map[hir.SymbolID]*mir.Function, len(program.Functions)),
+		resourceTypes:  make(map[hir.Type]*mir.ResourceType, len(program.ResourceTypes)),
 		testIntrinsics: make(map[hir.SymbolID]TestIntrinsicKind, len(options.TestIntrinsics)),
 		outputLimit:    options.OutputLimit,
 		steps:          maxSteps,
+	}
+	for index := range program.ResourceTypes {
+		definition := &program.ResourceTypes[index]
+		runtime.resourceTypes[definition.Type] = definition
 	}
 	for index := range program.Functions {
 		function := &program.Functions[index]
@@ -142,6 +147,7 @@ func ExecuteWithOptions(program mir.Program, entry string, options Options) (Out
 type runtime struct {
 	byName         map[string]*mir.Function
 	bySymbol       map[hir.SymbolID]*mir.Function
+	resourceTypes  map[hir.Type]*mir.ResourceType
 	testIntrinsics map[hir.SymbolID]TestIntrinsicKind
 	outputLimit    int
 	steps          int
@@ -238,9 +244,8 @@ const (
 )
 
 type resourceState struct {
-	typ        hir.Type
+	definition *mir.ResourceType
 	fields     map[string]runtimeValue
-	fieldOrder []string
 	dropped    bool
 }
 
@@ -287,19 +292,19 @@ func optionValue(variant string, payload *runtimeValue) (runtimeValue, error) {
 	}
 }
 
-func resourceValue(typ hir.Type, fields []string, values []runtimeValue) (runtimeValue, error) {
-	if typ == hir.TypeInvalid || len(fields) == 0 || len(fields) != len(values) {
-		return runtimeValue{}, fmt.Errorf("invalid resource construction for %q", typ)
+func resourceValue(definition *mir.ResourceType, values []runtimeValue) (runtimeValue, error) {
+	if definition == nil || definition.Type == hir.TypeInvalid || len(definition.Fields) == 0 || len(definition.Fields) != len(values) || definition.DropKind != hir.ResourceDropEmpty {
+		return runtimeValue{}, fmt.Errorf("invalid resource construction definition")
 	}
-	state := &resourceState{typ: typ, fields: make(map[string]runtimeValue, len(fields)), fieldOrder: slices.Clone(fields)}
-	for index, field := range fields {
-		if field == "" {
-			return runtimeValue{}, fmt.Errorf("resource %q has an empty field name", typ)
+	state := &resourceState{definition: definition, fields: make(map[string]runtimeValue, len(definition.Fields))}
+	for index, field := range definition.Fields {
+		if field.Name == "" {
+			return runtimeValue{}, fmt.Errorf("resource %q has an empty field name", definition.Type)
 		}
-		if _, duplicate := state.fields[field]; duplicate {
-			return runtimeValue{}, fmt.Errorf("resource %q has duplicate field %q", typ, field)
+		if _, duplicate := state.fields[field.Name]; duplicate {
+			return runtimeValue{}, fmt.Errorf("resource %q has duplicate field %q", definition.Type, field.Name)
 		}
-		state.fields[field] = values[index]
+		state.fields[field.Name] = values[index]
 	}
 	return runtimeValue{kind: valueResource, resource: state}, nil
 }
@@ -336,16 +341,19 @@ func (v runtimeValue) optionPayload(move bool) (runtimeValue, error) {
 	return payload, nil
 }
 
-func (v runtimeValue) field(name string) (runtimeValue, error) {
+func (v runtimeValue) field(definition *mir.ResourceType, name string) (runtimeValue, error) {
 	if v.kind != valueResource || v.resource == nil {
 		return runtimeValue{}, capabilityError("field read received a non-resource value")
 	}
+	if definition == nil || v.resource.definition == nil || v.resource.definition.Type != definition.Type {
+		return runtimeValue{}, fmt.Errorf("field read resource definition does not match the runtime value")
+	}
 	if v.resource.dropped {
-		return runtimeValue{}, fmt.Errorf("resource %q was read after drop", v.resource.typ)
+		return runtimeValue{}, fmt.Errorf("resource %q was read after drop", v.resource.definition.Type)
 	}
 	value, found := v.resource.fields[name]
 	if !found {
-		return runtimeValue{}, fmt.Errorf("resource %q has no field %q", v.resource.typ, name)
+		return runtimeValue{}, fmt.Errorf("resource %q has no field %q", v.resource.definition.Type, name)
 	}
 	return value, nil
 }
@@ -484,7 +492,7 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					}
 					values[index] = value
 				}
-				constructed, err := resourceValue(operation.Type, operation.Fields, values)
+				constructed, err := resourceValue(r.resourceTypes[operation.Type], values)
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("resource construction in %q: %w", function.Name, err)
 				}
@@ -494,7 +502,7 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("field read in %q: %w", function.Name, err)
 				}
-				value, err := receiver.field(operation.Field)
+				value, err := receiver.field(r.resourceTypes[operation.OwnerType], operation.Field)
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("field read in %q: %w", function.Name, err)
 				}
@@ -632,14 +640,17 @@ func (r *runtime) dropValue(value runtimeValue, binding hir.Span) error {
 		if value.resource == nil {
 			return fmt.Errorf("resource value has no state")
 		}
+		if value.resource.definition == nil || value.resource.definition.DropKind != hir.ResourceDropEmpty {
+			return fmt.Errorf("resource value has no executable drop definition")
+		}
 		if value.resource.dropped {
-			return fmt.Errorf("resource %q was dropped twice", value.resource.typ)
+			return fmt.Errorf("resource %q was dropped twice", value.resource.definition.Type)
 		}
 		value.resource.dropped = true
-		r.dropTrace = append(r.dropTrace, DropEvent{ResourceType: value.resource.typ, Binding: binding})
-		for index := len(value.resource.fieldOrder) - 1; index >= 0; index-- {
-			field := value.resource.fieldOrder[index]
-			if err := r.dropValue(value.resource.fields[field], binding); err != nil {
+		r.dropTrace = append(r.dropTrace, DropEvent{ResourceType: value.resource.definition.Type, Binding: binding})
+		for index := len(value.resource.definition.Fields) - 1; index >= 0; index-- {
+			field := value.resource.definition.Fields[index]
+			if err := r.dropValue(value.resource.fields[field.Name], binding); err != nil {
 				return err
 			}
 		}

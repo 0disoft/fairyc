@@ -8,13 +8,15 @@ import (
 )
 
 type resourceInfo struct {
-	symbol *symbol
-	fields map[string]resourceField
+	symbol        *symbol
+	fields        map[string]resourceField
+	orderedFields []resourceField
 }
 
 type resourceField struct {
 	name        string
 	typ         hir.Type
+	span        hir.Span
 	declaration hir.Span
 }
 
@@ -72,11 +74,14 @@ func (a *analyzer) prepareResourceTypes() {
 				if _, _, borrow := hir.BorrowElement(fieldType); borrow {
 					a.addDiagnostic("E1003", span(module.file.Path, field.Type.Span))
 				}
-				info.fields[field.Name] = resourceField{
+				resolved := resourceField{
 					name:        field.Name,
 					typ:         fieldType,
+					span:        span(module.file.Path, field.Span),
 					declaration: span(module.file.Path, field.NameSpan),
 				}
+				info.fields[field.Name] = resolved
+				info.orderedFields = append(info.orderedFields, resolved)
 			}
 		}
 	}

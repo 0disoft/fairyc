@@ -10,8 +10,13 @@ import (
 )
 
 // Lower normalizes typed HIR into executable mutable-local MIR.
-func Lower(input hir.Package, properties TypeProperties) (Program, error) {
-	program := Program{}
+func Lower(input hir.Package) (Program, error) {
+	resourceTypes, err := lowerResourceTypes(input)
+	if err != nil {
+		return Program{}, err
+	}
+	program := Program{ResourceTypes: resourceTypes}
+	properties := newTypeProperties(resourceTypes)
 	for _, module := range input.Modules {
 		for index := range module.Functions {
 			function := &module.Functions[index]
@@ -33,6 +38,46 @@ func Lower(input hir.Package, properties TypeProperties) (Program, error) {
 		return 0
 	})
 	return program, nil
+}
+
+func lowerResourceTypes(input hir.Package) ([]ResourceType, error) {
+	var result []ResourceType
+	seen := make(map[hir.Type]struct{})
+	for _, module := range input.Modules {
+		for _, resource := range module.Resources {
+			if resource.Type == "" || resource.Type == hir.TypeInvalid {
+				return nil, fmt.Errorf("resource %s::%s has no concrete type", module.Path, resource.Name)
+			}
+			if _, duplicate := seen[resource.Type]; duplicate {
+				return nil, fmt.Errorf("duplicate resource type %q", resource.Type)
+			}
+			seen[resource.Type] = struct{}{}
+			if resource.DropKind != hir.ResourceDropEmpty {
+				return nil, fmt.Errorf("resource %q has unsupported drop kind %q", resource.Type, resource.DropKind)
+			}
+			definition := ResourceType{
+				Type: resource.Type, Span: resource.Span, Entity: resourceTypeEntity(resource.Type),
+				DropKind: resource.DropKind, DropSpan: resource.DropSpan,
+				Fields: make([]ResourceField, 0, len(resource.Fields)),
+			}
+			fieldNames := make(map[string]struct{}, len(resource.Fields))
+			for _, field := range resource.Fields {
+				if field.Name == "" || field.Type == "" || field.Type == hir.TypeInvalid {
+					return nil, fmt.Errorf("resource %q has an invalid field definition", resource.Type)
+				}
+				if _, duplicate := fieldNames[field.Name]; duplicate {
+					return nil, fmt.Errorf("resource %q has duplicate field %q", resource.Type, field.Name)
+				}
+				fieldNames[field.Name] = struct{}{}
+				definition.Fields = append(definition.Fields, ResourceField{Name: field.Name, Type: field.Type, Span: field.Span})
+			}
+			result = append(result, definition)
+		}
+	}
+	slices.SortFunc(result, func(left, right ResourceType) int {
+		return strings.Compare(string(left.Type), string(right.Type))
+	})
+	return result, nil
 }
 
 type bindingInfo struct {
@@ -57,7 +102,7 @@ type activeLoop struct {
 type functionLowerer struct {
 	module      string
 	source      *hir.Function
-	properties  TypeProperties
+	properties  typeProperties
 	result      Function
 	current     BlockID
 	bindings    map[hir.SymbolID]bindingInfo
@@ -68,7 +113,7 @@ type functionLowerer struct {
 	nextLocal   LocalID
 }
 
-func newFunctionLowerer(module string, function *hir.Function, properties TypeProperties) *functionLowerer {
+func newFunctionLowerer(module string, function *hir.Function, properties typeProperties) *functionLowerer {
 	result := Function{
 		Symbol:     function.Symbol,
 		Name:       module + "::" + function.Name,
@@ -444,7 +489,8 @@ func (l *functionLowerer) lowerFieldRead(expression *hir.Expression) (Operand, e
 	destination := l.newTemporary()
 	l.appendOperation(Operation{
 		Kind: OperationFieldRead, Span: expression.Span, DestinationLocal: destination,
-		Operands: []Operand{receiver}, Field: expression.Operator,
+		Operands: []Operand{receiver}, OwnerType: expression.Children[0].Type,
+		Type: expression.Type, Field: expression.Operator,
 	})
 	return Operand{Kind: OperandLocal, Local: destination}, nil
 }

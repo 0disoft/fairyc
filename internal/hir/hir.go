@@ -130,7 +130,34 @@ type Package struct {
 type Module struct {
 	Path       string
 	SourcePath string
+	Resources  []Resource
 	Functions  []Function
+}
+
+// ResourceDropKind classifies how much user drop behavior survived semantic lowering.
+type ResourceDropKind string
+
+const (
+	ResourceDropMissing  ResourceDropKind = "missing"
+	ResourceDropEmpty    ResourceDropKind = "empty"
+	ResourceDropNonEmpty ResourceDropKind = "non-empty"
+)
+
+// Resource is one resolved move-only aggregate definition in declaration order.
+type Resource struct {
+	Name     string
+	Type     Type
+	Span     Span
+	Fields   []ResourceField
+	DropKind ResourceDropKind
+	DropSpan Span
+}
+
+// ResourceField is one resolved resource field with source identity.
+type ResourceField struct {
+	Name string
+	Type Type
+	Span Span
 }
 
 // Function is one typed function body.

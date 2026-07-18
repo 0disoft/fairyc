@@ -23,12 +23,12 @@ For every case, the runner must:
 
 A seed-construction failure, baseline verifier failure, missing target, ignored mutation, more than one applied mutation, extra verifier code, or verifier crash is a harness failure. It cannot be counted as successful rejection.
 
-`internal/mirverifyfixture` implements this protocol for all ten seeds and nineteen mutations. It deep-clones each verified baseline before mutation and compares the complete verifier result rather than searching for an expected code inside a larger cascade. The plain-region seed includes enter, place, and reset operations; removing reset or replacing its closed exit kind isolates `V1403`. The break-region-control seed carries a `break` reset followed by its loop-exit goto; removing that reset isolates `V1403` before return. The checked-arithmetic seed has a complete addition check edge; removing its marker isolates `V1501` at the continuation operation.
+`internal/mirverifyfixture` implements this protocol for all ten seeds and twenty-one mutations. It deep-clones each verified baseline before mutation and compares the complete verifier result rather than searching for an expected code inside a larger cascade. The resource-return seed carries the verified `seed::Token` definition; removing only that definition isolates `V1001` before any interpreter or backend can infer its shape. The plain-region seed includes enter, place, and reset operations; removing reset or replacing its closed exit kind isolates `V1403`. The break-region-control seed carries a `break` reset followed by its loop-exit goto; removing that reset isolates `V1403` before return. The checked-arithmetic seed has a complete addition check edge; removing its marker isolates `V1501` at the continuation operation.
 
 ## Seed families
 
 - `scalar-return`: initialized scalar return with one reachable terminated block;
-- `resource-return`: one resource obligation, initialized drop flag, flag clear before drop, and clean return;
+- `resource-return`: one empty-drop resource definition and obligation, initialized drop flag, flag clear before drop, and clean return;
 - `borrow-return`: one valid parameter origin and bounded loan;
 - `plain-region`: inert placement that remains within one plain region;
 - `break-region-control`: inert placement, a `break`-kind reset, and a goto to the loop exit;
@@ -42,7 +42,7 @@ The Go harness may represent these seeds however the internal MIR requires, but 
 
 ## Mutation rules
 
-Each mutation is closed and typed: remove a terminator, introduce a use before initialization, duplicate a resource discharge, remove cleanup, move a resource projection, remove drop-flag initialization, reorder flag clear after drop, extend a loan, add a return origin, mark a region value escaping, place a `NeedsDrop` value in a plain region, remove a Region reset, corrupt a required division check, remove a checked-arithmetic marker, add an unwind successor, reinsert a source-only form, or remove unsafe provenance. A mutation names `supportingEntity` when its target alone would not identify the replacement value or exact check to remove.
+Each mutation is closed and typed: remove a resource type definition, remove a terminator, introduce a use before initialization, duplicate a resource discharge, remove cleanup, move a resource projection, remove drop-flag initialization, reorder flag clear after drop, extend a loan, add a return origin, mark a region value escaping, place a `NeedsDrop` value in a plain region, remove a Region reset, corrupt a required division check, remove a checked-arithmetic marker, add an unwind successor, reinsert a source-only form, remove a tagged-operation type, or remove unsafe provenance. A mutation names `supportingEntity` when its target alone would not identify the replacement value or exact check to remove.
 
 Mutation application is deterministic and idempotence is not assumed. Applying the same recipe twice is a harness error rather than a second test case.
 

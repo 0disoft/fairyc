@@ -28,6 +28,9 @@ function names prevent source identifiers from becoming ABI or injection surface
 The emitter rejects resources, resource-bearing or nested tagged values, other tagged payload
 combinations, Region operations, safe borrows, unsafe operations, FFI, complete runtime and
 standard-library lowering, malformed destinations, and non-canonical block shapes.
+Verified MIR now carries program-level resource definitions with ordered fields and an empty-drop
+gate, but the scalar emitter does not consume them yet. Their presence is a prerequisite for a later
+resource transport, not evidence that C resource layout or drop glue exists.
 `spec/fixtures/c-emission/manifest-v0.json` currently proves eight source-to-emission cases and
 repeated byte identity. No C parser, compiler, object writer, assembler, linker, executable,
 sanitizer, layout probe, or ABI probe runs in that fixture lane.

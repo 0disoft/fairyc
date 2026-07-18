@@ -198,11 +198,7 @@ func lowerSingleProgram(argument, sourceRoot string, stderr io.Writer, subset st
 		}
 		return loweredProgram{}, ExitInvalidInvocation
 	}
-	resourceTypes := make([]hir.Type, 0, len(frontendResult.AST.Resources))
-	for _, resource := range frontendResult.AST.Resources {
-		resourceTypes = append(resourceTypes, hir.Type(frontendResult.AST.Path+"::"+resource.Name))
-	}
-	program, err := mir.Lower(semanticResult.HIR, mir.NewTypeProperties(resourceTypes))
+	program, err := mir.Lower(semanticResult.HIR)
 	if err != nil {
 		return loweredProgram{}, subsetCapabilityError(stderr, subset, err)
 	}

@@ -30,9 +30,12 @@ An immutable green tree and incremental reparse are deferred. The parser boundar
 
 ## Semantic lowering
 
-Typed HIR preserves source concepts. Flow CFG computes fixed-point state without becoming a backend contract. MIR removes source conveniences and records their behavior explicitly.
+Typed HIR preserves source concepts. Resource definitions retain canonical identity, ordered resolved
+fields, source spans, and drop-body classification instead of being reconstructed from use sites.
+Flow CFG computes fixed-point state without becoming a backend contract. MIR removes source
+conveniences and records their behavior explicitly.
 
-`?` becomes a discriminant branch. Resource state becomes moves, flags where genuinely needed, and cleanup blocks. Aggregate construction carries field progress. Calls receive already ordered argument temporaries. Bounds, arithmetic, shift, and assertion failures become explicit checked branches and traps.
+`?` becomes a discriminant branch. Resource state becomes moves, flags where genuinely needed, and cleanup blocks. Resource construction and field reads refer to a verified MIR resource definition; the current executable gate permits only empty user drop bodies. Aggregate construction carries field progress. Calls receive already ordered argument temporaries. Bounds, arithmetic, shift, and assertion failures become explicit checked branches and traps.
 
 Cleanup chains are created directly per normal exiting edge, verified, then identical suffixes may be merged. Traps have no cleanup edge. Calls have no unwind edge in Stage 0.
 

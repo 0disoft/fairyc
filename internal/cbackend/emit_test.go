@@ -240,11 +240,7 @@ func lowerSource(t *testing.T, contents string) mir.Program {
 	if len(semanticResult.Diagnostics) != 0 || len(semanticResult.Unsupported) != 0 {
 		t.Fatalf("Analyze() diagnostics = %+v, unsupported = %+v", semanticResult.Diagnostics, semanticResult.Unsupported)
 	}
-	resourceTypes := make([]hir.Type, 0, len(parsed.AST.Resources))
-	for _, resource := range parsed.AST.Resources {
-		resourceTypes = append(resourceTypes, hir.Type(parsed.AST.Path+"::"+resource.Name))
-	}
-	program, err := mir.Lower(semanticResult.HIR, mir.NewTypeProperties(resourceTypes))
+	program, err := mir.Lower(semanticResult.HIR)
 	if err != nil {
 		t.Fatalf("Lower() error = %v", err)
 	}
