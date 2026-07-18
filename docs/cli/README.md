@@ -35,6 +35,8 @@ short-circuit control, scalar `while`, whole resources, resource-bearing built-i
 resource reassignment, consuming-close ownership, Region fallthrough and early-exit reset paths, and source-linked drop traces, and reports an
 exact scalar result or canonical trap. It does not
 discover files, execute user drop bodies, lower Region `break` or `continue`, implement effects, host I/O, or native code generation.
+The interpreter fixture's in-memory byte hooks require manifest options that this CLI never accepts;
+declaring a similarly named Fairy C function does not grant output authority.
 Infinite execution is stopped by the bounded interpreter and reported as an unsupported-capability result rather than a language trap. In
 particular, it does not satisfy the planned `fairyc check` contract.
 

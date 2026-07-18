@@ -54,7 +54,9 @@ skip reset. They require scope-indexed cleanup edges shared with general nested-
   matches `std/alloc.fy`.
 - No public standard-library constructor, arena capacity model, allocator ABI, or address contract
   is introduced.
-- ADR 0021 later closes direct-return and Result-propagation exits; Region `break`, `continue`, and controlled I/O remain separate Phase 1 gates.
+- ADR 0021 later closes direct-return and Result-propagation exits, while ADR 0022 adds only a
+  fixture-authorized in-memory output harness. Region `break`, `continue`, and real host I/O remain
+  separate Phase 1 gates.
 
 ## Rejected alternatives
 

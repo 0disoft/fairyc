@@ -27,20 +27,21 @@ exhaustive shallow matching, and local, parameter, branch, loop, overwrite, and 
 must-use obligations. Mutable-local MIR lowering and verification
 execute all 9 MIR normalization v0 cases for the current scalar, resource, tagged-payload, Result, Region, cleanup, call,
 and division-trap subset. All 8 verifier baselines and 17 isolated mutation cases execute through
-the same MIR verifier. The first MIR interpreter executes all 37 interpreter v0 cases, including
+the same MIR verifier. The first MIR interpreter executes all 39 interpreter v0 cases, including
 scalar `Option` and `Result` construction, exhaustive matching, and both Result `?` paths, and is
 exposed by the unstable `experimental run` command. Resource construction, field reads, whole-root
 call moves, source-linked drop traces, resource-bearing `Option` and `Result` payload moves, ordered
 resource reassignment, explicit consuming-close success/failure ownership, and normal lexical
 Region placement, inner cleanup, normal reset, direct return, Result propagation, and nested
-early-exit reset execute; `break` and `continue` Region exits, I/O intrinsics,
-effects, and every later Phase 1 capability
+early-exit reset execute. Manifest-authorized in-memory stdout/stderr byte hooks prove output order
+and bounded failure without granting host access; `break` and `continue` Region exits, real file
+and console I/O, effects, and every later Phase 1 capability
 remain unimplemented.
 
 - Implement source management, lexer, trivia-preserving tokens and spans, compact recoverable syntax, deterministic diagnostics, one-file modules, alias imports, and non-generic typed HIR in Go.
 - Implement restricted inert enums, whole-resource moves, local last-use loans, call-bounded mutable reborrows, single-origin borrow returns, plain regions, `Option`, `Result`, shallow `match`, and explicit `?` and `discard`.
 - Implement Flow CFG, mutable-local MIR, drop elaboration, the verifier, target-independent layouts, and the compatibility-vector metadata model.
-- Build a small MIR interpreter covering scalar and tagged behavior, resource payloads, drop traces, region allocation, partial I/O test intrinsics, and traps.
+- Build a small MIR interpreter covering scalar and tagged behavior, resource payloads, drop traces, region allocation, a controlled in-memory I/O test harness, and traps.
 
 Exit gate: positive and negative fixtures agree with the source contracts, resource-bearing built-in variants have correct active-payload traces, and every named verifier seed passes before its isolated mutation demonstrates the intended single `Vxxxx` rejection.
 

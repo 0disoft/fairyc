@@ -2,6 +2,7 @@
 package interpreter
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"slices"
@@ -10,14 +11,27 @@ import (
 	"github.com/0disoft/fairyc/internal/mir"
 )
 
+// TestIntrinsicKind identifies one closed, fixture-only interpreter hook.
+type TestIntrinsicKind string
+
 const (
-	OutcomeReturn = "return"
-	OutcomeTrap   = "trap"
-	OutcomeLimit  = "limit"
-	LimitStep     = "step-limit"
-	maxCallDepth  = 256
-	maxSteps      = 1_000_000
+	OutcomeReturn                                  = "return"
+	OutcomeTrap                                    = "trap"
+	OutcomeLimit                                   = "limit"
+	LimitStep                                      = "step-limit"
+	LimitOutput                                    = "output-limit"
+	TestIntrinsicWriteStdoutByte TestIntrinsicKind = "write-stdout-byte"
+	TestIntrinsicWriteStderrByte TestIntrinsicKind = "write-stderr-byte"
+	maxCallDepth                                   = 256
+	maxSteps                                       = 1_000_000
+	maxConfiguredTestOutputBytes                   = 1 << 20
 )
+
+// Options enables closed interpreter-harness behavior that is not part of the Fairy C language.
+type Options struct {
+	TestIntrinsics map[string]TestIntrinsicKind
+	OutputLimit    int
+}
 
 // Outcome is one bounded interpreter completion.
 type Outcome struct {
@@ -26,6 +40,15 @@ type Outcome struct {
 	TrapCategory string
 	DropTrace    []DropEvent
 	RegionTrace  []RegionEvent
+	Stdout       []byte
+	Stderr       []byte
+	IOTrace      []IOEvent
+}
+
+// IOEvent records one ordered byte written to a controlled in-memory test stream.
+type IOEvent struct {
+	Stream string
+	Byte   byte
 }
 
 // DropEvent is one resource drop-glue invocation in execution order.
@@ -62,13 +85,20 @@ func capabilityErrorKind(kind, format string, arguments ...any) error {
 
 // Execute verifies program and invokes one zero-argument i32 entry function.
 func Execute(program mir.Program, entry string) (Outcome, error) {
+	return ExecuteWithOptions(program, entry, Options{})
+}
+
+// ExecuteWithOptions runs verified MIR with explicitly configured, in-memory test intrinsics.
+func ExecuteWithOptions(program mir.Program, entry string, options Options) (Outcome, error) {
 	if failures := mir.Verify(program); len(failures) != 0 {
 		return Outcome{}, fmt.Errorf("verify MIR before interpretation: %v", failures)
 	}
 	runtime := runtime{
-		byName:   make(map[string]*mir.Function, len(program.Functions)),
-		bySymbol: make(map[hir.SymbolID]*mir.Function, len(program.Functions)),
-		steps:    maxSteps,
+		byName:         make(map[string]*mir.Function, len(program.Functions)),
+		bySymbol:       make(map[hir.SymbolID]*mir.Function, len(program.Functions)),
+		testIntrinsics: make(map[hir.SymbolID]TestIntrinsicKind, len(options.TestIntrinsics)),
+		outputLimit:    options.OutputLimit,
+		steps:          maxSteps,
 	}
 	for index := range program.Functions {
 		function := &program.Functions[index]
@@ -88,26 +118,114 @@ func Execute(program mir.Program, entry string) (Outcome, error) {
 	if len(function.Parameters) != 0 || function.ResultType != hir.TypeI32 {
 		return Outcome{}, capabilityError("entry function %q must have type fn() -> i32", entry)
 	}
+	if err := runtime.configureTestIntrinsics(entry, options); err != nil {
+		return Outcome{}, err
+	}
 	completion, err := runtime.call(function, nil, 0)
 	if err != nil {
+		var capability CapabilityError
+		if errors.As(err, &capability) && capability.Kind != "" {
+			return runtime.outcome(OutcomeLimit, 0, ""), err
+		}
 		return Outcome{}, err
 	}
 	if completion.trapCategory != "" {
-		return Outcome{Kind: OutcomeTrap, TrapCategory: completion.trapCategory, DropTrace: slices.Clone(runtime.dropTrace), RegionTrace: slices.Clone(runtime.regionTrace)}, nil
+		return runtime.outcome(OutcomeTrap, 0, completion.trapCategory), nil
 	}
 	value, err := completion.value.asI32()
 	if err != nil {
 		return Outcome{}, fmt.Errorf("entry function %q: %w", entry, err)
 	}
-	return Outcome{Kind: OutcomeReturn, Value: value, DropTrace: slices.Clone(runtime.dropTrace), RegionTrace: slices.Clone(runtime.regionTrace)}, nil
+	return runtime.outcome(OutcomeReturn, value, ""), nil
 }
 
 type runtime struct {
-	byName      map[string]*mir.Function
-	bySymbol    map[hir.SymbolID]*mir.Function
-	steps       int
-	dropTrace   []DropEvent
-	regionTrace []RegionEvent
+	byName         map[string]*mir.Function
+	bySymbol       map[hir.SymbolID]*mir.Function
+	testIntrinsics map[hir.SymbolID]TestIntrinsicKind
+	outputLimit    int
+	steps          int
+	dropTrace      []DropEvent
+	regionTrace    []RegionEvent
+	stdout         []byte
+	stderr         []byte
+	ioTrace        []IOEvent
+}
+
+func (r *runtime) configureTestIntrinsics(entry string, options Options) error {
+	if len(options.TestIntrinsics) == 0 {
+		if options.OutputLimit != 0 {
+			return fmt.Errorf("test output limit requires at least one configured test intrinsic")
+		}
+		return nil
+	}
+	if options.OutputLimit <= 0 || options.OutputLimit > maxConfiguredTestOutputBytes {
+		return fmt.Errorf("test output limit must be between 1 and %d bytes", maxConfiguredTestOutputBytes)
+	}
+	names := make([]string, 0, len(options.TestIntrinsics))
+	for name := range options.TestIntrinsics {
+		names = append(names, name)
+	}
+	slices.Sort(names)
+	for _, name := range names {
+		kind := options.TestIntrinsics[name]
+		if name == entry {
+			return fmt.Errorf("entry function %q cannot be a test intrinsic", name)
+		}
+		function := r.byName[name]
+		if function == nil {
+			return fmt.Errorf("test intrinsic function %q is missing", name)
+		}
+		if len(function.Parameters) != 1 || function.ResultType != hir.TypeI32 {
+			return fmt.Errorf("test intrinsic function %q must have type fn(i32) -> i32", name)
+		}
+		switch kind {
+		case TestIntrinsicWriteStdoutByte, TestIntrinsicWriteStderrByte:
+		default:
+			return fmt.Errorf("test intrinsic function %q has unsupported kind %q", name, kind)
+		}
+		if _, duplicate := r.testIntrinsics[function.Symbol]; duplicate {
+			return fmt.Errorf("test intrinsic symbol %d is configured twice", function.Symbol)
+		}
+		r.testIntrinsics[function.Symbol] = kind
+	}
+	return nil
+}
+
+func (r *runtime) outcome(kind string, value int32, trapCategory string) Outcome {
+	return Outcome{
+		Kind: kind, Value: value, TrapCategory: trapCategory,
+		DropTrace: slices.Clone(r.dropTrace), RegionTrace: slices.Clone(r.regionTrace),
+		Stdout: slices.Clone(r.stdout), Stderr: slices.Clone(r.stderr), IOTrace: slices.Clone(r.ioTrace),
+	}
+}
+
+func (r *runtime) callTestIntrinsic(kind TestIntrinsicKind, arguments []runtimeValue) (runtimeValue, error) {
+	if len(arguments) != 1 {
+		return runtimeValue{}, fmt.Errorf("test intrinsic %q received %d arguments, want 1", kind, len(arguments))
+	}
+	value, err := arguments[0].asI32()
+	if err != nil {
+		return runtimeValue{}, fmt.Errorf("test intrinsic %q byte: %w", kind, err)
+	}
+	if value < 0 || value > 255 {
+		return runtimeValue{}, capabilityError("test intrinsic %q byte %d is outside 0..255", kind, value)
+	}
+	stream := "stdout"
+	if kind == TestIntrinsicWriteStderrByte {
+		stream = "stderr"
+	}
+	if len(r.ioTrace) >= r.outputLimit {
+		return runtimeValue{}, capabilityErrorKind(LimitOutput, "interpreter test output limit of %d bytes exceeded", r.outputLimit)
+	}
+	byteValue := byte(value)
+	if stream == "stdout" {
+		r.stdout = append(r.stdout, byteValue)
+	} else {
+		r.stderr = append(r.stderr, byteValue)
+	}
+	r.ioTrace = append(r.ioTrace, IOEvent{Stream: stream, Byte: byteValue})
+	return i32Value(1), nil
 }
 
 type valueKind uint8
@@ -443,9 +561,19 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				}
 				values[index] = value
 			}
-			completion, err := r.call(callee, values, depth+1)
-			if err != nil || completion.trapCategory != "" {
-				return completion, err
+			completion := callCompletion{}
+			var callErr error
+			if intrinsic, configured := r.testIntrinsics[callee.Symbol]; configured {
+				value, err := r.callTestIntrinsic(intrinsic, values)
+				if err != nil {
+					return callCompletion{}, err
+				}
+				completion.value = value
+			} else {
+				completion, callErr = r.call(callee, values, depth+1)
+			}
+			if callErr != nil || completion.trapCategory != "" {
+				return completion, callErr
 			}
 			locals[terminator.DestinationLocal] = completion.value
 			next, err := oneSuccessor(terminator)

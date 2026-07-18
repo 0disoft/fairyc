@@ -3,8 +3,7 @@
   "schemaVersion": "fairyc.interpreter-fixtures/v0",
   "deferred": [
     "user-defined drop-body execution and observable drop side effects",
-    "controlled partial I/O test intrinsics",
-    "bounded stdout, stderr, process status, and argument fixtures"
+    "real host stdout, stderr, files, process status, and argument fixtures"
   ],
   "contracts": [
     "docs/product/02-spec.md",
@@ -13,6 +12,7 @@
     "docs/adr/0018-stage-0-option-constructors-and-match.md",
     "docs/adr/0020-stage-0-region-mir-and-interpreter.md",
     "docs/adr/0021-stage-0-region-early-exit-cleanup.md",
+    "docs/adr/0022-controlled-interpreter-io-harness.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/mir-v0.md",
     "docs/engineering/05-testing-standard.md"
@@ -697,6 +697,55 @@
             "placements": 1,
             "dropCountBeforeReset": 1
           }
+        ]
+      }
+    },
+    {
+      "id": "pass.interpreter.test-io-bytes",
+      "sourceRoot": "cases/pass/test-io-bytes/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "testIntrinsics": [
+        { "function": "main::write_stderr_byte", "kind": "write-stderr-byte" },
+        { "function": "main::write_stdout_byte", "kind": "write-stdout-byte" }
+      ],
+      "outputLimit": 4,
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42,
+        "stdoutBytes": [52, 50],
+        "stderrBytes": [69, 10],
+        "ioTrace": [
+          { "stream": "stdout", "byte": 52 },
+          { "stream": "stderr", "byte": 69 },
+          { "stream": "stdout", "byte": 50 },
+          { "stream": "stderr", "byte": 10 }
+        ]
+      }
+    },
+    {
+      "id": "pass.interpreter.test-io-output-limit",
+      "sourceRoot": "cases/pass/test-io-bytes/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "testIntrinsics": [
+        { "function": "main::write_stderr_byte", "kind": "write-stderr-byte" },
+        { "function": "main::write_stdout_byte", "kind": "write-stdout-byte" }
+      ],
+      "outputLimit": 3,
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "limit",
+        "category": "output-limit",
+        "stdoutBytes": [52, 50],
+        "stderrBytes": [69],
+        "ioTrace": [
+          { "stream": "stdout", "byte": 52 },
+          { "stream": "stderr", "byte": 69 },
+          { "stream": "stdout", "byte": 50 }
         ]
       }
     },

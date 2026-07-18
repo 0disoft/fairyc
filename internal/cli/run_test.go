@@ -234,6 +234,19 @@ func TestExperimentalRunInterpretsScalarProgram(t *testing.T) {
 	}
 }
 
+func TestExperimentalRunDoesNotAuthorizeTestIntrinsicByName(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", `module main;
+fn write_stdout_byte(value: i32) -> i32 { value }
+fn main() -> i32 { write_stdout_byte(42) }
+`)
+	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
+	if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
 func TestExperimentalRunInterpretsResultMatchAndPropagation(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()

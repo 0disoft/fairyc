@@ -60,10 +60,41 @@
         "dropCountBeforeReset": { "type": "integer", "minimum": 0 }
       }
     },
+    "byte": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255
+    },
+    "testIntrinsic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["function", "kind"],
+      "properties": {
+        "function": { "$ref": "#/$defs/functionName" },
+        "kind": { "enum": ["write-stdout-byte", "write-stderr-byte"] }
+      }
+    },
+    "ioEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stream", "byte"],
+      "properties": {
+        "stream": { "enum": ["stdout", "stderr"] },
+        "byte": { "$ref": "#/$defs/byte" }
+      }
+    },
+    "functionName": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]*(?:::[A-Za-z_][A-Za-z0-9_]*)+$"
+    },
     "case": {
       "type": "object",
       "additionalProperties": false,
       "required": ["id", "sourceRoot", "sources", "entry", "expect"],
+      "dependentRequired": {
+        "testIntrinsics": ["outputLimit"],
+        "outputLimit": ["testIntrinsics"]
+      },
       "properties": {
         "id": {
           "type": "string",
@@ -76,10 +107,14 @@
           "uniqueItems": true,
           "items": { "$ref": "#/$defs/sourcePath" }
         },
-        "entry": {
-          "type": "string",
-          "pattern": "^[A-Za-z_][A-Za-z0-9_]*(?:::[A-Za-z_][A-Za-z0-9_]*)+$"
+        "entry": { "$ref": "#/$defs/functionName" },
+        "testIntrinsics": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/testIntrinsic" }
         },
+        "outputLimit": { "type": "integer", "minimum": 1, "maximum": 1048576 },
         "expect": {
           "oneOf": [
             { "$ref": "#/$defs/returnExpectation" },
@@ -105,6 +140,21 @@
         "regions": {
           "type": "array",
           "items": { "$ref": "#/$defs/regionEvent" }
+        },
+        "stdoutBytes": {
+          "type": "array",
+          "maxItems": 1048576,
+          "items": { "$ref": "#/$defs/byte" }
+        },
+        "stderrBytes": {
+          "type": "array",
+          "maxItems": 1048576,
+          "items": { "$ref": "#/$defs/byte" }
+        },
+        "ioTrace": {
+          "type": "array",
+          "maxItems": 1048576,
+          "items": { "$ref": "#/$defs/ioEvent" }
         }
       }
     },
@@ -137,7 +187,22 @@
         "status": { "const": "pass" },
         "completedThrough": { "const": "interpret" },
         "outcome": { "const": "limit" },
-        "category": { "const": "step-limit" }
+        "category": { "enum": ["step-limit", "output-limit"] },
+        "stdoutBytes": {
+          "type": "array",
+          "maxItems": 1048576,
+          "items": { "$ref": "#/$defs/byte" }
+        },
+        "stderrBytes": {
+          "type": "array",
+          "maxItems": 1048576,
+          "items": { "$ref": "#/$defs/byte" }
+        },
+        "ioTrace": {
+          "type": "array",
+          "maxItems": 1048576,
+          "items": { "$ref": "#/$defs/ioEvent" }
+        }
       }
     }
   }

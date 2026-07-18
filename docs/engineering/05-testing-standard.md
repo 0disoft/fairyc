@@ -35,12 +35,12 @@ cases in `spec/fixtures/mir/manifest-v0.json` after Flow, mutable-local MIR lowe
 verification, comparing source-linked evaluation, call, move, Region, cleanup, Result-branch, trap, and
 eliminated-form facts. `internal/mirverifyfixture` constructs all 8 named verifier seeds, requires
 each baseline to pass, clones it, applies exactly one typed mutation, and proves all 17 cases return
-the complete expected one-code result. `internal/interpreterfixture` executes all 37 interpreter
+the complete expected one-code result. `internal/interpreterfixture` executes all 39 interpreter
 v0 cases through source loading, Flow, verified MIR, and the bounded interpreter, comparing exact
 `i32` returns, scalar and resource-bearing `Option` and `Result` construction, every built-in match
 variant, both Result `?` paths, canonical trap categories, resource construction, whole-root call
 moves, ordered resource reassignment, consuming-close ownership, active-variant cleanup,
-Region fallthrough, direct-return, Result-propagation, and nested reset ordering, source-linked drop traces, or the stable interpreter step-limit
+Region fallthrough, direct-return, Result-propagation, and nested reset ordering, source-linked drop traces, exact fixture-only output bytes and order, or the stable interpreter step/output limits
 category. Backend, ABI, runtime, and Atlas runners do not exist yet; their fixtures remain future
 evidence requirements.
 
@@ -69,7 +69,7 @@ evidence requirements.
 | Resolved package graph | `spec/fixtures/package/` proves instance equality, feature splits, direct visibility, module isolation, ambiguity, transitive hiding, and explicit standard-library injection without choosing public package-manager syntax |
 | Built-in tagged resources | `Ok`, `Err`, `Some`, discard, match, propagation, early return, and nested active-payload drop traces |
 | MIR verifier mutation | `spec/fixtures/mir-verifier/` currently proves all 8 named baselines and 17 isolated mutation cases, including missing Region reset and invalid reset-exit kind `V1403`, through the Go verifier runner without serializing arbitrary MIR |
-| MIR interpreter run, trap, and limit | `spec/fixtures/interpreter/` currently proves all 37 v0 cases: literal return, scalar call arithmetic, boolean branching and logical not, source `&&` and `||` short-circuiting, scalar `while`, scalar and resource-bearing `Option` and `Result` construction, every built-in match variant, scalar and resource-bearing Result `?` paths, resource construction and field reads, whole-root and tagged-payload moves, resource returns, ordered live/dead/self reassignment, consuming-close success/failure ownership, nested active-variant cleanup, deterministic drop traces, lexical Region placement and reset on fallthrough, conditional fallthrough, direct return, Result propagation, and nested exits, division-by-zero trap identity, and bounded step-limit termination; user drop-body effects, Region `break` and `continue`, and I/O remain deferred |
+| MIR interpreter run, trap, and limit | `spec/fixtures/interpreter/` currently proves all 39 v0 cases: literal return, scalar call arithmetic, boolean branching and logical not, source `&&` and `||` short-circuiting, scalar `while`, scalar and resource-bearing `Option` and `Result` construction, every built-in match variant, scalar and resource-bearing Result `?` paths, resource construction and field reads, whole-root and tagged-payload moves, resource returns, ordered live/dead/self reassignment, consuming-close success/failure ownership, nested active-variant cleanup, deterministic drop traces, lexical Region placement and reset on fallthrough, conditional fallthrough, direct return, Result propagation, and nested exits, exact manifest-authorized in-memory stdout/stderr bytes, order, and retained limit prefix, division-by-zero trap identity, and bounded step/output-limit termination; user drop-body effects, Region `break` and `continue`, and host I/O remain deferred |
 | Drop elaboration | Partial construction, loop `break` and `continue`, and cleanup-suffix merging |
 | C differential | Interpreter parity for output, status, trap category, and drop trace across declared compilers and profiles |
 | C safety | Overflow, division, shifts, evaluation order, aliasing, alignment, inactive payload, and sanitizer-assisted checks |

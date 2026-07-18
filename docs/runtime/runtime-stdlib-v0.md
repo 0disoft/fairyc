@@ -13,6 +13,10 @@ The compiler and MIR directly own checked, wrapping, saturating, and checked-res
 
 Heap allocation, files, UTF-8 validation, strings, buffers, formatting, console access, and environment access are not intrinsics.
 
+The interpreter fixture harness may replace explicitly manifest-bound call symbols with bounded
+in-memory stdout or stderr byte sinks. This is test configuration, not a compiler-known operation,
+runtime symbol, standard-library API, magic source name, or permission to access host streams.
+
 ### Thin runtime
 
 The Stage 0 runtime owns only:
