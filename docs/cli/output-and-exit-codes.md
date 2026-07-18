@@ -36,8 +36,8 @@ automation. They are not the stable exit-code taxonomy:
 `experimental parse` writes one `fairyc.experimental.parse/v0` JSON document, defined by
 `spec/cli/experimental-parse-v0.schema.json`, to stdout even when source diagnostics exist.
 `experimental check-syntax` writes human diagnostics to stderr and does not emit a machine result.
-`experimental check-semantics` writes one success line with a typed-HIR function count, semantic
-diagnostics on stderr, or an explicit unsupported-subset message on stderr. None of these commands
+`experimental check-semantics` writes one success line with typed-HIR module and function counts for
+a multi-file input, semantic diagnostics on stderr, or an explicit unsupported-subset message on stderr. None of these commands
 uses ANSI escapes. Human positions are one-based line and byte-column values backed
 by the diagnostic's zero-based half-open byte span.
 

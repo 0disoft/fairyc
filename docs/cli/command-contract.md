@@ -14,21 +14,23 @@ The current Go prototype implements three deliberately unstable developer comman
 | --- | --- | --- |
 | `fairyc experimental parse <file.fy>` | Parse one source-root-relative file and verify lossless syntax plus error-free AST lowering | `fairyc.experimental.parse/v0` JSON on stdout, defined by `spec/cli/experimental-parse-v0.schema.json` |
 | `fairyc experimental check-syntax <file.fy>` | Check lexing, parsing, recovery, module identity, lossless reconstruction, and error-free AST lowering | Success line on stdout or human diagnostics on stderr |
-| `fairyc experimental check-semantics <file.fy>` | Resolve names, type-check, and analyze local safe-borrow Flow for one module in the implemented subset | Typed-HIR function count on stdout, human source diagnostics on stderr, or an explicit unsupported-subset error |
+| `fairyc experimental check-semantics <file.fy> [<file.fy>...]` | Resolve names, type-check, and analyze local safe-borrow Flow for an explicit module set in the implemented subset | Typed-HIR module and function counts on stdout, human source diagnostics on stderr, or an explicit unsupported-subset error |
 
-These commands treat the current directory as their temporary source root, accept exactly one
-relative regular file, reject root escape including escaping symbolic links, and read no more than
-the current implementation byte budget. Their spelling and numeric exit codes are prototype-only.
+These commands treat the current directory as their temporary source root. `parse` and
+`check-syntax` accept exactly one relative regular file; `check-semantics` accepts one or more
+explicit relative regular files under bounded file-count and aggregate-byte budgets. All reject root
+escape including escaping symbolic links and read no more than the current implementation budget.
+Their spelling and numeric exit codes are prototype-only.
 The JSON report includes relative path, byte length, module identity, token kinds, CST node kinds,
 half-open byte spans, child indexes, and structured diagnostics. It excludes source text, token
 text, cooked literal values, and absolute local paths. When bounded loading detects more bytes than
 the implementation limit, `truncated` is true and `byteLength` is a lower bound rather than a
 claimed full-file size.
 
-`check-semantics` currently supplies only the named source file to semantic analysis. An import whose
-module is not present in that one-file input therefore fails resolution; the multi-file semantic
-fixture runner, not this command, is the current package-level proof. Syntax outside the implemented
-semantic subset returns a capability error and never counts as a successful check.
+`check-semantics` never scans directories or follows an import to discover another source file. Each
+imported module must be included explicitly. Duplicate paths and input sets beyond the prototype
+budgets are rejected before semantic analysis. Syntax outside the implemented semantic subset
+returns a capability error and never counts as a successful check.
 
 `fairyc check` remains unimplemented. It must not be aliased to `check-syntax`, because the planned
 command below also requires general resource, region, and effect analysis beyond the local borrow

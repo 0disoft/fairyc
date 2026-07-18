@@ -18,6 +18,7 @@ const (
 	ExitInvalidInvocation = 2
 	ExitSourceDiagnostics = 3
 	ExitInternalFailure   = 4
+	maxSemanticInputFiles = 64
 )
 
 const usage = `Fairy C Stage 0 frontend prototype
@@ -25,7 +26,7 @@ const usage = `Fairy C Stage 0 frontend prototype
 Usage:
   fairyc experimental parse <file.fy>
   fairyc experimental check-syntax <file.fy>
-  fairyc experimental check-semantics <file.fy>
+  fairyc experimental check-semantics <file.fy> [<file.fy>...]
   fairyc --help
 
 The experimental commands are unstable. The reserved "fairyc check" command is not implemented
@@ -63,48 +64,83 @@ func runExperimental(args []string, sourceRoot string, stdout, stderr io.Writer)
 	if len(args) == 2 && isHelp(args[1]) {
 		return writeHelp(stdout, stderr)
 	}
-	if len(args) != 2 {
-		return invocationError(stderr, fmt.Sprintf("experimental command %q expects exactly one source file", command))
-	}
 	switch command {
 	case "parse":
+		if len(args) != 2 {
+			return invocationError(stderr, fmt.Sprintf("experimental command %q expects exactly one source file", command))
+		}
 		return runParse(args[1], sourceRoot, stdout, stderr)
 	case "check-syntax":
+		if len(args) != 2 {
+			return invocationError(stderr, fmt.Sprintf("experimental command %q expects exactly one source file", command))
+		}
 		return runCheckSyntax(args[1], sourceRoot, stdout, stderr)
 	case "check-semantics":
-		return runCheckSemantics(args[1], sourceRoot, stdout, stderr)
+		if len(args) < 2 {
+			return invocationError(stderr, "experimental command \"check-semantics\" expects one or more source files")
+		}
+		return runCheckSemantics(args[1:], sourceRoot, stdout, stderr)
 	default:
 		return invocationError(stderr, fmt.Sprintf("unknown experimental command %q", command))
 	}
 }
 
-func runCheckSemantics(argument, sourceRoot string, stdout, stderr io.Writer) int {
+func runCheckSemantics(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
 	limits := source.DefaultLimits()
-	loaded, err := loadSource(sourceRoot, argument, limits.MaxBytes)
-	if err != nil {
-		var tooLarge sourceTooLargeError
-		if errors.As(err, &tooLarge) {
-			value := source.ExhaustionDiagnostic(0)
-			if writeErr := writeDiagnostics(stderr, tooLarge.relativePath, nil, []diagnostic.Diagnostic{value}); writeErr != nil {
+	if len(arguments) > maxSemanticInputFiles {
+		return invocationError(stderr, fmt.Sprintf("experimental command \"check-semantics\" accepts at most %d source files", maxSemanticInputFiles))
+	}
+	aggregateLimit := limits.MaxBytes * 4
+	aggregateBytes := 0
+	loadedFiles := make([]loadedSource, 0, len(arguments))
+	seen := make(map[string]struct{}, len(arguments))
+	for _, argument := range arguments {
+		loaded, err := loadSource(sourceRoot, argument, limits.MaxBytes)
+		if err != nil {
+			var tooLarge sourceTooLargeError
+			if errors.As(err, &tooLarge) {
+				value := source.ExhaustionDiagnostic(0)
+				if writeErr := writeDiagnostics(stderr, tooLarge.relativePath, nil, []diagnostic.Diagnostic{value}); writeErr != nil {
+					return ExitInternalFailure
+				}
+				return ExitSourceDiagnostics
+			}
+			return inputError(stderr, err)
+		}
+		if _, duplicate := seen[loaded.file.RelativePath]; duplicate {
+			return invocationError(stderr, fmt.Sprintf("semantic input %q is listed more than once", safeDisplayPath(loaded.file.RelativePath)))
+		}
+		seen[loaded.file.RelativePath] = struct{}{}
+		aggregateBytes += len(loaded.file.Bytes)
+		if aggregateBytes > aggregateLimit {
+			return invocationError(stderr, "semantic input set exceeds the experimental aggregate byte limit")
+		}
+		loadedFiles = append(loadedFiles, loaded)
+	}
+
+	semanticFiles := make([]semantic.File, 0, len(loadedFiles))
+	sources := make(map[string][]byte, len(loadedFiles))
+	syntaxFailed := false
+	for _, loaded := range loadedFiles {
+		frontendResult, err := frontend.AnalyzeSyntax(loaded.file, limits)
+		if err != nil {
+			return internalError(stderr)
+		}
+		sources[loaded.file.RelativePath] = frontendResult.Tree.Source
+		if len(frontendResult.Tree.Diagnostics) > 0 {
+			syntaxFailed = true
+			if err := writeDiagnostics(stderr, loaded.file.RelativePath, frontendResult.Tree.Source, frontendResult.Tree.Diagnostics); err != nil {
 				return ExitInternalFailure
 			}
-			return ExitSourceDiagnostics
+			continue
 		}
-		return inputError(stderr, err)
+		semanticFiles = append(semanticFiles, semantic.File{Path: loaded.file.RelativePath, Module: frontendResult.AST})
 	}
-	frontendResult, err := frontend.AnalyzeSyntax(loaded.file, limits)
-	if err != nil {
-		return internalError(stderr)
-	}
-	if len(frontendResult.Tree.Diagnostics) > 0 {
-		if err := writeDiagnostics(stderr, loaded.file.RelativePath, frontendResult.Tree.Source, frontendResult.Tree.Diagnostics); err != nil {
-			return ExitInternalFailure
-		}
+	if syntaxFailed {
 		return ExitSourceDiagnostics
 	}
-	result := semantic.Analyze([]semantic.File{{Path: loaded.file.RelativePath, Module: frontendResult.AST}})
+	result := semantic.Analyze(semanticFiles)
 	if len(result.Diagnostics) > 0 {
-		sources := map[string][]byte{loaded.file.RelativePath: frontendResult.Tree.Source}
 		if err := writeSemanticDiagnostics(stderr, sources, result.Diagnostics); err != nil {
 			return ExitInternalFailure
 		}
@@ -120,7 +156,13 @@ func runCheckSemantics(argument, sourceRoot string, stdout, stderr io.Writer) in
 	for _, module := range result.HIR.Modules {
 		functions += len(module.Functions)
 	}
-	if _, err := fmt.Fprintf(stdout, "semantics ok: %s (typed HIR: %d function(s))\n", safeDisplayPath(loaded.file.RelativePath), functions); err != nil {
+	if len(loadedFiles) == 1 {
+		if _, err := fmt.Fprintf(stdout, "semantics ok: %s (typed HIR: %d function(s))\n", safeDisplayPath(loadedFiles[0].file.RelativePath), functions); err != nil {
+			return outputError(stderr)
+		}
+		return ExitSuccess
+	}
+	if _, err := fmt.Fprintf(stdout, "semantics ok: %d file(s), %d module(s) (typed HIR: %d function(s))\n", len(loadedFiles), len(result.HIR.Modules), functions); err != nil {
 		return outputError(stderr)
 	}
 	return ExitSuccess

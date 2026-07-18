@@ -27,15 +27,16 @@ The following commands are manual developer examples, not agent command authorit
 ```text
 go run ./cmd/fairyc experimental check-syntax examples/syntax/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/syntax/main.fy
+go run ./cmd/fairyc experimental check-semantics examples/semantic/main.fy examples/semantic/math.fy
 go run ./cmd/fairyc experimental parse examples/syntax/main.fy
 ```
 
 Both commands treat the current directory as the temporary source root. `parse` emits versioned,
 deterministic JSON containing token and CST kinds and byte spans, but not source text, token text,
-literal values, or absolute paths. `check-semantics` accepts the currently implemented single-file
-scalar and safe-borrow subset and rejects unsupported syntax as a capability limitation rather than
-claiming success. The official `fairyc check` command remains unavailable until general resource,
-region, and effect analysis exist.
+literal values, or absolute paths. `check-semantics` accepts an explicit bounded list of source files
+for the currently implemented scalar and safe-borrow subset. It rejects duplicate paths, root
+escapes, oversized input sets, and unsupported syntax rather than claiming success. The official
+`fairyc check` command remains unavailable until general resource, region, and effect analysis exist.
 
 ## Design anchors
 

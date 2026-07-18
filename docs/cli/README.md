@@ -21,12 +21,12 @@ Only `check`, a minimal `build`, compiler inspection, and semantic test executio
 
 The Go frontend currently exposes `fairyc experimental parse <file.fy>`,
 `fairyc experimental check-syntax <file.fy>`, and
-`fairyc experimental check-semantics <file.fy>`. These are developer inspection commands whose
+`fairyc experimental check-semantics <file.fy> [<file.fy>...]`. These are developer inspection commands whose
 spelling and numeric exit codes may change. `check-semantics` resolves names and creates typed HIR
-for the implemented single-file scalar and safe-borrow subset. It also checks local last-use loans,
-borrow conflicts, and safe-borrow return origins. It does not implement general resource ownership,
-regions, or effects, generate code, or execute programs. In particular, it does not satisfy the
-planned `fairyc check` contract.
+for an explicit bounded module set in the implemented scalar and safe-borrow subset. It also checks
+local last-use loans, borrow conflicts, and safe-borrow return origins. It does not discover files,
+implement general resource ownership, regions, or effects, generate code, or execute programs. In
+particular, it does not satisfy the planned `fairyc check` contract.
 
 Human developers can run the examples shown in the repository `README.md`. Agent verification uses
 the configured `fairyc_go_build`, `fairyc_go_vet`, and `fairyc_go_test` intents; the manual `go run`

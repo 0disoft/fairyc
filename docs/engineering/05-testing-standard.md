@@ -14,6 +14,10 @@ stable commands, deterministic content-safe JSON, schema synchronization, human 
 bounded file reads, source-root escape rejection, output failure, clean syntax checks, semantic
 success, semantic diagnostics, and unsupported-subset rejection.
 
+Experimental semantic CLI coverage also verifies explicit multi-file module sets, input-order
+determinism, cross-file visibility diagnostics, duplicate rejection, bounded file counts, and a
+repository-owned qualified-import example.
+
 `internal/semanticfixture` executes all 11 cases in `spec/fixtures/semantic/manifest-v0.json`
 against name resolution, typed HIR, and local safe-borrow Flow. It verifies exact failure phase,
 complete diagnostic set, related spans, selected resolution coordinates, selected canonical type

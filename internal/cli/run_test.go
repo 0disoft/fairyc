@@ -102,6 +102,48 @@ func TestExperimentalCheckSemanticsBuildsTypedHIR(t *testing.T) {
 	}
 }
 
+func TestExperimentalCheckSemanticsAcceptsExplicitModuleSet(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\nimport math as m;\nfn answer() -> i32 { m::forty_two() }\n")
+	writeTestSource(t, root, "math.fy", "module math;\npub fn forty_two() -> i32 { 42 }\n")
+	firstCode, firstOut, firstErr := runForTest([]string{"experimental", "check-semantics", "main.fy", "math.fy"}, root)
+	secondCode, secondOut, secondErr := runForTest([]string{"experimental", "check-semantics", "math.fy", "main.fy"}, root)
+	want := "semantics ok: 2 file(s), 2 module(s) (typed HIR: 2 function(s))\n"
+	if firstCode != ExitSuccess || secondCode != ExitSuccess || firstOut != want || secondOut != want || firstErr != "" || secondErr != "" {
+		t.Fatalf("Run() first=(%d, %q, %q), second=(%d, %q, %q)", firstCode, firstOut, firstErr, secondCode, secondOut, secondErr)
+	}
+}
+
+func TestExperimentalCheckSemanticsReportsCrossFileVisibility(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\nimport math as m;\nfn answer() -> i32 { m::hidden() }\n")
+	writeTestSource(t, root, "math.fy", "module math;\nfn hidden() -> i32 { 42 }\n")
+	code, stdout, stderr := runForTest([]string{"experimental", "check-semantics", "main.fy", "math.fy"}, root)
+	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "E0103: item is not visible from this module") || !strings.Contains(stderr, "declaration: math.fy") {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
+func TestExperimentalCheckSemanticsRejectsDuplicateAndOversizedModuleSets(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { 0 }\n")
+	duplicateCode, duplicateOut, duplicateErr := runForTest([]string{"experimental", "check-semantics", "main.fy", "main.fy"}, root)
+	if duplicateCode != ExitInvalidInvocation || duplicateOut != "" || !strings.Contains(duplicateErr, "listed more than once") {
+		t.Fatalf("duplicate Run() = code %d, stdout %q, stderr %q", duplicateCode, duplicateOut, duplicateErr)
+	}
+	arguments := []string{"experimental", "check-semantics"}
+	for range maxSemanticInputFiles + 1 {
+		arguments = append(arguments, "main.fy")
+	}
+	limitCode, limitOut, limitErr := runForTest(arguments, root)
+	if limitCode != ExitInvalidInvocation || limitOut != "" || !strings.Contains(limitErr, "accepts at most") {
+		t.Fatalf("limit Run() = code %d, stdout %q, stderr %q", limitCode, limitOut, limitErr)
+	}
+}
+
 func TestExperimentalCheckSemanticsReportsResolveDiagnostic(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
@@ -129,6 +171,18 @@ func TestRepositorySyntaxExampleStaysRunnable(t *testing.T) {
 		root,
 	)
 	if code != ExitSuccess || stdout != "syntax ok: examples/syntax/main.fy\n" || stderr != "" {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
+func TestRepositorySemanticExampleStaysRunnable(t *testing.T) {
+	root := filepath.Clean(filepath.Join("..", ".."))
+	code, stdout, stderr := runForTest(
+		[]string{"experimental", "check-semantics", "examples/semantic/main.fy", "examples/semantic/math.fy"},
+		root,
+	)
+	want := "semantics ok: 2 file(s), 2 module(s) (typed HIR: 2 function(s))\n"
+	if code != ExitSuccess || stdout != want || stderr != "" {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
 	}
 }
