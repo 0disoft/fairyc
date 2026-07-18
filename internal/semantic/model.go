@@ -34,6 +34,7 @@ type Result struct {
 	Resolutions      []Resolution
 	Types            []TypeFact
 	Borrows          []BorrowFact
+	ResourceStates   []ResourceStateFact
 	Unsupported      []Unsupported
 }
 
@@ -79,6 +80,24 @@ type BorrowFact struct {
 	Escapes bool
 }
 
+// ResourceState is the source-visible ownership state of one complete resource root.
+type ResourceState string
+
+const (
+	ResourceLive      ResourceState = "Live"
+	ResourceDead      ResourceState = "Dead"
+	ResourceMaybeLive ResourceState = "MaybeLive"
+)
+
+// ResourceStateFact samples one binding immediately before or after a source span.
+type ResourceStateFact struct {
+	Binding            hir.Span
+	At                 hir.Span
+	Observation        string
+	State              ResourceState
+	CleanupObligations *int
+}
+
 // Unsupported identifies syntax outside the deliberately narrow implemented semantic subset.
 type Unsupported struct {
 	Feature string
@@ -109,6 +128,7 @@ func Analyze(files []File) Result {
 	result.Resolutions = analyzer.resolutions
 	result.Types = analyzer.types
 	result.Borrows = analyzer.borrows
+	result.ResourceStates = analyzer.resourceStates
 	result.Unsupported = analyzer.unsupported
 	if len(result.Diagnostics) > 0 {
 		if analyzer.flowStarted {
@@ -153,6 +173,19 @@ func (a *analyzer) finish() {
 		}
 		return cmp.Compare(left.Origin, right.Origin)
 	})
+	slices.SortFunc(a.resourceStates, func(left, right ResourceStateFact) int {
+		if n := compareSpan(left.Binding, right.Binding); n != 0 {
+			return n
+		}
+		if n := compareSpan(left.At, right.At); n != 0 {
+			return n
+		}
+		return cmp.Compare(left.Observation, right.Observation)
+	})
+	a.resourceStates = slices.CompactFunc(a.resourceStates, func(left, right ResourceStateFact) bool {
+		return compareSpan(left.Binding, right.Binding) == 0 && compareSpan(left.At, right.At) == 0 &&
+			left.Observation == right.Observation && left.State == right.State && obligationsEqual(left.CleanupObligations, right.CleanupObligations)
+	})
 	a.types = slices.CompactFunc(a.types, func(left, right TypeFact) bool {
 		return compareSpan(left.Expression, right.Expression) == 0 && left.CanonicalType == right.CanonicalType
 	})
@@ -165,6 +198,13 @@ func (a *analyzer) finish() {
 	a.unsupported = slices.CompactFunc(a.unsupported, func(left, right Unsupported) bool {
 		return compareSpan(left.Span, right.Span) == 0 && left.Feature == right.Feature
 	})
+}
+
+func obligationsEqual(left, right *int) bool {
+	if left == nil || right == nil {
+		return left == nil && right == nil
+	}
+	return *left == *right
 }
 
 func compareDiagnostic(left, right Diagnostic) int {

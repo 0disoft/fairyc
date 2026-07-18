@@ -17,6 +17,7 @@ type typeChecker struct {
 
 func (a *analyzer) typeCheck() Result {
 	result := Result{}
+	a.prepareResourceTypes()
 	for _, module := range a.moduleOrder {
 		hirModule := hir.Module{Path: module.file.Module.Path, SourcePath: module.file.Path}
 		for index := range module.file.Module.Functions {
@@ -161,6 +162,9 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 		case statement.Kind == syntax.KindExprStmt || statement.Kind == syntax.KindDiscard:
 			expression, _ := c.checkExpression(statement.Expression, hir.TypeInvalid)
 			hirStatement.Expression = expression
+		case statement.Kind == syntax.KindWhile:
+			expression, _ := c.checkExpression(statement.Expression, hir.TypeVoid)
+			hirStatement.Expression = expression
 		default:
 			c.analyzer.addUnsupported(c.module.file.Path, statement.Span, "statement "+string(statement.Kind))
 		}
@@ -213,6 +217,12 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 		actual = c.checkCall(expression, result)
 	case syntax.KindIf:
 		actual = c.checkIf(expression, result, expected)
+	case syntax.KindWhile:
+		actual = c.checkWhile(expression, result)
+	case syntax.KindRecord:
+		actual = c.checkRecord(expression, result)
+	case syntax.KindFieldExpr:
+		actual = c.checkField(expression, result)
 	case syntax.KindBlock:
 		if expression.Block == nil {
 			actual = hir.TypeInvalid
@@ -230,6 +240,79 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 		c.addType(result.Span, actual)
 	}
 	return result, actual
+}
+
+func (c *typeChecker) checkWhile(expression *ast.Expression, result *hir.Expression) hir.Type {
+	if len(expression.Children) != 2 {
+		return hir.TypeInvalid
+	}
+	condition, conditionType := c.checkExpression(expression.Children[0], hir.TypeBool)
+	result.Children = appendExpression(result.Children, condition)
+	if conditionType != hir.TypeInvalid && conditionType != hir.TypeBool {
+		c.analyzer.addDiagnostic("E1007", span(c.module.file.Path, expression.Children[0].Span))
+	}
+	body, _ := c.checkExpression(expression.Children[1], hir.TypeVoid)
+	result.Children = appendExpression(result.Children, body)
+	return hir.TypeVoid
+}
+
+func (c *typeChecker) checkRecord(expression *ast.Expression, result *hir.Expression) hir.Type {
+	if len(expression.Children) == 0 {
+		return hir.TypeInvalid
+	}
+	constructor := c.analyzer.resolved[expression.Children[0]]
+	if constructor == nil || constructor.resource == nil {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "record constructor that is not a resource")
+		return hir.TypeInvalid
+	}
+	info := c.analyzer.resourceTypes[constructor.typ]
+	if info == nil {
+		return hir.TypeInvalid
+	}
+	result.Symbol = constructor.id
+	seen := make(map[string]struct{}, len(expression.Children)-1)
+	for _, fieldExpression := range expression.Children[1:] {
+		field, found := info.fields[fieldExpression.Text]
+		if !found || len(fieldExpression.Children) != 1 {
+			c.analyzer.addUnsupported(c.module.file.Path, fieldExpression.Span, "unknown or malformed resource field "+fieldExpression.Text)
+			continue
+		}
+		if _, duplicate := seen[fieldExpression.Text]; duplicate {
+			c.analyzer.addUnsupported(c.module.file.Path, fieldExpression.Span, "duplicate resource field "+fieldExpression.Text)
+			continue
+		}
+		seen[fieldExpression.Text] = struct{}{}
+		value, actual := c.checkExpression(fieldExpression.Children[0], field.typ)
+		result.Children = appendExpression(result.Children, value)
+		c.requireType("E1006", span(c.module.file.Path, fieldExpression.Children[0].Span), actual, field.typ, field.declaration)
+	}
+	if len(seen) != len(info.fields) {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "resource construction with missing fields")
+	}
+	return constructor.typ
+}
+
+func (c *typeChecker) checkField(expression *ast.Expression, result *hir.Expression) hir.Type {
+	if len(expression.Children) != 1 {
+		return hir.TypeInvalid
+	}
+	receiver, receiverType := c.checkExpression(expression.Children[0], hir.TypeInvalid)
+	result.Children = appendExpression(result.Children, receiver)
+	if element, _, borrow := hir.BorrowElement(receiverType); borrow {
+		receiverType = element
+	}
+	info, found := c.analyzer.resourceType(receiverType)
+	if !found {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "field access on a non-resource value")
+		return hir.TypeInvalid
+	}
+	field, found := info.fields[expression.Text]
+	if !found {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "unknown resource field "+expression.Text)
+		return hir.TypeInvalid
+	}
+	result.Operator = expression.Text
+	return field.typ
 }
 
 func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expression) hir.Type {
@@ -344,7 +427,7 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 		expected := hir.TypeInvalid
 		var expectedSpan = callee.typeSpan
 		if index < len(callee.function.Parameters) {
-			expected = c.canonicalType(callee.function.Parameters[index].Type)
+			expected = c.analyzer.canonicalType(c.analyzer.modules[callee.module], callee.function.Parameters[index].Type)
 			expectedSpan = callee.function.Parameters[index].Type.Span
 		}
 		child, actual := c.checkExpression(argument, expected)
@@ -359,7 +442,7 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 			)
 		}
 	}
-	callee.typ = c.canonicalType(callee.function.ResultType)
+	callee.typ = c.analyzer.canonicalType(c.analyzer.modules[callee.module], callee.function.ResultType)
 	return callee.typ
 }
 
@@ -393,39 +476,7 @@ func (c *typeChecker) checkIf(expression *ast.Expression, result *hir.Expression
 }
 
 func (c *typeChecker) canonicalType(reference ast.TypeReference) hir.Type {
-	value, ok := canonicalTypeText(reference.Text)
-	if ok {
-		return value
-	}
-	c.analyzer.addUnsupported(c.module.file.Path, reference.Span, "type "+strings.TrimSpace(reference.Text))
-	return hir.TypeInvalid
-}
-
-func canonicalTypeText(text string) (hir.Type, bool) {
-	trimmed := strings.TrimSpace(text)
-	switch trimmed {
-	case "bool":
-		return hir.TypeBool, true
-	case "i32":
-		return hir.TypeI32, true
-	}
-	if strings.HasPrefix(trimmed, "&") {
-		remainder := strings.TrimSpace(trimmed[1:])
-		mutable := strings.HasPrefix(remainder, "mut") &&
-			(len(remainder) == len("mut") || remainder[len("mut")] == ' ' || remainder[len("mut")] == '&')
-		if mutable {
-			remainder = strings.TrimSpace(remainder[len("mut"):])
-		}
-		element, ok := canonicalTypeText(remainder)
-		if !ok {
-			return hir.TypeInvalid, false
-		}
-		if mutable {
-			return hir.MutableBorrow(element), true
-		}
-		return hir.SharedBorrow(element), true
-	}
-	return hir.TypeInvalid, false
+	return c.analyzer.canonicalType(c.module, reference)
 }
 
 func (c *typeChecker) requireType(code string, primary hir.Span, actual, expected hir.Type, expectedSpan hir.Span) {

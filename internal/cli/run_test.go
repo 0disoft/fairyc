@@ -164,6 +164,28 @@ func TestExperimentalCheckSemanticsRejectsUnsupportedSubset(t *testing.T) {
 	}
 }
 
+func TestExperimentalCheckSemanticsChecksResourceFlow(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", `module main;
+resource Token {
+    value: i32;
+    drop fn(self: &mut Self) {}
+}
+fn consume(token: Token) -> i32 { token.value }
+fn invalid() -> i32 {
+    let token: Token = Token { value: 1 };
+    let first: i32 = consume(token);
+    consume(token)
+}
+`)
+	code, stdout, stderr := runForTest([]string{"experimental", "check-semantics", "main.fy"}, root)
+	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "E1101: resource is used after ownership was moved") ||
+		!strings.Contains(stderr, "declaration: main.fy") || !strings.Contains(stderr, "move: main.fy") {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
 func TestRepositorySyntaxExampleStaysRunnable(t *testing.T) {
 	root := filepath.Clean(filepath.Join("..", ".."))
 	code, stdout, stderr := runForTest(
@@ -183,6 +205,17 @@ func TestRepositorySemanticExampleStaysRunnable(t *testing.T) {
 	)
 	want := "semantics ok: 2 file(s), 2 module(s) (typed HIR: 2 function(s))\n"
 	if code != ExitSuccess || stdout != want || stderr != "" {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
+func TestRepositoryResourceExampleStaysRunnable(t *testing.T) {
+	root := filepath.Clean(filepath.Join("..", ".."))
+	code, stdout, stderr := runForTest(
+		[]string{"experimental", "check-semantics", "examples/resources/main.fy"},
+		root,
+	)
+	if code != ExitSuccess || stdout != "semantics ok: examples/resources/main.fy (typed HIR: 2 function(s))\n" || stderr != "" {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
 	}
 }

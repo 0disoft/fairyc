@@ -15,9 +15,27 @@ type Module struct {
 	Path      string
 	Span      diagnostic.Span
 	Imports   []Import
+	Resources []Resource
 	Functions []Function
 	Bindings  []Binding
 	Literals  []Literal
+}
+
+// Resource is one move-only named aggregate with compiler-owned cleanup.
+type Resource struct {
+	Name     string
+	Public   bool
+	Span     diagnostic.Span
+	NameSpan diagnostic.Span
+	Fields   []FieldDeclaration
+}
+
+// FieldDeclaration records one named aggregate field and its written type.
+type FieldDeclaration struct {
+	Name     string
+	Span     diagnostic.Span
+	NameSpan diagnostic.Span
+	Type     TypeReference
 }
 
 // Import records one explicit module alias.
@@ -118,6 +136,8 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 		switch child.Kind {
 		case syntax.KindImport:
 			module.Imports = append(module.Imports, lowerImport(tree, child))
+		case syntax.KindResource:
+			module.Resources = append(module.Resources, lowerResource(tree, child))
 		case syntax.KindFunction:
 			module.Functions = append(module.Functions, lowerFunction(tree, child))
 		}
@@ -153,6 +173,33 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 	}
 	walk(tree.Root)
 	return module, nil
+}
+
+func lowerResource(tree *syntax.Tree, node syntax.Node) Resource {
+	value := Resource{
+		Name:     node.Text,
+		Public:   containsKeywordBeforeName(tree, node, "pub", node.Text),
+		Span:     node.Span,
+		NameSpan: findIdentifierSpan(tree, node, node.Text, "resource"),
+	}
+	for _, childID := range node.Children {
+		child, found := tree.Node(childID)
+		if !found || child.Kind != syntax.KindField {
+			continue
+		}
+		field := FieldDeclaration{
+			Name:     child.Text,
+			Span:     child.Span,
+			NameSpan: findIdentifierSpan(tree, child, child.Text, ""),
+		}
+		if len(child.Children) > 0 {
+			if typeNode, ok := tree.Node(child.Children[0]); ok && typeNode.Kind == syntax.KindType {
+				field.Type = lowerType(typeNode)
+			}
+		}
+		value.Fields = append(value.Fields, field)
+	}
+	return value
 }
 
 func lowerImport(tree *syntax.Tree, node syntax.Node) Import {

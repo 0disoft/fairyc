@@ -21,7 +21,9 @@ repository-owned qualified-import example.
 `internal/semanticfixture` executes all 11 cases in `spec/fixtures/semantic/manifest-v0.json`
 against name resolution, typed HIR, and local safe-borrow Flow. It verifies exact failure phase,
 complete diagnostic set, related spans, selected resolution coordinates, selected canonical type
-facts, borrow origins, last uses, and escape facts. Resource, Region, Result, MIR, MIR-verifier,
+facts, borrow origins, last uses, and escape facts. `internal/resourcefixture` executes all 7 cases
+in `spec/fixtures/resource/manifest-v0.json`, comparing complete-root states, cleanup obligations,
+and the complete deterministic `E11xx` set after parser, resolver, and type setup. Region, Result, MIR, MIR-verifier,
 resolved-package-graph, interpreter, backend, ABI, runtime, and Atlas runners do not exist yet;
 their fixtures remain future evidence requirements.
 
@@ -42,7 +44,7 @@ their fixtures remain future evidence requirements.
 | Semantic pass and fail | `spec/fixtures/semantic/` currently proves all 11 v0 cases: resolution coordinates, canonical types, local last-use loans, borrow return origins, phase ownership, related spans, and deterministic cascade suppression |
 | Module pass and fail | File-to-module identity, explicit aliases, forbidden import forms, cycles, and source visibility |
 | Type and initialization fail | Inert/resource separation and initialized-local rules |
-| Resource flow pass and fail | `spec/fixtures/resource/` proves whole-root moves, scope obligations, branch and loop states, and deterministic `E11xx` spans once a runner exists; consuming close and double-drop execution remain future groups |
+| Resource flow pass and fail | `spec/fixtures/resource/` currently proves all 7 v0 cases: whole-root moves, scope obligations, branch and loop states, and deterministic `E11xx` spans; reassignment, consuming close, and concrete drop traces remain future groups |
 | Borrow-origin pass and fail | Local last-use loans, conflicts, single-origin return, and storage bans |
 | Region pass and fail | `spec/fixtures/region/manifest-v1.json` proves parameter and local origins, permitted parameter-origin returns, `E3101` local escape, capability restrictions, and no `NeedsDrop` placement once a runner exists |
 | Result pass and fail | `spec/fixtures/result/` proves return, discard, must-use behavior, `?` classification, exactly-once evaluation, and error compatibility once a runner exists; constructors and payload traces remain deferred |

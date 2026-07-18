@@ -15,10 +15,11 @@ The first Stage 0 frontend slice now exists in Go: immutable source bytes, a los
 compact recoverable syntax, error-free AST lowering, deterministic `E00xx` diagnostics, and a
 runner for all parser v0 fixtures. The next slice resolves names and produces typed HIR for the
 fixture-backed scalar and safe-borrow subset. Its semantic runner executes all 11 v0 resolve, type,
-and local Flow cases, including last-use loans and borrow-return origins. An explicitly unstable
+and local Flow cases, including last-use loans and borrow-return origins. Whole-root resource Flow
+also executes all 7 v0 cases for moves, cleanup obligations, branch joins, and loop back-edges. An explicitly unstable
 `fairyc experimental` CLI can inspect, syntax-check, or semantic-check one source-root-relative
-`.fy` file. There is no stable CLI, general resource ownership Flow, MIR, interpreter, backend,
-standard library, runtime, package manager, supported target, or stable language revision yet.
+`.fy` file. There is no stable CLI, tagged-resource Flow, MIR, interpreter, backend, standard
+library, runtime, package manager, supported target, or stable language revision yet.
 
 ## Try the parser prototype
 
@@ -28,15 +29,17 @@ The following commands are manual developer examples, not agent command authorit
 go run ./cmd/fairyc experimental check-syntax examples/syntax/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/syntax/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/semantic/main.fy examples/semantic/math.fy
+go run ./cmd/fairyc experimental check-semantics examples/resources/main.fy
 go run ./cmd/fairyc experimental parse examples/syntax/main.fy
 ```
 
 Both commands treat the current directory as the temporary source root. `parse` emits versioned,
 deterministic JSON containing token and CST kinds and byte spans, but not source text, token text,
 literal values, or absolute paths. `check-semantics` accepts an explicit bounded list of source files
-for the currently implemented scalar and safe-borrow subset. It rejects duplicate paths, root
+for the currently implemented scalar, safe-borrow, and whole-resource subset. It rejects duplicate paths, root
 escapes, oversized input sets, and unsupported syntax rather than claiming success. The official
-`fairyc check` command remains unavailable until general resource, region, and effect analysis exist.
+`fairyc check` command remains unavailable until tagged resource payloads, reassignment/close rules,
+regions, and effects exist.
 
 ## Design anchors
 

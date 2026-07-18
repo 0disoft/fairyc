@@ -26,10 +26,12 @@ The before-or-after observation makes a move transition testable without seriali
 
 ## Consequences
 
-- The future resource test runner must complete parser, resolver, and type phases before comparing Flow facts.
+- `internal/resourcefixture` completes parser, resolver, and type phases before comparing Flow facts
+  across every v0 case.
 - A pass case may assert multiple states at one operand span to prove the transition caused by that operand.
 - A fail case may expose `MaybeLive` as the rejected computed state, but no later source operation may treat that state as usable.
-- No current fixture is claimed to pass an implementation because the compiler and runner do not exist yet.
+- All 7 current cases execute against the Go Stage 0 implementation; later fixture groups remain
+  unimplemented rather than being inferred from these results.
 
 ## Revisit conditions
 

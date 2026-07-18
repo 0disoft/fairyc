@@ -66,6 +66,7 @@ func (a *analyzer) flowFunction(module *moduleScope, function *ast.Function) {
 		a.borrows = append(a.borrows, loan.fact)
 	}
 	a.checkLoanConflicts(module.file.Path, loans, inventory.assignments)
+	a.resourceFlowFunction(module, function)
 
 	if _, _, returnsBorrow := hir.BorrowElement(a.functions[function].typ); !returnsBorrow {
 		return

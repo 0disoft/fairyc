@@ -31,6 +31,7 @@ regenerate, or override compiler source.
 - Semantic acceptance fixtures: spec/fixtures/semantic/manifest-v0.json
 - Semantic fixture runner: internal/semanticfixture/
 - Resource Flow fixtures: spec/fixtures/resource/manifest-v0.json
+- Resource Flow fixture runner: internal/resourcefixture/
 - Region fixtures: spec/fixtures/region/manifest-v1.json
 - Result fixtures: spec/fixtures/result/manifest-v0.json
 - MIR normalization fixtures: spec/fixtures/mir/manifest-v0.json

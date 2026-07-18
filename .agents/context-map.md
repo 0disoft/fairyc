@@ -17,6 +17,7 @@
 - Semantic fixture route: spec/fixtures/semantic/manifest-v0.json
 - Semantic runner route: internal/semanticfixture/
 - Resource Flow fixture route: spec/fixtures/resource/manifest-v0.json
+- Resource Flow runner route: internal/resourcefixture/
 - Region fixture route: spec/fixtures/region/manifest-v1.json
 - Result fixture route: spec/fixtures/result/manifest-v0.json
 - MIR fixture route: spec/fixtures/mir/manifest-v0.json

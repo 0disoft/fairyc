@@ -139,6 +139,14 @@ func semanticDiagnosticSummary(code string) string {
 		return "return value does not match the declared result type"
 	case "E1010":
 		return "call argument count does not match the declaration"
+	case "E1101":
+		return "resource is used after ownership was moved"
+	case "E1103":
+		return "moving a field out of a resource is not supported"
+	case "E1104":
+		return "branch join leaves resource ownership path-dependent"
+	case "E1105":
+		return "loop body changes the resource state required by the next iteration"
 	default:
 		return "semantic diagnostic"
 	}

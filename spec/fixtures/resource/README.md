@@ -16,6 +16,9 @@ Each state assertion names:
 
 `Live` always has one obligation and `Dead` always has zero. `MaybeLive` is recorded only as a rejected source state and uses `cleanupObligations: null` because one unconditional count does not exist.
 
+`internal/resourcefixture` executes all 7 v0 cases after requiring parser, resolver, and type setup
+to succeed. It compares selected state observations and the complete independent `E11xx` set.
+
 ## Diagnostic assertions
 
 Fail cases list every independent `E11xx` diagnostic after cascade suppression. Primary and related spans use source-root-relative `/` paths and zero-based half-open UTF-8 byte offsets. Related spans sort by role, path, start byte, and end byte. Full wording, Flow block numbers, MIR locals, and backend drop flags are not assertions.

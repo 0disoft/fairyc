@@ -60,3 +60,22 @@ func TestLowerPreservesFunctionSemanticStructure(t *testing.T) {
 		t.Fatalf("body = %+v", function.Body)
 	}
 }
+
+func TestLowerCapturesResourceFields(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nresource Pair { left: i32; right: i32; drop fn(self: &mut Self) {} }\n")
+	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	module, err := Lower(tree)
+	if err != nil {
+		t.Fatalf("Lower() error = %v", err)
+	}
+	if len(module.Resources) != 1 || module.Resources[0].Name != "Pair" || len(module.Resources[0].Fields) != 2 {
+		t.Fatalf("resources = %+v", module.Resources)
+	}
+	if module.Resources[0].Fields[0].Name != "left" || module.Resources[0].Fields[0].Type.Text != "i32" {
+		t.Fatalf("first field = %+v", module.Resources[0].Fields[0])
+	}
+}

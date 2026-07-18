@@ -21,11 +21,13 @@ type symbol struct {
 	mutable     bool
 	public      bool
 	function    *ast.Function
+	resource    *ast.Resource
 }
 
 type moduleScope struct {
 	file      File
 	functions map[string]*symbol
+	resources map[string]*symbol
 	imports   map[string]*moduleScope
 }
 
@@ -44,12 +46,15 @@ type analyzer struct {
 	parameter      map[*ast.Parameter]*symbol
 	parameterIndex map[*symbol]int
 	functions      map[*ast.Function]*symbol
+	resources      map[*ast.Resource]*symbol
 	diagnostics    []Diagnostic
 	resolutions    []Resolution
 	types          []TypeFact
 	borrows        []BorrowFact
 	unsupported    []Unsupported
 	flowStarted    bool
+	resourceTypes  map[hir.Type]*resourceInfo
+	resourceStates []ResourceStateFact
 }
 
 func newAnalyzer(files []File) *analyzer {
@@ -61,11 +66,14 @@ func newAnalyzer(files []File) *analyzer {
 		parameter:      make(map[*ast.Parameter]*symbol),
 		parameterIndex: make(map[*symbol]int),
 		functions:      make(map[*ast.Function]*symbol),
+		resources:      make(map[*ast.Resource]*symbol),
+		resourceTypes:  make(map[hir.Type]*resourceInfo),
 	}
 }
 
 func (a *analyzer) resolve() {
 	a.declareModules()
+	a.declareResources()
 	a.declareFunctions()
 	a.resolveImports()
 	if len(a.diagnostics) > 0 {
@@ -93,6 +101,7 @@ func (a *analyzer) declareModules() {
 		module := &moduleScope{
 			file:      file,
 			functions: make(map[string]*symbol),
+			resources: make(map[string]*symbol),
 			imports:   make(map[string]*moduleScope),
 		}
 		a.modules[file.Module.Path] = module
@@ -100,11 +109,38 @@ func (a *analyzer) declareModules() {
 	}
 }
 
+func (a *analyzer) declareResources() {
+	for _, module := range a.moduleOrder {
+		for index := range module.file.Module.Resources {
+			resource := &module.file.Module.Resources[index]
+			if previous := module.item(resource.Name); previous != nil {
+				a.addDiagnostic("E0102", span(module.file.Path, resource.NameSpan), RelatedSpan{
+					Role: "previous-declaration",
+					Span: span(previous.source, previous.declaration),
+				})
+				continue
+			}
+			value := &symbol{
+				id:          a.allocateSymbol(),
+				kind:        "resource",
+				name:        resource.Name,
+				module:      module.file.Module.Path,
+				source:      module.file.Path,
+				declaration: resource.NameSpan,
+				public:      resource.Public,
+				resource:    resource,
+			}
+			module.resources[resource.Name] = value
+			a.resources[resource] = value
+		}
+	}
+}
+
 func (a *analyzer) declareFunctions() {
 	for _, module := range a.moduleOrder {
 		for index := range module.file.Module.Functions {
 			function := &module.file.Module.Functions[index]
-			if previous, found := module.functions[function.Name]; found {
+			if previous := module.item(function.Name); previous != nil {
 				a.addDiagnostic("E0102", span(module.file.Path, function.NameSpan), RelatedSpan{
 					Role: "previous-declaration",
 					Span: span(previous.source, previous.declaration),
@@ -131,7 +167,7 @@ func (a *analyzer) declareFunctions() {
 func (a *analyzer) resolveImports() {
 	for _, module := range a.moduleOrder {
 		for _, imported := range module.file.Module.Imports {
-			if previous, found := module.functions[imported.Alias]; found {
+			if previous := module.item(imported.Alias); previous != nil {
 				a.addDiagnostic("E0102", span(module.file.Path, imported.AliasSpan), RelatedSpan{
 					Role: "previous-declaration",
 					Span: span(previous.source, previous.declaration),
@@ -238,11 +274,11 @@ func (a *analyzer) resolvePath(module *moduleScope, scope *lexicalScope, express
 	if len(parts) == 1 {
 		target = lookupLexical(scope, parts[0])
 		if target == nil {
-			target = module.functions[parts[0]]
+			target = module.item(parts[0])
 		}
 	} else if len(parts) == 2 {
 		if imported := module.imports[parts[0]]; imported != nil {
-			target = imported.functions[parts[1]]
+			target = imported.item(parts[1])
 			if target != nil && imported != module && !target.public {
 				a.addDiagnostic("E0103", span(module.file.Path, expression.Span), RelatedSpan{
 					Role: "declaration",
@@ -269,6 +305,13 @@ func (a *analyzer) resolvePath(module *moduleScope, scope *lexicalScope, express
 			Declaration: span(target.source, target.declaration),
 		},
 	})
+}
+
+func (m *moduleScope) item(name string) *symbol {
+	if value := m.functions[name]; value != nil {
+		return value
+	}
+	return m.resources[name]
 }
 
 func lookupLexical(scope *lexicalScope, name string) *symbol {
