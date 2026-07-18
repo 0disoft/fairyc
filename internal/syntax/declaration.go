@@ -361,7 +361,7 @@ func (p *parser) parseType() NodeID {
 					break
 				}
 			}
-			p.expect(">")
+			p.expectTypeClose()
 		}
 		return p.addTypeNode(start, children)
 	}
@@ -384,7 +384,7 @@ func (p *parser) rawFrom(startFull int) string {
 		return ""
 	}
 	start := p.tree.Tokens[startFull].Span.StartByte
-	end := p.tree.Tokens[p.lastFullIndex].Span.EndByte
+	end := p.lastEndByte
 	return string(p.tree.Source[start:end])
 }
 

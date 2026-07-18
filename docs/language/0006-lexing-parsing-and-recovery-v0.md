@@ -41,6 +41,12 @@ A numeric candidate consumes the complete radix, digit, separator, decimal-point
 
 Every lexer step reaches EOF, consumes at least one source byte, or emits one declared zero-width synthetic token while changing recovery state. Invalid UTF-8, escapes, comments, and numeric candidates retain their raw bytes and cannot be silently dropped or replaced.
 
+The lexer preserves longest-match `>>` as one raw token. In an expression it remains the right-shift
+operator. In a type-argument closing position the parser consumes its two source bytes as two
+adjacent `>` delimiters, so `Option<Option<T>>` needs no separating whitespace. The lossless token
+stream keeps the original `>>` spelling, while nested type-node spans may end at the byte boundary
+between its two characters.
+
 ## Keywords and contextual words
 
 The reserved keywords are:

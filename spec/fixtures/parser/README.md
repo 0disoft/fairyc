@@ -7,6 +7,8 @@ This directory is the executable-data companion to `spec/grammar/stage0.ebnf` an
 The Go runner lives in `internal/parserfixture`. It rejects unknown manifest fields and paths that
 escape their declared roots, requires lossless source reconstruction for passing cases, lowers an
 AST only after an error-free parse, and compares every listed diagnostic exactly.
+The pass corpus also pins contextual `>>`: the raw token remains lossless, expression use remains a
+right shift, and nested type arguments close without whitespace.
 
 ## Result boundary
 

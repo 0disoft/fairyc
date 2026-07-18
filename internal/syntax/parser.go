@@ -36,6 +36,8 @@ type parser struct {
 	significant   []int
 	position      int
 	lastFullIndex int
+	lastEndByte   int
+	splitShift    bool
 	hasExhausted  bool
 }
 
@@ -52,6 +54,7 @@ func newParser(file source.File, tree *Tree, budget *source.Budget) *parser {
 		budget:        budget,
 		significant:   significant,
 		lastFullIndex: -1,
+		lastEndByte:   -1,
 	}
 }
 
@@ -60,7 +63,11 @@ func (p *parser) current() lexer.Token {
 		position := len(p.tree.Source)
 		return lexer.Token{Kind: lexer.EOF, Span: diagnostic.Span{StartByte: position, EndByte: position}}
 	}
-	return p.tree.Tokens[p.significant[p.position]]
+	token := p.tree.Tokens[p.significant[p.position]]
+	if p.splitShift {
+		token.Span.StartByte++
+	}
+	return token
 }
 
 func (p *parser) currentFullIndex() int {
@@ -89,7 +96,9 @@ func (p *parser) advance() lexer.Token {
 			return token
 		}
 		p.lastFullIndex = p.currentFullIndex()
+		p.lastEndByte = token.Span.EndByte
 		p.position++
+		p.splitShift = false
 	}
 	return token
 }
@@ -111,13 +120,33 @@ func (p *parser) expect(text string) bool {
 	return false
 }
 
+func (p *parser) expectTypeClose() bool {
+	if p.match(">") {
+		return true
+	}
+	if p.at(">>") {
+		token := p.current()
+		if token.Span.EndByte-token.Span.StartByte == 2 && p.budget.ChargeToken() && p.budget.ChargeWork(1) {
+			p.lastFullIndex = p.currentFullIndex()
+			p.lastEndByte = token.Span.StartByte + 1
+			p.splitShift = true
+			return true
+		}
+		p.emitExhausted()
+		return false
+	}
+	position := p.current().Span.StartByte
+	p.emit("E0007", diagnostic.Span{StartByte: position, EndByte: position}, diagnostic.RepairInsert, ">")
+	return false
+}
+
 func (p *parser) expectStatementTerminator() bool {
 	if p.match(";") {
 		return true
 	}
 	position := p.current().Span.StartByte
-	if p.lastFullIndex >= 0 && p.lastFullIndex < len(p.tree.Tokens) {
-		position = p.tree.Tokens[p.lastFullIndex].Span.EndByte
+	if p.lastEndByte >= 0 {
+		position = p.lastEndByte
 	}
 	p.emit("E0007", diagnostic.Span{StartByte: position, EndByte: position}, diagnostic.RepairInsert, ";")
 	return false
@@ -177,7 +206,7 @@ func (p *parser) addNode(kind Kind, startFull int, children []NodeID, text, cook
 	endFull := startFull
 	if p.lastFullIndex >= startFull && p.lastFullIndex >= 0 && p.lastFullIndex < len(p.tree.Tokens) {
 		endFull = p.lastFullIndex + 1
-		endByte = p.tree.Tokens[p.lastFullIndex].Span.EndByte
+		endByte = p.lastEndByte
 	}
 	node := Node{
 		Kind:       kind,

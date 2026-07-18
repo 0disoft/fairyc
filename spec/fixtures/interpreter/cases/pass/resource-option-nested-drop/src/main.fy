@@ -7,6 +7,6 @@ resource Token {
 }
 
 fn main() -> i32 {
-    let wrapped: Option<Option<Token> > = Option::Some(Option::Some(Token { value: 42 }));
+    let wrapped: Option<Option<Token>> = Option::Some(Option::Some(Token { value: 42 }));
     42
 }

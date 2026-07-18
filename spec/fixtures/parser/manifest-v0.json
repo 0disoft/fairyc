@@ -109,6 +109,15 @@
       }
     },
     {
+      "id": "pass.nested-type-close",
+      "sourceRoot": "cases/pass/nested-type-close/src",
+      "source": "nested.fy",
+      "expect": {
+        "status": "pass",
+        "module": "nested"
+      }
+    },
+    {
       "id": "fail.invalid-numeric-separator",
       "sourceRoot": "cases/fail/invalid-numeric-separator/src",
       "source": "main.fy",
