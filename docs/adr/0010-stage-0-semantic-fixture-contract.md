@@ -29,7 +29,9 @@ Small semantic facts survive compiler refactoring. Whole-HIR snapshots do not. E
 
 - The compiler test runner must parse every listed source without `E00xx` before semantic assertions are evaluated.
 - A resolver or type checker may use any internal arena and ID layout as long as the canonical assertions remain equal.
-- The current fixture data is executable contract input, but no runner exists yet and no fixture is claimed to pass an implementation.
+- `internal/semanticfixture` parses every case, executes the `resolve` and `type` cases, and reports
+  `flow` cases as deferred. The runner never promotes parser validity or an unsupported later phase
+  into a semantic pass.
 - Adding a stable semantic diagnostic requires the catalog, owning language contract, schema-compatible fixture, and case source to change together.
 
 ## Revisit conditions

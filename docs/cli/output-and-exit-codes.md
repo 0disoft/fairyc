@@ -29,14 +29,16 @@ automation. They are not the stable exit-code taxonomy:
 | Code | Experimental meaning |
 | ---: | --- |
 | `0` | The requested syntax operation completed without source diagnostics. |
-| `2` | Invocation or bounded input loading failed. |
+| `2` | Invocation or bounded input loading failed, or the experimental semantic subset cannot represent the requested syntax. |
 | `3` | One or more source diagnostics were produced. |
 | `4` | An internal invariant or output write failed. |
 
 `experimental parse` writes one `fairyc.experimental.parse/v0` JSON document, defined by
 `spec/cli/experimental-parse-v0.schema.json`, to stdout even when source diagnostics exist.
 `experimental check-syntax` writes human diagnostics to stderr and does not emit a machine result.
-Neither command uses ANSI escapes. Human positions are one-based line and byte-column values backed
+`experimental check-semantics` writes one success line with a typed-HIR function count, semantic
+diagnostics on stderr, or an explicit unsupported-subset message on stderr. None of these commands
+uses ANSI escapes. Human positions are one-based line and byte-column values backed
 by the diagnostic's zero-based half-open byte span.
 
 The JSON schema intentionally excludes source text, token text, cooked literal values, and absolute

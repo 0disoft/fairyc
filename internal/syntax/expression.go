@@ -41,6 +41,9 @@ func (p *parser) parseExpression(minBindingPower int, allowRecord bool) NodeID {
 	comparisonSeen := false
 	for p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 		start := p.nodeStart(left)
+		if p.at("{") && !allowRecord {
+			return left
+		}
 		switch p.currentText() {
 		case "(":
 			if 140 < minBindingPower {

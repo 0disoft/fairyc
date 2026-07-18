@@ -12,9 +12,10 @@
 - Stage 0 language route: docs/language/
 - Normative grammar route: spec/grammar/stage0.ebnf
 - Parser fixture route: spec/fixtures/parser/manifest-v0.json
-- Frontend implementation route: internal/source/, internal/lexer/, internal/syntax/, internal/ast/
+- Frontend implementation route: internal/source/, internal/lexer/, internal/syntax/, internal/ast/, internal/frontend/, internal/semantic/, internal/hir/
 - Parser runner route: internal/parserfixture/
 - Semantic fixture route: spec/fixtures/semantic/manifest-v0.json
+- Semantic runner route: internal/semanticfixture/
 - Resource Flow fixture route: spec/fixtures/resource/manifest-v0.json
 - Region fixture route: spec/fixtures/region/manifest-v1.json
 - Result fixture route: spec/fixtures/result/manifest-v0.json

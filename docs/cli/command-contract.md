@@ -8,12 +8,13 @@ This document owns planned `fairyc` command semantics. It does not claim that a 
 
 ## Implemented experimental frontend surface
 
-The current Go prototype implements two deliberately unstable developer commands:
+The current Go prototype implements three deliberately unstable developer commands:
 
 | Command | Purpose | Output |
 | --- | --- | --- |
 | `fairyc experimental parse <file.fy>` | Parse one source-root-relative file and verify lossless syntax plus error-free AST lowering | `fairyc.experimental.parse/v0` JSON on stdout, defined by `spec/cli/experimental-parse-v0.schema.json` |
 | `fairyc experimental check-syntax <file.fy>` | Check lexing, parsing, recovery, module identity, lossless reconstruction, and error-free AST lowering | Success line on stdout or human diagnostics on stderr |
+| `fairyc experimental check-semantics <file.fy>` | Resolve names and type-check one module in the implemented scalar `bool`/`i32` subset | Typed-HIR function count on stdout, human source diagnostics on stderr, or an explicit unsupported-subset error |
 
 These commands treat the current directory as their temporary source root, accept exactly one
 relative regular file, reject root escape including escaping symbolic links, and read no more than
@@ -24,8 +25,13 @@ text, cooked literal values, and absolute local paths. When bounded loading dete
 the implementation limit, `truncated` is true and `byteLength` is a lower bound rather than a
 claimed full-file size.
 
+`check-semantics` currently supplies only the named source file to semantic analysis. An import whose
+module is not present in that one-file input therefore fails resolution; the multi-file semantic
+fixture runner, not this command, is the current package-level proof. Syntax outside the implemented
+semantic subset returns a capability error and never counts as a successful check.
+
 `fairyc check` remains unimplemented. It must not be aliased to `check-syntax`, because the planned
-command below also requires name resolution, typing, resource, borrow, region, and effect analysis.
+command below also requires Flow, resource, borrow, region, and effect analysis.
 
 ## Stage 0 surface
 

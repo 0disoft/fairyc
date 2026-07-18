@@ -9,6 +9,7 @@ import (
 
 	"github.com/0disoft/fairyc/internal/diagnostic"
 	"github.com/0disoft/fairyc/internal/frontend"
+	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/source"
 )
 
@@ -24,10 +25,11 @@ const usage = `Fairy C Stage 0 frontend prototype
 Usage:
   fairyc experimental parse <file.fy>
   fairyc experimental check-syntax <file.fy>
+  fairyc experimental check-semantics <file.fy>
   fairyc --help
 
 The experimental commands are unstable. The reserved "fairyc check" command is not implemented
-until name resolution, typing, and resource analysis exist.
+until resource and effect analysis exist.
 `
 
 // Run executes one bounded command without reading global process arguments or exiting the process.
@@ -69,9 +71,59 @@ func runExperimental(args []string, sourceRoot string, stdout, stderr io.Writer)
 		return runParse(args[1], sourceRoot, stdout, stderr)
 	case "check-syntax":
 		return runCheckSyntax(args[1], sourceRoot, stdout, stderr)
+	case "check-semantics":
+		return runCheckSemantics(args[1], sourceRoot, stdout, stderr)
 	default:
 		return invocationError(stderr, fmt.Sprintf("unknown experimental command %q", command))
 	}
+}
+
+func runCheckSemantics(argument, sourceRoot string, stdout, stderr io.Writer) int {
+	limits := source.DefaultLimits()
+	loaded, err := loadSource(sourceRoot, argument, limits.MaxBytes)
+	if err != nil {
+		var tooLarge sourceTooLargeError
+		if errors.As(err, &tooLarge) {
+			value := source.ExhaustionDiagnostic(0)
+			if writeErr := writeDiagnostics(stderr, tooLarge.relativePath, nil, []diagnostic.Diagnostic{value}); writeErr != nil {
+				return ExitInternalFailure
+			}
+			return ExitSourceDiagnostics
+		}
+		return inputError(stderr, err)
+	}
+	frontendResult, err := frontend.AnalyzeSyntax(loaded.file, limits)
+	if err != nil {
+		return internalError(stderr)
+	}
+	if len(frontendResult.Tree.Diagnostics) > 0 {
+		if err := writeDiagnostics(stderr, loaded.file.RelativePath, frontendResult.Tree.Source, frontendResult.Tree.Diagnostics); err != nil {
+			return ExitInternalFailure
+		}
+		return ExitSourceDiagnostics
+	}
+	result := semantic.Analyze([]semantic.File{{Path: loaded.file.RelativePath, Module: frontendResult.AST}})
+	if len(result.Diagnostics) > 0 {
+		sources := map[string][]byte{loaded.file.RelativePath: frontendResult.Tree.Source}
+		if err := writeSemanticDiagnostics(stderr, sources, result.Diagnostics); err != nil {
+			return ExitInternalFailure
+		}
+		return ExitSourceDiagnostics
+	}
+	if len(result.Unsupported) > 0 {
+		if err := writeUnsupportedSemantics(stderr, result.Unsupported); err != nil {
+			return ExitInternalFailure
+		}
+		return ExitInvalidInvocation
+	}
+	functions := 0
+	for _, module := range result.HIR.Modules {
+		functions += len(module.Functions)
+	}
+	if _, err := fmt.Fprintf(stdout, "semantics ok: %s (typed HIR: %d function(s))\n", safeDisplayPath(loaded.file.RelativePath), functions); err != nil {
+		return outputError(stderr)
+	}
+	return ExitSuccess
 }
 
 func runParse(argument, sourceRoot string, stdout, stderr io.Writer) int {

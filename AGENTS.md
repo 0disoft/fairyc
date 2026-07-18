@@ -26,9 +26,10 @@ regenerate, or override compiler source.
 - Stage 0 language semantics: docs/language/*.md
 - Normative Stage 0 grammar: spec/grammar/stage0.ebnf
 - Parser acceptance fixtures: spec/fixtures/parser/manifest-v0.json
-- Stage 0 frontend implementation: internal/source/, internal/lexer/, internal/syntax/, internal/ast/
+- Stage 0 frontend implementation: internal/source/, internal/lexer/, internal/syntax/, internal/ast/, internal/frontend/, internal/semantic/, internal/hir/
 - Parser fixture runner: internal/parserfixture/
 - Semantic acceptance fixtures: spec/fixtures/semantic/manifest-v0.json
+- Semantic fixture runner: internal/semanticfixture/
 - Resource Flow fixtures: spec/fixtures/resource/manifest-v0.json
 - Region fixtures: spec/fixtures/region/manifest-v1.json
 - Result fixtures: spec/fixtures/result/manifest-v0.json

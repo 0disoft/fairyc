@@ -92,6 +92,36 @@ func TestExperimentalCheckSyntaxAcceptsCleanInput(t *testing.T) {
 	}
 }
 
+func TestExperimentalCheckSemanticsBuildsTypedHIR(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\nfn choose(flag: bool) -> i32 { if flag { 1 } else { 2 } }\n")
+	code, stdout, stderr := runForTest([]string{"experimental", "check-semantics", "main.fy"}, root)
+	if code != ExitSuccess || stdout != "semantics ok: main.fy (typed HIR: 1 function(s))\n" || stderr != "" {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
+func TestExperimentalCheckSemanticsReportsResolveDiagnostic(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\nfn answer() -> i32 { missing }\n")
+	code, stdout, stderr := runForTest([]string{"experimental", "check-semantics", "main.fy"}, root)
+	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "main.fy:2:22: E0101: unresolved name or path") {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
+func TestExperimentalCheckSemanticsRejectsUnsupportedSubset(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\nfn borrow(value: i32) -> i32 { *&value }\n")
+	code, stdout, stderr := runForTest([]string{"experimental", "check-semantics", "main.fy"}, root)
+	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "experimental semantic subset does not support prefix operator &") {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
 func TestRepositorySyntaxExampleStaysRunnable(t *testing.T) {
 	root := filepath.Clean(filepath.Join("..", ".."))
 	code, stdout, stderr := runForTest(

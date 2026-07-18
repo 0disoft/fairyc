@@ -21,6 +21,10 @@ Pass assertions identify source text with source-root-relative paths and half-op
 
 Fail assertions list the complete deterministic set of independent diagnostics. Diagnostics caused only by an already-poisoned name or type are suppressed as cascades. Full prose is intentionally outside the fixture contract.
 
+`internal/semanticfixture` currently parses every listed source and executes the `resolve` and
+`type` cases. It records `flow` cases as deferred after syntax validation until Flow analysis exists;
+deferred cases are not successful cases.
+
 ## Paths, spans, and order
 
 - Paths use `/`, are relative to `sourceRoot`, and cannot contain `.` or `..` segments.

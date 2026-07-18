@@ -5,19 +5,78 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/0disoft/fairyc/internal/diagnostic"
+	"github.com/0disoft/fairyc/internal/lexer"
 	"github.com/0disoft/fairyc/internal/syntax"
 )
 
-// Module is the parser fixture-facing portion of the lowered AST.
+// Module is one source file after syntax-only lowering.
 type Module struct {
-	Path     string
-	Bindings []Binding
-	Literals []Literal
+	Path      string
+	Span      diagnostic.Span
+	Imports   []Import
+	Functions []Function
+	Bindings  []Binding
+	Literals  []Literal
+}
+
+// Import records one explicit module alias.
+type Import struct {
+	Path      string
+	Alias     string
+	Span      diagnostic.Span
+	PathSpan  diagnostic.Span
+	AliasSpan diagnostic.Span
+}
+
+// Function records a source function before name resolution and typing.
+type Function struct {
+	Name       string
+	Public     bool
+	Span       diagnostic.Span
+	NameSpan   diagnostic.Span
+	Parameters []Parameter
+	ResultType TypeReference
+	Body       *Block
+}
+
+// Parameter records one function parameter and its written type.
+type Parameter struct {
+	Name     string
+	Span     diagnostic.Span
+	NameSpan diagnostic.Span
+	Type     TypeReference
+}
+
+// TypeReference preserves the canonicalizable source spelling and exact source span.
+type TypeReference struct {
+	Text string
+	Span diagnostic.Span
+}
+
+// Block owns one lexical statement scope and an optional tail expression.
+type Block struct {
+	Span       diagnostic.Span
+	Statements []Statement
+	Tail       *Expression
+}
+
+// Statement is the syntax-level statement shape used by semantic analysis.
+type Statement struct {
+	Kind       syntax.Kind
+	Span       diagnostic.Span
+	Binding    *Binding
+	Target     *Expression
+	Expression *Expression
 }
 
 // Binding records a source declaration and its expression tree.
 type Binding struct {
 	Name       string
+	Mutable    bool
+	Span       diagnostic.Span
+	NameSpan   diagnostic.Span
+	Type       *TypeReference
 	Expression *Expression
 }
 
@@ -28,12 +87,14 @@ type Literal struct {
 	Cooked string
 }
 
-// Expression is a small structural AST used before name resolution and typing.
+// Expression is a structural AST expression used before name resolution and typing.
 type Expression struct {
 	Kind     syntax.Kind
+	Span     diagnostic.Span
 	Text     string
 	Cooked   string
 	Children []*Expression
+	Block    *Block
 }
 
 // Lower rejects diagnostic CSTs and converts source concepts without semantic analysis.
@@ -44,24 +105,40 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 	if !tree.ErrorFree() {
 		return nil, errors.New("diagnostic syntax tree cannot lower to AST")
 	}
-	module := &Module{Path: tree.Module}
+	root, found := tree.Node(tree.Root)
+	if !found || root.Kind != syntax.KindSource {
+		return nil, errors.New("syntax tree has no source root")
+	}
+	module := &Module{Path: tree.Module, Span: root.Span}
+	for _, childID := range root.Children {
+		child, ok := tree.Node(childID)
+		if !ok {
+			continue
+		}
+		switch child.Kind {
+		case syntax.KindImport:
+			module.Imports = append(module.Imports, lowerImport(tree, child))
+		case syntax.KindFunction:
+			module.Functions = append(module.Functions, lowerFunction(tree, child))
+		}
+	}
+
 	visited := make(map[syntax.NodeID]struct{}, len(tree.Nodes))
 	var walk func(syntax.NodeID)
 	walk = func(id syntax.NodeID) {
 		if id == syntax.NoNode {
 			return
 		}
-		if _, found := visited[id]; found {
+		if _, seen := visited[id]; seen {
 			return
 		}
 		visited[id] = struct{}{}
-		node, found := tree.Node(id)
-		if !found {
+		node, ok := tree.Node(id)
+		if !ok {
 			return
 		}
-		if node.Kind == syntax.KindBinding && len(node.Children) > 0 {
-			expression := lowerExpression(tree, node.Children[len(node.Children)-1])
-			module.Bindings = append(module.Bindings, Binding{Name: node.Text, Expression: expression})
+		if node.Kind == syntax.KindBinding {
+			module.Bindings = append(module.Bindings, lowerBinding(tree, node))
 		}
 		if node.Kind == syntax.KindLiteral {
 			module.Literals = append(module.Literals, Literal{
@@ -78,15 +155,144 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 	return module, nil
 }
 
+func lowerImport(tree *syntax.Tree, node syntax.Node) Import {
+	value := Import{
+		Path:  node.Text,
+		Alias: node.Cooked,
+		Span:  node.Span,
+	}
+	if len(node.Children) > 0 {
+		if pathNode, found := tree.Node(node.Children[0]); found {
+			value.PathSpan = pathNode.Span
+		}
+	}
+	value.AliasSpan = findIdentifierSpan(tree, node, node.Cooked, "as")
+	return value
+}
+
+func lowerFunction(tree *syntax.Tree, node syntax.Node) Function {
+	value := Function{
+		Name:     node.Text,
+		Public:   containsKeywordBeforeName(tree, node, "pub", node.Text),
+		Span:     node.Span,
+		NameSpan: findIdentifierSpan(tree, node, node.Text, "fn"),
+	}
+	for _, childID := range node.Children {
+		child, found := tree.Node(childID)
+		if !found {
+			continue
+		}
+		switch child.Kind {
+		case syntax.KindParameter:
+			value.Parameters = append(value.Parameters, lowerParameter(tree, child))
+		case syntax.KindType:
+			value.ResultType = lowerType(child)
+		case syntax.KindBlock:
+			value.Body = lowerBlock(tree, child)
+		}
+	}
+	return value
+}
+
+func lowerParameter(tree *syntax.Tree, node syntax.Node) Parameter {
+	value := Parameter{
+		Name:     node.Text,
+		Span:     node.Span,
+		NameSpan: findIdentifierSpan(tree, node, node.Text, ""),
+	}
+	if len(node.Children) > 0 {
+		if typeNode, found := tree.Node(node.Children[0]); found && typeNode.Kind == syntax.KindType {
+			value.Type = lowerType(typeNode)
+		}
+	}
+	return value
+}
+
+func lowerType(node syntax.Node) TypeReference {
+	return TypeReference{Text: strings.TrimSpace(node.Text), Span: node.Span}
+}
+
+func lowerBlock(tree *syntax.Tree, node syntax.Node) *Block {
+	block := &Block{Span: node.Span}
+	for _, childID := range node.Children {
+		child, found := tree.Node(childID)
+		if !found {
+			continue
+		}
+		if child.Kind == syntax.KindTail {
+			if len(child.Children) > 0 {
+				block.Tail = lowerExpression(tree, child.Children[0])
+			}
+			continue
+		}
+		block.Statements = append(block.Statements, lowerStatement(tree, child))
+	}
+	return block
+}
+
+func lowerStatement(tree *syntax.Tree, node syntax.Node) Statement {
+	statement := Statement{Kind: node.Kind, Span: node.Span}
+	switch node.Kind {
+	case syntax.KindBinding:
+		binding := lowerBinding(tree, node)
+		statement.Binding = &binding
+	case syntax.KindAssignment:
+		if len(node.Children) > 0 {
+			statement.Target = lowerExpression(tree, node.Children[0])
+		}
+		if len(node.Children) > 1 {
+			statement.Expression = lowerExpression(tree, node.Children[1])
+		}
+	case syntax.KindReturn, syntax.KindDiscard, syntax.KindExprStmt:
+		if len(node.Children) > 0 {
+			statement.Expression = lowerExpression(tree, node.Children[0])
+		}
+	default:
+		statement.Expression = lowerExpressionNode(tree, node)
+	}
+	return statement
+}
+
+func lowerBinding(tree *syntax.Tree, node syntax.Node) Binding {
+	binding := Binding{
+		Name:     node.Text,
+		Mutable:  node.Cooked == "var",
+		Span:     node.Span,
+		NameSpan: findIdentifierSpan(tree, node, node.Text, node.Cooked),
+	}
+	for _, childID := range node.Children {
+		child, found := tree.Node(childID)
+		if !found {
+			continue
+		}
+		if child.Kind == syntax.KindType {
+			typeReference := lowerType(child)
+			binding.Type = &typeReference
+			continue
+		}
+		binding.Expression = lowerExpression(tree, childID)
+	}
+	return binding
+}
+
 func lowerExpression(tree *syntax.Tree, id syntax.NodeID) *Expression {
 	node, found := tree.Node(id)
 	if !found {
 		return nil
 	}
+	return lowerExpressionNode(tree, node)
+}
+
+func lowerExpressionNode(tree *syntax.Tree, node syntax.Node) *Expression {
 	expression := &Expression{
 		Kind:   node.Kind,
+		Span:   node.Span,
 		Text:   node.Text,
 		Cooked: node.Cooked,
+	}
+	if node.Kind == syntax.KindBlock {
+		expression.Block = lowerBlock(tree, node)
+		return expression
 	}
 	for _, child := range node.Children {
 		if lowered := lowerExpression(tree, child); lowered != nil {
@@ -94,6 +300,42 @@ func lowerExpression(tree *syntax.Tree, id syntax.NodeID) *Expression {
 		}
 	}
 	return expression
+}
+
+func findIdentifierSpan(tree *syntax.Tree, node syntax.Node, name, after string) diagnostic.Span {
+	if name == "" {
+		return diagnostic.Span{}
+	}
+	seenAfter := after == ""
+	start := max(node.TokenStart, 0)
+	end := min(node.TokenEnd, len(tree.Tokens))
+	for index := start; index < end; index++ {
+		token := tree.Tokens[index]
+		text := token.Text(tree.Source)
+		if !seenAfter {
+			seenAfter = text == after
+			continue
+		}
+		if token.Kind == lexer.Identifier && text == name {
+			return token.Span
+		}
+	}
+	return node.Span
+}
+
+func containsKeywordBeforeName(tree *syntax.Tree, node syntax.Node, keyword, name string) bool {
+	start := max(node.TokenStart, 0)
+	end := min(node.TokenEnd, len(tree.Tokens))
+	for index := start; index < end; index++ {
+		text := tree.Tokens[index].Text(tree.Source)
+		if tree.Tokens[index].Kind == lexer.Identifier && text == name {
+			return false
+		}
+		if text == keyword {
+			return true
+		}
+	}
+	return false
 }
 
 func classifyLiteral(raw string) string {
