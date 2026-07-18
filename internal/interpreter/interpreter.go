@@ -25,12 +25,20 @@ type Outcome struct {
 	Value        int32
 	TrapCategory string
 	DropTrace    []DropEvent
+	RegionTrace  []RegionEvent
 }
 
 // DropEvent is one resource drop-glue invocation in execution order.
 type DropEvent struct {
 	ResourceType hir.Type
 	Binding      hir.Span
+}
+
+// RegionEvent records one normal lexical reset and the work completed before it.
+type RegionEvent struct {
+	Region               hir.Span
+	Placements           int
+	DropCountBeforeReset int
 }
 
 // CapabilityError reports a valid verified-MIR program outside the implemented interpreter slice.
@@ -84,20 +92,21 @@ func Execute(program mir.Program, entry string) (Outcome, error) {
 		return Outcome{}, err
 	}
 	if completion.trapCategory != "" {
-		return Outcome{Kind: OutcomeTrap, TrapCategory: completion.trapCategory, DropTrace: slices.Clone(runtime.dropTrace)}, nil
+		return Outcome{Kind: OutcomeTrap, TrapCategory: completion.trapCategory, DropTrace: slices.Clone(runtime.dropTrace), RegionTrace: slices.Clone(runtime.regionTrace)}, nil
 	}
 	value, err := completion.value.asI32()
 	if err != nil {
 		return Outcome{}, fmt.Errorf("entry function %q: %w", entry, err)
 	}
-	return Outcome{Kind: OutcomeReturn, Value: value, DropTrace: slices.Clone(runtime.dropTrace)}, nil
+	return Outcome{Kind: OutcomeReturn, Value: value, DropTrace: slices.Clone(runtime.dropTrace), RegionTrace: slices.Clone(runtime.regionTrace)}, nil
 }
 
 type runtime struct {
-	byName    map[string]*mir.Function
-	bySymbol  map[hir.SymbolID]*mir.Function
-	steps     int
-	dropTrace []DropEvent
+	byName      map[string]*mir.Function
+	bySymbol    map[hir.SymbolID]*mir.Function
+	steps       int
+	dropTrace   []DropEvent
+	regionTrace []RegionEvent
 }
 
 type valueKind uint8
@@ -227,6 +236,11 @@ type callCompletion struct {
 	trapCategory string
 }
 
+type runtimeRegion struct {
+	span       hir.Span
+	placements []runtimeValue
+}
+
 func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth int) (callCompletion, error) {
 	if depth >= maxCallDepth {
 		return callCompletion{}, capabilityErrorKind("call-depth-limit", "interpreter call-depth limit exceeded")
@@ -235,6 +249,7 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 		return callCompletion{}, fmt.Errorf("call %q received %d argument(s), want %d", function.Name, len(arguments), len(function.Parameters))
 	}
 	locals := make(map[mir.LocalID]runtimeValue)
+	regions := make(map[hir.SymbolID]*runtimeRegion)
 	for index, parameter := range function.Parameters {
 		locals[parameter] = arguments[index]
 	}
@@ -365,6 +380,31 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					return callCompletion{}, fmt.Errorf("field read in %q: %w", function.Name, err)
 				}
 				locals[operation.DestinationLocal] = value
+			case mir.OperationRegionEnter:
+				if _, active := regions[operation.Symbol]; active {
+					return callCompletion{}, fmt.Errorf("region enter in %q reuses active region %d", function.Name, operation.Symbol)
+				}
+				regions[operation.Symbol] = &runtimeRegion{span: operation.Span}
+			case mir.OperationRegionPlace:
+				region := regions[operation.Symbol]
+				if region == nil {
+					return callCompletion{}, fmt.Errorf("region place in %q uses inactive region %d", function.Name, operation.Symbol)
+				}
+				value, err := evaluateOne(locals, operation.Operands)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("region place in %q: %w", function.Name, err)
+				}
+				region.placements = append(region.placements, value)
+				locals[operation.DestinationLocal] = value
+			case mir.OperationRegionReset:
+				region := regions[operation.Symbol]
+				if region == nil {
+					return callCompletion{}, fmt.Errorf("region reset in %q uses inactive region %d", function.Name, operation.Symbol)
+				}
+				r.regionTrace = append(r.regionTrace, RegionEvent{
+					Region: region.span, Placements: len(region.placements), DropCountBeforeReset: len(r.dropTrace),
+				})
+				delete(regions, operation.Symbol)
 			case mir.OperationMove:
 				delete(locals, mir.LocalID(operation.Symbol))
 			case mir.OperationDrop:
@@ -421,6 +461,9 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 			}
 			current = next
 		case mir.TerminatorReturn:
+			if len(regions) != 0 {
+				return callCompletion{}, fmt.Errorf("return from %q leaves %d active region(s)", function.Name, len(regions))
+			}
 			value, err := evaluate(locals, terminator.ReturnValue)
 			if err != nil {
 				return callCompletion{}, fmt.Errorf("return from %q: %w", function.Name, err)

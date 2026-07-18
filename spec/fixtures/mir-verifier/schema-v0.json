@@ -73,6 +73,7 @@
             "remove-exit-cleanup",
             "remove-flag-initialization",
             "remove-required-trap-check",
+            "remove-region-reset",
             "remove-terminator",
             "remove-unsafe-provenance",
             "use-before-initialize"

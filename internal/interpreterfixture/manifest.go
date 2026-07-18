@@ -18,17 +18,24 @@ type caseDefinition struct {
 }
 
 type expectation struct {
-	Status           string            `json:"status"`
-	CompletedThrough string            `json:"completedThrough"`
-	Outcome          string            `json:"outcome"`
-	Value            *int32            `json:"value,omitempty"`
-	Category         *string           `json:"category,omitempty"`
-	Drops            []dropExpectation `json:"drops,omitempty"`
+	Status           string              `json:"status"`
+	CompletedThrough string              `json:"completedThrough"`
+	Outcome          string              `json:"outcome"`
+	Value            *int32              `json:"value,omitempty"`
+	Category         *string             `json:"category,omitempty"`
+	Drops            []dropExpectation   `json:"drops,omitempty"`
+	Regions          []regionExpectation `json:"regions,omitempty"`
 }
 
 type dropExpectation struct {
 	ResourceType string          `json:"resourceType"`
 	Binding      spanExpectation `json:"binding"`
+}
+
+type regionExpectation struct {
+	Region               spanExpectation `json:"region"`
+	Placements           int             `json:"placements"`
+	DropCountBeforeReset int             `json:"dropCountBeforeReset"`
 }
 
 type spanExpectation struct {

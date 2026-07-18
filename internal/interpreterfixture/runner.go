@@ -149,10 +149,31 @@ func runCase(manifestDirectory string, fixture caseDefinition) []Failure {
 	if !dropTraceEqual(outcome.DropTrace, fixture.Expect.Drops) {
 		return []Failure{{CaseID: fixture.ID, Detail: fmt.Sprintf("drop trace: want %+v, got %+v", fixture.Expect.Drops, outcome.DropTrace)}}
 	}
+	if !regionTraceEqual(outcome.RegionTrace, fixture.Expect.Regions) {
+		return []Failure{{CaseID: fixture.ID, Detail: fmt.Sprintf("region trace: want %+v, got %+v", fixture.Expect.Regions, outcome.RegionTrace)}}
+	}
 	if outcome.Kind == interpreter.OutcomeTrap && outcome.TrapCategory != *fixture.Expect.Category {
 		return []Failure{{CaseID: fixture.ID, Detail: fmt.Sprintf("trap category: want %q, got %q", *fixture.Expect.Category, outcome.TrapCategory)}}
 	}
 	return nil
+}
+
+func regionTraceEqual(actual []interpreter.RegionEvent, expected []regionExpectation) bool {
+	if len(actual) != len(expected) {
+		return false
+	}
+	for index := range actual {
+		if !regionSpanEqual(actual[index].Region, expected[index].Region) ||
+			actual[index].Placements != expected[index].Placements ||
+			actual[index].DropCountBeforeReset != expected[index].DropCountBeforeReset {
+			return false
+		}
+	}
+	return true
+}
+
+func regionSpanEqual(actual hir.Span, expected spanExpectation) bool {
+	return actual.Source == expected.Source && actual.StartByte == expected.StartByte && actual.EndByte == expected.EndByte
 }
 
 func dropTraceEqual(actual []interpreter.DropEvent, expected []dropExpectation) bool {

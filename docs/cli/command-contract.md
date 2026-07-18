@@ -15,7 +15,7 @@ The current Go prototype implements four deliberately unstable developer command
 | `fairyc experimental parse <file.fy>` | Parse one source-root-relative file and verify lossless syntax plus error-free AST lowering | `fairyc.experimental.parse/v0` JSON on stdout, defined by `spec/cli/experimental-parse-v0.schema.json` |
 | `fairyc experimental check-syntax <file.fy>` | Check lexing, parsing, recovery, module identity, lossless reconstruction, and error-free AST lowering | Success line on stdout or human diagnostics on stderr |
 | `fairyc experimental check-semantics <file.fy> [<file.fy>...]` | Resolve names, type-check, and analyze local safe-borrow, whole-resource, Region, and complete Stage 0 Result must-use Flow for an explicit module set in the implemented subset | Typed-HIR module and function counts on stdout, human source diagnostics on stderr, or an explicit unsupported-subset error |
-| `fairyc experimental run <file.fy>` | Run one verified-MIR program in the scalar, tagged, and whole-resource subset whose selected module declares `main() -> i32` | `result: <i32>` on stdout, a canonical trap category on stderr, source diagnostics, or an explicit unsupported-subset error |
+| `fairyc experimental run <file.fy>` | Run one verified-MIR program in the scalar, tagged, whole-resource, and normal-fallthrough Region subset whose selected module declares `main() -> i32` | `result: <i32>` on stdout, a canonical trap category on stderr, source diagnostics, or an explicit unsupported-subset error |
 
 These commands treat the current directory as their temporary source root. `parse` and
 `check-syntax` accept exactly one relative regular file; `check-semantics` accepts one or more
@@ -39,9 +39,9 @@ MIR interpreter. The entry is the selected file module's zero-argument `main() -
 `if`, `!`, comparisons, source-level `&&` and `||` short-circuiting, scalar `while`, scalar tagged
 values, resource construction and field reads, whole-root and tagged-payload moves, resource-bearing
 built-in `Option` and `Result` values, ordered resource reassignment, consuming-close ownership,
-and cleanup drop events are
+normal lexical Region placement and reset from a direct `&mut` Arena local, and cleanup drop events are
 executable. The bounded interpreter reports its stable `step-limit` capability rather than hanging
-or reclassifying it as a language trap. User drop-body effects, Region reset, I/O, arguments, and
+or reclassifying it as a language trap. User drop-body effects, Region early exits, I/O, arguments, and
 multi-file run input remain outside the current interpreter subset.
 
 `fairyc check` remains unimplemented. It must not be aliased to `check-syntax`, because the planned

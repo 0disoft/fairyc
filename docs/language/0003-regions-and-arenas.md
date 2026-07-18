@@ -55,6 +55,13 @@ It is deferred rather than being treated as a hidden mode of `Region`.
 
 Normal lexical exit resets the region after ordinary inner-scope resource cleanup has completed. A trap is non-unwinding and performs no region reset as an observable language action; the process terminates. Foreign `longjmp` or exception transfer across the region scope is forbidden.
 
+The current executable prototype proves normal fallthrough with explicit MIR enter, place, and
+reset operations. Its trace records placement count and how many inner resource drops completed
+before reset without exposing addresses or offsets. Early `return`, `?`, `break`, and `continue`
+across the Region boundary remain an explicit lowering capability gap rather than silently skipping
+reset. Executable lowering currently requires the Arena source to be a direct `&mut` local; a
+side-effecting borrow-producing expression is rejected rather than skipped.
+
 ## Concurrency
 
 Stage 0 has no cross-thread region capability and no `Send` or `Sync`-style user traits. A region and its borrows are thread-local. Later concurrency support needs an explicit memory model and cannot be inferred from these rules.

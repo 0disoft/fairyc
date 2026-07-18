@@ -61,6 +61,7 @@ type Function struct {
 	Calls              []CallFact
 	Moves              []MoveFact
 	Reassignments      []ReassignmentFact
+	RegionScopes       []RegionScopeFact
 	CleanupPaths       []CleanupPathFact
 	ResultBranches     []ResultBranchFact
 	TrapPaths          []TrapPathFact
@@ -140,6 +141,9 @@ const (
 	OperationOptionPayload     OperationKind = "option-payload"
 	OperationResourceConstruct OperationKind = "resource-construct"
 	OperationFieldRead         OperationKind = "field-read"
+	OperationRegionEnter       OperationKind = "region-enter"
+	OperationRegionPlace       OperationKind = "region-place"
+	OperationRegionReset       OperationKind = "region-reset"
 )
 
 // LocalID identifies one source local, parameter, or compiler temporary.
@@ -251,6 +255,14 @@ type ReassignmentFact struct {
 	ValueBeforeDrop bool
 	DroppedOld      bool
 	InstalledNew    bool
+}
+
+// RegionScopeFact records source-linked placement and normal reset ordering for one lexical region.
+type RegionScopeFact struct {
+	Region             hir.Span
+	Placements         []hir.Span
+	CleanupBeforeReset []CleanupAction
+	Reset              hir.Span
 }
 
 // CleanupPathFact records the explicit cleanup chain for one normal exit.

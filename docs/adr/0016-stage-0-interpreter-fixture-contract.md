@@ -19,8 +19,9 @@ The initial cases cover literal return, scalar function calls with left-to-right
 ## Consequences
 
 - A fixture pass proves the complete source-to-interpreter path for the listed scalar, built-in tagged, and whole-resource subset.
+- Normal lexical Region fallthrough records placement count and the resource-drop count observed before reset; Arena addresses, capacity, and representation remain hidden.
 - The CLI may expose the same path under an explicitly unstable `experimental run` command without defining stable `fairyc run` semantics.
-- User drop-body effects, Region reset, controlled I/O, process output, arguments, and host integration remain explicit deferrals.
+- User drop-body effects, Region early-exit cleanup, controlled I/O, process output, arguments, and host integration remain explicit deferrals.
 - A new interpreter behavior requires synchronized MIR representation, verifier coverage, fixture schema or cases, CLI behavior when exposed, and documentation.
 
 ## Rejected alternatives

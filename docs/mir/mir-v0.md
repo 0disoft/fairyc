@@ -10,7 +10,7 @@ MIR is the only executable semantic contract consumed by backends. It records ev
 
 MIR v0 is a mutable-local control-flow graph rather than SSA. SSA conversion is a backend or optimization concern after the semantic form is verified.
 
-The current Go prototype implements the source-linked subset exercised by all seven MIR v0 normalization fixtures: ordered calls, complete-root and tagged-payload moves, RHS-before-drop resource reassignment, explicit normal-exit cleanup, `Result` propagation branches, checked division traps, and non-unwinding successors. The same verifier passes all eight named baselines and rejects all fifteen isolated v0 mutations with their single expected `Vxxxx` result. The bounded interpreter executes all thirty-two interpreter v0 cases for scalar and tagged control, resource construction and field reads, whole-root and active-payload moves, resource returns and propagation, live/dead/self reassignment, consuming-close ownership, nested cleanup, source-linked drop traces, canonical traps, and the step limit; user drop-body effects and later runtime behavior remain unfinished gates.
+The current Go prototype implements the source-linked subset exercised by all eight MIR v0 normalization fixtures: ordered calls, complete-root and tagged-payload moves, RHS-before-drop resource reassignment, explicit normal-exit cleanup, normal lexical Region placement and reset, `Result` propagation branches, checked division traps, and non-unwinding successors. The same verifier passes all eight named baselines and rejects all sixteen isolated v0 mutations with their single expected `Vxxxx` result. The bounded interpreter executes all thirty-three interpreter v0 cases for scalar and tagged control, resource construction and field reads, whole-root and active-payload moves, resource returns and propagation, live/dead/self reassignment, consuming-close ownership, nested cleanup, source-linked drop traces, normal Region reset, canonical traps, and the step limit; Region early exits, user drop-body effects, and later runtime behavior remain unfinished gates.
 
 ## Lowering pipeline
 
@@ -84,6 +84,7 @@ The verifier runs before every interpreter or backend handoff.
 | `V1302` | A safe-borrow return has exactly one permitted origin. |
 | `V1401` | A region-derived value does not escape its region. |
 | `V1402` | Plain-region allocation never receives a `NeedsDrop` type. |
+| `V1403` | Normal control flow enters, places into, and resets each lexical Region exactly once. |
 | `V1501` | Every potentially trapping operation has explicit checked control flow or a `Trap`. |
 | `V1502` | A Stage 0 call has no unwind successor. |
 | `V1601` | `?`, implicit drop, source short-circuiting, and nested side effects do not remain. |

@@ -48,6 +48,7 @@ type functionLowerer struct {
 	current    BlockID
 	bindings   map[hir.SymbolID]bindingInfo
 	live       map[hir.SymbolID]bool
+	regions    map[hir.SymbolID]int
 	nextLocal  LocalID
 }
 
@@ -66,6 +67,7 @@ func newFunctionLowerer(module string, function *hir.Function, properties TypePr
 		result:     result,
 		bindings:   make(map[hir.SymbolID]bindingInfo),
 		live:       make(map[hir.SymbolID]bool),
+		regions:    make(map[hir.SymbolID]int),
 	}
 }
 
@@ -185,6 +187,10 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 			if _, err := l.lowerWhile(statement.Expression); err != nil {
 				return false, err
 			}
+		case "region":
+			if _, err := l.lowerExpression(statement.Expression); err != nil {
+				return false, err
+			}
 		default:
 			return false, fmt.Errorf("unsupported HIR statement %q", statement.Kind)
 		}
@@ -248,6 +254,9 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		l.appendOperation(Operation{Kind: OperationUnary, Span: expression.Span, DestinationLocal: destination, Operands: []Operand{operand}, Operator: expression.Operator})
 		return Operand{Kind: OperandLocal, Local: destination}, nil
 	case "call":
+		if expression.Operator == "place" && len(expression.Children) == 2 && expression.Children[0].Type == hir.TypeRegion {
+			return l.lowerRegionPlace(expression)
+		}
 		return l.lowerCall(expression)
 	case "result-variant":
 		return l.lowerResultVariant(expression)
@@ -290,9 +299,74 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		}
 		value, _, err := l.lowerNestedBlock(*expression.Block)
 		return value, err
+	case "region":
+		return l.lowerRegion(expression)
 	default:
 		return Operand{}, fmt.Errorf("unsupported HIR expression %q", expression.Kind)
 	}
+}
+
+func (l *functionLowerer) lowerRegion(expression *hir.Expression) (Operand, error) {
+	if expression.Symbol == hir.NoSymbol || len(expression.Children) != 1 || expression.Block == nil {
+		return Operand{}, fmt.Errorf("malformed lexical region")
+	}
+	arena := &expression.Children[0]
+	if arena.Kind != "prefix" || arena.Operator != "&mut" || len(arena.Children) != 1 || arena.Children[0].Kind != "path" {
+		return Operand{}, fmt.Errorf("executable lexical region source must be a direct &mut local")
+	}
+	if _, active := l.regions[expression.Symbol]; active {
+		return Operand{}, fmt.Errorf("region %d is entered twice", expression.Symbol)
+	}
+	factIndex := len(l.result.RegionScopes)
+	l.result.RegionScopes = append(l.result.RegionScopes, RegionScopeFact{Region: expression.Span})
+	l.regions[expression.Symbol] = factIndex
+	l.appendOperation(Operation{Kind: OperationRegionEnter, Span: expression.Span, Symbol: expression.Symbol, DestinationLocal: NoLocal})
+	_, terminated, err := l.lowerNestedBlock(*expression.Block)
+	if err != nil {
+		return Operand{}, err
+	}
+	if terminated {
+		return Operand{}, fmt.Errorf("early exit from lexical region is not executable yet")
+	}
+	cleanup := l.emitCleanupDeclaredWithin(expression.Span)
+	l.appendOperation(Operation{Kind: OperationRegionReset, Span: expression.Span, Symbol: expression.Symbol, DestinationLocal: NoLocal})
+	fact := &l.result.RegionScopes[factIndex]
+	fact.CleanupBeforeReset = cleanup
+	fact.Reset = expression.Span
+	delete(l.regions, expression.Symbol)
+	return Operand{}, nil
+}
+
+func (l *functionLowerer) lowerRegionPlace(expression *hir.Expression) (Operand, error) {
+	receiver := &expression.Children[0]
+	if receiver.Kind != "path" || receiver.Symbol == hir.NoSymbol {
+		return Operand{}, fmt.Errorf("Region.place receiver is not one region capability")
+	}
+	factIndex, active := l.regions[receiver.Symbol]
+	if !active {
+		return Operand{}, fmt.Errorf("Region.place uses inactive region %d", receiver.Symbol)
+	}
+	valueExpression := &expression.Children[1]
+	value, err := l.lowerExpression(valueExpression)
+	if err != nil {
+		return Operand{}, err
+	}
+	if value.Kind == OperandInvalid {
+		return Operand{}, fmt.Errorf("Region.place value has no executable operand")
+	}
+	destination := l.newTemporary()
+	l.appendOperation(Operation{
+		Kind: OperationRegionPlace, Span: expression.Span, Symbol: receiver.Symbol,
+		DestinationLocal: destination, Operands: []Operand{value}, Type: valueExpression.Type,
+	})
+	l.result.RegionScopes[factIndex].Placements = append(l.result.RegionScopes[factIndex].Placements, expression.Span)
+	regionEntity := fmt.Sprintf("region:%d", receiver.Symbol)
+	operationEntity := fmt.Sprintf("operation:region-place:%d:%d", expression.Span.StartByte, expression.Span.EndByte)
+	l.result.RegionValues = append(l.result.RegionValues, RegionValue{
+		Entity: fmt.Sprintf("local:region-value:%d", destination), OperationEntity: operationEntity,
+		RegionEntity: regionEntity, NeedsDrop: l.properties.NeedsDrop(valueExpression.Type),
+	})
+	return Operand{Kind: OperandLocal, Local: destination}, nil
 }
 
 func (l *functionLowerer) lowerResourceConstruction(expression *hir.Expression) (Operand, error) {
@@ -852,6 +926,20 @@ func (l *functionLowerer) emitCleanup(live map[hir.SymbolID]bool) []CleanupActio
 		}
 		l.appendOperation(Operation{Kind: OperationDrop, Span: resource.Binding, Symbol: resource.Symbol, FlagClearedFirst: true})
 		live[resource.Symbol] = false
+		actions = append(actions, CleanupAction{Kind: "drop", Binding: resource.Binding})
+	}
+	return actions
+}
+
+func (l *functionLowerer) emitCleanupDeclaredWithin(scope hir.Span) []CleanupAction {
+	actions := make([]CleanupAction, 0)
+	for index := len(l.result.Resources) - 1; index >= 0; index-- {
+		resource := l.result.Resources[index]
+		if resource.Binding.Source != scope.Source || resource.Binding.StartByte < scope.StartByte || resource.Binding.EndByte > scope.EndByte || !l.live[resource.Symbol] {
+			continue
+		}
+		l.appendOperation(Operation{Kind: OperationDrop, Span: resource.Binding, Symbol: resource.Symbol, FlagClearedFirst: true})
+		l.live[resource.Symbol] = false
 		actions = append(actions, CleanupAction{Kind: "drop", Binding: resource.Binding})
 	}
 	return actions

@@ -40,6 +40,11 @@ func Clone(input Program) Program {
 		}
 		cloned.Moves = slices.Clone(function.Moves)
 		cloned.Reassignments = slices.Clone(function.Reassignments)
+		cloned.RegionScopes = slices.Clone(function.RegionScopes)
+		for index := range cloned.RegionScopes {
+			cloned.RegionScopes[index].Placements = slices.Clone(function.RegionScopes[index].Placements)
+			cloned.RegionScopes[index].CleanupBeforeReset = slices.Clone(function.RegionScopes[index].CleanupBeforeReset)
+		}
 		cloned.CleanupPaths = slices.Clone(function.CleanupPaths)
 		for index := range cloned.CleanupPaths {
 			cloned.CleanupPaths[index].Actions = slices.Clone(function.CleanupPaths[index].Actions)

@@ -3,7 +3,6 @@
   "schemaVersion": "fairyc.interpreter-fixtures/v0",
   "deferred": [
     "user-defined drop-body execution and observable drop side effects",
-    "Region mark and reset observations",
     "controlled partial I/O test intrinsics",
     "bounded stdout, stderr, process status, and argument fixtures"
   ],
@@ -12,6 +11,7 @@
     "docs/adr/0016-stage-0-interpreter-fixture-contract.md",
     "docs/adr/0017-stage-0-result-constructors-and-match.md",
     "docs/adr/0018-stage-0-option-constructors-and-match.md",
+    "docs/adr/0020-stage-0-region-mir-and-interpreter.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/mir-v0.md",
     "docs/engineering/05-testing-standard.md"
@@ -507,6 +507,43 @@
           {
             "resourceType": "main::Token",
             "binding": { "source": "main.fy", "startByte": 110, "endByte": 115 }
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.interpreter.region-reset",
+      "sourceRoot": "cases/pass/region-reset/src",
+      "sources": ["std/alloc.fy"],
+      "entry": "std::alloc::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 9,
+        "drops": [
+          {
+            "resourceType": "std::alloc::Token",
+            "binding": { "source": "std/alloc.fy", "startByte": 174, "endByte": 179 }
+          },
+          {
+            "resourceType": "std::alloc::Token",
+            "binding": { "source": "std/alloc.fy", "startByte": 442, "endByte": 447 }
+          },
+          {
+            "resourceType": "std::alloc::Token",
+            "binding": { "source": "std/alloc.fy", "startByte": 287, "endByte": 291 }
+          },
+          {
+            "resourceType": "std::alloc::Arena",
+            "binding": { "source": "std/alloc.fy", "startByte": 243, "endByte": 248 }
+          }
+        ],
+        "regions": [
+          {
+            "region": { "source": "std/alloc.fy", "startByte": 364, "endByte": 528 },
+            "placements": 1,
+            "dropCountBeforeReset": 2
           }
         ]
       }

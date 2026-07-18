@@ -6,4 +6,4 @@ A runner must construct the named baseline, verify it successfully, confirm ever
 
 `schema-v0.json` rejects unknown fields and uses JSON Schema draft 2020-12. Arbitrary graph serialization, mutation cascades, fuzz-corpus encoding, and crash-bundle rendering remain separate contracts.
 
-`internal/mirverifyfixture` executes all eight baselines and fifteen isolated mutations through the same MIR verifier used after source lowering. Passing this runner proves the listed v0 invariants and recipe isolation only; arbitrary malformed graphs, combined mutations, fuzzing, crash bundles, and backend-specific verification remain deferred.
+`internal/mirverifyfixture` executes all eight baselines and sixteen isolated mutations through the same MIR verifier used after source lowering. The additional plain-region mutation removes reset and isolates `V1403`. Passing this runner proves the listed v0 invariants and recipe isolation only; arbitrary malformed graphs, combined mutations, fuzzing, crash bundles, and backend-specific verification remain deferred.

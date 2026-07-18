@@ -49,6 +49,16 @@
         "binding": { "$ref": "#/$defs/span" }
       }
     },
+    "regionEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["region", "placements", "dropCountBeforeReset"],
+      "properties": {
+        "region": { "$ref": "#/$defs/span" },
+        "placements": { "type": "integer", "minimum": 0 },
+        "dropCountBeforeReset": { "type": "integer", "minimum": 0 }
+      }
+    },
     "case": {
       "type": "object",
       "additionalProperties": false,
@@ -90,6 +100,10 @@
         "drops": {
           "type": "array",
           "items": { "$ref": "#/$defs/dropEvent" }
+        },
+        "regions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/regionEvent" }
         }
       }
     },

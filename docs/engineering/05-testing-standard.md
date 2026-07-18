@@ -27,20 +27,20 @@ and the complete deterministic `E11xx` set after parser, resolver, and type setu
 `internal/regionfixture` executes all 6 cases in `spec/fixtures/region/manifest-v1.json`, compares
 hidden allocation origins and complete `E31xx` diagnostics, and admits the lexical Arena case only
 after proving its root, dependency, lookup, instance class, provider role, source root, and exported
-`std::alloc::Arena` against the referenced package graph. `internal/resultfixture` executes all 8
+`std::alloc::Arena` against the referenced package graph. `internal/resultfixture` executes all 20
 cases in `spec/fixtures/result/manifest-v0.json`, comparing qualified construction, exhaustive
 shallow matching, handling modes, canonical payloads,
-single-evaluation facts, and complete `E41xx` diagnostics. `internal/mirfixture` executes all 7
+single-evaluation facts, and complete `E41xx` diagnostics. `internal/mirfixture` executes all 8
 cases in `spec/fixtures/mir/manifest-v0.json` after Flow, mutable-local MIR lowering, and MIR
-verification, comparing source-linked evaluation, call, move, cleanup, Result-branch, trap, and
+verification, comparing source-linked evaluation, call, move, Region, cleanup, Result-branch, trap, and
 eliminated-form facts. `internal/mirverifyfixture` constructs all 8 named verifier seeds, requires
-each baseline to pass, clones it, applies exactly one typed mutation, and proves all 15 cases return
-the complete expected one-code result. `internal/interpreterfixture` executes all 32 interpreter
+each baseline to pass, clones it, applies exactly one typed mutation, and proves all 16 cases return
+the complete expected one-code result. `internal/interpreterfixture` executes all 33 interpreter
 v0 cases through source loading, Flow, verified MIR, and the bounded interpreter, comparing exact
 `i32` returns, scalar and resource-bearing `Option` and `Result` construction, every built-in match
 variant, both Result `?` paths, canonical trap categories, resource construction, whole-root call
 moves, ordered resource reassignment, consuming-close ownership, active-variant cleanup,
-source-linked drop traces, or the stable interpreter step-limit
+normal Region reset ordering, source-linked drop traces, or the stable interpreter step-limit
 category. Backend, ABI, runtime, and Atlas runners do not exist yet; their fixtures remain future
 evidence requirements.
 
@@ -65,11 +65,11 @@ evidence requirements.
 | Borrow-origin pass and fail | Local last-use loans, conflicts, single-origin return, and storage bans |
 | Region pass and fail | `spec/fixtures/region/manifest-v1.json` currently proves all 6 v1 cases: parameter and package-resolved local origins, permitted parameter-origin returns, `E3101` local escape, capability restrictions, and no `NeedsDrop` placement |
 | Result pass and fail | `spec/fixtures/result/` currently proves all 20 v0 cases: qualified scalar construction, exhaustive shallow matching, return, discard, propagation, local and parameter transfer, handled reassignment, all-branch handling, partial-branch rejection, loop back-edge and overwrite rejection, early-return obligations, exactly-once evaluation, and error compatibility; active resource payload traces are covered by MIR and interpreter fixtures |
-| MIR normalization | `spec/fixtures/mir/` currently proves all 7 v0 cases through the Go MIR runner: source-linked evaluation order, call successors, ownership transfer including a resource-bearing Option match, RHS-before-drop resource reassignment with live/dead destinations, cleanup order, Result branching, trap paths, and eliminated source forms; graph identity remains excluded |
+| MIR normalization | `spec/fixtures/mir/` currently proves all 8 v0 cases through the Go MIR runner: source-linked evaluation order, call successors, ownership transfer including a resource-bearing Option match, RHS-before-drop resource reassignment with live/dead destinations, normal Region placement and reset ordering, cleanup order, Result branching, trap paths, and eliminated source forms; graph identity remains excluded |
 | Resolved package graph | `spec/fixtures/package/` proves instance equality, feature splits, direct visibility, module isolation, ambiguity, transitive hiding, and explicit standard-library injection without choosing public package-manager syntax |
 | Built-in tagged resources | `Ok`, `Err`, `Some`, discard, match, propagation, early return, and nested active-payload drop traces |
-| MIR verifier mutation | `spec/fixtures/mir-verifier/` currently proves all 8 named baselines and 15 isolated mutation cases through the Go verifier runner without serializing arbitrary MIR |
-| MIR interpreter run, trap, and limit | `spec/fixtures/interpreter/` currently proves all 32 v0 cases: literal return, scalar call arithmetic, boolean branching and logical not, source `&&` and `||` short-circuiting, scalar `while`, scalar and resource-bearing `Option` and `Result` construction, every built-in match variant, scalar and resource-bearing Result `?` paths, resource construction and field reads, whole-root and tagged-payload moves, resource returns, ordered live/dead/self reassignment, consuming-close success/failure ownership, nested active-variant cleanup, deterministic drop traces, division-by-zero trap identity, and bounded step-limit termination; user drop-body effects, region reset, and I/O remain deferred |
+| MIR verifier mutation | `spec/fixtures/mir-verifier/` currently proves all 8 named baselines and 16 isolated mutation cases, including missing Region reset `V1403`, through the Go verifier runner without serializing arbitrary MIR |
+| MIR interpreter run, trap, and limit | `spec/fixtures/interpreter/` currently proves all 33 v0 cases: literal return, scalar call arithmetic, boolean branching and logical not, source `&&` and `||` short-circuiting, scalar `while`, scalar and resource-bearing `Option` and `Result` construction, every built-in match variant, scalar and resource-bearing Result `?` paths, resource construction and field reads, whole-root and tagged-payload moves, resource returns, ordered live/dead/self reassignment, consuming-close success/failure ownership, nested active-variant cleanup, deterministic drop traces, normal lexical Region placement and reset ordering, division-by-zero trap identity, and bounded step-limit termination; user drop-body effects, Region early exits, and I/O remain deferred |
 | Drop elaboration | Partial construction, nested early exits, loops, and cleanup-suffix merging |
 | C differential | Interpreter parity for output, status, trap category, and drop trace across declared compilers and profiles |
 | C safety | Overflow, division, shifts, evaluation order, aliasing, alignment, inactive payload, and sanitizer-assisted checks |

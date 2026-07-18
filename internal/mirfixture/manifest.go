@@ -52,6 +52,10 @@ type observationAssertion struct {
 	ValueBeforeDrop          bool                     `json:"valueBeforeDrop"`
 	DroppedOld               bool                     `json:"droppedOld"`
 	InstalledNew             bool                     `json:"installedNew"`
+	Region                   spanAssertion            `json:"region"`
+	Placements               []spanAssertion          `json:"placements"`
+	CleanupBeforeReset       []cleanupActionAssertion `json:"cleanupBeforeReset"`
+	Reset                    spanAssertion            `json:"reset"`
 	Exit                     spanAssertion            `json:"exit"`
 	ExitKind                 string                   `json:"exitKind"`
 	Actions                  []cleanupActionAssertion `json:"actions"`

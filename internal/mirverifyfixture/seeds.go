@@ -9,8 +9,9 @@ import (
 )
 
 const (
-	valueSymbol hir.SymbolID = 1
-	tokenSymbol hir.SymbolID = 2
+	valueSymbol  hir.SymbolID = 1
+	tokenSymbol  hir.SymbolID = 2
+	regionSymbol hir.SymbolID = 3
 )
 
 func constructSeed(id string) (mir.Program, error) {
@@ -107,13 +108,19 @@ func plainRegionSeed() mir.Function {
 		Name:  "seed::plain-region",
 		Entry: 0,
 		Entities: []string{
-			"local:inert-value", "local:resource-value", "operation:place-inert", "region:scratch", "terminator:return",
+			"local:inert-value", "local:resource-value", "operation:place-inert", "operation:region-reset", "region:scratch", "terminator:return",
 		},
 		RegionValues: []mir.RegionValue{{
 			Entity: "local:inert-value", OperationEntity: "operation:place-inert", RegionEntity: "region:scratch",
 		}},
 		Blocks: []mir.Block{{
-			ID: 0, Terminator: mir.Terminator{Kind: mir.TerminatorReturn, Entity: "terminator:return", UnwindSuccessor: mir.NoBlock},
+			ID: 0,
+			Operations: []mir.Operation{
+				{Kind: mir.OperationRegionEnter, Entity: "region:scratch", Symbol: regionSymbol, DestinationLocal: mir.NoLocal},
+				{Kind: mir.OperationRegionPlace, Entity: "operation:place-inert", Symbol: regionSymbol, DestinationLocal: mir.LocalID(valueSymbol), Operands: []mir.Operand{{Kind: mir.OperandI32, I32: 1}}, Type: hir.TypeI32},
+				{Kind: mir.OperationRegionReset, Entity: "operation:region-reset", Symbol: regionSymbol, DestinationLocal: mir.NoLocal},
+			},
+			Terminator: mir.Terminator{Kind: mir.TerminatorReturn, Entity: "terminator:return", UnwindSuccessor: mir.NoBlock, ReturnValue: mir.Operand{Kind: mir.OperandI32, I32: 0}},
 		}},
 	}
 }

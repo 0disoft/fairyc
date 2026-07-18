@@ -3,13 +3,13 @@
   "schemaVersion": "fairyc.mir-fixtures/v0",
   "deferred": [
     "partial aggregate construction until field-level fallibility is executable",
-    "Region mark and reset ordering until a source-linked MIR observation case is accepted",
     "backend variant layout and payload-place identity until the first code-generation contract",
     "cleanup-suffix merging until canonical path identity can be asserted without freezing block numbers"
   ],
   "contracts": [
     "docs/product/02-spec.md",
     "docs/adr/0013-stage-0-mir-fixture-contract.md",
+    "docs/adr/0020-stage-0-region-mir-and-interpreter.md",
     "docs/language/0001-values-and-resources.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/mir-v0.md",
@@ -268,6 +268,32 @@
             "valueBeforeDrop": true,
             "droppedOld": false,
             "installedNew": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.mir.region-reset",
+      "sourceRoot": "cases/pass/region-reset/src",
+      "sources": ["std/alloc.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "mir-verify",
+        "observations": [
+          {
+            "kind": "region-scope",
+            "function": "std::alloc::main",
+            "region": { "source": "std/alloc.fy", "startByte": 364, "endByte": 528 },
+            "placements": [
+              { "source": "std/alloc.fy", "startByte": 504, "endByte": 521 }
+            ],
+            "cleanupBeforeReset": [
+              {
+                "kind": "drop",
+                "binding": { "source": "std/alloc.fy", "startByte": 442, "endByte": 447 }
+              }
+            ],
+            "reset": { "source": "std/alloc.fy", "startByte": 364, "endByte": 528 }
           }
         ]
       }

@@ -79,6 +79,7 @@
               { "$ref": "#/$defs/call" },
               { "$ref": "#/$defs/move" },
               { "$ref": "#/$defs/resourceReassignment" },
+              { "$ref": "#/$defs/regionScope" },
               { "$ref": "#/$defs/cleanupPath" },
               { "$ref": "#/$defs/resultBranch" },
               { "$ref": "#/$defs/trapPath" },
@@ -148,6 +149,26 @@
         "valueBeforeDrop": { "const": true },
         "droppedOld": { "type": "boolean" },
         "installedNew": { "const": true }
+      }
+    },
+    "regionScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "function", "region", "placements", "cleanupBeforeReset", "reset"],
+      "properties": {
+        "kind": { "const": "region-scope" },
+        "function": { "$ref": "#/$defs/functionName" },
+        "region": { "$ref": "#/$defs/span" },
+        "placements": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/span" }
+        },
+        "cleanupBeforeReset": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/cleanupAction" }
+        },
+        "reset": { "$ref": "#/$defs/span" }
       }
     },
     "cleanupAction": {

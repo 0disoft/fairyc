@@ -23,7 +23,7 @@ For every case, the runner must:
 
 A seed-construction failure, baseline verifier failure, missing target, ignored mutation, more than one applied mutation, extra verifier code, or verifier crash is a harness failure. It cannot be counted as successful rejection.
 
-`internal/mirverifyfixture` implements this protocol for all eight seeds and fifteen mutations. It deep-clones each verified baseline before mutation and compares the complete verifier result rather than searching for an expected code inside a larger cascade.
+`internal/mirverifyfixture` implements this protocol for all eight seeds and sixteen mutations. It deep-clones each verified baseline before mutation and compares the complete verifier result rather than searching for an expected code inside a larger cascade. The plain-region seed includes enter, place, and reset operations; removing reset isolates `V1403`.
 
 ## Seed families
 
@@ -40,7 +40,7 @@ The Go harness may represent these seeds however the internal MIR requires, but 
 
 ## Mutation rules
 
-Each mutation is closed and typed: remove a terminator, introduce a use before initialization, duplicate a resource discharge, remove cleanup, move a resource projection, remove drop-flag initialization, reorder flag clear after drop, extend a loan, add a return origin, mark a region value escaping, place a `NeedsDrop` value in a plain region, remove a required trap check, add an unwind successor, reinsert a source-only form, or remove unsafe provenance. A mutation names `supportingEntity` when its target alone would not identify the replacement value or exact check to remove.
+Each mutation is closed and typed: remove a terminator, introduce a use before initialization, duplicate a resource discharge, remove cleanup, move a resource projection, remove drop-flag initialization, reorder flag clear after drop, extend a loan, add a return origin, mark a region value escaping, place a `NeedsDrop` value in a plain region, remove a Region reset, remove a required trap check, add an unwind successor, reinsert a source-only form, or remove unsafe provenance. A mutation names `supportingEntity` when its target alone would not identify the replacement value or exact check to remove.
 
 Mutation application is deterministic and idempotence is not assumed. Applying the same recipe twice is a harness error rather than a second test case.
 

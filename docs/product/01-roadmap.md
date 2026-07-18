@@ -25,14 +25,15 @@ whole-root resource Flow now executes all 10 resource v0 cases, including branch
 rejection. Result Flow executes all 20 result v0 cases, including qualified scalar construction,
 exhaustive shallow matching, and local, parameter, branch, loop, overwrite, and early-return
 must-use obligations. Mutable-local MIR lowering and verification
-execute all 7 MIR normalization v0 cases for the current scalar, resource, tagged-payload, Result, cleanup, call,
-and division-trap subset. All 8 verifier baselines and 15 isolated mutation cases execute through
-the same MIR verifier. The first MIR interpreter executes all 32 interpreter v0 cases, including
+execute all 8 MIR normalization v0 cases for the current scalar, resource, tagged-payload, Result, Region, cleanup, call,
+and division-trap subset. All 8 verifier baselines and 16 isolated mutation cases execute through
+the same MIR verifier. The first MIR interpreter executes all 33 interpreter v0 cases, including
 scalar `Option` and `Result` construction, exhaustive matching, and both Result `?` paths, and is
 exposed by the unstable `experimental run` command. Resource construction, field reads, whole-root
 call moves, source-linked drop traces, resource-bearing `Option` and `Result` payload moves, ordered
-resource reassignment, and explicit consuming-close success/failure ownership execute; Region runtime behavior,
-I/O intrinsics, effects, and every later Phase 1 capability
+resource reassignment, explicit consuming-close success/failure ownership, and normal lexical
+Region placement, inner cleanup, and reset execute; Region early-exit cleanup, I/O intrinsics,
+effects, and every later Phase 1 capability
 remain unimplemented.
 
 - Implement source management, lexer, trivia-preserving tokens and spans, compact recoverable syntax, deterministic diagnostics, one-file modules, alias imports, and non-generic typed HIR in Go.

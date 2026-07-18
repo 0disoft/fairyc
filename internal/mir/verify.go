@@ -25,8 +25,9 @@ type flagState struct {
 }
 
 type verificationState struct {
-	live  map[hir.SymbolID]bool
-	flags map[string]flagState
+	live    map[hir.SymbolID]bool
+	flags   map[string]flagState
+	regions map[hir.SymbolID]string
 }
 
 // Verify checks the executable invariants required before MIR handoff.
@@ -52,8 +53,9 @@ func verifyFunction(function *Function) []VerificationError {
 	}
 	resources := make(map[hir.SymbolID]ResourceLocal, len(function.Resources))
 	initial := verificationState{
-		live:  make(map[hir.SymbolID]bool, len(function.Resources)),
-		flags: make(map[string]flagState, len(function.DropFlags)),
+		live:    make(map[hir.SymbolID]bool, len(function.Resources)),
+		flags:   make(map[string]flagState, len(function.DropFlags)),
+		regions: make(map[hir.SymbolID]string),
 	}
 	for _, resource := range function.Resources {
 		resources[resource.Symbol] = resource
@@ -193,6 +195,26 @@ func verifyFunction(function *Function) []VerificationError {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "field read shape is invalid"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationRegionEnter:
+				if operation.Symbol == hir.NoSymbol || len(operation.Operands) != 0 || operation.DestinationLocal != NoLocal {
+					failures = append(failures, VerificationError{Code: "V1403", Entity: entity, Detail: "region enter shape is invalid"})
+				} else if _, active := state.regions[operation.Symbol]; active {
+					failures = append(failures, VerificationError{Code: "V1403", Entity: entity, Detail: "region is entered while already active"})
+				} else {
+					state.regions[operation.Symbol] = entity
+				}
+			case OperationRegionPlace:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if _, active := state.regions[operation.Symbol]; !active || len(operation.Operands) != 1 || operation.DestinationLocal == NoLocal || operation.Type == hir.TypeInvalid {
+					failures = append(failures, VerificationError{Code: "V1403", Entity: entity, Detail: "region placement does not name one active region and value"})
+				}
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationRegionReset:
+				if _, active := state.regions[operation.Symbol]; !active || len(operation.Operands) != 0 || operation.DestinationLocal != NoLocal {
+					failures = append(failures, VerificationError{Code: "V1403", Entity: entity, Detail: "region reset does not close one active region"})
+				} else {
+					delete(state.regions, operation.Symbol)
+				}
 			case OperationResultSwitch:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				if len(operation.Operands) != 1 {
@@ -225,6 +247,9 @@ func verifyFunction(function *Function) []VerificationError {
 				if state.live[symbol] {
 					failures = append(failures, VerificationError{Code: "V1102", Entity: blockEntityFor(function, item.id), Detail: "resource " + resourceEntity(resource, fmt.Sprintf("local:%d", symbol)) + " exits without cleanup"})
 				}
+			}
+			for _, entity := range state.regions {
+				failures = append(failures, VerificationError{Code: "V1403", Entity: entity, Detail: "normal return exits an active region without reset"})
 			}
 			continue
 		}
@@ -311,21 +336,30 @@ func uniqueNonEmpty(values []string) bool {
 
 func cloneVerificationState(input verificationState) verificationState {
 	result := verificationState{
-		live:  cloneLive(input.live),
-		flags: make(map[string]flagState, len(input.flags)),
+		live:    cloneLive(input.live),
+		flags:   make(map[string]flagState, len(input.flags)),
+		regions: make(map[hir.SymbolID]string, len(input.regions)),
 	}
 	for entity, state := range input.flags {
 		result.flags[entity] = state
+	}
+	for symbol, entity := range input.regions {
+		result.regions[symbol] = entity
 	}
 	return result
 }
 
 func mergeVerificationState(previous, incoming verificationState, resources map[hir.SymbolID]ResourceLocal) (verificationState, bool, bool) {
-	if len(previous.flags) != len(incoming.flags) {
+	if len(previous.flags) != len(incoming.flags) || len(previous.regions) != len(incoming.regions) {
 		return verificationState{}, false, true
 	}
 	for entity, state := range previous.flags {
 		if incoming.flags[entity] != state {
+			return verificationState{}, false, true
+		}
+	}
+	for symbol, entity := range previous.regions {
+		if incoming.regions[symbol] != entity {
 			return verificationState{}, false, true
 		}
 	}

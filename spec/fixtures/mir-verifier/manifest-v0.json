@@ -11,6 +11,7 @@
   "contracts": [
     "docs/product/02-spec.md",
     "docs/adr/0015-mir-verifier-mutation-fixture-contract.md",
+    "docs/adr/0020-stage-0-region-mir-and-interpreter.md",
     "docs/mir/mir-v0.md",
     "docs/mir/verifier-mutation-v0.md",
     "docs/mir/drop-elaboration-v0.md",
@@ -62,6 +63,7 @@
         "local:inert-value",
         "local:resource-value",
         "operation:place-inert",
+        "operation:region-reset",
         "region:scratch",
         "terminator:return"
       ]
@@ -175,6 +177,12 @@
         "supportingEntity": "local:resource-value"
       },
       "expect": { "status": "reject", "codes": ["V1402"], "primaryEntity": "operation:place-inert" }
+    },
+    {
+      "id": "fail.mir-verify.v1403.region-reset-missing",
+      "seed": "plain-region",
+      "mutation": { "kind": "remove-region-reset", "target": "operation:region-reset" },
+      "expect": { "status": "reject", "codes": ["V1403"], "primaryEntity": "region:scratch" }
     },
     {
       "id": "fail.mir-verify.v1501.missing-trap-check",

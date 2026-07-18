@@ -155,6 +155,11 @@ func applyMutation(program *mir.Program, mutation mutation) (int, error) {
 			*terminator = mir.Terminator{UnwindSuccessor: mir.NoBlock}
 			return 1, nil
 		}
+	case "remove-region-reset":
+		if block, index := findOperation(function, mutation.Target); block != nil {
+			block.Operations = append(block.Operations[:index], block.Operations[index+1:]...)
+			return 1, nil
+		}
 	case "use-before-initialize":
 		useBlock, useIndex := findOperation(function, mutation.Target)
 		initBlock, initIndex := findOperation(function, "statement:init-value")

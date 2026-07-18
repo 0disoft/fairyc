@@ -171,6 +171,13 @@ func hasObservation(function mir.Function, expected observationAssertion) bool {
 				return true
 			}
 		}
+	case "region-scope":
+		for _, actual := range function.RegionScopes {
+			if spanEqual(actual.Region, expected.Region) && spansEqual(actual.Placements, expected.Placements) &&
+				actionsEqual(actual.CleanupBeforeReset, expected.CleanupBeforeReset) && spanEqual(actual.Reset, expected.Reset) {
+				return true
+			}
+		}
 	case "cleanup-path":
 		for _, actual := range function.CleanupPaths {
 			if spanEqual(actual.Exit, expected.Exit) && actual.ExitKind == expected.ExitKind && actionsEqual(actual.Actions, expected.Actions) {
