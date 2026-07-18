@@ -185,6 +185,12 @@
       "expect": { "status": "reject", "codes": ["V1403"], "primaryEntity": "region:scratch" }
     },
     {
+      "id": "fail.mir-verify.v1403.region-reset-exit-kind-invalid",
+      "seed": "plain-region",
+      "mutation": { "kind": "invalidate-region-reset-exit-kind", "target": "operation:region-reset" },
+      "expect": { "status": "reject", "codes": ["V1403"], "primaryEntity": "operation:region-reset" }
+    },
+    {
       "id": "fail.mir-verify.v1501.missing-trap-check",
       "seed": "checked-division",
       "mutation": {

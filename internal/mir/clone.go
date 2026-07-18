@@ -44,6 +44,10 @@ func Clone(input Program) Program {
 		for index := range cloned.RegionScopes {
 			cloned.RegionScopes[index].Placements = slices.Clone(function.RegionScopes[index].Placements)
 			cloned.RegionScopes[index].CleanupBeforeReset = slices.Clone(function.RegionScopes[index].CleanupBeforeReset)
+			cloned.RegionScopes[index].EarlyResets = slices.Clone(function.RegionScopes[index].EarlyResets)
+			for resetIndex := range cloned.RegionScopes[index].EarlyResets {
+				cloned.RegionScopes[index].EarlyResets[resetIndex].CleanupBeforeReset = slices.Clone(function.RegionScopes[index].EarlyResets[resetIndex].CleanupBeforeReset)
+			}
 		}
 		cloned.CleanupPaths = slices.Clone(function.CleanupPaths)
 		for index := range cloned.CleanupPaths {

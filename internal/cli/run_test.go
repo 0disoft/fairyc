@@ -394,6 +394,37 @@ fn main() -> i32 {
 	}
 }
 
+func TestExperimentalRunExecutesRegionEarlyReturnReset(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "std/alloc.fy", `module std::alloc;
+
+pub resource Arena {
+    opaque: i32;
+    drop fn(self: &mut Self) {}
+}
+
+resource Token {
+    value: i32;
+    drop fn(self: &mut Self) {}
+}
+
+fn main() -> i32 {
+    var arena: Arena = Arena { opaque: 0 };
+    let outside: Token = Token { value: 20 };
+    region scratch in &mut arena {
+        let inner: Token = Token { value: 22 };
+        let stored: &i32 = scratch.place(1);
+        return outside.value + inner.value;
+    }
+}
+`)
+	code, stdout, stderr := runForTest([]string{"experimental", "run", "std/alloc.fy"}, root)
+	if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
 func TestExperimentalRunExecutesResourceBearingOption(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()

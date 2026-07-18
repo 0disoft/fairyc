@@ -5,6 +5,7 @@
 - Product source: `docs/product/02-spec.md`
 - Language source: `docs/language/0003-regions-and-arenas.md`
 - MIR source: `docs/mir/mir-v0.md`
+- Follow-up: `docs/adr/0021-stage-0-region-early-exit-cleanup.md`
 
 ## Context
 
@@ -53,7 +54,7 @@ skip reset. They require scope-indexed cleanup edges shared with general nested-
   matches `std/alloc.fy`.
 - No public standard-library constructor, arena capacity model, allocator ABI, or address contract
   is introduced.
-- Region early exits and controlled I/O remain separate Phase 1 gates.
+- ADR 0021 later closes direct-return and Result-propagation exits; Region `break`, `continue`, and controlled I/O remain separate Phase 1 gates.
 
 ## Rejected alternatives
 

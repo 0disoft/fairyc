@@ -39,9 +39,10 @@ MIR interpreter. The entry is the selected file module's zero-argument `main() -
 `if`, `!`, comparisons, source-level `&&` and `||` short-circuiting, scalar `while`, scalar tagged
 values, resource construction and field reads, whole-root and tagged-payload moves, resource-bearing
 built-in `Option` and `Result` values, ordered resource reassignment, consuming-close ownership,
-normal lexical Region placement and reset from a direct `&mut` Arena local, and cleanup drop events are
+lexical Region placement and reset on fallthrough, direct return, Result propagation, and nested
+exits from a direct `&mut` Arena local, and cleanup drop events are
 executable. The bounded interpreter reports its stable `step-limit` capability rather than hanging
-or reclassifying it as a language trap. User drop-body effects, Region early exits, I/O, arguments, and
+or reclassifying it as a language trap. User drop-body effects, Region `break` and `continue`, I/O, arguments, and
 multi-file run input remain outside the current interpreter subset.
 
 `fairyc check` remains unimplemented. It must not be aliased to `check-syntax`, because the planned

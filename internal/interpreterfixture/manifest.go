@@ -34,6 +34,7 @@ type dropExpectation struct {
 
 type regionExpectation struct {
 	Region               spanExpectation `json:"region"`
+	ExitKind             string          `json:"exitKind"`
 	Placements           int             `json:"placements"`
 	DropCountBeforeReset int             `json:"dropCountBeforeReset"`
 }

@@ -118,7 +118,7 @@ func plainRegionSeed() mir.Function {
 			Operations: []mir.Operation{
 				{Kind: mir.OperationRegionEnter, Entity: "region:scratch", Symbol: regionSymbol, DestinationLocal: mir.NoLocal},
 				{Kind: mir.OperationRegionPlace, Entity: "operation:place-inert", Symbol: regionSymbol, DestinationLocal: mir.LocalID(valueSymbol), Operands: []mir.Operand{{Kind: mir.OperandI32, I32: 1}}, Type: hir.TypeI32},
-				{Kind: mir.OperationRegionReset, Entity: "operation:region-reset", Symbol: regionSymbol, DestinationLocal: mir.NoLocal},
+				{Kind: mir.OperationRegionReset, Entity: "operation:region-reset", Symbol: regionSymbol, DestinationLocal: mir.NoLocal, ExitKind: "fallthrough"},
 			},
 			Terminator: mir.Terminator{Kind: mir.TerminatorReturn, Entity: "terminator:return", UnwindSuccessor: mir.NoBlock, ReturnValue: mir.Operand{Kind: mir.OperandI32, I32: 0}},
 		}},

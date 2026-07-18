@@ -7,7 +7,7 @@
 
 ## Context
 
-The MIR verifier defines sixteen isolated `Vxxxx` compiler-defect recipes. Source-pass MIR fixtures can prove normalized behavior, but valid source cannot deliberately create a missing terminator, uninitialized drop flag, missing Region reset, unwind successor, or absent unsafe provenance. Serializing arbitrary MIR graphs just to test these failures would accidentally create an internal interchange format before MIR representation exists.
+The MIR verifier defines seventeen isolated `Vxxxx` compiler-defect recipes. Source-pass MIR fixtures can prove normalized behavior, but valid source cannot deliberately create a missing terminator, uninitialized drop flag, missing or invalid Region reset, unwind successor, or absent unsafe provenance. Serializing arbitrary MIR graphs just to test these failures would accidentally create an internal interchange format before MIR representation exists.
 
 ## Decision
 

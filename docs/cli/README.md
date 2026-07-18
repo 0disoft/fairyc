@@ -32,9 +32,9 @@ and parameter transfer, branch and loop obligations, overwrite and early-return 
 error compatibility. `experimental run` executes the selected
 module's zero-argument `main() -> i32` through verified MIR, including boolean `if`,
 short-circuit control, scalar `while`, whole resources, resource-bearing built-in tags, ordered
-resource reassignment, consuming-close ownership, normal Region placement and reset, and source-linked drop traces, and reports an
+resource reassignment, consuming-close ownership, Region fallthrough and early-exit reset paths, and source-linked drop traces, and reports an
 exact scalar result or canonical trap. It does not
-discover files, execute user drop bodies, lower early exits across Region boundaries, implement effects, host I/O, or native code generation.
+discover files, execute user drop bodies, lower Region `break` or `continue`, implement effects, host I/O, or native code generation.
 Infinite execution is stopped by the bounded interpreter and reported as an unsupported-capability result rather than a language trap. In
 particular, it does not satisfy the planned `fairyc check` contract.
 

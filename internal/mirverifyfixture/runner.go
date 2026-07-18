@@ -160,6 +160,11 @@ func applyMutation(program *mir.Program, mutation mutation) (int, error) {
 			block.Operations = append(block.Operations[:index], block.Operations[index+1:]...)
 			return 1, nil
 		}
+	case "invalidate-region-reset-exit-kind":
+		if block, index := findOperation(function, mutation.Target); block != nil {
+			block.Operations[index].ExitKind = "break"
+			return 1, nil
+		}
 	case "use-before-initialize":
 		useBlock, useIndex := findOperation(function, mutation.Target)
 		initBlock, initIndex := findOperation(function, "statement:init-value")

@@ -210,9 +210,11 @@ func verifyFunction(function *Function) []VerificationError {
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationRegionReset:
-				if _, active := state.regions[operation.Symbol]; !active || len(operation.Operands) != 0 || operation.DestinationLocal != NoLocal {
+				_, active := state.regions[operation.Symbol]
+				if !active || len(operation.Operands) != 0 || operation.DestinationLocal != NoLocal || !validRegionExitKind(operation.ExitKind) {
 					failures = append(failures, VerificationError{Code: "V1403", Entity: entity, Detail: "region reset does not close one active region"})
-				} else {
+				}
+				if active {
 					delete(state.regions, operation.Symbol)
 				}
 			case OperationResultSwitch:
@@ -291,6 +293,10 @@ func verifyFunction(function *Function) []VerificationError {
 		}
 	}
 	return failures
+}
+
+func validRegionExitKind(value string) bool {
+	return value == "fallthrough" || value == "return" || value == "propagate"
 }
 
 func validSwitchShape(terminator Terminator) bool {

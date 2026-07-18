@@ -40,16 +40,23 @@ type bindingInfo struct {
 	span hir.Span
 }
 
+type activeRegion struct {
+	symbol    hir.SymbolID
+	span      hir.Span
+	factIndex int
+}
+
 type functionLowerer struct {
-	module     string
-	source     *hir.Function
-	properties TypeProperties
-	result     Function
-	current    BlockID
-	bindings   map[hir.SymbolID]bindingInfo
-	live       map[hir.SymbolID]bool
-	regions    map[hir.SymbolID]int
-	nextLocal  LocalID
+	module      string
+	source      *hir.Function
+	properties  TypeProperties
+	result      Function
+	current     BlockID
+	bindings    map[hir.SymbolID]bindingInfo
+	live        map[hir.SymbolID]bool
+	regions     map[hir.SymbolID]int
+	regionStack []activeRegion
+	nextLocal   LocalID
 }
 
 func newFunctionLowerer(module string, function *hir.Function, properties TypeProperties) *functionLowerer {
@@ -320,20 +327,23 @@ func (l *functionLowerer) lowerRegion(expression *hir.Expression) (Operand, erro
 	factIndex := len(l.result.RegionScopes)
 	l.result.RegionScopes = append(l.result.RegionScopes, RegionScopeFact{Region: expression.Span})
 	l.regions[expression.Symbol] = factIndex
+	l.regionStack = append(l.regionStack, activeRegion{symbol: expression.Symbol, span: expression.Span, factIndex: factIndex})
 	l.appendOperation(Operation{Kind: OperationRegionEnter, Span: expression.Span, Symbol: expression.Symbol, DestinationLocal: NoLocal})
 	_, terminated, err := l.lowerNestedBlock(*expression.Block)
 	if err != nil {
 		return Operand{}, err
 	}
-	if terminated {
-		return Operand{}, fmt.Errorf("early exit from lexical region is not executable yet")
+	if err := l.leaveLexicalRegion(expression.Symbol); err != nil {
+		return Operand{}, err
 	}
-	cleanup := l.emitCleanupDeclaredWithin(expression.Span)
-	l.appendOperation(Operation{Kind: OperationRegionReset, Span: expression.Span, Symbol: expression.Symbol, DestinationLocal: NoLocal})
+	if terminated {
+		return Operand{}, nil
+	}
+	cleanup := l.emitCleanupDeclaredWithin(l.live, expression.Span)
+	l.appendOperation(Operation{Kind: OperationRegionReset, Span: expression.Span, Symbol: expression.Symbol, DestinationLocal: NoLocal, ExitKind: "fallthrough"})
 	fact := &l.result.RegionScopes[factIndex]
 	fact.CleanupBeforeReset = cleanup
 	fact.Reset = expression.Span
-	delete(l.regions, expression.Symbol)
 	return Operand{}, nil
 }
 
@@ -860,7 +870,7 @@ func (l *functionLowerer) lowerPropagate(expression *hir.Expression) (Operand, e
 
 	errorLive := cloneLive(l.live)
 	l.current = errorBlock
-	errorActions := l.emitCleanup(errorLive)
+	errorActions := l.emitFunctionExitCleanup(errorLive, expression.Span, "propagate")
 	l.terminate(Terminator{Kind: TerminatorReturn, Span: expression.Span, UnwindSuccessor: NoBlock, ReturnValue: resultValue})
 	question := hir.Span{Source: expression.Span.Source, StartByte: max(expression.Span.StartByte, expression.Span.EndByte-1), EndByte: expression.Span.EndByte}
 	l.result.ResultBranches = append(l.result.ResultBranches, ResultBranchFact{
@@ -890,9 +900,9 @@ func (l *functionLowerer) lowerReturn(expression *hir.Expression, exit hir.Span)
 	if l.isLiveResourcePath(expression) {
 		value = l.materializeMove(expression, value, "return-value", true)
 	}
-	actions := l.emitCleanup(l.live)
+	actions := l.emitFunctionExitCleanup(l.live, exit, "return")
 	l.result.CleanupPaths = append(l.result.CleanupPaths, CleanupPathFact{Exit: exit, ExitKind: "return", Actions: actions})
-	if len(actions) > 0 {
+	if cleanupContainsDrop(actions) {
 		l.result.EliminatedForms = append(l.result.EliminatedForms, EliminatedFormFact{Form: "implicit-drop", RemainingCount: 0})
 	}
 	l.terminate(Terminator{Kind: TerminatorReturn, Span: exit, UnwindSuccessor: NoBlock, ReturnValue: value})
@@ -931,18 +941,53 @@ func (l *functionLowerer) emitCleanup(live map[hir.SymbolID]bool) []CleanupActio
 	return actions
 }
 
-func (l *functionLowerer) emitCleanupDeclaredWithin(scope hir.Span) []CleanupAction {
+func (l *functionLowerer) emitCleanupDeclaredWithin(live map[hir.SymbolID]bool, scope hir.Span) []CleanupAction {
 	actions := make([]CleanupAction, 0)
 	for index := len(l.result.Resources) - 1; index >= 0; index-- {
 		resource := l.result.Resources[index]
-		if resource.Binding.Source != scope.Source || resource.Binding.StartByte < scope.StartByte || resource.Binding.EndByte > scope.EndByte || !l.live[resource.Symbol] {
+		if resource.Binding.Source != scope.Source || resource.Binding.StartByte < scope.StartByte || resource.Binding.EndByte > scope.EndByte || !live[resource.Symbol] {
 			continue
 		}
 		l.appendOperation(Operation{Kind: OperationDrop, Span: resource.Binding, Symbol: resource.Symbol, FlagClearedFirst: true})
-		l.live[resource.Symbol] = false
+		live[resource.Symbol] = false
 		actions = append(actions, CleanupAction{Kind: "drop", Binding: resource.Binding})
 	}
 	return actions
+}
+
+func (l *functionLowerer) emitFunctionExitCleanup(live map[hir.SymbolID]bool, exit hir.Span, exitKind string) []CleanupAction {
+	actions := make([]CleanupAction, 0)
+	for index := len(l.regionStack) - 1; index >= 0; index-- {
+		region := l.regionStack[index]
+		cleanup := l.emitCleanupDeclaredWithin(live, region.span)
+		actions = append(actions, cleanup...)
+		l.appendOperation(Operation{Kind: OperationRegionReset, Span: region.span, Symbol: region.symbol, DestinationLocal: NoLocal, ExitKind: exitKind})
+		actions = append(actions, CleanupAction{Kind: "region-reset", Binding: region.span})
+		fact := &l.result.RegionScopes[region.factIndex]
+		fact.EarlyResets = append(fact.EarlyResets, RegionResetFact{
+			Exit: exit, ExitKind: exitKind, CleanupBeforeReset: cleanup, Reset: region.span,
+		})
+	}
+	actions = append(actions, l.emitCleanup(live)...)
+	return actions
+}
+
+func cleanupContainsDrop(actions []CleanupAction) bool {
+	for _, action := range actions {
+		if action.Kind == "drop" {
+			return true
+		}
+	}
+	return false
+}
+
+func (l *functionLowerer) leaveLexicalRegion(symbol hir.SymbolID) error {
+	if len(l.regionStack) == 0 || l.regionStack[len(l.regionStack)-1].symbol != symbol {
+		return fmt.Errorf("region %d does not close in lexical stack order", symbol)
+	}
+	l.regionStack = l.regionStack[:len(l.regionStack)-1]
+	delete(l.regions, symbol)
+	return nil
 }
 
 func (l *functionLowerer) isLiveResourcePath(expression *hir.Expression) bool {

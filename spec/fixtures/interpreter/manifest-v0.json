@@ -12,6 +12,7 @@
     "docs/adr/0017-stage-0-result-constructors-and-match.md",
     "docs/adr/0018-stage-0-option-constructors-and-match.md",
     "docs/adr/0020-stage-0-region-mir-and-interpreter.md",
+    "docs/adr/0021-stage-0-region-early-exit-cleanup.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/mir-v0.md",
     "docs/engineering/05-testing-standard.md"
@@ -542,8 +543,159 @@
         "regions": [
           {
             "region": { "source": "std/alloc.fy", "startByte": 364, "endByte": 528 },
+            "exitKind": "fallthrough",
             "placements": 1,
             "dropCountBeforeReset": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.interpreter.region-return-reset",
+      "sourceRoot": "cases/pass/region-early-exit/src",
+      "sources": ["std/alloc.fy"],
+      "entry": "std::alloc::return_from_region",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42,
+        "drops": [
+          {
+            "resourceType": "std::alloc::Token",
+            "binding": { "source": "std/alloc.fy", "startByte": 333, "endByte": 338 }
+          },
+          {
+            "resourceType": "std::alloc::Token",
+            "binding": { "source": "std/alloc.fy", "startByte": 248, "endByte": 255 }
+          },
+          {
+            "resourceType": "std::alloc::Arena",
+            "binding": { "source": "std/alloc.fy", "startByte": 204, "endByte": 209 }
+          }
+        ],
+        "regions": [
+          {
+            "region": { "source": "std/alloc.fy", "startByte": 290, "endByte": 463 },
+            "exitKind": "return",
+            "placements": 1,
+            "dropCountBeforeReset": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.interpreter.region-propagate-reset",
+      "sourceRoot": "cases/pass/region-early-exit/src",
+      "sources": ["std/alloc.fy"],
+      "entry": "std::alloc::propagate_main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42,
+        "drops": [
+          {
+            "resourceType": "std::alloc::Token",
+            "binding": { "source": "std/alloc.fy", "startByte": 676, "endByte": 681 }
+          },
+          {
+            "resourceType": "std::alloc::Token",
+            "binding": { "source": "std/alloc.fy", "startByte": 591, "endByte": 598 }
+          },
+          {
+            "resourceType": "std::alloc::Arena",
+            "binding": { "source": "std/alloc.fy", "startByte": 547, "endByte": 552 }
+          }
+        ],
+        "regions": [
+          {
+            "region": { "source": "std/alloc.fy", "startByte": 633, "endByte": 859 },
+            "exitKind": "propagate",
+            "placements": 1,
+            "dropCountBeforeReset": 1
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.interpreter.region-nested-return-reset",
+      "sourceRoot": "cases/pass/region-early-exit/src",
+      "sources": ["std/alloc.fy"],
+      "entry": "std::alloc::nested_return",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42,
+        "drops": [
+          {
+            "resourceType": "std::alloc::Token",
+            "binding": { "source": "std/alloc.fy", "startByte": 1407, "endByte": 1418 }
+          },
+          {
+            "resourceType": "std::alloc::Token",
+            "binding": { "source": "std/alloc.fy", "startByte": 1257, "endByte": 1268 }
+          },
+          {
+            "resourceType": "std::alloc::Token",
+            "binding": { "source": "std/alloc.fy", "startByte": 1162, "endByte": 1176 }
+          },
+          {
+            "resourceType": "std::alloc::Arena",
+            "binding": { "source": "std/alloc.fy", "startByte": 1112, "endByte": 1123 }
+          },
+          {
+            "resourceType": "std::alloc::Arena",
+            "binding": { "source": "std/alloc.fy", "startByte": 1062, "endByte": 1073 }
+          }
+        ],
+        "regions": [
+          {
+            "region": { "source": "std/alloc.fy", "startByte": 1356, "endByte": 1592 },
+            "exitKind": "return",
+            "placements": 1,
+            "dropCountBeforeReset": 1
+          },
+          {
+            "region": { "source": "std/alloc.fy", "startByte": 1210, "endByte": 1598 },
+            "exitKind": "return",
+            "placements": 1,
+            "dropCountBeforeReset": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.interpreter.region-conditional-fallthrough-reset",
+      "sourceRoot": "cases/pass/region-early-exit/src",
+      "sources": ["std/alloc.fy"],
+      "entry": "std::alloc::conditional_fallthrough_main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 40,
+        "drops": [
+          {
+            "resourceType": "std::alloc::Token",
+            "binding": { "source": "std/alloc.fy", "startByte": 1782, "endByte": 1787 }
+          },
+          {
+            "resourceType": "std::alloc::Token",
+            "binding": { "source": "std/alloc.fy", "startByte": 1697, "endByte": 1704 }
+          },
+          {
+            "resourceType": "std::alloc::Arena",
+            "binding": { "source": "std/alloc.fy", "startByte": 1653, "endByte": 1658 }
+          }
+        ],
+        "regions": [
+          {
+            "region": { "source": "std/alloc.fy", "startByte": 1739, "endByte": 1944 },
+            "exitKind": "fallthrough",
+            "placements": 1,
+            "dropCountBeforeReset": 1
           }
         ]
       }

@@ -188,6 +188,7 @@ type Operation struct {
 	TrapCategories   []string
 	FlagClearedFirst bool
 	SourceForm       string
+	ExitKind         string
 }
 
 // TerminatorKind identifies the only legal block-ending control transfers.
@@ -261,6 +262,15 @@ type ReassignmentFact struct {
 type RegionScopeFact struct {
 	Region             hir.Span
 	Placements         []hir.Span
+	CleanupBeforeReset []CleanupAction
+	Reset              hir.Span
+	EarlyResets        []RegionResetFact
+}
+
+// RegionResetFact records one non-fallthrough exit that cleans and resets a lexical region.
+type RegionResetFact struct {
+	Exit               hir.Span
+	ExitKind           string
 	CleanupBeforeReset []CleanupAction
 	Reset              hir.Span
 }

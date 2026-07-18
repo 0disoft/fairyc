@@ -164,6 +164,7 @@ func regionTraceEqual(actual []interpreter.RegionEvent, expected []regionExpecta
 	}
 	for index := range actual {
 		if !regionSpanEqual(actual[index].Region, expected[index].Region) ||
+			actual[index].ExitKind != expected[index].ExitKind ||
 			actual[index].Placements != expected[index].Placements ||
 			actual[index].DropCountBeforeReset != expected[index].DropCountBeforeReset {
 			return false

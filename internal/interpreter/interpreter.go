@@ -37,6 +37,7 @@ type DropEvent struct {
 // RegionEvent records one normal lexical reset and the work completed before it.
 type RegionEvent struct {
 	Region               hir.Span
+	ExitKind             string
 	Placements           int
 	DropCountBeforeReset int
 }
@@ -402,7 +403,8 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					return callCompletion{}, fmt.Errorf("region reset in %q uses inactive region %d", function.Name, operation.Symbol)
 				}
 				r.regionTrace = append(r.regionTrace, RegionEvent{
-					Region: region.span, Placements: len(region.placements), DropCountBeforeReset: len(r.dropTrace),
+					Region: region.span, ExitKind: operation.ExitKind,
+					Placements: len(region.placements), DropCountBeforeReset: len(r.dropTrace),
 				})
 				delete(regions, operation.Symbol)
 			case mir.OperationMove:

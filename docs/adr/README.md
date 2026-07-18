@@ -30,6 +30,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0018-stage-0-option-constructors-and-match.md`: qualified compiler-known Option construction and exhaustive shallow Option matching.
 - `0019-stage-0-result-must-use-dataflow.md`: local, parameter, branch, loop, overwrite, and early-exit Result obligations.
 - `0020-stage-0-region-mir-and-interpreter.md`: normal lexical Region placement, inner cleanup, reset trace, and `V1403`.
+- `0021-stage-0-region-early-exit-cleanup.md`: scope-indexed Region reset for `return`, Result `?`, and nested exits.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

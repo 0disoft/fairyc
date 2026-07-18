@@ -15,8 +15,8 @@ func TestMIRVerifierManifestV0(t *testing.T) {
 	if report.SeedsRun != 8 {
 		t.Fatalf("Run() seeds = %d, want 8", report.SeedsRun)
 	}
-	if report.CasesRun != 16 {
-		t.Fatalf("Run() cases = %d, want 16", report.CasesRun)
+	if report.CasesRun != 17 {
+		t.Fatalf("Run() cases = %d, want 17", report.CasesRun)
 	}
 	for _, failure := range report.Failures {
 		t.Errorf("%s: %s", failure.CaseID, failure.Detail)

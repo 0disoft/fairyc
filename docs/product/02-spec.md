@@ -92,9 +92,10 @@ An ordinary region may contain only values that do not need drop. A resource-awa
 
 Region-parameter origins, permitted returns, package-resolved local-region escape, resource-placement rejection, capability storage, and direct-construction rejection are versioned in `spec/fixtures/region/manifest-v1.json`. The lexical escape case names the explicit standard-library package instance that owns the opaque fixture `Arena` type.
 
-Verified MIR and interpreter fixtures additionally execute normal lexical Region entry, inert
-placement, inner-resource cleanup, and reset. Early control-flow exits across a Region boundary
-remain deferred until general scope-indexed cleanup edges are executable.
+Verified MIR and interpreter fixtures additionally execute lexical Region entry, inert placement,
+inner-resource cleanup, and reset on fallthrough, direct `return`, Result `?` propagation, and
+nested Region exits. `break` and `continue` remain deferred with their unimplemented control-flow
+forms.
 
 ## Errors and control flow
 

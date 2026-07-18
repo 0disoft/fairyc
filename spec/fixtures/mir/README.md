@@ -6,4 +6,4 @@ The manifest freezes source-linked semantic events rather than textual MIR, bloc
 
 `schema-v0.json` uses JSON Schema draft 2020-12 and rejects unknown fields. Source paths are case-root-relative, `/`-separated, and paired with half-open UTF-8 byte spans.
 
-`internal/mirfixture` executes all eight cases through parser, resolver, typer, Flow, mutable-local MIR lowering, and the MIR verifier. The Region case proves one inert placement and inner-resource cleanup before normal reset. Passing this runner proves only the source-linked v0 subset above; verifier mutations and interpreter outcomes are owned by their separate manifests, and no backend is proven.
+`internal/mirfixture` executes all nine cases through parser, resolver, typer, Flow, mutable-local MIR lowering, and the MIR verifier. The Region cases prove inert placement, inner-resource cleanup before normal reset, direct return and Result-propagation resets, and inner-to-outer nested reset order. Passing this runner proves only the source-linked v0 subset above; verifier mutations and interpreter outcomes are owned by their separate manifests, and no backend is proven.

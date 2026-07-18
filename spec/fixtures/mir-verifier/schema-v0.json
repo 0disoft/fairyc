@@ -69,6 +69,7 @@
             "escape-region-value",
             "extend-loan-past-origin",
             "insert-source-form",
+            "invalidate-region-reset-exit-kind",
             "move-resource-projection",
             "remove-exit-cleanup",
             "remove-flag-initialization",

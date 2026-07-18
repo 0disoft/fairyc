@@ -80,6 +80,7 @@
               { "$ref": "#/$defs/move" },
               { "$ref": "#/$defs/resourceReassignment" },
               { "$ref": "#/$defs/regionScope" },
+              { "$ref": "#/$defs/regionEarlyReset" },
               { "$ref": "#/$defs/cleanupPath" },
               { "$ref": "#/$defs/resultBranch" },
               { "$ref": "#/$defs/trapPath" },
@@ -164,6 +165,27 @@
           "minItems": 1,
           "items": { "$ref": "#/$defs/span" }
         },
+        "cleanupBeforeReset": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/cleanupAction" }
+        },
+        "reset": { "$ref": "#/$defs/span" }
+      }
+    },
+    "regionEarlyReset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "function", "region", "placements", "exit", "exitKind", "cleanupBeforeReset", "reset"],
+      "properties": {
+        "kind": { "const": "region-early-reset" },
+        "function": { "$ref": "#/$defs/functionName" },
+        "region": { "$ref": "#/$defs/span" },
+        "placements": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/span" }
+        },
+        "exit": { "$ref": "#/$defs/span" },
+        "exitKind": { "enum": ["return", "propagate"] },
         "cleanupBeforeReset": {
           "type": "array",
           "items": { "$ref": "#/$defs/cleanupAction" }
