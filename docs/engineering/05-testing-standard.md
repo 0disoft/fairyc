@@ -9,7 +9,10 @@ The Go frontend executes every case in `spec/fixtures/parser/manifest-v0.json` t
 `internal/parserfixture`. Source, lexer, syntax, AST, budget, containment, and manifest behavior
 also have focused unit tests. Lexer and parser fuzz targets run their deterministic seed corpus
 during ordinary Go tests and assert lossless reconstruction, stable output, valid spans, bounded
-exhaustion, and error-free AST lowering. Semantic, resource, Region, Result, MIR, MIR-verifier,
+exhaustion, and error-free AST lowering. Experimental CLI tests cover argument routing, reserved
+stable commands, deterministic content-safe JSON, schema synchronization, human diagnostics,
+bounded file reads, source-root escape rejection, output failure, and clean syntax checks.
+Semantic, resource, Region, Result, MIR, MIR-verifier,
 resolved-package-graph, interpreter, backend, ABI, runtime, and Atlas runners do not exist yet;
 their fixtures remain future evidence requirements.
 

@@ -6,6 +6,27 @@
 
 This document owns planned `fairyc` command semantics. It does not claim that a command is implemented. Implemented commands must be marked with tests and a language revision before release.
 
+## Implemented experimental frontend surface
+
+The current Go prototype implements two deliberately unstable developer commands:
+
+| Command | Purpose | Output |
+| --- | --- | --- |
+| `fairyc experimental parse <file.fy>` | Parse one source-root-relative file and verify lossless syntax plus error-free AST lowering | `fairyc.experimental.parse/v0` JSON on stdout, defined by `spec/cli/experimental-parse-v0.schema.json` |
+| `fairyc experimental check-syntax <file.fy>` | Check lexing, parsing, recovery, module identity, lossless reconstruction, and error-free AST lowering | Success line on stdout or human diagnostics on stderr |
+
+These commands treat the current directory as their temporary source root, accept exactly one
+relative regular file, reject root escape including escaping symbolic links, and read no more than
+the current implementation byte budget. Their spelling and numeric exit codes are prototype-only.
+The JSON report includes relative path, byte length, module identity, token kinds, CST node kinds,
+half-open byte spans, child indexes, and structured diagnostics. It excludes source text, token
+text, cooked literal values, and absolute local paths. When bounded loading detects more bytes than
+the implementation limit, `truncated` is true and `byteLength` is a lower bound rather than a
+claimed full-file size.
+
+`fairyc check` remains unimplemented. It must not be aliased to `check-syntax`, because the planned
+command below also requires name resolution, typing, resource, borrow, region, and effect analysis.
+
 ## Stage 0 surface
 
 | Command | Purpose | Code generation |
@@ -18,7 +39,9 @@ This document owns planned `fairyc` command semantics. It does not claim that a 
 | `fairyc explain <diagnostic-code>` | Explain a stable diagnostic code | No |
 | `fairyc targets` | Report known target profiles, status, evidence, and unavailable requirements | No |
 
-Exact positional syntax, package selection, workspace selection, target triples, feature flags, and configuration precedence remain UNDECIDED.
+Stable positional syntax, package selection, workspace selection, target triples, feature flags,
+and configuration precedence remain UNDECIDED. The implemented `experimental` spellings do not
+settle those stable decisions.
 
 ## General requirements
 

@@ -9,6 +9,7 @@ This directory contains versioned normative data that future compiler tests can 
 ## Current contents
 
 - `grammar/stage0.ebnf`: normative Stage 0 prototype grammar;
+- `cli/experimental-parse-v0.schema.json`: machine contract for the implemented experimental parse report;
 - `fixtures/parser/schema-v0.json`: parser-manifest schema;
 - `fixtures/parser/manifest-v0.json`: parser case index and expectations;
 - `fixtures/parser/cases/`: source-root-aware positive and negative mini-packages.

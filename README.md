@@ -13,9 +13,24 @@ The project is not trying to beat every hand-tuned C program or make every C own
 
 The first Stage 0 frontend slice now exists in Go: immutable source bytes, a lossless lexer,
 compact recoverable syntax, error-free AST lowering, deterministic `E00xx` diagnostics, and a
-runner for all parser v0 fixtures. There is no `fairyc` CLI, name resolver, typed HIR, MIR,
-interpreter, backend, standard library, runtime, package manager, supported target, or stable
+runner for all parser v0 fixtures. An explicitly unstable `fairyc experimental` CLI can inspect or
+syntax-check one source-root-relative `.fy` file. There is no stable CLI, name resolver, typed HIR,
+MIR, interpreter, backend, standard library, runtime, package manager, supported target, or stable
 language revision yet.
+
+## Try the parser prototype
+
+The following commands are manual developer examples, not agent command authority:
+
+```text
+go run ./cmd/fairyc experimental check-syntax examples/syntax/main.fy
+go run ./cmd/fairyc experimental parse examples/syntax/main.fy
+```
+
+Both commands treat the current directory as the temporary source root. `parse` emits versioned,
+deterministic JSON containing token and CST kinds and byte spans, but not source text, token text,
+literal values, or absolute paths. The official `fairyc check` command remains unavailable until
+name resolution, typing, and resource analysis exist.
 
 ## Design anchors
 

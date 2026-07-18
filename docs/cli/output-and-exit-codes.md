@@ -21,6 +21,28 @@ This repository type owns command behavior, arguments, flags, config loading, ex
 - Config precedence and default behavior: UNDECIDED
 - Runtime compatibility floor: UNDECIDED
 
+## Experimental frontend v0
+
+The implemented `fairyc experimental` commands use provisional process codes only for prototype
+automation. They are not the stable exit-code taxonomy:
+
+| Code | Experimental meaning |
+| ---: | --- |
+| `0` | The requested syntax operation completed without source diagnostics. |
+| `2` | Invocation or bounded input loading failed. |
+| `3` | One or more source diagnostics were produced. |
+| `4` | An internal invariant or output write failed. |
+
+`experimental parse` writes one `fairyc.experimental.parse/v0` JSON document, defined by
+`spec/cli/experimental-parse-v0.schema.json`, to stdout even when source diagnostics exist.
+`experimental check-syntax` writes human diagnostics to stderr and does not emit a machine result.
+Neither command uses ANSI escapes. Human positions are one-based line and byte-column values backed
+by the diagnostic's zero-based half-open byte span.
+
+The JSON schema intentionally excludes source text, token text, cooked literal values, and absolute
+paths. A report can therefore identify structure and spans without becoming a second copy of the
+source file. Stable `--json` behavior remains UNDECIDED.
+
 ## Review Blockers
 
 - A command changes without updating help, examples, output, and exit-code expectations.

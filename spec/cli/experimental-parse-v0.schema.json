@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fairyc:experimental-parse:v0",
+  "title": "Fairy C experimental parse report v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "sourcePath",
+    "byteLength",
+    "truncated",
+    "status",
+    "module",
+    "root",
+    "astLowered",
+    "tokens",
+    "nodes",
+    "diagnostics"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "fairyc.experimental.parse/v0"
+    },
+    "sourcePath": {
+      "type": "string",
+      "pattern": "^[^\\\\]+\\.fy$"
+    },
+    "byteLength": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Observed bytes. When truncated is true, this is only a lower bound."
+    },
+    "truncated": {
+      "type": "boolean"
+    },
+    "status": {
+      "enum": ["ok", "diagnostics"]
+    },
+    "module": {
+      "type": "string"
+    },
+    "root": {
+      "type": "integer",
+      "minimum": -1
+    },
+    "astLowered": {
+      "type": "boolean"
+    },
+    "tokens": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/token"
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/node"
+      }
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/diagnostic"
+      }
+    }
+  },
+  "$defs": {
+    "token": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "startByte", "endByte"],
+      "properties": {
+        "kind": {
+          "enum": [
+            "invalid",
+            "eof",
+            "trivia",
+            "identifier",
+            "keyword",
+            "integer",
+            "float",
+            "string",
+            "byte-string",
+            "c-string",
+            "symbol",
+            "unknown"
+          ]
+        },
+        "startByte": { "type": "integer", "minimum": 0 },
+        "endByte": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "startByte", "endByte", "children"],
+      "properties": {
+        "id": { "type": "integer", "minimum": 0 },
+        "kind": { "type": "string", "minLength": 1 },
+        "startByte": { "type": "integer", "minimum": 0 },
+        "endByte": { "type": "integer", "minimum": 0 },
+        "children": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "startByte", "endByte", "line", "byteColumn", "repair"],
+      "properties": {
+        "code": { "type": "string", "pattern": "^[EAV][0-9]{4}$" },
+        "startByte": { "type": "integer", "minimum": 0 },
+        "endByte": { "type": "integer", "minimum": 0 },
+        "line": { "type": "integer", "minimum": 1 },
+        "byteColumn": { "type": "integer", "minimum": 1 },
+        "repair": { "enum": ["none", "insert", "skip", "synchronize", "exit"] },
+        "expected": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

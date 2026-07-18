@@ -17,6 +17,18 @@
 
 Only `check`, a minimal `build`, compiler inspection, and semantic test execution are Stage 0 candidates. The remaining commands are product commitments only after their contracts and implementations exist.
 
+## Current prototype
+
+The Go frontend currently exposes only `fairyc experimental parse <file.fy>` and
+`fairyc experimental check-syntax <file.fy>`. These are developer inspection commands whose
+spelling and numeric exit codes may change. They do not resolve names, check types, analyze
+resources, generate code, or execute programs. In particular, they do not satisfy the planned
+`fairyc check` contract.
+
+Human developers can run the examples shown in the repository `README.md`. Agent verification uses
+the configured `fairyc_go_build`, `fairyc_go_vet`, and `fairyc_go_test` intents; the manual `go run`
+examples do not grant agent command authority.
+
 `targets` must distinguish `emittable`, `conformant`, and `supported`. The planned `x86_64-linux-gnu` profile cannot be reported as supported before its runtime, standard-library, ABI, toolchain, and clean-CI fixtures pass without skips.
 
 ## Profile principle
