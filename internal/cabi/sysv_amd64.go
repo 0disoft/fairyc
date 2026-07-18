@@ -272,6 +272,9 @@ func (e *Engine) Plan(signature Signature) (Plan, error) {
 	if signature.Result == nil {
 		result.Return = ReturnLocation{Kind: LocationVoid, Registers: []Register{}, Classification: Classification{Classes: []Class{}}}
 	} else {
+		if err := validateSignatureType(*signature.Result); err != nil {
+			return Plan{}, fmt.Errorf("classify return: %w", err)
+		}
 		classification, err := e.Classify(*signature.Result)
 		if err != nil {
 			return Plan{}, fmt.Errorf("classify return: %w", err)
@@ -288,6 +291,9 @@ func (e *Engine) Plan(signature Signature) (Plan, error) {
 		}
 	}
 	for index, parameter := range signature.Parameters {
+		if err := validateSignatureType(parameter); err != nil {
+			return Plan{}, fmt.Errorf("classify parameter %d: %w", index, err)
+		}
 		classification, err := e.Classify(parameter)
 		if err != nil {
 			return Plan{}, fmt.Errorf("classify parameter %d: %w", index, err)
@@ -307,6 +313,13 @@ func (e *Engine) Plan(signature Signature) (Plan, error) {
 		result.Arguments = append(result.Arguments, argument)
 	}
 	return result, nil
+}
+
+func validateSignatureType(value layout.Type) error {
+	if value.Kind == layout.KindArray {
+		return Error{Code: ErrorInvalidType, Detail: "fixed arrays require a containing C-representable struct at a function boundary"}
+	}
+	return nil
 }
 
 func assignRegisters(classes []Class, integers, vectors []Register, integerStart, vectorStart int) []Register {

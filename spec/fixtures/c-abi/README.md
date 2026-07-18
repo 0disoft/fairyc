@@ -7,8 +7,8 @@ only semantic class and register identities, not Go-host layout or local compile
 
 The pass cases cover integer and SSE scalars, pointers, function pointers, explicitly based C
 enums, arrays, mixed and homogeneous aggregates, hidden memory returns, integer and SSE exhaustion,
-and whole-aggregate rollback. Failure cases keep layout rejection and invalid floating enum bases
-fail-closed. `internal/cabifixture` must execute every case and may expose pass cases to a separate
+and whole-aggregate rollback. Failure cases keep direct array signatures, layout rejection, and
+invalid floating enum bases fail-closed. `internal/cabifixture` must execute every case and may expose pass cases to a separate
 native probe only after the complete manifest is clean.
 
 This schema is not a public FFI manifest, serialized compiler IR, stable native Fairy ABI, or proof

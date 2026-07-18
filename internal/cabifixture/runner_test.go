@@ -17,7 +17,7 @@ func TestRepositoryCABIManifestPasses(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Run() error = %v", err)
 	}
-	if report.Target != target.X8664LinuxGNU || report.CasesRun != 16 || report.Passed != 16 || len(report.Failures) != 0 {
+	if report.Target != target.X8664LinuxGNU || report.CasesRun != 17 || report.Passed != 17 || len(report.Failures) != 0 {
 		t.Fatalf("Run() report = %+v", report)
 	}
 	targetID, cases, err := NativeProbeCases(manifest)

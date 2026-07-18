@@ -18,6 +18,18 @@
   ],
   "cases": [
     {
+      "id": "fail.direct-array-result",
+      "signature": {
+        "result": {
+          "kind": "array",
+          "length": 2,
+          "element": { "kind": "language-scalar", "name": "i32" }
+        },
+        "parameters": []
+      },
+      "expect": { "status": "fail", "errorCode": "invalid-type" }
+    },
+    {
       "id": "fail.empty-aggregate",
       "signature": {
         "result": { "kind": "struct", "name": "Empty", "fields": [] },
@@ -74,9 +86,18 @@
       "id": "pass.float-array-return",
       "signature": {
         "result": {
-          "kind": "array",
-          "length": 3,
-          "element": { "kind": "language-scalar", "name": "f32" }
+          "kind": "struct",
+          "name": "FloatArray",
+          "fields": [
+            {
+              "name": "values",
+              "type": {
+                "kind": "array",
+                "length": 3,
+                "element": { "kind": "language-scalar", "name": "f32" }
+              }
+            }
+          ]
         },
         "parameters": []
       },
@@ -92,9 +113,18 @@
       "id": "pass.hidden-return-shifts-integer",
       "signature": {
         "result": {
-          "kind": "array",
-          "length": 3,
-          "element": { "kind": "language-scalar", "name": "i64" }
+          "kind": "struct",
+          "name": "LargeReturn",
+          "fields": [
+            {
+              "name": "values",
+              "type": {
+                "kind": "array",
+                "length": 3,
+                "element": { "kind": "language-scalar", "name": "i64" }
+              }
+            }
+          ]
         },
         "parameters": [
           { "kind": "language-scalar", "name": "i64" },

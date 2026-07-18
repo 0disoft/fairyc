@@ -54,7 +54,7 @@ func TestPlanAssignsMixedReturnAndHiddenResultPointer(t *testing.T) {
 	if plan.Return.Kind != LocationRegisters || !slices.Equal(plan.Return.Registers, []Register{"xmm0", "rax"}) {
 		t.Fatalf("mixed return = %+v", plan.Return)
 	}
-	large := array(scalar("i64"), 3)
+	large := structure(field("values", array(scalar("i64"), 3)))
 	plan, err = engine.Plan(Signature{Result: &large, Parameters: []layout.Type{scalar("i64"), scalar("f64")}})
 	if err != nil {
 		t.Fatal(err)
@@ -118,6 +118,11 @@ func TestPlanSupportsVoidAndRejectsInvalidTypes(t *testing.T) {
 		if !ok || code != test.code {
 			t.Errorf("%s error = %v, code %q", test.name, err, code)
 		}
+	}
+	directArray := array(scalar("i32"), 2)
+	_, err = engine.Plan(Signature{Result: &directArray})
+	if code, ok := Code(err); !ok || code != ErrorInvalidType || !strings.Contains(err.Error(), "containing C-representable struct") {
+		t.Fatalf("direct array signature error = %v, code %q", err, code)
 	}
 }
 

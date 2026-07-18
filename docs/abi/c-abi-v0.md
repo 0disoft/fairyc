@@ -102,7 +102,7 @@ target-laid-out types. It assigns `INTEGER`, `SSE`, or `MEMORY` eightbyte classe
 arguments to the six integer and eight SSE argument registers; maps returns to the two integer and
 two SSE return registers; rolls an aggregate wholly to the stack when either register family is
 insufficient; and reserves `rdi`/returns `rax` for a hidden memory-result pointer. The versioned v0
-C ABI manifest records 16 exact cases, of which 14 are pass cases available to a later native
+C ABI manifest records 17 exact cases, of which 14 are pass cases available to a later native
 probe. This host-independent plan is not a Clang/GCC crossing, does not expose exact stack-area
 offsets, and does not clear the `bidirectional-c-abi-fixtures` target marker.
 

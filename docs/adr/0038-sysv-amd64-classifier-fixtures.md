@@ -43,10 +43,12 @@ boundary.
 5. Register returns use `rax`/`rdx` for integer classes and `xmm0`/`xmm1` for SSE classes. A
    `MEMORY` result uses a hidden pointer in `rdi`, shifts later integer parameters, and returns that
    pointer in `rax`. Void results have no class or register.
-6. `fairyc.c-abi-fixtures/v0` owns the repository input and expected-plan vocabulary. Sixteen
-   canonical cases cover two fail-closed inputs and fourteen pass cases for scalar, pointer, enum,
+6. `fairyc.c-abi-fixtures/v0` owns the repository input and expected-plan vocabulary. Seventeen
+   canonical cases cover three fail-closed inputs and fourteen pass cases for scalar, pointer, enum,
    function-pointer, array, homogeneous, mixed, hidden-return, exhaustion, and rollback behavior.
    The schema reuses the layout fixture's recursive type definition instead of copying it.
+   Direct array parameters and returns fail because C adjusts array parameters to pointers and
+   forbids array return types; fixed arrays cross only inside a C-representable struct.
 7. `internal/cabifixture.NativeProbeCases` exposes isolated copies of pass cases only after all
    sixteen cases match. This is preparation for a separate bidirectional native probe, not proof
    that such a probe ran.

@@ -183,8 +183,9 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   offset, and top-level padding facts. `fairyc.layout-fixtures/v0` currently executes 14 pass/fail
   cases. This target-mechanics path does not implement the corresponding source syntax.
 - `internal/cabi` consumes those same target and layout facts for the closed SysV AMD64 Stage 0
-  type vocabulary. `fairyc.c-abi-fixtures/v0` executes 16 exact class and register-plan cases,
+  type vocabulary. `fairyc.c-abi-fixtures/v0` executes 17 exact class and register-plan cases,
   including hidden returns and whole-aggregate rollback under integer or SSE register exhaustion.
+  Direct array signatures fail because fixed arrays cross C only inside a representable struct.
   This does not implement source FFI or prove a native compiler crossing.
 - The nine valid layout cases additionally generate one deterministic private C11 probe. The Linux
   native runner compiles, links, and executes it with Clang/GCC and low/optimized profiles, checking
