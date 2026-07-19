@@ -164,7 +164,7 @@ missing target evidence marker.
 A separate fail-closed Linux/amd64 command is now present to compile those cases with Clang and GCC
 at `-O0` and `-O2`, link a closed conformance runtime, and compare process outcomes plus exact
 source-linked resource-drop sequences. Product emission and product builds contain no trace observer. It cannot run on
-this Windows host because no WSL distribution or Linux Clang/GCC execution environment is installed, and its hosted CI result
+this Windows host because no Linux Clang/GCC execution environment is installed, and its hosted CI result
 has not yet been observed. The target therefore remains unsupported.
 A provisional source-independent `fairyc explain <diagnostic-code>` lookup reports reserved Stage 0
 meanings and categories without reading source or invoking a toolchain. A provisional `fairyc targets`
@@ -183,6 +183,8 @@ The following commands are manual developer examples, not agent command authorit
 ```text
 go run ./cmd/fairyc explain E1101
 go run ./cmd/fairyc targets
+go run ./cmd/fairyc experimental run-host examples/windows_smoke/main.fy --profile optimized
+go run ./cmd/fairyc experimental build-host examples/windows_smoke/main.fy --profile optimized --output build/fairyc-windows-smoke.exe
 go run ./cmd/fairyc experimental check-syntax examples/syntax/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/syntax/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/semantic/main.fy examples/semantic/math.fy

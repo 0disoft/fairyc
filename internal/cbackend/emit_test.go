@@ -675,6 +675,32 @@ func TestEmitMaterializesCheckedDivisionDivisor(t *testing.T) {
 	}
 }
 
+func TestEmitConstructsCheckedArithmeticWithoutSignedCOperations(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn main() -> i32 {
+    let added: i32 = 2147483647 + 1;
+    -added
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, required := range []string{
+		"static int32_t fy_bits_to_i32(uint32_t bits)",
+		"fy_bits_to_i32((uint32_t)(INT32_C(2147483647)) + (uint32_t)(INT32_C(1)))",
+		"fy_bits_to_i32(UINT32_C(0) - (uint32_t)(fy_l_",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+	if strings.Contains(unit.Source, "(INT32_C(2147483647)) + (INT32_C(1))") {
+		t.Fatalf("generated C exposes checked signed overflow as a constant C expression:\n%s", unit.Source)
+	}
+}
+
 func TestEmitFlatI32Resource(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

@@ -38,8 +38,8 @@ features and makes no Windows target, ABI, FFI, standard-library, or conformance
    admitted host-smoke subset has no console API.
 6. `examples/windows_smoke/main.fy` is the checked-in executable smoke. The configured
    `fairyc_windows_host_smoke` intent retains and directly executes an optimized result-42 PE, then
-   runs result 42, result -1, and division-by-zero trap cases through both low and optimized MSVC
-   profiles.
+   runs result 42, result -1, division-by-zero, remainder-by-zero, signed-division-overflow,
+   integer-overflow, and invalid-shift cases through both low and optimized MSVC profiles.
 7. This does not add `x86_64-windows-msvc` to target inspection, does not validate Windows aggregate
    layout or calling convention, and does not make a `build-host` PE a supported distributable
    artifact. It is not self-hosting: the compiler remains the Go Stage 0 implementation.

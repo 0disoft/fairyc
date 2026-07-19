@@ -1162,15 +1162,18 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 			case mir.OperationUse:
 			case mir.OperationArithmeticCheck:
 				e.features["checked-arithmetic"] = struct{}{}
+				e.needsBitcast = true
 			case mir.OperationCheckedDivision:
 				e.features["checked-division"] = struct{}{}
 			case mir.OperationUnary:
 				if !supportedUnary(operation.Operator) {
 					return CapabilityError{Function: function.Name, Feature: "unary operator " + strconv.Quote(operation.Operator)}
 				}
+				if operation.Operator == "-" || operation.Operator == "~" {
+					e.needsBitcast = true
+				}
 				if operation.Operator == "~" {
 					e.features["scalar-bitwise"] = struct{}{}
-					e.needsBitcast = true
 				}
 			case mir.OperationBinary:
 				if !supportedBinary(operation.Operator) {
@@ -1179,6 +1182,8 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 				switch operation.Operator {
 				case "==", "!=", "<", "<=", ">", ">=":
 					e.features["scalar-comparison"] = struct{}{}
+				case "+", "-", "*":
+					e.needsBitcast = true
 				case "&", "^", "|":
 					e.features["scalar-bitwise"] = struct{}{}
 					e.needsBitcast = true
@@ -2350,7 +2355,7 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		case "+":
 			fmt.Fprintf(output, "    fy_l_%d = %s;\n", operation.DestinationLocal, value)
 		case "-":
-			fmt.Fprintf(output, "    fy_l_%d = -(%s);\n", operation.DestinationLocal, value)
+			fmt.Fprintf(output, "    fy_l_%d = fy_bits_to_i32(UINT32_C(0) - (uint32_t)(%s));\n", operation.DestinationLocal, value)
 		case "!":
 			fmt.Fprintf(output, "    fy_l_%d = (%s == INT32_C(0)) ? INT32_C(1) : INT32_C(0);\n", operation.DestinationLocal, value)
 		case "~":
@@ -2371,7 +2376,7 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		}
 		switch operation.Operator {
 		case "+", "-", "*":
-			fmt.Fprintf(output, "    fy_l_%d = (%s) %s (%s);\n", operation.DestinationLocal, leftValue, operation.Operator, rightValue)
+			fmt.Fprintf(output, "    fy_l_%d = fy_bits_to_i32((uint32_t)(%s) %s (uint32_t)(%s));\n", operation.DestinationLocal, leftValue, operation.Operator, rightValue)
 		case "/", "%":
 			output.WriteString("    fy_checked_divisor = ")
 			output.WriteString(rightValue)

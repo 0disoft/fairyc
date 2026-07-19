@@ -84,7 +84,7 @@ Nested MIR effects are emitted as separate C statements and temporaries. Functio
 
 | Fairy C operation | C transport rule |
 | --- | --- |
-| Ordinary signed arithmetic | Check with a defined helper or widened/unsigned method, trap on overflow, then construct the result. |
+| Ordinary signed arithmetic | Check with a defined helper or widened method, trap on overflow, then construct the result through corresponding-width unsigned arithmetic and a bit-preserving conversion. Generated C never evaluates the signed operation itself. |
 | Wrapping arithmetic | Perform corresponding-width unsigned arithmetic and convert by a specified bit-preserving path. |
 | Saturating arithmetic | Use explicit comparisons or helpers with no overflowing intermediate. |
 | Checked arithmetic | Return an explicit tagged result without invoking C undefined behavior. |
