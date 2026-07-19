@@ -61,7 +61,9 @@ Linux toolchain is locally executable.
 `internal/layout` is the next boundary: it turns those facts into checked array and aggregate size,
 alignment, offset, and padding results before any backend chooses C syntax. Separate Linux GNU and
 Windows MSVC manifests hold host-independent expectations. The generated native C probe checks
-every valid Linux case only; the Windows pass cases still lack an MSVC-native layout oracle.
+every valid Linux case through its configured runner. A separate Windows generator turns all eight
+Windows pass cases into MSVC C11 assertions; the configured host smoke compiles and executes them at
+low and optimized profiles. Neither local/configured path is a hosted receipt by itself.
 `internal/cabi` then turns the Linux type and layout facts into host-independent SysV AMD64
 eightbyte and register plans. The Linux runner turns validated pass plans into separate Clang/GCC
 caller and callee objects in both directions. Generated Fairy callers now cross scalar, pointer,

@@ -55,6 +55,7 @@ regenerate, or override compiler source.
 - Target layout engine: internal/layout/
 - Target layout fixtures: spec/fixtures/layout/manifest-v0.json and spec/fixtures/layout/manifest-windows-msvc-v0.json
 - Target layout fixture runner: internal/layoutfixture/
+- Windows MSVC native layout probe generator: internal/windowslayoutprobe/
 - SysV AMD64 C ABI classifier: internal/cabi/
 - C ABI classification fixtures: spec/fixtures/c-abi/manifest-v0.json
 - C ABI fixture runner: internal/cabifixture/

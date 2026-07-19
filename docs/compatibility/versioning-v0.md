@@ -62,6 +62,9 @@ type-description format, native ABI profile, cache
 artifact, or C probe result. Adding a layout family or fixture-visible failure code requires a new
 fixture-contract decision; changing target sizes, alignments, field placement, or classifier
 meaning additionally requires the applicable target-schema or ABI-profile decision.
+Native probes derived from a manifest are versioned repository evidence consumers, not new target
+identities. A local compiler pass does not promote maturity without the declared coverage set and
+hosted receipt.
 
 `fairyc.c-abi-fixtures/v0` versions fixed-signature type inputs and expected SysV AMD64 class,
 register, stack, and hidden-return plans. It reuses the layout fixture's recursive type vocabulary

@@ -99,8 +99,10 @@ native intent remains unavailable on the current Windows host and no WSL path is
 `fairyc_windows_host_smoke` intent uses a bounded temporary source root to exercise both product
 paths through locally discovered x64 MSVC: `build-host` must produce a bounded PE that directly
 returns 42, and `run-host` must independently return 42 before every temporary artifact is removed.
-That receipt is Windows host smoke only; it is not Linux native parity or Windows target/ABI
-conformance.
+The same intent derives one non-POSIX C11 unit from the eight valid Windows layout cases, then
+compiles and executes it under low and optimized MSVC profiles. That receipt is local Windows host
+and partial layout evidence only; it is not Linux native parity, a hosted Windows receipt, complete
+Windows layout coverage, or Windows call/ABI conformance.
 
 ## Owners
 

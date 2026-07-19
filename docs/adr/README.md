@@ -84,6 +84,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0072-defined-checked-arithmetic-c-construction.md`: checked negation, addition, subtraction, and multiplication construct results through defined unsigned C operations after the verified trap edge.
 - `0073-executable-x86-64-windows-msvc-target-spec.md`: host-independent LLP64, Microsoft x64 stack, PE/COFF, unwind, and fail-closed maturity facts without promoting the Windows host smoke.
 - `0074-windows-msvc-llp64-layout-fixtures.md`: separate host-independent Windows scalar, pointer, unavailable-typedef, aggregate-offset, and padding observations without claiming a native MSVC probe.
+- `0075-windows-msvc-native-layout-probe.md`: deterministic non-POSIX C11 assertions for the eight valid Windows layout cases compiled and executed by local x64 MSVC at low and optimized profiles without maturity promotion.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

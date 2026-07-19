@@ -21,14 +21,15 @@ type WindowsHostToolchain struct {
 	Environment []string
 }
 
-// WindowsHostArtifact is one bounded PE executable produced only for local host smoke.
+// WindowsHostArtifact is one bounded PE executable produced for local MSVC validation.
+// It is not a distributable target artifact or a target-conformance receipt.
 type WindowsHostArtifact struct {
 	Bytes     []byte
 	Toolchain WindowsHostToolchain
 	Profile   Profile
 }
 
-// WindowsHostOutcome is one bounded host execution result. ExitCode preserves the program's i32 bits.
+// WindowsHostOutcome is one bounded local MSVC execution result. ExitCode preserves the program's i32 bits.
 type WindowsHostOutcome struct {
 	ExitCode int32
 	Output   string
@@ -116,28 +117,57 @@ func BuildWindowsHost(toolchain WindowsHostToolchain, profile Profile, unitSourc
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		return WindowsHostArtifact{}, fmt.Errorf("MSVC host build requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
 	}
+	if unitSource == "" || runtimeSource == "" {
+		return WindowsHostArtifact{}, fmt.Errorf("C unit and runtime source must be non-empty")
+	}
+	return buildWindowsMSVC(toolchain, profile, []windowsMSVCSource{
+		{Name: "unit.c", Contents: unitSource},
+		{Name: "runtime.c", Contents: runtimeSource},
+	})
+}
+
+// BuildWindowsMSVCProbe compiles one closed target-evidence probe with local x64 MSVC.
+func BuildWindowsMSVCProbe(toolchain WindowsHostToolchain, profile Profile, probeSource string) (WindowsHostArtifact, error) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		return WindowsHostArtifact{}, fmt.Errorf("MSVC layout probe requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
+	if probeSource == "" {
+		return WindowsHostArtifact{}, fmt.Errorf("MSVC layout probe source must be non-empty")
+	}
+	return buildWindowsMSVC(toolchain, profile, []windowsMSVCSource{{Name: "probe.c", Contents: probeSource}})
+}
+
+type windowsMSVCSource struct {
+	Name     string
+	Contents string
+}
+
+func buildWindowsMSVC(toolchain WindowsHostToolchain, profile Profile, sources []windowsMSVCSource) (WindowsHostArtifact, error) {
 	if profile != LowProfile && profile != OptimizedProfile {
 		return WindowsHostArtifact{}, fmt.Errorf("unsupported C profile %q", profile.Name)
 	}
 	if toolchain.Name != "msvc" || toolchain.Path == "" || toolchain.Version == "" || len(toolchain.Environment) == 0 {
 		return WindowsHostArtifact{}, fmt.Errorf("invalid resolved MSVC host toolchain")
 	}
-	if unitSource == "" || runtimeSource == "" {
-		return WindowsHostArtifact{}, fmt.Errorf("C unit and runtime source must be non-empty")
+	if len(sources) == 0 {
+		return WindowsHostArtifact{}, fmt.Errorf("MSVC build has no C sources")
 	}
 	temporaryRoot, err := os.MkdirTemp("", "fairyc-msvc-host-")
 	if err != nil {
 		return WindowsHostArtifact{}, fmt.Errorf("create MSVC host temp root: %w", err)
 	}
 	defer os.RemoveAll(temporaryRoot)
-	unitPath := filepath.Join(temporaryRoot, "unit.c")
-	runtimePath := filepath.Join(temporaryRoot, "runtime.c")
 	executablePath := filepath.Join(temporaryRoot, "program.exe")
-	if err := os.WriteFile(unitPath, []byte(unitSource), 0o600); err != nil {
-		return WindowsHostArtifact{}, fmt.Errorf("write C unit: %w", err)
-	}
-	if err := os.WriteFile(runtimePath, []byte(runtimeSource), 0o600); err != nil {
-		return WindowsHostArtifact{}, fmt.Errorf("write C runtime: %w", err)
+	sourcePaths := make([]string, 0, len(sources))
+	for _, source := range sources {
+		if source.Name == "" || filepath.Base(source.Name) != source.Name || filepath.Ext(source.Name) != ".c" || source.Contents == "" {
+			return WindowsHostArtifact{}, fmt.Errorf("MSVC build source is invalid")
+		}
+		path := filepath.Join(temporaryRoot, source.Name)
+		if err := os.WriteFile(path, []byte(source.Contents), 0o600); err != nil {
+			return WindowsHostArtifact{}, fmt.Errorf("write MSVC source %s: %w", source.Name, err)
+		}
+		sourcePaths = append(sourcePaths, path)
 	}
 	optimization := "/Od"
 	if profile == OptimizedProfile {
@@ -145,8 +175,9 @@ func BuildWindowsHost(toolchain WindowsHostToolchain, profile Profile, unitSourc
 	}
 	arguments := []string{
 		"/nologo", "/std:c11", "/TC", "/W4", "/WX", "/MT", optimization,
-		unitPath, runtimePath, "/Fe:" + executablePath, "/link", "/INCREMENTAL:NO",
 	}
+	arguments = append(arguments, sourcePaths...)
+	arguments = append(arguments, "/Fe:"+executablePath, "/link", "/INCREMENTAL:NO")
 	if _, err := runWindowsHostCommand(toolchain.Path, toolchain.Environment, temporaryRoot, arguments...); err != nil {
 		return WindowsHostArtifact{}, fmt.Errorf("%s", strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
 	}
@@ -162,12 +193,24 @@ func ExecuteWindowsHost(artifact WindowsHostArtifact) (WindowsHostOutcome, error
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		return WindowsHostOutcome{}, fmt.Errorf("MSVC host execution requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
 	}
+	return executeWindowsMSVCArtifact(artifact, "MSVC host")
+}
+
+// ExecuteWindowsMSVCProbe runs one locally compiled target-evidence probe.
+func ExecuteWindowsMSVCProbe(artifact WindowsHostArtifact) (WindowsHostOutcome, error) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		return WindowsHostOutcome{}, fmt.Errorf("MSVC layout probe execution requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
+	return executeWindowsMSVCArtifact(artifact, "MSVC layout probe")
+}
+
+func executeWindowsMSVCArtifact(artifact WindowsHostArtifact, label string) (WindowsHostOutcome, error) {
 	if len(artifact.Bytes) == 0 || len(artifact.Bytes) > maxArtifactBytes {
-		return WindowsHostOutcome{}, fmt.Errorf("MSVC host executable has invalid size %d", len(artifact.Bytes))
+		return WindowsHostOutcome{}, fmt.Errorf("%s executable has invalid size %d", label, len(artifact.Bytes))
 	}
 	temporaryRoot, err := os.MkdirTemp("", "fairyc-msvc-run-")
 	if err != nil {
-		return WindowsHostOutcome{}, fmt.Errorf("create MSVC execution temp root: %w", err)
+		return WindowsHostOutcome{}, fmt.Errorf("create %s execution temp root: %w", label, err)
 	}
 	defer os.RemoveAll(temporaryRoot)
 	executablePath := filepath.Join(temporaryRoot, "program.exe")
@@ -184,16 +227,16 @@ func ExecuteWindowsHost(artifact WindowsHostArtifact) (WindowsHostOutcome, error
 	command.Stderr = &output
 	err = command.Run()
 	if errors.Is(contextValue.Err(), context.DeadlineExceeded) {
-		return WindowsHostOutcome{}, fmt.Errorf("MSVC host executable exceeded %s", commandTimeout)
+		return WindowsHostOutcome{}, fmt.Errorf("%s executable exceeded %s", label, commandTimeout)
 	}
 	if output.truncated {
-		return WindowsHostOutcome{}, fmt.Errorf("MSVC host executable exceeded %d output bytes", maxProcessOutput)
+		return WindowsHostOutcome{}, fmt.Errorf("%s executable exceeded %d output bytes", label, maxProcessOutput)
 	}
 	exitCode := 0
 	if err != nil {
 		var exitError *exec.ExitError
 		if !errors.As(err, &exitError) {
-			return WindowsHostOutcome{}, fmt.Errorf("execute MSVC host artifact: %w", err)
+			return WindowsHostOutcome{}, fmt.Errorf("execute %s artifact: %w", label, err)
 		}
 		exitCode = exitError.ExitCode()
 	}

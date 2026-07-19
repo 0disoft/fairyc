@@ -7,11 +7,12 @@
     "docs/adr/0031-target-layout-engine-and-fixtures.md",
     "docs/adr/0073-executable-x86-64-windows-msvc-target-spec.md",
     "docs/adr/0074-windows-msvc-llp64-layout-fixtures.md",
+    "docs/adr/0075-windows-msvc-native-layout-probe.md",
     "docs/abi/c-abi-v0.md",
     "docs/compatibility/versioning-v0.md"
   ],
   "deferred": [
-    "native MSVC layout probes and a hosted Windows receipt",
+    "complete Windows C scalar layout coverage and a hosted MSVC layout-probe receipt",
     "Microsoft x64 argument and return classification, shadow-space placement, and bidirectional calls",
     "PE/COFF object, relocation, symbol, unwind, and CodeView/PDB inspection",
     "Windows runtime, UCRT/VCRuntime policy, standard library, target C emission, and distribution"

@@ -22,4 +22,7 @@ classification, generated product C, object metadata, or bidirectional C ABI beh
 Linux native runner consumes isolated copies of the 11 validated Linux pass cases, generates private
 numeric C11 types with recursive layout assertions, and is configured for Clang/GCC at low and
 optimized profiles. The 5 rejection cases remain Go-owned; a configured native path is not a hosted
-success receipt. The eight Windows pass candidates currently have no native MSVC probe consumer.
+success receipt. `internal/windowslayoutprobe` translates the eight Windows pass cases into a
+separate ISO C11 unit without POSIX headers. The configured Windows host smoke compiles and executes
+that unit with local x64 MSVC at low and optimized profiles. Those local executions do not prove a
+hosted receipt, complete Windows scalar coverage, calling convention, object metadata, or unwind.

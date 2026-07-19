@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0036-native-c-layout-probe.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0075-windows-msvc-native-layout-probe.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -322,7 +322,9 @@ Target layout assertions are versioned in `spec/fixtures/layout/manifest-v0.json
 `spec/fixtures/layout/manifest-windows-msvc-v0.json` for Windows. They fix the closed layout input
 vocabulary, size/alignment arithmetic, declaration-order offsets, top-level padding, and failure
 codes without creating a serialized compiler IR, source-level aggregate promise, or native ABI
-receipt. Only the Linux pass cases currently feed a configured native C probe.
+receipt. Linux pass cases feed the configured Clang/GCC native probe. The eight Windows pass cases
+feed a separate local x64 MSVC C11 probe at low and optimized profiles; this is not complete Windows
+layout coverage or a hosted receipt.
 
 Formatting, checking, testing, documentation, vendoring, binding generation, and ABI inspection are planned tool surfaces, not claims of current implementation.
 

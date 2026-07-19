@@ -90,8 +90,9 @@ Host-independent scalar,
 array, explicit-C-enum, pointer, and nested-aggregate layout execution now runs through 16 versioned
 Linux v0 cases. A separate nine-case Windows MSVC manifest covers LLP64-sensitive C `long`,
 `size_t`, pointer, function-pointer, explicit-enum, and nested-record expectations while rejecting
-the absent POSIX `ssize_t` identity. Its eight pass cases do not yet have a native MSVC probe. The
-eleven valid Linux cases generate one deterministic C11 plus POSIX-typedef layout probe configured
+the absent POSIX `ssize_t` identity. Its eight pass cases now generate one non-POSIX C11 assertion
+unit compiled and executed by local x64 MSVC at low and optimized profiles. The eleven valid Linux
+cases generate one deterministic C11 plus POSIX-typedef layout probe configured
 for four Clang/GCC and low/optimized executions. Those native runs remain unobserved on this Windows
 host. A host-independent SysV AMD64 classifier now executes 17 versioned cases for eightbyte
 classes, registers, exhaustion rollback, and hidden returns, but bidirectional native ABI fixtures
@@ -181,8 +182,9 @@ target-neutral generated-C unit. `run-host` executes a temporary PE and reports 
 canonical trap; `build-host` retains a no-overwrite `.exe` below `build/`. Both deliberately reject
 FFI, `@repr(C)`, exact `c::*` scalars, and standard-library linkage. A formal fail-closed
 `x86_64-windows-msvc` TargetSpec now records LLP64 and platform identities, and its separate
-nine-case host-independent layout ledger covers the first LLP64-sensitive expectations. Native MSVC
-layout probes, Windows x64 classification, PE/COFF objects, runtime, standard library, supported
+nine-case host-independent layout ledger covers the first LLP64-sensitive expectations. All eight
+pass cases now cross a local MSVC C11 layout probe twice, but full scalar coverage and a hosted
+receipt remain absent. Windows x64 classification, PE/COFF objects, runtime, standard library, supported
 distribution artifacts, and conformance remain later gates.
 
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
@@ -215,7 +217,7 @@ Exit gate: Atlas failure cannot change compilation; stale or incompatible maps f
 ## Later capability gates
 
 - `x86_64-linux-musl`: requires a separate libc, sysroot, startup, loader, and static-distribution profile.
-- `x86_64-windows-msvc`: the TargetSpec exists but requires executable LLP64 layout, Microsoft x64 calling, PE/COFF, UCRT/VCRuntime, and unwind fixtures.
+- `x86_64-windows-msvc`: the TargetSpec and first eight-case local layout probe exist, but complete hosted LLP64 layout evidence, Microsoft x64 calling, PE/COFF, UCRT/VCRuntime, and unwind fixtures remain required.
 - QBE or another fast backend: requires stable internal semantics, interpreter and C oracles, ABI coverage, and measured edit-build benefit.
 - LLVM backend: requires representative workloads that justify optimization and distribution cost after simpler paths are exhausted.
 - Generics and `Vec<T>`: require non-generic stability plus compile-time, code-size, active-payload, and diagnostics fixtures.

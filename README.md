@@ -61,8 +61,10 @@ scalars, data and function pointers, explicitly based C enums, fixed arrays, nes
 offsets, internal and tail padding, and fail-closed malformed or overflowing inputs. These are
 target-mechanics fixtures, not source-language aggregate support or native C ABI proof.
 A separate nine-case Windows ledger proves LLP64-sensitive C scalars, pointer-width values,
-unavailable POSIX `ssize_t`, and exact mixed-record padding inside the same engine. It has no native
-MSVC layout-probe receipt yet.
+unavailable POSIX `ssize_t`, and exact mixed-record padding inside the same engine. Its eight pass
+cases generate one private C11 assertion unit that the configured Windows smoke compiles and
+executes with local x64 MSVC at low and optimized profiles. This is a local probe path, not a hosted
+receipt, complete scalar coverage, call/return ABI proof, or target-emission claim.
 A host-independent SysV AMD64 classifier now executes 17 versioned C ABI plan cases over the same
 type and layout vocabulary, covering INTEGER/SSE/MEMORY classes, mixed and homogeneous returns,
 hidden result pointers, register exhaustion, and whole-aggregate rollback. Those plans are not yet
@@ -164,6 +166,10 @@ A deterministic native C11 plus explicit POSIX-typedef probe now translates the 
 types and is configured for Clang/GCC at `-O0` and `-O2`. This Windows host cannot execute those
 four probe runs, and no hosted success receipt has been observed, so `c-layout-probes` remains a
 missing target evidence marker.
+A separate Windows C11 probe translates the eight valid LLP64 cases into private numeric types and
+compiles and executes them twice with local x64 MSVC through the configured host smoke. The target
+marker remains missing until the declared scalar/layout subset and hosted Windows receipt are
+complete; this local probe does not exercise Microsoft x64 calls, PE/COFF metadata, or unwind data.
 A separate fail-closed Linux/amd64 command is now present to compile those cases with Clang and GCC
 at `-O0` and `-O2`, link a closed conformance runtime, and compare process outcomes plus exact
 source-linked resource-drop sequences. Product emission and product builds contain no trace observer. It cannot run on
@@ -276,6 +282,7 @@ or arbitrary link-input option.
 - Executable target description: `internal/target/`
 - Experimental target JSON schema: `spec/cli/experimental-target-spec-v0.schema.json`
 - Target layout engine and fixtures: `internal/layout/`, `spec/fixtures/layout/manifest-v0.json`, `spec/fixtures/layout/manifest-windows-msvc-v0.json`
+- Windows MSVC native layout probe generator: `internal/windowslayoutprobe/`
 - Resolved package graph fixtures: `spec/fixtures/package/manifest-v0.json`
 - MIR and C backend contracts: `docs/mir/`
 - Package identity and visibility: `docs/package/package-graph-v0.md`

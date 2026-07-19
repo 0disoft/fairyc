@@ -160,8 +160,11 @@ profile assumes MSVC's default signed plain `char` and therefore excludes `/J`.
 
 The shared layout engine now executes a separate nine-case Windows repository manifest. It proves
 LLP64-sensitive leaf layouts, rejects POSIX `ssize_t`, and computes one exact 32-byte mixed record
-with eight-byte aggregate alignment and explicit internal/trailing padding. Those are repository
-expectations, not native MSVC `sizeof`, `offsetof`, call, object, or unwind observations.
+with eight-byte aggregate alignment and explicit internal/trailing padding. Its eight pass cases
+now generate a private C11 unit with `sizeof`, `_Alignof`, field-size, and `offsetof` assertions.
+The configured Windows host smoke compiles and executes that unit with local x64 MSVC at low and
+optimized profiles. This is direct local layout evidence for those eight cases, not a hosted
+receipt, complete scalar table, call/return, object, or unwind observation.
 
 These entries define target facts. Every listed C scalar now has exact source transport, but the
 entries do not claim C-scalar value semantics, aggregate forms, or additional call classes in the
@@ -196,10 +199,10 @@ baseline, and provisioning gates. `fairyc experimental target-spec x86_64-linux-
 same immutable data without probing the host.
 
 The Windows evidence block reports no target emission subset and keeps all maturity booleans false.
-It lists the missing LLP64 layout probes, Microsoft x64 classifier and bidirectional crossings,
-PE/COFF object and unwind fixtures, runtime, standard library, hosted Windows receipt, target C
-emission profile, toolchain baseline, and provisioning gates. The target-neutral MSVC host smoke
-does not clear those markers.
+It lists the still-incomplete LLP64 layout-probe evidence, Microsoft x64 classifier and
+bidirectional crossings, PE/COFF object and unwind fixtures, runtime, standard library, hosted
+Windows receipt, target C emission profile, toolchain baseline, and provisioning gates. The local
+eight-case MSVC probe is deliberately insufficient to clear those markers.
 
 ## `ToolchainSpec`
 
@@ -225,7 +228,7 @@ The planned transport matrix uses Clang as the primary compiler and GCC as an in
 
 ## Later profiles
 
-`x86_64-linux-musl` needs a separate libc, startup, sysroot, dynamic-loader, and static-distribution profile even though its CPU ABI is SysV-derived. The declared `x86_64-windows-msvc` TargetSpec still needs executable LLP64 layout probes, four-register classification, PE/COFF objects, UCRT/VCRuntime, and unwind fixtures before any maturity promotion.
+`x86_64-linux-musl` needs a separate libc, startup, sysroot, dynamic-loader, and static-distribution profile even though its CPU ABI is SysV-derived. The declared `x86_64-windows-msvc` TargetSpec still needs complete executable LLP64 layout coverage plus a hosted receipt, four-register classification, PE/COFF objects, UCRT/VCRuntime, and unwind fixtures before any maturity promotion.
 
 ## External references
 

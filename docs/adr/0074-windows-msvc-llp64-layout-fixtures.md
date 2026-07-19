@@ -27,7 +27,7 @@ file would either feed the wrong compiler path or force platform branching into 
    trailing padding at bytes 28 through 31.
 4. `internal/layoutfixture` executes both repository manifests through the same strict JSON and
    target lookup path. Pass-case extraction remains isolated and deterministic.
-5. No Windows native probe consumes the extracted cases yet. The TargetSpec keeps
+5. At this gate no Windows native probe consumes the extracted cases. The TargetSpec keeps
    `c-layout-probes`, `hosted-windows-receipt`, ABI, object, and unwind evidence missing.
 
 ## Consequences
@@ -35,4 +35,4 @@ file would either feed the wrong compiler path or force platform branching into 
 - The Go host no longer needs to guess whether the Windows layout table actually drives the shared
   layout engine.
 - Linux native probe identity remains unchanged and cannot accidentally absorb Windows cases.
-- Agreement with actual MSVC `sizeof`, `_Alignof`, and `offsetof` remains the next layout gate.
+- ADR 0075 later adds a separate local MSVC consumer without changing this manifest boundary.
