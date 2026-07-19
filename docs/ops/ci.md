@@ -39,14 +39,15 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
   products, and requires exit `42` with no output. A missing compiler or libc identity fails the job
   instead of producing a skip.
 - The native job retains no generated C, object, executable, cache, or report artifact. Its bounded
-  `fairyc.native-c-report/v25` JSON report is written only to the job log and contains toolchain
+  `fairyc.native-c-report/v26` JSON report is written only to the job log and contains toolchain
   fingerprints, fixture IDs, the sorted layout-case IDs, and drop-trace, layout-probe, and
   sanitizer, ABI case/direction, SystemHeap, Buffer, Arena, text, Linux File, scalar Fairy-source
   foreign-call, individual exact `c::int`, negative-preserving `c::long`, `c::size_t`, and
   negative-preserving target `c::ssize_t` producer/consumer foreign-calls, the remaining twelve-type
   C-scalar family crossing, raw-pointer foreign-call, register/hidden-memory struct-result
   foreign-call, exact SystemHeap block source-call, exact
-  nested Buffer source-call, exact Arena/Region source-call, actual CStr validation source-call, actual
+  nested Buffer source-call, exact Arena/Region source-call, actual CStr validation source-call,
+  actual owned String/CString source-call, actual
   text-validation source-call, actual text-view
   output-record source-call, and product-build
   execution counts but no temporary path.
@@ -66,6 +67,9 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
   both rejected calls.
   The struct-result count requires one 8-byte INTEGER-class return and one 20-byte MEMORY-class
   hidden return to cross separate caller/callee objects in both compiler directions and profiles.
+  The owned-text source-call count requires the exact nested heap, Buffer, String, CString, view, and
+  result records to cross the real `OwnedTextSource()` copy/view/append/drop and
+  from-text/view/drop helpers, with observable bytes, terminator, statuses, and normalized release.
 
 The containing Mustflow workspace provides local parity through `fairyc_go_vet` and
 `fairyc_go_test`, plus the Linux-only `fairyc_native_c_test` intent. Those intents additionally

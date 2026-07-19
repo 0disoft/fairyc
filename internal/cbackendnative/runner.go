@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v25"
+	reportSchemaVersion = "fairyc.native-c-report/v26"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -911,6 +911,272 @@ var cStrValidationSourceCallExpectedCFragments = []string{
 	" = &fy_l_",
 }
 
+const ownedTextSourceCallSmokeSource = `module main;
+@repr(C)
+struct fy_std_system_heap_block_v0 {
+    data: *mut void;
+    size: c::size_t;
+    alignment: c::size_t;
+}
+@repr(C)
+struct fy_std_buffer_v0 {
+    block: fy_std_system_heap_block_v0;
+    length: c::size_t;
+}
+@repr(C)
+struct fy_std_text_view_v0 {
+    data: *u8;
+    length: c::size_t;
+}
+@repr(C)
+struct fy_std_string_v0 {
+    bytes: fy_std_buffer_v0;
+}
+@repr(C)
+struct fy_std_cstr_view_v0 {
+    data: *u8;
+    length: c::size_t;
+}
+@repr(C)
+struct fy_std_cstring_v0 {
+    bytes: fy_std_buffer_v0;
+}
+@repr(C)
+struct fy_std_owned_text_result_v0 {
+    status: u32;
+    allocation_status: u32;
+}
+
+@link_name("fairyc_fixture_owned_text_zero_size_t")
+unsafe extern C fn zero_size_t() -> c::size_t;
+@link_name("fairyc_fixture_owned_text_storage")
+unsafe extern C fn text_storage() -> *u8;
+@link_name("fairyc_fixture_owned_text_storage_length")
+unsafe extern C fn text_storage_length() -> c::size_t;
+
+@link_name("fy_std_string_copy_v0")
+unsafe extern C fn string_copy(
+    input: *fy_std_text_view_v0,
+    output: *mut fy_std_string_v0
+) -> fy_std_owned_text_result_v0;
+@link_name("fy_std_string_as_view_v0")
+unsafe extern C fn string_as_view(
+    input: *fy_std_string_v0,
+    output: *mut fy_std_text_view_v0
+) -> fy_std_owned_text_result_v0;
+@link_name("fy_std_string_append_v0")
+unsafe extern C fn string_append(
+    value: *mut fy_std_string_v0,
+    suffix: *fy_std_text_view_v0
+) -> fy_std_owned_text_result_v0;
+@link_name("fy_std_string_drop_v0")
+unsafe extern C fn string_drop(value: *mut fy_std_string_v0) -> fy_std_owned_text_result_v0;
+
+@link_name("fy_std_cstring_from_text_v0")
+unsafe extern C fn cstring_from_text(
+    input: *fy_std_text_view_v0,
+    output: *mut fy_std_cstring_v0
+) -> fy_std_owned_text_result_v0;
+@link_name("fy_std_cstring_as_view_v0")
+unsafe extern C fn cstring_as_view(
+    input: *fy_std_cstring_v0,
+    output: *mut fy_std_cstr_view_v0
+) -> fy_std_owned_text_result_v0;
+@link_name("fy_std_cstring_drop_v0")
+unsafe extern C fn cstring_drop(value: *mut fy_std_cstring_v0) -> fy_std_owned_text_result_v0;
+
+@link_name("fairyc_fixture_string_view_is_fairy")
+unsafe extern C fn string_view_is_fairy(view: *fy_std_text_view_v0) -> u32;
+@link_name("fairyc_fixture_string_view_is_fairy_twice")
+unsafe extern C fn string_view_is_fairy_twice(view: *fy_std_text_view_v0) -> u32;
+@link_name("fairyc_fixture_string_is_empty")
+unsafe extern C fn string_is_empty(value: *fy_std_string_v0) -> u32;
+@link_name("fairyc_fixture_cstr_view_is_fairy")
+unsafe extern C fn cstr_view_is_fairy(view: *fy_std_cstr_view_v0) -> u32;
+@link_name("fairyc_fixture_cstring_is_empty")
+unsafe extern C fn cstring_is_empty(value: *fy_std_cstring_v0) -> u32;
+
+fn main() -> i32 {
+    let zero: c::size_t = unsafe { zero_size_t() };
+    let storage: *u8 = unsafe { text_storage() };
+    let storage_length: c::size_t = unsafe { text_storage_length() };
+    let input: fy_std_text_view_v0 = fy_std_text_view_v0 {
+        data: storage,
+        length: storage_length,
+    };
+
+    let string_block: fy_std_system_heap_block_v0 = fy_std_system_heap_block_v0 {
+        data: null,
+        size: zero,
+        alignment: zero,
+    };
+    let string_buffer: fy_std_buffer_v0 = fy_std_buffer_v0 {
+        block: string_block,
+        length: zero,
+    };
+    var owned_string: fy_std_string_v0 = fy_std_string_v0 { bytes: string_buffer };
+    var string_view: fy_std_text_view_v0 = fy_std_text_view_v0 {
+        data: null,
+        length: zero,
+    };
+    let copied: fy_std_owned_text_result_v0 = unsafe {
+        string_copy(
+            &input as *fy_std_text_view_v0,
+            &mut owned_string as *mut fy_std_string_v0
+        )
+    };
+    let viewed_once: fy_std_owned_text_result_v0 = unsafe {
+        string_as_view(
+            &owned_string as *fy_std_string_v0,
+            &mut string_view as *mut fy_std_text_view_v0
+        )
+    };
+    let observed_once: u32 = unsafe {
+        string_view_is_fairy(&string_view as *fy_std_text_view_v0)
+    };
+    let appended: fy_std_owned_text_result_v0 = unsafe {
+        string_append(
+            &mut owned_string as *mut fy_std_string_v0,
+            &input as *fy_std_text_view_v0
+        )
+    };
+    let viewed_twice: fy_std_owned_text_result_v0 = unsafe {
+        string_as_view(
+            &owned_string as *fy_std_string_v0,
+            &mut string_view as *mut fy_std_text_view_v0
+        )
+    };
+    let observed_twice: u32 = unsafe {
+        string_view_is_fairy_twice(&string_view as *fy_std_text_view_v0)
+    };
+    let dropped_string: fy_std_owned_text_result_v0 = unsafe {
+        string_drop(&mut owned_string as *mut fy_std_string_v0)
+    };
+    let string_empty: u32 = unsafe {
+        string_is_empty(&owned_string as *fy_std_string_v0)
+    };
+
+    let cstring_block: fy_std_system_heap_block_v0 = fy_std_system_heap_block_v0 {
+        data: null,
+        size: zero,
+        alignment: zero,
+    };
+    let cstring_buffer: fy_std_buffer_v0 = fy_std_buffer_v0 {
+        block: cstring_block,
+        length: zero,
+    };
+    var owned_cstring: fy_std_cstring_v0 = fy_std_cstring_v0 { bytes: cstring_buffer };
+    var cstr_view: fy_std_cstr_view_v0 = fy_std_cstr_view_v0 {
+        data: null,
+        length: zero,
+    };
+    let created_cstring: fy_std_owned_text_result_v0 = unsafe {
+        cstring_from_text(
+            &input as *fy_std_text_view_v0,
+            &mut owned_cstring as *mut fy_std_cstring_v0
+        )
+    };
+    let viewed_cstring: fy_std_owned_text_result_v0 = unsafe {
+        cstring_as_view(
+            &owned_cstring as *fy_std_cstring_v0,
+            &mut cstr_view as *mut fy_std_cstr_view_v0
+        )
+    };
+    let observed_cstring: u32 = unsafe {
+        cstr_view_is_fairy(&cstr_view as *fy_std_cstr_view_v0)
+    };
+    let dropped_cstring: fy_std_owned_text_result_v0 = unsafe {
+        cstring_drop(&mut owned_cstring as *mut fy_std_cstring_v0)
+    };
+    let cstring_empty: u32 = unsafe {
+        cstring_is_empty(&owned_cstring as *fy_std_cstring_v0)
+    };
+
+    if copied.status == 0 && copied.allocation_status == 0 &&
+        viewed_once.status == 0 && viewed_once.allocation_status == 0 && observed_once == 1 &&
+        appended.status == 0 && appended.allocation_status == 0 &&
+        viewed_twice.status == 0 && viewed_twice.allocation_status == 0 && observed_twice == 1 &&
+        dropped_string.status == 0 && dropped_string.allocation_status == 0 && string_empty == 1 &&
+        created_cstring.status == 0 && created_cstring.allocation_status == 0 &&
+        viewed_cstring.status == 0 && viewed_cstring.allocation_status == 0 && observed_cstring == 1 &&
+        dropped_cstring.status == 0 && dropped_cstring.allocation_status == 0 && cstring_empty == 1 {
+        42
+    } else {
+        0
+    }
+}
+`
+
+const ownedTextSourceCallBridge = `
+static const uint8_t fairyc_fixture_owned_text_bytes[] = {
+    UINT8_C(70), UINT8_C(97), UINT8_C(105), UINT8_C(114), UINT8_C(121)
+};
+
+size_t fairyc_fixture_owned_text_zero_size_t(void) { return (size_t)0; }
+
+const uint8_t *fairyc_fixture_owned_text_storage(void) {
+    return fairyc_fixture_owned_text_bytes;
+}
+
+size_t fairyc_fixture_owned_text_storage_length(void) {
+    return sizeof(fairyc_fixture_owned_text_bytes);
+}
+
+static uint32_t fairyc_fixture_bytes_are_fairy(const uint8_t *data, size_t length) {
+    return data != NULL && length == (size_t)5 &&
+           data[0] == UINT8_C(70) && data[1] == UINT8_C(97) &&
+           data[2] == UINT8_C(105) && data[3] == UINT8_C(114) &&
+           data[4] == UINT8_C(121) ? UINT32_C(1) : UINT32_C(0);
+}
+
+uint32_t fairyc_fixture_string_view_is_fairy(const struct fy_std_text_view_v0 *view) {
+    return view != NULL ? fairyc_fixture_bytes_are_fairy(view->data, view->length) : UINT32_C(0);
+}
+
+uint32_t fairyc_fixture_string_view_is_fairy_twice(const struct fy_std_text_view_v0 *view) {
+    return view != NULL && view->data != NULL && view->length == (size_t)10 &&
+           fairyc_fixture_bytes_are_fairy(view->data, (size_t)5) == UINT32_C(1) &&
+           fairyc_fixture_bytes_are_fairy(view->data + (size_t)5, (size_t)5) == UINT32_C(1) ?
+           UINT32_C(1) : UINT32_C(0);
+}
+
+uint32_t fairyc_fixture_string_is_empty(const struct fy_std_string_v0 *value) {
+    return value != NULL && value->bytes.block.data == NULL &&
+           value->bytes.block.size == (size_t)0 && value->bytes.block.alignment == (size_t)0 &&
+           value->bytes.length == (size_t)0 ? UINT32_C(1) : UINT32_C(0);
+}
+
+uint32_t fairyc_fixture_cstr_view_is_fairy(const struct fy_std_cstr_view_v0 *view) {
+    return view != NULL && fairyc_fixture_bytes_are_fairy(view->data, view->length) == UINT32_C(1) &&
+           view->data[view->length] == UINT8_C(0) ? UINT32_C(1) : UINT32_C(0);
+}
+
+uint32_t fairyc_fixture_cstring_is_empty(const struct fy_std_cstring_v0 *value) {
+    return value != NULL && value->bytes.block.data == NULL &&
+           value->bytes.block.size == (size_t)0 && value->bytes.block.alignment == (size_t)0 &&
+           value->bytes.length == (size_t)0 ? UINT32_C(1) : UINT32_C(0);
+}
+`
+
+var ownedTextSourceCallExpectedCFragments = []string{
+	"struct fy_std_owned_text_result_v0 {",
+	"uint32_t status;",
+	"uint32_t allocation_status;",
+	"_Static_assert(sizeof(struct fy_std_owned_text_result_v0) == UINT64_C(8)",
+	"struct fy_std_string_v0 {",
+	"struct fy_std_buffer_v0 bytes;",
+	"struct fy_std_cstring_v0 {",
+	"extern struct fy_std_owned_text_result_v0 fy_std_string_copy_v0(const struct fy_std_text_view_v0 * fy_a_0, struct fy_std_string_v0 * fy_a_1);",
+	"extern struct fy_std_owned_text_result_v0 fy_std_string_as_view_v0(const struct fy_std_string_v0 * fy_a_0, struct fy_std_text_view_v0 * fy_a_1);",
+	"extern struct fy_std_owned_text_result_v0 fy_std_string_append_v0(struct fy_std_string_v0 * fy_a_0, const struct fy_std_text_view_v0 * fy_a_1);",
+	"extern struct fy_std_owned_text_result_v0 fy_std_string_drop_v0(struct fy_std_string_v0 * fy_a_0);",
+	"extern struct fy_std_owned_text_result_v0 fy_std_cstring_from_text_v0(const struct fy_std_text_view_v0 * fy_a_0, struct fy_std_cstring_v0 * fy_a_1);",
+	"extern struct fy_std_owned_text_result_v0 fy_std_cstring_as_view_v0(const struct fy_std_cstring_v0 * fy_a_0, struct fy_std_cstr_view_v0 * fy_a_1);",
+	"extern struct fy_std_owned_text_result_v0 fy_std_cstring_drop_v0(struct fy_std_cstring_v0 * fy_a_0);",
+	" = fy_std_string_copy_v0(",
+	" = fy_std_cstring_from_text_v0(",
+}
+
 // Compiler records the bounded toolchain fingerprint used by one native run.
 type Compiler struct {
 	Name    string `json:"name"`
@@ -942,6 +1208,7 @@ type Report struct {
 	ArenaSourceCallExecutions          int        `json:"arenaSourceCallExecutions"`
 	TextViewExecutions                 int        `json:"textViewExecutions"`
 	OwnedTextExecutions                int        `json:"ownedTextExecutions"`
+	OwnedTextSourceCallExecutions      int        `json:"ownedTextSourceCallExecutions"`
 	LinuxFileExecutions                int        `json:"linuxFileExecutions"`
 	ForeignCallExecutions              int        `json:"foreignCallExecutions"`
 	ForeignCIntCallExecutions          int        `json:"foreignCIntCallExecutions"`
@@ -1143,6 +1410,11 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.CStrValidationSourceCallExecutions = cStrValidationSourceCallExecutions
+	ownedTextSourceCallExecutions, err := runOwnedTextSourceCallProbe(temporaryRoot, toolchains, ownedTextSource)
+	if err != nil {
+		return Report{}, err
+	}
+	report.OwnedTextSourceCallExecutions = ownedTextSourceCallExecutions
 	linuxFileSource, err := cstdlib.LinuxFileSource()
 	if err != nil {
 		return Report{}, fmt.Errorf("load Linux File implementation: %w", err)
@@ -1478,6 +1750,21 @@ func runCStrValidationSourceCallProbe(temporaryRoot string, toolchains []cdriver
 		ownedTextSource+cStrValidationSourceCallBridge,
 		42,
 		cStrValidationSourceCallExpectedCFragments,
+	)
+}
+
+func runOwnedTextSourceCallProbe(temporaryRoot string, toolchains []cdriver.Toolchain, ownedTextSource string) (int, error) {
+	if ownedTextSource == "" {
+		return 0, fmt.Errorf("owned-text source-call probe requires a non-empty implementation")
+	}
+	return runForeignSourceProbe(
+		temporaryRoot,
+		toolchains,
+		"owned-text-source-call",
+		ownedTextSourceCallSmokeSource,
+		ownedTextSource+ownedTextSourceCallBridge,
+		42,
+		ownedTextSourceCallExpectedCFragments,
 	)
 }
 

@@ -38,7 +38,10 @@ C consumers. A consuming Buffer conversion must move storage only after validati
    successful hosted run. No hosted receipt has been observed.
 10. ADR 0060 later supersedes only the fully source-disconnected CStr-validation boundary: an
     internal generated-Fairy caller now crosses the exact view record into the real bounded C
-    validator. Owned String/CString construction and result mapping remain source-disconnected.
+    validator.
+11. ADR 0062 later supersedes the remaining raw source-disconnected lifecycle boundary: a generated
+    Fairy caller now crosses exact String/CString and result records through seven real C helpers.
+    Public safe resource ownership and source `Result` mapping remain disconnected.
 
 ## Consequences
 

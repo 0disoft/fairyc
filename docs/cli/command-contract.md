@@ -107,8 +107,9 @@ The exact C-scalar slices emit C `int`, LP64-sensitive `long`, `<stddef.h>` `siz
 consumer calls. `ssize_t` additionally fixes `_POSIX_C_SOURCE 200809L` before headers and preserves
 negative values. They do not accept literals or operators, do not
 accept raw pointers to C scalars, and do not alias the types to coincidentally sized Fairy integers.
-The exact internal text-view symbols are a closed project-owned allowlist; the `fy_` prefix does not
-become generally callable. The output-record source probe can emit a pointer call, but ordinary
+The exact internal SystemHeap, Buffer, Arena/Region, text-view, CStr, String, and CString symbols
+exercised by native source probes form a closed project-owned allowlist; the `fy_` prefix does not
+become generally callable. These probes can emit pointer and struct-result calls, but ordinary
 `build` supplies no companion source, object, library, search path, or arbitrary linker argument;
 the selected C driver must resolve the symbol from its ordinary closed link environment or the build
 fails. `experimental run` never binds host symbols and reports the interpreter capability boundary.

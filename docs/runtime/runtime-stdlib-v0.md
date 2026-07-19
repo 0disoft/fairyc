@@ -181,8 +181,17 @@ probe constructs the exact CStr view transport, obtains three bounded nonempty s
 the companion C unit, and calls the real `fy_std_cstr_validate_v0`. It requires valid storage to
 publish a length excluding the terminator, interior NUL to return status 4, missing final NUL to
 return status 3, and both failures to leave the prior valid view unchanged. This is raw internal FFI
-evidence; owned String/CString construction, source `Result` mapping, `&CStr` borrow origins, and the
-public safe `std::text` API remain disconnected.
+evidence.
+
+A second generated-Fairy source probe uses the exact nested SystemHeap block, Buffer, text view,
+String, CStr view, CString, and two-`u32` operation-result records. It calls the real String copy,
+immutable view, append, second view, and drop helpers, then the real CString from-text, CStr view, and
+drop helpers. C observers require `Fairy`, `FairyFairy`, the CString terminator immediately after the
+logical view, and canonical empty storage after both drops. All operation and allocation statuses
+must be zero. The C-only owned-text probe remains responsible for invalid UTF-8, failed Buffer moves,
+self-overlap, interior-NUL rollback, empty CString, and malformed-state negatives. Public safe
+String/CString resources, source `Result` mapping, `&str`/`&CStr` borrow origins, automatic linkage,
+and the `std::text` API remain disconnected.
 
 A `c"..."` literal provides allocation-free immutable `&CStr` storage with one compiler-appended trailing NUL and rejects a decoded interior NUL. It is source syntax, not a runtime constructor. `b"..."` similarly provides immutable static bytes without claiming UTF-8.
 

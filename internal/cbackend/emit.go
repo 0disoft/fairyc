@@ -868,6 +868,13 @@ var admittedStandardLibrarySymbols = map[string]struct{}{
 	"fy_std_text_utf8_valid_v0":        {},
 	"fy_std_text_validate_utf8_v0":     {},
 	"fy_std_cstr_validate_v0":          {},
+	"fy_std_string_copy_v0":            {},
+	"fy_std_string_as_view_v0":         {},
+	"fy_std_string_append_v0":          {},
+	"fy_std_string_drop_v0":            {},
+	"fy_std_cstring_from_text_v0":      {},
+	"fy_std_cstring_as_view_v0":        {},
+	"fy_std_cstring_drop_v0":           {},
 }
 
 var generatedCNames = map[string]struct{}{

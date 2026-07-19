@@ -261,7 +261,9 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   helpers. Exact generated node, Arena, and Region records additionally cross real initialization,
   begin, zeroed allocation through `void **`, reset, and drop. An exact generated CStr view record
   crosses the real bounded validator with valid, interior-NUL, and unterminated storage and observes
-  unchanged output on both failures. Report v25 records those four source-call counters plus
+  unchanged output on both failures. Exact nested String/CString records additionally cross the real
+  copy/view/append/drop and from-text/view/drop helpers and observe bytes, termination, statuses, and
+  normalized release. Report v26 records those five standard-library source-call counters plus
   `foreignCStructResultCallExecutions` for the register and hidden-memory result pair.
   Its closed
   `drop-trace-v0` emission profile assigns source/type/span identities to dense site IDs and compares

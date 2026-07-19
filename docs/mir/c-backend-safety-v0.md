@@ -133,8 +133,9 @@ included-header macro with that name before the prototype. `main`, generated `fy
 C11 keywords, and identifiers consumed by the generated preamble are rejected. The only current
 exceptions to the generated `fy_` namespace are the exact allowlisted internal standard-library
 symbols for SystemHeap allocate/deallocate, Buffer initialize/zeroed-resize/drop, Arena initialize,
-Region begin/zeroed-allocation/reset, Arena drop, and text validation/output initialization; the
-rest of the prefix remains closed. Typed null and an exact
+Region begin/zeroed-allocation/reset, Arena drop, text validation/output initialization, bounded
+CStr validation, String copy/view/append/drop, and CString from-text/view/drop; the rest of the
+prefix remains closed. Typed null and an exact
 direct-local borrow-to-raw-pointer cast are the only
 source-constructed raw pointers. The cast requires unsafe provenance, preserves the pointee type,
 forbids mutability strengthening, lowers to a verified MIR raw-address operation, and emits plain
@@ -185,17 +186,20 @@ report; they do not expand the eighteen interpreter-owned differential cases.
 Every C-scalar probe uses hand-written C producers and consumers so each value crosses a generated
 typed local without requiring a Fairy C literal. The family probe uses exactly representable finite
 floating values and makes no NaN, infinity, signed-zero, rounding, or floating-environment claim.
-`fairyc.native-c-report/v25` separately records four `foreignCStructResultCallExecutions`, four
+`fairyc.native-c-report/v26` separately records four `foreignCStructResultCallExecutions`, four
 `systemHeapSourceCallExecutions`, four
 `bufferSourceCallExecutions`, four `arenaSourceCallExecutions`, and four
-`cStrValidationSourceCallExecutions`. The first crosses an exact generated `void *`/`size_t` block into the
-real SystemHeap C unit. The second nests that block in the exact Buffer record, calls the real
+`cStrValidationSourceCallExecutions`, plus four `ownedTextSourceCallExecutions`. The SystemHeap count
+crosses an exact generated `void *`/`size_t` block into the real SystemHeap C unit. The Buffer count
+nests that block in the exact Buffer record, calls the real
 initialize, zeroed-resize, and drop helpers, and observes initialized bytes plus normalized release.
-The third crosses exact self-linked node, Arena, and Region records into the real Arena unit,
+The Arena count crosses exact self-linked node, Arena, and Region records into the real Arena unit,
 observes zeroed allocation through `void **`, and verifies reset/drop generation transitions. The
-fourth crosses the exact CStr view into the owned-text C unit, distinguishes valid, interior-NUL, and
-unterminated storage, and observes failure-atomic output. These are internal transport probes, not
-public allocator, Buffer, Arena, lexical Region, or safe text APIs.
+CStr count crosses the exact view into the owned-text C unit, distinguishes valid, interior-NUL, and
+unterminated storage, and observes failure-atomic output. The owned-text count crosses exact nested
+String/CString and result records into real copy/view/append/drop and from-text/view/drop helpers,
+then observes bytes, termination, success statuses, and normalized release. These are internal
+transport probes, not public allocator, Buffer, Arena, lexical Region, or safe text APIs.
 The struct-result count requires a generated Fairy caller to receive both a register-sized and a
 hidden-memory result from a separately compiled hand-written C callee in both compiler directions
 and profiles; it does not admit aggregate parameters.

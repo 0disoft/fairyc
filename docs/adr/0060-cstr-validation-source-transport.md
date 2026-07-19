@@ -53,3 +53,6 @@ features exist.
 - The existing C-only owned-text probe remains responsible for String/CString ownership, Buffer
   moves, append overlap, allocation rollback, drop, empty CString, and malformed-record coverage.
 - Native execution remains configured but unobserved on this Windows host.
+
+ADR 0062 later connects the successful raw String/CString lifecycle through exact generated records.
+Safe resource ownership, source `Result` mapping, and public `std::text` methods remain separate.

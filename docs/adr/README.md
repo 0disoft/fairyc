@@ -71,6 +71,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0059-arena-region-source-transport.md`: exact self-linked Arena/Region records, one opaque `void **` output slot, and a generated Fairy caller crossing the real Arena C unit.
 - `0060-cstr-validation-source-transport.md`: exact CStr view transport, nonempty bounded storage, failure-atomic output, and a generated Fairy caller crossing the real owned-text C unit.
 - `0061-repr-c-struct-foreign-result-transport.md`: nonempty `@repr(C)` foreign results with generated-Fairy register and hidden-memory return crossings while aggregate parameters stay closed.
+- `0062-owned-text-source-transport.md`: exact nested String/CString lifecycle calls from generated Fairy source with real by-value results, byte/terminator observers, and normalized drop.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

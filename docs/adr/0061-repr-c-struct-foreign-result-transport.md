@@ -46,3 +46,6 @@ exhaustion, and ownership questions. They remain separate gates.
 - Register and hidden-memory results now have generated-Fairy crossing coverage, but mixed
   INTEGER/SSE results, nested result interaction, and aggregate parameters remain separate tests.
 - Native execution remains configured but unobserved on this Windows host.
+
+ADR 0062 immediately consumes the two-`u32` result transport for real String and CString C helper
+calls; it does not turn that raw record into the public source `Result` representation.
