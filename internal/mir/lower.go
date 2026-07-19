@@ -15,6 +15,10 @@ func Lower(input hir.Package) (Program, error) {
 	if err != nil {
 		return Program{}, err
 	}
+	enumTypes, err := lowerEnumTypes(input)
+	if err != nil {
+		return Program{}, err
+	}
 	resourceTypes, err := lowerResourceTypes(input)
 	if err != nil {
 		return Program{}, err
@@ -23,8 +27,8 @@ func Lower(input hir.Package) (Program, error) {
 	if err != nil {
 		return Program{}, err
 	}
-	program := Program{StructTypes: structTypes, ResourceTypes: resourceTypes, ForeignFunctions: foreignFunctions}
-	properties := newTypeProperties(resourceTypes, structTypes)
+	program := Program{StructTypes: structTypes, EnumTypes: enumTypes, ResourceTypes: resourceTypes, ForeignFunctions: foreignFunctions}
+	properties := newTypeProperties(resourceTypes, structTypes, enumTypes)
 	for _, module := range input.Modules {
 		for index := range module.Functions {
 			function := &module.Functions[index]
@@ -46,6 +50,54 @@ func Lower(input hir.Package) (Program, error) {
 		return 0
 	})
 	return program, nil
+}
+
+func lowerEnumTypes(input hir.Package) ([]EnumType, error) {
+	var result []EnumType
+	seen := make(map[hir.Type]struct{})
+	for _, module := range input.Modules {
+		for _, enumeration := range module.Enums {
+			if enumeration.Type == "" || enumeration.Type == hir.TypeInvalid || enumeration.Name == "" {
+				return nil, fmt.Errorf("enum %s::%s has no concrete identity", module.Path, enumeration.Name)
+			}
+			if _, duplicate := seen[enumeration.Type]; duplicate {
+				return nil, fmt.Errorf("duplicate enum type %q", enumeration.Type)
+			}
+			seen[enumeration.Type] = struct{}{}
+			definition := EnumType{
+				Type: enumeration.Type, Name: enumeration.Name, Span: enumeration.Span,
+				Entity: enumTypeEntity(enumeration.Type), Variants: make([]EnumVariant, 0, len(enumeration.Variants)),
+			}
+			variantNames := make(map[string]struct{}, len(enumeration.Variants))
+			for _, variant := range enumeration.Variants {
+				if variant.Name == "" {
+					return nil, fmt.Errorf("enum %q has an empty variant name", enumeration.Type)
+				}
+				if _, duplicate := variantNames[variant.Name]; duplicate {
+					return nil, fmt.Errorf("enum %q has duplicate variant %q", enumeration.Type, variant.Name)
+				}
+				variantNames[variant.Name] = struct{}{}
+				lowered := EnumVariant{Name: variant.Name, Span: variant.Span, Fields: make([]EnumField, 0, len(variant.Fields))}
+				fieldNames := make(map[string]struct{}, len(variant.Fields))
+				for _, field := range variant.Fields {
+					if field.Name == "" || field.Type == "" || field.Type == hir.TypeInvalid {
+						return nil, fmt.Errorf("enum %q variant %q has an invalid field", enumeration.Type, variant.Name)
+					}
+					if _, duplicate := fieldNames[field.Name]; duplicate {
+						return nil, fmt.Errorf("enum %q variant %q has duplicate field %q", enumeration.Type, variant.Name, field.Name)
+					}
+					fieldNames[field.Name] = struct{}{}
+					lowered.Fields = append(lowered.Fields, EnumField{Name: field.Name, Type: field.Type, Span: field.Span})
+				}
+				definition.Variants = append(definition.Variants, lowered)
+			}
+			result = append(result, definition)
+		}
+	}
+	slices.SortFunc(result, func(left, right EnumType) int {
+		return strings.Compare(string(left.Type), string(right.Type))
+	})
+	return result, nil
 }
 
 func lowerStructTypes(input hir.Package) ([]StructType, error) {
@@ -443,6 +495,8 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		return l.lowerResultVariant(expression)
 	case "option-variant":
 		return l.lowerOptionVariant(expression)
+	case "enum-variant":
+		return l.lowerEnumVariant(expression)
 	case "binary":
 		if len(expression.Children) != 2 {
 			return Operand{}, fmt.Errorf("binary expression has %d children", len(expression.Children))
@@ -703,7 +757,42 @@ func (l *functionLowerer) lowerOptionVariant(expression *hir.Expression) (Operan
 	return Operand{Kind: OperandLocal, Local: destination}, nil
 }
 
+func (l *functionLowerer) lowerEnumVariant(expression *hir.Expression) (Operand, error) {
+	definition := l.properties.Enum(expression.Type)
+	if definition == nil || expression.Variant == "" || len(expression.Children) != len(expression.Fields) {
+		return Operand{}, fmt.Errorf("malformed enum variant %q with %d values and %d fields", expression.Variant, len(expression.Children), len(expression.Fields))
+	}
+	variant, found := enumVariantDefinition(definition, expression.Variant)
+	if !found || !sameNames(expression.Fields, enumFieldNames(variant.Fields)) {
+		return Operand{}, fmt.Errorf("enum variant %q fields do not match type %q", expression.Variant, expression.Type)
+	}
+	operands := make([]Operand, 0, len(expression.Children))
+	for index := range expression.Children {
+		value, err := l.lowerExpression(&expression.Children[index])
+		if err != nil {
+			return Operand{}, err
+		}
+		if value.Kind == OperandInvalid {
+			return Operand{}, fmt.Errorf("enum payload field %q has no value", expression.Fields[index])
+		}
+		operands = append(operands, value)
+	}
+	destination := l.newTemporary()
+	l.appendOperation(Operation{
+		Kind: OperationEnumConstruct, Span: expression.Span, DestinationLocal: destination,
+		Operands: operands, Fields: slices.Clone(expression.Fields), Variant: expression.Variant, Type: expression.Type,
+	})
+	return Operand{Kind: OperandLocal, Local: destination}, nil
+}
+
 func (l *functionLowerer) lowerMatch(expression *hir.Expression) (Operand, error) {
+	if len(expression.Children) == 1 && l.properties.Enum(expression.Children[0].Type) != nil {
+		return l.lowerEnumMatch(expression)
+	}
+	return l.lowerBuiltinMatch(expression)
+}
+
+func (l *functionLowerer) lowerBuiltinMatch(expression *hir.Expression) (Operand, error) {
 	if len(expression.Children) != 1 || len(expression.Arms) != 2 {
 		return Operand{}, fmt.Errorf("built-in match has %d scrutinees and %d arms", len(expression.Children), len(expression.Arms))
 	}
@@ -826,6 +915,166 @@ func (l *functionLowerer) lowerMatch(expression *hir.Expression) (Operand, error
 		return Operand{}, nil
 	}
 	return Operand{Kind: OperandLocal, Local: destination}, nil
+}
+
+func (l *functionLowerer) lowerEnumMatch(expression *hir.Expression) (Operand, error) {
+	if len(expression.Children) != 1 {
+		return Operand{}, fmt.Errorf("enum match has %d scrutinees", len(expression.Children))
+	}
+	definition := l.properties.Enum(expression.Children[0].Type)
+	if definition == nil || len(expression.Arms) != len(definition.Variants) || len(definition.Variants) == 0 {
+		return Operand{}, fmt.Errorf("enum match for %q has %d arms, want %d", expression.Children[0].Type, len(expression.Arms), len(definition.Variants))
+	}
+	scrutinee, err := l.lowerExpression(&expression.Children[0])
+	if err != nil {
+		return Operand{}, err
+	}
+	if scrutinee.Kind == OperandInvalid {
+		return Operand{}, fmt.Errorf("enum match scrutinee has no value")
+	}
+	branchLive := cloneLive(l.live)
+	blocks := make(map[string]BlockID, len(definition.Variants))
+	successors := make([]BlockID, 0, len(definition.Variants))
+	variants := make([]string, 0, len(definition.Variants))
+	for _, variant := range definition.Variants {
+		block := l.newBlock()
+		blocks[variant.Name] = block
+		successors = append(successors, block)
+		variants = append(variants, variant.Name)
+	}
+	joinBlock := l.newBlock()
+	l.terminate(Terminator{
+		Kind: TerminatorSwitch, Span: expression.Children[0].Span, Successors: successors, UnwindSuccessor: NoBlock,
+		SwitchKind: "enum", SwitchType: definition.Type, SwitchVariants: variants, SwitchOperands: []Operand{scrutinee},
+	})
+	destination := NoLocal
+	if expression.Type != hir.TypeVoid {
+		destination = l.newTemporary()
+	}
+	continuing := 0
+	var mergedLive map[hir.SymbolID]bool
+	seen := make(map[string]struct{}, len(definition.Variants))
+	for index := range expression.Arms {
+		arm := &expression.Arms[index]
+		block, found := blocks[arm.Variant]
+		if !found {
+			return Operand{}, fmt.Errorf("enum match has unknown variant %q", arm.Variant)
+		}
+		if _, duplicate := seen[arm.Variant]; duplicate {
+			return Operand{}, fmt.Errorf("enum match has duplicate variant %q", arm.Variant)
+		}
+		seen[arm.Variant] = struct{}{}
+		variant, _ := enumVariantDefinition(definition, arm.Variant)
+		l.current = block
+		l.live = cloneLive(branchLive)
+		bound := make(map[string]struct{}, len(arm.Bindings))
+		for _, binding := range arm.Bindings {
+			field, declared := enumFieldDefinition(variant, binding.Field)
+			if !declared || binding.Symbol == hir.NoSymbol || field.Type != binding.Type {
+				return Operand{}, fmt.Errorf("enum match binding %q does not match variant %q", binding.Field, arm.Variant)
+			}
+			if _, duplicate := bound[binding.Field]; duplicate {
+				return Operand{}, fmt.Errorf("enum match binding %q is duplicated", binding.Field)
+			}
+			bound[binding.Field] = struct{}{}
+			l.appendOperation(Operation{
+				Kind: OperationEnumPayload, Span: binding.Span, DestinationLocal: LocalID(binding.Symbol),
+				Operands: []Operand{scrutinee}, OwnerType: definition.Type, Variant: arm.Variant,
+				Field: binding.Field, Type: binding.Type,
+			})
+		}
+		if len(bound) != len(variant.Fields) {
+			return Operand{}, fmt.Errorf("enum match variant %q has incomplete payload bindings", arm.Variant)
+		}
+		armValue, lowerErr := l.lowerExpression(&arm.Expression)
+		if lowerErr != nil {
+			return Operand{}, lowerErr
+		}
+		if l.blockTerminated(l.current) {
+			continue
+		}
+		if destination != NoLocal {
+			if armValue.Kind == OperandInvalid {
+				return Operand{}, fmt.Errorf("value-producing enum match arm %q has no value", arm.Variant)
+			}
+			if l.properties.NeedsDrop(expression.Type) && l.isLiveResourcePath(&arm.Expression) {
+				armValue = l.materializeMove(&arm.Expression, armValue, "enum-match-result", true)
+			}
+			l.appendOperation(Operation{Kind: OperationAssign, Span: arm.Expression.Span, DestinationLocal: destination, Operands: []Operand{armValue}})
+		}
+		l.terminate(Terminator{Kind: TerminatorGoto, Span: arm.Expression.Span, Successors: []BlockID{joinBlock}, UnwindSuccessor: NoBlock})
+		if continuing == 0 {
+			mergedLive = cloneLive(l.live)
+		} else if !sameLiveState(mergedLive, l.live) {
+			return Operand{}, fmt.Errorf("enum match arms disagree on resource state after Flow validation")
+		}
+		continuing++
+	}
+	if len(seen) != len(definition.Variants) {
+		return Operand{}, fmt.Errorf("non-exhaustive enum match")
+	}
+	l.current = joinBlock
+	if continuing == 0 {
+		l.live = cloneLive(branchLive)
+		l.terminate(Terminator{Kind: TerminatorUnreachable, Span: expression.Span, UnwindSuccessor: NoBlock})
+		return Operand{}, nil
+	}
+	l.live = mergedLive
+	if destination == NoLocal {
+		return Operand{}, nil
+	}
+	return Operand{Kind: OperandLocal, Local: destination}, nil
+}
+
+func enumVariantDefinition(definition *EnumType, name string) (EnumVariant, bool) {
+	if definition == nil {
+		return EnumVariant{}, false
+	}
+	for _, variant := range definition.Variants {
+		if variant.Name == name {
+			return variant, true
+		}
+	}
+	return EnumVariant{}, false
+}
+
+func enumFieldDefinition(variant EnumVariant, name string) (EnumField, bool) {
+	for _, field := range variant.Fields {
+		if field.Name == name {
+			return field, true
+		}
+	}
+	return EnumField{}, false
+}
+
+func enumFieldNames(fields []EnumField) []string {
+	result := make([]string, len(fields))
+	for index := range fields {
+		result[index] = fields[index].Name
+	}
+	return result
+}
+
+func sameNames(left, right []string) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	seen := make(map[string]struct{}, len(left))
+	for _, name := range left {
+		if name == "" {
+			return false
+		}
+		seen[name] = struct{}{}
+	}
+	if len(seen) != len(left) {
+		return false
+	}
+	for _, name := range right {
+		if _, found := seen[name]; !found {
+			return false
+		}
+	}
+	return true
 }
 
 func (l *functionLowerer) lowerWhile(expression *hir.Expression) (Operand, error) {

@@ -310,5 +310,14 @@ type MatchArm struct {
 	Variant     string
 	Binding     SymbolID
 	BindingSpan Span
+	Bindings    []MatchBinding
 	Expression  Expression
+}
+
+// MatchBinding maps one named user-enum payload field to its arm-local symbol.
+type MatchBinding struct {
+	Field  string
+	Symbol SymbolID
+	Type   Type
+	Span   Span
 }

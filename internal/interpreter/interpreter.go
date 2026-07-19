@@ -97,6 +97,7 @@ func ExecuteWithOptions(program mir.Program, entry string, options Options) (Out
 		byName:         make(map[string]*mir.Function, len(program.Functions)),
 		bySymbol:       make(map[hir.SymbolID]*mir.Function, len(program.Functions)),
 		structTypes:    make(map[hir.Type]*mir.StructType, len(program.StructTypes)),
+		enumTypes:      make(map[hir.Type]*mir.EnumType, len(program.EnumTypes)),
 		resourceTypes:  make(map[hir.Type]*mir.ResourceType, len(program.ResourceTypes)),
 		testIntrinsics: make(map[hir.SymbolID]TestIntrinsicKind, len(options.TestIntrinsics)),
 		outputLimit:    options.OutputLimit,
@@ -105,6 +106,10 @@ func ExecuteWithOptions(program mir.Program, entry string, options Options) (Out
 	for index := range program.StructTypes {
 		definition := &program.StructTypes[index]
 		runtime.structTypes[definition.Type] = definition
+	}
+	for index := range program.EnumTypes {
+		definition := &program.EnumTypes[index]
+		runtime.enumTypes[definition.Type] = definition
 	}
 	for index := range program.ResourceTypes {
 		definition := &program.ResourceTypes[index]
@@ -153,6 +158,7 @@ type runtime struct {
 	byName         map[string]*mir.Function
 	bySymbol       map[hir.SymbolID]*mir.Function
 	structTypes    map[hir.Type]*mir.StructType
+	enumTypes      map[hir.Type]*mir.EnumType
 	resourceTypes  map[hir.Type]*mir.ResourceType
 	testIntrinsics map[hir.SymbolID]TestIntrinsicKind
 	outputLimit    int
@@ -244,14 +250,25 @@ type valueKind uint8
 
 const (
 	valueI32 valueKind = iota + 1
+	valueU8
+	valueU32
+	valueUSize
+	valueNull
 	valueResult
 	valueOption
+	valueEnum
 	valueStruct
 	valueResource
 )
 
 type structState struct {
 	definition *mir.StructType
+	fields     map[string]runtimeValue
+}
+
+type enumState struct {
+	definition *mir.EnumType
+	variant    string
 	fields     map[string]runtimeValue
 }
 
@@ -270,7 +287,10 @@ type taggedState struct {
 type runtimeValue struct {
 	kind      valueKind
 	i32       int32
+	u64       uint64
+	typ       hir.Type
 	tagged    *taggedState
+	enum      *enumState
 	structure *structState
 	resource  *resourceState
 }
@@ -303,6 +323,37 @@ func optionValue(variant string, payload *runtimeValue) (runtimeValue, error) {
 	default:
 		return runtimeValue{}, fmt.Errorf("invalid Option variant %q", variant)
 	}
+}
+
+func enumValue(definition *mir.EnumType, variantName string, fieldNames []string, values []runtimeValue) (runtimeValue, error) {
+	if definition == nil || definition.Type == hir.TypeInvalid || len(fieldNames) != len(values) {
+		return runtimeValue{}, fmt.Errorf("invalid enum construction definition")
+	}
+	var variant *mir.EnumVariant
+	for index := range definition.Variants {
+		if definition.Variants[index].Name == variantName {
+			variant = &definition.Variants[index]
+			break
+		}
+	}
+	if variant == nil || len(variant.Fields) != len(fieldNames) {
+		return runtimeValue{}, fmt.Errorf("enum %q has no matching variant %q", definition.Type, variantName)
+	}
+	declared := make(map[string]struct{}, len(variant.Fields))
+	for _, field := range variant.Fields {
+		declared[field.Name] = struct{}{}
+	}
+	state := &enumState{definition: definition, variant: variantName, fields: make(map[string]runtimeValue, len(fieldNames))}
+	for index, fieldName := range fieldNames {
+		if _, found := declared[fieldName]; !found {
+			return runtimeValue{}, fmt.Errorf("enum %q variant %q has no field %q", definition.Type, variantName, fieldName)
+		}
+		if _, duplicate := state.fields[fieldName]; duplicate {
+			return runtimeValue{}, fmt.Errorf("enum %q variant %q repeats field %q", definition.Type, variantName, fieldName)
+		}
+		state.fields[fieldName] = values[index]
+	}
+	return runtimeValue{kind: valueEnum, enum: state}, nil
 }
 
 func resourceValue(definition *mir.ResourceType, values []runtimeValue) (runtimeValue, error) {
@@ -398,6 +449,20 @@ func (v runtimeValue) structField(definition *mir.StructType, name string) (runt
 	value, found := v.structure.fields[name]
 	if !found {
 		return runtimeValue{}, fmt.Errorf("struct %q has no field %q", v.structure.definition.Type, name)
+	}
+	return value, nil
+}
+
+func (v runtimeValue) enumPayload(definition *mir.EnumType, variant, field string) (runtimeValue, error) {
+	if v.kind != valueEnum || v.enum == nil || v.enum.definition == nil {
+		return runtimeValue{}, capabilityError("enum payload received a non-enum value")
+	}
+	if definition == nil || v.enum.definition.Type != definition.Type || v.enum.variant != variant {
+		return runtimeValue{}, fmt.Errorf("enum payload definition or active variant does not match")
+	}
+	value, found := v.enum.fields[field]
+	if !found {
+		return runtimeValue{}, fmt.Errorf("enum %q variant %q has no active field %q", definition.Type, variant, field)
 	}
 	return value, nil
 }
@@ -525,6 +590,30 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				payload, err := option.optionPayload(operation.MovePayload)
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("Option payload in %q: %w", function.Name, err)
+				}
+				locals[operation.DestinationLocal] = payload
+			case mir.OperationEnumConstruct:
+				values := make([]runtimeValue, len(operation.Operands))
+				for index, operand := range operation.Operands {
+					value, err := evaluate(locals, operand)
+					if err != nil {
+						return callCompletion{}, fmt.Errorf("enum construction in %q: %w", function.Name, err)
+					}
+					values[index] = value
+				}
+				constructed, err := enumValue(r.enumTypes[operation.Type], operation.Variant, operation.Fields, values)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("enum construction in %q: %w", function.Name, err)
+				}
+				locals[operation.DestinationLocal] = constructed
+			case mir.OperationEnumPayload:
+				container, err := evaluateOne(locals, operation.Operands)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("enum payload in %q: %w", function.Name, err)
+				}
+				payload, err := container.enumPayload(r.enumTypes[operation.OwnerType], operation.Variant, operation.Field)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("enum payload in %q: %w", function.Name, err)
 				}
 				locals[operation.DestinationLocal] = payload
 			case mir.OperationRawAddress:
@@ -739,6 +828,14 @@ func evaluate(locals map[mir.LocalID]runtimeValue, operand mir.Operand) (runtime
 	switch operand.Kind {
 	case mir.OperandI32:
 		return i32Value(operand.I32), nil
+	case mir.OperandU8:
+		return runtimeValue{kind: valueU8, u64: operand.U64, typ: hir.TypeU8}, nil
+	case mir.OperandU32:
+		return runtimeValue{kind: valueU32, u64: operand.U64, typ: hir.TypeU32}, nil
+	case mir.OperandUSize:
+		return runtimeValue{kind: valueUSize, u64: operand.U64, typ: hir.TypeUSize}, nil
+	case mir.OperandNull:
+		return runtimeValue{kind: valueNull, typ: operand.Type}, nil
 	case mir.OperandLocal:
 		value, found := locals[operand.Local]
 		if !found {
@@ -842,6 +939,23 @@ func evaluateSwitch(locals map[mir.LocalID]runtimeValue, terminator mir.Terminat
 			return terminator.Successors[1], "", nil
 		}
 		return mir.NoBlock, "", fmt.Errorf("Option switch received invalid variant %q", value.tagged.variant)
+	case "enum":
+		value, err := evaluateOne(locals, terminator.SwitchOperands)
+		if err != nil {
+			return mir.NoBlock, "", err
+		}
+		if value.kind != valueEnum || value.enum == nil || value.enum.definition == nil || value.enum.definition.Type != terminator.SwitchType {
+			return mir.NoBlock, "", capabilityError("enum switch received a non-matching enum value")
+		}
+		if len(terminator.Successors) != len(terminator.SwitchVariants) {
+			return mir.NoBlock, "", fmt.Errorf("enum switch has %d successors for %d variants", len(terminator.Successors), len(terminator.SwitchVariants))
+		}
+		for index, variant := range terminator.SwitchVariants {
+			if value.enum.variant == variant {
+				return terminator.Successors[index], "", nil
+			}
+		}
+		return mir.NoBlock, "", fmt.Errorf("enum switch received invalid variant %q", value.enum.variant)
 	case "checked-division":
 		left, right, err := evaluateTwoI32(locals, terminator.SwitchOperands)
 		if err != nil {

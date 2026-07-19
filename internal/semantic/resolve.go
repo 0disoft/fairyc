@@ -42,6 +42,11 @@ type lexicalScope struct {
 	names  map[string]*symbol
 }
 
+type enumVariantReference struct {
+	enumeration *symbol
+	variant     *ast.EnumVariant
+}
+
 type analyzer struct {
 	files            []File
 	modules          map[string]*moduleScope
@@ -56,6 +61,7 @@ type analyzer struct {
 	structs          map[*ast.Struct]*symbol
 	resources        map[*ast.Resource]*symbol
 	enums            map[*ast.Enum]*symbol
+	enumVariantPaths map[*ast.Expression]enumVariantReference
 	regions          map[*ast.Expression]*symbol
 	regionType       *symbol
 	diagnostics      []Diagnostic
@@ -88,6 +94,7 @@ func newAnalyzer(files []File) *analyzer {
 		structs:          make(map[*ast.Struct]*symbol),
 		resources:        make(map[*ast.Resource]*symbol),
 		enums:            make(map[*ast.Enum]*symbol),
+		enumVariantPaths: make(map[*ast.Expression]enumVariantReference),
 		regions:          make(map[*ast.Expression]*symbol),
 		resourceTypes:    make(map[hir.Type]*resourceInfo),
 		structTypes:      make(map[hir.Type]*structInfo),
@@ -384,7 +391,9 @@ func (a *analyzer) resolveExpression(module *moduleScope, scope *lexicalScope, e
 		return
 	}
 	if expression.Kind == syntax.KindPath && !isBuiltinVariantPath(expression.Text) {
-		a.resolvePath(module, scope, expression)
+		if _, recognized := a.resolveEnumVariantPath(module, expression); !recognized {
+			a.resolvePath(module, scope, expression)
+		}
 	}
 	if expression.Block != nil {
 		a.resolveBlock(module, expression.Block, scope)
@@ -407,6 +416,31 @@ func (a *analyzer) resolveMatch(module *moduleScope, scope *lexicalScope, expres
 		pattern := arm.Children[0]
 		body := arm.Children[1]
 		armScope := &lexicalScope{parent: scope, names: make(map[string]*symbol)}
+		if pattern != nil && pattern.Kind == syntax.KindPattern {
+			if reference, recognized := a.resolveEnumVariantPath(module, pattern); recognized {
+				if reference.variant != nil {
+					for _, field := range pattern.Children[1:] {
+						if field == nil || field.Kind != syntax.KindField || field.Cooked == "" {
+							continue
+						}
+						if previous := armScope.names[field.Cooked]; previous != nil {
+							a.addDiagnostic("E0102", span(module.file.Path, field.Span), RelatedSpan{
+								Role: "previous-declaration", Span: span(previous.source, previous.declaration),
+							})
+							continue
+						}
+						value := &symbol{
+							id: a.allocateSymbol(), kind: "match-binding", name: field.Cooked,
+							module: module.file.Module.Path, source: module.file.Path, declaration: field.Span,
+						}
+						armScope.names[field.Cooked] = value
+						a.resolved[field] = value
+					}
+				}
+				a.resolveExpression(module, armScope, body)
+				continue
+			}
+		}
 		if pattern == nil || pattern.Kind != syntax.KindPattern || !isBuiltinVariantPath(pattern.Text) {
 			a.resolveExpression(module, armScope, pattern)
 			a.resolveExpression(module, armScope, body)
@@ -437,6 +471,56 @@ func (a *analyzer) resolveMatch(module *moduleScope, scope *lexicalScope, expres
 		a.resolved[binding] = value
 		a.resolveExpression(module, armScope, body)
 	}
+}
+
+func (a *analyzer) resolveEnumVariantPath(module *moduleScope, expression *ast.Expression) (enumVariantReference, bool) {
+	if expression == nil {
+		return enumVariantReference{}, false
+	}
+	parts := strings.Split(expression.Text, "::")
+	var owner *symbol
+	switch len(parts) {
+	case 2:
+		owner = module.enums[parts[0]]
+	case 3:
+		imported := module.imports[parts[0]]
+		if imported == nil {
+			return enumVariantReference{}, false
+		}
+		owner = imported.enums[parts[1]]
+		if owner != nil && imported != module && !owner.public {
+			a.addDiagnostic("E0103", span(module.file.Path, expression.Span), RelatedSpan{
+				Role: "declaration", Span: span(owner.source, owner.declaration),
+			})
+			return enumVariantReference{}, true
+		}
+	default:
+		return enumVariantReference{}, false
+	}
+	if owner == nil || owner.enumeration == nil {
+		return enumVariantReference{}, false
+	}
+	variantName := parts[len(parts)-1]
+	for index := range owner.enumeration.Variants {
+		variant := &owner.enumeration.Variants[index]
+		if variant.Name != variantName {
+			continue
+		}
+		reference := enumVariantReference{enumeration: owner, variant: variant}
+		a.enumVariantPaths[expression] = reference
+		a.resolutions = append(a.resolutions, Resolution{
+			Use: span(module.file.Path, expression.Span),
+			Target: SymbolCoordinate{
+				Module: owner.module, Name: owner.name + "::" + variant.Name, Kind: "enum-variant",
+				Declaration: span(owner.source, variant.NameSpan),
+			},
+		})
+		return reference, true
+	}
+	a.addDiagnostic("E0101", span(module.file.Path, expression.Span), RelatedSpan{
+		Role: "enum-declaration", Span: span(owner.source, owner.declaration),
+	})
+	return enumVariantReference{}, true
 }
 
 func (a *analyzer) resolveRegion(module *moduleScope, scope *lexicalScope, expression *ast.Expression) {

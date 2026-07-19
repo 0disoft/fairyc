@@ -279,6 +279,67 @@ fn main() -> i32 { 0 }
 	}
 }
 
+func TestAnalyzeBuildsRestrictedEnumConstructorsAndExhaustiveMatch(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+enum Message {
+    Empty;
+    Value { amount: i32; };
+    Pair { left: i32; right: i32; };
+}
+fn score(message: Message) -> i32 {
+    match message {
+        Message::Empty => 0,
+        Message::Value { amount: value } => value,
+        Message::Pair { left: first, right: second } => first + second,
+    }
+}
+fn main() -> i32 { score(Message::Pair { left: 20, right: 22 }) }
+`,
+	})
+	assertCleanTypeResult(t, result)
+	if len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].Functions) != 2 {
+		t.Fatalf("HIR modules = %+v", result.HIR.Modules)
+	}
+	score := result.HIR.Modules[0].Functions[0]
+	if score.Body.Tail == nil || score.Body.Tail.Kind != "match" || len(score.Body.Tail.Arms) != 3 {
+		t.Fatalf("score = %+v", score)
+	}
+	if score.Body.Tail.Arms[0].Variant != "Empty" || len(score.Body.Tail.Arms[0].Bindings) != 0 {
+		t.Fatalf("empty arm = %+v", score.Body.Tail.Arms[0])
+	}
+	if bindings := score.Body.Tail.Arms[2].Bindings; len(bindings) != 2 || bindings[0].Field != "left" || bindings[0].Type != hir.TypeI32 || bindings[1].Field != "right" || bindings[1].Type != hir.TypeI32 {
+		t.Fatalf("pair bindings = %+v", bindings)
+	}
+	main := result.HIR.Modules[0].Functions[1]
+	if main.Body.Tail == nil || main.Body.Tail.Kind != "call" || len(main.Body.Tail.Children) != 2 || main.Body.Tail.Children[1].Kind != "enum-variant" || main.Body.Tail.Children[1].Variant != "Pair" {
+		t.Fatalf("main = %+v", main)
+	}
+}
+
+func TestAnalyzeResolvesPublicEnumVariantAcrossImportAlias(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"api.fy":  "module api;\npub enum Status { Ready; Code { value: i32; }; }\n",
+		"main.fy": "module main;\nimport api as a;\nfn main() -> i32 { match (a::Status::Code { value: 42 }) { a::Status::Ready => 0, a::Status::Code { value: code } => code, } }\n",
+	})
+	assertCleanTypeResult(t, result)
+	if len(result.Resolutions) < 3 {
+		t.Fatalf("resolutions = %+v", result.Resolutions)
+	}
+}
+
+func TestAnalyzeRejectsNonExhaustiveRestrictedEnumMatch(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\nenum Status { Ready; Failed; }\nfn main() -> i32 { match Status::Ready { Status::Ready => 0, } }\n",
+	})
+	if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "non-exhaustive enum match" {
+		t.Fatalf("diagnostics = %+v, unsupported = %+v", result.Diagnostics, result.Unsupported)
+	}
+}
+
 func TestAnalyzeRejectsNonInertEnumPayloads(t *testing.T) {
 	t.Parallel()
 	tests := []struct {

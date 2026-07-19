@@ -374,6 +374,126 @@ fn main() -> i32 {
 	}
 }
 
+func TestLowerRestrictedEnumConstructionPayloadAndSwitch(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+enum Message {
+    Empty;
+    Pair { left: i32; right: i32; };
+}
+fn main() -> i32 {
+    let message: Message = Message::Pair { left: 20, right: 22 };
+    match message {
+        Message::Empty => 0,
+        Message::Pair { left: first, right: second } => first + second,
+    }
+}
+`)
+	if len(program.EnumTypes) != 1 || program.EnumTypes[0].Type != hir.Type("main::Message") || len(program.EnumTypes[0].Variants) != 2 {
+		t.Fatalf("enum types = %+v", program.EnumTypes)
+	}
+	function := program.Functions[0]
+	constructs := 0
+	payloads := 0
+	switches := 0
+	for _, block := range function.Blocks {
+		for _, operation := range block.Operations {
+			switch operation.Kind {
+			case OperationEnumConstruct:
+				constructs++
+				if operation.Variant != "Pair" || !slices.Equal(operation.Fields, []string{"left", "right"}) || len(operation.Operands) != 2 {
+					t.Fatalf("enum construct = %+v", operation)
+				}
+			case OperationEnumPayload:
+				payloads++
+				if operation.OwnerType != hir.Type("main::Message") || operation.Variant != "Pair" || operation.Type != hir.TypeI32 {
+					t.Fatalf("enum payload = %+v", operation)
+				}
+			}
+		}
+		if block.Terminator.Kind == TerminatorSwitch && block.Terminator.SwitchKind == "enum" {
+			switches++
+			if block.Terminator.SwitchType != hir.Type("main::Message") || !slices.Equal(block.Terminator.SwitchVariants, []string{"Empty", "Pair"}) || len(block.Terminator.Successors) != 2 {
+				t.Fatalf("enum switch = %+v", block.Terminator)
+			}
+		}
+	}
+	if constructs != 1 || payloads != 2 || switches != 1 {
+		t.Fatalf("constructs=%d payloads=%d switches=%d", constructs, payloads, switches)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+}
+
+func TestVerifyRejectsMutatedRestrictedEnumOperations(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+enum Message { Empty; Value { amount: i32; }; }
+fn main() -> i32 {
+    let message: Message = Message::Value { amount: 42 };
+    match message { Message::Empty => 0, Message::Value { amount: value } => value, }
+}
+`)
+	mutations := []struct {
+		name   string
+		mutate func(*Program)
+	}{
+		{
+			name: "construct-variant",
+			mutate: func(value *Program) {
+				for blockIndex := range value.Functions[0].Blocks {
+					for operationIndex := range value.Functions[0].Blocks[blockIndex].Operations {
+						operation := &value.Functions[0].Blocks[blockIndex].Operations[operationIndex]
+						if operation.Kind == OperationEnumConstruct {
+							operation.Variant = "Forged"
+							return
+						}
+					}
+				}
+			},
+		},
+		{
+			name: "payload-field",
+			mutate: func(value *Program) {
+				for blockIndex := range value.Functions[0].Blocks {
+					for operationIndex := range value.Functions[0].Blocks[blockIndex].Operations {
+						operation := &value.Functions[0].Blocks[blockIndex].Operations[operationIndex]
+						if operation.Kind == OperationEnumPayload {
+							operation.Field = "forged"
+							return
+						}
+					}
+				}
+			},
+		},
+		{
+			name: "switch-table",
+			mutate: func(value *Program) {
+				for blockIndex := range value.Functions[0].Blocks {
+					terminator := &value.Functions[0].Blocks[blockIndex].Terminator
+					if terminator.Kind == TerminatorSwitch && terminator.SwitchKind == "enum" {
+						terminator.SwitchVariants[0] = "Forged"
+						return
+					}
+				}
+			},
+		},
+	}
+	for _, mutation := range mutations {
+		mutation := mutation
+		t.Run(mutation.name, func(t *testing.T) {
+			t.Parallel()
+			mutated := Clone(program)
+			mutation.mutate(&mutated)
+			failures := Verify(mutated)
+			if len(failures) == 0 || failures[0].Code != "V1001" {
+				t.Fatalf("Verify() failures = %+v, want V1001", failures)
+			}
+		})
+	}
+}
+
 func lowerTestSource(t *testing.T, text string) Program {
 	t.Helper()
 	parsed, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(text)), source.DefaultLimits())

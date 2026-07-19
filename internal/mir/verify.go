@@ -33,17 +33,27 @@ type verificationState struct {
 // Verify checks the executable invariants required before MIR handoff.
 func Verify(program Program) []VerificationError {
 	structTypes, failures := verifyStructTypes(program.StructTypes)
+	enumTypes, enumFailures := verifyEnumTypes(program.EnumTypes)
+	failures = append(failures, enumFailures...)
 	resourceTypes, resourceFailures := verifyResourceTypes(program.ResourceTypes)
 	failures = append(failures, resourceFailures...)
 	for value := range structTypes {
 		if _, collision := resourceTypes[value]; collision {
 			failures = append(failures, VerificationError{Code: "V1001", Entity: structTypeEntity(value), Detail: "aggregate type is both struct and resource"})
 		}
+		if _, collision := enumTypes[value]; collision {
+			failures = append(failures, VerificationError{Code: "V1001", Entity: structTypeEntity(value), Detail: "aggregate type is both struct and enum"})
+		}
+	}
+	for value := range enumTypes {
+		if _, collision := resourceTypes[value]; collision {
+			failures = append(failures, VerificationError{Code: "V1001", Entity: enumTypeEntity(value), Detail: "aggregate type is both enum and resource"})
+		}
 	}
 	foreignFunctions, foreignFailures := verifyForeignFunctions(program.ForeignFunctions)
 	failures = append(failures, foreignFailures...)
 	for index := range program.Functions {
-		failures = append(failures, verifyFunction(&program.Functions[index], structTypes, resourceTypes, foreignFunctions)...)
+		failures = append(failures, verifyFunction(&program.Functions[index], structTypes, enumTypes, resourceTypes, foreignFunctions)...)
 	}
 	slices.SortFunc(failures, func(left, right VerificationError) int {
 		if value := cmp.Compare(left.Code, right.Code); value != 0 {
@@ -54,6 +64,49 @@ func Verify(program Program) []VerificationError {
 	return slices.CompactFunc(failures, func(left, right VerificationError) bool {
 		return left.Code == right.Code && left.Entity == right.Entity
 	})
+}
+
+func verifyEnumTypes(definitions []EnumType) (map[hir.Type]*EnumType, []VerificationError) {
+	enums := make(map[hir.Type]*EnumType, len(definitions))
+	var failures []VerificationError
+	for index := range definitions {
+		definition := &definitions[index]
+		entity := fallbackEntity(definition.Entity, enumTypeEntity(definition.Type))
+		if definition.Type == "" || definition.Type == hir.TypeInvalid || definition.Name == "" {
+			failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "enum definition has no concrete identity"})
+			continue
+		}
+		if _, duplicate := enums[definition.Type]; duplicate {
+			failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "enum definition is duplicated"})
+			continue
+		}
+		enums[definition.Type] = definition
+		variantNames := make(map[string]struct{}, len(definition.Variants))
+		for _, variant := range definition.Variants {
+			if variant.Name == "" {
+				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "enum definition has an empty variant"})
+				continue
+			}
+			if _, duplicate := variantNames[variant.Name]; duplicate {
+				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "enum definition has a duplicate variant"})
+				continue
+			}
+			variantNames[variant.Name] = struct{}{}
+			fieldNames := make(map[string]struct{}, len(variant.Fields))
+			for _, field := range variant.Fields {
+				if field.Name == "" || field.Type == "" || field.Type == hir.TypeInvalid {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "enum definition has an invalid payload field"})
+					continue
+				}
+				if _, duplicate := fieldNames[field.Name]; duplicate {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "enum definition has a duplicate payload field"})
+					continue
+				}
+				fieldNames[field.Name] = struct{}{}
+			}
+		}
+	}
+	return enums, failures
 }
 
 func verifyStructTypes(definitions []StructType) (map[hir.Type]*StructType, []VerificationError) {
@@ -154,7 +207,7 @@ func verifyResourceTypes(definitions []ResourceType) (map[hir.Type]*ResourceType
 	return resources, failures
 }
 
-func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, resourceTypes map[hir.Type]*ResourceType, foreignFunctions map[hir.SymbolID]*ForeignFunction) []VerificationError {
+func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, enumTypes map[hir.Type]*EnumType, resourceTypes map[hir.Type]*ResourceType, foreignFunctions map[hir.SymbolID]*ForeignFunction) []VerificationError {
 	if int(function.Entry) < 0 || int(function.Entry) >= len(function.Blocks) {
 		return []VerificationError{{Code: "V1001", Entity: function.Name, Detail: "entry block is missing"}}
 	}
@@ -332,6 +385,26 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, re
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "Option payload has no concrete payload type"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationEnumConstruct:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				definition := enumTypes[operation.Type]
+				variant, found := enumVariantDefinition(definition, operation.Variant)
+				if definition == nil || !found {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: enumTypeEntity(operation.Type), Detail: "enum construction type or variant has no definition"})
+				}
+				if operation.DestinationLocal == NoLocal || len(operation.Fields) != len(operation.Operands) || !sameNames(operation.Fields, enumFieldNames(variant.Fields)) {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "enum construction fields do not match the variant definition"})
+				}
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationEnumPayload:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				definition := enumTypes[operation.OwnerType]
+				variant, variantFound := enumVariantDefinition(definition, operation.Variant)
+				field, fieldFound := enumFieldDefinition(variant, operation.Field)
+				if definition == nil || !variantFound || !fieldFound || field.Type != operation.Type || operation.DestinationLocal == NoLocal || len(operation.Operands) != 1 {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "enum payload extraction does not match the variant definition"})
+				}
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationRawAddress:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				element, mutable, pointer := hir.RawPointerElement(operation.Type)
@@ -466,6 +539,12 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, re
 			if !validSwitchShape(terminator) {
 				failures = append(failures, VerificationError{Code: "V1001", Entity: terminatorEntity(item.id, terminator), Detail: "switch shape does not match its kind"})
 			}
+			if terminator.SwitchKind == "enum" {
+				definition := enumTypes[terminator.SwitchType]
+				if definition == nil || !slices.Equal(terminator.SwitchVariants, enumVariantNames(definition.Variants)) {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: terminatorEntity(item.id, terminator), Detail: "enum switch variants do not match the enum definition"})
+				}
+			}
 		}
 		if terminator.Kind == TerminatorReturn {
 			failures = append(failures, verifyOperands(state, []Operand{terminator.ReturnValue}, terminatorEntity(item.id, terminator))...)
@@ -534,6 +613,8 @@ func validSwitchShape(terminator Terminator) bool {
 		return len(terminator.SwitchOperands) == 1 && len(terminator.Successors) == 2
 	case "option":
 		return len(terminator.SwitchOperands) == 1 && len(terminator.Successors) == 2
+	case "enum":
+		return terminator.SwitchType != "" && terminator.SwitchType != hir.TypeInvalid && len(terminator.SwitchOperands) == 1 && len(terminator.Successors) > 0 && len(terminator.Successors) == len(terminator.SwitchVariants) && uniqueNonEmpty(terminator.SwitchVariants)
 	case "checked-division":
 		return len(terminator.SwitchOperands) == 2 && len(terminator.Successors) == 2 && (terminator.Operator == "/" || terminator.Operator == "%")
 	case "checked-unary", "checked-arithmetic", "checked-shift":
@@ -542,6 +623,14 @@ func validSwitchShape(terminator Terminator) bool {
 	default:
 		return false
 	}
+}
+
+func enumVariantNames(variants []EnumVariant) []string {
+	result := make([]string, len(variants))
+	for index := range variants {
+		result[index] = variants[index].Name
+	}
+	return result
 }
 
 func checkedArithmeticSpec(operator string, operandCount int) (string, []string, bool) {

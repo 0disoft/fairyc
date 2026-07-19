@@ -17,9 +17,10 @@ const NoBlock BlockID = -1
 type typeProperties struct {
 	resources map[hir.Type]struct{}
 	structs   map[hir.Type]struct{}
+	enums     map[hir.Type]*EnumType
 }
 
-func newTypeProperties(resources []ResourceType, structs []StructType) typeProperties {
+func newTypeProperties(resources []ResourceType, structs []StructType, enums []EnumType) typeProperties {
 	resourceValues := make(map[hir.Type]struct{}, len(resources))
 	for _, value := range resources {
 		resourceValues[value.Type] = struct{}{}
@@ -28,7 +29,11 @@ func newTypeProperties(resources []ResourceType, structs []StructType) typePrope
 	for _, value := range structs {
 		structValues[value.Type] = struct{}{}
 	}
-	return typeProperties{resources: resourceValues, structs: structValues}
+	enumValues := make(map[hir.Type]*EnumType, len(enums))
+	for index := range enums {
+		enumValues[enums[index].Type] = &enums[index]
+	}
+	return typeProperties{resources: resourceValues, structs: structValues, enums: enumValues}
 }
 
 func (p typeProperties) IsResource(value hir.Type) bool {
@@ -39,6 +44,10 @@ func (p typeProperties) IsResource(value hir.Type) bool {
 func (p typeProperties) IsStruct(value hir.Type) bool {
 	_, found := p.structs[value]
 	return found
+}
+
+func (p typeProperties) Enum(value hir.Type) *EnumType {
+	return p.enums[value]
 }
 
 // NeedsDrop reports whether a value can own an active cleanup obligation.
@@ -56,9 +65,33 @@ func (p typeProperties) NeedsDrop(value hir.Type) bool {
 // Program is verified before it is handed to an interpreter or backend.
 type Program struct {
 	StructTypes      []StructType
+	EnumTypes        []EnumType
 	ResourceTypes    []ResourceType
 	ForeignFunctions []ForeignFunction
 	Functions        []Function
+}
+
+// EnumType is one verified restricted inert tagged definition used by executable MIR.
+type EnumType struct {
+	Type     hir.Type
+	Name     string
+	Span     hir.Span
+	Entity   string
+	Variants []EnumVariant
+}
+
+// EnumVariant preserves declaration order and its named payload fields.
+type EnumVariant struct {
+	Name   string
+	Span   hir.Span
+	Fields []EnumField
+}
+
+// EnumField preserves one named inert payload field.
+type EnumField struct {
+	Name string
+	Type hir.Type
+	Span hir.Span
 }
 
 // StructType is one verified inert aggregate definition used by executable MIR.
@@ -208,6 +241,8 @@ const (
 	OperationResultPayload     OperationKind = "result-payload"
 	OperationOptionConstruct   OperationKind = "option-construct"
 	OperationOptionPayload     OperationKind = "option-payload"
+	OperationEnumConstruct     OperationKind = "enum-construct"
+	OperationEnumPayload       OperationKind = "enum-payload"
 	OperationRawAddress        OperationKind = "raw-address"
 	OperationStructConstruct   OperationKind = "struct-construct"
 	OperationResourceConstruct OperationKind = "resource-construct"
@@ -274,6 +309,10 @@ func structTypeEntity(value hir.Type) string {
 	return aggregateTypeEntity("struct-type", value)
 }
 
+func enumTypeEntity(value hir.Type) string {
+	return aggregateTypeEntity("enum-type", value)
+}
+
 func resourceTypeEntity(value hir.Type) string {
 	return aggregateTypeEntity("resource-type", value)
 }
@@ -325,6 +364,8 @@ type Terminator struct {
 	DestinationLocal LocalID
 	ReturnValue      Operand
 	SwitchKind       string
+	SwitchType       hir.Type
+	SwitchVariants   []string
 	SwitchOperands   []Operand
 	Operator         string
 }

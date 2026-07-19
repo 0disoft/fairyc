@@ -334,7 +334,9 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "literal "+literalClass(expression.Text))
 		}
 	case syntax.KindPath:
-		if symbol := c.analyzer.resolved[expression]; symbol != nil {
+		if reference, found := c.analyzer.enumVariantPaths[expression]; found {
+			actual = c.checkEnumPath(expression, result, reference)
+		} else if symbol := c.analyzer.resolved[expression]; symbol != nil {
 			result.Symbol = symbol.id
 			actual = symbol.typ
 		} else if variant, option := optionVariantPath(expression.Text); option {
@@ -462,6 +464,9 @@ func (c *typeChecker) checkRecord(expression *ast.Expression, result *hir.Expres
 	if len(expression.Children) == 0 {
 		return hir.TypeInvalid
 	}
+	if reference, found := c.analyzer.enumVariantPaths[expression.Children[0]]; found {
+		return c.checkEnumRecord(expression, result, reference)
+	}
 	constructor := c.analyzer.resolved[expression.Children[0]]
 	if constructor != nil && constructor.typ == hir.TypeRegion {
 		c.analyzer.addDiagnostic("E3104", span(c.module.file.Path, expression.Span))
@@ -503,6 +508,64 @@ func (c *typeChecker) checkRecord(expression *ast.Expression, result *hir.Expres
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "resource construction with missing fields")
 	}
 	return constructor.typ
+}
+
+func (c *typeChecker) checkEnumPath(expression *ast.Expression, result *hir.Expression, reference enumVariantReference) hir.Type {
+	variant, found := c.enumVariant(reference)
+	if !found {
+		return hir.TypeInvalid
+	}
+	if len(variant.orderedFields) != 0 {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "enum payload variant used without record construction")
+		return hir.TypeInvalid
+	}
+	result.Kind = "enum-variant"
+	result.Symbol = reference.enumeration.id
+	result.Variant = variant.name
+	return reference.enumeration.typ
+}
+
+func (c *typeChecker) checkEnumRecord(expression *ast.Expression, result *hir.Expression, reference enumVariantReference) hir.Type {
+	variant, found := c.enumVariant(reference)
+	if !found {
+		return hir.TypeInvalid
+	}
+	result.Kind = "enum-variant"
+	result.Symbol = reference.enumeration.id
+	result.Variant = variant.name
+	seen := make(map[string]struct{}, len(expression.Children)-1)
+	for _, fieldExpression := range expression.Children[1:] {
+		field, declared := variant.fields[fieldExpression.Text]
+		if !declared || len(fieldExpression.Children) != 1 {
+			c.analyzer.addUnsupported(c.module.file.Path, fieldExpression.Span, "unknown or malformed enum payload field "+fieldExpression.Text)
+			continue
+		}
+		if _, duplicate := seen[fieldExpression.Text]; duplicate {
+			c.analyzer.addUnsupported(c.module.file.Path, fieldExpression.Span, "duplicate enum payload field "+fieldExpression.Text)
+			continue
+		}
+		seen[fieldExpression.Text] = struct{}{}
+		value, actual := c.checkExpression(fieldExpression.Children[0], field.typ)
+		result.Children = appendExpression(result.Children, value)
+		result.Fields = append(result.Fields, fieldExpression.Text)
+		c.requireType("E1006", span(c.module.file.Path, fieldExpression.Children[0].Span), actual, field.typ, field.declaration)
+	}
+	if len(seen) != len(variant.fields) {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "enum payload construction with missing fields")
+	}
+	return reference.enumeration.typ
+}
+
+func (c *typeChecker) enumVariant(reference enumVariantReference) (enumVariant, bool) {
+	if reference.enumeration == nil || reference.variant == nil {
+		return enumVariant{}, false
+	}
+	info := c.analyzer.enumTypes[reference.enumeration.typ]
+	if info == nil {
+		return enumVariant{}, false
+	}
+	variant, found := info.variants[reference.variant.Name]
+	return variant, found
 }
 
 func (c *typeChecker) checkField(expression *ast.Expression, result *hir.Expression) hir.Type {
@@ -789,20 +852,91 @@ func (c *typeChecker) checkResultConstructor(expression *ast.Expression, result 
 }
 
 func (c *typeChecker) checkMatch(expression *ast.Expression, result *hir.Expression, expected hir.Type) hir.Type {
-	if len(expression.Children) != 3 {
-		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "built-in match without exactly two arms")
+	if len(expression.Children) < 2 {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "match without arms")
 		return hir.TypeInvalid
 	}
 	scrutinee, scrutineeType := c.checkExpression(expression.Children[0], hir.TypeInvalid)
 	result.Children = appendExpression(result.Children, scrutinee)
 	if _, _, ok := hir.ResultElements(scrutineeType); ok {
+		if len(expression.Children) != 3 {
+			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "built-in Result match without exactly two arms")
+			return hir.TypeInvalid
+		}
 		return c.checkResultMatch(expression, result, expected, scrutineeType)
 	}
 	if payloadType, ok := hir.OptionElement(scrutineeType); ok {
+		if len(expression.Children) != 3 {
+			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "built-in Option match without exactly two arms")
+			return hir.TypeInvalid
+		}
 		return c.checkOptionMatch(expression, result, expected, payloadType)
 	}
-	c.analyzer.addUnsupported(c.module.file.Path, expression.Children[0].Span, "match scrutinee outside the implemented Result and Option subset")
+	if info := c.analyzer.enumTypes[scrutineeType]; info != nil {
+		return c.checkEnumMatch(expression, result, expected, info)
+	}
+	c.analyzer.addUnsupported(c.module.file.Path, expression.Children[0].Span, "match scrutinee outside the implemented Result, Option, and restricted enum subset")
 	return hir.TypeInvalid
+}
+
+func (c *typeChecker) checkEnumMatch(expression *ast.Expression, result *hir.Expression, expected hir.Type, info *enumInfo) hir.Type {
+	seen := make(map[string]struct{}, len(info.variants))
+	actual := expected
+	for _, armExpression := range expression.Children[1:] {
+		if armExpression == nil || armExpression.Kind != syntax.KindPattern || armExpression.Text != "arm" || len(armExpression.Children) != 2 {
+			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "malformed enum match arm")
+			return hir.TypeInvalid
+		}
+		pattern := armExpression.Children[0]
+		reference, found := c.analyzer.enumVariantPaths[pattern]
+		if !found || reference.enumeration != info.symbol || reference.variant == nil {
+			c.analyzer.addUnsupported(c.module.file.Path, pattern.Span, "pattern from a different or unresolved enum")
+			return hir.TypeInvalid
+		}
+		variant := info.variants[reference.variant.Name]
+		if _, duplicate := seen[variant.name]; duplicate {
+			c.analyzer.addUnsupported(c.module.file.Path, pattern.Span, "duplicate enum match variant")
+			return hir.TypeInvalid
+		}
+		seen[variant.name] = struct{}{}
+		arm := hir.MatchArm{Variant: variant.name, Binding: hir.NoSymbol}
+		boundFields := make(map[string]struct{}, len(pattern.Children)-1)
+		for _, fieldExpression := range pattern.Children[1:] {
+			field, declared := variant.fields[fieldExpression.Text]
+			binding := c.analyzer.resolved[fieldExpression]
+			if !declared || binding == nil || fieldExpression.Cooked == "" {
+				c.analyzer.addUnsupported(c.module.file.Path, fieldExpression.Span, "unknown or malformed enum pattern field "+fieldExpression.Text)
+				return hir.TypeInvalid
+			}
+			if _, duplicate := boundFields[fieldExpression.Text]; duplicate {
+				c.analyzer.addUnsupported(c.module.file.Path, fieldExpression.Span, "duplicate enum pattern field "+fieldExpression.Text)
+				return hir.TypeInvalid
+			}
+			boundFields[fieldExpression.Text] = struct{}{}
+			binding.typ = field.typ
+			bindingSpan := span(c.module.file.Path, fieldExpression.Span)
+			c.hir.Locals = append(c.hir.Locals, hir.Local{Symbol: binding.id, Name: binding.name, Type: field.typ, Span: bindingSpan})
+			c.addType(bindingSpan, field.typ)
+			arm.Bindings = append(arm.Bindings, hir.MatchBinding{Field: field.name, Symbol: binding.id, Type: field.typ, Span: bindingSpan})
+		}
+		if len(boundFields) != len(variant.fields) {
+			c.analyzer.addUnsupported(c.module.file.Path, pattern.Span, "enum pattern with missing payload fields")
+			return hir.TypeInvalid
+		}
+		body, bodyType := c.checkExpression(armExpression.Children[1], actual)
+		if actual == hir.TypeInvalid {
+			actual = bodyType
+		} else {
+			c.requireType("E1006", span(c.module.file.Path, armExpression.Children[1].Span), bodyType, actual, span(c.module.file.Path, expression.Span))
+		}
+		arm.Expression = *body
+		result.Arms = append(result.Arms, arm)
+	}
+	if len(seen) != len(info.variants) {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "non-exhaustive enum match")
+		return hir.TypeInvalid
+	}
+	return actual
 }
 
 func (c *typeChecker) checkResultMatch(expression *ast.Expression, result *hir.Expression, expected, scrutineeType hir.Type) hir.Type {

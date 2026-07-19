@@ -6,12 +6,19 @@ import "slices"
 func Clone(input Program) Program {
 	result := Program{
 		StructTypes:      slices.Clone(input.StructTypes),
+		EnumTypes:        slices.Clone(input.EnumTypes),
 		ResourceTypes:    slices.Clone(input.ResourceTypes),
 		ForeignFunctions: slices.Clone(input.ForeignFunctions),
 		Functions:        make([]Function, len(input.Functions)),
 	}
 	for index := range result.StructTypes {
 		result.StructTypes[index].Fields = slices.Clone(input.StructTypes[index].Fields)
+	}
+	for index := range result.EnumTypes {
+		result.EnumTypes[index].Variants = slices.Clone(input.EnumTypes[index].Variants)
+		for variantIndex := range result.EnumTypes[index].Variants {
+			result.EnumTypes[index].Variants[variantIndex].Fields = slices.Clone(input.EnumTypes[index].Variants[variantIndex].Fields)
+		}
 	}
 	for index := range result.ForeignFunctions {
 		result.ForeignFunctions[index].ParameterTypes = slices.Clone(input.ForeignFunctions[index].ParameterTypes)
@@ -43,6 +50,7 @@ func Clone(input Program) Program {
 			clonedBlock.Terminator.TrapCategories = slices.Clone(block.Terminator.TrapCategories)
 			clonedBlock.Terminator.Arguments = slices.Clone(block.Terminator.Arguments)
 			clonedBlock.Terminator.SwitchOperands = slices.Clone(block.Terminator.SwitchOperands)
+			clonedBlock.Terminator.SwitchVariants = slices.Clone(block.Terminator.SwitchVariants)
 			cloned.Blocks[blockIndex] = clonedBlock
 		}
 		cloned.OrderedEvaluations = slices.Clone(function.OrderedEvaluations)
