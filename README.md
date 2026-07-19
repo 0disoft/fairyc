@@ -92,12 +92,13 @@ FFI, `@repr(C)`, exact `c::*` values, and provisional standard-library calls, so
 source-to-native use without pretending that the host-smoke artifact is a Windows target result.
 The distinct `experimental build-target` command now consumes the declared
 `x86_64-windows-msvc` profile, emits LLP64-aware C11, and retains one target-labelled PE. Its
-checked-in source proves four-byte `c::long` emission and calls the real project-owned
-SystemHeap allocate/deallocate plus `fy_std_text_utf8_valid_v0` C implementations before returning
-42. The Windows x64 heap path uses the documented 16-byte `malloc` alignment ceiling instead of the
-MSVC C header's missing `max_align_t`. Every other foreign symbol, unproven standard-library
-component, companion input, user linker option, distribution promise, and self-hosting path remains
-closed.
+checked-in source proves four-byte `c::long` emission and calls the real project-owned SystemHeap,
+Buffer, and `fy_std_text_utf8_valid_v0` C implementations before returning 42. Buffer selection
+pulls in SystemHeap exactly once, then construction, length-four resize metadata, and normalized
+drop state execute at both MSVC profiles. The Windows x64 heap path uses the documented 16-byte
+`malloc` alignment ceiling instead of the MSVC C header's missing `max_align_t`. Every other foreign
+symbol, unproven standard-library component, companion input, user linker option, distribution
+promise, and self-hosting path remains closed.
 A provisional SystemHeap implementation now lives in the target standard-library
 boundary rather than the thin runtime. It normalizes empty allocation, admits current fundamental
 alignments, preserves bytes across copy-and-release growth or shrink, and leaves the old block

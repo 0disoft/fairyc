@@ -102,9 +102,11 @@ returns 42, and `run-host` must independently return 42 before every temporary a
 The same smoke invokes `build-target` for `x86_64-windows-msvc` on the checked-in
 `examples/windows_target/main.fy`. Target selection happens before C emission, the generated unit
 uses the LLP64 profile and four-byte `c::long`, calls the real project-owned
-SystemHeap allocate/deallocate and `fy_std_text_utf8_valid_v0` C components, and the resulting PE
-must return 42. The heap path allocates eight bytes at alignment eight, observes the record, frees
-it, and observes normalized zero state; the target source caps fundamental alignment at the
+SystemHeap, Buffer, and `fy_std_text_utf8_valid_v0` C components, and the resulting PE must return
+42. The heap path allocates eight bytes at alignment eight, observes the record, frees it, and
+observes normalized zero state. The Buffer path selects SystemHeap exactly once, initializes
+capacity eight, resizes metadata to length four, drops, and observes normalized zero state; it does
+not inspect the zeroed bytes. The target source caps fundamental alignment at the
 documented Windows x64 `malloc` guarantee of 16 bytes. The resolver rejects every other foreign or
 unproven standard-library symbol before discovering MSVC, so these are closed source-level
 crossings rather than broad Windows FFI/runtime evidence.

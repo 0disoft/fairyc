@@ -13,6 +13,12 @@ struct system_heap_block {
     alignment: usize;
 }
 
+@repr(C)
+struct buffer {
+    block: system_heap_block;
+    length: usize;
+}
+
 @link_name("fy_std_system_heap_allocate_v0")
 unsafe extern C fn allocate(
     size: usize,
@@ -22,6 +28,15 @@ unsafe extern C fn allocate(
 
 @link_name("fy_std_system_heap_deallocate_v0")
 unsafe extern C fn deallocate(block: *mut system_heap_block) -> u32;
+
+@link_name("fy_std_buffer_initialize_v0")
+unsafe extern C fn initialize_buffer(capacity: usize, output: *mut buffer) -> u32;
+
+@link_name("fy_std_buffer_resize_zeroed_v0")
+unsafe extern C fn resize_buffer_zeroed(value: *mut buffer, new_length: usize) -> u32;
+
+@link_name("fy_std_buffer_drop_v0")
+unsafe extern C fn drop_buffer(value: *mut buffer) -> u32;
 
 fn main() -> i32 {
     var block: system_heap_block = system_heap_block {
@@ -37,7 +52,30 @@ fn main() -> i32 {
         deallocate(&mut block as *mut system_heap_block)
     };
     let deallocation_valid: bool = block.size == 0 && block.alignment == 0;
+    let empty_block: system_heap_block = system_heap_block {
+        data: null,
+        size: 0,
+        alignment: 0,
+    };
+    var bytes: buffer = buffer {
+        block: empty_block,
+        length: 0,
+    };
+    let initialized: u32 = unsafe {
+        initialize_buffer(8, &mut bytes as *mut buffer)
+    };
+    let resized: u32 = unsafe {
+        resize_buffer_zeroed(&mut bytes as *mut buffer, 4)
+    };
+    let buffer_valid: bool = bytes.block.size == 8 && bytes.block.alignment == 1 &&
+        bytes.length == 4;
+    let dropped: u32 = unsafe {
+        drop_buffer(&mut bytes as *mut buffer)
+    };
+    let buffer_dropped: bool = bytes.block.size == 0 && bytes.block.alignment == 0 &&
+        bytes.length == 0;
     if allocated == 0 && allocation_valid && deallocated == 0 && deallocation_valid &&
+        initialized == 0 && resized == 0 && buffer_valid && dropped == 0 && buffer_dropped &&
         unsafe { utf8_valid(null, 0) } == 1 {
         42
     } else {

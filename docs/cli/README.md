@@ -93,8 +93,9 @@ distribution, or self-hosting claims.
 profile, emits target-labelled C11, requires Windows LLP64 C-scalar providers, rejects unavailable
 `c::ssize_t`, and builds a no-overwrite PE through locally resolved x64 MSVC. The current command
 permits target declarations such as unused `c::long` and automatically links exact proven
-SystemHeap allocate/deallocate and `fy_std_text_utf8_valid_v0` project-owned components when called.
-The Windows x64 SystemHeap ceiling is 16-byte fundamental alignment. Every other foreign symbol or
+SystemHeap allocate/deallocate, Buffer initialize/zeroed-resize/drop, and
+`fy_std_text_utf8_valid_v0` project-owned components when called. Buffer pulls in SystemHeap once;
+the Windows x64 SystemHeap ceiling is 16-byte fundamental alignment. Every other foreign symbol or
 unproven standard-library component fails before toolchain discovery; companion inputs and user
 linker options remain absent. Its receipt is target-emission and one-way closed-FFI evidence, not
 complete ABI/runtime conformance, hosted support, a distributable artifact promise, or self-hosting.

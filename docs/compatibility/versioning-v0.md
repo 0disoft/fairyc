@@ -70,6 +70,11 @@ alignment ceiling derived from the Windows x64 `malloc` contract. The ceiling, t
 record layout, minimal component closure, and normalized release observations are prototype
 compatibility data; allocator resize, forced OOM, over-aligned allocation, hosted CRT deployment,
 and the public `std::alloc` API remain outside the admitted slice.
+ADR 0085 adds exact Buffer initialize, zeroed-resize, and drop linkage. The nested 32-byte record,
+Buffer-to-SystemHeap component closure, deterministic single emission, capacity/length
+observations, and normalized drop state are prototype compatibility data. Zeroed byte observation,
+append/reserve/truncate/clear, safe ownership, and the public `std::bytes` API remain outside the
+Windows slice.
 
 `fairyc.layout-fixtures/v0` separately versions the repository input and expectation vocabulary for
 the target-layout engine; each manifest binds one declared target. It is not a public

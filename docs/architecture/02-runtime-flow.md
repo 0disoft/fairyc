@@ -65,9 +65,10 @@ semantic C emitter but selects Windows scalar providers and layout facts, identi
 `x86_64-windows-msvc`, rejects unavailable POSIX `c::ssize_t`, and leaves validation-only drop
 instrumentation unavailable. `experimental build-target` resolves MSVC only after that profile has
 been selected. Its target-specific support resolver admits only exact project-owned SystemHeap
-allocate/deallocate and `fy_std_text_utf8_valid_v0` calls, selects SystemHeap and text-view C
-components plus scalar runtime, and rejects every other foreign or unproven standard-library symbol
-before toolchain discovery. The Windows SystemHeap source overrides only its fundamental-alignment
+allocate/deallocate, Buffer initialize/zeroed-resize/drop, and `fy_std_text_utf8_valid_v0` calls.
+Buffer selection closes over SystemHeap in deterministic component order; the resolver combines
+SystemHeap, Buffer, text-view, and scalar runtime at most once each and rejects every other foreign
+or unproven standard-library symbol before toolchain discovery. The Windows SystemHeap source overrides only its fundamental-alignment
 ceiling with the x64 `malloc` guarantee of 16 bytes; allocation semantics stay shared. Companion
 inputs and arbitrary linker arguments remain absent.
 `internal/layout` is the next boundary: it turns those facts into checked array and aggregate size,

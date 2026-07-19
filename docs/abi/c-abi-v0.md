@@ -252,9 +252,10 @@ The Windows evidence block reports `scalar-and-llp64-c-scalar-c11` while keeping
 booleans false. `Stage0WindowsMSVCProfile` binds generated C to the Windows TargetSpec, emits
 four-byte `c::long` assertions, rejects unavailable `c::ssize_t`, and is executed through the
 checked-in `build-target` example. That example crosses SystemHeap allocate/deallocate with a
-24-byte pointer/`usize`/`usize` record, then calls `fy_std_text_utf8_valid_v0` using a null `*u8` and
-zero `usize`; the Windows support resolver links only SystemHeap, text view, and scalar runtime,
-while every other foreign symbol fails closed. The SystemHeap C source receives a target-only
+24-byte pointer/`usize`/`usize` record, crosses Buffer initialize/zeroed-resize/drop with a nested
+32-byte record, then calls `fy_std_text_utf8_valid_v0` using a null `*u8` and zero `usize`. Buffer
+selection closes over SystemHeap; the Windows support resolver links only SystemHeap, Buffer, text
+view, and scalar runtime, while every other foreign symbol fails closed. The SystemHeap C source receives a target-only
 16-byte maximum-fundamental-alignment definition matching the Windows x64 `malloc` contract. It
 lists the still-incomplete LLP64 layout-probe evidence, complete bidirectional source-level and
 independently inspected Microsoft x64 crossings,

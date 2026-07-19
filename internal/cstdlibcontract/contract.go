@@ -49,6 +49,9 @@ var symbolComponents = map[string]Component{
 var windowsMSVCSymbolComponents = map[string]Component{
 	"fy_std_system_heap_allocate_v0":   ComponentSystemHeap,
 	"fy_std_system_heap_deallocate_v0": ComponentSystemHeap,
+	"fy_std_buffer_initialize_v0":      ComponentBuffer,
+	"fy_std_buffer_resize_zeroed_v0":   ComponentBuffer,
+	"fy_std_buffer_drop_v0":            ComponentBuffer,
 	"fy_std_text_utf8_valid_v0":        ComponentTextView,
 }
 

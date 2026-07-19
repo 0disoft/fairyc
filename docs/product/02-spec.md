@@ -352,11 +352,13 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   Its backend profile consumes Windows LLP64 scalar providers, emits the target ID in the C unit,
   admits `c::long` as four-byte signed C `long`, and rejects unavailable POSIX `c::ssize_t`.
   `examples/windows_target/main.fy` carries an unused `c::long` declaration so local x64 MSVC must
-  compile the target assertion, then calls exact project-owned SystemHeap allocate/deallocate and
-  `fy_std_text_utf8_valid_v0(*u8, usize) -> u32` C implementations before the generated PE can
-  return 42. The heap crossing requires an eight-byte block, observes its size and alignment, frees
-  it, and observes normalized zero state. The Windows resolver links only SystemHeap, text view, and
-  the scalar runtime. It fixes the SystemHeap fundamental-alignment ceiling at the documented
+  compile the target assertion, then calls exact project-owned SystemHeap allocate/deallocate,
+  Buffer initialize/zeroed-resize/drop, and `fy_std_text_utf8_valid_v0(*u8, usize) -> u32` C
+  implementations before the generated PE can return 42. The heap crossing requires an eight-byte
+  block, observes its size and alignment, frees it, and observes normalized zero state. The Buffer
+  crossing selects the Buffer-to-SystemHeap dependency closure, observes capacity eight and length
+  four, drops it, and observes normalized zero state. It does not read the zeroed bytes. The Windows
+  resolver links only SystemHeap, Buffer, text view, and the scalar runtime. It fixes the SystemHeap fundamental-alignment ceiling at the documented
   Windows x64 `malloc` guarantee of 16 bytes because MSVC C does not provide `max_align_t` in
   `<stddef.h>`. Every other standard-library or foreign symbol fails before toolchain resolution;
   companion inputs and user linker arguments remain absent. This clears only the missing target

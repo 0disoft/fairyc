@@ -281,6 +281,9 @@ func TestWindowsMSVCSourceForSymbolsKeepsClosedRuntimeSlice(t *testing.T) {
 	t.Parallel()
 	source, err := WindowsMSVCSourceForSymbols([]string{
 		"fy_std_text_utf8_valid_v0",
+		"fy_std_buffer_initialize_v0",
+		"fy_std_buffer_resize_zeroed_v0",
+		"fy_std_buffer_drop_v0",
 		"fy_std_system_heap_allocate_v0",
 		"fy_std_system_heap_deallocate_v0",
 	})
@@ -292,18 +295,19 @@ func TestWindowsMSVCSourceForSymbolsKeepsClosedRuntimeSlice(t *testing.T) {
 	}
 	for _, required := range []string{
 		"fy_std_system_heap_allocate_v0", "fy_std_system_heap_deallocate_v0",
+		"fy_std_buffer_initialize_v0", "fy_std_buffer_resize_zeroed_v0", "fy_std_buffer_drop_v0",
 		"fy_std_text_utf8_valid_v0", "fy_std_text_validate_utf8_v0",
 	} {
 		if !strings.Contains(source, required) {
 			t.Errorf("Windows source is missing %q", required)
 		}
 	}
-	for _, forbidden := range []string{"fy_std_buffer_initialize_v0", "fy_std_linux_file_open_v0", "_POSIX_C_SOURCE"} {
+	for _, forbidden := range []string{"fy_std_arena_initialize_v0", "fy_std_linux_file_open_v0", "_POSIX_C_SOURCE"} {
 		if strings.Contains(source, forbidden) {
 			t.Errorf("Windows source unexpectedly contains %q", forbidden)
 		}
 	}
-	for _, symbol := range []string{"fairyc_external_helper", "fy_std_buffer_initialize_v0"} {
+	for _, symbol := range []string{"fairyc_external_helper", "fy_std_arena_initialize_v0"} {
 		if _, err := WindowsMSVCSourceForSymbols([]string{symbol}); err == nil {
 			t.Errorf("WindowsMSVCSourceForSymbols(%q) unexpectedly succeeded", symbol)
 		}

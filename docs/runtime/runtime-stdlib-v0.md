@@ -104,8 +104,11 @@ newly visible byte. Capacity growth policy, spare bytes, and raw parts remain un
 
 One internal generated Fairy caller now declares the exact nested SystemHeap-block plus `size_t`
 record, calls the real initialize, zeroed-resize, and drop helpers, observes the initialized prefix,
-and verifies normalized release through bounded C observers. This proves only closed source-to-C
-transport. `experimental build` still does not link this implementation automatically, and no
+and verifies normalized release through bounded C observers. Windows `build-target` now admits
+initialize, zeroed-resize, and drop, selects Buffer plus its SystemHeap dependency exactly once,
+observes capacity eight and length four, then observes normalized drop state under both MSVC
+profiles. That Windows path does not read the initialized bytes, while the Linux C-only and source
+probes retain byte-level zeroing evidence. These remain closed source-to-C transports; no
 source-visible `std::bytes::Buffer`, safe constructor, borrow surface, or ownership-aware resource
 wrapper exists.
 
