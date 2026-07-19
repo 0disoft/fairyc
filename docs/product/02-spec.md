@@ -354,7 +354,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   `examples/windows_target/main.fy` carries an unused `c::long` declaration so local x64 MSVC must
   compile the target assertion, then calls exact project-owned SystemHeap allocate/deallocate,
   Buffer initialize/zeroed-resize/drop, Arena initialize/Region begin/zeroed allocation/reset/Arena
-  drop, and `fy_std_text_utf8_valid_v0(*u8, usize) -> u32` C
+  drop, CStr validation, String copy/view/append/drop, CString from-text/view/drop, and
+  `fy_std_text_utf8_valid_v0(*u8, usize) -> u32` C
   implementations before the generated PE can return 42. The heap crossing requires an eight-byte
   block, observes its size and alignment, frees it, and observes normalized zero state. The Buffer
   crossing selects the Buffer-to-SystemHeap dependency closure, observes capacity eight and length
@@ -362,12 +363,17 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   closure, observes initialization generation 1, one active Region and non-null allocation/node,
   reset generation 2 with invalidated Region state, and drop generation 3. Private Windows generation
   fields use target-width `usize` only as a layout-compatible transport, not a public representation.
-  Neither Buffer nor Arena reads the zeroed bytes on this path. The Windows resolver links only
-  SystemHeap, Buffer, Arena, text view, and the scalar runtime. It fixes the SystemHeap fundamental-alignment ceiling at the documented
+  Neither Buffer nor Arena reads the zeroed bytes on this path. Owned text copies a compiler-owned
+  five-byte UTF-8 literal, observes String length five then ten after append, normalized drop,
+  six-byte CString storage with logical CStr length five, normalized drop, and direct validation of
+  compiler-owned terminated storage. It observes only status, length, alignment, and pointer state,
+  not returned bytes. The Windows resolver links only SystemHeap, Buffer, Arena, text view, owned
+  text, and the scalar runtime. It fixes the SystemHeap fundamental-alignment ceiling at the documented
   Windows x64 `malloc` guarantee of 16 bytes because MSVC C does not provide `max_align_t` in
   `<stddef.h>`. Every other standard-library or foreign symbol fails before toolchain resolution;
   companion inputs and user linker arguments remain absent. Lexical `region` lowering, copied
-  placement, failure paths, public standard-library wrappers, and stable layouts remain absent. This clears only the missing target
+  placement, owned-text byte/terminator contents, failure paths, public standard-library wrappers,
+  source ownership/Result mapping, and stable layouts remain absent. This clears only the missing target
   C-emission-profile evidence; `emittable`, `conformant`, and `supported` remain false.
 - QBE or another fast backend and LLVM require separate measured adoption decisions after MIR stability.
 - Early caching is whole-package and bounded. Function-level caching requires measured invalidation or latency pressure.

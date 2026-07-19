@@ -66,9 +66,10 @@ semantic C emitter but selects Windows scalar providers and layout facts, identi
 instrumentation unavailable. `experimental build-target` resolves MSVC only after that profile has
 been selected. Its target-specific support resolver admits only exact project-owned SystemHeap
 allocate/deallocate, Buffer initialize/zeroed-resize/drop, Arena initialize/Region begin/zeroed
-allocation/reset/Arena drop, and `fy_std_text_utf8_valid_v0` calls. Buffer and Arena selection each
+allocation/reset/Arena drop, CStr validation, String copy/view/append/drop, CString
+from-text/view/drop, and `fy_std_text_utf8_valid_v0` calls. Buffer and Arena selection each
 close over SystemHeap in deterministic component order; the resolver combines SystemHeap, Buffer,
-Arena, text-view, and scalar runtime at most once each and rejects every other foreign
+Arena, text-view, owned-text, and scalar runtime at most once each and rejects every other foreign
 or unproven standard-library symbol before toolchain discovery. The Windows SystemHeap source overrides only its fundamental-alignment
 ceiling with the x64 `malloc` guarantee of 16 bytes; allocation semantics stay shared. Companion
 inputs and arbitrary linker arguments remain absent.
@@ -122,6 +123,12 @@ Arena, Region, and `void **` transport. It observes initialization, active attac
 allocation/node, reset invalidation, and drop generation transitions at both profiles without
 dereferencing the returned storage. This is lifecycle and dependency-closure evidence, not safe
 lexical Region lowering, zeroed-byte observation, a public representation, or a public allocator API.
+The Windows target example also crosses compiler-owned static UTF-8 and C-string storage into the
+real owned-text source. Private nested heap/Buffer/String/CString/view/result records carry String
+copy, view, append, second view, and drop plus CString construction, view, drop, and direct CStr
+validation. Status, length, alignment, pointer, and normalized-drop state execute at both profiles;
+the FY subset cannot dereference the returned view, so byte, terminator, and failure-matrix evidence
+remains in the Linux probes. This does not add safe source ownership or a public text API.
 `internal/cstdlibcontract` owns the exact-symbol/component maps used by backend admission and
 target-specific product linking. The emitted C unit records only actually called foreign names;
 `experimental build` and `build-target` link only the permitted minimal dependency-closed C source

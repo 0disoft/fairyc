@@ -93,7 +93,7 @@ source-to-native use without pretending that the host-smoke artifact is a Window
 The distinct `experimental build-target` command now consumes the declared
 `x86_64-windows-msvc` profile, emits LLP64-aware C11, and retains one target-labelled PE. Its
 checked-in source proves four-byte `c::long` emission and calls the real project-owned SystemHeap,
-Buffer, Arena/Region, and `fy_std_text_utf8_valid_v0` C implementations before returning 42. Buffer
+Buffer, Arena/Region, String/CString/CStr, and UTF-8 C implementations before returning 42. Buffer
 selection pulls in SystemHeap exactly once, then construction, length-four resize metadata, and
 normalized drop state execute at both MSVC profiles. Arena selection independently closes over the
 same SystemHeap component once, then initialization, one active Region, an eight-byte allocation,
@@ -153,6 +153,13 @@ second generated FY caller uses exact nested heap/buffer/String/CString/result r
 real String copy, view, append, and drop helpers plus CString creation, CStr view, and drop. Its C
 observers require exact bytes, repeated append, one terminator, and normalized release. These are raw
 internal transports; public safe String/CString types and source `Result` mapping remain absent.
+Windows `build-target` now admits the eight exact owned-text and CStr entry points. A compiler-owned
+five-byte UTF-8 literal is copied into String, viewed at length five, appended to length ten, and
+dropped to normalized storage; the same input becomes a six-byte terminated CString whose view has
+logical length five before normalized drop. A direct compiler-owned `c"Fairy"` storage block also
+passes bounded CStr validation. The FY path observes statuses, lengths, non-null pointers, alignment,
+and cleanup but cannot dereference returned storage, so exact copied bytes, terminator contents, and
+the failure matrix remain owned by the Linux probes.
 The Linux File C slice now exposes partial I/O, write-all progress, sync, and consuming close that
 is never retried, even after failure. Its C-only four-way probe remains configured but unobserved.
 A separate generated FY caller now crosses exact result, File, and open-option records into the real

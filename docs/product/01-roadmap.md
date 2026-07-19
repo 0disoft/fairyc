@@ -148,7 +148,11 @@ four-way generated-Fairy crossing now calls the real bounded CStr validator with
 and unterminated nonempty storage and requires failure to preserve the prior output view. Another
 four-way generated-Fairy crossing calls the real String copy/view/append/drop and CString
 from-text/view/drop helpers with exact nested records and by-value result records. Public safe
-String/CString resources, Result error resources, and ownership-aware calls remain missing.
+String/CString resources, Result error resources, and ownership-aware calls remain missing. The
+Windows target build now executes those seven lifecycle calls plus direct CStr validation at both
+MSVC profiles. It observes String lengths five and ten, six-byte CString storage with a logical
+length-five view, successful statuses, non-null pointers, and normalized drops; exact bytes,
+terminator contents, and failure cases remain Linux-probe responsibilities.
 The Linux File C slice now also covers partial read/write, write-all progress, sync, and consuming
 close including forced close failure. Its four C-only native runs remain configured but unobserved.
 A second four-way generated-Fairy crossing uses exact result, File, and open-option records to call
@@ -217,11 +221,15 @@ foreign declaration; the emitted unit asserts four-byte LLP64 `long`, rejects un
 `c::ssize_t`, allocates and frees an eight-byte block through the real project-owned SystemHeap,
 selects the Buffer/SystemHeap closure for initialize, length-four resize metadata, and drop, selects
 the Arena/SystemHeap closure for initialize, Region begin, eight-byte allocation, reset, and drop, calls
-the exact empty-input UTF-8 validator, compiles its generated and standard-library C units through
+the owned-text closure for String copy/view/append/drop, CString from-text/view/drop, and direct CStr
+validation, calls the exact empty-input UTF-8 validator, compiles its generated and standard-library C units through
 local x64 MSVC at low and optimized profiles, passes COFF/PE/unwind inspection, and returns 42 in
 both executions. The Arena checks require generation 1 after initialization, active/non-null
 allocation state, generation 2 with Region invalidation after reset, and generation 3 after drop;
-they do not dereference the allocated bytes. Windows x64 SystemHeap uses the documented 16-byte `malloc` alignment ceiling
+they do not dereference the allocated bytes.
+The owned-text checks observe successful results, five-to-ten String length, six-byte CString storage,
+logical CStr length five, non-null views, and normalized drops without dereferencing the views.
+Windows x64 SystemHeap uses the documented 16-byte `malloc` alignment ceiling
 because MSVC C does not expose `max_align_t` in `<stddef.h>`.
 Every other foreign symbol, unproven Windows standard-library component, companion input, user
 linker argument, debug output, packaging, and hosted receipt remains closed. The Windows TargetSpec therefore reports

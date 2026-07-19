@@ -81,6 +81,13 @@ Arena-to-SystemHeap closure, single emission, non-null allocation/node state, ac
 generation 1/2/3 transitions are prototype compatibility data. Returned-byte observation, copied
 placement, simultaneous or stale Region failures, active-drop rejection, safe lexical lowering,
 stable representation, and the public `std::alloc` API remain outside the Windows slice.
+ADR 0087 adds exact CStr validation, String copy/view/append/drop, and CString from-text/view/drop
+linkage. Private 16-byte views, 32-byte nested owned records, 8-byte result returns, the
+owned-text-to-SystemHeap/Buffer/text-view closure, deterministic single emission, length/status/
+pointer observations, and normalized drops are prototype compatibility data. Independent output-
+byte and terminator observation, invalid-input and allocation-failure rollback, safe ownership,
+source `Result` mapping, stable layouts, and the public `std::text` API remain outside the Windows
+slice.
 
 `fairyc.layout-fixtures/v0` separately versions the repository input and expectation vocabulary for
 the target-layout engine; each manifest binds one declared target. It is not a public

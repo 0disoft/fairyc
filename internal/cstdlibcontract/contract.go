@@ -58,6 +58,14 @@ var windowsMSVCSymbolComponents = map[string]Component{
 	"fy_std_region_reset_v0":           ComponentArena,
 	"fy_std_arena_drop_v0":             ComponentArena,
 	"fy_std_text_utf8_valid_v0":        ComponentTextView,
+	"fy_std_cstr_validate_v0":          ComponentOwnedText,
+	"fy_std_string_copy_v0":            ComponentOwnedText,
+	"fy_std_string_as_view_v0":         ComponentOwnedText,
+	"fy_std_string_append_v0":          ComponentOwnedText,
+	"fy_std_string_drop_v0":            ComponentOwnedText,
+	"fy_std_cstring_from_text_v0":      ComponentOwnedText,
+	"fy_std_cstring_as_view_v0":        ComponentOwnedText,
+	"fy_std_cstring_drop_v0":           ComponentOwnedText,
 }
 
 var componentLinkOrder = []Component{

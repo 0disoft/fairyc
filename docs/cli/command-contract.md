@@ -47,7 +47,7 @@ The current Go prototype implements ten deliberately unstable developer commands
 | `fairyc experimental target-spec <x86_64-linux-gnu\|x86_64-windows-msvc>` | Inspect one known host-independent target description without resolving a local toolchain | Deterministic `fairyc.target-spec/v0` JSON on stdout, defined by `spec/cli/experimental-target-spec-v0.schema.json` |
 | `fairyc experimental emit-c <file.fy>` | Lower one scalar, restricted inert user-enum, bounded optionally `@link_name`-mapped `unsafe extern C fn` using admitted fixed-width, pointer-width, any of the sixteen exact transport-only TargetSpec C scalars, admitted raw pointers including opaque `void` and one pointer-to-opaque-pointer output slot, or nonempty acyclic `@repr(C)` pointer values whose fields may include exact C scalars or nested `@repr(C)` records, exact direct-local raw address, flat all-`i32` resource, or admitted resource-bearing built-in tag program through verified MIR and emit the provisional constrained C transport without invoking a toolchain | Exactly one deterministic C11 translation unit, with an explicit POSIX.1-2008 typedef profile only when required, on stdout; source diagnostics or capability errors on stderr |
 | `fairyc experimental build <file.fy> --cc <clang\|gcc> --profile <low\|optimized> --output <build/path>` | Compile and link one verified program in that constrained subset for the host `x86_64-linux-gnu` profile with an explicit C compiler, optimization profile, and ignored output path | A no-overwrite executable below `build/` plus one relative-path receipt, or source, capability, toolchain, link, or artifact diagnostics |
-| `fairyc experimental build-target <file.fy> --target x86_64-windows-msvc --profile <low\|optimized> --output <build/path.exe>` | Emit one verified program through the provisional Windows MSVC C profile, automatically link exact proven SystemHeap, Buffer and Arena dependency closures, and UTF-8 validation components when called, resolve local x64 MSVC, and retain one target-labelled PE | A no-overwrite `.exe` below `build/` plus one `x86_64-windows-msvc` receipt, or source, target-subset, support-link, toolchain, compile, link, or artifact diagnostics |
+| `fairyc experimental build-target <file.fy> --target x86_64-windows-msvc --profile <low\|optimized> --output <build/path.exe>` | Emit one verified program through the provisional Windows MSVC C profile, automatically link exact proven SystemHeap, Buffer, Arena, owned-text, CStr, and UTF-8 validation dependency closures when called, resolve local x64 MSVC, and retain one target-labelled PE | A no-overwrite `.exe` below `build/` plus one `x86_64-windows-msvc` receipt, or source, target-subset, support-link, toolchain, compile, link, or artifact diagnostics |
 | `fairyc experimental build-host <file.fy> --profile <low\|optimized> --output <build/path.exe>` | On Windows/amd64, compile one target-neutral verified program with locally discovered x64 MSVC and retain its PE without declaring a Windows target ABI | A no-overwrite `.exe` below `build/` plus a host-smoke receipt, or bounded source, capability, toolchain, compile, or artifact diagnostics |
 | `fairyc experimental run-host <file.fy> --profile <low\|optimized>` | On Windows/amd64, compile and execute one target-neutral verified program with locally discovered x64 MSVC without declaring a Windows target ABI | `native result: <i32> (windows/amd64 host-smoke, msvc <version>, <profile>)`, a canonical trap, or bounded source, capability, toolchain, compile, or execution diagnostics |
 | `fairyc experimental run <file.fy>` | Run one verified-MIR program in the scalar, tagged, whole-resource, and implemented Region subset whose selected module declares `main() -> i32` | `result: <i32>` on stdout, a canonical trap category on stderr, source diagnostics, or an explicit unsupported-subset error |
@@ -153,8 +153,11 @@ before C is emitted. Exact `fy_std_system_heap_allocate_v0`,
 `fy_std_buffer_resize_zeroed_v0`, `fy_std_buffer_drop_v0`,
 `fy_std_arena_initialize_v0`, `fy_std_region_begin_v0`,
 `fy_std_region_allocate_zeroed_v0`, `fy_std_region_reset_v0`, `fy_std_arena_drop_v0`, and
-`fy_std_text_utf8_valid_v0` calls select project-owned SystemHeap/Buffer/Arena/text-view C components and
-scalar runtime. Buffer and Arena close over SystemHeap and every component is emitted once in
+`fy_std_cstr_validate_v0`, `fy_std_string_copy_v0`, `fy_std_string_as_view_v0`,
+`fy_std_string_append_v0`, `fy_std_string_drop_v0`, `fy_std_cstring_from_text_v0`,
+`fy_std_cstring_as_view_v0`, `fy_std_cstring_drop_v0`, and `fy_std_text_utf8_valid_v0` calls select
+project-owned SystemHeap/Buffer/Arena/text-view/owned-text C components and scalar runtime. Buffer,
+Arena, and owned text close over their declared dependencies and every component is emitted once in
 deterministic order. Windows x64 SystemHeap admits fundamental
 alignment through 16 bytes. Every other foreign symbol and unproven standard-library component
 fails before toolchain discovery; companion objects, user linker inputs, debug/PDB output
@@ -162,7 +165,10 @@ contracts, and distribution packaging remain closed. The command accepts only th
 target ID, low or optimized profile, and a canonical no-overwrite `.exe` path under `build/`; it
 does not use WSL. The checked-in target example observes the Arena generation/active/pointer
 lifecycle but cannot dereference the returned storage, so it does not independently prove zeroed
-payload bytes, copied placement, failure handling, or safe lexical Region lowering.
+payload bytes, copied placement, failure handling, or safe lexical Region lowering. It also executes
+String and CString success lifecycles plus direct CStr validation, but observes only statuses,
+lengths, alignment, pointers, and normalized drops; returned bytes, terminator contents, rollback,
+and safe ownership remain outside the command contract.
 
 For the admitted foreign-call slice, `emit-c` writes a plain external prototype and call using the
 declaration name by default or its single validated `@link_name` string. Compatible mappings to one

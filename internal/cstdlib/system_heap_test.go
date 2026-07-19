@@ -289,6 +289,14 @@ func TestWindowsMSVCSourceForSymbolsKeepsClosedRuntimeSlice(t *testing.T) {
 		"fy_std_region_allocate_zeroed_v0",
 		"fy_std_region_reset_v0",
 		"fy_std_arena_drop_v0",
+		"fy_std_string_copy_v0",
+		"fy_std_string_as_view_v0",
+		"fy_std_string_append_v0",
+		"fy_std_string_drop_v0",
+		"fy_std_cstr_validate_v0",
+		"fy_std_cstring_from_text_v0",
+		"fy_std_cstring_as_view_v0",
+		"fy_std_cstring_drop_v0",
 		"fy_std_system_heap_allocate_v0",
 		"fy_std_system_heap_deallocate_v0",
 	})
@@ -304,17 +312,20 @@ func TestWindowsMSVCSourceForSymbolsKeepsClosedRuntimeSlice(t *testing.T) {
 		"fy_std_arena_initialize_v0", "fy_std_region_begin_v0",
 		"fy_std_region_allocate_zeroed_v0", "fy_std_region_reset_v0", "fy_std_arena_drop_v0",
 		"fy_std_text_utf8_valid_v0", "fy_std_text_validate_utf8_v0",
+		"fy_std_cstr_validate_v0", "fy_std_string_copy_v0", "fy_std_string_as_view_v0",
+		"fy_std_string_append_v0", "fy_std_string_drop_v0", "fy_std_cstring_from_text_v0",
+		"fy_std_cstring_as_view_v0", "fy_std_cstring_drop_v0",
 	} {
 		if !strings.Contains(source, required) {
 			t.Errorf("Windows source is missing %q", required)
 		}
 	}
-	for _, forbidden := range []string{"fy_std_string_copy_v0", "fy_std_linux_file_open_v0", "_POSIX_C_SOURCE"} {
+	for _, forbidden := range []string{"fy_std_linux_file_open_v0", "_POSIX_C_SOURCE"} {
 		if strings.Contains(source, forbidden) {
 			t.Errorf("Windows source unexpectedly contains %q", forbidden)
 		}
 	}
-	for _, symbol := range []string{"fairyc_external_helper", "fy_std_string_copy_v0"} {
+	for _, symbol := range []string{"fairyc_external_helper", "fy_std_linux_file_open_v0"} {
 		if _, err := WindowsMSVCSourceForSymbols([]string{symbol}); err == nil {
 			t.Errorf("WindowsMSVCSourceForSymbols(%q) unexpectedly succeeded", symbol)
 		}

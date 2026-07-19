@@ -112,6 +112,12 @@ begin, allocation, reset, and drop calls, but it does not alias the types in the
 the Arena representation, or admit arbitrary cross-translation-unit aggregate transport. The
 Windows FY caller observes state and pointer transitions without dereferencing allocated bytes.
 
+The same Windows product smoke now carries private 16-byte text and CStr views, 32-byte nested
+String/CString records, and an 8-byte two-`u32` owned-text result. It executes small aggregate return
+transport from the separately compiled C unit for String and CString operations at both profiles.
+That is one closed same-toolchain source crossing, not a stable record ABI, broad aggregate-return
+conformance, byte-content proof, or permission for by-value aggregate parameters.
+
 The implemented foreign-result slice admits those same nonempty acyclic `@repr(C)` records by value.
 Generated C emits the exact public struct return type and ordinary assignment. A generated Fairy
 caller is configured to receive both an 8-byte INTEGER-class result and a 20-byte MEMORY-class
@@ -260,9 +266,11 @@ booleans false. `Stage0WindowsMSVCProfile` binds generated C to the Windows Targ
 four-byte `c::long` assertions, rejects unavailable `c::ssize_t`, and is executed through the
 checked-in `build-target` example. That example crosses SystemHeap allocate/deallocate with a
 24-byte pointer/`usize`/`usize` record, crosses Buffer initialize/zeroed-resize/drop with a nested
-32-byte record, then calls `fy_std_text_utf8_valid_v0` using a null `*u8` and zero `usize`. Buffer
-selection closes over SystemHeap; the Windows support resolver links only SystemHeap, Buffer, text
-view, and scalar runtime, while every other foreign symbol fails closed. The SystemHeap C source receives a target-only
+32-byte record, crosses private Arena/Region records, crosses String/CString/CStr lifecycle with
+private views and 8-byte result returns, then calls `fy_std_text_utf8_valid_v0` using a null `*u8`
+and zero `usize`. Buffer, Arena, and owned text close over their declared dependencies; the Windows
+support resolver links only SystemHeap, Buffer, Arena, text
+view, owned text, and scalar runtime, while every other foreign symbol fails closed. The SystemHeap C source receives a target-only
 16-byte maximum-fundamental-alignment definition matching the Windows x64 `malloc` contract. It
 lists the still-incomplete LLP64 layout-probe evidence, complete bidirectional source-level and
 independently inspected Microsoft x64 crossings,
