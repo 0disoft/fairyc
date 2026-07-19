@@ -92,11 +92,12 @@ distribution, or self-hosting claims.
 `experimental build-target` is separate from those smokes. It selects the Windows MSVC emission
 profile, emits target-labelled C11, requires Windows LLP64 C-scalar providers, rejects unavailable
 `c::ssize_t`, and builds a no-overwrite PE through locally resolved x64 MSVC. The current command
-permits target declarations such as unused `c::long` and automatically links the exact proven
-`fy_std_text_utf8_valid_v0` project-owned component when called. Every other foreign symbol or
+permits target declarations such as unused `c::long` and automatically links exact proven
+SystemHeap allocate/deallocate and `fy_std_text_utf8_valid_v0` project-owned components when called.
+The Windows x64 SystemHeap ceiling is 16-byte fundamental alignment. Every other foreign symbol or
 unproven standard-library component fails before toolchain discovery; companion inputs and user
 linker options remain absent. Its receipt is target-emission and one-way closed-FFI evidence, not
-complete ABI conformance, hosted support, a distributable artifact promise, or self-hosting.
+complete ABI/runtime conformance, hosted support, a distributable artifact promise, or self-hosting.
 `experimental target-spec` emits `fairyc.target-spec/v0` JSON without probing the host or exposing
 local tool paths. Linux reports its current scalar, flat-resource, and resource-tagged emission
 subset. Windows reports `scalar-and-llp64-c-scalar-c11`. Both keep `emittable`, `conformant`, and `supported` false and list

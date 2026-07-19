@@ -71,16 +71,20 @@ Allocation is fallible and reports at least out-of-memory, size overflow, unsupp
 
 Zero-size requests do not call the platform allocator. They produce length and capacity zero; deallocation is a no-op; empty raw pointer identity is unspecified. Public raw `realloc` is excluded. `Buffer.reserve` checks size overflow, leaves the old allocation unchanged on failure, and cannot run with a live borrow into the buffer.
 
-The first provisional `x86_64-linux-gnu` SystemHeap C slice lives in `internal/cstdlib`, not the thin
-runtime. It admits only nonzero power-of-two alignments at or below `_Alignof(max_align_t)`, which
-covers all currently admitted scalar layouts; over-aligned requests fail closed. Zero-size requests
-still validate alignment but never call `malloc`. Growth and shrink use allocate-copy-release rather
-than raw `realloc`, so validation and allocation failures leave the original block unchanged.
+The first provisional SystemHeap C slice lives in `internal/cstdlib`, not the thin runtime. On
+`x86_64-linux-gnu` it admits only nonzero power-of-two alignments at or below
+`_Alignof(max_align_t)`. MSVC C does not expose `max_align_t` through `<stddef.h>`, so the
+`x86_64-windows-msvc` support resolver supplies the documented 16-byte x64 `malloc` fundamental
+alignment ceiling. Over-aligned requests fail closed on both targets. Zero-size requests still
+validate alignment but never call `malloc`. Growth and shrink use allocate-copy-release rather than
+raw `realloc`, so validation and allocation failures leave the original block unchanged.
 
-This helper is not yet part of `experimental build` or a source-visible `std::alloc` module. One
-internal generated Fairy caller now declares the exact `void *`, `size_t`, `size_t` block, calls the
-real allocate and deallocate symbols, and observes allocation plus normalized release through a
-bounded C test observer. Its independent closed Linux probe still checks empty normalization,
+This helper is not yet a source-visible `std::alloc` module. Linux product linkage selects it for
+exact called symbols; Windows `build-target` now admits only allocate/deallocate and uses a private
+pointer/`usize`/`usize` record to request eight bytes, observe size/alignment, release, and observe
+normalized zero state at both MSVC profiles. A separate internal Linux generated Fairy caller
+declares the exact `void *`, `size_t`, `size_t` block and observes allocation plus normalized release
+through a bounded C test observer. Its independent closed Linux probe still checks empty normalization,
 alignment, prefix preservation, failure rollback, malformed-block rejection, shrink, and release
 under Clang/GCC at low and optimized profiles. Neither path deterministically forces host OOM, and
 no hosted success receipt has been observed.
@@ -259,6 +263,8 @@ Hidden allocation, infallible heap allocation, generic allocator vtables, public
 
 ## External references
 
+- Microsoft x64 `malloc` alignment:
+  <https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/malloc?view=msvc-170>
 - POSIX.1-2024 `malloc`: <https://pubs.opengroup.org/onlinepubs/9799919799/functions/malloc.html>
 - Linux `write(2)`: <https://man7.org/linux/man-pages/man2/write.2.html>
 - Linux `close(2)`: <https://man7.org/linux/man-pages/man2/close.2.html>

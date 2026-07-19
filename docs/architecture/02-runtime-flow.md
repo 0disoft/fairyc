@@ -64,9 +64,11 @@ Linux toolchain is locally executable.
 semantic C emitter but selects Windows scalar providers and layout facts, identifies its output as
 `x86_64-windows-msvc`, rejects unavailable POSIX `c::ssize_t`, and leaves validation-only drop
 instrumentation unavailable. `experimental build-target` resolves MSVC only after that profile has
-been selected. Its target-specific support resolver admits only the exact project-owned
-`fy_std_text_utf8_valid_v0` call, selects the text-view C component plus scalar runtime, and rejects
-every other foreign or unproven standard-library symbol before toolchain discovery. Companion
+been selected. Its target-specific support resolver admits only exact project-owned SystemHeap
+allocate/deallocate and `fy_std_text_utf8_valid_v0` calls, selects SystemHeap and text-view C
+components plus scalar runtime, and rejects every other foreign or unproven standard-library symbol
+before toolchain discovery. The Windows SystemHeap source overrides only its fundamental-alignment
+ceiling with the x64 `malloc` guarantee of 16 bytes; allocation semantics stay shared. Companion
 inputs and arbitrary linker arguments remain absent.
 `internal/layout` is the next boundary: it turns those facts into checked array and aggregate size,
 alignment, offset, and padding results before any backend chooses C syntax. Separate Linux GNU and
@@ -110,10 +112,12 @@ trap, cleanup, or foreign-call rules.
 `internal/cstdlib` is a separate target-standard-library transport boundary. Its first provisional
 SystemHeap helper normalizes empty allocation, rejects unsupported alignment, and preserves the old
 block when copy-and-release resize fails. A closed C probe reaches the existing Linux compiler
-matrix. One internal generated Fairy transport now calls the real allocate/deallocate symbols with
-an exact C-layout block. `internal/cstdlibcontract` owns the single exact-symbol/component map used
-by both backend admission and product linking. The emitted C unit records only actually called
-foreign names, and `experimental build` links the minimal dependency-closed provisional C source
+matrix. Internal generated Fairy transports call the real allocate/deallocate symbols with exact
+C-layout blocks on Linux and a private layout-equivalent `usize` block on Windows. The Windows path
+uses the target's 16-byte x64 `malloc` alignment ceiling and executes at both MSVC profiles.
+`internal/cstdlibcontract` owns the exact-symbol/component maps used by backend admission and
+target-specific product linking. The emitted C unit records only actually called foreign names;
+`experimental build` and `build-target` link only the permitted minimal dependency-closed C source
 plus the scalar runtime. No public standard-library API exists. This does not
 broaden the thin runtime or complete the standard library.
 

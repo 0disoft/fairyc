@@ -210,9 +210,11 @@ stays fail-closed.
 The first declared Windows target build now selects a distinct C-backend profile rather than
 labelling Linux-profile output after the fact. A checked-in FY source carries an unused `c::long`
 foreign declaration; the emitted unit asserts four-byte LLP64 `long`, rejects unavailable
-`c::ssize_t`, calls the exact project-owned empty-input UTF-8 validator, compiles its generated and
-standard-library C units through local x64 MSVC at low and optimized profiles, passes
-COFF/PE/unwind inspection, and returns 42 in both executions.
+`c::ssize_t`, allocates and frees an eight-byte block through the real project-owned SystemHeap,
+calls the exact empty-input UTF-8 validator, compiles its generated and standard-library C units
+through local x64 MSVC at low and optimized profiles, passes COFF/PE/unwind inspection, and returns
+42 in both executions. Windows x64 SystemHeap uses the documented 16-byte `malloc` alignment ceiling
+because MSVC C does not expose `max_align_t` in `<stddef.h>`.
 Every other foreign symbol, unproven Windows standard-library component, companion input, user
 linker argument, debug output, packaging, and hosted receipt remains closed. The Windows TargetSpec therefore reports
 `scalar-and-llp64-c-scalar-c11` and no longer lists `target-c-emission-profile`, while all three
@@ -248,7 +250,7 @@ Exit gate: Atlas failure cannot change compilation; stale or incompatible maps f
 ## Later capability gates
 
 - `x86_64-linux-musl`: requires a separate libc, sysroot, startup, loader, and static-distribution profile.
-- `x86_64-windows-msvc`: the TargetSpec, scalar/LLP64 C-emission product builds at both profiles, one closed FY-to-project-C UTF-8 call, an eight-case local layout probe, 15-case host-independent Microsoft x64 classifier, 12-case same-MSVC native crossing, bounded PE32+ executable inspection, structural live-COFF object inspection, static version-1/version-2 unwind-structure inspection, and a three-case native exception/virtual-walk probe exist, but complete hosted LLP64 layout evidence, broader and bidirectional source-level Fairy crossings, independent or inspected call evidence, versioned exact COFF symbol/COMDAT/relocation fixtures, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, UCRT/VCRuntime, distribution, and debug fixtures remain required.
+- `x86_64-windows-msvc`: the TargetSpec, scalar/LLP64 C-emission product builds at both profiles, closed FY-to-project-C SystemHeap and UTF-8 calls, an eight-case local layout probe, 15-case host-independent Microsoft x64 classifier, 12-case same-MSVC native crossing, bounded PE32+ executable inspection, structural live-COFF object inspection, static version-1/version-2 unwind-structure inspection, and a three-case native exception/virtual-walk probe exist, but complete hosted LLP64 layout evidence, broader and bidirectional source-level Fairy crossings, independent or inspected call evidence, versioned exact COFF symbol/COMDAT/relocation fixtures, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, complete UCRT/VCRuntime and deployment evidence, distribution, and debug fixtures remain required.
 - QBE or another fast backend: requires stable internal semantics, interpreter and C oracles, ABI coverage, and measured edit-build benefit.
 - LLVM backend: requires representative workloads that justify optimization and distribution cost after simpler paths are exhausted.
 - Generics and `Vec<T>`: require non-generic stability plus compile-time, code-size, active-payload, and diagnostics fixtures.

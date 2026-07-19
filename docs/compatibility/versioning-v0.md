@@ -65,6 +65,11 @@ requires a separate capability and compatibility decision rather than silently w
 ADR 0083 admits exactly `fy_std_text_utf8_valid_v0` as the first Windows source-call linkage. That
 symbol's signature, selected component, and fail-closed rejection of every other foreign symbol are
 prototype compatibility data; this does not make the complete standard library portable or stable.
+ADR 0084 adds exact SystemHeap allocate/deallocate linkage and a target-only 16-byte fundamental
+alignment ceiling derived from the Windows x64 `malloc` contract. The ceiling, two signatures,
+record layout, minimal component closure, and normalized release observations are prototype
+compatibility data; allocator resize, forced OOM, over-aligned allocation, hosted CRT deployment,
+and the public `std::alloc` API remain outside the admitted slice.
 
 `fairyc.layout-fixtures/v0` separately versions the repository input and expectation vocabulary for
 the target-layout engine; each manifest binds one declared target. It is not a public

@@ -150,7 +150,16 @@ func WindowsMSVCSourceForSymbols(symbols []string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return sourceForComponents(components)
+	source, err := sourceForComponents(components)
+	if err != nil {
+		return "", err
+	}
+	for _, component := range components {
+		if component == cstdlibcontract.ComponentSystemHeap {
+			return "#define FY_STD_SYSTEM_HEAP_MAX_ALIGNMENT_V0 ((size_t)16)\n" + source, nil
+		}
+	}
+	return source, nil
 }
 
 func sourceForComponents(components []cstdlibcontract.Component) (string, error) {

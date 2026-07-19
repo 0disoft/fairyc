@@ -93,6 +93,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0081-windows-x64-native-unwind-execution.md`: low/optimized native SEH dispatch, captured-context virtual walk, and abnormal termination-handler execution across three separately compiled MSVC C frames without adding Fairy C exception semantics or promoting target maturity.
 - `0082-windows-msvc-target-c-emission.md`: explicit pre-emission Windows target selection, LLP64-aware scalar C output, and a checked-in FY-to-MSVC executable path without source-level Windows FFI or maturity promotion.
 - `0083-windows-msvc-closed-stdlib-crossing.md`: one exact FY-to-project-C UTF-8 validation call through target-specific minimal linkage, with all other foreign symbols remaining fail-closed.
+- `0084-windows-msvc-system-heap-crossing.md`: closed FY-to-SystemHeap allocation and release through the Windows x64 16-byte `malloc` alignment contract without opening broader runtime or linker inputs.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

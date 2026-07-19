@@ -3,6 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef FY_STD_SYSTEM_HEAP_MAX_ALIGNMENT_V0
+#define FY_STD_SYSTEM_HEAP_MAX_ALIGNMENT_V0 _Alignof(max_align_t)
+#endif
+
 enum fy_std_alloc_status_v0 {
     FY_STD_ALLOC_OK_V0 = 0,
     FY_STD_ALLOC_OUT_OF_MEMORY_V0 = 1,
@@ -20,7 +24,7 @@ struct fy_std_system_heap_block_v0 {
 static int fy_std_system_heap_alignment_supported_v0(size_t alignment) {
     return alignment != 0 &&
            (alignment & (alignment - 1)) == 0 &&
-           alignment <= _Alignof(max_align_t);
+           alignment <= FY_STD_SYSTEM_HEAP_MAX_ALIGNMENT_V0;
 }
 
 static int fy_std_system_heap_block_valid_v0(const struct fy_std_system_heap_block_v0 *block) {

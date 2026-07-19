@@ -74,8 +74,8 @@ versioned cases cover shared ordinal RCX/RDX/R8/R9 or XMM0-3 slots, fifth-argume
 small aggregate integer transport, odd-size and 16-byte aggregate indirection, and hidden-return
 slot shifting. The 12 pass plans additionally generate separate caller and callee C11 translation
 units that local x64 MSVC compiles, links, and executes at low and optimized profiles. Independent
-compiler or assembly/register inspection, source-level Fairy crossings, and a hosted receipt remain
-missing;
+compiler or assembly/register inspection, broader and bidirectional source-level Fairy crossings,
+and a hosted receipt remain missing;
 stack/shadow-store observations, callbacks, exports, and hosted evidence remain absent.
 The 14 valid plans now generate separate caller and callee objects for Clang-to-GCC and
 GCC-to-Clang at `-O0` and `-O2`, for 56 configured crossings. This Windows host cannot execute
@@ -93,10 +93,12 @@ source-to-native use without pretending that the host-smoke artifact is a Window
 The distinct `experimental build-target` command now consumes the declared
 `x86_64-windows-msvc` profile, emits LLP64-aware C11, and retains one target-labelled PE. Its
 checked-in source proves four-byte `c::long` emission and calls the real project-owned
-`fy_std_text_utf8_valid_v0` C implementation before returning 42. Every other foreign symbol,
-unproven standard-library component, companion input, user linker option, distribution promise,
-and self-hosting path remains closed.
-A provisional `x86_64-linux-gnu` SystemHeap implementation now lives in the target standard-library
+SystemHeap allocate/deallocate plus `fy_std_text_utf8_valid_v0` C implementations before returning
+42. The Windows x64 heap path uses the documented 16-byte `malloc` alignment ceiling instead of the
+MSVC C header's missing `max_align_t`. Every other foreign symbol, unproven standard-library
+component, companion input, user linker option, distribution promise, and self-hosting path remains
+closed.
+A provisional SystemHeap implementation now lives in the target standard-library
 boundary rather than the thin runtime. It normalizes empty allocation, admits current fundamental
 alignments, preserves bytes across copy-and-release growth or shrink, and leaves the old block
 unchanged when validation or allocation fails. A closed C-only probe and an internal generated FY

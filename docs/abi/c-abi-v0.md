@@ -251,9 +251,11 @@ same immutable data without probing the host.
 The Windows evidence block reports `scalar-and-llp64-c-scalar-c11` while keeping all maturity
 booleans false. `Stage0WindowsMSVCProfile` binds generated C to the Windows TargetSpec, emits
 four-byte `c::long` assertions, rejects unavailable `c::ssize_t`, and is executed through the
-checked-in `build-target` example. That example performs one FY-to-project-C call to
-`fy_std_text_utf8_valid_v0` using a null `*u8` and zero `usize`; the Windows support resolver links
-only the text-view component and scalar runtime, while every other foreign symbol fails closed. It
+checked-in `build-target` example. That example crosses SystemHeap allocate/deallocate with a
+24-byte pointer/`usize`/`usize` record, then calls `fy_std_text_utf8_valid_v0` using a null `*u8` and
+zero `usize`; the Windows support resolver links only SystemHeap, text view, and scalar runtime,
+while every other foreign symbol fails closed. The SystemHeap C source receives a target-only
+16-byte maximum-fundamental-alignment definition matching the Windows x64 `malloc` contract. It
 lists the still-incomplete LLP64 layout-probe evidence, complete bidirectional source-level and
 independently inspected Microsoft x64 crossings,
 PE/COFF object and unwind fixtures, complete runtime and standard library, hosted
@@ -285,7 +287,7 @@ The planned transport matrix uses Clang as the primary compiler and GCC as an in
 
 ## Later profiles
 
-`x86_64-linux-musl` needs a separate libc, startup, sysroot, dynamic-loader, and static-distribution profile even though its CPU ABI is SysV-derived. The declared `x86_64-windows-msvc` TargetSpec still needs complete executable LLP64 layout coverage plus a hosted receipt, independent or register-inspected four-slot call evidence, source-level Fairy crossings, versioned exact COFF symbol/COMDAT/relocation fixtures, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, UCRT/VCRuntime, and debug fixtures before any maturity promotion.
+`x86_64-linux-musl` needs a separate libc, startup, sysroot, dynamic-loader, and static-distribution profile even though its CPU ABI is SysV-derived. The declared `x86_64-windows-msvc` TargetSpec still needs complete executable LLP64 layout coverage plus a hosted receipt, independent or register-inspected four-slot call evidence, broader and bidirectional source-level Fairy crossings, versioned exact COFF symbol/COMDAT/relocation fixtures, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, complete UCRT/VCRuntime and deployment evidence, and debug fixtures before any maturity promotion.
 
 ## External references
 

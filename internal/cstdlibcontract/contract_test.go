@@ -58,16 +58,18 @@ func TestAdmittedKeepsUnexercisedLinuxFileSymbolsClosed(t *testing.T) {
 	}
 }
 
-func TestWindowsMSVCComponentsForSymbolsAdmitsOnlyProvenTextValidation(t *testing.T) {
+func TestWindowsMSVCComponentsForSymbolsAdmitsOnlyProvenRuntimeSlice(t *testing.T) {
 	t.Parallel()
 	components, err := WindowsMSVCComponentsForSymbols([]string{
 		"fy_std_text_utf8_valid_v0",
+		"fy_std_system_heap_deallocate_v0",
+		"fy_std_system_heap_allocate_v0",
 		"fy_std_text_utf8_valid_v0",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if want := []Component{ComponentTextView}; !slices.Equal(components, want) {
+	if want := []Component{ComponentSystemHeap, ComponentTextView}; !slices.Equal(components, want) {
 		t.Fatalf("components = %v, want %v", components, want)
 	}
 	for _, test := range []struct {
@@ -75,7 +77,7 @@ func TestWindowsMSVCComponentsForSymbolsAdmitsOnlyProvenTextValidation(t *testin
 		contains string
 	}{
 		{symbol: "fairyc_external_helper", contains: "no closed x86_64-windows-msvc companion contract"},
-		{symbol: "fy_std_linux_file_close_v0", contains: "no x86_64-windows-msvc source contract"},
+		{symbol: "fy_std_buffer_initialize_v0", contains: "no x86_64-windows-msvc source contract"},
 		{symbol: "fy_std_missing_v0", contains: "unrecognized Stage 0 standard-library symbol"},
 	} {
 		if _, err := WindowsMSVCComponentsForSymbols([]string{test.symbol}); err == nil || !strings.Contains(err.Error(), test.contains) {

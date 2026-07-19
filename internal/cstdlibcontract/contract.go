@@ -47,7 +47,9 @@ var symbolComponents = map[string]Component{
 }
 
 var windowsMSVCSymbolComponents = map[string]Component{
-	"fy_std_text_utf8_valid_v0": ComponentTextView,
+	"fy_std_system_heap_allocate_v0":   ComponentSystemHeap,
+	"fy_std_system_heap_deallocate_v0": ComponentSystemHeap,
+	"fy_std_text_utf8_valid_v0":        ComponentTextView,
 }
 
 var componentLinkOrder = []Component{
