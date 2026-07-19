@@ -42,8 +42,9 @@ not expose which structural assumptions were checked.
 - A file with only an `MZ` prefix can no longer masquerade as a valid Windows smoke artifact.
 - The same parser covers retained and temporary products, so probe executables cannot silently
   drift onto a different machine, subsystem, or image class.
-- COFF object inspection and Windows unwind validation remain separate next gates because linked
-  image structure cannot prove their source records or semantics.
+- ADR 0079 later adds structural inspection of every live MSVC COFF object. Exact versioned object
+  expectations and Windows unwind validation remain separate because linked image structure and
+  generic bounds cannot prove their records or semantics.
 
 ## External basis
 

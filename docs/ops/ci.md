@@ -110,6 +110,12 @@ retained product image and all four probe images and requires bounded AMD64 PE32
 identity, aligned image/header/section ranges, a readable executable `.text`, and an executable
 entry point. This does not inspect object symbols or relocations, unwind/debug payloads, imported
 API compatibility, signing, installer packaging, or distribution behavior.
+The driver also parses every intermediate `.obj` from `build-host`, every `run-host` case, and both
+profiles of both native probes before linking results leave the temporary root. Raw AMD64 COFF,
+bounded section and relocation ranges, readable executable `.text`/`.text$...`, valid relocation
+symbol indexes, and named symbols are mandatory; storage-free `.bss` is admitted only with the
+uninitialized-data characteristic. Object bytes are not uploaded or retained. Exact symbol,
+COMDAT, relocation-type, unwind, debug, and hosted object expectations remain unconfigured.
 
 ## Owners
 

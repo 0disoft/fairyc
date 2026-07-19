@@ -160,7 +160,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, 14 run-host outcomes covered signed results and four arithmetic trap categories, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, and %d PE32+ executable images passed structural inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), layoutCases, layoutExecutions, abiCases, abiExecutions, 1+layoutExecutions+abiExecutions, toolchain.Version)
+	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, 14 run-host outcomes covered signed results and four arithmetic trap categories, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, %d PE32+ executable images passed structural inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), layoutCases, layoutExecutions, abiCases, abiExecutions, 1+layoutExecutions+abiExecutions, toolchain.Version)
 	return nil
 }
 
@@ -174,6 +174,9 @@ func runWindowsLayoutProbe(toolchain cdriver.WindowsHostToolchain) (int, int, er
 		artifact, err := cdriver.BuildWindowsMSVCProbe(toolchain, profile, unit.Source)
 		if err != nil {
 			return executions, len(unit.Cases), fmt.Errorf("build Windows MSVC layout probe with %s: %w", profile.Name, err)
+		}
+		if len(artifact.Objects) != 1 || artifact.Objects[0].Name != "probe.obj" {
+			return executions, len(unit.Cases), fmt.Errorf("Windows MSVC layout probe with %s returned unexpected COFF object receipts", profile.Name)
 		}
 		if _, err := pecoff.InspectExecutable(artifact.Bytes); err != nil {
 			return executions, len(unit.Cases), fmt.Errorf("inspect Windows MSVC layout probe PE executable image with %s: %w", profile.Name, err)
@@ -200,6 +203,9 @@ func runWindowsABIProbe(toolchain cdriver.WindowsHostToolchain) (int, int, error
 		artifact, err := cdriver.BuildWindowsMSVCABIProbe(toolchain, profile, unit.CallerSource, unit.CalleeSource)
 		if err != nil {
 			return executions, len(unit.Cases), fmt.Errorf("build Windows MSVC ABI probe with %s: %w", profile.Name, err)
+		}
+		if len(artifact.Objects) != 2 || artifact.Objects[0].Name != "caller.obj" || artifact.Objects[1].Name != "callee.obj" {
+			return executions, len(unit.Cases), fmt.Errorf("Windows MSVC ABI probe with %s returned unexpected COFF object receipts", profile.Name)
 		}
 		if _, err := pecoff.InspectExecutable(artifact.Bytes); err != nil {
 			return executions, len(unit.Cases), fmt.Errorf("inspect Windows MSVC ABI probe PE executable image with %s: %w", profile.Name, err)

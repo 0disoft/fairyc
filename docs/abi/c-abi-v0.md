@@ -214,6 +214,15 @@ directory presence is recorded but their payloads are not interpreted. This is e
 structure evidence only, not COFF object symbol/relocation, `.pdata`/`.xdata`, CodeView/PDB, target
 emission, or distribution conformance.
 
+Before returning any linked Windows artifact, the shared C driver now parses every intermediate
+MSVC `.obj` as raw AMD64 COFF. It rejects optional PE headers and linked-image flags; requires
+bounded raw and relocation ranges, readable executable `.text` or `.text$...` code, valid
+relocation symbol indexes, and named symbols; and permits storage-free uninitialized `.bss` only
+when its section characteristic says so. This covers every `build-host`, `run-host`, layout-probe,
+and ABI-probe compilation in the local smoke. It still does not define exact exported/imported
+symbols, COMDAT selection, permitted relocation types, `.pdata`/`.xdata` content, or a hosted
+object-fixture receipt, so `pe-coff-object-fixtures` remains missing.
+
 This executable description is target data, not conformance evidence. Its evidence block names the
 existing `scalar-and-flat-i32-resource-tagged-c11` subset, keeps `emittable`, `conformant`, and `supported` false, and
 lists the missing hosted native C layout-probe receipt, bidirectional ABI, runtime, standard-library, hosted-Linux, toolchain
@@ -252,7 +261,7 @@ The planned transport matrix uses Clang as the primary compiler and GCC as an in
 
 ## Later profiles
 
-`x86_64-linux-musl` needs a separate libc, startup, sysroot, dynamic-loader, and static-distribution profile even though its CPU ABI is SysV-derived. The declared `x86_64-windows-msvc` TargetSpec still needs complete executable LLP64 layout coverage plus a hosted receipt, independent or register-inspected four-slot call evidence, source-level Fairy crossings, COFF object symbols and relocations, UCRT/VCRuntime, unwind payloads, and debug fixtures before any maturity promotion.
+`x86_64-linux-musl` needs a separate libc, startup, sysroot, dynamic-loader, and static-distribution profile even though its CPU ABI is SysV-derived. The declared `x86_64-windows-msvc` TargetSpec still needs complete executable LLP64 layout coverage plus a hosted receipt, independent or register-inspected four-slot call evidence, source-level Fairy crossings, versioned exact COFF symbol/COMDAT/relocation fixtures, UCRT/VCRuntime, unwind payloads, and debug fixtures before any maturity promotion.
 
 ## External references
 

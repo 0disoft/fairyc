@@ -77,7 +77,14 @@ evidence.
 without using the host loader and rejects non-AMD64, non-PE32+, DLL, non-console, misaligned,
 out-of-range, duplicate-section, missing-`.text`, and non-executable-entry images. The Windows smoke
 applies it to the retained product image and both profiles of the layout and ABI probes before
-execution. COFF object records and unwind/debug payload semantics remain outside this boundary.
+execution. COFF object records and unwind/debug payload semantics remain outside this linked-image
+branch.
+The same package has a distinct raw-COFF path used inside `internal/cdriver` before local linking
+results are returned. It admits MSVC `.text$...` subsections and storage-free uninitialized `.bss`,
+but requires bounded section and relocation ranges, valid relocation symbol indexes, readable
+executable code, and named symbols. Object bytes survive only in the in-memory build receipt; the
+temporary source, object, and executable root is still removed. Exact symbol and relocation-type
+contracts remain a later versioned fixture boundary.
 
 `internal/cstdlib` is a separate target-standard-library transport boundary. Its first provisional
 SystemHeap helper normalizes empty allocation, rejects unsupported alignment, and preserves the old

@@ -10,6 +10,8 @@ import (
 	"runtime"
 	"slices"
 	"strings"
+
+	"github.com/0disoft/fairyc/internal/pecoff"
 )
 
 // WindowsHostToolchain is one locally resolved MSVC installation for target-neutral host smoke.
@@ -21,10 +23,17 @@ type WindowsHostToolchain struct {
 	Environment []string
 }
 
-// WindowsHostArtifact is one bounded PE executable produced for local MSVC validation.
+// WindowsHostObject is one bounded and structurally validated intermediate COFF object.
+type WindowsHostObject struct {
+	Name  string
+	Bytes []byte
+}
+
+// WindowsHostArtifact is one bounded PE executable plus its validated COFF objects.
 // It is not a distributable target artifact or a target-conformance receipt.
 type WindowsHostArtifact struct {
 	Bytes     []byte
+	Objects   []WindowsHostObject
 	Toolchain WindowsHostToolchain
 	Profile   Profile
 }
@@ -174,15 +183,23 @@ func buildWindowsMSVC(toolchain WindowsHostToolchain, profile Profile, sources [
 	defer os.RemoveAll(temporaryRoot)
 	executablePath := filepath.Join(temporaryRoot, "program.exe")
 	sourcePaths := make([]string, 0, len(sources))
+	objectNames := make([]string, 0, len(sources))
+	seenNames := make(map[string]struct{}, len(sources))
 	for _, source := range sources {
 		if source.Name == "" || filepath.Base(source.Name) != source.Name || filepath.Ext(source.Name) != ".c" || source.Contents == "" {
 			return WindowsHostArtifact{}, fmt.Errorf("MSVC build source is invalid")
 		}
+		key := strings.ToLower(source.Name)
+		if _, duplicate := seenNames[key]; duplicate {
+			return WindowsHostArtifact{}, fmt.Errorf("MSVC build repeats source name %q", source.Name)
+		}
+		seenNames[key] = struct{}{}
 		path := filepath.Join(temporaryRoot, source.Name)
 		if err := os.WriteFile(path, []byte(source.Contents), 0o600); err != nil {
 			return WindowsHostArtifact{}, fmt.Errorf("write MSVC source %s: %w", source.Name, err)
 		}
 		sourcePaths = append(sourcePaths, path)
+		objectNames = append(objectNames, strings.TrimSuffix(source.Name, filepath.Ext(source.Name))+".obj")
 	}
 	optimization := "/Od"
 	if profile == OptimizedProfile {
@@ -200,7 +217,18 @@ func buildWindowsMSVC(toolchain WindowsHostToolchain, profile Profile, sources [
 	if err != nil {
 		return WindowsHostArtifact{}, err
 	}
-	return WindowsHostArtifact{Bytes: contents, Toolchain: toolchain, Profile: profile}, nil
+	objects := make([]WindowsHostObject, 0, len(objectNames))
+	for _, name := range objectNames {
+		objectBytes, err := readArtifact(filepath.Join(temporaryRoot, name))
+		if err != nil {
+			return WindowsHostArtifact{}, fmt.Errorf("read MSVC COFF object %s: %s", name, strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
+		}
+		if _, err := pecoff.InspectObject(objectBytes); err != nil {
+			return WindowsHostArtifact{}, fmt.Errorf("inspect MSVC COFF object %s: %w", name, err)
+		}
+		objects = append(objects, WindowsHostObject{Name: name, Bytes: objectBytes})
+	}
+	return WindowsHostArtifact{Bytes: contents, Objects: objects, Toolchain: toolchain, Profile: profile}, nil
 }
 
 // ExecuteWindowsHost runs one temporary PE and returns its exact i32 exit bits and bounded output.

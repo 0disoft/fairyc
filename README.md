@@ -180,8 +180,12 @@ smoke separately crosses all 12 validated Microsoft x64 call cases between calle
 translation units at both profiles. The target marker remains missing until broader layout and
 independent/source-level/hosted ABI evidence exists. A host-independent PE parser now validates the
 product image plus all four probe images as bounded AMD64 PE32+ console executables with aligned
-headers and sections and an executable `.text` entry point. It does not inspect COFF objects,
-symbols, relocations, or Windows unwind records.
+headers and sections and an executable `.text` entry point. That linked-image path does not inspect
+object symbols, relocations, or Windows unwind records. The same package separately parses every
+intermediate MSVC `.obj` before its temporary build root is removed. It requires raw AMD64 COFF,
+bounded section and relocation ranges, readable executable `.text` or `.text$...` code, valid
+relocation symbol indexes, and a nonempty symbol table while admitting raw-storage-free `.bss`.
+This is structural live-object evidence, not a versioned symbol/relocation fixture or unwind proof.
 A separate fail-closed Linux/amd64 command is now present to compile those cases with Clang and GCC
 at `-O0` and `-O2`, link a closed conformance runtime, and compare process outcomes plus exact
 source-linked resource-drop sequences. Product emission and product builds contain no trace observer. It cannot run on
@@ -298,7 +302,7 @@ or arbitrary link-input option.
 - Windows MSVC native layout probe generator: `internal/windowslayoutprobe/`
 - Target C ABI classifiers and fixtures: `internal/cabi/`, `spec/fixtures/c-abi/manifest-v0.json`, `spec/fixtures/c-abi/manifest-windows-msvc-v0.json`
 - Windows MSVC native ABI probe generator: `internal/windowsabiprobe/`
-- Windows AMD64 PE executable structure inspector: `internal/pecoff/`
+- Windows AMD64 PE executable and COFF object structure inspector: `internal/pecoff/`
 - Resolved package graph fixtures: `spec/fixtures/package/manifest-v0.json`
 - MIR and C backend contracts: `docs/mir/`
 - Package identity and visibility: `docs/package/package-graph-v0.md`

@@ -18,6 +18,7 @@ const (
 	optionalHeader64Magic      = 0x020b
 	windowsConsoleSubsystem    = 3
 	sectionContainsCode        = 0x00000020
+	sectionUninitializedData   = 0x00000080
 	sectionExecutable          = 0x20000000
 	sectionReadable            = 0x40000000
 	importDirectoryIndex       = 1

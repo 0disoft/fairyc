@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0078-windows-pe-executable-structure-inspection.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0079-windows-msvc-coff-object-inspection.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -249,6 +249,13 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   executable code. It records import and exception-directory presence without treating either as
   validated content. COFF object symbols and relocations, `.pdata`/`.xdata` semantics, CodeView/PDB,
   source-level Windows target emission, and a hosted receipt remain separate gates.
+- The Windows C driver retains each compiler-produced `.obj` only in its bounded temporary root,
+  parses it as raw AMD64 COFF, and fails before returning the linked image when the object has an
+  optional PE header, linked-image flags, no `.text`/`.text$...` code, invalid raw or relocation
+  ranges, relocation indexes outside the raw symbol table, or no named symbols. Uninitialized
+  `.bss` may have a nonzero logical size and zero raw pointer. The driver returns isolated object
+  bytes and dense names as an internal receipt, then removes every temporary file. This is not yet
+  a versioned exact symbol, COMDAT, relocation-type, unwind, or hosted object fixture.
 - The eleven valid layout cases additionally generate one deterministic private C11 plus explicit
   POSIX-typedef probe. The Linux
   native runner compiles, links, and executes it with Clang/GCC and low/optimized profiles, checking

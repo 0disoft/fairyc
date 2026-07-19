@@ -79,6 +79,9 @@ a new fixture-contract and applicable target/ABI-profile decision.
 The PE executable inspector is internal validation policy rather than a serialized compatibility
 format. Tightening its admitted image structure requires synchronized synthetic rejection tests and
 Windows smoke evidence, but does not create a stable PE, COFF object, debug, or unwind contract.
+The raw COFF object inspector follows the same internal-policy rule. Its current section, symbol,
+and relocation bounds are validation mechanics; no object byte identity, symbol ordering, COMDAT
+selection, relocation-type set, or serialized receipt is a compatibility promise.
 
 ## Diagnostics
 
