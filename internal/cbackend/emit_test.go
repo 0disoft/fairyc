@@ -157,6 +157,36 @@ fn main() -> i32 { unsafe { consume_c_size_t(make_c_size_t()) } }
 	}
 }
 
+func TestEmitDistinctCLongForeignTransport(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+@link_name("fairyc_fixture_make_c_long")
+unsafe extern C fn make_c_long() -> c::long;
+@link_name("fairyc_fixture_consume_c_long")
+unsafe extern C fn consume_c_long(value: c::long) -> i32;
+fn main() -> i32 { unsafe { consume_c_long(make_c_long()) } }
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, required := range []string{
+		"_Static_assert(sizeof(long) == UINT64_C(8), \"fairyc target c.long size\");",
+		"_Static_assert(_Alignof(long) == UINT64_C(8), \"fairyc target c.long alignment\");",
+		"_Static_assert(((long)-1) < (long)0, \"fairyc target c.long signed\");",
+		"extern long fairyc_fixture_make_c_long(void);",
+		"extern int32_t fairyc_fixture_consume_c_long(long fy_a_0);",
+		"fairyc_fixture_consume_c_long(fy_l_",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+	if !slices.Contains(unit.Features, "c-long") || strings.Contains(unit.Source, "int64_t fairyc_fixture_make_c_long") || strings.Contains(unit.Source, "fairyc_fixture_consume_c_long(int64_t") {
+		t.Fatalf("generated C erased c::long identity:\n%s", unit.Source)
+	}
+}
+
 func TestEmitDistinctCSSizeTForeignTransport(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
@@ -192,7 +222,7 @@ fn main() -> i32 { unsafe { consume_c_ssize_t(make_c_ssize_t()) } }
 
 func TestEmitKeepsCScalarPointersOutsideByValueTransportSlice(t *testing.T) {
 	t.Parallel()
-	for _, typeRef := range []string{"c::int", "c::size_t", "c::ssize_t"} {
+	for _, typeRef := range []string{"c::int", "c::long", "c::size_t", "c::ssize_t"} {
 		t.Run(typeRef, func(t *testing.T) {
 			program := lowerSource(t, "module main;\nunsafe extern C fn consume_pointer(value: *"+typeRef+") -> i32;\nfn main() -> i32 { unsafe { consume_pointer(null) } }\n")
 			_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())

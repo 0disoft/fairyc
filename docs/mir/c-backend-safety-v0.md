@@ -25,9 +25,9 @@ for a deliberately narrow subset. It accepts `i32`, `bool`, `Option<i32>`, and
 comparisons, bitwise operations, and the implemented checked arithmetic families. Private numeric C
 function names prevent source identifiers from becoming ABI or injection surfaces.
 
-The foreign-call transport additionally accepts exact `c::int`, `c::size_t`, and target-specific
-`c::ssize_t` results and parameters. HIR and MIR keep those types distinct from `i32`, `usize`, and
-`isize`; the backend emits C `int`, `<stddef.h>` `size_t`, or POSIX.1-2008 `<sys/types.h>`
+The foreign-call transport additionally accepts exact `c::int`, `c::long`, `c::size_t`, and target-specific
+`c::ssize_t` results and parameters. HIR and MIR keep those types distinct from coincidentally sized
+Fairy integers; the backend emits C `int`, `long`, `<stddef.h>` `size_t`, or POSIX.1-2008 `<sys/types.h>`
 `ssize_t`, records separate features, and asserts their target size and alignment. The typedef paths
 also assert unsignedness or signedness. `ssize_t` selects `_POSIX_C_SOURCE 200809L` before every
 header rather than silently relying on the host's default feature namespace. These
@@ -116,7 +116,7 @@ The implemented source slice preserves individual `unsafe extern C fn` declarati
 nonempty `@link_name("symbol")`, and
 `unsafe {}` or `unsafe fn` call provenance through AST, typed HIR, and verified MIR. The C backend
 currently admits `C` declarations using `i32`, `u8`, `u32`, `usize`, exact by-value `c::int`,
-`c::size_t`, and target-specific `c::ssize_t`, raw pointers to
+`c::long`, `c::size_t`, and target-specific `c::ssize_t`, raw pointers to
 that bounded scalar set, and raw pointers to admitted nonempty `@repr(C)` structs. It emits one plain prototype and an ordinary call without `pure`, `const`, `restrict`,
 `nothrow`, alias, retention, or visibility promises. Compatible repeated declarations of the same
 external name coalesce even when their Fairy names differ; signature conflicts fail closed. A local preprocessor guard undefines an
@@ -158,13 +158,14 @@ empty stdout/stderr, and is not selectable through the product CLI. Output, nega
 `i32` returns, user drop-body effects, public layout, ABI, and broader runtime behavior remain
 unimplemented. A clean sanitizer run is backend evidence, not the language-semantics oracle.
 
-The same runner additionally plans four scalar, four exact `c::int`, four exact `c::size_t`, four
+The same runner additionally plans four scalar, four exact `c::int`, four negative-preserving
+`c::long`, four exact `c::size_t`, four
 negative-preserving `c::ssize_t`, and four typed-null pointer/target-scalar
 Fairy-source foreign-call crossings: Clang-generated Fairy caller to GCC C callee and the reverse
 at low and optimized profiles. Those crossings use the existing separate-object driver and are
-counted separately as `foreignCallExecutions`, `foreignCIntCallExecutions`,
+counted separately as `foreignCallExecutions`, `foreignCIntCallExecutions`, `foreignCLongCallExecutions`,
 `foreignCSizeTCallExecutions`, `foreignCSSizeTCallExecutions`, and
-`foreignPointerCallExecutions` in `fairyc.native-c-report/v18`; they do not expand the eighteen
+`foreignPointerCallExecutions` in `fairyc.native-c-report/v19`; they do not expand the eighteen
 interpreter-owned differential cases. The `c::int` probe uses a hand-written C producer and consumer
 so each value crosses a generated typed local without requiring a Fairy C integer literal.
 

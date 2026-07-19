@@ -34,7 +34,7 @@ An item is visible to another module only when declared `pub`. Private fields of
 Fixture types use the source spelling normalized without trivia:
 
 - primitives and nominal paths use names such as `i32`, `bool`, and `math::Point`;
-- the first compiler-known C scalars keep exact canonical identities `c::int`, `c::size_t`, and
+- the first compiler-known C scalars keep exact canonical identities `c::int`, `c::long`, `c::size_t`, and
   target-specific `c::ssize_t`, distinct from `i32`, `usize`, `isize`, and a user module named `c`;
 - references use `&T` or `&mut T`;
 - raw pointers use `*T` or `*mut T`;
@@ -50,7 +50,7 @@ Integer and floating literal text remains exact until an expected type is availa
 The current source C-scalar slices deliberately have no contextual integer literals. Their only
 value origin is a typed foreign-call result, which may be relayed through locals and later
 foreign-call arguments. Arithmetic, comparison, and conversion remain unsupported rather than
-inheriting `i32`, `usize`, or `isize` rules.
+inheriting fixed-width or pointer-width Fairy integer rules.
 
 Boolean conditions are exact: `if`, `while`, `&&`, `||`, and `!` require `bool`. Integer truthiness is rejected. Both branches of an `if` expression must have one compatible type. A function tail expression or explicit return must match the declared return type.
 

@@ -22,7 +22,7 @@ lowering, and parser-fixture-runner portion of the first item exists. Name resol
 now cover the semantic fixture's scalar and safe-borrow subset. Local last-use loans, borrow
   conflicts, single-origin borrow returns, Stage 0 signed-left-shift rejection, loop-context diagnostics,
   scalar foreign-call unsafe/signature boundaries, and `@link_name` shape diagnostics execute across
-  all 21 semantic v0 cases, including distinct `c::int`, `c::size_t`, and target-specific
+  all 22 semantic v0 cases, including distinct `c::int`, `c::long`, `c::size_t`, and target-specific
   `c::ssize_t` foreign transport. General
   whole-root resource Flow now executes all 12 resource v0 cases, including branch, normal-loop,
   break-edge, and continue-edge state rejection. Result Flow executes all 24 result v0 cases, including qualified scalar construction,

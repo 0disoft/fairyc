@@ -18,14 +18,19 @@ func TestX8664LinuxGNUSpecIsValidAndHostIndependent(t *testing.T) {
 	if spec.Pointer != (Layout{SizeBytes: 8, AlignmentBytes: 8}) || spec.Stack.CallAlignmentBytes != 16 || spec.ObjectFormat != "elf64" {
 		t.Fatalf("target core layout = %+v", spec)
 	}
-	var sizeT, ssizeT Scalar
+	var cLong, sizeT, ssizeT Scalar
 	for _, scalar := range spec.CScalars {
 		switch scalar.Name {
+		case "c.long":
+			cLong = scalar
 		case "c.size_t":
 			sizeT = scalar
 		case "c.ssize_t":
 			ssizeT = scalar
 		}
+	}
+	if cLong.Name == "" || cLong.Layout != (Layout{SizeBytes: 8, AlignmentBytes: 8}) || cLong.Signedness != "signed" || cLong.Header != "" || cLong.Availability != "" {
+		t.Fatalf("target c.long = %+v", cLong)
 	}
 	if sizeT.Name == "" || sizeT.Layout != (Layout{SizeBytes: 8, AlignmentBytes: 8}) || sizeT.Signedness != "unsigned" || sizeT.Header != "stddef.h" || sizeT.Availability != "iso-c11" {
 		t.Fatalf("target c.size_t = %+v", sizeT)

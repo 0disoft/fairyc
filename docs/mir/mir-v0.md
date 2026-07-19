@@ -106,10 +106,10 @@ Fixture-visible trap categories use the canonical identities `bounds`, `integer-
 
 Arguments are fully evaluated into temporaries from left to right before the call terminator. A call records its destination, normal continuation, source span, unsafe scope when applicable, and foreign ABI when applicable.
 
-The first source C-scalar transports preserve `c::int`, `c::size_t`, and target-specific
+The first source C-scalar transports preserve `c::int`, `c::long`, `c::size_t`, and target-specific
 `c::ssize_t` as distinct foreign result and parameter types. A producer call may initialize a local
 of any exact type and a later consumer call may use the local as its argument. MIR does not encode
-those values as `i32`, `usize`, or `isize` immediates, and the verifier's shared foreign-signature rule therefore treats the
+those values as fixed-width or pointer-width Fairy immediates, and the verifier's shared foreign-signature rule therefore treats the
 corresponding declarations as incompatible. Full call-operand type checking remains a backend
 responsibility in this prototype.
 

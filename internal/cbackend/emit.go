@@ -97,6 +97,7 @@ type emitter struct {
 	needsBitcast       bool
 	needsShift         bool
 	cIntLayout         target.Layout
+	cLongLayout        target.Layout
 	cSizeTLayout       target.Layout
 	cSSizeTLayout      target.Layout
 	instrumentation    string
@@ -151,6 +152,13 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	cInt, found := targetCScalar(targetSpec, "c.int")
 	if !found {
 		return Unit{}, fmt.Errorf("C emission target %q has no c.int layout", profile.Target)
+	}
+	cLong, found := targetCScalar(targetSpec, "c.long")
+	if !found {
+		return Unit{}, fmt.Errorf("C emission target %q has no c.long layout", profile.Target)
+	}
+	if cLong.Header != "" || cLong.Availability != "" {
+		return Unit{}, fmt.Errorf("C emission target %q has invalid c.long provider", profile.Target)
 	}
 	cSizeT, found := targetCScalar(targetSpec, "c.size_t")
 	if !found {
@@ -221,6 +229,7 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 		dynamicTrapTargets: make(map[int]map[mir.BlockID]struct{}),
 		localTypes:         make([]map[mir.LocalID]hir.Type, len(functions)),
 		cIntLayout:         cInt.Layout,
+		cLongLayout:        cLong.Layout,
 		cSizeTLayout:       cSizeT.Layout,
 		cSSizeTLayout:      cSSizeT.Layout,
 		instrumentation:    profile.Instrumentation,
@@ -602,6 +611,8 @@ func (e *emitter) recordCScalarFeature(value hir.Type) {
 	switch value {
 	case hir.TypeCInt:
 		e.features["c-int"] = struct{}{}
+	case hir.TypeCLong:
+		e.features["c-long"] = struct{}{}
 	case hir.TypeCSizeT:
 		e.features["c-size-t"] = struct{}{}
 	case hir.TypeCSSizeT:
@@ -648,6 +659,8 @@ func (e *emitter) foreignCType(value hir.Type, result bool) (string, error) {
 		return "uintptr_t", nil
 	case hir.TypeCInt:
 		return "int", nil
+	case hir.TypeCLong:
+		return "long", nil
 	case hir.TypeCSizeT:
 		return "size_t", nil
 	case hir.TypeCSSizeT:
@@ -810,7 +823,7 @@ func isResultI32I32(value hir.Type) bool {
 
 func (e *emitter) supportedCValueType(value hir.Type) bool {
 	value = canonicalCValueType(value)
-	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeU32 || value == hir.TypeUSize || value == hir.TypeCInt || value == hir.TypeCSizeT || value == hir.TypeCSSizeT || isOptionI32(value) || isResultI32I32(value) {
+	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeU32 || value == hir.TypeUSize || value == hir.TypeCInt || value == hir.TypeCLong || value == hir.TypeCSizeT || value == hir.TypeCSSizeT || isOptionI32(value) || isResultI32I32(value) {
 		return true
 	}
 	if element, _, pointer := hir.RawPointerElement(value); pointer {
@@ -844,6 +857,8 @@ func (e *emitter) cValueType(value hir.Type) (string, error) {
 		return "uintptr_t", nil
 	case value == hir.TypeCInt:
 		return "int", nil
+	case value == hir.TypeCLong:
+		return "long", nil
 	case value == hir.TypeCSizeT:
 		return "size_t", nil
 	case value == hir.TypeCSSizeT:
@@ -1619,6 +1634,11 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 	if _, used := e.features["c-int"]; used {
 		fmt.Fprintf(output, "_Static_assert(sizeof(int) == UINT64_C(%d), \"fairyc target c.int size\");\n", e.cIntLayout.SizeBytes)
 		fmt.Fprintf(output, "_Static_assert(_Alignof(int) == UINT64_C(%d), \"fairyc target c.int alignment\");\n\n", e.cIntLayout.AlignmentBytes)
+	}
+	if _, used := e.features["c-long"]; used {
+		fmt.Fprintf(output, "_Static_assert(sizeof(long) == UINT64_C(%d), \"fairyc target c.long size\");\n", e.cLongLayout.SizeBytes)
+		fmt.Fprintf(output, "_Static_assert(_Alignof(long) == UINT64_C(%d), \"fairyc target c.long alignment\");\n", e.cLongLayout.AlignmentBytes)
+		output.WriteString("_Static_assert(((long)-1) < (long)0, \"fairyc target c.long signed\");\n\n")
 	}
 	if usesCSizeT {
 		fmt.Fprintf(output, "_Static_assert(sizeof(size_t) == UINT64_C(%d), \"fairyc target c.size_t size\");\n", e.cSizeTLayout.SizeBytes)

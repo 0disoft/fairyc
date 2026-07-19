@@ -14,7 +14,7 @@ The project is not trying to beat every hand-tuned C program or make every C own
 The first Stage 0 frontend slice now exists in Go: immutable source bytes, a lossless lexer,
 compact recoverable syntax, error-free AST lowering, deterministic `E00xx` diagnostics, and a
 runner for all parser v0 fixtures. The next slice resolves names and produces typed HIR for the
-  fixture-backed scalar, safe-borrow, and scalar foreign-call subset. Its semantic runner executes all 21 v0 resolve, type,
+  fixture-backed scalar, safe-borrow, and scalar foreign-call subset. Its semantic runner executes all 22 v0 resolve, type,
 and local Flow cases, including last-use loans and borrow-return origins. Whole-root resource Flow
   also executes all 12 v0 cases for moves, cleanup obligations, branch joins, normal, break, and continue loop edges,
 consuming tagged matches, and live/dead resource reassignment. The
@@ -68,7 +68,7 @@ The 14 valid plans now generate separate caller and callee objects for Clang-to-
 GCC-to-Clang at `-O0` and `-O2`, for 56 configured crossings. This Windows host cannot execute
 them. Separate scalar source fixtures now carry an explicitly mapped
 `@link_name` plus `unsafe extern C fn(i32) -> i32`
-and exact `c::int`/`c::size_t`/negative `c::ssize_t` producer-result to typed-local to consumer-argument flows through
+and exact `c::int`/negative `c::long`/`c::size_t`/negative `c::ssize_t` producer-result to typed-local to consumer-argument flows through
 AST, typed HIR, verified MIR, C emission, and four planned cross-compiler object crossings each;
 none of those native executions has been observed on this Windows host.
 A provisional `x86_64-linux-gnu` SystemHeap implementation now lives in the target standard-library
@@ -99,7 +99,7 @@ claimed.
 The Linux File C slice now exposes partial I/O, write-all progress, sync, and consuming close that
 is never retried, even after failure. Its four-way probe is configured but unobserved and source
 effects remain unimplemented.
-The source FFI slice accepts `i32`, `u8`, `u32`, `usize`, exact transport-only `c::int`,
+The source FFI slice accepts `i32`, `u8`, `u32`, `usize`, exact transport-only `c::int`, `c::long`,
 `c::size_t`, and target-specific POSIX `c::ssize_t`, plus admitted raw-pointer parameters or
 results. A declaration may keep its Fairy name or use one nonempty `@link_name("external_symbol")`;
 AST, typed HIR, MIR, prototypes, and calls preserve the source/link identity split.
@@ -109,8 +109,8 @@ while C emission produces a plain external prototype with no inferred alias, pur
 unwind attributes. Typed `null` crosses a closed pointer/target-scalar native probe. An exact
 safe-borrow-to-raw-pointer cast now lowers only for a direct local place inside `unsafe`, allowing a
 flat nonempty `@repr(C)` record to cross by pointer and receive standard-library output.
-those C scalar types remain distinct from `i32`/`usize`/`isize`, emit exact C
-`int`/`size_t`/`ssize_t` with target and provider assertions, and currently have no source literal, operator, cast, raw-pointer, interpreter, or
+those C scalar types remain distinct from coincidentally sized Fairy integers, emit exact C
+`int`/`long`/`size_t`/`ssize_t` with target and provider assertions, and currently have no source literal, operator, cast, raw-pointer, interpreter, or
 aggregate-field support. Raw
 dereference or arithmetic, arbitrary casts, callbacks, other `c.*` scalars, nested or
 by-value aggregates, exports, and public standard-library wrappers remain unimplemented.

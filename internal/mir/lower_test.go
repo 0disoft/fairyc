@@ -277,6 +277,48 @@ fn main() -> i32 { unsafe { consume_c_size_t(make_c_size_t()) } }
 	}
 }
 
+func TestLowerPreservesCLongAcrossForeignCallResultAndArgument(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+@link_name("fairyc_fixture_make_c_long")
+unsafe extern C fn make_c_long() -> c::long;
+@link_name("fairyc_fixture_consume_c_long")
+unsafe extern C fn consume_c_long(value: c::long) -> i32;
+fn main() -> i32 { unsafe { consume_c_long(make_c_long()) } }
+`)
+	var producer, consumer ForeignFunction
+	for _, foreign := range program.ForeignFunctions {
+		switch foreign.Name {
+		case "main::make_c_long":
+			producer = foreign
+		case "main::consume_c_long":
+			consumer = foreign
+		}
+	}
+	if producer.ResultType != hir.TypeCLong || consumer.ResultType != hir.TypeI32 || !slices.Equal(consumer.ParameterTypes, []hir.Type{hir.TypeCLong}) {
+		t.Fatalf("foreign signatures = %+v", program.ForeignFunctions)
+	}
+	var producerCall, consumerCall *Terminator
+	for blockIndex := range program.Functions[0].Blocks {
+		terminator := &program.Functions[0].Blocks[blockIndex].Terminator
+		if terminator.Kind != TerminatorCall {
+			continue
+		}
+		switch terminator.Callee {
+		case producer.Symbol:
+			producerCall = terminator
+		case consumer.Symbol:
+			consumerCall = terminator
+		}
+	}
+	if producerCall == nil || consumerCall == nil || producerCall.DestinationLocal == NoLocal || len(consumerCall.Arguments) != 1 || consumerCall.Arguments[0].Kind != OperandLocal || consumerCall.Arguments[0].Local != producerCall.DestinationLocal {
+		t.Fatalf("producer call = %+v, consumer call = %+v", producerCall, consumerCall)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+}
+
 func TestLowerPreservesCSSizeTAcrossForeignCallResultAndArgument(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;

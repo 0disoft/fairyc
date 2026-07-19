@@ -39,10 +39,12 @@ plain-`char`, width, literal, and arithmetic contracts.
    `usize` or `uintptr_t`; ADR 0053 implements that independent slice. `c::ssize_t` remains a later
    target-library/POSIX slice and must not alias `isize` or `intptr_t`; ADR 0054 implements that
    independent target-qualified transport.
+8. `c::long` remains excluded by this decision and must not alias `i64` or `isize`; ADR 0055 later
+   implements the exact LP64-sensitive keyword transport.
 
 ## Consequences
 
 - Fairy code can preserve one real C scalar across imported calls without lying about its identity.
 - The interpreter still fails closed at the first foreign call and invents no host binding.
-- The target's other C scalar entries remain layout and ABI-classifier vocabulary, not source
-  language support.
+- Except for the independently accepted later slices, the target's other C scalar entries remain
+  layout and ABI-classifier vocabulary, not source language support.

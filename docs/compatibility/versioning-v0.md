@@ -101,7 +101,9 @@ exact `c::int` producer-result to typed-local to consumer-argument crossing. V17
 `foreignCSizeTCallExecutions` for the corresponding exact `<stddef.h>` `size_t` crossing and adds
 target `c.size_t` to the independently versioned target data. V18 adds
 `foreignCSSizeTCallExecutions`, target `c.ssize_t`, and optional scalar `header`/`availability`
-metadata for the negative-preserving POSIX.1-2008 crossing. The runner emits one exact version and does not pretend the
+metadata for the negative-preserving POSIX.1-2008 crossing. V19 adds
+`foreignCLongCallExecutions` for the exact negative C `long` crossing without changing TargetSpec
+or layout-fixture shape. The runner emits one exact version and does not pretend the
 report shapes are interchangeable.
 
 ## Runtime and standard library
