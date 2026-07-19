@@ -318,10 +318,11 @@ MIR verifier rejection recipes are versioned in `spec/fixtures/mir-verifier/mani
 
 Resolved package graph assertions are versioned in `spec/fixtures/package/manifest-v0.json`. They fix package-instance equality, one source root per instance, direct-only dependency visibility, module-provider ambiguity, and explicit standard-library injection without choosing public manifest, lockfile, coordinate, registry, or solver syntax.
 
-Target layout assertions are versioned in `spec/fixtures/layout/manifest-v0.json`. They fix the
-first target's closed layout input vocabulary, size/alignment arithmetic, declaration-order offsets,
-top-level padding, and failure codes without creating a serialized compiler IR, source-level
-aggregate promise, or native ABI receipt.
+Target layout assertions are versioned in `spec/fixtures/layout/manifest-v0.json` for Linux and
+`spec/fixtures/layout/manifest-windows-msvc-v0.json` for Windows. They fix the closed layout input
+vocabulary, size/alignment arithmetic, declaration-order offsets, top-level padding, and failure
+codes without creating a serialized compiler IR, source-level aggregate promise, or native ABI
+receipt. Only the Linux pass cases currently feed a configured native C probe.
 
 Formatting, checking, testing, documentation, vendoring, binding generation, and ABI inspection are planned tool surfaces, not claims of current implementation.
 

@@ -27,6 +27,25 @@ func TestRepositoryLayoutManifestPasses(t *testing.T) {
 	}
 }
 
+func TestWindowsMSVCLayoutManifestPasses(t *testing.T) {
+	t.Parallel()
+	path := filepath.Join("..", "..", "spec", "fixtures", "layout", "manifest-windows-msvc-v0.json")
+	report, err := Run(path)
+	if err != nil {
+		t.Fatalf("Run() error = %v", err)
+	}
+	if report.Target != target.X8664WindowsMSVC || report.CasesRun != 9 || report.Passed != 9 || len(report.Failures) != 0 {
+		t.Fatalf("Run() report = %+v", report)
+	}
+	targetID, cases, err := NativeProbeCases(path)
+	if err != nil {
+		t.Fatalf("NativeProbeCases() error = %v", err)
+	}
+	if targetID != target.X8664WindowsMSVC || len(cases) != 8 || cases[0].ID != "pass.c-enum-long" || cases[len(cases)-1].ID != "pass.pointer" {
+		t.Fatalf("NativeProbeCases() = %q, %+v", targetID, cases)
+	}
+}
+
 func TestManifestRejectsUnknownFieldsAndTrailingData(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()

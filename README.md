@@ -56,10 +56,13 @@ records LP64, SysV AMD64, ELF, and DWARF. Windows MSVC records LLP64, four-byte 
 shadow space, Microsoft x64, COFF, and Windows unwind/CodeView identities. Neither contains a local
 compiler, SDK, sysroot, registry, or filesystem path; both still report `emittable`, `conformant`,
 and `supported` as false.
-The host-independent layout engine now executes all 16 target-layout v0 cases for language and C
+The host-independent layout engine executes all 16 Linux target-layout v0 cases for language and C
 scalars, data and function pointers, explicitly based C enums, fixed arrays, nested structs, field
 offsets, internal and tail padding, and fail-closed malformed or overflowing inputs. These are
 target-mechanics fixtures, not source-language aggregate support or native C ABI proof.
+A separate nine-case Windows ledger proves LLP64-sensitive C scalars, pointer-width values,
+unavailable POSIX `ssize_t`, and exact mixed-record padding inside the same engine. It has no native
+MSVC layout-probe receipt yet.
 A host-independent SysV AMD64 classifier now executes 17 versioned C ABI plan cases over the same
 type and layout vocabulary, covering INTEGER/SSE/MEMORY classes, mixed and homogeneous returns,
 hidden result pointers, register exhaustion, and whole-aggregate rollback. Those plans are not yet
@@ -272,7 +275,7 @@ or arbitrary link-input option.
 - Linux scalar C differential runner: `internal/cbackendnative/`
 - Executable target description: `internal/target/`
 - Experimental target JSON schema: `spec/cli/experimental-target-spec-v0.schema.json`
-- Target layout engine and fixtures: `internal/layout/`, `spec/fixtures/layout/manifest-v0.json`
+- Target layout engine and fixtures: `internal/layout/`, `spec/fixtures/layout/manifest-v0.json`, `spec/fixtures/layout/manifest-windows-msvc-v0.json`
 - Resolved package graph fixtures: `spec/fixtures/package/manifest-v0.json`
 - MIR and C backend contracts: `docs/mir/`
 - Package identity and visibility: `docs/package/package-graph-v0.md`

@@ -158,6 +158,11 @@ bytes, 32 shadow-space bytes, Microsoft x64 aggregate and return identities, COF
 symbols, `.pdata`/`.xdata` unwind metadata, and generated-C CodeView/PDB debugging. Its target
 profile assumes MSVC's default signed plain `char` and therefore excludes `/J`.
 
+The shared layout engine now executes a separate nine-case Windows repository manifest. It proves
+LLP64-sensitive leaf layouts, rejects POSIX `ssize_t`, and computes one exact 32-byte mixed record
+with eight-byte aggregate alignment and explicit internal/trailing padding. Those are repository
+expectations, not native MSVC `sizeof`, `offsetof`, call, object, or unwind observations.
+
 These entries define target facts. Every listed C scalar now has exact source transport, but the
 entries do not claim C-scalar value semantics, aggregate forms, or additional call classes in the
 current semantic frontend or C backend.

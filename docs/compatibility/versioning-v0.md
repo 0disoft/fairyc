@@ -57,7 +57,8 @@ fixture and hosted receipts rather than only editing the booleans. The experimen
 `spec/cli/experimental-target-spec-v0.schema.json` must remain synchronized with the Go model.
 
 `fairyc.layout-fixtures/v0` separately versions the repository input and expectation vocabulary for
-the target-layout engine. It is not a public type-description format, native ABI profile, cache
+the target-layout engine; each manifest binds one declared target. It is not a public
+type-description format, native ABI profile, cache
 artifact, or C probe result. Adding a layout family or fixture-visible failure code requires a new
 fixture-contract decision; changing target sizes, alignments, field placement, or classifier
 meaning additionally requires the applicable target-schema or ABI-profile decision.

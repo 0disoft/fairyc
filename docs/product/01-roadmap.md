@@ -88,8 +88,11 @@ facts and provisional Windows LLP64/Microsoft-x64/COFF/unwind facts, including a
 use only the Linux typed target ID, while local toolchain paths remain outside both contracts.
 Host-independent scalar,
 array, explicit-C-enum, pointer, and nested-aggregate layout execution now runs through 16 versioned
-v0 cases. The eleven valid cases now also generate one deterministic C11 plus POSIX-typedef layout probe configured for
-four Clang/GCC and low/optimized executions. Those native runs remain unobserved on this Windows
+Linux v0 cases. A separate nine-case Windows MSVC manifest covers LLP64-sensitive C `long`,
+`size_t`, pointer, function-pointer, explicit-enum, and nested-record expectations while rejecting
+the absent POSIX `ssize_t` identity. Its eight pass cases do not yet have a native MSVC probe. The
+eleven valid Linux cases generate one deterministic C11 plus POSIX-typedef layout probe configured
+for four Clang/GCC and low/optimized executions. Those native runs remain unobserved on this Windows
 host. A host-independent SysV AMD64 classifier now executes 17 versioned cases for eightbyte
 classes, registers, exhaustion rollback, and hidden returns, but bidirectional native ABI fixtures
 and hosted evidence remain incomplete. Its 14 pass plans now generate 56 configured separate-object
@@ -177,7 +180,8 @@ Separate Windows/amd64 host-smoke commands now discover local x64 MSVC without W
 target-neutral generated-C unit. `run-host` executes a temporary PE and reports the `i32` result or
 canonical trap; `build-host` retains a no-overwrite `.exe` below `build/`. Both deliberately reject
 FFI, `@repr(C)`, exact `c::*` scalars, and standard-library linkage. A formal fail-closed
-`x86_64-windows-msvc` TargetSpec now records LLP64 and platform identities, while executable LLP64
+`x86_64-windows-msvc` TargetSpec now records LLP64 and platform identities, and its separate
+nine-case host-independent layout ledger covers the first LLP64-sensitive expectations. Native MSVC
 layout probes, Windows x64 classification, PE/COFF objects, runtime, standard library, supported
 distribution artifacts, and conformance remain later gates.
 

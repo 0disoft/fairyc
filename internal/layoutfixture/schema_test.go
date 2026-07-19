@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/layout"
+	"github.com/0disoft/fairyc/internal/target"
 )
 
 func TestLayoutSchemaIdentityAndErrorCodesMatchRunner(t *testing.T) {
@@ -19,10 +20,13 @@ func TestLayoutSchemaIdentityAndErrorCodesMatchRunner(t *testing.T) {
 		t.Fatal(err)
 	}
 	var schema struct {
-		Dialect  string   `json:"$schema"`
-		ID       string   `json:"$id"`
-		Required []string `json:"required"`
-		Defs     struct {
+		Dialect    string   `json:"$schema"`
+		ID         string   `json:"$id"`
+		Required   []string `json:"required"`
+		Properties map[string]struct {
+			Enum []string `json:"enum"`
+		} `json:"properties"`
+		Defs struct {
 			Expect struct {
 				OneOf []struct {
 					Properties map[string]struct {
@@ -42,6 +46,10 @@ func TestLayoutSchemaIdentityAndErrorCodesMatchRunner(t *testing.T) {
 	slices.Sort(schema.Required)
 	if !slices.Equal(schema.Required, wantRequired) {
 		t.Fatalf("schema required = %v, want %v", schema.Required, wantRequired)
+	}
+	wantTargets := []string{string(target.X8664LinuxGNU), string(target.X8664WindowsMSVC)}
+	if !slices.Equal(schema.Properties["target"].Enum, wantTargets) {
+		t.Fatalf("schema targets = %v, want %v", schema.Properties["target"].Enum, wantTargets)
 	}
 	if len(schema.Defs.Expect.OneOf) != 2 {
 		t.Fatalf("expectation variants = %d", len(schema.Defs.Expect.OneOf))

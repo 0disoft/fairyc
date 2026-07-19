@@ -53,14 +53,16 @@ Only the interpreter and `x86_64-linux-gnu` C path are committed before the firs
 Generated C uses a declared dialect, compiler family, target profile, statements, ordered temporaries, and helpers to preserve evaluation order, overflow, division, shifts, bit casts, aliasing, and trap semantics. It is a constrained reference transport, not universally portable C or the Fairy C semantic model.
 
 `internal/target` is the host-independent source for declared target IDs, scalar and pointer
-layouts, SysV AMD64 classifier identities, stack facts, ELF/DWARF contracts, and maturity evidence.
+layouts, per-profile calling-convention identities, stack facts, object/debug/unwind contracts, and
+maturity evidence.
 The C driver adds local compiler, libc, and path resolution only after selecting that target. A
 target can therefore be inspected on Windows without borrowing Windows layout or claiming that the
 Linux toolchain is locally executable.
 `internal/layout` is the next boundary: it turns those facts into checked array and aggregate size,
-alignment, offset, and padding results before any backend chooses C syntax. The current layout
-fixtures are host-independent expectations; a generated native C probe now checks every valid
-case. `internal/cabi` then turns the same type and layout facts into host-independent SysV AMD64
+alignment, offset, and padding results before any backend chooses C syntax. Separate Linux GNU and
+Windows MSVC manifests hold host-independent expectations. The generated native C probe checks
+every valid Linux case only; the Windows pass cases still lack an MSVC-native layout oracle.
+`internal/cabi` then turns the Linux type and layout facts into host-independent SysV AMD64
 eightbyte and register plans. The Linux runner turns validated pass plans into separate Clang/GCC
 caller and callee objects in both directions. Generated Fairy callers now cross scalar, pointer,
 register-result, and hidden-memory-result boundaries; an observed hosted result remains a later

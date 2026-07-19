@@ -1,0 +1,114 @@
+{
+  "$schema": "./schema-v0.json",
+  "schemaVersion": "fairyc.layout-fixtures/v0",
+  "target": "x86_64-windows-msvc",
+  "contracts": [
+    "docs/product/02-spec.md",
+    "docs/adr/0031-target-layout-engine-and-fixtures.md",
+    "docs/adr/0073-executable-x86-64-windows-msvc-target-spec.md",
+    "docs/adr/0074-windows-msvc-llp64-layout-fixtures.md",
+    "docs/abi/c-abi-v0.md",
+    "docs/compatibility/versioning-v0.md"
+  ],
+  "deferred": [
+    "native MSVC layout probes and a hosted Windows receipt",
+    "Microsoft x64 argument and return classification, shadow-space placement, and bidirectional calls",
+    "PE/COFF object, relocation, symbol, unwind, and CodeView/PDB inspection",
+    "Windows runtime, UCRT/VCRuntime policy, standard library, target C emission, and distribution"
+  ],
+  "cases": [
+    {
+      "id": "fail.c-ssize-t",
+      "type": { "kind": "c-scalar", "name": "c.ssize_t" },
+      "expect": { "status": "fail", "errorCode": "unknown-scalar" }
+    },
+    {
+      "id": "pass.c-enum-long",
+      "type": { "kind": "c-enum", "name": "c.long" },
+      "expect": {
+        "status": "pass",
+        "layout": { "sizeBytes": 4, "alignmentBytes": 4, "fields": [], "padding": [] }
+      }
+    },
+    {
+      "id": "pass.c-long",
+      "type": { "kind": "c-scalar", "name": "c.long" },
+      "expect": {
+        "status": "pass",
+        "layout": { "sizeBytes": 4, "alignmentBytes": 4, "fields": [], "padding": [] }
+      }
+    },
+    {
+      "id": "pass.c-size-t",
+      "type": { "kind": "c-scalar", "name": "c.size_t" },
+      "expect": {
+        "status": "pass",
+        "layout": { "sizeBytes": 8, "alignmentBytes": 8, "fields": [], "padding": [] }
+      }
+    },
+    {
+      "id": "pass.c-ulong",
+      "type": { "kind": "c-scalar", "name": "c.ulong" },
+      "expect": {
+        "status": "pass",
+        "layout": { "sizeBytes": 4, "alignmentBytes": 4, "fields": [], "padding": [] }
+      }
+    },
+    {
+      "id": "pass.function-pointer",
+      "type": { "kind": "function-pointer" },
+      "expect": {
+        "status": "pass",
+        "layout": { "sizeBytes": 8, "alignmentBytes": 8, "fields": [], "padding": [] }
+      }
+    },
+    {
+      "id": "pass.language-isize",
+      "type": { "kind": "language-scalar", "name": "isize" },
+      "expect": {
+        "status": "pass",
+        "layout": { "sizeBytes": 8, "alignmentBytes": 8, "fields": [], "padding": [] }
+      }
+    },
+    {
+      "id": "pass.llp64-struct",
+      "type": {
+        "kind": "struct",
+        "name": "WindowsRecord",
+        "fields": [
+          { "name": "marker", "type": { "kind": "language-scalar", "name": "u8" } },
+          { "name": "count", "type": { "kind": "c-scalar", "name": "c.long" } },
+          { "name": "data", "type": { "kind": "pointer" } },
+          { "name": "length", "type": { "kind": "c-scalar", "name": "c.size_t" } },
+          { "name": "tail", "type": { "kind": "c-scalar", "name": "c.ulong" } }
+        ]
+      },
+      "expect": {
+        "status": "pass",
+        "layout": {
+          "sizeBytes": 32,
+          "alignmentBytes": 8,
+          "fields": [
+            { "name": "marker", "offsetBytes": 0, "sizeBytes": 1, "alignmentBytes": 1 },
+            { "name": "count", "offsetBytes": 4, "sizeBytes": 4, "alignmentBytes": 4 },
+            { "name": "data", "offsetBytes": 8, "sizeBytes": 8, "alignmentBytes": 8 },
+            { "name": "length", "offsetBytes": 16, "sizeBytes": 8, "alignmentBytes": 8 },
+            { "name": "tail", "offsetBytes": 24, "sizeBytes": 4, "alignmentBytes": 4 }
+          ],
+          "padding": [
+            { "offsetBytes": 1, "sizeBytes": 3 },
+            { "offsetBytes": 28, "sizeBytes": 4 }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pass.pointer",
+      "type": { "kind": "pointer" },
+      "expect": {
+        "status": "pass",
+        "layout": { "sizeBytes": 8, "alignmentBytes": 8, "fields": [], "padding": [] }
+      }
+    }
+  ]
+}
