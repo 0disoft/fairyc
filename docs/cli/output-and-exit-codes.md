@@ -51,6 +51,10 @@ diagnostics and capability failures produce no partial C output.
 then writes `built: <relative-path> (x86_64-linux-gnu, <compiler>, <profile>)` to stdout. Toolchain,
 link, and artifact failures write bounded human diagnostics to stderr with provisional code `6`.
 An existing output is not replaced and no partial C translation unit is written to stdout.
+`experimental run-host` writes `native result: <i32> (windows/amd64 host-smoke, msvc <version>,
+<profile>)` after a target-neutral temporary MSVC build and execution. A canonical runtime trap uses
+the same `trap: <category>` stderr form and code `5`; toolchain, compile, temporary-artifact, timeout,
+unexpected-output, or execution failures use code `6`. It writes no persistent executable.
 `experimental run` writes `result: <i32>` to stdout on return, or `trap: <category>` to stderr with
 provisional code `5` on a language trap. Its bounded `step-limit` is a capability result with code
 `2`, not a language trap. None of these commands

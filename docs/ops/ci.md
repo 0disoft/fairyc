@@ -94,9 +94,11 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
 
 The containing Mustflow workspace provides local parity through `fairyc_go_vet` and
 `fairyc_go_test`, plus the Linux-only `fairyc_native_c_test` intent. Those intents additionally
-isolate ignored Go caches and disable module network access for local agent verification. The native
-intent is unavailable on the current Windows host because no registered WSL distribution or C
-compiler exists; ordinary Go validation is not native parity.
+isolate ignored Go caches and disable module network access for local agent verification. The Linux
+native intent remains unavailable on the current Windows host and no WSL path is used. The separate
+`fairyc_windows_host_smoke` intent compiles and executes the checked-in target-neutral FY example
+through locally discovered x64 MSVC with bounded temporary artifacts. That receipt is Windows host
+smoke only; it is not Linux native parity or Windows target/ABI conformance.
 
 ## Owners
 

@@ -77,6 +77,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0065-compiler-owned-c-string-static-storage.md`: verified `Static` C-string literals, exact terminated storage, unsafe immutable data-address extraction, and native evidence counters.
 - `0066-compiler-owned-byte-string-slice-storage.md`: exact byte-string storage, private non-null slice views, empty sentinels, typed-local data extraction, and native evidence counters.
 - `0067-compiler-owned-utf8-string-static-storage.md`: decoded UTF-8 validation, distinct text operands, private non-null string views, typed-local data extraction, and native evidence counters.
+- `0068-windows-msvc-target-neutral-host-smoke.md`: WSL-free target-neutral `.fy` compilation and temporary execution through a locally discovered x64 MSVC toolchain without a Windows ABI claim.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

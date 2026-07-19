@@ -27,7 +27,9 @@ inspection,
 `fairyc experimental emit-c <file.fy>` for deterministic scalar, explicitly link-mapped foreign-call,
 flat-resource, and resource-tagged C11 inspection and
 `fairyc experimental build <file.fy> --cc <clang|gcc> --profile <low|optimized> --output <build/path>`
-for an explicit host-Linux executable in that subset, and
+for an explicit host-Linux executable in that subset,
+`fairyc experimental run-host <file.fy> --profile <low|optimized>` for a temporary target-neutral
+Windows/amd64 MSVC host smoke, and
 `fairyc experimental run <file.fy>` for the fixture-backed scalar MIR interpreter subset. These are developer commands whose
 spelling and numeric exit codes may change. `check-semantics` resolves names and creates typed HIR
 for an explicit bounded module set in the implemented scalar, safe-borrow, whole-resource, Region, and Result subset.
@@ -75,6 +77,11 @@ exact admitted symbols used by actual calls. It accepts no user companion source
 search path, or arbitrary linker argument, so every other admitted foreign symbol must already
 resolve through the selected driver's ordinary link environment.
 The resulting product artifact is uninstrumented; the native fixture recorder is not linked.
+`experimental run-host` does execute native code, but only as a WSL-free Windows developer smoke.
+It auto-discovers the installed x64 MSVC and Windows SDK, admits only target-neutral private C
+transport, removes the temporary PE after execution, and rejects FFI, provisional standard-library
+calls, `@repr(C)`, and exact `c::*` values. Its receipt is host-smoke evidence, not a Windows target,
+ABI, distribution, or self-hosting claim.
 `experimental target-spec` emits `fairyc.target-spec/v0` JSON without probing the host or exposing
 local tool paths. Its current scalar, flat-resource, and resource-tagged emission subset is reported separately from the false
 `emittable`, `conformant`, and `supported` target states and their missing evidence.

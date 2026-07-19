@@ -172,6 +172,12 @@ C-scalar value semantics, nested enum or array fields, by-value aggregate parame
 wrappers remain Phase 2 work. The internal empty-input text transports are real source-to-stdlib-C
 exceptions, not completed wrappers.
 
+A separate Windows/amd64 host-smoke command now discovers local x64 MSVC without WSL, compiles one
+target-neutral generated-C unit, executes a temporary PE, and reports the `i32` result or canonical
+trap. It deliberately rejects FFI, `@repr(C)`, exact `c::*` scalars, and standard-library linkage.
+Formal `x86_64-windows-msvc` TargetSpec, LLP64 layout, Windows x64 ABI, PE/COFF metadata, runtime,
+standard library, persistent build artifacts, and conformance remain later gates.
+
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.
 - Run interpreter-to-C differential fixtures and turn the validated C ABI plans into bidirectional

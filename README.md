@@ -72,6 +72,10 @@ negative `c::ssize_t` flows, plus one family fixture for the remaining twelve Ta
 Every value travels from producer result through a typed local to a matching consumer argument
 across AST, typed HIR, verified MIR, and C emission, with four planned cross-compiler object
 crossings per fixture; none of those native executions has been observed on this Windows host.
+A separate WSL-free `experimental run-host` command can now compile a target-neutral verified `.fy`
+program through generated C into a temporary x64 MSVC PE and execute it locally. It rejects FFI,
+`@repr(C)`, exact `c::*` values, and provisional standard-library calls, so this proves a local
+source-to-native smoke without pretending that a Windows TargetSpec, ABI, or self-hosted compiler exists.
 A provisional `x86_64-linux-gnu` SystemHeap implementation now lives in the target standard-library
 boundary rather than the thin runtime. It normalizes empty allocation, admits current fundamental
 alignments, preserves bytes across copy-and-release growth or shrink, and leaves the old block
