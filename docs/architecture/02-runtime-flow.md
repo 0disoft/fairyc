@@ -85,6 +85,11 @@ but requires bounded section and relocation ranges, valid relocation symbol inde
 executable code, and named symbols. Object bytes survive only in the in-memory build receipt; the
 temporary source, object, and executable root is still removed. Exact symbol and relocation-type
 contracts remain a later versioned fixture boundary.
+The linked-image branch additionally walks the Microsoft x64 exception directory. It maps sorted
+`.pdata` runtime-function entries to executable code and readable unwind data, validates version 1
+prolog-code slot structure and bounded version 2 epilog descriptors, and checks handler or chained
+tails without interpreting language-specific payloads. This remains static structure inspection;
+the Windows loader and unwinder are not used as a hidden semantic oracle.
 
 `internal/cstdlib` is a separate target-standard-library transport boundary. Its first provisional
 SystemHeap helper normalizes empty allocation, rejects unsupported alignment, and preserves the old

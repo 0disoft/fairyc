@@ -46,7 +46,9 @@ not a pretend Linux proxy and not a second copy of the ABI rules encoded only in
   variadic floating mirroring, vector and intrinsic exceptions, retained callbacks, exports, and
   foreign unwinding still need separate fixtures.
 - ADR 0078 later parses the retained and temporary linked PE images without turning temporary
-  object files into product or conformance artifacts; COFF object and unwind inspection remain open.
+  object files into product or conformance artifacts. ADR 0079 later adds structural live-COFF
+  inspection and ADR 0080 adds static linked-image unwind inspection; exact and semantic fixtures
+  remain open.
 
 ## External basis
 

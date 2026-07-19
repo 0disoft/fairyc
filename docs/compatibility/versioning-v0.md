@@ -82,6 +82,10 @@ Windows smoke evidence, but does not create a stable PE, COFF object, debug, or 
 The raw COFF object inspector follows the same internal-policy rule. Its current section, symbol,
 and relocation bounds are validation mechanics; no object byte identity, symbol ordering, COMDAT
 selection, relocation-type set, or serialized receipt is a compatibility promise.
+Microsoft x64 unwind inspection is likewise an internal validation policy. Neither the observed
+runtime-function count nor version-1/version-2 mix is stable. Future semantic epilog, handler,
+chain, or runtime-walk fixtures require an explicit unwind-contract decision before they can become
+target evidence.
 
 ## Diagnostics
 

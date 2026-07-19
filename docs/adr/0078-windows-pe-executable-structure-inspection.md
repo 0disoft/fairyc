@@ -43,8 +43,8 @@ not expose which structural assumptions were checked.
 - The same parser covers retained and temporary products, so probe executables cannot silently
   drift onto a different machine, subsystem, or image class.
 - ADR 0079 later adds structural inspection of every live MSVC COFF object. Exact versioned object
-  expectations and Windows unwind validation remain separate because linked image structure and
-  generic bounds cannot prove their records or semantics.
+  expectations remain separate. ADR 0080 later adds static linked-image unwind structure; semantic
+  unwind behavior remains separate because generic bounds cannot prove runtime behavior.
 
 ## External basis
 

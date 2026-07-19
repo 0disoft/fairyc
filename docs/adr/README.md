@@ -89,6 +89,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0077-windows-msvc-native-abi-probe.md`: same-version local MSVC caller/callee crossings for the twelve validated Microsoft x64 pass cases without source-level, independent, hosted, object, or unwind promotion.
 - `0078-windows-pe-executable-structure-inspection.md`: bounded AMD64 PE32+ executable-header, section-range, and entry-point validation for five local MSVC images without COFF-object, unwind, debug, or distribution promotion.
 - `0079-windows-msvc-coff-object-inspection.md`: bounded raw AMD64 COFF section, symbol, and relocation-structure validation for every local MSVC object without exact object-fixture, unwind, debug, hosted, or maturity promotion.
+- `0080-windows-x64-unwind-structure-inspection.md`: static `.pdata`, runtime-function, version-1 prolog, version-2 epilog-boundary, handler-tail, and chained-tail inspection for five local PE images without semantic unwinder or maturity promotion.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

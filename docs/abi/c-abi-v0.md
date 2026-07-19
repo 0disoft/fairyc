@@ -223,6 +223,16 @@ and ABI-probe compilation in the local smoke. It still does not define exact exp
 symbols, COMDAT selection, permitted relocation types, `.pdata`/`.xdata` content, or a hosted
 object-fixture receipt, so `pe-coff-object-fixtures` remains missing.
 
+The executable-image path now follows the Microsoft x64 exception directory as well. It requires a
+readable non-executable `.pdata` table of sorted nonoverlapping 12-byte `RUNTIME_FUNCTION` entries,
+maps every function range to executable code, and maps every DWORD-aligned unwind RVA to readable
+file-backed data. Version 1 prolog operations are checked for slot counts and descending code
+offsets. Local MSVC 14.51 also emits version 2 records, so bounded short/long epilog descriptors and
+spare slots are admitted structurally and reported separately. Minimum exception-handler and chained
+tails are checked. Version-2 epilog offset meaning, language-specific handler payloads, recursive
+chain equivalence, runtime unwinder behavior, object-level unwind relocations, and hosted fixtures
+remain absent; `windows-x64-unwind-fixtures` therefore remains missing.
+
 This executable description is target data, not conformance evidence. Its evidence block names the
 existing `scalar-and-flat-i32-resource-tagged-c11` subset, keeps `emittable`, `conformant`, and `supported` false, and
 lists the missing hosted native C layout-probe receipt, bidirectional ABI, runtime, standard-library, hosted-Linux, toolchain
@@ -261,7 +271,7 @@ The planned transport matrix uses Clang as the primary compiler and GCC as an in
 
 ## Later profiles
 
-`x86_64-linux-musl` needs a separate libc, startup, sysroot, dynamic-loader, and static-distribution profile even though its CPU ABI is SysV-derived. The declared `x86_64-windows-msvc` TargetSpec still needs complete executable LLP64 layout coverage plus a hosted receipt, independent or register-inspected four-slot call evidence, source-level Fairy crossings, versioned exact COFF symbol/COMDAT/relocation fixtures, UCRT/VCRuntime, unwind payloads, and debug fixtures before any maturity promotion.
+`x86_64-linux-musl` needs a separate libc, startup, sysroot, dynamic-loader, and static-distribution profile even though its CPU ABI is SysV-derived. The declared `x86_64-windows-msvc` TargetSpec still needs complete executable LLP64 layout coverage plus a hosted receipt, independent or register-inspected four-slot call evidence, source-level Fairy crossings, versioned exact COFF symbol/COMDAT/relocation fixtures, semantic and runtime-walk unwind fixtures, UCRT/VCRuntime, and debug fixtures before any maturity promotion.
 
 ## External references
 

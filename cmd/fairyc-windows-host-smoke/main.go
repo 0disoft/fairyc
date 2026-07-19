@@ -117,6 +117,10 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("inspect build-host PE executable image: %w", err)
 	}
+	unwindReport, err := pecoff.InspectAMD64Unwind(artifact)
+	if err != nil {
+		return fmt.Errorf("inspect build-host Microsoft x64 unwind data: %w", err)
+	}
 	if err := executeExpectResult(artifactPath, 42); err != nil {
 		return err
 	}
@@ -160,7 +164,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, 14 run-host outcomes covered signed results and four arithmetic trap categories, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, %d PE32+ executable images passed structural inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), layoutCases, layoutExecutions, abiCases, abiExecutions, 1+layoutExecutions+abiExecutions, toolchain.Version)
+	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, 14 run-host outcomes covered signed results and four arithmetic trap categories, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, %d PE32+ executable images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, layoutCases, layoutExecutions, abiCases, abiExecutions, 1+layoutExecutions+abiExecutions, toolchain.Version)
 	return nil
 }
 
@@ -180,6 +184,9 @@ func runWindowsLayoutProbe(toolchain cdriver.WindowsHostToolchain) (int, int, er
 		}
 		if _, err := pecoff.InspectExecutable(artifact.Bytes); err != nil {
 			return executions, len(unit.Cases), fmt.Errorf("inspect Windows MSVC layout probe PE executable image with %s: %w", profile.Name, err)
+		}
+		if _, err := pecoff.InspectAMD64Unwind(artifact.Bytes); err != nil {
+			return executions, len(unit.Cases), fmt.Errorf("inspect Windows MSVC layout probe unwind data with %s: %w", profile.Name, err)
 		}
 		outcome, err := cdriver.ExecuteWindowsMSVCProbe(artifact)
 		if err != nil {
@@ -209,6 +216,9 @@ func runWindowsABIProbe(toolchain cdriver.WindowsHostToolchain) (int, int, error
 		}
 		if _, err := pecoff.InspectExecutable(artifact.Bytes); err != nil {
 			return executions, len(unit.Cases), fmt.Errorf("inspect Windows MSVC ABI probe PE executable image with %s: %w", profile.Name, err)
+		}
+		if _, err := pecoff.InspectAMD64Unwind(artifact.Bytes); err != nil {
+			return executions, len(unit.Cases), fmt.Errorf("inspect Windows MSVC ABI probe unwind data with %s: %w", profile.Name, err)
 		}
 		outcome, err := cdriver.ExecuteWindowsMSVCABIProbe(artifact)
 		if err != nil {

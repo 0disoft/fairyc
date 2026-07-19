@@ -116,6 +116,13 @@ bounded section and relocation ranges, readable executable `.text`/`.text$...`, 
 symbol indexes, and named symbols are mandatory; storage-free `.bss` is admitted only with the
 uninitialized-data characteristic. Object bytes are not uploaded or retained. Exact symbol,
 COMDAT, relocation-type, unwind, debug, and hosted object expectations remain unconfigured.
+All five linked PE images additionally traverse the Microsoft x64 exception directory before
+execution. The local gate requires sorted nonoverlapping `.pdata` runtime-function ranges,
+executable code coverage, DWORD-aligned file-backed unwind records, bounded version 1 prolog slots,
+bounded version 2 epilog descriptors, and minimum handler/chained tails. The receipt reports the
+retained product's runtime-function and version-2 record counts without stabilizing them. It does
+not execute a synthetic exception/unwind walk or validate language handler data, complete chain
+semantics, object-level unwind relocations, or hosted runner behavior.
 
 ## Owners
 

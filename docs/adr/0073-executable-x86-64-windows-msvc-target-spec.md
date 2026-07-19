@@ -55,8 +55,8 @@ incomplete calling contract.
   separate later gates.
 - ADR 0076 later adds the host-independent Microsoft x64 classifier, ADR 0077 adds same-MSVC native
   crossings, ADR 0078 adds linked PE executable-structure inspection, and ADR 0079 adds structural
-  live-COFF inspection. Only the corresponding narrow evidence advances; the remaining target gates
-  stay fail-closed.
+  live-COFF inspection. ADR 0080 adds static version-1/version-2 unwind-structure inspection. Only
+  the corresponding narrow evidence advances; the remaining target gates stay fail-closed.
 - Extending the stack schema changes every target document structurally even though the Linux
   shadow-space value is zero.
 

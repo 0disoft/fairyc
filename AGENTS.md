@@ -61,7 +61,7 @@ regenerate, or override compiler source.
 - C ABI classification fixtures: spec/fixtures/c-abi/manifest-v0.json and spec/fixtures/c-abi/manifest-windows-msvc-v0.json
 - C ABI fixture runner: internal/cabifixture/
 - Windows MSVC native ABI probe generator: internal/windowsabiprobe/
-- Windows AMD64 PE executable and COFF object structure inspector: internal/pecoff/
+- Windows AMD64 PE, COFF object, and x64 unwind structure inspector: internal/pecoff/
 - Resolved package graph fixtures: spec/fixtures/package/manifest-v0.json
 - Executable MIR semantics: docs/mir/*.md
 - Package identity and visibility: docs/package/*.md

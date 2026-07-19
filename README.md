@@ -186,6 +186,12 @@ intermediate MSVC `.obj` before its temporary build root is removed. It requires
 bounded section and relocation ranges, readable executable `.text` or `.text$...` code, valid
 relocation symbol indexes, and a nonempty symbol table while admitting raw-storage-free `.bss`.
 This is structural live-object evidence, not a versioned symbol/relocation fixture or unwind proof.
+The linked-image inspector now also follows the exception data directory into `.pdata` and its
+referenced unwind records. It validates sorted nonoverlapping executable `RUNTIME_FUNCTION` ranges,
+DWORD-aligned file-backed unwind RVAs, version/flag/frame/prolog structure, bounded v1 unwind-code
+slots, version-2 epilog descriptor bounds, and minimum handler or chained tails. The local MSVC
+product currently exposes both version 1 and version 2 records. Version-2 epilog offset semantics,
+language-specific handler data, actual unwinder behavior, and versioned hosted fixtures remain open.
 A separate fail-closed Linux/amd64 command is now present to compile those cases with Clang and GCC
 at `-O0` and `-O2`, link a closed conformance runtime, and compare process outcomes plus exact
 source-linked resource-drop sequences. Product emission and product builds contain no trace observer. It cannot run on
@@ -302,7 +308,7 @@ or arbitrary link-input option.
 - Windows MSVC native layout probe generator: `internal/windowslayoutprobe/`
 - Target C ABI classifiers and fixtures: `internal/cabi/`, `spec/fixtures/c-abi/manifest-v0.json`, `spec/fixtures/c-abi/manifest-windows-msvc-v0.json`
 - Windows MSVC native ABI probe generator: `internal/windowsabiprobe/`
-- Windows AMD64 PE executable and COFF object structure inspector: `internal/pecoff/`
+- Windows AMD64 PE, COFF object, and x64 unwind structure inspector: `internal/pecoff/`
 - Resolved package graph fixtures: `spec/fixtures/package/manifest-v0.json`
 - MIR and C backend contracts: `docs/mir/`
 - Package identity and visibility: `docs/package/package-graph-v0.md`
