@@ -26,6 +26,74 @@ func TestParseBuildOptionsRequiresExplicitClosedChoices(t *testing.T) {
 	}
 }
 
+func TestProductSupportSourceLinksOnlyCalledStandardLibraryClosure(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name      string
+		symbols   []string
+		prefix    string
+		required  []string
+		forbidden []string
+	}{
+		{
+			name:      "scalar runtime only",
+			required:  []string{"fy_runtime_trap"},
+			forbidden: []string{"fy_std_text_utf8_valid_v0", "fy_std_system_heap_allocate_v0"},
+		},
+		{
+			name:      "text view",
+			symbols:   []string{"fy_std_text_utf8_valid_v0"},
+			required:  []string{"fy_std_text_utf8_valid_v0", "fy_runtime_trap"},
+			forbidden: []string{"fy_std_system_heap_allocate_v0", "fy_std_string_copy_v0"},
+		},
+		{
+			name:    "owned text dependencies",
+			symbols: []string{"fy_std_cstring_from_text_v0"},
+			required: []string{
+				"fy_std_system_heap_allocate_v0", "fy_std_buffer_initialize_v0",
+				"fy_std_text_utf8_valid_v0", "fy_std_cstring_from_text_v0", "fy_runtime_trap",
+			},
+			forbidden: []string{"fy_std_arena_initialize_v0", "fy_std_linux_file_open_v0"},
+		},
+		{
+			name:     "Linux feature macro stays first",
+			symbols:  []string{"fy_std_linux_file_close_v0", "fy_std_buffer_drop_v0"},
+			prefix:   "#define _POSIX_C_SOURCE 200809L\n",
+			required: []string{"fy_std_linux_file_close_v0", "fy_std_buffer_drop_v0", "fy_runtime_trap"},
+		},
+	}
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			source, err := productSupportSource(test.symbols)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if test.prefix != "" && !strings.HasPrefix(source, test.prefix) {
+				t.Errorf("support source does not start with %q", test.prefix)
+			}
+			for _, required := range test.required {
+				if !strings.Contains(source, required) {
+					t.Errorf("support source is missing %q", required)
+				}
+			}
+			for _, forbidden := range test.forbidden {
+				if strings.Contains(source, forbidden) {
+					t.Errorf("support source unexpectedly contains %q", forbidden)
+				}
+			}
+		})
+	}
+}
+
+func TestProductSupportSourceRejectsUnknownStandardLibrarySymbol(t *testing.T) {
+	t.Parallel()
+	if _, err := productSupportSource([]string{"fy_std_missing_v0"}); err == nil || !strings.Contains(err.Error(), "unrecognized Stage 0 standard-library symbol") {
+		t.Fatalf("productSupportSource() error = %v", err)
+	}
+}
+
 func TestParseBuildOptionsRejectsIncompleteOrOpenEndedArguments(t *testing.T) {
 	t.Parallel()
 	tests := []struct {

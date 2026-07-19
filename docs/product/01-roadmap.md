@@ -97,8 +97,8 @@ Clang/GCC crossings in both compiler directions and profiles; these are not yet 
 The first standard-library-owned C storage slice now implements provisional fallible `SystemHeap`
 allocation, copy-and-release resize, zero-size normalization, fundamental-alignment rejection, and
 failure rollback. A closed probe is configured for Clang/GCC at low and optimized profiles. It is
-not linked into product builds or exposed through a public `std::alloc` API. One internal generated
-Fairy caller now crosses its exact `void *`/`size_t` block into the real allocate and deallocate
+not exposed through a public `std::alloc` API. One internal generated Fairy caller now crosses its
+exact `void *`/`size_t` block into the real allocate and deallocate
 helpers for four additional configured native executions. All eight native SystemHeap executions
 remain unobserved on this Windows host; the later Arena, text ownership, and Linux File C slices now
 exist and each has a raw generated-Fairy source crossing.
@@ -106,8 +106,8 @@ The next storage slice now adds provisional Buffer construction, initialized-pre
 overlap-safe append across relocation, overflow rollback, zeroed growth, truncate, clear, and drop.
 Its four C-only native probe executions and four generated-Fairy source-call executions are
 configured but unobserved. The internal caller uses the exact nested SystemHeap-block record and
-reaches initialize, zeroed resize, and drop; public `std::bytes`, automatic product linkage, and
-safe ownership methods remain missing.
+reaches initialize, zeroed resize, and drop. Used-symbol product linkage now supplies the exact
+Buffer/SystemHeap closure, but public `std::bytes` and safe ownership methods remain missing.
 The Arena storage slice now adds a single-active-Region generation check, failure-atomic zeroed and
 copied byte placement, reset invalidation, stale-use rejection, and active-drop rejection. Its four
 C-only executions and four generated-Fairy source-call executions are configured but unobserved.
@@ -132,8 +132,15 @@ close including forced close failure. Its four C-only native runs remain configu
 A second four-way generated-Fairy crossing uses exact result, File, and open-option records to call
 the real open, write-all, sync, close, reopen, partial-read, EOF, and final-close helpers. It checks
 exact counts, repeated-close status, normalized closed state, and reconstructed bytes. Public safe
-File ownership, source effects, typed errors, automatic linkage, and hosted execution evidence
-remain missing.
+File ownership, source effects, typed errors, and hosted execution evidence remain missing.
+Used-symbol product linkage now selects Linux File only for actual admitted calls.
+
+The product build path now records sorted unique foreign symbols used by MIR calls and resolves the
+project-owned subset through one shared symbol/component contract. It links only the minimal
+dependency closure: Buffer and Arena pull in SystemHeap, and owned text pulls in SystemHeap, Buffer,
+and text view. A second four-way build smoke compiles and executes a self-contained FY call to the
+real UTF-8 validator. Public `std::*` modules, effects, safe resources, arbitrary link inputs, and an
+observed Linux receipt remain later gates.
 
 The source FFI slice admits `unsafe extern C fn` declarations using `i32`, `u8`, `u32`, `usize`, all
 sixteen exact transport-only TargetSpec C scalars, raw pointers to the bounded Fairy scalar set or

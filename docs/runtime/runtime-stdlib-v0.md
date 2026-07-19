@@ -133,7 +133,8 @@ records, initializes and attaches them through the real helpers, obtains eight i
 bytes through an exact `void **` output slot, then resets the Region and drops the Arena. Bounded C
 observers check the allocation, generation transitions, active flags, released node chain, and
 invalidated Region. This does not expose those records as the public representation, connect lexical
-`region` lowering, or add product standard-library linkage and safe allocation methods.
+`region` lowering, or add safe allocation methods. Product builds now select Arena plus SystemHeap
+for actual admitted calls only.
 
 Its four-way C-only native probe is configured for exclusive begin, zeroed allocation, copy, allocation
 rollback, empty normalization, active-drop rejection, reset, stale-use rejection, and final drop,
@@ -190,8 +191,9 @@ drop helpers. C observers require `Fairy`, `FairyFairy`, the CString terminator 
 logical view, and canonical empty storage after both drops. All operation and allocation statuses
 must be zero. The C-only owned-text probe remains responsible for invalid UTF-8, failed Buffer moves,
 self-overlap, interior-NUL rollback, empty CString, and malformed-state negatives. Public safe
-String/CString resources, source `Result` mapping, `&str`/`&CStr` borrow origins, automatic linkage,
-and the `std::text` API remain disconnected.
+String/CString resources, source `Result` mapping, `&str`/`&CStr` borrow origins, and the `std::text`
+API remain disconnected. Product build linkage is now automatic only for actual calls to the closed
+internal symbols; that raw link transport does not supply the missing safe API.
 
 A `c"..."` literal provides allocation-free immutable `&CStr` storage with one compiler-appended trailing NUL and rejects a decoded interior NUL. It is source syntax, not a runtime constructor. `b"..."` similarly provides immutable static bytes without claiming UTF-8.
 
@@ -215,8 +217,22 @@ records into the real C unit. It opens a prepared file for truncating writes, wr
 reopens for reading, performs three three-byte reads, observes EOF with count zero, closes, and
 requires the reconstructed bytes and normalized closed record. The companion C code owns only
 bounded inputs and observations; it does not replace the production file operations. Public safe
-File ownership, source effects, typed error resources, automatic linkage, and hosted evidence remain
-disconnected.
+File ownership, source effects, typed error resources, and hosted evidence remain disconnected.
+Product build linkage is now automatic only for the five admitted raw File calls; safe source
+construction and effect/error semantics remain disconnected.
+
+## Stage 0 product linkage
+
+The constrained C unit records sorted unique external names used by actual calls. Product builds
+resolve only exact `fy_std_*_v0` members through the shared standard-library contract, close their
+component dependencies, and combine those C sources with the scalar runtime. Unused foreign
+declarations do not select a component. Buffer and Arena require SystemHeap; owned text requires
+SystemHeap, Buffer, and text view; Linux File is independent and is placed first when selected so
+its feature-test macro precedes system headers.
+
+This is a closed implementation link, not package discovery. Other foreign names receive no source,
+object, library, search path, or linker argument from Fairy C and remain ordinary unresolved-link
+errors unless the selected driver's fixed environment already provides them.
 
 This is not a generic POSIX contract. POSIX.1-2024 and Linux differ for interrupted close behavior; other targets must define their own consuming-close rule before claiming support.
 

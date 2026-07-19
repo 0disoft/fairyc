@@ -364,7 +364,7 @@ func TestLinuxFileSourceCallSmokeReachesCEmission(t *testing.T) {
 
 func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 	t.Parallel()
-	if reportSchemaVersion != "fairyc.native-c-report/v27" {
+	if reportSchemaVersion != "fairyc.native-c-report/v28" {
 		t.Fatalf("report schema = %q", reportSchemaVersion)
 	}
 	encoded, err := json.Marshal(Report{
@@ -373,33 +373,35 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		Sanitizer: cdriver.AddressUndefinedSanitizerMode, SanitizerExecutions: 36,
 		ABICases:      []string{"pass.aggregate-rollback", "pass.void-return"},
 		ABIDirections: []string{"clang-caller-gcc-callee", "gcc-caller-clang-callee"}, ABIProbeExecutions: 56,
-		SystemHeapExecutions:               4,
-		SystemHeapSourceCallExecutions:     4,
-		BufferExecutions:                   4,
-		BufferSourceCallExecutions:         4,
-		ArenaExecutions:                    4,
-		ArenaSourceCallExecutions:          4,
-		TextViewExecutions:                 4,
-		OwnedTextExecutions:                4,
-		OwnedTextSourceCallExecutions:      4,
-		LinuxFileExecutions:                4,
-		LinuxFileSourceCallExecutions:      4,
-		ForeignCallExecutions:              4,
-		ForeignCIntCallExecutions:          4,
-		ForeignCLongCallExecutions:         4,
-		ForeignCScalarFamilyCallExecutions: 4,
-		ForeignCSizeTCallExecutions:        4,
-		ForeignCSSizeTCallExecutions:       4,
-		ForeignPointerCallExecutions:       4,
-		ForeignCStructResultCallExecutions: 4,
-		TextValidationSourceCallExecutions: 4,
-		TextViewOutputSourceCallExecutions: 4,
-		CStrValidationSourceCallExecutions: 4,
+		SystemHeapExecutions:                4,
+		SystemHeapSourceCallExecutions:      4,
+		BufferExecutions:                    4,
+		BufferSourceCallExecutions:          4,
+		ArenaExecutions:                     4,
+		ArenaSourceCallExecutions:           4,
+		TextViewExecutions:                  4,
+		OwnedTextExecutions:                 4,
+		OwnedTextSourceCallExecutions:       4,
+		LinuxFileExecutions:                 4,
+		LinuxFileSourceCallExecutions:       4,
+		ForeignCallExecutions:               4,
+		ForeignCIntCallExecutions:           4,
+		ForeignCLongCallExecutions:          4,
+		ForeignCScalarFamilyCallExecutions:  4,
+		ForeignCSizeTCallExecutions:         4,
+		ForeignCSSizeTCallExecutions:        4,
+		ForeignPointerCallExecutions:        4,
+		ForeignCStructResultCallExecutions:  4,
+		TextValidationSourceCallExecutions:  4,
+		TextViewOutputSourceCallExecutions:  4,
+		CStrValidationSourceCallExecutions:  4,
+		BuildSmokeExecutions:                4,
+		StandardLibraryBuildSmokeExecutions: 4,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v27"`) ||
+	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v28"`) ||
 		!strings.Contains(string(encoded), `"dropTraceExecutions":72`) ||
 		!strings.Contains(string(encoded), `"layoutCases":["pass.array-i32-three","pass.pointer"]`) ||
 		!strings.Contains(string(encoded), `"layoutProbeExecutions":4`) ||
@@ -429,7 +431,9 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		!strings.Contains(string(encoded), `"foreignCStructResultCallExecutions":4`) ||
 		!strings.Contains(string(encoded), `"textValidationSourceCallExecutions":4`) ||
 		!strings.Contains(string(encoded), `"textViewOutputSourceCallExecutions":4`) ||
-		!strings.Contains(string(encoded), `"cStrValidationSourceCallExecutions":4`) {
+		!strings.Contains(string(encoded), `"cStrValidationSourceCallExecutions":4`) ||
+		!strings.Contains(string(encoded), `"buildSmokeExecutions":4`) ||
+		!strings.Contains(string(encoded), `"standardLibraryBuildSmokeExecutions":4`) {
 		t.Fatalf("report JSON = %s", encoded)
 	}
 }

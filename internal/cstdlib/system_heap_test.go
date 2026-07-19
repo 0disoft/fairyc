@@ -199,3 +199,101 @@ func TestLinuxFileSourcesConsumeCloseAndExposePartialIO(t *testing.T) {
 		}
 	}
 }
+
+func TestSourceForSymbolsSelectsMinimalDependencyClosure(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name      string
+		symbols   []string
+		prefix    string
+		required  []string
+		forbidden []string
+	}{
+		{
+			name:    "ordinary foreign only",
+			symbols: []string{"fairyc_external_helper"},
+		},
+		{
+			name:     "text view only",
+			symbols:  []string{"fy_std_text_utf8_valid_v0"},
+			required: []string{"fy_std_text_utf8_valid_v0"},
+			forbidden: []string{
+				"fy_std_system_heap_allocate_v0", "fy_std_string_copy_v0", "fy_std_linux_file_open_v0",
+			},
+		},
+		{
+			name:    "owned text closure",
+			symbols: []string{"fy_std_string_append_v0"},
+			required: []string{
+				"fy_std_system_heap_allocate_v0", "fy_std_buffer_initialize_v0",
+				"fy_std_text_utf8_valid_v0", "fy_std_string_append_v0",
+			},
+			forbidden: []string{"fy_std_arena_initialize_v0", "fy_std_linux_file_open_v0"},
+		},
+		{
+			name:    "Linux File and Arena",
+			symbols: []string{"fy_std_linux_file_read_v0", "fy_std_region_begin_v0"},
+			prefix:  "#define _POSIX_C_SOURCE 200809L\n",
+			required: []string{
+				"#define _POSIX_C_SOURCE 200809L", "fy_std_linux_file_read_v0",
+				"fy_std_system_heap_allocate_v0", "fy_std_region_begin_v0",
+			},
+			forbidden: []string{"fy_std_buffer_initialize_v0", "fy_std_text_utf8_valid_v0"},
+		},
+	}
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			source, err := SourceForSymbols(test.symbols)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if test.prefix != "" && !strings.HasPrefix(source, test.prefix) {
+				t.Errorf("source does not start with %q", test.prefix)
+			}
+			for _, required := range test.required {
+				if !strings.Contains(source, required) {
+					t.Errorf("source is missing %q", required)
+				}
+			}
+			for _, forbidden := range test.forbidden {
+				if strings.Contains(source, forbidden) {
+					t.Errorf("source unexpectedly contains %q", forbidden)
+				}
+			}
+			if len(test.required) == 0 && source != "" {
+				t.Fatalf("source = %q, want empty", source)
+			}
+		})
+	}
+}
+
+func TestSourceForSymbolsRejectsUnknownStandardLibrarySymbol(t *testing.T) {
+	t.Parallel()
+	if _, err := SourceForSymbols([]string{"fy_std_missing_v0"}); err == nil {
+		t.Fatal("SourceForSymbols() accepted an unknown fy_std_ symbol")
+	}
+}
+
+func TestSourceForSymbolsEmitsEachDependencyOnce(t *testing.T) {
+	t.Parallel()
+	source, err := SourceForSymbols([]string{
+		"fy_std_string_append_v0",
+		"fy_std_buffer_drop_v0",
+		"fy_std_string_append_v0",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, definition := range []string{
+		"struct fy_std_system_heap_block_v0 {",
+		"struct fy_std_buffer_v0 {",
+		"struct fy_std_text_view_v0 {",
+		"struct fy_std_string_v0 {",
+	} {
+		if count := strings.Count(source, definition); count != 1 {
+			t.Errorf("%q definition count = %d, want 1", definition, count)
+		}
+	}
+}

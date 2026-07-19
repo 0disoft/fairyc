@@ -178,6 +178,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 ## Build and tooling contract
 
 - The Stage 0 compiler is implemented in Go.
+- The constrained C unit records sorted unique link names used by actual foreign calls. The
+  experimental product build resolves exact project-owned standard-library names through one shared
+  symbol/component contract and links only their dependency closure plus the scalar runtime; unused
+  declarations and unrelated library components are not linked.
 - Modules follow the one-file, explicit-alias import contract and do not use textual include expansion.
 - Parsing starts from original source bytes, preserves trivia and error provenance in compact lossless syntax, and lowers to AST only after an error-free batch parse. An immutable green tree and incremental reparse are deferred until formatter or IDE work requires them.
 - Semantic checking proceeds through resolver, type, and Flow phases. Fixtures compare stable source coordinates and canonical facts rather than build-local AST or HIR dumps.
@@ -265,9 +269,11 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   copy/view/append/drop and from-text/view/drop helpers and observe bytes, termination, statuses, and
   normalized release. Exact Linux File result, handle, and open-option records additionally cross
   the real open, write-all, sync, consuming-close, reopen, partial-read, EOF, and final-close helpers
-  while observing counts, repeated-close status, normalized state, and bytes. Report v27 records
+  while observing counts, repeated-close status, normalized state, and bytes. Report v28 records
   `linuxFileSourceCallExecutions` alongside the earlier standard-library source-call counters and
-  `foreignCStructResultCallExecutions` for the register and hidden-memory result pair.
+  `foreignCStructResultCallExecutions` for the register and hidden-memory result pair, plus
+  `standardLibraryBuildSmokeExecutions` for a self-contained product build that calls the real UTF-8
+  validator through automatic used-symbol linkage.
   Its closed
   `drop-trace-v0` emission profile assigns source/type/span identities to dense site IDs and compares
   exact four-byte native records with the MIR interpreter trace. This instrumentation is absent from

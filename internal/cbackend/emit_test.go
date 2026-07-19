@@ -92,6 +92,31 @@ func TestEmitScalarForeignCall(t *testing.T) {
 	}
 }
 
+func TestEmitTracksOnlyCalledForeignSymbolsInSortedOrder(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+@link_name("fairyc_fixture_z")
+unsafe extern C fn call_z(value: i32) -> i32;
+@link_name("fairyc_fixture_a")
+unsafe extern C fn call_a(value: i32) -> i32;
+@link_name("fairyc_fixture_unused")
+unsafe extern C fn unused(value: i32) -> i32;
+fn main() -> i32 {
+    let first: i32 = unsafe { call_z(20) };
+    let second: i32 = unsafe { call_a(first) };
+    unsafe { call_a(second) }
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	want := []string{"fairyc_fixture_a", "fairyc_fixture_z"}
+	if !slices.Equal(unit.ForeignSymbols, want) {
+		t.Fatalf("Emit() foreign symbols = %v, want %v", unit.ForeignSymbols, want)
+	}
+}
+
 func TestEmitDistinctCIntForeignTransport(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

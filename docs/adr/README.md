@@ -73,6 +73,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0061-repr-c-struct-foreign-result-transport.md`: nonempty `@repr(C)` foreign results with generated-Fairy register and hidden-memory return crossings while aggregate parameters stay closed.
 - `0062-owned-text-source-transport.md`: exact nested String/CString lifecycle calls from generated Fairy source with real by-value results, byte/terminator observers, and normalized drop.
 - `0063-linux-file-source-transport.md`: exact Linux File/open/result records and generated Fairy calls through real write-all, sync, consuming close, reopen, partial-read, and EOF behavior.
+- `0064-used-symbol-standard-library-auto-link.md`: one shared exact-symbol contract, called-symbol tracking, minimal dependency closure, and product-build linkage of provisional C standard-library units.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

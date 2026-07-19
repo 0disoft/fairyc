@@ -62,15 +62,18 @@ alignment, offset, and padding results before any backend chooses C syntax. The 
 fixtures are host-independent expectations; a generated native C probe now checks every valid
 case. `internal/cabi` then turns the same type and layout facts into host-independent SysV AMD64
 eightbyte and register plans. The Linux runner turns validated pass plans into separate Clang/GCC
-caller and callee objects in both directions; Fairy source FFI and an observed hosted result remain
-later evidence layers.
+caller and callee objects in both directions. Generated Fairy callers now cross scalar, pointer,
+register-result, and hidden-memory-result boundaries; an observed hosted result remains a later
+evidence layer.
 
 `internal/cstdlib` is a separate target-standard-library transport boundary. Its first provisional
 SystemHeap helper normalizes empty allocation, rejects unsupported alignment, and preserves the old
 block when copy-and-release resize fails. A closed C probe reaches the existing Linux compiler
 matrix. One internal generated Fairy transport now calls the real allocate/deallocate symbols with
-an exact C-layout block, but the helper is not linked into product builds or exposed as a public
-standard-library API. This does not
+an exact C-layout block. `internal/cstdlibcontract` owns the single exact-symbol/component map used
+by both backend admission and product linking. The emitted C unit records only actually called
+foreign names, and `experimental build` links the minimal dependency-closed provisional C source
+plus the scalar runtime. No public standard-library API exists. This does not
 broaden the thin runtime or complete the standard library.
 
 The implemented slice emits deterministic C11 for verified scalar-payload MIR, including
@@ -84,9 +87,10 @@ Linux/amd64 runner now drives Clang and GCC at low and optimized profiles, links
 runtime, executes each emitted fixture, compares its process outcome and source-linked drop trace,
 and separately runs every production unit under a closed ASan+UBSan mode. The same bounded C driver
 and runtime feed an explicit experimental single-file build command whose artifact is confined to
-the ignored source-root `build/` directory. The current Windows host cannot execute either native
-path, and no hosted run has been observed yet. Complete runtime, public ABI, and supported-target
-gates remain unimplemented.
+the ignored source-root `build/` directory. One product smoke remains scalar/resource-only; a second
+requires the ordinary build path to select and link the real text-view C component from an actual
+Fairy call. The current Windows host cannot execute either native path, and no hosted run has been
+observed yet. Complete runtime, public ABI, and supported-target gates remain unimplemented.
 
 ## Atlas flow
 

@@ -70,9 +70,10 @@ executable only under the source root's ignored `build/` directory. It neither o
 existing path nor implements empty, non-`i32`, nested, partially initialized, or nonempty-drop
 resources; nested tags or resource tags outside the exact `i32`/direct-resource payload gate; the broader interpreter subset; native execution;
 package builds; cross-compilation; installation; or a supported target.
-It accepts no companion source, object, library, search path, or arbitrary linker argument, so an
-admitted scalar foreign symbol must already resolve through the selected driver's ordinary link
-environment.
+It automatically supplies only the minimal project-owned standard-library C dependency closure for
+exact admitted symbols used by actual calls. It accepts no user companion source, object, library,
+search path, or arbitrary linker argument, so every other admitted foreign symbol must already
+resolve through the selected driver's ordinary link environment.
 The resulting product artifact is uninstrumented; the native fixture recorder is not linked.
 `experimental target-spec` emits `fairyc.target-spec/v0` JSON without probing the host or exposing
 local tool paths. Its current scalar, flat-resource, and resource-tagged emission subset is reported separately from the false

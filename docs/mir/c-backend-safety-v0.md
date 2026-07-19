@@ -142,6 +142,10 @@ source-constructed raw pointers. The cast requires unsafe provenance, preserves 
 forbids mutability strengthening, lowers to a verified MIR raw-address operation, and emits plain
 `&local` without `restrict` or `noalias`. Pointer dereference, arithmetic, integer conversion, and
 arbitrary casts remain rejected.
+Successful emission also records the sorted unique external link names used by actual foreign call
+terminators. Uncalled declarations remain prototypes but are absent from this link-requirement list.
+The exact standard-library namespace and component dependency mapping live in one shared contract
+consumed by both C-emission admission and product-build source selection.
 The sole nested-pointer exception is exactly `*mut *mut void`, so `&mut *mut void` can become a C
 `void **` output slot. Immutable outer or inner layers fail closed instead of risking incorrect C
 qualifier placement. Nested pointers to C scalars, structs, or other pointer types remain rejected.
@@ -187,7 +191,7 @@ report; they do not expand the eighteen interpreter-owned differential cases.
 Every C-scalar probe uses hand-written C producers and consumers so each value crosses a generated
 typed local without requiring a Fairy C literal. The family probe uses exactly representable finite
 floating values and makes no NaN, infinity, signed-zero, rounding, or floating-environment claim.
-`fairyc.native-c-report/v27` separately records four `foreignCStructResultCallExecutions`, four
+`fairyc.native-c-report/v28` separately records four `foreignCStructResultCallExecutions`, four
 `systemHeapSourceCallExecutions`, four
 `bufferSourceCallExecutions`, four `arenaSourceCallExecutions`, and four
 `cStrValidationSourceCallExecutions`, plus four `ownedTextSourceCallExecutions` and four
@@ -205,6 +209,9 @@ crosses exact result, handle, and open-option records into real open, write-all,
 and close helpers; it observes exact counts, repeated-close status, EOF, reconstructed bytes, and
 normalized closed state. These are internal transport probes, not public allocator, Buffer, Arena,
 lexical Region, safe text, or safe File APIs.
+Four `standardLibraryBuildSmokeExecutions` additionally require the ordinary product CLI to select
+the text-view C component from an actual called symbol, link it with the scalar runtime, and execute
+the resulting uninstrumented product under both compilers and profiles.
 The struct-result count requires a generated Fairy caller to receive both a register-sized and a
 hidden-memory result from a separately compiled hand-written C callee in both compiler directions
 and profiles; it does not admit aggregate parameters.

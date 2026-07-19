@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/0disoft/fairyc/internal/cstdlibcontract"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/layout"
 	"github.com/0disoft/fairyc/internal/mir"
@@ -57,6 +58,7 @@ type Unit struct {
 	Instrumentation string
 	Entry           string
 	Functions       []string
+	ForeignSymbols  []string
 	Features        []string
 	DropSites       []DropSite
 	Source          string
@@ -91,6 +93,7 @@ type emitter struct {
 	taggedByType       map[hir.Type]int
 	resourceLocals     []map[hir.SymbolID]mir.ResourceLocal
 	features           map[string]struct{}
+	usedForeignSymbols map[string]struct{}
 	trapCategories     map[string]struct{}
 	dynamicTrapTargets map[int]map[mir.BlockID]struct{}
 	localTypes         []map[mir.LocalID]hir.Type
@@ -271,6 +274,7 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 		taggedByType:       taggedByType,
 		resourceLocals:     make([]map[hir.SymbolID]mir.ResourceLocal, len(functions)),
 		features:           make(map[string]struct{}),
+		usedForeignSymbols: make(map[string]struct{}),
 		trapCategories:     make(map[string]struct{}),
 		dynamicTrapTargets: make(map[int]map[mir.BlockID]struct{}),
 		localTypes:         make([]map[mir.LocalID]hir.Type, len(functions)),
@@ -384,9 +388,14 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 		features = append(features, feature)
 	}
 	slices.Sort(features)
+	foreignSymbols := make([]string, 0, len(value.usedForeignSymbols))
+	for symbol := range value.usedForeignSymbols {
+		foreignSymbols = append(foreignSymbols, symbol)
+	}
+	slices.Sort(foreignSymbols)
 	return Unit{
 		Target: string(profile.Target), Dialect: profile.Dialect, Instrumentation: profile.Instrumentation,
-		Entry: entry, Functions: names, Features: features,
+		Entry: entry, Functions: names, ForeignSymbols: foreignSymbols, Features: features,
 		DropSites: slices.Clone(value.dropSites), Source: output.String(),
 	}, nil
 }
@@ -838,7 +847,7 @@ func validExternalCIdentifier(value string) bool {
 		return false
 	}
 	if strings.HasPrefix(value, "fy_") {
-		if _, admitted := admittedStandardLibrarySymbols[value]; !admitted {
+		if !cstdlibcontract.Admitted(value) {
 			return false
 		}
 	}
@@ -852,34 +861,6 @@ func validExternalCIdentifier(value string) bool {
 	}
 	_, keyword := c11Keywords[value]
 	return !keyword
-}
-
-var admittedStandardLibrarySymbols = map[string]struct{}{
-	"fy_std_system_heap_allocate_v0":   {},
-	"fy_std_system_heap_deallocate_v0": {},
-	"fy_std_buffer_initialize_v0":      {},
-	"fy_std_buffer_resize_zeroed_v0":   {},
-	"fy_std_buffer_drop_v0":            {},
-	"fy_std_arena_initialize_v0":       {},
-	"fy_std_region_begin_v0":           {},
-	"fy_std_region_allocate_zeroed_v0": {},
-	"fy_std_region_reset_v0":           {},
-	"fy_std_arena_drop_v0":             {},
-	"fy_std_text_utf8_valid_v0":        {},
-	"fy_std_text_validate_utf8_v0":     {},
-	"fy_std_cstr_validate_v0":          {},
-	"fy_std_string_copy_v0":            {},
-	"fy_std_string_as_view_v0":         {},
-	"fy_std_string_append_v0":          {},
-	"fy_std_string_drop_v0":            {},
-	"fy_std_cstring_from_text_v0":      {},
-	"fy_std_cstring_as_view_v0":        {},
-	"fy_std_cstring_drop_v0":           {},
-	"fy_std_linux_file_open_v0":        {},
-	"fy_std_linux_file_read_v0":        {},
-	"fy_std_linux_file_write_all_v0":   {},
-	"fy_std_linux_file_sync_v0":        {},
-	"fy_std_linux_file_close_v0":       {},
 }
 
 var generatedCNames = map[string]struct{}{
@@ -1157,6 +1138,7 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 			}
 			if foreign {
 				e.features["foreign-c-call"] = struct{}{}
+				e.usedForeignSymbols[e.foreignFunctions[e.foreignBySymbol[terminator.Callee]].LinkName] = struct{}{}
 				allowedUnsafeEntities[terminator.Entity] = struct{}{}
 				if terminator.ForeignABI != "C" || terminator.UnsafeScope.Source == "" {
 					return fmt.Errorf("foreign C call in %s lacks ABI or unsafe provenance", function.Name)

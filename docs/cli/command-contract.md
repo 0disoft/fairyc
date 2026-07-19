@@ -87,7 +87,8 @@ observer declaration, calls, site metadata, and stderr protocol never appear in 
 native runner's `address-undefined-o1` sanitizer mode is likewise validation-only and cannot be
 selected by `emit-c` or `build`.
 
-`experimental build` consumes that same C unit, binds the embedded scalar runtime, and uses
+`experimental build` consumes that same C unit, binds the embedded scalar runtime plus the minimal
+dependency-closed provisional standard-library C source selected by actual called link names, and uses
 the shared constrained-C driver. It requires Linux/amd64 with glibc and the explicitly selected
 `clang` or `gcc` from `PATH`; `low` fixes `-O0` and `optimized` fixes `-O2`. There is no compiler,
 profile, target, or output default. The output must be a canonical forward-slash path below the
@@ -110,10 +111,13 @@ accept raw pointers to C scalars, and do not alias the types to coincidentally s
 The exact internal SystemHeap, Buffer, Arena/Region, text-view, CStr, String, CString, and Linux File
 open/read/write-all/sync/close symbols
 exercised by native source probes form a closed project-owned allowlist; the `fy_` prefix does not
-become generally callable. These probes can emit pointer and struct-result calls, but ordinary
-`build` supplies no companion source, object, library, search path, or arbitrary linker argument;
-the selected C driver must resolve the symbol from its ordinary closed link environment or the build
-fails. `experimental run` never binds host symbols and reports the interpreter capability boundary.
+become generally callable. The backend records sorted unique link names used by call terminators;
+declarations without calls select no library component. `build` resolves the exact project-owned
+subset through one shared symbol/component contract and links only its dependency closure. It still
+supplies no user companion source, object, library, search path, or arbitrary linker argument, so
+every other foreign symbol must resolve from the selected driver's ordinary closed environment or
+the build fails. `experimental run` never binds host symbols and reports the interpreter capability
+boundary.
 
 `fairyc check` remains unimplemented. It must not be aliased to `check-syntax`, because the planned
 command below also requires effects and later semantic groups beyond

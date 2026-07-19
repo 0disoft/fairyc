@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v27"
+	reportSchemaVersion = "fairyc.native-c-report/v28"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -1493,44 +1493,45 @@ type Compiler struct {
 
 // Report is the deterministic success record emitted by the native fixture command.
 type Report struct {
-	SchemaVersion                      string     `json:"schemaVersion"`
-	Target                             string     `json:"target"`
-	Libc                               string     `json:"libc"`
-	Compilers                          []Compiler `json:"compilers"`
-	Profiles                           []string   `json:"profiles"`
-	Cases                              []string   `json:"cases"`
-	Executions                         int        `json:"executions"`
-	DropTraceExecutions                int        `json:"dropTraceExecutions"`
-	LayoutCases                        []string   `json:"layoutCases"`
-	LayoutProbeExecutions              int        `json:"layoutProbeExecutions"`
-	Sanitizer                          string     `json:"sanitizer"`
-	SanitizerExecutions                int        `json:"sanitizerExecutions"`
-	ABICases                           []string   `json:"abiCases"`
-	ABIDirections                      []string   `json:"abiDirections"`
-	ABIProbeExecutions                 int        `json:"abiProbeExecutions"`
-	SystemHeapExecutions               int        `json:"systemHeapExecutions"`
-	SystemHeapSourceCallExecutions     int        `json:"systemHeapSourceCallExecutions"`
-	BufferExecutions                   int        `json:"bufferExecutions"`
-	BufferSourceCallExecutions         int        `json:"bufferSourceCallExecutions"`
-	ArenaExecutions                    int        `json:"arenaExecutions"`
-	ArenaSourceCallExecutions          int        `json:"arenaSourceCallExecutions"`
-	TextViewExecutions                 int        `json:"textViewExecutions"`
-	OwnedTextExecutions                int        `json:"ownedTextExecutions"`
-	OwnedTextSourceCallExecutions      int        `json:"ownedTextSourceCallExecutions"`
-	LinuxFileExecutions                int        `json:"linuxFileExecutions"`
-	LinuxFileSourceCallExecutions      int        `json:"linuxFileSourceCallExecutions"`
-	ForeignCallExecutions              int        `json:"foreignCallExecutions"`
-	ForeignCIntCallExecutions          int        `json:"foreignCIntCallExecutions"`
-	ForeignCLongCallExecutions         int        `json:"foreignCLongCallExecutions"`
-	ForeignCScalarFamilyCallExecutions int        `json:"foreignCScalarFamilyCallExecutions"`
-	ForeignCSizeTCallExecutions        int        `json:"foreignCSizeTCallExecutions"`
-	ForeignCSSizeTCallExecutions       int        `json:"foreignCSSizeTCallExecutions"`
-	ForeignPointerCallExecutions       int        `json:"foreignPointerCallExecutions"`
-	ForeignCStructResultCallExecutions int        `json:"foreignCStructResultCallExecutions"`
-	TextValidationSourceCallExecutions int        `json:"textValidationSourceCallExecutions"`
-	TextViewOutputSourceCallExecutions int        `json:"textViewOutputSourceCallExecutions"`
-	CStrValidationSourceCallExecutions int        `json:"cStrValidationSourceCallExecutions"`
-	BuildSmokeExecutions               int        `json:"buildSmokeExecutions"`
+	SchemaVersion                       string     `json:"schemaVersion"`
+	Target                              string     `json:"target"`
+	Libc                                string     `json:"libc"`
+	Compilers                           []Compiler `json:"compilers"`
+	Profiles                            []string   `json:"profiles"`
+	Cases                               []string   `json:"cases"`
+	Executions                          int        `json:"executions"`
+	DropTraceExecutions                 int        `json:"dropTraceExecutions"`
+	LayoutCases                         []string   `json:"layoutCases"`
+	LayoutProbeExecutions               int        `json:"layoutProbeExecutions"`
+	Sanitizer                           string     `json:"sanitizer"`
+	SanitizerExecutions                 int        `json:"sanitizerExecutions"`
+	ABICases                            []string   `json:"abiCases"`
+	ABIDirections                       []string   `json:"abiDirections"`
+	ABIProbeExecutions                  int        `json:"abiProbeExecutions"`
+	SystemHeapExecutions                int        `json:"systemHeapExecutions"`
+	SystemHeapSourceCallExecutions      int        `json:"systemHeapSourceCallExecutions"`
+	BufferExecutions                    int        `json:"bufferExecutions"`
+	BufferSourceCallExecutions          int        `json:"bufferSourceCallExecutions"`
+	ArenaExecutions                     int        `json:"arenaExecutions"`
+	ArenaSourceCallExecutions           int        `json:"arenaSourceCallExecutions"`
+	TextViewExecutions                  int        `json:"textViewExecutions"`
+	OwnedTextExecutions                 int        `json:"ownedTextExecutions"`
+	OwnedTextSourceCallExecutions       int        `json:"ownedTextSourceCallExecutions"`
+	LinuxFileExecutions                 int        `json:"linuxFileExecutions"`
+	LinuxFileSourceCallExecutions       int        `json:"linuxFileSourceCallExecutions"`
+	ForeignCallExecutions               int        `json:"foreignCallExecutions"`
+	ForeignCIntCallExecutions           int        `json:"foreignCIntCallExecutions"`
+	ForeignCLongCallExecutions          int        `json:"foreignCLongCallExecutions"`
+	ForeignCScalarFamilyCallExecutions  int        `json:"foreignCScalarFamilyCallExecutions"`
+	ForeignCSizeTCallExecutions         int        `json:"foreignCSizeTCallExecutions"`
+	ForeignCSSizeTCallExecutions        int        `json:"foreignCSSizeTCallExecutions"`
+	ForeignPointerCallExecutions        int        `json:"foreignPointerCallExecutions"`
+	ForeignCStructResultCallExecutions  int        `json:"foreignCStructResultCallExecutions"`
+	TextValidationSourceCallExecutions  int        `json:"textValidationSourceCallExecutions"`
+	TextViewOutputSourceCallExecutions  int        `json:"textViewOutputSourceCallExecutions"`
+	CStrValidationSourceCallExecutions  int        `json:"cStrValidationSourceCallExecutions"`
+	BuildSmokeExecutions                int        `json:"buildSmokeExecutions"`
+	StandardLibraryBuildSmokeExecutions int        `json:"standardLibraryBuildSmokeExecutions"`
 }
 
 // Run compiles every emission fixture with Clang and GCC at low and optimized profiles, compares
@@ -1840,6 +1841,11 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.BuildSmokeExecutions = buildSmoke
+	standardLibraryBuildSmoke, err := runStandardLibraryBuildSmoke(temporaryRoot)
+	if err != nil {
+		return Report{}, err
+	}
+	report.StandardLibraryBuildSmokeExecutions = standardLibraryBuildSmoke
 	return report, nil
 }
 
@@ -2248,12 +2254,23 @@ func runLayoutProbe(temporaryRoot string, toolchains []cdriver.Toolchain, probe 
 }
 
 func runBuildSmoke(temporaryRoot string) (int, error) {
-	sourceRoot := filepath.Join(temporaryRoot, "product-build-smoke")
-	if err := os.Mkdir(sourceRoot, 0o700); err != nil {
-		return 0, fmt.Errorf("create product build smoke root: %w", err)
+	return runBuildSourceSmoke(temporaryRoot, "product-build-smoke", buildSmokeSource)
+}
+
+func runStandardLibraryBuildSmoke(temporaryRoot string) (int, error) {
+	return runBuildSourceSmoke(temporaryRoot, "stdlib-build-smoke", textValidationSourceCallSmokeSource)
+}
+
+func runBuildSourceSmoke(temporaryRoot, smokeID, source string) (int, error) {
+	if smokeID == "" || source == "" {
+		return 0, fmt.Errorf("product build smoke identity and source must be non-empty")
 	}
-	if err := os.WriteFile(filepath.Join(sourceRoot, "main.fy"), []byte(buildSmokeSource), 0o600); err != nil {
-		return 0, fmt.Errorf("write product build smoke source: %w", err)
+	sourceRoot := filepath.Join(temporaryRoot, smokeID)
+	if err := os.Mkdir(sourceRoot, 0o700); err != nil {
+		return 0, fmt.Errorf("create %s root: %w", smokeID, err)
+	}
+	if err := os.WriteFile(filepath.Join(sourceRoot, "main.fy"), []byte(source), 0o600); err != nil {
+		return 0, fmt.Errorf("write %s source: %w", smokeID, err)
 	}
 	executions := 0
 	for _, compiler := range []string{"clang", "gcc"} {
@@ -2268,14 +2285,14 @@ func runBuildSmoke(temporaryRoot string) (int, error) {
 				"--output", output,
 			}, sourceRoot, &stdout, &stderr)
 			if code != cli.ExitSuccess {
-				return 0, fmt.Errorf("product build smoke with %s/%s failed with code %d: %s", compiler, profile.Name, code, strings.TrimSpace(stderr.String()))
+				return 0, fmt.Errorf("%s with %s/%s failed with code %d: %s", smokeID, compiler, profile.Name, code, strings.TrimSpace(stderr.String()))
 			}
 			expectedReceipt := fmt.Sprintf("built: %s (%s, %s, %s)\n", output, target.X8664LinuxGNU, compiler, profile.Name)
 			if stdout.String() != expectedReceipt || stderr.Len() != 0 {
-				return 0, fmt.Errorf("product build smoke with %s/%s produced stdout %q and stderr %q", compiler, profile.Name, stdout.String(), stderr.String())
+				return 0, fmt.Errorf("%s with %s/%s produced stdout %q and stderr %q", smokeID, compiler, profile.Name, stdout.String(), stderr.String())
 			}
-			if err := execute("product-build-smoke", filepath.Join(sourceRoot, filepath.FromSlash(output)), 42, nil); err != nil {
-				return 0, fmt.Errorf("product build smoke with %s/%s: %w", compiler, profile.Name, err)
+			if err := execute(smokeID, filepath.Join(sourceRoot, filepath.FromSlash(output)), 42, nil); err != nil {
+				return 0, fmt.Errorf("%s with %s/%s: %w", smokeID, compiler, profile.Name, err)
 			}
 			executions++
 		}

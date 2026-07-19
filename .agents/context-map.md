@@ -37,6 +37,7 @@
 - Shared constrained-C driver route: internal/cdriver/
 - Embedded scalar C runtime route: internal/cruntime/
 - Linux scalar C differential route: internal/cbackendnative/, cmd/fairyc-native-fixtures/
+- Standard-library C symbol and component contract route: internal/cstdlibcontract/
 - Executable target-description route: internal/target/
 - Experimental target JSON schema route: spec/cli/experimental-target-spec-v0.schema.json
 - Target layout implementation route: internal/layout/

@@ -5,6 +5,8 @@ import (
 	_ "embed"
 	"fmt"
 	"strings"
+
+	"github.com/0disoft/fairyc/internal/cstdlibcontract"
 )
 
 //go:embed stage0_system_heap.c
@@ -129,6 +131,50 @@ func LinuxFileSource() (string, error) {
 // LinuxFileProbeSource returns the closed native conformance probe for Linux File.
 func LinuxFileProbeSource() (string, error) {
 	return canonicalSource("Linux File probe", stage0LinuxFileProbe)
+}
+
+// SourceForSymbols returns the minimal dependency-closed Stage 0 C implementation for the exact
+// standard-library symbols called by one generated unit. An empty result needs no stdlib object.
+func SourceForSymbols(symbols []string) (string, error) {
+	components, err := cstdlibcontract.ComponentsForSymbols(symbols)
+	if err != nil {
+		return "", err
+	}
+	var output strings.Builder
+	for _, component := range components {
+		name, source, err := componentSource(component)
+		if err != nil {
+			return "", err
+		}
+		canonical, err := canonicalSource(name, source)
+		if err != nil {
+			return "", err
+		}
+		if output.Len() != 0 {
+			output.WriteByte('\n')
+		}
+		output.WriteString(canonical)
+	}
+	return output.String(), nil
+}
+
+func componentSource(component cstdlibcontract.Component) (string, string, error) {
+	switch component {
+	case cstdlibcontract.ComponentLinuxFile:
+		return "Linux File", stage0LinuxFile, nil
+	case cstdlibcontract.ComponentSystemHeap:
+		return "SystemHeap", stage0SystemHeap, nil
+	case cstdlibcontract.ComponentBuffer:
+		return "Buffer", stage0Buffer, nil
+	case cstdlibcontract.ComponentArena:
+		return "Arena", stage0Arena, nil
+	case cstdlibcontract.ComponentTextView:
+		return "text view", stage0TextView, nil
+	case cstdlibcontract.ComponentOwnedText:
+		return "owned text", stage0OwnedText, nil
+	default:
+		return "", "", fmt.Errorf("unsupported Stage 0 standard-library component %q", component)
+	}
 }
 
 func canonicalSource(name, source string) (string, error) {

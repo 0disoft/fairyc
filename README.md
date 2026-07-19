@@ -77,28 +77,32 @@ boundary rather than the thin runtime. It normalizes empty allocation, admits cu
 alignments, preserves bytes across copy-and-release growth or shrink, and leaves the old block
 unchanged when validation or allocation fails. A closed C-only probe and an internal generated FY
 caller using the exact `void *`/`size_t` block each have four configured Clang/GCC low/optimized
-executions. Neither has an observed hosted receipt, and the helper is not product-linked or exposed
-through a public `std::alloc` API. Arena, text ownership, and Linux File now have their own C slices
-below; each now also has a raw generated-Fairy source crossing.
+executions. Neither has an observed hosted receipt. `experimental build` now selects this helper
+when an actual generated call requires it, but no public `std::alloc` API exists. Arena, text
+ownership, and Linux File now have their own C slices below; each now also has a raw generated-Fairy
+source crossing.
 A second provisional slice implements Buffer-owned initialized bytes, failure-atomic reserve,
 relocating self-overlap append, length-overflow rollback, zeroed growth, truncate, clear, and drop.
 Its closed C-only probe and an internal generated FY caller using the exact nested SystemHeap-block
 plus `size_t` record each have four configured Clang/GCC low/optimized executions. Neither has an
 observed hosted receipt. Three exact Buffer helpers are now admitted by the constrained source
-backend and exercised by the closed native fixture; product linkage and the public standard-library
-package remain absent.
+backend and exercised by the closed native fixture. Used-symbol product linkage selects the Buffer
+plus SystemHeap dependency closure; the public standard-library package remains absent.
 A third slice implements Arena-owned byte nodes with one active generation-checked Region,
 failure-atomic zeroed or copied placement, reset invalidation, stale-use rejection, and active-drop
 rejection. Its closed C-only probe and an internal generated FY caller using the exact self-linked
 node, Arena, and Region records each have four configured native executions. The generated caller
 crosses real initialization, begin, zeroed allocation through a `void **` output slot, reset, and
-drop, but lexical Region lowering, product linkage, and a public `std::alloc` API remain absent.
+drop. Used-symbol product linkage selects Arena plus SystemHeap, but lexical Region lowering and a
+public `std::alloc` API remain absent.
 The first text slice now validates canonical UTF-8 without allocation and rejects slicing through a
 multibyte sequence. Its native probe includes overlong forms, surrogates, values above U+10FFFF,
-truncation, and obsolete leaders, but remains unobserved and source-disconnected.
+truncation, and obsolete leaders and remains unobserved; raw source transports follow below.
 Its empty-input validator now has exact internal `fy_std_*_v0` symbols and two real FY-to-stdlib-C
 four-way crossings: direct validation and `@repr(C)` output-record initialization through a verified
-raw address. The public borrowed `str` wrapper and nonempty source pointer path still do not exist.
+raw address. The self-contained empty validator call is also the first configured product-build
+smoke that requires automatic standard-library linkage. The public borrowed `str` wrapper and
+nonempty source pointer path still do not exist.
 Buffer-backed String and CString C helpers now preserve ownership on failed UTF-8 conversion,
 support overlap-safe String append, expose immutable bounded views, reject interior NUL, and append
 exactly one C terminator. Their C-only native probe is configured but unobserved. A separate
@@ -114,7 +118,8 @@ A separate generated FY caller now crosses exact result, File, and open-option r
 open, write-all, sync, consuming-close, reopen, partial-read, EOF, and final-close helpers. It also
 requires a repeated close to report the closed status and both completed closes to normalize the
 descriptor record. This is raw internal transport; safe File ownership, source effects, typed
-errors, automatic linkage, and hosted execution evidence remain absent.
+errors, and hosted execution evidence remain absent. Product builds now select the Linux File C
+unit only when one of the five admitted calls is actually present.
 The source FFI slice accepts `i32`, `u8`, `u32`, `usize`, all sixteen exact transport-only TargetSpec
 C scalars, admitted raw-pointer parameters or results, and nonempty acyclic `@repr(C)` struct
 results. A declaration may keep its Fairy name or use one nonempty `@link_name("external_symbol")`;
@@ -135,6 +140,10 @@ output-slot shape is admitted for Arena allocation. A generated FY caller now re
 matrix. Raw dereference or arithmetic, arbitrary casts, nested enum or built-in-tag fields, arrays,
 callbacks, by-value aggregate parameters, exports, and public standard-library wrappers remain
 unimplemented.
+The C emitter records only foreign link names used by actual calls. `experimental build` uses one
+exact-symbol contract to link the minimal provisional standard-library dependency closure; unused
+declarations pull in nothing, while arbitrary foreign libraries and linker arguments remain closed.
+This enables raw internal calls, not yet a public `std::*` programming surface.
 A deterministic native C11 plus explicit POSIX-typedef probe now translates the eleven valid layout cases into private numeric
 types and is configured for Clang/GCC at `-O0` and `-O2`. This Windows host cannot execute those
 four probe runs, and no hosted success receipt has been observed, so `c-layout-probes` remains a

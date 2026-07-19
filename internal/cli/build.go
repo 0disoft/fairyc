@@ -17,6 +17,7 @@ import (
 	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/cruntime"
+	"github.com/0disoft/fairyc/internal/cstdlib"
 	"github.com/0disoft/fairyc/internal/target"
 )
 
@@ -50,7 +51,7 @@ func runBuild(arguments []string, sourceRoot string, stdout, stderr io.Writer) i
 		}
 		return internalError(stderr)
 	}
-	runtimeSource, err := cruntime.ScalarSource(productTrapExitBase)
+	supportSource, err := productSupportSource(unit.ForeignSymbols)
 	if err != nil {
 		return internalError(stderr)
 	}
@@ -58,7 +59,7 @@ func runBuild(arguments []string, sourceRoot string, stdout, stderr io.Writer) i
 	if err != nil {
 		return buildFailure(stderr, err)
 	}
-	artifact, err := cdriver.Build(toolchain, options.profile, unit.Source, runtimeSource)
+	artifact, err := cdriver.Build(toolchain, options.profile, unit.Source, supportSource)
 	if err != nil {
 		return buildFailure(stderr, err)
 	}
@@ -76,6 +77,21 @@ func runBuild(arguments []string, sourceRoot string, stdout, stderr io.Writer) i
 		return outputError(stderr)
 	}
 	return ExitSuccess
+}
+
+func productSupportSource(foreignSymbols []string) (string, error) {
+	standardLibrarySource, err := cstdlib.SourceForSymbols(foreignSymbols)
+	if err != nil {
+		return "", fmt.Errorf("resolve Stage 0 standard-library source: %w", err)
+	}
+	runtimeSource, err := cruntime.ScalarSource(productTrapExitBase)
+	if err != nil {
+		return "", err
+	}
+	if standardLibrarySource == "" {
+		return runtimeSource, nil
+	}
+	return standardLibrarySource + "\n" + runtimeSource, nil
 }
 
 func parseBuildOptions(arguments []string) (buildOptions, error) {
