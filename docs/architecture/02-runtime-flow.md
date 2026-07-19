@@ -76,7 +76,7 @@ evidence.
 `internal/pecoff` is the next evidence boundary after local linking. It parses executable bytes
 without using the host loader and rejects non-AMD64, non-PE32+, DLL, non-console, misaligned,
 out-of-range, duplicate-section, missing-`.text`, and non-executable-entry images. The Windows smoke
-applies it to the retained product image and both profiles of the layout and ABI probes before
+applies it to the retained product image and both profiles of the layout, ABI, and unwind probes before
 execution. COFF object records and unwind/debug payload semantics remain outside this linked-image
 branch.
 The same package has a distinct raw-COFF path used inside `internal/cdriver` before local linking
@@ -89,7 +89,13 @@ The linked-image branch additionally walks the Microsoft x64 exception directory
 `.pdata` runtime-function entries to executable code and readable unwind data, validates version 1
 prolog-code slot structure and bounded version 2 epilog descriptors, and checks handler or chained
 tails without interpreting language-specific payloads. This remains static structure inspection;
-the Windows loader and unwinder are not used as a hidden semantic oracle.
+the Windows loader and unwinder are not smuggled into that parser's structural oracle.
+A distinct `internal/windowsunwindprobe` execution layer then uses those platform services
+explicitly. Three separately compiled C units raise a private noncontinuable exception, inspect its
+payload and captured `CONTEXT` in an outer filter, virtual-walk the raiser, termination frame, and
+catcher, and require an abnormal `__finally` execution during the real handler-directed unwind.
+This layer proves only those closed native C frames. It does not change Stage 0's non-unwinding MIR,
+trap, cleanup, or foreign-call rules.
 
 `internal/cstdlib` is a separate target-standard-library transport boundary. Its first provisional
 SystemHeap helper normalizes empty allocation, rejects unsupported alignment, and preserves the old

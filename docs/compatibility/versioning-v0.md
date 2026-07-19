@@ -84,8 +84,10 @@ and relocation bounds are validation mechanics; no object byte identity, symbol 
 selection, relocation-type set, or serialized receipt is a compatibility promise.
 Microsoft x64 unwind inspection is likewise an internal validation policy. Neither the observed
 runtime-function count nor version-1/version-2 mix is stable. Future semantic epilog, handler,
-chain, or runtime-walk fixtures require an explicit unwind-contract decision before they can become
-target evidence.
+or chain fixtures require an explicit unwind-contract decision before they can become target
+evidence. ADR 0081 admits one closed native exception and virtual-walk probe as internal target
+evidence; its case IDs, process result, and required ordering are test contracts, not a public Fairy
+C exception ABI or serialized compatibility format.
 
 ## Diagnostics
 

@@ -16,6 +16,7 @@ import (
 	"github.com/0disoft/fairyc/internal/pecoff"
 	"github.com/0disoft/fairyc/internal/windowsabiprobe"
 	"github.com/0disoft/fairyc/internal/windowslayoutprobe"
+	"github.com/0disoft/fairyc/internal/windowsunwindprobe"
 )
 
 const negativeSource = `module negative;
@@ -164,8 +165,45 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, 14 run-host outcomes covered signed results and four arithmetic trap categories, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, %d PE32+ executable images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, layoutCases, layoutExecutions, abiCases, abiExecutions, 1+layoutExecutions+abiExecutions, toolchain.Version)
+	unwindExecutions, unwindCases, err := runWindowsUnwindProbe(toolchain)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, 14 run-host outcomes covered signed results and four arithmetic trap categories, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ executable images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, layoutCases, layoutExecutions, abiCases, abiExecutions, unwindCases, unwindExecutions, 1+layoutExecutions+abiExecutions+unwindExecutions, toolchain.Version)
 	return nil
+}
+
+func runWindowsUnwindProbe(toolchain cdriver.WindowsHostToolchain) (int, int, error) {
+	unit := windowsunwindprobe.Generate()
+	executions := 0
+	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+		artifact, err := cdriver.BuildWindowsMSVCUnwindProbe(toolchain, profile, unit.CatcherSource, unit.FrameSource, unit.RaiserSource)
+		if err != nil {
+			return executions, len(unit.Cases), fmt.Errorf("build Windows MSVC unwind probe with %s: %w", profile.Name, err)
+		}
+		if len(artifact.Objects) != 3 || artifact.Objects[0].Name != "catcher.obj" || artifact.Objects[1].Name != "frame.obj" || artifact.Objects[2].Name != "raiser.obj" {
+			return executions, len(unit.Cases), fmt.Errorf("Windows MSVC unwind probe with %s returned unexpected COFF object receipts", profile.Name)
+		}
+		if _, err := pecoff.InspectExecutable(artifact.Bytes); err != nil {
+			return executions, len(unit.Cases), fmt.Errorf("inspect Windows MSVC unwind probe PE executable image with %s: %w", profile.Name, err)
+		}
+		report, err := pecoff.InspectAMD64Unwind(artifact.Bytes)
+		if err != nil {
+			return executions, len(unit.Cases), fmt.Errorf("inspect Windows MSVC unwind probe unwind data with %s: %w", profile.Name, err)
+		}
+		if report.HandlerInfos == 0 {
+			return executions, len(unit.Cases), fmt.Errorf("Windows MSVC unwind probe with %s has no handler-bearing unwind records", profile.Name)
+		}
+		outcome, err := cdriver.ExecuteWindowsMSVCUnwindProbe(artifact)
+		if err != nil {
+			return executions, len(unit.Cases), fmt.Errorf("execute Windows MSVC unwind probe with %s: %w", profile.Name, err)
+		}
+		if outcome.ExitCode != 0 || outcome.Output != "" {
+			return executions, len(unit.Cases), fmt.Errorf("Windows MSVC unwind probe with %s returned %d and output %q", profile.Name, outcome.ExitCode, outcome.Output)
+		}
+		executions++
+	}
+	return executions, len(unit.Cases), nil
 }
 
 func runWindowsLayoutProbe(toolchain cdriver.WindowsHostToolchain) (int, int, error) {

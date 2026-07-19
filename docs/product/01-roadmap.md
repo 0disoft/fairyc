@@ -190,18 +190,23 @@ its 12 pass plans now cross separate caller and callee C11 translation units thr
 at both profiles. Independent compiler or assembly/register inspection, source-level Fairy
 crossings, and a hosted Windows receipt remain absent. PE/COFF objects, runtime, standard library,
 supported distribution artifacts, and conformance remain later gates. A bounded parser now checks
-the product executable and four native probe executables for AMD64 PE32+ console identity, aligned
+the product executable and six native probe executables for AMD64 PE32+ console identity, aligned
 headers/sections, and an executable entry point, but does not inspect `.obj` symbols, relocations,
 unwind payloads, or CodeView/PDB data.
 Every local MSVC compile in the same lane now also parses its intermediate `.obj` as raw AMD64 COFF
 before cleanup, including `.text$...`, `.bss`, symbol-table, and relocation-index structure. Exact
 versioned symbol names, COMDAT selection, relocation types, unwind records, and a hosted object
 receipt remain absent, so the target evidence marker stays fail-closed.
-The five local PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
+The seven local PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
 runtime-function ordering and code coverage plus referenced version 1 and version 2 unwind-record
-bounds, including handler/chained minimum tails. Version-2 epilog meaning, language-specific data,
-runtime unwind walks, object-level relocation expectations, and hosted evidence remain absent, so
-the unwind marker also stays fail-closed.
+bounds, including handler/chained minimum tails. A separate three-object probe now raises a private
+noncontinuable exception at both profiles, validates its payload in an outer SEH filter, walks the
+captured context through raiser, termination, and catcher functions with `RtlVirtualUnwind`, and
+requires the intervening `__finally` block to report one abnormal termination. This is native
+dispatcher/runtime-walk evidence for closed MSVC C frames. Version-2 epilog meaning,
+language-specific handler data, recursive chains, source-level Fairy or foreign-frame crossings,
+object-level relocation expectations, and hosted evidence remain absent, so the unwind marker also
+stays fail-closed.
 
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.
@@ -233,7 +238,7 @@ Exit gate: Atlas failure cannot change compilation; stale or incompatible maps f
 ## Later capability gates
 
 - `x86_64-linux-musl`: requires a separate libc, sysroot, startup, loader, and static-distribution profile.
-- `x86_64-windows-msvc`: the TargetSpec, first eight-case local layout probe, 15-case host-independent Microsoft x64 classifier, 12-case same-MSVC native crossing, bounded PE32+ executable inspection, structural live-COFF object inspection, and static version-1/version-2 unwind-structure inspection exist, but complete hosted LLP64 layout evidence, independent or inspected call evidence, source-level Fairy crossings, versioned exact COFF symbol/COMDAT/relocation fixtures, semantic/runtime unwind fixtures, UCRT/VCRuntime, and debug fixtures remain required.
+- `x86_64-windows-msvc`: the TargetSpec, first eight-case local layout probe, 15-case host-independent Microsoft x64 classifier, 12-case same-MSVC native crossing, bounded PE32+ executable inspection, structural live-COFF object inspection, static version-1/version-2 unwind-structure inspection, and a three-case native exception/virtual-walk probe exist, but complete hosted LLP64 layout evidence, independent or inspected call evidence, source-level Fairy crossings, versioned exact COFF symbol/COMDAT/relocation fixtures, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, UCRT/VCRuntime, and debug fixtures remain required.
 - QBE or another fast backend: requires stable internal semantics, interpreter and C oracles, ABI coverage, and measured edit-build benefit.
 - LLVM backend: requires representative workloads that justify optimization and distribution cost after simpler paths are exhausted.
 - Generics and `Vec<T>`: require non-generic stability plus compile-time, code-size, active-payload, and diagnostics fixtures.

@@ -105,24 +105,28 @@ callee C11 translation units from all twelve valid Microsoft x64 plans, compiles
 separately, and executes the linked probe under both profiles. Those receipts are local Windows
 host evidence only; they are not Linux native parity, a hosted Windows receipt, complete Windows
 layout coverage, source-level Fairy FFI, independent compiler/register inspection, PE/COFF
-object inspection, or Windows call/ABI conformance. Before execution, the same intent parses the
-retained product image and all four probe images and requires bounded AMD64 PE32+ non-DLL console
+object conformance, or Windows call/ABI conformance. It also compiles the catcher, stack-owning
+termination frame, and private exception raiser as three separate translation units, links and
+executes them under both profiles, and requires exact exception payload, ordered
+`RtlVirtualUnwind` frame discovery, and one abnormal `__finally` execution. Before execution, the
+same intent parses the retained product image and all six probe images and requires bounded AMD64 PE32+ non-DLL console
 identity, aligned image/header/section ranges, a readable executable `.text`, and an executable
 entry point. This does not inspect object symbols or relocations, unwind/debug payloads, imported
 API compatibility, signing, installer packaging, or distribution behavior.
 The driver also parses every intermediate `.obj` from `build-host`, every `run-host` case, and both
-profiles of both native probes before linking results leave the temporary root. Raw AMD64 COFF,
+profiles of all three native probes before linking results leave the temporary root. Raw AMD64 COFF,
 bounded section and relocation ranges, readable executable `.text`/`.text$...`, valid relocation
 symbol indexes, and named symbols are mandatory; storage-free `.bss` is admitted only with the
 uninitialized-data characteristic. Object bytes are not uploaded or retained. Exact symbol,
 COMDAT, relocation-type, unwind, debug, and hosted object expectations remain unconfigured.
-All five linked PE images additionally traverse the Microsoft x64 exception directory before
+All seven linked PE images additionally traverse the Microsoft x64 exception directory before
 execution. The local gate requires sorted nonoverlapping `.pdata` runtime-function ranges,
 executable code coverage, DWORD-aligned file-backed unwind records, bounded version 1 prolog slots,
 bounded version 2 epilog descriptors, and minimum handler/chained tails. The receipt reports the
-retained product's runtime-function and version-2 record counts without stabilizing them. It does
-not execute a synthetic exception/unwind walk or validate language handler data, complete chain
-semantics, object-level unwind relocations, or hosted runner behavior.
+retained product's runtime-function and version-2 record counts without stabilizing them. It
+executes the closed synthetic exception and virtual-unwind walk described above, but does not
+validate complete version-2 epilog semantics, language-specific handler payload parsing, recursive
+chains, Fairy/foreign-frame crossings, object-level unwind relocations, or hosted runner behavior.
 
 ## Owners
 

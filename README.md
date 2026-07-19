@@ -177,10 +177,12 @@ missing target evidence marker.
 A separate Windows C11 probe translates the eight valid LLP64 cases into private numeric types and
 compiles and executes them twice with local x64 MSVC through the configured host smoke. The same
 smoke separately crosses all 12 validated Microsoft x64 call cases between caller and callee
-translation units at both profiles. The target marker remains missing until broader layout and
-independent/source-level/hosted ABI evidence exists. A host-independent PE parser now validates the
-product image plus all four probe images as bounded AMD64 PE32+ console executables with aligned
-headers and sections and an executable `.text` entry point. That linked-image path does not inspect
+translation units at both profiles. A third three-object probe raises and catches a private Windows
+exception, virtual-walks raiser, termination, and catcher frames, and requires one abnormal
+`__finally` execution under both profiles. The target marker remains missing until broader layout
+and independent/source-level/hosted ABI and unwind evidence exists. A host-independent PE parser
+now validates the product image plus all six probe images as bounded AMD64 PE32+ console executables
+with aligned headers and sections and an executable `.text` entry point. That linked-image path does not inspect
 object symbols, relocations, or Windows unwind records. The same package separately parses every
 intermediate MSVC `.obj` before its temporary build root is removed. It requires raw AMD64 COFF,
 bounded section and relocation ranges, readable executable `.text` or `.text$...` code, valid
@@ -190,8 +192,10 @@ The linked-image inspector now also follows the exception data directory into `.
 referenced unwind records. It validates sorted nonoverlapping executable `RUNTIME_FUNCTION` ranges,
 DWORD-aligned file-backed unwind RVAs, version/flag/frame/prolog structure, bounded v1 unwind-code
 slots, version-2 epilog descriptor bounds, and minimum handler or chained tails. The local MSVC
-product currently exposes both version 1 and version 2 records. Version-2 epilog offset semantics,
-language-specific handler data, actual unwinder behavior, and versioned hosted fixtures remain open.
+product currently exposes both version 1 and version 2 records. The native unwind probe separately
+proves its closed exception payload, captured-context virtual walk, and handler-directed termination
+path. Version-2 epilog offset semantics, language-specific handler data, recursive chains,
+Fairy/foreign-frame crossings, object-level unwind relocations, and hosted fixtures remain open.
 A separate fail-closed Linux/amd64 command is now present to compile those cases with Clang and GCC
 at `-O0` and `-O2`, link a closed conformance runtime, and compare process outcomes plus exact
 source-linked resource-drop sequences. Product emission and product builds contain no trace observer. It cannot run on
@@ -308,6 +312,7 @@ or arbitrary link-input option.
 - Windows MSVC native layout probe generator: `internal/windowslayoutprobe/`
 - Target C ABI classifiers and fixtures: `internal/cabi/`, `spec/fixtures/c-abi/manifest-v0.json`, `spec/fixtures/c-abi/manifest-windows-msvc-v0.json`
 - Windows MSVC native ABI probe generator: `internal/windowsabiprobe/`
+- Windows x64 native exception and virtual-unwind probe generator: `internal/windowsunwindprobe/`
 - Windows AMD64 PE, COFF object, and x64 unwind structure inspector: `internal/pecoff/`
 - Resolved package graph fixtures: `spec/fixtures/package/manifest-v0.json`
 - MIR and C backend contracts: `docs/mir/`

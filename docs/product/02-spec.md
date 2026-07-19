@@ -262,8 +262,19 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   closed slot counts and descending offsets. Version 2 admits bounded short and long epilog
   descriptors plus spare slots because local MSVC 14.51 emits them despite the public Learn page
   still describing version 1 as current. Handler and chained tails receive minimum structural
-  checks only. Version-2 epilog offset semantics, language-specific handler data, recursive chain
-  equivalence, runtime unwinder behavior, and hosted fixtures remain fail-closed.
+  checks only.
+- A separate three-translation-unit Windows probe deliberately raises one private noncontinuable
+  software exception below a stack-owning `__try`/`__finally` frame and catches it in an outer
+  `__try`/`__except` frame. Its filter validates both exception arguments and uses
+  `RtlLookupFunctionEntry` plus `RtlVirtualUnwind` over the captured `CONTEXT` to observe the
+  raiser, termination frame, and catcher in order. The selected handler then requires the
+  `__finally` block to have executed exactly once with `AbnormalTermination()` true. Local x64
+  MSVC compiles and executes this closed C probe at low and optimized profiles after COFF and
+  linked-image structure validation. This is explicit Windows dispatcher and runtime-walk evidence,
+  not a Fairy C language unwind feature: Stage 0 traps and calls remain non-unwinding. Version-2
+  epilog offset semantics, language-specific handler payload parsing, recursive chain equivalence,
+  source-level Fairy or foreign-frame crossings, object-level unwind relocations, and hosted
+  fixtures remain fail-closed.
 - The eleven valid layout cases additionally generate one deterministic private C11 plus explicit
   POSIX-typedef probe. The Linux
   native runner compiles, links, and executes it with Clang/GCC and low/optimized profiles, checking

@@ -161,6 +161,22 @@ func BuildWindowsMSVCABIProbe(toolchain WindowsHostToolchain, profile Profile, c
 	})
 }
 
+// BuildWindowsMSVCUnwindProbe compiles the catcher, termination frame, and
+// raiser as separate translation units before linking them with local x64 MSVC.
+func BuildWindowsMSVCUnwindProbe(toolchain WindowsHostToolchain, profile Profile, catcherSource, frameSource, raiserSource string) (WindowsHostArtifact, error) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		return WindowsHostArtifact{}, fmt.Errorf("MSVC unwind probe requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
+	if catcherSource == "" || frameSource == "" || raiserSource == "" {
+		return WindowsHostArtifact{}, fmt.Errorf("MSVC unwind catcher, frame, and raiser sources must be non-empty")
+	}
+	return buildWindowsMSVC(toolchain, profile, []windowsMSVCSource{
+		{Name: "catcher.c", Contents: catcherSource},
+		{Name: "frame.c", Contents: frameSource},
+		{Name: "raiser.c", Contents: raiserSource},
+	})
+}
+
 type windowsMSVCSource struct {
 	Name     string
 	Contents string
@@ -253,6 +269,14 @@ func ExecuteWindowsMSVCABIProbe(artifact WindowsHostArtifact) (WindowsHostOutcom
 		return WindowsHostOutcome{}, fmt.Errorf("MSVC ABI probe execution requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
 	}
 	return executeWindowsMSVCArtifact(artifact, "MSVC ABI probe")
+}
+
+// ExecuteWindowsMSVCUnwindProbe runs one linked structured-exception fixture.
+func ExecuteWindowsMSVCUnwindProbe(artifact WindowsHostArtifact) (WindowsHostOutcome, error) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		return WindowsHostOutcome{}, fmt.Errorf("MSVC unwind probe execution requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
+	return executeWindowsMSVCArtifact(artifact, "MSVC unwind probe")
 }
 
 func executeWindowsMSVCArtifact(artifact WindowsHostArtifact, label string) (WindowsHostOutcome, error) {

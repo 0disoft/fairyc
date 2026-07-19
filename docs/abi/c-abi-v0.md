@@ -206,8 +206,8 @@ closed subset only. It does not prove source-level Fairy lowering, an independen
 register-level oracle, exact stack/shadow-store placement, complete PE/COFF object or unwind
 metadata, or hosted evidence.
 
-The Windows host smoke additionally parses all five linked executable images without invoking the
-host loader as the parser. The product image plus both profiles of the layout and ABI probes must be
+The Windows host smoke additionally parses all seven linked executable images without invoking the
+host loader as the parser. The product image plus both profiles of the layout, ABI, and unwind probes must be
 bounded AMD64 PE32+ large-address-aware non-DLL console images with aligned headers and sections, a
 readable executable `.text` section, and an entry point inside executable code. Import and exception
 directory presence is recorded but their payloads are not interpreted. This is executable-image
@@ -219,7 +219,7 @@ MSVC `.obj` as raw AMD64 COFF. It rejects optional PE headers and linked-image f
 bounded raw and relocation ranges, readable executable `.text` or `.text$...` code, valid
 relocation symbol indexes, and named symbols; and permits storage-free uninitialized `.bss` only
 when its section characteristic says so. This covers every `build-host`, `run-host`, layout-probe,
-and ABI-probe compilation in the local smoke. It still does not define exact exported/imported
+ABI-probe, and unwind-probe compilation in the local smoke. It still does not define exact exported/imported
 symbols, COMDAT selection, permitted relocation types, `.pdata`/`.xdata` content, or a hosted
 object-fixture receipt, so `pe-coff-object-fixtures` remains missing.
 
@@ -229,8 +229,17 @@ maps every function range to executable code, and maps every DWORD-aligned unwin
 file-backed data. Version 1 prolog operations are checked for slot counts and descending code
 offsets. Local MSVC 14.51 also emits version 2 records, so bounded short/long epilog descriptors and
 spare slots are admitted structurally and reported separately. Minimum exception-handler and chained
-tails are checked. Version-2 epilog offset meaning, language-specific handler payloads, recursive
-chain equivalence, runtime unwinder behavior, object-level unwind relocations, and hosted fixtures
+tails are checked.
+
+The native unwind probe adds a separate semantic layer above that parser. Local x64 MSVC compiles
+the catcher, stack-owning termination frame, and exception raiser separately at low and optimized
+profiles. `RaiseException` carries two checked application values into an outer `__except` filter;
+the filter walks the captured `CONTEXT` with `RtlLookupFunctionEntry` and `RtlVirtualUnwind` and
+requires the raiser, termination frame, and catcher in order. Selecting the handler must then run
+the intervening `__finally` exactly once with `AbnormalTermination()` true. The probe is closed C
+target evidence and does not add source exceptions or unwind successors to Fairy C. Version-2
+epilog offset meaning, language-specific handler payload parsing, recursive chain equivalence,
+source-level Fairy or foreign-frame crossings, object-level unwind relocations, and hosted fixtures
 remain absent; `windows-x64-unwind-fixtures` therefore remains missing.
 
 This executable description is target data, not conformance evidence. Its evidence block names the
@@ -244,8 +253,8 @@ It lists the still-incomplete LLP64 layout-probe evidence, complete bidirectiona
 independently inspected Microsoft x64 crossings,
 PE/COFF object and unwind fixtures, runtime, standard library, hosted
 Windows receipt, target C emission profile, toolchain baseline, and provisioning gates. The local
-eight-case layout probe and twelve-case same-MSVC C crossing are deliberately insufficient to clear
-those markers.
+eight-case layout probe, twelve-case same-MSVC C crossing, and three-case native unwind probe are
+deliberately insufficient to clear those markers.
 
 ## `ToolchainSpec`
 
@@ -271,12 +280,15 @@ The planned transport matrix uses Clang as the primary compiler and GCC as an in
 
 ## Later profiles
 
-`x86_64-linux-musl` needs a separate libc, startup, sysroot, dynamic-loader, and static-distribution profile even though its CPU ABI is SysV-derived. The declared `x86_64-windows-msvc` TargetSpec still needs complete executable LLP64 layout coverage plus a hosted receipt, independent or register-inspected four-slot call evidence, source-level Fairy crossings, versioned exact COFF symbol/COMDAT/relocation fixtures, semantic and runtime-walk unwind fixtures, UCRT/VCRuntime, and debug fixtures before any maturity promotion.
+`x86_64-linux-musl` needs a separate libc, startup, sysroot, dynamic-loader, and static-distribution profile even though its CPU ABI is SysV-derived. The declared `x86_64-windows-msvc` TargetSpec still needs complete executable LLP64 layout coverage plus a hosted receipt, independent or register-inspected four-slot call evidence, source-level Fairy crossings, versioned exact COFF symbol/COMDAT/relocation fixtures, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, UCRT/VCRuntime, and debug fixtures before any maturity promotion.
 
 ## External references
 
 - x86-64 psABI project: <https://gitlab.com/x86-psABIs/x86-64-ABI>
 - Microsoft x64 calling convention: <https://learn.microsoft.com/en-us/cpp/build/x64-calling-convention?view=msvc-170>
+- Microsoft `RaiseException`: <https://learn.microsoft.com/en-us/windows/win32/api/errhandlingapi/nf-errhandlingapi-raiseexception>
+- Microsoft `RtlVirtualUnwind`: <https://learn.microsoft.com/en-us/windows/win32/api/winnt/nf-winnt-rtlvirtualunwind>
+- Microsoft structured exception handler syntax: <https://learn.microsoft.com/en-us/windows/win32/debug/handler-syntax>
 - musl reference manual: <https://musl.libc.org/doc/1.0.0/manual.txt>
 
 These sources constrain target profiles; they do not define Fairy C source semantics.
