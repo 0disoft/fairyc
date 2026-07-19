@@ -704,6 +704,26 @@ func TestAnalyzeTypesRawPointerAndTargetScalarForeignCall(t *testing.T) {
 	}
 }
 
+func TestAnalyzeTypesRawVoidPointerForeignCall(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\nunsafe extern C fn foreign_probe(input: *void, output: *mut void) -> u32;\nfn main() -> i32 { if unsafe { foreign_probe(null, null) } == 0 { 0 } else { 1 } }\n",
+	})
+	assertCleanTypeResult(t, result)
+	foreign := result.HIR.Modules[0].ForeignFunctions[0]
+	wantParameters := []hir.Type{
+		hir.RawPointer(hir.TypeVoid, false),
+		hir.RawPointer(hir.TypeVoid, true),
+	}
+	actualParameters := make([]hir.Type, len(foreign.Parameters))
+	for index := range foreign.Parameters {
+		actualParameters[index] = foreign.Parameters[index].Type
+	}
+	if foreign.ResultType != hir.TypeU32 || !slices.Equal(actualParameters, wantParameters) {
+		t.Fatalf("foreign signature = %+v", foreign)
+	}
+}
+
 func TestAnalyzeRejectsForeignCallOutsideUnsafeBoundary(t *testing.T) {
 	t.Parallel()
 	text := "module main;\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { add_one(41) }\n"

@@ -286,7 +286,9 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	for _, structure := range structTypes {
 		if structure.definition.ReprC {
 			value.features["repr-c-struct"] = struct{}{}
-			break
+			for _, field := range structure.definition.Fields {
+				value.recordCScalarFeature(field.Type)
+			}
 		}
 	}
 	if len(resourceTypes) != 0 {
@@ -416,7 +418,7 @@ func prepareStructTypes(definitions []mir.StructType, engine *layout.Engine) ([]
 			if definition.ReprC && !validCABIIdentifier(field.Name) {
 				return nil, nil, CapabilityError{Feature: "repr(C) struct " + strconv.Quote(definition.Name) + " field name " + strconv.Quote(field.Name)}
 			}
-			fieldType, err := structFieldLayoutType(field.Type)
+			fieldType, err := structFieldLayoutType(field.Type, definition.ReprC)
 			if err != nil {
 				return nil, nil, CapabilityError{Feature: "struct type " + strconv.Quote(string(definition.Type)) + " field " + strconv.Quote(field.Name) + " of type " + strconv.Quote(string(field.Type))}
 			}
@@ -472,12 +474,15 @@ func prepareEnumTypes(definitions []mir.EnumType) ([]enumCType, map[hir.Type]int
 	return result, byType, nil
 }
 
-func structFieldLayoutType(value hir.Type) (layout.Type, error) {
+func structFieldLayoutType(value hir.Type, reprC bool) (layout.Type, error) {
 	value = canonicalCValueType(value)
 	switch value {
 	case hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
 		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(value)}, nil
 	default:
+		if transport, found := cScalarTransportForType(value); found && reprC {
+			return layout.Type{Kind: layout.KindCScalar, Name: transport.targetName}, nil
+		}
 		if _, _, pointer := hir.RawPointerElement(value); pointer {
 			return layout.Type{Kind: layout.KindPointer}, nil
 		}
@@ -716,6 +721,8 @@ func (e *emitter) foreignCType(value hir.Type, result bool) (string, error) {
 
 func (e *emitter) foreignPointerElementCType(value hir.Type) (string, error) {
 	switch value {
+	case hir.TypeVoid:
+		return "void", nil
 	case hir.TypeU8:
 		return "uint8_t", nil
 	case hir.TypeI32:
@@ -774,8 +781,10 @@ func validExternalCIdentifier(value string) bool {
 }
 
 var admittedStandardLibrarySymbols = map[string]struct{}{
-	"fy_std_text_utf8_valid_v0":    {},
-	"fy_std_text_validate_utf8_v0": {},
+	"fy_std_system_heap_allocate_v0":   {},
+	"fy_std_system_heap_deallocate_v0": {},
+	"fy_std_text_utf8_valid_v0":        {},
+	"fy_std_text_validate_utf8_v0":     {},
 }
 
 var generatedCNames = map[string]struct{}{

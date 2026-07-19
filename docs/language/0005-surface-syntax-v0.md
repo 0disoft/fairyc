@@ -58,10 +58,13 @@ unsafe extern C fn(...) -> T
 The current executable C-scalar source slice recognizes all sixteen C scalars declared by the
 selected TargetSpec, preserves every one as an exact identity distinct from coincidentally sized
 Fairy scalars, and permits them only as transported foreign-call results, locals, and arguments.
-Their literals, operators, comparisons, casts, raw pointers, and aggregate fields remain deferred.
+Their literals, operators, comparisons, casts, and raw pointers remain deferred. Exact C-scalar
+fields are admitted only in the current nonempty flat `@repr(C)` struct slice.
 `c::size_t` uses the ISO C `<stddef.h>` typedef; `c::ssize_t` is available only for the current
 `x86_64-linux-gnu` POSIX.1-2008 profile through `<sys/types.h>`. Plain `c::char` follows the selected
 target's signed `char` fact rather than inheriting either `c::schar` or `c::uchar`.
+Raw `*void` and `*mut void` are opaque C-interoperability pointers; safe borrows to `void`,
+dereference, arithmetic, integer conversion, and pointee-changing casts remain unavailable.
 
 ## Structs, resources, and enums
 

@@ -68,7 +68,9 @@ later evidence layers.
 `internal/cstdlib` is a separate target-standard-library transport boundary. Its first provisional
 SystemHeap helper normalizes empty allocation, rejects unsupported alignment, and preserves the old
 block when copy-and-release resize fails. A closed C probe reaches the existing Linux compiler
-matrix, but the helper is not linked into product builds or exposed to source yet. This does not
+matrix. One internal generated Fairy transport now calls the real allocate/deallocate symbols with
+an exact C-layout block, but the helper is not linked into product builds or exposed as a public
+standard-library API. This does not
 broaden the thin runtime or complete the standard library.
 
 The implemented slice emits deterministic C11 for verified scalar-payload MIR, including

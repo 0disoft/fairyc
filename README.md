@@ -75,10 +75,11 @@ crossings per fixture; none of those native executions has been observed on this
 A provisional `x86_64-linux-gnu` SystemHeap implementation now lives in the target standard-library
 boundary rather than the thin runtime. It normalizes empty allocation, admits current fundamental
 alignments, preserves bytes across copy-and-release growth or shrink, and leaves the old block
-unchanged when validation or allocation fails. A closed Clang/GCC low/optimized C probe is wired
-for four executions, but it is not source-callable, not product-linked, and has no observed hosted
-receipt. Arena, text ownership, and Linux File now have their own C slices below, but they remain
-source-disconnected.
+unchanged when validation or allocation fails. A closed C-only probe and an internal generated FY
+caller using the exact `void *`/`size_t` block each have four configured Clang/GCC low/optimized
+executions. Neither has an observed hosted receipt, and the helper is not product-linked or exposed
+through a public `std::alloc` API. Arena, text ownership, and Linux File now have their own C slices
+below, but they remain source-disconnected.
 A second provisional slice implements Buffer-owned initialized bytes, failure-atomic reserve,
 relocating self-overlap append, length-overflow rollback, zeroed growth, truncate, clear, and drop.
 Its four-way native C probe is configured but still unobserved and not source-callable; the public
@@ -112,7 +113,8 @@ safe-borrow-to-raw-pointer cast now lowers only for a direct local place inside 
 flat nonempty `@repr(C)` record to cross by pointer and receive standard-library output.
 Those C scalar types remain distinct from coincidentally represented Fairy scalars, emit their exact
 C spellings with target and provider assertions, and currently have no source literal, operator,
-cast, raw-pointer, interpreter, or aggregate-field support. Raw
+cast, raw-pointer, or interpreter support. Flat nonempty `@repr(C)` records may use exact C-scalar
+fields and opaque `void` pointers. Raw
 dereference or arithmetic, arbitrary casts, callbacks, nested or
 by-value aggregates, exports, and public standard-library wrappers remain unimplemented.
 A deterministic native C11 plus explicit POSIX-typedef probe now translates the eleven valid layout cases into private numeric

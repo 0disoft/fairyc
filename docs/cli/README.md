@@ -52,7 +52,8 @@ code. The native fixture lane's `drop-trace-v0` observer profile is not availabl
 command and never appears in its output.
 The admitted foreign declaration form currently supports `i32`, `u8`, `u32`, `usize`, all sixteen
 exact transport-only TargetSpec C scalars, raw pointers to
-the fixed-width Fairy scalar set, and raw pointers to admitted flat `@repr(C)` structs. It uses its source
+the fixed-width Fairy scalar set or opaque `void`, and raw pointers to admitted flat `@repr(C)`
+structs whose fields may include the exact C scalars. It uses its source
 identifier as the C symbol by default or accepts one nonempty `@link_name("symbol")`, and requires
 an explicit unsafe boundary. Raw pointers can be null,
 returned by another admitted foreign call, or produced by an exact direct-local borrow-to-pointer

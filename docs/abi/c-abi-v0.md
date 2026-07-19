@@ -48,8 +48,8 @@ unsafe extern C fn
 
 The current executable source subset implements `unsafe extern C fn` imports with an optional
 single nonempty `@link_name("symbol")`, using
-`i32`, `u8`, `u32`, `usize`, all sixteen distinct transport-only TargetSpec C scalars, raw pointers to the fixed-width
-Fairy scalar set, and raw pointers to an
+`i32`, `u8`, `u32`, `usize`, all sixteen distinct transport-only TargetSpec C scalars, raw pointers to
+the fixed-width Fairy scalar set or opaque `void`, and raw pointers to an
 admitted nonempty `@repr(C)` struct. AST, typed HIR, MIR, unsafe provenance, deterministic C
 source/link identity, prototype emission, typed null, separate-object cross-compiler linking, and process-status
 observation are wired. Source struct construction and field reads reach verified MIR, the MIR
@@ -82,7 +82,7 @@ Generated C asserts target-derived size and alignment for every used C scalar an
 signed and unsigned integer families. Target-specific `c::ssize_t` also defines
 `_POSIX_C_SOURCE 200809L`. Their only current value path is foreign return to typed local to matching
 foreign argument; they have no source literal, arithmetic, comparison, cast, interpreter behavior,
-or aggregate-field support. Raw pointers to C scalars also remain outside the admitted backend
+or general aggregate-field support. Raw pointers to C scalars also remain outside the admitted backend
 slice. This is not implementation of exports, callbacks, nested/array/enum `@repr(C)` fields, or
 by-value aggregate calls and returns. The interpreter remains fail-closed on every foreign call.
 
@@ -91,11 +91,12 @@ by-value aggregate calls and returns. The interpreter remains fail-closed on eve
 `@repr(C)` permits fixed-width integers, `c.*` scalars, `f32`, `f64`, raw pointers, fixed arrays, nested `@repr(C)` structs, and an explicitly based C enum. It rejects resources, safe borrows, slices, `str`, `CStr`, `Option`, `Result`, `Region`, `String`, `Buffer`, payload enums, empty structs, packed or custom alignment, unions, bit fields, long double, atomics, and vector types.
 
 The implemented source/backend slice is deliberately smaller than that language contract: it
-accepts only nonempty, flat structs over `u8`, `i32`, `u32`, `usize`, and raw pointers. The admitted
-source C scalars
-do not broaden that aggregate slice. Other
-contracted field families remain fail-closed until their source typing, layout, ABI, and native
-crossing tests are connected together.
+accepts only nonempty, flat structs over `u8`, `i32`, `u32`, `usize`, all sixteen exact TargetSpec C
+scalars, and admitted raw pointers including opaque `void`. C-scalar fields are accepted only in
+`@repr(C)` structs, use the same exact transport table and provider assertions as foreign scalar
+signatures, and have one source-to-real-SystemHeap-C mutation crossing. Other contracted field
+families remain fail-closed until their source typing, layout, ABI, and native crossing tests are
+connected together.
 
 C enums specify their underlying `c.*` integer. The backend may transport them as a fixed integer type plus constants rather than relying on a host compiler's default enum size.
 

@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v20"
+	reportSchemaVersion = "fairyc.native-c-report/v21"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -303,6 +303,83 @@ fn main() -> i32 {
 }
 `
 
+const systemHeapSourceCallSmokeSource = `module main;
+@repr(C)
+struct fy_std_system_heap_block_v0 {
+    data: *mut void;
+    size: c::size_t;
+    alignment: c::size_t;
+}
+
+@link_name("fairyc_fixture_zero_size_t")
+unsafe extern C fn zero_size_t() -> c::size_t;
+@link_name("fairyc_fixture_eight_size_t")
+unsafe extern C fn eight_size_t() -> c::size_t;
+@link_name("fy_std_system_heap_allocate_v0")
+unsafe extern C fn allocate(
+    size: c::size_t,
+    alignment: c::size_t,
+    output: *mut fy_std_system_heap_block_v0
+) -> u32;
+@link_name("fairyc_fixture_block_is_allocated")
+unsafe extern C fn block_is_allocated(block: *fy_std_system_heap_block_v0) -> u32;
+@link_name("fy_std_system_heap_deallocate_v0")
+unsafe extern C fn deallocate(block: *mut fy_std_system_heap_block_v0) -> u32;
+@link_name("fairyc_fixture_block_is_empty")
+unsafe extern C fn block_is_empty(block: *fy_std_system_heap_block_v0) -> u32;
+
+fn main() -> i32 {
+    let zero: c::size_t = unsafe { zero_size_t() };
+    var block: fy_std_system_heap_block_v0 = fy_std_system_heap_block_v0 {
+        data: null,
+        size: zero,
+        alignment: zero,
+    };
+    let size: c::size_t = unsafe { eight_size_t() };
+    let alignment: c::size_t = unsafe { eight_size_t() };
+    let allocated: u32 = unsafe {
+        allocate(size, alignment, &mut block as *mut fy_std_system_heap_block_v0)
+    };
+    let observed: u32 = unsafe {
+        block_is_allocated(&block as *fy_std_system_heap_block_v0)
+    };
+    let deallocated: u32 = unsafe {
+        deallocate(&mut block as *mut fy_std_system_heap_block_v0)
+    };
+    let cleared: u32 = unsafe {
+        block_is_empty(&block as *fy_std_system_heap_block_v0)
+    };
+    if allocated == 0 && observed == 1 && deallocated == 0 && cleared == 1 { 42 } else { 1 }
+}
+`
+
+const systemHeapSourceCallBridge = `
+size_t fairyc_fixture_zero_size_t(void) { return (size_t)0; }
+size_t fairyc_fixture_eight_size_t(void) { return (size_t)8; }
+
+uint32_t fairyc_fixture_block_is_allocated(const struct fy_std_system_heap_block_v0 *block) {
+    return block != NULL && block->data != NULL && block->size == (size_t)8 &&
+           block->alignment == (size_t)8 ? UINT32_C(1) : UINT32_C(0);
+}
+
+uint32_t fairyc_fixture_block_is_empty(const struct fy_std_system_heap_block_v0 *block) {
+    return block != NULL && block->data == NULL && block->size == (size_t)0 &&
+           block->alignment == (size_t)0 ? UINT32_C(1) : UINT32_C(0);
+}
+`
+
+var systemHeapSourceCallExpectedCFragments = []string{
+	"_Static_assert(sizeof(size_t) == UINT64_C(8), \"fairyc target c.size_t size\");",
+	"struct fy_std_system_heap_block_v0 {",
+	"void * data;",
+	"size_t size;",
+	"size_t alignment;",
+	"extern uint32_t fy_std_system_heap_allocate_v0(size_t fy_a_0, size_t fy_a_1, struct fy_std_system_heap_block_v0 * fy_a_2);",
+	"extern uint32_t fairyc_fixture_block_is_allocated(const struct fy_std_system_heap_block_v0 * fy_a_0);",
+	"extern uint32_t fy_std_system_heap_deallocate_v0(struct fy_std_system_heap_block_v0 * fy_a_0);",
+	" = &fy_l_",
+}
+
 // Compiler records the bounded toolchain fingerprint used by one native run.
 type Compiler struct {
 	Name    string `json:"name"`
@@ -327,6 +404,7 @@ type Report struct {
 	ABIDirections                      []string   `json:"abiDirections"`
 	ABIProbeExecutions                 int        `json:"abiProbeExecutions"`
 	SystemHeapExecutions               int        `json:"systemHeapExecutions"`
+	SystemHeapSourceCallExecutions     int        `json:"systemHeapSourceCallExecutions"`
 	BufferExecutions                   int        `json:"bufferExecutions"`
 	ArenaExecutions                    int        `json:"arenaExecutions"`
 	TextViewExecutions                 int        `json:"textViewExecutions"`
@@ -450,6 +528,11 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.SystemHeapExecutions = systemHeapExecutions
+	systemHeapSourceCallExecutions, err := runSystemHeapSourceCallProbe(temporaryRoot, toolchains, systemHeapSource)
+	if err != nil {
+		return Report{}, err
+	}
+	report.SystemHeapSourceCallExecutions = systemHeapSourceCallExecutions
 	storageSource, err := cstdlib.StorageSource()
 	if err != nil {
 		return Report{}, fmt.Errorf("load Buffer storage implementation: %w", err)
@@ -617,6 +700,21 @@ func Run(manifestPath string) (Report, error) {
 	}
 	report.BuildSmokeExecutions = buildSmoke
 	return report, nil
+}
+
+func runSystemHeapSourceCallProbe(temporaryRoot string, toolchains []cdriver.Toolchain, systemHeapSource string) (int, error) {
+	if systemHeapSource == "" {
+		return 0, fmt.Errorf("SystemHeap source-call probe requires a non-empty implementation")
+	}
+	return runForeignSourceProbe(
+		temporaryRoot,
+		toolchains,
+		"system-heap-source-call",
+		systemHeapSourceCallSmokeSource,
+		systemHeapSource+systemHeapSourceCallBridge,
+		42,
+		systemHeapSourceCallExpectedCFragments,
+	)
 }
 
 func runForeignCallProbe(temporaryRoot string, toolchains []cdriver.Toolchain) (int, error) {

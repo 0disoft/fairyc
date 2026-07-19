@@ -33,7 +33,8 @@ rounding, and `_Bool` normalization rules that this transport slice does not nee
    have no signedness assertion. Plain `char` uses the selected target's signed `c.char` fact.
 5. This remains transport-only. Fairy literals, arithmetic, comparison, casts, promotions,
    interpreter host bindings, raw pointers to C scalars, aggregate fields, and by-value aggregate
-   ABI do not become available. The native floating values are exactly representable finite values;
+   ABI do not become available in this slice. ADR 0057 later admits exact C-scalar fields only in
+   flat `@repr(C)` records. The native floating values are exactly representable finite values;
    the probe makes no NaN, infinity, signed-zero, rounding, or exception-mode claim.
 6. One semantic family fixture covers the twelve newly opened identities, raising the semantic v0
    total to twenty-three. Existing individual `c::int`, `c::long`, `c::size_t`, and `c::ssize_t`

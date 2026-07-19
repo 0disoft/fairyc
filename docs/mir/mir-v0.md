@@ -113,6 +113,11 @@ fixed-width, pointer-width, boolean, or floating immediates, and the verifier's 
 foreign-signature rule therefore treats mismatched identities as incompatible. Full call-operand
 type checking remains a backend responsibility in this prototype.
 
+Flat `@repr(C)` struct definitions may now retain any of those exact C-scalar identities as fields.
+Their struct construction and field-read operations keep the exact field types; target layout and C
+spelling remain backend-owned. Raw `*void` and `*mut void` retain opaque pointer identity and carry
+no dereference or conversion operation.
+
 Foreign declarations preserve separate source and external link identities. Declarations mapped to
 one link identity must have the same ABI, result type, and ordered parameter types or verification
 fails as `V1001`. Foreign calls cannot expose a safe reference in their raw MIR signature. Unknown

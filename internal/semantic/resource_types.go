@@ -331,7 +331,12 @@ func (a *analyzer) canonicalTypeText(module *moduleScope, text string) (hir.Type
 		if mutable {
 			remainder = strings.TrimSpace(remainder[len("mut"):])
 		}
-		element, ok := a.canonicalTypeText(module, remainder)
+		element, ok := hir.TypeInvalid, false
+		if remainder == "void" {
+			element, ok = hir.TypeVoid, true
+		} else {
+			element, ok = a.canonicalTypeText(module, remainder)
+		}
 		if !ok {
 			return hir.TypeInvalid, false
 		}

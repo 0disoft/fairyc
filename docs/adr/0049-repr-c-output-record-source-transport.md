@@ -17,7 +17,8 @@ undefined-behavior surface before provenance, alignment, and alias rules exist.
 ## Decision
 
 1. Item attributes are preserved through AST and typed HIR. The current executable `@repr(C)`
-   subset is a nonempty flat inert struct over `u8`, `i32`, `u32`, `usize`, and raw pointers.
+   subset in this slice is a nonempty flat inert struct over `u8`, `i32`, `u32`, `usize`, and raw
+   pointers. ADR 0057 later adds exact TargetSpec C-scalar fields and opaque `void` pointers.
 2. MIR owns a separate inert struct definition and `struct-construct` operation. It never borrows
    resource cleanup semantics. Field order and source names remain explicit.
 3. The only source-to-raw-address cast is an exact direct-local conversion from `&T` to `*T`,

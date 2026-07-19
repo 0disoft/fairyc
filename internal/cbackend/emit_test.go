@@ -514,6 +514,53 @@ fn main() -> i32 {
 	}
 }
 
+func TestEmitReprCStructPreservesVoidPointerAndExactCScalarFields(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+@repr(C)
+struct fy_std_system_heap_block_v0 {
+    data: *mut void;
+    size: c::size_t;
+    alignment: c::size_t;
+}
+fn main() -> i32 { 0 }
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, required := range []string{
+		"_Static_assert(sizeof(size_t) == UINT64_C(8), \"fairyc target c.size_t size\");",
+		"struct fy_std_system_heap_block_v0 {",
+		"void * data;",
+		"size_t size;",
+		"size_t alignment;",
+		"_Static_assert(sizeof(struct fy_std_system_heap_block_v0) == UINT64_C(24)",
+		"offsetof(struct fy_std_system_heap_block_v0, data) == UINT64_C(0)",
+		"offsetof(struct fy_std_system_heap_block_v0, size) == UINT64_C(8)",
+		"offsetof(struct fy_std_system_heap_block_v0, alignment) == UINT64_C(16)",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+	for _, feature := range []string{"c-size-t", "inert-struct", "repr-c-struct"} {
+		if !slices.Contains(unit.Features, feature) {
+			t.Fatalf("features = %v, want %q", unit.Features, feature)
+		}
+	}
+}
+
+func TestEmitKeepsCScalarFieldsInsideReprCStructs(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, "module main;\nstruct Private { size: c::size_t; }\nfn main() -> i32 { 0 }\n")
+	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	var capability cbackend.CapabilityError
+	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "struct type \"main::Private\" field \"size\" of type \"c::size_t\"") {
+		t.Fatalf("Emit() error = %v", err)
+	}
+}
+
 func TestEmitRestrictedEnumConstructionPayloadAndSwitch(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

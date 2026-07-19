@@ -150,7 +150,9 @@ C is a boundary contract rather than the default internal representation.
 - Platform-dependent C types use a distinct `c.*` namespace.
 - The executable source C-scalar slice transports all sixteen exact TargetSpec C scalars. They are
   distinct from coincidentally represented Fairy scalars; C-scalar literals, operators,
-  conversions, raw pointers, and aggregate fields remain deferred.
+  conversions, and raw pointers remain deferred. Exact C-scalar fields are admitted only in flat
+  nonempty `@repr(C)` structs. Opaque `*void` and `*mut void` are admitted without dereference or
+  conversion semantics.
 - Foreign calls and generated raw bindings are unsafe by default and use raw pointers rather than safe references.
 - Safe wrappers own length, nullability, lifetime, error, and ownership conversion.
 - Stage 0 callbacks are non-capturing, synchronous, same-thread raw `unsafe extern C` function pointers plus explicit user data.
@@ -185,7 +187,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - Inert struct declarations retain canonical identity, declaration-ordered fields, and `@repr(C)`
   classification through AST, typed HIR, verified MIR, the executable interpreter subset, and the
   constrained C backend. The current C-layout implementation is nonempty and flat over `u8`,
-  `i32`, `u32`, `usize`, and raw pointers; broader contracted field families remain fail-closed.
+  `i32`, `u32`, `usize`, all sixteen exact TargetSpec C scalars, and admitted raw pointers including
+  opaque `void`; broader contracted field families remain fail-closed.
 - The executable raw-address slice accepts only an exact direct-local `&T -> *T`, `&mut T -> *T`,
   or `&mut T -> *mut T` cast inside `unsafe`. AST keeps the target type separate, typed HIR keeps
   unsafe scope, MIR verifies pointee/mutability/provenance, generated C emits `&local`, and the
@@ -242,8 +245,9 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   profiles. It separately links generated FY callers to hand-written individual `c::int`,
   negative-preserving `c::long`, `c::size_t`, and negative-preserving `c::ssize_t`
   producer/consumer C units plus one twelve-type C-scalar family unit, and to the actual text-view C
-  unit for both the empty predicate and `@repr(C)` output-record mutation paths; report v20 records
-  those counters.
+  unit for both the empty predicate and `@repr(C)` output-record mutation paths. An exact generated
+  `void *`/`size_t` block additionally crosses the real SystemHeap allocate and deallocate helpers;
+  report v21 records those counters.
   Its closed
   `drop-trace-v0` emission profile assigns source/type/span identities to dense site IDs and compares
   exact four-byte native records with the MIR interpreter trace. This instrumentation is absent from

@@ -105,7 +105,9 @@ metadata for the negative-preserving POSIX.1-2008 crossing. V19 adds
 `foreignCLongCallExecutions` for the exact negative C `long` crossing without changing TargetSpec
 or layout-fixture shape. V20 adds `foreignCScalarFamilyCallExecutions` for one generated Fairy caller
 and one hand-written C companion crossing the remaining twelve exact TargetSpec C scalars in both
-compiler directions and profiles. The runner emits one exact version and does not pretend the
+compiler directions and profiles. V21 adds `systemHeapSourceCallExecutions` for the generated Fairy
+caller crossing the exact `void *`/`size_t` block into the real SystemHeap allocate and deallocate
+helpers in both compiler directions and profiles. The runner emits one exact version and does not pretend the
 report shapes are interchangeable.
 
 ## Runtime and standard library

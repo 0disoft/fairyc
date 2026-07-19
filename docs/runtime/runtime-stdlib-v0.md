@@ -77,10 +77,13 @@ covers all currently admitted scalar layouts; over-aligned requests fail closed.
 still validate alignment but never call `malloc`. Growth and shrink use allocate-copy-release rather
 than raw `realloc`, so validation and allocation failures leave the original block unchanged.
 
-This helper is not yet part of generated C, `experimental build`, or a source-visible `std::alloc`
-module. Its closed Linux probe checks empty normalization, alignment, prefix preservation, failure
-rollback, malformed-block rejection, shrink, and release under Clang/GCC at low and optimized profiles. It does not
-deterministically force host OOM, and no hosted success receipt has been observed.
+This helper is not yet part of `experimental build` or a source-visible `std::alloc` module. One
+internal generated Fairy caller now declares the exact `void *`, `size_t`, `size_t` block, calls the
+real allocate and deallocate symbols, and observes allocation plus normalized release through a
+bounded C test observer. Its independent closed Linux probe still checks empty normalization,
+alignment, prefix preservation, failure rollback, malformed-block rejection, shrink, and release
+under Clang/GCC at low and optimized profiles. Neither path deterministically forces host OOM, and
+no hosted success receipt has been observed.
 
 ## `Buffer`
 

@@ -36,9 +36,10 @@ program can already construct `SystemHeap` or call its operations.
    executes it with Clang and GCC at low and optimized profiles.
 7. `fairyc.native-c-report/v6` adds `systemHeapExecutions`. A successful configured run records four
    executions. This receipt remains unobserved until the hosted Linux job runs.
-8. The helper is not linked into `experimental build`, exposed in generated C, or callable from
-   Fairy C source yet. `complete-runtime` and `complete-standard-library` therefore remain missing
-   target evidence.
+8. The helper is not linked into `experimental build`, exposed through a public standard-library
+   API, or callable from Fairy C source in this slice. ADR 0057 later adds one internal generated
+   Fairy transport probe without creating that public API. `complete-runtime` and
+   `complete-standard-library` therefore remain missing target evidence.
 
 ## Rationale
 

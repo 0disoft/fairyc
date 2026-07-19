@@ -33,7 +33,8 @@ signedness for signed and unsigned integer families. `ssize_t` selects `_POSIX_C
 before every header rather than silently relying on the host's default feature namespace. This
 slice deliberately creates no immediate C-scalar MIR operand: a foreign producer result local may
 be passed to a matching foreign consumer, while literals, operators, comparisons, casts,
-interpreter execution, raw pointers to C scalars, and aggregate fields remain closed.
+interpreter execution, and raw pointers to C scalars remain closed. Exact C-scalar fields are
+accepted only in nonempty flat `@repr(C)` structs and share the same transport table and assertions.
 
 The emitter additionally accepts direct resource values only when every program-level definition is
 nonempty, every declaration-ordered field is exactly `i32`, and the verified user drop body is
@@ -130,9 +131,9 @@ forbids mutability strengthening, lowers to a verified MIR raw-address operation
 `&local` without `restrict` or `noalias`. Pointer dereference, arithmetic, integer conversion, and
 arbitrary casts remain rejected.
 Source `@repr(C)` construction, field reads, exact public names, layout assertions, pointer
-prototype spelling, and direct-local address passing are implemented, but by-value aggregate ABI,
-nested enum or built-in-tag payloads, array fields, C-scalar value operations, C-scalar aggregate fields,
-and callbacks remain outside this slice.
+prototype spelling, direct-local address passing, opaque `void` pointers, and exact C-scalar fields
+are implemented, but by-value aggregate ABI, nested enum or built-in-tag payloads, array fields,
+C-scalar value operations, non-`@repr(C)` C-scalar fields, and callbacks remain outside this slice.
 
 The MIR interpreter deliberately returns a `foreign-call` capability error instead of guessing a
 host binding. A closed native fixture compiles the generated Fairy caller and a hand-written C
@@ -166,10 +167,13 @@ crossings use the existing separate-object driver and are counted separately as
 `foreignCallExecutions`, `foreignCIntCallExecutions`, `foreignCLongCallExecutions`,
 `foreignCSizeTCallExecutions`, `foreignCSSizeTCallExecutions`,
 `foreignCScalarFamilyCallExecutions`, and `foreignPointerCallExecutions` in
-`fairyc.native-c-report/v20`; they do not expand the eighteen interpreter-owned differential cases.
+`fairyc.native-c-report/v21`; they do not expand the eighteen interpreter-owned differential cases.
 Every C-scalar probe uses hand-written C producers and consumers so each value crosses a generated
 typed local without requiring a Fairy C literal. The family probe uses exactly representable finite
 floating values and makes no NaN, infinity, signed-zero, rounding, or floating-environment claim.
+The same report separately records four `systemHeapSourceCallExecutions`: an exact generated
+`void *`/`size_t` block crosses into the real SystemHeap C unit, is mutated by allocation, and is
+normalized by deallocation. This is an internal transport probe, not a public allocator API.
 
 `internal/cdriver` and `internal/cruntime` are the one implementation path for both that matrix and
 the experimental constrained-C executable builder. The driver fixes the C dialect, warning policy,

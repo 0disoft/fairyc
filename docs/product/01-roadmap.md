@@ -97,9 +97,11 @@ Clang/GCC crossings in both compiler directions and profiles; these are not yet 
 The first standard-library-owned C storage slice now implements provisional fallible `SystemHeap`
 allocation, copy-and-release resize, zero-size normalization, fundamental-alignment rejection, and
 failure rollback. A closed probe is configured for Clang/GCC at low and optimized profiles. It is
-not source-callable or linked into product builds yet, and its four native executions remain
-unobserved on this Windows host; the later Arena, text ownership, and Linux File C slices now exist
-but remain source-disconnected.
+not linked into product builds or exposed through a public `std::alloc` API. One internal generated
+Fairy caller now crosses its exact `void *`/`size_t` block into the real allocate and deallocate
+helpers for four additional configured native executions. All eight native SystemHeap executions
+remain unobserved on this Windows host; the later Arena, text ownership, and Linux File C slices now
+exist but remain source-disconnected.
 The next storage slice now adds provisional Buffer construction, initialized-prefix-only reserve,
 overlap-safe append across relocation, overflow rollback, zeroed growth, truncate, clear, and drop.
 Its four native probe executions are likewise configured but unobserved, and source programs still
@@ -122,14 +124,16 @@ close including forced close failure. Its four native runs remain configured but
 source-visible File effects and error resources remain missing.
 
 The source FFI slice admits `unsafe extern C fn` declarations using `i32`, `u8`, `u32`, `usize`, all
-sixteen exact transport-only TargetSpec C scalars, raw pointers to the bounded Fairy scalar set, and
-raw pointers to flat nonempty `@repr(C)` records. A single
+sixteen exact transport-only TargetSpec C scalars, raw pointers to the bounded Fairy scalar set or
+opaque `void`, and raw pointers to flat nonempty `@repr(C)` records whose fields may include the
+exact C scalars. A single
 `@link_name("symbol")` may separate the Fairy lookup name from the external C symbol. Unsafe call,
 link identity, and raw-address provenance survive AST, typed HIR, and MIR verification; the C
 backend emits unannotated prototypes, exact record tags/fields/layout assertions, and `&local` only
 for an exact unsafe borrow-to-pointer cast. The native lane plans four scalar, four typed-null
 pointer/target-scalar, four individual exact C-scalar, four remaining twelve-type C-scalar-family,
-four real UTF-8 validation, and four real text-view output-record crossings. The interpreter refuses
+four real SystemHeap block, four real UTF-8 validation, and four real text-view output-record
+crossings. The interpreter refuses
 raw addresses and foreign execution. Dereference, pointer arithmetic, arbitrary casts, callbacks,
 C-scalar value semantics, nested or by-value aggregates, exports, and public standard-library
 wrappers remain Phase 2 work. The internal empty-input text transports are real source-to-stdlib-C
