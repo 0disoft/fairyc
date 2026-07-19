@@ -276,6 +276,29 @@ func TestSourceForSymbolsRejectsUnknownStandardLibrarySymbol(t *testing.T) {
 	}
 }
 
+func TestWindowsMSVCSourceForSymbolsKeepsClosedPortableSlice(t *testing.T) {
+	t.Parallel()
+	source, err := WindowsMSVCSourceForSymbols([]string{"fy_std_text_utf8_valid_v0"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, required := range []string{"fy_std_text_utf8_valid_v0", "fy_std_text_validate_utf8_v0"} {
+		if !strings.Contains(source, required) {
+			t.Errorf("Windows source is missing %q", required)
+		}
+	}
+	for _, forbidden := range []string{"fy_std_system_heap_allocate_v0", "fy_std_linux_file_open_v0", "_POSIX_C_SOURCE"} {
+		if strings.Contains(source, forbidden) {
+			t.Errorf("Windows source unexpectedly contains %q", forbidden)
+		}
+	}
+	for _, symbol := range []string{"fairyc_external_helper", "fy_std_system_heap_allocate_v0"} {
+		if _, err := WindowsMSVCSourceForSymbols([]string{symbol}); err == nil {
+			t.Errorf("WindowsMSVCSourceForSymbols(%q) unexpectedly succeeded", symbol)
+		}
+	}
+}
+
 func TestSourceForSymbolsEmitsEachDependencyOnce(t *testing.T) {
 	t.Parallel()
 	source, err := SourceForSymbols([]string{

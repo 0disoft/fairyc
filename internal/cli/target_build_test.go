@@ -62,7 +62,23 @@ func TestExperimentalBuildTargetFailsClosedOutsideWindowsAMD64(t *testing.T) {
 	}
 }
 
-func TestExperimentalBuildTargetRejectsCalledForeignSymbolBeforeToolchainResolution(t *testing.T) {
+func TestWindowsTargetSupportSourceAdmitsOnlyProvenStandardLibraryCall(t *testing.T) {
+	t.Parallel()
+	source, err := windowsTargetSupportSource([]string{"fy_std_text_utf8_valid_v0"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, required := range []string{"fy_std_text_utf8_valid_v0", "fy_runtime_trap"} {
+		if !strings.Contains(source, required) {
+			t.Errorf("support source is missing %q", required)
+		}
+	}
+	if strings.Contains(source, "fy_std_system_heap_allocate_v0") || strings.Contains(source, "_POSIX_C_SOURCE") {
+		t.Fatal("support source widened beyond the proven Windows text-validation component")
+	}
+}
+
+func TestExperimentalBuildTargetRejectsUncontractedForeignSymbolBeforeToolchainResolution(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
 	writeTestSource(t, root, "main.fy", `module main;
@@ -75,7 +91,25 @@ fn main() -> i32 { unsafe { missing(0) } }
 		"--target", string(target.X8664WindowsMSVC),
 		"--profile", "low", "--output", "build/main.exe",
 	}, root)
-	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "called foreign symbols require a declared Windows companion-link contract") {
+	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "foreign symbol \"fairyc_missing\" has no closed x86_64-windows-msvc companion contract") {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
+func TestExperimentalBuildTargetRejectsUnprovenWindowsStandardLibrarySymbolBeforeToolchainResolution(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", `module main;
+@link_name("fy_std_system_heap_allocate_v0")
+unsafe extern C fn allocate(size: usize, alignment: usize, output: *void) -> u32;
+fn main() -> i32 { if unsafe { allocate(0, 1, null) } == 0 { 42 } else { 1 } }
+`)
+	code, stdout, stderr := runForTest([]string{
+		"experimental", "build-target", "main.fy",
+		"--target", string(target.X8664WindowsMSVC),
+		"--profile", "low", "--output", "build/main.exe",
+	}, root)
+	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "has no x86_64-windows-msvc source contract") {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
 	}
 }

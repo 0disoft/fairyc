@@ -68,8 +68,9 @@ An existing output is not replaced and no partial C translation unit is written 
 `build/`, then writes `built: <relative-path> (x86_64-windows-msvc, msvc <version>, <profile>)` to
 stdout. Invalid or unavailable targets use code `2`; source diagnostics use code `3`; an admitted
 source outside the provisional target subset uses code `2`; toolchain, compile, link, and artifact
-failures use code `6`. Called foreign symbols fail before toolchain resolution, and an existing
-output is never replaced.
+failures use code `6`. The exact admitted UTF-8 standard-library call is linked automatically;
+every other foreign or unproven standard-library symbol fails with code `2` before toolchain
+resolution. An existing output is never replaced.
 `experimental build-host` writes a successful PE only to the explicit ignored `.exe` path below
 `build/`, then writes `built: <relative-path> (windows/amd64 host-smoke, msvc <version>, <profile>)`
 to stdout. It uses code `6` for toolchain, compile, or artifact failures and never replaces an

@@ -46,6 +46,10 @@ var symbolComponents = map[string]Component{
 	"fy_std_linux_file_close_v0":       ComponentLinuxFile,
 }
 
+var windowsMSVCSymbolComponents = map[string]Component{
+	"fy_std_text_utf8_valid_v0": ComponentTextView,
+}
+
 var componentLinkOrder = []Component{
 	ComponentLinuxFile,
 	ComponentSystemHeap,
@@ -75,13 +79,39 @@ func ComponentsForSymbols(symbols []string) ([]Component, error) {
 		}
 		addComponentClosure(required, component)
 	}
+	return componentsInLinkOrder(required), nil
+}
+
+// WindowsMSVCComponentsForSymbols returns the closed standard-library subset
+// with current source-level x86_64-windows-msvc execution evidence. Unlike the
+// Linux product path, arbitrary foreign symbols are rejected before linking.
+func WindowsMSVCComponentsForSymbols(symbols []string) ([]Component, error) {
+	required := make(map[Component]struct{})
+	for _, symbol := range symbols {
+		component, found := windowsMSVCSymbolComponents[symbol]
+		if !found {
+			switch {
+			case strings.HasPrefix(symbol, "fy_std_") && Admitted(symbol):
+				return nil, fmt.Errorf("Stage 0 standard-library symbol %q has no x86_64-windows-msvc source contract", symbol)
+			case strings.HasPrefix(symbol, "fy_std_"):
+				return nil, fmt.Errorf("unrecognized Stage 0 standard-library symbol %q", symbol)
+			default:
+				return nil, fmt.Errorf("foreign symbol %q has no closed x86_64-windows-msvc companion contract", symbol)
+			}
+		}
+		addComponentClosure(required, component)
+	}
+	return componentsInLinkOrder(required), nil
+}
+
+func componentsInLinkOrder(required map[Component]struct{}) []Component {
 	components := make([]Component, 0, len(required))
 	for _, component := range componentLinkOrder {
 		if _, found := required[component]; found {
 			components = append(components, component)
 		}
 	}
-	return components, nil
+	return components
 }
 
 func addComponentClosure(required map[Component]struct{}, component Component) {

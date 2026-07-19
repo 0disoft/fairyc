@@ -84,6 +84,10 @@ func productSupportSource(foreignSymbols []string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("resolve Stage 0 standard-library source: %w", err)
 	}
+	return combineProductSupportSource(standardLibrarySource)
+}
+
+func combineProductSupportSource(standardLibrarySource string) (string, error) {
 	runtimeSource, err := cruntime.ScalarSource(productTrapExitBase)
 	if err != nil {
 		return "", err

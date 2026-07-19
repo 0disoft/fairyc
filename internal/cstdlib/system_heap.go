@@ -140,6 +140,20 @@ func SourceForSymbols(symbols []string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	return sourceForComponents(components)
+}
+
+// WindowsMSVCSourceForSymbols returns only standard-library C components with
+// current source-level x86_64-windows-msvc execution evidence.
+func WindowsMSVCSourceForSymbols(symbols []string) (string, error) {
+	components, err := cstdlibcontract.WindowsMSVCComponentsForSymbols(symbols)
+	if err != nil {
+		return "", err
+	}
+	return sourceForComponents(components)
+}
+
+func sourceForComponents(components []cstdlibcontract.Component) (string, error) {
 	var output strings.Builder
 	for _, component := range components {
 		name, source, err := componentSource(component)

@@ -64,8 +64,10 @@ Linux toolchain is locally executable.
 semantic C emitter but selects Windows scalar providers and layout facts, identifies its output as
 `x86_64-windows-msvc`, rejects unavailable POSIX `c::ssize_t`, and leaves validation-only drop
 instrumentation unavailable. `experimental build-target` resolves MSVC only after that profile has
-been selected and rejects called foreign symbols before toolchain discovery while companion-link
-and Windows standard-library contracts are absent.
+been selected. Its target-specific support resolver admits only the exact project-owned
+`fy_std_text_utf8_valid_v0` call, selects the text-view C component plus scalar runtime, and rejects
+every other foreign or unproven standard-library symbol before toolchain discovery. Companion
+inputs and arbitrary linker arguments remain absent.
 `internal/layout` is the next boundary: it turns those facts into checked array and aggregate size,
 alignment, offset, and padding results before any backend chooses C syntax. Separate Linux GNU and
 Windows MSVC manifests hold host-independent expectations. The generated native C probe checks
@@ -84,7 +86,7 @@ evidence.
 `internal/pecoff` is the next evidence boundary after local linking. It parses executable bytes
 without using the host loader and rejects non-AMD64, non-PE32+, DLL, non-console, misaligned,
 out-of-range, duplicate-section, missing-`.text`, and non-executable-entry images. The Windows smoke
-applies it to the retained target-neutral product, declared-target product, and both profiles of the layout, ABI, and unwind probes before
+applies it to the retained target-neutral product, both declared-target profile products, and both profiles of the layout, ABI, and unwind probes before
 execution. COFF object records and unwind/debug payload semantics remain outside this linked-image
 branch.
 The same package has a distinct raw-COFF path used inside `internal/cdriver` before local linking

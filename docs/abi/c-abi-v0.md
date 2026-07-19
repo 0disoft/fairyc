@@ -206,8 +206,8 @@ closed subset only. It does not prove source-level Fairy lowering, an independen
 register-level oracle, exact stack/shadow-store placement, complete PE/COFF object or unwind
 metadata, or hosted evidence.
 
-The Windows smoke additionally parses all eight linked executable images without invoking the host
-loader as the parser. The target-neutral product, declared-target product, plus both profiles of the layout, ABI, and unwind probes must be
+The Windows smoke additionally parses all nine linked executable images without invoking the host
+loader as the parser. The target-neutral product, both declared-target profile products, plus both profiles of the layout, ABI, and unwind probes must be
 bounded AMD64 PE32+ large-address-aware non-DLL console images with aligned headers and sections, a
 readable executable `.text` section, and an entry point inside executable code. Import and exception
 directory presence is recorded but their payloads are not interpreted. This is executable-image
@@ -251,9 +251,12 @@ same immutable data without probing the host.
 The Windows evidence block reports `scalar-and-llp64-c-scalar-c11` while keeping all maturity
 booleans false. `Stage0WindowsMSVCProfile` binds generated C to the Windows TargetSpec, emits
 four-byte `c::long` assertions, rejects unavailable `c::ssize_t`, and is executed through the
-checked-in `build-target` example. It lists the still-incomplete LLP64 layout-probe evidence, complete bidirectional source-level and
+checked-in `build-target` example. That example performs one FY-to-project-C call to
+`fy_std_text_utf8_valid_v0` using a null `*u8` and zero `usize`; the Windows support resolver links
+only the text-view component and scalar runtime, while every other foreign symbol fails closed. It
+lists the still-incomplete LLP64 layout-probe evidence, complete bidirectional source-level and
 independently inspected Microsoft x64 crossings,
-PE/COFF object and unwind fixtures, runtime, standard library, hosted
+PE/COFF object and unwind fixtures, complete runtime and standard library, hosted
 Windows receipt, toolchain baseline, and provisioning gates. The local
 eight-case layout probe, twelve-case same-MSVC C crossing, and three-case native unwind probe are
 deliberately insufficient to clear those markers.

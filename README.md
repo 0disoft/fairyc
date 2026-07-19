@@ -92,9 +92,10 @@ FFI, `@repr(C)`, exact `c::*` values, and provisional standard-library calls, so
 source-to-native use without pretending that the host-smoke artifact is a Windows target result.
 The distinct `experimental build-target` command now consumes the declared
 `x86_64-windows-msvc` profile, emits LLP64-aware C11, and retains one target-labelled PE. Its
-checked-in source proves four-byte `c::long` emission and native result 42 without permitting called
-foreign symbols, companion objects, Windows standard-library linkage, distribution support, or
-self-hosting.
+checked-in source proves four-byte `c::long` emission and calls the real project-owned
+`fy_std_text_utf8_valid_v0` C implementation before returning 42. Every other foreign symbol,
+unproven standard-library component, companion input, user linker option, distribution promise,
+and self-hosting path remains closed.
 A provisional `x86_64-linux-gnu` SystemHeap implementation now lives in the target standard-library
 boundary rather than the thin runtime. It normalizes empty allocation, admits current fundamental
 alignments, preserves bytes across copy-and-release growth or shrink, and leaves the old block
@@ -185,7 +186,7 @@ translation units at both profiles. A third three-object probe raises and catche
 exception, virtual-walks raiser, termination, and catcher frames, and requires one abnormal
 `__finally` execution under both profiles. The target marker remains missing until broader layout
 and independent/source-level/hosted ABI and unwind evidence exists. A host-independent PE parser
-now validates the host-smoke product, declared-target product, and all six probe images as bounded
+now validates the host-smoke product, both declared-target profile products, and all six probe images as bounded
 AMD64 PE32+ console executables
 with aligned headers and sections and an executable `.text` entry point. That linked-image path does not inspect
 object symbols, relocations, or Windows unwind records. The same package separately parses every

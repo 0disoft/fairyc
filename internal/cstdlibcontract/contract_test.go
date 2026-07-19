@@ -2,6 +2,7 @@ package cstdlibcontract
 
 import (
 	"slices"
+	"strings"
 	"testing"
 )
 
@@ -53,6 +54,32 @@ func TestAdmittedKeepsUnexercisedLinuxFileSymbolsClosed(t *testing.T) {
 	for _, symbol := range []string{"fy_std_linux_file_write_v0", "fy_std_linux_file_drop_v0"} {
 		if Admitted(symbol) {
 			t.Fatalf("%s unexpectedly admitted", symbol)
+		}
+	}
+}
+
+func TestWindowsMSVCComponentsForSymbolsAdmitsOnlyProvenTextValidation(t *testing.T) {
+	t.Parallel()
+	components, err := WindowsMSVCComponentsForSymbols([]string{
+		"fy_std_text_utf8_valid_v0",
+		"fy_std_text_utf8_valid_v0",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := []Component{ComponentTextView}; !slices.Equal(components, want) {
+		t.Fatalf("components = %v, want %v", components, want)
+	}
+	for _, test := range []struct {
+		symbol   string
+		contains string
+	}{
+		{symbol: "fairyc_external_helper", contains: "no closed x86_64-windows-msvc companion contract"},
+		{symbol: "fy_std_linux_file_close_v0", contains: "no x86_64-windows-msvc source contract"},
+		{symbol: "fy_std_missing_v0", contains: "unrecognized Stage 0 standard-library symbol"},
+	} {
+		if _, err := WindowsMSVCComponentsForSymbols([]string{test.symbol}); err == nil || !strings.Contains(err.Error(), test.contains) {
+			t.Errorf("WindowsMSVCComponentsForSymbols(%q) error = %v; want containing %q", test.symbol, err, test.contains)
 		}
 	}
 }

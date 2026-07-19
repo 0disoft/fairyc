@@ -8,6 +8,7 @@ import (
 
 	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/cdriver"
+	"github.com/0disoft/fairyc/internal/cstdlib"
 	"github.com/0disoft/fairyc/internal/target"
 )
 
@@ -38,15 +39,15 @@ func runTargetBuild(arguments []string, sourceRoot string, stdout, stderr io.Wri
 	if err := validateWindowsTargetUnit(unit); err != nil {
 		return subsetCapabilityError(stderr, "Windows target build", err)
 	}
-	runtimeSource, err := productSupportSource(nil)
+	supportSource, err := windowsTargetSupportSource(unit.ForeignSymbols)
 	if err != nil {
-		return internalError(stderr)
+		return subsetCapabilityError(stderr, "Windows target support linkage", err)
 	}
 	toolchain, err := cdriver.ResolveWindowsHostMSVC()
 	if err != nil {
 		return buildFailure(stderr, err)
 	}
-	artifact, err := cdriver.BuildWindowsMSVCTarget(toolchain, options.profile, unit.Source, runtimeSource)
+	artifact, err := cdriver.BuildWindowsMSVCTarget(toolchain, options.profile, unit.Source, supportSource)
 	if err != nil {
 		return buildFailure(stderr, err)
 	}
@@ -127,8 +128,13 @@ func validateWindowsTargetUnit(unit cbackend.Unit) error {
 	if unit.Target != string(target.X8664WindowsMSVC) || unit.Dialect != cbackend.DialectC11 || unit.Instrumentation != "" {
 		return fmt.Errorf("emitted unit does not use the closed Windows MSVC C11 profile")
 	}
-	if len(unit.ForeignSymbols) != 0 {
-		return fmt.Errorf("called foreign symbols require a declared Windows companion-link contract")
-	}
 	return nil
+}
+
+func windowsTargetSupportSource(foreignSymbols []string) (string, error) {
+	standardLibrarySource, err := cstdlib.WindowsMSVCSourceForSymbols(foreignSymbols)
+	if err != nil {
+		return "", err
+	}
+	return combineProductSupportSource(standardLibrarySource)
 }

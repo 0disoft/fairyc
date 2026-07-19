@@ -247,8 +247,9 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   smoke. It requires a bounded AMD64 PE32+ non-DLL console image, large-address awareness, aligned
   image/header/section ranges, a readable executable `.text` section, and an entry point inside
   executable code. It records import and exception-directory presence without treating either as
-  validated content. COFF object symbols and relocations, `.pdata`/`.xdata` semantics, CodeView/PDB,
-  source-level Windows target emission, and a hosted receipt remain separate gates.
+  validated content. Exact COFF object symbols and relocation types, complete `.pdata`/`.xdata`
+  semantics, CodeView/PDB, broad source-level Windows FFI, and a hosted receipt remain separate
+  gates.
 - The Windows C driver retains each compiler-produced `.obj` only in its bounded temporary root,
   parses it as raw AMD64 COFF, and fails before returning the linked image when the object has an
   optional PE header, linked-image flags, no `.text`/`.text$...` code, invalid raw or relocation
@@ -351,10 +352,12 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   Its backend profile consumes Windows LLP64 scalar providers, emits the target ID in the C unit,
   admits `c::long` as four-byte signed C `long`, and rejects unavailable POSIX `c::ssize_t`.
   `examples/windows_target/main.fy` carries an unused `c::long` declaration so local x64 MSVC must
-  compile the target assertion before the generated PE can return 42. Called foreign symbols fail
-  before toolchain resolution because companion-link and Windows standard-library contracts remain
-  absent. This clears only the missing target C-emission-profile evidence; `emittable`,
-  `conformant`, and `supported` remain false.
+  compile the target assertion, then calls the exact project-owned
+  `fy_std_text_utf8_valid_v0(*u8, usize) -> u32` C implementation before the generated PE can return
+  42. The Windows support resolver links only that proven text-view component plus the scalar
+  runtime. Every other standard-library or foreign symbol fails before toolchain resolution;
+  companion inputs and user linker arguments remain absent. This clears only the missing target
+  C-emission-profile evidence; `emittable`, `conformant`, and `supported` remain false.
 - QBE or another fast backend and LLVM require separate measured adoption decisions after MIR stability.
 - Early caching is whole-package and bounded. Function-level caching requires measured invalidation or latency pressure.
 - Development output contains intentional deliverables and small state, not an unbounded copy of every intermediate.

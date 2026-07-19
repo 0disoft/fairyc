@@ -60,8 +60,11 @@ profile may represent, not whether the target is conformant. The experimental `b
 command currently admits only `x86_64-windows-msvc`, a fixed low/optimized profile choice, one FY
 source, and one `.exe` output. Its command spelling and text receipt remain unstable CLI surface;
 the selected target identity, scalar layout, C dialect, and emitted static assertions still must
-match the target-schema and ABI-profile contracts. Adding called source-level FFI or another target
+match the target-schema and ABI-profile contracts. Adding another called source-level FFI symbol or another target
 requires a separate capability and compatibility decision rather than silently widening this path.
+ADR 0083 admits exactly `fy_std_text_utf8_valid_v0` as the first Windows source-call linkage. That
+symbol's signature, selected component, and fail-closed rejection of every other foreign symbol are
+prototype compatibility data; this does not make the complete standard library portable or stable.
 
 `fairyc.layout-fixtures/v0` separately versions the repository input and expectation vocabulary for
 the target-layout engine; each manifest binds one declared target. It is not a public
