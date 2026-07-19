@@ -200,7 +200,6 @@ var x8664WindowsMSVCSpec = Spec{
 			"target-c-emission-profile",
 			"toolchain-baseline",
 			"toolchain-provisioning",
-			"windows-x64-abi-classifier",
 			"windows-x64-unwind-fixtures",
 		},
 	},

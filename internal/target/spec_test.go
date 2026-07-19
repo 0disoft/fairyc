@@ -86,6 +86,11 @@ func TestX8664WindowsMSVCSpecIsValidLLP64AndFailClosed(t *testing.T) {
 	if spec.Evidence.EmissionSubset != "none" || spec.Evidence.Emittable || spec.Evidence.Conformant || spec.Evidence.Supported {
 		t.Fatalf("Windows target overclaims maturity = %+v", spec.Evidence)
 	}
+	for _, missing := range spec.Evidence.Missing {
+		if missing == "windows-x64-abi-classifier" {
+			t.Fatalf("implemented Windows classifier remains marked missing: %+v", spec.Evidence)
+		}
+	}
 }
 
 func TestLookupReturnsIsolatedCopies(t *testing.T) {

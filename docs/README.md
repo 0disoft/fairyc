@@ -22,6 +22,7 @@
 - Linux scalar C differential runner: internal/cbackendnative/
 - Resolved package graph fixture manifest: spec/fixtures/package/manifest-v0.json
 - Windows MSVC layout fixture manifest: spec/fixtures/layout/manifest-windows-msvc-v0.json
+- Windows MSVC C ABI fixture manifest: spec/fixtures/c-abi/manifest-windows-msvc-v0.json
 - Executable semantics and C transport: docs/mir/*.md
 - Package identity and visibility: docs/package/*.md
 - Target and C ABI contract: docs/abi/*.md

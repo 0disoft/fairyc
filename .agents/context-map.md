@@ -44,8 +44,8 @@
 - Target layout fixture route: spec/fixtures/layout/manifest-v0.json and spec/fixtures/layout/manifest-windows-msvc-v0.json
 - Target layout fixture runner route: internal/layoutfixture/
 - Windows MSVC native layout probe route: internal/windowslayoutprobe/, cmd/fairyc-windows-host-smoke/
-- SysV AMD64 C ABI classifier route: internal/cabi/
-- C ABI classification fixture route: spec/fixtures/c-abi/manifest-v0.json
+- Target C ABI classifier route: internal/cabi/
+- C ABI classification fixture route: spec/fixtures/c-abi/manifest-v0.json and spec/fixtures/c-abi/manifest-windows-msvc-v0.json
 - C ABI classification fixture runner route: internal/cabifixture/
 - Resolved package graph fixture route: spec/fixtures/package/manifest-v0.json
 - MIR and C backend route: docs/mir/

@@ -42,5 +42,5 @@ C scalars and `@repr(C)`.
 - A bad four-byte `long`, eight-byte `size_t`, pointer width, function-pointer width, or mixed LLP64
   record offset now fails in the real MSVC frontend before the smoke can pass.
 - Linux POSIX probe generation and execution remain untouched.
-- The next Windows layout step is full declared scalar coverage plus a hosted receipt; the next
-  independent ABI step is a Microsoft x64 classifier and native crossing ledger.
+- The next Windows layout step is full declared scalar coverage plus a hosted receipt. ADR 0076
+  later adds the independent Microsoft x64 classifier; native crossing evidence remains next.

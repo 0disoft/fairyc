@@ -1,14 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:fairyc:c-abi-fixtures:v0",
-  "title": "Fairy C SysV AMD64 C ABI fixtures v0",
+  "title": "Fairy C target C ABI fixtures v0",
   "type": "object",
   "additionalProperties": false,
   "required": ["$schema", "schemaVersion", "target", "contracts", "deferred", "cases"],
   "properties": {
     "$schema": { "type": "string", "minLength": 1 },
     "schemaVersion": { "const": "fairyc.c-abi-fixtures/v0" },
-    "target": { "const": "x86_64-linux-gnu" },
+    "target": { "enum": ["x86_64-linux-gnu", "x86_64-windows-msvc"] },
     "contracts": {
       "type": "array",
       "minItems": 1,
@@ -117,7 +117,7 @@
             ]
           }
         },
-        "hiddenPointerRegister": { "const": "rdi" },
+        "hiddenPointerRegister": { "enum": ["rdi", "rcx"] },
         "pointerResultRegister": { "const": "rax" }
       }
     }

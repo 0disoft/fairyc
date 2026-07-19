@@ -184,7 +184,9 @@ FFI, `@repr(C)`, exact `c::*` scalars, and standard-library linkage. A formal fa
 `x86_64-windows-msvc` TargetSpec now records LLP64 and platform identities, and its separate
 nine-case host-independent layout ledger covers the first LLP64-sensitive expectations. All eight
 pass cases now cross a local MSVC C11 layout probe twice, but full scalar coverage and a hosted
-receipt remain absent. Windows x64 classification, PE/COFF objects, runtime, standard library, supported
+receipt remain absent. A separate 15-case Microsoft x64 classifier ledger now proves four shared
+ordinal slots, small-record integer transport, aggregate indirection, and hidden-return shifting;
+its 12 pass plans still lack native MSVC call crossings. PE/COFF objects, runtime, standard library, supported
 distribution artifacts, and conformance remain later gates.
 
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
@@ -217,7 +219,7 @@ Exit gate: Atlas failure cannot change compilation; stale or incompatible maps f
 ## Later capability gates
 
 - `x86_64-linux-musl`: requires a separate libc, sysroot, startup, loader, and static-distribution profile.
-- `x86_64-windows-msvc`: the TargetSpec and first eight-case local layout probe exist, but complete hosted LLP64 layout evidence, Microsoft x64 calling, PE/COFF, UCRT/VCRuntime, and unwind fixtures remain required.
+- `x86_64-windows-msvc`: the TargetSpec, first eight-case local layout probe, and 15-case host-independent Microsoft x64 classifier exist, but complete hosted LLP64 layout evidence, native call crossings, PE/COFF, UCRT/VCRuntime, and unwind fixtures remain required.
 - QBE or another fast backend: requires stable internal semantics, interpreter and C oracles, ABI coverage, and measured edit-build benefit.
 - LLVM backend: requires representative workloads that justify optimization and distribution cost after simpler paths are exhausted.
 - Generics and `Vec<T>`: require non-generic stability plus compile-time, code-size, active-payload, and diagnostics fixtures.

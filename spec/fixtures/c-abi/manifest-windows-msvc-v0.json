@@ -1,0 +1,334 @@
+{
+  "$schema": "./schema-v0.json",
+  "schemaVersion": "fairyc.c-abi-fixtures/v0",
+  "target": "x86_64-windows-msvc",
+  "contracts": [
+    "docs/adr/0006-c-abi-v0-and-first-conformance-target.md",
+    "docs/adr/0073-executable-x86-64-windows-msvc-target-spec.md",
+    "docs/adr/0076-microsoft-x64-classifier-fixtures.md",
+    "docs/abi/c-abi-v0.md",
+    "docs/compatibility/versioning-v0.md"
+  ],
+  "deferred": [
+    "bidirectional native MSVC argument and return probes plus a hosted Windows receipt",
+    "exact stack argument offsets, 32-byte shadow-store observations, by-reference temporary alignment and lifetime, and assembly inspection",
+    "variadic floating-point register mirroring, vector and intrinsic exceptions, callbacks, exports, and foreign unwinding",
+    "Windows target C emission, PE/COFF object metadata, runtime, standard library, and distribution"
+  ],
+  "cases": [
+    {
+      "id": "fail.direct-array-result",
+      "signature": {
+        "result": {
+          "kind": "array",
+          "length": 2,
+          "element": { "kind": "language-scalar", "name": "i32" }
+        },
+        "parameters": []
+      },
+      "expect": { "status": "fail", "errorCode": "invalid-type" }
+    },
+    {
+      "id": "fail.empty-aggregate",
+      "signature": {
+        "result": { "kind": "struct", "name": "Empty", "fields": [] },
+        "parameters": []
+      },
+      "expect": { "status": "fail", "errorCode": "layout-rejected" }
+    },
+    {
+      "id": "fail.floating-enum-base",
+      "signature": {
+        "result": { "kind": "c-enum", "name": "c.float" },
+        "parameters": []
+      },
+      "expect": { "status": "fail", "errorCode": "invalid-c-enum-base" }
+    },
+    {
+      "id": "pass.fifth-float-stack",
+      "signature": {
+        "result": null,
+        "parameters": [
+          { "kind": "language-scalar", "name": "i64" },
+          { "kind": "language-scalar", "name": "i64" },
+          { "kind": "language-scalar", "name": "i64" },
+          { "kind": "language-scalar", "name": "i64" },
+          { "kind": "language-scalar", "name": "f64" }
+        ]
+      },
+      "expect": {
+        "status": "pass",
+        "plan": {
+          "return": { "kind": "void", "classes": [], "registers": [] },
+          "arguments": [
+            { "kind": "registers", "classes": ["integer"], "registers": ["rcx"] },
+            { "kind": "registers", "classes": ["integer"], "registers": ["rdx"] },
+            { "kind": "registers", "classes": ["integer"], "registers": ["r8"] },
+            { "kind": "registers", "classes": ["integer"], "registers": ["r9"] },
+            { "kind": "stack", "classes": ["sse"], "registers": [] }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pass.hidden-return-shifts-slots",
+      "signature": {
+        "result": {
+          "kind": "struct",
+          "name": "LargeReturn",
+          "fields": [
+            { "name": "left", "type": { "kind": "language-scalar", "name": "i64" } },
+            { "name": "right", "type": { "kind": "language-scalar", "name": "i64" } }
+          ]
+        },
+        "parameters": [
+          { "kind": "language-scalar", "name": "i64" },
+          { "kind": "language-scalar", "name": "f64" },
+          { "kind": "pointer" },
+          { "kind": "language-scalar", "name": "i32" }
+        ]
+      },
+      "expect": {
+        "status": "pass",
+        "plan": {
+          "return": {
+            "kind": "indirect",
+            "classes": ["memory"],
+            "registers": [],
+            "hiddenPointerRegister": "rcx",
+            "pointerResultRegister": "rax"
+          },
+          "arguments": [
+            { "kind": "registers", "classes": ["integer"], "registers": ["rdx"] },
+            { "kind": "registers", "classes": ["sse"], "registers": ["xmm2"] },
+            { "kind": "registers", "classes": ["integer"], "registers": ["r9"] },
+            { "kind": "stack", "classes": ["integer"], "registers": [] }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pass.indirect-aggregate-after-four-slots",
+      "signature": {
+        "result": null,
+        "parameters": [
+          { "kind": "language-scalar", "name": "i64" },
+          { "kind": "language-scalar", "name": "i64" },
+          { "kind": "language-scalar", "name": "i64" },
+          { "kind": "language-scalar", "name": "i64" },
+          {
+            "kind": "struct",
+            "name": "Pair",
+            "fields": [
+              { "name": "left", "type": { "kind": "language-scalar", "name": "i64" } },
+              { "name": "right", "type": { "kind": "language-scalar", "name": "i64" } }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "status": "pass",
+        "plan": {
+          "return": { "kind": "void", "classes": [], "registers": [] },
+          "arguments": [
+            { "kind": "registers", "classes": ["integer"], "registers": ["rcx"] },
+            { "kind": "registers", "classes": ["integer"], "registers": ["rdx"] },
+            { "kind": "registers", "classes": ["integer"], "registers": ["r8"] },
+            { "kind": "registers", "classes": ["integer"], "registers": ["r9"] },
+            { "kind": "indirect", "classes": ["memory"], "registers": [] }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pass.indirect-odd-size-aggregate",
+      "signature": {
+        "result": null,
+        "parameters": [
+          {
+            "kind": "struct",
+            "name": "ThreeBytes",
+            "fields": [
+              { "name": "a", "type": { "kind": "language-scalar", "name": "u8" } },
+              { "name": "b", "type": { "kind": "language-scalar", "name": "u8" } },
+              { "name": "c", "type": { "kind": "language-scalar", "name": "u8" } }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "status": "pass",
+        "plan": {
+          "return": { "kind": "void", "classes": [], "registers": [] },
+          "arguments": [
+            { "kind": "indirect", "classes": ["memory"], "registers": ["rcx"] }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pass.indirect-sixteen-byte-aggregate",
+      "signature": {
+        "result": null,
+        "parameters": [
+          {
+            "kind": "struct",
+            "name": "Pair",
+            "fields": [
+              { "name": "left", "type": { "kind": "language-scalar", "name": "i64" } },
+              { "name": "right", "type": { "kind": "language-scalar", "name": "i64" } }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "status": "pass",
+        "plan": {
+          "return": { "kind": "void", "classes": [], "registers": [] },
+          "arguments": [
+            { "kind": "indirect", "classes": ["memory"], "registers": ["rcx"] }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pass.pointer-enum-function",
+      "signature": {
+        "result": { "kind": "c-enum", "name": "c.uint" },
+        "parameters": [
+          { "kind": "pointer" },
+          { "kind": "function-pointer" },
+          { "kind": "c-enum", "name": "c.uint" }
+        ]
+      },
+      "expect": {
+        "status": "pass",
+        "plan": {
+          "return": { "kind": "registers", "classes": ["integer"], "registers": ["rax"] },
+          "arguments": [
+            { "kind": "registers", "classes": ["integer"], "registers": ["rcx"] },
+            { "kind": "registers", "classes": ["integer"], "registers": ["rdx"] },
+            { "kind": "registers", "classes": ["integer"], "registers": ["r8"] }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pass.positional-mixed-slots",
+      "signature": {
+        "result": null,
+        "parameters": [
+          { "kind": "language-scalar", "name": "f64" },
+          { "kind": "language-scalar", "name": "i64" },
+          { "kind": "language-scalar", "name": "f32" },
+          { "kind": "pointer" }
+        ]
+      },
+      "expect": {
+        "status": "pass",
+        "plan": {
+          "return": { "kind": "void", "classes": [], "registers": [] },
+          "arguments": [
+            { "kind": "registers", "classes": ["sse"], "registers": ["xmm0"] },
+            { "kind": "registers", "classes": ["integer"], "registers": ["rdx"] },
+            { "kind": "registers", "classes": ["sse"], "registers": ["xmm2"] },
+            { "kind": "registers", "classes": ["integer"], "registers": ["r9"] }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pass.scalar-float",
+      "signature": {
+        "result": { "kind": "language-scalar", "name": "f64" },
+        "parameters": [{ "kind": "language-scalar", "name": "f32" }]
+      },
+      "expect": {
+        "status": "pass",
+        "plan": {
+          "return": { "kind": "registers", "classes": ["sse"], "registers": ["xmm0"] },
+          "arguments": [{ "kind": "registers", "classes": ["sse"], "registers": ["xmm0"] }]
+        }
+      }
+    },
+    {
+      "id": "pass.scalar-integer",
+      "signature": {
+        "result": { "kind": "language-scalar", "name": "i64" },
+        "parameters": [{ "kind": "language-scalar", "name": "i32" }]
+      },
+      "expect": {
+        "status": "pass",
+        "plan": {
+          "return": { "kind": "registers", "classes": ["integer"], "registers": ["rax"] },
+          "arguments": [{ "kind": "registers", "classes": ["integer"], "registers": ["rcx"] }]
+        }
+      }
+    },
+    {
+      "id": "pass.small-float-record",
+      "signature": {
+        "result": {
+          "kind": "struct",
+          "name": "FloatRecord",
+          "fields": [{ "name": "value", "type": { "kind": "language-scalar", "name": "f32" } }]
+        },
+        "parameters": [
+          {
+            "kind": "struct",
+            "name": "FloatRecord",
+            "fields": [{ "name": "value", "type": { "kind": "language-scalar", "name": "f32" } }]
+          }
+        ]
+      },
+      "expect": {
+        "status": "pass",
+        "plan": {
+          "return": { "kind": "registers", "classes": ["integer"], "registers": ["rax"] },
+          "arguments": [{ "kind": "registers", "classes": ["integer"], "registers": ["rcx"] }]
+        }
+      }
+    },
+    {
+      "id": "pass.small-integer-record",
+      "signature": {
+        "result": {
+          "kind": "struct",
+          "name": "EightBytes",
+          "fields": [
+            { "name": "left", "type": { "kind": "language-scalar", "name": "u32" } },
+            { "name": "right", "type": { "kind": "language-scalar", "name": "u32" } }
+          ]
+        },
+        "parameters": [
+          {
+            "kind": "struct",
+            "name": "FourBytes",
+            "fields": [
+              { "name": "left", "type": { "kind": "language-scalar", "name": "u16" } },
+              { "name": "right", "type": { "kind": "language-scalar", "name": "u16" } }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "status": "pass",
+        "plan": {
+          "return": { "kind": "registers", "classes": ["integer"], "registers": ["rax"] },
+          "arguments": [{ "kind": "registers", "classes": ["integer"], "registers": ["rcx"] }]
+        }
+      }
+    },
+    {
+      "id": "pass.void-return",
+      "signature": { "result": null, "parameters": [] },
+      "expect": {
+        "status": "pass",
+        "plan": {
+          "return": { "kind": "void", "classes": [], "registers": [] },
+          "arguments": []
+        }
+      }
+    }
+  ]
+}

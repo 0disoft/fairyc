@@ -192,6 +192,16 @@ executions. That configured cross-compiler path is not an observed hosted receip
 aggregate FFI lowering, does not expose exact stack-area offsets, and does not clear the
 `bidirectional-c-abi-fixtures` target marker.
 
+For `x86_64-windows-msvc`, the same engine selects a separate Microsoft x64 algorithm. Four
+declaration-order parameter slots choose RCX/RDX/R8/R9 for integer, pointer, small-record, or
+by-reference-pointer transport and XMM0-3 for scalar floating transport. Later parameters use the
+stack. Naturally laid out records of exactly 1, 2, 4, or 8 bytes travel as integer values;
+odd-sized and larger records travel indirectly. A memory result uses a hidden pointer in RCX,
+returns that pointer in RAX, and moves the first explicit parameter to slot one. The separate
+Windows v0 manifest executes 15 exact cases, of which 12 are pass plans. These facts clear only the
+missing classifier capability; no native MSVC call, exact stack/shadow-store, PE/COFF, unwind, or
+hosted evidence follows.
+
 This executable description is target data, not conformance evidence. Its evidence block names the
 existing `scalar-and-flat-i32-resource-tagged-c11` subset, keeps `emittable`, `conformant`, and `supported` false, and
 lists the missing hosted native C layout-probe receipt, bidirectional ABI, runtime, standard-library, hosted-Linux, toolchain
@@ -199,8 +209,8 @@ baseline, and provisioning gates. `fairyc experimental target-spec x86_64-linux-
 same immutable data without probing the host.
 
 The Windows evidence block reports no target emission subset and keeps all maturity booleans false.
-It lists the still-incomplete LLP64 layout-probe evidence, Microsoft x64 classifier and
-bidirectional crossings, PE/COFF object and unwind fixtures, runtime, standard library, hosted
+It lists the still-incomplete LLP64 layout-probe evidence, Microsoft x64 bidirectional crossings,
+PE/COFF object and unwind fixtures, runtime, standard library, hosted
 Windows receipt, target C emission profile, toolchain baseline, and provisioning gates. The local
 eight-case MSVC probe is deliberately insufficient to clear those markers.
 
@@ -228,7 +238,7 @@ The planned transport matrix uses Clang as the primary compiler and GCC as an in
 
 ## Later profiles
 
-`x86_64-linux-musl` needs a separate libc, startup, sysroot, dynamic-loader, and static-distribution profile even though its CPU ABI is SysV-derived. The declared `x86_64-windows-msvc` TargetSpec still needs complete executable LLP64 layout coverage plus a hosted receipt, four-register classification, PE/COFF objects, UCRT/VCRuntime, and unwind fixtures before any maturity promotion.
+`x86_64-linux-musl` needs a separate libc, startup, sysroot, dynamic-loader, and static-distribution profile even though its CPU ABI is SysV-derived. The declared `x86_64-windows-msvc` TargetSpec still needs complete executable LLP64 layout coverage plus a hosted receipt, native four-slot call crossings, PE/COFF objects, UCRT/VCRuntime, and unwind fixtures before any maturity promotion.
 
 ## External references
 

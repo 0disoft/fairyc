@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/cabi"
+	"github.com/0disoft/fairyc/internal/target"
 )
 
 func TestCABIJSONSchemaMatchesRunnerVocabulary(t *testing.T) {
@@ -18,10 +19,13 @@ func TestCABIJSONSchemaMatchesRunnerVocabulary(t *testing.T) {
 		t.Fatal(err)
 	}
 	var schema struct {
-		Dialect  string   `json:"$schema"`
-		ID       string   `json:"$id"`
-		Required []string `json:"required"`
-		Defs     struct {
+		Dialect    string   `json:"$schema"`
+		ID         string   `json:"$id"`
+		Required   []string `json:"required"`
+		Properties map[string]struct {
+			Enum []string `json:"enum"`
+		} `json:"properties"`
+		Defs struct {
 			Signature struct {
 				Properties struct {
 					Result struct {
@@ -43,6 +47,11 @@ func TestCABIJSONSchemaMatchesRunnerVocabulary(t *testing.T) {
 					} `json:"properties"`
 				} `json:"oneOf"`
 			} `json:"expect"`
+			Location struct {
+				Properties map[string]struct {
+					Enum []string `json:"enum"`
+				} `json:"properties"`
+			} `json:"location"`
 		} `json:"$defs"`
 	}
 	if err := json.Unmarshal(contents, &schema); err != nil {
@@ -55,6 +64,13 @@ func TestCABIJSONSchemaMatchesRunnerVocabulary(t *testing.T) {
 	slices.Sort(schema.Required)
 	if !slices.Equal(schema.Required, wantRequired) {
 		t.Fatalf("schema required = %v, want %v", schema.Required, wantRequired)
+	}
+	wantTargets := []string{string(target.X8664LinuxGNU), string(target.X8664WindowsMSVC)}
+	if !slices.Equal(schema.Properties["target"].Enum, wantTargets) {
+		t.Fatalf("schema targets = %v, want %v", schema.Properties["target"].Enum, wantTargets)
+	}
+	if want := []string{"rdi", "rcx"}; !slices.Equal(schema.Defs.Location.Properties["hiddenPointerRegister"].Enum, want) {
+		t.Fatalf("schema hidden result registers = %v, want %v", schema.Defs.Location.Properties["hiddenPointerRegister"].Enum, want)
 	}
 	typeRef := "../layout/schema-v0.json#/$defs/type"
 	if len(schema.Defs.Signature.Properties.Result.OneOf) != 2 || schema.Defs.Signature.Properties.Result.OneOf[1].Ref != typeRef || schema.Defs.Signature.Properties.Parameters.Items.Ref != typeRef {

@@ -66,8 +66,10 @@ Native probes derived from a manifest are versioned repository evidence consumer
 identities. A local compiler pass does not promote maturity without the declared coverage set and
 hosted receipt.
 
-`fairyc.c-abi-fixtures/v0` versions fixed-signature type inputs and expected SysV AMD64 class,
-register, stack, and hidden-return plans. It reuses the layout fixture's recursive type vocabulary
+`fairyc.c-abi-fixtures/v0` versions fixed-signature type inputs and target-bound class, register,
+stack, indirect, and hidden-return plans. The Linux manifest records SysV AMD64 eightbyte and
+register-family behavior; the Windows manifest records Microsoft x64 ordinal slots and aggregate
+indirection. It reuses the layout fixture's recursive type vocabulary
 but is not a public binding format, stable native Fairy ABI, object contract, or hosted conformance
 receipt. Changing class merge, exhaustion rollback, hidden-result, or register identities requires
 a new fixture-contract and applicable target/ABI-profile decision.

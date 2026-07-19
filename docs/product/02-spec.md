@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0075-windows-msvc-native-layout-probe.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0076-microsoft-x64-classifier-fixtures.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -236,6 +236,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   The 14 pass plans generate separate Clang/GCC caller and callee objects in both directions and
   profiles for 56 configured native crossings. This does not implement source FFI or establish a
   hosted result.
+- For Windows the same engine selects a distinct Microsoft x64 planner. A separate 15-case
+  manifest covers RCX/RDX/R8/R9 and XMM0-3 selection by shared declaration-order slot, later stack
+  parameters, 1/2/4/8-byte record integer transport, larger or odd-size record indirection, and the
+  hidden-return RCX slot. Its 12 pass plans do not yet feed native MSVC call crossings.
 - The eleven valid layout cases additionally generate one deterministic private C11 plus explicit
   POSIX-typedef probe. The Linux
   native runner compiles, links, and executes it with Clang/GCC and low/optimized profiles, checking

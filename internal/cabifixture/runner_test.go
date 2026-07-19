@@ -38,6 +38,28 @@ func TestRepositoryCABIManifestPasses(t *testing.T) {
 	}
 }
 
+func TestRepositoryWindowsMSVCCABIManifestPasses(t *testing.T) {
+	t.Parallel()
+	manifest := filepath.Join("..", "..", "spec", "fixtures", "c-abi", "manifest-windows-msvc-v0.json")
+	report, err := Run(manifest)
+	if err != nil {
+		t.Fatalf("Run() error = %v", err)
+	}
+	if report.Target != target.X8664WindowsMSVC || report.CasesRun != 15 || report.Passed != 15 || len(report.Failures) != 0 {
+		t.Fatalf("Run() report = %+v", report)
+	}
+	targetID, cases, err := NativeProbeCases(manifest)
+	if err != nil {
+		t.Fatalf("NativeProbeCases() error = %v", err)
+	}
+	if targetID != target.X8664WindowsMSVC || len(cases) != 12 || cases[0].ID != "pass.fifth-float-stack" || cases[len(cases)-1].ID != "pass.void-return" {
+		t.Fatalf("NativeProbeCases() = %q, %+v", targetID, cases)
+	}
+	if cases[1].Plan.Return.HiddenPointerRegister != "rcx" || cases[1].Plan.Arguments[0].Registers[0] != "rdx" || cases[1].Plan.Arguments[1].Registers[0] != "xmm2" {
+		t.Fatalf("hidden return slot plan = %+v", cases[1].Plan)
+	}
+}
+
 func TestManifestRejectsUnknownFieldsAndTrailingData(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()

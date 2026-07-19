@@ -82,7 +82,6 @@ x86_64-windows-msvc
     - target-c-emission-profile
     - toolchain-baseline
     - toolchain-provisioning
-    - windows-x64-abi-classifier
     - windows-x64-unwind-fixtures
 `
 	if firstOut != want {

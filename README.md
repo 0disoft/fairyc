@@ -69,6 +69,11 @@ A host-independent SysV AMD64 classifier now executes 17 versioned C ABI plan ca
 type and layout vocabulary, covering INTEGER/SSE/MEMORY classes, mixed and homogeneous returns,
 hidden result pointers, register exhaustion, and whole-aggregate rollback. Those plans are not yet
 native evidence by themselves, and the target's C ABI marker stays fail-closed.
+The same target-bound engine now selects a separate Microsoft x64 algorithm for Windows. Its 15
+versioned cases cover shared ordinal RCX/RDX/R8/R9 or XMM0-3 slots, fifth-argument stack transport,
+small aggregate integer transport, odd-size and 16-byte aggregate indirection, and hidden-return
+slot shifting. The 12 pass plans are host-independent expectations only; native MSVC crossings,
+stack/shadow-store observations, callbacks, exports, and hosted evidence remain absent.
 The 14 valid plans now generate separate caller and callee objects for Clang-to-GCC and
 GCC-to-Clang at `-O0` and `-O2`, for 56 configured crossings. This Windows host cannot execute
 them. Separate scalar source fixtures now carry explicitly mapped `@link_name` declarations for
@@ -283,6 +288,7 @@ or arbitrary link-input option.
 - Experimental target JSON schema: `spec/cli/experimental-target-spec-v0.schema.json`
 - Target layout engine and fixtures: `internal/layout/`, `spec/fixtures/layout/manifest-v0.json`, `spec/fixtures/layout/manifest-windows-msvc-v0.json`
 - Windows MSVC native layout probe generator: `internal/windowslayoutprobe/`
+- Target C ABI classifiers and fixtures: `internal/cabi/`, `spec/fixtures/c-abi/manifest-v0.json`, `spec/fixtures/c-abi/manifest-windows-msvc-v0.json`
 - Resolved package graph fixtures: `spec/fixtures/package/manifest-v0.json`
 - MIR and C backend contracts: `docs/mir/`
 - Package identity and visibility: `docs/package/package-graph-v0.md`

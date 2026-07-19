@@ -64,11 +64,12 @@ Windows MSVC manifests hold host-independent expectations. The generated native 
 every valid Linux case through its configured runner. A separate Windows generator turns all eight
 Windows pass cases into MSVC C11 assertions; the configured host smoke compiles and executes them at
 low and optimized profiles. Neither local/configured path is a hosted receipt by itself.
-`internal/cabi` then turns the Linux type and layout facts into host-independent SysV AMD64
-eightbyte and register plans. The Linux runner turns validated pass plans into separate Clang/GCC
+`internal/cabi` then selects a target algorithm over the same type and layout facts. Linux produces
+SysV AMD64 eightbyte/register plans; Windows produces Microsoft x64 ordinal-slot, direct-small-
+aggregate, indirect-aggregate, and hidden-result plans. The Linux runner turns its validated pass plans into separate Clang/GCC
 caller and callee objects in both directions. Generated Fairy callers now cross scalar, pointer,
 register-result, and hidden-memory-result boundaries; an observed hosted result remains a later
-evidence layer.
+evidence layer. Windows native call crossings remain a separate later layer.
 
 `internal/cstdlib` is a separate target-standard-library transport boundary. Its first provisional
 SystemHeap helper normalizes empty allocation, rejects unsupported alignment, and preserves the old
