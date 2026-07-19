@@ -101,7 +101,7 @@ not linked into product builds or exposed through a public `std::alloc` API. One
 Fairy caller now crosses its exact `void *`/`size_t` block into the real allocate and deallocate
 helpers for four additional configured native executions. All eight native SystemHeap executions
 remain unobserved on this Windows host; the later Arena, text ownership, and Linux File C slices now
-exist but remain source-disconnected.
+exist; owned text and Linux File remain source-disconnected.
 The next storage slice now adds provisional Buffer construction, initialized-prefix-only reserve,
 overlap-safe append across relocation, overflow rollback, zeroed growth, truncate, clear, and drop.
 Its four C-only native probe executions and four generated-Fairy source-call executions are
@@ -110,8 +110,10 @@ reaches initialize, zeroed resize, and drop; public `std::bytes`, automatic prod
 safe ownership methods remain missing.
 The Arena storage slice now adds a single-active-Region generation check, failure-atomic zeroed and
 copied byte placement, reset invalidation, stale-use rejection, and active-drop rejection. Its four
-native executions are configured but unobserved; source-level `std::alloc` construction and calls
-remain missing.
+C-only executions and four generated-Fairy source-call executions are configured but unobserved.
+The internal caller crosses exact self-linked node, Arena, and Region records, obtains zeroed bytes
+through `void **`, and verifies reset/drop generations; lexical Region lowering, source-level
+`std::alloc` construction, and safe calls remain missing.
 The allocation-free text-view slice now checks canonical UTF-8 and code-point byte boundaries,
 including overlong, surrogate, out-of-range, truncated, and obsolete forms. Its four native runs
 are configured but unobserved. A separate four-way Fairy-source crossing now calls the actual
@@ -134,7 +136,7 @@ link identity, and raw-address provenance survive AST, typed HIR, and MIR verifi
 backend emits unannotated prototypes, exact record tags/fields/layout assertions, and `&local` only
 for an exact unsafe borrow-to-pointer cast. The native lane plans four scalar, four typed-null
 pointer/target-scalar, four individual exact C-scalar, four remaining twelve-type C-scalar-family,
-four real SystemHeap block, four real nested Buffer, four real UTF-8 validation, and four real text-view output-record
+four real SystemHeap block, four real nested Buffer, four real Arena/Region, four real UTF-8 validation, and four real text-view output-record
 crossings. The interpreter refuses
 raw addresses and foreign execution. Dereference, pointer arithmetic, arbitrary casts, callbacks,
 C-scalar value semantics, nested enum or array fields, by-value aggregate FFI, exports, and public standard-library

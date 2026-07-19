@@ -117,6 +117,8 @@ type checking remains a backend responsibility in this prototype.
 `@repr(C)` struct as fields. Their struct construction and field-read operations keep the exact
 field types; target layout, dependency ordering, and C spelling remain backend-owned. Raw `*void`
 and `*mut void` retain opaque pointer identity and carry no dereference or conversion operation.
+One nested pointer-to-opaque-pointer type may carry the verified direct-local address of a pointer
+output slot; MIR still contains no raw load, store, arithmetic, or pointee conversion.
 
 Foreign declarations preserve separate source and external link identities. Declarations mapped to
 one link identity must have the same ABI, result type, and ordered parameter types or verification

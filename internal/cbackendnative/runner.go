@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v22"
+	reportSchemaVersion = "fairyc.native-c-report/v23"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -492,6 +492,213 @@ var bufferSourceCallExpectedCFragments = []string{
 	" = &fy_l_",
 }
 
+const arenaSourceCallSmokeSource = `module main;
+@repr(C)
+struct fy_std_arena_v0 {
+    head: *mut fy_std_arena_node_v0;
+    generation: c::ulong;
+    active_region: u8;
+}
+@repr(C)
+struct fy_std_region_v0 {
+    arena: *mut fy_std_arena_v0;
+    mark: *mut fy_std_arena_node_v0;
+    generation: c::ulong;
+    active: u8;
+}
+@repr(C)
+struct fy_std_arena_node_v0 {
+    storage: fy_std_system_heap_block_v0;
+    next: *mut fy_std_arena_node_v0;
+}
+@repr(C)
+struct fy_std_system_heap_block_v0 {
+    data: *mut void;
+    size: c::size_t;
+    alignment: c::size_t;
+}
+
+@link_name("fairyc_fixture_zero_c_ulong")
+unsafe extern C fn zero_c_ulong() -> c::ulong;
+@link_name("fairyc_fixture_eight_size_t")
+unsafe extern C fn eight_size_t() -> c::size_t;
+@link_name("fy_std_arena_initialize_v0")
+unsafe extern C fn initialize_arena(output: *mut fy_std_arena_v0) -> u32;
+@link_name("fy_std_region_begin_v0")
+unsafe extern C fn begin_region(
+    arena: *mut fy_std_arena_v0,
+    output: *mut fy_std_region_v0
+) -> u32;
+@link_name("fy_std_region_allocate_zeroed_v0")
+unsafe extern C fn allocate_zeroed(
+    scope: *mut fy_std_region_v0,
+    size: c::size_t,
+    alignment: c::size_t,
+    output: *mut *mut void
+) -> u32;
+@link_name("fairyc_fixture_arena_allocation_is_zeroed")
+unsafe extern C fn allocation_is_zeroed(
+    arena: *mut fy_std_arena_v0,
+    scope: *mut fy_std_region_v0,
+    data: *mut void
+) -> u32;
+@link_name("fy_std_region_reset_v0")
+unsafe extern C fn reset_region(scope: *mut fy_std_region_v0) -> u32;
+@link_name("fairyc_fixture_arena_region_is_reset")
+unsafe extern C fn region_is_reset(
+    arena: *mut fy_std_arena_v0,
+    scope: *mut fy_std_region_v0
+) -> u32;
+@link_name("fy_std_arena_drop_v0")
+unsafe extern C fn drop_arena(arena: *mut fy_std_arena_v0) -> u32;
+@link_name("fairyc_fixture_arena_is_dropped")
+unsafe extern C fn arena_is_dropped(arena: *mut fy_std_arena_v0) -> u32;
+
+fn main() -> i32 {
+    let zero_generation: c::ulong = unsafe { zero_c_ulong() };
+    var arena: fy_std_arena_v0 = fy_std_arena_v0 {
+        head: null,
+        generation: zero_generation,
+        active_region: 0,
+    };
+    var scope: fy_std_region_v0 = fy_std_region_v0 {
+        arena: null,
+        mark: null,
+        generation: zero_generation,
+        active: 0,
+    };
+    let initialized: u32 = unsafe {
+        initialize_arena(&mut arena as *mut fy_std_arena_v0)
+    };
+    let began: u32 = unsafe {
+        begin_region(
+            &mut arena as *mut fy_std_arena_v0,
+            &mut scope as *mut fy_std_region_v0
+        )
+    };
+    let size: c::size_t = unsafe { eight_size_t() };
+    let alignment: c::size_t = unsafe { eight_size_t() };
+    var data: *mut void = null;
+    let allocated: u32 = unsafe {
+        allocate_zeroed(
+            &mut scope as *mut fy_std_region_v0,
+            size,
+            alignment,
+            &mut data as *mut *mut void
+        )
+    };
+    let observed: u32 = unsafe {
+        allocation_is_zeroed(
+            &mut arena as *mut fy_std_arena_v0,
+            &mut scope as *mut fy_std_region_v0,
+            data
+        )
+    };
+    let reset: u32 = unsafe {
+        reset_region(&mut scope as *mut fy_std_region_v0)
+    };
+    let cleared: u32 = unsafe {
+        region_is_reset(
+            &mut arena as *mut fy_std_arena_v0,
+            &mut scope as *mut fy_std_region_v0
+        )
+    };
+    let dropped: u32 = unsafe {
+        drop_arena(&mut arena as *mut fy_std_arena_v0)
+    };
+    let finalized: u32 = unsafe {
+        arena_is_dropped(&mut arena as *mut fy_std_arena_v0)
+    };
+    if initialized == 0 && began == 0 && allocated == 0 && observed == 1 &&
+        reset == 0 && cleared == 1 && dropped == 0 && finalized == 1 {
+        42
+    } else {
+        1
+    }
+}
+`
+
+const arenaSourceCallBridge = `
+_Static_assert(
+    _Generic((uint64_t)0, unsigned long: 1, default: 0),
+    "fairyc target uint64_t is unsigned long"
+);
+
+unsigned long fairyc_fixture_zero_c_ulong(void) { return 0UL; }
+size_t fairyc_fixture_eight_size_t(void) { return (size_t)8; }
+
+uint32_t fairyc_fixture_arena_allocation_is_zeroed(
+    struct fy_std_arena_v0 *arena,
+    struct fy_std_region_v0 *region,
+    void *data
+) {
+    if (arena == NULL || region == NULL || data == NULL || arena->head == NULL ||
+        arena->generation != UINT64_C(1) || arena->active_region != UINT8_C(1) ||
+        region->arena != arena || region->mark != NULL ||
+        region->generation != UINT64_C(1) || region->active != UINT8_C(1) ||
+        (uintptr_t)data % (uintptr_t)8 != (uintptr_t)0) {
+        return UINT32_C(0);
+    }
+    const uint8_t *bytes = (const uint8_t *)data;
+    for (size_t index = 0; index < (size_t)8; ++index) {
+        if (bytes[index] != UINT8_C(0)) {
+            return UINT32_C(0);
+        }
+    }
+    return UINT32_C(1);
+}
+
+uint32_t fairyc_fixture_arena_region_is_reset(
+    struct fy_std_arena_v0 *arena,
+    struct fy_std_region_v0 *region
+) {
+    return arena != NULL && region != NULL && arena->head == NULL &&
+           arena->generation == UINT64_C(2) && arena->active_region == UINT8_C(0) &&
+           region->arena == NULL && region->mark == NULL &&
+           region->generation == UINT64_C(0) && region->active == UINT8_C(0) ?
+           UINT32_C(1) : UINT32_C(0);
+}
+
+uint32_t fairyc_fixture_arena_is_dropped(struct fy_std_arena_v0 *arena) {
+    return arena != NULL && arena->head == NULL && arena->generation == UINT64_C(3) &&
+           arena->active_region == UINT8_C(0) ? UINT32_C(1) : UINT32_C(0);
+}
+`
+
+var arenaSourceCallExpectedCFragments = []string{
+	"_Static_assert(sizeof(unsigned long) == UINT64_C(8), \"fairyc target c.ulong size\");",
+	"struct fy_std_system_heap_block_v0 {",
+	"struct fy_std_arena_node_v0 {",
+	"struct fy_std_system_heap_block_v0 storage;",
+	"struct fy_std_arena_node_v0 * next;",
+	"_Static_assert(sizeof(struct fy_std_arena_node_v0) == UINT64_C(32)",
+	"_Static_assert(_Alignof(struct fy_std_arena_node_v0) == UINT64_C(8)",
+	"offsetof(struct fy_std_arena_node_v0, storage) == UINT64_C(0)",
+	"offsetof(struct fy_std_arena_node_v0, next) == UINT64_C(24)",
+	"struct fy_std_arena_v0 {",
+	"struct fy_std_arena_node_v0 * head;",
+	"unsigned long generation;",
+	"uint8_t active_region;",
+	"_Static_assert(sizeof(struct fy_std_arena_v0) == UINT64_C(24)",
+	"offsetof(struct fy_std_arena_v0, head) == UINT64_C(0)",
+	"offsetof(struct fy_std_arena_v0, generation) == UINT64_C(8)",
+	"offsetof(struct fy_std_arena_v0, active_region) == UINT64_C(16)",
+	"struct fy_std_region_v0 {",
+	"struct fy_std_arena_v0 * arena;",
+	"struct fy_std_arena_node_v0 * mark;",
+	"_Static_assert(sizeof(struct fy_std_region_v0) == UINT64_C(32)",
+	"offsetof(struct fy_std_region_v0, arena) == UINT64_C(0)",
+	"offsetof(struct fy_std_region_v0, mark) == UINT64_C(8)",
+	"offsetof(struct fy_std_region_v0, generation) == UINT64_C(16)",
+	"offsetof(struct fy_std_region_v0, active) == UINT64_C(24)",
+	"extern uint32_t fy_std_arena_initialize_v0(struct fy_std_arena_v0 * fy_a_0);",
+	"extern uint32_t fy_std_region_begin_v0(struct fy_std_arena_v0 * fy_a_0, struct fy_std_region_v0 * fy_a_1);",
+	"extern uint32_t fy_std_region_allocate_zeroed_v0(struct fy_std_region_v0 * fy_a_0, size_t fy_a_1, size_t fy_a_2, void * * fy_a_3);",
+	"extern uint32_t fy_std_region_reset_v0(struct fy_std_region_v0 * fy_a_0);",
+	"extern uint32_t fy_std_arena_drop_v0(struct fy_std_arena_v0 * fy_a_0);",
+	" = &fy_l_",
+}
+
 // Compiler records the bounded toolchain fingerprint used by one native run.
 type Compiler struct {
 	Name    string `json:"name"`
@@ -520,6 +727,7 @@ type Report struct {
 	BufferExecutions                   int        `json:"bufferExecutions"`
 	BufferSourceCallExecutions         int        `json:"bufferSourceCallExecutions"`
 	ArenaExecutions                    int        `json:"arenaExecutions"`
+	ArenaSourceCallExecutions          int        `json:"arenaSourceCallExecutions"`
 	TextViewExecutions                 int        `json:"textViewExecutions"`
 	OwnedTextExecutions                int        `json:"ownedTextExecutions"`
 	LinuxFileExecutions                int        `json:"linuxFileExecutions"`
@@ -681,6 +889,11 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.ArenaExecutions = arenaExecutions
+	arenaSourceCallExecutions, err := runArenaSourceCallProbe(temporaryRoot, toolchains, arenaSource)
+	if err != nil {
+		return Report{}, err
+	}
+	report.ArenaSourceCallExecutions = arenaSourceCallExecutions
 	textViewSource, err := cstdlib.TextViewSource()
 	if err != nil {
 		return Report{}, fmt.Errorf("load text view implementation: %w", err)
@@ -847,6 +1060,21 @@ func runBufferSourceCallProbe(temporaryRoot string, toolchains []cdriver.Toolcha
 		storageSource+bufferSourceCallBridge,
 		42,
 		bufferSourceCallExpectedCFragments,
+	)
+}
+
+func runArenaSourceCallProbe(temporaryRoot string, toolchains []cdriver.Toolchain, arenaSource string) (int, error) {
+	if arenaSource == "" {
+		return 0, fmt.Errorf("Arena source-call probe requires a non-empty implementation")
+	}
+	return runForeignSourceProbe(
+		temporaryRoot,
+		toolchains,
+		"arena-source-call",
+		arenaSourceCallSmokeSource,
+		arenaSource+arenaSourceCallBridge,
+		42,
+		arenaSourceCallExpectedCFragments,
 	)
 }
 

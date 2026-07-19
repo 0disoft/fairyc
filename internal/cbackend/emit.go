@@ -759,6 +759,12 @@ func (e *emitter) foreignCType(value hir.Type, result bool) (string, error) {
 		return "uintptr_t", nil
 	}
 	if element, mutable, pointer := hir.RawPointerElement(value); pointer {
+		if nestedElement, nestedMutable, nested := hir.RawPointerElement(element); nested {
+			if mutable && nestedMutable && nestedElement == hir.TypeVoid {
+				return "void * *", nil
+			}
+			return "", fmt.Errorf("foreign raw-pointer nesting type %q", value)
+		}
 		pointee, err := e.foreignPointerElementCType(element)
 		if err != nil {
 			return "", err
@@ -842,6 +848,11 @@ var admittedStandardLibrarySymbols = map[string]struct{}{
 	"fy_std_buffer_initialize_v0":      {},
 	"fy_std_buffer_resize_zeroed_v0":   {},
 	"fy_std_buffer_drop_v0":            {},
+	"fy_std_arena_initialize_v0":       {},
+	"fy_std_region_begin_v0":           {},
+	"fy_std_region_allocate_zeroed_v0": {},
+	"fy_std_region_reset_v0":           {},
+	"fy_std_arena_drop_v0":             {},
 	"fy_std_text_utf8_valid_v0":        {},
 	"fy_std_text_validate_utf8_v0":     {},
 }

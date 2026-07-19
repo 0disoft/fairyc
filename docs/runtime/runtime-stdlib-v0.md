@@ -126,9 +126,16 @@ and generation; allocation publishes a tracking node only after both byte storag
 succeed; reset frees allocations back to the mark, advances the generation, and invalidates the
 Region. A second simultaneous Region, stale post-reset use, or Arena drop during an active Region
 fails closed. Zero-size placement validates alignment without allocating. Representation, node
-granularity, and growth policy remain private and source construction remains unavailable.
+granularity, and growth policy remain private.
 
-Its four-way native probe is configured for exclusive begin, zeroed allocation, copy, allocation
+One internal generated Fairy caller now declares exact target-specific node, Arena, and Region
+records, initializes and attaches them through the real helpers, obtains eight initialized zero
+bytes through an exact `void **` output slot, then resets the Region and drops the Arena. Bounded C
+observers check the allocation, generation transitions, active flags, released node chain, and
+invalidated Region. This does not expose those records as the public representation, connect lexical
+`region` lowering, or add product standard-library linkage and safe allocation methods.
+
+Its four-way C-only native probe is configured for exclusive begin, zeroed allocation, copy, allocation
 rollback, empty normalization, active-drop rejection, reset, stale-use rejection, and final drop,
 but no Linux execution receipt has been observed.
 

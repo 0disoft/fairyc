@@ -66,6 +66,9 @@ nested `@repr(C)` records but not arrays or enum fields.
 target's signed `char` fact rather than inheriting either `c::schar` or `c::uchar`.
 Raw `*void` and `*mut void` are opaque C-interoperability pointers; safe borrows to `void`,
 dereference, arithmetic, integer conversion, and pointee-changing casts remain unavailable.
+The executable foreign slice additionally admits one pointer-to-opaque-pointer output shape such as
+`*mut *mut void`; both layers must be mutable, and pointer nesting does not generalize to C scalars,
+arbitrary pointees, or the other mutability combinations.
 
 ## Structs, resources, and enums
 

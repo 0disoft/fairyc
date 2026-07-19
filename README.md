@@ -79,7 +79,7 @@ unchanged when validation or allocation fails. A closed C-only probe and an inte
 caller using the exact `void *`/`size_t` block each have four configured Clang/GCC low/optimized
 executions. Neither has an observed hosted receipt, and the helper is not product-linked or exposed
 through a public `std::alloc` API. Arena, text ownership, and Linux File now have their own C slices
-below, but they remain source-disconnected.
+below; owned text and Linux File remain source-disconnected.
 A second provisional slice implements Buffer-owned initialized bytes, failure-atomic reserve,
 relocating self-overlap append, length-overflow rollback, zeroed growth, truncate, clear, and drop.
 Its closed C-only probe and an internal generated FY caller using the exact nested SystemHeap-block
@@ -89,8 +89,10 @@ backend and exercised by the closed native fixture; product linkage and the publ
 package remain absent.
 A third slice implements Arena-owned byte nodes with one active generation-checked Region,
 failure-atomic zeroed or copied placement, reset invalidation, stale-use rejection, and active-drop
-rejection. Its native matrix is likewise configured but unobserved and disconnected from source
-lowering.
+rejection. Its closed C-only probe and an internal generated FY caller using the exact self-linked
+node, Arena, and Region records each have four configured native executions. The generated caller
+crosses real initialization, begin, zeroed allocation through a `void **` output slot, reset, and
+drop, but lexical Region lowering, product linkage, and a public `std::alloc` API remain absent.
 The first text slice now validates canonical UTF-8 without allocation and rejects slicing through a
 multibyte sequence. Its native probe includes overlong forms, surrogates, values above U+10FFFF,
 truncation, and obsolete leaders, but remains unobserved and source-disconnected.
@@ -118,7 +120,8 @@ Those C scalar types remain distinct from coincidentally represented Fairy scala
 C spellings with target and provider assertions, and currently have no source literal, operator,
 cast, raw-pointer, or interpreter support. Nonempty `@repr(C)` records may use exact C-scalar fields,
 opaque `void` pointers, and acyclic nested `@repr(C)` records; generated definitions are ordered by
-dependency and guarded by target-derived nested layout assertions. Raw dereference or arithmetic,
+dependency and guarded by target-derived nested layout assertions. One pointer-to-opaque-pointer
+output-slot shape is admitted for Arena allocation. Raw dereference or arithmetic,
 arbitrary casts, nested enum or built-in-tag fields, arrays, callbacks, by-value aggregate FFI,
 exports, and public standard-library wrappers remain unimplemented.
 A deterministic native C11 plus explicit POSIX-typedef probe now translates the eleven valid layout cases into private numeric

@@ -55,3 +55,6 @@ order is not an ABI dependency order.
 - Arrays, explicit C enums, callbacks, exports, by-value aggregate calls and returns, and public
   Buffer ownership semantics remain separate gates.
 - Native execution remains configured but unobserved on this Windows host.
+
+ADR 0059 later reuses nested-record dependency ordering for the Arena node's SystemHeap block and
+adds a self-pointer plus one opaque pointer-output-slot transport shape.

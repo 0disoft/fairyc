@@ -51,7 +51,8 @@ The current executable source subset implements `unsafe extern C fn` imports wit
 single nonempty `@link_name("symbol")`, using
 `i32`, `u8`, `u32`, `usize`, all sixteen distinct transport-only TargetSpec C scalars, raw pointers to
 the fixed-width Fairy scalar set or opaque `void`, and raw pointers to an
-admitted nonempty `@repr(C)` struct. AST, typed HIR, MIR, unsafe provenance, deterministic C
+admitted nonempty `@repr(C)` struct. One pointer-to-opaque-pointer output-slot shape is additionally
+admitted for exact `void **` calls; it does not open arbitrary pointer nesting. AST, typed HIR, MIR, unsafe provenance, deterministic C
 source/link identity, prototype emission, typed null, separate-object cross-compiler linking, and process-status
 observation are wired. Source struct construction and field reads reach verified MIR, the MIR
 interpreter for its executable scalar subset, and generated C. Inside an explicit unsafe boundary,
@@ -97,7 +98,10 @@ accepts only acyclic nonempty structs over `u8`, `i32`, `u32`, `usize`, all sixt
 C scalars, admitted raw pointers including opaque `void`, and nested structs that are themselves
 `@repr(C)`. C-scalar fields use the same exact transport table and provider assertions as foreign
 scalar signatures. One flat record crosses the real SystemHeap C unit; one nested record crosses
-the real Buffer C unit. Arrays, explicit C enums, floating Fairy scalars, and other contracted field
+the real Buffer C unit; exact self-linked node, Arena, and Region records cross the real Arena C
+unit. The Arena crossing requires that the selected provider's `uint64_t` is exactly
+`unsigned long` before using `c::ulong` for the generation fields. Arrays, explicit C enums,
+floating Fairy scalars, and other contracted field
 families remain fail-closed until their source typing, layout, ABI, and native crossing tests are
 connected together.
 

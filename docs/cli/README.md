@@ -53,7 +53,9 @@ command and never appears in its output.
 The admitted foreign declaration form currently supports `i32`, `u8`, `u32`, `usize`, all sixteen
 exact transport-only TargetSpec C scalars, raw pointers to
 the fixed-width Fairy scalar set or opaque `void`, and raw pointers to admitted nonempty acyclic
-`@repr(C)` structs whose fields may include exact C scalars or nested `@repr(C)` records. It uses its source
+`@repr(C)` structs whose fields may include exact C scalars or nested `@repr(C)` records. One
+pointer-to-opaque-pointer output slot such as `*mut *mut void` is admitted without general pointer
+nesting. It uses its source
 identifier as the C symbol by default or accepts one nonempty `@link_name("symbol")`, and requires
 an explicit unsafe boundary. Raw pointers can be null,
 returned by another admitted foreign call, or produced by an exact direct-local borrow-to-pointer

@@ -35,6 +35,10 @@ failure must not publish a partial node, and Arena drop must not race an active 
 9. `fairyc.native-c-report/v8` adds `arenaExecutions`, expected to be four only after a successful
    hosted run. No hosted receipt has been observed.
 
+ADR 0059 later source-connects initialization, begin, zeroed allocation, reset, and drop through an
+exact internal record crossing. It does not make the node layout public or connect lexical Region
+lowering to the C helper.
+
 ## Consequences
 
 - The one-allocation-per-object prototype is intentionally simple and not a performance claim.

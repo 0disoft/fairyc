@@ -319,6 +319,46 @@ func TestEmitRawPointerAndTargetScalarForeignCall(t *testing.T) {
 	}
 }
 
+func TestEmitMutableVoidPointerOutputSlot(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+unsafe extern C fn fill(output: *mut *mut void) -> u32;
+fn main() -> i32 {
+    var output: *mut void = null;
+    if unsafe { fill(&mut output as *mut *mut void) } == 0 { 42 } else { 1 }
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, required := range []string{
+		"extern uint32_t fill(void * * fy_a_0);",
+		"void * fy_l_",
+		"void * * fy_l_",
+		" = &fy_l_",
+		"fill(fy_l_",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+}
+
+func TestEmitRejectsOtherNestedRawPointerMutabilityShapes(t *testing.T) {
+	t.Parallel()
+	for _, typeRef := range []string{"**void", "**mut void", "*mut *void"} {
+		t.Run(typeRef, func(t *testing.T) {
+			program := lowerSource(t, "module main;\nunsafe extern C fn inspect(value: "+typeRef+") -> u32;\nfn main() -> i32 { if unsafe { inspect(null) } == 0 { 42 } else { 1 } }\n")
+			_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+			var capability cbackend.CapabilityError
+			if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "foreign raw-pointer nesting type") {
+				t.Fatalf("Emit() error = %v", err)
+			}
+		})
+	}
+}
+
 func TestEmitRejectsReservedExternalSymbol(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main;\n@link_name(\"main\")\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n")

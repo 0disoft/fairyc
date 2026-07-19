@@ -120,21 +120,25 @@ Raw foreign signatures contain C ABI scalars, explicitly represented aggregates,
 The implemented source slice preserves individual `unsafe extern C fn` declarations, one optional
 nonempty `@link_name("symbol")`, and
 `unsafe {}` or `unsafe fn` call provenance through AST, typed HIR, and verified MIR. The C backend
-currently admits `C` declarations using `i32`, `u8`, `u32`, `usize`, exact by-value `c::int`,
-`c::long`, `c::size_t`, and target-specific `c::ssize_t`, raw pointers to
-that bounded scalar set, and raw pointers to admitted nonempty `@repr(C)` structs. It emits one plain prototype and an ordinary call without `pure`, `const`, `restrict`,
+currently admits `C` declarations using `i32`, `u8`, `u32`, `usize`, every exact TargetSpec C
+scalar, raw pointers to that bounded Fairy scalar set or opaque `void`, raw pointers to admitted
+nonempty `@repr(C)` structs, and one pointer-to-opaque-pointer output-slot shape. It emits one plain prototype and an ordinary call without `pure`, `const`, `restrict`,
 `nothrow`, alias, retention, or visibility promises. Compatible repeated declarations of the same
 external name coalesce even when their Fairy names differ; signature conflicts fail closed. A local preprocessor guard undefines an
 included-header macro with that name before the prototype. `main`, generated `fy_`/`FY_` names,
 C11 keywords, and identifiers consumed by the generated preamble are rejected. The only current
 exceptions to the generated `fy_` namespace are the exact allowlisted internal standard-library
-symbols for SystemHeap allocate/deallocate, Buffer initialize/zeroed-resize/drop, and text
-validation/output initialization; the rest of the prefix remains closed. Typed null and an exact
+symbols for SystemHeap allocate/deallocate, Buffer initialize/zeroed-resize/drop, Arena initialize,
+Region begin/zeroed-allocation/reset, Arena drop, and text validation/output initialization; the
+rest of the prefix remains closed. Typed null and an exact
 direct-local borrow-to-raw-pointer cast are the only
 source-constructed raw pointers. The cast requires unsafe provenance, preserves the pointee type,
 forbids mutability strengthening, lowers to a verified MIR raw-address operation, and emits plain
 `&local` without `restrict` or `noalias`. Pointer dereference, arithmetic, integer conversion, and
 arbitrary casts remain rejected.
+The sole nested-pointer exception is exactly `*mut *mut void`, so `&mut *mut void` can become a C
+`void **` output slot. Immutable outer or inner layers fail closed instead of risking incorrect C
+qualifier placement. Nested pointers to C scalars, structs, or other pointer types remain rejected.
 Source `@repr(C)` construction, field reads, exact public names, layout assertions, pointer
 prototype spelling, direct-local address passing, opaque `void` pointers, exact C-scalar fields,
 and acyclic nested `@repr(C)` fields are implemented, but by-value aggregate ABI, nested enum or
@@ -177,11 +181,13 @@ report; they do not expand the eighteen interpreter-owned differential cases.
 Every C-scalar probe uses hand-written C producers and consumers so each value crosses a generated
 typed local without requiring a Fairy C literal. The family probe uses exactly representable finite
 floating values and makes no NaN, infinity, signed-zero, rounding, or floating-environment claim.
-`fairyc.native-c-report/v22` separately records four `systemHeapSourceCallExecutions` and four
-`bufferSourceCallExecutions`. The first crosses an exact generated `void *`/`size_t` block into the
+`fairyc.native-c-report/v23` separately records four `systemHeapSourceCallExecutions`, four
+`bufferSourceCallExecutions`, and four `arenaSourceCallExecutions`. The first crosses an exact generated `void *`/`size_t` block into the
 real SystemHeap C unit. The second nests that block in the exact Buffer record, calls the real
 initialize, zeroed-resize, and drop helpers, and observes initialized bytes plus normalized release.
-These are internal transport probes, not public allocator or Buffer APIs.
+The third crosses exact self-linked node, Arena, and Region records into the real Arena unit,
+observes zeroed allocation through `void **`, and verifies reset/drop generation transitions. These
+are internal transport probes, not public allocator, Buffer, Arena, or lexical Region APIs.
 
 `internal/cdriver` and `internal/cruntime` are the one implementation path for both that matrix and
 the experimental constrained-C executable builder. The driver fixes the C dialect, warning policy,
