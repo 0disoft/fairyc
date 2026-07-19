@@ -20,32 +20,9 @@ func runHost(arguments []string, sourceRoot string, stdout, stderr io.Writer) in
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	lowered, code := lowerSingleProgram(options.source, sourceRoot, stderr, "Windows host-smoke C-emission")
+	artifact, code := compileWindowsHost(options.source, options.profile, sourceRoot, stderr)
 	if code != ExitSuccess {
 		return code
-	}
-	unit, err := cbackend.Emit(lowered.program, lowered.entryName, cbackend.Stage0Profile())
-	if err != nil {
-		var capability cbackend.CapabilityError
-		if errors.As(err, &capability) {
-			return subsetCapabilityError(stderr, "Windows host-smoke C-emission", capability)
-		}
-		return internalError(stderr)
-	}
-	if err := validateWindowsHostUnit(unit); err != nil {
-		return subsetCapabilityError(stderr, "Windows host-smoke", err)
-	}
-	runtimeSource, err := productSupportSource(nil)
-	if err != nil {
-		return internalError(stderr)
-	}
-	toolchain, err := cdriver.ResolveWindowsHostMSVC()
-	if err != nil {
-		return buildFailure(stderr, err)
-	}
-	artifact, err := cdriver.BuildWindowsHost(toolchain, options.profile, unit.Source, runtimeSource)
-	if err != nil {
-		return buildFailure(stderr, err)
 	}
 	outcome, err := cdriver.ExecuteWindowsHost(artifact)
 	if err != nil {
@@ -64,6 +41,37 @@ func runHost(arguments []string, sourceRoot string, stdout, stderr io.Writer) in
 		return outputError(stderr)
 	}
 	return ExitSuccess
+}
+
+func compileWindowsHost(source string, profile cdriver.Profile, sourceRoot string, stderr io.Writer) (cdriver.WindowsHostArtifact, int) {
+	lowered, code := lowerSingleProgram(source, sourceRoot, stderr, "Windows host-smoke C-emission")
+	if code != ExitSuccess {
+		return cdriver.WindowsHostArtifact{}, code
+	}
+	unit, err := cbackend.Emit(lowered.program, lowered.entryName, cbackend.Stage0Profile())
+	if err != nil {
+		var capability cbackend.CapabilityError
+		if errors.As(err, &capability) {
+			return cdriver.WindowsHostArtifact{}, subsetCapabilityError(stderr, "Windows host-smoke C-emission", capability)
+		}
+		return cdriver.WindowsHostArtifact{}, internalError(stderr)
+	}
+	if err := validateWindowsHostUnit(unit); err != nil {
+		return cdriver.WindowsHostArtifact{}, subsetCapabilityError(stderr, "Windows host-smoke", err)
+	}
+	runtimeSource, err := productSupportSource(nil)
+	if err != nil {
+		return cdriver.WindowsHostArtifact{}, internalError(stderr)
+	}
+	toolchain, err := cdriver.ResolveWindowsHostMSVC()
+	if err != nil {
+		return cdriver.WindowsHostArtifact{}, buildFailure(stderr, err)
+	}
+	artifact, err := cdriver.BuildWindowsHost(toolchain, profile, unit.Source, runtimeSource)
+	if err != nil {
+		return cdriver.WindowsHostArtifact{}, buildFailure(stderr, err)
+	}
+	return artifact, ExitSuccess
 }
 
 func parseHostRunOptions(arguments []string) (hostRunOptions, error) {

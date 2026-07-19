@@ -16,10 +16,12 @@ features and makes no Windows target, ABI, FFI, standard-library, or conformance
 
 ## Decision
 
-1. `fairyc experimental run-host <file.fy> --profile <low|optimized>` is a Windows/amd64-only,
-   unstable host-smoke command. It compiles one verified program with locally installed x64 MSVC,
-   executes a temporary PE image, reports the program's `i32` result, and removes all temporary C,
-   object, PDB, and executable files.
+1. `fairyc experimental run-host <file.fy> --profile <low|optimized>` and
+   `fairyc experimental build-host <file.fy> --profile <low|optimized> --output <build/path.exe>`
+   are Windows/amd64-only unstable host-smoke commands. Both compile one verified program with
+   locally installed x64 MSVC. `run-host` executes a temporary PE, reports the program's `i32`
+   result, and removes it. `build-host` atomically writes one no-overwrite PE below the ignored
+   source-root `build/` directory for later manual execution.
 2. The command discovers Visual Studio through the official local `vswhere.exe`, reads the selected
    MSVC tool version, selects the latest complete Windows 10/11 SDK, and constructs a closed
    `PATH`/`INCLUDE`/`LIB` overlay. It invokes `cl.exe` directly; it does not require a Developer
@@ -37,13 +39,14 @@ features and makes no Windows target, ABI, FFI, standard-library, or conformance
 6. `examples/windows_smoke/main.fy` is the checked-in executable smoke. The configured
    `fairyc_windows_host_smoke` intent builds and runs it through MSVC and must report result 42.
 7. This does not add `x86_64-windows-msvc` to target inspection, does not validate Windows aggregate
-   layout or calling convention, does not produce a distributable artifact, and is not self-hosting:
-   the compiler remains the Go Stage 0 implementation.
+   layout or calling convention, and does not make a `build-host` PE a supported distributable
+   artifact. It is not self-hosting: the compiler remains the Go Stage 0 implementation.
 
 ## Consequences
 
 - A Windows developer without WSL can now prove `.fy -> Go Stage 0 compiler -> verified MIR -> C ->
-  MSVC PE -> native execution` on the closed host-smoke subset.
+  MSVC PE -> native execution` on the closed host-smoke subset and optionally retain that PE for
+  local use.
 - The resolver fails closed when Visual Studio components or a complete SDK are absent instead of
   falling back to an undeclared compiler or inherited shell state.
 - Formal Windows target work remains a separate future decision with its own TargetSpec, layout,

@@ -296,11 +296,12 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   runtime to produce a no-overwrite executable below `build/` on an eligible host. This artifact
   path does not expand the constrained backend subset, establish stable build syntax, or change target
   support status.
-- The Windows/amd64 `run-host` smoke separately compiles one target-neutral verified unit with a
-  locally discovered x64 MSVC toolchain, executes a temporary PE, and reports the `i32` result or a
-  canonical trap. It uses no WSL and rejects foreign symbols, standard-library linkage, `@repr(C)`,
-  exact `c::*` scalars, and foreign calls or results. It does not declare or imply a Windows target,
-  ABI, persistent artifact, conformance result, or self-hosted compiler.
+- The Windows/amd64 `run-host` and `build-host` smokes separately compile one target-neutral verified
+  unit with a locally discovered x64 MSVC toolchain. `run-host` executes a temporary PE and reports
+  the `i32` result or canonical trap; `build-host` retains one no-overwrite `.exe` below `build/`.
+  They use no WSL and reject foreign symbols, standard-library linkage, `@repr(C)`, exact `c::*`
+  scalars, and foreign calls or results. They do not declare or imply a Windows target, ABI,
+  supported distribution artifact, conformance result, or self-hosted compiler.
 - QBE or another fast backend and LLVM require separate measured adoption decisions after MIR stability.
 - Early caching is whole-package and bounded. Function-level caching requires measured invalidation or latency pressure.
 - Development output contains intentional deliverables and small state, not an unbounded copy of every intermediate.

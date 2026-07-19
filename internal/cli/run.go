@@ -36,6 +36,7 @@ Usage:
   fairyc experimental target-spec <target-id>
   fairyc experimental emit-c <file.fy>
   fairyc experimental build <file.fy> --cc <clang|gcc> --profile <low|optimized> --output <build/path>
+  fairyc experimental build-host <file.fy> --profile <low|optimized> --output <build/path.exe>
   fairyc experimental run-host <file.fy> --profile <low|optimized>
   fairyc experimental run <file.fy>
   fairyc --help
@@ -105,6 +106,8 @@ func runExperimental(args []string, sourceRoot string, stdout, stderr io.Writer)
 		return runEmitC(args[1], sourceRoot, stdout, stderr)
 	case "build":
 		return runBuild(args[1:], sourceRoot, stdout, stderr)
+	case "build-host":
+		return runHostBuild(args[1:], sourceRoot, stdout, stderr)
 	case "run-host":
 		return runHost(args[1:], sourceRoot, stdout, stderr)
 	default:

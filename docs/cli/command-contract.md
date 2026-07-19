@@ -18,6 +18,7 @@ The current Go prototype implements seven deliberately unstable developer comman
 | `fairyc experimental target-spec x86_64-linux-gnu` | Inspect the first host-independent target description without resolving a local toolchain | Deterministic `fairyc.target-spec/v0` JSON on stdout, defined by `spec/cli/experimental-target-spec-v0.schema.json` |
 | `fairyc experimental emit-c <file.fy>` | Lower one scalar, restricted inert user-enum, bounded optionally `@link_name`-mapped `unsafe extern C fn` using admitted fixed-width, pointer-width, any of the sixteen exact transport-only TargetSpec C scalars, admitted raw pointers including opaque `void` and one pointer-to-opaque-pointer output slot, or nonempty acyclic `@repr(C)` pointer values whose fields may include exact C scalars or nested `@repr(C)` records, exact direct-local raw address, flat all-`i32` resource, or admitted resource-bearing built-in tag program through verified MIR and emit the provisional constrained C transport without invoking a toolchain | Exactly one deterministic C11 translation unit, with an explicit POSIX.1-2008 typedef profile only when required, on stdout; source diagnostics or capability errors on stderr |
 | `fairyc experimental build <file.fy> --cc <clang\|gcc> --profile <low\|optimized> --output <build/path>` | Compile and link one verified program in that constrained subset for the host `x86_64-linux-gnu` profile with an explicit C compiler, optimization profile, and ignored output path | A no-overwrite executable below `build/` plus one relative-path receipt, or source, capability, toolchain, link, or artifact diagnostics |
+| `fairyc experimental build-host <file.fy> --profile <low\|optimized> --output <build/path.exe>` | On Windows/amd64, compile one target-neutral verified program with locally discovered x64 MSVC and retain its PE without declaring a Windows target ABI | A no-overwrite `.exe` below `build/` plus a host-smoke receipt, or bounded source, capability, toolchain, compile, or artifact diagnostics |
 | `fairyc experimental run-host <file.fy> --profile <low\|optimized>` | On Windows/amd64, compile and execute one target-neutral verified program with locally discovered x64 MSVC without declaring a Windows target ABI | `native result: <i32> (windows/amd64 host-smoke, msvc <version>, <profile>)`, a canonical trap, or bounded source, capability, toolchain, compile, or execution diagnostics |
 | `fairyc experimental run <file.fy>` | Run one verified-MIR program in the scalar, tagged, whole-resource, and implemented Region subset whose selected module declares `main() -> i32` | `result: <i32>` on stdout, a canonical trap category on stderr, source diagnostics, or an explicit unsupported-subset error |
 
@@ -101,12 +102,15 @@ package state, or network request. The provisional executable is not a supported
 a stable `fairyc build` result. It is uninstrumented and does not link the native differential
 drop recorder or sanitizer runtimes.
 
-`experimental run-host` is a separate Windows/amd64 developer smoke, not another target selection.
-It discovers x64 MSVC and a complete Windows SDK locally, compiles with C11 warnings-as-errors and a
-static C runtime, executes a temporary PE, and deletes all temporary artifacts. It rejects foreign
-symbols, provisional standard-library linkage, `@repr(C)`, exact `c::*` scalar use, and foreign calls
-or results because those need an actual `x86_64-windows-msvc` TargetSpec and ABI contract. It does not
-use WSL, inherit a Developer Command Prompt, persist a build artifact, or claim Windows conformance.
+`experimental run-host` and `experimental build-host` are separate Windows/amd64 developer smokes,
+not target selections. They discover x64 MSVC and a complete Windows SDK locally and compile with C11
+warnings-as-errors plus a static C runtime. `run-host` executes and removes a temporary PE;
+`build-host` requires a canonical `.exe` path below the ignored source-root `build/` directory and
+uses the same no-overwrite staging and promotion boundary as the Linux experimental build. Both
+reject foreign symbols, provisional standard-library linkage, `@repr(C)`, exact `c::*` scalar use,
+and foreign calls or results because those need an actual `x86_64-windows-msvc` TargetSpec and ABI
+contract. Neither uses WSL or inherits a Developer Command Prompt, and a retained host-smoke PE is
+not a supported distribution artifact or Windows conformance evidence.
 
 For the admitted foreign-call slice, `emit-c` writes a plain external prototype and call using the
 declaration name by default or its single validated `@link_name` string. Compatible mappings to one
