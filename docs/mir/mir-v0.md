@@ -106,7 +106,11 @@ Fixture-visible trap categories use the canonical identities `bounds`, `integer-
 
 Arguments are fully evaluated into temporaries from left to right before the call terminator. A call records its destination, normal continuation, source span, unsafe scope when applicable, and foreign ABI when applicable.
 
-Foreign calls cannot expose a safe reference in their raw MIR signature. Unknown foreign functions receive no alias, no-unwind, read-only, or escape attributes unless an explicit wrapper contract proves them.
+Foreign declarations preserve separate source and external link identities. Declarations mapped to
+one link identity must have the same ABI, result type, and ordered parameter types or verification
+fails as `V1001`. Foreign calls cannot expose a safe reference in their raw MIR signature. Unknown
+foreign functions receive no alias, no-unwind, read-only, or escape attributes unless an explicit
+wrapper contract proves them.
 
 ## Verification invariants
 
@@ -114,7 +118,7 @@ The verifier runs before every interpreter or backend handoff.
 
 | Code | Invariant |
 | --- | --- |
-| `V1001` | Every reachable block ends in exactly one terminator; each operation has its required shape and concrete type identity; and every executable resource use agrees with one valid program-level resource definition. |
+| `V1001` | Every reachable block ends in exactly one terminator; each operation has its required shape and concrete type identity; every executable aggregate use agrees with one valid program-level definition; and foreign declarations mapped to one link name have compatible signatures. |
 | `V1002` | Every use is dominated by an initialized assignment on all incoming paths. |
 | `V1101` | A resource root is moved or dropped at most once. |
 | `V1102` | A live resource on a normal exiting edge has exactly one cleanup obligation. |

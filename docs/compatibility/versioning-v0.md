@@ -94,7 +94,9 @@ closed exact-name scalar Fairy-source caller to hand-written C callee crossings.
 V14 adds `textValidationSourceCallExecutions` for a generated Fairy caller linked against the
 actual provisional text-view C unit. V15 adds `textViewOutputSourceCallExecutions` for a generated
 Fairy caller that passes a verified raw address to a flat `@repr(C)` output record, observes the
-record mutation, and links the same real text-view C unit. The runner emits one exact version and does not pretend the
+record mutation, and links the same real text-view C unit. ADR 0051 later strengthens the existing
+source probes without changing report shape or counters: their Fairy declaration names now differ
+from their emitted external `@link_name` symbols. The runner emits one exact version and does not pretend the
 report shapes are interchangeable.
 
 ## Runtime and standard library

@@ -60,6 +60,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0048-source-callable-utf8-validation-transport.md`: exact allowlisted FY-to-real-stdlib-C empty-input UTF-8 validation crossing without a public wrapper claim.
 - `0049-repr-c-output-record-source-transport.md`: flat source `@repr(C)` records, verified direct-local raw addresses, and a real stdlib C output mutation crossing.
 - `0050-restricted-inert-enum-execution.md`: qualified restricted user-enum construction, exhaustive named-field matching, verified MIR, interpreter execution, and private C tag transport.
+- `0051-source-link-name-transport.md`: distinct Fairy declaration and external C symbol identities through AST, typed HIR, verified MIR, generated C, and existing native probes.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

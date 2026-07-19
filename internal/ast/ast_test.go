@@ -137,7 +137,7 @@ func TestLowerPreservesStructAttributesAndArgumentOrder(t *testing.T) {
 		t.Fatalf("structs = %+v", module.Structs)
 	}
 	attribute := module.Structs[0].Attributes[0]
-	if attribute.Name != "repr" || len(attribute.Arguments) != 1 || attribute.Arguments[0] != "C" {
+	if attribute.Name != "repr" || len(attribute.Arguments) != 1 || attribute.Arguments[0].Raw != "C" || attribute.Arguments[0].Cooked != "" {
 		t.Fatalf("attribute = %+v", attribute)
 	}
 	if len(module.Structs[0].Fields) != 2 || module.Structs[0].Fields[0].Name != "data" || module.Structs[0].Fields[1].Name != "length" {
@@ -170,7 +170,7 @@ func TestLowerCapturesEnumType(t *testing.T) {
 
 func TestLowerPreservesForeignDeclarationAndUnsafeBoundaries(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\nunsafe extern C fn add_one(value: i32) -> i32;\nunsafe fn wrapper(value: i32) -> i32 { add_one(value) }\nfn main() -> i32 { unsafe { add_one(41) } }\n")
+	input := []byte("module main;\n@link_name(\"fairyc_fixture_add_\\x6fne\")\nunsafe extern C fn add_one(value: i32) -> i32;\nunsafe fn wrapper(value: i32) -> i32 { add_one(value) }\nfn main() -> i32 { unsafe { add_one(41) } }\n")
 	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
 	if len(tree.Diagnostics) != 0 {
 		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
@@ -183,8 +183,12 @@ func TestLowerPreservesForeignDeclarationAndUnsafeBoundaries(t *testing.T) {
 		t.Fatalf("foreign functions = %+v", module.ForeignFunctions)
 	}
 	foreign := module.ForeignFunctions[0]
-	if foreign.Name != "add_one" || foreign.ABI != "C" || len(foreign.Parameters) != 1 || foreign.Parameters[0].Type.Text != "i32" || foreign.ResultType.Text != "i32" {
+	if foreign.Name != "add_one" || foreign.ABI != "C" || len(foreign.Parameters) != 1 || foreign.Parameters[0].Type.Text != "i32" || foreign.ResultType.Text != "i32" || len(foreign.Attributes) != 1 {
 		t.Fatalf("foreign function = %+v", foreign)
+	}
+	attribute := foreign.Attributes[0]
+	if attribute.Name != "link_name" || len(attribute.Arguments) != 1 || attribute.Arguments[0].Raw != "\"fairyc_fixture_add_\\x6fne\"" || attribute.Arguments[0].Cooked != "fairyc_fixture_add_one" {
+		t.Fatalf("foreign attribute = %+v", attribute)
 	}
 	if len(module.Functions) != 2 || !module.Functions[0].Unsafe || module.Functions[1].Unsafe {
 		t.Fatalf("functions = %+v", module.Functions)

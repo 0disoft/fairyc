@@ -2,6 +2,7 @@
 package ast
 
 import (
+	"encoding/hex"
 	"errors"
 	"strings"
 
@@ -26,11 +27,12 @@ type Module struct {
 
 // Enum is one restricted inert tagged type declaration.
 type Enum struct {
-	Name     string
-	Public   bool
-	Span     diagnostic.Span
-	NameSpan diagnostic.Span
-	Variants []EnumVariant
+	Name       string
+	Public     bool
+	Span       diagnostic.Span
+	NameSpan   diagnostic.Span
+	Attributes []Attribute
+	Variants   []EnumVariant
 }
 
 // EnumVariant preserves one declared tag and its ordered named payload fields.
@@ -55,17 +57,25 @@ type Struct struct {
 type Attribute struct {
 	Name      string
 	Span      diagnostic.Span
-	Arguments []string
+	Arguments []AttributeArgument
+}
+
+// AttributeArgument preserves source spelling, lexer-cooked content, and its exact source span.
+type AttributeArgument struct {
+	Raw    string
+	Cooked string
+	Span   diagnostic.Span
 }
 
 // Resource is one move-only named aggregate with compiler-owned cleanup.
 type Resource struct {
-	Name     string
-	Public   bool
-	Span     diagnostic.Span
-	NameSpan diagnostic.Span
-	Fields   []FieldDeclaration
-	Drop     *ResourceDrop
+	Name       string
+	Public     bool
+	Span       diagnostic.Span
+	NameSpan   diagnostic.Span
+	Attributes []Attribute
+	Fields     []FieldDeclaration
+	Drop       *ResourceDrop
 }
 
 // ResourceDrop preserves the source declaration and body until semantic support is selected.
@@ -98,6 +108,7 @@ type Function struct {
 	Unsafe     bool
 	Span       diagnostic.Span
 	NameSpan   diagnostic.Span
+	Attributes []Attribute
 	Parameters []Parameter
 	ResultType TypeReference
 	Body       *Block
@@ -110,6 +121,7 @@ type ForeignFunction struct {
 	ABI        string
 	Span       diagnostic.Span
 	NameSpan   diagnostic.Span
+	Attributes []Attribute
 	Parameters []Parameter
 	ResultType TypeReference
 }
@@ -240,10 +252,11 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 
 func lowerEnum(tree *syntax.Tree, node syntax.Node) Enum {
 	value := Enum{
-		Name:     node.Text,
-		Public:   containsKeywordBeforeName(tree, node, "pub", node.Text),
-		Span:     node.Span,
-		NameSpan: findIdentifierSpan(tree, node, node.Text, "enum"),
+		Name:       node.Text,
+		Public:     containsKeywordBeforeName(tree, node, "pub", node.Text),
+		Span:       node.Span,
+		NameSpan:   findIdentifierSpan(tree, node, node.Text, "enum"),
+		Attributes: lowerAttributes(tree, node),
 	}
 	for _, childID := range node.Children {
 		child, found := tree.Node(childID)
@@ -262,11 +275,18 @@ func lowerEnum(tree *syntax.Tree, node syntax.Node) Enum {
 
 func lowerStruct(tree *syntax.Tree, node syntax.Node) Struct {
 	value := Struct{
-		Name:     node.Text,
-		Public:   containsKeywordBeforeName(tree, node, "pub", node.Text),
-		Span:     node.Span,
-		NameSpan: findIdentifierSpan(tree, node, node.Text, "struct"),
+		Name:       node.Text,
+		Public:     containsKeywordBeforeName(tree, node, "pub", node.Text),
+		Span:       node.Span,
+		NameSpan:   findIdentifierSpan(tree, node, node.Text, "struct"),
+		Attributes: lowerAttributes(tree, node),
 	}
+	value.Fields = lowerFields(tree, node)
+	return value
+}
+
+func lowerAttributes(tree *syntax.Tree, node syntax.Node) []Attribute {
+	var result []Attribute
 	for _, childID := range node.Children {
 		child, found := tree.Node(childID)
 		if !found || child.Kind != syntax.KindAttribute {
@@ -278,20 +298,33 @@ func lowerStruct(tree *syntax.Tree, node syntax.Node) Struct {
 			if !ok || index == 0 && argument.Kind == syntax.KindPath && argument.Text == child.Text {
 				continue
 			}
-			attribute.Arguments = append(attribute.Arguments, argument.Text)
+			attribute.Arguments = append(attribute.Arguments, AttributeArgument{
+				Raw: argument.Text, Cooked: decodedAttributeArgument(argument), Span: argument.Span,
+			})
 		}
-		value.Attributes = append(value.Attributes, attribute)
+		result = append(result, attribute)
 	}
-	value.Fields = lowerFields(tree, node)
-	return value
+	return result
+}
+
+func decodedAttributeArgument(argument syntax.Node) string {
+	if !strings.HasPrefix(argument.Text, "\"") || argument.Cooked == "" {
+		return ""
+	}
+	decoded, err := hex.DecodeString(argument.Cooked)
+	if err != nil {
+		return ""
+	}
+	return string(decoded)
 }
 
 func lowerResource(tree *syntax.Tree, node syntax.Node) Resource {
 	value := Resource{
-		Name:     node.Text,
-		Public:   containsKeywordBeforeName(tree, node, "pub", node.Text),
-		Span:     node.Span,
-		NameSpan: findIdentifierSpan(tree, node, node.Text, "resource"),
+		Name:       node.Text,
+		Public:     containsKeywordBeforeName(tree, node, "pub", node.Text),
+		Span:       node.Span,
+		NameSpan:   findIdentifierSpan(tree, node, node.Text, "resource"),
+		Attributes: lowerAttributes(tree, node),
 	}
 	value.Fields = lowerFields(tree, node)
 	for _, childID := range node.Children {
@@ -351,11 +384,12 @@ func lowerImport(tree *syntax.Tree, node syntax.Node) Import {
 
 func lowerFunction(tree *syntax.Tree, node syntax.Node) Function {
 	value := Function{
-		Name:     node.Text,
-		Public:   containsKeywordBeforeName(tree, node, "pub", node.Text),
-		Unsafe:   containsKeywordBeforeName(tree, node, "unsafe", node.Text),
-		Span:     node.Span,
-		NameSpan: findIdentifierSpan(tree, node, node.Text, "fn"),
+		Name:       node.Text,
+		Public:     containsKeywordBeforeName(tree, node, "pub", node.Text),
+		Unsafe:     containsKeywordBeforeName(tree, node, "unsafe", node.Text),
+		Span:       node.Span,
+		NameSpan:   findIdentifierSpan(tree, node, node.Text, "fn"),
+		Attributes: lowerAttributes(tree, node),
 	}
 	for _, childID := range node.Children {
 		child, found := tree.Node(childID)
@@ -376,11 +410,12 @@ func lowerFunction(tree *syntax.Tree, node syntax.Node) Function {
 
 func lowerForeignFunction(tree *syntax.Tree, node syntax.Node) ForeignFunction {
 	value := ForeignFunction{
-		Name:     node.Text,
-		Public:   containsKeywordBeforeName(tree, node, "pub", node.Text),
-		ABI:      "C",
-		Span:     node.Span,
-		NameSpan: findIdentifierSpan(tree, node, node.Text, "fn"),
+		Name:       node.Text,
+		Public:     containsKeywordBeforeName(tree, node, "pub", node.Text),
+		ABI:        "C",
+		Span:       node.Span,
+		NameSpan:   findIdentifierSpan(tree, node, node.Text, "fn"),
+		Attributes: lowerAttributes(tree, node),
 	}
 	for _, childID := range node.Children {
 		child, found := tree.Node(childID)

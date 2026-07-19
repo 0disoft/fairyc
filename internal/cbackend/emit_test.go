@@ -59,7 +59,7 @@ func TestEmitScalarControlUnit(t *testing.T) {
 
 func TestEmitScalarForeignCall(t *testing.T) {
 	t.Parallel()
-	program := lowerSource(t, "module main;\nunsafe extern C fn fairyc_fixture_add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { fairyc_fixture_add_one(41) } }\n")
+	program := lowerSource(t, "module main;\n@link_name(\"fairyc_fixture_add_one\")\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n")
 	_, interpreterErr := interpreter.Execute(program, "main::main")
 	var interpreterCapability interpreter.CapabilityError
 	if !errors.As(interpreterErr, &interpreterCapability) || interpreterCapability.Kind != "foreign-call" {
@@ -82,6 +82,9 @@ func TestEmitScalarForeignCall(t *testing.T) {
 	}
 	if strings.Contains(unit.Source, "static int32_t fairyc_fixture_add_one") {
 		t.Fatalf("generated C turned an imported symbol into an internal definition:\n%s", unit.Source)
+	}
+	if strings.Contains(unit.Source, "extern int32_t add_one(") {
+		t.Fatalf("generated C used the Fairy declaration name instead of @link_name:\n%s", unit.Source)
 	}
 	if strings.Contains(unit.Source, "int32_t fy_l_0;") {
 		t.Fatalf("generated C declared a phantom local for the foreign symbol:\n%s", unit.Source)
@@ -108,8 +111,7 @@ func TestEmitRawPointerAndTargetScalarForeignCall(t *testing.T) {
 
 func TestEmitRejectsReservedExternalSymbol(t *testing.T) {
 	t.Parallel()
-	program := lowerSource(t, "module main;\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n")
-	program.ForeignFunctions[0].LinkName = "main"
+	program := lowerSource(t, "module main;\n@link_name(\"main\")\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n")
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	var capability cbackend.CapabilityError
 	if !errors.As(err, &capability) || capability.Function != "main::add_one" || capability.Feature != "external C symbol \"main\"" {
@@ -119,11 +121,20 @@ func TestEmitRejectsReservedExternalSymbol(t *testing.T) {
 
 func TestEmitRejectsUnrecognizedStandardLibrarySymbol(t *testing.T) {
 	t.Parallel()
-	program := lowerSource(t, "module main;\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n")
-	program.ForeignFunctions[0].LinkName = "fy_std_unrecognized_v0"
+	program := lowerSource(t, "module main;\n@link_name(\"fy_std_unrecognized_v0\")\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n")
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	var capability cbackend.CapabilityError
 	if !errors.As(err, &capability) || capability.Function != "main::add_one" || capability.Feature != "external C symbol \"fy_std_unrecognized_v0\"" {
+		t.Fatalf("Emit() error = %v", err)
+	}
+}
+
+func TestEmitRejectsLinkNameThatIsNotAC11Identifier(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, "module main;\n@link_name(\"bad-name\")\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n")
+	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	var capability cbackend.CapabilityError
+	if !errors.As(err, &capability) || capability.Function != "main::add_one" || capability.Feature != "external C symbol \"bad-name\"" {
 		t.Fatalf("Emit() error = %v", err)
 	}
 }
@@ -149,9 +160,9 @@ func TestEmitGuardsExternalSymbolAgainstHeaderMacro(t *testing.T) {
 func TestEmitCoalescesCompatibleExternalDeclarations(t *testing.T) {
 	t.Parallel()
 	program := lowerSources(t, map[string]string{
-		"bindingsa.fy": "module bindingsa;\npub unsafe extern C fn shared_add_one(value: i32) -> i32;\n",
-		"bindingsb.fy": "module bindingsb;\npub unsafe extern C fn shared_add_one(value: i32) -> i32;\n",
-		"main.fy":      "module main;\nimport bindingsb as b;\nfn main() -> i32 { unsafe { b::shared_add_one(41) } }\n",
+		"bindingsa.fy": "module bindingsa;\n@link_name(\"shared_add_one\")\npub unsafe extern C fn add_from_a(value: i32) -> i32;\n",
+		"bindingsb.fy": "module bindingsb;\n@link_name(\"shared_add_one\")\npub unsafe extern C fn add_from_b(value: i32) -> i32;\n",
+		"main.fy":      "module main;\nimport bindingsb as b;\nfn main() -> i32 { unsafe { b::add_from_b(41) } }\n",
 	})
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil {
@@ -166,12 +177,12 @@ func TestEmitCoalescesCompatibleExternalDeclarations(t *testing.T) {
 func TestEmitRejectsConflictingExternalDeclarations(t *testing.T) {
 	t.Parallel()
 	program := lowerSources(t, map[string]string{
-		"bindingsa.fy": "module bindingsa;\npub unsafe extern C fn shared_symbol(value: i32) -> i32;\n",
-		"bindingsb.fy": "module bindingsb;\npub unsafe extern C fn shared_symbol() -> i32;\n",
+		"bindingsa.fy": "module bindingsa;\n@link_name(\"shared_symbol\")\npub unsafe extern C fn accepts_value(value: i32) -> i32;\n",
+		"bindingsb.fy": "module bindingsb;\n@link_name(\"shared_symbol\")\npub unsafe extern C fn no_arguments() -> i32;\n",
 		"main.fy":      "module main;\nfn main() -> i32 { 0 }\n",
 	})
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
-	if err == nil || !strings.Contains(err.Error(), "conflicting external C declarations") || !strings.Contains(err.Error(), "shared_symbol") {
+	if err == nil || !strings.Contains(err.Error(), "C emission requires verified MIR: V1001") {
 		t.Fatalf("Emit() error = %v", err)
 	}
 }

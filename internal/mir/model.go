@@ -2,6 +2,7 @@
 package mir
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/hir"
@@ -121,6 +122,11 @@ type ForeignFunction struct {
 	ParameterTypes []hir.Type
 	ResultType     hir.Type
 	Entity         string
+}
+
+// CompatibleForeignSignature reports whether two declarations can name one external ABI symbol.
+func CompatibleForeignSignature(left, right ForeignFunction) bool {
+	return left.ABI == right.ABI && left.ResultType == right.ResultType && slices.Equal(left.ParameterTypes, right.ParameterTypes)
 }
 
 // ResourceType is one verified move-only aggregate definition used by executable MIR.

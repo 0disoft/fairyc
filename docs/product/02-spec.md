@@ -187,6 +187,11 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   or `&mut T -> *mut T` cast inside `unsafe`. AST keeps the target type separate, typed HIR keeps
   unsafe scope, MIR verifies pointee/mutability/provenance, generated C emits `&local`, and the
   interpreter fails closed instead of inventing an address.
+- An `unsafe extern C fn` may keep its Fairy name as the external symbol or use exactly one
+  nonempty `@link_name("symbol")`. AST preserves raw and cooked attribute evidence, typed HIR and
+  MIR preserve distinct source/link identities, and generated C validates and emits only the link
+  identity. Compatible declarations of one external symbol coalesce; conflicting signatures fail
+  closed. The attribute grants no interpreter or host-binding authority.
 - The C backend is the only committed Stage 0 product backend and emits a constrained target/toolchain profile rather than universally portable C.
 - `internal/target` owns the executable `fairyc.target-spec/v0` description for the first target.
   It records host-independent LP64, scalar, pointer, SysV AMD64, ELF, unwind, debug, and C-layout

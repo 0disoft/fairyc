@@ -422,14 +422,14 @@ func TestAnalyzeRejectsNonEmptyResourceDropBodyAsUnsupported(t *testing.T) {
 func TestAnalyzeTypesForeignCallInsideUnsafeBlock(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{
-		"main.fy": "module main;\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n",
+		"main.fy": "module main;\n@link_name(\"fairyc_fixture_add_one\")\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n",
 	})
 	assertCleanTypeResult(t, result)
 	if len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].ForeignFunctions) != 1 {
 		t.Fatalf("HIR = %+v", result.HIR)
 	}
 	foreign := result.HIR.Modules[0].ForeignFunctions[0]
-	if foreign.Name != "add_one" || foreign.LinkName != "add_one" || foreign.ABI != "C" || foreign.ResultType != hir.TypeI32 || len(foreign.Parameters) != 1 || foreign.Parameters[0].Type != hir.TypeI32 {
+	if foreign.Name != "add_one" || foreign.LinkName != "fairyc_fixture_add_one" || foreign.ABI != "C" || foreign.ResultType != hir.TypeI32 || len(foreign.Parameters) != 1 || foreign.Parameters[0].Type != hir.TypeI32 {
 		t.Fatalf("foreign function = %+v", foreign)
 	}
 	tail := result.HIR.Modules[0].Functions[0].Body.Tail
@@ -439,6 +439,59 @@ func TestAnalyzeTypesForeignCallInsideUnsafeBlock(t *testing.T) {
 	call := tail.Children[0].Block.Tail
 	if call.Kind != "call" || call.ForeignABI != "C" || call.UnsafeScope == nil || call.Symbol != foreign.Symbol {
 		t.Fatalf("foreign call = %+v", call)
+	}
+}
+
+func TestAnalyzeRejectsMalformedOrDuplicateLinkName(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		name string
+		text string
+		last bool
+	}{
+		{name: "no argument", text: "module main;\n@link_name\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { 0 }\n"},
+		{name: "empty string", text: "module main;\n@link_name(\"\")\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { 0 }\n"},
+		{name: "path argument", text: "module main;\n@link_name(C)\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { 0 }\n"},
+		{name: "two arguments", text: "module main;\n@link_name(\"first\", \"second\")\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { 0 }\n"},
+		{name: "byte string", text: "module main;\n@link_name(b\"symbol\")\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { 0 }\n"},
+		{name: "C string", text: "module main;\n@link_name(c\"symbol\")\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { 0 }\n"},
+		{name: "duplicate", text: "module main;\n@link_name(\"first\")\n@link_name(\"second\")\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { 0 }\n", last: true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			result := analyzeText(t, map[string]string{"main.fy": test.text})
+			if result.FailedPhase != semantic.PhaseType || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E5106" {
+				t.Fatalf("result = %+v", result)
+			}
+			start := strings.Index(test.text, "@link_name")
+			if test.last {
+				start = strings.LastIndex(test.text, "@link_name")
+			}
+			end := strings.Index(test.text[start:], "\n")
+			if end < 0 {
+				end = len(test.text) - start
+			}
+			assertSpan(t, result.Diagnostics[0].Primary, "main.fy", start, start+end)
+		})
+	}
+}
+
+func TestAnalyzeDoesNotSilentlyAcceptUnknownForeignAttribute(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\n@calling_convention(C)\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { 0 }\n",
+	})
+	if len(result.Diagnostics) != 0 || len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "foreign function attribute @calling_convention" {
+		t.Fatalf("result = %+v", result)
+	}
+}
+
+func TestAnalyzeDoesNotSilentlyAcceptLinkNameOnOrdinaryFunction(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\n@link_name(\"external_main\")\nfn main() -> i32 { 0 }\n",
+	})
+	if len(result.Diagnostics) != 0 || len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "function attribute @link_name" {
+		t.Fatalf("result = %+v", result)
 	}
 }
 

@@ -123,12 +123,12 @@ func TestLowerRejectsNonEmptyResourceDropKind(t *testing.T) {
 
 func TestLowerPreservesForeignCallABIAndUnsafeProvenance(t *testing.T) {
 	t.Parallel()
-	program := lowerTestSource(t, "module main;\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n")
+	program := lowerTestSource(t, "module main;\n@link_name(\"fairyc_fixture_add_one\")\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n")
 	if len(program.ForeignFunctions) != 1 {
 		t.Fatalf("foreign functions = %+v", program.ForeignFunctions)
 	}
 	foreign := program.ForeignFunctions[0]
-	if foreign.Name != "main::add_one" || foreign.LinkName != "add_one" || foreign.ABI != "C" || foreign.ResultType != hir.TypeI32 || !slices.Equal(foreign.ParameterTypes, []hir.Type{hir.TypeI32}) {
+	if foreign.Name != "main::add_one" || foreign.LinkName != "fairyc_fixture_add_one" || foreign.ABI != "C" || foreign.ResultType != hir.TypeI32 || !slices.Equal(foreign.ParameterTypes, []hir.Type{hir.TypeI32}) {
 		t.Fatalf("foreign function = %+v", foreign)
 	}
 	function := program.Functions[0]
@@ -187,6 +187,32 @@ func TestLowerPreservesForeignCallABIAndUnsafeProvenance(t *testing.T) {
 				t.Fatalf("Verify() after %s = %+v", test.name, failures)
 			}
 		})
+	}
+}
+
+func TestVerifyRejectsConflictingForeignSignaturesForOneLinkName(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, "module main;\n@link_name(\"shared_symbol\")\nunsafe extern C fn with_value(value: i32) -> i32;\nfn main() -> i32 { 0 }\n")
+	conflict := program.ForeignFunctions[0]
+	conflict.Symbol = hir.SymbolID(999)
+	conflict.Name = "other::without_value"
+	conflict.ParameterTypes = nil
+	conflict.Entity = "foreign:other.fy:0:1"
+	program.ForeignFunctions = append(program.ForeignFunctions, conflict)
+	failures := Verify(program)
+	if len(failures) != 1 || failures[0].Code != "V1001" || failures[0].Entity != conflict.Entity || !strings.Contains(failures[0].Detail, "conflicting signatures") {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+}
+
+func TestVerifyRejectsEmptyForeignLinkName(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, "module main;\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { 0 }\n")
+	entity := program.ForeignFunctions[0].Entity
+	program.ForeignFunctions[0].LinkName = ""
+	failures := Verify(program)
+	if len(failures) != 1 || failures[0].Code != "V1001" || failures[0].Entity != entity || !strings.Contains(failures[0].Detail, "incomplete") {
+		t.Fatalf("Verify() failures = %+v", failures)
 	}
 }
 

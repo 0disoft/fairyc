@@ -263,9 +263,9 @@ func TestExperimentalEmitCWritesDeterministicTranslationUnit(t *testing.T) {
 func TestExperimentalEmitCEmitsScalarForeignCall(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nunsafe extern C fn fairyc_fixture_add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { fairyc_fixture_add_one(41) } }\n")
+	writeTestSource(t, root, "main.fy", "module main;\n@link_name(\"fairyc_fixture_add_one\")\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "emit-c", "main.fy"}, root)
-	if code != ExitSuccess || stderr != "" || !strings.Contains(stdout, "extern int32_t fairyc_fixture_add_one(int32_t fy_a_0);") || !strings.Contains(stdout, "fairyc_fixture_add_one(INT32_C(41))") {
+	if code != ExitSuccess || stderr != "" || !strings.Contains(stdout, "extern int32_t fairyc_fixture_add_one(int32_t fy_a_0);") || !strings.Contains(stdout, "fairyc_fixture_add_one(INT32_C(41))") || strings.Contains(stdout, "extern int32_t add_one(") {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
 	}
 }
@@ -273,7 +273,7 @@ func TestExperimentalEmitCEmitsScalarForeignCall(t *testing.T) {
 func TestExperimentalRunRejectsForeignCallWithoutHostBinding(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nunsafe extern C fn fairyc_fixture_add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { fairyc_fixture_add_one(41) } }\n")
+	writeTestSource(t, root, "main.fy", "module main;\n@link_name(\"fairyc_fixture_add_one\")\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
 	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "outside the experimental interpreter subset") || !strings.Contains(stderr, "cannot execute foreign ABI \"C\" call") {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)

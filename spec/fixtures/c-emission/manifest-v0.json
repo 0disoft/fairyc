@@ -4,7 +4,7 @@
   "deferred": [
     "C parsing, compilation, object emission, linking, and native execution inside this emission-only runner; the separate Linux runner owns that evidence",
     "output, negative and larger i32 returns, user drop-body effects, and sanitizer observations beyond the native process-status and compiler-owned drop-trace oracle",
-    "non-i32, empty, nested, partial-initialization, nonempty-drop, and nested-tag resource values plus Region, borrow, unsafe, FFI, complete runtime, and standard-library C lowering",
+    "non-i32, empty, nested, partial-initialization, nonempty-drop, and nested-tag resource values plus Region, borrow, complete runtime, and general standard-library C lowering; foreign calls requiring host binding are owned by separate C-backend and native-runner evidence",
     "target layout, C ABI classification, object metadata, symbol, relocation, and sanitizer evidence"
   ],
   "contracts": [

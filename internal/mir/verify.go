@@ -145,6 +145,7 @@ func verifyStructTypes(definitions []StructType) (map[hir.Type]*StructType, []Ve
 
 func verifyForeignFunctions(definitions []ForeignFunction) (map[hir.SymbolID]*ForeignFunction, []VerificationError) {
 	result := make(map[hir.SymbolID]*ForeignFunction, len(definitions))
+	byLinkName := make(map[string]*ForeignFunction, len(definitions))
 	var failures []VerificationError
 	for index := range definitions {
 		definition := &definitions[index]
@@ -158,6 +159,13 @@ func verifyForeignFunctions(definitions []ForeignFunction) (map[hir.SymbolID]*Fo
 			continue
 		}
 		result[definition.Symbol] = definition
+		if previous, duplicate := byLinkName[definition.LinkName]; duplicate {
+			if !CompatibleForeignSignature(*previous, *definition) {
+				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "foreign declarations for one link name have conflicting signatures"})
+			}
+		} else {
+			byLinkName[definition.LinkName] = definition
+		}
 		if _, _, borrow := hir.BorrowElement(definition.ResultType); borrow {
 			failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "foreign result exposes a safe borrow"})
 		}

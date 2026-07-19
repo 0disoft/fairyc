@@ -97,12 +97,13 @@ explicit in MIR.
 
 Raw foreign signatures contain C ABI scalars, explicitly represented aggregates, and raw pointers. Safe borrows are constructed only in Fairy C wrappers after validation.
 
-The implemented source slice preserves individual `unsafe extern C fn` declarations and
+The implemented source slice preserves individual `unsafe extern C fn` declarations, one optional
+nonempty `@link_name("symbol")`, and
 `unsafe {}` or `unsafe fn` call provenance through AST, typed HIR, and verified MIR. The C backend
-currently admits exact-name `C` declarations using `i32`, `u8`, `u32`, `usize`, raw pointers to
+currently admits `C` declarations using `i32`, `u8`, `u32`, `usize`, raw pointers to
 that bounded scalar set, and raw pointers to admitted nonempty `@repr(C)` structs. It emits one plain prototype and an ordinary call without `pure`, `const`, `restrict`,
 `nothrow`, alias, retention, or visibility promises. Compatible repeated declarations of the same
-external name coalesce; signature conflicts fail closed. A local preprocessor guard undefines an
+external name coalesce even when their Fairy names differ; signature conflicts fail closed. A local preprocessor guard undefines an
 included-header macro with that name before the prototype. `main`, generated `fy_`/`FY_` names,
 C11 keywords, and identifiers consumed by the generated preamble are rejected. The only current
 exceptions to the generated `fy_` namespace are the exact allowlisted internal standard-library
@@ -114,7 +115,7 @@ forbids mutability strengthening, lowers to a verified MIR raw-address operation
 arbitrary casts remain rejected.
 Source `@repr(C)` construction, field reads, exact public names, layout assertions, pointer
 prototype spelling, and direct-local address passing are implemented, but by-value aggregate ABI,
-nested enum or built-in-tag payloads, array fields, `@link_name`, `c.*` scalars, and callbacks remain outside this slice.
+nested enum or built-in-tag payloads, array fields, `c.*` scalars, and callbacks remain outside this slice.
 
 The MIR interpreter deliberately returns a `foreign-call` capability error instead of guessing a
 host binding. A closed native fixture compiles the generated Fairy caller and a hand-written C

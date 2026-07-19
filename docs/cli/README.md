@@ -24,7 +24,7 @@ The Go frontend currently exposes `fairyc experimental parse <file.fy>`,
 `fairyc experimental check-semantics <file.fy> [<file.fy>...]`. The compiler prototype also exposes
 `fairyc experimental target-spec x86_64-linux-gnu` for deterministic host-independent target
 inspection,
-`fairyc experimental emit-c <file.fy>` for deterministic scalar, exact-name scalar foreign-call,
+`fairyc experimental emit-c <file.fy>` for deterministic scalar, explicitly link-mapped foreign-call,
 flat-resource, and resource-tagged C11 inspection and
 `fairyc experimental build <file.fy> --cc <clang|gcc> --profile <low|optimized> --output <build/path>`
 for an explicit host-Linux executable in that subset, and
@@ -52,10 +52,11 @@ code. The native fixture lane's `drop-trace-v0` observer profile is not availabl
 command and never appears in its output.
 The admitted foreign declaration form currently supports `i32`, `u8`, `u32`, `usize`, raw pointers
 to that bounded scalar set, and raw pointers to admitted flat `@repr(C)` structs. It uses its source
-identifier as the exact C symbol and requires an explicit unsafe boundary. Raw pointers can be null,
+identifier as the C symbol by default or accepts one nonempty `@link_name("symbol")`, and requires
+an explicit unsafe boundary. Raw pointers can be null,
 returned by another admitted foreign call, or produced by an exact direct-local borrow-to-pointer
 cast inside `unsafe`. Dereference, arithmetic, integer conversion, mutability strengthening, and
-arbitrary casts remain unavailable. No `@link_name`, callback, `c.*` scalar, nested or by-value
+arbitrary casts remain unavailable. No callback, `c.*` scalar, nested or by-value
 aggregate, export, or inferred C attribute is implemented.
 `experimental build` sends that exact constrained-C unit through the shared bounded C driver and embedded
 runtime. It has no implicit compiler, optimization, or output choice; requires Linux/amd64 with

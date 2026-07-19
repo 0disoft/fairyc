@@ -46,15 +46,16 @@ unsafe extern C fn
 
 `pub` is not an ABI marker.
 
-The current executable source subset implements exact-name `unsafe extern C fn` imports with
+The current executable source subset implements `unsafe extern C fn` imports with an optional
+single nonempty `@link_name("symbol")`, using
 `i32`, `u8`, `u32`, `usize`, raw pointers to that bounded scalar set, and raw pointers to an
 admitted nonempty `@repr(C)` struct. AST, typed HIR, MIR, unsafe provenance, deterministic C
-prototype emission, typed null, separate-object cross-compiler linking, and process-status
+source/link identity, prototype emission, typed null, separate-object cross-compiler linking, and process-status
 observation are wired. Source struct construction and field reads reach verified MIR, the MIR
 interpreter for its executable scalar subset, and generated C. Inside an explicit unsafe boundary,
 an exact `&T -> *T`, `&mut T -> *T`, or `&mut T -> *mut T` cast may take the address of a direct
 local place without inventing alias promises. Raw dereference, pointer arithmetic, integer-pointer
-conversion, mutability strengthening, and other casts remain unsupported. This is not implementation of `@link_name`, exports, callbacks, `c.*` scalars,
+conversion, mutability strengthening, and other casts remain unsupported. This is not implementation of exports, callbacks, `c.*` scalars,
 nested/array/enum `@repr(C)` fields, or by-value aggregate calls and returns. The interpreter
 remains fail-closed on every foreign call.
 

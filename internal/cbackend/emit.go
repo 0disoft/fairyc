@@ -409,7 +409,7 @@ func normalizeForeignFunctions(input []mir.ForeignFunction) ([]mir.ForeignFuncti
 		}
 		if index, duplicateName := byLinkName[function.LinkName]; duplicateName {
 			canonical := &result[index]
-			if canonical.ABI != function.ABI || canonical.ResultType != function.ResultType || !slices.Equal(canonical.ParameterTypes, function.ParameterTypes) {
+			if !mir.CompatibleForeignSignature(*canonical, function) {
 				return nil, nil, fmt.Errorf("conflicting external C declarations %s and %s name %q", canonical.Name, function.Name, function.LinkName)
 			}
 			bySymbol[function.Symbol] = index

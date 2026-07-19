@@ -65,8 +65,9 @@ fn main() -> i32 {
 `
 
 const foreignCallSmokeSource = `module main;
-unsafe extern C fn fairyc_fixture_add_one(value: i32) -> i32;
-fn main() -> i32 { unsafe { fairyc_fixture_add_one(41) } }
+@link_name("fairyc_fixture_add_one")
+unsafe extern C fn add_one(value: i32) -> i32;
+fn main() -> i32 { unsafe { add_one(41) } }
 `
 
 const foreignCallCompanionSource = `#include <stdint.h>
@@ -100,9 +101,10 @@ uint32_t fairyc_fixture_pointer_scalars(
 `
 
 const textValidationSourceCallSmokeSource = `module main;
-unsafe extern C fn fy_std_text_utf8_valid_v0(data: *u8, length: usize) -> u32;
+@link_name("fy_std_text_utf8_valid_v0")
+unsafe extern C fn utf8_valid(data: *u8, length: usize) -> u32;
 fn main() -> i32 {
-    if unsafe { fy_std_text_utf8_valid_v0(null, 0) } == 1 { 42 } else { 1 }
+    if unsafe { utf8_valid(null, 0) } == 1 { 42 } else { 1 }
 }
 `
 
@@ -112,7 +114,8 @@ struct fy_std_text_view_v0 {
     data: *u8;
     length: usize;
 }
-unsafe extern C fn fy_std_text_validate_utf8_v0(
+@link_name("fy_std_text_validate_utf8_v0")
+unsafe extern C fn validate_utf8(
     data: *u8,
     length: usize,
     output: *mut fy_std_text_view_v0
@@ -120,7 +123,7 @@ unsafe extern C fn fy_std_text_validate_utf8_v0(
 fn main() -> i32 {
     var output: fy_std_text_view_v0 = fy_std_text_view_v0 { data: null, length: 99 };
     let status: u32 = unsafe {
-        fy_std_text_validate_utf8_v0(
+        validate_utf8(
             null,
             0,
             &mut output as *mut fy_std_text_view_v0

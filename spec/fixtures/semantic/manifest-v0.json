@@ -9,6 +9,7 @@
     "docs/language/0007-name-resolution-and-typing-v0.md",
     "docs/adr/0024-stage-0-loop-control-and-cleanup.md",
     "docs/adr/0046-scalar-source-foreign-c-call.md",
+    "docs/adr/0051-source-link-name-transport.md",
     "docs/diagnostics/catalog-v0.md"
   ],
   "cases": [
@@ -128,18 +129,18 @@
         "completedThrough": "flow",
         "resolutions": [
           {
-            "use": { "source": "main.fy", "startByte": 94, "endByte": 101 },
+            "use": { "source": "main.fy", "startByte": 131, "endByte": 138 },
             "target": {
               "module": "main",
               "name": "add_one",
               "kind": "foreign-function",
-              "declaration": { "source": "main.fy", "startByte": 33, "endByte": 40 }
+              "declaration": { "source": "main.fy", "startByte": 70, "endByte": 77 }
             }
           }
         ],
         "types": [
           {
-            "expression": { "source": "main.fy", "startByte": 94, "endByte": 105 },
+            "expression": { "source": "main.fy", "startByte": 131, "endByte": 142 },
             "canonicalType": "i32"
           }
         ]
@@ -423,6 +424,48 @@
                   "startByte": 48,
                   "endByte": 53
                 }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.malformed-link-name",
+      "sourceRoot": "cases/fail/malformed-link-name/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          {
+            "code": "E5106",
+            "primary": { "source": "main.fy", "startByte": 14, "endByte": 27 },
+            "related": [
+              {
+                "role": "declaration",
+                "span": { "source": "main.fy", "startByte": 47, "endByte": 54 }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.duplicate-link-name",
+      "sourceRoot": "cases/fail/duplicate-link-name/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          {
+            "code": "E5106",
+            "primary": { "source": "main.fy", "startByte": 41, "endByte": 68 },
+            "related": [
+              {
+                "role": "declaration",
+                "span": { "source": "main.fy", "startByte": 88, "endByte": 95 }
               }
             ]
           }

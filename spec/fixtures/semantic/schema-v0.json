@@ -129,7 +129,7 @@
           "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
         },
         "kind": {
-          "enum": ["const", "struct", "resource", "enum", "function", "parameter", "local"]
+          "enum": ["const", "struct", "resource", "enum", "function", "foreign-function", "parameter", "local"]
         },
         "declaration": {
           "$ref": "#/$defs/span"

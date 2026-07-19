@@ -157,6 +157,11 @@ unsafe extern C fn c_read(
 ) -> c::ssize_t;
 ```
 
+Without the attribute, the Fairy declaration name is also the external C identifier. With it, the
+Fairy name remains the source lookup name and the one nonempty cooked string becomes the external
+identifier. Missing, non-string, empty, multiple, or duplicate arguments are `E5106`; the backend
+still rejects names outside its C11 and private-namespace policy.
+
 There is no parallel `extern C {}` block syntax. C-layout types use `@repr(C)`. Pointer casts and raw dereferences require unsafe code. `as` is limited to value-preserving conversions; narrowing uses an explicit fallible conversion.
 
 ## Grammar and recovery authority

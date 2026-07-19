@@ -74,6 +74,7 @@ Diagnostic codes are stable identifiers for a semantic category. Exact wording a
 | `E5103` | Foreign unwind, exception, or `longjmp` may cross a Fairy C frame. |
 | `E5104` | Safe foreign callback is not supported in Stage 0. |
 | `E5105` | A retained foreign-pointer API received stack or region-borrowed storage. |
+| `E5106` | `@link_name` is duplicated or does not contain exactly one nonempty string literal. |
 | `E6101` | Type has no supported ABI classification for the selected target. |
 | `E6102` | Required target layout fact is unknown. |
 | `E6103` | C ABI v0 excludes the requested calling, layout, callback, TLS, or variadic feature. |

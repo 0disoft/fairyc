@@ -21,7 +21,8 @@ Current implementation status: the source, lexer, recoverable-syntax, parser-dia
 lowering, and parser-fixture-runner portion of the first item exists. Name resolution and typed HIR
 now cover the semantic fixture's scalar and safe-borrow subset. Local last-use loans, borrow
   conflicts, single-origin borrow returns, Stage 0 signed-left-shift rejection, loop-context diagnostics,
-  and scalar foreign-call unsafe/signature boundaries execute across all 16 semantic v0 cases. General
+  scalar foreign-call unsafe/signature boundaries, and `@link_name` shape diagnostics execute across
+  all 18 semantic v0 cases. General
   whole-root resource Flow now executes all 12 resource v0 cases, including branch, normal-loop,
   break-edge, and continue-edge state rejection. Result Flow executes all 24 result v0 cases, including qualified scalar construction,
 exhaustive shallow matching, and local, parameter, branch, loop, overwrite, and early-return
@@ -89,8 +90,9 @@ host. A host-independent SysV AMD64 classifier now executes 17 versioned cases f
 classes, registers, exhaustion rollback, and hidden returns, but bidirectional native ABI fixtures
 and hosted evidence remain incomplete. Its 14 pass plans now generate 56 configured separate-object
 Clang/GCC crossings in both compiler directions and profiles; these are not yet hosted evidence or
- source-level aggregate Fairy FFI fixtures. An exact-name scalar `i32 -> i32` source fixture now
- traverses AST, HIR, MIR, C emission, separate objects, and both compiler directions, but its four
+ source-level aggregate Fairy FFI fixtures. An explicitly `@link_name`-mapped scalar `i32 -> i32`
+ source fixture now traverses AST, HIR, MIR, C emission, separate objects, and both compiler
+ directions, but its four
  native executions remain unobserved on this Windows host.
 The first standard-library-owned C storage slice now implements provisional fallible `SystemHeap`
 allocation, copy-and-release resize, zero-size normalization, fundamental-alignment rejection, and
@@ -119,13 +121,14 @@ The Linux File C slice now also covers partial read/write, write-all progress, s
 close including forced close failure. Its four native runs remain configured but unobserved, and
 source-visible File effects and error resources remain missing.
 
-The source FFI slice admits exact-name `unsafe extern C fn` declarations using `i32`, `u8`, `u32`,
-`usize`, raw pointers to that bounded scalar set, and raw pointers to flat nonempty `@repr(C)`
-records. Unsafe call and raw-address provenance survive AST, typed HIR, and MIR verification; the C
+The source FFI slice admits `unsafe extern C fn` declarations using `i32`, `u8`, `u32`, `usize`, raw
+pointers to that bounded scalar set, and raw pointers to flat nonempty `@repr(C)` records. A single
+`@link_name("symbol")` may separate the Fairy lookup name from the external C symbol. Unsafe call,
+link identity, and raw-address provenance survive AST, typed HIR, and MIR verification; the C
 backend emits unannotated prototypes, exact record tags/fields/layout assertions, and `&local` only
 for an exact unsafe borrow-to-pointer cast. The native lane plans four scalar, four typed-null
 pointer/target-scalar, four real UTF-8 validation, and four real text-view output-record crossings.
-The interpreter refuses raw addresses and foreign execution. `@link_name`, dereference, pointer
+The interpreter refuses raw addresses and foreign execution. Dereference, pointer
 arithmetic, arbitrary casts, callbacks, `c.*` scalars, nested or by-value aggregates, exports, and
 public standard-library wrappers remain Phase 2 work. The internal empty-input text transports are
 real source-to-stdlib-C exceptions, not completed wrappers.

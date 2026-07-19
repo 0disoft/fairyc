@@ -69,6 +69,9 @@ func (a *analyzer) typeCheck() Result {
 
 func (a *analyzer) checkEnum(module *moduleScope, enumeration *ast.Enum) hir.Enum {
 	value := a.enums[enumeration]
+	for _, attribute := range enumeration.Attributes {
+		a.addUnsupported(module.file.Path, attribute.Span, "enum attribute @"+attribute.Name)
+	}
 	result := hir.Enum{Name: enumeration.Name, Type: value.typ, Span: span(module.file.Path, enumeration.Span)}
 	if info := a.enumTypes[value.typ]; info != nil {
 		for _, variant := range info.orderedVariants {
@@ -96,8 +99,23 @@ func (a *analyzer) checkStruct(module *moduleScope, structure *ast.Struct) hir.S
 
 func (a *analyzer) checkForeignFunction(module *moduleScope, function *ast.ForeignFunction) hir.ForeignFunction {
 	symbol := a.foreignFunctions[function]
+	linkName := function.Name
+	seenLinkName := false
+	for _, attribute := range function.Attributes {
+		if attribute.Name != "link_name" {
+			a.addUnsupported(module.file.Path, attribute.Span, "foreign function attribute @"+attribute.Name)
+			continue
+		}
+		if seenLinkName || len(attribute.Arguments) != 1 || len(attribute.Arguments[0].Raw) < 2 || attribute.Arguments[0].Raw[0] != '"' || attribute.Arguments[0].Cooked == "" {
+			a.addDiagnostic("E5106", span(module.file.Path, attribute.Span), RelatedSpan{Role: "declaration", Span: span(module.file.Path, function.NameSpan)})
+			seenLinkName = true
+			continue
+		}
+		seenLinkName = true
+		linkName = attribute.Arguments[0].Cooked
+	}
 	result := hir.ForeignFunction{
-		Symbol: symbol.id, Name: function.Name, LinkName: function.Name, ABI: function.ABI,
+		Symbol: symbol.id, Name: function.Name, LinkName: linkName, ABI: function.ABI,
 		Span: span(module.file.Path, function.Span), ResultType: a.canonicalType(module, function.ResultType),
 	}
 	symbol.typ = result.ResultType
@@ -124,6 +142,9 @@ func (a *analyzer) checkForeignFunction(module *moduleScope, function *ast.Forei
 
 func (a *analyzer) checkResource(module *moduleScope, resource *ast.Resource) hir.Resource {
 	value := a.resources[resource]
+	for _, attribute := range resource.Attributes {
+		a.addUnsupported(module.file.Path, attribute.Span, "resource attribute @"+attribute.Name)
+	}
 	result := hir.Resource{
 		Name:     resource.Name,
 		Type:     value.typ,
@@ -152,6 +173,9 @@ func (a *analyzer) checkResource(module *moduleScope, resource *ast.Resource) hi
 
 func (c *typeChecker) checkFunction() hir.Function {
 	functionSymbol := c.analyzer.functions[c.function]
+	for _, attribute := range c.function.Attributes {
+		c.analyzer.addUnsupported(c.module.file.Path, attribute.Span, "function attribute @"+attribute.Name)
+	}
 	resultType := c.canonicalType(c.function.ResultType)
 	functionSymbol.typ = resultType
 	if errorSpan, ok := resultFailureSpan(c.function.ResultType); ok {
