@@ -53,8 +53,9 @@ incomplete calling contract.
 - The next host-independent gate can execute LLP64 layout fixtures against these facts. Microsoft
   x64 classification, native ABI crossings, PE/COFF inspection, and unwind validation remain
   separate later gates.
-- ADR 0076 later adds the host-independent Microsoft x64 classifier and removes only that missing
-  capability marker; native crossings and the remaining target gates stay fail-closed.
+- ADR 0076 later adds the host-independent Microsoft x64 classifier, ADR 0077 adds same-MSVC native
+  crossings, and ADR 0078 adds linked PE executable-structure inspection. Only the corresponding
+  narrow evidence advances; the remaining target gates stay fail-closed.
 - Extending the stack schema changes every target document structurally even though the Linux
   shadow-space value is zero.
 

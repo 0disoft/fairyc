@@ -76,6 +76,10 @@ but is not a public binding format, stable native Fairy ABI, object contract, or
 receipt. Changing class merge, exhaustion rollback, hidden-result, or register identities requires
 a new fixture-contract and applicable target/ABI-profile decision.
 
+The PE executable inspector is internal validation policy rather than a serialized compatibility
+format. Tightening its admitted image structure requires synchronized synthetic rejection tests and
+Windows smoke evidence, but does not create a stable PE, COFF object, debug, or unwind contract.
+
 ## Diagnostics
 
 The diagnostic catalog versions rule identities. Once a code appears in a released compiler, it is not reused for another rule. Wording, related notes, and repair hints may improve without changing the code; severity or rule meaning changes require a new compatibility decision.

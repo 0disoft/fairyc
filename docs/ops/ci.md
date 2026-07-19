@@ -105,7 +105,11 @@ callee C11 translation units from all twelve valid Microsoft x64 plans, compiles
 separately, and executes the linked probe under both profiles. Those receipts are local Windows
 host evidence only; they are not Linux native parity, a hosted Windows receipt, complete Windows
 layout coverage, source-level Fairy FFI, independent compiler/register inspection, PE/COFF
-inspection, or Windows call/ABI conformance.
+object inspection, or Windows call/ABI conformance. Before execution, the same intent parses the
+retained product image and all four probe images and requires bounded AMD64 PE32+ non-DLL console
+identity, aligned image/header/section ranges, a readable executable `.text`, and an executable
+entry point. This does not inspect object symbols or relocations, unwind/debug payloads, imported
+API compatibility, signing, installer packaging, or distribution behavior.
 
 ## Owners
 

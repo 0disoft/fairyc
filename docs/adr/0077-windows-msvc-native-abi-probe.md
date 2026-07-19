@@ -45,8 +45,8 @@ not a pretend Linux proxy and not a second copy of the ABI rules encoded only in
 - The probe uses positive deterministic scalar values. Narrow signed/unsigned extension boundaries,
   variadic floating mirroring, vector and intrinsic exceptions, retained callbacks, exports, and
   foreign unwinding still need separate fixtures.
-- A later PE/COFF inspection gate can analyze the retained in-memory artifact bytes without turning
-  temporary object files into product or conformance artifacts.
+- ADR 0078 later parses the retained and temporary linked PE images without turning temporary
+  object files into product or conformance artifacts; COFF object and unwind inspection remain open.
 
 ## External basis
 

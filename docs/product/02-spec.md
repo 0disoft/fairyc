@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0077-windows-msvc-native-abi-probe.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0078-windows-pe-executable-structure-inspection.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -243,6 +243,12 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   units that local x64 MSVC compiles, links, and executes at low and optimized profiles. This is a
   same-compiler local crossing, not source-level Fairy FFI, independent ABI inspection, or hosted
   evidence.
+- `internal/pecoff` parses every retained or temporary executable produced by the Windows host
+  smoke. It requires a bounded AMD64 PE32+ non-DLL console image, large-address awareness, aligned
+  image/header/section ranges, a readable executable `.text` section, and an entry point inside
+  executable code. It records import and exception-directory presence without treating either as
+  validated content. COFF object symbols and relocations, `.pdata`/`.xdata` semantics, CodeView/PDB,
+  source-level Windows target emission, and a hosted receipt remain separate gates.
 - The eleven valid layout cases additionally generate one deterministic private C11 plus explicit
   POSIX-typedef probe. The Linux
   native runner compiles, links, and executes it with Clang/GCC and low/optimized profiles, checking

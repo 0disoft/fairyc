@@ -189,7 +189,10 @@ ordinal slots, small-record integer transport, aggregate indirection, and hidden
 its 12 pass plans now cross separate caller and callee C11 translation units through local x64 MSVC
 at both profiles. Independent compiler or assembly/register inspection, source-level Fairy
 crossings, and a hosted Windows receipt remain absent. PE/COFF objects, runtime, standard library,
-supported distribution artifacts, and conformance remain later gates.
+supported distribution artifacts, and conformance remain later gates. A bounded parser now checks
+the product executable and four native probe executables for AMD64 PE32+ console identity, aligned
+headers/sections, and an executable entry point, but does not inspect `.obj` symbols, relocations,
+unwind payloads, or CodeView/PDB data.
 
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.
@@ -221,7 +224,7 @@ Exit gate: Atlas failure cannot change compilation; stale or incompatible maps f
 ## Later capability gates
 
 - `x86_64-linux-musl`: requires a separate libc, sysroot, startup, loader, and static-distribution profile.
-- `x86_64-windows-msvc`: the TargetSpec, first eight-case local layout probe, 15-case host-independent Microsoft x64 classifier, and 12-case same-MSVC native crossing exist, but complete hosted LLP64 layout evidence, independent or inspected call evidence, source-level Fairy crossings, PE/COFF, UCRT/VCRuntime, and unwind fixtures remain required.
+- `x86_64-windows-msvc`: the TargetSpec, first eight-case local layout probe, 15-case host-independent Microsoft x64 classifier, 12-case same-MSVC native crossing, and bounded PE32+ executable-structure inspection exist, but complete hosted LLP64 layout evidence, independent or inspected call evidence, source-level Fairy crossings, COFF object/symbol/relocation fixtures, UCRT/VCRuntime, and unwind/debug fixtures remain required.
 - QBE or another fast backend: requires stable internal semantics, interpreter and C oracles, ABI coverage, and measured edit-build benefit.
 - LLVM backend: requires representative workloads that justify optimization and distribution cost after simpler paths are exhausted.
 - Generics and `Vec<T>`: require non-generic stability plus compile-time, code-size, active-payload, and diagnostics fixtures.

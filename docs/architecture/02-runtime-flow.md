@@ -73,6 +73,11 @@ evidence layer. The Windows host smoke turns all twelve validated pass plans int
 and callee C11 translation units and crosses them through local x64 MSVC at both profiles. That
 same-compiler probe remains below source-level Fairy FFI, independent ABI inspection, and hosted
 evidence.
+`internal/pecoff` is the next evidence boundary after local linking. It parses executable bytes
+without using the host loader and rejects non-AMD64, non-PE32+, DLL, non-console, misaligned,
+out-of-range, duplicate-section, missing-`.text`, and non-executable-entry images. The Windows smoke
+applies it to the retained product image and both profiles of the layout and ABI probes before
+execution. COFF object records and unwind/debug payload semantics remain outside this boundary.
 
 `internal/cstdlib` is a separate target-standard-library transport boundary. Its first provisional
 SystemHeap helper normalizes empty allocation, rejects unsupported alignment, and preserves the old

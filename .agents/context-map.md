@@ -49,6 +49,7 @@
 - C ABI classification fixture route: spec/fixtures/c-abi/manifest-v0.json and spec/fixtures/c-abi/manifest-windows-msvc-v0.json
 - C ABI classification fixture runner route: internal/cabifixture/
 - Windows MSVC native ABI probe route: internal/windowsabiprobe/, internal/cdriver/, cmd/fairyc-windows-host-smoke/
+- Windows AMD64 PE executable inspection route: internal/pecoff/, cmd/fairyc-windows-host-smoke/
 - Resolved package graph fixture route: spec/fixtures/package/manifest-v0.json
 - MIR and C backend route: docs/mir/
 - Package identity and visibility route: docs/package/

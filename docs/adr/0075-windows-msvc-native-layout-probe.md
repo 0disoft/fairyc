@@ -43,4 +43,5 @@ C scalars and `@repr(C)`.
   record offset now fails in the real MSVC frontend before the smoke can pass.
 - Linux POSIX probe generation and execution remain untouched.
 - The next Windows layout step is full declared scalar coverage plus a hosted receipt. ADR 0076
-  later adds the independent Microsoft x64 classifier; native crossing evidence remains next.
+  later adds the independent Microsoft x64 classifier, ADR 0077 adds same-MSVC native crossings,
+  and ADR 0078 adds linked PE executable-structure inspection without completing layout evidence.

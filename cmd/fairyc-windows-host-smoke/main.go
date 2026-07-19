@@ -13,6 +13,7 @@ import (
 
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/cli"
+	"github.com/0disoft/fairyc/internal/pecoff"
 	"github.com/0disoft/fairyc/internal/windowsabiprobe"
 	"github.com/0disoft/fairyc/internal/windowslayoutprobe"
 )
@@ -63,8 +64,6 @@ const checkedInSuccessPath = "examples/windows_smoke/main.fy"
 const windowsLayoutManifestPath = "spec/fixtures/layout/manifest-windows-msvc-v0.json"
 const windowsABIManifestPath = "spec/fixtures/c-abi/manifest-windows-msvc-v0.json"
 
-const maxSmokeArtifactBytes = 64 * 1024 * 1024
-
 func main() {
 	if err := run(); err != nil {
 		fmt.Fprintf(os.Stderr, "fairyc Windows host smoke failed: %v\n", err)
@@ -114,8 +113,9 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("read build-host artifact: %w", err)
 	}
-	if len(artifact) < 2 || len(artifact) > maxSmokeArtifactBytes || artifact[0] != 'M' || artifact[1] != 'Z' {
-		return fmt.Errorf("build-host artifact is not a bounded PE image")
+	peReport, err := pecoff.InspectExecutable(artifact)
+	if err != nil {
+		return fmt.Errorf("inspect build-host PE executable image: %w", err)
 	}
 	if err := executeExpectResult(artifactPath, 42); err != nil {
 		return err
@@ -160,7 +160,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Windows host smoke passed: build-host PE %d bytes, 14 run-host outcomes covered signed results and four arithmetic trap categories, %d LLP64 layout cases passed %d MSVC probe executions, and %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions across low/optimized with msvc %s\n", len(artifact), layoutCases, layoutExecutions, abiCases, abiExecutions, toolchain.Version)
+	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, 14 run-host outcomes covered signed results and four arithmetic trap categories, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, and %d PE32+ executable images passed structural inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), layoutCases, layoutExecutions, abiCases, abiExecutions, 1+layoutExecutions+abiExecutions, toolchain.Version)
 	return nil
 }
 
@@ -174,6 +174,9 @@ func runWindowsLayoutProbe(toolchain cdriver.WindowsHostToolchain) (int, int, er
 		artifact, err := cdriver.BuildWindowsMSVCProbe(toolchain, profile, unit.Source)
 		if err != nil {
 			return executions, len(unit.Cases), fmt.Errorf("build Windows MSVC layout probe with %s: %w", profile.Name, err)
+		}
+		if _, err := pecoff.InspectExecutable(artifact.Bytes); err != nil {
+			return executions, len(unit.Cases), fmt.Errorf("inspect Windows MSVC layout probe PE executable image with %s: %w", profile.Name, err)
 		}
 		outcome, err := cdriver.ExecuteWindowsMSVCProbe(artifact)
 		if err != nil {
@@ -197,6 +200,9 @@ func runWindowsABIProbe(toolchain cdriver.WindowsHostToolchain) (int, int, error
 		artifact, err := cdriver.BuildWindowsMSVCABIProbe(toolchain, profile, unit.CallerSource, unit.CalleeSource)
 		if err != nil {
 			return executions, len(unit.Cases), fmt.Errorf("build Windows MSVC ABI probe with %s: %w", profile.Name, err)
+		}
+		if _, err := pecoff.InspectExecutable(artifact.Bytes); err != nil {
+			return executions, len(unit.Cases), fmt.Errorf("inspect Windows MSVC ABI probe PE executable image with %s: %w", profile.Name, err)
 		}
 		outcome, err := cdriver.ExecuteWindowsMSVCABIProbe(artifact)
 		if err != nil {
