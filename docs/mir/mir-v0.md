@@ -53,12 +53,21 @@ representation from how a local happens to be used.
 
 MIR v0 requires rvalues for use, unary operations, checked arithmetic, wrapping arithmetic, saturating arithmetic, comparisons, casts, aggregate construction, discriminant read, safe borrow, raw address, region allocation, and explicit unsafe operations.
 
-Built-in `Option` and `Result` construction records the concrete constructed type. Inert struct and
-resource construction use distinct operations backed by separate program-level definitions, so
+Built-in `Option` and `Result` construction records the concrete constructed type. Inert struct,
+restricted user enum, and resource construction use distinct operations backed by separate
+program-level definitions, so
 copyable layout values never acquire cleanup semantics by being mistaken for resources. Field reads
 name the owner type and are verified against exactly one aggregate definition. Payload extraction
 records the concrete extracted type. Missing type identity is `V1001`; an interpreter or backend
 cannot infer it from source syntax, local numbering, or use sites.
+
+Each restricted user enum definition preserves declaration-ordered variants and declaration-ordered
+named payload fields. `enum-construct` records the exact variant and a complete unique field set;
+`enum-payload` records owner type, active variant, field, and extracted type. An `enum` switch
+records the concrete enum type and a variant table in declaration order, with one successor per
+variant. The verifier rejects missing definitions, forged variants, incomplete or duplicate fields,
+payload type drift, and reordered or incomplete switch tables as `V1001`. Resource and safe-borrow
+payloads are rejected before MIR.
 
 The implemented raw-address operation accepts only a direct local place produced by an exact safe
 borrow-to-raw-pointer cast. It records pointee type, source borrow mutability, destination pointer
@@ -89,7 +98,7 @@ Statements include local storage markers, assignment, drop-flag update, `Drop`, 
 
 ### Terminators
 
-Terminators include `Goto`, integer, boolean, or discriminant switch, `Call`, `Return`, `Trap`, and `Unreachable`. A boolean switch has exactly two successors ordered true then false. Source `&&` and `||` are lowered to boolean switches and branch-local assignments before verification. Source `break` and `continue` become cleanup followed by a goto to the nearest loop exit or header; neither source form remains in MIR. Stage 0 calls have normal successors only. There is no unwind successor.
+Terminators include `Goto`, integer, boolean, or discriminant switch, `Call`, `Return`, `Trap`, and `Unreachable`. A boolean switch has exactly two successors ordered true then false. A restricted user-enum switch has one successor per declaration-ordered variant and carries that exact table. Source `&&` and `||` are lowered to boolean switches and branch-local assignments before verification. Source `break` and `continue` become cleanup followed by a goto to the nearest loop exit or header; neither source form remains in MIR. Stage 0 calls have normal successors only. There is no unwind successor.
 
 Fixture-visible trap categories use the canonical identities `bounds`, `integer-overflow`, `division-by-zero`, `signed-division-overflow`, `invalid-shift`, `assertion-failed`, and `unreachable`. A backend may choose a target-specific termination mechanism, but it cannot rename or merge the semantic outcome reported by the interpreter and differential harness.
 
@@ -132,7 +141,7 @@ The source cases do not test malformed graphs. `spec/fixtures/mir-verifier/manif
 
 ## Interpreter
 
-The first semantic oracle is a small MIR interpreter supporting scalars, tagged `Option` and `Result`, moves, drop traces, region mark and reset, branches, and traps. It constructs inert structs and resources and resolves field reads from their distinct verified program-level definitions; only the resource definition participates in reverse-field cleanup. The only executable drop classification is currently `empty`; source user drop-body effects are not interpreted. Its options-only fixture harness may intercept explicitly bound call symbols as bounded in-memory stdout/stderr byte sinks; those hooks are not MIR operations, source-name conventions, standard-library APIs, or host I/O. The interpreter is not required to emulate a complete operating system or C ABI.
+The first semantic oracle is a small MIR interpreter supporting scalars, tagged `Option` and `Result`, restricted inert user enums, moves, drop traces, region mark and reset, branches, and traps. It constructs user enums, selects declaration-ordered variants, extracts named payload fields, and also constructs inert structs and resources and resolves field reads from their distinct verified program-level definitions; only the resource definition participates in reverse-field cleanup. The only executable drop classification is currently `empty`; source user drop-body effects are not interpreted. Its options-only fixture harness may intercept explicitly bound call symbols as bounded in-memory stdout/stderr byte sinks; those hooks are not MIR operations, source-name conventions, standard-library APIs, or host I/O. The interpreter is not required to emulate a complete operating system or C ABI.
 
 The interpreter precedes a second native backend. Differential fixtures compare interpreter outcomes with generated C compiled at multiple optimization levels and, where the target fixture declares them, more than one independent C compiler.
 

@@ -293,6 +293,61 @@ fn main() -> i32 {
 	}
 }
 
+func TestEmitRestrictedEnumConstructionPayloadAndSwitch(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+enum Message {
+    Empty;
+    Value { amount: i32; };
+    Pair { left: i32; right: i32; };
+}
+fn score(message: Message) -> i32 {
+    match message {
+        Message::Empty => 0,
+        Message::Value { amount: value } => value,
+        Message::Pair { left: first, right: second } => first + second,
+    }
+}
+fn main() -> i32 { score(Message::Pair { left: 20, right: 22 }) }
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	wantFeatures := []string{"checked-arithmetic", "inert-enum", "scalar-call", "scalar-control-flow", "trap"}
+	if !slices.Equal(unit.Features, wantFeatures) {
+		t.Fatalf("features = %v, want %v", unit.Features, wantFeatures)
+	}
+	for _, required := range []string{
+		"typedef union {\n    uint8_t unused;",
+		"struct {\n        int32_t f_0;\n        int32_t f_1;\n    } v_2;",
+		"typedef struct { uint32_t tag; fy_enum_payload_0 payload; } fy_enum_0;",
+		"(fy_enum_0){ .tag = UINT32_C(2), .payload.v_2 = { .f_0 = INT32_C(20), .f_1 = INT32_C(22) } }",
+		".tag == UINT32_C(0)",
+		".payload.v_2.f_0;",
+		"fy_runtime_trap(FY_TRAP_UNREACHABLE);",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+	for _, leaked := range []string{"Message", "Empty", "Value", "Pair", "amount", "left", "right"} {
+		if strings.Contains(unit.Source, leaked) {
+			t.Errorf("generated C leaks source enum identifier %q", leaked)
+		}
+	}
+}
+
+func TestEmitRejectsNestedEnumPayloadUntilDependencyOrderingExists(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, "module main;\nenum Inner { Ready; }\nenum Outer { Wrapped { value: Inner; }; }\nfn main() -> i32 { 0 }\n")
+	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	var capability cbackend.CapabilityError
+	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "enum type \"main::Outer\"") || !strings.Contains(capability.Feature, "field \"value\" of type \"main::Inner\"") {
+		t.Fatalf("Emit() error = %v", err)
+	}
+}
+
 func TestEmitRejectsInvalidReprCStructName(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main;\n@repr(C)\nstruct Packet { value: u32; }\nfn main() -> i32 { 0 }\n")

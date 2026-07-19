@@ -41,6 +41,7 @@
         "checked-division",
         "checked-shift",
         "flat-i32-resource",
+        "inert-enum",
         "resource-option",
         "resource-result",
         "scalar-bitwise",

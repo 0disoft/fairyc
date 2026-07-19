@@ -96,6 +96,9 @@ enum IoError {
 ```
 
 User-enum payload fields must be inert and copyable. Resource payloads remain special to built-in `Option` and `Result`, whose active-variant move and drop behavior is compiler-defined.
+Payloadless construction uses `IoError::NotFound`; named payload construction uses
+`IoError::PermissionDenied { os_code: value }`. A shallow user-enum match lists every declared
+variant exactly once and binds every named field in the active payload.
 
 ## Expressions and control flow
 
@@ -112,10 +115,9 @@ let file =
 
 `Result` construction uses `Result::Ok(expression)` and `Result::Err(expression)` only where one
 contextual `Result<T, E>` type is known. A shallow Result match uses exactly one
-`Result::Ok(binding)` arm and one `Result::Err(binding)` arm. General shallow built-in or user-enum
-patterns may later use a single bound payload, shallow named inert fields, or `_`; nested
-destructuring, guards, or-patterns, slice patterns, `ref` modifiers, and resource-field extraction
-are excluded.
+`Result::Ok(binding)` arm and one `Result::Err(binding)` arm. Restricted user-enum patterns now use
+shallow named inert fields and exact exhaustiveness. Wildcards, nested destructuring, guards,
+or-patterns, slice patterns, `ref` modifiers, and resource-field extraction are excluded.
 
 Assignment is a statement. Comma expressions, `++`, `--`, C ternary syntax, and integer truthiness are excluded. Ordinary arithmetic traps as defined by the product specification; wrapping, saturating, and checked behavior uses methods rather than additional operator tokens.
 

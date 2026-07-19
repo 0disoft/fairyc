@@ -43,9 +43,9 @@ through typed HIR and executable MIR. The current executable subset accepts only
 `drop` body; any nonempty body fails explicitly before Flow or MIR instead of being silently ignored.
 The interpreter constructs, reads, and recursively drops resources from the verified MIR definition,
 but still does not execute user drop-body effects.
-The constrained C backend emits deterministic ISO C11 for 17 verified fixtures across the scalar
-payload surface, flat nonempty all-`i32` resources with empty drop bodies, and resource-bearing
-built-in `Option` and `Result` values. The cases cover
+The constrained C backend emits deterministic ISO C11 for 18 verified fixtures across the scalar
+payload surface, restricted inert user enums, flat nonempty all-`i32` resources with empty drop
+bodies, and resource-bearing built-in `Option` and `Result` values. The cases cover
 resource construction, field reads, whole-root call moves, live reassignment, calls and control
 flow, active-payload moves, Result propagation, bitwise operations, checked division and shift, overflow
 trapping, scalar `Option` Some and None, and scalar `Result` propagation success and failure. This

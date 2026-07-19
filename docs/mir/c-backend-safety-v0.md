@@ -43,7 +43,7 @@ safe borrows; unsafe operations outside the admitted scalar foreign-call form; c
 standard-library lowering; malformed
 destinations; and non-canonical block shapes. Empty-drop discharge produces no invented cleanup
 call. This is private transport, not public Fairy ABI or user drop-body execution.
-`spec/fixtures/c-emission/manifest-v0.json` currently proves seventeen source-to-emission cases and
+`spec/fixtures/c-emission/manifest-v0.json` currently proves eighteen source-to-emission cases and
 repeated byte identity. No C parser, compiler, object writer, assembler, linker, executable,
 sanitizer, layout probe, or ABI probe runs in that fixture lane.
 
@@ -114,7 +114,7 @@ forbids mutability strengthening, lowers to a verified MIR raw-address operation
 arbitrary casts remain rejected.
 Source `@repr(C)` construction, field reads, exact public names, layout assertions, pointer
 prototype spelling, and direct-local address passing are implemented, but by-value aggregate ABI,
-nested/array/enum fields, `@link_name`, `c.*` scalars, and callbacks remain outside this slice.
+nested enum or built-in-tag payloads, array fields, `@link_name`, `c.*` scalars, and callbacks remain outside this slice.
 
 The MIR interpreter deliberately returns a `foreign-call` capability error instead of guessing a
 host binding. A closed native fixture compiles the generated Fairy caller and a hand-written C
@@ -127,14 +127,14 @@ A C `longjmp` or C++ exception crossing generated Fairy C frames is forbidden. I
 
 ## Differential verification
 
-`internal/cbackendnative` implements the first scalar, flat-resource, and resource-tagged matrix
-shape for Linux/amd64 with glibc, Clang and GCC, and low and optimized profiles. Its seventeen cases plan 68 process-status
+`internal/cbackendnative` implements the first scalar, inert-enum, flat-resource, and resource-tagged matrix
+shape for Linux/amd64 with glibc, Clang and GCC, and low and optimized profiles. Its eighteen cases plan 72 process-status
 and exact source-linked drop-trace comparisons for small non-negative returns and canonical trap
 category, including both scalar tag families, flat resource transport, and resource-bearing
 Option/Result paths. A closed internal instrumentation profile emits conditional active-payload
 observer calls keyed by canonical resource type and binding span; production C contains none of
 those declarations, calls, or site metadata. Each production unit also has a separate configured
-Clang and GCC execution at `-O1` with address and undefined-behavior sanitizers, for 34 planned
+Clang and GCC execution at `-O1` with address and undefined-behavior sanitizers, for 36 planned
 sanitizer executions. That path overrides ambient sanitizer options, forbids recovery, requires
 empty stdout/stderr, and is not selectable through the product CLI. Output, negative or larger
 `i32` returns, user drop-body effects, public layout, ABI, and broader runtime behavior remain
@@ -144,7 +144,7 @@ The same runner additionally plans four scalar and four typed-null pointer/targe
 Fairy-source foreign-call crossings: Clang-generated Fairy caller to GCC C callee and the reverse
 at low and optimized profiles. Those crossings use the existing separate-object driver and are
 counted separately as `foreignCallExecutions` and `foreignPointerCallExecutions` in
-`fairyc.native-c-report/v13`; they do not expand the seventeen interpreter-owned differential cases.
+`fairyc.native-c-report/v13`; they do not expand the eighteen interpreter-owned differential cases.
 
 `internal/cdriver` and `internal/cruntime` are the one implementation path for both that matrix and
 the experimental constrained-C executable builder. The driver fixes the C dialect, warning policy,

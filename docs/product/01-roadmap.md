@@ -41,8 +41,10 @@ multiplication, negation, division, remainder, and signed right shift execute ac
   categories; signed left shift is rejected as `E1011`. Nearest-loop `break` and `continue` now execute
   with resource and Region cleanup. Verified resource definitions now preserve ordered fields and
   empty-drop classification from AST through HIR into MIR; nonempty user drop bodies fail as
-  unsupported before executable lowering. The C backend now emits deterministic ISO C11 for 17
-  verified scalar, flat-resource, and resource-tagged cases under the provisional `x86_64-linux-gnu` profile,
+  unsupported before executable lowering. Restricted inert enums now preserve named payloads,
+  construct through qualified variants, require exhaustive shallow matches, and execute through
+  verified MIR, the interpreter, and the constrained C backend. The C backend now emits deterministic ISO C11 for 18
+  verified scalar, inert-enum, flat-resource, and resource-tagged cases under the provisional `x86_64-linux-gnu` profile,
   including `Option<i32>` and `Result<i32, i32>` construction, match, calls, and propagation plus
   all-`i32` resource construction, field reads, moves, reassignment, and resource-bearing built-in
   tag variants and propagation. The unstable
@@ -63,12 +65,12 @@ Exit gate: positive and negative fixtures agree with the source contracts, resou
 
 Current implementation status: a fail-closed Linux/amd64 constrained-C differential command now
 requires glibc, Clang, and GCC and is wired into a separate hosted Ubuntu CI job. It is designed to
-run all 17 emission cases at low and optimized profiles for 68 process-status and exact
+run all 18 emission cases at low and optimized profiles for 72 process-status and exact
 source-linked drop-trace comparisons, then drive
 the actual experimental build CLI with resource-bearing Option and Result plus a flat all-`i32` resource
 through 4 compiler/profile executable
 smokes. The same job also compiles and executes each production, uninstrumented C unit with Clang
-and GCC under the closed `address-undefined-o1` ASan+UBSan mode for 34 fail-closed sanitizer
+and GCC under the closed `address-undefined-o1` ASan+UBSan mode for 36 fail-closed sanitizer
 executions. The current Windows
 host has no eligible Linux toolchain, and no hosted run receipt has been observed, so this is a
 configured lane rather than native conformance evidence. A shared bounded C driver and embedded

@@ -82,6 +82,8 @@ type emitter struct {
 	entryIndex         int
 	structTypes        []structCType
 	structByType       map[hir.Type]int
+	enumTypes          []enumCType
+	enumByType         map[hir.Type]int
 	resourceTypes      []resourceCType
 	resourceByType     map[hir.Type]int
 	taggedTypes        []taggedCType
@@ -112,6 +114,12 @@ type resourceCType struct {
 	fieldIndex map[string]int
 }
 
+type enumCType struct {
+	definition   mir.EnumType
+	variantIndex map[string]int
+	fieldIndex   []map[string]int
+}
+
 // Emit verifies MIR, rejects unsupported semantic families, and emits one deterministic C unit.
 func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	if profile != Stage0Profile() && profile != Stage0DropTraceProfile() {
@@ -132,6 +140,10 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 		return Unit{}, fmt.Errorf("create C resource layout engine: %w", err)
 	}
 	structTypes, structByType, err := prepareStructTypes(program.StructTypes, layoutEngine)
+	if err != nil {
+		return Unit{}, err
+	}
+	enumTypes, enumByType, err := prepareEnumTypes(program.EnumTypes)
 	if err != nil {
 		return Unit{}, err
 	}
@@ -166,6 +178,8 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 		entryIndex:         -1,
 		structTypes:        structTypes,
 		structByType:       structByType,
+		enumTypes:          enumTypes,
+		enumByType:         enumByType,
 		resourceTypes:      resourceTypes,
 		resourceByType:     resourceByType,
 		taggedTypes:        taggedTypes,
@@ -179,6 +193,9 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	}
 	if len(structTypes) != 0 {
 		value.features["inert-struct"] = struct{}{}
+	}
+	if len(enumTypes) != 0 {
+		value.features["inert-enum"] = struct{}{}
 	}
 	for _, structure := range structTypes {
 		if structure.definition.ReprC {
@@ -217,6 +234,9 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 		return Unit{}, fmt.Errorf("C entry function %q is missing", entry)
 	}
 	if err := value.inspectForeignFunctions(); err != nil {
+		return Unit{}, err
+	}
+	if err := value.inspectEnumTypes(); err != nil {
 		return Unit{}, err
 	}
 	entryFunction := &functions[value.entryIndex]
@@ -335,6 +355,37 @@ func prepareStructTypes(definitions []mir.StructType, engine *layout.Engine) ([]
 	return result, byType, nil
 }
 
+func prepareEnumTypes(definitions []mir.EnumType) ([]enumCType, map[hir.Type]int, error) {
+	ordered := slices.Clone(definitions)
+	slices.SortFunc(ordered, func(left, right mir.EnumType) int {
+		return strings.Compare(string(left.Type), string(right.Type))
+	})
+	result := make([]enumCType, 0, len(ordered))
+	byType := make(map[hir.Type]int, len(ordered))
+	for _, definition := range ordered {
+		if len(definition.Variants) == 0 {
+			return nil, nil, CapabilityError{Feature: "empty enum type " + strconv.Quote(string(definition.Type))}
+		}
+		if _, duplicate := byType[definition.Type]; duplicate {
+			return nil, nil, fmt.Errorf("duplicate C enum type %q", definition.Type)
+		}
+		value := enumCType{
+			definition: definition, variantIndex: make(map[string]int, len(definition.Variants)),
+			fieldIndex: make([]map[string]int, len(definition.Variants)),
+		}
+		for variantIndex, variant := range definition.Variants {
+			value.variantIndex[variant.Name] = variantIndex
+			value.fieldIndex[variantIndex] = make(map[string]int, len(variant.Fields))
+			for fieldIndex, field := range variant.Fields {
+				value.fieldIndex[variantIndex][field.Name] = fieldIndex
+			}
+		}
+		byType[definition.Type] = len(result)
+		result = append(result, value)
+	}
+	return result, byType, nil
+}
+
 func structFieldLayoutType(value hir.Type) (layout.Type, error) {
 	value = canonicalCValueType(value)
 	switch value {
@@ -446,6 +497,7 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 					inferred = hir.TypeI32
 				case mir.OperationResultConstruct, mir.OperationOptionConstruct,
 					mir.OperationResultPayload, mir.OperationOptionPayload,
+					mir.OperationEnumConstruct, mir.OperationEnumPayload,
 					mir.OperationRawAddress, mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead:
 					inferred = operation.Type
 				}
@@ -508,6 +560,30 @@ func (e *emitter) inspectForeignFunctions() error {
 		}
 	}
 	return nil
+}
+
+func (e *emitter) inspectEnumTypes() error {
+	for _, enumeration := range e.enumTypes {
+		for _, variant := range enumeration.definition.Variants {
+			for _, field := range variant.Fields {
+				if _, err := e.enumPayloadCType(field.Type); err != nil {
+					return CapabilityError{Feature: "enum type " + strconv.Quote(string(enumeration.definition.Type)) + " variant " + strconv.Quote(variant.Name) + " field " + strconv.Quote(field.Name) + " of type " + strconv.Quote(string(field.Type))}
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (e *emitter) enumPayloadCType(value hir.Type) (string, error) {
+	canonical := canonicalCValueType(value)
+	if canonical == hir.TypeU8 || canonical == hir.TypeI32 || canonical == hir.TypeU32 || canonical == hir.TypeUSize || isRawPointer(canonical) {
+		return e.cValueType(canonical)
+	}
+	if _, structure := e.structByType[canonical]; structure {
+		return e.cValueType(canonical)
+	}
+	return "", fmt.Errorf("unsupported enum payload type %q", value)
 }
 
 func (e *emitter) foreignCType(value hir.Type, result bool) (string, error) {
@@ -695,6 +771,9 @@ func (e *emitter) supportedCValueType(value hir.Type) bool {
 	if _, structure := e.structByType[value]; structure {
 		return true
 	}
+	if _, enumeration := e.enumByType[value]; enumeration {
+		return true
+	}
 	_, tagged := e.taggedByType[value]
 	return tagged
 }
@@ -719,6 +798,9 @@ func (e *emitter) cValueType(value hir.Type) (string, error) {
 	default:
 		if index, found := e.structByType[value]; found {
 			return e.structCTypeName(index), nil
+		}
+		if index, found := e.enumByType[value]; found {
+			return fmt.Sprintf("fy_enum_%d", index), nil
 		}
 		if index, found := e.resourceByType[value]; found {
 			return fmt.Sprintf("fy_resource_%d", index), nil
@@ -797,6 +879,10 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 				e.features["raw-address"] = struct{}{}
 			case mir.OperationStructConstruct:
 				if err := e.inspectStructOperation(functionIndex, *operation); err != nil {
+					return err
+				}
+			case mir.OperationEnumConstruct, mir.OperationEnumPayload:
+				if err := e.inspectEnumOperation(functionIndex, *operation); err != nil {
 					return err
 				}
 			case mir.OperationResourceConstruct:
@@ -955,7 +1041,8 @@ func (e *emitter) callSignature(symbol hir.SymbolID) (hir.Type, []hir.Type, bool
 func validateOperationShape(function string, operation mir.Operation) error {
 	switch operation.Kind {
 	case mir.OperationAssign, mir.OperationInitialize, mir.OperationUnary, mir.OperationBinary,
-		mir.OperationRawAddress, mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead:
+		mir.OperationRawAddress, mir.OperationStructConstruct, mir.OperationEnumConstruct, mir.OperationEnumPayload,
+		mir.OperationResourceConstruct, mir.OperationFieldRead:
 		if operation.DestinationLocal < 0 {
 			return fmt.Errorf("%s operation in %s has no destination local", operation.Kind, function)
 		}
@@ -1037,6 +1124,65 @@ func (e *emitter) inspectStructOperation(functionIndex int, operation mir.Operat
 		}
 		if canonicalCValueType(receiverType) != canonicalCValueType(operation.OwnerType) {
 			return fmt.Errorf("struct field read in %s has receiver type %q, want %q", function.Name, receiverType, operation.OwnerType)
+		}
+	}
+	return nil
+}
+
+func (e *emitter) inspectEnumOperation(functionIndex int, operation mir.Operation) error {
+	function := &e.functions[functionIndex]
+	ownerType := operation.Type
+	if operation.Kind == mir.OperationEnumPayload {
+		ownerType = operation.OwnerType
+	}
+	index, found := e.enumByType[ownerType]
+	if !found {
+		return CapabilityError{Function: function.Name, Feature: "enum operation type " + strconv.Quote(string(ownerType))}
+	}
+	definition := &e.enumTypes[index]
+	variantIndex, found := definition.variantIndex[operation.Variant]
+	if !found {
+		return fmt.Errorf("enum operation in %s names missing variant %q", function.Name, operation.Variant)
+	}
+	variant := definition.definition.Variants[variantIndex]
+	switch operation.Kind {
+	case mir.OperationEnumConstruct:
+		if len(operation.Fields) != len(variant.Fields) || len(operation.Operands) != len(variant.Fields) {
+			return fmt.Errorf("enum construction in %s does not match variant %q", function.Name, operation.Variant)
+		}
+		seen := make(map[string]struct{}, len(operation.Fields))
+		for operandIndex, fieldName := range operation.Fields {
+			fieldIndex, declared := definition.fieldIndex[variantIndex][fieldName]
+			if !declared {
+				return fmt.Errorf("enum construction in %s names missing field %q", function.Name, fieldName)
+			}
+			if _, duplicate := seen[fieldName]; duplicate {
+				return fmt.Errorf("enum construction in %s repeats field %q", function.Name, fieldName)
+			}
+			seen[fieldName] = struct{}{}
+			operandType, err := e.operandType(functionIndex, operation.Operands[operandIndex])
+			if err != nil {
+				return fmt.Errorf("enum construction field %q in %s: %w", fieldName, function.Name, err)
+			}
+			if canonicalCValueType(operandType) != canonicalCValueType(variant.Fields[fieldIndex].Type) {
+				return fmt.Errorf("enum construction field %q in %s has type %q, want %q", fieldName, function.Name, operandType, variant.Fields[fieldIndex].Type)
+			}
+		}
+	case mir.OperationEnumPayload:
+		fieldIndex, declared := definition.fieldIndex[variantIndex][operation.Field]
+		if !declared || canonicalCValueType(variant.Fields[fieldIndex].Type) != canonicalCValueType(operation.Type) {
+			return fmt.Errorf("enum payload in %s does not match field %q", function.Name, operation.Field)
+		}
+		receiver, err := oneOperand(operation.Operands)
+		if err != nil {
+			return fmt.Errorf("enum payload in %s: %w", function.Name, err)
+		}
+		receiverType, err := e.operandType(functionIndex, receiver)
+		if err != nil {
+			return fmt.Errorf("enum payload in %s: %w", function.Name, err)
+		}
+		if canonicalCValueType(receiverType) != canonicalCValueType(operation.OwnerType) {
+			return fmt.Errorf("enum payload in %s has receiver type %q, want %q", function.Name, receiverType, operation.OwnerType)
 		}
 	}
 	return nil
@@ -1278,6 +1424,36 @@ func (e *emitter) inspectTaggedOperation(functionIndex int, operation mir.Operat
 
 func (e *emitter) inspectSwitch(functionIndex int, terminator mir.Terminator) error {
 	function := &e.functions[functionIndex]
+	if terminator.SwitchKind == "enum" {
+		index, found := e.enumByType[terminator.SwitchType]
+		if !found {
+			return CapabilityError{Function: function.Name, Feature: "enum switch type " + strconv.Quote(string(terminator.SwitchType))}
+		}
+		definition := &e.enumTypes[index]
+		if len(terminator.Successors) != len(definition.definition.Variants) || len(terminator.SwitchVariants) != len(definition.definition.Variants) {
+			return fmt.Errorf("enum switch in %s has an incomplete branch table", function.Name)
+		}
+		for variantIndex, variant := range definition.definition.Variants {
+			if terminator.SwitchVariants[variantIndex] != variant.Name {
+				return fmt.Errorf("enum switch in %s has variant %q at index %d, want %q", function.Name, terminator.SwitchVariants[variantIndex], variantIndex, variant.Name)
+			}
+		}
+		operand, err := oneOperand(terminator.SwitchOperands)
+		if err != nil {
+			return fmt.Errorf("enum switch in %s: %w", function.Name, err)
+		}
+		valueType, err := e.operandType(functionIndex, operand)
+		if err != nil {
+			return fmt.Errorf("enum switch in %s: %w", function.Name, err)
+		}
+		if canonicalCValueType(valueType) != canonicalCValueType(terminator.SwitchType) {
+			return fmt.Errorf("enum switch in %s has type %q, want %q", function.Name, valueType, terminator.SwitchType)
+		}
+		e.features["inert-enum"] = struct{}{}
+		e.features["trap"] = struct{}{}
+		e.trapCategories["unreachable"] = struct{}{}
+		return nil
+	}
 	if len(terminator.Successors) != 2 {
 		return fmt.Errorf("switch in %s has %d successors", function.Name, len(terminator.Successors))
 	}
@@ -1392,6 +1568,25 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 			fmt.Fprintf(output, "_Static_assert(offsetof(%s, %s) == UINT64_C(%d), \"fairyc struct %d field %d offset\");\n", cType, e.structCFieldName(index, fieldIndex), field.OffsetBytes, index, fieldIndex)
 		}
 		output.WriteByte('\n')
+	}
+	for enumIndex, enumeration := range e.enumTypes {
+		fmt.Fprintf(output, "typedef union {\n    uint8_t unused;\n")
+		for variantIndex, variant := range enumeration.definition.Variants {
+			if len(variant.Fields) == 0 {
+				continue
+			}
+			output.WriteString("    struct {\n")
+			for fieldIndex, field := range variant.Fields {
+				cType, err := e.enumPayloadCType(field.Type)
+				if err != nil {
+					return fmt.Errorf("emit enum %q variant %q field %q: %w", enumeration.definition.Type, variant.Name, field.Name, err)
+				}
+				fmt.Fprintf(output, "        %s f_%d;\n", cType, fieldIndex)
+			}
+			fmt.Fprintf(output, "    } v_%d;\n", variantIndex)
+		}
+		fmt.Fprintf(output, "} fy_enum_payload_%d;\n", enumIndex)
+		fmt.Fprintf(output, "typedef struct { uint32_t tag; fy_enum_payload_%d payload; } fy_enum_%d;\n\n", enumIndex, enumIndex)
 	}
 	for index, resource := range e.resourceTypes {
 		output.WriteString("typedef struct {\n")
@@ -1579,6 +1774,59 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			return fmt.Errorf("raw address in %s has invalid local operand", function)
 		}
 		fmt.Fprintf(output, "    fy_l_%d = &fy_l_%d;\n", operation.DestinationLocal, operand.Local)
+	case mir.OperationEnumConstruct:
+		enumIndex, found := e.enumByType[operation.Type]
+		if !found {
+			return CapabilityError{Function: function, Feature: "enum construction type " + strconv.Quote(string(operation.Type))}
+		}
+		enumeration := &e.enumTypes[enumIndex]
+		variantIndex, found := enumeration.variantIndex[operation.Variant]
+		if !found {
+			return fmt.Errorf("enum construction in %s names missing variant %q", function, operation.Variant)
+		}
+		fmt.Fprintf(output, "    fy_l_%d = (fy_enum_%d){ .tag = UINT32_C(%d)", operation.DestinationLocal, enumIndex, variantIndex)
+		if len(operation.Operands) != 0 {
+			fmt.Fprintf(output, ", .payload.v_%d = { ", variantIndex)
+			for operandIndex, operand := range operation.Operands {
+				if operandIndex != 0 {
+					output.WriteString(", ")
+				}
+				fieldIndex, declared := enumeration.fieldIndex[variantIndex][operation.Fields[operandIndex]]
+				if !declared {
+					return fmt.Errorf("enum construction in %s names missing field %q", function, operation.Fields[operandIndex])
+				}
+				value, err := cOperand(operand)
+				if err != nil {
+					return fmt.Errorf("enum construction field %d in %s: %w", operandIndex, function, err)
+				}
+				fmt.Fprintf(output, ".f_%d = %s", fieldIndex, value)
+			}
+			output.WriteString(" }")
+		}
+		output.WriteString(" };\n")
+	case mir.OperationEnumPayload:
+		enumIndex, found := e.enumByType[operation.OwnerType]
+		if !found {
+			return CapabilityError{Function: function, Feature: "enum payload type " + strconv.Quote(string(operation.OwnerType))}
+		}
+		enumeration := &e.enumTypes[enumIndex]
+		variantIndex, found := enumeration.variantIndex[operation.Variant]
+		if !found {
+			return fmt.Errorf("enum payload in %s names missing variant %q", function, operation.Variant)
+		}
+		fieldIndex, found := enumeration.fieldIndex[variantIndex][operation.Field]
+		if !found {
+			return fmt.Errorf("enum payload in %s names missing field %q", function, operation.Field)
+		}
+		container, err := oneOperand(operation.Operands)
+		if err != nil {
+			return fmt.Errorf("enum payload in %s: %w", function, err)
+		}
+		value, err := cOperand(container)
+		if err != nil {
+			return fmt.Errorf("enum payload in %s: %w", function, err)
+		}
+		fmt.Fprintf(output, "    fy_l_%d = (%s).payload.v_%d.f_%d;\n", operation.DestinationLocal, value, variantIndex, fieldIndex)
 	case mir.OperationStructConstruct:
 		index, found := e.structByType[operation.Type]
 		if !found {
@@ -1864,6 +2112,33 @@ func (e *emitter) emitTerminator(output *strings.Builder, functionIndex int, blo
 
 func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, terminator mir.Terminator) error {
 	function := &e.functions[functionIndex]
+	if terminator.SwitchKind == "enum" {
+		enumIndex, found := e.enumByType[terminator.SwitchType]
+		if !found {
+			return CapabilityError{Function: function.Name, Feature: "enum switch type " + strconv.Quote(string(terminator.SwitchType))}
+		}
+		if len(terminator.Successors) != len(terminator.SwitchVariants) {
+			return fmt.Errorf("enum switch in %s has %d successors for %d variants", function.Name, len(terminator.Successors), len(terminator.SwitchVariants))
+		}
+		operand, err := oneOperand(terminator.SwitchOperands)
+		if err != nil {
+			return fmt.Errorf("enum switch in %s: %w", function.Name, err)
+		}
+		value, err := cOperand(operand)
+		if err != nil {
+			return fmt.Errorf("enum switch in %s: %w", function.Name, err)
+		}
+		enumeration := &e.enumTypes[enumIndex]
+		for branchIndex, variant := range terminator.SwitchVariants {
+			variantIndex, found := enumeration.variantIndex[variant]
+			if !found {
+				return fmt.Errorf("enum switch in %s names missing variant %q", function.Name, variant)
+			}
+			fmt.Fprintf(output, "    if ((%s).tag == UINT32_C(%d)) goto fy_b_%d;\n", value, variantIndex, terminator.Successors[branchIndex])
+		}
+		output.WriteString("    fy_runtime_trap(FY_TRAP_UNREACHABLE);\n")
+		return nil
+	}
 	if len(terminator.Successors) != 2 {
 		return fmt.Errorf("switch in %s has %d successors", function.Name, len(terminator.Successors))
 	}
@@ -2037,6 +2312,7 @@ func operationHasDestination(kind mir.OperationKind) bool {
 	case mir.OperationInitialize, mir.OperationAssign, mir.OperationUnary, mir.OperationBinary,
 		mir.OperationResultConstruct, mir.OperationResultPayload,
 		mir.OperationOptionConstruct, mir.OperationOptionPayload,
+		mir.OperationEnumConstruct, mir.OperationEnumPayload,
 		mir.OperationRawAddress, mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationRegionPlace:
 		return true
 	default:

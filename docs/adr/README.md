@@ -59,6 +59,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0047-raw-pointer-target-scalar-foreign-call.md`: typed-null raw-pointer plus fixed-width and pointer-width source FFI transport with a separate four-way native crossing.
 - `0048-source-callable-utf8-validation-transport.md`: exact allowlisted FY-to-real-stdlib-C empty-input UTF-8 validation crossing without a public wrapper claim.
 - `0049-repr-c-output-record-source-transport.md`: flat source `@repr(C)` records, verified direct-local raw addresses, and a real stdlib C output mutation crossing.
+- `0050-restricted-inert-enum-execution.md`: qualified restricted user-enum construction, exhaustive named-field matching, verified MIR, interpreter execution, and private C tag transport.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

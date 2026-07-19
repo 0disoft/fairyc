@@ -56,7 +56,12 @@ The explanatory surface is in `docs/language/0005-surface-syntax-v0.md`; exact s
 
 `struct` represents passive data. It has no implicit constructor or destructor. A struct is copyable only when all fields are copyable. It cannot contain a resource or a safe borrow in Stage 0. Hidden heap allocation and user-defined implicit conversion are not allowed.
 
-A restricted user `enum` may contain only inert copyable payload fields. Built-in `Option` and `Result` may contain resources because the compiler owns active-variant move and drop behavior. General resource-bearing enums are deferred.
+A restricted user `enum` may contain only inert copyable payload fields. A payloadless variant is
+constructed as `Enum::Variant`; a payload variant uses `Enum::Variant { field: value }`. Shallow
+matching names every payload field and covers every declared variant exactly once. Local enum paths
+and public enum paths through one import alias are implemented. Built-in `Option` and `Result` may
+contain resources because the compiler owns active-variant move and drop behavior. General
+resource-bearing enums are deferred.
 
 ### Resources
 
@@ -118,7 +123,7 @@ resource cleanup and Region reset before their MIR goto; use outside a loop is `
 
 Changing a value from `T` to `Option<T>` must not silently turn a normal function call into conditional execution. Stage 0 return types contain at most one safe-borrow leaf. Full control-flow behavior is defined in `docs/language/0004-results-traps-and-control-flow.md`.
 
-Result return, discard, propagation, local and parameter transfer, branch and loop must-use dataflow, `break` and `continue` edge obligations, non-Result `?`, and error-compatibility assertions are versioned in `spec/fixtures/result/manifest-v0.json`. Qualified Result syntax is fixed by ADR 0017, qualified Option syntax by ADR 0018, complete Stage 0 Result obligations by ADR 0019, and loop-control cleanup by ADR 0024. Scalar and resource-bearing built-in constructors and shallow matches execute through the MIR interpreter. Whole resources execute construction, field reads, call moves, tagged-payload ownership transfer, active-variant cleanup, and source-linked drop events. User-defined resource-bearing enums remain excluded.
+Result return, discard, propagation, local and parameter transfer, branch and loop must-use dataflow, `break` and `continue` edge obligations, non-Result `?`, and error-compatibility assertions are versioned in `spec/fixtures/result/manifest-v0.json`. Qualified Result syntax is fixed by ADR 0017, qualified Option syntax by ADR 0018, complete Stage 0 Result obligations by ADR 0019, and loop-control cleanup by ADR 0024. Scalar and resource-bearing built-in constructors and shallow matches execute through the MIR interpreter. Restricted user-enum construction, named inert payload extraction, and exhaustive multi-way matching execute through verified MIR and the interpreter; one C-emission fixture carries the same behavior into the native matrix. Whole resources execute construction, field reads, call moves, tagged-payload ownership transfer, active-variant cleanup, and source-linked drop events. User-defined resource-bearing enums remain excluded.
 
 ## Safe-code semantics
 
@@ -205,16 +210,19 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - Its fixture-only output hooks require explicit manifest bindings, capture bytes in memory under a
   shared limit, and never authorize source names, the CLI, or host streams.
 - The current C backend emits deterministic ISO C11 only for verified scalar, flat inert-struct,
-  flat-resource, and resource-tagged MIR
+  restricted inert-enum, flat-resource, and resource-tagged MIR
   under the provisional `x86_64-linux-gnu` profile. It includes private `Option<i32>`,
   `Result<i32, i32>`, nonempty all-`i32` resource transport, and built-in resource-bearing tags whose
-  payloads are exactly `i32` or direct admitted resources, but no public tagged or resource ABI.
+  payloads are exactly `i32` or direct admitted resources, plus private restricted user-enum tags
+  whose payload fields are admitted scalars, raw pointers, or flat inert structs. Nested user enums
+  and built-in tags inside a user-enum payload remain a C-backend capability boundary. No public
+  tagged or resource ABI is claimed.
   Nonempty admitted `@repr(C)` structs preserve public tags and field names; their layout and private
   resource layout are computed from the target description and guarded by generated C11 size,
   alignment, and offset assertions. Its emission fixtures do not compile, link, or execute C and do
   not establish a target support level.
 - A separate Linux/amd64 command requires glibc, Clang, and GCC and is configured to compare the
-  current scalar, flat inert-struct, flat-resource, and resource-tagged cases at low and optimized
+  current scalar, flat inert-struct, restricted inert-enum, flat-resource, and resource-tagged cases at low and optimized
   profiles. It separately links generated FY callers to the actual text-view C unit for both the
   empty predicate and `@repr(C)` output-record mutation paths; report v15 records those counters.
   Its closed

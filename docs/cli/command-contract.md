@@ -16,7 +16,7 @@ The current Go prototype implements seven deliberately unstable developer comman
 | `fairyc experimental check-syntax <file.fy>` | Check lexing, parsing, recovery, module identity, lossless reconstruction, and error-free AST lowering | Success line on stdout or human diagnostics on stderr |
 | `fairyc experimental check-semantics <file.fy> [<file.fy>...]` | Resolve names, type-check, and analyze local safe-borrow, whole-resource, Region, and complete Stage 0 Result must-use Flow for an explicit module set in the implemented subset | Typed-HIR module and function counts on stdout, human source diagnostics on stderr, or an explicit unsupported-subset error |
 | `fairyc experimental target-spec x86_64-linux-gnu` | Inspect the first host-independent target description without resolving a local toolchain | Deterministic `fairyc.target-spec/v0` JSON on stdout, defined by `spec/cli/experimental-target-spec-v0.schema.json` |
-| `fairyc experimental emit-c <file.fy>` | Lower one scalar, bounded exact-name `unsafe extern C fn` using admitted fixed-width, pointer-width, raw-pointer, or flat `@repr(C)` pointer values, exact direct-local raw address, flat all-`i32` resource, or admitted resource-bearing built-in tag program through verified MIR and emit the provisional constrained C transport without invoking a toolchain | Exactly one deterministic ISO C11 translation unit on stdout, source diagnostics or capability errors on stderr |
+| `fairyc experimental emit-c <file.fy>` | Lower one scalar, restricted inert user-enum, bounded exact-name `unsafe extern C fn` using admitted fixed-width, pointer-width, raw-pointer, or flat `@repr(C)` pointer values, exact direct-local raw address, flat all-`i32` resource, or admitted resource-bearing built-in tag program through verified MIR and emit the provisional constrained C transport without invoking a toolchain | Exactly one deterministic ISO C11 translation unit on stdout, source diagnostics or capability errors on stderr |
 | `fairyc experimental build <file.fy> --cc <clang\|gcc> --profile <low\|optimized> --output <build/path>` | Compile and link one verified program in that constrained subset for the host `x86_64-linux-gnu` profile with an explicit C compiler, optimization profile, and ignored output path | A no-overwrite executable below `build/` plus one relative-path receipt, or source, capability, toolchain, link, or artifact diagnostics |
 | `fairyc experimental run <file.fy>` | Run one verified-MIR program in the scalar, tagged, whole-resource, and implemented Region subset whose selected module declares `main() -> i32` | `result: <i32>` on stdout, a canonical trap category on stderr, source diagnostics, or an explicit unsupported-subset error |
 
@@ -70,6 +70,9 @@ parse the generated C, invoke Clang or GCC, link the test runtime, execute a pro
 tagged structs. Direct nonempty all-`i32` resources with empty drop bodies and built-in
 resource-bearing tags whose payloads are exactly `i32` or direct admitted resources use private
 numeric structs whose size, alignment, and field offsets are asserted against target-layout results.
+Restricted user enums use private numeric tags and private union payload storage. Payloadless and
+named-field variants, exact exhaustive shallow matching, and admitted scalar/raw-pointer/flat-struct
+payload fields are supported; nested user enums and built-in tags inside their payloads fail closed.
 Flat nonempty source `@repr(C)` structs over `u8`, `i32`, `u32`, `usize`, and raw pointers preserve
 their public C tag and field names and receive target-computed layout assertions. An exact direct-
 local `&T -> *T`, `&mut T -> *T`, or `&mut T -> *mut T` cast inside `unsafe` lowers to verified
