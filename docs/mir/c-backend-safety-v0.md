@@ -25,6 +25,13 @@ for a deliberately narrow subset. It accepts `i32`, `bool`, `Option<i32>`, and
 comparisons, bitwise operations, and the implemented checked arithmetic families. Private numeric C
 function names prevent source identifiers from becoming ABI or injection surfaces.
 
+The foreign-call transport additionally accepts exact `c::int` results and parameters. HIR and
+MIR keep that type distinct from `i32`; the backend emits C `int`, records the `c-int` feature, and
+asserts `sizeof(int)` and `_Alignof(int)` against target key `c.int`. The first slice deliberately
+creates no immediate C-integer MIR operand: a foreign producer result local may be passed to a
+foreign consumer, while literals, operators, casts, interpreter execution, and aggregate fields
+remain closed.
+
 The emitter additionally accepts direct resource values only when every program-level definition is
 nonempty, every declaration-ordered field is exactly `i32`, and the verified user drop body is
 empty. Resources may be locals, parameters, private function returns, and by-value call arguments.
@@ -100,7 +107,7 @@ Raw foreign signatures contain C ABI scalars, explicitly represented aggregates,
 The implemented source slice preserves individual `unsafe extern C fn` declarations, one optional
 nonempty `@link_name("symbol")`, and
 `unsafe {}` or `unsafe fn` call provenance through AST, typed HIR, and verified MIR. The C backend
-currently admits `C` declarations using `i32`, `u8`, `u32`, `usize`, raw pointers to
+currently admits `C` declarations using `i32`, `u8`, `u32`, `usize`, exact by-value `c::int`, raw pointers to
 that bounded scalar set, and raw pointers to admitted nonempty `@repr(C)` structs. It emits one plain prototype and an ordinary call without `pure`, `const`, `restrict`,
 `nothrow`, alias, retention, or visibility promises. Compatible repeated declarations of the same
 external name coalesce even when their Fairy names differ; signature conflicts fail closed. A local preprocessor guard undefines an
@@ -115,7 +122,8 @@ forbids mutability strengthening, lowers to a verified MIR raw-address operation
 arbitrary casts remain rejected.
 Source `@repr(C)` construction, field reads, exact public names, layout assertions, pointer
 prototype spelling, and direct-local address passing are implemented, but by-value aggregate ABI,
-nested enum or built-in-tag payloads, array fields, `c.*` scalars, and callbacks remain outside this slice.
+nested enum or built-in-tag payloads, array fields, other `c.*` scalars, `c::int` aggregate fields,
+and callbacks remain outside this slice.
 
 The MIR interpreter deliberately returns a `foreign-call` capability error instead of guessing a
 host binding. A closed native fixture compiles the generated Fairy caller and a hand-written C
@@ -141,11 +149,13 @@ empty stdout/stderr, and is not selectable through the product CLI. Output, nega
 `i32` returns, user drop-body effects, public layout, ABI, and broader runtime behavior remain
 unimplemented. A clean sanitizer run is backend evidence, not the language-semantics oracle.
 
-The same runner additionally plans four scalar and four typed-null pointer/target-scalar
+The same runner additionally plans four scalar, four exact `c::int`, and four typed-null pointer/target-scalar
 Fairy-source foreign-call crossings: Clang-generated Fairy caller to GCC C callee and the reverse
 at low and optimized profiles. Those crossings use the existing separate-object driver and are
-counted separately as `foreignCallExecutions` and `foreignPointerCallExecutions` in
-`fairyc.native-c-report/v13`; they do not expand the eighteen interpreter-owned differential cases.
+counted separately as `foreignCallExecutions`, `foreignCIntCallExecutions`, and
+`foreignPointerCallExecutions` in `fairyc.native-c-report/v16`; they do not expand the eighteen
+interpreter-owned differential cases. The `c::int` probe uses a hand-written C producer and consumer
+so the value crosses a generated typed local without requiring a Fairy C integer literal.
 
 `internal/cdriver` and `internal/cruntime` are the one implementation path for both that matrix and
 the experimental constrained-C executable builder. The driver fixes the C dialect, warning policy,

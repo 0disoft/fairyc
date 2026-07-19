@@ -34,6 +34,8 @@ An item is visible to another module only when declared `pub`. Private fields of
 Fixture types use the source spelling normalized without trivia:
 
 - primitives and nominal paths use names such as `i32`, `bool`, and `math::Point`;
+- the first compiler-known C scalar keeps the exact canonical identity `c::int`, distinct from
+  `i32` and from a user module named `c`;
 - references use `&T` or `&mut T`;
 - raw pointers use `*T` or `*mut T`;
 - arrays and slices use `[T; N]` and `[T]`;
@@ -44,6 +46,11 @@ Nominal `struct`, `resource`, and `enum` declarations are not structurally inter
 ## Literal and expression typing
 
 Integer and floating literal text remains exact until an expected type is available. An unconstrained integer defaults to `i32`; an unconstrained float defaults to `f64`. Range checking occurs after type selection and does not wrap.
+
+The current source `c::int` slice deliberately has no contextual integer literal. Its only value
+origin is a typed foreign-call result, which may be relayed through locals and later foreign-call
+arguments. Arithmetic, comparison, and conversion involving that value remain unsupported rather
+than inheriting `i32` rules.
 
 Boolean conditions are exact: `if`, `while`, `&&`, `||`, and `!` require `bool`. Integer truthiness is rejected. Both branches of an `if` expression must have one compatible type. A function tail expression or explicit return must match the declared return type.
 

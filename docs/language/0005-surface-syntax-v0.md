@@ -41,6 +41,7 @@ Stage 0 type syntax includes:
 ```text
 bool, void
 i8, u8, i16, u16, i32, u32, i64, u64, isize, usize
+c::int
 f32, f64
 Path::Type
 &T, &mut T
@@ -52,6 +53,11 @@ unsafe extern C fn(...) -> T
 ```
 
 `str` and `CStr` are unsized compiler-known view types and appear as `&str` and `&CStr`. User-defined generic declarations are excluded even though built-in `Option`, `Result`, slices, and arrays accept type arguments.
+
+The current executable C-scalar source slice recognizes only `c::int`, preserves it as distinct
+from `i32`, and permits it only as transported foreign-call results, locals, and arguments.
+`c::int` literals, operators, casts, and aggregate fields remain deferred. `c::size_t` is not a
+`usize` alias, and `c::ssize_t` is not an ISO C11 type; both require later target/header contracts.
 
 ## Structs, resources, and enums
 

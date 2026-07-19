@@ -16,7 +16,7 @@ The current Go prototype implements seven deliberately unstable developer comman
 | `fairyc experimental check-syntax <file.fy>` | Check lexing, parsing, recovery, module identity, lossless reconstruction, and error-free AST lowering | Success line on stdout or human diagnostics on stderr |
 | `fairyc experimental check-semantics <file.fy> [<file.fy>...]` | Resolve names, type-check, and analyze local safe-borrow, whole-resource, Region, and complete Stage 0 Result must-use Flow for an explicit module set in the implemented subset | Typed-HIR module and function counts on stdout, human source diagnostics on stderr, or an explicit unsupported-subset error |
 | `fairyc experimental target-spec x86_64-linux-gnu` | Inspect the first host-independent target description without resolving a local toolchain | Deterministic `fairyc.target-spec/v0` JSON on stdout, defined by `spec/cli/experimental-target-spec-v0.schema.json` |
-| `fairyc experimental emit-c <file.fy>` | Lower one scalar, restricted inert user-enum, bounded optionally `@link_name`-mapped `unsafe extern C fn` using admitted fixed-width, pointer-width, raw-pointer, or flat `@repr(C)` pointer values, exact direct-local raw address, flat all-`i32` resource, or admitted resource-bearing built-in tag program through verified MIR and emit the provisional constrained C transport without invoking a toolchain | Exactly one deterministic ISO C11 translation unit on stdout, source diagnostics or capability errors on stderr |
+| `fairyc experimental emit-c <file.fy>` | Lower one scalar, restricted inert user-enum, bounded optionally `@link_name`-mapped `unsafe extern C fn` using admitted fixed-width, pointer-width, exact transport-only `c::int`, raw-pointer, or flat `@repr(C)` pointer values, exact direct-local raw address, flat all-`i32` resource, or admitted resource-bearing built-in tag program through verified MIR and emit the provisional constrained C transport without invoking a toolchain | Exactly one deterministic ISO C11 translation unit on stdout, source diagnostics or capability errors on stderr |
 | `fairyc experimental build <file.fy> --cc <clang\|gcc> --profile <low\|optimized> --output <build/path>` | Compile and link one verified program in that constrained subset for the host `x86_64-linux-gnu` profile with an explicit C compiler, optimization profile, and ignored output path | A no-overwrite executable below `build/` plus one relative-path receipt, or source, capability, toolchain, link, or artifact diagnostics |
 | `fairyc experimental run <file.fy>` | Run one verified-MIR program in the scalar, tagged, whole-resource, and implemented Region subset whose selected module declares `main() -> i32` | `result: <i32>` on stdout, a canonical trap category on stderr, source diagnostics, or an explicit unsupported-subset error |
 
@@ -99,6 +99,9 @@ drop recorder or sanitizer runtimes.
 For the admitted foreign-call slice, `emit-c` writes a plain external prototype and call using the
 declaration name by default or its single validated `@link_name` string. Compatible mappings to one
 external symbol coalesce and conflicting signatures fail closed.
+The exact `c::int` slice emits C `int`, target size/alignment assertions, and a typed local between
+foreign producer and consumer calls. It does not accept a `c::int` literal or operator and does not
+alias the type to `i32`.
 The exact internal text-view symbols are a closed project-owned allowlist; the `fy_` prefix does not
 become generally callable. The output-record source probe can emit a pointer call, but ordinary
 `build` supplies no companion source, object, library, search path, or arbitrary linker argument;

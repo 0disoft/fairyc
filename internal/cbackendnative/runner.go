@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v15"
+	reportSchemaVersion = "fairyc.native-c-report/v16"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -74,6 +74,25 @@ const foreignCallCompanionSource = `#include <stdint.h>
 
 int32_t fairyc_fixture_add_one(int32_t value) {
     return value + INT32_C(1);
+}
+`
+
+const foreignCIntCallSmokeSource = `module main;
+@link_name("fairyc_fixture_make_c_int")
+unsafe extern C fn make_c_int() -> c::int;
+@link_name("fairyc_fixture_consume_c_int")
+unsafe extern C fn consume_c_int(value: c::int) -> i32;
+fn main() -> i32 { unsafe { consume_c_int(make_c_int()) } }
+`
+
+const foreignCIntCallCompanionSource = `#include <stdint.h>
+
+int fairyc_fixture_make_c_int(void) {
+    return 41;
+}
+
+int32_t fairyc_fixture_consume_c_int(int value) {
+    return value == 41 ? INT32_C(42) : INT32_C(1);
 }
 `
 
@@ -163,6 +182,7 @@ type Report struct {
 	OwnedTextExecutions                int        `json:"ownedTextExecutions"`
 	LinuxFileExecutions                int        `json:"linuxFileExecutions"`
 	ForeignCallExecutions              int        `json:"foreignCallExecutions"`
+	ForeignCIntCallExecutions          int        `json:"foreignCIntCallExecutions"`
 	ForeignPointerCallExecutions       int        `json:"foreignPointerCallExecutions"`
 	TextValidationSourceCallExecutions int        `json:"textValidationSourceCallExecutions"`
 	TextViewOutputSourceCallExecutions int        `json:"textViewOutputSourceCallExecutions"`
@@ -353,6 +373,11 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.ForeignCallExecutions = foreignCallExecutions
+	foreignCIntCallExecutions, err := runForeignCIntCallProbe(temporaryRoot, toolchains)
+	if err != nil {
+		return Report{}, err
+	}
+	report.ForeignCIntCallExecutions = foreignCIntCallExecutions
 	foreignPointerCallExecutions, err := runForeignPointerCallProbe(temporaryRoot, toolchains)
 	if err != nil {
 		return Report{}, err
@@ -430,6 +455,25 @@ func runForeignCallProbe(temporaryRoot string, toolchains []cdriver.Toolchain) (
 		[]string{
 			"extern int32_t fairyc_fixture_add_one(int32_t fy_a_0);",
 			"fairyc_fixture_add_one(INT32_C(41))",
+		},
+	)
+}
+
+func runForeignCIntCallProbe(temporaryRoot string, toolchains []cdriver.Toolchain) (int, error) {
+	return runForeignSourceProbe(
+		temporaryRoot,
+		toolchains,
+		"foreign-c-int-call",
+		foreignCIntCallSmokeSource,
+		foreignCIntCallCompanionSource,
+		42,
+		[]string{
+			"_Static_assert(sizeof(int) == UINT64_C(4), \"fairyc target c.int size\");",
+			"_Static_assert(_Alignof(int) == UINT64_C(4), \"fairyc target c.int alignment\");",
+			"extern int fairyc_fixture_make_c_int(void);",
+			"extern int32_t fairyc_fixture_consume_c_int(int fy_a_0);",
+			"fairyc_fixture_make_c_int()",
+			"fairyc_fixture_consume_c_int(fy_l_",
 		},
 	)
 }

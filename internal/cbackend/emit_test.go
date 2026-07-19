@@ -91,6 +91,41 @@ func TestEmitScalarForeignCall(t *testing.T) {
 	}
 }
 
+func TestEmitDistinctCIntForeignTransport(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+@link_name("fairyc_fixture_make_c_int")
+unsafe extern C fn make_c_int() -> c::int;
+@link_name("fairyc_fixture_consume_c_int")
+unsafe extern C fn consume_c_int(value: c::int) -> i32;
+fn main() -> i32 { unsafe { consume_c_int(make_c_int()) } }
+`)
+	_, interpreterErr := interpreter.Execute(program, "main::main")
+	var interpreterCapability interpreter.CapabilityError
+	if !errors.As(interpreterErr, &interpreterCapability) || interpreterCapability.Kind != "foreign-call" {
+		t.Fatalf("interpreter error = %v", interpreterErr)
+	}
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, required := range []string{
+		"_Static_assert(sizeof(int) == UINT64_C(4), \"fairyc target c.int size\");",
+		"_Static_assert(_Alignof(int) == UINT64_C(4), \"fairyc target c.int alignment\");",
+		"extern int fairyc_fixture_make_c_int(void);",
+		"extern int32_t fairyc_fixture_consume_c_int(int fy_a_0);",
+		"fairyc_fixture_make_c_int();",
+		"fairyc_fixture_consume_c_int(fy_l_",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+	if !slices.Contains(unit.Features, "c-int") || strings.Contains(unit.Source, "extern int32_t fairyc_fixture_make_c_int") || strings.Contains(unit.Source, "fairyc_fixture_consume_c_int(int32_t") {
+		t.Fatalf("generated C erased c::int identity:\n%s", unit.Source)
+	}
+}
+
 func TestEmitRawPointerAndTargetScalarForeignCall(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main;\nunsafe extern C fn foreign_probe(data: *u8, output: *mut u32, length: usize, marker: u8) -> u32;\nfn main() -> i32 { if unsafe { foreign_probe(null, null, 0, 7) } == 42 { 0 } else { 1 } }\n")

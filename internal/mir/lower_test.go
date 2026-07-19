@@ -190,6 +190,66 @@ func TestLowerPreservesForeignCallABIAndUnsafeProvenance(t *testing.T) {
 	}
 }
 
+func TestLowerPreservesCIntAcrossForeignCallResultAndArgument(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+@link_name("fairyc_fixture_make_c_int")
+unsafe extern C fn make_c_int() -> c::int;
+@link_name("fairyc_fixture_consume_c_int")
+unsafe extern C fn consume_c_int(value: c::int) -> i32;
+fn main() -> i32 { unsafe { consume_c_int(make_c_int()) } }
+`)
+	if len(program.ForeignFunctions) != 2 {
+		t.Fatalf("foreign functions = %+v", program.ForeignFunctions)
+	}
+	var producer, consumer ForeignFunction
+	for _, foreign := range program.ForeignFunctions {
+		switch foreign.Name {
+		case "main::make_c_int":
+			producer = foreign
+		case "main::consume_c_int":
+			consumer = foreign
+		}
+	}
+	if producer.ResultType != hir.TypeCInt || len(producer.ParameterTypes) != 0 || consumer.ResultType != hir.TypeI32 || !slices.Equal(consumer.ParameterTypes, []hir.Type{hir.TypeCInt}) {
+		t.Fatalf("foreign signatures = %+v", program.ForeignFunctions)
+	}
+	var producerCall, consumerCall *Terminator
+	for blockIndex := range program.Functions[0].Blocks {
+		terminator := &program.Functions[0].Blocks[blockIndex].Terminator
+		if terminator.Kind != TerminatorCall {
+			continue
+		}
+		switch terminator.Callee {
+		case producer.Symbol:
+			producerCall = terminator
+		case consumer.Symbol:
+			consumerCall = terminator
+		}
+	}
+	if producerCall == nil || consumerCall == nil || producerCall.DestinationLocal == NoLocal || len(consumerCall.Arguments) != 1 || consumerCall.Arguments[0].Kind != OperandLocal || consumerCall.Arguments[0].Local != producerCall.DestinationLocal {
+		t.Fatalf("producer call = %+v, consumer call = %+v", producerCall, consumerCall)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+}
+
+func TestVerifyKeepsI32AndCIntForeignSignaturesDistinct(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, "module main;\n@link_name(\"shared_symbol\")\nunsafe extern C fn with_c_int(value: c::int) -> i32;\nfn main() -> i32 { 0 }\n")
+	conflict := program.ForeignFunctions[0]
+	conflict.Symbol = hir.SymbolID(999)
+	conflict.Name = "other::with_i32"
+	conflict.ParameterTypes = []hir.Type{hir.TypeI32}
+	conflict.Entity = "foreign:other.fy:0:1"
+	program.ForeignFunctions = append(program.ForeignFunctions, conflict)
+	failures := Verify(program)
+	if len(failures) != 1 || failures[0].Code != "V1001" || failures[0].Entity != conflict.Entity || !strings.Contains(failures[0].Detail, "conflicting signatures") {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+}
+
 func TestVerifyRejectsConflictingForeignSignaturesForOneLinkName(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, "module main;\n@link_name(\"shared_symbol\")\nunsafe extern C fn with_value(value: i32) -> i32;\nfn main() -> i32 { 0 }\n")

@@ -48,14 +48,19 @@ unsafe extern C fn
 
 The current executable source subset implements `unsafe extern C fn` imports with an optional
 single nonempty `@link_name("symbol")`, using
-`i32`, `u8`, `u32`, `usize`, raw pointers to that bounded scalar set, and raw pointers to an
+`i32`, `u8`, `u32`, `usize`, the distinct transport-only `c::int`, raw pointers to the fixed-width
+Fairy scalar set, and raw pointers to an
 admitted nonempty `@repr(C)` struct. AST, typed HIR, MIR, unsafe provenance, deterministic C
 source/link identity, prototype emission, typed null, separate-object cross-compiler linking, and process-status
 observation are wired. Source struct construction and field reads reach verified MIR, the MIR
 interpreter for its executable scalar subset, and generated C. Inside an explicit unsafe boundary,
 an exact `&T -> *T`, `&mut T -> *T`, or `&mut T -> *mut T` cast may take the address of a direct
 local place without inventing alias promises. Raw dereference, pointer arithmetic, integer-pointer
-conversion, mutability strengthening, and other casts remain unsupported. This is not implementation of exports, callbacks, `c.*` scalars,
+conversion, mutability strengthening, and other casts remain unsupported. Source `c::int` maps to
+target key `c.int`, emits exact C `int`, and is guarded by target-derived size and alignment
+assertions. Its only current value path is foreign return to typed local to foreign argument; it has
+no source literal, arithmetic, comparison, cast, interpreter behavior, or aggregate-field support.
+This is not implementation of exports, callbacks, other `c.*` scalars,
 nested/array/enum `@repr(C)` fields, or by-value aggregate calls and returns. The interpreter
 remains fail-closed on every foreign call.
 
@@ -64,7 +69,8 @@ remains fail-closed on every foreign call.
 `@repr(C)` permits fixed-width integers, `c.*` scalars, `f32`, `f64`, raw pointers, fixed arrays, nested `@repr(C)` structs, and an explicitly based C enum. It rejects resources, safe borrows, slices, `str`, `CStr`, `Option`, `Result`, `Region`, `String`, `Buffer`, payload enums, empty structs, packed or custom alignment, unions, bit fields, long double, atomics, and vector types.
 
 The implemented source/backend slice is deliberately smaller than that language contract: it
-accepts only nonempty, flat structs over `u8`, `i32`, `u32`, `usize`, and raw pointers. Other
+accepts only nonempty, flat structs over `u8`, `i32`, `u32`, `usize`, and raw pointers. `c::int`
+does not broaden that aggregate slice. Other
 contracted field families remain fail-closed until their source typing, layout, ABI, and native
 crossing tests are connected together.
 

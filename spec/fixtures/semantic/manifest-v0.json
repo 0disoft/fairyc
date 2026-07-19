@@ -147,6 +147,15 @@
       }
     },
     {
+      "id": "pass.type.c-int-foreign-roundtrip",
+      "sourceRoot": "cases/pass/c-int-foreign-roundtrip/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow"
+      }
+    },
+    {
       "id": "fail.resolve.unresolved-name",
       "sourceRoot": "cases/fail/unresolved-name/src",
       "sources": ["main.fy"],

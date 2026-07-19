@@ -148,6 +148,9 @@ C is a boundary contract rather than the default internal representation.
 - The first planned conformance target is `x86_64-linux-gnu`; it is not supported until all declared target fixtures and CI paths pass.
 - C-layout types use `@repr(C)` and exported or imported symbols use explicit `unsafe extern C fn` declarations.
 - Platform-dependent C types use a distinct `c.*` namespace.
+- The first executable source C-scalar slice is exact `c::int` foreign transport. It is distinct
+  from `i32`; other C scalars, C-integer literals and operators, and `c::int` aggregate fields
+  remain deferred.
 - Foreign calls and generated raw bindings are unsafe by default and use raw pointers rather than safe references.
 - Safe wrappers own length, nullability, lifetime, error, and ownership conversion.
 - Stage 0 callbacks are non-capturing, synchronous, same-thread raw `unsafe extern C` function pointers plus explicit user data.
@@ -192,6 +195,9 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   MIR preserve distinct source/link identities, and generated C validates and emits only the link
   identity. Compatible declarations of one external symbol coalesce; conflicting signatures fail
   closed. The attribute grants no interpreter or host-binding authority.
+- A foreign result may produce exact `c::int`, occupy a typed MIR local, and feed a later foreign
+  `c::int` parameter. Generated C spells the type `int` and asserts its target `c.int` size and
+  alignment. `c::size_t` is not `usize`; `c::ssize_t` is a later POSIX target-library type.
 - The C backend is the only committed Stage 0 product backend and emits a constrained target/toolchain profile rather than universally portable C.
 - `internal/target` owns the executable `fairyc.target-spec/v0` description for the first target.
   It records host-independent LP64, scalar, pointer, SysV AMD64, ELF, unwind, debug, and C-layout
@@ -228,8 +234,9 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   not establish a target support level.
 - A separate Linux/amd64 command requires glibc, Clang, and GCC and is configured to compare the
   current scalar, flat inert-struct, restricted inert-enum, flat-resource, and resource-tagged cases at low and optimized
-  profiles. It separately links generated FY callers to the actual text-view C unit for both the
-  empty predicate and `@repr(C)` output-record mutation paths; report v15 records those counters.
+  profiles. It separately links generated FY callers to hand-written `c::int` producer/consumer C
+  and to the actual text-view C unit for both the empty predicate and `@repr(C)` output-record
+  mutation paths; report v16 records those counters.
   Its closed
   `drop-trace-v0` emission profile assigns source/type/span identities to dense site IDs and compares
   exact four-byte native records with the MIR interpreter trace. This instrumentation is absent from

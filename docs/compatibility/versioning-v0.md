@@ -96,7 +96,8 @@ actual provisional text-view C unit. V15 adds `textViewOutputSourceCallExecution
 Fairy caller that passes a verified raw address to a flat `@repr(C)` output record, observes the
 record mutation, and links the same real text-view C unit. ADR 0051 later strengthens the existing
 source probes without changing report shape or counters: their Fairy declaration names now differ
-from their emitted external `@link_name` symbols. The runner emits one exact version and does not pretend the
+from their emitted external `@link_name` symbols. V16 adds `foreignCIntCallExecutions` for the
+exact `c::int` producer-result to typed-local to consumer-argument crossing. The runner emits one exact version and does not pretend the
 report shapes are interchangeable.
 
 ## Runtime and standard library

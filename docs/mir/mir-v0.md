@@ -106,6 +106,12 @@ Fixture-visible trap categories use the canonical identities `bounds`, `integer-
 
 Arguments are fully evaluated into temporaries from left to right before the call terminator. A call records its destination, normal continuation, source span, unsafe scope when applicable, and foreign ABI when applicable.
 
+The first source C-scalar transport preserves `c::int` as a distinct foreign result and parameter
+type. A producer call may initialize a local of that exact type and a later consumer call may use
+the local as its argument. MIR does not encode that value as an `i32` immediate, and the verifier's
+shared foreign-signature rule therefore treats `c::int` and `i32` declarations as incompatible.
+Full call-operand type checking remains a backend responsibility in this prototype.
+
 Foreign declarations preserve separate source and external link identities. Declarations mapped to
 one link identity must have the same ABI, result type, and ordered parameter types or verification
 fails as `V1001`. Foreign calls cannot expose a safe reference in their raw MIR signature. Unknown
