@@ -105,6 +105,13 @@ floating Fairy scalars, and other contracted field
 families remain fail-closed until their source typing, layout, ABI, and native crossing tests are
 connected together.
 
+The Windows target product smoke uses a separate private `usize` generation transport. Under the
+selected x64 MSVC TargetSpec, `usize` and the C unit's `uint64_t` are both eight-byte, eight-aligned
+unsigned storage. That private same-layout crossing is sufficient for the closed initialization,
+begin, allocation, reset, and drop calls, but it does not alias the types in the language, stabilize
+the Arena representation, or admit arbitrary cross-translation-unit aggregate transport. The
+Windows FY caller observes state and pointer transitions without dereferencing allocated bytes.
+
 The implemented foreign-result slice admits those same nonempty acyclic `@repr(C)` records by value.
 Generated C emits the exact public struct return type and ordinary assignment. A generated Fairy
 caller is configured to receive both an 8-byte INTEGER-class result and a 20-byte MEMORY-class

@@ -80,9 +80,10 @@ validate alignment but never call `malloc`. Growth and shrink use allocate-copy-
 raw `realloc`, so validation and allocation failures leave the original block unchanged.
 
 This helper is not yet a source-visible `std::alloc` module. Linux product linkage selects it for
-exact called symbols; Windows `build-target` now admits only allocate/deallocate and uses a private
-pointer/`usize`/`usize` record to request eight bytes, observe size/alignment, release, and observe
-normalized zero state at both MSVC profiles. A separate internal Linux generated Fairy caller
+exact called symbols; Windows `build-target` uses a private pointer/`usize`/`usize` record to request
+eight bytes, observe size/alignment, release, and observe normalized zero state at both MSVC
+profiles. The same component is selected once for Buffer and Arena dependency closures. A separate
+internal Linux generated Fairy caller
 declares the exact `void *`, `size_t`, `size_t` block and observes allocation plus normalized release
 through a bounded C test observer. Its independent closed Linux probe still checks empty normalization,
 alignment, prefix preservation, failure rollback, malformed-block rejection, shrink, and release
@@ -142,6 +143,16 @@ observers check the allocation, generation transitions, active flags, released n
 invalidated Region. This does not expose those records as the public representation, connect lexical
 `region` lowering, or add safe allocation methods. Product builds now select Arena plus SystemHeap
 for actual admitted calls only.
+
+Windows `build-target` now admits exactly initialization, begin, zeroed allocation, reset, and drop.
+Its checked-in FY program uses private 32/24/32-byte node/Arena/Region records and target-width
+`usize` generation fields, which are layout-compatible with the selected Windows x64 C provider but
+are not a public ABI. Both MSVC profiles observe generation 1 after initialization, one active Region
+and non-null allocation/node state, generation 2 with cleared Region state after reset, and generation
+3 after drop. The FY subset cannot safely dereference the returned raw storage, so this Windows path
+does not inspect zeroed payload bytes; the Linux C-only and source probes retain that responsibility.
+Copied placement, simultaneous and stale Region failures, active-drop rejection, safe lexical
+`region` lowering, and public `std::alloc` construction remain outside this Windows slice.
 
 Its four-way C-only native probe is configured for exclusive begin, zeroed allocation, copy, allocation
 rollback, empty normalization, active-drop rejection, reset, stale-use rejection, and final drop,

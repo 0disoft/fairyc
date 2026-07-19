@@ -95,6 +95,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0083-windows-msvc-closed-stdlib-crossing.md`: one exact FY-to-project-C UTF-8 validation call through target-specific minimal linkage, with all other foreign symbols remaining fail-closed.
 - `0084-windows-msvc-system-heap-crossing.md`: closed FY-to-SystemHeap allocation and release through the Windows x64 16-byte `malloc` alignment contract without opening broader runtime or linker inputs.
 - `0085-windows-msvc-buffer-dependency-closure.md`: closed FY-to-Buffer construction, resize metadata, and drop with deterministic single SystemHeap dependency linkage at both MSVC profiles.
+- `0086-windows-msvc-arena-region-lifecycle.md`: closed FY-to-Arena initialization, one Region allocation/reset, and final drop with deterministic SystemHeap dependency linkage at both MSVC profiles.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

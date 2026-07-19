@@ -69,6 +69,11 @@ func TestWindowsTargetSupportSourceAdmitsOnlyProvenStandardLibraryCall(t *testin
 		"fy_std_buffer_initialize_v0",
 		"fy_std_buffer_resize_zeroed_v0",
 		"fy_std_buffer_drop_v0",
+		"fy_std_arena_initialize_v0",
+		"fy_std_region_begin_v0",
+		"fy_std_region_allocate_zeroed_v0",
+		"fy_std_region_reset_v0",
+		"fy_std_arena_drop_v0",
 		"fy_std_system_heap_allocate_v0",
 		"fy_std_system_heap_deallocate_v0",
 	})
@@ -78,14 +83,16 @@ func TestWindowsTargetSupportSourceAdmitsOnlyProvenStandardLibraryCall(t *testin
 	for _, required := range []string{
 		"fy_std_system_heap_allocate_v0", "fy_std_system_heap_deallocate_v0",
 		"fy_std_buffer_initialize_v0", "fy_std_buffer_resize_zeroed_v0", "fy_std_buffer_drop_v0",
+		"fy_std_arena_initialize_v0", "fy_std_region_begin_v0",
+		"fy_std_region_allocate_zeroed_v0", "fy_std_region_reset_v0", "fy_std_arena_drop_v0",
 		"fy_std_text_utf8_valid_v0", "fy_runtime_trap",
 	} {
 		if !strings.Contains(source, required) {
 			t.Errorf("support source is missing %q", required)
 		}
 	}
-	if strings.Contains(source, "fy_std_arena_initialize_v0") || strings.Contains(source, "_POSIX_C_SOURCE") {
-		t.Fatal("support source widened beyond the proven Windows SystemHeap, Buffer, and text-validation components")
+	if strings.Contains(source, "fy_std_string_copy_v0") || strings.Contains(source, "_POSIX_C_SOURCE") {
+		t.Fatal("support source widened beyond the proven Windows SystemHeap, Buffer, Arena, and text-validation components")
 	}
 }
 
@@ -111,9 +118,9 @@ func TestExperimentalBuildTargetRejectsUnprovenWindowsStandardLibrarySymbolBefor
 	t.Parallel()
 	root := t.TempDir()
 	writeTestSource(t, root, "main.fy", `module main;
-@link_name("fy_std_arena_initialize_v0")
-unsafe extern C fn initialize(output: *void) -> u32;
-fn main() -> i32 { if unsafe { initialize(null) } == 0 { 42 } else { 1 } }
+@link_name("fy_std_string_copy_v0")
+unsafe extern C fn copy(input: *void, output: *void) -> u32;
+fn main() -> i32 { if unsafe { copy(null, null) } == 0 { 42 } else { 1 } }
 `)
 	code, stdout, stderr := runForTest([]string{
 		"experimental", "build-target", "main.fy",

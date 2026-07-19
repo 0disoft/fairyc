@@ -75,6 +75,12 @@ Buffer-to-SystemHeap component closure, deterministic single emission, capacity/
 observations, and normalized drop state are prototype compatibility data. Zeroed byte observation,
 append/reserve/truncate/clear, safe ownership, and the public `std::bytes` API remain outside the
 Windows slice.
+ADR 0086 adds exact Arena initialize, Region begin, zeroed allocation, Region reset, and Arena drop
+linkage. The private 32/24/32-byte node/Arena/Region layouts, target-width generation transport,
+Arena-to-SystemHeap closure, single emission, non-null allocation/node state, active flags, and
+generation 1/2/3 transitions are prototype compatibility data. Returned-byte observation, copied
+placement, simultaneous or stale Region failures, active-drop rejection, safe lexical lowering,
+stable representation, and the public `std::alloc` API remain outside the Windows slice.
 
 `fairyc.layout-fixtures/v0` separately versions the repository input and expectation vocabulary for
 the target-layout engine; each manifest binds one declared target. It is not a public

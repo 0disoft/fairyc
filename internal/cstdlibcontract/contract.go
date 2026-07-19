@@ -52,6 +52,11 @@ var windowsMSVCSymbolComponents = map[string]Component{
 	"fy_std_buffer_initialize_v0":      ComponentBuffer,
 	"fy_std_buffer_resize_zeroed_v0":   ComponentBuffer,
 	"fy_std_buffer_drop_v0":            ComponentBuffer,
+	"fy_std_arena_initialize_v0":       ComponentArena,
+	"fy_std_region_begin_v0":           ComponentArena,
+	"fy_std_region_allocate_zeroed_v0": ComponentArena,
+	"fy_std_region_reset_v0":           ComponentArena,
+	"fy_std_arena_drop_v0":             ComponentArena,
 	"fy_std_text_utf8_valid_v0":        ComponentTextView,
 }
 

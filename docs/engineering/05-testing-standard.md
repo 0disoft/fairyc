@@ -88,6 +88,13 @@ contract. It requires self-linked node pointers, the nested SystemHeap block, pr
 `uint64_t`/`unsigned long` identity, 32/24/32-byte node/Arena/Region layouts, a `void **` output slot,
 observable zeroed bytes, released nodes, invalidated Region state, and reset/drop generations.
 
+The Windows target product smoke covers a narrower source-level Arena lane. Its private FY records
+use target-width `usize` for the C unit's eight-byte generation storage, call the five exact lifecycle
+symbols, require generation 1 after initialization, one active Region and non-null allocation/node,
+generation 2 plus cleared Region state after reset, and generation 3 after drop at low and optimized
+MSVC profiles. It does not dereference the output pointer, so zeroed contents and the Arena failure
+matrix remain owned by the Linux C-only and generated-source probes.
+
 The text-view probe validates mixed-width text and rejects stray continuation bytes, two overlong
 families, surrogate encodings, values above U+10FFFF, truncation, and obsolete leaders. It checks
 valid and invalid byte-boundary slices, empty normalization, invalid pointer/length pairs, and

@@ -65,9 +65,10 @@ semantic C emitter but selects Windows scalar providers and layout facts, identi
 `x86_64-windows-msvc`, rejects unavailable POSIX `c::ssize_t`, and leaves validation-only drop
 instrumentation unavailable. `experimental build-target` resolves MSVC only after that profile has
 been selected. Its target-specific support resolver admits only exact project-owned SystemHeap
-allocate/deallocate, Buffer initialize/zeroed-resize/drop, and `fy_std_text_utf8_valid_v0` calls.
-Buffer selection closes over SystemHeap in deterministic component order; the resolver combines
-SystemHeap, Buffer, text-view, and scalar runtime at most once each and rejects every other foreign
+allocate/deallocate, Buffer initialize/zeroed-resize/drop, Arena initialize/Region begin/zeroed
+allocation/reset/Arena drop, and `fy_std_text_utf8_valid_v0` calls. Buffer and Arena selection each
+close over SystemHeap in deterministic component order; the resolver combines SystemHeap, Buffer,
+Arena, text-view, and scalar runtime at most once each and rejects every other foreign
 or unproven standard-library symbol before toolchain discovery. The Windows SystemHeap source overrides only its fundamental-alignment
 ceiling with the x64 `malloc` guarantee of 16 bytes; allocation semantics stay shared. Companion
 inputs and arbitrary linker arguments remain absent.
@@ -116,6 +117,11 @@ block when copy-and-release resize fails. A closed C probe reaches the existing 
 matrix. Internal generated Fairy transports call the real allocate/deallocate symbols with exact
 C-layout blocks on Linux and a private layout-equivalent `usize` block on Windows. The Windows path
 uses the target's 16-byte x64 `malloc` alignment ceiling and executes at both MSVC profiles.
+The same Windows target example now reaches the real Arena source through private self-linked node,
+Arena, Region, and `void **` transport. It observes initialization, active attachment, a non-null
+allocation/node, reset invalidation, and drop generation transitions at both profiles without
+dereferencing the returned storage. This is lifecycle and dependency-closure evidence, not safe
+lexical Region lowering, zeroed-byte observation, a public representation, or a public allocator API.
 `internal/cstdlibcontract` owns the exact-symbol/component maps used by backend admission and
 target-specific product linking. The emitted C unit records only actually called foreign names;
 `experimental build` and `build-target` link only the permitted minimal dependency-closed C source

@@ -121,7 +121,11 @@ copied byte placement, reset invalidation, stale-use rejection, and active-drop 
 C-only executions and four generated-Fairy source-call executions are configured but unobserved.
 The internal caller crosses exact self-linked node, Arena, and Region records, obtains zeroed bytes
 through `void **`, and verifies reset/drop generations; lexical Region lowering, source-level
-`std::alloc` construction, and safe calls remain missing.
+`std::alloc` construction, and safe calls remain missing. The declared Windows target build now
+executes the five exact Arena/Region lifecycle calls at both MSVC profiles, observes non-null
+allocation plus node/active/generation state, reset invalidation, and final drop, and closes Arena
+over SystemHeap exactly once. Its FY path cannot inspect returned bytes, so byte-level zeroing and
+the broader failure matrix remain Linux-probe responsibilities.
 The allocation-free text-view slice now checks canonical UTF-8 and code-point byte boundaries,
 including overlong, surrogate, out-of-range, truncated, and obsolete forms. Its four native runs
 are configured but unobserved. A separate four-way Fairy-source crossing now calls the actual
@@ -211,10 +215,13 @@ The first declared Windows target build now selects a distinct C-backend profile
 labelling Linux-profile output after the fact. A checked-in FY source carries an unused `c::long`
 foreign declaration; the emitted unit asserts four-byte LLP64 `long`, rejects unavailable
 `c::ssize_t`, allocates and frees an eight-byte block through the real project-owned SystemHeap,
-selects the Buffer/SystemHeap closure for initialize, length-four resize metadata, and drop, calls
+selects the Buffer/SystemHeap closure for initialize, length-four resize metadata, and drop, selects
+the Arena/SystemHeap closure for initialize, Region begin, eight-byte allocation, reset, and drop, calls
 the exact empty-input UTF-8 validator, compiles its generated and standard-library C units through
 local x64 MSVC at low and optimized profiles, passes COFF/PE/unwind inspection, and returns 42 in
-both executions. Windows x64 SystemHeap uses the documented 16-byte `malloc` alignment ceiling
+both executions. The Arena checks require generation 1 after initialization, active/non-null
+allocation state, generation 2 with Region invalidation after reset, and generation 3 after drop;
+they do not dereference the allocated bytes. Windows x64 SystemHeap uses the documented 16-byte `malloc` alignment ceiling
 because MSVC C does not expose `max_align_t` in `<stddef.h>`.
 Every other foreign symbol, unproven Windows standard-library component, companion input, user
 linker argument, debug output, packaging, and hosted receipt remains closed. The Windows TargetSpec therefore reports
@@ -251,7 +258,7 @@ Exit gate: Atlas failure cannot change compilation; stale or incompatible maps f
 ## Later capability gates
 
 - `x86_64-linux-musl`: requires a separate libc, sysroot, startup, loader, and static-distribution profile.
-- `x86_64-windows-msvc`: the TargetSpec, scalar/LLP64 C-emission product builds at both profiles, closed FY-to-project-C SystemHeap, Buffer, and UTF-8 calls, an eight-case local layout probe, 15-case host-independent Microsoft x64 classifier, 12-case same-MSVC native crossing, bounded PE32+ executable inspection, structural live-COFF object inspection, static version-1/version-2 unwind-structure inspection, and a three-case native exception/virtual-walk probe exist, but complete hosted LLP64 layout evidence, broader and bidirectional source-level Fairy crossings, independent or inspected call evidence, versioned exact COFF symbol/COMDAT/relocation fixtures, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, complete UCRT/VCRuntime and deployment evidence, distribution, and debug fixtures remain required.
+- `x86_64-windows-msvc`: the TargetSpec, scalar/LLP64 C-emission product builds at both profiles, closed FY-to-project-C SystemHeap, Buffer, Arena/Region lifecycle, and UTF-8 calls, an eight-case local layout probe, 15-case host-independent Microsoft x64 classifier, 12-case same-MSVC native crossing, bounded PE32+ executable inspection, structural live-COFF object inspection, static version-1/version-2 unwind-structure inspection, and a three-case native exception/virtual-walk probe exist, but complete hosted LLP64 layout evidence, broader and bidirectional source-level Fairy crossings, independent or inspected call evidence, versioned exact COFF symbol/COMDAT/relocation fixtures, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, complete UCRT/VCRuntime and deployment evidence, distribution, and debug fixtures remain required.
 - QBE or another fast backend: requires stable internal semantics, interpreter and C oracles, ABI coverage, and measured edit-build benefit.
 - LLVM backend: requires representative workloads that justify optimization and distribution cost after simpler paths are exhausted.
 - Generics and `Vec<T>`: require non-generic stability plus compile-time, code-size, active-payload, and diagnostics fixtures.

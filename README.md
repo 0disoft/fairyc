@@ -93,12 +93,14 @@ source-to-native use without pretending that the host-smoke artifact is a Window
 The distinct `experimental build-target` command now consumes the declared
 `x86_64-windows-msvc` profile, emits LLP64-aware C11, and retains one target-labelled PE. Its
 checked-in source proves four-byte `c::long` emission and calls the real project-owned SystemHeap,
-Buffer, and `fy_std_text_utf8_valid_v0` C implementations before returning 42. Buffer selection
-pulls in SystemHeap exactly once, then construction, length-four resize metadata, and normalized
-drop state execute at both MSVC profiles. The Windows x64 heap path uses the documented 16-byte
-`malloc` alignment ceiling instead of the MSVC C header's missing `max_align_t`. Every other foreign
-symbol, unproven standard-library component, companion input, user linker option, distribution
-promise, and self-hosting path remains closed.
+Buffer, Arena/Region, and `fy_std_text_utf8_valid_v0` C implementations before returning 42. Buffer
+selection pulls in SystemHeap exactly once, then construction, length-four resize metadata, and
+normalized drop state execute at both MSVC profiles. Arena selection independently closes over the
+same SystemHeap component once, then initialization, one active Region, an eight-byte allocation,
+reset invalidation, and drop generations execute at both profiles. The Windows x64 heap path uses
+the documented 16-byte `malloc` alignment ceiling instead of the MSVC C header's missing
+`max_align_t`. Every other foreign symbol, unproven standard-library component, companion input,
+user linker option, distribution promise, and self-hosting path remains closed.
 A provisional SystemHeap implementation now lives in the target standard-library
 boundary rather than the thin runtime. It normalizes empty allocation, admits current fundamental
 alignments, preserves bytes across copy-and-release growth or shrink, and leaves the old block
@@ -121,7 +123,12 @@ rejection. Its closed C-only probe and an internal generated FY caller using the
 node, Arena, and Region records each have four configured native executions. The generated caller
 crosses real initialization, begin, zeroed allocation through a `void **` output slot, reset, and
 drop. Used-symbol product linkage selects Arena plus SystemHeap, but lexical Region lowering and a
-public `std::alloc` API remain absent.
+public `std::alloc` API remain absent. Windows `build-target` now admits the five exact lifecycle
+symbols used by that example and observes non-null allocation plus node, active-state, and generation
+transitions at both MSVC profiles. Its private generation transport is target-width `usize`, which
+matches the selected Windows x64 C layout without becoming a public representation promise. This
+Windows path does not dereference the returned storage or independently inspect its zeroed bytes;
+the Linux probes retain byte-level evidence.
 The first text slice now validates canonical UTF-8 without allocation and rejects slicing through a
 multibyte sequence. Its native probe includes overlong forms, surrogates, values above U+10FFFF,
 truncation, and obsolete leaders and remains unobserved; raw source transports follow below.
