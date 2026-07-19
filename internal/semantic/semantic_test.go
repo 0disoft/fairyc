@@ -250,6 +250,68 @@ fn main() -> i32 {
 	}
 }
 
+func TestAnalyzePreservesRestrictedInertEnumDefinitions(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+struct Position { line: u32; column: u32; }
+enum ParseError {
+    Empty;
+    Unexpected { position: Position; byte: u8; };
+}
+fn main() -> i32 { 0 }
+`,
+	})
+	assertCleanTypeResult(t, result)
+	if len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].Enums) != 1 {
+		t.Fatalf("HIR modules = %+v", result.HIR.Modules)
+	}
+	enumeration := result.HIR.Modules[0].Enums[0]
+	if enumeration.Name != "ParseError" || enumeration.Type != hir.Type("main::ParseError") || len(enumeration.Variants) != 2 {
+		t.Fatalf("enum = %+v", enumeration)
+	}
+	if enumeration.Variants[0].Name != "Empty" || len(enumeration.Variants[0].Fields) != 0 {
+		t.Fatalf("payloadless variant = %+v", enumeration.Variants[0])
+	}
+	variant := enumeration.Variants[1]
+	if variant.Name != "Unexpected" || len(variant.Fields) != 2 || variant.Fields[0].Name != "position" || variant.Fields[0].Type != hir.Type("main::Position") || variant.Fields[1].Name != "byte" || variant.Fields[1].Type != hir.TypeU8 {
+		t.Fatalf("payload variant = %+v", variant)
+	}
+}
+
+func TestAnalyzeRejectsNonInertEnumPayloads(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name string
+		text string
+		code string
+	}{
+		{name: "borrow", text: "module main;\nenum Bad { Value { payload: &i32; }; }\nfn main() -> i32 { 0 }\n", code: "E1004"},
+		{name: "region", text: "module main;\nenum Bad { Value { payload: Region; }; }\nfn main() -> i32 { 0 }\n", code: "E3103"},
+		{name: "resource", text: "module main;\nresource Token { value: i32; drop fn(self: &mut Self) {} }\nenum Bad { Value { payload: Token; }; }\nfn main() -> i32 { 0 }\n", code: "E1004"},
+	}
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			result := analyzeText(t, map[string]string{"main.fy": test.text})
+			if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != test.code {
+				t.Fatalf("diagnostics = %+v, unsupported = %+v", result.Diagnostics, result.Unsupported)
+			}
+		})
+	}
+}
+
+func TestAnalyzeRejectsDuplicateEnumVariantsAndFields(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\nenum Bad { Same; Same; Payload { value: i32; value: u32; }; }\nfn main() -> i32 { 0 }\n",
+	})
+	if len(result.Diagnostics) != 2 || result.Diagnostics[0].Code != "E0102" || result.Diagnostics[1].Code != "E0102" {
+		t.Fatalf("diagnostics = %+v", result.Diagnostics)
+	}
+}
+
 func TestAnalyzeRejectsUnsafeFieldsInInertStructs(t *testing.T) {
 	t.Parallel()
 	tests := []struct {

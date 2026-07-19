@@ -154,9 +154,32 @@ type Module struct {
 	Path             string
 	SourcePath       string
 	Structs          []Struct
+	Enums            []Enum
 	Resources        []Resource
 	ForeignFunctions []ForeignFunction
 	Functions        []Function
+}
+
+// Enum is one resolved restricted inert tagged definition in declaration order.
+type Enum struct {
+	Name     string
+	Type     Type
+	Span     Span
+	Variants []EnumVariant
+}
+
+// EnumVariant is one resolved tag with ordered named payload fields.
+type EnumVariant struct {
+	Name   string
+	Span   Span
+	Fields []EnumField
+}
+
+// EnumField is one resolved inert copyable payload field.
+type EnumField struct {
+	Name string
+	Type Type
+	Span Span
 }
 
 // Struct is one inert aggregate definition in declaration order.

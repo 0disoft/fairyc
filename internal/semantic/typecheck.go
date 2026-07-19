@@ -23,6 +23,7 @@ func (a *analyzer) typeCheck() Result {
 	a.prepareAggregateIdentities()
 	a.prepareResourceTypes()
 	a.prepareStructTypes()
+	a.prepareEnumTypes()
 	for _, module := range a.moduleOrder {
 		hirModule := hir.Module{Path: module.file.Module.Path, SourcePath: module.file.Path}
 		for index := range module.file.Module.Structs {
@@ -31,6 +32,13 @@ func (a *analyzer) typeCheck() Result {
 				continue
 			}
 			hirModule.Structs = append(hirModule.Structs, a.checkStruct(module, structure))
+		}
+		for index := range module.file.Module.Enums {
+			enumeration := &module.file.Module.Enums[index]
+			if a.enums[enumeration] == nil {
+				continue
+			}
+			hirModule.Enums = append(hirModule.Enums, a.checkEnum(module, enumeration))
 		}
 		for index := range module.file.Module.Resources {
 			resource := &module.file.Module.Resources[index]
@@ -55,6 +63,21 @@ func (a *analyzer) typeCheck() Result {
 			hirModule.Functions = append(hirModule.Functions, checker.checkFunction())
 		}
 		result.HIR.Modules = append(result.HIR.Modules, hirModule)
+	}
+	return result
+}
+
+func (a *analyzer) checkEnum(module *moduleScope, enumeration *ast.Enum) hir.Enum {
+	value := a.enums[enumeration]
+	result := hir.Enum{Name: enumeration.Name, Type: value.typ, Span: span(module.file.Path, enumeration.Span)}
+	if info := a.enumTypes[value.typ]; info != nil {
+		for _, variant := range info.orderedVariants {
+			hirVariant := hir.EnumVariant{Name: variant.name, Span: variant.span}
+			for _, field := range variant.orderedFields {
+				hirVariant.Fields = append(hirVariant.Fields, hir.EnumField{Name: field.name, Type: field.typ, Span: field.span})
+			}
+			result.Variants = append(result.Variants, hirVariant)
+		}
 	}
 	return result
 }

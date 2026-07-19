@@ -20,11 +20,26 @@ type structInfo struct {
 	reprC         bool
 }
 
+type enumInfo struct {
+	symbol          *symbol
+	variants        map[string]enumVariant
+	orderedVariants []enumVariant
+}
+
+type enumVariant struct {
+	name          string
+	span          hir.Span
+	declaration   hir.Span
+	fields        map[string]resourceField
+	orderedFields []resourceField
+}
+
 type resourceField struct {
 	name        string
 	typ         hir.Type
 	span        hir.Span
 	declaration hir.Span
+	typeSpan    hir.Span
 }
 
 func (a *analyzer) prepareAggregateIdentities() {
@@ -33,6 +48,7 @@ func (a *analyzer) prepareAggregateIdentities() {
 			enumeration := &module.file.Module.Enums[index]
 			if value := a.enums[enumeration]; value != nil {
 				value.typ = hir.Type(module.file.Module.Path + "::" + enumeration.Name)
+				a.enumTypes[value.typ] = &enumInfo{symbol: value, variants: make(map[string]enumVariant)}
 			}
 		}
 		for index := range module.file.Module.Structs {
@@ -52,6 +68,118 @@ func (a *analyzer) prepareAggregateIdentities() {
 			a.resourceTypes[value.typ] = &resourceInfo{symbol: value, fields: make(map[string]resourceField)}
 		}
 	}
+}
+
+func (a *analyzer) prepareEnumTypes() {
+	for _, module := range a.moduleOrder {
+		for enumIndex := range module.file.Module.Enums {
+			enumeration := &module.file.Module.Enums[enumIndex]
+			value := a.enums[enumeration]
+			if value == nil {
+				continue
+			}
+			info := a.enumTypes[value.typ]
+			for variantIndex := range enumeration.Variants {
+				variantDeclaration := &enumeration.Variants[variantIndex]
+				if previous, duplicate := info.variants[variantDeclaration.Name]; duplicate {
+					a.addDiagnostic("E0102", span(module.file.Path, variantDeclaration.NameSpan), RelatedSpan{
+						Role: "previous-declaration", Span: previous.declaration,
+					})
+					continue
+				}
+				variant := enumVariant{
+					name: variantDeclaration.Name, span: span(module.file.Path, variantDeclaration.Span),
+					declaration: span(module.file.Path, variantDeclaration.NameSpan), fields: make(map[string]resourceField),
+				}
+				for fieldIndex := range variantDeclaration.Fields {
+					field := &variantDeclaration.Fields[fieldIndex]
+					if previous, duplicate := variant.fields[field.Name]; duplicate {
+						a.addDiagnostic("E0102", span(module.file.Path, field.NameSpan), RelatedSpan{
+							Role: "previous-declaration", Span: previous.declaration,
+						})
+						continue
+					}
+					fieldType := a.canonicalType(module, field.Type)
+					resolved := resourceField{
+						name: field.Name, typ: fieldType, span: span(module.file.Path, field.Span),
+						declaration: span(module.file.Path, field.NameSpan), typeSpan: span(module.file.Path, field.Type.Span),
+					}
+					variant.fields[field.Name] = resolved
+					variant.orderedFields = append(variant.orderedFields, resolved)
+				}
+				info.variants[variant.name] = variant
+				info.orderedVariants = append(info.orderedVariants, variant)
+			}
+		}
+	}
+
+	for _, info := range a.enumTypes {
+		for _, variant := range info.orderedVariants {
+			for _, field := range variant.orderedFields {
+				if field.typ == hir.TypeInvalid {
+					continue
+				}
+				if field.typ == hir.TypeRegion {
+					a.addDiagnostic("E3103", field.typeSpan, RelatedSpan{Role: "capability", Span: field.declaration})
+					continue
+				}
+				if !a.inertCopyable(field.typ, make(map[hir.Type]uint8)) {
+					a.addDiagnostic("E1004", field.typeSpan, RelatedSpan{Role: "variant", Span: variant.declaration})
+				}
+			}
+		}
+	}
+}
+
+func (a *analyzer) inertCopyable(value hir.Type, state map[hir.Type]uint8) bool {
+	switch value {
+	case hir.TypeBool, hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
+		return true
+	case hir.TypeInvalid, hir.TypeVoid, hir.TypeRegion:
+		return false
+	}
+	if _, _, pointer := hir.RawPointerElement(value); pointer {
+		return true
+	}
+	if _, _, borrow := hir.BorrowElement(value); borrow {
+		return false
+	}
+	if a.isResource(value) {
+		return false
+	}
+	if element, option := hir.OptionElement(value); option {
+		return a.inertCopyable(element, state)
+	}
+	if success, failure, result := hir.ResultElements(value); result {
+		return a.inertCopyable(success, state) && a.inertCopyable(failure, state)
+	}
+	if state[value] == 1 {
+		return false
+	}
+	if state[value] == 2 {
+		return true
+	}
+	state[value] = 1
+	defer func() { state[value] = 2 }()
+	if info := a.structTypes[value]; info != nil {
+		for _, field := range info.orderedFields {
+			if !a.inertCopyable(field.typ, state) {
+				return false
+			}
+		}
+		return true
+	}
+	if info := a.enumTypes[value]; info != nil {
+		for _, variant := range info.orderedVariants {
+			for _, field := range variant.orderedFields {
+				if !a.inertCopyable(field.typ, state) {
+					return false
+				}
+			}
+		}
+		return true
+	}
+	return false
 }
 
 func (a *analyzer) prepareResourceTypes() {

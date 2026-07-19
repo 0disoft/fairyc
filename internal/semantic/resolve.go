@@ -66,6 +66,7 @@ type analyzer struct {
 	flowStarted      bool
 	resourceTypes    map[hir.Type]*resourceInfo
 	structTypes      map[hir.Type]*structInfo
+	enumTypes        map[hir.Type]*enumInfo
 	resourceStates   []ResourceStateFact
 	expressionTypes  map[*ast.Expression]hir.Type
 	regionOrigins    []RegionOriginFact
@@ -90,6 +91,7 @@ func newAnalyzer(files []File) *analyzer {
 		regions:          make(map[*ast.Expression]*symbol),
 		resourceTypes:    make(map[hir.Type]*resourceInfo),
 		structTypes:      make(map[hir.Type]*structInfo),
+		enumTypes:        make(map[hir.Type]*enumInfo),
 		expressionTypes:  make(map[*ast.Expression]hir.Type),
 		regionType:       &symbol{id: hir.NoSymbol, kind: "capability", name: "Region", typ: hir.TypeRegion},
 	}

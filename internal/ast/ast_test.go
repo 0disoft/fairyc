@@ -147,7 +147,7 @@ func TestLowerPreservesStructAttributesAndArgumentOrder(t *testing.T) {
 
 func TestLowerCapturesEnumType(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\nenum Error { Failed; }\n")
+	input := []byte("module main;\nenum Error { Failed; Os { code: i32; retryable: bool; }; }\n")
 	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
 	if len(tree.Diagnostics) != 0 {
 		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
@@ -156,8 +156,15 @@ func TestLowerCapturesEnumType(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Lower() error = %v", err)
 	}
-	if len(module.Enums) != 1 || module.Enums[0].Name != "Error" {
+	if len(module.Enums) != 1 || module.Enums[0].Name != "Error" || len(module.Enums[0].Variants) != 2 {
 		t.Fatalf("enums = %+v", module.Enums)
+	}
+	if module.Enums[0].Variants[0].Name != "Failed" || len(module.Enums[0].Variants[0].Fields) != 0 {
+		t.Fatalf("payloadless variant = %+v", module.Enums[0].Variants[0])
+	}
+	variant := module.Enums[0].Variants[1]
+	if variant.Name != "Os" || len(variant.Fields) != 2 || variant.Fields[0].Name != "code" || variant.Fields[0].Type.Text != "i32" || variant.Fields[1].Name != "retryable" || variant.Fields[1].Type.Text != "bool" {
+		t.Fatalf("payload variant = %+v", variant)
 	}
 }
 

@@ -24,12 +24,21 @@ type Module struct {
 	Literals         []Literal
 }
 
-// Enum is one inert tagged type declaration before payload semantics are implemented.
+// Enum is one restricted inert tagged type declaration.
 type Enum struct {
 	Name     string
 	Public   bool
 	Span     diagnostic.Span
 	NameSpan diagnostic.Span
+	Variants []EnumVariant
+}
+
+// EnumVariant preserves one declared tag and its ordered named payload fields.
+type EnumVariant struct {
+	Name     string
+	Span     diagnostic.Span
+	NameSpan diagnostic.Span
+	Fields   []FieldDeclaration
 }
 
 // Struct is one inert named aggregate without compiler-owned cleanup.
@@ -230,12 +239,25 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 }
 
 func lowerEnum(tree *syntax.Tree, node syntax.Node) Enum {
-	return Enum{
+	value := Enum{
 		Name:     node.Text,
 		Public:   containsKeywordBeforeName(tree, node, "pub", node.Text),
 		Span:     node.Span,
 		NameSpan: findIdentifierSpan(tree, node, node.Text, "enum"),
 	}
+	for _, childID := range node.Children {
+		child, found := tree.Node(childID)
+		if !found || child.Kind != syntax.KindVariant {
+			continue
+		}
+		value.Variants = append(value.Variants, EnumVariant{
+			Name:     child.Text,
+			Span:     child.Span,
+			NameSpan: findIdentifierSpan(tree, child, child.Text, ""),
+			Fields:   lowerFields(tree, child),
+		})
+	}
+	return value
 }
 
 func lowerStruct(tree *syntax.Tree, node syntax.Node) Struct {
