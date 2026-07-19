@@ -14,12 +14,26 @@ import (
 	"github.com/0disoft/fairyc/internal/cli"
 )
 
-const smokeSource = `module main;
+const successSource = `module main;
 
 fn main() -> i32 {
     let empty: &str = "";
     let text: &str = "Fairy λ";
     if unsafe { text as *u8 } != null { 42 } else { 1 }
+}
+`
+
+const negativeSource = `module negative;
+
+fn main() -> i32 {
+    -1
+}
+`
+
+const trapSource = `module trap;
+
+fn main() -> i32 {
+    42 / 0
 }
 `
 
@@ -38,8 +52,14 @@ func run() error {
 		return fmt.Errorf("create temporary source root: %w", err)
 	}
 	defer os.RemoveAll(root)
-	if err := os.WriteFile(filepath.Join(root, "main.fy"), []byte(smokeSource), 0o600); err != nil {
-		return fmt.Errorf("write smoke source: %w", err)
+	for name, source := range map[string]string{
+		"main.fy":     successSource,
+		"negative.fy": negativeSource,
+		"trap.fy":     trapSource,
+	} {
+		if err := os.WriteFile(filepath.Join(root, name), []byte(source), 0o600); err != nil {
+			return fmt.Errorf("write %s smoke source: %w", name, err)
+		}
 	}
 
 	var buildStdout bytes.Buffer
@@ -59,23 +79,50 @@ func run() error {
 	if len(artifact) < 2 || len(artifact) > maxSmokeArtifactBytes || artifact[0] != 'M' || artifact[1] != 'Z' {
 		return fmt.Errorf("build-host artifact is not a bounded PE image")
 	}
-	if err := executeExpect42(artifactPath); err != nil {
+	if err := executeExpectResult(artifactPath, 42); err != nil {
 		return err
 	}
 
-	var runStdout bytes.Buffer
-	var runStderr bytes.Buffer
-	runCode := cli.Run([]string{
-		"experimental", "run-host", "main.fy", "--profile", "optimized",
-	}, root, &runStdout, &runStderr)
-	if runCode != cli.ExitSuccess || runStderr.Len() != 0 || !strings.HasPrefix(runStdout.String(), "native result: 42 (windows/amd64 host-smoke, msvc ") {
-		return fmt.Errorf("run-host returned code %d, stdout %q, stderr %q", runCode, runStdout.String(), runStderr.String())
+	for _, testCase := range []struct {
+		name         string
+		source       string
+		profile      string
+		code         int
+		stdoutPrefix string
+		stderr       string
+	}{
+		{name: "success low", source: "main.fy", profile: "low", code: cli.ExitSuccess, stdoutPrefix: "native result: 42 (windows/amd64 host-smoke, msvc "},
+		{name: "success optimized", source: "main.fy", profile: "optimized", code: cli.ExitSuccess, stdoutPrefix: "native result: 42 (windows/amd64 host-smoke, msvc "},
+		{name: "negative low", source: "negative.fy", profile: "low", code: cli.ExitSuccess, stdoutPrefix: "native result: -1 (windows/amd64 host-smoke, msvc "},
+		{name: "negative optimized", source: "negative.fy", profile: "optimized", code: cli.ExitSuccess, stdoutPrefix: "native result: -1 (windows/amd64 host-smoke, msvc "},
+		{name: "trap low", source: "trap.fy", profile: "low", code: cli.ExitProgramTrap, stderr: "trap: division-by-zero\n"},
+		{name: "trap optimized", source: "trap.fy", profile: "optimized", code: cli.ExitProgramTrap, stderr: "trap: division-by-zero\n"},
+	} {
+		if err := runHostCase(root, testCase.name, testCase.source, testCase.profile, testCase.code, testCase.stdoutPrefix, testCase.stderr); err != nil {
+			return err
+		}
 	}
-	fmt.Printf("Windows host smoke passed: build-host PE %d bytes and run-host both returned 42\n", len(artifact))
+	fmt.Printf("Windows host smoke passed: build-host PE %d bytes and 6 run-host outcomes covered 42, -1, and division-by-zero across low/optimized\n", len(artifact))
 	return nil
 }
 
-func executeExpect42(path string) error {
+func runHostCase(root, name, source, profile string, wantCode int, wantStdoutPrefix, wantStderr string) error {
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	code := cli.Run([]string{
+		"experimental", "run-host", source, "--profile", profile,
+	}, root, &stdout, &stderr)
+	stdoutMatches := stdout.Len() == 0
+	if wantStdoutPrefix != "" {
+		stdoutMatches = strings.HasPrefix(stdout.String(), wantStdoutPrefix)
+	}
+	if code != wantCode || stderr.String() != wantStderr || !stdoutMatches {
+		return fmt.Errorf("%s run-host returned code %d, stdout %q, stderr %q", name, code, stdout.String(), stderr.String())
+	}
+	return nil
+}
+
+func executeExpectResult(path string, expected int32) error {
 	contextValue, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	command := exec.CommandContext(contextValue, path)
@@ -87,13 +134,21 @@ func executeExpect42(path string) error {
 	if errors.Is(contextValue.Err(), context.DeadlineExceeded) {
 		return fmt.Errorf("build-host artifact exceeded execution timeout")
 	}
-	var exitError *exec.ExitError
-	if !errors.As(err, &exitError) || exitError.ExitCode() != 42 || output.Len() != 0 {
+	exitCode := 0
+	if err != nil {
+		var exitError *exec.ExitError
+		if !errors.As(err, &exitError) {
+			return fmt.Errorf("build-host artifact execution failed: %w", err)
+		}
+		exitCode = exitError.ExitCode()
+	}
+	actual := int32(uint32(exitCode))
+	if actual != expected || output.Len() != 0 {
 		exitCode := -1
 		if command.ProcessState != nil {
 			exitCode = command.ProcessState.ExitCode()
 		}
-		return fmt.Errorf("build-host artifact returned error %v, exit %d, output %q", err, exitCode, output.String())
+		return fmt.Errorf("build-host artifact returned error %v, exit %d (i32 %d), output %q", err, exitCode, actual, output.String())
 	}
 	return nil
 }

@@ -2132,6 +2132,9 @@ func (e *emitter) emitFunction(output *strings.Builder, functionIndex int) error
 		fmt.Fprintf(output, "    %s fy_l_%d;\n", cType, local)
 		fmt.Fprintf(output, "    (void)&fy_l_%d;\n", local)
 	}
+	if functionNeedsCheckedDivisor(*function) {
+		output.WriteString("    volatile int32_t fy_checked_divisor;\n")
+	}
 	dynamicTargets := e.dynamicTrapTargets[functionIndex]
 	if len(dynamicTargets) != 0 {
 		output.WriteString("    uint32_t fy_pending_trap = FY_TRAP_UNREACHABLE;\n")
@@ -2367,8 +2370,13 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			return fmt.Errorf("binary in %s: %w", function, err)
 		}
 		switch operation.Operator {
-		case "+", "-", "*", "/", "%":
+		case "+", "-", "*":
 			fmt.Fprintf(output, "    fy_l_%d = (%s) %s (%s);\n", operation.DestinationLocal, leftValue, operation.Operator, rightValue)
+		case "/", "%":
+			output.WriteString("    fy_checked_divisor = ")
+			output.WriteString(rightValue)
+			output.WriteString(";\n")
+			fmt.Fprintf(output, "    fy_l_%d = (%s) %s fy_checked_divisor;\n", operation.DestinationLocal, leftValue, operation.Operator)
 		case ">>":
 			fmt.Fprintf(output, "    fy_l_%d = fy_sar_i32(%s, %s);\n", operation.DestinationLocal, leftValue, rightValue)
 		case "&", "^", "|":
@@ -2735,6 +2743,17 @@ func collectLocals(function mir.Function) []mir.LocalID {
 	}
 	slices.Sort(result)
 	return result
+}
+
+func functionNeedsCheckedDivisor(function mir.Function) bool {
+	for _, block := range function.Blocks {
+		for _, operation := range block.Operations {
+			if operation.Kind == mir.OperationBinary && (operation.Operator == "/" || operation.Operator == "%") {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func operationHasDestination(kind mir.OperationKind) bool {

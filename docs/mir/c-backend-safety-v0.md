@@ -88,10 +88,12 @@ Nested MIR effects are emitted as separate C statements and temporaries. Functio
 | Wrapping arithmetic | Perform corresponding-width unsigned arithmetic and convert by a specified bit-preserving path. |
 | Saturating arithmetic | Use explicit comparisons or helpers with no overflowing intermediate. |
 | Checked arithmetic | Return an explicit tagged result without invoking C undefined behavior. |
-| Division | Check zero and signed-minimum divided by negative one before the C operation. |
+| Division and remainder | Check zero and signed-minimum divided by negative one before the C operation. Materialize the verified divisor through a function-local volatile C transport slot so a host C compiler cannot reject or fold an otherwise unreachable constant-undefined expression. |
 | Shift | Check the amount against the operand width before the C shift. Signed left shift is not a Stage 0 source operation. |
 
 The backend cannot add C or LLVM overflow, exactness, alignment, or alias promises unless the verified MIR fact explicitly proves them.
+The volatile divisor slot is private generated-C transport. It does not add source-visible volatile
+semantics, and it is emitted only in functions containing checked division or remainder.
 
 ## Representation and access
 

@@ -1,7 +1,7 @@
 {
   "tool": "ssealed",
   "version": "0.6.11",
-  "generatedAt": "2026-07-19T08:31:02.102Z",
+  "generatedAt": "2026-07-19T08:41:55.106Z",
   "scope": "general",
   "profile": "cli-tool",
   "addons": [
@@ -496,13 +496,13 @@
     },
     {
       "path": "docs/adr/README.md",
-      "checksum": "sha256:f55eea358d80c50db2e4f4b7e8d2122b543268f67f9a4499db18b26c2278530c",
+      "checksum": "sha256:658d62c5be597253106def974df48d463d1e0f46628e4e074ce18862e268cab7",
       "kind": "document",
       "ownership": "seeded",
       "presence": "optional",
       "status": "active",
       "initialChecksum": "sha256:57be3aaeda2ef7dc55f76bc760d7a3576cb24e41ecf861dadf27f5c9d07fd00c",
-      "acceptedChecksum": "sha256:f55eea358d80c50db2e4f4b7e8d2122b543268f67f9a4499db18b26c2278530c",
+      "acceptedChecksum": "sha256:658d62c5be597253106def974df48d463d1e0f46628e4e074ce18862e268cab7",
       "generatedChecksum": "sha256:57be3aaeda2ef7dc55f76bc760d7a3576cb24e41ecf861dadf27f5c9d07fd00c"
     },
     {

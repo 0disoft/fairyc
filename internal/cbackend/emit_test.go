@@ -643,6 +643,38 @@ func TestTrapCodesAreStable(t *testing.T) {
 	}
 }
 
+func TestEmitMaterializesCheckedDivisionDivisor(t *testing.T) {
+	t.Parallel()
+	for _, testCase := range []struct {
+		name     string
+		operator string
+	}{
+		{name: "division", operator: "/"},
+		{name: "remainder", operator: "%"},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+			program := lowerSource(t, fmt.Sprintf("module main;\nfn main() -> i32 { 42 %s 0 }\n", testCase.operator))
+			unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+			if err != nil {
+				t.Fatalf("Emit() error = %v", err)
+			}
+			for _, required := range []string{
+				"volatile int32_t fy_checked_divisor;",
+				"fy_checked_divisor = INT32_C(0);",
+				fmt.Sprintf("(INT32_C(42)) %s fy_checked_divisor;", testCase.operator),
+			} {
+				if !strings.Contains(unit.Source, required) {
+					t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+				}
+			}
+			if strings.Contains(unit.Source, fmt.Sprintf("%s (INT32_C(0))", testCase.operator)) {
+				t.Fatalf("generated C exposes a checked zero divisor as a constant C expression:\n%s", unit.Source)
+			}
+		})
+	}
+}
+
 func TestEmitFlatI32Resource(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
