@@ -200,6 +200,8 @@ A `c"..."` literal provides allocation-free immutable `&CStr` storage with one c
 
 A `b"..."` literal provides allocation-free immutable `&[u8]` storage with exact decoded bytes, no UTF-8 promise, no appended terminator, and hidden `Static` origin. MIR retains the byte count as the logical length. The generated-C path uses a private non-null `{ data, length }` value, deduplicated immutable arrays for nonempty values, and a one-byte sentinel with length zero for empty values. An explicit unsafe conversion may expose a literal or typed local's immutable `*u8` data address; mutable extraction, indexing, slicing, source-level length access, a public slice ABI, and implicit text conversion remain unimplemented.
 
+A `"..."` literal provides allocation-free immutable `&str` storage after the complete decoded byte sequence passes UTF-8 validation. MIR retains a distinct text operand and byte length rather than reusing byte-string or C-string meaning. The generated-C path uses a private non-null `fy_str { data, length }` value, deduplicated exact immutable UTF-8 arrays for nonempty values, and a one-byte sentinel with length zero for empty values. An explicit unsafe conversion may expose a literal or typed local's immutable `*u8` data address; mutable extraction, indexing, slicing, source-level length access, a public string ABI, implicit byte-to-text conversion, and implicit C termination remain unimplemented.
+
 ## Linux `File` v0
 
 The initial API is explicitly tied to the `x86_64-linux-gnu` target and accepts `&CStr`, not a purported portable UTF-8 path.

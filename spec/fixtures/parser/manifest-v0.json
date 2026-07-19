@@ -163,6 +163,24 @@
       }
     },
     {
+      "id": "fail.invalid-utf8-string-escape",
+      "sourceRoot": "cases/fail/invalid-utf8-string-escape/src",
+      "source": "main.fy",
+      "expect": {
+        "status": "fail",
+        "diagnostics": [
+          {
+            "code": "E0005",
+            "span": {
+              "startByte": 32,
+              "endByte": 38
+            },
+            "repair": "none"
+          }
+        ]
+      }
+    },
+    {
       "id": "fail.c-string-interior-nul",
       "sourceRoot": "cases/fail/c-string-interior-nul/src",
       "source": "main.fy",

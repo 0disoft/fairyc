@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v30"
+	reportSchemaVersion = "fairyc.native-c-report/v31"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -77,6 +77,52 @@ fn main() -> i32 {
     if unsafe { bytes as *u8 } != null { 42 } else { 1 }
 }
 `
+
+const utf8StringLiteralBuildSmokeSource = `module main;
+fn main() -> i32 {
+    let empty: &str = "";
+    let text: &str = "Fairy λ";
+    if unsafe { text as *u8 } != null { 42 } else { 1 }
+}
+`
+
+const utf8StringLiteralSourceCallSmokeSource = `module main;
+@link_name("fairyc_fixture_is_fairy_utf8")
+unsafe extern C fn is_fairy_utf8(value: *u8) -> u32;
+fn main() -> i32 {
+    let text: &str = "Fairy λ";
+    if unsafe { is_fairy_utf8(text as *u8) } == 1 { 42 } else { 1 }
+}
+`
+
+const utf8StringLiteralSourceCallCompanion = `#include <stdint.h>
+
+uint32_t fairyc_fixture_is_fairy_utf8(const uint8_t *value) {
+    static const uint8_t expected[8] = {
+        UINT8_C(70), UINT8_C(97), UINT8_C(105), UINT8_C(114),
+        UINT8_C(121), UINT8_C(32), UINT8_C(206), UINT8_C(187)
+    };
+    if (value == 0) {
+        return UINT32_C(0);
+    }
+    for (uint32_t index = 0; index < UINT32_C(8); index++) {
+        if (value[index] != expected[index]) {
+            return UINT32_C(0);
+        }
+    }
+    return UINT32_C(1);
+}
+`
+
+var utf8StringLiteralSourceCallExpectedCFragments = []string{
+	"typedef struct fy_str",
+	"static const uint8_t fy_static_str_",
+	"UINT8_C(70), UINT8_C(97), UINT8_C(105), UINT8_C(114), UINT8_C(121), UINT8_C(32), UINT8_C(206), UINT8_C(187)",
+	".length = ((uintptr_t)UINT64_C(8))",
+	"extern uint32_t fairyc_fixture_is_fairy_utf8(const uint8_t * fy_a_0);",
+	".data;",
+	"fairyc_fixture_is_fairy_utf8(fy_l_",
+}
 
 const byteStringLiteralSourceCallSmokeSource = `module main;
 @link_name("fairyc_fixture_is_fairy_bytes")
@@ -1616,10 +1662,12 @@ type Report struct {
 	TextViewOutputSourceCallExecutions  int        `json:"textViewOutputSourceCallExecutions"`
 	CStrValidationSourceCallExecutions  int        `json:"cStrValidationSourceCallExecutions"`
 	ByteStringSourceCallExecutions      int        `json:"byteStringLiteralSourceCallExecutions"`
+	UTF8StringSourceCallExecutions      int        `json:"utf8StringLiteralSourceCallExecutions"`
 	CStringLiteralSourceCallExecutions  int        `json:"cStringLiteralSourceCallExecutions"`
 	BuildSmokeExecutions                int        `json:"buildSmokeExecutions"`
 	StandardLibraryBuildSmokeExecutions int        `json:"standardLibraryBuildSmokeExecutions"`
 	ByteStringBuildSmokeExecutions      int        `json:"byteStringLiteralBuildSmokeExecutions"`
+	UTF8StringBuildSmokeExecutions      int        `json:"utf8StringLiteralBuildSmokeExecutions"`
 	CStringLiteralBuildSmokeExecutions  int        `json:"cStringLiteralBuildSmokeExecutions"`
 }
 
@@ -1887,6 +1935,11 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.ByteStringSourceCallExecutions = byteStringLiteralSourceCallExecutions
+	utf8StringLiteralSourceCallExecutions, err := runUTF8StringLiteralSourceCallProbe(temporaryRoot, toolchains)
+	if err != nil {
+		return Report{}, err
+	}
+	report.UTF8StringSourceCallExecutions = utf8StringLiteralSourceCallExecutions
 	cStringLiteralSourceCallExecutions, err := runCStringLiteralSourceCallProbe(temporaryRoot, toolchains)
 	if err != nil {
 		return Report{}, err
@@ -1950,6 +2003,11 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.ByteStringBuildSmokeExecutions = byteStringLiteralBuildSmoke
+	utf8StringLiteralBuildSmoke, err := runUTF8StringLiteralBuildSmoke(temporaryRoot)
+	if err != nil {
+		return Report{}, err
+	}
+	report.UTF8StringBuildSmokeExecutions = utf8StringLiteralBuildSmoke
 	cStringLiteralBuildSmoke, err := runCStringLiteralBuildSmoke(temporaryRoot)
 	if err != nil {
 		return Report{}, err
@@ -1967,6 +2025,18 @@ func runByteStringLiteralSourceCallProbe(temporaryRoot string, toolchains []cdri
 		byteStringLiteralSourceCallCompanion,
 		42,
 		byteStringLiteralSourceCallExpectedCFragments,
+	)
+}
+
+func runUTF8StringLiteralSourceCallProbe(temporaryRoot string, toolchains []cdriver.Toolchain) (int, error) {
+	return runForeignSourceProbe(
+		temporaryRoot,
+		toolchains,
+		"utf8-string-literal-source-call",
+		utf8StringLiteralSourceCallSmokeSource,
+		utf8StringLiteralSourceCallCompanion,
+		42,
+		utf8StringLiteralSourceCallExpectedCFragments,
 	)
 }
 
@@ -2396,6 +2466,10 @@ func runStandardLibraryBuildSmoke(temporaryRoot string) (int, error) {
 
 func runByteStringLiteralBuildSmoke(temporaryRoot string) (int, error) {
 	return runBuildSourceSmoke(temporaryRoot, "byte-string-literal-build-smoke", byteStringLiteralBuildSmokeSource)
+}
+
+func runUTF8StringLiteralBuildSmoke(temporaryRoot string) (int, error) {
+	return runBuildSourceSmoke(temporaryRoot, "utf8-string-literal-build-smoke", utf8StringLiteralBuildSmokeSource)
 }
 
 func runCStringLiteralBuildSmoke(temporaryRoot string) (int, error) {

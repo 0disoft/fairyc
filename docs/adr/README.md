@@ -74,6 +74,9 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0062-owned-text-source-transport.md`: exact nested String/CString lifecycle calls from generated Fairy source with real by-value results, byte/terminator observers, and normalized drop.
 - `0063-linux-file-source-transport.md`: exact Linux File/open/result records and generated Fairy calls through real write-all, sync, consuming close, reopen, partial-read, and EOF behavior.
 - `0064-used-symbol-standard-library-auto-link.md`: one shared exact-symbol contract, called-symbol tracking, minimal dependency closure, and product-build linkage of provisional C standard-library units.
+- `0065-compiler-owned-c-string-static-storage.md`: verified `Static` C-string literals, exact terminated storage, unsafe immutable data-address extraction, and native evidence counters.
+- `0066-compiler-owned-byte-string-slice-storage.md`: exact byte-string storage, private non-null slice views, empty sentinels, typed-local data extraction, and native evidence counters.
+- `0067-compiler-owned-utf8-string-static-storage.md`: decoded UTF-8 validation, distinct text operands, private non-null string views, typed-local data extraction, and native evidence counters.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

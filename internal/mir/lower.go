@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/0disoft/fairyc/internal/hir"
 )
@@ -414,6 +415,13 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 	}
 	switch expression.Kind {
 	case "literal":
+		if expression.Type == hir.SharedBorrow(hir.TypeStr) && strings.HasPrefix(expression.Value, "\"") {
+			decoded, err := hex.DecodeString(expression.Cooked)
+			if err != nil || !utf8.Valid(decoded) {
+				return Operand{}, fmt.Errorf("invalid cooked UTF-8 string literal %q", expression.Value)
+			}
+			return Operand{Kind: OperandString, Type: expression.Type, StaticData: string(decoded)}, nil
+		}
 		if expression.Type == hir.SharedBorrow(hir.TypeByteSlice) && strings.HasPrefix(expression.Value, "b\"") {
 			decoded, err := hex.DecodeString(expression.Cooked)
 			if err != nil {
@@ -568,6 +576,32 @@ func (l *functionLowerer) lowerRawAddressCast(expression *hir.Expression) (Opera
 		return Operand{}, fmt.Errorf("malformed raw-address cast")
 	}
 	borrow := &expression.Children[0]
+	if (borrow.Kind == "literal" || borrow.Kind == "path") && borrow.Type == hir.SharedBorrow(hir.TypeStr) && expression.Type == hir.RawPointer(hir.TypeU8, false) {
+		value, err := l.lowerExpression(borrow)
+		if err != nil {
+			return Operand{}, err
+		}
+		if value.Kind != OperandString && value.Kind != OperandLocal {
+			return Operand{}, fmt.Errorf("string data address source has invalid operand kind %q", value.Kind)
+		}
+		destination := l.newTemporary()
+		entity := sourceEntity("str-data-address", expression.Span)
+		l.appendOperation(Operation{
+			Kind: OperationStrDataAddress, Entity: entity, Span: expression.Span,
+			DestinationLocal: destination,
+			Operands:         []Operand{value},
+			Type:             expression.Type,
+			OwnerType:        borrow.Type,
+			Operator:         expression.Operator,
+			UnsafeScope:      *expression.UnsafeScope,
+		})
+		l.result.UnsafeOperations = append(l.result.UnsafeOperations, UnsafeOperation{
+			Entity:           entity,
+			SourceSpanEntity: sourceEntity("span", expression.Span),
+			ScopeEntity:      sourceEntity("unsafe-scope", *expression.UnsafeScope),
+		})
+		return Operand{Kind: OperandLocal, Local: destination}, nil
+	}
 	if (borrow.Kind == "literal" || borrow.Kind == "path") && borrow.Type == hir.SharedBorrow(hir.TypeByteSlice) && expression.Type == hir.RawPointer(hir.TypeU8, false) {
 		value, err := l.lowerExpression(borrow)
 		if err != nil {

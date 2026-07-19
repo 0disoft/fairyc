@@ -7,6 +7,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/0disoft/fairyc/internal/cstdlibcontract"
 	"github.com/0disoft/fairyc/internal/hir"
@@ -105,6 +106,7 @@ type emitter struct {
 	dropSites          []DropSite
 	dropSiteByKey      map[dropSiteKey]uint32
 	byteStringStorage  map[string]string
+	stringStorage      map[string]string
 	cStringStorage     map[string]string
 }
 
@@ -254,6 +256,10 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	if err != nil {
 		return Unit{}, err
 	}
+	stringStorage, err := collectStringStorage(functions)
+	if err != nil {
+		return Unit{}, err
+	}
 	cStringStorage, err := collectCStringStorage(functions)
 	if err != nil {
 		return Unit{}, err
@@ -292,10 +298,14 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 		cScalars:           cScalars,
 		instrumentation:    profile.Instrumentation,
 		byteStringStorage:  byteStringStorage,
+		stringStorage:      stringStorage,
 		cStringStorage:     cStringStorage,
 	}
 	if len(byteStringStorage) != 0 {
 		value.features["static-byte-string"] = struct{}{}
+	}
+	if len(stringStorage) != 0 {
+		value.features["static-utf8-string"] = struct{}{}
 	}
 	if len(cStringStorage) != 0 {
 		value.features["static-c-string"] = struct{}{}
@@ -375,6 +385,7 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 		return Unit{}, err
 	}
 	value.emitByteStringStorage(&output)
+	value.emitStringStorage(&output)
 	value.emitCStringStorage(&output)
 	for index := range foreignFunctions {
 		value.emitForeignMacroGuard(&output, index)
@@ -675,7 +686,7 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 				case mir.OperationResultConstruct, mir.OperationOptionConstruct,
 					mir.OperationResultPayload, mir.OperationOptionPayload,
 					mir.OperationEnumConstruct, mir.OperationEnumPayload,
-					mir.OperationRawAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
+					mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead:
 					inferred = operation.Type
 				}
@@ -939,6 +950,11 @@ func inferredOperandType(localTypes map[mir.LocalID]hir.Type, operand mir.Operan
 			return operand.Type, true
 		}
 		return hir.TypeInvalid, false
+	case mir.OperandString:
+		if operand.Type == hir.SharedBorrow(hir.TypeStr) && utf8.ValidString(operand.StaticData) {
+			return operand.Type, true
+		}
+		return hir.TypeInvalid, false
 	case mir.OperandCString:
 		if operand.Type == hir.SharedBorrow(hir.TypeCStr) {
 			return operand.Type, true
@@ -971,7 +987,7 @@ func isResultI32I32(value hir.Type) bool {
 
 func (e *emitter) supportedCValueType(value hir.Type) bool {
 	value = canonicalCValueType(value)
-	if value == hir.SharedBorrow(hir.TypeByteSlice) || value == hir.SharedBorrow(hir.TypeCStr) {
+	if value == hir.SharedBorrow(hir.TypeByteSlice) || value == hir.SharedBorrow(hir.TypeStr) || value == hir.SharedBorrow(hir.TypeCStr) {
 		return true
 	}
 	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeU32 || value == hir.TypeUSize || hir.IsCScalar(value) || isOptionI32(value) || isResultI32I32(value) {
@@ -1003,6 +1019,8 @@ func (e *emitter) cValueType(value hir.Type) (string, error) {
 	switch {
 	case value == hir.SharedBorrow(hir.TypeByteSlice):
 		return "fy_byte_slice", nil
+	case value == hir.SharedBorrow(hir.TypeStr):
+		return "fy_str", nil
 	case value == hir.SharedBorrow(hir.TypeCStr):
 		return "const uint8_t *", nil
 	case value == hir.TypeU8:
@@ -1103,6 +1121,12 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 				}
 				allowedUnsafeEntities[operation.Entity] = struct{}{}
 				e.features["raw-address"] = struct{}{}
+			case mir.OperationStrDataAddress:
+				if err := e.inspectStrDataAddress(functionIndex, *operation); err != nil {
+					return err
+				}
+				allowedUnsafeEntities[operation.Entity] = struct{}{}
+				e.features["str-data-address"] = struct{}{}
 			case mir.OperationByteSliceDataAddress:
 				if err := e.inspectByteSliceDataAddress(functionIndex, *operation); err != nil {
 					return err
@@ -1280,7 +1304,7 @@ func (e *emitter) callSignature(symbol hir.SymbolID) (hir.Type, []hir.Type, bool
 func validateOperationShape(function string, operation mir.Operation) error {
 	switch operation.Kind {
 	case mir.OperationAssign, mir.OperationInitialize, mir.OperationUnary, mir.OperationBinary,
-		mir.OperationRawAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
+		mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationEnumConstruct, mir.OperationEnumPayload,
 		mir.OperationResourceConstruct, mir.OperationFieldRead:
 		if operation.DestinationLocal < 0 {
@@ -1342,6 +1366,32 @@ func (e *emitter) inspectByteSliceDataAddress(functionIndex int, operation mir.O
 	}
 	if _, err := e.cValueType(operation.Type); err != nil {
 		return CapabilityError{Function: function.Name, Feature: "byte-slice data address type " + strconv.Quote(string(operation.Type))}
+	}
+	return nil
+}
+
+func (e *emitter) inspectStrDataAddress(functionIndex int, operation mir.Operation) error {
+	function := &e.functions[functionIndex]
+	operand, err := oneOperand(operation.Operands)
+	if err != nil {
+		return fmt.Errorf("string data address in %s: %w", function.Name, err)
+	}
+	if operand.Kind != mir.OperandString && operand.Kind != mir.OperandLocal || operation.Entity == "" || operation.UnsafeScope.Source == "" {
+		return fmt.Errorf("string data address in %s has incomplete storage or unsafe provenance", function.Name)
+	}
+	element, mutable, pointer := hir.RawPointerElement(operation.Type)
+	if !pointer || mutable || element != hir.TypeU8 || operation.OwnerType != hir.SharedBorrow(hir.TypeStr) || operation.Operator != "as" {
+		return fmt.Errorf("string data address in %s has incompatible source and pointer types", function.Name)
+	}
+	operandType, err := e.operandType(functionIndex, operand)
+	if err != nil {
+		return fmt.Errorf("string data address in %s: %w", function.Name, err)
+	}
+	if operandType != operation.OwnerType {
+		return fmt.Errorf("string data address in %s has storage type %q, want %q", function.Name, operandType, operation.OwnerType)
+	}
+	if _, err := e.cValueType(operation.Type); err != nil {
+		return CapabilityError{Function: function.Name, Feature: "string data address type " + strconv.Quote(string(operation.Type))}
 	}
 	return nil
 }
@@ -1500,6 +1550,11 @@ func (e *emitter) operandType(functionIndex int, operand mir.Operand) (hir.Type,
 			return operand.Type, nil
 		}
 		return hir.TypeInvalid, fmt.Errorf("byte-string operand has invalid type %q", operand.Type)
+	case mir.OperandString:
+		if operand.Type == hir.SharedBorrow(hir.TypeStr) && utf8.ValidString(operand.StaticData) {
+			return operand.Type, nil
+		}
+		return hir.TypeInvalid, fmt.Errorf("string operand has invalid type %q", operand.Type)
 	case mir.OperandCString:
 		if operand.Type == hir.SharedBorrow(hir.TypeCStr) {
 			return operand.Type, nil
@@ -1863,6 +1918,12 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 		output.WriteString("    uintptr_t length;\n")
 		output.WriteString("} fy_byte_slice;\n\n")
 	}
+	if _, used := e.features["static-utf8-string"]; used {
+		output.WriteString("typedef struct fy_str {\n")
+		output.WriteString("    const uint8_t *data;\n")
+		output.WriteString("    uintptr_t length;\n")
+		output.WriteString("} fy_str;\n\n")
+	}
 	for _, transport := range cScalarTransports {
 		if _, used := e.features[transport.feature]; !used {
 			continue
@@ -2113,6 +2174,16 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			return fmt.Errorf("raw address in %s has invalid local operand", function)
 		}
 		fmt.Fprintf(output, "    fy_l_%d = &fy_l_%d;\n", operation.DestinationLocal, operand.Local)
+	case mir.OperationStrDataAddress:
+		operand, err := oneOperand(operation.Operands)
+		if err != nil || operand.Kind != mir.OperandString && operand.Kind != mir.OperandLocal {
+			return fmt.Errorf("string data address in %s has invalid storage operand", function)
+		}
+		if operand.Kind == mir.OperandLocal {
+			fmt.Fprintf(output, "    fy_l_%d = fy_l_%d.data;\n", operation.DestinationLocal, operand.Local)
+		} else {
+			fmt.Fprintf(output, "    fy_l_%d = %s;\n", operation.DestinationLocal, stringStorageSymbol(operand.StaticData))
+		}
 	case mir.OperationByteSliceDataAddress:
 		operand, err := oneOperand(operation.Operands)
 		if err != nil || operand.Kind != mir.OperandByteString && operand.Kind != mir.OperandLocal {
@@ -2672,7 +2743,7 @@ func operationHasDestination(kind mir.OperationKind) bool {
 		mir.OperationResultConstruct, mir.OperationResultPayload,
 		mir.OperationOptionConstruct, mir.OperationOptionPayload,
 		mir.OperationEnumConstruct, mir.OperationEnumPayload,
-		mir.OperationRawAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
+		mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationRegionPlace:
 		return true
 	default:
@@ -2709,6 +2780,11 @@ func cOperand(operand mir.Operand) (string, error) {
 			return "", fmt.Errorf("byte-string operand has invalid static storage")
 		}
 		return fmt.Sprintf("(fy_byte_slice){ .data = %s, .length = ((uintptr_t)UINT64_C(%d)) }", byteStringStorageSymbol(operand.StaticData), len(operand.StaticData)), nil
+	case mir.OperandString:
+		if operand.Type != hir.SharedBorrow(hir.TypeStr) || !utf8.ValidString(operand.StaticData) {
+			return "", fmt.Errorf("string operand has invalid static storage")
+		}
+		return fmt.Sprintf("(fy_str){ .data = %s, .length = ((uintptr_t)UINT64_C(%d)) }", stringStorageSymbol(operand.StaticData), len(operand.StaticData)), nil
 	case mir.OperandCString:
 		if operand.Type != hir.SharedBorrow(hir.TypeCStr) || !validCStringStorage(operand.StaticData) {
 			return "", fmt.Errorf("C string operand has invalid static storage")
@@ -2719,18 +2795,26 @@ func cOperand(operand mir.Operand) (string, error) {
 	}
 }
 
-func collectByteStringStorage(functions []mir.Function) (map[string]string, error) {
+type staticStorageSpec struct {
+	operandKind  mir.OperandKind
+	valueType    hir.Type
+	label        string
+	symbolPrefix string
+	valid        func(string) bool
+}
+
+func collectStaticStorage(functions []mir.Function, spec staticStorageSpec) (map[string]string, error) {
 	result := make(map[string]string)
 	record := func(function string, operand mir.Operand) error {
-		if operand.Kind != mir.OperandByteString {
+		if operand.Kind != spec.operandKind {
 			return nil
 		}
-		if operand.Type != hir.SharedBorrow(hir.TypeByteSlice) {
-			return fmt.Errorf("collect byte-string storage in %s: operand has invalid static storage", function)
+		if operand.Type != spec.valueType || spec.valid != nil && !spec.valid(operand.StaticData) {
+			return fmt.Errorf("collect %s storage in %s: operand has invalid static storage", spec.label, function)
 		}
-		symbol := byteStringStorageSymbol(operand.StaticData)
+		symbol := staticStorageSymbol(spec.symbolPrefix, operand.StaticData)
 		if previous, found := result[symbol]; found && previous != operand.StaticData {
-			return fmt.Errorf("collect byte-string storage in %s: digest collision for %s", function, symbol)
+			return fmt.Errorf("collect %s storage in %s: digest collision for %s", spec.label, function, symbol)
 		}
 		result[symbol] = operand.StaticData
 		return nil
@@ -2764,24 +2848,24 @@ func collectByteStringStorage(functions []mir.Function) (map[string]string, erro
 	return result, nil
 }
 
-func byteStringStorageSymbol(value string) string {
+func staticStorageSymbol(prefix, value string) string {
 	digest := sha256.Sum256([]byte(value))
-	return fmt.Sprintf("fy_static_bytes_%x", digest)
+	return fmt.Sprintf("%s%x", prefix, digest)
 }
 
-func (e *emitter) emitByteStringStorage(output *strings.Builder) {
-	if len(e.byteStringStorage) == 0 {
+func emitStaticStorage(output *strings.Builder, storage map[string]string, emptySentinel bool) {
+	if len(storage) == 0 {
 		return
 	}
-	symbols := make([]string, 0, len(e.byteStringStorage))
-	for symbol := range e.byteStringStorage {
+	symbols := make([]string, 0, len(storage))
+	for symbol := range storage {
 		symbols = append(symbols, symbol)
 	}
 	slices.Sort(symbols)
 	for _, symbol := range symbols {
-		value := e.byteStringStorage[symbol]
+		value := storage[symbol]
 		storageLength := len(value)
-		if storageLength == 0 {
+		if emptySentinel && storageLength == 0 {
 			storageLength = 1
 		}
 		fmt.Fprintf(output, "static const uint8_t %s[%d] = { ", symbol, storageLength)
@@ -2800,49 +2884,41 @@ func (e *emitter) emitByteStringStorage(output *strings.Builder) {
 	output.WriteByte('\n')
 }
 
+func collectStringStorage(functions []mir.Function) (map[string]string, error) {
+	return collectStaticStorage(functions, staticStorageSpec{
+		operandKind: mir.OperandString, valueType: hir.SharedBorrow(hir.TypeStr), label: "UTF-8 string",
+		symbolPrefix: "fy_static_str_", valid: utf8.ValidString,
+	})
+}
+
+func stringStorageSymbol(value string) string {
+	return staticStorageSymbol("fy_static_str_", value)
+}
+
+func (e *emitter) emitStringStorage(output *strings.Builder) {
+	emitStaticStorage(output, e.stringStorage, true)
+}
+
+func collectByteStringStorage(functions []mir.Function) (map[string]string, error) {
+	return collectStaticStorage(functions, staticStorageSpec{
+		operandKind: mir.OperandByteString, valueType: hir.SharedBorrow(hir.TypeByteSlice),
+		label: "byte-string", symbolPrefix: "fy_static_bytes_",
+	})
+}
+
+func byteStringStorageSymbol(value string) string {
+	return staticStorageSymbol("fy_static_bytes_", value)
+}
+
+func (e *emitter) emitByteStringStorage(output *strings.Builder) {
+	emitStaticStorage(output, e.byteStringStorage, true)
+}
+
 func collectCStringStorage(functions []mir.Function) (map[string]string, error) {
-	result := make(map[string]string)
-	record := func(function string, operand mir.Operand) error {
-		if operand.Kind != mir.OperandCString {
-			return nil
-		}
-		if operand.Type != hir.SharedBorrow(hir.TypeCStr) || !validCStringStorage(operand.StaticData) {
-			return fmt.Errorf("collect C string storage in %s: operand has invalid static storage", function)
-		}
-		symbol := cStringStorageSymbol(operand.StaticData)
-		if previous, found := result[symbol]; found && previous != operand.StaticData {
-			return fmt.Errorf("collect C string storage in %s: digest collision for %s", function, symbol)
-		}
-		result[symbol] = operand.StaticData
-		return nil
-	}
-	recordAll := func(function string, operands []mir.Operand) error {
-		for _, operand := range operands {
-			if err := record(function, operand); err != nil {
-				return err
-			}
-		}
-		return nil
-	}
-	for _, function := range functions {
-		for _, block := range function.Blocks {
-			for _, operation := range block.Operations {
-				if err := recordAll(function.Name, operation.Operands); err != nil {
-					return nil, err
-				}
-			}
-			if err := recordAll(function.Name, block.Terminator.Arguments); err != nil {
-				return nil, err
-			}
-			if err := recordAll(function.Name, block.Terminator.SwitchOperands); err != nil {
-				return nil, err
-			}
-			if err := record(function.Name, block.Terminator.ReturnValue); err != nil {
-				return nil, err
-			}
-		}
-	}
-	return result, nil
+	return collectStaticStorage(functions, staticStorageSpec{
+		operandKind: mir.OperandCString, valueType: hir.SharedBorrow(hir.TypeCStr),
+		label: "C string", symbolPrefix: "fy_static_cstr_", valid: validCStringStorage,
+	})
 }
 
 func validCStringStorage(value string) bool {
@@ -2850,31 +2926,11 @@ func validCStringStorage(value string) bool {
 }
 
 func cStringStorageSymbol(value string) string {
-	digest := sha256.Sum256([]byte(value))
-	return fmt.Sprintf("fy_static_cstr_%x", digest)
+	return staticStorageSymbol("fy_static_cstr_", value)
 }
 
 func (e *emitter) emitCStringStorage(output *strings.Builder) {
-	if len(e.cStringStorage) == 0 {
-		return
-	}
-	symbols := make([]string, 0, len(e.cStringStorage))
-	for symbol := range e.cStringStorage {
-		symbols = append(symbols, symbol)
-	}
-	slices.Sort(symbols)
-	for _, symbol := range symbols {
-		value := e.cStringStorage[symbol]
-		fmt.Fprintf(output, "static const uint8_t %s[%d] = { ", symbol, len(value))
-		for index := 0; index < len(value); index++ {
-			if index != 0 {
-				output.WriteString(", ")
-			}
-			fmt.Fprintf(output, "UINT8_C(%d)", value[index])
-		}
-		output.WriteString(" };\n")
-	}
-	output.WriteByte('\n')
+	emitStaticStorage(output, e.cStringStorage, false)
 }
 
 func isRawPointer(value hir.Type) bool {

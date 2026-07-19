@@ -105,8 +105,11 @@ smoke that requires automatic standard-library linkage. Compiler-owned `c"..."` 
 the C backend as immutable static bytes, and an explicit unsafe direct-literal conversion can expose
 its read-only `*u8` address to raw FFI. Compiler-owned `b"..."` storage now independently reaches a
 private non-null `{ data, length }` byte-slice transport, including an empty length-zero sentinel;
-typed locals may expose only the immutable data address through explicit unsafe conversion. The
-public borrowed `str` wrapper, slice operations, and general safe text API still do not exist.
+typed locals may expose only the immutable data address through explicit unsafe conversion. Plain
+`"..."` literals now independently reach a private non-null `fy_str` view after complete decoded
+UTF-8 validation, with deduplicated immutable storage and the same empty length-zero sentinel rule;
+typed locals can expose only immutable data through explicit unsafe conversion. Indexing, slicing,
+source-level length access, a stable public string ABI, and the general safe text API still do not exist.
 Buffer-backed String and CString C helpers now preserve ownership on failed UTF-8 conversion,
 support overlap-safe String append, expose immutable bounded views, reject interior NUL, and append
 exactly one C terminator. Their C-only native probe is configured but unobserved. A separate

@@ -248,6 +248,9 @@ func (s *scanner) scanString(kind Kind, openerBytes int) {
 	if !terminated && s.position >= len(s.source) {
 		s.emitDiagnostic("E0005", start, s.position, diagnostic.RepairExit, "\"")
 	}
+	if kind == String && terminated && !utf8.Valid(cooked) {
+		s.emitDiagnostic("E0005", start, s.position, diagnostic.RepairNone, "")
+	}
 	if kind == CString {
 		cooked = append(cooked, 0)
 	}

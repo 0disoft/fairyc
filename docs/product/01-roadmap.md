@@ -127,8 +127,11 @@ terminated bytes, and generated C as deduplicated immutable static storage. The 
 expose only an immutable `*u8` address through an explicit unsafe operation. Compiler-owned
 `b"..."` storage now crosses the same stages as exact non-terminated bytes and a private non-null
 `{ data, length }` view; empty literals retain length zero through an immutable sentinel and typed
-locals can expose only the immutable data address. UTF-8 string literals, indexing, slicing,
-source-level length access, public CStr operations, and a stable slice ABI remain missing.
+locals can expose only the immutable data address. Plain UTF-8 `"..."` literals now cross semantic
+typing, a distinct MIR operand, and a private `fy_str` view with decoded UTF-8 validation,
+deduplicated immutable bytes, an empty non-null sentinel, and typed-local immutable data extraction.
+Indexing, slicing, source-level length access, public CStr operations, safe text operations, and stable
+slice or string ABIs remain missing.
 Owned String and CString now have provisional Buffer-backed C transport with immutable views,
 successful-only Buffer moves, failure ownership preservation, self-source append, interior-NUL
 rejection, and exact termination. Four C-only native runs are configured but unobserved. A separate

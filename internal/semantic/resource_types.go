@@ -319,6 +319,8 @@ func (a *analyzer) canonicalTypeText(module *moduleScope, text string) (hir.Type
 		return hir.TypeUSize, true
 	case "[u8]":
 		return hir.TypeByteSlice, true
+	case "str":
+		return hir.TypeStr, true
 	case "CStr":
 		return hir.TypeCStr, true
 	case "Region":
@@ -379,11 +381,11 @@ func (a *analyzer) canonicalTypeText(module *moduleScope, text string) (hir.Type
 }
 
 func validUnsizedTypeUse(value hir.Type) bool {
-	if value == hir.TypeByteSlice || value == hir.TypeCStr {
+	if value == hir.TypeByteSlice || value == hir.TypeStr || value == hir.TypeCStr {
 		return false
 	}
 	if element, mutable, borrow := hir.BorrowElement(value); borrow {
-		if element == hir.TypeByteSlice || element == hir.TypeCStr {
+		if element == hir.TypeByteSlice || element == hir.TypeStr || element == hir.TypeCStr {
 			return !mutable
 		}
 		return validUnsizedTypeUse(element)

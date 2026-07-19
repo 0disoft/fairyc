@@ -128,7 +128,11 @@ storage is read by C and `cStringLiteralBuildSmokeExecutions` for the ordinary p
 carrying nonempty static `&CStr` storage, both under both compilers and profiles. V30 adds
 `byteStringLiteralSourceCallExecutions` for a generated Fairy caller whose private `&[u8]` view
 retains exact bytes and length before C reads its data, plus `byteStringLiteralBuildSmokeExecutions`
-for the ordinary product-build path carrying that view under both compilers and profiles. The
+for the ordinary product-build path carrying that view under both compilers and profiles. V31 adds
+`utf8StringLiteralSourceCallExecutions` for a generated Fairy caller whose distinct private `&str`
+view retains exact valid UTF-8 bytes and byte length before C reads its data, plus
+`utf8StringLiteralBuildSmokeExecutions` for the ordinary product-build path carrying that text view
+under both compilers and profiles. The
 runner emits one exact version and does not pretend the report shapes are interchangeable.
 
 ## Runtime and standard library

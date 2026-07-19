@@ -50,3 +50,18 @@ func TestNumericAndStringCooking(t *testing.T) {
 		t.Fatalf("cooked literals = %v, want %v", got, want)
 	}
 }
+
+func TestStringHexEscapesMustFormValidUTF8(t *testing.T) {
+	t.Parallel()
+	validInput := []byte(`"\xCE\xBB"`)
+	valid := Lex(source.NewFile("valid.fy", validInput), source.NewBudget(source.DefaultLimits(), len(validInput)))
+	if len(valid.Diagnostics) != 0 || len(valid.Tokens) == 0 || valid.Tokens[0].Kind != String || valid.Tokens[0].Cooked != "cebb" {
+		t.Fatalf("valid hex-escaped UTF-8 = %+v", valid)
+	}
+
+	invalidInput := []byte(`"\xFF"`)
+	invalid := Lex(source.NewFile("invalid.fy", invalidInput), source.NewBudget(source.DefaultLimits(), len(invalidInput)))
+	if len(invalid.Diagnostics) != 1 || invalid.Diagnostics[0].Code != "E0005" || invalid.Diagnostics[0].Span.StartByte != 0 || invalid.Diagnostics[0].Span.EndByte != len(invalidInput) || invalid.Diagnostics[0].Repair != "none" {
+		t.Fatalf("invalid hex-escaped UTF-8 diagnostics = %+v", invalid.Diagnostics)
+	}
+}

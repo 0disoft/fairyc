@@ -199,7 +199,7 @@ report; they do not expand the eighteen interpreter-owned differential cases.
 Every C-scalar probe uses hand-written C producers and consumers so each value crosses a generated
 typed local without requiring a Fairy C literal. The family probe uses exactly representable finite
 floating values and makes no NaN, infinity, signed-zero, rounding, or floating-environment claim.
-`fairyc.native-c-report/v30` separately records four `foreignCStructResultCallExecutions`, four
+`fairyc.native-c-report/v31` separately records four `foreignCStructResultCallExecutions`, four
 `systemHeapSourceCallExecutions`, four
 `bufferSourceCallExecutions`, four `arenaSourceCallExecutions`, and four
 `cStrValidationSourceCallExecutions`, plus four `ownedTextSourceCallExecutions` and four
@@ -226,6 +226,12 @@ typed local's immutable data address, and have a separate C callee verify all fi
 `byteStringLiteralBuildSmokeExecutions` separately require the ordinary product CLI to carry that
 view into an executable returning 42 under both compilers and profiles. Empty literals instead use
 the non-null one-byte sentinel with logical length zero.
+Four `utf8StringLiteralSourceCallExecutions` require a generated Fairy caller to construct a private
+`&str` view over exact `Fairy λ` UTF-8 storage, preserve byte length eight, extract a typed local's
+immutable data address, and have a separate C callee verify all eight bytes. Four
+`utf8StringLiteralBuildSmokeExecutions` separately require the ordinary product CLI to carry that
+view into an executable returning 42 under both compilers and profiles. Empty text uses a non-null
+one-byte sentinel with logical length zero, and invalid decoded UTF-8 never reaches MIR.
 Four `cStringLiteralSourceCallExecutions` require a generated Fairy caller to create exact
 `fairy\0` storage, cross the dedicated unsafe immutable-byte-pointer operation, and have a separate C
 callee verify all six bytes. Four `cStringLiteralBuildSmokeExecutions` separately require the

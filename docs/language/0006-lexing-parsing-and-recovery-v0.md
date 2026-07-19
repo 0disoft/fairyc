@@ -94,7 +94,7 @@ Hexadecimal floats, `.5`, `1.`, `NaN`, infinity spellings, and type suffixes are
 
 `b"..."` produces an immutable `&[u8]` with `Static` origin. `c"..."` produces an immutable `&CStr` with `Static` origin; the compiler appends exactly one trailing NUL, and a decoded interior NUL is rejected as `E0006`.
 
-All three forms support `\\`, `\"`, `\n`, `\r`, `\t`, `\0`, and `\xNN`. Text strings additionally support `\u{H}` through `\u{HHHHHH}` for a valid non-surrogate Unicode scalar. Byte and C strings reject `\u{...}`; non-ASCII source characters are encoded as their UTF-8 bytes. Unknown, truncated, out-of-range, or surrogate escapes are `E0005`.
+All three forms support `\\`, `\"`, `\n`, `\r`, `\t`, `\0`, and `\xNN`. Text strings additionally support `\u{H}` through `\u{HHHHHH}` for a valid non-surrogate Unicode scalar. Byte and C strings reject `\u{...}`; non-ASCII source characters are encoded as their UTF-8 bytes. Unknown, truncated, out-of-range, or surrogate escapes are `E0005`. A text literal whose complete decoded byte sequence is not valid UTF-8, including invalid combinations of otherwise well-formed `\xNN` escapes, is also one `E0005` with no automatic repair.
 
 Raw strings, character literals, multiline strings, implicit concatenation, locale conversion, and interpolation are excluded. Adjacent literals remain separate tokens and require an explicit operation.
 

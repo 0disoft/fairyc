@@ -1282,6 +1282,82 @@ func TestEmitRejectsUnverifiedMIRAndUnknownProfile(t *testing.T) {
 	}
 }
 
+func TestEmitDeduplicatesCompilerOwnedUTF8StringStorage(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn main() -> i32 {
+    let first: &str = "λ";
+    let second: &str = "λ";
+    let empty: &str = "";
+    42
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	if !slices.Equal(unit.Features, []string{"static-utf8-string"}) {
+		t.Fatalf("features = %v", unit.Features)
+	}
+	if strings.Count(unit.Source, "static const uint8_t fy_static_str_") != 2 {
+		t.Fatalf("generated C did not deduplicate UTF-8 string storage or preserve the empty sentinel:\n%s", unit.Source)
+	}
+	for _, required := range []string{
+		"typedef struct fy_str",
+		"const uint8_t *data;",
+		"uintptr_t length;",
+		"[2] = { UINT8_C(206), UINT8_C(187) };",
+		"[1] = { UINT8_C(0) };",
+		"fy_str fy_l_",
+		"(void)&fy_l_",
+		"((uintptr_t)UINT64_C(2))",
+		"((uintptr_t)UINT64_C(0))",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+	second, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil || second.Source != unit.Source {
+		t.Fatalf("second Emit() differs: error=%v", err)
+	}
+}
+
+func TestEmitUTF8StringLocalDataAddressForForeignCall(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+@link_name("fairyc_fixture_is_fairy_text")
+unsafe extern C fn is_fairy_text(value: *u8) -> u32;
+fn main() -> i32 {
+    let text: &str = "fairy";
+    if unsafe { is_fairy_text(text as *u8) } == 1 { 42 } else { 1 }
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, feature := range []string{"foreign-c-call", "static-utf8-string", "str-data-address"} {
+		if !slices.Contains(unit.Features, feature) {
+			t.Errorf("features %v are missing %q", unit.Features, feature)
+		}
+	}
+	if !slices.Equal(unit.ForeignSymbols, []string{"fairyc_fixture_is_fairy_text"}) {
+		t.Fatalf("foreign symbols = %v", unit.ForeignSymbols)
+	}
+	for _, required := range []string{
+		"extern uint32_t fairyc_fixture_is_fairy_text(const uint8_t * fy_a_0);",
+		"static const uint8_t fy_static_str_",
+		".length = ((uintptr_t)UINT64_C(5))",
+		".data;",
+		"fairyc_fixture_is_fairy_text(fy_l_",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+}
+
 func lowerSource(t *testing.T, contents string) mir.Program {
 	t.Helper()
 	return lowerSources(t, map[string]string{"main.fy": contents})

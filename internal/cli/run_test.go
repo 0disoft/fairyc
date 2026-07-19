@@ -157,9 +157,9 @@ func TestExperimentalCheckSemanticsReportsResolveDiagnostic(t *testing.T) {
 func TestExperimentalCheckSemanticsRejectsUnsupportedSubset(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn text() -> i32 { \"unsupported\" }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn value() -> i32 { 1.5 }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "check-semantics", "main.fy"}, root)
-	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "experimental semantic subset does not support literal string") {
+	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "experimental semantic subset does not support literal float") {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
 	}
 }

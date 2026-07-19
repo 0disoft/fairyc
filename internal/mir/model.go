@@ -4,6 +4,7 @@ package mir
 import (
 	"slices"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/0disoft/fairyc/internal/hir"
 )
@@ -261,6 +262,8 @@ const (
 
 const OperationByteSliceDataAddress OperationKind = "byte-slice-data-address"
 
+const OperationStrDataAddress OperationKind = "str-data-address"
+
 // LocalID identifies one source local, parameter, or compiler temporary.
 type LocalID int
 
@@ -283,6 +286,8 @@ const (
 
 const OperandByteString OperandKind = "byte-string"
 
+const OperandString OperandKind = "string"
+
 // Operand is an already-evaluated scalar value source.
 type Operand struct {
 	Kind  OperandKind
@@ -297,6 +302,10 @@ type Operand struct {
 
 func validCStringStaticData(value string) bool {
 	return len(value) > 0 && value[len(value)-1] == 0 && !strings.Contains(value[:len(value)-1], "\x00")
+}
+
+func validUTF8StringStaticData(value string) bool {
+	return utf8.ValidString(value)
 }
 
 // Operation carries explicit ownership, trap, and normalization information.
