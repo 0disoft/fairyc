@@ -70,9 +70,10 @@ The backend cannot add C or LLVM overflow, exactness, alignment, or alias promis
   pointer, stack, classifier, and object-format facts.
 - `internal/layout` now computes checked array and aggregate size, alignment, field offset, and
   padding from that description. The C emitter consumes those results for flat all-`i32` private
-  resource structs and their permitted resource-bearing built-in tags, and emits `_Static_assert`
-  checks for `sizeof`, `_Alignof`, and every `offsetof`. General nested resources and `@repr(C)`
-  values remain rejected rather than partially lowered.
+  resources, their permitted resource-bearing built-in tags, and nonempty flat source `@repr(C)`
+  structs over `u8`, `i32`, `u32`, `usize`, and raw pointers. It emits `_Static_assert` checks for
+  `sizeof`, `_Alignof`, and every `offsetof`; public C records preserve their declared tag and field
+  names. General nested resources and the remaining contracted `@repr(C)` field families fail closed.
 - Bit reinterpretation and potentially unaligned access use a `memcpy`-style transport rather than incompatible lvalue access.
 - `Option<i32>` and `Result<i32, i32>` currently use distinct private structs with a `uint32_t` tag
   and `int32_t` payload. Generated C extracts payload only in the selected variant block and traps
@@ -98,8 +99,8 @@ Raw foreign signatures contain C ABI scalars, explicitly represented aggregates,
 
 The implemented source slice preserves individual `unsafe extern C fn` declarations and
 `unsafe {}` or `unsafe fn` call provenance through AST, typed HIR, and verified MIR. The C backend
-currently admits exact-name `C` declarations using `i32`, `u8`, `u32`, `usize`, and raw pointers to
-that bounded scalar set; it emits one plain prototype and an ordinary call without `pure`, `const`, `restrict`,
+currently admits exact-name `C` declarations using `i32`, `u8`, `u32`, `usize`, raw pointers to
+that bounded scalar set, and raw pointers to admitted nonempty `@repr(C)` structs. It emits one plain prototype and an ordinary call without `pure`, `const`, `restrict`,
 `nothrow`, alias, retention, or visibility promises. Compatible repeated declarations of the same
 external name coalesce; signature conflicts fail closed. A local preprocessor guard undefines an
 included-header macro with that name before the prototype. `main`, generated `fy_`/`FY_` names,
@@ -107,7 +108,9 @@ C11 keywords, and identifiers consumed by the generated preamble are rejected. T
 exception to the generated `fy_` namespace is the exact allowlisted internal standard-library
 symbol `fy_std_text_utf8_valid_v0`; the rest of the prefix remains closed. Typed null is the
 only source-constructed raw pointer; pointer dereference, arithmetic, and casts remain rejected.
-`@link_name`, `c.*` scalars, callbacks, and `@repr(C)` aggregates remain outside this source slice.
+Source `@repr(C)` construction, field reads, exact public names, layout assertions, and pointer
+prototype spelling are implemented, but passing a non-null local address, by-value aggregate ABI,
+nested/array/enum fields, `@link_name`, `c.*` scalars, and callbacks remain outside this slice.
 
 The MIR interpreter deliberately returns a `foreign-call` capability error instead of guessing a
 host binding. A closed native fixture compiles the generated Fairy caller and a hand-written C

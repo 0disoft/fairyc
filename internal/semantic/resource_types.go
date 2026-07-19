@@ -13,6 +13,13 @@ type resourceInfo struct {
 	orderedFields []resourceField
 }
 
+type structInfo struct {
+	symbol        *symbol
+	fields        map[string]resourceField
+	orderedFields []resourceField
+	reprC         bool
+}
+
 type resourceField struct {
 	name        string
 	typ         hir.Type
@@ -32,6 +39,7 @@ func (a *analyzer) prepareAggregateIdentities() {
 			structure := &module.file.Module.Structs[index]
 			if value := a.structs[structure]; value != nil {
 				value.typ = hir.Type(module.file.Module.Path + "::" + structure.Name)
+				a.structTypes[value.typ] = &structInfo{symbol: value, fields: make(map[string]resourceField)}
 			}
 		}
 		for index := range module.file.Module.Resources {
@@ -95,23 +103,50 @@ func (a *analyzer) prepareStructTypes() {
 			if value == nil {
 				continue
 			}
-			seen := make(map[string]hir.Span, len(structure.Fields))
-			for fieldIndex := range structure.Fields {
-				field := &structure.Fields[fieldIndex]
-				if previous, duplicate := seen[field.Name]; duplicate {
-					a.addDiagnostic("E0102", span(module.file.Path, field.NameSpan), RelatedSpan{Role: "previous-declaration", Span: previous})
+			info := a.structTypes[value.typ]
+			for _, attribute := range structure.Attributes {
+				if attribute.Name == "repr" && len(attribute.Arguments) == 1 && attribute.Arguments[0] == "C" && !info.reprC {
+					info.reprC = true
 					continue
 				}
-				seen[field.Name] = span(module.file.Path, field.NameSpan)
-				if a.canonicalType(module, field.Type) == hir.TypeRegion {
+				a.addUnsupported(module.file.Path, attribute.Span, "struct attribute @"+attribute.Name)
+			}
+			if info.reprC && len(structure.Fields) == 0 {
+				a.addUnsupported(module.file.Path, structure.Span, "empty @repr(C) struct")
+			}
+			for fieldIndex := range structure.Fields {
+				field := &structure.Fields[fieldIndex]
+				if previous, duplicate := info.fields[field.Name]; duplicate {
+					a.addDiagnostic("E0102", span(module.file.Path, field.NameSpan), RelatedSpan{Role: "previous-declaration", Span: previous.declaration})
+					continue
+				}
+				fieldType := a.canonicalType(module, field.Type)
+				if fieldType == hir.TypeRegion {
 					a.addDiagnostic("E3103", span(module.file.Path, field.Type.Span), RelatedSpan{
 						Role: "capability",
 						Span: span(module.file.Path, field.NameSpan),
 					})
 				}
+				if _, _, borrow := hir.BorrowElement(fieldType); borrow {
+					a.addDiagnostic("E1003", span(module.file.Path, field.Type.Span))
+				}
+				if a.isResource(fieldType) {
+					a.addDiagnostic("E1002", span(module.file.Path, field.Type.Span))
+				}
+				resolved := resourceField{
+					name: field.Name, typ: fieldType,
+					span: span(module.file.Path, field.Span), declaration: span(module.file.Path, field.NameSpan),
+				}
+				info.fields[field.Name] = resolved
+				info.orderedFields = append(info.orderedFields, resolved)
 			}
 		}
 	}
+}
+
+func (a *analyzer) structType(value hir.Type) (*structInfo, bool) {
+	info, found := a.structTypes[value]
+	return info, found
 }
 
 func (a *analyzer) canonicalType(module *moduleScope, reference ast.TypeReference) hir.Type {

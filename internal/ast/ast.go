@@ -34,11 +34,19 @@ type Enum struct {
 
 // Struct is one inert named aggregate without compiler-owned cleanup.
 type Struct struct {
-	Name     string
-	Public   bool
-	Span     diagnostic.Span
-	NameSpan diagnostic.Span
-	Fields   []FieldDeclaration
+	Name       string
+	Public     bool
+	Span       diagnostic.Span
+	NameSpan   diagnostic.Span
+	Attributes []Attribute
+	Fields     []FieldDeclaration
+}
+
+// Attribute preserves one item attribute until semantic ownership selects its meaning.
+type Attribute struct {
+	Name      string
+	Span      diagnostic.Span
+	Arguments []string
 }
 
 // Resource is one move-only named aggregate with compiler-owned cleanup.
@@ -235,6 +243,21 @@ func lowerStruct(tree *syntax.Tree, node syntax.Node) Struct {
 		Public:   containsKeywordBeforeName(tree, node, "pub", node.Text),
 		Span:     node.Span,
 		NameSpan: findIdentifierSpan(tree, node, node.Text, "struct"),
+	}
+	for _, childID := range node.Children {
+		child, found := tree.Node(childID)
+		if !found || child.Kind != syntax.KindAttribute {
+			continue
+		}
+		attribute := Attribute{Name: child.Text, Span: child.Span}
+		for index, argumentID := range child.Children {
+			argument, ok := tree.Node(argumentID)
+			if !ok || index == 0 && argument.Kind == syntax.KindPath && argument.Text == child.Text {
+				continue
+			}
+			attribute.Arguments = append(attribute.Arguments, argument.Text)
+		}
+		value.Attributes = append(value.Attributes, attribute)
 	}
 	value.Fields = lowerFields(tree, node)
 	return value

@@ -287,6 +287,13 @@ func (a *analyzer) resourceRecord(module *moduleScope, expression *ast.Expressio
 	}
 	info := a.resourceTypes[constructor.typ]
 	if info == nil {
+		if structure := a.structTypes[constructor.typ]; structure != nil {
+			for _, fieldExpression := range expression.Children[1:] {
+				if len(fieldExpression.Children) == 1 {
+					a.resourceExpression(module, fieldExpression.Children[0], environment, resourceRead)
+				}
+			}
+		}
 		return
 	}
 	for _, fieldExpression := range expression.Children[1:] {
@@ -319,6 +326,8 @@ func (a *analyzer) resourceField(module *moduleScope, expression *ast.Expression
 	field, found := resourceField{}, false
 	if info != nil {
 		field, found = info.fields[expression.Text]
+	} else if structure := a.structTypes[ownerType]; structure != nil {
+		field, found = structure.fields[expression.Text]
 	}
 	if found && mode == resourceMove && a.isResource(field.typ) {
 		a.addDiagnostic("E1103", span(module.file.Path, expression.Span),

@@ -24,6 +24,13 @@ func (a *analyzer) typeCheck() Result {
 	a.prepareStructTypes()
 	for _, module := range a.moduleOrder {
 		hirModule := hir.Module{Path: module.file.Module.Path, SourcePath: module.file.Path}
+		for index := range module.file.Module.Structs {
+			structure := &module.file.Module.Structs[index]
+			if a.structs[structure] == nil {
+				continue
+			}
+			hirModule.Structs = append(hirModule.Structs, a.checkStruct(module, structure))
+		}
 		for index := range module.file.Module.Resources {
 			resource := &module.file.Module.Resources[index]
 			if a.resources[resource] == nil {
@@ -47,6 +54,18 @@ func (a *analyzer) typeCheck() Result {
 			hirModule.Functions = append(hirModule.Functions, checker.checkFunction())
 		}
 		result.HIR.Modules = append(result.HIR.Modules, hirModule)
+	}
+	return result
+}
+
+func (a *analyzer) checkStruct(module *moduleScope, structure *ast.Struct) hir.Struct {
+	value := a.structs[structure]
+	result := hir.Struct{Name: structure.Name, Type: value.typ, Span: span(module.file.Path, structure.Span)}
+	if info := a.structTypes[value.typ]; info != nil {
+		result.ReprC = info.reprC
+		for _, field := range info.orderedFields {
+			result.Fields = append(result.Fields, hir.StructField{Name: field.name, Type: field.typ, Span: field.span})
+		}
 	}
 	return result
 }
@@ -394,18 +413,23 @@ func (c *typeChecker) checkRecord(expression *ast.Expression, result *hir.Expres
 		result.Symbol = constructor.id
 		return hir.TypeInvalid
 	}
-	if constructor == nil || constructor.resource == nil {
-		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "record constructor that is not a resource")
+	if constructor == nil || constructor.resource == nil && constructor.structure == nil {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "record constructor that is not an aggregate")
 		return hir.TypeInvalid
 	}
-	info := c.analyzer.resourceTypes[constructor.typ]
-	if info == nil {
+	fields := map[string]resourceField(nil)
+	if info := c.analyzer.resourceTypes[constructor.typ]; info != nil {
+		fields = info.fields
+	} else if info := c.analyzer.structTypes[constructor.typ]; info != nil {
+		fields = info.fields
+	}
+	if fields == nil {
 		return hir.TypeInvalid
 	}
 	result.Symbol = constructor.id
 	seen := make(map[string]struct{}, len(expression.Children)-1)
 	for _, fieldExpression := range expression.Children[1:] {
-		field, found := info.fields[fieldExpression.Text]
+		field, found := fields[fieldExpression.Text]
 		if !found || len(fieldExpression.Children) != 1 {
 			c.analyzer.addUnsupported(c.module.file.Path, fieldExpression.Span, "unknown or malformed resource field "+fieldExpression.Text)
 			continue
@@ -420,7 +444,7 @@ func (c *typeChecker) checkRecord(expression *ast.Expression, result *hir.Expres
 		result.Fields = append(result.Fields, fieldExpression.Text)
 		c.requireType("E1006", span(c.module.file.Path, fieldExpression.Children[0].Span), actual, field.typ, field.declaration)
 	}
-	if len(seen) != len(info.fields) {
+	if len(seen) != len(fields) {
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "resource construction with missing fields")
 	}
 	return constructor.typ
@@ -435,12 +459,17 @@ func (c *typeChecker) checkField(expression *ast.Expression, result *hir.Express
 	if element, _, borrow := hir.BorrowElement(receiverType); borrow {
 		receiverType = element
 	}
-	info, found := c.analyzer.resourceType(receiverType)
-	if !found {
-		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "field access on a non-resource value")
+	fields := map[string]resourceField(nil)
+	if info, found := c.analyzer.resourceType(receiverType); found {
+		fields = info.fields
+	} else if info, found := c.analyzer.structType(receiverType); found {
+		fields = info.fields
+	}
+	if fields == nil {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "field access on a non-aggregate value")
 		return hir.TypeInvalid
 	}
-	field, found := info.fields[expression.Text]
+	field, found := fields[expression.Text]
 	if !found {
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "unknown resource field "+expression.Text)
 		return hir.TypeInvalid

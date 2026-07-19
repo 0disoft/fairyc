@@ -221,6 +221,68 @@ func TestAnalyzePreservesOrderedResourceDefinitionWithEmptyDrop(t *testing.T) {
 	}
 }
 
+func TestAnalyzePreservesReprCStructAndTypesAggregateExpressions(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+@repr(C)
+struct Packet { code: u32; length: usize; }
+fn main() -> i32 {
+    let packet: Packet = Packet { code: 42, length: 0 };
+    if packet.code == 42 { 0 } else { 1 }
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+	if len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].Structs) != 1 {
+		t.Fatalf("HIR modules = %+v", result.HIR.Modules)
+	}
+	structure := result.HIR.Modules[0].Structs[0]
+	if structure.Name != "Packet" || structure.Type != hir.Type("main::Packet") || !structure.ReprC || len(structure.Fields) != 2 {
+		t.Fatalf("struct = %+v", structure)
+	}
+	if structure.Fields[0].Name != "code" || structure.Fields[0].Type != hir.TypeU32 || structure.Fields[1].Name != "length" || structure.Fields[1].Type != hir.TypeUSize {
+		t.Fatalf("struct fields = %+v", structure.Fields)
+	}
+	main := result.HIR.Modules[0].Functions[0]
+	if len(main.Locals) != 1 || main.Locals[0].Type != hir.Type("main::Packet") || main.Body.Tail == nil || main.Body.Tail.Kind != "if" {
+		t.Fatalf("main = %+v", main)
+	}
+}
+
+func TestAnalyzeRejectsUnsafeFieldsInInertStructs(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name string
+		text string
+		code string
+	}{
+		{name: "borrow", text: "module main;\nstruct Holder { value: &i32; }\nfn main() -> i32 { 0 }\n", code: "E1003"},
+		{name: "region", text: "module main;\nstruct Holder { value: Region; }\nfn main() -> i32 { 0 }\n", code: "E3103"},
+		{name: "resource", text: "module main;\nresource Token { value: i32; drop fn(self: &mut Self) {} }\nstruct Holder { value: Token; }\nfn main() -> i32 { 0 }\n", code: "E1002"},
+	}
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			result := analyzeText(t, map[string]string{"main.fy": test.text})
+			if result.FailedPhase != semantic.PhaseType || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != test.code {
+				t.Fatalf("result = %+v", result)
+			}
+		})
+	}
+}
+
+func TestAnalyzeRejectsUnsupportedStructRepresentation(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\n@repr(packed)\nstruct Packet { value: u32; }\nfn main() -> i32 { 0 }\n",
+	})
+	if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "struct attribute @repr" {
+		t.Fatalf("result = %+v", result)
+	}
+}
+
 func TestAnalyzeRejectsNonEmptyResourceDropBodyAsUnsupported(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{

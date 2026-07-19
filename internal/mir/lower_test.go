@@ -61,6 +61,52 @@ fn main() -> i32 {
 	}
 }
 
+func TestLowerPreservesReprCStructDefinitionConstructionAndFieldRead(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+@repr(C)
+struct Packet { code: u32; length: usize; }
+fn main() -> i32 {
+    let packet: Packet = Packet { code: 42, length: 0 };
+    if packet.code == 42 { 0 } else { 1 }
+}
+`)
+	if len(program.StructTypes) != 1 {
+		t.Fatalf("struct types = %+v", program.StructTypes)
+	}
+	definition := program.StructTypes[0]
+	if definition.Type != hir.Type("main::Packet") || definition.Name != "Packet" || definition.Entity != "struct-type:main-packet" || !definition.ReprC || len(definition.Fields) != 2 {
+		t.Fatalf("struct definition = %+v", definition)
+	}
+	if definition.Fields[0].Name != "code" || definition.Fields[0].Type != hir.TypeU32 || definition.Fields[1].Name != "length" || definition.Fields[1].Type != hir.TypeUSize {
+		t.Fatalf("struct fields = %+v", definition.Fields)
+	}
+	var construct, read *Operation
+	for functionIndex := range program.Functions {
+		for blockIndex := range program.Functions[functionIndex].Blocks {
+			operations := program.Functions[functionIndex].Blocks[blockIndex].Operations
+			for operationIndex := range operations {
+				operation := &operations[operationIndex]
+				switch operation.Kind {
+				case OperationStructConstruct:
+					construct = operation
+				case OperationFieldRead:
+					read = operation
+				}
+			}
+		}
+	}
+	if construct == nil || construct.Type != definition.Type || !slices.Equal(construct.Fields, []string{"code", "length"}) {
+		t.Fatalf("struct construction = %+v", construct)
+	}
+	if read == nil || read.OwnerType != definition.Type || read.Type != hir.TypeU32 || read.Field != "code" {
+		t.Fatalf("field read = %+v", read)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+}
+
 func TestLowerRejectsNonEmptyResourceDropKind(t *testing.T) {
 	t.Parallel()
 	_, err := Lower(hir.Package{Modules: []hir.Module{{
@@ -203,6 +249,19 @@ func TestCloneDeepCopiesResourceDefinitions(t *testing.T) {
 	cloned.ResourceTypes[0].Fields[0].Name = "changed"
 	if original.ResourceTypes[0].Fields[0].Name != "value" {
 		t.Fatalf("Clone() aliased resource fields: original = %+v, clone = %+v", original, cloned)
+	}
+}
+
+func TestCloneDeepCopiesStructDefinitions(t *testing.T) {
+	t.Parallel()
+	original := Program{StructTypes: []StructType{{
+		Type: hir.Type("main::Packet"), Name: "Packet", ReprC: true,
+		Fields: []StructField{{Name: "code", Type: hir.TypeU32}},
+	}}}
+	cloned := Clone(original)
+	cloned.StructTypes[0].Fields[0].Name = "changed"
+	if original.StructTypes[0].Fields[0].Name != "code" {
+		t.Fatalf("Clone() aliased struct fields: original = %+v, clone = %+v", original, cloned)
 	}
 }
 

@@ -153,9 +153,26 @@ type Package struct {
 type Module struct {
 	Path             string
 	SourcePath       string
+	Structs          []Struct
 	Resources        []Resource
 	ForeignFunctions []ForeignFunction
 	Functions        []Function
+}
+
+// Struct is one inert aggregate definition in declaration order.
+type Struct struct {
+	Name   string
+	Type   Type
+	Span   Span
+	ReprC  bool
+	Fields []StructField
+}
+
+// StructField is one resolved inert aggregate field.
+type StructField struct {
+	Name string
+	Type Type
+	Span Span
 }
 
 // ForeignFunction is one typed raw C declaration with an exact external symbol name.

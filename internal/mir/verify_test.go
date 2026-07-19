@@ -183,6 +183,31 @@ func TestVerifyRejectsResourceConstructionFieldMismatch(t *testing.T) {
 	}
 }
 
+func TestVerifyRejectsStructConstructionFieldMismatch(t *testing.T) {
+	t.Parallel()
+	program := Program{
+		StructTypes: []StructType{{
+			Type: hir.Type("main::Packet"), Name: "Packet", Entity: "struct-type:main-packet", ReprC: true,
+			Fields: []StructField{{Name: "code", Type: hir.TypeU32}},
+		}},
+		Functions: []Function{{
+			Name: "main::main", Entry: 0,
+			Blocks: []Block{{
+				ID: 0,
+				Operations: []Operation{{
+					Kind: OperationStructConstruct, DestinationLocal: 1, Type: hir.Type("main::Packet"),
+					Fields: []string{"wrong"}, Operands: []Operand{{Kind: OperandU32, U64: 1}},
+				}},
+				Terminator: Terminator{Kind: TerminatorReturn, UnwindSuccessor: NoBlock, ReturnValue: Operand{Kind: OperandI32, I32: 0}},
+			}},
+		}},
+	}
+	failures := Verify(program)
+	if len(failures) != 1 || failures[0].Code != "V1001" {
+		t.Fatalf("Verify() failures = %+v, want one V1001", failures)
+	}
+}
+
 func TestVerifyRejectsPayloadMoveOnNonPayloadOperation(t *testing.T) {
 	t.Parallel()
 	program := Program{Functions: []Function{{

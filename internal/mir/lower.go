@@ -11,6 +11,10 @@ import (
 
 // Lower normalizes typed HIR into executable mutable-local MIR.
 func Lower(input hir.Package) (Program, error) {
+	structTypes, err := lowerStructTypes(input)
+	if err != nil {
+		return Program{}, err
+	}
 	resourceTypes, err := lowerResourceTypes(input)
 	if err != nil {
 		return Program{}, err
@@ -19,8 +23,8 @@ func Lower(input hir.Package) (Program, error) {
 	if err != nil {
 		return Program{}, err
 	}
-	program := Program{ResourceTypes: resourceTypes, ForeignFunctions: foreignFunctions}
-	properties := newTypeProperties(resourceTypes)
+	program := Program{StructTypes: structTypes, ResourceTypes: resourceTypes, ForeignFunctions: foreignFunctions}
+	properties := newTypeProperties(resourceTypes, structTypes)
 	for _, module := range input.Modules {
 		for index := range module.Functions {
 			function := &module.Functions[index]
@@ -42,6 +46,43 @@ func Lower(input hir.Package) (Program, error) {
 		return 0
 	})
 	return program, nil
+}
+
+func lowerStructTypes(input hir.Package) ([]StructType, error) {
+	var result []StructType
+	seen := make(map[hir.Type]struct{})
+	for _, module := range input.Modules {
+		for _, structure := range module.Structs {
+			if structure.Type == "" || structure.Type == hir.TypeInvalid || structure.Name == "" {
+				return nil, fmt.Errorf("struct %s::%s has no concrete identity", module.Path, structure.Name)
+			}
+			if _, duplicate := seen[structure.Type]; duplicate {
+				return nil, fmt.Errorf("duplicate struct type %q", structure.Type)
+			}
+			seen[structure.Type] = struct{}{}
+			definition := StructType{
+				Type: structure.Type, Name: structure.Name, Span: structure.Span,
+				Entity: structTypeEntity(structure.Type), ReprC: structure.ReprC,
+				Fields: make([]StructField, 0, len(structure.Fields)),
+			}
+			fieldNames := make(map[string]struct{}, len(structure.Fields))
+			for _, field := range structure.Fields {
+				if field.Name == "" || field.Type == "" || field.Type == hir.TypeInvalid {
+					return nil, fmt.Errorf("struct %q has an invalid field definition", structure.Type)
+				}
+				if _, duplicate := fieldNames[field.Name]; duplicate {
+					return nil, fmt.Errorf("struct %q has duplicate field %q", structure.Type, field.Name)
+				}
+				fieldNames[field.Name] = struct{}{}
+				definition.Fields = append(definition.Fields, StructField{Name: field.Name, Type: field.Type, Span: field.Span})
+			}
+			result = append(result, definition)
+		}
+	}
+	slices.SortFunc(result, func(left, right StructType) int {
+		return strings.Compare(string(left.Type), string(right.Type))
+	})
+	return result, nil
 }
 
 func lowerForeignFunctions(input hir.Package) ([]ForeignFunction, error) {
@@ -369,7 +410,7 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		}
 		return l.lowerExpression(&expression.Children[0])
 	case "record":
-		return l.lowerResourceConstruction(expression)
+		return l.lowerAggregateConstruction(expression)
 	case "field-expression":
 		return l.lowerFieldRead(expression)
 	case "prefix":
@@ -517,9 +558,14 @@ func (l *functionLowerer) lowerRegionPlace(expression *hir.Expression) (Operand,
 	return Operand{Kind: OperandLocal, Local: destination}, nil
 }
 
-func (l *functionLowerer) lowerResourceConstruction(expression *hir.Expression) (Operand, error) {
+func (l *functionLowerer) lowerAggregateConstruction(expression *hir.Expression) (Operand, error) {
 	if len(expression.Children) == 0 || len(expression.Children) != len(expression.Fields) || expression.Type == hir.TypeInvalid {
-		return Operand{}, fmt.Errorf("malformed resource construction with %d values and %d fields", len(expression.Children), len(expression.Fields))
+		return Operand{}, fmt.Errorf("malformed aggregate construction with %d values and %d fields", len(expression.Children), len(expression.Fields))
+	}
+	isResource := l.properties.IsResource(expression.Type)
+	isStruct := l.properties.IsStruct(expression.Type)
+	if !isResource && !isStruct {
+		return Operand{}, fmt.Errorf("aggregate construction type %q has no MIR definition", expression.Type)
 	}
 	operands := make([]Operand, 0, len(expression.Children))
 	for index := range expression.Children {
@@ -528,16 +574,20 @@ func (l *functionLowerer) lowerResourceConstruction(expression *hir.Expression) 
 			return Operand{}, err
 		}
 		if value.Kind == OperandInvalid {
-			return Operand{}, fmt.Errorf("resource field %q has no value", expression.Fields[index])
+			return Operand{}, fmt.Errorf("aggregate field %q has no value", expression.Fields[index])
 		}
-		if l.isLiveResourcePath(&expression.Children[index]) {
+		if isResource && l.isLiveResourcePath(&expression.Children[index]) {
 			value = l.materializeMove(&expression.Children[index], value, "resource-field", true)
 		}
 		operands = append(operands, value)
 	}
 	destination := l.newTemporary()
+	kind := OperationStructConstruct
+	if isResource {
+		kind = OperationResourceConstruct
+	}
 	l.appendOperation(Operation{
-		Kind: OperationResourceConstruct, Span: expression.Span, DestinationLocal: destination,
+		Kind: kind, Span: expression.Span, DestinationLocal: destination,
 		Operands: operands, Fields: slices.Clone(expression.Fields), Type: expression.Type,
 	})
 	return Operand{Kind: OperandLocal, Local: destination}, nil

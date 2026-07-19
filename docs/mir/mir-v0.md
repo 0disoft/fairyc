@@ -53,7 +53,10 @@ representation from how a local happens to be used.
 
 MIR v0 requires rvalues for use, unary operations, checked arithmetic, wrapping arithmetic, saturating arithmetic, comparisons, casts, aggregate construction, discriminant read, safe borrow, raw address, region allocation, and explicit unsafe operations.
 
-Built-in `Option` and `Result` construction records the concrete constructed type. Payload extraction
+Built-in `Option` and `Result` construction records the concrete constructed type. Inert struct and
+resource construction use distinct operations backed by separate program-level definitions, so
+copyable layout values never acquire cleanup semantics by being mistaken for resources. Field reads
+name the owner type and are verified against exactly one aggregate definition. Payload extraction
 records the concrete extracted type. Missing type identity is `V1001`; an interpreter or backend
 cannot infer it from source syntax, local numbering, or use sites.
 
@@ -123,7 +126,7 @@ The source cases do not test malformed graphs. `spec/fixtures/mir-verifier/manif
 
 ## Interpreter
 
-The first semantic oracle is a small MIR interpreter supporting scalars, tagged `Option` and `Result`, moves, drop traces, region mark and reset, branches, and traps. It constructs resources and resolves field reads from the verified program-level resource definition, and uses that definition for reverse-field cleanup. The only executable drop classification is currently `empty`; source user drop-body effects are not interpreted. Its options-only fixture harness may intercept explicitly bound call symbols as bounded in-memory stdout/stderr byte sinks; those hooks are not MIR operations, source-name conventions, standard-library APIs, or host I/O. The interpreter is not required to emulate a complete operating system or C ABI.
+The first semantic oracle is a small MIR interpreter supporting scalars, tagged `Option` and `Result`, moves, drop traces, region mark and reset, branches, and traps. It constructs inert structs and resources and resolves field reads from their distinct verified program-level definitions; only the resource definition participates in reverse-field cleanup. The only executable drop classification is currently `empty`; source user drop-body effects are not interpreted. Its options-only fixture harness may intercept explicitly bound call symbols as bounded in-memory stdout/stderr byte sinks; those hooks are not MIR operations, source-name conventions, standard-library APIs, or host I/O. The interpreter is not required to emulate a complete operating system or C ABI.
 
 The interpreter precedes a second native backend. Differential fixtures compare interpreter outcomes with generated C compiled at multiple optimization levels and, where the target fixture declares them, more than one independent C compiler.
 

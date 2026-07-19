@@ -174,6 +174,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   spans, and drop-body classification through typed HIR into MIR. The current executable prototype
   accepts only an empty user `drop` body and reports a nonempty body as unsupported before Flow;
   this implementation gate does not remove user drop bodies from the language contract.
+- Inert struct declarations retain canonical identity, declaration-ordered fields, and `@repr(C)`
+  classification through AST, typed HIR, verified MIR, the executable interpreter subset, and the
+  constrained C backend. The current C-layout implementation is nonempty and flat over `u8`,
+  `i32`, `u32`, `usize`, and raw pointers; broader contracted field families remain fail-closed.
 - The C backend is the only committed Stage 0 product backend and emits a constrained target/toolchain profile rather than universally portable C.
 - `internal/target` owns the executable `fairyc.target-spec/v0` description for the first target.
   It records host-independent LP64, scalar, pointer, SysV AMD64, ELF, unwind, debug, and C-layout
@@ -196,12 +200,13 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - A small MIR interpreter is the semantic oracle before any second native backend.
 - Its fixture-only output hooks require explicit manifest bindings, capture bytes in memory under a
   shared limit, and never authorize source names, the CLI, or host streams.
-- The current C backend emits deterministic ISO C11 only for verified scalar, flat-resource, and
-  resource-tagged MIR
+- The current C backend emits deterministic ISO C11 only for verified scalar, flat inert-struct,
+  flat-resource, and resource-tagged MIR
   under the provisional `x86_64-linux-gnu` profile. It includes private `Option<i32>`,
   `Result<i32, i32>`, nonempty all-`i32` resource transport, and built-in resource-bearing tags whose
   payloads are exactly `i32` or direct admitted resources, but no public tagged or resource ABI.
-  Resource layout is computed from the target description and guarded by generated C11 size,
+  Nonempty admitted `@repr(C)` structs preserve public tags and field names; their layout and private
+  resource layout are computed from the target description and guarded by generated C11 size,
   alignment, and offset assertions. Its emission fixtures do not compile, link, or execute C and do
   not establish a target support level.
 - A separate Linux/amd64 command requires glibc, Clang, and GCC and is configured to compare the

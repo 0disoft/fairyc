@@ -96,10 +96,15 @@ func ExecuteWithOptions(program mir.Program, entry string, options Options) (Out
 	runtime := runtime{
 		byName:         make(map[string]*mir.Function, len(program.Functions)),
 		bySymbol:       make(map[hir.SymbolID]*mir.Function, len(program.Functions)),
+		structTypes:    make(map[hir.Type]*mir.StructType, len(program.StructTypes)),
 		resourceTypes:  make(map[hir.Type]*mir.ResourceType, len(program.ResourceTypes)),
 		testIntrinsics: make(map[hir.SymbolID]TestIntrinsicKind, len(options.TestIntrinsics)),
 		outputLimit:    options.OutputLimit,
 		steps:          maxSteps,
+	}
+	for index := range program.StructTypes {
+		definition := &program.StructTypes[index]
+		runtime.structTypes[definition.Type] = definition
 	}
 	for index := range program.ResourceTypes {
 		definition := &program.ResourceTypes[index]
@@ -147,6 +152,7 @@ func ExecuteWithOptions(program mir.Program, entry string, options Options) (Out
 type runtime struct {
 	byName         map[string]*mir.Function
 	bySymbol       map[hir.SymbolID]*mir.Function
+	structTypes    map[hir.Type]*mir.StructType
 	resourceTypes  map[hir.Type]*mir.ResourceType
 	testIntrinsics map[hir.SymbolID]TestIntrinsicKind
 	outputLimit    int
@@ -240,8 +246,14 @@ const (
 	valueI32 valueKind = iota + 1
 	valueResult
 	valueOption
+	valueStruct
 	valueResource
 )
+
+type structState struct {
+	definition *mir.StructType
+	fields     map[string]runtimeValue
+}
 
 type resourceState struct {
 	definition *mir.ResourceType
@@ -256,10 +268,11 @@ type taggedState struct {
 }
 
 type runtimeValue struct {
-	kind     valueKind
-	i32      int32
-	tagged   *taggedState
-	resource *resourceState
+	kind      valueKind
+	i32       int32
+	tagged    *taggedState
+	structure *structState
+	resource  *resourceState
 }
 
 func i32Value(value int32) runtimeValue {
@@ -309,6 +322,23 @@ func resourceValue(definition *mir.ResourceType, values []runtimeValue) (runtime
 	return runtimeValue{kind: valueResource, resource: state}, nil
 }
 
+func structValue(definition *mir.StructType, values []runtimeValue) (runtimeValue, error) {
+	if definition == nil || definition.Type == hir.TypeInvalid || len(definition.Fields) == 0 || len(definition.Fields) != len(values) {
+		return runtimeValue{}, fmt.Errorf("invalid struct construction definition")
+	}
+	state := &structState{definition: definition, fields: make(map[string]runtimeValue, len(definition.Fields))}
+	for index, field := range definition.Fields {
+		if field.Name == "" {
+			return runtimeValue{}, fmt.Errorf("struct %q has an empty field name", definition.Type)
+		}
+		if _, duplicate := state.fields[field.Name]; duplicate {
+			return runtimeValue{}, fmt.Errorf("struct %q has duplicate field %q", definition.Type, field.Name)
+		}
+		state.fields[field.Name] = values[index]
+	}
+	return runtimeValue{kind: valueStruct, structure: state}, nil
+}
+
 func (v runtimeValue) asI32() (int32, error) {
 	if v.kind != valueI32 {
 		return 0, capabilityError("value is not an executable i32 scalar")
@@ -354,6 +384,20 @@ func (v runtimeValue) field(definition *mir.ResourceType, name string) (runtimeV
 	value, found := v.resource.fields[name]
 	if !found {
 		return runtimeValue{}, fmt.Errorf("resource %q has no field %q", v.resource.definition.Type, name)
+	}
+	return value, nil
+}
+
+func (v runtimeValue) structField(definition *mir.StructType, name string) (runtimeValue, error) {
+	if v.kind != valueStruct || v.structure == nil {
+		return runtimeValue{}, capabilityError("field read received a non-struct value")
+	}
+	if definition == nil || v.structure.definition == nil || v.structure.definition.Type != definition.Type {
+		return runtimeValue{}, fmt.Errorf("field read struct definition does not match the runtime value")
+	}
+	value, found := v.structure.fields[name]
+	if !found {
+		return runtimeValue{}, fmt.Errorf("struct %q has no field %q", v.structure.definition.Type, name)
 	}
 	return value, nil
 }
@@ -483,6 +527,20 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					return callCompletion{}, fmt.Errorf("Option payload in %q: %w", function.Name, err)
 				}
 				locals[operation.DestinationLocal] = payload
+			case mir.OperationStructConstruct:
+				values := make([]runtimeValue, len(operation.Operands))
+				for index, operand := range operation.Operands {
+					value, err := evaluate(locals, operand)
+					if err != nil {
+						return callCompletion{}, fmt.Errorf("struct construction in %q: %w", function.Name, err)
+					}
+					values[index] = value
+				}
+				constructed, err := structValue(r.structTypes[operation.Type], values)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("struct construction in %q: %w", function.Name, err)
+				}
+				locals[operation.DestinationLocal] = constructed
 			case mir.OperationResourceConstruct:
 				values := make([]runtimeValue, len(operation.Operands))
 				for index, operand := range operation.Operands {
@@ -502,7 +560,12 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("field read in %q: %w", function.Name, err)
 				}
-				value, err := receiver.field(r.resourceTypes[operation.OwnerType], operation.Field)
+				var value runtimeValue
+				if definition := r.structTypes[operation.OwnerType]; definition != nil {
+					value, err = receiver.structField(definition, operation.Field)
+				} else {
+					value, err = receiver.field(r.resourceTypes[operation.OwnerType], operation.Field)
+				}
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("field read in %q: %w", function.Name, err)
 				}

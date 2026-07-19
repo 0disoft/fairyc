@@ -5,9 +5,13 @@ import "slices"
 // Clone makes an independent MIR copy for verifier mutation and backend isolation.
 func Clone(input Program) Program {
 	result := Program{
+		StructTypes:      slices.Clone(input.StructTypes),
 		ResourceTypes:    slices.Clone(input.ResourceTypes),
 		ForeignFunctions: slices.Clone(input.ForeignFunctions),
 		Functions:        make([]Function, len(input.Functions)),
+	}
+	for index := range result.StructTypes {
+		result.StructTypes[index].Fields = slices.Clone(input.StructTypes[index].Fields)
 	}
 	for index := range result.ForeignFunctions {
 		result.ForeignFunctions[index].ParameterTypes = slices.Clone(input.ForeignFunctions[index].ParameterTypes)

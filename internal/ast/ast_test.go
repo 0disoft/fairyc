@@ -122,6 +122,29 @@ func TestLowerCapturesStructFields(t *testing.T) {
 	}
 }
 
+func TestLowerPreservesStructAttributesAndArgumentOrder(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\n@repr(C)\nstruct Packet { data: *u8; length: usize; }\n")
+	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	module, err := Lower(tree)
+	if err != nil {
+		t.Fatalf("Lower() error = %v", err)
+	}
+	if len(module.Structs) != 1 || len(module.Structs[0].Attributes) != 1 {
+		t.Fatalf("structs = %+v", module.Structs)
+	}
+	attribute := module.Structs[0].Attributes[0]
+	if attribute.Name != "repr" || len(attribute.Arguments) != 1 || attribute.Arguments[0] != "C" {
+		t.Fatalf("attribute = %+v", attribute)
+	}
+	if len(module.Structs[0].Fields) != 2 || module.Structs[0].Fields[0].Name != "data" || module.Structs[0].Fields[1].Name != "length" {
+		t.Fatalf("fields = %+v", module.Structs[0].Fields)
+	}
+}
+
 func TestLowerCapturesEnumType(t *testing.T) {
 	t.Parallel()
 	input := []byte("module main;\nenum Error { Failed; }\n")

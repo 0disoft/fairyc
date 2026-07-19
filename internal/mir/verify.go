@@ -32,11 +32,18 @@ type verificationState struct {
 
 // Verify checks the executable invariants required before MIR handoff.
 func Verify(program Program) []VerificationError {
-	resourceTypes, failures := verifyResourceTypes(program.ResourceTypes)
+	structTypes, failures := verifyStructTypes(program.StructTypes)
+	resourceTypes, resourceFailures := verifyResourceTypes(program.ResourceTypes)
+	failures = append(failures, resourceFailures...)
+	for value := range structTypes {
+		if _, collision := resourceTypes[value]; collision {
+			failures = append(failures, VerificationError{Code: "V1001", Entity: structTypeEntity(value), Detail: "aggregate type is both struct and resource"})
+		}
+	}
 	foreignFunctions, foreignFailures := verifyForeignFunctions(program.ForeignFunctions)
 	failures = append(failures, foreignFailures...)
 	for index := range program.Functions {
-		failures = append(failures, verifyFunction(&program.Functions[index], resourceTypes, foreignFunctions)...)
+		failures = append(failures, verifyFunction(&program.Functions[index], structTypes, resourceTypes, foreignFunctions)...)
 	}
 	slices.SortFunc(failures, func(left, right VerificationError) int {
 		if value := cmp.Compare(left.Code, right.Code); value != 0 {
@@ -47,6 +54,40 @@ func Verify(program Program) []VerificationError {
 	return slices.CompactFunc(failures, func(left, right VerificationError) bool {
 		return left.Code == right.Code && left.Entity == right.Entity
 	})
+}
+
+func verifyStructTypes(definitions []StructType) (map[hir.Type]*StructType, []VerificationError) {
+	structs := make(map[hir.Type]*StructType, len(definitions))
+	var failures []VerificationError
+	for index := range definitions {
+		definition := &definitions[index]
+		entity := fallbackEntity(definition.Entity, structTypeEntity(definition.Type))
+		if definition.Type == "" || definition.Type == hir.TypeInvalid || definition.Name == "" {
+			failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "struct definition has no concrete identity"})
+			continue
+		}
+		if _, duplicate := structs[definition.Type]; duplicate {
+			failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "struct definition is duplicated"})
+			continue
+		}
+		structs[definition.Type] = definition
+		if definition.ReprC && len(definition.Fields) == 0 {
+			failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "repr(C) struct definition is empty"})
+		}
+		fieldNames := make(map[string]struct{}, len(definition.Fields))
+		for _, field := range definition.Fields {
+			if field.Name == "" || field.Type == "" || field.Type == hir.TypeInvalid {
+				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "struct definition has an invalid field"})
+				continue
+			}
+			if _, duplicate := fieldNames[field.Name]; duplicate {
+				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "struct definition has a duplicate field"})
+				continue
+			}
+			fieldNames[field.Name] = struct{}{}
+		}
+	}
+	return structs, failures
 }
 
 func verifyForeignFunctions(definitions []ForeignFunction) (map[hir.SymbolID]*ForeignFunction, []VerificationError) {
@@ -113,7 +154,7 @@ func verifyResourceTypes(definitions []ResourceType) (map[hir.Type]*ResourceType
 	return resources, failures
 }
 
-func verifyFunction(function *Function, resourceTypes map[hir.Type]*ResourceType, foreignFunctions map[hir.SymbolID]*ForeignFunction) []VerificationError {
+func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, resourceTypes map[hir.Type]*ResourceType, foreignFunctions map[hir.SymbolID]*ForeignFunction) []VerificationError {
 	if int(function.Entry) < 0 || int(function.Entry) >= len(function.Blocks) {
 		return []VerificationError{{Code: "V1001", Entity: function.Name, Detail: "entry block is missing"}}
 	}
@@ -287,6 +328,19 @@ func verifyFunction(function *Function, resourceTypes map[hir.Type]*ResourceType
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "Option payload has no concrete payload type"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationStructConstruct:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				definition := structTypes[operation.Type]
+				if definition == nil {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: structTypeEntity(operation.Type), Detail: "struct construction type has no definition"})
+				}
+				if operation.DestinationLocal == NoLocal || operation.Type == "" || operation.Type == hir.TypeInvalid || len(operation.Fields) == 0 || len(operation.Fields) != len(operation.Operands) || !uniqueNonEmpty(operation.Fields) {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "struct construction shape is invalid"})
+				}
+				if definition != nil && !slices.Equal(operation.Fields, structFieldNames(definition.Fields)) {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "struct construction fields do not match the definition"})
+				}
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationResourceConstruct:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				definition := resourceTypes[operation.Type]
@@ -302,17 +356,24 @@ func verifyFunction(function *Function, resourceTypes map[hir.Type]*ResourceType
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationFieldRead:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
-				definition := resourceTypes[operation.OwnerType]
-				if definition == nil {
-					failures = append(failures, VerificationError{Code: "V1001", Entity: resourceTypeEntity(operation.OwnerType), Detail: "field-read owner type has no resource definition"})
+				resourceDefinition := resourceTypes[operation.OwnerType]
+				structDefinition := structTypes[operation.OwnerType]
+				if resourceDefinition == nil && structDefinition == nil {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: structTypeEntity(operation.OwnerType), Detail: "field-read owner type has no aggregate definition"})
 				}
 				if operation.DestinationLocal == NoLocal || operation.OwnerType == "" || operation.OwnerType == hir.TypeInvalid || operation.Type == "" || operation.Type == hir.TypeInvalid || operation.Field == "" || len(operation.Operands) != 1 {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "field read shape is invalid"})
 				}
-				if definition != nil {
-					field, found := resourceField(definition.Fields, operation.Field)
+				if resourceDefinition != nil {
+					field, found := resourceField(resourceDefinition.Fields, operation.Field)
 					if !found || field.Type != operation.Type {
 						failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "field read does not match the resource definition"})
+					}
+				}
+				if structDefinition != nil {
+					field, found := structField(structDefinition.Fields, operation.Field)
+					if !found || field.Type != operation.Type {
+						failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "field read does not match the struct definition"})
 					}
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
@@ -618,6 +679,14 @@ func resourceFieldNames(fields []ResourceField) []string {
 	return names
 }
 
+func structFieldNames(fields []StructField) []string {
+	names := make([]string, 0, len(fields))
+	for _, field := range fields {
+		names = append(names, field.Name)
+	}
+	return names
+}
+
 func resourceField(fields []ResourceField, name string) (ResourceField, bool) {
 	for _, field := range fields {
 		if field.Name == name {
@@ -625,6 +694,15 @@ func resourceField(fields []ResourceField, name string) (ResourceField, bool) {
 		}
 	}
 	return ResourceField{}, false
+}
+
+func structField(fields []StructField, name string) (StructField, bool) {
+	for _, field := range fields {
+		if field.Name == name {
+			return field, true
+		}
+	}
+	return StructField{}, false
 }
 
 func cloneVerificationState(input verificationState) verificationState {

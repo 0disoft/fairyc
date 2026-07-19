@@ -256,6 +256,53 @@ func TestEmitRejectsNonI32ResourceField(t *testing.T) {
 	}
 }
 
+func TestEmitReprCStructPreservesPublicTagFieldsAndLayout(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+@repr(C)
+struct fy_std_text_view_v0 { data: *u8; length: usize; }
+unsafe extern C fn foreign_take(output: *mut fy_std_text_view_v0) -> u32;
+fn main() -> i32 {
+    let view: fy_std_text_view_v0 = fy_std_text_view_v0 { data: null, length: 0 };
+    if view.length == 0 { 0 } else { 1 }
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, required := range []string{
+		"struct fy_std_text_view_v0 {",
+		"const uint8_t * data;",
+		"uintptr_t length;",
+		"_Static_assert(sizeof(struct fy_std_text_view_v0) == UINT64_C(16)",
+		"offsetof(struct fy_std_text_view_v0, data) == UINT64_C(0)",
+		"offsetof(struct fy_std_text_view_v0, length) == UINT64_C(8)",
+		"extern uint32_t foreign_take(struct fy_std_text_view_v0 *",
+		"(struct fy_std_text_view_v0){ .data = ((void *)0)",
+		".length = ((uintptr_t)UINT64_C(0)) }",
+		".length;",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+	if !slices.Contains(unit.Features, "inert-struct") || !slices.Contains(unit.Features, "repr-c-struct") {
+		t.Fatalf("features = %v", unit.Features)
+	}
+}
+
+func TestEmitRejectsInvalidReprCStructName(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, "module main;\n@repr(C)\nstruct Packet { value: u32; }\nfn main() -> i32 { 0 }\n")
+	program.StructTypes[0].Name = "bad-name"
+	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	var capability cbackend.CapabilityError
+	if !errors.As(err, &capability) || capability.Feature != "repr(C) struct name \"bad-name\"" {
+		t.Fatalf("Emit() error = %v", err)
+	}
+}
+
 func TestEmitRejectsNonScalarParameterType(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main;\nfn inspect(value: &i32) -> i32 { 0 }\nfn main() -> i32 { 0 }\n")

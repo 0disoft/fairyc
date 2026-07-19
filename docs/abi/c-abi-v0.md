@@ -18,11 +18,13 @@ Target claims use three levels:
 
 The Windows Go compiler host does not define target layout. Proving the first target requires WSL or Linux CI, an explicit glibc baseline, a sysroot or runner image, Clang and GCC, and a target runtime bundle.
 
-The current Go prototype can emit deterministic ISO C11 for a verified scalar, flat-resource, and resource-tagged
-profile carrying this target identity, including private `Option<i32>`, `Result<i32, i32>`, and
-nonempty all-`i32` resource transport plus built-in resource-bearing tags. Resource and tagged
-structs are compiler-private and do not alter the
-rule below that resources are forbidden from `@repr(C)` and the public C ABI.
+The current Go prototype can emit deterministic ISO C11 for a verified scalar, inert-struct,
+flat-resource, and resource-tagged profile carrying this target identity. The inert-struct slice
+includes nonempty source `@repr(C)` records whose fields are currently limited to `u8`, `i32`,
+`u32`, `usize`, and raw pointers. It preserves the public C tag and field names and emits target-
+computed size, alignment, and offset assertions. Private `Option<i32>`, `Result<i32, i32>`,
+all-`i32` resources, and resource-bearing tags remain compiler-private; resources are still
+forbidden from `@repr(C)` and the public C ABI.
 A separate Linux/amd64 runner is configured to require glibc, Clang, and GCC, link the embedded
 scalar runtime, compare process status at low and optimized profiles, probe valid target layouts,
 and run each production unit under a closed ASan+UBSan mode. No hosted success receipt has been
@@ -45,16 +47,24 @@ unsafe extern C fn
 `pub` is not an ABI marker.
 
 The current executable source subset implements exact-name `unsafe extern C fn` imports with
-`i32`, `u8`, `u32`, `usize`, and raw pointers to that bounded scalar set. AST, typed HIR, MIR,
-unsafe provenance, deterministic C prototype emission, typed null, separate-object cross-compiler
-linking, and process-status observation are wired. Non-null pointer construction, dereference,
-arithmetic, and casts remain unsupported. This is not implementation of `@link_name`, export
-generation, callbacks, `c.*` scalars, or `@repr(C)` source aggregates. The interpreter remains
-fail-closed on every foreign call.
+`i32`, `u8`, `u32`, `usize`, raw pointers to that bounded scalar set, and raw pointers to an
+admitted nonempty `@repr(C)` struct. AST, typed HIR, MIR, unsafe provenance, deterministic C
+prototype emission, typed null, separate-object cross-compiler linking, and process-status
+observation are wired. Source struct construction and field reads reach verified MIR, the MIR
+interpreter for its executable scalar subset, and generated C. Non-null pointer construction,
+dereference, arithmetic, and casts remain unsupported, so source cannot yet pass a local struct's
+address to C. This is not implementation of `@link_name`, exports, callbacks, `c.*` scalars,
+nested/array/enum `@repr(C)` fields, or by-value aggregate calls and returns. The interpreter
+remains fail-closed on every foreign call.
 
 ## C-representable types
 
 `@repr(C)` permits fixed-width integers, `c.*` scalars, `f32`, `f64`, raw pointers, fixed arrays, nested `@repr(C)` structs, and an explicitly based C enum. It rejects resources, safe borrows, slices, `str`, `CStr`, `Option`, `Result`, `Region`, `String`, `Buffer`, payload enums, empty structs, packed or custom alignment, unions, bit fields, long double, atomics, and vector types.
+
+The implemented source/backend slice is deliberately smaller than that language contract: it
+accepts only nonempty, flat structs over `u8`, `i32`, `u32`, `usize`, and raw pointers. Other
+contracted field families remain fail-closed until their source typing, layout, ABI, and native
+crossing tests are connected together.
 
 C enums specify their underlying `c.*` integer. The backend may transport them as a fixed integer type plus constants rather than relying on a host compiler's default enum size.
 

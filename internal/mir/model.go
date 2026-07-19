@@ -16,14 +16,29 @@ const NoBlock BlockID = -1
 // typeProperties provides the compiler-known type facts needed during lowering.
 type typeProperties struct {
 	resources map[hir.Type]struct{}
+	structs   map[hir.Type]struct{}
 }
 
-func newTypeProperties(resources []ResourceType) typeProperties {
-	values := make(map[hir.Type]struct{}, len(resources))
+func newTypeProperties(resources []ResourceType, structs []StructType) typeProperties {
+	resourceValues := make(map[hir.Type]struct{}, len(resources))
 	for _, value := range resources {
-		values[value.Type] = struct{}{}
+		resourceValues[value.Type] = struct{}{}
 	}
-	return typeProperties{resources: values}
+	structValues := make(map[hir.Type]struct{}, len(structs))
+	for _, value := range structs {
+		structValues[value.Type] = struct{}{}
+	}
+	return typeProperties{resources: resourceValues, structs: structValues}
+}
+
+func (p typeProperties) IsResource(value hir.Type) bool {
+	_, found := p.resources[value]
+	return found
+}
+
+func (p typeProperties) IsStruct(value hir.Type) bool {
+	_, found := p.structs[value]
+	return found
 }
 
 // NeedsDrop reports whether a value can own an active cleanup obligation.
@@ -40,9 +55,27 @@ func (p typeProperties) NeedsDrop(value hir.Type) bool {
 
 // Program is verified before it is handed to an interpreter or backend.
 type Program struct {
+	StructTypes      []StructType
 	ResourceTypes    []ResourceType
 	ForeignFunctions []ForeignFunction
 	Functions        []Function
+}
+
+// StructType is one verified inert aggregate definition used by executable MIR.
+type StructType struct {
+	Type   hir.Type
+	Name   string
+	Span   hir.Span
+	Entity string
+	ReprC  bool
+	Fields []StructField
+}
+
+// StructField preserves source identity, declaration order, and the resolved field type.
+type StructField struct {
+	Name string
+	Type hir.Type
+	Span hir.Span
 }
 
 // ForeignFunction is one verified raw external declaration consumed by a backend, not the interpreter.
@@ -175,6 +208,7 @@ const (
 	OperationResultPayload     OperationKind = "result-payload"
 	OperationOptionConstruct   OperationKind = "option-construct"
 	OperationOptionPayload     OperationKind = "option-payload"
+	OperationStructConstruct   OperationKind = "struct-construct"
 	OperationResourceConstruct OperationKind = "resource-construct"
 	OperationFieldRead         OperationKind = "field-read"
 	OperationRegionEnter       OperationKind = "region-enter"
@@ -234,7 +268,15 @@ type Operation struct {
 	ExitKind         string
 }
 
+func structTypeEntity(value hir.Type) string {
+	return aggregateTypeEntity("struct-type", value)
+}
+
 func resourceTypeEntity(value hir.Type) string {
+	return aggregateTypeEntity("resource-type", value)
+}
+
+func aggregateTypeEntity(prefix string, value hir.Type) string {
 	var name strings.Builder
 	separator := false
 	for _, value := range strings.ToLower(string(value)) {
@@ -249,9 +291,9 @@ func resourceTypeEntity(value hir.Type) string {
 		separator = name.Len() > 0
 	}
 	if name.Len() == 0 {
-		return "resource-type:invalid"
+		return prefix + ":invalid"
 	}
-	return "resource-type:" + name.String()
+	return prefix + ":" + name.String()
 }
 
 // TerminatorKind identifies the only legal block-ending control transfers.

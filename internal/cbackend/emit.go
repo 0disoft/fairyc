@@ -80,6 +80,8 @@ type emitter struct {
 	foreignFunctions   []mir.ForeignFunction
 	foreignBySymbol    map[hir.SymbolID]int
 	entryIndex         int
+	structTypes        []structCType
+	structByType       map[hir.Type]int
 	resourceTypes      []resourceCType
 	resourceByType     map[hir.Type]int
 	taggedTypes        []taggedCType
@@ -94,6 +96,13 @@ type emitter struct {
 	instrumentation    string
 	dropSites          []DropSite
 	dropSiteByKey      map[dropSiteKey]uint32
+}
+
+type structCType struct {
+	definition mir.StructType
+	layout     layout.Result
+	layoutType layout.Type
+	fieldIndex map[string]int
 }
 
 type resourceCType struct {
@@ -121,6 +130,10 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	layoutEngine, err := layout.New(targetSpec)
 	if err != nil {
 		return Unit{}, fmt.Errorf("create C resource layout engine: %w", err)
+	}
+	structTypes, structByType, err := prepareStructTypes(program.StructTypes, layoutEngine)
+	if err != nil {
+		return Unit{}, err
 	}
 	resourceTypes, resourceByType, err := prepareResourceTypes(program.ResourceTypes, layoutEngine)
 	if err != nil {
@@ -151,6 +164,8 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 		foreignFunctions:   foreignFunctions,
 		foreignBySymbol:    foreignBySymbol,
 		entryIndex:         -1,
+		structTypes:        structTypes,
+		structByType:       structByType,
 		resourceTypes:      resourceTypes,
 		resourceByType:     resourceByType,
 		taggedTypes:        taggedTypes,
@@ -161,6 +176,15 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 		dynamicTrapTargets: make(map[int]map[mir.BlockID]struct{}),
 		localTypes:         make([]map[mir.LocalID]hir.Type, len(functions)),
 		instrumentation:    profile.Instrumentation,
+	}
+	if len(structTypes) != 0 {
+		value.features["inert-struct"] = struct{}{}
+	}
+	for _, structure := range structTypes {
+		if structure.definition.ReprC {
+			value.features["repr-c-struct"] = struct{}{}
+			break
+		}
 	}
 	if len(resourceTypes) != 0 {
 		value.features["flat-i32-resource"] = struct{}{}
@@ -257,6 +281,71 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 		Entry: entry, Functions: names, Features: features,
 		DropSites: slices.Clone(value.dropSites), Source: output.String(),
 	}, nil
+}
+
+func prepareStructTypes(definitions []mir.StructType, engine *layout.Engine) ([]structCType, map[hir.Type]int, error) {
+	ordered := slices.Clone(definitions)
+	slices.SortFunc(ordered, func(left, right mir.StructType) int {
+		return strings.Compare(string(left.Type), string(right.Type))
+	})
+	result := make([]structCType, 0, len(ordered))
+	byType := make(map[hir.Type]int, len(ordered))
+	publicNames := make(map[string]hir.Type)
+	for _, definition := range ordered {
+		if len(definition.Fields) == 0 {
+			return nil, nil, CapabilityError{Feature: "empty struct type " + strconv.Quote(string(definition.Type))}
+		}
+		if definition.ReprC {
+			if !validCABIIdentifier(definition.Name) {
+				return nil, nil, CapabilityError{Feature: "repr(C) struct name " + strconv.Quote(definition.Name)}
+			}
+			if previous, duplicate := publicNames[definition.Name]; duplicate {
+				return nil, nil, fmt.Errorf("repr(C) structs %q and %q share C tag %q", previous, definition.Type, definition.Name)
+			}
+			publicNames[definition.Name] = definition.Type
+		}
+		fields := make([]layout.Field, 0, len(definition.Fields))
+		fieldIndex := make(map[string]int, len(definition.Fields))
+		for index, field := range definition.Fields {
+			if definition.ReprC && !validCABIIdentifier(field.Name) {
+				return nil, nil, CapabilityError{Feature: "repr(C) struct " + strconv.Quote(definition.Name) + " field name " + strconv.Quote(field.Name)}
+			}
+			fieldType, err := structFieldLayoutType(field.Type)
+			if err != nil {
+				return nil, nil, CapabilityError{Feature: "struct type " + strconv.Quote(string(definition.Type)) + " field " + strconv.Quote(field.Name) + " of type " + strconv.Quote(string(field.Type))}
+			}
+			fieldIndex[field.Name] = index
+			layoutName := fmt.Sprintf("f_%d", index)
+			if definition.ReprC {
+				layoutName = field.Name
+			}
+			fields = append(fields, layout.Field{Name: layoutName, Type: fieldType})
+		}
+		aggregateType := layout.Type{Kind: layout.KindStruct, Fields: fields}
+		computed, err := engine.Of(aggregateType)
+		if err != nil {
+			return nil, nil, fmt.Errorf("compute C transport layout for struct %q: %w", definition.Type, err)
+		}
+		if _, duplicate := byType[definition.Type]; duplicate {
+			return nil, nil, fmt.Errorf("duplicate C struct type %q", definition.Type)
+		}
+		byType[definition.Type] = len(result)
+		result = append(result, structCType{definition: definition, layout: computed, layoutType: aggregateType, fieldIndex: fieldIndex})
+	}
+	return result, byType, nil
+}
+
+func structFieldLayoutType(value hir.Type) (layout.Type, error) {
+	value = canonicalCValueType(value)
+	switch value {
+	case hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
+		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(value)}, nil
+	default:
+		if _, _, pointer := hir.RawPointerElement(value); pointer {
+			return layout.Type{Kind: layout.KindPointer}, nil
+		}
+		return layout.Type{}, fmt.Errorf("unsupported struct field type %q", value)
+	}
 }
 
 func normalizeForeignFunctions(input []mir.ForeignFunction) ([]mir.ForeignFunction, map[hir.SymbolID]int, error) {
@@ -357,7 +446,7 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 					inferred = hir.TypeI32
 				case mir.OperationResultConstruct, mir.OperationOptionConstruct,
 					mir.OperationResultPayload, mir.OperationOptionPayload,
-					mir.OperationResourceConstruct, mir.OperationFieldRead:
+					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead:
 					inferred = operation.Type
 				}
 				if operation.DestinationLocal == mir.NoLocal || inferred == hir.TypeInvalid || inferred == "" {
@@ -409,11 +498,11 @@ func (e *emitter) inspectForeignFunctions() error {
 		if !validExternalCIdentifier(function.LinkName) {
 			return CapabilityError{Function: function.Name, Feature: "external C symbol " + strconv.Quote(function.LinkName)}
 		}
-		if _, err := foreignCType(function.ResultType, true); err != nil {
+		if _, err := e.foreignCType(function.ResultType, true); err != nil {
 			return CapabilityError{Function: function.Name, Feature: err.Error()}
 		}
 		for _, parameterType := range function.ParameterTypes {
-			if _, err := foreignCType(parameterType, false); err != nil {
+			if _, err := e.foreignCType(parameterType, false); err != nil {
 				return CapabilityError{Function: function.Name, Feature: err.Error()}
 			}
 		}
@@ -421,7 +510,7 @@ func (e *emitter) inspectForeignFunctions() error {
 	return nil
 }
 
-func foreignCType(value hir.Type, result bool) (string, error) {
+func (e *emitter) foreignCType(value hir.Type, result bool) (string, error) {
 	if result && value == hir.TypeVoid {
 		return "void", nil
 	}
@@ -436,7 +525,7 @@ func foreignCType(value hir.Type, result bool) (string, error) {
 		return "uintptr_t", nil
 	}
 	if element, mutable, pointer := hir.RawPointerElement(value); pointer {
-		pointee, err := foreignPointerElementCType(element)
+		pointee, err := e.foreignPointerElementCType(element)
 		if err != nil {
 			return "", err
 		}
@@ -452,7 +541,7 @@ func foreignCType(value hir.Type, result bool) (string, error) {
 	return "", fmt.Errorf("foreign %s type %q", role, value)
 }
 
-func foreignPointerElementCType(value hir.Type) (string, error) {
+func (e *emitter) foreignPointerElementCType(value hir.Type) (string, error) {
 	switch value {
 	case hir.TypeU8:
 		return "uint8_t", nil
@@ -463,8 +552,31 @@ func foreignPointerElementCType(value hir.Type) (string, error) {
 	case hir.TypeUSize:
 		return "uintptr_t", nil
 	default:
+		if index, found := e.structByType[value]; found {
+			definition := e.structTypes[index].definition
+			if !definition.ReprC {
+				return "", fmt.Errorf("foreign raw-pointer element struct %q is not repr(C)", value)
+			}
+			return "struct " + definition.Name, nil
+		}
 		return "", fmt.Errorf("foreign raw-pointer element type %q", value)
 	}
+}
+
+func validCABIIdentifier(value string) bool {
+	if value == "" {
+		return false
+	}
+	if _, reserved := generatedCNames[value]; reserved {
+		return false
+	}
+	for index, character := range value {
+		if character > 0x7f || !(character == '_' || character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z' || index > 0 && character >= '0' && character <= '9') {
+			return false
+		}
+	}
+	_, keyword := c11Keywords[value]
+	return !keyword
 }
 
 func validExternalCIdentifier(value string) bool {
@@ -572,11 +684,14 @@ func (e *emitter) supportedCValueType(value hir.Type) bool {
 		return true
 	}
 	if element, _, pointer := hir.RawPointerElement(value); pointer {
-		_, err := foreignPointerElementCType(element)
+		_, err := e.foreignPointerElementCType(element)
 		return err == nil
 	}
 	_, resource := e.resourceByType[value]
 	if resource {
+		return true
+	}
+	if _, structure := e.structByType[value]; structure {
 		return true
 	}
 	_, tagged := e.taggedByType[value]
@@ -595,12 +710,15 @@ func (e *emitter) cValueType(value hir.Type) (string, error) {
 	case value == hir.TypeUSize:
 		return "uintptr_t", nil
 	case isRawPointer(value):
-		return foreignCType(value, false)
+		return e.foreignCType(value, false)
 	case isOptionI32(value):
 		return "fy_option_i32", nil
 	case isResultI32I32(value):
 		return "fy_result_i32_i32", nil
 	default:
+		if index, found := e.structByType[value]; found {
+			return e.structCTypeName(index), nil
+		}
 		if index, found := e.resourceByType[value]; found {
 			return fmt.Sprintf("fy_resource_%d", index), nil
 		}
@@ -609,6 +727,14 @@ func (e *emitter) cValueType(value hir.Type) (string, error) {
 		}
 		return "", fmt.Errorf("unsupported C value type %q", value)
 	}
+}
+
+func (e *emitter) structCTypeName(index int) string {
+	definition := e.structTypes[index].definition
+	if definition.ReprC {
+		return "struct " + definition.Name
+	}
+	return fmt.Sprintf("fy_struct_%d", index)
 }
 
 func (e *emitter) inspectFunction(functionIndex int) error {
@@ -662,8 +788,20 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 				if err := e.inspectResourceDischarge(functionIndex, *operation); err != nil {
 					return err
 				}
-			case mir.OperationResourceConstruct, mir.OperationFieldRead:
+			case mir.OperationStructConstruct:
+				if err := e.inspectStructOperation(functionIndex, *operation); err != nil {
+					return err
+				}
+			case mir.OperationResourceConstruct:
 				if err := e.inspectResourceOperation(functionIndex, *operation); err != nil {
+					return err
+				}
+			case mir.OperationFieldRead:
+				if _, structure := e.structByType[operation.OwnerType]; structure {
+					if err := e.inspectStructOperation(functionIndex, *operation); err != nil {
+						return err
+					}
+				} else if err := e.inspectResourceOperation(functionIndex, *operation); err != nil {
 					return err
 				}
 			case mir.OperationUse:
@@ -810,13 +948,62 @@ func (e *emitter) callSignature(symbol hir.SymbolID) (hir.Type, []hir.Type, bool
 func validateOperationShape(function string, operation mir.Operation) error {
 	switch operation.Kind {
 	case mir.OperationAssign, mir.OperationInitialize, mir.OperationUnary, mir.OperationBinary,
-		mir.OperationResourceConstruct, mir.OperationFieldRead:
+		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead:
 		if operation.DestinationLocal < 0 {
 			return fmt.Errorf("%s operation in %s has no destination local", operation.Kind, function)
 		}
 	case mir.OperationMove, mir.OperationDrop:
 		if operation.Symbol == hir.NoSymbol {
 			return fmt.Errorf("%s operation in %s has no resource symbol", operation.Kind, function)
+		}
+	}
+	return nil
+}
+
+func (e *emitter) inspectStructOperation(functionIndex int, operation mir.Operation) error {
+	function := &e.functions[functionIndex]
+	switch operation.Kind {
+	case mir.OperationStructConstruct:
+		index, found := e.structByType[operation.Type]
+		if !found {
+			return CapabilityError{Function: function.Name, Feature: "struct construction type " + strconv.Quote(string(operation.Type))}
+		}
+		definition := &e.structTypes[index]
+		if len(operation.Fields) != len(definition.definition.Fields) || len(operation.Operands) != len(definition.definition.Fields) {
+			return fmt.Errorf("struct construction in %s does not match type %q", function.Name, operation.Type)
+		}
+		for fieldIndex, field := range definition.definition.Fields {
+			if operation.Fields[fieldIndex] != field.Name {
+				return fmt.Errorf("struct construction in %s has field %q at index %d, want %q", function.Name, operation.Fields[fieldIndex], fieldIndex, field.Name)
+			}
+			operandType, err := e.operandType(functionIndex, operation.Operands[fieldIndex])
+			if err != nil {
+				return fmt.Errorf("struct construction field %d in %s: %w", fieldIndex, function.Name, err)
+			}
+			if canonicalCValueType(operandType) != canonicalCValueType(field.Type) {
+				return fmt.Errorf("struct construction field %d in %s has type %q, want %q", fieldIndex, function.Name, operandType, field.Type)
+			}
+		}
+	case mir.OperationFieldRead:
+		index, found := e.structByType[operation.OwnerType]
+		if !found {
+			return CapabilityError{Function: function.Name, Feature: "field-read owner type " + strconv.Quote(string(operation.OwnerType))}
+		}
+		definition := &e.structTypes[index]
+		fieldIndex, found := definition.fieldIndex[operation.Field]
+		if !found || canonicalCValueType(definition.definition.Fields[fieldIndex].Type) != canonicalCValueType(operation.Type) {
+			return fmt.Errorf("struct field read in %s does not match field %q", function.Name, operation.Field)
+		}
+		receiver, err := oneOperand(operation.Operands)
+		if err != nil {
+			return fmt.Errorf("struct field read in %s: %w", function.Name, err)
+		}
+		receiverType, err := e.operandType(functionIndex, receiver)
+		if err != nil {
+			return fmt.Errorf("struct field read in %s: %w", function.Name, err)
+		}
+		if canonicalCValueType(receiverType) != canonicalCValueType(operation.OwnerType) {
+			return fmt.Errorf("struct field read in %s has receiver type %q, want %q", function.Name, receiverType, operation.OwnerType)
 		}
 	}
 	return nil
@@ -1140,13 +1327,39 @@ func (e *emitter) recordTrapCategories(function string, categories []string) err
 func (e *emitter) emitPreamble(output *strings.Builder) error {
 	fmt.Fprintf(output, "/* fairyc constrained C transport: %s, ISO C11 */\n", target.X8664LinuxGNU)
 	output.WriteString("#include <stdint.h>\n")
-	if len(e.resourceTypes) != 0 {
+	if len(e.structTypes) != 0 || len(e.resourceTypes) != 0 {
 		output.WriteString("#include <stddef.h>\n")
 	}
 	if e.needsBitcast {
 		output.WriteString("#include <string.h>\n")
 	}
 	output.WriteByte('\n')
+	for index, structure := range e.structTypes {
+		if structure.definition.ReprC {
+			fmt.Fprintf(output, "struct %s {\n", structure.definition.Name)
+		} else {
+			output.WriteString("typedef struct {\n")
+		}
+		for fieldIndex, field := range structure.definition.Fields {
+			cType, err := e.cValueType(field.Type)
+			if err != nil {
+				return fmt.Errorf("emit struct %q field %q: %w", structure.definition.Type, field.Name, err)
+			}
+			fmt.Fprintf(output, "    %s %s;\n", cType, e.structCFieldName(index, fieldIndex))
+		}
+		cType := e.structCTypeName(index)
+		if structure.definition.ReprC {
+			output.WriteString("};\n")
+		} else {
+			fmt.Fprintf(output, "} %s;\n", cType)
+		}
+		fmt.Fprintf(output, "_Static_assert(sizeof(%s) == UINT64_C(%d), \"fairyc struct %d size\");\n", cType, structure.layout.SizeBytes, index)
+		fmt.Fprintf(output, "_Static_assert(_Alignof(%s) == UINT64_C(%d), \"fairyc struct %d alignment\");\n", cType, structure.layout.AlignmentBytes, index)
+		for fieldIndex, field := range structure.layout.Fields {
+			fmt.Fprintf(output, "_Static_assert(offsetof(%s, %s) == UINT64_C(%d), \"fairyc struct %d field %d offset\");\n", cType, e.structCFieldName(index, fieldIndex), field.OffsetBytes, index, fieldIndex)
+		}
+		output.WriteByte('\n')
+	}
 	for index, resource := range e.resourceTypes {
 		output.WriteString("typedef struct {\n")
 		for fieldIndex := range resource.definition.Fields {
@@ -1209,6 +1422,14 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 	return nil
 }
 
+func (e *emitter) structCFieldName(structIndex, fieldIndex int) string {
+	definition := e.structTypes[structIndex].definition
+	if definition.ReprC {
+		return definition.Fields[fieldIndex].Name
+	}
+	return fmt.Sprintf("f_%d", fieldIndex)
+}
+
 func (e *emitter) emitPrototype(output *strings.Builder, functionIndex int) error {
 	function := &e.functions[functionIndex]
 	resultType, err := e.cFunctionResultType(function.ResultType)
@@ -1225,7 +1446,7 @@ func (e *emitter) emitPrototype(output *strings.Builder, functionIndex int) erro
 
 func (e *emitter) emitForeignPrototype(output *strings.Builder, functionIndex int) error {
 	function := &e.foreignFunctions[functionIndex]
-	resultType, err := foreignCType(function.ResultType, true)
+	resultType, err := e.foreignCType(function.ResultType, true)
 	if err != nil {
 		return fmt.Errorf("foreign prototype for %s: %w", function.Name, err)
 	}
@@ -1237,7 +1458,7 @@ func (e *emitter) emitForeignPrototype(output *strings.Builder, functionIndex in
 			if index != 0 {
 				output.WriteString(", ")
 			}
-			cType, typeErr := foreignCType(parameterType, false)
+			cType, typeErr := e.foreignCType(parameterType, false)
 			if typeErr != nil {
 				return fmt.Errorf("foreign prototype for %s: %w", function.Name, typeErr)
 			}
@@ -1319,6 +1540,23 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			return fmt.Errorf("assign in %s: %w", function, err)
 		}
 		fmt.Fprintf(output, "    fy_l_%d = %s;\n", operation.DestinationLocal, value)
+	case mir.OperationStructConstruct:
+		index, found := e.structByType[operation.Type]
+		if !found {
+			return CapabilityError{Function: function, Feature: "struct construction type " + strconv.Quote(string(operation.Type))}
+		}
+		fmt.Fprintf(output, "    fy_l_%d = (%s){ ", operation.DestinationLocal, e.structCTypeName(index))
+		for fieldIndex, operand := range operation.Operands {
+			if fieldIndex != 0 {
+				output.WriteString(", ")
+			}
+			value, err := cOperand(operand)
+			if err != nil {
+				return fmt.Errorf("struct construction field %d in %s: %w", fieldIndex, function, err)
+			}
+			fmt.Fprintf(output, ".%s = %s", e.structCFieldName(index, fieldIndex), value)
+		}
+		output.WriteString(" };\n")
 	case mir.OperationResourceConstruct:
 		index, found := e.resourceByType[operation.Type]
 		if !found {
@@ -1337,6 +1575,22 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		}
 		output.WriteString(" };\n")
 	case mir.OperationFieldRead:
+		if index, found := e.structByType[operation.OwnerType]; found {
+			fieldIndex, fieldFound := e.structTypes[index].fieldIndex[operation.Field]
+			if !fieldFound {
+				return fmt.Errorf("struct field read in %s names missing field %q", function, operation.Field)
+			}
+			receiver, err := oneOperand(operation.Operands)
+			if err != nil {
+				return fmt.Errorf("struct field read in %s: %w", function, err)
+			}
+			value, err := cOperand(receiver)
+			if err != nil {
+				return fmt.Errorf("struct field read in %s: %w", function, err)
+			}
+			fmt.Fprintf(output, "    fy_l_%d = (%s).%s;\n", operation.DestinationLocal, value, e.structCFieldName(index, fieldIndex))
+			break
+		}
 		index, found := e.resourceByType[operation.OwnerType]
 		if !found {
 			return CapabilityError{Function: function, Feature: "field-read owner type " + strconv.Quote(string(operation.OwnerType))}
@@ -1744,7 +1998,7 @@ func operationHasDestination(kind mir.OperationKind) bool {
 	case mir.OperationInitialize, mir.OperationAssign, mir.OperationUnary, mir.OperationBinary,
 		mir.OperationResultConstruct, mir.OperationResultPayload,
 		mir.OperationOptionConstruct, mir.OperationOptionPayload,
-		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationRegionPlace:
+		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationRegionPlace:
 		return true
 	default:
 		return false
