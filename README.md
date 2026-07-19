@@ -109,7 +109,7 @@ The Linux File C slice now exposes partial I/O, write-all progress, sync, and co
 is never retried, even after failure. Its four-way probe is configured but unobserved and source
 effects remain unimplemented.
 The source FFI slice accepts `i32`, `u8`, `u32`, `usize`, all sixteen exact transport-only TargetSpec
-C scalars, plus admitted raw-pointer parameters or
+C scalars, admitted raw-pointer parameters or results, and nonempty acyclic `@repr(C)` struct
 results. A declaration may keep its Fairy name or use one nonempty `@link_name("external_symbol")`;
 AST, typed HIR, MIR, prototypes, and calls preserve the source/link identity split.
 Calls require `unsafe {}` or `unsafe fn`; missing unsafe provenance is `E5101` and safe references in
@@ -123,9 +123,11 @@ C spellings with target and provider assertions, and currently have no source li
 cast, raw-pointer, or interpreter support. Nonempty `@repr(C)` records may use exact C-scalar fields,
 opaque `void` pointers, and acyclic nested `@repr(C)` records; generated definitions are ordered by
 dependency and guarded by target-derived nested layout assertions. One pointer-to-opaque-pointer
-output-slot shape is admitted for Arena allocation. Raw dereference or arithmetic,
-arbitrary casts, nested enum or built-in-tag fields, arrays, callbacks, by-value aggregate FFI,
-exports, and public standard-library wrappers remain unimplemented.
+output-slot shape is admitted for Arena allocation. A generated FY caller now receives both an
+8-byte register result and a 20-byte hidden-memory result from hand-written C in the four-way native
+matrix. Raw dereference or arithmetic, arbitrary casts, nested enum or built-in-tag fields, arrays,
+callbacks, by-value aggregate parameters, exports, and public standard-library wrappers remain
+unimplemented.
 A deterministic native C11 plus explicit POSIX-typedef probe now translates the eleven valid layout cases into private numeric
 types and is configured for Clang/GCC at `-O0` and `-O2`. This Windows host cannot execute those
 four probe runs, and no hosted success receipt has been observed, so `c-layout-probes` remains a

@@ -75,12 +75,13 @@ named-field variants, exact exhaustive shallow matching, and admitted scalar/raw
 payload fields are supported; nested user enums and built-in tags inside their payloads fail closed.
 Nonempty source `@repr(C)` structs over `u8`, `i32`, `u32`, `usize`, exact C scalars, admitted raw
 pointers, and acyclic nested `@repr(C)` records preserve their public C tag and field names, emit
-dependencies before users, and receive target-computed layout assertions. An exact direct-
+dependencies before users, and receive target-computed layout assertions. The same records may be
+foreign results by value; foreign aggregate parameters remain rejected. An exact direct-
 local `&T -> *T`, `&mut T -> *T`, or `&mut T -> *mut T` cast inside `unsafe` lowers to verified
 raw-address MIR and generated `&local`; the exact `&mut *mut void` output slot is included. Nested
 tags, empty or non-`i32` resources, partial
 initialization, user drop effects, Region, retained safe borrows, raw dereference or arithmetic,
-arbitrary casts, by-value aggregate FFI, complete runtime, and general standard-library lowering fail with the provisional capability
+arbitrary casts, by-value aggregate parameters, complete runtime, and general standard-library lowering fail with the provisional capability
 code. The closed native fixture `drop-trace-v0` profile is not selectable through the CLI and its
 observer declaration, calls, site metadata, and stderr protocol never appear in this output. The
 native runner's `address-undefined-o1` sanitizer mode is likewise validation-only and cannot be

@@ -700,6 +700,9 @@ func (e *emitter) inspectForeignFunctions() error {
 		if _, err := e.foreignCType(function.ResultType, true); err != nil {
 			return CapabilityError{Function: function.Name, Feature: err.Error()}
 		}
+		if _, structure := e.structByType[function.ResultType]; structure {
+			e.features["foreign-c-struct-result"] = struct{}{}
+		}
 		e.recordCScalarFeature(function.ResultType)
 		for _, parameterType := range function.ParameterTypes {
 			if _, err := e.foreignCType(parameterType, false); err != nil {
@@ -773,6 +776,15 @@ func (e *emitter) foreignCType(value hir.Type, result bool) (string, error) {
 			return pointee + " *", nil
 		}
 		return "const " + pointee + " *", nil
+	}
+	if index, structure := e.structByType[value]; structure {
+		if !result {
+			return "", fmt.Errorf("foreign parameter type %q", value)
+		}
+		if !e.structTypes[index].definition.ReprC {
+			return "", fmt.Errorf("foreign result struct %q is not repr(C)", value)
+		}
+		return e.structCTypeName(index), nil
 	}
 	role := "parameter"
 	if result {

@@ -113,7 +113,9 @@ the real initialize, zeroed-resize, and drop helpers in both compiler directions
 adds `arenaSourceCallExecutions` for exact self-linked node, Arena, and Region records crossing real
 initialization, begin, zeroed allocation, reset, and drop in both directions and profiles. V24 adds
 `cStrValidationSourceCallExecutions` for an exact generated CStr view crossing the real bounded
-validator with valid, interior-NUL, and unterminated storage in both directions and profiles. The
+validator with valid, interior-NUL, and unterminated storage in both directions and profiles. V25
+adds `foreignCStructResultCallExecutions` for one generated Fairy caller receiving both an 8-byte
+register result and a 20-byte hidden-memory result from C in both directions and profiles. The
 runner emits one exact version and does not pretend the report shapes are interchangeable.
 
 ## Runtime and standard library

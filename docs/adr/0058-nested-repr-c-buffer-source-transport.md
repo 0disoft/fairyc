@@ -58,3 +58,6 @@ order is not an ABI dependency order.
 
 ADR 0059 later reuses nested-record dependency ordering for the Arena node's SystemHeap block and
 adds a self-pointer plus one opaque pointer-output-slot transport shape.
+
+ADR 0061 later supersedes only the by-value-return half of item 9 and the corresponding consequence:
+an admitted nonempty `@repr(C)` record may be a foreign result. Aggregate parameters remain closed.

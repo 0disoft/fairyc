@@ -554,6 +554,79 @@ fn main() -> i32 {
 	}
 }
 
+func TestEmitReprCStructForeignResult(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+@repr(C)
+struct fairyc_fixture_status {
+    status: u32;
+    detail: u32;
+}
+@link_name("fairyc_fixture_make_status")
+unsafe extern C fn make_status() -> fairyc_fixture_status;
+fn main() -> i32 {
+    let result: fairyc_fixture_status = unsafe { make_status() };
+    if result.status == 41 && result.detail == 1 { 42 } else { 0 }
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	if !slices.Contains(unit.Features, "foreign-c-struct-result") {
+		t.Fatalf("features = %v", unit.Features)
+	}
+	for _, required := range []string{
+		"struct fairyc_fixture_status {",
+		"uint32_t status;",
+		"uint32_t detail;",
+		"_Static_assert(sizeof(struct fairyc_fixture_status) == UINT64_C(8)",
+		"extern struct fairyc_fixture_status fairyc_fixture_make_status(void);",
+		" = fairyc_fixture_make_status();",
+		".status;",
+		".detail;",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+}
+
+func TestEmitRejectsReprCStructForeignParameter(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+@repr(C)
+struct fairyc_fixture_status { status: u32; detail: u32; }
+unsafe extern C fn consume_status(value: fairyc_fixture_status) -> i32;
+fn main() -> i32 {
+    let value: fairyc_fixture_status = fairyc_fixture_status { status: 41, detail: 1 };
+    unsafe { consume_status(value) }
+}
+`)
+	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	var capability cbackend.CapabilityError
+	if !errors.As(err, &capability) || capability.Function != "main::consume_status" || capability.Feature != `foreign parameter type "main::fairyc_fixture_status"` {
+		t.Fatalf("Emit() error = %v", err)
+	}
+}
+
+func TestEmitRejectsNonReprCStructForeignResult(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+struct PrivateStatus { status: u32; detail: u32; }
+unsafe extern C fn make_status() -> PrivateStatus;
+fn main() -> i32 {
+    let result: PrivateStatus = unsafe { make_status() };
+    if result.status == 41 { 42 } else { 0 }
+}
+`)
+	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	var capability cbackend.CapabilityError
+	if !errors.As(err, &capability) || capability.Function != "main::make_status" || capability.Feature != `foreign result struct "main::PrivateStatus" is not repr(C)` {
+		t.Fatalf("Emit() error = %v", err)
+	}
+}
+
 func TestEmitReprCStructPreservesVoidPointerAndExactCScalarFields(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

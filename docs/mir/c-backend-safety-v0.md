@@ -38,6 +38,10 @@ accepted only in nonempty `@repr(C)` structs and share the same transport table 
 An admitted struct may contain another acyclic nonempty `@repr(C)` struct by value. The backend
 orders complete definitions by dependency and reuses the child target layout when computing the
 containing field; recursive value dependencies and non-`@repr(C)` nested structs fail closed.
+The same admitted records may be foreign results by value. MIR retains the nominal destination type
+and generated C uses the exact public tag plus ordinary assignment. Foreign aggregate parameters
+remain closed. The native matrix includes an 8-byte register result and a 20-byte hidden-memory
+result from a separately compiled C callee.
 
 The emitter additionally accepts direct resource values only when every program-level definition is
 nonempty, every declaration-ordered field is exactly `i32`, and the verified user drop body is
@@ -181,7 +185,8 @@ report; they do not expand the eighteen interpreter-owned differential cases.
 Every C-scalar probe uses hand-written C producers and consumers so each value crosses a generated
 typed local without requiring a Fairy C literal. The family probe uses exactly representable finite
 floating values and makes no NaN, infinity, signed-zero, rounding, or floating-environment claim.
-`fairyc.native-c-report/v24` separately records four `systemHeapSourceCallExecutions`, four
+`fairyc.native-c-report/v25` separately records four `foreignCStructResultCallExecutions`, four
+`systemHeapSourceCallExecutions`, four
 `bufferSourceCallExecutions`, four `arenaSourceCallExecutions`, and four
 `cStrValidationSourceCallExecutions`. The first crosses an exact generated `void *`/`size_t` block into the
 real SystemHeap C unit. The second nests that block in the exact Buffer record, calls the real
@@ -191,6 +196,9 @@ observes zeroed allocation through `void **`, and verifies reset/drop generation
 fourth crosses the exact CStr view into the owned-text C unit, distinguishes valid, interior-NUL, and
 unterminated storage, and observes failure-atomic output. These are internal transport probes, not
 public allocator, Buffer, Arena, lexical Region, or safe text APIs.
+The struct-result count requires a generated Fairy caller to receive both a register-sized and a
+hidden-memory result from a separately compiled hand-written C callee in both compiler directions
+and profiles; it does not admit aggregate parameters.
 
 `internal/cdriver` and `internal/cruntime` are the one implementation path for both that matrix and
 the experimental constrained-C executable builder. The driver fixes the C dialect, warning policy,

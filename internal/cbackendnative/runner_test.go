@@ -64,6 +64,25 @@ func TestForeignPointerCallSmokeSourceReachesCEmission(t *testing.T) {
 	}
 }
 
+func TestForeignCStructResultCallSmokeSourceReachesCEmission(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "main.fy"), []byte(foreignCStructResultCallSmokeSource), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	code := cli.Run([]string{"experimental", "emit-c", "main.fy"}, root, &stdout, &stderr)
+	if code != cli.ExitSuccess || stderr.Len() != 0 {
+		t.Fatalf("foreign C struct-result call C emission = code %d, stderr %q", code, stderr.String())
+	}
+	for _, required := range foreignCStructResultCallExpectedCFragments {
+		if !strings.Contains(stdout.String(), required) {
+			t.Errorf("foreign C struct-result call C emission is missing %q", required)
+		}
+	}
+}
+
 func TestForeignCIntCallSmokeSourceReachesCEmission(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
@@ -307,7 +326,7 @@ func TestCStrValidationSourceCallSmokeReachesCEmission(t *testing.T) {
 
 func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 	t.Parallel()
-	if reportSchemaVersion != "fairyc.native-c-report/v24" {
+	if reportSchemaVersion != "fairyc.native-c-report/v25" {
 		t.Fatalf("report schema = %q", reportSchemaVersion)
 	}
 	encoded, err := json.Marshal(Report{
@@ -332,6 +351,7 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		ForeignCSizeTCallExecutions:        4,
 		ForeignCSSizeTCallExecutions:       4,
 		ForeignPointerCallExecutions:       4,
+		ForeignCStructResultCallExecutions: 4,
 		TextValidationSourceCallExecutions: 4,
 		TextViewOutputSourceCallExecutions: 4,
 		CStrValidationSourceCallExecutions: 4,
@@ -339,7 +359,7 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v24"`) ||
+	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v25"`) ||
 		!strings.Contains(string(encoded), `"dropTraceExecutions":72`) ||
 		!strings.Contains(string(encoded), `"layoutCases":["pass.array-i32-three","pass.pointer"]`) ||
 		!strings.Contains(string(encoded), `"layoutProbeExecutions":4`) ||
@@ -364,6 +384,7 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		!strings.Contains(string(encoded), `"foreignCSizeTCallExecutions":4`) ||
 		!strings.Contains(string(encoded), `"foreignCSSizeTCallExecutions":4`) ||
 		!strings.Contains(string(encoded), `"foreignPointerCallExecutions":4`) ||
+		!strings.Contains(string(encoded), `"foreignCStructResultCallExecutions":4`) ||
 		!strings.Contains(string(encoded), `"textValidationSourceCallExecutions":4`) ||
 		!strings.Contains(string(encoded), `"textViewOutputSourceCallExecutions":4`) ||
 		!strings.Contains(string(encoded), `"cStrValidationSourceCallExecutions":4`) {

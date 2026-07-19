@@ -132,16 +132,17 @@ source-visible File effects and error resources remain missing.
 The source FFI slice admits `unsafe extern C fn` declarations using `i32`, `u8`, `u32`, `usize`, all
 sixteen exact transport-only TargetSpec C scalars, raw pointers to the bounded Fairy scalar set or
 opaque `void`, and raw pointers to nonempty acyclic `@repr(C)` records whose fields may include the
-exact C scalars or nested `@repr(C)` records. A single
+exact C scalars or nested `@repr(C)` records. The same nonempty acyclic records may now be foreign
+results by value, while aggregate parameters remain closed. A single
 `@link_name("symbol")` may separate the Fairy lookup name from the external C symbol. Unsafe call,
 link identity, and raw-address provenance survive AST, typed HIR, and MIR verification; the C
 backend emits unannotated prototypes, exact record tags/fields/layout assertions, and `&local` only
 for an exact unsafe borrow-to-pointer cast. The native lane plans four scalar, four typed-null
 pointer/target-scalar, four individual exact C-scalar, four remaining twelve-type C-scalar-family,
-four real SystemHeap block, four real nested Buffer, four real Arena/Region, four real UTF-8 validation, and four real text-view output-record
+four register/hidden-memory struct-result, four real SystemHeap block, four real nested Buffer, four real Arena/Region, four real UTF-8 validation, and four real text-view output-record
 crossings. The interpreter refuses
 raw addresses and foreign execution. Dereference, pointer arithmetic, arbitrary casts, callbacks,
-C-scalar value semantics, nested enum or array fields, by-value aggregate FFI, exports, and public standard-library
+C-scalar value semantics, nested enum or array fields, by-value aggregate parameters, exports, and public standard-library
 wrappers remain Phase 2 work. The internal empty-input text transports are real source-to-stdlib-C
 exceptions, not completed wrappers.
 

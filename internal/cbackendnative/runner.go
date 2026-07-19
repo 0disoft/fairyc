@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v24"
+	reportSchemaVersion = "fairyc.native-c-report/v25"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -269,6 +269,82 @@ uint32_t fairyc_fixture_pointer_scalars(
     return UINT32_C(42);
 }
 `
+
+const foreignCStructResultCallSmokeSource = `module main;
+@repr(C)
+struct fairyc_fixture_status_v0 {
+    status: u32;
+    allocation_status: u32;
+}
+@repr(C)
+struct fairyc_fixture_large_status_v0 {
+    first: u32;
+    second: u32;
+    third: u32;
+    fourth: u32;
+    fifth: u32;
+}
+@link_name("fairyc_fixture_make_status_v0")
+unsafe extern C fn make_status() -> fairyc_fixture_status_v0;
+@link_name("fairyc_fixture_make_large_status_v0")
+unsafe extern C fn make_large_status() -> fairyc_fixture_large_status_v0;
+fn main() -> i32 {
+    let result: fairyc_fixture_status_v0 = unsafe { make_status() };
+    let large: fairyc_fixture_large_status_v0 = unsafe { make_large_status() };
+    if result.status == 41 && result.allocation_status == 1 &&
+        large.first == 1 && large.second == 2 && large.third == 3 &&
+        large.fourth == 4 && large.fifth == 5 {
+        42
+    } else {
+        0
+    }
+}
+`
+
+const foreignCStructResultCallCompanionSource = `#include <stdint.h>
+
+struct fairyc_fixture_status_v0 {
+    uint32_t status;
+    uint32_t allocation_status;
+};
+
+struct fairyc_fixture_large_status_v0 {
+    uint32_t first;
+    uint32_t second;
+    uint32_t third;
+    uint32_t fourth;
+    uint32_t fifth;
+};
+
+struct fairyc_fixture_status_v0 fairyc_fixture_make_status_v0(void) {
+    struct fairyc_fixture_status_v0 result = {UINT32_C(41), UINT32_C(1)};
+    return result;
+}
+
+struct fairyc_fixture_large_status_v0 fairyc_fixture_make_large_status_v0(void) {
+    struct fairyc_fixture_large_status_v0 result = {
+        UINT32_C(1), UINT32_C(2), UINT32_C(3), UINT32_C(4), UINT32_C(5)
+    };
+    return result;
+}
+`
+
+var foreignCStructResultCallExpectedCFragments = []string{
+	"struct fairyc_fixture_status_v0 {",
+	"uint32_t status;",
+	"uint32_t allocation_status;",
+	"_Static_assert(sizeof(struct fairyc_fixture_status_v0) == UINT64_C(8)",
+	"_Static_assert(_Alignof(struct fairyc_fixture_status_v0) == UINT64_C(4)",
+	"offsetof(struct fairyc_fixture_status_v0, status) == UINT64_C(0)",
+	"offsetof(struct fairyc_fixture_status_v0, allocation_status) == UINT64_C(4)",
+	"extern struct fairyc_fixture_status_v0 fairyc_fixture_make_status_v0(void);",
+	" = fairyc_fixture_make_status_v0();",
+	"struct fairyc_fixture_large_status_v0 {",
+	"_Static_assert(sizeof(struct fairyc_fixture_large_status_v0) == UINT64_C(20)",
+	"offsetof(struct fairyc_fixture_large_status_v0, fifth) == UINT64_C(16)",
+	"extern struct fairyc_fixture_large_status_v0 fairyc_fixture_make_large_status_v0(void);",
+	" = fairyc_fixture_make_large_status_v0();",
+}
 
 const textValidationSourceCallSmokeSource = `module main;
 @link_name("fy_std_text_utf8_valid_v0")
@@ -874,6 +950,7 @@ type Report struct {
 	ForeignCSizeTCallExecutions        int        `json:"foreignCSizeTCallExecutions"`
 	ForeignCSSizeTCallExecutions       int        `json:"foreignCSSizeTCallExecutions"`
 	ForeignPointerCallExecutions       int        `json:"foreignPointerCallExecutions"`
+	ForeignCStructResultCallExecutions int        `json:"foreignCStructResultCallExecutions"`
 	TextValidationSourceCallExecutions int        `json:"textValidationSourceCallExecutions"`
 	TextViewOutputSourceCallExecutions int        `json:"textViewOutputSourceCallExecutions"`
 	CStrValidationSourceCallExecutions int        `json:"cStrValidationSourceCallExecutions"`
@@ -1114,6 +1191,11 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.ForeignPointerCallExecutions = foreignPointerCallExecutions
+	foreignCStructResultCallExecutions, err := runForeignCStructResultCallProbe(temporaryRoot, toolchains)
+	if err != nil {
+		return Report{}, err
+	}
+	report.ForeignCStructResultCallExecutions = foreignCStructResultCallExecutions
 	textValidationSourceCallExecutions, err := runTextValidationSourceCallProbe(temporaryRoot, toolchains, textViewSource)
 	if err != nil {
 		return Report{}, err
@@ -1339,6 +1421,18 @@ func runForeignPointerCallProbe(temporaryRoot string, toolchains []cdriver.Toolc
 			"extern uint32_t fairyc_fixture_pointer_scalars(const uint8_t * fy_a_0, uint32_t * fy_a_1, uintptr_t fy_a_2, uint8_t fy_a_3);",
 			"fairyc_fixture_pointer_scalars(((void *)0), ((void *)0), ((uintptr_t)UINT64_C(0)), UINT8_C(7))",
 		},
+	)
+}
+
+func runForeignCStructResultCallProbe(temporaryRoot string, toolchains []cdriver.Toolchain) (int, error) {
+	return runForeignSourceProbe(
+		temporaryRoot,
+		toolchains,
+		"foreign-c-struct-result-call",
+		foreignCStructResultCallSmokeSource,
+		foreignCStructResultCallCompanionSource,
+		42,
+		foreignCStructResultCallExpectedCFragments,
 	)
 }
 

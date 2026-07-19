@@ -210,6 +210,11 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   Target-specific `ssize_t` consumes declared `sys/types.h`/`posix.1-2008` metadata. Plain `char`
   follows target signedness. Floating transport is limited to exact finite probe values and makes no
   NaN, infinity, signed-zero, rounding, or exception-mode promise.
+- A foreign result may also be a nonempty acyclic `@repr(C)` struct from the admitted field subset.
+  Generated C uses the exact public tag and ordinary C by-value assignment; target-derived size,
+  alignment, and field offsets remain asserted. Foreign aggregate parameters remain rejected. The
+  configured source probe crosses one 8-byte INTEGER-class result and one 20-byte MEMORY-class
+  hidden result between separate Clang/GCC objects in both directions and profiles.
 - The C backend is the only committed Stage 0 product backend and emits a constrained target/toolchain profile rather than universally portable C.
 - `internal/target` owns the executable `fairyc.target-spec/v0` description for the first target.
   It records host-independent LP64, scalar, pointer, SysV AMD64, ELF, unwind, debug, and C-layout
@@ -256,7 +261,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   helpers. Exact generated node, Arena, and Region records additionally cross real initialization,
   begin, zeroed allocation through `void **`, reset, and drop. An exact generated CStr view record
   crosses the real bounded validator with valid, interior-NUL, and unterminated storage and observes
-  unchanged output on both failures. Report v24 records all four source-call counters.
+  unchanged output on both failures. Report v25 records those four source-call counters plus
+  `foreignCStructResultCallExecutions` for the register and hidden-memory result pair.
   Its closed
   `drop-trace-v0` emission profile assigns source/type/span identities to dense site IDs and compares
   exact four-byte native records with the MIR interpreter trace. This instrumentation is absent from

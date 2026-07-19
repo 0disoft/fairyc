@@ -86,8 +86,8 @@ signed and unsigned integer families. Target-specific `c::ssize_t` also defines
 foreign argument; they have no source literal, arithmetic, comparison, cast, interpreter behavior,
 or raw-pointer support. Exact C-scalar fields may appear directly or through admitted nested
 `@repr(C)` records. Raw pointers to C scalars remain outside the admitted backend slice. This is not
-implementation of exports, callbacks, array or enum `@repr(C)` fields, or by-value aggregate calls
-and returns. The interpreter remains fail-closed on every foreign call.
+implementation of exports, callbacks, array or enum `@repr(C)` fields, or by-value aggregate
+parameters. The interpreter remains fail-closed on every foreign call.
 
 ## C-representable types
 
@@ -104,6 +104,12 @@ unit. The Arena crossing requires that the selected provider's `uint64_t` is exa
 floating Fairy scalars, and other contracted field
 families remain fail-closed until their source typing, layout, ABI, and native crossing tests are
 connected together.
+
+The implemented foreign-result slice admits those same nonempty acyclic `@repr(C)` records by value.
+Generated C emits the exact public struct return type and ordinary assignment. A generated Fairy
+caller is configured to receive both an 8-byte INTEGER-class result and a 20-byte MEMORY-class
+hidden result from a separately compiled C callee in both compiler directions and profiles.
+Aggregate parameters remain fail-closed.
 
 C enums specify their underlying `c.*` integer. The backend may transport them as a fixed integer type plus constants rather than relying on a host compiler's default enum size.
 
@@ -194,8 +200,9 @@ Native source-level call fixtures are eventually bidirectional: Fairy-to-C and C
 classification fixtures already cover integer and floating register exhaustion, mixed arguments,
 pointers, by-value structs, and hidden aggregate returns. Native crossings must additionally cover
 narrow signed and unsigned values, nested aggregates, null raw pointers, and the permitted callback
-form before the target can claim that source-level gate. The current cross-compiler C-object probe
-checks both compiler directions for the existing plans but does not substitute for Fairy lowering.
+form before the target can claim that source-level gate. The current generated-Fairy struct-result
+probe covers one register and one hidden return in both compiler directions; it does not yet cover
+aggregate parameters, mixed INTEGER/SSE source records, or nested-result interaction.
 
 The planned transport matrix uses Clang as the primary compiler and GCC as an independent compiler, each at low and optimized profiles. Sanitizers supplement but do not define conformance.
 

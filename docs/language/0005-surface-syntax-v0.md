@@ -60,7 +60,8 @@ selected TargetSpec, preserves every one as an exact identity distinct from coin
 Fairy scalars, and permits them only as transported foreign-call results, locals, and arguments.
 Their literals, operators, comparisons, casts, and raw pointers remain deferred. Exact C-scalar
 fields are admitted only in the current nonempty `@repr(C)` struct slice, which also admits acyclic
-nested `@repr(C)` records but not arrays or enum fields.
+nested `@repr(C)` records but not arrays or enum fields. Those admitted records may be foreign-call
+results by value. Foreign aggregate parameters remain deferred.
 `c::size_t` uses the ISO C `<stddef.h>` typedef; `c::ssize_t` is available only for the current
 `x86_64-linux-gnu` POSIX.1-2008 profile through `<sys/types.h>`. Plain `c::char` follows the selected
 target's signed `char` fact rather than inheriting either `c::schar` or `c::uchar`.
