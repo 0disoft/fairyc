@@ -875,6 +875,11 @@ var admittedStandardLibrarySymbols = map[string]struct{}{
 	"fy_std_cstring_from_text_v0":      {},
 	"fy_std_cstring_as_view_v0":        {},
 	"fy_std_cstring_drop_v0":           {},
+	"fy_std_linux_file_open_v0":        {},
+	"fy_std_linux_file_read_v0":        {},
+	"fy_std_linux_file_write_all_v0":   {},
+	"fy_std_linux_file_sync_v0":        {},
+	"fy_std_linux_file_close_v0":       {},
 }
 
 var generatedCNames = map[string]struct{}{

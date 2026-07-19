@@ -379,6 +379,22 @@ func TestEmitRejectsUnrecognizedStandardLibrarySymbol(t *testing.T) {
 	}
 }
 
+func TestEmitKeepsUnexercisedLinuxFileSymbolsClosed(t *testing.T) {
+	t.Parallel()
+	for _, symbol := range []string{"fy_std_linux_file_write_v0", "fy_std_linux_file_drop_v0"} {
+		symbol := symbol
+		t.Run(symbol, func(t *testing.T) {
+			t.Parallel()
+			program := lowerSource(t, "module main;\n@link_name(\""+symbol+"\")\nunsafe extern C fn file_operation(value: i32) -> i32;\nfn main() -> i32 { unsafe { file_operation(41) } }\n")
+			_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+			var capability cbackend.CapabilityError
+			if !errors.As(err, &capability) || capability.Function != "main::file_operation" || capability.Feature != "external C symbol \""+symbol+"\"" {
+				t.Fatalf("Emit() error = %v", err)
+			}
+		})
+	}
+}
+
 func TestEmitRejectsLinkNameThatIsNotAC11Identifier(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main;\n@link_name(\"bad-name\")\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n")

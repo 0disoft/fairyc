@@ -263,7 +263,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   crosses the real bounded validator with valid, interior-NUL, and unterminated storage and observes
   unchanged output on both failures. Exact nested String/CString records additionally cross the real
   copy/view/append/drop and from-text/view/drop helpers and observe bytes, termination, statuses, and
-  normalized release. Report v26 records those five standard-library source-call counters plus
+  normalized release. Exact Linux File result, handle, and open-option records additionally cross
+  the real open, write-all, sync, consuming-close, reopen, partial-read, EOF, and final-close helpers
+  while observing counts, repeated-close status, normalized state, and bytes. Report v27 records
+  `linuxFileSourceCallExecutions` alongside the earlier standard-library source-call counters and
   `foreignCStructResultCallExecutions` for the register and hidden-memory result pair.
   Its closed
   `drop-trace-v0` emission profile assigns source/type/span identities to dense site IDs and compares

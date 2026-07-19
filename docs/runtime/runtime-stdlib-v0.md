@@ -207,7 +207,16 @@ The provisional Linux C helper now implements bounded C-string paths, closed ope
 read/write counts, progress-reporting `write_all`, `fsync`, consuming close, and silent best-effort
 drop. Close clears ownership before one kernel call, including the failure path. Its native probe
 uses three-byte reads and a forced `EBADF` close failure; four compiler/profile runs are configured
-but unobserved, and no Fairy source API or effect declaration is connected.
+but unobserved.
+
+A separate generated-Fairy source probe crosses exact operation-result, File, and open-option
+records into the real C unit. It opens a prepared file for truncating writes, writes all nine
+`FairyFile` bytes, synchronizes, consumes close, requires a second close to report the closed status,
+reopens for reading, performs three three-byte reads, observes EOF with count zero, closes, and
+requires the reconstructed bytes and normalized closed record. The companion C code owns only
+bounded inputs and observations; it does not replace the production file operations. Public safe
+File ownership, source effects, typed error resources, automatic linkage, and hosted evidence remain
+disconnected.
 
 This is not a generic POSIX contract. POSIX.1-2024 and Linux differ for interrupted close behavior; other targets must define their own consuming-close rule before claiming support.
 

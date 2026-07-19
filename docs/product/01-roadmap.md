@@ -101,7 +101,7 @@ not linked into product builds or exposed through a public `std::alloc` API. One
 Fairy caller now crosses its exact `void *`/`size_t` block into the real allocate and deallocate
 helpers for four additional configured native executions. All eight native SystemHeap executions
 remain unobserved on this Windows host; the later Arena, text ownership, and Linux File C slices now
-exist; Linux File remains source-disconnected.
+exist and each has a raw generated-Fairy source crossing.
 The next storage slice now adds provisional Buffer construction, initialized-prefix-only reserve,
 overlap-safe append across relocation, overflow rollback, zeroed growth, truncate, clear, and drop.
 Its four C-only native probe executions and four generated-Fairy source-call executions are
@@ -128,8 +128,12 @@ four-way generated-Fairy crossing calls the real String copy/view/append/drop an
 from-text/view/drop helpers with exact nested records and by-value result records. Public safe
 String/CString resources, Result error resources, and ownership-aware calls remain missing.
 The Linux File C slice now also covers partial read/write, write-all progress, sync, and consuming
-close including forced close failure. Its four native runs remain configured but unobserved, and
-source-visible File effects and error resources remain missing.
+close including forced close failure. Its four C-only native runs remain configured but unobserved.
+A second four-way generated-Fairy crossing uses exact result, File, and open-option records to call
+the real open, write-all, sync, close, reopen, partial-read, EOF, and final-close helpers. It checks
+exact counts, repeated-close status, normalized closed state, and reconstructed bytes. Public safe
+File ownership, source effects, typed errors, automatic linkage, and hosted execution evidence
+remain missing.
 
 The source FFI slice admits `unsafe extern C fn` declarations using `i32`, `u8`, `u32`, `usize`, all
 sixteen exact transport-only TargetSpec C scalars, raw pointers to the bounded Fairy scalar set or

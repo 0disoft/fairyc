@@ -343,9 +343,28 @@ func TestOwnedTextSourceCallSmokeReachesCEmission(t *testing.T) {
 	}
 }
 
+func TestLinuxFileSourceCallSmokeReachesCEmission(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "main.fy"), []byte(linuxFileSourceCallSmokeSource), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	code := cli.Run([]string{"experimental", "emit-c", "main.fy"}, root, &stdout, &stderr)
+	if code != cli.ExitSuccess || stderr.Len() != 0 {
+		t.Fatalf("Linux File source call C emission = code %d, stderr %q", code, stderr.String())
+	}
+	for _, required := range linuxFileSourceCallExpectedCFragments {
+		if !strings.Contains(stdout.String(), required) {
+			t.Errorf("Linux File source call C emission is missing %q", required)
+		}
+	}
+}
+
 func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 	t.Parallel()
-	if reportSchemaVersion != "fairyc.native-c-report/v26" {
+	if reportSchemaVersion != "fairyc.native-c-report/v27" {
 		t.Fatalf("report schema = %q", reportSchemaVersion)
 	}
 	encoded, err := json.Marshal(Report{
@@ -364,6 +383,7 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		OwnedTextExecutions:                4,
 		OwnedTextSourceCallExecutions:      4,
 		LinuxFileExecutions:                4,
+		LinuxFileSourceCallExecutions:      4,
 		ForeignCallExecutions:              4,
 		ForeignCIntCallExecutions:          4,
 		ForeignCLongCallExecutions:         4,
@@ -379,7 +399,7 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v26"`) ||
+	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v27"`) ||
 		!strings.Contains(string(encoded), `"dropTraceExecutions":72`) ||
 		!strings.Contains(string(encoded), `"layoutCases":["pass.array-i32-three","pass.pointer"]`) ||
 		!strings.Contains(string(encoded), `"layoutProbeExecutions":4`) ||
@@ -398,6 +418,7 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		!strings.Contains(string(encoded), `"ownedTextExecutions":4`) ||
 		!strings.Contains(string(encoded), `"ownedTextSourceCallExecutions":4`) ||
 		!strings.Contains(string(encoded), `"linuxFileExecutions":4`) ||
+		!strings.Contains(string(encoded), `"linuxFileSourceCallExecutions":4`) ||
 		!strings.Contains(string(encoded), `"foreignCallExecutions":4`) ||
 		!strings.Contains(string(encoded), `"foreignCIntCallExecutions":4`) ||
 		!strings.Contains(string(encoded), `"foreignCLongCallExecutions":4`) ||
@@ -418,6 +439,14 @@ func TestSystemHeapProbeRunnerRejectsEmptySourceBeforeToolchainUse(t *testing.T)
 	toolchains := []cdriver.Toolchain{{Name: "clang"}, {Name: "gcc"}}
 	if _, err := runStandardLibraryProbe(t.TempDir(), toolchains, "SystemHeap", "system-heap", "", ""); err == nil || !strings.Contains(err.Error(), "must be non-empty") {
 		t.Fatalf("runStandardLibraryProbe() error = %v", err)
+	}
+}
+
+func TestLinuxFileSourceCallProbeRejectsEmptySourceBeforeToolchainUse(t *testing.T) {
+	t.Parallel()
+	toolchains := []cdriver.Toolchain{{Name: "clang"}, {Name: "gcc"}}
+	if _, err := runLinuxFileSourceCallProbe(t.TempDir(), toolchains, ""); err == nil || !strings.Contains(err.Error(), "requires a non-empty implementation") {
+		t.Fatalf("runLinuxFileSourceCallProbe() error = %v", err)
 	}
 }
 

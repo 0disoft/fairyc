@@ -79,7 +79,7 @@ unchanged when validation or allocation fails. A closed C-only probe and an inte
 caller using the exact `void *`/`size_t` block each have four configured Clang/GCC low/optimized
 executions. Neither has an observed hosted receipt, and the helper is not product-linked or exposed
 through a public `std::alloc` API. Arena, text ownership, and Linux File now have their own C slices
-below; Linux File remains source-disconnected.
+below; each now also has a raw generated-Fairy source crossing.
 A second provisional slice implements Buffer-owned initialized bytes, failure-atomic reserve,
 relocating self-overlap append, length-overflow rollback, zeroed growth, truncate, clear, and drop.
 Its closed C-only probe and an internal generated FY caller using the exact nested SystemHeap-block
@@ -109,8 +109,12 @@ real String copy, view, append, and drop helpers plus CString creation, CStr vie
 observers require exact bytes, repeated append, one terminator, and normalized release. These are raw
 internal transports; public safe String/CString types and source `Result` mapping remain absent.
 The Linux File C slice now exposes partial I/O, write-all progress, sync, and consuming close that
-is never retried, even after failure. Its four-way probe is configured but unobserved and source
-effects remain unimplemented.
+is never retried, even after failure. Its C-only four-way probe remains configured but unobserved.
+A separate generated FY caller now crosses exact result, File, and open-option records into the real
+open, write-all, sync, consuming-close, reopen, partial-read, EOF, and final-close helpers. It also
+requires a repeated close to report the closed status and both completed closes to normalize the
+descriptor record. This is raw internal transport; safe File ownership, source effects, typed
+errors, automatic linkage, and hosted execution evidence remain absent.
 The source FFI slice accepts `i32`, `u8`, `u32`, `usize`, all sixteen exact transport-only TargetSpec
 C scalars, admitted raw-pointer parameters or results, and nonempty acyclic `@repr(C)` struct
 results. A declaration may keep its Fairy name or use one nonempty `@link_name("external_symbol")`;

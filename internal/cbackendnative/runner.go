@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v26"
+	reportSchemaVersion = "fairyc.native-c-report/v27"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -1177,6 +1177,314 @@ var ownedTextSourceCallExpectedCFragments = []string{
 	" = fy_std_cstring_from_text_v0(",
 }
 
+const linuxFileSourceCallSmokeSource = `module main;
+@repr(C)
+struct fy_std_file_result_v0 {
+    status: u32;
+    error_number: i32;
+    count: c::size_t;
+}
+@repr(C)
+struct fy_std_linux_file_v0 {
+    descriptor: c::int;
+    open: u8;
+}
+@repr(C)
+struct fy_std_linux_open_options_v0 {
+    read: u8;
+    write: u8;
+    create: u8;
+    truncate: u8;
+    mode: u32;
+}
+
+@link_name("fairyc_fixture_file_prepare_path")
+unsafe extern C fn prepare_path() -> u32;
+@link_name("fairyc_fixture_file_path")
+unsafe extern C fn file_path() -> *u8;
+@link_name("fairyc_fixture_file_path_storage_length")
+unsafe extern C fn file_path_storage_length() -> c::size_t;
+@link_name("fairyc_fixture_file_payload")
+unsafe extern C fn file_payload() -> *u8;
+@link_name("fairyc_fixture_file_payload_length")
+unsafe extern C fn file_payload_length() -> c::size_t;
+@link_name("fairyc_fixture_file_three_size_t")
+unsafe extern C fn three_size_t() -> c::size_t;
+@link_name("fairyc_fixture_file_zero_size_t")
+unsafe extern C fn zero_size_t() -> c::size_t;
+@link_name("fairyc_fixture_file_closed_descriptor")
+unsafe extern C fn closed_descriptor() -> c::int;
+@link_name("fairyc_fixture_file_read_segment_one")
+unsafe extern C fn read_segment_one() -> *mut u8;
+@link_name("fairyc_fixture_file_read_segment_two")
+unsafe extern C fn read_segment_two() -> *mut u8;
+@link_name("fairyc_fixture_file_read_segment_three")
+unsafe extern C fn read_segment_three() -> *mut u8;
+
+@link_name("fy_std_linux_file_open_v0")
+unsafe extern C fn linux_file_open(
+    path: *u8,
+    path_storage_length: c::size_t,
+    options: *fy_std_linux_open_options_v0,
+    output: *mut fy_std_linux_file_v0
+) -> fy_std_file_result_v0;
+@link_name("fy_std_linux_file_read_v0")
+unsafe extern C fn linux_file_read(
+    file: *mut fy_std_linux_file_v0,
+    buffer: *mut u8,
+    length: c::size_t
+) -> fy_std_file_result_v0;
+@link_name("fy_std_linux_file_write_all_v0")
+unsafe extern C fn linux_file_write_all(
+    file: *mut fy_std_linux_file_v0,
+    buffer: *u8,
+    length: c::size_t
+) -> fy_std_file_result_v0;
+@link_name("fy_std_linux_file_sync_v0")
+unsafe extern C fn linux_file_sync(
+    file: *mut fy_std_linux_file_v0
+) -> fy_std_file_result_v0;
+@link_name("fy_std_linux_file_close_v0")
+unsafe extern C fn linux_file_close(
+    file: *mut fy_std_linux_file_v0
+) -> fy_std_file_result_v0;
+
+@link_name("fairyc_fixture_file_result_matches")
+unsafe extern C fn result_matches(
+    result: *fy_std_file_result_v0,
+    status: u32,
+    error_number: i32,
+    count: c::size_t
+) -> u32;
+@link_name("fairyc_fixture_file_is_closed")
+unsafe extern C fn file_is_closed(file: *fy_std_linux_file_v0) -> u32;
+@link_name("fairyc_fixture_file_buffers_match_and_cleanup")
+unsafe extern C fn buffers_match_and_cleanup() -> u32;
+
+fn main() -> i32 {
+    let prepared: u32 = unsafe { prepare_path() };
+    let path: *u8 = unsafe { file_path() };
+    let path_length: c::size_t = unsafe { file_path_storage_length() };
+    let payload: *u8 = unsafe { file_payload() };
+    let payload_length: c::size_t = unsafe { file_payload_length() };
+    let three: c::size_t = unsafe { three_size_t() };
+    let zero: c::size_t = unsafe { zero_size_t() };
+    let closed: c::int = unsafe { closed_descriptor() };
+
+    var file: fy_std_linux_file_v0 = fy_std_linux_file_v0 {
+        descriptor: closed,
+        open: 0,
+    };
+    let write_options: fy_std_linux_open_options_v0 = fy_std_linux_open_options_v0 {
+        read: 0,
+        write: 1,
+        create: 0,
+        truncate: 1,
+        mode: 384,
+    };
+    let opened_for_write: fy_std_file_result_v0 = unsafe {
+        linux_file_open(
+            path,
+            path_length,
+            &write_options as *fy_std_linux_open_options_v0,
+            &mut file as *mut fy_std_linux_file_v0
+        )
+    };
+    let opened_for_write_ok: u32 = unsafe {
+        result_matches(&opened_for_write as *fy_std_file_result_v0, 0, 0, zero)
+    };
+    let written: fy_std_file_result_v0 = unsafe {
+        linux_file_write_all(&mut file as *mut fy_std_linux_file_v0, payload, payload_length)
+    };
+    let written_ok: u32 = unsafe {
+        result_matches(&written as *fy_std_file_result_v0, 0, 0, payload_length)
+    };
+    let synced: fy_std_file_result_v0 = unsafe {
+        linux_file_sync(&mut file as *mut fy_std_linux_file_v0)
+    };
+    let synced_ok: u32 = unsafe {
+        result_matches(&synced as *fy_std_file_result_v0, 0, 0, zero)
+    };
+    let closed_after_write: fy_std_file_result_v0 = unsafe {
+        linux_file_close(&mut file as *mut fy_std_linux_file_v0)
+    };
+    let closed_after_write_ok: u32 = unsafe {
+        result_matches(&closed_after_write as *fy_std_file_result_v0, 0, 0, zero)
+    };
+    let closed_state_after_write: u32 = unsafe {
+        file_is_closed(&file as *fy_std_linux_file_v0)
+    };
+    let closed_twice: fy_std_file_result_v0 = unsafe {
+        linux_file_close(&mut file as *mut fy_std_linux_file_v0)
+    };
+    let closed_twice_ok: u32 = unsafe {
+        result_matches(&closed_twice as *fy_std_file_result_v0, 3, 0, zero)
+    };
+
+    let read_options: fy_std_linux_open_options_v0 = fy_std_linux_open_options_v0 {
+        read: 1,
+        write: 0,
+        create: 0,
+        truncate: 0,
+        mode: 0,
+    };
+    let opened_for_read: fy_std_file_result_v0 = unsafe {
+        linux_file_open(
+            path,
+            path_length,
+            &read_options as *fy_std_linux_open_options_v0,
+            &mut file as *mut fy_std_linux_file_v0
+        )
+    };
+    let opened_for_read_ok: u32 = unsafe {
+        result_matches(&opened_for_read as *fy_std_file_result_v0, 0, 0, zero)
+    };
+    let first_buffer: *mut u8 = unsafe { read_segment_one() };
+    let second_buffer: *mut u8 = unsafe { read_segment_two() };
+    let third_buffer: *mut u8 = unsafe { read_segment_three() };
+    let read_first: fy_std_file_result_v0 = unsafe {
+        linux_file_read(&mut file as *mut fy_std_linux_file_v0, first_buffer, three)
+    };
+    let read_first_ok: u32 = unsafe {
+        result_matches(&read_first as *fy_std_file_result_v0, 0, 0, three)
+    };
+    let read_second: fy_std_file_result_v0 = unsafe {
+        linux_file_read(&mut file as *mut fy_std_linux_file_v0, second_buffer, three)
+    };
+    let read_second_ok: u32 = unsafe {
+        result_matches(&read_second as *fy_std_file_result_v0, 0, 0, three)
+    };
+    let read_third: fy_std_file_result_v0 = unsafe {
+        linux_file_read(&mut file as *mut fy_std_linux_file_v0, third_buffer, three)
+    };
+    let read_third_ok: u32 = unsafe {
+        result_matches(&read_third as *fy_std_file_result_v0, 0, 0, three)
+    };
+    let read_eof: fy_std_file_result_v0 = unsafe {
+        linux_file_read(&mut file as *mut fy_std_linux_file_v0, first_buffer, three)
+    };
+    let read_eof_ok: u32 = unsafe {
+        result_matches(&read_eof as *fy_std_file_result_v0, 0, 0, zero)
+    };
+    let closed_after_read: fy_std_file_result_v0 = unsafe {
+        linux_file_close(&mut file as *mut fy_std_linux_file_v0)
+    };
+    let closed_after_read_ok: u32 = unsafe {
+        result_matches(&closed_after_read as *fy_std_file_result_v0, 0, 0, zero)
+    };
+    let closed_state_after_read: u32 = unsafe {
+        file_is_closed(&file as *fy_std_linux_file_v0)
+    };
+    let observed: u32 = unsafe { buffers_match_and_cleanup() };
+
+    if prepared == 1 && opened_for_write_ok == 1 && written_ok == 1 && synced_ok == 1 &&
+        closed_after_write_ok == 1 && closed_state_after_write == 1 && closed_twice_ok == 1 &&
+        opened_for_read_ok == 1 && read_first_ok == 1 && read_second_ok == 1 &&
+        read_third_ok == 1 && read_eof_ok == 1 && closed_after_read_ok == 1 &&
+        closed_state_after_read == 1 && observed == 1 {
+        42
+    } else {
+        0
+    }
+}
+`
+
+const linuxFileSourceCallBridge = `
+#include <stdlib.h>
+
+static char fairyc_fixture_file_path_storage[] = "/tmp/fairyc-file-source-XXXXXX";
+static const uint8_t fairyc_fixture_file_payload_bytes[] = {
+    UINT8_C(70), UINT8_C(97), UINT8_C(105), UINT8_C(114), UINT8_C(121),
+    UINT8_C(70), UINT8_C(105), UINT8_C(108), UINT8_C(101)
+};
+static uint8_t fairyc_fixture_file_read_bytes[9];
+
+uint32_t fairyc_fixture_file_prepare_path(void) {
+    int descriptor = mkstemp(fairyc_fixture_file_path_storage);
+    if (descriptor < 0) {
+        return UINT32_C(0);
+    }
+    if (close(descriptor) != 0) {
+        (void)unlink(fairyc_fixture_file_path_storage);
+        return UINT32_C(0);
+    }
+    return UINT32_C(1);
+}
+
+const uint8_t *fairyc_fixture_file_path(void) {
+    return (const uint8_t *)fairyc_fixture_file_path_storage;
+}
+
+size_t fairyc_fixture_file_path_storage_length(void) {
+    return sizeof(fairyc_fixture_file_path_storage);
+}
+
+const uint8_t *fairyc_fixture_file_payload(void) {
+    return fairyc_fixture_file_payload_bytes;
+}
+
+size_t fairyc_fixture_file_payload_length(void) {
+    return sizeof(fairyc_fixture_file_payload_bytes);
+}
+
+size_t fairyc_fixture_file_three_size_t(void) { return (size_t)3; }
+size_t fairyc_fixture_file_zero_size_t(void) { return (size_t)0; }
+int fairyc_fixture_file_closed_descriptor(void) { return -1; }
+uint8_t *fairyc_fixture_file_read_segment_one(void) { return fairyc_fixture_file_read_bytes; }
+uint8_t *fairyc_fixture_file_read_segment_two(void) { return fairyc_fixture_file_read_bytes + 3; }
+uint8_t *fairyc_fixture_file_read_segment_three(void) { return fairyc_fixture_file_read_bytes + 6; }
+
+uint32_t fairyc_fixture_file_result_matches(
+    const struct fy_std_file_result_v0 *result,
+    uint32_t status,
+    int32_t error_number,
+    size_t count
+) {
+    return result != NULL && result->status == status && result->error_number == error_number &&
+           result->count == count ? UINT32_C(1) : UINT32_C(0);
+}
+
+uint32_t fairyc_fixture_file_is_closed(const struct fy_std_linux_file_v0 *file) {
+    return file != NULL && file->descriptor == -1 && file->open == UINT8_C(0) ?
+           UINT32_C(1) : UINT32_C(0);
+}
+
+uint32_t fairyc_fixture_file_buffers_match_and_cleanup(void) {
+    uint32_t matches = UINT32_C(1);
+    for (size_t index = 0; index < sizeof(fairyc_fixture_file_payload_bytes); ++index) {
+        if (fairyc_fixture_file_read_bytes[index] != fairyc_fixture_file_payload_bytes[index]) {
+            matches = UINT32_C(0);
+        }
+    }
+    if (unlink(fairyc_fixture_file_path_storage) != 0) {
+        return UINT32_C(0);
+    }
+    return matches;
+}
+`
+
+var linuxFileSourceCallExpectedCFragments = []string{
+	"struct fy_std_file_result_v0 {",
+	"uint32_t status;",
+	"int32_t error_number;",
+	"size_t count;",
+	"_Static_assert(sizeof(struct fy_std_file_result_v0) == UINT64_C(16)",
+	"struct fy_std_linux_file_v0 {",
+	"int descriptor;",
+	"uint8_t open;",
+	"struct fy_std_linux_open_options_v0 {",
+	"extern struct fy_std_file_result_v0 fy_std_linux_file_open_v0(const uint8_t * fy_a_0, size_t fy_a_1, const struct fy_std_linux_open_options_v0 * fy_a_2, struct fy_std_linux_file_v0 * fy_a_3);",
+	"extern struct fy_std_file_result_v0 fy_std_linux_file_read_v0(struct fy_std_linux_file_v0 * fy_a_0, uint8_t * fy_a_1, size_t fy_a_2);",
+	"extern struct fy_std_file_result_v0 fy_std_linux_file_write_all_v0(struct fy_std_linux_file_v0 * fy_a_0, const uint8_t * fy_a_1, size_t fy_a_2);",
+	"extern struct fy_std_file_result_v0 fy_std_linux_file_sync_v0(struct fy_std_linux_file_v0 * fy_a_0);",
+	"extern struct fy_std_file_result_v0 fy_std_linux_file_close_v0(struct fy_std_linux_file_v0 * fy_a_0);",
+	" = fy_std_linux_file_open_v0(",
+	" = fy_std_linux_file_read_v0(",
+	" = fy_std_linux_file_write_all_v0(",
+	" = fy_std_linux_file_sync_v0(",
+	" = fy_std_linux_file_close_v0(",
+}
+
 // Compiler records the bounded toolchain fingerprint used by one native run.
 type Compiler struct {
 	Name    string `json:"name"`
@@ -1210,6 +1518,7 @@ type Report struct {
 	OwnedTextExecutions                int        `json:"ownedTextExecutions"`
 	OwnedTextSourceCallExecutions      int        `json:"ownedTextSourceCallExecutions"`
 	LinuxFileExecutions                int        `json:"linuxFileExecutions"`
+	LinuxFileSourceCallExecutions      int        `json:"linuxFileSourceCallExecutions"`
 	ForeignCallExecutions              int        `json:"foreignCallExecutions"`
 	ForeignCIntCallExecutions          int        `json:"foreignCIntCallExecutions"`
 	ForeignCLongCallExecutions         int        `json:"foreignCLongCallExecutions"`
@@ -1428,6 +1737,11 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.LinuxFileExecutions = linuxFileExecutions
+	linuxFileSourceCallExecutions, err := runLinuxFileSourceCallProbe(temporaryRoot, toolchains, linuxFileSource)
+	if err != nil {
+		return Report{}, err
+	}
+	report.LinuxFileSourceCallExecutions = linuxFileSourceCallExecutions
 	foreignCallExecutions, err := runForeignCallProbe(temporaryRoot, toolchains)
 	if err != nil {
 		return Report{}, err
@@ -1765,6 +2079,21 @@ func runOwnedTextSourceCallProbe(temporaryRoot string, toolchains []cdriver.Tool
 		ownedTextSource+ownedTextSourceCallBridge,
 		42,
 		ownedTextSourceCallExpectedCFragments,
+	)
+}
+
+func runLinuxFileSourceCallProbe(temporaryRoot string, toolchains []cdriver.Toolchain, linuxFileSource string) (int, error) {
+	if linuxFileSource == "" {
+		return 0, fmt.Errorf("Linux File source-call probe requires a non-empty implementation")
+	}
+	return runForeignSourceProbe(
+		temporaryRoot,
+		toolchains,
+		"linux-file-source-call",
+		linuxFileSourceCallSmokeSource,
+		linuxFileSource+linuxFileSourceCallBridge,
+		42,
+		linuxFileSourceCallExpectedCFragments,
 	)
 }
 
