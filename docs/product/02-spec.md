@@ -148,9 +148,9 @@ C is a boundary contract rather than the default internal representation.
 - The first planned conformance target is `x86_64-linux-gnu`; it is not supported until all declared target fixtures and CI paths pass.
 - C-layout types use `@repr(C)` and exported or imported symbols use explicit `unsafe extern C fn` declarations.
 - Platform-dependent C types use a distinct `c.*` namespace.
-- The first executable source C-scalar slice is exact `c::int` foreign transport. It is distinct
-  from `i32`; other C scalars, C-integer literals and operators, and `c::int` aggregate fields
-  remain deferred.
+- The first executable source C-scalar slices are exact `c::int` and `c::size_t` foreign transport.
+  They are distinct from `i32` and `usize`; other C scalars, C-integer literals and operators, raw
+  pointers to C scalars, and C-scalar aggregate fields remain deferred.
 - Foreign calls and generated raw bindings are unsafe by default and use raw pointers rather than safe references.
 - Safe wrappers own length, nullability, lifetime, error, and ownership conversion.
 - Stage 0 callbacks are non-capturing, synchronous, same-thread raw `unsafe extern C` function pointers plus explicit user data.
@@ -195,16 +195,17 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   MIR preserve distinct source/link identities, and generated C validates and emits only the link
   identity. Compatible declarations of one external symbol coalesce; conflicting signatures fail
   closed. The attribute grants no interpreter or host-binding authority.
-- A foreign result may produce exact `c::int`, occupy a typed MIR local, and feed a later foreign
-  `c::int` parameter. Generated C spells the type `int` and asserts its target `c.int` size and
-  alignment. `c::size_t` is not `usize`; `c::ssize_t` is a later POSIX target-library type.
+- A foreign result may produce exact `c::int` or `c::size_t`, occupy a typed MIR local, and feed a
+  later matching foreign parameter. Generated C spells the types `int` and `<stddef.h>` `size_t`
+  and asserts target size/alignment; `size_t` also remains unsigned. `c::ssize_t` is a later POSIX
+  target-library type.
 - The C backend is the only committed Stage 0 product backend and emits a constrained target/toolchain profile rather than universally portable C.
 - `internal/target` owns the executable `fairyc.target-spec/v0` description for the first target.
   It records host-independent LP64, scalar, pointer, SysV AMD64, ELF, unwind, debug, and C-layout
   feature facts while excluding every local compiler, SDK, and sysroot path.
 - `internal/layout` consumes that description and computes checked scalar, pointer, explicitly
   based C-enum, positive fixed-array, and nonempty nested-struct size, natural alignment, field
-  offset, and top-level padding facts. `fairyc.layout-fixtures/v0` currently executes 14 pass/fail
+  offset, and top-level padding facts. `fairyc.layout-fixtures/v0` currently executes 15 pass/fail
   cases. This target-mechanics path does not implement the corresponding source syntax.
 - `internal/cabi` consumes those same target and layout facts for the closed SysV AMD64 Stage 0
   type vocabulary. `fairyc.c-abi-fixtures/v0` executes 17 exact class and register-plan cases,
@@ -213,7 +214,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   The 14 pass plans generate separate Clang/GCC caller and callee objects in both directions and
   profiles for 56 configured native crossings. This does not implement source FFI or establish a
   hosted result.
-- The nine valid layout cases additionally generate one deterministic private C11 probe. The Linux
+- The ten valid layout cases additionally generate one deterministic private C11 probe. The Linux
   native runner compiles, links, and executes it with Clang/GCC and low/optimized profiles, checking
   recursive size, alignment, field size, and offset assertions. Failure cases remain Go-owned input
   rejections. No hosted success receipt follows from the configured path.
@@ -234,9 +235,9 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   not establish a target support level.
 - A separate Linux/amd64 command requires glibc, Clang, and GCC and is configured to compare the
   current scalar, flat inert-struct, restricted inert-enum, flat-resource, and resource-tagged cases at low and optimized
-  profiles. It separately links generated FY callers to hand-written `c::int` producer/consumer C
+  profiles. It separately links generated FY callers to hand-written `c::int` and `c::size_t` producer/consumer C
   and to the actual text-view C unit for both the empty predicate and `@repr(C)` output-record
-  mutation paths; report v16 records those counters.
+  mutation paths; report v17 records those counters.
   Its closed
   `drop-trace-v0` emission profile assigns source/type/span identities to dense site IDs and compares
   exact four-byte native records with the MIR interpreter trace. This instrumentation is absent from

@@ -48,7 +48,7 @@ unsafe extern C fn
 
 The current executable source subset implements `unsafe extern C fn` imports with an optional
 single nonempty `@link_name("symbol")`, using
-`i32`, `u8`, `u32`, `usize`, the distinct transport-only `c::int`, raw pointers to the fixed-width
+`i32`, `u8`, `u32`, `usize`, the distinct transport-only `c::int` and `c::size_t`, raw pointers to the fixed-width
 Fairy scalar set, and raw pointers to an
 admitted nonempty `@repr(C)` struct. AST, typed HIR, MIR, unsafe provenance, deterministic C
 source/link identity, prototype emission, typed null, separate-object cross-compiler linking, and process-status
@@ -58,9 +58,11 @@ an exact `&T -> *T`, `&mut T -> *T`, or `&mut T -> *mut T` cast may take the add
 local place without inventing alias promises. Raw dereference, pointer arithmetic, integer-pointer
 conversion, mutability strengthening, and other casts remain unsupported. Source `c::int` maps to
 target key `c.int`, emits exact C `int`, and is guarded by target-derived size and alignment
-assertions. Its only current value path is foreign return to typed local to foreign argument; it has
+assertions. Exact `c::size_t` maps separately to target key `c.size_t`, includes `<stddef.h>`, emits
+C `size_t`, and asserts target size, alignment, and unsignedness instead of aliasing `usize` or
+`uintptr_t`. Their only current value path is foreign return to typed local to foreign argument; they have
 no source literal, arithmetic, comparison, cast, interpreter behavior, or aggregate-field support.
-This is not implementation of exports, callbacks, other `c.*` scalars,
+Raw pointers to C scalars also remain outside the admitted backend slice. This is not implementation of exports, callbacks, other `c.*` scalars,
 nested/array/enum `@repr(C)` fields, or by-value aggregate calls and returns. The interpreter
 remains fail-closed on every foreign call.
 
@@ -69,7 +71,8 @@ remains fail-closed on every foreign call.
 `@repr(C)` permits fixed-width integers, `c.*` scalars, `f32`, `f64`, raw pointers, fixed arrays, nested `@repr(C)` structs, and an explicitly based C enum. It rejects resources, safe borrows, slices, `str`, `CStr`, `Option`, `Result`, `Region`, `String`, `Buffer`, payload enums, empty structs, packed or custom alignment, unions, bit fields, long double, atomics, and vector types.
 
 The implemented source/backend slice is deliberately smaller than that language contract: it
-accepts only nonempty, flat structs over `u8`, `i32`, `u32`, `usize`, and raw pointers. `c::int`
+accepts only nonempty, flat structs over `u8`, `i32`, `u32`, `usize`, and raw pointers. `c::int` and
+`c::size_t`
 does not broaden that aggregate slice. Other
 contracted field families remain fail-closed until their source typing, layout, ABI, and native
 crossing tests are connected together.
@@ -117,8 +120,8 @@ frontend or C backend.
 `internal/layout` now executes those facts for scalars, pointers, explicitly based C enums,
 positive fixed arrays, and nonempty nested structs. Its versioned v0 manifest records exact size,
 natural alignment, declaration-order field offsets, top-level internal padding, tail padding, and
-closed rejection codes across 14 cases. This proves the internal target-layout algorithm against
-repository expectations only. The nine valid cases now also generate a private recursive C11 probe
+closed rejection codes across 15 cases. This proves the internal target-layout algorithm against
+repository expectations only. The ten valid cases now also generate a private recursive C11 probe
 with `sizeof`, `_Alignof`, field `sizeof`, and `offsetof` assertions configured for four
 Clang/GCC low/optimized executions. Those executions are not yet observed on a hosted Linux runner;
 call, return, object, and bidirectional ABI probes remain required native evidence.

@@ -15,14 +15,14 @@ func TestRepositoryLayoutManifestPasses(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Run() error = %v", err)
 	}
-	if report.Target != target.X8664LinuxGNU || report.CasesRun != 14 || report.Passed != 14 || len(report.Failures) != 0 {
+	if report.Target != target.X8664LinuxGNU || report.CasesRun != 15 || report.Passed != 15 || len(report.Failures) != 0 {
 		t.Fatalf("Run() report = %+v", report)
 	}
 	targetID, cases, err := NativeProbeCases(filepath.Join("..", "..", "spec", "fixtures", "layout", "manifest-v0.json"))
 	if err != nil {
 		t.Fatalf("NativeProbeCases() error = %v", err)
 	}
-	if targetID != target.X8664LinuxGNU || len(cases) != 9 || cases[0].ID != "pass.array-i32-three" || cases[len(cases)-1].ID != "pass.pointer" {
+	if targetID != target.X8664LinuxGNU || len(cases) != 10 || cases[0].ID != "pass.array-i32-three" || cases[len(cases)-1].ID != "pass.pointer" {
 		t.Fatalf("NativeProbeCases() = %q, %+v", targetID, cases)
 	}
 }

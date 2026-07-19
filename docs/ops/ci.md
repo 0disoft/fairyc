@@ -20,7 +20,7 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
   Linux/amd64, glibc, Clang, and GCC; compiles all eighteen current C-emission cases at `-O0` and
   `-O2` with pedantic warnings as errors; links the scalar trap runtime plus the closed conformance
   drop recorder; plans 72 exact process-status and source-linked drop-sequence comparisons; and
-  compiles and executes one recursive C11 probe for all 9 valid target-layout cases under the same
+  compiles and executes one recursive C11 probe for all 10 valid target-layout cases under the same
   4 compiler/profile pairs. It additionally recompiles every production C unit once per compiler
   with the closed `address-undefined-o1` ASan+UBSan mode, overrides ambient sanitizer options, and
   requires all 36 executions to produce no diagnostic. The same job generates separate caller and
@@ -39,10 +39,10 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
   products, and requires exit `42` with no output. A missing compiler or libc identity fails the job
   instead of producing a skip.
 - The native job retains no generated C, object, executable, cache, or report artifact. Its bounded
-  `fairyc.native-c-report/v16` JSON report is written only to the job log and contains toolchain
+  `fairyc.native-c-report/v17` JSON report is written only to the job log and contains toolchain
   fingerprints, fixture IDs, the sorted layout-case IDs, and drop-trace, layout-probe, and
   sanitizer, ABI case/direction, SystemHeap, Buffer, Arena, text, Linux File, scalar Fairy-source
-  foreign-call, exact `c::int` producer/consumer foreign-call, raw-pointer foreign-call, actual text-validation source-call, actual text-view
+  foreign-call, exact `c::int` and `c::size_t` producer/consumer foreign-calls, raw-pointer foreign-call, actual text-validation source-call, actual text-view
   output-record source-call, and product-build
   execution counts but no temporary path.
   Each foreign-call count is four only after generated Fairy callers and hand-written C callees

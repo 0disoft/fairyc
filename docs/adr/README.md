@@ -62,6 +62,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0050-restricted-inert-enum-execution.md`: qualified restricted user-enum construction, exhaustive named-field matching, verified MIR, interpreter execution, and private C tag transport.
 - `0051-source-link-name-transport.md`: distinct Fairy declaration and external C symbol identities through AST, typed HIR, verified MIR, generated C, and existing native probes.
 - `0052-distinct-c-int-source-transport.md`: exact source `c::int` identity across foreign return/local/argument transport, target assertions, and a separate native crossing.
+- `0053-distinct-c-size-t-source-transport.md`: exact ISO C `size_t` identity, target/header assertions, layout evidence, and foreign producer/consumer transport.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

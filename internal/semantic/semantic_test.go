@@ -475,21 +475,47 @@ fn main() -> i32 { unsafe { consume_c_int(make_c_int()) } }
 	}
 }
 
+func TestAnalyzePreservesDistinctCSizeTForeignTransport(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+@link_name("fairyc_fixture_make_c_size_t")
+unsafe extern C fn make_c_size_t() -> c::size_t;
+@link_name("fairyc_fixture_consume_c_size_t")
+unsafe extern C fn consume_c_size_t(value: c::size_t) -> i32;
+fn main() -> i32 { unsafe { consume_c_size_t(make_c_size_t()) } }
+`,
+	})
+	assertCleanTypeResult(t, result)
+	if len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].ForeignFunctions) != 2 {
+		t.Fatalf("HIR = %+v", result.HIR)
+	}
+	producer := result.HIR.Modules[0].ForeignFunctions[0]
+	consumer := result.HIR.Modules[0].ForeignFunctions[1]
+	if producer.Name != "make_c_size_t" || producer.ResultType != hir.TypeCSizeT || producer.ResultType == hir.TypeUSize || len(producer.Parameters) != 0 {
+		t.Fatalf("producer = %+v", producer)
+	}
+	if consumer.Name != "consume_c_size_t" || consumer.ResultType != hir.TypeI32 || len(consumer.Parameters) != 1 || consumer.Parameters[0].Type != hir.TypeCSizeT {
+		t.Fatalf("consumer = %+v", consumer)
+	}
+}
+
 func TestAnalyzeKeepsCIntImmediateAndPlatformTypedefsDeferred(t *testing.T) {
 	t.Parallel()
-	t.Run("immediate", func(t *testing.T) {
-		text := "module main;\nfn deferred(value: c::int) -> i32 { let copy: c::int = 1; 0 }\nfn main() -> i32 { 0 }\n"
-		result := analyzeText(t, map[string]string{"main.fy": text})
-		if result.FailedPhase != semantic.PhaseType || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E1006" || len(result.Unsupported) != 0 {
-			t.Fatalf("result = %+v", result)
-		}
-	})
+	for _, typeRef := range []string{"c::int", "c::size_t"} {
+		t.Run(typeRef+" immediate", func(t *testing.T) {
+			text := "module main;\nfn deferred(value: " + typeRef + ") -> i32 { let copy: " + typeRef + " = 1; 0 }\nfn main() -> i32 { 0 }\n"
+			result := analyzeText(t, map[string]string{"main.fy": text})
+			if result.FailedPhase != semantic.PhaseType || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E1006" || len(result.Unsupported) != 0 {
+				t.Fatalf("result = %+v", result)
+			}
+		})
+	}
 	for _, test := range []struct {
 		name    string
 		typeRef string
 		feature string
 	}{
-		{name: "size t", typeRef: "c::size_t", feature: "type c::size_t"},
 		{name: "ssize t", typeRef: "c::ssize_t", feature: "type c::ssize_t"},
 	} {
 		t.Run(test.name, func(t *testing.T) {

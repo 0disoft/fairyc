@@ -96,6 +96,7 @@ type emitter struct {
 	needsBitcast       bool
 	needsShift         bool
 	cIntLayout         target.Layout
+	cSizeTLayout       target.Layout
 	instrumentation    string
 	dropSites          []DropSite
 	dropSiteByKey      map[dropSiteKey]uint32
@@ -148,6 +149,10 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	cIntLayout, found := targetCScalarLayout(targetSpec, "c.int")
 	if !found {
 		return Unit{}, fmt.Errorf("C emission target %q has no c.int layout", profile.Target)
+	}
+	cSizeTLayout, found := targetCScalarLayout(targetSpec, "c.size_t")
+	if !found {
+		return Unit{}, fmt.Errorf("C emission target %q has no c.size_t layout", profile.Target)
 	}
 	layoutEngine, err := layout.New(targetSpec)
 	if err != nil {
@@ -204,6 +209,7 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 		dynamicTrapTargets: make(map[int]map[mir.BlockID]struct{}),
 		localTypes:         make([]map[mir.LocalID]hir.Type, len(functions)),
 		cIntLayout:         cIntLayout,
+		cSizeTLayout:       cSizeTLayout,
 		instrumentation:    profile.Instrumentation,
 	}
 	if len(structTypes) != 0 {
@@ -568,19 +574,24 @@ func (e *emitter) inspectForeignFunctions() error {
 		if _, err := e.foreignCType(function.ResultType, true); err != nil {
 			return CapabilityError{Function: function.Name, Feature: err.Error()}
 		}
-		if function.ResultType == hir.TypeCInt {
-			e.features["c-int"] = struct{}{}
-		}
+		e.recordCScalarFeature(function.ResultType)
 		for _, parameterType := range function.ParameterTypes {
 			if _, err := e.foreignCType(parameterType, false); err != nil {
 				return CapabilityError{Function: function.Name, Feature: err.Error()}
 			}
-			if parameterType == hir.TypeCInt {
-				e.features["c-int"] = struct{}{}
-			}
+			e.recordCScalarFeature(parameterType)
 		}
 	}
 	return nil
+}
+
+func (e *emitter) recordCScalarFeature(value hir.Type) {
+	switch value {
+	case hir.TypeCInt:
+		e.features["c-int"] = struct{}{}
+	case hir.TypeCSizeT:
+		e.features["c-size-t"] = struct{}{}
+	}
 }
 
 func (e *emitter) inspectEnumTypes() error {
@@ -622,6 +633,8 @@ func (e *emitter) foreignCType(value hir.Type, result bool) (string, error) {
 		return "uintptr_t", nil
 	case hir.TypeCInt:
 		return "int", nil
+	case hir.TypeCSizeT:
+		return "size_t", nil
 	}
 	if element, mutable, pointer := hir.RawPointerElement(value); pointer {
 		pointee, err := e.foreignPointerElementCType(element)
@@ -650,8 +663,6 @@ func (e *emitter) foreignPointerElementCType(value hir.Type) (string, error) {
 		return "uint32_t", nil
 	case hir.TypeUSize:
 		return "uintptr_t", nil
-	case hir.TypeCInt:
-		return "int", nil
 	default:
 		if index, found := e.structByType[value]; found {
 			definition := e.structTypes[index].definition
@@ -782,7 +793,7 @@ func isResultI32I32(value hir.Type) bool {
 
 func (e *emitter) supportedCValueType(value hir.Type) bool {
 	value = canonicalCValueType(value)
-	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeU32 || value == hir.TypeUSize || value == hir.TypeCInt || isOptionI32(value) || isResultI32I32(value) {
+	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeU32 || value == hir.TypeUSize || value == hir.TypeCInt || value == hir.TypeCSizeT || isOptionI32(value) || isResultI32I32(value) {
 		return true
 	}
 	if element, _, pointer := hir.RawPointerElement(value); pointer {
@@ -816,6 +827,8 @@ func (e *emitter) cValueType(value hir.Type) (string, error) {
 		return "uintptr_t", nil
 	case value == hir.TypeCInt:
 		return "int", nil
+	case value == hir.TypeCSizeT:
+		return "size_t", nil
 	case isRawPointer(value):
 		return e.foreignCType(value, false)
 	case isOptionI32(value):
@@ -852,9 +865,7 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 	if function.ResultType != hir.TypeVoid && !e.supportedCValueType(function.ResultType) {
 		return CapabilityError{Function: function.Name, Feature: "result type " + strconv.Quote(string(function.ResultType))}
 	}
-	if function.ResultType == hir.TypeCInt {
-		e.features["c-int"] = struct{}{}
-	}
+	e.recordCScalarFeature(function.ResultType)
 	if len(function.ParameterTypes) != len(function.Parameters) {
 		return fmt.Errorf("MIR function %s has %d parameter types for %d parameters", function.Name, len(function.ParameterTypes), len(function.Parameters))
 	}
@@ -862,9 +873,7 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 		if !e.supportedCValueType(parameterType) {
 			return CapabilityError{Function: function.Name, Feature: "parameter type " + strconv.Quote(string(parameterType))}
 		}
-		if parameterType == hir.TypeCInt {
-			e.features["c-int"] = struct{}{}
-		}
+		e.recordCScalarFeature(parameterType)
 	}
 	for _, resource := range function.Resources {
 		if !e.supportedNeedsDropType(resource.Type) {
@@ -1569,7 +1578,8 @@ func (e *emitter) recordTrapCategories(function string, categories []string) err
 func (e *emitter) emitPreamble(output *strings.Builder) error {
 	fmt.Fprintf(output, "/* fairyc constrained C transport: %s, ISO C11 */\n", target.X8664LinuxGNU)
 	output.WriteString("#include <stdint.h>\n")
-	if len(e.structTypes) != 0 || len(e.resourceTypes) != 0 {
+	_, usesCSizeT := e.features["c-size-t"]
+	if len(e.structTypes) != 0 || len(e.resourceTypes) != 0 || usesCSizeT {
 		output.WriteString("#include <stddef.h>\n")
 	}
 	if e.needsBitcast {
@@ -1579,6 +1589,11 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 	if _, used := e.features["c-int"]; used {
 		fmt.Fprintf(output, "_Static_assert(sizeof(int) == UINT64_C(%d), \"fairyc target c.int size\");\n", e.cIntLayout.SizeBytes)
 		fmt.Fprintf(output, "_Static_assert(_Alignof(int) == UINT64_C(%d), \"fairyc target c.int alignment\");\n\n", e.cIntLayout.AlignmentBytes)
+	}
+	if usesCSizeT {
+		fmt.Fprintf(output, "_Static_assert(sizeof(size_t) == UINT64_C(%d), \"fairyc target c.size_t size\");\n", e.cSizeTLayout.SizeBytes)
+		fmt.Fprintf(output, "_Static_assert(_Alignof(size_t) == UINT64_C(%d), \"fairyc target c.size_t alignment\");\n", e.cSizeTLayout.AlignmentBytes)
+		output.WriteString("_Static_assert(((size_t)-1) > (size_t)0, \"fairyc target c.size_t unsigned\");\n\n")
 	}
 	for index, structure := range e.structTypes {
 		if structure.definition.ReprC {

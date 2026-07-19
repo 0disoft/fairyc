@@ -183,6 +183,8 @@ func cScalarSpelling(name string) (string, bool) {
 		return "signed char", true
 	case "c.short":
 		return "short", true
+	case "c.size_t":
+		return "size_t", true
 	case "c.uchar":
 		return "unsigned char", true
 	case "c.uint":

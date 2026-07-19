@@ -126,6 +126,51 @@ fn main() -> i32 { unsafe { consume_c_int(make_c_int()) } }
 	}
 }
 
+func TestEmitDistinctCSizeTForeignTransport(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+@link_name("fairyc_fixture_make_c_size_t")
+unsafe extern C fn make_c_size_t() -> c::size_t;
+@link_name("fairyc_fixture_consume_c_size_t")
+unsafe extern C fn consume_c_size_t(value: c::size_t) -> i32;
+fn main() -> i32 { unsafe { consume_c_size_t(make_c_size_t()) } }
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, required := range []string{
+		"#include <stddef.h>",
+		"_Static_assert(sizeof(size_t) == UINT64_C(8), \"fairyc target c.size_t size\");",
+		"_Static_assert(_Alignof(size_t) == UINT64_C(8), \"fairyc target c.size_t alignment\");",
+		"_Static_assert(((size_t)-1) > (size_t)0, \"fairyc target c.size_t unsigned\");",
+		"extern size_t fairyc_fixture_make_c_size_t(void);",
+		"extern int32_t fairyc_fixture_consume_c_size_t(size_t fy_a_0);",
+		"fairyc_fixture_consume_c_size_t(fy_l_",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+	if !slices.Contains(unit.Features, "c-size-t") || strings.Contains(unit.Source, "uintptr_t fairyc_fixture_make_c_size_t") || strings.Contains(unit.Source, "fairyc_fixture_consume_c_size_t(uintptr_t") {
+		t.Fatalf("generated C erased c::size_t identity:\n%s", unit.Source)
+	}
+}
+
+func TestEmitKeepsCScalarPointersOutsideByValueTransportSlice(t *testing.T) {
+	t.Parallel()
+	for _, typeRef := range []string{"c::int", "c::size_t"} {
+		t.Run(typeRef, func(t *testing.T) {
+			program := lowerSource(t, "module main;\nunsafe extern C fn consume_pointer(value: *"+typeRef+") -> i32;\nfn main() -> i32 { unsafe { consume_pointer(null) } }\n")
+			_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+			var capability cbackend.CapabilityError
+			if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "foreign raw-pointer element type \""+typeRef+"\"") {
+				t.Fatalf("Emit() error = %v", err)
+			}
+		})
+	}
+}
+
 func TestEmitRawPointerAndTargetScalarForeignCall(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main;\nunsafe extern C fn foreign_probe(data: *u8, output: *mut u32, length: usize, marker: u8) -> u32;\nfn main() -> i32 { if unsafe { foreign_probe(null, null, 0, 7) } == 42 { 0 } else { 1 } }\n")

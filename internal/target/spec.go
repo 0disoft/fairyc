@@ -105,6 +105,7 @@ var x8664LinuxGNUSpec = Spec{
 		{Name: "c.longlong", Layout: Layout{SizeBytes: 8, AlignmentBytes: 8}, Signedness: "signed"},
 		{Name: "c.schar", Layout: Layout{SizeBytes: 1, AlignmentBytes: 1}, Signedness: "signed"},
 		{Name: "c.short", Layout: Layout{SizeBytes: 2, AlignmentBytes: 2}, Signedness: "signed"},
+		{Name: "c.size_t", Layout: Layout{SizeBytes: 8, AlignmentBytes: 8}, Signedness: "unsigned"},
 		{Name: "c.uchar", Layout: Layout{SizeBytes: 1, AlignmentBytes: 1}, Signedness: "unsigned"},
 		{Name: "c.uint", Layout: Layout{SizeBytes: 4, AlignmentBytes: 4}, Signedness: "unsigned"},
 		{Name: "c.ulong", Layout: Layout{SizeBytes: 8, AlignmentBytes: 8}, Signedness: "unsigned"},

@@ -88,6 +88,30 @@ func TestForeignCIntCallSmokeSourceReachesCEmission(t *testing.T) {
 	}
 }
 
+func TestForeignCSizeTCallSmokeSourceReachesCEmission(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "main.fy"), []byte(foreignCSizeTCallSmokeSource), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	code := cli.Run([]string{"experimental", "emit-c", "main.fy"}, root, &stdout, &stderr)
+	if code != cli.ExitSuccess || stderr.Len() != 0 {
+		t.Fatalf("foreign c::size_t call C emission = code %d, stderr %q", code, stderr.String())
+	}
+	for _, required := range []string{
+		"#include <stddef.h>",
+		"_Static_assert(sizeof(size_t) == UINT64_C(8), \"fairyc target c.size_t size\");",
+		"extern size_t fairyc_fixture_make_c_size_t(void);",
+		"extern int32_t fairyc_fixture_consume_c_size_t(size_t fy_a_0);",
+	} {
+		if !strings.Contains(stdout.String(), required) {
+			t.Errorf("foreign c::size_t call C emission is missing %q", required)
+		}
+	}
+}
+
 func TestTextValidationSourceCallSmokeReachesCEmission(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
@@ -139,7 +163,7 @@ func TestTextViewOutputSourceCallSmokeReachesCEmission(t *testing.T) {
 
 func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 	t.Parallel()
-	if reportSchemaVersion != "fairyc.native-c-report/v16" {
+	if reportSchemaVersion != "fairyc.native-c-report/v17" {
 		t.Fatalf("report schema = %q", reportSchemaVersion)
 	}
 	encoded, err := json.Marshal(Report{
@@ -156,6 +180,7 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		LinuxFileExecutions:                4,
 		ForeignCallExecutions:              4,
 		ForeignCIntCallExecutions:          4,
+		ForeignCSizeTCallExecutions:        4,
 		ForeignPointerCallExecutions:       4,
 		TextValidationSourceCallExecutions: 4,
 		TextViewOutputSourceCallExecutions: 4,
@@ -163,7 +188,7 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v16"`) ||
+	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v17"`) ||
 		!strings.Contains(string(encoded), `"dropTraceExecutions":72`) ||
 		!strings.Contains(string(encoded), `"layoutCases":["pass.array-i32-three","pass.pointer"]`) ||
 		!strings.Contains(string(encoded), `"layoutProbeExecutions":4`) ||
@@ -180,6 +205,7 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		!strings.Contains(string(encoded), `"linuxFileExecutions":4`) ||
 		!strings.Contains(string(encoded), `"foreignCallExecutions":4`) ||
 		!strings.Contains(string(encoded), `"foreignCIntCallExecutions":4`) ||
+		!strings.Contains(string(encoded), `"foreignCSizeTCallExecutions":4`) ||
 		!strings.Contains(string(encoded), `"foreignPointerCallExecutions":4`) ||
 		!strings.Contains(string(encoded), `"textValidationSourceCallExecutions":4`) ||
 		!strings.Contains(string(encoded), `"textViewOutputSourceCallExecutions":4`) {
@@ -230,12 +256,13 @@ func TestGenerateLayoutProbeFromRepositoryFixtures(t *testing.T) {
 	if err != nil || repeated.Source != unit.Source || !slices.Equal(repeated.Cases, unit.Cases) {
 		t.Fatalf("repeated layout probe drifted: %v", err)
 	}
-	if unit.Target != target.X8664LinuxGNU || len(unit.Cases) != 9 || !strings.HasSuffix(unit.Source, "int main(void) { return 0; }\n") {
+	if unit.Target != target.X8664LinuxGNU || len(unit.Cases) != 10 || !strings.HasSuffix(unit.Source, "int main(void) { return 0; }\n") {
 		t.Fatalf("layout probe unit = %+v", unit)
 	}
 	for _, required := range []string{
 		"typedef int32_t",
 		"typedef long",
+		"typedef size_t",
 		"typedef void *",
 		"typedef void (*",
 		"_Static_assert(sizeof(",

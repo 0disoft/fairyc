@@ -15,6 +15,7 @@ const (
 	TypeU32     Type = "u32"
 	TypeUSize   Type = "usize"
 	TypeCInt    Type = "c::int"
+	TypeCSizeT  Type = "c::size_t"
 	TypeRegion  Type = "Region"
 )
 

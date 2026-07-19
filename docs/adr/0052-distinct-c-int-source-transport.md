@@ -35,9 +35,9 @@ plain-`char`, width, literal, and arithmetic contracts.
    and expects four Clang/GCC low/optimized executions. `fairyc.native-c-report/v16` adds
    `foreignCIntCallExecutions`; the eighteen production emission cases and their 72/36 execution
    counts do not change.
-7. `c::size_t` remains a later ISO C typedef/header slice and must not alias `usize` or
-   `uintptr_t`. `c::ssize_t` remains a later target-library/POSIX slice and must not alias
-   `isize` or `intptr_t`.
+7. `c::size_t` remains a later ISO C typedef/header slice in this decision and must not alias
+   `usize` or `uintptr_t`; ADR 0053 implements that independent slice. `c::ssize_t` remains a later
+   target-library/POSIX slice and must not alias `isize` or `intptr_t`.
 
 ## Consequences
 
