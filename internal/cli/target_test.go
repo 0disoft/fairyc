@@ -1,7 +1,9 @@
 package cli
 
 import (
+	"bytes"
 	"encoding/json"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -33,6 +35,61 @@ func TestExperimentalTargetSpecEmitsDeterministicHostIndependentJSON(t *testing.
 		if strings.Contains(firstOut, forbidden) {
 			t.Fatalf("target-spec output contains host-local data %q: %s", forbidden, firstOut)
 		}
+	}
+}
+
+func TestTargetsReportsKnownMaturityWithoutReadingSource(t *testing.T) {
+	t.Parallel()
+	missingRoot := filepath.Join(t.TempDir(), "missing")
+	firstCode, firstOut, firstErr := runForTest([]string{"targets"}, missingRoot)
+	secondCode, secondOut, secondErr := runForTest([]string{"targets"}, missingRoot)
+	if firstCode != ExitSuccess || secondCode != ExitSuccess || firstErr != "" || secondErr != "" {
+		t.Fatalf("Run() first=(%d, %q), second=(%d, %q)", firstCode, firstErr, secondCode, secondErr)
+	}
+	if firstOut != secondOut {
+		t.Fatalf("targets output is nondeterministic:\nfirst=%s\nsecond=%s", firstOut, secondOut)
+	}
+	want := `x86_64-linux-gnu
+  schema: fairyc.target-spec/v0
+  emission subset: scalar-and-flat-i32-resource-tagged-c11
+  emittable: no
+  conformant: no
+  supported: no
+  missing evidence:
+    - bidirectional-c-abi-fixtures
+    - c-layout-probes
+    - complete-runtime
+    - complete-standard-library
+    - hosted-linux-receipt
+    - toolchain-baseline
+    - toolchain-provisioning
+`
+	if firstOut != want {
+		t.Fatalf("targets output = %q, want %q", firstOut, want)
+	}
+	for _, forbidden := range []string{"x86_64-windows-msvc", "C:\\", "/usr/bin/", "msvc"} {
+		if strings.Contains(firstOut, forbidden) {
+			t.Fatalf("targets output contains undeclared or host-local value %q: %s", forbidden, firstOut)
+		}
+	}
+}
+
+func TestTargetsRejectsArgumentsAndHandlesHelpAndOutputFailure(t *testing.T) {
+	t.Parallel()
+	code, stdout, stderr := runForTest([]string{"targets", "x86_64-linux-gnu"}, t.TempDir())
+	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "does not accept arguments") {
+		t.Fatalf("targets argument = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+	for _, flag := range []string{"-h", "--help"} {
+		code, stdout, stderr = runForTest([]string{"targets", flag}, t.TempDir())
+		if code != ExitSuccess || !strings.Contains(stdout, "fairyc targets") || stderr != "" {
+			t.Fatalf("targets %s = code %d, stdout %q, stderr %q", flag, code, stdout, stderr)
+		}
+	}
+	var failure bytes.Buffer
+	code = Run([]string{"targets"}, t.TempDir(), failingWriter{}, &failure)
+	if code != ExitInternalFailure || !strings.Contains(failure.String(), "write output failed") {
+		t.Fatalf("targets output failure = code %d, stderr %q", code, failure.String())
 	}
 }
 

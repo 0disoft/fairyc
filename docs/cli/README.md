@@ -20,7 +20,8 @@ Only `check`, a minimal `build`, compiler inspection, and semantic test executio
 ## Current prototype
 
 The Go frontend currently exposes the source-independent
-`fairyc explain <diagnostic-code>` lookup plus `fairyc experimental parse <file.fy>`,
+`fairyc explain <diagnostic-code>` lookup, the host-independent `fairyc targets` maturity report,
+plus `fairyc experimental parse <file.fy>`,
 `fairyc experimental check-syntax <file.fy>`, and
 `fairyc experimental check-semantics <file.fy> [<file.fy>...]`. The compiler prototype also exposes
 `fairyc experimental target-spec x86_64-linux-gnu` for deterministic host-independent target
@@ -100,6 +101,13 @@ current directory. It performs no toolchain discovery, target probe, process exe
 request, or write. The output explicitly marks the catalog provisional; a successful lookup does
 not claim that the diagnostic is implemented, fixture-backed, released, or stable. Listing, fuzzy
 search, JSON, localization, and repair guidance remain unimplemented.
+
+`fairyc targets` accepts no arguments and deterministically lists every declared TargetSpec with
+its schema, admitted emission subset, independent `emittable`, `conformant`, and `supported` states,
+and sorted missing evidence. It reads no source or configuration and performs no host, toolchain,
+SDK, sysroot, WSL, process, network, or write operation. The target-neutral Windows MSVC smoke is
+not a TargetSpec and therefore does not appear as `x86_64-windows-msvc`. JSON, filters, target
+selection, and release-stable output remain unimplemented.
 
 Human developers can run the examples shown in the repository `README.md`. Agent verification uses
 the configured `fairyc_go_build`, `fairyc_go_vet`, and `fairyc_go_test` intents; the manual `go run`

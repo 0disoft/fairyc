@@ -167,7 +167,8 @@ source-linked resource-drop sequences. Product emission and product builds conta
 this Windows host because no WSL distribution or Linux Clang/GCC execution environment is installed, and its hosted CI result
 has not yet been observed. The target therefore remains unsupported.
 A provisional source-independent `fairyc explain <diagnostic-code>` lookup reports reserved Stage 0
-meanings and categories without reading source or invoking a toolchain. An unstable
+meanings and categories without reading source or invoking a toolchain. A provisional `fairyc targets`
+report lists declared target maturity and missing evidence without probing this Windows host. An unstable
 `fairyc experimental` CLI can inspect syntax, syntax-check, semantic-check, emit the
 scalar, flat-resource, and resource-tagged C11 translation unit, build that subset into a Linux executable on an eligible host,
 inspect the declared target specification, or interpret one source-root-relative `.fy` file, while semantic checking also
@@ -181,6 +182,7 @@ The following commands are manual developer examples, not agent command authorit
 
 ```text
 go run ./cmd/fairyc explain E1101
+go run ./cmd/fairyc targets
 go run ./cmd/fairyc experimental check-syntax examples/syntax/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/syntax/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/semantic/main.fy examples/semantic/math.fy
@@ -198,8 +200,9 @@ go run ./cmd/fairyc experimental run examples/run/resource_option.fy
 go run ./cmd/fairyc experimental parse examples/syntax/main.fy
 ```
 
-`explain` does not read the current directory or source tree and marks its diagnostic catalog as
-provisional. The experimental source commands treat the current directory as the temporary source
+`explain` and `targets` do not read the current directory or source tree. The former marks its
+diagnostic catalog as provisional; the latter reports declared TargetSpec evidence without probing
+local MSVC, SDK, WSL, or any other toolchain. The experimental source commands treat the current directory as the temporary source
 root. `parse` emits versioned,
 deterministic JSON containing token and CST kinds and byte spans, but not source text, token text,
 literal values, or absolute paths. `check-semantics` accepts an explicit bounded list of source files

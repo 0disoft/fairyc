@@ -21,6 +21,19 @@ fixture-backed, released, or stable. JSON output, listing, fuzzy search, localiz
 guidance remain unimplemented. Phase 3 still owns release stabilization of this command and the
 broader CLI.
 
+## Implemented target maturity surface
+
+`fairyc targets` is implemented as a provisional, source-independent human report over the
+validated values returned by `target.All()`. It accepts no arguments. For every target in canonical
+ID order it writes the TargetSpec schema, admitted emission subset, independent `emittable`,
+`conformant`, and `supported` yes/no states, and the sorted missing-evidence markers.
+
+The command performs no source or configuration read, directory scan, executable lookup, toolchain,
+SDK, sysroot, or WSL probe, process execution, network request, or write. It reports declared target
+contracts rather than local host capabilities, so the Windows MSVC host smoke does not create an
+`x86_64-windows-msvc` entry. JSON, filtering, target selection, and release-stable output remain
+unimplemented; Phase 3 still owns stabilization.
+
 ## Implemented experimental compiler surface
 
 The current Go prototype implements nine deliberately unstable developer commands:

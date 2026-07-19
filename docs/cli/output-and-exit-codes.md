@@ -24,8 +24,8 @@ This repository type owns command behavior, arguments, flags, config loading, ex
 
 ## Prototype frontend v0
 
-The implemented `fairyc explain` and `fairyc experimental` commands use provisional process codes
-only for prototype automation. They are not the stable exit-code taxonomy:
+The implemented `fairyc explain`, `fairyc targets`, and `fairyc experimental` commands use
+provisional process codes only for prototype automation. They are not the stable exit-code taxonomy:
 
 | Code | Prototype meaning |
 | ---: | --- |
@@ -42,6 +42,12 @@ It reads no source or configuration and has no filesystem, process, network, too
 write side effect. Missing, extra, malformed, and unknown codes use code `2` with empty stdout.
 Output-write failure uses code `4`. The successful output reserves a prototype meaning and does not
 claim implementation, fixture coverage, release, or stability.
+
+`fairyc targets` writes one deterministic, ANSI-free human block per validated TargetSpec in
+canonical ID order. Each block includes schema, emission subset, three independent maturity states,
+and sorted missing-evidence markers. The command accepts no arguments and has no source,
+configuration, filesystem, process, network, toolchain, target-probe, WSL, or write side effect.
+Unexpected arguments use code `2`; output-write failure uses code `4`.
 
 `experimental parse` writes one `fairyc.experimental.parse/v0` JSON document, defined by
 `spec/cli/experimental-parse-v0.schema.json`, to stdout even when source diagnostics exist.
@@ -69,7 +75,7 @@ unexpected-output, or execution failures use code `6`. It writes no persistent e
 `experimental run` writes `result: <i32>` to stdout on return, or `trap: <category>` to stderr with
 provisional code `5` on a language trap. Its bounded `step-limit` is a capability result with code
 `2`, not a language trap. None of these commands
-uses ANSI escapes. `fairyc explain` likewise uses no ANSI escapes. Human positions are one-based line and byte-column values backed
+uses ANSI escapes. `fairyc explain` and `fairyc targets` likewise use no ANSI escapes. Human positions are one-based line and byte-column values backed
 by the diagnostic's zero-based half-open byte span.
 
 The parse JSON schema intentionally excludes source text, token text, cooked literal values, and

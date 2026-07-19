@@ -292,6 +292,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - The experimental target-inspection command emits that target description without probing the
   host. It reports `scalar-and-flat-i32-resource-tagged-c11` separately while keeping `emittable`,
   `conformant`, and `supported` false and listing the evidence still missing.
+- The provisional top-level `targets` command renders every validated TargetSpec in canonical ID
+  order with its schema, admitted emission subset, independent maturity states, and sorted missing
+  evidence. It performs no host or toolchain probe, and the target-neutral Windows MSVC smoke does
+  not create a Windows target entry.
 - The experimental single-file build command uses the same bounded C driver and embedded scalar
   runtime to produce a no-overwrite executable below `build/` on an eligible host. This artifact
   path does not expand the constrained backend subset, establish stable build syntax, or change target

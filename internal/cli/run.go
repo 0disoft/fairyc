@@ -31,6 +31,7 @@ const usage = `Fairy C Stage 0 compiler prototype
 
 Usage:
   fairyc explain <diagnostic-code>
+  fairyc targets
   fairyc experimental parse <file.fy>
   fairyc experimental check-syntax <file.fy>
   fairyc experimental check-semantics <file.fy> [<file.fy>...]
@@ -62,6 +63,12 @@ func Run(args []string, sourceRoot string, stdout, stderr io.Writer) int {
 			return writeHelp(stdout, stderr)
 		}
 		return runExplain(args[1:], stdout, stderr)
+	}
+	if args[0] == "targets" {
+		if len(args) == 2 && (args[1] == "-h" || args[1] == "--help") {
+			return writeHelp(stdout, stderr)
+		}
+		return runTargets(args[1:], stdout, stderr)
 	}
 	if args[0] == "check" {
 		return invocationError(stderr, `"check" is reserved for the full semantic pipeline; use "experimental check-syntax" for parser-only validation`)
