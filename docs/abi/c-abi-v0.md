@@ -206,20 +206,20 @@ closed subset only. It does not prove source-level Fairy lowering, an independen
 register-level oracle, exact stack/shadow-store placement, complete PE/COFF object or unwind
 metadata, or hosted evidence.
 
-The Windows host smoke additionally parses all seven linked executable images without invoking the
-host loader as the parser. The product image plus both profiles of the layout, ABI, and unwind probes must be
+The Windows smoke additionally parses all eight linked executable images without invoking the host
+loader as the parser. The target-neutral product, declared-target product, plus both profiles of the layout, ABI, and unwind probes must be
 bounded AMD64 PE32+ large-address-aware non-DLL console images with aligned headers and sections, a
 readable executable `.text` section, and an entry point inside executable code. Import and exception
 directory presence is recorded but their payloads are not interpreted. This is executable-image
-structure evidence only, not COFF object symbol/relocation, `.pdata`/`.xdata`, CodeView/PDB, target
-emission, or distribution conformance.
+structure evidence only, not COFF object symbol/relocation, `.pdata`/`.xdata`, CodeView/PDB, or
+distribution conformance.
 
 Before returning any linked Windows artifact, the shared C driver now parses every intermediate
 MSVC `.obj` as raw AMD64 COFF. It rejects optional PE headers and linked-image flags; requires
 bounded raw and relocation ranges, readable executable `.text` or `.text$...` code, valid
 relocation symbol indexes, and named symbols; and permits storage-free uninitialized `.bss` only
-when its section characteristic says so. This covers every `build-host`, `run-host`, layout-probe,
-ABI-probe, and unwind-probe compilation in the local smoke. It still does not define exact exported/imported
+when its section characteristic says so. This covers every `build-host`, `build-target`, `run-host`,
+layout-probe, ABI-probe, and unwind-probe compilation in the local smoke. It still does not define exact exported/imported
 symbols, COMDAT selection, permitted relocation types, `.pdata`/`.xdata` content, or a hosted
 object-fixture receipt, so `pe-coff-object-fixtures` remains missing.
 
@@ -248,11 +248,13 @@ lists the missing hosted native C layout-probe receipt, bidirectional ABI, runti
 baseline, and provisioning gates. `fairyc experimental target-spec x86_64-linux-gnu` exposes that
 same immutable data without probing the host.
 
-The Windows evidence block reports no target emission subset and keeps all maturity booleans false.
-It lists the still-incomplete LLP64 layout-probe evidence, complete bidirectional source-level and
+The Windows evidence block reports `scalar-and-llp64-c-scalar-c11` while keeping all maturity
+booleans false. `Stage0WindowsMSVCProfile` binds generated C to the Windows TargetSpec, emits
+four-byte `c::long` assertions, rejects unavailable `c::ssize_t`, and is executed through the
+checked-in `build-target` example. It lists the still-incomplete LLP64 layout-probe evidence, complete bidirectional source-level and
 independently inspected Microsoft x64 crossings,
 PE/COFF object and unwind fixtures, runtime, standard library, hosted
-Windows receipt, target C emission profile, toolchain baseline, and provisioning gates. The local
+Windows receipt, toolchain baseline, and provisioning gates. The local
 eight-case layout probe, twelve-case same-MSVC C crossing, and three-case native unwind probe are
 deliberately insufficient to clear those markers.
 

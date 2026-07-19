@@ -37,7 +37,7 @@ stabilization.
 
 ## Implemented experimental compiler surface
 
-The current Go prototype implements nine deliberately unstable developer commands:
+The current Go prototype implements ten deliberately unstable developer commands:
 
 | Command | Purpose | Output |
 | --- | --- | --- |
@@ -47,6 +47,7 @@ The current Go prototype implements nine deliberately unstable developer command
 | `fairyc experimental target-spec <x86_64-linux-gnu\|x86_64-windows-msvc>` | Inspect one known host-independent target description without resolving a local toolchain | Deterministic `fairyc.target-spec/v0` JSON on stdout, defined by `spec/cli/experimental-target-spec-v0.schema.json` |
 | `fairyc experimental emit-c <file.fy>` | Lower one scalar, restricted inert user-enum, bounded optionally `@link_name`-mapped `unsafe extern C fn` using admitted fixed-width, pointer-width, any of the sixteen exact transport-only TargetSpec C scalars, admitted raw pointers including opaque `void` and one pointer-to-opaque-pointer output slot, or nonempty acyclic `@repr(C)` pointer values whose fields may include exact C scalars or nested `@repr(C)` records, exact direct-local raw address, flat all-`i32` resource, or admitted resource-bearing built-in tag program through verified MIR and emit the provisional constrained C transport without invoking a toolchain | Exactly one deterministic C11 translation unit, with an explicit POSIX.1-2008 typedef profile only when required, on stdout; source diagnostics or capability errors on stderr |
 | `fairyc experimental build <file.fy> --cc <clang\|gcc> --profile <low\|optimized> --output <build/path>` | Compile and link one verified program in that constrained subset for the host `x86_64-linux-gnu` profile with an explicit C compiler, optimization profile, and ignored output path | A no-overwrite executable below `build/` plus one relative-path receipt, or source, capability, toolchain, link, or artifact diagnostics |
+| `fairyc experimental build-target <file.fy> --target x86_64-windows-msvc --profile <low\|optimized> --output <build/path.exe>` | Emit one verified program through the provisional Windows MSVC C profile, resolve local x64 MSVC, and retain one target-labelled PE | A no-overwrite `.exe` below `build/` plus one `x86_64-windows-msvc` receipt, or source, target-subset, toolchain, compile, link, or artifact diagnostics |
 | `fairyc experimental build-host <file.fy> --profile <low\|optimized> --output <build/path.exe>` | On Windows/amd64, compile one target-neutral verified program with locally discovered x64 MSVC and retain its PE without declaring a Windows target ABI | A no-overwrite `.exe` below `build/` plus a host-smoke receipt, or bounded source, capability, toolchain, compile, or artifact diagnostics |
 | `fairyc experimental run-host <file.fy> --profile <low\|optimized>` | On Windows/amd64, compile and execute one target-neutral verified program with locally discovered x64 MSVC without declaring a Windows target ABI | `native result: <i32> (windows/amd64 host-smoke, msvc <version>, <profile>)`, a canonical trap, or bounded source, capability, toolchain, compile, or execution diagnostics |
 | `fairyc experimental run <file.fy>` | Run one verified-MIR program in the scalar, tagged, whole-resource, and implemented Region subset whose selected module declares `main() -> i32` | `result: <i32>` on stdout, a canonical trap category on stderr, source diagnostics, or an explicit unsupported-subset error |
@@ -141,6 +142,15 @@ and foreign calls or results because the declared `x86_64-windows-msvc` TargetSp
 target C-emission profile, executable layout/ABI evidence, runtime, or standard library. Neither
 uses WSL or inherits a Developer Command Prompt, and a retained host-smoke PE is
 not a supported distribution artifact or Windows conformance evidence.
+
+`experimental build-target` is the first command that consumes the declared Windows TargetSpec
+instead of borrowing the Linux emission profile. The current closed subset admits ordinary scalar
+programs and target C-scalar declarations that the Windows profile actually provides. Emitted
+`c::long` assertions require the four-byte LLP64 layout while `c::ssize_t` fails as unavailable
+before C is emitted. Called foreign symbols, companion objects, provisional standard-library
+components, user linker inputs, debug/PDB output contracts, and distribution packaging remain
+closed. The command accepts only the exact Windows target ID, low or optimized profile, and a
+canonical no-overwrite `.exe` path under `build/`; it does not use WSL.
 
 For the admitted foreign-call slice, `emit-c` writes a plain external prototype and call using the
 declaration name by default or its single validated `@link_name` string. Compatible mappings to one

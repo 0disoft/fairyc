@@ -62,6 +62,7 @@ fn main() -> i32 {
 `
 
 const checkedInSuccessPath = "examples/windows_smoke/main.fy"
+const checkedInWindowsTargetPath = "examples/windows_target/main.fy"
 const windowsLayoutManifestPath = "spec/fixtures/layout/manifest-windows-msvc-v0.json"
 const windowsABIManifestPath = "spec/fixtures/c-abi/manifest-windows-msvc-v0.json"
 
@@ -77,6 +78,10 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("read checked-in Windows smoke source: %w", err)
 	}
+	windowsTargetSource, err := os.ReadFile(filepath.FromSlash(checkedInWindowsTargetPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in Windows target source: %w", err)
+	}
 	root, err := os.MkdirTemp("", "fairyc-windows-host-smoke-")
 	if err != nil {
 		return fmt.Errorf("create temporary source root: %w", err)
@@ -84,6 +89,7 @@ func run() error {
 	defer os.RemoveAll(root)
 	for name, source := range map[string]string{
 		checkedInSuccessPath:          string(successSource),
+		checkedInWindowsTargetPath:    string(windowsTargetSource),
 		"negative.fy":                 negativeSource,
 		"division_by_zero.fy":         divisionByZeroSource,
 		"remainder_by_zero.fy":        remainderByZeroSource,
@@ -124,6 +130,31 @@ func run() error {
 	}
 	if err := executeExpectResult(artifactPath, 42); err != nil {
 		return err
+	}
+
+	var targetBuildStdout bytes.Buffer
+	var targetBuildStderr bytes.Buffer
+	targetBuildCode := cli.Run([]string{
+		"experimental", "build-target", checkedInWindowsTargetPath,
+		"--target", "x86_64-windows-msvc", "--profile", "optimized",
+		"--output", "build/windows-target.exe",
+	}, root, &targetBuildStdout, &targetBuildStderr)
+	if targetBuildCode != cli.ExitSuccess || targetBuildStderr.Len() != 0 || !strings.HasPrefix(targetBuildStdout.String(), "built: build/windows-target.exe (x86_64-windows-msvc, msvc ") {
+		return fmt.Errorf("build-target returned code %d, stdout %q, stderr %q", targetBuildCode, targetBuildStdout.String(), targetBuildStderr.String())
+	}
+	targetArtifactPath := filepath.Join(root, "build", "windows-target.exe")
+	targetArtifact, err := os.ReadFile(targetArtifactPath)
+	if err != nil {
+		return fmt.Errorf("read build-target artifact: %w", err)
+	}
+	if _, err := pecoff.InspectExecutable(targetArtifact); err != nil {
+		return fmt.Errorf("inspect build-target PE executable image: %w", err)
+	}
+	if _, err := pecoff.InspectAMD64Unwind(targetArtifact); err != nil {
+		return fmt.Errorf("inspect build-target Microsoft x64 unwind data: %w", err)
+	}
+	if err := executeExpectResult(targetArtifactPath, 42); err != nil {
+		return fmt.Errorf("execute build-target artifact: %w", err)
 	}
 
 	for _, testCase := range []struct {
@@ -169,7 +200,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, 14 run-host outcomes covered signed results and four arithmetic trap categories, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ executable images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, layoutCases, layoutExecutions, abiCases, abiExecutions, unwindCases, unwindExecutions, 1+layoutExecutions+abiExecutions+unwindExecutions, toolchain.Version)
+	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, 1 source-level Windows target build checked LLP64 c.long emission and native result 42, 14 run-host outcomes covered signed results and four arithmetic trap categories, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ executable images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, layoutCases, layoutExecutions, abiCases, abiExecutions, unwindCases, unwindExecutions, 2+layoutExecutions+abiExecutions+unwindExecutions, toolchain.Version)
 	return nil
 }
 

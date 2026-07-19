@@ -68,7 +68,7 @@ func TestTargetsReportsKnownMaturityWithoutReadingSource(t *testing.T) {
 
 x86_64-windows-msvc
   schema: fairyc.target-spec/v0
-  emission subset: none
+  emission subset: scalar-and-llp64-c-scalar-c11
   emittable: no
   conformant: no
   supported: no
@@ -79,7 +79,6 @@ x86_64-windows-msvc
     - complete-standard-library
     - hosted-windows-receipt
     - pe-coff-object-fixtures
-    - target-c-emission-profile
     - toolchain-baseline
     - toolchain-provisioning
     - windows-x64-unwind-fixtures

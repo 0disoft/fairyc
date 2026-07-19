@@ -89,8 +89,12 @@ Separate WSL-free `experimental run-host` and `experimental build-host` commands
 target-neutral verified `.fy` program through generated C into an x64 MSVC PE. The first executes and
 removes a temporary image; the second retains one no-overwrite `.exe` under `build/`. Both reject
 FFI, `@repr(C)`, exact `c::*` values, and provisional standard-library calls, so they provide local
-source-to-native use without pretending that the declared Windows TargetSpec has an emission
-profile, ABI evidence, distributable artifact, or self-hosted compiler.
+source-to-native use without pretending that the host-smoke artifact is a Windows target result.
+The distinct `experimental build-target` command now consumes the declared
+`x86_64-windows-msvc` profile, emits LLP64-aware C11, and retains one target-labelled PE. Its
+checked-in source proves four-byte `c::long` emission and native result 42 without permitting called
+foreign symbols, companion objects, Windows standard-library linkage, distribution support, or
+self-hosting.
 A provisional `x86_64-linux-gnu` SystemHeap implementation now lives in the target standard-library
 boundary rather than the thin runtime. It normalizes empty allocation, admits current fundamental
 alignments, preserves bytes across copy-and-release growth or shrink, and leaves the old block
@@ -181,7 +185,8 @@ translation units at both profiles. A third three-object probe raises and catche
 exception, virtual-walks raiser, termination, and catcher frames, and requires one abnormal
 `__finally` execution under both profiles. The target marker remains missing until broader layout
 and independent/source-level/hosted ABI and unwind evidence exists. A host-independent PE parser
-now validates the product image plus all six probe images as bounded AMD64 PE32+ console executables
+now validates the host-smoke product, declared-target product, and all six probe images as bounded
+AMD64 PE32+ console executables
 with aligned headers and sections and an executable `.text` entry point. That linked-image path does not inspect
 object symbols, relocations, or Windows unwind records. The same package separately parses every
 intermediate MSVC `.obj` before its temporary build root is removed. It requires raw AMD64 COFF,
@@ -220,6 +225,7 @@ go run ./cmd/fairyc explain E1101
 go run ./cmd/fairyc targets
 go run ./cmd/fairyc experimental run-host examples/windows_smoke/main.fy --profile optimized
 go run ./cmd/fairyc experimental build-host examples/windows_smoke/main.fy --profile optimized --output build/fairyc-windows-smoke.exe
+go run ./cmd/fairyc experimental build-target examples/windows_target/main.fy --target x86_64-windows-msvc --profile optimized --output build/fairyc-windows-target.exe
 go run ./cmd/fairyc experimental check-syntax examples/syntax/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/syntax/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/semantic/main.fy examples/semantic/math.fy

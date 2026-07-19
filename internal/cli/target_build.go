@@ -1,0 +1,134 @@
+package cli
+
+import (
+	"errors"
+	"fmt"
+	"io"
+	"strings"
+
+	"github.com/0disoft/fairyc/internal/cbackend"
+	"github.com/0disoft/fairyc/internal/cdriver"
+	"github.com/0disoft/fairyc/internal/target"
+)
+
+type targetBuildOptions struct {
+	source   string
+	targetID target.ID
+	profile  cdriver.Profile
+	output   string
+}
+
+func runTargetBuild(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
+	options, err := parseTargetBuildOptions(arguments)
+	if err != nil {
+		return invocationError(stderr, err.Error())
+	}
+	lowered, code := lowerSingleProgram(options.source, sourceRoot, stderr, "Windows target C-emission")
+	if code != ExitSuccess {
+		return code
+	}
+	unit, err := cbackend.Emit(lowered.program, lowered.entryName, cbackend.Stage0WindowsMSVCProfile())
+	if err != nil {
+		var capability cbackend.CapabilityError
+		if errors.As(err, &capability) {
+			return subsetCapabilityError(stderr, "Windows target C-emission", capability)
+		}
+		return internalError(stderr)
+	}
+	if err := validateWindowsTargetUnit(unit); err != nil {
+		return subsetCapabilityError(stderr, "Windows target build", err)
+	}
+	runtimeSource, err := productSupportSource(nil)
+	if err != nil {
+		return internalError(stderr)
+	}
+	toolchain, err := cdriver.ResolveWindowsHostMSVC()
+	if err != nil {
+		return buildFailure(stderr, err)
+	}
+	artifact, err := cdriver.BuildWindowsMSVCTarget(toolchain, options.profile, unit.Source, runtimeSource)
+	if err != nil {
+		return buildFailure(stderr, err)
+	}
+	if err := writeBuildArtifact(sourceRoot, options.output, artifact.Bytes); err != nil {
+		return buildFailure(stderr, err)
+	}
+	if _, err := fmt.Fprintf(
+		stdout,
+		"built: %s (%s, msvc %s, %s)\n",
+		options.output,
+		options.targetID,
+		artifact.Toolchain.Version,
+		artifact.Profile.Name,
+	); err != nil {
+		return outputError(stderr)
+	}
+	return ExitSuccess
+}
+
+func parseTargetBuildOptions(arguments []string) (targetBuildOptions, error) {
+	if len(arguments) == 0 {
+		return targetBuildOptions{}, fmt.Errorf("experimental command \"build-target\" expects one source file and explicit --target, --profile, and --output values")
+	}
+	options := targetBuildOptions{source: arguments[0]}
+	if options.source == "" || strings.HasPrefix(options.source, "-") {
+		return targetBuildOptions{}, fmt.Errorf("experimental command \"build-target\" expects the source file before its flags")
+	}
+	seen := make(map[string]bool, 3)
+	for index := 1; index < len(arguments); {
+		flag := arguments[index]
+		if flag != "--target" && flag != "--profile" && flag != "--output" {
+			return targetBuildOptions{}, fmt.Errorf("experimental command \"build-target\" does not accept flag %q", flag)
+		}
+		if seen[flag] {
+			return targetBuildOptions{}, fmt.Errorf("experimental command \"build-target\" received %s more than once", flag)
+		}
+		if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
+			return targetBuildOptions{}, fmt.Errorf("experimental command \"build-target\" requires a value for %s", flag)
+		}
+		seen[flag] = true
+		value := arguments[index+1]
+		switch flag {
+		case "--target":
+			if target.ID(value) != target.X8664WindowsMSVC {
+				return targetBuildOptions{}, fmt.Errorf("experimental build-target currently requires --target %s", target.X8664WindowsMSVC)
+			}
+			options.targetID = target.X8664WindowsMSVC
+		case "--profile":
+			switch value {
+			case cdriver.LowProfile.Name:
+				options.profile = cdriver.LowProfile
+			case cdriver.OptimizedProfile.Name:
+				options.profile = cdriver.OptimizedProfile
+			default:
+				return targetBuildOptions{}, fmt.Errorf("experimental command \"build-target\" requires --profile low or --profile optimized")
+			}
+		case "--output":
+			normalized, err := validateBuildOutput(value)
+			if err != nil {
+				return targetBuildOptions{}, err
+			}
+			if !strings.HasSuffix(strings.ToLower(normalized), ".exe") {
+				return targetBuildOptions{}, fmt.Errorf("experimental build-target Windows output must end with .exe")
+			}
+			options.output = normalized
+		}
+		index += 2
+	}
+	for _, flag := range []string{"--target", "--profile", "--output"} {
+		if !seen[flag] {
+			return targetBuildOptions{}, fmt.Errorf("experimental command \"build-target\" requires %s", flag)
+		}
+	}
+	return options, nil
+}
+
+func validateWindowsTargetUnit(unit cbackend.Unit) error {
+	if unit.Target != string(target.X8664WindowsMSVC) || unit.Dialect != cbackend.DialectC11 || unit.Instrumentation != "" {
+		return fmt.Errorf("emitted unit does not use the closed Windows MSVC C11 profile")
+	}
+	if len(unit.ForeignSymbols) != 0 {
+		return fmt.Errorf("called foreign symbols require a declared Windows companion-link contract")
+	}
+	return nil
+}

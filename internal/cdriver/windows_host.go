@@ -135,6 +135,21 @@ func BuildWindowsHost(toolchain WindowsHostToolchain, profile Profile, unitSourc
 	})
 }
 
+// BuildWindowsMSVCTarget compiles a unit emitted for the declared
+// x86_64-windows-msvc profile. Local paths remain toolchain-resolution data.
+func BuildWindowsMSVCTarget(toolchain WindowsHostToolchain, profile Profile, unitSource, runtimeSource string) (WindowsHostArtifact, error) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		return WindowsHostArtifact{}, fmt.Errorf("MSVC target build requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
+	if unitSource == "" || runtimeSource == "" {
+		return WindowsHostArtifact{}, fmt.Errorf("target C unit and runtime source must be non-empty")
+	}
+	return buildWindowsMSVC(toolchain, profile, []windowsMSVCSource{
+		{Name: "unit.c", Contents: unitSource},
+		{Name: "runtime.c", Contents: runtimeSource},
+	})
+}
+
 // BuildWindowsMSVCProbe compiles one closed target-evidence probe with local x64 MSVC.
 func BuildWindowsMSVCProbe(toolchain WindowsHostToolchain, profile Profile, probeSource string) (WindowsHostArtifact, error) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {

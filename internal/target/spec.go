@@ -189,7 +189,7 @@ var x8664WindowsMSVCSpec = Spec{
 	DebugContract:     "generated-c-codeview-pdb",
 	ReprCFeatures:     slices.Clone(x8664LinuxGNUSpec.ReprCFeatures),
 	Evidence: Evidence{
-		EmissionSubset: "none",
+		EmissionSubset: "scalar-and-llp64-c-scalar-c11",
 		Missing: []string{
 			"bidirectional-c-abi-fixtures",
 			"c-layout-probes",
@@ -197,7 +197,6 @@ var x8664WindowsMSVCSpec = Spec{
 			"complete-standard-library",
 			"hosted-windows-receipt",
 			"pe-coff-object-fixtures",
-			"target-c-emission-profile",
 			"toolchain-baseline",
 			"toolchain-provisioning",
 			"windows-x64-unwind-fixtures",

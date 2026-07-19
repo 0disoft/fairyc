@@ -336,7 +336,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - The provisional top-level `targets` command renders every validated TargetSpec in canonical ID
   order with its schema, admitted emission subset, independent maturity states, and sorted missing
   evidence. It performs no host or toolchain probe. The Windows entry reports emission subset
-  `none` and remains independent from the target-neutral MSVC host smoke.
+  `scalar-and-llp64-c-scalar-c11` and remains independent from the target-neutral MSVC host smoke.
 - The experimental single-file build command uses the same bounded C driver and embedded scalar
   runtime to produce a no-overwrite executable below `build/` on an eligible host. This artifact
   path does not expand the constrained backend subset, establish stable build syntax, or change target
@@ -347,6 +347,14 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   They use no WSL and reject foreign symbols, standard-library linkage, `@repr(C)`, exact `c::*`
   scalars, and foreign calls or results. They do not establish Windows target emission, ABI,
   supported distribution artifacts, conformance, or self-hosting.
+- The distinct `experimental build-target` path selects `x86_64-windows-msvc` before C emission.
+  Its backend profile consumes Windows LLP64 scalar providers, emits the target ID in the C unit,
+  admits `c::long` as four-byte signed C `long`, and rejects unavailable POSIX `c::ssize_t`.
+  `examples/windows_target/main.fy` carries an unused `c::long` declaration so local x64 MSVC must
+  compile the target assertion before the generated PE can return 42. Called foreign symbols fail
+  before toolchain resolution because companion-link and Windows standard-library contracts remain
+  absent. This clears only the missing target C-emission-profile evidence; `emittable`,
+  `conformant`, and `supported` remain false.
 - QBE or another fast backend and LLVM require separate measured adoption decisions after MIR stability.
 - Early caching is whole-package and bounded. Function-level caching requires measured invalidation or latency pressure.
 - Development output contains intentional deliverables and small state, not an unbounded copy of every intermediate.

@@ -58,6 +58,49 @@ func TestEmitScalarControlUnit(t *testing.T) {
 	}
 }
 
+func TestEmitWindowsMSVCProfileUsesLLP64TargetFacts(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+@link_name("fairyc_unused_long")
+unsafe extern C fn unused_long(value: c::long) -> c::long;
+fn main() -> i32 { 42 }
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0WindowsMSVCProfile())
+	if err != nil {
+		t.Fatalf("Emit(Windows MSVC) error = %v", err)
+	}
+	if unit.Target != string(target.X8664WindowsMSVC) || unit.Dialect != cbackend.DialectC11 || unit.Instrumentation != "" {
+		t.Fatalf("Emit(Windows MSVC) identity = %+v", unit)
+	}
+	for _, required := range []string{
+		"/* fairyc constrained C transport: x86_64-windows-msvc, ISO C11 */",
+		"_Static_assert(sizeof(long) == UINT64_C(4), \"fairyc target c.long size\");",
+		"_Static_assert(_Alignof(long) == UINT64_C(4), \"fairyc target c.long alignment\");",
+		"extern long fairyc_unused_long(long fy_a_0);",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("Windows MSVC generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+	if strings.Contains(unit.Source, "_POSIX_C_SOURCE") || strings.Contains(unit.Source, "sys/types.h") {
+		t.Fatalf("Windows MSVC generated C leaked POSIX providers:\n%s", unit.Source)
+	}
+}
+
+func TestEmitWindowsMSVCProfileRejectsUnavailablePOSIXScalar(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+@link_name("fairyc_unused_ssize")
+unsafe extern C fn unused_ssize(value: c::ssize_t) -> c::ssize_t;
+fn main() -> i32 { 42 }
+`)
+	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0WindowsMSVCProfile())
+	var capability cbackend.CapabilityError
+	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, `C scalar "c.ssize_t" is unavailable for target "x86_64-windows-msvc"`) {
+		t.Fatalf("Emit(Windows MSVC c.ssize_t) error = %v", err)
+	}
+}
+
 func TestEmitScalarForeignCall(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main;\n@link_name(\"fairyc_fixture_add_one\")\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n")

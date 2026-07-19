@@ -83,12 +83,12 @@ func TestX8664WindowsMSVCSpecIsValidLLP64AndFailClosed(t *testing.T) {
 	if cLong.Layout != (Layout{SizeBytes: 4, AlignmentBytes: 4}) || sizeT.Layout != (Layout{SizeBytes: 8, AlignmentBytes: 8}) {
 		t.Fatalf("Windows LLP64 scalar facts: c.long=%+v c.size_t=%+v", cLong, sizeT)
 	}
-	if spec.Evidence.EmissionSubset != "none" || spec.Evidence.Emittable || spec.Evidence.Conformant || spec.Evidence.Supported {
+	if spec.Evidence.EmissionSubset != "scalar-and-llp64-c-scalar-c11" || spec.Evidence.Emittable || spec.Evidence.Conformant || spec.Evidence.Supported {
 		t.Fatalf("Windows target overclaims maturity = %+v", spec.Evidence)
 	}
 	for _, missing := range spec.Evidence.Missing {
-		if missing == "windows-x64-abi-classifier" {
-			t.Fatalf("implemented Windows classifier remains marked missing: %+v", spec.Evidence)
+		if missing == "windows-x64-abi-classifier" || missing == "target-c-emission-profile" {
+			t.Fatalf("implemented Windows evidence remains marked missing: %+v", spec.Evidence)
 		}
 	}
 }

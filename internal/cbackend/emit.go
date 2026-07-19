@@ -31,9 +31,15 @@ type Profile struct {
 	Instrumentation string
 }
 
-// Stage0Profile returns the only currently implemented C emission profile.
+// Stage0Profile returns the Linux GNU Stage 0 C emission profile.
 func Stage0Profile() Profile {
 	return Profile{Target: target.X8664LinuxGNU, Dialect: DialectC11}
+}
+
+// Stage0WindowsMSVCProfile returns the provisional Windows MSVC Stage 0 C
+// emission profile. It has no validation-only instrumentation.
+func Stage0WindowsMSVCProfile() Profile {
+	return Profile{Target: target.X8664WindowsMSVC, Dialect: DialectC11}
 }
 
 // Stage0DropTraceProfile returns the native-conformance profile that observes compiler-owned drops.
@@ -80,6 +86,7 @@ func (e CapabilityError) Error() string {
 }
 
 type emitter struct {
+	targetID           target.ID
 	functions          []mir.Function
 	bySymbol           map[hir.SymbolID]int
 	foreignFunctions   []mir.ForeignFunction
@@ -201,7 +208,7 @@ func targetCScalar(spec target.Spec, name string) (target.Scalar, bool) {
 
 // Emit verifies MIR, rejects unsupported semantic families, and emits one deterministic C unit.
 func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
-	if profile != Stage0Profile() && profile != Stage0DropTraceProfile() {
+	if profile != Stage0Profile() && profile != Stage0WindowsMSVCProfile() && profile != Stage0DropTraceProfile() {
 		return Unit{}, fmt.Errorf(
 			"unsupported C emission profile target=%q dialect=%q instrumentation=%q",
 			profile.Target, profile.Dialect, profile.Instrumentation,
@@ -217,11 +224,14 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	if !found {
 		return Unit{}, fmt.Errorf("C emission target %q is missing", profile.Target)
 	}
+	if err := target.Validate(targetSpec); err != nil {
+		return Unit{}, fmt.Errorf("C emission target %q is invalid: %w", profile.Target, err)
+	}
 	cScalars := make(map[hir.Type]target.Scalar, len(cScalarTransports))
 	for _, transport := range cScalarTransports {
 		scalar, scalarFound := targetCScalar(targetSpec, transport.targetName)
 		if !scalarFound {
-			return Unit{}, fmt.Errorf("C emission target %q has no %s layout", profile.Target, transport.targetName)
+			continue
 		}
 		if scalar.Header != transport.header || scalar.Availability != transport.availability {
 			return Unit{}, fmt.Errorf("C emission target %q has invalid %s provider", profile.Target, transport.targetName)
@@ -276,6 +286,7 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 		return Unit{}, err
 	}
 	value := &emitter{
+		targetID:           profile.Target,
 		functions:          functions,
 		bySymbol:           make(map[hir.SymbolID]int, len(functions)),
 		foreignFunctions:   foreignFunctions,
@@ -791,6 +802,9 @@ func (e *emitter) foreignCType(value hir.Type, result bool) (string, error) {
 		return "void", nil
 	}
 	if transport, found := cScalarTransportForType(value); found {
+		if _, available := e.cScalars[value]; !available {
+			return "", fmt.Errorf("C scalar %q is unavailable for target %q", transport.targetName, e.targetID)
+		}
 		return transport.cType, nil
 	}
 	switch value {
@@ -1014,6 +1028,9 @@ func (e *emitter) supportedCValueType(value hir.Type) bool {
 func (e *emitter) cValueType(value hir.Type) (string, error) {
 	value = canonicalCValueType(value)
 	if transport, found := cScalarTransportForType(value); found {
+		if _, available := e.cScalars[value]; !available {
+			return "", fmt.Errorf("C scalar %q is unavailable for target %q", transport.targetName, e.targetID)
+		}
 		return transport.cType, nil
 	}
 	switch {
@@ -1904,7 +1921,7 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 	if usesCSSizeT {
 		transportProfile += " with POSIX.1-2008 typedefs"
 	}
-	fmt.Fprintf(output, "/* fairyc constrained C transport: %s, %s */\n", target.X8664LinuxGNU, transportProfile)
+	fmt.Fprintf(output, "/* fairyc constrained C transport: %s, %s */\n", e.targetID, transportProfile)
 	output.WriteString("#include <stdint.h>\n")
 	_, usesCSizeT := e.features["c-size-t"]
 	if len(e.structTypes) != 0 || len(e.resourceTypes) != 0 || usesCSizeT {
@@ -1933,7 +1950,10 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 		if _, used := e.features[transport.feature]; !used {
 			continue
 		}
-		scalar := e.cScalars[transport.sourceType]
+		scalar, available := e.cScalars[transport.sourceType]
+		if !available {
+			return CapabilityError{Feature: fmt.Sprintf("C scalar %q on target %q", transport.targetName, e.targetID)}
+		}
 		fmt.Fprintf(output, "_Static_assert(sizeof(%s) == UINT64_C(%d), \"fairyc target %s size\");\n", transport.cType, scalar.Layout.SizeBytes, transport.targetName)
 		fmt.Fprintf(output, "_Static_assert(_Alignof(%s) == UINT64_C(%d), \"fairyc target %s alignment\");\n", transport.cType, scalar.Layout.AlignmentBytes, transport.targetName)
 		switch scalar.Signedness {

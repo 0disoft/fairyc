@@ -190,14 +190,14 @@ its 12 pass plans now cross separate caller and callee C11 translation units thr
 at both profiles. Independent compiler or assembly/register inspection, source-level Fairy
 crossings, and a hosted Windows receipt remain absent. PE/COFF objects, runtime, standard library,
 supported distribution artifacts, and conformance remain later gates. A bounded parser now checks
-the product executable and six native probe executables for AMD64 PE32+ console identity, aligned
+the host-smoke product, declared-target product, and six native probe executables for AMD64 PE32+ console identity, aligned
 headers/sections, and an executable entry point, but does not inspect `.obj` symbols, relocations,
 unwind payloads, or CodeView/PDB data.
 Every local MSVC compile in the same lane now also parses its intermediate `.obj` as raw AMD64 COFF
 before cleanup, including `.text$...`, `.bss`, symbol-table, and relocation-index structure. Exact
 versioned symbol names, COMDAT selection, relocation types, unwind records, and a hosted object
 receipt remain absent, so the target evidence marker stays fail-closed.
-The seven local PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
+The eight local PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
 runtime-function ordering and code coverage plus referenced version 1 and version 2 unwind-record
 bounds, including handler/chained minimum tails. A separate three-object probe now raises a private
 noncontinuable exception at both profiles, validates its payload in an outer SEH filter, walks the
@@ -207,6 +207,14 @@ dispatcher/runtime-walk evidence for closed MSVC C frames. Version-2 epilog mean
 language-specific handler data, recursive chains, source-level Fairy or foreign-frame crossings,
 object-level relocation expectations, and hosted evidence remain absent, so the unwind marker also
 stays fail-closed.
+The first declared Windows target build now selects a distinct C-backend profile rather than
+labelling Linux-profile output after the fact. A checked-in FY source carries an unused `c::long`
+foreign declaration; the emitted unit asserts four-byte LLP64 `long`, rejects unavailable
+`c::ssize_t`, compiles through local x64 MSVC, passes COFF/PE/unwind inspection, and returns 42.
+Called foreign symbols, companion inputs, Windows standard-library linkage, debug output, packaging,
+and hosted receipts remain closed. The Windows TargetSpec therefore reports
+`scalar-and-llp64-c-scalar-c11` and no longer lists `target-c-emission-profile`, while all three
+maturity booleans remain false.
 
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.
@@ -238,7 +246,7 @@ Exit gate: Atlas failure cannot change compilation; stale or incompatible maps f
 ## Later capability gates
 
 - `x86_64-linux-musl`: requires a separate libc, sysroot, startup, loader, and static-distribution profile.
-- `x86_64-windows-msvc`: the TargetSpec, first eight-case local layout probe, 15-case host-independent Microsoft x64 classifier, 12-case same-MSVC native crossing, bounded PE32+ executable inspection, structural live-COFF object inspection, static version-1/version-2 unwind-structure inspection, and a three-case native exception/virtual-walk probe exist, but complete hosted LLP64 layout evidence, independent or inspected call evidence, source-level Fairy crossings, versioned exact COFF symbol/COMDAT/relocation fixtures, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, UCRT/VCRuntime, and debug fixtures remain required.
+- `x86_64-windows-msvc`: the TargetSpec, first scalar/LLP64 C-emission product build, eight-case local layout probe, 15-case host-independent Microsoft x64 classifier, 12-case same-MSVC native crossing, bounded PE32+ executable inspection, structural live-COFF object inspection, static version-1/version-2 unwind-structure inspection, and a three-case native exception/virtual-walk probe exist, but complete hosted LLP64 layout evidence, called source-level Fairy crossings, independent or inspected call evidence, versioned exact COFF symbol/COMDAT/relocation fixtures, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, UCRT/VCRuntime, distribution, and debug fixtures remain required.
 - QBE or another fast backend: requires stable internal semantics, interpreter and C oracles, ABI coverage, and measured edit-build benefit.
 - LLVM backend: requires representative workloads that justify optimization and distribution cost after simpler paths are exhausted.
 - Generics and `Vec<T>`: require non-generic stability plus compile-time, code-size, active-payload, and diagnostics fixtures.

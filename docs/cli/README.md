@@ -30,6 +30,8 @@ host-independent target inspection,
 flat-resource, and resource-tagged C11 inspection and
 `fairyc experimental build <file.fy> --cc <clang|gcc> --profile <low|optimized> --output <build/path>`
 for an explicit host-Linux executable in that subset,
+`fairyc experimental build-target <file.fy> --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe>`
+for the first declared Windows target C-emission subset,
 `fairyc experimental build-host <file.fy> --profile <low|optimized> --output <build/path.exe>` for a
 retained target-neutral Windows/amd64 MSVC PE,
 `fairyc experimental run-host <file.fy> --profile <low|optimized>` for a temporary target-neutral
@@ -87,9 +89,16 @@ private C transport, and reject FFI, provisional standard-library calls, `@repr(
 `c::*` values. `run-host` removes the temporary PE after execution; `build-host` retains one
 no-overwrite `.exe` under `build/`. Their receipts are host-smoke evidence, not Windows target, ABI,
 distribution, or self-hosting claims.
+`experimental build-target` is separate from those smokes. It selects the Windows MSVC emission
+profile, emits target-labelled C11, requires Windows LLP64 C-scalar providers, rejects unavailable
+`c::ssize_t`, and builds a no-overwrite PE through locally resolved x64 MSVC. The current command
+permits target declarations such as unused `c::long`, but rejects every called foreign symbol
+because companion-link and Windows standard-library contracts are still absent. Its receipt is
+target-emission evidence, not ABI conformance, hosted support, a distributable artifact promise, or
+self-hosting.
 `experimental target-spec` emits `fairyc.target-spec/v0` JSON without probing the host or exposing
 local tool paths. Linux reports its current scalar, flat-resource, and resource-tagged emission
-subset. Windows reports `none`. Both keep `emittable`, `conformant`, and `supported` false and list
+subset. Windows reports `scalar-and-llp64-c-scalar-c11`. Both keep `emittable`, `conformant`, and `supported` false and list
 their own missing evidence.
 The interpreter fixture's in-memory byte hooks require manifest options that this CLI never accepts;
 declaring a similarly named Fairy C function does not grant output authority.
@@ -107,7 +116,8 @@ search, JSON, localization, and repair guidance remain unimplemented.
 its schema, admitted emission subset, independent `emittable`, `conformant`, and `supported` states,
 and sorted missing evidence. It reads no source or configuration and performs no host, toolchain,
 SDK, sysroot, WSL, process, network, or write operation. The declared `x86_64-windows-msvc`
-TargetSpec is host-independent and remains separate from the target-neutral Windows MSVC smoke.
+TargetSpec is host-independent; only `build-target` later resolves a local toolchain after selecting
+the declared Windows profile. It remains separate from the target-neutral Windows MSVC smoke.
 JSON, filters, target selection, and release-stable output remain unimplemented.
 
 Human developers can run the examples shown in the repository `README.md`. Agent verification uses

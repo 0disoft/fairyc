@@ -76,6 +76,9 @@ func TestWindowsHostDriverFailsClosedOnIneligibleHost(t *testing.T) {
 	if _, err := BuildWindowsHost(WindowsHostToolchain{}, LowProfile, "unit", "runtime"); err == nil || !strings.Contains(err.Error(), "requires windows/amd64") {
 		t.Fatalf("BuildWindowsHost() error = %v", err)
 	}
+	if _, err := BuildWindowsMSVCTarget(WindowsHostToolchain{}, LowProfile, "unit", "runtime"); err == nil || !strings.Contains(err.Error(), "requires windows/amd64") {
+		t.Fatalf("BuildWindowsMSVCTarget() error = %v", err)
+	}
 	if _, err := BuildWindowsMSVCProbe(WindowsHostToolchain{}, LowProfile, "probe"); err == nil || !strings.Contains(err.Error(), "requires windows/amd64") {
 		t.Fatalf("BuildWindowsMSVCProbe() error = %v", err)
 	}

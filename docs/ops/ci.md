@@ -99,6 +99,10 @@ native intent remains unavailable on the current Windows host and no WSL path is
 `fairyc_windows_host_smoke` intent uses a bounded temporary source root to exercise both product
 paths through locally discovered x64 MSVC: `build-host` must produce a bounded PE that directly
 returns 42, and `run-host` must independently return 42 before every temporary artifact is removed.
+The same smoke invokes `build-target` for `x86_64-windows-msvc` on the checked-in
+`examples/windows_target/main.fy`. Target selection happens before C emission, the generated unit
+uses the LLP64 profile and four-byte `c::long`, and the resulting PE must return 42. The command
+still rejects called foreign symbols, so this receipt is not source-level Windows FFI evidence.
 The same intent derives one non-POSIX C11 unit from the eight valid Windows layout cases, then
 compiles and executes it under low and optimized MSVC profiles. It also derives separate caller and
 callee C11 translation units from all twelve valid Microsoft x64 plans, compiles and links them
@@ -109,7 +113,8 @@ object conformance, or Windows call/ABI conformance. It also compiles the catche
 termination frame, and private exception raiser as three separate translation units, links and
 executes them under both profiles, and requires exact exception payload, ordered
 `RtlVirtualUnwind` frame discovery, and one abnormal `__finally` execution. Before execution, the
-same intent parses the retained product image and all six probe images and requires bounded AMD64 PE32+ non-DLL console
+same intent parses the target-neutral product image, declared-target product image, and all six
+probe images and requires bounded AMD64 PE32+ non-DLL console
 identity, aligned image/header/section ranges, a readable executable `.text`, and an executable
 entry point. This does not inspect object symbols or relocations, unwind/debug payloads, imported
 API compatibility, signing, installer packaging, or distribution behavior.
@@ -119,7 +124,7 @@ bounded section and relocation ranges, readable executable `.text`/`.text$...`, 
 symbol indexes, and named symbols are mandatory; storage-free `.bss` is admitted only with the
 uninitialized-data characteristic. Object bytes are not uploaded or retained. Exact symbol,
 COMDAT, relocation-type, unwind, debug, and hosted object expectations remain unconfigured.
-All seven linked PE images additionally traverse the Microsoft x64 exception directory before
+All eight linked PE images additionally traverse the Microsoft x64 exception directory before
 execution. The local gate requires sorted nonoverlapping `.pdata` runtime-function ranges,
 executable code coverage, DWORD-aligned file-backed unwind records, bounded version 1 prolog slots,
 bounded version 2 epilog descriptors, and minimum handler/chained tails. The receipt reports the

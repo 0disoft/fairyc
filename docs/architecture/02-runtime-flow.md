@@ -48,7 +48,9 @@ later fast path:       verified MIR -> measured fast backend -> object -> linker
 later optimized path:  verified/optimized MIR -> LLVM IR -> object -> linker
 ```
 
-Only the interpreter and `x86_64-linux-gnu` C path are committed before the first hosted executable slice. Later target and backend paths are separate capability decisions.
+The interpreter, `x86_64-linux-gnu` C path, and first provisional
+`x86_64-windows-msvc` scalar/LLP64 C-emission path are committed. Later target and backend
+expansions remain separate capability decisions.
 
 Generated C uses a declared dialect, compiler family, target profile, statements, ordered temporaries, and helpers to preserve evaluation order, overflow, division, shifts, bit casts, aliasing, and trap semantics. It is a constrained reference transport, not universally portable C or the Fairy C semantic model.
 
@@ -58,6 +60,12 @@ maturity evidence.
 The C driver adds local compiler, libc, and path resolution only after selecting that target. A
 target can therefore be inspected on Windows without borrowing Windows layout or claiming that the
 Linux toolchain is locally executable.
+`Stage0WindowsMSVCProfile` is the first backend consumer of the Windows description. It shares the
+semantic C emitter but selects Windows scalar providers and layout facts, identifies its output as
+`x86_64-windows-msvc`, rejects unavailable POSIX `c::ssize_t`, and leaves validation-only drop
+instrumentation unavailable. `experimental build-target` resolves MSVC only after that profile has
+been selected and rejects called foreign symbols before toolchain discovery while companion-link
+and Windows standard-library contracts are absent.
 `internal/layout` is the next boundary: it turns those facts into checked array and aggregate size,
 alignment, offset, and padding results before any backend chooses C syntax. Separate Linux GNU and
 Windows MSVC manifests hold host-independent expectations. The generated native C probe checks
@@ -76,7 +84,7 @@ evidence.
 `internal/pecoff` is the next evidence boundary after local linking. It parses executable bytes
 without using the host loader and rejects non-AMD64, non-PE32+, DLL, non-console, misaligned,
 out-of-range, duplicate-section, missing-`.text`, and non-executable-entry images. The Windows smoke
-applies it to the retained product image and both profiles of the layout, ABI, and unwind probes before
+applies it to the retained target-neutral product, declared-target product, and both profiles of the layout, ABI, and unwind probes before
 execution. COFF object records and unwind/debug payload semantics remain outside this linked-image
 branch.
 The same package has a distinct raw-COFF path used inside `internal/cdriver` before local linking
