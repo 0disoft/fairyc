@@ -24,8 +24,8 @@ The Go frontend currently exposes the source-independent
 plus `fairyc experimental parse <file.fy>`,
 `fairyc experimental check-syntax <file.fy>`, and
 `fairyc experimental check-semantics <file.fy> [<file.fy>...]`. The compiler prototype also exposes
-`fairyc experimental target-spec x86_64-linux-gnu` for deterministic host-independent target
-inspection,
+`fairyc experimental target-spec <x86_64-linux-gnu|x86_64-windows-msvc>` for deterministic
+host-independent target inspection,
 `fairyc experimental emit-c <file.fy>` for deterministic scalar, explicitly link-mapped foreign-call,
 flat-resource, and resource-tagged C11 inspection and
 `fairyc experimental build <file.fy> --cc <clang|gcc> --profile <low|optimized> --output <build/path>`
@@ -88,8 +88,9 @@ private C transport, and reject FFI, provisional standard-library calls, `@repr(
 no-overwrite `.exe` under `build/`. Their receipts are host-smoke evidence, not Windows target, ABI,
 distribution, or self-hosting claims.
 `experimental target-spec` emits `fairyc.target-spec/v0` JSON without probing the host or exposing
-local tool paths. Its current scalar, flat-resource, and resource-tagged emission subset is reported separately from the false
-`emittable`, `conformant`, and `supported` target states and their missing evidence.
+local tool paths. Linux reports its current scalar, flat-resource, and resource-tagged emission
+subset. Windows reports `none`. Both keep `emittable`, `conformant`, and `supported` false and list
+their own missing evidence.
 The interpreter fixture's in-memory byte hooks require manifest options that this CLI never accepts;
 declaring a similarly named Fairy C function does not grant output authority.
 Infinite execution is stopped by the bounded interpreter and reported as an unsupported-capability result rather than a language trap. In
@@ -105,9 +106,9 @@ search, JSON, localization, and repair guidance remain unimplemented.
 `fairyc targets` accepts no arguments and deterministically lists every declared TargetSpec with
 its schema, admitted emission subset, independent `emittable`, `conformant`, and `supported` states,
 and sorted missing evidence. It reads no source or configuration and performs no host, toolchain,
-SDK, sysroot, WSL, process, network, or write operation. The target-neutral Windows MSVC smoke is
-not a TargetSpec and therefore does not appear as `x86_64-windows-msvc`. JSON, filters, target
-selection, and release-stable output remain unimplemented.
+SDK, sysroot, WSL, process, network, or write operation. The declared `x86_64-windows-msvc`
+TargetSpec is host-independent and remains separate from the target-neutral Windows MSVC smoke.
+JSON, filters, target selection, and release-stable output remain unimplemented.
 
 Human developers can run the examples shown in the repository `README.md`. Agent verification uses
 the configured `fairyc_go_build`, `fairyc_go_vet`, and `fairyc_go_test` intents; the manual `go run`

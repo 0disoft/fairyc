@@ -51,11 +51,11 @@ flow, active-payload moves, Result propagation, bitwise operations, checked divi
 trapping, scalar `Option` Some and None, and scalar `Result` propagation success and failure. This
 fixture lane only produces C text; no C compiler, linker, native executable, complete runtime, target
 conformance, or self-hosting is implied.
-The first executable `fairyc.target-spec/v0` description now owns the host-independent
-`x86_64-linux-gnu` identity, LP64 scalar and pointer layouts, SysV AMD64 calling and stack facts,
-ELF/DWARF identities, and fail-closed maturity evidence. It deliberately contains no local
-compiler, SDK, or sysroot path and still reports `emittable`, `conformant`, and `supported` as
-false.
+Executable `fairyc.target-spec/v0` descriptions now own host-independent target facts. Linux GNU
+records LP64, SysV AMD64, ELF, and DWARF. Windows MSVC records LLP64, four-byte C `long`, 32-byte
+shadow space, Microsoft x64, COFF, and Windows unwind/CodeView identities. Neither contains a local
+compiler, SDK, sysroot, registry, or filesystem path; both still report `emittable`, `conformant`,
+and `supported` as false.
 The host-independent layout engine now executes all 16 target-layout v0 cases for language and C
 scalars, data and function pointers, explicitly based C enums, fixed arrays, nested structs, field
 offsets, internal and tail padding, and fail-closed malformed or overflowing inputs. These are
@@ -76,8 +76,8 @@ Separate WSL-free `experimental run-host` and `experimental build-host` commands
 target-neutral verified `.fy` program through generated C into an x64 MSVC PE. The first executes and
 removes a temporary image; the second retains one no-overwrite `.exe` under `build/`. Both reject
 FFI, `@repr(C)`, exact `c::*` values, and provisional standard-library calls, so they provide local
-source-to-native use without pretending that a Windows TargetSpec, ABI, distributable artifact, or
-self-hosted compiler exists.
+source-to-native use without pretending that the declared Windows TargetSpec has an emission
+profile, ABI evidence, distributable artifact, or self-hosted compiler.
 A provisional `x86_64-linux-gnu` SystemHeap implementation now lives in the target standard-library
 boundary rather than the thin runtime. It normalizes empty allocation, admits current fundamental
 alignments, preserves bytes across copy-and-release growth or shrink, and leaves the old block
@@ -192,6 +192,7 @@ go run ./cmd/fairyc experimental check-semantics examples/resources/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/regions/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/results/main.fy
 go run ./cmd/fairyc experimental target-spec x86_64-linux-gnu
+go run ./cmd/fairyc experimental target-spec x86_64-windows-msvc
 go run ./cmd/fairyc experimental emit-c examples/c/main.fy
 go run ./cmd/fairyc experimental emit-c examples/c/tagged.fy
 go run ./cmd/fairyc experimental emit-c examples/c/resource.fy
@@ -220,9 +221,10 @@ trap. The official
 `fairyc check` command remains unavailable until effects and the
 remaining semantic groups exist.
 
-`experimental target-spec` accepts exactly the known `x86_64-linux-gnu` ID and writes deterministic
-`fairyc.target-spec/v0` JSON. The result separates target semantics from local toolchain discovery
-and lists the missing evidence that keeps all three target maturity claims false.
+`experimental target-spec` accepts exactly one known Linux GNU or Windows MSVC ID and writes
+deterministic `fairyc.target-spec/v0` JSON. The result separates target semantics from local
+toolchain discovery and lists the profile-specific missing evidence that keeps all three target
+maturity claims false.
 
 `experimental emit-c` accepts the same single-file entry shape and prints the verified scalar plus
 flat all-`i32` resource and resource-bearing built-in tag C11 translation unit directly to stdout.

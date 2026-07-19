@@ -16,7 +16,7 @@ Target claims use three levels:
 - `conformant`: all declared language, layout, bidirectional C ABI, runtime, and toolchain fixtures pass without skips;
 - `supported`: conformance plus maintained CI, distribution, diagnostics, and documented toolchain provisioning.
 
-The Windows Go compiler host does not define target layout. Proving the first target requires WSL or Linux CI, an explicit glibc baseline, a sysroot or runner image, Clang and GCC, and a target runtime bundle.
+The Windows Go compiler host does not define Linux target layout. Proving the first target requires native Linux CI or a dedicated Linux runner, an explicit glibc baseline, a sysroot or runner image, Clang and GCC, and a target runtime bundle. WSL is not a project prerequisite.
 
 The current Go prototype can emit deterministic C11 for a verified scalar, inert-struct,
 flat-resource, and resource-tagged profile carrying this target identity. The inert-struct slice
@@ -144,13 +144,19 @@ provider-qualified C typedefs must name both a header and a closed availability 
 
 It contains no local executable or SDK paths.
 
-`internal/target` now implements the first host-independent description under
-`fairyc.target-spec/v0`. For `x86_64-linux-gnu` it fixes little-endian LP64, eight-byte pointers and
+`internal/target` now implements host-independent descriptions under `fairyc.target-spec/v0`.
+For `x86_64-linux-gnu` it fixes little-endian LP64, eight-byte pointers and
 function pointers, the Stage 0 language and permitted C scalar size/alignment table, 16-byte SysV
-call alignment, the 128-byte red zone, SysV AMD64 aggregate and return-classifier identities,
+call alignment, the 128-byte red zone, zero shadow space, SysV AMD64 aggregate and return-classifier identities,
 ELF64 symbols, DWARF CFI unwind, generated-C DWARF debugging, and the permitted `@repr(C)` feature
 vocabulary. The scalar tables are ordered by canonical type name and every alignment is validated
 as a nonzero power of two.
+
+For `x86_64-windows-msvc` it fixes little-endian LLP64, eight-byte pointers and function pointers,
+four-byte C `long`, eight-byte `size_t`, no POSIX `ssize_t`, 16-byte call alignment, zero red-zone
+bytes, 32 shadow-space bytes, Microsoft x64 aggregate and return identities, COFF objects and
+symbols, `.pdata`/`.xdata` unwind metadata, and generated-C CodeView/PDB debugging. Its target
+profile assumes MSVC's default signed plain `char` and therefore excludes `/J`.
 
 These entries define target facts. Every listed C scalar now has exact source transport, but the
 entries do not claim C-scalar value semantics, aggregate forms, or additional call classes in the
@@ -184,6 +190,12 @@ lists the missing hosted native C layout-probe receipt, bidirectional ABI, runti
 baseline, and provisioning gates. `fairyc experimental target-spec x86_64-linux-gnu` exposes that
 same immutable data without probing the host.
 
+The Windows evidence block reports no target emission subset and keeps all maturity booleans false.
+It lists the missing LLP64 layout probes, Microsoft x64 classifier and bidirectional crossings,
+PE/COFF object and unwind fixtures, runtime, standard library, hosted Windows receipt, target C
+emission profile, toolchain baseline, and provisioning gates. The target-neutral MSVC host smoke
+does not clear those markers.
+
 ## `ToolchainSpec`
 
 Toolchain data includes C dialect, compiler and linker driver identities, version fingerprint, sysroot, libc family and baseline, startup objects, default libraries, dynamic loader, sanitizer capabilities, required flags, and local capability resolution. Local installation paths are resolution results, not target semantics.
@@ -208,7 +220,7 @@ The planned transport matrix uses Clang as the primary compiler and GCC as an in
 
 ## Later profiles
 
-`x86_64-linux-musl` needs a separate libc, startup, sysroot, dynamic-loader, and static-distribution profile even though its CPU ABI is SysV-derived. `x86_64-windows-msvc` needs its own LLP64 layouts, four-register and shadow-space calling rules, PE/COFF, UCRT/VCRuntime, and unwind metadata contract.
+`x86_64-linux-musl` needs a separate libc, startup, sysroot, dynamic-loader, and static-distribution profile even though its CPU ABI is SysV-derived. The declared `x86_64-windows-msvc` TargetSpec still needs executable LLP64 layout probes, four-register classification, PE/COFF objects, UCRT/VCRuntime, and unwind fixtures before any maturity promotion.
 
 ## External references
 

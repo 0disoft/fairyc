@@ -82,10 +82,11 @@ scalar runtime serve both that lane and the experimental single-file build comma
 closed conformance runtime records four-byte drop-site IDs only for the native matrix. Product C and
 product-built artifacts contain no observer. This proves
 the product wiring exists, not that runtime, ABI, or target-conformance gates pass.
-The first executable `fairyc.target-spec/v0` now centralizes host-independent LP64 scalar and
-pointer layouts, SysV AMD64 calling and stack identities, ELF/DWARF identities, C-layout feature
-vocabulary, and explicit missing maturity evidence. The C backend and driver share its typed target
-ID, while local toolchain paths remain outside the target contract. Host-independent scalar,
+The executable `fairyc.target-spec/v0` now centralizes host-independent Linux LP64/SysV/ELF/DWARF
+facts and provisional Windows LLP64/Microsoft-x64/COFF/unwind facts, including an explicit zero or
+32-byte shadow-space rule and per-profile missing maturity evidence. The C backend and driver still
+use only the Linux typed target ID, while local toolchain paths remain outside both contracts.
+Host-independent scalar,
 array, explicit-C-enum, pointer, and nested-aggregate layout execution now runs through 16 versioned
 v0 cases. The eleven valid cases now also generate one deterministic C11 plus POSIX-typedef layout probe configured for
 four Clang/GCC and low/optimized executions. Those native runs remain unobserved on this Windows
@@ -175,9 +176,10 @@ exceptions, not completed wrappers.
 Separate Windows/amd64 host-smoke commands now discover local x64 MSVC without WSL and compile one
 target-neutral generated-C unit. `run-host` executes a temporary PE and reports the `i32` result or
 canonical trap; `build-host` retains a no-overwrite `.exe` below `build/`. Both deliberately reject
-FFI, `@repr(C)`, exact `c::*` scalars, and standard-library linkage. Formal
-`x86_64-windows-msvc` TargetSpec, LLP64 layout, Windows x64 ABI, PE/COFF metadata, runtime, standard
-library, supported distribution artifacts, and conformance remain later gates.
+FFI, `@repr(C)`, exact `c::*` scalars, and standard-library linkage. A formal fail-closed
+`x86_64-windows-msvc` TargetSpec now records LLP64 and platform identities, while executable LLP64
+layout probes, Windows x64 classification, PE/COFF objects, runtime, standard library, supported
+distribution artifacts, and conformance remain later gates.
 
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.
@@ -209,7 +211,7 @@ Exit gate: Atlas failure cannot change compilation; stale or incompatible maps f
 ## Later capability gates
 
 - `x86_64-linux-musl`: requires a separate libc, sysroot, startup, loader, and static-distribution profile.
-- `x86_64-windows-msvc`: requires LLP64 layout, Microsoft x64 calling, PE/COFF, UCRT/VCRuntime, and unwind fixtures.
+- `x86_64-windows-msvc`: the TargetSpec exists but requires executable LLP64 layout, Microsoft x64 calling, PE/COFF, UCRT/VCRuntime, and unwind fixtures.
 - QBE or another fast backend: requires stable internal semantics, interpreter and C oracles, ABI coverage, and measured edit-build benefit.
 - LLVM backend: requires representative workloads that justify optimization and distribution cost after simpler paths are exhausted.
 - Generics and `Vec<T>`: require non-generic stability plus compile-time, code-size, active-payload, and diagnostics fixtures.

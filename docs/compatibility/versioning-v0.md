@@ -50,7 +50,7 @@ Target schema versions the structure of target descriptions. ABI profile version
 Local SDK or compiler paths never participate in target semantic identity. Toolchain family, baseline, and capability fingerprint do.
 
 The prototype `fairyc.target-spec/v0` object is the first executable target-schema member. Its
-identity, scalar and pointer layouts, stack rules, classifier identities, object and symbol model,
+identity, scalar and pointer layouts, call alignment, red-zone and shadow-space rules, classifier identities, object and symbol model,
 unwind/debug contract, and C-layout feature vocabulary are compatibility data. Its maturity
 evidence is current capability evidence, not an ABI promise; promoting a status requires the named
 fixture and hosted receipts rather than only editing the booleans. The experimental CLI schema at

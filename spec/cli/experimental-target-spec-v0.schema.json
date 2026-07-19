@@ -4,6 +4,44 @@
   "title": "Fairy C target specification v0",
   "type": "object",
   "additionalProperties": false,
+  "oneOf": [
+    {
+      "properties": {
+        "id": { "const": "x86_64-linux-gnu" },
+        "operatingSystem": { "const": "linux" },
+        "environment": { "const": "gnu" },
+        "dataModel": { "const": "lp64" },
+        "callingConvention": { "const": "sysv-amd64" },
+        "aggregateLayout": { "const": "sysv-amd64-lp64" },
+        "returnClassifier": { "const": "sysv-amd64" },
+        "objectFormat": { "const": "elf64" },
+        "symbolModel": { "const": "elf" },
+        "unwindModel": { "const": "dwarf-cfi" },
+        "debugContract": { "const": "generated-c-dwarf" },
+        "evidence": {
+          "properties": { "emissionSubset": { "const": "scalar-and-flat-i32-resource-tagged-c11" } }
+        }
+      }
+    },
+    {
+      "properties": {
+        "id": { "const": "x86_64-windows-msvc" },
+        "operatingSystem": { "const": "windows" },
+        "environment": { "const": "msvc" },
+        "dataModel": { "const": "llp64" },
+        "callingConvention": { "const": "microsoft-x64" },
+        "aggregateLayout": { "const": "msvc-x64-llp64" },
+        "returnClassifier": { "const": "microsoft-x64" },
+        "objectFormat": { "const": "coff-x86-64" },
+        "symbolModel": { "const": "coff" },
+        "unwindModel": { "const": "windows-x64-pdata-xdata" },
+        "debugContract": { "const": "generated-c-codeview-pdb" },
+        "evidence": {
+          "properties": { "emissionSubset": { "const": "none" } }
+        }
+      }
+    }
+  ],
   "required": [
     "schemaVersion",
     "id",
@@ -29,12 +67,12 @@
   ],
   "properties": {
     "schemaVersion": { "const": "fairyc.target-spec/v0" },
-    "id": { "const": "x86_64-linux-gnu" },
+    "id": { "enum": ["x86_64-linux-gnu", "x86_64-windows-msvc"] },
     "architecture": { "const": "x86_64" },
-    "operatingSystem": { "const": "linux" },
-    "environment": { "const": "gnu" },
+    "operatingSystem": { "enum": ["linux", "windows"] },
+    "environment": { "enum": ["gnu", "msvc"] },
     "endianness": { "const": "little" },
-    "dataModel": { "const": "lp64" },
+    "dataModel": { "enum": ["lp64", "llp64"] },
     "pointer": { "$ref": "#/$defs/layout" },
     "functionPointer": { "$ref": "#/$defs/layout" },
     "languageScalars": {
@@ -48,13 +86,13 @@
       "items": { "$ref": "#/$defs/scalar" }
     },
     "stack": { "$ref": "#/$defs/stack" },
-    "callingConvention": { "const": "sysv-amd64" },
-    "aggregateLayout": { "const": "sysv-amd64-lp64" },
-    "returnClassifier": { "const": "sysv-amd64" },
-    "objectFormat": { "const": "elf64" },
-    "symbolModel": { "const": "elf" },
-    "unwindModel": { "const": "dwarf-cfi" },
-    "debugContract": { "const": "generated-c-dwarf" },
+    "callingConvention": { "enum": ["sysv-amd64", "microsoft-x64"] },
+    "aggregateLayout": { "enum": ["sysv-amd64-lp64", "msvc-x64-llp64"] },
+    "returnClassifier": { "enum": ["sysv-amd64", "microsoft-x64"] },
+    "objectFormat": { "enum": ["elf64", "coff-x86-64"] },
+    "symbolModel": { "enum": ["elf", "coff"] },
+    "unwindModel": { "enum": ["dwarf-cfi", "windows-x64-pdata-xdata"] },
+    "debugContract": { "enum": ["generated-c-dwarf", "generated-c-codeview-pdb"] },
     "reprCFeatures": {
       "type": "array",
       "minItems": 1,
@@ -92,10 +130,11 @@
     "stack": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["callAlignmentBytes", "redZoneBytes"],
+      "required": ["callAlignmentBytes", "redZoneBytes", "shadowSpaceBytes"],
       "properties": {
         "callAlignmentBytes": { "type": "integer", "minimum": 1 },
-        "redZoneBytes": { "type": "integer", "minimum": 0 }
+        "redZoneBytes": { "type": "integer", "minimum": 0 },
+        "shadowSpaceBytes": { "type": "integer", "minimum": 0, "multipleOf": 8 }
       }
     },
     "evidence": {
@@ -103,7 +142,7 @@
       "additionalProperties": false,
       "required": ["emissionSubset", "emittable", "conformant", "supported", "missing"],
       "properties": {
-        "emissionSubset": { "const": "scalar-and-flat-i32-resource-tagged-c11" },
+        "emissionSubset": { "enum": ["none", "scalar-and-flat-i32-resource-tagged-c11"] },
         "emittable": { "const": false },
         "conformant": { "const": false },
         "supported": { "const": false },

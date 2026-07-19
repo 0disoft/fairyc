@@ -12,28 +12,30 @@ import (
 
 func TestExperimentalTargetSpecEmitsDeterministicHostIndependentJSON(t *testing.T) {
 	t.Parallel()
-	arguments := []string{"experimental", "target-spec", string(target.X8664LinuxGNU)}
-	firstCode, firstOut, firstErr := runForTest(arguments, t.TempDir())
-	secondCode, secondOut, secondErr := runForTest(arguments, t.TempDir())
-	if firstCode != ExitSuccess || secondCode != ExitSuccess || firstErr != "" || secondErr != "" {
-		t.Fatalf("Run() first=(%d, %q), second=(%d, %q)", firstCode, firstErr, secondCode, secondErr)
-	}
-	if firstOut != secondOut {
-		t.Fatalf("target-spec output is nondeterministic:\nfirst=%s\nsecond=%s", firstOut, secondOut)
-	}
-	var spec target.Spec
-	if err := json.Unmarshal([]byte(firstOut), &spec); err != nil {
-		t.Fatalf("target-spec output is not JSON: %v\n%s", err, firstOut)
-	}
-	if err := target.Validate(spec); err != nil {
-		t.Fatalf("target-spec output is invalid: %v", err)
-	}
-	if spec.ID != target.X8664LinuxGNU || spec.Evidence.Emittable || spec.Evidence.Conformant || spec.Evidence.Supported {
-		t.Fatalf("target-spec identity or evidence = %+v", spec)
-	}
-	for _, forbidden := range []string{"executablePath", "sdkPath", "sysrootPath", "\\\\", "/usr/bin/"} {
-		if strings.Contains(firstOut, forbidden) {
-			t.Fatalf("target-spec output contains host-local data %q: %s", forbidden, firstOut)
+	for _, id := range []target.ID{target.X8664LinuxGNU, target.X8664WindowsMSVC} {
+		arguments := []string{"experimental", "target-spec", string(id)}
+		firstCode, firstOut, firstErr := runForTest(arguments, t.TempDir())
+		secondCode, secondOut, secondErr := runForTest(arguments, t.TempDir())
+		if firstCode != ExitSuccess || secondCode != ExitSuccess || firstErr != "" || secondErr != "" {
+			t.Fatalf("Run(%q) first=(%d, %q), second=(%d, %q)", id, firstCode, firstErr, secondCode, secondErr)
+		}
+		if firstOut != secondOut {
+			t.Fatalf("target-spec %q output is nondeterministic:\nfirst=%s\nsecond=%s", id, firstOut, secondOut)
+		}
+		var spec target.Spec
+		if err := json.Unmarshal([]byte(firstOut), &spec); err != nil {
+			t.Fatalf("target-spec %q output is not JSON: %v\n%s", id, err, firstOut)
+		}
+		if err := target.Validate(spec); err != nil {
+			t.Fatalf("target-spec %q output is invalid: %v", id, err)
+		}
+		if spec.ID != id || spec.Evidence.Emittable || spec.Evidence.Conformant || spec.Evidence.Supported {
+			t.Fatalf("target-spec %q identity or evidence = %+v", id, spec)
+		}
+		for _, forbidden := range []string{"executablePath", "sdkPath", "sysrootPath", "C:\\", "/usr/bin/"} {
+			if strings.Contains(firstOut, forbidden) {
+				t.Fatalf("target-spec %q output contains host-local data %q: %s", id, forbidden, firstOut)
+			}
 		}
 	}
 }
@@ -63,11 +65,30 @@ func TestTargetsReportsKnownMaturityWithoutReadingSource(t *testing.T) {
     - hosted-linux-receipt
     - toolchain-baseline
     - toolchain-provisioning
+
+x86_64-windows-msvc
+  schema: fairyc.target-spec/v0
+  emission subset: none
+  emittable: no
+  conformant: no
+  supported: no
+  missing evidence:
+    - bidirectional-c-abi-fixtures
+    - c-layout-probes
+    - complete-runtime
+    - complete-standard-library
+    - hosted-windows-receipt
+    - pe-coff-object-fixtures
+    - target-c-emission-profile
+    - toolchain-baseline
+    - toolchain-provisioning
+    - windows-x64-abi-classifier
+    - windows-x64-unwind-fixtures
 `
 	if firstOut != want {
 		t.Fatalf("targets output = %q, want %q", firstOut, want)
 	}
-	for _, forbidden := range []string{"x86_64-windows-msvc", "C:\\", "/usr/bin/", "msvc"} {
+	for _, forbidden := range []string{"C:\\", "/usr/bin/", "Program Files"} {
 		if strings.Contains(firstOut, forbidden) {
 			t.Fatalf("targets output contains undeclared or host-local value %q: %s", forbidden, firstOut)
 		}
@@ -97,7 +118,7 @@ func TestExperimentalTargetSpecRejectsUnknownOrMissingTarget(t *testing.T) {
 	t.Parallel()
 	for _, arguments := range [][]string{
 		{"experimental", "target-spec"},
-		{"experimental", "target-spec", "x86_64-windows-msvc"},
+		{"experimental", "target-spec", "aarch64-windows-msvc"},
 		{"experimental", "target-spec", string(target.X8664LinuxGNU), "extra"},
 	} {
 		code, stdout, stderr := runForTest(arguments, t.TempDir())

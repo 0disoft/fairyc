@@ -52,7 +52,7 @@ Only the interpreter and `x86_64-linux-gnu` C path are committed before the firs
 
 Generated C uses a declared dialect, compiler family, target profile, statements, ordered temporaries, and helpers to preserve evaluation order, overflow, division, shifts, bit casts, aliasing, and trap semantics. It is a constrained reference transport, not universally portable C or the Fairy C semantic model.
 
-`internal/target` is the host-independent source for the first target ID, scalar and pointer
+`internal/target` is the host-independent source for declared target IDs, scalar and pointer
 layouts, SysV AMD64 classifier identities, stack facts, ELF/DWARF contracts, and maturity evidence.
 The C driver adds local compiler, libc, and path resolution only after selecting that target. A
 target can therefore be inspected on Windows without borrowing Windows layout or claiming that the

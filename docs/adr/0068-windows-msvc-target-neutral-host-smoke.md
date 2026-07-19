@@ -40,9 +40,10 @@ features and makes no Windows target, ABI, FFI, standard-library, or conformance
    `fairyc_windows_host_smoke` intent retains and directly executes an optimized result-42 PE, then
    runs result 42, result -1, division-by-zero, remainder-by-zero, signed-division-overflow,
    integer-overflow, and invalid-shift cases through both low and optimized MSVC profiles.
-7. This does not add `x86_64-windows-msvc` to target inspection, does not validate Windows aggregate
-   layout or calling convention, and does not make a `build-host` PE a supported distributable
-   artifact. It is not self-hosting: the compiler remains the Go Stage 0 implementation.
+7. This does not validate Windows aggregate layout or calling convention and does not make a
+   `build-host` PE a supported distributable artifact. It is not self-hosting: the compiler remains
+   the Go Stage 0 implementation. ADR 0073 later adds a fail-closed `x86_64-windows-msvc`
+   TargetSpec, but these host-smoke commands neither consume it nor clear its missing evidence.
 
 ## Consequences
 
@@ -51,5 +52,5 @@ features and makes no Windows target, ABI, FFI, standard-library, or conformance
   local use.
 - The resolver fails closed when Visual Studio components or a complete SDK are absent instead of
   falling back to an undeclared compiler or inherited shell state.
-- Formal Windows target work remains a separate future decision with its own TargetSpec, layout,
-  ABI, runtime, standard-library, and conformance evidence.
+- Formal Windows target work remains separately gated. ADR 0073 supplies only the TargetSpec;
+  layout, ABI, runtime, standard-library, object, unwind, and conformance evidence remain missing.

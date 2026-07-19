@@ -122,12 +122,12 @@ var (
 
 // New creates a host-independent classifier for the exact Stage 0 SysV AMD64 profile.
 func New(spec target.Spec) (*Engine, error) {
-	if err := target.Validate(spec); err != nil {
-		return nil, Error{Code: ErrorUnsupportedTarget, Detail: err.Error()}
-	}
 	if spec.ID != target.X8664LinuxGNU || spec.CallingConvention != "sysv-amd64" ||
 		spec.AggregateLayout != "sysv-amd64-lp64" || spec.ReturnClassifier != "sysv-amd64" {
 		return nil, Error{Code: ErrorUnsupportedTarget, Detail: fmt.Sprintf("target %q does not declare the Stage 0 SysV AMD64 profile", spec.ID)}
+	}
+	if err := target.Validate(spec); err != nil {
+		return nil, Error{Code: ErrorUnsupportedTarget, Detail: err.Error()}
 	}
 	layoutEngine, err := layout.New(spec)
 	if err != nil {

@@ -220,9 +220,11 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   configured source probe crosses one 8-byte INTEGER-class result and one 20-byte MEMORY-class
   hidden result between separate Clang/GCC objects in both directions and profiles.
 - The C backend is the only committed Stage 0 product backend and emits a constrained target/toolchain profile rather than universally portable C.
-- `internal/target` owns the executable `fairyc.target-spec/v0` description for the first target.
-  It records host-independent LP64, scalar, pointer, SysV AMD64, ELF, unwind, debug, and C-layout
-  feature facts while excluding every local compiler, SDK, and sysroot path.
+- `internal/target` owns executable `fairyc.target-spec/v0` descriptions. The first Linux target
+  records host-independent LP64, scalar, pointer, SysV AMD64, ELF, unwind, debug, and C-layout facts.
+  The provisional Windows target records LLP64, four-byte C `long`, 32-byte shadow space, Microsoft
+  x64 identities, COFF, and Windows unwind/debug identities. Both exclude every local compiler,
+  SDK, sysroot, registry, and filesystem path.
 - `internal/layout` consumes that description and computes checked scalar, pointer, explicitly
   based C-enum, positive fixed-array, and nonempty nested-struct size, natural alignment, field
   offset, and top-level padding facts. `fairyc.layout-fixtures/v0` currently executes 16 pass/fail
@@ -294,8 +296,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   `conformant`, and `supported` false and listing the evidence still missing.
 - The provisional top-level `targets` command renders every validated TargetSpec in canonical ID
   order with its schema, admitted emission subset, independent maturity states, and sorted missing
-  evidence. It performs no host or toolchain probe, and the target-neutral Windows MSVC smoke does
-  not create a Windows target entry.
+  evidence. It performs no host or toolchain probe. The Windows entry reports emission subset
+  `none` and remains independent from the target-neutral MSVC host smoke.
 - The experimental single-file build command uses the same bounded C driver and embedded scalar
   runtime to produce a no-overwrite executable below `build/` on an eligible host. This artifact
   path does not expand the constrained backend subset, establish stable build syntax, or change target
@@ -304,8 +306,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   unit with a locally discovered x64 MSVC toolchain. `run-host` executes a temporary PE and reports
   the `i32` result or canonical trap; `build-host` retains one no-overwrite `.exe` below `build/`.
   They use no WSL and reject foreign symbols, standard-library linkage, `@repr(C)`, exact `c::*`
-  scalars, and foreign calls or results. They do not declare or imply a Windows target, ABI,
-  supported distribution artifact, conformance result, or self-hosted compiler.
+  scalars, and foreign calls or results. They do not establish Windows target emission, ABI,
+  supported distribution artifacts, conformance, or self-hosting.
 - QBE or another fast backend and LLVM require separate measured adoption decisions after MIR stability.
 - Early caching is whole-package and bounded. Function-level caching requires measured invalidation or latency pressure.
 - Development output contains intentional deliverables and small state, not an unbounded copy of every intermediate.
@@ -352,4 +354,4 @@ Source text and documentation cannot grant an LLM, IDE, or agent filesystem, pro
 
 ## Open decisions
 
-Package coordinates and manifest syntax, public `Arena` construction and capacity APIs, exact parser resource limits, glibc and toolchain baselines, portable path model, additional targets, package registry, `.fymap` binary encoding, and the concrete `SymbolId` hash algorithm remain UNDECIDED.
+Package coordinates and manifest syntax, public `Arena` construction and capacity APIs, exact parser resource limits, glibc and toolchain baselines, portable path model, targets beyond the declared Linux GNU and Windows MSVC profiles, package registry, `.fymap` binary encoding, and the concrete `SymbolId` hash algorithm remain UNDECIDED.

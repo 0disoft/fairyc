@@ -30,9 +30,10 @@ ID order it writes the TargetSpec schema, admitted emission subset, independent 
 
 The command performs no source or configuration read, directory scan, executable lookup, toolchain,
 SDK, sysroot, or WSL probe, process execution, network request, or write. It reports declared target
-contracts rather than local host capabilities, so the Windows MSVC host smoke does not create an
-`x86_64-windows-msvc` entry. JSON, filtering, target selection, and release-stable output remain
-unimplemented; Phase 3 still owns stabilization.
+contracts rather than local host capabilities. The `x86_64-windows-msvc` entry therefore reports
+LLP64 facts and missing evidence independently from the target-neutral MSVC host smoke. JSON,
+filtering, target selection, and release-stable output remain unimplemented; Phase 3 still owns
+stabilization.
 
 ## Implemented experimental compiler surface
 
@@ -43,7 +44,7 @@ The current Go prototype implements nine deliberately unstable developer command
 | `fairyc experimental parse <file.fy>` | Parse one source-root-relative file and verify lossless syntax plus error-free AST lowering | `fairyc.experimental.parse/v0` JSON on stdout, defined by `spec/cli/experimental-parse-v0.schema.json` |
 | `fairyc experimental check-syntax <file.fy>` | Check lexing, parsing, recovery, module identity, lossless reconstruction, and error-free AST lowering | Success line on stdout or human diagnostics on stderr |
 | `fairyc experimental check-semantics <file.fy> [<file.fy>...]` | Resolve names, type-check, and analyze local safe-borrow, whole-resource, Region, and complete Stage 0 Result must-use Flow for an explicit module set in the implemented subset | Typed-HIR module and function counts on stdout, human source diagnostics on stderr, or an explicit unsupported-subset error |
-| `fairyc experimental target-spec x86_64-linux-gnu` | Inspect the first host-independent target description without resolving a local toolchain | Deterministic `fairyc.target-spec/v0` JSON on stdout, defined by `spec/cli/experimental-target-spec-v0.schema.json` |
+| `fairyc experimental target-spec <x86_64-linux-gnu\|x86_64-windows-msvc>` | Inspect one known host-independent target description without resolving a local toolchain | Deterministic `fairyc.target-spec/v0` JSON on stdout, defined by `spec/cli/experimental-target-spec-v0.schema.json` |
 | `fairyc experimental emit-c <file.fy>` | Lower one scalar, restricted inert user-enum, bounded optionally `@link_name`-mapped `unsafe extern C fn` using admitted fixed-width, pointer-width, any of the sixteen exact transport-only TargetSpec C scalars, admitted raw pointers including opaque `void` and one pointer-to-opaque-pointer output slot, or nonempty acyclic `@repr(C)` pointer values whose fields may include exact C scalars or nested `@repr(C)` records, exact direct-local raw address, flat all-`i32` resource, or admitted resource-bearing built-in tag program through verified MIR and emit the provisional constrained C transport without invoking a toolchain | Exactly one deterministic C11 translation unit, with an explicit POSIX.1-2008 typedef profile only when required, on stdout; source diagnostics or capability errors on stderr |
 | `fairyc experimental build <file.fy> --cc <clang\|gcc> --profile <low\|optimized> --output <build/path>` | Compile and link one verified program in that constrained subset for the host `x86_64-linux-gnu` profile with an explicit C compiler, optimization profile, and ignored output path | A no-overwrite executable below `build/` plus one relative-path receipt, or source, capability, toolchain, link, or artifact diagnostics |
 | `fairyc experimental build-host <file.fy> --profile <low\|optimized> --output <build/path.exe>` | On Windows/amd64, compile one target-neutral verified program with locally discovered x64 MSVC and retain its PE without declaring a Windows target ABI | A no-overwrite `.exe` below `build/` plus a host-smoke receipt, or bounded source, capability, toolchain, compile, or artifact diagnostics |
@@ -136,8 +137,9 @@ warnings-as-errors plus a static C runtime. `run-host` executes and removes a te
 `build-host` requires a canonical `.exe` path below the ignored source-root `build/` directory and
 uses the same no-overwrite staging and promotion boundary as the Linux experimental build. Both
 reject foreign symbols, provisional standard-library linkage, `@repr(C)`, exact `c::*` scalar use,
-and foreign calls or results because those need an actual `x86_64-windows-msvc` TargetSpec and ABI
-contract. Neither uses WSL or inherits a Developer Command Prompt, and a retained host-smoke PE is
+and foreign calls or results because the declared `x86_64-windows-msvc` TargetSpec still has no
+target C-emission profile, executable layout/ABI evidence, runtime, or standard library. Neither
+uses WSL or inherits a Developer Command Prompt, and a retained host-smoke PE is
 not a supported distribution artifact or Windows conformance evidence.
 
 For the admitted foreign-call slice, `emit-c` writes a plain external prototype and call using the

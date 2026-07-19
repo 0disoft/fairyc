@@ -133,3 +133,46 @@ func TestTargetSpecScalarProviderSchemaMatchesSemanticValidator(t *testing.T) {
 		t.Fatalf("scalar provider availability enum = %v", got)
 	}
 }
+
+func TestTargetSpecSchemaProfilesMatchKnownTargets(t *testing.T) {
+	t.Parallel()
+	schemaBytes, err := os.ReadFile(filepath.Join("..", "..", "spec", "cli", "experimental-target-spec-v0.schema.json"))
+	if err != nil {
+		t.Fatalf("read schema: %v", err)
+	}
+	var schema struct {
+		OneOf []struct {
+			Properties map[string]struct {
+				Const string `json:"const"`
+			} `json:"properties"`
+		} `json:"oneOf"`
+		Defs struct {
+			Stack struct {
+				Required   []string `json:"required"`
+				Properties map[string]struct {
+					Minimum    *uint32 `json:"minimum"`
+					MultipleOf uint32  `json:"multipleOf"`
+				} `json:"properties"`
+			} `json:"stack"`
+		} `json:"$defs"`
+	}
+	if err := json.Unmarshal(schemaBytes, &schema); err != nil {
+		t.Fatalf("decode schema contract: %v", err)
+	}
+	var profileIDs []string
+	for _, profile := range schema.OneOf {
+		profileIDs = append(profileIDs, profile.Properties["id"].Const)
+	}
+	wantIDs := []string{string(target.X8664LinuxGNU), string(target.X8664WindowsMSVC)}
+	if !slices.Equal(profileIDs, wantIDs) {
+		t.Fatalf("target schema profiles = %v, want %v", profileIDs, wantIDs)
+	}
+	wantStackFields := []string{"callAlignmentBytes", "redZoneBytes", "shadowSpaceBytes"}
+	if !slices.Equal(schema.Defs.Stack.Required, wantStackFields) {
+		t.Fatalf("target stack required fields = %v, want %v", schema.Defs.Stack.Required, wantStackFields)
+	}
+	shadow := schema.Defs.Stack.Properties["shadowSpaceBytes"]
+	if shadow.Minimum == nil || *shadow.Minimum != 0 || shadow.MultipleOf != 8 {
+		t.Fatalf("target shadow-space schema = %+v", shadow)
+	}
+}

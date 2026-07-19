@@ -15,7 +15,7 @@ func TestX8664LinuxGNUSpecIsValidAndHostIndependent(t *testing.T) {
 	if err := Validate(spec); err != nil {
 		t.Fatalf("Validate() error = %v", err)
 	}
-	if spec.Pointer != (Layout{SizeBytes: 8, AlignmentBytes: 8}) || spec.Stack.CallAlignmentBytes != 16 || spec.ObjectFormat != "elf64" {
+	if spec.Pointer != (Layout{SizeBytes: 8, AlignmentBytes: 8}) || spec.Stack != (StackRules{CallAlignmentBytes: 16, RedZoneBytes: 128, ShadowSpaceBytes: 0}) || spec.ObjectFormat != "elf64" {
 		t.Fatalf("target core layout = %+v", spec)
 	}
 	var cLong, sizeT, ssizeT Scalar
@@ -55,22 +55,57 @@ func TestX8664LinuxGNUSpecIsValidAndHostIndependent(t *testing.T) {
 	}
 }
 
+func TestX8664WindowsMSVCSpecIsValidLLP64AndFailClosed(t *testing.T) {
+	t.Parallel()
+	spec, found := Lookup(X8664WindowsMSVC)
+	if !found {
+		t.Fatal("x86_64-windows-msvc target is missing")
+	}
+	if err := Validate(spec); err != nil {
+		t.Fatalf("Validate() error = %v", err)
+	}
+	if spec.DataModel != "llp64" || spec.Pointer != (Layout{SizeBytes: 8, AlignmentBytes: 8}) ||
+		spec.Stack != (StackRules{CallAlignmentBytes: 16, RedZoneBytes: 0, ShadowSpaceBytes: 32}) ||
+		spec.ObjectFormat != "coff-x86-64" || spec.UnwindModel != "windows-x64-pdata-xdata" {
+		t.Fatalf("Windows target core facts = %+v", spec)
+	}
+	var cLong, sizeT Scalar
+	for _, scalar := range spec.CScalars {
+		switch scalar.Name {
+		case "c.long":
+			cLong = scalar
+		case "c.size_t":
+			sizeT = scalar
+		case "c.ssize_t":
+			t.Fatalf("Windows target exposes unavailable POSIX scalar: %+v", scalar)
+		}
+	}
+	if cLong.Layout != (Layout{SizeBytes: 4, AlignmentBytes: 4}) || sizeT.Layout != (Layout{SizeBytes: 8, AlignmentBytes: 8}) {
+		t.Fatalf("Windows LLP64 scalar facts: c.long=%+v c.size_t=%+v", cLong, sizeT)
+	}
+	if spec.Evidence.EmissionSubset != "none" || spec.Evidence.Emittable || spec.Evidence.Conformant || spec.Evidence.Supported {
+		t.Fatalf("Windows target overclaims maturity = %+v", spec.Evidence)
+	}
+}
+
 func TestLookupReturnsIsolatedCopies(t *testing.T) {
 	t.Parallel()
-	first, _ := Lookup(X8664LinuxGNU)
-	first.LanguageScalars[0].Name = "mutated"
-	first.ReprCFeatures[0] = "mutated"
-	first.Evidence.Missing[0] = "mutated"
-	second, _ := Lookup(X8664LinuxGNU)
-	if second.LanguageScalars[0].Name == "mutated" || second.ReprCFeatures[0] == "mutated" || second.Evidence.Missing[0] == "mutated" {
-		t.Fatalf("Lookup() leaked mutable target state: %+v", second)
+	for _, id := range []ID{X8664LinuxGNU, X8664WindowsMSVC} {
+		first, _ := Lookup(id)
+		first.LanguageScalars[0].Name = "mutated"
+		first.ReprCFeatures[0] = "mutated"
+		first.Evidence.Missing[0] = "mutated"
+		second, _ := Lookup(id)
+		if second.LanguageScalars[0].Name == "mutated" || second.ReprCFeatures[0] == "mutated" || second.Evidence.Missing[0] == "mutated" {
+			t.Fatalf("Lookup(%q) leaked mutable target state: %+v", id, second)
+		}
 	}
 }
 
 func TestLookupRejectsUnknownTarget(t *testing.T) {
 	t.Parallel()
-	if _, found := Lookup("x86_64-windows-msvc"); found {
-		t.Fatal("unimplemented target was reported as known")
+	if _, found := Lookup("aarch64-linux-gnu"); found {
+		t.Fatal("unknown target was reported as known")
 	}
 }
 
@@ -86,6 +121,8 @@ func TestValidateRejectsMalformedLayoutOrderingAndMaturity(t *testing.T) {
 			spec.LanguageScalars[0], spec.LanguageScalars[1] = spec.LanguageScalars[1], spec.LanguageScalars[0]
 		}},
 		{name: "supported without conformance", mutate: func(spec *Spec) { spec.Evidence.Supported = true }},
+		{name: "profile identity drift", mutate: func(spec *Spec) { spec.DataModel = "llp64" }},
+		{name: "profile stack drift", mutate: func(spec *Spec) { spec.Stack.ShadowSpaceBytes = 32 }},
 		{name: "missing evidence erased", mutate: func(spec *Spec) { spec.Evidence.Missing = nil }},
 		{name: "language scalar with C header", mutate: func(spec *Spec) {
 			spec.LanguageScalars[0].Header = "stddef.h"

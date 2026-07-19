@@ -82,6 +82,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0070-provisional-target-maturity-list.md`: deterministic known-target maturity and missing-evidence reporting without host probing or target promotion.
 - `0071-checked-division-c-materialization.md`: volatile private divisor transport after verified MIR checks prevents host C compilers from rejecting unreachable constant-undefined division and remainder.
 - `0072-defined-checked-arithmetic-c-construction.md`: checked negation, addition, subtraction, and multiplication construct results through defined unsigned C operations after the verified trap edge.
+- `0073-executable-x86-64-windows-msvc-target-spec.md`: host-independent LLP64, Microsoft x64 stack, PE/COFF, unwind, and fail-closed maturity facts without promoting the Windows host smoke.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 
