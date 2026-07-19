@@ -37,6 +37,10 @@ read and propagate spare uninitialized capacity.
 9. The helper remains unavailable to Fairy C source and is not product-linked. `String`, `CString`,
    and file I/O therefore cannot claim Buffer-backed execution yet.
 
+ADR 0058 later supersedes only the source-disconnected part of item 9: an internal generated Fairy
+caller now reaches three exact Buffer helpers through nested `@repr(C)` transport. The helper is
+still not product-linked and no public `std::bytes::Buffer` API is claimed.
+
 ## Consequences
 
 - Growth copies initialized bytes instead of using raw `realloc`; this favors semantic proof over an

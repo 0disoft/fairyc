@@ -150,9 +150,10 @@ C is a boundary contract rather than the default internal representation.
 - Platform-dependent C types use a distinct `c.*` namespace.
 - The executable source C-scalar slice transports all sixteen exact TargetSpec C scalars. They are
   distinct from coincidentally represented Fairy scalars; C-scalar literals, operators,
-  conversions, and raw pointers remain deferred. Exact C-scalar fields are admitted only in flat
-  nonempty `@repr(C)` structs. Opaque `*void` and `*mut void` are admitted without dereference or
-  conversion semantics.
+  conversions, and raw pointers remain deferred. Exact C-scalar fields are admitted only in
+  nonempty `@repr(C)` structs; an acyclic nested field is admitted only when its type is also
+  `@repr(C)`. Opaque `*void` and `*mut void` are admitted without dereference or conversion
+  semantics.
 - Foreign calls and generated raw bindings are unsafe by default and use raw pointers rather than safe references.
 - Safe wrappers own length, nullability, lifetime, error, and ownership conversion.
 - Stage 0 callbacks are non-capturing, synchronous, same-thread raw `unsafe extern C` function pointers plus explicit user data.
@@ -186,9 +187,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   this implementation gate does not remove user drop bodies from the language contract.
 - Inert struct declarations retain canonical identity, declaration-ordered fields, and `@repr(C)`
   classification through AST, typed HIR, verified MIR, the executable interpreter subset, and the
-  constrained C backend. The current C-layout implementation is nonempty and flat over `u8`,
-  `i32`, `u32`, `usize`, all sixteen exact TargetSpec C scalars, and admitted raw pointers including
-  opaque `void`; broader contracted field families remain fail-closed.
+  constrained C backend. The current C-layout implementation is nonempty and acyclic over `u8`,
+  `i32`, `u32`, `usize`, all sixteen exact TargetSpec C scalars, admitted raw pointers including
+  opaque `void`, and nested types that are themselves `@repr(C)`. Dependencies are emitted before
+  their users; recursive value types and broader contracted field families remain fail-closed.
 - The executable raw-address slice accepts only an exact direct-local `&T -> *T`, `&mut T -> *T`,
   or `&mut T -> *mut T` cast inside `unsafe`. AST keeps the target type separate, typed HIR keeps
   unsafe scope, MIR verifies pointee/mutability/provenance, generated C emits `&local`, and the
@@ -212,7 +214,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - `internal/layout` consumes that description and computes checked scalar, pointer, explicitly
   based C-enum, positive fixed-array, and nonempty nested-struct size, natural alignment, field
   offset, and top-level padding facts. `fairyc.layout-fixtures/v0` currently executes 16 pass/fail
-  cases. This target-mechanics path does not implement the corresponding source syntax.
+  cases. This target-mechanics path does not by itself admit corresponding source syntax.
 - `internal/cabi` consumes those same target and layout facts for the closed SysV AMD64 Stage 0
   type vocabulary. `fairyc.c-abi-fixtures/v0` executes 17 exact class and register-plan cases,
   including hidden returns and whole-aggregate rollback under integer or SSE register exhaustion.
@@ -228,12 +230,12 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - A small MIR interpreter is the semantic oracle before any second native backend.
 - Its fixture-only output hooks require explicit manifest bindings, capture bytes in memory under a
   shared limit, and never authorize source names, the CLI, or host streams.
-- The current C backend emits deterministic C11 only for verified scalar, flat inert-struct,
+- The current C backend emits deterministic C11 only for verified scalar, inert-struct,
   restricted inert-enum, flat-resource, and resource-tagged MIR
   under the provisional `x86_64-linux-gnu` profile. It includes private `Option<i32>`,
   `Result<i32, i32>`, nonempty all-`i32` resource transport, and built-in resource-bearing tags whose
   payloads are exactly `i32` or direct admitted resources, plus private restricted user-enum tags
-  whose payload fields are admitted scalars, raw pointers, or flat inert structs. Nested user enums
+  whose payload fields are admitted scalars, raw pointers, or admitted inert structs. Nested user enums
   and built-in tags inside a user-enum payload remain a C-backend capability boundary. No public
   tagged or resource ABI is claimed.
   Nonempty admitted `@repr(C)` structs preserve public tags and field names; their layout and private
@@ -246,8 +248,9 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   negative-preserving `c::long`, `c::size_t`, and negative-preserving `c::ssize_t`
   producer/consumer C units plus one twelve-type C-scalar family unit, and to the actual text-view C
   unit for both the empty predicate and `@repr(C)` output-record mutation paths. An exact generated
-  `void *`/`size_t` block additionally crosses the real SystemHeap allocate and deallocate helpers;
-  report v21 records those counters.
+  `void *`/`size_t` block additionally crosses the real SystemHeap allocate and deallocate helpers.
+  A nested generated Buffer record then crosses the real initialize, zeroed-resize, and drop
+  helpers. Report v22 records both source-call counters.
   Its closed
   `drop-trace-v0` emission profile assigns source/type/span identities to dense site IDs and compares
   exact four-byte native records with the MIR interpreter trace. This instrumentation is absent from

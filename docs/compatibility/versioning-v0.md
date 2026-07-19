@@ -107,8 +107,10 @@ or layout-fixture shape. V20 adds `foreignCScalarFamilyCallExecutions` for one g
 and one hand-written C companion crossing the remaining twelve exact TargetSpec C scalars in both
 compiler directions and profiles. V21 adds `systemHeapSourceCallExecutions` for the generated Fairy
 caller crossing the exact `void *`/`size_t` block into the real SystemHeap allocate and deallocate
-helpers in both compiler directions and profiles. The runner emits one exact version and does not pretend the
-report shapes are interchangeable.
+helpers in both compiler directions and profiles. V22 adds `bufferSourceCallExecutions` for a
+generated Fairy caller crossing the exact nested SystemHeap-block plus `size_t` Buffer record into
+the real initialize, zeroed-resize, and drop helpers in both compiler directions and profiles. The
+runner emits one exact version and does not pretend the report shapes are interchangeable.
 
 ## Runtime and standard library
 

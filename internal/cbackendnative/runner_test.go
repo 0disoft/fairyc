@@ -248,9 +248,28 @@ func TestSystemHeapSourceCallSmokeReachesCEmission(t *testing.T) {
 	}
 }
 
+func TestBufferSourceCallSmokeReachesCEmission(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "main.fy"), []byte(bufferSourceCallSmokeSource), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	code := cli.Run([]string{"experimental", "emit-c", "main.fy"}, root, &stdout, &stderr)
+	if code != cli.ExitSuccess || stderr.Len() != 0 {
+		t.Fatalf("Buffer source call C emission = code %d, stderr %q", code, stderr.String())
+	}
+	for _, required := range bufferSourceCallExpectedCFragments {
+		if !strings.Contains(stdout.String(), required) {
+			t.Errorf("Buffer source call C emission is missing %q", required)
+		}
+	}
+}
+
 func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 	t.Parallel()
-	if reportSchemaVersion != "fairyc.native-c-report/v21" {
+	if reportSchemaVersion != "fairyc.native-c-report/v22" {
 		t.Fatalf("report schema = %q", reportSchemaVersion)
 	}
 	encoded, err := json.Marshal(Report{
@@ -262,6 +281,7 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		SystemHeapExecutions:               4,
 		SystemHeapSourceCallExecutions:     4,
 		BufferExecutions:                   4,
+		BufferSourceCallExecutions:         4,
 		ArenaExecutions:                    4,
 		TextViewExecutions:                 4,
 		OwnedTextExecutions:                4,
@@ -279,7 +299,7 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v21"`) ||
+	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v22"`) ||
 		!strings.Contains(string(encoded), `"dropTraceExecutions":72`) ||
 		!strings.Contains(string(encoded), `"layoutCases":["pass.array-i32-three","pass.pointer"]`) ||
 		!strings.Contains(string(encoded), `"layoutProbeExecutions":4`) ||
@@ -291,6 +311,7 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		!strings.Contains(string(encoded), `"systemHeapExecutions":4`) ||
 		!strings.Contains(string(encoded), `"systemHeapSourceCallExecutions":4`) ||
 		!strings.Contains(string(encoded), `"bufferExecutions":4`) ||
+		!strings.Contains(string(encoded), `"bufferSourceCallExecutions":4`) ||
 		!strings.Contains(string(encoded), `"arenaExecutions":4`) ||
 		!strings.Contains(string(encoded), `"textViewExecutions":4`) ||
 		!strings.Contains(string(encoded), `"ownedTextExecutions":4`) ||

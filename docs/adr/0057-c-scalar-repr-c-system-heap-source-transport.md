@@ -49,3 +49,7 @@ callers.
 - Buffer, Arena, owned text, and File records can reuse the same exact flat-field mechanism in later
   source crossings, but nested resource wrappers and public APIs still need their own contracts.
 - Native execution remains configured but unobserved on this Windows host.
+
+ADR 0058 later admits acyclic nested `@repr(C)` fields and uses the exact SystemHeap block as the
+first field of an internal Fairy Buffer record. Public resource wrappers remain outside both
+decisions.

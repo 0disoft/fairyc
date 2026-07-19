@@ -551,6 +551,84 @@ fn main() -> i32 { 0 }
 	}
 }
 
+func TestEmitNestedReprCStructsInDependencyOrderWithExactLayout(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+@repr(C)
+struct fy_std_buffer_v0 {
+    block: fy_std_system_heap_block_v0;
+    length: c::size_t;
+}
+@repr(C)
+struct fy_std_system_heap_block_v0 {
+    data: *mut void;
+    size: c::size_t;
+    alignment: c::size_t;
+}
+fn main() -> i32 { 0 }
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	heapDefinition := strings.Index(unit.Source, "struct fy_std_system_heap_block_v0 {")
+	bufferDefinition := strings.Index(unit.Source, "struct fy_std_buffer_v0 {")
+	if heapDefinition < 0 || bufferDefinition < 0 || heapDefinition >= bufferDefinition {
+		t.Fatalf("nested repr(C) definitions are not dependency ordered:\n%s", unit.Source)
+	}
+	for _, required := range []string{
+		"struct fy_std_system_heap_block_v0 block;",
+		"size_t length;",
+		"_Static_assert(sizeof(struct fy_std_system_heap_block_v0) == UINT64_C(24)",
+		"offsetof(struct fy_std_system_heap_block_v0, data) == UINT64_C(0)",
+		"offsetof(struct fy_std_system_heap_block_v0, size) == UINT64_C(8)",
+		"offsetof(struct fy_std_system_heap_block_v0, alignment) == UINT64_C(16)",
+		"_Static_assert(sizeof(struct fy_std_buffer_v0) == UINT64_C(32)",
+		"offsetof(struct fy_std_buffer_v0, block) == UINT64_C(0)",
+		"offsetof(struct fy_std_buffer_v0, length) == UINT64_C(24)",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+	for _, feature := range []string{"c-size-t", "inert-struct", "repr-c-struct"} {
+		if !slices.Contains(unit.Features, feature) {
+			t.Fatalf("features = %v, want %q", unit.Features, feature)
+		}
+	}
+}
+
+func TestEmitRejectsRecursiveStructDependency(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+@repr(C)
+struct First { second: Second; }
+@repr(C)
+struct Second { first: First; }
+fn main() -> i32 { 0 }
+`)
+	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	var capability cbackend.CapabilityError
+	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "recursive struct dependency involving") {
+		t.Fatalf("Emit() error = %v", err)
+	}
+}
+
+func TestEmitRejectsNonReprCNestedStruct(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+struct Private { value: u32; }
+@repr(C)
+struct Public { inner: Private; }
+fn main() -> i32 { 0 }
+`)
+	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	var capability cbackend.CapabilityError
+	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, `struct type "main::Public" field "inner" of type "main::Private": nested struct type "main::Private" is not repr(C)`) {
+		t.Fatalf("Emit() error = %v", err)
+	}
+}
+
 func TestEmitKeepsCScalarFieldsInsideReprCStructs(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main;\nstruct Private { size: c::size_t; }\nfn main() -> i32 { 0 }\n")

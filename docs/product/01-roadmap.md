@@ -104,8 +104,10 @@ remain unobserved on this Windows host; the later Arena, text ownership, and Lin
 exist but remain source-disconnected.
 The next storage slice now adds provisional Buffer construction, initialized-prefix-only reserve,
 overlap-safe append across relocation, overflow rollback, zeroed growth, truncate, clear, and drop.
-Its four native probe executions are likewise configured but unobserved, and source programs still
-cannot call the helper.
+Its four C-only native probe executions and four generated-Fairy source-call executions are
+configured but unobserved. The internal caller uses the exact nested SystemHeap-block record and
+reaches initialize, zeroed resize, and drop; public `std::bytes`, automatic product linkage, and
+safe ownership methods remain missing.
 The Arena storage slice now adds a single-active-Region generation check, failure-atomic zeroed and
 copied byte placement, reset invalidation, stale-use rejection, and active-drop rejection. Its four
 native executions are configured but unobserved; source-level `std::alloc` construction and calls
@@ -125,17 +127,17 @@ source-visible File effects and error resources remain missing.
 
 The source FFI slice admits `unsafe extern C fn` declarations using `i32`, `u8`, `u32`, `usize`, all
 sixteen exact transport-only TargetSpec C scalars, raw pointers to the bounded Fairy scalar set or
-opaque `void`, and raw pointers to flat nonempty `@repr(C)` records whose fields may include the
-exact C scalars. A single
+opaque `void`, and raw pointers to nonempty acyclic `@repr(C)` records whose fields may include the
+exact C scalars or nested `@repr(C)` records. A single
 `@link_name("symbol")` may separate the Fairy lookup name from the external C symbol. Unsafe call,
 link identity, and raw-address provenance survive AST, typed HIR, and MIR verification; the C
 backend emits unannotated prototypes, exact record tags/fields/layout assertions, and `&local` only
 for an exact unsafe borrow-to-pointer cast. The native lane plans four scalar, four typed-null
 pointer/target-scalar, four individual exact C-scalar, four remaining twelve-type C-scalar-family,
-four real SystemHeap block, four real UTF-8 validation, and four real text-view output-record
+four real SystemHeap block, four real nested Buffer, four real UTF-8 validation, and four real text-view output-record
 crossings. The interpreter refuses
 raw addresses and foreign execution. Dereference, pointer arithmetic, arbitrary casts, callbacks,
-C-scalar value semantics, nested or by-value aggregates, exports, and public standard-library
+C-scalar value semantics, nested enum or array fields, by-value aggregate FFI, exports, and public standard-library
 wrappers remain Phase 2 work. The internal empty-input text transports are real source-to-stdlib-C
 exceptions, not completed wrappers.
 

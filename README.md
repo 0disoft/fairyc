@@ -82,8 +82,11 @@ through a public `std::alloc` API. Arena, text ownership, and Linux File now hav
 below, but they remain source-disconnected.
 A second provisional slice implements Buffer-owned initialized bytes, failure-atomic reserve,
 relocating self-overlap append, length-overflow rollback, zeroed growth, truncate, clear, and drop.
-Its four-way native C probe is configured but still unobserved and not source-callable; the public
-standard-library package remains absent.
+Its closed C-only probe and an internal generated FY caller using the exact nested SystemHeap-block
+plus `size_t` record each have four configured Clang/GCC low/optimized executions. Neither has an
+observed hosted receipt. Three exact Buffer helpers are now admitted by the constrained source
+backend and exercised by the closed native fixture; product linkage and the public standard-library
+package remain absent.
 A third slice implements Arena-owned byte nodes with one active generation-checked Region,
 failure-atomic zeroed or copied placement, reset invalidation, stale-use rejection, and active-drop
 rejection. Its native matrix is likewise configured but unobserved and disconnected from source
@@ -110,13 +113,14 @@ raw declarations are `E5102`. The interpreter fails closed with a `foreign-call`
 while C emission produces a plain external prototype with no inferred alias, purity, retention, or
 unwind attributes. Typed `null` crosses a closed pointer/target-scalar native probe. An exact
 safe-borrow-to-raw-pointer cast now lowers only for a direct local place inside `unsafe`, allowing a
-flat nonempty `@repr(C)` record to cross by pointer and receive standard-library output.
+nonempty `@repr(C)` record to cross by pointer and receive standard-library output.
 Those C scalar types remain distinct from coincidentally represented Fairy scalars, emit their exact
 C spellings with target and provider assertions, and currently have no source literal, operator,
-cast, raw-pointer, or interpreter support. Flat nonempty `@repr(C)` records may use exact C-scalar
-fields and opaque `void` pointers. Raw
-dereference or arithmetic, arbitrary casts, callbacks, nested or
-by-value aggregates, exports, and public standard-library wrappers remain unimplemented.
+cast, raw-pointer, or interpreter support. Nonempty `@repr(C)` records may use exact C-scalar fields,
+opaque `void` pointers, and acyclic nested `@repr(C)` records; generated definitions are ordered by
+dependency and guarded by target-derived nested layout assertions. Raw dereference or arithmetic,
+arbitrary casts, nested enum or built-in-tag fields, arrays, callbacks, by-value aggregate FFI,
+exports, and public standard-library wrappers remain unimplemented.
 A deterministic native C11 plus explicit POSIX-typedef probe now translates the eleven valid layout cases into private numeric
 types and is configured for Clang/GCC at `-O0` and `-O2`. This Windows host cannot execute those
 four probe runs, and no hosted success receipt has been observed, so `c-layout-probes` remains a

@@ -392,10 +392,10 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 }
 
 func prepareStructTypes(definitions []mir.StructType, engine *layout.Engine) ([]structCType, map[hir.Type]int, error) {
-	ordered := slices.Clone(definitions)
-	slices.SortFunc(ordered, func(left, right mir.StructType) int {
-		return strings.Compare(string(left.Type), string(right.Type))
-	})
+	ordered, err := orderStructDefinitions(definitions)
+	if err != nil {
+		return nil, nil, err
+	}
 	result := make([]structCType, 0, len(ordered))
 	byType := make(map[hir.Type]int, len(ordered))
 	publicNames := make(map[string]hir.Type)
@@ -418,9 +418,9 @@ func prepareStructTypes(definitions []mir.StructType, engine *layout.Engine) ([]
 			if definition.ReprC && !validCABIIdentifier(field.Name) {
 				return nil, nil, CapabilityError{Feature: "repr(C) struct " + strconv.Quote(definition.Name) + " field name " + strconv.Quote(field.Name)}
 			}
-			fieldType, err := structFieldLayoutType(field.Type, definition.ReprC)
+			fieldType, err := structFieldLayoutType(field.Type, definition.ReprC, result, byType)
 			if err != nil {
-				return nil, nil, CapabilityError{Feature: "struct type " + strconv.Quote(string(definition.Type)) + " field " + strconv.Quote(field.Name) + " of type " + strconv.Quote(string(field.Type))}
+				return nil, nil, CapabilityError{Feature: "struct type " + strconv.Quote(string(definition.Type)) + " field " + strconv.Quote(field.Name) + " of type " + strconv.Quote(string(field.Type)) + ": " + err.Error()}
 			}
 			fieldIndex[field.Name] = index
 			layoutName := fmt.Sprintf("f_%d", index)
@@ -441,6 +441,56 @@ func prepareStructTypes(definitions []mir.StructType, engine *layout.Engine) ([]
 		result = append(result, structCType{definition: definition, layout: computed, layoutType: aggregateType, fieldIndex: fieldIndex})
 	}
 	return result, byType, nil
+}
+
+func orderStructDefinitions(definitions []mir.StructType) ([]mir.StructType, error) {
+	sorted := slices.Clone(definitions)
+	slices.SortFunc(sorted, func(left, right mir.StructType) int {
+		return strings.Compare(string(left.Type), string(right.Type))
+	})
+	byType := make(map[hir.Type]mir.StructType, len(sorted))
+	for _, definition := range sorted {
+		if _, duplicate := byType[definition.Type]; duplicate {
+			return nil, fmt.Errorf("duplicate C struct type %q", definition.Type)
+		}
+		byType[definition.Type] = definition
+	}
+	state := make(map[hir.Type]uint8, len(sorted))
+	ordered := make([]mir.StructType, 0, len(sorted))
+	var visit func(mir.StructType) error
+	visit = func(definition mir.StructType) error {
+		switch state[definition.Type] {
+		case 1:
+			return CapabilityError{Feature: "recursive struct dependency involving " + strconv.Quote(string(definition.Type))}
+		case 2:
+			return nil
+		}
+		state[definition.Type] = 1
+		dependencies := make([]hir.Type, 0, len(definition.Fields))
+		for _, field := range definition.Fields {
+			if _, nested := byType[field.Type]; nested {
+				dependencies = append(dependencies, field.Type)
+			}
+		}
+		slices.SortFunc(dependencies, func(left, right hir.Type) int {
+			return strings.Compare(string(left), string(right))
+		})
+		dependencies = slices.Compact(dependencies)
+		for _, dependency := range dependencies {
+			if err := visit(byType[dependency]); err != nil {
+				return err
+			}
+		}
+		state[definition.Type] = 2
+		ordered = append(ordered, definition)
+		return nil
+	}
+	for _, definition := range sorted {
+		if err := visit(definition); err != nil {
+			return nil, err
+		}
+	}
+	return ordered, nil
 }
 
 func prepareEnumTypes(definitions []mir.EnumType) ([]enumCType, map[hir.Type]int, error) {
@@ -474,8 +524,14 @@ func prepareEnumTypes(definitions []mir.EnumType) ([]enumCType, map[hir.Type]int
 	return result, byType, nil
 }
 
-func structFieldLayoutType(value hir.Type, reprC bool) (layout.Type, error) {
+func structFieldLayoutType(value hir.Type, reprC bool, structures []structCType, byType map[hir.Type]int) (layout.Type, error) {
 	value = canonicalCValueType(value)
+	if index, nested := byType[value]; nested {
+		if !reprC || !structures[index].definition.ReprC {
+			return layout.Type{}, fmt.Errorf("nested struct type %q is not repr(C)", value)
+		}
+		return structures[index].layoutType, nil
+	}
 	switch value {
 	case hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
 		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(value)}, nil
@@ -783,6 +839,9 @@ func validExternalCIdentifier(value string) bool {
 var admittedStandardLibrarySymbols = map[string]struct{}{
 	"fy_std_system_heap_allocate_v0":   {},
 	"fy_std_system_heap_deallocate_v0": {},
+	"fy_std_buffer_initialize_v0":      {},
+	"fy_std_buffer_resize_zeroed_v0":   {},
+	"fy_std_buffer_drop_v0":            {},
 	"fy_std_text_utf8_valid_v0":        {},
 	"fy_std_text_validate_utf8_v0":     {},
 }

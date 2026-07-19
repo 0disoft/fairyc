@@ -52,14 +52,14 @@ code. The native fixture lane's `drop-trace-v0` observer profile is not availabl
 command and never appears in its output.
 The admitted foreign declaration form currently supports `i32`, `u8`, `u32`, `usize`, all sixteen
 exact transport-only TargetSpec C scalars, raw pointers to
-the fixed-width Fairy scalar set or opaque `void`, and raw pointers to admitted flat `@repr(C)`
-structs whose fields may include the exact C scalars. It uses its source
+the fixed-width Fairy scalar set or opaque `void`, and raw pointers to admitted nonempty acyclic
+`@repr(C)` structs whose fields may include exact C scalars or nested `@repr(C)` records. It uses its source
 identifier as the C symbol by default or accepts one nonempty `@link_name("symbol")`, and requires
 an explicit unsafe boundary. Raw pointers can be null,
 returned by another admitted foreign call, or produced by an exact direct-local borrow-to-pointer
 cast inside `unsafe`. Dereference, arithmetic, integer conversion, mutability strengthening, and
-arbitrary casts remain unavailable. No callback, C-scalar value operation, nested or by-value
-aggregate, export, or inferred C attribute is implemented.
+arbitrary casts remain unavailable. No callback, C-scalar value operation, array or enum aggregate
+field, by-value aggregate FFI, export, or inferred C attribute is implemented.
 `experimental build` sends that exact constrained-C unit through the shared bounded C driver and embedded
 runtime. It has no implicit compiler, optimization, or output choice; requires Linux/amd64 with
 glibc; accepts only Clang or GCC and the closed `low` or `optimized` profiles; and creates a new

@@ -20,8 +20,9 @@ The Windows Go compiler host does not define target layout. Proving the first ta
 
 The current Go prototype can emit deterministic C11 for a verified scalar, inert-struct,
 flat-resource, and resource-tagged profile carrying this target identity. The inert-struct slice
-includes nonempty source `@repr(C)` records whose fields are currently limited to `u8`, `i32`,
-`u32`, `usize`, and raw pointers. It preserves the public C tag and field names and emits target-
+includes nonempty source `@repr(C)` records whose fields may use `u8`, `i32`, `u32`, `usize`, all
+sixteen exact TargetSpec C scalars, admitted raw pointers, and acyclic nested `@repr(C)` records. It
+preserves the public C tag and field names, emits dependencies before their users, and emits target-
 computed size, alignment, and offset assertions. Private `Option<i32>`, `Result<i32, i32>`,
 all-`i32` resources, and resource-bearing tags remain compiler-private; resources are still
 forbidden from `@repr(C)` and the public C ABI.
@@ -82,19 +83,21 @@ Generated C asserts target-derived size and alignment for every used C scalar an
 signed and unsigned integer families. Target-specific `c::ssize_t` also defines
 `_POSIX_C_SOURCE 200809L`. Their only current value path is foreign return to typed local to matching
 foreign argument; they have no source literal, arithmetic, comparison, cast, interpreter behavior,
-or general aggregate-field support. Raw pointers to C scalars also remain outside the admitted backend
-slice. This is not implementation of exports, callbacks, nested/array/enum `@repr(C)` fields, or
-by-value aggregate calls and returns. The interpreter remains fail-closed on every foreign call.
+or raw-pointer support. Exact C-scalar fields may appear directly or through admitted nested
+`@repr(C)` records. Raw pointers to C scalars remain outside the admitted backend slice. This is not
+implementation of exports, callbacks, array or enum `@repr(C)` fields, or by-value aggregate calls
+and returns. The interpreter remains fail-closed on every foreign call.
 
 ## C-representable types
 
 `@repr(C)` permits fixed-width integers, `c.*` scalars, `f32`, `f64`, raw pointers, fixed arrays, nested `@repr(C)` structs, and an explicitly based C enum. It rejects resources, safe borrows, slices, `str`, `CStr`, `Option`, `Result`, `Region`, `String`, `Buffer`, payload enums, empty structs, packed or custom alignment, unions, bit fields, long double, atomics, and vector types.
 
 The implemented source/backend slice is deliberately smaller than that language contract: it
-accepts only nonempty, flat structs over `u8`, `i32`, `u32`, `usize`, all sixteen exact TargetSpec C
-scalars, and admitted raw pointers including opaque `void`. C-scalar fields are accepted only in
-`@repr(C)` structs, use the same exact transport table and provider assertions as foreign scalar
-signatures, and have one source-to-real-SystemHeap-C mutation crossing. Other contracted field
+accepts only acyclic nonempty structs over `u8`, `i32`, `u32`, `usize`, all sixteen exact TargetSpec
+C scalars, admitted raw pointers including opaque `void`, and nested structs that are themselves
+`@repr(C)`. C-scalar fields use the same exact transport table and provider assertions as foreign
+scalar signatures. One flat record crosses the real SystemHeap C unit; one nested record crosses
+the real Buffer C unit. Arrays, explicit C enums, floating Fairy scalars, and other contracted field
 families remain fail-closed until their source typing, layout, ABI, and native crossing tests are
 connected together.
 

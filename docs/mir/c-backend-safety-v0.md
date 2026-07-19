@@ -34,7 +34,10 @@ before every header rather than silently relying on the host's default feature n
 slice deliberately creates no immediate C-scalar MIR operand: a foreign producer result local may
 be passed to a matching foreign consumer, while literals, operators, comparisons, casts,
 interpreter execution, and raw pointers to C scalars remain closed. Exact C-scalar fields are
-accepted only in nonempty flat `@repr(C)` structs and share the same transport table and assertions.
+accepted only in nonempty `@repr(C)` structs and share the same transport table and assertions.
+An admitted struct may contain another acyclic nonempty `@repr(C)` struct by value. The backend
+orders complete definitions by dependency and reuses the child target layout when computing the
+containing field; recursive value dependencies and non-`@repr(C)` nested structs fail closed.
 
 The emitter additionally accepts direct resource values only when every program-level definition is
 nonempty, every declaration-ordered field is exactly `i32`, and the verified user drop body is
@@ -86,8 +89,9 @@ The backend cannot add C or LLVM overflow, exactness, alignment, or alias promis
   pointer, stack, classifier, and object-format facts.
 - `internal/layout` now computes checked array and aggregate size, alignment, field offset, and
   padding from that description. The C emitter consumes those results for flat all-`i32` private
-  resources, their permitted resource-bearing built-in tags, and nonempty flat source `@repr(C)`
-  structs over `u8`, `i32`, `u32`, `usize`, and raw pointers. It emits `_Static_assert` checks for
+  resources, their permitted resource-bearing built-in tags, and nonempty source `@repr(C)` structs
+  over `u8`, `i32`, `u32`, `usize`, exact C scalars, admitted raw pointers, and acyclic nested
+  `@repr(C)` records. It emits dependencies before their users plus `_Static_assert` checks for
   `sizeof`, `_Alignof`, and every `offsetof`; public C records preserve their declared tag and field
   names. General nested resources and the remaining contracted `@repr(C)` field families fail closed.
 - Bit reinterpretation and potentially unaligned access use a `memcpy`-style transport rather than incompatible lvalue access.
@@ -124,16 +128,18 @@ external name coalesce even when their Fairy names differ; signature conflicts f
 included-header macro with that name before the prototype. `main`, generated `fy_`/`FY_` names,
 C11 keywords, and identifiers consumed by the generated preamble are rejected. The only current
 exceptions to the generated `fy_` namespace are the exact allowlisted internal standard-library
-symbols `fy_std_text_utf8_valid_v0` and `fy_std_text_validate_utf8_v0`; the rest of the prefix
-remains closed. Typed null and an exact direct-local borrow-to-raw-pointer cast are the only
+symbols for SystemHeap allocate/deallocate, Buffer initialize/zeroed-resize/drop, and text
+validation/output initialization; the rest of the prefix remains closed. Typed null and an exact
+direct-local borrow-to-raw-pointer cast are the only
 source-constructed raw pointers. The cast requires unsafe provenance, preserves the pointee type,
 forbids mutability strengthening, lowers to a verified MIR raw-address operation, and emits plain
 `&local` without `restrict` or `noalias`. Pointer dereference, arithmetic, integer conversion, and
 arbitrary casts remain rejected.
 Source `@repr(C)` construction, field reads, exact public names, layout assertions, pointer
-prototype spelling, direct-local address passing, opaque `void` pointers, and exact C-scalar fields
-are implemented, but by-value aggregate ABI, nested enum or built-in-tag payloads, array fields,
-C-scalar value operations, non-`@repr(C)` C-scalar fields, and callbacks remain outside this slice.
+prototype spelling, direct-local address passing, opaque `void` pointers, exact C-scalar fields,
+and acyclic nested `@repr(C)` fields are implemented, but by-value aggregate ABI, nested enum or
+built-in-tag payloads, array fields, C-scalar value operations, non-`@repr(C)` C-scalar fields, and
+callbacks remain outside this slice.
 
 The MIR interpreter deliberately returns a `foreign-call` capability error instead of guessing a
 host binding. A closed native fixture compiles the generated Fairy caller and a hand-written C
@@ -166,14 +172,16 @@ Clang-generated Fairy caller to GCC C callee and the reverse at low and optimize
 crossings use the existing separate-object driver and are counted separately as
 `foreignCallExecutions`, `foreignCIntCallExecutions`, `foreignCLongCallExecutions`,
 `foreignCSizeTCallExecutions`, `foreignCSSizeTCallExecutions`,
-`foreignCScalarFamilyCallExecutions`, and `foreignPointerCallExecutions` in
-`fairyc.native-c-report/v21`; they do not expand the eighteen interpreter-owned differential cases.
+`foreignCScalarFamilyCallExecutions`, and `foreignPointerCallExecutions` in the current native
+report; they do not expand the eighteen interpreter-owned differential cases.
 Every C-scalar probe uses hand-written C producers and consumers so each value crosses a generated
 typed local without requiring a Fairy C literal. The family probe uses exactly representable finite
 floating values and makes no NaN, infinity, signed-zero, rounding, or floating-environment claim.
-The same report separately records four `systemHeapSourceCallExecutions`: an exact generated
-`void *`/`size_t` block crosses into the real SystemHeap C unit, is mutated by allocation, and is
-normalized by deallocation. This is an internal transport probe, not a public allocator API.
+`fairyc.native-c-report/v22` separately records four `systemHeapSourceCallExecutions` and four
+`bufferSourceCallExecutions`. The first crosses an exact generated `void *`/`size_t` block into the
+real SystemHeap C unit. The second nests that block in the exact Buffer record, calls the real
+initialize, zeroed-resize, and drop helpers, and observes initialized bytes plus normalized release.
+These are internal transport probes, not public allocator or Buffer APIs.
 
 `internal/cdriver` and `internal/cruntime` are the one implementation path for both that matrix and
 the experimental constrained-C executable builder. The driver fixes the C dialect, warning policy,
