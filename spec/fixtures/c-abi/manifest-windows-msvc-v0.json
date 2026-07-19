@@ -6,11 +6,12 @@
     "docs/adr/0006-c-abi-v0-and-first-conformance-target.md",
     "docs/adr/0073-executable-x86-64-windows-msvc-target-spec.md",
     "docs/adr/0076-microsoft-x64-classifier-fixtures.md",
+    "docs/adr/0077-windows-msvc-native-abi-probe.md",
     "docs/abi/c-abi-v0.md",
     "docs/compatibility/versioning-v0.md"
   ],
   "deferred": [
-    "bidirectional native MSVC argument and return probes plus a hosted Windows receipt",
+    "independent-compiler or assembly/register crossing evidence, source-level Fairy crossings, and a hosted Windows receipt",
     "exact stack argument offsets, 32-byte shadow-store observations, by-reference temporary alignment and lifetime, and assembly inspection",
     "variadic floating-point register mirroring, vector and intrinsic exceptions, callbacks, exports, and foreign unwinding",
     "Windows target C emission, PE/COFF object metadata, runtime, standard library, and distribution"

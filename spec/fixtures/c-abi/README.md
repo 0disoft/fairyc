@@ -14,9 +14,12 @@ native probe only after the complete manifest is clean.
 
 The Windows manifest covers Microsoft x64's four shared ordinal argument slots, integer versus SSE
 register selection by slot, later stack arguments, one-slot hidden returns, 1/2/4/8-byte aggregate
-integer transport, and indirect odd-size or larger aggregate transport. Its twelve pass plans do
-not yet feed a native MSVC call probe. Exact stack offsets, shadow-store observation, temporary
-alignment and lifetime, variadics, vector exceptions, callbacks, and exports remain deferred.
+integer transport, and indirect odd-size or larger aggregate transport. Its twelve pass plans feed
+one generated caller and one generated callee C11 translation unit. The configured Windows host
+smoke compiles, links, and executes that pair with local x64 MSVC at low and optimized profiles.
+This same-compiler local crossing is not source-level Fairy FFI, independent-compiler or assembly
+evidence, or a hosted receipt. Exact stack offsets, shadow-store observation, temporary alignment
+and lifetime, variadics, vector exceptions, retained callbacks, and exports remain deferred.
 
 This schema is not a public FFI manifest, serialized compiler IR, stable native Fairy ABI, or proof
 that a target compiler crossed the boundary. It excludes variadics, vectors, x87, unions, packed or

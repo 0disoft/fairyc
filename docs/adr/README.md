@@ -86,6 +86,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0074-windows-msvc-llp64-layout-fixtures.md`: separate host-independent Windows scalar, pointer, unavailable-typedef, aggregate-offset, and padding observations without claiming a native MSVC probe.
 - `0075-windows-msvc-native-layout-probe.md`: deterministic non-POSIX C11 assertions for the eight valid Windows layout cases compiled and executed by local x64 MSVC at low and optimized profiles without maturity promotion.
 - `0076-microsoft-x64-classifier-fixtures.md`: target-bound four-slot Microsoft x64 argument, aggregate-indirection, and hidden-result plans across fifteen host-independent cases without native-call promotion.
+- `0077-windows-msvc-native-abi-probe.md`: same-version local MSVC caller/callee crossings for the twelve validated Microsoft x64 pass cases without source-level, independent, hosted, object, or unwind promotion.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

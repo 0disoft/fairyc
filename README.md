@@ -72,7 +72,10 @@ native evidence by themselves, and the target's C ABI marker stays fail-closed.
 The same target-bound engine now selects a separate Microsoft x64 algorithm for Windows. Its 15
 versioned cases cover shared ordinal RCX/RDX/R8/R9 or XMM0-3 slots, fifth-argument stack transport,
 small aggregate integer transport, odd-size and 16-byte aggregate indirection, and hidden-return
-slot shifting. The 12 pass plans are host-independent expectations only; native MSVC crossings,
+slot shifting. The 12 pass plans additionally generate separate caller and callee C11 translation
+units that local x64 MSVC compiles, links, and executes at low and optimized profiles. Independent
+compiler or assembly/register inspection, source-level Fairy crossings, and a hosted receipt remain
+missing;
 stack/shadow-store observations, callbacks, exports, and hosted evidence remain absent.
 The 14 valid plans now generate separate caller and callee objects for Clang-to-GCC and
 GCC-to-Clang at `-O0` and `-O2`, for 56 configured crossings. This Windows host cannot execute
@@ -172,9 +175,11 @@ types and is configured for Clang/GCC at `-O0` and `-O2`. This Windows host cann
 four probe runs, and no hosted success receipt has been observed, so `c-layout-probes` remains a
 missing target evidence marker.
 A separate Windows C11 probe translates the eight valid LLP64 cases into private numeric types and
-compiles and executes them twice with local x64 MSVC through the configured host smoke. The target
-marker remains missing until the declared scalar/layout subset and hosted Windows receipt are
-complete; this local probe does not exercise Microsoft x64 calls, PE/COFF metadata, or unwind data.
+compiles and executes them twice with local x64 MSVC through the configured host smoke. The same
+smoke separately crosses all 12 validated Microsoft x64 call cases between caller and callee
+translation units at both profiles. The target marker remains missing until broader layout and
+independent/source-level/hosted ABI evidence exists; neither probe inspects PE/COFF metadata or
+unwind data.
 A separate fail-closed Linux/amd64 command is now present to compile those cases with Clang and GCC
 at `-O0` and `-O2`, link a closed conformance runtime, and compare process outcomes plus exact
 source-linked resource-drop sequences. Product emission and product builds contain no trace observer. It cannot run on
@@ -287,8 +292,10 @@ or arbitrary link-input option.
 - Executable target description: `internal/target/`
 - Experimental target JSON schema: `spec/cli/experimental-target-spec-v0.schema.json`
 - Target layout engine and fixtures: `internal/layout/`, `spec/fixtures/layout/manifest-v0.json`, `spec/fixtures/layout/manifest-windows-msvc-v0.json`
+- Shared Windows MSVC C probe type emitter: `internal/msvccprobe/`
 - Windows MSVC native layout probe generator: `internal/windowslayoutprobe/`
 - Target C ABI classifiers and fixtures: `internal/cabi/`, `spec/fixtures/c-abi/manifest-v0.json`, `spec/fixtures/c-abi/manifest-windows-msvc-v0.json`
+- Windows MSVC native ABI probe generator: `internal/windowsabiprobe/`
 - Resolved package graph fixtures: `spec/fixtures/package/manifest-v0.json`
 - MIR and C backend contracts: `docs/mir/`
 - Package identity and visibility: `docs/package/package-graph-v0.md`

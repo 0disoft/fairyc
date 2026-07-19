@@ -79,11 +79,17 @@ func TestWindowsHostDriverFailsClosedOnIneligibleHost(t *testing.T) {
 	if _, err := BuildWindowsMSVCProbe(WindowsHostToolchain{}, LowProfile, "probe"); err == nil || !strings.Contains(err.Error(), "requires windows/amd64") {
 		t.Fatalf("BuildWindowsMSVCProbe() error = %v", err)
 	}
+	if _, err := BuildWindowsMSVCABIProbe(WindowsHostToolchain{}, LowProfile, "caller", "callee"); err == nil || !strings.Contains(err.Error(), "requires windows/amd64") {
+		t.Fatalf("BuildWindowsMSVCABIProbe() error = %v", err)
+	}
 	if _, err := ExecuteWindowsHost(WindowsHostArtifact{Bytes: []byte("image")}); err == nil || !strings.Contains(err.Error(), "requires windows/amd64") {
 		t.Fatalf("ExecuteWindowsHost() error = %v", err)
 	}
 	if _, err := ExecuteWindowsMSVCProbe(WindowsHostArtifact{Bytes: []byte("image")}); err == nil || !strings.Contains(err.Error(), "requires windows/amd64") {
 		t.Fatalf("ExecuteWindowsMSVCProbe() error = %v", err)
+	}
+	if _, err := ExecuteWindowsMSVCABIProbe(WindowsHostArtifact{Bytes: []byte("image")}); err == nil || !strings.Contains(err.Error(), "requires windows/amd64") {
+		t.Fatalf("ExecuteWindowsMSVCABIProbe() error = %v", err)
 	}
 }
 

@@ -100,9 +100,12 @@ native intent remains unavailable on the current Windows host and no WSL path is
 paths through locally discovered x64 MSVC: `build-host` must produce a bounded PE that directly
 returns 42, and `run-host` must independently return 42 before every temporary artifact is removed.
 The same intent derives one non-POSIX C11 unit from the eight valid Windows layout cases, then
-compiles and executes it under low and optimized MSVC profiles. That receipt is local Windows host
-and partial layout evidence only; it is not Linux native parity, a hosted Windows receipt, complete
-Windows layout coverage, or Windows call/ABI conformance.
+compiles and executes it under low and optimized MSVC profiles. It also derives separate caller and
+callee C11 translation units from all twelve valid Microsoft x64 plans, compiles and links them
+separately, and executes the linked probe under both profiles. Those receipts are local Windows
+host evidence only; they are not Linux native parity, a hosted Windows receipt, complete Windows
+layout coverage, source-level Fairy FFI, independent compiler/register inspection, PE/COFF
+inspection, or Windows call/ABI conformance.
 
 ## Owners
 

@@ -69,7 +69,9 @@ hosted receipt.
 `fairyc.c-abi-fixtures/v0` versions fixed-signature type inputs and target-bound class, register,
 stack, indirect, and hidden-return plans. The Linux manifest records SysV AMD64 eightbyte and
 register-family behavior; the Windows manifest records Microsoft x64 ordinal slots and aggregate
-indirection. It reuses the layout fixture's recursive type vocabulary
+indirection. The Windows pass subset additionally owns the inputs for the same-version local MSVC
+caller/callee probe; changing that subset or its initialization/check semantics requires an
+applicable fixture and probe-contract decision. It reuses the layout fixture's recursive type vocabulary
 but is not a public binding format, stable native Fairy ABI, object contract, or hosted conformance
 receipt. Changing class merge, exhaustion rollback, hidden-result, or register identities requires
 a new fixture-contract and applicable target/ABI-profile decision.

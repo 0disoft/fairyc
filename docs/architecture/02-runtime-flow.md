@@ -69,7 +69,10 @@ SysV AMD64 eightbyte/register plans; Windows produces Microsoft x64 ordinal-slot
 aggregate, indirect-aggregate, and hidden-result plans. The Linux runner turns its validated pass plans into separate Clang/GCC
 caller and callee objects in both directions. Generated Fairy callers now cross scalar, pointer,
 register-result, and hidden-memory-result boundaries; an observed hosted result remains a later
-evidence layer. Windows native call crossings remain a separate later layer.
+evidence layer. The Windows host smoke turns all twelve validated pass plans into separate caller
+and callee C11 translation units and crosses them through local x64 MSVC at both profiles. That
+same-compiler probe remains below source-level Fairy FFI, independent ABI inspection, and hosted
+evidence.
 
 `internal/cstdlib` is a separate target-standard-library transport boundary. Its first provisional
 SystemHeap helper normalizes empty allocation, rejects unsupported alignment, and preserves the old

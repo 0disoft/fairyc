@@ -13,6 +13,7 @@ import (
 
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/cli"
+	"github.com/0disoft/fairyc/internal/windowsabiprobe"
 	"github.com/0disoft/fairyc/internal/windowslayoutprobe"
 )
 
@@ -60,6 +61,7 @@ fn main() -> i32 {
 
 const checkedInSuccessPath = "examples/windows_smoke/main.fy"
 const windowsLayoutManifestPath = "spec/fixtures/layout/manifest-windows-msvc-v0.json"
+const windowsABIManifestPath = "spec/fixtures/c-abi/manifest-windows-msvc-v0.json"
 
 const maxSmokeArtifactBytes = 64 * 1024 * 1024
 
@@ -146,39 +148,66 @@ func run() error {
 			return err
 		}
 	}
-	toolchainVersion, layoutExecutions, layoutCases, err := runWindowsLayoutProbe()
+	toolchain, err := cdriver.ResolveWindowsHostMSVC()
+	if err != nil {
+		return fmt.Errorf("resolve Windows MSVC probe toolchain: %w", err)
+	}
+	layoutExecutions, layoutCases, err := runWindowsLayoutProbe(toolchain)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Windows host smoke passed: build-host PE %d bytes, 14 run-host outcomes covered signed results and four arithmetic trap categories, and %d LLP64 layout cases passed %d MSVC probe executions across low/optimized with msvc %s\n", len(artifact), layoutCases, layoutExecutions, toolchainVersion)
+	abiExecutions, abiCases, err := runWindowsABIProbe(toolchain)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Windows host smoke passed: build-host PE %d bytes, 14 run-host outcomes covered signed results and four arithmetic trap categories, %d LLP64 layout cases passed %d MSVC probe executions, and %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions across low/optimized with msvc %s\n", len(artifact), layoutCases, layoutExecutions, abiCases, abiExecutions, toolchain.Version)
 	return nil
 }
 
-func runWindowsLayoutProbe() (string, int, int, error) {
+func runWindowsLayoutProbe(toolchain cdriver.WindowsHostToolchain) (int, int, error) {
 	unit, err := windowslayoutprobe.Generate(filepath.FromSlash(windowsLayoutManifestPath))
 	if err != nil {
-		return "", 0, 0, fmt.Errorf("generate Windows MSVC layout probe: %w", err)
-	}
-	toolchain, err := cdriver.ResolveWindowsHostMSVC()
-	if err != nil {
-		return "", 0, 0, fmt.Errorf("resolve Windows MSVC layout probe toolchain: %w", err)
+		return 0, 0, fmt.Errorf("generate Windows MSVC layout probe: %w", err)
 	}
 	executions := 0
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
 		artifact, err := cdriver.BuildWindowsMSVCProbe(toolchain, profile, unit.Source)
 		if err != nil {
-			return "", executions, len(unit.Cases), fmt.Errorf("build Windows MSVC layout probe with %s: %w", profile.Name, err)
+			return executions, len(unit.Cases), fmt.Errorf("build Windows MSVC layout probe with %s: %w", profile.Name, err)
 		}
 		outcome, err := cdriver.ExecuteWindowsMSVCProbe(artifact)
 		if err != nil {
-			return "", executions, len(unit.Cases), fmt.Errorf("execute Windows MSVC layout probe with %s: %w", profile.Name, err)
+			return executions, len(unit.Cases), fmt.Errorf("execute Windows MSVC layout probe with %s: %w", profile.Name, err)
 		}
 		if outcome.ExitCode != 0 || outcome.Output != "" {
-			return "", executions, len(unit.Cases), fmt.Errorf("Windows MSVC layout probe with %s returned %d and output %q", profile.Name, outcome.ExitCode, outcome.Output)
+			return executions, len(unit.Cases), fmt.Errorf("Windows MSVC layout probe with %s returned %d and output %q", profile.Name, outcome.ExitCode, outcome.Output)
 		}
 		executions++
 	}
-	return toolchain.Version, executions, len(unit.Cases), nil
+	return executions, len(unit.Cases), nil
+}
+
+func runWindowsABIProbe(toolchain cdriver.WindowsHostToolchain) (int, int, error) {
+	unit, err := windowsabiprobe.Generate(filepath.FromSlash(windowsABIManifestPath))
+	if err != nil {
+		return 0, 0, fmt.Errorf("generate Windows MSVC ABI probe: %w", err)
+	}
+	executions := 0
+	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+		artifact, err := cdriver.BuildWindowsMSVCABIProbe(toolchain, profile, unit.CallerSource, unit.CalleeSource)
+		if err != nil {
+			return executions, len(unit.Cases), fmt.Errorf("build Windows MSVC ABI probe with %s: %w", profile.Name, err)
+		}
+		outcome, err := cdriver.ExecuteWindowsMSVCABIProbe(artifact)
+		if err != nil {
+			return executions, len(unit.Cases), fmt.Errorf("execute Windows MSVC ABI probe with %s: %w", profile.Name, err)
+		}
+		if outcome.ExitCode != 0 || outcome.Output != "" {
+			return executions, len(unit.Cases), fmt.Errorf("Windows MSVC ABI probe with %s returned %d and output %q", profile.Name, outcome.ExitCode, outcome.Output)
+		}
+		executions++
+	}
+	return executions, len(unit.Cases), nil
 }
 
 func runHostCase(root, name, source, profile string, wantCode int, wantStdoutPrefix, wantStderr string) error {

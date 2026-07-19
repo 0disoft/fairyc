@@ -137,6 +137,21 @@ func BuildWindowsMSVCProbe(toolchain WindowsHostToolchain, profile Profile, prob
 	return buildWindowsMSVC(toolchain, profile, []windowsMSVCSource{{Name: "probe.c", Contents: probeSource}})
 }
 
+// BuildWindowsMSVCABIProbe compiles one caller and one callee translation unit
+// separately before linking them with local x64 MSVC.
+func BuildWindowsMSVCABIProbe(toolchain WindowsHostToolchain, profile Profile, callerSource, calleeSource string) (WindowsHostArtifact, error) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		return WindowsHostArtifact{}, fmt.Errorf("MSVC ABI probe requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
+	if callerSource == "" || calleeSource == "" {
+		return WindowsHostArtifact{}, fmt.Errorf("MSVC ABI caller and callee sources must be non-empty")
+	}
+	return buildWindowsMSVC(toolchain, profile, []windowsMSVCSource{
+		{Name: "caller.c", Contents: callerSource},
+		{Name: "callee.c", Contents: calleeSource},
+	})
+}
+
 type windowsMSVCSource struct {
 	Name     string
 	Contents string
@@ -202,6 +217,14 @@ func ExecuteWindowsMSVCProbe(artifact WindowsHostArtifact) (WindowsHostOutcome, 
 		return WindowsHostOutcome{}, fmt.Errorf("MSVC layout probe execution requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
 	}
 	return executeWindowsMSVCArtifact(artifact, "MSVC layout probe")
+}
+
+// ExecuteWindowsMSVCABIProbe runs one linked caller/callee ABI probe.
+func ExecuteWindowsMSVCABIProbe(artifact WindowsHostArtifact) (WindowsHostOutcome, error) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		return WindowsHostOutcome{}, fmt.Errorf("MSVC ABI probe execution requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
+	return executeWindowsMSVCArtifact(artifact, "MSVC ABI probe")
 }
 
 func executeWindowsMSVCArtifact(artifact WindowsHostArtifact, label string) (WindowsHostOutcome, error) {
