@@ -171,7 +171,7 @@ Compiler intrinsics, the thin runtime, and standard-library APIs are separate bo
 
 Stage 0 allocation supports only explicit `SystemHeap` and lexical `Arena` or `Region`. Allocation is fallible, zero-size behavior is normalized by Fairy C, and no hidden default allocator or user allocator protocol exists.
 
-`Buffer` is the only growable owned collection. `Vec<T>` is deferred with user generics. `str` and `CStr` are compiler-known unsized views; `String` and `CString` are owned resources. The initial Linux `File` API accepts `&CStr`, preserves partial I/O, and uses a consuming non-retried Linux close contract. Portable paths, embedded support, and resource-aware arenas remain deferred.
+`Buffer` is the only growable owned collection. `Vec<T>` is deferred with user generics. `[u8]`, `str`, and `CStr` are compiler-known unsized views; `String` and `CString` are owned resources. Compiler-owned `b"..."` literals implement immutable static `&[u8]` construction and private generated-C transport, while general slice operations remain deferred. The initial Linux `File` API accepts `&CStr`, preserves partial I/O, and uses a consuming non-retried Linux close contract. Portable paths, embedded support, and resource-aware arenas remain deferred.
 
 The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 
@@ -269,14 +269,17 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   copy/view/append/drop and from-text/view/drop helpers and observe bytes, termination, statuses, and
   normalized release. Exact Linux File result, handle, and open-option records additionally cross
   the real open, write-all, sync, consuming-close, reopen, partial-read, EOF, and final-close helpers
-  while observing counts, repeated-close status, normalized state, and bytes. Report v29 records
+  while observing counts, repeated-close status, normalized state, and bytes. Report v30 records
   `linuxFileSourceCallExecutions` alongside the earlier standard-library source-call counters and
   `foreignCStructResultCallExecutions` for the register and hidden-memory result pair, plus
   `standardLibraryBuildSmokeExecutions` for a self-contained product build that calls the real UTF-8
   validator through automatic used-symbol linkage. It additionally records
   `cStringLiteralSourceCallExecutions` when generated source-owned `fairy\0` storage is read by a C
   callee and `cStringLiteralBuildSmokeExecutions` when the ordinary product build carries nonempty
-  compiler-owned `&CStr` storage into an executed binary.
+  compiler-owned `&CStr` storage into an executed binary. It additionally records
+  `byteStringLiteralSourceCallExecutions` when a generated private `&[u8]` view preserves five exact
+  `fairy` bytes and its length before C reads the data, and `byteStringLiteralBuildSmokeExecutions`
+  when the ordinary product build carries the same view path into an executed binary.
   Its closed
   `drop-trace-v0` emission profile assigns source/type/span identities to dense site IDs and compares
   exact four-byte native records with the MIR interpreter trace. This instrumentation is absent from

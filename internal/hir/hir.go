@@ -17,6 +17,7 @@ const (
 	TypeI32        Type = "i32"
 	TypeU32        Type = "u32"
 	TypeUSize      Type = "usize"
+	TypeByteSlice  Type = "[u8]"
 	TypeCStr       Type = "CStr"
 	TypeCBool      Type = "c::bool"
 	TypeCChar      Type = "c::char"

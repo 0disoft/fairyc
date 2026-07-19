@@ -414,6 +414,13 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 	}
 	switch expression.Kind {
 	case "literal":
+		if expression.Type == hir.SharedBorrow(hir.TypeByteSlice) && strings.HasPrefix(expression.Value, "b\"") {
+			decoded, err := hex.DecodeString(expression.Cooked)
+			if err != nil {
+				return Operand{}, fmt.Errorf("invalid cooked byte-string literal %q", expression.Value)
+			}
+			return Operand{Kind: OperandByteString, Type: expression.Type, StaticData: string(decoded)}, nil
+		}
 		if expression.Type == hir.SharedBorrow(hir.TypeCStr) && strings.HasPrefix(expression.Value, "c\"") {
 			decoded, err := hex.DecodeString(expression.Cooked)
 			if err != nil || !validCStringStaticData(string(decoded)) {
@@ -561,6 +568,32 @@ func (l *functionLowerer) lowerRawAddressCast(expression *hir.Expression) (Opera
 		return Operand{}, fmt.Errorf("malformed raw-address cast")
 	}
 	borrow := &expression.Children[0]
+	if (borrow.Kind == "literal" || borrow.Kind == "path") && borrow.Type == hir.SharedBorrow(hir.TypeByteSlice) && expression.Type == hir.RawPointer(hir.TypeU8, false) {
+		value, err := l.lowerExpression(borrow)
+		if err != nil {
+			return Operand{}, err
+		}
+		if value.Kind != OperandByteString && value.Kind != OperandLocal {
+			return Operand{}, fmt.Errorf("byte-slice data address source has invalid operand kind %q", value.Kind)
+		}
+		destination := l.newTemporary()
+		entity := sourceEntity("byte-slice-data-address", expression.Span)
+		l.appendOperation(Operation{
+			Kind: OperationByteSliceDataAddress, Entity: entity, Span: expression.Span,
+			DestinationLocal: destination,
+			Operands:         []Operand{value},
+			Type:             expression.Type,
+			OwnerType:        borrow.Type,
+			Operator:         expression.Operator,
+			UnsafeScope:      *expression.UnsafeScope,
+		})
+		l.result.UnsafeOperations = append(l.result.UnsafeOperations, UnsafeOperation{
+			Entity:           entity,
+			SourceSpanEntity: sourceEntity("span", expression.Span),
+			ScopeEntity:      sourceEntity("unsafe-scope", *expression.UnsafeScope),
+		})
+		return Operand{Kind: OperandLocal, Local: destination}, nil
+	}
 	if borrow.Kind == "literal" && borrow.Type == hir.SharedBorrow(hir.TypeCStr) && expression.Type == hir.RawPointer(hir.TypeU8, false) {
 		value, err := l.lowerExpression(borrow)
 		if err != nil {

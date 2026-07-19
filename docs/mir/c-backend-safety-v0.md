@@ -25,6 +25,12 @@ for a deliberately narrow subset. It accepts `i32`, `bool`, `Option<i32>`, and
 comparisons, bitwise operations, and the implemented checked arithmetic families. Private numeric C
 function names prevent source identifiers from becoming ABI or injection surfaces.
 
+The same internal-value subset now admits compiler-owned immutable `&[u8]` literals. MIR retains
+their exact bytes and logical length, including empty and embedded-NUL values. Generated C uses a
+private `fy_byte_slice { const uint8_t *data; uintptr_t length; }`, exact deduplicated immutable
+storage for nonempty values, and a one-byte immutable sentinel with length zero for empty values.
+This private shape is neither a public Fairy layout nor a foreign-call ABI.
+
 The foreign-call transport additionally accepts all sixteen exact TargetSpec C scalars as results
 and parameters. HIR and MIR keep those types distinct from coincidentally represented Fairy
 scalars; one ordered backend table maps them to exact C spellings, TargetSpec keys, features, and
@@ -141,7 +147,9 @@ direct-local borrow-to-raw-pointer cast are the only
 source-constructed raw pointers. The cast requires unsafe provenance, preserves the pointee type,
 forbids mutability strengthening, lowers to a verified MIR raw-address operation, and emits plain
 `&local` without `restrict` or `noalias`. Pointer dereference, arithmetic, integer conversion, and
-arbitrary casts remain rejected.
+arbitrary casts remain rejected. A separate verified `byte-slice-data-address` operation may expose
+the immutable data pointer of a compiler-owned `&[u8]` literal or typed local inside unsafe code;
+it cannot strengthen mutability or pass the safe slice itself through a foreign signature.
 Successful emission also records the sorted unique external link names used by actual foreign call
 terminators. Uncalled declarations remain prototypes but are absent from this link-requirement list.
 The exact standard-library namespace and component dependency mapping live in one shared contract
@@ -191,7 +199,7 @@ report; they do not expand the eighteen interpreter-owned differential cases.
 Every C-scalar probe uses hand-written C producers and consumers so each value crosses a generated
 typed local without requiring a Fairy C literal. The family probe uses exactly representable finite
 floating values and makes no NaN, infinity, signed-zero, rounding, or floating-environment claim.
-`fairyc.native-c-report/v29` separately records four `foreignCStructResultCallExecutions`, four
+`fairyc.native-c-report/v30` separately records four `foreignCStructResultCallExecutions`, four
 `systemHeapSourceCallExecutions`, four
 `bufferSourceCallExecutions`, four `arenaSourceCallExecutions`, and four
 `cStrValidationSourceCallExecutions`, plus four `ownedTextSourceCallExecutions` and four
@@ -212,6 +220,12 @@ lexical Region, safe text, or safe File APIs.
 Four `standardLibraryBuildSmokeExecutions` additionally require the ordinary product CLI to select
 the text-view C component from an actual called symbol, link it with the scalar runtime, and execute
 the resulting uninstrumented product under both compilers and profiles.
+Four `byteStringLiteralSourceCallExecutions` require a generated Fairy caller to construct a
+private `&[u8]` view over exact non-terminated `fairy` storage, preserve length five, extract the
+typed local's immutable data address, and have a separate C callee verify all five bytes. Four
+`byteStringLiteralBuildSmokeExecutions` separately require the ordinary product CLI to carry that
+view into an executable returning 42 under both compilers and profiles. Empty literals instead use
+the non-null one-byte sentinel with logical length zero.
 Four `cStringLiteralSourceCallExecutions` require a generated Fairy caller to create exact
 `fairy\0` storage, cross the dedicated unsafe immutable-byte-pointer operation, and have a separate C
 callee verify all six bytes. Four `cStringLiteralBuildSmokeExecutions` separately require the

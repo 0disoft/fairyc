@@ -167,6 +167,35 @@ func TestAnalyzeTypesCStringLiteralWithStaticBorrowOrigin(t *testing.T) {
 	assertSpan(t, result.Borrows[0].Borrow, "main.fy", start, start+len("c\"fairy\""))
 }
 
+func TestAnalyzeTypesByteStringLiteralWithStaticBorrowOrigin(t *testing.T) {
+	t.Parallel()
+	text := "module main;\n\nfn main() -> i32 {\n    let bytes: &[u8] = b\"\\x00A\";\n    42\n}\n"
+	result := analyzeText(t, map[string]string{"main.fy": text})
+	assertCleanTypeResult(t, result)
+
+	if len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].Functions) != 1 {
+		t.Fatalf("HIR modules = %+v", result.HIR.Modules)
+	}
+	function := result.HIR.Modules[0].Functions[0]
+	wantType := hir.SharedBorrow(hir.TypeByteSlice)
+	if len(function.Locals) != 1 || function.Locals[0].Type != wantType {
+		t.Fatalf("locals = %+v, want one %q local", function.Locals, wantType)
+	}
+	if len(function.Body.Statements) != 1 || function.Body.Statements[0].Expression == nil {
+		t.Fatalf("body = %+v", function.Body)
+	}
+	literal := function.Body.Statements[0].Expression
+	if literal.Kind != "literal" || literal.Type != wantType || literal.Value != `b"\x00A"` || literal.Cooked != "0041" {
+		t.Fatalf("literal = %+v", literal)
+	}
+
+	start := strings.Index(text, `b"\x00A"`)
+	if len(result.Borrows) != 1 || result.Borrows[0].Kind != "shared" || result.Borrows[0].Origin != "Static" {
+		t.Fatalf("borrows = %+v", result.Borrows)
+	}
+	assertSpan(t, result.Borrows[0].Borrow, "main.fy", start, start+len(`b"\x00A"`))
+}
+
 func TestAnalyzeBuildsQualifiedResultConstructorsAndMatch(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{
@@ -815,6 +844,67 @@ fn main() -> i32 {
 	wantType := hir.RawPointer(hir.TypeU8, false)
 	if cast == nil || cast.Kind != "cast" || cast.Type != wantType || cast.TargetType != wantType || cast.UnsafeScope == nil || len(cast.Children) != 1 || cast.Children[0].Type != hir.SharedBorrow(hir.TypeCStr) {
 		t.Fatalf("cast = %+v", cast)
+	}
+}
+
+func TestAnalyzeTypesByteStringLiteralToImmutableBytePointerCast(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn main() -> i32 {
+    let pointer: *u8 = unsafe { b"fairy" as *u8 };
+    42
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+	main := result.HIR.Modules[0].Functions[0]
+	if len(main.Locals) != 1 || main.Locals[0].Type != hir.RawPointer(hir.TypeU8, false) {
+		t.Fatalf("locals = %+v", main.Locals)
+	}
+	unsafeExpression := main.Body.Statements[0].Expression
+	if unsafeExpression == nil || len(unsafeExpression.Children) != 1 || unsafeExpression.Children[0].Block == nil {
+		t.Fatalf("unsafe expression = %+v", unsafeExpression)
+	}
+	cast := unsafeExpression.Children[0].Block.Tail
+	wantType := hir.RawPointer(hir.TypeU8, false)
+	if cast == nil || cast.Kind != "cast" || cast.Type != wantType || cast.TargetType != wantType || cast.UnsafeScope == nil || len(cast.Children) != 1 || cast.Children[0].Type != hir.SharedBorrow(hir.TypeByteSlice) {
+		t.Fatalf("cast = %+v", cast)
+	}
+}
+
+func TestAnalyzeRejectsMutableOrUnwrappedByteStringLiteralTypes(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name    string
+		source  string
+		feature string
+	}{
+		{
+			name:    "bare unsized byte slice",
+			source:  "module main;\nfn main() -> i32 { let value: [u8] = b\"fairy\"; 0 }\n",
+			feature: "type [u8]",
+		},
+		{
+			name:    "mutable byte slice borrow",
+			source:  "module main;\nfn main() -> i32 { let value: &mut [u8] = b\"fairy\"; 0 }\n",
+			feature: "type &mut [u8]",
+		},
+		{
+			name:    "mutable byte pointer extraction",
+			source:  "module main;\nfn main() -> i32 { let value: *mut u8 = unsafe { b\"fairy\" as *mut u8 }; 0 }\n",
+			feature: "cast from &[u8] to *mut u8",
+		},
+	}
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			result := analyzeText(t, map[string]string{"main.fy": test.source})
+			if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != test.feature {
+				t.Fatalf("result = %+v", result)
+			}
+		})
 	}
 }
 

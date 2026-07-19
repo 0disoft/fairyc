@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v29"
+	reportSchemaVersion = "fairyc.native-c-report/v30"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -69,6 +69,51 @@ fn main() -> i32 {
     if unsafe { c"fairy" as *u8 } != null { 42 } else { 1 }
 }
 `
+
+const byteStringLiteralBuildSmokeSource = `module main;
+fn main() -> i32 {
+    let empty: &[u8] = b"";
+    let bytes: &[u8] = b"fairy";
+    if unsafe { bytes as *u8 } != null { 42 } else { 1 }
+}
+`
+
+const byteStringLiteralSourceCallSmokeSource = `module main;
+@link_name("fairyc_fixture_is_fairy_bytes")
+unsafe extern C fn is_fairy_bytes(value: *u8) -> u32;
+fn main() -> i32 {
+    let bytes: &[u8] = b"fairy";
+    if unsafe { is_fairy_bytes(bytes as *u8) } == 1 { 42 } else { 1 }
+}
+`
+
+const byteStringLiteralSourceCallCompanion = `#include <stdint.h>
+
+uint32_t fairyc_fixture_is_fairy_bytes(const uint8_t *value) {
+    static const uint8_t expected[5] = {
+        UINT8_C(102), UINT8_C(97), UINT8_C(105), UINT8_C(114), UINT8_C(121)
+    };
+    if (value == 0) {
+        return UINT32_C(0);
+    }
+    for (uint32_t index = 0; index < UINT32_C(5); index++) {
+        if (value[index] != expected[index]) {
+            return UINT32_C(0);
+        }
+    }
+    return UINT32_C(1);
+}
+`
+
+var byteStringLiteralSourceCallExpectedCFragments = []string{
+	"typedef struct fy_byte_slice",
+	"static const uint8_t fy_static_bytes_",
+	"UINT8_C(102), UINT8_C(97), UINT8_C(105), UINT8_C(114), UINT8_C(121)",
+	".length = ((uintptr_t)UINT64_C(5))",
+	"extern uint32_t fairyc_fixture_is_fairy_bytes(const uint8_t * fy_a_0);",
+	".data;",
+	"fairyc_fixture_is_fairy_bytes(fy_l_",
+}
 
 const cStringLiteralSourceCallSmokeSource = `module main;
 @link_name("fairyc_fixture_is_fairy")
@@ -1570,9 +1615,11 @@ type Report struct {
 	TextValidationSourceCallExecutions  int        `json:"textValidationSourceCallExecutions"`
 	TextViewOutputSourceCallExecutions  int        `json:"textViewOutputSourceCallExecutions"`
 	CStrValidationSourceCallExecutions  int        `json:"cStrValidationSourceCallExecutions"`
+	ByteStringSourceCallExecutions      int        `json:"byteStringLiteralSourceCallExecutions"`
 	CStringLiteralSourceCallExecutions  int        `json:"cStringLiteralSourceCallExecutions"`
 	BuildSmokeExecutions                int        `json:"buildSmokeExecutions"`
 	StandardLibraryBuildSmokeExecutions int        `json:"standardLibraryBuildSmokeExecutions"`
+	ByteStringBuildSmokeExecutions      int        `json:"byteStringLiteralBuildSmokeExecutions"`
 	CStringLiteralBuildSmokeExecutions  int        `json:"cStringLiteralBuildSmokeExecutions"`
 }
 
@@ -1835,6 +1882,11 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.TextViewOutputSourceCallExecutions = textViewOutputSourceCallExecutions
+	byteStringLiteralSourceCallExecutions, err := runByteStringLiteralSourceCallProbe(temporaryRoot, toolchains)
+	if err != nil {
+		return Report{}, err
+	}
+	report.ByteStringSourceCallExecutions = byteStringLiteralSourceCallExecutions
 	cStringLiteralSourceCallExecutions, err := runCStringLiteralSourceCallProbe(temporaryRoot, toolchains)
 	if err != nil {
 		return Report{}, err
@@ -1893,12 +1945,29 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.StandardLibraryBuildSmokeExecutions = standardLibraryBuildSmoke
+	byteStringLiteralBuildSmoke, err := runByteStringLiteralBuildSmoke(temporaryRoot)
+	if err != nil {
+		return Report{}, err
+	}
+	report.ByteStringBuildSmokeExecutions = byteStringLiteralBuildSmoke
 	cStringLiteralBuildSmoke, err := runCStringLiteralBuildSmoke(temporaryRoot)
 	if err != nil {
 		return Report{}, err
 	}
 	report.CStringLiteralBuildSmokeExecutions = cStringLiteralBuildSmoke
 	return report, nil
+}
+
+func runByteStringLiteralSourceCallProbe(temporaryRoot string, toolchains []cdriver.Toolchain) (int, error) {
+	return runForeignSourceProbe(
+		temporaryRoot,
+		toolchains,
+		"byte-string-literal-source-call",
+		byteStringLiteralSourceCallSmokeSource,
+		byteStringLiteralSourceCallCompanion,
+		42,
+		byteStringLiteralSourceCallExpectedCFragments,
+	)
 }
 
 func runCStringLiteralSourceCallProbe(temporaryRoot string, toolchains []cdriver.Toolchain) (int, error) {
@@ -2323,6 +2392,10 @@ func runBuildSmoke(temporaryRoot string) (int, error) {
 
 func runStandardLibraryBuildSmoke(temporaryRoot string) (int, error) {
 	return runBuildSourceSmoke(temporaryRoot, "stdlib-build-smoke", textValidationSourceCallSmokeSource)
+}
+
+func runByteStringLiteralBuildSmoke(temporaryRoot string) (int, error) {
+	return runBuildSourceSmoke(temporaryRoot, "byte-string-literal-build-smoke", byteStringLiteralBuildSmokeSource)
 }
 
 func runCStringLiteralBuildSmoke(temporaryRoot string) (int, error) {

@@ -103,8 +103,10 @@ four-way crossings: direct validation and `@repr(C)` output-record initializatio
 raw address. The self-contained empty validator call is also the first configured product-build
 smoke that requires automatic standard-library linkage. Compiler-owned `c"..."` storage now reaches
 the C backend as immutable static bytes, and an explicit unsafe direct-literal conversion can expose
-its read-only `*u8` address to raw FFI. The public borrowed `str` wrapper and general safe text API
-still do not exist.
+its read-only `*u8` address to raw FFI. Compiler-owned `b"..."` storage now independently reaches a
+private non-null `{ data, length }` byte-slice transport, including an empty length-zero sentinel;
+typed locals may expose only the immutable data address through explicit unsafe conversion. The
+public borrowed `str` wrapper, slice operations, and general safe text API still do not exist.
 Buffer-backed String and CString C helpers now preserve ownership on failed UTF-8 conversion,
 support overlap-safe String append, expose immutable bounded views, reject interior NUL, and append
 exactly one C terminator. Their C-only native probe is configured but unobserved. A separate

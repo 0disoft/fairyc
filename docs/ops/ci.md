@@ -39,7 +39,7 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
   products, and requires exit `42` with no output. A missing compiler or libc identity fails the job
   instead of producing a skip.
 - The native job retains no generated C, object, executable, cache, or report artifact. Its bounded
-  `fairyc.native-c-report/v29` JSON report is written only to the job log and contains toolchain
+  `fairyc.native-c-report/v30` JSON report is written only to the job log and contains toolchain
   fingerprints, fixture IDs, the sorted layout-case IDs, and drop-trace, layout-probe, and
   sanitizer, ABI case/direction, SystemHeap, Buffer, Arena, text, Linux File, scalar Fairy-source
   foreign-call, individual exact `c::int`, negative-preserving `c::long`, `c::size_t`, and
@@ -70,6 +70,11 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
   explicit unsafe immutable-byte-pointer operation and be read byte-for-byte by a separate C callee.
   Its product-build count separately requires the ordinary CLI artifact to contain nonempty
   compiler-owned storage and execute with exit 42 under all four compiler/profile combinations.
+  The byte-string literal source-call count separately requires exact non-terminated `fairy`
+  storage, a private non-null `&[u8]` view with length five, typed-local immutable data-address
+  extraction, and a separate C callee reading all five bytes. Its product-build count requires the
+  same view path to execute with exit 42 under all four compiler/profile combinations. Empty-slice
+  sentinel behavior remains covered by host-independent emitter tests.
   The struct-result count requires one 8-byte INTEGER-class return and one 20-byte MEMORY-class
   hidden return to cross separate caller/callee objects in both compiler directions and profiles.
   The owned-text source-call count requires the exact nested heap, Buffer, String, CString, view, and

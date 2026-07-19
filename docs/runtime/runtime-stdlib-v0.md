@@ -196,7 +196,9 @@ borrow origins, and the `std::text` API remain disconnected. A source `c"..."` l
 verified `Static` origin and compiler-owned C storage. Product build linkage is now automatic only for actual calls to the closed
 internal symbols; that raw link transport does not supply the missing safe API.
 
-A `c"..."` literal provides allocation-free immutable `&CStr` storage with one compiler-appended trailing NUL and rejects a decoded interior NUL. The implemented C path emits exact `static const uint8_t[]` bytes, deduplicates equal storage, and permits only an explicit unsafe conversion to immutable `*u8` for the direct-literal raw FFI form. It is source syntax, not a runtime constructor. `b"..."` similarly promises immutable static bytes without claiming UTF-8, but its semantic, MIR, slice-layout, and backend path remains unimplemented.
+A `c"..."` literal provides allocation-free immutable `&CStr` storage with one compiler-appended trailing NUL and rejects a decoded interior NUL. The implemented C path emits exact `static const uint8_t[]` bytes, deduplicates equal storage, and permits only an explicit unsafe conversion to immutable `*u8` for the direct-literal raw FFI form. It is source syntax, not a runtime constructor.
+
+A `b"..."` literal provides allocation-free immutable `&[u8]` storage with exact decoded bytes, no UTF-8 promise, no appended terminator, and hidden `Static` origin. MIR retains the byte count as the logical length. The generated-C path uses a private non-null `{ data, length }` value, deduplicated immutable arrays for nonempty values, and a one-byte sentinel with length zero for empty values. An explicit unsafe conversion may expose a literal or typed local's immutable `*u8` data address; mutable extraction, indexing, slicing, source-level length access, a public slice ABI, and implicit text conversion remain unimplemented.
 
 ## Linux `File` v0
 

@@ -125,7 +125,10 @@ product build that resolves a self-contained Fairy UTF-8 validator call through 
 used-symbol standard-library contract under both compilers and profiles. V29 adds
 `cStringLiteralSourceCallExecutions` for a generated Fairy caller whose compiler-owned terminated
 storage is read by C and `cStringLiteralBuildSmokeExecutions` for the ordinary product-build path
-carrying nonempty static `&CStr` storage, both under both compilers and profiles. The
+carrying nonempty static `&CStr` storage, both under both compilers and profiles. V30 adds
+`byteStringLiteralSourceCallExecutions` for a generated Fairy caller whose private `&[u8]` view
+retains exact bytes and length before C reads its data, plus `byteStringLiteralBuildSmokeExecutions`
+for the ordinary product-build path carrying that view under both compilers and profiles. The
 runner emits one exact version and does not pretend the report shapes are interchangeable.
 
 ## Runtime and standard library

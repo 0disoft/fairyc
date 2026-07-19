@@ -381,9 +381,28 @@ func TestCStringLiteralSourceCallSmokeReachesCEmission(t *testing.T) {
 	}
 }
 
+func TestByteStringLiteralSourceCallSmokeReachesCEmission(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "main.fy"), []byte(byteStringLiteralSourceCallSmokeSource), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	code := cli.Run([]string{"experimental", "emit-c", "main.fy"}, root, &stdout, &stderr)
+	if code != cli.ExitSuccess || stderr.Len() != 0 {
+		t.Fatalf("byte-string literal source call C emission = code %d, stderr %q", code, stderr.String())
+	}
+	for _, required := range byteStringLiteralSourceCallExpectedCFragments {
+		if !strings.Contains(stdout.String(), required) {
+			t.Errorf("byte-string literal source call C emission is missing %q", required)
+		}
+	}
+}
+
 func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 	t.Parallel()
-	if reportSchemaVersion != "fairyc.native-c-report/v29" {
+	if reportSchemaVersion != "fairyc.native-c-report/v30" {
 		t.Fatalf("report schema = %q", reportSchemaVersion)
 	}
 	encoded, err := json.Marshal(Report{
@@ -414,15 +433,17 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		TextValidationSourceCallExecutions:  4,
 		TextViewOutputSourceCallExecutions:  4,
 		CStrValidationSourceCallExecutions:  4,
+		ByteStringSourceCallExecutions:      4,
 		CStringLiteralSourceCallExecutions:  4,
 		BuildSmokeExecutions:                4,
 		StandardLibraryBuildSmokeExecutions: 4,
+		ByteStringBuildSmokeExecutions:      4,
 		CStringLiteralBuildSmokeExecutions:  4,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v29"`) ||
+	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v30"`) ||
 		!strings.Contains(string(encoded), `"dropTraceExecutions":72`) ||
 		!strings.Contains(string(encoded), `"layoutCases":["pass.array-i32-three","pass.pointer"]`) ||
 		!strings.Contains(string(encoded), `"layoutProbeExecutions":4`) ||
@@ -453,9 +474,11 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		!strings.Contains(string(encoded), `"textValidationSourceCallExecutions":4`) ||
 		!strings.Contains(string(encoded), `"textViewOutputSourceCallExecutions":4`) ||
 		!strings.Contains(string(encoded), `"cStrValidationSourceCallExecutions":4`) ||
+		!strings.Contains(string(encoded), `"byteStringLiteralSourceCallExecutions":4`) ||
 		!strings.Contains(string(encoded), `"cStringLiteralSourceCallExecutions":4`) ||
 		!strings.Contains(string(encoded), `"buildSmokeExecutions":4`) ||
 		!strings.Contains(string(encoded), `"standardLibraryBuildSmokeExecutions":4`) ||
+		!strings.Contains(string(encoded), `"byteStringLiteralBuildSmokeExecutions":4`) ||
 		!strings.Contains(string(encoded), `"cStringLiteralBuildSmokeExecutions":4`) {
 		t.Fatalf("report JSON = %s", encoded)
 	}

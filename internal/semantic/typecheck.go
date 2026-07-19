@@ -440,8 +440,9 @@ func (c *typeChecker) checkCast(expression *ast.Expression, result *hir.Expressi
 	sourceElement, sourceMutable, sourceBorrow := hir.BorrowElement(sourceType)
 	targetElement, targetMutable, targetPointer := hir.RawPointerElement(targetType)
 	sameElement := sourceElement == targetElement && (sourceMutable || !targetMutable)
+	byteSliceBytes := sourceElement == hir.TypeByteSlice && !sourceMutable && targetElement == hir.TypeU8 && !targetMutable
 	cStringBytes := sourceElement == hir.TypeCStr && !sourceMutable && targetElement == hir.TypeU8 && !targetMutable
-	if !sourceBorrow || !targetPointer || !sameElement && !cStringBytes {
+	if !sourceBorrow || !targetPointer || !sameElement && !byteSliceBytes && !cStringBytes {
 		c.analyzer.addUnsupported(
 			c.module.file.Path,
 			expression.Span,
@@ -1147,6 +1148,9 @@ func literalType(raw string, expected hir.Type) (hir.Type, bool) {
 	}
 	if strings.HasPrefix(raw, "c\"") {
 		return hir.SharedBorrow(hir.TypeCStr), true
+	}
+	if strings.HasPrefix(raw, "b\"") {
+		return hir.SharedBorrow(hir.TypeByteSlice), true
 	}
 	if raw != "" && raw[0] >= '0' && raw[0] <= '9' && !strings.ContainsAny(raw, ".eE") {
 		switch expected {

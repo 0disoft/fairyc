@@ -259,6 +259,8 @@ const (
 	OperationRegionReset       OperationKind = "region-reset"
 )
 
+const OperationByteSliceDataAddress OperationKind = "byte-slice-data-address"
+
 // LocalID identifies one source local, parameter, or compiler temporary.
 type LocalID int
 
@@ -279,6 +281,8 @@ const (
 	OperandCString OperandKind = "c-string"
 )
 
+const OperandByteString OperandKind = "byte-string"
+
 // Operand is an already-evaluated scalar value source.
 type Operand struct {
 	Kind  OperandKind
@@ -286,8 +290,8 @@ type Operand struct {
 	I32   int32
 	U64   uint64
 	Type  hir.Type
-	// StaticData stores exact compiler-owned bytes in a comparable form. C strings include
-	// their single trailing NUL so verifier and backend boundaries do not reconstruct it.
+	// StaticData stores exact compiler-owned bytes in a comparable form. Byte strings retain
+	// their exact length; C strings include their single trailing NUL.
 	StaticData string
 }
 
