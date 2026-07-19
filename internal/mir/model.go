@@ -208,6 +208,7 @@ const (
 	OperationResultPayload     OperationKind = "result-payload"
 	OperationOptionConstruct   OperationKind = "option-construct"
 	OperationOptionPayload     OperationKind = "option-payload"
+	OperationRawAddress        OperationKind = "raw-address"
 	OperationStructConstruct   OperationKind = "struct-construct"
 	OperationResourceConstruct OperationKind = "resource-construct"
 	OperationFieldRead         OperationKind = "field-read"
@@ -260,6 +261,7 @@ type Operation struct {
 	OwnerType        hir.Type
 	Field            string
 	Operator         string
+	UnsafeScope      hir.Span
 	Variant          string
 	MovePayload      bool
 	TrapCategories   []string

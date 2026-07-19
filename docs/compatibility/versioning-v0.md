@@ -92,7 +92,9 @@ adding `ownedTextExecutions` for String ownership and CString termination. V11 a
 closed exact-name scalar Fairy-source caller to hand-written C callee crossings. V13 adds
 `foreignPointerCallExecutions` for the typed-null raw-pointer plus `usize`/`u8` crossing. The runner
 V14 adds `textValidationSourceCallExecutions` for a generated Fairy caller linked against the
-actual provisional text-view C unit. The runner emits one exact version and does not pretend the
+actual provisional text-view C unit. V15 adds `textViewOutputSourceCallExecutions` for a generated
+Fairy caller that passes a verified raw address to a flat `@repr(C)` output record, observes the
+record mutation, and links the same real text-view C unit. The runner emits one exact version and does not pretend the
 report shapes are interchangeable.
 
 ## Runtime and standard library

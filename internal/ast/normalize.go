@@ -28,7 +28,14 @@ func NormalizeExpression(expression *Expression) string {
 		parts = append(parts, expression.Text+")")
 		return strings.Join(parts, " ")
 	case "cast":
-		return listForm("as", expression.Children)
+		parts := []string{"(as"}
+		for _, child := range expression.Children {
+			parts = append(parts, NormalizeExpression(child))
+		}
+		if expression.Type != nil {
+			parts = append(parts, expression.Type.Text)
+		}
+		return strings.Join(parts, " ") + ")"
 	case "error":
 		return listForm("error", expression.Children)
 	default:

@@ -263,8 +263,8 @@ func TestEmitReprCStructPreservesPublicTagFieldsAndLayout(t *testing.T) {
 struct fy_std_text_view_v0 { data: *u8; length: usize; }
 unsafe extern C fn foreign_take(output: *mut fy_std_text_view_v0) -> u32;
 fn main() -> i32 {
-    let view: fy_std_text_view_v0 = fy_std_text_view_v0 { data: null, length: 0 };
-    if view.length == 0 { 0 } else { 1 }
+    var view: fy_std_text_view_v0 = fy_std_text_view_v0 { data: null, length: 0 };
+    if unsafe { foreign_take(&mut view as *mut fy_std_text_view_v0) } == 0 { 0 } else { 1 }
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -281,7 +281,8 @@ fn main() -> i32 {
 		"extern uint32_t foreign_take(struct fy_std_text_view_v0 *",
 		"(struct fy_std_text_view_v0){ .data = ((void *)0)",
 		".length = ((uintptr_t)UINT64_C(0)) }",
-		".length;",
+		" = &fy_l_",
+		"foreign_take(fy_l_",
 	} {
 		if !strings.Contains(unit.Source, required) {
 			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)

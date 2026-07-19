@@ -86,9 +86,36 @@ func TestTextValidationSourceCallSmokeReachesCEmission(t *testing.T) {
 	}
 }
 
+func TestTextViewOutputSourceCallSmokeReachesCEmission(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "main.fy"), []byte(textViewOutputSourceCallSmokeSource), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	code := cli.Run([]string{"experimental", "emit-c", "main.fy"}, root, &stdout, &stderr)
+	if code != cli.ExitSuccess || stderr.Len() != 0 {
+		t.Fatalf("text view output source call C emission = code %d, stderr %q", code, stderr.String())
+	}
+	for _, required := range []string{
+		"struct fy_std_text_view_v0 {",
+		"const uint8_t * data;",
+		"uintptr_t length;",
+		"extern uint32_t fy_std_text_validate_utf8_v0(const uint8_t * fy_a_0, uintptr_t fy_a_1, struct fy_std_text_view_v0 * fy_a_2);",
+		" = &fy_l_",
+		"fy_std_text_validate_utf8_v0(((void *)0), ((uintptr_t)UINT64_C(0)), fy_l_",
+		".length",
+	} {
+		if !strings.Contains(stdout.String(), required) {
+			t.Errorf("text view output source call C emission is missing %q", required)
+		}
+	}
+}
+
 func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 	t.Parallel()
-	if reportSchemaVersion != "fairyc.native-c-report/v14" {
+	if reportSchemaVersion != "fairyc.native-c-report/v15" {
 		t.Fatalf("report schema = %q", reportSchemaVersion)
 	}
 	encoded, err := json.Marshal(Report{
@@ -106,11 +133,12 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		ForeignCallExecutions:              4,
 		ForeignPointerCallExecutions:       4,
 		TextValidationSourceCallExecutions: 4,
+		TextViewOutputSourceCallExecutions: 4,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v14"`) ||
+	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v15"`) ||
 		!strings.Contains(string(encoded), `"dropTraceExecutions":68`) ||
 		!strings.Contains(string(encoded), `"layoutCases":["pass.array-i32-three","pass.pointer"]`) ||
 		!strings.Contains(string(encoded), `"layoutProbeExecutions":4`) ||
@@ -127,7 +155,8 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		!strings.Contains(string(encoded), `"linuxFileExecutions":4`) ||
 		!strings.Contains(string(encoded), `"foreignCallExecutions":4`) ||
 		!strings.Contains(string(encoded), `"foreignPointerCallExecutions":4`) ||
-		!strings.Contains(string(encoded), `"textValidationSourceCallExecutions":4`) {
+		!strings.Contains(string(encoded), `"textValidationSourceCallExecutions":4`) ||
+		!strings.Contains(string(encoded), `"textViewOutputSourceCallExecutions":4`) {
 		t.Fatalf("report JSON = %s", encoded)
 	}
 }

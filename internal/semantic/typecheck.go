@@ -1,6 +1,7 @@
 package semantic
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/ast"
@@ -333,6 +334,8 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 		actual = c.checkPrefix(expression, result)
 	case syntax.KindBinary:
 		actual = c.checkBinary(expression, result)
+	case syntax.KindCast:
+		actual = c.checkCast(expression, result)
 	case syntax.KindCall:
 		actual = c.checkCall(expression, result, expected)
 	case syntax.KindIf:
@@ -372,6 +375,35 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 		c.addType(result.Span, actual)
 	}
 	return result, actual
+}
+
+func (c *typeChecker) checkCast(expression *ast.Expression, result *hir.Expression) hir.Type {
+	result.Operator = "as"
+	if len(expression.Children) != 1 || expression.Type == nil {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "malformed cast")
+		return hir.TypeInvalid
+	}
+	targetType := c.analyzer.canonicalType(c.module, *expression.Type)
+	result.TargetType = targetType
+	child, sourceType := c.checkExpression(expression.Children[0], hir.TypeInvalid)
+	result.Children = appendExpression(result.Children, child)
+	sourceElement, sourceMutable, sourceBorrow := hir.BorrowElement(sourceType)
+	targetElement, targetMutable, targetPointer := hir.RawPointerElement(targetType)
+	if !sourceBorrow || !targetPointer || sourceElement != targetElement || !sourceMutable && targetMutable {
+		c.analyzer.addUnsupported(
+			c.module.file.Path,
+			expression.Span,
+			fmt.Sprintf("cast from %s to %s", sourceType, targetType),
+		)
+		return hir.TypeInvalid
+	}
+	if len(c.unsafeScopes) == 0 {
+		c.analyzer.addDiagnostic("E5101", span(c.module.file.Path, expression.Span))
+	} else {
+		scope := c.unsafeScopes[len(c.unsafeScopes)-1]
+		result.UnsafeScope = &scope
+	}
+	return targetType
 }
 
 func (c *typeChecker) checkUnsafe(expression *ast.Expression, result *hir.Expression, expected hir.Type) hir.Type {

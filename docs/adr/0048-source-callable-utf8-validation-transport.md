@@ -38,4 +38,6 @@ Result<&str, ...>` surface still needs slices, borrow-origin construction, and e
   pipeline and linker.
 - Full text-view construction still requires `@repr(C)` output records or an equivalent decided
   binding representation.
+- ADR 0049 subsequently supplies that narrow flat-record and direct-local raw-address transport;
+  this ADR's predicate call and v14 counter remain independently meaningful.
 - The target evidence remains configured but unobserved until the Linux lane succeeds.

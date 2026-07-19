@@ -105,11 +105,15 @@ that bounded scalar set, and raw pointers to admitted nonempty `@repr(C)` struct
 external name coalesce; signature conflicts fail closed. A local preprocessor guard undefines an
 included-header macro with that name before the prototype. `main`, generated `fy_`/`FY_` names,
 C11 keywords, and identifiers consumed by the generated preamble are rejected. The only current
-exception to the generated `fy_` namespace is the exact allowlisted internal standard-library
-symbol `fy_std_text_utf8_valid_v0`; the rest of the prefix remains closed. Typed null is the
-only source-constructed raw pointer; pointer dereference, arithmetic, and casts remain rejected.
-Source `@repr(C)` construction, field reads, exact public names, layout assertions, and pointer
-prototype spelling are implemented, but passing a non-null local address, by-value aggregate ABI,
+exceptions to the generated `fy_` namespace are the exact allowlisted internal standard-library
+symbols `fy_std_text_utf8_valid_v0` and `fy_std_text_validate_utf8_v0`; the rest of the prefix
+remains closed. Typed null and an exact direct-local borrow-to-raw-pointer cast are the only
+source-constructed raw pointers. The cast requires unsafe provenance, preserves the pointee type,
+forbids mutability strengthening, lowers to a verified MIR raw-address operation, and emits plain
+`&local` without `restrict` or `noalias`. Pointer dereference, arithmetic, integer conversion, and
+arbitrary casts remain rejected.
+Source `@repr(C)` construction, field reads, exact public names, layout assertions, pointer
+prototype spelling, and direct-local address passing are implemented, but by-value aggregate ABI,
 nested/array/enum fields, `@link_name`, `c.*` scalars, and callbacks remain outside this slice.
 
 The MIR interpreter deliberately returns a `foreign-call` capability error instead of guessing a

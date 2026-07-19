@@ -158,6 +158,7 @@ type Expression struct {
 	Span     diagnostic.Span
 	Text     string
 	Cooked   string
+	Type     *TypeReference
 	Children []*Expression
 	Block    *Block
 }
@@ -475,6 +476,13 @@ func lowerExpressionNode(tree *syntax.Tree, node syntax.Node) *Expression {
 		return expression
 	}
 	for _, child := range node.Children {
+		if node.Kind == syntax.KindCast {
+			if typeNode, found := tree.Node(child); found && typeNode.Kind == syntax.KindType {
+				target := lowerType(typeNode)
+				expression.Type = &target
+				continue
+			}
+		}
 		if lowered := lowerExpression(tree, child); lowered != nil {
 			expression.Children = append(expression.Children, lowered)
 		}

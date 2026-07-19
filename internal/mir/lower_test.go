@@ -239,6 +239,63 @@ func TestLowerPreservesRawPointerAndTargetScalarForeignOperands(t *testing.T) {
 	}
 }
 
+func TestLowerPreservesRawAddressUnsafeProvenance(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+@repr(C)
+struct Packet { code: u32; }
+unsafe extern C fn sink(output: *mut Packet) -> u32;
+fn main() -> i32 {
+    var output: Packet = Packet { code: 0 };
+    if unsafe { sink(&mut output as *mut Packet) } == 0 { 0 } else { 1 }
+}
+`)
+	function := program.Functions[0]
+	var address *Operation
+	for blockIndex := range function.Blocks {
+		for operationIndex := range function.Blocks[blockIndex].Operations {
+			operation := &function.Blocks[blockIndex].Operations[operationIndex]
+			if operation.Kind == OperationRawAddress {
+				address = operation
+			}
+		}
+	}
+	wantPointer := hir.RawPointer(hir.Type("main::Packet"), true)
+	if address == nil || address.Type != wantPointer || address.OwnerType != hir.Type("main::Packet") || address.Operator != "&mut" || address.Entity == "" || address.UnsafeScope.Source != "main.fy" || len(address.Operands) != 1 || address.Operands[0].Kind != OperandLocal {
+		t.Fatalf("raw address = %+v", address)
+	}
+	if len(function.UnsafeOperations) != 2 {
+		t.Fatalf("unsafe operations = %+v", function.UnsafeOperations)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+	mutated := Clone(program)
+	for blockIndex := range mutated.Functions[0].Blocks {
+		for operationIndex := range mutated.Functions[0].Blocks[blockIndex].Operations {
+			operation := &mutated.Functions[0].Blocks[blockIndex].Operations[operationIndex]
+			if operation.Kind == OperationRawAddress {
+				operation.UnsafeScope.StartByte = operation.Span.StartByte + 1
+			}
+		}
+	}
+	if failures := Verify(mutated); len(failures) != 1 || failures[0].Code != "V1701" {
+		t.Fatalf("Verify() invalid raw-address scope = %+v", failures)
+	}
+	mutated = Clone(program)
+	for blockIndex := range mutated.Functions[0].Blocks {
+		for operationIndex := range mutated.Functions[0].Blocks[blockIndex].Operations {
+			operation := &mutated.Functions[0].Blocks[blockIndex].Operations[operationIndex]
+			if operation.Kind == OperationRawAddress {
+				operation.Operator = "&"
+			}
+		}
+	}
+	if failures := Verify(mutated); len(failures) != 1 || failures[0].Code != "V1001" {
+		t.Fatalf("Verify() strengthened raw-address mutability = %+v", failures)
+	}
+}
+
 func TestCloneDeepCopiesResourceDefinitions(t *testing.T) {
 	t.Parallel()
 	original := Program{ResourceTypes: []ResourceType{{

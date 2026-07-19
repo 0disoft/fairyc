@@ -186,6 +186,10 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, re
 			failures = append(failures, VerificationError{Code: "V1701", Entity: function.Name, Detail: "unsafe instruction has no entity identity"})
 			continue
 		}
+		if _, duplicate := unsafeByEntity[operation.Entity]; duplicate {
+			failures = append(failures, VerificationError{Code: "V1701", Entity: operation.Entity, Detail: "unsafe instruction entity is duplicated"})
+			continue
+		}
 		unsafeByEntity[operation.Entity] = operation
 	}
 	type pendingBlock struct {
@@ -326,6 +330,27 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, re
 				}
 				if operation.Type == hir.TypeInvalid || operation.Type == "" {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "Option payload has no concrete payload type"})
+				}
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationRawAddress:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				element, mutable, pointer := hir.RawPointerElement(operation.Type)
+				shapeValid := operation.DestinationLocal != NoLocal && len(operation.Operands) == 1 &&
+					operation.Operands[0].Kind == OperandLocal && operation.OwnerType != "" && operation.OwnerType != hir.TypeInvalid &&
+					pointer && element == operation.OwnerType &&
+					(operation.Operator == "&" && !mutable || operation.Operator == "&mut")
+				if !shapeValid {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "raw address shape is invalid"})
+				}
+				provenance, hasProvenance := unsafeByEntity[operation.Entity]
+				expectedEntity := sourceEntity("raw-address", operation.Span)
+				sourceSpanEntity := sourceEntity("span", operation.Span)
+				scopeEntity := sourceEntity("unsafe-scope", operation.UnsafeScope)
+				scopeContainsOperation := operation.UnsafeScope.Source == operation.Span.Source &&
+					operation.UnsafeScope.StartByte <= operation.Span.StartByte && operation.UnsafeScope.EndByte >= operation.Span.EndByte
+				if operation.Entity != expectedEntity || !scopeContainsOperation || !hasProvenance ||
+					provenance.SourceSpanEntity != sourceSpanEntity || provenance.ScopeEntity != scopeEntity {
+					failures = append(failures, VerificationError{Code: "V1701", Entity: entity, Detail: "raw address lacks matching unsafe provenance"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationStructConstruct:

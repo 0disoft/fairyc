@@ -186,3 +186,30 @@ func TestLowerPreservesForeignDeclarationAndUnsafeBoundaries(t *testing.T) {
 		t.Fatalf("main tail = %+v", module.Functions[1].Body)
 	}
 }
+
+func TestLowerPreservesCastTargetTypeSeparatelyFromOperand(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nfn main() -> i32 { var value: i32 = 0; let pointer: *mut i32 = unsafe { &mut value as *mut i32 }; 0 }\n")
+	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	module, err := Lower(tree)
+	if err != nil {
+		t.Fatalf("Lower() error = %v", err)
+	}
+	if len(module.Functions) != 1 || module.Functions[0].Body == nil || len(module.Functions[0].Body.Statements) != 2 {
+		t.Fatalf("functions = %+v", module.Functions)
+	}
+	unsafeExpression := module.Functions[0].Body.Statements[1].Binding.Expression
+	if unsafeExpression == nil || unsafeExpression.Kind != syntax.KindUnsafe || len(unsafeExpression.Children) != 1 || unsafeExpression.Children[0].Block == nil {
+		t.Fatalf("unsafe expression = %+v", unsafeExpression)
+	}
+	cast := unsafeExpression.Children[0].Block.Tail
+	if cast == nil || cast.Kind != syntax.KindCast || cast.Type == nil || cast.Type.Text != "*mut i32" || len(cast.Children) != 1 || cast.Children[0].Kind != syntax.KindPrefix {
+		t.Fatalf("cast = %+v", cast)
+	}
+	if got, want := NormalizeExpression(cast), "(as (&mut value) *mut i32)"; got != want {
+		t.Fatalf("NormalizeExpression() = %q, want %q", got, want)
+	}
+}

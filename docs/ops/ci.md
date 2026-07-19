@@ -39,15 +39,17 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
   products, and requires exit `42` with no output. A missing compiler or libc identity fails the job
   instead of producing a skip.
 - The native job retains no generated C, object, executable, cache, or report artifact. Its bounded
-  `fairyc.native-c-report/v14` JSON report is written only to the job log and contains toolchain
+  `fairyc.native-c-report/v15` JSON report is written only to the job log and contains toolchain
   fingerprints, fixture IDs, the sorted layout-case IDs, and drop-trace, layout-probe, and
   sanitizer, ABI case/direction, SystemHeap, Buffer, Arena, text, Linux File, scalar Fairy-source
-  foreign-call, raw-pointer foreign-call, actual text-validation source-call, and product-build
+  foreign-call, raw-pointer foreign-call, actual text-validation source-call, actual text-view
+  output-record source-call, and product-build
   execution counts but no temporary path.
   Each foreign-call count is four only after generated Fairy callers and hand-written C callees
   cross as separate Clang/GCC objects in both directions and profiles and return `42` with no output.
   The text-validation source-call count additionally requires linking the generated caller against
-  `TextViewSource()` rather than a mock companion.
+  `TextViewSource()` rather than a mock companion. The output-record count additionally requires
+  the generated FY caller to pass a verified direct-local raw address and observe the C-written field.
 
 The containing Mustflow workspace provides local parity through `fairyc_go_vet` and
 `fairyc_go_test`, plus the Linux-only `fairyc_native_c_test` intent. Those intents additionally

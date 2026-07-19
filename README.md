@@ -87,8 +87,9 @@ lowering.
 The first text slice now validates canonical UTF-8 without allocation and rejects slicing through a
 multibyte sequence. Its native probe includes overlong forms, surrogates, values above U+10FFFF,
 truncation, and obsolete leaders, but remains unobserved and source-disconnected.
-Its empty-input validator now has one exact internal `fy_std_*_v0` symbol and a real FY-to-stdlib-C
-four-way crossing; the public borrowed `str` wrapper and nonempty source pointer path still do not exist.
+Its empty-input validator now has exact internal `fy_std_*_v0` symbols and two real FY-to-stdlib-C
+four-way crossings: direct validation and `@repr(C)` output-record initialization through a verified
+raw address. The public borrowed `str` wrapper and nonempty source pointer path still do not exist.
 Buffer-backed String and CString C helpers now preserve ownership on failed UTF-8 conversion,
 support overlap-safe String append, expose immutable bounded views, reject interior NUL, and append
 exactly one C terminator. Their native probe is configured but unobserved, and no source API is
@@ -101,9 +102,11 @@ admitted raw-pointer parameters or results.
 Calls require `unsafe {}` or `unsafe fn`; missing unsafe provenance is `E5101` and safe references in
 raw declarations are `E5102`. The interpreter fails closed with a `foreign-call` capability error,
 while C emission produces a plain external prototype with no inferred alias, purity, retention, or
-unwind attributes. Typed `null` now crosses a closed pointer/target-scalar native probe.
-`@link_name`, non-null pointer construction or dereference, callbacks, `c.*` scalars, aggregates,
-exports, and standard-library wrapper calls remain unimplemented.
+unwind attributes. Typed `null` crosses a closed pointer/target-scalar native probe. An exact
+safe-borrow-to-raw-pointer cast now lowers only for a direct local place inside `unsafe`, allowing a
+flat nonempty `@repr(C)` record to cross by pointer and receive standard-library output.
+`@link_name`, raw dereference or arithmetic, arbitrary casts, callbacks, `c.*` scalars, nested or
+by-value aggregates, exports, and public standard-library wrappers remain unimplemented.
 A deterministic native C11 probe now translates the nine valid layout cases into private numeric
 types and is configured for Clang/GCC at `-O0` and `-O2`. This Windows host cannot execute those
 four probe runs, and no hosted success receipt has been observed, so `c-layout-probes` remains a

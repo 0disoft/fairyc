@@ -178,6 +178,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   classification through AST, typed HIR, verified MIR, the executable interpreter subset, and the
   constrained C backend. The current C-layout implementation is nonempty and flat over `u8`,
   `i32`, `u32`, `usize`, and raw pointers; broader contracted field families remain fail-closed.
+- The executable raw-address slice accepts only an exact direct-local `&T -> *T`, `&mut T -> *T`,
+  or `&mut T -> *mut T` cast inside `unsafe`. AST keeps the target type separate, typed HIR keeps
+  unsafe scope, MIR verifies pointee/mutability/provenance, generated C emits `&local`, and the
+  interpreter fails closed instead of inventing an address.
 - The C backend is the only committed Stage 0 product backend and emits a constrained target/toolchain profile rather than universally portable C.
 - `internal/target` owns the executable `fairyc.target-spec/v0` description for the first target.
   It records host-independent LP64, scalar, pointer, SysV AMD64, ELF, unwind, debug, and C-layout
@@ -210,7 +214,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   alignment, and offset assertions. Its emission fixtures do not compile, link, or execute C and do
   not establish a target support level.
 - A separate Linux/amd64 command requires glibc, Clang, and GCC and is configured to compare the
-  current scalar, flat-resource, and resource-tagged cases at low and optimized profiles. Its closed
+  current scalar, flat inert-struct, flat-resource, and resource-tagged cases at low and optimized
+  profiles. It separately links generated FY callers to the actual text-view C unit for both the
+  empty predicate and `@repr(C)` output-record mutation paths; report v15 records those counters.
+  Its closed
   `drop-trace-v0` emission profile assigns source/type/span identities to dense site IDs and compares
   exact four-byte native records with the MIR interpreter trace. This instrumentation is absent from
   product `emit-c` and `build`. No hosted success receipt or broader target

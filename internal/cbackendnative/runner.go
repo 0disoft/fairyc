@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v14"
+	reportSchemaVersion = "fairyc.native-c-report/v15"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -106,6 +106,30 @@ fn main() -> i32 {
 }
 `
 
+const textViewOutputSourceCallSmokeSource = `module main;
+@repr(C)
+struct fy_std_text_view_v0 {
+    data: *u8;
+    length: usize;
+}
+unsafe extern C fn fy_std_text_validate_utf8_v0(
+    data: *u8,
+    length: usize,
+    output: *mut fy_std_text_view_v0
+) -> u32;
+fn main() -> i32 {
+    var output: fy_std_text_view_v0 = fy_std_text_view_v0 { data: null, length: 99 };
+    let status: u32 = unsafe {
+        fy_std_text_validate_utf8_v0(
+            null,
+            0,
+            &mut output as *mut fy_std_text_view_v0
+        )
+    };
+    if status == 0 && output.length == 0 { 42 } else { 1 }
+}
+`
+
 // Compiler records the bounded toolchain fingerprint used by one native run.
 type Compiler struct {
 	Name    string `json:"name"`
@@ -138,6 +162,7 @@ type Report struct {
 	ForeignCallExecutions              int        `json:"foreignCallExecutions"`
 	ForeignPointerCallExecutions       int        `json:"foreignPointerCallExecutions"`
 	TextValidationSourceCallExecutions int        `json:"textValidationSourceCallExecutions"`
+	TextViewOutputSourceCallExecutions int        `json:"textViewOutputSourceCallExecutions"`
 	BuildSmokeExecutions               int        `json:"buildSmokeExecutions"`
 }
 
@@ -335,6 +360,11 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.TextValidationSourceCallExecutions = textValidationSourceCallExecutions
+	textViewOutputSourceCallExecutions, err := runTextViewOutputSourceCallProbe(temporaryRoot, toolchains, textViewSource)
+	if err != nil {
+		return Report{}, err
+	}
+	report.TextViewOutputSourceCallExecutions = textViewOutputSourceCallExecutions
 	for caseIndex, fixture := range fixtureReport.Emitted {
 		if fixture.Unit.Target != string(target.X8664LinuxGNU) || fixture.Unit.Dialect != cbackend.DialectC11 {
 			return Report{}, fmt.Errorf("case %s emitted unexpected profile %s/%s", fixture.ID, fixture.Unit.Target, fixture.Unit.Dialect)
@@ -427,6 +457,24 @@ func runTextValidationSourceCallProbe(temporaryRoot string, toolchains []cdriver
 		[]string{
 			"extern uint32_t fy_std_text_utf8_valid_v0(const uint8_t * fy_a_0, uintptr_t fy_a_1);",
 			"fy_std_text_utf8_valid_v0(((void *)0), ((uintptr_t)UINT64_C(0)))",
+		},
+	)
+}
+
+func runTextViewOutputSourceCallProbe(temporaryRoot string, toolchains []cdriver.Toolchain, textViewSource string) (int, error) {
+	return runForeignSourceProbe(
+		temporaryRoot,
+		toolchains,
+		"text-view-output-source-call",
+		textViewOutputSourceCallSmokeSource,
+		textViewSource,
+		42,
+		[]string{
+			"struct fy_std_text_view_v0 {",
+			"extern uint32_t fy_std_text_validate_utf8_v0(const uint8_t * fy_a_0, uintptr_t fy_a_1, struct fy_std_text_view_v0 * fy_a_2);",
+			" = &fy_l_",
+			"fy_std_text_validate_utf8_v0(((void *)0), ((uintptr_t)UINT64_C(0)), fy_l_",
+			".length",
 		},
 	)
 }

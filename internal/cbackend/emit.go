@@ -446,7 +446,7 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 					inferred = hir.TypeI32
 				case mir.OperationResultConstruct, mir.OperationOptionConstruct,
 					mir.OperationResultPayload, mir.OperationOptionPayload,
-					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead:
+					mir.OperationRawAddress, mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead:
 					inferred = operation.Type
 				}
 				if operation.DestinationLocal == mir.NoLocal || inferred == hir.TypeInvalid || inferred == "" {
@@ -601,7 +601,8 @@ func validExternalCIdentifier(value string) bool {
 }
 
 var admittedStandardLibrarySymbols = map[string]struct{}{
-	"fy_std_text_utf8_valid_v0": {},
+	"fy_std_text_utf8_valid_v0":    {},
+	"fy_std_text_validate_utf8_v0": {},
 }
 
 var generatedCNames = map[string]struct{}{
@@ -764,7 +765,7 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 	if len(function.RegionValues) != 0 {
 		return CapabilityError{Function: function.Name, Feature: "Region values"}
 	}
-	foreignCallEntities := make(map[string]struct{})
+	allowedUnsafeEntities := make(map[string]struct{})
 	for blockIndex := range function.Blocks {
 		block := &function.Blocks[blockIndex]
 		if block.ID != mir.BlockID(blockIndex) {
@@ -788,6 +789,12 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 				if err := e.inspectResourceDischarge(functionIndex, *operation); err != nil {
 					return err
 				}
+			case mir.OperationRawAddress:
+				if err := e.inspectRawAddress(functionIndex, *operation); err != nil {
+					return err
+				}
+				allowedUnsafeEntities[operation.Entity] = struct{}{}
+				e.features["raw-address"] = struct{}{}
 			case mir.OperationStructConstruct:
 				if err := e.inspectStructOperation(functionIndex, *operation); err != nil {
 					return err
@@ -858,7 +865,7 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 			}
 			if foreign {
 				e.features["foreign-c-call"] = struct{}{}
-				foreignCallEntities[terminator.Entity] = struct{}{}
+				allowedUnsafeEntities[terminator.Entity] = struct{}{}
 				if terminator.ForeignABI != "C" || terminator.UnsafeScope.Source == "" {
 					return fmt.Errorf("foreign C call in %s lacks ABI or unsafe provenance", function.Name)
 				}
@@ -926,8 +933,8 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 		}
 	}
 	for _, operation := range function.UnsafeOperations {
-		if _, foreign := foreignCallEntities[operation.Entity]; !foreign {
-			return CapabilityError{Function: function.Name, Feature: "unsafe operation outside the foreign-call subset"}
+		if _, admitted := allowedUnsafeEntities[operation.Entity]; !admitted {
+			return CapabilityError{Function: function.Name, Feature: "unsafe operation outside the admitted raw-address and foreign-call subset"}
 		}
 	}
 	return nil
@@ -948,7 +955,7 @@ func (e *emitter) callSignature(symbol hir.SymbolID) (hir.Type, []hir.Type, bool
 func validateOperationShape(function string, operation mir.Operation) error {
 	switch operation.Kind {
 	case mir.OperationAssign, mir.OperationInitialize, mir.OperationUnary, mir.OperationBinary,
-		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead:
+		mir.OperationRawAddress, mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead:
 		if operation.DestinationLocal < 0 {
 			return fmt.Errorf("%s operation in %s has no destination local", operation.Kind, function)
 		}
@@ -956,6 +963,32 @@ func validateOperationShape(function string, operation mir.Operation) error {
 		if operation.Symbol == hir.NoSymbol {
 			return fmt.Errorf("%s operation in %s has no resource symbol", operation.Kind, function)
 		}
+	}
+	return nil
+}
+
+func (e *emitter) inspectRawAddress(functionIndex int, operation mir.Operation) error {
+	function := &e.functions[functionIndex]
+	operand, err := oneOperand(operation.Operands)
+	if err != nil {
+		return fmt.Errorf("raw address in %s: %w", function.Name, err)
+	}
+	if operand.Kind != mir.OperandLocal || operation.Entity == "" || operation.UnsafeScope.Source == "" {
+		return fmt.Errorf("raw address in %s has incomplete place or unsafe provenance", function.Name)
+	}
+	element, mutable, pointer := hir.RawPointerElement(operation.Type)
+	if !pointer || element != operation.OwnerType || operation.Operator != "&" && operation.Operator != "&mut" || operation.Operator == "&" && mutable {
+		return fmt.Errorf("raw address in %s has incompatible source and pointer types", function.Name)
+	}
+	operandType, err := e.operandType(functionIndex, operand)
+	if err != nil {
+		return fmt.Errorf("raw address in %s: %w", function.Name, err)
+	}
+	if canonicalCValueType(operandType) != canonicalCValueType(operation.OwnerType) {
+		return fmt.Errorf("raw address in %s has place type %q, want %q", function.Name, operandType, operation.OwnerType)
+	}
+	if _, err := e.cValueType(operation.Type); err != nil {
+		return CapabilityError{Function: function.Name, Feature: "raw address type " + strconv.Quote(string(operation.Type))}
 	}
 	return nil
 }
@@ -1540,6 +1573,12 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			return fmt.Errorf("assign in %s: %w", function, err)
 		}
 		fmt.Fprintf(output, "    fy_l_%d = %s;\n", operation.DestinationLocal, value)
+	case mir.OperationRawAddress:
+		operand, err := oneOperand(operation.Operands)
+		if err != nil || operand.Kind != mir.OperandLocal {
+			return fmt.Errorf("raw address in %s has invalid local operand", function)
+		}
+		fmt.Fprintf(output, "    fy_l_%d = &fy_l_%d;\n", operation.DestinationLocal, operand.Local)
 	case mir.OperationStructConstruct:
 		index, found := e.structByType[operation.Type]
 		if !found {
@@ -1998,7 +2037,7 @@ func operationHasDestination(kind mir.OperationKind) bool {
 	case mir.OperationInitialize, mir.OperationAssign, mir.OperationUnary, mir.OperationBinary,
 		mir.OperationResultConstruct, mir.OperationResultPayload,
 		mir.OperationOptionConstruct, mir.OperationOptionPayload,
-		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationRegionPlace:
+		mir.OperationRawAddress, mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationRegionPlace:
 		return true
 	default:
 		return false

@@ -118,13 +118,15 @@ close including forced close failure. Its four native runs remain configured but
 source-visible File effects and error resources remain missing.
 
 The source FFI slice admits exact-name `unsafe extern C fn` declarations using `i32`, `u8`, `u32`,
-`usize`, and raw pointers to that bounded scalar set. Unsafe call provenance survives AST, typed
-HIR, and MIR verification; the C backend emits an unannotated external prototype and call; and the
-native lane plans four scalar plus four typed-null pointer/target-scalar separate-object Clang/GCC
-crossings. The interpreter refuses foreign execution. `@link_name`, non-null pointer operations,
-callbacks, `c.*` scalars, `@repr(C)` aggregates, exports, and public standard-library wrappers
-remain Phase 2 work. The internal empty-input UTF-8 validation transport is the first real
-source-to-stdlib-C exception, not a completed wrapper.
+`usize`, raw pointers to that bounded scalar set, and raw pointers to flat nonempty `@repr(C)`
+records. Unsafe call and raw-address provenance survive AST, typed HIR, and MIR verification; the C
+backend emits unannotated prototypes, exact record tags/fields/layout assertions, and `&local` only
+for an exact unsafe borrow-to-pointer cast. The native lane plans four scalar, four typed-null
+pointer/target-scalar, four real UTF-8 validation, and four real text-view output-record crossings.
+The interpreter refuses raw addresses and foreign execution. `@link_name`, dereference, pointer
+arithmetic, arbitrary casts, callbacks, `c.*` scalars, nested or by-value aggregates, exports, and
+public standard-library wrappers remain Phase 2 work. The internal empty-input text transports are
+real source-to-stdlib-C exceptions, not completed wrappers.
 
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.

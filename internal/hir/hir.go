@@ -272,6 +272,7 @@ type Expression struct {
 	Value       string
 	Variant     string
 	Operator    string
+	TargetType  Type
 	Symbol      SymbolID
 	ForeignABI  string
 	UnsafeScope *Span

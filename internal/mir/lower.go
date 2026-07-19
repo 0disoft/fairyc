@@ -413,6 +413,8 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		return l.lowerAggregateConstruction(expression)
 	case "field-expression":
 		return l.lowerFieldRead(expression)
+	case "cast":
+		return l.lowerRawAddressCast(expression)
 	case "prefix":
 		if len(expression.Children) != 1 {
 			return Operand{}, fmt.Errorf("prefix expression has %d children", len(expression.Children))
@@ -490,6 +492,41 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 	default:
 		return Operand{}, fmt.Errorf("unsupported HIR expression %q", expression.Kind)
 	}
+}
+
+func (l *functionLowerer) lowerRawAddressCast(expression *hir.Expression) (Operand, error) {
+	if expression.Operator != "as" || expression.TargetType != expression.Type || expression.UnsafeScope == nil || len(expression.Children) != 1 {
+		return Operand{}, fmt.Errorf("malformed raw-address cast")
+	}
+	borrow := &expression.Children[0]
+	if borrow.Kind != "prefix" || (borrow.Operator != "&" && borrow.Operator != "&mut") || len(borrow.Children) != 1 {
+		return Operand{}, fmt.Errorf("raw-address cast source is not a direct borrow")
+	}
+	place := &borrow.Children[0]
+	if place.Kind != "path" || place.Symbol == hir.NoSymbol {
+		return Operand{}, fmt.Errorf("raw-address cast source is not a direct local place")
+	}
+	element, _, pointer := hir.RawPointerElement(expression.Type)
+	if !pointer || element != place.Type {
+		return Operand{}, fmt.Errorf("raw-address cast type %q does not match place type %q", expression.Type, place.Type)
+	}
+	destination := l.newTemporary()
+	entity := sourceEntity("raw-address", expression.Span)
+	l.appendOperation(Operation{
+		Kind: OperationRawAddress, Entity: entity, Span: expression.Span,
+		DestinationLocal: destination,
+		Operands:         []Operand{{Kind: OperandLocal, Local: LocalID(place.Symbol)}},
+		Type:             expression.Type,
+		OwnerType:        place.Type,
+		Operator:         borrow.Operator,
+		UnsafeScope:      *expression.UnsafeScope,
+	})
+	l.result.UnsafeOperations = append(l.result.UnsafeOperations, UnsafeOperation{
+		Entity:           entity,
+		SourceSpanEntity: sourceEntity("span", expression.Span),
+		ScopeEntity:      sourceEntity("unsafe-scope", *expression.UnsafeScope),
+	})
+	return Operand{Kind: OperandLocal, Local: destination}, nil
 }
 
 func (l *functionLowerer) lowerRegion(expression *hir.Expression) (Operand, error) {

@@ -50,11 +50,13 @@ when the same verified MIR is admissible to `emit-c`.
 translation unit to stdout. It does not write an artifact, invoke a C toolchain, link, or run native
 code. The native fixture lane's `drop-trace-v0` observer profile is not available through this
 command and never appears in its output.
-The admitted foreign declaration form currently supports `i32`, `u8`, `u32`, `usize`, and raw
-pointers to that bounded scalar set, uses its source identifier as the exact C symbol, and requires
-an explicit unsafe boundary. Raw pointers can currently be null or returned by another admitted
-foreign call; dereference, arithmetic, and casts remain unavailable. No `@link_name`, callback,
-`c.*` scalar, aggregate, export, or inferred C attribute is implemented.
+The admitted foreign declaration form currently supports `i32`, `u8`, `u32`, `usize`, raw pointers
+to that bounded scalar set, and raw pointers to admitted flat `@repr(C)` structs. It uses its source
+identifier as the exact C symbol and requires an explicit unsafe boundary. Raw pointers can be null,
+returned by another admitted foreign call, or produced by an exact direct-local borrow-to-pointer
+cast inside `unsafe`. Dereference, arithmetic, integer conversion, mutability strengthening, and
+arbitrary casts remain unavailable. No `@link_name`, callback, `c.*` scalar, nested or by-value
+aggregate, export, or inferred C attribute is implemented.
 `experimental build` sends that exact constrained-C unit through the shared bounded C driver and embedded
 runtime. It has no implicit compiler, optimization, or output choice; requires Linux/amd64 with
 glibc; accepts only Clang or GCC and the closed `low` or `optimized` profiles; and creates a new

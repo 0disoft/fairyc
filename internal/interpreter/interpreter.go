@@ -527,6 +527,8 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					return callCompletion{}, fmt.Errorf("Option payload in %q: %w", function.Name, err)
 				}
 				locals[operation.DestinationLocal] = payload
+			case mir.OperationRawAddress:
+				return callCompletion{}, capabilityErrorKind("raw-address", "raw address in %q requires a native backend", function.Name)
 			case mir.OperationStructConstruct:
 				values := make([]runtimeValue, len(operation.Operands))
 				for index, operand := range operation.Operands {

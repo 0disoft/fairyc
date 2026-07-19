@@ -60,6 +60,12 @@ name the owner type and are verified against exactly one aggregate definition. P
 records the concrete extracted type. Missing type identity is `V1001`; an interpreter or backend
 cannot infer it from source syntax, local numbering, or use sites.
 
+The implemented raw-address operation accepts only a direct local place produced by an exact safe
+borrow-to-raw-pointer cast. It records pointee type, source borrow mutability, destination pointer
+type, source span, and containing unsafe scope. `V1701` rejects missing or forged scope provenance;
+`V1001` rejects a mismatched place, pointee, mutability, or operation shape. The C backend emits
+`&local`; the interpreter reports a native-only capability boundary instead of fabricating an address.
+
 Every user resource type has one program-level definition containing its canonical type identity,
 source span, declaration-ordered field names and resolved field types, and drop classification.
 Resource construction names that definition and lists exactly its declared fields in order. A field

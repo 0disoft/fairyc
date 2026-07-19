@@ -51,9 +51,10 @@ The current executable source subset implements exact-name `unsafe extern C fn` 
 admitted nonempty `@repr(C)` struct. AST, typed HIR, MIR, unsafe provenance, deterministic C
 prototype emission, typed null, separate-object cross-compiler linking, and process-status
 observation are wired. Source struct construction and field reads reach verified MIR, the MIR
-interpreter for its executable scalar subset, and generated C. Non-null pointer construction,
-dereference, arithmetic, and casts remain unsupported, so source cannot yet pass a local struct's
-address to C. This is not implementation of `@link_name`, exports, callbacks, `c.*` scalars,
+interpreter for its executable scalar subset, and generated C. Inside an explicit unsafe boundary,
+an exact `&T -> *T`, `&mut T -> *T`, or `&mut T -> *mut T` cast may take the address of a direct
+local place without inventing alias promises. Raw dereference, pointer arithmetic, integer-pointer
+conversion, mutability strengthening, and other casts remain unsupported. This is not implementation of `@link_name`, exports, callbacks, `c.*` scalars,
 nested/array/enum `@repr(C)` fields, or by-value aggregate calls and returns. The interpreter
 remains fail-closed on every foreign call.
 

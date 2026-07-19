@@ -373,6 +373,75 @@ func TestAnalyzeRejectsForeignCallOutsideUnsafeBoundary(t *testing.T) {
 	assertSpan(t, result.Diagnostics[0].Primary, "main.fy", start, start+len("add_one(41)"))
 }
 
+func TestAnalyzeTypesBorrowToRawPointerCastInsideUnsafeBoundary(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+@repr(C)
+struct Packet { code: u32; }
+unsafe extern C fn sink(output: *mut Packet) -> u32;
+fn main() -> i32 {
+    var output: Packet = Packet { code: 0 };
+    if unsafe { sink(&mut output as *mut Packet) } == 0 { 0 } else { 1 }
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+	main := result.HIR.Modules[0].Functions[0]
+	condition := &main.Body.Tail.Children[0]
+	unsafeExpression := &condition.Children[0]
+	call := unsafeExpression.Children[0].Block.Tail
+	if call == nil || len(call.Children) != 2 {
+		t.Fatalf("call = %+v", call)
+	}
+	cast := &call.Children[1]
+	wantType := hir.RawPointer(hir.Type("main::Packet"), true)
+	if cast.Kind != "cast" || cast.Operator != "as" || cast.Type != wantType || cast.TargetType != wantType || cast.UnsafeScope == nil || len(cast.Children) != 1 || cast.Children[0].Type != hir.MutableBorrow(hir.Type("main::Packet")) {
+		t.Fatalf("cast = %+v", cast)
+	}
+}
+
+func TestAnalyzeRejectsBorrowToRawPointerCastOutsideUnsafeBoundary(t *testing.T) {
+	t.Parallel()
+	text := "module main;\nfn main() -> i32 { var value: i32 = 0; let pointer: *mut i32 = &mut value as *mut i32; 0 }\n"
+	result := analyzeText(t, map[string]string{"main.fy": text})
+	if result.FailedPhase != semantic.PhaseType || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E5101" {
+		t.Fatalf("result = %+v", result)
+	}
+	start := strings.Index(text, "&mut value")
+	assertSpan(t, result.Diagnostics[0].Primary, "main.fy", start, start+len("&mut value as *mut i32"))
+}
+
+func TestAnalyzeRejectsRawPointerCastThatChangesPointeeOrStrengthensMutability(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name    string
+		source  string
+		feature string
+	}{
+		{
+			name:    "mutability strengthening",
+			source:  "module main;\nfn main() -> i32 { let value: i32 = 0; let pointer: *mut i32 = unsafe { &value as *mut i32 }; 0 }\n",
+			feature: "cast from &i32 to *mut i32",
+		},
+		{
+			name:    "pointee change",
+			source:  "module main;\nfn main() -> i32 { var value: i32 = 0; let pointer: *mut u32 = unsafe { &mut value as *mut u32 }; 0 }\n",
+			feature: "cast from &mut i32 to *mut u32",
+		},
+	}
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			result := analyzeText(t, map[string]string{"main.fy": test.source})
+			if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != test.feature {
+				t.Fatalf("result = %+v", result)
+			}
+		})
+	}
+}
+
 func TestAnalyzeRejectsSafeBorrowInForeignSignature(t *testing.T) {
 	t.Parallel()
 	text := "module main;\nunsafe extern C fn inspect(value: &i32) -> i32;\nfn main() -> i32 { 0 }\n"

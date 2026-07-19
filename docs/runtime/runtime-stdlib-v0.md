@@ -133,10 +133,12 @@ that land on code-point boundaries and leaves output unchanged on failure. Empty
 is normalized but not observable; compiler borrow origins remain outside the C record.
 
 The four-way native probe for these validation and slicing cases is configured but unobserved on
-this Windows host. Its canonical validator additionally exposes the internal ABI-major symbol
-`fy_std_text_utf8_valid_v0`; a Fairy source fixture calls the empty-input path through raw FFI and
-the actual text-view C unit. This is not the public safe `std::text` API and does not implement a
-borrowed `str` result, nonempty source pointer construction, owned text, Unicode normalization,
+this Windows host. Its canonical validator additionally exposes the internal ABI-major symbols
+`fy_std_text_utf8_valid_v0` and `fy_std_text_validate_utf8_v0`. One Fairy source fixture calls the
+empty-input predicate through raw FFI; another constructs the exact flat `@repr(C)` view record,
+passes its verified direct-local raw address, and observes the C helper replace sentinel length 99
+with zero. Both link the actual text-view C unit. This is not the public safe `std::text` API and
+does not implement a borrowed `str` result, nonempty input storage, owned text, Unicode normalization,
 grapheme segmentation, case conversion, or locale behavior.
 
 `String` is a resource owning a UTF-8 `Buffer`. It can copy from `&str`, consume a `Buffer` after validation, expose `&str`, and append fallibly. A failed consuming UTF-8 conversion returns ownership of the original `Buffer` in its error resource. Mutable raw bytes are not exposed.
