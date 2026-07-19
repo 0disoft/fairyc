@@ -14,7 +14,8 @@ import (
 )
 
 const (
-	// DialectC11 identifies the extension-free ISO C11 emission subset.
+	// DialectC11 identifies the C11 compiler dialect; target-qualified typedefs may require
+	// an explicit feature-test macro and provider header within that dialect.
 	DialectC11 = "c11"
 	// InstrumentationDropTraceV0 identifies the closed native-conformance drop observer.
 	InstrumentationDropTraceV0 = "drop-trace-v0"
@@ -97,6 +98,7 @@ type emitter struct {
 	needsShift         bool
 	cIntLayout         target.Layout
 	cSizeTLayout       target.Layout
+	cSSizeTLayout      target.Layout
 	instrumentation    string
 	dropSites          []DropSite
 	dropSiteByKey      map[dropSiteKey]uint32
@@ -122,13 +124,13 @@ type enumCType struct {
 	fieldIndex   []map[string]int
 }
 
-func targetCScalarLayout(spec target.Spec, name string) (target.Layout, bool) {
+func targetCScalar(spec target.Spec, name string) (target.Scalar, bool) {
 	for _, scalar := range spec.CScalars {
 		if scalar.Name == name {
-			return scalar.Layout, true
+			return scalar, true
 		}
 	}
-	return target.Layout{}, false
+	return target.Scalar{}, false
 }
 
 // Emit verifies MIR, rejects unsupported semantic families, and emits one deterministic C unit.
@@ -146,13 +148,23 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	if !found {
 		return Unit{}, fmt.Errorf("C emission target %q is missing", profile.Target)
 	}
-	cIntLayout, found := targetCScalarLayout(targetSpec, "c.int")
+	cInt, found := targetCScalar(targetSpec, "c.int")
 	if !found {
 		return Unit{}, fmt.Errorf("C emission target %q has no c.int layout", profile.Target)
 	}
-	cSizeTLayout, found := targetCScalarLayout(targetSpec, "c.size_t")
+	cSizeT, found := targetCScalar(targetSpec, "c.size_t")
 	if !found {
 		return Unit{}, fmt.Errorf("C emission target %q has no c.size_t layout", profile.Target)
+	}
+	if cSizeT.Header != "stddef.h" || cSizeT.Availability != "iso-c11" {
+		return Unit{}, fmt.Errorf("C emission target %q has invalid c.size_t provider", profile.Target)
+	}
+	cSSizeT, found := targetCScalar(targetSpec, "c.ssize_t")
+	if !found {
+		return Unit{}, fmt.Errorf("C emission target %q has no c.ssize_t layout", profile.Target)
+	}
+	if cSSizeT.Header != "sys/types.h" || cSSizeT.Availability != "posix.1-2008" {
+		return Unit{}, fmt.Errorf("C emission target %q has invalid c.ssize_t provider", profile.Target)
 	}
 	layoutEngine, err := layout.New(targetSpec)
 	if err != nil {
@@ -208,8 +220,9 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 		trapCategories:     make(map[string]struct{}),
 		dynamicTrapTargets: make(map[int]map[mir.BlockID]struct{}),
 		localTypes:         make([]map[mir.LocalID]hir.Type, len(functions)),
-		cIntLayout:         cIntLayout,
-		cSizeTLayout:       cSizeTLayout,
+		cIntLayout:         cInt.Layout,
+		cSizeTLayout:       cSizeT.Layout,
+		cSSizeTLayout:      cSSizeT.Layout,
 		instrumentation:    profile.Instrumentation,
 	}
 	if len(structTypes) != 0 {
@@ -591,6 +604,8 @@ func (e *emitter) recordCScalarFeature(value hir.Type) {
 		e.features["c-int"] = struct{}{}
 	case hir.TypeCSizeT:
 		e.features["c-size-t"] = struct{}{}
+	case hir.TypeCSSizeT:
+		e.features["c-ssize-t"] = struct{}{}
 	}
 }
 
@@ -635,6 +650,8 @@ func (e *emitter) foreignCType(value hir.Type, result bool) (string, error) {
 		return "int", nil
 	case hir.TypeCSizeT:
 		return "size_t", nil
+	case hir.TypeCSSizeT:
+		return "ssize_t", nil
 	}
 	if element, mutable, pointer := hir.RawPointerElement(value); pointer {
 		pointee, err := e.foreignPointerElementCType(element)
@@ -718,7 +735,7 @@ var admittedStandardLibrarySymbols = map[string]struct{}{
 }
 
 var generatedCNames = map[string]struct{}{
-	"uint8_t": {}, "int32_t": {}, "uint32_t": {}, "uint64_t": {}, "uintptr_t": {}, "size_t": {},
+	"uint8_t": {}, "int32_t": {}, "uint32_t": {}, "uint64_t": {}, "uintptr_t": {}, "size_t": {}, "ssize_t": {},
 	"UINT8_C": {}, "INT32_C": {}, "UINT32_C": {}, "UINT64_C": {},
 	"INT32_MIN": {}, "INT32_MAX": {}, "UINT32_MAX": {}, "UINTPTR_MAX": {},
 }
@@ -793,7 +810,7 @@ func isResultI32I32(value hir.Type) bool {
 
 func (e *emitter) supportedCValueType(value hir.Type) bool {
 	value = canonicalCValueType(value)
-	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeU32 || value == hir.TypeUSize || value == hir.TypeCInt || value == hir.TypeCSizeT || isOptionI32(value) || isResultI32I32(value) {
+	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeU32 || value == hir.TypeUSize || value == hir.TypeCInt || value == hir.TypeCSizeT || value == hir.TypeCSSizeT || isOptionI32(value) || isResultI32I32(value) {
 		return true
 	}
 	if element, _, pointer := hir.RawPointerElement(value); pointer {
@@ -829,6 +846,8 @@ func (e *emitter) cValueType(value hir.Type) (string, error) {
 		return "int", nil
 	case value == hir.TypeCSizeT:
 		return "size_t", nil
+	case value == hir.TypeCSSizeT:
+		return "ssize_t", nil
 	case isRawPointer(value):
 		return e.foreignCType(value, false)
 	case isOptionI32(value):
@@ -1576,11 +1595,22 @@ func (e *emitter) recordTrapCategories(function string, categories []string) err
 }
 
 func (e *emitter) emitPreamble(output *strings.Builder) error {
-	fmt.Fprintf(output, "/* fairyc constrained C transport: %s, ISO C11 */\n", target.X8664LinuxGNU)
+	_, usesCSSizeT := e.features["c-ssize-t"]
+	if usesCSSizeT {
+		output.WriteString("#define _POSIX_C_SOURCE 200809L\n")
+	}
+	transportProfile := "ISO C11"
+	if usesCSSizeT {
+		transportProfile += " with POSIX.1-2008 typedefs"
+	}
+	fmt.Fprintf(output, "/* fairyc constrained C transport: %s, %s */\n", target.X8664LinuxGNU, transportProfile)
 	output.WriteString("#include <stdint.h>\n")
 	_, usesCSizeT := e.features["c-size-t"]
 	if len(e.structTypes) != 0 || len(e.resourceTypes) != 0 || usesCSizeT {
 		output.WriteString("#include <stddef.h>\n")
+	}
+	if usesCSSizeT {
+		output.WriteString("#include <sys/types.h>\n")
 	}
 	if e.needsBitcast {
 		output.WriteString("#include <string.h>\n")
@@ -1594,6 +1624,11 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 		fmt.Fprintf(output, "_Static_assert(sizeof(size_t) == UINT64_C(%d), \"fairyc target c.size_t size\");\n", e.cSizeTLayout.SizeBytes)
 		fmt.Fprintf(output, "_Static_assert(_Alignof(size_t) == UINT64_C(%d), \"fairyc target c.size_t alignment\");\n", e.cSizeTLayout.AlignmentBytes)
 		output.WriteString("_Static_assert(((size_t)-1) > (size_t)0, \"fairyc target c.size_t unsigned\");\n\n")
+	}
+	if usesCSSizeT {
+		fmt.Fprintf(output, "_Static_assert(sizeof(ssize_t) == UINT64_C(%d), \"fairyc target c.ssize_t size\");\n", e.cSSizeTLayout.SizeBytes)
+		fmt.Fprintf(output, "_Static_assert(_Alignof(ssize_t) == UINT64_C(%d), \"fairyc target c.ssize_t alignment\");\n", e.cSSizeTLayout.AlignmentBytes)
+		output.WriteString("_Static_assert(((ssize_t)-1) < (ssize_t)0, \"fairyc target c.ssize_t signed\");\n\n")
 	}
 	for index, structure := range e.structTypes {
 		if structure.definition.ReprC {

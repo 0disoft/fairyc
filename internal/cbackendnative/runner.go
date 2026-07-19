@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v17"
+	reportSchemaVersion = "fairyc.native-c-report/v18"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -113,6 +113,28 @@ size_t fairyc_fixture_make_c_size_t(void) {
 
 int32_t fairyc_fixture_consume_c_size_t(size_t value) {
     return value == (size_t)41 ? INT32_C(42) : INT32_C(1);
+}
+`
+
+const foreignCSSizeTCallSmokeSource = `module main;
+@link_name("fairyc_fixture_make_c_ssize_t")
+unsafe extern C fn make_c_ssize_t() -> c::ssize_t;
+@link_name("fairyc_fixture_consume_c_ssize_t")
+unsafe extern C fn consume_c_ssize_t(value: c::ssize_t) -> i32;
+fn main() -> i32 { unsafe { consume_c_ssize_t(make_c_ssize_t()) } }
+`
+
+const foreignCSSizeTCallCompanionSource = `#define _POSIX_C_SOURCE 200809L
+
+#include <stdint.h>
+#include <sys/types.h>
+
+ssize_t fairyc_fixture_make_c_ssize_t(void) {
+    return (ssize_t)-41;
+}
+
+int32_t fairyc_fixture_consume_c_ssize_t(ssize_t value) {
+    return value == (ssize_t)-41 && value < (ssize_t)0 ? INT32_C(42) : INT32_C(1);
 }
 `
 
@@ -204,6 +226,7 @@ type Report struct {
 	ForeignCallExecutions              int        `json:"foreignCallExecutions"`
 	ForeignCIntCallExecutions          int        `json:"foreignCIntCallExecutions"`
 	ForeignCSizeTCallExecutions        int        `json:"foreignCSizeTCallExecutions"`
+	ForeignCSSizeTCallExecutions       int        `json:"foreignCSSizeTCallExecutions"`
 	ForeignPointerCallExecutions       int        `json:"foreignPointerCallExecutions"`
 	TextValidationSourceCallExecutions int        `json:"textValidationSourceCallExecutions"`
 	TextViewOutputSourceCallExecutions int        `json:"textViewOutputSourceCallExecutions"`
@@ -404,6 +427,11 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.ForeignCSizeTCallExecutions = foreignCSizeTCallExecutions
+	foreignCSSizeTCallExecutions, err := runForeignCSSizeTCallProbe(temporaryRoot, toolchains)
+	if err != nil {
+		return Report{}, err
+	}
+	report.ForeignCSSizeTCallExecutions = foreignCSSizeTCallExecutions
 	foreignPointerCallExecutions, err := runForeignPointerCallProbe(temporaryRoot, toolchains)
 	if err != nil {
 		return Report{}, err
@@ -520,6 +548,27 @@ func runForeignCSizeTCallProbe(temporaryRoot string, toolchains []cdriver.Toolch
 			"extern int32_t fairyc_fixture_consume_c_size_t(size_t fy_a_0);",
 			"fairyc_fixture_make_c_size_t()",
 			"fairyc_fixture_consume_c_size_t(fy_l_",
+		},
+	)
+}
+
+func runForeignCSSizeTCallProbe(temporaryRoot string, toolchains []cdriver.Toolchain) (int, error) {
+	return runForeignSourceProbe(
+		temporaryRoot,
+		toolchains,
+		"foreign-c-ssize-t-call",
+		foreignCSSizeTCallSmokeSource,
+		foreignCSSizeTCallCompanionSource,
+		42,
+		[]string{
+			"#define _POSIX_C_SOURCE 200809L",
+			"#include <sys/types.h>",
+			"_Static_assert(sizeof(ssize_t) == UINT64_C(8), \"fairyc target c.ssize_t size\");",
+			"_Static_assert(_Alignof(ssize_t) == UINT64_C(8), \"fairyc target c.ssize_t alignment\");",
+			"extern ssize_t fairyc_fixture_make_c_ssize_t(void);",
+			"extern int32_t fairyc_fixture_consume_c_ssize_t(ssize_t fy_a_0);",
+			"fairyc_fixture_make_c_ssize_t()",
+			"fairyc_fixture_consume_c_ssize_t(fy_l_",
 		},
 	)
 }

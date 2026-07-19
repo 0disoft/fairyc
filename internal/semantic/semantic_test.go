@@ -500,39 +500,39 @@ fn main() -> i32 { unsafe { consume_c_size_t(make_c_size_t()) } }
 	}
 }
 
-func TestAnalyzeKeepsCIntImmediateAndPlatformTypedefsDeferred(t *testing.T) {
+func TestAnalyzePreservesDistinctCSSizeTForeignTransport(t *testing.T) {
 	t.Parallel()
-	for _, typeRef := range []string{"c::int", "c::size_t"} {
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+@link_name("fairyc_fixture_make_c_ssize_t")
+unsafe extern C fn make_c_ssize_t() -> c::ssize_t;
+@link_name("fairyc_fixture_consume_c_ssize_t")
+unsafe extern C fn consume_c_ssize_t(value: c::ssize_t) -> i32;
+fn main() -> i32 { unsafe { consume_c_ssize_t(make_c_ssize_t()) } }
+`,
+	})
+	assertCleanTypeResult(t, result)
+	if len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].ForeignFunctions) != 2 {
+		t.Fatalf("HIR = %+v", result.HIR)
+	}
+	producer := result.HIR.Modules[0].ForeignFunctions[0]
+	consumer := result.HIR.Modules[0].ForeignFunctions[1]
+	if producer.Name != "make_c_ssize_t" || producer.ResultType != hir.TypeCSSizeT || producer.ResultType == hir.TypeUSize || len(producer.Parameters) != 0 {
+		t.Fatalf("producer = %+v", producer)
+	}
+	if consumer.Name != "consume_c_ssize_t" || consumer.ResultType != hir.TypeI32 || len(consumer.Parameters) != 1 || consumer.Parameters[0].Type != hir.TypeCSSizeT {
+		t.Fatalf("consumer = %+v", consumer)
+	}
+}
+
+func TestAnalyzeKeepsCScalarImmediatesDeferred(t *testing.T) {
+	t.Parallel()
+	for _, typeRef := range []string{"c::int", "c::size_t", "c::ssize_t"} {
 		t.Run(typeRef+" immediate", func(t *testing.T) {
 			text := "module main;\nfn deferred(value: " + typeRef + ") -> i32 { let copy: " + typeRef + " = 1; 0 }\nfn main() -> i32 { 0 }\n"
 			result := analyzeText(t, map[string]string{"main.fy": text})
 			if result.FailedPhase != semantic.PhaseType || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E1006" || len(result.Unsupported) != 0 {
 				t.Fatalf("result = %+v", result)
-			}
-		})
-	}
-	for _, test := range []struct {
-		name    string
-		typeRef string
-		feature string
-	}{
-		{name: "ssize t", typeRef: "c::ssize_t", feature: "type c::ssize_t"},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			text := "module main;\nfn deferred(value: " + test.typeRef + ") -> i32 { 0 }\nfn main() -> i32 { 0 }\n"
-			result := analyzeText(t, map[string]string{"main.fy": text})
-			if len(result.Unsupported) == 0 {
-				t.Fatalf("result unexpectedly accepted %s: %+v", test.typeRef, result)
-			}
-			found := false
-			for _, unsupported := range result.Unsupported {
-				if unsupported.Feature == test.feature {
-					found = true
-					break
-				}
-			}
-			if !found {
-				t.Fatalf("unsupported = %+v, want feature %q", result.Unsupported, test.feature)
 			}
 		})
 	}

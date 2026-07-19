@@ -18,17 +18,19 @@ maturity claims false.
 
 ## Current scalar, flat-resource, and resource-tagged emission slice
 
-`internal/cbackend` currently emits one deterministic ISO C11 translation unit from verified MIR
+`internal/cbackend` currently emits one deterministic C11 translation unit from verified MIR
 for a deliberately narrow subset. It accepts `i32`, `bool`, `Option<i32>`, and
 `Result<i32, i32>` parameters and internal results, `void` internal results, a zero-argument
 `main() -> i32` entry, calls and control flow, scalar tag construction, match and Result `?`,
 comparisons, bitwise operations, and the implemented checked arithmetic families. Private numeric C
 function names prevent source identifiers from becoming ABI or injection surfaces.
 
-The foreign-call transport additionally accepts exact `c::int` and `c::size_t` results and
-parameters. HIR and MIR keep those types distinct from `i32` and `usize`; the backend emits C `int`
-or `<stddef.h>` `size_t`, records separate `c-int`/`c-size-t` features, and asserts their size and
-alignment against target keys `c.int`/`c.size_t`. The `size_t` path also asserts unsignedness. These
+The foreign-call transport additionally accepts exact `c::int`, `c::size_t`, and target-specific
+`c::ssize_t` results and parameters. HIR and MIR keep those types distinct from `i32`, `usize`, and
+`isize`; the backend emits C `int`, `<stddef.h>` `size_t`, or POSIX.1-2008 `<sys/types.h>`
+`ssize_t`, records separate features, and asserts their target size and alignment. The typedef paths
+also assert unsignedness or signedness. `ssize_t` selects `_POSIX_C_SOURCE 200809L` before every
+header rather than silently relying on the host's default feature namespace. These
 slices deliberately create no immediate C-integer MIR operand: a foreign producer result local may
 be passed to a foreign consumer, while literals, operators, casts, interpreter execution, raw
 pointers to C scalars, and aggregate fields remain closed.
@@ -54,6 +56,11 @@ call. This is private transport, not public Fairy ABI or user drop-body executio
 `spec/fixtures/c-emission/manifest-v0.json` currently proves eighteen source-to-emission cases and
 repeated byte identity. No C parser, compiler, object writer, assembler, linker, executable,
 sanitizer, layout probe, or ABI probe runs in that fixture lane.
+
+The C11 dialect is extension-free for programs using only ISO-owned type families. Selecting
+target `c::ssize_t` deliberately changes the provider profile: generated C fixes
+`_POSIX_C_SOURCE 200809L` before headers and includes `<sys/types.h>`. No other source construct may
+silently enable that namespace.
 
 ## Ordered evaluation
 
@@ -108,8 +115,8 @@ Raw foreign signatures contain C ABI scalars, explicitly represented aggregates,
 The implemented source slice preserves individual `unsafe extern C fn` declarations, one optional
 nonempty `@link_name("symbol")`, and
 `unsafe {}` or `unsafe fn` call provenance through AST, typed HIR, and verified MIR. The C backend
-currently admits `C` declarations using `i32`, `u8`, `u32`, `usize`, exact by-value `c::int` and
-`c::size_t`, raw pointers to
+currently admits `C` declarations using `i32`, `u8`, `u32`, `usize`, exact by-value `c::int`,
+`c::size_t`, and target-specific `c::ssize_t`, raw pointers to
 that bounded scalar set, and raw pointers to admitted nonempty `@repr(C)` structs. It emits one plain prototype and an ordinary call without `pure`, `const`, `restrict`,
 `nothrow`, alias, retention, or visibility promises. Compatible repeated declarations of the same
 external name coalesce even when their Fairy names differ; signature conflicts fail closed. A local preprocessor guard undefines an
@@ -151,12 +158,13 @@ empty stdout/stderr, and is not selectable through the product CLI. Output, nega
 `i32` returns, user drop-body effects, public layout, ABI, and broader runtime behavior remain
 unimplemented. A clean sanitizer run is backend evidence, not the language-semantics oracle.
 
-The same runner additionally plans four scalar, four exact `c::int`, four exact `c::size_t`, and four typed-null pointer/target-scalar
+The same runner additionally plans four scalar, four exact `c::int`, four exact `c::size_t`, four
+negative-preserving `c::ssize_t`, and four typed-null pointer/target-scalar
 Fairy-source foreign-call crossings: Clang-generated Fairy caller to GCC C callee and the reverse
 at low and optimized profiles. Those crossings use the existing separate-object driver and are
 counted separately as `foreignCallExecutions`, `foreignCIntCallExecutions`,
-`foreignCSizeTCallExecutions`, and `foreignPointerCallExecutions` in
-`fairyc.native-c-report/v17`; they do not expand the eighteen
+`foreignCSizeTCallExecutions`, `foreignCSSizeTCallExecutions`, and
+`foreignPointerCallExecutions` in `fairyc.native-c-report/v18`; they do not expand the eighteen
 interpreter-owned differential cases. The `c::int` probe uses a hand-written C producer and consumer
 so each value crosses a generated typed local without requiring a Fairy C integer literal.
 

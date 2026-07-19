@@ -77,10 +77,16 @@
       "type": "object",
       "additionalProperties": false,
       "required": ["name", "layout", "signedness"],
+      "dependentRequired": {
+        "header": ["availability"],
+        "availability": ["header"]
+      },
       "properties": {
         "name": { "type": "string", "minLength": 1 },
         "layout": { "$ref": "#/$defs/layout" },
-        "signedness": { "enum": ["signed", "unsigned", "not-applicable"] }
+        "signedness": { "enum": ["signed", "unsigned", "not-applicable"] },
+        "header": { "type": "string", "pattern": "^[A-Za-z0-9_-][A-Za-z0-9_.-]*(?:/[A-Za-z0-9_-][A-Za-z0-9_.-]*)*\\.h$" },
+        "availability": { "enum": ["iso-c11", "posix.1-2008"] }
       }
     },
     "stack": {

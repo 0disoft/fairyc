@@ -44,7 +44,7 @@ a multi-file input, semantic diagnostics on stderr, or an explicit unsupported-s
 `experimental target-spec` writes one deterministic `fairyc.target-spec/v0` JSON document, defined
 by `spec/cli/experimental-target-spec-v0.schema.json`, to stdout. Missing, extra, or unknown target
 IDs produce code `2`, no JSON, and a bounded invocation diagnostic on stderr.
-`experimental emit-c` writes exactly one deterministic ISO C11 translation unit to stdout on
+`experimental emit-c` writes exactly one deterministic C11 translation unit to stdout on
 success. It adds no banner, JSON envelope, ANSI escape, absolute path, or source text. Source
 diagnostics and capability failures produce no partial C output.
 `experimental build` writes a successful executable only to the explicit ignored `build/` path and

@@ -37,8 +37,9 @@ func generateLayoutProbe(targetID target.ID, cases []layoutfixture.NativeProbeCa
 		return layoutProbeUnit{}, err
 	}
 	emitter := layoutProbeEmitter{engine: engine}
-	emitter.output.WriteString("/* fairyc native C layout probe: numeric private types, ISO C11 */\n")
-	emitter.output.WriteString("#include <stddef.h>\n#include <stdint.h>\n\n")
+	emitter.output.WriteString("#define _POSIX_C_SOURCE 200809L\n")
+	emitter.output.WriteString("/* fairyc native C layout probe: numeric private types, ISO C11 with POSIX.1-2008 typedefs */\n")
+	emitter.output.WriteString("#include <stddef.h>\n#include <stdint.h>\n#include <sys/types.h>\n\n")
 	caseIDs := make([]string, 0, len(cases))
 	previous := ""
 	for _, probeCase := range cases {
@@ -185,6 +186,8 @@ func cScalarSpelling(name string) (string, bool) {
 		return "short", true
 	case "c.size_t":
 		return "size_t", true
+	case "c.ssize_t":
+		return "ssize_t", true
 	case "c.uchar":
 		return "unsigned char", true
 	case "c.uint":

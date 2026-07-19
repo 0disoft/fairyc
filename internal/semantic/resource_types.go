@@ -133,7 +133,7 @@ func (a *analyzer) prepareEnumTypes() {
 
 func (a *analyzer) inertCopyable(value hir.Type, state map[hir.Type]uint8) bool {
 	switch value {
-	case hir.TypeBool, hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize, hir.TypeCInt, hir.TypeCSizeT:
+	case hir.TypeBool, hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize, hir.TypeCInt, hir.TypeCSizeT, hir.TypeCSSizeT:
 		return true
 	case hir.TypeInvalid, hir.TypeVoid, hir.TypeRegion:
 		return false
@@ -318,6 +318,8 @@ func (a *analyzer) canonicalTypeText(module *moduleScope, text string) (hir.Type
 		return hir.TypeCInt, true
 	case "c::size_t":
 		return hir.TypeCSizeT, true
+	case "c::ssize_t":
+		return hir.TypeCSSizeT, true
 	case "Region":
 		return hir.TypeRegion, true
 	}

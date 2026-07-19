@@ -95,6 +95,14 @@
       }
     },
     {
+      "id": "pass.c-ssize-t",
+      "type": { "kind": "c-scalar", "name": "c.ssize_t" },
+      "expect": {
+        "status": "pass",
+        "layout": { "sizeBytes": 8, "alignmentBytes": 8, "fields": [], "padding": [] }
+      }
+    },
+    {
       "id": "pass.function-pointer",
       "type": { "kind": "function-pointer" },
       "expect": {

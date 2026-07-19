@@ -18,15 +18,20 @@ func TestX8664LinuxGNUSpecIsValidAndHostIndependent(t *testing.T) {
 	if spec.Pointer != (Layout{SizeBytes: 8, AlignmentBytes: 8}) || spec.Stack.CallAlignmentBytes != 16 || spec.ObjectFormat != "elf64" {
 		t.Fatalf("target core layout = %+v", spec)
 	}
-	var sizeT Scalar
+	var sizeT, ssizeT Scalar
 	for _, scalar := range spec.CScalars {
-		if scalar.Name == "c.size_t" {
+		switch scalar.Name {
+		case "c.size_t":
 			sizeT = scalar
-			break
+		case "c.ssize_t":
+			ssizeT = scalar
 		}
 	}
-	if sizeT.Name == "" || sizeT.Layout != (Layout{SizeBytes: 8, AlignmentBytes: 8}) || sizeT.Signedness != "unsigned" {
+	if sizeT.Name == "" || sizeT.Layout != (Layout{SizeBytes: 8, AlignmentBytes: 8}) || sizeT.Signedness != "unsigned" || sizeT.Header != "stddef.h" || sizeT.Availability != "iso-c11" {
 		t.Fatalf("target c.size_t = %+v", sizeT)
+	}
+	if ssizeT.Name == "" || ssizeT.Layout != (Layout{SizeBytes: 8, AlignmentBytes: 8}) || ssizeT.Signedness != "signed" || ssizeT.Header != "sys/types.h" || ssizeT.Availability != "posix.1-2008" {
+		t.Fatalf("target c.ssize_t = %+v", ssizeT)
 	}
 	if spec.Evidence.EmissionSubset != "scalar-and-flat-i32-resource-tagged-c11" {
 		t.Fatalf("target emission subset = %q", spec.Evidence.EmissionSubset)
@@ -77,6 +82,22 @@ func TestValidateRejectsMalformedLayoutOrderingAndMaturity(t *testing.T) {
 		}},
 		{name: "supported without conformance", mutate: func(spec *Spec) { spec.Evidence.Supported = true }},
 		{name: "missing evidence erased", mutate: func(spec *Spec) { spec.Evidence.Missing = nil }},
+		{name: "language scalar with C header", mutate: func(spec *Spec) {
+			spec.LanguageScalars[0].Header = "stddef.h"
+			spec.LanguageScalars[0].Availability = "iso-c11"
+		}},
+		{name: "C typedef missing availability", mutate: func(spec *Spec) {
+			spec.CScalars[cScalarIndex(spec.CScalars, "c.ssize_t")].Availability = ""
+		}},
+		{name: "C typedef parent header", mutate: func(spec *Spec) {
+			spec.CScalars[cScalarIndex(spec.CScalars, "c.ssize_t")].Header = "../sys/types.h"
+		}},
+		{name: "C typedef absolute header", mutate: func(spec *Spec) {
+			spec.CScalars[cScalarIndex(spec.CScalars, "c.ssize_t")].Header = "/sys/types.h"
+		}},
+		{name: "C typedef unknown availability", mutate: func(spec *Spec) {
+			spec.CScalars[cScalarIndex(spec.CScalars, "c.ssize_t")].Availability = "posix-next"
+		}},
 	}
 	for _, test := range tests {
 		test := test
@@ -89,4 +110,13 @@ func TestValidateRejectsMalformedLayoutOrderingAndMaturity(t *testing.T) {
 			}
 		})
 	}
+}
+
+func cScalarIndex(values []Scalar, name string) int {
+	for index, value := range values {
+		if value.Name == name {
+			return index
+		}
+	}
+	panic("test target is missing C scalar " + name)
 }

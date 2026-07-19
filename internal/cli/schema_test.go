@@ -101,3 +101,35 @@ func TestTargetSpecTopLevelMatchesSchema(t *testing.T) {
 		t.Fatalf("required fields = %v, schema fields = %v", schema.Required, schemaFields)
 	}
 }
+
+func TestTargetSpecScalarProviderSchemaMatchesSemanticValidator(t *testing.T) {
+	t.Parallel()
+	schemaBytes, err := os.ReadFile(filepath.Join("..", "..", "spec", "cli", "experimental-target-spec-v0.schema.json"))
+	if err != nil {
+		t.Fatalf("read schema: %v", err)
+	}
+	var schema struct {
+		Defs struct {
+			Scalar struct {
+				DependentRequired map[string][]string `json:"dependentRequired"`
+				Properties        map[string]struct {
+					Pattern string   `json:"pattern"`
+					Enum    []string `json:"enum"`
+				} `json:"properties"`
+			} `json:"scalar"`
+		} `json:"$defs"`
+	}
+	if err := json.Unmarshal(schemaBytes, &schema); err != nil {
+		t.Fatalf("decode schema contract: %v", err)
+	}
+	if !slices.Equal(schema.Defs.Scalar.DependentRequired["header"], []string{"availability"}) ||
+		!slices.Equal(schema.Defs.Scalar.DependentRequired["availability"], []string{"header"}) {
+		t.Fatalf("scalar provider dependencies = %+v", schema.Defs.Scalar.DependentRequired)
+	}
+	if got := schema.Defs.Scalar.Properties["header"].Pattern; got != `^[A-Za-z0-9_-][A-Za-z0-9_.-]*(?:/[A-Za-z0-9_-][A-Za-z0-9_.-]*)*\.h$` {
+		t.Fatalf("scalar provider header pattern = %q", got)
+	}
+	if got := schema.Defs.Scalar.Properties["availability"].Enum; !slices.Equal(got, []string{"iso-c11", "posix.1-2008"}) {
+		t.Fatalf("scalar provider availability enum = %v", got)
+	}
+}

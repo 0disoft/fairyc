@@ -106,10 +106,10 @@ Fixture-visible trap categories use the canonical identities `bounds`, `integer-
 
 Arguments are fully evaluated into temporaries from left to right before the call terminator. A call records its destination, normal continuation, source span, unsafe scope when applicable, and foreign ABI when applicable.
 
-The first source C-scalar transports preserve `c::int` and `c::size_t` as distinct foreign result
-and parameter types. A producer call may initialize a local of either exact type and a later
-consumer call may use the local as its argument. MIR does not encode those values as `i32` or
-`usize` immediates, and the verifier's shared foreign-signature rule therefore treats the
+The first source C-scalar transports preserve `c::int`, `c::size_t`, and target-specific
+`c::ssize_t` as distinct foreign result and parameter types. A producer call may initialize a local
+of any exact type and a later consumer call may use the local as its argument. MIR does not encode
+those values as `i32`, `usize`, or `isize` immediates, and the verifier's shared foreign-signature rule therefore treats the
 corresponding declarations as incompatible. Full call-operand type checking remains a backend
 responsibility in this prototype.
 
@@ -156,7 +156,7 @@ The first semantic oracle is a small MIR interpreter supporting scalars, tagged 
 
 The interpreter precedes a second native backend. Differential fixtures compare interpreter outcomes with generated C compiled at multiple optimization levels and, where the target fixture declares them, more than one independent C compiler.
 
-The current Go prototype also emits deterministic ISO C11 for the verified scalar and flat-resource
+The current Go prototype also emits deterministic C11 for the verified scalar and flat-resource
 subset in `spec/fixtures/c-emission/manifest-v0.json`, including private `Option<i32>` and
 `Result<i32, i32>` construction, calls, matching, and propagation. Direct nonempty all-`i32`
 resources with empty drop bodies may be constructed, read, moved through calls, returned, assigned,

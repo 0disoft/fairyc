@@ -16,6 +16,7 @@ const (
 	TypeUSize   Type = "usize"
 	TypeCInt    Type = "c::int"
 	TypeCSizeT  Type = "c::size_t"
+	TypeCSSizeT Type = "c::ssize_t"
 	TypeRegion  Type = "Region"
 )
 

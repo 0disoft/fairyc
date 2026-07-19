@@ -23,11 +23,13 @@ type Layout struct {
 	AlignmentBytes uint32 `json:"alignmentBytes"`
 }
 
-// Scalar records one closed scalar layout and signedness rule.
+// Scalar records one closed scalar layout, signedness rule, and optional C typedef provider.
 type Scalar struct {
-	Name       string `json:"name"`
-	Layout     Layout `json:"layout"`
-	Signedness string `json:"signedness"`
+	Name         string `json:"name"`
+	Layout       Layout `json:"layout"`
+	Signedness   string `json:"signedness"`
+	Header       string `json:"header,omitempty"`
+	Availability string `json:"availability,omitempty"`
 }
 
 // StackRules records the fixed SysV AMD64 stack facts needed by later lowering.
@@ -105,7 +107,8 @@ var x8664LinuxGNUSpec = Spec{
 		{Name: "c.longlong", Layout: Layout{SizeBytes: 8, AlignmentBytes: 8}, Signedness: "signed"},
 		{Name: "c.schar", Layout: Layout{SizeBytes: 1, AlignmentBytes: 1}, Signedness: "signed"},
 		{Name: "c.short", Layout: Layout{SizeBytes: 2, AlignmentBytes: 2}, Signedness: "signed"},
-		{Name: "c.size_t", Layout: Layout{SizeBytes: 8, AlignmentBytes: 8}, Signedness: "unsigned"},
+		{Name: "c.size_t", Layout: Layout{SizeBytes: 8, AlignmentBytes: 8}, Signedness: "unsigned", Header: "stddef.h", Availability: "iso-c11"},
+		{Name: "c.ssize_t", Layout: Layout{SizeBytes: 8, AlignmentBytes: 8}, Signedness: "signed", Header: "sys/types.h", Availability: "posix.1-2008"},
 		{Name: "c.uchar", Layout: Layout{SizeBytes: 1, AlignmentBytes: 1}, Signedness: "unsigned"},
 		{Name: "c.uint", Layout: Layout{SizeBytes: 4, AlignmentBytes: 4}, Signedness: "unsigned"},
 		{Name: "c.ulong", Layout: Layout{SizeBytes: 8, AlignmentBytes: 8}, Signedness: "unsigned"},
@@ -233,9 +236,44 @@ func validateScalars(family string, values []Scalar) error {
 		if err := validateLayout(family+" scalar "+value.Name, value.Layout); err != nil {
 			return err
 		}
+		if family == "language" && (value.Header != "" || value.Availability != "") {
+			return fmt.Errorf("language scalar %q cannot require a C header or availability profile", value.Name)
+		}
+		if (value.Header == "") != (value.Availability == "") {
+			return fmt.Errorf("%s scalar %q has incomplete header availability", family, value.Name)
+		}
+		if value.Header != "" {
+			if !validProviderHeader(value.Header) {
+				return fmt.Errorf("%s scalar %q has invalid header %q", family, value.Name, value.Header)
+			}
+			if value.Availability != "iso-c11" && value.Availability != "posix.1-2008" {
+				return fmt.Errorf("%s scalar %q has invalid availability %q", family, value.Name, value.Availability)
+			}
+		}
 		names = append(names, value.Name)
 	}
 	return validateSortedUnique(family+" scalar", names)
+}
+
+func validProviderHeader(value string) bool {
+	if strings.TrimSpace(value) != value || !strings.HasSuffix(value, ".h") {
+		return false
+	}
+	for _, segment := range strings.Split(value, "/") {
+		if segment == "" || segment == "." || segment == ".." {
+			return false
+		}
+		for _, character := range segment {
+			if (character >= 'a' && character <= 'z') ||
+				(character >= 'A' && character <= 'Z') ||
+				(character >= '0' && character <= '9') ||
+				character == '_' || character == '-' || character == '.' {
+				continue
+			}
+			return false
+		}
+	}
+	return true
 }
 
 func validateLayout(name string, value Layout) error {

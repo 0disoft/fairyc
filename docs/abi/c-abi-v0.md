@@ -18,7 +18,7 @@ Target claims use three levels:
 
 The Windows Go compiler host does not define target layout. Proving the first target requires WSL or Linux CI, an explicit glibc baseline, a sysroot or runner image, Clang and GCC, and a target runtime bundle.
 
-The current Go prototype can emit deterministic ISO C11 for a verified scalar, inert-struct,
+The current Go prototype can emit deterministic C11 for a verified scalar, inert-struct,
 flat-resource, and resource-tagged profile carrying this target identity. The inert-struct slice
 includes nonempty source `@repr(C)` records whose fields are currently limited to `u8`, `i32`,
 `u32`, `usize`, and raw pointers. It preserves the public C tag and field names and emits target-
@@ -48,7 +48,8 @@ unsafe extern C fn
 
 The current executable source subset implements `unsafe extern C fn` imports with an optional
 single nonempty `@link_name("symbol")`, using
-`i32`, `u8`, `u32`, `usize`, the distinct transport-only `c::int` and `c::size_t`, raw pointers to the fixed-width
+`i32`, `u8`, `u32`, `usize`, the distinct transport-only `c::int`, `c::size_t`, and target-specific
+`c::ssize_t`, raw pointers to the fixed-width
 Fairy scalar set, and raw pointers to an
 admitted nonempty `@repr(C)` struct. AST, typed HIR, MIR, unsafe provenance, deterministic C
 source/link identity, prototype emission, typed null, separate-object cross-compiler linking, and process-status
@@ -60,7 +61,9 @@ conversion, mutability strengthening, and other casts remain unsupported. Source
 target key `c.int`, emits exact C `int`, and is guarded by target-derived size and alignment
 assertions. Exact `c::size_t` maps separately to target key `c.size_t`, includes `<stddef.h>`, emits
 C `size_t`, and asserts target size, alignment, and unsignedness instead of aliasing `usize` or
-`uintptr_t`. Their only current value path is foreign return to typed local to foreign argument; they have
+`uintptr_t`. Target-specific `c::ssize_t` consumes the TargetSpec's `sys/types.h` and
+`posix.1-2008` provider metadata, defines `_POSIX_C_SOURCE 200809L`, emits exact `ssize_t`, and
+asserts signed layout instead of aliasing `isize` or `intptr_t`. Their only current value path is foreign return to typed local to foreign argument; they have
 no source literal, arithmetic, comparison, cast, interpreter behavior, or aggregate-field support.
 Raw pointers to C scalars also remain outside the admitted backend slice. This is not implementation of exports, callbacks, other `c.*` scalars,
 nested/array/enum `@repr(C)` fields, or by-value aggregate calls and returns. The interpreter
@@ -101,7 +104,12 @@ Debugging is delegated to generated-C `#line` directives and the C toolchain's D
 
 ## `TargetSpec`
 
-Semantic target data includes target identity, architecture, OS and environment, endianness, pointer and function-pointer layouts, scalar layouts, `usize` and `isize`, C scalar layouts and signedness, natural alignment, aggregate layout and C ABI classifier identities, stack and return rules, object format, symbol rules, unwind model, debug contract level, and supported `@repr(C)` features.
+Semantic target data includes target identity, architecture, OS and environment, endianness,
+pointer and function-pointer layouts, scalar layouts, `usize` and `isize`, C scalar layouts,
+signedness, optional typedef header/availability providers, natural alignment, aggregate layout and
+C ABI classifier identities, stack and return rules, object format, symbol rules, unwind model,
+debug contract level, and supported `@repr(C)` features. Language scalars cannot name C providers;
+provider-qualified C typedefs must name both a header and a closed availability profile.
 
 It contains no local executable or SDK paths.
 
@@ -120,8 +128,9 @@ frontend or C backend.
 `internal/layout` now executes those facts for scalars, pointers, explicitly based C enums,
 positive fixed arrays, and nonempty nested structs. Its versioned v0 manifest records exact size,
 natural alignment, declaration-order field offsets, top-level internal padding, tail padding, and
-closed rejection codes across 15 cases. This proves the internal target-layout algorithm against
-repository expectations only. The ten valid cases now also generate a private recursive C11 probe
+closed rejection codes across 16 cases. This proves the internal target-layout algorithm against
+repository expectations only. The eleven valid cases now also generate a private recursive C11
+plus POSIX typedef probe
 with `sizeof`, `_Alignof`, field `sizeof`, and `offsetof` assertions configured for four
 Clang/GCC low/optimized executions. Those executions are not yet observed on a hosted Linux runner;
 call, return, object, and bidirectional ABI probes remain required native evidence.

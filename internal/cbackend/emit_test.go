@@ -157,9 +157,42 @@ fn main() -> i32 { unsafe { consume_c_size_t(make_c_size_t()) } }
 	}
 }
 
+func TestEmitDistinctCSSizeTForeignTransport(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+@link_name("fairyc_fixture_make_c_ssize_t")
+unsafe extern C fn make_c_ssize_t() -> c::ssize_t;
+@link_name("fairyc_fixture_consume_c_ssize_t")
+unsafe extern C fn consume_c_ssize_t(value: c::ssize_t) -> i32;
+fn main() -> i32 { unsafe { consume_c_ssize_t(make_c_ssize_t()) } }
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, required := range []string{
+		"#define _POSIX_C_SOURCE 200809L",
+		"ISO C11 with POSIX.1-2008 typedefs",
+		"#include <sys/types.h>",
+		"_Static_assert(sizeof(ssize_t) == UINT64_C(8), \"fairyc target c.ssize_t size\");",
+		"_Static_assert(_Alignof(ssize_t) == UINT64_C(8), \"fairyc target c.ssize_t alignment\");",
+		"_Static_assert(((ssize_t)-1) < (ssize_t)0, \"fairyc target c.ssize_t signed\");",
+		"extern ssize_t fairyc_fixture_make_c_ssize_t(void);",
+		"extern int32_t fairyc_fixture_consume_c_ssize_t(ssize_t fy_a_0);",
+		"fairyc_fixture_consume_c_ssize_t(fy_l_",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+	if !slices.Contains(unit.Features, "c-ssize-t") || strings.Contains(unit.Source, "intptr_t fairyc_fixture_make_c_ssize_t") || strings.Contains(unit.Source, "fairyc_fixture_consume_c_ssize_t(intptr_t") {
+		t.Fatalf("generated C erased c::ssize_t identity:\n%s", unit.Source)
+	}
+}
+
 func TestEmitKeepsCScalarPointersOutsideByValueTransportSlice(t *testing.T) {
 	t.Parallel()
-	for _, typeRef := range []string{"c::int", "c::size_t"} {
+	for _, typeRef := range []string{"c::int", "c::size_t", "c::ssize_t"} {
 		t.Run(typeRef, func(t *testing.T) {
 			program := lowerSource(t, "module main;\nunsafe extern C fn consume_pointer(value: *"+typeRef+") -> i32;\nfn main() -> i32 { unsafe { consume_pointer(null) } }\n")
 			_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())

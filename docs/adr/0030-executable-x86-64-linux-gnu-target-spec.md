@@ -48,6 +48,8 @@ eligible glibc, Clang, and GCC installation before it can produce native evidenc
    remains until a clean hosted Linux report is observed.
    A scalar layout or `@repr(C)` vocabulary entry does not by itself make the corresponding Fairy C
    source type, aggregate, foreign call, or ABI fixture implemented.
+   ADR 0054 later adds optional paired C-typedef `header` and `availability` metadata without
+   adding host paths or promoting target maturity.
 7. This target description is a prototype compatibility member. Changing its layout or classifier
    meaning requires a target-schema or ABI-profile decision; fixing code to match unchanged data is
    an implementation change.

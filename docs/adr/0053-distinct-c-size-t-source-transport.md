@@ -30,8 +30,9 @@ aliasing bug into generated C.
 5. A dedicated hand-written C producer/consumer probe expects four Clang/GCC low/optimized
    executions. `fairyc.native-c-report/v17` adds `foreignCSizeTCallExecutions` without changing the
    eighteen production emission cases or their 72/36 counts.
-6. `c::ssize_t` remains excluded. It is a POSIX target-library type requiring `<sys/types.h>` and
-   signed return/error semantics, not the signed counterpart of an ISO C `size_t` language type.
+6. `c::ssize_t` remains excluded by this decision. ADR 0054 later adds it as a distinct POSIX
+   target-library type requiring `<sys/types.h>` and signed return/error transport, not as the
+   signed counterpart of an ISO C `size_t` language type.
 
 ## Consequences
 

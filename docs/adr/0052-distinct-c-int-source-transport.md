@@ -37,7 +37,8 @@ plain-`char`, width, literal, and arithmetic contracts.
    counts do not change.
 7. `c::size_t` remains a later ISO C typedef/header slice in this decision and must not alias
    `usize` or `uintptr_t`; ADR 0053 implements that independent slice. `c::ssize_t` remains a later
-   target-library/POSIX slice and must not alias `isize` or `intptr_t`.
+   target-library/POSIX slice and must not alias `isize` or `intptr_t`; ADR 0054 implements that
+   independent target-qualified transport.
 
 ## Consequences
 

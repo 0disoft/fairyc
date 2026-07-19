@@ -71,7 +71,7 @@ block when copy-and-release resize fails. A closed C probe reaches the existing 
 matrix, but the helper is not linked into product builds or exposed to source yet. This does not
 broaden the thin runtime or complete the standard library.
 
-The implemented slice emits deterministic ISO C11 for verified scalar-payload MIR, including
+The implemented slice emits deterministic C11 for verified scalar-payload MIR, including
 private `Option<i32>` and `Result<i32, i32>` transport, plus nonempty all-`i32` resource definitions
 with empty drop bodies and resource-bearing built-in tags whose other payloads are `i32` or another
 direct admitted resource. Resource and tagged layout comes from the declared target engine and is

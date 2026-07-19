@@ -22,7 +22,8 @@ lowering, and parser-fixture-runner portion of the first item exists. Name resol
 now cover the semantic fixture's scalar and safe-borrow subset. Local last-use loans, borrow
   conflicts, single-origin borrow returns, Stage 0 signed-left-shift rejection, loop-context diagnostics,
   scalar foreign-call unsafe/signature boundaries, and `@link_name` shape diagnostics execute across
-  all 20 semantic v0 cases, including distinct `c::int` and `c::size_t` foreign transport. General
+  all 21 semantic v0 cases, including distinct `c::int`, `c::size_t`, and target-specific
+  `c::ssize_t` foreign transport. General
   whole-root resource Flow now executes all 12 resource v0 cases, including branch, normal-loop,
   break-edge, and continue-edge state rejection. Result Flow executes all 24 result v0 cases, including qualified scalar construction,
 exhaustive shallow matching, and local, parameter, branch, loop, overwrite, and early-return
@@ -44,7 +45,7 @@ multiplication, negation, division, remainder, and signed right shift execute ac
   empty-drop classification from AST through HIR into MIR; nonempty user drop bodies fail as
   unsupported before executable lowering. Restricted inert enums now preserve named payloads,
   construct through qualified variants, require exhaustive shallow matches, and execute through
-  verified MIR, the interpreter, and the constrained C backend. The C backend now emits deterministic ISO C11 for 18
+  verified MIR, the interpreter, and the constrained C backend. The C backend now emits deterministic C11 for 18
   verified scalar, inert-enum, flat-resource, and resource-tagged cases under the provisional `x86_64-linux-gnu` profile,
   including `Option<i32>` and `Result<i32, i32>` construction, match, calls, and propagation plus
   all-`i32` resource construction, field reads, moves, reassignment, and resource-bearing built-in
@@ -83,8 +84,8 @@ The first executable `fairyc.target-spec/v0` now centralizes host-independent LP
 pointer layouts, SysV AMD64 calling and stack identities, ELF/DWARF identities, C-layout feature
 vocabulary, and explicit missing maturity evidence. The C backend and driver share its typed target
 ID, while local toolchain paths remain outside the target contract. Host-independent scalar,
-array, explicit-C-enum, pointer, and nested-aggregate layout execution now runs through 15 versioned
-v0 cases. The ten valid cases now also generate one deterministic C11 layout probe configured for
+array, explicit-C-enum, pointer, and nested-aggregate layout execution now runs through 16 versioned
+v0 cases. The eleven valid cases now also generate one deterministic C11 plus POSIX-typedef layout probe configured for
 four Clang/GCC and low/optimized executions. Those native runs remain unobserved on this Windows
 host. A host-independent SysV AMD64 classifier now executes 17 versioned cases for eightbyte
 classes, registers, exhaustion rollback, and hidden returns, but bidirectional native ABI fixtures
