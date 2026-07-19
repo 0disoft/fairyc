@@ -1,7 +1,7 @@
 {
   "tool": "ssealed",
   "version": "0.6.11",
-  "generatedAt": "2026-07-19T12:28:12.290Z",
+  "generatedAt": "2026-07-19T12:36:38.105Z",
   "scope": "general",
   "profile": "cli-tool",
   "addons": [
@@ -650,13 +650,13 @@
     },
     {
       "path": "docs/engineering/05-testing-standard.md",
-      "checksum": "sha256:d3fdabc3aee909581e766a2a77810f0a9a411045ecb35bbf0be8145780b90665",
+      "checksum": "sha256:45acaf9bc0dec5173f6460ebe09990649a410fe396cee786fa1cb7f1b98ecfa1",
       "kind": "document",
       "ownership": "seeded",
       "presence": "optional",
       "status": "active",
       "initialChecksum": "sha256:1f4bac44fda4431afe4567cadd6e5d080bcb2e3de09f468a9294251a6233c8e2",
-      "acceptedChecksum": "sha256:d3fdabc3aee909581e766a2a77810f0a9a411045ecb35bbf0be8145780b90665",
+      "acceptedChecksum": "sha256:45acaf9bc0dec5173f6460ebe09990649a410fe396cee786fa1cb7f1b98ecfa1",
       "generatedChecksum": "sha256:1f4bac44fda4431afe4567cadd6e5d080bcb2e3de09f468a9294251a6233c8e2"
     },
     {
@@ -738,13 +738,13 @@
     },
     {
       "path": "docs/ops/ci.md",
-      "checksum": "sha256:636f9998a584798fccb04737da4f840c10adb93c1c13f4c5d73a7b615655fc36",
+      "checksum": "sha256:c838dbc4bcc5d9e8d73bb8f97f01fd74405e590ce3a14715f514fa873a314838",
       "kind": "document",
       "ownership": "seeded",
       "presence": "optional",
       "status": "active",
       "initialChecksum": "sha256:22ccaa9f1a1371db7743291eebeef85d477ff5bc0838dde24a166722e8bdc525",
-      "acceptedChecksum": "sha256:636f9998a584798fccb04737da4f840c10adb93c1c13f4c5d73a7b615655fc36",
+      "acceptedChecksum": "sha256:c838dbc4bcc5d9e8d73bb8f97f01fd74405e590ce3a14715f514fa873a314838",
       "generatedChecksum": "sha256:22ccaa9f1a1371db7743291eebeef85d477ff5bc0838dde24a166722e8bdc525"
     },
     {

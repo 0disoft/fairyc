@@ -132,10 +132,13 @@ entry point. This does not inspect object symbols or relocations, unwind/debug p
 API compatibility, signing, installer packaging, or distribution behavior.
 The driver also parses every intermediate `.obj` from `build-host`, every `run-host` case, and both
 profiles of all three native probes before linking results leave the temporary root. Raw AMD64 COFF,
-bounded section and relocation ranges, readable executable `.text`/`.text$...`, valid relocation
+at most 4,096 sections inside the 64 MiB object budget, bounded section and relocation ranges,
+readable executable `.text`/`.text$...`, valid relocation
 symbol indexes, and named symbols are mandatory; storage-free `.bss` is admitted only with the
 uninitialized-data characteristic. Object bytes are not uploaded or retained. Exact symbol,
 COMDAT, relocation-type, unwind, debug, and hosted object expectations remain unconfigured.
+The ordinary Go tests include a 154-section positive regression object and reject 4,097 sections;
+the exact section count emitted by a future MSVC version remains unstabilized.
 All nine linked PE images additionally traverse the Microsoft x64 exception directory before
 execution. The local gate requires sorted nonoverlapping `.pdata` runtime-function ranges,
 executable code coverage, DWORD-aligned file-backed unwind records, bounded version 1 prolog slots,

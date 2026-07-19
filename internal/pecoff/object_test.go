@@ -40,6 +40,26 @@ func TestInspectObjectAcceptsMSVCTextSubsection(t *testing.T) {
 	}
 }
 
+func TestInspectObjectAcceptsMSVCFunctionLevelSectionCount(t *testing.T) {
+	t.Parallel()
+	const observedSections = 154
+	report, err := InspectObject(manySectionAMD64COFF(observedSections))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(report.Sections) != observedSections || report.Sections[0].Name != ".text$mn" {
+		t.Fatalf("COFF section receipt = %d, %q", len(report.Sections), report.Sections[0].Name)
+	}
+}
+
+func TestInspectObjectRejectsSectionCountOverBudget(t *testing.T) {
+	t.Parallel()
+	object := manySectionAMD64COFF(maxObjectSections + 1)
+	if _, err := InspectObject(object); err == nil || !strings.Contains(err.Error(), "invalid section count") {
+		t.Fatalf("InspectObject() error = %v", err)
+	}
+}
+
 func TestInspectObjectAcceptsUninitializedBSSWithoutRawStorage(t *testing.T) {
 	t.Parallel()
 	report, err := InspectObject(minimalAMD64COFFWithBSS())
@@ -147,6 +167,42 @@ func minimalAMD64COFFWithBSS() []byte {
 	binary.LittleEndian.PutUint32(object[secondSection+16:], 8)
 	binary.LittleEndian.PutUint32(object[secondSection+36:], sectionUninitializedData|sectionReadable|0x80000000)
 
+	binary.LittleEndian.PutUint32(object[relocOffset+4:], 0)
+	binary.LittleEndian.PutUint16(object[relocOffset+8:], 4)
+	copy(object[symbolOffset:], "sample")
+	binary.LittleEndian.PutUint16(object[symbolOffset+12:], 1)
+	binary.LittleEndian.PutUint16(object[symbolOffset+14:], 0x20)
+	object[symbolOffset+16] = 2
+	binary.LittleEndian.PutUint32(object[symbolOffset+18:], 4)
+	return object
+}
+
+func manySectionAMD64COFF(sectionCount int) []byte {
+	headerEnd := coffFileHeaderBytes + sectionCount*coffSectionHeaderBytes
+	rawOffset := headerEnd
+	relocOffset := rawOffset + 1
+	symbolOffset := relocOffset + coffRelocationBytes
+	object := make([]byte, symbolOffset+18+4)
+	binary.LittleEndian.PutUint16(object, machineAMD64)
+	binary.LittleEndian.PutUint16(object[2:], uint16(sectionCount))
+	binary.LittleEndian.PutUint32(object[8:], uint32(symbolOffset))
+	binary.LittleEndian.PutUint32(object[12:], 1)
+
+	for index := 0; index < sectionCount; index++ {
+		section := coffFileHeaderBytes + index*coffSectionHeaderBytes
+		if index == 0 {
+			copy(object[section:], ".text$mn")
+			binary.LittleEndian.PutUint32(object[section+16:], 1)
+			binary.LittleEndian.PutUint32(object[section+20:], uint32(rawOffset))
+			binary.LittleEndian.PutUint32(object[section+24:], uint32(relocOffset))
+			binary.LittleEndian.PutUint16(object[section+32:], 1)
+			binary.LittleEndian.PutUint32(object[section+36:], sectionContainsCode|sectionExecutable|sectionReadable)
+			continue
+		}
+		copy(object[section:], ".bss")
+		binary.LittleEndian.PutUint32(object[section+36:], sectionUninitializedData|sectionReadable|0x80000000)
+	}
+	object[rawOffset] = 0xc3
 	binary.LittleEndian.PutUint32(object[relocOffset+4:], 0)
 	binary.LittleEndian.PutUint16(object[relocOffset+8:], 4)
 	copy(object[symbolOffset:], "sample")

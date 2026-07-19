@@ -11,6 +11,7 @@ const (
 	coffFileHeaderBytes       = 20
 	coffSectionHeaderBytes    = 40
 	coffRelocationBytes       = 10
+	maxObjectSections         = 4096
 	sectionRelocationOverflow = 0x01000000
 )
 
@@ -54,7 +55,7 @@ func InspectObject(object []byte) (ObjectReport, error) {
 	if file.FileHeader.Characteristics&executableImage != 0 || file.FileHeader.Characteristics&dynamicLibrary != 0 {
 		return ObjectReport{}, fmt.Errorf("COFF object has linked-image characteristics %#x", file.FileHeader.Characteristics)
 	}
-	if len(file.Sections) == 0 || len(file.Sections) > maxSections {
+	if len(file.Sections) == 0 || len(file.Sections) > maxObjectSections {
 		return ObjectReport{}, fmt.Errorf("COFF object has invalid section count %d", len(file.Sections))
 	}
 	headerEnd := uint64(coffFileHeaderBytes + len(file.Sections)*coffSectionHeaderBytes)
