@@ -101,7 +101,7 @@ not linked into product builds or exposed through a public `std::alloc` API. One
 Fairy caller now crosses its exact `void *`/`size_t` block into the real allocate and deallocate
 helpers for four additional configured native executions. All eight native SystemHeap executions
 remain unobserved on this Windows host; the later Arena, text ownership, and Linux File C slices now
-exist; owned text and Linux File remain source-disconnected.
+exist; owned String/CString operations and Linux File remain source-disconnected.
 The next storage slice now adds provisional Buffer construction, initialized-prefix-only reserve,
 overlap-safe append across relocation, overflow rollback, zeroed growth, truncate, clear, and drop.
 Its four C-only native probe executions and four generated-Fairy source-call executions are
@@ -121,8 +121,10 @@ empty-input UTF-8 validator in the text-view C unit; the public borrowed text re
 source pointer path, and full wrapper remain missing.
 Owned String and CString now have provisional Buffer-backed C transport with immutable views,
 successful-only Buffer moves, failure ownership preservation, self-source append, interior-NUL
-rejection, and exact termination. Four native runs are configured but unobserved; source-level
-construction, Result error resources, and calls remain missing.
+rejection, and exact termination. Four C-only native runs are configured but unobserved. A separate
+four-way generated-Fairy crossing now calls the real bounded CStr validator with valid, interior-NUL,
+and unterminated nonempty storage and requires failure to preserve the prior output view. Owned
+String/CString construction, Result error resources, and safe calls remain missing.
 The Linux File C slice now also covers partial read/write, write-all progress, sync, and consuming
 close including forced close failure. Its four native runs remain configured but unobserved, and
 source-visible File effects and error resources remain missing.

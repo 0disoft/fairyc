@@ -254,8 +254,9 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   `void *`/`size_t` block additionally crosses the real SystemHeap allocate and deallocate helpers.
   A nested generated Buffer record then crosses the real initialize, zeroed-resize, and drop
   helpers. Exact generated node, Arena, and Region records additionally cross real initialization,
-  begin, zeroed allocation through `void **`, reset, and drop. Report v23 records all three
-  source-call counters.
+  begin, zeroed allocation through `void **`, reset, and drop. An exact generated CStr view record
+  crosses the real bounded validator with valid, interior-NUL, and unterminated storage and observes
+  unchanged output on both failures. Report v24 records all four source-call counters.
   Its closed
   `drop-trace-v0` emission profile assigns source/type/span identities to dense site IDs and compares
   exact four-byte native records with the MIR interpreter trace. This instrumentation is absent from

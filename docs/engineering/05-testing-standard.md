@@ -99,6 +99,11 @@ CString construction, bounded CStr view, exact trailing terminator, interior-NUL
 unchanged failure output, and empty CString. It does not assert source Result layout or locale
 conversion.
 
+A separate generated-Fairy CStr source probe protects the exact cross-translation-unit view record
+and real bounded validator call. Its success case requires a nonempty terminated byte sequence and a
+logical length excluding the terminator. Its two failure cases distinguish interior NUL from a
+missing terminator and require the previously valid output view to remain byte-for-byte observable.
+
 ## Oracle order
 
 1. Product specification and accepted ADRs define the intended boundary.
@@ -176,8 +181,9 @@ register exhaustion, mixed integer and floating arguments, by-value aggregate pl
 return storage. A separate-object Clang/GCC probe now exercises all 14 pass plans in both compiler
 directions. A Fairy-source probe additionally crosses typed null pointers plus `usize` and `u8` in
 both directions. Another four-way probe links the empty-input UTF-8 call against the actual
-standard-library text-view C unit instead of a mock. Buffer and Arena source probes now supply
-non-null nested records, a self-pointer, and one pointer-output crossing, but native source fixtures still need independently padded
+standard-library text-view C unit instead of a mock. A CStr probe additionally links the generated
+caller against the actual owned-text C unit and supplies nonempty success and failure storage.
+Buffer and Arena source probes supply non-null nested records, a self-pointer, and one pointer-output crossing, but native source fixtures still need independently padded
 `@repr(C)` structs, explicit C enums, narrow extension rules, actual aggregate calls and returns,
 and the permitted synchronous callback. Every excluded C ABI feature eventually needs a negative
 source fixture as its semantic surface is implemented.

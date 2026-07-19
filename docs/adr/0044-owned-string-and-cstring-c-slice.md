@@ -36,6 +36,9 @@ C consumers. A consuming Buffer conversion must move storage only after validati
    rejection, terminator presence, and empty CString.
 9. `fairyc.native-c-report/v10` adds `ownedTextExecutions`, expected to be four only after a
    successful hosted run. No hosted receipt has been observed.
+10. ADR 0060 later supersedes only the fully source-disconnected CStr-validation boundary: an
+    internal generated-Fairy caller now crosses the exact view record into the real bounded C
+    validator. Owned String/CString construction and result mapping remain source-disconnected.
 
 ## Consequences
 

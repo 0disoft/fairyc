@@ -39,13 +39,13 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
   products, and requires exit `42` with no output. A missing compiler or libc identity fails the job
   instead of producing a skip.
 - The native job retains no generated C, object, executable, cache, or report artifact. Its bounded
-  `fairyc.native-c-report/v23` JSON report is written only to the job log and contains toolchain
+  `fairyc.native-c-report/v24` JSON report is written only to the job log and contains toolchain
   fingerprints, fixture IDs, the sorted layout-case IDs, and drop-trace, layout-probe, and
   sanitizer, ABI case/direction, SystemHeap, Buffer, Arena, text, Linux File, scalar Fairy-source
   foreign-call, individual exact `c::int`, negative-preserving `c::long`, `c::size_t`, and
   negative-preserving target `c::ssize_t` producer/consumer foreign-calls, the remaining twelve-type
   C-scalar family crossing, raw-pointer foreign-call, exact SystemHeap block source-call, exact
-  nested Buffer source-call, exact Arena/Region source-call, actual
+  nested Buffer source-call, exact Arena/Region source-call, actual CStr validation source-call, actual
   text-validation source-call, actual text-view
   output-record source-call, and product-build
   execution counts but no temporary path.
@@ -60,6 +60,9 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
   The Arena source-call count additionally requires exact self-linked records, a provider assertion
   that `uint64_t` is `unsigned long`, one `void **` output slot, the real `ArenaSource()`, zeroed
   allocation, released nodes, and generation transitions through reset and drop.
+  The CStr validation count requires an exact generated view record, nonempty terminated,
+  interior-NUL, and unterminated storage, the real `OwnedTextSource()`, and unchanged output after
+  both rejected calls.
 
 The containing Mustflow workspace provides local parity through `fairyc_go_vet` and
 `fairyc_go_test`, plus the Linux-only `fairyc_native_c_test` intent. Those intents additionally

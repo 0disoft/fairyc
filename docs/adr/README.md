@@ -69,6 +69,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0057-c-scalar-repr-c-system-heap-source-transport.md`: exact C-scalar fields in flat `@repr(C)` records, opaque `void` pointers, and a generated Fairy caller crossing the real SystemHeap C unit.
 - `0058-nested-repr-c-buffer-source-transport.md`: dependency-ordered nested `@repr(C)` records and a generated Fairy caller crossing the real Buffer C unit.
 - `0059-arena-region-source-transport.md`: exact self-linked Arena/Region records, one opaque `void **` output slot, and a generated Fairy caller crossing the real Arena C unit.
+- `0060-cstr-validation-source-transport.md`: exact CStr view transport, nonempty bounded storage, failure-atomic output, and a generated Fairy caller crossing the real owned-text C unit.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

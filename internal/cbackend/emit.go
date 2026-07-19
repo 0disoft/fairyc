@@ -855,6 +855,7 @@ var admittedStandardLibrarySymbols = map[string]struct{}{
 	"fy_std_arena_drop_v0":             {},
 	"fy_std_text_utf8_valid_v0":        {},
 	"fy_std_text_validate_utf8_v0":     {},
+	"fy_std_cstr_validate_v0":          {},
 }
 
 var generatedCNames = map[string]struct{}{

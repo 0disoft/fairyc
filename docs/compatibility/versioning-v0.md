@@ -111,7 +111,9 @@ helpers in both compiler directions and profiles. V22 adds `bufferSourceCallExec
 generated Fairy caller crossing the exact nested SystemHeap-block plus `size_t` Buffer record into
 the real initialize, zeroed-resize, and drop helpers in both compiler directions and profiles. V23
 adds `arenaSourceCallExecutions` for exact self-linked node, Arena, and Region records crossing real
-initialization, begin, zeroed allocation, reset, and drop in both directions and profiles. The
+initialization, begin, zeroed allocation, reset, and drop in both directions and profiles. V24 adds
+`cStrValidationSourceCallExecutions` for an exact generated CStr view crossing the real bounded
+validator with valid, interior-NUL, and unterminated storage in both directions and profiles. The
 runner emits one exact version and does not pretend the report shapes are interchangeable.
 
 ## Runtime and standard library

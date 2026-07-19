@@ -79,7 +79,7 @@ unchanged when validation or allocation fails. A closed C-only probe and an inte
 caller using the exact `void *`/`size_t` block each have four configured Clang/GCC low/optimized
 executions. Neither has an observed hosted receipt, and the helper is not product-linked or exposed
 through a public `std::alloc` API. Arena, text ownership, and Linux File now have their own C slices
-below; owned text and Linux File remain source-disconnected.
+below; owned String/CString operations and Linux File remain source-disconnected.
 A second provisional slice implements Buffer-owned initialized bytes, failure-atomic reserve,
 relocating self-overlap append, length-overflow rollback, zeroed growth, truncate, clear, and drop.
 Its closed C-only probe and an internal generated FY caller using the exact nested SystemHeap-block
@@ -101,8 +101,10 @@ four-way crossings: direct validation and `@repr(C)` output-record initializatio
 raw address. The public borrowed `str` wrapper and nonempty source pointer path still do not exist.
 Buffer-backed String and CString C helpers now preserve ownership on failed UTF-8 conversion,
 support overlap-safe String append, expose immutable bounded views, reject interior NUL, and append
-exactly one C terminator. Their native probe is configured but unobserved, and no source API is
-claimed.
+exactly one C terminator. Their C-only native probe is configured but unobserved. A separate
+generated FY caller now crosses the exact CStr view record into the real bounded validator for valid,
+interior-NUL, and unterminated storage while checking failure leaves the prior view unchanged. Owned
+String/CString construction and a public safe source API remain absent.
 The Linux File C slice now exposes partial I/O, write-all progress, sync, and consuming close that
 is never retried, even after failure. Its four-way probe is configured but unobserved and source
 effects remain unimplemented.

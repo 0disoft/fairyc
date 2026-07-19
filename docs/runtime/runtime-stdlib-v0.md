@@ -176,7 +176,13 @@ bytes and one terminator are complete. Empty CString therefore owns one terminat
 CStr view has length zero.
 
 The owned-text four-way native probe is configured for these ownership, rollback, overlap, UTF-8,
-NUL, terminator, and empty-value cases but remains unobserved and source-disconnected.
+NUL, terminator, and empty-value cases but remains unobserved. A separate generated-Fairy source
+probe constructs the exact CStr view transport, obtains three bounded nonempty storage cases from
+the companion C unit, and calls the real `fy_std_cstr_validate_v0`. It requires valid storage to
+publish a length excluding the terminator, interior NUL to return status 4, missing final NUL to
+return status 3, and both failures to leave the prior valid view unchanged. This is raw internal FFI
+evidence; owned String/CString construction, source `Result` mapping, `&CStr` borrow origins, and the
+public safe `std::text` API remain disconnected.
 
 A `c"..."` literal provides allocation-free immutable `&CStr` storage with one compiler-appended trailing NUL and rejects a decoded interior NUL. It is source syntax, not a runtime constructor. `b"..."` similarly provides immutable static bytes without claiming UTF-8.
 
