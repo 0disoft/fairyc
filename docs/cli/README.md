@@ -19,7 +19,8 @@ Only `check`, a minimal `build`, compiler inspection, and semantic test executio
 
 ## Current prototype
 
-The Go frontend currently exposes `fairyc experimental parse <file.fy>`,
+The Go frontend currently exposes the source-independent
+`fairyc explain <diagnostic-code>` lookup plus `fairyc experimental parse <file.fy>`,
 `fairyc experimental check-syntax <file.fy>`, and
 `fairyc experimental check-semantics <file.fy> [<file.fy>...]`. The compiler prototype also exposes
 `fairyc experimental target-spec x86_64-linux-gnu` for deterministic host-independent target
@@ -92,6 +93,13 @@ The interpreter fixture's in-memory byte hooks require manifest options that thi
 declaring a similarly named Fairy C function does not grant output authority.
 Infinite execution is stopped by the bounded interpreter and reported as an unsupported-capability result rather than a language trap. In
 particular, it does not satisfy the planned `fairyc check` contract.
+
+`fairyc explain` accepts one exact uppercase `Edddd`, `Adddd`, or `Vdddd` code and writes its
+prototype meaning, category, and catalog identity without reading source, configuration, or the
+current directory. It performs no toolchain discovery, target probe, process execution, network
+request, or write. The output explicitly marks the catalog provisional; a successful lookup does
+not claim that the diagnostic is implemented, fixture-backed, released, or stable. Listing, fuzzy
+search, JSON, localization, and repair guidance remain unimplemented.
 
 Human developers can run the examples shown in the repository `README.md`. Agent verification uses
 the configured `fairyc_go_build`, `fairyc_go_vet`, and `fairyc_go_test` intents; the manual `go run`

@@ -117,6 +117,9 @@ func diagnosticSummary(value diagnostic.Diagnostic) string {
 	case "E0010":
 		return "frontend resource budget exhausted"
 	default:
+		if entry, found := diagnostic.Lookup(value.Code); found {
+			return entry.Meaning
+		}
 		return "frontend diagnostic"
 	}
 }
@@ -168,6 +171,9 @@ func semanticDiagnosticSummary(code string) string {
 	case "E5106":
 		return "@link_name requires exactly one nonempty string and may appear only once"
 	default:
+		if entry, found := diagnostic.Lookup(code); found {
+			return entry.Meaning
+		}
 		return "semantic diagnostic"
 	}
 }

@@ -6,9 +6,24 @@
 
 This document owns planned `fairyc` command semantics. It does not claim that a command is implemented. Implemented commands must be marked with tests and a language revision before release.
 
+## Implemented diagnostic explanation surface
+
+`fairyc explain <diagnostic-code>` is implemented as a provisional, source-independent lookup over
+the reserved Stage 0 catalog. It accepts exactly one canonical uppercase `Edddd`, `Adddd`, or
+`Vdddd` code. Success writes the exact catalog meaning, namespace category, and
+`fairyc.diagnostic-catalog/v0 (provisional Stage 0)` to stdout. The command reads no source or
+configuration, performs no directory scan, process execution, toolchain discovery, target probe,
+network request, or write, and does not require the source root to exist.
+
+Missing, extra, malformed, and unknown codes are invocation failures with prototype code `2` and no
+stdout. An explanation reserves a prototype meaning; it does not claim that the rule is implemented,
+fixture-backed, released, or stable. JSON output, listing, fuzzy search, localization, and repair
+guidance remain unimplemented. Phase 3 still owns release stabilization of this command and the
+broader CLI.
+
 ## Implemented experimental compiler surface
 
-The current Go prototype implements seven deliberately unstable developer commands:
+The current Go prototype implements nine deliberately unstable developer commands:
 
 | Command | Purpose | Output |
 | --- | --- | --- |

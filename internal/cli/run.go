@@ -30,6 +30,7 @@ const (
 const usage = `Fairy C Stage 0 compiler prototype
 
 Usage:
+  fairyc explain <diagnostic-code>
   fairyc experimental parse <file.fy>
   fairyc experimental check-syntax <file.fy>
   fairyc experimental check-semantics <file.fy> [<file.fy>...]
@@ -56,6 +57,12 @@ func Run(args []string, sourceRoot string, stdout, stderr io.Writer) int {
 	if len(args) == 0 {
 		return invocationError(stderr, "a command is required")
 	}
+	if args[0] == "explain" {
+		if len(args) == 2 && (args[1] == "-h" || args[1] == "--help") {
+			return writeHelp(stdout, stderr)
+		}
+		return runExplain(args[1:], stdout, stderr)
+	}
 	if args[0] == "check" {
 		return invocationError(stderr, `"check" is reserved for the full semantic pipeline; use "experimental check-syntax" for parser-only validation`)
 	}
@@ -63,6 +70,43 @@ func Run(args []string, sourceRoot string, stdout, stderr io.Writer) int {
 		return invocationError(stderr, fmt.Sprintf("unknown command %q", args[0]))
 	}
 	return runExperimental(args[1:], sourceRoot, stdout, stderr)
+}
+
+func runExplain(args []string, stdout, stderr io.Writer) int {
+	if len(args) != 1 {
+		return invocationError(stderr, `command "explain" expects exactly one diagnostic code`)
+	}
+	code := args[0]
+	if !validDiagnosticCode(code) {
+		return invocationError(stderr, fmt.Sprintf("diagnostic code %q is not in canonical E0001, A2001, or V1001 form", code))
+	}
+	entry, found := diagnostic.Lookup(code)
+	if !found {
+		return invocationError(stderr, fmt.Sprintf("unknown diagnostic code %q", code))
+	}
+	if _, err := fmt.Fprintf(
+		stdout,
+		"%s: %s\nCategory: %s\nCatalog: %s (provisional Stage 0)\n",
+		entry.Code,
+		entry.Meaning,
+		entry.Category,
+		diagnostic.CatalogVersion,
+	); err != nil {
+		return outputError(stderr)
+	}
+	return ExitSuccess
+}
+
+func validDiagnosticCode(code string) bool {
+	if len(code) != 5 || (code[0] != 'E' && code[0] != 'A' && code[0] != 'V') {
+		return false
+	}
+	for _, value := range code[1:] {
+		if value < '0' || value > '9' {
+			return false
+		}
+	}
+	return true
 }
 
 func runExperimental(args []string, sourceRoot string, stdout, stderr io.Writer) int {

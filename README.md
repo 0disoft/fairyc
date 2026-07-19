@@ -164,13 +164,15 @@ missing target evidence marker.
 A separate fail-closed Linux/amd64 command is now present to compile those cases with Clang and GCC
 at `-O0` and `-O2`, link a closed conformance runtime, and compare process outcomes plus exact
 source-linked resource-drop sequences. Product emission and product builds contain no trace observer. It cannot run on
-this Windows host because no WSL distribution or C compiler is installed, and its hosted CI result
+this Windows host because no WSL distribution or Linux Clang/GCC execution environment is installed, and its hosted CI result
 has not yet been observed. The target therefore remains unsupported.
-An unstable `fairyc experimental` CLI can inspect syntax, syntax-check, semantic-check, emit the
+A provisional source-independent `fairyc explain <diagnostic-code>` lookup reports reserved Stage 0
+meanings and categories without reading source or invoking a toolchain. An unstable
+`fairyc experimental` CLI can inspect syntax, syntax-check, semantic-check, emit the
 scalar, flat-resource, and resource-tagged C11 translation unit, build that subset into a Linux executable on an eligible host,
 inspect the declared target specification, or interpret one source-root-relative `.fy` file, while semantic checking also
 accepts an explicit module set. There is no stable CLI, user drop-body execution, native execution
-command, complete runtime, standard library, package manager, supported target, or stable language
+command, complete runtime, standard library, package manager, supported target, release-stable CLI, or stable language
 revision yet.
 
 ## Try the current prototype
@@ -178,6 +180,7 @@ revision yet.
 The following commands are manual developer examples, not agent command authority:
 
 ```text
+go run ./cmd/fairyc explain E1101
 go run ./cmd/fairyc experimental check-syntax examples/syntax/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/syntax/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/semantic/main.fy examples/semantic/math.fy
@@ -195,7 +198,9 @@ go run ./cmd/fairyc experimental run examples/run/resource_option.fy
 go run ./cmd/fairyc experimental parse examples/syntax/main.fy
 ```
 
-These commands treat the current directory as the temporary source root. `parse` emits versioned,
+`explain` does not read the current directory or source tree and marks its diagnostic catalog as
+provisional. The experimental source commands treat the current directory as the temporary source
+root. `parse` emits versioned,
 deterministic JSON containing token and CST kinds and byte spans, but not source text, token text,
 literal values, or absolute paths. `check-semantics` accepts an explicit bounded list of source files
 for the currently implemented scalar, safe-borrow, whole-resource, Region-parameter, and Result subset. It rejects duplicate paths, root

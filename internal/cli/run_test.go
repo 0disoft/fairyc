@@ -741,10 +741,80 @@ func TestStableCheckRemainsReserved(t *testing.T) {
 	}
 }
 
+func TestExplainReportsReservedDiagnosticWithoutReadingSource(t *testing.T) {
+	t.Parallel()
+	missingRoot := filepath.Join(t.TempDir(), "missing")
+	code, stdout, stderr := runForTest([]string{"explain", "E1101"}, missingRoot)
+	want := "E1101: Resource used after move or consumption.\n" +
+		"Category: Resource ownership and drop\n" +
+		"Catalog: fairyc.diagnostic-catalog/v0 (provisional Stage 0)\n"
+	if code != ExitSuccess || stdout != want || stderr != "" {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
+func TestExplainCoversAtlasAndVerifierCodes(t *testing.T) {
+	t.Parallel()
+	for _, testCase := range []struct {
+		code     string
+		category string
+	}{
+		{code: "A2001", category: "Category: Atlas warnings or hard map-integrity errors\n"},
+		{code: "V1403", category: "Category: MIR verifier defects\n"},
+	} {
+		code, stdout, stderr := runForTest([]string{"explain", testCase.code}, t.TempDir())
+		if code != ExitSuccess || !strings.HasPrefix(stdout, testCase.code+": ") || !strings.Contains(stdout, testCase.category) || stderr != "" {
+			t.Fatalf("Run(%s) = code %d, stdout %q, stderr %q", testCase.code, code, stdout, stderr)
+		}
+	}
+}
+
+func TestExplainRejectsMissingMalformedUnknownAndExtraCodes(t *testing.T) {
+	t.Parallel()
+	for _, testCase := range []struct {
+		name string
+		args []string
+		want string
+	}{
+		{name: "missing", args: []string{"explain"}, want: "expects exactly one diagnostic code"},
+		{name: "lowercase", args: []string{"explain", "e1101"}, want: "is not in canonical"},
+		{name: "help-word-is-not-a-code", args: []string{"explain", "help"}, want: "is not in canonical"},
+		{name: "unknown", args: []string{"explain", "E9999"}, want: "unknown diagnostic code"},
+		{name: "extra", args: []string{"explain", "E1101", "E1102"}, want: "expects exactly one diagnostic code"},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+			code, stdout, stderr := runForTest(testCase.args, t.TempDir())
+			if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, testCase.want) {
+				t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+			}
+		})
+	}
+}
+
+func TestExplainHelpFlagsUseGlobalHelp(t *testing.T) {
+	t.Parallel()
+	for _, flag := range []string{"-h", "--help"} {
+		code, stdout, stderr := runForTest([]string{"explain", flag}, t.TempDir())
+		if code != ExitSuccess || !strings.Contains(stdout, "fairyc explain <diagnostic-code>") || stderr != "" {
+			t.Fatalf("Run(%s) = code %d, stdout %q, stderr %q", flag, code, stdout, stderr)
+		}
+	}
+}
+
+func TestExplainOutputFailureReturnsInternalFailure(t *testing.T) {
+	t.Parallel()
+	var stderr bytes.Buffer
+	code := Run([]string{"explain", "E1101"}, t.TempDir(), failingWriter{}, &stderr)
+	if code != ExitInternalFailure || !strings.Contains(stderr.String(), "write output failed") {
+		t.Fatalf("Run() = code %d, stderr %q", code, stderr.String())
+	}
+}
+
 func TestHelpAndInvocationErrorsAreSeparated(t *testing.T) {
 	t.Parallel()
 	helpCode, helpOut, helpErr := runForTest([]string{"--help"}, t.TempDir())
-	if helpCode != ExitSuccess || !strings.Contains(helpOut, "experimental parse") || !strings.Contains(helpOut, "experimental target-spec") || !strings.Contains(helpOut, "experimental emit-c") || !strings.Contains(helpOut, "experimental build") || !strings.Contains(helpOut, "experimental build-host") || !strings.Contains(helpOut, "experimental run-host") || helpErr != "" {
+	if helpCode != ExitSuccess || !strings.Contains(helpOut, "fairyc explain") || !strings.Contains(helpOut, "experimental parse") || !strings.Contains(helpOut, "experimental target-spec") || !strings.Contains(helpOut, "experimental emit-c") || !strings.Contains(helpOut, "experimental build") || !strings.Contains(helpOut, "experimental build-host") || !strings.Contains(helpOut, "experimental run-host") || helpErr != "" {
 		t.Fatalf("help = code %d, stdout %q, stderr %q", helpCode, helpOut, helpErr)
 	}
 	errorCode, errorOut, errorErr := runForTest(nil, t.TempDir())

@@ -22,19 +22,26 @@ This repository type owns command behavior, arguments, flags, config loading, ex
 - Config precedence and default behavior: UNDECIDED
 - Runtime compatibility floor: UNDECIDED
 
-## Experimental frontend v0
+## Prototype frontend v0
 
-The implemented `fairyc experimental` commands use provisional process codes only for prototype
-automation. They are not the stable exit-code taxonomy:
+The implemented `fairyc explain` and `fairyc experimental` commands use provisional process codes
+only for prototype automation. They are not the stable exit-code taxonomy:
 
-| Code | Experimental meaning |
+| Code | Prototype meaning |
 | ---: | --- |
-| `0` | The requested syntax operation completed without source diagnostics. |
-| `2` | Invocation or bounded input loading failed, the experimental semantic subset cannot represent the requested syntax, or an interpreter capability limit was reached. |
+| `0` | The requested prototype operation completed successfully. |
+| `2` | Invocation, diagnostic-code lookup, or bounded input loading failed, the experimental semantic subset cannot represent the requested syntax, or an interpreter capability limit was reached. |
 | `3` | One or more source diagnostics were produced. |
 | `4` | An internal invariant or output write failed. |
 | `5` | The experimental MIR interpreter reached a canonical language trap. |
 | `6` | The experimental native build could not resolve or run its toolchain, link the scalar runtime, or safely materialize its artifact. |
+
+`fairyc explain` writes exactly three deterministic, ANSI-free lines to stdout on success: the
+canonical code and meaning, its category, and `fairyc.diagnostic-catalog/v0 (provisional Stage 0)`.
+It reads no source or configuration and has no filesystem, process, network, toolchain, target, or
+write side effect. Missing, extra, malformed, and unknown codes use code `2` with empty stdout.
+Output-write failure uses code `4`. The successful output reserves a prototype meaning and does not
+claim implementation, fixture coverage, release, or stability.
 
 `experimental parse` writes one `fairyc.experimental.parse/v0` JSON document, defined by
 `spec/cli/experimental-parse-v0.schema.json`, to stdout even when source diagnostics exist.
@@ -62,7 +69,7 @@ unexpected-output, or execution failures use code `6`. It writes no persistent e
 `experimental run` writes `result: <i32>` to stdout on return, or `trap: <category>` to stderr with
 provisional code `5` on a language trap. Its bounded `step-limit` is a capability result with code
 `2`, not a language trap. None of these commands
-uses ANSI escapes. Human positions are one-based line and byte-column values backed
+uses ANSI escapes. `fairyc explain` likewise uses no ANSI escapes. Human positions are one-based line and byte-column values backed
 by the diagnostic's zero-based half-open byte span.
 
 The parse JSON schema intentionally excludes source text, token text, cooked literal values, and

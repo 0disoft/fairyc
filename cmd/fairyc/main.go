@@ -1,17 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/0disoft/fairyc/internal/cli"
 )
 
 func main() {
-	sourceRoot, err := os.Getwd()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "fairyc: cannot determine the current source root")
-		os.Exit(cli.ExitInternalFailure)
-	}
-	os.Exit(cli.Run(os.Args[1:], sourceRoot, os.Stdout, os.Stderr))
+	// Source-consuming commands open this root inside cli.Run. Source-independent commands never
+	// touch it, so help, explain, and target inspection do not perform an eager filesystem query.
+	os.Exit(cli.Run(os.Args[1:], ".", os.Stdout, os.Stderr))
 }
