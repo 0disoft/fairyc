@@ -14,7 +14,7 @@ The project is not trying to beat every hand-tuned C program or make every C own
 The first Stage 0 frontend slice now exists in Go: immutable source bytes, a lossless lexer,
 compact recoverable syntax, error-free AST lowering, deterministic `E00xx` diagnostics, and a
 runner for all parser v0 fixtures. The next slice resolves names and produces typed HIR for the
-  fixture-backed scalar, safe-borrow, and scalar foreign-call subset. Its semantic runner executes all 22 v0 resolve, type,
+  fixture-backed scalar, safe-borrow, and scalar foreign-call subset. Its semantic runner executes all 23 v0 resolve, type,
 and local Flow cases, including last-use loans and borrow-return origins. Whole-root resource Flow
   also executes all 12 v0 cases for moves, cleanup obligations, branch joins, normal, break, and continue loop edges,
 consuming tagged matches, and live/dead resource reassignment. The
@@ -66,11 +66,12 @@ hidden result pointers, register exhaustion, and whole-aggregate rollback. Those
 native evidence by themselves, and the target's C ABI marker stays fail-closed.
 The 14 valid plans now generate separate caller and callee objects for Clang-to-GCC and
 GCC-to-Clang at `-O0` and `-O2`, for 56 configured crossings. This Windows host cannot execute
-them. Separate scalar source fixtures now carry an explicitly mapped
-`@link_name` plus `unsafe extern C fn(i32) -> i32`
-and exact `c::int`/negative `c::long`/`c::size_t`/negative `c::ssize_t` producer-result to typed-local to consumer-argument flows through
-AST, typed HIR, verified MIR, C emission, and four planned cross-compiler object crossings each;
-none of those native executions has been observed on this Windows host.
+them. Separate scalar source fixtures now carry explicitly mapped `@link_name` declarations for
+`unsafe extern C fn(i32) -> i32`, individual exact `c::int`, negative `c::long`, `c::size_t`, and
+negative `c::ssize_t` flows, plus one family fixture for the remaining twelve TargetSpec C scalars.
+Every value travels from producer result through a typed local to a matching consumer argument
+across AST, typed HIR, verified MIR, and C emission, with four planned cross-compiler object
+crossings per fixture; none of those native executions has been observed on this Windows host.
 A provisional `x86_64-linux-gnu` SystemHeap implementation now lives in the target standard-library
 boundary rather than the thin runtime. It normalizes empty allocation, admits current fundamental
 alignments, preserves bytes across copy-and-release growth or shrink, and leaves the old block
@@ -99,8 +100,8 @@ claimed.
 The Linux File C slice now exposes partial I/O, write-all progress, sync, and consuming close that
 is never retried, even after failure. Its four-way probe is configured but unobserved and source
 effects remain unimplemented.
-The source FFI slice accepts `i32`, `u8`, `u32`, `usize`, exact transport-only `c::int`, `c::long`,
-`c::size_t`, and target-specific POSIX `c::ssize_t`, plus admitted raw-pointer parameters or
+The source FFI slice accepts `i32`, `u8`, `u32`, `usize`, all sixteen exact transport-only TargetSpec
+C scalars, plus admitted raw-pointer parameters or
 results. A declaration may keep its Fairy name or use one nonempty `@link_name("external_symbol")`;
 AST, typed HIR, MIR, prototypes, and calls preserve the source/link identity split.
 Calls require `unsafe {}` or `unsafe fn`; missing unsafe provenance is `E5101` and safe references in
@@ -109,10 +110,10 @@ while C emission produces a plain external prototype with no inferred alias, pur
 unwind attributes. Typed `null` crosses a closed pointer/target-scalar native probe. An exact
 safe-borrow-to-raw-pointer cast now lowers only for a direct local place inside `unsafe`, allowing a
 flat nonempty `@repr(C)` record to cross by pointer and receive standard-library output.
-those C scalar types remain distinct from coincidentally sized Fairy integers, emit exact C
-`int`/`long`/`size_t`/`ssize_t` with target and provider assertions, and currently have no source literal, operator, cast, raw-pointer, interpreter, or
-aggregate-field support. Raw
-dereference or arithmetic, arbitrary casts, callbacks, other `c.*` scalars, nested or
+Those C scalar types remain distinct from coincidentally represented Fairy scalars, emit their exact
+C spellings with target and provider assertions, and currently have no source literal, operator,
+cast, raw-pointer, interpreter, or aggregate-field support. Raw
+dereference or arithmetic, arbitrary casts, callbacks, nested or
 by-value aggregates, exports, and public standard-library wrappers remain unimplemented.
 A deterministic native C11 plus explicit POSIX-typedef probe now translates the eleven valid layout cases into private numeric
 types and is configured for Clang/GCC at `-O0` and `-O2`. This Windows host cannot execute those
@@ -172,10 +173,10 @@ remaining semantic groups exist.
 and lists the missing evidence that keeps all three target maturity claims false.
 
 `experimental emit-c` accepts the same single-file entry shape and prints the verified scalar plus
-flat all-`i32` resource and resource-bearing built-in tag
-C11 translation unit directly to stdout. Target `c::ssize_t` alone adds the declared POSIX.1-2008
-feature macro and provider header. The command does not write a `.c` file or invoke a native
-toolchain.
+flat all-`i32` resource and resource-bearing built-in tag C11 translation unit directly to stdout.
+Every used C scalar receives target size/alignment assertions; signed and unsigned integer families
+also receive signedness assertions. Target `c::ssize_t` alone adds the declared POSIX.1-2008 feature
+macro and provider header. The command does not write a `.c` file or invoke a native toolchain.
 
 On Linux/amd64 with glibc and the explicitly selected Clang or GCC installed, `experimental build`
 uses that same verified unit and the embedded runtime to produce a no-overwrite executable

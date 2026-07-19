@@ -48,8 +48,7 @@ unsafe extern C fn
 
 The current executable source subset implements `unsafe extern C fn` imports with an optional
 single nonempty `@link_name("symbol")`, using
-`i32`, `u8`, `u32`, `usize`, the distinct transport-only `c::int`, `c::long`, `c::size_t`, and target-specific
-`c::ssize_t`, raw pointers to the fixed-width
+`i32`, `u8`, `u32`, `usize`, all sixteen distinct transport-only TargetSpec C scalars, raw pointers to the fixed-width
 Fairy scalar set, and raw pointers to an
 admitted nonempty `@repr(C)` struct. AST, typed HIR, MIR, unsafe provenance, deterministic C
 source/link identity, prototype emission, typed null, separate-object cross-compiler linking, and process-status
@@ -57,18 +56,35 @@ observation are wired. Source struct construction and field reads reach verified
 interpreter for its executable scalar subset, and generated C. Inside an explicit unsafe boundary,
 an exact `&T -> *T`, `&mut T -> *T`, or `&mut T -> *mut T` cast may take the address of a direct
 local place without inventing alias promises. Raw dereference, pointer arithmetic, integer-pointer
-conversion, mutability strengthening, and other casts remain unsupported. Source `c::int` maps to
-target key `c.int`, emits exact C `int`, and is guarded by target-derived size and alignment
-assertions. Exact `c::size_t` maps separately to target key `c.size_t`, includes `<stddef.h>`, emits
-C `size_t`, and asserts target size, alignment, and unsignedness instead of aliasing `usize` or
-`uintptr_t`. Exact `c::long` maps to target key `c.long`, emits C `long`, and asserts signed target
-layout instead of aliasing the coincidentally sized `i64` or `isize`. Target-specific `c::ssize_t` consumes the TargetSpec's `sys/types.h` and
-`posix.1-2008` provider metadata, defines `_POSIX_C_SOURCE 200809L`, emits exact `ssize_t`, and
-asserts signed layout instead of aliasing `isize` or `intptr_t`. Their only current value path is foreign return to typed local to foreign argument; they have
-no source literal, arithmetic, comparison, cast, interpreter behavior, or aggregate-field support.
-Raw pointers to C scalars also remain outside the admitted backend slice. This is not implementation of exports, callbacks, other `c.*` scalars,
-nested/array/enum `@repr(C)` fields, or by-value aggregate calls and returns. The interpreter
-remains fail-closed on every foreign call.
+conversion, mutability strengthening, and other casts remain unsupported. The exact source-to-C
+mapping is closed:
+
+| Fairy C | TargetSpec key | C spelling | Provider |
+| --- | --- | --- | --- |
+| `c::bool` | `c.bool` | `_Bool` | C11 keyword |
+| `c::char` | `c.char` | `char` | C11 keyword; signed on the selected target |
+| `c::double` | `c.double` | `double` | C11 keyword |
+| `c::float` | `c.float` | `float` | C11 keyword |
+| `c::int` | `c.int` | `int` | C11 keyword |
+| `c::long` | `c.long` | `long` | C11 keyword |
+| `c::longlong` | `c.longlong` | `long long` | C11 keyword |
+| `c::schar` | `c.schar` | `signed char` | C11 keyword |
+| `c::short` | `c.short` | `short` | C11 keyword |
+| `c::size_t` | `c.size_t` | `size_t` | `<stddef.h>`, ISO C11 |
+| `c::ssize_t` | `c.ssize_t` | `ssize_t` | `<sys/types.h>`, POSIX.1-2008 |
+| `c::uchar` | `c.uchar` | `unsigned char` | C11 keyword |
+| `c::uint` | `c.uint` | `unsigned int` | C11 keyword |
+| `c::ulong` | `c.ulong` | `unsigned long` | C11 keyword |
+| `c::ulonglong` | `c.ulonglong` | `unsigned long long` | C11 keyword |
+| `c::ushort` | `c.ushort` | `unsigned short` | C11 keyword |
+
+Generated C asserts target-derived size and alignment for every used C scalar and signedness for
+signed and unsigned integer families. Target-specific `c::ssize_t` also defines
+`_POSIX_C_SOURCE 200809L`. Their only current value path is foreign return to typed local to matching
+foreign argument; they have no source literal, arithmetic, comparison, cast, interpreter behavior,
+or aggregate-field support. Raw pointers to C scalars also remain outside the admitted backend
+slice. This is not implementation of exports, callbacks, nested/array/enum `@repr(C)` fields, or
+by-value aggregate calls and returns. The interpreter remains fail-closed on every foreign call.
 
 ## C-representable types
 
@@ -122,9 +138,9 @@ ELF64 symbols, DWARF CFI unwind, generated-C DWARF debugging, and the permitted 
 vocabulary. The scalar tables are ordered by canonical type name and every alignment is validated
 as a nonzero power of two.
 
-These entries define target facts for later compiler stages. They do not claim that every listed
-source scalar, `c.*` name, aggregate form, or call class is accepted by the current semantic
-frontend or C backend.
+These entries define target facts. Every listed C scalar now has exact source transport, but the
+entries do not claim C-scalar value semantics, aggregate forms, or additional call classes in the
+current semantic frontend or C backend.
 
 `internal/layout` now executes those facts for scalars, pointers, explicitly based C enums,
 positive fixed arrays, and nonempty nested structs. Its versioned v0 manifest records exact size,

@@ -103,7 +103,9 @@ target `c.size_t` to the independently versioned target data. V18 adds
 `foreignCSSizeTCallExecutions`, target `c.ssize_t`, and optional scalar `header`/`availability`
 metadata for the negative-preserving POSIX.1-2008 crossing. V19 adds
 `foreignCLongCallExecutions` for the exact negative C `long` crossing without changing TargetSpec
-or layout-fixture shape. The runner emits one exact version and does not pretend the
+or layout-fixture shape. V20 adds `foreignCScalarFamilyCallExecutions` for one generated Fairy caller
+and one hand-written C companion crossing the remaining twelve exact TargetSpec C scalars in both
+compiler directions and profiles. The runner emits one exact version and does not pretend the
 report shapes are interchangeable.
 
 ## Runtime and standard library

@@ -1,25 +1,56 @@
 // Package hir defines the typed High-level Intermediate Representation used after semantic analysis.
 package hir
 
-import "strings"
+import (
+	"slices"
+	"strings"
+)
 
 // Type is one canonical Fairy C type in the implemented Stage 0 subset.
 type Type string
 
 const (
-	TypeInvalid Type = "<invalid>"
-	TypeVoid    Type = "void"
-	TypeBool    Type = "bool"
-	TypeU8      Type = "u8"
-	TypeI32     Type = "i32"
-	TypeU32     Type = "u32"
-	TypeUSize   Type = "usize"
-	TypeCInt    Type = "c::int"
-	TypeCLong   Type = "c::long"
-	TypeCSizeT  Type = "c::size_t"
-	TypeCSSizeT Type = "c::ssize_t"
-	TypeRegion  Type = "Region"
+	TypeInvalid    Type = "<invalid>"
+	TypeVoid       Type = "void"
+	TypeBool       Type = "bool"
+	TypeU8         Type = "u8"
+	TypeI32        Type = "i32"
+	TypeU32        Type = "u32"
+	TypeUSize      Type = "usize"
+	TypeCBool      Type = "c::bool"
+	TypeCChar      Type = "c::char"
+	TypeCDouble    Type = "c::double"
+	TypeCFloat     Type = "c::float"
+	TypeCInt       Type = "c::int"
+	TypeCLong      Type = "c::long"
+	TypeCLongLong  Type = "c::longlong"
+	TypeCSChar     Type = "c::schar"
+	TypeCShort     Type = "c::short"
+	TypeCSizeT     Type = "c::size_t"
+	TypeCSSizeT    Type = "c::ssize_t"
+	TypeCUChar     Type = "c::uchar"
+	TypeCUInt      Type = "c::uint"
+	TypeCULong     Type = "c::ulong"
+	TypeCULongLong Type = "c::ulonglong"
+	TypeCUShort    Type = "c::ushort"
+	TypeRegion     Type = "Region"
 )
+
+var cScalarTypes = []Type{
+	TypeCBool, TypeCChar, TypeCDouble, TypeCFloat, TypeCInt, TypeCLong,
+	TypeCLongLong, TypeCSChar, TypeCShort, TypeCSizeT, TypeCSSizeT,
+	TypeCUChar, TypeCUInt, TypeCULong, TypeCULongLong, TypeCUShort,
+}
+
+// CScalarTypes returns the closed canonical C scalar vocabulary in target-key order.
+func CScalarTypes() []Type {
+	return slices.Clone(cScalarTypes)
+}
+
+// IsCScalar reports whether value is one exact target-owned C scalar identity.
+func IsCScalar(value Type) bool {
+	return slices.Contains(cScalarTypes, value)
+}
 
 // SharedBorrow returns the canonical non-null shared-borrow type for element.
 func SharedBorrow(element Type) Type {

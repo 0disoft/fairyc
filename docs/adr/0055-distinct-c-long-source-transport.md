@@ -32,7 +32,8 @@ than a coincidental machine representation. Target layout and native layout-prob
    after both compiler directions and both profiles execute successfully.
 6. Plain C `char`, `_Bool`, floating C types, the remaining signed and unsigned keyword-width
    families, literals, operators, and conversions require separate contracts rather than inheriting
-   this slice by width.
+   this slice by width. ADR 0056 later implements their exact transport-only identities without
+   opening those value semantics.
 
 ## Consequences
 

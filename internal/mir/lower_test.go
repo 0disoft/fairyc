@@ -1,6 +1,7 @@
 package mir
 
 import (
+	"fmt"
 	"slices"
 	"strings"
 	"testing"
@@ -358,6 +359,75 @@ fn main() -> i32 { unsafe { consume_c_ssize_t(make_c_ssize_t()) } }
 	}
 	if failures := Verify(program); len(failures) != 0 {
 		t.Fatalf("Verify() failures = %+v", failures)
+	}
+}
+
+func TestLowerPreservesRemainingCScalarsAcrossForeignCalls(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name string
+		typ  hir.Type
+	}{
+		{name: "bool", typ: hir.TypeCBool},
+		{name: "char", typ: hir.TypeCChar},
+		{name: "double", typ: hir.TypeCDouble},
+		{name: "float", typ: hir.TypeCFloat},
+		{name: "longlong", typ: hir.TypeCLongLong},
+		{name: "schar", typ: hir.TypeCSChar},
+		{name: "short", typ: hir.TypeCShort},
+		{name: "uchar", typ: hir.TypeCUChar},
+		{name: "uint", typ: hir.TypeCUInt},
+		{name: "ulong", typ: hir.TypeCULong},
+		{name: "ulonglong", typ: hir.TypeCULongLong},
+		{name: "ushort", typ: hir.TypeCUShort},
+	}
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			text := fmt.Sprintf(`module main;
+unsafe extern C fn make_%[1]s() -> %[2]s;
+unsafe extern C fn consume_%[1]s(value: %[2]s) -> i32;
+fn main() -> i32 { unsafe { consume_%[1]s(make_%[1]s()) } }
+`, test.name, test.typ)
+			program := lowerTestSource(t, text)
+			if len(program.ForeignFunctions) != 2 {
+				t.Fatalf("foreign functions = %+v", program.ForeignFunctions)
+			}
+			var producer, consumer ForeignFunction
+			for _, foreign := range program.ForeignFunctions {
+				switch foreign.Name {
+				case "main::make_" + test.name:
+					producer = foreign
+				case "main::consume_" + test.name:
+					consumer = foreign
+				}
+			}
+			if producer.ResultType != test.typ || len(producer.ParameterTypes) != 0 ||
+				consumer.ResultType != hir.TypeI32 || !slices.Equal(consumer.ParameterTypes, []hir.Type{test.typ}) {
+				t.Fatalf("foreign signatures = %+v", program.ForeignFunctions)
+			}
+			var producerCall, consumerCall *Terminator
+			for blockIndex := range program.Functions[0].Blocks {
+				terminator := &program.Functions[0].Blocks[blockIndex].Terminator
+				if terminator.Kind != TerminatorCall {
+					continue
+				}
+				switch terminator.Callee {
+				case producer.Symbol:
+					producerCall = terminator
+				case consumer.Symbol:
+					consumerCall = terminator
+				}
+			}
+			if producerCall == nil || consumerCall == nil || producerCall.DestinationLocal == NoLocal ||
+				len(consumerCall.Arguments) != 1 || consumerCall.Arguments[0].Kind != OperandLocal ||
+				consumerCall.Arguments[0].Local != producerCall.DestinationLocal {
+				t.Fatalf("producer call = %+v, consumer call = %+v", producerCall, consumerCall)
+			}
+			if failures := Verify(program); len(failures) != 0 {
+				t.Fatalf("Verify() failures = %+v", failures)
+			}
+		})
 	}
 }
 

@@ -1,6 +1,7 @@
 package semantic_test
 
 import (
+	"fmt"
 	"slices"
 	"strings"
 	"testing"
@@ -550,9 +551,53 @@ fn main() -> i32 { unsafe { consume_c_ssize_t(make_c_ssize_t()) } }
 	}
 }
 
+func TestAnalyzePreservesRemainingCScalarForeignTransport(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name     string
+		typeRef  string
+		wantType hir.Type
+	}{
+		{name: "bool", typeRef: "c::bool", wantType: hir.TypeCBool},
+		{name: "char", typeRef: "c::char", wantType: hir.TypeCChar},
+		{name: "double", typeRef: "c::double", wantType: hir.TypeCDouble},
+		{name: "float", typeRef: "c::float", wantType: hir.TypeCFloat},
+		{name: "longlong", typeRef: "c::longlong", wantType: hir.TypeCLongLong},
+		{name: "schar", typeRef: "c::schar", wantType: hir.TypeCSChar},
+		{name: "short", typeRef: "c::short", wantType: hir.TypeCShort},
+		{name: "uchar", typeRef: "c::uchar", wantType: hir.TypeCUChar},
+		{name: "uint", typeRef: "c::uint", wantType: hir.TypeCUInt},
+		{name: "ulong", typeRef: "c::ulong", wantType: hir.TypeCULong},
+		{name: "ulonglong", typeRef: "c::ulonglong", wantType: hir.TypeCULongLong},
+		{name: "ushort", typeRef: "c::ushort", wantType: hir.TypeCUShort},
+	}
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			text := fmt.Sprintf(`module main;
+unsafe extern C fn make_%[1]s() -> %[2]s;
+unsafe extern C fn consume_%[1]s(value: %[2]s) -> i32;
+fn main() -> i32 { unsafe { consume_%[1]s(make_%[1]s()) } }
+`, test.name, test.typeRef)
+			result := analyzeText(t, map[string]string{"main.fy": text})
+			assertCleanTypeResult(t, result)
+			if len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].ForeignFunctions) != 2 {
+				t.Fatalf("HIR = %+v", result.HIR)
+			}
+			producer := result.HIR.Modules[0].ForeignFunctions[0]
+			consumer := result.HIR.Modules[0].ForeignFunctions[1]
+			if producer.ResultType != test.wantType || len(producer.Parameters) != 0 ||
+				consumer.ResultType != hir.TypeI32 || len(consumer.Parameters) != 1 || consumer.Parameters[0].Type != test.wantType {
+				t.Fatalf("foreign functions = %+v", result.HIR.Modules[0].ForeignFunctions)
+			}
+		})
+	}
+}
+
 func TestAnalyzeKeepsCScalarImmediatesDeferred(t *testing.T) {
 	t.Parallel()
-	for _, typeRef := range []string{"c::int", "c::long", "c::size_t", "c::ssize_t"} {
+	for _, cScalar := range hir.CScalarTypes() {
+		typeRef := string(cScalar)
 		t.Run(typeRef+" immediate", func(t *testing.T) {
 			text := "module main;\nfn deferred(value: " + typeRef + ") -> i32 { let copy: " + typeRef + " = 1; 0 }\nfn main() -> i32 { 0 }\n"
 			result := analyzeText(t, map[string]string{"main.fy": text})

@@ -65,6 +65,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0053-distinct-c-size-t-source-transport.md`: exact ISO C `size_t` identity, target/header assertions, layout evidence, and foreign producer/consumer transport.
 - `0054-posix-ssize-t-source-transport.md`: target-owned POSIX typedef metadata, exact negative `ssize_t` transport, and a separate native crossing.
 - `0055-distinct-c-long-source-transport.md`: exact LP64-sensitive C `long` identity, signed target assertions, and a separate negative-value native crossing.
+- `0056-complete-c-scalar-source-transport.md`: all sixteen target C scalar identities, one drift-checked backend table, and one twelve-type native family crossing.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

@@ -22,8 +22,7 @@ lowering, and parser-fixture-runner portion of the first item exists. Name resol
 now cover the semantic fixture's scalar and safe-borrow subset. Local last-use loans, borrow
   conflicts, single-origin borrow returns, Stage 0 signed-left-shift rejection, loop-context diagnostics,
   scalar foreign-call unsafe/signature boundaries, and `@link_name` shape diagnostics execute across
-  all 22 semantic v0 cases, including distinct `c::int`, `c::long`, `c::size_t`, and target-specific
-  `c::ssize_t` foreign transport. General
+  all 23 semantic v0 cases, including exact transport for all sixteen TargetSpec C scalars. General
   whole-root resource Flow now executes all 12 resource v0 cases, including branch, normal-loop,
   break-edge, and continue-edge state rejection. Result Flow executes all 24 result v0 cases, including qualified scalar construction,
 exhaustive shallow matching, and local, parameter, branch, loop, overwrite, and early-return
@@ -122,17 +121,19 @@ The Linux File C slice now also covers partial read/write, write-all progress, s
 close including forced close failure. Its four native runs remain configured but unobserved, and
 source-visible File effects and error resources remain missing.
 
-The source FFI slice admits `unsafe extern C fn` declarations using `i32`, `u8`, `u32`, `usize`, raw
-pointers to that bounded scalar set, and raw pointers to flat nonempty `@repr(C)` records. A single
+The source FFI slice admits `unsafe extern C fn` declarations using `i32`, `u8`, `u32`, `usize`, all
+sixteen exact transport-only TargetSpec C scalars, raw pointers to the bounded Fairy scalar set, and
+raw pointers to flat nonempty `@repr(C)` records. A single
 `@link_name("symbol")` may separate the Fairy lookup name from the external C symbol. Unsafe call,
 link identity, and raw-address provenance survive AST, typed HIR, and MIR verification; the C
 backend emits unannotated prototypes, exact record tags/fields/layout assertions, and `&local` only
 for an exact unsafe borrow-to-pointer cast. The native lane plans four scalar, four typed-null
-pointer/target-scalar, four real UTF-8 validation, and four real text-view output-record crossings.
-The interpreter refuses raw addresses and foreign execution. Dereference, pointer
-arithmetic, arbitrary casts, callbacks, `c.*` scalars, nested or by-value aggregates, exports, and
-public standard-library wrappers remain Phase 2 work. The internal empty-input text transports are
-real source-to-stdlib-C exceptions, not completed wrappers.
+pointer/target-scalar, four individual exact C-scalar, four remaining twelve-type C-scalar-family,
+four real UTF-8 validation, and four real text-view output-record crossings. The interpreter refuses
+raw addresses and foreign execution. Dereference, pointer arithmetic, arbitrary casts, callbacks,
+C-scalar value semantics, nested or by-value aggregates, exports, and public standard-library
+wrappers remain Phase 2 work. The internal empty-input text transports are real source-to-stdlib-C
+exceptions, not completed wrappers.
 
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.

@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v19"
+	reportSchemaVersion = "fairyc.native-c-report/v20"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -157,6 +157,96 @@ int32_t fairyc_fixture_consume_c_ssize_t(ssize_t value) {
 }
 `
 
+const foreignCScalarFamilyCallSmokeSource = `module main;
+unsafe extern C fn fairyc_fixture_make_c_bool() -> c::bool;
+unsafe extern C fn fairyc_fixture_consume_c_bool(value: c::bool) -> i32;
+unsafe extern C fn fairyc_fixture_make_c_char() -> c::char;
+unsafe extern C fn fairyc_fixture_consume_c_char(value: c::char) -> i32;
+unsafe extern C fn fairyc_fixture_make_c_double() -> c::double;
+unsafe extern C fn fairyc_fixture_consume_c_double(value: c::double) -> i32;
+unsafe extern C fn fairyc_fixture_make_c_float() -> c::float;
+unsafe extern C fn fairyc_fixture_consume_c_float(value: c::float) -> i32;
+unsafe extern C fn fairyc_fixture_make_c_longlong() -> c::longlong;
+unsafe extern C fn fairyc_fixture_consume_c_longlong(value: c::longlong) -> i32;
+unsafe extern C fn fairyc_fixture_make_c_schar() -> c::schar;
+unsafe extern C fn fairyc_fixture_consume_c_schar(value: c::schar) -> i32;
+unsafe extern C fn fairyc_fixture_make_c_short() -> c::short;
+unsafe extern C fn fairyc_fixture_consume_c_short(value: c::short) -> i32;
+unsafe extern C fn fairyc_fixture_make_c_uchar() -> c::uchar;
+unsafe extern C fn fairyc_fixture_consume_c_uchar(value: c::uchar) -> i32;
+unsafe extern C fn fairyc_fixture_make_c_uint() -> c::uint;
+unsafe extern C fn fairyc_fixture_consume_c_uint(value: c::uint) -> i32;
+unsafe extern C fn fairyc_fixture_make_c_ulong() -> c::ulong;
+unsafe extern C fn fairyc_fixture_consume_c_ulong(value: c::ulong) -> i32;
+unsafe extern C fn fairyc_fixture_make_c_ulonglong() -> c::ulonglong;
+unsafe extern C fn fairyc_fixture_consume_c_ulonglong(value: c::ulonglong) -> i32;
+unsafe extern C fn fairyc_fixture_make_c_ushort() -> c::ushort;
+unsafe extern C fn fairyc_fixture_consume_c_ushort(value: c::ushort) -> i32;
+
+fn check_bool() -> i32 { unsafe { fairyc_fixture_consume_c_bool(fairyc_fixture_make_c_bool()) } }
+fn check_char() -> i32 { unsafe { fairyc_fixture_consume_c_char(fairyc_fixture_make_c_char()) } }
+fn check_double() -> i32 { unsafe { fairyc_fixture_consume_c_double(fairyc_fixture_make_c_double()) } }
+fn check_float() -> i32 { unsafe { fairyc_fixture_consume_c_float(fairyc_fixture_make_c_float()) } }
+fn check_longlong() -> i32 { unsafe { fairyc_fixture_consume_c_longlong(fairyc_fixture_make_c_longlong()) } }
+fn check_schar() -> i32 { unsafe { fairyc_fixture_consume_c_schar(fairyc_fixture_make_c_schar()) } }
+fn check_short() -> i32 { unsafe { fairyc_fixture_consume_c_short(fairyc_fixture_make_c_short()) } }
+fn check_uchar() -> i32 { unsafe { fairyc_fixture_consume_c_uchar(fairyc_fixture_make_c_uchar()) } }
+fn check_uint() -> i32 { unsafe { fairyc_fixture_consume_c_uint(fairyc_fixture_make_c_uint()) } }
+fn check_ulong() -> i32 { unsafe { fairyc_fixture_consume_c_ulong(fairyc_fixture_make_c_ulong()) } }
+fn check_ulonglong() -> i32 { unsafe { fairyc_fixture_consume_c_ulonglong(fairyc_fixture_make_c_ulonglong()) } }
+fn check_ushort() -> i32 { unsafe { fairyc_fixture_consume_c_ushort(fairyc_fixture_make_c_ushort()) } }
+
+fn main() -> i32 {
+    let failures: i32 = check_bool() + check_char() + check_double() + check_float() +
+        check_longlong() + check_schar() + check_short() + check_uchar() + check_uint() +
+        check_ulong() + check_ulonglong() + check_ushort();
+    if failures == 0 { 42 } else { 1 }
+}
+`
+
+const foreignCScalarFamilyCallCompanionSource = `#include <stdint.h>
+
+_Bool fairyc_fixture_make_c_bool(void) { return (_Bool)1; }
+int32_t fairyc_fixture_consume_c_bool(_Bool value) { return value == (_Bool)1 ? INT32_C(0) : INT32_C(1); }
+char fairyc_fixture_make_c_char(void) { return (char)-41; }
+int32_t fairyc_fixture_consume_c_char(char value) { return value == (char)-41 && value < (char)0 ? INT32_C(0) : INT32_C(1); }
+double fairyc_fixture_make_c_double(void) { return -1.5; }
+int32_t fairyc_fixture_consume_c_double(double value) { return value == -1.5 ? INT32_C(0) : INT32_C(1); }
+float fairyc_fixture_make_c_float(void) { return -1.5F; }
+int32_t fairyc_fixture_consume_c_float(float value) { return value == -1.5F ? INT32_C(0) : INT32_C(1); }
+long long fairyc_fixture_make_c_longlong(void) { return -41LL; }
+int32_t fairyc_fixture_consume_c_longlong(long long value) { return value == -41LL ? INT32_C(0) : INT32_C(1); }
+signed char fairyc_fixture_make_c_schar(void) { return (signed char)-41; }
+int32_t fairyc_fixture_consume_c_schar(signed char value) { return value == (signed char)-41 ? INT32_C(0) : INT32_C(1); }
+short fairyc_fixture_make_c_short(void) { return (short)-41; }
+int32_t fairyc_fixture_consume_c_short(short value) { return value == (short)-41 ? INT32_C(0) : INT32_C(1); }
+unsigned char fairyc_fixture_make_c_uchar(void) { return (unsigned char)41; }
+int32_t fairyc_fixture_consume_c_uchar(unsigned char value) { return value == (unsigned char)41 ? INT32_C(0) : INT32_C(1); }
+unsigned int fairyc_fixture_make_c_uint(void) { return 41U; }
+int32_t fairyc_fixture_consume_c_uint(unsigned int value) { return value == 41U ? INT32_C(0) : INT32_C(1); }
+unsigned long fairyc_fixture_make_c_ulong(void) { return 41UL; }
+int32_t fairyc_fixture_consume_c_ulong(unsigned long value) { return value == 41UL ? INT32_C(0) : INT32_C(1); }
+unsigned long long fairyc_fixture_make_c_ulonglong(void) { return 41ULL; }
+int32_t fairyc_fixture_consume_c_ulonglong(unsigned long long value) { return value == 41ULL ? INT32_C(0) : INT32_C(1); }
+unsigned short fairyc_fixture_make_c_ushort(void) { return (unsigned short)41; }
+int32_t fairyc_fixture_consume_c_ushort(unsigned short value) { return value == (unsigned short)41 ? INT32_C(0) : INT32_C(1); }
+`
+
+var foreignCScalarFamilyExpectedCFragments = []string{
+	"_Static_assert(sizeof(_Bool) == UINT64_C(1), \"fairyc target c.bool size\");",
+	"_Static_assert(((char)-1) < (char)0, \"fairyc target c.char signed\");",
+	"extern double fairyc_fixture_make_c_double(void);",
+	"extern int32_t fairyc_fixture_consume_c_float(float fy_a_0);",
+	"extern long long fairyc_fixture_make_c_longlong(void);",
+	"extern int32_t fairyc_fixture_consume_c_schar(signed char fy_a_0);",
+	"extern short fairyc_fixture_make_c_short(void);",
+	"extern int32_t fairyc_fixture_consume_c_uchar(unsigned char fy_a_0);",
+	"extern unsigned int fairyc_fixture_make_c_uint(void);",
+	"extern int32_t fairyc_fixture_consume_c_ulong(unsigned long fy_a_0);",
+	"extern unsigned long long fairyc_fixture_make_c_ulonglong(void);",
+	"extern int32_t fairyc_fixture_consume_c_ushort(unsigned short fy_a_0);",
+}
+
 const foreignPointerCallSmokeSource = `module main;
 unsafe extern C fn fairyc_fixture_pointer_scalars(data: *u8, output: *mut u32, length: usize, marker: u8) -> u32;
 fn main() -> i32 {
@@ -245,6 +335,7 @@ type Report struct {
 	ForeignCallExecutions              int        `json:"foreignCallExecutions"`
 	ForeignCIntCallExecutions          int        `json:"foreignCIntCallExecutions"`
 	ForeignCLongCallExecutions         int        `json:"foreignCLongCallExecutions"`
+	ForeignCScalarFamilyCallExecutions int        `json:"foreignCScalarFamilyCallExecutions"`
 	ForeignCSizeTCallExecutions        int        `json:"foreignCSizeTCallExecutions"`
 	ForeignCSSizeTCallExecutions       int        `json:"foreignCSSizeTCallExecutions"`
 	ForeignPointerCallExecutions       int        `json:"foreignPointerCallExecutions"`
@@ -447,6 +538,11 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.ForeignCLongCallExecutions = foreignCLongCallExecutions
+	foreignCScalarFamilyCallExecutions, err := runForeignCScalarFamilyCallProbe(temporaryRoot, toolchains)
+	if err != nil {
+		return Report{}, err
+	}
+	report.ForeignCScalarFamilyCallExecutions = foreignCScalarFamilyCallExecutions
 	foreignCSizeTCallExecutions, err := runForeignCSizeTCallProbe(temporaryRoot, toolchains)
 	if err != nil {
 		return Report{}, err
@@ -574,6 +670,18 @@ func runForeignCLongCallProbe(temporaryRoot string, toolchains []cdriver.Toolcha
 			"fairyc_fixture_make_c_long()",
 			"fairyc_fixture_consume_c_long(fy_l_",
 		},
+	)
+}
+
+func runForeignCScalarFamilyCallProbe(temporaryRoot string, toolchains []cdriver.Toolchain) (int, error) {
+	return runForeignSourceProbe(
+		temporaryRoot,
+		toolchains,
+		"foreign-c-scalar-family-call",
+		foreignCScalarFamilyCallSmokeSource,
+		foreignCScalarFamilyCallCompanionSource,
+		42,
+		foreignCScalarFamilyExpectedCFragments,
 	)
 }
 

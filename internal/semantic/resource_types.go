@@ -132,8 +132,11 @@ func (a *analyzer) prepareEnumTypes() {
 }
 
 func (a *analyzer) inertCopyable(value hir.Type, state map[hir.Type]uint8) bool {
+	if hir.IsCScalar(value) {
+		return true
+	}
 	switch value {
-	case hir.TypeBool, hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize, hir.TypeCInt, hir.TypeCLong, hir.TypeCSizeT, hir.TypeCSSizeT:
+	case hir.TypeBool, hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
 		return true
 	case hir.TypeInvalid, hir.TypeVoid, hir.TypeRegion:
 		return false
@@ -314,16 +317,12 @@ func (a *analyzer) canonicalTypeText(module *moduleScope, text string) (hir.Type
 		return hir.TypeU32, true
 	case "usize":
 		return hir.TypeUSize, true
-	case "c::int":
-		return hir.TypeCInt, true
-	case "c::long":
-		return hir.TypeCLong, true
-	case "c::size_t":
-		return hir.TypeCSizeT, true
-	case "c::ssize_t":
-		return hir.TypeCSSizeT, true
 	case "Region":
 		return hir.TypeRegion, true
+	}
+	candidate := hir.Type(trimmed)
+	if hir.IsCScalar(candidate) {
+		return candidate, true
 	}
 	if strings.HasPrefix(trimmed, "*") {
 		remainder := strings.TrimSpace(trimmed[1:])

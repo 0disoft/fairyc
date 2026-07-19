@@ -34,8 +34,9 @@ An item is visible to another module only when declared `pub`. Private fields of
 Fixture types use the source spelling normalized without trivia:
 
 - primitives and nominal paths use names such as `i32`, `bool`, and `math::Point`;
-- the first compiler-known C scalars keep exact canonical identities `c::int`, `c::long`, `c::size_t`, and
-  target-specific `c::ssize_t`, distinct from `i32`, `usize`, `isize`, and a user module named `c`;
+- the compiler-known C scalars keep the sixteen exact canonical identities listed in
+  `0005-surface-syntax-v0.md`, distinct from Fairy fixed-width, pointer-width, boolean, and floating
+  types and from a user module named `c`;
 - references use `&T` or `&mut T`;
 - raw pointers use `*T` or `*mut T`;
 - arrays and slices use `[T; N]` and `[T]`;
@@ -47,10 +48,10 @@ Nominal `struct`, `resource`, and `enum` declarations are not structurally inter
 
 Integer and floating literal text remains exact until an expected type is available. An unconstrained integer defaults to `i32`; an unconstrained float defaults to `f64`. Range checking occurs after type selection and does not wrap.
 
-The current source C-scalar slices deliberately have no contextual integer literals. Their only
-value origin is a typed foreign-call result, which may be relayed through locals and later
-foreign-call arguments. Arithmetic, comparison, and conversion remain unsupported rather than
-inheriting fixed-width or pointer-width Fairy integer rules.
+The current source C-scalar slice deliberately has no contextual literals. Its only value origin is
+a typed foreign-call result, which may be relayed through locals and later matching foreign-call
+arguments. Arithmetic, comparison, conversion, boolean normalization, and floating-point behavior
+remain unsupported rather than inheriting Fairy scalar rules or C promotion rules.
 
 Boolean conditions are exact: `if`, `while`, `&&`, `||`, and `!` require `bool`. Integer truthiness is rejected. Both branches of an `if` expression must have one compatible type. A function tail expression or explicit return must match the declared return type.
 

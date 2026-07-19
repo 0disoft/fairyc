@@ -25,15 +25,15 @@ for a deliberately narrow subset. It accepts `i32`, `bool`, `Option<i32>`, and
 comparisons, bitwise operations, and the implemented checked arithmetic families. Private numeric C
 function names prevent source identifiers from becoming ABI or injection surfaces.
 
-The foreign-call transport additionally accepts exact `c::int`, `c::long`, `c::size_t`, and target-specific
-`c::ssize_t` results and parameters. HIR and MIR keep those types distinct from coincidentally sized
-Fairy integers; the backend emits C `int`, `long`, `<stddef.h>` `size_t`, or POSIX.1-2008 `<sys/types.h>`
-`ssize_t`, records separate features, and asserts their target size and alignment. The typedef paths
-also assert unsignedness or signedness. `ssize_t` selects `_POSIX_C_SOURCE 200809L` before every
-header rather than silently relying on the host's default feature namespace. These
-slices deliberately create no immediate C-integer MIR operand: a foreign producer result local may
-be passed to a foreign consumer, while literals, operators, casts, interpreter execution, raw
-pointers to C scalars, and aggregate fields remain closed.
+The foreign-call transport additionally accepts all sixteen exact TargetSpec C scalars as results
+and parameters. HIR and MIR keep those types distinct from coincidentally represented Fairy
+scalars; one ordered backend table maps them to exact C spellings, TargetSpec keys, features, and
+optional providers. Generated C asserts target size and alignment for every used scalar and
+signedness for signed and unsigned integer families. `ssize_t` selects `_POSIX_C_SOURCE 200809L`
+before every header rather than silently relying on the host's default feature namespace. This
+slice deliberately creates no immediate C-scalar MIR operand: a foreign producer result local may
+be passed to a matching foreign consumer, while literals, operators, comparisons, casts,
+interpreter execution, raw pointers to C scalars, and aggregate fields remain closed.
 
 The emitter additionally accepts direct resource values only when every program-level definition is
 nonempty, every declaration-ordered field is exactly `i32`, and the verified user drop body is
@@ -131,7 +131,7 @@ forbids mutability strengthening, lowers to a verified MIR raw-address operation
 arbitrary casts remain rejected.
 Source `@repr(C)` construction, field reads, exact public names, layout assertions, pointer
 prototype spelling, and direct-local address passing are implemented, but by-value aggregate ABI,
-nested enum or built-in-tag payloads, array fields, other `c.*` scalars, C-scalar aggregate fields,
+nested enum or built-in-tag payloads, array fields, C-scalar value operations, C-scalar aggregate fields,
 and callbacks remain outside this slice.
 
 The MIR interpreter deliberately returns a `foreign-call` capability error instead of guessing a
@@ -159,15 +159,17 @@ empty stdout/stderr, and is not selectable through the product CLI. Output, nega
 unimplemented. A clean sanitizer run is backend evidence, not the language-semantics oracle.
 
 The same runner additionally plans four scalar, four exact `c::int`, four negative-preserving
-`c::long`, four exact `c::size_t`, four
-negative-preserving `c::ssize_t`, and four typed-null pointer/target-scalar
-Fairy-source foreign-call crossings: Clang-generated Fairy caller to GCC C callee and the reverse
-at low and optimized profiles. Those crossings use the existing separate-object driver and are
-counted separately as `foreignCallExecutions`, `foreignCIntCallExecutions`, `foreignCLongCallExecutions`,
-`foreignCSizeTCallExecutions`, `foreignCSSizeTCallExecutions`, and
-`foreignPointerCallExecutions` in `fairyc.native-c-report/v19`; they do not expand the eighteen
-interpreter-owned differential cases. The `c::int` probe uses a hand-written C producer and consumer
-so each value crosses a generated typed local without requiring a Fairy C integer literal.
+`c::long`, four exact `c::size_t`, four negative-preserving `c::ssize_t`, four complete twelve-type
+C-scalar-family, and four typed-null pointer/target-scalar Fairy-source foreign-call crossings:
+Clang-generated Fairy caller to GCC C callee and the reverse at low and optimized profiles. Those
+crossings use the existing separate-object driver and are counted separately as
+`foreignCallExecutions`, `foreignCIntCallExecutions`, `foreignCLongCallExecutions`,
+`foreignCSizeTCallExecutions`, `foreignCSSizeTCallExecutions`,
+`foreignCScalarFamilyCallExecutions`, and `foreignPointerCallExecutions` in
+`fairyc.native-c-report/v20`; they do not expand the eighteen interpreter-owned differential cases.
+Every C-scalar probe uses hand-written C producers and consumers so each value crosses a generated
+typed local without requiring a Fairy C literal. The family probe uses exactly representable finite
+floating values and makes no NaN, infinity, signed-zero, rounding, or floating-environment claim.
 
 `internal/cdriver` and `internal/cruntime` are the one implementation path for both that matrix and
 the experimental constrained-C executable builder. The driver fixes the C dialect, warning policy,

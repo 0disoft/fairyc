@@ -2,6 +2,7 @@ package cbackend_test
 
 import (
 	"errors"
+	"fmt"
 	"slices"
 	"strings"
 	"testing"
@@ -220,9 +221,75 @@ fn main() -> i32 { unsafe { consume_c_ssize_t(make_c_ssize_t()) } }
 	}
 }
 
+func TestEmitRemainingCScalarForeignTransport(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name       string
+		typeRef    string
+		cType      string
+		feature    string
+		size       uint32
+		alignment  uint32
+		signedness string
+	}{
+		{name: "bool", typeRef: "c::bool", cType: "_Bool", feature: "c-bool", size: 1, alignment: 1},
+		{name: "char", typeRef: "c::char", cType: "char", feature: "c-char", size: 1, alignment: 1, signedness: "signed"},
+		{name: "double", typeRef: "c::double", cType: "double", feature: "c-double", size: 8, alignment: 8},
+		{name: "float", typeRef: "c::float", cType: "float", feature: "c-float", size: 4, alignment: 4},
+		{name: "longlong", typeRef: "c::longlong", cType: "long long", feature: "c-longlong", size: 8, alignment: 8, signedness: "signed"},
+		{name: "schar", typeRef: "c::schar", cType: "signed char", feature: "c-schar", size: 1, alignment: 1, signedness: "signed"},
+		{name: "short", typeRef: "c::short", cType: "short", feature: "c-short", size: 2, alignment: 2, signedness: "signed"},
+		{name: "uchar", typeRef: "c::uchar", cType: "unsigned char", feature: "c-uchar", size: 1, alignment: 1, signedness: "unsigned"},
+		{name: "uint", typeRef: "c::uint", cType: "unsigned int", feature: "c-uint", size: 4, alignment: 4, signedness: "unsigned"},
+		{name: "ulong", typeRef: "c::ulong", cType: "unsigned long", feature: "c-ulong", size: 8, alignment: 8, signedness: "unsigned"},
+		{name: "ulonglong", typeRef: "c::ulonglong", cType: "unsigned long long", feature: "c-ulonglong", size: 8, alignment: 8, signedness: "unsigned"},
+		{name: "ushort", typeRef: "c::ushort", cType: "unsigned short", feature: "c-ushort", size: 2, alignment: 2, signedness: "unsigned"},
+	}
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			program := lowerSource(t, fmt.Sprintf(`module main;
+@link_name("fairyc_fixture_make_c_%[1]s")
+unsafe extern C fn make_%[1]s() -> %[2]s;
+@link_name("fairyc_fixture_consume_c_%[1]s")
+unsafe extern C fn consume_%[1]s(value: %[2]s) -> i32;
+fn main() -> i32 { unsafe { consume_%[1]s(make_%[1]s()) } }
+`, test.name, test.typeRef))
+			unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+			if err != nil {
+				t.Fatalf("Emit() error = %v", err)
+			}
+			targetName := strings.Replace(test.typeRef, "::", ".", 1)
+			required := []string{
+				fmt.Sprintf("_Static_assert(sizeof(%s) == UINT64_C(%d), \"fairyc target %s size\");", test.cType, test.size, targetName),
+				fmt.Sprintf("_Static_assert(_Alignof(%s) == UINT64_C(%d), \"fairyc target %s alignment\");", test.cType, test.alignment, targetName),
+				fmt.Sprintf("extern %s fairyc_fixture_make_c_%s(void);", test.cType, test.name),
+				fmt.Sprintf("extern int32_t fairyc_fixture_consume_c_%s(%s fy_a_0);", test.name, test.cType),
+				"fairyc_fixture_consume_c_" + test.name + "(fy_l_",
+			}
+			if test.signedness != "" {
+				operator := "<"
+				if test.signedness == "unsigned" {
+					operator = ">"
+				}
+				required = append(required, fmt.Sprintf("_Static_assert(((%s)-1) %s (%s)0, \"fairyc target %s %s\");", test.cType, operator, test.cType, targetName, test.signedness))
+			}
+			for _, text := range required {
+				if !strings.Contains(unit.Source, text) {
+					t.Errorf("generated C is missing %q:\n%s", text, unit.Source)
+				}
+			}
+			if !slices.Contains(unit.Features, test.feature) {
+				t.Fatalf("features = %v, want %q", unit.Features, test.feature)
+			}
+		})
+	}
+}
+
 func TestEmitKeepsCScalarPointersOutsideByValueTransportSlice(t *testing.T) {
 	t.Parallel()
-	for _, typeRef := range []string{"c::int", "c::long", "c::size_t", "c::ssize_t"} {
+	for _, cScalar := range hir.CScalarTypes() {
+		typeRef := string(cScalar)
 		t.Run(typeRef, func(t *testing.T) {
 			program := lowerSource(t, "module main;\nunsafe extern C fn consume_pointer(value: *"+typeRef+") -> i32;\nfn main() -> i32 { unsafe { consume_pointer(null) } }\n")
 			_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())

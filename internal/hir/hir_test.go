@@ -1,6 +1,31 @@
 package hir
 
-import "testing"
+import (
+	"slices"
+	"testing"
+)
+
+func TestCScalarVocabularyIsClosedAndOrdered(t *testing.T) {
+	t.Parallel()
+	want := []Type{
+		"c::bool", "c::char", "c::double", "c::float", "c::int", "c::long", "c::longlong",
+		"c::schar", "c::short", "c::size_t", "c::ssize_t", "c::uchar", "c::uint", "c::ulong",
+		"c::ulonglong", "c::ushort",
+	}
+	got := CScalarTypes()
+	if !slices.Equal(got, want) {
+		t.Fatalf("CScalarTypes() = %v, want %v", got, want)
+	}
+	for _, value := range got {
+		if !IsCScalar(value) {
+			t.Fatalf("IsCScalar(%q) = false", value)
+		}
+	}
+	got[0] = TypeInvalid
+	if CScalarTypes()[0] != TypeCBool || IsCScalar(Type("c::unknown")) {
+		t.Fatal("C scalar vocabulary leaked mutation or accepted an unknown type")
+	}
+}
 
 func TestResultElementsPreservesNestedPayloads(t *testing.T) {
 	t.Parallel()

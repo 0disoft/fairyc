@@ -41,7 +41,8 @@ Stage 0 type syntax includes:
 ```text
 bool, void
 i8, u8, i16, u16, i32, u32, i64, u64, isize, usize
-c::int, c::long, c::size_t, c::ssize_t
+c::bool, c::char, c::double, c::float, c::int, c::long, c::longlong, c::schar
+c::short, c::size_t, c::ssize_t, c::uchar, c::uint, c::ulong, c::ulonglong, c::ushort
 f32, f64
 Path::Type
 &T, &mut T
@@ -54,13 +55,13 @@ unsafe extern C fn(...) -> T
 
 `str` and `CStr` are unsized compiler-known view types and appear as `&str` and `&CStr`. User-defined generic declarations are excluded even though built-in `Option`, `Result`, slices, and arrays accept type arguments.
 
-The current executable C-scalar source slice recognizes `c::int`, `c::long`, `c::size_t`, and
-target-specific `c::ssize_t`, preserves them as distinct from coincidentally sized Fairy integers,
-and permits them only as
-transported foreign-call results, locals, and arguments. Their literals, operators, casts, raw
-pointers, and aggregate fields remain deferred. `c::size_t` uses the ISO C `<stddef.h>` typedef;
-`c::ssize_t` is available only for the current `x86_64-linux-gnu` POSIX.1-2008 profile through
-`<sys/types.h>`.
+The current executable C-scalar source slice recognizes all sixteen C scalars declared by the
+selected TargetSpec, preserves every one as an exact identity distinct from coincidentally sized
+Fairy scalars, and permits them only as transported foreign-call results, locals, and arguments.
+Their literals, operators, comparisons, casts, raw pointers, and aggregate fields remain deferred.
+`c::size_t` uses the ISO C `<stddef.h>` typedef; `c::ssize_t` is available only for the current
+`x86_64-linux-gnu` POSIX.1-2008 profile through `<sys/types.h>`. Plain `c::char` follows the selected
+target's signed `char` fact rather than inheriting either `c::schar` or `c::uchar`.
 
 ## Structs, resources, and enums
 

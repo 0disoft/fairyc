@@ -148,9 +148,9 @@ C is a boundary contract rather than the default internal representation.
 - The first planned conformance target is `x86_64-linux-gnu`; it is not supported until all declared target fixtures and CI paths pass.
 - C-layout types use `@repr(C)` and exported or imported symbols use explicit `unsafe extern C fn` declarations.
 - Platform-dependent C types use a distinct `c.*` namespace.
-- The first executable source C-scalar slices are exact `c::int`, `c::long`, `c::size_t`, and
-  target-specific POSIX `c::ssize_t` foreign transport. They are distinct from coincidentally sized Fairy integers; other C scalars, C-integer literals and operators, raw
-  pointers to C scalars, and C-scalar aggregate fields remain deferred.
+- The executable source C-scalar slice transports all sixteen exact TargetSpec C scalars. They are
+  distinct from coincidentally represented Fairy scalars; C-scalar literals, operators,
+  conversions, raw pointers, and aggregate fields remain deferred.
 - Foreign calls and generated raw bindings are unsafe by default and use raw pointers rather than safe references.
 - Safe wrappers own length, nullability, lifetime, error, and ownership conversion.
 - Stage 0 callbacks are non-capturing, synchronous, same-thread raw `unsafe extern C` function pointers plus explicit user data.
@@ -195,10 +195,13 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   MIR preserve distinct source/link identities, and generated C validates and emits only the link
   identity. Compatible declarations of one external symbol coalesce; conflicting signatures fail
   closed. The attribute grants no interpreter or host-binding authority.
-- A foreign result may produce exact `c::int`, `c::long`, `c::size_t`, or `c::ssize_t`, occupy a typed MIR local, and feed a
-  later matching foreign parameter. Generated C spells the types `int`, `long`, and `<stddef.h>` `size_t`
-  and asserts target size/alignment; `size_t` remains unsigned. Target-specific `ssize_t` consumes
-  declared `sys/types.h`/`posix.1-2008` metadata, preserves negative values, and remains signed.
+- A foreign result may produce any of the sixteen exact TargetSpec C scalars, occupy a typed MIR
+  local, and feed a later matching foreign parameter. One drift-checked backend table owns each
+  exact C spelling, TargetSpec key, feature, and optional provider. Generated C asserts target
+  size/alignment for every used scalar and signedness for signed and unsigned integer families.
+  Target-specific `ssize_t` consumes declared `sys/types.h`/`posix.1-2008` metadata. Plain `char`
+  follows target signedness. Floating transport is limited to exact finite probe values and makes no
+  NaN, infinity, signed-zero, rounding, or exception-mode promise.
 - The C backend is the only committed Stage 0 product backend and emits a constrained target/toolchain profile rather than universally portable C.
 - `internal/target` owns the executable `fairyc.target-spec/v0` description for the first target.
   It records host-independent LP64, scalar, pointer, SysV AMD64, ELF, unwind, debug, and C-layout
@@ -236,9 +239,11 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   not establish a target support level.
 - A separate Linux/amd64 command requires glibc, Clang, and GCC and is configured to compare the
   current scalar, flat inert-struct, restricted inert-enum, flat-resource, and resource-tagged cases at low and optimized
-  profiles. It separately links generated FY callers to hand-written `c::int`, negative-preserving `c::long`, `c::size_t`, and negative-preserving `c::ssize_t` producer/consumer C
-  and to the actual text-view C unit for both the empty predicate and `@repr(C)` output-record
-  mutation paths; report v19 records those counters.
+  profiles. It separately links generated FY callers to hand-written individual `c::int`,
+  negative-preserving `c::long`, `c::size_t`, and negative-preserving `c::ssize_t`
+  producer/consumer C units plus one twelve-type C-scalar family unit, and to the actual text-view C
+  unit for both the empty predicate and `@repr(C)` output-record mutation paths; report v20 records
+  those counters.
   Its closed
   `drop-trace-v0` emission profile assigns source/type/span identities to dense site IDs and compares
   exact four-byte native records with the MIR interpreter trace. This instrumentation is absent from

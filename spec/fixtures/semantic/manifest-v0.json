@@ -165,6 +165,15 @@
       }
     },
     {
+      "id": "pass.type.c-scalar-family-foreign-roundtrip",
+      "sourceRoot": "cases/pass/c-scalar-family-foreign-roundtrip/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow"
+      }
+    },
+    {
       "id": "pass.type.c-size-t-foreign-roundtrip",
       "sourceRoot": "cases/pass/c-size-t-foreign-roundtrip/src",
       "sources": ["main.fy"],

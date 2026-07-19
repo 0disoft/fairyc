@@ -96,10 +96,7 @@ type emitter struct {
 	localTypes         []map[mir.LocalID]hir.Type
 	needsBitcast       bool
 	needsShift         bool
-	cIntLayout         target.Layout
-	cLongLayout        target.Layout
-	cSizeTLayout       target.Layout
-	cSSizeTLayout      target.Layout
+	cScalars           map[hir.Type]target.Scalar
 	instrumentation    string
 	dropSites          []DropSite
 	dropSiteByKey      map[dropSiteKey]uint32
@@ -125,6 +122,66 @@ type enumCType struct {
 	fieldIndex   []map[string]int
 }
 
+type cScalarTransport struct {
+	sourceType   hir.Type
+	targetName   string
+	cType        string
+	feature      string
+	header       string
+	availability string
+}
+
+var cScalarTransports = []cScalarTransport{
+	{sourceType: hir.TypeCBool, targetName: "c.bool", cType: "_Bool", feature: "c-bool"},
+	{sourceType: hir.TypeCChar, targetName: "c.char", cType: "char", feature: "c-char"},
+	{sourceType: hir.TypeCDouble, targetName: "c.double", cType: "double", feature: "c-double"},
+	{sourceType: hir.TypeCFloat, targetName: "c.float", cType: "float", feature: "c-float"},
+	{sourceType: hir.TypeCInt, targetName: "c.int", cType: "int", feature: "c-int"},
+	{sourceType: hir.TypeCLong, targetName: "c.long", cType: "long", feature: "c-long"},
+	{sourceType: hir.TypeCLongLong, targetName: "c.longlong", cType: "long long", feature: "c-longlong"},
+	{sourceType: hir.TypeCSChar, targetName: "c.schar", cType: "signed char", feature: "c-schar"},
+	{sourceType: hir.TypeCShort, targetName: "c.short", cType: "short", feature: "c-short"},
+	{sourceType: hir.TypeCSizeT, targetName: "c.size_t", cType: "size_t", feature: "c-size-t", header: "stddef.h", availability: "iso-c11"},
+	{sourceType: hir.TypeCSSizeT, targetName: "c.ssize_t", cType: "ssize_t", feature: "c-ssize-t", header: "sys/types.h", availability: "posix.1-2008"},
+	{sourceType: hir.TypeCUChar, targetName: "c.uchar", cType: "unsigned char", feature: "c-uchar"},
+	{sourceType: hir.TypeCUInt, targetName: "c.uint", cType: "unsigned int", feature: "c-uint"},
+	{sourceType: hir.TypeCULong, targetName: "c.ulong", cType: "unsigned long", feature: "c-ulong"},
+	{sourceType: hir.TypeCULongLong, targetName: "c.ulonglong", cType: "unsigned long long", feature: "c-ulonglong"},
+	{sourceType: hir.TypeCUShort, targetName: "c.ushort", cType: "unsigned short", feature: "c-ushort"},
+}
+
+func cScalarTransportForType(value hir.Type) (cScalarTransport, bool) {
+	for _, transport := range cScalarTransports {
+		if transport.sourceType == value {
+			return transport, true
+		}
+	}
+	return cScalarTransport{}, false
+}
+
+func validateCScalarTransports() error {
+	expected := hir.CScalarTypes()
+	if len(cScalarTransports) != len(expected) {
+		return fmt.Errorf("C scalar transport table has %d entries, want %d", len(cScalarTransports), len(expected))
+	}
+	seenTarget := make(map[string]struct{}, len(cScalarTransports))
+	seenFeature := make(map[string]struct{}, len(cScalarTransports))
+	for index, transport := range cScalarTransports {
+		if transport.sourceType != expected[index] || transport.targetName == "" || transport.cType == "" || transport.feature == "" {
+			return fmt.Errorf("C scalar transport entry %d is incomplete or out of canonical order", index)
+		}
+		if _, duplicate := seenTarget[transport.targetName]; duplicate {
+			return fmt.Errorf("C scalar transport target %q is duplicated", transport.targetName)
+		}
+		if _, duplicate := seenFeature[transport.feature]; duplicate {
+			return fmt.Errorf("C scalar transport feature %q is duplicated", transport.feature)
+		}
+		seenTarget[transport.targetName] = struct{}{}
+		seenFeature[transport.feature] = struct{}{}
+	}
+	return nil
+}
+
 func targetCScalar(spec target.Spec, name string) (target.Scalar, bool) {
 	for _, scalar := range spec.CScalars {
 		if scalar.Name == name {
@@ -145,34 +202,23 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	if failures := mir.Verify(program); len(failures) != 0 {
 		return Unit{}, fmt.Errorf("C emission requires verified MIR: %s at %s", failures[0].Code, failures[0].Entity)
 	}
+	if err := validateCScalarTransports(); err != nil {
+		return Unit{}, err
+	}
 	targetSpec, found := target.Lookup(profile.Target)
 	if !found {
 		return Unit{}, fmt.Errorf("C emission target %q is missing", profile.Target)
 	}
-	cInt, found := targetCScalar(targetSpec, "c.int")
-	if !found {
-		return Unit{}, fmt.Errorf("C emission target %q has no c.int layout", profile.Target)
-	}
-	cLong, found := targetCScalar(targetSpec, "c.long")
-	if !found {
-		return Unit{}, fmt.Errorf("C emission target %q has no c.long layout", profile.Target)
-	}
-	if cLong.Header != "" || cLong.Availability != "" {
-		return Unit{}, fmt.Errorf("C emission target %q has invalid c.long provider", profile.Target)
-	}
-	cSizeT, found := targetCScalar(targetSpec, "c.size_t")
-	if !found {
-		return Unit{}, fmt.Errorf("C emission target %q has no c.size_t layout", profile.Target)
-	}
-	if cSizeT.Header != "stddef.h" || cSizeT.Availability != "iso-c11" {
-		return Unit{}, fmt.Errorf("C emission target %q has invalid c.size_t provider", profile.Target)
-	}
-	cSSizeT, found := targetCScalar(targetSpec, "c.ssize_t")
-	if !found {
-		return Unit{}, fmt.Errorf("C emission target %q has no c.ssize_t layout", profile.Target)
-	}
-	if cSSizeT.Header != "sys/types.h" || cSSizeT.Availability != "posix.1-2008" {
-		return Unit{}, fmt.Errorf("C emission target %q has invalid c.ssize_t provider", profile.Target)
+	cScalars := make(map[hir.Type]target.Scalar, len(cScalarTransports))
+	for _, transport := range cScalarTransports {
+		scalar, scalarFound := targetCScalar(targetSpec, transport.targetName)
+		if !scalarFound {
+			return Unit{}, fmt.Errorf("C emission target %q has no %s layout", profile.Target, transport.targetName)
+		}
+		if scalar.Header != transport.header || scalar.Availability != transport.availability {
+			return Unit{}, fmt.Errorf("C emission target %q has invalid %s provider", profile.Target, transport.targetName)
+		}
+		cScalars[transport.sourceType] = scalar
 	}
 	layoutEngine, err := layout.New(targetSpec)
 	if err != nil {
@@ -228,10 +274,7 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 		trapCategories:     make(map[string]struct{}),
 		dynamicTrapTargets: make(map[int]map[mir.BlockID]struct{}),
 		localTypes:         make([]map[mir.LocalID]hir.Type, len(functions)),
-		cIntLayout:         cInt.Layout,
-		cLongLayout:        cLong.Layout,
-		cSizeTLayout:       cSizeT.Layout,
-		cSSizeTLayout:      cSSizeT.Layout,
+		cScalars:           cScalars,
 		instrumentation:    profile.Instrumentation,
 	}
 	if len(structTypes) != 0 {
@@ -608,15 +651,8 @@ func (e *emitter) inspectForeignFunctions() error {
 }
 
 func (e *emitter) recordCScalarFeature(value hir.Type) {
-	switch value {
-	case hir.TypeCInt:
-		e.features["c-int"] = struct{}{}
-	case hir.TypeCLong:
-		e.features["c-long"] = struct{}{}
-	case hir.TypeCSizeT:
-		e.features["c-size-t"] = struct{}{}
-	case hir.TypeCSSizeT:
-		e.features["c-ssize-t"] = struct{}{}
+	if transport, found := cScalarTransportForType(value); found {
+		e.features[transport.feature] = struct{}{}
 	}
 }
 
@@ -648,6 +684,9 @@ func (e *emitter) foreignCType(value hir.Type, result bool) (string, error) {
 	if result && value == hir.TypeVoid {
 		return "void", nil
 	}
+	if transport, found := cScalarTransportForType(value); found {
+		return transport.cType, nil
+	}
 	switch value {
 	case hir.TypeU8:
 		return "uint8_t", nil
@@ -657,14 +696,6 @@ func (e *emitter) foreignCType(value hir.Type, result bool) (string, error) {
 		return "uint32_t", nil
 	case hir.TypeUSize:
 		return "uintptr_t", nil
-	case hir.TypeCInt:
-		return "int", nil
-	case hir.TypeCLong:
-		return "long", nil
-	case hir.TypeCSizeT:
-		return "size_t", nil
-	case hir.TypeCSSizeT:
-		return "ssize_t", nil
 	}
 	if element, mutable, pointer := hir.RawPointerElement(value); pointer {
 		pointee, err := e.foreignPointerElementCType(element)
@@ -823,7 +854,7 @@ func isResultI32I32(value hir.Type) bool {
 
 func (e *emitter) supportedCValueType(value hir.Type) bool {
 	value = canonicalCValueType(value)
-	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeU32 || value == hir.TypeUSize || value == hir.TypeCInt || value == hir.TypeCLong || value == hir.TypeCSizeT || value == hir.TypeCSSizeT || isOptionI32(value) || isResultI32I32(value) {
+	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeU32 || value == hir.TypeUSize || hir.IsCScalar(value) || isOptionI32(value) || isResultI32I32(value) {
 		return true
 	}
 	if element, _, pointer := hir.RawPointerElement(value); pointer {
@@ -846,6 +877,9 @@ func (e *emitter) supportedCValueType(value hir.Type) bool {
 
 func (e *emitter) cValueType(value hir.Type) (string, error) {
 	value = canonicalCValueType(value)
+	if transport, found := cScalarTransportForType(value); found {
+		return transport.cType, nil
+	}
 	switch {
 	case value == hir.TypeU8:
 		return "uint8_t", nil
@@ -855,14 +889,6 @@ func (e *emitter) cValueType(value hir.Type) (string, error) {
 		return "uint32_t", nil
 	case value == hir.TypeUSize:
 		return "uintptr_t", nil
-	case value == hir.TypeCInt:
-		return "int", nil
-	case value == hir.TypeCLong:
-		return "long", nil
-	case value == hir.TypeCSizeT:
-		return "size_t", nil
-	case value == hir.TypeCSSizeT:
-		return "ssize_t", nil
 	case isRawPointer(value):
 		return e.foreignCType(value, false)
 	case isOptionI32(value):
@@ -1631,24 +1657,23 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 		output.WriteString("#include <string.h>\n")
 	}
 	output.WriteByte('\n')
-	if _, used := e.features["c-int"]; used {
-		fmt.Fprintf(output, "_Static_assert(sizeof(int) == UINT64_C(%d), \"fairyc target c.int size\");\n", e.cIntLayout.SizeBytes)
-		fmt.Fprintf(output, "_Static_assert(_Alignof(int) == UINT64_C(%d), \"fairyc target c.int alignment\");\n\n", e.cIntLayout.AlignmentBytes)
-	}
-	if _, used := e.features["c-long"]; used {
-		fmt.Fprintf(output, "_Static_assert(sizeof(long) == UINT64_C(%d), \"fairyc target c.long size\");\n", e.cLongLayout.SizeBytes)
-		fmt.Fprintf(output, "_Static_assert(_Alignof(long) == UINT64_C(%d), \"fairyc target c.long alignment\");\n", e.cLongLayout.AlignmentBytes)
-		output.WriteString("_Static_assert(((long)-1) < (long)0, \"fairyc target c.long signed\");\n\n")
-	}
-	if usesCSizeT {
-		fmt.Fprintf(output, "_Static_assert(sizeof(size_t) == UINT64_C(%d), \"fairyc target c.size_t size\");\n", e.cSizeTLayout.SizeBytes)
-		fmt.Fprintf(output, "_Static_assert(_Alignof(size_t) == UINT64_C(%d), \"fairyc target c.size_t alignment\");\n", e.cSizeTLayout.AlignmentBytes)
-		output.WriteString("_Static_assert(((size_t)-1) > (size_t)0, \"fairyc target c.size_t unsigned\");\n\n")
-	}
-	if usesCSSizeT {
-		fmt.Fprintf(output, "_Static_assert(sizeof(ssize_t) == UINT64_C(%d), \"fairyc target c.ssize_t size\");\n", e.cSSizeTLayout.SizeBytes)
-		fmt.Fprintf(output, "_Static_assert(_Alignof(ssize_t) == UINT64_C(%d), \"fairyc target c.ssize_t alignment\");\n", e.cSSizeTLayout.AlignmentBytes)
-		output.WriteString("_Static_assert(((ssize_t)-1) < (ssize_t)0, \"fairyc target c.ssize_t signed\");\n\n")
+	for _, transport := range cScalarTransports {
+		if _, used := e.features[transport.feature]; !used {
+			continue
+		}
+		scalar := e.cScalars[transport.sourceType]
+		fmt.Fprintf(output, "_Static_assert(sizeof(%s) == UINT64_C(%d), \"fairyc target %s size\");\n", transport.cType, scalar.Layout.SizeBytes, transport.targetName)
+		fmt.Fprintf(output, "_Static_assert(_Alignof(%s) == UINT64_C(%d), \"fairyc target %s alignment\");\n", transport.cType, scalar.Layout.AlignmentBytes, transport.targetName)
+		switch scalar.Signedness {
+		case "signed":
+			fmt.Fprintf(output, "_Static_assert(((%s)-1) < (%s)0, \"fairyc target %s signed\");\n", transport.cType, transport.cType, transport.targetName)
+		case "unsigned":
+			fmt.Fprintf(output, "_Static_assert(((%s)-1) > (%s)0, \"fairyc target %s unsigned\");\n", transport.cType, transport.cType, transport.targetName)
+		case "not-applicable":
+		default:
+			return fmt.Errorf("C scalar %q has invalid signedness %q", transport.targetName, scalar.Signedness)
+		}
+		output.WriteByte('\n')
 	}
 	for index, structure := range e.structTypes {
 		if structure.definition.ReprC {
