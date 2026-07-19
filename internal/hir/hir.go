@@ -17,6 +17,7 @@ const (
 	TypeI32        Type = "i32"
 	TypeU32        Type = "u32"
 	TypeUSize      Type = "usize"
+	TypeCStr       Type = "CStr"
 	TypeCBool      Type = "c::bool"
 	TypeCChar      Type = "c::char"
 	TypeCDouble    Type = "c::double"
@@ -328,6 +329,7 @@ type Expression struct {
 	Type        Type
 	Span        Span
 	Value       string
+	Cooked      string
 	Variant     string
 	Operator    string
 	TargetType  Type

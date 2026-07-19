@@ -191,11 +191,12 @@ drop helpers. C observers require `Fairy`, `FairyFairy`, the CString terminator 
 logical view, and canonical empty storage after both drops. All operation and allocation statuses
 must be zero. The C-only owned-text probe remains responsible for invalid UTF-8, failed Buffer moves,
 self-overlap, interior-NUL rollback, empty CString, and malformed-state negatives. Public safe
-String/CString resources, source `Result` mapping, `&str`/`&CStr` borrow origins, and the `std::text`
-API remain disconnected. Product build linkage is now automatic only for actual calls to the closed
+String/CString resources, source `Result` mapping, general `&str` and wrapper-produced `&CStr`
+borrow origins, and the `std::text` API remain disconnected. A source `c"..."` literal now has a
+verified `Static` origin and compiler-owned C storage. Product build linkage is now automatic only for actual calls to the closed
 internal symbols; that raw link transport does not supply the missing safe API.
 
-A `c"..."` literal provides allocation-free immutable `&CStr` storage with one compiler-appended trailing NUL and rejects a decoded interior NUL. It is source syntax, not a runtime constructor. `b"..."` similarly provides immutable static bytes without claiming UTF-8.
+A `c"..."` literal provides allocation-free immutable `&CStr` storage with one compiler-appended trailing NUL and rejects a decoded interior NUL. The implemented C path emits exact `static const uint8_t[]` bytes, deduplicates equal storage, and permits only an explicit unsafe conversion to immutable `*u8` for the direct-literal raw FFI form. It is source syntax, not a runtime constructor. `b"..."` similarly promises immutable static bytes without claiming UTF-8, but its semantic, MIR, slice-layout, and backend path remains unimplemented.
 
 ## Linux `File` v0
 

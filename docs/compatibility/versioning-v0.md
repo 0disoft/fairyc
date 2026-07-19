@@ -122,7 +122,10 @@ real owned-text lifecycle helpers in both directions and profiles. V27 adds
 the real Linux open, write-all, sync, consuming-close, partial-read, EOF, and final-close lifecycle
 in both directions and profiles. V28 adds `standardLibraryBuildSmokeExecutions` for an ordinary
 product build that resolves a self-contained Fairy UTF-8 validator call through the shared
-used-symbol standard-library contract under both compilers and profiles. The
+used-symbol standard-library contract under both compilers and profiles. V29 adds
+`cStringLiteralSourceCallExecutions` for a generated Fairy caller whose compiler-owned terminated
+storage is read by C and `cStringLiteralBuildSmokeExecutions` for the ordinary product-build path
+carrying nonempty static `&CStr` storage, both under both compilers and profiles. The
 runner emits one exact version and does not pretend the report shapes are interchangeable.
 
 ## Runtime and standard library

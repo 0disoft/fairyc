@@ -103,6 +103,16 @@ func (a *analyzer) collectLoans(module *moduleScope, block *ast.Block, origins m
 					},
 				})
 			}
+			if bindingSymbol != nil && isStaticBorrowLiteral(binding.Expression) && len(candidates) == 1 {
+				loans = append(loans, flowLoan{
+					binding: bindingSymbol,
+					fact: BorrowFact{
+						Borrow: span(module.file.Path, binding.Expression.Span),
+						Kind:   "shared",
+						Origin: candidates[0].name,
+					},
+				})
+			}
 		}
 		loans = append(loans, a.collectLoansFromExpression(module, statement.Expression, origins)...)
 	}
@@ -214,6 +224,13 @@ func (a *analyzer) expressionOrigins(module *moduleScope, expression *ast.Expres
 		return nil
 	}
 	switch expression.Kind {
+	case syntax.KindLiteral:
+		if isStaticBorrowLiteral(expression) {
+			return []flowOrigin{{
+				name:        "Static",
+				declaration: span(module.file.Path, expression.Span),
+			}}
+		}
 	case syntax.KindPath:
 		value := a.resolved[expression]
 		if origin, found := origins[value]; found {
@@ -388,6 +405,11 @@ func compactOrigins(values []flowOrigin) []flowOrigin {
 func isBorrowExpression(expression *ast.Expression) bool {
 	return expression != nil && expression.Kind == syntax.KindPrefix &&
 		(expression.Text == "&" || expression.Text == "&mut") && len(expression.Children) == 1
+}
+
+func isStaticBorrowLiteral(expression *ast.Expression) bool {
+	return expression != nil && expression.Kind == syntax.KindLiteral &&
+		(strings.HasPrefix(expression.Text, "\"") || strings.HasPrefix(expression.Text, "b\"") || strings.HasPrefix(expression.Text, "c\""))
 }
 
 func borrowKind(operator string) string {

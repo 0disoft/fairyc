@@ -191,7 +191,7 @@ report; they do not expand the eighteen interpreter-owned differential cases.
 Every C-scalar probe uses hand-written C producers and consumers so each value crosses a generated
 typed local without requiring a Fairy C literal. The family probe uses exactly representable finite
 floating values and makes no NaN, infinity, signed-zero, rounding, or floating-environment claim.
-`fairyc.native-c-report/v28` separately records four `foreignCStructResultCallExecutions`, four
+`fairyc.native-c-report/v29` separately records four `foreignCStructResultCallExecutions`, four
 `systemHeapSourceCallExecutions`, four
 `bufferSourceCallExecutions`, four `arenaSourceCallExecutions`, and four
 `cStrValidationSourceCallExecutions`, plus four `ownedTextSourceCallExecutions` and four
@@ -212,6 +212,13 @@ lexical Region, safe text, or safe File APIs.
 Four `standardLibraryBuildSmokeExecutions` additionally require the ordinary product CLI to select
 the text-view C component from an actual called symbol, link it with the scalar runtime, and execute
 the resulting uninstrumented product under both compilers and profiles.
+Four `cStringLiteralSourceCallExecutions` require a generated Fairy caller to create exact
+`fairy\0` storage, cross the dedicated unsafe immutable-byte-pointer operation, and have a separate C
+callee verify all six bytes. Four `cStringLiteralBuildSmokeExecutions` separately require the
+ordinary product CLI to carry nonempty compiler-owned `&CStr` storage into an executable returning
+42 under both compilers and profiles. The C emitter materializes each unique byte sequence once as
+sorted translation-unit `static const uint8_t[]` storage; MIR never delegates literal meaning to C
+string-token spelling.
 The struct-result count requires a generated Fairy caller to receive both a register-sized and a
 hidden-memory result from a separately compiled hand-written C callee in both compiler directions
 and profiles; it does not admit aggregate parameters.

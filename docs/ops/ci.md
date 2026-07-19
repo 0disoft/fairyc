@@ -39,7 +39,7 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
   products, and requires exit `42` with no output. A missing compiler or libc identity fails the job
   instead of producing a skip.
 - The native job retains no generated C, object, executable, cache, or report artifact. Its bounded
-  `fairyc.native-c-report/v28` JSON report is written only to the job log and contains toolchain
+  `fairyc.native-c-report/v29` JSON report is written only to the job log and contains toolchain
   fingerprints, fixture IDs, the sorted layout-case IDs, and drop-trace, layout-probe, and
   sanitizer, ABI case/direction, SystemHeap, Buffer, Arena, text, Linux File, scalar Fairy-source
   foreign-call, individual exact `c::int`, negative-preserving `c::long`, `c::size_t`, and
@@ -49,7 +49,8 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
   nested Buffer source-call, exact Arena/Region source-call, actual CStr validation source-call,
   actual owned String/CString source-call, actual Linux File source-call, actual
   text-validation source-call, actual text-view
-  output-record source-call, ordinary product-build, and automatically linked standard-library product-build
+  output-record source-call, compiler-owned C-string source-call, ordinary product-build,
+  automatically linked standard-library product-build, and compiler-owned C-string product-build
   execution counts but no temporary path.
   Each foreign-call count is four only after generated Fairy callers and hand-written C callees
   cross as separate Clang/GCC objects in both directions and profiles and return `42` with no output.
@@ -65,6 +66,10 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
   The CStr validation count requires an exact generated view record, nonempty terminated,
   interior-NUL, and unterminated storage, the real `OwnedTextSource()`, and unchanged output after
   both rejected calls.
+  The C-string literal source-call count requires generated `fairy\0` static storage to cross the
+  explicit unsafe immutable-byte-pointer operation and be read byte-for-byte by a separate C callee.
+  Its product-build count separately requires the ordinary CLI artifact to contain nonempty
+  compiler-owned storage and execute with exit 42 under all four compiler/profile combinations.
   The struct-result count requires one 8-byte INTEGER-class return and one 20-byte MEMORY-class
   hidden return to cross separate caller/callee objects in both compiler directions and profiles.
   The owned-text source-call count requires the exact nested heap, Buffer, String, CString, view, and

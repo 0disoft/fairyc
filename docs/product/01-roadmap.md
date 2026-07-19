@@ -70,7 +70,9 @@ run all 18 emission cases at low and optimized profiles for 72 process-status an
 source-linked drop-trace comparisons, then drive
 the actual experimental build CLI with resource-bearing Option and Result plus a flat all-`i32` resource
 through 4 compiler/profile executable
-smokes. The same job also compiles and executes each production, uninstrumented C unit with Clang
+smokes. It now adds a four-way product build containing compiler-owned nonempty `&CStr` storage and
+a separate four-way generated-Fairy-to-C call that verifies every byte of `fairy\0`. The same job
+also compiles and executes each production, uninstrumented C unit with Clang
 and GCC under the closed `address-undefined-o1` ASan+UBSan mode for 36 fail-closed sanitizer
 executions. The current Windows
 host has no eligible Linux toolchain, and no hosted run receipt has been observed, so this is a
@@ -119,6 +121,10 @@ including overlong, surrogate, out-of-range, truncated, and obsolete forms. Its 
 are configured but unobserved. A separate four-way Fairy-source crossing now calls the actual
 empty-input UTF-8 validator in the text-view C unit; the public borrowed text result, nonempty
 source pointer path, and full wrapper remain missing.
+Compiler-owned `c"..."` storage now crosses semantic typing with `Static` origin, MIR as exact
+terminated bytes, and generated C as deduplicated immutable static storage. The direct literal can
+expose only an immutable `*u8` address through an explicit unsafe operation. UTF-8 string literals,
+byte-string slice layout, public CStr operations, and general view execution remain missing.
 Owned String and CString now have provisional Buffer-backed C transport with immutable views,
 successful-only Buffer moves, failure ownership preservation, self-source append, interior-NUL
 rejection, and exact termination. Four C-only native runs are configured but unobserved. A separate

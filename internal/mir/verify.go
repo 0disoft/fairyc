@@ -434,6 +434,26 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 					failures = append(failures, VerificationError{Code: "V1701", Entity: entity, Detail: "raw address lacks matching unsafe provenance"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationCStrDataAddress:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				element, mutable, pointer := hir.RawPointerElement(operation.Type)
+				shapeValid := operation.DestinationLocal != NoLocal && len(operation.Operands) == 1 &&
+					operation.Operands[0].Kind == OperandCString && operation.OwnerType == hir.SharedBorrow(hir.TypeCStr) &&
+					pointer && element == hir.TypeU8 && !mutable && operation.Operator == "as"
+				if !shapeValid {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "C string data address shape is invalid"})
+				}
+				provenance, hasProvenance := unsafeByEntity[operation.Entity]
+				expectedEntity := sourceEntity("cstr-data-address", operation.Span)
+				sourceSpanEntity := sourceEntity("span", operation.Span)
+				scopeEntity := sourceEntity("unsafe-scope", operation.UnsafeScope)
+				scopeContainsOperation := operation.UnsafeScope.Source == operation.Span.Source &&
+					operation.UnsafeScope.StartByte <= operation.Span.StartByte && operation.UnsafeScope.EndByte >= operation.Span.EndByte
+				if operation.Entity != expectedEntity || !scopeContainsOperation || !hasProvenance ||
+					provenance.SourceSpanEntity != sourceSpanEntity || provenance.ScopeEntity != scopeEntity {
+					failures = append(failures, VerificationError{Code: "V1701", Entity: entity, Detail: "C string data address lacks matching unsafe provenance"})
+				}
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationStructConstruct:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				definition := structTypes[operation.Type]
@@ -760,6 +780,10 @@ func verifyOperands(state verificationState, operands []Operand, entity string) 
 		case OperandNull:
 			if _, _, pointer := hir.RawPointerElement(operand.Type); !pointer {
 				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "null operand has no raw-pointer type"})
+			}
+		case OperandCString:
+			if operand.Type != hir.SharedBorrow(hir.TypeCStr) || !validCStringStaticData(operand.StaticData) {
+				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "C string operand has invalid static storage"})
 			}
 		default:
 			failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: fmt.Sprintf("operand has unknown kind %q", operand.Kind)})

@@ -138,6 +138,35 @@ func TestAnalyzeRejectsUnsupportedLiteralWithoutInventingType(t *testing.T) {
 	}
 }
 
+func TestAnalyzeTypesCStringLiteralWithStaticBorrowOrigin(t *testing.T) {
+	t.Parallel()
+	text := "module main;\n\nfn main() -> i32 {\n    let name: &CStr = c\"fairy\";\n    42\n}\n"
+	result := analyzeText(t, map[string]string{"main.fy": text})
+	assertCleanTypeResult(t, result)
+
+	if len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].Functions) != 1 {
+		t.Fatalf("HIR modules = %+v", result.HIR.Modules)
+	}
+	function := result.HIR.Modules[0].Functions[0]
+	wantType := hir.SharedBorrow(hir.TypeCStr)
+	if len(function.Locals) != 1 || function.Locals[0].Type != wantType {
+		t.Fatalf("locals = %+v, want one %q local", function.Locals, wantType)
+	}
+	if len(function.Body.Statements) != 1 || function.Body.Statements[0].Expression == nil {
+		t.Fatalf("body = %+v", function.Body)
+	}
+	literal := function.Body.Statements[0].Expression
+	if literal.Kind != "literal" || literal.Type != wantType || literal.Value != "c\"fairy\"" || literal.Cooked != "666169727900" {
+		t.Fatalf("literal = %+v", literal)
+	}
+
+	start := strings.Index(text, "c\"fairy\"")
+	if len(result.Borrows) != 1 || result.Borrows[0].Kind != "shared" || result.Borrows[0].Origin != "Static" {
+		t.Fatalf("borrows = %+v", result.Borrows)
+	}
+	assertSpan(t, result.Borrows[0].Borrow, "main.fy", start, start+len("c\"fairy\""))
+}
+
 func TestAnalyzeBuildsQualifiedResultConstructorsAndMatch(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{
@@ -760,6 +789,67 @@ fn main() -> i32 {
 	wantType := hir.RawPointer(hir.Type("main::Packet"), true)
 	if cast.Kind != "cast" || cast.Operator != "as" || cast.Type != wantType || cast.TargetType != wantType || cast.UnsafeScope == nil || len(cast.Children) != 1 || cast.Children[0].Type != hir.MutableBorrow(hir.Type("main::Packet")) {
 		t.Fatalf("cast = %+v", cast)
+	}
+}
+
+func TestAnalyzeTypesCStringLiteralToImmutableBytePointerCast(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn main() -> i32 {
+    let pointer: *u8 = unsafe { c"fairy" as *u8 };
+    42
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+	main := result.HIR.Modules[0].Functions[0]
+	if len(main.Locals) != 1 || main.Locals[0].Type != hir.RawPointer(hir.TypeU8, false) {
+		t.Fatalf("locals = %+v", main.Locals)
+	}
+	unsafeExpression := main.Body.Statements[0].Expression
+	if unsafeExpression == nil || len(unsafeExpression.Children) != 1 || unsafeExpression.Children[0].Block == nil {
+		t.Fatalf("unsafe expression = %+v", unsafeExpression)
+	}
+	cast := unsafeExpression.Children[0].Block.Tail
+	wantType := hir.RawPointer(hir.TypeU8, false)
+	if cast == nil || cast.Kind != "cast" || cast.Type != wantType || cast.TargetType != wantType || cast.UnsafeScope == nil || len(cast.Children) != 1 || cast.Children[0].Type != hir.SharedBorrow(hir.TypeCStr) {
+		t.Fatalf("cast = %+v", cast)
+	}
+}
+
+func TestAnalyzeRejectsMutableOrUnwrappedCStringLiteralTypes(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name    string
+		source  string
+		feature string
+	}{
+		{
+			name:    "bare unsized CStr",
+			source:  "module main;\nfn main() -> i32 { let value: CStr = c\"fairy\"; 0 }\n",
+			feature: "type CStr",
+		},
+		{
+			name:    "mutable CStr borrow",
+			source:  "module main;\nfn main() -> i32 { let value: &mut CStr = c\"fairy\"; 0 }\n",
+			feature: "type &mut CStr",
+		},
+		{
+			name:    "mutable byte pointer extraction",
+			source:  "module main;\nfn main() -> i32 { let value: *mut u8 = unsafe { c\"fairy\" as *mut u8 }; 0 }\n",
+			feature: "cast from &CStr to *mut u8",
+		},
+	}
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			result := analyzeText(t, map[string]string{"main.fy": test.source})
+			if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != test.feature {
+				t.Fatalf("result = %+v", result)
+			}
+		})
 	}
 }
 

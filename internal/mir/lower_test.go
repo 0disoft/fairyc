@@ -578,6 +578,76 @@ fn main() -> i32 {
 	}
 }
 
+func TestLowerPreservesCStringStaticStorageOperand(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+fn main() -> i32 {
+    let name: &CStr = c"fairy";
+    42
+}
+`)
+	function := program.Functions[0]
+	var literal *Operand
+	for blockIndex := range function.Blocks {
+		for operationIndex := range function.Blocks[blockIndex].Operations {
+			operation := &function.Blocks[blockIndex].Operations[operationIndex]
+			if operation.Kind == OperationAssign && len(operation.Operands) == 1 && operation.Operands[0].Kind == OperandCString {
+				literal = &operation.Operands[0]
+			}
+		}
+	}
+	wantType := hir.SharedBorrow(hir.TypeCStr)
+	if literal == nil || literal.Type != wantType || literal.StaticData != "fairy\x00" {
+		t.Fatalf("C string operand = %+v, want type %q and exact terminated bytes", literal, wantType)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+	mutated := Clone(program)
+	for blockIndex := range mutated.Functions[0].Blocks {
+		for operationIndex := range mutated.Functions[0].Blocks[blockIndex].Operations {
+			operation := &mutated.Functions[0].Blocks[blockIndex].Operations[operationIndex]
+			if operation.Kind == OperationAssign && len(operation.Operands) == 1 && operation.Operands[0].Kind == OperandCString {
+				operation.Operands[0].StaticData = "fairy"
+			}
+		}
+	}
+	if failures := Verify(mutated); len(failures) != 1 || failures[0].Code != "V1001" {
+		t.Fatalf("Verify() unterminated C string failures = %+v", failures)
+	}
+}
+
+func TestLowerPreservesCStringDataAddressUnsafeProvenance(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+@link_name("fairyc_fixture_is_fairy")
+unsafe extern C fn is_fairy(value: *u8) -> u32;
+fn main() -> i32 {
+    if unsafe { is_fairy(c"fairy" as *u8) } == 1 { 42 } else { 1 }
+}
+`)
+	function := program.Functions[0]
+	var address *Operation
+	for blockIndex := range function.Blocks {
+		for operationIndex := range function.Blocks[blockIndex].Operations {
+			operation := &function.Blocks[blockIndex].Operations[operationIndex]
+			if operation.Kind == OperationCStrDataAddress {
+				address = operation
+			}
+		}
+	}
+	wantPointer := hir.RawPointer(hir.TypeU8, false)
+	if address == nil || address.Type != wantPointer || address.OwnerType != hir.SharedBorrow(hir.TypeCStr) || address.Operator != "as" || address.Entity == "" || address.UnsafeScope.Source != "main.fy" || len(address.Operands) != 1 || address.Operands[0].Kind != OperandCString || address.Operands[0].StaticData != "fairy\x00" {
+		t.Fatalf("C string data address = %+v", address)
+	}
+	if len(function.UnsafeOperations) != 2 {
+		t.Fatalf("unsafe operations = %+v", function.UnsafeOperations)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+}
+
 func TestCloneDeepCopiesResourceDefinitions(t *testing.T) {
 	t.Parallel()
 	original := Program{ResourceTypes: []ResourceType{{

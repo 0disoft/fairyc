@@ -250,6 +250,7 @@ const (
 	OperationEnumConstruct     OperationKind = "enum-construct"
 	OperationEnumPayload       OperationKind = "enum-payload"
 	OperationRawAddress        OperationKind = "raw-address"
+	OperationCStrDataAddress   OperationKind = "cstr-data-address"
 	OperationStructConstruct   OperationKind = "struct-construct"
 	OperationResourceConstruct OperationKind = "resource-construct"
 	OperationFieldRead         OperationKind = "field-read"
@@ -275,6 +276,7 @@ const (
 	OperandU32     OperandKind = "u32"
 	OperandUSize   OperandKind = "usize"
 	OperandNull    OperandKind = "null"
+	OperandCString OperandKind = "c-string"
 )
 
 // Operand is an already-evaluated scalar value source.
@@ -284,6 +286,13 @@ type Operand struct {
 	I32   int32
 	U64   uint64
 	Type  hir.Type
+	// StaticData stores exact compiler-owned bytes in a comparable form. C strings include
+	// their single trailing NUL so verifier and backend boundaries do not reconstruct it.
+	StaticData string
+}
+
+func validCStringStaticData(value string) bool {
+	return len(value) > 0 && value[len(value)-1] == 0 && !strings.Contains(value[:len(value)-1], "\x00")
 }
 
 // Operation carries explicit ownership, trap, and normalization information.

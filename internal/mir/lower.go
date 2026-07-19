@@ -1,6 +1,7 @@
 package mir
 
 import (
+	"encoding/hex"
 	"fmt"
 	"slices"
 	"strconv"
@@ -413,6 +414,13 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 	}
 	switch expression.Kind {
 	case "literal":
+		if expression.Type == hir.SharedBorrow(hir.TypeCStr) && strings.HasPrefix(expression.Value, "c\"") {
+			decoded, err := hex.DecodeString(expression.Cooked)
+			if err != nil || !validCStringStaticData(string(decoded)) {
+				return Operand{}, fmt.Errorf("invalid cooked C string literal %q", expression.Value)
+			}
+			return Operand{Kind: OperandCString, Type: expression.Type, StaticData: string(decoded)}, nil
+		}
 		if expression.Type == hir.TypeBool {
 			switch expression.Value {
 			case "true":
@@ -553,6 +561,29 @@ func (l *functionLowerer) lowerRawAddressCast(expression *hir.Expression) (Opera
 		return Operand{}, fmt.Errorf("malformed raw-address cast")
 	}
 	borrow := &expression.Children[0]
+	if borrow.Kind == "literal" && borrow.Type == hir.SharedBorrow(hir.TypeCStr) && expression.Type == hir.RawPointer(hir.TypeU8, false) {
+		value, err := l.lowerExpression(borrow)
+		if err != nil {
+			return Operand{}, err
+		}
+		destination := l.newTemporary()
+		entity := sourceEntity("cstr-data-address", expression.Span)
+		l.appendOperation(Operation{
+			Kind: OperationCStrDataAddress, Entity: entity, Span: expression.Span,
+			DestinationLocal: destination,
+			Operands:         []Operand{value},
+			Type:             expression.Type,
+			OwnerType:        borrow.Type,
+			Operator:         expression.Operator,
+			UnsafeScope:      *expression.UnsafeScope,
+		})
+		l.result.UnsafeOperations = append(l.result.UnsafeOperations, UnsafeOperation{
+			Entity:           entity,
+			SourceSpanEntity: sourceEntity("span", expression.Span),
+			ScopeEntity:      sourceEntity("unsafe-scope", *expression.UnsafeScope),
+		})
+		return Operand{Kind: OperandLocal, Local: destination}, nil
+	}
 	if borrow.Kind != "prefix" || (borrow.Operator != "&" && borrow.Operator != "&mut") || len(borrow.Children) != 1 {
 		return Operand{}, fmt.Errorf("raw-address cast source is not a direct borrow")
 	}

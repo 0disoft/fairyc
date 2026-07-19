@@ -117,6 +117,73 @@ fn main() -> i32 {
 	}
 }
 
+func TestEmitDeduplicatesCompilerOwnedCStringStorage(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn main() -> i32 {
+    let first: &CStr = c"fairy";
+    let second: &CStr = c"fairy";
+    42
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	if !slices.Equal(unit.Features, []string{"static-c-string"}) {
+		t.Fatalf("features = %v", unit.Features)
+	}
+	if strings.Count(unit.Source, "static const uint8_t fy_static_cstr_") != 1 {
+		t.Fatalf("generated C did not deduplicate C string storage:\n%s", unit.Source)
+	}
+	for _, required := range []string{
+		"[6] = { UINT8_C(102), UINT8_C(97), UINT8_C(105), UINT8_C(114), UINT8_C(121), UINT8_C(0) };",
+		"const uint8_t * fy_l_",
+		" = fy_static_cstr_",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+	second, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil || second.Source != unit.Source {
+		t.Fatalf("second Emit() differs: error=%v", err)
+	}
+}
+
+func TestEmitCStringLiteralDataAddressForForeignCall(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+@link_name("fairyc_fixture_is_fairy")
+unsafe extern C fn is_fairy(value: *u8) -> u32;
+fn main() -> i32 {
+    if unsafe { is_fairy(c"fairy" as *u8) } == 1 { 42 } else { 1 }
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, feature := range []string{"cstr-data-address", "foreign-c-call", "static-c-string"} {
+		if !slices.Contains(unit.Features, feature) {
+			t.Errorf("features %v are missing %q", unit.Features, feature)
+		}
+	}
+	if !slices.Equal(unit.ForeignSymbols, []string{"fairyc_fixture_is_fairy"}) {
+		t.Fatalf("foreign symbols = %v", unit.ForeignSymbols)
+	}
+	for _, required := range []string{
+		"extern uint32_t fairyc_fixture_is_fairy(const uint8_t * fy_a_0);",
+		"static const uint8_t fy_static_cstr_",
+		" = fy_static_cstr_",
+		"fairyc_fixture_is_fairy(fy_l_",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+}
+
 func TestEmitDistinctCIntForeignTransport(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

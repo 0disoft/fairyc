@@ -101,8 +101,10 @@ truncation, and obsolete leaders and remains unobserved; raw source transports f
 Its empty-input validator now has exact internal `fy_std_*_v0` symbols and two real FY-to-stdlib-C
 four-way crossings: direct validation and `@repr(C)` output-record initialization through a verified
 raw address. The self-contained empty validator call is also the first configured product-build
-smoke that requires automatic standard-library linkage. The public borrowed `str` wrapper and
-nonempty source pointer path still do not exist.
+smoke that requires automatic standard-library linkage. Compiler-owned `c"..."` storage now reaches
+the C backend as immutable static bytes, and an explicit unsafe direct-literal conversion can expose
+its read-only `*u8` address to raw FFI. The public borrowed `str` wrapper and general safe text API
+still do not exist.
 Buffer-backed String and CString C helpers now preserve ownership on failed UTF-8 conversion,
 support overlap-safe String append, expose immutable bounded views, reject interior NUL, and append
 exactly one C terminator. Their C-only native probe is configured but unobserved. A separate
@@ -213,11 +215,11 @@ below the ignored `build/` directory. Compiler, `low` or `optimized` profile, an
 mandatory. This Windows host cannot execute that command, and the command remains narrower than the
 interpreter: scalar tags, direct flat nonempty all-`i32` resources with empty drop bodies, and
 `Option<R>` or `Result<S, E>` where each payload is exactly `i32` or such a direct resource work.
-Nested tags, non-`i32` or nested resource fields, partial initialization, user drop effects, Region,
-Region, general unsafe operations, non-scalar FFI, and standard-library programs still fail closed
-before native compilation. `unsafe extern C fn` calls, optionally mapped through one validated
-`@link_name`, are admitted only for `i32` parameters and result; `experimental build` succeeds only
-when the selected C driver can resolve the
+Nested tags, partial initialization, user drop effects, general unsafe operations, arbitrary
+aggregate parameters, callbacks, and public standard-library programs still fail closed before
+native compilation. `unsafe extern C fn` calls, optionally mapped through one validated
+`@link_name`, admit only the closed scalar, raw-pointer, and selected `@repr(C)` result transports;
+`experimental build` succeeds only when the selected C driver can resolve the
 external symbol from its ordinary link environment because the product CLI has no companion-source
 or arbitrary link-input option.
 

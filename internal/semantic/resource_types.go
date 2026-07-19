@@ -282,7 +282,7 @@ func (a *analyzer) structType(value hir.Type) (*structInfo, bool) {
 
 func (a *analyzer) canonicalType(module *moduleScope, reference ast.TypeReference) hir.Type {
 	value, ok := a.canonicalTypeText(module, reference.Text)
-	if ok {
+	if ok && validUnsizedTypeUse(value) {
 		return value
 	}
 	a.addUnsupported(module.file.Path, reference.Span, "type "+strings.TrimSpace(reference.Text))
@@ -317,6 +317,8 @@ func (a *analyzer) canonicalTypeText(module *moduleScope, text string) (hir.Type
 		return hir.TypeU32, true
 	case "usize":
 		return hir.TypeUSize, true
+	case "CStr":
+		return hir.TypeCStr, true
 	case "Region":
 		return hir.TypeRegion, true
 	}
@@ -372,6 +374,28 @@ func (a *analyzer) canonicalTypeText(module *moduleScope, text string) (hir.Type
 		return hir.TypeInvalid, false
 	}
 	return target.typ, true
+}
+
+func validUnsizedTypeUse(value hir.Type) bool {
+	if value == hir.TypeCStr {
+		return false
+	}
+	if element, mutable, borrow := hir.BorrowElement(value); borrow {
+		if element == hir.TypeCStr {
+			return !mutable
+		}
+		return validUnsizedTypeUse(element)
+	}
+	if element, option := hir.OptionElement(value); option {
+		return validUnsizedTypeUse(element)
+	}
+	if success, failure, result := hir.ResultElements(value); result {
+		return validUnsizedTypeUse(success) && validUnsizedTypeUse(failure)
+	}
+	if element, _, pointer := hir.RawPointerElement(value); pointer {
+		return validUnsizedTypeUse(element)
+	}
+	return true
 }
 
 func (a *analyzer) resourceType(value hir.Type) (*resourceInfo, bool) {

@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v28"
+	reportSchemaVersion = "fairyc.native-c-report/v29"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -63,6 +63,46 @@ fn main() -> i32 {
     }
 }
 `
+
+const cStringLiteralBuildSmokeSource = `module main;
+fn main() -> i32 {
+    if unsafe { c"fairy" as *u8 } != null { 42 } else { 1 }
+}
+`
+
+const cStringLiteralSourceCallSmokeSource = `module main;
+@link_name("fairyc_fixture_is_fairy")
+unsafe extern C fn is_fairy(value: *u8) -> u32;
+fn main() -> i32 {
+    if unsafe { is_fairy(c"fairy" as *u8) } == 1 { 42 } else { 1 }
+}
+`
+
+const cStringLiteralSourceCallCompanion = `#include <stdint.h>
+
+uint32_t fairyc_fixture_is_fairy(const uint8_t *value) {
+    static const uint8_t expected[6] = {
+        UINT8_C(102), UINT8_C(97), UINT8_C(105), UINT8_C(114), UINT8_C(121), UINT8_C(0)
+    };
+    if (value == 0) {
+        return UINT32_C(0);
+    }
+    for (uint32_t index = 0; index < UINT32_C(6); index++) {
+        if (value[index] != expected[index]) {
+            return UINT32_C(0);
+        }
+    }
+    return UINT32_C(1);
+}
+`
+
+var cStringLiteralSourceCallExpectedCFragments = []string{
+	"static const uint8_t fy_static_cstr_",
+	"UINT8_C(102), UINT8_C(97), UINT8_C(105), UINT8_C(114), UINT8_C(121), UINT8_C(0)",
+	"extern uint32_t fairyc_fixture_is_fairy(const uint8_t * fy_a_0);",
+	" = fy_static_cstr_",
+	"fairyc_fixture_is_fairy(fy_l_",
+}
 
 const foreignCallSmokeSource = `module main;
 @link_name("fairyc_fixture_add_one")
@@ -1530,8 +1570,10 @@ type Report struct {
 	TextValidationSourceCallExecutions  int        `json:"textValidationSourceCallExecutions"`
 	TextViewOutputSourceCallExecutions  int        `json:"textViewOutputSourceCallExecutions"`
 	CStrValidationSourceCallExecutions  int        `json:"cStrValidationSourceCallExecutions"`
+	CStringLiteralSourceCallExecutions  int        `json:"cStringLiteralSourceCallExecutions"`
 	BuildSmokeExecutions                int        `json:"buildSmokeExecutions"`
 	StandardLibraryBuildSmokeExecutions int        `json:"standardLibraryBuildSmokeExecutions"`
+	CStringLiteralBuildSmokeExecutions  int        `json:"cStringLiteralBuildSmokeExecutions"`
 }
 
 // Run compiles every emission fixture with Clang and GCC at low and optimized profiles, compares
@@ -1793,6 +1835,11 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.TextViewOutputSourceCallExecutions = textViewOutputSourceCallExecutions
+	cStringLiteralSourceCallExecutions, err := runCStringLiteralSourceCallProbe(temporaryRoot, toolchains)
+	if err != nil {
+		return Report{}, err
+	}
+	report.CStringLiteralSourceCallExecutions = cStringLiteralSourceCallExecutions
 	for caseIndex, fixture := range fixtureReport.Emitted {
 		if fixture.Unit.Target != string(target.X8664LinuxGNU) || fixture.Unit.Dialect != cbackend.DialectC11 {
 			return Report{}, fmt.Errorf("case %s emitted unexpected profile %s/%s", fixture.ID, fixture.Unit.Target, fixture.Unit.Dialect)
@@ -1846,7 +1893,24 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.StandardLibraryBuildSmokeExecutions = standardLibraryBuildSmoke
+	cStringLiteralBuildSmoke, err := runCStringLiteralBuildSmoke(temporaryRoot)
+	if err != nil {
+		return Report{}, err
+	}
+	report.CStringLiteralBuildSmokeExecutions = cStringLiteralBuildSmoke
 	return report, nil
+}
+
+func runCStringLiteralSourceCallProbe(temporaryRoot string, toolchains []cdriver.Toolchain) (int, error) {
+	return runForeignSourceProbe(
+		temporaryRoot,
+		toolchains,
+		"c-string-literal-source-call",
+		cStringLiteralSourceCallSmokeSource,
+		cStringLiteralSourceCallCompanion,
+		42,
+		cStringLiteralSourceCallExpectedCFragments,
+	)
 }
 
 func runSystemHeapSourceCallProbe(temporaryRoot string, toolchains []cdriver.Toolchain, systemHeapSource string) (int, error) {
@@ -2259,6 +2323,10 @@ func runBuildSmoke(temporaryRoot string) (int, error) {
 
 func runStandardLibraryBuildSmoke(temporaryRoot string) (int, error) {
 	return runBuildSourceSmoke(temporaryRoot, "stdlib-build-smoke", textValidationSourceCallSmokeSource)
+}
+
+func runCStringLiteralBuildSmoke(temporaryRoot string) (int, error) {
+	return runBuildSourceSmoke(temporaryRoot, "c-string-literal-build-smoke", cStringLiteralBuildSmokeSource)
 }
 
 func runBuildSourceSmoke(temporaryRoot, smokeID, source string) (int, error) {

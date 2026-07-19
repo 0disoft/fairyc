@@ -269,11 +269,14 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   copy/view/append/drop and from-text/view/drop helpers and observe bytes, termination, statuses, and
   normalized release. Exact Linux File result, handle, and open-option records additionally cross
   the real open, write-all, sync, consuming-close, reopen, partial-read, EOF, and final-close helpers
-  while observing counts, repeated-close status, normalized state, and bytes. Report v28 records
+  while observing counts, repeated-close status, normalized state, and bytes. Report v29 records
   `linuxFileSourceCallExecutions` alongside the earlier standard-library source-call counters and
   `foreignCStructResultCallExecutions` for the register and hidden-memory result pair, plus
   `standardLibraryBuildSmokeExecutions` for a self-contained product build that calls the real UTF-8
-  validator through automatic used-symbol linkage.
+  validator through automatic used-symbol linkage. It additionally records
+  `cStringLiteralSourceCallExecutions` when generated source-owned `fairy\0` storage is read by a C
+  callee and `cStringLiteralBuildSmokeExecutions` when the ordinary product build carries nonempty
+  compiler-owned `&CStr` storage into an executed binary.
   Its closed
   `drop-trace-v0` emission profile assigns source/type/span identities to dense site IDs and compares
   exact four-byte native records with the MIR interpreter trace. This instrumentation is absent from
