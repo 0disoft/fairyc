@@ -67,12 +67,13 @@ A trap, process abort, or forbidden foreign nonlocal control transfer is not a n
 
 Safe code cannot forget or disarm a resource. A resource implementation may expose a narrow unsafe internal operation that clears its cleanup obligation after ownership has been transferred to an external system; that operation must be represented explicitly in MIR and carry source provenance.
 
-The current Go prototype preserves each resource's ordered resolved field definitions and classifies
-its user drop body through AST, typed HIR, and MIR. Executable lowering currently accepts only an
-empty user drop body; a nonempty body is reported as an unsupported prototype feature before Flow.
-The interpreter's synthetic drop trace and reverse-field recursion are not execution of that body.
-This is an implementation gate, not a change to the Stage 0 language requirement that an implemented
-user drop body be compiler-invoked, infallible, and exactly once on normal cleanup.
+The current Go prototype preserves each resource's ordered resolved field definitions and lowers a
+nonempty user body into one compiler-private typed drop function. HIR and MIR link that function by
+symbol and exact resource type; the receiver owns no recursive cleanup obligation. The interpreter
+executes the body in a distinct `dropping` state before reverse field recursion, and the constrained
+C backend calls the same verified glue. The implemented subset is still effect-free: a drop body
+that requires undeclared I/O or host effects is rejected, and implicit cleanup does not yet propagate
+resource-declared effects into its enclosing function.
 
 ## Fallible close
 

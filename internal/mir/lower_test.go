@@ -108,16 +108,17 @@ fn main() -> i32 {
 	}
 }
 
-func TestLowerRejectsNonEmptyResourceDropKind(t *testing.T) {
+func TestLowerRejectsNonEmptyResourceWithoutDropGlue(t *testing.T) {
 	t.Parallel()
 	_, err := Lower(hir.Package{Modules: []hir.Module{{
 		Path: "main",
 		Resources: []hir.Resource{{
 			Name: "Token", Type: hir.Type("main::Token"), DropKind: hir.ResourceDropNonEmpty,
-			Fields: []hir.ResourceField{{Name: "value", Type: hir.TypeI32}},
+			DropSymbol: hir.NoSymbol,
+			Fields:     []hir.ResourceField{{Name: "value", Type: hir.TypeI32}},
 		}},
 	}}})
-	if err == nil || !strings.Contains(err.Error(), "unsupported drop kind") {
+	if err == nil || !strings.Contains(err.Error(), "inconsistent drop symbol") {
 		t.Fatalf("Lower() error = %v", err)
 	}
 }
@@ -1290,7 +1291,7 @@ fn main() -> i32 {
 func TestCloneDeepCopiesResourceDefinitions(t *testing.T) {
 	t.Parallel()
 	original := Program{ResourceTypes: []ResourceType{{
-		Type: hir.Type("main::Token"), DropKind: hir.ResourceDropEmpty,
+		Type: hir.Type("main::Token"), DropKind: hir.ResourceDropEmpty, DropSymbol: hir.NoSymbol,
 		Fields: []ResourceField{{Name: "value", Type: hir.TypeI32}},
 	}}}
 	cloned := Clone(original)

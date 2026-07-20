@@ -82,8 +82,8 @@ field, by-value aggregate parameter, export, or inferred C attribute is implemen
 runtime. It has no implicit compiler, optimization, or output choice; requires Linux/amd64 with
 glibc; accepts only Clang or GCC and the closed `low` or `optimized` profiles; and creates a new
 executable only under the source root's ignored `build/` directory. It neither overwrites an
-existing path nor implements empty, non-`i32`, nested, partially initialized, or nonempty-drop
-resources; nested tags or resource tags outside the exact `i32`/direct-resource payload gate; the broader interpreter subset; native execution;
+  existing path nor implements empty, nested, partially initialized, or effect-bearing-drop
+  resources; nested tags or resource tags outside the admitted direct-resource payload gate; the broader interpreter subset; native execution;
 package builds; cross-compilation; installation; or a supported target.
 It automatically supplies only the minimal project-owned standard-library C dependency closure for
 exact admitted symbols used by actual calls. It accepts no user companion source, object, library,

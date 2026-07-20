@@ -84,6 +84,8 @@ type analyzer struct {
 	resourceLoops    []resourceLoopFrame
 	resultLoops      []resultLoopFrame
 	borrowReturns    map[*symbol]borrowReturnSummary
+	dropFunctions    map[*ast.Resource]*ast.Function
+	dropOwners       map[*ast.Function]*ast.Resource
 }
 
 func newAnalyzer(files []File) *analyzer {
@@ -106,6 +108,8 @@ func newAnalyzer(files []File) *analyzer {
 		enumTypes:        make(map[hir.Type]*enumInfo),
 		expressionTypes:  make(map[*ast.Expression]hir.Type),
 		borrowReturns:    make(map[*symbol]borrowReturnSummary),
+		dropFunctions:    make(map[*ast.Resource]*ast.Function),
+		dropOwners:       make(map[*ast.Function]*ast.Resource),
 		regionType:       &symbol{id: hir.NoSymbol, kind: "capability", name: "Region", typ: hir.TypeRegion},
 	}
 }
@@ -116,13 +120,58 @@ func (a *analyzer) resolve() {
 	a.declareStructs()
 	a.declareResources()
 	a.declareCallables()
+	a.declareResourceDropFunctions()
 	a.resolveImports()
 	if len(a.diagnostics) > 0 {
 		return
 	}
 	for _, module := range a.moduleOrder {
+		for index := range module.file.Module.Resources {
+			resource := &module.file.Module.Resources[index]
+			if function := a.dropFunctions[resource]; function != nil {
+				a.resolveFunction(module, function)
+			}
+		}
 		for index := range module.file.Module.Functions {
 			a.resolveFunction(module, &module.file.Module.Functions[index])
+		}
+	}
+}
+
+func (a *analyzer) declareResourceDropFunctions() {
+	for _, module := range a.moduleOrder {
+		for index := range module.file.Module.Resources {
+			resource := &module.file.Module.Resources[index]
+			if a.resources[resource] == nil || resource.Drop == nil || resource.Drop.Body == nil ||
+				len(resource.Drop.Body.Statements) == 0 && resource.Drop.Body.Tail == nil {
+				continue
+			}
+			function := &ast.Function{
+				Name:     "$drop$" + resource.Name,
+				Span:     resource.Drop.Span,
+				NameSpan: resource.Drop.Span,
+				Parameters: []ast.Parameter{{
+					Name:     "self",
+					Span:     resource.Drop.Span,
+					NameSpan: resource.Drop.Span,
+					Type:     ast.TypeReference{Text: resource.Name, Span: resource.NameSpan},
+				}},
+				ResultType: ast.TypeReference{Text: "void", Span: resource.Drop.Span},
+				Body:       resource.Drop.Body,
+			}
+			value := &symbol{
+				id:          a.allocateSymbol(),
+				kind:        "resource-drop",
+				name:        function.Name,
+				module:      module.file.Module.Path,
+				source:      module.file.Path,
+				declaration: resource.Drop.Span,
+				typeSpan:    resource.Drop.Span,
+				function:    function,
+			}
+			a.functions[function] = value
+			a.dropFunctions[resource] = function
+			a.dropOwners[function] = resource
 		}
 	}
 }

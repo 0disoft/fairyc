@@ -185,7 +185,7 @@ func TestVerifyRejectsResourceConstructionFieldMismatch(t *testing.T) {
 	program := Program{
 		ResourceTypes: []ResourceType{{
 			Type: hir.Type("main::Token"), Entity: "resource-type:main-token",
-			Fields: []ResourceField{{Name: "value", Type: hir.TypeI32}}, DropKind: hir.ResourceDropEmpty,
+			Fields: []ResourceField{{Name: "value", Type: hir.TypeI32}}, DropKind: hir.ResourceDropEmpty, DropSymbol: hir.NoSymbol,
 		}},
 		Functions: []Function{{
 			Name:  "main::main",

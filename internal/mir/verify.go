@@ -52,6 +52,7 @@ func Verify(program Program) []VerificationError {
 	}
 	foreignFunctions, foreignFailures := verifyForeignFunctions(program.ForeignFunctions)
 	failures = append(failures, foreignFailures...)
+	failures = append(failures, verifyDropGlueLinks(program.ResourceTypes, program.Functions)...)
 	for index := range program.Functions {
 		failures = append(failures, verifyFunction(&program.Functions[index], structTypes, enumTypes, resourceTypes, foreignFunctions)...)
 	}
@@ -64,6 +65,55 @@ func Verify(program Program) []VerificationError {
 	return slices.CompactFunc(failures, func(left, right VerificationError) bool {
 		return left.Code == right.Code && left.Entity == right.Entity
 	})
+}
+
+func verifyDropGlueLinks(resources []ResourceType, functions []Function) []VerificationError {
+	bySymbol := make(map[hir.SymbolID]*Function, len(functions))
+	byResource := make(map[hir.Type]*Function)
+	var failures []VerificationError
+	for index := range functions {
+		function := &functions[index]
+		if previous := bySymbol[function.Symbol]; previous != nil {
+			failures = append(failures, VerificationError{Code: "V1001", Entity: function.Name, Detail: "function symbol is duplicated"})
+		} else {
+			bySymbol[function.Symbol] = function
+		}
+		if function.DropGlueFor == "" {
+			continue
+		}
+		if previous := byResource[function.DropGlueFor]; previous != nil {
+			failures = append(failures, VerificationError{Code: "V1001", Entity: function.Name, Detail: "resource has duplicate drop glue"})
+		} else {
+			byResource[function.DropGlueFor] = function
+		}
+		if len(function.Parameters) != 1 || len(function.ParameterTypes) != 1 ||
+			function.ParameterTypes[0] != function.DropGlueFor || function.ResultType != hir.TypeVoid {
+			failures = append(failures, VerificationError{Code: "V1001", Entity: function.Name, Detail: "drop glue signature is not fn(Resource) -> void"})
+		}
+		if len(function.Parameters) == 1 {
+			for _, local := range function.Resources {
+				if local.Symbol == hir.SymbolID(function.Parameters[0]) {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: function.Name, Detail: "drop receiver owns a recursive cleanup obligation"})
+				}
+			}
+		}
+	}
+	for index := range resources {
+		resource := &resources[index]
+		entity := fallbackEntity(resource.Entity, resourceTypeEntity(resource.Type))
+		switch resource.DropKind {
+		case hir.ResourceDropEmpty:
+			if resource.DropSymbol != hir.NoSymbol {
+				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "empty drop has an executable drop symbol"})
+			}
+		case hir.ResourceDropNonEmpty:
+			function := bySymbol[resource.DropSymbol]
+			if resource.DropSymbol == hir.NoSymbol || function == nil || function.DropGlueFor != resource.Type || byResource[resource.Type] != function {
+				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "non-empty drop has no matching drop glue"})
+			}
+		}
+	}
+	return failures
 }
 
 func verifyEnumTypes(definitions []EnumType) (map[hir.Type]*EnumType, []VerificationError) {
@@ -196,7 +246,7 @@ func verifyResourceTypes(definitions []ResourceType) (map[hir.Type]*ResourceType
 			continue
 		}
 		resources[definition.Type] = definition
-		if definition.DropKind != hir.ResourceDropEmpty {
+		if definition.DropKind != hir.ResourceDropEmpty && definition.DropKind != hir.ResourceDropNonEmpty {
 			failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "resource definition has unsupported drop behavior"})
 		}
 		fieldNames := make(map[string]struct{}, len(definition.Fields))
@@ -713,7 +763,13 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 			}
 		}
 		if terminator.Kind == TerminatorReturn {
-			failures = append(failures, verifyOperands(state, []Operand{terminator.ReturnValue}, terminatorEntity(item.id, terminator))...)
+			if function.ResultType == hir.TypeVoid {
+				if terminator.ReturnValue.Kind != OperandInvalid {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: terminatorEntity(item.id, terminator), Detail: "void return carries a value"})
+				}
+			} else {
+				failures = append(failures, verifyOperands(state, []Operand{terminator.ReturnValue}, terminatorEntity(item.id, terminator))...)
+			}
 			for symbol, resource := range resources {
 				if state.live[symbol] {
 					failures = append(failures, VerificationError{Code: "V1102", Entity: blockEntityFor(function, item.id), Detail: "resource " + resourceEntity(resource, fmt.Sprintf("local:%d", symbol)) + " exits without cleanup"})

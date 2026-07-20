@@ -49,6 +49,7 @@
         "flat-i32-resource",
         "inert-enum",
         "inert-struct",
+        "non-empty-resource-drop",
         "resource-option",
         "resource-result",
         "scalar-bitwise",

@@ -42,13 +42,14 @@ right-shift behavior, exact invalid-shift traps, and bounded step-limit
 termination. Fixture-only, manifest-authorized byte sinks additionally prove exact in-memory
 stdout/stderr bytes, cross-stream order, and a shared output limit without granting host I/O.
 Resource declarations now retain ordered, resolved fields and drop-body classification from AST
-through typed HIR and executable MIR. The current executable subset accepts only an empty user
-`drop` body; any nonempty body fails explicitly before Flow or MIR instead of being silently ignored.
+through typed HIR and executable MIR. A pure nonempty body becomes one verifier-linked private
+function, executes in the interpreter's `dropping` state, and is called by generated C before field
+cleanup. Resource-declared drop effects and implicit-cleanup effect propagation remain deferred.
 The interpreter constructs, reads, and recursively drops resources from the verified MIR definition,
 but still does not execute user drop-body effects.
-The constrained C backend emits deterministic C11 for 33 verified fixtures across the scalar
+The constrained C backend emits deterministic C11 for 34 verified fixtures across the scalar
 payload surface, restricted inert user enums, flat nonempty move-only resources over Fairy copy
-scalars or raw pointers with empty drop bodies, copy-scalar/inert-struct and resource-bearing
+scalars or raw pointers with empty or pure nonempty drop bodies, copy-scalar/inert-struct and resource-bearing
 built-in `Option` and `Result` values,
 borrowed-view byte lengths, checked
 immutable byte-slice indexing and end-exclusive slicing, the target-independent value-preserving integer casts `u8 as i32`,
@@ -371,7 +372,7 @@ On Linux/amd64 with glibc and the explicitly selected Clang or GCC installed, `e
 uses that same verified unit and the embedded runtime to produce a no-overwrite executable
 below the ignored `build/` directory. Compiler, `low` or `optimized` profile, and output path are
 mandatory. This Windows host cannot execute that command, and the command remains narrower than the
-interpreter: scalar tags, direct flat nonempty all-`i32` resources with empty drop bodies, and
+interpreter: scalar tags, direct flat nonempty resources with empty or pure nonempty drop bodies, and
 `Option<R>` or `Result<S, E>` where each payload is exactly `i32` or such a direct resource work.
 Nested tags, partial initialization, user drop effects, general unsafe operations, arbitrary
 aggregate parameters, callbacks, and public standard-library programs still fail closed before

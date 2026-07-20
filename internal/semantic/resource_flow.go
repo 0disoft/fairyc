@@ -60,6 +60,35 @@ func (a *analyzer) resourceFlowFunction(module *moduleScope, function *ast.Funct
 	a.resourceBlock(module, function.Body, environment, false, tailMode)
 }
 
+func (a *analyzer) resourceFlowDropFunction(module *moduleScope, function *ast.Function) {
+	if function.Body == nil || len(function.Parameters) != 1 {
+		return
+	}
+	parameter := &function.Parameters[0]
+	receiver := a.parameter[parameter]
+	if receiver == nil || !a.isResource(receiver.typ) {
+		return
+	}
+	environment := resourceEnvironment{
+		receiver: {
+			state:       ResourceLive,
+			declaration: span(module.file.Path, parameter.NameSpan),
+		},
+	}
+	a.resourceBlock(module, function.Body, environment, false, resourceRead)
+	state := environment[receiver]
+	if state.state == ResourceLive {
+		return
+	}
+	primary := span(module.file.Path, function.Body.Span)
+	related := []RelatedSpan{{Role: "declaration", Span: state.declaration}}
+	if state.move != nil {
+		primary = *state.move
+		related = append(related, RelatedSpan{Role: "move", Span: *state.move})
+	}
+	a.addDiagnostic("E1102", primary, related...)
+}
+
 func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environment resourceEnvironment, scoped bool, tailMode resourceUse) bool {
 	if block == nil {
 		return true

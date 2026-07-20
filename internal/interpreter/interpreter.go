@@ -261,6 +261,7 @@ const (
 	valueEnum
 	valueStruct
 	valueResource
+	valueVoid
 )
 
 type structState struct {
@@ -277,6 +278,7 @@ type enumState struct {
 type resourceState struct {
 	definition *mir.ResourceType
 	fields     map[string]runtimeValue
+	dropping   bool
 	dropped    bool
 }
 
@@ -361,7 +363,8 @@ func enumValue(definition *mir.EnumType, variantName string, fieldNames []string
 }
 
 func resourceValue(definition *mir.ResourceType, values []runtimeValue) (runtimeValue, error) {
-	if definition == nil || definition.Type == hir.TypeInvalid || len(definition.Fields) == 0 || len(definition.Fields) != len(values) || definition.DropKind != hir.ResourceDropEmpty {
+	if definition == nil || definition.Type == hir.TypeInvalid || len(definition.Fields) == 0 || len(definition.Fields) != len(values) ||
+		definition.DropKind != hir.ResourceDropEmpty && definition.DropKind != hir.ResourceDropNonEmpty {
 		return runtimeValue{}, fmt.Errorf("invalid resource construction definition")
 	}
 	state := &resourceState{definition: definition, fields: make(map[string]runtimeValue, len(definition.Fields))}
@@ -813,8 +816,12 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				if !found {
 					return callCompletion{}, fmt.Errorf("drop in %q names missing local %d", function.Name, local)
 				}
-				if err := r.dropValue(value, operation.Span); err != nil {
+				trap, err := r.dropValue(value, operation.Span, depth)
+				if err != nil {
 					return callCompletion{}, fmt.Errorf("drop in %q: %w", function.Name, err)
+				}
+				if trap != "" {
+					return callCompletion{trapCategory: trap}, nil
 				}
 				delete(locals, local)
 			}
@@ -858,7 +865,9 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 			if callErr != nil || completion.trapCategory != "" {
 				return completion, callErr
 			}
-			locals[terminator.DestinationLocal] = completion.value
+			if terminator.DestinationLocal != mir.NoLocal {
+				locals[terminator.DestinationLocal] = completion.value
+			}
 			next, err := oneSuccessor(terminator)
 			if err != nil {
 				return callCompletion{}, err
@@ -876,6 +885,9 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 		case mir.TerminatorReturn:
 			if len(regions) != 0 {
 				return callCompletion{}, fmt.Errorf("return from %q leaves %d active region(s)", function.Name, len(regions))
+			}
+			if function.ResultType == hir.TypeVoid {
+				return callCompletion{value: runtimeValue{kind: valueVoid, typ: hir.TypeVoid}}, nil
 			}
 			value, err := evaluate(locals, terminator.ReturnValue)
 			if err != nil {
@@ -895,43 +907,60 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 	}
 }
 
-func (r *runtime) dropValue(value runtimeValue, binding hir.Span) error {
+func (r *runtime) dropValue(value runtimeValue, binding hir.Span, depth int) (string, error) {
 	switch value.kind {
 	case valueI32, valueU8, valueU32, valueUSize, valueNull:
-		return nil
+		return "", nil
 	case valueResult, valueOption:
 		if value.tagged == nil {
-			return fmt.Errorf("tagged value has no state")
+			return "", fmt.Errorf("tagged value has no state")
 		}
 		if value.tagged.dropped {
-			return fmt.Errorf("%s::%s was dropped twice", taggedFamily(value.kind), value.tagged.variant)
+			return "", fmt.Errorf("%s::%s was dropped twice", taggedFamily(value.kind), value.tagged.variant)
 		}
 		value.tagged.dropped = true
 		if value.tagged.payload == nil {
-			return nil
+			return "", nil
 		}
-		return r.dropValue(*value.tagged.payload, binding)
+		return r.dropValue(*value.tagged.payload, binding, depth)
 	case valueResource:
 		if value.resource == nil {
-			return fmt.Errorf("resource value has no state")
+			return "", fmt.Errorf("resource value has no state")
 		}
-		if value.resource.definition == nil || value.resource.definition.DropKind != hir.ResourceDropEmpty {
-			return fmt.Errorf("resource value has no executable drop definition")
+		if value.resource.definition == nil ||
+			value.resource.definition.DropKind != hir.ResourceDropEmpty && value.resource.definition.DropKind != hir.ResourceDropNonEmpty {
+			return "", fmt.Errorf("resource value has no executable drop definition")
 		}
-		if value.resource.dropped {
-			return fmt.Errorf("resource %q was dropped twice", value.resource.definition.Type)
+		if value.resource.dropped || value.resource.dropping {
+			return "", fmt.Errorf("resource %q was dropped twice", value.resource.definition.Type)
 		}
-		value.resource.dropped = true
+		value.resource.dropping = true
 		r.dropTrace = append(r.dropTrace, DropEvent{ResourceType: value.resource.definition.Type, Binding: binding})
-		for index := len(value.resource.definition.Fields) - 1; index >= 0; index-- {
-			field := value.resource.definition.Fields[index]
-			if err := r.dropValue(value.resource.fields[field.Name], binding); err != nil {
-				return err
+		if value.resource.definition.DropKind == hir.ResourceDropNonEmpty {
+			glue := r.bySymbol[value.resource.definition.DropSymbol]
+			if glue == nil || glue.DropGlueFor != value.resource.definition.Type {
+				return "", fmt.Errorf("resource %q has no matching drop glue", value.resource.definition.Type)
+			}
+			completion, err := r.call(glue, []runtimeValue{value}, depth+1)
+			if err != nil {
+				return "", err
+			}
+			if completion.trapCategory != "" {
+				return completion.trapCategory, nil
 			}
 		}
-		return nil
+		value.resource.dropping = false
+		value.resource.dropped = true
+		for index := len(value.resource.definition.Fields) - 1; index >= 0; index-- {
+			field := value.resource.definition.Fields[index]
+			trap, err := r.dropValue(value.resource.fields[field.Name], binding, depth)
+			if err != nil || trap != "" {
+				return trap, err
+			}
+		}
+		return "", nil
 	default:
-		return capabilityError("value has no executable drop behavior")
+		return "", capabilityError("value has no executable drop behavior")
 	}
 }
 

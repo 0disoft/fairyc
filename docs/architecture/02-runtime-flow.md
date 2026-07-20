@@ -35,7 +35,7 @@ fields, source spans, and drop-body classification instead of being reconstructe
 Flow CFG computes fixed-point state without becoming a backend contract. MIR removes source
 conveniences and records their behavior explicitly.
 
-`?` becomes a discriminant branch. Resource state becomes moves, flags where genuinely needed, and cleanup blocks. Resource construction and field reads refer to a verified MIR resource definition; the current executable gate permits only empty user drop bodies. Aggregate construction carries field progress. Calls receive already ordered argument temporaries. Bounds, arithmetic, shift, and assertion failures become explicit checked branches and traps.
+`?` becomes a discriminant branch. Resource state becomes moves, flags where genuinely needed, and cleanup blocks. Resource construction and field reads refer to a verified MIR resource definition; a nonempty drop body becomes a compiler-private typed function linked by symbol and exact resource type. Aggregate construction carries field progress. Calls receive already ordered argument temporaries. Bounds, arithmetic, shift, and assertion failures become explicit checked branches and traps.
 
 Cleanup chains are created directly per normal exiting edge, verified, then identical suffixes may be merged. Traps have no cleanup edge. Calls have no unwind edge in Stage 0.
 
@@ -155,7 +155,7 @@ broaden the thin runtime or complete the standard library.
 The implemented slice emits deterministic C11 for verified scalar-payload MIR, including
 private `Option<i32>` and `Result<i32, i32>` transport, copy-only built-in tags over canonical Fairy
 scalars or admitted inert structs, plus nonempty resource definitions over Fairy copy scalars or
-raw pointers with empty drop bodies and resource-bearing built-in tags whose other payloads are
+  raw pointers with empty or pure nonempty drop bodies and resource-bearing built-in tags whose other payloads are
 supported copy values or another
 direct admitted resource. Resource and tagged layout comes from the declared target engine and is
 rechecked with C11 size, alignment, and field-offset assertions. `?` error paths rebuild the

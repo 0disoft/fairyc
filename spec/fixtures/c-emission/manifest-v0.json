@@ -35,6 +35,7 @@
     "docs/adr/0112-fixed-u8-array-byte-view-borrow.md",
     "docs/adr/0118-copy-tagged-transport-and-typed-console-result.md",
     "docs/adr/0119-flat-copy-resource-c-transport.md",
+    "docs/adr/0120-verified-nonempty-resource-drop-glue.md",
     "docs/adr/0107-omitted-immutable-byte-view-slice-bounds.md",
     "docs/adr/0108-integer-literal-range-validation.md",
     "docs/adr/0109-direct-i32-minimum-literal.md",
@@ -219,6 +220,22 @@
         "dialect": "c11",
         "functions": ["main::main"],
         "features": ["flat-copy-resource", "scalar-comparison", "scalar-control-flow"]
+      }
+    },
+    {
+      "id": "pass.c-emission.resource-drop-body",
+      "sourceRoot": "cases/pass/resource-drop-body/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::$drop$Token", "main::main", "main::observe"],
+        "features": ["flat-i32-resource", "non-empty-resource-drop", "scalar-call"]
       }
     },
     {

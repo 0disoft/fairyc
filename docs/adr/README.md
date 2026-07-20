@@ -129,6 +129,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0117-effect-annotated-windows-console-wrapper.md`: end-to-end `console` authority from the raw Windows stdout declaration through safe FY wrappers and `main`.
 - `0118-copy-tagged-transport-and-typed-console-result.md`: target-laid-out copy-only built-in tags and a progress-preserving typed Windows console result.
 - `0119-flat-copy-resource-c-transport.md`: move-only target-laid-out resource transport over Fairy copy scalars and raw pointers, with schema-feature drift enforcement.
+- `0120-verified-nonempty-resource-drop-glue.md`: compiler-private typed drop functions linked through HIR, MIR, interpreter, and constrained C.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

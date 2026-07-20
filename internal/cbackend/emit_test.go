@@ -58,6 +58,36 @@ func TestEmitScalarControlUnit(t *testing.T) {
 	}
 }
 
+func TestEmitNonEmptyResourceDropBodyAsVerifiedGlue(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn observe(value: i32) -> i32 { value }
+resource Token {
+    value: i32;
+    drop fn(self: &mut Self) {
+        let observed: i32 = observe(self.value);
+    }
+}
+fn main() -> i32 {
+    let token: Token = Token { value: 65 };
+    42
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0WindowsMSVCProfile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	dropIndex := slices.Index(unit.Functions, "main::$drop$Token")
+	observeIndex := slices.Index(unit.Functions, "main::observe")
+	if dropIndex < 0 || observeIndex < 0 || !slices.Contains(unit.Features, "non-empty-resource-drop") {
+		t.Fatalf("Emit() identity = functions %v, features %v", unit.Functions, unit.Features)
+	}
+	if !strings.Contains(unit.Source, fmt.Sprintf("fy_fn_%d(fy_l_", dropIndex)) ||
+		!strings.Contains(unit.Source, fmt.Sprintf("fy_fn_%d(", observeIndex)) {
+		t.Fatalf("generated C does not call verified drop glue and its typed body:\n%s", unit.Source)
+	}
+}
+
 func TestEmitWindowsMSVCProfileUsesLLP64TargetFacts(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

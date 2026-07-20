@@ -239,8 +239,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - Typed HIR lowers through an analysis-only Flow CFG into mutable-local, backend-independent MIR.
 - Resource declarations retain canonical type identity, declaration-ordered resolved fields, source
   spans, and drop-body classification through typed HIR into MIR. The current executable prototype
-  accepts only an empty user `drop` body and reports a nonempty body as unsupported before Flow;
-  this implementation gate does not remove user drop bodies from the language contract.
+  accepts an empty or pure nonempty user `drop` body, lowers the latter to verifier-linked private
+  glue, and still rejects effect-bearing drop until implicit cleanup effects are implemented.
 - Inert struct declarations retain canonical identity, declaration-ordered fields, and `@repr(C)`
   classification through AST, typed HIR, verified MIR, the executable interpreter subset, and the
   constrained C backend. The current C-layout implementation is nonempty and acyclic over `u8`,

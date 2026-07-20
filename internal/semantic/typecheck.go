@@ -65,6 +65,17 @@ func (a *analyzer) typeCheck() Result {
 			checker := typeChecker{analyzer: a, module: module, function: function}
 			hirModule.Functions = append(hirModule.Functions, checker.checkFunction())
 		}
+		for index := range module.file.Module.Resources {
+			resource := &module.file.Module.Resources[index]
+			function := a.dropFunctions[resource]
+			if function == nil || a.functions[function] == nil {
+				continue
+			}
+			checker := typeChecker{analyzer: a, module: module, function: function}
+			dropFunction := checker.checkFunction()
+			dropFunction.DropGlueFor = a.resources[resource].typ
+			hirModule.Functions = append(hirModule.Functions, dropFunction)
+		}
 		result.HIR.Modules = append(result.HIR.Modules, hirModule)
 	}
 	return result
@@ -153,10 +164,11 @@ func (a *analyzer) checkResource(module *moduleScope, resource *ast.Resource) hi
 		a.addUnsupported(module.file.Path, attribute.Span, "resource attribute @"+attribute.Name)
 	}
 	result := hir.Resource{
-		Name:     resource.Name,
-		Type:     value.typ,
-		Span:     span(module.file.Path, resource.Span),
-		DropKind: hir.ResourceDropMissing,
+		Name:       resource.Name,
+		Type:       value.typ,
+		Span:       span(module.file.Path, resource.Span),
+		DropKind:   hir.ResourceDropMissing,
+		DropSymbol: hir.NoSymbol,
 	}
 	if info := a.resourceTypes[value.typ]; info != nil {
 		result.Fields = make([]hir.ResourceField, 0, len(info.orderedFields))
@@ -174,7 +186,11 @@ func (a *analyzer) checkResource(module *moduleScope, resource *ast.Resource) hi
 		return result
 	}
 	result.DropKind = hir.ResourceDropNonEmpty
-	a.addUnsupported(module.file.Path, resource.Drop.Span, "non-empty resource drop body")
+	if function := a.dropFunctions[resource]; function != nil {
+		if dropSymbol := a.functions[function]; dropSymbol != nil {
+			result.DropSymbol = dropSymbol.id
+		}
+	}
 	return result
 }
 
@@ -186,7 +202,10 @@ func (c *typeChecker) checkFunction() hir.Function {
 		}
 		c.analyzer.addUnsupported(c.module.file.Path, attribute.Span, "function attribute @"+attribute.Name)
 	}
-	resultType := c.canonicalType(c.function.ResultType)
+	resultType := hir.TypeVoid
+	if c.analyzer.dropOwners[c.function] == nil {
+		resultType = c.canonicalType(c.function.ResultType)
+	}
 	functionSymbol.typ = resultType
 	if errorSpan, ok := resultFailureSpan(c.function.ResultType); ok {
 		functionSymbol.resultError = errorSpan

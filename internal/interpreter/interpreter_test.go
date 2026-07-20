@@ -36,6 +36,35 @@ fn main() -> i32 { score(Message::Pair { left: 20, right: 22 }) }
 	}
 }
 
+func TestExecuteNonEmptyResourceDropBody(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn observe(value: i32) -> i32 { value }
+resource Token {
+    value: i32;
+    drop fn(self: &mut Self) {
+        let observed: i32 = observe(self.value);
+    }
+}
+fn main() -> i32 {
+    let token: Token = Token { value: 65 };
+    42
+}
+`)
+	outcome, err := interpreter.ExecuteWithOptions(program, "main::main", interpreter.Options{
+		TestIntrinsics: map[string]interpreter.TestIntrinsicKind{
+			"main::observe": interpreter.TestIntrinsicWriteStdoutByte,
+		},
+		OutputLimit: 1,
+	})
+	if err != nil {
+		t.Fatalf("ExecuteWithOptions() error = %v", err)
+	}
+	if outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 || string(outcome.Stdout) != "A" || len(outcome.DropTrace) != 1 {
+		t.Fatalf("ExecuteWithOptions() outcome = %+v", outcome)
+	}
+}
+
 func TestExecuteImmutableByteViewIndexWithinBounds(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

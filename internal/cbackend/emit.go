@@ -351,6 +351,9 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	}
 	for _, resource := range resourceTypes {
 		value.features[resource.feature] = struct{}{}
+		if resource.definition.DropKind == hir.ResourceDropNonEmpty {
+			value.features["non-empty-resource-drop"] = struct{}{}
+		}
 	}
 	for index := range functions {
 		function := &functions[index]
@@ -644,8 +647,8 @@ func prepareResourceTypes(definitions []mir.ResourceType, engine *layout.Engine)
 	result := make([]resourceCType, 0, len(ordered))
 	byType := make(map[hir.Type]int, len(ordered))
 	for _, definition := range ordered {
-		if definition.DropKind != hir.ResourceDropEmpty {
-			return nil, nil, CapabilityError{Feature: "resource type " + strconv.Quote(string(definition.Type)) + " with non-empty drop behavior"}
+		if definition.DropKind != hir.ResourceDropEmpty && definition.DropKind != hir.ResourceDropNonEmpty {
+			return nil, nil, CapabilityError{Feature: "resource type " + strconv.Quote(string(definition.Type)) + " with unsupported drop behavior"}
 		}
 		if len(definition.Fields) == 0 {
 			return nil, nil, CapabilityError{Feature: "empty resource type " + strconv.Quote(string(definition.Type))}
@@ -3050,6 +3053,9 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			if err := e.emitDropTrace(output, functionIndex, operation); err != nil {
 				return fmt.Errorf("drop trace in %s: %w", function, err)
 			}
+		}
+		if err := e.emitDropGlue(output, functionIndex, operation); err != nil {
+			return fmt.Errorf("drop glue in %s: %w", function, err)
 		}
 	case mir.OperationUnary:
 		operand, err := oneOperand(operation.Operands)

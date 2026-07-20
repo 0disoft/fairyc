@@ -132,12 +132,13 @@ func CompatibleForeignSignature(left, right ForeignFunction) bool {
 
 // ResourceType is one verified move-only aggregate definition used by executable MIR.
 type ResourceType struct {
-	Type     hir.Type
-	Span     hir.Span
-	Entity   string
-	Fields   []ResourceField
-	DropKind hir.ResourceDropKind
-	DropSpan hir.Span
+	Type       hir.Type
+	Span       hir.Span
+	Entity     string
+	Fields     []ResourceField
+	DropKind   hir.ResourceDropKind
+	DropSpan   hir.Span
+	DropSymbol hir.SymbolID
 }
 
 // ResourceField preserves declaration order and the resolved semantic field type.
@@ -174,6 +175,7 @@ type Function struct {
 	ResultBranches     []ResultBranchFact
 	TrapPaths          []TrapPathFact
 	EliminatedForms    []EliminatedFormFact
+	DropGlueFor        hir.Type
 }
 
 // ResourceLocal is one parameter or local that owns a cleanup obligation while live.

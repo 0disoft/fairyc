@@ -10,7 +10,9 @@ resource native_handle {
     raw: *mut void;
     state: u32;
 
-    drop fn(self: &mut Self) {}
+    drop fn(self: &mut Self) {
+        let final_state: u32 = self.state;
+    }
 }
 
 @repr(C)

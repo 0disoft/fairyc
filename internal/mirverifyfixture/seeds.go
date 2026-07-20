@@ -24,7 +24,7 @@ func constructSeed(id string) (mir.Program, error) {
 		function = resourceReturnSeed()
 		resourceTypes = []mir.ResourceType{{
 			Type: hir.Type("seed::Token"), Entity: "resource-type:seed-token",
-			Fields: []mir.ResourceField{{Name: "value", Type: hir.TypeI32}}, DropKind: hir.ResourceDropEmpty,
+			Fields: []mir.ResourceField{{Name: "value", Type: hir.TypeI32}}, DropKind: hir.ResourceDropEmpty, DropSymbol: hir.NoSymbol,
 		}}
 	case "borrow-return":
 		function = borrowReturnSeed()

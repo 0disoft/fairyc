@@ -184,12 +184,16 @@ func lowerResourceTypes(input hir.Package) ([]ResourceType, error) {
 				return nil, fmt.Errorf("duplicate resource type %q", resource.Type)
 			}
 			seen[resource.Type] = struct{}{}
-			if resource.DropKind != hir.ResourceDropEmpty {
+			if resource.DropKind != hir.ResourceDropEmpty && resource.DropKind != hir.ResourceDropNonEmpty {
 				return nil, fmt.Errorf("resource %q has unsupported drop kind %q", resource.Type, resource.DropKind)
+			}
+			if resource.DropKind == hir.ResourceDropEmpty && resource.DropSymbol != hir.NoSymbol ||
+				resource.DropKind == hir.ResourceDropNonEmpty && resource.DropSymbol == hir.NoSymbol {
+				return nil, fmt.Errorf("resource %q has inconsistent drop symbol %d for kind %q", resource.Type, resource.DropSymbol, resource.DropKind)
 			}
 			definition := ResourceType{
 				Type: resource.Type, Span: resource.Span, Entity: resourceTypeEntity(resource.Type),
-				DropKind: resource.DropKind, DropSpan: resource.DropSpan,
+				DropKind: resource.DropKind, DropSpan: resource.DropSpan, DropSymbol: resource.DropSymbol,
 				Fields: make([]ResourceField, 0, len(resource.Fields)),
 			}
 			fieldNames := make(map[string]struct{}, len(resource.Fields))
@@ -247,11 +251,12 @@ type functionLowerer struct {
 
 func newFunctionLowerer(module string, function *hir.Function, properties typeProperties) *functionLowerer {
 	result := Function{
-		Symbol:     function.Symbol,
-		Name:       module + "::" + function.Name,
-		Span:       function.Span,
-		ResultType: function.ResultType,
-		Entry:      0,
+		Symbol:      function.Symbol,
+		Name:        module + "::" + function.Name,
+		Span:        function.Span,
+		ResultType:  function.ResultType,
+		Entry:       0,
+		DropGlueFor: function.DropGlueFor,
 	}
 	return &functionLowerer{
 		module:     module,
@@ -267,12 +272,13 @@ func newFunctionLowerer(module string, function *hir.Function, properties typePr
 func (l *functionLowerer) lower() (Function, error) {
 	l.newBlock()
 	maximumSymbol := hir.SymbolID(0)
-	for _, parameter := range l.source.Parameters {
+	for index, parameter := range l.source.Parameters {
 		maximumSymbol = max(maximumSymbol, parameter.Symbol)
 		l.result.Parameters = append(l.result.Parameters, LocalID(parameter.Symbol))
 		l.result.ParameterTypes = append(l.result.ParameterTypes, parameter.Type)
 		l.bindings[parameter.Symbol] = bindingInfo{typ: parameter.Type, span: parameter.Span}
-		if l.properties.NeedsDrop(parameter.Type) {
+		isDropReceiver := l.source.DropGlueFor != "" && index == 0 && parameter.Type == l.source.DropGlueFor
+		if l.properties.NeedsDrop(parameter.Type) && !isDropReceiver {
 			l.live[parameter.Symbol] = true
 			l.result.Resources = append(l.result.Resources, ResourceLocal{
 				Symbol: parameter.Symbol, Type: parameter.Type, Binding: parameter.Span, Parameter: true,
@@ -293,6 +299,15 @@ func (l *functionLowerer) lower() (Function, error) {
 	terminated, err := l.lowerBlock(l.source.Body)
 	if err != nil {
 		return Function{}, err
+	}
+	if !terminated && l.source.ResultType == hir.TypeVoid {
+		actions := l.emitFunctionExitCleanup(l.live, l.source.Body.Span, "return")
+		l.result.CleanupPaths = append(l.result.CleanupPaths, CleanupPathFact{Exit: l.source.Body.Span, ExitKind: "return", Actions: actions})
+		if cleanupContainsDrop(actions) {
+			l.result.EliminatedForms = append(l.result.EliminatedForms, EliminatedFormFact{Form: "implicit-drop", RemainingCount: 0})
+		}
+		l.terminate(Terminator{Kind: TerminatorReturn, Span: l.source.Body.Span, UnwindSuccessor: NoBlock})
+		terminated = true
 	}
 	if !terminated {
 		return Function{}, fmt.Errorf("function has no lowered return")

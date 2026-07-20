@@ -80,9 +80,9 @@ and emit no partial JSON. The reported constrained-C emission subset does not ma
 imported module must be included explicitly. Duplicate paths and input sets beyond the prototype
 budgets are rejected before semantic analysis. Syntax outside the implemented semantic subset
 returns a capability error and never counts as a successful check.
-Resource declarations with empty user `drop` bodies preserve their ordered resolved fields in typed
-HIR. A nonempty user `drop` body returns the explicit unsupported-subset error before Flow; it is not
-accepted and then ignored by `run`, `emit-c`, or `build`.
+Resource declarations preserve ordered resolved fields in typed HIR. A pure nonempty user `drop`
+body becomes a compiler-private typed function linked from its resource; an effect-bearing body
+remains rejected until resource drop effects propagate through implicit cleanup.
 
 `experimental run` does not invoke a backend, linker, runtime, or host subprocess. It runs one
 positional entry plus zero or more repeated `--source` files through parser, semantic analysis, Flow,
@@ -111,7 +111,7 @@ parse the generated C, invoke Clang or GCC, link the test runtime, execute a pro
 `emittable`, `conformant`, or `supported` target. `Option<i32>` and `Result<i32, i32>` use private
 compact tagged structs. Other built-in tags whose payloads are canonical Fairy copy scalars or
 admitted inert structs use target-laid-out private numeric structs. Direct nonempty all-`i32`
-resources over Fairy copy scalars or raw pointers with empty drop bodies and built-in
+resources over Fairy copy scalars or raw pointers with empty or pure nonempty drop bodies and built-in
 resource-bearing tags whose payloads are exactly `i32` or direct admitted resources use private
 numeric structs whose size, alignment, and field offsets are asserted against target-layout results.
 Restricted user enums use private numeric tags and private union payload storage. Payloadless and

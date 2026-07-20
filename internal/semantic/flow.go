@@ -31,6 +31,12 @@ func (a *analyzer) flowCheck() {
 				a.flowFunction(module, function)
 			}
 		}
+		for index := range module.file.Module.Resources {
+			resource := &module.file.Module.Resources[index]
+			if function := a.dropFunctions[resource]; function != nil {
+				a.resourceFlowDropFunction(module, function)
+			}
+		}
 	}
 }
 

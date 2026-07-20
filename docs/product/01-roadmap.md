@@ -47,10 +47,10 @@ unsigned right shift execute across trapping and
   categories. Matching-type left shift additionally traps on an unrepresentable result, with
   invalid amount taking precedence over overflow. Nearest-loop `break` and `continue` now execute
   with resource and Region cleanup. Verified resource definitions now preserve ordered fields and
-  empty-drop classification from AST through HIR into MIR; nonempty user drop bodies fail as
-  unsupported before executable lowering. Restricted inert enums now preserve named payloads,
+  drop classification from AST through HIR into MIR; pure nonempty user drop bodies now lower to
+  verifier-linked private functions and execute before reverse field cleanup. Restricted inert enums now preserve named payloads,
   construct through qualified variants, require exhaustive shallow matches, and execute through
-  verified MIR, the interpreter, and the constrained C backend. The C backend now emits deterministic C11 for 33
+  verified MIR, the interpreter, and the constrained C backend. The C backend now emits deterministic C11 for 34
   verified scalar, borrowed-view, typed-comparison, inert-enum, flat-resource, and resource-tagged cases under the provisional `x86_64-linux-gnu` profile,
   including `Option<i32>` and `Result<i32, i32>` construction, match, calls, and propagation,
   copy-scalar/inert-struct tagged transport, private
@@ -75,7 +75,7 @@ Exit gate: positive and negative fixtures agree with the source contracts, resou
 
 Current implementation status: a fail-closed Linux/amd64 constrained-C differential command now
 requires glibc, Clang, and GCC and is wired into a separate hosted Ubuntu CI job. It is designed to
-run all 33 emission cases at low and optimized profiles for 132 process-status and exact
+run all 34 emission cases at low and optimized profiles for 136 process-status and exact
 source-linked drop-trace comparisons, then drive
 the actual experimental build CLI with resource-bearing Option and Result plus a flat all-`i32` resource
 through 4 compiler/profile executable
@@ -83,7 +83,7 @@ smokes. It now adds four-way product builds containing compiler-owned nonempty `
 private compiler-owned `&[u8]` view, plus separate generated-Fairy-to-C calls that verify every byte
 of `fairy\0` and every non-terminated byte of `fairy` respectively. The same job
 also compiles and executes each production, uninstrumented C unit with Clang
-and GCC under the closed `address-undefined-o1` ASan+UBSan mode for 66 fail-closed sanitizer
+and GCC under the closed `address-undefined-o1` ASan+UBSan mode for 68 fail-closed sanitizer
 executions. The current Windows
 host has no eligible Linux toolchain, and no hosted run receipt has been observed, so this is a
 configured lane rather than native conformance evidence. A shared bounded C driver and embedded

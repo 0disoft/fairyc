@@ -44,6 +44,19 @@ func (a *analyzer) prepareCallableEffects() {
 				Effects:     slices.Clone(value.effects),
 			})
 		}
+		for index := range module.file.Module.Resources {
+			resource := &module.file.Module.Resources[index]
+			function := a.dropFunctions[resource]
+			value := a.functions[function]
+			if function == nil || value == nil {
+				continue
+			}
+			value.effects, value.effectSpan, value.effectsValid = a.parseEffects(
+				module.file.Path,
+				resource.Drop.Span,
+				nil,
+			)
+		}
 	}
 }
 

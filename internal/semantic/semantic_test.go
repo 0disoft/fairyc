@@ -550,17 +550,49 @@ func TestAnalyzeRejectsUnsupportedStructRepresentation(t *testing.T) {
 	}
 }
 
-func TestAnalyzeRejectsNonEmptyResourceDropBodyAsUnsupported(t *testing.T) {
+func TestAnalyzeLowersNonEmptyResourceDropBodyToHiddenGlue(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{
-		"main.fy": "module main;\nresource Token { value: i32; drop fn(self: &mut Self) { let marker: i32 = 1; } }\nfn main() -> i32 { 0 }\n",
+		"main.fy": "module main;\nresource Token { value: i32; drop fn(self: &mut Self) { let marker: i32 = self.value; } }\nfn main() -> i32 { 0 }\n",
 	})
-	if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "non-empty resource drop body" {
-		t.Fatalf("unsupported = %+v", result.Unsupported)
-	}
-	if result.CompletedThrough != semantic.PhaseResolve || len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].Resources) != 1 || result.HIR.Modules[0].Resources[0].DropKind != hir.ResourceDropNonEmpty {
+	assertCleanTypeResult(t, result)
+	if len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].Resources) != 1 || len(result.HIR.Modules[0].Functions) != 2 {
 		t.Fatalf("result = %+v", result)
 	}
+	resource := result.HIR.Modules[0].Resources[0]
+	if resource.DropKind != hir.ResourceDropNonEmpty || resource.DropSymbol == hir.NoSymbol {
+		t.Fatalf("resource = %+v", resource)
+	}
+	var glue *hir.Function
+	for index := range result.HIR.Modules[0].Functions {
+		function := &result.HIR.Modules[0].Functions[index]
+		if function.Symbol == resource.DropSymbol {
+			glue = function
+		}
+	}
+	if glue == nil || glue.DropGlueFor != resource.Type || len(glue.Parameters) != 1 || glue.Parameters[0].Type != resource.Type || glue.ResultType != hir.TypeVoid {
+		t.Fatalf("drop glue = %+v", glue)
+	}
+}
+
+func TestAnalyzeRejectsMovingDropReceiver(t *testing.T) {
+	t.Parallel()
+	text := `module main;
+resource Token {
+    value: i32;
+    drop fn(self: &mut Self) {
+        let consumed: i32 = consume(self);
+    }
+}
+fn consume(token: Token) -> i32 { token.value }
+fn main() -> i32 { 0 }
+`
+	result := analyzeText(t, map[string]string{"main.fy": text})
+	if result.FailedPhase != semantic.PhaseFlow || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E1102" {
+		t.Fatalf("result = %+v", result)
+	}
+	start := strings.Index(text, "self);")
+	assertSpan(t, result.Diagnostics[0].Primary, "main.fy", start, start+len("self"))
 }
 
 func TestAnalyzeTypesForeignCallInsideUnsafeBlock(t *testing.T) {

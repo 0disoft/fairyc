@@ -252,7 +252,7 @@ The source cases do not test malformed graphs. `spec/fixtures/mir-verifier/manif
 
 ## Interpreter
 
-The first semantic oracle is a small MIR interpreter supporting scalars, tagged `Option` and `Result`, restricted inert user enums, borrowed UTF-8 and byte views with byte-length reads, moves, drop traces, region mark and reset, branches, and traps. It constructs user enums, selects declaration-ordered variants, extracts named payload fields, and also constructs inert structs and resources and resolves field reads from their distinct verified program-level definitions; only the resource definition participates in reverse-field cleanup. The only executable drop classification is currently `empty`; source user drop-body effects are not interpreted. Its options-only fixture harness may intercept explicitly bound call symbols as bounded in-memory stdout/stderr byte sinks; those hooks are not MIR operations, source-name conventions, standard-library APIs, or host I/O. The interpreter is not required to emulate a complete operating system or C ABI.
+The first semantic oracle is a small MIR interpreter supporting scalars, tagged `Option` and `Result`, restricted inert user enums, borrowed UTF-8 and byte views with byte-length reads, moves, drop traces, region mark and reset, branches, and traps. It constructs user enums, selects declaration-ordered variants, extracts named payload fields, and also constructs inert structs and resources and resolves field reads from their distinct verified program-level definitions; only the resource definition participates in reverse-field cleanup. Empty and pure nonempty drop classifications execute; the latter invokes verifier-linked private glue in a distinct `dropping` state before field cleanup. Source drop-body effects are not yet interpreted. Its options-only fixture harness may intercept explicitly bound call symbols as bounded in-memory stdout/stderr byte sinks; those hooks are not MIR operations, source-name conventions, standard-library APIs, or host I/O. The interpreter is not required to emulate a complete operating system or C ABI.
 
 The interpreter precedes a second native backend. Differential fixtures compare interpreter outcomes with generated C compiled at multiple optimization levels and, where the target fixture declares them, more than one independent C compiler.
 
@@ -260,7 +260,7 @@ The current Go prototype also emits deterministic C11 for the verified scalar an
 subset in `spec/fixtures/c-emission/manifest-v0.json`, including private `Option<i32>` and
 `Result<i32, i32>` construction, calls, matching, and propagation plus target-laid-out built-in tags
 whose payloads are canonical Fairy copy scalars or admitted inert structs. Direct nonempty resources
-over Fairy copy scalars or raw pointers with empty drop bodies may be constructed, read, moved
+over Fairy copy scalars or raw pointers with empty or pure nonempty drop bodies may be constructed, read, moved
 through calls, returned, assigned,
 and discharged. Resource-bearing `Option` and `Result` values are also accepted when every payload
 is a supported copy value or one of those direct resources. Their
