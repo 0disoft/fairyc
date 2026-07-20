@@ -1,7 +1,7 @@
 {
   "tool": "ssealed",
   "version": "0.6.11",
-  "generatedAt": "2026-07-20T01:16:05.268Z",
+  "generatedAt": "2026-07-20T01:30:56.066Z",
   "scope": "general",
   "profile": "cli-tool",
   "addons": [
@@ -738,13 +738,13 @@
     },
     {
       "path": "docs/ops/ci.md",
-      "checksum": "sha256:e89dbe6c11a7d09fac14953df8ef5294a00db2d8b3060616a2cee72ed957748a",
+      "checksum": "sha256:fbf1c5f08cc7b672458f49a5884a8445e8243f48cc1cf18703ea73f4d32d94eb",
       "kind": "document",
       "ownership": "seeded",
       "presence": "optional",
       "status": "active",
       "initialChecksum": "sha256:22ccaa9f1a1371db7743291eebeef85d477ff5bc0838dde24a166722e8bdc525",
-      "acceptedChecksum": "sha256:e89dbe6c11a7d09fac14953df8ef5294a00db2d8b3060616a2cee72ed957748a",
+      "acceptedChecksum": "sha256:fbf1c5f08cc7b672458f49a5884a8445e8243f48cc1cf18703ea73f4d32d94eb",
       "generatedChecksum": "sha256:22ccaa9f1a1371db7743291eebeef85d477ff5bc0838dde24a166722e8bdc525"
     },
     {
@@ -826,13 +826,13 @@
     },
     {
       "path": "docs/product/01-roadmap.md",
-      "checksum": "sha256:aa5bf820d42a02aeefb3cece2149f03604bbadc824f1af67f7f07a20dcc4e33d",
+      "checksum": "sha256:a7c5f879a8f3af6c310f348e59615fbf7d003ffa6bdc9e57f6e8ecfe898eb3ad",
       "kind": "document",
       "ownership": "seeded",
       "presence": "optional",
       "status": "active",
       "initialChecksum": "sha256:950d7a44619b2ff2626421126a59af4ac1b98f258f252a78d9ead96b568640e4",
-      "acceptedChecksum": "sha256:aa5bf820d42a02aeefb3cece2149f03604bbadc824f1af67f7f07a20dcc4e33d",
+      "acceptedChecksum": "sha256:a7c5f879a8f3af6c310f348e59615fbf7d003ffa6bdc9e57f6e8ecfe898eb3ad",
       "generatedChecksum": "sha256:950d7a44619b2ff2626421126a59af4ac1b98f258f252a78d9ead96b568640e4"
     },
     {

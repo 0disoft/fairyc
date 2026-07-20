@@ -241,6 +241,10 @@ Microsoft x64 unwind structure, executes a temporary optimized image of the chec
 example, requires no output and native result 42, and removes the image. The configured Windows
 smoke therefore covers two retained target builds plus one direct target execution and ten total PE
 images. This improves the developer execution path without changing target maturity.
+The GitHub Actions Windows matrix is now configured to execute that full smoke after `go test`,
+using the hosted runner's local x64 MSVC and SDK with no WSL and retaining no artifacts. The
+`hosted-windows-receipt` marker deliberately remains missing until an exit-zero workflow run is
+observed for the exact commit; workflow text is not execution evidence.
 
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.

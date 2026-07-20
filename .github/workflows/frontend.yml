@@ -34,6 +34,9 @@ jobs:
         run: go vet -mod=readonly ./...
       - name: Test
         run: go test -mod=readonly -count=1 ./...
+      - name: Run Windows native target smoke
+        if: runner.os == 'Windows'
+        run: go run -mod=readonly ./cmd/fairyc-windows-host-smoke
 
   native-c:
     name: C differential (Linux)

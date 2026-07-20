@@ -12,6 +12,10 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
 - Go dependency and build caching is disabled because the current module has no external dependency
   graph and the project has not justified retained CI cache storage.
 - `go vet -mod=readonly ./...` runs before `go test -mod=readonly -count=1 ./...`.
+- After those ordinary checks, only the Windows matrix entry runs
+  `cmd/fairyc-windows-host-smoke`. The command discovers the hosted runner's local x64 MSVC and
+  Windows SDK without WSL, exercises the target-neutral and declared-target paths plus layout, ABI,
+  PE/COFF, and unwind probes, and retains no executable, object, generated C, PDB, or report artifact.
 - The workflow uploads no build artifact and performs no deploy, release, publication, or write to
   repository state.
 - Ordinary tests execute the fixed lexer and parser fuzz seeds. Timed fuzz campaigns remain
@@ -160,6 +164,10 @@ executes the closed synthetic exception and virtual-unwind walk described above,
 validate complete version-2 epilog semantics, language-specific handler payload parsing, recursive
 chains, Fairy/foreign-frame crossings, object-level unwind relocations, or hosted runner behavior.
 
+The Windows matrix now configures that same smoke after its ordinary Go test suite. Configuration
+alone is not a hosted receipt: `hosted-windows-receipt` remains missing until GitHub records an
+exit-zero run for the exact commit, and a later code or runner-image change requires a fresh run.
+
 ## Owners
 
 - Primary owner: UNASSIGNED
@@ -171,5 +179,6 @@ chains, Fairy/foreign-frame crossings, object-level unwind relocations, or hoste
 - Required validation names: VALIDATION.md
 - Release blocker status: UNDECIDED; branch protection is external repository state and is not
   claimed by this document.
-- Remaining operational risk: remote workflow execution, including the new native job, has not been
-  observed yet, and no timed fuzz campaign or coverage threshold exists.
+- Remaining operational risk: remote workflow execution, including the Linux native job and the
+  Windows native target smoke, has not been observed at the current commit, and no timed fuzz
+  campaign or coverage threshold exists.
