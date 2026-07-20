@@ -258,9 +258,11 @@ returns status 1 with zero progress. Status 2 means stdout was unavailable, stat
 `written == length`.
 
 Its FY raw declaration and the checked safe text wrapper both declare `@effects(console)`. The
-example entry must propagate that effect even though it contains no raw pointer or unsafe block.
-This is executable authority tracking for one Windows-only helper, not a stable `std::io` API or a
-typed console-error design.
+wrapper returns `Result<usize, ConsoleError>`: success preserves the exact byte count, while failure
+preserves the nonzero raw status and completed-prefix count in an example-local typed record. The
+example entry must propagate the effect even though it contains no raw pointer or unsafe block.
+This is executable authority and typed-progress tracking for one Windows-only helper, not a stable
+`std::io` API, portable error taxonomy, or public tagged ABI.
 
 The implementation obtains `STD_OUTPUT_HANDLE` once and loops in `DWORD`-bounded chunks until all
 bytes are written or a failure reports the completed prefix. It does not allocate, append a newline,

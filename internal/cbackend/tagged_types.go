@@ -16,14 +16,17 @@ const (
 )
 
 type taggedCType struct {
-	typ      hir.Type
-	kind     string
-	payloads []hir.Type
-	layout   layout.Result
+	typ       hir.Type
+	kind      string
+	payloads  []hir.Type
+	layout    layout.Result
+	needsDrop bool
 }
 
-func prepareResourceTaggedTypes(
+func prepareTaggedTypes(
 	program mir.Program,
+	structures []structCType,
+	structByType map[hir.Type]int,
 	resources []resourceCType,
 	resourceByType map[hir.Type]int,
 	engine *layout.Engine,
@@ -31,24 +34,29 @@ func prepareResourceTaggedTypes(
 	candidates := make(map[hir.Type]taggedCType)
 	consider := func(value hir.Type) {
 		if element, option := hir.OptionElement(value); option {
-			if _, resource := resourceByType[element]; resource {
-				candidates[value] = taggedCType{typ: value, kind: taggedOption, payloads: []hir.Type{element}}
+			if isOptionI32(value) || !supportedTaggedPayload(element, structByType, resourceByType) {
+				return
+			}
+			_, needsDrop := resourceByType[element]
+			candidates[value] = taggedCType{
+				typ: value, kind: taggedOption, payloads: []hir.Type{element}, needsDrop: needsDrop,
 			}
 			return
 		}
 		success, failure, result := hir.ResultElements(value)
-		if !result {
+		if !result || isResultI32I32(value) {
 			return
 		}
-		_, successResource := resourceByType[success]
-		_, failureResource := resourceByType[failure]
-		if !successResource && !failureResource {
+		if !supportedTaggedPayload(success, structByType, resourceByType) ||
+			!supportedTaggedPayload(failure, structByType, resourceByType) {
 			return
 		}
-		if !supportedTaggedPayload(success, resourceByType) || !supportedTaggedPayload(failure, resourceByType) {
-			return
+		_, successNeedsDrop := resourceByType[success]
+		_, failureNeedsDrop := resourceByType[failure]
+		candidates[value] = taggedCType{
+			typ: value, kind: taggedResult, payloads: []hir.Type{success, failure},
+			needsDrop: successNeedsDrop || failureNeedsDrop,
 		}
-		candidates[value] = taggedCType{typ: value, kind: taggedResult, payloads: []hir.Type{success, failure}}
 	}
 	for _, function := range program.Functions {
 		consider(function.ResultType)
@@ -81,15 +89,15 @@ func prepareResourceTaggedTypes(
 			Type: layout.Type{Kind: layout.KindLanguageScalar, Name: "u32"},
 		}}
 		for index, payload := range candidate.payloads {
-			payloadType, ok := taggedPayloadLayout(payload, resources, resourceByType)
+			payloadType, ok := taggedPayloadLayout(payload, structures, structByType, resources, resourceByType)
 			if !ok {
-				return nil, nil, fmt.Errorf("resource tagged type %q has unsupported payload %q", value, payload)
+				return nil, nil, fmt.Errorf("tagged type %q has unsupported payload %q", value, payload)
 			}
 			fields = append(fields, layout.Field{Name: fmt.Sprintf("p_%d", index), Type: payloadType})
 		}
 		computed, err := engine.Of(layout.Type{Kind: layout.KindStruct, Fields: fields})
 		if err != nil {
-			return nil, nil, fmt.Errorf("compute C transport layout for resource tagged type %q: %w", value, err)
+			return nil, nil, fmt.Errorf("compute C transport layout for tagged type %q: %w", value, err)
 		}
 		candidate.layout = computed
 		byType[value] = len(result)
@@ -98,17 +106,31 @@ func prepareResourceTaggedTypes(
 	return result, byType, nil
 }
 
-func supportedTaggedPayload(value hir.Type, resourceByType map[hir.Type]int) bool {
-	if value == hir.TypeI32 {
+func supportedTaggedPayload(value hir.Type, structByType map[hir.Type]int, resourceByType map[hir.Type]int) bool {
+	value = canonicalCValueType(value)
+	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeU32 || value == hir.TypeUSize {
+		return true
+	}
+	if _, structure := structByType[value]; structure {
 		return true
 	}
 	_, resource := resourceByType[value]
 	return resource
 }
 
-func taggedPayloadLayout(value hir.Type, resources []resourceCType, resourceByType map[hir.Type]int) (layout.Type, bool) {
-	if value == hir.TypeI32 {
-		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(hir.TypeI32)}, true
+func taggedPayloadLayout(
+	value hir.Type,
+	structures []structCType,
+	structByType map[hir.Type]int,
+	resources []resourceCType,
+	resourceByType map[hir.Type]int,
+) (layout.Type, bool) {
+	value = canonicalCValueType(value)
+	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeU32 || value == hir.TypeUSize {
+		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(value)}, true
+	}
+	if index, found := structByType[value]; found {
+		return structures[index].layoutType, true
 	}
 	index, found := resourceByType[value]
 	if !found {
@@ -121,11 +143,11 @@ func (e *emitter) supportedNeedsDropType(value hir.Type) bool {
 	if _, direct := e.resourceByType[value]; direct {
 		return true
 	}
-	_, tagged := e.taggedByType[value]
-	return tagged
+	tagged, found := e.taggedType(value)
+	return found && tagged.needsDrop
 }
 
-func (e *emitter) resourceTaggedType(value hir.Type) (*taggedCType, bool) {
+func (e *emitter) taggedType(value hir.Type) (*taggedCType, bool) {
 	index, found := e.taggedByType[value]
 	if !found {
 		return nil, false
@@ -137,32 +159,40 @@ func (e *emitter) optionCSpec(value hir.Type) (hir.Type, string, bool) {
 	if isOptionI32(value) {
 		return hir.TypeI32, "scalar-option", true
 	}
-	tagged, found := e.resourceTaggedType(value)
+	tagged, found := e.taggedType(value)
 	if !found || tagged.kind != taggedOption || len(tagged.payloads) != 1 {
 		return hir.TypeInvalid, "", false
 	}
-	return tagged.payloads[0], "resource-option", true
+	feature := "copy-option"
+	if tagged.needsDrop {
+		feature = "resource-option"
+	}
+	return tagged.payloads[0], feature, true
 }
 
 func (e *emitter) resultCSpec(value hir.Type) (hir.Type, hir.Type, string, bool) {
 	if isResultI32I32(value) {
 		return hir.TypeI32, hir.TypeI32, "scalar-result", true
 	}
-	tagged, found := e.resourceTaggedType(value)
+	tagged, found := e.taggedType(value)
 	if !found || tagged.kind != taggedResult || len(tagged.payloads) != 2 {
 		return hir.TypeInvalid, hir.TypeInvalid, "", false
 	}
-	return tagged.payloads[0], tagged.payloads[1], "resource-result", true
+	feature := "copy-result"
+	if tagged.needsDrop {
+		feature = "resource-result"
+	}
+	return tagged.payloads[0], tagged.payloads[1], feature, true
 }
 
-func (e *emitter) emitResourceTaggedTypes(output *strings.Builder) error {
+func (e *emitter) emitTaggedTypes(output *strings.Builder) error {
 	for index, tagged := range e.taggedTypes {
 		output.WriteString("typedef struct {\n")
 		output.WriteString("    uint32_t tag;\n")
 		for payloadIndex, payload := range tagged.payloads {
 			cType, err := e.cValueType(payload)
 			if err != nil {
-				return fmt.Errorf("resource tagged type %q payload %d: %w", tagged.typ, payloadIndex, err)
+				return fmt.Errorf("tagged type %q payload %d: %w", tagged.typ, payloadIndex, err)
 			}
 			fmt.Fprintf(output, "    %s p_%d;\n", cType, payloadIndex)
 		}

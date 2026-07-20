@@ -49,7 +49,8 @@ Arena provider is included explicitly. It also checks Result return, discard, pr
 and parameter transfer, branch and loop obligations, overwrite and early-return rejection, and
 error compatibility. `experimental run` analyzes only its explicit entry-plus-`--source` closure and executes the selected
 module's zero-argument `main() -> i32` through verified MIR, including boolean `if`,
-short-circuit control, scalar `while`, whole resources, resource-bearing built-in tags, ordered
+short-circuit control, scalar `while`, whole resources, copy-only and resource-bearing built-in
+tags, ordered
 resource reassignment, consuming-close ownership, Region fallthrough, return, propagation, nested,
 break, and continue reset paths, and source-linked drop traces, and reports an
 exact scalar result or canonical division, integer-overflow, or invalid-shift trap. Checked

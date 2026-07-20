@@ -78,7 +78,7 @@ func (e *emitter) dropLeafTypes(value hir.Type) []hir.Type {
 	if _, direct := e.resourceByType[value]; direct {
 		return []hir.Type{value}
 	}
-	tagged, found := e.resourceTaggedType(value)
+	tagged, found := e.taggedType(value)
 	if !found {
 		return nil
 	}
@@ -99,7 +99,7 @@ func (e *emitter) emitDropTrace(output *strings.Builder, functionIndex int, oper
 	if _, direct := e.resourceByType[resource.Type]; direct {
 		return e.emitDropTraceCall(output, resource.Type, operation.Span, "")
 	}
-	tagged, found := e.resourceTaggedType(resource.Type)
+	tagged, found := e.taggedType(resource.Type)
 	if !found {
 		return fmt.Errorf("drop trace has unsupported resource type %q", resource.Type)
 	}

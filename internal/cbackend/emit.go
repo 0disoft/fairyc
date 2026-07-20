@@ -256,7 +256,9 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	if err != nil {
 		return Unit{}, err
 	}
-	taggedTypes, taggedByType, err := prepareResourceTaggedTypes(program, resourceTypes, resourceByType, layoutEngine)
+	taggedTypes, taggedByType, err := prepareTaggedTypes(
+		program, structTypes, structByType, resourceTypes, resourceByType, layoutEngine,
+	)
 	if err != nil {
 		return Unit{}, err
 	}
@@ -2551,8 +2553,9 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 		output.WriteByte('\n')
 	}
 	_, scalarOption := e.features["scalar-option"]
+	_, copyOption := e.features["copy-option"]
 	_, resourceOption := e.features["resource-option"]
-	if scalarOption || resourceOption {
+	if scalarOption || copyOption || resourceOption {
 		output.WriteString("#define FY_OPTION_NONE UINT32_C(0)\n")
 		output.WriteString("#define FY_OPTION_SOME UINT32_C(1)\n")
 	}
@@ -2560,15 +2563,16 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 		output.WriteString("typedef struct { uint32_t tag; int32_t payload; } fy_option_i32;\n\n")
 	}
 	_, scalarResult := e.features["scalar-result"]
+	_, copyResult := e.features["copy-result"]
 	_, resourceResult := e.features["resource-result"]
-	if scalarResult || resourceResult {
+	if scalarResult || copyResult || resourceResult {
 		output.WriteString("#define FY_RESULT_OK UINT32_C(0)\n")
 		output.WriteString("#define FY_RESULT_ERR UINT32_C(1)\n")
 	}
 	if scalarResult {
 		output.WriteString("typedef struct { uint32_t tag; int32_t payload; } fy_result_i32_i32;\n\n")
 	}
-	if err := e.emitResourceTaggedTypes(output); err != nil {
+	if err := e.emitTaggedTypes(output); err != nil {
 		return err
 	}
 	if e.instrumentation == InstrumentationDropTraceV0 {

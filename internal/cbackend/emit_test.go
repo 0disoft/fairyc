@@ -1588,6 +1588,72 @@ fn main() -> i32 {
 	}
 }
 
+func TestEmitCopyResultWithStructError(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+struct ConsoleError {
+    status: u32;
+    written: usize;
+}
+fn write(accept: bool) -> Result<usize, ConsoleError> {
+    if accept {
+        Result::Ok(42)
+    } else {
+        Result::Err(ConsoleError { status: 3, written: 7 })
+    }
+}
+fn main() -> i32 {
+    match write(false) {
+        Result::Ok(_) => 0,
+        Result::Err(error) => if error.status == 3 { 42 } else { 0 },
+    }
+}
+`)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("interpreter = %+v, %v", outcome, err)
+	}
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	wantFeatures := []string{"copy-result", "inert-struct", "scalar-call", "scalar-comparison", "scalar-control-flow", "trap"}
+	if !slices.Equal(unit.Features, wantFeatures) {
+		t.Fatalf("Emit() features = %v, want %v", unit.Features, wantFeatures)
+	}
+	for _, required := range []string{
+		"_Static_assert(sizeof(fy_tagged_0) == UINT64_C(32)",
+		"offsetof(fy_tagged_0, p_0) == UINT64_C(8)",
+		"offsetof(fy_tagged_0, p_1) == UINT64_C(16)",
+		"(fy_tagged_0){ .tag = FY_RESULT_OK, .p_0 =",
+		"(fy_tagged_0){ .tag = FY_RESULT_ERR, .p_1 =",
+		".p_1;",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q", required)
+		}
+	}
+}
+
+func TestEmitRejectsResultWithEnumError(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+enum Failure { Denied; }
+fn main() -> i32 {
+    let result: Result<i32, Failure> = Result::Err(Failure::Denied);
+    match result {
+        Result::Ok(value) => value,
+        Result::Err(_) => 42,
+    }
+}
+`)
+	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	var capability cbackend.CapabilityError
+	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "Result construction type") {
+		t.Fatalf("Emit() error = %v", err)
+	}
+}
+
 func TestEmitResourceBearingOption(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

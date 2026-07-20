@@ -109,7 +109,9 @@ verifier, and zero-argument entry-module `main() -> i32` path, then invokes only
 It writes raw C11 to stdout with no banner or metadata and writes no repository file. It does not
 parse the generated C, invoke Clang or GCC, link the test runtime, execute a program, or establish an
 `emittable`, `conformant`, or `supported` target. `Option<i32>` and `Result<i32, i32>` use private
-tagged structs. Direct nonempty all-`i32` resources with empty drop bodies and built-in
+compact tagged structs. Other built-in tags whose payloads are canonical Fairy copy scalars or
+admitted inert structs use target-laid-out private numeric structs. Direct nonempty all-`i32`
+resources with empty drop bodies and built-in
 resource-bearing tags whose payloads are exactly `i32` or direct admitted resources use private
 numeric structs whose size, alignment, and field offsets are asserted against target-layout results.
 Restricted user enums use private numeric tags and private union payload storage. Payloadless and

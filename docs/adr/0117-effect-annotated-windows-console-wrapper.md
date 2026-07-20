@@ -38,7 +38,8 @@ therefore suitable as executable effect evidence, not as the portable `std::io` 
   fixtures rather than bypassing it through an unsafe support module.
 - `unsafe` proves the raw memory and FFI crossing; `console` separately propagates externally
   observable authority through safe calls.
-- The current boolean wrapper remains deliberately local and experimental.
+- ADR 0118 later replaces the local boolean result with a progress-preserving typed record while
+  retaining this effect boundary.
 
 ## Verification
 

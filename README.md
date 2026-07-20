@@ -46,9 +46,10 @@ through typed HIR and executable MIR. The current executable subset accepts only
 `drop` body; any nonempty body fails explicitly before Flow or MIR instead of being silently ignored.
 The interpreter constructs, reads, and recursively drops resources from the verified MIR definition,
 but still does not execute user drop-body effects.
-The constrained C backend emits deterministic C11 for 31 verified fixtures across the scalar
+The constrained C backend emits deterministic C11 for 32 verified fixtures across the scalar
 payload surface, restricted inert user enums, flat nonempty all-`i32` resources with empty drop
-bodies, resource-bearing built-in `Option` and `Result` values, borrowed-view byte lengths, checked
+bodies, copy-scalar/inert-struct and resource-bearing built-in `Option` and `Result` values,
+borrowed-view byte lengths, checked
 immutable byte-slice indexing and end-exclusive slicing, the target-independent value-preserving integer casts `u8 as i32`,
 `u8 as u32`, `u8 as usize`, and `u32 as usize`, checked `u8`, `u32`, and `usize` addition,
 subtraction, multiplication, division, remainder, bitwise operations, and checked right shift,
@@ -124,11 +125,13 @@ is still experimental and does not promote target maturity.
 without a compiler banner and preserves the program's full Windows process status. The checked-in
 `examples/windows_output/main.fy` uses a support module containing the one exact unsafe Windows
 stdout write-all symbol inside a checked local helper. The raw declaration, safe text wrapper, and
-`main` propagate `@effects(console)` while the byte-view helper remains pure. Its `main` passes `&str` and `&[u8]` through safe internal calls; the
+`main` propagate `@effects(console)` while the byte-view helper remains pure. The wrapper returns
+`Result<usize, ConsoleError>`, preserving either the exact byte count or the runtime status plus
+completed prefix. Its `main` passes `&str` and `&[u8]` through safe internal calls; the
 byte helper observes the exact NUL and `A` bytes through checked read-only indexing while the entry contains no raw pointer or `unsafe`,
 prints `Fairy C says hi`, and exits 42. That is real
 FY-to-MSVC process output, unsafe containment, and source-effect enforcement, but it is not yet a
-portable typed-error `std::io` API.
+portable `std::io` API or final symbolic error taxonomy.
 A provisional SystemHeap implementation now lives in the target standard-library
 boundary rather than the thin runtime. It normalizes empty allocation, admits current fundamental
 alignments, preserves bytes across copy-and-release growth or shrink, and leaves the old block
@@ -354,8 +357,9 @@ deterministic `fairyc.target-spec/v0` JSON. The result separates target semantic
 toolchain discovery and lists the profile-specific missing evidence that keeps all three target
 maturity claims false.
 
-`experimental emit-c` accepts the same explicit entry-plus-`--source` closure and prints the verified scalar plus
-flat all-`i32` resource and resource-bearing built-in tag C11 translation unit directly to stdout.
+`experimental emit-c` accepts the same explicit entry-plus-`--source` closure and prints the verified
+scalar plus copy-scalar/inert-struct tags, flat all-`i32` resources, and resource-bearing built-in
+tags as a C11 translation unit directly to stdout.
 Every used C scalar receives target size/alignment assertions; signed and unsigned integer families
 also receive signedness assertions. Target `c::ssize_t` alone adds the declared POSIX.1-2008 feature
 macro and provider header. The command does not write a `.c` file or invoke a native toolchain.

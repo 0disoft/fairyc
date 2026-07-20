@@ -340,8 +340,9 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - The current C backend emits deterministic C11 only for verified scalar, inert-struct,
   restricted inert-enum, flat-resource, and resource-tagged MIR
   under the provisional `x86_64-linux-gnu` profile. It includes private `Option<i32>`,
-  `Result<i32, i32>`, nonempty all-`i32` resource transport, and built-in resource-bearing tags whose
-  payloads are exactly `i32` or direct admitted resources, plus private restricted user-enum tags
+  `Result<i32, i32>`, copy-only built-in tags over canonical Fairy scalars or admitted inert structs,
+  nonempty all-`i32` resource transport, and built-in resource-bearing tags whose payloads are
+  exactly `i32` or direct admitted resources, plus private restricted user-enum tags
   whose payload fields are admitted scalars, raw pointers, or admitted inert structs. Nested user enums
   and built-in tags inside a user-enum payload remain a C-backend capability boundary. No public
   tagged or resource ABI is claimed.
