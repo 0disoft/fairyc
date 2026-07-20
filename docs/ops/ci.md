@@ -147,6 +147,8 @@ ASCII bytes `Fairy C says hi\n`, and exits 42. The CLI must forward those stdout
 produce no stderr, preserve status 42, inspect the temporary PE and unwind data, and remove the
 image. The entry module is safe while the explicit support module owns the raw crossing; this is not
 a portable `std::io` or public package-build receipt.
+The raw declaration, safe text wrapper, and entry must all declare `console`; deleting the entry or
+wrapper declaration must fail semantic analysis with `E7102` before MSVC is invoked.
 The same intent derives one non-POSIX C11 unit from the eight valid Windows layout cases, then
 compiles and executes it under low and optimized MSVC profiles. It also derives separate caller and
 callee C11 translation units from all twelve valid Microsoft x64 plans, compiles and links them

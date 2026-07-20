@@ -2,6 +2,7 @@ module examples::windows_output::main;
 
 import examples::windows_output::windows_console as console;
 
+@effects(console)
 fn main() -> i32 {
     let text: &str = "Fairy C says hi\n";
     let bytes: &[u8] = b"\x00A";

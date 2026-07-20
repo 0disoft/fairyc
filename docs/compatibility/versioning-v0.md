@@ -104,6 +104,10 @@ ADR 0091 adds the unstable `experimental exec-target` process contract and exact
 streams, preserved 32-bit program status, the `{ status: u32, written: usize }` transport, status
 meanings 0 through 4, and target-specific admission are prototype compatibility data. They do not
 stabilize a public `std::io` API, console encoding, installation, or target maturity.
+ADR 0117 adds `console` to the raw declaration, checked safe wrapper, and example entry contract.
+Those annotations are language-level call-acceptance data, while the helper name, boolean result,
+and example module paths remain experimental and do not become a standard-library compatibility
+promise.
 ADR 0092 adds `.len` to safe borrows of `str` and `[u8]`. The property name, `usize` result, byte-count
 meaning, metadata-only behavior, and absence of scanning, allocation, calls, and traps are pre-1
 language semantics. This does not stabilize private view layout, indexing, slicing, Unicode

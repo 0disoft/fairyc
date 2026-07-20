@@ -203,7 +203,8 @@ slice exposes only unsafe `fy_std_windows_stdout_write_all_v0`; stdin, stderr wr
 Unicode console policy, and a safe public `std::io` wrapper remain absent.
 The checked-in output example confines that raw call to a safe local `&str` helper, supplies the
 length through the view's `usize` byte-count `.len`, and verifies status plus completed progress.
-Its `main` contains no raw pointer, foreign call, or `unsafe`, and a safe `&[u8]` helper separately
+The raw declaration, wrapper, and `main` propagate `@effects(console)`; `unsafe` remains an
+independent support-module boundary. `main` contains no raw pointer, foreign call, or `unsafe`, and a safe `&[u8]` helper separately
 proves byte-view internal-call transport.
 
 For the admitted foreign-call slice, `emit-c` writes a plain external prototype and call using the

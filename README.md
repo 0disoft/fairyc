@@ -122,11 +122,13 @@ category and rejects program output. This is the first direct Windows target exe
 is still experimental and does not promote target maturity.
 `experimental exec-target` is the program-facing sibling: it forwards bounded stdout and stderr
 without a compiler banner and preserves the program's full Windows process status. The checked-in
-`examples/windows_output/main.fy` contains the one exact unsafe Windows stdout write-all symbol
-inside a checked local helper. Its `main` passes `&str` and `&[u8]` through safe internal calls; the
+`examples/windows_output/main.fy` uses a support module containing the one exact unsafe Windows
+stdout write-all symbol inside a checked local helper. The raw declaration, safe text wrapper, and
+`main` propagate `@effects(console)` while the byte-view helper remains pure. Its `main` passes `&str` and `&[u8]` through safe internal calls; the
 byte helper observes the exact NUL and `A` bytes through checked read-only indexing while the entry contains no raw pointer or `unsafe`,
 prints `Fairy C says hi`, and exits 42. That is real
-FY-to-MSVC process output and unsafe containment, but it is not yet a portable `std::io` API.
+FY-to-MSVC process output, unsafe containment, and source-effect enforcement, but it is not yet a
+portable typed-error `std::io` API.
 A provisional SystemHeap implementation now lives in the target standard-library
 boundary rather than the thin runtime. It normalizes empty allocation, admits current fundamental
 alignments, preserves bytes across copy-and-release growth or shrink, and leaves the old block

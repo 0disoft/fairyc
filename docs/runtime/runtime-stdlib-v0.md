@@ -257,6 +257,11 @@ returns status 1 with zero progress. Status 2 means stdout was unavailable, stat
 `WriteFile` failure, and status 4 reports impossible zero progress. Success is status 0 with
 `written == length`.
 
+Its FY raw declaration and the checked safe text wrapper both declare `@effects(console)`. The
+example entry must propagate that effect even though it contains no raw pointer or unsafe block.
+This is executable authority tracking for one Windows-only helper, not a stable `std::io` API or a
+typed console-error design.
+
 The implementation obtains `STD_OUTPUT_HANDLE` once and loops in `DWORD`-bounded chunks until all
 bytes are written or a failure reports the completed prefix. It does not allocate, append a newline,
 transcode, retain the input pointer, retry a failed operation, or hide partial progress. The call is
@@ -267,7 +272,8 @@ unproven or unimplemented.
 
 This raw function is admitted only by the `x86_64-windows-msvc` support resolver and must be called
 inside `unsafe`. The checked-in example confines the call to a safe function in an explicitly listed
-support module; that function accepts `&str`, derives the raw length from `.len`, and reports success
+support module; that function accepts `&str`, derives the raw length from `.len`, declares
+`@effects(console)`, and reports success
 only after checking status and completed progress. This is an example of unsafe containment, not a
 public `std::io` module, portable console API, stable error type, or stable result layout.
 

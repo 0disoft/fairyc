@@ -126,6 +126,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0114-interprocedural-borrow-return-summaries.md`: fixed-point internal return-origin summaries that map one exact parameter, region parameter, or static source through borrow-returning calls.
 - `0115-loop-carried-safe-borrow-provenance.md`: canonical loan-site generations plus loop-header, `continue`, and `break` environment joins for safe-borrow reassignment in `while`.
 - `0116-stage-0-source-effects.md`: closed external-capability declarations, canonical typed-HIR sets, caller-superset checks, and unsafe-independent effect diagnostics.
+- `0117-effect-annotated-windows-console-wrapper.md`: end-to-end `console` authority from the raw Windows stdout declaration through safe FY wrappers and `main`.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

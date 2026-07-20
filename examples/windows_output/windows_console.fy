@@ -6,9 +6,11 @@ struct write_result {
     written: usize;
 }
 
+@effects(console)
 @link_name("fy_std_windows_stdout_write_all_v0")
 unsafe extern C fn stdout_write_all(data: *u8, length: usize) -> write_result;
 
+@effects(console)
 pub fn stdout_contract_edge_states() -> bool {
     let empty: write_result = unsafe {
         stdout_write_all(null, 0)
@@ -20,6 +22,7 @@ pub fn stdout_contract_edge_states() -> bool {
         invalid.status == 1 && invalid.written == 0
 }
 
+@effects(console)
 pub fn stdout_write_text(text: &str) -> bool {
     let result: write_result = unsafe {
         stdout_write_all(text as *u8, text.len)
