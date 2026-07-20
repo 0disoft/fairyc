@@ -21,8 +21,9 @@ Pass assertions identify source text with source-root-relative paths and half-op
 
 Fail assertions list the complete deterministic set of independent diagnostics. Diagnostics caused only by an already-poisoned name or type are suppressed as cascades. Full prose is intentionally outside the fixture contract.
 
-`internal/semanticfixture` executes all twenty-two listed `resolve`, `type`, and local `flow` cases. The type
-cases include `E1012` rejection for loop control
+`internal/semanticfixture` executes all twenty-three listed `resolve`, `type`, and local `flow` cases. The type
+cases include `E1012` rejection for loop control and `E1013` rejection before MIR when an integer
+literal exceeds its selected implemented type,
 without an enclosing `while`, plus pass cases that preserve all sixteen exact TargetSpec C scalars
 across nested foreign producer and consumer calls. The Flow
 assertions cover borrow origin, last use, escape, conflict, and single-origin return behavior without

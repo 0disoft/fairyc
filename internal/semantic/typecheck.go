@@ -2,6 +2,7 @@ package semantic
 
 import (
 	"fmt"
+	"math/big"
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/ast"
@@ -363,6 +364,9 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 		actual, supported = literalType(expression.Text, expected)
 		if !supported {
 			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "literal "+literalClass(expression.Text))
+		} else if isIntegerLiteral(expression.Text) && !integerLiteralFits(expression.Text, actual) {
+			c.analyzer.addDiagnostic("E1013", span(c.module.file.Path, expression.Span))
+			actual = hir.TypeInvalid
 		}
 	case syntax.KindPath:
 		if reference, found := c.analyzer.enumVariantPaths[expression]; found {
@@ -1298,7 +1302,7 @@ func literalType(raw string, expected hir.Type) (hir.Type, bool) {
 	if strings.HasPrefix(raw, "\"") {
 		return hir.SharedBorrow(hir.TypeStr), true
 	}
-	if raw != "" && raw[0] >= '0' && raw[0] <= '9' && !strings.ContainsAny(raw, ".eE") {
+	if isIntegerLiteral(raw) {
 		switch expected {
 		case hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
 			return expected, true
@@ -1306,6 +1310,45 @@ func literalType(raw string, expected hir.Type) (hir.Type, bool) {
 		return hir.TypeI32, true
 	}
 	return hir.TypeInvalid, false
+}
+
+func isIntegerLiteral(raw string) bool {
+	if raw == "" || raw[0] < '0' || raw[0] > '9' {
+		return false
+	}
+	if strings.HasPrefix(raw, "0x") || strings.HasPrefix(raw, "0X") || strings.HasPrefix(raw, "0b") || strings.HasPrefix(raw, "0B") {
+		return true
+	}
+	return !strings.ContainsAny(raw, ".eE")
+}
+
+func integerLiteralFits(raw string, selected hir.Type) bool {
+	clean := strings.ReplaceAll(raw, "_", "")
+	base := 10
+	digits := clean
+	if strings.HasPrefix(clean, "0x") || strings.HasPrefix(clean, "0X") {
+		base, digits = 16, clean[2:]
+	} else if strings.HasPrefix(clean, "0b") || strings.HasPrefix(clean, "0B") {
+		base, digits = 2, clean[2:]
+	}
+	value := new(big.Int)
+	if _, ok := value.SetString(digits, base); !ok || value.Sign() < 0 {
+		return false
+	}
+	var maximum *big.Int
+	switch selected {
+	case hir.TypeI32:
+		maximum = new(big.Int).SetInt64(1<<31 - 1)
+	case hir.TypeU8:
+		maximum = new(big.Int).SetUint64(1<<8 - 1)
+	case hir.TypeU32:
+		maximum = new(big.Int).SetUint64(1<<32 - 1)
+	case hir.TypeUSize:
+		maximum = new(big.Int).SetUint64(^uint64(0))
+	default:
+		return true
+	}
+	return value.Cmp(maximum) <= 0
 }
 
 func literalClass(raw string) string {

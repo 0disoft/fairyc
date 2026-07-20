@@ -14,8 +14,8 @@ The project is not trying to beat every hand-tuned C program or make every C own
 The first Stage 0 frontend slice now exists in Go: immutable source bytes, a lossless lexer,
 compact recoverable syntax, error-free AST lowering, deterministic `E00xx` diagnostics, and a
 runner for all parser v0 fixtures. The next slice resolves names and produces typed HIR for the
-  fixture-backed scalar, safe-borrow, and scalar foreign-call subset. Its semantic runner executes all 22 v0 resolve, type,
-and local Flow cases, including last-use loans and borrow-return origins. Whole-root resource Flow
+  fixture-backed scalar, safe-borrow, and scalar foreign-call subset. Its semantic runner executes all 23 v0 resolve, type,
+and local Flow cases, including integer-literal range rejection, last-use loans, and borrow-return origins. Whole-root resource Flow
   also executes all 12 v0 cases for moves, cleanup obligations, branch joins, normal, break, and continue loop edges,
 consuming tagged matches, and live/dead resource reassignment. The
 Region runner executes all 6 v1 cases, including package-proven `std::alloc::Arena`, hidden

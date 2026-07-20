@@ -92,6 +92,46 @@ func TestAnalyzeReportsBindingTypeMismatch(t *testing.T) {
 	assertSpan(t, result.Diagnostics[0].Related[0].Span, "main.fy", expected, expected+4)
 }
 
+func TestAnalyzeTypesRadixAndSeparatedIntegerLiterals(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn main() -> i32 {
+    let byte: u8 = 0xFF;
+    let word: u32 = 0xDEAD_BEEF;
+    let size: usize = 0b1111_1111;
+    if byte == 255 && word == 3735928559 && size == 255 { 42 } else { 1 }
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+}
+
+func TestAnalyzeRejectsIntegerLiteralOutsideSelectedType(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		name    string
+		typeRef string
+		value   string
+	}{
+		{name: "i32", typeRef: "i32", value: "2147483648"},
+		{name: "u8", typeRef: "u8", value: "0x100"},
+		{name: "u32", typeRef: "u32", value: "4_294_967_296"},
+		{name: "usize", typeRef: "usize", value: "18_446_744_073_709_551_616"},
+	} {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			text := "module main;\nfn main() -> i32 { let value: " + test.typeRef + " = " + test.value + "; 0 }\n"
+			result := analyzeText(t, map[string]string{"main.fy": text})
+			if result.FailedPhase != semantic.PhaseType || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E1013" {
+				t.Fatalf("result = %+v", result)
+			}
+			start := strings.Index(text, test.value)
+			assertSpan(t, result.Diagnostics[0].Primary, "main.fy", start, start+len(test.value))
+		})
+	}
+}
+
 func TestAnalyzeReportsNonBooleanCondition(t *testing.T) {
 	t.Parallel()
 	text := "module main;\n\nfn answer() -> i32 {\n    if 1 { 2 } else { 3 }\n}\n"

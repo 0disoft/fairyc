@@ -46,7 +46,7 @@ Nominal `struct`, `resource`, and `enum` declarations are not structurally inter
 
 ## Literal and expression typing
 
-Integer and floating literal text remains exact until an expected type is available. An unconstrained integer defaults to `i32`; an unconstrained float defaults to `f64`. Range checking occurs after type selection and does not wrap.
+Integer and floating literal text remains exact until an expected type is available. An unconstrained integer defaults to `i32`; an unconstrained float defaults to `f64`. Decimal, hexadecimal, and binary integer values are range-checked after type selection and do not wrap; an out-of-range implemented integer literal is `E1013` before MIR lowering.
 
 The implemented safe integer `as` subset is closed to `u8 -> i32`, `u8 -> u32`, `u8 -> usize`, and
 `u32 -> usize`. Each target contains the complete mathematical source range, so no value changes or
@@ -106,6 +106,7 @@ Within one case, diagnostics sort by source path using unsigned UTF-8 byte order
 - `E1008` assignment target is not a mutable place;
 - `E1009` return expression does not match the declared return type;
 - `E1010` call arity does not match the declaration.
+- `E1013` integer literal does not fit its selected implemented integer type.
 
 Ownership and borrow diagnostics retain their `E11xx` and `E21xx` meanings from `docs/diagnostics/catalog-v0.md`.
 

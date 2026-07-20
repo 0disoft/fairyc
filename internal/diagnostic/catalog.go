@@ -54,6 +54,7 @@ var catalogEntries = []CatalogEntry{
 	{Code: "E1009", Category: categoryType, Meaning: "Return expression is incompatible with the declared return type."},
 	{Code: "E1010", Category: categoryType, Meaning: "Call argument count does not match the resolved declaration."},
 	{Code: "E1012", Category: categoryType, Meaning: "`break` or `continue` has no enclosing `while` loop."},
+	{Code: "E1013", Category: categoryType, Meaning: "Integer literal is outside the range of its selected `i32`, `u8`, `u32`, or `usize` type."},
 	{Code: "E1101", Category: categoryResource, Meaning: "Resource used after move or consumption."},
 	{Code: "E1102", Category: categoryResource, Meaning: "Operation would create or execute a second cleanup obligation."},
 	{Code: "E1103", Category: categoryResource, Meaning: "Resource field move is not supported."},

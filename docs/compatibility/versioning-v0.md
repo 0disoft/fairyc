@@ -116,6 +116,10 @@ ADR 0107 adds omitted start and end spellings to immutable byte-view slicing. Ze
 receiver length normalization, written-bound evaluation order, the unchanged checked MIR shape,
 and the `bounds` outcome are pre-1 semantics; inclusive ranges, text slicing, and private C layout
 remain unstabilized.
+ADR 0108 assigns `E1013` to a well-formed integer literal outside its selected implemented integer
+type. Radix-independent mathematical comparison, complete-literal spans, pre-MIR rejection, and the
+four Stage 0 limits are pre-1 semantics; signed-literal folding, suffixes, wider integers, and C
+scalar immediates remain unstabilized.
 ADR 0093 admits exact `&str` and `&[u8]` parameters on ordinary internal functions. Exact source
 types, non-owning borrow behavior, matching call operands, and the absence of implicit raw-pointer
 conversion are pre-1 language semantics. Interpreter values and generated-C by-value descriptors
