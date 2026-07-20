@@ -106,6 +106,11 @@ closed support linkage, MSVC resolution, and PE/unwind validation, but executes 
 instead of retaining it. It reports the exact signed `i32` result or the same canonical product-trap
 category and rejects program output. This is the first direct Windows target execution command; it
 is still experimental and does not promote target maturity.
+`experimental exec-target` is the program-facing sibling: it forwards bounded stdout and stderr
+without a compiler banner and preserves the program's full Windows process status. The checked-in
+`examples/windows_output/main.fy` uses one exact unsafe Windows stdout write-all symbol to print
+`Fairy C says hi` and exit 42. That is real FY-to-MSVC process output, but it is not yet a safe,
+portable `std::io` API.
 A provisional SystemHeap implementation now lives in the target standard-library
 boundary rather than the thin runtime. It normalizes empty allocation, admits current fundamental
 alignments, preserves bytes across copy-and-release growth or shrink, and leaves the old block
@@ -209,7 +214,8 @@ exception, virtual-walks raiser, termination, and catcher frames, and requires o
 `__finally` execution under both profiles. The target marker remains missing until broader layout
 and independent/source-level/hosted ABI and unwind evidence exists. A host-independent PE parser
 now validates the host-smoke product, both declared-target profile products, two direct run-target
-temporary products (including one driven by a separately built `fairyc.exe`), and all six probe images as bounded
+temporary products (including one driven by a separately built `fairyc.exe`), one exec-target
+output product, and all six probe images as bounded
 AMD64 PE32+ console executables
 with aligned headers and sections and an executable `.text` entry point. That linked-image path does not inspect
 object symbols, relocations, or Windows unwind records. The same package separately parses every
@@ -236,8 +242,8 @@ report lists declared target maturity and missing evidence without probing this 
 `fairyc experimental` CLI can inspect syntax, syntax-check, semantic-check, emit the
 scalar, flat-resource, and resource-tagged C11 translation unit, build that subset into a Linux executable on an eligible host,
 inspect the declared target specification, or interpret one source-root-relative `.fy` file, while semantic checking also
-accepts an explicit module set. There is no stable CLI, user drop-body execution, native execution
-command, complete runtime, standard library, package manager, supported target, release-stable CLI, or stable language
+accepts an explicit module set. There is no stable CLI, user drop-body execution, complete runtime,
+safe standard library, package manager, supported target, release-stable CLI, or stable language
 revision yet.
 
 ## Try the current prototype
@@ -251,6 +257,7 @@ go run ./cmd/fairyc experimental run-host examples/windows_smoke/main.fy --profi
 go run ./cmd/fairyc experimental build-host examples/windows_smoke/main.fy --profile optimized --output build/fairyc-windows-smoke.exe
 go run ./cmd/fairyc experimental build-target examples/windows_target/main.fy --target x86_64-windows-msvc --profile optimized --output build/fairyc-windows-target.exe
 go run ./cmd/fairyc experimental run-target examples/windows_target/main.fy --target x86_64-windows-msvc --profile optimized
+go run ./cmd/fairyc experimental exec-target examples/windows_output/main.fy --target x86_64-windows-msvc --profile optimized
 go run ./cmd/fairyc experimental check-syntax examples/syntax/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/syntax/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/semantic/main.fy examples/semantic/math.fy

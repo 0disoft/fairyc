@@ -747,7 +747,7 @@ func (e *emitter) inspectForeignFunctions() error {
 		if function.ABI != "C" {
 			return CapabilityError{Function: function.Name, Feature: "foreign ABI " + strconv.Quote(function.ABI)}
 		}
-		if !validExternalCIdentifier(function.LinkName) {
+		if !validExternalCIdentifier(function.LinkName, e.targetID) {
 			return CapabilityError{Function: function.Name, Feature: "external C symbol " + strconv.Quote(function.LinkName)}
 		}
 		if _, err := e.foreignCType(function.ResultType, true); err != nil {
@@ -889,12 +889,12 @@ func validCABIIdentifier(value string) bool {
 	return !keyword
 }
 
-func validExternalCIdentifier(value string) bool {
+func validExternalCIdentifier(value string, targetID target.ID) bool {
 	if value == "" || value == "main" || strings.HasPrefix(value, "FY_") {
 		return false
 	}
 	if strings.HasPrefix(value, "fy_") {
-		if !cstdlibcontract.Admitted(value) {
+		if !cstdlibcontract.AdmittedForTarget(value, targetID) {
 			return false
 		}
 	}

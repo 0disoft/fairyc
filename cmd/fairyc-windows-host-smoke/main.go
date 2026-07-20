@@ -64,6 +64,7 @@ fn main() -> i32 {
 const checkedInSuccessPath = "examples/windows_smoke/main.fy"
 const checkedInWindowsTargetPath = "examples/windows_target/main.fy"
 const checkedInWindowsQuickstartPath = "examples/windows_quickstart/main.fy"
+const checkedInWindowsOutputPath = "examples/windows_output/main.fy"
 const windowsLayoutManifestPath = "spec/fixtures/layout/manifest-windows-msvc-v0.json"
 const windowsABIManifestPath = "spec/fixtures/c-abi/manifest-windows-msvc-v0.json"
 const subprocessOutputLimit = 64 * 1024
@@ -92,6 +93,10 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("read checked-in Windows quickstart source: %w", err)
 	}
+	windowsOutputSource, err := os.ReadFile(filepath.FromSlash(checkedInWindowsOutputPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in Windows output source: %w", err)
+	}
 	root, err := os.MkdirTemp("", "fairyc-windows-host-smoke-")
 	if err != nil {
 		return fmt.Errorf("create temporary source root: %w", err)
@@ -101,6 +106,7 @@ func run() error {
 		checkedInSuccessPath:           string(successSource),
 		checkedInWindowsTargetPath:     string(windowsTargetSource),
 		checkedInWindowsQuickstartPath: string(windowsQuickstartSource),
+		checkedInWindowsOutputPath:     string(windowsOutputSource),
 		"negative.fy":                  negativeSource,
 		"division_by_zero.fy":          divisionByZeroSource,
 		"remainder_by_zero.fy":         remainderByZeroSource,
@@ -183,6 +189,17 @@ func run() error {
 		return fmt.Errorf("run-target returned code %d, stdout %q, stderr %q", targetRunCode, targetRunStdout.String(), targetRunStderr.String())
 	}
 	targetRunExecutions++
+	targetExecExecutions := 0
+	var targetExecStdout bytes.Buffer
+	var targetExecStderr bytes.Buffer
+	targetExecCode := cli.Run([]string{
+		"experimental", "exec-target", checkedInWindowsOutputPath,
+		"--target", "x86_64-windows-msvc", "--profile", "optimized",
+	}, root, &targetExecStdout, &targetExecStderr)
+	if targetExecCode != 42 || targetExecStdout.String() != "Fairy C says hi\n" || targetExecStderr.Len() != 0 {
+		return fmt.Errorf("exec-target returned code %d, stdout %q, stderr %q", targetExecCode, targetExecStdout.String(), targetExecStderr.String())
+	}
+	targetExecExecutions++
 	standaloneCompilerBytes, err := runStandaloneCompiler(repositoryRoot, root)
 	if err != nil {
 		return err
@@ -232,7 +249,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds and %d direct run-target executions checked LLP64 c.long emission, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart execution, 14 run-host outcomes covered signed results and four arithmetic trap categories, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, targetRunExecutions, standaloneCompilerBytes, layoutCases, layoutExecutions, abiCases, abiExecutions, unwindCases, unwindExecutions, 1+targetBuildExecutions+targetRunExecutions+layoutExecutions+abiExecutions+unwindExecutions, toolchain.Version)
+	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds, %d direct run-target executions, and %d exec-target execution checked LLP64 c.long emission, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, exact stdout bytes, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart execution, 14 run-host outcomes covered signed results and four arithmetic trap categories, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, layoutCases, layoutExecutions, abiCases, abiExecutions, unwindCases, unwindExecutions, 1+targetBuildExecutions+targetRunExecutions+targetExecExecutions+layoutExecutions+abiExecutions+unwindExecutions, toolchain.Version)
 	return nil
 }
 

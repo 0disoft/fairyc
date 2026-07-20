@@ -35,13 +35,15 @@ or redistributable. From the repository root in PowerShell:
 New-Item -ItemType Directory -Force build | Out-Null
 bun tools/run-go.ts build -mod=readonly -trimpath -o build/fairyc.exe ./cmd/fairyc
 .\build\fairyc.exe experimental run-target examples/windows_quickstart/main.fy --target x86_64-windows-msvc --profile optimized
+.\build\fairyc.exe experimental exec-target examples/windows_output/main.fy --target x86_64-windows-msvc --profile optimized
 ```
 
 The first command creates only the ignored output directory. The wrapper keeps Go caches under the
 ignored `.cache/go-*` roots and disables module and checksum network access. The expected final
-receipt starts with `native result: 42`; the FY program itself is compiled into and executed as a
-temporary MSVC PE. WSL is neither installed nor invoked by this path. Delete `build/fairyc.exe` to
-undo the local bootstrap output.
+`run-target` receipt starts with `native result: 42`; `exec-target` prints `Fairy C says hi` and
+returns the FY program's status 42. In both cases the FY program itself is compiled into and
+executed as a temporary MSVC PE. WSL is neither installed nor invoked by this path. Delete
+`build/fairyc.exe` to undo the local bootstrap output.
 
 The configured Windows smoke independently builds `fairyc.exe` into a temporary directory, invokes
 its help surface, runs the checked-in quickstart through its `run-target` command, and removes both

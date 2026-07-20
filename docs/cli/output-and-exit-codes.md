@@ -77,6 +77,12 @@ execution. Reserved product-trap statuses write `trap: <category>` to stderr and
 Source and target-subset failures use codes `3` and `2`; toolchain, compile, link, PE/unwind
 inspection, unexpected program output, and execution failures use code `6`. It writes no artifact
 below the source root.
+`experimental exec-target` instead writes the program's captured stdout and stderr bytes to their
+matching streams without a compiler receipt, then returns the program's full 32-bit Windows process
+status. A nonzero status in this command is a program result, not automatically a compiler failure.
+The streams share one 64 KiB capture budget and have no cross-stream ordering promise. Toolchain,
+compile, link, PE/COFF/unwind inspection, timeout, capture-limit, and CLI output-write failures keep
+their ordinary prototype diagnostic codes and do not masquerade as program statuses.
 `experimental build-host` writes a successful PE only to the explicit ignored `.exe` path below
 `build/`, then writes `built: <relative-path> (windows/amd64 host-smoke, msvc <version>, <profile>)`
 to stdout. It uses code `6` for toolchain, compile, or artifact failures and never replaces an

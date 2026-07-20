@@ -199,14 +199,14 @@ at both profiles. Independent compiler or assembly/register inspection, source-l
 crossings, and a hosted Windows receipt remain absent. PE/COFF objects, runtime, standard library,
 supported distribution artifacts, and conformance remain later gates. A bounded parser now checks
 the host-smoke product, both declared-target profile products, two direct run-target temporary
-products, and six native probe executables for AMD64 PE32+ console identity, aligned
+products, one exec-target temporary output product, and six native probe executables for AMD64 PE32+ console identity, aligned
 headers/sections, and an executable entry point, but does not inspect `.obj` symbols, relocations,
 unwind payloads, or CodeView/PDB data.
 Every local MSVC compile in the same lane now also parses its intermediate `.obj` as raw AMD64 COFF
 before cleanup, including `.text$...`, `.bss`, symbol-table, and relocation-index structure. Exact
 versioned symbol names, COMDAT selection, relocation types, unwind records, and a hosted object
 receipt remain absent, so the target evidence marker stays fail-closed.
-The eleven local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
+The twelve local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
 runtime-function ordering and code coverage plus referenced version 1 and version 2 unwind-record
 bounds, including handler/chained minimum tails. A separate three-object probe now raises a private
 noncontinuable exception at both profiles, validates its payload in an outer SEH filter, walks the
@@ -239,11 +239,16 @@ maturity booleans remain false.
 The same target compilation is now exposed through `experimental run-target`. It validates PE and
 Microsoft x64 unwind structure, executes a temporary optimized image of the checked-in FY target
 example, requires no output and native result 42, and removes the image. The configured Windows
-smoke therefore covers two retained target builds plus two direct target executions and eleven total
+smoke therefore covers two retained target builds plus two direct target executions and twelve total
 target or probe PE images. The second direct execution comes from a separately built temporary
 `fairyc.exe` compiling the minimal Windows quickstart, so the standalone compiler process boundary
 is exercised without retaining or distributing it. This improves the developer execution path
 without changing target maturity or claiming self-hosting.
+The additional `experimental exec-target` path uses the same inspected temporary Windows target but
+forwards separated bounded stdout and stderr without a compiler receipt and preserves the program's
+32-bit Windows status. Its FY example observes empty and invalid raw-write cases, emits the exact 16
+ASCII bytes `Fairy C says hi\n`, and exits 42 through one Windows-only unsafe C symbol. This does not
+establish a safe or portable `std::io` surface, target support, or self-hosting.
 The GitHub Actions Windows matrix is now configured to execute that full smoke after `go test`,
 using the hosted runner's local x64 MSVC and SDK with no WSL and retaining no artifacts. The
 `hosted-windows-receipt` marker deliberately remains missing until an exit-zero workflow run is

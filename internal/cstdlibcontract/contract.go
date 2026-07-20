@@ -4,18 +4,21 @@ package cstdlibcontract
 import (
 	"fmt"
 	"strings"
+
+	"github.com/0disoft/fairyc/internal/target"
 )
 
 // Component identifies one source-owned standard-library implementation slice.
 type Component string
 
 const (
-	ComponentLinuxFile  Component = "linux-file"
-	ComponentSystemHeap Component = "system-heap"
-	ComponentBuffer     Component = "buffer"
-	ComponentArena      Component = "arena"
-	ComponentTextView   Component = "text-view"
-	ComponentOwnedText  Component = "owned-text"
+	ComponentLinuxFile      Component = "linux-file"
+	ComponentWindowsConsole Component = "windows-console"
+	ComponentSystemHeap     Component = "system-heap"
+	ComponentBuffer         Component = "buffer"
+	ComponentArena          Component = "arena"
+	ComponentTextView       Component = "text-view"
+	ComponentOwnedText      Component = "owned-text"
 )
 
 var symbolComponents = map[string]Component{
@@ -46,30 +49,36 @@ var symbolComponents = map[string]Component{
 	"fy_std_linux_file_close_v0":       ComponentLinuxFile,
 }
 
+var windowsOnlySymbolComponents = map[string]Component{
+	"fy_std_windows_stdout_write_all_v0": ComponentWindowsConsole,
+}
+
 var windowsMSVCSymbolComponents = map[string]Component{
-	"fy_std_system_heap_allocate_v0":   ComponentSystemHeap,
-	"fy_std_system_heap_deallocate_v0": ComponentSystemHeap,
-	"fy_std_buffer_initialize_v0":      ComponentBuffer,
-	"fy_std_buffer_resize_zeroed_v0":   ComponentBuffer,
-	"fy_std_buffer_drop_v0":            ComponentBuffer,
-	"fy_std_arena_initialize_v0":       ComponentArena,
-	"fy_std_region_begin_v0":           ComponentArena,
-	"fy_std_region_allocate_zeroed_v0": ComponentArena,
-	"fy_std_region_reset_v0":           ComponentArena,
-	"fy_std_arena_drop_v0":             ComponentArena,
-	"fy_std_text_utf8_valid_v0":        ComponentTextView,
-	"fy_std_cstr_validate_v0":          ComponentOwnedText,
-	"fy_std_string_copy_v0":            ComponentOwnedText,
-	"fy_std_string_as_view_v0":         ComponentOwnedText,
-	"fy_std_string_append_v0":          ComponentOwnedText,
-	"fy_std_string_drop_v0":            ComponentOwnedText,
-	"fy_std_cstring_from_text_v0":      ComponentOwnedText,
-	"fy_std_cstring_as_view_v0":        ComponentOwnedText,
-	"fy_std_cstring_drop_v0":           ComponentOwnedText,
+	"fy_std_windows_stdout_write_all_v0": ComponentWindowsConsole,
+	"fy_std_system_heap_allocate_v0":     ComponentSystemHeap,
+	"fy_std_system_heap_deallocate_v0":   ComponentSystemHeap,
+	"fy_std_buffer_initialize_v0":        ComponentBuffer,
+	"fy_std_buffer_resize_zeroed_v0":     ComponentBuffer,
+	"fy_std_buffer_drop_v0":              ComponentBuffer,
+	"fy_std_arena_initialize_v0":         ComponentArena,
+	"fy_std_region_begin_v0":             ComponentArena,
+	"fy_std_region_allocate_zeroed_v0":   ComponentArena,
+	"fy_std_region_reset_v0":             ComponentArena,
+	"fy_std_arena_drop_v0":               ComponentArena,
+	"fy_std_text_utf8_valid_v0":          ComponentTextView,
+	"fy_std_cstr_validate_v0":            ComponentOwnedText,
+	"fy_std_string_copy_v0":              ComponentOwnedText,
+	"fy_std_string_as_view_v0":           ComponentOwnedText,
+	"fy_std_string_append_v0":            ComponentOwnedText,
+	"fy_std_string_drop_v0":              ComponentOwnedText,
+	"fy_std_cstring_from_text_v0":        ComponentOwnedText,
+	"fy_std_cstring_as_view_v0":          ComponentOwnedText,
+	"fy_std_cstring_drop_v0":             ComponentOwnedText,
 }
 
 var componentLinkOrder = []Component{
 	ComponentLinuxFile,
+	ComponentWindowsConsole,
 	ComponentSystemHeap,
 	ComponentBuffer,
 	ComponentArena,
@@ -79,8 +88,29 @@ var componentLinkOrder = []Component{
 
 // Admitted reports whether symbol is one exact project-owned Stage 0 C entry point.
 func Admitted(symbol string) bool {
-	_, found := symbolComponents[symbol]
+	if _, found := symbolComponents[symbol]; found {
+		return true
+	}
+	_, found := windowsOnlySymbolComponents[symbol]
 	return found
+}
+
+// AdmittedForTarget reports whether one exact project-owned symbol belongs to
+// the closed C standard-library contract for targetID.
+func AdmittedForTarget(symbol string, targetID target.ID) bool {
+	switch targetID {
+	case target.X8664LinuxGNU:
+		_, found := symbolComponents[symbol]
+		return found
+	case target.X8664WindowsMSVC:
+		if _, found := windowsMSVCSymbolComponents[symbol]; found {
+			return true
+		}
+		_, knownForAnotherTarget := symbolComponents[symbol]
+		return knownForAnotherTarget
+	default:
+		return false
+	}
 }
 
 // ComponentsForSymbols returns the minimal dependency-closed component set in deterministic C
@@ -90,6 +120,9 @@ func ComponentsForSymbols(symbols []string) ([]Component, error) {
 	for _, symbol := range symbols {
 		component, found := symbolComponents[symbol]
 		if !found {
+			if _, targetSpecific := windowsOnlySymbolComponents[symbol]; targetSpecific {
+				return nil, fmt.Errorf("Stage 0 standard-library symbol %q has no x86_64-linux-gnu source contract", symbol)
+			}
 			if strings.HasPrefix(symbol, "fy_std_") {
 				return nil, fmt.Errorf("unrecognized Stage 0 standard-library symbol %q", symbol)
 			}

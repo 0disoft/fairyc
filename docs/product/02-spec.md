@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0080-windows-x64-unwind-structure-inspection.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0091-windows-stdout-exec-target.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -385,6 +385,14 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   reports either exact signed `i32` result bits or the canonical product-trap category. It accepts no
   output path, compiler selection, companion input, or linker option and retains no target artifact.
   Direct local execution is additional product-path evidence, not hosted conformance or support.
+- `experimental exec-target` uses the same validated temporary Windows target but forwards its
+  separated stdout and stderr byte sequences without a compiler receipt and preserves the full
+  32-bit program status. One target-only unsafe
+  `fy_std_windows_stdout_write_all_v0(*u8, usize) -> { status: u32, written: usize }` call loops over
+  `WriteFile`, reports partial progress on failure, normalizes empty input, rejects nonempty null
+  input, and is admitted only by the Windows support resolver. This is executable process I/O, not
+  a safe or portable `std::io` package, Unicode console policy, stdin, stderr writing, arguments, or
+  target maturity evidence.
 - QBE or another fast backend and LLVM require separate measured adoption decisions after MIR stability.
 - Early caching is whole-package and bounded. Function-level caching requires measured invalidation or latency pressure.
 - Development output contains intentional deliverables and small state, not an unbounded copy of every intermediate.

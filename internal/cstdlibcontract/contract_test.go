@@ -4,6 +4,8 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/0disoft/fairyc/internal/target"
 )
 
 func TestComponentsForSymbolsClosesDependenciesInDeterministicOrder(t *testing.T) {
@@ -58,9 +60,24 @@ func TestAdmittedKeepsUnexercisedLinuxFileSymbolsClosed(t *testing.T) {
 	}
 }
 
+func TestAdmittedForTargetKeepsWindowsConsoleTargetBound(t *testing.T) {
+	t.Parallel()
+	const symbol = "fy_std_windows_stdout_write_all_v0"
+	if !Admitted(symbol) || !AdmittedForTarget(symbol, target.X8664WindowsMSVC) {
+		t.Fatal("Windows stdout symbol is not admitted for its target")
+	}
+	if AdmittedForTarget(symbol, target.X8664LinuxGNU) {
+		t.Fatal("Windows stdout symbol leaked into the Linux target contract")
+	}
+	if _, err := ComponentsForSymbols([]string{symbol}); err == nil || !strings.Contains(err.Error(), "no x86_64-linux-gnu source contract") {
+		t.Fatalf("ComponentsForSymbols() error = %v", err)
+	}
+}
+
 func TestWindowsMSVCComponentsForSymbolsAdmitsOnlyProvenRuntimeSlice(t *testing.T) {
 	t.Parallel()
 	components, err := WindowsMSVCComponentsForSymbols([]string{
+		"fy_std_windows_stdout_write_all_v0",
 		"fy_std_text_utf8_valid_v0",
 		"fy_std_buffer_resize_zeroed_v0",
 		"fy_std_buffer_initialize_v0",
@@ -85,7 +102,7 @@ func TestWindowsMSVCComponentsForSymbolsAdmitsOnlyProvenRuntimeSlice(t *testing.
 	if err != nil {
 		t.Fatal(err)
 	}
-	if want := []Component{ComponentSystemHeap, ComponentBuffer, ComponentArena, ComponentTextView, ComponentOwnedText}; !slices.Equal(components, want) {
+	if want := []Component{ComponentWindowsConsole, ComponentSystemHeap, ComponentBuffer, ComponentArena, ComponentTextView, ComponentOwnedText}; !slices.Equal(components, want) {
 		t.Fatalf("components = %v, want %v", components, want)
 	}
 	for _, test := range []struct {

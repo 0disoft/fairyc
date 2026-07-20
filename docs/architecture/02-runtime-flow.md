@@ -79,8 +79,9 @@ no-overwrite output; `run-target` executes an independently temporary image, rej
 reports either exact signed `i32` process bits or a canonical product trap. Neither path uses WSL.
 The Windows execution driver captures stdout and stderr into separate byte sequences under one
 shared 64 KiB ceiling. It preserves stream identity but makes no ordering claim between the two OS
-pipes. `run-host` and `run-target` still require both streams to be empty; the split is a prerequisite
-for a later explicit console contract, not permission for source-visible output.
+pipes. `run-host` and `run-target` still require both streams to be empty. `exec-target` forwards the
+separated bounded streams without a compiler receipt and preserves the program status; the current
+source surface reaches only one unsafe Windows stdout write-all function.
 `internal/layout` is the next boundary: it turns those facts into checked array and aggregate size,
 alignment, offset, and padding results before any backend chooses C syntax. Separate Linux GNU and
 Windows MSVC manifests hold host-independent expectations. The generated native C probe checks

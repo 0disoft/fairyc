@@ -133,6 +133,11 @@ standalone Go `fairyc.exe` in a bounded temporary directory, verifies its help s
 separate compiler process to compile and execute `examples/windows_quickstart/main.fy`. Both calls
 validate temporary PE and unwind data, require the exact target-labelled native-result receipt for
 42, retain no artifact, and use no WSL.
+The smoke also invokes `exec-target` once for `examples/windows_output/main.fy`. That FY program
+requires empty and invalid-input results from the Windows-only stdout helper, writes exactly the 16
+ASCII bytes `Fairy C says hi\n`, and exits 42. The CLI must forward those stdout bytes exactly,
+produce no stderr, preserve status 42, inspect the temporary PE and unwind data, and remove the
+image. This is an unsafe raw output crossing, not a portable or safe `std::io` receipt.
 The same intent derives one non-POSIX C11 unit from the eight valid Windows layout cases, then
 compiles and executes it under low and optimized MSVC profiles. It also derives separate caller and
 callee C11 translation units from all twelve valid Microsoft x64 plans, compiles and links them
@@ -144,7 +149,7 @@ termination frame, and private exception raiser as three separate translation un
 executes them under both profiles, and requires exact exception payload, ordered
 `RtlVirtualUnwind` frame discovery, and one abnormal `__finally` execution. Before execution, the
 same intent parses the target-neutral product image, both declared-target profile images, the two
-direct run-target temporary images, and all six probe images and requires bounded AMD64 PE32+ non-DLL console
+direct run-target temporary images, the exec-target temporary image, and all six probe images and requires bounded AMD64 PE32+ non-DLL console
 identity, aligned image/header/section ranges, a readable executable `.text`, and an executable
 entry point. This does not inspect object symbols or relocations, unwind/debug payloads, imported
 API compatibility, signing, installer packaging, or distribution behavior.
@@ -157,7 +162,7 @@ uninitialized-data characteristic. Object bytes are not uploaded or retained. Ex
 COMDAT, relocation-type, unwind, debug, and hosted object expectations remain unconfigured.
 The ordinary Go tests include a 154-section positive regression object and reject 4,097 sections;
 the exact section count emitted by a future MSVC version remains unstabilized.
-All eleven linked target or probe PE images additionally traverse the Microsoft x64 exception directory before
+All twelve linked target or probe PE images additionally traverse the Microsoft x64 exception directory before
 execution. The local gate requires sorted nonoverlapping `.pdata` runtime-function ranges,
 executable code coverage, DWORD-aligned file-backed unwind records, bounded version 1 prolog slots,
 bounded version 2 epilog descriptors, and minimum handler/chained tails. The receipt reports the

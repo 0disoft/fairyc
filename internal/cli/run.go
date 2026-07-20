@@ -40,6 +40,7 @@ Usage:
   fairyc experimental build <file.fy> --cc <clang|gcc> --profile <low|optimized> --output <build/path>
   fairyc experimental build-target <file.fy> --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe>
   fairyc experimental run-target <file.fy> --target x86_64-windows-msvc --profile <low|optimized>
+  fairyc experimental exec-target <file.fy> --target x86_64-windows-msvc --profile <low|optimized>
   fairyc experimental build-host <file.fy> --profile <low|optimized> --output <build/path.exe>
   fairyc experimental run-host <file.fy> --profile <low|optimized>
   fairyc experimental run <file.fy>
@@ -163,6 +164,8 @@ func runExperimental(args []string, sourceRoot string, stdout, stderr io.Writer)
 		return runTargetBuild(args[1:], sourceRoot, stdout, stderr)
 	case "run-target":
 		return runTarget(args[1:], sourceRoot, stdout, stderr)
+	case "exec-target":
+		return execTarget(args[1:], sourceRoot, stdout, stderr)
 	case "build-host":
 		return runHostBuild(args[1:], sourceRoot, stdout, stderr)
 	case "run-host":

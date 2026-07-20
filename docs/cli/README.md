@@ -34,6 +34,8 @@ for an explicit host-Linux executable in that subset,
 for the first declared Windows target C-emission subset,
 `fairyc experimental run-target <file.fy> --target x86_64-windows-msvc --profile <low|optimized>`
 for direct temporary execution of that declared Windows target subset,
+`fairyc experimental exec-target <file.fy> --target x86_64-windows-msvc --profile <low|optimized>`
+for program-facing Windows execution with exact stdout/stderr forwarding and process status,
 `fairyc experimental build-host <file.fy> --profile <low|optimized> --output <build/path.exe>` for a
 retained target-neutral Windows/amd64 MSVC PE,
 `fairyc experimental run-host <file.fy> --profile <low|optimized>` for a temporary target-neutral
@@ -111,6 +113,11 @@ Success writes `native result: <i32> (x86_64-windows-msvc, msvc <version>, <prof
 trap writes its canonical category and exits with the trap code. Any program output is currently a
 build/execution failure because source-visible target I/O is not implemented. It retains no artifact
 and does not use WSL.
+`experimental exec-target` uses the same validated temporary target path but adds no result receipt:
+program stdout and stderr stay on their matching streams and the program's 32-bit Windows status
+becomes the CLI status. The shared 64 KiB capture ceiling remains fail-closed, and cross-stream order
+is unspecified. The checked-in output example reaches only the unsafe internal Windows stdout
+write-all symbol; it is not a safe or portable `std::io` surface.
 `experimental target-spec` emits `fairyc.target-spec/v0` JSON without probing the host or exposing
 local tool paths. Linux reports its current scalar, flat-resource, and resource-tagged emission
 subset. Windows reports `scalar-and-llp64-c-scalar-c11`. Both keep `emittable`, `conformant`, and `supported` false and list

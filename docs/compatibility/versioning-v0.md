@@ -93,6 +93,11 @@ Its required target/profile flags, absence of an output path, target-labelled na
 canonical product-trap mapping, zero-output rule, pre-execution PE/unwind validation, and temporary-
 artifact cleanup are unstable CLI and validation policy, not a stable language or target ABI. The
 command adds direct local evidence without changing `emittable`, `conformant`, or `supported`.
+ADR 0091 adds the unstable `experimental exec-target` process contract and exact Windows-only
+`fy_std_windows_stdout_write_all_v0` symbol. Required target/profile flags, separated bounded
+streams, preserved 32-bit program status, the `{ status: u32, written: usize }` transport, status
+meanings 0 through 4, and target-specific admission are prototype compatibility data. They do not
+stabilize a public `std::io` API, console encoding, installation, or target maturity.
 
 `fairyc.layout-fixtures/v0` separately versions the repository input and expectation vocabulary for
 the target-layout engine; each manifest binds one declared target. It is not a public

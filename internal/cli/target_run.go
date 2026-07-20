@@ -51,31 +51,35 @@ func runTarget(arguments []string, sourceRoot string, stdout, stderr io.Writer) 
 }
 
 func parseTargetRunOptions(arguments []string) (targetRunOptions, error) {
+	return parseTargetExecutionOptions("run-target", arguments)
+}
+
+func parseTargetExecutionOptions(command string, arguments []string) (targetRunOptions, error) {
 	if len(arguments) == 0 {
-		return targetRunOptions{}, fmt.Errorf("experimental command \"run-target\" expects one source file and explicit --target and --profile values")
+		return targetRunOptions{}, fmt.Errorf("experimental command %q expects one source file and explicit --target and --profile values", command)
 	}
 	options := targetRunOptions{source: arguments[0]}
 	if options.source == "" || strings.HasPrefix(options.source, "-") {
-		return targetRunOptions{}, fmt.Errorf("experimental command \"run-target\" expects the source file before its flags")
+		return targetRunOptions{}, fmt.Errorf("experimental command %q expects the source file before its flags", command)
 	}
 	seen := make(map[string]bool, 2)
 	for index := 1; index < len(arguments); {
 		flag := arguments[index]
 		if flag != "--target" && flag != "--profile" {
-			return targetRunOptions{}, fmt.Errorf("experimental command \"run-target\" does not accept flag %q", flag)
+			return targetRunOptions{}, fmt.Errorf("experimental command %q does not accept flag %q", command, flag)
 		}
 		if seen[flag] {
-			return targetRunOptions{}, fmt.Errorf("experimental command \"run-target\" received %s more than once", flag)
+			return targetRunOptions{}, fmt.Errorf("experimental command %q received %s more than once", command, flag)
 		}
 		if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
-			return targetRunOptions{}, fmt.Errorf("experimental command \"run-target\" requires a value for %s", flag)
+			return targetRunOptions{}, fmt.Errorf("experimental command %q requires a value for %s", command, flag)
 		}
 		seen[flag] = true
 		value := arguments[index+1]
 		switch flag {
 		case "--target":
 			if target.ID(value) != target.X8664WindowsMSVC {
-				return targetRunOptions{}, fmt.Errorf("experimental run-target currently requires --target %s", target.X8664WindowsMSVC)
+				return targetRunOptions{}, fmt.Errorf("experimental %s currently requires --target %s", command, target.X8664WindowsMSVC)
 			}
 			options.targetID = target.X8664WindowsMSVC
 		case "--profile":
@@ -85,14 +89,14 @@ func parseTargetRunOptions(arguments []string) (targetRunOptions, error) {
 			case cdriver.OptimizedProfile.Name:
 				options.profile = cdriver.OptimizedProfile
 			default:
-				return targetRunOptions{}, fmt.Errorf("experimental command \"run-target\" requires --profile low or --profile optimized")
+				return targetRunOptions{}, fmt.Errorf("experimental command %q requires --profile low or --profile optimized", command)
 			}
 		}
 		index += 2
 	}
 	for _, flag := range []string{"--target", "--profile"} {
 		if !seen[flag] {
-			return targetRunOptions{}, fmt.Errorf("experimental command \"run-target\" requires %s", flag)
+			return targetRunOptions{}, fmt.Errorf("experimental command %q requires %s", command, flag)
 		}
 	}
 	return options, nil

@@ -280,6 +280,7 @@ func TestSourceForSymbolsRejectsUnknownStandardLibrarySymbol(t *testing.T) {
 func TestWindowsMSVCSourceForSymbolsKeepsClosedRuntimeSlice(t *testing.T) {
 	t.Parallel()
 	source, err := WindowsMSVCSourceForSymbols([]string{
+		"fy_std_windows_stdout_write_all_v0",
 		"fy_std_text_utf8_valid_v0",
 		"fy_std_buffer_initialize_v0",
 		"fy_std_buffer_resize_zeroed_v0",
@@ -307,6 +308,7 @@ func TestWindowsMSVCSourceForSymbolsKeepsClosedRuntimeSlice(t *testing.T) {
 		t.Fatal("Windows SystemHeap source is missing its x64 malloc alignment contract")
 	}
 	for _, required := range []string{
+		"fy_std_windows_stdout_write_all_v0", "WriteFile", "GetStdHandle",
 		"fy_std_system_heap_allocate_v0", "fy_std_system_heap_deallocate_v0",
 		"fy_std_buffer_initialize_v0", "fy_std_buffer_resize_zeroed_v0", "fy_std_buffer_drop_v0",
 		"fy_std_arena_initialize_v0", "fy_std_region_begin_v0",
@@ -329,6 +331,13 @@ func TestWindowsMSVCSourceForSymbolsKeepsClosedRuntimeSlice(t *testing.T) {
 		if _, err := WindowsMSVCSourceForSymbols([]string{symbol}); err == nil {
 			t.Errorf("WindowsMSVCSourceForSymbols(%q) unexpectedly succeeded", symbol)
 		}
+	}
+}
+
+func TestLinuxSourceRejectsWindowsConsoleSymbol(t *testing.T) {
+	t.Parallel()
+	if _, err := SourceForSymbols([]string{"fy_std_windows_stdout_write_all_v0"}); err == nil || !strings.Contains(err.Error(), "no x86_64-linux-gnu source contract") {
+		t.Fatalf("SourceForSymbols() error = %v", err)
 	}
 }
 

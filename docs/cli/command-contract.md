@@ -37,7 +37,7 @@ stabilization.
 
 ## Implemented experimental compiler surface
 
-The current Go prototype implements eleven deliberately unstable developer commands:
+The current Go prototype implements twelve deliberately unstable developer commands:
 
 | Command | Purpose | Output |
 | --- | --- | --- |
@@ -49,6 +49,7 @@ The current Go prototype implements eleven deliberately unstable developer comma
 | `fairyc experimental build <file.fy> --cc <clang\|gcc> --profile <low\|optimized> --output <build/path>` | Compile and link one verified program in that constrained subset for the host `x86_64-linux-gnu` profile with an explicit C compiler, optimization profile, and ignored output path | A no-overwrite executable below `build/` plus one relative-path receipt, or source, capability, toolchain, link, or artifact diagnostics |
 | `fairyc experimental build-target <file.fy> --target x86_64-windows-msvc --profile <low\|optimized> --output <build/path.exe>` | Emit one verified program through the provisional Windows MSVC C profile, automatically link exact proven SystemHeap, Buffer, Arena, owned-text, CStr, and UTF-8 validation dependency closures when called, resolve local x64 MSVC, and retain one target-labelled PE | A no-overwrite `.exe` below `build/` plus one `x86_64-windows-msvc` receipt, or source, target-subset, support-link, toolchain, compile, link, or artifact diagnostics |
 | `fairyc experimental run-target <file.fy> --target x86_64-windows-msvc --profile <low\|optimized>` | Compile the same declared Windows target subset, validate the temporary PE and Microsoft x64 unwind structure, execute it with bounded captured output, and remove it | `native result: <i32> (x86_64-windows-msvc, msvc <version>, <profile>)`, a canonical trap, or source, target-subset, support-link, toolchain, compile, link, structure, or execution diagnostics |
+| `fairyc experimental exec-target <file.fy> --target x86_64-windows-msvc --profile <low\|optimized>` | Compile the same declared Windows target subset, execute it with separated bounded streams, and behave as the program process | Exact program stdout and stderr plus the program's unsigned-preserved 32-bit Windows exit status; compiler or execution failures still use CLI diagnostic codes |
 | `fairyc experimental build-host <file.fy> --profile <low\|optimized> --output <build/path.exe>` | On Windows/amd64, compile one target-neutral verified program with locally discovered x64 MSVC and retain its PE without declaring a Windows target ABI | A no-overwrite `.exe` below `build/` plus a host-smoke receipt, or bounded source, capability, toolchain, compile, or artifact diagnostics |
 | `fairyc experimental run-host <file.fy> --profile <low\|optimized>` | On Windows/amd64, compile and execute one target-neutral verified program with locally discovered x64 MSVC without declaring a Windows target ABI | `native result: <i32> (windows/amd64 host-smoke, msvc <version>, <profile>)`, a canonical trap, or bounded source, capability, toolchain, compile, or execution diagnostics |
 | `fairyc experimental run <file.fy>` | Run one verified-MIR program in the scalar, tagged, whole-resource, and implemented Region subset whose selected module declares `main() -> i32` | `result: <i32>` on stdout, a canonical trap category on stderr, source diagnostics, or an explicit unsupported-subset error |
@@ -178,6 +179,16 @@ temporary executable must produce no stdout or stderr; ordinary results preserve
 bits, while reserved product-trap statuses map to canonical categories and exit code `5`. Temporary
 files are removed by the driver. This is direct target execution, not target support, installation,
 distribution, or self-hosting.
+
+`experimental exec-target` accepts the same required source, target, and profile values and the same
+closed compiler/linker inputs, but it is the program-facing sibling rather than an inspection
+receipt. It forwards captured stdout and stderr to their matching CLI streams without adding a
+banner, preserves the program's full 32-bit Windows process status as its own status, and emits no
+native-result or trap receipt. The two streams share one 64 KiB capture limit and have no declared
+cross-stream ordering. Toolchain, compilation, structure, timeout, capture-limit, and CLI output-
+write failures remain compiler failures rather than program statuses. The current source-callable
+slice exposes only unsafe `fy_std_windows_stdout_write_all_v0`; stdin, stderr writes, arguments,
+Unicode console policy, and a safe public `std::io` wrapper remain absent.
 
 For the admitted foreign-call slice, `emit-c` writes a plain external prototype and call using the
 declaration name by default or its single validated `@link_name` string. Compatible mappings to one

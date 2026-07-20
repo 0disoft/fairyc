@@ -45,6 +45,9 @@ var stage0LinuxFile string
 //go:embed stage0_linux_file_probe.c
 var stage0LinuxFileProbe string
 
+//go:embed stage0_windows_console.c
+var stage0WindowsConsole string
+
 // SystemHeapSource returns the provisional x86_64-linux-gnu SystemHeap implementation.
 func SystemHeapSource() (string, error) {
 	return canonicalSource("SystemHeap", stage0SystemHeap)
@@ -133,6 +136,11 @@ func LinuxFileProbeSource() (string, error) {
 	return canonicalSource("Linux File probe", stage0LinuxFileProbe)
 }
 
+// WindowsConsoleSource returns the target-specific bounded stdout implementation.
+func WindowsConsoleSource() (string, error) {
+	return canonicalSource("Windows console", stage0WindowsConsole)
+}
+
 // SourceForSymbols returns the minimal dependency-closed Stage 0 C implementation for the exact
 // standard-library symbols called by one generated unit. An empty result needs no stdlib object.
 func SourceForSymbols(symbols []string) (string, error) {
@@ -185,6 +193,8 @@ func componentSource(component cstdlibcontract.Component) (string, string, error
 	switch component {
 	case cstdlibcontract.ComponentLinuxFile:
 		return "Linux File", stage0LinuxFile, nil
+	case cstdlibcontract.ComponentWindowsConsole:
+		return "Windows console", stage0WindowsConsole, nil
 	case cstdlibcontract.ComponentSystemHeap:
 		return "SystemHeap", stage0SystemHeap, nil
 	case cstdlibcontract.ComponentBuffer:

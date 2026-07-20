@@ -231,6 +231,26 @@ A `b"..."` literal provides allocation-free immutable `&[u8]` storage with exact
 
 A `"..."` literal provides allocation-free immutable `&str` storage after the complete decoded byte sequence passes UTF-8 validation. MIR retains a distinct text operand and byte length rather than reusing byte-string or C-string meaning. The generated-C path uses a private non-null `fy_str { data, length }` value, deduplicated exact immutable UTF-8 arrays for nonempty values, and a one-byte sentinel with length zero for empty values. An explicit unsafe conversion may expose a literal or typed local's immutable `*u8` data address; mutable extraction, indexing, slicing, source-level length access, a public string ABI, implicit byte-to-text conversion, and implicit C termination remain unimplemented.
 
+## Windows stdout write-all v0
+
+The target-only unsafe symbol `fy_std_windows_stdout_write_all_v0` accepts one immutable byte
+pointer and `usize` length and returns a private `@repr(C)` result containing `u32 status` and
+`usize written`. Empty input succeeds without consulting the process handle. Nonempty null input
+returns status 1 with zero progress. Status 2 means stdout was unavailable, status 3 reports a
+`WriteFile` failure, and status 4 reports impossible zero progress. Success is status 0 with
+`written == length`.
+
+The implementation obtains `STD_OUTPUT_HANDLE` once and loops in `DWORD`-bounded chunks until all
+bytes are written or a failure reports the completed prefix. It does not allocate, append a newline,
+transcode, retry a failed operation, or hide partial progress. The configured Windows smoke verifies
+empty and invalid inputs plus exact ASCII bytes through a captured pipe; interactive Unicode console
+encoding, terminal modes, stdin, stderr writing, colors, formatting, and cancellation remain
+unproven or unimplemented.
+
+This raw function is admitted only by the `x86_64-windows-msvc` support resolver and must be called
+inside `unsafe`. It is not a public `std::io` module, safe borrow wrapper, portable console API, or
+stable result layout.
+
 ## Linux `File` v0
 
 The initial API is explicitly tied to the `x86_64-linux-gnu` target and accepts `&CStr`, not a purported portable UTF-8 path.
@@ -261,8 +281,9 @@ The constrained C unit records sorted unique external names used by actual calls
 resolve only exact `fy_std_*_v0` members through the shared standard-library contract, close their
 component dependencies, and combine those C sources with the scalar runtime. Unused foreign
 declarations do not select a component. Buffer and Arena require SystemHeap; owned text requires
-SystemHeap, Buffer, and text view; Linux File is independent and is placed first when selected so
-its feature-test macro precedes system headers.
+SystemHeap, Buffer, and text view. Linux File and Windows console are target-specific independent
+components; Linux File is placed first when selected so its feature-test macro precedes system
+headers.
 
 This is a closed implementation link, not package discovery. Other foreign names receive no source,
 object, library, search path, or linker argument from Fairy C and remain ordinary unresolved-link
