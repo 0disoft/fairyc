@@ -432,6 +432,24 @@
                 }
               }
             ]
+          },
+          {
+            "code": "E2102",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 122,
+              "endByte": 128
+            },
+            "related": [
+              {
+                "role": "origin",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 96,
+                  "endByte": 101
+                }
+              }
+            ]
           }
         ]
       }

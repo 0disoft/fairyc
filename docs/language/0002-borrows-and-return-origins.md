@@ -21,6 +21,10 @@ The compiler tracks a `BorrowOrigin` that is not part of source syntax:
 | `Local(scope)` | Borrow derived from a local owner | No |
 | `RawUnknown` | Provenance entered through raw or foreign memory | No safe return without an explicit unsafe wrapper proof |
 
+`Param(i)` is assigned only when an already-borrowed parameter is propagated. Directly borrowing
+a by-value parameter with `&parameter` borrows its callee-local stack storage, so its origin is
+`Local(parameter)` and returning it is `E2102`.
+
 `Static` may be shortened to an expected parameter or region origin. Origins are never lengthened.
 
 UTF-8 string, byte-string, and C-string literals produce immutable compiler-owned storage with `Static` origin. The source language has no explicit lifetime spelling for that origin; it is tracked as the same hidden fact used for other program-static storage.

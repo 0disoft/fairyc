@@ -324,12 +324,11 @@ func (a *analyzer) originForSymbol(value *symbol) flowOrigin {
 		return flowOrigin{}
 	}
 	switch value.kind {
-	case "parameter":
-		return flowOrigin{
-			name:        fmt.Sprintf("Param(%d)", a.parameterIndex[value]),
-			declaration: span(value.source, value.declaration),
-		}
-	case "local":
+	case "parameter", "local":
+		// A direct `&place` borrows the storage occupied by that place in the
+		// current call frame. Even when the place is a by-value parameter, that
+		// storage is local to the callee and cannot be returned. Param(i) is
+		// reserved for an already-borrowed parameter propagated by value.
 		return flowOrigin{
 			name:        "Local(" + value.name + ")",
 			declaration: span(value.source, value.declaration),
