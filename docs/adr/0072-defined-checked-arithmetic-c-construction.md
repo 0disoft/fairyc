@@ -34,5 +34,5 @@ as the corresponding modulo-2^32 unsigned operation.
 - The result construction remains defined even if a future backend-control defect reaches it after
   a missing check; that does not excuse or mask verifier and trap-edge failures, which retain their
   own tests.
-- Division and remainder keep the separate checked-divisor materialization from ADR 0071 because
-  unsigned division would not preserve signed quotient and remainder semantics.
+- Division and remainder keep the separate exact-type checked-divisor materialization from ADR 0071
+  because their zero and signed-overflow checks differ from additive overflow construction.

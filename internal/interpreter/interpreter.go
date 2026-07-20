@@ -912,9 +912,9 @@ func evaluateBinary(locals map[mir.LocalID]runtimeValue, operation mir.Operation
 		}
 		result, err := orderedScalarValues(operation.Operator, leftValue, rightValue, operation.OwnerType)
 		return i32Value(boolValue(result)), "", err
-	case "+", "-", "*":
-		if !hir.CheckedArithmeticType(operation.OwnerType) || operation.Type != operation.OwnerType {
-			return runtimeValue{}, "", capabilityError("checked arithmetic has incompatible owner or result type")
+	case "+", "-", "*", "/", "%":
+		if !hir.CheckedDivisionType(operation.OwnerType) || operation.Type != operation.OwnerType {
+			return runtimeValue{}, "", capabilityError("checked integer operation has incompatible owner or result type")
 		}
 		if operation.OwnerType != hir.TypeI32 {
 			return checkedUnsignedArithmetic(operation.Operator, leftValue, rightValue, operation.OwnerType)
@@ -961,6 +961,16 @@ func checkedUnsignedArithmetic(operator string, left, right runtimeValue, ownerT
 			return runtimeValue{}, "integer-overflow", nil
 		}
 		result = left.u64 * right.u64
+	case "/":
+		if right.u64 == 0 {
+			return runtimeValue{}, "division-by-zero", nil
+		}
+		result = left.u64 / right.u64
+	case "%":
+		if right.u64 == 0 {
+			return runtimeValue{}, "division-by-zero", nil
+		}
+		result = left.u64 % right.u64
 	default:
 		return runtimeValue{}, "", capabilityError("unsupported checked unsigned arithmetic operator %q", operator)
 	}
@@ -1196,15 +1206,30 @@ func evaluateSwitch(locals map[mir.LocalID]runtimeValue, terminator mir.Terminat
 		}
 		return mir.NoBlock, "", fmt.Errorf("enum switch received invalid variant %q", value.enum.variant)
 	case "checked-division":
-		left, right, err := evaluateTwoI32(locals, terminator.SwitchOperands)
+		left, right, err := evaluateTwo(locals, terminator.SwitchOperands)
 		if err != nil {
 			return mir.NoBlock, "", err
 		}
-		if right == 0 {
-			return mir.NoBlock, "division-by-zero", nil
-		}
-		if left == math.MinInt32 && right == -1 {
-			return mir.NoBlock, "signed-division-overflow", nil
+		if terminator.SwitchType == hir.TypeI32 {
+			leftI32, leftErr := left.asI32()
+			rightI32, rightErr := right.asI32()
+			if leftErr != nil || rightErr != nil {
+				return mir.NoBlock, "", capabilityError("checked i32 division received incompatible operands")
+			}
+			if rightI32 == 0 {
+				return mir.NoBlock, "division-by-zero", nil
+			}
+			if leftI32 == math.MinInt32 && rightI32 == -1 {
+				return mir.NoBlock, "signed-division-overflow", nil
+			}
+		} else {
+			_, trap, err := checkedUnsignedArithmetic(terminator.Operator, left, right, terminator.SwitchType)
+			if err != nil {
+				return mir.NoBlock, "", err
+			}
+			if trap != "" {
+				return mir.NoBlock, trap, nil
+			}
 		}
 		return terminator.Successors[0], "", nil
 	case "checked-view-index":

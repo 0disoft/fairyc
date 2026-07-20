@@ -337,7 +337,8 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				state.live[operation.Symbol] = false
 			case OperationCheckedDivision:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
-				if len(operation.Operands) != 2 || (operation.Operator != "/" && operation.Operator != "%") || !slices.Equal(operation.TrapCategories, []string{"division-by-zero", "signed-division-overflow"}) {
+				categories, valid := divisionTrapCategories(operation.OwnerType)
+				if !validCheckedDivisionShape(operation) || !valid || !slices.Equal(operation.TrapCategories, categories) {
 					failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "division is missing required trap checks"})
 				}
 			case OperationArithmeticCheck:
@@ -723,7 +724,8 @@ func validSwitchShape(terminator Terminator) bool {
 	case "enum":
 		return terminator.SwitchType != "" && terminator.SwitchType != hir.TypeInvalid && len(terminator.SwitchOperands) == 1 && len(terminator.Successors) > 0 && len(terminator.Successors) == len(terminator.SwitchVariants) && uniqueNonEmpty(terminator.SwitchVariants)
 	case "checked-division":
-		return len(terminator.SwitchOperands) == 2 && len(terminator.Successors) == 2 && (terminator.Operator == "/" || terminator.Operator == "%")
+		return len(terminator.SwitchOperands) == 2 && len(terminator.Successors) == 2 &&
+			(terminator.Operator == "/" || terminator.Operator == "%") && hir.CheckedDivisionType(terminator.SwitchType)
 	case "checked-view-index":
 		return len(terminator.SwitchOperands) == 2 && len(terminator.Successors) == 2 && terminator.Operator == "[]"
 	case "checked-unary", "checked-arithmetic", "checked-shift":
@@ -787,6 +789,24 @@ func validCheckedArithmeticShape(operation Operation) bool {
 	return false
 }
 
+func validCheckedDivisionShape(operation Operation) bool {
+	return len(operation.Operands) == 2 && (operation.Operator == "/" || operation.Operator == "%") &&
+		hir.CheckedDivisionType(operation.OwnerType) && operation.Type == operation.OwnerType &&
+		scalarOperandMatches(operation.Operands[0], operation.OwnerType) &&
+		scalarOperandMatches(operation.Operands[1], operation.OwnerType)
+}
+
+func divisionTrapCategories(ownerType hir.Type) ([]string, bool) {
+	if !hir.CheckedDivisionType(ownerType) {
+		return nil, false
+	}
+	categories := []string{"division-by-zero"}
+	if ownerType == hir.TypeI32 {
+		categories = append(categories, "signed-division-overflow")
+	}
+	return categories, true
+}
+
 func validViewIndexShape(operation Operation, destination bool) bool {
 	if len(operation.Operands) != 2 || operation.OwnerType != hir.SharedBorrow(hir.TypeByteSlice) ||
 		operation.IndexType != hir.TypeUSize || operation.Type != hir.TypeU8 || operation.Operator != "[]" {
@@ -824,7 +844,9 @@ func validBinaryShape(operation Operation) bool {
 		return hir.ScalarOrderedType(operation.OwnerType) && operation.Type == hir.TypeBool
 	case "+", "-", "*":
 		return hir.CheckedArithmeticType(operation.OwnerType) && operation.Type == operation.OwnerType
-	case "/", "%", ">>", "&", "^", "|":
+	case "/", "%":
+		return hir.CheckedDivisionType(operation.OwnerType) && operation.Type == operation.OwnerType
+	case ">>", "&", "^", "|":
 		return operation.OwnerType == hir.TypeI32 && operation.Type == hir.TypeI32
 	default:
 		return false
@@ -910,7 +932,8 @@ func trappingOperationSpec(operation Operation) (string, OperationKind, []string
 		return "", "", nil, false
 	}
 	if operation.Operator == "/" || operation.Operator == "%" {
-		return "checked-division", OperationCheckedDivision, []string{"division-by-zero", "signed-division-overflow"}, true
+		categories, valid := divisionTrapCategories(operation.OwnerType)
+		return "checked-division", OperationCheckedDivision, categories, valid && validBinaryShape(operation)
 	}
 	switchKind, categories, valid := checkedArithmeticSpec(operation.Operator, len(operation.Operands))
 	return switchKind, OperationArithmeticCheck, categories, valid && validBinaryShape(operation)
@@ -921,7 +944,7 @@ func checkedTerminatorMatches(terminator Terminator, continuation BlockID, switc
 		len(terminator.Successors) != 2 || terminator.Successors[0] != continuation || !slices.Equal(terminator.SwitchOperands, operands) {
 		return false
 	}
-	if switchKind == "checked-unary" || switchKind == "checked-arithmetic" || switchKind == "checked-shift" {
+	if switchKind == "checked-unary" || switchKind == "checked-arithmetic" || switchKind == "checked-division" || switchKind == "checked-shift" {
 		return terminator.SwitchType == ownerType
 	}
 	return true
@@ -931,7 +954,8 @@ func checkedMarkerStatus(block *Block, markerKind OperationKind, operator string
 	for index := len(block.Operations) - 1; index >= 0; index-- {
 		operation := block.Operations[index]
 		if operation.Kind == markerKind && operation.Operator == operator && slices.Equal(operation.Operands, operands) {
-			typeMatches := markerKind != OperationArithmeticCheck || operation.OwnerType == ownerType && operation.Type == resultType
+			typeMatches := (markerKind != OperationArithmeticCheck && markerKind != OperationCheckedDivision) ||
+				operation.OwnerType == ownerType && operation.Type == resultType
 			return operationEntity(block.ID, index, operation), typeMatches && slices.Equal(operation.TrapCategories, categories)
 		}
 	}

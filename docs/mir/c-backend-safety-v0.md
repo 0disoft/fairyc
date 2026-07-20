@@ -33,6 +33,11 @@ the unsigned C operation only after those checks, so neither wraparound nor opti
 erase the Fairy C `integer-overflow` meaning. Marker, switch, operand, and result type drift fails
 closed before C text is produced.
 
+Checked division and remainder use a function-local volatile divisor slot whose C type matches the
+verified `i32`, `u8`, `u32`, or `usize` operand type. Every type checks zero before the operation;
+only `i32` emits the signed-minimum/negative-one check. This prevents strict C compilers from
+diagnosing an unreachable constant-zero expression without erasing typed MIR semantics.
+
 The same internal-value subset now admits compiler-owned immutable `&[u8]` literals. MIR retains
 their exact bytes and logical length, including empty and embedded-NUL values. Generated C uses a
 private `fy_byte_slice { const uint8_t *data; uintptr_t length; }`, exact deduplicated immutable

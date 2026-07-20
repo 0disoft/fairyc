@@ -36,14 +36,14 @@ func TestCEmissionManifestV0(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Run() error = %v", err)
 	}
-	if report.CasesRun != 24 {
-		t.Fatalf("Run() cases = %d, want 24", report.CasesRun)
+	if report.CasesRun != 25 {
+		t.Fatalf("Run() cases = %d, want 25", report.CasesRun)
 	}
 	for _, failure := range report.Failures {
 		t.Errorf("%s: %s", failure.CaseID, failure.Detail)
 	}
-	if len(report.Emitted) != 24 {
-		t.Errorf("Run() emitted = %d, want 24", len(report.Emitted))
+	if len(report.Emitted) != 25 {
+		t.Errorf("Run() emitted = %d, want 25", len(report.Emitted))
 	}
 	observedDrops := 0
 	for _, fixture := range report.Emitted {

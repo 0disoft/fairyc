@@ -207,7 +207,9 @@ rejected and require a later explicit fallible conversion contract.
 Binary `+`, `-`, and `*` accept exactly matching `i32`, `u8`, `u32`, or `usize` operands and return
 that same type. Their ordinary source meaning is checked: overflow and unsigned underflow trap as
 `integer-overflow`; they never inherit C unsigned wrapping. Mixed types, implicit promotions, and
-unsigned division, remainder, shift, or bitwise operations remain rejected.
+Matching `i32`, `u8`, `u32`, or `usize` operands also support `/` and `%`; zero traps before the
+operation and only the signed type has the minimum-by-negative-one overflow case. Unsigned shift and
+bitwise operations remain rejected.
 
 Equality operators `==` and `!=` accept matching operands of `bool`, `i32`, `u8`, `u32`, or
 `usize`. Ordered comparison operators `<`, `<=`, `>`, and `>=` accept matching operands of `i32`,

@@ -10,7 +10,7 @@ MIR is the only executable semantic contract consumed by backends. It records ev
 
 MIR v0 is a mutable-local control-flow graph rather than SSA. SSA conversion is a backend or optimization concern after the semantic form is verified.
 
-The current Go prototype implements the source-linked subset exercised by all eleven MIR v0 normalization fixtures: ordered calls, complete-root and tagged-payload moves, RHS-before-drop resource reassignment, explicit normal-exit cleanup, lexical Region placement and reset on fallthrough, direct return, Result propagation, nested exits, nearest-loop `break` and `continue`, `Result` propagation branches, checked division, remainder, and arithmetic traps, and non-unwinding successors. The same verifier passes all ten named baselines and rejects all twenty-one isolated v0 mutations with their single expected `Vxxxx` result. The bounded interpreter executes all sixty-four interpreter v0 cases for scalar and tagged control, typed scalar comparisons, checked byte indexing, value-preserving integer casts, and checked `u8`, `u32`, and `usize` arithmetic, resource construction and field reads, whole-root and active-payload moves, resource returns and propagation, live/dead/self reassignment, consuming-close ownership, nested and loop-control cleanup, source-linked drop traces, Region reset paths, controlled in-memory test output, exact arithmetic, division, remainder, and right-shift trap and boundary outcomes, and the step and output limits; user drop-body effects, signed left shift, and later runtime behavior remain unfinished gates.
+The current Go prototype implements the source-linked subset exercised by all eleven MIR v0 normalization fixtures: ordered calls, complete-root and tagged-payload moves, RHS-before-drop resource reassignment, explicit normal-exit cleanup, lexical Region placement and reset on fallthrough, direct return, Result propagation, nested exits, nearest-loop `break` and `continue`, `Result` propagation branches, checked division, remainder, and arithmetic traps, and non-unwinding successors. The same verifier passes all ten named baselines and rejects all twenty-one isolated v0 mutations with their single expected `Vxxxx` result. The bounded interpreter executes all sixty-eight interpreter v0 cases for scalar and tagged control, typed scalar comparisons, checked byte indexing, value-preserving integer casts, and checked `u8`, `u32`, and `usize` arithmetic including division and remainder, resource construction and field reads, whole-root and active-payload moves, resource returns and propagation, live/dead/self reassignment, consuming-close ownership, nested and loop-control cleanup, source-linked drop traces, Region reset paths, controlled in-memory test output, exact arithmetic, division, remainder, and right-shift trap and boundary outcomes, and the step and output limits; user drop-body effects, signed left shift, and later runtime behavior remain unfinished gates.
 
 ## Lowering pipeline
 
@@ -58,7 +58,8 @@ A scalar `binary` operation records its exact common operand type in `OwnerType`
 returns `bool`; ordering admits matching operands from the four Fairy integer types and returns
 `bool`. The interpreter executes raw-pointer equality only when both values are typed null; native
   non-null pointer identity remains backend evidence. Binary `+`, `-`, and `*` also admit matching
-  `i32`, `u8`, `u32`, or `usize` operands and return that same type; other executable arithmetic and
+  `i32`, `u8`, `u32`, or `usize` operands and return that same type. `/` and `%` admit the same
+  matching integer set with an exact typed checked-division marker and switch; other executable arithmetic and
   bitwise operations remain `i32 -> i32`. `V1001` rejects missing or forged type metadata,
 invalid immediate families, mixed types, aggregate equality, pointer ordering, and boolean ordering.
 
@@ -112,7 +113,8 @@ right shift use an explicit check block, a two-successor switch, a non-returning
 fresh continuation containing the operation. The marker and switch carry the same operands and
 operator as the continuation. Addition, subtraction, multiplication, and negation expose
 `integer-overflow`; right shift exposes `invalid-shift`; division and remainder expose
-`division-by-zero` followed by `signed-division-overflow`. Signed left shift is rejected before MIR.
+`division-by-zero`, with `signed-division-overflow` additionally present only for `i32`. Signed left
+shift is rejected before MIR.
 
 ### Statements
 

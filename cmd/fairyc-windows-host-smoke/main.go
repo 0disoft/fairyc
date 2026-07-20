@@ -63,6 +63,29 @@ fn main() -> i32 {
 }
 `
 
+const unsignedDivisionSource = `module unsigned_division;
+
+fn main() -> i32 {
+    let byte_input: u8 = 84;
+    let byte: u8 = byte_input / 2;
+    let word_input: u32 = 85;
+    let word: u32 = word_input % 43;
+    let size_input: usize = 84;
+    let size: usize = size_input / 2;
+    if byte == 42 && word == 42 && size == 42 { 42 } else { 1 }
+}
+`
+
+const unsignedDivisionZeroSource = `module unsigned_division_zero;
+
+fn main() -> i32 {
+    let numerator: usize = 42;
+    let zero: usize = 0;
+    let value: usize = numerator / zero;
+    42
+}
+`
+
 const invalidShiftSource = `module invalid_shift;
 
 fn main() -> i32 {
@@ -148,6 +171,8 @@ func run() error {
 		"signed_division_overflow.fy":     signedDivisionOverflowSource,
 		"integer_overflow.fy":             integerOverflowSource,
 		"usize_overflow.fy":               usizeOverflowSource,
+		"unsigned_division.fy":            unsignedDivisionSource,
+		"unsigned_division_zero.fy":       unsignedDivisionZeroSource,
 		"invalid_shift.fy":                invalidShiftSource,
 		"bounds.fy":                       boundsSource,
 	} {
@@ -271,6 +296,10 @@ func run() error {
 		{name: "integer overflow optimized", source: "integer_overflow.fy", profile: "optimized", code: cli.ExitProgramTrap, stderr: "trap: integer-overflow\n"},
 		{name: "usize overflow low", source: "usize_overflow.fy", profile: "low", code: cli.ExitProgramTrap, stderr: "trap: integer-overflow\n"},
 		{name: "usize overflow optimized", source: "usize_overflow.fy", profile: "optimized", code: cli.ExitProgramTrap, stderr: "trap: integer-overflow\n"},
+		{name: "unsigned division low", source: "unsigned_division.fy", profile: "low", code: cli.ExitSuccess, stdoutPrefix: "native result: 42 (windows/amd64 host-smoke, msvc "},
+		{name: "unsigned division optimized", source: "unsigned_division.fy", profile: "optimized", code: cli.ExitSuccess, stdoutPrefix: "native result: 42 (windows/amd64 host-smoke, msvc "},
+		{name: "unsigned division by zero low", source: "unsigned_division_zero.fy", profile: "low", code: cli.ExitProgramTrap, stderr: "trap: division-by-zero\n"},
+		{name: "unsigned division by zero optimized", source: "unsigned_division_zero.fy", profile: "optimized", code: cli.ExitProgramTrap, stderr: "trap: division-by-zero\n"},
 		{name: "invalid shift low", source: "invalid_shift.fy", profile: "low", code: cli.ExitProgramTrap, stderr: "trap: invalid-shift\n"},
 		{name: "invalid shift optimized", source: "invalid_shift.fy", profile: "optimized", code: cli.ExitProgramTrap, stderr: "trap: invalid-shift\n"},
 		{name: "byte-view bounds low", source: "bounds.fy", profile: "low", code: cli.ExitProgramTrap, stderr: "trap: bounds\n"},
@@ -296,7 +325,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, checked byte indexing, value-preserving integer casts, and checked unsigned arithmetic, exact stdout bytes, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart and output execution, 20 run-host outcomes covered byte-view iteration, usize arithmetic and overflow, signed results, and five trap categories, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, layoutCases, layoutExecutions, abiCases, abiExecutions, unwindCases, unwindExecutions, 1+targetBuildExecutions+targetRunExecutions+targetExecExecutions+layoutExecutions+abiExecutions+unwindExecutions, toolchain.Version)
+	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, checked byte indexing, value-preserving integer casts, checked unsigned arithmetic, division, and remainder, exact stdout bytes, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart and output execution, 24 run-host outcomes covered byte-view iteration, usize arithmetic and overflow, unsigned division and zero traps, signed results, and five trap categories, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, layoutCases, layoutExecutions, abiCases, abiExecutions, unwindCases, unwindExecutions, 1+targetBuildExecutions+targetRunExecutions+targetExecExecutions+layoutExecutions+abiExecutions+unwindExecutions, toolchain.Version)
 	return nil
 }
 

@@ -969,6 +969,36 @@ func TestAnalyzeRejectsCheckedArithmeticOnBool(t *testing.T) {
 	}
 }
 
+func TestAnalyzeTypesCheckedUnsignedDivision(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn main() -> i32 {
+    let byte_input: u8 = 84;
+    let byte: u8 = byte_input / 2;
+    let word_input: u32 = 85;
+    let word: u32 = word_input % 43;
+    let size_input: usize = 84;
+    let size: usize = size_input / 2;
+    if byte == 42 && word == 42 && size == 42 { 42 } else { 1 }
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+	statements := result.HIR.Modules[0].Functions[0].Body.Statements
+	for _, expectation := range []struct {
+		statement int
+		operator  string
+		typ       hir.Type
+	}{{1, "/", hir.TypeU8}, {3, "%", hir.TypeU32}, {5, "/", hir.TypeUSize}} {
+		expression := statements[expectation.statement].Expression
+		if expression == nil || expression.Operator != expectation.operator || expression.Type != expectation.typ ||
+			len(expression.Children) != 2 || expression.Children[0].Type != expectation.typ || expression.Children[1].Type != expectation.typ {
+			t.Fatalf("checked division statement %d = %+v", expectation.statement, expression)
+		}
+	}
+}
+
 func TestAnalyzeTypesCStringLiteralToImmutableBytePointerCast(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{

@@ -56,7 +56,8 @@ unsupported until an explicit fallible conversion contract exists.
 Binary `+`, `-`, and `*` require two matching operands from `i32`, `u8`, `u32`, or `usize` and
 produce that same type. Each operation has checked ordinary semantics and traps on a result outside
 the selected type, including unsigned subtraction below zero. There is no arithmetic-time promotion,
-coercion, wrapping, or mixed signedness. Other unsigned arithmetic operators remain unsupported.
+coercion, wrapping, or mixed signedness. `/` and `%` admit the same matching types, return that type,
+and trap on a zero divisor; unsigned shifts and bitwise operators remain unsupported.
 
 `==` and `!=` require two matching operands from `bool`, `i32`, `u8`, `u32`, or `usize` and produce
 `bool`. `<`, `<=`, `>`, and `>=` require two matching operands from `i32`, `u8`, `u32`, or `usize`

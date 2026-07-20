@@ -844,6 +844,7 @@ fn main() -> i32 {
     let next: usize = size + 1;
     if next == 42 { 42 } else { 1 }
 }
+
 `)
 	function := &program.Functions[0]
 	var marker *Operation
@@ -881,6 +882,54 @@ fn main() -> i32 {
 	}
 	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1501" {
 		t.Fatalf("Verify() arithmetic marker type mutation failures = %+v", failures)
+	}
+}
+
+func TestLowerPreservesCheckedUSizeDivisionType(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+fn main() -> i32 {
+    let numerator: usize = 84;
+    let quotient: usize = numerator / 2;
+    if quotient == 42 { 42 } else { 1 }
+}
+`)
+	function := &program.Functions[0]
+	var marker *Operation
+	var result *Operation
+	var check *Terminator
+	for blockIndex := range function.Blocks {
+		block := &function.Blocks[blockIndex]
+		for operationIndex := range block.Operations {
+			operation := &block.Operations[operationIndex]
+			if operation.Kind == OperationCheckedDivision {
+				marker = operation
+				check = &block.Terminator
+			}
+			if operation.Kind == OperationBinary && operation.Operator == "/" {
+				result = operation
+			}
+		}
+	}
+	if marker == nil || result == nil || check == nil || marker.OwnerType != hir.TypeUSize || marker.Type != hir.TypeUSize ||
+		!slices.Equal(marker.TrapCategories, []string{"division-by-zero"}) || result.OwnerType != hir.TypeUSize ||
+		result.Type != hir.TypeUSize || check.SwitchKind != "checked-division" || check.SwitchType != hir.TypeUSize {
+		t.Fatalf("marker = %+v, result = %+v, check = %+v", marker, result, check)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+	mutated := Clone(program)
+	for blockIndex := range mutated.Functions[0].Blocks {
+		for operationIndex := range mutated.Functions[0].Blocks[blockIndex].Operations {
+			operation := &mutated.Functions[0].Blocks[blockIndex].Operations[operationIndex]
+			if operation.Kind == OperationCheckedDivision {
+				operation.OwnerType = hir.TypeU32
+			}
+		}
+	}
+	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1501" {
+		t.Fatalf("Verify() division marker type mutation failures = %+v", failures)
 	}
 }
 

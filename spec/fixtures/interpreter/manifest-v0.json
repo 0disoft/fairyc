@@ -19,6 +19,7 @@
     "docs/adr/0098-value-preserving-integer-casts.md",
     "docs/adr/0099-typed-scalar-comparisons.md",
     "docs/adr/0100-checked-unsigned-arithmetic.md",
+    "docs/adr/0101-checked-unsigned-division.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/mir-v0.md",
     "docs/engineering/05-testing-standard.md"
@@ -1102,6 +1103,34 @@
         "outcome": "trap",
         "category": "integer-overflow"
       }
+    },
+    {
+      "id": "pass.interpreter.checked-unsigned-division",
+      "sourceRoot": "cases/pass/checked-unsigned-division/src",
+      "sources": ["main.fy"],
+      "entry": "main::divide",
+      "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "return", "value": 42 }
+    },
+    {
+      "id": "pass.interpreter.checked-u8-division-zero",
+      "sourceRoot": "cases/pass/checked-unsigned-division/src",
+      "sources": ["main.fy"],
+      "entry": "main::u8_zero",
+      "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "trap", "category": "division-by-zero" }
+    },
+    {
+      "id": "pass.interpreter.checked-u32-remainder-zero",
+      "sourceRoot": "cases/pass/checked-unsigned-division/src",
+      "sources": ["main.fy"],
+      "entry": "main::u32_zero",
+      "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "trap", "category": "division-by-zero" }
+    },
+    {
+      "id": "pass.interpreter.checked-usize-division-zero",
+      "sourceRoot": "cases/pass/checked-unsigned-division/src",
+      "sources": ["main.fy"],
+      "entry": "main::usize_zero",
+      "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "trap", "category": "division-by-zero" }
     }
   ]
 }

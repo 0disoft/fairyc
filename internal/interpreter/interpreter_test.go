@@ -132,6 +132,18 @@ fn usize_add_overflow() -> i32 {
     let overflow: usize = value + 1;
     42
 }
+fn unsigned_division() -> i32 {
+    let byte_input: u8 = 84;
+    let byte: u8 = byte_input / 2;
+    let word_input: u32 = 85;
+    let word: u32 = word_input % 43;
+    let size_input: usize = 84;
+    let size: usize = size_input / 2;
+    if byte == 42 && word == 42 && size == 42 { 42 } else { 1 }
+}
+fn u8_divide_zero() -> i32 { let numerator: u8 = 42; let zero: u8 = 0; let value: u8 = numerator / zero; 42 }
+fn u32_remainder_zero() -> i32 { let numerator: u32 = 42; let zero: u32 = 0; let value: u32 = numerator % zero; 42 }
+fn usize_divide_zero() -> i32 { let numerator: usize = 42; let zero: usize = 0; let value: usize = numerator / zero; 42 }
 `)
 	for _, testCase := range []struct {
 		entry string
@@ -143,6 +155,10 @@ fn usize_add_overflow() -> i32 {
 		{entry: "main::u8_multiply_overflow", kind: interpreter.OutcomeTrap, trap: "integer-overflow"},
 		{entry: "main::u32_subtract_underflow", kind: interpreter.OutcomeTrap, trap: "integer-overflow"},
 		{entry: "main::usize_add_overflow", kind: interpreter.OutcomeTrap, trap: "integer-overflow"},
+		{entry: "main::unsigned_division", kind: interpreter.OutcomeReturn, value: 42},
+		{entry: "main::u8_divide_zero", kind: interpreter.OutcomeTrap, trap: "division-by-zero"},
+		{entry: "main::u32_remainder_zero", kind: interpreter.OutcomeTrap, trap: "division-by-zero"},
+		{entry: "main::usize_divide_zero", kind: interpreter.OutcomeTrap, trap: "division-by-zero"},
 	} {
 		outcome, err := interpreter.Execute(program, testCase.entry)
 		if err != nil {

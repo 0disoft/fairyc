@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0096-explicit-multi-source-prototype-program-commands.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0101-checked-unsigned-division.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -137,6 +137,9 @@ Optimization level and backend must not change the meaning of safe code. Express
 - Ordinary `+`, `-`, and `*` accept matching `i32`, `u8`, `u32`, or `usize` operands and trap with
   `integer-overflow` when the mathematical result is outside that exact type. They never promote,
   change signedness, or wrap according to the backend or build profile.
+- Ordinary `/` and `%` accept those same matching types. A zero divisor always traps as
+  `division-by-zero`; only `i32` minimum with negative one additionally traps as
+  `signed-division-overflow`.
 - Source `as` integer conversion is currently limited to the target-independent, value-preserving
   pairs `u8 -> i32`, `u8 -> u32`, `u8 -> usize`, and `u32 -> usize`. Narrowing, signedness-changing,
   C-scalar, pointer/integer, and other numeric conversions require a later explicit contract.

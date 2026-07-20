@@ -20,15 +20,16 @@ depend on an unrelated helper implementation.
 1. Verified MIR remains the semantic authority for division-by-zero and signed-division-overflow
    traps. The interpreter and checked control-flow shape do not change.
 2. A generated C function containing checked division or remainder declares one function-local
-   `volatile int32_t` divisor slot. Immediately before the C operation, the emitter stores the
-   already-checked divisor in that slot and uses the volatile read as the C divisor.
+   volatile divisor slot for each exact `i32`, `u8`, `u32`, or `usize` type used by that function.
+   Immediately before the C operation, the emitter stores the already-checked divisor in the
+   matching slot and uses the volatile read as the C divisor.
 3. The slot prevents a host C compiler from treating a source constant as an immediately undefined
    C constant expression. It is private transport and creates no Fairy C volatile type, operation,
    observable side effect, or public ABI.
-4. One slot is reused by sequential operations within the generated C function. It is automatic
-   storage, so recursive invocations retain independent slots.
-5. Backend source tests cover both division and remainder by a constant zero. The Windows host smoke
-   compiles and executes the division trap through low and optimized MSVC profiles.
+4. One slot per used type is reused by sequential operations within the generated C function. It is
+   automatic storage, so recursive invocations retain independent slots.
+5. Backend source tests cover division and remainder across the four admitted types. The Windows
+   host smoke compiles and executes signed and unsigned zero traps through both MSVC profiles.
 
 ## Consequences
 

@@ -181,11 +181,13 @@ func checkedDivisionSeed() mir.Function {
 				ID: 0, Entity: "block:check",
 				Operations: []mir.Operation{{
 					Kind: mir.OperationCheckedDivision, Entity: "operation:division",
-					Operands: operands, Operator: "/", TrapCategories: categories,
+					Operands: operands, OwnerType: hir.TypeI32, Type: hir.TypeI32,
+					Operator: "/", TrapCategories: categories,
 				}},
 				Terminator: mir.Terminator{
 					Kind: mir.TerminatorSwitch, Successors: []mir.BlockID{1, 2}, UnwindSuccessor: mir.NoBlock,
-					SwitchKind: "checked-division", SwitchOperands: operands, Operator: "/",
+					SwitchKind: "checked-division", SwitchType: hir.TypeI32,
+					SwitchOperands: operands, Operator: "/",
 				},
 			},
 			{

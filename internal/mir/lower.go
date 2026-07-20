@@ -1561,16 +1561,21 @@ func sourceEntity(kind string, span hir.Span) string {
 }
 
 func (l *functionLowerer) lowerCheckedDivision(expression *hir.Expression, left, right Operand) error {
-	categories := []string{"division-by-zero", "signed-division-overflow"}
+	categories := []string{"division-by-zero"}
+	if expression.Type == hir.TypeI32 {
+		categories = append(categories, "signed-division-overflow")
+	}
 	l.appendOperation(Operation{
 		Kind: OperationCheckedDivision, Span: expression.Span, Operands: []Operand{left, right},
+		OwnerType: expression.Children[0].Type, Type: expression.Type,
 		Operator: expression.Operator, TrapCategories: slices.Clone(categories),
 	})
 	continuation := l.newBlock()
 	trap := l.newBlock()
 	l.terminate(Terminator{
 		Kind: TerminatorSwitch, Span: expression.Span, Successors: []BlockID{continuation, trap}, UnwindSuccessor: NoBlock,
-		SwitchKind: "checked-division", SwitchOperands: []Operand{left, right}, Operator: expression.Operator,
+		SwitchKind: "checked-division", SwitchType: expression.Children[0].Type,
+		SwitchOperands: []Operand{left, right}, Operator: expression.Operator,
 	})
 	l.current = trap
 	l.terminate(Terminator{Kind: TerminatorTrap, Span: expression.Span, UnwindSuccessor: NoBlock, TrapCategories: slices.Clone(categories)})

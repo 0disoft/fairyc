@@ -1451,6 +1451,8 @@ func (e *emitter) inspectBinary(functionIndex int, operation mir.Operation) erro
 		validShape = hir.ScalarOrderedType(operation.OwnerType) && operation.Type == hir.TypeBool
 	case "+", "-", "*":
 		validShape = hir.CheckedArithmeticType(operation.OwnerType) && operation.Type == operation.OwnerType
+	case "/", "%":
+		validShape = hir.CheckedDivisionType(operation.OwnerType) && operation.Type == operation.OwnerType
 	default:
 		validShape = operation.OwnerType == hir.TypeI32 && operation.Type == hir.TypeI32
 	}
@@ -1481,6 +1483,21 @@ func unsignedCMaximum(value hir.Type) (string, error) {
 		return "UINTPTR_MAX", nil
 	default:
 		return "", fmt.Errorf("type %q has no unsigned C maximum", value)
+	}
+}
+
+func checkedDivisorName(value hir.Type) (string, error) {
+	switch value {
+	case hir.TypeI32:
+		return "fy_checked_divisor_i32", nil
+	case hir.TypeU8:
+		return "fy_checked_divisor_u8", nil
+	case hir.TypeU32:
+		return "fy_checked_divisor_u32", nil
+	case hir.TypeUSize:
+		return "fy_checked_divisor_usize", nil
+	default:
+		return "", fmt.Errorf("type %q has no checked divisor slot", value)
 	}
 }
 
@@ -2019,8 +2036,21 @@ func (e *emitter) inspectSwitch(functionIndex int, terminator mir.Terminator) er
 		e.trapCategories["unreachable"] = struct{}{}
 		return nil
 	case "checked-division":
+		left, right, err := twoOperands(terminator.SwitchOperands)
+		if err != nil {
+			return fmt.Errorf("checked division in %s: %w", function.Name, err)
+		}
+		leftType, leftErr := e.operandType(functionIndex, left)
+		rightType, rightErr := e.operandType(functionIndex, right)
+		if leftErr != nil || rightErr != nil || !hir.CheckedDivisionType(terminator.SwitchType) ||
+			leftType != terminator.SwitchType || rightType != terminator.SwitchType {
+			return fmt.Errorf("checked division in %s has incompatible type metadata", function.Name)
+		}
 		e.features["checked-division"] = struct{}{}
-		categories = []string{"division-by-zero", "signed-division-overflow"}
+		categories = []string{"division-by-zero"}
+		if terminator.SwitchType == hir.TypeI32 {
+			categories = append(categories, "signed-division-overflow")
+		}
 	case "checked-view-index":
 		receiver, index, err := twoOperands(terminator.SwitchOperands)
 		if err != nil {
@@ -2350,8 +2380,16 @@ func (e *emitter) emitFunction(output *strings.Builder, functionIndex int) error
 		fmt.Fprintf(output, "    %s fy_l_%d;\n", cType, local)
 		fmt.Fprintf(output, "    (void)&fy_l_%d;\n", local)
 	}
-	if functionNeedsCheckedDivisor(*function) {
-		output.WriteString("    volatile int32_t fy_checked_divisor;\n")
+	for _, divisorType := range functionCheckedDivisorTypes(*function) {
+		cType, err := e.cValueType(divisorType)
+		if err != nil {
+			return fmt.Errorf("function %s checked divisor type: %w", function.Name, err)
+		}
+		name, err := checkedDivisorName(divisorType)
+		if err != nil {
+			return fmt.Errorf("function %s checked divisor type: %w", function.Name, err)
+		}
+		fmt.Fprintf(output, "    volatile %s %s;\n", cType, name)
 	}
 	dynamicTargets := e.dynamicTrapTargets[functionIndex]
 	if len(dynamicTargets) != 0 {
@@ -2633,10 +2671,14 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 				fmt.Fprintf(output, "    fy_l_%d = (%s) %s (%s);\n", operation.DestinationLocal, leftValue, operation.Operator, rightValue)
 			}
 		case "/", "%":
-			output.WriteString("    fy_checked_divisor = ")
+			divisor, err := checkedDivisorName(operation.OwnerType)
+			if err != nil {
+				return fmt.Errorf("checked division in %s: %w", function, err)
+			}
+			output.WriteString("    " + divisor + " = ")
 			output.WriteString(rightValue)
 			output.WriteString(";\n")
-			fmt.Fprintf(output, "    fy_l_%d = (%s) %s fy_checked_divisor;\n", operation.DestinationLocal, leftValue, operation.Operator)
+			fmt.Fprintf(output, "    fy_l_%d = (%s) %s %s;\n", operation.DestinationLocal, leftValue, operation.Operator, divisor)
 		case ">>":
 			fmt.Fprintf(output, "    fy_l_%d = fy_sar_i32(%s, %s);\n", operation.DestinationLocal, leftValue, rightValue)
 		case "&", "^", "|":
@@ -2938,8 +2980,10 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		if err != nil {
 			return fmt.Errorf("checked division in %s: %w", function.Name, err)
 		}
-		fmt.Fprintf(output, "    if (%s == INT32_C(0)) { fy_pending_trap = FY_TRAP_DIVISION_BY_ZERO; goto fy_b_%d; }\n", rightValue, failure)
-		fmt.Fprintf(output, "    if (%s == INT32_MIN && %s == -INT32_C(1)) { fy_pending_trap = FY_TRAP_SIGNED_DIVISION_OVERFLOW; goto fy_b_%d; }\n", leftValue, rightValue, failure)
+		fmt.Fprintf(output, "    if (%s == 0) { fy_pending_trap = FY_TRAP_DIVISION_BY_ZERO; goto fy_b_%d; }\n", rightValue, failure)
+		if terminator.SwitchType == hir.TypeI32 {
+			fmt.Fprintf(output, "    if (%s == INT32_MIN && %s == -INT32_C(1)) { fy_pending_trap = FY_TRAP_SIGNED_DIVISION_OVERFLOW; goto fy_b_%d; }\n", leftValue, rightValue, failure)
+		}
 		fmt.Fprintf(output, "    goto fy_b_%d;\n", success)
 	case "checked-view-index":
 		receiver, index, err := twoOperands(terminator.SwitchOperands)
@@ -3035,15 +3079,22 @@ func collectLocals(function mir.Function) []mir.LocalID {
 	return result
 }
 
-func functionNeedsCheckedDivisor(function mir.Function) bool {
+func functionCheckedDivisorTypes(function mir.Function) []hir.Type {
+	found := make(map[hir.Type]bool)
 	for _, block := range function.Blocks {
 		for _, operation := range block.Operations {
 			if operation.Kind == mir.OperationBinary && (operation.Operator == "/" || operation.Operator == "%") {
-				return true
+				found[operation.OwnerType] = true
 			}
 		}
 	}
-	return false
+	result := make([]hir.Type, 0, len(found))
+	for _, candidate := range []hir.Type{hir.TypeI32, hir.TypeU8, hir.TypeU32, hir.TypeUSize} {
+		if found[candidate] {
+			result = append(result, candidate)
+		}
+	}
+	return result
 }
 
 func operationHasDestination(kind mir.OperationKind) bool {

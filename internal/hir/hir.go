@@ -117,6 +117,11 @@ func CheckedArithmeticType(value Type) bool {
 	return value == TypeI32 || value == TypeU8 || value == TypeU32 || value == TypeUSize
 }
 
+// CheckedDivisionType reports the closed Stage 0 ordinary / and % subset.
+func CheckedDivisionType(value Type) bool {
+	return CheckedArithmeticType(value)
+}
+
 // OptionElement decomposes one canonical compiler-known Option type.
 func OptionElement(value Type) (element Type, ok bool) {
 	text := string(value)

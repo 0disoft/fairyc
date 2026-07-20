@@ -354,6 +354,7 @@ fn main() -> i32 {
     let size_sum: usize = size + 1;
     if byte_product == 42 && word_difference == 42 && size_sum == 42 { 42 } else { 1 }
 }
+
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil {
@@ -373,6 +374,40 @@ fn main() -> i32 {
 		if !strings.Contains(unit.Source, required) {
 			t.Errorf("generated C is missing checked unsigned arithmetic %q:\n%s", required, unit.Source)
 		}
+	}
+}
+
+func TestEmitCheckedUnsignedDivision(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn main() -> i32 {
+    let byte_input: u8 = 84;
+    let byte: u8 = byte_input / 2;
+    let word_input: u32 = 85;
+    let word: u32 = word_input % 43;
+    let size_input: usize = 84;
+    let size: usize = size_input / 2;
+    if byte == 42 && word == 42 && size == 42 { 42 } else { 1 }
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, required := range []string{
+		"volatile uint8_t fy_checked_divisor_u8;",
+		"volatile uint32_t fy_checked_divisor_u32;",
+		"volatile uintptr_t fy_checked_divisor_usize;",
+		"/ fy_checked_divisor_u8;",
+		"% fy_checked_divisor_u32;",
+		"/ fy_checked_divisor_usize;",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing checked unsigned division %q:\n%s", required, unit.Source)
+		}
+	}
+	if strings.Contains(unit.Source, "FY_TRAP_SIGNED_DIVISION_OVERFLOW") {
+		t.Fatalf("unsigned-only C unit includes signed division overflow machinery:\n%s", unit.Source)
 	}
 }
 
@@ -811,9 +846,9 @@ func TestEmitMaterializesCheckedDivisionDivisor(t *testing.T) {
 				t.Fatalf("Emit() error = %v", err)
 			}
 			for _, required := range []string{
-				"volatile int32_t fy_checked_divisor;",
-				"fy_checked_divisor = INT32_C(0);",
-				fmt.Sprintf("(INT32_C(42)) %s fy_checked_divisor;", testCase.operator),
+				"volatile int32_t fy_checked_divisor_i32;",
+				"fy_checked_divisor_i32 = INT32_C(0);",
+				fmt.Sprintf("(INT32_C(42)) %s fy_checked_divisor_i32;", testCase.operator),
 			} {
 				if !strings.Contains(unit.Source, required) {
 					t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
