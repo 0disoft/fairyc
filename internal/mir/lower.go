@@ -680,8 +680,11 @@ func (l *functionLowerer) lowerArrayConstruction(expression *hir.Expression) (Op
 }
 
 func (l *functionLowerer) lowerArrayBorrowView(expression *hir.Expression) (Operand, error) {
-	wantView := hir.SharedBorrow(hir.TypeByteSlice)
-	if len(expression.Children) != 1 || expression.Operator != "&" || expression.Type != wantView {
+	wantShared := hir.SharedBorrow(hir.TypeByteSlice)
+	wantMutable := hir.MutableBorrow(hir.TypeByteSlice)
+	validBorrow := (expression.Operator == "&" && expression.Type == wantShared) ||
+		(expression.Operator == "&mut" && expression.Type == wantMutable)
+	if len(expression.Children) != 1 || !validBorrow {
 		return Operand{}, fmt.Errorf("malformed fixed-array byte-view borrow")
 	}
 	elementType, length, array := hir.FixedArrayParts(expression.Children[0].Type)
@@ -828,7 +831,10 @@ func (l *functionLowerer) lowerRawAddressCast(expression *hir.Expression) (Opera
 		})
 		return Operand{Kind: OperandLocal, Local: destination}, nil
 	}
-	if (borrow.Kind == "literal" || borrow.Kind == "path") && borrow.Type == hir.SharedBorrow(hir.TypeByteSlice) && expression.Type == hir.RawPointer(hir.TypeU8, false) {
+	byteSliceElement, byteSliceMutable, byteSliceBorrow := hir.BorrowElement(borrow.Type)
+	bytePointerElement, bytePointerMutable, bytePointer := hir.RawPointerElement(expression.Type)
+	if (borrow.Kind == "literal" || borrow.Kind == "path") && byteSliceBorrow && byteSliceElement == hir.TypeByteSlice &&
+		bytePointer && bytePointerElement == hir.TypeU8 && (byteSliceMutable || !bytePointerMutable) {
 		value, err := l.lowerExpression(borrow)
 		if err != nil {
 			return Operand{}, err

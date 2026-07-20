@@ -80,7 +80,7 @@ omitted end is the retained length of the already-evaluated receiver. The receiv
 written bound evaluate once from left to right. The result is `&[u8]` with the receiver's borrow
 origin when `start <= end && end <= bytes.len`; otherwise evaluation traps with `bounds` before
 deriving a pointer. This does not admit inclusive bounds, `str` indexing or slicing, indexed
-assignment, mutable byte views, or unchecked access.
+assignment, mutable-view indexing or slicing, or unchecked access.
 
 The first executable fixed-array subset accepts `[T; N]` only when `T` is `bool`, `i32`, `u8`,
 `u32`, or `usize` and `1 <= N <= 4096`. The ceiling is a provisional Stage 0 implementation guard
@@ -90,18 +90,23 @@ right. `array[index]` requires `usize`, returns `T`, and traps with `bounds` whe
 least `N`. `array.len` evaluates the receiver once and returns exact canonical `N` as `usize`
 without a scan, allocation, runtime call, memory read, or trap. Empty and repeated literals remain parser-valid but unsupported until zero-size
 representation and expansion-budget contracts exist. Array fields, nesting, resource elements,
-mutable indexing, slicing, properties other than `.len`, general borrowing, and foreign signatures
-remain closed. One direct shared borrow of an admitted `[u8; N]` place contextually becomes
-`&[u8]` when that view type is already expected, as in `let bytes: &[u8] = &array` or an internal
-`&[u8]` call argument. It retains the array's origin and exact `N`; other element types, `&mut`,
-temporary sources, and escaping local views remain closed. A `var` safe-borrow local may be
+mutable indexing, slicing, properties other than `.len`, broad array coercions, and foreign
+signatures remain closed. One direct shared borrow of an admitted `[u8; N]` place contextually
+becomes `&[u8]` when that view type is already expected, as in
+`let bytes: &[u8] = &array` or an internal `&[u8]` call argument. A direct exclusive borrow of a
+mutable admitted `[u8; N]` place likewise becomes `&mut [u8]` only where that exact type is expected.
+Both views retain the array's origin and exact `N`; other element types, bare values, temporary
+sources, inferred conversions, and escaping local views remain closed. The mutable view may cross
+internal calls and expose `.len`, but it adds no safe indexing, assignment, slicing, or resizing.
+A `var` safe-borrow local may be
 reassigned in straight-line, branch, or `while` control flow; reachable branch, header,
 `continue`, and `break` origins are joined and returning a multi-origin result is rejected.
 
 Internal function parameters may name an exact `&[T; N]` or `&mut [T; N]` for an admitted fixed
 array. This is a safe borrow of the whole array, not a slice, and does not add resizing, mutable
 indexing, array fields, foreign-reference parameters, or a public ABI. Contextual `&[u8; N]` to
-`&[u8]` conversion remains shared-only.
+`&[u8]` and `&mut [u8; N]` to `&mut [u8]` conversion preserve their respective shared or exclusive
+loan; neither converts between mutabilities.
 
 Ordinary internal functions may accept `&str` and `&[u8]` parameters. Calls preserve the exact safe
 borrow and its caller-proven origin; they do not convert the argument to a raw pointer or transfer

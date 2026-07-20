@@ -1871,7 +1871,6 @@ fn main() -> i32 {
 	if failures := Verify(program); len(failures) != 0 {
 		t.Fatalf("Verify() failures = %+v", failures)
 	}
-
 	mutated := Clone(program)
 	for functionIndex := range mutated.Functions {
 		for blockIndex := range mutated.Functions[functionIndex].Blocks {
@@ -1885,6 +1884,50 @@ fn main() -> i32 {
 	}
 	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1001" {
 		t.Fatalf("Verify() array byte-view mutation failures = %+v", failures)
+	}
+}
+
+func TestLowerPreservesMutableFixedU8ArrayByteViewBorrow(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+fn length(bytes: &mut [u8]) -> usize { bytes.len }
+fn main() -> i32 {
+    var values: [u8; 3] = [40, 41, 42];
+    if length(&mut values) == 3 { 42 } else { 1 }
+}
+`)
+	var borrow *Operation
+	for functionIndex := range program.Functions {
+		for blockIndex := range program.Functions[functionIndex].Blocks {
+			for operationIndex := range program.Functions[functionIndex].Blocks[blockIndex].Operations {
+				operation := &program.Functions[functionIndex].Blocks[blockIndex].Operations[operationIndex]
+				if operation.Kind == OperationArrayBorrowView && operation.Operator == "&mut" {
+					borrow = operation
+				}
+			}
+		}
+	}
+	if borrow == nil || borrow.OwnerType != hir.FixedArray(hir.TypeU8, 3) || borrow.Type != hir.MutableBorrow(hir.TypeByteSlice) ||
+		borrow.DestinationLocal == NoLocal || len(borrow.Operands) != 1 || borrow.Operands[0].Kind != OperandLocal {
+		t.Fatalf("mutable array byte-view borrow = %+v", borrow)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+
+	mutated := Clone(program)
+	for functionIndex := range mutated.Functions {
+		for blockIndex := range mutated.Functions[functionIndex].Blocks {
+			for operationIndex := range mutated.Functions[functionIndex].Blocks[blockIndex].Operations {
+				operation := &mutated.Functions[functionIndex].Blocks[blockIndex].Operations[operationIndex]
+				if operation.Kind == OperationArrayBorrowView && operation.Operator == "&mut" {
+					operation.Type = hir.SharedBorrow(hir.TypeByteSlice)
+				}
+			}
+		}
+	}
+	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1001" {
+		t.Fatalf("Verify() mutable byte-view type mutation failures = %+v", failures)
 	}
 }
 

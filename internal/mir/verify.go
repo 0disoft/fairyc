@@ -601,10 +601,13 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 			case OperationByteSliceDataAddress:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				element, mutable, pointer := hir.RawPointerElement(operation.Type)
+				ownerElement, ownerMutable, ownerBorrow := hir.BorrowElement(operation.OwnerType)
+				staticStorageValid := len(operation.Operands) == 1 &&
+					(operation.Operands[0].Kind != OperandByteString || !ownerMutable)
 				shapeValid := operation.DestinationLocal != NoLocal && len(operation.Operands) == 1 &&
 					(operation.Operands[0].Kind == OperandByteString || operation.Operands[0].Kind == OperandLocal) &&
-					operation.OwnerType == hir.SharedBorrow(hir.TypeByteSlice) &&
-					pointer && element == hir.TypeU8 && !mutable && operation.Operator == "as"
+					ownerBorrow && ownerElement == hir.TypeByteSlice && staticStorageValid &&
+					pointer && element == hir.TypeU8 && (ownerMutable || !mutable) && operation.Operator == "as"
 				if !shapeValid {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "byte-slice data address shape is invalid"})
 				}
@@ -1028,9 +1031,10 @@ func validArrayConstructShape(operation Operation) bool {
 
 func validArrayBorrowViewShape(operation Operation) bool {
 	elementType, length, array := hir.FixedArrayParts(operation.OwnerType)
+	viewValid := (operation.Type == hir.SharedBorrow(hir.TypeByteSlice) && operation.Operator == "&") ||
+		(operation.Type == hir.MutableBorrow(hir.TypeByteSlice) && operation.Operator == "&mut")
 	return array && elementType == hir.TypeU8 && hir.ExecutableFixedArrayShape(elementType, length) &&
-		operation.DestinationLocal != NoLocal && operation.Type == hir.SharedBorrow(hir.TypeByteSlice) &&
-		operation.Operator == "&" && len(operation.Operands) == 1 && operation.Operands[0].Kind == OperandLocal
+		operation.DestinationLocal != NoLocal && viewValid && len(operation.Operands) == 1 && operation.Operands[0].Kind == OperandLocal
 }
 
 func validArrayLengthShape(operation Operation) bool {

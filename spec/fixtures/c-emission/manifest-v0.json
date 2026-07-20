@@ -36,6 +36,7 @@
     "docs/adr/0118-copy-tagged-transport-and-typed-console-result.md",
     "docs/adr/0119-flat-copy-resource-c-transport.md",
     "docs/adr/0120-verified-nonempty-resource-drop-glue.md",
+    "docs/adr/0125-mutable-fixed-u8-array-byte-view.md",
     "docs/adr/0107-omitted-immutable-byte-view-slice-bounds.md",
     "docs/adr/0108-integer-literal-range-validation.md",
     "docs/adr/0109-direct-i32-minimum-literal.md",
@@ -572,6 +573,22 @@
         "dialect": "c11",
         "functions": ["main::bounds_trap", "main::main", "main::pick", "main::view_pick"],
         "features": ["array-byte-view-borrow", "array-index", "array-length", "scalar-call", "scalar-cast", "scalar-comparison", "scalar-control-flow", "scalar-fixed-array", "trap", "view-index"]
+      }
+    },
+    {
+      "id": "pass.c-emission.mutable-fixed-array-byte-view",
+      "sourceRoot": "cases/pass/mutable-fixed-array-byte-view/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::length", "main::main"],
+        "features": ["array-index", "mutable-array-byte-view-borrow", "scalar-call", "scalar-cast", "scalar-comparison", "scalar-control-flow", "scalar-fixed-array", "trap", "view-length"]
       }
     },
     {

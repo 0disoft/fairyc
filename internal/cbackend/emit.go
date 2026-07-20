@@ -1044,7 +1044,8 @@ func isResultI32I32(value hir.Type) bool {
 
 func (e *emitter) supportedCValueType(value hir.Type) bool {
 	value = canonicalCValueType(value)
-	if value == hir.SharedBorrow(hir.TypeByteSlice) || value == hir.SharedBorrow(hir.TypeStr) || value == hir.SharedBorrow(hir.TypeCStr) {
+	if value == hir.SharedBorrow(hir.TypeByteSlice) || value == hir.MutableBorrow(hir.TypeByteSlice) ||
+		value == hir.SharedBorrow(hir.TypeStr) || value == hir.SharedBorrow(hir.TypeCStr) {
 		return true
 	}
 	if _, borrow := e.safeBorrowCType(value); borrow {
@@ -1088,6 +1089,8 @@ func (e *emitter) cValueType(value hir.Type) (string, error) {
 	switch {
 	case value == hir.SharedBorrow(hir.TypeByteSlice):
 		return "fy_byte_slice", nil
+	case value == hir.MutableBorrow(hir.TypeByteSlice):
+		return "fy_mut_byte_slice", nil
 	case value == hir.SharedBorrow(hir.TypeStr):
 		return "fy_str", nil
 	case value == hir.SharedBorrow(hir.TypeCStr):
@@ -1300,7 +1303,11 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 				if err := e.inspectArrayBorrowView(functionIndex, *operation); err != nil {
 					return err
 				}
-				e.features["array-byte-view-borrow"] = struct{}{}
+				if operation.Type == hir.MutableBorrow(hir.TypeByteSlice) {
+					e.features["mutable-array-byte-view-borrow"] = struct{}{}
+				} else {
+					e.features["array-byte-view-borrow"] = struct{}{}
+				}
 			case mir.OperationArrayLength:
 				if err := e.inspectArrayLength(functionIndex, *operation); err != nil {
 					return err
@@ -1538,8 +1545,10 @@ func (e *emitter) inspectArrayBorrowView(functionIndex int, operation mir.Operat
 		return fmt.Errorf("fixed-array byte-view borrow in %s: %w", function.Name, err)
 	}
 	elementType, length, array := hir.FixedArrayParts(operation.OwnerType)
+	viewValid := (operation.Type == hir.SharedBorrow(hir.TypeByteSlice) && operation.Operator == "&") ||
+		(operation.Type == hir.MutableBorrow(hir.TypeByteSlice) && operation.Operator == "&mut")
 	if !array || elementType != hir.TypeU8 || !hir.ExecutableFixedArrayShape(elementType, length) ||
-		operation.Type != hir.SharedBorrow(hir.TypeByteSlice) || operation.Operator != "&" {
+		!viewValid {
 		return fmt.Errorf("fixed-array byte-view borrow in %s has incompatible owner, result, or operator", function.Name)
 	}
 	receiverType, err := e.operandType(functionIndex, receiver)
@@ -1894,7 +1903,10 @@ func (e *emitter) inspectByteSliceDataAddress(functionIndex int, operation mir.O
 		return fmt.Errorf("byte-slice data address in %s has incomplete storage or unsafe provenance", function.Name)
 	}
 	element, mutable, pointer := hir.RawPointerElement(operation.Type)
-	if !pointer || mutable || element != hir.TypeU8 || operation.OwnerType != hir.SharedBorrow(hir.TypeByteSlice) || operation.Operator != "as" {
+	ownerElement, ownerMutable, ownerBorrow := hir.BorrowElement(operation.OwnerType)
+	staticStorageValid := operand.Kind != mir.OperandByteString || !ownerMutable
+	if !pointer || element != hir.TypeU8 || !ownerBorrow || ownerElement != hir.TypeByteSlice ||
+		!staticStorageValid || (!ownerMutable && mutable) || operation.Operator != "as" {
 		return fmt.Errorf("byte-slice data address in %s has incompatible source and pointer types", function.Name)
 	}
 	operandType, err := e.operandType(functionIndex, operand)
@@ -2579,11 +2591,19 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 		output.WriteString("#include <string.h>\n")
 	}
 	output.WriteByte('\n')
-	if _, used := e.features["static-byte-string"]; used {
+	_, usesStaticByteString := e.features["static-byte-string"]
+	_, usesArrayByteView := e.features["array-byte-view-borrow"]
+	if usesStaticByteString || usesArrayByteView {
 		output.WriteString("typedef struct fy_byte_slice {\n")
 		output.WriteString("    const uint8_t *data;\n")
 		output.WriteString("    uintptr_t length;\n")
 		output.WriteString("} fy_byte_slice;\n\n")
+	}
+	if _, used := e.features["mutable-array-byte-view-borrow"]; used {
+		output.WriteString("typedef struct fy_mut_byte_slice {\n")
+		output.WriteString("    uint8_t *data;\n")
+		output.WriteString("    uintptr_t length;\n")
+		output.WriteString("} fy_mut_byte_slice;\n\n")
 	}
 	if _, used := e.features["static-utf8-string"]; used {
 		output.WriteString("typedef struct fy_str {\n")
@@ -3071,7 +3091,11 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		if !array {
 			return fmt.Errorf("fixed-array byte-view borrow in %s has type %q", function, operation.OwnerType)
 		}
-		fmt.Fprintf(output, "    fy_l_%d = (fy_byte_slice){ .data = fy_l_%d.data, .length = ((uintptr_t)UINT64_C(%d)) };\n", operation.DestinationLocal, receiver.Local, length)
+		viewType := "fy_byte_slice"
+		if operation.Type == hir.MutableBorrow(hir.TypeByteSlice) {
+			viewType = "fy_mut_byte_slice"
+		}
+		fmt.Fprintf(output, "    fy_l_%d = (%s){ .data = fy_l_%d.data, .length = ((uintptr_t)UINT64_C(%d)) };\n", operation.DestinationLocal, viewType, receiver.Local, length)
 	case mir.OperationArrayLength:
 		if _, err := oneOperand(operation.Operands); err != nil {
 			return fmt.Errorf("fixed-array length in %s: %w", function, err)

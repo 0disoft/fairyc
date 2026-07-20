@@ -466,7 +466,10 @@ func validUnsizedTypeUse(value hir.Type) bool {
 		return false
 	}
 	if element, mutable, borrow := hir.BorrowElement(value); borrow {
-		if element == hir.TypeByteSlice || element == hir.TypeStr || element == hir.TypeCStr {
+		if element == hir.TypeByteSlice {
+			return true
+		}
+		if element == hir.TypeStr || element == hir.TypeCStr {
 			return !mutable
 		}
 		return validUnsizedTypeUse(element)

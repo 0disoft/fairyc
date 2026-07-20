@@ -22,7 +22,7 @@ lowering, and parser-fixture-runner portion of the first item exists. Name resol
 now cover the semantic fixture's scalar and safe-borrow subset. Local last-use loans, borrow
   conflicts, single-origin borrow returns, checked matching-type left shift, loop-context diagnostics,
   scalar foreign-call unsafe/signature boundaries, and `@link_name` shape diagnostics execute across
-  all 33 semantic v0 cases, including branch- and loop-aware safe-borrow reassignment, exact
+  all 38 semantic v0 cases, including branch- and loop-aware safe-borrow reassignment, exact
   interprocedural borrow-return summaries, integer-literal range rejection before MIR, and exact
   transport for all sixteen TargetSpec C scalars. The type phase also canonicalizes the closed
   seven-name `@effects(...)` vocabulary and enforces caller supersets independently from unsafe. General
@@ -32,7 +32,7 @@ exhaustive shallow matching, and local, parameter, branch, loop, overwrite, and 
 must-use obligations. Mutable-local MIR lowering and verification
   execute all 11 MIR normalization v0 cases for the current scalar, resource, tagged-payload, Result, Region, loop-control cleanup, call,
   division, and checked-arithmetic trap subset. All 10 verifier baselines and 21 isolated mutation cases execute through
-  the same MIR verifier. The first MIR interpreter executes all 90 interpreter v0 cases, including direct `i32` minimum constants, scalar fixed-array calls, contextual immutable byte-view borrowing, exact lengths, and checked indexing, and
+  the same MIR verifier. The first MIR interpreter executes all 91 interpreter v0 cases, including direct `i32` minimum constants, scalar fixed-array calls, contextual immutable and mutable byte-view borrowing, exact lengths, and checked indexing, and
 scalar `Option` and `Result` construction, exhaustive matching, and both Result `?` paths, and is
 exposed by the unstable `experimental run` command, which now accepts a bounded explicit entry-plus-
 repeated-`--source` module closure without discovery. Resource construction, field reads, whole-root
@@ -51,17 +51,17 @@ unsigned right shift execute across trapping and
   verifier-linked private functions and execute before reverse field cleanup. Resource-declared
   effects are preserved and required only at actual cleanup edges. Restricted inert enums now preserve named payloads,
   construct through qualified variants, require exhaustive shallow matches, and execute through
-  verified MIR, the interpreter, and the constrained C backend. The C backend now emits deterministic C11 for 34
+  verified MIR, the interpreter, and the constrained C backend. The C backend now emits deterministic C11 for 35
   verified scalar, borrowed-view, typed-comparison, inert-enum, flat-resource, and resource-tagged cases under the provisional `x86_64-linux-gnu` profile,
   including `Option<i32>` and `Result<i32, i32>` construction, match, calls, and propagation,
   copy-scalar/inert-struct tagged transport, private
-  positive scalar fixed-array construction, contextual zero-copy `[u8; N]` byte-view borrowing, exact length observation, internal value calls, and checked read-only indexing, plus
+  positive scalar fixed-array construction, contextual zero-copy shared and mutable `[u8; N]` byte-view borrowing, exact length observation, internal value calls, and checked read-only indexing, plus
   flat copy-resource construction, field reads, moves, reassignment, and resource-bearing built-in
   tag variants and propagation. The unstable
   `experimental emit-c` command exposes that exact verified translation unit on stdout
   without writing an artifact. On an eligible Linux/amd64 glibc host, `experimental build` can now
   compile and link that subset with explicit Clang or GCC and low or optimized profiles into
-  a no-overwrite `build/` artifact. Real safe file and console I/O, effect-bearing function values,
+  a no-overwrite `build/` artifact. Stable portable file and console packages, effect-bearing function values,
   and every later Phase 1
   capability remain unimplemented.
 
@@ -76,7 +76,7 @@ Exit gate: positive and negative fixtures agree with the source contracts, resou
 
 Current implementation status: a fail-closed Linux/amd64 constrained-C differential command now
 requires glibc, Clang, and GCC and is wired into a separate hosted Ubuntu CI job. It is designed to
-run all 34 emission cases at low and optimized profiles for 136 process-status and exact
+run all 35 emission cases at low and optimized profiles for 140 process-status and exact
 source-linked drop-trace comparisons, then drive
 the actual experimental build CLI with resource-bearing Option and Result plus a flat all-`i32` resource
 through 4 compiler/profile executable
@@ -84,7 +84,7 @@ smokes. It now adds four-way product builds containing compiler-owned nonempty `
 private compiler-owned `&[u8]` view, plus separate generated-Fairy-to-C calls that verify every byte
 of `fairy\0` and every non-terminated byte of `fairy` respectively. The same job
 also compiles and executes each production, uninstrumented C unit with Clang
-and GCC under the closed `address-undefined-o1` ASan+UBSan mode for 68 fail-closed sanitizer
+and GCC under the closed `address-undefined-o1` ASan+UBSan mode for 70 fail-closed sanitizer
 executions. The current Windows
 host has no eligible Linux toolchain, and no hosted run receipt has been observed, so this is a
 configured lane rather than native conformance evidence. A shared bounded C driver and embedded
@@ -158,6 +158,10 @@ end-exclusive slicing through verified MIR bounds checks, interpreter `bounds` o
 generated-C checked loads or pointer derivation. Indexed assignment, inclusive ranges, text
 indexing or slicing, public CStr operations, Unicode counting, safe text operations, and stable
 slice or string ABIs remain missing.
+Mutable fixed `[u8; N]` places now contextually borrow as `&mut [u8]` for exact internal parameters.
+The view preserves its exclusive origin, exposes canonical length, emits a private writable
+descriptor, and may derive `*mut u8` only inside unsafe wrapper code. Safe mutable indexing,
+assignment, slicing, resizing, and retained foreign pointers remain missing.
 Owned String and CString now have provisional Buffer-backed C transport with immutable views,
 successful-only Buffer moves, failure ownership preservation, self-source append, interior-NUL
 rejection, and exact termination. Four C-only native runs are configured but unobserved. A separate
@@ -182,8 +186,10 @@ bounded ASCII-to-`WCHAR` open, one-call partial read, progress-preserving write-
 consuming close, and silent best-effort drop without hidden allocation. Its low and optimized
 separate-translation-unit MSVC probes cover create/truncate, exact data, three-byte reads, EOF,
 repeated close, forced `ERROR_INVALID_HANDLE`, drop, and repeated drop after COFF, PE, and unwind
-inspection. The six admitted symbols remain raw and target-bound; safe FY ownership, typed error
-mapping, filesystem effects at the wrapper surface, and mutable byte access remain the next gate.
+inspection. An example-level safe FY module now adds move-only ownership, typed errors, filesystem
+effects, consuming close, implicit drop, and `read(&mut [u8])`; low and optimized `.fy` builds fill
+the caller's fixed array and return 42 through local MSVC without WSL. A stable `std::fs`, portable
+Unicode path, hosted receipt, general mutable-buffer operations, and public layout remain later gates.
 
 The product build path now records sorted unique foreign symbols used by MIR calls and resolves the
 project-owned subset through one shared symbol/component contract. It links only the minimal

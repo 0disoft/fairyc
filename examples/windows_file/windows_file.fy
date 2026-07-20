@@ -45,7 +45,7 @@ unsafe extern C fn file_open_raw(
 @link_name("fy_std_windows_file_read_v0")
 unsafe extern C fn file_read_raw(
     file: *mut void,
-    buffer: *mut void,
+    buffer: *mut u8,
     length: usize
 ) -> fy_std_windows_file_result_v0;
 
@@ -136,9 +136,9 @@ pub fn write_all(file: &mut File, bytes: &[u8]) -> Result<usize, FileError> {
 }
 
 @effects(filesystem)
-pub fn read_16(file: &mut File, buffer: &mut [u8; 16]) -> Result<usize, FileError> {
+pub fn read(file: &mut File, buffer: &mut [u8]) -> Result<usize, FileError> {
     let result: fy_std_windows_file_result_v0 = unsafe {
-        file_read_raw(file as *mut void, buffer as *mut void, 16)
+        file_read_raw(file as *mut void, buffer as *mut u8, buffer.len)
     };
     if result.status == 0 {
         Result::Ok(result.count)

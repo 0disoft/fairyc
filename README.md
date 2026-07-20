@@ -14,7 +14,7 @@ The project is not trying to beat every hand-tuned C program or make every C own
 The first Stage 0 frontend slice now exists in Go: immutable source bytes, a lossless lexer,
 compact recoverable syntax, error-free AST lowering, deterministic `E00xx` diagnostics, and a
 runner for all parser v0 fixtures. The next slice resolves names and produces typed HIR for the
-  fixture-backed scalar, safe-borrow, scalar foreign-call, and declared-effect subset. Its semantic runner executes all 35 v0 resolve, type,
+  fixture-backed scalar, safe-borrow, scalar foreign-call, and declared-effect subset. Its semantic runner executes all 38 v0 resolve, type,
 and local Flow cases, including integer-literal range rejection, branch- and loop-aware safe-borrow reassignment,
 exact interprocedural borrow-return summaries, last-use loans, borrow-return origins, canonical
 `@effects(...)` sets, and caller-superset enforcement. Whole-root resource Flow
@@ -30,7 +30,7 @@ error compatibility. The MIR runner executes all
 left-to-right call evaluation, complete-root moves, normal-exit cleanup order, `Result` error
   cleanup, nearest-loop control, explicit checked arithmetic, and non-unwinding trap paths. The verifier mutation runner constructs all 10 named
   baselines and proves all 21 isolated `V1001` through `V1701` rejection recipes. The first MIR
-  interpreter slice executes all 90 v0 cases for literal return, direct `i32` minimum constants, scalar fixed-array calls, contextual immutable byte-view borrowing, exact lengths, and checked indexing, function-call arithmetic,
+  interpreter slice executes all 91 v0 cases for literal return, direct `i32` minimum constants, scalar fixed-array calls, contextual immutable and mutable byte-view borrowing, exact lengths, and checked indexing, function-call arithmetic,
 boolean branches and logical not, source `&&` and `||` short-circuiting, scalar `while`, scalar
 `Option` construction/matching, scalar `Result` construction/matching/propagation,
 resource construction, field reads, call moves, resource-bearing `Option` and `Result` payload moves,
@@ -48,7 +48,7 @@ cleanup. A nonempty resource may declare drop effects, and Resource Flow require
 actual cleanup edges; whole-root moves transfer the obligation without charging the sender.
 The interpreter constructs, reads, and recursively drops resources from the verified MIR definition;
 host effect implementations remain target-runtime work rather than interpreter emulation.
-The constrained C backend emits deterministic C11 for 34 verified fixtures across the scalar
+The constrained C backend emits deterministic C11 for 35 verified fixtures across the scalar
 payload surface, restricted inert user enums, flat nonempty move-only resources over Fairy copy
 scalars or raw pointers with empty or pure nonempty drop bodies, copy-scalar/inert-struct and resource-bearing
 built-in `Option` and `Result` values,
@@ -58,7 +58,7 @@ immutable byte-slice indexing and end-exclusive slicing, the target-independent 
 subtraction, multiplication, division, remainder, bitwise operations, and checked right shift,
 typed equality across `bool` and the four Fairy integer scalars,
 typed ordering across those integer scalars, borrowed UTF-8/byte-slice internal calls, and private
-value-semantic scalar fixed arrays with exact lengths, contextual immutable byte-view borrowing,
+value-semantic scalar fixed arrays with exact lengths, contextual immutable and mutable byte-view borrowing,
 and checked read-only indexing. The cases cover
 resource construction, field reads, whole-root call moves, live reassignment, calls and control
 flow, active-payload moves, Result propagation, bitwise operations, checked division and shift, overflow
@@ -190,13 +190,16 @@ Fixed arrays of `bool`, `i32`, `u8`, `u32`, or `usize` with `1 <= N <= 4096` now
 nonempty list literals, cross internal calls and returns as inert copy values, expose exact
 zero-cost `usize` `.len`, and support checked read-only `usize` indexing. A direct shared borrow of
 `[u8; N]` contextually becomes `&[u8]` where that type is expected, so local arrays can use the
-existing immutable byte-view calls and operations without unsafe code. The ceiling is a provisional
-Stage 0 implementation guard, not a stable language or ABI limit. A mutable safe-borrow local may
+existing immutable byte-view calls and operations without unsafe code. A direct exclusive borrow
+of a mutable `[u8; N]` likewise becomes `&mut [u8]` only where that internal parameter type is
+expected. It carries exact length and may expose `*mut u8` only inside unsafe wrapper code; safe
+mutable indexing, assignment, and slicing remain absent. The ceiling is a provisional Stage 0
+implementation guard, not a stable language or ABI limit. A mutable safe-borrow local may
 be reassigned through straight-line, branch, and `while` control flow; Flow replaces its provenance
 after evaluating the right-hand side, joins reachable branch/header/`continue`/`break` origins
 without guessing, and releases old owners only after their last reachable loan use. Exact whole-
-array `&[T; N]` and `&mut [T; N]` types may now cross internal calls without becoming slices or
-copyable aliases. Empty and repeated literals, fields, nesting, mutable indexing, general slicing,
+array `&[T; N]` and `&mut [T; N]` types may now cross internal calls without becoming copyable
+aliases. Empty and repeated literals, fields, nesting, mutable indexing, general slicing,
 and public or foreign ABI use remain closed.
 Internal borrow-returning calls now infer one exact formal borrow parameter, region parameter, or
 static return source before ordinary Flow checks. The selected actual argument alone carries its
@@ -234,9 +237,9 @@ closes, reopens, reads in three-byte chunks, observes EOF, forces `ERROR_INVALID
 repeated close and drop at low and optimized local MSVC profiles. The six raw calls are target-bound
 through the closed resolver. A checked-in two-module FY example now wraps that exact component in a
 move-only `File`, preserves status, Win32 code, and completed bytes in `FileError`, carries
-`filesystem` effects, writes and synchronizes `FairyFile`, reads it through a bounded mutable fixed-
-array borrow, observes EOF, consumes explicit close, and proves implicit drop by successfully
-reopening a path whose live write handle would deny sharing. Low and optimized MSVC builds both
+`filesystem` effects, writes and synchronizes `FairyFile`, reads it through `read(&mut [u8])`
+backed by a mutable fixed array, observes EOF, consumes explicit close, and proves implicit drop by
+successfully reopening a path whose live write handle would deny sharing. Low and optimized MSVC builds both
 return 42 after object, PE, and unwind inspection. This is usable Stage 0 source evidence, not yet a
 stable `std::fs`, portable Unicode path, general mutable-buffer, hosted, or public-layout contract.
 The source FFI slice accepts `i32`, `u8`, `u32`, `usize`, all sixteen exact transport-only TargetSpec

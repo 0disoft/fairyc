@@ -20,6 +20,7 @@
     "docs/adr/0116-stage-0-source-effects.md",
     "docs/adr/0121-resource-drop-effects.md",
     "docs/adr/0123-mutable-parameter-and-opaque-borrow-cast.md",
+    "docs/adr/0125-mutable-fixed-u8-array-byte-view.md",
     "docs/diagnostics/catalog-v0.md"
   ],
   "cases": [
@@ -874,6 +875,15 @@
     {
       "id": "pass.type.mutable-parameter",
       "sourceRoot": "cases/pass/mutable-parameter/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow"
+      }
+    },
+    {
+      "id": "pass.type.mutable-fixed-array-byte-view",
+      "sourceRoot": "cases/pass/mutable-fixed-array-byte-view/src",
       "sources": ["main.fy"],
       "expect": {
         "status": "pass",

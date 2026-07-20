@@ -156,7 +156,7 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_open_v0(
 
 struct fy_std_windows_file_result_v0 fy_std_windows_file_read_v0(
     void *file_storage,
-    void *buffer,
+    uint8_t *buffer,
     size_t length
 ) {
     struct fy_std_windows_file_v0 file;

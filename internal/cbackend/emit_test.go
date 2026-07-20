@@ -388,6 +388,55 @@ fn main() -> i32 {
 	}
 }
 
+func TestEmitMutableFixedArrayByteViewDataAddress(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+unsafe extern C fn fill(data: *mut u8, length: usize) -> u32;
+fn fill_safe(bytes: &mut [u8]) -> u32 {
+    unsafe { fill(bytes as *mut u8, bytes.len) }
+}
+fn main() -> i32 {
+    var values: [u8; 3] = [0, 0, 0];
+    if fill_safe(&mut values) == 0 { 42 } else { 1 }
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, feature := range []string{"byte-slice-data-address", "mutable-array-byte-view-borrow", "scalar-fixed-array"} {
+		if !slices.Contains(unit.Features, feature) {
+			t.Errorf("features %v are missing %q", unit.Features, feature)
+		}
+	}
+	for _, required := range []string{
+		"typedef struct fy_mut_byte_slice {", "uint8_t *data;", "fy_mut_byte_slice fy_l_",
+		"(fy_mut_byte_slice){ .data = fy_l_", ".data;", "fill(fy_l_",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+}
+
+func TestEmitArrayByteViewDeclaresTransportWithoutLiteralStorage(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn length(bytes: &[u8]) -> usize { bytes.len }
+fn main() -> i32 {
+    let values: [u8; 3] = [40, 41, 42];
+    if length(&values) == 3 { 42 } else { 1 }
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	if !strings.Contains(unit.Source, "typedef struct fy_byte_slice {") || strings.Contains(unit.Source, "static const uint8_t fy_static_bytes_") {
+		t.Fatalf("generated C does not declare the array-only immutable view transport:\n%s", unit.Source)
+	}
+}
+
 func TestEmitRejectsFixedArrayBeyondExecutableElementLimit(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main;\nfn main() -> i32 { 42 }\n")

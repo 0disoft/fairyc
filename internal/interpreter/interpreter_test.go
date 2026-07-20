@@ -137,6 +137,24 @@ fn main() -> i32 {
 	}
 }
 
+func TestExecuteMutableFixedU8ArrayBorrowedAsByteView(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn length(bytes: &mut [u8]) -> usize { bytes.len }
+fn main() -> i32 {
+    var values: [u8; 3] = [40, 41, 42];
+    if length(&mut values) == 3 { values[2] as i32 } else { 1 }
+}
+`)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+	if outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("outcome = %+v", outcome)
+	}
+}
+
 func TestExecuteReassignedFixedArrayByteView(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

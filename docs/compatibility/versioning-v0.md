@@ -140,8 +140,12 @@ whole-array loan. Element order, length, `bounds`, and this contextual conversio
 semantics. The current `1..=4096` element admission ceiling and private C wrappers are provisional
 implementation guards rather than compatibility promises; empty/repeated literals, fields,
 nesting, mutation, general slicing, and ABI use remain unstabilized or excluded. Exact whole-array
-safe-borrow parameters are pre-1 internal-call semantics and do not stabilize a mutable slice or C
-ABI.
+safe-borrow parameters are pre-1 internal-call semantics and do not stabilize a C ABI.
+ADR 0125 adds the exact contextual mutable pair from a mutable `[u8; N]` place to `&mut [u8]`,
+retaining one exclusive origin and canonical length through internal calls. The private writable C
+descriptor and matching `*mut u8` extraction are pre-1 transport contracts. Safe mutable indexing,
+assignment, slicing, resizing, temporary borrowing, retained foreign pointers, and a public slice
+ABI remain excluded or unstabilized.
 ADR 0113 admits branch-aware safe-borrow reassignment with right-hand-side-first replacement,
 loan-generation preservation across aliases, reachable `if`/`match` origin joins, and path-aware
 loan liveness. Those rules and fail-closed multi-origin returns are pre-1 semantics. ADR 0114 adds compiler-internal fixed-point return-origin

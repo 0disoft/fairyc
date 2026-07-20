@@ -33,12 +33,12 @@ fn read_then_close(mut file: fs::File) -> i32 {
         0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
     ];
-    let operation_code: i32 = match fs::read_16(&mut file, &mut buffer) {
+    let operation_code: i32 = match fs::read(&mut file, &mut buffer) {
         Result::Ok(read) => if read == 9 &&
             buffer[0] == 70 && buffer[1] == 97 && buffer[2] == 105 &&
             buffer[3] == 114 && buffer[4] == 121 && buffer[5] == 70 &&
             buffer[6] == 105 && buffer[7] == 108 && buffer[8] == 101 {
-            match fs::read_16(&mut file, &mut buffer) {
+            match fs::read(&mut file, &mut buffer) {
                 Result::Ok(eof) => if eof == 0 { 0 } else { 23 },
                 Result::Err(_) => 22,
             }

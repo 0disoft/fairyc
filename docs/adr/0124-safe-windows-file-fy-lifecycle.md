@@ -5,6 +5,7 @@
 - Runtime source: `docs/runtime/runtime-stdlib-v0.md`
 - Ownership source: `docs/language/0001-values-and-resources.md`
 - C boundary source: `docs/mir/c-backend-safety-v0.md`
+- Amended by: `docs/adr/0125-mutable-fixed-u8-array-byte-view.md`
 
 ## Context
 
@@ -14,9 +15,9 @@ wrappers. The remaining gap was source-level proof: a Fairy program still could 
 move-only File, propagate filesystem effects, map raw status into a typed error, use a safe buffer,
 or execute verified drop glue against the real handle component.
 
-The first connection must not pretend that Stage 0 already has mutable slices, a portable path
-type, general standard-library package discovery, arbitrary FFI linkage, or a stable public resource
-layout.
+The first connection must not pretend that Stage 0 already has general mutable-slice operations, a
+portable path type, general standard-library package discovery, arbitrary FFI linkage, or a stable
+public resource layout.
 
 ## Decision
 
@@ -30,12 +31,12 @@ layout.
    closed allowlisted raw open symbol, and return `Result<File, FileError>`. `FileError` preserves
    raw status, Win32 code, and completed-byte count. A failed open consumes and drops its still-
    closed temporary so branch ownership remains identical.
-4. `write_all`, `sync`, and the bounded `read_16` accept safe borrows. Existing resource or fixed-
+4. `write_all`, `sync`, and the initial bounded `read_16` accept safe borrows. Existing resource or fixed-
    array borrow values may erase only to an opaque raw pointer inside the wrapper's unsafe block;
    generated C forwards the referent pointer instead of taking the address of the borrow carrier.
-5. `read_16` is intentionally `[u8; 16]` rather than a fake mutable slice. The C boundary receives
-   opaque storage for the generated fixed-array wrapper, whose first byte array member begins at
-   offset zero. General buffer lengths, mutable slices, and unchecked indexing remain closed.
+5. ADR 0125 supersedes that initial length-specific choice with `read(&mut [u8])`. A mutable fixed
+   `[u8; N]` place contextually supplies the private data pointer and canonical length; safe mutable
+   indexing, slicing, temporary borrowing, retained foreign pointers, and public ABI remain closed.
 6. `close(mut file: File)` consumes the resource by value. The raw close normalizes before its one
    kernel attempt; ordinary generated cleanup then observes closed state and becomes a no-op on
    both raw success and failure.
@@ -57,7 +58,7 @@ layout.
 - Unsafe code stays inside the support module; the entry module uses typed `Result`, safe borrows,
   consuming ownership, effects, and checked indexing.
 - The proof is local Windows x64 MSVC evidence, not hosted CI, Unicode-complete paths, other Windows
-  architectures, MinGW compatibility, a stable `std::fs` API, general mutable-buffer support, or
+  architectures, MinGW compatibility, a stable `std::fs` API, general mutable-buffer operations, or
   self-hosting.
 
 ## Verification

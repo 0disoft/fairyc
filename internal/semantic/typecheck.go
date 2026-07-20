@@ -631,7 +631,7 @@ func (c *typeChecker) checkCast(expression *ast.Expression, result *hir.Expressi
 	borrowValue := child != nil && child.Kind == "path"
 	opaqueElement := targetElement == hir.TypeVoid && (sourceMutable || !targetMutable) &&
 		(directLocalBorrow || borrowValue)
-	byteSliceBytes := sourceElement == hir.TypeByteSlice && !sourceMutable && targetElement == hir.TypeU8 && !targetMutable
+	byteSliceBytes := sourceElement == hir.TypeByteSlice && targetElement == hir.TypeU8 && (sourceMutable || !targetMutable)
 	stringBytes := sourceElement == hir.TypeStr && !sourceMutable && targetElement == hir.TypeU8 && !targetMutable
 	cStringBytes := sourceElement == hir.TypeCStr && !sourceMutable && targetElement == hir.TypeU8 && !targetMutable
 	if !sourceBorrow || !targetPointer || !sameElement && !opaqueElement && !byteSliceBytes && !stringBytes && !cStringBytes {
@@ -889,6 +889,11 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 		if target == nil || !target.mutable {
 			c.analyzer.addDiagnostic("E1008", span(c.module.file.Path, expression.Children[0].Span))
 			return hir.TypeInvalid
+		}
+		if element, length, array := hir.FixedArrayParts(childType); expected == hir.MutableBorrow(hir.TypeByteSlice) &&
+			array && element == hir.TypeU8 && hir.ExecutableFixedArrayShape(element, length) {
+			result.Kind = "array-view-borrow"
+			return expected
 		}
 		return hir.MutableBorrow(childType)
 	case "*":

@@ -40,6 +40,7 @@
         "array-byte-view-borrow",
         "array-index",
         "array-length",
+        "mutable-array-byte-view-borrow",
         "assert",
         "checked-arithmetic",
         "checked-division",

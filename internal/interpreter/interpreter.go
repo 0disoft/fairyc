@@ -579,9 +579,12 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				}
 				elementType, length, array := hir.FixedArrayParts(operation.OwnerType)
 				wantView := hir.SharedBorrow(hir.TypeByteSlice)
+				if operation.Operator == "&mut" {
+					wantView = hir.MutableBorrow(hir.TypeByteSlice)
+				}
 				if !array || elementType != hir.TypeU8 || !hir.ExecutableFixedArrayShape(elementType, length) ||
 					receiver.kind != valueArray || receiver.typ != operation.OwnerType || uint64(len(receiver.elements)) != length ||
-					operation.Type != wantView || operation.Operator != "&" {
+					operation.Type != wantView || (operation.Operator != "&" && operation.Operator != "&mut") {
 					return callCompletion{}, fmt.Errorf("fixed-array byte-view borrow in %q has incompatible runtime value", function.Name)
 				}
 				bytes := make([]byte, len(receiver.elements))

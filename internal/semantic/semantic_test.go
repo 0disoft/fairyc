@@ -1593,7 +1593,7 @@ fn main() -> i32 {
 	}
 }
 
-func TestAnalyzeRejectsMutableOrUnwrappedByteStringLiteralTypes(t *testing.T) {
+func TestAnalyzeRejectsUnwrappedOrMutablePointerByteStringLiteralTypes(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name    string
@@ -1604,11 +1604,6 @@ func TestAnalyzeRejectsMutableOrUnwrappedByteStringLiteralTypes(t *testing.T) {
 			name:    "bare unsized byte slice",
 			source:  "module main;\nfn main() -> i32 { let value: [u8] = b\"fairy\"; 0 }\n",
 			feature: "type [u8]",
-		},
-		{
-			name:    "mutable byte slice borrow",
-			source:  "module main;\nfn main() -> i32 { let value: &mut [u8] = b\"fairy\"; 0 }\n",
-			feature: "type &mut [u8]",
 		},
 		{
 			name:    "mutable byte pointer extraction",
@@ -1625,6 +1620,16 @@ func TestAnalyzeRejectsMutableOrUnwrappedByteStringLiteralTypes(t *testing.T) {
 				t.Fatalf("result = %+v", result)
 			}
 		})
+	}
+}
+
+func TestAnalyzeRejectsImmutableByteStringAsMutableByteView(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\nfn main() -> i32 { let value: &mut [u8] = b\"fairy\"; 0 }\n",
+	})
+	if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E1006" || len(result.Unsupported) != 0 {
+		t.Fatalf("result = %+v", result)
 	}
 }
 
@@ -1897,6 +1902,50 @@ fn main() -> i32 {
 	if borrow.Kind != "array-view-borrow" || borrow.Operator != "&" || borrow.Type != hir.SharedBorrow(hir.TypeByteSlice) ||
 		len(borrow.Children) != 1 || borrow.Children[0].Type != hir.FixedArray(hir.TypeU8, 3) {
 		t.Fatalf("array byte-view borrow = %+v", borrow)
+	}
+}
+
+func TestAnalyzeTypesContextualMutableU8ArrayBorrowAsByteView(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn length(bytes: &mut [u8]) -> usize { bytes.len }
+fn main() -> i32 {
+    var values: [u8; 3] = [40, 41, 42];
+    if length(&mut values) == 3 { 42 } else { 1 }
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+	main := result.HIR.Modules[0].Functions[1]
+	condition := main.Body.Tail
+	if condition == nil || condition.Kind != "if" || len(condition.Children) == 0 {
+		t.Fatalf("main tail = %+v", condition)
+	}
+	call := condition.Children[0].Children[0]
+	if call.Kind != "call" || len(call.Children) != 2 {
+		t.Fatalf("mutable byte-view call = %+v", call)
+	}
+	borrow := call.Children[1]
+	if borrow.Kind != "array-view-borrow" || borrow.Operator != "&mut" || borrow.Type != hir.MutableBorrow(hir.TypeByteSlice) ||
+		len(borrow.Children) != 1 || borrow.Children[0].Type != hir.FixedArray(hir.TypeU8, 3) {
+		t.Fatalf("mutable array byte-view borrow = %+v", borrow)
+	}
+}
+
+func TestAnalyzeRejectsMutableByteViewOfImmutableFixedArray(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn length(bytes: &mut [u8]) -> usize { bytes.len }
+fn main() -> i32 {
+    let values: [u8; 3] = [40, 41, 42];
+    if length(&mut values) == 3 { 42 } else { 1 }
+}
+`,
+	})
+	if result.FailedPhase != semantic.PhaseType || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E1008" {
+		t.Fatalf("result = %+v", result)
 	}
 }
 
