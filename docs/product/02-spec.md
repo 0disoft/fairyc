@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0117-effect-annotated-windows-console-wrapper.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0128-build-local-package-identity.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -244,6 +244,13 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - Modules follow the one-file, explicit-alias import contract and do not use textual include expansion.
 - Parsing starts from original source bytes, preserves trivia and error provenance in compact lossless syntax, and lowers to AST only after an error-free batch parse. An immutable green tree and incremental reparse are deferred until formatter or IDE work requires them.
 - Semantic checking proceeds through resolver, type, and Flow phases. Fixtures compare stable source coordinates and canonical facts rather than build-local AST or HIR dumps.
+- Already-resolved multi-package input carries a deterministic build-local package discriminator and
+  exact import-provider bindings. Semantic module identity is package plus source-visible module
+  path, and typed HIR and MIR retain the discriminator for internal type and function identity.
+  Every source import in that input requires exactly one validated provider binding; missing,
+  duplicate, unused, or absent-package bindings reject before semantic phases.
+  The private numeric ID and qualification spelling are disposable and cannot define source syntax,
+  public diagnostics, lockfiles, caches, Atlas identity, or ABI names.
 - Typed HIR lowers through an analysis-only Flow CFG into mutable-local, backend-independent MIR.
 - Resource declarations retain canonical type identity, declaration-ordered resolved fields, source
   spans, and drop-body classification through typed HIR into MIR. The current executable prototype
@@ -481,7 +488,7 @@ Source-linked MIR normalization assertions are versioned in `spec/fixtures/mir/m
 
 MIR verifier rejection recipes are versioned in `spec/fixtures/mir-verifier/manifest-v0.json`. They require a verified named seed, exactly one typed mutation, and exactly one expected `Vxxxx` result without creating a general serialized MIR or plugin format.
 
-Resolved package graph assertions are versioned in `spec/fixtures/package/manifest-v0.json`. They fix package-instance equality, one source root per instance, direct-only dependency visibility, module-provider ambiguity, and explicit standard-library injection without choosing public manifest, lockfile, coordinate, registry, or solver syntax. `internal/packagefixture` executes all eight cases through the reusable `internal/packagegraph` validator and resolver, and Region v1 consumes the same validated graph result.
+Resolved package graph assertions are versioned in `spec/fixtures/package/manifest-v0.json`. They fix package-instance equality, one source root per instance, direct-only dependency visibility, module-provider ambiguity, and explicit standard-library injection without choosing public manifest, lockfile, coordinate, registry, or solver syntax. `internal/packagefixture` executes all eight cases through the reusable `internal/packagegraph` validator and resolver, converts passing graphs into build-local semantic package input, and proves isolated equal module paths complete semantic Flow. Region v1 consumes the same validated graph result.
 
 Target layout assertions are versioned in `spec/fixtures/layout/manifest-v0.json` for Linux and
 `spec/fixtures/layout/manifest-windows-msvc-v0.json` for Windows. They fix the closed layout input

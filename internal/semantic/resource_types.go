@@ -48,14 +48,14 @@ func (a *analyzer) prepareAggregateIdentities() {
 		for index := range module.file.Module.Enums {
 			enumeration := &module.file.Module.Enums[index]
 			if value := a.enums[enumeration]; value != nil {
-				value.typ = hir.Type(module.file.Module.Path + "::" + enumeration.Name)
+				value.typ = hir.Type(module.identityPath() + "::" + enumeration.Name)
 				a.enumTypes[value.typ] = &enumInfo{symbol: value, variants: make(map[string]enumVariant)}
 			}
 		}
 		for index := range module.file.Module.Structs {
 			structure := &module.file.Module.Structs[index]
 			if value := a.structs[structure]; value != nil {
-				value.typ = hir.Type(module.file.Module.Path + "::" + structure.Name)
+				value.typ = hir.Type(module.identityPath() + "::" + structure.Name)
 				a.structTypes[value.typ] = &structInfo{symbol: value, fields: make(map[string]resourceField)}
 			}
 		}
@@ -65,7 +65,7 @@ func (a *analyzer) prepareAggregateIdentities() {
 			if value == nil {
 				continue
 			}
-			value.typ = hir.Type(module.file.Module.Path + "::" + resource.Name)
+			value.typ = hir.Type(module.identityPath() + "::" + resource.Name)
 			a.resourceTypes[value.typ] = &resourceInfo{symbol: value, fields: make(map[string]resourceField)}
 		}
 	}

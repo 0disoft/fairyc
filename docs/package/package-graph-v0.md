@@ -57,9 +57,19 @@ fields, proves that each declared source list exactly matches the contained regu
 parses every source with its package-local module identity, and executes all eight manifest cases
 through `internal/packagegraph`. The graph engine compares the exact resolved-instance tuple,
 deduplicates equal instances, validates unique direct bindings, and resolves imports through only
-the current instance and direct dependency instances. The Region v1 runner consumes the same
-validated `pass.package.stdlib-arena-region` result instead of maintaining a second package-lookup
-interpretation.
+the current instance and direct dependency instances. Passing graphs can then produce build-local
+semantic package input: one nonzero `PackageID` per exact instance class, one parsed source set per
+class, and exactly one import-provider binding per source import from the validated lookup result.
+Missing, duplicate, unused, or absent-package bindings reject semantic input rather than falling
+back to a same-named module. The
+`pass.package.module-path-isolation` case completes semantic Flow with four distinct HIR package
+identities even though both dependency instances own `util.fy` and module `util`. The Region v1
+runner consumes the same validated `pass.package.stdlib-arena-region` result instead of maintaining
+a second package-lookup interpretation.
+
+The numeric IDs and their compiler-private source/module qualification are disposable build facts.
+They are not the deferred public `PackageInstanceId`, a lockfile encoding, an ABI name, or a stable
+diagnostic path.
 
 This is compiler-side consumption of an already-resolved graph. It is not evidence for a package
 solver, public manifest, lockfile, source downloader, registry, cache, or stable diagnostic surface.

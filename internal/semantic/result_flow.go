@@ -420,9 +420,9 @@ func (a *analyzer) recordResultHandling(module *moduleScope, expression *ast.Exp
 	a.resultHandling = append(a.resultHandling, ResultHandlingFact{
 		Expression:      span(module.file.Path, expression.Span),
 		Mode:            mode,
-		ResultType:      displayResultType(module.file.Module.Path, value),
-		SuccessType:     displayResultType(module.file.Module.Path, success),
-		ErrorType:       displayResultType(module.file.Module.Path, failure),
+		ResultType:      displayResultType(module.identityPath(), value),
+		SuccessType:     displayResultType(module.identityPath(), success),
+		ErrorType:       displayResultType(module.identityPath(), failure),
 		EvaluationCount: 1,
 	})
 }
@@ -439,9 +439,9 @@ func (a *analyzer) recordPropagateHandling(module *moduleScope, expression *ast.
 	a.resultHandling = append(a.resultHandling, ResultHandlingFact{
 		Expression:      span(module.file.Path, expression.Span),
 		Mode:            "propagate",
-		ResultType:      displayResultType(module.file.Module.Path, value),
-		SuccessType:     displayResultType(module.file.Module.Path, success),
-		ErrorType:       displayResultType(module.file.Module.Path, failure),
+		ResultType:      displayResultType(module.identityPath(), value),
+		SuccessType:     displayResultType(module.identityPath(), success),
+		ErrorType:       displayResultType(module.identityPath(), failure),
 		EvaluationCount: 1,
 	})
 }

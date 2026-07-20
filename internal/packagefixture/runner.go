@@ -14,6 +14,7 @@ import (
 
 	"github.com/0disoft/fairyc/internal/frontend"
 	"github.com/0disoft/fairyc/internal/packagegraph"
+	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/source"
 )
 
@@ -157,7 +158,7 @@ func resolveCase(manifestDirectory string, fixture caseDefinition) (ResolvedCase
 		if err != nil {
 			return ResolvedCase{}, fmt.Errorf("package node %q source root: %v", node.Node, err)
 		}
-		modules, err := loadPackageModules(sourceRoot, node.Sources, &totalBytes)
+		modules, files, err := loadPackageModules(sourceRoot, node.Sources, &totalBytes)
 		if err != nil {
 			return ResolvedCase{}, fmt.Errorf("package node %q: %v", node.Node, err)
 		}
@@ -176,7 +177,7 @@ func resolveCase(manifestDirectory string, fixture caseDefinition) (ResolvedCase
 		})
 		resolvedNodes = append(resolvedNodes, ResolvedNode{
 			ID: node.Node, Role: node.Role, SourceRoot: sourceRoot,
-			Sources: slices.Clone(node.Sources), Modules: slices.Clone(modules),
+			Sources: slices.Clone(node.Sources), Modules: slices.Clone(modules), Files: files,
 		})
 	}
 	for _, dependency := range fixture.Dependencies {
@@ -283,43 +284,45 @@ func validatePassExpectation(expected expectation) error {
 	return nil
 }
 
-func loadPackageModules(root string, expectedSources []string, totalBytes *int64) ([]packagegraph.Module, error) {
+func loadPackageModules(root string, expectedSources []string, totalBytes *int64) ([]packagegraph.Module, []semantic.File, error) {
 	actualSources, err := listFYFiles(root)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if !slices.Equal(actualSources, expectedSources) {
-		return nil, fmt.Errorf("source list is incomplete or contains unlisted files: want %v, found %v", expectedSources, actualSources)
+		return nil, nil, fmt.Errorf("source list is incomplete or contains unlisted files: want %v, found %v", expectedSources, actualSources)
 	}
 	modules := make([]packagegraph.Module, 0, len(expectedSources))
+	files := make([]semantic.File, 0, len(expectedSources))
 	for _, relative := range expectedSources {
 		path, err := resolveWithin(root, root, relative)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		contents, err := readBoundedRegularFile(path, source.DefaultLimits().MaxBytes)
 		if err != nil {
-			return nil, fmt.Errorf("read source %q: %w", relative, err)
+			return nil, nil, fmt.Errorf("read source %q: %w", relative, err)
 		}
 		*totalBytes += int64(len(contents))
 		if *totalBytes > maxCaseSourceBytes {
-			return nil, fmt.Errorf("package case source bytes exceed the implementation guard")
+			return nil, nil, fmt.Errorf("package case source bytes exceed the implementation guard")
 		}
 		result, err := frontend.AnalyzeSyntax(source.NewFile(relative, contents), source.DefaultLimits())
 		if err != nil {
-			return nil, fmt.Errorf("analyze syntax %q: %w", relative, err)
+			return nil, nil, fmt.Errorf("analyze syntax %q: %w", relative, err)
 		}
 		if len(result.Tree.Diagnostics) != 0 || result.AST == nil {
-			return nil, fmt.Errorf("source %q is not parser-valid: %+v", relative, result.Tree.Diagnostics)
+			return nil, nil, fmt.Errorf("source %q is not parser-valid: %+v", relative, result.Tree.Diagnostics)
 		}
 		imports := make([]string, len(result.AST.Imports))
 		for index, imported := range result.AST.Imports {
 			imports[index] = imported.Path
 		}
 		modules = append(modules, packagegraph.Module{Path: result.AST.Path, Imports: imports})
+		files = append(files, semantic.File{Path: relative, Module: result.AST})
 	}
 	slices.SortFunc(modules, func(left, right packagegraph.Module) int { return strings.Compare(left.Path, right.Path) })
-	return modules, nil
+	return modules, files, nil
 }
 
 func listFYFiles(root string) ([]string, error) {

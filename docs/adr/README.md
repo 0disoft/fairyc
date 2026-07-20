@@ -137,6 +137,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0125-mutable-fixed-u8-array-byte-view.md`: contextual exclusive fixed-array byte views with private mutable C transport and a length-generic safe Windows File read wrapper.
 - `0126-checked-mutable-indexed-assignment.md`: bounds-before-value fixed-array and mutable-byte-view stores with verified alias and value-copy semantics.
 - `0127-experimental-verified-mir-check.md`: explicit source-closure validation through MIR verification without execution, backend, toolchain, or artifact writes.
+- `0128-build-local-package-identity.md`: resolved package identity carried through semantic lookup, typed HIR types, source identities, and MIR names without stabilizing a public package ID.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

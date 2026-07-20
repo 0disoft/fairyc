@@ -284,6 +284,32 @@ type SymbolID int
 // NoSymbol represents an expression without a resolved declaration.
 const NoSymbol SymbolID = -1
 
+// PackageID is a deterministic build-local resolved-instance identity. It must not be serialized
+// as PackageInstanceId, a lockfile key, a language type spelling, or an ABI name.
+type PackageID uint32
+
+// DefaultPackage preserves the original single-package compiler path.
+const DefaultPackage PackageID = 0
+
+// QualifiedModulePath returns one compiler-private module identity. Source-visible module paths
+// remain unchanged; only non-default resolved instances receive a build-local prefix.
+func QualifiedModulePath(packageID PackageID, modulePath string) string {
+	if packageID == DefaultPackage {
+		return modulePath
+	}
+	return "$p" + strconv.FormatUint(uint64(packageID), 10) + "::" + modulePath
+}
+
+// QualifiedSourcePath returns one compiler-private source identity. The original path remains
+// recoverable by the package input owner; this prevents equal package-local paths from collapsing
+// build-local spans before a public diagnostic path-mapping contract exists.
+func QualifiedSourcePath(packageID PackageID, sourcePath string) string {
+	if packageID == DefaultPackage {
+		return sourcePath
+	}
+	return "$p" + strconv.FormatUint(uint64(packageID), 10) + "/" + sourcePath
+}
+
 // Span identifies original source bytes without storing source contents.
 type Span struct {
 	Source    string
@@ -298,6 +324,7 @@ type Package struct {
 
 // Module is one typed source module.
 type Module struct {
+	Package          PackageID
 	Path             string
 	SourcePath       string
 	Structs          []Struct

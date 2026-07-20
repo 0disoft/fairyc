@@ -1,7 +1,10 @@
 // Package packagefixture executes the versioned resolved-package-graph acceptance manifest.
 package packagefixture
 
-import "github.com/0disoft/fairyc/internal/packagegraph"
+import (
+	"github.com/0disoft/fairyc/internal/packagegraph"
+	"github.com/0disoft/fairyc/internal/semantic"
+)
 
 type manifest struct {
 	Schema        string           `json:"$schema"`
@@ -76,6 +79,7 @@ type ResolvedNode struct {
 	SourceRoot string
 	Sources    []string
 	Modules    []packagegraph.Module
+	Files      []semantic.File
 }
 
 // ResolvedCase exposes one fully validated fixture case to other compiler acceptance runners.

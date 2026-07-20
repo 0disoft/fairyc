@@ -32,12 +32,13 @@ func Lower(input hir.Package) (Program, error) {
 	program := Program{StructTypes: structTypes, EnumTypes: enumTypes, ResourceTypes: resourceTypes, ForeignFunctions: foreignFunctions}
 	properties := newTypeProperties(resourceTypes, structTypes, enumTypes)
 	for _, module := range input.Modules {
+		moduleIdentity := hir.QualifiedModulePath(module.Package, module.Path)
 		for index := range module.Functions {
 			function := &module.Functions[index]
-			lowerer := newFunctionLowerer(module.Path, function, properties)
+			lowerer := newFunctionLowerer(moduleIdentity, function, properties)
 			lowered, err := lowerer.lower()
 			if err != nil {
-				return Program{}, fmt.Errorf("lower %s::%s: %w", module.Path, function.Name, err)
+				return Program{}, fmt.Errorf("lower %s::%s: %w", moduleIdentity, function.Name, err)
 			}
 			program.Functions = append(program.Functions, lowered)
 		}
@@ -143,6 +144,7 @@ func lowerForeignFunctions(input hir.Package) ([]ForeignFunction, error) {
 	var result []ForeignFunction
 	seen := make(map[hir.SymbolID]struct{})
 	for _, module := range input.Modules {
+		moduleIdentity := hir.QualifiedModulePath(module.Package, module.Path)
 		for _, function := range module.ForeignFunctions {
 			if function.Symbol == hir.NoSymbol || function.Name == "" || function.LinkName == "" || function.ABI == "" {
 				return nil, fmt.Errorf("foreign function %s::%s has an incomplete declaration", module.Path, function.Name)
@@ -152,7 +154,7 @@ func lowerForeignFunctions(input hir.Package) ([]ForeignFunction, error) {
 			}
 			seen[function.Symbol] = struct{}{}
 			lowered := ForeignFunction{
-				Symbol: function.Symbol, Name: module.Path + "::" + function.Name,
+				Symbol: function.Symbol, Name: moduleIdentity + "::" + function.Name,
 				LinkName: function.LinkName, ABI: function.ABI, Span: function.Span,
 				ResultType: function.ResultType,
 				Entity:     sourceEntity("foreign", function.Span),

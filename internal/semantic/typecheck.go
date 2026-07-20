@@ -28,7 +28,7 @@ func (a *analyzer) typeCheck() Result {
 	a.prepareEnumTypes()
 	a.prepareCallableEffects()
 	for _, module := range a.moduleOrder {
-		hirModule := hir.Module{Path: module.file.Module.Path, SourcePath: module.file.Path}
+		hirModule := hir.Module{Package: module.key.packageID, Path: module.file.Module.Path, SourcePath: module.file.Path}
 		for index := range module.file.Module.Structs {
 			structure := &module.file.Module.Structs[index]
 			if a.structs[structure] == nil {
@@ -1073,7 +1073,7 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 		expected := hir.TypeInvalid
 		var expectedSpan = callee.typeSpan
 		if index < len(callee.function.Parameters) {
-			expected = c.analyzer.canonicalType(c.analyzer.modules[callee.module], callee.function.Parameters[index].Type)
+			expected = c.analyzer.canonicalType(c.analyzer.symbolModule(callee), callee.function.Parameters[index].Type)
 			expectedSpan = callee.function.Parameters[index].Type.Span
 		}
 		child, actual := c.checkExpression(argument, expected)
@@ -1088,7 +1088,7 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 			)
 		}
 	}
-	callee.typ = c.analyzer.canonicalType(c.analyzer.modules[callee.module], callee.function.ResultType)
+	callee.typ = c.analyzer.canonicalType(c.analyzer.symbolModule(callee), callee.function.ResultType)
 	if errorSpan, ok := resultFailureSpan(callee.function.ResultType); ok {
 		callee.resultError = errorSpan
 	}
@@ -1121,7 +1121,7 @@ func (c *typeChecker) checkForeignCall(expression *ast.Expression, result *hir.E
 		expected := hir.TypeInvalid
 		expectedSpan := declaration.ResultType.Span
 		if index < len(declaration.Parameters) {
-			expected = c.analyzer.canonicalType(c.analyzer.modules[callee.module], declaration.Parameters[index].Type)
+			expected = c.analyzer.canonicalType(c.analyzer.symbolModule(callee), declaration.Parameters[index].Type)
 			expectedSpan = declaration.Parameters[index].Type.Span
 		}
 		child, actual := c.checkExpression(argument, expected)
@@ -1130,7 +1130,7 @@ func (c *typeChecker) checkForeignCall(expression *ast.Expression, result *hir.E
 			c.requireType("E1006", span(c.module.file.Path, argument.Span), actual, expected, span(callee.source, expectedSpan))
 		}
 	}
-	callee.typ = c.analyzer.canonicalType(c.analyzer.modules[callee.module], declaration.ResultType)
+	callee.typ = c.analyzer.canonicalType(c.analyzer.symbolModule(callee), declaration.ResultType)
 	return callee.typ
 }
 

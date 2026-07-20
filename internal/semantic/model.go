@@ -3,10 +3,13 @@ package semantic
 
 import (
 	"cmp"
+	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/source"
 )
 
 // Phase is one ordered semantic analysis boundary.
@@ -21,8 +24,28 @@ const (
 
 // File is one syntax-clean AST with its source-root-relative identity.
 type File struct {
-	Path   string
-	Module *ast.Module
+	Package hir.PackageID
+	Path    string
+	Module  *ast.Module
+}
+
+// PackageImport binds one source import path from a resolved package instance to its exact direct
+// provider instance. It is build input, not source syntax or a public package manifest field.
+type PackageImport struct {
+	FromPackage hir.PackageID
+	ImportPath  string
+	ToPackage   hir.PackageID
+}
+
+// PackageInput is one already-resolved, source-acquired semantic compilation input.
+type PackageInput struct {
+	Files   []File
+	Imports []PackageImport
+}
+
+type packageImportKey struct {
+	packageID hir.PackageID
+	path      string
 }
 
 // Result contains observable semantic facts and build-local typed HIR.
@@ -60,8 +83,10 @@ type Resolution struct {
 	Target SymbolCoordinate
 }
 
-// SymbolCoordinate is stable fixture-facing declaration identity.
+// SymbolCoordinate is fixture-facing declaration identity within one compilation. Package is a
+// build-local discriminator and must not be serialized as a compatibility fact.
 type SymbolCoordinate struct {
+	Package     hir.PackageID
 	Module      string
 	Name        string
 	Kind        string
@@ -134,9 +159,31 @@ type Unsupported struct {
 
 // Analyze resolves every file before creating type facts or HIR.
 func Analyze(files []File) Result {
+	return analyze(files, nil)
+}
+
+// AnalyzePackages resolves an already-resolved multi-package input without choosing a public
+// manifest, lockfile, solver, source acquisition, or PackageInstanceId encoding.
+func AnalyzePackages(input PackageInput) (Result, error) {
+	bindings, err := validatePackageInput(input)
+	if err != nil {
+		return Result{}, err
+	}
+	return analyze(input.Files, bindings), nil
+}
+
+func analyze(files []File, bindings map[packageImportKey]hir.PackageID) Result {
 	ordered := append([]File(nil), files...)
-	slices.SortFunc(ordered, func(a, b File) int { return cmp.Compare(a.Path, b.Path) })
-	analyzer := newAnalyzer(ordered)
+	slices.SortFunc(ordered, func(a, b File) int {
+		if byPackage := cmp.Compare(a.Package, b.Package); byPackage != 0 {
+			return byPackage
+		}
+		return cmp.Compare(a.Path, b.Path)
+	})
+	for index := range ordered {
+		ordered[index].Path = hir.QualifiedSourcePath(ordered[index].Package, ordered[index].Path)
+	}
+	analyzer := newAnalyzer(ordered, bindings)
 	analyzer.resolve()
 	if len(analyzer.diagnostics) > 0 {
 		analyzer.finish()
@@ -177,6 +224,65 @@ func Analyze(files []File) Result {
 		result.CompletedThrough = PhaseResolve
 	}
 	return result
+}
+
+func validatePackageInput(input PackageInput) (map[packageImportKey]hir.PackageID, error) {
+	packages := make(map[hir.PackageID]struct{})
+	usedImports := make(map[packageImportKey]struct{})
+	sourcePaths := make(map[packageImportKey]struct{})
+	for _, file := range input.Files {
+		packages[file.Package] = struct{}{}
+		sourceKey := packageImportKey{packageID: file.Package, path: file.Path}
+		if _, duplicate := sourcePaths[sourceKey]; duplicate {
+			return nil, fmt.Errorf("package %d source path %q is present more than once", file.Package, file.Path)
+		}
+		sourcePaths[sourceKey] = struct{}{}
+		if file.Module == nil {
+			return nil, fmt.Errorf("package %d source path %q has no syntax-clean module", file.Package, file.Path)
+		}
+		for _, imported := range file.Module.Imports {
+			usedImports[packageImportKey{packageID: file.Package, path: imported.Path}] = struct{}{}
+		}
+	}
+	bindings := make(map[packageImportKey]hir.PackageID, len(input.Imports))
+	for _, binding := range input.Imports {
+		if _, found := packages[binding.FromPackage]; !found {
+			return nil, fmt.Errorf("package import source %d is not present", binding.FromPackage)
+		}
+		if _, found := packages[binding.ToPackage]; !found {
+			return nil, fmt.Errorf("package import target %d is not present", binding.ToPackage)
+		}
+		if !validModulePath(binding.ImportPath) {
+			return nil, fmt.Errorf("package import path %q is invalid", binding.ImportPath)
+		}
+		key := packageImportKey{packageID: binding.FromPackage, path: binding.ImportPath}
+		if _, duplicate := bindings[key]; duplicate {
+			return nil, fmt.Errorf("package import from %d for %q is bound more than once", binding.FromPackage, binding.ImportPath)
+		}
+		if _, used := usedImports[key]; !used {
+			return nil, fmt.Errorf("package import from %d for %q has no source use", binding.FromPackage, binding.ImportPath)
+		}
+		bindings[key] = binding.ToPackage
+	}
+	for key := range usedImports {
+		if _, found := bindings[key]; !found {
+			return nil, fmt.Errorf("package import from %d for %q has no resolved binding", key.packageID, key.path)
+		}
+	}
+	return bindings, nil
+}
+
+func validModulePath(value string) bool {
+	segments := strings.Split(value, "::")
+	if len(segments) == 0 {
+		return false
+	}
+	for _, segment := range segments {
+		if !source.ValidIdentifier(segment) {
+			return false
+		}
+	}
+	return true
 }
 
 func (a *analyzer) finish() {

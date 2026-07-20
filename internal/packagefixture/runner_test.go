@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/packagegraph"
+	"github.com/0disoft/fairyc/internal/semantic"
 )
 
 func TestPackageManifestV0(t *testing.T) {
@@ -38,6 +39,36 @@ func TestResolveCaseReturnsValidatedStdlibGraph(t *testing.T) {
 	}
 	if resolved.ExpectedStatus != "pass" || resolved.Rejection != nil || len(resolved.Resolution.Lookups) != 1 {
 		t.Fatalf("ResolveCase() = %+v", resolved)
+	}
+}
+
+func TestResolvedModulePathIsolationReachesSemanticAnalysis(t *testing.T) {
+	t.Parallel()
+	manifestPath := filepath.Join("..", "..", "spec", "fixtures", "package", "manifest-v0.json")
+	resolved, err := ResolveCase(manifestPath, "pass.package.module-path-isolation")
+	if err != nil {
+		t.Fatalf("ResolveCase() error = %v", err)
+	}
+	input, err := resolved.SemanticInput()
+	if err != nil {
+		t.Fatalf("SemanticInput() error = %v", err)
+	}
+	result, err := semantic.AnalyzePackages(input)
+	if err != nil {
+		t.Fatalf("AnalyzePackages() error = %v", err)
+	}
+	if result.CompletedThrough != semantic.PhaseFlow || result.FailedPhase != semantic.PhaseNone || len(result.Diagnostics) != 0 || len(result.Unsupported) != 0 {
+		t.Fatalf("AnalyzePackages() result = %+v", result)
+	}
+	if len(result.HIR.Modules) != 4 {
+		t.Fatalf("AnalyzePackages() modules = %d, want 4", len(result.HIR.Modules))
+	}
+	packages := make(map[uint32]struct{})
+	for _, module := range result.HIR.Modules {
+		packages[uint32(module.Package)] = struct{}{}
+	}
+	if len(packages) != 4 {
+		t.Fatalf("AnalyzePackages() package identities = %v", packages)
 	}
 }
 
@@ -85,7 +116,7 @@ func TestLoadPackageModulesRejectsUnlistedSource(t *testing.T) {
 		t.Fatal(err)
 	}
 	total := int64(0)
-	if _, err := loadPackageModules(root, []string{"main.fy"}, &total); err == nil || !strings.Contains(err.Error(), "source list is incomplete") {
+	if _, _, err := loadPackageModules(root, []string{"main.fy"}, &total); err == nil || !strings.Contains(err.Error(), "source list is incomplete") {
 		t.Fatalf("loadPackageModules() error = %v", err)
 	}
 }

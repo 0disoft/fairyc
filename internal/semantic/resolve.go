@@ -11,6 +11,7 @@ import (
 
 type symbol struct {
 	id           hir.SymbolID
+	packageID    hir.PackageID
 	kind         string
 	name         string
 	module       string
@@ -31,13 +32,23 @@ type symbol struct {
 	enumeration  *ast.Enum
 }
 
+type moduleKey struct {
+	packageID hir.PackageID
+	path      string
+}
+
 type moduleScope struct {
+	key       moduleKey
 	file      File
 	functions map[string]*symbol
 	structs   map[string]*symbol
 	resources map[string]*symbol
 	enums     map[string]*symbol
 	imports   map[string]*moduleScope
+}
+
+func (m *moduleScope) identityPath() string {
+	return hir.QualifiedModulePath(m.key.packageID, m.file.Module.Path)
 }
 
 type lexicalScope struct {
@@ -52,7 +63,8 @@ type enumVariantReference struct {
 
 type analyzer struct {
 	files                 []File
-	modules               map[string]*moduleScope
+	modules               map[moduleKey]*moduleScope
+	packageImports        map[packageImportKey]hir.PackageID
 	moduleOrder           []*moduleScope
 	nextSymbol            hir.SymbolID
 	resolved              map[*ast.Expression]*symbol
@@ -91,10 +103,11 @@ type analyzer struct {
 	dropOwners            map[*ast.Function]*ast.Resource
 }
 
-func newAnalyzer(files []File) *analyzer {
+func newAnalyzer(files []File, packageImports map[packageImportKey]hir.PackageID) *analyzer {
 	return &analyzer{
 		files:            files,
-		modules:          make(map[string]*moduleScope, len(files)),
+		modules:          make(map[moduleKey]*moduleScope, len(files)),
+		packageImports:   packageImports,
 		resolved:         make(map[*ast.Expression]*symbol),
 		bindingSymbols:   make(map[*ast.Binding]*symbol),
 		parameter:        make(map[*ast.Parameter]*symbol),
@@ -165,6 +178,7 @@ func (a *analyzer) declareResourceDropFunctions() {
 			}
 			value := &symbol{
 				id:          a.allocateSymbol(),
+				packageID:   module.key.packageID,
 				kind:        "resource-drop",
 				name:        function.Name,
 				module:      module.file.Module.Path,
@@ -185,7 +199,8 @@ func (a *analyzer) declareModules() {
 		if file.Module == nil {
 			continue
 		}
-		if previous, found := a.modules[file.Module.Path]; found {
+		key := moduleKey{packageID: file.Package, path: file.Module.Path}
+		if previous, found := a.modules[key]; found {
 			a.addDiagnostic("E0102", span(file.Path, file.Module.Span), RelatedSpan{
 				Role: "previous-declaration",
 				Span: span(previous.file.Path, previous.file.Module.Span),
@@ -193,6 +208,7 @@ func (a *analyzer) declareModules() {
 			continue
 		}
 		module := &moduleScope{
+			key:       key,
 			file:      file,
 			functions: make(map[string]*symbol),
 			structs:   make(map[string]*symbol),
@@ -200,7 +216,7 @@ func (a *analyzer) declareModules() {
 			enums:     make(map[string]*symbol),
 			imports:   make(map[string]*moduleScope),
 		}
-		a.modules[file.Module.Path] = module
+		a.modules[key] = module
 		a.moduleOrder = append(a.moduleOrder, module)
 	}
 }
@@ -215,6 +231,7 @@ func (a *analyzer) declareEnums() {
 			}
 			value := &symbol{
 				id:          a.allocateSymbol(),
+				packageID:   module.key.packageID,
 				kind:        "enum",
 				name:        enumeration.Name,
 				module:      module.file.Module.Path,
@@ -239,6 +256,7 @@ func (a *analyzer) declareStructs() {
 			}
 			value := &symbol{
 				id:          a.allocateSymbol(),
+				packageID:   module.key.packageID,
 				kind:        "struct",
 				name:        structure.Name,
 				module:      module.file.Module.Path,
@@ -266,6 +284,7 @@ func (a *analyzer) declareResources() {
 			}
 			value := &symbol{
 				id:          a.allocateSymbol(),
+				packageID:   module.key.packageID,
 				kind:        "resource",
 				name:        resource.Name,
 				module:      module.file.Module.Path,
@@ -307,6 +326,7 @@ func (a *analyzer) declareFunction(module *moduleScope, function *ast.Function) 
 	}
 	value := &symbol{
 		id:          a.allocateSymbol(),
+		packageID:   module.key.packageID,
 		kind:        "function",
 		name:        function.Name,
 		module:      module.file.Module.Path,
@@ -328,7 +348,7 @@ func (a *analyzer) declareForeignFunction(module *moduleScope, function *ast.For
 		return
 	}
 	value := &symbol{
-		id: a.allocateSymbol(), kind: "foreign-function", name: function.Name,
+		id: a.allocateSymbol(), packageID: module.key.packageID, kind: "foreign-function", name: function.Name,
 		module: module.file.Module.Path, source: module.file.Path,
 		declaration: function.NameSpan, typeSpan: function.ResultType.Span,
 		public: function.Public, foreign: function,
@@ -362,7 +382,16 @@ func (a *analyzer) resolveImports() {
 				a.addDiagnostic("E0102", span(module.file.Path, imported.AliasSpan))
 				continue
 			}
-			target, found := a.modules[imported.Path]
+			targetPackage := module.key.packageID
+			if a.packageImports != nil {
+				bound, exists := a.packageImports[packageImportKey{packageID: module.key.packageID, path: imported.Path}]
+				if !exists {
+					a.addDiagnostic("E0101", span(module.file.Path, imported.PathSpan))
+					continue
+				}
+				targetPackage = bound
+			}
+			target, found := a.modules[moduleKey{packageID: targetPackage, path: imported.Path}]
 			if !found {
 				a.addDiagnostic("E0101", span(module.file.Path, imported.PathSpan))
 				continue
@@ -385,6 +414,7 @@ func (a *analyzer) resolveFunction(module *moduleScope, function *ast.Function) 
 		}
 		value := &symbol{
 			id:          a.allocateSymbol(),
+			packageID:   module.key.packageID,
 			kind:        "parameter",
 			name:        parameter.Name,
 			module:      module.file.Module.Path,
@@ -418,6 +448,7 @@ func (a *analyzer) resolveBlock(module *moduleScope, block *ast.Block, parent *l
 			}
 			value := &symbol{
 				id:          a.allocateSymbol(),
+				packageID:   module.key.packageID,
 				kind:        "local",
 				name:        binding.Name,
 				module:      module.file.Module.Path,
@@ -490,7 +521,7 @@ func (a *analyzer) resolveMatch(module *moduleScope, scope *lexicalScope, expres
 							continue
 						}
 						value := &symbol{
-							id: a.allocateSymbol(), kind: "match-binding", name: field.Cooked,
+							id: a.allocateSymbol(), packageID: module.key.packageID, kind: "match-binding", name: field.Cooked,
 							module: module.file.Module.Path, source: module.file.Path, declaration: field.Span,
 						}
 						armScope.names[field.Cooked] = value
@@ -521,6 +552,7 @@ func (a *analyzer) resolveMatch(module *moduleScope, scope *lexicalScope, expres
 		}
 		value := &symbol{
 			id:          a.allocateSymbol(),
+			packageID:   module.key.packageID,
 			kind:        "match-binding",
 			name:        binding.Text,
 			module:      module.file.Module.Path,
@@ -571,7 +603,7 @@ func (a *analyzer) resolveEnumVariantPath(module *moduleScope, expression *ast.E
 		a.resolutions = append(a.resolutions, Resolution{
 			Use: span(module.file.Path, expression.Span),
 			Target: SymbolCoordinate{
-				Module: owner.module, Name: owner.name + "::" + variant.Name, Kind: "enum-variant",
+				Package: owner.packageID, Module: owner.module, Name: owner.name + "::" + variant.Name, Kind: "enum-variant",
 				Declaration: span(owner.source, variant.NameSpan),
 			},
 		})
@@ -589,7 +621,7 @@ func (a *analyzer) resolveRegion(module *moduleScope, scope *lexicalScope, expre
 	}
 	a.resolveExpression(module, scope, expression.Children[0])
 	regionScope := &lexicalScope{parent: scope, names: make(map[string]*symbol)}
-	value := &symbol{id: a.allocateSymbol(), kind: "region", name: expression.Text, module: module.file.Module.Path, source: module.file.Path, declaration: expression.Span, typ: hir.TypeRegion}
+	value := &symbol{id: a.allocateSymbol(), packageID: module.key.packageID, kind: "region", name: expression.Text, module: module.file.Module.Path, source: module.file.Path, declaration: expression.Span, typ: hir.TypeRegion}
 	regionScope.names[expression.Text] = value
 	a.regions[expression] = value
 	body := expression.Children[1]
@@ -636,6 +668,7 @@ func (a *analyzer) resolvePath(module *moduleScope, scope *lexicalScope, express
 	a.resolutions = append(a.resolutions, Resolution{
 		Use: span(module.file.Path, expression.Span),
 		Target: SymbolCoordinate{
+			Package:     target.packageID,
 			Module:      target.module,
 			Name:        target.name,
 			Kind:        target.kind,
@@ -655,6 +688,13 @@ func (m *moduleScope) item(name string) *symbol {
 		return value
 	}
 	return m.resources[name]
+}
+
+func (a *analyzer) symbolModule(value *symbol) *moduleScope {
+	if value == nil {
+		return nil
+	}
+	return a.modules[moduleKey{packageID: value.packageID, path: value.module}]
 }
 
 func lookupLexical(scope *lexicalScope, name string) *symbol {
