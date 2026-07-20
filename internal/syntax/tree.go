@@ -52,6 +52,7 @@ const (
 	KindCast       Kind = "cast"
 	KindCall       Kind = "call"
 	KindIndex      Kind = "index"
+	KindSlice      Kind = "slice"
 	KindFieldExpr  Kind = "field-expression"
 	KindPropagate  Kind = "propagate"
 	KindArray      Kind = "array"

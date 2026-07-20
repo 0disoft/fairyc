@@ -1443,6 +1443,43 @@ func TestAnalyzeRejectsUnsupportedViewIndexShapes(t *testing.T) {
 	})
 }
 
+func TestAnalyzeTypesImmutableByteViewSlice(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn trim(bytes: &[u8]) -> &[u8] { bytes[1..2] }
+`,
+	})
+	assertCleanTypeResult(t, result)
+	expression := result.HIR.Modules[0].Functions[0].Body.Tail
+	wantView := hir.SharedBorrow(hir.TypeByteSlice)
+	if expression == nil || expression.Kind != "view-slice" || expression.Type != wantView || expression.Operator != ".." ||
+		len(expression.Children) != 3 || expression.Children[0].Type != wantView ||
+		expression.Children[1].Type != hir.TypeUSize || expression.Children[2].Type != hir.TypeUSize {
+		t.Fatalf("slice expression = %+v", expression)
+	}
+}
+
+func TestAnalyzeRejectsUnsupportedViewSliceShapes(t *testing.T) {
+	t.Parallel()
+	t.Run("text receiver", func(t *testing.T) {
+		result := analyzeText(t, map[string]string{
+			"main.fy": "module main;\nfn main() -> i32 { let value: &str = \"fairy\"[0..1]; 42 }\n",
+		})
+		if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "slicing outside immutable byte views" {
+			t.Fatalf("result = %+v", result)
+		}
+	})
+	t.Run("non-usize bounds", func(t *testing.T) {
+		result := analyzeText(t, map[string]string{
+			"main.fy": "module main;\nfn main() -> i32 { let start: u32 = 0; let value: &[u8] = b\"fairy\"[start..1]; 42 }\n",
+		})
+		if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E1006" || len(result.Unsupported) != 0 {
+			t.Fatalf("result = %+v", result)
+		}
+	})
+}
+
 func TestAnalyzeRejectsUnknownBorrowedViewField(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{

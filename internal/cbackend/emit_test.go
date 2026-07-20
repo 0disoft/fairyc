@@ -296,6 +296,38 @@ fn main() -> i32 {
 	}
 }
 
+func TestEmitCheckedImmutableByteViewSlice(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn main() -> i32 {
+    let bytes: &[u8] = b"fairy"[1..4];
+    if bytes.len == 3 && bytes[0] == 97 && bytes[2] == 114 { 42 } else { 1 }
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, feature := range []string{"static-byte-string", "trap", "view-slice", "view-index"} {
+		if !slices.Contains(unit.Features, feature) {
+			t.Errorf("features %v are missing %q", unit.Features, feature)
+		}
+	}
+	for _, required := range []string{
+		"FY_TRAP_BOUNDS",
+		" || ",
+		" > (",
+		").length) { fy_pending_trap = FY_TRAP_BOUNDS;",
+		"(fy_byte_slice){ .data = ",
+		".data + (",
+		".length = (",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+}
+
 func TestEmitValuePreservingIntegerCast(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

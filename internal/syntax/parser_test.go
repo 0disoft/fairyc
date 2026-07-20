@@ -94,3 +94,26 @@ func TestMissingSemicolonRecoversWithoutConsumingNextStatement(t *testing.T) {
 		t.Fatalf("Parse() span = %+v, want zero-width at %d", diagnostic.Span, position)
 	}
 }
+
+func TestParseImmutableByteViewSlice(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nfn main() -> &[u8] { b\"fairy\"[1..4] }\n")
+	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	var slice *Node
+	for index := range tree.Nodes {
+		if tree.Nodes[index].Kind == KindSlice {
+			slice = &tree.Nodes[index]
+			break
+		}
+	}
+	if slice == nil || slice.Text != ".." || len(slice.Children) != 3 {
+		t.Fatalf("slice node = %+v", slice)
+	}
+	reconstructed, ok := tree.Reconstruct()
+	if !ok || !slices.Equal(reconstructed, input) {
+		t.Fatalf("Reconstruct() = %q, %v; want %q, true", reconstructed, ok, input)
+	}
+}

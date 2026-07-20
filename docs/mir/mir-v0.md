@@ -102,6 +102,13 @@ and `usize` index in source order. The load records the exact borrowed owner and
 The verifier rejects a mismatched family, index type, result type, operator, marker, trap category,
 or non-dominating check as `V1001` or `V1501`. It never infers safety from generated-C layout.
 
+Immutable byte-view slicing uses the parallel `view-slice-check`, `checked-view-slice`, non-returning
+`bounds` trap, and `view-slice` continuation shape. Marker, switch, and continuation carry the same
+already-evaluated `&[u8]` receiver, `usize` start, and `usize` exclusive end in source order. The
+continuation produces `&[u8]` only after the checked edge proves `start <= end && end <= len`.
+`V1001` rejects malformed view or bound metadata; `V1501` rejects a missing marker, reordered
+operands, wrong trap edge, or non-dominating check.
+
 The implemented raw-address operation accepts only a direct local place produced by an exact safe
 borrow-to-raw-pointer cast. It records pointee type, source borrow mutability, destination pointer
 type, source span, and containing unsafe scope. `V1701` rejects missing or forged scope provenance;

@@ -105,6 +105,9 @@ language semantics. This does not stabilize private view layout, indexing, slici
 counting, `CStr` operations, or a public string ABI.
 ADR 0104 adds `.is_empty` to the same views as the exact zero-length `bool`, preserving the same
 metadata-only and no-scan/no-call contract without stabilizing private representation.
+ADR 0105 adds mandatory-bound, end-exclusive `&[u8]` slicing. The result type, left-to-right
+single evaluation, `start <= end <= len` rule, `bounds` trap, and borrow-origin preservation are
+pre-1 semantics; omitted bounds, text slicing, and private C layout remain unstabilized.
 ADR 0093 admits exact `&str` and `&[u8]` parameters on ordinary internal functions. Exact source
 types, non-owning borrow behavior, matching call operands, and the absence of implicit raw-pointer
 conversion are pre-1 language semantics. Interpreter values and generated-C by-value descriptors

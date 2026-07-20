@@ -800,6 +800,79 @@ fn main() -> i32 {
 	}
 }
 
+func TestLowerPreservesCheckedImmutableByteViewSlice(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+fn main() -> i32 {
+    let bytes: &[u8] = b"fairy"[1..4];
+    42
+}
+`)
+	function := &program.Functions[0]
+	var check *Operation
+	var slice *Operation
+	var checkedSwitch *Terminator
+	for blockIndex := range function.Blocks {
+		block := &function.Blocks[blockIndex]
+		for operationIndex := range block.Operations {
+			operation := &block.Operations[operationIndex]
+			switch operation.Kind {
+			case OperationViewSliceCheck:
+				check = operation
+			case OperationViewSlice:
+				slice = operation
+			}
+		}
+		if block.Terminator.SwitchKind == "checked-view-slice" {
+			checkedSwitch = &block.Terminator
+		}
+	}
+	wantView := hir.SharedBorrow(hir.TypeByteSlice)
+	if check == nil || check.OwnerType != wantView || check.IndexType != hir.TypeUSize || check.Type != wantView || check.Operator != ".." ||
+		len(check.Operands) != 3 || check.Operands[0].Kind != OperandByteString ||
+		check.Operands[1].Kind != OperandUSize || check.Operands[2].Kind != OperandUSize ||
+		!slices.Equal(check.TrapCategories, []string{"bounds"}) {
+		t.Fatalf("slice check = %+v", check)
+	}
+	if slice == nil || slice.OwnerType != wantView || slice.IndexType != hir.TypeUSize || slice.Type != wantView || slice.Operator != ".." ||
+		len(slice.Operands) != 3 || len(slice.TrapCategories) != 0 {
+		t.Fatalf("slice operation = %+v", slice)
+	}
+	if checkedSwitch == nil || checkedSwitch.Operator != ".." || len(checkedSwitch.Successors) != 2 ||
+		!slices.Equal(checkedSwitch.SwitchOperands, check.Operands) {
+		t.Fatalf("slice switch = %+v", checkedSwitch)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+
+	mutated := Clone(program)
+	for blockIndex := range mutated.Functions[0].Blocks {
+		for operationIndex := range mutated.Functions[0].Blocks[blockIndex].Operations {
+			operation := &mutated.Functions[0].Blocks[blockIndex].Operations[operationIndex]
+			if operation.Kind == OperationViewSliceCheck {
+				operation.TrapCategories = nil
+			}
+		}
+	}
+	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1501" {
+		t.Fatalf("Verify() missing slice bounds marker failures = %+v", failures)
+	}
+
+	mutated = Clone(program)
+	for blockIndex := range mutated.Functions[0].Blocks {
+		for operationIndex := range mutated.Functions[0].Blocks[blockIndex].Operations {
+			operation := &mutated.Functions[0].Blocks[blockIndex].Operations[operationIndex]
+			if operation.Kind == OperationViewSlice {
+				operation.Operands[1], operation.Operands[2] = operation.Operands[2], operation.Operands[1]
+			}
+		}
+	}
+	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1501" {
+		t.Fatalf("Verify() reordered slice bounds failures = %+v", failures)
+	}
+}
+
 func TestLowerPreservesValuePreservingIntegerCast(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;

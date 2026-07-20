@@ -114,6 +114,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0102-typed-bitwise-and-checked-right-shift.md`: typed unary complement, matching-type binary bitwise operations, and exact-width checked arithmetic/logical right shift for `i32`, `u8`, `u32`, and `usize` through MIR, interpreter, C11, and WSL-free Windows execution.
 - `0103-checked-left-shift.md`: matching-type exact-width left shift with stable invalid-amount-before-overflow precedence and defined C11 construction.
 - `0104-borrowed-view-emptiness.md`: zero-cost boolean emptiness metadata for borrowed UTF-8 and byte views through interpreter, C11, and Windows execution.
+- `0105-checked-immutable-byte-view-slicing.md`: end-exclusive zero-copy `&[u8]` subviews with preserved borrow origin and dominating `bounds` checks before pointer derivation.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

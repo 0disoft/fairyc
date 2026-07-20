@@ -700,7 +700,7 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 					mir.OperationResultPayload, mir.OperationOptionPayload,
 					mir.OperationEnumConstruct, mir.OperationEnumPayload,
 					mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
-					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex,
+					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice,
 					mir.OperationScalarCast:
 					inferred = operation.Type
 				}
@@ -1198,6 +1198,16 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 					return err
 				}
 				e.features["view-index"] = struct{}{}
+			case mir.OperationViewSliceCheck:
+				if err := e.inspectViewSlice(functionIndex, *operation, false); err != nil {
+					return err
+				}
+				e.features["view-slice"] = struct{}{}
+			case mir.OperationViewSlice:
+				if err := e.inspectViewSlice(functionIndex, *operation, true); err != nil {
+					return err
+				}
+				e.features["view-slice"] = struct{}{}
 			case mir.OperationScalarCast:
 				if err := e.inspectScalarCast(functionIndex, *operation); err != nil {
 					return err
@@ -1366,7 +1376,7 @@ func validateOperationShape(function string, operation mir.Operation) error {
 	case mir.OperationAssign, mir.OperationInitialize, mir.OperationUnary, mir.OperationBinary,
 		mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationEnumConstruct, mir.OperationEnumPayload,
-		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationScalarCast:
+		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice, mir.OperationScalarCast:
 		if operation.DestinationLocal < 0 {
 			return fmt.Errorf("%s operation in %s has no destination local", operation.Kind, function)
 		}
@@ -1441,6 +1451,29 @@ func (e *emitter) inspectViewIndex(functionIndex int, operation mir.Operation, d
 	}
 	if destination && len(operation.TrapCategories) != 0 || !destination && !slices.Equal(operation.TrapCategories, []string{"bounds"}) {
 		return fmt.Errorf("immutable byte-view index in %s has an invalid trap marker", function.Name)
+	}
+	return nil
+}
+
+func (e *emitter) inspectViewSlice(functionIndex int, operation mir.Operation, destination bool) error {
+	function := &e.functions[functionIndex]
+	receiver, start, end, err := threeOperands(operation.Operands)
+	if err != nil {
+		return fmt.Errorf("immutable byte-view slice in %s: %w", function.Name, err)
+	}
+	wantView := hir.SharedBorrow(hir.TypeByteSlice)
+	if operation.OwnerType != wantView || operation.IndexType != hir.TypeUSize || operation.Type != wantView || operation.Operator != ".." ||
+		destination != (operation.DestinationLocal != mir.NoLocal) {
+		return fmt.Errorf("immutable byte-view slice in %s has incompatible owner, result, operator, or destination", function.Name)
+	}
+	receiverType, receiverErr := e.operandType(functionIndex, receiver)
+	startType, startErr := e.operandType(functionIndex, start)
+	endType, endErr := e.operandType(functionIndex, end)
+	if receiverErr != nil || startErr != nil || endErr != nil || receiverType != wantView || startType != hir.TypeUSize || endType != hir.TypeUSize {
+		return fmt.Errorf("immutable byte-view slice in %s has incompatible operand types", function.Name)
+	}
+	if destination && len(operation.TrapCategories) != 0 || !destination && !slices.Equal(operation.TrapCategories, []string{"bounds"}) {
+		return fmt.Errorf("immutable byte-view slice in %s has an invalid trap marker", function.Name)
 	}
 	return nil
 }
@@ -2152,6 +2185,20 @@ func (e *emitter) inspectSwitch(functionIndex int, terminator mir.Terminator) er
 		}
 		e.features["view-index"] = struct{}{}
 		categories = []string{"bounds"}
+	case "checked-view-slice":
+		receiver, start, end, err := threeOperands(terminator.SwitchOperands)
+		if err != nil {
+			return fmt.Errorf("checked byte-view slice in %s: %w", function.Name, err)
+		}
+		receiverType, receiverErr := e.operandType(functionIndex, receiver)
+		startType, startErr := e.operandType(functionIndex, start)
+		endType, endErr := e.operandType(functionIndex, end)
+		if receiverErr != nil || startErr != nil || endErr != nil || terminator.Operator != ".." ||
+			receiverType != hir.SharedBorrow(hir.TypeByteSlice) || startType != hir.TypeUSize || endType != hir.TypeUSize {
+			return fmt.Errorf("checked byte-view slice in %s has incompatible operands", function.Name)
+		}
+		e.features["view-slice"] = struct{}{}
+		categories = []string{"bounds"}
 	case "checked-unary":
 		operand, err := oneOperand(terminator.SwitchOperands)
 		if err != nil {
@@ -2708,6 +2755,24 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			return fmt.Errorf("immutable byte-view index offset in %s: %w", function, err)
 		}
 		fmt.Fprintf(output, "    fy_l_%d = (%s).data[%s];\n", operation.DestinationLocal, receiverValue, indexValue)
+	case mir.OperationViewSlice:
+		receiver, start, end, err := threeOperands(operation.Operands)
+		if err != nil {
+			return fmt.Errorf("immutable byte-view slice in %s: %w", function, err)
+		}
+		receiverValue, err := cOperand(receiver)
+		if err != nil {
+			return fmt.Errorf("immutable byte-view slice receiver in %s: %w", function, err)
+		}
+		startValue, err := cOperand(start)
+		if err != nil {
+			return fmt.Errorf("immutable byte-view slice start in %s: %w", function, err)
+		}
+		endValue, err := cOperand(end)
+		if err != nil {
+			return fmt.Errorf("immutable byte-view slice end in %s: %w", function, err)
+		}
+		fmt.Fprintf(output, "    fy_l_%d = (fy_byte_slice){ .data = (%s).data + (%s), .length = (%s) - (%s) };\n", operation.DestinationLocal, receiverValue, startValue, endValue, startValue)
 	case mir.OperationScalarCast:
 		operand, err := oneOperand(operation.Operands)
 		if err != nil {
@@ -2890,7 +2955,7 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			field = "p_0"
 		}
 		fmt.Fprintf(output, "    fy_l_%d = (%s).%s;\n", operation.DestinationLocal, container, field)
-	case mir.OperationUse, mir.OperationArithmeticCheck, mir.OperationCheckedDivision, mir.OperationViewIndexCheck, mir.OperationResultSwitch:
+	case mir.OperationUse, mir.OperationArithmeticCheck, mir.OperationCheckedDivision, mir.OperationViewIndexCheck, mir.OperationViewSliceCheck, mir.OperationResultSwitch:
 	default:
 		return CapabilityError{Function: function, Feature: "MIR operation " + strconv.Quote(string(operation.Kind))}
 	}
@@ -3122,6 +3187,25 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		}
 		fmt.Fprintf(output, "    if (%s >= (%s).length) { fy_pending_trap = FY_TRAP_BOUNDS; goto fy_b_%d; }\n", indexValue, receiverValue, failure)
 		fmt.Fprintf(output, "    goto fy_b_%d;\n", success)
+	case "checked-view-slice":
+		receiver, start, end, err := threeOperands(terminator.SwitchOperands)
+		if err != nil {
+			return fmt.Errorf("checked byte-view slice in %s: %w", function.Name, err)
+		}
+		receiverValue, err := cOperand(receiver)
+		if err != nil {
+			return fmt.Errorf("checked byte-view slice receiver in %s: %w", function.Name, err)
+		}
+		startValue, err := cOperand(start)
+		if err != nil {
+			return fmt.Errorf("checked byte-view slice start in %s: %w", function.Name, err)
+		}
+		endValue, err := cOperand(end)
+		if err != nil {
+			return fmt.Errorf("checked byte-view slice end in %s: %w", function.Name, err)
+		}
+		fmt.Fprintf(output, "    if ((%s) > (%s) || (%s) > (%s).length) { fy_pending_trap = FY_TRAP_BOUNDS; goto fy_b_%d; }\n", startValue, endValue, endValue, receiverValue, failure)
+		fmt.Fprintf(output, "    goto fy_b_%d;\n", success)
 	case "checked-shift":
 		_, amount, err := twoOperands(terminator.SwitchOperands)
 		if err != nil {
@@ -3254,7 +3338,7 @@ func operationHasDestination(kind mir.OperationKind) bool {
 		mir.OperationOptionConstruct, mir.OperationOptionPayload,
 		mir.OperationEnumConstruct, mir.OperationEnumPayload,
 		mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
-		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex,
+		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice,
 		mir.OperationScalarCast, mir.OperationRegionPlace:
 		return true
 	default:
@@ -3511,6 +3595,13 @@ func twoOperands(operands []mir.Operand) (mir.Operand, mir.Operand, error) {
 		return mir.Operand{}, mir.Operand{}, fmt.Errorf("expected two scalar operands")
 	}
 	return operands[0], operands[1], nil
+}
+
+func threeOperands(operands []mir.Operand) (mir.Operand, mir.Operand, mir.Operand, error) {
+	if len(operands) != 3 || operands[0].Kind == mir.OperandInvalid || operands[1].Kind == mir.OperandInvalid || operands[2].Kind == mir.OperandInvalid {
+		return mir.Operand{}, mir.Operand{}, mir.Operand{}, fmt.Errorf("expected three scalar operands")
+	}
+	return operands[0], operands[1], operands[2], nil
 }
 
 func oneSuccessor(terminator mir.Terminator) (mir.BlockID, error) {

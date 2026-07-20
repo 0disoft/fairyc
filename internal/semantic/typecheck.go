@@ -390,6 +390,8 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 		actual = c.checkCall(expression, result, expected)
 	case syntax.KindIndex:
 		actual = c.checkIndex(expression, result)
+	case syntax.KindSlice:
+		actual = c.checkSlice(expression, result)
 	case syntax.KindIf:
 		actual = c.checkIf(expression, result, expected)
 	case syntax.KindMatch:
@@ -454,6 +456,30 @@ func (c *typeChecker) checkIndex(expression *ast.Expression, result *hir.Express
 	result.Kind = "view-index"
 	result.Operator = "[]"
 	return hir.TypeU8
+}
+
+func (c *typeChecker) checkSlice(expression *ast.Expression, result *hir.Expression) hir.Type {
+	if len(expression.Children) != 3 {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "malformed slice expression")
+		return hir.TypeInvalid
+	}
+	receiver, receiverType := c.checkExpression(expression.Children[0], hir.TypeInvalid)
+	start, startType := c.checkExpression(expression.Children[1], hir.TypeUSize)
+	end, endType := c.checkExpression(expression.Children[2], hir.TypeUSize)
+	result.Children = appendExpression(result.Children, receiver, start, end)
+	wantReceiver := hir.SharedBorrow(hir.TypeByteSlice)
+	if receiverType != wantReceiver {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Children[0].Span, "slicing outside immutable byte views")
+		return hir.TypeInvalid
+	}
+	c.requireType("E1006", span(c.module.file.Path, expression.Children[1].Span), startType, hir.TypeUSize, span(c.module.file.Path, expression.Span))
+	c.requireType("E1006", span(c.module.file.Path, expression.Children[2].Span), endType, hir.TypeUSize, span(c.module.file.Path, expression.Span))
+	if startType != hir.TypeUSize || endType != hir.TypeUSize {
+		return hir.TypeInvalid
+	}
+	result.Kind = "view-slice"
+	result.Operator = ".."
+	return wantReceiver
 }
 
 func (c *typeChecker) checkCast(expression *ast.Expression, result *hir.Expression) hir.Type {

@@ -260,6 +260,8 @@ const (
 	OperationViewEmpty         OperationKind = "view-empty"
 	OperationViewIndexCheck    OperationKind = "view-index-check"
 	OperationViewIndex         OperationKind = "view-index"
+	OperationViewSliceCheck    OperationKind = "view-slice-check"
+	OperationViewSlice         OperationKind = "view-slice"
 	OperationRegionEnter       OperationKind = "region-enter"
 	OperationRegionPlace       OperationKind = "region-place"
 	OperationRegionReset       OperationKind = "region-reset"

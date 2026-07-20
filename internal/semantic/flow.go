@@ -246,6 +246,10 @@ func (a *analyzer) expressionOrigins(module *moduleScope, expression *ast.Expres
 		if len(expression.Children) == 1 {
 			return a.expressionOrigins(module, expression.Children[0], origins)
 		}
+	case syntax.KindSlice:
+		if len(expression.Children) == 3 {
+			return a.expressionOrigins(module, expression.Children[0], origins)
+		}
 	case syntax.KindBlock:
 		if expression.Block != nil {
 			return a.expressionOrigins(module, expression.Block.Tail, origins)

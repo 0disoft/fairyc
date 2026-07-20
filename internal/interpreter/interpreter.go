@@ -582,6 +582,24 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				}
 				locals[operation.DestinationLocal] = runtimeValue{kind: valueU8, u64: uint64(receiver.staticData[index.u64]), typ: hir.TypeU8}
 			case mir.OperationViewIndexCheck:
+			case mir.OperationViewSlice:
+				receiver, start, end, err := evaluateViewSliceOperands(locals, operation.Operands)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("immutable byte-view slice in %q: %w", function.Name, err)
+				}
+				wantView := hir.SharedBorrow(hir.TypeByteSlice)
+				if receiver.typ != operation.OwnerType || operation.OwnerType != wantView ||
+					operation.IndexType != hir.TypeUSize || operation.Type != wantView || operation.Operator != ".." {
+					return callCompletion{}, fmt.Errorf("immutable byte-view slice in %q has incompatible runtime value", function.Name)
+				}
+				if start.u64 > end.u64 || end.u64 > receiver.u64 || end.u64 > uint64(len(receiver.staticData)) {
+					return callCompletion{}, fmt.Errorf("immutable byte-view slice in %q executed without a dominating bounds check", function.Name)
+				}
+				locals[operation.DestinationLocal] = runtimeValue{
+					kind: valueView, u64: end.u64 - start.u64, typ: wantView,
+					staticData: receiver.staticData[start.u64:end.u64],
+				}
+			case mir.OperationViewSliceCheck:
 			case mir.OperationResultConstruct:
 				payload, err := evaluateOne(locals, operation.Operands)
 				if err != nil {
@@ -1328,6 +1346,18 @@ func evaluateSwitch(locals map[mir.LocalID]runtimeValue, terminator mir.Terminat
 			return mir.NoBlock, "bounds", nil
 		}
 		return terminator.Successors[0], "", nil
+	case "checked-view-slice":
+		receiver, start, end, err := evaluateViewSliceOperands(locals, terminator.SwitchOperands)
+		if err != nil {
+			return mir.NoBlock, "", err
+		}
+		if len(terminator.Successors) != 2 {
+			return mir.NoBlock, "", fmt.Errorf("checked byte-view slice has %d successors, want 2", len(terminator.Successors))
+		}
+		if start.u64 > end.u64 || end.u64 > receiver.u64 {
+			return mir.NoBlock, "bounds", nil
+		}
+		return terminator.Successors[0], "", nil
 	case "checked-unary":
 		value, err := evaluateOneI32(locals, terminator.SwitchOperands)
 		if err != nil {
@@ -1408,6 +1438,30 @@ func evaluateViewIndexOperands(locals map[mir.LocalID]runtimeValue, operands []m
 		return runtimeValue{}, runtimeValue{}, capabilityError("byte-view index received incompatible operands")
 	}
 	return receiver, index, nil
+}
+
+func evaluateViewSliceOperands(locals map[mir.LocalID]runtimeValue, operands []mir.Operand) (runtimeValue, runtimeValue, runtimeValue, error) {
+	if len(operands) != 3 {
+		return runtimeValue{}, runtimeValue{}, runtimeValue{}, fmt.Errorf("byte-view slice has %d operands, want 3", len(operands))
+	}
+	receiver, err := evaluate(locals, operands[0])
+	if err != nil {
+		return runtimeValue{}, runtimeValue{}, runtimeValue{}, err
+	}
+	start, err := evaluate(locals, operands[1])
+	if err != nil {
+		return runtimeValue{}, runtimeValue{}, runtimeValue{}, err
+	}
+	end, err := evaluate(locals, operands[2])
+	if err != nil {
+		return runtimeValue{}, runtimeValue{}, runtimeValue{}, err
+	}
+	wantView := hir.SharedBorrow(hir.TypeByteSlice)
+	if receiver.kind != valueView || receiver.typ != wantView ||
+		start.kind != valueUSize || start.typ != hir.TypeUSize || end.kind != valueUSize || end.typ != hir.TypeUSize {
+		return runtimeValue{}, runtimeValue{}, runtimeValue{}, capabilityError("byte-view slice received incompatible operands")
+	}
+	return receiver, start, end, nil
 }
 
 func unary(operator string, value int32) (int32, string, error) {

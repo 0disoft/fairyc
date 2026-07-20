@@ -352,6 +352,11 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				if !validViewIndexShape(operation, false) || !slices.Equal(operation.TrapCategories, []string{"bounds"}) {
 					failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "immutable byte-view index is missing its bounds check"})
 				}
+			case OperationViewSliceCheck:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if !validViewSliceShape(operation, false) || !slices.Equal(operation.TrapCategories, []string{"bounds"}) {
+					failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "immutable byte-view slice is missing its bounds check"})
+				}
 			case OperationAssign:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
@@ -601,6 +606,12 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "immutable byte-view index shape is invalid"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationViewSlice:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if !validViewSliceShape(operation, true) || len(operation.TrapCategories) != 0 {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "immutable byte-view slice shape is invalid"})
+				}
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationRegionEnter:
 				if operation.Symbol == hir.NoSymbol || len(operation.Operands) != 0 || operation.DestinationLocal != NoLocal {
 					failures = append(failures, VerificationError{Code: "V1403", Entity: entity, Detail: "region enter shape is invalid"})
@@ -746,6 +757,8 @@ func validSwitchShape(terminator Terminator) bool {
 			(terminator.Operator == "/" || terminator.Operator == "%") && hir.CheckedDivisionType(terminator.SwitchType)
 	case "checked-view-index":
 		return len(terminator.SwitchOperands) == 2 && len(terminator.Successors) == 2 && terminator.Operator == "[]"
+	case "checked-view-slice":
+		return len(terminator.SwitchOperands) == 3 && len(terminator.Successors) == 2 && terminator.Operator == ".."
 	case "checked-unary", "checked-arithmetic", "checked-shift":
 		switchKind, _, valid := checkedArithmeticSpec(terminator.Operator, len(terminator.SwitchOperands))
 		if !valid || switchKind != terminator.SwitchKind || len(terminator.Successors) != 2 {
@@ -843,6 +856,27 @@ func validViewIndexShape(operation Operation, destination bool) bool {
 		return false
 	}
 	return index.Kind == OperandLocal || index.Kind == OperandUSize
+}
+
+func validViewSliceShape(operation Operation, destination bool) bool {
+	wantView := hir.SharedBorrow(hir.TypeByteSlice)
+	if len(operation.Operands) != 3 || operation.OwnerType != wantView ||
+		operation.IndexType != hir.TypeUSize || operation.Type != wantView || operation.Operator != ".." {
+		return false
+	}
+	if destination != (operation.DestinationLocal != NoLocal) {
+		return false
+	}
+	receiver := operation.Operands[0]
+	if receiver.Kind != OperandLocal && (receiver.Kind != OperandByteString || receiver.Type != wantView) {
+		return false
+	}
+	for _, bound := range operation.Operands[1:] {
+		if bound.Kind != OperandLocal && bound.Kind != OperandUSize {
+			return false
+		}
+	}
+	return true
 }
 
 func scalarCastOperandMatches(operand Operand, sourceType hir.Type) bool {
@@ -964,6 +998,9 @@ func verifyTrapCheckEdges(function *Function) []VerificationError {
 func trappingOperationSpec(operation Operation) (string, OperationKind, []string, bool) {
 	if operation.Kind == OperationViewIndex {
 		return "checked-view-index", OperationViewIndexCheck, []string{"bounds"}, validViewIndexShape(operation, true)
+	}
+	if operation.Kind == OperationViewSlice {
+		return "checked-view-slice", OperationViewSliceCheck, []string{"bounds"}, validViewSliceShape(operation, true)
 	}
 	if operation.Kind == OperationUnary {
 		switchKind, categories, valid := checkedArithmeticSpec(operation.Operator, len(operation.Operands))

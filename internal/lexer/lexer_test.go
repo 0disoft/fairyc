@@ -51,6 +51,28 @@ func TestNumericAndStringCooking(t *testing.T) {
 	}
 }
 
+func TestRangePunctuationIsOneLosslessToken(t *testing.T) {
+	t.Parallel()
+	input := []byte(`b"fairy"[1..4]`)
+	result := Lex(source.NewFile("slice.fy", input), source.NewBudget(source.DefaultLimits(), len(input)))
+	if len(result.Diagnostics) != 0 {
+		t.Fatalf("Lex() diagnostics = %+v", result.Diagnostics)
+	}
+	var ranges int
+	for _, token := range result.Tokens {
+		if token.Text(result.Source) == ".." {
+			ranges++
+		}
+	}
+	if ranges != 1 {
+		t.Fatalf("range token count = %d, tokens = %+v", ranges, result.Tokens)
+	}
+	reconstructed, ok := result.Reconstruct()
+	if !ok || !slices.Equal(reconstructed, input) {
+		t.Fatalf("Reconstruct() = %q, %v; want %q, true", reconstructed, ok, input)
+	}
+}
+
 func TestStringHexEscapesMustFormValidUTF8(t *testing.T) {
 	t.Parallel()
 	validInput := []byte(`"\xCE\xBB"`)

@@ -70,6 +70,62 @@ fn main() -> i32 {
 	}
 }
 
+func TestExecuteImmutableByteViewSlice(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn main() -> i32 {
+    let bytes: &[u8] = b"fairy"[1..4];
+    if bytes.len == 3 && bytes[0] == 97 && bytes[2] == 114 { 42 } else { 1 }
+}
+`)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+	if outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("Execute() outcome = %+v", outcome)
+	}
+}
+
+func TestExecuteEmptyImmutableByteViewSliceAtEnd(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn main() -> i32 {
+    let bytes: &[u8] = b"fairy"[5..5];
+    if bytes.is_empty { 42 } else { 1 }
+}
+`)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+	if outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("Execute() outcome = %+v", outcome)
+	}
+}
+
+func TestExecuteImmutableByteViewSliceBoundsTraps(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		name   string
+		bounds string
+	}{
+		{name: "start after end", bounds: "4..2"},
+		{name: "end after length", bounds: "0..6"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			program := lowerSource(t, "module main;\nfn main() -> i32 { let bytes: &[u8] = b\"fairy\"["+test.bounds+"]; 42 }\n")
+			outcome, err := interpreter.Execute(program, "main::main")
+			if err != nil {
+				t.Fatalf("Execute() error = %v", err)
+			}
+			if outcome.Kind != interpreter.OutcomeTrap || outcome.TrapCategory != "bounds" {
+				t.Fatalf("Execute() outcome = %+v", outcome)
+			}
+		})
+	}
+}
+
 func TestExecuteValuePreservingIntegerCast(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

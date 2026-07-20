@@ -101,7 +101,8 @@ the enclosing function's declared Result type on the error path.
 
 The emitter rejects empty, non-`i32`, nested, partially initialized, or nonempty-drop resources;
 resource-bearing nested tags and other tagged payload combinations; Region operations;
-safe-borrow operations other than the exact verified view metadata reads; unsafe operations
+safe-borrow operations other than the exact verified view metadata, immutable byte indexing, and
+immutable byte slicing subset; unsafe operations
 outside the admitted scalar foreign-call form; complete runtime and
 standard-library lowering; malformed
 destinations; and non-canonical block shapes. Empty-drop discharge produces no invented cleanup
@@ -157,6 +158,10 @@ semantics, and it is emitted only in functions containing checked division or re
 - Type punning through incompatible C lvalues is forbidden.
 - Stage 0 emits no `restrict` and makes no speculative `noalias` promise.
 - Padding bytes are never treated as initialized semantic data.
+- Immutable byte-view slicing emits both `start > end` and `end > length` checks before any C
+  pointer addition. Only the success continuation constructs the private `{ data + start,
+  end - start }` view, so neither unsigned subtraction nor pointer formation can precede the
+  dominating `bounds` decision.
 
 ## Traps and cleanup
 

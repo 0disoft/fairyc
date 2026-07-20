@@ -23,6 +23,7 @@
     "docs/adr/0102-typed-bitwise-and-checked-right-shift.md",
     "docs/adr/0103-checked-left-shift.md",
     "docs/adr/0104-borrowed-view-emptiness.md",
+    "docs/adr/0105-checked-immutable-byte-view-slicing.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/mir-v0.md",
     "docs/engineering/05-testing-standard.md"
@@ -1204,6 +1205,34 @@
       "sources": ["main.fy"],
       "entry": "main::main",
       "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "return", "value": 42 }
+    },
+    {
+      "id": "pass.interpreter.view-slice",
+      "sourceRoot": "cases/pass/view-slice/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "return", "value": 42 }
+    },
+    {
+      "id": "pass.interpreter.view-slice-empty-at-end",
+      "sourceRoot": "cases/pass/view-slice/src",
+      "sources": ["main.fy"],
+      "entry": "main::empty_at_end",
+      "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "return", "value": 42 }
+    },
+    {
+      "id": "pass.interpreter.view-slice-start-after-end",
+      "sourceRoot": "cases/pass/view-slice/src",
+      "sources": ["main.fy"],
+      "entry": "main::start_after_end",
+      "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "trap", "category": "bounds" }
+    },
+    {
+      "id": "pass.interpreter.view-slice-end-after-length",
+      "sourceRoot": "cases/pass/view-slice/src",
+      "sources": ["main.fy"],
+      "entry": "main::end_after_length",
+      "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "trap", "category": "bounds" }
     }
   ]
 }

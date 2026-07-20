@@ -65,9 +65,15 @@ func (p *parser) parseExpression(minBindingPower int, allowRecord bool) NodeID {
 				return left
 			}
 			p.advance()
-			index := p.parseExpression(0, true)
+			first := p.parseExpression(0, true)
+			if p.match("..") {
+				end := p.parseExpression(0, true)
+				p.expect("]")
+				left = p.addNode(KindSlice, start, []NodeID{left, first, end}, "..", "")
+				continue
+			}
 			p.expect("]")
-			left = p.addNode(KindIndex, start, []NodeID{left, index}, "", "")
+			left = p.addNode(KindIndex, start, []NodeID{left, first}, "", "")
 			continue
 		case ".":
 			if 140 < minBindingPower {
@@ -302,7 +308,7 @@ func isPrefixOperator(value string) bool {
 
 func isExpressionTerminator(value string) bool {
 	switch value {
-	case "", ";", ",", ")", "]", "}", "=", "=>", "let", "var", "return", "discard", "while", "break", "continue", "region":
+	case "", ";", ",", ")", "]", "}", "=", "=>", "..", "let", "var", "return", "discard", "while", "break", "continue", "region":
 		return true
 	default:
 		return false
