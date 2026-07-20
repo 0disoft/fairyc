@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 #include <windows.h>
 
 enum fy_std_windows_file_status_v0 {
@@ -41,15 +42,29 @@ static struct fy_std_windows_file_result_v0 fy_std_windows_file_result_v0(
     return result;
 }
 
-static struct fy_std_windows_file_v0 *fy_std_windows_file_state_v0(void *storage) {
-    return (struct fy_std_windows_file_v0 *)storage;
-}
-
 static int fy_std_windows_file_valid_v0(const struct fy_std_windows_file_v0 *file) {
     return file != NULL &&
            ((file->open == UINT8_C(0) && file->handle == NULL) ||
             (file->open == UINT8_C(1) && file->handle != NULL &&
              file->handle != INVALID_HANDLE_VALUE));
+}
+
+static int fy_std_windows_file_load_v0(
+    const void *storage,
+    struct fy_std_windows_file_v0 *file
+) {
+    if (storage == NULL || file == NULL) {
+        return 0;
+    }
+    memcpy(file, storage, sizeof *file);
+    return fy_std_windows_file_valid_v0(file);
+}
+
+static void fy_std_windows_file_store_v0(
+    void *storage,
+    const struct fy_std_windows_file_v0 *file
+) {
+    memcpy(storage, file, sizeof *file);
 }
 
 static uint32_t fy_std_windows_path_v0(const uint8_t *path, WCHAR *wide_path) {
@@ -94,15 +109,16 @@ static DWORD fy_std_windows_creation_disposition_v0(
 struct fy_std_windows_file_result_v0 fy_std_windows_file_open_v0(
     const uint8_t *path,
     const struct fy_std_windows_open_options_v0 *options,
-    struct fy_std_windows_file_v0 *output
+    void *output_storage
 ) {
     WCHAR wide_path[FY_STD_WINDOWS_PATH_CAPACITY_V0];
     uint32_t path_status = fy_std_windows_path_v0(path, wide_path);
     if (path_status != FY_STD_WINDOWS_FILE_OK_V0) {
         return fy_std_windows_file_result_v0(path_status, ERROR_SUCCESS, 0);
     }
+    struct fy_std_windows_file_v0 output;
     if (!fy_std_windows_open_options_valid_v0(options) ||
-        !fy_std_windows_file_valid_v0(output) || output->open != UINT8_C(0)) {
+        !fy_std_windows_file_load_v0(output_storage, &output) || output.open != UINT8_C(0)) {
         return fy_std_windows_file_result_v0(
             FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0,
             ERROR_SUCCESS,
@@ -132,25 +148,26 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_open_v0(
             0
         );
     }
-    output->handle = handle;
-    output->open = UINT8_C(1);
+    output.handle = handle;
+    output.open = UINT8_C(1);
+    fy_std_windows_file_store_v0(output_storage, &output);
     return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_OK_V0, ERROR_SUCCESS, 0);
 }
 
 struct fy_std_windows_file_result_v0 fy_std_windows_file_read_v0(
     void *file_storage,
-    uint8_t *buffer,
+    void *buffer,
     size_t length
 ) {
-    struct fy_std_windows_file_v0 *file = fy_std_windows_file_state_v0(file_storage);
-    if (!fy_std_windows_file_valid_v0(file)) {
+    struct fy_std_windows_file_v0 file;
+    if (!fy_std_windows_file_load_v0(file_storage, &file)) {
         return fy_std_windows_file_result_v0(
             FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0,
             ERROR_SUCCESS,
             0
         );
     }
-    if (file->open == UINT8_C(0)) {
+    if (file.open == UINT8_C(0)) {
         return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_CLOSED_V0, ERROR_SUCCESS, 0);
     }
     if (length != 0 && buffer == NULL) {
@@ -165,7 +182,7 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_read_v0(
     }
     DWORD requested = length > (size_t)MAXDWORD ? MAXDWORD : (DWORD)length;
     DWORD completed = 0;
-    if (!ReadFile((HANDLE)file->handle, buffer, requested, &completed, NULL)) {
+    if (!ReadFile((HANDLE)file.handle, buffer, requested, &completed, NULL)) {
         return fy_std_windows_file_result_v0(
             FY_STD_WINDOWS_FILE_IO_ERROR_V0,
             GetLastError(),
@@ -184,15 +201,15 @@ static struct fy_std_windows_file_result_v0 fy_std_windows_file_write_v0(
     const uint8_t *buffer,
     size_t length
 ) {
-    struct fy_std_windows_file_v0 *file = fy_std_windows_file_state_v0(file_storage);
-    if (!fy_std_windows_file_valid_v0(file)) {
+    struct fy_std_windows_file_v0 file;
+    if (!fy_std_windows_file_load_v0(file_storage, &file)) {
         return fy_std_windows_file_result_v0(
             FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0,
             ERROR_SUCCESS,
             0
         );
     }
-    if (file->open == UINT8_C(0)) {
+    if (file.open == UINT8_C(0)) {
         return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_CLOSED_V0, ERROR_SUCCESS, 0);
     }
     if (length != 0 && buffer == NULL) {
@@ -207,7 +224,7 @@ static struct fy_std_windows_file_result_v0 fy_std_windows_file_write_v0(
     }
     DWORD requested = length > (size_t)MAXDWORD ? MAXDWORD : (DWORD)length;
     DWORD completed = 0;
-    if (!WriteFile((HANDLE)file->handle, buffer, requested, &completed, NULL)) {
+    if (!WriteFile((HANDLE)file.handle, buffer, requested, &completed, NULL)) {
         return fy_std_windows_file_result_v0(
             FY_STD_WINDOWS_FILE_IO_ERROR_V0,
             GetLastError(),
@@ -250,18 +267,18 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_write_all_v0(
 }
 
 struct fy_std_windows_file_result_v0 fy_std_windows_file_sync_v0(void *file_storage) {
-    struct fy_std_windows_file_v0 *file = fy_std_windows_file_state_v0(file_storage);
-    if (!fy_std_windows_file_valid_v0(file)) {
+    struct fy_std_windows_file_v0 file;
+    if (!fy_std_windows_file_load_v0(file_storage, &file)) {
         return fy_std_windows_file_result_v0(
             FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0,
             ERROR_SUCCESS,
             0
         );
     }
-    if (file->open == UINT8_C(0)) {
+    if (file.open == UINT8_C(0)) {
         return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_CLOSED_V0, ERROR_SUCCESS, 0);
     }
-    if (!FlushFileBuffers((HANDLE)file->handle)) {
+    if (!FlushFileBuffers((HANDLE)file.handle)) {
         return fy_std_windows_file_result_v0(
             FY_STD_WINDOWS_FILE_IO_ERROR_V0,
             GetLastError(),
@@ -272,20 +289,21 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_sync_v0(void *file_stor
 }
 
 struct fy_std_windows_file_result_v0 fy_std_windows_file_close_v0(void *file_storage) {
-    struct fy_std_windows_file_v0 *file = fy_std_windows_file_state_v0(file_storage);
-    if (!fy_std_windows_file_valid_v0(file)) {
+    struct fy_std_windows_file_v0 file;
+    if (!fy_std_windows_file_load_v0(file_storage, &file)) {
         return fy_std_windows_file_result_v0(
             FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0,
             ERROR_SUCCESS,
             0
         );
     }
-    if (file->open == UINT8_C(0)) {
+    if (file.open == UINT8_C(0)) {
         return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_CLOSED_V0, ERROR_SUCCESS, 0);
     }
-    HANDLE handle = (HANDLE)file->handle;
-    file->handle = NULL;
-    file->open = UINT8_C(0);
+    HANDLE handle = (HANDLE)file.handle;
+    file.handle = NULL;
+    file.open = UINT8_C(0);
+    fy_std_windows_file_store_v0(file_storage, &file);
     if (!CloseHandle(handle)) {
         return fy_std_windows_file_result_v0(
             FY_STD_WINDOWS_FILE_IO_ERROR_V0,
@@ -297,11 +315,12 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_close_v0(void *file_sto
 }
 
 uint32_t fy_std_windows_file_drop_v0(void *file_storage) {
-    struct fy_std_windows_file_v0 *file = fy_std_windows_file_state_v0(file_storage);
-    if (fy_std_windows_file_valid_v0(file) && file->open != UINT8_C(0)) {
-        HANDLE handle = (HANDLE)file->handle;
-        file->handle = NULL;
-        file->open = UINT8_C(0);
+    struct fy_std_windows_file_v0 file;
+    if (fy_std_windows_file_load_v0(file_storage, &file) && file.open != UINT8_C(0)) {
+        HANDLE handle = (HANDLE)file.handle;
+        file.handle = NULL;
+        file.open = UINT8_C(0);
+        fy_std_windows_file_store_v0(file_storage, &file);
         (void)CloseHandle(handle);
     }
     return UINT32_C(0);

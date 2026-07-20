@@ -1223,6 +1223,22 @@ fn main() -> i32 { if call(Packet { code: 0 }) == 0 { 42 } else { 1 } }
 	}
 }
 
+func TestAnalyzeAllowsBorrowValueToOpaquePointer(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+resource Token { value: u32; drop fn(self: &mut Self) {} }
+unsafe extern C fn sink(output: *mut void) -> u32;
+fn inspect(token: &mut Token) -> u32 { unsafe { sink(token as *mut void) } }
+fn main() -> i32 {
+    var token: Token = Token { value: 42 };
+    if inspect(&mut token) == 0 { 42 } else { 1 }
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+}
+
 func TestAnalyzeTypesValuePreservingIntegerCasts(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{
@@ -1674,11 +1690,6 @@ func TestAnalyzeRejectsRawPointerCastThatChangesPointeeOrStrengthensMutability(t
 			name:    "opaque mutability strengthening",
 			source:  "module main;\nfn main() -> i32 { let value: i32 = 0; let pointer: *mut void = unsafe { &value as *mut void }; 0 }\n",
 			feature: "cast from &i32 to *mut void",
-		},
-		{
-			name:    "opaque cast of borrow value instead of direct local borrow",
-			source:  "module main;\nfn inspect(value: &mut i32) -> i32 { let pointer: *mut void = unsafe { value as *mut void }; 0 }\nfn main() -> i32 { var value: i32 = 0; inspect(&mut value) }\n",
-			feature: "cast from &mut i32 to *mut void",
 		},
 		{
 			name:    "pointee change",

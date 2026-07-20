@@ -162,8 +162,9 @@ Optimization level and backend must not change the meaning of safe code. Express
   byte-view calls, metadata, indexing, and slicing can consume locally assembled bytes. A mutable
   safe-borrow local may switch owners after right-hand-side evaluation; Flow joins reachable
   branch and loop-edge origins and keeps every reachable loan generation live. Empty or repeated
-  literals, other fields, nesting, mutation, general slicing or borrowing, escaping local views,
-  and foreign ABI use remain deferred.
+  literals, other fields, nesting, mutation, general slicing, escaping local views, and foreign ABI
+  use remain deferred. Exact whole-array `&[T; N]` and `&mut [T; N]` internal parameters are
+  admitted without creating a slice or public representation.
 - Division by zero, signed minimum divided by negative one, invalid shifts, and ordinary integer overflow trap.
 - Matching-type shifts accept `i32`, `u8`, `u32`, or `usize`. Right shift is arithmetic for `i32`
   and logical for unsigned types. Negative `i32` amounts and amounts at or above the exact operand
@@ -440,13 +441,16 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   its result record, uses no hidden allocation, and is selected only when an admitted call is
   present. A separate-translation-unit native probe exercises normal lifecycle, three-byte reads,
   EOF, repeated close, forced invalid-handle close failure, and repeated drop at both local MSVC
-  profiles after COFF, PE, and unwind inspection. The checked-in FY target example does not call
-  this raw File component yet. The SystemHeap path fixes its fundamental-alignment ceiling at the documented
+  profiles after COFF, PE, and unwind inspection. A second checked-in two-module FY example now
+  wraps this raw component in an effect-checked move-only File, typed errors, bounded fixed-array
+  reads, consuming close, and implicit drop, then returns 42 at both MSVC profiles. This is an
+  example-level Stage 0 boundary rather than a stable public standard-library package. The
+  SystemHeap path fixes its fundamental-alignment ceiling at the documented
   Windows x64 `malloc` guarantee of 16 bytes because MSVC C does not provide `max_align_t` in
   `<stddef.h>`. Every other standard-library or foreign symbol fails before toolchain resolution;
   foreign companion inputs and user linker arguments remain absent. Lexical `region` lowering, copied
-  placement, owned-text byte/terminator contents, failure paths, public standard-library wrappers,
-  safe File ownership/effect/error mapping, and stable layouts remain absent. This clears only the missing target
+  placement, owned-text byte/terminator contents, failure paths, stable `std::fs` naming, portable
+  paths, general mutable buffers, and stable layouts remain absent. This clears only the missing target
   C-emission-profile evidence; `emittable`, `conformant`, and `supported` remain false.
 - `experimental run-target` reuses that exact Windows target compilation and closed linkage, validates
   the temporary PE plus Microsoft x64 unwind structure, executes it without WSL, rejects output, and

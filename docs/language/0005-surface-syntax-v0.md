@@ -98,6 +98,11 @@ temporary sources, and escaping local views remain closed. A `var` safe-borrow l
 reassigned in straight-line, branch, or `while` control flow; reachable branch, header,
 `continue`, and `break` origins are joined and returning a multi-origin result is rejected.
 
+Internal function parameters may name an exact `&[T; N]` or `&mut [T; N]` for an admitted fixed
+array. This is a safe borrow of the whole array, not a slice, and does not add resizing, mutable
+indexing, array fields, foreign-reference parameters, or a public ABI. Contextual `&[u8; N]` to
+`&[u8]` conversion remains shared-only.
+
 Ordinary internal functions may accept `&str` and `&[u8]` parameters. Calls preserve the exact safe
 borrow and its caller-proven origin; they do not convert the argument to a raw pointer or transfer
 ownership. A safe function may contain an explicit lexical `unsafe` block and expose a checked
@@ -122,8 +127,10 @@ Raw `*void` and `*mut void` are opaque C-interoperability pointers. Inside `unsa
 `&T` may become `*void`, and `&mut T` may become `*void` or `*mut void`; the conversion preserves
 the concrete owner type in verified MIR and never strengthens mutability. Exact typed
 borrow-to-pointer casts and immutable `&CStr` parameter data extraction use the same explicit unsafe
-boundary. Raw dereference, arithmetic, integer conversion, and every other pointee-changing cast
-remain unavailable.
+boundary. An existing safe resource or fixed-array borrow may likewise erase only its referent type
+to `void`; it forwards the referent pointer and never takes the address of the borrow carrier. Raw
+dereference, arithmetic, integer conversion, and every other pointee-changing cast remain
+unavailable.
 The executable foreign slice additionally admits one pointer-to-opaque-pointer output shape such as
 `*mut *mut void`; both layers must be mutable, and pointer nesting does not generalize to C scalars,
 arbitrary pointees, or the other mutability combinations.

@@ -158,12 +158,15 @@ host evidence only; they are not Linux native parity, a hosted Windows receipt, 
 layout coverage, source-level Fairy FFI, independent compiler/register inspection, PE/COFF
 object conformance, or Windows call/ABI conformance. It separately compiles the project-owned
 Windows File implementation and its caller probe, then executes create/write/sync/close/reopen,
-partial read, EOF, forced close failure, and repeated drop under both profiles. It also compiles the catcher, stack-owning
+partial read, EOF, forced close failure, and repeated drop under both profiles. A separate checked-in
+FY source pair then executes safe write/sync/read/EOF, consuming close, and implicit-drop release at
+both profiles. It also compiles the catcher, stack-owning
 termination frame, and private exception raiser as three separate translation units, links and
 executes them under both profiles, and requires exact exception payload, ordered
 `RtlVirtualUnwind` frame discovery, and one abnormal `__finally` execution. Before execution, the
 same intent parses the target-neutral product image, both declared-target profile images, the two
-direct run-target temporary images, both exec-target temporary images, and all eight probe images
+safe FY File lifecycle images, both direct run-target temporary images, both exec-target temporary
+images, and all eight probe images
 and requires bounded AMD64 PE32+ non-DLL console
 identity, aligned image/header/section ranges, a readable executable `.text`, and an executable
 entry point. This does not inspect object symbols or relocations, unwind/debug payloads, imported

@@ -329,9 +329,16 @@ admits only `fy_std_windows_file_open_v0`, `fy_std_windows_file_read_v0`,
 `fy_std_windows_file_write_all_v0`, `fy_std_windows_file_sync_v0`,
 `fy_std_windows_file_close_v0`, and `fy_std_windows_file_drop_v0`. A separate-translation-unit probe
 executes create/truncate, write-all, sync, normal and repeated close, three-byte reads, EOF, forced
-`ERROR_INVALID_HANDLE` close failure, drop, and repeated drop at both local MSVC profiles. This is a
-raw runtime contract; safe FY `File` construction, typed errors, byte-buffer wrappers, and implicit
-resource-drop execution are not connected yet.
+`ERROR_INVALID_HANDLE` close failure, drop, and repeated drop at both local MSVC profiles.
+
+The example-level `examples/windows_file/windows_file.fy` module now connects that raw contract to
+an effect-checked move-only FY `File`, typed `FileError`, create/truncate and read opens, write-all,
+sync, consuming close, and a bounded `[u8; 16]` read wrapper. Runtime state crosses the private
+opaque boundary through bytewise `memcpy` load/store so the C unit does not dereference generated
+resource storage through an incompatible struct type. Low and optimized source builds write and
+read nine bytes, observe EOF, execute explicit close, and prove implicit drop by reopening a path
+whose write handle would otherwise deny sharing. This remains a target-specific example boundary,
+not a stable `std::fs`, portable path, mutable-slice, or public resource-layout contract.
 
 ## Stage 0 product linkage
 

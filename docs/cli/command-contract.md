@@ -228,7 +228,8 @@ subset through one shared symbol/component contract and links only its dependenc
 supplies no user companion source, object, library, search path, or arbitrary linker argument, so
 every other foreign symbol must resolve from the selected driver's ordinary closed environment or
 the build fails. Windows File symbols are target-bound and resolve to an independent inline-handle
-C component only for `x86_64-windows-msvc`; they do not make a safe FY File API. `experimental run`
+C component only for `x86_64-windows-msvc`. The checked-in ADR 0124 module builds a safe example
+wrapper from only those symbols; it does not stabilize `std::fs` or open linker inputs. `experimental run`
 never binds host symbols and reports the interpreter capability boundary.
 
 `fairyc check` remains unimplemented. It must not be aliased to `check-syntax` or the current

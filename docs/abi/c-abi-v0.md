@@ -221,10 +221,11 @@ closed subset only. It does not prove source-level Fairy lowering, an independen
 register-level oracle, exact stack/shadow-store placement, complete PE/COFF object or unwind
 metadata, or hosted evidence.
 
-The Windows smoke additionally parses all fifteen linked target or probe executable images without
+The Windows smoke additionally parses all seventeen linked target or probe executable images without
 invoking the host loader as the parser. The target-neutral product, both declared-target profile
-products, two direct run-target temporary products, two exec-target temporary output products,
-plus both profiles of the Windows File, layout, ABI, and unwind probes must be
+products, both safe FY File lifecycle products, two direct run-target temporary products, two
+exec-target temporary output products, plus both profiles of the raw Windows File, layout, ABI,
+and unwind probes must be
 bounded AMD64 PE32+ large-address-aware non-DLL console images with aligned headers and sections, a
 readable executable `.text` section, and an entry point inside executable code. Import payloads are
 not interpreted. The exception directory, `.pdata`, and referenced unwind records separately cross

@@ -880,6 +880,37 @@ func (l *functionLowerer) lowerRawAddressCast(expression *hir.Expression) (Opera
 		})
 		return Operand{Kind: OperandLocal, Local: destination}, nil
 	}
+	if borrow.Kind == "path" && borrow.Symbol != hir.NoSymbol {
+		sourceElement, sourceMutable, sourceBorrow := hir.BorrowElement(borrow.Type)
+		targetElement, targetMutable, targetPointer := hir.RawPointerElement(expression.Type)
+		if sourceBorrow && targetPointer && (targetElement == sourceElement || targetElement == hir.TypeVoid) &&
+			(sourceMutable || !targetMutable) {
+			value, err := l.lowerExpression(borrow)
+			if err != nil {
+				return Operand{}, err
+			}
+			if value.Kind != OperandLocal {
+				return Operand{}, fmt.Errorf("raw borrow pointer source has invalid operand kind %q", value.Kind)
+			}
+			destination := l.newTemporary()
+			entity := sourceEntity("raw-borrow-pointer", expression.Span)
+			l.appendOperation(Operation{
+				Kind: OperationRawBorrowPointer, Entity: entity, Span: expression.Span,
+				DestinationLocal: destination,
+				Operands:         []Operand{value},
+				Type:             expression.Type,
+				OwnerType:        borrow.Type,
+				Operator:         expression.Operator,
+				UnsafeScope:      *expression.UnsafeScope,
+			})
+			l.result.UnsafeOperations = append(l.result.UnsafeOperations, UnsafeOperation{
+				Entity:           entity,
+				SourceSpanEntity: sourceEntity("span", expression.Span),
+				ScopeEntity:      sourceEntity("unsafe-scope", *expression.UnsafeScope),
+			})
+			return Operand{Kind: OperandLocal, Local: destination}, nil
+		}
+	}
 	if borrow.Kind != "prefix" || (borrow.Operator != "&" && borrow.Operator != "&mut") || len(borrow.Children) != 1 {
 		return Operand{}, fmt.Errorf("raw-address cast source is not a direct borrow")
 	}

@@ -651,6 +651,60 @@ fn main() -> i32 {
 	}
 }
 
+func TestLowerPreservesSafeBorrowToOpaquePointer(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+resource Token { value: u32; drop fn(self: &mut Self) {} }
+unsafe extern C fn sink(output: *mut void) -> u32;
+fn inspect(token: &mut Token) -> u32 { unsafe { sink(token as *mut void) } }
+fn main() -> i32 {
+    var token: Token = Token { value: 42 };
+    if inspect(&mut token) == 0 { 42 } else { 1 }
+}
+`)
+	var borrow *Operation
+	var raw *Operation
+	for functionIndex := range program.Functions {
+		for blockIndex := range program.Functions[functionIndex].Blocks {
+			for operationIndex := range program.Functions[functionIndex].Blocks[blockIndex].Operations {
+				operation := &program.Functions[functionIndex].Blocks[blockIndex].Operations[operationIndex]
+				switch operation.Kind {
+				case OperationUnary:
+					if operation.Operator == "&mut" && operation.OwnerType == hir.Type("main::Token") {
+						borrow = operation
+					}
+				case OperationRawBorrowPointer:
+					raw = operation
+				}
+			}
+		}
+	}
+	wantBorrow := hir.MutableBorrow(hir.Type("main::Token"))
+	if borrow == nil || borrow.Type != wantBorrow || len(borrow.Operands) != 1 || borrow.Operands[0].Kind != OperandLocal {
+		t.Fatalf("safe resource borrow = %+v", borrow)
+	}
+	if raw == nil || raw.OwnerType != wantBorrow || raw.Type != hir.RawPointer(hir.TypeVoid, true) || raw.Operator != "as" || raw.Entity == "" {
+		t.Fatalf("raw borrow pointer = %+v", raw)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+	mutated := Clone(program)
+	for functionIndex := range mutated.Functions {
+		for blockIndex := range mutated.Functions[functionIndex].Blocks {
+			for operationIndex := range mutated.Functions[functionIndex].Blocks[blockIndex].Operations {
+				operation := &mutated.Functions[functionIndex].Blocks[blockIndex].Operations[operationIndex]
+				if operation.Kind == OperationRawBorrowPointer {
+					operation.Type = hir.RawPointer(hir.TypeU32, true)
+				}
+			}
+		}
+	}
+	if failures := Verify(mutated); len(failures) != 1 || failures[0].Code != "V1001" {
+		t.Fatalf("Verify() mismatched raw borrow pointer = %+v", failures)
+	}
+}
+
 func TestLowerPreservesCStringStaticStorageOperand(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;

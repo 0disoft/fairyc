@@ -1018,7 +1018,47 @@ fn main() -> i32 { if inspect(c"fairy") == 0 { 42 } else { 1 } }
 	}
 	for _, required := range []string{
 		"extern uint32_t inspect_raw(const uint8_t * fy_a_0);",
-		".data;",
+		"const uint8_t * fy_l_",
+		" = fy_l_",
+		"inspect_raw(fy_l_",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+	if strings.Contains(unit.Source, ".data;") {
+		t.Fatalf("generated C treats a CStr pointer parameter as a descriptor:\n%s", unit.Source)
+	}
+}
+
+func TestEmitResourceAndArraySafeBorrowsToOpaquePointers(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+resource Token { value: u32; drop fn(self: &mut Self) {} }
+unsafe extern C fn inspect_raw(token: *mut void, bytes: *mut void) -> u32;
+fn inspect(token: &mut Token, bytes: &mut [u8; 4]) -> u32 {
+    unsafe { inspect_raw(token as *mut void, bytes as *mut void) }
+}
+fn main() -> i32 {
+    var token: Token = Token { value: 42 };
+    var bytes: [u8; 4] = [0, 0, 0, 0];
+    if inspect(&mut token, &mut bytes) == 0 { 42 } else { 1 }
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, feature := range []string{"raw-borrow-pointer", "scalar-fixed-array", "flat-copy-resource"} {
+		if !slices.Contains(unit.Features, feature) {
+			t.Errorf("features = %v, want %q", unit.Features, feature)
+		}
+	}
+	for _, required := range []string{
+		"extern uint32_t inspect_raw(void * fy_a_0, void * fy_a_1);",
+		"fy_resource_0 *",
+		"fy_array_0 *",
+		" = &fy_l_",
 		"inspect_raw(fy_l_",
 	} {
 		if !strings.Contains(unit.Source, required) {

@@ -57,7 +57,9 @@ defining a stable language or ABI limit. An array index is contextually `usize` 
 array element type. The exact `.len` property returns `usize`; no other fixed-array property is in
 the executable subset. When `&[u8]` is the expected type, a direct `&` of an admitted `[u8; N]`
 place contextually produces that immutable view. This is the only fixed-array coercion; it does not
-apply to a bare array value, another element type, a temporary, or a mutable borrow.
+apply to a bare array value, another element type, a temporary, or a mutable borrow. Exact whole-
+array safe-borrow types such as `&[u8; N]` and `&mut [u8; N]` may appear on internal parameters;
+they are not coercions and do not create a mutable slice.
 
 The implemented safe integer `as` subset is closed to `u8 -> i32`, `u8 -> u32`, `u8 -> usize`, and
 `u32 -> usize`. Each target contains the complete mathematical source range, so no value changes or

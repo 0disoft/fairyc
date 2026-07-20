@@ -73,7 +73,9 @@ from-text/view/drop, and `fy_std_text_utf8_valid_v0` calls. Buffer and Arena sel
 close over SystemHeap in deterministic component order; the resolver combines SystemHeap, Buffer,
 Arena, text-view, owned-text, and scalar runtime at most once each. It also owns independent
 target-bound Windows console and Windows File components; the File slice is selected only by one of
-its six admitted raw calls and stores the handle inline without a hidden allocation. Every other
+its six admitted raw calls and stores the handle inline without a hidden allocation. The ADR 0124
+example module contains the unsafe boundary and exposes effect-checked move-only FY wrappers over
+only those calls; it does not widen component selection or linker input. Every other
 foreign or unproven standard-library symbol is rejected before toolchain discovery. The Windows SystemHeap source overrides only its fundamental-alignment
 ceiling with the x64 `malloc` guarantee of 16 bytes; allocation semantics stay shared. Companion
 inputs and arbitrary linker arguments remain absent.

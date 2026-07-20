@@ -193,6 +193,8 @@ const checkedInWindowsTargetPath = "examples/windows_target/main.fy"
 const checkedInWindowsQuickstartPath = "examples/windows_quickstart/main.fy"
 const checkedInWindowsOutputPath = "examples/windows_output/main.fy"
 const checkedInWindowsOutputSupportPath = "examples/windows_output/windows_console.fy"
+const checkedInWindowsFilePath = "examples/windows_file/main.fy"
+const checkedInWindowsFileSupportPath = "examples/windows_file/windows_file.fy"
 const windowsLayoutManifestPath = "spec/fixtures/layout/manifest-windows-msvc-v0.json"
 const windowsABIManifestPath = "spec/fixtures/c-abi/manifest-windows-msvc-v0.json"
 const subprocessOutputLimit = 64 * 1024
@@ -237,6 +239,14 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("read checked-in Windows output support source: %w", err)
 	}
+	windowsFileSource, err := os.ReadFile(filepath.FromSlash(checkedInWindowsFilePath))
+	if err != nil {
+		return fmt.Errorf("read checked-in Windows File source: %w", err)
+	}
+	windowsFileSupportSource, err := os.ReadFile(filepath.FromSlash(checkedInWindowsFileSupportPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in Windows File support source: %w", err)
+	}
 	root, err := os.MkdirTemp("", "fairyc-windows-host-smoke-")
 	if err != nil {
 		return fmt.Errorf("create temporary source root: %w", err)
@@ -250,6 +260,8 @@ func run() error {
 		checkedInWindowsQuickstartPath:    string(windowsQuickstartSource),
 		checkedInWindowsOutputPath:        string(windowsOutputSource),
 		checkedInWindowsOutputSupportPath: string(windowsOutputSupportSource),
+		checkedInWindowsFilePath:          string(windowsFileSource),
+		checkedInWindowsFileSupportPath:   string(windowsFileSupportSource),
 		"negative.fy":                     negativeSource,
 		"division_by_zero.fy":             divisionByZeroSource,
 		"remainder_by_zero.fy":            remainderByZeroSource,
@@ -332,6 +344,36 @@ func run() error {
 			return fmt.Errorf("execute build-target %s artifact: %w", profile, err)
 		}
 		targetBuildExecutions++
+	}
+	windowsFileSourceExecutions := 0
+	for _, profile := range []string{"low", "optimized"} {
+		output := fmt.Sprintf("build/windows-file-%s.exe", profile)
+		var fileBuildStdout bytes.Buffer
+		var fileBuildStderr bytes.Buffer
+		fileBuildCode := cli.Run([]string{
+			"experimental", "build-target", checkedInWindowsFilePath,
+			"--source", checkedInWindowsFileSupportPath,
+			"--target", "x86_64-windows-msvc", "--profile", profile,
+			"--output", output,
+		}, root, &fileBuildStdout, &fileBuildStderr)
+		if fileBuildCode != cli.ExitSuccess || fileBuildStderr.Len() != 0 || !strings.HasPrefix(fileBuildStdout.String(), "built: "+output+" (x86_64-windows-msvc, msvc ") {
+			return fmt.Errorf("Windows File build-target %s returned code %d, stdout %q, stderr %q", profile, fileBuildCode, fileBuildStdout.String(), fileBuildStderr.String())
+		}
+		fileArtifactPath := filepath.Join(root, filepath.FromSlash(output))
+		fileArtifact, err := os.ReadFile(fileArtifactPath)
+		if err != nil {
+			return fmt.Errorf("read Windows File build-target %s artifact: %w", profile, err)
+		}
+		if _, err := pecoff.InspectExecutable(fileArtifact); err != nil {
+			return fmt.Errorf("inspect Windows File build-target %s PE executable image: %w", profile, err)
+		}
+		if _, err := pecoff.InspectAMD64Unwind(fileArtifact); err != nil {
+			return fmt.Errorf("inspect Windows File build-target %s Microsoft x64 unwind data: %w", profile, err)
+		}
+		if err := executeExpectResult(fileArtifactPath, 42); err != nil {
+			return fmt.Errorf("execute Windows File build-target %s artifact: %w", profile, err)
+		}
+		windowsFileSourceExecutions++
 	}
 	targetRunExecutions := 0
 	var targetRunStdout bytes.Buffer
@@ -435,7 +477,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls and checked indexing, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart and output execution, 38 run-host outcomes covered fixed arrays, byte-view iteration and slicing, assertions in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, windowsFileExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, unwindCases, unwindExecutions, 1+targetBuildExecutions+targetRunExecutions+targetExecExecutions+windowsFileExecutions+layoutExecutions+abiExecutions+unwindExecutions, toolchain.Version)
+	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds plus %d source-level safe File lifecycle builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls and checked indexing, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart and output execution, 38 run-host outcomes covered fixed arrays, byte-view iteration and slicing, assertions in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, windowsFileSourceExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, windowsFileExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, unwindCases, unwindExecutions, 1+targetBuildExecutions+windowsFileSourceExecutions+targetRunExecutions+targetExecExecutions+windowsFileExecutions+layoutExecutions+abiExecutions+unwindExecutions, toolchain.Version)
 	return nil
 }
 
@@ -728,6 +770,7 @@ func executeExpectResult(path string, expected int32) error {
 	contextValue, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	command := exec.CommandContext(contextValue, path)
+	command.Dir = filepath.Dir(path)
 	command.Stdin = nil
 	var output bytes.Buffer
 	command.Stdout = &output

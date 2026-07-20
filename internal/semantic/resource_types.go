@@ -381,7 +381,10 @@ func (a *analyzer) canonicalTypeTextMode(module *moduleScope, text string, allow
 		if mutable {
 			remainder = strings.TrimSpace(remainder[len("mut"):])
 		}
-		element, ok := a.canonicalTypeTextMode(module, remainder, false)
+		// A safe borrow may name one executable fixed array. The array parser still
+		// rejects nested fixed arrays because it canonicalizes its element with
+		// allowFixedArray=false.
+		element, ok := a.canonicalTypeTextMode(module, remainder, true)
 		if !ok {
 			return hir.TypeInvalid, false
 		}

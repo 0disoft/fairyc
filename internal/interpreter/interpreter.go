@@ -737,7 +737,7 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					return callCompletion{}, fmt.Errorf("enum payload in %q: %w", function.Name, err)
 				}
 				locals[operation.DestinationLocal] = payload
-			case mir.OperationRawAddress:
+			case mir.OperationRawAddress, mir.OperationRawBorrowPointer:
 				return callCompletion{}, capabilityErrorKind("raw-address", "raw address in %q requires a native backend", function.Name)
 			case mir.OperationStructConstruct:
 				values := make([]runtimeValue, len(operation.Operands))

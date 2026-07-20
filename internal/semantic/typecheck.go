@@ -628,7 +628,9 @@ func (c *typeChecker) checkCast(expression *ast.Expression, result *hir.Expressi
 	sameElement := sourceElement == targetElement && (sourceMutable || !targetMutable)
 	directLocalBorrow := child != nil && child.Kind == "prefix" && (child.Operator == "&" || child.Operator == "&mut") &&
 		len(child.Children) == 1 && child.Children[0].Kind == "path"
-	opaqueElement := targetElement == hir.TypeVoid && (sourceMutable || !targetMutable) && directLocalBorrow
+	borrowValue := child != nil && child.Kind == "path"
+	opaqueElement := targetElement == hir.TypeVoid && (sourceMutable || !targetMutable) &&
+		(directLocalBorrow || borrowValue)
 	byteSliceBytes := sourceElement == hir.TypeByteSlice && !sourceMutable && targetElement == hir.TypeU8 && !targetMutable
 	stringBytes := sourceElement == hir.TypeStr && !sourceMutable && targetElement == hir.TypeU8 && !targetMutable
 	cStringBytes := sourceElement == hir.TypeCStr && !sourceMutable && targetElement == hir.TypeU8 && !targetMutable

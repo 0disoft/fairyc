@@ -737,7 +737,7 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 				case mir.OperationResultConstruct, mir.OperationOptionConstruct,
 					mir.OperationResultPayload, mir.OperationOptionPayload,
 					mir.OperationEnumConstruct, mir.OperationEnumPayload,
-					mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
+					mir.OperationRawAddress, mir.OperationRawBorrowPointer, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice,
 					mir.OperationScalarCast, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex:
 					inferred = operation.Type
@@ -1047,6 +1047,9 @@ func (e *emitter) supportedCValueType(value hir.Type) bool {
 	if value == hir.SharedBorrow(hir.TypeByteSlice) || value == hir.SharedBorrow(hir.TypeStr) || value == hir.SharedBorrow(hir.TypeCStr) {
 		return true
 	}
+	if _, borrow := e.safeBorrowCType(value); borrow {
+		return true
+	}
 	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeU32 || value == hir.TypeUSize || hir.IsCScalar(value) || isOptionI32(value) || isResultI32I32(value) {
 		return true
 	}
@@ -1078,6 +1081,9 @@ func (e *emitter) cValueType(value hir.Type) (string, error) {
 			return "", fmt.Errorf("C scalar %q is unavailable for target %q", transport.targetName, e.targetID)
 		}
 		return transport.cType, nil
+	}
+	if cType, borrow := e.safeBorrowCType(value); borrow {
+		return cType, nil
 	}
 	switch {
 	case value == hir.SharedBorrow(hir.TypeByteSlice):
@@ -1118,6 +1124,25 @@ func (e *emitter) cValueType(value hir.Type) (string, error) {
 		}
 		return "", fmt.Errorf("unsupported C value type %q", value)
 	}
+}
+
+func (e *emitter) safeBorrowCType(value hir.Type) (string, bool) {
+	element, mutable, borrow := hir.BorrowElement(value)
+	if !borrow {
+		return "", false
+	}
+	pointee := ""
+	if index, found := e.resourceByType[element]; found {
+		pointee = fmt.Sprintf("fy_resource_%d", index)
+	} else if index, found := e.arrayByType[element]; found {
+		pointee = e.arrayCTypeName(index)
+	} else {
+		return "", false
+	}
+	if mutable {
+		return pointee + " *", true
+	}
+	return "const " + pointee + " *", true
 }
 
 func (e *emitter) structCTypeName(index int) string {
@@ -1187,6 +1212,12 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 				}
 				allowedUnsafeEntities[operation.Entity] = struct{}{}
 				e.features["raw-address"] = struct{}{}
+			case mir.OperationRawBorrowPointer:
+				if err := e.inspectRawBorrowPointer(functionIndex, *operation); err != nil {
+					return err
+				}
+				allowedUnsafeEntities[operation.Entity] = struct{}{}
+				e.features["raw-borrow-pointer"] = struct{}{}
 			case mir.OperationStrDataAddress:
 				if err := e.inspectStrDataAddress(functionIndex, *operation); err != nil {
 					return err
@@ -1446,7 +1477,7 @@ func (e *emitter) callSignature(symbol hir.SymbolID) (hir.Type, []hir.Type, bool
 func validateOperationShape(function string, operation mir.Operation) error {
 	switch operation.Kind {
 	case mir.OperationAssign, mir.OperationInitialize, mir.OperationUnary, mir.OperationBinary,
-		mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
+		mir.OperationRawAddress, mir.OperationRawBorrowPointer, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationEnumConstruct, mir.OperationEnumPayload,
 		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice, mir.OperationScalarCast,
 		mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex:
@@ -1707,6 +1738,29 @@ func (e *emitter) inspectUnary(functionIndex int, operation mir.Operation) error
 	if operation.DestinationLocal == mir.NoLocal || !supportedUnary(operation.Operator) {
 		return fmt.Errorf("typed scalar unary operation in %s has an invalid destination or operator", function.Name)
 	}
+	if operation.Operator == "&" || operation.Operator == "&mut" {
+		if operand.Kind != mir.OperandLocal {
+			return fmt.Errorf("safe borrow in %s does not name a local place", function.Name)
+		}
+		wantType := hir.SharedBorrow(operation.OwnerType)
+		if operation.Operator == "&mut" {
+			wantType = hir.MutableBorrow(operation.OwnerType)
+		}
+		if operation.Type != wantType {
+			return fmt.Errorf("safe borrow in %s has type %q, want %q", function.Name, operation.Type, wantType)
+		}
+		if _, ok := e.safeBorrowCType(operation.Type); !ok {
+			return CapabilityError{Function: function.Name, Feature: "safe borrow type " + strconv.Quote(string(operation.Type))}
+		}
+		operandType, err := e.operandType(functionIndex, operand)
+		if err != nil {
+			return fmt.Errorf("safe borrow in %s: %w", function.Name, err)
+		}
+		if operandType != operation.OwnerType {
+			return fmt.Errorf("safe borrow in %s has operand type %q, want %q", function.Name, operandType, operation.OwnerType)
+		}
+		return nil
+	}
 	validShape := false
 	switch operation.Operator {
 	case "!":
@@ -1794,6 +1848,38 @@ func (e *emitter) inspectRawAddress(functionIndex int, operation mir.Operation) 
 	}
 	if _, err := e.cValueType(operation.Type); err != nil {
 		return CapabilityError{Function: function.Name, Feature: "raw address type " + strconv.Quote(string(operation.Type))}
+	}
+	return nil
+}
+
+func (e *emitter) inspectRawBorrowPointer(functionIndex int, operation mir.Operation) error {
+	function := &e.functions[functionIndex]
+	operand, err := oneOperand(operation.Operands)
+	if err != nil {
+		return fmt.Errorf("raw borrow pointer in %s: %w", function.Name, err)
+	}
+	if operand.Kind != mir.OperandLocal || operation.DestinationLocal == mir.NoLocal ||
+		operation.Entity == "" || operation.UnsafeScope.Source == "" || operation.Operator != "as" {
+		return fmt.Errorf("raw borrow pointer in %s has incomplete operand or unsafe provenance", function.Name)
+	}
+	sourceElement, sourceMutable, sourceBorrow := hir.BorrowElement(operation.OwnerType)
+	targetElement, targetMutable, targetPointer := hir.RawPointerElement(operation.Type)
+	if !sourceBorrow || !targetPointer || (targetElement != sourceElement && targetElement != hir.TypeVoid) ||
+		(!sourceMutable && targetMutable) {
+		return fmt.Errorf("raw borrow pointer in %s has incompatible source and pointer types", function.Name)
+	}
+	operandType, err := e.operandType(functionIndex, operand)
+	if err != nil {
+		return fmt.Errorf("raw borrow pointer in %s: %w", function.Name, err)
+	}
+	if operandType != operation.OwnerType {
+		return fmt.Errorf("raw borrow pointer in %s has operand type %q, want %q", function.Name, operandType, operation.OwnerType)
+	}
+	if _, ok := e.safeBorrowCType(operation.OwnerType); !ok {
+		return CapabilityError{Function: function.Name, Feature: "raw borrow owner type " + strconv.Quote(string(operation.OwnerType))}
+	}
+	if _, err := e.cValueType(operation.Type); err != nil {
+		return CapabilityError{Function: function.Name, Feature: "raw borrow pointer type " + strconv.Quote(string(operation.Type))}
 	}
 	return nil
 }
@@ -2778,6 +2864,12 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			return fmt.Errorf("raw address in %s has invalid local operand", function)
 		}
 		fmt.Fprintf(output, "    fy_l_%d = &fy_l_%d;\n", operation.DestinationLocal, operand.Local)
+	case mir.OperationRawBorrowPointer:
+		operand, err := oneOperand(operation.Operands)
+		if err != nil || operand.Kind != mir.OperandLocal {
+			return fmt.Errorf("raw borrow pointer in %s has invalid local operand", function)
+		}
+		fmt.Fprintf(output, "    fy_l_%d = fy_l_%d;\n", operation.DestinationLocal, operand.Local)
 	case mir.OperationStrDataAddress:
 		operand, err := oneOperand(operation.Operands)
 		if err != nil || operand.Kind != mir.OperandString && operand.Kind != mir.OperandLocal {
@@ -2804,7 +2896,7 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			return fmt.Errorf("C string data address in %s has invalid storage operand", function)
 		}
 		if operand.Kind == mir.OperandLocal {
-			fmt.Fprintf(output, "    fy_l_%d = fy_l_%d.data;\n", operation.DestinationLocal, operand.Local)
+			fmt.Fprintf(output, "    fy_l_%d = fy_l_%d;\n", operation.DestinationLocal, operand.Local)
 		} else {
 			value, err := cOperand(operand)
 			if err != nil {
@@ -3087,6 +3179,11 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 				}
 				fmt.Fprintf(output, "    fy_l_%d = (%s)(~(%s)(%s));\n", operation.DestinationLocal, valueType, valueType, value)
 			}
+		case "&", "&mut":
+			if operand.Kind != mir.OperandLocal {
+				return fmt.Errorf("safe borrow in %s has invalid local operand", function)
+			}
+			fmt.Fprintf(output, "    fy_l_%d = &fy_l_%d;\n", operation.DestinationLocal, operand.Local)
 		}
 	case mir.OperationBinary:
 		left, right, err := twoOperands(operation.Operands)
@@ -3633,7 +3730,7 @@ func operationHasDestination(kind mir.OperationKind) bool {
 		mir.OperationResultConstruct, mir.OperationResultPayload,
 		mir.OperationOptionConstruct, mir.OperationOptionPayload,
 		mir.OperationEnumConstruct, mir.OperationEnumPayload,
-		mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
+		mir.OperationRawAddress, mir.OperationRawBorrowPointer, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice,
 		mir.OperationScalarCast, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex, mir.OperationRegionPlace:
 		return true
@@ -3867,7 +3964,8 @@ func cTrapSpec(category string) (string, uint32, bool) {
 }
 
 func supportedUnary(operator string) bool {
-	return operator == "+" || operator == "-" || operator == "!" || operator == "~"
+	return operator == "+" || operator == "-" || operator == "!" || operator == "~" ||
+		operator == "&" || operator == "&mut"
 }
 
 func supportedBinary(operator string) bool {

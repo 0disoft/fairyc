@@ -35,13 +35,19 @@ raw storage at the call site.
 5. Inside an explicit unsafe boundary, a direct shared borrow may cast to `*void` and a direct
    mutable borrow may cast to `*void` or `*mut void`. A shared borrow may not become `*mut void`.
    Exact-pointee borrow casts remain available; all other pointee-changing casts remain closed.
-6. MIR `raw-address` retains the concrete owner type even when the result pointer element is
+6. An existing safe-borrow path may erase its pointee only to `void` without strengthening
+   mutability. MIR records this as `raw-borrow-pointer`, distinct from `raw-address`: the operation
+   transports the already-borrowed referent pointer and must not take the address of the borrow
+   carrier. The constrained C backend admits this transport only for verified resource and fixed-
+   array borrows required by checked wrappers.
+7. MIR `raw-address` retains the concrete owner type even when the result pointer element is
    `void`. The verifier and C emitter accept only an exact owner element or `void`, require matching
    unsafe provenance, and preserve the existing no-mutability-strengthening rule.
-7. A borrowed CStr path parameter may expose its immutable data pointer through the existing
-   unsafe CStr-data operation. MIR and C emission distinguish a local descriptor from static literal
-   storage and load `.data` only for the local descriptor.
-8. HIR-to-MIR lowering intentionally stops carrying the mutable-binding bit after type checking:
+8. A borrowed CStr path parameter may expose its immutable data pointer through the existing
+   unsafe CStr-data operation. C transport already represents `&CStr` as `const uint8_t *`, so a
+   local parameter is forwarded unchanged while static literal storage uses its compiler-owned
+   address. Treating the parameter as a descriptor and reading `.data` is invalid C.
+9. HIR-to-MIR lowering intentionally stops carrying the mutable-binding bit after type checking:
    MIR is already a mutable-local control-flow representation, while ownership and cleanup facts
    remain explicit and verified separately.
 
@@ -54,14 +60,16 @@ raw storage at the call site.
 - `mut` is not C++-style reference syntax and does not change the caller's value; it only controls
   the callee's local place.
 - Mutable fields, mutable indexing or slices, arbitrary pointer arithmetic, raw dereference, foreign
-  mutable parameters, and stable public resource layout remain excluded.
+  safe-reference parameters, and stable public resource layout remain excluded.
 
 ## Verification
 
 - parser and AST tests require lossless reconstruction plus exact modifier and name-span retention;
 - semantic tests and fixtures accept mutable-parameter assignment and reject the same assignment on
   an immutable parameter;
-- semantic, MIR mutation, and C-emission tests cover `&mut T as *mut void`, reject mutability
-  strengthening, and retain the concrete owner type;
-- C emission tests require a borrowed CStr parameter to load its descriptor data pointer;
+- semantic, MIR mutation, and C-emission tests cover direct and existing-borrow opaque casts,
+  reject mutability strengthening, retain the concrete owner type, and distinguish address
+  formation from pointer forwarding;
+- C emission tests require a borrowed CStr parameter to forward its existing pointer without a
+  nonexistent descriptor-member access;
 - the complete Go suite remains the cross-platform frontend and backend oracle.

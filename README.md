@@ -194,9 +194,10 @@ existing immutable byte-view calls and operations without unsafe code. The ceili
 Stage 0 implementation guard, not a stable language or ABI limit. A mutable safe-borrow local may
 be reassigned through straight-line, branch, and `while` control flow; Flow replaces its provenance
 after evaluating the right-hand side, joins reachable branch/header/`continue`/`break` origins
-without guessing, and releases old owners only after their last reachable loan use. Empty and
-repeated literals, fields, nesting, mutable indexing, general slicing or borrowing, and public or
-foreign ABI use remain closed.
+without guessing, and releases old owners only after their last reachable loan use. Exact whole-
+array `&[T; N]` and `&mut [T; N]` types may now cross internal calls without becoming slices or
+copyable aliases. Empty and repeated literals, fields, nesting, mutable indexing, general slicing,
+and public or foreign ABI use remain closed.
 Internal borrow-returning calls now infer one exact formal borrow parameter, region parameter, or
 static return source before ordinary Flow checks. The selected actual argument alone carries its
 loan past the call, including across argument reordering and acyclic wrapper chains; recursive
@@ -231,8 +232,13 @@ explicitly, consumes state before one `CloseHandle` attempt on both success and 
 drop a silent one-attempt fallback. A separate-translation-unit probe creates, writes, syncs,
 closes, reopens, reads in three-byte chunks, observes EOF, forces `ERROR_INVALID_HANDLE`, and checks
 repeated close and drop at low and optimized local MSVC profiles. The six raw calls are target-bound
-through the closed resolver. A safe FY File resource, typed errors, filesystem-effect wrappers, and
-source-level buffer access are still absent.
+through the closed resolver. A checked-in two-module FY example now wraps that exact component in a
+move-only `File`, preserves status, Win32 code, and completed bytes in `FileError`, carries
+`filesystem` effects, writes and synchronizes `FairyFile`, reads it through a bounded mutable fixed-
+array borrow, observes EOF, consumes explicit close, and proves implicit drop by successfully
+reopening a path whose live write handle would deny sharing. Low and optimized MSVC builds both
+return 42 after object, PE, and unwind inspection. This is usable Stage 0 source evidence, not yet a
+stable `std::fs`, portable Unicode path, general mutable-buffer, hosted, or public-layout contract.
 The source FFI slice accepts `i32`, `u8`, `u32`, `usize`, all sixteen exact transport-only TargetSpec
 C scalars, admitted raw-pointer parameters or results, and nonempty acyclic `@repr(C)` struct
 results. A declaration may keep its Fairy name or use one nonempty `@link_name("external_symbol")`;
@@ -240,9 +246,10 @@ AST, typed HIR, MIR, prototypes, and calls preserve the source/link identity spl
 Calls require `unsafe {}` or `unsafe fn`; missing unsafe provenance is `E5101` and safe references in
 raw declarations are `E5102`. The interpreter fails closed with a `foreign-call` capability error,
 while C emission produces a plain external prototype with no inferred alias, purity, retention, or
-unwind attributes. Typed `null` crosses a closed pointer/target-scalar native probe. An exact
-safe-borrow-to-raw-pointer cast now lowers only for a direct local place inside `unsafe`, allowing a
-nonempty `@repr(C)` record to cross by pointer and receive standard-library output.
+unwind attributes. Typed `null` crosses a closed pointer/target-scalar native probe. An exact or
+opaque safe-borrow-to-raw-pointer cast may form the address of a direct local place inside `unsafe`.
+An existing resource or fixed-array safe borrow may erase only to `void` and forwards its referent
+pointer unchanged; neither path permits mutability strengthening.
 Those C scalar types remain distinct from coincidentally represented Fairy scalars, emit their exact
 C spellings with target and provider assertions, and currently have no source literal, operator,
 cast, raw-pointer, or interpreter support. Nonempty `@repr(C)` records may use exact C-scalar fields,

@@ -210,23 +210,27 @@ CStr validation, String copy/view/append/drop, CString from-text/view/drop, and 
 open/read/write-all/sync/close. The Windows target separately admits File
 open/read/write-all/sync/close/drop; its single-write helper retains internal C linkage. Direct
 Linux File write/drop and the rest of the prefix remain closed.
-Typed null and an exact or opaque
-direct-local borrow-to-raw-pointer cast are the only
-source-constructed raw pointers. The cast requires unsafe provenance, preserves the concrete owner
-type, permits the result pointee to be that exact type or `void`, forbids mutability strengthening,
-lowers to a verified MIR raw-address operation, and emits plain `&local` without `restrict` or
-`noalias`. Pointer dereference, arithmetic, integer conversion, and arbitrary casts remain rejected.
+Typed null, an exact or opaque direct-local borrow-to-raw-pointer cast, and opaque erasure of one
+existing safe resource or fixed-array borrow are the only source-constructed raw pointers. Direct
+place casts lower to verified MIR `raw-address` and emit `&local`. Existing-borrow erasure lowers to
+verified `raw-borrow-pointer` and emits the referent pointer unchanged. Both require unsafe
+provenance, retain the concrete owner type, permit only the exact referent or `void`, and forbid
+mutability strengthening, `restrict`, and `noalias`. Pointer dereference, arithmetic, integer
+conversion, and arbitrary casts remain rejected.
 A separate verified `byte-slice-data-address` operation may expose
 the immutable data pointer of a compiler-owned `&[u8]` literal or typed local inside unsafe code;
 it cannot strengthen mutability or pass the safe slice itself through a foreign signature.
-The corresponding CStr-data operation accepts static literal storage or a local borrowed CStr
-descriptor; the latter emits its immutable `.data` member rather than the descriptor address.
+The corresponding CStr-data operation accepts static literal storage or a local borrowed CStr.
+Static storage emits its compiler-owned address. A local `&CStr` is already transported as
+`const uint8_t *` and is forwarded unchanged; emitting a nonexistent `.data` member is rejected by
+the native C compiler and its regression test.
 Successful emission also records the sorted unique external link names used by actual foreign call
 terminators. Uncalled declarations remain prototypes but are absent from this link-requirement list.
 The exact standard-library namespace and component dependency mapping live in one shared contract
 consumed by both C-emission admission and product-build source selection.
 Windows File names are rejected for Linux and select one independent inline-handle component only
-for `x86_64-windows-msvc`; this raw admission does not create safe File semantics.
+for `x86_64-windows-msvc`. ADR 0124 connects an example-level safe FY wrapper while keeping stable
+`std::fs`, portable paths, general mutable buffers, and public layout outside this boundary.
 The sole nested-pointer exception is exactly `*mut *mut void`, so `&mut *mut void` can become a C
 `void **` output slot. Immutable outer or inner layers fail closed instead of risking incorrect C
 qualifier placement. Nested pointers to C scalars, structs, or other pointer types remain rejected.
@@ -290,7 +294,8 @@ then observes bytes, termination, success statuses, and normalized release. The 
 crosses exact result, handle, and open-option records into real open, write-all, sync, close, read,
 and close helpers; it observes exact counts, repeated-close status, EOF, reconstructed bytes, and
 normalized closed state. These are internal transport probes, not public allocator, Buffer, Arena,
-lexical Region, safe text, or safe File APIs.
+lexical Region, safe text, or stable safe File APIs. The Windows-only ADR 0124 example is a separate
+source-to-native lifecycle proof.
 Four `standardLibraryBuildSmokeExecutions` additionally require the ordinary product CLI to select
 the text-view C component from an actual called symbol, link it with the scalar runtime, and execute
 the resulting uninstrumented product under both compilers and profiles.

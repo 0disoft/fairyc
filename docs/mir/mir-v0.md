@@ -136,6 +136,13 @@ type, source span, and containing unsafe scope. `V1701` rejects missing or forge
 `V1001` rejects a mismatched place, pointee, mutability, or operation shape. The C backend emits
 `&local`; the interpreter reports a native-only capability boundary instead of fabricating an address.
 
+The separate `raw-borrow-pointer` operation consumes one already-evaluated safe-borrow local and
+forwards its referent pointer. It accepts the exact referent or opaque `void` target, forbids
+mutability strengthening, retains the safe-borrow owner type, and requires the same verified unsafe
+provenance. The C backend currently admits resource and fixed-array borrow carriers and emits a
+plain pointer assignment; it must not emit `&borrow`. The interpreter remains fail-closed because
+it has no native-address model.
+
 Every user resource type has one program-level definition containing its canonical type identity,
 source span, declaration-ordered field names and resolved field types, and drop classification.
 Resource construction names that definition and lists exactly its declared fields in order. A field

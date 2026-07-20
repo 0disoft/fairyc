@@ -51,9 +51,9 @@ return, or retrying a handle after a failed close.
 - Windows now has a real project-owned raw File component with an executable consuming-close
   contract and no hidden allocation.
 - The component is target-specific and intentionally narrower than a future safe `std::fs` API.
-- Exact Windows handle state can be stored inline in a future move-only FY `File` resource.
-- Public FY construction, typed `FileError`, filesystem effect propagation through wrappers, safe
-  byte-buffer access, and source-level implicit-drop execution remain separate work.
+- ADR 0124 connects the exact handle state to a move-only FY `File` resource, typed `FileError`,
+  filesystem-effect wrappers, one bounded safe read buffer, consuming close, and source-level
+  implicit drop. A stable public `std::fs` package remains separate work.
 - The local probe is same-toolchain Windows evidence. It does not establish hosted CI, other Windows
   architectures, MinGW compatibility, portable paths, or self-hosting.
 

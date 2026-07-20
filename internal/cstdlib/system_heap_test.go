@@ -215,7 +215,9 @@ func TestWindowsFileSourcesConsumeCloseAndExposePartialIO(t *testing.T) {
 		"CreateFileW", "ReadFile", "WriteFile", "FlushFileBuffers", "CloseHandle",
 		"FY_STD_WINDOWS_FILE_PATH_ENCODING_V0", "FY_STD_WINDOWS_FILE_PATH_TOO_LONG_V0",
 		"static struct fy_std_windows_file_result_v0 fy_std_windows_file_write_v0(",
-		"file->handle = NULL", "file->open = UINT8_C(0)",
+		"memcpy(file, storage, sizeof *file)", "memcpy(storage, file, sizeof *file)",
+		"file.handle = NULL", "file.open = UINT8_C(0)",
+		"fy_std_windows_file_store_v0(file_storage, &file);\n    if (!CloseHandle(handle))",
 	} {
 		if !strings.Contains(implementation, required) {
 			t.Errorf("Windows File implementation is missing %q", required)

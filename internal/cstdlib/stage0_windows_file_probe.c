@@ -34,9 +34,9 @@ struct fy_std_windows_open_options_v0 {
 struct fy_std_windows_file_result_v0 fy_std_windows_file_open_v0(
     const uint8_t *,
     const struct fy_std_windows_open_options_v0 *,
-    struct fy_std_windows_file_v0 *
+    void *
 );
-struct fy_std_windows_file_result_v0 fy_std_windows_file_read_v0(void *, uint8_t *, size_t);
+struct fy_std_windows_file_result_v0 fy_std_windows_file_read_v0(void *, void *, size_t);
 struct fy_std_windows_file_result_v0 fy_std_windows_file_write_all_v0(
     void *,
     const uint8_t *,
