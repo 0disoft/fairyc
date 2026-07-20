@@ -51,6 +51,8 @@ later optimized path:  verified/optimized MIR -> LLVM IR -> object -> linker
 The interpreter, `x86_64-linux-gnu` C path, and first provisional
 `x86_64-windows-msvc` scalar/LLP64 C-emission path are committed. Later target and backend
 expansions remain separate capability decisions.
+The interpreter CLI and Windows target CLIs accept the same bounded explicit source closure: one
+entry module plus repeated source files, with no directory, manifest, or import-driven discovery.
 
 Generated C uses a declared dialect, compiler family, target profile, statements, ordered temporaries, and helpers to preserve evaluation order, overflow, division, shifts, bit casts, aliasing, and trap semantics. It is a constrained reference transport, not universally portable C or the Fairy C semantic model.
 

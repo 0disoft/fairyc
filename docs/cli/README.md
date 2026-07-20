@@ -40,14 +40,14 @@ for program-facing Windows execution with exact stdout/stderr forwarding and pro
 retained target-neutral Windows/amd64 MSVC PE,
 `fairyc experimental run-host <file.fy> --profile <low|optimized>` for a temporary target-neutral
 Windows/amd64 MSVC host smoke, and
-`fairyc experimental run <file.fy>` for the fixture-backed scalar MIR interpreter subset. These are developer commands whose
+`fairyc experimental run <entry.fy> [--source <file.fy>]...` for the fixture-backed scalar MIR interpreter subset. These are developer commands whose
 spelling and numeric exit codes may change. `check-semantics` resolves names and creates typed HIR
 for an explicit bounded module set in the implemented scalar, safe-borrow, whole-resource, Region, and Result subset.
 It checks local last-use loans, borrow conflicts, borrow return origins, whole moves, cleanup states,
 branch joins, loop back-edges and control exits, Region parameter origins, `place`, and lexical Region escape when its
 Arena provider is included explicitly. It also checks Result return, discard, propagation, local
 and parameter transfer, branch and loop obligations, overwrite and early-return rejection, and
-error compatibility. `experimental run` executes the selected
+error compatibility. `experimental run` analyzes only its explicit entry-plus-`--source` closure and executes the selected
 module's zero-argument `main() -> i32` through verified MIR, including boolean `if`,
 short-circuit control, scalar `while`, whole resources, resource-bearing built-in tags, ordered
 resource reassignment, consuming-close ownership, Region fallthrough, return, propagation, nested,

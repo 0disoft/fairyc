@@ -113,6 +113,9 @@ positional entry rule, explicit-only closure, 64-file ceiling, per-file and aggr
 duplicate/path/module rejection, and lack of discovery are unstable CLI and validation policy.
 They do not define a package manifest, lockfile, module search path, dependency solver, registry,
 foreign companion input, linker interface, or supported distribution contract.
+ADR 0095 applies the same explicit-only closure to unstable `experimental run`. It preserves the
+interpreter subset and result/trap contract while adding no backend, package, discovery, cache, I/O,
+or host-process compatibility promise.
 
 `fairyc.layout-fixtures/v0` separately versions the repository input and expectation vocabulary for
 the target-layout engine; each manifest binds one declared target. It is not a public

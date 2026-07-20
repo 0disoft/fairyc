@@ -52,7 +52,7 @@ The current Go prototype implements twelve deliberately unstable developer comma
 | `fairyc experimental exec-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low\|optimized>` | Compile the same explicitly closed Windows target module set, execute it with separated bounded streams, and behave as the program process | Exact program stdout and stderr plus the program's unsigned-preserved 32-bit Windows exit status; compiler or execution failures still use CLI diagnostic codes |
 | `fairyc experimental build-host <file.fy> --profile <low\|optimized> --output <build/path.exe>` | On Windows/amd64, compile one target-neutral verified program with locally discovered x64 MSVC and retain its PE without declaring a Windows target ABI | A no-overwrite `.exe` below `build/` plus a host-smoke receipt, or bounded source, capability, toolchain, compile, or artifact diagnostics |
 | `fairyc experimental run-host <file.fy> --profile <low\|optimized>` | On Windows/amd64, compile and execute one target-neutral verified program with locally discovered x64 MSVC without declaring a Windows target ABI | `native result: <i32> (windows/amd64 host-smoke, msvc <version>, <profile>)`, a canonical trap, or bounded source, capability, toolchain, compile, or execution diagnostics |
-| `fairyc experimental run <file.fy>` | Run one verified-MIR program in the scalar, tagged, whole-resource, and implemented Region subset whose selected module declares `main() -> i32` | `result: <i32>` on stdout, a canonical trap category on stderr, source diagnostics, or an explicit unsupported-subset error |
+| `fairyc experimental run <entry.fy> [--source <file.fy>]...` | Run one explicitly closed verified-MIR module set in the scalar, tagged, whole-resource, and implemented Region subset whose entry module declares `main() -> i32` | `result: <i32>` on stdout, a canonical trap category on stderr, source-set diagnostics, or an explicit unsupported-subset error |
 
 These commands treat the current directory as their temporary source root. `parse` and
 `check-syntax` accept exactly one relative regular file; `check-semantics` accepts one or more
@@ -83,9 +83,11 @@ Resource declarations with empty user `drop` bodies preserve their ordered resol
 HIR. A nonempty user `drop` body returns the explicit unsupported-subset error before Flow; it is not
 accepted and then ignored by `run`, `emit-c`, or `build`.
 
-`experimental run` does not invoke a backend, linker, runtime, or host subprocess. It runs the
-source file through parser, semantic analysis, Flow, MIR lowering, the MIR verifier, and the bounded
-MIR interpreter. The entry is the selected file module's zero-argument `main() -> i32`; boolean
+`experimental run` does not invoke a backend, linker, runtime, or host subprocess. It runs one
+positional entry plus zero or more repeated `--source` files through parser, semantic analysis, Flow,
+MIR lowering, the MIR verifier, and the bounded MIR interpreter. The closure uses the same 64-file,
+per-file, aggregate-byte, duplicate, containment, and no-discovery rules as the Windows target
+commands. The entry is the positional file module's zero-argument `main() -> i32`; boolean
 `if`, `!`, comparisons, source-level `&&` and `||` short-circuiting, scalar `while`, scalar tagged
 values, resource construction and field reads, whole-root and tagged-payload moves, resource-bearing
 built-in `Option` and `Result` values, ordered resource reassignment, consuming-close ownership,
@@ -95,8 +97,8 @@ cleanup drop events, checked `i32` negation, addition,
 subtraction, multiplication, and signed right shift are
 executable. The bounded interpreter reports its stable `step-limit` capability rather than hanging
 or reclassifying it as a language trap. Interpreter-fixture byte hooks are not available from this
-command and matching function names do not activate them. User drop-body effects, I/O, arguments, and
-multi-file run input remain outside the current interpreter subset. Signed left shift is rejected
+command and matching function names do not activate them. User drop-body effects, I/O, and arguments
+remain outside the current interpreter subset. Signed left shift is rejected
 by semantic analysis as `E1011` rather than reaching the interpreter.
 
 `experimental emit-c` shares the same single-file syntax, semantics, Flow, MIR-lowering, verifier,

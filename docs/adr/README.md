@@ -104,6 +104,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0092-borrowed-view-byte-length.md`: zero-cost byte-length access for borrowed UTF-8 and byte-slice views through typed HIR, verified MIR, the interpreter, and private C transport.
 - `0093-borrowed-view-internal-call-transport.md`: exact internal-function transport for borrowed UTF-8 and byte-slice views so narrow unsafe operations can be contained behind safe support-module helpers without inventing a public standard library.
 - `0094-explicit-multi-source-windows-target-commands.md`: bounded entry-plus-repeated-source module closures for Windows target build, inspection-run, and program-facing execution without automatic discovery or linker-input widening.
+- `0095-explicit-multi-source-interpreter-run.md`: the same bounded explicit FY module closure for fast verified-MIR interpreter execution without a backend, host process, or source discovery.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

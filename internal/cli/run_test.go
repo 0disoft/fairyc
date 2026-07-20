@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -363,6 +364,42 @@ func TestExperimentalRunInterpretsScalarProgram(t *testing.T) {
 	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
 	if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
+func TestExperimentalRunInterpretsExplicitModuleClosure(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\nimport helper as h;\nfn main() -> i32 { h::answer() }\n")
+	writeTestSource(t, root, "helper.fy", "module helper;\npub fn answer() -> i32 { 42 }\n")
+	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy", "--source", "helper.fy"}, root)
+	if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
+func TestParseRunSourcesRejectsInvalidClosureArguments(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		arguments []string
+		contains  string
+	}{
+		{nil, "expects one entry source file"},
+		{[]string{"--source", "helper.fy"}, "entry source file before"},
+		{[]string{"main.fy", "--profile", "low"}, "does not accept flag"},
+		{[]string{"main.fy", "--source"}, "requires a value for --source"},
+		{[]string{"main.fy", "--source", "--target"}, "requires a value for --source"},
+	} {
+		if _, err := parseRunSources(test.arguments); err == nil || !strings.Contains(err.Error(), test.contains) {
+			t.Errorf("parseRunSources(%q) error = %v; want containing %q", test.arguments, err, test.contains)
+		}
+	}
+	overLimit := []string{"main.fy"}
+	for index := 0; index < maxExplicitInputFiles; index++ {
+		overLimit = append(overLimit, "--source", fmt.Sprintf("module-%d.fy", index))
+	}
+	if _, err := parseRunSources(overLimit); err == nil || !strings.Contains(err.Error(), "accepts at most 64 source files") {
+		t.Fatalf("over-limit source error = %v", err)
 	}
 }
 
@@ -728,6 +765,20 @@ func TestRepositoryInterpreterExampleStaysRunnable(t *testing.T) {
 	root := filepath.Clean(filepath.Join("..", ".."))
 	code, stdout, stderr := runForTest(
 		[]string{"experimental", "run", "examples/run/main.fy"},
+		root,
+	)
+	if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
+func TestRepositoryMultiSourceInterpreterExampleStaysRunnable(t *testing.T) {
+	root := filepath.Clean(filepath.Join("..", ".."))
+	code, stdout, stderr := runForTest(
+		[]string{
+			"experimental", "run", "examples/run/modules/main.fy",
+			"--source", "examples/run/modules/math.fy",
+		},
 		root,
 	)
 	if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {

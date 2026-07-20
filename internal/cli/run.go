@@ -43,7 +43,7 @@ Usage:
   fairyc experimental exec-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low|optimized>
   fairyc experimental build-host <file.fy> --profile <low|optimized> --output <build/path.exe>
   fairyc experimental run-host <file.fy> --profile <low|optimized>
-  fairyc experimental run <file.fy>
+  fairyc experimental run <entry.fy> [--source <file.fy>]...
   fairyc --help
 
 The experimental commands are unstable. The reserved "fairyc check" command is not implemented
@@ -147,10 +147,7 @@ func runExperimental(args []string, sourceRoot string, stdout, stderr io.Writer)
 		}
 		return runCheckSemantics(args[1:], sourceRoot, stdout, stderr)
 	case "run":
-		if len(args) != 2 {
-			return invocationError(stderr, "experimental command \"run\" expects exactly one source file")
-		}
-		return runInterpreter(args[1], sourceRoot, stdout, stderr)
+		return runInterpreter(args[1:], sourceRoot, stdout, stderr)
 	case "target-spec":
 		return runTargetSpec(args[1:], stdout, stderr)
 	case "emit-c":
@@ -175,8 +172,12 @@ func runExperimental(args []string, sourceRoot string, stdout, stderr io.Writer)
 	}
 }
 
-func runInterpreter(argument, sourceRoot string, stdout, stderr io.Writer) int {
-	lowered, code := lowerSingleProgram(argument, sourceRoot, stderr, "interpreter")
+func runInterpreter(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
+	sources, err := parseRunSources(arguments)
+	if err != nil {
+		return invocationError(stderr, err.Error())
+	}
+	lowered, code := lowerProgramSources(sources, sourceRoot, stderr, "interpreter")
 	if code != ExitSuccess {
 		return code
 	}
@@ -201,6 +202,29 @@ func runInterpreter(argument, sourceRoot string, stdout, stderr io.Writer) int {
 		return outputError(stderr)
 	}
 	return ExitSuccess
+}
+
+func parseRunSources(arguments []string) ([]string, error) {
+	if len(arguments) == 0 {
+		return nil, fmt.Errorf("experimental command \"run\" expects one entry source file")
+	}
+	if arguments[0] == "" || strings.HasPrefix(arguments[0], "-") {
+		return nil, fmt.Errorf("experimental command \"run\" expects the entry source file before its flags")
+	}
+	sources := []string{arguments[0]}
+	for index := 1; index < len(arguments); index += 2 {
+		if arguments[index] != "--source" {
+			return nil, fmt.Errorf("experimental command \"run\" does not accept flag %q", arguments[index])
+		}
+		if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
+			return nil, fmt.Errorf("experimental command \"run\" requires a value for --source")
+		}
+		sources = append(sources, arguments[index+1])
+		if len(sources) > maxExplicitInputFiles {
+			return nil, fmt.Errorf("experimental command \"run\" accepts at most %d source files", maxExplicitInputFiles)
+		}
+	}
+	return sources, nil
 }
 
 func runEmitC(argument, sourceRoot string, stdout, stderr io.Writer) int {

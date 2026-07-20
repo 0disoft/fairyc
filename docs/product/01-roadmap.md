@@ -31,7 +31,8 @@ must-use obligations. Mutable-local MIR lowering and verification
   division, and checked-arithmetic trap subset. All 10 verifier baselines and 21 isolated mutation cases execute through
   the same MIR verifier. The first MIR interpreter executes all 56 interpreter v0 cases, including
 scalar `Option` and `Result` construction, exhaustive matching, and both Result `?` paths, and is
-exposed by the unstable `experimental run` command. Resource construction, field reads, whole-root
+exposed by the unstable `experimental run` command, which now accepts a bounded explicit entry-plus-
+repeated-`--source` module closure without discovery. Resource construction, field reads, whole-root
 call moves, source-linked drop traces, resource-bearing `Option` and `Result` payload moves, ordered
 resource reassignment, explicit consuming-close success/failure ownership, and normal lexical
 Region placement, inner cleanup, normal reset, direct return, Result propagation, and nested

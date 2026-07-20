@@ -276,6 +276,7 @@ go run ./cmd/fairyc experimental emit-c examples/c/resource_tagged.fy
 go run ./cmd/fairyc experimental build examples/c/tagged.fy --cc clang --profile optimized --output build/fairyc-example
 go run ./cmd/fairyc experimental run examples/run/main.fy
 go run ./cmd/fairyc experimental run examples/run/resource_option.fy
+go run ./cmd/fairyc experimental run examples/run/modules/main.fy --source examples/run/modules/math.fy
 go run ./cmd/fairyc experimental parse examples/syntax/main.fy
 ```
 
@@ -295,12 +296,14 @@ deterministic JSON containing token and CST kinds and byte spans, but not source
 literal values, or absolute paths. `check-semantics` accepts an explicit bounded list of source files
 for the currently implemented scalar, safe-borrow, whole-resource, Region-parameter, and Result subset. It rejects duplicate paths, root
 escapes, oversized input sets, and unsupported syntax rather than claiming success. The official
-`experimental run` accepts one file whose declared module contains `main() -> i32`, executes its
+`experimental run` accepts one entry plus a bounded explicit repeated-`--source` module closure whose
+entry module contains `main() -> i32`, then executes its
 verified MIR in the bounded interpreter, including boolean `if`, short-circuit control, scalar `while`,
 resource construction, field reads, whole-root call moves, resource-bearing built-in tagged values,
-ordered resource reassignment, consuming-close ownership patterns, cleanup drop events,
-  and Region fallthrough, direct-return, Result-propagation, nested, break, and continue reset paths,
-checked addition, subtraction, multiplication, negation, and signed right shift, and reports either `result: <i32>` or a canonical
+ordered resource reassignment, consuming-close ownership patterns, cleanup drop events, Region
+fallthrough, direct-return, Result-propagation, nested, break, and continue reset paths, checked
+addition, subtraction, multiplication, negation, and signed right shift. It performs no source
+discovery and needs no C toolchain, MSVC, WSL, or host subprocess, and reports either `result: <i32>` or a canonical
 trap. The official
 `fairyc check` command remains unavailable until effects and the
 remaining semantic groups exist.
