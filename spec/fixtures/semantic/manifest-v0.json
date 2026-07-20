@@ -18,6 +18,7 @@
     "docs/adr/0114-interprocedural-borrow-return-summaries.md",
     "docs/adr/0115-loop-carried-safe-borrow-provenance.md",
     "docs/adr/0116-stage-0-source-effects.md",
+    "docs/adr/0121-resource-drop-effects.md",
     "docs/diagnostics/catalog-v0.md"
   ],
   "cases": [
@@ -763,6 +764,29 @@
       }
     },
     {
+      "id": "pass.flow.resource-drop-effects",
+      "sourceRoot": "cases/pass/resource-drop-effects/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow",
+        "effects": [
+          {
+            "declaration": { "source": "main.fy", "startByte": 44, "endByte": 49 },
+            "effects": ["filesystem"]
+          },
+          {
+            "declaration": { "source": "main.fy", "startByte": 168, "endByte": 173 },
+            "effects": ["filesystem"]
+          },
+          {
+            "declaration": { "source": "main.fy", "startByte": 218, "endByte": 222 },
+            "effects": ["filesystem"]
+          }
+        ]
+      }
+    },
+    {
       "id": "fail.type.missing-call-effect",
       "sourceRoot": "cases/fail/missing-call-effect/src",
       "sources": ["main.fy"],
@@ -773,6 +797,27 @@
           {
             "code": "E7102",
             "primary": { "source": "main.fy", "startByte": 79, "endByte": 83 },
+            "related": [
+              {
+                "role": "effect-declaration",
+                "span": { "source": "main.fy", "startByte": 14, "endByte": 34 }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.missing-resource-drop-effect",
+      "sourceRoot": "cases/fail/missing-resource-drop-effect/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "flow",
+        "diagnostics": [
+          {
+            "code": "E7102",
+            "primary": { "source": "main.fy", "startByte": 164, "endByte": 217 },
             "related": [
               {
                 "role": "effect-declaration",

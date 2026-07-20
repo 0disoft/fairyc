@@ -46,16 +46,27 @@ func (a *analyzer) prepareCallableEffects() {
 		}
 		for index := range module.file.Module.Resources {
 			resource := &module.file.Module.Resources[index]
+			resourceValue := a.resources[resource]
+			if resourceValue == nil {
+				continue
+			}
+			resourceValue.effects, resourceValue.effectSpan, resourceValue.effectsValid = a.parseEffects(
+				module.file.Path,
+				resource.NameSpan,
+				resource.Attributes,
+			)
+			a.effectFacts = append(a.effectFacts, EffectFact{
+				Declaration: span(module.file.Path, resource.NameSpan),
+				Effects:     slices.Clone(resourceValue.effects),
+			})
 			function := a.dropFunctions[resource]
 			value := a.functions[function]
 			if function == nil || value == nil {
 				continue
 			}
-			value.effects, value.effectSpan, value.effectsValid = a.parseEffects(
-				module.file.Path,
-				resource.Drop.Span,
-				nil,
-			)
+			value.effects = slices.Clone(resourceValue.effects)
+			value.effectSpan = resourceValue.effectSpan
+			value.effectsValid = resourceValue.effectsValid
 		}
 	}
 }

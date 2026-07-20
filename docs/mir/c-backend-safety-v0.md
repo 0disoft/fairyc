@@ -250,8 +250,9 @@ those declarations, calls, or site metadata. Each production unit also has a sep
 Clang and GCC execution at `-O1` with address and undefined-behavior sanitizers, for 40 planned
 sanitizer executions. That path overrides ambient sanitizer options, forbids recovery, requires
 empty stdout/stderr, and is not selectable through the product CLI. Output, negative or larger
-`i32` returns, user drop-body effects, public layout, ABI, and broader runtime behavior remain
-unimplemented. A clean sanitizer run is backend evidence, not the language-semantics oracle.
+`i32` returns, effect-bearing drop-body/native-runtime integration evidence, public layout, ABI, and
+broader runtime behavior remain unimplemented. A clean sanitizer run is backend evidence, not the
+language-semantics oracle.
 
 The same runner additionally plans four scalar, four exact `c::int`, four negative-preserving
 `c::long`, four exact `c::size_t`, four negative-preserving `c::ssize_t`, four complete twelve-type

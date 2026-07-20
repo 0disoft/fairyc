@@ -71,9 +71,9 @@ The current Go prototype preserves each resource's ordered resolved field defini
 nonempty user body into one compiler-private typed drop function. HIR and MIR link that function by
 symbol and exact resource type; the receiver owns no recursive cleanup obligation. The interpreter
 executes the body in a distinct `dropping` state before reverse field recursion, and the constrained
-C backend calls the same verified glue. The implemented subset is still effect-free: a drop body
-that requires undeclared I/O or host effects is rejected, and implicit cleanup does not yet propagate
-resource-declared effects into its enclosing function.
+C backend calls the same verified glue. A nonempty resource may declare drop effects; the private
+glue carries that exact set, and Resource Flow requires it at normal and abrupt cleanup edges. A
+whole-root move transfers the obligation without charging the sender for effects it does not run.
 
 ## Fallible close
 

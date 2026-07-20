@@ -80,7 +80,7 @@ Diagnostic codes are stable identifiers for a semantic category. Exact wording a
 | `E6102` | Required target layout fact is unknown. |
 | `E6103` | C ABI v0 excludes the requested calling, layout, callback, TLS, or variadic feature. |
 | `E7101` | `@effects` is empty, duplicated, malformed, or names an effect outside the Stage 0 vocabulary. |
-| `E7102` | A call requires one or more effects not declared by the enclosing function. |
+| `E7102` | A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. |
 | `E8001` | Selected runtime ABI is incompatible with generated code. |
 | `E8002` | Requested language revision is unsupported by this compiler. |
 | `A2001` | Dependency map is incompatible; affected Atlas relations are partial or unavailable while compilation remains valid. |

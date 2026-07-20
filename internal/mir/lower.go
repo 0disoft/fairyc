@@ -194,7 +194,8 @@ func lowerResourceTypes(input hir.Package) ([]ResourceType, error) {
 			definition := ResourceType{
 				Type: resource.Type, Span: resource.Span, Entity: resourceTypeEntity(resource.Type),
 				DropKind: resource.DropKind, DropSpan: resource.DropSpan, DropSymbol: resource.DropSymbol,
-				Fields: make([]ResourceField, 0, len(resource.Fields)),
+				DropEffects: slices.Clone(resource.DropEffects),
+				Fields:      make([]ResourceField, 0, len(resource.Fields)),
 			}
 			fieldNames := make(map[string]struct{}, len(resource.Fields))
 			for _, field := range resource.Fields {
@@ -255,6 +256,7 @@ func newFunctionLowerer(module string, function *hir.Function, properties typePr
 		Name:        module + "::" + function.Name,
 		Span:        function.Span,
 		ResultType:  function.ResultType,
+		Effects:     slices.Clone(function.Effects),
 		Entry:       0,
 		DropGlueFor: function.DropGlueFor,
 	}

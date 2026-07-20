@@ -84,7 +84,7 @@ var catalogEntries = []CatalogEntry{
 	{Code: "E6102", Category: categoryABI, Meaning: "Required target layout fact is unknown."},
 	{Code: "E6103", Category: categoryABI, Meaning: "C ABI v0 excludes the requested calling, layout, callback, TLS, or variadic feature."},
 	{Code: "E7101", Category: categoryEffect, Meaning: "`@effects` is empty, duplicated, malformed, or names an effect outside the Stage 0 vocabulary."},
-	{Code: "E7102", Category: categoryEffect, Meaning: "A call requires one or more effects not declared by the enclosing function."},
+	{Code: "E7102", Category: categoryEffect, Meaning: "A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function."},
 	{Code: "E8001", Category: categoryCompatibility, Meaning: "Selected runtime ABI is incompatible with generated code."},
 	{Code: "E8002", Category: categoryCompatibility, Meaning: "Requested language revision is unsupported by this compiler."},
 	{Code: "A2001", Category: categoryAtlas, Meaning: "Dependency map is incompatible; affected Atlas relations are partial or unavailable while compilation remains valid."},

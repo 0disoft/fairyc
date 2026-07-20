@@ -103,13 +103,15 @@ func verifyDropGlueLinks(resources []ResourceType, functions []Function) []Verif
 		entity := fallbackEntity(resource.Entity, resourceTypeEntity(resource.Type))
 		switch resource.DropKind {
 		case hir.ResourceDropEmpty:
-			if resource.DropSymbol != hir.NoSymbol {
+			if resource.DropSymbol != hir.NoSymbol || len(resource.DropEffects) != 0 {
 				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "empty drop has an executable drop symbol"})
 			}
 		case hir.ResourceDropNonEmpty:
 			function := bySymbol[resource.DropSymbol]
 			if resource.DropSymbol == hir.NoSymbol || function == nil || function.DropGlueFor != resource.Type || byResource[resource.Type] != function {
 				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "non-empty drop has no matching drop glue"})
+			} else if !slices.Equal(function.Effects, resource.DropEffects) {
+				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "drop glue effects do not match the resource declaration"})
 			}
 		}
 	}
@@ -240,6 +242,15 @@ func verifyResourceTypes(definitions []ResourceType) (map[hir.Type]*ResourceType
 		if definition.Type == "" || definition.Type == hir.TypeInvalid {
 			failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "resource definition has no concrete type"})
 			continue
+		}
+		if !slices.Equal(definition.DropEffects, hir.CanonicalEffects(definition.DropEffects)) {
+			failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "drop effects are not canonical"})
+		}
+		for _, effect := range definition.DropEffects {
+			if _, valid := hir.ParseEffect(string(effect)); !valid {
+				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "drop effect is outside the Stage 0 vocabulary"})
+				break
+			}
 		}
 		if _, duplicate := resources[definition.Type]; duplicate {
 			failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "resource definition is duplicated"})

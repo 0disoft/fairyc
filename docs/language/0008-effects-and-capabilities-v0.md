@@ -2,7 +2,7 @@
 
 - Status: Draft Stage 0 contract
 - Product source: `docs/product/02-spec.md`
-- Decision source: `docs/adr/0116-stage-0-source-effects.md`
+- Decision sources: `docs/adr/0116-stage-0-source-effects.md`, `docs/adr/0121-resource-drop-effects.md`
 - Semantic fixtures: `spec/fixtures/semantic/manifest-v0.json`
 
 ## Purpose
@@ -12,13 +12,15 @@ every instruction a function executes and they are not an optimizer purity claim
 can touch a file, console, environment, process, network, clock, or random source declares that
 capability even when one particular execution path does not use it.
 
-Stage 0 effects are checked before Flow and survive in typed HIR. They do not by themselves grant a
+Stage 0 call effects are checked before Flow; compiler-scheduled resource cleanup effects are
+checked by Resource Flow. Both survive in typed HIR. They do not by themselves grant a
 backend, interpreter, or standard-library implementation. Real host I/O remains unavailable until
 the corresponding safe API, typed errors, runtime transport, and target evidence exist.
 
 ## Declaration syntax
 
-An ordinary or raw foreign function may carry one `@effects(...)` attribute:
+An ordinary function, raw foreign function, or resource with a nonempty drop body may carry one
+`@effects(...)` attribute:
 
 ```fy
 @effects(filesystem)
@@ -31,12 +33,22 @@ fn main() -> i32 {
     discard load_config();
     0
 }
+
+@effects(filesystem)
+resource File {
+    handle: *mut void;
+
+    drop fn(self: &mut Self) {
+        // later safe runtime release
+    }
+}
 ```
 
 Arguments are identifiers from the closed Stage 0 vocabulary. Source order is not semantic; typed
 HIR stores a sorted duplicate-free set. An empty attribute, a duplicate attribute or argument, a
 literal argument, and an unknown name are `E7101`. Omitting the attribute declares the empty set.
-There is no separate `pure` spelling.
+There is no separate `pure` spelling. An empty resource drop body cannot claim effects because it
+has no user cleanup operation to authorize.
 
 ## Closed Stage 0 vocabulary
 
@@ -70,6 +82,18 @@ Raw foreign calls independently require an `unsafe` boundary. `unsafe { raw_call
 the foreign-memory boundary; the enclosing function must still declare every effect named by the
 foreign declaration. A foreign declaration without `@effects` makes no external-authority claim to
 the source checker; authors of a safe wrapper are responsible for assigning the correct contract.
+
+## Implicit cleanup rule
+
+When Resource Flow proves that a live resource will be dropped, the enclosing function must declare
+every effect on that resource. The rule applies to normal function and nested-scope exit, explicit
+return, live-resource reassignment, and cleanup caused by `break` or `continue`. `Option<R>` and
+`Result<R, E>` use the union of their resource-bearing payload effects.
+
+A complete-root move makes the source dead before cleanup is considered. Passing or returning a
+resource therefore does not require its drop effects in the sender; the new owner is checked when
+and where it actually drops the value. Missing authority is `E7102`, related to the resource's
+effect declaration.
 
 ## Deferred forms
 

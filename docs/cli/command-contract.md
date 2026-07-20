@@ -80,9 +80,10 @@ and emit no partial JSON. The reported constrained-C emission subset does not ma
 imported module must be included explicitly. Duplicate paths and input sets beyond the prototype
 budgets are rejected before semantic analysis. Syntax outside the implemented semantic subset
 returns a capability error and never counts as a successful check.
-Resource declarations preserve ordered resolved fields in typed HIR. A pure nonempty user `drop`
-body becomes a compiler-private typed function linked from its resource; an effect-bearing body
-remains rejected until resource drop effects propagate through implicit cleanup.
+Resource declarations preserve ordered resolved fields in typed HIR. A nonempty user `drop` body
+becomes a compiler-private typed function linked from its resource. Its declared effects are checked
+inside the glue and at every compiler-scheduled cleanup edge; moving the complete resource transfers
+the obligation without charging the sender.
 
 `experimental run` does not invoke a backend, linker, runtime, or host subprocess. It runs one
 positional entry plus zero or more repeated `--source` files through parser, semantic analysis, Flow,
@@ -97,10 +98,11 @@ return, Result propagation, nested, break, and continue exits from a direct `&mu
 cleanup drop events, checked `i32` negation, addition,
 subtraction, multiplication, division, remainder, matching-type bitwise operations, and signed or
 unsigned right shift are
-executable. The bounded interpreter reports its stable `step-limit` capability rather than hanging
+executable. Effect-bearing drop contracts are accepted, but the interpreter does not emulate their
+host filesystem, console, network, process, clock, environment, or random operations. The bounded interpreter reports its stable `step-limit` capability rather than hanging
 or reclassifying it as a language trap. Interpreter-fixture byte hooks are not available from this
-command and matching function names do not activate them. User drop-body effects, I/O, and arguments
-remain outside the current interpreter subset. Matching-type left shift reaches the interpreter
+command and matching function names do not activate them. Host I/O and arguments remain outside the
+current interpreter subset. Matching-type left shift reaches the interpreter
 only through verified width and representability checks and reports `invalid-shift` before
 `integer-overflow` when both conditions could apply.
 

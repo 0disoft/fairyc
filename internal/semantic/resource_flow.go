@@ -2,6 +2,7 @@ package semantic
 
 import (
 	"maps"
+	"slices"
 
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/hir"
@@ -14,6 +15,11 @@ const (
 	resourceRead resourceUse = iota
 	resourceMove
 )
+
+type dropEffectRequirement struct {
+	owner   *symbol
+	effects []hir.Effect
+}
 
 type resourceValueState struct {
 	state       ResourceState
@@ -33,9 +39,10 @@ type resourceLoopEdge struct {
 }
 
 type resourceLoopFrame struct {
-	header   hir.Span
-	baseline resourceEnvironment
-	edges    []resourceLoopEdge
+	header     hir.Span
+	baseline   resourceEnvironment
+	edges      []resourceLoopEdge
+	scopeDepth int
 }
 
 func (a *analyzer) resourceFlowFunction(module *moduleScope, function *ast.Function) {
@@ -43,6 +50,8 @@ func (a *analyzer) resourceFlowFunction(module *moduleScope, function *ast.Funct
 		return
 	}
 	environment := make(resourceEnvironment)
+	a.beginResourceEffects(a.functions[function], nil)
+	defer a.endResourceEffects()
 	for index := range function.Parameters {
 		parameter := &function.Parameters[index]
 		value := a.parameter[parameter]
@@ -57,7 +66,10 @@ func (a *analyzer) resourceFlowFunction(module *moduleScope, function *ast.Funct
 	if value := a.functions[function]; value != nil && a.isResource(value.typ) {
 		tailMode = resourceMove
 	}
-	a.resourceBlock(module, function.Body, environment, false, tailMode)
+	reachable := a.resourceBlock(module, function.Body, environment, false, tailMode)
+	if reachable {
+		a.checkResourceEnvironmentEffects(environment, span(module.file.Path, function.Body.Span), nil)
+	}
 }
 
 func (a *analyzer) resourceFlowDropFunction(module *moduleScope, function *ast.Function) {
@@ -75,6 +87,8 @@ func (a *analyzer) resourceFlowDropFunction(module *moduleScope, function *ast.F
 			declaration: span(module.file.Path, parameter.NameSpan),
 		},
 	}
+	a.beginResourceEffects(a.functions[function], receiver)
+	defer a.endResourceEffects()
 	a.resourceBlock(module, function.Body, environment, false, resourceRead)
 	state := environment[receiver]
 	if state.state == ResourceLive {
@@ -100,6 +114,9 @@ func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environm
 			existing[value] = struct{}{}
 		}
 	}
+	a.resourceScopes = append(a.resourceScopes, make(map[*symbol]struct{}))
+	scopeIndex := len(a.resourceScopes) - 1
+	defer func() { a.resourceScopes = a.resourceScopes[:scopeIndex] }()
 	reachable := true
 	for index := range block.Statements {
 		if !reachable {
@@ -120,6 +137,7 @@ func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environm
 					state:       ResourceLive,
 					declaration: span(module.file.Path, binding.NameSpan),
 				}
+				a.resourceScopes[scopeIndex][value] = struct{}{}
 			}
 		case statement.Kind == syntax.KindAssignment:
 			a.resourceAssignment(module, statement, environment)
@@ -127,8 +145,10 @@ func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environm
 			a.resourceWhile(module, statement.Expression, environment)
 		case statement.Kind == syntax.KindReturn:
 			a.resourceExpression(module, statement.Expression, environment, resourceMove)
+			a.checkResourceEnvironmentEffects(environment, span(module.file.Path, statement.Span), nil)
 			reachable = false
 		case statement.Kind == syntax.KindBreak || statement.Kind == syntax.KindContinue:
+			a.checkResourceLoopExitEffects(environment, span(module.file.Path, statement.Span))
 			a.captureResourceLoopEdge(environment)
 			reachable = false
 		default:
@@ -139,6 +159,9 @@ func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environm
 		a.resourceExpression(module, block.Tail, environment, tailMode)
 	}
 	if scoped {
+		if reachable {
+			a.checkResourceEnvironmentEffects(environment, span(module.file.Path, block.Span), a.resourceScopes[scopeIndex])
+		}
 		for value := range environment {
 			if _, found := existing[value]; !found {
 				delete(environment, value)
@@ -164,6 +187,9 @@ func (a *analyzer) resourceAssignment(module *moduleScope, statement *ast.Statem
 	}
 	at := span(module.file.Path, statement.Target.Span)
 	a.recordResourceStates(environment, at, "before")
+	if state.state == ResourceLive {
+		a.checkResourceValueEffects(target, at)
+	}
 	if state.state != ResourceMaybeLive {
 		state.state = ResourceLive
 		state.move = nil
@@ -293,6 +319,9 @@ func (a *analyzer) resourceMatch(module *moduleScope, expression *ast.Expression
 			}
 			reachable := a.resourceExpression(module, arm.Children[1], branch, mode)
 			if binding != nil {
+				if reachable {
+					a.checkResourceEnvironmentEffects(branch, span(module.file.Path, arm.Span), map[*symbol]struct{}{binding: {}})
+				}
 				delete(branch, binding)
 			}
 			branches = append(branches, resourceBranch{environment: branch, reachable: reachable})
@@ -396,7 +425,9 @@ func (a *analyzer) resourceWhile(module *moduleScope, expression *ast.Expression
 	a.resourceExpression(module, condition, environment, resourceRead)
 	baseline := cloneResourceEnvironment(environment)
 	bodyEnvironment := cloneResourceEnvironment(baseline)
-	a.resourceLoops = append(a.resourceLoops, resourceLoopFrame{header: header, baseline: cloneResourceEnvironment(baseline)})
+	a.resourceLoops = append(a.resourceLoops, resourceLoopFrame{
+		header: header, baseline: cloneResourceEnvironment(baseline), scopeDepth: len(a.resourceScopes),
+	})
 	bodyReachable := a.resourceExpression(module, expression.Children[1], bodyEnvironment, resourceRead)
 	frame := a.resourceLoops[len(a.resourceLoops)-1]
 	a.resourceLoops = a.resourceLoops[:len(a.resourceLoops)-1]
@@ -500,6 +531,95 @@ func (a *analyzer) isResource(value hir.Type) bool {
 	}
 	success, failure, result := hir.ResultElements(value)
 	return result && (a.isResource(success) || a.isResource(failure))
+}
+
+func (a *analyzer) beginResourceEffects(caller, exempt *symbol) {
+	a.resourceCaller = caller
+	a.resourceCleanupExempt = exempt
+	a.resourceScopes = nil
+}
+
+func (a *analyzer) endResourceEffects() {
+	a.resourceCaller = nil
+	a.resourceCleanupExempt = nil
+	a.resourceScopes = nil
+}
+
+func (a *analyzer) checkResourceLoopExitEffects(environment resourceEnvironment, at hir.Span) {
+	if len(a.resourceLoops) == 0 {
+		return
+	}
+	frame := a.resourceLoops[len(a.resourceLoops)-1]
+	values := make(map[*symbol]struct{})
+	for index := frame.scopeDepth; index < len(a.resourceScopes); index++ {
+		for value := range a.resourceScopes[index] {
+			values[value] = struct{}{}
+		}
+	}
+	a.checkResourceEnvironmentEffects(environment, at, values)
+}
+
+func (a *analyzer) checkResourceEnvironmentEffects(environment resourceEnvironment, at hir.Span, only map[*symbol]struct{}) {
+	values := make([]*symbol, 0, len(environment))
+	for value, state := range environment {
+		if state.state != ResourceLive || value == a.resourceCleanupExempt {
+			continue
+		}
+		if only != nil {
+			if _, selected := only[value]; !selected {
+				continue
+			}
+		}
+		values = append(values, value)
+	}
+	slices.SortFunc(values, func(left, right *symbol) int {
+		return compareSpan(span(left.source, left.declaration), span(right.source, right.declaration))
+	})
+	seen := make(map[*symbol]struct{})
+	for _, value := range values {
+		a.checkResourceValueEffectsOnce(value, at, seen)
+	}
+}
+
+func (a *analyzer) checkResourceValueEffects(value *symbol, at hir.Span) {
+	a.checkResourceValueEffectsOnce(value, at, make(map[*symbol]struct{}))
+}
+
+func (a *analyzer) checkResourceValueEffectsOnce(value *symbol, at hir.Span, seen map[*symbol]struct{}) {
+	caller := a.resourceCaller
+	if value == nil || caller == nil || !caller.effectsValid {
+		return
+	}
+	for _, requirement := range a.requiredDropEffects(value.typ) {
+		owner := requirement.owner
+		if owner == nil || !owner.effectsValid || len(hir.MissingEffects(caller.effects, requirement.effects)) == 0 {
+			continue
+		}
+		if _, duplicate := seen[owner]; duplicate {
+			continue
+		}
+		seen[owner] = struct{}{}
+		related := owner.declaration
+		if owner.effectSpan.EndByte > owner.effectSpan.StartByte {
+			related = owner.effectSpan
+		}
+		a.addDiagnostic("E7102", at, RelatedSpan{
+			Role: "effect-declaration", Span: span(owner.source, related),
+		})
+	}
+}
+
+func (a *analyzer) requiredDropEffects(value hir.Type) []dropEffectRequirement {
+	if info := a.resourceTypes[value]; info != nil && info.symbol != nil {
+		return []dropEffectRequirement{{owner: info.symbol, effects: slices.Clone(info.symbol.effects)}}
+	}
+	if element, option := hir.OptionElement(value); option {
+		return a.requiredDropEffects(element)
+	}
+	if success, failure, result := hir.ResultElements(value); result {
+		return append(a.requiredDropEffects(success), a.requiredDropEffects(failure)...)
+	}
+	return nil
 }
 
 func cloneResourceEnvironment(source resourceEnvironment) resourceEnvironment {

@@ -27,17 +27,18 @@ would instead schedule recursive cleanup of the value while its own destructor w
 5. The constrained C backend invokes the verified private function for direct resources and the
    active resource payload of admitted `Option` or `Result` values. Production C does not paste or
    reconstruct source text.
-6. This slice admits only a pure drop body under the existing source-effect checker. Resource-level
-   drop-effect declarations and implicit-drop effect propagation are deferred. Therefore it does
-   not yet authorize a safe File destructor that calls the host filesystem.
+6. This first slice admitted only a pure drop body. ADR 0121 subsequently adds resource-level
+   drop-effect declarations and checks actual implicit cleanup edges without charging whole-root
+   moves.
 
 ## Consequences
 
 - Nonempty drop behavior now survives every compiler stage and executes in the MIR interpreter.
 - The Windows target example takes the nonempty path through generated C, local x64 MSVC, and a
   retained-output-free native process without requiring WSL.
-- Raw handle release remains unavailable until drop effects and the Windows File runtime are
-  connected; pointer-width resource transport alone is not advertised as safe ownership.
+- Raw handle release remains unavailable until the Windows File runtime is connected;
+  pointer-width resource transport and effect propagation alone are not advertised as safe
+  ownership.
 
 ## Verification
 

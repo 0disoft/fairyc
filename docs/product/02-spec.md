@@ -114,7 +114,10 @@ empty set. A direct call is accepted only when the caller declares every callee 
 no ambient authority, and raw foreign calls must satisfy both this rule and their independent
 `unsafe` boundary.
 
-Effects are canonical typed-HIR metadata and API compatibility facts, not proof that a runtime or
+An effect-bearing nonempty resource drop body declares the authority used by its private glue.
+Resource Flow requires that set only where a live value is actually cleaned up; a whole-root move
+transfers the obligation without charging the sender. Effects are canonical typed-HIR metadata and
+API compatibility facts, not proof that a runtime or
 backend operation exists. `unsafe`, explicit allocation, Region operations, traps, and cleanup are
 not external effects. Full rules are in `docs/language/0008-effects-and-capabilities-v0.md`.
 
@@ -239,8 +242,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - Typed HIR lowers through an analysis-only Flow CFG into mutable-local, backend-independent MIR.
 - Resource declarations retain canonical type identity, declaration-ordered resolved fields, source
   spans, and drop-body classification through typed HIR into MIR. The current executable prototype
-  accepts an empty or pure nonempty user `drop` body, lowers the latter to verifier-linked private
-  glue, and still rejects effect-bearing drop until implicit cleanup effects are implemented.
+  accepts an empty or effect-declared nonempty user `drop` body, lowers the latter to verifier-linked
+  private glue, and checks actual implicit cleanup edges in Resource Flow.
 - Inert struct declarations retain canonical identity, declaration-ordered fields, and `@repr(C)`
   classification through AST, typed HIR, verified MIR, the executable interpreter subset, and the
   constrained C backend. The current C-layout implementation is nonempty and acyclic over `u8`,

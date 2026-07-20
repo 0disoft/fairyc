@@ -1,6 +1,7 @@
 package mir
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/hir"
@@ -202,6 +203,31 @@ func TestVerifyRejectsResourceConstructionFieldMismatch(t *testing.T) {
 	failures := Verify(program)
 	if len(failures) != 1 || failures[0].Code != "V1001" {
 		t.Fatalf("Verify() failures = %+v, want one V1001", failures)
+	}
+}
+
+func TestVerifyRejectsResourceDropGlueEffectMismatch(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+@effects(filesystem)
+resource Token {
+    value: i32;
+    drop fn(self: &mut Self) { let marker: i32 = self.value; }
+}
+@effects(filesystem)
+fn main() -> i32 {
+    let token: Token = Token { value: 42 };
+    0
+}
+`)
+	for index := range program.Functions {
+		if program.Functions[index].DropGlueFor != "" {
+			program.Functions[index].Effects = nil
+		}
+	}
+	failures := Verify(program)
+	if len(failures) != 1 || failures[0].Code != "V1001" || !strings.Contains(failures[0].Detail, "effects") {
+		t.Fatalf("Verify() failures = %+v, want one drop-effect V1001", failures)
 	}
 }
 

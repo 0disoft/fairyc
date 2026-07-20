@@ -47,8 +47,9 @@ unsigned right shift execute across trapping and
   categories. Matching-type left shift additionally traps on an unrepresentable result, with
   invalid amount taking precedence over overflow. Nearest-loop `break` and `continue` now execute
   with resource and Region cleanup. Verified resource definitions now preserve ordered fields and
-  drop classification from AST through HIR into MIR; pure nonempty user drop bodies now lower to
-  verifier-linked private functions and execute before reverse field cleanup. Restricted inert enums now preserve named payloads,
+  drop classification from AST through HIR into MIR; nonempty user drop bodies now lower to
+  verifier-linked private functions and execute before reverse field cleanup. Resource-declared
+  effects are preserved and required only at actual cleanup edges. Restricted inert enums now preserve named payloads,
   construct through qualified variants, require exhaustive shallow matches, and execute through
   verified MIR, the interpreter, and the constrained C backend. The C backend now emits deterministic C11 for 34
   verified scalar, borrowed-view, typed-comparison, inert-enum, flat-resource, and resource-tagged cases under the provisional `x86_64-linux-gnu` profile,

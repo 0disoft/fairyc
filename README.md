@@ -14,7 +14,7 @@ The project is not trying to beat every hand-tuned C program or make every C own
 The first Stage 0 frontend slice now exists in Go: immutable source bytes, a lossless lexer,
 compact recoverable syntax, error-free AST lowering, deterministic `E00xx` diagnostics, and a
 runner for all parser v0 fixtures. The next slice resolves names and produces typed HIR for the
-  fixture-backed scalar, safe-borrow, scalar foreign-call, and declared-effect subset. Its semantic runner executes all 33 v0 resolve, type,
+  fixture-backed scalar, safe-borrow, scalar foreign-call, and declared-effect subset. Its semantic runner executes all 35 v0 resolve, type,
 and local Flow cases, including integer-literal range rejection, branch- and loop-aware safe-borrow reassignment,
 exact interprocedural borrow-return summaries, last-use loans, borrow-return origins, canonical
 `@effects(...)` sets, and caller-superset enforcement. Whole-root resource Flow
@@ -42,11 +42,12 @@ right-shift behavior, exact invalid-shift traps, and bounded step-limit
 termination. Fixture-only, manifest-authorized byte sinks additionally prove exact in-memory
 stdout/stderr bytes, cross-stream order, and a shared output limit without granting host I/O.
 Resource declarations now retain ordered, resolved fields and drop-body classification from AST
-through typed HIR and executable MIR. A pure nonempty body becomes one verifier-linked private
+through typed HIR and executable MIR. A nonempty body becomes one verifier-linked private
 function, executes in the interpreter's `dropping` state, and is called by generated C before field
-cleanup. Resource-declared drop effects and implicit-cleanup effect propagation remain deferred.
-The interpreter constructs, reads, and recursively drops resources from the verified MIR definition,
-but still does not execute user drop-body effects.
+cleanup. A nonempty resource may declare drop effects, and Resource Flow requires them only on
+actual cleanup edges; whole-root moves transfer the obligation without charging the sender.
+The interpreter constructs, reads, and recursively drops resources from the verified MIR definition;
+host effect implementations remain target-runtime work rather than interpreter emulation.
 The constrained C backend emits deterministic C11 for 34 verified fixtures across the scalar
 payload surface, restricted inert user enums, flat nonempty move-only resources over Fairy copy
 scalars or raw pointers with empty or pure nonempty drop bodies, copy-scalar/inert-struct and resource-bearing

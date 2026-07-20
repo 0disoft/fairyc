@@ -575,6 +575,100 @@ func TestAnalyzeLowersNonEmptyResourceDropBodyToHiddenGlue(t *testing.T) {
 	}
 }
 
+func TestAnalyzePropagatesDeclaredResourceDropEffects(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+@effects(filesystem)
+resource Token {
+    value: i32;
+    drop fn(self: &mut Self) { let marker: i32 = touch(); }
+}
+@effects(filesystem)
+fn touch() -> i32 { 1 }
+@effects(filesystem)
+fn main() -> i32 { let token: Token = Token { value: 42 }; 0 }
+`,
+	})
+	assertCleanTypeResult(t, result)
+	resource := result.HIR.Modules[0].Resources[0]
+	if !slices.Equal(resource.DropEffects, []hir.Effect{hir.EffectFilesystem}) {
+		t.Fatalf("resource drop effects = %v", resource.DropEffects)
+	}
+	var glue *hir.Function
+	for index := range result.HIR.Modules[0].Functions {
+		function := &result.HIR.Modules[0].Functions[index]
+		if function.Symbol == resource.DropSymbol {
+			glue = function
+		}
+	}
+	if glue == nil || !slices.Equal(glue.Effects, resource.DropEffects) {
+		t.Fatalf("drop glue = %+v", glue)
+	}
+	if len(result.Effects) != 3 || !slices.Equal(result.Effects[0].Effects, resource.DropEffects) {
+		t.Fatalf("effect facts = %+v", result.Effects)
+	}
+}
+
+func TestAnalyzeRequiresDeclaredEffectsAtImplicitResourceDropSites(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		name string
+		body string
+	}{
+		{name: "normal function exit", body: "fn main() -> i32 { let token: Token = Token { value: 1 }; 0 }"},
+		{name: "early return", body: "fn main(token: Token) -> i32 { return 0; }"},
+		{name: "nested block exit", body: "fn main() -> i32 { { let token: Token = Token { value: 1 }; }; 0 }"},
+		{name: "loop break", body: "fn main() -> i32 { while true { let token: Token = Token { value: 1 }; break; } 0 }"},
+		{name: "live reassignment", body: "fn replace() -> Token { var token: Token = Token { value: 1 }; token = Token { value: 2 }; token }\nfn main() -> i32 { 0 }"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			text := `module main;
+@effects(filesystem)
+resource Token {
+    value: i32;
+    drop fn(self: &mut Self) { let marker: i32 = self.value; }
+}
+` + test.body + "\n"
+			result := analyzeText(t, map[string]string{"main.fy": text})
+			if result.FailedPhase != semantic.PhaseFlow || len(result.Diagnostics) == 0 || result.Diagnostics[0].Code != "E7102" || len(result.Unsupported) != 0 {
+				t.Fatalf("result = %+v", result)
+			}
+			if len(result.Diagnostics[0].Related) != 1 || result.Diagnostics[0].Related[0].Role != "effect-declaration" {
+				t.Fatalf("related = %+v", result.Diagnostics[0].Related)
+			}
+			attributeStart := strings.Index(text, "@effects")
+			assertSpan(t, result.Diagnostics[0].Related[0].Span, "main.fy", attributeStart, attributeStart+len("@effects(filesystem)"))
+		})
+	}
+}
+
+func TestAnalyzeDoesNotRequireDropEffectsAfterWholeResourceMove(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+@effects(filesystem)
+resource Token {
+    value: i32;
+    drop fn(self: &mut Self) { let marker: i32 = self.value; }
+}
+fn pass(token: Token) -> Token { token }
+fn main() -> i32 { 0 }
+`,
+	})
+	assertCleanTypeResult(t, result)
+}
+
+func TestAnalyzeRejectsEffectsOnEmptyResourceDrop(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\n@effects(filesystem)\nresource Token { value: i32; drop fn(self: &mut Self) {} }\nfn main() -> i32 { 0 }\n",
+	})
+	if result.FailedPhase != semantic.PhaseType || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E7101" {
+		t.Fatalf("result = %+v", result)
+	}
+}
+
 func TestAnalyzeRejectsMovingDropReceiver(t *testing.T) {
 	t.Parallel()
 	text := `module main;

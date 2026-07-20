@@ -25,9 +25,11 @@ func Clone(input Program) Program {
 	}
 	for index := range result.ResourceTypes {
 		result.ResourceTypes[index].Fields = slices.Clone(input.ResourceTypes[index].Fields)
+		result.ResourceTypes[index].DropEffects = slices.Clone(input.ResourceTypes[index].DropEffects)
 	}
 	for functionIndex, function := range input.Functions {
 		cloned := function
+		cloned.Effects = slices.Clone(function.Effects)
 		cloned.Parameters = slices.Clone(function.Parameters)
 		cloned.ParameterTypes = slices.Clone(function.ParameterTypes)
 		cloned.Resources = slices.Clone(function.Resources)

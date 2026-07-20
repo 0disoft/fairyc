@@ -161,14 +161,18 @@ func (a *analyzer) checkForeignFunction(module *moduleScope, function *ast.Forei
 func (a *analyzer) checkResource(module *moduleScope, resource *ast.Resource) hir.Resource {
 	value := a.resources[resource]
 	for _, attribute := range resource.Attributes {
+		if attribute.Name == effectsAttribute {
+			continue
+		}
 		a.addUnsupported(module.file.Path, attribute.Span, "resource attribute @"+attribute.Name)
 	}
 	result := hir.Resource{
-		Name:       resource.Name,
-		Type:       value.typ,
-		Span:       span(module.file.Path, resource.Span),
-		DropKind:   hir.ResourceDropMissing,
-		DropSymbol: hir.NoSymbol,
+		Name:        resource.Name,
+		Type:        value.typ,
+		Span:        span(module.file.Path, resource.Span),
+		DropKind:    hir.ResourceDropMissing,
+		DropSymbol:  hir.NoSymbol,
+		DropEffects: slices.Clone(value.effects),
 	}
 	if info := a.resourceTypes[value.typ]; info != nil {
 		result.Fields = make([]hir.ResourceField, 0, len(info.orderedFields))
@@ -182,6 +186,11 @@ func (a *analyzer) checkResource(module *moduleScope, resource *ast.Resource) hi
 	}
 	result.DropSpan = span(module.file.Path, resource.Drop.Span)
 	if len(resource.Drop.Body.Statements) == 0 && resource.Drop.Body.Tail == nil {
+		if len(value.effects) > 0 && value.effectsValid {
+			a.addDiagnostic("E7101", span(module.file.Path, value.effectSpan), RelatedSpan{
+				Role: "drop-declaration", Span: span(module.file.Path, resource.Drop.Span),
+			})
+		}
 		result.DropKind = hir.ResourceDropEmpty
 		return result
 	}

@@ -375,13 +375,14 @@ const (
 
 // Resource is one resolved move-only aggregate definition in declaration order.
 type Resource struct {
-	Name       string
-	Type       Type
-	Span       Span
-	Fields     []ResourceField
-	DropKind   ResourceDropKind
-	DropSpan   Span
-	DropSymbol SymbolID
+	Name        string
+	Type        Type
+	Span        Span
+	Fields      []ResourceField
+	DropKind    ResourceDropKind
+	DropSpan    Span
+	DropSymbol  SymbolID
+	DropEffects []Effect
 }
 
 // ResourceField is one resolved resource field with source identity.

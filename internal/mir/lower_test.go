@@ -62,6 +62,37 @@ fn main() -> i32 {
 	}
 }
 
+func TestLowerPreservesResourceDropEffectsOnDefinitionAndGlue(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+@effects(filesystem)
+resource Token {
+    value: i32;
+    drop fn(self: &mut Self) { let marker: i32 = self.value; }
+}
+@effects(filesystem)
+fn main() -> i32 {
+    let token: Token = Token { value: 42 };
+    0
+}
+`)
+	if len(program.ResourceTypes) != 1 || !slices.Equal(program.ResourceTypes[0].DropEffects, []hir.Effect{hir.EffectFilesystem}) {
+		t.Fatalf("resource types = %+v", program.ResourceTypes)
+	}
+	var glue *Function
+	for index := range program.Functions {
+		if program.Functions[index].DropGlueFor == program.ResourceTypes[0].Type {
+			glue = &program.Functions[index]
+		}
+	}
+	if glue == nil || !slices.Equal(glue.Effects, program.ResourceTypes[0].DropEffects) {
+		t.Fatalf("drop glue = %+v", glue)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+}
+
 func TestLowerPreservesReprCStructDefinitionConstructionAndFieldRead(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
