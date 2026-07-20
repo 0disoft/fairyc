@@ -108,6 +108,7 @@ Nested MIR effects are emitted as separate C statements and temporaries. Functio
 | Division and remainder | Check zero and signed-minimum divided by negative one before the C operation. Materialize the verified divisor through a function-local volatile C transport slot so a host C compiler cannot reject or fold an otherwise unreachable constant-undefined expression. |
 | Shift | Check the amount against the operand width before the C shift. Signed left shift is not a Stage 0 source operation. |
 | Value-preserving integer cast | Verify one admitted source/result pair, then emit an explicit C cast to `int32_t`, `uint32_t`, or `uintptr_t`. Every source value is representable, so no trap, truncation, wrapping, or implementation-defined signed conversion occurs. |
+| Typed scalar and raw-pointer comparison | Verify two matching operands and the exact `bool` result before emission. Scalar equality is limited to `bool`, `i32`, `u8`, `u32`, and `usize`; scalar ordering excludes `bool`. Matching raw pointers admit equality only, with no dereference or ordering. Generated C normalizes the result to `INT32_C(0)` or `INT32_C(1)`. |
 
 The backend cannot add C or LLVM overflow, exactness, alignment, or alias promises unless the verified MIR fact explicitly proves them.
 The volatile divisor slot is private generated-C transport. It does not add source-visible volatile

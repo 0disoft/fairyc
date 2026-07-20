@@ -315,6 +315,33 @@ fn main() -> i32 { b"*"[0] as i32 }
 	}
 }
 
+func TestEmitTypedUnsignedOrderedComparisons(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn main() -> i32 {
+    let byte: u8 = b"*"[0];
+    let word: u32 = byte as u32;
+    let size: usize = word as usize;
+    let pointer: *u8 = null;
+    if byte > 41 && word >= 42 && size <= 42 && pointer == null { 42 } else { 1 }
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, feature := range []string{"scalar-cast", "scalar-comparison", "scalar-control-flow", "view-index"} {
+		if !slices.Contains(unit.Features, feature) {
+			t.Errorf("features %v are missing %q", unit.Features, feature)
+		}
+	}
+	for _, required := range []string{") > (UINT8_C(41))", ") >= (UINT32_C(42))", ") <= (((uintptr_t)UINT64_C(42)))", ") == (((void *)0))"} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing typed comparison %q:\n%s", required, unit.Source)
+		}
+	}
+}
+
 func TestEmitByteStringLiteralDataAddressForForeignCall(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

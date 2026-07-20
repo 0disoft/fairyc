@@ -735,11 +735,18 @@ func (c *typeChecker) checkBinary(expression *ast.Expression, result *hir.Expres
 	case "==", "!=":
 		if leftType != hir.TypeInvalid && rightType != hir.TypeInvalid && leftType != rightType {
 			c.analyzer.addDiagnostic("E1006", span(c.module.file.Path, expression.Children[1].Span))
+		} else if leftType != hir.TypeInvalid && !hir.ScalarEqualityType(leftType) {
+			if _, _, pointer := hir.RawPointerElement(leftType); !pointer {
+				c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "equality comparison on "+string(leftType))
+			}
 		}
 		return hir.TypeBool
 	case "<", "<=", ">", ">=":
-		c.requireType("E1006", span(c.module.file.Path, expression.Children[0].Span), leftType, hir.TypeI32, span(c.module.file.Path, expression.Span))
-		c.requireType("E1006", span(c.module.file.Path, expression.Children[1].Span), rightType, hir.TypeI32, span(c.module.file.Path, expression.Span))
+		if leftType != hir.TypeInvalid && rightType != hir.TypeInvalid && leftType != rightType {
+			c.analyzer.addDiagnostic("E1006", span(c.module.file.Path, expression.Children[1].Span))
+		} else if leftType != hir.TypeInvalid && !hir.ScalarOrderedType(leftType) {
+			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "ordered comparison on "+string(leftType))
+		}
 		return hir.TypeBool
 	case "<<":
 		c.requireType("E1006", span(c.module.file.Path, expression.Children[0].Span), leftType, hir.TypeI32, span(c.module.file.Path, expression.Span))

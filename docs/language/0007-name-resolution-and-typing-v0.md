@@ -53,6 +53,12 @@ The implemented safe integer `as` subset is closed to `u8 -> i32`, `u8 -> u32`, 
 traps. Other integer pairs are not inferred, truncated, wrapped, or sign-reinterpreted; they remain
 unsupported until an explicit fallible conversion contract exists.
 
+`==` and `!=` require two matching operands from `bool`, `i32`, `u8`, `u32`, or `usize` and produce
+`bool`. `<`, `<=`, `>`, and `>=` require two matching operands from `i32`, `u8`, `u32`, or `usize`
+and produce `bool`. Two matching raw-pointer types may use equality for null or identity checks.
+There is no comparison-time promotion or coercion. Aggregate, borrow, and C-scalar equality plus
+pointer ordering and boolean ordering remain unsupported.
+
 The current source C-scalar slice deliberately has no contextual literals. Its only value origin is
 a typed foreign-call result, which may be relayed through locals and later matching foreign-call
 arguments. Arithmetic, comparison, conversion, boolean normalization, and floating-point behavior

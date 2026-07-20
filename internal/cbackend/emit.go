@@ -692,8 +692,10 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 					if len(operation.Operands) == 1 {
 						inferred, _ = inferredOperandType(localTypes, operation.Operands[0])
 					}
-				case mir.OperationUnary, mir.OperationBinary:
+				case mir.OperationUnary:
 					inferred = hir.TypeI32
+				case mir.OperationBinary:
+					inferred = operation.Type
 				case mir.OperationResultConstruct, mir.OperationOptionConstruct,
 					mir.OperationResultPayload, mir.OperationOptionPayload,
 					mir.OperationEnumConstruct, mir.OperationEnumPayload,
@@ -1214,8 +1216,8 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 					e.features["scalar-bitwise"] = struct{}{}
 				}
 			case mir.OperationBinary:
-				if !supportedBinary(operation.Operator) {
-					return CapabilityError{Function: function.Name, Feature: "binary operator " + strconv.Quote(operation.Operator)}
+				if err := e.inspectBinary(functionIndex, *operation); err != nil {
+					return err
 				}
 				switch operation.Operator {
 				case "==", "!=", "<", "<=", ">", ">=":
@@ -1427,6 +1429,42 @@ func (e *emitter) inspectScalarCast(functionIndex int, operation mir.Operation) 
 	}
 	if _, err := e.cValueType(operation.Type); err != nil {
 		return fmt.Errorf("value-preserving integer cast result in %s: %w", function.Name, err)
+	}
+	return nil
+}
+
+func (e *emitter) inspectBinary(functionIndex int, operation mir.Operation) error {
+	function := &e.functions[functionIndex]
+	left, right, err := twoOperands(operation.Operands)
+	if err != nil {
+		return fmt.Errorf("typed scalar binary operation in %s: %w", function.Name, err)
+	}
+	if operation.DestinationLocal == mir.NoLocal || !supportedBinary(operation.Operator) {
+		return fmt.Errorf("typed scalar binary operation in %s has an invalid destination or operator", function.Name)
+	}
+	validShape := false
+	switch operation.Operator {
+	case "==", "!=":
+		_, _, pointer := hir.RawPointerElement(operation.OwnerType)
+		validShape = (hir.ScalarEqualityType(operation.OwnerType) || pointer) && operation.Type == hir.TypeBool
+	case "<", "<=", ">", ">=":
+		validShape = hir.ScalarOrderedType(operation.OwnerType) && operation.Type == hir.TypeBool
+	default:
+		validShape = operation.OwnerType == hir.TypeI32 && operation.Type == hir.TypeI32
+	}
+	if !validShape {
+		return fmt.Errorf("typed scalar binary operation in %s has incompatible owner or result type", function.Name)
+	}
+	leftType, err := e.operandType(functionIndex, left)
+	if err != nil {
+		return fmt.Errorf("typed scalar binary left operand in %s: %w", function.Name, err)
+	}
+	rightType, err := e.operandType(functionIndex, right)
+	if err != nil {
+		return fmt.Errorf("typed scalar binary right operand in %s: %w", function.Name, err)
+	}
+	if leftType != operation.OwnerType || rightType != operation.OwnerType {
+		return fmt.Errorf("typed scalar binary operation in %s has operand types %q and %q, want %q", function.Name, leftType, rightType, operation.OwnerType)
 	}
 	return nil
 }

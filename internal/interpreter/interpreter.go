@@ -881,50 +881,112 @@ func evaluate(locals map[mir.LocalID]runtimeValue, operand mir.Operand) (runtime
 }
 
 func evaluateBinary(locals map[mir.LocalID]runtimeValue, operation mir.Operation) (int32, string, error) {
-	if operation.Operator == "==" || operation.Operator == "!=" {
-		if len(operation.Operands) != 2 {
-			return 0, "", fmt.Errorf("comparison has %d operands, want 2", len(operation.Operands))
+	if len(operation.Operands) != 2 {
+		return 0, "", fmt.Errorf("binary operation has %d operands, want 2", len(operation.Operands))
+	}
+	leftValue, err := evaluate(locals, operation.Operands[0])
+	if err != nil {
+		return 0, "", err
+	}
+	rightValue, err := evaluate(locals, operation.Operands[1])
+	if err != nil {
+		return 0, "", err
+	}
+	switch operation.Operator {
+	case "==", "!=":
+		_, _, pointer := hir.RawPointerElement(operation.OwnerType)
+		if (!hir.ScalarEqualityType(operation.OwnerType) && !pointer) || operation.Type != hir.TypeBool {
+			return 0, "", capabilityError("equality comparison has incompatible owner or result type")
 		}
-		left, err := evaluate(locals, operation.Operands[0])
-		if err != nil {
-			return 0, "", err
-		}
-		right, err := evaluate(locals, operation.Operands[1])
-		if err != nil {
-			return 0, "", err
-		}
-		equal, err := equalScalarValues(left, right)
+		equal, err := equalScalarValues(leftValue, rightValue, operation.OwnerType)
 		if err != nil {
 			return 0, "", err
 		}
 		if operation.Operator == "!=" {
 			equal = !equal
 		}
-		if equal {
-			return 1, "", nil
+		return boolValue(equal), "", nil
+	case "<", "<=", ">", ">=":
+		if !hir.ScalarOrderedType(operation.OwnerType) || operation.Type != hir.TypeBool {
+			return 0, "", capabilityError("ordered comparison has incompatible owner or result type")
 		}
-		return 0, "", nil
+		result, err := orderedScalarValues(operation.Operator, leftValue, rightValue, operation.OwnerType)
+		return boolValue(result), "", err
 	}
-	left, right, err := evaluateTwoI32(locals, operation.Operands)
+	if operation.OwnerType != hir.TypeI32 || operation.Type != hir.TypeI32 {
+		return 0, "", capabilityError("arithmetic operation has incompatible owner or result type")
+	}
+	left, err := leftValue.asI32()
+	if err != nil {
+		return 0, "", err
+	}
+	right, err := rightValue.asI32()
 	if err != nil {
 		return 0, "", err
 	}
 	return binary(operation.Operator, left, right)
 }
 
-func equalScalarValues(left, right runtimeValue) (bool, error) {
-	if left.kind != right.kind || left.typ != right.typ {
+func equalScalarValues(left, right runtimeValue, ownerType hir.Type) (bool, error) {
+	if !comparisonRuntimeMatches(left, ownerType) || !comparisonRuntimeMatches(right, ownerType) {
 		return false, capabilityError("comparison operands have different runtime scalar types")
 	}
-	switch left.kind {
-	case valueI32:
+	switch ownerType {
+	case hir.TypeBool, hir.TypeI32:
 		return left.i32 == right.i32, nil
-	case valueU8, valueU32, valueUSize:
+	case hir.TypeU8, hir.TypeU32, hir.TypeUSize:
 		return left.u64 == right.u64, nil
-	case valueNull:
-		return true, nil
 	default:
-		return false, capabilityError("value is not an executable equality scalar")
+		if _, _, pointer := hir.RawPointerElement(ownerType); pointer {
+			return true, nil
+		}
+		return false, capabilityError("value is not an executable equality value")
+	}
+}
+
+func orderedScalarValues(operator string, left, right runtimeValue, ownerType hir.Type) (bool, error) {
+	if !comparisonRuntimeMatches(left, ownerType) || !comparisonRuntimeMatches(right, ownerType) {
+		return false, capabilityError("ordered comparison operands have incompatible runtime scalar types")
+	}
+	if ownerType == hir.TypeI32 {
+		switch operator {
+		case "<":
+			return left.i32 < right.i32, nil
+		case "<=":
+			return left.i32 <= right.i32, nil
+		case ">":
+			return left.i32 > right.i32, nil
+		case ">=":
+			return left.i32 >= right.i32, nil
+		}
+	}
+	switch operator {
+	case "<":
+		return left.u64 < right.u64, nil
+	case "<=":
+		return left.u64 <= right.u64, nil
+	case ">":
+		return left.u64 > right.u64, nil
+	case ">=":
+		return left.u64 >= right.u64, nil
+	default:
+		return false, capabilityError("unsupported ordered comparison operator %q", operator)
+	}
+}
+
+func comparisonRuntimeMatches(value runtimeValue, ownerType hir.Type) bool {
+	switch ownerType {
+	case hir.TypeBool, hir.TypeI32:
+		return value.kind == valueI32
+	case hir.TypeU8:
+		return value.kind == valueU8 && value.typ == hir.TypeU8 && value.u64 <= math.MaxUint8
+	case hir.TypeU32:
+		return value.kind == valueU32 && value.typ == hir.TypeU32 && value.u64 <= math.MaxUint32
+	case hir.TypeUSize:
+		return value.kind == valueUSize && value.typ == hir.TypeUSize
+	default:
+		_, _, pointer := hir.RawPointerElement(ownerType)
+		return pointer && value.kind == valueNull && value.typ == ownerType
 	}
 }
 

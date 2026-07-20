@@ -797,6 +797,45 @@ fn main() -> i32 { b"*"[0] as i32 }
 	}
 }
 
+func TestLowerPreservesTypedUnsignedOrderedComparison(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+fn main() -> i32 {
+    let size: usize = 42;
+    if size > 41 { 42 } else { 1 }
+}
+`)
+	function := &program.Functions[0]
+	var comparison *Operation
+	for blockIndex := range function.Blocks {
+		for operationIndex := range function.Blocks[blockIndex].Operations {
+			operation := &function.Blocks[blockIndex].Operations[operationIndex]
+			if operation.Kind == OperationBinary && operation.Operator == ">" {
+				comparison = operation
+			}
+		}
+	}
+	if comparison == nil || comparison.OwnerType != hir.TypeUSize || comparison.Type != hir.TypeBool ||
+		comparison.DestinationLocal == NoLocal || len(comparison.Operands) != 2 {
+		t.Fatalf("typed comparison = %+v", comparison)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+	mutated := Clone(program)
+	for blockIndex := range mutated.Functions[0].Blocks {
+		for operationIndex := range mutated.Functions[0].Blocks[blockIndex].Operations {
+			operation := &mutated.Functions[0].Blocks[blockIndex].Operations[operationIndex]
+			if operation.Kind == OperationBinary && operation.Operator == ">" {
+				operation.OwnerType = hir.TypeBool
+			}
+		}
+	}
+	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1001" {
+		t.Fatalf("Verify() comparison owner mutation failures = %+v", failures)
+	}
+}
+
 func TestLowerPreservesByteStringDataAddressUnsafeProvenance(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;

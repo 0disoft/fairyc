@@ -866,6 +866,63 @@ func TestAnalyzeRejectsNonValuePreservingIntegerCast(t *testing.T) {
 	}
 }
 
+func TestAnalyzeTypesScalarComparisons(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn main() -> i32 {
+    let byte: u8 = 41;
+    let word: u32 = 42;
+    let size: usize = 43;
+    let pointer: *u8 = null;
+    let bool_equal: bool = true != false;
+    let signed_ordered: bool = -1 < 0;
+    let byte_ordered: bool = byte < 42;
+    let word_ordered: bool = word >= 42;
+    let size_ordered: bool = size <= 43;
+    let pointer_equal: bool = pointer == null;
+    if bool_equal && signed_ordered && byte_ordered && word_ordered && size_ordered && pointer_equal { 42 } else { 1 }
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+	statements := result.HIR.Modules[0].Functions[0].Body.Statements
+	wantOwners := []hir.Type{hir.TypeBool, hir.TypeI32, hir.TypeU8, hir.TypeU32, hir.TypeUSize}
+	for index, owner := range wantOwners {
+		expression := statements[index+4].Expression
+		if expression == nil || expression.Kind != "binary" || expression.Type != hir.TypeBool ||
+			len(expression.Children) != 2 || expression.Children[0].Type != owner || expression.Children[1].Type != owner {
+			t.Fatalf("comparison statement %d = %+v", index+4, expression)
+		}
+	}
+	pointerComparison := statements[9].Expression
+	if pointerComparison == nil || pointerComparison.Type != hir.TypeBool || len(pointerComparison.Children) != 2 ||
+		pointerComparison.Children[0].Type != hir.RawPointer(hir.TypeU8, false) ||
+		pointerComparison.Children[1].Type != hir.RawPointer(hir.TypeU8, false) {
+		t.Fatalf("pointer comparison = %+v", pointerComparison)
+	}
+}
+
+func TestAnalyzeRejectsNonScalarEqualityAndBooleanOrdering(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+struct Pair { value: i32; }
+fn main() -> i32 {
+    let left: Pair = Pair { value: 1 };
+    let right: Pair = Pair { value: 1 };
+    let same: bool = left == right;
+    let ordered: bool = true < false;
+    42
+}
+`,
+	})
+	if len(result.Unsupported) != 2 || result.Unsupported[0].Feature != "equality comparison on main::Pair" ||
+		result.Unsupported[1].Feature != "ordered comparison on bool" {
+		t.Fatalf("result = %+v", result)
+	}
+}
+
 func TestAnalyzeTypesCStringLiteralToImmutableBytePointerCast(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{

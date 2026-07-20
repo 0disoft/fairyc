@@ -17,6 +17,7 @@
     "docs/adr/0024-stage-0-loop-control-and-cleanup.md",
     "docs/adr/0097-checked-immutable-byte-view-indexing.md",
     "docs/adr/0098-value-preserving-integer-casts.md",
+    "docs/adr/0099-typed-scalar-comparisons.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/mir-v0.md",
     "docs/engineering/05-testing-standard.md"
@@ -1032,6 +1033,18 @@
     {
       "id": "pass.interpreter.value-preserving-integer-cast",
       "sourceRoot": "cases/pass/value-preserving-integer-cast/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42
+      }
+    },
+    {
+      "id": "pass.interpreter.typed-scalar-comparisons",
+      "sourceRoot": "cases/pass/typed-scalar-comparisons/src",
       "sources": ["main.fy"],
       "entry": "main::main",
       "expect": {

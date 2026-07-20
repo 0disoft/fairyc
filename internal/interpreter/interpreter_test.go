@@ -84,6 +84,26 @@ fn main() -> i32 { b"*"[0] as i32 }
 	}
 }
 
+func TestExecuteTypedScalarComparisons(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn main() -> i32 {
+    let byte: u8 = b"*"[0];
+    let word: u32 = byte as u32;
+    let size: usize = word as usize;
+    let pointer: *u8 = null;
+    if true == true && -1 < 0 && byte > 41 && word >= 42 && size <= 42 && pointer == null { 42 } else { 1 }
+}
+`)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+	if outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("Execute() outcome = %+v", outcome)
+	}
+}
+
 func lowerSource(t *testing.T, contents string) mir.Program {
 	t.Helper()
 	parsed, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(contents)), source.DefaultLimits())

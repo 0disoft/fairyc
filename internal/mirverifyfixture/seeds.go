@@ -192,7 +192,7 @@ func checkedDivisionSeed() mir.Function {
 				ID: 1, Entity: "block:continuation",
 				Operations: []mir.Operation{{
 					Kind: mir.OperationBinary, Entity: "operation:division-result", DestinationLocal: 1,
-					Operands: operands, Operator: "/",
+					Operands: operands, OwnerType: hir.TypeI32, Type: hir.TypeI32, Operator: "/",
 				}},
 				Terminator: mir.Terminator{
 					Kind: mir.TerminatorReturn, UnwindSuccessor: mir.NoBlock,
@@ -237,7 +237,7 @@ func checkedArithmeticSeed() mir.Function {
 				ID: 1, Entity: "block:arithmetic-continuation",
 				Operations: []mir.Operation{{
 					Kind: mir.OperationBinary, Entity: "operation:add-result", DestinationLocal: 1,
-					Operands: operands, Operator: "+",
+					Operands: operands, OwnerType: hir.TypeI32, Type: hir.TypeI32, Operator: "+",
 				}},
 				Terminator: mir.Terminator{
 					Kind: mir.TerminatorReturn, UnwindSuccessor: mir.NoBlock,

@@ -554,7 +554,11 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 			}
 		}
 		destination := l.newTemporary()
-		l.appendOperation(Operation{Kind: OperationBinary, Span: expression.Span, DestinationLocal: destination, Operands: []Operand{left, right}, Operator: expression.Operator})
+		l.appendOperation(Operation{
+			Kind: OperationBinary, Span: expression.Span, DestinationLocal: destination,
+			Operands: []Operand{left, right}, OwnerType: expression.Children[0].Type,
+			Type: expression.Type, Operator: expression.Operator,
+		})
 		return Operand{Kind: OperandLocal, Local: destination}, nil
 	case "propagate":
 		return l.lowerPropagate(expression)

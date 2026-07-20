@@ -204,6 +204,13 @@ dereferences require unsafe code. Safe integer `as` currently admits exactly `u8
 Narrowing, signedness-changing, C-scalar, pointer/integer, and other numeric conversions remain
 rejected and require a later explicit fallible conversion contract.
 
+Equality operators `==` and `!=` accept matching operands of `bool`, `i32`, `u8`, `u32`, or
+`usize`. Ordered comparison operators `<`, `<=`, `>`, and `>=` accept matching operands of `i32`,
+`u8`, `u32`, or `usize`. Equality also accepts two matching raw-pointer types for null and identity
+checks; it does not dereference either operand and needs no additional unsafe scope. Comparisons do
+not promote, widen, or mix types. Aggregate equality, pointer ordering, and boolean ordering remain
+rejected.
+
 ## Grammar and recovery authority
 
 `spec/grammar/stage0.ebnf` is the complete normative prototype grammar. `docs/language/0006-lexing-parsing-and-recovery-v0.md` owns source-byte handling, literal cooking, the Pratt binding-power table, module identity, recovery, and canonical byte spans. `spec/fixtures/parser/manifest-v0.json` owns positive and negative acceptance evidence.

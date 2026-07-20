@@ -102,6 +102,16 @@ func ValuePreservingIntegerCast(sourceType, targetType Type) bool {
 	}
 }
 
+// ScalarEqualityType reports the closed Stage 0 equality-comparison subset.
+func ScalarEqualityType(value Type) bool {
+	return value == TypeBool || ScalarOrderedType(value)
+}
+
+// ScalarOrderedType reports the closed Stage 0 ordered-comparison subset.
+func ScalarOrderedType(value Type) bool {
+	return value == TypeI32 || value == TypeU8 || value == TypeU32 || value == TypeUSize
+}
+
 // OptionElement decomposes one canonical compiler-known Option type.
 func OptionElement(value Type) (element Type, ok bool) {
 	text := string(value)

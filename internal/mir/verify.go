@@ -351,8 +351,14 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				if !validViewIndexShape(operation, false) || !slices.Equal(operation.TrapCategories, []string{"bounds"}) {
 					failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "immutable byte-view index is missing its bounds check"})
 				}
-			case OperationAssign, OperationUnary, OperationBinary:
+			case OperationAssign, OperationUnary:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationBinary:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if !validBinaryShape(operation) {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "typed scalar binary operation shape is invalid"})
+				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationScalarCast:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
@@ -770,6 +776,46 @@ func scalarCastOperandMatches(operand Operand, sourceType hir.Type) bool {
 		return true
 	}
 	return sourceType == hir.TypeU8 && operand.Kind == OperandU8 || sourceType == hir.TypeU32 && operand.Kind == OperandU32
+}
+
+func validBinaryShape(operation Operation) bool {
+	if operation.DestinationLocal == NoLocal || len(operation.Operands) != 2 ||
+		!scalarOperandMatches(operation.Operands[0], operation.OwnerType) ||
+		!scalarOperandMatches(operation.Operands[1], operation.OwnerType) {
+		return false
+	}
+	switch operation.Operator {
+	case "==", "!=":
+		_, _, pointer := hir.RawPointerElement(operation.OwnerType)
+		return (hir.ScalarEqualityType(operation.OwnerType) || pointer) && operation.Type == hir.TypeBool
+	case "<", "<=", ">", ">=":
+		return hir.ScalarOrderedType(operation.OwnerType) && operation.Type == hir.TypeBool
+	case "+", "-", "*", "/", "%", ">>", "&", "^", "|":
+		return operation.OwnerType == hir.TypeI32 && operation.Type == hir.TypeI32
+	default:
+		return false
+	}
+}
+
+func scalarOperandMatches(operand Operand, ownerType hir.Type) bool {
+	if operand.Kind == OperandLocal {
+		return true
+	}
+	if _, _, pointer := hir.RawPointerElement(ownerType); pointer {
+		return operand.Kind == OperandNull && operand.Type == ownerType
+	}
+	switch ownerType {
+	case hir.TypeBool, hir.TypeI32:
+		return operand.Kind == OperandI32
+	case hir.TypeU8:
+		return operand.Kind == OperandU8
+	case hir.TypeU32:
+		return operand.Kind == OperandU32
+	case hir.TypeUSize:
+		return operand.Kind == OperandUSize
+	default:
+		return false
+	}
 }
 
 func verifyTrapCheckEdges(function *Function) []VerificationError {
