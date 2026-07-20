@@ -208,8 +208,8 @@ translation units at both profiles. A third three-object probe raises and catche
 exception, virtual-walks raiser, termination, and catcher frames, and requires one abnormal
 `__finally` execution under both profiles. The target marker remains missing until broader layout
 and independent/source-level/hosted ABI and unwind evidence exists. A host-independent PE parser
-now validates the host-smoke product, both declared-target profile products, one direct run-target
-temporary product, and all six probe images as bounded
+now validates the host-smoke product, both declared-target profile products, two direct run-target
+temporary products (including one driven by a separately built `fairyc.exe`), and all six probe images as bounded
 AMD64 PE32+ console executables
 with aligned headers and sections and an executable `.text` entry point. That linked-image path does not inspect
 object symbols, relocations, or Windows unwind records. The same package separately parses every
@@ -268,6 +268,12 @@ go run ./cmd/fairyc experimental run examples/run/main.fy
 go run ./cmd/fairyc experimental run examples/run/resource_option.fy
 go run ./cmd/fairyc experimental parse examples/syntax/main.fy
 ```
+
+For repeated Windows use, `DEVELOPMENT.md` gives the WSL-free manual bootstrap that creates ignored
+`build/fairyc.exe`. The configured Windows smoke separately builds a temporary standalone compiler
+process and requires that executable to run `examples/windows_quickstart/main.fy` through MSVC with
+native result 42. The compiler binary is still built from Go; only the input program and resulting
+temporary target executable are Fairy C.
 
 `explain` and `targets` do not read the current directory or source tree. The former marks its
 diagnostic catalog as provisional; the latter reports declared TargetSpec evidence without probing

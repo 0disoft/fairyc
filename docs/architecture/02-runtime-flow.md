@@ -95,8 +95,9 @@ evidence.
 `internal/pecoff` is the next evidence boundary after local linking. It parses executable bytes
 without using the host loader and rejects non-AMD64, non-PE32+, DLL, non-console, misaligned,
 out-of-range, duplicate-section, missing-`.text`, and non-executable-entry images. The Windows smoke
-applies it to the retained target-neutral product, both declared-target profile products, one direct
-run-target temporary product, and both profiles of the layout, ABI, and unwind probes before
+applies it to the retained target-neutral product, both declared-target profile products, two direct
+run-target temporary products (one driven through a separately built compiler process), and both
+profiles of the layout, ABI, and unwind probes before
 execution. COFF object records and unwind/debug payload semantics remain outside this linked-image
 branch.
 The same package has a distinct raw-COFF path used inside `internal/cdriver` before local linking

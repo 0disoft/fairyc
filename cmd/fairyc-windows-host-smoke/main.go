@@ -63,8 +63,10 @@ fn main() -> i32 {
 
 const checkedInSuccessPath = "examples/windows_smoke/main.fy"
 const checkedInWindowsTargetPath = "examples/windows_target/main.fy"
+const checkedInWindowsQuickstartPath = "examples/windows_quickstart/main.fy"
 const windowsLayoutManifestPath = "spec/fixtures/layout/manifest-windows-msvc-v0.json"
 const windowsABIManifestPath = "spec/fixtures/c-abi/manifest-windows-msvc-v0.json"
+const subprocessOutputLimit = 64 * 1024
 
 func main() {
 	if err := run(); err != nil {
@@ -74,6 +76,10 @@ func main() {
 }
 
 func run() error {
+	repositoryRoot, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("resolve repository root: %w", err)
+	}
 	successSource, err := os.ReadFile(filepath.FromSlash(checkedInSuccessPath))
 	if err != nil {
 		return fmt.Errorf("read checked-in Windows smoke source: %w", err)
@@ -82,20 +88,25 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("read checked-in Windows target source: %w", err)
 	}
+	windowsQuickstartSource, err := os.ReadFile(filepath.FromSlash(checkedInWindowsQuickstartPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in Windows quickstart source: %w", err)
+	}
 	root, err := os.MkdirTemp("", "fairyc-windows-host-smoke-")
 	if err != nil {
 		return fmt.Errorf("create temporary source root: %w", err)
 	}
 	defer os.RemoveAll(root)
 	for name, source := range map[string]string{
-		checkedInSuccessPath:          string(successSource),
-		checkedInWindowsTargetPath:    string(windowsTargetSource),
-		"negative.fy":                 negativeSource,
-		"division_by_zero.fy":         divisionByZeroSource,
-		"remainder_by_zero.fy":        remainderByZeroSource,
-		"signed_division_overflow.fy": signedDivisionOverflowSource,
-		"integer_overflow.fy":         integerOverflowSource,
-		"invalid_shift.fy":            invalidShiftSource,
+		checkedInSuccessPath:           string(successSource),
+		checkedInWindowsTargetPath:     string(windowsTargetSource),
+		checkedInWindowsQuickstartPath: string(windowsQuickstartSource),
+		"negative.fy":                  negativeSource,
+		"division_by_zero.fy":          divisionByZeroSource,
+		"remainder_by_zero.fy":         remainderByZeroSource,
+		"signed_division_overflow.fy":  signedDivisionOverflowSource,
+		"integer_overflow.fy":          integerOverflowSource,
+		"invalid_shift.fy":             invalidShiftSource,
 	} {
 		destination := filepath.Join(root, filepath.FromSlash(name))
 		if err := os.MkdirAll(filepath.Dir(destination), 0o700); err != nil {
@@ -172,6 +183,11 @@ func run() error {
 		return fmt.Errorf("run-target returned code %d, stdout %q, stderr %q", targetRunCode, targetRunStdout.String(), targetRunStderr.String())
 	}
 	targetRunExecutions++
+	standaloneCompilerBytes, err := runStandaloneCompiler(repositoryRoot, root)
+	if err != nil {
+		return err
+	}
+	targetRunExecutions++
 
 	for _, testCase := range []struct {
 		name         string
@@ -216,8 +232,125 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds and %d direct run-target execution checked LLP64 c.long emission, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, and UTF-8 crossings, and native result 42, 14 run-host outcomes covered signed results and four arithmetic trap categories, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ executable images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, targetRunExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, unwindCases, unwindExecutions, 1+targetBuildExecutions+targetRunExecutions+layoutExecutions+abiExecutions+unwindExecutions, toolchain.Version)
+	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds and %d direct run-target executions checked LLP64 c.long emission, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart execution, 14 run-host outcomes covered signed results and four arithmetic trap categories, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, targetRunExecutions, standaloneCompilerBytes, layoutCases, layoutExecutions, abiCases, abiExecutions, unwindCases, unwindExecutions, 1+targetBuildExecutions+targetRunExecutions+layoutExecutions+abiExecutions+unwindExecutions, toolchain.Version)
 	return nil
+}
+
+func runStandaloneCompiler(repositoryRoot, sourceRoot string) (int64, error) {
+	temporaryRoot, err := os.MkdirTemp("", "fairyc-standalone-compiler-smoke-")
+	if err != nil {
+		return 0, fmt.Errorf("create standalone compiler directory: %w", err)
+	}
+	defer os.RemoveAll(temporaryRoot)
+
+	executablePath := filepath.Join(temporaryRoot, "fairyc.exe")
+	buildContext, cancelBuild := context.WithTimeout(context.Background(), 90*time.Second)
+	defer cancelBuild()
+	build := exec.CommandContext(buildContext, "go", "build", "-mod=readonly", "-trimpath", "-o", executablePath, "./cmd/fairyc")
+	build.Dir = repositoryRoot
+	build.Stdin = nil
+	var buildStdout boundedBuffer
+	var buildStderr boundedBuffer
+	buildStdout.limit = subprocessOutputLimit
+	buildStderr.limit = subprocessOutputLimit
+	build.Stdout = &buildStdout
+	build.Stderr = &buildStderr
+	if err := build.Run(); err != nil {
+		if errors.Is(buildContext.Err(), context.DeadlineExceeded) {
+			return 0, fmt.Errorf("standalone compiler build exceeded timeout")
+		}
+		return 0, fmt.Errorf("build standalone compiler: %w; stdout %q; stderr %q", err, buildStdout.String(), buildStderr.String())
+	}
+	if buildStdout.Len() != 0 || buildStderr.Len() != 0 {
+		return 0, fmt.Errorf("standalone compiler build produced unexpected output: stdout %q; stderr %q", buildStdout.String(), buildStderr.String())
+	}
+	info, err := os.Stat(executablePath)
+	if err != nil {
+		return 0, fmt.Errorf("stat standalone compiler: %w", err)
+	}
+	if !info.Mode().IsRegular() || info.Size() == 0 {
+		return 0, fmt.Errorf("standalone compiler is not a nonempty regular file")
+	}
+
+	helpCode, helpStdout, helpStderr, err := runStandaloneCommand(sourceRoot, executablePath, "--help")
+	if err != nil {
+		return 0, fmt.Errorf("execute standalone compiler help: %w", err)
+	}
+	if helpCode != cli.ExitSuccess || helpStderr != "" || !strings.Contains(helpStdout, "fairyc experimental run-target") {
+		return 0, fmt.Errorf("standalone compiler help returned code %d, stdout %q, stderr %q", helpCode, helpStdout, helpStderr)
+	}
+
+	runCode, runStdout, runStderr, err := runStandaloneCommand(
+		sourceRoot,
+		executablePath,
+		"experimental", "run-target", checkedInWindowsQuickstartPath,
+		"--target", "x86_64-windows-msvc", "--profile", "optimized",
+	)
+	if err != nil {
+		return 0, fmt.Errorf("execute standalone compiler quickstart: %w", err)
+	}
+	if runCode != cli.ExitSuccess || runStderr != "" || !strings.HasPrefix(runStdout, "native result: 42 (x86_64-windows-msvc, msvc ") {
+		return 0, fmt.Errorf("standalone compiler run-target returned code %d, stdout %q, stderr %q", runCode, runStdout, runStderr)
+	}
+	return info.Size(), nil
+}
+
+func runStandaloneCommand(directory, executablePath string, arguments ...string) (int, string, string, error) {
+	contextValue, cancel := context.WithTimeout(context.Background(), 45*time.Second)
+	defer cancel()
+	command := exec.CommandContext(contextValue, executablePath, arguments...)
+	command.Dir = directory
+	command.Stdin = nil
+	var stdout boundedBuffer
+	var stderr boundedBuffer
+	stdout.limit = subprocessOutputLimit
+	stderr.limit = subprocessOutputLimit
+	command.Stdout = &stdout
+	command.Stderr = &stderr
+	err := command.Run()
+	if errors.Is(contextValue.Err(), context.DeadlineExceeded) {
+		return -1, stdout.String(), stderr.String(), fmt.Errorf("command exceeded timeout")
+	}
+	if err == nil {
+		return 0, stdout.String(), stderr.String(), nil
+	}
+	var exitError *exec.ExitError
+	if !errors.As(err, &exitError) {
+		return -1, stdout.String(), stderr.String(), err
+	}
+	return exitError.ExitCode(), stdout.String(), stderr.String(), nil
+}
+
+type boundedBuffer struct {
+	buffer    bytes.Buffer
+	limit     int
+	truncated bool
+}
+
+func (buffer *boundedBuffer) Write(value []byte) (int, error) {
+	originalLength := len(value)
+	remaining := buffer.limit - buffer.buffer.Len()
+	if remaining > 0 {
+		if len(value) > remaining {
+			value = value[:remaining]
+		}
+		_, _ = buffer.buffer.Write(value)
+	}
+	if originalLength > remaining {
+		buffer.truncated = true
+	}
+	return originalLength, nil
+}
+
+func (buffer *boundedBuffer) Len() int {
+	return buffer.buffer.Len()
+}
+
+func (buffer *boundedBuffer) String() string {
+	if buffer.truncated {
+		return buffer.buffer.String() + "\n[output truncated]"
+	}
+	return buffer.buffer.String()
 }
 
 func runWindowsUnwindProbe(toolchain cdriver.WindowsHostToolchain) (int, int, error) {

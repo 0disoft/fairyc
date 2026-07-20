@@ -98,6 +98,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0086-windows-msvc-arena-region-lifecycle.md`: closed FY-to-Arena initialization, one Region allocation/reset, and final drop with deterministic SystemHeap dependency linkage at both MSVC profiles.
 - `0087-windows-msvc-owned-text-lifecycle.md`: closed compiler-owned text to String/CString/CStr success lifecycles with deterministic SystemHeap, Buffer, and text-view dependency linkage at both MSVC profiles.
 - `0088-experimental-windows-target-run-command.md`: direct temporary execution of the declared Windows target path with shared compilation, PE/unwind validation, exact result/trap reporting, and no WSL.
+- `0089-standalone-windows-compiler-smoke.md`: temporary Go-built `fairyc.exe` process validation that compiles and executes a minimal FY Windows target without distribution or self-hosting claims.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

@@ -37,7 +37,7 @@ stabilization.
 
 ## Implemented experimental compiler surface
 
-The current Go prototype implements ten deliberately unstable developer commands:
+The current Go prototype implements eleven deliberately unstable developer commands:
 
 | Command | Purpose | Output |
 | --- | --- | --- |

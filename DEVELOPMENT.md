@@ -25,6 +25,29 @@ This document records the executable development boundary for the Go Stage 0 com
   `fairyc_go_build`, `fairyc_go_test_parser`, and `fairyc_go_test`. Their exact argv, writes, and
   timeouts are owned by the workspace command contract.
 
+## Local Windows compiler executable
+
+The Stage 0 compiler can be built as an ordinary local Windows executable. This removes `go run`
+from repeated compiler invocations; it does not make the compiler self-hosted, released, installed,
+or redistributable. From the repository root in PowerShell:
+
+```powershell
+New-Item -ItemType Directory -Force build | Out-Null
+bun tools/run-go.ts build -mod=readonly -trimpath -o build/fairyc.exe ./cmd/fairyc
+.\build\fairyc.exe experimental run-target examples/windows_quickstart/main.fy --target x86_64-windows-msvc --profile optimized
+```
+
+The first command creates only the ignored output directory. The wrapper keeps Go caches under the
+ignored `.cache/go-*` roots and disables module and checksum network access. The expected final
+receipt starts with `native result: 42`; the FY program itself is compiled into and executed as a
+temporary MSVC PE. WSL is neither installed nor invoked by this path. Delete `build/fairyc.exe` to
+undo the local bootstrap output.
+
+The configured Windows smoke independently builds `fairyc.exe` into a temporary directory, invokes
+its help surface, runs the checked-in quickstart through its `run-target` command, and removes both
+the compiler and target images. That proves the standalone process path without treating an ignored
+local build artifact as source truth.
+
 ## Implementation boundaries
 
 - `internal/source` owns immutable source bytes, module identity, and the shared parse budget.

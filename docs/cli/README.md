@@ -138,6 +138,10 @@ JSON, filters, target selection, and release-stable output remain unimplemented.
 Human developers can run the examples shown in the repository `README.md`. Agent verification uses
 the configured `fairyc_go_build`, `fairyc_go_vet`, and `fairyc_go_test` intents; the manual `go run`
 examples do not grant agent command authority.
+`DEVELOPMENT.md` also documents the manual WSL-free build of ignored `build/fairyc.exe` for repeated
+Windows use. The configured Windows smoke independently builds and removes a temporary compiler
+executable, verifies its help surface, and drives the scalar quickstart through that separate
+process; none of those paths is self-hosting or a distribution promise.
 
 The future stable `targets` command must distinguish `emittable`, `conformant`, and `supported`.
 The experimental single-target JSON does not settle its stable list or filtering syntax. The

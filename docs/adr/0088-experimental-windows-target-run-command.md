@@ -31,7 +31,7 @@ skip the PE and unwind checks applied by the Windows evidence lane.
    <profile>)`. Windows process bits are preserved as signed `i32`. Reserved product-trap statuses
    print `trap: <category>` and return CLI exit code 5.
 5. The configured Windows smoke executes the checked-in target example once through `run-target` at
-   the optimized profile, requires result 42, and includes its temporary image in the ten-image
+   the optimized profile, requires result 42, and includes its temporary image in the Windows
    PE/unwind evidence count. No WSL or Linux compatibility layer participates.
 6. This command is an unstable developer surface. It does not establish hosted execution, target
    conformance, support, installation, distribution, debugging, source-visible I/O, or self-hosting.

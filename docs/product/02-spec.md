@@ -178,6 +178,11 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 ## Build and tooling contract
 
 - The Stage 0 compiler is implemented in Go.
+- The Windows smoke must also build `cmd/fairyc` as a standalone temporary `fairyc.exe`, execute its
+  help surface, and use that separate process to compile and run the checked-in scalar quickstart
+  through `x86_64-windows-msvc`. This proves the bootstrap process boundary only: the compiler is
+  still Go-built, the artifact is removed, and no self-hosting, installation, distribution, or WSL
+  contract follows.
 - The constrained C unit records sorted unique link names used by actual foreign calls. The
   experimental product build resolves exact project-owned standard-library names through one shared
   symbol/component contract and links only their dependency closure plus the scalar runtime; unused
