@@ -256,6 +256,8 @@ const (
 	OperationResourceConstruct OperationKind = "resource-construct"
 	OperationFieldRead         OperationKind = "field-read"
 	OperationViewLength        OperationKind = "view-length"
+	OperationViewIndexCheck    OperationKind = "view-index-check"
+	OperationViewIndex         OperationKind = "view-index"
 	OperationRegionEnter       OperationKind = "region-enter"
 	OperationRegionPlace       OperationKind = "region-place"
 	OperationRegionReset       OperationKind = "region-reset"
@@ -323,6 +325,7 @@ type Operation struct {
 	Fields           []string
 	Type             hir.Type
 	OwnerType        hir.Type
+	IndexType        hir.Type
 	Field            string
 	Operator         string
 	UnsafeScope      hir.Span

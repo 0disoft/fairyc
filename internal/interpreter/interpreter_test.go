@@ -36,6 +36,40 @@ fn main() -> i32 { score(Message::Pair { left: 20, right: 22 }) }
 	}
 }
 
+func TestExecuteImmutableByteViewIndexWithinBounds(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn main() -> i32 {
+    let value: u8 = b"\x00A"[1];
+    42
+}
+`)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+	if outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("Execute() outcome = %+v", outcome)
+	}
+}
+
+func TestExecuteImmutableByteViewIndexOutOfBoundsTraps(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn main() -> i32 {
+    let value: u8 = b"A"[1];
+    42
+}
+`)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+	if outcome.Kind != interpreter.OutcomeTrap || outcome.TrapCategory != "bounds" {
+		t.Fatalf("Execute() outcome = %+v", outcome)
+	}
+}
+
 func lowerSource(t *testing.T, contents string) mir.Program {
 	t.Helper()
 	parsed, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(contents)), source.DefaultLimits())

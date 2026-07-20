@@ -106,6 +106,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0094-explicit-multi-source-windows-target-commands.md`: bounded entry-plus-repeated-source module closures for Windows target build, inspection-run, and program-facing execution without automatic discovery or linker-input widening.
 - `0095-explicit-multi-source-interpreter-run.md`: the same bounded explicit FY module closure for fast verified-MIR interpreter execution without a backend, host process, or source discovery.
 - `0096-explicit-multi-source-prototype-program-commands.md`: entry-plus-repeated-source closures for C inspection, Linux build, and target-neutral Windows host build/run without widening foreign or linker inputs.
+- `0097-checked-immutable-byte-view-indexing.md`: read-only `&[u8]` indexing through contextual `usize`, verified dominating bounds checks, interpreter traps, and private C byte loads without opening slicing or text indexing.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

@@ -15,6 +15,7 @@
     "docs/adr/0022-controlled-interpreter-io-harness.md",
     "docs/adr/0023-explicit-checked-arithmetic-mir.md",
     "docs/adr/0024-stage-0-loop-control-and-cleanup.md",
+    "docs/adr/0097-checked-immutable-byte-view-indexing.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/mir-v0.md",
     "docs/engineering/05-testing-standard.md"
@@ -1001,6 +1002,30 @@
         "completedThrough": "interpret",
         "outcome": "limit",
         "category": "step-limit"
+      }
+    },
+    {
+      "id": "pass.interpreter.byte-view-index-in-bounds",
+      "sourceRoot": "cases/pass/byte-view-index/src",
+      "sources": ["main.fy"],
+      "entry": "main::in_bounds",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42
+      }
+    },
+    {
+      "id": "pass.interpreter.byte-view-index-bounds-trap",
+      "sourceRoot": "cases/pass/byte-view-index/src",
+      "sources": ["main.fy"],
+      "entry": "main::out_of_bounds",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "trap",
+        "category": "bounds"
       }
     }
   ]

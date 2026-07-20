@@ -687,6 +687,80 @@ fn main() -> i32 {
 	}
 }
 
+func TestLowerPreservesCheckedImmutableByteViewIndex(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+fn main() -> i32 {
+    let value: u8 = b"\x00A"[1];
+    42
+}
+`)
+	function := &program.Functions[0]
+	var check *Operation
+	var load *Operation
+	var checkedSwitch *Terminator
+	for blockIndex := range function.Blocks {
+		block := &function.Blocks[blockIndex]
+		for operationIndex := range block.Operations {
+			operation := &block.Operations[operationIndex]
+			switch operation.Kind {
+			case OperationViewIndexCheck:
+				check = operation
+			case OperationViewIndex:
+				load = operation
+			}
+		}
+		if block.Terminator.SwitchKind == "checked-view-index" {
+			checkedSwitch = &block.Terminator
+		}
+	}
+	wantOwner := hir.SharedBorrow(hir.TypeByteSlice)
+	if check == nil || check.OwnerType != wantOwner || check.IndexType != hir.TypeUSize || check.Type != hir.TypeU8 || check.Operator != "[]" ||
+		len(check.Operands) != 2 || check.Operands[0].Kind != OperandByteString || check.Operands[1].Kind != OperandUSize ||
+		!slices.Equal(check.TrapCategories, []string{"bounds"}) {
+		t.Fatalf("index check = %+v", check)
+	}
+	if load == nil || load.OwnerType != wantOwner || load.IndexType != hir.TypeUSize || load.Type != hir.TypeU8 || load.Operator != "[]" ||
+		len(load.Operands) != 2 || len(load.TrapCategories) != 0 {
+		t.Fatalf("index load = %+v", load)
+	}
+	if checkedSwitch == nil || checkedSwitch.Operator != "[]" || len(checkedSwitch.Successors) != 2 ||
+		!slices.Equal(checkedSwitch.SwitchOperands, check.Operands) {
+		t.Fatalf("index switch = %+v", checkedSwitch)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+
+	mutated := Clone(program)
+	for blockIndex := range mutated.Functions[0].Blocks {
+		for operationIndex := range mutated.Functions[0].Blocks[blockIndex].Operations {
+			operation := &mutated.Functions[0].Blocks[blockIndex].Operations[operationIndex]
+			if operation.Kind == OperationViewIndexCheck {
+				operation.TrapCategories = nil
+			}
+		}
+	}
+	failures := Verify(mutated)
+	if len(failures) == 0 || failures[0].Code != "V1501" {
+		t.Fatalf("Verify() missing bounds marker failures = %+v", failures)
+	}
+
+	mutated = Clone(program)
+	for blockIndex := range mutated.Functions[0].Blocks {
+		for operationIndex := range mutated.Functions[0].Blocks[blockIndex].Operations {
+			operation := &mutated.Functions[0].Blocks[blockIndex].Operations[operationIndex]
+			if operation.Kind == OperationViewIndex {
+				operation.IndexType = hir.TypeI32
+			}
+		}
+	}
+	failures = Verify(mutated)
+	if len(failures) == 0 || failures[0].Code != "V1001" {
+		t.Fatalf("Verify() index type mutation failures = %+v", failures)
+	}
+}
+
 func TestLowerPreservesByteStringDataAddressUnsafeProvenance(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;

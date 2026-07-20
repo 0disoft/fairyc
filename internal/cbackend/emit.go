@@ -698,7 +698,7 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 					mir.OperationResultPayload, mir.OperationOptionPayload,
 					mir.OperationEnumConstruct, mir.OperationEnumPayload,
 					mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
-					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength:
+					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewIndex:
 					inferred = operation.Type
 				}
 				if operation.DestinationLocal == mir.NoLocal || inferred == hir.TypeInvalid || inferred == "" {
@@ -1181,6 +1181,16 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 					return err
 				}
 				e.features["view-length"] = struct{}{}
+			case mir.OperationViewIndexCheck:
+				if err := e.inspectViewIndex(functionIndex, *operation, false); err != nil {
+					return err
+				}
+				e.features["view-index"] = struct{}{}
+			case mir.OperationViewIndex:
+				if err := e.inspectViewIndex(functionIndex, *operation, true); err != nil {
+					return err
+				}
+				e.features["view-index"] = struct{}{}
 			case mir.OperationUse:
 			case mir.OperationArithmeticCheck:
 				e.features["checked-arithmetic"] = struct{}{}
@@ -1333,7 +1343,7 @@ func validateOperationShape(function string, operation mir.Operation) error {
 	case mir.OperationAssign, mir.OperationInitialize, mir.OperationUnary, mir.OperationBinary,
 		mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationEnumConstruct, mir.OperationEnumPayload,
-		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength:
+		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewIndex:
 		if operation.DestinationLocal < 0 {
 			return fmt.Errorf("%s operation in %s has no destination local", operation.Kind, function)
 		}
@@ -1361,6 +1371,33 @@ func (e *emitter) inspectViewLength(functionIndex int, operation mir.Operation) 
 	}
 	if receiverType != operation.OwnerType {
 		return fmt.Errorf("borrowed-view length in %s has receiver type %q, want %q", function.Name, receiverType, operation.OwnerType)
+	}
+	return nil
+}
+
+func (e *emitter) inspectViewIndex(functionIndex int, operation mir.Operation, destination bool) error {
+	function := &e.functions[functionIndex]
+	receiver, index, err := twoOperands(operation.Operands)
+	if err != nil {
+		return fmt.Errorf("immutable byte-view index in %s: %w", function.Name, err)
+	}
+	if operation.OwnerType != hir.SharedBorrow(hir.TypeByteSlice) || operation.IndexType != hir.TypeUSize || operation.Type != hir.TypeU8 || operation.Operator != "[]" ||
+		destination != (operation.DestinationLocal != mir.NoLocal) {
+		return fmt.Errorf("immutable byte-view index in %s has incompatible owner, result, operator, or destination", function.Name)
+	}
+	receiverType, err := e.operandType(functionIndex, receiver)
+	if err != nil {
+		return fmt.Errorf("immutable byte-view index in %s: %w", function.Name, err)
+	}
+	indexType, err := e.operandType(functionIndex, index)
+	if err != nil {
+		return fmt.Errorf("immutable byte-view index in %s: %w", function.Name, err)
+	}
+	if receiverType != operation.OwnerType || indexType != operation.IndexType {
+		return fmt.Errorf("immutable byte-view index in %s has receiver type %q and index type %q", function.Name, receiverType, indexType)
+	}
+	if destination && len(operation.TrapCategories) != 0 || !destination && !slices.Equal(operation.TrapCategories, []string{"bounds"}) {
+		return fmt.Errorf("immutable byte-view index in %s has an invalid trap marker", function.Name)
 	}
 	return nil
 }
@@ -1902,6 +1939,24 @@ func (e *emitter) inspectSwitch(functionIndex int, terminator mir.Terminator) er
 	case "checked-division":
 		e.features["checked-division"] = struct{}{}
 		categories = []string{"division-by-zero", "signed-division-overflow"}
+	case "checked-view-index":
+		receiver, index, err := twoOperands(terminator.SwitchOperands)
+		if err != nil {
+			return fmt.Errorf("checked byte-view index in %s: %w", function.Name, err)
+		}
+		receiverType, err := e.operandType(functionIndex, receiver)
+		if err != nil {
+			return fmt.Errorf("checked byte-view index receiver in %s: %w", function.Name, err)
+		}
+		indexType, err := e.operandType(functionIndex, index)
+		if err != nil {
+			return fmt.Errorf("checked byte-view index offset in %s: %w", function.Name, err)
+		}
+		if terminator.Operator != "[]" || receiverType != hir.SharedBorrow(hir.TypeByteSlice) || indexType != hir.TypeUSize {
+			return fmt.Errorf("checked byte-view index in %s has incompatible operands", function.Name)
+		}
+		e.features["view-index"] = struct{}{}
+		categories = []string{"bounds"}
 	case "checked-unary", "checked-arithmetic":
 		e.features["checked-arithmetic"] = struct{}{}
 		categories = []string{"integer-overflow"}
@@ -2388,6 +2443,20 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			return fmt.Errorf("borrowed-view length in %s: %w", function, err)
 		}
 		fmt.Fprintf(output, "    fy_l_%d = (%s).length;\n", operation.DestinationLocal, value)
+	case mir.OperationViewIndex:
+		receiver, index, err := twoOperands(operation.Operands)
+		if err != nil {
+			return fmt.Errorf("immutable byte-view index in %s: %w", function, err)
+		}
+		receiverValue, err := cOperand(receiver)
+		if err != nil {
+			return fmt.Errorf("immutable byte-view index receiver in %s: %w", function, err)
+		}
+		indexValue, err := cOperand(index)
+		if err != nil {
+			return fmt.Errorf("immutable byte-view index offset in %s: %w", function, err)
+		}
+		fmt.Fprintf(output, "    fy_l_%d = (%s).data[%s];\n", operation.DestinationLocal, receiverValue, indexValue)
 	case mir.OperationMove:
 		fmt.Fprintf(output, "    (void)fy_l_%d;\n", operation.Symbol)
 	case mir.OperationDrop:
@@ -2526,7 +2595,7 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			field = "p_0"
 		}
 		fmt.Fprintf(output, "    fy_l_%d = (%s).%s;\n", operation.DestinationLocal, container, field)
-	case mir.OperationUse, mir.OperationArithmeticCheck, mir.OperationCheckedDivision, mir.OperationResultSwitch:
+	case mir.OperationUse, mir.OperationArithmeticCheck, mir.OperationCheckedDivision, mir.OperationViewIndexCheck, mir.OperationResultSwitch:
 	default:
 		return CapabilityError{Function: function, Feature: "MIR operation " + strconv.Quote(string(operation.Kind))}
 	}
@@ -2726,6 +2795,21 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		fmt.Fprintf(output, "    if (%s == INT32_C(0)) { fy_pending_trap = FY_TRAP_DIVISION_BY_ZERO; goto fy_b_%d; }\n", rightValue, failure)
 		fmt.Fprintf(output, "    if (%s == INT32_MIN && %s == -INT32_C(1)) { fy_pending_trap = FY_TRAP_SIGNED_DIVISION_OVERFLOW; goto fy_b_%d; }\n", leftValue, rightValue, failure)
 		fmt.Fprintf(output, "    goto fy_b_%d;\n", success)
+	case "checked-view-index":
+		receiver, index, err := twoOperands(terminator.SwitchOperands)
+		if err != nil {
+			return fmt.Errorf("checked byte-view index in %s: %w", function.Name, err)
+		}
+		receiverValue, err := cOperand(receiver)
+		if err != nil {
+			return fmt.Errorf("checked byte-view index receiver in %s: %w", function.Name, err)
+		}
+		indexValue, err := cOperand(index)
+		if err != nil {
+			return fmt.Errorf("checked byte-view index offset in %s: %w", function.Name, err)
+		}
+		fmt.Fprintf(output, "    if (%s >= (%s).length) { fy_pending_trap = FY_TRAP_BOUNDS; goto fy_b_%d; }\n", indexValue, receiverValue, failure)
+		fmt.Fprintf(output, "    goto fy_b_%d;\n", success)
 	case "checked-shift":
 		_, amount, err := twoOperands(terminator.SwitchOperands)
 		if err != nil {
@@ -2823,7 +2907,7 @@ func operationHasDestination(kind mir.OperationKind) bool {
 		mir.OperationOptionConstruct, mir.OperationOptionPayload,
 		mir.OperationEnumConstruct, mir.OperationEnumPayload,
 		mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
-		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationRegionPlace:
+		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewIndex, mir.OperationRegionPlace:
 		return true
 	default:
 		return false

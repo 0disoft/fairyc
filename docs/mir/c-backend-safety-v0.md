@@ -36,6 +36,12 @@ and `[u8]`. Generated C copies the descriptor's `length` member into a `uintptr_
 `usize`; it does not call a helper, scan storage, allocate, trap, or expose the descriptor layout.
 The verifier fixes the owner family and result type before emission.
 
+Verified immutable `&[u8]` indexing compares the `uintptr_t`-backed index against the descriptor's
+byte length, routes failure to the canonical `FY_TRAP_BOUNDS` path, and only then emits one
+`data[index]` load into a `uint8_t`-backed Fairy `u8`. Receiver and index operands are evaluated once
+before the check and reused unchanged by the load. The C backend rejects missing or mismatched MIR
+check, owner, index, result, operator, or trap facts instead of emitting unchecked access.
+
 Internal generated functions may accept those exact safe borrowed views by value. Calls pass the
 private descriptor unchanged, preserving data and byte length without granting ownership or
 creating a foreign ABI. Function declarations, call operands, and inferred local types must agree;

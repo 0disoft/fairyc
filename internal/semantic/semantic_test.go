@@ -1094,6 +1094,44 @@ fn main() -> i32 {
 	}
 }
 
+func TestAnalyzeTypesImmutableByteViewIndexAsU8(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn main() -> i32 {
+    let value: u8 = b"\x00A"[1];
+    42
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+	expression := result.HIR.Modules[0].Functions[0].Body.Statements[0].Expression
+	if expression == nil || expression.Kind != "view-index" || expression.Type != hir.TypeU8 || expression.Operator != "[]" ||
+		len(expression.Children) != 2 || expression.Children[0].Type != hir.SharedBorrow(hir.TypeByteSlice) || expression.Children[1].Type != hir.TypeUSize {
+		t.Fatalf("index expression = %+v", expression)
+	}
+}
+
+func TestAnalyzeRejectsUnsupportedViewIndexShapes(t *testing.T) {
+	t.Parallel()
+	t.Run("text receiver", func(t *testing.T) {
+		result := analyzeText(t, map[string]string{
+			"main.fy": "module main;\nfn main() -> i32 { let value: u8 = \"fairy\"[0]; 42 }\n",
+		})
+		if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "indexing outside immutable byte views" {
+			t.Fatalf("result = %+v", result)
+		}
+	})
+	t.Run("non-usize offset", func(t *testing.T) {
+		result := analyzeText(t, map[string]string{
+			"main.fy": "module main;\nfn main() -> i32 { let offset: u32 = 0; let value: u8 = b\"fairy\"[offset]; 42 }\n",
+		})
+		if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E1006" || len(result.Unsupported) != 0 {
+			t.Fatalf("result = %+v", result)
+		}
+	})
+}
+
 func TestAnalyzeRejectsUnknownBorrowedViewField(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{

@@ -75,6 +75,13 @@ The operation copies the existing byte-length metadata and has no call, allocati
 ownership effect. A mismatched operand family, owner, property, or result is `V1001`; backends may
 not reinterpret the count as Unicode scalars, graphemes, capacity, or a C terminator-inclusive size.
 
+Immutable byte-view indexing uses a `view-index-check` marker, a two-successor
+`checked-view-index` switch, a non-returning `bounds` trap block, and a fresh continuation containing
+the `view-index` load. The marker, switch, and load carry the same already-evaluated `&[u8]` receiver
+and `usize` index in source order. The load records the exact borrowed owner and a `u8` destination.
+The verifier rejects a mismatched family, index type, result type, operator, marker, trap category,
+or non-dominating check as `V1001` or `V1501`. It never infers safety from generated-C layout.
+
 The implemented raw-address operation accepts only a direct local place produced by an exact safe
 borrow-to-raw-pointer cast. It records pointee type, source borrow mutability, destination pointer
 type, source span, and containing unsafe scope. `V1701` rejects missing or forged scope provenance;

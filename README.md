@@ -43,10 +43,10 @@ through typed HIR and executable MIR. The current executable subset accepts only
 `drop` body; any nonempty body fails explicitly before Flow or MIR instead of being silently ignored.
 The interpreter constructs, reads, and recursively drops resources from the verified MIR definition,
 but still does not execute user drop-body effects.
-The constrained C backend emits deterministic C11 for 20 verified fixtures across the scalar
+The constrained C backend emits deterministic C11 for 21 verified fixtures across the scalar
 payload surface, restricted inert user enums, flat nonempty all-`i32` resources with empty drop
-bodies, resource-bearing built-in `Option` and `Result` values, borrowed-view byte lengths, and
-borrowed UTF-8/byte-slice internal calls. The cases cover
+bodies, resource-bearing built-in `Option` and `Result` values, borrowed-view byte lengths, checked
+immutable byte-slice indexing, and borrowed UTF-8/byte-slice internal calls. The cases cover
 resource construction, field reads, whole-root call moves, live reassignment, calls and control
 flow, active-payload moves, Result propagation, bitwise operations, checked division and shift, overflow
 trapping, scalar `Option` Some and None, and scalar `Result` propagation success and failure. This
@@ -111,8 +111,9 @@ is still experimental and does not promote target maturity.
 `experimental exec-target` is the program-facing sibling: it forwards bounded stdout and stderr
 without a compiler banner and preserves the program's full Windows process status. The checked-in
 `examples/windows_output/main.fy` contains the one exact unsafe Windows stdout write-all symbol
-inside a checked local helper. Its `main` passes `&str` and `&[u8]` through safe internal calls,
-contains no raw pointer or `unsafe`, prints `Fairy C says hi`, and exits 42. That is real
+inside a checked local helper. Its `main` passes `&str` and `&[u8]` through safe internal calls; the
+byte helper executes checked read-only indexing while the entry contains no raw pointer or `unsafe`,
+prints `Fairy C says hi`, and exits 42. That is real
 FY-to-MSVC process output and unsafe containment, but it is not yet a portable `std::io` API.
 A provisional SystemHeap implementation now lives in the target standard-library
 boundary rather than the thin runtime. It normalizes empty allocation, admits current fundamental
@@ -157,7 +158,9 @@ typed locals may expose only the immutable data address through explicit unsafe 
 UTF-8 validation, with deduplicated immutable storage and the same empty length-zero sentinel rule;
 typed locals can expose only immutable data through explicit unsafe conversion. Safe borrowed
 `&str` and `&[u8]` views expose `.len` as their `usize` byte count without scanning or allocation.
-Indexing, slicing, a stable public string ABI, and the general safe text API still do not exist.
+Immutable `&[u8]` additionally supports read-only `usize` indexing to `u8` behind a verified
+`bounds` trap. Slicing, indexed assignment, text indexing, a stable public string ABI, and the
+general safe text API still do not exist.
 Buffer-backed String and CString C helpers now preserve ownership on failed UTF-8 conversion,
 support overlap-safe String append, expose immutable bounded views, reject interior NUL, and append
 exactly one C terminator. Their C-only native probe is configured but unobserved. A separate

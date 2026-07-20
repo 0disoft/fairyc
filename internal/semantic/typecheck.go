@@ -388,6 +388,8 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 		actual = c.checkCast(expression, result)
 	case syntax.KindCall:
 		actual = c.checkCall(expression, result, expected)
+	case syntax.KindIndex:
+		actual = c.checkIndex(expression, result)
 	case syntax.KindIf:
 		actual = c.checkIf(expression, result, expected)
 	case syntax.KindMatch:
@@ -425,6 +427,33 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 		c.addType(result.Span, actual)
 	}
 	return result, actual
+}
+
+func (c *typeChecker) checkIndex(expression *ast.Expression, result *hir.Expression) hir.Type {
+	if len(expression.Children) != 2 {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "malformed index expression")
+		return hir.TypeInvalid
+	}
+	receiver, receiverType := c.checkExpression(expression.Children[0], hir.TypeInvalid)
+	index, indexType := c.checkExpression(expression.Children[1], hir.TypeUSize)
+	result.Children = appendExpression(result.Children, receiver, index)
+	if receiverType != hir.SharedBorrow(hir.TypeByteSlice) {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Children[0].Span, "indexing outside immutable byte views")
+		return hir.TypeInvalid
+	}
+	c.requireType(
+		"E1006",
+		span(c.module.file.Path, expression.Children[1].Span),
+		indexType,
+		hir.TypeUSize,
+		span(c.module.file.Path, expression.Span),
+	)
+	if indexType == hir.TypeInvalid || indexType != hir.TypeUSize {
+		return hir.TypeInvalid
+	}
+	result.Kind = "view-index"
+	result.Operator = "[]"
+	return hir.TypeU8
 }
 
 func (c *typeChecker) checkCast(expression *ast.Expression, result *hir.Expression) hir.Type {

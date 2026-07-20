@@ -20,6 +20,7 @@
     "docs/adr/0050-restricted-inert-enum-execution.md",
     "docs/adr/0092-borrowed-view-byte-length.md",
     "docs/adr/0093-borrowed-view-internal-call-transport.md",
+    "docs/adr/0097-checked-immutable-byte-view-indexing.md",
     "docs/mir/mir-v0.md",
     "docs/mir/c-backend-safety-v0.md",
     "docs/runtime/runtime-stdlib-v0.md",
@@ -345,6 +346,22 @@
         "dialect": "c11",
         "functions": ["main::byte_length", "main::main", "main::text_length"],
         "features": ["scalar-call", "scalar-comparison", "scalar-control-flow", "static-byte-string", "static-utf8-string", "view-length"]
+      }
+    },
+    {
+      "id": "pass.c-emission.byte-view-index",
+      "sourceRoot": "cases/pass/byte-view-index/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main"],
+        "features": ["scalar-control-flow", "static-byte-string", "trap", "view-index"]
       }
     }
   ]

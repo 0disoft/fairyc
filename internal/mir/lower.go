@@ -490,6 +490,8 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		return l.lowerFieldRead(expression)
 	case "view-length":
 		return l.lowerViewLength(expression)
+	case "view-index":
+		return l.lowerViewIndex(expression)
 	case "cast":
 		return l.lowerRawAddressCast(expression)
 	case "prefix":
@@ -820,6 +822,54 @@ func (l *functionLowerer) lowerViewLength(expression *hir.Expression) (Operand, 
 		Kind: OperationViewLength, Span: expression.Span, DestinationLocal: destination,
 		Operands: []Operand{receiver}, OwnerType: expression.Children[0].Type,
 		Type: expression.Type, Field: expression.Operator,
+	})
+	return Operand{Kind: OperandLocal, Local: destination}, nil
+}
+
+func (l *functionLowerer) lowerViewIndex(expression *hir.Expression) (Operand, error) {
+	if len(expression.Children) != 2 || expression.Operator != "[]" || expression.Type != hir.TypeU8 ||
+		expression.Children[0].Type != hir.SharedBorrow(hir.TypeByteSlice) || expression.Children[1].Type != hir.TypeUSize {
+		return Operand{}, fmt.Errorf("malformed immutable byte-view index")
+	}
+	receiver, err := l.lowerExpression(&expression.Children[0])
+	if err != nil {
+		return Operand{}, err
+	}
+	index, err := l.lowerExpression(&expression.Children[1])
+	if err != nil {
+		return Operand{}, err
+	}
+	if receiver.Kind == OperandInvalid || index.Kind == OperandInvalid {
+		return Operand{}, fmt.Errorf("immutable byte-view index has an invalid operand")
+	}
+	operands := []Operand{receiver, index}
+	l.result.OrderedEvaluations = append(l.result.OrderedEvaluations, OrderedEvaluationFact{
+		Expression:               expression.Span,
+		Sequence:                 []hir.Span{expression.Children[0].Span, expression.Children[1].Span},
+		MaterializedBeforeParent: true,
+	})
+	l.appendOperation(Operation{
+		Kind: OperationViewIndexCheck, Span: expression.Span, DestinationLocal: NoLocal, Operands: slices.Clone(operands),
+		OwnerType: expression.Children[0].Type, IndexType: expression.Children[1].Type, Type: expression.Type, Operator: expression.Operator,
+		TrapCategories: []string{"bounds"},
+	})
+	continuation := l.newBlock()
+	trap := l.newBlock()
+	l.terminate(Terminator{
+		Kind: TerminatorSwitch, Span: expression.Span, Successors: []BlockID{continuation, trap}, UnwindSuccessor: NoBlock,
+		SwitchKind: "checked-view-index", SwitchOperands: slices.Clone(operands), Operator: expression.Operator,
+	})
+	l.current = trap
+	l.terminate(Terminator{Kind: TerminatorTrap, Span: expression.Span, UnwindSuccessor: NoBlock, TrapCategories: []string{"bounds"}})
+	l.result.TrapPaths = append(l.result.TrapPaths, TrapPathFact{
+		Operation: expression.Span, Categories: []string{"bounds"}, CleanupActions: []CleanupAction{}, HasSuccessor: false,
+	})
+	l.current = continuation
+	destination := l.newTemporary()
+	l.appendOperation(Operation{
+		Kind: OperationViewIndex, Span: expression.Span, DestinationLocal: destination,
+		Operands: slices.Clone(operands), OwnerType: expression.Children[0].Type,
+		IndexType: expression.Children[1].Type, Type: expression.Type, Operator: expression.Operator,
 	})
 	return Operand{Kind: OperandLocal, Local: destination}, nil
 }

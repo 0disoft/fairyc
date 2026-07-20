@@ -268,6 +268,34 @@ fn main() -> i32 {
 	}
 }
 
+func TestEmitCheckedImmutableByteViewIndex(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn main() -> i32 {
+    let value: u8 = b"\x00A"[1];
+    42
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, feature := range []string{"static-byte-string", "trap", "view-index"} {
+		if !slices.Contains(unit.Features, feature) {
+			t.Errorf("features %v are missing %q", unit.Features, feature)
+		}
+	}
+	for _, required := range []string{
+		"FY_TRAP_BOUNDS",
+		".length) { fy_pending_trap = FY_TRAP_BOUNDS;",
+		".data[",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+}
+
 func TestEmitByteStringLiteralDataAddressForForeignCall(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

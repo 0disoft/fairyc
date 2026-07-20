@@ -143,8 +143,10 @@ deduplicated immutable bytes, an empty non-null sentinel, and typed-local immuta
 Borrowed `&str` and `&[u8]` views now expose their exact byte count through zero-cost `.len` metadata
 reads and cross internal function calls as private non-owning descriptors. One new emission case
 executes both borrowed-view parameter families through the interpreter and deterministic C backend.
-Indexing, slicing, public CStr operations, Unicode counting, safe text operations, and stable
-slice or string ABIs remain missing.
+Immutable `&[u8]` now supports read-only `usize` indexing to `u8` through explicit verified MIR
+bounds checks, interpreter `bounds` outcomes, and generated-C checked loads. Slicing, indexed
+assignment, text indexing, public CStr operations, Unicode counting, safe text operations, and
+stable slice or string ABIs remain missing.
 Owned String and CString now have provisional Buffer-backed C transport with immutable views,
 successful-only Buffer moves, failure ownership preservation, self-source append, interior-NUL
 rejection, and exact termination. Four C-only native runs are configured but unobserved. A separate
@@ -256,6 +258,7 @@ forwards separated bounded stdout and stderr without a compiler receipt and pres
 explicitly listed modules, observes empty and invalid raw-write cases, derives the
 request and progress lengths from borrowed-view `.len`, confines the Windows-only unsafe C symbol
 to a checked local `&str` helper, passes both borrowed-view families through safe internal calls,
+executes two checked byte-view loads, and covers the `bounds` trap at both MSVC profiles,
 emits the exact 16 ASCII bytes `Fairy C says hi\n`, and exits 42. Its `main` contains no raw pointer,
 foreign call, or `unsafe`. The same
 output/status contract is observed both in-process and through the separately built `fairyc.exe`.

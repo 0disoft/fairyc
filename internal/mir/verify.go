@@ -346,6 +346,11 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				if !valid || !slices.Equal(operation.TrapCategories, categories) {
 					failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "arithmetic operation is missing required trap checks"})
 				}
+			case OperationViewIndexCheck:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if !validViewIndexShape(operation, false) || !slices.Equal(operation.TrapCategories, []string{"bounds"}) {
+					failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "immutable byte-view index is missing its bounds check"})
+				}
 			case OperationAssign, OperationUnary, OperationBinary:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
@@ -557,6 +562,12 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "borrowed-view length shape is invalid"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationViewIndex:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if !validViewIndexShape(operation, true) || len(operation.TrapCategories) != 0 {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "immutable byte-view index shape is invalid"})
+				}
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationRegionEnter:
 				if operation.Symbol == hir.NoSymbol || len(operation.Operands) != 0 || operation.DestinationLocal != NoLocal {
 					failures = append(failures, VerificationError{Code: "V1403", Entity: entity, Detail: "region enter shape is invalid"})
@@ -699,6 +710,8 @@ func validSwitchShape(terminator Terminator) bool {
 		return terminator.SwitchType != "" && terminator.SwitchType != hir.TypeInvalid && len(terminator.SwitchOperands) == 1 && len(terminator.Successors) > 0 && len(terminator.Successors) == len(terminator.SwitchVariants) && uniqueNonEmpty(terminator.SwitchVariants)
 	case "checked-division":
 		return len(terminator.SwitchOperands) == 2 && len(terminator.Successors) == 2 && (terminator.Operator == "/" || terminator.Operator == "%")
+	case "checked-view-index":
+		return len(terminator.SwitchOperands) == 2 && len(terminator.Successors) == 2 && terminator.Operator == "[]"
 	case "checked-unary", "checked-arithmetic", "checked-shift":
 		switchKind, _, valid := checkedArithmeticSpec(terminator.Operator, len(terminator.SwitchOperands))
 		return valid && switchKind == terminator.SwitchKind && len(terminator.Successors) == 2
@@ -726,6 +739,22 @@ func checkedArithmeticSpec(operator string, operandCount int) (string, []string,
 	default:
 		return "", nil, false
 	}
+}
+
+func validViewIndexShape(operation Operation, destination bool) bool {
+	if len(operation.Operands) != 2 || operation.OwnerType != hir.SharedBorrow(hir.TypeByteSlice) ||
+		operation.IndexType != hir.TypeUSize || operation.Type != hir.TypeU8 || operation.Operator != "[]" {
+		return false
+	}
+	if destination != (operation.DestinationLocal != NoLocal) {
+		return false
+	}
+	receiver := operation.Operands[0]
+	index := operation.Operands[1]
+	if receiver.Kind != OperandLocal && (receiver.Kind != OperandByteString || receiver.Type != operation.OwnerType) {
+		return false
+	}
+	return index.Kind == OperandLocal || index.Kind == OperandUSize
 }
 
 func verifyTrapCheckEdges(function *Function) []VerificationError {
@@ -775,6 +804,9 @@ func verifyTrapCheckEdges(function *Function) []VerificationError {
 }
 
 func trappingOperationSpec(operation Operation) (string, OperationKind, []string, bool) {
+	if operation.Kind == OperationViewIndex {
+		return "checked-view-index", OperationViewIndexCheck, []string{"bounds"}, validViewIndexShape(operation, true)
+	}
 	if operation.Kind == OperationUnary {
 		switchKind, categories, valid := checkedArithmeticSpec(operation.Operator, len(operation.Operands))
 		return switchKind, OperationArithmeticCheck, categories, valid
