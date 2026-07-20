@@ -88,6 +88,11 @@ pointer observations, and normalized drops are prototype compatibility data. Ind
 byte and terminator observation, invalid-input and allocation-failure rollback, safe ownership,
 source `Result` mapping, stable layouts, and the public `std::text` API remain outside the Windows
 slice.
+ADR 0088 adds `experimental run-target` over the same `x86_64-windows-msvc` compilation contract.
+Its required target/profile flags, absence of an output path, target-labelled native-result receipt,
+canonical product-trap mapping, zero-output rule, pre-execution PE/unwind validation, and temporary-
+artifact cleanup are unstable CLI and validation policy, not a stable language or target ABI. The
+command adds direct local evidence without changing `emittable`, `conformant`, or `supported`.
 
 `fairyc.layout-fixtures/v0` separately versions the repository input and expectation vocabulary for
 the target-layout engine; each manifest binds one declared target. It is not a public

@@ -270,6 +270,15 @@ func ExecuteWindowsHost(artifact WindowsHostArtifact) (WindowsHostOutcome, error
 	return executeWindowsMSVCArtifact(artifact, "MSVC host")
 }
 
+// ExecuteWindowsMSVCTarget runs one temporary PE built for the declared
+// x86_64-windows-msvc target and returns its exact i32 exit bits and bounded output.
+func ExecuteWindowsMSVCTarget(artifact WindowsHostArtifact) (WindowsHostOutcome, error) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		return WindowsHostOutcome{}, fmt.Errorf("MSVC target execution requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
+	return executeWindowsMSVCArtifact(artifact, "MSVC target")
+}
+
 // ExecuteWindowsMSVCProbe runs one locally compiled target-evidence probe.
 func ExecuteWindowsMSVCProbe(artifact WindowsHostArtifact) (WindowsHostOutcome, error) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {

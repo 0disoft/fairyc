@@ -97,6 +97,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0085-windows-msvc-buffer-dependency-closure.md`: closed FY-to-Buffer construction, resize metadata, and drop with deterministic single SystemHeap dependency linkage at both MSVC profiles.
 - `0086-windows-msvc-arena-region-lifecycle.md`: closed FY-to-Arena initialization, one Region allocation/reset, and final drop with deterministic SystemHeap dependency linkage at both MSVC profiles.
 - `0087-windows-msvc-owned-text-lifecycle.md`: closed compiler-owned text to String/CString/CStr success lifecycles with deterministic SystemHeap, Buffer, and text-view dependency linkage at both MSVC profiles.
+- `0088-experimental-windows-target-run-command.md`: direct temporary execution of the declared Windows target path with shared compilation, PE/unwind validation, exact result/trap reporting, and no WSL.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

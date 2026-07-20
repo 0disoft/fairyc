@@ -101,6 +101,11 @@ reset invalidation, and drop generations execute at both profiles. The Windows x
 the documented 16-byte `malloc` alignment ceiling instead of the MSVC C header's missing
 `max_align_t`. Every other foreign symbol, unproven standard-library component, companion input,
 user linker option, distribution promise, and self-hosting path remains closed.
+The sibling `experimental run-target` command uses the same declared target, emission profile,
+closed support linkage, MSVC resolution, and PE/unwind validation, but executes a temporary image
+instead of retaining it. It reports the exact signed `i32` result or the same canonical product-trap
+category and rejects program output. This is the first direct Windows target execution command; it
+is still experimental and does not promote target maturity.
 A provisional SystemHeap implementation now lives in the target standard-library
 boundary rather than the thin runtime. It normalizes empty allocation, admits current fundamental
 alignments, preserves bytes across copy-and-release growth or shrink, and leaves the old block
@@ -203,7 +208,8 @@ translation units at both profiles. A third three-object probe raises and catche
 exception, virtual-walks raiser, termination, and catcher frames, and requires one abnormal
 `__finally` execution under both profiles. The target marker remains missing until broader layout
 and independent/source-level/hosted ABI and unwind evidence exists. A host-independent PE parser
-now validates the host-smoke product, both declared-target profile products, and all six probe images as bounded
+now validates the host-smoke product, both declared-target profile products, one direct run-target
+temporary product, and all six probe images as bounded
 AMD64 PE32+ console executables
 with aligned headers and sections and an executable `.text` entry point. That linked-image path does not inspect
 object symbols, relocations, or Windows unwind records. The same package separately parses every
@@ -244,6 +250,7 @@ go run ./cmd/fairyc targets
 go run ./cmd/fairyc experimental run-host examples/windows_smoke/main.fy --profile optimized
 go run ./cmd/fairyc experimental build-host examples/windows_smoke/main.fy --profile optimized --output build/fairyc-windows-smoke.exe
 go run ./cmd/fairyc experimental build-target examples/windows_target/main.fy --target x86_64-windows-msvc --profile optimized --output build/fairyc-windows-target.exe
+go run ./cmd/fairyc experimental run-target examples/windows_target/main.fy --target x86_64-windows-msvc --profile optimized
 go run ./cmd/fairyc experimental check-syntax examples/syntax/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/syntax/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/semantic/main.fy examples/semantic/math.fy

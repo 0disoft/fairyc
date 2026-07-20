@@ -9,6 +9,7 @@ import (
 	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/cstdlib"
+	"github.com/0disoft/fairyc/internal/pecoff"
 	"github.com/0disoft/fairyc/internal/target"
 )
 
@@ -24,32 +25,9 @@ func runTargetBuild(arguments []string, sourceRoot string, stdout, stderr io.Wri
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	lowered, code := lowerSingleProgram(options.source, sourceRoot, stderr, "Windows target C-emission")
+	artifact, code := compileWindowsTarget(options.source, options.targetID, options.profile, sourceRoot, stderr)
 	if code != ExitSuccess {
 		return code
-	}
-	unit, err := cbackend.Emit(lowered.program, lowered.entryName, cbackend.Stage0WindowsMSVCProfile())
-	if err != nil {
-		var capability cbackend.CapabilityError
-		if errors.As(err, &capability) {
-			return subsetCapabilityError(stderr, "Windows target C-emission", capability)
-		}
-		return internalError(stderr)
-	}
-	if err := validateWindowsTargetUnit(unit); err != nil {
-		return subsetCapabilityError(stderr, "Windows target build", err)
-	}
-	supportSource, err := windowsTargetSupportSource(unit.ForeignSymbols)
-	if err != nil {
-		return subsetCapabilityError(stderr, "Windows target support linkage", err)
-	}
-	toolchain, err := cdriver.ResolveWindowsHostMSVC()
-	if err != nil {
-		return buildFailure(stderr, err)
-	}
-	artifact, err := cdriver.BuildWindowsMSVCTarget(toolchain, options.profile, unit.Source, supportSource)
-	if err != nil {
-		return buildFailure(stderr, err)
 	}
 	if err := writeBuildArtifact(sourceRoot, options.output, artifact.Bytes); err != nil {
 		return buildFailure(stderr, err)
@@ -65,6 +43,46 @@ func runTargetBuild(arguments []string, sourceRoot string, stdout, stderr io.Wri
 		return outputError(stderr)
 	}
 	return ExitSuccess
+}
+
+func compileWindowsTarget(source string, targetID target.ID, profile cdriver.Profile, sourceRoot string, stderr io.Writer) (cdriver.WindowsHostArtifact, int) {
+	if targetID != target.X8664WindowsMSVC {
+		return cdriver.WindowsHostArtifact{}, invocationError(stderr, fmt.Sprintf("Windows target compilation requires %s", target.X8664WindowsMSVC))
+	}
+	lowered, code := lowerSingleProgram(source, sourceRoot, stderr, "Windows target C-emission")
+	if code != ExitSuccess {
+		return cdriver.WindowsHostArtifact{}, code
+	}
+	unit, err := cbackend.Emit(lowered.program, lowered.entryName, cbackend.Stage0WindowsMSVCProfile())
+	if err != nil {
+		var capability cbackend.CapabilityError
+		if errors.As(err, &capability) {
+			return cdriver.WindowsHostArtifact{}, subsetCapabilityError(stderr, "Windows target C-emission", capability)
+		}
+		return cdriver.WindowsHostArtifact{}, internalError(stderr)
+	}
+	if err := validateWindowsTargetUnit(unit); err != nil {
+		return cdriver.WindowsHostArtifact{}, subsetCapabilityError(stderr, "Windows target build", err)
+	}
+	supportSource, err := windowsTargetSupportSource(unit.ForeignSymbols)
+	if err != nil {
+		return cdriver.WindowsHostArtifact{}, subsetCapabilityError(stderr, "Windows target support linkage", err)
+	}
+	toolchain, err := cdriver.ResolveWindowsHostMSVC()
+	if err != nil {
+		return cdriver.WindowsHostArtifact{}, buildFailure(stderr, err)
+	}
+	artifact, err := cdriver.BuildWindowsMSVCTarget(toolchain, profile, unit.Source, supportSource)
+	if err != nil {
+		return cdriver.WindowsHostArtifact{}, buildFailure(stderr, err)
+	}
+	if _, err := pecoff.InspectExecutable(artifact.Bytes); err != nil {
+		return cdriver.WindowsHostArtifact{}, buildFailure(stderr, fmt.Errorf("inspect Windows target PE: %w", err))
+	}
+	if _, err := pecoff.InspectAMD64Unwind(artifact.Bytes); err != nil {
+		return cdriver.WindowsHostArtifact{}, buildFailure(stderr, fmt.Errorf("inspect Windows target unwind data: %w", err))
+	}
+	return artifact, ExitSuccess
 }
 
 func parseTargetBuildOptions(arguments []string) (targetBuildOptions, error) {

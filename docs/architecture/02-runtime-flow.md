@@ -63,7 +63,7 @@ Linux toolchain is locally executable.
 `Stage0WindowsMSVCProfile` is the first backend consumer of the Windows description. It shares the
 semantic C emitter but selects Windows scalar providers and layout facts, identifies its output as
 `x86_64-windows-msvc`, rejects unavailable POSIX `c::ssize_t`, and leaves validation-only drop
-instrumentation unavailable. `experimental build-target` resolves MSVC only after that profile has
+instrumentation unavailable. `experimental build-target` and `experimental run-target` resolve MSVC only after that profile has
 been selected. Its target-specific support resolver admits only exact project-owned SystemHeap
 allocate/deallocate, Buffer initialize/zeroed-resize/drop, Arena initialize/Region begin/zeroed
 allocation/reset/Arena drop, CStr validation, String copy/view/append/drop, CString
@@ -73,6 +73,10 @@ Arena, text-view, owned-text, and scalar runtime at most once each and rejects e
 or unproven standard-library symbol before toolchain discovery. The Windows SystemHeap source overrides only its fundamental-alignment
 ceiling with the x64 `malloc` guarantee of 16 bytes; allocation semantics stay shared. Companion
 inputs and arbitrary linker arguments remain absent.
+Both target commands share one compilation function and validate the resulting PE and Microsoft x64
+unwind structure before retaining or executing it. `build-target` promotes bytes to one explicit
+no-overwrite output; `run-target` executes an independently temporary image, rejects output, and
+reports either exact signed `i32` process bits or a canonical product trap. Neither path uses WSL.
 `internal/layout` is the next boundary: it turns those facts into checked array and aggregate size,
 alignment, offset, and padding results before any backend chooses C syntax. Separate Linux GNU and
 Windows MSVC manifests hold host-independent expectations. The generated native C probe checks
@@ -91,7 +95,8 @@ evidence.
 `internal/pecoff` is the next evidence boundary after local linking. It parses executable bytes
 without using the host loader and rejects non-AMD64, non-PE32+, DLL, non-console, misaligned,
 out-of-range, duplicate-section, missing-`.text`, and non-executable-entry images. The Windows smoke
-applies it to the retained target-neutral product, both declared-target profile products, and both profiles of the layout, ABI, and unwind probes before
+applies it to the retained target-neutral product, both declared-target profile products, one direct
+run-target temporary product, and both profiles of the layout, ABI, and unwind probes before
 execution. COFF object records and unwind/debug payload semantics remain outside this linked-image
 branch.
 The same package has a distinct raw-COFF path used inside `internal/cdriver` before local linking

@@ -375,6 +375,11 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   placement, owned-text byte/terminator contents, failure paths, public standard-library wrappers,
   source ownership/Result mapping, and stable layouts remain absent. This clears only the missing target
   C-emission-profile evidence; `emittable`, `conformant`, and `supported` remain false.
+- `experimental run-target` reuses that exact Windows target compilation and closed linkage, validates
+  the temporary PE plus Microsoft x64 unwind structure, executes it without WSL, rejects output, and
+  reports either exact signed `i32` result bits or the canonical product-trap category. It accepts no
+  output path, compiler selection, companion input, or linker option and retains no target artifact.
+  Direct local execution is additional product-path evidence, not hosted conformance or support.
 - QBE or another fast backend and LLVM require separate measured adoption decisions after MIR stability.
 - Early caching is whole-package and bounded. Function-level caching requires measured invalidation or latency pressure.
 - Development output contains intentional deliverables and small state, not an unbounded copy of every intermediate.

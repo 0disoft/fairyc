@@ -32,6 +32,8 @@ flat-resource, and resource-tagged C11 inspection and
 for an explicit host-Linux executable in that subset,
 `fairyc experimental build-target <file.fy> --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe>`
 for the first declared Windows target C-emission subset,
+`fairyc experimental run-target <file.fy> --target x86_64-windows-msvc --profile <low|optimized>`
+for direct temporary execution of that declared Windows target subset,
 `fairyc experimental build-host <file.fy> --profile <low|optimized> --output <build/path.exe>` for a
 retained target-neutral Windows/amd64 MSVC PE,
 `fairyc experimental run-host <file.fy> --profile <low|optimized>` for a temporary target-neutral
@@ -103,6 +105,12 @@ linker options remain absent. Its receipt is target-emission and one-way closed-
 complete ABI/runtime conformance, zeroed Arena-byte or owned-text byte/terminator observation,
 owned-text failure behavior, hosted support, a distributable
 artifact promise, or self-hosting.
+`experimental run-target` shares that exact target compilation and support-link contract, validates
+the temporary PE and x64 unwind structure, executes it with bounded captured output, and removes it.
+Success writes `native result: <i32> (x86_64-windows-msvc, msvc <version>, <profile>)`; a product
+trap writes its canonical category and exits with the trap code. Any program output is currently a
+build/execution failure because source-visible target I/O is not implemented. It retains no artifact
+and does not use WSL.
 `experimental target-spec` emits `fairyc.target-spec/v0` JSON without probing the host or exposing
 local tool paths. Linux reports its current scalar, flat-resource, and resource-tagged emission
 subset. Windows reports `scalar-and-llp64-c-scalar-c11`. Both keep `emittable`, `conformant`, and `supported` false and list

@@ -198,14 +198,15 @@ its 12 pass plans now cross separate caller and callee C11 translation units thr
 at both profiles. Independent compiler or assembly/register inspection, source-level Fairy
 crossings, and a hosted Windows receipt remain absent. PE/COFF objects, runtime, standard library,
 supported distribution artifacts, and conformance remain later gates. A bounded parser now checks
-the host-smoke product, both declared-target profile products, and six native probe executables for AMD64 PE32+ console identity, aligned
+the host-smoke product, both declared-target profile products, one direct run-target temporary
+product, and six native probe executables for AMD64 PE32+ console identity, aligned
 headers/sections, and an executable entry point, but does not inspect `.obj` symbols, relocations,
 unwind payloads, or CodeView/PDB data.
 Every local MSVC compile in the same lane now also parses its intermediate `.obj` as raw AMD64 COFF
 before cleanup, including `.text$...`, `.bss`, symbol-table, and relocation-index structure. Exact
 versioned symbol names, COMDAT selection, relocation types, unwind records, and a hosted object
 receipt remain absent, so the target evidence marker stays fail-closed.
-The nine local PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
+The ten local PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
 runtime-function ordering and code coverage plus referenced version 1 and version 2 unwind-record
 bounds, including handler/chained minimum tails. A separate three-object probe now raises a private
 noncontinuable exception at both profiles, validates its payload in an outer SEH filter, walks the
@@ -235,6 +236,11 @@ Every other foreign symbol, unproven Windows standard-library component, compani
 linker argument, debug output, packaging, and hosted receipt remains closed. The Windows TargetSpec therefore reports
 `scalar-and-llp64-c-scalar-c11` and no longer lists `target-c-emission-profile`, while all three
 maturity booleans remain false.
+The same target compilation is now exposed through `experimental run-target`. It validates PE and
+Microsoft x64 unwind structure, executes a temporary optimized image of the checked-in FY target
+example, requires no output and native result 42, and removes the image. The configured Windows
+smoke therefore covers two retained target builds plus one direct target execution and ten total PE
+images. This improves the developer execution path without changing target maturity.
 
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.
