@@ -343,6 +343,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - A small MIR interpreter is the semantic oracle before any second native backend.
 - Its unstable `experimental run` path accepts one entry plus an explicit bounded repeated-`--source`
   closure, selects the entry module's `main() -> i32`, and performs no source discovery.
+- Its unstable `experimental check` path accepts one primary source plus the same bounded repeated
+  `--source` closure, requires no executable entry, and stops after MIR verification. It performs no
+  backend, target, toolchain, process, network, or artifact action and does not stabilize the future
+  package-aware `fairyc check` command.
 - Its fixture-only output hooks require explicit manifest bindings, capture bytes in memory under a
   shared limit, and never authorize source names, the CLI, or host streams.
 - The current C backend emits deterministic C11 only for verified scalar, inert-struct,

@@ -35,6 +35,7 @@ Usage:
   fairyc experimental parse <file.fy>
   fairyc experimental check-syntax <file.fy>
   fairyc experimental check-semantics <file.fy> [<file.fy>...]
+  fairyc experimental check <primary.fy> [--source <file.fy>]...
   fairyc experimental target-spec <target-id>
   fairyc experimental emit-c <entry.fy> [--source <file.fy>]...
   fairyc experimental build <entry.fy> [--source <file.fy>]... --cc <clang|gcc> --profile <low|optimized> --output <build/path>
@@ -46,8 +47,8 @@ Usage:
   fairyc experimental run <entry.fy> [--source <file.fy>]...
   fairyc --help
 
-The experimental commands are unstable. The reserved "fairyc check" command is not implemented
-until effect and later semantic analysis groups exist.
+The experimental commands are unstable. The release-stable "fairyc check" command remains reserved;
+use "fairyc experimental check" for the current verified-MIR source-closure check.
 `
 
 // Run executes one bounded command without reading global process arguments or exiting the process.
@@ -74,7 +75,7 @@ func Run(args []string, sourceRoot string, stdout, stderr io.Writer) int {
 		return runTargets(args[1:], stdout, stderr)
 	}
 	if args[0] == "check" {
-		return invocationError(stderr, `"check" is reserved for the full semantic pipeline; use "experimental check-syntax" for parser-only validation`)
+		return invocationError(stderr, `"check" is reserved for the release-stable package-aware pipeline; use "experimental check" for the current verified-MIR source closure`)
 	}
 	if args[0] != "experimental" {
 		return invocationError(stderr, fmt.Sprintf("unknown command %q", args[0]))
@@ -146,6 +147,8 @@ func runExperimental(args []string, sourceRoot string, stdout, stderr io.Writer)
 			return invocationError(stderr, "experimental command \"check-semantics\" expects one or more source files")
 		}
 		return runCheckSemantics(args[1:], sourceRoot, stdout, stderr)
+	case "check":
+		return runCheck(args[1:], sourceRoot, stdout, stderr)
 	case "run":
 		return runInterpreter(args[1:], sourceRoot, stdout, stderr)
 	case "target-spec":
@@ -206,11 +209,19 @@ func parseRunSources(arguments []string) ([]string, error) {
 }
 
 func parseExplicitSources(command string, arguments []string) ([]string, error) {
+	return parseExplicitSourceSet(command, "entry", arguments)
+}
+
+func parseCheckSources(arguments []string) ([]string, error) {
+	return parseExplicitSourceSet("check", "primary", arguments)
+}
+
+func parseExplicitSourceSet(command, firstRole string, arguments []string) ([]string, error) {
 	if len(arguments) == 0 {
-		return nil, fmt.Errorf("experimental command %q expects one entry source file", command)
+		return nil, fmt.Errorf("experimental command %q expects one %s source file", command, firstRole)
 	}
 	if arguments[0] == "" || strings.HasPrefix(arguments[0], "-") {
-		return nil, fmt.Errorf("experimental command %q expects the entry source file before its flags", command)
+		return nil, fmt.Errorf("experimental command %q expects the %s source file before its flags", command, firstRole)
 	}
 	additional := make([]string, 0, (len(arguments)-1)/2)
 	for index := 1; index < len(arguments); index += 2 {
@@ -225,6 +236,27 @@ func parseExplicitSources(command string, arguments []string) ([]string, error) 
 		}
 	}
 	return programSourceSet(arguments[0], additional), nil
+}
+
+func runCheck(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
+	sources, err := parseCheckSources(arguments)
+	if err != nil {
+		return invocationError(stderr, err.Error())
+	}
+	lowered, code := lowerCheckedSources(sources, sourceRoot, stderr, "verified-MIR check")
+	if code != ExitSuccess {
+		return code
+	}
+	if _, err := fmt.Fprintf(
+		stdout,
+		"check ok: %d file(s) (verified MIR: %d function(s), %d foreign declaration(s))\n",
+		len(sources),
+		len(lowered.program.Functions),
+		len(lowered.program.ForeignFunctions),
+	); err != nil {
+		return outputError(stderr)
+	}
+	return ExitSuccess
 }
 
 func appendProgramSource(command string, additional *[]string, value string) error {
@@ -274,6 +306,14 @@ func lowerSingleProgram(argument, sourceRoot string, stderr io.Writer, subset st
 }
 
 func lowerProgramSources(arguments []string, sourceRoot string, stderr io.Writer, subset string) (loweredProgram, int) {
+	return lowerProgramSourcesInternal(arguments, sourceRoot, stderr, subset, true)
+}
+
+func lowerCheckedSources(arguments []string, sourceRoot string, stderr io.Writer, subset string) (loweredProgram, int) {
+	return lowerProgramSourcesInternal(arguments, sourceRoot, stderr, subset, false)
+}
+
+func lowerProgramSourcesInternal(arguments []string, sourceRoot string, stderr io.Writer, subset string, requireEntry bool) (loweredProgram, int) {
 	limits := source.DefaultLimits()
 	if len(arguments) == 0 {
 		return loweredProgram{}, invocationError(stderr, "a program source entry is required")
@@ -348,6 +388,9 @@ func lowerProgramSources(arguments []string, sourceRoot string, stderr io.Writer
 	}
 	if failures := mir.Verify(program); len(failures) != 0 {
 		return loweredProgram{}, internalError(stderr)
+	}
+	if !requireEntry {
+		return loweredProgram{program: program}, ExitSuccess
 	}
 	entryName := entryModule + "::main"
 	entry, found := programEntry(program, entryName)

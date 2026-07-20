@@ -150,6 +150,10 @@ ADR 0126 adds checked mutable scalar-array and `&mut [u8]` indexed assignment, m
 bounds-before-value evaluation order, and the private `array-index-store`/`view-index-store` MIR
 forms. These are pre-1 source and internal-IR additions; mutable slicing, public slice layout, foreign
 safe references, and stable MIR serialization remain absent.
+ADR 0127 adds the provisional `experimental check` spelling, explicit primary-plus-source closure,
+and one human verified-MIR count line. These are prototype CLI contracts only. They do not stabilize
+the future package-aware `fairyc check`, configuration, target selection, JSON, exit codes, or
+function-count meaning.
 ADR 0113 admits branch-aware safe-borrow reassignment with right-hand-side-first replacement,
 loan-generation preservation across aliases, reachable `if`/`match` origin joins, and path-aware
 loan liveness. Those rules and fail-closed multi-origin returns are pre-1 semantics. ADR 0114 adds compiler-internal fixed-point return-origin

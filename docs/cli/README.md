@@ -23,7 +23,9 @@ The Go frontend currently exposes the source-independent
 `fairyc explain <diagnostic-code>` lookup, the host-independent `fairyc targets` maturity report,
 plus `fairyc experimental parse <file.fy>`,
 `fairyc experimental check-syntax <file.fy>`, and
-`fairyc experimental check-semantics <file.fy> [<file.fy>...]`. The compiler prototype also exposes
+`fairyc experimental check-semantics <file.fy> [<file.fy>...]`. The complete implemented
+non-executing pipeline is `fairyc experimental check <primary.fy> [--source <file.fy>]...`.
+The compiler prototype also exposes
 `fairyc experimental target-spec <x86_64-linux-gnu|x86_64-windows-msvc>` for deterministic
 host-independent target inspection,
 `fairyc experimental emit-c <entry.fy> [--source <file.fy>]...` for deterministic scalar, explicitly link-mapped foreign-call,
@@ -47,7 +49,15 @@ It checks local last-use loans, borrow conflicts, borrow return origins, whole m
 branch joins, loop back-edges and control exits, Region parameter origins, `place`, and lexical Region escape when its
 Arena provider is included explicitly. It also checks Result return, discard, propagation, local
 and parameter transfer, branch and loop obligations, overwrite and early-return rejection, and
-error compatibility. `experimental run` analyzes only its explicit entry-plus-`--source` closure and executes the selected
+error compatibility.
+
+`experimental check` uses the same bounded explicit closure transport as `run`, but the primary file
+need not define `main`. It stops after MIR verification and reports function plus foreign-declaration
+counts. It performs no target selection, interpreter execution, C emission, toolchain discovery,
+process execution, network access, or artifact write, so verified FFI wrappers can pass even though
+`experimental run` cannot execute their foreign calls.
+
+`experimental run` analyzes only its explicit entry-plus-`--source` closure and executes the selected
 module's zero-argument `main() -> i32` through verified MIR, including boolean `if`,
 short-circuit control, scalar `while`, whole resources, copy-only and resource-bearing built-in
 tags, ordered

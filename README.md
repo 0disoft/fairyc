@@ -59,7 +59,7 @@ subtraction, multiplication, division, remainder, bitwise operations, and checke
 typed equality across `bool` and the four Fairy integer scalars,
 typed ordering across those integer scalars, borrowed UTF-8/byte-slice internal calls, and private
 value-semantic scalar fixed arrays with exact lengths, contextual immutable and mutable byte-view borrowing,
-and checked read-only indexing. The cases cover
+and checked indexed reads and mutable stores. The cases cover
 resource construction, field reads, whole-root call moves, live reassignment, calls and control
 flow, active-payload moves, Result propagation, bitwise operations, checked division and shift, overflow
 trapping, scalar `Option` Some and None, and scalar `Result` propagation success and failure. This
@@ -333,6 +333,7 @@ go run ./cmd/fairyc experimental check-semantics examples/semantic/main.fy examp
 go run ./cmd/fairyc experimental check-semantics examples/resources/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/regions/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/results/main.fy
+go run ./cmd/fairyc experimental check examples/run/modules/main.fy --source examples/run/modules/math.fy
 go run ./cmd/fairyc experimental target-spec x86_64-linux-gnu
 go run ./cmd/fairyc experimental target-spec x86_64-windows-msvc
 go run ./cmd/fairyc experimental emit-c examples/c/main.fy
@@ -365,6 +366,9 @@ deterministic JSON containing token and CST kinds and byte spans, but not source
 literal values, or absolute paths. `check-semantics` accepts an explicit bounded list of source files
 for the currently implemented scalar, safe-borrow, whole-resource, Region-parameter, and Result subset. It rejects duplicate paths, root
 escapes, oversized input sets, and unsupported syntax rather than claiming success. The official
+`experimental check` continues that explicit closure through MIR lowering and verification without
+requiring `main`, running code, generating C, probing MSVC or WSL, or writing an artifact. It can
+therefore validate an admitted FFI wrapper that the interpreter cannot execute. The official
 `experimental run` accepts one entry plus a bounded explicit repeated-`--source` module closure whose
 entry module contains `main() -> i32`, then executes its
 verified MIR in the bounded interpreter, including boolean `if`, short-circuit control, scalar `while`,
@@ -375,8 +379,8 @@ addition, subtraction, multiplication, negation, matching-type bitwise operation
 signed or unsigned right shift. It performs no source
 discovery and needs no C toolchain, MSVC, WSL, or host subprocess, and reports either `result: <i32>` or a canonical
 trap. The official
-`fairyc check` command remains unavailable until the remaining semantic groups exist. The effect
-checker is implemented, but that does not substitute for the rest of the command contract.
+release-stable `fairyc check` command remains unavailable; `experimental check` does not settle
+package discovery, targets, configuration, JSON, or stable output and exit codes.
 
 `experimental target-spec` accepts exactly one known Linux GNU or Windows MSVC ID and writes
 deterministic `fairyc.target-spec/v0` JSON. The result separates target semantics from local

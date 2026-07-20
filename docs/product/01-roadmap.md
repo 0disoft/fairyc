@@ -46,7 +46,14 @@ unsigned right shift execute across trapping and
   non-trapping boundaries with exact overflow, division-by-zero, or invalid-shift
   categories. Matching-type left shift additionally traps on an unrepresentable result, with
   invalid amount taking precedence over overflow. Nearest-loop `break` and `continue` now execute
-  with resource and Region cleanup. Verified resource definitions now preserve ordered fields and
+  with resource and Region cleanup.
+
+The sibling `experimental check` command accepts the same bounded explicit source closure but
+requires no executable entry and stops after MIR verification. It validates admitted libraries and
+FFI wrappers without interpreter, backend, target, toolchain, process, network, or artifact access;
+release-stable `fairyc check` semantics remain a later gate.
+
+Verified resource definitions now preserve ordered fields and
   drop classification from AST through HIR into MIR; nonempty user drop bodies now lower to
   verifier-linked private functions and execute before reverse field cleanup. Resource-declared
   effects are preserved and required only at actual cleanup edges. Restricted inert enums now preserve named payloads,
@@ -55,7 +62,7 @@ unsigned right shift execute across trapping and
   verified scalar, borrowed-view, typed-comparison, inert-enum, flat-resource, and resource-tagged cases under the provisional `x86_64-linux-gnu` profile,
   including `Option<i32>` and `Result<i32, i32>` construction, match, calls, and propagation,
   copy-scalar/inert-struct tagged transport, private
-  positive scalar fixed-array construction, contextual zero-copy shared and mutable `[u8; N]` byte-view borrowing, exact length observation, internal value calls, and checked read-only indexing, plus
+  positive scalar fixed-array construction, contextual zero-copy shared and mutable `[u8; N]` byte-view borrowing, exact length observation, internal value calls, and checked reads and indexed stores, plus
   flat copy-resource construction, field reads, moves, reassignment, and resource-bearing built-in
   tag variants and propagation. The unstable
   `experimental emit-c` command exposes that exact verified translation unit on stdout
@@ -84,7 +91,7 @@ smokes. It now adds four-way product builds containing compiler-owned nonempty `
 private compiler-owned `&[u8]` view, plus separate generated-Fairy-to-C calls that verify every byte
 of `fairy\0` and every non-terminated byte of `fairy` respectively. The same job
 also compiles and executes each production, uninstrumented C unit with Clang
-and GCC under the closed `address-undefined-o1` ASan+UBSan mode for 70 fail-closed sanitizer
+and GCC under the closed `address-undefined-o1` ASan+UBSan mode for 72 fail-closed sanitizer
 executions. The current Windows
 host has no eligible Linux toolchain, and no hosted run receipt has been observed, so this is a
 configured lane rather than native conformance evidence. A shared bounded C driver and embedded

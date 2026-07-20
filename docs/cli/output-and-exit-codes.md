@@ -54,6 +54,10 @@ Unexpected arguments use code `2`; output-write failure uses code `4`.
 `experimental check-syntax` writes human diagnostics to stderr and does not emit a machine result.
 `experimental check-semantics` writes one success line with typed-HIR module and function counts for
 a multi-file input, semantic diagnostics on stderr, or an explicit unsupported-subset message on stderr.
+`experimental check` writes exactly
+`check ok: <files> file(s) (verified MIR: <functions> function(s), <foreign> foreign declaration(s))`
+after the complete explicit closure passes MIR verification. It emits no partial success output on
+source diagnostics or subset failure and requires no executable entry, backend, toolchain, or write.
 `experimental target-spec` writes one deterministic `fairyc.target-spec/v0` JSON document, defined
 by `spec/cli/experimental-target-spec-v0.schema.json`, to stdout. Missing, extra, or unknown target
 IDs produce code `2`, no JSON, and a bounded invocation diagnostic on stderr.

@@ -116,6 +116,71 @@ func TestExperimentalCheckSemanticsAcceptsExplicitModuleSet(t *testing.T) {
 	}
 }
 
+func TestExperimentalCheckBuildsVerifiedMIRWithoutExecuting(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "library.fy", `module library;
+@link_name("fairyc_fixture_add_one")
+unsafe extern C fn add_one(value: i32) -> i32;
+pub fn answer() -> i32 { unsafe { add_one(41) } }
+`)
+	code, stdout, stderr := runForTest([]string{"experimental", "check", "library.fy"}, root)
+	want := "check ok: 1 file(s) (verified MIR: 1 function(s), 1 foreign declaration(s))\n"
+	if code != ExitSuccess || stdout != want || stderr != "" {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
+func TestExperimentalCheckAcceptsExplicitSourceClosure(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\nimport helper as h;\nfn main() -> i32 { h::answer() }\n")
+	writeTestSource(t, root, "helper.fy", "module helper;\npub fn answer() -> i32 { 42 }\n")
+	code, stdout, stderr := runForTest([]string{"experimental", "check", "main.fy", "--source", "helper.fy"}, root)
+	want := "check ok: 2 file(s) (verified MIR: 2 function(s), 0 foreign declaration(s))\n"
+	if code != ExitSuccess || stdout != want || stderr != "" {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
+func TestExperimentalCheckReportsSourceDiagnostics(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { missing }\n")
+	code, stdout, stderr := runForTest([]string{"experimental", "check", "main.fy"}, root)
+	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "E0101: unresolved name or path") {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
+func TestParseCheckSourcesRejectsInvalidClosureArguments(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		arguments []string
+		contains  string
+	}{
+		{nil, "expects one primary source file"},
+		{[]string{"--source", "helper.fy"}, "primary source file before"},
+		{[]string{"main.fy", "--profile", "low"}, "does not accept flag"},
+		{[]string{"main.fy", "--source"}, "requires a value for --source"},
+	} {
+		if _, err := parseCheckSources(test.arguments); err == nil || !strings.Contains(err.Error(), test.contains) {
+			t.Errorf("parseCheckSources(%q) error = %v; want containing %q", test.arguments, err, test.contains)
+		}
+	}
+}
+
+func TestExperimentalCheckOutputFailureReturnsInternalFailure(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { 42 }\n")
+	var stderr bytes.Buffer
+	code := Run([]string{"experimental", "check", "main.fy"}, root, failingWriter{}, &stderr)
+	if code != ExitInternalFailure || !strings.Contains(stderr.String(), "write output failed") {
+		t.Fatalf("Run() = code %d, stderr %q", code, stderr.String())
+	}
+}
+
 func TestLowerProgramSourcesBuildsExplicitModuleClosure(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
@@ -842,7 +907,8 @@ func TestStableCheckRemainsReserved(t *testing.T) {
 	if code != ExitInvalidInvocation || stdout != "" {
 		t.Fatalf("Run() = code %d, stdout %q", code, stdout)
 	}
-	if !strings.Contains(stderr, "reserved for the full semantic pipeline") {
+	if !strings.Contains(stderr, "reserved for the release-stable package-aware pipeline") ||
+		!strings.Contains(stderr, `use "experimental check"`) {
 		t.Fatalf("stderr = %q", stderr)
 	}
 }
@@ -920,7 +986,7 @@ func TestExplainOutputFailureReturnsInternalFailure(t *testing.T) {
 func TestHelpAndInvocationErrorsAreSeparated(t *testing.T) {
 	t.Parallel()
 	helpCode, helpOut, helpErr := runForTest([]string{"--help"}, t.TempDir())
-	if helpCode != ExitSuccess || !strings.Contains(helpOut, "fairyc explain") || !strings.Contains(helpOut, "experimental parse") || !strings.Contains(helpOut, "experimental target-spec") || !strings.Contains(helpOut, "experimental emit-c") || !strings.Contains(helpOut, "experimental build") || !strings.Contains(helpOut, "experimental build-target") || !strings.Contains(helpOut, "experimental run-target") || !strings.Contains(helpOut, "experimental exec-target") || !strings.Contains(helpOut, "experimental build-host") || !strings.Contains(helpOut, "experimental run-host") || helpErr != "" {
+	if helpCode != ExitSuccess || !strings.Contains(helpOut, "fairyc explain") || !strings.Contains(helpOut, "experimental parse") || !strings.Contains(helpOut, "experimental check <primary.fy>") || !strings.Contains(helpOut, "experimental target-spec") || !strings.Contains(helpOut, "experimental emit-c") || !strings.Contains(helpOut, "experimental build") || !strings.Contains(helpOut, "experimental build-target") || !strings.Contains(helpOut, "experimental run-target") || !strings.Contains(helpOut, "experimental exec-target") || !strings.Contains(helpOut, "experimental build-host") || !strings.Contains(helpOut, "experimental run-host") || helpErr != "" {
 		t.Fatalf("help = code %d, stdout %q, stderr %q", helpCode, helpOut, helpErr)
 	}
 	errorCode, errorOut, errorErr := runForTest(nil, t.TempDir())
