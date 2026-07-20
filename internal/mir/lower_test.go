@@ -873,6 +873,80 @@ fn main() -> i32 {
 	}
 }
 
+func TestLowerNormalizesOmittedImmutableByteViewSliceBounds(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+fn main() -> i32 {
+    let bytes: &[u8] = b"fairy"[..];
+    if bytes.len == 5 { 42 } else { 1 }
+}
+`)
+	function := &program.Functions[0]
+	var length *Operation
+	var check *Operation
+	for blockIndex := range function.Blocks {
+		for operationIndex := range function.Blocks[blockIndex].Operations {
+			operation := &function.Blocks[blockIndex].Operations[operationIndex]
+			if operation.Kind == OperationViewLength && length == nil {
+				length = operation
+			}
+			if operation.Kind == OperationViewSliceCheck {
+				check = operation
+			}
+		}
+	}
+	if length == nil || len(length.Operands) != 1 || length.Operands[0].Kind != OperandByteString {
+		t.Fatalf("omitted end length = %+v", length)
+	}
+	if check == nil || len(check.Operands) != 3 || check.Operands[1].Kind != OperandUSize || check.Operands[1].U64 != 0 ||
+		check.Operands[2].Kind != OperandLocal || check.Operands[2].Local != length.DestinationLocal {
+		t.Fatalf("normalized slice check = %+v, length = %+v", check, length)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+}
+
+func TestLowerOmittedSliceEndDoesNotReevaluateReceiver(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+fn identity(bytes: &[u8]) -> &[u8] { bytes }
+fn main() -> i32 {
+    let bytes: &[u8] = identity(b"fairy")[1..];
+    if bytes.len == 4 { 42 } else { 1 }
+}
+`)
+	var function *Function
+	for index := range program.Functions {
+		if program.Functions[index].Name == "main::main" {
+			function = &program.Functions[index]
+			break
+		}
+	}
+	if function == nil {
+		t.Fatal("main function is missing")
+	}
+	if len(function.Calls) != 1 {
+		t.Fatalf("main calls = %+v, want one receiver evaluation", function.Calls)
+	}
+	var length *Operation
+	for blockIndex := range function.Blocks {
+		for operationIndex := range function.Blocks[blockIndex].Operations {
+			operation := &function.Blocks[blockIndex].Operations[operationIndex]
+			if operation.Kind == OperationViewLength {
+				length = operation
+				break
+			}
+		}
+	}
+	if length == nil || len(length.Operands) != 1 || length.Operands[0].Kind != OperandLocal {
+		t.Fatalf("omitted-end length = %+v", length)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+}
+
 func TestLowerPreservesValuePreservingIntegerCast(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;

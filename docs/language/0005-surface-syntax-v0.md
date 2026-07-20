@@ -67,11 +67,13 @@ an unsuffixed integer literal receives that contextual type. The result has type
 and index evaluate once from left to right, and an index greater than or equal to `.len` traps with
 category `bounds` before any data access.
 
-The same immutable view supports `bytes[start..end]` with two mandatory `usize` bounds and an
-exclusive end. Receiver, start, and end evaluate once from left to right. The result is `&[u8]`
-with the receiver's borrow origin when `start <= end && end <= bytes.len`; otherwise evaluation
-traps with `bounds` before deriving a pointer. This does not admit omitted or inclusive bounds,
-`str` indexing or slicing, indexed assignment, mutable byte views, or unchecked access.
+The same immutable view supports end-exclusive `bytes[start..end]`, `bytes[..end]`,
+`bytes[start..]`, and `bytes[..]`. Written bounds have type `usize`; an omitted start is zero and an
+omitted end is the retained length of the already-evaluated receiver. The receiver and every
+written bound evaluate once from left to right. The result is `&[u8]` with the receiver's borrow
+origin when `start <= end && end <= bytes.len`; otherwise evaluation traps with `bounds` before
+deriving a pointer. This does not admit inclusive bounds, `str` indexing or slicing, indexed
+assignment, mutable byte views, or unchecked access.
 
 Ordinary internal functions may accept `&str` and `&[u8]` parameters. Calls preserve the exact safe
 borrow and its caller-proven origin; they do not convert the argument to a raw pointer or transfer

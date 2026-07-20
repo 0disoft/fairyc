@@ -25,6 +25,7 @@
     "docs/adr/0104-borrowed-view-emptiness.md",
     "docs/adr/0105-checked-immutable-byte-view-slicing.md",
     "docs/adr/0106-always-checked-assert.md",
+    "docs/adr/0107-omitted-immutable-byte-view-slice-bounds.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/mir-v0.md",
     "docs/engineering/05-testing-standard.md"
@@ -1234,6 +1235,27 @@
       "sources": ["main.fy"],
       "entry": "main::end_after_length",
       "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "trap", "category": "bounds" }
+    },
+    {
+      "id": "pass.interpreter.view-slice-omitted-start",
+      "sourceRoot": "cases/pass/view-slice/src",
+      "sources": ["main.fy"],
+      "entry": "main::omitted_start",
+      "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "return", "value": 42 }
+    },
+    {
+      "id": "pass.interpreter.view-slice-omitted-end",
+      "sourceRoot": "cases/pass/view-slice/src",
+      "sources": ["main.fy"],
+      "entry": "main::omitted_end",
+      "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "return", "value": 42 }
+    },
+    {
+      "id": "pass.interpreter.view-slice-omitted-both",
+      "sourceRoot": "cases/pass/view-slice/src",
+      "sources": ["main.fy"],
+      "entry": "main::omitted_both",
+      "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "return", "value": 42 }
     },
     {
       "id": "pass.interpreter.assert-true",

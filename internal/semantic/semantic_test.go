@@ -1460,6 +1460,38 @@ fn trim(bytes: &[u8]) -> &[u8] { bytes[1..2] }
 	}
 }
 
+func TestAnalyzeTypesImmutableByteViewSliceWithOmittedBounds(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		name         string
+		bounds       string
+		omittedStart bool
+		omittedEnd   bool
+	}{
+		{name: "start", bounds: "..4", omittedStart: true},
+		{name: "end", bounds: "1..", omittedEnd: true},
+		{name: "both", bounds: "..", omittedStart: true, omittedEnd: true},
+	} {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			result := analyzeText(t, map[string]string{
+				"main.fy": "module main;\nfn trim(bytes: &[u8]) -> &[u8] { bytes[" + test.bounds + "] }\n",
+			})
+			assertCleanTypeResult(t, result)
+			expression := result.HIR.Modules[0].Functions[0].Body.Tail
+			if expression == nil || expression.Kind != "view-slice" || len(expression.Children) != 3 {
+				t.Fatalf("slice expression = %+v", expression)
+			}
+			if got := expression.Children[1].Kind == "omitted-range-bound"; got != test.omittedStart {
+				t.Fatalf("start kind = %q, omitted = %v", expression.Children[1].Kind, got)
+			}
+			if got := expression.Children[2].Kind == "omitted-range-bound"; got != test.omittedEnd {
+				t.Fatalf("end kind = %q, omitted = %v", expression.Children[2].Kind, got)
+			}
+		})
+	}
+}
+
 func TestAnalyzeRejectsUnsupportedViewSliceShapes(t *testing.T) {
 	t.Parallel()
 	t.Run("text receiver", func(t *testing.T) {

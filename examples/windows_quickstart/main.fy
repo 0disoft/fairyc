@@ -1,7 +1,7 @@
 module examples::windows_quickstart::main;
 
 fn main() -> i32 {
-    let bytes: &[u8] = b"\x00\x13\x17\x00"[1..3];
+    let bytes: &[u8] = b"\x00\x13\x17\x00"[1..];
     var index: usize = 0;
     var total: i32 = 0;
     while index < bytes.len {

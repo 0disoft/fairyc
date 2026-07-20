@@ -65,9 +65,28 @@ func (p *parser) parseExpression(minBindingPower int, allowRecord bool) NodeID {
 				return left
 			}
 			p.advance()
+			if p.at("..") {
+				omittedStartToken := p.currentFullIndex()
+				p.advance()
+				omittedStart := p.addNode(KindOmitBound, omittedStartToken, nil, "start", "")
+				end := NoNode
+				if p.at("]") {
+					end = p.addNode(KindOmitBound, p.currentFullIndex(), nil, "end", "")
+				} else {
+					end = p.parseExpression(0, true)
+				}
+				p.expect("]")
+				left = p.addNode(KindSlice, start, []NodeID{left, omittedStart, end}, "..", "")
+				continue
+			}
 			first := p.parseExpression(0, true)
 			if p.match("..") {
-				end := p.parseExpression(0, true)
+				end := NoNode
+				if p.at("]") {
+					end = p.addNode(KindOmitBound, p.currentFullIndex(), nil, "end", "")
+				} else {
+					end = p.parseExpression(0, true)
+				}
 				p.expect("]")
 				left = p.addNode(KindSlice, start, []NodeID{left, first, end}, "..", "")
 				continue

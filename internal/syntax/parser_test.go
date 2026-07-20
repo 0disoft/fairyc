@@ -118,6 +118,44 @@ func TestParseImmutableByteViewSlice(t *testing.T) {
 	}
 }
 
+func TestParseImmutableByteViewSliceWithOmittedBounds(t *testing.T) {
+	t.Parallel()
+	for _, bounds := range []string{"..4", "1..", ".."} {
+		bounds := bounds
+		t.Run(bounds, func(t *testing.T) {
+			input := []byte("module main;\nfn main() -> &[u8] { b\"fairy\"[" + bounds + "] }\n")
+			tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+			if len(tree.Diagnostics) != 0 {
+				t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+			}
+			var slice *Node
+			for index := range tree.Nodes {
+				if tree.Nodes[index].Kind == KindSlice {
+					slice = &tree.Nodes[index]
+				}
+			}
+			if slice == nil || len(slice.Children) != 3 {
+				t.Fatalf("slice node = %+v", slice)
+			}
+			start, startFound := tree.Node(slice.Children[1])
+			end, endFound := tree.Node(slice.Children[2])
+			if !startFound || !endFound {
+				t.Fatalf("slice bounds are missing from tree: start=%v end=%v", startFound, endFound)
+			}
+			if bounds[0] == '.' && (start.Kind != KindOmitBound || start.Text != "start") {
+				t.Fatalf("slice start = %+v", start)
+			}
+			if bounds[len(bounds)-1] == '.' && (end.Kind != KindOmitBound || end.Text != "end") {
+				t.Fatalf("slice end = %+v", end)
+			}
+			reconstructed, ok := tree.Reconstruct()
+			if !ok || !slices.Equal(reconstructed, input) {
+				t.Fatalf("Reconstruct() = %q, %v; want %q, true", reconstructed, ok, input)
+			}
+		})
+	}
+}
+
 func TestParseAlwaysCheckedAssertStatement(t *testing.T) {
 	t.Parallel()
 	input := []byte("module main;\nfn main() -> i32 { assert(true); 42 }\n")

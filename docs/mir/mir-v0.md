@@ -10,7 +10,7 @@ MIR is the only executable semantic contract consumed by backends. It records ev
 
 MIR v0 is a mutable-local control-flow graph rather than SSA. SSA conversion is a backend or optimization concern after the semantic form is verified.
 
-The current Go prototype implements the source-linked subset exercised by all eleven MIR v0 normalization fixtures: ordered calls, complete-root and tagged-payload moves, RHS-before-drop resource reassignment, explicit normal-exit cleanup, lexical Region placement and reset on fallthrough, direct return, Result propagation, nested exits, nearest-loop `break` and `continue`, `Result` propagation branches, checked division, remainder, arithmetic, shift, byte-view, and assertion traps, and non-unwinding successors. The same verifier passes all ten named baselines and rejects all twenty-one isolated v0 mutations with their single expected `Vxxxx` result. The bounded interpreter executes all eighty-four interpreter v0 cases for scalar and tagged control, typed scalar comparisons, borrowed-view length and emptiness metadata, checked byte indexing and slicing, always-checked assertions, value-preserving integer casts, and checked `i32`, `u8`, `u32`, and `usize` arithmetic, division, remainder, bitwise operations, and left/right shift, resource construction and field reads, whole-root and active-payload moves, resource returns and propagation, live/dead/self reassignment, consuming-close ownership, nested and loop-control cleanup, source-linked drop traces, Region reset paths, controlled in-memory test output, exact trap and boundary outcomes, and the step and output limits; user drop-body effects and later runtime behavior remain unfinished gates.
+The current Go prototype implements the source-linked subset exercised by all eleven MIR v0 normalization fixtures: ordered calls, complete-root and tagged-payload moves, RHS-before-drop resource reassignment, explicit normal-exit cleanup, lexical Region placement and reset on fallthrough, direct return, Result propagation, nested exits, nearest-loop `break` and `continue`, `Result` propagation branches, checked division, remainder, arithmetic, shift, byte-view, and assertion traps, and non-unwinding successors. The same verifier passes all ten named baselines and rejects all twenty-one isolated v0 mutations with their single expected `Vxxxx` result. The bounded interpreter executes all eighty-seven interpreter v0 cases for scalar and tagged control, typed scalar comparisons, borrowed-view length and emptiness metadata, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, value-preserving integer casts, and checked `i32`, `u8`, `u32`, and `usize` arithmetic, division, remainder, bitwise operations, and left/right shift, resource construction and field reads, whole-root and active-payload moves, resource returns and propagation, live/dead/self reassignment, consuming-close ownership, nested and loop-control cleanup, source-linked drop traces, Region reset paths, controlled in-memory test output, exact trap and boundary outcomes, and the step and output limits; user drop-body effects and later runtime behavior remain unfinished gates.
 
 ## Lowering pipeline
 
@@ -108,6 +108,11 @@ already-evaluated `&[u8]` receiver, `usize` start, and `usize` exclusive end in 
 continuation produces `&[u8]` only after the checked edge proves `start <= end && end <= len`.
 `V1001` rejects malformed view or bound metadata; `V1501` rejects a missing marker, reordered
 operands, wrong trap edge, or non-dominating check.
+
+Source omitted bounds exist only in typed HIR. An omitted start becomes `usize` zero; an omitted end
+becomes one `view-length` read from the already-materialized receiver. Lowering then emits the same
+three already-evaluated operands as an explicit-bound slice. No omitted-bound marker may survive in
+verified MIR, and receiver evaluation is never duplicated to obtain the default end.
 
 The implemented raw-address operation accepts only a direct local place produced by an exact safe
 borrow-to-raw-pointer cast. It records pointee type, source borrow mutability, destination pointer

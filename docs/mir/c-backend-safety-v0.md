@@ -162,7 +162,9 @@ semantics, and it is emitted only in functions containing checked division or re
 - Immutable byte-view slicing emits both `start > end` and `end > length` checks before any C
   pointer addition. Only the success continuation constructs the private `{ data + start,
   end - start }` view, so neither unsigned subtraction nor pointer formation can precede the
-  dominating `bounds` decision.
+  dominating `bounds` decision. An omitted start reaches this path as `usize` zero; an omitted end
+  is a prior metadata read from the already-materialized receiver, never a second receiver
+  evaluation.
 
 ## Traps and cleanup
 

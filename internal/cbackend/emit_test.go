@@ -328,6 +328,28 @@ fn main() -> i32 {
 	}
 }
 
+func TestEmitImmutableByteViewSliceWithOmittedBounds(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn main() -> i32 {
+    let bytes: &[u8] = b"fairy"[1..];
+    if bytes.len == 4 && bytes[3] == 121 { 42 } else { 1 }
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, feature := range []string{"view-length", "view-slice", "view-index"} {
+		if !slices.Contains(unit.Features, feature) {
+			t.Errorf("features %v are missing %q", unit.Features, feature)
+		}
+	}
+	if !strings.Contains(unit.Source, ".length;") || !strings.Contains(unit.Source, ".data + (") {
+		t.Fatalf("generated C does not normalize the omitted end through retained length:\n%s", unit.Source)
+	}
+}
+
 func TestEmitValuePreservingIntegerCast(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

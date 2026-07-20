@@ -54,6 +54,7 @@ const (
 	KindCall       Kind = "call"
 	KindIndex      Kind = "index"
 	KindSlice      Kind = "slice"
+	KindOmitBound  Kind = "omitted-range-bound"
 	KindFieldExpr  Kind = "field-expression"
 	KindPropagate  Kind = "propagate"
 	KindArray      Kind = "array"

@@ -470,8 +470,8 @@ func (c *typeChecker) checkSlice(expression *ast.Expression, result *hir.Express
 		return hir.TypeInvalid
 	}
 	receiver, receiverType := c.checkExpression(expression.Children[0], hir.TypeInvalid)
-	start, startType := c.checkExpression(expression.Children[1], hir.TypeUSize)
-	end, endType := c.checkExpression(expression.Children[2], hir.TypeUSize)
+	start, startType := c.checkSliceBound(expression.Children[1], "start")
+	end, endType := c.checkSliceBound(expression.Children[2], "end")
 	result.Children = appendExpression(result.Children, receiver, start, end)
 	wantReceiver := hir.SharedBorrow(hir.TypeByteSlice)
 	if receiverType != wantReceiver {
@@ -486,6 +486,20 @@ func (c *typeChecker) checkSlice(expression *ast.Expression, result *hir.Express
 	result.Kind = "view-slice"
 	result.Operator = ".."
 	return wantReceiver
+}
+
+func (c *typeChecker) checkSliceBound(expression *ast.Expression, position string) (*hir.Expression, hir.Type) {
+	if expression != nil && expression.Kind == syntax.KindOmitBound {
+		if expression.Text != position {
+			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "malformed omitted slice bound")
+			return nil, hir.TypeInvalid
+		}
+		return &hir.Expression{
+			Kind: "omitted-range-bound", Type: hir.TypeUSize, Span: span(c.module.file.Path, expression.Span),
+			Operator: position, Symbol: hir.NoSymbol,
+		}, hir.TypeUSize
+	}
+	return c.checkExpression(expression, hir.TypeUSize)
 }
 
 func (c *typeChecker) checkCast(expression *ast.Expression, result *hir.Expression) hir.Type {

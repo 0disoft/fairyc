@@ -23,8 +23,9 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
 - A separate Ubuntu native-C job invokes `cmd/fairyc-native-fixtures`. The command requires
   Linux/amd64, glibc, Clang, and GCC; compiles all 29 current C-emission cases at `-O0` and
   `-O2` with pedantic warnings as errors; links the scalar trap runtime plus the closed conformance
-  drop recorder; plans 116 exact process-status and source-linked drop-sequence comparisons; and
-  compiles and executes one recursive C11 plus explicit POSIX-typedef probe for all 11 valid target-layout cases under the same
+  drop recorder; plans 116 exact process-status and source-linked drop-sequence comparisons;
+  exercises explicit and omitted-bound immutable byte-view slicing through the same checked MIR and
+  generated-C path; and compiles and executes one recursive C11 plus explicit POSIX-typedef probe for all 11 valid target-layout cases under the same
   4 compiler/profile pairs. It additionally recompiles every production C unit once per compiler
   with the closed `address-undefined-o1` ASan+UBSan mode, overrides ambient sanitizer options, and
   requires all 58 executions to produce no diagnostic. The same job generates separate caller and

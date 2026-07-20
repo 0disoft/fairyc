@@ -87,6 +87,31 @@ fn main() -> i32 {
 	}
 }
 
+func TestExecuteImmutableByteViewSliceWithOmittedBounds(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		name   string
+		bounds string
+		want   string
+	}{
+		{name: "start", bounds: "..2", want: "bytes.len == 2 && bytes[1] == 97"},
+		{name: "end", bounds: "2..", want: "bytes.len == 3 && bytes[0] == 105"},
+		{name: "both", bounds: "..", want: "bytes.len == 5 && bytes[4] == 121"},
+	} {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			program := lowerSource(t, "module main;\nfn main() -> i32 { let bytes: &[u8] = b\"fairy\"["+test.bounds+"]; if "+test.want+" { 42 } else { 1 } }\n")
+			outcome, err := interpreter.Execute(program, "main::main")
+			if err != nil {
+				t.Fatalf("Execute() error = %v", err)
+			}
+			if outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+				t.Fatalf("Execute() outcome = %+v", outcome)
+			}
+		})
+	}
+}
+
 func TestExecuteEmptyImmutableByteViewSliceAtEnd(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

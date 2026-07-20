@@ -112,6 +112,10 @@ ADR 0106 adds `assert(condition);` as an always-checked statement. Exact `bool` 
 single evaluation, profile-independent execution, and the `assertion-failed` category are pre-1
 semantics; messages, debug-only checks, compile-time assertions, and unsafe assumptions remain
 separate and unstabilized.
+ADR 0107 adds omitted start and end spellings to immutable byte-view slicing. Zero and retained
+receiver length normalization, written-bound evaluation order, the unchanged checked MIR shape,
+and the `bounds` outcome are pre-1 semantics; inclusive ranges, text slicing, and private C layout
+remain unstabilized.
 ADR 0093 admits exact `&str` and `&[u8]` parameters on ordinary internal functions. Exact source
 types, non-owning borrow behavior, matching call operands, and the absence of implicit raw-pointer
 conversion are pre-1 language semantics. Interpreter values and generated-C by-value descriptors

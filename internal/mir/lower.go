@@ -972,25 +972,48 @@ func (l *functionLowerer) lowerViewSlice(expression *hir.Expression) (Operand, e
 	if err != nil {
 		return Operand{}, err
 	}
-	start, err := l.lowerExpression(&expression.Children[1])
-	if err != nil {
-		return Operand{}, err
+	start := Operand{Kind: OperandUSize, U64: 0}
+	if expression.Children[1].Kind == "omitted-range-bound" {
+		if expression.Children[1].Operator != "start" {
+			return Operand{}, fmt.Errorf("malformed omitted byte-view slice start")
+		}
+	} else {
+		start, err = l.lowerExpression(&expression.Children[1])
+		if err != nil {
+			return Operand{}, err
+		}
 	}
-	end, err := l.lowerExpression(&expression.Children[2])
-	if err != nil {
-		return Operand{}, err
+	var end Operand
+	if expression.Children[2].Kind == "omitted-range-bound" {
+		if expression.Children[2].Operator != "end" {
+			return Operand{}, fmt.Errorf("malformed omitted byte-view slice end")
+		}
+		endLocal := l.newTemporary()
+		l.appendOperation(Operation{
+			Kind: OperationViewLength, Span: expression.Children[2].Span, DestinationLocal: endLocal,
+			Operands: []Operand{receiver}, OwnerType: wantView, Type: hir.TypeUSize, Field: "len",
+		})
+		end = Operand{Kind: OperandLocal, Local: endLocal}
+	} else {
+		end, err = l.lowerExpression(&expression.Children[2])
+		if err != nil {
+			return Operand{}, err
+		}
 	}
 	if receiver.Kind == OperandInvalid || start.Kind == OperandInvalid || end.Kind == OperandInvalid {
 		return Operand{}, fmt.Errorf("immutable byte-view slice has an invalid operand")
 	}
 	operands := []Operand{receiver, start, end}
+	sequence := []hir.Span{expression.Children[0].Span}
+	if expression.Children[1].Kind != "omitted-range-bound" {
+		sequence = append(sequence, expression.Children[1].Span)
+	}
+	if expression.Children[2].Kind != "omitted-range-bound" {
+		sequence = append(sequence, expression.Children[2].Span)
+	}
 	l.result.OrderedEvaluations = append(l.result.OrderedEvaluations, OrderedEvaluationFact{
-		Expression: expression.Span,
-		Sequence: []hir.Span{
-			expression.Children[0].Span,
-			expression.Children[1].Span,
-			expression.Children[2].Span,
-		},
+		Expression:               expression.Span,
+		Sequence:                 sequence,
 		MaterializedBeforeParent: true,
 	})
 	l.appendOperation(Operation{

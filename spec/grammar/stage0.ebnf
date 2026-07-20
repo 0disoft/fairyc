@@ -152,7 +152,7 @@ postfix_expression = primary_expression postfix_suffix* ;
 postfix_suffix = call_suffix | index_suffix | field_suffix | "?" ;
 call_suffix = "(" argument_list? ")" ;
 argument_list = expression ("," expression)* ","? ;
-index_suffix = "[" expression (".." expression)? "]" ;
+index_suffix = "[" (expression ".." expression? | ".." expression? | expression) "]" ;
 field_suffix = "." IDENT ;
 
 primary_expression = literal

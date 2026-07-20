@@ -19,3 +19,18 @@ fn end_after_length() -> i32 {
     let bytes: &[u8] = b"fairy"[0..6];
     42
 }
+
+fn omitted_start() -> i32 {
+    let bytes: &[u8] = b"fairy"[..2];
+    if bytes.len == 2 && bytes[1] == 97 { 42 } else { 1 }
+}
+
+fn omitted_end() -> i32 {
+    let bytes: &[u8] = b"fairy"[2..];
+    if bytes.len == 3 && bytes[0] == 105 { 42 } else { 1 }
+}
+
+fn omitted_both() -> i32 {
+    let bytes: &[u8] = b"fairy"[..];
+    if bytes.len == 5 && bytes[4] == 121 { 42 } else { 1 }
+}
