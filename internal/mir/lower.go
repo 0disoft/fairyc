@@ -555,6 +555,8 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 				l.lowerCheckedArithmetic(expression, []Operand{left, right}, "checked-arithmetic", []string{"integer-overflow"})
 			case ">>":
 				l.lowerCheckedArithmetic(expression, []Operand{left, right}, "checked-shift", []string{"invalid-shift"})
+			case "<<":
+				l.lowerCheckedArithmetic(expression, []Operand{left, right}, "checked-shift", []string{"invalid-shift", "integer-overflow"})
 			}
 		}
 		destination := l.newTemporary()

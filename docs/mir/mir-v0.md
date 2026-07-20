@@ -10,7 +10,7 @@ MIR is the only executable semantic contract consumed by backends. It records ev
 
 MIR v0 is a mutable-local control-flow graph rather than SSA. SSA conversion is a backend or optimization concern after the semantic form is verified.
 
-The current Go prototype implements the source-linked subset exercised by all eleven MIR v0 normalization fixtures: ordered calls, complete-root and tagged-payload moves, RHS-before-drop resource reassignment, explicit normal-exit cleanup, lexical Region placement and reset on fallthrough, direct return, Result propagation, nested exits, nearest-loop `break` and `continue`, `Result` propagation branches, checked division, remainder, arithmetic, and right-shift traps, and non-unwinding successors. The same verifier passes all ten named baselines and rejects all twenty-one isolated v0 mutations with their single expected `Vxxxx` result. The bounded interpreter executes all seventy-two interpreter v0 cases for scalar and tagged control, typed scalar comparisons, checked byte indexing, value-preserving integer casts, and checked `i32`, `u8`, `u32`, and `usize` arithmetic, division, remainder, bitwise operations, and right shift, resource construction and field reads, whole-root and active-payload moves, resource returns and propagation, live/dead/self reassignment, consuming-close ownership, nested and loop-control cleanup, source-linked drop traces, Region reset paths, controlled in-memory test output, exact trap and boundary outcomes, and the step and output limits; user drop-body effects, left shift, and later runtime behavior remain unfinished gates.
+The current Go prototype implements the source-linked subset exercised by all eleven MIR v0 normalization fixtures: ordered calls, complete-root and tagged-payload moves, RHS-before-drop resource reassignment, explicit normal-exit cleanup, lexical Region placement and reset on fallthrough, direct return, Result propagation, nested exits, nearest-loop `break` and `continue`, `Result` propagation branches, checked division, remainder, arithmetic, and shift traps, and non-unwinding successors. The same verifier passes all ten named baselines and rejects all twenty-one isolated v0 mutations with their single expected `Vxxxx` result. The bounded interpreter executes all seventy-seven interpreter v0 cases for scalar and tagged control, typed scalar comparisons, checked byte indexing, value-preserving integer casts, and checked `i32`, `u8`, `u32`, and `usize` arithmetic, division, remainder, bitwise operations, and left/right shift, resource construction and field reads, whole-root and active-payload moves, resource returns and propagation, live/dead/self reassignment, consuming-close ownership, nested and loop-control cleanup, source-linked drop traces, Region reset paths, controlled in-memory test output, exact trap and boundary outcomes, and the step and output limits; user drop-body effects and later runtime behavior remain unfinished gates.
 
 ## Lowering pipeline
 
@@ -120,8 +120,9 @@ fresh continuation containing the operation. The marker and switch carry the sam
 operator as the continuation. Addition, subtraction, multiplication, and negation expose
 `integer-overflow`; right shift exposes `invalid-shift` and carries the exact operand width;
 division and remainder expose `division-by-zero`, with `signed-division-overflow` additionally
-present only for `i32`. Left shift is rejected before MIR. Matching-type `&`, `^`, and `|` lower as
-typed non-trapping binary operations.
+present only for `i32`. Left shift exposes ordered `invalid-shift`, then `integer-overflow`, and
+carries the same exact operand type through its marker, switch, and continuation. Matching-type
+`&`, `^`, and `|` lower as typed non-trapping binary operations.
 
 ### Statements
 

@@ -767,6 +767,8 @@ func checkedArithmeticSpec(operator string, operandCount int) (string, []string,
 		return "checked-arithmetic", []string{"integer-overflow"}, true
 	case operator == ">>" && operandCount == 2:
 		return "checked-shift", []string{"invalid-shift"}, true
+	case operator == "<<" && operandCount == 2:
+		return "checked-shift", []string{"invalid-shift", "integer-overflow"}, true
 	default:
 		return "", nil, false
 	}
@@ -789,7 +791,7 @@ func validCheckedArithmeticShape(operation Operation) bool {
 		}
 		return scalarOperandMatches(operation.Operands[0], hir.TypeI32)
 	}
-	if len(operation.Operands) == 2 && operation.Operator == ">>" {
+	if len(operation.Operands) == 2 && (operation.Operator == ">>" || operation.Operator == "<<") {
 		return hir.CheckedShiftType(operation.OwnerType) && operation.Type == operation.OwnerType &&
 			scalarOperandMatches(operation.Operands[0], operation.OwnerType) &&
 			scalarOperandMatches(operation.Operands[1], operation.OwnerType)
@@ -854,7 +856,7 @@ func validBinaryShape(operation Operation) bool {
 		return hir.CheckedArithmeticType(operation.OwnerType) && operation.Type == operation.OwnerType
 	case "/", "%":
 		return hir.CheckedDivisionType(operation.OwnerType) && operation.Type == operation.OwnerType
-	case ">>":
+	case ">>", "<<":
 		return hir.CheckedShiftType(operation.OwnerType) && operation.Type == operation.OwnerType
 	case "&", "^", "|":
 		return hir.BitwiseIntegerType(operation.OwnerType) && operation.Type == operation.OwnerType

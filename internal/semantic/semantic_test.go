@@ -1029,23 +1029,57 @@ fn main() -> i32 {
 	}
 }
 
+func TestAnalyzeTypesCheckedLeftShift(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn main() -> i32 {
+    let signed_input: i32 = 21;
+    let signed: i32 = signed_input << 1;
+    let byte_input: u8 = 21;
+    let byte: u8 = byte_input << 1;
+    let word_input: u32 = 21;
+    let word: u32 = word_input << 1;
+    let size_input: usize = 21;
+    let size: usize = size_input << 1;
+    if signed == 42 && byte == 42 && word == 42 && size == 42 { 42 } else { 1 }
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+	statements := result.HIR.Modules[0].Functions[0].Body.Statements
+	for _, expectation := range []struct {
+		statement int
+		typ       hir.Type
+	}{{1, hir.TypeI32}, {3, hir.TypeU8}, {5, hir.TypeU32}, {7, hir.TypeUSize}} {
+		expression := statements[expectation.statement].Expression
+		if expression == nil || expression.Operator != "<<" || expression.Type != expectation.typ ||
+			len(expression.Children) != 2 || expression.Children[0].Type != expectation.typ || expression.Children[1].Type != expectation.typ {
+			t.Fatalf("checked left shift statement %d = %+v", expectation.statement, expression)
+		}
+	}
+}
+
 func TestAnalyzeRejectsUnsupportedOrMixedBitwiseAndShiftTypes(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{
 		"main.fy": `module main;
 fn main() -> i32 {
     let invalid_bitwise: bool = true | false;
+    let invalid_left_shift: bool = true << false;
     let byte: u8 = 42;
     let word: u32 = 1;
     let invalid_shift: u8 = byte >> word;
+    let invalid_left_mixed: u8 = byte << word;
     42
 }
 `,
 	})
-	if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "bitwise operation on bool" {
+	if len(result.Unsupported) != 2 || result.Unsupported[0].Feature != "bitwise operation on bool" ||
+		result.Unsupported[1].Feature != "checked left shift on bool" {
 		t.Fatalf("unsupported = %+v", result.Unsupported)
 	}
-	if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E1006" {
+	if len(result.Diagnostics) != 2 || result.Diagnostics[0].Code != "E1006" || result.Diagnostics[1].Code != "E1006" {
 		t.Fatalf("diagnostics = %+v", result.Diagnostics)
 	}
 }

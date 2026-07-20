@@ -6,6 +6,7 @@
 - Language source: `docs/language/0004-results-traps-and-control-flow.md`
 - MIR source: `docs/mir/mir-v0.md`
 - Fixture sources: `spec/fixtures/mir/manifest-v0.json`, `spec/fixtures/mir-verifier/manifest-v0.json`, and `spec/fixtures/interpreter/manifest-v0.json`
+- Superseded in part: ADR 0103 later admits checked left shift with explicit width and overflow edges
 
 ## Context
 
@@ -36,8 +37,8 @@ contracts.
    The canonical v0 lowering therefore uses a fresh single-predecessor continuation block.
 5. The MIR interpreter selects the success or trap outcome from the checked switch. It does not
    discover overflow for the first time when executing the continuation operation.
-6. Left shift remains outside Stage 0 and is rejected during type checking as `E1011`.
-   It produces no executable MIR.
+6. At this decision point, left shift remained outside Stage 0 and was rejected during type
+   checking as `E1011`; ADR 0103 later replaces this clause with executable checked-shift MIR.
 7. MIR normalization fixtures record the static possible categories. Interpreter and CLI fixtures
    record the one dynamic category actually selected for a concrete input.
 

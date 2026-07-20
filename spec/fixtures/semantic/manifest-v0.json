@@ -10,6 +10,7 @@
     "docs/adr/0024-stage-0-loop-control-and-cleanup.md",
     "docs/adr/0046-scalar-source-foreign-c-call.md",
     "docs/adr/0051-source-link-name-transport.md",
+    "docs/adr/0103-checked-left-shift.md",
     "docs/diagnostics/catalog-v0.md"
   ],
   "cases": [
@@ -283,26 +284,6 @@
               "source": "main.fy",
               "startByte": 42,
               "endByte": 43
-            },
-            "related": []
-          }
-        ]
-      }
-    },
-    {
-      "id": "fail.type.signed-left-shift",
-      "sourceRoot": "cases/fail/signed-left-shift/src",
-      "sources": ["main.fy"],
-      "expect": {
-        "status": "fail",
-        "phase": "type",
-        "diagnostics": [
-          {
-            "code": "E1011",
-            "primary": {
-              "source": "main.fy",
-              "startByte": 61,
-              "endByte": 76
             },
             "related": []
           }

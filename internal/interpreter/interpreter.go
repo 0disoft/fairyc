@@ -915,9 +915,9 @@ func evaluateBinary(locals map[mir.LocalID]runtimeValue, operation mir.Operation
 		if operation.OwnerType != hir.TypeI32 {
 			return checkedUnsignedIntegerOperation(operation.Operator, leftValue, rightValue, operation.OwnerType)
 		}
-	case ">>":
+	case ">>", "<<":
 		if !hir.CheckedShiftType(operation.OwnerType) || operation.Type != operation.OwnerType {
-			return runtimeValue{}, "", capabilityError("checked right shift has incompatible owner or result type")
+			return runtimeValue{}, "", capabilityError("checked shift has incompatible owner or result type")
 		}
 		if operation.OwnerType != hir.TypeI32 {
 			return checkedUnsignedIntegerOperation(operation.Operator, leftValue, rightValue, operation.OwnerType)
@@ -1032,6 +1032,20 @@ func checkedUnsignedIntegerOperation(operator string, left, right runtimeValue, 
 			return runtimeValue{}, "invalid-shift", nil
 		}
 		result = left.u64 >> uint32(right.u64)
+	case "<<":
+		width := uint64(64)
+		if ownerType == hir.TypeU8 {
+			width = 8
+		} else if ownerType == hir.TypeU32 {
+			width = 32
+		}
+		if right.u64 >= width {
+			return runtimeValue{}, "invalid-shift", nil
+		}
+		if left.u64 > limit>>uint32(right.u64) {
+			return runtimeValue{}, "integer-overflow", nil
+		}
+		result = left.u64 << uint32(right.u64)
 	default:
 		return runtimeValue{}, "", capabilityError("unsupported unsigned integer operator %q", operator)
 	}

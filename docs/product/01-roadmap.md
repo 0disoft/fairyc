@@ -20,16 +20,16 @@ Exit gate: the written contracts have no contradictory syntax, initialization, o
 Current implementation status: the source, lexer, recoverable-syntax, parser-diagnostic, AST
 lowering, and parser-fixture-runner portion of the first item exists. Name resolution and typed HIR
 now cover the semantic fixture's scalar and safe-borrow subset. Local last-use loans, borrow
-  conflicts, single-origin borrow returns, Stage 0 signed-left-shift rejection, loop-context diagnostics,
+  conflicts, single-origin borrow returns, checked matching-type left shift, loop-context diagnostics,
   scalar foreign-call unsafe/signature boundaries, and `@link_name` shape diagnostics execute across
-  all 23 semantic v0 cases, including exact transport for all sixteen TargetSpec C scalars. General
+  all 22 semantic v0 cases, including exact transport for all sixteen TargetSpec C scalars. General
   whole-root resource Flow now executes all 12 resource v0 cases, including branch, normal-loop,
   break-edge, and continue-edge state rejection. Result Flow executes all 24 result v0 cases, including qualified scalar construction,
 exhaustive shallow matching, and local, parameter, branch, loop, overwrite, and early-return
 must-use obligations. Mutable-local MIR lowering and verification
   execute all 11 MIR normalization v0 cases for the current scalar, resource, tagged-payload, Result, Region, loop-control cleanup, call,
   division, and checked-arithmetic trap subset. All 10 verifier baselines and 21 isolated mutation cases execute through
-  the same MIR verifier. The first MIR interpreter executes all 72 interpreter v0 cases, including
+  the same MIR verifier. The first MIR interpreter executes all 77 interpreter v0 cases, including
 scalar `Option` and `Result` construction, exhaustive matching, and both Result `?` paths, and is
 exposed by the unstable `experimental run` command, which now accepts a bounded explicit entry-plus-
 repeated-`--source` module closure without discovery. Resource construction, field reads, whole-root
@@ -41,7 +41,8 @@ and bounded failure without granting host access. Checked `i32` addition, subtra
 multiplication, negation, division, remainder, matching-type bitwise operations, and signed or
 unsigned right shift execute across trapping and
   non-trapping boundaries with exact overflow, division-by-zero, or invalid-shift
-  categories; left shift is rejected as `E1011`. Nearest-loop `break` and `continue` now execute
+  categories. Matching-type left shift additionally traps on an unrepresentable result, with
+  invalid amount taking precedence over overflow. Nearest-loop `break` and `continue` now execute
   with resource and Region cleanup. Verified resource definitions now preserve ordered fields and
   empty-drop classification from AST through HIR into MIR; nonempty user drop bodies fail as
   unsupported before executable lowering. Restricted inert enums now preserve named payloads,
@@ -68,7 +69,7 @@ Exit gate: positive and negative fixtures agree with the source contracts, resou
 
 Current implementation status: a fail-closed Linux/amd64 constrained-C differential command now
 requires glibc, Clang, and GCC and is wired into a separate hosted Ubuntu CI job. It is designed to
-run all 26 emission cases at low and optimized profiles for 104 process-status and exact
+run all 27 emission cases at low and optimized profiles for 108 process-status and exact
 source-linked drop-trace comparisons, then drive
 the actual experimental build CLI with resource-bearing Option and Result plus a flat all-`i32` resource
 through 4 compiler/profile executable
@@ -76,7 +77,7 @@ smokes. It now adds four-way product builds containing compiler-owned nonempty `
 private compiler-owned `&[u8]` view, plus separate generated-Fairy-to-C calls that verify every byte
 of `fairy\0` and every non-terminated byte of `fairy` respectively. The same job
 also compiles and executes each production, uninstrumented C unit with Clang
-and GCC under the closed `address-undefined-o1` ASan+UBSan mode for 52 fail-closed sanitizer
+and GCC under the closed `address-undefined-o1` ASan+UBSan mode for 54 fail-closed sanitizer
 executions. The current Windows
 host has no eligible Linux toolchain, and no hosted run receipt has been observed, so this is a
 configured lane rather than native conformance evidence. A shared bounded C driver and embedded

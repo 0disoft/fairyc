@@ -61,7 +61,8 @@ and trap on a zero divisor. Unary `~` admits one value from the same integer set
 `|`, and `>>` admit matching values from that set and return the exact operand type. Bitwise
 operations do not trap. Right shift keeps signed arithmetic behavior for `i32`, uses
 logical behavior for unsigned types, and traps before execution when the amount is outside the
-exact operand width. Left shift remains unsupported as `E1011`.
+exact operand width. Left shift accepts the same matching types, checks that width first, and then
+traps when the mathematical result is not representable in the exact type.
 
 `==` and `!=` require two matching operands from `bool`, `i32`, `u8`, `u32`, or `usize` and produce
 `bool`. `<`, `<=`, `>`, and `>=` require two matching operands from `i32`, `u8`, `u32`, or `usize`

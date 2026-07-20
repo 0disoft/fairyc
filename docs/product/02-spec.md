@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0102-typed-bitwise-and-checked-right-shift.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0103-checked-left-shift.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -131,9 +131,10 @@ Optimization level and backend must not change the meaning of safe code. Express
 
 - Out-of-bounds indexing traps unless safety is proven statically.
 - Division by zero, signed minimum divided by negative one, invalid shifts, and ordinary integer overflow trap.
-- Matching-type right shift accepts `i32`, `u8`, `u32`, or `usize`. `i32` uses arithmetic right
-  shift; unsigned types use logical right shift. Negative `i32` amounts and amounts at or above the
-  exact operand width trap as `invalid-shift`. Left shift remains rejected as `E1011`.
+- Matching-type shifts accept `i32`, `u8`, `u32`, or `usize`. Right shift is arithmetic for `i32`
+  and logical for unsigned types. Negative `i32` amounts and amounts at or above the exact operand
+  width trap as `invalid-shift`. Left shift then traps as `integer-overflow` when its mathematical
+  result is not representable; invalid amount takes precedence over overflow.
 - Null cannot inhabit ordinary references.
 - Wrapping, saturating, and checked arithmetic use distinct operations.
 - Ordinary `+`, `-`, and `*` accept matching `i32`, `u8`, `u32`, or `usize` operands and trap with

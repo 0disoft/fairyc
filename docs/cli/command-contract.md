@@ -100,8 +100,9 @@ unsigned right shift are
 executable. The bounded interpreter reports its stable `step-limit` capability rather than hanging
 or reclassifying it as a language trap. Interpreter-fixture byte hooks are not available from this
 command and matching function names do not activate them. User drop-body effects, I/O, and arguments
-remain outside the current interpreter subset. Left shift is rejected
-by semantic analysis as `E1011` rather than reaching the interpreter.
+remain outside the current interpreter subset. Matching-type left shift reaches the interpreter
+only through verified width and representability checks and reports `invalid-shift` before
+`integer-overflow` when both conditions could apply.
 
 `experimental emit-c` shares the same explicit source closure, semantics, Flow, MIR-lowering,
 verifier, and zero-argument entry-module `main() -> i32` path, then invokes only the constrained C emitter.

@@ -26,6 +26,7 @@
     "docs/adr/0100-checked-unsigned-arithmetic.md",
     "docs/adr/0101-checked-unsigned-division.md",
     "docs/adr/0102-typed-bitwise-and-checked-right-shift.md",
+    "docs/adr/0103-checked-left-shift.md",
     "docs/mir/mir-v0.md",
     "docs/mir/c-backend-safety-v0.md",
     "docs/runtime/runtime-stdlib-v0.md",
@@ -447,6 +448,22 @@
         "dialect": "c11",
         "functions": ["main::main"],
         "features": ["checked-arithmetic", "checked-shift", "scalar-bitwise", "scalar-comparison", "scalar-control-flow", "trap"]
+      }
+    },
+    {
+      "id": "pass.c-emission.checked-left-shift",
+      "sourceRoot": "cases/pass/checked-left-shift/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main"],
+        "features": ["checked-arithmetic", "checked-shift", "scalar-comparison", "scalar-control-flow", "trap"]
       }
     }
   ]

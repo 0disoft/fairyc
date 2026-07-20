@@ -32,7 +32,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0020-stage-0-region-mir-and-interpreter.md`: normal lexical Region placement, inner cleanup, reset trace, and `V1403`.
 - `0021-stage-0-region-early-exit-cleanup.md`: scope-indexed Region reset for `return`, Result `?`, and nested exits.
 - `0022-controlled-interpreter-io-harness.md`: opt-in in-memory stdout/stderr byte hooks with a shared output limit.
-- `0023-explicit-checked-arithmetic-mir.md`: verified overflow and right-shift checks, exact trap edges, and Stage 0 left-shift rejection.
+- `0023-explicit-checked-arithmetic-mir.md`: verified overflow and right-shift checks, exact trap edges, and the historical left-shift restriction later replaced by ADR 0103.
 - `0024-stage-0-loop-control-and-cleanup.md`: nearest-loop `break` and `continue`, Flow obligations, and scope-indexed Region cleanup.
 - `0025-verified-scalar-c-emission.md`: fail-closed verified-MIR emission for the provisional scalar ISO C11 transport.
 - `0026-linux-scalar-c-differential-lane.md`: fail-closed Clang/GCC low/optimized native execution on Linux/amd64 with glibc.
@@ -112,6 +112,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0100-checked-unsigned-arithmetic.md`: matching-type trapping `u8`, `u32`, and `usize` addition, subtraction, and multiplication through typed MIR, interpreter, C11, and WSL-free Windows execution.
 - `0101-checked-unsigned-division.md`: matching-type `u8`, `u32`, and `usize` division and remainder with typed zero-divisor traps and exact C divisor materialization.
 - `0102-typed-bitwise-and-checked-right-shift.md`: typed unary complement, matching-type binary bitwise operations, and exact-width checked arithmetic/logical right shift for `i32`, `u8`, `u32`, and `usize` through MIR, interpreter, C11, and WSL-free Windows execution.
+- `0103-checked-left-shift.md`: matching-type exact-width left shift with stable invalid-amount-before-overflow precedence and defined C11 construction.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

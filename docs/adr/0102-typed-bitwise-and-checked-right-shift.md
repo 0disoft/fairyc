@@ -3,6 +3,7 @@
 - Status: Accepted
 - Date: 2026-07-20
 - Language surface: typed `~`, matching-type `&`, `^`, `|`, and checked `>>` for `i32`, `u8`, `u32`, and `usize`
+- Superseded in part: ADR 0103 later admits checked matching-type left shift and removes `E1011`
 
 ## Context
 
@@ -33,8 +34,9 @@ could run.
 6. The interpreter checks the shift amount before computing the result. Generated C emits the same
    width check before any C shift; unsigned continuation operations use their exact unsigned C
    representation, while `i32` retains the bit-preserving arithmetic-shift helper.
-7. Signed and unsigned left shift remain rejected as `E1011`. Rotates, wrapping shifts, mixed-type
-   operands, C-scalar bitwise operations, and wider integer families remain deferred.
+7. At this decision point, signed and unsigned left shift remained rejected as `E1011`; ADR 0103
+   later replaces that restriction with checked matching-type left shift. Rotates, wrapping shifts,
+   mixed-type operands, C-scalar bitwise operations, and wider integer families remain deferred.
 8. The interpreter fixture contract grows to 72 cases and the C-emission contract to 26 cases. The
    derived Linux matrix therefore plans 104 low/optimized compiler executions and 52 sanitizer
    executions. The local Windows smoke executes unsigned success and invalid-width cases under both

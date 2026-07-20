@@ -142,8 +142,6 @@ func semanticDiagnosticSummary(code string) string {
 		return "return value does not match the declared result type"
 	case "E1010":
 		return "call argument count does not match the declaration"
-	case "E1011":
-		return "signed left shift is not supported in Stage 0"
 	case "E1012":
 		return "break and continue require an enclosing while loop"
 	case "E1101":

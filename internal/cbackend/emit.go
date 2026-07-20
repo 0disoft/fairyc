@@ -1234,11 +1234,13 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 					if operation.OwnerType == hir.TypeI32 {
 						e.needsBitcast = true
 					}
-				case ">>":
+				case ">>", "<<":
 					e.features["checked-shift"] = struct{}{}
 					if operation.OwnerType == hir.TypeI32 {
 						e.needsBitcast = true
-						e.needsShift = true
+						if operation.Operator == ">>" {
+							e.needsShift = true
+						}
 					}
 				}
 			case mir.OperationResultConstruct, mir.OperationResultPayload,
@@ -1462,7 +1464,7 @@ func (e *emitter) inspectBinary(functionIndex int, operation mir.Operation) erro
 		validShape = hir.CheckedArithmeticType(operation.OwnerType) && operation.Type == operation.OwnerType
 	case "/", "%":
 		validShape = hir.CheckedDivisionType(operation.OwnerType) && operation.Type == operation.OwnerType
-	case ">>":
+	case ">>", "<<":
 		validShape = hir.CheckedShiftType(operation.OwnerType) && operation.Type == operation.OwnerType
 	case "&", "^", "|":
 		validShape = hir.BitwiseIntegerType(operation.OwnerType) && operation.Type == operation.OwnerType
@@ -2162,7 +2164,14 @@ func (e *emitter) inspectSwitch(functionIndex int, terminator mir.Terminator) er
 			return fmt.Errorf("checked shift in %s has incompatible type metadata", function.Name)
 		}
 		e.features["checked-shift"] = struct{}{}
-		categories = []string{"invalid-shift"}
+		switch terminator.Operator {
+		case "<<":
+			categories = []string{"invalid-shift", "integer-overflow"}
+		case ">>":
+			categories = []string{"invalid-shift"}
+		default:
+			return fmt.Errorf("checked shift in %s has unsupported operator %q", function.Name, terminator.Operator)
+		}
 	default:
 		return CapabilityError{Function: function.Name, Feature: "MIR switch " + strconv.Quote(terminator.SwitchKind)}
 	}
@@ -2750,6 +2759,12 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			} else {
 				fmt.Fprintf(output, "    fy_l_%d = (%s) >> (%s);\n", operation.DestinationLocal, leftValue, rightValue)
 			}
+		case "<<":
+			if operation.OwnerType == hir.TypeI32 {
+				fmt.Fprintf(output, "    fy_l_%d = fy_bits_to_i32((uint32_t)(%s) << (uint32_t)(%s));\n", operation.DestinationLocal, leftValue, rightValue)
+			} else {
+				fmt.Fprintf(output, "    fy_l_%d = (%s) << (%s);\n", operation.DestinationLocal, leftValue, rightValue)
+			}
 		case "&", "^", "|":
 			if operation.OwnerType == hir.TypeI32 {
 				fmt.Fprintf(output, "    fy_l_%d = fy_bits_to_i32((uint32_t)(%s) %s (uint32_t)(%s));\n", operation.DestinationLocal, leftValue, operation.Operator, rightValue)
@@ -3091,6 +3106,26 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		} else {
 			fmt.Fprintf(output, "    if (%s >= %s) { fy_pending_trap = FY_TRAP_INVALID_SHIFT; goto fy_b_%d; }\n", amountValue, width, failure)
 		}
+		if terminator.Operator == "<<" {
+			value, _, err := twoOperands(terminator.SwitchOperands)
+			if err != nil {
+				return fmt.Errorf("checked left shift in %s: %w", function.Name, err)
+			}
+			valueText, err := cOperand(value)
+			if err != nil {
+				return fmt.Errorf("checked left shift in %s: %w", function.Name, err)
+			}
+			if terminator.SwitchType == hir.TypeI32 {
+				expression := fmt.Sprintf("((int64_t)(%s) * (INT64_C(1) << (uint32_t)(%s)))", valueText, amountValue)
+				fmt.Fprintf(output, "    if (%s < (int64_t)INT32_MIN || %s > (int64_t)INT32_MAX) { fy_pending_trap = FY_TRAP_INTEGER_OVERFLOW; goto fy_b_%d; }\n", expression, expression, failure)
+			} else {
+				maximum, err := unsignedCMaximum(terminator.SwitchType)
+				if err != nil {
+					return fmt.Errorf("checked left shift in %s: %w", function.Name, err)
+				}
+				fmt.Fprintf(output, "    if ((%s) > (%s >> (%s))) { fy_pending_trap = FY_TRAP_INTEGER_OVERFLOW; goto fy_b_%d; }\n", valueText, maximum, amountValue, failure)
+			}
+		}
 		fmt.Fprintf(output, "    goto fy_b_%d;\n", success)
 	default:
 		return CapabilityError{Function: function.Name, Feature: "MIR switch " + strconv.Quote(terminator.SwitchKind)}
@@ -3423,7 +3458,7 @@ func supportedUnary(operator string) bool {
 
 func supportedBinary(operator string) bool {
 	switch operator {
-	case "+", "-", "*", "/", "%", ">>", "&", "^", "|", "==", "!=", "<", "<=", ">", ">=":
+	case "+", "-", "*", "/", "%", "<<", ">>", "&", "^", "|", "==", "!=", "<", "<=", ">", ">=":
 		return true
 	default:
 		return false

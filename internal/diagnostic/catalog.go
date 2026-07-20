@@ -53,7 +53,6 @@ var catalogEntries = []CatalogEntry{
 	{Code: "E1008", Category: categoryType, Meaning: "Assignment target is not a mutable place."},
 	{Code: "E1009", Category: categoryType, Meaning: "Return expression is incompatible with the declared return type."},
 	{Code: "E1010", Category: categoryType, Meaning: "Call argument count does not match the resolved declaration."},
-	{Code: "E1011", Category: categoryType, Meaning: "Signed left shift is not supported in Stage 0."},
 	{Code: "E1012", Category: categoryType, Meaning: "`break` or `continue` has no enclosing `while` loop."},
 	{Code: "E1101", Category: categoryResource, Meaning: "Resource used after move or consumption."},
 	{Code: "E1102", Category: categoryResource, Meaning: "Operation would create or execute a second cleanup obligation."},

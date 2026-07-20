@@ -505,12 +505,12 @@ func TestExperimentalRunReportsCheckedArithmeticTraps(t *testing.T) {
 	}
 }
 
-func TestExperimentalRunRejectsSignedLeftShift(t *testing.T) {
+func TestExperimentalRunExecutesCheckedLeftShift(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
 	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { 1 << 1 }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
-	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "E1011: signed left shift is not supported in Stage 0") {
+	if code != ExitSuccess || stdout != "result: 2\n" || stderr != "" {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
 	}
 }

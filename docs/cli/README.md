@@ -54,7 +54,8 @@ resource reassignment, consuming-close ownership, Region fallthrough, return, pr
 break, and continue reset paths, and source-linked drop traces, and reports an
 exact scalar result or canonical division, integer-overflow, or invalid-shift trap. Checked
 negation, matching-type addition, subtraction, multiplication, division, remainder, bitwise
-operations, and signed or unsigned right shift are executable; left shift is rejected as `E1011`;
+operations, and checked left or right shift are executable. Invalid shift amounts trap before a
+left-shift overflow check; an unrepresentable left-shift result traps as `integer-overflow`;
 loop control without an enclosing `while` is rejected as `E1012`.
 It does not discover files, execute user drop bodies, implement effects, or provide host I/O.
 It also does not execute foreign calls: those fail with the interpreter capability boundary even

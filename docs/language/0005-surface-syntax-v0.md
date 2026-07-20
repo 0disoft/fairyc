@@ -209,9 +209,10 @@ that same type. Their ordinary source meaning is checked: overflow and unsigned 
 `integer-overflow`; they never inherit C unsigned wrapping. Matching `i32`, `u8`, `u32`, or `usize`
 operands also support `/` and `%`; zero traps before the operation and only the signed type has the
 minimum-by-negative-one overflow case. Unary `~` accepts any one of those types; the same matching
-types support binary `&`, `^`, `|`, and `>>`. Bitwise operations preserve the exact type without trapping. Right shift uses arithmetic behavior
-for `i32`, logical behavior for unsigned types, and traps on an amount outside the exact operand
-width. Mixed types, implicit promotions, and left shift remain rejected.
+types support binary `&`, `^`, `|`, `<<`, and `>>`. Bitwise operations preserve the exact type without trapping. Right shift uses arithmetic behavior
+for `i32` and logical behavior for unsigned types. Both shifts trap on an amount outside the exact
+operand width; left shift additionally traps when the mathematical result is not representable.
+Mixed types and implicit promotions remain rejected.
 
 Equality operators `==` and `!=` accept matching operands of `bool`, `i32`, `u8`, `u32`, or
 `usize`. Ordered comparison operators `<`, `<=`, `>`, and `>=` accept matching operands of `i32`,

@@ -464,6 +464,46 @@ fn main() -> i32 {
 	}
 }
 
+func TestEmitCheckedLeftShiftWithoutSignedCUndefinedBehavior(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn main() -> i32 {
+    let signed_input: i32 = 21;
+    let signed: i32 = signed_input << 1;
+    let byte_input: u8 = 21;
+    let byte: u8 = byte_input << 1;
+    let word_input: u32 = 21;
+    let word: u32 = word_input << 1;
+    let size_input: usize = 21;
+    let size: usize = size_input << 1;
+    if signed == 42 && byte == 42 && word == 42 && size == 42 { 42 } else { 1 }
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, feature := range []string{"checked-shift", "scalar-comparison", "scalar-control-flow", "trap"} {
+		if !slices.Contains(unit.Features, feature) {
+			t.Errorf("features %v are missing %q", unit.Features, feature)
+		}
+	}
+	for _, required := range []string{
+		"FY_TRAP_INVALID_SHIFT",
+		"FY_TRAP_INTEGER_OVERFLOW",
+		"(int64_t)INT32_MIN",
+		"(int64_t)INT32_MAX",
+		"UINT8_MAX >> (",
+		"UINT32_MAX >> (",
+		"UINTPTR_MAX >> (",
+		"fy_bits_to_i32((uint32_t)(",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing checked left shift %q:\n%s", required, unit.Source)
+		}
+	}
+}
+
 func TestEmitByteStringLiteralDataAddressForForeignCall(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
