@@ -15,11 +15,14 @@ fn main() -> i32 {
     let signed: [i32; 1] = [42];
     let wide: [u32; 1] = [42];
     let offsets: [usize; 1] = [2];
+    let answer_bytes: &[u8] = &answers;
     assert(answers.len == 3);
     assert(flags.len == 2);
     assert(signed.len == 1);
     assert(wide.len == 1);
     assert(offsets.len == 1);
+    assert(answer_bytes.len == 3);
+    assert(answer_bytes[0] == 40);
     assert(answers[2] as i32 == total);
     assert(flags[1]);
     assert(signed[0] == total);

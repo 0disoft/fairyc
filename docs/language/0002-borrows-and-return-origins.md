@@ -37,6 +37,11 @@ Place overlap is deliberately coarse. Borrows of different fields of the same ro
 
 Passing an existing mutable borrow to a call creates a call-bounded reborrow when the parameter is `&mut T`. The original borrow becomes usable again after the call's last use. Returning, storing, or assigning the borrow to a longer-lived destination is not a call-bounded reborrow and must satisfy the ordinary origin and escape rules.
 
+The first executable array-view bridge permits a direct shared borrow of an admitted `[u8; N]`
+place where `&[u8]` is already expected. It retains the place's origin and loans the whole array.
+Safe-borrow reassignment remains closed until Flow can update and merge origin sets at assignment
+edges.
+
 ## Return rule
 
 A function may return a safe borrow only when every successful return derives from one origin:

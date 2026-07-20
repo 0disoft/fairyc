@@ -300,16 +300,17 @@ func TestEmitCheckedScalarFixedArrayIndex(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 fn pick(values: [u8; 3], index: usize) -> u8 { values[index] }
+fn view_pick(values: &[u8], index: usize) -> u8 { values[index] }
 fn main() -> i32 {
     let values: [u8; 3] = [40, 41, 42];
-    if values.len == 3 { pick(values, 2) as i32 } else { 1 }
+    if values.len == 3 && view_pick(&values, 0) == 40 { pick(values, 2) as i32 } else { 1 }
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil {
 		t.Fatalf("Emit() error = %v", err)
 	}
-	for _, feature := range []string{"array-index", "array-length", "scalar-fixed-array", "trap"} {
+	for _, feature := range []string{"array-byte-view-borrow", "array-index", "array-length", "scalar-fixed-array", "trap", "view-index"} {
 		if !slices.Contains(unit.Features, feature) {
 			t.Errorf("features %v are missing %q", unit.Features, feature)
 		}
@@ -317,6 +318,7 @@ fn main() -> i32 {
 	for _, required := range []string{
 		"typedef struct { uint8_t data[UINT64_C(3)]; } fy_array_0;",
 		"(fy_array_0){ .data = { UINT8_C(40), UINT8_C(41), UINT8_C(42) } }",
+		"(fy_byte_slice){ .data = fy_l_",
 		"= ((uintptr_t)UINT64_C(3));",
 		">= ((uintptr_t)UINT64_C(3))",
 		".data[",

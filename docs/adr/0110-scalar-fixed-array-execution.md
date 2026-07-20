@@ -30,10 +30,11 @@ build contracts do not own.
    The repeated form cannot open until expansion work and storage are charged to an explicit
    compiler budget; the implementation must not amplify a short source token into unbounded host
    allocation or generated C.
-6. Arrays are not admitted inside structs, resources, enums, `Option`, `Result`, borrows, raw
-   pointers, or foreign signatures in this slice. Array fields, nested arrays, resource elements,
-   mutable indexing, array-to-slice borrowing, and stable layout are deferred. ADR 0111 separately
-   admits the representation-independent `.len` property.
+6. Arrays are not admitted inside structs, resources, enums, `Option`, `Result`, raw pointers, or
+   foreign signatures in this slice. Array fields, nested arrays, resource elements, mutable
+   indexing, general array-to-slice conversion, and stable layout are deferred. ADR 0111 separately
+   admits the representation-independent `.len` property, and ADR 0112 admits one contextual shared
+   `[u8; N]`-to-`&[u8]` borrow.
 7. MIR uses explicit array construction, bounds-check marker, checked switch, and index operations.
    The verifier requires the exact element count, scalar operand types, `usize` index, `bounds`
    trap edge, and a dominating matching check before access.

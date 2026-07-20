@@ -24,8 +24,9 @@ borrowing decisions.
    receiver with an admitted fixed-array type, field `len`, and a `usize` destination.
 5. The interpreter validates the runtime array shape and returns the retained canonical length. The
    C backend emits canonical `N` as `uintptr_t`; it does not use `sizeof` or inspect wrapper storage.
-6. `.is_empty`, `.capacity`, general reflection, zero-length arrays, slicing, array-to-slice
-   borrowing, mutation, and stable layout remain closed. Since the current subset requires
+6. `.is_empty`, `.capacity`, general reflection, zero-length arrays, slicing, general
+   array-to-slice conversion, mutation, and stable layout remain closed. ADR 0112 separately admits
+   the contextual shared borrow from `[u8; N]` to `&[u8]`. Since the current subset requires
    `N >= 1`, adding `.is_empty` now would only freeze an unnecessary constant property before
    zero-length semantics exist.
 

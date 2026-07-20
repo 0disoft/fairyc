@@ -1538,6 +1538,48 @@ func TestAnalyzeTypesScalarFixedArrayLength(t *testing.T) {
 	}
 }
 
+func TestAnalyzeTypesContextualU8ArrayBorrowAsByteView(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn first(bytes: &[u8]) -> u8 { bytes[0] }
+fn main() -> i32 {
+    let values: [u8; 3] = [40, 41, 42];
+    let bytes: &[u8] = &values;
+    first(bytes) as i32
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+	main := result.HIR.Modules[0].Functions[1]
+	if len(main.Body.Statements) != 2 || main.Body.Statements[1].Expression == nil {
+		t.Fatalf("main statements = %+v", main.Body.Statements)
+	}
+	borrow := main.Body.Statements[1].Expression
+	if borrow.Kind != "array-view-borrow" || borrow.Operator != "&" || borrow.Type != hir.SharedBorrow(hir.TypeByteSlice) ||
+		len(borrow.Children) != 1 || borrow.Children[0].Type != hir.FixedArray(hir.TypeU8, 3) {
+		t.Fatalf("array byte-view borrow = %+v", borrow)
+	}
+}
+
+func TestAnalyzeKeepsSafeBorrowReassignmentClosed(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn main() -> i32 {
+    let left: [u8; 1] = [41];
+    let right: [u8; 1] = [42];
+    var bytes: &[u8] = &left;
+    bytes = &right;
+    bytes[0] as i32
+}
+`,
+	})
+	if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "safe-borrow reassignment" {
+		t.Fatalf("unsupported = %+v", result.Unsupported)
+	}
+}
+
 func TestAnalyzeKeepsOtherFixedArrayFieldsClosed(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{

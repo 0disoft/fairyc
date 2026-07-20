@@ -569,6 +569,26 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					values[index] = value
 				}
 				locals[operation.DestinationLocal] = runtimeValue{kind: valueArray, typ: operation.Type, elements: values}
+			case mir.OperationArrayBorrowView:
+				receiver, err := evaluateOne(locals, operation.Operands)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("fixed-array byte-view borrow in %q: %w", function.Name, err)
+				}
+				elementType, length, array := hir.FixedArrayParts(operation.OwnerType)
+				wantView := hir.SharedBorrow(hir.TypeByteSlice)
+				if !array || elementType != hir.TypeU8 || !hir.ExecutableFixedArrayShape(elementType, length) ||
+					receiver.kind != valueArray || receiver.typ != operation.OwnerType || uint64(len(receiver.elements)) != length ||
+					operation.Type != wantView || operation.Operator != "&" {
+					return callCompletion{}, fmt.Errorf("fixed-array byte-view borrow in %q has incompatible runtime value", function.Name)
+				}
+				bytes := make([]byte, len(receiver.elements))
+				for index, element := range receiver.elements {
+					if element.kind != valueU8 || element.typ != hir.TypeU8 || element.u64 > 255 {
+						return callCompletion{}, fmt.Errorf("fixed-array byte-view borrow element %d in %q is not u8", index, function.Name)
+					}
+					bytes[index] = byte(element.u64)
+				}
+				locals[operation.DestinationLocal] = runtimeValue{kind: valueView, u64: length, staticData: string(bytes), typ: wantView}
 			case mir.OperationArrayLength:
 				receiver, err := evaluateOne(locals, operation.Operands)
 				if err != nil {

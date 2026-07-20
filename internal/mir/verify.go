@@ -386,6 +386,12 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "fixed-array construction shape is invalid"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationArrayBorrowView:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if !validArrayBorrowViewShape(operation) {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "fixed-array byte-view borrow shape is invalid"})
+				}
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationArrayLength:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				if !validArrayLengthShape(operation) {
@@ -928,6 +934,13 @@ func validArrayConstructShape(operation Operation) bool {
 		}
 	}
 	return true
+}
+
+func validArrayBorrowViewShape(operation Operation) bool {
+	elementType, length, array := hir.FixedArrayParts(operation.OwnerType)
+	return array && elementType == hir.TypeU8 && hir.ExecutableFixedArrayShape(elementType, length) &&
+		operation.DestinationLocal != NoLocal && operation.Type == hir.SharedBorrow(hir.TypeByteSlice) &&
+		operation.Operator == "&" && len(operation.Operands) == 1 && operation.Operands[0].Kind == OperandLocal
 }
 
 func validArrayLengthShape(operation Operation) bool {

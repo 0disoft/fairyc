@@ -83,8 +83,11 @@ right. `array[index]` requires `usize`, returns `T`, and traps with `bounds` whe
 least `N`. `array.len` evaluates the receiver once and returns exact canonical `N` as `usize`
 without a scan, allocation, runtime call, memory read, or trap. Empty and repeated literals remain parser-valid but unsupported until zero-size
 representation and expansion-budget contracts exist. Array fields, nesting, resource elements,
-mutable indexing, slicing, properties other than `.len`, borrowing, and foreign signatures remain
-closed.
+mutable indexing, slicing, properties other than `.len`, general borrowing, and foreign signatures
+remain closed. One direct shared borrow of an admitted `[u8; N]` place contextually becomes
+`&[u8]` when that view type is already expected, as in `let bytes: &[u8] = &array` or an internal
+`&[u8]` call argument. It retains the array's origin and exact `N`; other element types, `&mut`,
+temporary sources, escaping local views, and safe-borrow reassignment remain closed.
 
 Ordinary internal functions may accept `&str` and `&[u8]` parameters. Calls preserve the exact safe
 borrow and its caller-proven origin; they do not convert the argument to a raw pointer or transfer

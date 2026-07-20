@@ -29,7 +29,7 @@ exhaustive shallow matching, and local, parameter, branch, loop, overwrite, and 
 must-use obligations. Mutable-local MIR lowering and verification
   execute all 11 MIR normalization v0 cases for the current scalar, resource, tagged-payload, Result, Region, loop-control cleanup, call,
   division, and checked-arithmetic trap subset. All 10 verifier baselines and 21 isolated mutation cases execute through
-  the same MIR verifier. The first MIR interpreter executes all 90 interpreter v0 cases, including direct `i32` minimum constants, scalar fixed-array calls, exact lengths, and checked indexing, and
+  the same MIR verifier. The first MIR interpreter executes all 90 interpreter v0 cases, including direct `i32` minimum constants, scalar fixed-array calls, contextual immutable byte-view borrowing, exact lengths, and checked indexing, and
 scalar `Option` and `Result` construction, exhaustive matching, and both Result `?` paths, and is
 exposed by the unstable `experimental run` command, which now accepts a bounded explicit entry-plus-
 repeated-`--source` module closure without discovery. Resource construction, field reads, whole-root
@@ -50,7 +50,7 @@ unsigned right shift execute across trapping and
   verified MIR, the interpreter, and the constrained C backend. The C backend now emits deterministic C11 for 31
   verified scalar, borrowed-view, typed-comparison, inert-enum, flat-resource, and resource-tagged cases under the provisional `x86_64-linux-gnu` profile,
   including `Option<i32>` and `Result<i32, i32>` construction, match, calls, and propagation, private
-  positive scalar fixed-array construction, exact length observation, internal value calls, and checked read-only indexing, plus
+  positive scalar fixed-array construction, contextual zero-copy `[u8; N]` byte-view borrowing, exact length observation, internal value calls, and checked read-only indexing, plus
   all-`i32` resource construction, field reads, moves, reassignment, and resource-bearing built-in
   tag variants and propagation. The unstable
   `experimental emit-c` command exposes that exact verified translation unit on stdout

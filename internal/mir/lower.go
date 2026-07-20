@@ -519,6 +519,8 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		return l.lowerAggregateConstruction(expression)
 	case "array":
 		return l.lowerArrayConstruction(expression)
+	case "array-view-borrow":
+		return l.lowerArrayBorrowView(expression)
 	case "array-length":
 		return l.lowerArrayLength(expression)
 	case "field-expression":
@@ -656,6 +658,31 @@ func (l *functionLowerer) lowerArrayConstruction(expression *hir.Expression) (Op
 	})
 	l.result.OrderedEvaluations = append(l.result.OrderedEvaluations, OrderedEvaluationFact{
 		Expression: expression.Span, Sequence: sequence, MaterializedBeforeParent: true,
+	})
+	return Operand{Kind: OperandLocal, Local: destination}, nil
+}
+
+func (l *functionLowerer) lowerArrayBorrowView(expression *hir.Expression) (Operand, error) {
+	wantView := hir.SharedBorrow(hir.TypeByteSlice)
+	if len(expression.Children) != 1 || expression.Operator != "&" || expression.Type != wantView {
+		return Operand{}, fmt.Errorf("malformed fixed-array byte-view borrow")
+	}
+	elementType, length, array := hir.FixedArrayParts(expression.Children[0].Type)
+	if !array || elementType != hir.TypeU8 || !hir.ExecutableFixedArrayShape(elementType, length) {
+		return Operand{}, fmt.Errorf("fixed-array byte-view borrow has unsupported owner type %q", expression.Children[0].Type)
+	}
+	receiver, err := l.lowerExpression(&expression.Children[0])
+	if err != nil {
+		return Operand{}, err
+	}
+	if receiver.Kind != OperandLocal {
+		return Operand{}, fmt.Errorf("fixed-array byte-view borrow requires one local owner")
+	}
+	destination := l.newTemporary()
+	l.appendOperation(Operation{
+		Kind: OperationArrayBorrowView, Span: expression.Span, DestinationLocal: destination,
+		Operands: []Operand{receiver}, OwnerType: expression.Children[0].Type,
+		Type: expression.Type, Operator: expression.Operator,
 	})
 	return Operand{Kind: OperandLocal, Local: destination}, nil
 }

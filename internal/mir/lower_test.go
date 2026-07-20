@@ -1714,6 +1714,53 @@ fn main() -> i32 { if make().len == 3 { 42 } else { 1 } }
 	}
 }
 
+func TestLowerPreservesFixedU8ArrayByteViewBorrow(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+fn first(bytes: &[u8]) -> i32 { bytes[2] as i32 }
+fn main() -> i32 {
+    let values: [u8; 3] = [40, 41, 42];
+    first(&values)
+}
+`)
+	var borrow *Operation
+	for functionIndex := range program.Functions {
+		if program.Functions[functionIndex].Name != "main::main" {
+			continue
+		}
+		for blockIndex := range program.Functions[functionIndex].Blocks {
+			for operationIndex := range program.Functions[functionIndex].Blocks[blockIndex].Operations {
+				operation := &program.Functions[functionIndex].Blocks[blockIndex].Operations[operationIndex]
+				if operation.Kind == OperationArrayBorrowView {
+					borrow = operation
+				}
+			}
+		}
+	}
+	if borrow == nil || borrow.OwnerType != hir.FixedArray(hir.TypeU8, 3) || borrow.Type != hir.SharedBorrow(hir.TypeByteSlice) ||
+		borrow.Operator != "&" || borrow.DestinationLocal == NoLocal || len(borrow.Operands) != 1 || borrow.Operands[0].Kind != OperandLocal {
+		t.Fatalf("array byte-view borrow = %+v", borrow)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+
+	mutated := Clone(program)
+	for functionIndex := range mutated.Functions {
+		for blockIndex := range mutated.Functions[functionIndex].Blocks {
+			for operationIndex := range mutated.Functions[functionIndex].Blocks[blockIndex].Operations {
+				operation := &mutated.Functions[functionIndex].Blocks[blockIndex].Operations[operationIndex]
+				if operation.Kind == OperationArrayBorrowView {
+					operation.Operator = "&mut"
+				}
+			}
+		}
+	}
+	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1001" {
+		t.Fatalf("Verify() array byte-view mutation failures = %+v", failures)
+	}
+}
+
 func lowerTestSource(t *testing.T, text string) Program {
 	t.Helper()
 	parsed, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(text)), source.DefaultLimits())

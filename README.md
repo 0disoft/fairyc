@@ -28,7 +28,7 @@ error compatibility. The MIR runner executes all
 left-to-right call evaluation, complete-root moves, normal-exit cleanup order, `Result` error
   cleanup, nearest-loop control, explicit checked arithmetic, and non-unwinding trap paths. The verifier mutation runner constructs all 10 named
   baselines and proves all 21 isolated `V1001` through `V1701` rejection recipes. The first MIR
-  interpreter slice executes all 90 v0 cases for literal return, direct `i32` minimum constants, scalar fixed-array calls, exact lengths, and checked indexing, function-call arithmetic,
+  interpreter slice executes all 90 v0 cases for literal return, direct `i32` minimum constants, scalar fixed-array calls, contextual immutable byte-view borrowing, exact lengths, and checked indexing, function-call arithmetic,
 boolean branches and logical not, source `&&` and `||` short-circuiting, scalar `while`, scalar
 `Option` construction/matching, scalar `Result` construction/matching/propagation,
 resource construction, field reads, call moves, resource-bearing `Option` and `Result` payload moves,
@@ -52,7 +52,8 @@ immutable byte-slice indexing and end-exclusive slicing, the target-independent 
 subtraction, multiplication, division, remainder, bitwise operations, and checked right shift,
 typed equality across `bool` and the four Fairy integer scalars,
 typed ordering across those integer scalars, borrowed UTF-8/byte-slice internal calls, and private
-value-semantic scalar fixed arrays with exact lengths and checked read-only indexing. The cases cover
+value-semantic scalar fixed arrays with exact lengths, contextual immutable byte-view borrowing,
+and checked read-only indexing. The cases cover
 resource construction, field reads, whole-root call moves, live reassignment, calls and control
 flow, active-payload moves, Result propagation, bitwise operations, checked division and shift, overflow
 trapping, scalar `Option` Some and None, and scalar `Result` propagation success and failure. This
@@ -175,9 +176,12 @@ evaluate once left to right and preserve the receiver's borrow origin. Indexed a
 indexing or slicing, a stable public string ABI, and the general safe text API still do not exist.
 Fixed arrays of `bool`, `i32`, `u8`, `u32`, or `usize` with `1 <= N <= 4096` now construct from
 nonempty list literals, cross internal calls and returns as inert copy values, expose exact
-zero-cost `usize` `.len`, and support checked read-only `usize` indexing. The ceiling is a provisional Stage 0 implementation guard, not a stable
-language or ABI limit. Empty and repeated literals, fields, nesting, mutable indexing, slicing,
-properties other than `.len`, array-to-slice borrowing, and public or foreign ABI use remain closed.
+zero-cost `usize` `.len`, and support checked read-only `usize` indexing. A direct shared borrow of
+`[u8; N]` contextually becomes `&[u8]` where that type is expected, so local arrays can use the
+existing immutable byte-view calls and operations without unsafe code. The ceiling is a provisional
+Stage 0 implementation guard, not a stable language or ABI limit. Empty and repeated literals,
+fields, nesting, mutable indexing, general slicing or borrowing, safe-borrow reassignment, and
+public or foreign ABI use remain closed.
 Buffer-backed String and CString C helpers now preserve ownership on failed UTF-8 conversion,
 support overlap-safe String append, expose immutable bounded views, reject interior NUL, and append
 exactly one C terminator. Their C-only native probe is configured but unobserved. A separate

@@ -299,6 +299,9 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 			value, actual := c.checkExpression(statement.Expression, targetType)
 			hirStatement.Target = target
 			hirStatement.Expression = value
+			if _, _, borrow := hir.BorrowElement(targetType); borrow {
+				c.analyzer.addUnsupported(c.module.file.Path, statement.Span, "safe-borrow reassignment")
+			}
 			if statement.Target != nil {
 				resolved := c.analyzer.resolved[statement.Target]
 				if resolved == nil || !resolved.mutable {
@@ -391,7 +394,7 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 			actual = hir.TypeInvalid
 		}
 	case syntax.KindPrefix:
-		actual = c.checkPrefix(expression, result)
+		actual = c.checkPrefix(expression, result, expected)
 	case syntax.KindBinary:
 		actual = c.checkBinary(expression, result)
 	case syntax.KindCast:
@@ -796,7 +799,7 @@ func (c *typeChecker) checkField(expression *ast.Expression, result *hir.Express
 	return field.typ
 }
 
-func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expression) hir.Type {
+func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expression, expected hir.Type) hir.Type {
 	result.Operator = expression.Text
 	if len(expression.Children) != 1 {
 		return hir.TypeInvalid
@@ -833,6 +836,11 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 		if c.analyzer.resolved[expression.Children[0]] == nil {
 			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "borrow of a non-place expression")
 			return hir.TypeInvalid
+		}
+		if element, length, array := hir.FixedArrayParts(childType); expected == hir.SharedBorrow(hir.TypeByteSlice) &&
+			array && element == hir.TypeU8 && hir.ExecutableFixedArrayShape(element, length) {
+			result.Kind = "array-view-borrow"
+			return expected
 		}
 		return hir.SharedBorrow(childType)
 	case "&mut":

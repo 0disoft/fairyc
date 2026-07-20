@@ -4,6 +4,10 @@ fn pick(values: [u8; 3], index: usize) -> u8 {
     values[index]
 }
 
+fn view_pick(values: &[u8], index: usize) -> u8 {
+    values[index]
+}
+
 fn main() -> i32 {
     let values: [u8; 3] = [40, 41, 42];
     let flags: [bool; 2] = [false, true];
@@ -11,7 +15,7 @@ fn main() -> i32 {
     let wide: [u32; 1] = [42];
     let offsets: [usize; 1] = [2];
     if values.len == 3 && flags.len == 2 && signed.len == 1 && wide.len == 1 && offsets.len == 1 &&
-       flags[1] && signed[0] == 42 && wide[0] == 42 && offsets[0] == 2 {
+       flags[1] && signed[0] == 42 && wide[0] == 42 && offsets[0] == 2 && view_pick(&values, 0) == 40 {
         pick(values, offsets[0]) as i32
     } else {
         1
