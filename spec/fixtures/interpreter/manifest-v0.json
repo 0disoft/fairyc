@@ -29,6 +29,7 @@
     "docs/adr/0108-integer-literal-range-validation.md",
     "docs/adr/0109-direct-i32-minimum-literal.md",
     "docs/adr/0110-scalar-fixed-array-execution.md",
+    "docs/adr/0111-scalar-fixed-array-length.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/mir-v0.md",
     "docs/engineering/05-testing-standard.md"

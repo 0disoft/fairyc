@@ -54,7 +54,8 @@ is the written element count, so an annotation with another `N` is `E1006`. The 
 admits only the five copy-scalar element types named by ADR 0110 and currently rejects `N` outside
 `1..=4096` as unsupported. That ceiling guards the provisional by-value implementation rather than
 defining a stable language or ABI limit. An array index is contextually `usize` and returns the
-array element type.
+array element type. The exact `.len` property returns `usize`; no other fixed-array property is in
+the executable subset.
 
 The implemented safe integer `as` subset is closed to `u8 -> i32`, `u8 -> u32`, `u8 -> usize`, and
 `u32 -> usize`. Each target contains the complete mathematical source range, so no value changes or

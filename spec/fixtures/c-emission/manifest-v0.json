@@ -31,6 +31,7 @@
     "docs/adr/0105-checked-immutable-byte-view-slicing.md",
     "docs/adr/0106-always-checked-assert.md",
     "docs/adr/0110-scalar-fixed-array-execution.md",
+    "docs/adr/0111-scalar-fixed-array-length.md",
     "docs/adr/0107-omitted-immutable-byte-view-slice-bounds.md",
     "docs/adr/0108-integer-literal-range-validation.md",
     "docs/adr/0109-direct-i32-minimum-literal.md",
@@ -502,7 +503,7 @@
         "target": "x86_64-linux-gnu",
         "dialect": "c11",
         "functions": ["main::bounds_trap", "main::main", "main::pick"],
-        "features": ["array-index", "scalar-call", "scalar-cast", "scalar-comparison", "scalar-control-flow", "scalar-fixed-array", "trap"]
+        "features": ["array-index", "array-length", "scalar-call", "scalar-cast", "scalar-comparison", "scalar-control-flow", "scalar-fixed-array", "trap"]
       }
     },
     {
@@ -518,7 +519,7 @@
         "target": "x86_64-linux-gnu",
         "dialect": "c11",
         "functions": ["main::bounds_trap", "main::main", "main::pick"],
-        "features": ["array-index", "scalar-call", "scalar-cast", "scalar-comparison", "scalar-control-flow", "scalar-fixed-array", "trap"]
+        "features": ["array-index", "array-length", "scalar-call", "scalar-cast", "scalar-comparison", "scalar-control-flow", "scalar-fixed-array", "trap"]
       }
     },
     {

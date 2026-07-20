@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0110-scalar-fixed-array-execution.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0111-scalar-fixed-array-length.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -133,8 +133,9 @@ Optimization level and backend must not change the meaning of safe code. Express
 - Fixed arrays `[T; N]` currently admit only `bool`, `i32`, `u8`, `u32`, or `usize`, nonempty list
   literals, and `1 <= N <= 4096`. The ceiling is a provisional implementation guard, not a stable
   language or ABI limit. Elements evaluate once left to right, arrays copy across internal calls
-  and results, and a `usize` index returns `T` or traps with `bounds`. Empty or repeated literals,
-  fields, nesting, mutation, slicing, `.len`, borrowing, and foreign ABI use remain deferred.
+  and results, `.len` returns exact canonical `N` as `usize` without a scan or trap, and a `usize`
+  index returns `T` or traps with `bounds`. Empty or repeated literals, other fields, nesting,
+  mutation, slicing, borrowing, and foreign ABI use remain deferred.
 - Division by zero, signed minimum divided by negative one, invalid shifts, and ordinary integer overflow trap.
 - Matching-type shifts accept `i32`, `u8`, `u32`, or `usize`. Right shift is arithmetic for `i32`
   and logical for unsigned types. Negative `i32` amounts and amounts at or above the exact operand

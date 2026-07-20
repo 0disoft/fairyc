@@ -32,7 +32,8 @@ build contracts do not own.
    allocation or generated C.
 6. Arrays are not admitted inside structs, resources, enums, `Option`, `Result`, borrows, raw
    pointers, or foreign signatures in this slice. Array fields, nested arrays, resource elements,
-   mutable indexing, `.len`, array-to-slice borrowing, and stable layout are deferred.
+   mutable indexing, array-to-slice borrowing, and stable layout are deferred. ADR 0111 separately
+   admits the representation-independent `.len` property.
 7. MIR uses explicit array construction, bounds-check marker, checked switch, and index operations.
    The verifier requires the exact element count, scalar operand types, `usize` index, `bounds`
    trap edge, and a dominating matching check before access.

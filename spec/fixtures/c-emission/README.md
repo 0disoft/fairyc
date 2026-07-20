@@ -18,7 +18,8 @@ failure, restricted inert user-enum construction, named payload extraction, and 
 plus flat all-`i32` resource construction, field access, whole-root call move, empty-drop
 discharge, live reassignment, resource-bearing Option Some and None, resource Result Ok and Err, and
 resource Result propagation success and error, plus positive scalar fixed-array construction,
-internal value calls, checked read-only indexing, zero-cost byte-length reads, checked explicit
+internal value calls, exact canonical length observation, checked read-only indexing, zero-cost
+byte-length reads, checked explicit
 and omitted-bound end-exclusive immutable byte-view slicing, and internal
 function transport for borrowed UTF-8 and byte-string views. Generated resource and resource-tagged structs use target-layout assertions, but this
 lane does not ask a C compiler to evaluate them. No C parser, Clang, GCC, sysroot,

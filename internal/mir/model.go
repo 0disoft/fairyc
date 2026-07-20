@@ -246,6 +246,7 @@ const (
 	OperationBinary            OperationKind = "binary"
 	OperationScalarCast        OperationKind = "scalar-cast"
 	OperationArrayConstruct    OperationKind = "array-construct"
+	OperationArrayLength       OperationKind = "array-length"
 	OperationArrayIndexCheck   OperationKind = "array-index-check"
 	OperationArrayIndex        OperationKind = "array-index"
 	OperationResultConstruct   OperationKind = "result-construct"

@@ -519,6 +519,8 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		return l.lowerAggregateConstruction(expression)
 	case "array":
 		return l.lowerArrayConstruction(expression)
+	case "array-length":
+		return l.lowerArrayLength(expression)
 	case "field-expression":
 		return l.lowerFieldRead(expression)
 	case "view-length":
@@ -654,6 +656,30 @@ func (l *functionLowerer) lowerArrayConstruction(expression *hir.Expression) (Op
 	})
 	l.result.OrderedEvaluations = append(l.result.OrderedEvaluations, OrderedEvaluationFact{
 		Expression: expression.Span, Sequence: sequence, MaterializedBeforeParent: true,
+	})
+	return Operand{Kind: OperandLocal, Local: destination}, nil
+}
+
+func (l *functionLowerer) lowerArrayLength(expression *hir.Expression) (Operand, error) {
+	if len(expression.Children) != 1 || expression.Operator != "len" || expression.Type != hir.TypeUSize {
+		return Operand{}, fmt.Errorf("malformed fixed-array length")
+	}
+	elementType, length, array := hir.FixedArrayParts(expression.Children[0].Type)
+	if !array || !hir.ExecutableFixedArrayShape(elementType, length) {
+		return Operand{}, fmt.Errorf("fixed-array length has unsupported owner type %q", expression.Children[0].Type)
+	}
+	receiver, err := l.lowerExpression(&expression.Children[0])
+	if err != nil {
+		return Operand{}, err
+	}
+	if receiver.Kind == OperandInvalid {
+		return Operand{}, fmt.Errorf("fixed-array length has no receiver value")
+	}
+	destination := l.newTemporary()
+	l.appendOperation(Operation{
+		Kind: OperationArrayLength, Span: expression.Span, DestinationLocal: destination,
+		Operands: []Operand{receiver}, OwnerType: expression.Children[0].Type,
+		Type: expression.Type, Field: expression.Operator,
 	})
 	return Operand{Kind: OperandLocal, Local: destination}, nil
 }

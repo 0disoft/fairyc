@@ -569,6 +569,17 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					values[index] = value
 				}
 				locals[operation.DestinationLocal] = runtimeValue{kind: valueArray, typ: operation.Type, elements: values}
+			case mir.OperationArrayLength:
+				receiver, err := evaluateOne(locals, operation.Operands)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("fixed-array length in %q: %w", function.Name, err)
+				}
+				elementType, length, array := hir.FixedArrayParts(operation.OwnerType)
+				if !array || !hir.ExecutableFixedArrayShape(elementType, length) || receiver.kind != valueArray || receiver.typ != operation.OwnerType ||
+					uint64(len(receiver.elements)) != length || operation.Type != hir.TypeUSize || operation.Field != "len" {
+					return callCompletion{}, fmt.Errorf("fixed-array length in %q has incompatible runtime value", function.Name)
+				}
+				locals[operation.DestinationLocal] = runtimeValue{kind: valueUSize, u64: length, typ: hir.TypeUSize}
 			case mir.OperationArrayIndex:
 				receiver, index, err := evaluateArrayIndexOperands(locals, operation.Operands)
 				if err != nil {

@@ -10,7 +10,8 @@ fn main() -> i32 {
     let signed: [i32; 1] = [42];
     let wide: [u32; 1] = [42];
     let offsets: [usize; 1] = [2];
-    if flags[1] && signed[0] == 42 && wide[0] == 42 && offsets[0] == 2 {
+    if values.len == 3 && flags.len == 2 && signed.len == 1 && wide.len == 1 && offsets.len == 1 &&
+       flags[1] && signed[0] == 42 && wide[0] == 42 && offsets[0] == 2 {
         pick(values, offsets[0]) as i32
     } else {
         1

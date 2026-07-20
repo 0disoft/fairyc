@@ -80,9 +80,11 @@ The first executable fixed-array subset accepts `[T; N]` only when `T` is `bool`
 for the initial by-value representation, not a stable language or ABI limit. A nonempty list
 `[a, b, ...]` constructs an inert copy value and evaluates its elements exactly once from left to
 right. `array[index]` requires `usize`, returns `T`, and traps with `bounds` when the index is at
-least `N`. Empty and repeated literals remain parser-valid but unsupported until zero-size
+least `N`. `array.len` evaluates the receiver once and returns exact canonical `N` as `usize`
+without a scan, allocation, runtime call, memory read, or trap. Empty and repeated literals remain parser-valid but unsupported until zero-size
 representation and expansion-budget contracts exist. Array fields, nesting, resource elements,
-mutable indexing, slicing, `.len`, borrowing, and foreign signatures remain closed.
+mutable indexing, slicing, properties other than `.len`, borrowing, and foreign signatures remain
+closed.
 
 Ordinary internal functions may accept `&str` and `&[u8]` parameters. Calls preserve the exact safe
 borrow and its caller-proven origin; they do not convert the argument to a raw pointer or transfer

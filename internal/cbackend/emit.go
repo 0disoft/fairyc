@@ -712,7 +712,7 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 					mir.OperationEnumConstruct, mir.OperationEnumPayload,
 					mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice,
-					mir.OperationScalarCast, mir.OperationArrayConstruct, mir.OperationArrayIndex:
+					mir.OperationScalarCast, mir.OperationArrayConstruct, mir.OperationArrayLength, mir.OperationArrayIndex:
 					inferred = operation.Type
 				}
 				if operation.DestinationLocal == mir.NoLocal || inferred == hir.TypeInvalid || inferred == "" {
@@ -1238,6 +1238,11 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 					return err
 				}
 				e.features["scalar-fixed-array"] = struct{}{}
+			case mir.OperationArrayLength:
+				if err := e.inspectArrayLength(functionIndex, *operation); err != nil {
+					return err
+				}
+				e.features["array-length"] = struct{}{}
 			case mir.OperationArrayIndexCheck:
 				if err := e.inspectArrayIndex(functionIndex, *operation, false); err != nil {
 					return err
@@ -1412,7 +1417,7 @@ func validateOperationShape(function string, operation mir.Operation) error {
 		mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationEnumConstruct, mir.OperationEnumPayload,
 		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice, mir.OperationScalarCast,
-		mir.OperationArrayConstruct, mir.OperationArrayIndex:
+		mir.OperationArrayConstruct, mir.OperationArrayLength, mir.OperationArrayIndex:
 		if operation.DestinationLocal < 0 {
 			return fmt.Errorf("%s operation in %s has no destination local", operation.Kind, function)
 		}
@@ -1459,6 +1464,26 @@ func (e *emitter) inspectArrayConstruction(functionIndex int, operation mir.Oper
 		if err != nil || operandType != elementType {
 			return fmt.Errorf("fixed-array construction element %d in %s has incompatible type", index, function.Name)
 		}
+	}
+	return nil
+}
+
+func (e *emitter) inspectArrayLength(functionIndex int, operation mir.Operation) error {
+	function := &e.functions[functionIndex]
+	receiver, err := oneOperand(operation.Operands)
+	if err != nil {
+		return fmt.Errorf("fixed-array length in %s: %w", function.Name, err)
+	}
+	elementType, length, array := hir.FixedArrayParts(operation.OwnerType)
+	if !array || !hir.ExecutableFixedArrayShape(elementType, length) || operation.Type != hir.TypeUSize || operation.Field != "len" {
+		return fmt.Errorf("fixed-array length in %s has incompatible owner, result, or field", function.Name)
+	}
+	receiverType, err := e.operandType(functionIndex, receiver)
+	if err != nil {
+		return fmt.Errorf("fixed-array length in %s: %w", function.Name, err)
+	}
+	if receiverType != operation.OwnerType {
+		return fmt.Errorf("fixed-array length in %s has receiver type %q, want %q", function.Name, receiverType, operation.OwnerType)
 	}
 	return nil
 }
@@ -2872,6 +2897,15 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			output.WriteString(value)
 		}
 		output.WriteString(" } };\n")
+	case mir.OperationArrayLength:
+		if _, err := oneOperand(operation.Operands); err != nil {
+			return fmt.Errorf("fixed-array length in %s: %w", function, err)
+		}
+		_, length, array := hir.FixedArrayParts(operation.OwnerType)
+		if !array {
+			return fmt.Errorf("fixed-array length in %s has type %q", function, operation.OwnerType)
+		}
+		fmt.Fprintf(output, "    fy_l_%d = ((uintptr_t)UINT64_C(%d));\n", operation.DestinationLocal, length)
 	case mir.OperationArrayIndex:
 		receiver, index, err := twoOperands(operation.Operands)
 		if err != nil {
@@ -3515,7 +3549,7 @@ func operationHasDestination(kind mir.OperationKind) bool {
 		mir.OperationEnumConstruct, mir.OperationEnumPayload,
 		mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice,
-		mir.OperationScalarCast, mir.OperationArrayConstruct, mir.OperationArrayIndex, mir.OperationRegionPlace:
+		mir.OperationScalarCast, mir.OperationArrayConstruct, mir.OperationArrayLength, mir.OperationArrayIndex, mir.OperationRegionPlace:
 		return true
 	default:
 		return false

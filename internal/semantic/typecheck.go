@@ -765,6 +765,15 @@ func (c *typeChecker) checkField(expression *ast.Expression, result *hir.Express
 			return hir.TypeInvalid
 		}
 	}
+	if element, length, array := hir.FixedArrayParts(receiverType); array && hir.ExecutableFixedArrayShape(element, length) {
+		if expression.Text == "len" {
+			result.Kind = "array-length"
+			result.Operator = "len"
+			return hir.TypeUSize
+		}
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "unknown fixed-array field "+expression.Text)
+		return hir.TypeInvalid
+	}
 	if element, _, borrow := hir.BorrowElement(receiverType); borrow {
 		receiverType = element
 	}

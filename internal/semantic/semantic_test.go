@@ -1525,6 +1525,29 @@ func TestAnalyzeTypesScalarFixedArrayLiteralAndIndex(t *testing.T) {
 	}
 }
 
+func TestAnalyzeTypesScalarFixedArrayLength(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\nfn length(values: [u32; 3]) -> usize { values.len }\n",
+	})
+	assertCleanTypeResult(t, result)
+	expression := result.HIR.Modules[0].Functions[0].Body.Tail
+	if expression == nil || expression.Kind != "array-length" || expression.Type != hir.TypeUSize || expression.Operator != "len" ||
+		len(expression.Children) != 1 || expression.Children[0].Type != hir.FixedArray(hir.TypeU32, 3) {
+		t.Fatalf("array length expression = %+v", expression)
+	}
+}
+
+func TestAnalyzeKeepsOtherFixedArrayFieldsClosed(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\nfn main() -> i32 { let values: [i32; 1] = [42]; if values.is_empty { 1 } else { 42 } }\n",
+	})
+	if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "unknown fixed-array field is_empty" {
+		t.Fatalf("unsupported = %+v", result.Unsupported)
+	}
+}
+
 func TestAnalyzeRejectsFixedArrayLengthAndElementMismatch(t *testing.T) {
 	t.Parallel()
 	for _, text := range []string{

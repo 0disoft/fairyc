@@ -76,7 +76,7 @@ func TestExecuteScalarFixedArrayAcrossCallAndIndex(t *testing.T) {
 fn pick(values: [u8; 3], index: usize) -> u8 { values[index] }
 fn main() -> i32 {
     let values: [u8; 3] = [40, 41, 42];
-    pick(values, 2) as i32
+    if values.len == 3 { pick(values, 2) as i32 } else { 1 }
 }
 `)
 	outcome, err := interpreter.Execute(program, "main::main")

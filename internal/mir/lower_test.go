@@ -1664,6 +1664,56 @@ fn main() -> i32 {
 	}
 }
 
+func TestLowerPreservesScalarFixedArrayLength(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+fn make() -> [u32; 3] { [40, 41, 42] }
+fn main() -> i32 { if make().len == 3 { 42 } else { 1 } }
+`)
+	var mainFunction *Function
+	for functionIndex := range program.Functions {
+		if program.Functions[functionIndex].Name == "main::main" {
+			mainFunction = &program.Functions[functionIndex]
+			break
+		}
+	}
+	if mainFunction == nil || len(mainFunction.Calls) != 1 {
+		t.Fatalf("main function/calls = %+v, want one receiver evaluation", mainFunction)
+	}
+	var length *Operation
+	for blockIndex := range mainFunction.Blocks {
+		for operationIndex := range mainFunction.Blocks[blockIndex].Operations {
+			operation := &mainFunction.Blocks[blockIndex].Operations[operationIndex]
+			if operation.Kind == OperationArrayLength {
+				length = operation
+			}
+		}
+	}
+	wantArray := hir.FixedArray(hir.TypeU32, 3)
+	if length == nil || length.OwnerType != wantArray || length.Type != hir.TypeUSize || length.Field != "len" ||
+		length.DestinationLocal == NoLocal || len(length.Operands) != 1 {
+		t.Fatalf("array length = %+v", length)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+
+	mutated := Clone(program)
+	for functionIndex := range mutated.Functions {
+		for blockIndex := range mutated.Functions[functionIndex].Blocks {
+			for operationIndex := range mutated.Functions[functionIndex].Blocks[blockIndex].Operations {
+				operation := &mutated.Functions[functionIndex].Blocks[blockIndex].Operations[operationIndex]
+				if operation.Kind == OperationArrayLength {
+					operation.Field = "size"
+				}
+			}
+		}
+	}
+	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1001" {
+		t.Fatalf("Verify() array-length mutation failures = %+v", failures)
+	}
+}
+
 func lowerTestSource(t *testing.T, text string) Program {
 	t.Helper()
 	parsed, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(text)), source.DefaultLimits())

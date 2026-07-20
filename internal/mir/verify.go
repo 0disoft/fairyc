@@ -386,6 +386,12 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "fixed-array construction shape is invalid"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationArrayLength:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if !validArrayLengthShape(operation) {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "fixed-array length shape is invalid"})
+				}
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationArrayIndexCheck:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				if !validArrayIndexShape(operation, false) || !slices.Equal(operation.TrapCategories, []string{"bounds"}) {
@@ -922,6 +928,13 @@ func validArrayConstructShape(operation Operation) bool {
 		}
 	}
 	return true
+}
+
+func validArrayLengthShape(operation Operation) bool {
+	elementType, length, array := hir.FixedArrayParts(operation.OwnerType)
+	return array && hir.ExecutableFixedArrayShape(elementType, length) && operation.DestinationLocal != NoLocal &&
+		operation.Type == hir.TypeUSize && operation.Field == "len" && len(operation.Operands) == 1 &&
+		operation.Operands[0].Kind == OperandLocal
 }
 
 func validArrayIndexShape(operation Operation, destination bool) bool {
