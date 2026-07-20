@@ -365,6 +365,12 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 				return false, err
 			}
 		case "assignment":
+			if statement.Target != nil && (statement.Target.Kind == "array-index" || statement.Target.Kind == "view-index") {
+				if err := l.lowerIndexedAssignment(statement); err != nil {
+					return false, err
+				}
+				continue
+			}
 			value, err := l.lowerExpression(statement.Expression)
 			if err != nil {
 				return false, err
@@ -416,6 +422,88 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 		}
 	}
 	return l.blockTerminated(l.current), nil
+}
+
+func (l *functionLowerer) lowerIndexedAssignment(statement hir.Statement) error {
+	target := statement.Target
+	if target == nil || statement.Expression == nil || len(target.Children) != 2 || target.Operator != "[]" ||
+		target.Children[1].Type != hir.TypeUSize || statement.Expression.Type != target.Type {
+		return fmt.Errorf("malformed indexed assignment")
+	}
+	receiver, err := l.lowerExpression(&target.Children[0])
+	if err != nil {
+		return err
+	}
+	index, err := l.lowerExpression(&target.Children[1])
+	if err != nil {
+		return err
+	}
+	if receiver.Kind == OperandInvalid || index.Kind == OperandInvalid {
+		return fmt.Errorf("indexed assignment has an invalid place operand")
+	}
+	checkKind := OperationArrayIndexCheck
+	storeKind := OperationArrayIndexStore
+	switchKind := "checked-array-index"
+	if target.Kind == "view-index" {
+		if target.Children[0].Type != hir.MutableBorrow(hir.TypeByteSlice) || target.Type != hir.TypeU8 {
+			return fmt.Errorf("mutable byte-view assignment has incompatible type metadata")
+		}
+		checkKind = OperationViewIndexCheck
+		storeKind = OperationViewIndexStore
+		switchKind = "checked-view-index"
+		receiver = l.freezeScalarOperand(receiver, target.Children[0].Span)
+	} else {
+		elementType, _, array := hir.FixedArrayParts(target.Children[0].Type)
+		if target.Kind != "array-index" || !array || elementType != target.Type {
+			return fmt.Errorf("fixed-array assignment has incompatible type metadata")
+		}
+	}
+	index = l.freezeScalarOperand(index, target.Children[1].Span)
+	placeOperands := []Operand{receiver, index}
+	l.result.OrderedEvaluations = append(l.result.OrderedEvaluations, OrderedEvaluationFact{
+		Expression:               statement.Span,
+		Sequence:                 []hir.Span{target.Children[0].Span, target.Children[1].Span, statement.Expression.Span},
+		MaterializedBeforeParent: true,
+	})
+	l.appendOperation(Operation{
+		Kind: checkKind, Span: target.Span, DestinationLocal: NoLocal, Operands: slices.Clone(placeOperands),
+		OwnerType: target.Children[0].Type, IndexType: hir.TypeUSize, Type: target.Type, Operator: "[]",
+		TrapCategories: []string{"bounds"},
+	})
+	continuation := l.newBlock()
+	trap := l.newBlock()
+	l.terminate(Terminator{
+		Kind: TerminatorSwitch, Span: target.Span, Successors: []BlockID{continuation, trap}, UnwindSuccessor: NoBlock,
+		SwitchKind: switchKind, SwitchOperands: slices.Clone(placeOperands), Operator: "[]",
+	})
+	l.current = trap
+	l.terminate(Terminator{Kind: TerminatorTrap, Span: target.Span, UnwindSuccessor: NoBlock, TrapCategories: []string{"bounds"}})
+	l.result.TrapPaths = append(l.result.TrapPaths, TrapPathFact{
+		Operation: target.Span, Categories: []string{"bounds"}, CleanupActions: []CleanupAction{}, HasSuccessor: false,
+	})
+	l.current = continuation
+	value, err := l.lowerExpression(statement.Expression)
+	if err != nil {
+		return err
+	}
+	if value.Kind == OperandInvalid {
+		return fmt.Errorf("indexed assignment has an invalid value operand")
+	}
+	l.appendOperation(Operation{
+		Kind: storeKind, Span: statement.Span, DestinationLocal: NoLocal,
+		Operands: append(slices.Clone(placeOperands), value), OwnerType: target.Children[0].Type,
+		IndexType: hir.TypeUSize, Type: target.Type, Operator: "[]=",
+	})
+	return nil
+}
+
+func (l *functionLowerer) freezeScalarOperand(value Operand, at hir.Span) Operand {
+	if value.Kind == OperandInvalid {
+		return value
+	}
+	destination := l.newTemporary()
+	l.appendOperation(Operation{Kind: OperationAssign, Span: at, DestinationLocal: destination, Operands: []Operand{value}})
+	return Operand{Kind: OperandLocal, Local: destination}
 }
 
 func (l *functionLowerer) lowerAssert(expression *hir.Expression, statementSpan hir.Span) error {
@@ -1110,8 +1198,8 @@ func (l *functionLowerer) lowerViewEmpty(expression *hir.Expression) (Operand, e
 
 func (l *functionLowerer) lowerViewIndex(expression *hir.Expression) (Operand, error) {
 	if len(expression.Children) != 2 || expression.Operator != "[]" || expression.Type != hir.TypeU8 ||
-		expression.Children[0].Type != hir.SharedBorrow(hir.TypeByteSlice) || expression.Children[1].Type != hir.TypeUSize {
-		return Operand{}, fmt.Errorf("malformed immutable byte-view index")
+		!isByteViewType(expression.Children[0].Type) || expression.Children[1].Type != hir.TypeUSize {
+		return Operand{}, fmt.Errorf("malformed byte-view index")
 	}
 	receiver, err := l.lowerExpression(&expression.Children[0])
 	if err != nil {
@@ -1122,7 +1210,7 @@ func (l *functionLowerer) lowerViewIndex(expression *hir.Expression) (Operand, e
 		return Operand{}, err
 	}
 	if receiver.Kind == OperandInvalid || index.Kind == OperandInvalid {
-		return Operand{}, fmt.Errorf("immutable byte-view index has an invalid operand")
+		return Operand{}, fmt.Errorf("byte-view index has an invalid operand")
 	}
 	operands := []Operand{receiver, index}
 	l.result.OrderedEvaluations = append(l.result.OrderedEvaluations, OrderedEvaluationFact{
@@ -1154,6 +1242,10 @@ func (l *functionLowerer) lowerViewIndex(expression *hir.Expression) (Operand, e
 		IndexType: expression.Children[1].Type, Type: expression.Type, Operator: expression.Operator,
 	})
 	return Operand{Kind: OperandLocal, Local: destination}, nil
+}
+
+func isByteViewType(value hir.Type) bool {
+	return value == hir.SharedBorrow(hir.TypeByteSlice) || value == hir.MutableBorrow(hir.TypeByteSlice)
 }
 
 func (l *functionLowerer) lowerViewSlice(expression *hir.Expression) (Operand, error) {

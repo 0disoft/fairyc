@@ -4,6 +4,11 @@ fn second(left: &[u8], right: &[u8]) -> &[u8] {
     right
 }
 
+fn set_last(bytes: &mut [u8]) -> u8 {
+    bytes[2] = 42;
+    bytes[2]
+}
+
 fn main() -> i32 {
     let bytes: &[u8] = b"\x00\x13\x17\x00"[1..];
     var index: usize = 0b0;
@@ -14,7 +19,10 @@ fn main() -> i32 {
     }
     assert(total == 0x2A);
     assert(-0x8000_0000 + 0x7FFF_FFFF + 0b1 == 0);
-    let answers: [u8; 3] = [40, 41, 42];
+    var answers: [u8; 3] = [0, 0, 0];
+    answers[0] = 40;
+    answers[1] = 41;
+    let changed: u8 = set_last(&mut answers);
     let flags: [bool; 2] = [false, true];
     let signed: [i32; 1] = [42];
     let wide: [u32; 1] = [42];
@@ -39,6 +47,7 @@ fn main() -> i32 {
     assert(offsets.len == 1);
     assert(answer_bytes.len == 3);
     assert(answer_bytes[0] == 40);
+    assert(changed == 42);
     assert(selected_bytes[2] == 42);
     assert(loop_selected[2] == 42);
     assert(selected_by_call[2] == 42);

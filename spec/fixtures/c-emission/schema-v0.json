@@ -39,8 +39,10 @@
       "enum": [
         "array-byte-view-borrow",
         "array-index",
+        "array-index-store",
         "array-length",
         "mutable-array-byte-view-borrow",
+        "mutable-view-index-store",
         "assert",
         "checked-arithmetic",
         "checked-division",

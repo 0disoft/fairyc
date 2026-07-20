@@ -33,8 +33,8 @@ func TestInterpreterManifestV0(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Run() error = %v", err)
 	}
-	if report.CasesRun != 91 {
-		t.Fatalf("Run() cases = %d, want 91", report.CasesRun)
+	if report.CasesRun != 92 {
+		t.Fatalf("Run() cases = %d, want 92", report.CasesRun)
 	}
 	for _, failure := range report.Failures {
 		t.Errorf("%s: %s", failure.CaseID, failure.Detail)

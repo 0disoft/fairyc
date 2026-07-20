@@ -12,7 +12,7 @@ output, LF-only text, and no absolute fixture path. It also creates a determinis
 `drop-trace-v0` unit, proves every interpreter-observed drop has a source/type/span site, and keeps
 that unit separate from the production translation unit.
 
-These 35 cases are emission evidence, not native-code evidence. They cover scalar control,
+These 36 cases are emission evidence, not native-code evidence. They cover scalar control,
 checked arithmetic, direct `i32` minimum emission as `INT32_MIN`, always-checked assertion control, `Option<i32>` Some and None, and `Result<i32, i32>` propagation success and
 failure, copy-only `Result<usize, inert-struct>` transport, restricted inert user-enum construction,
 named payload extraction, and exhaustive switch,
@@ -21,7 +21,7 @@ whole-root call move, empty-drop and compiler-private typed nonempty-drop
 discharge, live reassignment, resource-bearing Option Some and None, resource Result Ok and Err, and
 resource Result propagation success and error, plus positive scalar fixed-array construction,
 contextual zero-copy immutable and mutable byte-view borrowing, internal value calls, exact canonical length
-observation, checked read-only indexing, zero-cost
+observation, checked reads and fixed-array or mutable-view indexed stores, zero-cost
 byte-length reads, checked explicit
 and omitted-bound end-exclusive immutable byte-view slicing, and internal
 function transport for borrowed UTF-8 and byte-string views. Generated resource and resource-tagged structs use target-layout assertions, but this

@@ -30,7 +30,7 @@ error compatibility. The MIR runner executes all
 left-to-right call evaluation, complete-root moves, normal-exit cleanup order, `Result` error
   cleanup, nearest-loop control, explicit checked arithmetic, and non-unwinding trap paths. The verifier mutation runner constructs all 10 named
   baselines and proves all 21 isolated `V1001` through `V1701` rejection recipes. The first MIR
-  interpreter slice executes all 91 v0 cases for literal return, direct `i32` minimum constants, scalar fixed-array calls, contextual immutable and mutable byte-view borrowing, exact lengths, and checked indexing, function-call arithmetic,
+  interpreter slice executes all 92 v0 cases for literal return, direct `i32` minimum constants, scalar fixed-array calls, contextual immutable and mutable byte-view borrowing, exact lengths, checked reads and indexed stores, function-call arithmetic,
 boolean branches and logical not, source `&&` and `||` short-circuiting, scalar `while`, scalar
 `Option` construction/matching, scalar `Result` construction/matching/propagation,
 resource construction, field reads, call moves, resource-bearing `Option` and `Result` payload moves,
@@ -48,7 +48,7 @@ cleanup. A nonempty resource may declare drop effects, and Resource Flow require
 actual cleanup edges; whole-root moves transfer the obligation without charging the sender.
 The interpreter constructs, reads, and recursively drops resources from the verified MIR definition;
 host effect implementations remain target-runtime work rather than interpreter emulation.
-The constrained C backend emits deterministic C11 for 35 verified fixtures across the scalar
+The constrained C backend emits deterministic C11 for 36 verified fixtures across the scalar
 payload surface, restricted inert user enums, flat nonempty move-only resources over Fairy copy
 scalars or raw pointers with empty or pure nonempty drop bodies, copy-scalar/inert-struct and resource-bearing
 built-in `Option` and `Result` values,
@@ -184,8 +184,10 @@ zero-length `bool` without scanning or allocation.
 Immutable `&[u8]` additionally supports read-only `usize` indexing to `u8` and end-exclusive
 `bytes[start..end]`, `bytes[..end]`, `bytes[start..]`, and `bytes[..]` subviews behind verified
 `bounds` traps. Omitted bounds normalize to zero or the retained receiver length; written operands
-evaluate once left to right and preserve the receiver's borrow origin. Indexed assignment, text
-indexing or slicing, a stable public string ABI, and the general safe text API still do not exist.
+evaluate once left to right and preserve the receiver's borrow origin. Mutable `&mut [u8]` also
+supports checked `u8` reads and indexed stores; the place is checked before the right-hand side is
+evaluated. Text indexing or slicing, a stable public string ABI, and the general safe text API still
+do not exist.
 Fixed arrays of `bool`, `i32`, `u8`, `u32`, or `usize` with `1 <= N <= 4096` now construct from
 nonempty list literals, cross internal calls and returns as inert copy values, expose exact
 zero-cost `usize` `.len`, and support checked read-only `usize` indexing. A direct shared borrow of
@@ -193,13 +195,14 @@ zero-cost `usize` `.len`, and support checked read-only `usize` indexing. A dire
 existing immutable byte-view calls and operations without unsafe code. A direct exclusive borrow
 of a mutable `[u8; N]` likewise becomes `&mut [u8]` only where that internal parameter type is
 expected. It carries exact length and may expose `*mut u8` only inside unsafe wrapper code; safe
-mutable indexing, assignment, and slicing remain absent. The ceiling is a provisional Stage 0
+checked reads and indexed `u8` stores are available, while mutable slicing remains absent. Mutable
+fixed scalar-array locals and `mut` parameters likewise support checked element assignment. The ceiling is a provisional Stage 0
 implementation guard, not a stable language or ABI limit. A mutable safe-borrow local may
 be reassigned through straight-line, branch, and `while` control flow; Flow replaces its provenance
 after evaluating the right-hand side, joins reachable branch/header/`continue`/`break` origins
 without guessing, and releases old owners only after their last reachable loan use. Exact whole-
 array `&[T; N]` and `&mut [T; N]` types may now cross internal calls without becoming copyable
-aliases. Empty and repeated literals, fields, nesting, mutable indexing, general slicing,
+aliases. Empty and repeated literals, fields, nesting, general mutable projections and slicing,
 and public or foreign ABI use remain closed.
 Internal borrow-returning calls now infer one exact formal borrow parameter, region parameter, or
 static return source before ordinary Flow checks. The selected actual argument alone carries its

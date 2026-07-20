@@ -32,6 +32,7 @@
     "docs/adr/0111-scalar-fixed-array-length.md",
     "docs/adr/0112-fixed-u8-array-byte-view-borrow.md",
     "docs/adr/0125-mutable-fixed-u8-array-byte-view.md",
+    "docs/adr/0126-checked-mutable-indexed-assignment.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/mir-v0.md",
     "docs/engineering/05-testing-standard.md"
@@ -1295,6 +1296,13 @@
       "sources": ["main.fy"],
       "entry": "main::main",
       "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "return", "value": 42 }
+    },
+    {
+      "id": "pass.interpreter.mutable-fixed-array-byte-view-bounds",
+      "sourceRoot": "cases/pass/mutable-fixed-array-byte-view/src",
+      "sources": ["main.fy"],
+      "entry": "main::bounds_trap",
+      "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "trap", "category": "bounds" }
     },
     {
       "id": "pass.interpreter.assert-true",

@@ -10,7 +10,7 @@ MIR is the only executable semantic contract consumed by backends. It records ev
 
 MIR v0 is a mutable-local control-flow graph rather than SSA. SSA conversion is a backend or optimization concern after the semantic form is verified.
 
-The current Go prototype implements the source-linked subset exercised by all eleven MIR v0 normalization fixtures: ordered calls, complete-root and tagged-payload moves, RHS-before-drop resource reassignment, explicit normal-exit cleanup, lexical Region placement and reset on fallthrough, direct return, Result propagation, nested exits, nearest-loop `break` and `continue`, `Result` propagation branches, checked division, remainder, arithmetic, shift, byte-view, scalar fixed-array, and assertion traps, and non-unwinding successors. The same verifier passes all ten named baselines and rejects all twenty-one isolated v0 mutations with their single expected `Vxxxx` result. The bounded interpreter executes all ninety-one interpreter v0 cases for scalar and tagged control, direct `i32` minimum constants, scalar fixed-array construction, calls, contextual immutable and mutable byte-view borrowing, exact lengths, and checked indexing, typed scalar comparisons, borrowed-view length and emptiness metadata, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, value-preserving integer casts, and checked `i32`, `u8`, `u32`, and `usize` arithmetic, division, remainder, bitwise operations, and left/right shift, resource construction and field reads, whole-root and active-payload moves, resource returns and propagation, live/dead/self reassignment, consuming-close ownership, nested and loop-control cleanup, source-linked drop traces, Region reset paths, controlled in-memory test output, exact trap and boundary outcomes, and the step and output limits; resource drop-effect contracts are verified while host-capability runtime behavior remains an unfinished gate.
+The current Go prototype implements the source-linked subset exercised by all eleven MIR v0 normalization fixtures: ordered calls, complete-root and tagged-payload moves, RHS-before-drop resource reassignment, explicit normal-exit cleanup, lexical Region placement and reset on fallthrough, direct return, Result propagation, nested exits, nearest-loop `break` and `continue`, `Result` propagation branches, checked division, remainder, arithmetic, shift, byte-view, scalar fixed-array, and assertion traps, and non-unwinding successors. The same verifier passes all ten named baselines and rejects all twenty-one isolated v0 mutations with their single expected `Vxxxx` result. The bounded interpreter executes all ninety-two interpreter v0 cases for scalar and tagged control, direct `i32` minimum constants, scalar fixed-array construction, calls, contextual immutable and mutable byte-view borrowing, exact lengths, checked reads and indexed stores, typed scalar comparisons, borrowed-view length and emptiness metadata, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, value-preserving integer casts, and checked `i32`, `u8`, `u32`, and `usize` arithmetic, division, remainder, bitwise operations, and left/right shift, resource construction and field reads, whole-root and active-payload moves, resource returns and propagation, live/dead/self reassignment, consuming-close ownership, nested and loop-control cleanup, source-linked drop traces, Region reset paths, controlled in-memory test output, exact trap and boundary outcomes, and the step and output limits; resource drop-effect contracts are verified while host-capability runtime behavior remains an unfinished gate.
 
 Scalar fixed arrays lower to an explicit construction operation followed by ordinary local value
 transport. Exact length observation lowers to `array-length`: it keeps the already-evaluated local
@@ -23,11 +23,19 @@ operand, the exact byte-view mutability pair, the length shape, the `usize` inde
 check. No source array form, storage-derived length, implicit pointer conversion, or unchecked
 access survives verified MIR.
 
-The mutable byte view currently has metadata and internal-call semantics only. Inside verified
+Mutable fixed-array assignment lowers its receiver and `usize` index before the value, freezes the
+scalar index, and emits `array-index-check` plus `checked-array-index` before any right-hand-side
+blocks. The success region evaluates the value and ends with no-result `array-index-store`.
+`&mut [u8]` uses the parallel `view-index-check`, `checked-view-index`, and `view-index-store` path;
+ordinary `view-index` also admits mutable owners for reads. The verifier proves the complete checked
+success edge dominates the store even when a call or branch evaluates the right-hand side. It matches
+the frozen place operands and rejects any path, type, mutability, operator, value, or trap drift.
+
+The mutable byte view has metadata, checked read/store, and internal-call semantics. Inside verified
 unsafe provenance, `byte-slice-data-address` may produce `*mut u8` from `&mut [u8]`; the shared
 owner produces only immutable `*u8`. The verifier rejects a mismatched owner, element type, pointer
-mutability, static mutable storage request, or missing source operand as `V1001`. No MIR operation
-loads from or writes through a mutable view in safe source.
+mutability, static mutable storage request, or missing source operand as `V1001`. Mutable slicing and
+general projections still have no MIR operation.
 
 A direct unary-minus `i32` minimum source form is normalized in typed HIR to one literal before MIR.
 MIR carries exact value `-2147483648`; it does not retain an out-of-range positive child or a unary

@@ -1914,6 +1914,7 @@ fn main() -> i32 {
     var values: [u8; 3] = [40, 41, 42];
     if length(&mut values) == 3 { 42 } else { 1 }
 }
+
 `,
 	})
 	assertCleanTypeResult(t, result)
@@ -1930,6 +1931,66 @@ fn main() -> i32 {
 	if borrow.Kind != "array-view-borrow" || borrow.Operator != "&mut" || borrow.Type != hir.MutableBorrow(hir.TypeByteSlice) ||
 		len(borrow.Children) != 1 || borrow.Children[0].Type != hir.FixedArray(hir.TypeU8, 3) {
 		t.Fatalf("mutable array byte-view borrow = %+v", borrow)
+	}
+}
+
+func TestAnalyzeTypesCheckedMutableIndexedAssignment(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn update_array(mut values: [u8; 3]) -> u8 {
+    values[1] = 42;
+    values[1]
+}
+fn update_view(bytes: &mut [u8]) -> u8 {
+    bytes[1] = 42;
+    bytes[1]
+}
+fn main() -> i32 { 0 }
+`,
+	})
+	assertCleanTypeResult(t, result)
+	functions := result.HIR.Modules[0].Functions
+	if len(functions) != 3 {
+		t.Fatalf("functions = %+v", functions)
+	}
+	arrayTarget := functions[0].Body.Statements[0].Target
+	if arrayTarget == nil || arrayTarget.Kind != "array-index" || arrayTarget.Type != hir.TypeU8 ||
+		len(arrayTarget.Children) != 2 || arrayTarget.Children[0].Type != hir.FixedArray(hir.TypeU8, 3) {
+		t.Fatalf("array assignment target = %+v", arrayTarget)
+	}
+	viewTarget := functions[1].Body.Statements[0].Target
+	if viewTarget == nil || viewTarget.Kind != "view-index" || viewTarget.Type != hir.TypeU8 ||
+		len(viewTarget.Children) != 2 || viewTarget.Children[0].Type != hir.MutableBorrow(hir.TypeByteSlice) {
+		t.Fatalf("view assignment target = %+v", viewTarget)
+	}
+	viewRead := functions[1].Body.Tail
+	if viewRead == nil || viewRead.Kind != "view-index" || viewRead.Children[0].Type != hir.MutableBorrow(hir.TypeByteSlice) {
+		t.Fatalf("mutable view read = %+v", viewRead)
+	}
+}
+
+func TestAnalyzeRejectsImmutableIndexedAssignmentTargets(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		name string
+		text string
+	}{
+		{
+			name: "fixed array binding",
+			text: "module main;\nfn main() -> i32 { let values: [u8; 1] = [0]; values[0] = 42; 0 }\n",
+		},
+		{
+			name: "shared byte view",
+			text: "module main;\nfn update(bytes: &[u8]) -> i32 { bytes[0] = 42; 0 }\n",
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			result := analyzeText(t, map[string]string{"main.fy": test.text})
+			if result.FailedPhase != semantic.PhaseType || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E1008" {
+				t.Fatalf("result = %+v", result)
+			}
+		})
 	}
 }
 
@@ -2330,7 +2391,7 @@ func TestAnalyzeRejectsUnsupportedViewIndexShapes(t *testing.T) {
 		result := analyzeText(t, map[string]string{
 			"main.fy": "module main;\nfn main() -> i32 { let value: u8 = \"fairy\"[0]; 42 }\n",
 		})
-		if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "indexing outside immutable byte views" {
+		if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "indexing outside byte views" {
 			t.Fatalf("result = %+v", result)
 		}
 	})

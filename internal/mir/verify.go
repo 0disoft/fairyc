@@ -411,7 +411,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 			case OperationViewIndexCheck:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				if !validViewIndexShape(operation, false) || !slices.Equal(operation.TrapCategories, []string{"bounds"}) {
-					failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "immutable byte-view index is missing its bounds check"})
+					failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "byte-view index is missing its bounds check"})
 				}
 			case OperationViewSliceCheck:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
@@ -470,6 +470,11 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "fixed-array index shape is invalid"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationArrayIndexStore:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if !validArrayIndexStoreShape(operation) || len(operation.TrapCategories) != 0 {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "fixed-array index store shape is invalid"})
+				}
 			case OperationResultConstruct:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				if len(operation.Operands) != 1 || operation.DestinationLocal == NoLocal {
@@ -719,9 +724,14 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 			case OperationViewIndex:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				if !validViewIndexShape(operation, true) || len(operation.TrapCategories) != 0 {
-					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "immutable byte-view index shape is invalid"})
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "byte-view index shape is invalid"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationViewIndexStore:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if !validViewIndexStoreShape(operation) || len(operation.TrapCategories) != 0 {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "mutable byte-view index store shape is invalid"})
+				}
 			case OperationViewSlice:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				if !validViewSliceShape(operation, true) || len(operation.TrapCategories) != 0 {
@@ -1000,7 +1010,7 @@ func divisionTrapCategories(ownerType hir.Type) ([]string, bool) {
 }
 
 func validViewIndexShape(operation Operation, destination bool) bool {
-	if len(operation.Operands) != 2 || operation.OwnerType != hir.SharedBorrow(hir.TypeByteSlice) ||
+	if len(operation.Operands) != 2 || !isVerifiedByteViewType(operation.OwnerType) ||
 		operation.IndexType != hir.TypeUSize || operation.Type != hir.TypeU8 || operation.Operator != "[]" {
 		return false
 	}
@@ -1009,10 +1019,24 @@ func validViewIndexShape(operation Operation, destination bool) bool {
 	}
 	receiver := operation.Operands[0]
 	index := operation.Operands[1]
-	if receiver.Kind != OperandLocal && (receiver.Kind != OperandByteString || receiver.Type != operation.OwnerType) {
+	if receiver.Kind != OperandLocal && (operation.OwnerType != hir.SharedBorrow(hir.TypeByteSlice) || receiver.Kind != OperandByteString || receiver.Type != operation.OwnerType) {
 		return false
 	}
 	return index.Kind == OperandLocal || index.Kind == OperandUSize
+}
+
+func validViewIndexStoreShape(operation Operation) bool {
+	if len(operation.Operands) != 3 || operation.OwnerType != hir.MutableBorrow(hir.TypeByteSlice) ||
+		operation.IndexType != hir.TypeUSize || operation.Type != hir.TypeU8 || operation.Operator != "[]=" || operation.DestinationLocal != NoLocal {
+		return false
+	}
+	return operation.Operands[0].Kind == OperandLocal &&
+		(operation.Operands[1].Kind == OperandLocal || operation.Operands[1].Kind == OperandUSize) &&
+		scalarOperandMatches(operation.Operands[2], hir.TypeU8)
+}
+
+func isVerifiedByteViewType(value hir.Type) bool {
+	return value == hir.SharedBorrow(hir.TypeByteSlice) || value == hir.MutableBorrow(hir.TypeByteSlice)
 }
 
 func validArrayConstructShape(operation Operation) bool {
@@ -1052,6 +1076,17 @@ func validArrayIndexShape(operation Operation, destination bool) bool {
 	}
 	return operation.Operands[0].Kind == OperandLocal &&
 		(operation.Operands[1].Kind == OperandLocal || operation.Operands[1].Kind == OperandUSize)
+}
+
+func validArrayIndexStoreShape(operation Operation) bool {
+	elementType, length, array := hir.FixedArrayParts(operation.OwnerType)
+	if !array || !hir.ExecutableFixedArrayShape(elementType, length) || operation.Type != elementType ||
+		operation.IndexType != hir.TypeUSize || operation.Operator != "[]=" || len(operation.Operands) != 3 || operation.DestinationLocal != NoLocal {
+		return false
+	}
+	return operation.Operands[0].Kind == OperandLocal &&
+		(operation.Operands[1].Kind == OperandLocal || operation.Operands[1].Kind == OperandUSize) &&
+		scalarOperandMatches(operation.Operands[2], elementType)
 }
 
 func validViewSliceShape(operation Operation, destination bool) bool {
@@ -1159,6 +1194,7 @@ func verifyTrapCheckEdges(function *Function) []VerificationError {
 			predecessors[successor] = append(predecessors[successor], block.ID)
 		}
 	}
+	dominators := blockDominators(function, predecessors)
 	var failures []VerificationError
 	for blockIndex := range function.Blocks {
 		block := &function.Blocks[blockIndex]
@@ -1168,39 +1204,127 @@ func verifyTrapCheckEdges(function *Function) []VerificationError {
 				continue
 			}
 			entity := operationEntity(block.ID, operationIndex, operation)
-			incoming := predecessors[block.ID]
-			if len(incoming) != 1 {
-				failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "trapping operation does not have one checked predecessor"})
-				continue
-			}
-			checkBlock := blocks[incoming[0]]
-			if checkBlock == nil {
-				failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "trapping operation is not dominated by its complete checked edge"})
-				continue
-			}
-			markerEntity, markerValid := checkedMarkerStatus(checkBlock, markerKind, operation.Operator, operation.Operands, operation.OwnerType, operation.Type, categories)
-			if !markerValid {
-				if markerEntity == "" {
-					markerEntity = entity
+			checkedOperator, checkedOperands := trappingCheckIdentity(operation)
+			invalidMarker, complete := completeCheckedDominator(function, blocks, dominators, block.ID, switchKind, markerKind, checkedOperator,
+				checkedOperands, operation.OwnerType, operation.Type, categories)
+			if !complete {
+				failureEntity := entity
+				detail := "trapping operation is not dominated by its complete checked edge"
+				if invalidMarker != "" {
+					failureEntity = invalidMarker
+					detail = "trapping operation is missing its complete check marker"
 				}
-				failures = append(failures, VerificationError{Code: "V1501", Entity: markerEntity, Detail: "trapping operation is missing its complete check marker"})
-				continue
-			}
-			if !checkedTerminatorMatches(checkBlock.Terminator, block.ID, switchKind, operation.Operator, operation.Operands, operation.OwnerType) ||
-				!checkedTrapSuccessorMatches(blocks, checkBlock.Terminator, categories) {
-				failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "trapping operation is not dominated by its complete checked edge"})
+				failures = append(failures, VerificationError{Code: "V1501", Entity: failureEntity, Detail: detail})
 			}
 		}
 	}
 	return failures
 }
 
+func blockDominators(function *Function, predecessors map[BlockID][]BlockID) map[BlockID]map[BlockID]struct{} {
+	all := make(map[BlockID]struct{}, len(function.Blocks))
+	for _, block := range function.Blocks {
+		all[block.ID] = struct{}{}
+	}
+	dominators := make(map[BlockID]map[BlockID]struct{}, len(function.Blocks))
+	for _, block := range function.Blocks {
+		if block.ID == function.Entry {
+			dominators[block.ID] = map[BlockID]struct{}{block.ID: {}}
+		} else {
+			dominators[block.ID] = cloneBlockSet(all)
+		}
+	}
+	changed := true
+	for changed {
+		changed = false
+		for _, block := range function.Blocks {
+			if block.ID == function.Entry {
+				continue
+			}
+			incoming := predecessors[block.ID]
+			next := make(map[BlockID]struct{})
+			if len(incoming) > 0 {
+				next = cloneBlockSet(dominators[incoming[0]])
+				for _, predecessor := range incoming[1:] {
+					for candidate := range next {
+						if _, found := dominators[predecessor][candidate]; !found {
+							delete(next, candidate)
+						}
+					}
+				}
+			}
+			next[block.ID] = struct{}{}
+			if !sameBlockSet(dominators[block.ID], next) {
+				dominators[block.ID] = next
+				changed = true
+			}
+		}
+	}
+	return dominators
+}
+
+func completeCheckedDominator(function *Function, blocks map[BlockID]*Block, dominators map[BlockID]map[BlockID]struct{}, target BlockID,
+	switchKind string, markerKind OperationKind, operator string, operands []Operand, ownerType, resultType hir.Type, categories []string) (string, bool) {
+	invalidMarker := ""
+	for index := range function.Blocks {
+		candidate := &function.Blocks[index]
+		if candidate.ID == target {
+			continue
+		}
+		if _, dominates := dominators[target][candidate.ID]; !dominates {
+			continue
+		}
+		markerEntity, markerValid := checkedMarkerStatus(candidate, markerKind, operator, operands, ownerType, resultType, categories)
+		if markerEntity != "" && !markerValid && invalidMarker == "" {
+			invalidMarker = markerEntity
+		}
+		if !markerValid || len(candidate.Terminator.Successors) != 2 {
+			continue
+		}
+		success := candidate.Terminator.Successors[0]
+		if _, successDominates := dominators[target][success]; !successDominates {
+			continue
+		}
+		if checkedTerminatorMatches(candidate.Terminator, success, switchKind, operator, operands, ownerType) &&
+			checkedTrapSuccessorMatches(blocks, candidate.Terminator, categories) {
+			return "", true
+		}
+	}
+	return invalidMarker, false
+}
+
+func cloneBlockSet(source map[BlockID]struct{}) map[BlockID]struct{} {
+	result := make(map[BlockID]struct{}, len(source))
+	for value := range source {
+		result[value] = struct{}{}
+	}
+	return result
+}
+
+func sameBlockSet(left, right map[BlockID]struct{}) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	for value := range left {
+		if _, found := right[value]; !found {
+			return false
+		}
+	}
+	return true
+}
+
 func trappingOperationSpec(operation Operation) (string, OperationKind, []string, bool) {
 	if operation.Kind == OperationArrayIndex {
 		return "checked-array-index", OperationArrayIndexCheck, []string{"bounds"}, validArrayIndexShape(operation, true)
 	}
+	if operation.Kind == OperationArrayIndexStore {
+		return "checked-array-index", OperationArrayIndexCheck, []string{"bounds"}, validArrayIndexStoreShape(operation)
+	}
 	if operation.Kind == OperationViewIndex {
 		return "checked-view-index", OperationViewIndexCheck, []string{"bounds"}, validViewIndexShape(operation, true)
+	}
+	if operation.Kind == OperationViewIndexStore {
+		return "checked-view-index", OperationViewIndexCheck, []string{"bounds"}, validViewIndexStoreShape(operation)
 	}
 	if operation.Kind == OperationViewSlice {
 		return "checked-view-slice", OperationViewSliceCheck, []string{"bounds"}, validViewSliceShape(operation, true)
@@ -1218,6 +1342,13 @@ func trappingOperationSpec(operation Operation) (string, OperationKind, []string
 	}
 	switchKind, categories, valid := checkedArithmeticSpec(operation.Operator, len(operation.Operands))
 	return switchKind, OperationArithmeticCheck, categories, valid && validBinaryShape(operation)
+}
+
+func trappingCheckIdentity(operation Operation) (string, []Operand) {
+	if operation.Kind == OperationArrayIndexStore || operation.Kind == OperationViewIndexStore {
+		return "[]", operation.Operands[:2]
+	}
+	return operation.Operator, operation.Operands
 }
 
 func checkedTerminatorMatches(terminator Terminator, continuation BlockID, switchKind, operator string, operands []Operand, ownerType hir.Type) bool {

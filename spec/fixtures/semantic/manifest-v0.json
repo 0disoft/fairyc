@@ -21,6 +21,7 @@
     "docs/adr/0121-resource-drop-effects.md",
     "docs/adr/0123-mutable-parameter-and-opaque-borrow-cast.md",
     "docs/adr/0125-mutable-fixed-u8-array-byte-view.md",
+    "docs/adr/0126-checked-mutable-indexed-assignment.md",
     "docs/diagnostics/catalog-v0.md"
   ],
   "cases": [

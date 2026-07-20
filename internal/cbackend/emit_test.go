@@ -335,6 +335,7 @@ fn main() -> i32 {
     let values: [u8; 3] = [40, 41, 42];
     if values.len == 3 && view_pick(&values, 0) == 40 { pick(values, 2) as i32 } else { 1 }
 }
+
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil {
@@ -360,6 +361,39 @@ fn main() -> i32 {
 	second, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil || second.Source != unit.Source {
 		t.Fatalf("second Emit() differs: error=%v", err)
+	}
+}
+
+func TestEmitCheckedMutableIndexedStores(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn update(bytes: &mut [u8]) -> u8 {
+    bytes[1] = 42;
+    bytes[1]
+}
+fn main() -> i32 {
+    var values: [u8; 3] = [1, 2, 3];
+    values[0] = 40;
+    update(&mut values) as i32
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, feature := range []string{"array-index-store", "mutable-view-index-store", "view-index"} {
+		if !slices.Contains(unit.Features, feature) {
+			t.Errorf("features %v are missing %q", unit.Features, feature)
+		}
+	}
+	for _, required := range []string{
+		"] = UINT8_C(40);",
+		"] = UINT8_C(42);",
+		"FY_TRAP_BOUNDS",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
 	}
 }
 

@@ -172,6 +172,11 @@ func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environm
 }
 
 func (a *analyzer) resourceAssignment(module *moduleScope, statement *ast.Statement, environment resourceEnvironment) {
+	if indexedAssignmentTarget(statement.Target) {
+		a.resourceExpression(module, statement.Target, environment, resourceRead)
+		a.resourceExpression(module, statement.Expression, environment, resourceRead)
+		return
+	}
 	a.resourceExpression(module, statement.Expression, environment, resourceMove)
 	if statement.Target == nil {
 		return

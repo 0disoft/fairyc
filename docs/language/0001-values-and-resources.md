@@ -41,6 +41,12 @@ Compiler IR may create uninitialized temporaries while evaluating an aggregate. 
 
 `let` prevents reassignment but may still be consumed. `var` permits reassignment and is required when creating a mutable borrow. An ordinary by-value parameter is likewise an immutable callee-local place unless written `mut name: Type`; that modifier permits callee-local reassignment and `&mut` without changing the argument type or making the value copyable. Ownership transfer has no source-level `move` operator: assignment to a by-value destination, a by-value argument, or a return consumes a resource, and diagnostics name that transfer site.
 
+Indexed assignment is mutation of an existing scalar place, not replacement of a complete resource
+root. It evaluates and checks the receiver plus index before evaluating the right-hand side, then
+stores only on the checked success path. Complete resource-root reassignment retains its separate
+RHS-before-old-drop transaction. Passing a fixed array by value copies its elements; borrowing it as
+`&[u8]` or `&mut [u8]` aliases the selected owner for the proven loan extent.
+
 ## Affine resource ownership
 
 A resource local has one of three flow states at a program point:

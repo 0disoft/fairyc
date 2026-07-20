@@ -282,6 +282,18 @@ type resourceState struct {
 	dropped    bool
 }
 
+type arrayState struct {
+	elements []runtimeValue
+}
+
+type byteViewState struct {
+	staticData string
+	array      *arrayState
+	offset     uint64
+	length     uint64
+	mutable    bool
+}
+
 type taggedState struct {
 	variant string
 	payload *runtimeValue
@@ -289,16 +301,78 @@ type taggedState struct {
 }
 
 type runtimeValue struct {
-	kind       valueKind
-	i32        int32
-	u64        uint64
-	staticData string
-	typ        hir.Type
-	tagged     *taggedState
-	enum       *enumState
-	structure  *structState
-	resource   *resourceState
-	elements   []runtimeValue
+	kind      valueKind
+	i32       int32
+	u64       uint64
+	typ       hir.Type
+	tagged    *taggedState
+	enum      *enumState
+	structure *structState
+	resource  *resourceState
+	array     *arrayState
+	view      *byteViewState
+}
+
+func (v runtimeValue) cloneForValueCopy() runtimeValue {
+	copy := v
+	if v.kind != valueArray || v.array == nil {
+		return copy
+	}
+	elements := make([]runtimeValue, len(v.array.elements))
+	for index, element := range v.array.elements {
+		elements[index] = element.cloneForValueCopy()
+	}
+	copy.array = &arrayState{elements: elements}
+	return copy
+}
+
+func staticByteView(data string, typ hir.Type) runtimeValue {
+	return runtimeValue{kind: valueView, typ: typ, view: &byteViewState{staticData: data, length: uint64(len(data))}}
+}
+
+func (v runtimeValue) byteAt(index uint64) (byte, error) {
+	if v.kind != valueView || v.view == nil || index >= v.view.length {
+		return 0, capabilityError("byte-view read received an invalid runtime value")
+	}
+	absolute := v.view.offset + index
+	if v.view.array != nil {
+		if absolute >= uint64(len(v.view.array.elements)) {
+			return 0, capabilityError("byte-view read exceeds its array backing")
+		}
+		element := v.view.array.elements[absolute]
+		if element.kind != valueU8 || element.typ != hir.TypeU8 || element.u64 > 255 {
+			return 0, capabilityError("byte-view array backing contains a non-u8 value")
+		}
+		return byte(element.u64), nil
+	}
+	if absolute >= uint64(len(v.view.staticData)) {
+		return 0, capabilityError("byte-view read exceeds its static backing")
+	}
+	return v.view.staticData[absolute], nil
+}
+
+func (v runtimeValue) storeByte(index uint64, value runtimeValue) error {
+	if v.kind != valueView || v.view == nil || !v.view.mutable || v.typ != hir.MutableBorrow(hir.TypeByteSlice) ||
+		v.view.array == nil || index >= v.view.length || value.kind != valueU8 || value.typ != hir.TypeU8 || value.u64 > 255 {
+		return capabilityError("mutable byte-view store received an invalid runtime value")
+	}
+	absolute := v.view.offset + index
+	if absolute >= uint64(len(v.view.array.elements)) {
+		return capabilityError("mutable byte-view store exceeds its array backing")
+	}
+	v.view.array.elements[absolute] = value
+	return nil
+}
+
+func (v runtimeValue) sliceByteView(start, end uint64) (runtimeValue, error) {
+	if v.kind != valueView || v.view == nil || v.typ != hir.SharedBorrow(hir.TypeByteSlice) || start > end || end > v.view.length {
+		return runtimeValue{}, capabilityError("byte-view slice received an invalid runtime value")
+	}
+	view := &byteViewState{array: v.view.array, offset: v.view.offset + start, length: end - start}
+	if v.view.array == nil {
+		view.staticData = v.view.staticData
+	}
+	return runtimeValue{kind: valueView, typ: v.typ, view: view}, nil
 }
 
 func i32Value(value int32) runtimeValue {
@@ -494,7 +568,7 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 	locals := make(map[mir.LocalID]runtimeValue)
 	regions := make(map[hir.SymbolID]*runtimeRegion)
 	for index, parameter := range function.Parameters {
-		locals[parameter] = arguments[index]
+		locals[parameter] = arguments[index].cloneForValueCopy()
 	}
 	current := function.Entry
 	for {
@@ -526,7 +600,7 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("assign in %q: %w", function.Name, err)
 				}
-				locals[operation.DestinationLocal] = value
+				locals[operation.DestinationLocal] = value.cloneForValueCopy()
 			case mir.OperationUnary:
 				value, trap, err := evaluateUnary(locals, operation)
 				if err != nil {
@@ -571,7 +645,7 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					}
 					values[index] = value
 				}
-				locals[operation.DestinationLocal] = runtimeValue{kind: valueArray, typ: operation.Type, elements: values}
+				locals[operation.DestinationLocal] = runtimeValue{kind: valueArray, typ: operation.Type, array: &arrayState{elements: values}}
 			case mir.OperationArrayBorrowView:
 				receiver, err := evaluateOne(locals, operation.Operands)
 				if err != nil {
@@ -583,18 +657,18 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					wantView = hir.MutableBorrow(hir.TypeByteSlice)
 				}
 				if !array || elementType != hir.TypeU8 || !hir.ExecutableFixedArrayShape(elementType, length) ||
-					receiver.kind != valueArray || receiver.typ != operation.OwnerType || uint64(len(receiver.elements)) != length ||
+					receiver.kind != valueArray || receiver.typ != operation.OwnerType || receiver.array == nil || uint64(len(receiver.array.elements)) != length ||
 					operation.Type != wantView || (operation.Operator != "&" && operation.Operator != "&mut") {
 					return callCompletion{}, fmt.Errorf("fixed-array byte-view borrow in %q has incompatible runtime value", function.Name)
 				}
-				bytes := make([]byte, len(receiver.elements))
-				for index, element := range receiver.elements {
+				for index, element := range receiver.array.elements {
 					if element.kind != valueU8 || element.typ != hir.TypeU8 || element.u64 > 255 {
 						return callCompletion{}, fmt.Errorf("fixed-array byte-view borrow element %d in %q is not u8", index, function.Name)
 					}
-					bytes[index] = byte(element.u64)
 				}
-				locals[operation.DestinationLocal] = runtimeValue{kind: valueView, u64: length, staticData: string(bytes), typ: wantView}
+				locals[operation.DestinationLocal] = runtimeValue{kind: valueView, typ: wantView, view: &byteViewState{
+					array: receiver.array, length: length, mutable: operation.Operator == "&mut",
+				}}
 			case mir.OperationArrayLength:
 				receiver, err := evaluateOne(locals, operation.Operands)
 				if err != nil {
@@ -602,7 +676,7 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				}
 				elementType, length, array := hir.FixedArrayParts(operation.OwnerType)
 				if !array || !hir.ExecutableFixedArrayShape(elementType, length) || receiver.kind != valueArray || receiver.typ != operation.OwnerType ||
-					uint64(len(receiver.elements)) != length || operation.Type != hir.TypeUSize || operation.Field != "len" {
+					receiver.array == nil || uint64(len(receiver.array.elements)) != length || operation.Type != hir.TypeUSize || operation.Field != "len" {
 					return callCompletion{}, fmt.Errorf("fixed-array length in %q has incompatible runtime value", function.Name)
 				}
 				locals[operation.DestinationLocal] = runtimeValue{kind: valueUSize, u64: length, typ: hir.TypeUSize}
@@ -615,43 +689,67 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				if !array || !hir.ExecutableFixedArrayShape(elementType, length) || receiver.typ != operation.OwnerType || operation.Type != elementType || operation.IndexType != hir.TypeUSize || operation.Operator != "[]" {
 					return callCompletion{}, fmt.Errorf("fixed-array index in %q has incompatible runtime type metadata", function.Name)
 				}
-				if index.u64 >= length || index.u64 >= uint64(len(receiver.elements)) {
+				if receiver.array == nil || index.u64 >= length || index.u64 >= uint64(len(receiver.array.elements)) {
 					return callCompletion{}, fmt.Errorf("fixed-array index in %q executed without a dominating bounds check", function.Name)
 				}
-				locals[operation.DestinationLocal] = receiver.elements[index.u64]
+				locals[operation.DestinationLocal] = receiver.array.elements[index.u64]
 			case mir.OperationArrayIndexCheck:
+			case mir.OperationArrayIndexStore:
+				receiver, index, value, err := evaluateArrayIndexStoreOperands(locals, operation.Operands)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("fixed-array index store in %q: %w", function.Name, err)
+				}
+				elementType, length, array := hir.FixedArrayParts(operation.OwnerType)
+				if !array || operation.Type != elementType || operation.IndexType != hir.TypeUSize || operation.Operator != "[]=" || receiver.typ != operation.OwnerType ||
+					receiver.array == nil || index.u64 >= length || index.u64 >= uint64(len(receiver.array.elements)) || !comparisonRuntimeMatches(value, elementType) {
+					return callCompletion{}, fmt.Errorf("fixed-array index store in %q has incompatible runtime value", function.Name)
+				}
+				receiver.array.elements[index.u64] = value
 			case mir.OperationViewLength:
 				receiver, err := evaluateOne(locals, operation.Operands)
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("borrowed-view length in %q: %w", function.Name, err)
 				}
-				if receiver.kind != valueView || receiver.typ != operation.OwnerType || operation.Type != hir.TypeUSize || operation.Field != "len" {
+				if receiver.kind != valueView || receiver.view == nil || receiver.typ != operation.OwnerType || operation.Type != hir.TypeUSize || operation.Field != "len" {
 					return callCompletion{}, fmt.Errorf("borrowed-view length in %q has incompatible runtime value", function.Name)
 				}
-				locals[operation.DestinationLocal] = runtimeValue{kind: valueUSize, u64: receiver.u64, typ: hir.TypeUSize}
+				locals[operation.DestinationLocal] = runtimeValue{kind: valueUSize, u64: receiver.view.length, typ: hir.TypeUSize}
 			case mir.OperationViewEmpty:
 				receiver, err := evaluateOne(locals, operation.Operands)
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("borrowed-view emptiness in %q: %w", function.Name, err)
 				}
-				if receiver.kind != valueView || receiver.typ != operation.OwnerType || operation.Type != hir.TypeBool || operation.Field != "is_empty" {
+				if receiver.kind != valueView || receiver.view == nil || receiver.typ != operation.OwnerType || operation.Type != hir.TypeBool || operation.Field != "is_empty" {
 					return callCompletion{}, fmt.Errorf("borrowed-view emptiness in %q has incompatible runtime value", function.Name)
 				}
-				locals[operation.DestinationLocal] = runtimeValue{kind: valueI32, i32: boolValue(receiver.u64 == 0), typ: hir.TypeBool}
+				locals[operation.DestinationLocal] = runtimeValue{kind: valueI32, i32: boolValue(receiver.view.length == 0), typ: hir.TypeBool}
 			case mir.OperationViewIndex:
 				receiver, index, err := evaluateViewIndexOperands(locals, operation.Operands)
 				if err != nil {
-					return callCompletion{}, fmt.Errorf("immutable byte-view index in %q: %w", function.Name, err)
+					return callCompletion{}, fmt.Errorf("byte-view index in %q: %w", function.Name, err)
 				}
-				if receiver.typ != operation.OwnerType || operation.OwnerType != hir.SharedBorrow(hir.TypeByteSlice) ||
+				if receiver.typ != operation.OwnerType || !isRuntimeByteViewType(operation.OwnerType) ||
 					operation.IndexType != hir.TypeUSize || operation.Type != hir.TypeU8 || operation.Operator != "[]" {
-					return callCompletion{}, fmt.Errorf("immutable byte-view index in %q has incompatible runtime value", function.Name)
+					return callCompletion{}, fmt.Errorf("byte-view index in %q has incompatible runtime value", function.Name)
 				}
-				if index.u64 >= receiver.u64 || index.u64 >= uint64(len(receiver.staticData)) {
-					return callCompletion{}, fmt.Errorf("immutable byte-view index in %q executed without a dominating bounds check", function.Name)
+				byteValue, err := receiver.byteAt(index.u64)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("byte-view index in %q executed without a dominating bounds check: %w", function.Name, err)
 				}
-				locals[operation.DestinationLocal] = runtimeValue{kind: valueU8, u64: uint64(receiver.staticData[index.u64]), typ: hir.TypeU8}
+				locals[operation.DestinationLocal] = runtimeValue{kind: valueU8, u64: uint64(byteValue), typ: hir.TypeU8}
 			case mir.OperationViewIndexCheck:
+			case mir.OperationViewIndexStore:
+				receiver, index, value, err := evaluateViewIndexStoreOperands(locals, operation.Operands)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("mutable byte-view index store in %q: %w", function.Name, err)
+				}
+				if receiver.typ != operation.OwnerType || operation.OwnerType != hir.MutableBorrow(hir.TypeByteSlice) || operation.IndexType != hir.TypeUSize ||
+					operation.Type != hir.TypeU8 || operation.Operator != "[]=" {
+					return callCompletion{}, fmt.Errorf("mutable byte-view index store in %q has incompatible runtime metadata", function.Name)
+				}
+				if err := receiver.storeByte(index.u64, value); err != nil {
+					return callCompletion{}, fmt.Errorf("mutable byte-view index store in %q executed without a dominating bounds check: %w", function.Name, err)
+				}
 			case mir.OperationViewSlice:
 				receiver, start, end, err := evaluateViewSliceOperands(locals, operation.Operands)
 				if err != nil {
@@ -662,13 +760,11 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					operation.IndexType != hir.TypeUSize || operation.Type != wantView || operation.Operator != ".." {
 					return callCompletion{}, fmt.Errorf("immutable byte-view slice in %q has incompatible runtime value", function.Name)
 				}
-				if start.u64 > end.u64 || end.u64 > receiver.u64 || end.u64 > uint64(len(receiver.staticData)) {
-					return callCompletion{}, fmt.Errorf("immutable byte-view slice in %q executed without a dominating bounds check", function.Name)
+				sliced, err := receiver.sliceByteView(start.u64, end.u64)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("immutable byte-view slice in %q executed without a dominating bounds check: %w", function.Name, err)
 				}
-				locals[operation.DestinationLocal] = runtimeValue{
-					kind: valueView, u64: end.u64 - start.u64, typ: wantView,
-					staticData: receiver.staticData[start.u64:end.u64],
-				}
+				locals[operation.DestinationLocal] = sliced
 			case mir.OperationViewSliceCheck:
 			case mir.OperationResultConstruct:
 				payload, err := evaluateOne(locals, operation.Operands)
@@ -869,7 +965,7 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				return completion, callErr
 			}
 			if terminator.DestinationLocal != mir.NoLocal {
-				locals[terminator.DestinationLocal] = completion.value
+				locals[terminator.DestinationLocal] = completion.value.cloneForValueCopy()
 			}
 			next, err := oneSuccessor(terminator)
 			if err != nil {
@@ -991,7 +1087,7 @@ func evaluate(locals map[mir.LocalID]runtimeValue, operand mir.Operand) (runtime
 	case mir.OperandUSize:
 		return runtimeValue{kind: valueUSize, u64: operand.U64, typ: hir.TypeUSize}, nil
 	case mir.OperandString, mir.OperandByteString:
-		return runtimeValue{kind: valueView, u64: uint64(len(operand.StaticData)), staticData: operand.StaticData, typ: operand.Type}, nil
+		return staticByteView(operand.StaticData, operand.Type), nil
 	case mir.OperandNull:
 		return runtimeValue{kind: valueNull, typ: operand.Type}, nil
 	case mir.OperandLocal:
@@ -1459,7 +1555,7 @@ func evaluateSwitch(locals map[mir.LocalID]runtimeValue, terminator mir.Terminat
 		if len(terminator.Successors) != 2 {
 			return mir.NoBlock, "", fmt.Errorf("checked byte-view index has %d successors, want 2", len(terminator.Successors))
 		}
-		if index.u64 >= receiver.u64 {
+		if receiver.view == nil || index.u64 >= receiver.view.length {
 			return mir.NoBlock, "bounds", nil
 		}
 		return terminator.Successors[0], "", nil
@@ -1487,7 +1583,7 @@ func evaluateSwitch(locals map[mir.LocalID]runtimeValue, terminator mir.Terminat
 		if len(terminator.Successors) != 2 {
 			return mir.NoBlock, "", fmt.Errorf("checked byte-view slice has %d successors, want 2", len(terminator.Successors))
 		}
-		if start.u64 > end.u64 || end.u64 > receiver.u64 {
+		if receiver.view == nil || start.u64 > end.u64 || end.u64 > receiver.view.length {
 			return mir.NoBlock, "bounds", nil
 		}
 		return terminator.Successors[0], "", nil
@@ -1567,10 +1663,22 @@ func evaluateViewIndexOperands(locals map[mir.LocalID]runtimeValue, operands []m
 	if err != nil {
 		return runtimeValue{}, runtimeValue{}, err
 	}
-	if receiver.kind != valueView || receiver.typ != hir.SharedBorrow(hir.TypeByteSlice) || index.kind != valueUSize || index.typ != hir.TypeUSize {
+	if receiver.kind != valueView || receiver.view == nil || !isRuntimeByteViewType(receiver.typ) || index.kind != valueUSize || index.typ != hir.TypeUSize {
 		return runtimeValue{}, runtimeValue{}, capabilityError("byte-view index received incompatible operands")
 	}
 	return receiver, index, nil
+}
+
+func evaluateViewIndexStoreOperands(locals map[mir.LocalID]runtimeValue, operands []mir.Operand) (runtimeValue, runtimeValue, runtimeValue, error) {
+	receiver, index, value, err := evaluateThreeOperands(locals, operands, "mutable byte-view index store")
+	if err != nil {
+		return runtimeValue{}, runtimeValue{}, runtimeValue{}, err
+	}
+	if receiver.kind != valueView || receiver.view == nil || receiver.typ != hir.MutableBorrow(hir.TypeByteSlice) ||
+		index.kind != valueUSize || index.typ != hir.TypeUSize || value.kind != valueU8 || value.typ != hir.TypeU8 || value.u64 > 255 {
+		return runtimeValue{}, runtimeValue{}, runtimeValue{}, capabilityError("mutable byte-view index store received incompatible operands")
+	}
+	return receiver, index, value, nil
 }
 
 func evaluateArrayIndexOperands(locals map[mir.LocalID]runtimeValue, operands []mir.Operand) (runtimeValue, runtimeValue, error) {
@@ -1585,10 +1693,44 @@ func evaluateArrayIndexOperands(locals map[mir.LocalID]runtimeValue, operands []
 	if err != nil {
 		return runtimeValue{}, runtimeValue{}, err
 	}
-	if receiver.kind != valueArray || index.kind != valueUSize || index.typ != hir.TypeUSize {
+	if receiver.kind != valueArray || receiver.array == nil || index.kind != valueUSize || index.typ != hir.TypeUSize {
 		return runtimeValue{}, runtimeValue{}, capabilityError("fixed-array index received incompatible operands")
 	}
 	return receiver, index, nil
+}
+
+func evaluateArrayIndexStoreOperands(locals map[mir.LocalID]runtimeValue, operands []mir.Operand) (runtimeValue, runtimeValue, runtimeValue, error) {
+	receiver, index, value, err := evaluateThreeOperands(locals, operands, "fixed-array index store")
+	if err != nil {
+		return runtimeValue{}, runtimeValue{}, runtimeValue{}, err
+	}
+	if receiver.kind != valueArray || receiver.array == nil || index.kind != valueUSize || index.typ != hir.TypeUSize {
+		return runtimeValue{}, runtimeValue{}, runtimeValue{}, capabilityError("fixed-array index store received incompatible operands")
+	}
+	return receiver, index, value, nil
+}
+
+func evaluateThreeOperands(locals map[mir.LocalID]runtimeValue, operands []mir.Operand, operation string) (runtimeValue, runtimeValue, runtimeValue, error) {
+	if len(operands) != 3 {
+		return runtimeValue{}, runtimeValue{}, runtimeValue{}, fmt.Errorf("%s has %d operands, want 3", operation, len(operands))
+	}
+	first, err := evaluate(locals, operands[0])
+	if err != nil {
+		return runtimeValue{}, runtimeValue{}, runtimeValue{}, err
+	}
+	second, err := evaluate(locals, operands[1])
+	if err != nil {
+		return runtimeValue{}, runtimeValue{}, runtimeValue{}, err
+	}
+	third, err := evaluate(locals, operands[2])
+	if err != nil {
+		return runtimeValue{}, runtimeValue{}, runtimeValue{}, err
+	}
+	return first, second, third, nil
+}
+
+func isRuntimeByteViewType(value hir.Type) bool {
+	return value == hir.SharedBorrow(hir.TypeByteSlice) || value == hir.MutableBorrow(hir.TypeByteSlice)
 }
 
 func evaluateViewSliceOperands(locals map[mir.LocalID]runtimeValue, operands []mir.Operand) (runtimeValue, runtimeValue, runtimeValue, error) {

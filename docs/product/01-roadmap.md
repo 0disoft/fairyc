@@ -32,7 +32,7 @@ exhaustive shallow matching, and local, parameter, branch, loop, overwrite, and 
 must-use obligations. Mutable-local MIR lowering and verification
   execute all 11 MIR normalization v0 cases for the current scalar, resource, tagged-payload, Result, Region, loop-control cleanup, call,
   division, and checked-arithmetic trap subset. All 10 verifier baselines and 21 isolated mutation cases execute through
-  the same MIR verifier. The first MIR interpreter executes all 91 interpreter v0 cases, including direct `i32` minimum constants, scalar fixed-array calls, contextual immutable and mutable byte-view borrowing, exact lengths, and checked indexing, and
+  the same MIR verifier. The first MIR interpreter executes all 92 interpreter v0 cases, including direct `i32` minimum constants, scalar fixed-array calls, contextual immutable and mutable byte-view borrowing, exact lengths, checked reads and indexed stores, and
 scalar `Option` and `Result` construction, exhaustive matching, and both Result `?` paths, and is
 exposed by the unstable `experimental run` command, which now accepts a bounded explicit entry-plus-
 repeated-`--source` module closure without discovery. Resource construction, field reads, whole-root
@@ -51,7 +51,7 @@ unsigned right shift execute across trapping and
   verifier-linked private functions and execute before reverse field cleanup. Resource-declared
   effects are preserved and required only at actual cleanup edges. Restricted inert enums now preserve named payloads,
   construct through qualified variants, require exhaustive shallow matches, and execute through
-  verified MIR, the interpreter, and the constrained C backend. The C backend now emits deterministic C11 for 35
+  verified MIR, the interpreter, and the constrained C backend. The C backend now emits deterministic C11 for 36
   verified scalar, borrowed-view, typed-comparison, inert-enum, flat-resource, and resource-tagged cases under the provisional `x86_64-linux-gnu` profile,
   including `Option<i32>` and `Result<i32, i32>` construction, match, calls, and propagation,
   copy-scalar/inert-struct tagged transport, private
@@ -76,7 +76,7 @@ Exit gate: positive and negative fixtures agree with the source contracts, resou
 
 Current implementation status: a fail-closed Linux/amd64 constrained-C differential command now
 requires glibc, Clang, and GCC and is wired into a separate hosted Ubuntu CI job. It is designed to
-run all 35 emission cases at low and optimized profiles for 140 process-status and exact
+run all 36 emission cases at low and optimized profiles for 144 process-status and exact
 source-linked drop-trace comparisons, then drive
 the actual experimental build CLI with resource-bearing Option and Result plus a flat all-`i32` resource
 through 4 compiler/profile executable
@@ -155,13 +155,15 @@ non-owning descriptors. One new emission case
 executes both borrowed-view parameter families through the interpreter and deterministic C backend.
 Immutable `&[u8]` now supports read-only `usize` indexing to `u8` and explicit or omitted-bound,
 end-exclusive slicing through verified MIR bounds checks, interpreter `bounds` outcomes, and
-generated-C checked loads or pointer derivation. Indexed assignment, inclusive ranges, text
+generated-C checked loads or pointer derivation. Inclusive ranges, text
 indexing or slicing, public CStr operations, Unicode counting, safe text operations, and stable
 slice or string ABIs remain missing.
 Mutable fixed `[u8; N]` places now contextually borrow as `&mut [u8]` for exact internal parameters.
 The view preserves its exclusive origin, exposes canonical length, emits a private writable
-descriptor, and may derive `*mut u8` only inside unsafe wrapper code. Safe mutable indexing,
-assignment, slicing, resizing, and retained foreign pointers remain missing.
+descriptor, supports checked `u8` reads and indexed stores, and may derive `*mut u8` only inside
+unsafe wrapper code. Mutable fixed scalar-array places also support checked exact-type element
+assignment. Bounds are proven before right-hand-side evaluation. Mutable slicing, resizing, and
+retained foreign pointers remain missing.
 Owned String and CString now have provisional Buffer-backed C transport with immutable views,
 successful-only Buffer moves, failure ownership preservation, self-source append, interior-NUL
 rejection, and exact termination. Four C-only native runs are configured but unobserved. A separate

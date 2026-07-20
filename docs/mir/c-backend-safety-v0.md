@@ -63,11 +63,18 @@ borrows of `str` and shared or mutable `[u8]`. Generated C either copies the des
 call a helper, scan storage, allocate, trap, or expose the descriptor layout.
 The verifier fixes the owner family and result type before emission.
 
-Verified immutable `&[u8]` indexing compares the `uintptr_t`-backed index against the descriptor's
+Verified shared or mutable `&[u8]` indexing compares the `uintptr_t`-backed index against the descriptor's
 byte length, routes failure to the canonical `FY_TRAP_BOUNDS` path, and only then emits one
 `data[index]` load into a `uint8_t`-backed Fairy `u8`. Receiver and index operands are evaluated once
 before the check and reused unchanged by the load. The C backend rejects missing or mismatched MIR
 check, owner, index, result, operator, or trap facts instead of emitting unchecked access.
+
+Verified indexed assignment reuses the exact checked receiver and frozen `uintptr_t` index. The
+complete bounds edge is emitted before any right-hand-side blocks, and only its success region emits
+one typed fixed-array or mutable-view `data[index] = value`. Shared descriptors and immutable array
+places never reach a store operation. Generated C adds no allocation, helper call, `restrict`,
+retained pointer, or public ABI, and the verifier rejects a store not dominated by its matching
+non-returning `FY_TRAP_BOUNDS` edge.
 
 Internal generated functions may accept those exact safe borrowed views by value. Calls pass the
 private descriptor unchanged, preserving data and byte length without granting ownership or
@@ -121,7 +128,7 @@ standard-library lowering; malformed
 destinations; and non-canonical block shapes. Empty-drop discharge produces no invented cleanup
 call. Nonempty direct and admitted active tagged payloads invoke verified private glue before field
 cleanup. This is private transport, not public Fairy ABI.
-`spec/fixtures/c-emission/manifest-v0.json` currently proves 35 source-to-emission cases and
+`spec/fixtures/c-emission/manifest-v0.json` currently proves 36 source-to-emission cases and
 repeated byte identity. No C parser, compiler, object writer, assembler, linker, executable,
 sanitizer, layout probe, or ABI probe runs in that fixture lane.
 

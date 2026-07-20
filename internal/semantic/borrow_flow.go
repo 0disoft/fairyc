@@ -294,6 +294,19 @@ func (f *borrowFlowAnalyzer) evaluateStatement(statement *ast.Statement, environ
 		f.checkReturn(statement.Expression, value)
 		return false
 	case syntax.KindAssignment:
+		if indexedAssignmentTarget(statement.Target) {
+			if _, reachable := f.evaluateExpression(statement.Target, environment); !reachable {
+				return false
+			}
+			_, reachable := f.evaluateExpression(statement.Expression, environment)
+			if !reachable {
+				return false
+			}
+			if owner := indexedArrayOwner(f.analyzer, statement.Target); owner != nil {
+				f.checkOwnerAssignment(statement, owner, environment)
+			}
+			return true
+		}
 		value, reachable := f.evaluateExpression(statement.Expression, environment)
 		if !reachable {
 			return false
@@ -1034,11 +1047,36 @@ func (f *borrowFlowAnalyzer) liveBlock(block *ast.Block, liveOut borrowLiveMap, 
 				delete(live, target)
 			}
 			live = f.liveExpression(statement.Expression, live, context)
+			if indexedAssignmentTarget(statement.Target) {
+				live = f.liveExpression(statement.Target, live, context)
+			}
 		default:
 			live = f.liveExpression(statement.Expression, live, context)
 		}
 	}
 	return live
+}
+
+func indexedAssignmentTarget(expression *ast.Expression) bool {
+	return expression != nil && expression.Kind == syntax.KindIndex
+}
+
+func indexedArrayOwner(analyzer *analyzer, target *ast.Expression) *symbol {
+	if analyzer == nil || !indexedAssignmentTarget(target) || len(target.Children) != 2 {
+		return nil
+	}
+	receiver := assignmentRootPath(target.Children[0])
+	if receiver == nil {
+		return nil
+	}
+	owner := analyzer.resolved[receiver]
+	if owner == nil {
+		return nil
+	}
+	if _, _, fixedArray := hir.FixedArrayParts(owner.typ); !fixedArray {
+		return nil
+	}
+	return owner
 }
 
 func (f *borrowFlowAnalyzer) liveExpression(expression *ast.Expression, liveOut borrowLiveMap, context borrowLiveContext) borrowLiveMap {

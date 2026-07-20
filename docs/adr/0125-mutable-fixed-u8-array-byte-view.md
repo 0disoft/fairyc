@@ -59,6 +59,10 @@ references, retained pointers, or a public slice ABI.
 - The private descriptor, the current `1..=4096` fixed-array admission ceiling, and the Windows
   example are pre-1 implementation contracts, not a stable Fairy or C ABI.
 
+ADR 0126 amends the transport-only limitation in Decision 3 and Decision 7 by adding checked `u8`
+reads and indexed stores through `&mut [u8]`. It preserves this ADR's origin, exclusivity, private
+descriptor, raw-pointer, no-slicing, no-resizing, and no-public-ABI boundaries.
+
 ## Verification
 
 - semantic, MIR, interpreter, and constrained-C tests cover contextual construction, exact

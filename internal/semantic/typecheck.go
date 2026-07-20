@@ -338,11 +338,8 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 			value, actual := c.checkExpression(statement.Expression, targetType)
 			hirStatement.Target = target
 			hirStatement.Expression = value
-			if statement.Target != nil {
-				resolved := c.analyzer.resolved[statement.Target]
-				if resolved == nil || !resolved.mutable {
-					c.analyzer.addDiagnostic("E1008", span(c.module.file.Path, statement.Target.Span))
-				}
+			if statement.Target != nil && !c.mutableAssignmentTarget(statement.Target, target) {
+				c.analyzer.addDiagnostic("E1008", span(c.module.file.Path, statement.Target.Span))
 			}
 			if statement.Expression != nil {
 				c.requireType(
@@ -547,8 +544,10 @@ func (c *typeChecker) checkIndex(expression *ast.Expression, result *hir.Express
 	index, indexType := c.checkExpression(expression.Children[1], hir.TypeUSize)
 	result.Children = appendExpression(result.Children, receiver, index)
 	arrayElement, _, fixedArray := hir.FixedArrayParts(receiverType)
-	if receiverType != hir.SharedBorrow(hir.TypeByteSlice) && !fixedArray {
-		c.analyzer.addUnsupported(c.module.file.Path, expression.Children[0].Span, "indexing outside immutable byte views")
+	sharedBytes := hir.SharedBorrow(hir.TypeByteSlice)
+	mutableBytes := hir.MutableBorrow(hir.TypeByteSlice)
+	if receiverType != sharedBytes && receiverType != mutableBytes && !fixedArray {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Children[0].Span, "indexing outside byte views")
 		return hir.TypeInvalid
 	}
 	c.requireType(
@@ -569,6 +568,39 @@ func (c *typeChecker) checkIndex(expression *ast.Expression, result *hir.Express
 	result.Kind = "view-index"
 	result.Operator = "[]"
 	return hir.TypeU8
+}
+
+func (c *typeChecker) mutableAssignmentTarget(source *ast.Expression, target *hir.Expression) bool {
+	if source == nil || target == nil {
+		return false
+	}
+	switch target.Kind {
+	case "path":
+		resolved := c.analyzer.resolved[source]
+		return resolved != nil && resolved.mutable
+	case "array-index":
+		if len(source.Children) != 2 || len(target.Children) != 2 {
+			return false
+		}
+		receiver := assignmentRootPath(source.Children[0])
+		resolved := c.analyzer.resolved[receiver]
+		_, _, fixedArray := hir.FixedArrayParts(target.Children[0].Type)
+		return fixedArray && resolved != nil && resolved.mutable
+	case "view-index":
+		return len(target.Children) == 2 && target.Children[0].Type == hir.MutableBorrow(hir.TypeByteSlice)
+	default:
+		return false
+	}
+}
+
+func assignmentRootPath(expression *ast.Expression) *ast.Expression {
+	for expression != nil && expression.Kind == syntax.KindGroup && len(expression.Children) == 1 {
+		expression = expression.Children[0]
+	}
+	if expression == nil || expression.Kind != syntax.KindPath {
+		return nil
+	}
+	return expression
 }
 
 func (c *typeChecker) checkSlice(expression *ast.Expression, result *hir.Expression) hir.Type {

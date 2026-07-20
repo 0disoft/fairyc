@@ -135,6 +135,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0123-mutable-parameter-and-opaque-borrow-cast.md`: callee-local `mut` parameters, verifier-retained opaque owner addresses, and borrowed CStr parameter data extraction for checked raw wrappers.
 - `0124-safe-windows-file-fy-lifecycle.md`: effect-checked move-only FY File wrappers with typed errors, bounded safe buffer I/O, consuming close, and native implicit-drop proof on Windows.
 - `0125-mutable-fixed-u8-array-byte-view.md`: contextual exclusive fixed-array byte views with private mutable C transport and a length-generic safe Windows File read wrapper.
+- `0126-checked-mutable-indexed-assignment.md`: bounds-before-value fixed-array and mutable-byte-view stores with verified alias and value-copy semantics.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

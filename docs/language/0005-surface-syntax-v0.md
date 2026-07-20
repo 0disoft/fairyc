@@ -74,6 +74,15 @@ an unsuffixed integer literal receives that contextual type. The result has type
 and index evaluate once from left to right, and an index greater than or equal to `.len` traps with
 category `bounds` before any data access.
 
+A mutable fixed scalar-array place supports `values[index] = value` when the receiver is a `var`
+local or `mut` by-value parameter. A value of type `&mut [u8]` supports both the same checked `u8`
+read and `bytes[index] = value`; the borrow binding itself may remain `let` because the borrow type,
+not binding reassignment, grants referent mutation. A shared view, immutable array place, literal,
+call result, or other non-place target is rejected. The receiver and `usize` index evaluate once from
+left to right, the complete `bounds` check runs before the right-hand side, and only the success path
+evaluates the value once and stores it. Mutable slicing, nested projections, resource elements,
+compound assignment, and user-defined indexing remain outside Stage 0.
+
 The same immutable view supports end-exclusive `bytes[start..end]`, `bytes[..end]`,
 `bytes[start..]`, and `bytes[..]`. Written bounds have type `usize`; an omitted start is zero and an
 omitted end is the retained length of the already-evaluated receiver. The receiver and every

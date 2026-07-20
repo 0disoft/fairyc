@@ -1279,6 +1279,11 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 					return err
 				}
 				e.features["view-index"] = struct{}{}
+			case mir.OperationViewIndexStore:
+				if err := e.inspectViewIndexStore(functionIndex, *operation); err != nil {
+					return err
+				}
+				e.features["mutable-view-index-store"] = struct{}{}
 			case mir.OperationViewSliceCheck:
 				if err := e.inspectViewSlice(functionIndex, *operation, false); err != nil {
 					return err
@@ -1323,6 +1328,11 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 					return err
 				}
 				e.features["array-index"] = struct{}{}
+			case mir.OperationArrayIndexStore:
+				if err := e.inspectArrayIndexStore(functionIndex, *operation); err != nil {
+					return err
+				}
+				e.features["array-index-store"] = struct{}{}
 			case mir.OperationUse:
 			case mir.OperationArithmeticCheck:
 				e.features["checked-arithmetic"] = struct{}{}
@@ -1603,6 +1613,28 @@ func (e *emitter) inspectArrayIndex(functionIndex int, operation mir.Operation, 
 	return nil
 }
 
+func (e *emitter) inspectArrayIndexStore(functionIndex int, operation mir.Operation) error {
+	function := &e.functions[functionIndex]
+	receiver, index, value, err := threeOperands(operation.Operands)
+	if err != nil {
+		return fmt.Errorf("fixed-array index store in %s: %w", function.Name, err)
+	}
+	elementType, _, array := hir.FixedArrayParts(operation.OwnerType)
+	if !array || operation.Type != elementType || operation.IndexType != hir.TypeUSize || operation.Operator != "[]=" || operation.DestinationLocal != mir.NoLocal {
+		return fmt.Errorf("fixed-array index store in %s has incompatible owner, value, operator, or destination", function.Name)
+	}
+	receiverType, receiverErr := e.operandType(functionIndex, receiver)
+	indexType, indexErr := e.operandType(functionIndex, index)
+	valueType, valueErr := e.operandType(functionIndex, value)
+	if receiverErr != nil || indexErr != nil || valueErr != nil || receiverType != operation.OwnerType || indexType != hir.TypeUSize || valueType != elementType {
+		return fmt.Errorf("fixed-array index store in %s has incompatible operand types", function.Name)
+	}
+	if len(operation.TrapCategories) != 0 {
+		return fmt.Errorf("fixed-array index store in %s has an invalid trap marker", function.Name)
+	}
+	return nil
+}
+
 func (e *emitter) inspectViewEmpty(functionIndex int, operation mir.Operation) error {
 	function := &e.functions[functionIndex]
 	receiver, err := oneOperand(operation.Operands)
@@ -1627,27 +1659,53 @@ func (e *emitter) inspectViewIndex(functionIndex int, operation mir.Operation, d
 	function := &e.functions[functionIndex]
 	receiver, index, err := twoOperands(operation.Operands)
 	if err != nil {
-		return fmt.Errorf("immutable byte-view index in %s: %w", function.Name, err)
+		return fmt.Errorf("byte-view index in %s: %w", function.Name, err)
 	}
-	if operation.OwnerType != hir.SharedBorrow(hir.TypeByteSlice) || operation.IndexType != hir.TypeUSize || operation.Type != hir.TypeU8 || operation.Operator != "[]" ||
+	if !isCByteViewType(operation.OwnerType) || operation.IndexType != hir.TypeUSize || operation.Type != hir.TypeU8 || operation.Operator != "[]" ||
 		destination != (operation.DestinationLocal != mir.NoLocal) {
-		return fmt.Errorf("immutable byte-view index in %s has incompatible owner, result, operator, or destination", function.Name)
+		return fmt.Errorf("byte-view index in %s has incompatible owner, result, operator, or destination", function.Name)
 	}
 	receiverType, err := e.operandType(functionIndex, receiver)
 	if err != nil {
-		return fmt.Errorf("immutable byte-view index in %s: %w", function.Name, err)
+		return fmt.Errorf("byte-view index in %s: %w", function.Name, err)
 	}
 	indexType, err := e.operandType(functionIndex, index)
 	if err != nil {
-		return fmt.Errorf("immutable byte-view index in %s: %w", function.Name, err)
+		return fmt.Errorf("byte-view index in %s: %w", function.Name, err)
 	}
 	if receiverType != operation.OwnerType || indexType != operation.IndexType {
-		return fmt.Errorf("immutable byte-view index in %s has receiver type %q and index type %q", function.Name, receiverType, indexType)
+		return fmt.Errorf("byte-view index in %s has receiver type %q and index type %q", function.Name, receiverType, indexType)
 	}
 	if destination && len(operation.TrapCategories) != 0 || !destination && !slices.Equal(operation.TrapCategories, []string{"bounds"}) {
-		return fmt.Errorf("immutable byte-view index in %s has an invalid trap marker", function.Name)
+		return fmt.Errorf("byte-view index in %s has an invalid trap marker", function.Name)
 	}
 	return nil
+}
+
+func (e *emitter) inspectViewIndexStore(functionIndex int, operation mir.Operation) error {
+	function := &e.functions[functionIndex]
+	receiver, index, value, err := threeOperands(operation.Operands)
+	if err != nil {
+		return fmt.Errorf("mutable byte-view index store in %s: %w", function.Name, err)
+	}
+	if operation.OwnerType != hir.MutableBorrow(hir.TypeByteSlice) || operation.IndexType != hir.TypeUSize || operation.Type != hir.TypeU8 ||
+		operation.Operator != "[]=" || operation.DestinationLocal != mir.NoLocal {
+		return fmt.Errorf("mutable byte-view index store in %s has incompatible owner, value, operator, or destination", function.Name)
+	}
+	receiverType, receiverErr := e.operandType(functionIndex, receiver)
+	indexType, indexErr := e.operandType(functionIndex, index)
+	valueType, valueErr := e.operandType(functionIndex, value)
+	if receiverErr != nil || indexErr != nil || valueErr != nil || receiverType != operation.OwnerType || indexType != hir.TypeUSize || valueType != hir.TypeU8 {
+		return fmt.Errorf("mutable byte-view index store in %s has incompatible operand types", function.Name)
+	}
+	if len(operation.TrapCategories) != 0 {
+		return fmt.Errorf("mutable byte-view index store in %s has an invalid trap marker", function.Name)
+	}
+	return nil
+}
+
+func isCByteViewType(value hir.Type) bool {
+	return value == hir.SharedBorrow(hir.TypeByteSlice) || value == hir.MutableBorrow(hir.TypeByteSlice)
 }
 
 func (e *emitter) inspectViewSlice(functionIndex int, operation mir.Operation, destination bool) error {
@@ -2464,7 +2522,7 @@ func (e *emitter) inspectSwitch(functionIndex int, terminator mir.Terminator) er
 		if err != nil {
 			return fmt.Errorf("checked byte-view index offset in %s: %w", function.Name, err)
 		}
-		if terminator.Operator != "[]" || receiverType != hir.SharedBorrow(hir.TypeByteSlice) || indexType != hir.TypeUSize {
+		if terminator.Operator != "[]" || !isCByteViewType(receiverType) || indexType != hir.TypeUSize {
 			return fmt.Errorf("checked byte-view index in %s has incompatible operands", function.Name)
 		}
 		e.features["view-index"] = struct{}{}
@@ -3119,20 +3177,44 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			return fmt.Errorf("fixed-array index offset in %s: %w", function, err)
 		}
 		fmt.Fprintf(output, "    fy_l_%d = (%s).data[%s];\n", operation.DestinationLocal, receiverValue, indexValue)
+	case mir.OperationArrayIndexStore:
+		receiver, index, value, err := threeOperands(operation.Operands)
+		if err != nil {
+			return fmt.Errorf("fixed-array index store in %s: %w", function, err)
+		}
+		receiverValue, receiverErr := cOperand(receiver)
+		indexValue, indexErr := cOperand(index)
+		storedValue, valueErr := cOperand(value)
+		if receiverErr != nil || indexErr != nil || valueErr != nil {
+			return fmt.Errorf("fixed-array index store in %s has an invalid operand", function)
+		}
+		fmt.Fprintf(output, "    (%s).data[%s] = %s;\n", receiverValue, indexValue, storedValue)
 	case mir.OperationViewIndex:
 		receiver, index, err := twoOperands(operation.Operands)
 		if err != nil {
-			return fmt.Errorf("immutable byte-view index in %s: %w", function, err)
+			return fmt.Errorf("byte-view index in %s: %w", function, err)
 		}
 		receiverValue, err := cOperand(receiver)
 		if err != nil {
-			return fmt.Errorf("immutable byte-view index receiver in %s: %w", function, err)
+			return fmt.Errorf("byte-view index receiver in %s: %w", function, err)
 		}
 		indexValue, err := cOperand(index)
 		if err != nil {
-			return fmt.Errorf("immutable byte-view index offset in %s: %w", function, err)
+			return fmt.Errorf("byte-view index offset in %s: %w", function, err)
 		}
 		fmt.Fprintf(output, "    fy_l_%d = (%s).data[%s];\n", operation.DestinationLocal, receiverValue, indexValue)
+	case mir.OperationViewIndexStore:
+		receiver, index, value, err := threeOperands(operation.Operands)
+		if err != nil {
+			return fmt.Errorf("mutable byte-view index store in %s: %w", function, err)
+		}
+		receiverValue, receiverErr := cOperand(receiver)
+		indexValue, indexErr := cOperand(index)
+		storedValue, valueErr := cOperand(value)
+		if receiverErr != nil || indexErr != nil || valueErr != nil {
+			return fmt.Errorf("mutable byte-view index store in %s has an invalid operand", function)
+		}
+		fmt.Fprintf(output, "    (%s).data[%s] = %s;\n", receiverValue, indexValue, storedValue)
 	case mir.OperationViewSlice:
 		receiver, start, end, err := threeOperands(operation.Operands)
 		if err != nil {

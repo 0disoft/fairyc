@@ -1736,6 +1736,7 @@ fn main() -> i32 {
     let values: [u8; 3] = [40, 41, 42];
     pick(values, 2) as i32
 }
+
 `)
 	var construct, check, index *Operation
 	var checked *Terminator
@@ -1788,6 +1789,60 @@ fn main() -> i32 {
 	}
 	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1501" {
 		t.Fatalf("Verify() array-check mutation failures = %+v", failures)
+	}
+}
+
+func TestLowerPreservesCheckedIndexedStores(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+fn update_view(bytes: &mut [u8], value: u8) -> u8 {
+    bytes[1] = value;
+    bytes[1]
+}
+fn main() -> i32 {
+    var values: [u8; 3] = [1, 2, 3];
+    values[0] = 40;
+    update_view(&mut values, 42) as i32
+}
+`)
+	var arrayStore, viewStore *Operation
+	for functionIndex := range program.Functions {
+		for blockIndex := range program.Functions[functionIndex].Blocks {
+			for operationIndex := range program.Functions[functionIndex].Blocks[blockIndex].Operations {
+				operation := &program.Functions[functionIndex].Blocks[blockIndex].Operations[operationIndex]
+				switch operation.Kind {
+				case OperationArrayIndexStore:
+					arrayStore = operation
+				case OperationViewIndexStore:
+					viewStore = operation
+				}
+			}
+		}
+	}
+	if arrayStore == nil || arrayStore.OwnerType != hir.FixedArray(hir.TypeU8, 3) || arrayStore.Type != hir.TypeU8 ||
+		arrayStore.Operator != "[]=" || arrayStore.DestinationLocal != NoLocal || len(arrayStore.Operands) != 3 {
+		t.Fatalf("array store = %+v", arrayStore)
+	}
+	if viewStore == nil || viewStore.OwnerType != hir.MutableBorrow(hir.TypeByteSlice) || viewStore.Type != hir.TypeU8 ||
+		viewStore.Operator != "[]=" || viewStore.DestinationLocal != NoLocal || len(viewStore.Operands) != 3 {
+		t.Fatalf("view store = %+v", viewStore)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+	mutated := Clone(program)
+	for functionIndex := range mutated.Functions {
+		for blockIndex := range mutated.Functions[functionIndex].Blocks {
+			for operationIndex := range mutated.Functions[functionIndex].Blocks[blockIndex].Operations {
+				operation := &mutated.Functions[functionIndex].Blocks[blockIndex].Operations[operationIndex]
+				if operation.Kind == OperationViewIndexStore {
+					operation.Operator = "[]"
+				}
+			}
+		}
+	}
+	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1001" {
+		t.Fatalf("Verify() store mutation failures = %+v", failures)
 	}
 }
 

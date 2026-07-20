@@ -155,6 +155,75 @@ fn main() -> i32 {
 	}
 }
 
+func TestExecuteCheckedMutableIndexedStores(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn update(bytes: &mut [u8]) -> u8 {
+    bytes[1] = 42;
+    bytes[1]
+}
+fn main() -> i32 {
+    var values: [u8; 3] = [1, 2, 3];
+    values[0] = 40;
+    let changed: u8 = update(&mut values);
+    if values[0] == 40 && values[1] == changed && values[1] == 42 { 42 } else { 1 }
+}
+`)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+	if outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("outcome = %+v", outcome)
+	}
+}
+
+func TestExecuteFixedArrayCallPreservesValueSemanticsAcrossMutation(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn changed(mut values: [u8; 2]) -> u8 {
+    values[0] = 42;
+    values[0]
+}
+fn main() -> i32 {
+    let values: [u8; 2] = [1, 2];
+    let result: u8 = changed(values);
+    if result == 42 && values[0] == 1 { 42 } else { 1 }
+}
+`)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+	if outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("outcome = %+v", outcome)
+	}
+}
+
+func TestExecuteIndexedStoreChecksBoundsBeforeEvaluatingValue(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn observe(value: i32) -> i32 { value }
+fn main() -> i32 {
+    var values: [i32; 1] = [0];
+    values[1] = observe(65);
+    42
+}
+`)
+	outcome, err := interpreter.ExecuteWithOptions(program, "main::main", interpreter.Options{
+		TestIntrinsics: map[string]interpreter.TestIntrinsicKind{
+			"main::observe": interpreter.TestIntrinsicWriteStdoutByte,
+		},
+		OutputLimit: 1,
+	})
+	if err != nil {
+		t.Fatalf("ExecuteWithOptions() error = %v", err)
+	}
+	if outcome.Kind != interpreter.OutcomeTrap || outcome.TrapCategory != "bounds" || len(outcome.Stdout) != 0 {
+		t.Fatalf("outcome = %+v", outcome)
+	}
+}
+
 func TestExecuteReassignedFixedArrayByteView(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

@@ -146,6 +146,10 @@ retaining one exclusive origin and canonical length through internal calls. The 
 descriptor and matching `*mut u8` extraction are pre-1 transport contracts. Safe mutable indexing,
 assignment, slicing, resizing, temporary borrowing, retained foreign pointers, and a public slice
 ABI remain excluded or unstabilized.
+ADR 0126 adds checked mutable scalar-array and `&mut [u8]` indexed assignment, mutable-view reads,
+bounds-before-value evaluation order, and the private `array-index-store`/`view-index-store` MIR
+forms. These are pre-1 source and internal-IR additions; mutable slicing, public slice layout, foreign
+safe references, and stable MIR serialization remain absent.
 ADR 0113 admits branch-aware safe-borrow reassignment with right-hand-side-first replacement,
 loan-generation preservation across aliases, reachable `if`/`match` origin joins, and path-aware
 loan liveness. Those rules and fail-closed multi-origin returns are pre-1 semantics. ADR 0114 adds compiler-internal fixed-point return-origin
