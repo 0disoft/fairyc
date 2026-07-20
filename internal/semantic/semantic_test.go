@@ -1562,7 +1562,118 @@ fn main() -> i32 {
 	}
 }
 
-func TestAnalyzeKeepsSafeBorrowReassignmentClosed(t *testing.T) {
+func TestAnalyzeTracksSequentialAndBranchSafeBorrowReassignment(t *testing.T) {
+	t.Parallel()
+	for _, fixture := range []struct {
+		name   string
+		branch string
+	}{
+		{name: "sequential", branch: "current = right;"},
+		{name: "same branch origin", branch: "if flag { current = right; 0 } else { current = right; 0 };"},
+	} {
+		t.Run(fixture.name, func(t *testing.T) {
+			result := analyzeText(t, map[string]string{
+				"main.fy": `module main;
+fn select(flag: bool, left: &i32, right: &i32) -> &i32 {
+    var current: &i32 = left;
+    ` + fixture.branch + `
+    current
+}
+`,
+			})
+			assertCleanTypeResult(t, result)
+			if len(result.Borrows) != 1 || result.Borrows[0].Origin != "Param(2)" || !result.Borrows[0].Escapes {
+				t.Fatalf("borrows = %+v", result.Borrows)
+			}
+		})
+	}
+}
+
+func TestAnalyzeRejectsBranchMergedSafeBorrowOrigins(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn select(flag: bool, left: &i32, right: &i32) -> &i32 {
+    var current: &i32 = left;
+    if flag { current = left; 0 } else { current = right; 0 };
+    current
+}
+`,
+	})
+	if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E2103" {
+		t.Fatalf("diagnostics = %+v", result.Diagnostics)
+	}
+}
+
+func TestAnalyzeEndsReassignedArrayViewLoanBeforeNewOrigin(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn main() -> i32 {
+    var left: [u8; 1] = [41];
+    var right: [u8; 1] = [42];
+    var bytes: &[u8] = &left;
+    bytes = &right;
+    left = [40];
+    bytes[0] as i32
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+}
+
+func TestAnalyzeProtectsReassignedArrayViewNewOrigin(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn main() -> i32 {
+    var left: [u8; 1] = [41];
+    var right: [u8; 1] = [42];
+    var bytes: &[u8] = &left;
+    bytes = &right;
+    right = [43];
+    bytes[0] as i32
+}
+`,
+	})
+	if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E2101" {
+		t.Fatalf("diagnostics = %+v", result.Diagnostics)
+	}
+}
+
+func TestAnalyzeBorrowLivenessIsBranchReachable(t *testing.T) {
+	t.Parallel()
+	t.Run("disjoint branches", func(t *testing.T) {
+		result := analyzeText(t, map[string]string{
+			"main.fy": `module main;
+fn main(flag: bool) -> i32 {
+    var value: i32 = 1;
+    let view: &i32 = &value;
+    if flag { value = 2; 0 } else { *view };
+    42
+}
+`,
+		})
+		assertCleanTypeResult(t, result)
+	})
+	t.Run("same branch", func(t *testing.T) {
+		result := analyzeText(t, map[string]string{
+			"main.fy": `module main;
+fn main(flag: bool) -> i32 {
+    var value: i32 = 1;
+    let view: &i32 = &value;
+    if flag { value = 2; *view } else { 0 };
+    42
+}
+`,
+		})
+		if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E2101" {
+			t.Fatalf("diagnostics = %+v", result.Diagnostics)
+		}
+	})
+}
+
+func TestAnalyzeKeepsLoopCarriedSafeBorrowReassignmentClosed(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{
 		"main.fy": `module main;
@@ -1570,12 +1681,12 @@ fn main() -> i32 {
     let left: [u8; 1] = [41];
     let right: [u8; 1] = [42];
     var bytes: &[u8] = &left;
-    bytes = &right;
+    while false { bytes = &right; }
     bytes[0] as i32
 }
 `,
 	})
-	if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "safe-borrow reassignment" {
+	if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "safe-borrow reassignment inside loop" {
 		t.Fatalf("unsupported = %+v", result.Unsupported)
 	}
 }

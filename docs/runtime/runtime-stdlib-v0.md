@@ -16,8 +16,10 @@ copy transport, exact length observation, checked indexing, and contextual share
 `&[u8]` view construction. They require no runtime allocation or library entry point. The
 provisional Stage 0 by-value implementation admits `1..=4096` elements; that ceiling is not a
 stable language or ABI limit. Empty/repeated literals, array fields, mutation, general slicing,
-properties other than `.len`, other array borrows, safe-borrow reassignment, and ABI exposure remain
-outside this slice.
+properties other than `.len`, other array borrows, and ABI exposure remain outside this slice.
+Outside-loop safe-borrow reassignment is compiler-owned local descriptor transport after Flow
+proves provenance and loans; it adds no runtime allocation or library entry point. Loop-carried
+safe-borrow reassignment remains outside this slice.
 
 Heap allocation, files, UTF-8 validation, strings, buffers, formatting, console access, and environment access are not intrinsics.
 

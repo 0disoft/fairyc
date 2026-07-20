@@ -87,7 +87,9 @@ mutable indexing, slicing, properties other than `.len`, general borrowing, and 
 remain closed. One direct shared borrow of an admitted `[u8; N]` place contextually becomes
 `&[u8]` when that view type is already expected, as in `let bytes: &[u8] = &array` or an internal
 `&[u8]` call argument. It retains the array's origin and exact `N`; other element types, `&mut`,
-temporary sources, escaping local views, and safe-borrow reassignment remain closed.
+temporary sources, and escaping local views remain closed. A `var` safe-borrow local may be
+reassigned outside loops; reachable branch origins are joined and returning a multi-origin result
+is rejected. Loop-carried safe-borrow reassignment remains closed.
 
 Ordinary internal functions may accept `&str` and `&[u8]` parameters. Calls preserve the exact safe
 borrow and its caller-proven origin; they do not convert the argument to a raw pointer or transfer

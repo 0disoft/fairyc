@@ -108,6 +108,26 @@ fn main() -> i32 {
 	}
 }
 
+func TestExecuteReassignedFixedArrayByteView(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn main() -> i32 {
+    let first: [u8; 3] = [1, 2, 3];
+    let second: [u8; 3] = [40, 41, 42];
+    var bytes: &[u8] = &first;
+    bytes = &second;
+    bytes[2] as i32
+}
+`)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+	if outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("outcome = %+v", outcome)
+	}
+}
+
 func TestExecuteScalarFixedArrayOutOfBoundsTraps(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

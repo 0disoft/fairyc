@@ -122,6 +122,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0110-scalar-fixed-array-execution.md`: provisionally bounded copy-scalar fixed arrays with nonempty list construction, internal value calls, checked indexing, and private C wrappers.
 - `0111-scalar-fixed-array-length.md`: exact zero-cost `usize` length observation for admitted fixed arrays without opening layout reflection or slicing.
 - `0112-fixed-u8-array-byte-view-borrow.md`: contextual shared borrowing of admitted fixed `u8` arrays as immutable byte views without opening mutable slices or public ABI.
+- `0113-branch-aware-safe-borrow-reassignment.md`: provenance-carrying safe-borrow reassignment with reachable branch joins, loan generations, and loop-carried reassignment kept fail-closed.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

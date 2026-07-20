@@ -333,6 +333,31 @@ fn main() -> i32 {
 	}
 }
 
+func TestEmitReassignedFixedArrayByteView(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn main() -> i32 {
+    let first: [u8; 3] = [1, 2, 3];
+    let second: [u8; 3] = [40, 41, 42];
+    var bytes: &[u8] = &first;
+    bytes = &second;
+    bytes[2] as i32
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, feature := range []string{"array-byte-view-borrow", "scalar-fixed-array", "view-index"} {
+		if !slices.Contains(unit.Features, feature) {
+			t.Errorf("features %v are missing %q", unit.Features, feature)
+		}
+	}
+	if strings.Count(unit.Source, "(fy_byte_slice){ .data = fy_l_") != 2 || !strings.Contains(unit.Source, ".data[") {
+		t.Fatalf("generated C does not preserve both view definitions and the selected read:\n%s", unit.Source)
+	}
+}
+
 func TestEmitRejectsFixedArrayBeyondExecutableElementLimit(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main;\nfn main() -> i32 { 42 }\n")

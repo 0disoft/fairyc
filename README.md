@@ -14,8 +14,9 @@ The project is not trying to beat every hand-tuned C program or make every C own
 The first Stage 0 frontend slice now exists in Go: immutable source bytes, a lossless lexer,
 compact recoverable syntax, error-free AST lowering, deterministic `E00xx` diagnostics, and a
 runner for all parser v0 fixtures. The next slice resolves names and produces typed HIR for the
-  fixture-backed scalar, safe-borrow, and scalar foreign-call subset. Its semantic runner executes all 23 v0 resolve, type,
-and local Flow cases, including integer-literal range rejection, last-use loans, and borrow-return origins. Whole-root resource Flow
+  fixture-backed scalar, safe-borrow, and scalar foreign-call subset. Its semantic runner executes all 25 v0 resolve, type,
+and local Flow cases, including integer-literal range rejection, branch-aware safe-borrow reassignment,
+last-use loans, and borrow-return origins. Whole-root resource Flow
   also executes all 12 v0 cases for moves, cleanup obligations, branch joins, normal, break, and continue loop edges,
 consuming tagged matches, and live/dead resource reassignment. The
 Region runner executes all 6 v1 cases, including package-proven `std::alloc::Arena`, hidden
@@ -179,9 +180,12 @@ nonempty list literals, cross internal calls and returns as inert copy values, e
 zero-cost `usize` `.len`, and support checked read-only `usize` indexing. A direct shared borrow of
 `[u8; N]` contextually becomes `&[u8]` where that type is expected, so local arrays can use the
 existing immutable byte-view calls and operations without unsafe code. The ceiling is a provisional
-Stage 0 implementation guard, not a stable language or ABI limit. Empty and repeated literals,
-fields, nesting, mutable indexing, general slicing or borrowing, safe-borrow reassignment, and
-public or foreign ABI use remain closed.
+Stage 0 implementation guard, not a stable language or ABI limit. A mutable safe-borrow local may
+be reassigned outside loops; Flow replaces its provenance after evaluating the right-hand side,
+joins reachable branch origins without guessing, and releases old owners only after their last
+reachable loan use. Loop-carried safe-borrow reassignment, empty and repeated literals, fields,
+nesting, mutable indexing, general slicing or borrowing, and public or foreign ABI use remain
+closed.
 Buffer-backed String and CString C helpers now preserve ownership on failed UTF-8 conversion,
 support overlap-safe String append, expose immutable bounded views, reject interior NUL, and append
 exactly one C terminator. Their C-only native probe is configured but unobserved. A separate

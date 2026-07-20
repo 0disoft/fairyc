@@ -24,8 +24,9 @@ fixed-array-specific function or compiler-owned literal storage.
 3. The view retains the source place's hidden origin and exact canonical `N`. The ordinary
    last-use loan prevents assignment, mutation, or movement of the array while the view is live.
    A view of a callee-local array or by-value parameter cannot escape and is rejected with `E2102`.
-4. Safe-borrow reassignment remains unsupported until Flow can update and merge origin sets across
-   assignments. This prevents a mutable view local from silently changing provenance.
+4. ADR 0113 permits safe-borrow reassignment outside loops after Flow has evaluated the right-hand
+   side, replaced the target provenance, and joined reachable branch origins. Loop-carried
+   reassignment remains closed rather than silently changing provenance across iterations.
 5. Typed HIR uses `array-view-borrow`. MIR uses one explicit `array-borrow-view` operation with a
    local `[u8; N]` operand, canonical owner type, exact immutable byte-view result, and `&` marker.
    The verifier rejects every other shape.
@@ -48,7 +49,8 @@ fixed-array-specific function or compiler-owned literal storage.
 
 ## Verification
 
-- semantic tests distinguish contextual conversion from closed safe-borrow reassignment;
+- semantic tests distinguish contextual conversion, permitted outside-loop reassignment, and the
+  closed loop-carried form;
 - MIR tests preserve `array-borrow-view` and reject a mutated operator;
 - interpreter and C-emission tests read the exact bytes through an internal `&[u8]` call;
 - the shared fixed-array acceptance fixture exercises the bridge without changing fixture totals;

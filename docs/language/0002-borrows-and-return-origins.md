@@ -39,8 +39,23 @@ Passing an existing mutable borrow to a call creates a call-bounded reborrow whe
 
 The first executable array-view bridge permits a direct shared borrow of an admitted `[u8; N]`
 place where `&[u8]` is already expected. It retains the place's origin and loans the whole array.
-Safe-borrow reassignment remains closed until Flow can update and merge origin sets at assignment
-edges.
+
+A mutable local containing a safe borrow may be reassigned outside loops. Flow evaluates the
+right-hand side first and then replaces the target's origin and retained-loan set. Each direct
+borrow creates a loan generation; copying a borrow preserves that generation, so replacing one
+alias does not release an owner while another alias can still reach a later use.
+
+`if` and `match` analyze each branch with an independent borrow environment and join only reachable
+exits. Equal origins compact to one fact. Different possible origins remain a disjunction and a
+return of that value is `E2103`; source order never chooses a winning branch. Loan liveness is also
+path-aware, so a use in one branch does not keep an unrelated mutually exclusive branch's owner
+borrowed. Loop-carried safe-borrow reassignment remains unsupported until iteration, `break`, and
+`continue` edges have an explicit provenance fixed-point contract.
+
+An internal borrow-returning call with exactly one safe-borrow argument propagates that argument's
+origin. With multiple safe-borrow arguments, Stage 0 conservatively retains their union until
+function summaries can name the selected input origin. With no proven borrow argument, Flow fails
+closed instead of inventing static provenance.
 
 ## Return rule
 

@@ -299,8 +299,8 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 			value, actual := c.checkExpression(statement.Expression, targetType)
 			hirStatement.Target = target
 			hirStatement.Expression = value
-			if _, _, borrow := hir.BorrowElement(targetType); borrow {
-				c.analyzer.addUnsupported(c.module.file.Path, statement.Span, "safe-borrow reassignment")
+			if _, _, borrow := hir.BorrowElement(targetType); borrow && c.loopDepth > 0 {
+				c.analyzer.addUnsupported(c.module.file.Path, statement.Span, "safe-borrow reassignment inside loop")
 			}
 			if statement.Target != nil {
 				resolved := c.analyzer.resolved[statement.Target]
