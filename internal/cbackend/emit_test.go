@@ -1755,6 +1755,28 @@ fn main() -> i32 {
 	}
 }
 
+func TestEmitAlwaysCheckedAssert(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, "module main;\nfn main() -> i32 { let ready: bool = true; assert(ready); 42 }\n")
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, feature := range []string{"assert", "trap"} {
+		if !slices.Contains(unit.Features, feature) {
+			t.Errorf("features %v are missing %q", unit.Features, feature)
+		}
+	}
+	for _, required := range []string{
+		"FY_TRAP_ASSERTION_FAILED",
+		"== INT32_C(0)) { fy_pending_trap = FY_TRAP_ASSERTION_FAILED;",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+}
+
 func lowerSource(t *testing.T, contents string) mir.Program {
 	t.Helper()
 	return lowerSources(t, map[string]string{"main.fy": contents})

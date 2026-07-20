@@ -1525,6 +1525,28 @@ func TestAnalyzeRejectsMutableOrUnwrappedUTF8StringLiteralTypes(t *testing.T) {
 	}
 }
 
+func TestAnalyzeTypesAlwaysCheckedAssertCondition(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\nfn main() -> i32 { let ready: bool = true; assert(ready); 42 }\n",
+	})
+	assertCleanTypeResult(t, result)
+	statement := result.HIR.Modules[0].Functions[0].Body.Statements[1]
+	if statement.Kind != "assert" || statement.Expression == nil || statement.Expression.Type != hir.TypeBool {
+		t.Fatalf("assert statement = %+v", statement)
+	}
+}
+
+func TestAnalyzeRejectsNonBooleanAssertCondition(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\nfn main() -> i32 { assert(1); 42 }\n",
+	})
+	if result.FailedPhase != semantic.PhaseType || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E1007" || len(result.Unsupported) != 0 {
+		t.Fatalf("result = %+v", result)
+	}
+}
+
 func analyzeText(t *testing.T, files map[string]string) semantic.Result {
 	t.Helper()
 	inputs := make([]semantic.File, 0, len(files))

@@ -226,6 +226,22 @@ fn usize_divide_zero() -> i32 { let numerator: usize = 42; let zero: usize = 0; 
 	}
 }
 
+func TestExecuteAlwaysCheckedAssert(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn passes() -> i32 { assert(true); 42 }
+fn fails() -> i32 { assert(false); 42 }
+`)
+	passed, err := interpreter.Execute(program, "main::passes")
+	if err != nil || passed.Kind != interpreter.OutcomeReturn || passed.Value != 42 {
+		t.Fatalf("Execute(passes) = %+v, %v", passed, err)
+	}
+	failed, err := interpreter.Execute(program, "main::fails")
+	if err != nil || failed.Kind != interpreter.OutcomeTrap || failed.TrapCategory != "assertion-failed" {
+		t.Fatalf("Execute(fails) = %+v, %v", failed, err)
+	}
+}
+
 func lowerSource(t *testing.T, contents string) mir.Program {
 	t.Helper()
 	parsed, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(contents)), source.DefaultLimits())

@@ -949,6 +949,9 @@ func assignLocalType(localTypes map[mir.LocalID]hir.Type, local mir.LocalID, val
 func inferredOperandType(localTypes map[mir.LocalID]hir.Type, operand mir.Operand) (hir.Type, bool) {
 	switch operand.Kind {
 	case mir.OperandI32:
+		if operand.Type == hir.TypeBool {
+			return hir.TypeBool, operand.I32 == 0 || operand.I32 == 1
+		}
 		return hir.TypeI32, true
 	case mir.OperandU8:
 		return hir.TypeU8, true
@@ -1832,6 +1835,12 @@ func (e *emitter) inspectEnumOperation(functionIndex int, operation mir.Operatio
 func (e *emitter) operandType(functionIndex int, operand mir.Operand) (hir.Type, error) {
 	switch operand.Kind {
 	case mir.OperandI32:
+		if operand.Type == hir.TypeBool {
+			if operand.I32 == 0 || operand.I32 == 1 {
+				return hir.TypeBool, nil
+			}
+			return hir.TypeInvalid, fmt.Errorf("boolean immediate has value %d", operand.I32)
+		}
 		return hir.TypeI32, nil
 	case mir.OperandU8:
 		return hir.TypeU8, nil
@@ -2117,6 +2126,21 @@ func (e *emitter) inspectSwitch(functionIndex int, terminator mir.Terminator) er
 	switch terminator.SwitchKind {
 	case "bool":
 		return nil
+	case "assert":
+		operand, err := oneOperand(terminator.SwitchOperands)
+		if err != nil {
+			return fmt.Errorf("assert in %s: %w", function.Name, err)
+		}
+		valid := operand.Kind == mir.OperandI32 && operand.Type == hir.TypeBool && (operand.I32 == 0 || operand.I32 == 1)
+		if operand.Kind == mir.OperandLocal {
+			operandType, typeErr := e.operandType(functionIndex, operand)
+			valid = typeErr == nil && operandType == hir.TypeBool
+		}
+		if !valid || terminator.SwitchType != hir.TypeBool || terminator.Operator != "assert" {
+			return fmt.Errorf("assert in %s has incompatible condition metadata", function.Name)
+		}
+		e.features["assert"] = struct{}{}
+		categories = []string{"assertion-failed"}
 	case "option":
 		operand, err := oneOperand(terminator.SwitchOperands)
 		if err != nil {
@@ -3082,6 +3106,17 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		}
 		fmt.Fprintf(output, "    if (%s != INT32_C(0)) goto fy_b_%d;\n", value, success)
 		fmt.Fprintf(output, "    goto fy_b_%d;\n", failure)
+	case "assert":
+		operand, err := oneOperand(terminator.SwitchOperands)
+		if err != nil {
+			return fmt.Errorf("assert in %s: %w", function.Name, err)
+		}
+		value, err := cOperand(operand)
+		if err != nil {
+			return fmt.Errorf("assert condition in %s: %w", function.Name, err)
+		}
+		fmt.Fprintf(output, "    if (%s == INT32_C(0)) { fy_pending_trap = FY_TRAP_ASSERTION_FAILED; goto fy_b_%d; }\n", value, failure)
+		fmt.Fprintf(output, "    goto fy_b_%d;\n", success)
 	case "option":
 		operand, err := oneOperand(terminator.SwitchOperands)
 		if err != nil {

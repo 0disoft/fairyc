@@ -24,6 +24,7 @@
     "docs/adr/0103-checked-left-shift.md",
     "docs/adr/0104-borrowed-view-emptiness.md",
     "docs/adr/0105-checked-immutable-byte-view-slicing.md",
+    "docs/adr/0106-always-checked-assert.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/mir-v0.md",
     "docs/engineering/05-testing-standard.md"
@@ -1233,6 +1234,20 @@
       "sources": ["main.fy"],
       "entry": "main::end_after_length",
       "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "trap", "category": "bounds" }
+    },
+    {
+      "id": "pass.interpreter.assert-true",
+      "sourceRoot": "cases/pass/assert/src",
+      "sources": ["main.fy"],
+      "entry": "main::passes",
+      "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "return", "value": 42 }
+    },
+    {
+      "id": "pass.interpreter.assert-false",
+      "sourceRoot": "cases/pass/assert/src",
+      "sources": ["main.fy"],
+      "entry": "main::fails",
+      "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "trap", "category": "assertion-failed" }
     }
   ]
 }

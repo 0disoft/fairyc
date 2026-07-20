@@ -313,6 +313,12 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 					span(c.module.file.Path, statement.Target.Span),
 				)
 			}
+		case statement.Kind == syntax.KindAssert:
+			expression, actual := c.checkExpression(statement.Expression, hir.TypeBool)
+			hirStatement.Expression = expression
+			if statement.Expression != nil && actual != hir.TypeInvalid && actual != hir.TypeBool {
+				c.analyzer.addDiagnostic("E1007", span(c.module.file.Path, statement.Expression.Span))
+			}
 		case statement.Kind == syntax.KindExprStmt || statement.Kind == syntax.KindDiscard:
 			expression, _ := c.checkExpression(statement.Expression, hir.TypeInvalid)
 			hirStatement.Expression = expression

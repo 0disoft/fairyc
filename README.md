@@ -28,7 +28,7 @@ error compatibility. The MIR runner executes all
 left-to-right call evaluation, complete-root moves, normal-exit cleanup order, `Result` error
   cleanup, nearest-loop control, explicit checked arithmetic, and non-unwinding trap paths. The verifier mutation runner constructs all 10 named
   baselines and proves all 21 isolated `V1001` through `V1701` rejection recipes. The first MIR
-  interpreter slice executes all 82 v0 cases for literal return, function-call arithmetic,
+  interpreter slice executes all 84 v0 cases for literal return, function-call arithmetic,
 boolean branches and logical not, source `&&` and `||` short-circuiting, scalar `while`, scalar
 `Option` construction/matching, scalar `Result` construction/matching/propagation,
 resource construction, field reads, call moves, resource-bearing `Option` and `Result` payload moves,
@@ -44,7 +44,7 @@ through typed HIR and executable MIR. The current executable subset accepts only
 `drop` body; any nonempty body fails explicitly before Flow or MIR instead of being silently ignored.
 The interpreter constructs, reads, and recursively drops resources from the verified MIR definition,
 but still does not execute user drop-body effects.
-The constrained C backend emits deterministic C11 for 28 verified fixtures across the scalar
+The constrained C backend emits deterministic C11 for 29 verified fixtures across the scalar
 payload surface, restricted inert user enums, flat nonempty all-`i32` resources with empty drop
 bodies, resource-bearing built-in `Option` and `Result` values, borrowed-view byte lengths, checked
 immutable byte-slice indexing and end-exclusive slicing, the target-independent value-preserving integer casts `u8 as i32`,
@@ -57,6 +57,9 @@ flow, active-payload moves, Result propagation, bitwise operations, checked divi
 trapping, scalar `Option` Some and None, and scalar `Result` propagation success and failure. This
 fixture lane only produces C text; no C compiler, linker, native executable, complete runtime, target
 conformance, or self-hosting is implied.
+
+Source `assert(condition);` now requires one `bool` and remains active in low and optimized builds.
+False traps as `assertion-failed`; it is not lowered to the build-mode-sensitive C assert macro.
 Executable `fairyc.target-spec/v0` descriptions now own host-independent target facts. Linux GNU
 records LP64, SysV AMD64, ELF, and DWARF. Windows MSVC records LLP64, four-byte C `long`, 32-byte
 shadow space, Microsoft x64, COFF, and Windows unwind/CodeView identities. Neither contains a local

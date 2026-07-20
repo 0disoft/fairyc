@@ -117,3 +117,26 @@ func TestParseImmutableByteViewSlice(t *testing.T) {
 		t.Fatalf("Reconstruct() = %q, %v; want %q, true", reconstructed, ok, input)
 	}
 }
+
+func TestParseAlwaysCheckedAssertStatement(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nfn main() -> i32 { assert(true); 42 }\n")
+	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	var assertion *Node
+	for index := range tree.Nodes {
+		if tree.Nodes[index].Kind == KindAssert {
+			assertion = &tree.Nodes[index]
+			break
+		}
+	}
+	if assertion == nil || len(assertion.Children) != 1 {
+		t.Fatalf("assert node = %+v", assertion)
+	}
+	reconstructed, ok := tree.Reconstruct()
+	if !ok || !slices.Equal(reconstructed, input) {
+		t.Fatalf("Reconstruct() = %q, %v; want %q, true", reconstructed, ok, input)
+	}
+}

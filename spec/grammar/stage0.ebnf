@@ -98,6 +98,7 @@ block = "{" statement* tail_expression? "}" ;
 
 statement = binding_stmt
           | assignment_stmt
+          | assert_stmt
           | return_stmt
           | discard_stmt
           | while_stmt
@@ -118,6 +119,7 @@ assignment_stmt = expression "=" expression ";" ;
 expression_stmt = expression ";" ;
 
 return_stmt = "return" expression? ";" ;
+assert_stmt = "assert" "(" expression ")" ";" ;
 discard_stmt = "discard" expression ";" ;
 while_stmt = "while" control_expression block ;
 break_stmt = "break" ";" ;

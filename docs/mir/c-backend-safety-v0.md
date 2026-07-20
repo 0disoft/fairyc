@@ -132,6 +132,7 @@ Nested MIR effects are emitted as separate C statements and temporaries. Functio
 | Shift | Check the amount against the exact operand width before any C shift. Right shift uses the bit-preserving arithmetic helper for `i32` and exact unsigned C operations otherwise. Left shift then checks mathematical representability, reports overflow only after a valid amount, performs signed transport through `uint32_t`, and reconstructs `i32` from bits. |
 | Value-preserving integer cast | Verify one admitted source/result pair, then emit an explicit C cast to `int32_t`, `uint32_t`, or `uintptr_t`. Every source value is representable, so no trap, truncation, wrapping, or implementation-defined signed conversion occurs. |
 | Typed scalar and raw-pointer comparison | Verify two matching operands and the exact `bool` result before emission. Scalar equality is limited to `bool`, `i32`, `u8`, `u32`, and `usize`; scalar ordering excludes `bool`. Matching raw pointers admit equality only, with no dereference or ordering. Generated C normalizes the result to `INT32_C(0)` or `INT32_C(1)`. |
+| Assert | Verify one exact `bool` operand and canonical failure edge, compare with zero in every profile, and dispatch `FY_TRAP_ASSERTION_FAILED` through the trap runtime. Never emit or include the C library `assert` macro. |
 
 The backend cannot add C or LLVM overflow, exactness, alignment, or alias promises unless the verified MIR fact explicitly proves them.
 The volatile divisor slot is private generated-C transport. It does not add source-visible volatile

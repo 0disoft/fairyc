@@ -881,6 +881,12 @@ func taggedFamily(kind valueKind) string {
 func evaluate(locals map[mir.LocalID]runtimeValue, operand mir.Operand) (runtimeValue, error) {
 	switch operand.Kind {
 	case mir.OperandI32:
+		if operand.Type == hir.TypeBool {
+			if operand.I32 != 0 && operand.I32 != 1 {
+				return runtimeValue{}, capabilityError("boolean immediate has value %d", operand.I32)
+			}
+			return runtimeValue{kind: valueI32, i32: operand.I32, typ: hir.TypeBool}, nil
+		}
 		return i32Value(operand.I32), nil
 	case mir.OperandU8:
 		return runtimeValue{kind: valueU8, u64: operand.U64, typ: hir.TypeU8}, nil
@@ -1254,6 +1260,21 @@ func evaluateSwitch(locals map[mir.LocalID]runtimeValue, terminator mir.Terminat
 			return mir.NoBlock, "", fmt.Errorf("bool switch received non-boolean value %d", value)
 		}
 		return terminator.Successors[value^1], "", nil
+	case "assert":
+		value, err := evaluateOne(locals, terminator.SwitchOperands)
+		if err != nil {
+			return mir.NoBlock, "", err
+		}
+		if value.kind != valueI32 || value.typ != hir.TypeBool || (value.i32 != 0 && value.i32 != 1) {
+			return mir.NoBlock, "", capabilityError("assert received a non-boolean value")
+		}
+		if len(terminator.Successors) != 2 {
+			return mir.NoBlock, "", fmt.Errorf("assert switch has %d successors, want 2", len(terminator.Successors))
+		}
+		if value.i32 == 0 {
+			return mir.NoBlock, "assertion-failed", nil
+		}
+		return terminator.Successors[0], "", nil
 	case "result":
 		value, err := evaluateOne(locals, terminator.SwitchOperands)
 		if err != nil {

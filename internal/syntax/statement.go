@@ -16,6 +16,8 @@ func (p *parser) parseBlock() NodeID {
 			children = append(children, p.parseBinding())
 		case "return":
 			children = append(children, p.parseReturn())
+		case "assert":
+			children = append(children, p.parseAssert())
 		case "discard":
 			children = append(children, p.parseDiscard())
 		case "while":
@@ -55,6 +57,16 @@ func (p *parser) parseBlock() NodeID {
 	}
 	p.expect("}")
 	return p.addNode(KindBlock, start, children, "", "")
+}
+
+func (p *parser) parseAssert() NodeID {
+	start := p.currentFullIndex()
+	p.advance()
+	p.expect("(")
+	condition := p.parseExpression(0, true)
+	p.expect(")")
+	p.expectStatementTerminator()
+	return p.addNode(KindAssert, start, []NodeID{condition}, "", "")
 }
 
 func (p *parser) parseBinding() NodeID {

@@ -8,5 +8,6 @@ fn main() -> i32 {
         total = total + (bytes[index] as i32);
         index = index + 1;
     }
+    assert(total == 42);
     if !bytes.is_empty && b"".is_empty { total } else { 1 }
 }

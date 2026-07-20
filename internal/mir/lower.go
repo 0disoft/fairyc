@@ -377,6 +377,10 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 			} else {
 				l.appendOperation(Operation{Kind: OperationAssign, Span: statement.Span, DestinationLocal: LocalID(statement.Target.Symbol), Operands: []Operand{value}})
 			}
+		case "assert":
+			if err := l.lowerAssert(statement.Expression, statement.Span); err != nil {
+				return false, err
+			}
 		case "while":
 			if _, err := l.lowerWhile(statement.Expression); err != nil {
 				return false, err
@@ -395,6 +399,33 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 		}
 	}
 	return l.blockTerminated(l.current), nil
+}
+
+func (l *functionLowerer) lowerAssert(expression *hir.Expression, statementSpan hir.Span) error {
+	if expression == nil || expression.Type != hir.TypeBool {
+		return fmt.Errorf("malformed assert statement")
+	}
+	condition, err := l.lowerExpression(expression)
+	if err != nil {
+		return err
+	}
+	if condition.Kind == OperandInvalid {
+		return fmt.Errorf("assert statement has no condition value")
+	}
+	condition.Type = hir.TypeBool
+	continuation := l.newBlock()
+	trap := l.newBlock()
+	l.terminate(Terminator{
+		Kind: TerminatorSwitch, Span: statementSpan, Successors: []BlockID{continuation, trap}, UnwindSuccessor: NoBlock,
+		SwitchKind: "assert", SwitchType: hir.TypeBool, SwitchOperands: []Operand{condition}, Operator: "assert",
+	})
+	l.current = trap
+	l.terminate(Terminator{Kind: TerminatorTrap, Span: statementSpan, UnwindSuccessor: NoBlock, TrapCategories: []string{"assertion-failed"}})
+	l.result.TrapPaths = append(l.result.TrapPaths, TrapPathFact{
+		Operation: statementSpan, Categories: []string{"assertion-failed"}, CleanupActions: []CleanupAction{}, HasSuccessor: false,
+	})
+	l.current = continuation
+	return nil
 }
 
 func (l *functionLowerer) lowerNestedBlock(block hir.Block) (Operand, bool, error) {
@@ -439,9 +470,9 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		if expression.Type == hir.TypeBool {
 			switch expression.Value {
 			case "true":
-				return Operand{Kind: OperandI32, I32: 1}, nil
+				return Operand{Kind: OperandI32, I32: 1, Type: hir.TypeBool}, nil
 			case "false":
-				return Operand{Kind: OperandI32, I32: 0}, nil
+				return Operand{Kind: OperandI32, I32: 0, Type: hir.TypeBool}, nil
 			default:
 				return Operand{}, fmt.Errorf("invalid bool literal %q", expression.Value)
 			}

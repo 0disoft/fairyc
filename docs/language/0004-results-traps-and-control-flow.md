@@ -91,7 +91,11 @@ Stage 0 foreign callbacks are raw `unsafe extern C` function pointers plus expli
 
 ## Assertions and optimizer assumptions
 
-`assert` is always checked. A debug-only assertion, if later introduced, cannot become an optimizer fact. An assumption that permits undefined behavior when false belongs to an explicit unsafe operation and must remain visible in MIR provenance.
+`assert(condition);` requires one `bool`, evaluates it once, continues when true, and traps as
+`assertion-failed` when false. It is always checked at every optimization profile. A debug-only
+assertion, if later introduced, cannot become an optimizer fact. An assumption that permits
+undefined behavior when false belongs to an explicit unsafe operation and must remain visible in
+MIR provenance. Messages and compile-time assertions are not part of this statement.
 
 ## Required diagnostics
 

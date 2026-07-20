@@ -703,6 +703,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 		}
 	}
 	failures = append(failures, verifyTrapCheckEdges(function)...)
+	failures = append(failures, verifyAssertEdges(function)...)
 
 	for _, loan := range function.Loans {
 		if loan.OutlivesOrigin {
@@ -746,6 +747,9 @@ func validSwitchShape(terminator Terminator) bool {
 		return len(terminator.SwitchOperands) == 0 && len(terminator.Successors) == 2
 	case "bool":
 		return len(terminator.SwitchOperands) == 1 && len(terminator.Successors) == 2
+	case "assert":
+		return terminator.SwitchType == hir.TypeBool && terminator.Operator == "assert" &&
+			len(terminator.SwitchOperands) == 1 && validAssertOperand(terminator.SwitchOperands[0]) && len(terminator.Successors) == 2
 	case "result":
 		return len(terminator.SwitchOperands) == 1 && len(terminator.Successors) == 2
 	case "option":
@@ -774,6 +778,35 @@ func validSwitchShape(terminator Terminator) bool {
 	default:
 		return false
 	}
+}
+
+func validAssertOperand(operand Operand) bool {
+	return operand.Type == hir.TypeBool && (operand.Kind == OperandLocal || operand.Kind == OperandI32 && (operand.I32 == 0 || operand.I32 == 1))
+}
+
+func verifyAssertEdges(function *Function) []VerificationError {
+	blocks := make(map[BlockID]*Block, len(function.Blocks))
+	for index := range function.Blocks {
+		blocks[function.Blocks[index].ID] = &function.Blocks[index]
+	}
+	var failures []VerificationError
+	for index := range function.Blocks {
+		block := &function.Blocks[index]
+		terminator := block.Terminator
+		if terminator.Kind != TerminatorSwitch || terminator.SwitchKind != "assert" {
+			continue
+		}
+		entity := terminatorEntity(block.ID, terminator)
+		if len(terminator.Successors) != 2 || terminator.Successors[0] == terminator.Successors[1] {
+			failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "assertion is missing distinct success and failure edges"})
+			continue
+		}
+		trap := blocks[terminator.Successors[1]]
+		if trap == nil || trap.Terminator.Kind != TerminatorTrap || !slices.Equal(trap.Terminator.TrapCategories, []string{"assertion-failed"}) {
+			failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "assertion failure edge does not trap as assertion-failed"})
+		}
+	}
+	return failures
 }
 
 func enumVariantNames(variants []EnumVariant) []string {
@@ -1058,6 +1091,10 @@ func verifyOperands(state verificationState, operands []Operand, entity string) 
 				failures = append(failures, VerificationError{Code: "V1002", Entity: entity, Detail: fmt.Sprintf("local %d used before initialization", operand.Local)})
 			}
 		case OperandI32:
+			if operand.Type != "" && operand.Type != hir.TypeI32 && operand.Type != hir.TypeBool ||
+				operand.Type == hir.TypeBool && operand.I32 != 0 && operand.I32 != 1 {
+				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "i32 operand has invalid scalar type metadata"})
+			}
 		case OperandU8:
 			if operand.U64 > 255 {
 				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "u8 operand is outside its value range"})

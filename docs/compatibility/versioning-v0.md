@@ -108,6 +108,10 @@ metadata-only and no-scan/no-call contract without stabilizing private represent
 ADR 0105 adds mandatory-bound, end-exclusive `&[u8]` slicing. The result type, left-to-right
 single evaluation, `start <= end <= len` rule, `bounds` trap, and borrow-origin preservation are
 pre-1 semantics; omitted bounds, text slicing, and private C layout remain unstabilized.
+ADR 0106 adds `assert(condition);` as an always-checked statement. Exact `bool` input,
+single evaluation, profile-independent execution, and the `assertion-failed` category are pre-1
+semantics; messages, debug-only checks, compile-time assertions, and unsafe assumptions remain
+separate and unstabilized.
 ADR 0093 admits exact `&str` and `&[u8]` parameters on ordinary internal functions. Exact source
 types, non-owning borrow behavior, matching call operands, and the absence of implicit raw-pointer
 conversion are pre-1 language semantics. Interpreter values and generated-C by-value descriptors

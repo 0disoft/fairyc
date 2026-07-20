@@ -10,7 +10,7 @@ import (
 )
 
 var keywords = map[string]struct{}{
-	"as": {}, "break": {}, "const": {}, "continue": {}, "discard": {},
+	"as": {}, "assert": {}, "break": {}, "const": {}, "continue": {}, "discard": {},
 	"drop": {}, "else": {}, "enum": {}, "extern": {}, "false": {},
 	"fn": {}, "if": {}, "impl": {}, "import": {}, "in": {}, "let": {},
 	"match": {}, "module": {}, "mut": {}, "null": {}, "pub": {},

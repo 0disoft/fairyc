@@ -425,9 +425,9 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		t.Fatalf("report schema = %q", reportSchemaVersion)
 	}
 	encoded, err := json.Marshal(Report{
-		SchemaVersion: reportSchemaVersion, Executions: 112, DropTraceExecutions: 112,
+		SchemaVersion: reportSchemaVersion, Executions: 116, DropTraceExecutions: 116,
 		LayoutCases: []string{"pass.array-i32-three", "pass.pointer"}, LayoutProbeExecutions: 4,
-		Sanitizer: cdriver.AddressUndefinedSanitizerMode, SanitizerExecutions: 56,
+		Sanitizer: cdriver.AddressUndefinedSanitizerMode, SanitizerExecutions: 58,
 		ABICases:      []string{"pass.aggregate-rollback", "pass.void-return"},
 		ABIDirections: []string{"clang-caller-gcc-callee", "gcc-caller-clang-callee"}, ABIProbeExecutions: 56,
 		SystemHeapExecutions:                4,
@@ -465,11 +465,11 @@ func TestNativeReportSchemaTracksNativeEvidenceShape(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !strings.Contains(string(encoded), `"schemaVersion":"fairyc.native-c-report/v31"`) ||
-		!strings.Contains(string(encoded), `"dropTraceExecutions":112`) ||
+		!strings.Contains(string(encoded), `"dropTraceExecutions":116`) ||
 		!strings.Contains(string(encoded), `"layoutCases":["pass.array-i32-three","pass.pointer"]`) ||
 		!strings.Contains(string(encoded), `"layoutProbeExecutions":4`) ||
 		!strings.Contains(string(encoded), `"sanitizer":"address-undefined-o1"`) ||
-		!strings.Contains(string(encoded), `"sanitizerExecutions":56`) ||
+		!strings.Contains(string(encoded), `"sanitizerExecutions":58`) ||
 		!strings.Contains(string(encoded), `"abiCases":["pass.aggregate-rollback","pass.void-return"]`) ||
 		!strings.Contains(string(encoded), `"abiDirections":["clang-caller-gcc-callee","gcc-caller-clang-callee"]`) ||
 		!strings.Contains(string(encoded), `"abiProbeExecutions":56`) ||

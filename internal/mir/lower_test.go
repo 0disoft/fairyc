@@ -1482,6 +1482,51 @@ fn main() -> i32 {
 	}
 }
 
+func TestLowerPreservesAlwaysCheckedAssert(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, "module main;\nfn main() -> i32 { let ready: bool = true; assert(ready); 42 }\n")
+	function := &program.Functions[0]
+	var assertion *Terminator
+	for blockIndex := range function.Blocks {
+		terminator := &function.Blocks[blockIndex].Terminator
+		if terminator.SwitchKind == "assert" {
+			assertion = terminator
+			break
+		}
+	}
+	if assertion == nil || assertion.SwitchType != hir.TypeBool || assertion.Operator != "assert" ||
+		len(assertion.SwitchOperands) != 1 || assertion.SwitchOperands[0].Type != hir.TypeBool || len(assertion.Successors) != 2 {
+		t.Fatalf("assert switch = %+v", assertion)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+
+	mutated := Clone(program)
+	for blockIndex := range mutated.Functions[0].Blocks {
+		terminator := &mutated.Functions[0].Blocks[blockIndex].Terminator
+		if terminator.Kind == TerminatorTrap && slices.Equal(terminator.TrapCategories, []string{"assertion-failed"}) {
+			terminator.TrapCategories = []string{"bounds"}
+			break
+		}
+	}
+	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1501" {
+		t.Fatalf("Verify() assert trap mutation failures = %+v", failures)
+	}
+
+	mutated = Clone(program)
+	for blockIndex := range mutated.Functions[0].Blocks {
+		terminator := &mutated.Functions[0].Blocks[blockIndex].Terminator
+		if terminator.SwitchKind == "assert" {
+			terminator.SwitchOperands[0].Type = hir.TypeI32
+			break
+		}
+	}
+	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1001" {
+		t.Fatalf("Verify() assert operand-type mutation failures = %+v", failures)
+	}
+}
+
 func lowerTestSource(t *testing.T, text string) Program {
 	t.Helper()
 	parsed, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(text)), source.DefaultLimits())
