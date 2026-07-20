@@ -92,6 +92,8 @@ type emitter struct {
 	foreignFunctions   []mir.ForeignFunction
 	foreignBySymbol    map[hir.SymbolID]int
 	entryIndex         int
+	arrayTypes         []arrayCType
+	arrayByType        map[hir.Type]int
 	structTypes        []structCType
 	structByType       map[hir.Type]int
 	enumTypes          []enumCType
@@ -262,6 +264,10 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	slices.SortFunc(functions, func(left, right mir.Function) int {
 		return strings.Compare(left.Name, right.Name)
 	})
+	arrayTypes, arrayByType, err := prepareScalarArrayTypes(functions)
+	if err != nil {
+		return Unit{}, err
+	}
 	byteStringStorage, err := collectByteStringStorage(functions)
 	if err != nil {
 		return Unit{}, err
@@ -292,6 +298,8 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 		foreignFunctions:   foreignFunctions,
 		foreignBySymbol:    foreignBySymbol,
 		entryIndex:         -1,
+		arrayTypes:         arrayTypes,
+		arrayByType:        arrayByType,
 		structTypes:        structTypes,
 		structByType:       structByType,
 		enumTypes:          enumTypes,
@@ -323,6 +331,9 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	}
 	if len(structTypes) != 0 {
 		value.features["inert-struct"] = struct{}{}
+	}
+	if len(arrayTypes) != 0 {
+		value.features["scalar-fixed-array"] = struct{}{}
 	}
 	if len(enumTypes) != 0 {
 		value.features["inert-enum"] = struct{}{}
@@ -701,7 +712,7 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 					mir.OperationEnumConstruct, mir.OperationEnumPayload,
 					mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice,
-					mir.OperationScalarCast:
+					mir.OperationScalarCast, mir.OperationArrayConstruct, mir.OperationArrayIndex:
 					inferred = operation.Type
 				}
 				if operation.DestinationLocal == mir.NoLocal || inferred == hir.TypeInvalid || inferred == "" {
@@ -1012,6 +1023,9 @@ func (e *emitter) supportedCValueType(value hir.Type) bool {
 	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeU32 || value == hir.TypeUSize || hir.IsCScalar(value) || isOptionI32(value) || isResultI32I32(value) {
 		return true
 	}
+	if _, array := e.arrayByType[value]; array {
+		return true
+	}
 	if element, _, pointer := hir.RawPointerElement(value); pointer {
 		_, err := e.foreignPointerElementCType(element)
 		return err == nil
@@ -1060,6 +1074,9 @@ func (e *emitter) cValueType(value hir.Type) (string, error) {
 	case isResultI32I32(value):
 		return "fy_result_i32_i32", nil
 	default:
+		if index, found := e.arrayByType[value]; found {
+			return e.arrayCTypeName(index), nil
+		}
 		if index, found := e.structByType[value]; found {
 			return e.structCTypeName(index), nil
 		}
@@ -1216,6 +1233,21 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 					return err
 				}
 				e.features["scalar-cast"] = struct{}{}
+			case mir.OperationArrayConstruct:
+				if err := e.inspectArrayConstruction(functionIndex, *operation); err != nil {
+					return err
+				}
+				e.features["scalar-fixed-array"] = struct{}{}
+			case mir.OperationArrayIndexCheck:
+				if err := e.inspectArrayIndex(functionIndex, *operation, false); err != nil {
+					return err
+				}
+				e.features["array-index"] = struct{}{}
+			case mir.OperationArrayIndex:
+				if err := e.inspectArrayIndex(functionIndex, *operation, true); err != nil {
+					return err
+				}
+				e.features["array-index"] = struct{}{}
 			case mir.OperationUse:
 			case mir.OperationArithmeticCheck:
 				e.features["checked-arithmetic"] = struct{}{}
@@ -1379,7 +1411,8 @@ func validateOperationShape(function string, operation mir.Operation) error {
 	case mir.OperationAssign, mir.OperationInitialize, mir.OperationUnary, mir.OperationBinary,
 		mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationEnumConstruct, mir.OperationEnumPayload,
-		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice, mir.OperationScalarCast:
+		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice, mir.OperationScalarCast,
+		mir.OperationArrayConstruct, mir.OperationArrayIndex:
 		if operation.DestinationLocal < 0 {
 			return fmt.Errorf("%s operation in %s has no destination local", operation.Kind, function)
 		}
@@ -1407,6 +1440,47 @@ func (e *emitter) inspectViewLength(functionIndex int, operation mir.Operation) 
 	}
 	if receiverType != operation.OwnerType {
 		return fmt.Errorf("borrowed-view length in %s has receiver type %q, want %q", function.Name, receiverType, operation.OwnerType)
+	}
+	return nil
+}
+
+func (e *emitter) inspectArrayConstruction(functionIndex int, operation mir.Operation) error {
+	function := &e.functions[functionIndex]
+	elementType, length, array := hir.FixedArrayParts(operation.Type)
+	if !array || operation.OwnerType != elementType || operation.Operator != "list" ||
+		operation.DestinationLocal == mir.NoLocal || uint64(len(operation.Operands)) != length {
+		return fmt.Errorf("fixed-array construction in %s has incompatible type or length", function.Name)
+	}
+	if _, found := e.arrayByType[operation.Type]; !found {
+		return CapabilityError{Function: function.Name, Feature: "fixed-array type " + strconv.Quote(string(operation.Type))}
+	}
+	for index, operand := range operation.Operands {
+		operandType, err := e.operandType(functionIndex, operand)
+		if err != nil || operandType != elementType {
+			return fmt.Errorf("fixed-array construction element %d in %s has incompatible type", index, function.Name)
+		}
+	}
+	return nil
+}
+
+func (e *emitter) inspectArrayIndex(functionIndex int, operation mir.Operation, destination bool) error {
+	function := &e.functions[functionIndex]
+	receiver, index, err := twoOperands(operation.Operands)
+	if err != nil {
+		return fmt.Errorf("fixed-array index in %s: %w", function.Name, err)
+	}
+	elementType, _, array := hir.FixedArrayParts(operation.OwnerType)
+	if !array || operation.Type != elementType || operation.IndexType != hir.TypeUSize || operation.Operator != "[]" ||
+		destination != (operation.DestinationLocal != mir.NoLocal) {
+		return fmt.Errorf("fixed-array index in %s has incompatible owner, result, operator, or destination", function.Name)
+	}
+	receiverType, receiverErr := e.operandType(functionIndex, receiver)
+	indexType, indexErr := e.operandType(functionIndex, index)
+	if receiverErr != nil || indexErr != nil || receiverType != operation.OwnerType || indexType != hir.TypeUSize {
+		return fmt.Errorf("fixed-array index in %s has incompatible operand types", function.Name)
+	}
+	if destination && len(operation.TrapCategories) != 0 || !destination && !slices.Equal(operation.TrapCategories, []string{"bounds"}) {
+		return fmt.Errorf("fixed-array index in %s has an invalid trap marker", function.Name)
 	}
 	return nil
 }
@@ -2209,6 +2283,19 @@ func (e *emitter) inspectSwitch(functionIndex int, terminator mir.Terminator) er
 		}
 		e.features["view-index"] = struct{}{}
 		categories = []string{"bounds"}
+	case "checked-array-index":
+		receiver, index, err := twoOperands(terminator.SwitchOperands)
+		if err != nil {
+			return fmt.Errorf("checked fixed-array index in %s: %w", function.Name, err)
+		}
+		receiverType, receiverErr := e.operandType(functionIndex, receiver)
+		indexType, indexErr := e.operandType(functionIndex, index)
+		if _, _, array := hir.FixedArrayParts(receiverType); receiverErr != nil || indexErr != nil || !array ||
+			terminator.Operator != "[]" || indexType != hir.TypeUSize {
+			return fmt.Errorf("checked fixed-array index in %s has incompatible operands", function.Name)
+		}
+		e.features["array-index"] = struct{}{}
+		categories = []string{"bounds"}
 	case "checked-view-slice":
 		receiver, start, end, err := threeOperands(terminator.SwitchOperands)
 		if err != nil {
@@ -2350,6 +2437,9 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 			return fmt.Errorf("C scalar %q has invalid signedness %q", transport.targetName, scalar.Signedness)
 		}
 		output.WriteByte('\n')
+	}
+	if err := e.emitScalarArrayTypes(output); err != nil {
+		return err
 	}
 	for index, structure := range e.structTypes {
 		if structure.definition.ReprC {
@@ -2765,6 +2855,37 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			return fmt.Errorf("borrowed-view emptiness in %s: %w", function, err)
 		}
 		fmt.Fprintf(output, "    fy_l_%d = ((%s).length == ((uintptr_t)UINT64_C(0))) ? INT32_C(1) : INT32_C(0);\n", operation.DestinationLocal, value)
+	case mir.OperationArrayConstruct:
+		arrayIndex, found := e.arrayByType[operation.Type]
+		if !found {
+			return CapabilityError{Function: function, Feature: "fixed-array construction type " + strconv.Quote(string(operation.Type))}
+		}
+		fmt.Fprintf(output, "    fy_l_%d = (%s){ .data = { ", operation.DestinationLocal, e.arrayCTypeName(arrayIndex))
+		for index, operand := range operation.Operands {
+			if index != 0 {
+				output.WriteString(", ")
+			}
+			value, err := cOperand(operand)
+			if err != nil {
+				return fmt.Errorf("fixed-array construction element %d in %s: %w", index, function, err)
+			}
+			output.WriteString(value)
+		}
+		output.WriteString(" } };\n")
+	case mir.OperationArrayIndex:
+		receiver, index, err := twoOperands(operation.Operands)
+		if err != nil {
+			return fmt.Errorf("fixed-array index in %s: %w", function, err)
+		}
+		receiverValue, err := cOperand(receiver)
+		if err != nil {
+			return fmt.Errorf("fixed-array index receiver in %s: %w", function, err)
+		}
+		indexValue, err := cOperand(index)
+		if err != nil {
+			return fmt.Errorf("fixed-array index offset in %s: %w", function, err)
+		}
+		fmt.Fprintf(output, "    fy_l_%d = (%s).data[%s];\n", operation.DestinationLocal, receiverValue, indexValue)
 	case mir.OperationViewIndex:
 		receiver, index, err := twoOperands(operation.Operands)
 		if err != nil {
@@ -2979,7 +3100,8 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			field = "p_0"
 		}
 		fmt.Fprintf(output, "    fy_l_%d = (%s).%s;\n", operation.DestinationLocal, container, field)
-	case mir.OperationUse, mir.OperationArithmeticCheck, mir.OperationCheckedDivision, mir.OperationViewIndexCheck, mir.OperationViewSliceCheck, mir.OperationResultSwitch:
+	case mir.OperationUse, mir.OperationArithmeticCheck, mir.OperationCheckedDivision, mir.OperationViewIndexCheck, mir.OperationViewSliceCheck,
+		mir.OperationArrayIndexCheck, mir.OperationResultSwitch:
 	default:
 		return CapabilityError{Function: function, Feature: "MIR operation " + strconv.Quote(string(operation.Kind))}
 	}
@@ -3222,6 +3344,25 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		}
 		fmt.Fprintf(output, "    if (%s >= (%s).length) { fy_pending_trap = FY_TRAP_BOUNDS; goto fy_b_%d; }\n", indexValue, receiverValue, failure)
 		fmt.Fprintf(output, "    goto fy_b_%d;\n", success)
+	case "checked-array-index":
+		receiver, index, err := twoOperands(terminator.SwitchOperands)
+		if err != nil {
+			return fmt.Errorf("checked fixed-array index in %s: %w", function.Name, err)
+		}
+		receiverType, err := e.operandType(functionIndex, receiver)
+		if err != nil {
+			return fmt.Errorf("checked fixed-array index receiver in %s: %w", function.Name, err)
+		}
+		_, length, array := hir.FixedArrayParts(receiverType)
+		if !array {
+			return fmt.Errorf("checked fixed-array index receiver in %s has type %q", function.Name, receiverType)
+		}
+		indexValue, err := cOperand(index)
+		if err != nil {
+			return fmt.Errorf("checked fixed-array index offset in %s: %w", function.Name, err)
+		}
+		fmt.Fprintf(output, "    if (%s >= ((uintptr_t)UINT64_C(%d))) { fy_pending_trap = FY_TRAP_BOUNDS; goto fy_b_%d; }\n", indexValue, length, failure)
+		fmt.Fprintf(output, "    goto fy_b_%d;\n", success)
 	case "checked-view-slice":
 		receiver, start, end, err := threeOperands(terminator.SwitchOperands)
 		if err != nil {
@@ -3374,7 +3515,7 @@ func operationHasDestination(kind mir.OperationKind) bool {
 		mir.OperationEnumConstruct, mir.OperationEnumPayload,
 		mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice,
-		mir.OperationScalarCast, mir.OperationRegionPlace:
+		mir.OperationScalarCast, mir.OperationArrayConstruct, mir.OperationArrayIndex, mir.OperationRegionPlace:
 		return true
 	default:
 		return false

@@ -1601,6 +1601,69 @@ func TestLowerPreservesAlwaysCheckedAssert(t *testing.T) {
 	}
 }
 
+func TestLowerPreservesCheckedScalarFixedArrayIndex(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+fn pick(values: [u8; 3], index: usize) -> u8 { values[index] }
+fn main() -> i32 {
+    let values: [u8; 3] = [40, 41, 42];
+    pick(values, 2) as i32
+}
+`)
+	var construct, check, index *Operation
+	var checked *Terminator
+	for functionIndex := range program.Functions {
+		for blockIndex := range program.Functions[functionIndex].Blocks {
+			block := &program.Functions[functionIndex].Blocks[blockIndex]
+			for operationIndex := range block.Operations {
+				operation := &block.Operations[operationIndex]
+				switch operation.Kind {
+				case OperationArrayConstruct:
+					construct = operation
+				case OperationArrayIndexCheck:
+					check = operation
+				case OperationArrayIndex:
+					index = operation
+				}
+			}
+			if block.Terminator.SwitchKind == "checked-array-index" {
+				checked = &block.Terminator
+			}
+		}
+	}
+	wantArray := hir.FixedArray(hir.TypeU8, 3)
+	if construct == nil || construct.Type != wantArray || construct.OwnerType != hir.TypeU8 || len(construct.Operands) != 3 {
+		t.Fatalf("array construction = %+v", construct)
+	}
+	if check == nil || check.OwnerType != wantArray || check.Type != hir.TypeU8 || !slices.Equal(check.TrapCategories, []string{"bounds"}) {
+		t.Fatalf("array index check = %+v", check)
+	}
+	if index == nil || index.OwnerType != wantArray || index.Type != hir.TypeU8 || index.DestinationLocal == NoLocal {
+		t.Fatalf("array index = %+v", index)
+	}
+	if checked == nil || len(checked.Successors) != 2 || len(checked.SwitchOperands) != 2 {
+		t.Fatalf("checked array switch = %+v", checked)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+
+	mutated := Clone(program)
+	for functionIndex := range mutated.Functions {
+		for blockIndex := range mutated.Functions[functionIndex].Blocks {
+			for operationIndex := range mutated.Functions[functionIndex].Blocks[blockIndex].Operations {
+				operation := &mutated.Functions[functionIndex].Blocks[blockIndex].Operations[operationIndex]
+				if operation.Kind == OperationArrayIndexCheck {
+					operation.TrapCategories = nil
+				}
+			}
+		}
+	}
+	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1501" {
+		t.Fatalf("Verify() array-check mutation failures = %+v", failures)
+	}
+}
+
 func lowerTestSource(t *testing.T, text string) Program {
 	t.Helper()
 	parsed, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(text)), source.DefaultLimits())

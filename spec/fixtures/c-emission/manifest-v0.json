@@ -30,6 +30,7 @@
     "docs/adr/0104-borrowed-view-emptiness.md",
     "docs/adr/0105-checked-immutable-byte-view-slicing.md",
     "docs/adr/0106-always-checked-assert.md",
+    "docs/adr/0110-scalar-fixed-array-execution.md",
     "docs/adr/0107-omitted-immutable-byte-view-slice-bounds.md",
     "docs/adr/0108-integer-literal-range-validation.md",
     "docs/adr/0109-direct-i32-minimum-literal.md",
@@ -486,6 +487,38 @@
         "dialect": "c11",
         "functions": ["main::main"],
         "features": ["scalar-comparison", "scalar-control-flow", "static-byte-string", "trap", "view-index", "view-length", "view-slice"]
+      }
+    },
+    {
+      "id": "pass.c-emission.fixed-array",
+      "sourceRoot": "cases/pass/fixed-array/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::bounds_trap", "main::main", "main::pick"],
+        "features": ["array-index", "scalar-call", "scalar-cast", "scalar-comparison", "scalar-control-flow", "scalar-fixed-array", "trap"]
+      }
+    },
+    {
+      "id": "pass.c-emission.fixed-array-bounds",
+      "sourceRoot": "cases/pass/fixed-array/src",
+      "sources": ["main.fy"],
+      "entry": "main::bounds_trap",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "trap",
+        "category": "bounds",
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::bounds_trap", "main::main", "main::pick"],
+        "features": ["array-index", "scalar-call", "scalar-cast", "scalar-comparison", "scalar-control-flow", "scalar-fixed-array", "trap"]
       }
     },
     {

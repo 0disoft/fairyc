@@ -380,6 +380,23 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "value-preserving integer cast shape is invalid"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationArrayConstruct:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if !validArrayConstructShape(operation) {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "fixed-array construction shape is invalid"})
+				}
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationArrayIndexCheck:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if !validArrayIndexShape(operation, false) || !slices.Equal(operation.TrapCategories, []string{"bounds"}) {
+					failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "fixed-array index is missing its bounds check"})
+				}
+			case OperationArrayIndex:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if !validArrayIndexShape(operation, true) || len(operation.TrapCategories) != 0 {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "fixed-array index shape is invalid"})
+				}
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationResultConstruct:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				if len(operation.Operands) != 1 || operation.DestinationLocal == NoLocal {
@@ -761,6 +778,8 @@ func validSwitchShape(terminator Terminator) bool {
 			(terminator.Operator == "/" || terminator.Operator == "%") && hir.CheckedDivisionType(terminator.SwitchType)
 	case "checked-view-index":
 		return len(terminator.SwitchOperands) == 2 && len(terminator.Successors) == 2 && terminator.Operator == "[]"
+	case "checked-array-index":
+		return len(terminator.SwitchOperands) == 2 && len(terminator.Successors) == 2 && terminator.Operator == "[]"
 	case "checked-view-slice":
 		return len(terminator.SwitchOperands) == 3 && len(terminator.Successors) == 2 && terminator.Operator == ".."
 	case "checked-unary", "checked-arithmetic", "checked-shift":
@@ -889,6 +908,30 @@ func validViewIndexShape(operation Operation, destination bool) bool {
 		return false
 	}
 	return index.Kind == OperandLocal || index.Kind == OperandUSize
+}
+
+func validArrayConstructShape(operation Operation) bool {
+	elementType, length, array := hir.FixedArrayParts(operation.Type)
+	if !array || !hir.ExecutableFixedArrayShape(elementType, length) || operation.OwnerType != elementType ||
+		operation.Operator != "list" || operation.DestinationLocal == NoLocal || uint64(len(operation.Operands)) != length {
+		return false
+	}
+	for _, operand := range operation.Operands {
+		if !scalarOperandMatches(operand, elementType) {
+			return false
+		}
+	}
+	return true
+}
+
+func validArrayIndexShape(operation Operation, destination bool) bool {
+	elementType, length, array := hir.FixedArrayParts(operation.OwnerType)
+	if !array || !hir.ExecutableFixedArrayShape(elementType, length) || operation.Type != elementType || operation.IndexType != hir.TypeUSize || operation.Operator != "[]" ||
+		len(operation.Operands) != 2 || destination != (operation.DestinationLocal != NoLocal) {
+		return false
+	}
+	return operation.Operands[0].Kind == OperandLocal &&
+		(operation.Operands[1].Kind == OperandLocal || operation.Operands[1].Kind == OperandUSize)
 }
 
 func validViewSliceShape(operation Operation, destination bool) bool {
@@ -1029,6 +1072,9 @@ func verifyTrapCheckEdges(function *Function) []VerificationError {
 }
 
 func trappingOperationSpec(operation Operation) (string, OperationKind, []string, bool) {
+	if operation.Kind == OperationArrayIndex {
+		return "checked-array-index", OperationArrayIndexCheck, []string{"bounds"}, validArrayIndexShape(operation, true)
+	}
 	if operation.Kind == OperationViewIndex {
 		return "checked-view-index", OperationViewIndexCheck, []string{"bounds"}, validViewIndexShape(operation, true)
 	}

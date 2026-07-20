@@ -26,6 +26,25 @@ func TestLowerPreservesExplicitGrouping(t *testing.T) {
 	}
 }
 
+func TestLowerPreservesFixedArrayLiteralForm(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nfn main() -> i32 { let values: [i32; 3] = [1, 2, 3]; values[1] }\n")
+	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	module, err := Lower(tree)
+	if err != nil {
+		t.Fatalf("Lower() error = %v", err)
+	}
+	if len(module.Bindings) != 1 || module.Bindings[0].Type == nil || module.Bindings[0].Type.Text != "[i32; 3]" {
+		t.Fatalf("bindings = %+v", module.Bindings)
+	}
+	if got, want := NormalizeExpression(module.Bindings[0].Expression), "(array 1 2 3)"; got != want {
+		t.Fatalf("NormalizeExpression() = %q, want %q", got, want)
+	}
+}
+
 func TestLowerRejectsDiagnosticTree(t *testing.T) {
 	t.Parallel()
 	input := []byte("module wrong;")

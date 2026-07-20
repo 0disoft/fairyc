@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0109-direct-i32-minimum-literal.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0110-scalar-fixed-array-execution.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -130,6 +130,11 @@ Result return, discard, propagation, local and parameter transfer, branch and lo
 Optimization level and backend must not change the meaning of safe code. Expression operands and call arguments evaluate from left to right.
 
 - Out-of-bounds indexing traps unless safety is proven statically.
+- Fixed arrays `[T; N]` currently admit only `bool`, `i32`, `u8`, `u32`, or `usize`, nonempty list
+  literals, and `1 <= N <= 4096`. The ceiling is a provisional implementation guard, not a stable
+  language or ABI limit. Elements evaluate once left to right, arrays copy across internal calls
+  and results, and a `usize` index returns `T` or traps with `bounds`. Empty or repeated literals,
+  fields, nesting, mutation, slicing, `.len`, borrowing, and foreign ABI use remain deferred.
 - Division by zero, signed minimum divided by negative one, invalid shifts, and ordinary integer overflow trap.
 - Matching-type shifts accept `i32`, `u8`, `u32`, or `usize`. Right shift is arithmetic for `i32`
   and logical for unsigned types. Negative `i32` amounts and amounts at or above the exact operand
@@ -189,7 +194,7 @@ Compiler intrinsics, the thin runtime, and standard-library APIs are separate bo
 
 Stage 0 allocation supports only explicit `SystemHeap` and lexical `Arena` or `Region`. Allocation is fallible, zero-size behavior is normalized by Fairy C, and no hidden default allocator or user allocator protocol exists.
 
-`Buffer` is the only growable owned collection. `Vec<T>` is deferred with user generics. `[u8]`, `str`, and `CStr` are compiler-known unsized views; `String` and `CString` are owned resources. Compiler-owned `b"..."` literals implement immutable static `&[u8]` construction and private generated-C transport. Safe borrowed `&[u8]` and `&str` views expose `.len` as a `usize` byte count and `.is_empty` as the exact zero-length `bool` by reading existing metadata; neither access scans, allocates, calls, traps, or counts Unicode characters. Immutable `&[u8]` additionally supports read-only `usize` indexing with a `u8` result and end-exclusive slicing with an immutable `&[u8]` result. Slice starts and ends may be omitted, normalizing to zero and the retained receiver length without re-evaluating the receiver. Written operands evaluate once left to right and trap with `bounds` before access or pointer derivation when their bounds fail; slicing preserves the receiver's borrow origin. `str` indexing or slicing, inclusive ranges, indexed assignment, mutable views, and other general view operations remain deferred. The initial Linux `File` API accepts `&CStr`, preserves partial I/O, and uses a consuming non-retried Linux close contract. Portable paths, embedded support, and resource-aware arenas remain deferred.
+`Buffer` is the only growable owned collection. `Vec<T>` is deferred with user generics. Positive scalar fixed arrays are compiler-owned inert values but are not growable collections or public ABI records. `[u8]`, `str`, and `CStr` are compiler-known unsized views; `String` and `CString` are owned resources. Compiler-owned `b"..."` literals implement immutable static `&[u8]` construction and private generated-C transport. Safe borrowed `&[u8]` and `&str` views expose `.len` as a `usize` byte count and `.is_empty` as the exact zero-length `bool` by reading existing metadata; neither access scans, allocates, calls, traps, or counts Unicode characters. Immutable `&[u8]` additionally supports read-only `usize` indexing with a `u8` result and end-exclusive slicing with an immutable `&[u8]` result. Slice starts and ends may be omitted, normalizing to zero and the retained receiver length without re-evaluating the receiver. Written operands evaluate once left to right and trap with `bounds` before access or pointer derivation when their bounds fail; slicing preserves the receiver's borrow origin. `str` indexing or slicing, inclusive ranges, indexed assignment, mutable views, and other general view operations remain deferred. The initial Linux `File` API accepts `&CStr`, preserves partial I/O, and uses a consuming non-retried Linux close contract. Portable paths, embedded support, and resource-aware arenas remain deferred.
 
 The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 

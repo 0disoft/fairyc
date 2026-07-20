@@ -1,6 +1,7 @@
 package semantic
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/ast"
@@ -100,6 +101,9 @@ func (a *analyzer) prepareEnumTypes() {
 						continue
 					}
 					fieldType := a.canonicalType(module, field.Type)
+					if _, _, array := hir.FixedArrayParts(fieldType); array {
+						a.addUnsupported(module.file.Path, field.Type.Span, "fixed-array enum payload")
+					}
 					resolved := resourceField{
 						name: field.Name, typ: fieldType, span: span(module.file.Path, field.Span),
 						declaration: span(module.file.Path, field.NameSpan), typeSpan: span(module.file.Path, field.Type.Span),
@@ -121,6 +125,9 @@ func (a *analyzer) prepareEnumTypes() {
 				}
 				if field.typ == hir.TypeRegion {
 					a.addDiagnostic("E3103", field.typeSpan, RelatedSpan{Role: "capability", Span: field.declaration})
+					continue
+				}
+				if _, _, array := hir.FixedArrayParts(field.typ); array {
 					continue
 				}
 				if !a.inertCopyable(field.typ, make(map[hir.Type]uint8)) {
@@ -204,6 +211,9 @@ func (a *analyzer) prepareResourceTypes() {
 					continue
 				}
 				fieldType := a.canonicalType(module, field.Type)
+				if _, _, array := hir.FixedArrayParts(fieldType); array {
+					a.addUnsupported(module.file.Path, field.Type.Span, "fixed-array resource field")
+				}
 				if fieldType == hir.TypeRegion {
 					a.addDiagnostic("E3103", span(module.file.Path, field.Type.Span), RelatedSpan{
 						Role: "capability",
@@ -252,6 +262,9 @@ func (a *analyzer) prepareStructTypes() {
 					continue
 				}
 				fieldType := a.canonicalType(module, field.Type)
+				if _, _, array := hir.FixedArrayParts(fieldType); array {
+					a.addUnsupported(module.file.Path, field.Type.Span, "fixed-array struct field")
+				}
 				if fieldType == hir.TypeRegion {
 					a.addDiagnostic("E3103", span(module.file.Path, field.Type.Span), RelatedSpan{
 						Role: "capability",
@@ -290,17 +303,30 @@ func (a *analyzer) canonicalType(module *moduleScope, reference ast.TypeReferenc
 }
 
 func (a *analyzer) canonicalTypeText(module *moduleScope, text string) (hir.Type, bool) {
+	return a.canonicalTypeTextMode(module, text, true)
+}
+
+func (a *analyzer) canonicalTypeTextMode(module *moduleScope, text string, allowFixedArray bool) (hir.Type, bool) {
 	trimmed := strings.TrimSpace(text)
+	if allowFixedArray {
+		if elementText, length, ok := parseFixedArrayTypeText(trimmed); ok {
+			element, elementOK := a.canonicalTypeTextMode(module, elementText, false)
+			if !elementOK || !hir.ExecutableFixedArrayShape(element, length) {
+				return hir.TypeInvalid, false
+			}
+			return hir.FixedArray(element, length), true
+		}
+	}
 	if option, ok := parseOptionType(trimmed); ok {
-		element, elementOK := a.canonicalTypeText(module, option)
+		element, elementOK := a.canonicalTypeTextMode(module, option, false)
 		if !elementOK {
 			return hir.TypeInvalid, false
 		}
 		return hir.Option(element), true
 	}
 	if result, ok := parseResultType(trimmed); ok {
-		success, successOK := a.canonicalTypeText(module, result.success)
-		failure, failureOK := a.canonicalTypeText(module, result.failure)
+		success, successOK := a.canonicalTypeTextMode(module, result.success, false)
+		failure, failureOK := a.canonicalTypeTextMode(module, result.failure, false)
 		if !successOK || !failureOK {
 			return hir.TypeInvalid, false
 		}
@@ -341,7 +367,7 @@ func (a *analyzer) canonicalTypeText(module *moduleScope, text string) (hir.Type
 		if remainder == "void" {
 			element, ok = hir.TypeVoid, true
 		} else {
-			element, ok = a.canonicalTypeText(module, remainder)
+			element, ok = a.canonicalTypeTextMode(module, remainder, false)
 		}
 		if !ok {
 			return hir.TypeInvalid, false
@@ -355,7 +381,7 @@ func (a *analyzer) canonicalTypeText(module *moduleScope, text string) (hir.Type
 		if mutable {
 			remainder = strings.TrimSpace(remainder[len("mut"):])
 		}
-		element, ok := a.canonicalTypeText(module, remainder)
+		element, ok := a.canonicalTypeTextMode(module, remainder, false)
 		if !ok {
 			return hir.TypeInvalid, false
 		}
@@ -378,6 +404,58 @@ func (a *analyzer) canonicalTypeText(module *moduleScope, text string) (hir.Type
 		return hir.TypeInvalid, false
 	}
 	return target.typ, true
+}
+
+func parseFixedArrayTypeText(text string) (string, uint64, bool) {
+	if len(text) < 5 || text[0] != '[' || text[len(text)-1] != ']' {
+		return "", 0, false
+	}
+	inside := text[1 : len(text)-1]
+	depth := 0
+	separator := -1
+	for index := 0; index < len(inside); index++ {
+		switch inside[index] {
+		case '[', '<':
+			depth++
+		case ']', '>':
+			depth--
+			if depth < 0 {
+				return "", 0, false
+			}
+		case ';':
+			if depth == 0 {
+				if separator >= 0 {
+					return "", 0, false
+				}
+				separator = index
+			}
+		}
+	}
+	if depth != 0 || separator <= 0 || separator == len(inside)-1 {
+		return "", 0, false
+	}
+	element := strings.TrimSpace(inside[:separator])
+	length, ok := parsePositiveArrayLength(strings.TrimSpace(inside[separator+1:]))
+	if element == "" || !ok {
+		return "", 0, false
+	}
+	return element, length, true
+}
+
+func parsePositiveArrayLength(raw string) (uint64, bool) {
+	clean := strings.ReplaceAll(raw, "_", "")
+	base := 10
+	digits := clean
+	if strings.HasPrefix(clean, "0x") || strings.HasPrefix(clean, "0X") {
+		base, digits = 16, clean[2:]
+	} else if strings.HasPrefix(clean, "0b") || strings.HasPrefix(clean, "0B") {
+		base, digits = 2, clean[2:]
+	}
+	if digits == "" {
+		return 0, false
+	}
+	value, err := strconv.ParseUint(digits, base, 64)
+	return value, err == nil && value > 0
 }
 
 func validUnsizedTypeUse(value hir.Type) bool {

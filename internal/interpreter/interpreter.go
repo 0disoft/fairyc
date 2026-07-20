@@ -253,6 +253,7 @@ const (
 	valueU8
 	valueU32
 	valueUSize
+	valueArray
 	valueView
 	valueNull
 	valueResult
@@ -295,6 +296,7 @@ type runtimeValue struct {
 	enum       *enumState
 	structure  *structState
 	resource   *resourceState
+	elements   []runtimeValue
 }
 
 func i32Value(value int32) runtimeValue {
@@ -550,6 +552,37 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					return callCompletion{}, fmt.Errorf("value-preserving integer cast in %q: %w", function.Name, err)
 				}
 				locals[operation.DestinationLocal] = converted
+			case mir.OperationArrayConstruct:
+				elementType, length, array := hir.FixedArrayParts(operation.Type)
+				if !array || !hir.ExecutableFixedArrayShape(elementType, length) || operation.OwnerType != elementType || operation.Operator != "list" || uint64(len(operation.Operands)) != length {
+					return callCompletion{}, fmt.Errorf("fixed-array construction in %q has incompatible type metadata", function.Name)
+				}
+				values := make([]runtimeValue, len(operation.Operands))
+				for index, operand := range operation.Operands {
+					value, err := evaluate(locals, operand)
+					if err != nil {
+						return callCompletion{}, fmt.Errorf("fixed-array construction element %d in %q: %w", index, function.Name, err)
+					}
+					if !comparisonRuntimeMatches(value, elementType) {
+						return callCompletion{}, capabilityError("fixed-array construction element %d in %q has incompatible runtime type", index, function.Name)
+					}
+					values[index] = value
+				}
+				locals[operation.DestinationLocal] = runtimeValue{kind: valueArray, typ: operation.Type, elements: values}
+			case mir.OperationArrayIndex:
+				receiver, index, err := evaluateArrayIndexOperands(locals, operation.Operands)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("fixed-array index in %q: %w", function.Name, err)
+				}
+				elementType, length, array := hir.FixedArrayParts(operation.OwnerType)
+				if !array || !hir.ExecutableFixedArrayShape(elementType, length) || receiver.typ != operation.OwnerType || operation.Type != elementType || operation.IndexType != hir.TypeUSize || operation.Operator != "[]" {
+					return callCompletion{}, fmt.Errorf("fixed-array index in %q has incompatible runtime type metadata", function.Name)
+				}
+				if index.u64 >= length || index.u64 >= uint64(len(receiver.elements)) {
+					return callCompletion{}, fmt.Errorf("fixed-array index in %q executed without a dominating bounds check", function.Name)
+				}
+				locals[operation.DestinationLocal] = receiver.elements[index.u64]
+			case mir.OperationArrayIndexCheck:
 			case mir.OperationViewLength:
 				receiver, err := evaluateOne(locals, operation.Operands)
 				if err != nil {
@@ -1367,6 +1400,22 @@ func evaluateSwitch(locals map[mir.LocalID]runtimeValue, terminator mir.Terminat
 			return mir.NoBlock, "bounds", nil
 		}
 		return terminator.Successors[0], "", nil
+	case "checked-array-index":
+		receiver, index, err := evaluateArrayIndexOperands(locals, terminator.SwitchOperands)
+		if err != nil {
+			return mir.NoBlock, "", err
+		}
+		_, length, array := hir.FixedArrayParts(receiver.typ)
+		if !array {
+			return mir.NoBlock, "", capabilityError("checked fixed-array index received a non-array value")
+		}
+		if len(terminator.Successors) != 2 {
+			return mir.NoBlock, "", fmt.Errorf("checked fixed-array index has %d successors, want 2", len(terminator.Successors))
+		}
+		if index.u64 >= length {
+			return mir.NoBlock, "bounds", nil
+		}
+		return terminator.Successors[0], "", nil
 	case "checked-view-slice":
 		receiver, start, end, err := evaluateViewSliceOperands(locals, terminator.SwitchOperands)
 		if err != nil {
@@ -1457,6 +1506,24 @@ func evaluateViewIndexOperands(locals map[mir.LocalID]runtimeValue, operands []m
 	}
 	if receiver.kind != valueView || receiver.typ != hir.SharedBorrow(hir.TypeByteSlice) || index.kind != valueUSize || index.typ != hir.TypeUSize {
 		return runtimeValue{}, runtimeValue{}, capabilityError("byte-view index received incompatible operands")
+	}
+	return receiver, index, nil
+}
+
+func evaluateArrayIndexOperands(locals map[mir.LocalID]runtimeValue, operands []mir.Operand) (runtimeValue, runtimeValue, error) {
+	if len(operands) != 2 {
+		return runtimeValue{}, runtimeValue{}, fmt.Errorf("fixed-array index has %d operands, want 2", len(operands))
+	}
+	receiver, err := evaluate(locals, operands[0])
+	if err != nil {
+		return runtimeValue{}, runtimeValue{}, err
+	}
+	index, err := evaluate(locals, operands[1])
+	if err != nil {
+		return runtimeValue{}, runtimeValue{}, err
+	}
+	if receiver.kind != valueArray || index.kind != valueUSize || index.typ != hir.TypeUSize {
+		return runtimeValue{}, runtimeValue{}, capabilityError("fixed-array index received incompatible operands")
 	}
 	return receiver, index, nil
 }

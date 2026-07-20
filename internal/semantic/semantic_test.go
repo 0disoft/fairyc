@@ -1508,6 +1508,67 @@ fn main() -> i32 {
 	}
 }
 
+func TestAnalyzeTypesScalarFixedArrayLiteralAndIndex(t *testing.T) {
+	t.Parallel()
+	text := "module main;\nfn pick(values: [u8; 3], index: usize) -> u8 { values[index] }\nfn main() -> i32 { let values: [u8; 3] = [40, 41, 42]; pick(values, 2) as i32 }\n"
+	result := analyzeText(t, map[string]string{"main.fy": text})
+	assertCleanTypeResult(t, result)
+	main := result.HIR.Modules[0].Functions[1]
+	array := main.Body.Statements[0].Expression
+	if array == nil || array.Kind != "array" || array.Type != hir.FixedArray(hir.TypeU8, 3) || array.Operator != "list" || len(array.Children) != 3 {
+		t.Fatalf("array expression = %+v", array)
+	}
+	pick := result.HIR.Modules[0].Functions[0]
+	index := pick.Body.Tail
+	if index == nil || index.Kind != "array-index" || index.Type != hir.TypeU8 || index.Operator != "[]" || len(index.Children) != 2 {
+		t.Fatalf("array index = %+v", index)
+	}
+}
+
+func TestAnalyzeRejectsFixedArrayLengthAndElementMismatch(t *testing.T) {
+	t.Parallel()
+	for _, text := range []string{
+		"module main;\nfn main() -> i32 { let values: [i32; 2] = [1, 2, 3]; values[0] }\n",
+		"module main;\nfn main() -> i32 { let values = [1, true]; values[0] }\n",
+	} {
+		result := analyzeText(t, map[string]string{"main.fy": text})
+		if result.FailedPhase != semantic.PhaseType || len(result.Diagnostics) == 0 || result.Diagnostics[0].Code != "E1006" {
+			t.Fatalf("result = %+v", result)
+		}
+	}
+}
+
+func TestAnalyzeKeepsAmplifyingFixedArrayFormsClosed(t *testing.T) {
+	t.Parallel()
+	for _, literal := range []string{"[]", "[1; 3]"} {
+		text := "module main;\nfn main() -> i32 { let values: [i32; 3] = " + literal + "; 0 }\n"
+		result := analyzeText(t, map[string]string{"main.fy": text})
+		if len(result.Unsupported) != 1 {
+			t.Fatalf("literal %s unsupported = %+v", literal, result.Unsupported)
+		}
+	}
+}
+
+func TestAnalyzeRejectsFixedArrayBeyondExecutableElementLimit(t *testing.T) {
+	t.Parallel()
+	length := hir.MaxExecutableFixedArrayElements + 1
+	t.Run("type", func(t *testing.T) {
+		text := fmt.Sprintf("module main;\nfn main(values: [u8; %d]) -> i32 { 0 }\n", length)
+		result := analyzeText(t, map[string]string{"main.fy": text})
+		if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != fmt.Sprintf("type [u8; %d]", length) {
+			t.Fatalf("unsupported = %+v", result.Unsupported)
+		}
+	})
+	t.Run("inferred literal", func(t *testing.T) {
+		literal := "[" + strings.Repeat("0,", int(length-1)) + "0]"
+		text := "module main;\nfn main() -> i32 { let values = " + literal + "; 0 }\n"
+		result := analyzeText(t, map[string]string{"main.fy": text})
+		if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != fmt.Sprintf("fixed-array literal with %d elements", length) {
+			t.Fatalf("unsupported = %+v", result.Unsupported)
+		}
+	})
+}
+
 func TestAnalyzeRejectsUnsupportedViewIndexShapes(t *testing.T) {
 	t.Parallel()
 	t.Run("text receiver", func(t *testing.T) {

@@ -119,6 +119,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0107-omitted-immutable-byte-view-slice-bounds.md`: prefix, suffix, and whole immutable byte-view slices normalized to the existing checked MIR path without receiver re-evaluation.
 - `0108-integer-literal-range-validation.md`: radix-correct range validation at the semantic boundary with stable `E1013` rejection before MIR.
 - `0109-direct-i32-minimum-literal.md`: direct decimal, hexadecimal, or binary `i32` minimum folding plus allocation-limited semantic magnitude comparison.
+- `0110-scalar-fixed-array-execution.md`: provisionally bounded copy-scalar fixed arrays with nonempty list construction, internal value calls, checked indexing, and private C wrappers.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

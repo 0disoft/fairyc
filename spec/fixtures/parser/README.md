@@ -26,6 +26,9 @@ Successful precedence fixtures use a compact prefix tree:
 (group expression)
 (call callee argument...)
 (index receiver index)
+(array element...)
+(array-repeat element count)
+(array-empty)
 (field receiver name)
 (? expression)
 ```

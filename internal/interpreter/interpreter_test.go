@@ -70,6 +70,41 @@ fn main() -> i32 {
 	}
 }
 
+func TestExecuteScalarFixedArrayAcrossCallAndIndex(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn pick(values: [u8; 3], index: usize) -> u8 { values[index] }
+fn main() -> i32 {
+    let values: [u8; 3] = [40, 41, 42];
+    pick(values, 2) as i32
+}
+`)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+	if outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("Execute() outcome = %+v", outcome)
+	}
+}
+
+func TestExecuteScalarFixedArrayOutOfBoundsTraps(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn main() -> i32 {
+    let values: [i32; 2] = [40, 42];
+    values[2]
+}
+`)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+	if outcome.Kind != interpreter.OutcomeTrap || outcome.TrapCategory != "bounds" {
+		t.Fatalf("Execute() outcome = %+v", outcome)
+	}
+}
+
 func TestExecuteImmutableByteViewSlice(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

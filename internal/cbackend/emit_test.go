@@ -296,6 +296,52 @@ fn main() -> i32 {
 	}
 }
 
+func TestEmitCheckedScalarFixedArrayIndex(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn pick(values: [u8; 3], index: usize) -> u8 { values[index] }
+fn main() -> i32 {
+    let values: [u8; 3] = [40, 41, 42];
+    pick(values, 2) as i32
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, feature := range []string{"array-index", "scalar-fixed-array", "trap"} {
+		if !slices.Contains(unit.Features, feature) {
+			t.Errorf("features %v are missing %q", unit.Features, feature)
+		}
+	}
+	for _, required := range []string{
+		"typedef struct { uint8_t data[UINT64_C(3)]; } fy_array_0;",
+		"(fy_array_0){ .data = { UINT8_C(40), UINT8_C(41), UINT8_C(42) } }",
+		">= ((uintptr_t)UINT64_C(3))",
+		".data[",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+	second, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil || second.Source != unit.Source {
+		t.Fatalf("second Emit() differs: error=%v", err)
+	}
+}
+
+func TestEmitRejectsFixedArrayBeyondExecutableElementLimit(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, "module main;\nfn main() -> i32 { 42 }\n")
+	program.Functions[0].ParameterTypes = []hir.Type{
+		hir.FixedArray(hir.TypeU8, hir.MaxExecutableFixedArrayElements+1),
+	}
+	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err == nil || !strings.Contains(err.Error(), "outside the bounded executable C subset") {
+		t.Fatalf("Emit() error = %v", err)
+	}
+}
+
 func TestEmitCheckedImmutableByteViewSlice(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

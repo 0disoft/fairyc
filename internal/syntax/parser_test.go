@@ -178,3 +178,26 @@ func TestParseAlwaysCheckedAssertStatement(t *testing.T) {
 		t.Fatalf("Reconstruct() = %q, %v; want %q, true", reconstructed, ok, input)
 	}
 }
+
+func TestParseDistinguishesFixedArrayLiteralForms(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nfn main() -> i32 { let list = [1, 2, 3]; let repeated = [4; 2]; let empty = []; list[0] }\n")
+	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	want := []string{"list", "repeat", "empty"}
+	var got []string
+	for index := range tree.Nodes {
+		if tree.Nodes[index].Kind == KindArray {
+			got = append(got, tree.Nodes[index].Text)
+		}
+	}
+	if !slices.Equal(got, want) {
+		t.Fatalf("array forms = %v, want %v", got, want)
+	}
+	reconstructed, ok := tree.Reconstruct()
+	if !ok || !slices.Equal(reconstructed, input) {
+		t.Fatalf("Reconstruct() = %q, %v; want %q, true", reconstructed, ok, input)
+	}
+}

@@ -517,6 +517,8 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		return l.lowerExpression(&expression.Children[0])
 	case "record":
 		return l.lowerAggregateConstruction(expression)
+	case "array":
+		return l.lowerArrayConstruction(expression)
 	case "field-expression":
 		return l.lowerFieldRead(expression)
 	case "view-length":
@@ -525,6 +527,8 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		return l.lowerViewEmpty(expression)
 	case "view-index":
 		return l.lowerViewIndex(expression)
+	case "array-index":
+		return l.lowerArrayIndex(expression)
 	case "view-slice":
 		return l.lowerViewSlice(expression)
 	case "scalar-cast":
@@ -620,6 +624,86 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 	default:
 		return Operand{}, fmt.Errorf("unsupported HIR expression %q", expression.Kind)
 	}
+}
+
+func (l *functionLowerer) lowerArrayConstruction(expression *hir.Expression) (Operand, error) {
+	elementType, length, array := hir.FixedArrayParts(expression.Type)
+	if !array || expression.Operator != "list" || uint64(len(expression.Children)) != length || !hir.FixedArrayScalarElement(elementType) {
+		return Operand{}, fmt.Errorf("malformed fixed-array construction")
+	}
+	operands := make([]Operand, 0, len(expression.Children))
+	sequence := make([]hir.Span, 0, len(expression.Children))
+	for index := range expression.Children {
+		if expression.Children[index].Type != elementType {
+			return Operand{}, fmt.Errorf("fixed-array element %d has type %q, want %q", index, expression.Children[index].Type, elementType)
+		}
+		operand, err := l.lowerExpression(&expression.Children[index])
+		if err != nil {
+			return Operand{}, err
+		}
+		if operand.Kind == OperandInvalid {
+			return Operand{}, fmt.Errorf("fixed-array element %d has no executable value", index)
+		}
+		operands = append(operands, operand)
+		sequence = append(sequence, expression.Children[index].Span)
+	}
+	destination := l.newTemporary()
+	l.appendOperation(Operation{
+		Kind: OperationArrayConstruct, Span: expression.Span, DestinationLocal: destination,
+		Operands: operands, Type: expression.Type, OwnerType: elementType, Operator: expression.Operator,
+	})
+	l.result.OrderedEvaluations = append(l.result.OrderedEvaluations, OrderedEvaluationFact{
+		Expression: expression.Span, Sequence: sequence, MaterializedBeforeParent: true,
+	})
+	return Operand{Kind: OperandLocal, Local: destination}, nil
+}
+
+func (l *functionLowerer) lowerArrayIndex(expression *hir.Expression) (Operand, error) {
+	if len(expression.Children) != 2 || expression.Operator != "[]" || expression.Children[1].Type != hir.TypeUSize {
+		return Operand{}, fmt.Errorf("malformed fixed-array index")
+	}
+	elementType, _, array := hir.FixedArrayParts(expression.Children[0].Type)
+	if !array || expression.Type != elementType {
+		return Operand{}, fmt.Errorf("fixed-array index result type %q does not match owner %q", expression.Type, expression.Children[0].Type)
+	}
+	receiver, err := l.lowerExpression(&expression.Children[0])
+	if err != nil {
+		return Operand{}, err
+	}
+	index, err := l.lowerExpression(&expression.Children[1])
+	if err != nil {
+		return Operand{}, err
+	}
+	if receiver.Kind == OperandInvalid || index.Kind == OperandInvalid {
+		return Operand{}, fmt.Errorf("fixed-array index has an invalid operand")
+	}
+	operands := []Operand{receiver, index}
+	l.result.OrderedEvaluations = append(l.result.OrderedEvaluations, OrderedEvaluationFact{
+		Expression: expression.Span, Sequence: []hir.Span{expression.Children[0].Span, expression.Children[1].Span}, MaterializedBeforeParent: true,
+	})
+	l.appendOperation(Operation{
+		Kind: OperationArrayIndexCheck, Span: expression.Span, DestinationLocal: NoLocal, Operands: slices.Clone(operands),
+		OwnerType: expression.Children[0].Type, IndexType: hir.TypeUSize, Type: elementType, Operator: expression.Operator,
+		TrapCategories: []string{"bounds"},
+	})
+	continuation := l.newBlock()
+	trap := l.newBlock()
+	l.terminate(Terminator{
+		Kind: TerminatorSwitch, Span: expression.Span, Successors: []BlockID{continuation, trap}, UnwindSuccessor: NoBlock,
+		SwitchKind: "checked-array-index", SwitchOperands: slices.Clone(operands), Operator: expression.Operator,
+	})
+	l.current = trap
+	l.terminate(Terminator{Kind: TerminatorTrap, Span: expression.Span, UnwindSuccessor: NoBlock, TrapCategories: []string{"bounds"}})
+	l.result.TrapPaths = append(l.result.TrapPaths, TrapPathFact{
+		Operation: expression.Span, Categories: []string{"bounds"}, CleanupActions: []CleanupAction{}, HasSuccessor: false,
+	})
+	l.current = continuation
+	destination := l.newTemporary()
+	l.appendOperation(Operation{
+		Kind: OperationArrayIndex, Span: expression.Span, DestinationLocal: destination, Operands: slices.Clone(operands),
+		OwnerType: expression.Children[0].Type, IndexType: hir.TypeUSize, Type: elementType, Operator: expression.Operator,
+	})
+	return Operand{Kind: OperandLocal, Local: destination}, nil
 }
 
 func (l *functionLowerer) lowerScalarCast(expression *hir.Expression) (Operand, error) {

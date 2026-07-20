@@ -28,6 +28,7 @@
     "docs/adr/0107-omitted-immutable-byte-view-slice-bounds.md",
     "docs/adr/0108-integer-literal-range-validation.md",
     "docs/adr/0109-direct-i32-minimum-literal.md",
+    "docs/adr/0110-scalar-fixed-array-execution.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/mir-v0.md",
     "docs/engineering/05-testing-standard.md"
@@ -1270,6 +1271,20 @@
       "sources": ["main.fy"],
       "entry": "main::omitted_both",
       "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "return", "value": 42 }
+    },
+    {
+      "id": "pass.interpreter.fixed-array",
+      "sourceRoot": "cases/pass/fixed-array/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "return", "value": 42 }
+    },
+    {
+      "id": "pass.interpreter.fixed-array-bounds",
+      "sourceRoot": "cases/pass/fixed-array/src",
+      "sources": ["main.fy"],
+      "entry": "main::bounds_trap",
+      "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "trap", "category": "bounds" }
     },
     {
       "id": "pass.interpreter.assert-true",

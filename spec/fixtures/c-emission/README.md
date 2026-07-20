@@ -12,12 +12,13 @@ output, LF-only text, and no absolute fixture path. It also creates a determinis
 `drop-trace-v0` unit, proves every interpreter-observed drop has a source/type/span site, and keeps
 that unit separate from the production translation unit.
 
-These 29 cases are emission evidence, not native-code evidence. They cover scalar control,
+These 31 cases are emission evidence, not native-code evidence. They cover scalar control,
 checked arithmetic, direct `i32` minimum emission as `INT32_MIN`, always-checked assertion control, `Option<i32>` Some and None, and `Result<i32, i32>` propagation success and
 failure, restricted inert user-enum construction, named payload extraction, and exhaustive switch,
 plus flat all-`i32` resource construction, field access, whole-root call move, empty-drop
 discharge, live reassignment, resource-bearing Option Some and None, resource Result Ok and Err, and
-resource Result propagation success and error, plus zero-cost byte-length reads, checked explicit
+resource Result propagation success and error, plus positive scalar fixed-array construction,
+internal value calls, checked read-only indexing, zero-cost byte-length reads, checked explicit
 and omitted-bound end-exclusive immutable byte-view slicing, and internal
 function transport for borrowed UTF-8 and byte-string views. Generated resource and resource-tagged structs use target-layout assertions, but this
 lane does not ask a C compiler to evaluate them. No C parser, Clang, GCC, sysroot,
@@ -27,8 +28,9 @@ same cases.
 
 `internal/cbackendnative` is the separate Linux/amd64 lane. It consumes the interpreter-approved
 instrumented units from this runner, requires glibc plus Clang and GCC, links the scalar runtime plus
-a closed four-byte recorder, and plans 116 process-status and exact drop-sequence comparisons at low
-and optimized profiles. Those executions include explicit and omitted-bound byte-view slicing. This observes compiler-owned empty resource cleanup and active built-in
+a closed four-byte recorder, and plans 124 process-status and exact drop-sequence comparisons at low
+and optimized profiles. Those executions include scalar fixed-array indexing plus explicit and
+omitted-bound byte-view slicing. This observes compiler-owned empty resource cleanup and active built-in
 payload selection; it does not execute user drop bodies. The
 emission runner itself remains
 toolchain-free and does not inherit native evidence from the presence of that separate command.

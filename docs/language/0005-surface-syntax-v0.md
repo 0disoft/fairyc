@@ -75,6 +75,15 @@ origin when `start <= end && end <= bytes.len`; otherwise evaluation traps with 
 deriving a pointer. This does not admit inclusive bounds, `str` indexing or slicing, indexed
 assignment, mutable byte views, or unchecked access.
 
+The first executable fixed-array subset accepts `[T; N]` only when `T` is `bool`, `i32`, `u8`,
+`u32`, or `usize` and `1 <= N <= 4096`. The ceiling is a provisional Stage 0 implementation guard
+for the initial by-value representation, not a stable language or ABI limit. A nonempty list
+`[a, b, ...]` constructs an inert copy value and evaluates its elements exactly once from left to
+right. `array[index]` requires `usize`, returns `T`, and traps with `bounds` when the index is at
+least `N`. Empty and repeated literals remain parser-valid but unsupported until zero-size
+representation and expansion-budget contracts exist. Array fields, nesting, resource elements,
+mutable indexing, slicing, `.len`, borrowing, and foreign signatures remain closed.
+
 Ordinary internal functions may accept `&str` and `&[u8]` parameters. Calls preserve the exact safe
 borrow and its caller-proven origin; they do not convert the argument to a raw pointer or transfer
 ownership. A safe function may contain an explicit lexical `unsafe` block and expose a checked

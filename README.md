@@ -28,7 +28,7 @@ error compatibility. The MIR runner executes all
 left-to-right call evaluation, complete-root moves, normal-exit cleanup order, `Result` error
   cleanup, nearest-loop control, explicit checked arithmetic, and non-unwinding trap paths. The verifier mutation runner constructs all 10 named
   baselines and proves all 21 isolated `V1001` through `V1701` rejection recipes. The first MIR
-  interpreter slice executes all 88 v0 cases for literal return, direct `i32` minimum constants, function-call arithmetic,
+  interpreter slice executes all 90 v0 cases for literal return, direct `i32` minimum constants, scalar fixed-array calls and checked indexing, function-call arithmetic,
 boolean branches and logical not, source `&&` and `||` short-circuiting, scalar `while`, scalar
 `Option` construction/matching, scalar `Result` construction/matching/propagation,
 resource construction, field reads, call moves, resource-bearing `Option` and `Result` payload moves,
@@ -44,14 +44,15 @@ through typed HIR and executable MIR. The current executable subset accepts only
 `drop` body; any nonempty body fails explicitly before Flow or MIR instead of being silently ignored.
 The interpreter constructs, reads, and recursively drops resources from the verified MIR definition,
 but still does not execute user drop-body effects.
-The constrained C backend emits deterministic C11 for 29 verified fixtures across the scalar
+The constrained C backend emits deterministic C11 for 31 verified fixtures across the scalar
 payload surface, restricted inert user enums, flat nonempty all-`i32` resources with empty drop
 bodies, resource-bearing built-in `Option` and `Result` values, borrowed-view byte lengths, checked
 immutable byte-slice indexing and end-exclusive slicing, the target-independent value-preserving integer casts `u8 as i32`,
 `u8 as u32`, `u8 as usize`, and `u32 as usize`, checked `u8`, `u32`, and `usize` addition,
 subtraction, multiplication, division, remainder, bitwise operations, and checked right shift,
 typed equality across `bool` and the four Fairy integer scalars,
-typed ordering across those integer scalars, and borrowed UTF-8/byte-slice internal calls. The cases cover
+typed ordering across those integer scalars, borrowed UTF-8/byte-slice internal calls, and private
+value-semantic scalar fixed arrays with checked read-only indexing. The cases cover
 resource construction, field reads, whole-root call moves, live reassignment, calls and control
 flow, active-payload moves, Result propagation, bitwise operations, checked division and shift, overflow
 trapping, scalar `Option` Some and None, and scalar `Result` propagation success and failure. This
@@ -172,6 +173,11 @@ Immutable `&[u8]` additionally supports read-only `usize` indexing to `u8` and e
 `bounds` traps. Omitted bounds normalize to zero or the retained receiver length; written operands
 evaluate once left to right and preserve the receiver's borrow origin. Indexed assignment, text
 indexing or slicing, a stable public string ABI, and the general safe text API still do not exist.
+Fixed arrays of `bool`, `i32`, `u8`, `u32`, or `usize` with `1 <= N <= 4096` now construct from
+nonempty list literals, cross internal calls and returns as inert copy values, and support checked
+read-only `usize` indexing. The ceiling is a provisional Stage 0 implementation guard, not a stable
+language or ABI limit. Empty and repeated literals, fields, nesting, mutable indexing, slicing,
+`.len`, array-to-slice borrowing, and public or foreign ABI use remain closed.
 Buffer-backed String and CString C helpers now preserve ownership on failed UTF-8 conversion,
 support overlap-safe String append, expose immutable bounded views, reject interior NUL, and append
 exactly one C terminator. Their C-only native probe is configured but unobserved. A separate
@@ -213,7 +219,8 @@ opaque `void` pointers, and acyclic nested `@repr(C)` records; generated definit
 dependency and guarded by target-derived nested layout assertions. One pointer-to-opaque-pointer
 output-slot shape is admitted for Arena allocation. A generated FY caller now receives both an
 8-byte register result and a 20-byte hidden-memory result from hand-written C in the four-way native
-matrix. Raw dereference or arithmetic, arbitrary casts, nested enum or built-in-tag fields, arrays,
+matrix. Raw dereference or arithmetic, arbitrary casts, nested enum or built-in-tag fields, array
+fields or foreign array signatures,
 callbacks, by-value aggregate parameters, exports, and public standard-library wrappers remain
 unimplemented.
 The C emitter records only foreign link names used by actual calls. `experimental build` uses one

@@ -11,6 +11,12 @@
 
 The compiler and MIR directly own checked, wrapping, saturating, and checked-result arithmetic; division and shift validation; bounds checks and traps; layout queries; bit copy and bit cast; built-in `Option` and `Result` tags and active-payload movement; resource move and drop glue; borrow and region markers; raw memory operations; and slice construction and indexing.
 
+The compiler also owns the current bounded scalar fixed-array value, list-construction, internal
+copy transport, and checked indexing operations. They require no runtime allocation or library
+entry point. The provisional Stage 0 by-value implementation admits `1..=4096` elements; that
+ceiling is not a stable language or ABI limit. Empty/repeated literals, array fields, mutation,
+slicing, borrowing, and ABI exposure remain outside this slice.
+
 Heap allocation, files, UTF-8 validation, strings, buffers, formatting, console access, and environment access are not intrinsics.
 
 The interpreter fixture harness may replace explicitly manifest-bound call symbols with bounded

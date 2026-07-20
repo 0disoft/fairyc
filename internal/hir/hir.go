@@ -3,6 +3,7 @@ package hir
 
 import (
 	"slices"
+	"strconv"
 	"strings"
 )
 
@@ -63,6 +64,67 @@ func SharedBorrow(element Type) Type {
 // MutableBorrow returns the canonical non-null exclusive-borrow type for element.
 func MutableBorrow(element Type) Type {
 	return Type("&mut " + string(element))
+}
+
+// FixedArray returns the canonical sized-array type for one positive element count.
+func FixedArray(element Type, length uint64) Type {
+	return Type("[" + string(element) + "; " + strconv.FormatUint(length, 10) + "]")
+}
+
+// MaxExecutableFixedArrayElements is the provisional Stage 0 implementation guard for arrays
+// transported by value. It is not a stable language or ABI limit and may change when array storage
+// and calling conventions stop using the first private value representation.
+const MaxExecutableFixedArrayElements uint64 = 1 << 12
+
+// FixedArrayParts decomposes one canonical positive fixed-array type.
+func FixedArrayParts(value Type) (element Type, length uint64, ok bool) {
+	text := string(value)
+	if len(text) < 5 || text[0] != '[' || text[len(text)-1] != ']' {
+		return TypeInvalid, 0, false
+	}
+	inside := text[1 : len(text)-1]
+	depth := 0
+	separator := -1
+	for index := 0; index < len(inside); index++ {
+		switch inside[index] {
+		case '[', '<':
+			depth++
+		case ']', '>':
+			depth--
+			if depth < 0 {
+				return TypeInvalid, 0, false
+			}
+		case ';':
+			if depth == 0 {
+				if separator >= 0 {
+					return TypeInvalid, 0, false
+				}
+				separator = index
+			}
+		}
+	}
+	if depth != 0 || separator <= 0 || separator == len(inside)-1 {
+		return TypeInvalid, 0, false
+	}
+	elementText := strings.TrimSpace(inside[:separator])
+	lengthText := strings.TrimSpace(inside[separator+1:])
+	parsed, err := strconv.ParseUint(lengthText, 10, 64)
+	if err != nil || parsed == 0 || elementText == "" {
+		return TypeInvalid, 0, false
+	}
+	return Type(elementText), parsed, true
+}
+
+// FixedArrayScalarElement reports the closed copy-scalar element set admitted by the first
+// executable fixed-array slice.
+func FixedArrayScalarElement(value Type) bool {
+	return value == TypeBool || value == TypeU8 || value == TypeI32 || value == TypeU32 || value == TypeUSize
+}
+
+// ExecutableFixedArrayShape reports whether one array shape belongs to the bounded first
+// executable subset shared by semantic analysis, MIR verification, interpretation, and C emission.
+func ExecutableFixedArrayShape(element Type, length uint64) bool {
+	return FixedArrayScalarElement(element) && length > 0 && length <= MaxExecutableFixedArrayElements
 }
 
 // RawPointer returns the canonical nullable raw-pointer type for element.

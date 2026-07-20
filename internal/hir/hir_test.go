@@ -58,3 +58,36 @@ func TestOptionElementRejectsMultiplePayloads(t *testing.T) {
 		t.Fatal("OptionElement() accepted two payload types")
 	}
 }
+
+func TestFixedArrayPartsRoundTripsCanonicalScalarArray(t *testing.T) {
+	t.Parallel()
+	value := FixedArray(TypeU32, 3)
+	element, length, ok := FixedArrayParts(value)
+	if value != "[u32; 3]" || !ok || element != TypeU32 || length != 3 {
+		t.Fatalf("FixedArray round trip = %q, %q, %d, %v", value, element, length, ok)
+	}
+	for _, invalid := range []Type{"[u32]", "[u32; 0]", "[u32; nope]", "[u32; 3; 4]"} {
+		if _, _, accepted := FixedArrayParts(invalid); accepted {
+			t.Fatalf("FixedArrayParts(%q) accepted invalid type", invalid)
+		}
+	}
+}
+
+func TestExecutableFixedArrayShapeEnforcesClosedElementAndLengthSet(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		element Type
+		length  uint64
+		want    bool
+	}{
+		{element: TypeBool, length: 1, want: true},
+		{element: TypeUSize, length: MaxExecutableFixedArrayElements, want: true},
+		{element: TypeI32, length: 0, want: false},
+		{element: TypeU8, length: MaxExecutableFixedArrayElements + 1, want: false},
+		{element: Type("main::Resource"), length: 1, want: false},
+	} {
+		if got := ExecutableFixedArrayShape(test.element, test.length); got != test.want {
+			t.Errorf("ExecutableFixedArrayShape(%q, %d) = %v, want %v", test.element, test.length, got, test.want)
+		}
+	}
+}

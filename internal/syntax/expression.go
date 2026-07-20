@@ -236,9 +236,12 @@ func (p *parser) parseArray() NodeID {
 	start := p.currentFullIndex()
 	p.advance()
 	children := make([]NodeID, 0, 4)
+	form := "empty"
 	if !p.at("]") {
+		form = "list"
 		children = append(children, p.parseExpression(0, true))
 		if p.match(";") {
+			form = "repeat"
 			children = append(children, p.parseConstExpression())
 		} else {
 			for !p.budget.Exhausted() && p.match(",") && !p.at("]") {
@@ -247,7 +250,7 @@ func (p *parser) parseArray() NodeID {
 		}
 	}
 	p.expect("]")
-	return p.addNode(KindArray, start, children, "", "")
+	return p.addNode(KindArray, start, children, form, "")
 }
 
 func (p *parser) parseIf() NodeID {

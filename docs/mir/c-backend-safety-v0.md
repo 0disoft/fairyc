@@ -107,7 +107,7 @@ outside the admitted scalar foreign-call form; complete runtime and
 standard-library lowering; malformed
 destinations; and non-canonical block shapes. Empty-drop discharge produces no invented cleanup
 call. This is private transport, not public Fairy ABI or user drop-body execution.
-`spec/fixtures/c-emission/manifest-v0.json` currently proves twenty source-to-emission cases and
+`spec/fixtures/c-emission/manifest-v0.json` currently proves 31 source-to-emission cases and
 repeated byte identity. No C parser, compiler, object writer, assembler, linker, executable,
 sanitizer, layout probe, or ABI probe runs in that fixture lane.
 
@@ -132,6 +132,7 @@ Nested MIR effects are emitted as separate C statements and temporaries. Functio
 | Shift | Check the amount against the exact operand width before any C shift. Right shift uses the bit-preserving arithmetic helper for `i32` and exact unsigned C operations otherwise. Left shift then checks mathematical representability, reports overflow only after a valid amount, performs signed transport through `uint32_t`, and reconstructs `i32` from bits. |
 | Value-preserving integer cast | Verify one admitted source/result pair, then emit an explicit C cast to `int32_t`, `uint32_t`, or `uintptr_t`. Every source value is representable, so no trap, truncation, wrapping, or implementation-defined signed conversion occurs. |
 | Typed scalar and raw-pointer comparison | Verify two matching operands and the exact `bool` result before emission. Scalar equality is limited to `bool`, `i32`, `u8`, `u32`, and `usize`; scalar ordering excludes `bool`. Matching raw pointers admit equality only, with no dereference or ordering. Generated C normalizes the result to `INT32_C(0)` or `INT32_C(1)`. |
+| Scalar fixed-array construction and indexing | Verify one canonical length inside the provisional `1..=4096` executable bound and the exact copy-scalar element type. Emit a private assignable struct wrapper, materialize list elements left to right, check `usize` against the retained constant length, and access `.data[index]` only on the success edge. The bound and wrapper are implementation guards, not a public Fairy or C ABI. |
 | Assert | Verify one exact `bool` operand and canonical failure edge, compare with zero in every profile, and dispatch `FY_TRAP_ASSERTION_FAILED` through the trap runtime. Never emit or include the C library `assert` macro. |
 
 The backend cannot add C or LLVM overflow, exactness, alignment, or alias promises unless the verified MIR fact explicitly proves them.
@@ -159,6 +160,9 @@ semantics, and it is emitted only in functions containing checked division or re
 - Type punning through incompatible C lvalues is forbidden.
 - A folded direct `i32` minimum literal emits `INT32_MIN`; generated C never relies on the
   implementation-defined type or conversion of a positive decimal `2147483648` token.
+- A bounded scalar fixed array emits as a private struct containing one exact C array so ordinary
+  internal assignments, parameters, and results preserve Fairy value semantics. Raw C arrays,
+  field embedding, foreign signatures, and layout stability are not inferred from this wrapper.
 - Stage 0 emits no `restrict` and makes no speculative `noalias` promise.
 - Padding bytes are never treated as initialized semantic data.
 - Immutable byte-view slicing emits both `start > end` and `end > length` checks before any C

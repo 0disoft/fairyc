@@ -20,6 +20,14 @@ func NormalizeExpression(expression *Expression) string {
 		return listForm("call", expression.Children)
 	case "index":
 		return listForm("index", expression.Children)
+	case "array":
+		name := "array"
+		if expression.Text == "repeat" {
+			name = "array-repeat"
+		} else if expression.Text == "empty" {
+			name = "array-empty"
+		}
+		return listForm(name, expression.Children)
 	case "field-expression":
 		parts := []string{"(field"}
 		if len(expression.Children) > 0 {

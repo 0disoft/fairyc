@@ -118,6 +118,20 @@
       }
     },
     {
+      "id": "pass.array-forms",
+      "sourceRoot": "cases/pass/array-forms/src",
+      "source": "array_forms.fy",
+      "expect": {
+        "status": "pass",
+        "module": "array_forms",
+        "expressions": [
+          { "binding": "list", "tree": "(array 1 2 3)" },
+          { "binding": "repeated", "tree": "(array-repeat 4 2)" },
+          { "binding": "empty", "tree": "(array-empty)" }
+        ]
+      }
+    },
+    {
       "id": "pass.foreign-call",
       "sourceRoot": "cases/pass/foreign-call/src",
       "source": "main.fy",
