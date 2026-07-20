@@ -25,6 +25,14 @@ for a deliberately narrow subset. It accepts `i32`, `bool`, `Option<i32>`, and
 comparisons, bitwise operations, and the implemented checked arithmetic families. Private numeric C
 function names prevent source identifiers from becoming ABI or injection surfaces.
 
+Checked `u8`, `u32`, and `usize` addition, subtraction, and multiplication are emitted only after
+the verified typed trap edge. The backend tests preconditions against `UINT8_MAX`, `UINT32_MAX`, or
+`UINTPTR_MAX` before evaluating the source operation: addition uses `left > max - right`, subtraction
+uses `left < right`, and nonzero multiplication uses `left > max / right`. The continuation performs
+the unsigned C operation only after those checks, so neither wraparound nor optimizer behavior can
+erase the Fairy C `integer-overflow` meaning. Marker, switch, operand, and result type drift fails
+closed before C text is produced.
+
 The same internal-value subset now admits compiler-owned immutable `&[u8]` literals. MIR retains
 their exact bytes and logical length, including empty and embedded-NUL values. Generated C uses a
 private `fy_byte_slice { const uint8_t *data; uintptr_t length; }`, exact deduplicated immutable

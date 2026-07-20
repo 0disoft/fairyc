@@ -53,6 +53,11 @@ The implemented safe integer `as` subset is closed to `u8 -> i32`, `u8 -> u32`, 
 traps. Other integer pairs are not inferred, truncated, wrapped, or sign-reinterpreted; they remain
 unsupported until an explicit fallible conversion contract exists.
 
+Binary `+`, `-`, and `*` require two matching operands from `i32`, `u8`, `u32`, or `usize` and
+produce that same type. Each operation has checked ordinary semantics and traps on a result outside
+the selected type, including unsigned subtraction below zero. There is no arithmetic-time promotion,
+coercion, wrapping, or mixed signedness. Other unsigned arithmetic operators remain unsupported.
+
 `==` and `!=` require two matching operands from `bool`, `i32`, `u8`, `u32`, or `usize` and produce
 `bool`. `<`, `<=`, `>`, and `>=` require two matching operands from `i32`, `u8`, `u32`, or `usize`
 and produce `bool`. Two matching raw-pointer types may use equality for null or identity checks.

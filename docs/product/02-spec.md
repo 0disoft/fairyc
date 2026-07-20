@@ -134,6 +134,9 @@ Optimization level and backend must not change the meaning of safe code. Express
 - Signed right shift is the only Stage 0 source shift; signed left shift is rejected as `E1011`.
 - Null cannot inhabit ordinary references.
 - Wrapping, saturating, and checked arithmetic use distinct operations.
+- Ordinary `+`, `-`, and `*` accept matching `i32`, `u8`, `u32`, or `usize` operands and trap with
+  `integer-overflow` when the mathematical result is outside that exact type. They never promote,
+  change signedness, or wrap according to the backend or build profile.
 - Source `as` integer conversion is currently limited to the target-independent, value-preserving
   pairs `u8 -> i32`, `u8 -> u32`, `u8 -> usize`, and `u32 -> usize`. Narrowing, signedness-changing,
   C-scalar, pointer/integer, and other numeric conversions require a later explicit contract.

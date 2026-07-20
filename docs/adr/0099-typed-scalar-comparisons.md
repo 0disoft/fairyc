@@ -28,8 +28,8 @@ safe checks such as `bytes.len > 0` from having one executable meaning across bo
 6. The interpreter compares signed `i32` mathematically and the unsigned `u8`, `u32`, and `usize`
    domains as exact unsigned values. The C backend independently checks both operand types and emits
    a matching fixed-width or `uintptr_t` comparison normalized to `INT32_C(0)` or `INT32_C(1)`.
-7. `examples/windows_quickstart/main.fy` guards its checked byte load with `bytes.len > 0`, so both
-   low and optimized MSVC execution prove the `usize` ordering path before returning byte value 42.
+7. `examples/windows_quickstart/main.fy` uses `index < bytes.len` while iterating its byte view, so
+   both low and optimized MSVC execution prove the `usize` ordering path before returning value 42.
 
 ## Consequences
 

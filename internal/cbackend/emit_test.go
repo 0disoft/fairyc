@@ -342,6 +342,40 @@ fn main() -> i32 {
 	}
 }
 
+func TestEmitCheckedUnsignedArithmetic(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn main() -> i32 {
+    let byte: u8 = 6;
+    let byte_product: u8 = byte * 7;
+    let word: u32 = 50;
+    let word_difference: u32 = word - 8;
+    let size: usize = 41;
+    let size_sum: usize = size + 1;
+    if byte_product == 42 && word_difference == 42 && size_sum == 42 { 42 } else { 1 }
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, feature := range []string{"checked-arithmetic", "scalar-comparison", "scalar-control-flow", "trap"} {
+		if !slices.Contains(unit.Features, feature) {
+			t.Errorf("features %v are missing %q", unit.Features, feature)
+		}
+	}
+	for _, required := range []string{
+		"UINT8_MAX / (UINT8_C(7))",
+		"if ((fy_l_",
+		") < (UINT32_C(8))",
+		"UINTPTR_MAX - (((uintptr_t)UINT64_C(1)))",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing checked unsigned arithmetic %q:\n%s", required, unit.Source)
+		}
+	}
+}
+
 func TestEmitByteStringLiteralDataAddressForForeignCall(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

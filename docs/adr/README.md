@@ -109,6 +109,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0097-checked-immutable-byte-view-indexing.md`: read-only `&[u8]` indexing through contextual `usize`, verified dominating bounds checks, interpreter traps, and private C byte loads without opening slicing or text indexing.
 - `0098-value-preserving-integer-casts.md`: four target-independent widening integer `as` pairs through explicit MIR, interpreter values, generated C casts, and a WSL-free Windows quickstart that returns its indexed byte.
 - `0099-typed-scalar-comparisons.md`: exact matching-type equality and integer ordering through typed MIR, the interpreter, generated C, and the WSL-free Windows quickstart length guard.
+- `0100-checked-unsigned-arithmetic.md`: matching-type trapping `u8`, `u32`, and `usize` addition, subtraction, and multiplication through typed MIR, interpreter, C11, and WSL-free Windows execution.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

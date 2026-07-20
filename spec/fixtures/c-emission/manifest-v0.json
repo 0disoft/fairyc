@@ -23,6 +23,7 @@
     "docs/adr/0097-checked-immutable-byte-view-indexing.md",
     "docs/adr/0098-value-preserving-integer-casts.md",
     "docs/adr/0099-typed-scalar-comparisons.md",
+    "docs/adr/0100-checked-unsigned-arithmetic.md",
     "docs/mir/mir-v0.md",
     "docs/mir/c-backend-safety-v0.md",
     "docs/runtime/runtime-stdlib-v0.md",
@@ -396,6 +397,22 @@
         "dialect": "c11",
         "functions": ["main::main"],
         "features": ["scalar-cast", "scalar-comparison", "scalar-control-flow", "static-byte-string", "trap", "view-index"]
+      }
+    },
+    {
+      "id": "pass.c-emission.checked-unsigned-arithmetic",
+      "sourceRoot": "cases/pass/checked-unsigned-arithmetic/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main"],
+        "features": ["checked-arithmetic", "scalar-comparison", "scalar-control-flow", "trap"]
       }
     }
   ]

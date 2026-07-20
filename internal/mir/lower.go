@@ -508,7 +508,11 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 			l.lowerCheckedArithmetic(expression, []Operand{operand}, "checked-unary", []string{"integer-overflow"})
 		}
 		destination := l.newTemporary()
-		l.appendOperation(Operation{Kind: OperationUnary, Span: expression.Span, DestinationLocal: destination, Operands: []Operand{operand}, Operator: expression.Operator})
+		l.appendOperation(Operation{
+			Kind: OperationUnary, Span: expression.Span, DestinationLocal: destination,
+			Operands: []Operand{operand}, OwnerType: expression.Children[0].Type,
+			Type: expression.Type, Operator: expression.Operator,
+		})
 		return Operand{Kind: OperandLocal, Local: destination}, nil
 	case "call":
 		if expression.Operator == "place" && len(expression.Children) == 2 && expression.Children[0].Type == hir.TypeRegion {
@@ -1580,13 +1584,15 @@ func (l *functionLowerer) lowerCheckedDivision(expression *hir.Expression, left,
 func (l *functionLowerer) lowerCheckedArithmetic(expression *hir.Expression, operands []Operand, switchKind string, categories []string) {
 	l.appendOperation(Operation{
 		Kind: OperationArithmeticCheck, Span: expression.Span, Operands: slices.Clone(operands),
+		OwnerType: expression.Children[0].Type, Type: expression.Type,
 		Operator: expression.Operator, TrapCategories: slices.Clone(categories),
 	})
 	continuation := l.newBlock()
 	trap := l.newBlock()
 	l.terminate(Terminator{
 		Kind: TerminatorSwitch, Span: expression.Span, Successors: []BlockID{continuation, trap}, UnwindSuccessor: NoBlock,
-		SwitchKind: switchKind, SwitchOperands: slices.Clone(operands), Operator: expression.Operator,
+		SwitchKind: switchKind, SwitchType: expression.Children[0].Type,
+		SwitchOperands: slices.Clone(operands), Operator: expression.Operator,
 	})
 	l.current = trap
 	l.terminate(Terminator{Kind: TerminatorTrap, Span: expression.Span, UnwindSuccessor: NoBlock, TrapCategories: slices.Clone(categories)})

@@ -104,6 +104,56 @@ fn main() -> i32 {
 	}
 }
 
+func TestExecuteCheckedUnsignedArithmeticAndByteIteration(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn iterate() -> i32 {
+    let bytes: &[u8] = b"\x13\x17";
+    var index: usize = 0;
+    var total: i32 = 0;
+    while index < bytes.len {
+        total = total + (bytes[index] as i32);
+        index = index + 1;
+    }
+    total
+}
+fn u8_multiply_overflow() -> i32 {
+    let value: u8 = 128;
+    let overflow: u8 = value * 2;
+    42
+}
+fn u32_subtract_underflow() -> i32 {
+    let value: u32 = 0;
+    let underflow: u32 = value - 1;
+    42
+}
+fn usize_add_overflow() -> i32 {
+    let value: usize = 18446744073709551615;
+    let overflow: usize = value + 1;
+    42
+}
+`)
+	for _, testCase := range []struct {
+		entry string
+		kind  string
+		value int32
+		trap  string
+	}{
+		{entry: "main::iterate", kind: interpreter.OutcomeReturn, value: 42},
+		{entry: "main::u8_multiply_overflow", kind: interpreter.OutcomeTrap, trap: "integer-overflow"},
+		{entry: "main::u32_subtract_underflow", kind: interpreter.OutcomeTrap, trap: "integer-overflow"},
+		{entry: "main::usize_add_overflow", kind: interpreter.OutcomeTrap, trap: "integer-overflow"},
+	} {
+		outcome, err := interpreter.Execute(program, testCase.entry)
+		if err != nil {
+			t.Fatalf("Execute(%s) error = %v", testCase.entry, err)
+		}
+		if outcome.Kind != testCase.kind || outcome.Value != testCase.value || outcome.TrapCategory != testCase.trap {
+			t.Fatalf("Execute(%s) outcome = %+v", testCase.entry, outcome)
+		}
+	}
+}
+
 func lowerSource(t *testing.T, contents string) mir.Program {
 	t.Helper()
 	parsed, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(contents)), source.DefaultLimits())

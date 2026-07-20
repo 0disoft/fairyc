@@ -923,6 +923,52 @@ fn main() -> i32 {
 	}
 }
 
+func TestAnalyzeTypesCheckedUnsignedArithmetic(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn main() -> i32 {
+    let byte: u8 = 6;
+    let byte_product: u8 = byte * 7;
+    let word: u32 = 50;
+    let word_difference: u32 = word - 8;
+    let size: usize = 41;
+    let size_sum: usize = size + 1;
+    if byte_product == 42 && word_difference == 42 && size_sum == 42 { 42 } else { 1 }
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+	statements := result.HIR.Modules[0].Functions[0].Body.Statements
+	want := []struct {
+		statement int
+		operator  string
+		typ       hir.Type
+	}{
+		{statement: 1, operator: "*", typ: hir.TypeU8},
+		{statement: 3, operator: "-", typ: hir.TypeU32},
+		{statement: 5, operator: "+", typ: hir.TypeUSize},
+	}
+	for _, expectation := range want {
+		expression := statements[expectation.statement].Expression
+		if expression == nil || expression.Kind != "binary" || expression.Operator != expectation.operator ||
+			expression.Type != expectation.typ || len(expression.Children) != 2 ||
+			expression.Children[0].Type != expectation.typ || expression.Children[1].Type != expectation.typ {
+			t.Fatalf("checked arithmetic statement %d = %+v", expectation.statement, expression)
+		}
+	}
+}
+
+func TestAnalyzeRejectsCheckedArithmeticOnBool(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\nfn main() -> i32 { let invalid: bool = true + false; 42 }\n",
+	})
+	if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "checked arithmetic on bool" {
+		t.Fatalf("result = %+v", result)
+	}
+}
+
 func TestAnalyzeTypesCStringLiteralToImmutableBytePointerCast(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{

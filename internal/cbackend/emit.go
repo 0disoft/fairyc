@@ -916,7 +916,7 @@ func validExternalCIdentifier(value string, targetID target.ID) bool {
 var generatedCNames = map[string]struct{}{
 	"uint8_t": {}, "int32_t": {}, "uint32_t": {}, "uint64_t": {}, "uintptr_t": {}, "size_t": {}, "ssize_t": {},
 	"UINT8_C": {}, "INT32_C": {}, "UINT32_C": {}, "UINT64_C": {},
-	"INT32_MIN": {}, "INT32_MAX": {}, "UINT32_MAX": {}, "UINTPTR_MAX": {},
+	"INT32_MIN": {}, "INT32_MAX": {}, "UINT8_MAX": {}, "UINT32_MAX": {}, "UINTPTR_MAX": {},
 }
 
 var c11Keywords = map[string]struct{}{
@@ -1449,6 +1449,8 @@ func (e *emitter) inspectBinary(functionIndex int, operation mir.Operation) erro
 		validShape = (hir.ScalarEqualityType(operation.OwnerType) || pointer) && operation.Type == hir.TypeBool
 	case "<", "<=", ">", ">=":
 		validShape = hir.ScalarOrderedType(operation.OwnerType) && operation.Type == hir.TypeBool
+	case "+", "-", "*":
+		validShape = hir.CheckedArithmeticType(operation.OwnerType) && operation.Type == operation.OwnerType
 	default:
 		validShape = operation.OwnerType == hir.TypeI32 && operation.Type == hir.TypeI32
 	}
@@ -1467,6 +1469,19 @@ func (e *emitter) inspectBinary(functionIndex int, operation mir.Operation) erro
 		return fmt.Errorf("typed scalar binary operation in %s has operand types %q and %q, want %q", function.Name, leftType, rightType, operation.OwnerType)
 	}
 	return nil
+}
+
+func unsignedCMaximum(value hir.Type) (string, error) {
+	switch value {
+	case hir.TypeU8:
+		return "UINT8_MAX", nil
+	case hir.TypeU32:
+		return "UINT32_MAX", nil
+	case hir.TypeUSize:
+		return "UINTPTR_MAX", nil
+	default:
+		return "", fmt.Errorf("type %q has no unsigned C maximum", value)
+	}
 }
 
 func (e *emitter) inspectRawAddress(functionIndex int, operation mir.Operation) error {
@@ -2024,10 +2039,41 @@ func (e *emitter) inspectSwitch(functionIndex int, terminator mir.Terminator) er
 		}
 		e.features["view-index"] = struct{}{}
 		categories = []string{"bounds"}
-	case "checked-unary", "checked-arithmetic":
+	case "checked-unary":
+		operand, err := oneOperand(terminator.SwitchOperands)
+		if err != nil {
+			return fmt.Errorf("checked unary in %s: %w", function.Name, err)
+		}
+		operandType, err := e.operandType(functionIndex, operand)
+		if err != nil || terminator.SwitchType != hir.TypeI32 || operandType != hir.TypeI32 {
+			return fmt.Errorf("checked unary in %s has incompatible type metadata", function.Name)
+		}
+		e.features["checked-arithmetic"] = struct{}{}
+		categories = []string{"integer-overflow"}
+	case "checked-arithmetic":
+		left, right, err := twoOperands(terminator.SwitchOperands)
+		if err != nil {
+			return fmt.Errorf("checked arithmetic in %s: %w", function.Name, err)
+		}
+		leftType, leftErr := e.operandType(functionIndex, left)
+		rightType, rightErr := e.operandType(functionIndex, right)
+		if leftErr != nil || rightErr != nil || !hir.CheckedArithmeticType(terminator.SwitchType) ||
+			leftType != terminator.SwitchType || rightType != terminator.SwitchType {
+			return fmt.Errorf("checked arithmetic in %s has incompatible type metadata", function.Name)
+		}
 		e.features["checked-arithmetic"] = struct{}{}
 		categories = []string{"integer-overflow"}
 	case "checked-shift":
+		left, right, err := twoOperands(terminator.SwitchOperands)
+		if err != nil {
+			return fmt.Errorf("checked shift in %s: %w", function.Name, err)
+		}
+		leftType, leftErr := e.operandType(functionIndex, left)
+		rightType, rightErr := e.operandType(functionIndex, right)
+		if leftErr != nil || rightErr != nil || terminator.SwitchType != hir.TypeI32 ||
+			leftType != hir.TypeI32 || rightType != hir.TypeI32 {
+			return fmt.Errorf("checked shift in %s has incompatible type metadata", function.Name)
+		}
 		e.features["checked-shift"] = struct{}{}
 		categories = []string{"invalid-shift"}
 	default:
@@ -2581,7 +2627,11 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		}
 		switch operation.Operator {
 		case "+", "-", "*":
-			fmt.Fprintf(output, "    fy_l_%d = fy_bits_to_i32((uint32_t)(%s) %s (uint32_t)(%s));\n", operation.DestinationLocal, leftValue, operation.Operator, rightValue)
+			if operation.OwnerType == hir.TypeI32 {
+				fmt.Fprintf(output, "    fy_l_%d = fy_bits_to_i32((uint32_t)(%s) %s (uint32_t)(%s));\n", operation.DestinationLocal, leftValue, operation.Operator, rightValue)
+			} else {
+				fmt.Fprintf(output, "    fy_l_%d = (%s) %s (%s);\n", operation.DestinationLocal, leftValue, operation.Operator, rightValue)
+			}
 		case "/", "%":
 			output.WriteString("    fy_checked_divisor = ")
 			output.WriteString(rightValue)
@@ -2857,8 +2907,23 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		if err != nil {
 			return fmt.Errorf("checked arithmetic in %s: %w", function.Name, err)
 		}
-		expression := fmt.Sprintf("((int64_t)(%s) %s (int64_t)(%s))", leftValue, terminator.Operator, rightValue)
-		fmt.Fprintf(output, "    if (%s < (int64_t)INT32_MIN || %s > (int64_t)INT32_MAX) { fy_pending_trap = FY_TRAP_INTEGER_OVERFLOW; goto fy_b_%d; }\n", expression, expression, failure)
+		if terminator.SwitchType == hir.TypeI32 {
+			expression := fmt.Sprintf("((int64_t)(%s) %s (int64_t)(%s))", leftValue, terminator.Operator, rightValue)
+			fmt.Fprintf(output, "    if (%s < (int64_t)INT32_MIN || %s > (int64_t)INT32_MAX) { fy_pending_trap = FY_TRAP_INTEGER_OVERFLOW; goto fy_b_%d; }\n", expression, expression, failure)
+		} else {
+			maximum, err := unsignedCMaximum(terminator.SwitchType)
+			if err != nil {
+				return fmt.Errorf("checked arithmetic in %s: %w", function.Name, err)
+			}
+			switch terminator.Operator {
+			case "+":
+				fmt.Fprintf(output, "    if ((%s) > %s - (%s)) { fy_pending_trap = FY_TRAP_INTEGER_OVERFLOW; goto fy_b_%d; }\n", leftValue, maximum, rightValue, failure)
+			case "-":
+				fmt.Fprintf(output, "    if ((%s) < (%s)) { fy_pending_trap = FY_TRAP_INTEGER_OVERFLOW; goto fy_b_%d; }\n", leftValue, rightValue, failure)
+			case "*":
+				fmt.Fprintf(output, "    if ((%s) != 0 && (%s) > %s / (%s)) { fy_pending_trap = FY_TRAP_INTEGER_OVERFLOW; goto fy_b_%d; }\n", rightValue, leftValue, maximum, rightValue, failure)
+			}
+		}
 		fmt.Fprintf(output, "    goto fy_b_%d;\n", success)
 	case "checked-division":
 		left, right, err := twoOperands(terminator.SwitchOperands)

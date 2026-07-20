@@ -543,7 +543,7 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				if trap != "" {
 					return callCompletion{trapCategory: trap}, nil
 				}
-				locals[operation.DestinationLocal] = i32Value(result)
+				locals[operation.DestinationLocal] = result
 			case mir.OperationScalarCast:
 				value, err := evaluateOne(locals, operation.Operands)
 				if err != nil {
@@ -880,51 +880,117 @@ func evaluate(locals map[mir.LocalID]runtimeValue, operand mir.Operand) (runtime
 	}
 }
 
-func evaluateBinary(locals map[mir.LocalID]runtimeValue, operation mir.Operation) (int32, string, error) {
+func evaluateBinary(locals map[mir.LocalID]runtimeValue, operation mir.Operation) (runtimeValue, string, error) {
 	if len(operation.Operands) != 2 {
-		return 0, "", fmt.Errorf("binary operation has %d operands, want 2", len(operation.Operands))
+		return runtimeValue{}, "", fmt.Errorf("binary operation has %d operands, want 2", len(operation.Operands))
 	}
 	leftValue, err := evaluate(locals, operation.Operands[0])
 	if err != nil {
-		return 0, "", err
+		return runtimeValue{}, "", err
 	}
 	rightValue, err := evaluate(locals, operation.Operands[1])
 	if err != nil {
-		return 0, "", err
+		return runtimeValue{}, "", err
 	}
 	switch operation.Operator {
 	case "==", "!=":
 		_, _, pointer := hir.RawPointerElement(operation.OwnerType)
 		if (!hir.ScalarEqualityType(operation.OwnerType) && !pointer) || operation.Type != hir.TypeBool {
-			return 0, "", capabilityError("equality comparison has incompatible owner or result type")
+			return runtimeValue{}, "", capabilityError("equality comparison has incompatible owner or result type")
 		}
 		equal, err := equalScalarValues(leftValue, rightValue, operation.OwnerType)
 		if err != nil {
-			return 0, "", err
+			return runtimeValue{}, "", err
 		}
 		if operation.Operator == "!=" {
 			equal = !equal
 		}
-		return boolValue(equal), "", nil
+		return i32Value(boolValue(equal)), "", nil
 	case "<", "<=", ">", ">=":
 		if !hir.ScalarOrderedType(operation.OwnerType) || operation.Type != hir.TypeBool {
-			return 0, "", capabilityError("ordered comparison has incompatible owner or result type")
+			return runtimeValue{}, "", capabilityError("ordered comparison has incompatible owner or result type")
 		}
 		result, err := orderedScalarValues(operation.Operator, leftValue, rightValue, operation.OwnerType)
-		return boolValue(result), "", err
+		return i32Value(boolValue(result)), "", err
+	case "+", "-", "*":
+		if !hir.CheckedArithmeticType(operation.OwnerType) || operation.Type != operation.OwnerType {
+			return runtimeValue{}, "", capabilityError("checked arithmetic has incompatible owner or result type")
+		}
+		if operation.OwnerType != hir.TypeI32 {
+			return checkedUnsignedArithmetic(operation.Operator, leftValue, rightValue, operation.OwnerType)
+		}
 	}
 	if operation.OwnerType != hir.TypeI32 || operation.Type != hir.TypeI32 {
-		return 0, "", capabilityError("arithmetic operation has incompatible owner or result type")
+		return runtimeValue{}, "", capabilityError("arithmetic operation has incompatible owner or result type")
 	}
 	left, err := leftValue.asI32()
 	if err != nil {
-		return 0, "", err
+		return runtimeValue{}, "", err
 	}
 	right, err := rightValue.asI32()
 	if err != nil {
-		return 0, "", err
+		return runtimeValue{}, "", err
 	}
-	return binary(operation.Operator, left, right)
+	result, trap, err := binary(operation.Operator, left, right)
+	return i32Value(result), trap, err
+}
+
+func checkedUnsignedArithmetic(operator string, left, right runtimeValue, ownerType hir.Type) (runtimeValue, string, error) {
+	if !comparisonRuntimeMatches(left, ownerType) || !comparisonRuntimeMatches(right, ownerType) ||
+		ownerType == hir.TypeBool || ownerType == hir.TypeI32 {
+		return runtimeValue{}, "", capabilityError("checked unsigned arithmetic received incompatible operands")
+	}
+	limit, ok := unsignedArithmeticLimit(ownerType)
+	if !ok {
+		return runtimeValue{}, "", capabilityError("checked unsigned arithmetic has unsupported type %q", ownerType)
+	}
+	var result uint64
+	switch operator {
+	case "+":
+		if left.u64 > limit-right.u64 {
+			return runtimeValue{}, "integer-overflow", nil
+		}
+		result = left.u64 + right.u64
+	case "-":
+		if left.u64 < right.u64 {
+			return runtimeValue{}, "integer-overflow", nil
+		}
+		result = left.u64 - right.u64
+	case "*":
+		if right.u64 != 0 && left.u64 > limit/right.u64 {
+			return runtimeValue{}, "integer-overflow", nil
+		}
+		result = left.u64 * right.u64
+	default:
+		return runtimeValue{}, "", capabilityError("unsupported checked unsigned arithmetic operator %q", operator)
+	}
+	return unsignedRuntimeValue(ownerType, result), "", nil
+}
+
+func unsignedArithmeticLimit(ownerType hir.Type) (uint64, bool) {
+	switch ownerType {
+	case hir.TypeU8:
+		return math.MaxUint8, true
+	case hir.TypeU32:
+		return math.MaxUint32, true
+	case hir.TypeUSize:
+		return math.MaxUint64, true
+	default:
+		return 0, false
+	}
+}
+
+func unsignedRuntimeValue(ownerType hir.Type, value uint64) runtimeValue {
+	switch ownerType {
+	case hir.TypeU8:
+		return runtimeValue{kind: valueU8, u64: value, typ: hir.TypeU8}
+	case hir.TypeU32:
+		return runtimeValue{kind: valueU32, u64: value, typ: hir.TypeU32}
+	case hir.TypeUSize:
+		return runtimeValue{kind: valueUSize, u64: value, typ: hir.TypeUSize}
+	default:
+		return runtimeValue{}
+	}
 }
 
 func equalScalarValues(left, right runtimeValue, ownerType hir.Type) (bool, error) {
@@ -1031,10 +1097,7 @@ func evaluateOneI32(locals map[mir.LocalID]runtimeValue, operands []mir.Operand)
 }
 
 func evaluateTwoI32(locals map[mir.LocalID]runtimeValue, operands []mir.Operand) (int32, int32, error) {
-	if len(operands) != 2 {
-		return 0, 0, fmt.Errorf("operation has %d operands, want 2", len(operands))
-	}
-	leftValue, err := evaluate(locals, operands[0])
+	leftValue, rightValue, err := evaluateTwo(locals, operands)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -1042,11 +1105,19 @@ func evaluateTwoI32(locals map[mir.LocalID]runtimeValue, operands []mir.Operand)
 	if err != nil {
 		return 0, 0, err
 	}
-	rightValue, err := evaluate(locals, operands[1])
-	if err != nil {
-		return 0, 0, err
-	}
 	right, err := rightValue.asI32()
+	return left, right, err
+}
+
+func evaluateTwo(locals map[mir.LocalID]runtimeValue, operands []mir.Operand) (runtimeValue, runtimeValue, error) {
+	if len(operands) != 2 {
+		return runtimeValue{}, runtimeValue{}, fmt.Errorf("operation has %d operands, want 2", len(operands))
+	}
+	left, err := evaluate(locals, operands[0])
+	if err != nil {
+		return runtimeValue{}, runtimeValue{}, err
+	}
+	right, err := evaluate(locals, operands[1])
 	return left, right, err
 }
 
@@ -1161,7 +1232,30 @@ func evaluateSwitch(locals map[mir.LocalID]runtimeValue, terminator mir.Terminat
 			return mir.NoBlock, trap, nil
 		}
 		return terminator.Successors[0], "", nil
-	case "checked-arithmetic", "checked-shift":
+	case "checked-arithmetic":
+		left, right, err := evaluateTwo(locals, terminator.SwitchOperands)
+		if err != nil {
+			return mir.NoBlock, "", err
+		}
+		var trap string
+		if terminator.SwitchType == hir.TypeI32 {
+			leftI32, leftErr := left.asI32()
+			rightI32, rightErr := right.asI32()
+			if leftErr != nil || rightErr != nil {
+				return mir.NoBlock, "", capabilityError("checked i32 arithmetic received incompatible operands")
+			}
+			_, trap, err = binary(terminator.Operator, leftI32, rightI32)
+		} else {
+			_, trap, err = checkedUnsignedArithmetic(terminator.Operator, left, right, terminator.SwitchType)
+		}
+		if err != nil {
+			return mir.NoBlock, "", err
+		}
+		if trap != "" {
+			return mir.NoBlock, trap, nil
+		}
+		return terminator.Successors[0], "", nil
+	case "checked-shift":
 		left, right, err := evaluateTwoI32(locals, terminator.SwitchOperands)
 		if err != nil {
 			return mir.NoBlock, "", err

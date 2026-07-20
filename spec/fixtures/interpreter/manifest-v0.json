@@ -18,6 +18,7 @@
     "docs/adr/0097-checked-immutable-byte-view-indexing.md",
     "docs/adr/0098-value-preserving-integer-casts.md",
     "docs/adr/0099-typed-scalar-comparisons.md",
+    "docs/adr/0100-checked-unsigned-arithmetic.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/mir-v0.md",
     "docs/engineering/05-testing-standard.md"
@@ -1052,6 +1053,54 @@
         "completedThrough": "interpret",
         "outcome": "return",
         "value": 42
+      }
+    },
+    {
+      "id": "pass.interpreter.checked-unsigned-byte-iteration",
+      "sourceRoot": "cases/pass/checked-unsigned-arithmetic/src",
+      "sources": ["main.fy"],
+      "entry": "main::iterate",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42
+      }
+    },
+    {
+      "id": "pass.interpreter.checked-u8-multiply-overflow",
+      "sourceRoot": "cases/pass/checked-unsigned-arithmetic/src",
+      "sources": ["main.fy"],
+      "entry": "main::u8_multiply_overflow",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "trap",
+        "category": "integer-overflow"
+      }
+    },
+    {
+      "id": "pass.interpreter.checked-u32-subtract-underflow",
+      "sourceRoot": "cases/pass/checked-unsigned-arithmetic/src",
+      "sources": ["main.fy"],
+      "entry": "main::u32_subtract_underflow",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "trap",
+        "category": "integer-overflow"
+      }
+    },
+    {
+      "id": "pass.interpreter.checked-usize-add-overflow",
+      "sourceRoot": "cases/pass/checked-unsigned-arithmetic/src",
+      "sources": ["main.fy"],
+      "entry": "main::usize_add_overflow",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "trap",
+        "category": "integer-overflow"
       }
     }
   ]

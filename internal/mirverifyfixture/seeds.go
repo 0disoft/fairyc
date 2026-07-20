@@ -226,11 +226,12 @@ func checkedArithmeticSeed() mir.Function {
 				ID: 0, Entity: "block:arithmetic-check",
 				Operations: []mir.Operation{{
 					Kind: mir.OperationArithmeticCheck, Entity: "operation:add-check",
-					Operands: operands, Operator: "+", TrapCategories: categories,
+					Operands: operands, OwnerType: hir.TypeI32, Type: hir.TypeI32,
+					Operator: "+", TrapCategories: categories,
 				}},
 				Terminator: mir.Terminator{
 					Kind: mir.TerminatorSwitch, Successors: []mir.BlockID{1, 2}, UnwindSuccessor: mir.NoBlock,
-					SwitchKind: "checked-arithmetic", SwitchOperands: operands, Operator: "+",
+					SwitchKind: "checked-arithmetic", SwitchType: hir.TypeI32, SwitchOperands: operands, Operator: "+",
 				},
 			},
 			{
