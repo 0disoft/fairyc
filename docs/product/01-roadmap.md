@@ -47,7 +47,7 @@ unsigned right shift execute across trapping and
   empty-drop classification from AST through HIR into MIR; nonempty user drop bodies fail as
   unsupported before executable lowering. Restricted inert enums now preserve named payloads,
   construct through qualified variants, require exhaustive shallow matches, and execute through
-  verified MIR, the interpreter, and the constrained C backend. The C backend now emits deterministic C11 for 26
+  verified MIR, the interpreter, and the constrained C backend. The C backend now emits deterministic C11 for 27
   verified scalar, borrowed-view, typed-comparison, inert-enum, flat-resource, and resource-tagged cases under the provisional `x86_64-linux-gnu` profile,
   including `Option<i32>` and `Result<i32, i32>` construction, match, calls, and propagation plus
   all-`i32` resource construction, field reads, moves, reassignment, and resource-bearing built-in
