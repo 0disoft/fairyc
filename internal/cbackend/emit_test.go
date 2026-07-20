@@ -411,6 +411,50 @@ fn main() -> i32 {
 	}
 }
 
+func TestEmitUnsignedBitwiseAndCheckedRightShift(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn main() -> i32 {
+    let byte_input: u8 = 84;
+    let byte: u8 = byte_input >> 1;
+    let word_input: u32 = 43;
+    let word: u32 = word_input & 63;
+    let word_shift_input: u32 = 84;
+    let word_shift: u32 = word_shift_input >> 1;
+    let size_input: usize = 43;
+    let size: usize = (size_input ^ 1) | 0;
+    let size_shift_input: usize = 84;
+    let size_shift: usize = size_shift_input >> 1;
+    if byte == 42 && word == 43 && word_shift == 42 && size == 42 && size_shift == 42 { 42 } else { 1 }
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, feature := range []string{"checked-shift", "scalar-bitwise", "scalar-comparison", "scalar-control-flow", "trap"} {
+		if !slices.Contains(unit.Features, feature) {
+			t.Errorf("features %v are missing %q", unit.Features, feature)
+		}
+	}
+	for _, required := range []string{
+		">= UINT8_C(8)",
+		">= UINT32_C(32)",
+		">= ((uintptr_t)UINT64_C(64))",
+		") >> (UINT8_C(1))",
+		") & (UINT32_C(63))",
+		") ^ (((uintptr_t)UINT64_C(1)))",
+		") | (((uintptr_t)UINT64_C(0)))",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing typed unsigned operation %q:\n%s", required, unit.Source)
+		}
+	}
+	if strings.Contains(unit.Source, "fy_sar_i32") || strings.Contains(unit.Source, "fy_bits_to_i32") {
+		t.Fatalf("unsigned-only C unit includes signed bit helper machinery:\n%s", unit.Source)
+	}
+}
+
 func TestEmitByteStringLiteralDataAddressForForeignCall(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

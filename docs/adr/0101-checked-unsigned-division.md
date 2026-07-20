@@ -20,7 +20,8 @@ could not divide. That blocks ordinary length, chunk, alignment, and hashing cal
    missing or type-forged check edge before interpretation or C emission.
 5. Generated C materializes the checked divisor through a function-local volatile slot of the exact
    Fairy integer representation. This preserves strict-C compilation even for a source constant zero.
-6. Unsigned shifts, bitwise operators, wider integer families, and mixed arithmetic remain separate.
+6. Unsigned shifts and bitwise operators remain separate in this decision and are admitted later by
+   ADR 0102. Wider integer families and mixed arithmetic remain deferred.
 
 ## Consequences
 

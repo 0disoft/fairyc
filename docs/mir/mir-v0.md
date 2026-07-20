@@ -10,7 +10,7 @@ MIR is the only executable semantic contract consumed by backends. It records ev
 
 MIR v0 is a mutable-local control-flow graph rather than SSA. SSA conversion is a backend or optimization concern after the semantic form is verified.
 
-The current Go prototype implements the source-linked subset exercised by all eleven MIR v0 normalization fixtures: ordered calls, complete-root and tagged-payload moves, RHS-before-drop resource reassignment, explicit normal-exit cleanup, lexical Region placement and reset on fallthrough, direct return, Result propagation, nested exits, nearest-loop `break` and `continue`, `Result` propagation branches, checked division, remainder, and arithmetic traps, and non-unwinding successors. The same verifier passes all ten named baselines and rejects all twenty-one isolated v0 mutations with their single expected `Vxxxx` result. The bounded interpreter executes all sixty-eight interpreter v0 cases for scalar and tagged control, typed scalar comparisons, checked byte indexing, value-preserving integer casts, and checked `u8`, `u32`, and `usize` arithmetic including division and remainder, resource construction and field reads, whole-root and active-payload moves, resource returns and propagation, live/dead/self reassignment, consuming-close ownership, nested and loop-control cleanup, source-linked drop traces, Region reset paths, controlled in-memory test output, exact arithmetic, division, remainder, and right-shift trap and boundary outcomes, and the step and output limits; user drop-body effects, signed left shift, and later runtime behavior remain unfinished gates.
+The current Go prototype implements the source-linked subset exercised by all eleven MIR v0 normalization fixtures: ordered calls, complete-root and tagged-payload moves, RHS-before-drop resource reassignment, explicit normal-exit cleanup, lexical Region placement and reset on fallthrough, direct return, Result propagation, nested exits, nearest-loop `break` and `continue`, `Result` propagation branches, checked division, remainder, arithmetic, and right-shift traps, and non-unwinding successors. The same verifier passes all ten named baselines and rejects all twenty-one isolated v0 mutations with their single expected `Vxxxx` result. The bounded interpreter executes all seventy-two interpreter v0 cases for scalar and tagged control, typed scalar comparisons, checked byte indexing, value-preserving integer casts, and checked `i32`, `u8`, `u32`, and `usize` arithmetic, division, remainder, bitwise operations, and right shift, resource construction and field reads, whole-root and active-payload moves, resource returns and propagation, live/dead/self reassignment, consuming-close ownership, nested and loop-control cleanup, source-linked drop traces, Region reset paths, controlled in-memory test output, exact trap and boundary outcomes, and the step and output limits; user drop-body effects, left shift, and later runtime behavior remain unfinished gates.
 
 ## Lowering pipeline
 
@@ -59,8 +59,9 @@ returns `bool`; ordering admits matching operands from the four Fairy integer ty
 `bool`. The interpreter executes raw-pointer equality only when both values are typed null; native
   non-null pointer identity remains backend evidence. Binary `+`, `-`, and `*` also admit matching
   `i32`, `u8`, `u32`, or `usize` operands and return that same type. `/` and `%` admit the same
-  matching integer set with an exact typed checked-division marker and switch; other executable arithmetic and
-  bitwise operations remain `i32 -> i32`. `V1001` rejects missing or forged type metadata,
+  matching integer set with an exact typed checked-division marker and switch. `&`, `^`, and `|`
+  admit the same matching set without a trap; `>>` admits it through an exact typed checked-shift
+  marker and switch. `V1001` rejects missing or forged type metadata,
 invalid immediate families, mixed types, aggregate equality, pointer ordering, and boolean ordering.
 
 Built-in `Option` and `Result` construction records the concrete constructed type. Inert struct,
@@ -108,13 +109,14 @@ from these definitions; callers cannot supply a separate AST-built resource-type
 
 Each arithmetic family has distinct operations. Backends cannot infer trapping or wrapping from a build profile.
 
-Ordinary `i32` negation, addition, subtraction, multiplication, division, remainder, and signed
-right shift use an explicit check block, a two-successor switch, a non-returning trap block, and a
+Ordinary `i32` negation and matching-type `i32`, `u8`, `u32`, or `usize` addition, subtraction,
+multiplication, division, remainder, and right shift use an explicit check block, a two-successor switch, a non-returning trap block, and a
 fresh continuation containing the operation. The marker and switch carry the same operands and
 operator as the continuation. Addition, subtraction, multiplication, and negation expose
-`integer-overflow`; right shift exposes `invalid-shift`; division and remainder expose
-`division-by-zero`, with `signed-division-overflow` additionally present only for `i32`. Signed left
-shift is rejected before MIR.
+`integer-overflow`; right shift exposes `invalid-shift` and carries the exact operand width;
+division and remainder expose `division-by-zero`, with `signed-division-overflow` additionally
+present only for `i32`. Left shift is rejected before MIR. Matching-type `&`, `^`, and `|` lower as
+typed non-trapping binary operations.
 
 ### Statements
 
@@ -154,6 +156,12 @@ and a `checked-arithmetic` switch with the same `SwitchType`. The continuation m
 only after the non-trapping edge; the other edge reaches the canonical non-returning
 `integer-overflow` block. `V1501` rejects a missing marker, operand/operator drift, or a marker/switch
 type that differs from the binary operation. This applies to `i32`, `u8`, `u32`, and `usize`.
+
+A checked `>>` lowers one typed `binary`, one typed `checked-arithmetic` marker whose operator is
+`>>`, and a `checked-shift` switch with the same `SwitchType`. The trap edge is exactly
+`invalid-shift`; the continuation is reachable only for an amount inside the selected type width.
+`V1501` rejects marker, operand, operator, category, or type drift. `i32` continuation semantics are
+arithmetic right shift, while `u8`, `u32`, and `usize` continuation semantics are logical right shift.
 
 `@repr(C)` struct definitions may retain any of those exact C-scalar identities or another acyclic
 `@repr(C)` struct as fields. Their struct construction and field-read operations keep the exact

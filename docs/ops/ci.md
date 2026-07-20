@@ -21,13 +21,13 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
 - Ordinary tests execute the fixed lexer and parser fuzz seeds. Timed fuzz campaigns remain
   unconfigured rather than pretending a short CI sample proves coverage.
 - A separate Ubuntu native-C job invokes `cmd/fairyc-native-fixtures`. The command requires
-  Linux/amd64, glibc, Clang, and GCC; compiles all twenty current C-emission cases at `-O0` and
+  Linux/amd64, glibc, Clang, and GCC; compiles all 26 current C-emission cases at `-O0` and
   `-O2` with pedantic warnings as errors; links the scalar trap runtime plus the closed conformance
-  drop recorder; plans 100 exact process-status and source-linked drop-sequence comparisons; and
+  drop recorder; plans 104 exact process-status and source-linked drop-sequence comparisons; and
   compiles and executes one recursive C11 plus explicit POSIX-typedef probe for all 11 valid target-layout cases under the same
   4 compiler/profile pairs. It additionally recompiles every production C unit once per compiler
   with the closed `address-undefined-o1` ASan+UBSan mode, overrides ambient sanitizer options, and
-  requires all 50 executions to produce no diagnostic. The same job generates separate caller and
+  requires all 52 executions to produce no diagnostic. The same job generates separate caller and
   callee objects for all 14 C ABI pass plans and crosses Clang-to-GCC plus GCC-to-Clang at both
   profiles for 56 zero-output executions. The same matrix compiles and runs the provisional
   SystemHeap C probe four times, covering empty normalization, supported alignment, growth/shrink
@@ -134,6 +134,9 @@ separate compiler process to compile and execute `examples/windows_quickstart/ma
 validate temporary PE and unwind data, require the exact target-labelled native-result receipt for
 42, retain no artifact, and use no WSL. The quickstart iterates a byte view with checked `usize`
 arithmetic, while separate low and optimized cases require maximum-`usize` addition to trap.
+Separate low and optimized `run-host` cases also require matching-type unsigned bitwise operations
+and right shifts to return 42, and require a `usize` shift amount of 64 to report `invalid-shift`.
+Together with the existing scalar and trap cases, the direct `run-host` table now has 28 outcomes.
 The smoke also invokes `exec-target` twice with entry `examples/windows_output/main.fy` and explicit
 `--source examples/windows_output/windows_console.fy`: once through the in-process CLI test boundary
 and once through the separately built `fairyc.exe`. That two-module FY program

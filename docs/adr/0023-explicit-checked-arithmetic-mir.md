@@ -36,7 +36,7 @@ contracts.
    The canonical v0 lowering therefore uses a fresh single-predecessor continuation block.
 5. The MIR interpreter selects the success or trap outcome from the checked switch. It does not
    discover overflow for the first time when executing the continuation operation.
-6. Signed left shift remains outside Stage 0 and is rejected during type checking as `E1011`.
+6. Left shift remains outside Stage 0 and is rejected during type checking as `E1011`.
    It produces no executable MIR.
 7. MIR normalization fixtures record the static possible categories. Interpreter and CLI fixtures
    record the one dynamic category actually selected for a concrete input.

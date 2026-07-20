@@ -95,11 +95,12 @@ built-in `Option` and `Result` values, ordered resource reassignment, consuming-
 nearest-loop `break` and `continue`, lexical Region placement and reset on fallthrough, direct
 return, Result propagation, nested, break, and continue exits from a direct `&mut` Arena local,
 cleanup drop events, checked `i32` negation, addition,
-subtraction, multiplication, and signed right shift are
+subtraction, multiplication, division, remainder, matching-type bitwise operations, and signed or
+unsigned right shift are
 executable. The bounded interpreter reports its stable `step-limit` capability rather than hanging
 or reclassifying it as a language trap. Interpreter-fixture byte hooks are not available from this
 command and matching function names do not activate them. User drop-body effects, I/O, and arguments
-remain outside the current interpreter subset. Signed left shift is rejected
+remain outside the current interpreter subset. Left shift is rejected
 by semantic analysis as `E1011` rather than reaching the interpreter.
 
 `experimental emit-c` shares the same explicit source closure, semantics, Flow, MIR-lowering,

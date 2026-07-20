@@ -917,7 +917,21 @@ func evaluateBinary(locals map[mir.LocalID]runtimeValue, operation mir.Operation
 			return runtimeValue{}, "", capabilityError("checked integer operation has incompatible owner or result type")
 		}
 		if operation.OwnerType != hir.TypeI32 {
-			return checkedUnsignedArithmetic(operation.Operator, leftValue, rightValue, operation.OwnerType)
+			return checkedUnsignedIntegerOperation(operation.Operator, leftValue, rightValue, operation.OwnerType)
+		}
+	case ">>":
+		if !hir.CheckedShiftType(operation.OwnerType) || operation.Type != operation.OwnerType {
+			return runtimeValue{}, "", capabilityError("checked right shift has incompatible owner or result type")
+		}
+		if operation.OwnerType != hir.TypeI32 {
+			return checkedUnsignedIntegerOperation(operation.Operator, leftValue, rightValue, operation.OwnerType)
+		}
+	case "&", "^", "|":
+		if !hir.BitwiseIntegerType(operation.OwnerType) || operation.Type != operation.OwnerType {
+			return runtimeValue{}, "", capabilityError("bitwise operation has incompatible owner or result type")
+		}
+		if operation.OwnerType != hir.TypeI32 {
+			return checkedUnsignedIntegerOperation(operation.Operator, leftValue, rightValue, operation.OwnerType)
 		}
 	}
 	if operation.OwnerType != hir.TypeI32 || operation.Type != hir.TypeI32 {
@@ -935,14 +949,14 @@ func evaluateBinary(locals map[mir.LocalID]runtimeValue, operation mir.Operation
 	return i32Value(result), trap, err
 }
 
-func checkedUnsignedArithmetic(operator string, left, right runtimeValue, ownerType hir.Type) (runtimeValue, string, error) {
+func checkedUnsignedIntegerOperation(operator string, left, right runtimeValue, ownerType hir.Type) (runtimeValue, string, error) {
 	if !comparisonRuntimeMatches(left, ownerType) || !comparisonRuntimeMatches(right, ownerType) ||
 		ownerType == hir.TypeBool || ownerType == hir.TypeI32 {
-		return runtimeValue{}, "", capabilityError("checked unsigned arithmetic received incompatible operands")
+		return runtimeValue{}, "", capabilityError("unsigned integer operation received incompatible operands")
 	}
 	limit, ok := unsignedArithmeticLimit(ownerType)
 	if !ok {
-		return runtimeValue{}, "", capabilityError("checked unsigned arithmetic has unsupported type %q", ownerType)
+		return runtimeValue{}, "", capabilityError("unsigned integer operation has unsupported type %q", ownerType)
 	}
 	var result uint64
 	switch operator {
@@ -971,8 +985,25 @@ func checkedUnsignedArithmetic(operator string, left, right runtimeValue, ownerT
 			return runtimeValue{}, "division-by-zero", nil
 		}
 		result = left.u64 % right.u64
+	case "&":
+		result = left.u64 & right.u64
+	case "^":
+		result = left.u64 ^ right.u64
+	case "|":
+		result = left.u64 | right.u64
+	case ">>":
+		width := uint64(64)
+		if ownerType == hir.TypeU8 {
+			width = 8
+		} else if ownerType == hir.TypeU32 {
+			width = 32
+		}
+		if right.u64 >= width {
+			return runtimeValue{}, "invalid-shift", nil
+		}
+		result = left.u64 >> uint32(right.u64)
 	default:
-		return runtimeValue{}, "", capabilityError("unsupported checked unsigned arithmetic operator %q", operator)
+		return runtimeValue{}, "", capabilityError("unsupported unsigned integer operator %q", operator)
 	}
 	return unsignedRuntimeValue(ownerType, result), "", nil
 }
@@ -1223,7 +1254,7 @@ func evaluateSwitch(locals map[mir.LocalID]runtimeValue, terminator mir.Terminat
 				return mir.NoBlock, "signed-division-overflow", nil
 			}
 		} else {
-			_, trap, err := checkedUnsignedArithmetic(terminator.Operator, left, right, terminator.SwitchType)
+			_, trap, err := checkedUnsignedIntegerOperation(terminator.Operator, left, right, terminator.SwitchType)
 			if err != nil {
 				return mir.NoBlock, "", err
 			}
@@ -1271,7 +1302,7 @@ func evaluateSwitch(locals map[mir.LocalID]runtimeValue, terminator mir.Terminat
 			}
 			_, trap, err = binary(terminator.Operator, leftI32, rightI32)
 		} else {
-			_, trap, err = checkedUnsignedArithmetic(terminator.Operator, left, right, terminator.SwitchType)
+			_, trap, err = checkedUnsignedIntegerOperation(terminator.Operator, left, right, terminator.SwitchType)
 		}
 		if err != nil {
 			return mir.NoBlock, "", err
@@ -1281,11 +1312,21 @@ func evaluateSwitch(locals map[mir.LocalID]runtimeValue, terminator mir.Terminat
 		}
 		return terminator.Successors[0], "", nil
 	case "checked-shift":
-		left, right, err := evaluateTwoI32(locals, terminator.SwitchOperands)
+		left, right, err := evaluateTwo(locals, terminator.SwitchOperands)
 		if err != nil {
 			return mir.NoBlock, "", err
 		}
-		_, trap, err := binary(terminator.Operator, left, right)
+		var trap string
+		if terminator.SwitchType == hir.TypeI32 {
+			leftI32, leftErr := left.asI32()
+			rightI32, rightErr := right.asI32()
+			if leftErr != nil || rightErr != nil {
+				return mir.NoBlock, "", capabilityError("checked i32 right shift received incompatible operands")
+			}
+			_, trap, err = binary(terminator.Operator, leftI32, rightI32)
+		} else {
+			_, trap, err = checkedUnsignedIntegerOperation(terminator.Operator, left, right, terminator.SwitchType)
+		}
 		if err != nil {
 			return mir.NoBlock, "", err
 		}

@@ -20,6 +20,7 @@
     "docs/adr/0099-typed-scalar-comparisons.md",
     "docs/adr/0100-checked-unsigned-arithmetic.md",
     "docs/adr/0101-checked-unsigned-division.md",
+    "docs/adr/0102-typed-bitwise-and-checked-right-shift.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/mir-v0.md",
     "docs/engineering/05-testing-standard.md"
@@ -1131,6 +1132,34 @@
       "sources": ["main.fy"],
       "entry": "main::usize_zero",
       "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "trap", "category": "division-by-zero" }
+    },
+    {
+      "id": "pass.interpreter.checked-unsigned-bitwise-shift",
+      "sourceRoot": "cases/pass/checked-unsigned-bitwise-shift/src",
+      "sources": ["main.fy"],
+      "entry": "main::evaluate",
+      "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "return", "value": 42 }
+    },
+    {
+      "id": "pass.interpreter.checked-u8-invalid-shift",
+      "sourceRoot": "cases/pass/checked-unsigned-bitwise-shift/src",
+      "sources": ["main.fy"],
+      "entry": "main::u8_invalid_shift",
+      "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "trap", "category": "invalid-shift" }
+    },
+    {
+      "id": "pass.interpreter.checked-u32-invalid-shift",
+      "sourceRoot": "cases/pass/checked-unsigned-bitwise-shift/src",
+      "sources": ["main.fy"],
+      "entry": "main::u32_invalid_shift",
+      "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "trap", "category": "invalid-shift" }
+    },
+    {
+      "id": "pass.interpreter.checked-usize-invalid-shift",
+      "sourceRoot": "cases/pass/checked-unsigned-bitwise-shift/src",
+      "sources": ["main.fy"],
+      "entry": "main::usize_invalid_shift",
+      "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "trap", "category": "invalid-shift" }
     }
   ]
 }

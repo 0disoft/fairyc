@@ -53,8 +53,9 @@ short-circuit control, scalar `while`, whole resources, resource-bearing built-i
 resource reassignment, consuming-close ownership, Region fallthrough, return, propagation, nested,
 break, and continue reset paths, and source-linked drop traces, and reports an
 exact scalar result or canonical division, integer-overflow, or invalid-shift trap. Checked
-negation, addition, subtraction, multiplication, and signed right shift are executable; signed
-left shift is rejected as `E1011`; loop control without an enclosing `while` is rejected as `E1012`.
+negation, matching-type addition, subtraction, multiplication, division, remainder, bitwise
+operations, and signed or unsigned right shift are executable; left shift is rejected as `E1011`;
+loop control without an enclosing `while` is rejected as `E1012`.
 It does not discover files, execute user drop bodies, implement effects, or provide host I/O.
 It also does not execute foreign calls: those fail with the interpreter capability boundary even
 when the same verified MIR is admissible to `emit-c`.

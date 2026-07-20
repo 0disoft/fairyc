@@ -736,6 +736,9 @@ func validSwitchShape(terminator Terminator) bool {
 		if terminator.SwitchKind == "checked-arithmetic" {
 			return hir.CheckedArithmeticType(terminator.SwitchType)
 		}
+		if terminator.SwitchKind == "checked-shift" {
+			return hir.CheckedShiftType(terminator.SwitchType)
+		}
 		return terminator.SwitchType == hir.TypeI32
 	default:
 		return false
@@ -774,17 +777,16 @@ func validCheckedArithmeticShape(operation Operation) bool {
 				scalarOperandMatches(operation.Operands[1], operation.OwnerType)
 		}
 	}
-	if (len(operation.Operands) == 1 && operation.Operator == "-") ||
-		(len(operation.Operands) == 2 && operation.Operator == ">>") {
+	if len(operation.Operands) == 1 && operation.Operator == "-" {
 		if operation.OwnerType != hir.TypeI32 || operation.Type != hir.TypeI32 {
 			return false
 		}
-		for _, operand := range operation.Operands {
-			if !scalarOperandMatches(operand, hir.TypeI32) {
-				return false
-			}
-		}
-		return true
+		return scalarOperandMatches(operation.Operands[0], hir.TypeI32)
+	}
+	if len(operation.Operands) == 2 && operation.Operator == ">>" {
+		return hir.CheckedShiftType(operation.OwnerType) && operation.Type == operation.OwnerType &&
+			scalarOperandMatches(operation.Operands[0], operation.OwnerType) &&
+			scalarOperandMatches(operation.Operands[1], operation.OwnerType)
 	}
 	return false
 }
@@ -846,8 +848,10 @@ func validBinaryShape(operation Operation) bool {
 		return hir.CheckedArithmeticType(operation.OwnerType) && operation.Type == operation.OwnerType
 	case "/", "%":
 		return hir.CheckedDivisionType(operation.OwnerType) && operation.Type == operation.OwnerType
-	case ">>", "&", "^", "|":
-		return operation.OwnerType == hir.TypeI32 && operation.Type == hir.TypeI32
+	case ">>":
+		return hir.CheckedShiftType(operation.OwnerType) && operation.Type == operation.OwnerType
+	case "&", "^", "|":
+		return hir.BitwiseIntegerType(operation.OwnerType) && operation.Type == operation.OwnerType
 	default:
 		return false
 	}

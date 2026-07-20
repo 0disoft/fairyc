@@ -999,6 +999,57 @@ fn main() -> i32 {
 	}
 }
 
+func TestAnalyzeTypesUnsignedBitwiseAndCheckedRightShift(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn main() -> i32 {
+    let byte: u8 = 84;
+    let byte_shifted: u8 = byte >> 1;
+    let word: u32 = 43;
+    let word_masked: u32 = word & 63;
+    let size: usize = 43;
+    let size_mixed: usize = (size ^ 1) | 0;
+    if byte_shifted == 42 && word_masked == 43 && size_mixed == 42 { 42 } else { 1 }
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+	statements := result.HIR.Modules[0].Functions[0].Body.Statements
+	for _, expectation := range []struct {
+		statement int
+		operator  string
+		typ       hir.Type
+	}{{1, ">>", hir.TypeU8}, {3, "&", hir.TypeU32}, {5, "|", hir.TypeUSize}} {
+		expression := statements[expectation.statement].Expression
+		if expression == nil || expression.Operator != expectation.operator || expression.Type != expectation.typ ||
+			len(expression.Children) != 2 || expression.Children[0].Type != expectation.typ || expression.Children[1].Type != expectation.typ {
+			t.Fatalf("typed integer operation statement %d = %+v", expectation.statement, expression)
+		}
+	}
+}
+
+func TestAnalyzeRejectsUnsupportedOrMixedBitwiseAndShiftTypes(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn main() -> i32 {
+    let invalid_bitwise: bool = true | false;
+    let byte: u8 = 42;
+    let word: u32 = 1;
+    let invalid_shift: u8 = byte >> word;
+    42
+}
+`,
+	})
+	if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "bitwise operation on bool" {
+		t.Fatalf("unsupported = %+v", result.Unsupported)
+	}
+	if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E1006" {
+		t.Fatalf("diagnostics = %+v", result.Diagnostics)
+	}
+}
+
 func TestAnalyzeTypesCStringLiteralToImmutableBytePointerCast(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{

@@ -771,10 +771,24 @@ func (c *typeChecker) checkBinary(expression *ast.Expression, result *hir.Expres
 			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "checked division on "+string(leftType))
 		}
 		return leftType
-	case ">>", "&", "^", "|":
-		c.requireType("E1006", span(c.module.file.Path, expression.Children[0].Span), leftType, hir.TypeI32, span(c.module.file.Path, expression.Span))
-		c.requireType("E1006", span(c.module.file.Path, expression.Children[1].Span), rightType, hir.TypeI32, span(c.module.file.Path, expression.Span))
-		return hir.TypeI32
+	case ">>":
+		if leftType != hir.TypeInvalid && rightType != hir.TypeInvalid && leftType != rightType {
+			c.analyzer.addDiagnostic("E1006", span(c.module.file.Path, expression.Children[1].Span))
+			return leftType
+		}
+		if leftType != hir.TypeInvalid && !hir.CheckedShiftType(leftType) {
+			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "checked right shift on "+string(leftType))
+		}
+		return leftType
+	case "&", "^", "|":
+		if leftType != hir.TypeInvalid && rightType != hir.TypeInvalid && leftType != rightType {
+			c.analyzer.addDiagnostic("E1006", span(c.module.file.Path, expression.Children[1].Span))
+			return leftType
+		}
+		if leftType != hir.TypeInvalid && !hir.BitwiseIntegerType(leftType) {
+			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "bitwise operation on "+string(leftType))
+		}
+		return leftType
 	default:
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "binary operator "+expression.Text)
 		return hir.TypeInvalid

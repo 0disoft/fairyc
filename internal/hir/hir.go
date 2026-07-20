@@ -122,6 +122,16 @@ func CheckedDivisionType(value Type) bool {
 	return CheckedArithmeticType(value)
 }
 
+// BitwiseIntegerType reports the closed Stage 0 binary &, ^, and | subset.
+func BitwiseIntegerType(value Type) bool {
+	return CheckedArithmeticType(value)
+}
+
+// CheckedShiftType reports the closed Stage 0 checked right-shift subset.
+func CheckedShiftType(value Type) bool {
+	return CheckedArithmeticType(value)
+}
+
 // OptionElement decomposes one canonical compiler-known Option type.
 func OptionElement(value Type) (element Type, ok bool) {
 	text := string(value)

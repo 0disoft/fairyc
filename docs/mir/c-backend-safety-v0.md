@@ -38,6 +38,12 @@ verified `i32`, `u8`, `u32`, or `usize` operand type. Every type checks zero bef
 only `i32` emits the signed-minimum/negative-one check. This prevents strict C compilers from
 diagnosing an unreachable constant-zero expression without erasing typed MIR semantics.
 
+Matching-type `&`, `^`, and `|` preserve the exact verified `i32`, `u8`, `u32`, or `usize` result.
+The signed path uses explicit bit-preserving `uint32_t` transport; unsigned paths use their exact
+unsigned representation directly. Right shift first checks the amount against 32 for `i32`, 8 for
+`u8`, 32 for `u32`, or 64 for the admitted `usize` targets. Only the non-trapping continuation emits
+the C shift. `i32` uses the defined arithmetic-shift helper; unsigned types use a direct logical shift.
+
 The same internal-value subset now admits compiler-owned immutable `&[u8]` literals. MIR retains
 their exact bytes and logical length, including empty and embedded-NUL values. Generated C uses a
 private `fy_byte_slice { const uint8_t *data; uintptr_t length; }`, exact deduplicated immutable
@@ -119,7 +125,7 @@ Nested MIR effects are emitted as separate C statements and temporaries. Functio
 | Saturating arithmetic | Use explicit comparisons or helpers with no overflowing intermediate. |
 | Checked arithmetic | Return an explicit tagged result without invoking C undefined behavior. |
 | Division and remainder | Check zero and signed-minimum divided by negative one before the C operation. Materialize the verified divisor through a function-local volatile C transport slot so a host C compiler cannot reject or fold an otherwise unreachable constant-undefined expression. |
-| Shift | Check the amount against the operand width before the C shift. Signed left shift is not a Stage 0 source operation. |
+| Shift | Check the amount against the exact operand width before the C shift. Use the bit-preserving arithmetic-right helper for `i32` and exact unsigned C shift for `u8`, `u32`, or `usize`. Left shift is not a Stage 0 source operation. |
 | Value-preserving integer cast | Verify one admitted source/result pair, then emit an explicit C cast to `int32_t`, `uint32_t`, or `uintptr_t`. Every source value is representable, so no trap, truncation, wrapping, or implementation-defined signed conversion occurs. |
 | Typed scalar and raw-pointer comparison | Verify two matching operands and the exact `bool` result before emission. Scalar equality is limited to `bool`, `i32`, `u8`, `u32`, and `usize`; scalar ordering excludes `bool`. Matching raw pointers admit equality only, with no dereference or ordering. Generated C normalizes the result to `INT32_C(0)` or `INT32_C(1)`. |
 

@@ -30,8 +30,9 @@ backend behavior drift at exactly the integer boundary where optimization bugs a
 5. The interpreter performs explicit range checks before constructing the typed result. The C backend
    emits pre-operation checks against `UINT8_MAX`, `UINT32_MAX`, or `UINTPTR_MAX`; it never depends on
    wrapped unsigned output to decide whether a trap should have happened.
-6. Division, remainder, shifts, bitwise operators, wrapping, saturating, and explicit checked-result
-   APIs are unchanged. This ADR does not broaden literals, conversions, or mixed-type arithmetic.
+6. Division, remainder, shifts, and bitwise operators are unchanged by this decision; ADRs 0101 and
+   0102 admit their matching-type subsets later. Wrapping, saturating, explicit checked-result APIs,
+   broader literals, conversions, and mixed-type arithmetic remain unchanged.
 7. `examples/windows_quickstart/main.fy` iterates a two-byte `&[u8]` with a `usize` counter and returns
    their sum after value-preserving `u8 as i32` conversions. The Windows host smoke executes that path
    and a maximum-`usize` addition trap under both low and optimized MSVC profiles without WSL.
@@ -40,8 +41,9 @@ backend behavior drift at exactly the integer boundary where optimization bugs a
 
 - A normal source loop can now traverse an immutable byte view without raw pointers or a host helper.
 - Overflow behavior is identical in the interpreter and generated C instead of inheriting C wrapping.
-- Unsigned division, remainder, shifts, bitwise operations, mixed arithmetic, and wider integer
-  families remain deliberate future slices.
+- Unsigned division and remainder are admitted later by ADR 0101, and matching-type bitwise
+  operations plus checked right shift by ADR 0102. Mixed arithmetic and wider integer families
+  remain deliberate future slices.
 
 ## References
 

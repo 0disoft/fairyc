@@ -1202,7 +1202,12 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 			case mir.OperationUse:
 			case mir.OperationArithmeticCheck:
 				e.features["checked-arithmetic"] = struct{}{}
-				e.needsBitcast = true
+				if operation.OwnerType == hir.TypeI32 {
+					e.needsBitcast = true
+					if operation.Operator == ">>" {
+						e.needsShift = true
+					}
+				}
 			case mir.OperationCheckedDivision:
 				e.features["checked-division"] = struct{}{}
 			case mir.OperationUnary:
@@ -1226,11 +1231,15 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 					e.needsBitcast = true
 				case "&", "^", "|":
 					e.features["scalar-bitwise"] = struct{}{}
-					e.needsBitcast = true
+					if operation.OwnerType == hir.TypeI32 {
+						e.needsBitcast = true
+					}
 				case ">>":
 					e.features["checked-shift"] = struct{}{}
-					e.needsBitcast = true
-					e.needsShift = true
+					if operation.OwnerType == hir.TypeI32 {
+						e.needsBitcast = true
+						e.needsShift = true
+					}
 				}
 			case mir.OperationResultConstruct, mir.OperationResultPayload,
 				mir.OperationOptionConstruct, mir.OperationOptionPayload, mir.OperationResultSwitch:
@@ -1453,8 +1462,10 @@ func (e *emitter) inspectBinary(functionIndex int, operation mir.Operation) erro
 		validShape = hir.CheckedArithmeticType(operation.OwnerType) && operation.Type == operation.OwnerType
 	case "/", "%":
 		validShape = hir.CheckedDivisionType(operation.OwnerType) && operation.Type == operation.OwnerType
-	default:
-		validShape = operation.OwnerType == hir.TypeI32 && operation.Type == hir.TypeI32
+	case ">>":
+		validShape = hir.CheckedShiftType(operation.OwnerType) && operation.Type == operation.OwnerType
+	case "&", "^", "|":
+		validShape = hir.BitwiseIntegerType(operation.OwnerType) && operation.Type == operation.OwnerType
 	}
 	if !validShape {
 		return fmt.Errorf("typed scalar binary operation in %s has incompatible owner or result type", function.Name)
@@ -1483,6 +1494,21 @@ func unsignedCMaximum(value hir.Type) (string, error) {
 		return "UINTPTR_MAX", nil
 	default:
 		return "", fmt.Errorf("type %q has no unsigned C maximum", value)
+	}
+}
+
+func shiftCWidth(value hir.Type) (string, error) {
+	switch value {
+	case hir.TypeI32:
+		return "INT32_C(32)", nil
+	case hir.TypeU8:
+		return "UINT8_C(8)", nil
+	case hir.TypeU32:
+		return "UINT32_C(32)", nil
+	case hir.TypeUSize:
+		return "((uintptr_t)UINT64_C(64))", nil
+	default:
+		return "", fmt.Errorf("type %q has no checked right-shift width", value)
 	}
 }
 
@@ -2100,8 +2126,8 @@ func (e *emitter) inspectSwitch(functionIndex int, terminator mir.Terminator) er
 		}
 		leftType, leftErr := e.operandType(functionIndex, left)
 		rightType, rightErr := e.operandType(functionIndex, right)
-		if leftErr != nil || rightErr != nil || terminator.SwitchType != hir.TypeI32 ||
-			leftType != hir.TypeI32 || rightType != hir.TypeI32 {
+		if leftErr != nil || rightErr != nil || !hir.CheckedShiftType(terminator.SwitchType) ||
+			leftType != terminator.SwitchType || rightType != terminator.SwitchType {
 			return fmt.Errorf("checked shift in %s has incompatible type metadata", function.Name)
 		}
 		e.features["checked-shift"] = struct{}{}
@@ -2680,9 +2706,17 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			output.WriteString(";\n")
 			fmt.Fprintf(output, "    fy_l_%d = (%s) %s %s;\n", operation.DestinationLocal, leftValue, operation.Operator, divisor)
 		case ">>":
-			fmt.Fprintf(output, "    fy_l_%d = fy_sar_i32(%s, %s);\n", operation.DestinationLocal, leftValue, rightValue)
+			if operation.OwnerType == hir.TypeI32 {
+				fmt.Fprintf(output, "    fy_l_%d = fy_sar_i32(%s, %s);\n", operation.DestinationLocal, leftValue, rightValue)
+			} else {
+				fmt.Fprintf(output, "    fy_l_%d = (%s) >> (%s);\n", operation.DestinationLocal, leftValue, rightValue)
+			}
 		case "&", "^", "|":
-			fmt.Fprintf(output, "    fy_l_%d = fy_bits_to_i32((uint32_t)(%s) %s (uint32_t)(%s));\n", operation.DestinationLocal, leftValue, operation.Operator, rightValue)
+			if operation.OwnerType == hir.TypeI32 {
+				fmt.Fprintf(output, "    fy_l_%d = fy_bits_to_i32((uint32_t)(%s) %s (uint32_t)(%s));\n", operation.DestinationLocal, leftValue, operation.Operator, rightValue)
+			} else {
+				fmt.Fprintf(output, "    fy_l_%d = (%s) %s (%s);\n", operation.DestinationLocal, leftValue, operation.Operator, rightValue)
+			}
 		case "==", "!=", "<", "<=", ">", ">=":
 			fmt.Fprintf(output, "    fy_l_%d = ((%s) %s (%s)) ? INT32_C(1) : INT32_C(0);\n", operation.DestinationLocal, leftValue, operation.Operator, rightValue)
 		}
@@ -3009,7 +3043,15 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		if err != nil {
 			return fmt.Errorf("checked shift in %s: %w", function.Name, err)
 		}
-		fmt.Fprintf(output, "    if (%s < INT32_C(0) || %s >= INT32_C(32)) { fy_pending_trap = FY_TRAP_INVALID_SHIFT; goto fy_b_%d; }\n", amountValue, amountValue, failure)
+		width, err := shiftCWidth(terminator.SwitchType)
+		if err != nil {
+			return fmt.Errorf("checked shift in %s: %w", function.Name, err)
+		}
+		if terminator.SwitchType == hir.TypeI32 {
+			fmt.Fprintf(output, "    if (%s < INT32_C(0) || %s >= %s) { fy_pending_trap = FY_TRAP_INVALID_SHIFT; goto fy_b_%d; }\n", amountValue, amountValue, width, failure)
+		} else {
+			fmt.Fprintf(output, "    if (%s >= %s) { fy_pending_trap = FY_TRAP_INVALID_SHIFT; goto fy_b_%d; }\n", amountValue, width, failure)
+		}
 		fmt.Fprintf(output, "    goto fy_b_%d;\n", success)
 	default:
 		return CapabilityError{Function: function.Name, Feature: "MIR switch " + strconv.Quote(terminator.SwitchKind)}
