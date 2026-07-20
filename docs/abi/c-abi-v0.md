@@ -221,14 +221,16 @@ closed subset only. It does not prove source-level Fairy lowering, an independen
 register-level oracle, exact stack/shadow-store placement, complete PE/COFF object or unwind
 metadata, or hosted evidence.
 
-The Windows smoke additionally parses all thirteen linked target or probe executable images without
+The Windows smoke additionally parses all fifteen linked target or probe executable images without
 invoking the host loader as the parser. The target-neutral product, both declared-target profile
 products, two direct run-target temporary products, two exec-target temporary output products,
-plus both profiles of the layout, ABI, and unwind probes must be
+plus both profiles of the Windows File, layout, ABI, and unwind probes must be
 bounded AMD64 PE32+ large-address-aware non-DLL console images with aligned headers and sections, a
-readable executable `.text` section, and an entry point inside executable code. Import and exception
-directory presence is recorded but their payloads are not interpreted. This is executable-image
-structure evidence only, not COFF object symbol/relocation, `.pdata`/`.xdata`, CodeView/PDB, or
+readable executable `.text` section, and an entry point inside executable code. Import payloads are
+not interpreted. The exception directory, `.pdata`, and referenced unwind records separately cross
+the bounded Microsoft x64 structural inspector; language-specific handler data, recursive chain
+equivalence, and object-level unwind relocations remain unproven. This is executable-image and
+bounded unwind-structure evidence only, not complete COFF symbol/relocation, CodeView/PDB, or
 distribution conformance.
 
 Before returning any linked Windows artifact, the shared C driver now parses every intermediate
@@ -236,7 +238,7 @@ MSVC `.obj` as raw AMD64 COFF. It rejects optional PE headers and linked-image f
 bounded raw and relocation ranges, readable executable `.text` or `.text$...` code, valid
 relocation symbol indexes, and named symbols; and permits storage-free uninitialized `.bss` only
 when its section characteristic says so. This covers every `build-host`, `build-target`, `run-host`,
-layout-probe, ABI-probe, and unwind-probe compilation in the local smoke. It still does not define exact exported/imported
+Windows-File-probe, layout-probe, ABI-probe, and unwind-probe compilation in the local smoke. It still does not define exact exported/imported
 symbols, COMDAT selection, permitted relocation types, `.pdata`/`.xdata` content, or a hosted
 object-fixture receipt, so `pe-coff-object-fixtures` remains missing.
 

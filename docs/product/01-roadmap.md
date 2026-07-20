@@ -177,6 +177,13 @@ the real open, write-all, sync, close, reopen, partial-read, EOF, and final-clos
 exact counts, repeated-close status, normalized closed state, and reconstructed bytes. Public safe
 File ownership, source effects, typed errors, and hosted execution evidence remain missing.
 Used-symbol product linkage now selects Linux File only for actual admitted calls.
+The Windows target now owns a separate raw File C component over inline `HANDLE` state. It has
+bounded ASCII-to-`WCHAR` open, one-call partial read, progress-preserving write-all, explicit sync,
+consuming close, and silent best-effort drop without hidden allocation. Its low and optimized
+separate-translation-unit MSVC probes cover create/truncate, exact data, three-byte reads, EOF,
+repeated close, forced `ERROR_INVALID_HANDLE`, drop, and repeated drop after COFF, PE, and unwind
+inspection. The six admitted symbols remain raw and target-bound; safe FY ownership, typed error
+mapping, filesystem effects at the wrapper surface, and mutable byte access remain the next gate.
 
 The product build path now records sorted unique foreign symbols used by MIR calls and resolves the
 project-owned subset through one shared symbol/component contract. It links only the minimal
@@ -216,14 +223,15 @@ at both profiles. Independent compiler or assembly/register inspection, source-l
 crossings, and a hosted Windows receipt remain absent. PE/COFF objects, runtime, standard library,
 supported distribution artifacts, and conformance remain later gates. A bounded parser now checks
 the host-smoke product, both declared-target profile products, two direct run-target temporary
-products, two exec-target temporary output products, and six native probe executables for AMD64 PE32+ console identity, aligned
+products, two exec-target temporary output products, and eight native probe executables for AMD64
+PE32+ console identity, aligned
 headers/sections, and an executable entry point, but does not inspect `.obj` symbols, relocations,
 unwind payloads, or CodeView/PDB data.
 Every local MSVC compile in the same lane now also parses its intermediate `.obj` as raw AMD64 COFF
 before cleanup, including `.text$...`, `.bss`, symbol-table, and relocation-index structure. Exact
 versioned symbol names, COMDAT selection, relocation types, unwind records, and a hosted object
 receipt remain absent, so the target evidence marker stays fail-closed.
-The thirteen local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
+The fifteen local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
 runtime-function ordering and code coverage plus referenced version 1 and version 2 unwind-record
 bounds, including handler/chained minimum tails. A separate three-object probe now raises a private
 noncontinuable exception at both profiles, validates its payload in an outer SEH filter, walks the

@@ -207,7 +207,9 @@ exceptions to the generated `fy_` namespace are the exact allowlisted internal s
 symbols for SystemHeap allocate/deallocate, Buffer initialize/zeroed-resize/drop, Arena initialize,
 Region begin/zeroed-allocation/reset, Arena drop, text validation/output initialization, bounded
 CStr validation, String copy/view/append/drop, CString from-text/view/drop, and Linux File
-open/read/write-all/sync/close; direct File write/drop and the rest of the prefix remain closed.
+open/read/write-all/sync/close. The Windows target separately admits File
+open/read/write-all/sync/close/drop; its single-write helper retains internal C linkage. Direct
+Linux File write/drop and the rest of the prefix remain closed.
 Typed null and an exact
 direct-local borrow-to-raw-pointer cast are the only
 source-constructed raw pointers. The cast requires unsafe provenance, preserves the pointee type,
@@ -220,6 +222,8 @@ Successful emission also records the sorted unique external link names used by a
 terminators. Uncalled declarations remain prototypes but are absent from this link-requirement list.
 The exact standard-library namespace and component dependency mapping live in one shared contract
 consumed by both C-emission admission and product-build source selection.
+Windows File names are rejected for Linux and select one independent inline-handle component only
+for `x86_64-windows-msvc`; this raw admission does not create safe File semantics.
 The sole nested-pointer exception is exactly `*mut *mut void`, so `&mut *mut void` can become a C
 `void **` output slot. Immutable outer or inner layers fail closed instead of risking incorrect C
 qualifier placement. Nested pointers to C scalars, structs, or other pointer types remain rejected.

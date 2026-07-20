@@ -13,6 +13,7 @@ import (
 
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/cli"
+	"github.com/0disoft/fairyc/internal/cstdlib"
 	"github.com/0disoft/fairyc/internal/pecoff"
 	"github.com/0disoft/fairyc/internal/windowsabiprobe"
 	"github.com/0disoft/fairyc/internal/windowslayoutprobe"
@@ -418,6 +419,10 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("resolve Windows MSVC probe toolchain: %w", err)
 	}
+	windowsFileExecutions, err := runWindowsFileProbe(toolchain)
+	if err != nil {
+		return err
+	}
 	layoutExecutions, layoutCases, err := runWindowsLayoutProbe(toolchain)
 	if err != nil {
 		return err
@@ -430,7 +435,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls and checked indexing, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart and output execution, 38 run-host outcomes covered fixed arrays, byte-view iteration and slicing, assertions in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, layoutCases, layoutExecutions, abiCases, abiExecutions, unwindCases, unwindExecutions, 1+targetBuildExecutions+targetRunExecutions+targetExecExecutions+layoutExecutions+abiExecutions+unwindExecutions, toolchain.Version)
+	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls and checked indexing, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart and output execution, 38 run-host outcomes covered fixed arrays, byte-view iteration and slicing, assertions in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, windowsFileExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, unwindCases, unwindExecutions, 1+targetBuildExecutions+targetRunExecutions+targetExecExecutions+windowsFileExecutions+layoutExecutions+abiExecutions+unwindExecutions, toolchain.Version)
 	return nil
 }
 
@@ -598,6 +603,42 @@ func runWindowsUnwindProbe(toolchain cdriver.WindowsHostToolchain) (int, int, er
 		executions++
 	}
 	return executions, len(unit.Cases), nil
+}
+
+func runWindowsFileProbe(toolchain cdriver.WindowsHostToolchain) (int, error) {
+	implementation, err := cstdlib.WindowsFileSource()
+	if err != nil {
+		return 0, fmt.Errorf("load Windows File implementation: %w", err)
+	}
+	probe, err := cstdlib.WindowsFileProbeSource()
+	if err != nil {
+		return 0, fmt.Errorf("load Windows File probe: %w", err)
+	}
+	executions := 0
+	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+		artifact, err := cdriver.BuildWindowsMSVCABIProbe(toolchain, profile, probe, implementation)
+		if err != nil {
+			return executions, fmt.Errorf("build Windows File probe with %s: %w", profile.Name, err)
+		}
+		if len(artifact.Objects) != 2 || artifact.Objects[0].Name != "caller.obj" || artifact.Objects[1].Name != "callee.obj" {
+			return executions, fmt.Errorf("Windows File probe with %s returned unexpected COFF object receipts", profile.Name)
+		}
+		if _, err := pecoff.InspectExecutable(artifact.Bytes); err != nil {
+			return executions, fmt.Errorf("inspect Windows File probe PE with %s: %w", profile.Name, err)
+		}
+		if _, err := pecoff.InspectAMD64Unwind(artifact.Bytes); err != nil {
+			return executions, fmt.Errorf("inspect Windows File probe unwind data with %s: %w", profile.Name, err)
+		}
+		outcome, err := cdriver.ExecuteWindowsMSVCABIProbe(artifact)
+		if err != nil {
+			return executions, fmt.Errorf("execute Windows File probe with %s: %w", profile.Name, err)
+		}
+		if outcome.ExitCode != 0 || outcome.Stdout != "" || outcome.Stderr != "" {
+			return executions, fmt.Errorf("Windows File probe with %s returned %d, stdout %q, and stderr %q", profile.Name, outcome.ExitCode, outcome.Stdout, outcome.Stderr)
+		}
+		executions++
+	}
+	return executions, nil
 }
 
 func runWindowsLayoutProbe(toolchain cdriver.WindowsHostToolchain) (int, int, error) {

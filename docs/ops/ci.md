@@ -156,17 +156,20 @@ callee C11 translation units from all twelve valid Microsoft x64 plans, compiles
 separately, and executes the linked probe under both profiles. Those receipts are local Windows
 host evidence only; they are not Linux native parity, a hosted Windows receipt, complete Windows
 layout coverage, source-level Fairy FFI, independent compiler/register inspection, PE/COFF
-object conformance, or Windows call/ABI conformance. It also compiles the catcher, stack-owning
+object conformance, or Windows call/ABI conformance. It separately compiles the project-owned
+Windows File implementation and its caller probe, then executes create/write/sync/close/reopen,
+partial read, EOF, forced close failure, and repeated drop under both profiles. It also compiles the catcher, stack-owning
 termination frame, and private exception raiser as three separate translation units, links and
 executes them under both profiles, and requires exact exception payload, ordered
 `RtlVirtualUnwind` frame discovery, and one abnormal `__finally` execution. Before execution, the
 same intent parses the target-neutral product image, both declared-target profile images, the two
-direct run-target temporary images, both exec-target temporary images, and all six probe images and requires bounded AMD64 PE32+ non-DLL console
+direct run-target temporary images, both exec-target temporary images, and all eight probe images
+and requires bounded AMD64 PE32+ non-DLL console
 identity, aligned image/header/section ranges, a readable executable `.text`, and an executable
 entry point. This does not inspect object symbols or relocations, unwind/debug payloads, imported
 API compatibility, signing, installer packaging, or distribution behavior.
 The driver also parses every intermediate `.obj` from `build-host`, every `run-host` case, and both
-profiles of all three native probes before linking results leave the temporary root. Raw AMD64 COFF,
+profiles of all four native probes before linking results leave the temporary root. Raw AMD64 COFF,
 at most 4,096 sections inside the 64 MiB object budget, bounded section and relocation ranges,
 readable executable `.text`/`.text$...`, valid relocation
 symbol indexes, and named symbols are mandatory; storage-free `.bss` is admitted only with the
@@ -174,7 +177,7 @@ uninitialized-data characteristic. Object bytes are not uploaded or retained. Ex
 COMDAT, relocation-type, unwind, debug, and hosted object expectations remain unconfigured.
 The ordinary Go tests include a 154-section positive regression object and reject 4,097 sections;
 the exact section count emitted by a future MSVC version remains unstabilized.
-All thirteen linked target or probe PE images additionally traverse the Microsoft x64 exception directory before
+All fifteen linked target or probe PE images additionally traverse the Microsoft x64 exception directory before
 execution. The local gate requires sorted nonoverlapping `.pdata` runtime-function ranges,
 executable code coverage, DWORD-aligned file-backed unwind records, bounded version 1 prolog slots,
 bounded version 2 epilog descriptors, and minimum handler/chained tails. The receipt reports the

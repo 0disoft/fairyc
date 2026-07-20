@@ -219,16 +219,17 @@ The exact C-scalar slices emit C `int`, LP64-sensitive `long`, `<stddef.h>` `siz
 consumer calls. `ssize_t` additionally fixes `_POSIX_C_SOURCE 200809L` before headers and preserves
 negative values. They do not accept literals or operators, do not
 accept raw pointers to C scalars, and do not alias the types to coincidentally sized Fairy integers.
-The exact internal SystemHeap, Buffer, Arena/Region, text-view, CStr, String, CString, and Linux File
-open/read/write-all/sync/close symbols
+The exact internal SystemHeap, Buffer, Arena/Region, text-view, CStr, String, CString, Linux File
+open/read/write-all/sync/close, and Windows File open/read/write-all/sync/close/drop symbols
 exercised by native source probes form a closed project-owned allowlist; the `fy_` prefix does not
 become generally callable. The backend records sorted unique link names used by call terminators;
 declarations without calls select no library component. `build` resolves the exact project-owned
 subset through one shared symbol/component contract and links only its dependency closure. It still
 supplies no user companion source, object, library, search path, or arbitrary linker argument, so
 every other foreign symbol must resolve from the selected driver's ordinary closed environment or
-the build fails. `experimental run` never binds host symbols and reports the interpreter capability
-boundary.
+the build fails. Windows File symbols are target-bound and resolve to an independent inline-handle
+C component only for `x86_64-windows-msvc`; they do not make a safe FY File API. `experimental run`
+never binds host symbols and reports the interpreter capability boundary.
 
 `fairyc check` remains unimplemented. It must not be aliased to `check-syntax` or the current
 effect-aware `check-semantics`, because the planned command below still requires later semantic

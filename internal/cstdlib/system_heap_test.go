@@ -201,6 +201,63 @@ func TestLinuxFileSourcesConsumeCloseAndExposePartialIO(t *testing.T) {
 	}
 }
 
+func TestWindowsFileSourcesConsumeCloseAndExposePartialIO(t *testing.T) {
+	t.Parallel()
+	implementation, err := WindowsFileSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	probe, err := WindowsFileProbeSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, required := range []string{
+		"CreateFileW", "ReadFile", "WriteFile", "FlushFileBuffers", "CloseHandle",
+		"FY_STD_WINDOWS_FILE_PATH_ENCODING_V0", "FY_STD_WINDOWS_FILE_PATH_TOO_LONG_V0",
+		"static struct fy_std_windows_file_result_v0 fy_std_windows_file_write_v0(",
+		"file->handle = NULL", "file->open = UINT8_C(0)",
+	} {
+		if !strings.Contains(implementation, required) {
+			t.Errorf("Windows File implementation is missing %q", required)
+		}
+	}
+	for _, required := range []string{
+		"result.os_code != (uint32_t)ERROR_INVALID_HANDLE",
+		"fy_std_windows_file_read_v0(&file, received + total, requested)",
+		"fy_std_windows_file_drop_v0(&file)",
+	} {
+		if !strings.Contains(probe, required) {
+			t.Errorf("Windows File probe is missing %q", required)
+		}
+	}
+}
+
+func TestWindowsMSVCSourceForSymbolsSelectsOnlyWindowsFile(t *testing.T) {
+	t.Parallel()
+	source, err := WindowsMSVCSourceForSymbols([]string{"fy_std_windows_file_open_v0"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, required := range []string{
+		"fy_std_windows_file_open_v0", "fy_std_windows_file_read_v0",
+		"fy_std_windows_file_write_all_v0", "fy_std_windows_file_sync_v0",
+		"fy_std_windows_file_close_v0", "fy_std_windows_file_drop_v0",
+	} {
+		if !strings.Contains(source, required) {
+			t.Errorf("Windows File closure is missing %q", required)
+		}
+	}
+	for _, forbidden := range []string{
+		"fy_std_windows_stdout_write_all_v0", "GetStdHandle",
+		"fy_std_system_heap_allocate_v0", "fy_std_buffer_initialize_v0",
+		"fy_std_linux_file_open_v0", "_POSIX_C_SOURCE",
+	} {
+		if strings.Contains(source, forbidden) {
+			t.Errorf("Windows File closure unexpectedly contains %q", forbidden)
+		}
+	}
+}
+
 func TestSourceForSymbolsSelectsMinimalDependencyClosure(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -281,6 +338,12 @@ func TestWindowsMSVCSourceForSymbolsKeepsClosedRuntimeSlice(t *testing.T) {
 	t.Parallel()
 	source, err := WindowsMSVCSourceForSymbols([]string{
 		"fy_std_windows_stdout_write_all_v0",
+		"fy_std_windows_file_open_v0",
+		"fy_std_windows_file_read_v0",
+		"fy_std_windows_file_write_all_v0",
+		"fy_std_windows_file_sync_v0",
+		"fy_std_windows_file_close_v0",
+		"fy_std_windows_file_drop_v0",
 		"fy_std_text_utf8_valid_v0",
 		"fy_std_buffer_initialize_v0",
 		"fy_std_buffer_resize_zeroed_v0",
@@ -309,6 +372,9 @@ func TestWindowsMSVCSourceForSymbolsKeepsClosedRuntimeSlice(t *testing.T) {
 	}
 	for _, required := range []string{
 		"fy_std_windows_stdout_write_all_v0", "WriteFile", "GetStdHandle",
+		"fy_std_windows_file_open_v0", "fy_std_windows_file_read_v0",
+		"fy_std_windows_file_write_all_v0", "fy_std_windows_file_sync_v0",
+		"fy_std_windows_file_close_v0", "fy_std_windows_file_drop_v0", "CreateFileW",
 		"fy_std_system_heap_allocate_v0", "fy_std_system_heap_deallocate_v0",
 		"fy_std_buffer_initialize_v0", "fy_std_buffer_resize_zeroed_v0", "fy_std_buffer_drop_v0",
 		"fy_std_arena_initialize_v0", "fy_std_region_begin_v0",
@@ -334,10 +400,12 @@ func TestWindowsMSVCSourceForSymbolsKeepsClosedRuntimeSlice(t *testing.T) {
 	}
 }
 
-func TestLinuxSourceRejectsWindowsConsoleSymbol(t *testing.T) {
+func TestLinuxSourceRejectsWindowsOnlySymbol(t *testing.T) {
 	t.Parallel()
-	if _, err := SourceForSymbols([]string{"fy_std_windows_stdout_write_all_v0"}); err == nil || !strings.Contains(err.Error(), "no x86_64-linux-gnu source contract") {
-		t.Fatalf("SourceForSymbols() error = %v", err)
+	for _, symbol := range []string{"fy_std_windows_stdout_write_all_v0", "fy_std_windows_file_open_v0"} {
+		if _, err := SourceForSymbols([]string{symbol}); err == nil || !strings.Contains(err.Error(), "no x86_64-linux-gnu source contract") {
+			t.Fatalf("SourceForSymbols(%q) error = %v", symbol, err)
+		}
 	}
 }
 

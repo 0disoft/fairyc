@@ -303,15 +303,45 @@ File ownership, source effects, typed error resources, and hosted evidence remai
 Product build linkage is now automatic only for the five admitted raw File calls; safe source
 construction and effect/error semantics remain disconnected.
 
+## Windows `File` C slice v0
+
+The provisional `x86_64-windows-msvc` component stores one `HANDLE` plus an explicit open byte
+inline and normalizes the closed state to `{ NULL, 0 }`. It performs no hidden allocation. Open
+accepts a bounded NUL-terminated ASCII byte path and closed read/write/create/truncate options,
+converts the path into a stack-owned `WCHAR[4096]`, and calls `CreateFileW`. Empty paths, non-ASCII
+bytes, missing termination within the bound, invalid option combinations, and non-closed output
+storage fail before ownership changes. This narrow bootstrap boundary is not the future portable or
+Unicode-complete path contract.
+
+Read performs one `ReadFile` call and returns its exact partial count, including zero at EOF.
+`write_all` loops over a component-private single-write helper, preserves the completed prefix on
+failure, and reports no progress if a successful write completes zero bytes. Sync calls
+`FlushFileBuffers` explicitly.
+
+Explicit close first copies the live handle, normalizes the caller-owned state, and then calls
+`CloseHandle` exactly once. The state therefore remains consumed even when the kernel rejects the
+close, and automatic drop cannot retry it. Repeated explicit close reports the closed status.
+Automatic drop similarly normalizes before one best-effort close, discards the error, allocates
+nothing, and emits no output.
+
+The raw result record is `{ status: u32, os_code: u32, count: usize }`. The closed target contract
+admits only `fy_std_windows_file_open_v0`, `fy_std_windows_file_read_v0`,
+`fy_std_windows_file_write_all_v0`, `fy_std_windows_file_sync_v0`,
+`fy_std_windows_file_close_v0`, and `fy_std_windows_file_drop_v0`. A separate-translation-unit probe
+executes create/truncate, write-all, sync, normal and repeated close, three-byte reads, EOF, forced
+`ERROR_INVALID_HANDLE` close failure, drop, and repeated drop at both local MSVC profiles. This is a
+raw runtime contract; safe FY `File` construction, typed errors, byte-buffer wrappers, and implicit
+resource-drop execution are not connected yet.
+
 ## Stage 0 product linkage
 
 The constrained C unit records sorted unique external names used by actual calls. Product builds
 resolve only exact `fy_std_*_v0` members through the shared standard-library contract, close their
 component dependencies, and combine those C sources with the scalar runtime. Unused foreign
 declarations do not select a component. Buffer and Arena require SystemHeap; owned text requires
-SystemHeap, Buffer, and text view. Linux File and Windows console are target-specific independent
-components; Linux File is placed first when selected so its feature-test macro precedes system
-headers.
+SystemHeap, Buffer, and text view. Linux File, Windows console, and Windows File are target-specific
+independent components; Linux File is placed first when selected so its feature-test macro precedes
+system headers.
 
 This is a closed implementation link, not package discovery. Other foreign names receive no source,
 object, library, search path, or linker argument from Fairy C and remain ordinary unresolved-link
@@ -342,5 +372,8 @@ Hidden allocation, infallible heap allocation, generic allocator vtables, public
 - POSIX.1-2024 `malloc`: <https://pubs.opengroup.org/onlinepubs/9799919799/functions/malloc.html>
 - Linux `write(2)`: <https://man7.org/linux/man-pages/man2/write.2.html>
 - Linux `close(2)`: <https://man7.org/linux/man-pages/man2/close.2.html>
+- Windows `CreateFileW`: <https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew>
+- Windows `ReadFile`: <https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-readfile>
+- Windows `CloseHandle`: <https://learn.microsoft.com/en-us/windows/win32/api/handleapi/nf-handleapi-closehandle>
 
 These references constrain the initial hosted implementation. Fairy wrappers intentionally normalize implementation-defined allocator and file-descriptor behavior.

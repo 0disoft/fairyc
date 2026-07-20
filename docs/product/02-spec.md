@@ -219,7 +219,7 @@ Compiler intrinsics, the thin runtime, and standard-library APIs are separate bo
 
 Stage 0 allocation supports only explicit `SystemHeap` and lexical `Arena` or `Region`. Allocation is fallible, zero-size behavior is normalized by Fairy C, and no hidden default allocator or user allocator protocol exists.
 
-`Buffer` is the only growable owned collection. `Vec<T>` is deferred with user generics. Positive scalar fixed arrays are compiler-owned inert values but are not growable collections or public ABI records. `[u8]`, `str`, and `CStr` are compiler-known unsized views; `String` and `CString` are owned resources. Compiler-owned `b"..."` literals implement immutable static `&[u8]` construction and private generated-C transport. Safe borrowed `&[u8]` and `&str` views expose `.len` as a `usize` byte count and `.is_empty` as the exact zero-length `bool` by reading existing metadata; neither access scans, allocates, calls, traps, or counts Unicode characters. Immutable `&[u8]` additionally supports read-only `usize` indexing with a `u8` result and end-exclusive slicing with an immutable `&[u8]` result. Slice starts and ends may be omitted, normalizing to zero and the retained receiver length without re-evaluating the receiver. Written operands evaluate once left to right and trap with `bounds` before access or pointer derivation when their bounds fail; slicing preserves the receiver's borrow origin. `str` indexing or slicing, inclusive ranges, indexed assignment, mutable views, and other general view operations remain deferred. The initial Linux `File` API accepts `&CStr`, preserves partial I/O, and uses a consuming non-retried Linux close contract. Portable paths, embedded support, and resource-aware arenas remain deferred.
+`Buffer` is the only growable owned collection. `Vec<T>` is deferred with user generics. Positive scalar fixed arrays are compiler-owned inert values but are not growable collections or public ABI records. `[u8]`, `str`, and `CStr` are compiler-known unsized views; `String` and `CString` are owned resources. Compiler-owned `b"..."` literals implement immutable static `&[u8]` construction and private generated-C transport. Safe borrowed `&[u8]` and `&str` views expose `.len` as a `usize` byte count and `.is_empty` as the exact zero-length `bool` by reading existing metadata; neither access scans, allocates, calls, traps, or counts Unicode characters. Immutable `&[u8]` additionally supports read-only `usize` indexing with a `u8` result and end-exclusive slicing with an immutable `&[u8]` result. Slice starts and ends may be omitted, normalizing to zero and the retained receiver length without re-evaluating the receiver. Written operands evaluate once left to right and trap with `bounds` before access or pointer derivation when their bounds fail; slicing preserves the receiver's borrow origin. `str` indexing or slicing, inclusive ranges, indexed assignment, mutable views, and other general view operations remain deferred. The initial Linux `File` API accepts `&CStr`, preserves partial I/O, and uses a consuming non-retried Linux close contract. A separate raw Windows C slice stores inline `HANDLE` state, preserves partial counts, syncs explicitly, and consumes state before one `CloseHandle` attempt; it is not yet a safe FY API. Portable paths, embedded support, and resource-aware arenas remain deferred.
 
 The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 
@@ -429,13 +429,20 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   five-byte UTF-8 literal, observes String length five then ten after append, normalized drop,
   six-byte CString storage with logical CStr length five, normalized drop, and direct validation of
   compiler-owned terminated storage. It observes only status, length, alignment, and pointer state,
-  not returned bytes. The Windows resolver links only SystemHeap, Buffer, Arena, text view, owned
-  text, and the scalar runtime. It fixes the SystemHeap fundamental-alignment ceiling at the documented
+  not returned bytes. The checked-in example links only SystemHeap, Buffer, Arena, text view, owned
+  text, and the scalar runtime. The closed Windows resolver additionally admits six target-bound
+  raw File operations: open, partial read, write-all, sync, consuming close, and best-effort drop.
+  Their independent C component accepts a bounded ASCII bootstrap path, captures Win32 errors in
+  its result record, uses no hidden allocation, and is selected only when an admitted call is
+  present. A separate-translation-unit native probe exercises normal lifecycle, three-byte reads,
+  EOF, repeated close, forced invalid-handle close failure, and repeated drop at both local MSVC
+  profiles after COFF, PE, and unwind inspection. The checked-in FY target example does not call
+  this raw File component yet. The SystemHeap path fixes its fundamental-alignment ceiling at the documented
   Windows x64 `malloc` guarantee of 16 bytes because MSVC C does not provide `max_align_t` in
   `<stddef.h>`. Every other standard-library or foreign symbol fails before toolchain resolution;
   foreign companion inputs and user linker arguments remain absent. Lexical `region` lowering, copied
   placement, owned-text byte/terminator contents, failure paths, public standard-library wrappers,
-  source ownership/Result mapping, and stable layouts remain absent. This clears only the missing target
+  safe File ownership/effect/error mapping, and stable layouts remain absent. This clears only the missing target
   C-emission-profile evidence; `emittable`, `conformant`, and `supported` remain false.
 - `experimental run-target` reuses that exact Windows target compilation and closed linkage, validates
   the temporary PE plus Microsoft x64 unwind structure, executes it without WSL, rejects output, and

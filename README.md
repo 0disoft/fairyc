@@ -225,6 +225,14 @@ requires a repeated close to report the closed status and both completed closes 
 descriptor record. This is raw internal transport; safe File ownership, source effects, typed
 errors, and hosted execution evidence remain absent. Product builds now select the Linux File C
 unit only when one of the five admitted calls is actually present.
+Windows now has an independent File C slice over inline `HANDLE` state with no hidden allocation.
+It accepts a bounded ASCII bootstrap path, preserves partial read and write-all progress, syncs
+explicitly, consumes state before one `CloseHandle` attempt on both success and failure, and makes
+drop a silent one-attempt fallback. A separate-translation-unit probe creates, writes, syncs,
+closes, reopens, reads in three-byte chunks, observes EOF, forces `ERROR_INVALID_HANDLE`, and checks
+repeated close and drop at low and optimized local MSVC profiles. The six raw calls are target-bound
+through the closed resolver. A safe FY File resource, typed errors, filesystem-effect wrappers, and
+source-level buffer access are still absent.
 The source FFI slice accepts `i32`, `u8`, `u32`, `usize`, all sixteen exact transport-only TargetSpec
 C scalars, admitted raw-pointer parameters or results, and nonempty acyclic `@repr(C)` struct
 results. A declaration may keep its Fairy name or use one nonempty `@link_name("external_symbol")`;
@@ -262,7 +270,7 @@ exception, virtual-walks raiser, termination, and catcher frames, and requires o
 `__finally` execution under both profiles. The target marker remains missing until broader layout
 and independent/source-level/hosted ABI and unwind evidence exists. A host-independent PE parser
 now validates the host-smoke product, both declared-target profile products, two direct run-target
-temporary products, two exec-target output products, and all six probe images as bounded
+temporary products, two exec-target output products, and all eight probe images as bounded
 AMD64 PE32+ console executables
 with aligned headers and sections and an executable `.text` entry point. That linked-image path does not inspect
 object symbols, relocations, or Windows unwind records. The same package separately parses every
