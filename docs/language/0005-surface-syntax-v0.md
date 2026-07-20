@@ -61,6 +61,12 @@ multi-byte UTF-8 encodings. It reads existing view metadata without scanning, al
 a trap. It does not define indexing, slicing, capacity, Unicode scalar or grapheme counting,
 `CStr.len`, or a public view representation.
 
+Ordinary internal functions may accept `&str` and `&[u8]` parameters. Calls preserve the exact safe
+borrow and its caller-proven origin; they do not convert the argument to a raw pointer or transfer
+ownership. A safe function may contain an explicit lexical `unsafe` block and expose a checked
+result to safe callers, but foreign declarations themselves still reject safe-borrow parameters and
+the internal view transport is not a public ABI.
+
 The current executable C-scalar source slice recognizes all sixteen C scalars declared by the
 selected TargetSpec, preserves every one as an exact identity distinct from coincidentally sized
 Fairy scalars, and permits them only as transported foreign-call results, locals, and arguments.

@@ -102,6 +102,11 @@ ADR 0092 adds `.len` to safe borrows of `str` and `[u8]`. The property name, `us
 meaning, metadata-only behavior, and absence of scanning, allocation, calls, and traps are pre-1
 language semantics. This does not stabilize private view layout, indexing, slicing, Unicode
 counting, `CStr` operations, or a public string ABI.
+ADR 0093 admits exact `&str` and `&[u8]` parameters on ordinary internal functions. Exact source
+types, non-owning borrow behavior, matching call operands, and the absence of implicit raw-pointer
+conversion are pre-1 language semantics. Interpreter values and generated-C by-value descriptors
+remain private implementation transport; foreign safe-borrow signatures, exported ABI, retained
+borrows, and public `std::io` remain excluded.
 
 `fairyc.layout-fixtures/v0` separately versions the repository input and expectation vocabulary for
 the target-layout engine; each manifest binds one declared target. It is not a public

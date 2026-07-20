@@ -102,6 +102,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0090-bounded-windows-process-stream-capture.md`: separate stdout/stderr capture under one synchronized output budget without inventing cross-stream order or enabling source-visible console I/O.
 - `0091-windows-stdout-exec-target.md`: program-facing Windows target execution with separated streams, preserved process status, and one progress-reporting unsafe stdout write-all symbol.
 - `0092-borrowed-view-byte-length.md`: zero-cost byte-length access for borrowed UTF-8 and byte-slice views through typed HIR, verified MIR, the interpreter, and private C transport.
+- `0093-borrowed-view-internal-call-transport.md`: exact internal-function transport for borrowed UTF-8 and byte-slice views so narrow unsafe operations can be contained behind safe local helpers without inventing a public standard library.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

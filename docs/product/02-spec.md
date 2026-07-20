@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0092-borrowed-view-byte-length.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0093-borrowed-view-internal-call-transport.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -391,8 +391,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   32-bit program status. One target-only unsafe
   `fy_std_windows_stdout_write_all_v0(*u8, usize) -> { status: u32, written: usize }` call loops over
   `WriteFile`, reports partial progress on failure, normalizes empty input, rejects nonempty null
-  input, and is admitted only by the Windows support resolver. The checked-in example derives both
-  the request length and progress comparison from the source view's `.len`. This is executable process I/O, not
+  input, and is admitted only by the Windows support resolver. The checked-in example contains that
+  operation inside a safe local `&str` helper, validates status and progress, and keeps raw pointers,
+  foreign calls, and `unsafe` out of `main`. A second safe `&[u8]` helper proves byte-view parameter
+  transport. This is executable process I/O and local unsafe containment, not
   a safe or portable `std::io` package, Unicode console policy, stdin, stderr writing, arguments, or
   target maturity evidence.
 - QBE or another fast backend and LLVM require separate measured adoption decisions after MIR stability.

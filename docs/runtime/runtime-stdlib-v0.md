@@ -242,14 +242,17 @@ returns status 1 with zero progress. Status 2 means stdout was unavailable, stat
 
 The implementation obtains `STD_OUTPUT_HANDLE` once and loops in `DWORD`-bounded chunks until all
 bytes are written or a failure reports the completed prefix. It does not allocate, append a newline,
-transcode, retry a failed operation, or hide partial progress. The configured Windows smoke verifies
+transcode, retain the input pointer, retry a failed operation, or hide partial progress. The call is
+synchronous: every input-pointer use ends before it returns. The configured Windows smoke verifies
 empty and invalid inputs plus exact ASCII bytes through a captured pipe; interactive Unicode console
 encoding, terminal modes, stdin, stderr writing, colors, formatting, and cancellation remain
 unproven or unimplemented.
 
 This raw function is admitted only by the `x86_64-windows-msvc` support resolver and must be called
-inside `unsafe`. It is not a public `std::io` module, safe borrow wrapper, portable console API, or
-stable result layout.
+inside `unsafe`. The checked-in example confines the call to a safe local function accepting
+`&str`; that function derives the raw length from `.len` and reports success only after checking
+status and completed progress. This is an example of unsafe containment, not a public `std::io`
+module, portable console API, stable error type, or stable result layout.
 
 ## Linux `File` v0
 

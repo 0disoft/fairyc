@@ -81,7 +81,9 @@ The Windows execution driver captures stdout and stderr into separate byte seque
 shared 64 KiB ceiling. It preserves stream identity but makes no ordering claim between the two OS
 pipes. `run-host` and `run-target` still require both streams to be empty. `exec-target` forwards the
 separated bounded streams without a compiler receipt and preserves the program status; the current
-source surface reaches only one unsafe Windows stdout write-all function.
+source surface reaches only one unsafe Windows stdout write-all function. The checked-in program
+contains it behind a safe local `&str` helper; `main` uses only safe borrowed-view calls while the
+private generated-C descriptors carry data and length between internal functions.
 `internal/layout` is the next boundary: it turns those facts into checked array and aggregate size,
 alignment, offset, and padding results before any backend chooses C syntax. Separate Linux GNU and
 Windows MSVC manifests hold host-independent expectations. The generated native C probe checks

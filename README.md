@@ -43,9 +43,10 @@ through typed HIR and executable MIR. The current executable subset accepts only
 `drop` body; any nonempty body fails explicitly before Flow or MIR instead of being silently ignored.
 The interpreter constructs, reads, and recursively drops resources from the verified MIR definition,
 but still does not execute user drop-body effects.
-The constrained C backend emits deterministic C11 for 19 verified fixtures across the scalar
+The constrained C backend emits deterministic C11 for 20 verified fixtures across the scalar
 payload surface, restricted inert user enums, flat nonempty all-`i32` resources with empty drop
-bodies, resource-bearing built-in `Option` and `Result` values, and borrowed-view byte lengths. The cases cover
+bodies, resource-bearing built-in `Option` and `Result` values, borrowed-view byte lengths, and
+borrowed UTF-8/byte-slice internal calls. The cases cover
 resource construction, field reads, whole-root call moves, live reassignment, calls and control
 flow, active-payload moves, Result propagation, bitwise operations, checked division and shift, overflow
 trapping, scalar `Option` Some and None, and scalar `Result` propagation success and failure. This
@@ -108,9 +109,10 @@ category and rejects program output. This is the first direct Windows target exe
 is still experimental and does not promote target maturity.
 `experimental exec-target` is the program-facing sibling: it forwards bounded stdout and stderr
 without a compiler banner and preserves the program's full Windows process status. The checked-in
-`examples/windows_output/main.fy` uses one exact unsafe Windows stdout write-all symbol to print
-`Fairy C says hi` and exit 42. That is real FY-to-MSVC process output, but it is not yet a safe,
-portable `std::io` API.
+`examples/windows_output/main.fy` contains the one exact unsafe Windows stdout write-all symbol
+inside a checked local helper. Its `main` passes `&str` and `&[u8]` through safe internal calls,
+contains no raw pointer or `unsafe`, prints `Fairy C says hi`, and exits 42. That is real
+FY-to-MSVC process output and unsafe containment, but it is not yet a portable `std::io` API.
 A provisional SystemHeap implementation now lives in the target standard-library
 boundary rather than the thin runtime. It normalizes empty allocation, admits current fundamental
 alignments, preserves bytes across copy-and-release growth or shrink, and leaves the old block

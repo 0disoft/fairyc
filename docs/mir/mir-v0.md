@@ -112,6 +112,12 @@ Fixture-visible trap categories use the canonical identities `bounds`, `integer-
 
 Arguments are fully evaluated into temporaries from left to right before the call terminator. A call records its destination, normal continuation, source span, unsafe scope when applicable, and foreign ABI when applicable.
 
+Internal calls may pass exact `&str` and `&[u8]` operands to matching parameters. The semantic
+borrow origin and permission are checked before MIR; MIR retains the exact parameter type and does
+not lower the argument to a raw address. The interpreter passes its private view value, while a
+native backend selects private storage transport only after verification. Foreign signatures still
+reject safe borrows.
+
 Source C-scalar transport preserves all sixteen TargetSpec C-scalar identities as distinct foreign
 result and parameter types. A producer call may initialize a local of any exact type and a later
 consumer call may use the local as its argument. MIR does not encode those values as Fairy
