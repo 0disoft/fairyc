@@ -13,7 +13,7 @@ output, LF-only text, and no absolute fixture path. It also creates a determinis
 that unit separate from the production translation unit.
 
 These 29 cases are emission evidence, not native-code evidence. They cover scalar control,
-checked arithmetic, always-checked assertion control, `Option<i32>` Some and None, and `Result<i32, i32>` propagation success and
+checked arithmetic, direct `i32` minimum emission as `INT32_MIN`, always-checked assertion control, `Option<i32>` Some and None, and `Result<i32, i32>` propagation success and
 failure, restricted inert user-enum construction, named payload extraction, and exhaustive switch,
 plus flat all-`i32` resource construction, field access, whole-root call move, empty-drop
 discharge, live reassignment, resource-bearing Option Some and None, resource Result Ok and Err, and

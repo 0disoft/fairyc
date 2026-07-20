@@ -120,6 +120,9 @@ ADR 0108 assigns `E1013` to a well-formed integer literal outside its selected i
 type. Radix-independent mathematical comparison, complete-literal spans, pre-MIR rejection, and the
 four Stage 0 limits are pre-1 semantics; signed-literal folding, suffixes, wider integers, and C
 scalar immediates remain unstabilized.
+ADR 0109 admits the exact `i32` minimum magnitude only beneath direct unary minus. Equivalent radix
+spellings, normalized literal HIR, unchanged runtime negation overflow, and `E1013` for larger or
+independently grouped magnitudes are pre-1 semantics; broader constant folding remains unstabilized.
 ADR 0093 admits exact `&str` and `&[u8]` parameters on ordinary internal functions. Exact source
 types, non-owning borrow behavior, matching call operands, and the absence of implicit raw-pointer
 conversion are pre-1 language semantics. Interpreter values and generated-C by-value descriptors

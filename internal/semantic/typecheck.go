@@ -2,7 +2,7 @@ package semantic
 
 import (
 	"fmt"
-	"math/big"
+	"strconv"
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/ast"
@@ -728,6 +728,12 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 	if len(expression.Children) != 1 {
 		return hir.TypeInvalid
 	}
+	if expression.Text == "-" && directI32MinimumLiteral(expression.Children[0]) {
+		result.Kind = "literal"
+		result.Value = "-2147483648"
+		result.Operator = ""
+		return hir.TypeI32
+	}
 	child, childType := c.checkExpression(expression.Children[0], hir.TypeInvalid)
 	result.Children = appendExpression(result.Children, child)
 	switch expression.Text {
@@ -1323,32 +1329,98 @@ func isIntegerLiteral(raw string) bool {
 }
 
 func integerLiteralFits(raw string, selected hir.Type) bool {
-	clean := strings.ReplaceAll(raw, "_", "")
-	base := 10
-	digits := clean
-	if strings.HasPrefix(clean, "0x") || strings.HasPrefix(clean, "0X") {
-		base, digits = 16, clean[2:]
-	} else if strings.HasPrefix(clean, "0b") || strings.HasPrefix(clean, "0B") {
-		base, digits = 2, clean[2:]
-	}
-	value := new(big.Int)
-	if _, ok := value.SetString(digits, base); !ok || value.Sign() < 0 {
-		return false
-	}
-	var maximum *big.Int
+	var maximum uint64
 	switch selected {
 	case hir.TypeI32:
-		maximum = new(big.Int).SetInt64(1<<31 - 1)
+		maximum = 1<<31 - 1
 	case hir.TypeU8:
-		maximum = new(big.Int).SetUint64(1<<8 - 1)
+		maximum = 1<<8 - 1
 	case hir.TypeU32:
-		maximum = new(big.Int).SetUint64(1<<32 - 1)
+		maximum = 1<<32 - 1
 	case hir.TypeUSize:
-		maximum = new(big.Int).SetUint64(^uint64(0))
+		maximum = ^uint64(0)
 	default:
 		return true
 	}
-	return value.Cmp(maximum) <= 0
+	comparison, valid := compareIntegerLiteralMagnitude(raw, maximum)
+	return valid && comparison <= 0
+}
+
+func directI32MinimumLiteral(expression *ast.Expression) bool {
+	if expression == nil || expression.Kind != syntax.KindLiteral || !isIntegerLiteral(expression.Text) {
+		return false
+	}
+	comparison, valid := compareIntegerLiteralMagnitude(expression.Text, 1<<31)
+	return valid && comparison == 0
+}
+
+func compareIntegerLiteralMagnitude(raw string, maximum uint64) (int, bool) {
+	base, start := 10, 0
+	if strings.HasPrefix(raw, "0x") || strings.HasPrefix(raw, "0X") {
+		base, start = 16, 2
+	} else if strings.HasPrefix(raw, "0b") || strings.HasPrefix(raw, "0B") {
+		base, start = 2, 2
+	}
+	maximumDigits := strconv.FormatUint(maximum, base)
+	significantDigits := 0
+	seenNonZero := false
+	for index := start; index < len(raw); index++ {
+		if raw[index] == '_' {
+			continue
+		}
+		digit, valid := integerDigitValue(raw[index])
+		if !valid || digit >= base {
+			return 0, false
+		}
+		if !seenNonZero && digit == 0 {
+			continue
+		}
+		seenNonZero = true
+		significantDigits++
+	}
+	if !seenNonZero {
+		return -1, true
+	}
+	if significantDigits < len(maximumDigits) {
+		return -1, true
+	}
+	if significantDigits > len(maximumDigits) {
+		return 1, true
+	}
+	maximumIndex := 0
+	seenNonZero = false
+	for index := start; index < len(raw); index++ {
+		if raw[index] == '_' {
+			continue
+		}
+		digit, _ := integerDigitValue(raw[index])
+		if !seenNonZero && digit == 0 {
+			continue
+		}
+		seenNonZero = true
+		maximumDigit, _ := integerDigitValue(maximumDigits[maximumIndex])
+		if digit < maximumDigit {
+			return -1, true
+		}
+		if digit > maximumDigit {
+			return 1, true
+		}
+		maximumIndex++
+	}
+	return 0, true
+}
+
+func integerDigitValue(value byte) (int, bool) {
+	switch {
+	case value >= '0' && value <= '9':
+		return int(value - '0'), true
+	case value >= 'a' && value <= 'f':
+		return int(value-'a') + 10, true
+	case value >= 'A' && value <= 'F':
+		return int(value-'A') + 10, true
+	default:
+		return 0, false
+	}
 }
 
 func literalClass(raw string) string {

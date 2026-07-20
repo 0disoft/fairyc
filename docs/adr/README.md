@@ -117,7 +117,8 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0105-checked-immutable-byte-view-slicing.md`: end-exclusive zero-copy `&[u8]` subviews with preserved borrow origin and dominating `bounds` checks before pointer derivation.
 - `0106-always-checked-assert.md`: profile-independent `assert(condition);` with exact bool typing, verified failure edges, and stable `assertion-failed` traps.
 - `0107-omitted-immutable-byte-view-slice-bounds.md`: prefix, suffix, and whole immutable byte-view slices normalized to the existing checked MIR path without receiver re-evaluation.
-- `0108-integer-literal-range-validation.md`: radix-correct arbitrary-precision range validation at the semantic boundary with stable `E1013` rejection before MIR.
+- `0108-integer-literal-range-validation.md`: radix-correct range validation at the semantic boundary with stable `E1013` rejection before MIR.
+- `0109-direct-i32-minimum-literal.md`: direct decimal, hexadecimal, or binary `i32` minimum folding plus allocation-limited semantic magnitude comparison.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

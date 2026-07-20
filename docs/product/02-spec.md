@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0108-integer-literal-range-validation.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0109-direct-i32-minimum-literal.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -43,7 +43,7 @@ Name resolution, canonical type selection, phase ownership, cascade suppression,
 - `if` is an expression. `match` is limited to shallow variants and inert fields.
 - `discard` explicitly ignores a must-use value and drops its active payload.
 - Unsafe operations and C declarations use `unsafe`, `unsafe extern C fn`, `@repr(C)`, and `@link_name`.
-- Decimal, hexadecimal, binary, floating, UTF-8 string, byte-string, C-string, boolean, and raw-pointer null literals use the exact spellings and escape rules in the parser contract.
+- Decimal, hexadecimal, binary, floating, UTF-8 string, byte-string, C-string, boolean, and raw-pointer null literals use the exact spellings and escape rules in the parser contract. Implemented integers reject out-of-range magnitudes as `E1013` before MIR; direct unary minus folds the one exact `i32` minimum magnitude without changing runtime checked-negation behavior.
 - Expressions follow one fixed Pratt binding-power table; comparisons are non-associative and assignment is never an expression.
 - File identity maps source-root-relative `path/name.fy` directly to `module path::name;` with no special root filename.
 - Parser recovery preserves byte spans and error nodes but never permits a recovered file to reach HIR.

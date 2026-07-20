@@ -132,6 +132,51 @@ func TestAnalyzeRejectsIntegerLiteralOutsideSelectedType(t *testing.T) {
 	}
 }
 
+func TestAnalyzeFoldsDirectI32MinimumLiteral(t *testing.T) {
+	t.Parallel()
+	for _, value := range []string{"-2147483648", "-0x8000_0000", "-0b10000000000000000000000000000000"} {
+		value := value
+		t.Run(value, func(t *testing.T) {
+			result := analyzeText(t, map[string]string{
+				"main.fy": "module main;\nfn main() -> i32 { " + value + " }\n",
+			})
+			assertCleanTypeResult(t, result)
+			tail := result.HIR.Modules[0].Functions[0].Body.Tail
+			if tail == nil || tail.Kind != "literal" || tail.Type != hir.TypeI32 || tail.Value != "-2147483648" || len(tail.Children) != 0 {
+				t.Fatalf("folded minimum = %+v", tail)
+			}
+		})
+	}
+}
+
+func TestAnalyzeRejectsIntegerMagnitudeBeyondDirectI32Minimum(t *testing.T) {
+	t.Parallel()
+	for _, value := range []string{"-2147483649", "-0x8000_0001"} {
+		value := value
+		t.Run(value, func(t *testing.T) {
+			text := "module main;\nfn main() -> i32 { " + value + " }\n"
+			result := analyzeText(t, map[string]string{"main.fy": text})
+			if result.FailedPhase != semantic.PhaseType || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E1013" {
+				t.Fatalf("result = %+v", result)
+			}
+			start := strings.Index(text, value) + 1
+			assertSpan(t, result.Diagnostics[0].Primary, "main.fy", start, start+len(value)-1)
+		})
+	}
+}
+
+func TestAnalyzeRejectsVeryLongIntegerWithoutHostOverflow(t *testing.T) {
+	t.Parallel()
+	value := strings.Repeat("9", 64<<10)
+	text := "module main;\nfn main() -> i32 { " + value + " }\n"
+	result := analyzeText(t, map[string]string{"main.fy": text})
+	if result.FailedPhase != semantic.PhaseType || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E1013" {
+		t.Fatalf("diagnostics = %+v, unsupported = %+v", result.Diagnostics, result.Unsupported)
+	}
+	start := strings.Index(text, value)
+	assertSpan(t, result.Diagnostics[0].Primary, "main.fy", start, start+len(value))
+}
+
 func TestAnalyzeReportsNonBooleanCondition(t *testing.T) {
 	t.Parallel()
 	text := "module main;\n\nfn answer() -> i32 {\n    if 1 { 2 } else { 3 }\n}\n"

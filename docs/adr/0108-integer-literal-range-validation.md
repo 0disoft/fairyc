@@ -3,6 +3,7 @@
 - Status: Accepted
 - Date: 2026-07-20
 - Diagnostic: `E1013`
+- Superseded in part: ADR 0109 admits the exact `i32` minimum magnitude under direct unary minus and replaces the semantic arbitrary-precision comparison implementation.
 
 ## Context
 

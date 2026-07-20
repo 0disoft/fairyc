@@ -157,6 +157,8 @@ semantics, and it is emitted only in functions containing checked division or re
   Their larger inactive-field representation is a transport choice, not a stabilized language
   layout or ABI promise.
 - Type punning through incompatible C lvalues is forbidden.
+- A folded direct `i32` minimum literal emits `INT32_MIN`; generated C never relies on the
+  implementation-defined type or conversion of a positive decimal `2147483648` token.
 - Stage 0 emits no `restrict` and makes no speculative `noalias` promise.
 - Padding bytes are never treated as initialized semantic data.
 - Immutable byte-view slicing emits both `start > end` and `end > length` checks before any C

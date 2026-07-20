@@ -20,6 +20,10 @@ fn subtract_boundary() -> i32 {
     -2147483647 - 1
 }
 
+fn direct_minimum_literal() -> i32 {
+    -0x8000_0000
+}
+
 fn multiply_boundary() -> i32 {
     46340 * 46340
 }

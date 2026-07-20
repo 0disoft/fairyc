@@ -26,6 +26,8 @@
     "docs/adr/0105-checked-immutable-byte-view-slicing.md",
     "docs/adr/0106-always-checked-assert.md",
     "docs/adr/0107-omitted-immutable-byte-view-slice-bounds.md",
+    "docs/adr/0108-integer-literal-range-validation.md",
+    "docs/adr/0109-direct-i32-minimum-literal.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/mir-v0.md",
     "docs/engineering/05-testing-standard.md"
@@ -108,6 +110,18 @@
       "sourceRoot": "cases/pass/checked-arithmetic/src",
       "sources": ["main.fy"],
       "entry": "main::subtract_boundary",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": -2147483648
+      }
+    },
+    {
+      "id": "pass.interpreter.direct-i32-minimum-literal",
+      "sourceRoot": "cases/pass/checked-arithmetic/src",
+      "sources": ["main.fy"],
+      "entry": "main::direct_minimum_literal",
       "expect": {
         "status": "pass",
         "completedThrough": "interpret",

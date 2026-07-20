@@ -9,5 +9,6 @@ fn main() -> i32 {
         index = index + 1;
     }
     assert(total == 0x2A);
+    assert(-0x8000_0000 + 0x7FFF_FFFF + 0b1 == 0);
     if !bytes.is_empty && b"".is_empty { total } else { 0b1 }
 }

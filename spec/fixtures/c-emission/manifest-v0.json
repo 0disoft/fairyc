@@ -31,6 +31,8 @@
     "docs/adr/0105-checked-immutable-byte-view-slicing.md",
     "docs/adr/0106-always-checked-assert.md",
     "docs/adr/0107-omitted-immutable-byte-view-slice-bounds.md",
+    "docs/adr/0108-integer-literal-range-validation.md",
+    "docs/adr/0109-direct-i32-minimum-literal.md",
     "docs/mir/mir-v0.md",
     "docs/mir/c-backend-safety-v0.md",
     "docs/runtime/runtime-stdlib-v0.md",
