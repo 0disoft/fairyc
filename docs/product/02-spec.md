@@ -341,8 +341,9 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   restricted inert-enum, flat-resource, and resource-tagged MIR
   under the provisional `x86_64-linux-gnu` profile. It includes private `Option<i32>`,
   `Result<i32, i32>`, copy-only built-in tags over canonical Fairy scalars or admitted inert structs,
-  nonempty all-`i32` resource transport, and built-in resource-bearing tags whose payloads are
-  exactly `i32` or direct admitted resources, plus private restricted user-enum tags
+  nonempty empty-drop resource transport over Fairy copy scalars or raw pointers, and built-in
+  resource-bearing tags whose payloads are exactly `i32` or direct admitted resources, plus private
+  restricted user-enum tags
   whose payload fields are admitted scalars, raw pointers, or admitted inert structs. Nested user enums
   and built-in tags inside a user-enum payload remain a C-backend capability boundary. No public
   tagged or resource ABI is claimed.
@@ -386,7 +387,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   product `emit-c` and `build`. No hosted success receipt or broader target
   conformance follows from the command's presence.
 - The experimental target-inspection command emits that target description without probing the
-  host. It reports `scalar-and-flat-i32-resource-tagged-c11` separately while keeping `emittable`,
+  host. It reports `scalar-and-flat-copy-resource-tagged-c11` separately while keeping `emittable`,
   `conformant`, and `supported` false and listing the evidence still missing.
 - The provisional top-level `targets` command renders every validated TargetSpec in canonical ID
   order with its schema, admitted emission subset, independent maturity states, and sorted missing
@@ -409,7 +410,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   Its backend profile consumes Windows LLP64 scalar providers, emits the target ID in the C unit,
   admits `c::long` as four-byte signed C `long`, and rejects unavailable POSIX `c::ssize_t`.
   `examples/windows_target/main.fy` carries an unused `c::long` declaration so local x64 MSVC must
-  compile the target assertion, then calls exact project-owned SystemHeap allocate/deallocate,
+  compile the target assertion, constructs and reads one move-only resource containing an exact
+  pointer-width raw handle plus `u32` state, then calls exact project-owned SystemHeap allocate/deallocate,
   Buffer initialize/zeroed-resize/drop, Arena initialize/Region begin/zeroed allocation/reset/Arena
   drop, CStr validation, String copy/view/append/drop, CString from-text/view/drop, and
   `fy_std_text_utf8_valid_v0(*u8, usize) -> u32` C

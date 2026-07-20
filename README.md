@@ -46,9 +46,10 @@ through typed HIR and executable MIR. The current executable subset accepts only
 `drop` body; any nonempty body fails explicitly before Flow or MIR instead of being silently ignored.
 The interpreter constructs, reads, and recursively drops resources from the verified MIR definition,
 but still does not execute user drop-body effects.
-The constrained C backend emits deterministic C11 for 32 verified fixtures across the scalar
-payload surface, restricted inert user enums, flat nonempty all-`i32` resources with empty drop
-bodies, copy-scalar/inert-struct and resource-bearing built-in `Option` and `Result` values,
+The constrained C backend emits deterministic C11 for 33 verified fixtures across the scalar
+payload surface, restricted inert user enums, flat nonempty move-only resources over Fairy copy
+scalars or raw pointers with empty drop bodies, copy-scalar/inert-struct and resource-bearing
+built-in `Option` and `Result` values,
 borrowed-view byte lengths, checked
 immutable byte-slice indexing and end-exclusive slicing, the target-independent value-preserving integer casts `u8 as i32`,
 `u8 as u32`, `u8 as usize`, and `u32 as usize`, checked `u8`, `u32`, and `usize` addition,
@@ -113,7 +114,9 @@ normalized drop state execute at both MSVC profiles. Arena selection independent
 same SystemHeap component once, then initialization, one active Region, an eight-byte allocation,
 reset invalidation, and drop generations execute at both profiles. The Windows x64 heap path uses
 the documented 16-byte `malloc` alignment ceiling instead of the MSVC C header's missing
-`max_align_t`. The Windows target commands now accept a bounded explicit FY module closure through
+`max_align_t`. The same checked-in target constructs and reads a move-only resource containing an
+exact pointer-width raw handle plus `u32` state before returning 42. The Windows target commands now
+accept a bounded explicit FY module closure through
 repeated `--source`; every foreign companion input, unproven standard-library component, user linker
 option, distribution promise, and self-hosting path remains closed.
 The sibling `experimental run-target` command uses the same declared target, emission profile,

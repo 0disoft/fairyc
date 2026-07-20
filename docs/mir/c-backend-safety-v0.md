@@ -88,9 +88,11 @@ remain closed. The native matrix includes an 8-byte register result and a 20-byt
 result from a separately compiled C callee.
 
 The emitter additionally accepts direct resource values only when every program-level definition is
-nonempty, every declaration-ordered field is exactly `i32`, and the verified user drop body is
-empty. Resources may be locals, parameters, private function returns, and by-value call arguments.
-Numeric translation-unit types and fields prevent source identifiers from becoming C symbols.
+nonempty, every declaration-ordered field is a Fairy copy scalar or raw pointer, and the verified
+user drop body is empty. Resources may be locals, parameters, private function returns, and by-value
+call arguments. Exact MIR field types select target-laid-out private C fields; raw pointers remain
+non-owning values during empty-drop cleanup. Numeric translation-unit types and fields prevent
+source identifiers from becoming C symbols.
 
 Generic `Option` and `Result` values are accepted when each payload is a canonical Fairy copy scalar
 (`bool`, `u8`, `i32`, `u32`, or `usize`), an admitted inert struct, or a direct admitted resource.
@@ -102,7 +104,8 @@ Copy-only tags do not need drop; a generic tag needs drop only when a direct pay
 Payload extraction must agree with the MIR move marker. Result propagation reconstructs the
 enclosing function's declared Result type on the error path.
 
-The emitter rejects empty, non-`i32`, nested, partially initialized, or nonempty-drop resources;
+The emitter rejects empty, nested-struct/array/C-scalar/borrow/Region/nested-resource, partially
+initialized, or nonempty-drop resources;
 nested tags, user-enum/array/raw-pointer/C-scalar tagged payloads, and other tagged payload
 combinations; Region operations;
 safe-borrow operations other than the exact verified view metadata, immutable byte indexing, and
@@ -111,7 +114,7 @@ outside the admitted scalar foreign-call form; complete runtime and
 standard-library lowering; malformed
 destinations; and non-canonical block shapes. Empty-drop discharge produces no invented cleanup
 call. This is private transport, not public Fairy ABI or user drop-body execution.
-`spec/fixtures/c-emission/manifest-v0.json` currently proves 32 source-to-emission cases and
+`spec/fixtures/c-emission/manifest-v0.json` currently proves 33 source-to-emission cases and
 repeated byte identity. No C parser, compiler, object writer, assembler, linker, executable,
 sanitizer, layout probe, or ABI probe runs in that fixture lane.
 

@@ -29,6 +29,54 @@ func TestCEmissionSchemaV0Header(t *testing.T) {
 	}
 }
 
+func TestCEmissionSchemaAllowsEveryManifestFeature(t *testing.T) {
+	t.Parallel()
+	root := filepath.Join("..", "..", "spec", "fixtures", "c-emission")
+	contents, err := os.ReadFile(filepath.Join(root, "schema-v0.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var schema struct {
+		Definitions struct {
+			Feature struct {
+				Enum []string `json:"enum"`
+			} `json:"feature"`
+		} `json:"$defs"`
+	}
+	if err := json.Unmarshal(contents, &schema); err != nil {
+		t.Fatalf("schema is not JSON: %v", err)
+	}
+	allowed := make(map[string]struct{}, len(schema.Definitions.Feature.Enum))
+	for _, feature := range schema.Definitions.Feature.Enum {
+		if _, duplicate := allowed[feature]; duplicate {
+			t.Fatalf("schema repeats feature %q", feature)
+		}
+		allowed[feature] = struct{}{}
+	}
+	manifestContents, err := os.ReadFile(filepath.Join(root, "manifest-v0.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var manifest struct {
+		Cases []struct {
+			ID     string `json:"id"`
+			Expect struct {
+				Features []string `json:"features"`
+			} `json:"expect"`
+		} `json:"cases"`
+	}
+	if err := json.Unmarshal(manifestContents, &manifest); err != nil {
+		t.Fatalf("manifest is not JSON: %v", err)
+	}
+	for _, fixture := range manifest.Cases {
+		for _, feature := range fixture.Expect.Features {
+			if _, found := allowed[feature]; !found {
+				t.Errorf("%s uses feature %q absent from schema", fixture.ID, feature)
+			}
+		}
+	}
+}
+
 func TestCEmissionManifestV0(t *testing.T) {
 	t.Parallel()
 	manifestPath := filepath.Join("..", "..", "spec", "fixtures", "c-emission", "manifest-v0.json")
@@ -36,14 +84,14 @@ func TestCEmissionManifestV0(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Run() error = %v", err)
 	}
-	if report.CasesRun != 32 {
-		t.Fatalf("Run() cases = %d, want 32", report.CasesRun)
+	if report.CasesRun != 33 {
+		t.Fatalf("Run() cases = %d, want 33", report.CasesRun)
 	}
 	for _, failure := range report.Failures {
 		t.Errorf("%s: %s", failure.CaseID, failure.Detail)
 	}
-	if len(report.Emitted) != 32 {
-		t.Errorf("Run() emitted = %d, want 32", len(report.Emitted))
+	if len(report.Emitted) != 33 {
+		t.Errorf("Run() emitted = %d, want 33", len(report.Emitted))
 	}
 	observedDrops := 0
 	for _, fixture := range report.Emitted {

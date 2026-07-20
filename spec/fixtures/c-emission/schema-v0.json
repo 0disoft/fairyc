@@ -37,20 +37,35 @@
     },
     "feature": {
       "enum": [
+        "array-byte-view-borrow",
+        "array-index",
+        "array-length",
+        "assert",
         "checked-arithmetic",
         "checked-division",
         "checked-shift",
+        "copy-result",
+        "flat-copy-resource",
         "flat-i32-resource",
         "inert-enum",
+        "inert-struct",
         "resource-option",
         "resource-result",
         "scalar-bitwise",
         "scalar-call",
+        "scalar-cast",
         "scalar-comparison",
         "scalar-control-flow",
+        "scalar-fixed-array",
         "scalar-option",
         "scalar-result",
-        "trap"
+        "static-byte-string",
+        "static-utf8-string",
+        "trap",
+        "view-empty",
+        "view-index",
+        "view-length",
+        "view-slice"
       ]
     },
     "expectation": {

@@ -6,6 +6,13 @@ unsafe extern C fn unused_windows_long(value: c::long) -> c::long;
 @link_name("fy_std_text_utf8_valid_v0")
 unsafe extern C fn utf8_valid(data: *u8, length: usize) -> u32;
 
+resource native_handle {
+    raw: *mut void;
+    state: u32;
+
+    drop fn(self: &mut Self) {}
+}
+
 @repr(C)
 struct system_heap_block {
     data: *mut void;
@@ -151,6 +158,8 @@ unsafe extern C fn view_cstring(
 unsafe extern C fn drop_cstring(value: *mut owned_cstring) -> owned_text_result;
 
 fn main() -> i32 {
+    let handle: native_handle = native_handle { raw: null, state: 42 };
+    let handle_valid: bool = handle.raw == null && handle.state == 42;
     var block: system_heap_block = system_heap_block {
         data: null,
         size: 0,
@@ -307,7 +316,8 @@ fn main() -> i32 {
         validate_cstr(c"Fairy" as *u8, 6, &mut direct_cstr_view as *mut cstr_view)
     };
     let direct_cstr_state: bool = direct_cstr_view.data != null && direct_cstr_view.length == 5;
-    if allocated == 0 && allocation_valid && deallocated == 0 && deallocation_valid &&
+    if handle_valid && allocated == 0 && allocation_valid &&
+        deallocated == 0 && deallocation_valid &&
         initialized == 0 && resized == 0 && buffer_valid && dropped == 0 && buffer_dropped &&
         arena_initialized == 0 && arena_initial_state && region_started == 0 && region_active &&
         region_allocated == 0 && region_allocation_state && region_reset == 0 &&

@@ -897,7 +897,7 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 
 func (r *runtime) dropValue(value runtimeValue, binding hir.Span) error {
 	switch value.kind {
-	case valueI32:
+	case valueI32, valueU8, valueU32, valueUSize, valueNull:
 		return nil
 	case valueResult, valueOption:
 		if value.tagged == nil {

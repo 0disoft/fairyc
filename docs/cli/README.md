@@ -103,6 +103,7 @@ plus repeatable `--source` values form an explicit closure of at most 64 FY file
 source root and existing aggregate byte limit. Duplicate paths, module/path drift, unresolved
 imports, and a missing entry fail; no directory, manifest, or transitive source discovery occurs. The current command
 permits target declarations such as unused `c::long` and automatically links exact proven
+move-only resource transport over Fairy copy scalars or raw pointers, plus
 SystemHeap allocate/deallocate, Buffer initialize/zeroed-resize/drop, Arena initialize/Region
 begin/zeroed-allocation/reset/Arena-drop, CStr validation, String copy/view/append/drop, CString
 from-text/view/drop, and `fy_std_text_utf8_valid_v0` project-owned components when called. Buffer,

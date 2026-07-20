@@ -154,8 +154,9 @@ broaden the thin runtime or complete the standard library.
 
 The implemented slice emits deterministic C11 for verified scalar-payload MIR, including
 private `Option<i32>` and `Result<i32, i32>` transport, copy-only built-in tags over canonical Fairy
-scalars or admitted inert structs, plus nonempty all-`i32` resource definitions with empty drop
-bodies and resource-bearing built-in tags whose other payloads are supported copy values or another
+scalars or admitted inert structs, plus nonempty resource definitions over Fairy copy scalars or
+raw pointers with empty drop bodies and resource-bearing built-in tags whose other payloads are
+supported copy values or another
 direct admitted resource. Resource and tagged layout comes from the declared target engine and is
 rechecked with C11 size, alignment, and field-offset assertions. `?` error paths rebuild the
 enclosing function's declared Result type instead of returning a differently typed operand

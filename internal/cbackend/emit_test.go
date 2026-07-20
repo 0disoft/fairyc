@@ -1184,12 +1184,58 @@ fn main() -> i32 {
 	}
 }
 
-func TestEmitRejectsNonI32ResourceField(t *testing.T) {
+func TestEmitFlatCopyResourceWithRawPointer(t *testing.T) {
 	t.Parallel()
-	program := lowerSource(t, "module main;\nresource Flag { value: bool; drop fn(self: &mut Self) {} }\nfn main() -> i32 { 0 }\n")
+	program := lowerSource(t, `module main;
+resource Handle {
+    raw: *mut void;
+    state: u32;
+    drop fn(self: &mut Self) {}
+}
+fn main() -> i32 {
+    let handle: Handle = Handle { raw: null, state: 42 };
+    if handle.raw == null {
+        if handle.state == 42 { 42 } else { 1 }
+    } else {
+        2
+    }
+}
+`)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("interpreter = %+v, %v", outcome, err)
+	}
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	wantFeatures := []string{"flat-copy-resource", "scalar-comparison", "scalar-control-flow"}
+	if !slices.Equal(unit.Features, wantFeatures) {
+		t.Fatalf("Emit() features = %v, want %v", unit.Features, wantFeatures)
+	}
+	for _, required := range []string{
+		"void * f_0;",
+		"uint32_t f_1;",
+		"_Static_assert(sizeof(fy_resource_0) == UINT64_C(16)",
+		"_Static_assert(_Alignof(fy_resource_0) == UINT64_C(8)",
+		"offsetof(fy_resource_0, f_0) == UINT64_C(0)",
+		"offsetof(fy_resource_0, f_1) == UINT64_C(8)",
+		"(fy_resource_0){ .f_0 = ((void *)0), .f_1 = UINT32_C(42) }",
+		".f_0;",
+		".f_1;",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q", required)
+		}
+	}
+}
+
+func TestEmitRejectsNestedStructResourceField(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, "module main;\nstruct Marker { value: u32; }\nresource Holder { marker: Marker; drop fn(self: &mut Self) {} }\nfn main() -> i32 { 0 }\n")
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	var capability cbackend.CapabilityError
-	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "field \"value\" of type \"bool\"") || capability.Function != "" {
+	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "field \"marker\" of type \"main::Marker\"") || capability.Function != "" {
 		t.Fatalf("Emit() error = %v", err)
 	}
 }

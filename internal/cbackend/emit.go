@@ -131,6 +131,7 @@ type resourceCType struct {
 	layout     layout.Result
 	layoutType layout.Type
 	fieldIndex map[string]int
+	feature    string
 }
 
 type enumCType struct {
@@ -348,8 +349,8 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 			}
 		}
 	}
-	if len(resourceTypes) != 0 {
-		value.features["flat-i32-resource"] = struct{}{}
+	for _, resource := range resourceTypes {
+		value.features[resource.feature] = struct{}{}
 	}
 	for index := range functions {
 		function := &functions[index]
@@ -651,14 +652,17 @@ func prepareResourceTypes(definitions []mir.ResourceType, engine *layout.Engine)
 		}
 		fields := make([]layout.Field, 0, len(definition.Fields))
 		fieldIndex := make(map[string]int, len(definition.Fields))
+		allI32 := true
 		for index, field := range definition.Fields {
-			if field.Type != hir.TypeI32 {
+			fieldType, ok := resourceFieldLayoutType(field.Type)
+			if !ok {
 				return nil, nil, CapabilityError{Feature: "resource type " + strconv.Quote(string(definition.Type)) + " field " + strconv.Quote(field.Name) + " of type " + strconv.Quote(string(field.Type))}
 			}
+			allI32 = allI32 && field.Type == hir.TypeI32
 			fieldIndex[field.Name] = index
 			fields = append(fields, layout.Field{
 				Name: fmt.Sprintf("f_%d", index),
-				Type: layout.Type{Kind: layout.KindLanguageScalar, Name: string(hir.TypeI32)},
+				Type: fieldType,
 			})
 		}
 		aggregateType := layout.Type{Kind: layout.KindStruct, Fields: fields}
@@ -673,9 +677,27 @@ func prepareResourceTypes(definitions []mir.ResourceType, engine *layout.Engine)
 			return nil, nil, fmt.Errorf("duplicate C resource type %q", definition.Type)
 		}
 		byType[definition.Type] = len(result)
-		result = append(result, resourceCType{definition: definition, layout: computed, layoutType: aggregateType, fieldIndex: fieldIndex})
+		feature := "flat-copy-resource"
+		if allI32 {
+			feature = "flat-i32-resource"
+		}
+		result = append(result, resourceCType{
+			definition: definition, layout: computed, layoutType: aggregateType,
+			fieldIndex: fieldIndex, feature: feature,
+		})
 	}
 	return result, byType, nil
+}
+
+func resourceFieldLayoutType(value hir.Type) (layout.Type, bool) {
+	canonical := canonicalCValueType(value)
+	if canonical == hir.TypeU8 || canonical == hir.TypeI32 || canonical == hir.TypeU32 || canonical == hir.TypeUSize {
+		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(canonical)}, true
+	}
+	if _, _, pointer := hir.RawPointerElement(value); pointer {
+		return layout.Type{Kind: layout.KindPointer}, true
+	}
+	return layout.Type{}, false
 }
 
 func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, error) {
@@ -2087,8 +2109,11 @@ func (e *emitter) inspectResourceOperation(functionIndex int, operation mir.Oper
 			if err != nil {
 				return fmt.Errorf("resource construction field %d in %s: %w", fieldIndex, function.Name, err)
 			}
-			if canonicalCValueType(operandType) != hir.TypeI32 {
-				return CapabilityError{Function: function.Name, Feature: "non-i32 resource construction field"}
+			if operandType != field.Type {
+				return fmt.Errorf(
+					"resource construction field %d in %s has type %q, want %q",
+					fieldIndex, function.Name, operandType, field.Type,
+				)
 			}
 		}
 	case mir.OperationFieldRead:
@@ -2097,8 +2122,15 @@ func (e *emitter) inspectResourceOperation(functionIndex int, operation mir.Oper
 			return CapabilityError{Function: function.Name, Feature: "field-read owner type " + strconv.Quote(string(operation.OwnerType))}
 		}
 		definition := &e.resourceTypes[index]
-		if _, found := definition.fieldIndex[operation.Field]; !found || operation.Type != hir.TypeI32 {
-			return CapabilityError{Function: function.Name, Feature: "non-i32 resource field read"}
+		fieldIndex, found := definition.fieldIndex[operation.Field]
+		if !found {
+			return fmt.Errorf("resource field read in %s names missing field %q", function.Name, operation.Field)
+		}
+		if operation.Type != definition.definition.Fields[fieldIndex].Type {
+			return fmt.Errorf(
+				"resource field read in %s has type %q, want %q",
+				function.Name, operation.Type, definition.definition.Fields[fieldIndex].Type,
+			)
 		}
 		receiver, err := oneOperand(operation.Operands)
 		if err != nil {
@@ -2541,8 +2573,12 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 	}
 	for index, resource := range e.resourceTypes {
 		output.WriteString("typedef struct {\n")
-		for fieldIndex := range resource.definition.Fields {
-			fmt.Fprintf(output, "    int32_t f_%d;\n", fieldIndex)
+		for fieldIndex, field := range resource.definition.Fields {
+			cType, err := e.cValueType(field.Type)
+			if err != nil {
+				return fmt.Errorf("resource type %q field %q: %w", resource.definition.Type, field.Name, err)
+			}
+			fmt.Fprintf(output, "    %s f_%d;\n", cType, fieldIndex)
 		}
 		fmt.Fprintf(output, "} fy_resource_%d;\n", index)
 		fmt.Fprintf(output, "_Static_assert(sizeof(fy_resource_%d) == UINT64_C(%d), \"fairyc resource %d size\");\n", index, resource.layout.SizeBytes, index)

@@ -38,7 +38,7 @@ func TestX8664LinuxGNUSpecIsValidAndHostIndependent(t *testing.T) {
 	if ssizeT.Name == "" || ssizeT.Layout != (Layout{SizeBytes: 8, AlignmentBytes: 8}) || ssizeT.Signedness != "signed" || ssizeT.Header != "sys/types.h" || ssizeT.Availability != "posix.1-2008" {
 		t.Fatalf("target c.ssize_t = %+v", ssizeT)
 	}
-	if spec.Evidence.EmissionSubset != "scalar-and-flat-i32-resource-tagged-c11" {
+	if spec.Evidence.EmissionSubset != "scalar-and-flat-copy-resource-tagged-c11" {
 		t.Fatalf("target emission subset = %q", spec.Evidence.EmissionSubset)
 	}
 	if spec.Evidence.Emittable || spec.Evidence.Conformant || spec.Evidence.Supported || len(spec.Evidence.Missing) == 0 {

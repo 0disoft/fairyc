@@ -260,7 +260,7 @@ source-level Fairy or foreign-frame crossings, object-level unwind relocations, 
 remain absent; `windows-x64-unwind-fixtures` therefore remains missing.
 
 This executable description is target data, not conformance evidence. Its evidence block names the
-existing `scalar-and-flat-i32-resource-tagged-c11` subset, keeps `emittable`, `conformant`, and `supported` false, and
+existing `scalar-and-flat-copy-resource-tagged-c11` subset, keeps `emittable`, `conformant`, and `supported` false, and
 lists the missing hosted native C layout-probe receipt, bidirectional ABI, runtime, standard-library, hosted-Linux, toolchain
 baseline, and provisioning gates. `fairyc experimental target-spec x86_64-linux-gnu` exposes that
 same immutable data without probing the host.

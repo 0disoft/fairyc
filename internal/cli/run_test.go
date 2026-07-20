@@ -359,14 +359,17 @@ func TestExperimentalEmitCRejectsUnsupportedBackendSubset(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
 	writeTestSource(t, root, "main.fy", `module main;
-resource Flag {
-    value: bool;
+struct Marker {
+    value: u32;
+}
+resource Holder {
+    marker: Marker;
     drop fn(self: &mut Self) {}
 }
 fn main() -> i32 { 0 }
 `)
 	code, stdout, stderr := runForTest([]string{"experimental", "emit-c", "main.fy"}, root)
-	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "experimental C-emission subset") || !strings.Contains(stderr, "field \"value\" of type \"bool\"") {
+	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "experimental C-emission subset") || !strings.Contains(stderr, "field \"marker\" of type \"main::Marker\"") {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
 	}
 }

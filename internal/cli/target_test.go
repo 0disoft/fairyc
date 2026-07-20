@@ -53,7 +53,7 @@ func TestTargetsReportsKnownMaturityWithoutReadingSource(t *testing.T) {
 	}
 	want := `x86_64-linux-gnu
   schema: fairyc.target-spec/v0
-  emission subset: scalar-and-flat-i32-resource-tagged-c11
+  emission subset: scalar-and-flat-copy-resource-tagged-c11
   emittable: no
   conformant: no
   supported: no

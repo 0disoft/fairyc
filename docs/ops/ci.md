@@ -21,14 +21,14 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
 - Ordinary tests execute the fixed lexer and parser fuzz seeds. Timed fuzz campaigns remain
   unconfigured rather than pretending a short CI sample proves coverage.
 - A separate Ubuntu native-C job invokes `cmd/fairyc-native-fixtures`. The command requires
-  Linux/amd64, glibc, Clang, and GCC; compiles all 32 current C-emission cases at `-O0` and
+  Linux/amd64, glibc, Clang, and GCC; compiles all 33 current C-emission cases at `-O0` and
   `-O2` with pedantic warnings as errors; links the scalar trap runtime plus the closed conformance
-  drop recorder; plans 128 exact process-status and source-linked drop-sequence comparisons;
+  drop recorder; plans 132 exact process-status and source-linked drop-sequence comparisons;
   exercises direct `i32` minimum transport plus explicit and omitted-bound immutable byte-view slicing through the same checked MIR and
   generated-C path; and compiles and executes one recursive C11 plus explicit POSIX-typedef probe for all 11 valid target-layout cases under the same
   4 compiler/profile pairs. It additionally recompiles every production C unit once per compiler
   with the closed `address-undefined-o1` ASan+UBSan mode, overrides ambient sanitizer options, and
-  requires all 64 executions to produce no diagnostic. The same job generates separate caller and
+  requires all 66 executions to produce no diagnostic. The same job generates separate caller and
   callee objects for all 14 C ABI pass plans and crosses Clang-to-GCC plus GCC-to-Clang at both
   profiles for 56 zero-output executions. The same matrix compiles and runs the provisional
   SystemHeap C probe four times, covering empty normalization, supported alignment, growth/shrink
@@ -107,8 +107,9 @@ returns 42, and `run-host` must independently return 42 before every temporary a
 The same smoke invokes `build-target` for `x86_64-windows-msvc` on the checked-in
 `examples/windows_target/main.fy`. Target selection happens before C emission, the generated unit
 uses the LLP64 profile and four-byte `c::long`, calls the real project-owned
-SystemHeap, Buffer, Arena/Region, String/CString/CStr, and UTF-8 C components, and the resulting PE must return
-42. The heap path allocates eight bytes at alignment eight, observes the record, frees it, and
+SystemHeap, Buffer, Arena/Region, String/CString/CStr, and UTF-8 C components, constructs one
+move-only pointer-width resource, and the resulting PE must return 42. The heap path allocates eight
+bytes at alignment eight, observes the record, frees it, and
 observes normalized zero state. The Buffer path selects SystemHeap exactly once, initializes
 capacity eight, resizes metadata to length four, drops, and observes normalized zero state; it does
 not inspect the zeroed bytes. The Arena path closes over the same SystemHeap component once,
