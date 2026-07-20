@@ -11,10 +11,10 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/frontend"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/interpreter"
-	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/source"
 )
@@ -115,7 +115,11 @@ func runCase(manifestDirectory string, fixture caseDefinition) []Failure {
 		}
 		files = append(files, semantic.File{Path: relativePath, Module: result.AST})
 	}
-	semanticResult := semantic.Analyze(files)
+	checked, err := compiler.Check(files)
+	if err != nil {
+		return []Failure{{CaseID: fixture.ID, Detail: err.Error()}}
+	}
+	semanticResult := checked.Semantic
 	if len(semanticResult.Unsupported) != 0 {
 		return []Failure{{CaseID: fixture.ID, Detail: fmt.Sprintf("fixture setup uses unsupported semantics: %+v", semanticResult.Unsupported)}}
 	}
@@ -125,11 +129,10 @@ func runCase(manifestDirectory string, fixture caseDefinition) []Failure {
 	if err := validateTestIntrinsicSignatures(semanticResult.HIR, fixture.TestIntrinsics); err != nil {
 		return []Failure{{CaseID: fixture.ID, Detail: err.Error()}}
 	}
-	program, err := mir.Lower(semanticResult.HIR)
-	if err != nil {
-		return []Failure{{CaseID: fixture.ID, Detail: err.Error()}}
+	if !checked.Verified {
+		return []Failure{{CaseID: fixture.ID, Detail: "fixture did not produce verified MIR"}}
 	}
-	outcome, err := interpreter.ExecuteWithOptions(program, fixture.Entry, interpreter.Options{
+	outcome, err := interpreter.ExecuteWithOptions(checked.MIR, fixture.Entry, interpreter.Options{
 		TestIntrinsics: testIntrinsics,
 		OutputLimit:    fixture.OutputLimit,
 	})

@@ -10,6 +10,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/frontend"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/mir"
@@ -98,21 +99,21 @@ func runCase(manifestDirectory string, fixture caseDefinition) []Failure {
 		files = append(files, semantic.File{Path: relativePath, Module: result.AST})
 	}
 
-	semanticResult := semantic.Analyze(files)
+	checked, err := compiler.Check(files)
+	if err != nil {
+		return []Failure{{CaseID: fixture.ID, Detail: err.Error()}}
+	}
+	semanticResult := checked.Semantic
 	if len(semanticResult.Unsupported) != 0 {
 		return []Failure{{CaseID: fixture.ID, Detail: fmt.Sprintf("fixture setup uses unsupported semantics: %+v", semanticResult.Unsupported)}}
 	}
 	if semanticResult.CompletedThrough != semantic.PhaseFlow || len(semanticResult.Diagnostics) != 0 {
 		return []Failure{{CaseID: fixture.ID, Detail: fmt.Sprintf("fixture did not complete Flow: phase=%q diagnostics=%+v", semanticResult.CompletedThrough, semanticResult.Diagnostics)}}
 	}
-	program, err := mir.Lower(semanticResult.HIR)
-	if err != nil {
-		return []Failure{{CaseID: fixture.ID, Detail: err.Error()}}
+	if !checked.Verified {
+		return []Failure{{CaseID: fixture.ID, Detail: "fixture did not produce verified MIR"}}
 	}
-	if failures := mir.Verify(program); len(failures) != 0 {
-		return []Failure{{CaseID: fixture.ID, Detail: fmt.Sprintf("MIR verifier rejected lowered program: %+v", failures)}}
-	}
-	return compareObservations(fixture, program)
+	return compareObservations(fixture, checked.MIR)
 }
 
 func compareObservations(fixture caseDefinition, program mir.Program) []Failure {

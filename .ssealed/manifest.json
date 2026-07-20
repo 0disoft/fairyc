@@ -1,7 +1,7 @@
 {
   "tool": "ssealed",
   "version": "0.6.11",
-  "generatedAt": "2026-07-20T23:29:31.120Z",
+  "generatedAt": "2026-07-20T23:41:37.921Z",
   "scope": "general",
   "profile": "cli-tool",
   "addons": [
@@ -529,13 +529,13 @@
     },
     {
       "path": "docs/architecture/02-runtime-flow.md",
-      "checksum": "sha256:ceda37e3e49432ae065f1c69e945bfb5ddc1f0718aa182055e65876bb3f1162b",
+      "checksum": "sha256:be4ff7b8602911ec3186ea7c68d8743beef0ca29e09e26ac070f41c86c115d8e",
       "kind": "document",
       "ownership": "seeded",
       "presence": "optional",
       "status": "active",
       "initialChecksum": "sha256:c0f5d7adf6082d4abc8e950b6b4f30103fcc40b32341513690ec00a2b2f7c288",
-      "acceptedChecksum": "sha256:ceda37e3e49432ae065f1c69e945bfb5ddc1f0718aa182055e65876bb3f1162b",
+      "acceptedChecksum": "sha256:be4ff7b8602911ec3186ea7c68d8743beef0ca29e09e26ac070f41c86c115d8e",
       "generatedChecksum": "sha256:c0f5d7adf6082d4abc8e950b6b4f30103fcc40b32341513690ec00a2b2f7c288"
     },
     {
@@ -650,13 +650,13 @@
     },
     {
       "path": "docs/engineering/05-testing-standard.md",
-      "checksum": "sha256:f336635dd36121962f60a0e8112e0e4085c98d0f545355f6c294e3aa738301b0",
+      "checksum": "sha256:e0c4799163fc77f23e8e7b8a92dddd270687f9f0d481cb2a525f90a27228d948",
       "kind": "document",
       "ownership": "seeded",
       "presence": "optional",
       "status": "active",
       "initialChecksum": "sha256:1f4bac44fda4431afe4567cadd6e5d080bcb2e3de09f468a9294251a6233c8e2",
-      "acceptedChecksum": "sha256:f336635dd36121962f60a0e8112e0e4085c98d0f545355f6c294e3aa738301b0",
+      "acceptedChecksum": "sha256:e0c4799163fc77f23e8e7b8a92dddd270687f9f0d481cb2a525f90a27228d948",
       "generatedChecksum": "sha256:1f4bac44fda4431afe4567cadd6e5d080bcb2e3de09f468a9294251a6233c8e2"
     },
     {

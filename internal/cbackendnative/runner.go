@@ -20,11 +20,11 @@ import (
 	"github.com/0disoft/fairyc/internal/cbackendfixture"
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/cli"
+	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/cruntime"
 	"github.com/0disoft/fairyc/internal/cstdlib"
 	"github.com/0disoft/fairyc/internal/frontend"
 	"github.com/0disoft/fairyc/internal/layoutfixture"
-	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/source"
 	"github.com/0disoft/fairyc/internal/target"
@@ -2329,18 +2329,18 @@ func runForeignSourceProbe(
 	if parsed.AST == nil || len(parsed.Tree.Diagnostics) != 0 {
 		return 0, fmt.Errorf("%s FY source is not parser-valid: %+v", probeID, parsed.Tree.Diagnostics)
 	}
-	semanticResult := semantic.Analyze([]semantic.File{{Path: sourcePath, Module: parsed.AST}})
+	checked, err := compiler.Check([]semantic.File{{Path: sourcePath, Module: parsed.AST}})
+	if err != nil {
+		return 0, fmt.Errorf("compile %s FY source: %w", probeID, err)
+	}
+	semanticResult := checked.Semantic
 	if semanticResult.CompletedThrough != semantic.PhaseFlow || len(semanticResult.Diagnostics) != 0 || len(semanticResult.Unsupported) != 0 {
 		return 0, fmt.Errorf("%s FY source did not complete Flow: phase=%q diagnostics=%+v unsupported=%+v", probeID, semanticResult.CompletedThrough, semanticResult.Diagnostics, semanticResult.Unsupported)
 	}
-	program, err := mir.Lower(semanticResult.HIR)
-	if err != nil {
-		return 0, fmt.Errorf("lower %s FY source: %w", probeID, err)
+	if !checked.Verified {
+		return 0, fmt.Errorf("%s FY source did not produce verified MIR", probeID)
 	}
-	if failures := mir.Verify(program); len(failures) != 0 {
-		return 0, fmt.Errorf("verify %s MIR: %+v", probeID, failures)
-	}
-	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	unit, err := cbackend.Emit(checked.MIR, "main::main", cbackend.Stage0Profile())
 	if err != nil {
 		return 0, fmt.Errorf("emit %s C: %w", probeID, err)
 	}

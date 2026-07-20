@@ -31,13 +31,19 @@ unit still looks reasonable.
    error stages. A verifier rejection remains an internal compiler defect rather than a user source
    diagnostic.
 5. A caller may consume `Result.MIR` only when `Result.Verified` is true.
-6. The experimental CLI source-closure path and resolved package fixture use this coordinator. Other
-   fixture runners may migrate to it without changing their manifest observations.
+6. The experimental CLI source-closure path, resolved package fixture, and every source-driven MIR,
+   interpreter, C-emission, and native-probe fixture producer use this coordinator without changing
+   their manifest observations.
+7. MIR-verifier mutation fixtures continue to invoke the verifier directly because verifier failure
+   is their test subject. Interpreter and backend entry points also retain defensive re-verification
+   for MIR received from callers; neither case is a source-to-MIR pipeline bypass.
 
 ## Consequences
 
 - Single-package product commands and resolved-package acceptance now share the same semantic,
   lowering, and verification gate.
+- Source-driven fixture lanes cannot silently assemble a weaker semantic-to-MIR sequence than the
+  product path.
 - Backend, interpreter, entry-point, toolchain, target, and artifact decisions remain downstream.
 - The coordinator does not make package discovery or a package-aware public CLI exist.
 - Expected source rejection stays structurally distinct from compiler failure.
@@ -48,5 +54,7 @@ unit still looks reasonable.
   resolved-package input failure;
 - CLI tests cover the existing check, run, emit, build, and target-facing behavior through the new
   coordinator;
+- a compiler-boundary architecture test parses every source-driven fixture runner and rejects direct
+  `semantic.Analyze`, `mir.Lower`, or `mir.Verify` calls;
 - the resolved module-path-isolation fixture completes the coordinator through verified MIR;
 - complete Go test, build, vet, and WSL-free Windows host-smoke intents cover integration regressions.

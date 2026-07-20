@@ -28,6 +28,11 @@ resolved package input. Ordinary source diagnostics remain semantic results, whi
 input, lowering failure, and verifier rejection retain distinct compiler-failure stages. A consumer
 receives executable MIR only after the shared coordinator marks it verified.
 
+The experimental product commands and all source-driven MIR, interpreter, C-emission, and native-
+probe fixture producers enter that boundary through `compiler.Check` or `compiler.CheckPackages`.
+Verifier-mutation fixtures call `mir.Verify` directly because rejection is their oracle, while the
+interpreter and C backend re-verify caller-provided MIR as a downstream defense.
+
 Parsing consumes original UTF-8 source bytes, preserves trivia and invalid-input provenance in compact lossless syntax, and recovers enough structure for deterministic diagnostics without accepting malformed programs as valid. Canonical spans remain half-open byte ranges. Only an error-free batch parse lowers to AST and HIR. Type checking operates on Fairy C target types, not Go host types. Arbitrary-size integer and exact-decimal literals remain exact until their target type and overflow behavior are known.
 
 In a resolved multi-package compilation, every semantic and MIR span carries the build-local package
