@@ -165,6 +165,11 @@ func comparePass(fixture caseDefinition, actual semantic.Result) []Failure {
 			failures = append(failures, Failure{CaseID: fixture.ID, Detail: fmt.Sprintf("borrow fact missing: %+v", expected)})
 		}
 	}
+	for _, expected := range fixture.Expect.Effects {
+		if !hasEffect(actual.Effects, expected) {
+			failures = append(failures, Failure{CaseID: fixture.ID, Detail: fmt.Sprintf("effect fact missing: %+v", expected)})
+		}
+	}
 	return failures
 }
 
@@ -217,6 +222,25 @@ func hasBorrow(actual []semantic.BorrowFact, expected borrowAssertion) bool {
 			return true
 		}
 		if value.LastUse != nil && expected.LastUse != nil && spanEqual(*value.LastUse, *expected.LastUse) {
+			return true
+		}
+	}
+	return false
+}
+
+func hasEffect(actual []semantic.EffectFact, expected effectAssertion) bool {
+	for _, value := range actual {
+		if !spanEqual(value.Declaration, expected.Declaration) || len(value.Effects) != len(expected.Effects) {
+			continue
+		}
+		matched := true
+		for index := range value.Effects {
+			if string(value.Effects[index]) != expected.Effects[index] {
+				matched = false
+				break
+			}
+		}
+		if matched {
 			return true
 		}
 	}

@@ -804,6 +804,143 @@ func TestAnalyzeDoesNotSilentlyAcceptLinkNameOnOrdinaryFunction(t *testing.T) {
 	}
 }
 
+func TestAnalyzePreservesCanonicalDeclaredEffectsOnFunctionsAndCalls(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+@effects(filesystem)
+fn load() -> i32 { 42 }
+@effects(filesystem, console)
+fn main() -> i32 { load() }
+`,
+	})
+	assertCleanTypeResult(t, result)
+	functions := result.HIR.Modules[0].Functions
+	if len(functions) != 2 {
+		t.Fatalf("functions = %+v", functions)
+	}
+	if !slices.Equal(functions[0].Effects, []hir.Effect{hir.EffectFilesystem}) {
+		t.Fatalf("load effects = %v", functions[0].Effects)
+	}
+	wantMain := []hir.Effect{hir.EffectConsole, hir.EffectFilesystem}
+	if !slices.Equal(functions[1].Effects, wantMain) {
+		t.Fatalf("main effects = %v, want %v", functions[1].Effects, wantMain)
+	}
+	if functions[1].Body.Tail == nil || !slices.Equal(functions[1].Body.Tail.Effects, functions[0].Effects) {
+		t.Fatalf("call effects = %+v", functions[1].Body.Tail)
+	}
+	if len(result.Effects) != 2 || !slices.Equal(result.Effects[0].Effects, functions[0].Effects) || !slices.Equal(result.Effects[1].Effects, functions[1].Effects) {
+		t.Fatalf("effect facts = %+v", result.Effects)
+	}
+}
+
+func TestAnalyzeChecksForeignEffectsIndependentlyFromUnsafe(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+@effects(filesystem)
+unsafe extern C fn raw_sync() -> i32;
+@effects(filesystem)
+fn main() -> i32 { unsafe { raw_sync() } }
+`,
+	})
+	assertCleanTypeResult(t, result)
+	foreign := result.HIR.Modules[0].ForeignFunctions[0]
+	if !slices.Equal(foreign.Effects, []hir.Effect{hir.EffectFilesystem}) {
+		t.Fatalf("foreign effects = %v", foreign.Effects)
+	}
+	call := result.HIR.Modules[0].Functions[0].Body.Tail.Children[0].Block.Tail
+	if call.UnsafeScope == nil || !slices.Equal(call.Effects, foreign.Effects) {
+		t.Fatalf("foreign call = %+v", call)
+	}
+}
+
+func TestAnalyzeRejectsCallWithoutRequiredEffects(t *testing.T) {
+	t.Parallel()
+	text := `module main;
+@effects(filesystem)
+fn load() -> i32 { 42 }
+fn main() -> i32 { load() }
+`
+	result := analyzeText(t, map[string]string{"main.fy": text})
+	if result.FailedPhase != semantic.PhaseType || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E7102" || len(result.Unsupported) != 0 {
+		t.Fatalf("result = %+v", result)
+	}
+	callStart := strings.LastIndex(text, "load()")
+	assertSpan(t, result.Diagnostics[0].Primary, "main.fy", callStart, callStart+len("load"))
+	attributeStart := strings.Index(text, "@effects")
+	if len(result.Diagnostics[0].Related) != 1 || result.Diagnostics[0].Related[0].Role != "effect-declaration" {
+		t.Fatalf("related = %+v", result.Diagnostics[0].Related)
+	}
+	assertSpan(t, result.Diagnostics[0].Related[0].Span, "main.fy", attributeStart, attributeStart+len("@effects(filesystem)"))
+}
+
+func TestAnalyzeRejectsMalformedUnknownOrDuplicateEffects(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		name string
+		attr string
+		last bool
+	}{
+		{name: "empty", attr: "@effects"},
+		{name: "empty arguments", attr: "@effects()"},
+		{name: "unknown", attr: "@effects(teleport)"},
+		{name: "string", attr: "@effects(\"filesystem\")"},
+		{name: "duplicate argument", attr: "@effects(console, console)"},
+		{name: "duplicate attribute", attr: "@effects(console)\n@effects(filesystem)", last: true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			text := "module main;\n" + test.attr + "\nfn main() -> i32 { 0 }\n"
+			result := analyzeText(t, map[string]string{"main.fy": text})
+			if result.FailedPhase != semantic.PhaseType || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E7101" || len(result.Unsupported) != 0 {
+				t.Fatalf("result = %+v", result)
+			}
+			if test.last {
+				start := strings.LastIndex(text, "@effects")
+				assertSpan(t, result.Diagnostics[0].Primary, "main.fy", start, start+len("@effects(filesystem)"))
+			}
+		})
+	}
+}
+
+func TestAnalyzeChecksEffectsAcrossImportedModule(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"api.fy": `module api;
+@effects(network)
+pub fn fetch() -> i32 { 42 }
+`,
+		"main.fy": `module main;
+import api as remote;
+@effects(network, console)
+fn main() -> i32 { remote::fetch() }
+`,
+	})
+	assertCleanTypeResult(t, result)
+	if len(result.HIR.Modules) != 2 || result.HIR.Modules[1].Path != "main" {
+		t.Fatalf("HIR modules = %+v", result.HIR.Modules)
+	}
+	call := result.HIR.Modules[1].Functions[0].Body.Tail
+	if call == nil || !slices.Equal(call.Effects, []hir.Effect{hir.EffectNetwork}) {
+		t.Fatalf("imported call = %+v", call)
+	}
+}
+
+func TestAnalyzeSuppressesMissingEffectCascadeAfterInvalidDeclaration(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+@effects(filesystem)
+fn load() -> i32 { 42 }
+@effects(teleport)
+fn main() -> i32 { load() }
+`,
+	})
+	if result.FailedPhase != semantic.PhaseType || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E7101" {
+		t.Fatalf("result = %+v", result)
+	}
+}
+
 func TestAnalyzeTypesRawPointerAndTargetScalarForeignCall(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{

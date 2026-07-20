@@ -2,6 +2,7 @@ package semantic
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -25,6 +26,7 @@ func (a *analyzer) typeCheck() Result {
 	a.prepareResourceTypes()
 	a.prepareStructTypes()
 	a.prepareEnumTypes()
+	a.prepareCallableEffects()
 	for _, module := range a.moduleOrder {
 		hirModule := hir.Module{Path: module.file.Module.Path, SourcePath: module.file.Path}
 		for index := range module.file.Module.Structs {
@@ -103,6 +105,9 @@ func (a *analyzer) checkForeignFunction(module *moduleScope, function *ast.Forei
 	linkName := function.Name
 	seenLinkName := false
 	for _, attribute := range function.Attributes {
+		if attribute.Name == effectsAttribute {
+			continue
+		}
 		if attribute.Name != "link_name" {
 			a.addUnsupported(module.file.Path, attribute.Span, "foreign function attribute @"+attribute.Name)
 			continue
@@ -117,7 +122,8 @@ func (a *analyzer) checkForeignFunction(module *moduleScope, function *ast.Forei
 	}
 	result := hir.ForeignFunction{
 		Symbol: symbol.id, Name: function.Name, LinkName: linkName, ABI: function.ABI,
-		Span: span(module.file.Path, function.Span), ResultType: a.canonicalType(module, function.ResultType),
+		Span: span(module.file.Path, function.Span), Effects: slices.Clone(symbol.effects),
+		ResultType: a.canonicalType(module, function.ResultType),
 	}
 	symbol.typ = result.ResultType
 	if _, _, borrow := hir.BorrowElement(result.ResultType); borrow {
@@ -175,6 +181,9 @@ func (a *analyzer) checkResource(module *moduleScope, resource *ast.Resource) hi
 func (c *typeChecker) checkFunction() hir.Function {
 	functionSymbol := c.analyzer.functions[c.function]
 	for _, attribute := range c.function.Attributes {
+		if attribute.Name == effectsAttribute {
+			continue
+		}
 		c.analyzer.addUnsupported(c.module.file.Path, attribute.Span, "function attribute @"+attribute.Name)
 	}
 	resultType := c.canonicalType(c.function.ResultType)
@@ -187,6 +196,7 @@ func (c *typeChecker) checkFunction() hir.Function {
 		Name:       c.function.Name,
 		Unsafe:     c.function.Unsafe,
 		Span:       span(c.module.file.Path, c.function.Span),
+		Effects:    slices.Clone(functionSymbol.effects),
 		ResultType: resultType,
 	}
 	c.hir = &result
@@ -966,6 +976,7 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 		return hir.TypeInvalid
 	}
 	if callee.foreign != nil {
+		c.checkCallEffects(calleeExpression, result, callee)
 		return c.checkForeignCall(expression, result, callee)
 	}
 	if callee.function == nil {
@@ -973,6 +984,7 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 		return hir.TypeInvalid
 	}
 	result.Symbol = callee.id
+	c.checkCallEffects(calleeExpression, result, callee)
 	result.Children = append(result.Children, hir.Expression{
 		Kind:   string(calleeExpression.Kind),
 		Type:   hir.TypeInvalid,

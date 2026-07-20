@@ -18,6 +18,7 @@ Diagnostic codes are stable identifiers for a semantic category. Exact wording a
 | `E41xx` | `Option`, `Result`, and propagation |
 | `E51xx` | Unsafe and foreign boundaries |
 | `E61xx` | Target layout and ABI |
+| `E71xx` | Effects and external capabilities |
 | `E80xx` | Compatibility and toolchain selection |
 | `Axxxx` | Atlas warnings or hard map-integrity errors |
 | `Vxxxx` | MIR verifier defects; never ordinary user diagnostics |
@@ -78,6 +79,8 @@ Diagnostic codes are stable identifiers for a semantic category. Exact wording a
 | `E6101` | Type has no supported ABI classification for the selected target. |
 | `E6102` | Required target layout fact is unknown. |
 | `E6103` | C ABI v0 excludes the requested calling, layout, callback, TLS, or variadic feature. |
+| `E7101` | `@effects` is empty, duplicated, malformed, or names an effect outside the Stage 0 vocabulary. |
+| `E7102` | A call requires one or more effects not declared by the enclosing function. |
 | `E8001` | Selected runtime ABI is incompatible with generated code. |
 | `E8002` | Requested language revision is unsupported by this compiler. |
 | `A2001` | Dependency map is incompatible; affected Atlas relations are partial or unavailable while compilation remains valid. |
@@ -92,6 +95,7 @@ The MIR verifier codes are defined in `docs/mir/mir-v0.md`.
 - An origin error names every candidate origin that caused rejection.
 - A cleanup error states whether ownership is live, dead, or path-dependent.
 - An FFI error names the boundary contract that must contain the unsafe proof.
+- An effect error names the rejected declaration or call and relates the callee effect contract.
 - A compatibility diagnostic names every mismatched vector member without replacing it with a generic compiler-version error.
 - An Atlas warning reports relation-specific completeness and never upgrades unavailable evidence to complete.
 - A syntax diagnostic uses a half-open source-byte span, records insertion or skipped-token provenance, and does not claim a recovered file is valid.

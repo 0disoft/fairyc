@@ -22,6 +22,7 @@ type expectation struct {
 	Resolutions      []resolutionAssertion `json:"resolutions"`
 	Types            []typeAssertion       `json:"types"`
 	Borrows          []borrowAssertion     `json:"borrows"`
+	Effects          []effectAssertion     `json:"effects"`
 	Diagnostics      []diagnosticAssertion `json:"diagnostics"`
 }
 
@@ -54,6 +55,11 @@ type borrowAssertion struct {
 	Origin  string         `json:"origin"`
 	LastUse *spanAssertion `json:"lastUse"`
 	Escapes bool           `json:"escapes"`
+}
+
+type effectAssertion struct {
+	Declaration spanAssertion `json:"declaration"`
+	Effects     []string      `json:"effects"`
 }
 
 type diagnosticAssertion struct {

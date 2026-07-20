@@ -74,6 +74,12 @@ The standard library is supplied as an explicit package instance under `docs/pac
 
 Built-in `Option`, `Result`, slices, `str`, and `CStr` get compiler-known view semantics; library modules provide operations over them.
 
+Future safe console, file, environment, process, network, clock, and random APIs must declare the
+matching source effect from `docs/language/0008-effects-and-capabilities-v0.md`. A target-specific
+raw foreign declaration and its safe wrapper carry the same external effect even though only the
+raw call also requires an `unsafe` boundary. The implemented effect checker does not itself expose
+any host operation.
+
 ## Allocation v0
 
 There is no generic allocator interface, borrowed allocator context, or hidden default allocator. `SystemHeap` is an inert zero-size handle whose concrete implementation is selected by the target standard library. `Arena` is a resource and lexical `Region` is the only safe bulk-allocation capability.

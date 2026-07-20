@@ -19,6 +19,7 @@
 | Option | Presence or absence | Inherits payload move and drop behavior |
 | Result | Success or typed failure | Must-use; `?` only at explicit sites |
 | Unsafe boundary | Searchable location where safe invariants may be assumed or broken | Carries source provenance into MIR |
+| Effect set | Closed external-authority contract on a callable | Caller declares a superset; independent from unsafe provenance |
 
 Generics, interfaces, dynamic dispatch, captured closures, async, self-reference, user interior mutability, and cross-thread capability traits are later language concepts, not Stage 0 compiler obligations.
 

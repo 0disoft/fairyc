@@ -7,6 +7,7 @@
     "docs/language/0002-borrows-and-return-origins.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/language/0007-name-resolution-and-typing-v0.md",
+    "docs/language/0008-effects-and-capabilities-v0.md",
     "docs/adr/0024-stage-0-loop-control-and-cleanup.md",
     "docs/adr/0046-scalar-source-foreign-c-call.md",
     "docs/adr/0051-source-link-name-transport.md",
@@ -16,6 +17,7 @@
     "docs/adr/0113-branch-aware-safe-borrow-reassignment.md",
     "docs/adr/0114-interprocedural-borrow-return-summaries.md",
     "docs/adr/0115-loop-carried-safe-borrow-provenance.md",
+    "docs/adr/0116-stage-0-source-effects.md",
     "docs/diagnostics/catalog-v0.md"
   ],
   "cases": [
@@ -735,6 +737,88 @@
               {
                 "role": "declaration",
                 "span": { "source": "main.fy", "startByte": 88, "endByte": 95 }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.type.effect-superset",
+      "sourceRoot": "cases/pass/effect-superset/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow",
+        "effects": [
+          {
+            "declaration": { "source": "main.fy", "startByte": 38, "endByte": 42 },
+            "effects": ["filesystem"]
+          },
+          {
+            "declaration": { "source": "main.fy", "startByte": 93, "endByte": 97 },
+            "effects": ["console", "filesystem"]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.missing-call-effect",
+      "sourceRoot": "cases/fail/missing-call-effect/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          {
+            "code": "E7102",
+            "primary": { "source": "main.fy", "startByte": 79, "endByte": 83 },
+            "related": [
+              {
+                "role": "effect-declaration",
+                "span": { "source": "main.fy", "startByte": 14, "endByte": 34 }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.unknown-effect",
+      "sourceRoot": "cases/fail/unknown-effect/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          {
+            "code": "E7101",
+            "primary": { "source": "main.fy", "startByte": 23, "endByte": 31 },
+            "related": [
+              {
+                "role": "declaration",
+                "span": { "source": "main.fy", "startByte": 36, "endByte": 40 }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.duplicate-effect",
+      "sourceRoot": "cases/fail/duplicate-effect/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          {
+            "code": "E7101",
+            "primary": { "source": "main.fy", "startByte": 32, "endByte": 39 },
+            "related": [
+              {
+                "role": "declaration",
+                "span": { "source": "main.fy", "startByte": 44, "endByte": 48 }
               }
             ]
           }

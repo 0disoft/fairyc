@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0115-loop-carried-safe-borrow-provenance.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0116-stage-0-source-effects.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -105,6 +105,18 @@ Verified MIR and interpreter fixtures additionally execute lexical Region entry,
 inner-resource cleanup, and reset on fallthrough, direct `return`, Result `?` propagation, and
 nested Region exits. `break` and `continue` target the nearest `while` and execute scope-indexed
 resource cleanup and Region reset before their MIR goto; use outside a loop is `E1012`.
+
+## Effects and external capabilities
+
+Functions declare external authority with `@effects(...)`. The Stage 0 vocabulary is exactly
+`console`, `filesystem`, `environment`, `process`, `network`, `clock`, and `random`; omission is the
+empty set. A direct call is accepted only when the caller declares every callee effect. `main` has
+no ambient authority, and raw foreign calls must satisfy both this rule and their independent
+`unsafe` boundary.
+
+Effects are canonical typed-HIR metadata and API compatibility facts, not proof that a runtime or
+backend operation exists. `unsafe`, explicit allocation, Region operations, traps, and cleanup are
+not external effects. Full rules are in `docs/language/0008-effects-and-capabilities-v0.md`.
 
 ## Errors and control flow
 

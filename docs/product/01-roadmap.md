@@ -22,9 +22,10 @@ lowering, and parser-fixture-runner portion of the first item exists. Name resol
 now cover the semantic fixture's scalar and safe-borrow subset. Local last-use loans, borrow
   conflicts, single-origin borrow returns, checked matching-type left shift, loop-context diagnostics,
   scalar foreign-call unsafe/signature boundaries, and `@link_name` shape diagnostics execute across
-  all 29 semantic v0 cases, including branch- and loop-aware safe-borrow reassignment, exact
+  all 33 semantic v0 cases, including branch- and loop-aware safe-borrow reassignment, exact
   interprocedural borrow-return summaries, integer-literal range rejection before MIR, and exact
-  transport for all sixteen TargetSpec C scalars. General
+  transport for all sixteen TargetSpec C scalars. The type phase also canonicalizes the closed
+  seven-name `@effects(...)` vocabulary and enforces caller supersets independently from unsafe. General
   whole-root resource Flow now executes all 12 resource v0 cases, including branch, normal-loop,
   break-edge, and continue-edge state rejection. Result Flow executes all 24 result v0 cases, including qualified scalar construction,
 exhaustive shallow matching, and local, parameter, branch, loop, overwrite, and early-return
@@ -58,7 +59,8 @@ unsigned right shift execute across trapping and
   `experimental emit-c` command exposes that exact verified translation unit on stdout
   without writing an artifact. On an eligible Linux/amd64 glibc host, `experimental build` can now
   compile and link that subset with explicit Clang or GCC and low or optimized profiles into
-  a no-overwrite `build/` artifact. Real file and console I/O, effects, and every later Phase 1
+  a no-overwrite `build/` artifact. Real safe file and console I/O, effect-bearing function values,
+  and every later Phase 1
   capability remain unimplemented.
 
 - Implement source management, lexer, trivia-preserving tokens and spans, compact recoverable syntax, deterministic diagnostics, one-file modules, alias imports, and non-generic typed HIR in Go.

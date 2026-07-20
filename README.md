@@ -14,9 +14,10 @@ The project is not trying to beat every hand-tuned C program or make every C own
 The first Stage 0 frontend slice now exists in Go: immutable source bytes, a lossless lexer,
 compact recoverable syntax, error-free AST lowering, deterministic `E00xx` diagnostics, and a
 runner for all parser v0 fixtures. The next slice resolves names and produces typed HIR for the
-  fixture-backed scalar, safe-borrow, and scalar foreign-call subset. Its semantic runner executes all 29 v0 resolve, type,
+  fixture-backed scalar, safe-borrow, scalar foreign-call, and declared-effect subset. Its semantic runner executes all 33 v0 resolve, type,
 and local Flow cases, including integer-literal range rejection, branch- and loop-aware safe-borrow reassignment,
-exact interprocedural borrow-return summaries, last-use loans, and borrow-return origins. Whole-root resource Flow
+exact interprocedural borrow-return summaries, last-use loans, borrow-return origins, canonical
+`@effects(...)` sets, and caller-superset enforcement. Whole-root resource Flow
   also executes all 12 v0 cases for moves, cleanup obligations, branch joins, normal, break, and continue loop edges,
 consuming tagged matches, and live/dead resource reassignment. The
 Region runner executes all 6 v1 cases, including package-proven `std::alloc::Arena`, hidden
@@ -343,8 +344,8 @@ addition, subtraction, multiplication, negation, matching-type bitwise operation
 signed or unsigned right shift. It performs no source
 discovery and needs no C toolchain, MSVC, WSL, or host subprocess, and reports either `result: <i32>` or a canonical
 trap. The official
-`fairyc check` command remains unavailable until effects and the
-remaining semantic groups exist.
+`fairyc check` command remains unavailable until the remaining semantic groups exist. The effect
+checker is implemented, but that does not substitute for the rest of the command contract.
 
 `experimental target-spec` accepts exactly one known Linux GNU or Windows MSVC ID and writes
 deterministic `fairyc.target-spec/v0` JSON. The result separates target semantics from local

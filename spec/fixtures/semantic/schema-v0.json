@@ -99,6 +99,12 @@
           "items": {
             "$ref": "#/$defs/borrowAssertion"
           }
+        },
+        "effects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/effectAssertion"
+          }
         }
       }
     },
@@ -173,6 +179,23 @@
         }
       }
     },
+    "effectAssertion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["declaration", "effects"],
+      "properties": {
+        "declaration": {
+          "$ref": "#/$defs/span"
+        },
+        "effects": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": ["clock", "console", "environment", "filesystem", "network", "process", "random"]
+          }
+        }
+      }
+    },
     "failExpectation": {
       "type": "object",
       "additionalProperties": false,
@@ -200,7 +223,7 @@
       "properties": {
         "code": {
           "type": "string",
-          "pattern": "^E(?:01|10|11|21|31|41|51)[0-9]{2}$"
+          "pattern": "^E(?:01|10|11|21|31|41|51|71)[0-9]{2}$"
         },
         "primary": {
           "$ref": "#/$defs/span"
@@ -231,7 +254,8 @@
             "last-use",
             "owner",
             "move",
-            "return"
+            "return",
+            "effect-declaration"
           ]
         },
         "span": {

@@ -90,6 +90,12 @@ Boolean conditions are exact: `if`, `while`, `&&`, `||`, and `!` require `bool`.
 
 Calls require an exact arity and each argument must satisfy its parameter type. Assignment requires a mutable place and a value compatible with that place. Borrow and raw-pointer conversions follow their explicit safety rules; `null` never inhabits a safe borrow.
 
+Before checking bodies, the type phase canonicalizes every ordinary and raw foreign
+`@effects(...)` declaration in the resolved module set. A direct call additionally requires the
+enclosing function's declared effects to contain the callee's set. These facts are source-order
+independent and are exposed through typed HIR and semantic fixtures. The complete vocabulary and
+compatibility rules are owned by `0008-effects-and-capabilities-v0.md`.
+
 For an assignment to a safe-borrow local, Flow evaluates the right-hand side before
 replacing the target origin and retained-loan set. Reachable `if` and `match` exits join origin
 facts; different origins remain a disjunction and cannot be returned as if one branch had won.
@@ -128,9 +134,11 @@ Within one case, diagnostics sort by source path using unsigned UTF-8 byte order
 - `E1008` assignment target is not a mutable place;
 - `E1009` return expression does not match the declared return type;
 - `E1010` call arity does not match the declaration.
-- `E1013` integer literal does not fit its selected implemented integer type.
+- `E1013` integer literal does not fit its selected implemented integer type;
+- `E7101` malformed, duplicate, empty, or unknown effect declaration;
+- `E7102` call requires an effect absent from the enclosing function declaration.
 
-Ownership and borrow diagnostics retain their `E11xx` and `E21xx` meanings from `docs/diagnostics/catalog-v0.md`.
+Ownership, borrow, and effect diagnostics retain their `E11xx`, `E21xx`, and `E71xx` meanings from `docs/diagnostics/catalog-v0.md`.
 
 ## Deferred rules
 

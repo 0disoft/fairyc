@@ -33,7 +33,12 @@ The compiler release uses SemVer. A patch may fix crashes, performance, diagnost
 
 Pre-1 language revisions are exact pins. A compiler may implement several revisions, but a newer pre-1 revision does not imply source compatibility.
 
-Grammar spelling, keyword status, literal cooking, precedence, module-path identity, recovery acceptance, resolution, canonical typing, resource and Region Flow rejection, Result handling, and whether a diagnostic blocks HIR are language-revision semantics. Parser-, semantic-, resource-, Region-, and Result-fixture schemas version their expectation-file shapes; they do not make two different language revisions source-compatible.
+Grammar spelling, keyword status, literal cooking, precedence, module-path identity, recovery acceptance, resolution, canonical typing, resource and Region Flow rejection, Result handling, declared effects, call-effect acceptance, and whether a diagnostic blocks HIR are language-revision semantics. Parser-, semantic-, resource-, Region-, and Result-fixture schemas version their expectation-file shapes; they do not make two different language revisions source-compatible.
+
+For one function contract, removing a declared effect preserves every existing caller accepted by
+the effect checker. Adding an effect or replacing it with another can invalidate callers and is a
+source-compatibility change. Reordering or deduplicating the same set is not a semantic change
+because typed HIR stores canonical lexical order; duplicate source declarations are rejected.
 
 ## MIR and cache
 

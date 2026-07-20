@@ -36,6 +36,7 @@ type Result struct {
 	Borrows          []BorrowFact
 	RegionOrigins    []RegionOriginFact
 	ResultHandling   []ResultHandlingFact
+	Effects          []EffectFact
 	ResourceStates   []ResourceStateFact
 	Unsupported      []Unsupported
 }
@@ -71,6 +72,12 @@ type SymbolCoordinate struct {
 type TypeFact struct {
 	Expression    hir.Span
 	CanonicalType hir.Type
+}
+
+// EffectFact records one callable's canonical declared source-effect set.
+type EffectFact struct {
+	Declaration hir.Span
+	Effects     []hir.Effect
 }
 
 // BorrowFact records the hidden origin and local lifetime of one safe borrow.
@@ -151,6 +158,7 @@ func Analyze(files []File) Result {
 	result.Borrows = analyzer.borrows
 	result.RegionOrigins = analyzer.regionOrigins
 	result.ResultHandling = analyzer.resultHandling
+	result.Effects = analyzer.effectFacts
 	result.ResourceStates = analyzer.resourceStates
 	result.Unsupported = analyzer.unsupported
 	if len(result.Diagnostics) > 0 {
@@ -195,6 +203,9 @@ func (a *analyzer) finish() {
 			return n
 		}
 		return cmp.Compare(left.Origin, right.Origin)
+	})
+	slices.SortFunc(a.effectFacts, func(left, right EffectFact) int {
+		return compareSpan(left.Declaration, right.Declaration)
 	})
 	slices.SortFunc(a.regionOrigins, func(left, right RegionOriginFact) int {
 		if n := compareSpan(left.Allocation, right.Allocation); n != 0 {

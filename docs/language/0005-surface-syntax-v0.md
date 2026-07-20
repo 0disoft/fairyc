@@ -16,6 +16,10 @@
 - A `let` resource may still be consumed. Binding immutability is not ownership immobility.
 - A by-value position consumes a resource. Stage 0 has no `move` expression or `move` argument keyword.
 - Globals are compile-time `const` only. Mutable globals are excluded.
+- An ordinary or raw foreign function may declare one closed external-capability set with
+  `@effects(clock, console, environment, filesystem, network, process, random)`. Arguments use only
+  the effects actually required; omission is the empty set. Exact semantics are owned by
+  `0008-effects-and-capabilities-v0.md`.
 
 ## Modules and imports
 

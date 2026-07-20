@@ -10,22 +10,25 @@ import (
 )
 
 type symbol struct {
-	id          hir.SymbolID
-	kind        string
-	name        string
-	module      string
-	source      string
-	declaration diagnostic.Span
-	typeSpan    diagnostic.Span
-	resultError diagnostic.Span
-	typ         hir.Type
-	mutable     bool
-	public      bool
-	function    *ast.Function
-	foreign     *ast.ForeignFunction
-	structure   *ast.Struct
-	resource    *ast.Resource
-	enumeration *ast.Enum
+	id           hir.SymbolID
+	kind         string
+	name         string
+	module       string
+	source       string
+	declaration  diagnostic.Span
+	typeSpan     diagnostic.Span
+	resultError  diagnostic.Span
+	effectSpan   diagnostic.Span
+	typ          hir.Type
+	effects      []hir.Effect
+	effectsValid bool
+	mutable      bool
+	public       bool
+	function     *ast.Function
+	foreign      *ast.ForeignFunction
+	structure    *ast.Struct
+	resource     *ast.Resource
+	enumeration  *ast.Enum
 }
 
 type moduleScope struct {
@@ -77,6 +80,7 @@ type analyzer struct {
 	expressionTypes  map[*ast.Expression]hir.Type
 	regionOrigins    []RegionOriginFact
 	resultHandling   []ResultHandlingFact
+	effectFacts      []EffectFact
 	resourceLoops    []resourceLoopFrame
 	resultLoops      []resultLoopFrame
 	borrowReturns    map[*symbol]borrowReturnSummary

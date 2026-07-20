@@ -22,6 +22,7 @@ Contract ownership is layered as follows:
 | Resource Flow behavior | `docs/language/0001-values-and-resources.md` and `spec/fixtures/resource/manifest-v0.json` | Flow CFG state, cleanup elaboration, MIR moves, and drop traces |
 | Region behavior | `docs/language/0003-regions-and-arenas.md` and `spec/fixtures/region/manifest-v1.json` | Flow origins, escape facts, resolved Arena ownership, reset lowering, and MIR region markers |
 | Result handling | `docs/language/0004-results-traps-and-control-flow.md` and `spec/fixtures/result/manifest-v0.json` | Flow handling facts, `?` branches, payload moves, and cleanup paths |
+| Effects and external capabilities | `docs/language/0008-effects-and-capabilities-v0.md` and `spec/fixtures/semantic/manifest-v0.json` | Typed HIR effect sets, direct-call checks, safe wrappers, and Atlas effect facts |
 | Executable control flow | `docs/mir/mir-v0.md` and `spec/fixtures/mir/manifest-v0.json` | Interpreter, C, later native, object, and assembly output |
 | MIR verifier defects | `docs/mir/verifier-mutation-v0.md` and `spec/fixtures/mir-verifier/manifest-v0.json` | Go seed constructors, mutation application, internal compiler error evidence, and fuzz seeds |
 | Resolved package graph | `docs/package/package-graph-v0.md` and `spec/fixtures/package/manifest-v0.json` | Resolver instances, module lookup, lockfile records, cache keys, and Atlas package edges |
@@ -44,6 +45,8 @@ Build caches, generated C, LLVM IR, object files, assembly, semantic maps, bench
 - A resolution, typing, or Flow rule change updates the owning language contract, semantic schema-compatible fixtures, diagnostic catalog, and typed-HIR or Flow implementation together.
 - A whole-root resource-state change updates the resource manifest, cleanup-obligation contract, `E11xx` meaning, Flow analysis, and drop elaboration together.
 - A Region or Result rule change updates its dedicated manifest, owning language contract, `E31xx` or `E41xx` meaning, Flow analysis, and MIR lowering together.
+- An effect rule change updates the effect language contract, semantic manifest, `E71xx` meaning,
+  typed HIR metadata, and direct-call checker together.
 - A MIR normalization change updates the MIR manifest, owning MIR contract, affected source semantics, verifier, interpreter, and enabled backend tests together.
 - A MIR verifier invariant change updates the verifier table, named seed or mutation recipe, expected code coverage, and harness protocol together.
 - A resolved package identity or visibility change updates the package graph manifest, package contract, module lookup, cache identity, and Atlas package-edge behavior together.

@@ -352,6 +352,7 @@ type ForeignFunction struct {
 	LinkName   string
 	ABI        string
 	Span       Span
+	Effects    []Effect
 	Parameters []ForeignParameter
 	ResultType Type
 }
@@ -395,6 +396,7 @@ type Function struct {
 	Name       string
 	Unsafe     bool
 	Span       Span
+	Effects    []Effect
 	Parameters []Parameter
 	Locals     []Local
 	ResultType Type
@@ -446,6 +448,7 @@ type Expression struct {
 	TargetType  Type
 	Symbol      SymbolID
 	ForeignABI  string
+	Effects     []Effect
 	UnsafeScope *Span
 	Children    []Expression
 	Fields      []string
