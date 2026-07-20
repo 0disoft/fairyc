@@ -38,11 +38,13 @@ verified `i32`, `u8`, `u32`, or `usize` operand type. Every type checks zero bef
 only `i32` emits the signed-minimum/negative-one check. This prevents strict C compilers from
 diagnosing an unreachable constant-zero expression without erasing typed MIR semantics.
 
-Matching-type `&`, `^`, and `|` preserve the exact verified `i32`, `u8`, `u32`, or `usize` result.
+Typed unary `~` and matching-type `&`, `^`, and `|` preserve the exact verified `i32`, `u8`, `u32`, or `usize` result.
 The signed path uses explicit bit-preserving `uint32_t` transport; unsigned paths use their exact
 unsigned representation directly. Right shift first checks the amount against 32 for `i32`, 8 for
 `u8`, 32 for `u32`, or 64 for the admitted `usize` targets. Only the non-trapping continuation emits
 the C shift. `i32` uses the defined arithmetic-shift helper; unsigned types use a direct logical shift.
+Unsigned unary complement is explicitly cast back to the verified `uint8_t`, `uint32_t`, or
+`uintptr_t` representation after C integer promotion; `i32` retains bit-preserving `uint32_t` transport.
 
 The same internal-value subset now admits compiler-owned immutable `&[u8]` literals. MIR retains
 their exact bytes and logical length, including empty and embedded-NUL values. Generated C uses a

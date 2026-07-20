@@ -127,6 +127,11 @@ func BitwiseIntegerType(value Type) bool {
 	return CheckedArithmeticType(value)
 }
 
+// BitwiseNotType reports the closed Stage 0 unary ~ subset.
+func BitwiseNotType(value Type) bool {
+	return BitwiseIntegerType(value)
+}
+
 // CheckedShiftType reports the closed Stage 0 checked right-shift subset.
 func CheckedShiftType(value Type) bool {
 	return CheckedArithmeticType(value)

@@ -981,6 +981,46 @@ fn main() -> i32 {
 	}
 }
 
+func TestLowerPreservesUnsignedBitwiseNotType(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+fn main() -> i32 {
+    let input: u32 = 4294967253;
+    let value: u32 = ~input;
+    if value == 42 { 42 } else { 1 }
+}
+`)
+	function := &program.Functions[0]
+	var bitwiseNot *Operation
+	for blockIndex := range function.Blocks {
+		for operationIndex := range function.Blocks[blockIndex].Operations {
+			operation := &function.Blocks[blockIndex].Operations[operationIndex]
+			if operation.Kind == OperationUnary && operation.Operator == "~" {
+				bitwiseNot = operation
+			}
+		}
+	}
+	if bitwiseNot == nil || bitwiseNot.OwnerType != hir.TypeU32 || bitwiseNot.Type != hir.TypeU32 ||
+		bitwiseNot.DestinationLocal == NoLocal || len(bitwiseNot.Operands) != 1 {
+		t.Fatalf("bitwise not = %+v", bitwiseNot)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+	mutated := Clone(program)
+	for blockIndex := range mutated.Functions[0].Blocks {
+		for operationIndex := range mutated.Functions[0].Blocks[blockIndex].Operations {
+			operation := &mutated.Functions[0].Blocks[blockIndex].Operations[operationIndex]
+			if operation.Kind == OperationUnary && operation.Operator == "~" {
+				operation.Type = hir.TypeUSize
+			}
+		}
+	}
+	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1001" {
+		t.Fatalf("Verify() bitwise-not type mutation failures = %+v", failures)
+	}
+}
+
 func TestLowerPreservesByteStringDataAddressUnsafeProvenance(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;

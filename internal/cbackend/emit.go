@@ -693,7 +693,7 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 						inferred, _ = inferredOperandType(localTypes, operation.Operands[0])
 					}
 				case mir.OperationUnary:
-					inferred = hir.TypeI32
+					inferred = operation.Type
 				case mir.OperationBinary:
 					inferred = operation.Type
 				case mir.OperationResultConstruct, mir.OperationOptionConstruct,
@@ -1211,10 +1211,10 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 			case mir.OperationCheckedDivision:
 				e.features["checked-division"] = struct{}{}
 			case mir.OperationUnary:
-				if !supportedUnary(operation.Operator) {
-					return CapabilityError{Function: function.Name, Feature: "unary operator " + strconv.Quote(operation.Operator)}
+				if err := e.inspectUnary(functionIndex, *operation); err != nil {
+					return err
 				}
-				if operation.Operator == "-" || operation.Operator == "~" {
+				if operation.Operator == "-" || operation.Operator == "~" && operation.OwnerType == hir.TypeI32 {
 					e.needsBitcast = true
 				}
 				if operation.Operator == "~" {
@@ -1480,6 +1480,37 @@ func (e *emitter) inspectBinary(functionIndex int, operation mir.Operation) erro
 	}
 	if leftType != operation.OwnerType || rightType != operation.OwnerType {
 		return fmt.Errorf("typed scalar binary operation in %s has operand types %q and %q, want %q", function.Name, leftType, rightType, operation.OwnerType)
+	}
+	return nil
+}
+
+func (e *emitter) inspectUnary(functionIndex int, operation mir.Operation) error {
+	function := &e.functions[functionIndex]
+	operand, err := oneOperand(operation.Operands)
+	if err != nil {
+		return fmt.Errorf("typed scalar unary operation in %s: %w", function.Name, err)
+	}
+	if operation.DestinationLocal == mir.NoLocal || !supportedUnary(operation.Operator) {
+		return fmt.Errorf("typed scalar unary operation in %s has an invalid destination or operator", function.Name)
+	}
+	validShape := false
+	switch operation.Operator {
+	case "!":
+		validShape = operation.OwnerType == hir.TypeBool && operation.Type == hir.TypeBool
+	case "+", "-":
+		validShape = operation.OwnerType == hir.TypeI32 && operation.Type == hir.TypeI32
+	case "~":
+		validShape = hir.BitwiseNotType(operation.OwnerType) && operation.Type == operation.OwnerType
+	}
+	if !validShape {
+		return fmt.Errorf("typed scalar unary operation in %s has incompatible owner or result type", function.Name)
+	}
+	operandType, err := e.operandType(functionIndex, operand)
+	if err != nil {
+		return fmt.Errorf("typed scalar unary operand in %s: %w", function.Name, err)
+	}
+	if operandType != operation.OwnerType {
+		return fmt.Errorf("typed scalar unary operation in %s has operand type %q, want %q", function.Name, operandType, operation.OwnerType)
 	}
 	return nil
 }
@@ -2674,7 +2705,15 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		case "!":
 			fmt.Fprintf(output, "    fy_l_%d = (%s == INT32_C(0)) ? INT32_C(1) : INT32_C(0);\n", operation.DestinationLocal, value)
 		case "~":
-			fmt.Fprintf(output, "    fy_l_%d = fy_bits_to_i32(~(uint32_t)(%s));\n", operation.DestinationLocal, value)
+			if operation.OwnerType == hir.TypeI32 {
+				fmt.Fprintf(output, "    fy_l_%d = fy_bits_to_i32(~(uint32_t)(%s));\n", operation.DestinationLocal, value)
+			} else {
+				valueType, err := e.cValueType(operation.OwnerType)
+				if err != nil {
+					return fmt.Errorf("bitwise not in %s: %w", function, err)
+				}
+				fmt.Fprintf(output, "    fy_l_%d = (%s)(~(%s)(%s));\n", operation.DestinationLocal, valueType, valueType, value)
+			}
 		}
 	case mir.OperationBinary:
 		left, right, err := twoOperands(operation.Operands)

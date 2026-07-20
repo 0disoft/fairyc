@@ -417,15 +417,21 @@ func TestEmitUnsignedBitwiseAndCheckedRightShift(t *testing.T) {
 fn main() -> i32 {
     let byte_input: u8 = 84;
     let byte: u8 = byte_input >> 1;
+    let byte_not_input: u8 = 213;
+    let byte_not: u8 = ~byte_not_input;
     let word_input: u32 = 43;
     let word: u32 = word_input & 63;
+    let word_not_input: u32 = 4294967253;
+    let word_not: u32 = ~word_not_input;
     let word_shift_input: u32 = 84;
     let word_shift: u32 = word_shift_input >> 1;
     let size_input: usize = 43;
     let size: usize = (size_input ^ 1) | 0;
+    let size_not_input: usize = 18446744073709551573;
+    let size_not: usize = ~size_not_input;
     let size_shift_input: usize = 84;
     let size_shift: usize = size_shift_input >> 1;
-    if byte == 42 && word == 43 && word_shift == 42 && size == 42 && size_shift == 42 { 42 } else { 1 }
+    if byte == 42 && byte_not == 42 && word == 43 && word_not == 42 && word_shift == 42 && size == 42 && size_not == 42 && size_shift == 42 { 42 } else { 1 }
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -445,6 +451,9 @@ fn main() -> i32 {
 		") & (UINT32_C(63))",
 		") ^ (((uintptr_t)UINT64_C(1)))",
 		") | (((uintptr_t)UINT64_C(0)))",
+		"(uint8_t)(~(uint8_t)(fy_l_",
+		"(uint32_t)(~(uint32_t)(fy_l_",
+		"(uintptr_t)(~(uintptr_t)(fy_l_",
 	} {
 		if !strings.Contains(unit.Source, required) {
 			t.Errorf("generated C is missing typed unsigned operation %q:\n%s", required, unit.Source)

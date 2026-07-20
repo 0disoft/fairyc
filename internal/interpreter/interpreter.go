@@ -523,18 +523,14 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				}
 				locals[operation.DestinationLocal] = value
 			case mir.OperationUnary:
-				value, err := evaluateOneI32(locals, operation.Operands)
+				value, trap, err := evaluateUnary(locals, operation)
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("unary in %q: %w", function.Name, err)
-				}
-				result, trap, err := unary(operation.Operator, value)
-				if err != nil {
-					return callCompletion{}, err
 				}
 				if trap != "" {
 					return callCompletion{trapCategory: trap}, nil
 				}
-				locals[operation.DestinationLocal] = i32Value(result)
+				locals[operation.DestinationLocal] = value
 			case mir.OperationBinary:
 				result, trap, err := evaluateBinary(locals, operation)
 				if err != nil {
@@ -946,6 +942,40 @@ func evaluateBinary(locals map[mir.LocalID]runtimeValue, operation mir.Operation
 		return runtimeValue{}, "", err
 	}
 	result, trap, err := binary(operation.Operator, left, right)
+	return i32Value(result), trap, err
+}
+
+func evaluateUnary(locals map[mir.LocalID]runtimeValue, operation mir.Operation) (runtimeValue, string, error) {
+	if len(operation.Operands) != 1 {
+		return runtimeValue{}, "", fmt.Errorf("unary operation has %d operands, want 1", len(operation.Operands))
+	}
+	value, err := evaluate(locals, operation.Operands[0])
+	if err != nil {
+		return runtimeValue{}, "", err
+	}
+	if operation.Operator == "~" && operation.OwnerType != hir.TypeI32 {
+		if !hir.BitwiseNotType(operation.OwnerType) || operation.Type != operation.OwnerType ||
+			!comparisonRuntimeMatches(value, operation.OwnerType) {
+			return runtimeValue{}, "", capabilityError("bitwise not has incompatible operand or result type")
+		}
+		limit, ok := unsignedArithmeticLimit(operation.OwnerType)
+		if !ok {
+			return runtimeValue{}, "", capabilityError("bitwise not has unsupported type %q", operation.OwnerType)
+		}
+		return unsignedRuntimeValue(operation.OwnerType, limit^value.u64), "", nil
+	}
+	if operation.Operator == "!" {
+		if operation.OwnerType != hir.TypeBool || operation.Type != hir.TypeBool {
+			return runtimeValue{}, "", capabilityError("logical not has incompatible operand or result type")
+		}
+	} else if operation.OwnerType != hir.TypeI32 || operation.Type != hir.TypeI32 {
+		return runtimeValue{}, "", capabilityError("unary operation has incompatible operand or result type")
+	}
+	i32, err := value.asI32()
+	if err != nil {
+		return runtimeValue{}, "", err
+	}
+	result, trap, err := unary(operation.Operator, i32)
 	return i32Value(result), trap, err
 }
 

@@ -1050,6 +1050,45 @@ fn main() -> i32 {
 	}
 }
 
+func TestAnalyzeTypesUnsignedBitwiseNot(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn main() -> i32 {
+    let byte_input: u8 = 213;
+    let byte: u8 = ~byte_input;
+    let word_input: u32 = 4294967253;
+    let word: u32 = ~word_input;
+    let size_input: usize = 18446744073709551573;
+    let size: usize = ~size_input;
+    if byte == 42 && word == 42 && size == 42 { 42 } else { 1 }
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+	statements := result.HIR.Modules[0].Functions[0].Body.Statements
+	for _, expectation := range []struct {
+		statement int
+		typ       hir.Type
+	}{{1, hir.TypeU8}, {3, hir.TypeU32}, {5, hir.TypeUSize}} {
+		expression := statements[expectation.statement].Expression
+		if expression == nil || expression.Kind != "prefix" || expression.Operator != "~" ||
+			expression.Type != expectation.typ || len(expression.Children) != 1 || expression.Children[0].Type != expectation.typ {
+			t.Fatalf("bitwise-not statement %d = %+v", expectation.statement, expression)
+		}
+	}
+}
+
+func TestAnalyzeRejectsBitwiseNotOnBool(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\nfn main() -> i32 { let invalid: bool = ~true; 42 }\n",
+	})
+	if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "bitwise not on bool" {
+		t.Fatalf("result = %+v", result)
+	}
+}
+
 func TestAnalyzeTypesCStringLiteralToImmutableBytePointerCast(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{

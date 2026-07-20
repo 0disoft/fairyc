@@ -57,8 +57,9 @@ Binary `+`, `-`, and `*` require two matching operands from `i32`, `u8`, `u32`, 
 produce that same type. Each operation has checked ordinary semantics and traps on a result outside
 the selected type, including unsigned subtraction below zero. There is no arithmetic-time promotion,
 coercion, wrapping, or mixed signedness. `/` and `%` admit the same matching types, return that type,
-and trap on a zero divisor. `&`, `^`, `|`, and `>>` admit the same matching types and return that
-type. Bitwise operations do not trap. Right shift keeps signed arithmetic behavior for `i32`, uses
+and trap on a zero divisor. Unary `~` admits one value from the same integer set. Binary `&`, `^`,
+`|`, and `>>` admit matching values from that set and return the exact operand type. Bitwise
+operations do not trap. Right shift keeps signed arithmetic behavior for `i32`, uses
 logical behavior for unsigned types, and traps before execution when the amount is outside the
 exact operand width. Left shift remains unsupported as `E1011`.
 

@@ -352,8 +352,14 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				if !validViewIndexShape(operation, false) || !slices.Equal(operation.TrapCategories, []string{"bounds"}) {
 					failures = append(failures, VerificationError{Code: "V1501", Entity: entity, Detail: "immutable byte-view index is missing its bounds check"})
 				}
-			case OperationAssign, OperationUnary:
+			case OperationAssign:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationUnary:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if !validUnaryShape(operation) {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "typed scalar unary operation shape is invalid"})
+				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationBinary:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
@@ -852,6 +858,23 @@ func validBinaryShape(operation Operation) bool {
 		return hir.CheckedShiftType(operation.OwnerType) && operation.Type == operation.OwnerType
 	case "&", "^", "|":
 		return hir.BitwiseIntegerType(operation.OwnerType) && operation.Type == operation.OwnerType
+	default:
+		return false
+	}
+}
+
+func validUnaryShape(operation Operation) bool {
+	if operation.DestinationLocal == NoLocal || len(operation.Operands) != 1 ||
+		!scalarOperandMatches(operation.Operands[0], operation.OwnerType) {
+		return false
+	}
+	switch operation.Operator {
+	case "!":
+		return operation.OwnerType == hir.TypeBool && operation.Type == hir.TypeBool
+	case "+", "-":
+		return operation.OwnerType == hir.TypeI32 && operation.Type == hir.TypeI32
+	case "~":
+		return hir.BitwiseNotType(operation.OwnerType) && operation.Type == operation.OwnerType
 	default:
 		return false
 	}

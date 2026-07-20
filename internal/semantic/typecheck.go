@@ -680,7 +680,7 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 			c.analyzer.addDiagnostic("E1007", span(c.module.file.Path, expression.Children[0].Span))
 		}
 		return hir.TypeBool
-	case "+", "-", "~":
+	case "+", "-":
 		c.requireType(
 			"E1006",
 			span(c.module.file.Path, expression.Children[0].Span),
@@ -689,6 +689,11 @@ func (c *typeChecker) checkPrefix(expression *ast.Expression, result *hir.Expres
 			span(c.module.file.Path, expression.Span),
 		)
 		return hir.TypeI32
+	case "~":
+		if childType != hir.TypeInvalid && !hir.BitwiseNotType(childType) {
+			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "bitwise not on "+string(childType))
+		}
+		return childType
 	case "&":
 		if c.analyzer.resolved[expression.Children[0]] == nil {
 			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "borrow of a non-place expression")

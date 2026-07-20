@@ -142,8 +142,8 @@ Optimization level and backend must not change the meaning of safe code. Express
 - Ordinary `/` and `%` accept those same matching types. A zero divisor always traps as
   `division-by-zero`; only `i32` minimum with negative one additionally traps as
   `signed-division-overflow`.
-- Binary `&`, `^`, and `|` accept those same matching types and return that exact type without
-  promotion, signedness conversion, or a trap.
+- Unary `~` and binary `&`, `^`, and `|` accept the same four integer types and return that exact
+  type without promotion, signedness conversion, or a trap. Binary operands must match.
 - Source `as` integer conversion is currently limited to the target-independent, value-preserving
   pairs `u8 -> i32`, `u8 -> u32`, `u8 -> usize`, and `u32 -> usize`. Narrowing, signedness-changing,
   C-scalar, pointer/integer, and other numeric conversions require a later explicit contract.

@@ -64,6 +64,11 @@ returns `bool`; ordering admits matching operands from the four Fairy integer ty
   marker and switch. `V1001` rejects missing or forged type metadata,
 invalid immediate families, mixed types, aggregate equality, pointer ordering, and boolean ordering.
 
+A scalar `unary` operation also records exact `OwnerType` and result `Type`. `~` admits `i32`,
+`u8`, `u32`, or `usize` and returns that same type; `!` remains `bool -> bool`, while unary `+` and
+checked unary `-` remain `i32 -> i32`. `V1001` rejects operator, operand, owner, result, immediate,
+or destination drift instead of letting an interpreter or backend infer `i32` from the opcode.
+
 Built-in `Option` and `Result` construction records the concrete constructed type. Inert struct,
 restricted user enum, and resource construction use distinct operations backed by separate
 program-level definitions, so
