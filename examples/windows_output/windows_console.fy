@@ -30,5 +30,5 @@ pub fn stdout_write_text(text: &str) -> bool {
 pub fn byte_view_ready(bytes: &[u8]) -> bool {
     let first: u8 = bytes[0];
     let second: u8 = bytes[1];
-    bytes.len == 2
+    first == 0 && second == 65 && bytes.len == 2
 }

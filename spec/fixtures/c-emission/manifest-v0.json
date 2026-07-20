@@ -361,7 +361,7 @@
         "target": "x86_64-linux-gnu",
         "dialect": "c11",
         "functions": ["main::main"],
-        "features": ["scalar-control-flow", "static-byte-string", "trap", "view-index"]
+        "features": ["scalar-comparison", "scalar-control-flow", "static-byte-string", "trap", "view-index"]
       }
     }
   ]

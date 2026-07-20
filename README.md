@@ -112,7 +112,7 @@ is still experimental and does not promote target maturity.
 without a compiler banner and preserves the program's full Windows process status. The checked-in
 `examples/windows_output/main.fy` contains the one exact unsafe Windows stdout write-all symbol
 inside a checked local helper. Its `main` passes `&str` and `&[u8]` through safe internal calls; the
-byte helper executes checked read-only indexing while the entry contains no raw pointer or `unsafe`,
+byte helper observes the exact NUL and `A` bytes through checked read-only indexing while the entry contains no raw pointer or `unsafe`,
 prints `Fairy C says hi`, and exits 42. That is real
 FY-to-MSVC process output and unsafe containment, but it is not yet a portable `std::io` API.
 A provisional SystemHeap implementation now lives in the target standard-library

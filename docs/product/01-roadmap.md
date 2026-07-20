@@ -258,7 +258,8 @@ forwards separated bounded stdout and stderr without a compiler receipt and pres
 explicitly listed modules, observes empty and invalid raw-write cases, derives the
 request and progress lengths from borrowed-view `.len`, confines the Windows-only unsafe C symbol
 to a checked local `&str` helper, passes both borrowed-view families through safe internal calls,
-executes two checked byte-view loads, and covers the `bounds` trap at both MSVC profiles,
+executes two checked byte-view loads that observe exact NUL and `A` values, and covers the `bounds`
+trap at both MSVC profiles,
 emits the exact 16 ASCII bytes `Fairy C says hi\n`, and exits 42. Its `main` contains no raw pointer,
 foreign call, or `unsafe`. The same
 output/status contract is observed both in-process and through the separately built `fairyc.exe`.

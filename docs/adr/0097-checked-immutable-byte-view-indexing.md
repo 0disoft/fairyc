@@ -34,6 +34,8 @@ mutable slices, arrays, text boundaries, places, assignment, iteration, and unch
 ## Consequences
 
 - A Fairy C program can read compiler-owned byte-string data without entering `unsafe`.
+- Interpreter, deterministic C-emission, and Windows MSVC acceptance paths observe byte value `65`
+  from `b"\x00A"[1]`; the Windows output example additionally observes the leading NUL byte.
 - Empty views and an index equal to the byte length trap deterministically without cleanup.
 - Bounds-check elimination is not implemented; every admitted index currently keeps the explicit
   dynamic check even when a future optimizer could prove it safe.
