@@ -155,6 +155,7 @@ func (a *analyzer) declareResourceDropFunctions() {
 				NameSpan: resource.Drop.Span,
 				Parameters: []ast.Parameter{{
 					Name:     "self",
+					Mutable:  true,
 					Span:     resource.Drop.Span,
 					NameSpan: resource.Drop.Span,
 					Type:     ast.TypeReference{Text: resource.Name, Span: resource.NameSpan},
@@ -390,6 +391,7 @@ func (a *analyzer) resolveFunction(module *moduleScope, function *ast.Function) 
 			source:      module.file.Path,
 			declaration: parameter.NameSpan,
 			typeSpan:    parameter.Type.Span,
+			mutable:     parameter.Mutable,
 		}
 		parameters.names[parameter.Name] = value
 		a.parameter[parameter] = value

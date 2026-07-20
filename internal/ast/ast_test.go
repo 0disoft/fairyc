@@ -80,6 +80,31 @@ func TestLowerPreservesFunctionSemanticStructure(t *testing.T) {
 	}
 }
 
+func TestLowerPreservesMutableParameterModifier(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nfn close(mut file: File, status: u32) -> i32 { 0 }\n")
+	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	module, err := Lower(tree)
+	if err != nil {
+		t.Fatalf("Lower() error = %v", err)
+	}
+	if len(module.Functions) != 1 || len(module.Functions[0].Parameters) != 2 {
+		t.Fatalf("functions = %+v", module.Functions)
+	}
+	parameters := module.Functions[0].Parameters
+	if parameters[0].Name != "file" || !parameters[0].Mutable || parameters[0].Type.Text != "File" ||
+		parameters[1].Name != "status" || parameters[1].Mutable || parameters[1].Type.Text != "u32" {
+		t.Fatalf("parameters = %+v", parameters)
+	}
+	wantStart := len("module main;\nfn close(mut ")
+	if parameters[0].NameSpan.StartByte != wantStart || parameters[0].NameSpan.EndByte != wantStart+len("file") {
+		t.Fatalf("mutable parameter name span = %+v", parameters[0].NameSpan)
+	}
+}
+
 func TestLowerCapturesResourceFields(t *testing.T) {
 	t.Parallel()
 	input := []byte("module main;\nresource Pair { left: i32; right: i32; drop fn(self: &mut Self) {} }\n")

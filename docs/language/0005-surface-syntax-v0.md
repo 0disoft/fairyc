@@ -13,6 +13,9 @@
 - A declaration is written `name: Type`; C declarators and `typedef`-dependent parsing do not exist.
 - Every function return type is explicit. No return value is `void`.
 - Source-level locals have initializers. `let` prevents reassignment; `var` permits reassignment and mutable borrowing.
+- An ordinary internal by-value parameter may use `mut name: Type`. The modifier makes only the
+  callee-local place assignable and mutably borrowable; foreign parameters and explicit receivers
+  do not use this spelling in Stage 0.
 - A `let` resource may still be consumed. Binding immutability is not ownership immobility.
 - A by-value position consumes a resource. Stage 0 has no `move` expression or `move` argument keyword.
 - Globals are compile-time `const` only. Mutable globals are excluded.
@@ -115,8 +118,12 @@ results by value. Foreign aggregate parameters remain deferred.
 `c::size_t` uses the ISO C `<stddef.h>` typedef; `c::ssize_t` is available only for the current
 `x86_64-linux-gnu` POSIX.1-2008 profile through `<sys/types.h>`. Plain `c::char` follows the selected
 target's signed `char` fact rather than inheriting either `c::schar` or `c::uchar`.
-Raw `*void` and `*mut void` are opaque C-interoperability pointers; safe borrows to `void`,
-dereference, arithmetic, integer conversion, and pointee-changing casts remain unavailable.
+Raw `*void` and `*mut void` are opaque C-interoperability pointers. Inside `unsafe`, a direct local
+`&T` may become `*void`, and `&mut T` may become `*void` or `*mut void`; the conversion preserves
+the concrete owner type in verified MIR and never strengthens mutability. Exact typed
+borrow-to-pointer casts and immutable `&CStr` parameter data extraction use the same explicit unsafe
+boundary. Raw dereference, arithmetic, integer conversion, and every other pointee-changing cast
+remain unavailable.
 The executable foreign slice additionally admits one pointer-to-opaque-pointer output shape such as
 `*mut *mut void`; both layers must be mutable, and pointer nesting does not generalize to C scalars,
 arbitrary pointees, or the other mutability combinations.

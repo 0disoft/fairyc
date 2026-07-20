@@ -1169,6 +1169,60 @@ fn main() -> i32 {
 	}
 }
 
+func TestAnalyzeAllowsMutableOrdinaryParameterAssignment(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\nfn update(mut value: i32) -> i32 { value = 42; value }\nfn main() -> i32 { update(0) }\n",
+	})
+	assertCleanTypeResult(t, result)
+	function := result.HIR.Modules[0].Functions[0]
+	if function.Name != "update" || len(function.Parameters) != 1 || !function.Parameters[0].Mutable || function.Parameters[0].Type != hir.TypeI32 {
+		t.Fatalf("function parameters = %+v", function.Parameters)
+	}
+}
+
+func TestAnalyzeRejectsImmutableOrdinaryParameterAssignment(t *testing.T) {
+	t.Parallel()
+	text := "module main;\nfn update(value: i32) -> i32 { value = 42; value }\n"
+	result := analyzeText(t, map[string]string{"main.fy": text})
+	if result.FailedPhase != semantic.PhaseType || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E1008" {
+		t.Fatalf("result = %+v", result)
+	}
+	start := strings.Index(text, "value =")
+	assertSpan(t, result.Diagnostics[0].Primary, "main.fy", start, start+len("value"))
+}
+
+func TestAnalyzeAllowsMutableParameterBorrowToOpaquePointer(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+@repr(C)
+struct Packet { code: u32; }
+unsafe extern C fn sink(output: *mut void) -> u32;
+fn call(mut packet: Packet) -> u32 { unsafe { sink(&mut packet as *mut void) } }
+fn main() -> i32 { if call(Packet { code: 0 }) == 0 { 42 } else { 1 } }
+`,
+	})
+	assertCleanTypeResult(t, result)
+	callFunction := result.HIR.Modules[0].Functions[0]
+	if callFunction.Name != "call" || len(callFunction.Parameters) != 1 || !callFunction.Parameters[0].Mutable {
+		t.Fatalf("call function = %+v", callFunction)
+	}
+	unsafeExpression := callFunction.Body.Tail
+	if unsafeExpression == nil || len(unsafeExpression.Children) != 1 || unsafeExpression.Children[0].Block == nil {
+		t.Fatalf("unsafe expression = %+v", unsafeExpression)
+	}
+	call := unsafeExpression.Children[0].Block.Tail
+	if call == nil || len(call.Children) != 2 {
+		t.Fatalf("foreign call = %+v", call)
+	}
+	cast := &call.Children[1]
+	if cast.Type != hir.RawPointer(hir.TypeVoid, true) || cast.TargetType != cast.Type ||
+		len(cast.Children) != 1 || cast.Children[0].Type != hir.MutableBorrow(hir.Type("main::Packet")) || cast.UnsafeScope == nil {
+		t.Fatalf("opaque cast = %+v", cast)
+	}
+}
+
 func TestAnalyzeTypesValuePreservingIntegerCasts(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{
@@ -1615,6 +1669,16 @@ func TestAnalyzeRejectsRawPointerCastThatChangesPointeeOrStrengthensMutability(t
 			name:    "mutability strengthening",
 			source:  "module main;\nfn main() -> i32 { let value: i32 = 0; let pointer: *mut i32 = unsafe { &value as *mut i32 }; 0 }\n",
 			feature: "cast from &i32 to *mut i32",
+		},
+		{
+			name:    "opaque mutability strengthening",
+			source:  "module main;\nfn main() -> i32 { let value: i32 = 0; let pointer: *mut void = unsafe { &value as *mut void }; 0 }\n",
+			feature: "cast from &i32 to *mut void",
+		},
+		{
+			name:    "opaque cast of borrow value instead of direct local borrow",
+			source:  "module main;\nfn inspect(value: &mut i32) -> i32 { let pointer: *mut void = unsafe { value as *mut void }; 0 }\nfn main() -> i32 { var value: i32 = 0; inspect(&mut value) }\n",
+			feature: "cast from &mut i32 to *mut void",
 		},
 		{
 			name:    "pointee change",

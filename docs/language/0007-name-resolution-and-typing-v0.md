@@ -88,7 +88,13 @@ remain unsupported rather than inheriting Fairy scalar rules or C promotion rule
 
 Boolean conditions are exact: `if`, `while`, `&&`, `||`, and `!` require `bool`. Integer truthiness is rejected. Both branches of an `if` expression must have one compatible type. A function tail expression or explicit return must match the declared return type.
 
-Calls require an exact arity and each argument must satisfy its parameter type. Assignment requires a mutable place and a value compatible with that place. Borrow and raw-pointer conversions follow their explicit safety rules; `null` never inhabits a safe borrow.
+Calls require an exact arity and each argument must satisfy its parameter type. An ordinary
+parameter is an immutable callee-local place unless its declaration carries `mut`; parameter
+mutability does not participate in call compatibility or ownership transfer. Assignment and
+`&mut` require a mutable local or parameter place and a compatible value. Inside `unsafe`, a direct
+borrow may erase its pointee to `*void` only without strengthening mutability; verified MIR retains
+the original owner type. Other borrow and raw-pointer conversions follow their explicit safety
+rules, and `null` never inhabits a safe borrow.
 
 Before checking bodies, the type phase canonicalizes every ordinary and raw foreign
 `@effects(...)` declaration in the resolved module set. A direct call additionally requires the

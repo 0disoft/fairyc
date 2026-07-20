@@ -240,10 +240,11 @@ func (c *typeChecker) checkFunction() hir.Function {
 		}
 		parameterSpan := span(c.module.file.Path, parameter.NameSpan)
 		result.Parameters = append(result.Parameters, hir.Parameter{
-			Symbol: symbol.id,
-			Name:   parameter.Name,
-			Type:   symbol.typ,
-			Span:   parameterSpan,
+			Symbol:  symbol.id,
+			Name:    parameter.Name,
+			Type:    symbol.typ,
+			Mutable: parameter.Mutable,
+			Span:    parameterSpan,
 		})
 		c.addType(parameterSpan, symbol.typ)
 	}
@@ -625,10 +626,13 @@ func (c *typeChecker) checkCast(expression *ast.Expression, result *hir.Expressi
 	sourceElement, sourceMutable, sourceBorrow := hir.BorrowElement(sourceType)
 	targetElement, targetMutable, targetPointer := hir.RawPointerElement(targetType)
 	sameElement := sourceElement == targetElement && (sourceMutable || !targetMutable)
+	directLocalBorrow := child != nil && child.Kind == "prefix" && (child.Operator == "&" || child.Operator == "&mut") &&
+		len(child.Children) == 1 && child.Children[0].Kind == "path"
+	opaqueElement := targetElement == hir.TypeVoid && (sourceMutable || !targetMutable) && directLocalBorrow
 	byteSliceBytes := sourceElement == hir.TypeByteSlice && !sourceMutable && targetElement == hir.TypeU8 && !targetMutable
 	stringBytes := sourceElement == hir.TypeStr && !sourceMutable && targetElement == hir.TypeU8 && !targetMutable
 	cStringBytes := sourceElement == hir.TypeCStr && !sourceMutable && targetElement == hir.TypeU8 && !targetMutable
-	if !sourceBorrow || !targetPointer || !sameElement && !byteSliceBytes && !stringBytes && !cStringBytes {
+	if !sourceBorrow || !targetPointer || !sameElement && !opaqueElement && !byteSliceBytes && !stringBytes && !cStringBytes {
 		c.analyzer.addUnsupported(
 			c.module.file.Path,
 			expression.Span,

@@ -132,6 +132,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0120-verified-nonempty-resource-drop-glue.md`: compiler-private typed drop functions linked through HIR, MIR, interpreter, and constrained C.
 - `0121-resource-drop-effects.md`: canonical resource-drop effects propagated through implicit cleanup edges while complete moves remain effect-free.
 - `0122-windows-file-consuming-close-c-slice.md`: target-bound Win32 File state, partial I/O, progress-preserving write-all, sync, consuming close, and best-effort drop through an inspected native MSVC probe.
+- `0123-mutable-parameter-and-opaque-borrow-cast.md`: callee-local `mut` parameters, verifier-retained opaque owner addresses, and borrowed CStr parameter data extraction for checked raw wrappers.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

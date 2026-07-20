@@ -233,7 +233,7 @@ func (p *parser) parseImpl(start int, leading []NodeID) NodeID {
 func (p *parser) parseFunction(start int, leading []NodeID, method bool) NodeID {
 	p.expect("fn")
 	name := p.parseName()
-	parameters := p.parseParameters(method)
+	parameters := p.parseParameters(method, true)
 	p.expect("->")
 	resultType := p.parseType()
 	body := p.parseBlock()
@@ -251,7 +251,7 @@ func (p *parser) parseForeignFunction(start int, leading []NodeID) NodeID {
 	}
 	p.expect("fn")
 	name := p.parseName()
-	parameters := p.parseParameters(false)
+	parameters := p.parseParameters(false, false)
 	p.expect("->")
 	resultType := p.parseType()
 	p.expect(";")
@@ -260,7 +260,7 @@ func (p *parser) parseForeignFunction(start int, leading []NodeID) NodeID {
 	return p.addNode(KindForeign, start, children, name, "")
 }
 
-func (p *parser) parseParameters(method bool) []NodeID {
+func (p *parser) parseParameters(method bool, allowMutable bool) []NodeID {
 	p.expect("(")
 	parameters := make([]NodeID, 0, 4)
 	if method && p.at("self") {
@@ -272,10 +272,14 @@ func (p *parser) parseParameters(method bool) []NodeID {
 	}
 	for !p.at(")") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 		start := p.currentFullIndex()
+		modifier := ""
+		if allowMutable && p.match("mut") {
+			modifier = "mut"
+		}
 		name := p.parseName()
 		p.expect(":")
 		typeID := p.parseType()
-		parameters = append(parameters, p.addNode(KindParameter, start, []NodeID{typeID}, name, ""))
+		parameters = append(parameters, p.addNode(KindParameter, start, []NodeID{typeID}, name, modifier))
 		if !p.match(",") {
 			break
 		}

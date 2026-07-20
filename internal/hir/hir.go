@@ -408,10 +408,11 @@ type Function struct {
 
 // Parameter is one resolved function parameter.
 type Parameter struct {
-	Symbol SymbolID
-	Name   string
-	Type   Type
-	Span   Span
+	Symbol  SymbolID
+	Name    string
+	Type    Type
+	Mutable bool
+	Span    Span
 }
 
 // Local is one resolved lexical binding.

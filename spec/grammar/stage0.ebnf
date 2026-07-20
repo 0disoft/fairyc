@@ -62,12 +62,14 @@ fairy_function_decl = "unsafe"? "fn" IDENT
                       ;
 
 foreign_function_decl = "unsafe" "extern" CONTEXT_C "fn" IDENT
-                        "(" ordinary_parameter_list? ")"
+                        "(" foreign_parameter_list? ")"
                         "->" type ";"
                         ;
 
 ordinary_parameter_list = ordinary_parameter ("," ordinary_parameter)* ","? ;
-ordinary_parameter = IDENT ":" type ;
+ordinary_parameter = "mut"? IDENT ":" type ;
+foreign_parameter_list = foreign_parameter ("," foreign_parameter)* ","? ;
+foreign_parameter = IDENT ":" type ;
 method_parameter_list = receiver_parameter ("," ordinary_parameter)* ","?
                       | ordinary_parameter_list
                       ;

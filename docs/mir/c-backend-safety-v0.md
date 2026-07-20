@@ -210,14 +210,17 @@ CStr validation, String copy/view/append/drop, CString from-text/view/drop, and 
 open/read/write-all/sync/close. The Windows target separately admits File
 open/read/write-all/sync/close/drop; its single-write helper retains internal C linkage. Direct
 Linux File write/drop and the rest of the prefix remain closed.
-Typed null and an exact
+Typed null and an exact or opaque
 direct-local borrow-to-raw-pointer cast are the only
-source-constructed raw pointers. The cast requires unsafe provenance, preserves the pointee type,
-forbids mutability strengthening, lowers to a verified MIR raw-address operation, and emits plain
-`&local` without `restrict` or `noalias`. Pointer dereference, arithmetic, integer conversion, and
-arbitrary casts remain rejected. A separate verified `byte-slice-data-address` operation may expose
+source-constructed raw pointers. The cast requires unsafe provenance, preserves the concrete owner
+type, permits the result pointee to be that exact type or `void`, forbids mutability strengthening,
+lowers to a verified MIR raw-address operation, and emits plain `&local` without `restrict` or
+`noalias`. Pointer dereference, arithmetic, integer conversion, and arbitrary casts remain rejected.
+A separate verified `byte-slice-data-address` operation may expose
 the immutable data pointer of a compiler-owned `&[u8]` literal or typed local inside unsafe code;
 it cannot strengthen mutability or pass the safe slice itself through a foreign signature.
+The corresponding CStr-data operation accepts static literal storage or a local borrowed CStr
+descriptor; the latter emits its immutable `.data` member rather than the descriptor address.
 Successful emission also records the sorted unique external link names used by actual foreign call
 terminators. Uncalled declarations remain prototypes but are absent from this link-requirement list.
 The exact standard-library namespace and component dependency mapping live in one shared contract

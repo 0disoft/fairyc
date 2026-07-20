@@ -94,6 +94,15 @@
       }
     },
     {
+      "id": "pass.mutable-parameter",
+      "sourceRoot": "cases/pass/mutable-parameter/src",
+      "source": "mutable_parameter.fy",
+      "expect": {
+        "status": "pass",
+        "module": "mutable_parameter"
+      }
+    },
+    {
       "id": "pass.postfix-chain",
       "sourceRoot": "cases/pass/postfix-chain/src",
       "source": "postfix_chain.fy",

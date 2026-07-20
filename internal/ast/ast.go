@@ -129,6 +129,7 @@ type ForeignFunction struct {
 // Parameter records one function parameter and its written type.
 type Parameter struct {
 	Name     string
+	Mutable  bool
 	Span     diagnostic.Span
 	NameSpan diagnostic.Span
 	Type     TypeReference
@@ -435,8 +436,9 @@ func lowerForeignFunction(tree *syntax.Tree, node syntax.Node) ForeignFunction {
 func lowerParameter(tree *syntax.Tree, node syntax.Node) Parameter {
 	value := Parameter{
 		Name:     node.Text,
+		Mutable:  node.Cooked == "mut",
 		Span:     node.Span,
-		NameSpan: findIdentifierSpan(tree, node, node.Text, ""),
+		NameSpan: findIdentifierSpan(tree, node, node.Text, node.Cooked),
 	}
 	if len(node.Children) > 0 {
 		if typeNode, found := tree.Node(node.Children[0]); found && typeNode.Kind == syntax.KindType {

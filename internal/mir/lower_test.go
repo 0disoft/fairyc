@@ -610,6 +610,47 @@ fn main() -> i32 {
 	}
 }
 
+func TestLowerPreservesOpaqueRawAddressOwnerType(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+@repr(C)
+struct Packet { code: u32; }
+unsafe extern C fn sink(output: *mut void) -> u32;
+fn main() -> i32 {
+    var output: Packet = Packet { code: 0 };
+    if unsafe { sink(&mut output as *mut void) } == 0 { 42 } else { 1 }
+}
+`)
+	var address *Operation
+	for blockIndex := range program.Functions[0].Blocks {
+		for operationIndex := range program.Functions[0].Blocks[blockIndex].Operations {
+			operation := &program.Functions[0].Blocks[blockIndex].Operations[operationIndex]
+			if operation.Kind == OperationRawAddress {
+				address = operation
+			}
+		}
+	}
+	wantOwner := hir.Type("main::Packet")
+	if address == nil || address.Type != hir.RawPointer(hir.TypeVoid, true) || address.OwnerType != wantOwner || address.Operator != "&mut" {
+		t.Fatalf("opaque raw address = %+v", address)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+	mutated := Clone(program)
+	for blockIndex := range mutated.Functions[0].Blocks {
+		for operationIndex := range mutated.Functions[0].Blocks[blockIndex].Operations {
+			operation := &mutated.Functions[0].Blocks[blockIndex].Operations[operationIndex]
+			if operation.Kind == OperationRawAddress {
+				operation.Type = hir.RawPointer(hir.TypeU32, true)
+			}
+		}
+	}
+	if failures := Verify(mutated); len(failures) != 1 || failures[0].Code != "V1001" {
+		t.Fatalf("Verify() mismatched opaque raw address = %+v", failures)
+	}
+}
+
 func TestLowerPreservesCStringStaticStorageOperand(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;

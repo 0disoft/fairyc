@@ -854,10 +854,13 @@ func (l *functionLowerer) lowerRawAddressCast(expression *hir.Expression) (Opera
 		})
 		return Operand{Kind: OperandLocal, Local: destination}, nil
 	}
-	if borrow.Kind == "literal" && borrow.Type == hir.SharedBorrow(hir.TypeCStr) && expression.Type == hir.RawPointer(hir.TypeU8, false) {
+	if (borrow.Kind == "literal" || borrow.Kind == "path") && borrow.Type == hir.SharedBorrow(hir.TypeCStr) && expression.Type == hir.RawPointer(hir.TypeU8, false) {
 		value, err := l.lowerExpression(borrow)
 		if err != nil {
 			return Operand{}, err
+		}
+		if value.Kind != OperandCString && value.Kind != OperandLocal {
+			return Operand{}, fmt.Errorf("C string data address source has invalid operand kind %q", value.Kind)
 		}
 		destination := l.newTemporary()
 		entity := sourceEntity("cstr-data-address", expression.Span)
@@ -885,7 +888,7 @@ func (l *functionLowerer) lowerRawAddressCast(expression *hir.Expression) (Opera
 		return Operand{}, fmt.Errorf("raw-address cast source is not a direct local place")
 	}
 	element, _, pointer := hir.RawPointerElement(expression.Type)
-	if !pointer || element != place.Type {
+	if !pointer || element != place.Type && element != hir.TypeVoid {
 		return Operand{}, fmt.Errorf("raw-address cast type %q does not match place type %q", expression.Type, place.Type)
 	}
 	destination := l.newTemporary()

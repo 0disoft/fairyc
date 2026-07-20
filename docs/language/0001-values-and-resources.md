@@ -39,7 +39,7 @@ Compiler IR may create uninitialized temporaries while evaluating an aggregate. 
 
 ## Binding and move syntax
 
-`let` prevents reassignment but may still be consumed. `var` permits reassignment and is required when creating a mutable borrow. Ownership transfer has no source-level `move` operator: assignment to a by-value destination, a by-value argument, or a return consumes a resource, and diagnostics name that transfer site.
+`let` prevents reassignment but may still be consumed. `var` permits reassignment and is required when creating a mutable borrow. An ordinary by-value parameter is likewise an immutable callee-local place unless written `mut name: Type`; that modifier permits callee-local reassignment and `&mut` without changing the argument type or making the value copyable. Ownership transfer has no source-level `move` operator: assignment to a by-value destination, a by-value argument, or a return consumes a resource, and diagnostics name that transfer site.
 
 ## Affine resource ownership
 

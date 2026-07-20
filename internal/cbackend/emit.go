@@ -1782,7 +1782,7 @@ func (e *emitter) inspectRawAddress(functionIndex int, operation mir.Operation) 
 		return fmt.Errorf("raw address in %s has incomplete place or unsafe provenance", function.Name)
 	}
 	element, mutable, pointer := hir.RawPointerElement(operation.Type)
-	if !pointer || element != operation.OwnerType || operation.Operator != "&" && operation.Operator != "&mut" || operation.Operator == "&" && mutable {
+	if !pointer || element != operation.OwnerType && element != hir.TypeVoid || operation.Operator != "&" && operation.Operator != "&mut" || operation.Operator == "&" && mutable {
 		return fmt.Errorf("raw address in %s has incompatible source and pointer types", function.Name)
 	}
 	operandType, err := e.operandType(functionIndex, operand)
@@ -1856,7 +1856,7 @@ func (e *emitter) inspectCStrDataAddress(functionIndex int, operation mir.Operat
 	if err != nil {
 		return fmt.Errorf("C string data address in %s: %w", function.Name, err)
 	}
-	if operand.Kind != mir.OperandCString || operation.Entity == "" || operation.UnsafeScope.Source == "" {
+	if operand.Kind != mir.OperandCString && operand.Kind != mir.OperandLocal || operation.Entity == "" || operation.UnsafeScope.Source == "" {
 		return fmt.Errorf("C string data address in %s has incomplete storage or unsafe provenance", function.Name)
 	}
 	element, mutable, pointer := hir.RawPointerElement(operation.Type)
@@ -2800,14 +2800,18 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		}
 	case mir.OperationCStrDataAddress:
 		operand, err := oneOperand(operation.Operands)
-		if err != nil || operand.Kind != mir.OperandCString {
+		if err != nil || operand.Kind != mir.OperandCString && operand.Kind != mir.OperandLocal {
 			return fmt.Errorf("C string data address in %s has invalid storage operand", function)
 		}
-		value, err := cOperand(operand)
-		if err != nil {
-			return fmt.Errorf("C string data address in %s: %w", function, err)
+		if operand.Kind == mir.OperandLocal {
+			fmt.Fprintf(output, "    fy_l_%d = fy_l_%d.data;\n", operation.DestinationLocal, operand.Local)
+		} else {
+			value, err := cOperand(operand)
+			if err != nil {
+				return fmt.Errorf("C string data address in %s: %w", function, err)
+			}
+			fmt.Fprintf(output, "    fy_l_%d = %s;\n", operation.DestinationLocal, value)
 		}
-		fmt.Fprintf(output, "    fy_l_%d = %s;\n", operation.DestinationLocal, value)
 	case mir.OperationEnumConstruct:
 		enumIndex, found := e.enumByType[operation.Type]
 		if !found {

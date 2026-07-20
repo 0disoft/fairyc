@@ -19,6 +19,7 @@
     "docs/adr/0115-loop-carried-safe-borrow-provenance.md",
     "docs/adr/0116-stage-0-source-effects.md",
     "docs/adr/0121-resource-drop-effects.md",
+    "docs/adr/0123-mutable-parameter-and-opaque-borrow-cast.md",
     "docs/diagnostics/catalog-v0.md"
   ],
   "cases": [
@@ -866,6 +867,31 @@
                 "span": { "source": "main.fy", "startByte": 44, "endByte": 48 }
               }
             ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.type.mutable-parameter",
+      "sourceRoot": "cases/pass/mutable-parameter/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow"
+      }
+    },
+    {
+      "id": "fail.type.immutable-parameter-assignment",
+      "sourceRoot": "cases/fail/immutable-parameter-assignment/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          {
+            "code": "E1008",
+            "primary": { "source": "main.fy", "startByte": 48, "endByte": 53 },
+            "related": []
           }
         ]
       }

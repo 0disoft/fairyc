@@ -978,6 +978,55 @@ fn main() -> i32 {
 	}
 }
 
+func TestEmitOpaqueAddressOfMutableLocal(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+@repr(C)
+struct Packet { code: u32; }
+unsafe extern C fn sink(output: *mut void) -> u32;
+fn main() -> i32 {
+    var output: Packet = Packet { code: 0 };
+    if unsafe { sink(&mut output as *mut void) } == 0 { 42 } else { 1 }
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, required := range []string{
+		"extern uint32_t sink(void * fy_a_0);",
+		"void * fy_l_",
+		" = &fy_l_",
+		"sink(fy_l_",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+}
+
+func TestEmitCStrParameterDataAddress(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+unsafe extern C fn inspect_raw(path: *u8) -> u32;
+fn inspect(path: &CStr) -> u32 { unsafe { inspect_raw(path as *u8) } }
+fn main() -> i32 { if inspect(c"fairy") == 0 { 42 } else { 1 } }
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, required := range []string{
+		"extern uint32_t inspect_raw(const uint8_t * fy_a_0);",
+		".data;",
+		"inspect_raw(fy_l_",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+}
+
 func TestEmitRejectsOtherNestedRawPointerMutabilityShapes(t *testing.T) {
 	t.Parallel()
 	for _, typeRef := range []string{"**void", "**mut void", "*mut *void"} {

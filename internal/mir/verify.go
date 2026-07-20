@@ -539,7 +539,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				element, mutable, pointer := hir.RawPointerElement(operation.Type)
 				shapeValid := operation.DestinationLocal != NoLocal && len(operation.Operands) == 1 &&
 					operation.Operands[0].Kind == OperandLocal && operation.OwnerType != "" && operation.OwnerType != hir.TypeInvalid &&
-					pointer && element == operation.OwnerType &&
+					pointer && (element == operation.OwnerType || element == hir.TypeVoid) &&
 					(operation.Operator == "&" && !mutable || operation.Operator == "&mut")
 				if !shapeValid {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "raw address shape is invalid"})
@@ -601,7 +601,8 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				element, mutable, pointer := hir.RawPointerElement(operation.Type)
 				shapeValid := operation.DestinationLocal != NoLocal && len(operation.Operands) == 1 &&
-					operation.Operands[0].Kind == OperandCString && operation.OwnerType == hir.SharedBorrow(hir.TypeCStr) &&
+					(operation.Operands[0].Kind == OperandCString || operation.Operands[0].Kind == OperandLocal) &&
+					operation.OwnerType == hir.SharedBorrow(hir.TypeCStr) &&
 					pointer && element == hir.TypeU8 && !mutable && operation.Operator == "as"
 				if !shapeValid {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "C string data address shape is invalid"})

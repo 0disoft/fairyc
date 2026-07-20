@@ -19,6 +19,29 @@ func TestParseBudgetFailsClosed(t *testing.T) {
 	}
 }
 
+func TestParseMutableOrdinaryParameterLosslessly(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nfn close(mut file: File, status: u32) -> i32 { 0 }\n")
+	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	parameters := make([]Node, 0, 2)
+	for _, node := range tree.Nodes {
+		if node.Kind == KindParameter {
+			parameters = append(parameters, node)
+		}
+	}
+	if len(parameters) != 2 || parameters[0].Text != "file" || parameters[0].Cooked != "mut" ||
+		parameters[1].Text != "status" || parameters[1].Cooked != "" {
+		t.Fatalf("parameters = %+v", parameters)
+	}
+	reconstructed, ok := tree.Reconstruct()
+	if !ok || !slices.Equal(reconstructed, input) {
+		t.Fatalf("Reconstruct() = %q, %v; want %q, true", reconstructed, ok, input)
+	}
+}
+
 func TestNestedTypeCloseKeepsShiftTokenLossless(t *testing.T) {
 	t.Parallel()
 	input := []byte("module main;\nfn wrap(value: Token) -> Option<Option<Token>> { value }\n")

@@ -42,6 +42,8 @@ Name resolution, canonical type selection, phase ownership, cascade suppression,
 - Statements use explicit semicolons. Assignment is a statement, and integer values are not implicit booleans.
 - Every file declares one module. Imports require aliases and cannot be wildcard, selective, cyclic, or re-exported.
 - `let` prevents reassignment, `var` permits reassignment and mutable borrowing, and both require initializers.
+- An ordinary internal parameter may use `mut name: Type` to make its callee-local place assignable
+  and mutably borrowable without changing the call type or ownership transfer.
 - A by-value position consumes a resource. There is no general `move` keyword.
 - Functions declare return types. Methods live in `impl` blocks and make shared, mutable, or consuming receivers explicit.
 - `if` is an expression. `match` is limited to shallow variants and inert fields.
@@ -88,7 +90,9 @@ Whole-root `Live`, `Dead`, and rejected `MaybeLive` transitions, live replacemen
 
 - `&T` is a non-null shared read-only borrow.
 - `&mut T` is a non-null exclusive mutable borrow.
-- `*T` is a raw pointer. Null values, pointer arithmetic, arbitrary casts, and dereference require an `unsafe` boundary.
+- `*T` is a raw pointer. Inside `unsafe`, a direct borrow may erase its pointee to `*void` without
+  strengthening mutability while MIR retains the concrete owner type. Null values, pointer
+  arithmetic, every other pointee-changing cast, and dereference remain outside safe code.
 - Nullable borrows use `Option<&T>` rather than a nullable reference representation.
 
 The Stage 0 borrow model uses local last-use loans and whole-root overlap. It does not infer disjoint mutable field borrows or two-phase borrows. A returned safe borrow must have one unambiguous origin. Stored borrows, self-reference, and multiple-origin returns must use an index or generation handle, a redesigned API, a lexical region, or a narrow unsafe module.
