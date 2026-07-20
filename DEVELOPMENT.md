@@ -46,9 +46,10 @@ executed as a temporary MSVC PE. WSL is neither installed nor invoked by this pa
 `build/fairyc.exe` to undo the local bootstrap output.
 
 The configured Windows smoke independently builds `fairyc.exe` into a temporary directory, invokes
-its help surface, runs the checked-in quickstart through its `run-target` command, and removes both
-the compiler and target images. That proves the standalone process path without treating an ignored
-local build artifact as source truth.
+its help surface, runs the checked-in quickstart through `run-target`, requires `exec-target` to
+forward the checked-in output example and return process status 42, and removes the compiler and
+target images. That proves both standalone process paths without treating an ignored local build
+artifact as source truth.
 
 ## Implementation boundaries
 

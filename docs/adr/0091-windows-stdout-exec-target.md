@@ -32,7 +32,7 @@ pretending that one operating-system write is all-or-nothing.
    a completed prefix.
 6. `examples/windows_output/main.fy` observes empty and invalid-input results, writes the exact 16
    ASCII bytes `Fairy C says hi\n`, and exits 42. The configured Windows smoke requires those exact
-   streams and status through `exec-target`.
+   streams and status both in-process and through a separately built `fairyc.exe` process.
 7. No WSL or Linux compatibility layer participates. The raw function remains unsafe and does not
    establish portable `std::io`, Unicode console behavior, stdin, stderr writes, formatting, or
    target support.

@@ -219,10 +219,10 @@ closed subset only. It does not prove source-level Fairy lowering, an independen
 register-level oracle, exact stack/shadow-store placement, complete PE/COFF object or unwind
 metadata, or hosted evidence.
 
-The Windows smoke additionally parses all twelve linked target or probe executable images without
+The Windows smoke additionally parses all thirteen linked target or probe executable images without
 invoking the host loader as the parser. The target-neutral product, both declared-target profile
-products, two direct run-target temporary products (one driven by a separately built `fairyc.exe`),
-one exec-target temporary output product, plus both profiles of the layout, ABI, and unwind probes must be
+products, two direct run-target temporary products, two exec-target temporary output products,
+plus both profiles of the layout, ABI, and unwind probes must be
 bounded AMD64 PE32+ large-address-aware non-DLL console images with aligned headers and sections, a
 readable executable `.text` section, and an entry point inside executable code. Import and exception
 directory presence is recorded but their payloads are not interpreted. This is executable-image
