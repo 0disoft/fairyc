@@ -28,7 +28,7 @@ func runHost(arguments []string, sourceRoot string, stdout, stderr io.Writer) in
 	if err != nil {
 		return buildFailure(stderr, err)
 	}
-	if outcome.Output != "" {
+	if outcome.Stdout != "" || outcome.Stderr != "" {
 		return buildFailure(stderr, fmt.Errorf("Windows host executable produced unexpected output"))
 	}
 	if category, trapped := windowsHostTrapCategory(outcome.ExitCode); trapped {

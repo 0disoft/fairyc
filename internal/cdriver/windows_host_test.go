@@ -114,3 +114,31 @@ func TestResolveProgramFilesX86FindsVisualStudioInstallerWhenAvailable(t *testin
 		t.Fatalf("Visual Studio Installer discovery = %q, %v", root, err)
 	}
 }
+
+func TestBoundedProcessOutputSeparatesStreamsUnderSharedLimit(t *testing.T) {
+	t.Parallel()
+	output := newBoundedProcessOutput(5)
+
+	if written, err := output.stdoutWriter().Write([]byte("abcd")); err != nil || written != 4 {
+		t.Fatalf("stdout Write() = %d, %v", written, err)
+	}
+	if written, err := output.stderrWriter().Write([]byte("xyz")); err != nil || written != 3 {
+		t.Fatalf("stderr Write() = %d, %v", written, err)
+	}
+	stdout, stderr, truncated := output.values()
+	if stdout != "abcd" || stderr != "x" || !truncated {
+		t.Fatalf("output = stdout %q, stderr %q, truncated %t", stdout, stderr, truncated)
+	}
+}
+
+func TestBoundedProcessOutputAcceptsExactSharedLimit(t *testing.T) {
+	t.Parallel()
+	output := newBoundedProcessOutput(5)
+
+	_, _ = output.stdoutWriter().Write([]byte("abc"))
+	_, _ = output.stderrWriter().Write([]byte("de"))
+	stdout, stderr, truncated := output.values()
+	if stdout != "abc" || stderr != "de" || truncated {
+		t.Fatalf("output = stdout %q, stderr %q, truncated %t", stdout, stderr, truncated)
+	}
+}

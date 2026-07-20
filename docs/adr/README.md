@@ -99,6 +99,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0087-windows-msvc-owned-text-lifecycle.md`: closed compiler-owned text to String/CString/CStr success lifecycles with deterministic SystemHeap, Buffer, and text-view dependency linkage at both MSVC profiles.
 - `0088-experimental-windows-target-run-command.md`: direct temporary execution of the declared Windows target path with shared compilation, PE/unwind validation, exact result/trap reporting, and no WSL.
 - `0089-standalone-windows-compiler-smoke.md`: temporary Go-built `fairyc.exe` process validation that compiles and executes a minimal FY Windows target without distribution or self-hosting claims.
+- `0090-bounded-windows-process-stream-capture.md`: separate stdout/stderr capture under one synchronized output budget without inventing cross-stream order or enabling source-visible console I/O.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

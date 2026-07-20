@@ -378,8 +378,8 @@ func runWindowsUnwindProbe(toolchain cdriver.WindowsHostToolchain) (int, int, er
 		if err != nil {
 			return executions, len(unit.Cases), fmt.Errorf("execute Windows MSVC unwind probe with %s: %w", profile.Name, err)
 		}
-		if outcome.ExitCode != 0 || outcome.Output != "" {
-			return executions, len(unit.Cases), fmt.Errorf("Windows MSVC unwind probe with %s returned %d and output %q", profile.Name, outcome.ExitCode, outcome.Output)
+		if outcome.ExitCode != 0 || outcome.Stdout != "" || outcome.Stderr != "" {
+			return executions, len(unit.Cases), fmt.Errorf("Windows MSVC unwind probe with %s returned %d, stdout %q, and stderr %q", profile.Name, outcome.ExitCode, outcome.Stdout, outcome.Stderr)
 		}
 		executions++
 	}
@@ -410,8 +410,8 @@ func runWindowsLayoutProbe(toolchain cdriver.WindowsHostToolchain) (int, int, er
 		if err != nil {
 			return executions, len(unit.Cases), fmt.Errorf("execute Windows MSVC layout probe with %s: %w", profile.Name, err)
 		}
-		if outcome.ExitCode != 0 || outcome.Output != "" {
-			return executions, len(unit.Cases), fmt.Errorf("Windows MSVC layout probe with %s returned %d and output %q", profile.Name, outcome.ExitCode, outcome.Output)
+		if outcome.ExitCode != 0 || outcome.Stdout != "" || outcome.Stderr != "" {
+			return executions, len(unit.Cases), fmt.Errorf("Windows MSVC layout probe with %s returned %d, stdout %q, and stderr %q", profile.Name, outcome.ExitCode, outcome.Stdout, outcome.Stderr)
 		}
 		executions++
 	}
@@ -442,8 +442,8 @@ func runWindowsABIProbe(toolchain cdriver.WindowsHostToolchain) (int, int, error
 		if err != nil {
 			return executions, len(unit.Cases), fmt.Errorf("execute Windows MSVC ABI probe with %s: %w", profile.Name, err)
 		}
-		if outcome.ExitCode != 0 || outcome.Output != "" {
-			return executions, len(unit.Cases), fmt.Errorf("Windows MSVC ABI probe with %s returned %d and output %q", profile.Name, outcome.ExitCode, outcome.Output)
+		if outcome.ExitCode != 0 || outcome.Stdout != "" || outcome.Stderr != "" {
+			return executions, len(unit.Cases), fmt.Errorf("Windows MSVC ABI probe with %s returned %d, stdout %q, and stderr %q", profile.Name, outcome.ExitCode, outcome.Stdout, outcome.Stderr)
 		}
 		executions++
 	}

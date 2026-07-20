@@ -10,6 +10,7 @@ import (
 	"runtime"
 	"slices"
 	"strings"
+	"sync"
 
 	"github.com/0disoft/fairyc/internal/pecoff"
 )
@@ -39,9 +40,11 @@ type WindowsHostArtifact struct {
 }
 
 // WindowsHostOutcome is one bounded local MSVC execution result. ExitCode preserves the program's i32 bits.
+// Stdout and Stderr preserve stream identity but do not claim ordering across the two OS pipes.
 type WindowsHostOutcome struct {
 	ExitCode int32
-	Output   string
+	Stdout   string
+	Stderr   string
 }
 
 // ResolveWindowsHostMSVC locates the latest complete x64 MSVC and Windows SDK installation.
@@ -321,14 +324,15 @@ func executeWindowsMSVCArtifact(artifact WindowsHostArtifact, label string) (Win
 	command := exec.CommandContext(contextValue, executablePath)
 	command.Stdin = nil
 	command.Dir = temporaryRoot
-	var output boundedBuffer
-	command.Stdout = &output
-	command.Stderr = &output
+	output := newBoundedProcessOutput(maxProcessOutput)
+	command.Stdout = output.stdoutWriter()
+	command.Stderr = output.stderrWriter()
 	err = command.Run()
 	if errors.Is(contextValue.Err(), context.DeadlineExceeded) {
 		return WindowsHostOutcome{}, fmt.Errorf("%s executable exceeded %s", label, commandTimeout)
 	}
-	if output.truncated {
+	stdout, stderr, truncated := output.values()
+	if truncated {
 		return WindowsHostOutcome{}, fmt.Errorf("%s executable exceeded %d output bytes", label, maxProcessOutput)
 	}
 	exitCode := 0
@@ -339,7 +343,76 @@ func executeWindowsMSVCArtifact(artifact WindowsHostArtifact, label string) (Win
 		}
 		exitCode = exitError.ExitCode()
 	}
-	return WindowsHostOutcome{ExitCode: int32(uint32(exitCode)), Output: output.String()}, nil
+	return WindowsHostOutcome{
+		ExitCode: int32(uint32(exitCode)),
+		Stdout:   stdout,
+		Stderr:   stderr,
+	}, nil
+}
+
+type processOutputStream uint8
+
+const (
+	processStdout processOutputStream = iota
+	processStderr
+)
+
+type boundedProcessOutput struct {
+	mu        sync.Mutex
+	limit     int
+	stdout    []byte
+	stderr    []byte
+	truncated bool
+}
+
+type boundedProcessStreamWriter struct {
+	output *boundedProcessOutput
+	stream processOutputStream
+}
+
+func newBoundedProcessOutput(limit int) *boundedProcessOutput {
+	return &boundedProcessOutput{limit: limit}
+}
+
+func (output *boundedProcessOutput) stdoutWriter() *boundedProcessStreamWriter {
+	return &boundedProcessStreamWriter{output: output, stream: processStdout}
+}
+
+func (output *boundedProcessOutput) stderrWriter() *boundedProcessStreamWriter {
+	return &boundedProcessStreamWriter{output: output, stream: processStderr}
+}
+
+func (writer *boundedProcessStreamWriter) Write(value []byte) (int, error) {
+	return writer.output.write(writer.stream, value), nil
+}
+
+func (output *boundedProcessOutput) write(stream processOutputStream, value []byte) int {
+	output.mu.Lock()
+	defer output.mu.Unlock()
+	originalLength := len(value)
+	available := output.limit - len(output.stdout) - len(output.stderr)
+	if available > 0 {
+		value = value[:min(available, len(value))]
+		switch stream {
+		case processStdout:
+			output.stdout = append(output.stdout, value...)
+		case processStderr:
+			output.stderr = append(output.stderr, value...)
+		default:
+			output.truncated = true
+			return originalLength
+		}
+	}
+	if originalLength > max(available, 0) {
+		output.truncated = true
+	}
+	return originalLength
+}
+
+func (output *boundedProcessOutput) values() (string, string, bool) {
+	output.mu.Lock()
+	defer output.mu.Unlock()
+	return string(output.stdout), string(output.stderr), output.truncated
 }
 
 func latestWindowsSDKVersion(sdkRoot string) (string, error) {
