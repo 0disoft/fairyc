@@ -48,6 +48,11 @@ Nominal `struct`, `resource`, and `enum` declarations are not structurally inter
 
 Integer and floating literal text remains exact until an expected type is available. An unconstrained integer defaults to `i32`; an unconstrained float defaults to `f64`. Range checking occurs after type selection and does not wrap.
 
+The implemented safe integer `as` subset is closed to `u8 -> i32`, `u8 -> u32`, `u8 -> usize`, and
+`u32 -> usize`. Each target contains the complete mathematical source range, so no value changes or
+traps. Other integer pairs are not inferred, truncated, wrapped, or sign-reinterpreted; they remain
+unsupported until an explicit fallible conversion contract exists.
+
 The current source C-scalar slice deliberately has no contextual literals. Its only value origin is
 a typed foreign-call result, which may be relayed through locals and later matching foreign-call
 arguments. Arithmetic, comparison, conversion, boolean normalization, and floating-point behavior

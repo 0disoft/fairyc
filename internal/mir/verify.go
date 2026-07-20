@@ -354,6 +354,14 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 			case OperationAssign, OperationUnary, OperationBinary:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationScalarCast:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				if operation.DestinationLocal == NoLocal || len(operation.Operands) != 1 || operation.Operator != "as" ||
+					!hir.ValuePreservingIntegerCast(operation.OwnerType, operation.Type) ||
+					!scalarCastOperandMatches(operation.Operands[0], operation.OwnerType) {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "value-preserving integer cast shape is invalid"})
+				}
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationResultConstruct:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				if len(operation.Operands) != 1 || operation.DestinationLocal == NoLocal {
@@ -755,6 +763,13 @@ func validViewIndexShape(operation Operation, destination bool) bool {
 		return false
 	}
 	return index.Kind == OperandLocal || index.Kind == OperandUSize
+}
+
+func scalarCastOperandMatches(operand Operand, sourceType hir.Type) bool {
+	if operand.Kind == OperandLocal {
+		return true
+	}
+	return sourceType == hir.TypeU8 && operand.Kind == OperandU8 || sourceType == hir.TypeU32 && operand.Kind == OperandU32
 }
 
 func verifyTrapCheckEdges(function *Function) []VerificationError {

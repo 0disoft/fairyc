@@ -1,7 +1,7 @@
 {
   "tool": "ssealed",
   "version": "0.6.11",
-  "generatedAt": "2026-07-20T07:34:41.075Z",
+  "generatedAt": "2026-07-20T07:54:25.240Z",
   "scope": "general",
   "profile": "cli-tool",
   "addons": [
@@ -496,13 +496,13 @@
     },
     {
       "path": "docs/adr/README.md",
-      "checksum": "sha256:c016ce70a41bbe816e9b11e7a782ced54278128a5649789ab92388953de7b959",
+      "checksum": "sha256:3630ce1f361612eb125b735cccbe62c6d2e06bb59fb0bf1fd1b6eb0ff935fe90",
       "kind": "document",
       "ownership": "seeded",
       "presence": "optional",
       "status": "active",
       "initialChecksum": "sha256:57be3aaeda2ef7dc55f76bc760d7a3576cb24e41ecf861dadf27f5c9d07fd00c",
-      "acceptedChecksum": "sha256:c016ce70a41bbe816e9b11e7a782ced54278128a5649789ab92388953de7b959",
+      "acceptedChecksum": "sha256:3630ce1f361612eb125b735cccbe62c6d2e06bb59fb0bf1fd1b6eb0ff935fe90",
       "generatedChecksum": "sha256:57be3aaeda2ef7dc55f76bc760d7a3576cb24e41ecf861dadf27f5c9d07fd00c"
     },
     {
@@ -650,13 +650,13 @@
     },
     {
       "path": "docs/engineering/05-testing-standard.md",
-      "checksum": "sha256:963d8de725d3a04bee2782c2b50a3034a893e85769612d83f4dedc475163a987",
+      "checksum": "sha256:d50dcf55229dd20cb7b61dba870c0938dc688d7ac759c240ee665fab3903f701",
       "kind": "document",
       "ownership": "seeded",
       "presence": "optional",
       "status": "active",
       "initialChecksum": "sha256:1f4bac44fda4431afe4567cadd6e5d080bcb2e3de09f468a9294251a6233c8e2",
-      "acceptedChecksum": "sha256:963d8de725d3a04bee2782c2b50a3034a893e85769612d83f4dedc475163a987",
+      "acceptedChecksum": "sha256:d50dcf55229dd20cb7b61dba870c0938dc688d7ac759c240ee665fab3903f701",
       "generatedChecksum": "sha256:1f4bac44fda4431afe4567cadd6e5d080bcb2e3de09f468a9294251a6233c8e2"
     },
     {
@@ -826,24 +826,24 @@
     },
     {
       "path": "docs/product/01-roadmap.md",
-      "checksum": "sha256:c678f37dde014b36d8f2a15dee009cd6a1e24defcffd627ddd2b4145390cb2ad",
+      "checksum": "sha256:7879edbd229bf11697ffe14a3f536a8f9e9d23a619f04e0c0be12ef879b3e338",
       "kind": "document",
       "ownership": "seeded",
       "presence": "optional",
       "status": "active",
       "initialChecksum": "sha256:950d7a44619b2ff2626421126a59af4ac1b98f258f252a78d9ead96b568640e4",
-      "acceptedChecksum": "sha256:c678f37dde014b36d8f2a15dee009cd6a1e24defcffd627ddd2b4145390cb2ad",
+      "acceptedChecksum": "sha256:7879edbd229bf11697ffe14a3f536a8f9e9d23a619f04e0c0be12ef879b3e338",
       "generatedChecksum": "sha256:950d7a44619b2ff2626421126a59af4ac1b98f258f252a78d9ead96b568640e4"
     },
     {
       "path": "docs/product/02-spec.md",
-      "checksum": "sha256:fef34adbe238e2f3b5c221389fd9c7ad805e40c917a3cfc5884fde9c1850e8dd",
+      "checksum": "sha256:354ac92827692308095089532d488b2efc06d4d3578b5b5af31fc2d2a20b9a64",
       "kind": "document",
       "ownership": "seeded",
       "presence": "optional",
       "status": "active",
       "initialChecksum": "sha256:a4b9ccd412af5252824341199977718a3cfddf59d3ebf2bc293ef3ffea3a862b",
-      "acceptedChecksum": "sha256:fef34adbe238e2f3b5c221389fd9c7ad805e40c917a3cfc5884fde9c1850e8dd",
+      "acceptedChecksum": "sha256:354ac92827692308095089532d488b2efc06d4d3578b5b5af31fc2d2a20b9a64",
       "generatedChecksum": "sha256:a4b9ccd412af5252824341199977718a3cfddf59d3ebf2bc293ef3ffea3a862b"
     },
     {
@@ -870,13 +870,13 @@
     },
     {
       "path": "README.md",
-      "checksum": "sha256:6e331507e4d3b850716eeced0bd3e154e1ea6e7b7dc3e88f127c58e325058796",
+      "checksum": "sha256:fa463601e1f13760f19995c725d6d5f11ea6f7ca78147878d6b46b9169ab2d18",
       "kind": "document",
       "ownership": "seeded",
       "presence": "optional",
       "status": "active",
       "initialChecksum": "sha256:ba13f8767a0e20ad4cd9f4951cb8bbaa90931186276a9979ebf5f08d67145d53",
-      "acceptedChecksum": "sha256:6e331507e4d3b850716eeced0bd3e154e1ea6e7b7dc3e88f127c58e325058796",
+      "acceptedChecksum": "sha256:fa463601e1f13760f19995c725d6d5f11ea6f7ca78147878d6b46b9169ab2d18",
       "generatedChecksum": "sha256:ba13f8767a0e20ad4cd9f4951cb8bbaa90931186276a9979ebf5f08d67145d53"
     },
     {

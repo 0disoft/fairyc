@@ -28,7 +28,7 @@ error compatibility. The MIR runner executes all
 left-to-right call evaluation, complete-root moves, normal-exit cleanup order, `Result` error
   cleanup, nearest-loop control, explicit checked arithmetic, and non-unwinding trap paths. The verifier mutation runner constructs all 10 named
   baselines and proves all 21 isolated `V1001` through `V1701` rejection recipes. The first MIR
-  interpreter slice executes all 56 v0 cases for literal return, function-call arithmetic,
+  interpreter slice executes all 59 v0 cases for literal return, function-call arithmetic,
 boolean branches and logical not, source `&&` and `||` short-circuiting, scalar `while`, scalar
 `Option` construction/matching, scalar `Result` construction/matching/propagation,
 resource construction, field reads, call moves, resource-bearing `Option` and `Result` payload moves,
@@ -43,10 +43,11 @@ through typed HIR and executable MIR. The current executable subset accepts only
 `drop` body; any nonempty body fails explicitly before Flow or MIR instead of being silently ignored.
 The interpreter constructs, reads, and recursively drops resources from the verified MIR definition,
 but still does not execute user drop-body effects.
-The constrained C backend emits deterministic C11 for 21 verified fixtures across the scalar
+The constrained C backend emits deterministic C11 for 22 verified fixtures across the scalar
 payload surface, restricted inert user enums, flat nonempty all-`i32` resources with empty drop
 bodies, resource-bearing built-in `Option` and `Result` values, borrowed-view byte lengths, checked
-immutable byte-slice indexing, and borrowed UTF-8/byte-slice internal calls. The cases cover
+immutable byte-slice indexing, the target-independent value-preserving integer casts `u8 as i32`,
+`u8 as u32`, `u8 as usize`, and `u32 as usize`, and borrowed UTF-8/byte-slice internal calls. The cases cover
 resource construction, field reads, whole-root call moves, live reassignment, calls and control
 flow, active-payload moves, Result propagation, bitwise operations, checked division and shift, overflow
 trapping, scalar `Option` Some and None, and scalar `Result` propagation success and failure. This
@@ -288,7 +289,8 @@ go run ./cmd/fairyc experimental parse examples/syntax/main.fy
 For repeated Windows use, `DEVELOPMENT.md` gives the WSL-free manual bootstrap that creates ignored
 `build/fairyc.exe`. The configured Windows smoke separately builds a temporary standalone compiler
 process and requires that executable to run `examples/windows_quickstart/main.fy` through MSVC with
-native result 42, then execute `examples/windows_output/main.fy` with exact stdout and process status
+native result 42 by indexing the byte literal `b"*"` and safely converting its `u8` value to `i32`,
+then execute `examples/windows_output/main.fy` with exact stdout and process status
 42 while explicitly supplying its separate `windows_console.fy` module. The compiler binary is
 still built from Go; only the input programs and resulting temporary
 target executables are Fairy C.

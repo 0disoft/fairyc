@@ -821,6 +821,51 @@ fn main() -> i32 {
 	}
 }
 
+func TestAnalyzeTypesValuePreservingIntegerCasts(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn main() -> i32 {
+    let byte: u8 = 42;
+    let signed: i32 = byte as i32;
+    let word: u32 = byte as u32;
+    let byte_size: usize = byte as usize;
+    let word_size: usize = word as usize;
+    signed
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+	statements := result.HIR.Modules[0].Functions[0].Body.Statements
+	want := []struct {
+		statement int
+		source    hir.Type
+		target    hir.Type
+	}{
+		{statement: 1, source: hir.TypeU8, target: hir.TypeI32},
+		{statement: 2, source: hir.TypeU8, target: hir.TypeU32},
+		{statement: 3, source: hir.TypeU8, target: hir.TypeUSize},
+		{statement: 4, source: hir.TypeU32, target: hir.TypeUSize},
+	}
+	for _, expectation := range want {
+		expression := statements[expectation.statement].Expression
+		if expression == nil || expression.Kind != "scalar-cast" || expression.Type != expectation.target || expression.TargetType != expectation.target ||
+			expression.Operator != "as" || expression.UnsafeScope != nil || len(expression.Children) != 1 || expression.Children[0].Type != expectation.source {
+			t.Fatalf("cast statement %d = %+v", expectation.statement, expression)
+		}
+	}
+}
+
+func TestAnalyzeRejectsNonValuePreservingIntegerCast(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\nfn main() -> i32 { let word: u32 = 42; word as i32 }\n",
+	})
+	if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "cast from u32 to i32" {
+		t.Fatalf("result = %+v", result)
+	}
+}
+
 func TestAnalyzeTypesCStringLiteralToImmutableBytePointerCast(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{

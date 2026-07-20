@@ -107,6 +107,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0095-explicit-multi-source-interpreter-run.md`: the same bounded explicit FY module closure for fast verified-MIR interpreter execution without a backend, host process, or source discovery.
 - `0096-explicit-multi-source-prototype-program-commands.md`: entry-plus-repeated-source closures for C inspection, Linux build, and target-neutral Windows host build/run without widening foreign or linker inputs.
 - `0097-checked-immutable-byte-view-indexing.md`: read-only `&[u8]` indexing through contextual `usize`, verified dominating bounds checks, interpreter traps, and private C byte loads without opening slicing or text indexing.
+- `0098-value-preserving-integer-casts.md`: four target-independent widening integer `as` pairs through explicit MIR, interpreter values, generated C casts, and a WSL-free Windows quickstart that returns its indexed byte.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

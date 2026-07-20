@@ -466,6 +466,10 @@ func (c *typeChecker) checkCast(expression *ast.Expression, result *hir.Expressi
 	result.TargetType = targetType
 	child, sourceType := c.checkExpression(expression.Children[0], hir.TypeInvalid)
 	result.Children = appendExpression(result.Children, child)
+	if hir.ValuePreservingIntegerCast(sourceType, targetType) {
+		result.Kind = "scalar-cast"
+		return targetType
+	}
 	sourceElement, sourceMutable, sourceBorrow := hir.BorrowElement(sourceType)
 	targetElement, targetMutable, targetPointer := hir.RawPointerElement(targetType)
 	sameElement := sourceElement == targetElement && (sourceMutable || !targetMutable)

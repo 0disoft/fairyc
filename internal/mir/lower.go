@@ -492,6 +492,8 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		return l.lowerViewLength(expression)
 	case "view-index":
 		return l.lowerViewIndex(expression)
+	case "scalar-cast":
+		return l.lowerScalarCast(expression)
 	case "cast":
 		return l.lowerRawAddressCast(expression)
 	case "prefix":
@@ -573,6 +575,27 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 	default:
 		return Operand{}, fmt.Errorf("unsupported HIR expression %q", expression.Kind)
 	}
+}
+
+func (l *functionLowerer) lowerScalarCast(expression *hir.Expression) (Operand, error) {
+	if expression.Operator != "as" || expression.TargetType != expression.Type || len(expression.Children) != 1 ||
+		!hir.ValuePreservingIntegerCast(expression.Children[0].Type, expression.Type) {
+		return Operand{}, fmt.Errorf("malformed value-preserving integer cast")
+	}
+	operand, err := l.lowerExpression(&expression.Children[0])
+	if err != nil {
+		return Operand{}, err
+	}
+	if operand.Kind == OperandInvalid {
+		return Operand{}, fmt.Errorf("value-preserving integer cast has no operand value")
+	}
+	destination := l.newTemporary()
+	l.appendOperation(Operation{
+		Kind: OperationScalarCast, Span: expression.Span, DestinationLocal: destination,
+		Operands: []Operand{operand}, OwnerType: expression.Children[0].Type,
+		Type: expression.Type, Operator: expression.Operator,
+	})
+	return Operand{Kind: OperandLocal, Local: destination}, nil
 }
 
 func (l *functionLowerer) lowerRawAddressCast(expression *hir.Expression) (Operand, error) {

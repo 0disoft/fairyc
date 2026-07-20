@@ -134,6 +134,9 @@ Optimization level and backend must not change the meaning of safe code. Express
 - Signed right shift is the only Stage 0 source shift; signed left shift is rejected as `E1011`.
 - Null cannot inhabit ordinary references.
 - Wrapping, saturating, and checked arithmetic use distinct operations.
+- Source `as` integer conversion is currently limited to the target-independent, value-preserving
+  pairs `u8 -> i32`, `u8 -> u32`, `u8 -> usize`, and `u32 -> usize`. Narrowing, signedness-changing,
+  C-scalar, pointer/integer, and other numeric conversions require a later explicit contract.
 - `assert` always traps when false; a debug-only assertion is not an optimizer assumption.
 - A trap is non-unwinding and does not run cleanup.
 - Optimizer assumptions and unchecked access are explicit unsafe operations.

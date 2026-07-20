@@ -90,6 +90,18 @@ func Option(element Type) Type {
 	return Type("Option<" + string(element) + ">")
 }
 
+// ValuePreservingIntegerCast reports the closed Stage 0 widening conversion subset.
+func ValuePreservingIntegerCast(sourceType, targetType Type) bool {
+	switch sourceType {
+	case TypeU8:
+		return targetType == TypeI32 || targetType == TypeU32 || targetType == TypeUSize
+	case TypeU32:
+		return targetType == TypeUSize
+	default:
+		return false
+	}
+}
+
 // OptionElement decomposes one canonical compiler-known Option type.
 func OptionElement(value Type) (element Type, ok bool) {
 	text := string(value)

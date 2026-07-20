@@ -698,7 +698,8 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 					mir.OperationResultPayload, mir.OperationOptionPayload,
 					mir.OperationEnumConstruct, mir.OperationEnumPayload,
 					mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
-					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewIndex:
+					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewIndex,
+					mir.OperationScalarCast:
 					inferred = operation.Type
 				}
 				if operation.DestinationLocal == mir.NoLocal || inferred == hir.TypeInvalid || inferred == "" {
@@ -1191,6 +1192,11 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 					return err
 				}
 				e.features["view-index"] = struct{}{}
+			case mir.OperationScalarCast:
+				if err := e.inspectScalarCast(functionIndex, *operation); err != nil {
+					return err
+				}
+				e.features["scalar-cast"] = struct{}{}
 			case mir.OperationUse:
 			case mir.OperationArithmeticCheck:
 				e.features["checked-arithmetic"] = struct{}{}
@@ -1343,7 +1349,7 @@ func validateOperationShape(function string, operation mir.Operation) error {
 	case mir.OperationAssign, mir.OperationInitialize, mir.OperationUnary, mir.OperationBinary,
 		mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationEnumConstruct, mir.OperationEnumPayload,
-		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewIndex:
+		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewIndex, mir.OperationScalarCast:
 		if operation.DestinationLocal < 0 {
 			return fmt.Errorf("%s operation in %s has no destination local", operation.Kind, function)
 		}
@@ -1398,6 +1404,29 @@ func (e *emitter) inspectViewIndex(functionIndex int, operation mir.Operation, d
 	}
 	if destination && len(operation.TrapCategories) != 0 || !destination && !slices.Equal(operation.TrapCategories, []string{"bounds"}) {
 		return fmt.Errorf("immutable byte-view index in %s has an invalid trap marker", function.Name)
+	}
+	return nil
+}
+
+func (e *emitter) inspectScalarCast(functionIndex int, operation mir.Operation) error {
+	function := &e.functions[functionIndex]
+	operand, err := oneOperand(operation.Operands)
+	if err != nil {
+		return fmt.Errorf("value-preserving integer cast in %s: %w", function.Name, err)
+	}
+	if operation.DestinationLocal == mir.NoLocal || operation.Operator != "as" ||
+		!hir.ValuePreservingIntegerCast(operation.OwnerType, operation.Type) {
+		return fmt.Errorf("value-preserving integer cast in %s has an invalid shape", function.Name)
+	}
+	operandType, err := e.operandType(functionIndex, operand)
+	if err != nil {
+		return fmt.Errorf("value-preserving integer cast in %s: %w", function.Name, err)
+	}
+	if operandType != operation.OwnerType {
+		return fmt.Errorf("value-preserving integer cast in %s has operand type %q, want %q", function.Name, operandType, operation.OwnerType)
+	}
+	if _, err := e.cValueType(operation.Type); err != nil {
+		return fmt.Errorf("value-preserving integer cast result in %s: %w", function.Name, err)
 	}
 	return nil
 }
@@ -2457,6 +2486,20 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			return fmt.Errorf("immutable byte-view index offset in %s: %w", function, err)
 		}
 		fmt.Fprintf(output, "    fy_l_%d = (%s).data[%s];\n", operation.DestinationLocal, receiverValue, indexValue)
+	case mir.OperationScalarCast:
+		operand, err := oneOperand(operation.Operands)
+		if err != nil {
+			return fmt.Errorf("value-preserving integer cast in %s: %w", function, err)
+		}
+		value, err := cOperand(operand)
+		if err != nil {
+			return fmt.Errorf("value-preserving integer cast in %s: %w", function, err)
+		}
+		targetType, err := e.cValueType(operation.Type)
+		if err != nil {
+			return fmt.Errorf("value-preserving integer cast result in %s: %w", function, err)
+		}
+		fmt.Fprintf(output, "    fy_l_%d = (%s)(%s);\n", operation.DestinationLocal, targetType, value)
 	case mir.OperationMove:
 		fmt.Fprintf(output, "    (void)fy_l_%d;\n", operation.Symbol)
 	case mir.OperationDrop:
@@ -2907,7 +2950,8 @@ func operationHasDestination(kind mir.OperationKind) bool {
 		mir.OperationOptionConstruct, mir.OperationOptionPayload,
 		mir.OperationEnumConstruct, mir.OperationEnumPayload,
 		mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
-		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewIndex, mir.OperationRegionPlace:
+		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewIndex,
+		mir.OperationScalarCast, mir.OperationRegionPlace:
 		return true
 	default:
 		return false

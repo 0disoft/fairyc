@@ -198,7 +198,11 @@ Fairy name remains the source lookup name and the one nonempty cooked string bec
 identifier. Missing, non-string, empty, multiple, or duplicate arguments are `E5106`; the backend
 still rejects names outside its C11 and private-namespace policy.
 
-There is no parallel `extern C {}` block syntax. C-layout types use `@repr(C)`. Pointer casts and raw dereferences require unsafe code. `as` is limited to value-preserving conversions; narrowing uses an explicit fallible conversion.
+There is no parallel `extern C {}` block syntax. C-layout types use `@repr(C)`. Pointer casts and raw
+dereferences require unsafe code. Safe integer `as` currently admits exactly `u8` to `i32`, `u32`, or
+`usize`, plus `u32` to `usize`; all four preserve every source value on every admitted target.
+Narrowing, signedness-changing, C-scalar, pointer/integer, and other numeric conversions remain
+rejected and require a later explicit fallible conversion contract.
 
 ## Grammar and recovery authority
 

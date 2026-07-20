@@ -296,6 +296,25 @@ fn main() -> i32 {
 	}
 }
 
+func TestEmitValuePreservingIntegerCast(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn main() -> i32 { b"*"[0] as i32 }
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, feature := range []string{"scalar-cast", "static-byte-string", "trap", "view-index"} {
+		if !slices.Contains(unit.Features, feature) {
+			t.Errorf("features %v are missing %q", unit.Features, feature)
+		}
+	}
+	if !strings.Contains(unit.Source, "= (int32_t)(fy_l_") {
+		t.Fatalf("generated C is missing the value-preserving uint8_t-to-int32_t cast:\n%s", unit.Source)
+	}
+}
+
 func TestEmitByteStringLiteralDataAddressForForeignCall(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

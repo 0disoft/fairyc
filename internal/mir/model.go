@@ -244,6 +244,7 @@ const (
 	OperationAssign            OperationKind = "assign"
 	OperationUnary             OperationKind = "unary"
 	OperationBinary            OperationKind = "binary"
+	OperationScalarCast        OperationKind = "scalar-cast"
 	OperationResultConstruct   OperationKind = "result-construct"
 	OperationResultPayload     OperationKind = "result-payload"
 	OperationOptionConstruct   OperationKind = "option-construct"

@@ -16,6 +16,7 @@
     "docs/adr/0023-explicit-checked-arithmetic-mir.md",
     "docs/adr/0024-stage-0-loop-control-and-cleanup.md",
     "docs/adr/0097-checked-immutable-byte-view-indexing.md",
+    "docs/adr/0098-value-preserving-integer-casts.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/mir-v0.md",
     "docs/engineering/05-testing-standard.md"
@@ -1026,6 +1027,18 @@
         "completedThrough": "interpret",
         "outcome": "trap",
         "category": "bounds"
+      }
+    },
+    {
+      "id": "pass.interpreter.value-preserving-integer-cast",
+      "sourceRoot": "cases/pass/value-preserving-integer-cast/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42
       }
     }
   ]

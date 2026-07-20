@@ -58,7 +58,9 @@ observation are wired. Source struct construction and field reads reach verified
 interpreter for its executable scalar subset, and generated C. Inside an explicit unsafe boundary,
 an exact `&T -> *T`, `&mut T -> *T`, or `&mut T -> *mut T` cast may take the address of a direct
 local place without inventing alias promises. Raw dereference, pointer arithmetic, integer-pointer
-conversion, mutability strengthening, and other casts remain unsupported. The exact source-to-C
+conversion, mutability strengthening, and other raw-pointer or C-scalar casts remain unsupported.
+The safe language-level value-preserving integer subset is defined separately by ADR 0098 and does
+not broaden this FFI surface. The exact source-to-C
 mapping is closed:
 
 | Fairy C | TargetSpec key | C spelling | Provider |

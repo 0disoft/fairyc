@@ -544,6 +544,16 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					return callCompletion{trapCategory: trap}, nil
 				}
 				locals[operation.DestinationLocal] = i32Value(result)
+			case mir.OperationScalarCast:
+				value, err := evaluateOne(locals, operation.Operands)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("value-preserving integer cast in %q: %w", function.Name, err)
+				}
+				converted, err := valuePreservingIntegerCast(value, operation.OwnerType, operation.Type)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("value-preserving integer cast in %q: %w", function.Name, err)
+				}
+				locals[operation.DestinationLocal] = converted
 			case mir.OperationViewLength:
 				receiver, err := evaluateOne(locals, operation.Operands)
 				if err != nil {
@@ -916,6 +926,31 @@ func equalScalarValues(left, right runtimeValue) (bool, error) {
 	default:
 		return false, capabilityError("value is not an executable equality scalar")
 	}
+}
+
+func valuePreservingIntegerCast(value runtimeValue, sourceType, targetType hir.Type) (runtimeValue, error) {
+	if !hir.ValuePreservingIntegerCast(sourceType, targetType) || value.typ != sourceType {
+		return runtimeValue{}, capabilityError("integer cast has incompatible source or target type")
+	}
+	switch sourceType {
+	case hir.TypeU8:
+		if value.kind != valueU8 || value.u64 > math.MaxUint8 {
+			return runtimeValue{}, capabilityError("integer cast received an invalid u8 value")
+		}
+		switch targetType {
+		case hir.TypeI32:
+			return i32Value(int32(value.u64)), nil
+		case hir.TypeU32:
+			return runtimeValue{kind: valueU32, u64: value.u64, typ: hir.TypeU32}, nil
+		case hir.TypeUSize:
+			return runtimeValue{kind: valueUSize, u64: value.u64, typ: hir.TypeUSize}, nil
+		}
+	case hir.TypeU32:
+		if value.kind == valueU32 && value.u64 <= math.MaxUint32 && targetType == hir.TypeUSize {
+			return runtimeValue{kind: valueUSize, u64: value.u64, typ: hir.TypeUSize}, nil
+		}
+	}
+	return runtimeValue{}, capabilityError("integer cast is outside the executable widening subset")
 }
 
 func evaluateOne(locals map[mir.LocalID]runtimeValue, operands []mir.Operand) (runtimeValue, error) {
