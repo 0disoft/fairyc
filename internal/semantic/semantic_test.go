@@ -1067,6 +1067,43 @@ fn main() -> i32 {
 	}
 }
 
+func TestAnalyzeTypesBorrowedViewLengthAsUSize(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn main() -> i32 {
+    let text: &str = "λx";
+    let bytes: &[u8] = b"\x00ABC";
+    let text_length: usize = text.len;
+    let byte_length: usize = bytes.len;
+    if text_length == 3 && byte_length == 4 { 42 } else { 1 }
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+	main := result.HIR.Modules[0].Functions[0]
+	if len(main.Body.Statements) != 4 {
+		t.Fatalf("body statements = %+v", main.Body.Statements)
+	}
+	for index, wantOwner := range []hir.Type{hir.SharedBorrow(hir.TypeStr), hir.SharedBorrow(hir.TypeByteSlice)} {
+		expression := main.Body.Statements[index+2].Expression
+		if expression == nil || expression.Kind != "view-length" || expression.Type != hir.TypeUSize || expression.Operator != "len" ||
+			len(expression.Children) != 1 || expression.Children[0].Type != wantOwner {
+			t.Fatalf("length expression %d = %+v, want owner %q", index, expression, wantOwner)
+		}
+	}
+}
+
+func TestAnalyzeRejectsUnknownBorrowedViewField(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\nfn main() -> i32 { let text: &str = \"fairy\"; let value: usize = text.capacity; 42 }\n",
+	})
+	if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "unknown borrowed-view field capacity" {
+		t.Fatalf("result = %+v", result)
+	}
+}
+
 func TestAnalyzeRejectsMutableOrUnwrappedUTF8StringLiteralTypes(t *testing.T) {
 	t.Parallel()
 	tests := []struct {

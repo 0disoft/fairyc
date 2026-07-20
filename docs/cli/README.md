@@ -117,7 +117,8 @@ and does not use WSL.
 program stdout and stderr stay on their matching streams and the program's 32-bit Windows status
 becomes the CLI status. The shared 64 KiB capture ceiling remains fail-closed, and cross-stream order
 is unspecified. The checked-in output example reaches only the unsafe internal Windows stdout
-write-all symbol; it is not a safe or portable `std::io` surface.
+write-all symbol and derives its byte count from the borrowed text view's `.len`; it is not a safe
+or portable `std::io` surface.
 `experimental target-spec` emits `fairyc.target-spec/v0` JSON without probing the host or exposing
 local tool paths. Linux reports its current scalar, flat-resource, and resource-tagged emission
 subset. Windows reports `scalar-and-llp64-c-scalar-c11`. Both keep `emittable`, `conformant`, and `supported` false and list

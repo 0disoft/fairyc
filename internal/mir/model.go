@@ -255,6 +255,7 @@ const (
 	OperationStructConstruct   OperationKind = "struct-construct"
 	OperationResourceConstruct OperationKind = "resource-construct"
 	OperationFieldRead         OperationKind = "field-read"
+	OperationViewLength        OperationKind = "view-length"
 	OperationRegionEnter       OperationKind = "region-enter"
 	OperationRegionPlace       OperationKind = "region-place"
 	OperationRegionReset       OperationKind = "region-reset"

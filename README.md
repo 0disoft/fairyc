@@ -43,9 +43,9 @@ through typed HIR and executable MIR. The current executable subset accepts only
 `drop` body; any nonempty body fails explicitly before Flow or MIR instead of being silently ignored.
 The interpreter constructs, reads, and recursively drops resources from the verified MIR definition,
 but still does not execute user drop-body effects.
-The constrained C backend emits deterministic C11 for 18 verified fixtures across the scalar
+The constrained C backend emits deterministic C11 for 19 verified fixtures across the scalar
 payload surface, restricted inert user enums, flat nonempty all-`i32` resources with empty drop
-bodies, and resource-bearing built-in `Option` and `Result` values. The cases cover
+bodies, resource-bearing built-in `Option` and `Result` values, and borrowed-view byte lengths. The cases cover
 resource construction, field reads, whole-root call moves, live reassignment, calls and control
 flow, active-payload moves, Result propagation, bitwise operations, checked division and shift, overflow
 trapping, scalar `Option` Some and None, and scalar `Result` propagation success and failure. This
@@ -152,8 +152,9 @@ private non-null `{ data, length }` byte-slice transport, including an empty len
 typed locals may expose only the immutable data address through explicit unsafe conversion. Plain
 `"..."` literals now independently reach a private non-null `fy_str` view after complete decoded
 UTF-8 validation, with deduplicated immutable storage and the same empty length-zero sentinel rule;
-typed locals can expose only immutable data through explicit unsafe conversion. Indexing, slicing,
-source-level length access, a stable public string ABI, and the general safe text API still do not exist.
+typed locals can expose only immutable data through explicit unsafe conversion. Safe borrowed
+`&str` and `&[u8]` views expose `.len` as their `usize` byte count without scanning or allocation.
+Indexing, slicing, a stable public string ABI, and the general safe text API still do not exist.
 Buffer-backed String and CString C helpers now preserve ownership on failed UTF-8 conversion,
 support overlap-safe String append, expose immutable bounded views, reject interior NUL, and append
 exactly one C terminator. Their C-only native probe is configured but unobserved. A separate

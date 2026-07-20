@@ -55,6 +55,12 @@ unsafe extern C fn(...) -> T
 
 `str` and `CStr` are unsized compiler-known view types and appear as `&str` and `&CStr`. User-defined generic declarations are excluded even though built-in `Option`, `Result`, slices, and arrays accept type arguments.
 
+A safe borrow whose element type is `str` or `[u8]` exposes the read-only property `.len` with
+result type `usize`. The property reports the view's byte count, including embedded NUL bytes and
+multi-byte UTF-8 encodings. It reads existing view metadata without scanning, allocation, a call, or
+a trap. It does not define indexing, slicing, capacity, Unicode scalar or grapheme counting,
+`CStr.len`, or a public view representation.
+
 The current executable C-scalar source slice recognizes all sixteen C scalars declared by the
 selected TargetSpec, preserves every one as an exact identity distinct from coincidentally sized
 Fairy scalars, and permits them only as transported foreign-call results, locals, and arguments.

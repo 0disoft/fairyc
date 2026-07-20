@@ -66,7 +66,7 @@ Exit gate: positive and negative fixtures agree with the source contracts, resou
 
 Current implementation status: a fail-closed Linux/amd64 constrained-C differential command now
 requires glibc, Clang, and GCC and is wired into a separate hosted Ubuntu CI job. It is designed to
-run all 18 emission cases at low and optimized profiles for 72 process-status and exact
+run all 19 emission cases at low and optimized profiles for 76 process-status and exact
 source-linked drop-trace comparisons, then drive
 the actual experimental build CLI with resource-bearing Option and Result plus a flat all-`i32` resource
 through 4 compiler/profile executable
@@ -74,7 +74,7 @@ smokes. It now adds four-way product builds containing compiler-owned nonempty `
 private compiler-owned `&[u8]` view, plus separate generated-Fairy-to-C calls that verify every byte
 of `fairy\0` and every non-terminated byte of `fairy` respectively. The same job
 also compiles and executes each production, uninstrumented C unit with Clang
-and GCC under the closed `address-undefined-o1` ASan+UBSan mode for 36 fail-closed sanitizer
+and GCC under the closed `address-undefined-o1` ASan+UBSan mode for 38 fail-closed sanitizer
 executions. The current Windows
 host has no eligible Linux toolchain, and no hosted run receipt has been observed, so this is a
 configured lane rather than native conformance evidence. A shared bounded C driver and embedded
@@ -139,7 +139,8 @@ expose only an immutable `*u8` address through an explicit unsafe operation. Com
 locals can expose only the immutable data address. Plain UTF-8 `"..."` literals now cross semantic
 typing, a distinct MIR operand, and a private `fy_str` view with decoded UTF-8 validation,
 deduplicated immutable bytes, an empty non-null sentinel, and typed-local immutable data extraction.
-Indexing, slicing, source-level length access, public CStr operations, safe text operations, and stable
+Borrowed `&str` and `&[u8]` views now expose their exact byte count through zero-cost `.len` metadata
+reads. Indexing, slicing, public CStr operations, Unicode counting, safe text operations, and stable
 slice or string ABIs remain missing.
 Owned String and CString now have provisional Buffer-backed C transport with immutable views,
 successful-only Buffer moves, failure ownership preservation, self-source append, interior-NUL
@@ -246,8 +247,9 @@ is exercised without retaining or distributing it. This improves the developer e
 without changing target maturity or claiming self-hosting.
 The additional `experimental exec-target` path uses the same inspected temporary Windows target but
 forwards separated bounded stdout and stderr without a compiler receipt and preserves the program's
-32-bit Windows status. Its FY example observes empty and invalid raw-write cases, emits the exact 16
-ASCII bytes `Fairy C says hi\n`, and exits 42 through one Windows-only unsafe C symbol. The same
+32-bit Windows status. Its FY example observes empty and invalid raw-write cases, derives the
+request and progress lengths from borrowed-view `.len`, emits the exact 16 ASCII bytes
+`Fairy C says hi\n`, and exits 42 through one Windows-only unsafe C symbol. The same
 output/status contract is observed both in-process and through the separately built `fairyc.exe`.
 This does not establish a safe or portable `std::io` surface, target support, or self-hosting.
 The GitHub Actions Windows matrix is now configured to execute that full smoke after `go test`,

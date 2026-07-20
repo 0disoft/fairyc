@@ -67,6 +67,28 @@ func TestVerifyRejectsMalformedBoolSwitch(t *testing.T) {
 	}
 }
 
+func TestVerifyRejectsMalformedBorrowedViewLength(t *testing.T) {
+	t.Parallel()
+	program := Program{Functions: []Function{{
+		Name:       "main::main",
+		ResultType: hir.TypeI32,
+		Entry:      0,
+		Blocks: []Block{{
+			ID: 0,
+			Operations: []Operation{{
+				Kind: OperationViewLength, DestinationLocal: 1,
+				Operands:  []Operand{{Kind: OperandString, Type: hir.SharedBorrow(hir.TypeStr), StaticData: "fairy"}},
+				OwnerType: hir.SharedBorrow(hir.TypeStr), Type: hir.TypeUSize, Field: "capacity",
+			}},
+			Terminator: Terminator{Kind: TerminatorReturn, UnwindSuccessor: NoBlock, ReturnValue: Operand{Kind: OperandI32, I32: 0}},
+		}},
+	}}}
+	failures := Verify(program)
+	if len(failures) != 1 || failures[0].Code != "V1001" {
+		t.Fatalf("Verify() failures = %+v, want one V1001", failures)
+	}
+}
+
 func TestVerifyRejectsMalformedResultOperation(t *testing.T) {
 	t.Parallel()
 	program := Program{Functions: []Function{{

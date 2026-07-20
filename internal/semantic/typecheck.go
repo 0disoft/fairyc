@@ -603,6 +603,15 @@ func (c *typeChecker) checkField(expression *ast.Expression, result *hir.Express
 	}
 	receiver, receiverType := c.checkExpression(expression.Children[0], hir.TypeInvalid)
 	result.Children = appendExpression(result.Children, receiver)
+	if element, _, borrow := hir.BorrowElement(receiverType); borrow && (element == hir.TypeStr || element == hir.TypeByteSlice) {
+		if expression.Text != "len" {
+			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "unknown borrowed-view field "+expression.Text)
+			return hir.TypeInvalid
+		}
+		result.Kind = "view-length"
+		result.Operator = "len"
+		return hir.TypeUSize
+	}
 	if element, _, borrow := hir.BorrowElement(receiverType); borrow {
 		receiverType = element
 	}

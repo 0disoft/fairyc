@@ -11,6 +11,7 @@ unsafe extern C fn stdout_write_all(data: *u8, length: usize) -> write_result;
 
 fn main() -> i32 {
     let text: &str = "Fairy C says hi\n";
+    let bytes: &[u8] = b"\x00A";
     let empty: write_result = unsafe {
         stdout_write_all(null, 0)
     };
@@ -18,9 +19,9 @@ fn main() -> i32 {
         stdout_write_all(null, 1)
     };
     let result: write_result = unsafe {
-        stdout_write_all(text as *u8, 16)
+        stdout_write_all(text as *u8, text.len)
     };
     let edge_states: bool = empty.status == 0 && empty.written == 0 &&
         invalid.status == 1 && invalid.written == 0;
-    if edge_states && result.status == 0 && result.written == 16 { 42 } else { 1 }
+    if edge_states && bytes.len == 2 && result.status == 0 && result.written == text.len { 42 } else { 1 }
 }

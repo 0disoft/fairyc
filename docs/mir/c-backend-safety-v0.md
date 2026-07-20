@@ -16,7 +16,7 @@ The backend does not read Go `unsafe.Sizeof`, local C compiler probes, or SDK pa
 semantics. The target object reports the existing scalar, flat-resource, and resource-tagged emission subset while leaving all three
 maturity claims false.
 
-## Current scalar, flat-resource, and resource-tagged emission slice
+## Current scalar, borrowed-view, flat-resource, and resource-tagged emission slice
 
 `internal/cbackend` currently emits one deterministic C11 translation unit from verified MIR
 for a deliberately narrow subset. It accepts `i32`, `bool`, `Option<i32>`, and
@@ -30,6 +30,11 @@ their exact bytes and logical length, including empty and embedded-NUL values. G
 private `fy_byte_slice { const uint8_t *data; uintptr_t length; }`, exact deduplicated immutable
 storage for nonempty values, and a one-byte immutable sentinel with length zero for empty values.
 This private shape is neither a public Fairy layout nor a foreign-call ABI.
+
+The same private view transport admits verified `view-length` operations for safe borrows of `str`
+and `[u8]`. Generated C copies the descriptor's `length` member into a `uintptr_t`-backed Fairy
+`usize`; it does not call a helper, scan storage, allocate, trap, or expose the descriptor layout.
+The verifier fixes the owner family and result type before emission.
 
 The foreign-call transport additionally accepts all sixteen exact TargetSpec C scalars as results
 and parameters. HIR and MIR keep those types distinct from coincidentally represented Fairy
@@ -63,11 +68,12 @@ the enclosing function's declared Result type on the error path.
 
 The emitter rejects empty, non-`i32`, nested, partially initialized, or nonempty-drop resources;
 resource-bearing nested tags and other tagged payload combinations; Region operations;
-safe borrows; unsafe operations outside the admitted scalar foreign-call form; complete runtime and
+safe-borrow operations other than the exact verified view-length metadata read; unsafe operations
+outside the admitted scalar foreign-call form; complete runtime and
 standard-library lowering; malformed
 destinations; and non-canonical block shapes. Empty-drop discharge produces no invented cleanup
 call. This is private transport, not public Fairy ABI or user drop-body execution.
-`spec/fixtures/c-emission/manifest-v0.json` currently proves eighteen source-to-emission cases and
+`spec/fixtures/c-emission/manifest-v0.json` currently proves nineteen source-to-emission cases and
 repeated byte identity. No C parser, compiler, object writer, assembler, linker, executable,
 sanitizer, layout probe, or ABI probe runs in that fixture lane.
 
@@ -176,14 +182,14 @@ A C `longjmp` or C++ exception crossing generated Fairy C frames is forbidden. I
 
 ## Differential verification
 
-`internal/cbackendnative` implements the first scalar, inert-enum, flat-resource, and resource-tagged matrix
-shape for Linux/amd64 with glibc, Clang and GCC, and low and optimized profiles. Its eighteen cases plan 72 process-status
+`internal/cbackendnative` implements the first scalar, borrowed-view, inert-enum, flat-resource, and resource-tagged matrix
+shape for Linux/amd64 with glibc, Clang and GCC, and low and optimized profiles. Its nineteen cases plan 76 process-status
 and exact source-linked drop-trace comparisons for small non-negative returns and canonical trap
 category, including both scalar tag families, flat resource transport, and resource-bearing
 Option/Result paths. A closed internal instrumentation profile emits conditional active-payload
 observer calls keyed by canonical resource type and binding span; production C contains none of
 those declarations, calls, or site metadata. Each production unit also has a separate configured
-Clang and GCC execution at `-O1` with address and undefined-behavior sanitizers, for 36 planned
+Clang and GCC execution at `-O1` with address and undefined-behavior sanitizers, for 38 planned
 sanitizer executions. That path overrides ambient sanitizer options, forbids recovery, requires
 empty stdout/stderr, and is not selectable through the product CLI. Output, negative or larger
 `i32` returns, user drop-body effects, public layout, ABI, and broader runtime behavior remain
@@ -197,7 +203,7 @@ crossings use the existing separate-object driver and are counted separately as
 `foreignCallExecutions`, `foreignCIntCallExecutions`, `foreignCLongCallExecutions`,
 `foreignCSizeTCallExecutions`, `foreignCSSizeTCallExecutions`,
 `foreignCScalarFamilyCallExecutions`, and `foreignPointerCallExecutions` in the current native
-report; they do not expand the eighteen interpreter-owned differential cases.
+report; they do not expand the nineteen interpreter-owned differential cases.
 Every C-scalar probe uses hand-written C producers and consumers so each value crosses a generated
 typed local without requiring a Fairy C literal. The family probe uses exactly representable finite
 floating values and makes no NaN, infinity, signed-zero, rounding, or floating-environment claim.

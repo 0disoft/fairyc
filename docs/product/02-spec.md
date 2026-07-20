@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0091-windows-stdout-exec-target.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0092-borrowed-view-byte-length.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -171,7 +171,7 @@ Compiler intrinsics, the thin runtime, and standard-library APIs are separate bo
 
 Stage 0 allocation supports only explicit `SystemHeap` and lexical `Arena` or `Region`. Allocation is fallible, zero-size behavior is normalized by Fairy C, and no hidden default allocator or user allocator protocol exists.
 
-`Buffer` is the only growable owned collection. `Vec<T>` is deferred with user generics. `[u8]`, `str`, and `CStr` are compiler-known unsized views; `String` and `CString` are owned resources. Compiler-owned `b"..."` literals implement immutable static `&[u8]` construction and private generated-C transport, while general slice operations remain deferred. The initial Linux `File` API accepts `&CStr`, preserves partial I/O, and uses a consuming non-retried Linux close contract. Portable paths, embedded support, and resource-aware arenas remain deferred.
+`Buffer` is the only growable owned collection. `Vec<T>` is deferred with user generics. `[u8]`, `str`, and `CStr` are compiler-known unsized views; `String` and `CString` are owned resources. Compiler-owned `b"..."` literals implement immutable static `&[u8]` construction and private generated-C transport. Safe borrowed `&[u8]` and `&str` views expose `.len` as a `usize` byte count by reading existing metadata; the access does not scan, allocate, call, trap, or count Unicode characters. Indexing, slicing, and other general view operations remain deferred. The initial Linux `File` API accepts `&CStr`, preserves partial I/O, and uses a consuming non-retried Linux close contract. Portable paths, embedded support, and resource-aware arenas remain deferred.
 
 The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 
@@ -391,7 +391,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   32-bit program status. One target-only unsafe
   `fy_std_windows_stdout_write_all_v0(*u8, usize) -> { status: u32, written: usize }` call loops over
   `WriteFile`, reports partial progress on failure, normalizes empty input, rejects nonempty null
-  input, and is admitted only by the Windows support resolver. This is executable process I/O, not
+  input, and is admitted only by the Windows support resolver. The checked-in example derives both
+  the request length and progress comparison from the source view's `.len`. This is executable process I/O, not
   a safe or portable `std::io` package, Unicode console policy, stdin, stderr writing, arguments, or
   target maturity evidence.
 - QBE or another fast backend and LLVM require separate measured adoption decisions after MIR stability.

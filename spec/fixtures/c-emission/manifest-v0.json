@@ -18,6 +18,7 @@
     "docs/adr/0034-resource-tagged-c-transport.md",
     "docs/adr/0035-native-drop-trace-differential.md",
     "docs/adr/0050-restricted-inert-enum-execution.md",
+    "docs/adr/0092-borrowed-view-byte-length.md",
     "docs/mir/mir-v0.md",
     "docs/mir/c-backend-safety-v0.md",
     "docs/runtime/runtime-stdlib-v0.md",
@@ -311,6 +312,22 @@
         "dialect": "c11",
         "functions": ["main::increment", "main::main"],
         "features": ["checked-arithmetic", "scalar-call", "scalar-control-flow", "scalar-result", "trap"]
+      }
+    },
+    {
+      "id": "pass.c-emission.view-length",
+      "sourceRoot": "cases/pass/view-length/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main"],
+        "features": ["scalar-comparison", "scalar-control-flow", "static-byte-string", "static-utf8-string", "view-length"]
       }
     }
   ]

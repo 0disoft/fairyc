@@ -51,7 +51,7 @@ representation from how a local happens to be used.
 
 ### Rvalues
 
-MIR v0 requires rvalues for use, unary operations, checked arithmetic, wrapping arithmetic, saturating arithmetic, comparisons, casts, aggregate construction, discriminant read, safe borrow, raw address, region allocation, and explicit unsafe operations.
+MIR v0 requires rvalues for use, unary operations, checked arithmetic, wrapping arithmetic, saturating arithmetic, comparisons, casts, aggregate construction, discriminant read, borrowed-view length, safe borrow, raw address, region allocation, and explicit unsafe operations.
 
 Built-in `Option` and `Result` construction records the concrete constructed type. Inert struct,
 restricted user enum, and resource construction use distinct operations backed by separate
@@ -68,6 +68,12 @@ records the concrete enum type and a variant table in declaration order, with on
 variant. The verifier rejects missing definitions, forged variants, incomplete or duplicate fields,
 payload type drift, and reordered or incomplete switch tables as `V1001`. Resource and safe-borrow
 payloads are rejected before MIR.
+
+The `view-length` operation accepts exactly one operand whose verified owner is a safe borrow of
+`str` or `[u8]`. It records that owner type, the exact `len` property, and a `usize` destination.
+The operation copies the existing byte-length metadata and has no call, allocation, scan, trap, or
+ownership effect. A mismatched operand family, owner, property, or result is `V1001`; backends may
+not reinterpret the count as Unicode scalars, graphemes, capacity, or a C terminator-inclusive size.
 
 The implemented raw-address operation accepts only a direct local place produced by an exact safe
 borrow-to-raw-pointer cast. It records pointee type, source borrow mutability, destination pointer
@@ -159,7 +165,7 @@ The source cases do not test malformed graphs. `spec/fixtures/mir-verifier/manif
 
 ## Interpreter
 
-The first semantic oracle is a small MIR interpreter supporting scalars, tagged `Option` and `Result`, restricted inert user enums, moves, drop traces, region mark and reset, branches, and traps. It constructs user enums, selects declaration-ordered variants, extracts named payload fields, and also constructs inert structs and resources and resolves field reads from their distinct verified program-level definitions; only the resource definition participates in reverse-field cleanup. The only executable drop classification is currently `empty`; source user drop-body effects are not interpreted. Its options-only fixture harness may intercept explicitly bound call symbols as bounded in-memory stdout/stderr byte sinks; those hooks are not MIR operations, source-name conventions, standard-library APIs, or host I/O. The interpreter is not required to emulate a complete operating system or C ABI.
+The first semantic oracle is a small MIR interpreter supporting scalars, tagged `Option` and `Result`, restricted inert user enums, borrowed UTF-8 and byte views with byte-length reads, moves, drop traces, region mark and reset, branches, and traps. It constructs user enums, selects declaration-ordered variants, extracts named payload fields, and also constructs inert structs and resources and resolves field reads from their distinct verified program-level definitions; only the resource definition participates in reverse-field cleanup. The only executable drop classification is currently `empty`; source user drop-body effects are not interpreted. Its options-only fixture harness may intercept explicitly bound call symbols as bounded in-memory stdout/stderr byte sinks; those hooks are not MIR operations, source-name conventions, standard-library APIs, or host I/O. The interpreter is not required to emulate a complete operating system or C ABI.
 
 The interpreter precedes a second native backend. Differential fixtures compare interpreter outcomes with generated C compiled at multiple optimization levels and, where the target fixture declares them, more than one independent C compiler.
 

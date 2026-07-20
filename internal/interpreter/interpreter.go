@@ -253,6 +253,7 @@ const (
 	valueU8
 	valueU32
 	valueUSize
+	valueView
 	valueNull
 	valueResult
 	valueOption
@@ -534,18 +535,23 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				}
 				locals[operation.DestinationLocal] = i32Value(result)
 			case mir.OperationBinary:
-				left, right, err := evaluateTwoI32(locals, operation.Operands)
+				result, trap, err := evaluateBinary(locals, operation)
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("binary in %q: %w", function.Name, err)
-				}
-				result, trap, err := binary(operation.Operator, left, right)
-				if err != nil {
-					return callCompletion{}, err
 				}
 				if trap != "" {
 					return callCompletion{trapCategory: trap}, nil
 				}
 				locals[operation.DestinationLocal] = i32Value(result)
+			case mir.OperationViewLength:
+				receiver, err := evaluateOne(locals, operation.Operands)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("borrowed-view length in %q: %w", function.Name, err)
+				}
+				if receiver.kind != valueView || receiver.typ != operation.OwnerType || operation.Type != hir.TypeUSize || operation.Field != "len" {
+					return callCompletion{}, fmt.Errorf("borrowed-view length in %q has incompatible runtime value", function.Name)
+				}
+				locals[operation.DestinationLocal] = runtimeValue{kind: valueUSize, u64: receiver.u64, typ: hir.TypeUSize}
 			case mir.OperationResultConstruct:
 				payload, err := evaluateOne(locals, operation.Operands)
 				if err != nil {
@@ -834,6 +840,8 @@ func evaluate(locals map[mir.LocalID]runtimeValue, operand mir.Operand) (runtime
 		return runtimeValue{kind: valueU32, u64: operand.U64, typ: hir.TypeU32}, nil
 	case mir.OperandUSize:
 		return runtimeValue{kind: valueUSize, u64: operand.U64, typ: hir.TypeUSize}, nil
+	case mir.OperandString, mir.OperandByteString:
+		return runtimeValue{kind: valueView, u64: uint64(len(operand.StaticData)), typ: operand.Type}, nil
 	case mir.OperandNull:
 		return runtimeValue{kind: valueNull, typ: operand.Type}, nil
 	case mir.OperandLocal:
@@ -844,6 +852,54 @@ func evaluate(locals map[mir.LocalID]runtimeValue, operand mir.Operand) (runtime
 		return value, nil
 	default:
 		return runtimeValue{}, capabilityError("operand has no executable value")
+	}
+}
+
+func evaluateBinary(locals map[mir.LocalID]runtimeValue, operation mir.Operation) (int32, string, error) {
+	if operation.Operator == "==" || operation.Operator == "!=" {
+		if len(operation.Operands) != 2 {
+			return 0, "", fmt.Errorf("comparison has %d operands, want 2", len(operation.Operands))
+		}
+		left, err := evaluate(locals, operation.Operands[0])
+		if err != nil {
+			return 0, "", err
+		}
+		right, err := evaluate(locals, operation.Operands[1])
+		if err != nil {
+			return 0, "", err
+		}
+		equal, err := equalScalarValues(left, right)
+		if err != nil {
+			return 0, "", err
+		}
+		if operation.Operator == "!=" {
+			equal = !equal
+		}
+		if equal {
+			return 1, "", nil
+		}
+		return 0, "", nil
+	}
+	left, right, err := evaluateTwoI32(locals, operation.Operands)
+	if err != nil {
+		return 0, "", err
+	}
+	return binary(operation.Operator, left, right)
+}
+
+func equalScalarValues(left, right runtimeValue) (bool, error) {
+	if left.kind != right.kind || left.typ != right.typ {
+		return false, capabilityError("comparison operands have different runtime scalar types")
+	}
+	switch left.kind {
+	case valueI32:
+		return left.i32 == right.i32, nil
+	case valueU8, valueU32, valueUSize:
+		return left.u64 == right.u64, nil
+	case valueNull:
+		return true, nil
+	default:
+		return false, capabilityError("value is not an executable equality scalar")
 	}
 }
 

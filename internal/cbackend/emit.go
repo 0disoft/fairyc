@@ -698,7 +698,7 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 					mir.OperationResultPayload, mir.OperationOptionPayload,
 					mir.OperationEnumConstruct, mir.OperationEnumPayload,
 					mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
-					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead:
+					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength:
 					inferred = operation.Type
 				}
 				if operation.DestinationLocal == mir.NoLocal || inferred == hir.TypeInvalid || inferred == "" {
@@ -1176,6 +1176,11 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 				} else if err := e.inspectResourceOperation(functionIndex, *operation); err != nil {
 					return err
 				}
+			case mir.OperationViewLength:
+				if err := e.inspectViewLength(functionIndex, *operation); err != nil {
+					return err
+				}
+				e.features["view-length"] = struct{}{}
 			case mir.OperationUse:
 			case mir.OperationArithmeticCheck:
 				e.features["checked-arithmetic"] = struct{}{}
@@ -1328,7 +1333,7 @@ func validateOperationShape(function string, operation mir.Operation) error {
 	case mir.OperationAssign, mir.OperationInitialize, mir.OperationUnary, mir.OperationBinary,
 		mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationEnumConstruct, mir.OperationEnumPayload,
-		mir.OperationResourceConstruct, mir.OperationFieldRead:
+		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength:
 		if operation.DestinationLocal < 0 {
 			return fmt.Errorf("%s operation in %s has no destination local", operation.Kind, function)
 		}
@@ -1336,6 +1341,26 @@ func validateOperationShape(function string, operation mir.Operation) error {
 		if operation.Symbol == hir.NoSymbol {
 			return fmt.Errorf("%s operation in %s has no resource symbol", operation.Kind, function)
 		}
+	}
+	return nil
+}
+
+func (e *emitter) inspectViewLength(functionIndex int, operation mir.Operation) error {
+	function := &e.functions[functionIndex]
+	receiver, err := oneOperand(operation.Operands)
+	if err != nil {
+		return fmt.Errorf("borrowed-view length in %s: %w", function.Name, err)
+	}
+	element, _, borrow := hir.BorrowElement(operation.OwnerType)
+	if !borrow || element != hir.TypeStr && element != hir.TypeByteSlice || operation.Type != hir.TypeUSize || operation.Field != "len" {
+		return fmt.Errorf("borrowed-view length in %s has incompatible owner, result, or field", function.Name)
+	}
+	receiverType, err := e.operandType(functionIndex, receiver)
+	if err != nil {
+		return fmt.Errorf("borrowed-view length in %s: %w", function.Name, err)
+	}
+	if receiverType != operation.OwnerType {
+		return fmt.Errorf("borrowed-view length in %s has receiver type %q, want %q", function.Name, receiverType, operation.OwnerType)
 	}
 	return nil
 }
@@ -2353,6 +2378,16 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			return fmt.Errorf("resource field read in %s: %w", function, err)
 		}
 		fmt.Fprintf(output, "    fy_l_%d = (%s).f_%d;\n", operation.DestinationLocal, value, fieldIndex)
+	case mir.OperationViewLength:
+		receiver, err := oneOperand(operation.Operands)
+		if err != nil {
+			return fmt.Errorf("borrowed-view length in %s: %w", function, err)
+		}
+		value, err := cOperand(receiver)
+		if err != nil {
+			return fmt.Errorf("borrowed-view length in %s: %w", function, err)
+		}
+		fmt.Fprintf(output, "    fy_l_%d = (%s).length;\n", operation.DestinationLocal, value)
 	case mir.OperationMove:
 		fmt.Fprintf(output, "    (void)fy_l_%d;\n", operation.Symbol)
 	case mir.OperationDrop:
@@ -2788,7 +2823,7 @@ func operationHasDestination(kind mir.OperationKind) bool {
 		mir.OperationOptionConstruct, mir.OperationOptionPayload,
 		mir.OperationEnumConstruct, mir.OperationEnumPayload,
 		mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
-		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationRegionPlace:
+		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationRegionPlace:
 		return true
 	default:
 		return false

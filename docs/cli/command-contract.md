@@ -189,6 +189,8 @@ cross-stream ordering. Toolchain, compilation, structure, timeout, capture-limit
 write failures remain compiler failures rather than program statuses. The current source-callable
 slice exposes only unsafe `fy_std_windows_stdout_write_all_v0`; stdin, stderr writes, arguments,
 Unicode console policy, and a safe public `std::io` wrapper remain absent.
+The checked-in output example supplies the raw function's length and verifies progress using the
+borrowed UTF-8 view's `usize` byte-count `.len` property rather than a duplicated integer constant.
 
 For the admitted foreign-call slice, `emit-c` writes a plain external prototype and call using the
 declaration name by default or its single validated `@link_name` string. Compatible mappings to one

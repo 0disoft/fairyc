@@ -98,6 +98,10 @@ ADR 0091 adds the unstable `experimental exec-target` process contract and exact
 streams, preserved 32-bit program status, the `{ status: u32, written: usize }` transport, status
 meanings 0 through 4, and target-specific admission are prototype compatibility data. They do not
 stabilize a public `std::io` API, console encoding, installation, or target maturity.
+ADR 0092 adds `.len` to safe borrows of `str` and `[u8]`. The property name, `usize` result, byte-count
+meaning, metadata-only behavior, and absence of scanning, allocation, calls, and traps are pre-1
+language semantics. This does not stabilize private view layout, indexing, slicing, Unicode
+counting, `CStr` operations, or a public string ABI.
 
 `fairyc.layout-fixtures/v0` separately versions the repository input and expectation vocabulary for
 the target-layout engine; each manifest binds one declared target. It is not a public

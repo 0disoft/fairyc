@@ -488,6 +488,8 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		return l.lowerAggregateConstruction(expression)
 	case "field-expression":
 		return l.lowerFieldRead(expression)
+	case "view-length":
+		return l.lowerViewLength(expression)
 	case "cast":
 		return l.lowerRawAddressCast(expression)
 	case "prefix":
@@ -796,6 +798,26 @@ func (l *functionLowerer) lowerFieldRead(expression *hir.Expression) (Operand, e
 	destination := l.newTemporary()
 	l.appendOperation(Operation{
 		Kind: OperationFieldRead, Span: expression.Span, DestinationLocal: destination,
+		Operands: []Operand{receiver}, OwnerType: expression.Children[0].Type,
+		Type: expression.Type, Field: expression.Operator,
+	})
+	return Operand{Kind: OperandLocal, Local: destination}, nil
+}
+
+func (l *functionLowerer) lowerViewLength(expression *hir.Expression) (Operand, error) {
+	if len(expression.Children) != 1 || expression.Operator != "len" || expression.Type != hir.TypeUSize {
+		return Operand{}, fmt.Errorf("malformed borrowed-view length")
+	}
+	receiver, err := l.lowerExpression(&expression.Children[0])
+	if err != nil {
+		return Operand{}, err
+	}
+	if receiver.Kind == OperandInvalid {
+		return Operand{}, fmt.Errorf("borrowed-view length has no receiver value")
+	}
+	destination := l.newTemporary()
+	l.appendOperation(Operation{
+		Kind: OperationViewLength, Span: expression.Span, DestinationLocal: destination,
 		Operands: []Operand{receiver}, OwnerType: expression.Children[0].Type,
 		Type: expression.Type, Field: expression.Operator,
 	})
