@@ -1,0 +1,92 @@
+package compiler_test
+
+import (
+	"errors"
+	"slices"
+	"testing"
+
+	"github.com/0disoft/fairyc/internal/compiler"
+	"github.com/0disoft/fairyc/internal/frontend"
+	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/semantic"
+	"github.com/0disoft/fairyc/internal/source"
+)
+
+func TestCheckProducesVerifiedMIR(t *testing.T) {
+	t.Parallel()
+	result, err := compiler.Check([]semantic.File{
+		parseCompilerFile(t, hir.DefaultPackage, "main.fy", "module main;\nfn main() -> i32 { 42 }\n"),
+	})
+	if err != nil {
+		t.Fatalf("Check() error = %v", err)
+	}
+	if !result.Verified || result.Semantic.CompletedThrough != semantic.PhaseFlow || len(result.MIR.Functions) != 1 || result.MIR.Functions[0].Name != "main::main" {
+		t.Fatalf("Check() result = %+v", result)
+	}
+}
+
+func TestCheckReturnsSourceDiagnosticsWithoutMIR(t *testing.T) {
+	t.Parallel()
+	result, err := compiler.Check([]semantic.File{
+		parseCompilerFile(t, hir.DefaultPackage, "main.fy", "module main;\nfn main() -> i32 { missing }\n"),
+	})
+	if err != nil {
+		t.Fatalf("Check() error = %v", err)
+	}
+	if result.Verified || result.Semantic.FailedPhase != semantic.PhaseResolve || len(result.Semantic.Diagnostics) != 1 || len(result.MIR.Functions) != 0 {
+		t.Fatalf("Check() result = %+v", result)
+	}
+}
+
+func TestCheckPackagesClassifiesInputFailure(t *testing.T) {
+	t.Parallel()
+	_, err := compiler.CheckPackages(semantic.PackageInput{
+		Files: []semantic.File{parseCompilerFile(t, 1, "main.fy", "module main;\nimport util as u;\nfn main() -> i32 { u::value() }\n")},
+	})
+	var pipelineError *compiler.Error
+	if !errors.As(err, &pipelineError) || pipelineError.Stage != compiler.StagePackageInput {
+		t.Fatalf("CheckPackages() error = %v", err)
+	}
+}
+
+func TestCheckPackagesVerifiesIsolatedModulePaths(t *testing.T) {
+	t.Parallel()
+	result, err := compiler.CheckPackages(semantic.PackageInput{
+		Files: []semantic.File{
+			parseCompilerFile(t, 1, "app_a.fy", "module app_a;\nimport util as u;\nfn main() -> i32 { u::value() }\n"),
+			parseCompilerFile(t, 2, "app_b.fy", "module app_b;\nimport util as u;\nfn main() -> i32 { u::value() }\n"),
+			parseCompilerFile(t, 3, "util.fy", "module util;\npub fn value() -> i32 { 1 }\n"),
+			parseCompilerFile(t, 4, "util.fy", "module util;\npub fn value() -> i32 { 2 }\n"),
+		},
+		Imports: []semantic.PackageImport{
+			{FromPackage: 1, ImportPath: "util", ToPackage: 3},
+			{FromPackage: 2, ImportPath: "util", ToPackage: 4},
+		},
+	})
+	if err != nil {
+		t.Fatalf("CheckPackages() error = %v", err)
+	}
+	if !result.Verified || result.Semantic.CompletedThrough != semantic.PhaseFlow {
+		t.Fatalf("CheckPackages() result = %+v", result)
+	}
+	names := make([]string, 0, len(result.MIR.Functions))
+	for _, function := range result.MIR.Functions {
+		names = append(names, function.Name)
+	}
+	want := []string{"$p1::app_a::main", "$p2::app_b::main", "$p3::util::value", "$p4::util::value"}
+	if !slices.Equal(names, want) {
+		t.Fatalf("CheckPackages() MIR function names = %v, want %v", names, want)
+	}
+}
+
+func parseCompilerFile(t *testing.T, packageID hir.PackageID, path, text string) semantic.File {
+	t.Helper()
+	parsed, err := frontend.AnalyzeSyntax(source.NewFile(path, []byte(text)), source.DefaultLimits())
+	if err != nil {
+		t.Fatalf("AnalyzeSyntax(%s) error = %v", path, err)
+	}
+	if len(parsed.Tree.Diagnostics) != 0 || parsed.AST == nil {
+		t.Fatalf("AnalyzeSyntax(%s) diagnostics = %+v, AST = %+v", path, parsed.Tree.Diagnostics, parsed.AST)
+	}
+	return semantic.File{Package: packageID, Path: path, Module: parsed.AST}
+}

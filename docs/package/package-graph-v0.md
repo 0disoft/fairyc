@@ -71,6 +71,10 @@ The numeric IDs and their compiler-private source/module qualification are dispo
 They are not the deferred public `PackageInstanceId`, a lockfile encoding, an ABI name, or a stable
 diagnostic path.
 
+The module-path-isolation result additionally crosses `internal/compiler` through semantic analysis,
+MIR lowering, and MIR verification. This proves compiler-pipeline consumption of the resolved graph;
+it still does not prove package discovery, a package-aware CLI, or backend support for package names.
+
 This is compiler-side consumption of an already-resolved graph. It is not evidence for a package
 solver, public manifest, lockfile, source downloader, registry, cache, or stable diagnostic surface.
 

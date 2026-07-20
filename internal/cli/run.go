@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/cbackend"
+	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/diagnostic"
 	"github.com/0disoft/fairyc/internal/frontend"
 	"github.com/0disoft/fairyc/internal/hir"
@@ -369,7 +370,8 @@ func lowerProgramSourcesInternal(arguments []string, sourceRoot string, stderr i
 	if syntaxFailed {
 		return loweredProgram{}, ExitSourceDiagnostics
 	}
-	semanticResult := semantic.Analyze(semanticFiles)
+	checked, pipelineErr := compiler.Check(semanticFiles)
+	semanticResult := checked.Semantic
 	if len(semanticResult.Diagnostics) > 0 {
 		if err := writeSemanticDiagnostics(stderr, sources, semanticResult.Diagnostics); err != nil {
 			return loweredProgram{}, ExitInternalFailure
@@ -382,13 +384,17 @@ func lowerProgramSourcesInternal(arguments []string, sourceRoot string, stderr i
 		}
 		return loweredProgram{}, ExitInvalidInvocation
 	}
-	program, err := mir.Lower(semanticResult.HIR)
-	if err != nil {
-		return loweredProgram{}, subsetCapabilityError(stderr, subset, err)
-	}
-	if failures := mir.Verify(program); len(failures) != 0 {
+	if pipelineErr != nil {
+		var failure *compiler.Error
+		if errors.As(pipelineErr, &failure) && failure.Stage == compiler.StageMIRLower {
+			return loweredProgram{}, subsetCapabilityError(stderr, subset, failure.Cause)
+		}
 		return loweredProgram{}, internalError(stderr)
 	}
+	if !checked.Verified {
+		return loweredProgram{}, internalError(stderr)
+	}
+	program := checked.MIR
 	if !requireEntry {
 		return loweredProgram{program: program}, ExitSuccess
 	}

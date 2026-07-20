@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0128-build-local-package-identity.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0129-shared-verified-mir-pipeline.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -252,6 +252,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   The private numeric ID and qualification spelling are disposable and cannot define source syntax,
   public diagnostics, lockfiles, caches, Atlas identity, or ABI names.
 - Typed HIR lowers through an analysis-only Flow CFG into mutable-local, backend-independent MIR.
+- One compiler-owned coordinator runs semantic analysis, MIR lowering, and MIR verification for
+  both explicit single-package closures and already-resolved package input. Source diagnostics and
+  unsupported forms stop before MIR; invalid package input, lowering failure, and verifier rejection
+  retain distinct failure ownership. Only a verified result may reach execution or a backend.
 - Resource declarations retain canonical type identity, declaration-ordered resolved fields, source
   spans, and drop-body classification through typed HIR into MIR. The current executable prototype
   accepts an empty or effect-declared nonempty user `drop` body, lowers the latter to verifier-linked

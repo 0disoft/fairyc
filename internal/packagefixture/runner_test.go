@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/packagegraph"
 	"github.com/0disoft/fairyc/internal/semantic"
 )
@@ -53,22 +54,22 @@ func TestResolvedModulePathIsolationReachesSemanticAnalysis(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SemanticInput() error = %v", err)
 	}
-	result, err := semantic.AnalyzePackages(input)
+	result, err := compiler.CheckPackages(input)
 	if err != nil {
-		t.Fatalf("AnalyzePackages() error = %v", err)
+		t.Fatalf("CheckPackages() error = %v", err)
 	}
-	if result.CompletedThrough != semantic.PhaseFlow || result.FailedPhase != semantic.PhaseNone || len(result.Diagnostics) != 0 || len(result.Unsupported) != 0 {
-		t.Fatalf("AnalyzePackages() result = %+v", result)
+	if !result.Verified || result.Semantic.CompletedThrough != semantic.PhaseFlow || result.Semantic.FailedPhase != semantic.PhaseNone || len(result.Semantic.Diagnostics) != 0 || len(result.Semantic.Unsupported) != 0 {
+		t.Fatalf("CheckPackages() result = %+v", result)
 	}
-	if len(result.HIR.Modules) != 4 {
-		t.Fatalf("AnalyzePackages() modules = %d, want 4", len(result.HIR.Modules))
+	if len(result.Semantic.HIR.Modules) != 4 || len(result.MIR.Functions) != 0 {
+		t.Fatalf("CheckPackages() HIR modules = %d, MIR functions = %d", len(result.Semantic.HIR.Modules), len(result.MIR.Functions))
 	}
 	packages := make(map[uint32]struct{})
-	for _, module := range result.HIR.Modules {
+	for _, module := range result.Semantic.HIR.Modules {
 		packages[uint32(module.Package)] = struct{}{}
 	}
 	if len(packages) != 4 {
-		t.Fatalf("AnalyzePackages() package identities = %v", packages)
+		t.Fatalf("CheckPackages() package identities = %v", packages)
 	}
 }
 

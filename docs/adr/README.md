@@ -138,6 +138,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0126-checked-mutable-indexed-assignment.md`: bounds-before-value fixed-array and mutable-byte-view stores with verified alias and value-copy semantics.
 - `0127-experimental-verified-mir-check.md`: explicit source-closure validation through MIR verification without execution, backend, toolchain, or artifact writes.
 - `0128-build-local-package-identity.md`: resolved package identity carried through semantic lookup, typed HIR types, source identities, and MIR names without stabilizing a public package ID.
+- `0129-shared-verified-mir-pipeline.md`: one compiler-owned semantic-to-MIR coordinator shared by explicit source closures and already-resolved package input.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 
