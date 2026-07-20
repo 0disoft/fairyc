@@ -90,11 +90,11 @@ Boolean conditions are exact: `if`, `while`, `&&`, `||`, and `!` require `bool`.
 
 Calls require an exact arity and each argument must satisfy its parameter type. Assignment requires a mutable place and a value compatible with that place. Borrow and raw-pointer conversions follow their explicit safety rules; `null` never inhabits a safe borrow.
 
-For an outside-loop assignment to a safe-borrow local, Flow evaluates the right-hand side before
+For an assignment to a safe-borrow local, Flow evaluates the right-hand side before
 replacing the target origin and retained-loan set. Reachable `if` and `match` exits join origin
 facts; different origins remain a disjunction and cannot be returned as if one branch had won.
-Loan conflicts use branch-reachable later uses. Loop-carried safe-borrow reassignment is rejected
-until an iteration-edge provenance contract exists.
+Loan conflicts use branch-reachable later uses. `while` additionally computes a header fixed point
+from entry, fallthrough, and `continue`, then joins header and `break` exits after the loop.
 
 Before Flow applies those rules at call sites, it infers a fixed-point return-origin summary for
 each internal borrow-returning function. The summary maps one formal borrow or region parameter, or

@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0114-interprocedural-borrow-return-summaries.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0115-loop-carried-safe-borrow-provenance.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -21,8 +21,8 @@ The following restrictions are part of the prototype contract:
 - source-level locals are initialized by their declarations; `MaybeUninit`, unions, and general uninitialized storage are deferred;
 - resources use whole-value affine ownership, and moving an individual resource field is rejected;
 - safe borrows may be used locally or returned from exactly one statically known parameter or region origin;
-- a mutable safe-borrow local may be reassigned outside loops; reachable branch origins are joined
-  without guessing, while loop-carried reassignment remains deferred;
+- a mutable safe-borrow local may be reassigned through straight-line, branch, and `while` control
+  flow; header, `continue`, and `break` origins are joined without guessing;
 - internal borrow-returning calls use inferred formal-parameter, region-parameter, or static return
   summaries; a recursive result without a complete proof remains closed;
 - named aggregates cannot store safe borrows, and inert structs cannot contain resource fields;
@@ -141,10 +141,10 @@ Optimization level and backend must not change the meaning of safe code. Express
   index returns `T` or traps with `bounds`. A direct shared borrow of an admitted `[u8; N]` place
   contextually becomes an immutable `&[u8]` with the same local origin and exact `N`, so existing
   byte-view calls, metadata, indexing, and slicing can consume locally assembled bytes. A mutable
-  safe-borrow local may switch owners outside loops after right-hand-side evaluation; Flow joins
-  reachable branch origins and keeps every reachable loan generation live. Loop-carried
-  safe-borrow reassignment, empty or repeated literals, other fields, nesting, mutation, general
-  slicing or borrowing, escaping local views, and foreign ABI use remain deferred.
+  safe-borrow local may switch owners after right-hand-side evaluation; Flow joins reachable
+  branch and loop-edge origins and keeps every reachable loan generation live. Empty or repeated
+  literals, other fields, nesting, mutation, general slicing or borrowing, escaping local views,
+  and foreign ABI use remain deferred.
 - Division by zero, signed minimum divided by negative one, invalid shifts, and ordinary integer overflow trap.
 - Matching-type shifts accept `i32`, `u8`, `u32`, or `usize`. Right shift is arithmetic for `i32`
   and logical for unsigned types. Negative `i32` amounts and amounts at or above the exact operand

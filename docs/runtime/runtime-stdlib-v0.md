@@ -17,9 +17,8 @@ copy transport, exact length observation, checked indexing, and contextual share
 provisional Stage 0 by-value implementation admits `1..=4096` elements; that ceiling is not a
 stable language or ABI limit. Empty/repeated literals, array fields, mutation, general slicing,
 properties other than `.len`, other array borrows, and ABI exposure remain outside this slice.
-Outside-loop safe-borrow reassignment is compiler-owned local descriptor transport after Flow
-proves provenance and loans; it adds no runtime allocation or library entry point. Loop-carried
-safe-borrow reassignment remains outside this slice.
+Safe-borrow reassignment is compiler-owned local descriptor transport after Flow proves branch and
+loop-edge provenance and loans; it adds no runtime allocation, phi object, or library entry point.
 Internal borrow-return summaries are likewise Flow-only proof metadata. They select an existing
 call result descriptor and add no runtime table, dispatch, allocation, or library entry point.
 

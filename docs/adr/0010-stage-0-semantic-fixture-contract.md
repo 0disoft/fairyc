@@ -19,8 +19,9 @@ The parser contract proves that source can reach AST lowering, but it does not p
 6. Diagnostics are compared as a deterministic complete set after suppressing cascades that exist only because an earlier symbol or type is poisoned. An unlisted independent diagnostic fails the case.
 7. Canonical ordering is source path by unsigned UTF-8 bytes, then `startByte`, `endByte`, and diagnostic code. Source paths use `/` and are relative to the case source root.
 8. The fixture set covers qualified import resolution, explicit typing, local and branch-reachable
-   last-use loans, outside-loop safe-borrow reassignment, reachable origin joins, single-parameter
-   borrow return, exact interprocedural return-parameter remapping, selected-call-owner loans,
+   last-use loans, branch and loop-carried safe-borrow reassignment, reachable header,
+   `continue`, and `break` origin joins, single-parameter borrow return, exact interprocedural
+   return-parameter remapping, selected-call-owner loans,
    unresolved and duplicate names, type mismatch, non-boolean conditions, active-loan conflicts,
    escaping local borrows, and multiple-origin returns.
 9. Resource-state, region, `Result`, layout, MIR, and runtime assertions may reuse the mini-package and span conventions, but they require their own fixtures or a versioned extension rather than silently broadening this v0 schema.

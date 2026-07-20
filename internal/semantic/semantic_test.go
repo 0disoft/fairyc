@@ -1779,7 +1779,7 @@ fn main(flag: bool) -> i32 {
 	})
 }
 
-func TestAnalyzeKeepsLoopCarriedSafeBorrowReassignmentClosed(t *testing.T) {
+func TestAnalyzeTracksLoopCarriedSafeBorrowReassignment(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{
 		"main.fy": `module main;
@@ -1792,8 +1792,94 @@ fn main() -> i32 {
 }
 `,
 	})
-	if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "safe-borrow reassignment inside loop" {
-		t.Fatalf("unsupported = %+v", result.Unsupported)
+	assertCleanTypeResult(t, result)
+}
+
+func TestAnalyzeLoopBorrowReassignmentReleasesPriorOwnerOnBodyPath(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn main(run: bool) -> i32 {
+    var left: [u8; 1] = [41];
+    let right: [u8; 1] = [42];
+    var bytes: &[u8] = &left;
+    while run {
+        bytes = &right;
+        left = [40];
+        if bytes[0] == 42 { break; } else { continue; }
+    }
+    42
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+}
+
+func TestAnalyzeLoopBorrowReassignmentProtectsNewOwner(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn main(run: bool) -> i32 {
+    let left: [u8; 1] = [41];
+    var right: [u8; 1] = [42];
+    var bytes: &[u8] = &left;
+    while run {
+        bytes = &right;
+        right = [0];
+        if bytes[0] == 42 { break; } else { continue; }
+    }
+    42
+}
+`,
+	})
+	if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E2101" {
+		t.Fatalf("diagnostics = %+v", result.Diagnostics)
+	}
+}
+
+func TestAnalyzeLoopContinueCarriesBorrowToHeader(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn main(run: bool) -> i32 {
+    let left: [u8; 1] = [41];
+    var right: [u8; 1] = [42];
+    var bytes: &[u8] = &left;
+    var first: bool = true;
+    while run {
+        if first {
+            bytes = &right;
+            first = false;
+            continue;
+        };
+        right = [0];
+        if bytes[0] == 42 { break; } else { break; }
+    }
+    42
+}
+`,
+	})
+	if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E2101" {
+		t.Fatalf("diagnostics = %+v", result.Diagnostics)
+	}
+}
+
+func TestAnalyzeLoopBreakJoinsBorrowReturnOrigins(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn select(run: bool, left: &i32, right: &i32) -> &i32 {
+    var current: &i32 = left;
+    while run {
+        current = right;
+        break;
+    }
+    current
+}
+`,
+	})
+	if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E2103" {
+		t.Fatalf("diagnostics = %+v", result.Diagnostics)
 	}
 }
 

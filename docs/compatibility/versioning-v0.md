@@ -131,13 +131,16 @@ whole-array loan. Element order, length, `bounds`, and this contextual conversio
 semantics. The current `1..=4096` element admission ceiling and private C wrappers are provisional
 implementation guards rather than compatibility promises; empty/repeated literals, fields,
 nesting, mutation, general slicing or borrowing, and ABI use remain unstabilized or excluded.
-ADR 0113 admits outside-loop safe-borrow reassignment with right-hand-side-first replacement,
+ADR 0113 admits branch-aware safe-borrow reassignment with right-hand-side-first replacement,
 loan-generation preservation across aliases, reachable `if`/`match` origin joins, and path-aware
-loan liveness. Those rules and fail-closed multi-origin returns are pre-1 semantics. Loop-carried
-reassignment remains unstabilized. ADR 0114 adds compiler-internal fixed-point return-origin
+loan liveness. Those rules and fail-closed multi-origin returns are pre-1 semantics. ADR 0114 adds compiler-internal fixed-point return-origin
 summaries for exact formal borrow parameters, region parameters, and static sources. Positional
 remapping, unselected call-bounded arguments, and fail-closed unknown recursive results are pre-1
 semantics; the summary representation is not a public function-type or ABI promise.
+ADR 0115 extends safe-borrow reassignment through `while` with canonical static loan-site IDs,
+entry/fallthrough/`continue` header joins, separate `break` exits, and a zero-iteration path. Those
+rules are pre-1 semantics; scalar predicate correlation and at-least-once loop proofs remain
+unstabilized.
 ADR 0093 admits exact `&str` and `&[u8]` parameters on ordinary internal functions. Exact source
 types, non-owning borrow behavior, matching call operands, and the absence of implicit raw-pointer
 conversion are pre-1 language semantics. Interpreter values and generated-C by-value descriptors

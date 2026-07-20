@@ -15,6 +15,7 @@
     "docs/adr/0112-fixed-u8-array-byte-view-borrow.md",
     "docs/adr/0113-branch-aware-safe-borrow-reassignment.md",
     "docs/adr/0114-interprocedural-borrow-return-summaries.md",
+    "docs/adr/0115-loop-carried-safe-borrow-provenance.md",
     "docs/diagnostics/catalog-v0.md"
   ],
   "cases": [
@@ -145,6 +146,32 @@
               "source": "main.fy",
               "startByte": 169,
               "endByte": 176
+            },
+            "escapes": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.flow.loop-borrow-reassignment",
+      "sourceRoot": "cases/pass/loop-borrow-reassignment/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow",
+        "borrows": [
+          {
+            "borrow": {
+              "source": "main.fy",
+              "startByte": 283,
+              "endByte": 290
+            },
+            "kind": "shared",
+            "origin": "Param(1)",
+            "lastUse": {
+              "source": "main.fy",
+              "startByte": 283,
+              "endByte": 290
             },
             "escapes": true
           }
@@ -554,6 +581,43 @@
                   "source": "main.fy",
                   "startByte": 48,
                   "endByte": 53
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.loop-borrow-break-origin",
+      "sourceRoot": "cases/fail/loop-borrow-break-origin/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "flow",
+        "diagnostics": [
+          {
+            "code": "E2103",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 166,
+              "endByte": 173
+            },
+            "related": [
+              {
+                "role": "candidate-origin",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 35,
+                  "endByte": 39
+                }
+              },
+              {
+                "role": "candidate-origin",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 47,
+                  "endByte": 52
                 }
               }
             ]

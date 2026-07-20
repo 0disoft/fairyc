@@ -35,6 +35,15 @@ type borrowLoanRecord struct {
 	fact    BorrowFact
 }
 
+type borrowLoanKey struct {
+	owner       *symbol
+	binding     *symbol
+	borrow      hir.Span
+	kind        string
+	originName  string
+	originPlace hir.Span
+}
+
 type borrowEnvironment map[*symbol]borrowValueState
 
 type borrowLiveMap map[*symbol]hir.Span
@@ -42,6 +51,15 @@ type borrowLiveMap map[*symbol]hir.Span
 type borrowLiveContext struct {
 	breakLive    borrowLiveMap
 	continueLive borrowLiveMap
+}
+
+type borrowLoopEdge struct {
+	kind        syntax.Kind
+	environment borrowEnvironment
+}
+
+type borrowLoopFrame struct {
+	edges []borrowLoopEdge
 }
 
 type borrowReturnSourceKind uint8
@@ -71,11 +89,14 @@ type borrowReturnTarget struct {
 }
 
 type borrowFlowAnalyzer struct {
-	analyzer  *analyzer
-	module    *moduleScope
-	function  *ast.Function
-	loans     []borrowLoanRecord
-	liveAfter map[*ast.Statement]borrowLiveMap
+	analyzer   *analyzer
+	module     *moduleScope
+	function   *ast.Function
+	loans      []borrowLoanRecord
+	liveAfter  map[*ast.Statement]borrowLiveMap
+	loanByKey  map[borrowLoanKey]int
+	loops      []borrowLoopFrame
+	probeDepth int
 
 	summarizing   bool
 	returnSeen    bool
@@ -166,6 +187,7 @@ func (a *analyzer) inferBorrowReturnSummary(module *moduleScope, function *ast.F
 	flow := &borrowFlowAnalyzer{
 		analyzer: a, module: module, function: function,
 		liveAfter:   make(map[*ast.Statement]borrowLiveMap),
+		loanByKey:   make(map[borrowLoanKey]int),
 		summarizing: true, returnKnown: true,
 	}
 	environment := flow.parameterEnvironment()
@@ -186,6 +208,7 @@ func (a *analyzer) borrowFlowFunction(module *moduleScope, function *ast.Functio
 	flow := &borrowFlowAnalyzer{
 		analyzer: a, module: module, function: function,
 		liveAfter: make(map[*ast.Statement]borrowLiveMap),
+		loanByKey: make(map[borrowLoanKey]int),
 	}
 	flow.liveBlock(function.Body, make(borrowLiveMap), borrowLiveContext{})
 	environment := flow.parameterEnvironment()
@@ -254,7 +277,7 @@ func (f *borrowFlowAnalyzer) evaluateStatement(statement *ast.Statement, environ
 		binding := f.analyzer.bindingSymbols[statement.Binding]
 		if reachable && isSafeBorrowSymbol(binding) {
 			if !value.known {
-				if !f.summarizing {
+				if !f.summarizing && !f.probing() {
 					f.analyzer.addUnsupported(f.module.file.Path, statement.Binding.Expression.Span, "safe-borrow binding with unknown origin")
 				}
 				delete(environment, binding)
@@ -278,7 +301,7 @@ func (f *borrowFlowAnalyzer) evaluateStatement(statement *ast.Statement, environ
 		target := f.analyzer.resolved[statement.Target]
 		if isSafeBorrowSymbol(target) {
 			if !value.known {
-				if !f.summarizing {
+				if !f.summarizing && !f.probing() {
 					f.analyzer.addUnsupported(f.module.file.Path, statement.Expression.Span, "safe-borrow assignment with unknown origin")
 				}
 				delete(environment, target)
@@ -290,6 +313,7 @@ func (f *borrowFlowAnalyzer) evaluateStatement(statement *ast.Statement, environ
 		f.checkOwnerAssignment(statement, target, environment)
 		return true
 	case syntax.KindBreak, syntax.KindContinue:
+		f.captureLoopEdge(statement.Kind, environment)
 		return false
 	default:
 		_, reachable := f.evaluateExpression(statement.Expression, environment)
@@ -540,18 +564,78 @@ func (f *borrowFlowAnalyzer) evaluateWhile(expression *ast.Expression, environme
 	if len(expression.Children) != 2 {
 		return f.evaluateChildren(expression.Children, environment)
 	}
-	if _, reachable := f.evaluateExpression(expression.Children[0], environment); !reachable {
+	condition := expression.Children[0]
+	bodyExpression := expression.Children[1]
+	entry := cloneBorrowEnvironment(environment)
+	header := cloneBorrowEnvironment(entry)
+
+	// Every join can only add one of the function's finite source origins or
+	// canonical loan-site IDs. Probe iterations suppress diagnostics and return
+	// facts; the converged header is evaluated once with observable effects.
+	limit := len(f.analyzer.expressionTypes) + 1
+	for iteration := 0; iteration < limit; iteration++ {
+		f.probeDepth++
+		conditionEnvironment := cloneBorrowEnvironment(header)
+		_, conditionReachable := f.evaluateExpression(condition, conditionEnvironment)
+		if !conditionReachable {
+			f.probeDepth--
+			break
+		}
+		bodyEnvironment := cloneBorrowEnvironment(conditionEnvironment)
+		f.loops = append(f.loops, borrowLoopFrame{})
+		_, bodyReachable := f.evaluateExpression(bodyExpression, bodyEnvironment)
+		frame := f.loops[len(f.loops)-1]
+		f.loops = f.loops[:len(f.loops)-1]
+		f.probeDepth--
+
+		branches := []borrowEnvironment{cloneBorrowEnvironment(entry)}
+		if bodyReachable {
+			branches = append(branches, bodyEnvironment)
+		}
+		for _, edge := range frame.edges {
+			if edge.kind == syntax.KindContinue {
+				branches = append(branches, edge.environment)
+			}
+		}
+		next := mergeBorrowEnvironments(entry, branches)
+		if sameBorrowEnvironment(header, next) {
+			header = next
+			break
+		}
+		header = next
+	}
+
+	conditionEnvironment := cloneBorrowEnvironment(header)
+	if _, reachable := f.evaluateExpression(condition, conditionEnvironment); !reachable {
 		return borrowValueState{}, false
 	}
-	base := cloneBorrowEnvironment(environment)
-	body := cloneBorrowEnvironment(base)
-	_, bodyReachable := f.evaluateExpression(expression.Children[1], body)
-	branches := []borrowEnvironment{base}
-	if bodyReachable {
-		branches = append(branches, body)
+	bodyEnvironment := cloneBorrowEnvironment(conditionEnvironment)
+	f.loops = append(f.loops, borrowLoopFrame{})
+	_, _ = f.evaluateExpression(bodyExpression, bodyEnvironment)
+	frame := f.loops[len(f.loops)-1]
+	f.loops = f.loops[:len(f.loops)-1]
+	exits := []borrowEnvironment{cloneBorrowEnvironment(header)}
+	for _, edge := range frame.edges {
+		if edge.kind == syntax.KindBreak {
+			exits = append(exits, edge.environment)
+		}
 	}
-	replaceBorrowEnvironment(environment, mergeBorrowEnvironments(base, branches))
+	replaceBorrowEnvironment(environment, mergeBorrowEnvironments(entry, exits))
 	return borrowValueState{}, true
+}
+
+func (f *borrowFlowAnalyzer) captureLoopEdge(kind syntax.Kind, environment borrowEnvironment) {
+	if len(f.loops) == 0 {
+		return
+	}
+	index := len(f.loops) - 1
+	f.loops[index].edges = append(f.loops[index].edges, borrowLoopEdge{
+		kind: kind, environment: cloneBorrowEnvironment(environment),
+	})
+}
+
+func (f *borrowFlowAnalyzer) probing() bool {
+	return f.probeDepth > 0
 }
 
 func (f *borrowFlowAnalyzer) regionBorrowValue(expression *ast.Expression) borrowValueState {
@@ -579,12 +663,20 @@ func (f *borrowFlowAnalyzer) regionBorrowValue(expression *ast.Expression) borro
 func (f *borrowFlowAnalyzer) materialize(value borrowValueState, binding *symbol) borrowValueState {
 	value = cloneBorrowValue(value)
 	for _, pending := range value.pending {
-		loan := borrowLoanRecord{
-			owner: pending.owner, binding: binding,
-			fact: BorrowFact{Borrow: pending.borrow, Kind: pending.kind, Origin: pending.origin.name},
+		key := borrowLoanKey{
+			owner: pending.owner, binding: binding, borrow: pending.borrow, kind: pending.kind,
+			originName: pending.origin.name, originPlace: pending.origin.declaration,
 		}
-		value.loans = append(value.loans, len(f.loans))
-		f.loans = append(f.loans, loan)
+		loanID, found := f.loanByKey[key]
+		if !found {
+			loanID = len(f.loans)
+			f.loanByKey[key] = loanID
+			f.loans = append(f.loans, borrowLoanRecord{
+				owner: pending.owner, binding: binding,
+				fact: BorrowFact{Borrow: pending.borrow, Kind: pending.kind, Origin: pending.origin.name},
+			})
+		}
+		value.loans = append(value.loans, loanID)
 	}
 	value.pending = nil
 	value.loans = uniqueInts(value.loans)
@@ -606,7 +698,7 @@ func (f *borrowFlowAnalyzer) markUse(value borrowValueState, use hir.Span) {
 }
 
 func (f *borrowFlowAnalyzer) checkOwnerAssignment(statement *ast.Statement, owner *symbol, environment borrowEnvironment) {
-	if f.summarizing || statement == nil || owner == nil || statement.Target == nil {
+	if f.summarizing || f.probing() || statement == nil || owner == nil || statement.Target == nil {
 		return
 	}
 	live := f.liveAfter[statement]
@@ -637,6 +729,9 @@ func (f *borrowFlowAnalyzer) checkReturn(expression *ast.Expression, value borro
 		return
 	}
 	if _, _, returnsBorrow := hir.BorrowElement(f.analyzer.functions[f.function].typ); !returnsBorrow {
+		return
+	}
+	if f.probing() {
 		return
 	}
 	if f.summarizing {
@@ -807,6 +902,29 @@ func replaceBorrowEnvironment(target, source borrowEnvironment) {
 	for symbol, state := range source {
 		target[symbol] = cloneBorrowValue(state)
 	}
+}
+
+func sameBorrowEnvironment(left, right borrowEnvironment) bool {
+	if len(left) != len(right) {
+		return false
+	}
+	for value, state := range left {
+		other, found := right[value]
+		if !found || !sameBorrowValue(state, other) {
+			return false
+		}
+	}
+	return true
+}
+
+func sameBorrowValue(left, right borrowValueState) bool {
+	return left.known == right.known &&
+		slices.EqualFunc(left.origins, right.origins, sameFlowOrigin) &&
+		slices.Equal(left.loans, right.loans) &&
+		slices.EqualFunc(left.pending, right.pending, func(left, right pendingBorrowLoan) bool {
+			return left.owner == right.owner && compareSpan(left.borrow, right.borrow) == 0 &&
+				left.kind == right.kind && sameFlowOrigin(left.origin, right.origin)
+		})
 }
 
 func mergeBorrowEnvironments(base borrowEnvironment, branches []borrowEnvironment) borrowEnvironment {

@@ -88,8 +88,8 @@ remain closed. One direct shared borrow of an admitted `[u8; N]` place contextua
 `&[u8]` when that view type is already expected, as in `let bytes: &[u8] = &array` or an internal
 `&[u8]` call argument. It retains the array's origin and exact `N`; other element types, `&mut`,
 temporary sources, and escaping local views remain closed. A `var` safe-borrow local may be
-reassigned outside loops; reachable branch origins are joined and returning a multi-origin result
-is rejected. Loop-carried safe-borrow reassignment remains closed.
+reassigned in straight-line, branch, or `while` control flow; reachable branch, header,
+`continue`, and `break` origins are joined and returning a multi-origin result is rejected.
 
 Ordinary internal functions may accept `&str` and `&[u8]` parameters. Calls preserve the exact safe
 borrow and its caller-proven origin; they do not convert the argument to a raw pointer or transfer

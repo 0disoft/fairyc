@@ -14,8 +14,8 @@ The project is not trying to beat every hand-tuned C program or make every C own
 The first Stage 0 frontend slice now exists in Go: immutable source bytes, a lossless lexer,
 compact recoverable syntax, error-free AST lowering, deterministic `E00xx` diagnostics, and a
 runner for all parser v0 fixtures. The next slice resolves names and produces typed HIR for the
-  fixture-backed scalar, safe-borrow, and scalar foreign-call subset. Its semantic runner executes all 27 v0 resolve, type,
-and local Flow cases, including integer-literal range rejection, branch-aware safe-borrow reassignment,
+  fixture-backed scalar, safe-borrow, and scalar foreign-call subset. Its semantic runner executes all 29 v0 resolve, type,
+and local Flow cases, including integer-literal range rejection, branch- and loop-aware safe-borrow reassignment,
 exact interprocedural borrow-return summaries, last-use loans, and borrow-return origins. Whole-root resource Flow
   also executes all 12 v0 cases for moves, cleanup obligations, branch joins, normal, break, and continue loop edges,
 consuming tagged matches, and live/dead resource reassignment. The
@@ -181,11 +181,11 @@ zero-cost `usize` `.len`, and support checked read-only `usize` indexing. A dire
 `[u8; N]` contextually becomes `&[u8]` where that type is expected, so local arrays can use the
 existing immutable byte-view calls and operations without unsafe code. The ceiling is a provisional
 Stage 0 implementation guard, not a stable language or ABI limit. A mutable safe-borrow local may
-be reassigned outside loops; Flow replaces its provenance after evaluating the right-hand side,
-joins reachable branch origins without guessing, and releases old owners only after their last
-reachable loan use. Loop-carried safe-borrow reassignment, empty and repeated literals, fields,
-nesting, mutable indexing, general slicing or borrowing, and public or foreign ABI use remain
-closed.
+be reassigned through straight-line, branch, and `while` control flow; Flow replaces its provenance
+after evaluating the right-hand side, joins reachable branch/header/`continue`/`break` origins
+without guessing, and releases old owners only after their last reachable loan use. Empty and
+repeated literals, fields, nesting, mutable indexing, general slicing or borrowing, and public or
+foreign ABI use remain closed.
 Internal borrow-returning calls now infer one exact formal borrow parameter, region parameter, or
 static return source before ordinary Flow checks. The selected actual argument alone carries its
 loan past the call, including across argument reordering and acyclic wrapper chains; recursive

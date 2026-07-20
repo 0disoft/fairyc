@@ -40,7 +40,7 @@ Passing an existing mutable borrow to a call creates a call-bounded reborrow whe
 The first executable array-view bridge permits a direct shared borrow of an admitted `[u8; N]`
 place where `&[u8]` is already expected. It retains the place's origin and loans the whole array.
 
-A mutable local containing a safe borrow may be reassigned outside loops. Flow evaluates the
+A mutable local containing a safe borrow may be reassigned. Flow evaluates the
 right-hand side first and then replaces the target's origin and retained-loan set. Each direct
 borrow creates a loan generation; copying a borrow preserves that generation, so replacing one
 alias does not release an owner while another alias can still reach a later use.
@@ -49,8 +49,14 @@ alias does not release an owner while another alias can still reach a later use.
 exits. Equal origins compact to one fact. Different possible origins remain a disjunction and a
 return of that value is `E2103`; source order never chooses a winning branch. Loan liveness is also
 path-aware, so a use in one branch does not keep an unrelated mutually exclusive branch's owner
-borrowed. Loop-carried safe-borrow reassignment remains unsupported until iteration, `break`, and
-`continue` edges have an explicit provenance fixed-point contract.
+borrowed.
+
+For `while`, Flow joins the initial entry, reachable fallthrough, and nearest-loop `continue` edges
+to a loop-header fixed point. A retained direct borrow uses one canonical static loan-site ID across
+analysis rounds instead of creating an unbounded sequence. The converged header and nearest-loop
+`break` environments form the post-loop state, including the zero-iteration path. Returning a
+post-loop value with different possible entry and iteration origins remains `E2103`. Scalar
+predicate correlation and at-least-once loop proofs are not part of this contract.
 
 Every internal borrow-returning function has a compiler-only summary inferred from its reachable
 returns: one exact `Param(i)`, `RegionParam(i)`, or static source. Summaries reach a fixed point

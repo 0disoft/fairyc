@@ -32,9 +32,9 @@ branch happened to be visited last. All three outcomes are wrong.
 6. ADR 0114 replaces the initial argument-union fallback with fixed-point internal function
    summaries. Calls map an exact parameter, region parameter, or static origin; an unproved
    recursive result remains unsupported rather than inventing provenance.
-7. Loop-carried safe-borrow reassignment remains closed. Its environment needs an explicit
-   iteration-carried fixed point and break/continue edge contract rather than reusing branch rules.
-   Backward loop liveness is still a bounded finite-source fixed point for already admitted loans.
+7. ADR 0115 supplies the iteration-carried fixed point and distinct `break`/`continue` edge
+   contract that this decision deliberately deferred. Backward loop liveness and forward
+   provenance now use finite-source fixed points.
 8. Typed HIR and MIR need no new assignment operation. Once Flow proves the source assignment,
    ordinary MIR local assignment transports the non-owning value descriptor. Interpreter and C
    backends therefore consume the same verified MIR assignment.
@@ -45,8 +45,8 @@ branch happened to be visited last. All three outcomes are wrong.
   borrowed after its last reachable use.
 - Branch joins preserve uncertainty instead of erasing it, making diagnostics deterministic and
   fail-closed.
-- Interprocedural return-origin summaries are defined by ADR 0114. Loop-carried borrow phis remain
-  later work.
+- Interprocedural return-origin summaries are defined by ADR 0114, and loop-carried provenance by
+  ADR 0115.
 
 ## Verification
 
