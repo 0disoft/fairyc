@@ -310,8 +310,28 @@ func QualifiedSourcePath(packageID PackageID, sourcePath string) string {
 	return "$p" + strconv.FormatUint(uint64(packageID), 10) + "/" + sourcePath
 }
 
-// Span identifies original source bytes without storing source contents.
+// SourcePathParts separates one compiler-private source identity into its build-local package and
+// original source-root-relative path. Valid source paths cannot begin with '$', so malformed
+// private spellings remain ordinary default-package paths instead of being guessed.
+func SourcePathParts(sourceIdentity string) (PackageID, string) {
+	if !strings.HasPrefix(sourceIdentity, "$p") {
+		return DefaultPackage, sourceIdentity
+	}
+	separator := strings.IndexByte(sourceIdentity, '/')
+	if separator <= 2 || separator == len(sourceIdentity)-1 {
+		return DefaultPackage, sourceIdentity
+	}
+	value, err := strconv.ParseUint(sourceIdentity[2:separator], 10, 32)
+	if err != nil || value == 0 {
+		return DefaultPackage, sourceIdentity
+	}
+	return PackageID(value), sourceIdentity[separator+1:]
+}
+
+// Span identifies original source bytes without storing source contents. Package is build-local;
+// Source remains the original relative display path and never carries private qualification.
 type Span struct {
+	Package   PackageID
 	Source    string
 	StartByte int
 	EndByte   int

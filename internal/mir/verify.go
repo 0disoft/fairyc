@@ -553,7 +553,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				expectedEntity := sourceEntity("raw-address", operation.Span)
 				sourceSpanEntity := sourceEntity("span", operation.Span)
 				scopeEntity := sourceEntity("unsafe-scope", operation.UnsafeScope)
-				scopeContainsOperation := operation.UnsafeScope.Source == operation.Span.Source &&
+				scopeContainsOperation := sameSpanSource(operation.UnsafeScope, operation.Span) &&
 					operation.UnsafeScope.StartByte <= operation.Span.StartByte && operation.UnsafeScope.EndByte >= operation.Span.EndByte
 				if operation.Entity != expectedEntity || !scopeContainsOperation || !hasProvenance ||
 					provenance.SourceSpanEntity != sourceSpanEntity || provenance.ScopeEntity != scopeEntity {
@@ -575,7 +575,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				expectedEntity := sourceEntity("raw-borrow-pointer", operation.Span)
 				sourceSpanEntity := sourceEntity("span", operation.Span)
 				scopeEntity := sourceEntity("unsafe-scope", operation.UnsafeScope)
-				scopeContainsOperation := operation.UnsafeScope.Source == operation.Span.Source &&
+				scopeContainsOperation := sameSpanSource(operation.UnsafeScope, operation.Span) &&
 					operation.UnsafeScope.StartByte <= operation.Span.StartByte && operation.UnsafeScope.EndByte >= operation.Span.EndByte
 				if operation.Entity != expectedEntity || !scopeContainsOperation || !hasProvenance ||
 					provenance.SourceSpanEntity != sourceSpanEntity || provenance.ScopeEntity != scopeEntity {
@@ -596,7 +596,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				expectedEntity := sourceEntity("str-data-address", operation.Span)
 				sourceSpanEntity := sourceEntity("span", operation.Span)
 				scopeEntity := sourceEntity("unsafe-scope", operation.UnsafeScope)
-				scopeContainsOperation := operation.UnsafeScope.Source == operation.Span.Source &&
+				scopeContainsOperation := sameSpanSource(operation.UnsafeScope, operation.Span) &&
 					operation.UnsafeScope.StartByte <= operation.Span.StartByte && operation.UnsafeScope.EndByte >= operation.Span.EndByte
 				if operation.Entity != expectedEntity || !scopeContainsOperation || !hasProvenance ||
 					provenance.SourceSpanEntity != sourceSpanEntity || provenance.ScopeEntity != scopeEntity {
@@ -620,7 +620,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				expectedEntity := sourceEntity("byte-slice-data-address", operation.Span)
 				sourceSpanEntity := sourceEntity("span", operation.Span)
 				scopeEntity := sourceEntity("unsafe-scope", operation.UnsafeScope)
-				scopeContainsOperation := operation.UnsafeScope.Source == operation.Span.Source &&
+				scopeContainsOperation := sameSpanSource(operation.UnsafeScope, operation.Span) &&
 					operation.UnsafeScope.StartByte <= operation.Span.StartByte && operation.UnsafeScope.EndByte >= operation.Span.EndByte
 				if operation.Entity != expectedEntity || !scopeContainsOperation || !hasProvenance ||
 					provenance.SourceSpanEntity != sourceSpanEntity || provenance.ScopeEntity != scopeEntity {
@@ -641,7 +641,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				expectedEntity := sourceEntity("cstr-data-address", operation.Span)
 				sourceSpanEntity := sourceEntity("span", operation.Span)
 				scopeEntity := sourceEntity("unsafe-scope", operation.UnsafeScope)
-				scopeContainsOperation := operation.UnsafeScope.Source == operation.Span.Source &&
+				scopeContainsOperation := sameSpanSource(operation.UnsafeScope, operation.Span) &&
 					operation.UnsafeScope.StartByte <= operation.Span.StartByte && operation.UnsafeScope.EndByte >= operation.Span.EndByte
 				if operation.Entity != expectedEntity || !scopeContainsOperation || !hasProvenance ||
 					provenance.SourceSpanEntity != sourceSpanEntity || provenance.ScopeEntity != scopeEntity {
@@ -784,7 +784,7 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				callEntity := sourceEntity("call", terminator.Span)
 				sourceSpanEntity := sourceEntity("span", terminator.Span)
 				scopeEntity := sourceEntity("unsafe-scope", terminator.UnsafeScope)
-				scopeContainsCall := terminator.UnsafeScope.Source == terminator.Span.Source &&
+				scopeContainsCall := sameSpanSource(terminator.UnsafeScope, terminator.Span) &&
 					terminator.UnsafeScope.StartByte <= terminator.Span.StartByte && terminator.UnsafeScope.EndByte >= terminator.Span.EndByte
 				if foreign == nil || terminator.ForeignABI != "C" || terminator.Entity != callEntity || !scopeContainsCall ||
 					!hasProvenance || provenance.SourceSpanEntity != sourceSpanEntity || provenance.ScopeEntity != scopeEntity {

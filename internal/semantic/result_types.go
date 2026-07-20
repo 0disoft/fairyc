@@ -146,5 +146,5 @@ func questionSpan(source string, expression *ast.Expression) hir.Span {
 	if end > expression.Span.StartByte {
 		start = end - 1
 	}
-	return hir.Span{Source: source, StartByte: start, EndByte: end}
+	return sourceSpan(source, start, end)
 }

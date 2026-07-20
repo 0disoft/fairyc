@@ -35,7 +35,8 @@ direct-only visibility, explicit standard-library injection, ambiguity, hidden t
 and duplicate bindings. Passing graphs now feed syntax-clean sources and exact import-provider
 bindings into semantic analysis with deterministic build-local package identity; equal dependency
 module and source paths remain distinct through typed HIR types and verified MIR names without
-choosing a public package ID. Mutable-local MIR lowering and verification
+choosing a public package ID. Package-aware spans keep that identity separate from the original
+relative source path so private numbering cannot leak into diagnostics. Mutable-local MIR lowering and verification
   execute all 11 MIR normalization v0 cases for the current scalar, resource, tagged-payload, Result, Region, loop-control cleanup, call,
   division, and checked-arithmetic trap subset. All 10 verifier baselines and 21 isolated mutation cases execute through
   the same MIR verifier. The first MIR interpreter executes all 92 interpreter v0 cases, including direct `i32` minimum constants, scalar fixed-array calls, contextual immutable and mutable byte-view borrowing, exact lengths, checked reads and indexed stores, and

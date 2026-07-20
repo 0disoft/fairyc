@@ -28,7 +28,8 @@ func (a *analyzer) typeCheck() Result {
 	a.prepareEnumTypes()
 	a.prepareCallableEffects()
 	for _, module := range a.moduleOrder {
-		hirModule := hir.Module{Package: module.key.packageID, Path: module.file.Module.Path, SourcePath: module.file.Path}
+		_, sourcePath := hir.SourcePathParts(module.file.Path)
+		hirModule := hir.Module{Package: module.key.packageID, Path: module.file.Module.Path, SourcePath: sourcePath}
 		for index := range module.file.Module.Structs {
 			structure := &module.file.Module.Structs[index]
 			if a.structs[structure] == nil {

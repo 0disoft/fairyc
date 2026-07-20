@@ -30,6 +30,11 @@ receives executable MIR only after the shared coordinator marks it verified.
 
 Parsing consumes original UTF-8 source bytes, preserves trivia and invalid-input provenance in compact lossless syntax, and recovers enough structure for deterministic diagnostics without accepting malformed programs as valid. Canonical spans remain half-open byte ranges. Only an error-free batch parse lowers to AST and HIR. Type checking operates on Fairy C target types, not Go host types. Arbitrary-size integer and exact-decimal literals remain exact until their target type and overflow behavior are known.
 
+In a resolved multi-package compilation, every semantic and MIR span carries the build-local package
+discriminator separately from its original relative source path. Sorting, compaction, unsafe
+provenance, and source-linked instrumentation use both fields. Source-visible paths never contain
+the private `$pN` qualification used by compiler entities.
+
 Semantic acceptance is split into resolver, type, and Flow phases. The versioned semantic fixtures assert declaration coordinates, canonical types, borrow origins, and complete independent diagnostic sets without freezing internal arena IDs or whole-HIR serialization.
 
 An immutable green tree and incremental reparse are deferred. The parser boundary preserves trivia so those features can be added without making them a prerequisite for executable semantics.

@@ -1982,7 +1982,7 @@ func (l *functionLowerer) lowerCall(expression *hir.Expression) (Operand, error)
 }
 
 func sourceEntity(kind string, span hir.Span) string {
-	return fmt.Sprintf("%s:%s:%d:%d", kind, span.Source, span.StartByte, span.EndByte)
+	return fmt.Sprintf("%s:%s:%d:%d", kind, hir.QualifiedSourcePath(span.Package, span.Source), span.StartByte, span.EndByte)
 }
 
 func (l *functionLowerer) lowerCheckedDivision(expression *hir.Expression, left, right Operand) error {
@@ -2077,7 +2077,7 @@ func (l *functionLowerer) lowerPropagate(expression *hir.Expression) (Operand, e
 		Kind: TerminatorReturn, Span: expression.Span, UnwindSuccessor: NoBlock,
 		ReturnValue: Operand{Kind: OperandLocal, Local: propagatedResult},
 	})
-	question := hir.Span{Source: expression.Span.Source, StartByte: max(expression.Span.StartByte, expression.Span.EndByte-1), EndByte: expression.Span.EndByte}
+	question := hir.Span{Package: expression.Span.Package, Source: expression.Span.Source, StartByte: max(expression.Span.StartByte, expression.Span.EndByte-1), EndByte: expression.Span.EndByte}
 	l.result.ResultBranches = append(l.result.ResultBranches, ResultBranchFact{
 		Question: question, ResultExpression: operand.Span, EvaluationCount: 1,
 		SuccessPayload: "Move", ErrorPayload: "Move", ResultTemporaryDeadOn: []string{"success", "error"},
@@ -2151,7 +2151,7 @@ func (l *functionLowerer) emitCleanupDeclaredWithin(live map[hir.SymbolID]bool, 
 	actions := make([]CleanupAction, 0)
 	for index := len(l.result.Resources) - 1; index >= 0; index-- {
 		resource := l.result.Resources[index]
-		if resource.Binding.Source != scope.Source || resource.Binding.StartByte < scope.StartByte || resource.Binding.EndByte > scope.EndByte || !live[resource.Symbol] {
+		if !sameSpanSource(resource.Binding, scope) || resource.Binding.StartByte < scope.StartByte || resource.Binding.EndByte > scope.EndByte || !live[resource.Symbol] {
 			continue
 		}
 		l.appendOperation(Operation{Kind: OperationDrop, Span: resource.Binding, Symbol: resource.Symbol, FlagClearedFirst: true})

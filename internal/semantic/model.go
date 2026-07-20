@@ -387,6 +387,9 @@ func compareRelated(left, right RelatedSpan) int {
 }
 
 func compareSpan(left, right hir.Span) int {
+	if n := cmp.Compare(left.Package, right.Package); n != 0 {
+		return n
+	}
 	if n := cmp.Compare(left.Source, right.Source); n != 0 {
 		return n
 	}

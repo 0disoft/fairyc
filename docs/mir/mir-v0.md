@@ -17,6 +17,11 @@ colliding. The default explicit single-package closure retains its original name
 numeric discriminator nor its private spelling is serialized MIR, a stable package identity, a
 native ABI name, or a public diagnostic contract.
 
+Source spans keep that discriminator in a separate field while retaining the original relative
+source path. MIR entity identity, scope containment, unsafe provenance, and source-linked drop sites
+compare both fields. Private `$pN` qualification may appear in compiler-only entity strings but not
+in source paths.
+
 The current Go prototype implements the source-linked subset exercised by all eleven MIR v0 normalization fixtures: ordered calls, complete-root and tagged-payload moves, RHS-before-drop resource reassignment, explicit normal-exit cleanup, lexical Region placement and reset on fallthrough, direct return, Result propagation, nested exits, nearest-loop `break` and `continue`, `Result` propagation branches, checked division, remainder, arithmetic, shift, byte-view, scalar fixed-array, and assertion traps, and non-unwinding successors. The same verifier passes all ten named baselines and rejects all twenty-one isolated v0 mutations with their single expected `Vxxxx` result. The bounded interpreter executes all ninety-two interpreter v0 cases for scalar and tagged control, direct `i32` minimum constants, scalar fixed-array construction, calls, contextual immutable and mutable byte-view borrowing, exact lengths, checked reads and indexed stores, typed scalar comparisons, borrowed-view length and emptiness metadata, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, value-preserving integer casts, and checked `i32`, `u8`, `u32`, and `usize` arithmetic, division, remainder, bitwise operations, and left/right shift, resource construction and field reads, whole-root and active-payload moves, resource returns and propagation, live/dead/self reassignment, consuming-close ownership, nested and loop-control cleanup, source-linked drop traces, Region reset paths, controlled in-memory test output, exact trap and boundary outcomes, and the step and output limits; resource drop-effect contracts are verified while host-capability runtime behavior remains an unfinished gate.
 
 Scalar fixed arrays lower to an explicit construction operation followed by ordinary local value

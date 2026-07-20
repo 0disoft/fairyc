@@ -219,7 +219,9 @@ Region v1 resolves its lexical escape source through the explicit standard-libra
 MIR fixtures compare source-linked observations after verification. They do not compare textual dumps, block or local numbers, temporary names, or generated C. MIR-verifier fixtures separately require each named baseline to verify, apply one typed mutation, and return the complete one-code result; arbitrary malformed graph input remains deferred.
 
 Package fixtures start from an already-resolved graph. Build-local package IDs may be asserted only
-inside compiler tests to prove isolation; they are not stable fixture output. The fixtures do not
+inside compiler tests to prove isolation; they are not stable fixture output. Package-aware tests
+must assert that source paths remain unqualified while span identity still distinguishes packages.
+Single-package fixture span matchers require the default package ID. The fixtures do not
 prove public manifest parsing, version solving, registry behavior, source acquisition, lockfile
 encoding, diagnostic path mapping, or a concrete package-instance hash.
 

@@ -264,7 +264,7 @@ func regionTraceEqual(actual []interpreter.RegionEvent, expected []regionExpecta
 }
 
 func regionSpanEqual(actual hir.Span, expected spanExpectation) bool {
-	return actual.Source == expected.Source && actual.StartByte == expected.StartByte && actual.EndByte == expected.EndByte
+	return actual.Package == hir.DefaultPackage && actual.Source == expected.Source && actual.StartByte == expected.StartByte && actual.EndByte == expected.EndByte
 }
 
 func dropTraceEqual(actual []interpreter.DropEvent, expected []dropExpectation) bool {
@@ -273,6 +273,7 @@ func dropTraceEqual(actual []interpreter.DropEvent, expected []dropExpectation) 
 	}
 	for index := range actual {
 		if string(actual[index].ResourceType) != expected[index].ResourceType ||
+			actual[index].Binding.Package != hir.DefaultPackage ||
 			actual[index].Binding.Source != expected[index].Binding.Source ||
 			actual[index].Binding.StartByte != expected[index].Binding.StartByte ||
 			actual[index].Binding.EndByte != expected[index].Binding.EndByte {

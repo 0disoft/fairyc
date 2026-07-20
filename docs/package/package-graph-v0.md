@@ -67,9 +67,10 @@ identities even though both dependency instances own `util.fy` and module `util`
 runner consumes the same validated `pass.package.stdlib-arena-region` result instead of maintaining
 a second package-lookup interpretation.
 
-The numeric IDs and their compiler-private source/module qualification are disposable build facts.
-They are not the deferred public `PackageInstanceId`, a lockfile encoding, an ABI name, or a stable
-diagnostic path.
+The numeric IDs and compiler-private module qualification are disposable build facts. Source spans
+store the numeric discriminator separately while retaining their original relative path; they never
+render `$pN` as part of that path. Neither representation is the deferred public
+`PackageInstanceId`, a lockfile encoding, an ABI name, or a stable diagnostic path.
 
 The module-path-isolation result additionally crosses `internal/compiler` through semantic analysis,
 MIR lowering, and MIR verification. This proves compiler-pipeline consumption of the resolved graph;

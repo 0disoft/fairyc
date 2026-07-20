@@ -239,7 +239,7 @@ func actionsEqual(actual []mir.CleanupAction, expected []cleanupActionAssertion)
 }
 
 func spanEqual(actual hir.Span, expected spanAssertion) bool {
-	return actual.Source == expected.Source && actual.StartByte == expected.StartByte && actual.EndByte == expected.EndByte
+	return actual.Package == hir.DefaultPackage && actual.Source == expected.Source && actual.StartByte == expected.StartByte && actual.EndByte == expected.EndByte
 }
 
 func sortedUnique(values []string) bool {

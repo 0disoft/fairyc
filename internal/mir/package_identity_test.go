@@ -2,6 +2,7 @@ package mir
 
 import (
 	"slices"
+	"strings"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/frontend"
@@ -39,6 +40,9 @@ func TestLowerPreservesBuildLocalPackageIdentity(t *testing.T) {
 	names := make([]string, 0, len(program.Functions))
 	for _, function := range program.Functions {
 		names = append(names, function.Name)
+		if function.Span.Package == hir.DefaultPackage || strings.Contains(function.Span.Source, "$p") {
+			t.Fatalf("Lower() function span leaked or lost package-aware source identity: %+v", function.Span)
+		}
 	}
 	want := []string{"$p1::app_a::main", "$p2::app_b::main", "$p3::util::value", "$p4::util::value"}
 	if !slices.Equal(names, want) {

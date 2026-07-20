@@ -28,9 +28,9 @@ identity only in the package fixture runner would leave the actual compiler pipe
    package instances remain independent; an import resolves only to its exact bound provider.
 3. Typed HIR modules retain `PackageID`. User-defined enum, struct, and resource identities and MIR
    function names use a compiler-private qualified module identity for non-default packages.
-4. Compiler-private source identities also include the build-local package discriminator so equal
-   package-local file paths cannot collapse span-sorted facts. Public diagnostic path mapping is a
-   later contract.
+4. Source spans retain the build-local package discriminator separately from the original relative
+   path, as refined by ADR 0130, so equal package-local paths cannot collapse or leak private
+   qualification into source-visible fields.
 5. `PackageID(0)` preserves the existing explicit single-package closure behavior and its exact HIR
    and MIR names.
 6. Build-local IDs and the `$pN` spelling are disposable implementation facts. They must not become

@@ -425,7 +425,7 @@ func (a *analyzer) resourceWhile(module *moduleScope, expression *ast.Expression
 		return
 	}
 	condition := expression.Children[0]
-	header := hir.Span{Source: module.file.Path, StartByte: expression.Span.StartByte, EndByte: condition.Span.EndByte}
+	header := sourceSpan(module.file.Path, expression.Span.StartByte, condition.Span.EndByte)
 	a.recordResourceStates(environment, header, "before")
 	a.resourceExpression(module, condition, environment, resourceRead)
 	baseline := cloneResourceEnvironment(environment)

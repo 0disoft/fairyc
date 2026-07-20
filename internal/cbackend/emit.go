@@ -53,6 +53,7 @@ func Stage0DropTraceProfile() Profile {
 // DropSite identifies one source-linked resource leaf that an instrumented drop may observe.
 type DropSite struct {
 	ID           uint32
+	Package      hir.PackageID
 	ResourceType string
 	Source       string
 	StartByte    int

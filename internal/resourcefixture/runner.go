@@ -155,7 +155,7 @@ func relatedEqual(actual []semantic.RelatedSpan, expected []relatedSpanAssertion
 }
 
 func spanEqual(actual hir.Span, expected spanAssertion) bool {
-	return actual.Source == expected.Source && actual.StartByte == expected.StartByte && actual.EndByte == expected.EndByte
+	return actual.Package == hir.DefaultPackage && actual.Source == expected.Source && actual.StartByte == expected.StartByte && actual.EndByte == expected.EndByte
 }
 
 func obligationsEqual(actual, expected *int) bool {

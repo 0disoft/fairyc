@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0129-shared-verified-mir-pipeline.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0130-package-aware-source-spans.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -249,6 +249,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   path, and typed HIR and MIR retain the discriminator for internal type and function identity.
   Every source import in that input requires exactly one validated provider binding; missing,
   duplicate, unused, or absent-package bindings reject before semantic phases.
+  Semantic and MIR spans store the build-local package discriminator separately from the original
+  relative source path. Source-visible paths never contain the private numeric qualification.
   The private numeric ID and qualification spelling are disposable and cannot define source syntax,
   public diagnostics, lockfiles, caches, Atlas identity, or ABI names.
 - Typed HIR lowers through an analysis-only Flow CFG into mutable-local, backend-independent MIR.

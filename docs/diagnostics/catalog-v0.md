@@ -100,6 +100,9 @@ The MIR verifier codes are defined in `docs/mir/mir-v0.md`.
 - An Atlas warning reports relation-specific completeness and never upgrades unavailable evidence to complete.
 - A syntax diagnostic uses a half-open source-byte span, records insertion or skipped-token provenance, and does not claim a recovered file is valid.
 - A semantic diagnostic uses a half-open source-byte span, names role-labelled declaration, type, loan, origin, or last-use spans when required, and suppresses errors caused only by a poisoned earlier fact.
+- In resolved multi-package analysis, a diagnostic span retains build-local package identity
+  separately from its original relative source path. A renderer must never expose the private
+  numeric package ID; a future package-aware CLI will supply the user-facing package label.
 - Unsupported Stage 0 features should suggest a handle, index, copy, region, split API, or unsafe wrapper only when that alternative actually fits the rejected operation.
 
 ## Compatibility

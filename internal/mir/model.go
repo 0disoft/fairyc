@@ -38,6 +38,10 @@ func newTypeProperties(resources []ResourceType, structs []StructType, enums []E
 	return typeProperties{resources: resourceValues, structs: structValues, enums: enumValues}
 }
 
+func sameSpanSource(left, right hir.Span) bool {
+	return left.Package == right.Package && left.Source == right.Source
+}
+
 func (p typeProperties) IsResource(value hir.Type) bool {
 	_, found := p.resources[value]
 	return found

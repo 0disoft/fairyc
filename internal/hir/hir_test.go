@@ -91,3 +91,18 @@ func TestExecutableFixedArrayShapeEnforcesClosedElementAndLengthSet(t *testing.T
 		}
 	}
 }
+
+func TestQualifiedSourcePathRoundTripsBuildLocalIdentity(t *testing.T) {
+	t.Parallel()
+	identity := QualifiedSourcePath(7, "src/util.fy")
+	packageID, sourcePath := SourcePathParts(identity)
+	if identity != "$p7/src/util.fy" || packageID != 7 || sourcePath != "src/util.fy" {
+		t.Fatalf("source identity round trip = %q, %d, %q", identity, packageID, sourcePath)
+	}
+	for _, ordinary := range []string{"main.fy", "$p0/main.fy", "$p4294967296/main.fy", "$p7/"} {
+		packageID, sourcePath = SourcePathParts(ordinary)
+		if packageID != DefaultPackage || sourcePath != ordinary {
+			t.Fatalf("SourcePathParts(%q) = %d, %q", ordinary, packageID, sourcePath)
+		}
+	}
+}

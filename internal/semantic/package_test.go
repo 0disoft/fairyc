@@ -40,20 +40,21 @@ func TestAnalyzePackagesResolvesEqualModulePathsByPackage(t *testing.T) {
 	for _, resolution := range result.Resolutions {
 		if resolution.Target.Module == "util" && resolution.Target.Name == "value" {
 			resolvedPackages[resolution.Target.Package]++
+			if resolution.Use.Package == hir.DefaultPackage || resolution.Target.Declaration.Package != resolution.Target.Package ||
+				strings.Contains(resolution.Use.Source, "$p") || strings.Contains(resolution.Target.Declaration.Source, "$p") {
+				t.Fatalf("AnalyzePackages() leaked or lost package-aware source identity: %+v", resolution)
+			}
 		}
 	}
 	if resolvedPackages[3] != 1 || resolvedPackages[4] != 1 || len(resolvedPackages) != 2 {
 		t.Fatalf("AnalyzePackages() util resolutions = %v", resolvedPackages)
 	}
 
-	sourcePaths := make(map[string]struct{})
+	sourcePaths := make(map[hir.PackageID]string)
 	for _, module := range result.HIR.Modules {
-		sourcePaths[module.SourcePath] = struct{}{}
+		sourcePaths[module.Package] = module.SourcePath
 	}
-	if _, found := sourcePaths["$p3/util.fy"]; !found {
-		t.Fatalf("AnalyzePackages() source paths = %v", sourcePaths)
-	}
-	if _, found := sourcePaths["$p4/util.fy"]; !found {
+	if sourcePaths[3] != "util.fy" || sourcePaths[4] != "util.fy" {
 		t.Fatalf("AnalyzePackages() source paths = %v", sourcePaths)
 	}
 	types := make(map[hir.Type]struct{})
@@ -67,6 +68,29 @@ func TestAnalyzePackagesResolvesEqualModulePathsByPackage(t *testing.T) {
 	}
 	if _, found := types[hir.Type("$p4::util::Token")]; !found {
 		t.Fatalf("AnalyzePackages() struct types = %v", types)
+	}
+}
+
+func TestAnalyzePackagesKeepsDiagnosticPathsUnqualified(t *testing.T) {
+	t.Parallel()
+	result, err := semantic.AnalyzePackages(semantic.PackageInput{
+		Files: []semantic.File{
+			parsePackageFile(t, 1, "app.fy", "module app;\nimport util as u;\nfn main() -> i32 { u::private_value() }\n"),
+			parsePackageFile(t, 2, "util.fy", "module util;\nfn private_value() -> i32 { 1 }\n"),
+		},
+		Imports: []semantic.PackageImport{{FromPackage: 1, ImportPath: "util", ToPackage: 2}},
+	})
+	if err != nil {
+		t.Fatalf("AnalyzePackages() error = %v", err)
+	}
+	if result.FailedPhase != semantic.PhaseResolve || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E0103" || len(result.Diagnostics[0].Related) != 1 {
+		t.Fatalf("AnalyzePackages() result = %+v", result)
+	}
+	diagnostic := result.Diagnostics[0]
+	if diagnostic.Primary.Package != 1 || diagnostic.Primary.Source != "app.fy" ||
+		diagnostic.Related[0].Span.Package != 2 || diagnostic.Related[0].Span.Source != "util.fy" ||
+		strings.Contains(diagnostic.Primary.Source, "$p") || strings.Contains(diagnostic.Related[0].Span.Source, "$p") {
+		t.Fatalf("AnalyzePackages() diagnostic paths = %+v", diagnostic)
 	}
 }
 
