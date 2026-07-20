@@ -559,6 +559,15 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					return callCompletion{}, fmt.Errorf("borrowed-view length in %q has incompatible runtime value", function.Name)
 				}
 				locals[operation.DestinationLocal] = runtimeValue{kind: valueUSize, u64: receiver.u64, typ: hir.TypeUSize}
+			case mir.OperationViewEmpty:
+				receiver, err := evaluateOne(locals, operation.Operands)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("borrowed-view emptiness in %q: %w", function.Name, err)
+				}
+				if receiver.kind != valueView || receiver.typ != operation.OwnerType || operation.Type != hir.TypeBool || operation.Field != "is_empty" {
+					return callCompletion{}, fmt.Errorf("borrowed-view emptiness in %q has incompatible runtime value", function.Name)
+				}
+				locals[operation.DestinationLocal] = runtimeValue{kind: valueI32, i32: boolValue(receiver.u64 == 0), typ: hir.TypeBool}
 			case mir.OperationViewIndex:
 				receiver, index, err := evaluateViewIndexOperands(locals, operation.Operands)
 				if err != nil {

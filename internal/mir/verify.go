@@ -583,6 +583,18 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "borrowed-view length shape is invalid"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationViewEmpty:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				ownerElement, _, ownerBorrow := hir.BorrowElement(operation.OwnerType)
+				ownerValid := ownerBorrow && (ownerElement == hir.TypeStr || ownerElement == hir.TypeByteSlice)
+				operandValid := len(operation.Operands) == 1 && (operation.Operands[0].Kind == OperandLocal ||
+					ownerElement == hir.TypeStr && operation.Operands[0].Kind == OperandString ||
+					ownerElement == hir.TypeByteSlice && operation.Operands[0].Kind == OperandByteString)
+				if operation.DestinationLocal == NoLocal || !ownerValid || !operandValid ||
+					operation.Type != hir.TypeBool || operation.Field != "is_empty" {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "borrowed-view emptiness shape is invalid"})
+				}
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationViewIndex:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				if !validViewIndexShape(operation, true) || len(operation.TrapCategories) != 0 {

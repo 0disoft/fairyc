@@ -490,6 +490,8 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		return l.lowerFieldRead(expression)
 	case "view-length":
 		return l.lowerViewLength(expression)
+	case "view-empty":
+		return l.lowerViewEmpty(expression)
 	case "view-index":
 		return l.lowerViewIndex(expression)
 	case "scalar-cast":
@@ -853,6 +855,26 @@ func (l *functionLowerer) lowerViewLength(expression *hir.Expression) (Operand, 
 	destination := l.newTemporary()
 	l.appendOperation(Operation{
 		Kind: OperationViewLength, Span: expression.Span, DestinationLocal: destination,
+		Operands: []Operand{receiver}, OwnerType: expression.Children[0].Type,
+		Type: expression.Type, Field: expression.Operator,
+	})
+	return Operand{Kind: OperandLocal, Local: destination}, nil
+}
+
+func (l *functionLowerer) lowerViewEmpty(expression *hir.Expression) (Operand, error) {
+	if len(expression.Children) != 1 || expression.Operator != "is_empty" || expression.Type != hir.TypeBool {
+		return Operand{}, fmt.Errorf("malformed borrowed-view emptiness")
+	}
+	receiver, err := l.lowerExpression(&expression.Children[0])
+	if err != nil {
+		return Operand{}, err
+	}
+	if receiver.Kind == OperandInvalid {
+		return Operand{}, fmt.Errorf("borrowed-view emptiness has no receiver value")
+	}
+	destination := l.newTemporary()
+	l.appendOperation(Operation{
+		Kind: OperationViewEmpty, Span: expression.Span, DestinationLocal: destination,
 		Operands: []Operand{receiver}, OwnerType: expression.Children[0].Type,
 		Type: expression.Type, Field: expression.Operator,
 	})

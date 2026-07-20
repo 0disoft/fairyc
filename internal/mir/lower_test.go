@@ -687,6 +687,45 @@ fn main() -> i32 {
 	}
 }
 
+func TestLowerPreservesBorrowedViewEmptiness(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+fn main() -> i32 {
+    let empty: bool = b"".is_empty;
+    if empty { 42 } else { 1 }
+}
+`)
+	var operation *Operation
+	for blockIndex := range program.Functions[0].Blocks {
+		for operationIndex := range program.Functions[0].Blocks[blockIndex].Operations {
+			candidate := &program.Functions[0].Blocks[blockIndex].Operations[operationIndex]
+			if candidate.Kind == OperationViewEmpty {
+				operation = candidate
+			}
+		}
+	}
+	wantOwner := hir.SharedBorrow(hir.TypeByteSlice)
+	if operation == nil || operation.OwnerType != wantOwner || operation.Type != hir.TypeBool ||
+		operation.Field != "is_empty" || operation.DestinationLocal == NoLocal || len(operation.Operands) != 1 {
+		t.Fatalf("view emptiness = %+v", operation)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+	mutated := Clone(program)
+	for blockIndex := range mutated.Functions[0].Blocks {
+		for operationIndex := range mutated.Functions[0].Blocks[blockIndex].Operations {
+			candidate := &mutated.Functions[0].Blocks[blockIndex].Operations[operationIndex]
+			if candidate.Kind == OperationViewEmpty {
+				candidate.Type = hir.TypeUSize
+			}
+		}
+	}
+	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1001" {
+		t.Fatalf("Verify() view-empty type mutation failures = %+v", failures)
+	}
+}
+
 func TestLowerPreservesCheckedImmutableByteViewIndex(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;

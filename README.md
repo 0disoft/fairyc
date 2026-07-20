@@ -28,7 +28,7 @@ error compatibility. The MIR runner executes all
 left-to-right call evaluation, complete-root moves, normal-exit cleanup order, `Result` error
   cleanup, nearest-loop control, explicit checked arithmetic, and non-unwinding trap paths. The verifier mutation runner constructs all 10 named
   baselines and proves all 21 isolated `V1001` through `V1701` rejection recipes. The first MIR
-  interpreter slice executes all 77 v0 cases for literal return, function-call arithmetic,
+  interpreter slice executes all 78 v0 cases for literal return, function-call arithmetic,
 boolean branches and logical not, source `&&` and `||` short-circuiting, scalar `while`, scalar
 `Option` construction/matching, scalar `Result` construction/matching/propagation,
 resource construction, field reads, call moves, resource-bearing `Option` and `Result` payload moves,
@@ -162,7 +162,8 @@ typed locals may expose only the immutable data address through explicit unsafe 
 `"..."` literals now independently reach a private non-null `fy_str` view after complete decoded
 UTF-8 validation, with deduplicated immutable storage and the same empty length-zero sentinel rule;
 typed locals can expose only immutable data through explicit unsafe conversion. Safe borrowed
-`&str` and `&[u8]` views expose `.len` as their `usize` byte count without scanning or allocation.
+`&str` and `&[u8]` views expose `.len` as their `usize` byte count and `.is_empty` as its exact
+zero-length `bool` without scanning or allocation.
 Immutable `&[u8]` additionally supports read-only `usize` indexing to `u8` behind a verified
 `bounds` trap. Slicing, indexed assignment, text indexing, a stable public string ABI, and the
 general safe text API still do not exist.

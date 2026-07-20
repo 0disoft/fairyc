@@ -58,8 +58,9 @@ unsafe extern C fn(...) -> T
 A safe borrow whose element type is `str` or `[u8]` exposes the read-only property `.len` with
 result type `usize`. The property reports the view's byte count, including embedded NUL bytes and
 multi-byte UTF-8 encodings. It reads existing view metadata without scanning, allocation, a call, or
-a trap. It does not define capacity, Unicode scalar or grapheme counting, `CStr.len`, or a public
-view representation.
+a trap. The same views expose `.is_empty` with result type `bool`, true exactly when the retained
+byte count is zero and with the same no-scan and no-call guarantees. These properties do not define
+capacity, Unicode scalar or grapheme counting, `CStr` metadata, or a public view representation.
 
 An immutable `&[u8]` supports the read-only expression `bytes[index]`. The index has type `usize`;
 an unsuffixed integer literal receives that contextual type. The result has type `u8`. The receiver

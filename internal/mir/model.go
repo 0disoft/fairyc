@@ -257,6 +257,7 @@ const (
 	OperationResourceConstruct OperationKind = "resource-construct"
 	OperationFieldRead         OperationKind = "field-read"
 	OperationViewLength        OperationKind = "view-length"
+	OperationViewEmpty         OperationKind = "view-empty"
 	OperationViewIndexCheck    OperationKind = "view-index-check"
 	OperationViewIndex         OperationKind = "view-index"
 	OperationRegionEnter       OperationKind = "region-enter"

@@ -113,6 +113,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0101-checked-unsigned-division.md`: matching-type `u8`, `u32`, and `usize` division and remainder with typed zero-divisor traps and exact C divisor materialization.
 - `0102-typed-bitwise-and-checked-right-shift.md`: typed unary complement, matching-type binary bitwise operations, and exact-width checked arithmetic/logical right shift for `i32`, `u8`, `u32`, and `usize` through MIR, interpreter, C11, and WSL-free Windows execution.
 - `0103-checked-left-shift.md`: matching-type exact-width left shift with stable invalid-amount-before-overflow precedence and defined C11 construction.
+- `0104-borrowed-view-emptiness.md`: zero-cost boolean emptiness metadata for borrowed UTF-8 and byte views through interpreter, C11, and Windows execution.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

@@ -52,9 +52,10 @@ private `fy_byte_slice { const uint8_t *data; uintptr_t length; }`, exact dedupl
 storage for nonempty values, and a one-byte immutable sentinel with length zero for empty values.
 This private shape is neither a public Fairy layout nor a foreign-call ABI.
 
-The same private view transport admits verified `view-length` operations for safe borrows of `str`
-and `[u8]`. Generated C copies the descriptor's `length` member into a `uintptr_t`-backed Fairy
-`usize`; it does not call a helper, scan storage, allocate, trap, or expose the descriptor layout.
+The same private view transport admits verified `view-length` and `view-empty` operations for safe
+borrows of `str` and `[u8]`. Generated C either copies the descriptor's `length` member into a
+`uintptr_t`-backed Fairy `usize` or compares it with zero and normalizes a Fairy `bool`; it does not
+call a helper, scan storage, allocate, trap, or expose the descriptor layout.
 The verifier fixes the owner family and result type before emission.
 
 Verified immutable `&[u8]` indexing compares the `uintptr_t`-backed index against the descriptor's
@@ -100,7 +101,7 @@ the enclosing function's declared Result type on the error path.
 
 The emitter rejects empty, non-`i32`, nested, partially initialized, or nonempty-drop resources;
 resource-bearing nested tags and other tagged payload combinations; Region operations;
-safe-borrow operations other than the exact verified view-length metadata read; unsafe operations
+safe-borrow operations other than the exact verified view metadata reads; unsafe operations
 outside the admitted scalar foreign-call form; complete runtime and
 standard-library lowering; malformed
 destinations; and non-canonical block shapes. Empty-drop discharge produces no invented cleanup

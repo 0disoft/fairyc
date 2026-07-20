@@ -700,7 +700,7 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 					mir.OperationResultPayload, mir.OperationOptionPayload,
 					mir.OperationEnumConstruct, mir.OperationEnumPayload,
 					mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
-					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewIndex,
+					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex,
 					mir.OperationScalarCast:
 					inferred = operation.Type
 				}
@@ -933,12 +933,11 @@ func assignLocalType(localTypes map[mir.LocalID]hir.Type, local mir.LocalID, val
 	if local < 0 {
 		return false, fmt.Errorf("local has invalid id %d", local)
 	}
-	value = canonicalCValueType(value)
 	if value == hir.TypeVoid || value == hir.TypeInvalid || value == "" {
 		return false, fmt.Errorf("local %d has invalid value type %q", local, value)
 	}
 	if existing, found := localTypes[local]; found {
-		if canonicalCValueType(existing) != value {
+		if canonicalCValueType(existing) != canonicalCValueType(value) {
 			return false, fmt.Errorf("local %d has conflicting types %q and %q", local, existing, value)
 		}
 		return false, nil
@@ -1184,6 +1183,11 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 					return err
 				}
 				e.features["view-length"] = struct{}{}
+			case mir.OperationViewEmpty:
+				if err := e.inspectViewEmpty(functionIndex, *operation); err != nil {
+					return err
+				}
+				e.features["view-empty"] = struct{}{}
 			case mir.OperationViewIndexCheck:
 				if err := e.inspectViewIndex(functionIndex, *operation, false); err != nil {
 					return err
@@ -1362,7 +1366,7 @@ func validateOperationShape(function string, operation mir.Operation) error {
 	case mir.OperationAssign, mir.OperationInitialize, mir.OperationUnary, mir.OperationBinary,
 		mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationEnumConstruct, mir.OperationEnumPayload,
-		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewIndex, mir.OperationScalarCast:
+		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationScalarCast:
 		if operation.DestinationLocal < 0 {
 			return fmt.Errorf("%s operation in %s has no destination local", operation.Kind, function)
 		}
@@ -1390,6 +1394,26 @@ func (e *emitter) inspectViewLength(functionIndex int, operation mir.Operation) 
 	}
 	if receiverType != operation.OwnerType {
 		return fmt.Errorf("borrowed-view length in %s has receiver type %q, want %q", function.Name, receiverType, operation.OwnerType)
+	}
+	return nil
+}
+
+func (e *emitter) inspectViewEmpty(functionIndex int, operation mir.Operation) error {
+	function := &e.functions[functionIndex]
+	receiver, err := oneOperand(operation.Operands)
+	if err != nil {
+		return fmt.Errorf("borrowed-view emptiness in %s: %w", function.Name, err)
+	}
+	element, _, borrow := hir.BorrowElement(operation.OwnerType)
+	if !borrow || element != hir.TypeStr && element != hir.TypeByteSlice || operation.Type != hir.TypeBool || operation.Field != "is_empty" {
+		return fmt.Errorf("borrowed-view emptiness in %s has incompatible owner, result, or field", function.Name)
+	}
+	receiverType, err := e.operandType(functionIndex, receiver)
+	if err != nil {
+		return fmt.Errorf("borrowed-view emptiness in %s: %w", function.Name, err)
+	}
+	if receiverType != operation.OwnerType {
+		return fmt.Errorf("borrowed-view emptiness in %s has receiver type %q, want %q", function.Name, receiverType, operation.OwnerType)
 	}
 	return nil
 }
@@ -2660,6 +2684,16 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			return fmt.Errorf("borrowed-view length in %s: %w", function, err)
 		}
 		fmt.Fprintf(output, "    fy_l_%d = (%s).length;\n", operation.DestinationLocal, value)
+	case mir.OperationViewEmpty:
+		receiver, err := oneOperand(operation.Operands)
+		if err != nil {
+			return fmt.Errorf("borrowed-view emptiness in %s: %w", function, err)
+		}
+		value, err := cOperand(receiver)
+		if err != nil {
+			return fmt.Errorf("borrowed-view emptiness in %s: %w", function, err)
+		}
+		fmt.Fprintf(output, "    fy_l_%d = ((%s).length == ((uintptr_t)UINT64_C(0))) ? INT32_C(1) : INT32_C(0);\n", operation.DestinationLocal, value)
 	case mir.OperationViewIndex:
 		receiver, index, err := twoOperands(operation.Operands)
 		if err != nil {
@@ -3220,7 +3254,7 @@ func operationHasDestination(kind mir.OperationKind) bool {
 		mir.OperationOptionConstruct, mir.OperationOptionPayload,
 		mir.OperationEnumConstruct, mir.OperationEnumPayload,
 		mir.OperationRawAddress, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
-		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewIndex,
+		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex,
 		mir.OperationScalarCast, mir.OperationRegionPlace:
 		return true
 	default:

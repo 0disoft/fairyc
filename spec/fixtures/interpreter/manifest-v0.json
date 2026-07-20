@@ -22,6 +22,7 @@
     "docs/adr/0101-checked-unsigned-division.md",
     "docs/adr/0102-typed-bitwise-and-checked-right-shift.md",
     "docs/adr/0103-checked-left-shift.md",
+    "docs/adr/0104-borrowed-view-emptiness.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/mir-v0.md",
     "docs/engineering/05-testing-standard.md"
@@ -1196,6 +1197,13 @@
       "sources": ["main.fy"],
       "entry": "main::u8_overflow",
       "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "trap", "category": "integer-overflow" }
+    },
+    {
+      "id": "pass.interpreter.view-metadata",
+      "sourceRoot": "cases/pass/view-metadata/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": { "status": "pass", "completedThrough": "interpret", "outcome": "return", "value": 42 }
     }
   ]
 }

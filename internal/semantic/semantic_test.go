@@ -1378,13 +1378,15 @@ fn main() -> i32 {
     let bytes: &[u8] = b"\x00ABC";
     let text_length: usize = text.len;
     let byte_length: usize = bytes.len;
-    if text_length == 3 && byte_length == 4 { 42 } else { 1 }
+    let text_empty: bool = text.is_empty;
+    let bytes_empty: bool = b"".is_empty;
+    if text_length == 3 && byte_length == 4 && !text_empty && bytes_empty { 42 } else { 1 }
 }
 `,
 	})
 	assertCleanTypeResult(t, result)
 	main := result.HIR.Modules[0].Functions[0]
-	if len(main.Body.Statements) != 4 {
+	if len(main.Body.Statements) != 6 {
 		t.Fatalf("body statements = %+v", main.Body.Statements)
 	}
 	for index, wantOwner := range []hir.Type{hir.SharedBorrow(hir.TypeStr), hir.SharedBorrow(hir.TypeByteSlice)} {
@@ -1392,6 +1394,13 @@ fn main() -> i32 {
 		if expression == nil || expression.Kind != "view-length" || expression.Type != hir.TypeUSize || expression.Operator != "len" ||
 			len(expression.Children) != 1 || expression.Children[0].Type != wantOwner {
 			t.Fatalf("length expression %d = %+v, want owner %q", index, expression, wantOwner)
+		}
+	}
+	for index, wantOwner := range []hir.Type{hir.SharedBorrow(hir.TypeStr), hir.SharedBorrow(hir.TypeByteSlice)} {
+		expression := main.Body.Statements[index+4].Expression
+		if expression == nil || expression.Kind != "view-empty" || expression.Type != hir.TypeBool || expression.Operator != "is_empty" ||
+			len(expression.Children) != 1 || expression.Children[0].Type != wantOwner {
+			t.Fatalf("emptiness expression %d = %+v, want owner %q", index, expression, wantOwner)
 		}
 	}
 }

@@ -27,6 +27,7 @@
     "docs/adr/0101-checked-unsigned-division.md",
     "docs/adr/0102-typed-bitwise-and-checked-right-shift.md",
     "docs/adr/0103-checked-left-shift.md",
+    "docs/adr/0104-borrowed-view-emptiness.md",
     "docs/mir/mir-v0.md",
     "docs/mir/c-backend-safety-v0.md",
     "docs/runtime/runtime-stdlib-v0.md",
@@ -335,7 +336,7 @@
         "target": "x86_64-linux-gnu",
         "dialect": "c11",
         "functions": ["main::main"],
-        "features": ["scalar-comparison", "scalar-control-flow", "static-byte-string", "static-utf8-string", "view-length"]
+        "features": ["scalar-comparison", "scalar-control-flow", "static-byte-string", "static-utf8-string", "view-empty", "view-length"]
       }
     },
     {

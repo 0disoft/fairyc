@@ -103,6 +103,8 @@ ADR 0092 adds `.len` to safe borrows of `str` and `[u8]`. The property name, `us
 meaning, metadata-only behavior, and absence of scanning, allocation, calls, and traps are pre-1
 language semantics. This does not stabilize private view layout, indexing, slicing, Unicode
 counting, `CStr` operations, or a public string ABI.
+ADR 0104 adds `.is_empty` to the same views as the exact zero-length `bool`, preserving the same
+metadata-only and no-scan/no-call contract without stabilizing private representation.
 ADR 0093 admits exact `&str` and `&[u8]` parameters on ordinary internal functions. Exact source
 types, non-owning borrow behavior, matching call operands, and the absence of implicit raw-pointer
 conversion are pre-1 language semantics. Interpreter values and generated-C by-value descriptors

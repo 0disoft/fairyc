@@ -29,7 +29,7 @@ exhaustive shallow matching, and local, parameter, branch, loop, overwrite, and 
 must-use obligations. Mutable-local MIR lowering and verification
   execute all 11 MIR normalization v0 cases for the current scalar, resource, tagged-payload, Result, Region, loop-control cleanup, call,
   division, and checked-arithmetic trap subset. All 10 verifier baselines and 21 isolated mutation cases execute through
-  the same MIR verifier. The first MIR interpreter executes all 77 interpreter v0 cases, including
+  the same MIR verifier. The first MIR interpreter executes all 78 interpreter v0 cases, including
 scalar `Option` and `Result` construction, exhaustive matching, and both Result `?` paths, and is
 exposed by the unstable `experimental run` command, which now accepts a bounded explicit entry-plus-
 repeated-`--source` module closure without discovery. Resource construction, field reads, whole-root
@@ -143,7 +143,8 @@ locals can expose only the immutable data address. Plain UTF-8 `"..."` literals 
 typing, a distinct MIR operand, and a private `fy_str` view with decoded UTF-8 validation,
 deduplicated immutable bytes, an empty non-null sentinel, and typed-local immutable data extraction.
 Borrowed `&str` and `&[u8]` views now expose their exact byte count through zero-cost `.len` metadata
-reads and cross internal function calls as private non-owning descriptors. One new emission case
+reads and exact zero-length state through `.is_empty`, and cross internal function calls as private
+non-owning descriptors. One new emission case
 executes both borrowed-view parameter families through the interpreter and deterministic C backend.
 Immutable `&[u8]` now supports read-only `usize` indexing to `u8` through explicit verified MIR
 bounds checks, interpreter `bounds` outcomes, and generated-C checked loads. Slicing, indexed

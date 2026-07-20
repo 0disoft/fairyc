@@ -504,6 +504,34 @@ fn main() -> i32 {
 	}
 }
 
+func TestEmitBorrowedViewEmptinessFromLengthMetadata(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn main() -> i32 {
+    let text: &str = "fairy";
+    let empty: &[u8] = b"";
+    if !text.is_empty && empty.is_empty { 42 } else { 1 }
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	if !slices.Contains(unit.Features, "view-empty") {
+		t.Fatalf("features %v are missing view-empty", unit.Features)
+	}
+	for _, required := range []string{
+		".length == ((uintptr_t)UINT64_C(0))) ? INT32_C(1) : INT32_C(0)",
+		"static const uint8_t fy_static_str_",
+		"static const uint8_t fy_static_bytes_",
+		"[1] = { UINT8_C(0) };",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing view emptiness %q:\n%s", required, unit.Source)
+		}
+	}
+}
+
 func TestEmitByteStringLiteralDataAddressForForeignCall(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
