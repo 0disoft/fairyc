@@ -52,10 +52,14 @@ path-aware, so a use in one branch does not keep an unrelated mutually exclusive
 borrowed. Loop-carried safe-borrow reassignment remains unsupported until iteration, `break`, and
 `continue` edges have an explicit provenance fixed-point contract.
 
-An internal borrow-returning call with exactly one safe-borrow argument propagates that argument's
-origin. With multiple safe-borrow arguments, Stage 0 conservatively retains their union until
-function summaries can name the selected input origin. With no proven borrow argument, Flow fails
-closed instead of inventing static provenance.
+Every internal borrow-returning function has a compiler-only summary inferred from its reachable
+returns: one exact `Param(i)`, `RegionParam(i)`, or static source. Summaries reach a fixed point
+through a reverse-call dependency worklist before ordinary Flow checks, so forward declarations,
+imported callees, argument reordering, and acyclic wrapper chains do not depend on source order.
+At a call, only the selected actual
+argument contributes its origin and retained loans; unselected borrow arguments remain
+call-bounded. A static summary borrows no argument. A recursive dependency whose result origin
+cannot be completely proven remains unsupported instead of inventing provenance.
 
 ## Return rule
 

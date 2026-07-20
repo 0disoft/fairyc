@@ -96,6 +96,11 @@ facts; different origins remain a disjunction and cannot be returned as if one b
 Loan conflicts use branch-reachable later uses. Loop-carried safe-borrow reassignment is rejected
 until an iteration-edge provenance contract exists.
 
+Before Flow applies those rules at call sites, it infers a fixed-point return-origin summary for
+each internal borrow-returning function. The summary maps one formal borrow or region parameter, or
+one static source, to the corresponding actual call argument. Unknown recursive results remain
+fail-closed and summaries never become part of source-visible function types.
+
 ## Borrow facts exposed to fixtures
 
 Semantic pass fixtures may assert:

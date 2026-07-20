@@ -3,6 +3,7 @@ package semantic
 import (
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/ast"
@@ -43,12 +44,139 @@ type borrowLiveContext struct {
 	continueLive borrowLiveMap
 }
 
+type borrowReturnSourceKind uint8
+
+const (
+	borrowReturnInvalid borrowReturnSourceKind = iota
+	borrowReturnParameter
+	borrowReturnRegionParameter
+	borrowReturnStatic
+)
+
+type borrowReturnSource struct {
+	kind      borrowReturnSourceKind
+	parameter int
+	origin    flowOrigin
+}
+
+type borrowReturnSummary struct {
+	known   bool
+	sources []borrowReturnSource
+}
+
+type borrowReturnTarget struct {
+	module   *moduleScope
+	function *ast.Function
+	symbol   *symbol
+}
+
 type borrowFlowAnalyzer struct {
 	analyzer  *analyzer
 	module    *moduleScope
 	function  *ast.Function
 	loans     []borrowLoanRecord
 	liveAfter map[*ast.Statement]borrowLiveMap
+
+	summarizing   bool
+	returnSeen    bool
+	returnKnown   bool
+	returnSources []borrowReturnSource
+}
+
+func (a *analyzer) inferBorrowReturnSummaries() {
+	var targets []*borrowReturnTarget
+	targetBySymbol := make(map[*symbol]*borrowReturnTarget)
+	for _, module := range a.moduleOrder {
+		for index := range module.file.Module.Functions {
+			function := &module.file.Module.Functions[index]
+			value := a.functions[function]
+			if value == nil {
+				continue
+			}
+			if _, _, returnsBorrow := hir.BorrowElement(value.typ); !returnsBorrow {
+				continue
+			}
+			a.borrowReturns[value] = borrowReturnSummary{}
+			target := &borrowReturnTarget{module: module, function: function, symbol: value}
+			targets = append(targets, target)
+			targetBySymbol[value] = target
+		}
+	}
+	if len(targets) == 0 {
+		return
+	}
+
+	callers := make(map[*symbol][]*borrowReturnTarget)
+	for _, caller := range targets {
+		for _, callee := range a.borrowReturnDependencies(caller.function, targetBySymbol) {
+			callers[callee] = append(callers[callee], caller)
+		}
+	}
+
+	queue := append([]*borrowReturnTarget(nil), targets...)
+	queued := make(map[*symbol]bool, len(targets))
+	for _, target := range targets {
+		queued[target.symbol] = true
+	}
+	for len(queue) > 0 {
+		target := queue[0]
+		queue = queue[1:]
+		queued[target.symbol] = false
+		next := a.inferBorrowReturnSummary(target.module, target.function)
+		if sameBorrowReturnSummary(a.borrowReturns[target.symbol], next) {
+			continue
+		}
+		a.borrowReturns[target.symbol] = next
+		for _, caller := range callers[target.symbol] {
+			if queued[caller.symbol] {
+				continue
+			}
+			queue = append(queue, caller)
+			queued[caller.symbol] = true
+		}
+	}
+}
+
+func (a *analyzer) borrowReturnDependencies(function *ast.Function, targets map[*symbol]*borrowReturnTarget) []*symbol {
+	if function == nil || function.Body == nil {
+		return nil
+	}
+	inventory := flowInventory{}
+	inventory.collectFunction(function.Body)
+	seen := make(map[*symbol]bool)
+	var result []*symbol
+	for _, expression := range inventory.expressions {
+		if expression == nil || expression.Kind != syntax.KindCall || len(expression.Children) == 0 {
+			continue
+		}
+		callee := a.resolved[expression.Children[0]]
+		if targets[callee] == nil || seen[callee] {
+			continue
+		}
+		seen[callee] = true
+		result = append(result, callee)
+	}
+	return result
+}
+
+func (a *analyzer) inferBorrowReturnSummary(module *moduleScope, function *ast.Function) borrowReturnSummary {
+	if function == nil || function.Body == nil {
+		return borrowReturnSummary{}
+	}
+	flow := &borrowFlowAnalyzer{
+		analyzer: a, module: module, function: function,
+		liveAfter:   make(map[*ast.Statement]borrowLiveMap),
+		summarizing: true, returnKnown: true,
+	}
+	environment := flow.parameterEnvironment()
+	flow.evaluateBlock(function.Body, environment, true)
+	if !flow.returnSeen || !flow.returnKnown {
+		return borrowReturnSummary{}
+	}
+	return borrowReturnSummary{
+		known:   true,
+		sources: compactBorrowReturnSources(flow.returnSources),
+	}
 }
 
 func (a *analyzer) borrowFlowFunction(module *moduleScope, function *ast.Function) {
@@ -60,11 +188,18 @@ func (a *analyzer) borrowFlowFunction(module *moduleScope, function *ast.Functio
 		liveAfter: make(map[*ast.Statement]borrowLiveMap),
 	}
 	flow.liveBlock(function.Body, make(borrowLiveMap), borrowLiveContext{})
+	environment := flow.parameterEnvironment()
+	flow.evaluateBlock(function.Body, environment, true)
+	for index := range flow.loans {
+		a.borrows = append(a.borrows, flow.loans[index].fact)
+	}
+}
 
+func (f *borrowFlowAnalyzer) parameterEnvironment() borrowEnvironment {
 	environment := make(borrowEnvironment)
-	for index := range function.Parameters {
-		parameter := &function.Parameters[index]
-		value := a.parameter[parameter]
+	for index := range f.function.Parameters {
+		parameter := &f.function.Parameters[index]
+		value := f.analyzer.parameter[parameter]
 		if !isSafeBorrowSymbol(value) {
 			continue
 		}
@@ -72,14 +207,11 @@ func (a *analyzer) borrowFlowFunction(module *moduleScope, function *ast.Functio
 			known: true,
 			origins: []flowOrigin{{
 				name:        fmt.Sprintf("Param(%d)", index),
-				declaration: span(module.file.Path, parameter.NameSpan),
+				declaration: span(f.module.file.Path, parameter.NameSpan),
 			}},
 		}
 	}
-	flow.evaluateBlock(function.Body, environment, true)
-	for index := range flow.loans {
-		a.borrows = append(a.borrows, flow.loans[index].fact)
-	}
+	return environment
 }
 
 func (f *borrowFlowAnalyzer) evaluateBlock(block *ast.Block, environment borrowEnvironment, tailReturns bool) (borrowValueState, bool) {
@@ -122,7 +254,9 @@ func (f *borrowFlowAnalyzer) evaluateStatement(statement *ast.Statement, environ
 		binding := f.analyzer.bindingSymbols[statement.Binding]
 		if reachable && isSafeBorrowSymbol(binding) {
 			if !value.known {
-				f.analyzer.addUnsupported(f.module.file.Path, statement.Binding.Expression.Span, "safe-borrow binding with unknown origin")
+				if !f.summarizing {
+					f.analyzer.addUnsupported(f.module.file.Path, statement.Binding.Expression.Span, "safe-borrow binding with unknown origin")
+				}
 				delete(environment, binding)
 			} else {
 				environment[binding] = f.materialize(value, binding)
@@ -144,7 +278,9 @@ func (f *borrowFlowAnalyzer) evaluateStatement(statement *ast.Statement, environ
 		target := f.analyzer.resolved[statement.Target]
 		if isSafeBorrowSymbol(target) {
 			if !value.known {
-				f.analyzer.addUnsupported(f.module.file.Path, statement.Expression.Span, "safe-borrow assignment with unknown origin")
+				if !f.summarizing {
+					f.analyzer.addUnsupported(f.module.file.Path, statement.Expression.Span, "safe-borrow assignment with unknown origin")
+				}
 				delete(environment, target)
 			} else {
 				environment[target] = f.materialize(value, target)
@@ -244,25 +380,17 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 		if _, reachable := f.evaluateExpression(expression.Children[0], environment); !reachable {
 			return borrowValueState{}, false
 		}
-		var borrowArguments []borrowValueState
-		for _, argument := range expression.Children[1:] {
+		arguments := expression.Children[1:]
+		argumentValues := make([]borrowValueState, 0, len(arguments))
+		for _, argument := range arguments {
 			value, reachable := f.evaluateExpression(argument, environment)
 			if !reachable {
 				return borrowValueState{}, false
 			}
-			if f.expressionReturnsBorrow(argument) {
-				borrowArguments = append(borrowArguments, value)
-			}
+			argumentValues = append(argumentValues, value)
 		}
 		if f.expressionReturnsBorrow(expression) {
-			// Stage 0 functions may return only a borrow derived from one safe-borrow
-			// parameter or Static. With one borrow argument the mapping is exact.
-			// Multiple borrow arguments stay as a conservative union until function
-			// summaries encode the selected parameter explicitly.
-			if len(borrowArguments) == 0 {
-				return borrowValueState{known: false}, true
-			}
-			return mergeBorrowValues(borrowArguments), true
+			return f.callBorrowValue(expression, arguments, argumentValues), true
 		}
 		return borrowValueState{}, true
 	default:
@@ -280,6 +408,70 @@ func (f *borrowFlowAnalyzer) evaluateChildren(children []*ast.Expression, enviro
 		result = value
 	}
 	return result, true
+}
+
+func (f *borrowFlowAnalyzer) callBorrowValue(call *ast.Expression, arguments []*ast.Expression, values []borrowValueState) borrowValueState {
+	if call == nil || len(call.Children) == 0 {
+		return borrowValueState{known: false}
+	}
+	callee := f.analyzer.resolved[call.Children[0]]
+	summary, found := f.analyzer.borrowReturns[callee]
+	if !found || !summary.known || len(summary.sources) == 0 {
+		return borrowValueState{known: false}
+	}
+
+	selected := make([]borrowValueState, 0, len(summary.sources))
+	for _, source := range summary.sources {
+		switch source.kind {
+		case borrowReturnParameter:
+			if source.parameter < 0 || source.parameter >= len(arguments) || source.parameter >= len(values) ||
+				!f.expressionReturnsBorrow(arguments[source.parameter]) {
+				return borrowValueState{known: false}
+			}
+			selected = append(selected, cloneBorrowValue(values[source.parameter]))
+		case borrowReturnRegionParameter:
+			if source.parameter < 0 || source.parameter >= len(arguments) {
+				return borrowValueState{known: false}
+			}
+			value := f.regionArgumentBorrowValue(arguments[source.parameter], source.origin)
+			if !value.known {
+				return borrowValueState{known: false}
+			}
+			selected = append(selected, value)
+		case borrowReturnStatic:
+			selected = append(selected, borrowValueState{known: true, origins: []flowOrigin{source.origin}})
+		default:
+			return borrowValueState{known: false}
+		}
+	}
+	return mergeBorrowValues(selected)
+}
+
+func (f *borrowFlowAnalyzer) regionArgumentBorrowValue(expression *ast.Expression, source flowOrigin) borrowValueState {
+	for expression != nil && (expression.Kind == syntax.KindGroup || expression.Kind == syntax.KindUnsafe) && len(expression.Children) == 1 {
+		expression = expression.Children[0]
+	}
+	if expression == nil || expression.Kind != syntax.KindPath {
+		return borrowValueState{known: false}
+	}
+	value := f.analyzer.resolved[expression]
+	allocation := source.allocation
+	switch {
+	case value != nil && value.kind == "parameter" && value.typ == hir.TypeRegion:
+		return borrowValueState{known: true, origins: []flowOrigin{{
+			name:        fmt.Sprintf("RegionParam(%d)", f.analyzer.parameterIndex[value]),
+			declaration: span(value.source, value.declaration),
+			allocation:  allocation,
+		}}}
+	case value != nil && value.kind == "region":
+		return borrowValueState{known: true, origins: []flowOrigin{{
+			name:        "LocalRegion(" + value.name + ")",
+			declaration: span(value.source, value.declaration),
+			allocation:  allocation,
+		}}}
+	default:
+		return borrowValueState{known: false}
+	}
 }
 
 func (f *borrowFlowAnalyzer) evaluateIf(expression *ast.Expression, environment borrowEnvironment) (borrowValueState, bool) {
@@ -414,7 +606,7 @@ func (f *borrowFlowAnalyzer) markUse(value borrowValueState, use hir.Span) {
 }
 
 func (f *borrowFlowAnalyzer) checkOwnerAssignment(statement *ast.Statement, owner *symbol, environment borrowEnvironment) {
-	if statement == nil || owner == nil || statement.Target == nil {
+	if f.summarizing || statement == nil || owner == nil || statement.Target == nil {
 		return
 	}
 	live := f.liveAfter[statement]
@@ -445,6 +637,10 @@ func (f *borrowFlowAnalyzer) checkReturn(expression *ast.Expression, value borro
 		return
 	}
 	if _, _, returnsBorrow := hir.BorrowElement(f.analyzer.functions[f.function].typ); !returnsBorrow {
+		return
+	}
+	if f.summarizing {
+		f.recordSummaryReturn(value)
 		return
 	}
 	returnSpan := span(f.module.file.Path, expression.Span)
@@ -502,6 +698,77 @@ func (f *borrowFlowAnalyzer) checkReturn(expression *ast.Expression, value borro
 			Borrow: returnSpan, Kind: kind, Origin: origin.name, LastUse: &copy, Escapes: true,
 		}})
 	}
+}
+
+func (f *borrowFlowAnalyzer) recordSummaryReturn(value borrowValueState) {
+	f.returnSeen = true
+	if !value.known || len(value.origins) == 0 {
+		f.returnKnown = false
+		return
+	}
+	for _, origin := range compactOrigins(value.origins) {
+		source, valid := borrowReturnSourceFromOrigin(origin)
+		if !valid {
+			f.returnKnown = false
+			continue
+		}
+		f.returnSources = append(f.returnSources, source)
+	}
+}
+
+func borrowReturnSourceFromOrigin(origin flowOrigin) (borrowReturnSource, bool) {
+	switch origin.name {
+	case "Static":
+		return borrowReturnSource{kind: borrowReturnStatic, parameter: -1, origin: origin}, true
+	}
+	if parameter, ok := indexedBorrowOrigin(origin.name, "Param("); ok {
+		return borrowReturnSource{kind: borrowReturnParameter, parameter: parameter, origin: origin}, true
+	}
+	if parameter, ok := indexedBorrowOrigin(origin.name, "RegionParam("); ok {
+		return borrowReturnSource{kind: borrowReturnRegionParameter, parameter: parameter, origin: origin}, true
+	}
+	return borrowReturnSource{kind: borrowReturnInvalid, parameter: -1, origin: origin}, false
+}
+
+func indexedBorrowOrigin(value, prefix string) (int, bool) {
+	if !strings.HasPrefix(value, prefix) || !strings.HasSuffix(value, ")") {
+		return 0, false
+	}
+	index, err := strconv.Atoi(strings.TrimSuffix(strings.TrimPrefix(value, prefix), ")"))
+	return index, err == nil && index >= 0
+}
+
+func compactBorrowReturnSources(values []borrowReturnSource) []borrowReturnSource {
+	values = slices.Clone(values)
+	slices.SortFunc(values, compareBorrowReturnSource)
+	return slices.CompactFunc(values, func(left, right borrowReturnSource) bool {
+		return compareBorrowReturnSource(left, right) == 0
+	})
+}
+
+func compareBorrowReturnSource(left, right borrowReturnSource) int {
+	if left.kind < right.kind {
+		return -1
+	}
+	if left.kind > right.kind {
+		return 1
+	}
+	if left.parameter < right.parameter {
+		return -1
+	}
+	if left.parameter > right.parameter {
+		return 1
+	}
+	if value := strings.Compare(left.origin.name, right.origin.name); value != 0 {
+		return value
+	}
+	return compareSpan(left.origin.declaration, right.origin.declaration)
+}
+
+func sameBorrowReturnSummary(left, right borrowReturnSummary) bool {
+	return left.known == right.known && slices.EqualFunc(left.sources, right.sources, func(left, right borrowReturnSource) bool {
+		return compareBorrowReturnSource(left, right) == 0
+	})
 }
 
 func (f *borrowFlowAnalyzer) expressionReturnsBorrow(expression *ast.Expression) bool {

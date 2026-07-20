@@ -20,6 +20,8 @@ properties other than `.len`, other array borrows, and ABI exposure remain outsi
 Outside-loop safe-borrow reassignment is compiler-owned local descriptor transport after Flow
 proves provenance and loans; it adds no runtime allocation or library entry point. Loop-carried
 safe-borrow reassignment remains outside this slice.
+Internal borrow-return summaries are likewise Flow-only proof metadata. They select an existing
+call result descriptor and add no runtime table, dispatch, allocation, or library entry point.
 
 Heap allocation, files, UTF-8 validation, strings, buffers, formatting, console access, and environment access are not intrinsics.
 

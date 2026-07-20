@@ -14,6 +14,7 @@
     "docs/adr/0108-integer-literal-range-validation.md",
     "docs/adr/0112-fixed-u8-array-byte-view-borrow.md",
     "docs/adr/0113-branch-aware-safe-borrow-reassignment.md",
+    "docs/adr/0114-interprocedural-borrow-return-summaries.md",
     "docs/diagnostics/catalog-v0.md"
   ],
   "cases": [
@@ -144,6 +145,47 @@
               "source": "main.fy",
               "startByte": 169,
               "endByte": 176
+            },
+            "escapes": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.flow.borrow-return-summary",
+      "sourceRoot": "cases/pass/borrow-return-summary/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow",
+        "borrows": [
+          {
+            "borrow": {
+              "source": "main.fy",
+              "startByte": 62,
+              "endByte": 81
+            },
+            "kind": "shared",
+            "origin": "Param(0)",
+            "lastUse": {
+              "source": "main.fy",
+              "startByte": 62,
+              "endByte": 81
+            },
+            "escapes": true
+          },
+          {
+            "borrow": {
+              "source": "main.fy",
+              "startByte": 134,
+              "endByte": 139
+            },
+            "kind": "shared",
+            "origin": "Param(1)",
+            "lastUse": {
+              "source": "main.fy",
+              "startByte": 134,
+              "endByte": 139
             },
             "escapes": true
           }
@@ -512,6 +554,43 @@
                   "source": "main.fy",
                   "startByte": 48,
                   "endByte": 53
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.borrow-return-summary-loan",
+      "sourceRoot": "cases/fail/borrow-return-summary-loan/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "flow",
+        "diagnostics": [
+          {
+            "code": "E2101",
+            "primary": {
+              "source": "main.fy",
+              "startByte": 207,
+              "endByte": 212
+            },
+            "related": [
+              {
+                "role": "last-use",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 224,
+                  "endByte": 232
+                }
+              },
+              {
+                "role": "loan",
+                "span": {
+                  "source": "main.fy",
+                  "startByte": 194,
+                  "endByte": 200
                 }
               }
             ]

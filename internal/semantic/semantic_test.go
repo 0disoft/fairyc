@@ -1605,6 +1605,112 @@ fn select(flag: bool, left: &i32, right: &i32) -> &i32 {
 	}
 }
 
+func TestAnalyzeMapsCalleeBorrowReturnParameterToExactArgument(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn relay(left: &i32, right: &i32) -> &i32 { second(right, left) }
+fn second(left: &i32, right: &i32) -> &i32 { right }
+`,
+	})
+	assertCleanTypeResult(t, result)
+	var escaping []string
+	for _, fact := range result.Borrows {
+		if fact.Escapes {
+			escaping = append(escaping, fact.Origin)
+		}
+	}
+	if !slices.Equal(escaping, []string{"Param(0)", "Param(1)"}) {
+		t.Fatalf("escaping origins = %v, borrows = %+v", escaping, result.Borrows)
+	}
+}
+
+func TestAnalyzeMapsCalleeRegionReturnParameterToExactArgument(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn relay(scratch: Region, value: i32) -> &i32 { store(scratch, value) }
+fn store(scratch: Region, value: i32) -> &i32 { scratch.place(value) }
+`,
+	})
+	assertCleanTypeResult(t, result)
+	var escaping []string
+	for _, fact := range result.Borrows {
+		if fact.Escapes {
+			escaping = append(escaping, fact.Origin)
+		}
+	}
+	if !slices.Equal(escaping, []string{"RegionParam(0)", "RegionParam(0)"}) {
+		t.Fatalf("escaping origins = %v, borrows = %+v", escaping, result.Borrows)
+	}
+}
+
+func TestAnalyzeKeepsUnprovedRecursiveBorrowReturnClosed(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\nfn recurse(value: &i32) -> &i32 { recurse(value) }\n",
+	})
+	if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "safe-borrow return with unknown origin" {
+		t.Fatalf("unsupported = %+v", result.Unsupported)
+	}
+}
+
+func TestAnalyzeMapsCalleeStaticBorrowReturnWithoutRetainingArguments(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn literal(left: &[u8], right: &[u8]) -> &[u8] { b"z" }
+fn relay(left: &[u8], right: &[u8]) -> &[u8] { literal(left, right) }
+`,
+	})
+	assertCleanTypeResult(t, result)
+	var escaping []string
+	for _, fact := range result.Borrows {
+		if fact.Escapes {
+			escaping = append(escaping, fact.Origin)
+		}
+	}
+	if !slices.Equal(escaping, []string{"Static", "Static"}) {
+		t.Fatalf("escaping origins = %v, borrows = %+v", escaping, result.Borrows)
+	}
+}
+
+func TestAnalyzeCalleeBorrowSummaryReleasesUnselectedOwner(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn second(left: &[u8], right: &[u8]) -> &[u8] { right }
+fn main() -> i32 {
+    var left: [u8; 1] = [1];
+    let right: [u8; 1] = [42];
+    let selected: &[u8] = second(&left, &right);
+    left = [2];
+    selected[0] as i32
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+}
+
+func TestAnalyzeCalleeBorrowSummaryProtectsSelectedOwner(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn second(left: &[u8], right: &[u8]) -> &[u8] { right }
+fn main() -> i32 {
+    let left: [u8; 1] = [1];
+    var right: [u8; 1] = [42];
+    let selected: &[u8] = second(&left, &right);
+    right = [0];
+    selected[0] as i32
+}
+`,
+	})
+	if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E2101" {
+		t.Fatalf("diagnostics = %+v", result.Diagnostics)
+	}
+}
+
 func TestAnalyzeEndsReassignedArrayViewLoanBeforeNewOrigin(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{

@@ -23,6 +23,7 @@ type flowInventory struct {
 
 func (a *analyzer) flowCheck() {
 	a.flowStarted = true
+	a.inferBorrowReturnSummaries()
 	for _, module := range a.moduleOrder {
 		for index := range module.file.Module.Functions {
 			function := &module.file.Module.Functions[index]

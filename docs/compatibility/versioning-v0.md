@@ -134,8 +134,10 @@ nesting, mutation, general slicing or borrowing, and ABI use remain unstabilized
 ADR 0113 admits outside-loop safe-borrow reassignment with right-hand-side-first replacement,
 loan-generation preservation across aliases, reachable `if`/`match` origin joins, and path-aware
 loan liveness. Those rules and fail-closed multi-origin returns are pre-1 semantics. Loop-carried
-reassignment and precise return-origin summaries for calls with multiple borrow arguments remain
-unstabilized.
+reassignment remains unstabilized. ADR 0114 adds compiler-internal fixed-point return-origin
+summaries for exact formal borrow parameters, region parameters, and static sources. Positional
+remapping, unselected call-bounded arguments, and fail-closed unknown recursive results are pre-1
+semantics; the summary representation is not a public function-type or ABI promise.
 ADR 0093 admits exact `&str` and `&[u8]` parameters on ordinary internal functions. Exact source
 types, non-owning borrow behavior, matching call operands, and the absence of implicit raw-pointer
 conversion are pre-1 language semantics. Interpreter values and generated-C by-value descriptors

@@ -29,10 +29,9 @@ branch happened to be visited last. All three outcomes are wrong.
    owner's loan. A use in the mutually exclusive branch does not create a false `E2101`.
 5. Direct safe-borrow returns still require one `Static`, `Param(i)`, or `RegionParam(i)` origin.
    `Local(name)` remains `E2102`, and a local-region origin remains `E3101`.
-6. A borrow-returning internal call with exactly one safe-borrow argument propagates that
-   argument's origin exactly. Calls with multiple safe-borrow arguments conservatively retain their
-   union until function summaries encode the selected parameter. A call with no provable borrow
-   argument remains unsupported rather than inventing `Static` provenance.
+6. ADR 0114 replaces the initial argument-union fallback with fixed-point internal function
+   summaries. Calls map an exact parameter, region parameter, or static origin; an unproved
+   recursive result remains unsupported rather than inventing provenance.
 7. Loop-carried safe-borrow reassignment remains closed. Its environment needs an explicit
    iteration-carried fixed point and break/continue edge contract rather than reusing branch rules.
    Backward loop liveness is still a bounded finite-source fixed point for already admitted loans.
@@ -46,7 +45,8 @@ branch happened to be visited last. All three outcomes are wrong.
   borrowed after its last reachable use.
 - Branch joins preserve uncertainty instead of erasing it, making diagnostics deterministic and
   fail-closed.
-- General interprocedural return-origin summaries and loop-carried borrow phis remain later work.
+- Interprocedural return-origin summaries are defined by ADR 0114. Loop-carried borrow phis remain
+  later work.
 
 ## Verification
 

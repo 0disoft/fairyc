@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0113-branch-aware-safe-borrow-reassignment.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0114-interprocedural-borrow-return-summaries.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -23,6 +23,8 @@ The following restrictions are part of the prototype contract:
 - safe borrows may be used locally or returned from exactly one statically known parameter or region origin;
 - a mutable safe-borrow local may be reassigned outside loops; reachable branch origins are joined
   without guessing, while loop-carried reassignment remains deferred;
+- internal borrow-returning calls use inferred formal-parameter, region-parameter, or static return
+  summaries; a recursive result without a complete proof remains closed;
 - named aggregates cannot store safe borrows, and inert structs cannot contain resource fields;
 - borrow-returning functions cannot be converted to function values, interface methods, or foreign callbacks;
 - self-referential aggregates, user-defined interior mutability, captured closures, async or coroutine state, and thread capability traits are not Stage 0 features;

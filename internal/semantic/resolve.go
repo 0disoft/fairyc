@@ -79,6 +79,7 @@ type analyzer struct {
 	resultHandling   []ResultHandlingFact
 	resourceLoops    []resourceLoopFrame
 	resultLoops      []resultLoopFrame
+	borrowReturns    map[*symbol]borrowReturnSummary
 }
 
 func newAnalyzer(files []File) *analyzer {
@@ -100,6 +101,7 @@ func newAnalyzer(files []File) *analyzer {
 		structTypes:      make(map[hir.Type]*structInfo),
 		enumTypes:        make(map[hir.Type]*enumInfo),
 		expressionTypes:  make(map[*ast.Expression]hir.Type),
+		borrowReturns:    make(map[*symbol]borrowReturnSummary),
 		regionType:       &symbol{id: hir.NoSymbol, kind: "capability", name: "Region", typ: hir.TypeRegion},
 	}
 }
