@@ -56,54 +56,6 @@ type relatedSpanAssertion struct {
 	Span spanAssertion `json:"span"`
 }
 
-type packageManifest struct {
-	SchemaVersion string        `json:"schemaVersion"`
-	Cases         []packageCase `json:"cases"`
-}
-
-type packageCase struct {
-	ID           string              `json:"id"`
-	CaseRoot     string              `json:"caseRoot"`
-	Packages     []packageNode       `json:"packages"`
-	Dependencies []packageDependency `json:"dependencies"`
-	Expect       packageExpectation  `json:"expect"`
-}
-
-type packageNode struct {
-	Node            string   `json:"node"`
-	Role            string   `json:"role"`
-	PackageUID      string   `json:"packageUid"`
-	SourceIdentity  string   `json:"sourceIdentity"`
-	VersionIdentity string   `json:"versionIdentity"`
-	Features        []string `json:"features"`
-	SourceRoot      string   `json:"sourceRoot"`
-	Sources         []string `json:"sources"`
-}
-
-type packageDependency struct {
-	Owner   string `json:"owner"`
-	Binding string `json:"binding"`
-	Target  string `json:"target"`
-}
-
-type packageExpectation struct {
-	Status          string                 `json:"status"`
-	InstanceClasses []packageInstanceClass `json:"instanceClasses"`
-	Lookups         []packageLookup        `json:"lookups"`
-}
-
-type packageInstanceClass struct {
-	Label   string   `json:"label"`
-	Members []string `json:"members"`
-}
-
-type packageLookup struct {
-	From          string `json:"from"`
-	ImportPath    string `json:"importPath"`
-	ProviderClass string `json:"providerClass"`
-	ModulePath    string `json:"modulePath"`
-}
-
 // Failure identifies one manifest assertion mismatch.
 type Failure struct {
 	CaseID string

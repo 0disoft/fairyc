@@ -4,6 +4,7 @@
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0014-resolved-package-graph-fixture-contract.md`
 - Fixture source: `spec/fixtures/package/manifest-v0.json`
+- Implementation sources: `internal/packagegraph/`, `internal/packagefixture/`
 
 ## Boundary
 
@@ -48,6 +49,20 @@ The initial package fixture proves that `std::alloc` belongs to the declared sta
 - Import lookup considers only the current instance and direct dependency targets.
 
 Reject reasons in this fixture schema are test-rule identities, not released user diagnostic codes.
+
+## Executable evidence
+
+`internal/packagefixture` strictly decodes the v0 manifest, rejects duplicate JSON keys and unknown
+fields, proves that each declared source list exactly matches the contained regular `.fy` files,
+parses every source with its package-local module identity, and executes all eight manifest cases
+through `internal/packagegraph`. The graph engine compares the exact resolved-instance tuple,
+deduplicates equal instances, validates unique direct bindings, and resolves imports through only
+the current instance and direct dependency instances. The Region v1 runner consumes the same
+validated `pass.package.stdlib-arena-region` result instead of maintaining a second package-lookup
+interpretation.
+
+This is compiler-side consumption of an already-resolved graph. It is not evidence for a package
+solver, public manifest, lockfile, source downloader, registry, cache, or stable diagnostic surface.
 
 ## Deferred surface
 

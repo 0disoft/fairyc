@@ -64,6 +64,8 @@ regenerate, or override compiler source.
 - Windows x64 native exception and virtual-unwind probe generator: internal/windowsunwindprobe/
 - Windows AMD64 PE, COFF object, and x64 unwind structure inspector: internal/pecoff/
 - Resolved package graph fixtures: spec/fixtures/package/manifest-v0.json
+- Resolved package graph validation and lookup: internal/packagegraph/
+- Resolved package graph fixture runner: internal/packagefixture/
 - Executable MIR semantics: docs/mir/*.md
 - Package identity and visibility: docs/package/*.md
 - Target and C ABI: docs/abi/*.md

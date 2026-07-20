@@ -13,7 +13,7 @@ This roadmap defines capability gates, not calendar promises. Exact durations, f
 - Reserve diagnostic categories and codes for rejected syntax, ownership, region, FFI, ABI, and compatibility paths.
 - Define Flow CFG, MIR v0, drop elaboration, the MIR verifier, isolated verifier-mutation recipes, generated-C safety rules, and compile-pass, compile-fail, run, trap, drop-trace, runtime, and bidirectional C ABI fixture formats.
 
-Exit gate: the written contracts have no contradictory syntax, initialization, ownership, cleanup, package identity, visibility, target, runtime, or compatibility rule, and every mandatory rule has an observable fixture class or an explicit dependency-gated deferral. Parser, semantic, resource, Region, Result, MIR, and package manifest cases must pass their future full runners with no unlisted independent diagnostics or observation drift.
+Exit gate: the written contracts have no contradictory syntax, initialization, ownership, cleanup, package identity, visibility, target, runtime, or compatibility rule, and every mandatory rule has an observable fixture class or an explicit dependency-gated deferral. Parser, semantic, resource, Region, Result, MIR, and package manifest cases must pass their full runners with no unlisted independent diagnostics or observation drift.
 
 ## Phase 1: first interpreted semantic slice
 
@@ -29,7 +29,10 @@ now cover the semantic fixture's scalar and safe-borrow subset. Local last-use l
   whole-root resource Flow now executes all 12 resource v0 cases, including branch, normal-loop,
   break-edge, and continue-edge state rejection. Result Flow executes all 24 result v0 cases, including qualified scalar construction,
 exhaustive shallow matching, and local, parameter, branch, loop, overwrite, and early-return
-must-use obligations. Mutable-local MIR lowering and verification
+must-use obligations. The resolved-package-graph engine and fixture runner execute all 8 package v0
+cases, including exact-instance deduplication, feature splits, isolated equal module paths,
+direct-only visibility, explicit standard-library injection, ambiguity, hidden transitive modules,
+and duplicate bindings. Mutable-local MIR lowering and verification
   execute all 11 MIR normalization v0 cases for the current scalar, resource, tagged-payload, Result, Region, loop-control cleanup, call,
   division, and checked-arithmetic trap subset. All 10 verifier baselines and 21 isolated mutation cases execute through
   the same MIR verifier. The first MIR interpreter executes all 92 interpreter v0 cases, including direct `i32` minimum constants, scalar fixed-array calls, contextual immutable and mutable byte-view borrowing, exact lengths, checked reads and indexed stores, and

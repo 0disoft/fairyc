@@ -441,7 +441,7 @@ or arbitrary link-input option.
 - Windows MSVC native ABI probe generator: `internal/windowsabiprobe/`
 - Windows x64 native exception and virtual-unwind probe generator: `internal/windowsunwindprobe/`
 - Windows AMD64 PE, COFF object, and x64 unwind structure inspector: `internal/pecoff/`
-- Resolved package graph fixtures: `spec/fixtures/package/manifest-v0.json`
+- Resolved package graph engine, fixture runner, and fixtures: `internal/packagegraph/`, `internal/packagefixture/`, `spec/fixtures/package/manifest-v0.json`
 - MIR and C backend contracts: `docs/mir/`
 - Package identity and visibility: `docs/package/package-graph-v0.md`
 - Target and C ABI: `docs/abi/c-abi-v0.md`

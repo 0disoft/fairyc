@@ -4,6 +4,9 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/0disoft/fairyc/internal/packagefixture"
+	"github.com/0disoft/fairyc/internal/packagegraph"
 )
 
 func TestRegionManifestV1(t *testing.T) {
@@ -44,14 +47,14 @@ func TestResolveWithinRejectsFixtureEscape(t *testing.T) {
 
 func TestStdlibLookupRejectsNonStdlibProvider(t *testing.T) {
 	t.Parallel()
-	fixture := packageCase{
-		Dependencies: []packageDependency{{Owner: "app", Binding: "stdlib", Target: "fake"}},
-		Expect: packageExpectation{
-			InstanceClasses: []packageInstanceClass{{Label: "provider", Members: []string{"fake"}}},
-			Lookups:         []packageLookup{{From: "app", ImportPath: "std::alloc", ProviderClass: "provider", ModulePath: "std::alloc"}},
-		},
+	fixture := packagefixture.ResolvedCase{
+		Nodes:        []packagefixture.ResolvedNode{{ID: "fake", Role: packagegraph.RoleDependency}},
+		Dependencies: []packagegraph.Dependency{{Owner: "app", Binding: "stdlib", Target: "fake"}},
+		Resolution: packagegraph.Result{Lookups: []packagegraph.Lookup{{
+			From: "app", ImportPath: "std::alloc", ModulePath: "std::alloc", ProviderMembers: []string{"fake"},
+		}}},
 	}
-	if _, _, err := stdlibLookup(fixture, "app", map[string]packageNode{"fake": {Node: "fake", Role: "dependency"}}); err == nil {
+	if _, err := stdlibProvider(fixture, "app"); err == nil {
 		t.Fatal("stdlibLookup() accepted a non-standard-library provider")
 	}
 }

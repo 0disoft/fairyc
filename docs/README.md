@@ -21,6 +21,7 @@
 - Provisional target standard-library C sources: internal/cstdlib/
 - Linux scalar C differential runner: internal/cbackendnative/
 - Resolved package graph fixture manifest: spec/fixtures/package/manifest-v0.json
+- Resolved package graph engine and fixture runner: internal/packagegraph/, internal/packagefixture/
 - Windows MSVC layout fixture manifest: spec/fixtures/layout/manifest-windows-msvc-v0.json
 - Windows MSVC C ABI fixture manifest: spec/fixtures/c-abi/manifest-windows-msvc-v0.json
 - Executable semantics and C transport: docs/mir/*.md

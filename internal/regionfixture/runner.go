@@ -12,14 +12,13 @@ import (
 
 	"github.com/0disoft/fairyc/internal/frontend"
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/packagefixture"
+	"github.com/0disoft/fairyc/internal/packagegraph"
 	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/source"
 )
 
-const (
-	regionFixtureSchema  = "fairyc.region-fixtures/v1"
-	packageFixtureSchema = "fairyc.package-fixtures/v0"
-)
+const regionFixtureSchema = "fairyc.region-fixtures/v1"
 
 // Run loads and executes every case in one Region manifest.
 func Run(manifestPath string) (Report, error) {
@@ -125,65 +124,25 @@ func loadPackageProvider(fixtureRoot, regionDirectory, expectedRoot string, expe
 	if err != nil {
 		return nil, fmt.Errorf("package graph manifest: %w", err)
 	}
-	var definition packageManifest
-	contents, err := os.ReadFile(manifestPath)
-	if err != nil {
-		return nil, fmt.Errorf("read package graph manifest: %w", err)
-	}
-	if err := json.Unmarshal(contents, &definition); err != nil {
-		return nil, fmt.Errorf("decode package graph manifest: %w", err)
-	}
-	if definition.SchemaVersion != packageFixtureSchema {
-		return nil, fmt.Errorf("unsupported package graph schema %q", definition.SchemaVersion)
-	}
-	var selected *packageCase
-	for index := range definition.Cases {
-		if definition.Cases[index].ID != reference.CaseID {
-			continue
-		}
-		if selected != nil {
-			return nil, fmt.Errorf("duplicate package graph case %q", reference.CaseID)
-		}
-		selected = &definition.Cases[index]
-	}
-	if selected == nil || selected.Expect.Status != "pass" {
-		return nil, fmt.Errorf("package graph case %q is missing or not passing", reference.CaseID)
-	}
-	return validatePackageProvider(fixtureRoot, filepath.Dir(manifestPath), expectedRoot, expectedSources, reference.RootNode, *selected)
-}
-
-func validatePackageProvider(fixtureRoot, packageDirectory, expectedRoot string, expectedSources []string, rootNode string, selected packageCase) ([]semantic.File, error) {
-	caseRoot, err := resolveWithin(fixtureRoot, packageDirectory, selected.CaseRoot)
+	selected, err := packagefixture.ResolveCase(manifestPath, reference.CaseID)
 	if err != nil {
 		return nil, err
 	}
-	nodes := make(map[string]packageNode, len(selected.Packages))
-	for _, node := range selected.Packages {
-		if _, duplicate := nodes[node.Node]; duplicate {
-			return nil, fmt.Errorf("duplicate package node %q", node.Node)
-		}
-		nodes[node.Node] = node
+	if selected.ExpectedStatus != "pass" || selected.Rejection != nil {
+		return nil, fmt.Errorf("package graph case %q is not passing", reference.CaseID)
 	}
-	root, found := nodes[rootNode]
-	if !found || root.Role != "root" {
-		return nil, fmt.Errorf("package root node %q is missing or not root", rootNode)
+	root, found := selected.Node(reference.RootNode)
+	if !found || root.Role != packagegraph.RoleRoot {
+		return nil, fmt.Errorf("package root node %q is missing or not root", reference.RootNode)
 	}
-	rootSource, err := resolveWithin(fixtureRoot, caseRoot, root.SourceRoot)
-	if err != nil || !samePath(rootSource, expectedRoot) || !slices.Equal(root.Sources, expectedSources) {
+	if !samePath(root.SourceRoot, expectedRoot) || !slices.Equal(root.Sources, expectedSources) {
 		return nil, fmt.Errorf("package root source does not match Region sourceRoot")
 	}
-	lookup, providerNode, err := stdlibLookup(selected, rootNode, nodes)
+	providerNode, err := stdlibProvider(selected, reference.RootNode)
 	if err != nil {
 		return nil, err
 	}
-	if lookup.ImportPath != "std::alloc" || lookup.ModulePath != "std::alloc" || providerNode.Role != "standard-library" {
-		return nil, fmt.Errorf("std::alloc provider is not the declared standard-library instance")
-	}
-	providerRoot, err := resolveWithin(fixtureRoot, caseRoot, providerNode.SourceRoot)
-	if err != nil {
-		return nil, err
-	}
-	files, err := loadSemanticSources(providerRoot, providerNode.Sources)
+	files, err := loadSemanticSources(providerNode.SourceRoot, providerNode.Sources)
 	if err != nil {
 		return nil, err
 	}
@@ -193,30 +152,19 @@ func validatePackageProvider(fixtureRoot, packageDirectory, expectedRoot string,
 	return files, nil
 }
 
-func stdlibLookup(selected packageCase, rootNode string, nodes map[string]packageNode) (packageLookup, packageNode, error) {
-	var lookup *packageLookup
-	for index := range selected.Expect.Lookups {
-		candidate := &selected.Expect.Lookups[index]
-		if candidate.From == rootNode && candidate.ImportPath == "std::alloc" {
-			if lookup != nil {
-				return packageLookup{}, packageNode{}, fmt.Errorf("package graph has ambiguous std::alloc lookups from %q", rootNode)
-			}
-			lookup = candidate
+func stdlibProvider(selected packagefixture.ResolvedCase, rootNode string) (packagefixture.ResolvedNode, error) {
+	provider := ""
+	for _, lookup := range selected.Resolution.Lookups {
+		if lookup.From != rootNode || lookup.ImportPath != "std::alloc" || lookup.ModulePath != "std::alloc" {
+			continue
 		}
-	}
-	if lookup == nil {
-		return packageLookup{}, packageNode{}, fmt.Errorf("package graph has no std::alloc lookup from %q", rootNode)
-	}
-	var provider string
-	matchingClasses := 0
-	for _, class := range selected.Expect.InstanceClasses {
-		if class.Label == lookup.ProviderClass && len(class.Members) == 1 {
-			matchingClasses++
-			provider = class.Members[0]
+		if provider != "" || len(lookup.ProviderMembers) != 1 {
+			return packagefixture.ResolvedNode{}, fmt.Errorf("package graph has ambiguous std::alloc lookup from %q", rootNode)
 		}
+		provider = lookup.ProviderMembers[0]
 	}
-	if provider == "" || matchingClasses != 1 {
-		return packageLookup{}, packageNode{}, fmt.Errorf("std::alloc provider class is missing or ambiguous")
+	if provider == "" {
+		return packagefixture.ResolvedNode{}, fmt.Errorf("package graph has no std::alloc lookup from %q", rootNode)
 	}
 	linked := false
 	for _, dependency := range selected.Dependencies {
@@ -225,13 +173,13 @@ func stdlibLookup(selected packageCase, rootNode string, nodes map[string]packag
 		}
 	}
 	if !linked {
-		return packageLookup{}, packageNode{}, fmt.Errorf("root package does not depend on std::alloc provider")
+		return packagefixture.ResolvedNode{}, fmt.Errorf("root package does not depend on std::alloc provider")
 	}
-	providerNode, found := nodes[provider]
-	if !found || providerNode.Role != "standard-library" {
-		return packageLookup{}, packageNode{}, fmt.Errorf("std::alloc provider is not a declared standard-library node")
+	providerNode, found := selected.Node(provider)
+	if !found || providerNode.Role != packagegraph.RoleStandardLibrary {
+		return packagefixture.ResolvedNode{}, fmt.Errorf("std::alloc provider is not a declared standard-library node")
 	}
-	return *lookup, providerNode, nil
+	return providerNode, nil
 }
 
 func exportsOpaqueArena(files []semantic.File) bool {
