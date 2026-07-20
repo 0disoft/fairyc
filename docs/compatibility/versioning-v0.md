@@ -57,8 +57,9 @@ fixture and hosted receipts rather than only editing the booleans. The experimen
 `spec/cli/experimental-target-spec-v0.schema.json` must remain synchronized with the Go model.
 The target entry's `emissionSubset` is compatibility data: it names what the selected backend
 profile may represent, not whether the target is conformant. The experimental `build-target`
-command currently admits only `x86_64-windows-msvc`, a fixed low/optimized profile choice, one FY
-source, and one `.exe` output. Its command spelling and text receipt remain unstable CLI surface;
+command currently admits only `x86_64-windows-msvc`, a fixed low/optimized profile choice, one
+positional FY entry plus a bounded explicit repeated-source closure, and one `.exe` output. Its
+command spelling and text receipt remain unstable CLI surface;
 the selected target identity, scalar layout, C dialect, and emitted static assertions still must
 match the target-schema and ABI-profile contracts. Adding another called source-level FFI symbol or another target
 requires a separate capability and compatibility decision rather than silently widening this path.
@@ -107,6 +108,11 @@ types, non-owning borrow behavior, matching call operands, and the absence of im
 conversion are pre-1 language semantics. Interpreter values and generated-C by-value descriptors
 remain private implementation transport; foreign safe-borrow signatures, exported ABI, retained
 borrows, and public `std::io` remain excluded.
+ADR 0094 adds repeatable `--source <file.fy>` to the three unstable Windows target commands. The
+positional entry rule, explicit-only closure, 64-file ceiling, per-file and aggregate limits,
+duplicate/path/module rejection, and lack of discovery are unstable CLI and validation policy.
+They do not define a package manifest, lockfile, module search path, dependency solver, registry,
+foreign companion input, linker interface, or supported distribution contract.
 
 `fairyc.layout-fixtures/v0` separately versions the repository input and expectation vocabulary for
 the target-layout engine; each manifest binds one declared target. It is not a public

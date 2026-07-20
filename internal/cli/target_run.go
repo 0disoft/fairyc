@@ -10,9 +10,10 @@ import (
 )
 
 type targetRunOptions struct {
-	source   string
-	targetID target.ID
-	profile  cdriver.Profile
+	source            string
+	additionalSources []string
+	targetID          target.ID
+	profile           cdriver.Profile
 }
 
 func runTarget(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
@@ -20,7 +21,7 @@ func runTarget(arguments []string, sourceRoot string, stdout, stderr io.Writer) 
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	artifact, code := compileWindowsTarget(options.source, options.targetID, options.profile, sourceRoot, stderr)
+	artifact, code := compileWindowsTarget(programSourceSet(options.source, options.additionalSources), options.targetID, options.profile, sourceRoot, stderr)
 	if code != ExitSuccess {
 		return code
 	}
@@ -56,7 +57,7 @@ func parseTargetRunOptions(arguments []string) (targetRunOptions, error) {
 
 func parseTargetExecutionOptions(command string, arguments []string) (targetRunOptions, error) {
 	if len(arguments) == 0 {
-		return targetRunOptions{}, fmt.Errorf("experimental command %q expects one source file and explicit --target and --profile values", command)
+		return targetRunOptions{}, fmt.Errorf("experimental command %q expects one entry source file and explicit --target and --profile values", command)
 	}
 	options := targetRunOptions{source: arguments[0]}
 	if options.source == "" || strings.HasPrefix(options.source, "-") {
@@ -65,18 +66,25 @@ func parseTargetExecutionOptions(command string, arguments []string) (targetRunO
 	seen := make(map[string]bool, 2)
 	for index := 1; index < len(arguments); {
 		flag := arguments[index]
-		if flag != "--target" && flag != "--profile" {
+		if flag != "--source" && flag != "--target" && flag != "--profile" {
 			return targetRunOptions{}, fmt.Errorf("experimental command %q does not accept flag %q", command, flag)
 		}
-		if seen[flag] {
+		if flag != "--source" && seen[flag] {
 			return targetRunOptions{}, fmt.Errorf("experimental command %q received %s more than once", command, flag)
 		}
 		if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
 			return targetRunOptions{}, fmt.Errorf("experimental command %q requires a value for %s", command, flag)
 		}
-		seen[flag] = true
+		if flag != "--source" {
+			seen[flag] = true
+		}
 		value := arguments[index+1]
 		switch flag {
+		case "--source":
+			options.additionalSources = append(options.additionalSources, value)
+			if len(options.additionalSources)+1 > maxExplicitInputFiles {
+				return targetRunOptions{}, fmt.Errorf("experimental command %q accepts at most %d source files", command, maxExplicitInputFiles)
+			}
 		case "--target":
 			if target.ID(value) != target.X8664WindowsMSVC {
 				return targetRunOptions{}, fmt.Errorf("experimental %s currently requires --target %s", command, target.X8664WindowsMSVC)

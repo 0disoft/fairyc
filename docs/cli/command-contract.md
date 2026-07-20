@@ -47,9 +47,9 @@ The current Go prototype implements twelve deliberately unstable developer comma
 | `fairyc experimental target-spec <x86_64-linux-gnu\|x86_64-windows-msvc>` | Inspect one known host-independent target description without resolving a local toolchain | Deterministic `fairyc.target-spec/v0` JSON on stdout, defined by `spec/cli/experimental-target-spec-v0.schema.json` |
 | `fairyc experimental emit-c <file.fy>` | Lower one scalar, restricted inert user-enum, bounded optionally `@link_name`-mapped `unsafe extern C fn` using admitted fixed-width, pointer-width, any of the sixteen exact transport-only TargetSpec C scalars, admitted raw pointers including opaque `void` and one pointer-to-opaque-pointer output slot, or nonempty acyclic `@repr(C)` pointer values whose fields may include exact C scalars or nested `@repr(C)` records, exact direct-local raw address, flat all-`i32` resource, or admitted resource-bearing built-in tag program through verified MIR and emit the provisional constrained C transport without invoking a toolchain | Exactly one deterministic C11 translation unit, with an explicit POSIX.1-2008 typedef profile only when required, on stdout; source diagnostics or capability errors on stderr |
 | `fairyc experimental build <file.fy> --cc <clang\|gcc> --profile <low\|optimized> --output <build/path>` | Compile and link one verified program in that constrained subset for the host `x86_64-linux-gnu` profile with an explicit C compiler, optimization profile, and ignored output path | A no-overwrite executable below `build/` plus one relative-path receipt, or source, capability, toolchain, link, or artifact diagnostics |
-| `fairyc experimental build-target <file.fy> --target x86_64-windows-msvc --profile <low\|optimized> --output <build/path.exe>` | Emit one verified program through the provisional Windows MSVC C profile, automatically link exact proven SystemHeap, Buffer, Arena, owned-text, CStr, and UTF-8 validation dependency closures when called, resolve local x64 MSVC, and retain one target-labelled PE | A no-overwrite `.exe` below `build/` plus one `x86_64-windows-msvc` receipt, or source, target-subset, support-link, toolchain, compile, link, or artifact diagnostics |
-| `fairyc experimental run-target <file.fy> --target x86_64-windows-msvc --profile <low\|optimized>` | Compile the same declared Windows target subset, validate the temporary PE and Microsoft x64 unwind structure, execute it with bounded captured output, and remove it | `native result: <i32> (x86_64-windows-msvc, msvc <version>, <profile>)`, a canonical trap, or source, target-subset, support-link, toolchain, compile, link, structure, or execution diagnostics |
-| `fairyc experimental exec-target <file.fy> --target x86_64-windows-msvc --profile <low\|optimized>` | Compile the same declared Windows target subset, execute it with separated bounded streams, and behave as the program process | Exact program stdout and stderr plus the program's unsigned-preserved 32-bit Windows exit status; compiler or execution failures still use CLI diagnostic codes |
+| `fairyc experimental build-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low\|optimized> --output <build/path.exe>` | Emit one explicitly closed FY module set through the provisional Windows MSVC C profile, automatically link exact proven SystemHeap, Buffer, Arena, owned-text, CStr, and UTF-8 validation dependency closures when called, resolve local x64 MSVC, and retain one target-labelled PE | A no-overwrite `.exe` below `build/` plus one `x86_64-windows-msvc` receipt, or source-set, target-subset, support-link, toolchain, compile, link, or artifact diagnostics |
+| `fairyc experimental run-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low\|optimized>` | Compile the same explicitly closed Windows target module set, validate the temporary PE and Microsoft x64 unwind structure, execute it with bounded captured output, and remove it | `native result: <i32> (x86_64-windows-msvc, msvc <version>, <profile>)`, a canonical trap, or source-set, target-subset, support-link, toolchain, compile, link, structure, or execution diagnostics |
+| `fairyc experimental exec-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low\|optimized>` | Compile the same explicitly closed Windows target module set, execute it with separated bounded streams, and behave as the program process | Exact program stdout and stderr plus the program's unsigned-preserved 32-bit Windows exit status; compiler or execution failures still use CLI diagnostic codes |
 | `fairyc experimental build-host <file.fy> --profile <low\|optimized> --output <build/path.exe>` | On Windows/amd64, compile one target-neutral verified program with locally discovered x64 MSVC and retain its PE without declaring a Windows target ABI | A no-overwrite `.exe` below `build/` plus a host-smoke receipt, or bounded source, capability, toolchain, compile, or artifact diagnostics |
 | `fairyc experimental run-host <file.fy> --profile <low\|optimized>` | On Windows/amd64, compile and execute one target-neutral verified program with locally discovered x64 MSVC without declaring a Windows target ABI | `native result: <i32> (windows/amd64 host-smoke, msvc <version>, <profile>)`, a canonical trap, or bounded source, capability, toolchain, compile, or execution diagnostics |
 | `fairyc experimental run <file.fy>` | Run one verified-MIR program in the scalar, tagged, whole-resource, and implemented Region subset whose selected module declares `main() -> i32` | `result: <i32>` on stdout, a canonical trap category on stderr, source diagnostics, or an explicit unsupported-subset error |
@@ -59,6 +59,9 @@ These commands treat the current directory as their temporary source root. `pars
 explicit relative regular files under bounded file-count and aggregate-byte budgets. All reject root
 escape including escaping symbolic links and read no more than the current implementation budget.
 Their spelling and numeric exit codes are prototype-only.
+The Windows target commands separately accept one positional entry plus repeatable `--source`
+values under the same 64-file and aggregate-byte ceilings. They analyze only that explicit set,
+require source-root-relative module identity, and perform no source discovery.
 The JSON report includes relative path, byte length, module identity, token kinds, CST node kinds,
 half-open byte spans, child indexes, and structured diagnostics. It excludes source text, token
 text, cooked literal values, and absolute local paths. When bounded loading detects more bytes than
@@ -162,7 +165,10 @@ project-owned SystemHeap/Buffer/Arena/text-view/owned-text C components and scal
 Arena, and owned text close over their declared dependencies and every component is emitted once in
 deterministic order. Windows x64 SystemHeap admits fundamental
 alignment through 16 bytes. Every other foreign symbol and unproven standard-library component
-fails before toolchain discovery; companion objects, user linker inputs, debug/PDB output
+fails before toolchain discovery. One positional entry and zero or more repeated `--source` FY files
+form an explicit closure of at most 64 files under the current source root and existing aggregate
+byte limit. Duplicate normalized paths, source-root escape, module/path drift, unresolved imports,
+and a missing entry fail before emission; no source discovery occurs. Companion objects, user linker inputs, debug/PDB output
 contracts, and distribution packaging remain closed. The command accepts only the exact Windows
 target ID, low or optimized profile, and a canonical no-overwrite `.exe` path under `build/`; it
 does not use WSL. The checked-in target example observes the Arena generation/active/pointer
@@ -172,7 +178,7 @@ String and CString success lifecycles plus direct CStr validation, but observes 
 lengths, alignment, pointers, and normalized drops; returned bytes, terminator contents, rollback,
 and safe ownership remain outside the command contract.
 
-`experimental run-target` accepts no output path, companion input, linker option, ambient target,
+`experimental run-target` accepts the same explicit FY source closure but no output path, foreign companion input, linker option, ambient target,
 or compiler override. It shares `build-target` lowering, exact standard-library resolution, local
 MSVC discovery, object inspection, PE inspection, and unwind inspection before execution. The
 temporary executable must produce no stdout or stderr; ordinary results preserve signed `i32` exit

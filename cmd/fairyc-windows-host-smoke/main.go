@@ -65,6 +65,7 @@ const checkedInSuccessPath = "examples/windows_smoke/main.fy"
 const checkedInWindowsTargetPath = "examples/windows_target/main.fy"
 const checkedInWindowsQuickstartPath = "examples/windows_quickstart/main.fy"
 const checkedInWindowsOutputPath = "examples/windows_output/main.fy"
+const checkedInWindowsOutputSupportPath = "examples/windows_output/windows_console.fy"
 const windowsLayoutManifestPath = "spec/fixtures/layout/manifest-windows-msvc-v0.json"
 const windowsABIManifestPath = "spec/fixtures/c-abi/manifest-windows-msvc-v0.json"
 const subprocessOutputLimit = 64 * 1024
@@ -97,22 +98,27 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("read checked-in Windows output source: %w", err)
 	}
+	windowsOutputSupportSource, err := os.ReadFile(filepath.FromSlash(checkedInWindowsOutputSupportPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in Windows output support source: %w", err)
+	}
 	root, err := os.MkdirTemp("", "fairyc-windows-host-smoke-")
 	if err != nil {
 		return fmt.Errorf("create temporary source root: %w", err)
 	}
 	defer os.RemoveAll(root)
 	for name, source := range map[string]string{
-		checkedInSuccessPath:           string(successSource),
-		checkedInWindowsTargetPath:     string(windowsTargetSource),
-		checkedInWindowsQuickstartPath: string(windowsQuickstartSource),
-		checkedInWindowsOutputPath:     string(windowsOutputSource),
-		"negative.fy":                  negativeSource,
-		"division_by_zero.fy":          divisionByZeroSource,
-		"remainder_by_zero.fy":         remainderByZeroSource,
-		"signed_division_overflow.fy":  signedDivisionOverflowSource,
-		"integer_overflow.fy":          integerOverflowSource,
-		"invalid_shift.fy":             invalidShiftSource,
+		checkedInSuccessPath:              string(successSource),
+		checkedInWindowsTargetPath:        string(windowsTargetSource),
+		checkedInWindowsQuickstartPath:    string(windowsQuickstartSource),
+		checkedInWindowsOutputPath:        string(windowsOutputSource),
+		checkedInWindowsOutputSupportPath: string(windowsOutputSupportSource),
+		"negative.fy":                     negativeSource,
+		"division_by_zero.fy":             divisionByZeroSource,
+		"remainder_by_zero.fy":            remainderByZeroSource,
+		"signed_division_overflow.fy":     signedDivisionOverflowSource,
+		"integer_overflow.fy":             integerOverflowSource,
+		"invalid_shift.fy":                invalidShiftSource,
 	} {
 		destination := filepath.Join(root, filepath.FromSlash(name))
 		if err := os.MkdirAll(filepath.Dir(destination), 0o700); err != nil {
@@ -194,6 +200,7 @@ func run() error {
 	var targetExecStderr bytes.Buffer
 	targetExecCode := cli.Run([]string{
 		"experimental", "exec-target", checkedInWindowsOutputPath,
+		"--source", checkedInWindowsOutputSupportPath,
 		"--target", "x86_64-windows-msvc", "--profile", "optimized",
 	}, root, &targetExecStdout, &targetExecStderr)
 	if targetExecCode != 42 || targetExecStdout.String() != "Fairy C says hi\n" || targetExecStderr.Len() != 0 {
@@ -317,6 +324,7 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string) (int64, error) {
 		sourceRoot,
 		executablePath,
 		"experimental", "exec-target", checkedInWindowsOutputPath,
+		"--source", checkedInWindowsOutputSupportPath,
 		"--target", "x86_64-windows-msvc", "--profile", "optimized",
 	)
 	if err != nil {

@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	"runtime"
 	"strings"
 	"testing"
@@ -12,19 +13,19 @@ import (
 func TestParseTargetRunOptionsRequiresClosedWindowsProfile(t *testing.T) {
 	t.Parallel()
 	options, err := parseTargetRunOptions([]string{
-		"main.fy", "--profile", "optimized", "--target", string(target.X8664WindowsMSVC),
+		"main.fy", "--source", "helper.fy", "--profile", "optimized", "--target", string(target.X8664WindowsMSVC),
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if options.source != "main.fy" || options.targetID != target.X8664WindowsMSVC || options.profile != cdriver.OptimizedProfile {
+	if options.source != "main.fy" || strings.Join(options.additionalSources, ",") != "helper.fy" || options.targetID != target.X8664WindowsMSVC || options.profile != cdriver.OptimizedProfile {
 		t.Fatalf("options = %+v", options)
 	}
 	for _, test := range []struct {
 		arguments []string
 		contains  string
 	}{
-		{nil, "expects one source file"},
+		{nil, "expects one entry source file"},
 		{[]string{"--target", string(target.X8664WindowsMSVC)}, "source file before"},
 		{[]string{"main.fy", "--profile", "low"}, "requires --target"},
 		{[]string{"main.fy", "--target", string(target.X8664WindowsMSVC)}, "requires --profile"},
@@ -32,10 +33,19 @@ func TestParseTargetRunOptionsRequiresClosedWindowsProfile(t *testing.T) {
 		{[]string{"main.fy", "--target", string(target.X8664WindowsMSVC), "--profile", "fast"}, "profile low"},
 		{[]string{"main.fy", "--target", string(target.X8664WindowsMSVC), "--profile", "low", "--output", "build/main.exe"}, "does not accept"},
 		{[]string{"main.fy", "--target", string(target.X8664WindowsMSVC), "--target", string(target.X8664WindowsMSVC), "--profile", "low"}, "more than once"},
+		{[]string{"main.fy", "--source", "--profile", "low"}, "requires a value for --source"},
 	} {
 		if _, err := parseTargetRunOptions(test.arguments); err == nil || !strings.Contains(err.Error(), test.contains) {
 			t.Errorf("parseTargetRunOptions(%q) error = %v; want containing %q", test.arguments, err, test.contains)
 		}
+	}
+	overLimit := []string{"main.fy"}
+	for index := 0; index < maxExplicitInputFiles; index++ {
+		overLimit = append(overLimit, "--source", fmt.Sprintf("module-%d.fy", index))
+	}
+	overLimit = append(overLimit, "--target", string(target.X8664WindowsMSVC), "--profile", "low")
+	if _, err := parseTargetRunOptions(overLimit); err == nil || !strings.Contains(err.Error(), "accepts at most 64 source files") {
+		t.Fatalf("over-limit source error = %v", err)
 	}
 }
 

@@ -249,10 +249,10 @@ encoding, terminal modes, stdin, stderr writing, colors, formatting, and cancell
 unproven or unimplemented.
 
 This raw function is admitted only by the `x86_64-windows-msvc` support resolver and must be called
-inside `unsafe`. The checked-in example confines the call to a safe local function accepting
-`&str`; that function derives the raw length from `.len` and reports success only after checking
-status and completed progress. This is an example of unsafe containment, not a public `std::io`
-module, portable console API, stable error type, or stable result layout.
+inside `unsafe`. The checked-in example confines the call to a safe function in an explicitly listed
+support module; that function accepts `&str`, derives the raw length from `.len`, and reports success
+only after checking status and completed progress. This is an example of unsafe containment, not a
+public `std::io` module, portable console API, stable error type, or stable result layout.
 
 ## Linux `File` v0
 

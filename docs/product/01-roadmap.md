@@ -235,8 +235,10 @@ The owned-text checks observe successful results, five-to-ten String length, six
 logical CStr length five, non-null views, and normalized drops without dereferencing the views.
 Windows x64 SystemHeap uses the documented 16-byte `malloc` alignment ceiling
 because MSVC C does not expose `max_align_t` in `<stddef.h>`.
-Every other foreign symbol, unproven Windows standard-library component, companion input, user
-linker argument, debug output, packaging, and hosted receipt remains closed. The Windows TargetSpec therefore reports
+The Windows target commands now admit one entry plus a bounded explicit repeated-`--source` FY
+module closure; the driver performs no manifest or implicit source discovery. Every foreign
+companion input, unproven Windows standard-library component, user linker argument, debug output,
+packaging, and hosted receipt remains closed. The Windows TargetSpec therefore reports
 `scalar-and-llp64-c-scalar-c11` and no longer lists `target-c-emission-profile`, while all three
 maturity booleans remain false.
 The same target compilation is now exposed through `experimental run-target`. It validates PE and
@@ -249,7 +251,8 @@ is exercised without retaining or distributing it. This improves the developer e
 without changing target maturity or claiming self-hosting.
 The additional `experimental exec-target` path uses the same inspected temporary Windows target but
 forwards separated bounded stdout and stderr without a compiler receipt and preserves the program's
-32-bit Windows status. Its FY example observes empty and invalid raw-write cases, derives the
+32-bit Windows status. Its FY example now splits the safe entry and unsafe support boundary into two
+explicitly listed modules, observes empty and invalid raw-write cases, derives the
 request and progress lengths from borrowed-view `.len`, confines the Windows-only unsafe C symbol
 to a checked local `&str` helper, passes both borrowed-view families through safe internal calls,
 emits the exact 16 ASCII bytes `Fairy C says hi\n`, and exits 42. Its `main` contains no raw pointer,

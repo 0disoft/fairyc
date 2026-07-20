@@ -11,16 +11,21 @@ import (
 func TestParseExecTargetOptionsUsesClosedWindowsProfile(t *testing.T) {
 	t.Parallel()
 	options, err := parseTargetExecutionOptions("exec-target", []string{
-		"main.fy", "--target", string(target.X8664WindowsMSVC), "--profile", "optimized",
+		"main.fy", "--source", "console.fy", "--source", "text.fy",
+		"--target", string(target.X8664WindowsMSVC), "--profile", "optimized",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if options.source != "main.fy" || options.targetID != target.X8664WindowsMSVC || options.profile.Name != "optimized" {
+	if options.source != "main.fy" || strings.Join(options.additionalSources, ",") != "console.fy,text.fy" ||
+		options.targetID != target.X8664WindowsMSVC || options.profile.Name != "optimized" {
 		t.Fatalf("options = %+v", options)
 	}
 	if _, err := parseTargetExecutionOptions("exec-target", []string{"main.fy", "--profile", "low"}); err == nil || !strings.Contains(err.Error(), "exec-target") {
 		t.Fatalf("missing target error = %v", err)
+	}
+	if _, err := parseTargetExecutionOptions("exec-target", []string{"main.fy", "--source", "--profile", "low"}); err == nil || !strings.Contains(err.Error(), "requires a value for --source") {
+		t.Fatalf("missing source value error = %v", err)
 	}
 }
 

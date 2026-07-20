@@ -73,7 +73,9 @@ Arena, text-view, owned-text, and scalar runtime at most once each and rejects e
 or unproven standard-library symbol before toolchain discovery. The Windows SystemHeap source overrides only its fundamental-alignment
 ceiling with the x64 `malloc` guarantee of 16 bytes; allocation semantics stay shared. Companion
 inputs and arbitrary linker arguments remain absent.
-Both target commands share one compilation function and validate the resulting PE and Microsoft x64
+The three target commands share one compilation function. Its frontend accepts one entry plus a
+bounded explicit repeated-source set, analyzes all listed modules together, and performs no ambient
+source discovery. The commands validate the resulting PE and Microsoft x64
 unwind structure before retaining or executing it. `build-target` promotes bytes to one explicit
 no-overwrite output; `run-target` executes an independently temporary image, rejects output, and
 reports either exact signed `i32` process bits or a canonical product trap. Neither path uses WSL.

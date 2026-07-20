@@ -30,9 +30,10 @@ library before package manifests and `std::*` modules exist.
    not retain its input pointer after returning, so the caller's borrow covers the complete foreign
    use. The wrapper must validate status and completed length before reporting success; a retaining,
    asynchronous, or otherwise uncontracted foreign function could not use this safe shape.
-6. `examples/windows_output/main.fy` uses safe local helpers for text output, raw-contract edge
-   checks, and byte-view length. Its `main` contains no raw pointer, foreign call, `unsafe` block, or
-   manually synchronized byte count.
+6. The checked-in Windows output example lists a separate support module whose safe helpers own text
+   output, raw-contract edge checks, and byte-view length. Its entry `main` contains no raw pointer,
+   foreign call, `unsafe` block, or manually synchronized byte count. ADR 0094 owns how that support
+   module enters the explicit program source closure.
 7. This decision does not create `std::io`, portable console behavior, a public error type, effect
    typing, formatting, stdin, stderr writes, retained borrows, callbacks, or external borrowed-view
    ABI.

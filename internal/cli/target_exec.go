@@ -11,7 +11,7 @@ func execTarget(arguments []string, sourceRoot string, stdout, stderr io.Writer)
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	artifact, code := compileWindowsTarget(options.source, options.targetID, options.profile, sourceRoot, stderr)
+	artifact, code := compileWindowsTarget(programSourceSet(options.source, options.additionalSources), options.targetID, options.profile, sourceRoot, stderr)
 	if code != ExitSuccess {
 		return code
 	}

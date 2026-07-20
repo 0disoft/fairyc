@@ -133,12 +133,14 @@ standalone Go `fairyc.exe` in a bounded temporary directory, verifies its help s
 separate compiler process to compile and execute `examples/windows_quickstart/main.fy`. Both calls
 validate temporary PE and unwind data, require the exact target-labelled native-result receipt for
 42, retain no artifact, and use no WSL.
-The smoke also invokes `exec-target` twice for `examples/windows_output/main.fy`: once through the
-in-process CLI test boundary and once through the separately built `fairyc.exe`. That FY program
+The smoke also invokes `exec-target` twice with entry `examples/windows_output/main.fy` and explicit
+`--source examples/windows_output/windows_console.fy`: once through the in-process CLI test boundary
+and once through the separately built `fairyc.exe`. That two-module FY program
 requires empty and invalid-input results from the Windows-only stdout helper, writes exactly the 16
 ASCII bytes `Fairy C says hi\n`, and exits 42. The CLI must forward those stdout bytes exactly,
 produce no stderr, preserve status 42, inspect the temporary PE and unwind data, and remove the
-image. This is an unsafe raw output crossing, not a portable or safe `std::io` receipt.
+image. The entry module is safe while the explicit support module owns the raw crossing; this is not
+a portable `std::io` or public package-build receipt.
 The same intent derives one non-POSIX C11 unit from the eight valid Windows layout cases, then
 compiles and executes it under low and optimized MSVC profiles. It also derives separate caller and
 callee C11 translation units from all twelve valid Microsoft x64 plans, compiles and links them

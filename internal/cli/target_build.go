@@ -14,10 +14,11 @@ import (
 )
 
 type targetBuildOptions struct {
-	source   string
-	targetID target.ID
-	profile  cdriver.Profile
-	output   string
+	source            string
+	additionalSources []string
+	targetID          target.ID
+	profile           cdriver.Profile
+	output            string
 }
 
 func runTargetBuild(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
@@ -25,7 +26,7 @@ func runTargetBuild(arguments []string, sourceRoot string, stdout, stderr io.Wri
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	artifact, code := compileWindowsTarget(options.source, options.targetID, options.profile, sourceRoot, stderr)
+	artifact, code := compileWindowsTarget(programSourceSet(options.source, options.additionalSources), options.targetID, options.profile, sourceRoot, stderr)
 	if code != ExitSuccess {
 		return code
 	}
@@ -45,11 +46,11 @@ func runTargetBuild(arguments []string, sourceRoot string, stdout, stderr io.Wri
 	return ExitSuccess
 }
 
-func compileWindowsTarget(source string, targetID target.ID, profile cdriver.Profile, sourceRoot string, stderr io.Writer) (cdriver.WindowsHostArtifact, int) {
+func compileWindowsTarget(sources []string, targetID target.ID, profile cdriver.Profile, sourceRoot string, stderr io.Writer) (cdriver.WindowsHostArtifact, int) {
 	if targetID != target.X8664WindowsMSVC {
 		return cdriver.WindowsHostArtifact{}, invocationError(stderr, fmt.Sprintf("Windows target compilation requires %s", target.X8664WindowsMSVC))
 	}
-	lowered, code := lowerSingleProgram(source, sourceRoot, stderr, "Windows target C-emission")
+	lowered, code := lowerProgramSources(sources, sourceRoot, stderr, "Windows target C-emission")
 	if code != ExitSuccess {
 		return cdriver.WindowsHostArtifact{}, code
 	}
@@ -87,7 +88,7 @@ func compileWindowsTarget(source string, targetID target.ID, profile cdriver.Pro
 
 func parseTargetBuildOptions(arguments []string) (targetBuildOptions, error) {
 	if len(arguments) == 0 {
-		return targetBuildOptions{}, fmt.Errorf("experimental command \"build-target\" expects one source file and explicit --target, --profile, and --output values")
+		return targetBuildOptions{}, fmt.Errorf("experimental command \"build-target\" expects one entry source file and explicit --target, --profile, and --output values")
 	}
 	options := targetBuildOptions{source: arguments[0]}
 	if options.source == "" || strings.HasPrefix(options.source, "-") {
@@ -96,18 +97,25 @@ func parseTargetBuildOptions(arguments []string) (targetBuildOptions, error) {
 	seen := make(map[string]bool, 3)
 	for index := 1; index < len(arguments); {
 		flag := arguments[index]
-		if flag != "--target" && flag != "--profile" && flag != "--output" {
+		if flag != "--source" && flag != "--target" && flag != "--profile" && flag != "--output" {
 			return targetBuildOptions{}, fmt.Errorf("experimental command \"build-target\" does not accept flag %q", flag)
 		}
-		if seen[flag] {
+		if flag != "--source" && seen[flag] {
 			return targetBuildOptions{}, fmt.Errorf("experimental command \"build-target\" received %s more than once", flag)
 		}
 		if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
 			return targetBuildOptions{}, fmt.Errorf("experimental command \"build-target\" requires a value for %s", flag)
 		}
-		seen[flag] = true
+		if flag != "--source" {
+			seen[flag] = true
+		}
 		value := arguments[index+1]
 		switch flag {
+		case "--source":
+			options.additionalSources = append(options.additionalSources, value)
+			if len(options.additionalSources)+1 > maxExplicitInputFiles {
+				return targetBuildOptions{}, fmt.Errorf("experimental command \"build-target\" accepts at most %d source files", maxExplicitInputFiles)
+			}
 		case "--target":
 			if target.ID(value) != target.X8664WindowsMSVC {
 				return targetBuildOptions{}, fmt.Errorf("experimental build-target currently requires --target %s", target.X8664WindowsMSVC)
@@ -140,6 +148,12 @@ func parseTargetBuildOptions(arguments []string) (targetBuildOptions, error) {
 		}
 	}
 	return options, nil
+}
+
+func programSourceSet(entry string, additional []string) []string {
+	result := make([]string, 0, 1+len(additional))
+	result = append(result, entry)
+	return append(result, additional...)
 }
 
 func validateWindowsTargetUnit(unit cbackend.Unit) error {

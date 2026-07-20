@@ -30,11 +30,11 @@ host-independent target inspection,
 flat-resource, and resource-tagged C11 inspection and
 `fairyc experimental build <file.fy> --cc <clang|gcc> --profile <low|optimized> --output <build/path>`
 for an explicit host-Linux executable in that subset,
-`fairyc experimental build-target <file.fy> --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe>`
+`fairyc experimental build-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe>`
 for the first declared Windows target C-emission subset,
-`fairyc experimental run-target <file.fy> --target x86_64-windows-msvc --profile <low|optimized>`
+`fairyc experimental run-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low|optimized>`
 for direct temporary execution of that declared Windows target subset,
-`fairyc experimental exec-target <file.fy> --target x86_64-windows-msvc --profile <low|optimized>`
+`fairyc experimental exec-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low|optimized>`
 for program-facing Windows execution with exact stdout/stderr forwarding and process status,
 `fairyc experimental build-host <file.fy> --profile <low|optimized> --output <build/path.exe>` for a
 retained target-neutral Windows/amd64 MSVC PE,
@@ -95,14 +95,17 @@ no-overwrite `.exe` under `build/`. Their receipts are host-smoke evidence, not 
 distribution, or self-hosting claims.
 `experimental build-target` is separate from those smokes. It selects the Windows MSVC emission
 profile, emits target-labelled C11, requires Windows LLP64 C-scalar providers, rejects unavailable
-`c::ssize_t`, and builds a no-overwrite PE through locally resolved x64 MSVC. The current command
+`c::ssize_t`, and builds a no-overwrite PE through locally resolved x64 MSVC. One positional entry
+plus repeatable `--source` values form an explicit closure of at most 64 FY files under the current
+source root and existing aggregate byte limit. Duplicate paths, module/path drift, unresolved
+imports, and a missing entry fail; no directory, manifest, or transitive source discovery occurs. The current command
 permits target declarations such as unused `c::long` and automatically links exact proven
 SystemHeap allocate/deallocate, Buffer initialize/zeroed-resize/drop, Arena initialize/Region
 begin/zeroed-allocation/reset/Arena-drop, CStr validation, String copy/view/append/drop, CString
 from-text/view/drop, and `fy_std_text_utf8_valid_v0` project-owned components when called. Buffer,
 Arena, and owned text pull in their declared dependencies once;
 the Windows x64 SystemHeap ceiling is 16-byte fundamental alignment. Every other foreign symbol or
-unproven standard-library component fails before toolchain discovery; companion inputs and user
+unproven standard-library component fails before toolchain discovery; foreign companion inputs and user
 linker options remain absent. Its receipt is target-emission and one-way closed-FFI evidence, not
 complete ABI/runtime conformance, zeroed Arena-byte or owned-text byte/terminator observation,
 owned-text failure behavior, hosted support, a distributable
@@ -119,7 +122,8 @@ becomes the CLI status. The shared 64 KiB capture ceiling remains fail-closed, a
 is unspecified. The checked-in output example reaches only the unsafe internal Windows stdout
 write-all symbol, but confines it to a checked local function accepting `&str`. Its `main` passes
 borrowed text and byte views only through safe internal calls and contains no raw pointer or
-`unsafe`; this still is not a portable `std::io` surface.
+`unsafe`. The entry and helper are separate modules passed through one explicit `--source`; this
+still is not a portable `std::io` surface or public package build.
 `experimental target-spec` emits `fairyc.target-spec/v0` JSON without probing the host or exposing
 local tool paths. Linux reports its current scalar, flat-resource, and resource-tagged emission
 subset. Windows reports `scalar-and-llp64-c-scalar-c11`. Both keep `emittable`, `conformant`, and `supported` false and list

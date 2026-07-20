@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0093-borrowed-view-internal-call-transport.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0094-explicit-multi-source-windows-target-commands.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -355,6 +355,9 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   scalars, and foreign calls or results. They do not establish Windows target emission, ABI,
   supported distribution artifacts, conformance, or self-hosting.
 - The distinct `experimental build-target` path selects `x86_64-windows-msvc` before C emission.
+  It accepts one entry FY file plus a bounded explicit repeated `--source` module list. All paths
+  remain under the current source root, duplicate normalized paths and module/path drift fail, and
+  no source discovery or manifest lookup occurs.
   Its backend profile consumes Windows LLP64 scalar providers, emits the target ID in the C unit,
   admits `c::long` as four-byte signed C `long`, and rejects unavailable POSIX `c::ssize_t`.
   `examples/windows_target/main.fy` carries an unused `c::long` declaration so local x64 MSVC must
@@ -377,14 +380,14 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   text, and the scalar runtime. It fixes the SystemHeap fundamental-alignment ceiling at the documented
   Windows x64 `malloc` guarantee of 16 bytes because MSVC C does not provide `max_align_t` in
   `<stddef.h>`. Every other standard-library or foreign symbol fails before toolchain resolution;
-  companion inputs and user linker arguments remain absent. Lexical `region` lowering, copied
+  foreign companion inputs and user linker arguments remain absent. Lexical `region` lowering, copied
   placement, owned-text byte/terminator contents, failure paths, public standard-library wrappers,
   source ownership/Result mapping, and stable layouts remain absent. This clears only the missing target
   C-emission-profile evidence; `emittable`, `conformant`, and `supported` remain false.
 - `experimental run-target` reuses that exact Windows target compilation and closed linkage, validates
   the temporary PE plus Microsoft x64 unwind structure, executes it without WSL, rejects output, and
   reports either exact signed `i32` result bits or the canonical product-trap category. It accepts no
-  output path, compiler selection, companion input, or linker option and retains no target artifact.
+  output path, compiler selection, foreign companion input, or linker option and retains no target artifact.
   Direct local execution is additional product-path evidence, not hosted conformance or support.
 - `experimental exec-target` uses the same validated temporary Windows target but forwards its
   separated stdout and stderr byte sequences without a compiler receipt and preserves the full

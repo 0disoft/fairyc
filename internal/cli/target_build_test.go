@@ -13,19 +13,19 @@ import (
 func TestParseTargetBuildOptionsRequiresClosedWindowsProfile(t *testing.T) {
 	t.Parallel()
 	options, err := parseTargetBuildOptions([]string{
-		"main.fy", "--output", "build/fairy.exe", "--profile", "optimized", "--target", string(target.X8664WindowsMSVC),
+		"main.fy", "--source", "helper.fy", "--output", "build/fairy.exe", "--profile", "optimized", "--target", string(target.X8664WindowsMSVC),
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if options.source != "main.fy" || options.targetID != target.X8664WindowsMSVC || options.profile != cdriver.OptimizedProfile || options.output != "build/fairy.exe" {
+	if options.source != "main.fy" || strings.Join(options.additionalSources, ",") != "helper.fy" || options.targetID != target.X8664WindowsMSVC || options.profile != cdriver.OptimizedProfile || options.output != "build/fairy.exe" {
 		t.Fatalf("options = %+v", options)
 	}
 	for _, test := range []struct {
 		arguments []string
 		contains  string
 	}{
-		{nil, "expects one source file"},
+		{nil, "expects one entry source file"},
 		{[]string{"--target", string(target.X8664WindowsMSVC)}, "source file before"},
 		{[]string{"main.fy", "--profile", "low", "--output", "build/main.exe"}, "requires --target"},
 		{[]string{"main.fy", "--target", string(target.X8664WindowsMSVC), "--output", "build/main.exe"}, "requires --profile"},
@@ -35,6 +35,7 @@ func TestParseTargetBuildOptionsRequiresClosedWindowsProfile(t *testing.T) {
 		{[]string{"main.fy", "--target", string(target.X8664WindowsMSVC), "--profile", "low", "--output", "build/main"}, "end with .exe"},
 		{[]string{"main.fy", "--target", string(target.X8664WindowsMSVC), "--profile", "low", "--output", "build/../main.exe"}, "canonical relative"},
 		{[]string{"main.fy", "--target", string(target.X8664WindowsMSVC), "--profile", "low", "--output", "build/main.exe", "--force", "yes"}, "does not accept"},
+		{[]string{"main.fy", "--source", "--profile", "low"}, "requires a value for --source"},
 	} {
 		if _, err := parseTargetBuildOptions(test.arguments); err == nil || !strings.Contains(err.Error(), test.contains) {
 			t.Errorf("parseTargetBuildOptions(%q) error = %v; want containing %q", test.arguments, err, test.contains)

@@ -115,6 +115,44 @@ func TestExperimentalCheckSemanticsAcceptsExplicitModuleSet(t *testing.T) {
 	}
 }
 
+func TestLowerProgramSourcesBuildsExplicitModuleClosure(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\nimport helper as h;\nfn main() -> i32 { h::answer() }\n")
+	writeTestSource(t, root, "helper.fy", "module helper;\npub fn answer() -> i32 { 42 }\n")
+	var stderr bytes.Buffer
+	lowered, code := lowerProgramSources([]string{"main.fy", "helper.fy"}, root, &stderr, "test C-emission")
+	if code != ExitSuccess || stderr.Len() != 0 {
+		t.Fatalf("lowerProgramSources() = code %d, stderr %q", code, stderr.String())
+	}
+	if lowered.entryName != "main::main" || len(lowered.program.Functions) != 2 {
+		t.Fatalf("lowered program = entry %q, functions %d", lowered.entryName, len(lowered.program.Functions))
+	}
+}
+
+func TestLowerProgramSourcesRejectsDuplicateInput(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { 42 }\n")
+	var stderr bytes.Buffer
+	_, code := lowerProgramSources([]string{"main.fy", "main.fy"}, root, &stderr, "test C-emission")
+	if code != ExitInvalidInvocation || !strings.Contains(stderr.String(), "program source \"main.fy\" is listed more than once") {
+		t.Fatalf("lowerProgramSources() = code %d, stderr %q", code, stderr.String())
+	}
+}
+
+func TestLowerProgramSourcesDoesNotDiscoverUnlistedModule(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\nimport helper as h;\nfn main() -> i32 { h::answer() }\n")
+	writeTestSource(t, root, "helper.fy", "module helper;\npub fn answer() -> i32 { 42 }\n")
+	var stderr bytes.Buffer
+	_, code := lowerProgramSources([]string{"main.fy"}, root, &stderr, "test C-emission")
+	if code != ExitSourceDiagnostics || !strings.Contains(stderr.String(), "E0101: unresolved name or path") {
+		t.Fatalf("lowerProgramSources() = code %d, stderr %q", code, stderr.String())
+	}
+}
+
 func TestExperimentalCheckSemanticsReportsCrossFileVisibility(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
@@ -135,7 +173,7 @@ func TestExperimentalCheckSemanticsRejectsDuplicateAndOversizedModuleSets(t *tes
 		t.Fatalf("duplicate Run() = code %d, stdout %q, stderr %q", duplicateCode, duplicateOut, duplicateErr)
 	}
 	arguments := []string{"experimental", "check-semantics"}
-	for range maxSemanticInputFiles + 1 {
+	for range maxExplicitInputFiles + 1 {
 		arguments = append(arguments, "main.fy")
 	}
 	limitCode, limitOut, limitErr := runForTest(arguments, root)

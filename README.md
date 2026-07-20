@@ -100,8 +100,9 @@ normalized drop state execute at both MSVC profiles. Arena selection independent
 same SystemHeap component once, then initialization, one active Region, an eight-byte allocation,
 reset invalidation, and drop generations execute at both profiles. The Windows x64 heap path uses
 the documented 16-byte `malloc` alignment ceiling instead of the MSVC C header's missing
-`max_align_t`. Every other foreign symbol, unproven standard-library component, companion input,
-user linker option, distribution promise, and self-hosting path remains closed.
+`max_align_t`. The Windows target commands now accept a bounded explicit FY module closure through
+repeated `--source`; every foreign companion input, unproven standard-library component, user linker
+option, distribution promise, and self-hosting path remains closed.
 The sibling `experimental run-target` command uses the same declared target, emission profile,
 closed support linkage, MSVC resolution, and PE/unwind validation, but executes a temporary image
 instead of retaining it. It reports the exact signed `i32` result or the same canonical product-trap
@@ -259,7 +260,7 @@ go run ./cmd/fairyc experimental run-host examples/windows_smoke/main.fy --profi
 go run ./cmd/fairyc experimental build-host examples/windows_smoke/main.fy --profile optimized --output build/fairyc-windows-smoke.exe
 go run ./cmd/fairyc experimental build-target examples/windows_target/main.fy --target x86_64-windows-msvc --profile optimized --output build/fairyc-windows-target.exe
 go run ./cmd/fairyc experimental run-target examples/windows_target/main.fy --target x86_64-windows-msvc --profile optimized
-go run ./cmd/fairyc experimental exec-target examples/windows_output/main.fy --target x86_64-windows-msvc --profile optimized
+go run ./cmd/fairyc experimental exec-target examples/windows_output/main.fy --source examples/windows_output/windows_console.fy --target x86_64-windows-msvc --profile optimized
 go run ./cmd/fairyc experimental check-syntax examples/syntax/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/syntax/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/semantic/main.fy examples/semantic/math.fy
@@ -282,7 +283,8 @@ For repeated Windows use, `DEVELOPMENT.md` gives the WSL-free manual bootstrap t
 `build/fairyc.exe`. The configured Windows smoke separately builds a temporary standalone compiler
 process and requires that executable to run `examples/windows_quickstart/main.fy` through MSVC with
 native result 42, then execute `examples/windows_output/main.fy` with exact stdout and process status
-42. The compiler binary is still built from Go; only the input programs and resulting temporary
+42 while explicitly supplying its separate `windows_console.fy` module. The compiler binary is
+still built from Go; only the input programs and resulting temporary
 target executables are Fairy C.
 
 `explain` and `targets` do not read the current directory or source tree. The former marks its

@@ -24,7 +24,7 @@ const (
 	ExitInternalFailure   = 4
 	ExitProgramTrap       = 5
 	ExitBuildFailure      = 6
-	maxSemanticInputFiles = 64
+	maxExplicitInputFiles = 64
 )
 
 const usage = `Fairy C Stage 0 compiler prototype
@@ -38,9 +38,9 @@ Usage:
   fairyc experimental target-spec <target-id>
   fairyc experimental emit-c <file.fy>
   fairyc experimental build <file.fy> --cc <clang|gcc> --profile <low|optimized> --output <build/path>
-  fairyc experimental build-target <file.fy> --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe>
-  fairyc experimental run-target <file.fy> --target x86_64-windows-msvc --profile <low|optimized>
-  fairyc experimental exec-target <file.fy> --target x86_64-windows-msvc --profile <low|optimized>
+  fairyc experimental build-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe>
+  fairyc experimental run-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low|optimized>
+  fairyc experimental exec-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low|optimized>
   fairyc experimental build-host <file.fy> --profile <low|optimized> --output <build/path.exe>
   fairyc experimental run-host <file.fy> --profile <low|optimized>
   fairyc experimental run <file.fy>
@@ -228,32 +228,68 @@ type loweredProgram struct {
 }
 
 func lowerSingleProgram(argument, sourceRoot string, stderr io.Writer, subset string) (loweredProgram, int) {
+	return lowerProgramSources([]string{argument}, sourceRoot, stderr, subset)
+}
+
+func lowerProgramSources(arguments []string, sourceRoot string, stderr io.Writer, subset string) (loweredProgram, int) {
 	limits := source.DefaultLimits()
-	loaded, err := loadSource(sourceRoot, argument, limits.MaxBytes)
-	if err != nil {
-		var tooLarge sourceTooLargeError
-		if errors.As(err, &tooLarge) {
-			value := source.ExhaustionDiagnostic(0)
-			if writeErr := writeDiagnostics(stderr, tooLarge.relativePath, nil, []diagnostic.Diagnostic{value}); writeErr != nil {
+	if len(arguments) == 0 {
+		return loweredProgram{}, invocationError(stderr, "a program source entry is required")
+	}
+	if len(arguments) > maxExplicitInputFiles {
+		return loweredProgram{}, invocationError(stderr, fmt.Sprintf("program source set accepts at most %d files", maxExplicitInputFiles))
+	}
+	aggregateLimit := limits.MaxBytes * 4
+	aggregateBytes := 0
+	seen := make(map[string]struct{}, len(arguments))
+	semanticFiles := make([]semantic.File, 0, len(arguments))
+	sources := make(map[string][]byte, len(arguments))
+	entryModule := ""
+	syntaxFailed := false
+	for index, argument := range arguments {
+		loaded, err := loadSource(sourceRoot, argument, limits.MaxBytes)
+		if err != nil {
+			var tooLarge sourceTooLargeError
+			if errors.As(err, &tooLarge) {
+				value := source.ExhaustionDiagnostic(0)
+				if writeErr := writeDiagnostics(stderr, tooLarge.relativePath, nil, []diagnostic.Diagnostic{value}); writeErr != nil {
+					return loweredProgram{}, ExitInternalFailure
+				}
+				return loweredProgram{}, ExitSourceDiagnostics
+			}
+			return loweredProgram{}, inputError(stderr, err)
+		}
+		if _, duplicate := seen[loaded.file.RelativePath]; duplicate {
+			return loweredProgram{}, invocationError(stderr, fmt.Sprintf("program source %q is listed more than once", safeDisplayPath(loaded.file.RelativePath)))
+		}
+		seen[loaded.file.RelativePath] = struct{}{}
+		aggregateBytes += len(loaded.file.Bytes)
+		if aggregateBytes > aggregateLimit {
+			return loweredProgram{}, invocationError(stderr, "program source set exceeds the experimental aggregate byte limit")
+		}
+		frontendResult, err := frontend.AnalyzeSyntax(loaded.file, limits)
+		if err != nil {
+			return loweredProgram{}, internalError(stderr)
+		}
+		sources[loaded.file.RelativePath] = frontendResult.Tree.Source
+		if len(frontendResult.Tree.Diagnostics) > 0 {
+			syntaxFailed = true
+			if err := writeDiagnostics(stderr, loaded.file.RelativePath, frontendResult.Tree.Source, frontendResult.Tree.Diagnostics); err != nil {
 				return loweredProgram{}, ExitInternalFailure
 			}
-			return loweredProgram{}, ExitSourceDiagnostics
+			continue
 		}
-		return loweredProgram{}, inputError(stderr, err)
-	}
-	frontendResult, err := frontend.AnalyzeSyntax(loaded.file, limits)
-	if err != nil {
-		return loweredProgram{}, internalError(stderr)
-	}
-	if len(frontendResult.Tree.Diagnostics) > 0 {
-		if err := writeDiagnostics(stderr, loaded.file.RelativePath, frontendResult.Tree.Source, frontendResult.Tree.Diagnostics); err != nil {
-			return loweredProgram{}, ExitInternalFailure
+		if index == 0 {
+			entryModule = frontendResult.AST.Path
 		}
+		semanticFiles = append(semanticFiles, semantic.File{Path: loaded.file.RelativePath, Module: frontendResult.AST})
+	}
+	if syntaxFailed {
 		return loweredProgram{}, ExitSourceDiagnostics
 	}
-	semanticResult := semantic.Analyze([]semantic.File{{Path: loaded.file.RelativePath, Module: frontendResult.AST}})
+	semanticResult := semantic.Analyze(semanticFiles)
 	if len(semanticResult.Diagnostics) > 0 {
-		if err := writeSemanticDiagnostics(stderr, map[string][]byte{loaded.file.RelativePath: frontendResult.Tree.Source}, semanticResult.Diagnostics); err != nil {
+		if err := writeSemanticDiagnostics(stderr, sources, semanticResult.Diagnostics); err != nil {
 			return loweredProgram{}, ExitInternalFailure
 		}
 		return loweredProgram{}, ExitSourceDiagnostics
@@ -271,7 +307,7 @@ func lowerSingleProgram(argument, sourceRoot string, stderr io.Writer, subset st
 	if failures := mir.Verify(program); len(failures) != 0 {
 		return loweredProgram{}, internalError(stderr)
 	}
-	entryName := frontendResult.AST.Path + "::main"
+	entryName := entryModule + "::main"
 	entry, found := programEntry(program, entryName)
 	if !found || len(entry.Parameters) != 0 || entry.ResultType != hir.TypeI32 {
 		return loweredProgram{}, subsetCapabilityError(stderr, subset, fmt.Errorf("entry %s must have type fn() -> i32", entryName))
@@ -301,8 +337,8 @@ func subsetCapabilityError(stderr io.Writer, subset string, err error) int {
 
 func runCheckSemantics(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
 	limits := source.DefaultLimits()
-	if len(arguments) > maxSemanticInputFiles {
-		return invocationError(stderr, fmt.Sprintf("experimental command \"check-semantics\" accepts at most %d source files", maxSemanticInputFiles))
+	if len(arguments) > maxExplicitInputFiles {
+		return invocationError(stderr, fmt.Sprintf("experimental command \"check-semantics\" accepts at most %d source files", maxExplicitInputFiles))
 	}
 	aggregateLimit := limits.MaxBytes * 4
 	aggregateBytes := 0
