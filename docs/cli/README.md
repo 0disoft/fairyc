@@ -26,9 +26,9 @@ plus `fairyc experimental parse <file.fy>`,
 `fairyc experimental check-semantics <file.fy> [<file.fy>...]`. The compiler prototype also exposes
 `fairyc experimental target-spec <x86_64-linux-gnu|x86_64-windows-msvc>` for deterministic
 host-independent target inspection,
-`fairyc experimental emit-c <file.fy>` for deterministic scalar, explicitly link-mapped foreign-call,
+`fairyc experimental emit-c <entry.fy> [--source <file.fy>]...` for deterministic scalar, explicitly link-mapped foreign-call,
 flat-resource, and resource-tagged C11 inspection and
-`fairyc experimental build <file.fy> --cc <clang|gcc> --profile <low|optimized> --output <build/path>`
+`fairyc experimental build <entry.fy> [--source <file.fy>]... --cc <clang|gcc> --profile <low|optimized> --output <build/path>`
 for an explicit host-Linux executable in that subset,
 `fairyc experimental build-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe>`
 for the first declared Windows target C-emission subset,
@@ -36,9 +36,9 @@ for the first declared Windows target C-emission subset,
 for direct temporary execution of that declared Windows target subset,
 `fairyc experimental exec-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low|optimized>`
 for program-facing Windows execution with exact stdout/stderr forwarding and process status,
-`fairyc experimental build-host <file.fy> --profile <low|optimized> --output <build/path.exe>` for a
+`fairyc experimental build-host <entry.fy> [--source <file.fy>]... --profile <low|optimized> --output <build/path.exe>` for a
 retained target-neutral Windows/amd64 MSVC PE,
-`fairyc experimental run-host <file.fy> --profile <low|optimized>` for a temporary target-neutral
+`fairyc experimental run-host <entry.fy> [--source <file.fy>]... --profile <low|optimized>` for a temporary target-neutral
 Windows/amd64 MSVC host smoke, and
 `fairyc experimental run <entry.fy> [--source <file.fy>]...` for the fixture-backed scalar MIR interpreter subset. These are developer commands whose
 spelling and numeric exit codes may change. `check-semantics` resolves names and creates typed HIR
@@ -58,7 +58,7 @@ left shift is rejected as `E1011`; loop control without an enclosing `while` is 
 It does not discover files, execute user drop bodies, implement effects, or provide host I/O.
 It also does not execute foreign calls: those fail with the interpreter capability boundary even
 when the same verified MIR is admissible to `emit-c`.
-`experimental emit-c` runs the same verified-MIR entry pipeline and writes one raw constrained C11
+`experimental emit-c` runs the same explicit verified-MIR module closure and writes one raw constrained C11
 translation unit to stdout. It does not write an artifact, invoke a C toolchain, link, or run native
 code. The native fixture lane's `drop-trace-v0` observer profile is not available through this
 command and never appears in its output.
@@ -89,7 +89,7 @@ resolve through the selected driver's ordinary link environment.
 The resulting product artifact is uninstrumented; the native fixture recorder is not linked.
 `experimental run-host` and `experimental build-host` use the same WSL-free Windows developer-smoke
 compiler path. They auto-discover the installed x64 MSVC and Windows SDK, admit only target-neutral
-private C transport, and reject FFI, provisional standard-library calls, `@repr(C)`, and exact
+private C transport, accept only explicit FY `--source` inputs, and reject FFI, provisional standard-library calls, `@repr(C)`, and exact
 `c::*` values. `run-host` removes the temporary PE after execution; `build-host` retains one
 no-overwrite `.exe` under `build/`. Their receipts are host-smoke evidence, not Windows target, ABI,
 distribution, or self-hosting claims.

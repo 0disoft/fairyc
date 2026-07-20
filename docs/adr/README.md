@@ -105,6 +105,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0093-borrowed-view-internal-call-transport.md`: exact internal-function transport for borrowed UTF-8 and byte-slice views so narrow unsafe operations can be contained behind safe support-module helpers without inventing a public standard library.
 - `0094-explicit-multi-source-windows-target-commands.md`: bounded entry-plus-repeated-source module closures for Windows target build, inspection-run, and program-facing execution without automatic discovery or linker-input widening.
 - `0095-explicit-multi-source-interpreter-run.md`: the same bounded explicit FY module closure for fast verified-MIR interpreter execution without a backend, host process, or source discovery.
+- `0096-explicit-multi-source-prototype-program-commands.md`: entry-plus-repeated-source closures for C inspection, Linux build, and target-neutral Windows host build/run without widening foreign or linker inputs.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

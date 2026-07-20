@@ -62,6 +62,8 @@ fn main() -> i32 {
 `
 
 const checkedInSuccessPath = "examples/windows_smoke/main.fy"
+const checkedInModuleMainPath = "examples/run/modules/main.fy"
+const checkedInModuleSupportPath = "examples/run/modules/math.fy"
 const checkedInWindowsTargetPath = "examples/windows_target/main.fy"
 const checkedInWindowsQuickstartPath = "examples/windows_quickstart/main.fy"
 const checkedInWindowsOutputPath = "examples/windows_output/main.fy"
@@ -86,6 +88,14 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("read checked-in Windows smoke source: %w", err)
 	}
+	moduleMainSource, err := os.ReadFile(filepath.FromSlash(checkedInModuleMainPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in multi-source entry: %w", err)
+	}
+	moduleSupportSource, err := os.ReadFile(filepath.FromSlash(checkedInModuleSupportPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in multi-source support: %w", err)
+	}
 	windowsTargetSource, err := os.ReadFile(filepath.FromSlash(checkedInWindowsTargetPath))
 	if err != nil {
 		return fmt.Errorf("read checked-in Windows target source: %w", err)
@@ -109,6 +119,8 @@ func run() error {
 	defer os.RemoveAll(root)
 	for name, source := range map[string]string{
 		checkedInSuccessPath:              string(successSource),
+		checkedInModuleMainPath:           string(moduleMainSource),
+		checkedInModuleSupportPath:        string(moduleSupportSource),
 		checkedInWindowsTargetPath:        string(windowsTargetSource),
 		checkedInWindowsQuickstartPath:    string(windowsQuickstartSource),
 		checkedInWindowsOutputPath:        string(windowsOutputSource),
@@ -132,7 +144,8 @@ func run() error {
 	var buildStdout bytes.Buffer
 	var buildStderr bytes.Buffer
 	buildCode := cli.Run([]string{
-		"experimental", "build-host", checkedInSuccessPath,
+		"experimental", "build-host", checkedInModuleMainPath,
+		"--source", checkedInModuleSupportPath,
 		"--profile", "optimized", "--output", "build/main.exe",
 	}, root, &buildStdout, &buildStderr)
 	if buildCode != cli.ExitSuccess || buildStderr.Len() != 0 || !strings.HasPrefix(buildStdout.String(), "built: build/main.exe (windows/amd64 host-smoke, msvc ") {
@@ -217,13 +230,14 @@ func run() error {
 	for _, testCase := range []struct {
 		name         string
 		source       string
+		support      string
 		profile      string
 		code         int
 		stdoutPrefix string
 		stderr       string
 	}{
 		{name: "success low", source: checkedInSuccessPath, profile: "low", code: cli.ExitSuccess, stdoutPrefix: "native result: 42 (windows/amd64 host-smoke, msvc "},
-		{name: "success optimized", source: checkedInSuccessPath, profile: "optimized", code: cli.ExitSuccess, stdoutPrefix: "native result: 42 (windows/amd64 host-smoke, msvc "},
+		{name: "multi-source success optimized", source: checkedInModuleMainPath, support: checkedInModuleSupportPath, profile: "optimized", code: cli.ExitSuccess, stdoutPrefix: "native result: 42 (windows/amd64 host-smoke, msvc "},
 		{name: "negative low", source: "negative.fy", profile: "low", code: cli.ExitSuccess, stdoutPrefix: "native result: -1 (windows/amd64 host-smoke, msvc "},
 		{name: "negative optimized", source: "negative.fy", profile: "optimized", code: cli.ExitSuccess, stdoutPrefix: "native result: -1 (windows/amd64 host-smoke, msvc "},
 		{name: "division by zero low", source: "division_by_zero.fy", profile: "low", code: cli.ExitProgramTrap, stderr: "trap: division-by-zero\n"},
@@ -237,7 +251,7 @@ func run() error {
 		{name: "invalid shift low", source: "invalid_shift.fy", profile: "low", code: cli.ExitProgramTrap, stderr: "trap: invalid-shift\n"},
 		{name: "invalid shift optimized", source: "invalid_shift.fy", profile: "optimized", code: cli.ExitProgramTrap, stderr: "trap: invalid-shift\n"},
 	} {
-		if err := runHostCase(root, testCase.name, testCase.source, testCase.profile, testCase.code, testCase.stdoutPrefix, testCase.stderr); err != nil {
+		if err := runHostCase(root, testCase.name, testCase.source, testCase.support, testCase.profile, testCase.code, testCase.stdoutPrefix, testCase.stderr); err != nil {
 			return err
 		}
 	}
@@ -491,12 +505,15 @@ func runWindowsABIProbe(toolchain cdriver.WindowsHostToolchain) (int, int, error
 	return executions, len(unit.Cases), nil
 }
 
-func runHostCase(root, name, source, profile string, wantCode int, wantStdoutPrefix, wantStderr string) error {
+func runHostCase(root, name, source, support, profile string, wantCode int, wantStdoutPrefix, wantStderr string) error {
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
-	code := cli.Run([]string{
-		"experimental", "run-host", source, "--profile", profile,
-	}, root, &stdout, &stderr)
+	arguments := []string{"experimental", "run-host", source}
+	if support != "" {
+		arguments = append(arguments, "--source", support)
+	}
+	arguments = append(arguments, "--profile", profile)
+	code := cli.Run(arguments, root, &stdout, &stderr)
 	stdoutMatches := stdout.Len() == 0
 	if wantStdoutPrefix != "" {
 		stdoutMatches = strings.HasPrefix(stdout.String(), wantStdoutPrefix)

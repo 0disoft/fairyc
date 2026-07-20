@@ -36,13 +36,13 @@ Usage:
   fairyc experimental check-syntax <file.fy>
   fairyc experimental check-semantics <file.fy> [<file.fy>...]
   fairyc experimental target-spec <target-id>
-  fairyc experimental emit-c <file.fy>
-  fairyc experimental build <file.fy> --cc <clang|gcc> --profile <low|optimized> --output <build/path>
+  fairyc experimental emit-c <entry.fy> [--source <file.fy>]...
+  fairyc experimental build <entry.fy> [--source <file.fy>]... --cc <clang|gcc> --profile <low|optimized> --output <build/path>
   fairyc experimental build-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe>
   fairyc experimental run-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low|optimized>
   fairyc experimental exec-target <entry.fy> [--source <file.fy>]... --target x86_64-windows-msvc --profile <low|optimized>
-  fairyc experimental build-host <file.fy> --profile <low|optimized> --output <build/path.exe>
-  fairyc experimental run-host <file.fy> --profile <low|optimized>
+  fairyc experimental build-host <entry.fy> [--source <file.fy>]... --profile <low|optimized> --output <build/path.exe>
+  fairyc experimental run-host <entry.fy> [--source <file.fy>]... --profile <low|optimized>
   fairyc experimental run <entry.fy> [--source <file.fy>]...
   fairyc --help
 
@@ -151,10 +151,7 @@ func runExperimental(args []string, sourceRoot string, stdout, stderr io.Writer)
 	case "target-spec":
 		return runTargetSpec(args[1:], stdout, stderr)
 	case "emit-c":
-		if len(args) != 2 {
-			return invocationError(stderr, "experimental command \"emit-c\" expects exactly one source file")
-		}
-		return runEmitC(args[1], sourceRoot, stdout, stderr)
+		return runEmitC(args[1:], sourceRoot, stdout, stderr)
 	case "build":
 		return runBuild(args[1:], sourceRoot, stdout, stderr)
 	case "build-target":
@@ -205,30 +202,51 @@ func runInterpreter(arguments []string, sourceRoot string, stdout, stderr io.Wri
 }
 
 func parseRunSources(arguments []string) ([]string, error) {
-	if len(arguments) == 0 {
-		return nil, fmt.Errorf("experimental command \"run\" expects one entry source file")
-	}
-	if arguments[0] == "" || strings.HasPrefix(arguments[0], "-") {
-		return nil, fmt.Errorf("experimental command \"run\" expects the entry source file before its flags")
-	}
-	sources := []string{arguments[0]}
-	for index := 1; index < len(arguments); index += 2 {
-		if arguments[index] != "--source" {
-			return nil, fmt.Errorf("experimental command \"run\" does not accept flag %q", arguments[index])
-		}
-		if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
-			return nil, fmt.Errorf("experimental command \"run\" requires a value for --source")
-		}
-		sources = append(sources, arguments[index+1])
-		if len(sources) > maxExplicitInputFiles {
-			return nil, fmt.Errorf("experimental command \"run\" accepts at most %d source files", maxExplicitInputFiles)
-		}
-	}
-	return sources, nil
+	return parseExplicitSources("run", arguments)
 }
 
-func runEmitC(argument, sourceRoot string, stdout, stderr io.Writer) int {
-	lowered, code := lowerSingleProgram(argument, sourceRoot, stderr, "C-emission")
+func parseExplicitSources(command string, arguments []string) ([]string, error) {
+	if len(arguments) == 0 {
+		return nil, fmt.Errorf("experimental command %q expects one entry source file", command)
+	}
+	if arguments[0] == "" || strings.HasPrefix(arguments[0], "-") {
+		return nil, fmt.Errorf("experimental command %q expects the entry source file before its flags", command)
+	}
+	additional := make([]string, 0, (len(arguments)-1)/2)
+	for index := 1; index < len(arguments); index += 2 {
+		if arguments[index] != "--source" {
+			return nil, fmt.Errorf("experimental command %q does not accept flag %q", command, arguments[index])
+		}
+		if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
+			return nil, fmt.Errorf("experimental command %q requires a value for --source", command)
+		}
+		if err := appendProgramSource(command, &additional, arguments[index+1]); err != nil {
+			return nil, err
+		}
+	}
+	return programSourceSet(arguments[0], additional), nil
+}
+
+func appendProgramSource(command string, additional *[]string, value string) error {
+	*additional = append(*additional, value)
+	if len(*additional)+1 > maxExplicitInputFiles {
+		return fmt.Errorf("experimental command %q accepts at most %d source files", command, maxExplicitInputFiles)
+	}
+	return nil
+}
+
+func programSourceSet(entry string, additional []string) []string {
+	result := make([]string, 0, 1+len(additional))
+	result = append(result, entry)
+	return append(result, additional...)
+}
+
+func runEmitC(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
+	sources, err := parseExplicitSources("emit-c", arguments)
+	if err != nil {
+		return invocationError(stderr, err.Error())
+	}
+	lowered, code := lowerProgramSources(sources, sourceRoot, stderr, "C-emission")
 	if code != ExitSuccess {
 		return code
 	}

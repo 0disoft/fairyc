@@ -112,9 +112,8 @@ func parseTargetBuildOptions(arguments []string) (targetBuildOptions, error) {
 		value := arguments[index+1]
 		switch flag {
 		case "--source":
-			options.additionalSources = append(options.additionalSources, value)
-			if len(options.additionalSources)+1 > maxExplicitInputFiles {
-				return targetBuildOptions{}, fmt.Errorf("experimental command \"build-target\" accepts at most %d source files", maxExplicitInputFiles)
+			if err := appendProgramSource("build-target", &options.additionalSources, value); err != nil {
+				return targetBuildOptions{}, err
 			}
 		case "--target":
 			if target.ID(value) != target.X8664WindowsMSVC {
@@ -148,12 +147,6 @@ func parseTargetBuildOptions(arguments []string) (targetBuildOptions, error) {
 		}
 	}
 	return options, nil
-}
-
-func programSourceSet(entry string, additional []string) []string {
-	result := make([]string, 0, 1+len(additional))
-	result = append(result, entry)
-	return append(result, additional...)
 }
 
 func validateWindowsTargetUnit(unit cbackend.Unit) error {

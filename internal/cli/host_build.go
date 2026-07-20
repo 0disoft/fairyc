@@ -9,9 +9,10 @@ import (
 )
 
 type hostBuildOptions struct {
-	source  string
-	profile cdriver.Profile
-	output  string
+	source            string
+	additionalSources []string
+	profile           cdriver.Profile
+	output            string
 }
 
 func runHostBuild(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
@@ -19,7 +20,7 @@ func runHostBuild(arguments []string, sourceRoot string, stdout, stderr io.Write
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	artifact, code := compileWindowsHost(options.source, options.profile, sourceRoot, stderr)
+	artifact, code := compileWindowsHost(programSourceSet(options.source, options.additionalSources), options.profile, sourceRoot, stderr)
 	if code != ExitSuccess {
 		return code
 	}
@@ -40,7 +41,7 @@ func runHostBuild(arguments []string, sourceRoot string, stdout, stderr io.Write
 
 func parseHostBuildOptions(arguments []string) (hostBuildOptions, error) {
 	if len(arguments) == 0 {
-		return hostBuildOptions{}, fmt.Errorf("experimental command \"build-host\" expects one source file and explicit --profile and --output values")
+		return hostBuildOptions{}, fmt.Errorf("experimental command \"build-host\" expects one entry source file and explicit --profile and --output values")
 	}
 	options := hostBuildOptions{source: arguments[0]}
 	if options.source == "" || strings.HasPrefix(options.source, "-") {
@@ -49,18 +50,24 @@ func parseHostBuildOptions(arguments []string) (hostBuildOptions, error) {
 	seen := make(map[string]bool, 2)
 	for index := 1; index < len(arguments); {
 		flag := arguments[index]
-		if flag != "--profile" && flag != "--output" {
+		if flag != "--source" && flag != "--profile" && flag != "--output" {
 			return hostBuildOptions{}, fmt.Errorf("experimental command \"build-host\" does not accept flag %q", flag)
 		}
-		if seen[flag] {
+		if flag != "--source" && seen[flag] {
 			return hostBuildOptions{}, fmt.Errorf("experimental command \"build-host\" received %s more than once", flag)
 		}
 		if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
 			return hostBuildOptions{}, fmt.Errorf("experimental command \"build-host\" requires a value for %s", flag)
 		}
-		seen[flag] = true
+		if flag != "--source" {
+			seen[flag] = true
+		}
 		value := arguments[index+1]
 		switch flag {
+		case "--source":
+			if err := appendProgramSource("build-host", &options.additionalSources, value); err != nil {
+				return hostBuildOptions{}, err
+			}
 		case "--profile":
 			switch value {
 			case cdriver.LowProfile.Name:

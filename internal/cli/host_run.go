@@ -11,8 +11,9 @@ import (
 )
 
 type hostRunOptions struct {
-	source  string
-	profile cdriver.Profile
+	source            string
+	additionalSources []string
+	profile           cdriver.Profile
 }
 
 func runHost(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
@@ -20,7 +21,7 @@ func runHost(arguments []string, sourceRoot string, stdout, stderr io.Writer) in
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	artifact, code := compileWindowsHost(options.source, options.profile, sourceRoot, stderr)
+	artifact, code := compileWindowsHost(programSourceSet(options.source, options.additionalSources), options.profile, sourceRoot, stderr)
 	if code != ExitSuccess {
 		return code
 	}
@@ -43,8 +44,8 @@ func runHost(arguments []string, sourceRoot string, stdout, stderr io.Writer) in
 	return ExitSuccess
 }
 
-func compileWindowsHost(source string, profile cdriver.Profile, sourceRoot string, stderr io.Writer) (cdriver.WindowsHostArtifact, int) {
-	lowered, code := lowerSingleProgram(source, sourceRoot, stderr, "Windows host-smoke C-emission")
+func compileWindowsHost(sources []string, profile cdriver.Profile, sourceRoot string, stderr io.Writer) (cdriver.WindowsHostArtifact, int) {
+	lowered, code := lowerProgramSources(sources, sourceRoot, stderr, "Windows host-smoke C-emission")
 	if code != ExitSuccess {
 		return cdriver.WindowsHostArtifact{}, code
 	}
@@ -75,20 +76,45 @@ func compileWindowsHost(source string, profile cdriver.Profile, sourceRoot strin
 }
 
 func parseHostRunOptions(arguments []string) (hostRunOptions, error) {
-	if len(arguments) != 3 || arguments[1] != "--profile" {
-		return hostRunOptions{}, fmt.Errorf("experimental command \"run-host\" expects one source file and --profile <low|optimized>")
+	if len(arguments) == 0 {
+		return hostRunOptions{}, fmt.Errorf("experimental command \"run-host\" expects one entry source file and explicit --profile value")
 	}
 	if arguments[0] == "" || strings.HasPrefix(arguments[0], "-") {
-		return hostRunOptions{}, fmt.Errorf("experimental command \"run-host\" expects the source file before its flags")
+		return hostRunOptions{}, fmt.Errorf("experimental command \"run-host\" expects the entry source file before its flags")
 	}
 	options := hostRunOptions{source: arguments[0]}
-	switch arguments[2] {
-	case cdriver.LowProfile.Name:
-		options.profile = cdriver.LowProfile
-	case cdriver.OptimizedProfile.Name:
-		options.profile = cdriver.OptimizedProfile
-	default:
-		return hostRunOptions{}, fmt.Errorf("experimental command \"run-host\" requires --profile low or --profile optimized")
+	seenProfile := false
+	for index := 1; index < len(arguments); index += 2 {
+		flag := arguments[index]
+		if flag != "--source" && flag != "--profile" {
+			return hostRunOptions{}, fmt.Errorf("experimental command \"run-host\" does not accept flag %q", flag)
+		}
+		if flag == "--profile" && seenProfile {
+			return hostRunOptions{}, fmt.Errorf("experimental command \"run-host\" received --profile more than once")
+		}
+		if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
+			return hostRunOptions{}, fmt.Errorf("experimental command \"run-host\" requires a value for %s", flag)
+		}
+		value := arguments[index+1]
+		switch flag {
+		case "--source":
+			if err := appendProgramSource("run-host", &options.additionalSources, value); err != nil {
+				return hostRunOptions{}, err
+			}
+		case "--profile":
+			seenProfile = true
+			switch value {
+			case cdriver.LowProfile.Name:
+				options.profile = cdriver.LowProfile
+			case cdriver.OptimizedProfile.Name:
+				options.profile = cdriver.OptimizedProfile
+			default:
+				return hostRunOptions{}, fmt.Errorf("experimental command \"run-host\" requires --profile low or --profile optimized")
+			}
+		}
+	}
+	if !seenProfile {
+		return hostRunOptions{}, fmt.Errorf("experimental command \"run-host\" requires --profile")
 	}
 	return options, nil
 }

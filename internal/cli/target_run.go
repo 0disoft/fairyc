@@ -81,9 +81,8 @@ func parseTargetExecutionOptions(command string, arguments []string) (targetRunO
 		value := arguments[index+1]
 		switch flag {
 		case "--source":
-			options.additionalSources = append(options.additionalSources, value)
-			if len(options.additionalSources)+1 > maxExplicitInputFiles {
-				return targetRunOptions{}, fmt.Errorf("experimental command %q accepts at most %d source files", command, maxExplicitInputFiles)
+			if err := appendProgramSource(command, &options.additionalSources, value); err != nil {
+				return targetRunOptions{}, err
 			}
 		case "--target":
 			if target.ID(value) != target.X8664WindowsMSVC {

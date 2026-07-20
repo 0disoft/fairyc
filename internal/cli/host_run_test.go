@@ -11,23 +11,28 @@ import (
 
 func TestParseHostRunOptionsRequiresClosedProfile(t *testing.T) {
 	t.Parallel()
-	options, err := parseHostRunOptions([]string{"main.fy", "--profile", "optimized"})
+	options, err := parseHostRunOptions([]string{"main.fy", "--source", "helper.fy", "--profile", "optimized"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if options.source != "main.fy" || options.profile != cdriver.OptimizedProfile {
+	if options.source != "main.fy" || strings.Join(options.additionalSources, ",") != "helper.fy" || options.profile != cdriver.OptimizedProfile {
 		t.Fatalf("options = %+v", options)
 	}
-	for _, arguments := range [][]string{
-		nil,
-		{"main.fy"},
-		{"--profile", "low", "main.fy"},
-		{"main.fy", "--cc", "msvc"},
-		{"main.fy", "--profile", "fast"},
-		{"main.fy", "--profile", "low", "extra"},
+	for _, test := range []struct {
+		arguments []string
+		contains  string
+	}{
+		{nil, "expects one entry source file"},
+		{[]string{"main.fy"}, "requires --profile"},
+		{[]string{"--profile", "low", "main.fy"}, "entry source file before"},
+		{[]string{"main.fy", "--cc", "msvc"}, "does not accept flag"},
+		{[]string{"main.fy", "--profile", "fast"}, "profile low"},
+		{[]string{"main.fy", "--profile", "low", "extra"}, "does not accept flag"},
+		{[]string{"main.fy", "--profile", "low", "--profile", "optimized"}, "more than once"},
+		{[]string{"main.fy", "--source", "--profile", "low"}, "requires a value for --source"},
 	} {
-		if _, err := parseHostRunOptions(arguments); err == nil {
-			t.Errorf("parseHostRunOptions(%q) succeeded", arguments)
+		if _, err := parseHostRunOptions(test.arguments); err == nil || !strings.Contains(err.Error(), test.contains) {
+			t.Errorf("parseHostRunOptions(%q) error = %v; want containing %q", test.arguments, err, test.contains)
 		}
 	}
 }

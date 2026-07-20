@@ -28,10 +28,11 @@ const (
 )
 
 type buildOptions struct {
-	source       string
-	compilerName string
-	profile      cdriver.Profile
-	output       string
+	source            string
+	additionalSources []string
+	compilerName      string
+	profile           cdriver.Profile
+	output            string
 }
 
 func runBuild(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
@@ -39,7 +40,7 @@ func runBuild(arguments []string, sourceRoot string, stdout, stderr io.Writer) i
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	lowered, code := lowerSingleProgram(options.source, sourceRoot, stderr, "C-emission")
+	lowered, code := lowerProgramSources(programSourceSet(options.source, options.additionalSources), sourceRoot, stderr, "C-emission")
 	if code != ExitSuccess {
 		return code
 	}
@@ -100,27 +101,33 @@ func combineProductSupportSource(standardLibrarySource string) (string, error) {
 
 func parseBuildOptions(arguments []string) (buildOptions, error) {
 	if len(arguments) == 0 {
-		return buildOptions{}, fmt.Errorf("experimental command \"build\" expects one source file and explicit --cc, --profile, and --output values")
+		return buildOptions{}, fmt.Errorf("experimental command \"build\" expects one entry source file and explicit --cc, --profile, and --output values")
 	}
 	options := buildOptions{source: arguments[0]}
-	if strings.HasPrefix(options.source, "-") {
+	if options.source == "" || strings.HasPrefix(options.source, "-") {
 		return buildOptions{}, fmt.Errorf("experimental command \"build\" expects the source file before its flags")
 	}
 	seen := make(map[string]bool, 3)
 	for index := 1; index < len(arguments); {
 		flag := arguments[index]
-		if flag != "--cc" && flag != "--profile" && flag != "--output" {
+		if flag != "--source" && flag != "--cc" && flag != "--profile" && flag != "--output" {
 			return buildOptions{}, fmt.Errorf("experimental command \"build\" does not accept flag %q", flag)
 		}
-		if seen[flag] {
+		if flag != "--source" && seen[flag] {
 			return buildOptions{}, fmt.Errorf("experimental command \"build\" received %s more than once", flag)
 		}
 		if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
 			return buildOptions{}, fmt.Errorf("experimental command \"build\" requires a value for %s", flag)
 		}
-		seen[flag] = true
+		if flag != "--source" {
+			seen[flag] = true
+		}
 		value := arguments[index+1]
 		switch flag {
+		case "--source":
+			if err := appendProgramSource("build", &options.additionalSources, value); err != nil {
+				return buildOptions{}, err
+			}
 		case "--cc":
 			if value != "clang" && value != "gcc" {
 				return buildOptions{}, fmt.Errorf("experimental command \"build\" requires --cc clang or --cc gcc")

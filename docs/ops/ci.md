@@ -14,7 +14,7 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
 - `go vet -mod=readonly ./...` runs before `go test -mod=readonly -count=1 ./...`.
 - After those ordinary checks, only the Windows matrix entry runs
   `cmd/fairyc-windows-host-smoke`. The command discovers the hosted runner's local x64 MSVC and
-  Windows SDK without WSL, exercises the target-neutral and declared-target paths plus layout, ABI,
+  Windows SDK without WSL, exercises single- and multi-source target-neutral paths plus the declared-target path, layout, ABI,
   PE/COFF, and unwind probes, and retains no executable, object, generated C, PDB, or report artifact.
 - The workflow uploads no build artifact and performs no deploy, release, publication, or write to
   repository state.

@@ -14,6 +14,7 @@ func TestParseBuildOptionsRequiresExplicitClosedChoices(t *testing.T) {
 	t.Parallel()
 	options, err := parseBuildOptions([]string{
 		"main.fy",
+		"--source", "helper.fy",
 		"--output", "build/hello",
 		"--profile", "optimized",
 		"--cc", "clang",
@@ -21,7 +22,7 @@ func TestParseBuildOptionsRequiresExplicitClosedChoices(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if options.source != "main.fy" || options.compilerName != "clang" || options.profile != cdriver.OptimizedProfile || options.output != "build/hello" {
+	if options.source != "main.fy" || strings.Join(options.additionalSources, ",") != "helper.fy" || options.compilerName != "clang" || options.profile != cdriver.OptimizedProfile || options.output != "build/hello" {
 		t.Fatalf("options = %+v", options)
 	}
 }
@@ -101,7 +102,7 @@ func TestParseBuildOptionsRejectsIncompleteOrOpenEndedArguments(t *testing.T) {
 		arguments []string
 		contains  string
 	}{
-		{name: "empty", contains: "expects one source file"},
+		{name: "empty", contains: "expects one entry source file"},
 		{name: "flag first", arguments: []string{"--cc", "clang"}, contains: "source file before"},
 		{name: "missing compiler", arguments: []string{"main.fy", "--profile", "low", "--output", "build/main"}, contains: "requires --cc"},
 		{name: "missing profile", arguments: []string{"main.fy", "--cc", "clang", "--output", "build/main"}, contains: "requires --profile"},
@@ -112,6 +113,7 @@ func TestParseBuildOptionsRejectsIncompleteOrOpenEndedArguments(t *testing.T) {
 		{name: "unknown flag", arguments: []string{"main.fy", "--cc", "gcc", "--profile", "low", "--output", "build/main", "--force"}, contains: "does not accept flag"},
 		{name: "duplicate", arguments: []string{"main.fy", "--cc", "gcc", "--cc", "clang", "--profile", "low", "--output", "build/main"}, contains: "more than once"},
 		{name: "missing value", arguments: []string{"main.fy", "--cc", "--profile", "low", "--output", "build/main"}, contains: "requires a value for --cc"},
+		{name: "missing source value", arguments: []string{"main.fy", "--source", "--profile", "low"}, contains: "requires a value for --source"},
 	}
 	for _, test := range tests {
 		test := test

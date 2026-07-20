@@ -79,7 +79,7 @@ and GCC under the closed `address-undefined-o1` ASan+UBSan mode for 40 fail-clos
 executions. The current Windows
 host has no eligible Linux toolchain, and no hosted run receipt has been observed, so this is a
 configured lane rather than native conformance evidence. A shared bounded C driver and embedded
-scalar runtime serve both that lane and the experimental single-file build command, while a separate
+scalar runtime serve both that lane and the experimental explicit-source-closure build command, while a separate
 closed conformance runtime records four-byte drop-site IDs only for the native matrix. Product C and
 product-built artifacts contain no observer. This proves
 the product wiring exists, not that runtime, ABI, or target-conformance gates pass.

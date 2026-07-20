@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0095-explicit-multi-source-interpreter-run.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0096-explicit-multi-source-prototype-program-commands.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -346,12 +346,12 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   order with its schema, admitted emission subset, independent maturity states, and sorted missing
   evidence. It performs no host or toolchain probe. The Windows entry reports emission subset
   `scalar-and-llp64-c-scalar-c11` and remains independent from the target-neutral MSVC host smoke.
-- The experimental single-file build command uses the same bounded C driver and embedded scalar
+- The experimental build command accepts the shared bounded explicit FY module closure and uses the same bounded C driver and embedded scalar
   runtime to produce a no-overwrite executable below `build/` on an eligible host. This artifact
   path does not expand the constrained backend subset, establish stable build syntax, or change target
   support status.
-- The Windows/amd64 `run-host` and `build-host` smokes separately compile one target-neutral verified
-  unit with a locally discovered x64 MSVC toolchain. `run-host` executes a temporary PE and reports
+- The Windows/amd64 `run-host` and `build-host` smokes separately compile one explicit target-neutral
+  verified FY module closure with a locally discovered x64 MSVC toolchain. `run-host` executes a temporary PE and reports
   the `i32` result or canonical trap; `build-host` retains one no-overwrite `.exe` below `build/`.
   They use no WSL and reject foreign symbols, standard-library linkage, `@repr(C)`, exact `c::*`
   scalars, and foreign calls or results. They do not establish Windows target emission, ABI,

@@ -12,19 +12,19 @@ import (
 func TestParseHostBuildOptionsRequiresClosedProfileAndExeOutput(t *testing.T) {
 	t.Parallel()
 	options, err := parseHostBuildOptions([]string{
-		"main.fy", "--output", "build/fairy.exe", "--profile", "optimized",
+		"main.fy", "--source", "helper.fy", "--output", "build/fairy.exe", "--profile", "optimized",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if options.source != "main.fy" || options.profile != cdriver.OptimizedProfile || options.output != "build/fairy.exe" {
+	if options.source != "main.fy" || strings.Join(options.additionalSources, ",") != "helper.fy" || options.profile != cdriver.OptimizedProfile || options.output != "build/fairy.exe" {
 		t.Fatalf("options = %+v", options)
 	}
 	for _, test := range []struct {
 		arguments []string
 		contains  string
 	}{
-		{nil, "expects one source file"},
+		{nil, "expects one entry source file"},
 		{[]string{"--profile", "low"}, "source file before"},
 		{[]string{"main.fy", "--output", "build/main.exe"}, "requires --profile"},
 		{[]string{"main.fy", "--profile", "low"}, "requires --output"},
@@ -32,6 +32,7 @@ func TestParseHostBuildOptionsRequiresClosedProfileAndExeOutput(t *testing.T) {
 		{[]string{"main.fy", "--profile", "low", "--output", "build/main"}, "end with .exe"},
 		{[]string{"main.fy", "--profile", "low", "--output", "build/../main.exe"}, "canonical relative"},
 		{[]string{"main.fy", "--profile", "low", "--output", "build/main.exe", "--force", "yes"}, "does not accept"},
+		{[]string{"main.fy", "--source", "--profile", "low"}, "requires a value for --source"},
 	} {
 		if _, err := parseHostBuildOptions(test.arguments); err == nil || !strings.Contains(err.Error(), test.contains) {
 			t.Errorf("parseHostBuildOptions(%q) error = %v; want containing %q", test.arguments, err, test.contains)

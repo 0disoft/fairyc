@@ -244,8 +244,9 @@ meanings and categories without reading source or invoking a toolchain. A provis
 report lists declared target maturity and missing evidence without probing this Windows host. An unstable
 `fairyc experimental` CLI can inspect syntax, syntax-check, semantic-check, emit the
 scalar, flat-resource, and resource-tagged C11 translation unit, build that subset into a Linux executable on an eligible host,
-inspect the declared target specification, or interpret one source-root-relative `.fy` file, while semantic checking also
-accepts an explicit module set. There is no stable CLI, user drop-body execution, complete runtime,
+inspect the declared target specification, or interpret an explicit source-root-relative FY module
+closure. Program commands use one entry plus repeated `--source`; semantic checking uses its explicit
+positional module set. There is no stable CLI, user drop-body execution, complete runtime,
 safe standard library, package manager, supported target, release-stable CLI, or stable language
 revision yet.
 
@@ -256,8 +257,8 @@ The following commands are manual developer examples, not agent command authorit
 ```text
 go run ./cmd/fairyc explain E1101
 go run ./cmd/fairyc targets
-go run ./cmd/fairyc experimental run-host examples/windows_smoke/main.fy --profile optimized
-go run ./cmd/fairyc experimental build-host examples/windows_smoke/main.fy --profile optimized --output build/fairyc-windows-smoke.exe
+go run ./cmd/fairyc experimental run-host examples/run/modules/main.fy --source examples/run/modules/math.fy --profile optimized
+go run ./cmd/fairyc experimental build-host examples/run/modules/main.fy --source examples/run/modules/math.fy --profile optimized --output build/fairyc-windows-smoke.exe
 go run ./cmd/fairyc experimental build-target examples/windows_target/main.fy --target x86_64-windows-msvc --profile optimized --output build/fairyc-windows-target.exe
 go run ./cmd/fairyc experimental run-target examples/windows_target/main.fy --target x86_64-windows-msvc --profile optimized
 go run ./cmd/fairyc experimental exec-target examples/windows_output/main.fy --source examples/windows_output/windows_console.fy --target x86_64-windows-msvc --profile optimized
@@ -273,6 +274,7 @@ go run ./cmd/fairyc experimental emit-c examples/c/main.fy
 go run ./cmd/fairyc experimental emit-c examples/c/tagged.fy
 go run ./cmd/fairyc experimental emit-c examples/c/resource.fy
 go run ./cmd/fairyc experimental emit-c examples/c/resource_tagged.fy
+go run ./cmd/fairyc experimental emit-c examples/run/modules/main.fy --source examples/run/modules/math.fy
 go run ./cmd/fairyc experimental build examples/c/tagged.fy --cc clang --profile optimized --output build/fairyc-example
 go run ./cmd/fairyc experimental run examples/run/main.fy
 go run ./cmd/fairyc experimental run examples/run/resource_option.fy
@@ -313,7 +315,7 @@ deterministic `fairyc.target-spec/v0` JSON. The result separates target semantic
 toolchain discovery and lists the profile-specific missing evidence that keeps all three target
 maturity claims false.
 
-`experimental emit-c` accepts the same single-file entry shape and prints the verified scalar plus
+`experimental emit-c` accepts the same explicit entry-plus-`--source` closure and prints the verified scalar plus
 flat all-`i32` resource and resource-bearing built-in tag C11 translation unit directly to stdout.
 Every used C scalar receives target size/alignment assertions; signed and unsigned integer families
 also receive signedness assertions. Target `c::ssize_t` alone adds the declared POSIX.1-2008 feature

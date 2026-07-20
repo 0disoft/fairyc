@@ -341,6 +341,20 @@ fn main() -> i32 {
 	}
 }
 
+func TestExperimentalEmitCEmitsExplicitModuleClosure(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeTestSource(t, root, "main.fy", "module main;\nimport helper as h;\nfn main() -> i32 { h::answer() }\n")
+	writeTestSource(t, root, "helper.fy", "module helper;\npub fn answer() -> i32 { 42 }\n")
+	code, stdout, stderr := runForTest([]string{"experimental", "emit-c", "main.fy", "--source", "helper.fy"}, root)
+	if code != ExitSuccess || stderr != "" || strings.Count(stdout, "static int32_t fy_fn_") != 4 || !strings.Contains(stdout, "fy_l_1 = fy_fn_0();") {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+	if strings.Contains(stdout, "helper") || strings.Contains(stdout, "answer") {
+		t.Fatalf("emit-c leaked module source identifiers:\n%s", stdout)
+	}
+}
+
 func TestExperimentalEmitCRejectsUnsupportedBackendSubset(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()

@@ -213,7 +213,7 @@ unit under ASan+UBSan with both compilers and treats every diagnostic as failure
 executed-path backend check, not another language oracle. The lane does not prove output, negative
 or larger `i32` returns, user drop-body effects, layout, ABI, the complete product runtime, or target conformance. The
 experimental build command shares this driver and scalar runtime but emits and links only the
-uninstrumented single-file artifact path; it does not inherit the fixture observer or broaden target
+uninstrumented explicit FY source closure; it does not inherit the fixture observer or broaden target
 evidence.
 
 ## Differential matrix

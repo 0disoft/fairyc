@@ -162,7 +162,7 @@ container. A separate
 Linux/amd64 runner now drives Clang and GCC at low and optimized profiles, links the embedded scalar
 runtime, executes each emitted fixture, compares its process outcome and source-linked drop trace,
 and separately runs every production unit under a closed ASan+UBSan mode. The same bounded C driver
-and runtime feed an explicit experimental single-file build command whose artifact is confined to
+and runtime feed an explicit experimental source-closure build command whose artifact is confined to
 the ignored source-root `build/` directory. One product smoke remains scalar/resource-only; a second
 requires the ordinary build path to select and link the real text-view C component from an actual
 Fairy call. The current Windows host cannot execute either native path, and no hosted run has been

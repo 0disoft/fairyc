@@ -116,6 +116,9 @@ foreign companion input, linker interface, or supported distribution contract.
 ADR 0095 applies the same explicit-only closure to unstable `experimental run`. It preserves the
 interpreter subset and result/trap contract while adding no backend, package, discovery, cache, I/O,
 or host-process compatibility promise.
+ADR 0096 applies the closure to `emit-c`, Linux `build`, and target-neutral Windows `build-host` and
+`run-host`. The repeated flag admits only FY files; compiler, linker, foreign-input, target, output,
+and artifact contracts remain unchanged and unstable.
 
 `fairyc.layout-fixtures/v0` separately versions the repository input and expectation vocabulary for
 the target-layout engine; each manifest binds one declared target. It is not a public
