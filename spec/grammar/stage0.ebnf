@@ -26,7 +26,6 @@ item_body = const_decl
           | struct_decl
           | resource_decl
           | enum_decl
-          | impl_decl
           | fairy_function_decl
           | foreign_function_decl
           ;
@@ -36,73 +35,68 @@ attribute_arguments = "(" attribute_argument_list? ")" ;
 attribute_argument_list = attribute_argument ("," attribute_argument)* ","? ;
 attribute_argument = path | integer_literal | string_literal ;
 
-const_decl = "const" IDENT ":" type "=" expression ";" ;
+const_decl = "const" type IDENT "=" expression ";" ;
 
 struct_decl = "struct" IDENT "{" field_decl* "}" ;
-field_decl = "pub"? IDENT ":" type ";" ;
+field_decl = "pub"? type IDENT ";" ;
 
-resource_decl = "resource" IDENT "{" field_decl* drop_decl? "}" ;
-drop_decl = "drop" "fn" "(" drop_receiver_parameter ")" block ;
-drop_receiver_parameter = "self" ":" "&" "mut" CONTEXT_SELF ;
+resource_decl = "resource" IDENT "{" field_decl* cleanup_decl? "}" ;
+cleanup_decl = attribute* "cleanup" statement_block ;
 
 enum_decl = "enum" IDENT "{" enum_variant* "}" ;
 enum_variant = IDENT enum_payload? ";" ;
 enum_payload = "{" enum_field_decl* "}" ;
-enum_field_decl = IDENT ":" type ";" ;
+enum_field_decl = type IDENT ";" ;
 
-impl_decl = "impl" type_path "{" impl_function_decl* "}" ;
-impl_function_decl = attribute* "pub"? "unsafe"? "fn" IDENT
-                     "(" method_parameter_list? ")"
-                     "->" type block
-                     ;
-
-fairy_function_decl = "unsafe"? "fn" IDENT
-                      "(" ordinary_parameter_list? ")"
-                      "->" type block
+fairy_function_decl = "unsafe"? "fn" type function_name
+                      "(" ordinary_parameter_list? ")" function_body
                       ;
 
-foreign_function_decl = "unsafe" "extern" CONTEXT_C "fn" IDENT
-                        "(" foreign_parameter_list? ")"
-                        "->" type ";"
+(* One optional owner qualifier distinguishes a type-owned function from a
+   module-local function. Receiver and owner agreement is semantic. *)
+function_name = IDENT ("::" IDENT)? ;
+
+foreign_function_decl = "unsafe" "extern" CONTEXT_C "fn" type IDENT
+                        "(" foreign_parameter_list? ")" ";"
                         ;
 
 ordinary_parameter_list = ordinary_parameter ("," ordinary_parameter)* ","? ;
-ordinary_parameter = "mut"? IDENT ":" type ;
+ordinary_parameter = type IDENT ;
 foreign_parameter_list = foreign_parameter ("," foreign_parameter)* ","? ;
-foreign_parameter = IDENT ":" type ;
-method_parameter_list = receiver_parameter ("," ordinary_parameter)* ","?
-                      | ordinary_parameter_list
-                      ;
-receiver_parameter = "self" ":" receiver_type ;
-receiver_type = "&" CONTEXT_SELF
-              | "&" "mut" CONTEXT_SELF
-              | CONTEXT_SELF
-              ;
+foreign_parameter = type IDENT ;
 
+(* Prefix constructors consume the complete type to their right. Postfix
+   brackets bind to their immediately preceding atom, so ref u8[] is a
+   reference to a slice while (ptr u8)[16] is an array of pointers. *)
 type = reference_type
      | raw_pointer_type
-     | slice_or_array_type
-     | foreign_function_type
-     | type_path
+     | postfix_type
      ;
 
-reference_type = "&" "mut"? type ;
-raw_pointer_type = "*" "mut"? type ;
-slice_or_array_type = "[" type (";" const_expression)? "]" ;
-foreign_function_type = "unsafe" "extern" CONTEXT_C "fn"
-                        "(" type_list? ")" "->" type
-                        ;
+reference_type = "ref" "mut"? type ;
+raw_pointer_type = "ptr" "mut"? type ;
+postfix_type = type_atom type_suffix* ;
+type_suffix = "[" const_expression? "]" ;
+type_atom = type_path
+          | grouped_type
+          | function_type
+          ;
+grouped_type = "(" type ")" ;
+function_type = "unsafe" "extern" CONTEXT_C "fn" type "(" type_list? ")" ;
 type_list = type ("," type)* ","? ;
 type_path = path type_arguments? ;
 type_arguments = "<" type ("," type)* ","? ">" ;
 
 block = "{" statement* tail_expression? "}" ;
+statement_block = "{" statement* "}" ;
+function_body = statement_block ;
 
 statement = binding_stmt
           | assignment_stmt
           | assert_stmt
           | return_stmt
           | discard_stmt
+          | if_statement
           | while_stmt
           | break_stmt
           | continue_stmt
@@ -110,9 +104,8 @@ statement = binding_stmt
           | expression_stmt
           ;
 
-binding_stmt = binding_kind IDENT type_annotation? "=" expression ";" ;
+binding_stmt = binding_kind (IDENT | type IDENT) "=" expression ";" ;
 binding_kind = "let" | "var" ;
-type_annotation = ":" type ;
 
 (* The parser first reads the left expression. If '=' follows, it forms an
    assignment statement; otherwise the expression statement requires ';'.
@@ -123,14 +116,14 @@ expression_stmt = expression ";" ;
 return_stmt = "return" expression? ";" ;
 assert_stmt = "assert" "(" expression ")" ";" ;
 discard_stmt = "discard" expression ";" ;
-while_stmt = "while" control_expression block ;
+if_statement = if_expression ;
+while_stmt = "while" "(" expression ")" statement_block ;
 break_stmt = "break" ";" ;
 continue_stmt = "continue" ";" ;
-region_stmt = "region" IDENT "in" expression block ;
+region_stmt = "region" IDENT "in" expression statement_block ;
 tail_expression = expression ;
 
 expression = logical_or_expression ;
-control_expression = logical_or_expression ;
 
 logical_or_expression = logical_and_expression ("||" logical_and_expression)* ;
 logical_and_expression = comparison_expression ("&&" comparison_expression)* ;
@@ -148,7 +141,7 @@ multiplicative_expression = cast_expression (("*" | "/" | "%") cast_expression)*
 
 cast_expression = prefix_expression ("as" type)* ;
 prefix_expression = prefix_operator prefix_expression | postfix_expression ;
-prefix_operator = "-" | "+" | "!" | "~" | "&" | "&" "mut" | "*" ;
+prefix_operator = "-" | "+" | "!" | "~" | "ref" | "ref" "mut" | "*" ;
 
 postfix_expression = primary_expression postfix_suffix* ;
 postfix_suffix = call_suffix | index_suffix | field_suffix | "?" ;
@@ -158,18 +151,22 @@ index_suffix = "[" (expression ".." expression? | ".." expression? | expression)
 field_suffix = "." IDENT ;
 
 primary_expression = literal
-                   | "self"
                    | path_expression
+                   | contextual_variant_expression
                    | grouped_expression
                    | array_expression
                    | record_expression
                    | block
                    | if_expression
-                   | match_expression
+                   | switch_expression
                    | unsafe_expression
                    ;
 
 path_expression = path ;
+contextual_variant_expression = contextual_variant
+                              | contextual_variant "{" record_field_list? "}"
+                              ;
+contextual_variant = "." IDENT ;
 grouped_expression = "(" expression ")" ;
 
 array_expression = "[" array_contents? "]" ;
@@ -177,28 +174,24 @@ array_contents = expression (";" const_expression | ("," expression)* ","?) ;
 
 record_expression = path "{" record_field_list? "}" ;
 record_field_list = record_field ("," record_field)* ","? ;
-record_field = IDENT ":" expression ;
+record_field = "." IDENT "=" expression ;
 
-if_expression = "if" control_expression block
+if_expression = "if" "(" expression ")" block
                 ("else" (block | if_expression))?
                 ;
 
-match_expression = "match" control_expression "{" match_arm* "}" ;
-match_arm = pattern "=>" expression "," ;
+switch_expression = "switch" "(" expression ")" "{" switch_case* "}" ;
+switch_case = "case" pattern ":" block ;
 
-(* The compiler-known Stage 0 Result spellings are Result::Ok(expression) and
-   Result::Err(expression), matched by Result::Ok(binding) and
-   Result::Err(binding). Option uses Option::Some(expression) and the bare path
-   Option::None, matched by Option::Some(binding) and bare Option::None. Their
-   arity, contextual type, and exhaustiveness are semantic checks over the
-   general path/call and pattern productions. *)
-pattern = "_"
-        | path
-        | path "(" IDENT ")"
-        | path "{" pattern_field_list? "}"
+(* A leading-dot variant requires a contextual enum, Option, or Result type.
+   Exhaustiveness, payload arity, and the ban on whole-value wildcards are
+   semantic checks over these shallow patterns. *)
+pattern = contextual_variant
+        | contextual_variant "(" IDENT ")"
+        | contextual_variant "{" pattern_field_list? "}"
         ;
 pattern_field_list = pattern_field ("," pattern_field)* ","? ;
-pattern_field = IDENT ":" IDENT ;
+pattern_field = "." IDENT "=" IDENT ;
 
 unsafe_expression = "unsafe" block ;
 
@@ -257,7 +250,6 @@ ASCII_LETTER = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i"
              ;
 
 CONTEXT_C = IDENT ;     (* raw spelling must be C *)
-CONTEXT_SELF = IDENT ;  (* raw spelling must be Self *)
 
 STRING_TOKEN = QUOTE TEXT_STRING_UNIT* QUOTE ;
 BYTE_STRING_TOKEN = "b" QUOTE BYTE_STRING_UNIT* QUOTE ;

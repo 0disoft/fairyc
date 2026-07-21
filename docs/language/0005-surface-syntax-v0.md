@@ -2,26 +2,28 @@
 
 - Status: Draft Stage 0 contract
 - Product source: `docs/product/02-spec.md`
-- Decision source: `docs/adr/0005-stage-0-surface-and-module-boundary.md`
+- Original boundary decision: `docs/adr/0005-stage-0-surface-and-module-boundary.md`
+- Current surface decision: `docs/adr/0136-c-shaped-source-surface.md`
 - Grammar decision: `docs/adr/0009-stage-0-grammar-and-parser-contract.md`
 - Normative grammar: `spec/grammar/stage0.ebnf`
-- Planned replacement: `docs/adr/0136-c-shaped-source-surface.md`
 
-> This document and the normative grammar describe the surface accepted by the current compiler.
-> ADR 0136 records the coordinated replacement for the next pre-1 language revision; none of its
-> spellings are accepted until the grammar, parser, fixtures, examples, diagnostics, and compatibility
-> metadata cut over together.
+> This document and the normative grammar describe the C-shaped surface accepted by the current
+> compiler. The immediately preceding Rust-shaped source revision is migration input only and is not
+> an alternate product grammar.
 
 ## Lexical and declaration rules
 
 - Source files use `.fy` and UTF-8. Stage 0 identifiers are ASCII letters, digits, and underscore and cannot start with a digit.
 - Statements end with explicit semicolons. There is no automatic insertion.
-- A declaration is written `name: Type`; C declarators and `typedef`-dependent parsing do not exist.
-- Every function return type is explicit. No return value is `void`.
+- Written declarations put one complete `Type` before one name. C name-splitting declarators,
+  multiple declarators, and `typedef`-dependent parsing do not exist.
+- Functions use `fn Result name(Parameters)`. Every result type is explicit; `void` explicitly marks
+  the absence of a returned value.
 - Source-level locals have initializers. `let` prevents reassignment; `var` permits reassignment and mutable borrowing.
-- An ordinary internal by-value parameter may use `mut name: Type`. The modifier makes only the
-  callee-local place assignable and mutably borrowable; foreign parameters and explicit receivers
-  do not use this spelling in Stage 0.
+- A written local is `let Type name = value;` or `var Type name = value;`. The inferred forms are
+  exactly `let name = value;` and `var name = value;`; `auto` is not a source declaration marker.
+- Parameters use `Type name`. A callee that needs a reassignable local explicitly initializes a
+  `var` local from its parameter; parameters have no separate `mut name` spelling.
 - A `let` resource may still be consumed. Binding immutability is not ownership immobility.
 - A by-value position consumes a resource. Stage 0 has no `move` expression or `move` argument keyword.
 - Globals are compile-time `const` only. Mutable globals are excluded.
@@ -58,30 +60,33 @@ c::bool, c::char, c::double, c::float, c::int, c::long, c::longlong, c::schar
 c::short, c::size_t, c::ssize_t, c::uchar, c::uint, c::ulong, c::ulonglong, c::ushort
 f32, f64
 Path::Type
-&T, &mut T
-*T, *mut T
-[T], [T; N]
+ref T, ref mut T
+ptr T, ptr mut T
+T[], T[N]
 Option<T>, Result<T, E>
 Region
-unsafe extern C fn(...) -> T
+unsafe extern C fn T(...)
 ```
 
-`str` and `CStr` are unsized compiler-known view types and appear as `&str` and `&CStr`. User-defined generic declarations are excluded even though built-in `Option`, `Result`, slices, and arrays accept type arguments.
+`str` and `CStr` are unsized compiler-known view types and appear as `ref str` and `ref CStr`.
+User-defined generic declarations are excluded even though built-in `Option`, `Result`, slices, and
+arrays accept type arguments. `T[]` is unsized and cannot appear by value; safe views use `ref T[]`
+or `ref mut T[]`.
 
-A safe borrow whose element type is `str` or `[u8]` exposes the read-only property `.len` with
+A safe borrow whose referent type is `str` or `u8[]` exposes the read-only property `.len` with
 result type `usize`. The property reports the view's byte count, including embedded NUL bytes and
 multi-byte UTF-8 encodings. It reads existing view metadata without scanning, allocation, a call, or
 a trap. The same views expose `.is_empty` with result type `bool`, true exactly when the retained
 byte count is zero and with the same no-scan and no-call guarantees. These properties do not define
 capacity, Unicode scalar or grapheme counting, `CStr` metadata, or a public view representation.
 
-An immutable `&[u8]` supports the read-only expression `bytes[index]`. The index has type `usize`;
+An immutable `ref u8[]` supports the read-only expression `bytes[index]`. The index has type `usize`;
 an unsuffixed integer literal receives that contextual type. The result has type `u8`. The receiver
 and index evaluate once from left to right, and an index greater than or equal to `.len` traps with
 category `bounds` before any data access.
 
 A mutable fixed scalar-array place supports `values[index] = value` when the receiver is a `var`
-local or `mut` by-value parameter. A value of type `&mut [u8]` supports both the same checked `u8`
+local. A value of type `ref mut u8[]` supports both the same checked `u8`
 read and `bytes[index] = value`; the borrow binding itself may remain `let` because the borrow type,
 not binding reassignment, grants referent mutation. A shared view, immutable array place, literal,
 call result, or other non-place target is rejected. The receiver and `usize` index evaluate once from
@@ -92,12 +97,12 @@ compound assignment, and user-defined indexing remain outside Stage 0.
 The same immutable view supports end-exclusive `bytes[start..end]`, `bytes[..end]`,
 `bytes[start..]`, and `bytes[..]`. Written bounds have type `usize`; an omitted start is zero and an
 omitted end is the retained length of the already-evaluated receiver. The receiver and every
-written bound evaluate once from left to right. The result is `&[u8]` with the receiver's borrow
+written bound evaluate once from left to right. The result is `ref u8[]` with the receiver's borrow
 origin when `start <= end && end <= bytes.len`; otherwise evaluation traps with `bounds` before
 deriving a pointer. This does not admit inclusive bounds, `str` indexing or slicing, indexed
 assignment, mutable-view indexing or slicing, or unchecked access.
 
-The first executable fixed-array subset accepts `[T; N]` only when `T` is `bool`, `i32`, `u8`,
+The first executable fixed-array subset accepts `T[N]` only when `T` is `bool`, `i32`, `u8`,
 `u32`, or `usize` and `1 <= N <= 4096`. The ceiling is a provisional Stage 0 implementation guard
 for the initial by-value representation, not a stable language or ABI limit. A nonempty list
 `[a, b, ...]` constructs an inert copy value and evaluates its elements exactly once from left to
@@ -106,10 +111,11 @@ least `N`. `array.len` evaluates the receiver once and returns exact canonical `
 without a scan, allocation, runtime call, memory read, or trap. Empty and repeated literals remain parser-valid but unsupported until zero-size
 representation and expansion-budget contracts exist. Array fields, nesting, resource elements,
 mutable indexing, slicing, properties other than `.len`, broad array coercions, and foreign
-signatures remain closed. One direct shared borrow of an admitted `[u8; N]` place contextually
-becomes `&[u8]` when that view type is already expected, as in
-`let bytes: &[u8] = &array` or an internal `&[u8]` call argument. A direct exclusive borrow of a
-mutable admitted `[u8; N]` place likewise becomes `&mut [u8]` only where that exact type is expected.
+signatures remain closed. One direct shared borrow of an admitted `u8[N]` place contextually
+becomes `ref u8[]` when that view type is already expected, as in
+`let ref u8[] bytes = ref array` or an internal `ref u8[]` call argument. A direct exclusive borrow
+of a mutable admitted `u8[N]` place likewise becomes `ref mut u8[]` only where that exact type is
+expected.
 Both views retain the array's origin and exact `N`; other element types, bare values, temporary
 sources, inferred conversions, and escaping local views remain closed. The mutable view may cross
 internal calls and expose `.len`, but it adds no safe indexing, assignment, slicing, or resizing.
@@ -117,13 +123,13 @@ A `var` safe-borrow local may be
 reassigned in straight-line, branch, or `while` control flow; reachable branch, header,
 `continue`, and `break` origins are joined and returning a multi-origin result is rejected.
 
-Internal function parameters may name an exact `&[T; N]` or `&mut [T; N]` for an admitted fixed
+Internal function parameters may name an exact `ref T[N]` or `ref mut T[N]` for an admitted fixed
 array. This is a safe borrow of the whole array, not a slice, and does not add resizing, mutable
-indexing, array fields, foreign-reference parameters, or a public ABI. Contextual `&[u8; N]` to
-`&[u8]` and `&mut [u8; N]` to `&mut [u8]` conversion preserve their respective shared or exclusive
+indexing, array fields, foreign-reference parameters, or a public ABI. Contextual `ref u8[N]` to
+`ref u8[]` and `ref mut u8[N]` to `ref mut u8[]` conversion preserve their respective shared or exclusive
 loan; neither converts between mutabilities.
 
-Ordinary internal functions may accept `&str` and `&[u8]` parameters. Calls preserve the exact safe
+Ordinary internal functions may accept `ref str` and `ref u8[]` parameters. Calls preserve the exact safe
 borrow and its caller-proven origin; they do not convert the argument to a raw pointer or transfer
 ownership. A safe function may contain an explicit lexical `unsafe` block and expose a checked
 result to safe callers, but foreign declarations themselves still reject safe-borrow parameters and
@@ -150,16 +156,16 @@ results by value. Foreign aggregate parameters remain deferred.
 `c::size_t` uses the ISO C `<stddef.h>` typedef; `c::ssize_t` is available only for the current
 `x86_64-linux-gnu` POSIX.1-2008 profile through `<sys/types.h>`. Plain `c::char` follows the selected
 target's signed `char` fact rather than inheriting either `c::schar` or `c::uchar`.
-Raw `*void` and `*mut void` are opaque C-interoperability pointers. Inside `unsafe`, a direct local
-`&T` may become `*void`, and `&mut T` may become `*void` or `*mut void`; the conversion preserves
+Raw `ptr void` and `ptr mut void` are opaque C-interoperability pointers. Inside `unsafe`, a direct
+local `ref T` may become `ptr void`, and `ref mut T` may become `ptr void` or `ptr mut void`; the conversion preserves
 the concrete owner type in verified MIR and never strengthens mutability. Exact typed
-borrow-to-pointer casts and immutable `&CStr` parameter data extraction use the same explicit unsafe
+borrow-to-pointer casts and immutable `ref CStr` parameter data extraction use the same explicit unsafe
 boundary. An existing safe resource or fixed-array borrow may likewise erase only its referent type
 to `void`; it forwards the referent pointer and never takes the address of the borrow carrier. Raw
 dereference, arithmetic, integer conversion, and every other pointee-changing cast remain
 unavailable.
 The executable foreign slice additionally admits one pointer-to-opaque-pointer output shape such as
-`*mut *mut void`; both layers must be mutable, and pointer nesting does not generalize to C scalars,
+`ptr mut ptr mut void`; both layers must be mutable, and pointer nesting does not generalize to C scalars,
 arbitrary pointees, or the other mutability combinations.
 
 ## Structs, resources, and enums
@@ -168,46 +174,49 @@ An inert struct contains only inert non-borrow fields:
 
 ```fy
 struct Point {
-    x: f32;
-    y: f32;
+    f32 x;
+    f32 y;
 }
 ```
 
-A resource may own cleanup and defines at most one infallible drop body. Ordinary methods live in an `impl` block:
+A resource may own cleanup and defines at most one infallible, non-callable `cleanup` block.
+Associated functions and methods use an owner-qualified function name:
 
 ```fy
 resource File {
-    handle: c::int;
+    c::int handle;
 
-    drop fn(self: &mut Self) {
+    cleanup {
         unsafe {
-            os_close_best_effort(self.handle);
+            os_close_best_effort(this.handle);
         }
     }
 }
 
-impl File {
-    pub fn close(self: Self) -> Result<void, CloseError> {
-        // target-specific consuming close
-    }
+pub fn Result<void, CloseError> File::close(File this) {
+    // target-specific consuming close
 }
 ```
 
-Receivers are exactly `self: &Self`, `self: &mut Self`, or `self: Self`. Resource fields are private outside the defining module. General field extraction from a resource remains forbidden.
+The first parameter named `this` is the receiver. Its exact forms are `ref File this`,
+`ref mut File this`, or `File this`, and its owner type must match `File::`. A qualified function
+without `this` is associated but is not a method. Resource fields are private outside the defining
+module. General field extraction from a resource remains forbidden.
 
 Restricted user enums provide typed inert errors:
 
 ```fy
 enum IoError {
     NotFound;
-    PermissionDenied { os_code: c::int; }
+    PermissionDenied { c::int os_code; }
 }
 ```
 
 User-enum payload fields must be inert and copyable. Resource payloads remain special to built-in `Option` and `Result`, whose active-variant move and drop behavior is compiler-defined.
-Payloadless construction uses `IoError::NotFound`; named payload construction uses
-`IoError::PermissionDenied { os_code: value }`. A shallow user-enum match lists every declared
-variant exactly once and binds every named field in the active payload.
+Payloadless construction uses contextual `.NotFound`; named payload construction uses
+`.PermissionDenied { .os_code = value }`. An exhaustive shallow `switch` lists every declared
+variant exactly once and binds every named field in the active payload. The expected enum type,
+never a global best-fit search, resolves a leading-dot variant.
 
 ## Expressions and control flow
 
@@ -215,18 +224,25 @@ variant exactly once and binds every named field in the active payload.
 
 ```fy
 let file =
-    if use_backup {
+    if (use_backup) {
         fs::File::open(backup)?
     } else {
         fs::File::open(primary)?
     };
 ```
 
-`Result` construction uses `Result::Ok(expression)` and `Result::Err(expression)` only where one
-contextual `Result<T, E>` type is known. A shallow Result match uses exactly one
-`Result::Ok(binding)` arm and one `Result::Err(binding)` arm. Restricted user-enum patterns now use
-shallow named inert fields and exact exhaustiveness. Wildcards, nested destructuring, guards,
-or-patterns, slice patterns, `ref` modifiers, and resource-field extraction are excluded.
+`Result` construction uses `.ok(expression)` and `.err(expression)` only where one contextual
+`Result<T, E>` type is known. A shallow Result switch uses exactly one `case .ok(binding): { ... }`
+and one `case .err(binding): { ... }`. `Option` analogously uses `.some(expression)` and `.none`.
+Every case owns a mandatory block, never falls through, and cannot target `break`. Restricted
+user-enum patterns use shallow named inert fields and exact exhaustiveness. Whole-value wildcards,
+nested destructuring, guards, or-patterns, slice patterns, and resource-field extraction are
+excluded; `_` may discard only a selected payload.
+
+`if`, `while`, and `switch` require parenthesized conditions or scrutinees. Function bodies do not
+return their final expression: a non-`void` function returns only through `return expression;`,
+while a `void` function may use `return;` or fall through. Value-producing `if` branches and
+`switch` case blocks may retain one unsemicolonized tail expression.
 
 Assignment is a statement. Comma expressions, `++`, `--`, C ternary syntax, and integer truthiness are excluded. Ordinary arithmetic traps as defined by the product specification; wrapping, saturating, and checked behavior uses methods rather than additional operator tokens.
 
@@ -259,11 +275,11 @@ Raw operations occur in `unsafe {}` or an `unsafe fn`. Each C declaration is ind
 
 ```fy
 @link_name("read")
-unsafe extern C fn c_read(
-    fd: c::int,
-    data: *mut u8,
-    size: c::size_t,
-) -> c::ssize_t;
+unsafe extern C fn c::ssize_t c_read(
+    c::int fd,
+    ptr mut u8 data,
+    c::size_t size,
+);
 ```
 
 Without the attribute, the Fairy declaration name is also the external C identifier. With it, the

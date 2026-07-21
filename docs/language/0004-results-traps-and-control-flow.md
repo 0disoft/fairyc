@@ -13,13 +13,14 @@ Fairy C evaluates expression operands, aggregate fields, and call arguments from
 
 `Option<T>` and `Result<T, E>` are tagged values. Their copyability and cleanup obligations follow their active payloads. Reading a resource payload by value moves it.
 
-`Result` is must-use. It must be matched, returned, propagated with `?`, or discarded with `discard expression;`. `?` is not defined for `Option` in Stage 0.
+`Result` is must-use. It must be switched over, returned, propagated with `?`, or discarded with
+`discard expression;`. `?` is not defined for `Option` in Stage 0.
 
 The explicit discard spelling is `discard expression;`. Discarding `Option` or `Result` drops only the active payload. A restricted user enum cannot contain a resource payload in Stage 0.
 
 Every evaluated Result carries one must-use obligation. Storing it transfers that obligation to the
 destination local, and passing it by value transfers the obligation to the callee's Result
-parameter. Result parameters therefore begin pending. Return, `discard`, exhaustive Result match,
+parameter. Result parameters therefore begin pending. Return, `discard`, exhaustive Result switch,
 and `?` discharge the obligation; assignment cannot silently discharge the previous destination.
 
 Any pending obligation at a normal scope exit, function exit, earlier return edge, or overwrite is
@@ -28,30 +29,30 @@ zero iterations and repeated back edges, so a value produced by one iteration ca
 by the next. These rules do not make every Result move-only: copyability still follows the payload,
 but every new Result evaluation must occupy a handling or transfer position.
 
-Stage 0 constructs Option variants with compiler-known qualified forms:
+Stage 0 constructs Option variants with contextual leading-dot forms:
 
 ```fy
-Option::Some(value)
-Option::None
+.some(value)
+.none
 ```
 
-Both forms require one contextual `Option<T>` type. `Option::Some` carries exactly one payload;
-`Option::None` is a bare variant and is not callable. A shallow Option match contains exactly one
-`Option::Some(binding)` arm and one bare `Option::None` arm. The None arm creates no binding and no
+Both forms require one contextual `Option<T>` type. `.some` carries exactly one payload;
+`.none` is a bare variant and is not callable. A shallow Option switch contains exactly one
+`case .some(binding)` and one bare `case .none`. The `.none` case creates no binding and no
 payload extraction. Wildcards, guards, nested patterns, and reference-style payload bindings remain
 outside this slice. Scalar, inert, and resource-bearing active payloads execute through verified MIR.
 
-Stage 0 constructs Result variants with compiler-known qualified paths:
+Stage 0 constructs Result variants with contextual leading-dot forms:
 
 ```fy
-Result::Ok(value)
-Result::Err(error)
+.ok(value)
+.err(error)
 ```
 
 These forms require one contextual `Result<T, E>` type and do not perform ordinary function
-lookup. Shallow matching uses exactly one `Result::Ok(binding)` arm and one
-`Result::Err(binding)` arm. The binding is local to its arm, the scrutinee is evaluated once, and
-both arms have one compatible result type. Wildcard Result arms, guards, nested patterns, and
+lookup. A shallow switch uses exactly one `case .ok(binding)` and one
+`case .err(binding)`. The binding is local to its case, the scrutinee is evaluated once, and
+both cases have one compatible result type. Wildcard Result cases, guards, nested patterns, and
 ref-style payload bindings are outside this slice.
 
 ## Propagation
@@ -59,9 +60,9 @@ ref-style payload bindings are outside this slice.
 `expr?` evaluates `expr` once, branches on the result tag, moves the success payload into the continuation, and moves the error payload into the function return path. Normal cleanup for every exited scope runs before that return. No backend receives a `?` operator.
 
 The Result fixtures classify expressions as returned, discarded, propagated, constructed, or
-matched, record canonical success and error types, and assert exactly-once evaluation. Their
+switched, record canonical success and error types, and assert exactly-once evaluation. Their
 parameter-driven cases remain valid evidence for handling independent of construction, while the
-qualified ADR 0017 constructor and match cases execute through typed HIR. Scalar Result and Option
+contextual constructor and switch cases execute through typed HIR. Scalar Result and Option
 variants execute through verified MIR. Resource-bearing construction, propagation, active-variant
 cleanup, and deterministic drop traces are covered by the MIR interpreter fixtures.
 

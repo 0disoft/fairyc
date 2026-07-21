@@ -7,7 +7,8 @@
 
 ## Borrow kinds
 
-`&T` is a non-null shared read-only borrow. `&mut T` is a non-null exclusive mutable borrow. Neither kind owns the referent. Nullability is expressed with `Option<&T>` or a raw pointer.
+`ref T` is a non-null shared read-only borrow. `ref mut T` is a non-null exclusive mutable borrow.
+Neither kind owns the referent. Nullability is expressed with `Option<ref T>` or a raw pointer.
 
 ## Hidden origins
 
@@ -22,7 +23,7 @@ The compiler tracks a `BorrowOrigin` that is not part of source syntax:
 | `RawUnknown` | Provenance entered through raw or foreign memory | No safe return without an explicit unsafe wrapper proof |
 
 `Param(i)` is assigned only when an already-borrowed parameter is propagated. Directly borrowing
-a by-value parameter with `&parameter` borrows its callee-local stack storage, so its origin is
+a by-value parameter with `ref parameter` borrows its callee-local stack storage, so its origin is
 `Local(parameter)` and returning it is `E2102`.
 
 `Static` may be shortened to an expected parameter or region origin. Origins are never lengthened.
@@ -35,10 +36,13 @@ Stage 0 loans are local and end after the last proven use in the current functio
 
 Place overlap is deliberately coarse. Borrows of different fields of the same root are treated as borrowing the whole root. Field-disjoint borrowing and two-phase borrows are deferred until real APIs justify their diagnostics and analysis cost.
 
-Passing an existing mutable borrow to a call creates a call-bounded reborrow when the parameter is `&mut T`. The original borrow becomes usable again after the call's last use. Returning, storing, or assigning the borrow to a longer-lived destination is not a call-bounded reborrow and must satisfy the ordinary origin and escape rules.
+Passing an existing mutable borrow to a call creates a call-bounded reborrow when the parameter is
+`ref mut T`. The original borrow becomes usable again after the call's last use. Returning, storing,
+or assigning the borrow to a longer-lived destination is not a call-bounded reborrow and must
+satisfy the ordinary origin and escape rules.
 
-The first executable array-view bridge permits a direct shared borrow of an admitted `[u8; N]`
-place where `&[u8]` is already expected. It retains the place's origin and loans the whole array.
+The first executable array-view bridge permits a direct shared borrow of an admitted `u8[N]`
+place where `ref u8[]` is already expected. It retains the place's origin and loans the whole array.
 
 A mutable local containing a safe borrow may be reassigned. Flow evaluates the
 right-hand side first and then replaces the target's origin and retained-loan set. Each direct
@@ -51,7 +55,7 @@ returned view copies the owner's hidden origin and retained loans; the raw point
 origin. A safe wrapper therefore returns `Param(i)` only when its owner argument already has that
 origin. Moving the owner through a by-value resource call before the view's last use is `E2105`.
 
-`if` and `match` analyze each branch with an independent borrow environment and join only reachable
+`if` and `switch` analyze each branch with an independent borrow environment and join only reachable
 exits. Equal origins compact to one fact. Different possible origins remain a disjunction and a
 return of that value is `E2103`; source order never chooses a winning branch. Loan liveness is also
 path-aware, so a use in one branch does not keep an unrelated mutually exclusive branch's owner
@@ -89,7 +93,8 @@ In Stage 0, a complete return type contains at most one safe-borrow leaf. This a
 
 Named `struct` and `resource` aggregates cannot contain safe borrow fields. A safe borrow may exist in a local temporary and in the restricted return shapes above, but it cannot become durable aggregate state.
 
-`str` and `CStr` are compiler-known unsized view types, not ordinary structs containing raw pointers. Their safe forms are `&str` and `&CStr` and retain an ordinary borrow origin.
+`str` and `CStr` are compiler-known unsized view types, not ordinary structs containing raw
+pointers. Their safe forms are `ref str` and `ref CStr` and retain an ordinary borrow origin.
 
 A function that returns a safe borrow cannot be converted to a function pointer, stored in an interface or dynamic-dispatch table, or used as a callback. Those forms would need the return origin to become part of a first-class function type, which Stage 0 intentionally does not model.
 
@@ -97,7 +102,9 @@ A function that returns a safe borrow cannot be converted to a function pointer,
 
 Safe self-referential aggregates are rejected because moving the aggregate could invalidate its internal reference. Use indices, generation handles, a lexical region with external references, or a narrow unsafe representation.
 
-User-defined interior mutability is not available in Stage 0. `&T` therefore preserves its read-only meaning. `Region` is a compiler-known capability with dedicated rules, not a user-definable exception.
+User-defined interior mutability is not available in Stage 0. `ref T` therefore preserves its
+read-only meaning. `Region` is a compiler-known capability with dedicated rules, not a user-definable
+exception.
 
 ## Raw and foreign boundaries
 

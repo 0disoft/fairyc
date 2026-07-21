@@ -7,7 +7,9 @@
 
 ## Region capability
 
-`Region` is a compiler-known lexical capability. It is not equivalent to `&mut Arena`, because repeated allocation through an ordinary exclusive borrow would otherwise create overlapping-borrow problems or require user-defined interior mutability.
+`Region` is a compiler-known lexical capability. It is not equivalent to `ref mut Arena`, because
+repeated allocation through an ordinary exclusive borrow would otherwise create overlapping-borrow
+problems or require user-defined interior mutability.
 
 A region capability:
 
@@ -17,7 +19,9 @@ A region capability:
 - resets when fallthrough, `return`, Result `?` propagation, `break`, or `continue` exits the lexical region;
 - assigns `RegionParam(i)` or the corresponding local region origin to derived borrows.
 
-`region scratch in arena { ... }` requires `arena` to have type `&mut std::alloc::Arena`. The exclusive borrow covers the lexical block, while `scratch` is a distinct compiler-owned capability so repeated allocations do not create overlapping ordinary borrows.
+`region scratch in arena { ... }` requires `arena` to have type `ref mut std::alloc::Arena`. The
+exclusive borrow covers the lexical block, while `scratch` is a distinct compiler-owned capability
+so repeated allocations do not create overlapping ordinary borrows.
 
 The Stage 0 allocation surface is limited to zero-initialized bytes, copied bytes, and `place(value)` for a fully initialized inert value whose type is inferred from the expression. There is no user generic `alloc<T>` syntax, safe uninitialized byte view, or resource placement.
 
@@ -58,7 +62,7 @@ Normal lexical exit resets the region after ordinary inner-scope resource cleanu
 The current executable prototype proves fallthrough, direct `return`, Result `?` propagation,
 nearest-loop `break` and `continue`, and nested Region exits with explicit MIR enter, place, drop,
 and reset operations. Its trace records the exit kind, placement count, and how many resource drops
-completed before reset without exposing addresses or offsets. Executable lowering currently requires the Arena source to be a direct `&mut` local; a
+completed before reset without exposing addresses or offsets. Executable lowering currently requires the Arena source to be a direct `ref mut` local; a
 side-effecting borrow-producing expression is rejected rather than skipped.
 
 ## Concurrency

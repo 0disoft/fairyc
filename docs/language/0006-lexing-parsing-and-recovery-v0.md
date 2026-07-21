@@ -52,12 +52,15 @@ between its two characters.
 The reserved keywords are:
 
 ```text
-as break const continue discard else enum extern false fn
-if impl import in let match module mut null pub region resource
-return self struct true unsafe var while drop
+as assert break case cleanup const continue discard else enum extern false fn
+if import in let module mut null ptr pub ref region resource return
+struct switch true unsafe var while
 ```
 
-Primitive type names, `Self`, and the `C` in `extern C` are contextual names rather than globally reserved keywords. A contextual name is interpreted specially only in its owning grammar position.
+Primitive type names, `this`, and the `C` in `extern C` are contextual names rather than globally
+reserved keywords. `this` gains receiver or cleanup meaning only in the corresponding
+owner-qualified function or resource cleanup block. A contextual name is interpreted specially only
+in its owning grammar position.
 
 ## Literals
 
@@ -90,9 +93,11 @@ Hexadecimal floats, `.5`, `1.`, `NaN`, infinity spellings, and type suffixes are
 
 ### String-family literals
 
-`"..."` produces an immutable `&str` with `Static` borrow origin. Its decoded contents must be valid Unicode scalar values and are encoded as UTF-8.
+`"..."` produces an immutable `ref str` with `Static` borrow origin. Its decoded contents must be valid Unicode scalar values and are encoded as UTF-8.
 
-`b"..."` produces an immutable `&[u8]` with `Static` origin. `c"..."` produces an immutable `&CStr` with `Static` origin; the compiler appends exactly one trailing NUL, and a decoded interior NUL is rejected as `E0006`.
+`b"..."` produces an immutable `ref u8[]` with `Static` origin. `c"..."` produces an immutable
+`ref CStr` with `Static` origin; the compiler appends exactly one trailing NUL, and a decoded
+interior NUL is rejected as `E0006`.
 
 All three forms support `\\`, `\"`, `\n`, `\r`, `\t`, `\0`, and `\xNN`. Text strings additionally support `\u{H}` through `\u{HHHHHH}` for a valid non-surrogate Unicode scalar. Byte and C strings reject `\u{...}`; non-ASCII source characters are encoded as their UTF-8 bytes. Unknown, truncated, out-of-range, or surrogate escapes are `E0005`. A text literal whose complete decoded byte sequence is not valid UTF-8, including invalid combinations of otherwise well-formed `\xNN` escapes, is also one `E0005` with no automatic repair.
 
@@ -100,7 +105,8 @@ Raw strings, character literals, multiline strings, implicit concatenation, loca
 
 ### Boolean and null literals
 
-`true` and `false` are `bool`. `null` is contextually valid only for a raw pointer type. Safe borrows use `Option<&T>` and cannot be initialized with `null`.
+`true` and `false` are `bool`. `null` is contextually valid only for a raw pointer type. Safe
+references use `Option<ref T>` and cannot be initialized with `null`.
 
 ## File-to-module identity
 
@@ -118,12 +124,13 @@ The comparison is case-sensitive on every host. Two paths or module declarations
 
 ## Operator table
 
-Higher binding power groups first. The future Pratt parser must use this table as executable data rather than duplicating precedence in control flow.
+Higher binding power groups first. The Pratt parser uses this table as executable data rather than
+duplicating precedence in control flow.
 
 | Binding power | Form | Operators | Associativity or policy |
 | ---: | --- | --- | --- |
 | 140 | Postfix | call `()`, index `[]`, field `.`, propagate `?` | Repeating left chain |
-| 130 | Prefix | `-`, `+`, `!`, `~`, `&`, `&mut`, `*` | Right |
+| 130 | Prefix | `-`, `+`, `!`, `~`, `ref`, `ref mut`, `*` | Right |
 | 120 | Cast | `as Type` | Repeating left chain |
 | 110 | Multiplicative | `*`, `/`, `%` | Left |
 | 100 | Additive | `+`, `-` | Left |
@@ -139,7 +146,9 @@ Assignment is not an expression and has no binding power. A second comparison op
 
 Postfix forms may chain in source order. `?` terminates no chain by itself, so `value()?.field` parses; later type and ownership checks decide whether the operation is legal. Call arguments and operands evaluate left to right independently of precedence grouping.
 
-Unparenthesized record expressions are not recognized as the condition or scrutinee immediately before the opening block of `if`, `while`, or `match`. Parentheses make that intent explicit and prevent the record-literal brace from being confused with the control-flow block.
+`if`, `while`, and `switch` always require a parenthesized condition or scrutinee. The closing `)`
+therefore separates a record literal inside the header from the following control-flow block without
+lexer or name-resolution guesses.
 
 ## Recovery contract
 
@@ -162,7 +171,7 @@ Synchronization sets are contextual:
 | Block statement | `;`, `}`, EOF, statement starter |
 | Parameter or argument | `,`, `)`, `]`, `}`, EOF |
 | Record field | `,`, `}`, EOF |
-| Match arm | `,`, `}`, EOF |
+| Switch case | `case`, `}`, EOF |
 
 Missing closing delimiters are inserted only when the current production owns the opener. An unexpected `}` is never deleted merely to continue an inner production. Expected-token lists are deduplicated and sorted by canonical token spelling for deterministic diagnostics.
 
@@ -172,4 +181,6 @@ Exact input-size, token-count, node-count, nesting, repair, diagnostic, and work
 
 `spec/fixtures/parser/manifest-v0.json` lists syntax-pass and syntax-fail mini-packages. Each case owns one source root, so the module declaration is checked against the actual fixture path. Expectations record normalized expression trees or literal facts for successful cases and stable code, byte span, and repair kind for failures.
 
-Syntax-pass means only that lexing, parsing, recovery, and module-path checks succeed. It does not claim name resolution, type checking, ownership checking, or execution success. The future parser test runner must compare every expectation against a fresh full parse and must reject unlisted diagnostics.
+Syntax-pass means only that lexing, parsing, recovery, and module-path checks succeed. It does not
+claim name resolution, type checking, ownership checking, or execution success. The parser fixture
+runner compares every expectation against a fresh full parse and rejects unlisted diagnostics.

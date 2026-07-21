@@ -38,15 +38,19 @@ Name resolution, canonical type selection, phase ownership, cascade suppression,
 ## Stage 0 surface
 
 - Source files use `.fy`, source is UTF-8, and Stage 0 identifiers are ASCII.
-- Declarations use `name: Type`; C declarators, C casts, preprocessing, and textual includes are absent.
+- Written declarations put one complete type before one name. C name-splitting declarators, C casts,
+  preprocessing, and textual includes are absent.
 - Statements use explicit semicolons. Assignment is a statement, and integer values are not implicit booleans.
 - Every file declares one module. Imports require aliases and cannot be wildcard, selective, cyclic, or re-exported.
 - `let` prevents reassignment, `var` permits reassignment and mutable borrowing, and both require initializers.
-- An ordinary internal parameter may use `mut name: Type` to make its callee-local place assignable
-  and mutably borrowable without changing the call type or ownership transfer.
+- Parameters use `Type name`. A callee that needs an assignable place initializes a `var` local from
+  the parameter without changing the call type or ownership transfer.
 - A by-value position consumes a resource. There is no general `move` keyword.
-- Functions declare return types. Methods live in `impl` blocks and make shared, mutable, or consuming receivers explicit.
-- `if` is an expression. `match` is limited to shallow variants and inert fields.
+- Functions use `fn Result name(Parameters)` and always declare a result type. Associated functions
+  and methods use owner-qualified names; a method's first parameter is an explicit shared, mutable,
+  or consuming `this` receiver.
+- `if` remains an expression. Exhaustive `switch` handles shallow variants and inert fields without
+  fallthrough.
 - `discard` explicitly ignores a must-use value and drops its active payload.
 - Unsafe operations and C declarations use `unsafe`, `unsafe extern C fn`, `@repr(C)`, and `@link_name`.
 - Decimal, hexadecimal, binary, floating, UTF-8 string, byte-string, C-string, boolean, and raw-pointer null literals use the exact spellings and escape rules in the parser contract. Implemented integers reject out-of-range magnitudes as `E1013` before MIR; direct unary minus folds the one exact `i32` minimum magnitude without changing runtime checked-negation behavior.
@@ -56,17 +60,18 @@ Name resolution, canonical type selection, phase ownership, cascade suppression,
 
 The explanatory surface is in `docs/language/0005-surface-syntax-v0.md`; exact spelling is owned by `spec/grammar/stage0.ebnf`, and lexing, precedence, module identity, and recovery are defined in `docs/language/0006-lexing-parsing-and-recovery-v0.md`.
 
-### Planned C-shaped pre-1 cutover
+### Current C-shaped pre-1 surface
 
-ADR 0136 accepts a coordinated breaking source revision aimed at C programmers without adopting C
-declarators. Its target uses explicit declaration introducers, type-before-name declarations,
+ADR 0136 defines the current coordinated breaking source revision aimed at C programmers without
+adopting C declarators. It uses explicit declaration introducers, type-before-name declarations,
 `let name = value;` inference without `auto`, `T[N]` and `T[]` postfix type constructors,
 read-only-by-default `ref T` and `ptr T` handles with explicit `mut` write capability, C99-shaped
 `.field = value` record designators, parenthesized control headers, explicit function returns,
 owner-qualified functions with explicit receivers, non-callable resource cleanup blocks,
 contextual leading-dot variants, exhaustive no-fallthrough `switch`, and unchanged exact-error `?`
-propagation. The current grammar and examples remain the only accepted surface until the complete
-cutover gate passes; dual parsing and compile-time source rewrites are forbidden.
+propagation. The grammar and examples named above are the only product-compiler surface. The
+immediately preceding revision is accepted only by the separate migration tool; dual parsing and
+compile-time source rewrites remain forbidden.
 
 Classic or range `for`, lexical `defer`, checked narrowing conversions, provider-qualified package
 imports, generic iterators, expression-bodied function shorthand, and formatter behavior are
@@ -169,7 +174,7 @@ Result return, discard, propagation, local and parameter transfer, branch and lo
 Optimization level and backend must not change the meaning of safe code. Expression operands and call arguments evaluate from left to right.
 
 - Out-of-bounds indexing traps unless safety is proven statically.
-- Fixed arrays `[T; N]` currently admit only `bool`, `i32`, `u8`, `u32`, or `usize`, nonempty list
+- Fixed arrays `T[N]` currently admit only `bool`, `i32`, `u8`, `u32`, or `usize`, nonempty list
   literals, and `1 <= N <= 4096`. The ceiling is a provisional implementation guard, not a stable
   language or ABI limit. Elements evaluate once left to right, arrays copy across internal calls
   and results, `.len` returns exact canonical `N` as `usize` without a scan or trap, and a `usize`
@@ -312,8 +317,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   unsupported forms stop before MIR; invalid package input, lowering failure, and verifier rejection
   retain distinct failure ownership. Only a verified result may reach execution or a backend.
 - Resource declarations retain canonical type identity, declaration-ordered resolved fields, source
-  spans, and drop-body classification through typed HIR into MIR. The current executable prototype
-  accepts an empty or effect-declared nonempty user `drop` body, lowers the latter to verifier-linked
+  spans, and cleanup-body classification through typed HIR into MIR. The current executable prototype
+  accepts an empty or effect-declared nonempty user `cleanup` body, lowers the latter to verifier-linked
   private glue, and checks actual implicit cleanup edges in Resource Flow.
 - Inert struct declarations retain canonical identity, declaration-ordered fields, and `@repr(C)`
   classification through AST, typed HIR, verified MIR, the executable interpreter subset, and the

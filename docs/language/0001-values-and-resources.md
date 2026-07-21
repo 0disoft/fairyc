@@ -13,7 +13,7 @@ Every fully resolved type has compiler-known properties:
 | --- | --- |
 | `Copyable` | Reading a value may duplicate it without transferring ownership. |
 | `NeedsDrop` | A live value owns a cleanup obligation. |
-| `ContainsSafeBorrow` | The representation contains a safe `&T` or `&mut T`. |
+| `ContainsSafeBorrow` | The representation contains a safe `ref T` or `ref mut T`. |
 | `BorrowOrigin` | The hidden origin that bounds a safe borrow, if one exists. |
 
 These are semantic properties, not user-implementable traits in Stage 0.
@@ -39,13 +39,18 @@ Compiler IR may create uninitialized temporaries while evaluating an aggregate. 
 
 ## Binding and move syntax
 
-`let` prevents reassignment but may still be consumed. `var` permits reassignment and is required when creating a mutable borrow. An ordinary by-value parameter is likewise an immutable callee-local place unless written `mut name: Type`; that modifier permits callee-local reassignment and `&mut` without changing the argument type or making the value copyable. Ownership transfer has no source-level `move` operator: assignment to a by-value destination, a by-value argument, or a return consumes a resource, and diagnostics name that transfer site.
+`let` prevents reassignment but may still be consumed. `var` permits reassignment and is required
+when creating a mutable borrow. An ordinary by-value parameter is an immutable callee-local place.
+A function that needs a reassignable place declares an explicit `var Type local = parameter;` and
+uses that local; parameter mutability is not a second declaration grammar. Ownership transfer has
+no source-level `move` operator: assignment to a by-value destination, a by-value argument, or a
+return consumes a resource, and diagnostics name that transfer site.
 
 Indexed assignment is mutation of an existing scalar place, not replacement of a complete resource
 root. It evaluates and checks the receiver plus index before evaluating the right-hand side, then
 stores only on the checked success path. Complete resource-root reassignment retains its separate
 RHS-before-old-drop transaction. Passing a fixed array by value copies its elements; borrowing it as
-`&[u8]` or `&mut [u8]` aliases the selected owner for the proven loan extent.
+`ref u8[]` or `ref mut u8[]` aliases the selected owner for the proven loan extent.
 
 ## Affine resource ownership
 
@@ -67,7 +72,9 @@ Resource Flow fixtures identify a binding declaration and sample its state immed
 
 ## Construction and destruction
 
-Construction is an ordinary function that returns a fully initialized value or a `Result`. `drop` is compiler-invoked, infallible, and runs exactly once for each live resource on every normal scope exit. Resource fields drop in reverse initialization order.
+Construction is an ordinary function that returns a fully initialized value or a `Result`.
+Resource cleanup is compiler-invoked, infallible, and runs exactly once for each live resource on
+every normal scope exit. Resource fields drop in reverse initialization order.
 
 A trap, process abort, or forbidden foreign nonlocal control transfer is not a normal scope exit and does not run cleanup.
 
@@ -77,7 +84,7 @@ The current Go prototype preserves each resource's ordered resolved field defini
 nonempty user body into one compiler-private typed drop function. HIR and MIR link that function by
 symbol and exact resource type; the receiver owns no recursive cleanup obligation. The interpreter
 executes the body in a distinct `dropping` state before reverse field recursion, and the constrained
-C backend calls the same verified glue. A nonempty resource may declare drop effects; the private
+C backend calls the same verified glue. A nonempty resource may declare cleanup effects; the private
 glue carries that exact set, and Resource Flow requires it at normal and abrupt cleanup edges. A
 whole-root move transfers the obligation without charging the sender for effects it does not run.
 
@@ -90,7 +97,10 @@ A fallible close operation must make ownership unambiguous.
 
 An API that returns an error while leaving it unspecified whether the original resource is still live is invalid.
 
-The initial Linux `File.close(self)` consumes ownership on every outcome and is not retried. This is a target-specific rule, not a portable POSIX promise. A general fallible-close protocol for composite resources is deferred because partial field moves are unavailable; composite resources rely on infallible reverse-order drop or keep fallibly closable leaves separate.
+The initial Linux `File.close(this)` consumes ownership on every outcome and is not retried. This is
+a target-specific rule, not a portable POSIX promise. A general fallible-close protocol for
+composite resources is deferred because partial field moves are unavailable; composite resources
+rely on infallible reverse-order drop or keep fallibly closable leaves separate.
 
 ## Reassignment
 

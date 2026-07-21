@@ -1,6 +1,6 @@
 # ADR 0136: Adopt a C-shaped source surface without C declarators
 
-- Status: Accepted for the next pre-1 language revision
+- Status: Accepted; C-shaped source is current, completion gate pending
 - Date: 2026-07-21
 - Product source: `docs/product/02-spec.md`
 - Current surface source: `docs/language/0005-surface-syntax-v0.md`
@@ -9,10 +9,10 @@
 
 ## Context
 
-The implemented Stage 0 surface uses `fn name(parameters) -> Result`, `name: Type`, `&mut`,
-`impl`, `match`, qualified built-in variants, and `drop fn(self: &mut Self)`. Those spellings are
-parseable and already carry useful ownership semantics, but together they present Fairy C as a
-small Rust-shaped language rather than as a repaired language for C programmers.
+The immediately preceding Stage 0 surface used `fn name(parameters) -> Result`, `name: Type`,
+`&mut`, `impl`, `match`, qualified built-in variants, and `drop fn(self: &mut Self)`. Those
+spellings carried useful ownership semantics, but together presented Fairy C as a small
+Rust-shaped language rather than as a repaired language for C programmers.
 
 Copying C declarators is not an acceptable remedy. C declarations split one type around its name,
 make array and function binding depend on punctuation placement, and can require typedef-aware
@@ -29,16 +29,14 @@ this cutover without their own semantic and fixture decisions.
 
 ### Compatibility boundary
 
-1. This ADR defines the target surface of the next pre-1 language revision. It does not change the
-   grammar accepted by the current compiler.
-2. The cutover is one breaking language revision. The product parser will not accept both the old
+1. This ADR defines the current C-shaped surface of the active pre-1 language revision.
+2. The cutover is one breaking language revision. The product parser must not accept both the old
    and new spellings, auto-detect a revision, or rewrite source while compiling.
-3. The immediately preceding revision may receive a separate lossless-CST migration tool. Its CLI
-   spelling remains undecided until a configured command contract and executable implementation
-   exist.
-4. An implemented cutover increments the language revision and requires at least a compiler minor
-   release. This design-only ADR does not itself change a release version, C ABI, runtime ABI, target
-   schema, or MIR version.
+3. The immediately preceding revision is handled by a separate migration tool. Migration is never
+   an implicit product-compiler parse mode.
+4. The cutover changes the source language revision but does not itself change the C ABI, runtime
+   ABI, target schema, or MIR version. Release numbering remains owned by the compatibility and
+   release contracts.
 
 ### Declaration spine
 
@@ -81,7 +79,7 @@ The exact rules are:
 - record construction uses C99-shaped designators, `Type { .field = value, ... }`; each selected
   field is named explicitly, and `field: value` is not a construction form;
 - foreign declarations use `unsafe extern C fn Result name(Parameters);`;
-- `type Name = Type;` is the only alias form; `typedef` is absent.
+- source aliases and `typedef` are absent from the cutover.
 
 The following remain forbidden:
 
@@ -122,7 +120,7 @@ return clause or executable epilogue.
 ### Type and access spelling
 
 Binding reassignment, lifetime and alias guarantees, and access through a handle are separate axes.
-The next surface uses these four first-class type constructors:
+The current surface uses these four first-class type constructors:
 
 | Type | Lifetime and alias guarantee | Nullable | Write through this handle |
 | --- | --- | --- | --- |
@@ -146,14 +144,13 @@ T[N]
 T[]
 Option<T>
 Result<T, E>
-fn R(A, B)
 unsafe extern C fn R(A, B)
 ```
 
 `T[]` remains unsized and cannot appear by value. Safe views are `ref T[]` and `ref mut T[]`.
-Function values are non-null; nullable callbacks use `Option<fn R(A)>`. Borrow-returning functions
-remain ineligible for first-class function conversion until return origin becomes part of the
-function type.
+Foreign function values are non-null; nullable callbacks use
+`Option<unsafe extern C fn R(A)>`. Borrow-returning functions remain ineligible for first-class
+function conversion until return origin becomes part of the function type.
 
 The array and slice brackets are part of the complete type and always precede the declared name.
 Prefix constructors consume the complete type to their right: `ref u8[]` is a reference to a byte
@@ -283,11 +280,10 @@ by this ADR. Classic and range `for`, lexical `defer`, checked narrowing convers
 iterators, and formatter behavior are also separate follow-up decisions rather than cutover
 requirements.
 
-## Implementation prerequisites
+## Implementation and completion requirements
 
-1. Replace AST type strings and semantic string reparsing with structural prefix, postfix, and
-   grouped type syntax plus interned semantic type identities before accepting the new compound
-   spellings.
+1. Represent prefix, postfix, and grouped types structurally through AST and interned semantic type
+   identities; semantic phases must not recover compound types by reparsing strings.
 2. Preserve owner-qualified functions, explicit receiver types, variant nodes, switch cases, and
    their spans structurally through AST and typed HIR.
 3. Reuse existing ownership, Result, switch, cleanup, and verifier semantics in MIR rather than
@@ -310,7 +306,9 @@ requirements.
   without reintroducing name-splitting declarators.
 - The cutover is intentionally source-incompatible and requires a coordinated grammar, parser,
   fixture, example, documentation, and diagnostic migration.
-- No current source example or parser behavior changes until the implementation gate completes.
+- Current source examples, fixtures, and the normative grammar use the C-shaped revision. The
+  remaining completion gate still requires removal of the previous grammar from the product compile
+  path and full validation evidence.
 
 ## Completion gate
 

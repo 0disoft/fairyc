@@ -19,26 +19,26 @@ the corresponding safe API, typed errors, runtime transport, and target evidence
 
 ## Declaration syntax
 
-An ordinary function, raw foreign function, or resource with a nonempty drop body may carry one
+An ordinary function, raw foreign function, or resource with a nonempty cleanup body may carry one
 `@effects(...)` attribute:
 
 ```fy
 @effects(filesystem)
-fn load_config() -> Result<Config, IoError> {
+fn Result<Config, IoError> load_config() {
     // later safe standard-library call
 }
 
 @effects(console, filesystem)
-fn main() -> i32 {
+fn i32 main() {
     discard load_config();
-    0
+    return 0;
 }
 
 @effects(filesystem)
 resource File {
-    handle: *mut void;
+    ptr mut void handle;
 
-    drop fn(self: &mut Self) {
+    cleanup {
         // later safe runtime release
     }
 }
@@ -47,7 +47,7 @@ resource File {
 Arguments are identifiers from the closed Stage 0 vocabulary. Source order is not semantic; typed
 HIR stores a sorted duplicate-free set. An empty attribute, a duplicate attribute or argument, a
 literal argument, and an unknown name are `E7101`. Omitting the attribute declares the empty set.
-There is no separate `pure` spelling. An empty resource drop body cannot claim effects because it
+There is no separate `pure` spelling. An empty resource cleanup body cannot claim effects because it
 has no user cleanup operation to authorize.
 
 ## Closed Stage 0 vocabulary
@@ -91,7 +91,7 @@ return, live-resource reassignment, and cleanup caused by `break` or `continue`.
 `Result<R, E>` use the union of their resource-bearing payload effects.
 
 A complete-root move makes the source dead before cleanup is considered. Passing or returning a
-resource therefore does not require its drop effects in the sender; the new owner is checked when
+resource therefore does not require its cleanup effects in the sender; the new owner is checked when
 and where it actually drops the value. Missing authority is `E7102`, related to the resource's
 effect declaration.
 

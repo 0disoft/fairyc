@@ -37,9 +37,9 @@ Fixture types use the source spelling normalized without trivia:
 - the compiler-known C scalars keep the sixteen exact canonical identities listed in
   `0005-surface-syntax-v0.md`, distinct from Fairy fixed-width, pointer-width, boolean, and floating
   types and from a user module named `c`;
-- references use `&T` or `&mut T`;
-- raw pointers use `*T` or `*mut T`;
-- arrays and slices use `[T; N]` and `[T]`;
+- references use `ref T` or `ref mut T`;
+- raw pointers use `ptr T` or `ptr mut T`;
+- arrays and slices use `T[N]` and `T[]`;
 - built-ins use `Option<T>` and `Result<T, E>`.
 
 Nominal `struct`, `resource`, and `enum` declarations are not structurally interchangeable. Stage 0 has no user-defined implicit conversion or overload resolution.
@@ -48,18 +48,18 @@ Nominal `struct`, `resource`, and `enum` declarations are not structurally inter
 
 Integer and floating literal text remains exact until an expected type is available. An unconstrained integer defaults to `i32`; an unconstrained float defaults to `f64`. Decimal, hexadecimal, and binary integer values are range-checked after type selection and do not wrap; an out-of-range implemented integer literal is `E1013` before MIR lowering. Direct unary minus may fold the exact magnitude `2147483648` to `i32` minimum in any admitted radix. The positive token is not separately representable, and parentheses or unary plus do not receive that exception. Semantic magnitude comparison is digit-bounded and does not allocate a second input-sized arbitrary-precision integer.
 
-A nonempty fixed-array list receives its element type from an expected `[T; N]` when present;
+A nonempty fixed-array list receives its element type from an expected `T[N]` when present;
 otherwise its first element selects `T` and later elements must match exactly. The resulting length
 is the written element count, so an annotation with another `N` is `E1006`. The executable subset
 admits only the five copy-scalar element types named by ADR 0110 and currently rejects `N` outside
 `1..=4096` as unsupported. That ceiling guards the provisional by-value implementation rather than
 defining a stable language or ABI limit. An array index is contextually `usize` and returns the
 array element type. The exact `.len` property returns `usize`; no other fixed-array property is in
-the executable subset. When `&[u8]` is the expected type, a direct `&` of an admitted `[u8; N]`
-place contextually produces that immutable view. When `&mut [u8]` is expected, a direct `&mut` of a
-mutable admitted `[u8; N]` place contextually produces the exclusive view. Neither rule applies to
+the executable subset. When `ref u8[]` is the expected type, a direct `ref` of an admitted `u8[N]`
+place contextually produces that immutable view. When `ref mut u8[]` is expected, a direct `ref mut`
+of a mutable admitted `u8[N]` place contextually produces the exclusive view. Neither rule applies to
 a bare array value, another element type, a temporary, or mismatched mutability. Exact whole-array
-safe-borrow types such as `&[u8; N]` and `&mut [u8; N]` may also appear on internal parameters;
+safe-borrow types such as `ref u8[N]` and `ref mut u8[N]` may also appear on internal parameters;
 they remain distinct from the contextual unsized views. The mutable view currently admits internal
 transport and `.len`, not safe element mutation, slicing, resizing, foreign references, or public
 ABI use.
@@ -91,13 +91,14 @@ a typed foreign-call result, which may be relayed through locals and later match
 arguments. Arithmetic, comparison, conversion, boolean normalization, and floating-point behavior
 remain unsupported rather than inheriting Fairy scalar rules or C promotion rules.
 
-Boolean conditions are exact: `if`, `while`, `&&`, `||`, and `!` require `bool`. Integer truthiness is rejected. Both branches of an `if` expression must have one compatible type. A function tail expression or explicit return must match the declared return type.
+Boolean conditions are exact: `if`, `while`, `&&`, `||`, and `!` require `bool`. Integer truthiness
+is rejected. Both branches of an `if` expression must have one compatible type. A non-`void`
+function uses explicit `return`, whose expression must match the declared return type.
 
 Calls require an exact arity and each argument must satisfy its parameter type. An ordinary
-parameter is an immutable callee-local place unless its declaration carries `mut`; parameter
-mutability does not participate in call compatibility or ownership transfer. Assignment and
-`&mut` require a mutable local or parameter place and a compatible value. Inside `unsafe`, a direct
-borrow may erase its pointee to `*void` only without strengthening mutability; verified MIR retains
+parameter is an immutable callee-local place. Code that needs reassignment first copies or moves it
+into an explicit `var` local. Assignment and `ref mut` require a mutable local place and a compatible
+value. Inside `unsafe`, a direct borrow may erase its pointee to `ptr void` only without strengthening mutability; verified MIR retains
 the original owner type. Other borrow and raw-pointer conversions follow their explicit safety
 rules, and `null` never inhabits a safe borrow.
 
@@ -108,7 +109,7 @@ independent and are exposed through typed HIR and semantic fixtures. The complet
 compatibility rules are owned by `0008-effects-and-capabilities-v0.md`.
 
 For an assignment to a safe-borrow local, Flow evaluates the right-hand side before
-replacing the target origin and retained-loan set. Reachable `if` and `match` exits join origin
+replacing the target origin and retained-loan set. Reachable `if` and `switch` exits join origin
 facts; different origins remain a disjunction and cannot be returned as if one branch had won.
 Loan conflicts use branch-reachable later uses. `while` additionally computes a header fixed point
 from entry, fallthrough, and `continue`, then joins header and `break` exits after the loop.
