@@ -87,6 +87,7 @@ const (
 type Node struct {
 	Kind       Kind
 	Span       diagnostic.Span
+	NameSpan   diagnostic.Span
 	TokenStart int
 	TokenEnd   int
 	Text       string

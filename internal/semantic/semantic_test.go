@@ -47,6 +47,20 @@ func TestAnalyzeCanonicalizesCShapedReferenceAndSliceTypes(t *testing.T) {
 	}
 }
 
+func TestAnalyzeCShapedDeclarationsAndInferredBindings(t *testing.T) {
+	t.Parallel()
+	text := "module main;\n\nfn usize length(ref u8[] bytes) { return bytes.len; }\nfn usize main() { let explicit = length(b\"fairy\"); let usize typed = explicit; var usize copy = typed; return copy; }\n"
+	result := analyzeText(t, map[string]string{"main.fy": text})
+	assertCleanTypeResult(t, result)
+	if len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].Functions) != 2 {
+		t.Fatalf("HIR = %+v", result.HIR)
+	}
+	main := result.HIR.Modules[0].Functions[1]
+	if main.ResultType != hir.TypeUSize || len(main.Locals) != 3 || main.Locals[0].Type != hir.TypeUSize || main.Locals[1].Type != hir.TypeUSize || main.Locals[2].Type != hir.TypeUSize {
+		t.Fatalf("main = %+v", main)
+	}
+}
+
 func TestAnalyzeReportsUnresolvedNameWithoutTypeCascade(t *testing.T) {
 	t.Parallel()
 	text := "module main;\n\nfn answer() -> i32 {\n    missing\n}\n"

@@ -81,6 +81,19 @@ func (p *parser) currentText() string {
 	return p.current().Text(p.tree.Source)
 }
 
+func (p *parser) peek(offset int) lexer.Token {
+	position := p.position + offset
+	if position < 0 || position >= len(p.significant) {
+		end := len(p.tree.Source)
+		return lexer.Token{Kind: lexer.EOF, Span: diagnostic.Span{StartByte: end, EndByte: end}}
+	}
+	return p.tree.Tokens[p.significant[position]]
+}
+
+func (p *parser) peekText(offset int) string {
+	return p.peek(offset).Text(p.tree.Source)
+}
+
 func (p *parser) at(text string) bool {
 	return p.currentText() == text
 }
@@ -219,6 +232,14 @@ func (p *parser) addNode(kind Kind, startFull int, children []NodeID, text, cook
 	}
 	p.tree.Nodes = append(p.tree.Nodes, node)
 	return NodeID(len(p.tree.Nodes) - 1)
+}
+
+func (p *parser) addNamedNode(kind Kind, startFull int, children []NodeID, text, cooked string, nameSpan diagnostic.Span) NodeID {
+	id := p.addNode(kind, startFull, children, text, cooked)
+	if id != NoNode && int(id) < len(p.tree.Nodes) {
+		p.tree.Nodes[id].NameSpan = nameSpan
+	}
+	return id
 }
 
 func (p *parser) enter() bool {

@@ -123,31 +123,39 @@ func (p *parser) parseAttribute() NodeID {
 
 func (p *parser) parseConst(start int, leading []NodeID) NodeID {
 	p.advance()
-	name := p.parseName()
-	p.expect(":")
-	typeID := p.parseType()
+	var name string
+	var nameSpan diagnostic.Span
+	var typeID NodeID
+	if p.atKind(lexer.Identifier) && p.peekText(1) == ":" {
+		name, nameSpan = p.parseNameWithSpan()
+		p.expect(":")
+		typeID = p.parseType()
+	} else {
+		typeID = p.parseType()
+		name, nameSpan = p.parseNameWithSpan()
+	}
 	p.expect("=")
 	expression := p.parseExpression(0, true)
 	p.expect(";")
 	children := append(append([]NodeID(nil), leading...), typeID, expression)
-	return p.addNode(KindConst, start, children, name, "")
+	return p.addNamedNode(KindConst, start, children, name, "", nameSpan)
 }
 
 func (p *parser) parseStruct(start int, leading []NodeID) NodeID {
 	p.advance()
-	name := p.parseName()
+	name, nameSpan := p.parseNameWithSpan()
 	p.expect("{")
 	children := append([]NodeID(nil), leading...)
 	for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 		children = append(children, p.parseField())
 	}
 	p.expect("}")
-	return p.addNode(KindStruct, start, children, name, "")
+	return p.addNamedNode(KindStruct, start, children, name, "", nameSpan)
 }
 
 func (p *parser) parseResource(start int, leading []NodeID) NodeID {
 	p.advance()
-	name := p.parseName()
+	name, nameSpan := p.parseNameWithSpan()
 	p.expect("{")
 	children := append([]NodeID(nil), leading...)
 	for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
@@ -158,7 +166,7 @@ func (p *parser) parseResource(start int, leading []NodeID) NodeID {
 		children = append(children, p.parseField())
 	}
 	p.expect("}")
-	return p.addNode(KindResource, start, children, name, "")
+	return p.addNamedNode(KindResource, start, children, name, "", nameSpan)
 }
 
 func (p *parser) parseDrop() NodeID {
@@ -182,12 +190,12 @@ func (p *parser) parseDrop() NodeID {
 
 func (p *parser) parseEnum(start int, leading []NodeID) NodeID {
 	p.advance()
-	name := p.parseName()
+	name, nameSpan := p.parseNameWithSpan()
 	p.expect("{")
 	children := append([]NodeID(nil), leading...)
 	for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 		variantStart := p.currentFullIndex()
-		variantName := p.parseName()
+		variantName, variantNameSpan := p.parseNameWithSpan()
 		variantChildren := make([]NodeID, 0, 2)
 		if p.match("{") {
 			for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
@@ -196,19 +204,17 @@ func (p *parser) parseEnum(start int, leading []NodeID) NodeID {
 			p.expect("}")
 		}
 		p.expect(";")
-		children = append(children, p.addNode(KindVariant, variantStart, variantChildren, variantName, ""))
+		children = append(children, p.addNamedNode(KindVariant, variantStart, variantChildren, variantName, "", variantNameSpan))
 	}
 	p.expect("}")
-	return p.addNode(KindEnum, start, children, name, "")
+	return p.addNamedNode(KindEnum, start, children, name, "", nameSpan)
 }
 
 func (p *parser) parseEnumField() NodeID {
 	start := p.currentFullIndex()
-	name := p.parseName()
-	p.expect(":")
-	typeID := p.parseType()
+	name, nameSpan, typeID := p.parseFieldHead()
 	p.expect(";")
-	return p.addNode(KindField, start, []NodeID{typeID}, name, "")
+	return p.addNamedNode(KindField, start, []NodeID{typeID}, name, "", nameSpan)
 }
 
 func (p *parser) parseImpl(start int, leading []NodeID) NodeID {
@@ -232,14 +238,24 @@ func (p *parser) parseImpl(start int, leading []NodeID) NodeID {
 
 func (p *parser) parseFunction(start int, leading []NodeID, method bool) NodeID {
 	p.expect("fn")
-	name := p.parseName()
-	parameters := p.parseParameters(method, true)
-	p.expect("->")
-	resultType := p.parseType()
+	var name string
+	var nameSpan diagnostic.Span
+	var resultType NodeID
+	var parameters []NodeID
+	if p.atKind(lexer.Identifier) && p.peekText(1) == "(" {
+		name, nameSpan = p.parseNameWithSpan()
+		parameters = p.parseParameters(method, true)
+		p.expect("->")
+		resultType = p.parseType()
+	} else {
+		resultType = p.parseType()
+		name, nameSpan = p.parseNameWithSpan()
+		parameters = p.parseParameters(method, true)
+	}
 	body := p.parseBlock()
 	children := append(append([]NodeID(nil), leading...), parameters...)
 	children = append(children, resultType, body)
-	return p.addNode(KindFunction, start, children, name, "")
+	return p.addNamedNode(KindFunction, start, children, name, "", nameSpan)
 }
 
 func (p *parser) parseForeignFunction(start int, leading []NodeID) NodeID {
@@ -250,14 +266,24 @@ func (p *parser) parseForeignFunction(start int, leading []NodeID) NodeID {
 		p.advance()
 	}
 	p.expect("fn")
-	name := p.parseName()
-	parameters := p.parseParameters(false, false)
-	p.expect("->")
-	resultType := p.parseType()
+	var name string
+	var nameSpan diagnostic.Span
+	var resultType NodeID
+	var parameters []NodeID
+	if p.atKind(lexer.Identifier) && p.peekText(1) == "(" {
+		name, nameSpan = p.parseNameWithSpan()
+		parameters = p.parseParameters(false, false)
+		p.expect("->")
+		resultType = p.parseType()
+	} else {
+		resultType = p.parseType()
+		name, nameSpan = p.parseNameWithSpan()
+		parameters = p.parseParameters(false, false)
+	}
 	p.expect(";")
 	children := append(append([]NodeID(nil), leading...), parameters...)
 	children = append(children, resultType)
-	return p.addNode(KindForeign, start, children, name, "")
+	return p.addNamedNode(KindForeign, start, children, name, "", nameSpan)
 }
 
 func (p *parser) parseParameters(method bool, allowMutable bool) []NodeID {
@@ -273,13 +299,22 @@ func (p *parser) parseParameters(method bool, allowMutable bool) []NodeID {
 	for !p.at(")") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 		start := p.currentFullIndex()
 		modifier := ""
-		if allowMutable && p.match("mut") {
-			modifier = "mut"
+		var name string
+		var nameSpan diagnostic.Span
+		var typeID NodeID
+		legacy := allowMutable && p.at("mut") || p.atKind(lexer.Identifier) && p.peekText(1) == ":"
+		if legacy {
+			if allowMutable && p.match("mut") {
+				modifier = "mut"
+			}
+			name, nameSpan = p.parseNameWithSpan()
+			p.expect(":")
+			typeID = p.parseType()
+		} else {
+			typeID = p.parseType()
+			name, nameSpan = p.parseNameWithSpan()
 		}
-		name := p.parseName()
-		p.expect(":")
-		typeID := p.parseType()
-		parameters = append(parameters, p.addNode(KindParameter, start, []NodeID{typeID}, name, modifier))
+		parameters = append(parameters, p.addNamedNode(KindParameter, start, []NodeID{typeID}, name, modifier, nameSpan))
 		if !p.match(",") {
 			break
 		}
@@ -306,11 +341,20 @@ func (p *parser) parseReceiver() NodeID {
 func (p *parser) parseField() NodeID {
 	start := p.currentFullIndex()
 	p.match("pub")
-	name := p.parseName()
-	p.expect(":")
-	typeID := p.parseType()
+	name, nameSpan, typeID := p.parseFieldHead()
 	p.expect(";")
-	return p.addNode(KindField, start, []NodeID{typeID}, name, "")
+	return p.addNamedNode(KindField, start, []NodeID{typeID}, name, "", nameSpan)
+}
+
+func (p *parser) parseFieldHead() (string, diagnostic.Span, NodeID) {
+	if p.atKind(lexer.Identifier) && p.peekText(1) == ":" {
+		name, nameSpan := p.parseNameWithSpan()
+		p.expect(":")
+		return name, nameSpan, p.parseType()
+	}
+	typeID := p.parseType()
+	name, nameSpan := p.parseNameWithSpan()
+	return name, nameSpan, typeID
 }
 
 func (p *parser) parseType() NodeID {
@@ -436,11 +480,17 @@ func (p *parser) rawFrom(startFull int) string {
 }
 
 func (p *parser) parseName() string {
+	name, _ := p.parseNameWithSpan()
+	return name
+}
+
+func (p *parser) parseNameWithSpan() (string, diagnostic.Span) {
 	if p.atKind(lexer.Identifier) {
 		name := p.currentText()
+		span := p.current().Span
 		p.advance()
-		return name
+		return name, span
 	}
 	p.unexpected()
-	return ""
+	return "", diagnostic.Span{}
 }

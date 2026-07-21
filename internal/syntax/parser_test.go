@@ -2,6 +2,7 @@ package syntax
 
 import (
 	"slices"
+	"strings"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/lexer"
@@ -139,6 +140,38 @@ func TestParseCShapedTypeForms(t *testing.T) {
 		if found[text] != form {
 			t.Fatalf("type %q form = %q, want %q; found = %+v", text, found[text], form, found)
 		}
+	}
+	reconstructed, ok := tree.Reconstruct()
+	if !ok || !slices.Equal(reconstructed, input) {
+		t.Fatalf("Reconstruct() = %q, %v; want %q, true", reconstructed, ok, input)
+	}
+}
+
+func TestParseCShapedDeclarationsAndNameSpans(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nconst usize LIMIT = 4;\nstruct Pair { i32 left; ptr u8 data; }\nenum Error { Os { i32 code; }; }\nfn Token Token(Token Token) { return Token; }\nunsafe extern C fn i32 c_add(i32 left, i32 right);\n")
+	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	var function *Node
+	var parameter *Node
+	for index := range tree.Nodes {
+		node := &tree.Nodes[index]
+		if node.Kind == KindFunction && node.Text == "Token" {
+			function = node
+		}
+		if node.Kind == KindParameter && node.Text == "Token" {
+			parameter = node
+		}
+	}
+	functionName := strings.Index(string(input), "Token Token") + len("Token ")
+	parameterName := strings.Index(string(input), "Token Token)") + len("Token ")
+	if function == nil || function.NameSpan.StartByte != functionName || function.NameSpan.EndByte != functionName+len("Token") {
+		t.Fatalf("function = %+v, want name span %d..%d", function, functionName, functionName+len("Token"))
+	}
+	if parameter == nil || parameter.NameSpan.StartByte != parameterName || parameter.NameSpan.EndByte != parameterName+len("Token") {
+		t.Fatalf("parameter = %+v, want name span %d..%d", parameter, parameterName, parameterName+len("Token"))
 	}
 	reconstructed, ok := tree.Reconstruct()
 	if !ok || !slices.Equal(reconstructed, input) {

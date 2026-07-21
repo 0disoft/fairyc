@@ -1,6 +1,9 @@
 package syntax
 
-import "github.com/0disoft/fairyc/internal/lexer"
+import (
+	"github.com/0disoft/fairyc/internal/diagnostic"
+	"github.com/0disoft/fairyc/internal/lexer"
+)
 
 func (p *parser) parseBlock() NodeID {
 	if !p.enter() {
@@ -73,15 +76,23 @@ func (p *parser) parseBinding() NodeID {
 	start := p.currentFullIndex()
 	bindingKind := p.currentText()
 	p.advance()
-	name := p.parseName()
+	var name string
+	var nameSpan diagnostic.Span
 	children := make([]NodeID, 0, 2)
-	if p.match(":") {
+	if p.atKind(lexer.Identifier) && p.peekText(1) == "=" {
+		name, nameSpan = p.parseNameWithSpan()
+	} else if p.atKind(lexer.Identifier) && p.peekText(1) == ":" {
+		name, nameSpan = p.parseNameWithSpan()
+		p.expect(":")
 		children = append(children, p.parseType())
+	} else {
+		children = append(children, p.parseType())
+		name, nameSpan = p.parseNameWithSpan()
 	}
 	p.expect("=")
 	children = append(children, p.parseExpression(0, true))
 	p.expectStatementTerminator()
-	return p.addNode(KindBinding, start, children, name, bindingKind)
+	return p.addNamedNode(KindBinding, start, children, name, bindingKind, nameSpan)
 }
 
 func (p *parser) parseReturn() NodeID {

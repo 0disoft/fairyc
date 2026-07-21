@@ -344,3 +344,29 @@ func TestLowerPreservesCShapedTypeBinding(t *testing.T) {
 		t.Fatalf("result type = %+v", result)
 	}
 }
+
+func TestLowerPreservesCShapedDeclarationOrder(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nstruct Pair { i32 left; i32 right; }\nfn i32 add(i32 left, i32 right) { let i32 sum = left + right; return sum; }\n")
+	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	module, err := Lower(tree)
+	if err != nil {
+		t.Fatalf("Lower() error = %v", err)
+	}
+	if len(module.Structs) != 1 || len(module.Structs[0].Fields) != 2 || module.Structs[0].Fields[0].Name != "left" || module.Structs[0].Fields[0].Type.Path != "i32" {
+		t.Fatalf("structs = %+v", module.Structs)
+	}
+	if len(module.Functions) != 1 || module.Functions[0].Name != "add" || module.Functions[0].ResultType.Path != "i32" || len(module.Functions[0].Parameters) != 2 {
+		t.Fatalf("functions = %+v", module.Functions)
+	}
+	function := module.Functions[0]
+	if function.Parameters[0].Name != "left" || function.Parameters[0].Type.Path != "i32" || function.Parameters[1].Name != "right" || function.Parameters[1].Type.Path != "i32" {
+		t.Fatalf("parameters = %+v", function.Parameters)
+	}
+	if function.Body == nil || len(function.Body.Statements) != 2 || function.Body.Statements[0].Binding == nil || function.Body.Statements[0].Binding.Name != "sum" || function.Body.Statements[0].Binding.Type == nil || function.Body.Statements[0].Binding.Type.Path != "i32" {
+		t.Fatalf("body = %+v", function.Body)
+	}
+}

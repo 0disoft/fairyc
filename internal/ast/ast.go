@@ -543,6 +543,9 @@ func findIdentifierSpan(tree *syntax.Tree, node syntax.Node, name, after string)
 	if name == "" {
 		return diagnostic.Span{}
 	}
+	if node.NameSpan.EndByte > node.NameSpan.StartByte {
+		return node.NameSpan
+	}
 	seenAfter := after == ""
 	start := max(node.TokenStart, 0)
 	end := min(node.TokenEnd, len(tree.Tokens))
