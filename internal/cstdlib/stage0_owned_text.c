@@ -258,7 +258,9 @@ struct fy_std_owned_text_result_v0 fy_std_string_append_storage_v0(
         return fy_std_owned_text_error_v0(FY_STD_OWNED_TEXT_INVALID_ARGUMENT_V0, FY_STD_ALLOC_OK_V0);
     }
     struct fy_std_owned_text_result_v0 result = fy_std_string_append_v0(&value, suffix);
-    memcpy(value_storage, &value, sizeof value);
+    if (result.status == FY_STD_OWNED_TEXT_OK_V0) {
+        memcpy(value_storage, &value, sizeof value);
+    }
     return result;
 }
 

@@ -170,12 +170,29 @@ func TestOwnedTextSourcesPreserveOwnershipAndNULTermination(t *testing.T) {
 		"fy_std_cstring_drop_storage_v0",
 		"memcpy(output_storage, &output, sizeof output)",
 		"memcpy(value_storage, &value, sizeof value)",
+		"if (result.status == FY_STD_OWNED_TEXT_OK_V0)",
 	} {
 		if !strings.Contains(implementation, required) {
 			t.Errorf("owned text implementation is missing %q", required)
 		}
 	}
-	for _, required := range []string{"invalid_buffer.block.data != invalid_data", "invalid_cstr", "cview.data[cview.length] != 0"} {
+	for _, required := range []string{
+		"invalid_buffer.block.data != invalid_data",
+		"invalid_cstr",
+		"cview.data[cview.length] != 0",
+		"fy_std_string_copy_storage_v0",
+		"fy_std_string_append_storage_v0",
+		"fy_std_string_drop_storage_v0",
+		"fy_std_cstring_from_text_storage_v0",
+		"fy_std_cstring_drop_storage_v0",
+		"preserved_string_bytes",
+		"preserved_nonempty_string_output",
+		"storage_self_prefix",
+		"malformed_string",
+		"overflow_text",
+		"preserved_nonempty_cstring_output",
+		"malformed_cstring",
+	} {
 		if !strings.Contains(probe, required) {
 			t.Errorf("owned text probe is missing %q", required)
 		}
@@ -183,6 +200,10 @@ func TestOwnedTextSourcesPreserveOwnershipAndNULTermination(t *testing.T) {
 	repeated, err := OwnedTextSource()
 	if err != nil || repeated != implementation || strings.Contains(implementation, "\r") || !strings.HasSuffix(implementation, "\n") {
 		t.Fatalf("OwnedTextSource() is not deterministic canonical C: %v", err)
+	}
+	repeatedProbe, err := OwnedTextProbeSource()
+	if err != nil || repeatedProbe != probe || strings.Contains(probe, "\r") || !strings.HasSuffix(probe, "\n") {
+		t.Fatalf("OwnedTextProbeSource() is not deterministic canonical C: %v", err)
 	}
 }
 

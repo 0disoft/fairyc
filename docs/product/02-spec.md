@@ -247,7 +247,12 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - The same smoke must build `examples/owned_text/main.fy` with its explicit safe support module at
   low and optimized `x86_64-windows-msvc` profiles, inspect both PE/unwind images, execute native
   result 42, and remove the products. This is source-level lifecycle evidence, not a stable library
-  or hosted-Windows receipt.
+  surface or hosted-Windows receipt. It must separately compile the raw owned-text probe and
+  target-specific implementation as
+  caller and callee translation units at both profiles. Those executions must preserve opaque
+  storage on rejected input, accept self-overlap, reject null and malformed storage, distinguish
+  interior NUL and size overflow, publish exact bytes and one terminator, and normalize normal plus
+  repeated drop. Forced allocation failure is not part of either deterministic native oracle.
 - The constrained C unit records sorted unique link names used by actual foreign calls. The
   experimental product build resolves exact project-owned standard-library names through one shared
   symbol/component contract and links only their dependency closure plus the scalar runtime; unused
@@ -477,7 +482,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   Windows x64 `malloc` guarantee of 16 bytes because MSVC C does not provide `max_align_t` in
   `<stddef.h>`. Every other standard-library or foreign symbol fails before toolchain resolution;
   foreign companion inputs and user linker arguments remain absent. Lexical `region` lowering, copied
-  placement, owned-text byte/terminator contents, failure paths, stable `std::fs` naming, portable
+  placement, source-level FY observation of owned-text byte/terminator contents, deterministic forced allocation
+  failure, stable `std::fs` naming, portable
   paths, general mutable buffers, and stable layouts remain absent. This clears only the missing target
   C-emission-profile evidence; `emittable`, `conformant`, and `supported` remain false.
 - `experimental run-target` reuses that exact Windows target compilation and closed linkage, validates

@@ -180,15 +180,17 @@ assignment. Bounds are proven before right-hand-side evaluation. Mutable slicing
 retained foreign pointers remain missing.
 Owned String and CString now have provisional Buffer-backed C transport with immutable views,
 successful-only Buffer moves, failure ownership preservation, self-source append, interior-NUL
-rejection, and exact termination. Four C-only native runs are configured but unobserved. Separate
+rejection, and exact termination. Four Linux C-only native runs remain configured and locally
+unobserved; the same probe now executes as two separate-translation-unit x64 MSVC runs. Separate
 generated-Fairy crossings call the real bounded CStr validator and exact raw String/CString records.
 An additional example-level safe FY module now confines five opaque storage bridges behind move-only
 `String`/`CString` resources, source `Result` errors, scalar lengths, and verified nonempty drop glue.
 Its low and optimized Windows target builds cover append, empty CString, interior-NUL rejection, and
 implicit cleanup with result 42. The existing raw Windows target lifecycle still observes lengths,
-pointers, alignment, statuses, and normalized drops. Exact bytes, terminator contents, allocation-
-failure rollback, invalid UTF-8, self-overlap, malformed state, safe owned-to-borrowed views, and a
-stable `std::text` surface remain later gates.
+pointers, alignment, statuses, and normalized drops. The raw Windows probe additionally observes
+exact bytes, terminator contents, invalid UTF-8, self-overlap, null/malformed storage, failure
+preservation, size overflow, and repeated drop. Deterministic forced allocation-failure rollback, safe
+owned-to-borrowed views, and a stable `std::text` surface remain later gates.
 The Linux File C slice now also covers partial read/write, write-all progress, sync, and consuming
 close including forced close failure. Its four C-only native runs remain configured but unobserved.
 A second four-way generated-Fairy crossing uses exact result, File, and open-option records to call
@@ -245,7 +247,8 @@ crossings, and a hosted Windows receipt remain absent. PE/COFF objects, runtime,
 supported distribution artifacts, and conformance remain later gates. A bounded parser now checks
 the host-smoke product, both declared-target profile products, both safe File and safe owned-text
 profile products, two direct run-target temporary products, two exec-target temporary output
-products, and eight native probe executables for AMD64
+products, and ten native probe executables for raw Windows File, raw owned text, layout, ABI, and
+unwind behavior for AMD64
 PE32+ console identity, aligned
 headers/sections, and an executable entry point, but does not inspect `.obj` symbols, relocations,
 unwind payloads, or CodeView/PDB data.
@@ -253,7 +256,7 @@ Every local MSVC compile in the same lane now also parses its intermediate `.obj
 before cleanup, including `.text$...`, `.bss`, symbol-table, and relocation-index structure. Exact
 versioned symbol names, COMDAT selection, relocation types, unwind records, and a hosted object
 receipt remain absent, so the target evidence marker stays fail-closed.
-The nineteen local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
+The twenty-one local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
 runtime-function ordering and code coverage plus referenced version 1 and version 2 unwind-record
 bounds, including handler/chained minimum tails. A separate three-object probe now raises a private
 noncontinuable exception at both profiles, validates its payload in an outer SEH filter, walks the
@@ -279,6 +282,10 @@ The owned-text checks observe successful results, five-to-ten String length, six
 logical CStr length five, non-null views, and normalized drops without dereferencing the views.
 Windows x64 SystemHeap uses the documented 16-byte `malloc` alignment ceiling
 because MSVC C does not expose `max_align_t` in `<stddef.h>`.
+A separate raw probe now links the owned-text closure as a second translation unit and executes at
+both profiles. It observes exact bytes and termination, invalid UTF-8 and interior NUL, null and
+malformed opaque storage, failure preservation, self-overlap, deterministic size overflow, and
+normal plus repeated drop. Forced allocation failure remains unforced in both native lanes.
 The Windows target commands now admit one entry plus a bounded explicit repeated-`--source` FY
 module closure; the driver performs no manifest or implicit source discovery. Every foreign
 companion input, unproven Windows standard-library component, user linker argument, debug output,
@@ -292,7 +299,7 @@ quickstart iterates two bytes with typed `usize` ordering and checked addition, 
 indexing, and safely converts each `u8` to `i32` through a separately built compiler process. The
 host smoke also proves maximum-`usize` addition traps under both MSVC profiles. The configured Windows
 smoke therefore covers two retained target builds, two safe File builds, two safe owned-text builds,
-two direct target executions, two exec-target executions, and nineteen total target or probe PE
+two direct target executions, two exec-target executions, and twenty-one total target or probe PE
 images. The second direct execution comes from a separately built temporary
 `fairyc.exe` compiling the minimal Windows quickstart, so the standalone compiler process boundary
 is exercised without retaining or distributing it. This improves the developer execution path

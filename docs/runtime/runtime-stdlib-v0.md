@@ -211,8 +211,13 @@ checks length overflow, rejects text containing NUL, and publishes its Buffer on
 bytes and one terminator are complete. Empty CString therefore owns one terminator byte while its
 CStr view has length zero.
 
-The owned-text four-way native probe is configured for these ownership, rollback, overlap, UTF-8,
-NUL, terminator, and empty-value cases but remains unobserved. A separate generated-Fairy source
+The owned-text four-way Linux native probe is configured for these ownership, rollback, overlap,
+UTF-8, NUL, terminator, and empty-value cases but remains locally unobserved. The same raw probe now
+links against the target-specific owned-text closure as separate caller and callee translation units
+and executes at low and optimized x64 MSVC profiles. It additionally checks opaque storage null and
+malformed rejection, failure preservation, self-overlap, deterministic size overflow, normal drop,
+and repeated drop. Forced allocation failure remains unforced in both configured native lanes. A
+separate generated-Fairy source
 probe constructs the exact CStr view transport, obtains three bounded nonempty storage cases from
 the companion C unit, and calls the real `fy_std_cstr_validate_v0`. It requires valid storage to
 publish a length excluding the terminator, interior NUL to return status 4, missing final NUL to
@@ -225,7 +230,8 @@ immutable view, append, second view, and drop helpers, then the real CString fro
 drop helpers. C observers require `Fairy`, `FairyFairy`, the CString terminator immediately after the
 logical view, and canonical empty storage after both drops. All operation and allocation statuses
 must be zero. The C-only owned-text probe remains responsible for invalid UTF-8, failed Buffer moves,
-self-overlap, interior-NUL rollback, empty CString, and malformed-state negatives. General `&str`
+self-overlap, interior-NUL rollback, empty CString, malformed-state negatives, opaque-storage
+failure preservation, and repeated drop. General `&str`
 and wrapper-produced `&CStr` borrow origins plus the stable `std::text` API remain disconnected. A
 separate example-level safe wrapper described below now owns source resources and `Result` mapping;
 it does not replace those missing borrowed-view or package contracts. A source `c"..."` literal now has a

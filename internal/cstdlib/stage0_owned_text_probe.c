@@ -34,6 +34,8 @@ struct fy_std_owned_text_result_v0 { uint32_t status; uint32_t allocation_status
 struct fy_std_string_v0 { struct fy_std_buffer_v0 bytes; };
 struct fy_std_cstr_view_v0 { const uint8_t *data; size_t length; };
 struct fy_std_cstring_v0 { struct fy_std_buffer_v0 bytes; };
+struct fy_std_string_storage_v0 { void *data; size_t capacity; size_t alignment; size_t length; };
+struct fy_std_cstring_storage_v0 { void *data; size_t capacity; size_t alignment; size_t storage_length; };
 
 uint32_t fy_std_buffer_initialize_v0(size_t capacity, struct fy_std_buffer_v0 *output);
 uint32_t fy_std_buffer_append_v0(struct fy_std_buffer_v0 *buffer, const uint8_t *source, size_t count);
@@ -47,9 +49,45 @@ uint32_t fy_std_cstr_validate_v0(const uint8_t *storage, size_t storage_length, 
 struct fy_std_owned_text_result_v0 fy_std_cstring_from_text_v0(const struct fy_std_text_view_v0 *input, struct fy_std_cstring_v0 *output);
 struct fy_std_owned_text_result_v0 fy_std_cstring_as_view_v0(const struct fy_std_cstring_v0 *input, struct fy_std_cstr_view_v0 *output);
 struct fy_std_owned_text_result_v0 fy_std_cstring_drop_v0(struct fy_std_cstring_v0 *value);
+struct fy_std_owned_text_result_v0 fy_std_string_copy_storage_v0(const struct fy_std_text_view_v0 *input, void *output_storage);
+struct fy_std_owned_text_result_v0 fy_std_string_append_storage_v0(void *value_storage, const struct fy_std_text_view_v0 *suffix);
+struct fy_std_owned_text_result_v0 fy_std_string_drop_storage_v0(void *value_storage);
+struct fy_std_owned_text_result_v0 fy_std_cstring_from_text_storage_v0(const struct fy_std_text_view_v0 *input, void *output_storage);
+struct fy_std_owned_text_result_v0 fy_std_cstring_drop_storage_v0(void *value_storage);
 
 static int ok(struct fy_std_owned_text_result_v0 result) {
     return result.status == FY_STD_OWNED_TEXT_OK_V0 && result.allocation_status == FY_STD_ALLOC_OK_V0;
+}
+
+static int invalid_argument(struct fy_std_owned_text_result_v0 result) {
+    return result.status == FY_STD_OWNED_TEXT_INVALID_ARGUMENT_V0 &&
+           result.allocation_status == FY_STD_ALLOC_OK_V0;
+}
+
+static int string_storage_empty(const struct fy_std_string_storage_v0 *storage) {
+    return storage->data == NULL && storage->capacity == 0 && storage->alignment == 0 &&
+           storage->length == 0;
+}
+
+static int cstring_storage_empty(const struct fy_std_cstring_storage_v0 *storage) {
+    return storage->data == NULL && storage->capacity == 0 && storage->alignment == 0 &&
+           storage->storage_length == 0;
+}
+
+static int string_storage_equal(
+    const struct fy_std_string_storage_v0 *left,
+    const struct fy_std_string_storage_v0 *right
+) {
+    return left->data == right->data && left->capacity == right->capacity &&
+           left->alignment == right->alignment && left->length == right->length;
+}
+
+static int cstring_storage_equal(
+    const struct fy_std_cstring_storage_v0 *left,
+    const struct fy_std_cstring_storage_v0 *right
+) {
+    return left->data == right->data && left->capacity == right->capacity &&
+           left->alignment == right->alignment && left->storage_length == right->storage_length;
 }
 
 int main(void) {
@@ -142,6 +180,114 @@ int main(void) {
         !ok(fy_std_cstring_as_view_v0(&cstring, &cview)) || cview.length != 0 || cview.data[0] != 0 ||
         !ok(fy_std_cstring_drop_v0(&cstring))) {
         return 14;
+    }
+
+    struct fy_std_string_storage_v0 string_storage = {NULL, 0, 0, 0};
+    struct fy_std_cstring_storage_v0 cstring_storage = {NULL, 0, 0, 0};
+    if (!invalid_argument(fy_std_string_copy_storage_v0(&hello_view, NULL)) ||
+        !invalid_argument(fy_std_string_append_storage_v0(NULL, &hello_view)) ||
+        !invalid_argument(fy_std_string_drop_storage_v0(NULL)) ||
+        !invalid_argument(fy_std_cstring_from_text_storage_v0(&hello_view, NULL)) ||
+        !invalid_argument(fy_std_cstring_drop_storage_v0(NULL))) {
+        return 15;
+    }
+    if (!invalid_argument(fy_std_string_copy_storage_v0(NULL, &string_storage)) ||
+        !string_storage_empty(&string_storage)) {
+        return 16;
+    }
+    struct fy_std_string_storage_v0 nonempty_string_output = {(void *)(uintptr_t)1, 7, 1, 7};
+    struct fy_std_string_storage_v0 preserved_nonempty_string_output = nonempty_string_output;
+    if (!invalid_argument(fy_std_string_copy_storage_v0(&hello_view, &nonempty_string_output)) ||
+        !string_storage_equal(&nonempty_string_output, &preserved_nonempty_string_output)) {
+        return 29;
+    }
+    if (!ok(fy_std_string_copy_storage_v0(&hello_view, &string_storage)) ||
+        string_storage.data == NULL || string_storage.length != sizeof hello ||
+        memcmp(string_storage.data, hello, sizeof hello) != 0) {
+        return 17;
+    }
+    struct fy_std_string_storage_v0 preserved_string = string_storage;
+    uint8_t preserved_string_bytes[sizeof hello];
+    memcpy(preserved_string_bytes, string_storage.data, sizeof preserved_string_bytes);
+    struct fy_std_text_view_v0 invalid_suffix = {NULL, 1};
+    if (!invalid_argument(fy_std_string_append_storage_v0(&string_storage, &invalid_suffix)) ||
+        !string_storage_equal(&string_storage, &preserved_string) ||
+        memcmp(string_storage.data, preserved_string_bytes, sizeof preserved_string_bytes) != 0) {
+        return 18;
+    }
+    struct fy_std_text_view_v0 storage_self_prefix = {
+        (const uint8_t *)string_storage.data,
+        string_storage.length
+    };
+    if (!ok(fy_std_string_append_storage_v0(&string_storage, &storage_self_prefix)) ||
+        string_storage.length != sizeof hello * 2 ||
+        memcmp(string_storage.data, hello, sizeof hello) != 0 ||
+        memcmp((const uint8_t *)string_storage.data + sizeof hello, hello, sizeof hello) != 0) {
+        return 19;
+    }
+    if (!ok(fy_std_string_drop_storage_v0(&string_storage)) ||
+        !string_storage_empty(&string_storage) ||
+        !ok(fy_std_string_drop_storage_v0(&string_storage)) ||
+        !string_storage_empty(&string_storage)) {
+        return 20;
+    }
+    struct fy_std_string_storage_v0 malformed_string = {(void *)(uintptr_t)1, 0, 0, 0};
+    preserved_string = malformed_string;
+    if (!invalid_argument(fy_std_string_append_storage_v0(&malformed_string, &hello_view)) ||
+        !string_storage_equal(&malformed_string, &preserved_string) ||
+        !invalid_argument(fy_std_string_drop_storage_v0(&malformed_string)) ||
+        !string_storage_equal(&malformed_string, &preserved_string)) {
+        return 21;
+    }
+
+    if (!invalid_argument(fy_std_cstring_from_text_storage_v0(NULL, &cstring_storage)) ||
+        !cstring_storage_empty(&cstring_storage)) {
+        return 22;
+    }
+    struct fy_std_cstring_storage_v0 nonempty_cstring_output = {(void *)(uintptr_t)1, 7, 1, 7};
+    struct fy_std_cstring_storage_v0 preserved_nonempty_cstring_output = nonempty_cstring_output;
+    if (!invalid_argument(fy_std_cstring_from_text_storage_v0(&hello_view, &nonempty_cstring_output)) ||
+        !cstring_storage_equal(&nonempty_cstring_output, &preserved_nonempty_cstring_output)) {
+        return 30;
+    }
+    struct fy_std_cstring_storage_v0 preserved_cstring = cstring_storage;
+    conversion = fy_std_cstring_from_text_storage_v0(&nul_view, &cstring_storage);
+    if (conversion.status != FY_STD_OWNED_TEXT_INTERIOR_NUL_V0 ||
+        conversion.allocation_status != FY_STD_ALLOC_OK_V0 ||
+        !cstring_storage_equal(&cstring_storage, &preserved_cstring)) {
+        return 23;
+    }
+    struct fy_std_text_view_v0 overflow_text = {hello, SIZE_MAX};
+    conversion = fy_std_cstring_from_text_storage_v0(&overflow_text, &cstring_storage);
+    if (conversion.status != FY_STD_OWNED_TEXT_SIZE_OVERFLOW_V0 ||
+        conversion.allocation_status != FY_STD_ALLOC_SIZE_OVERFLOW_V0 ||
+        !cstring_storage_equal(&cstring_storage, &preserved_cstring)) {
+        return 24;
+    }
+    if (!ok(fy_std_cstring_from_text_storage_v0(&empty_text, &cstring_storage)) ||
+        cstring_storage.data == NULL || cstring_storage.storage_length != 1 ||
+        ((const uint8_t *)cstring_storage.data)[0] != 0 ||
+        !ok(fy_std_cstring_drop_storage_v0(&cstring_storage)) ||
+        !cstring_storage_empty(&cstring_storage) ||
+        !ok(fy_std_cstring_drop_storage_v0(&cstring_storage)) ||
+        !cstring_storage_empty(&cstring_storage)) {
+        return 25;
+    }
+    if (!ok(fy_std_cstring_from_text_storage_v0(&hello_view, &cstring_storage)) ||
+        cstring_storage.data == NULL || cstring_storage.storage_length != sizeof hello + 1 ||
+        memcmp(cstring_storage.data, hello, sizeof hello) != 0 ||
+        ((const uint8_t *)cstring_storage.data)[sizeof hello] != 0) {
+        return 26;
+    }
+    if (!ok(fy_std_cstring_drop_storage_v0(&cstring_storage)) ||
+        !cstring_storage_empty(&cstring_storage)) {
+        return 27;
+    }
+    struct fy_std_cstring_storage_v0 malformed_cstring = {(void *)(uintptr_t)1, 0, 0, 0};
+    preserved_cstring = malformed_cstring;
+    if (!invalid_argument(fy_std_cstring_drop_storage_v0(&malformed_cstring)) ||
+        !cstring_storage_equal(&malformed_cstring, &preserved_cstring)) {
+        return 28;
     }
     return 0;
 }

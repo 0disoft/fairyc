@@ -47,8 +47,9 @@ representation without claiming that generated Fairy storage has a C struct effe
 - The storage bridge is deliberately tied to the example-private flat field order and the existing
   target-laid-out resource transport. Any field or layout change must update the bridge, tests, and
   this contract together.
-- Exact copied bytes, terminator contents, rollback under allocation failure, invalid UTF-8,
-  self-overlap, and malformed-state rejection remain owned by the independent native C probes.
+- Exact copied bytes, terminator contents, invalid UTF-8, self-overlap, null and malformed storage,
+  failure preservation, size overflow, and repeated-drop behavior remain owned by the independent
+  native C probe. Forced allocation-failure rollback still lacks a deterministic native oracle.
 - Safe borrowed views remain deferred instead of being faked as raw pointers or copied descriptors
   with unproven lifetime provenance.
 
@@ -60,4 +61,8 @@ representation without claiming that generated Fairy storage has a C struct effe
 - standard-library tests require all five bridges, their closed symbol mapping, and byte-copy
   storage transport;
 - the WSL-free Windows host smoke builds, inspects, and executes the safe example with local x64
-  MSVC at low and optimized profiles, including normal, empty, interior-NUL, and implicit-drop paths.
+  MSVC at low and optimized profiles, including normal, empty, interior-NUL, and implicit-drop paths;
+- the same smoke separately compiles the raw probe and target-specific owned-text closure into two
+  MSVC translation units per profile, inspects both COFF objects plus the linked PE/unwind data, and
+  executes exact bytes, termination, null/malformed rejection, failure preservation, self-overlap,
+  deterministic size overflow, normal drop, and repeated drop without WSL.

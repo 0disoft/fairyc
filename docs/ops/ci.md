@@ -15,7 +15,8 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
 - After those ordinary checks, only the Windows matrix entry runs
   `cmd/fairyc-windows-host-smoke`. The command discovers the hosted runner's local x64 MSVC and
   Windows SDK without WSL, exercises single- and multi-source target-neutral paths plus the declared-target path, safe File and owned-text source lifecycles, layout, ABI,
-  PE/COFF, and unwind probes, and retains no executable, object, generated C, PDB, or report artifact.
+  raw owned-text storage failure preservation, PE/COFF, and unwind probes, and retains no executable,
+  object, generated C, PDB, or report artifact.
 - The workflow uploads no build artifact and performs no deploy, release, publication, or write to
   repository state.
 - Ordinary tests execute the fixed lexer and parser fuzz seeds. Timed fuzz campaigns remain
@@ -126,9 +127,12 @@ storage is copied to a length-five String, viewed, appended to length ten, viewe
 to normalized storage. The same input produces six-byte CString storage, a logical length-five CStr
 view, and normalized drop; compiler-owned `c"Fairy"` storage also passes direct bounded validation.
 The lane requires zero operation/allocation statuses, non-null live pointers, expected lengths and
-alignment, and cleared storage after drop. It does not independently dereference returned views, so
-the Linux probes retain exact-byte, terminator-oracle, rollback, self-overlap, empty, allocation-
-failure, and malformed-state evidence.
+alignment, and cleared storage after drop. It does not independently dereference returned views.
+The same Windows intent separately compiles the raw owned-text probe and target-specific
+implementation as caller and callee translation units at low and optimized profiles. Those
+executions observe exact bytes, the terminator, invalid UTF-8, interior NUL, empty CString, null and
+malformed opaque storage, failure preservation, self-overlap, deterministic size overflow, and
+normal plus repeated drop. Forced allocation failure remains unforced in both configured native lanes.
 A separate checked-in two-module owned-text program keeps every raw declaration and unsafe cast in
 its support module. Its safe entry constructs move-only String/CString resources, appends text,
 checks byte lengths, accepts empty CString, rejects interior NUL with status 3, and relies on
@@ -166,13 +170,15 @@ object conformance, or Windows call/ABI conformance. It separately compiles the 
 Windows File implementation and its caller probe, then executes create/write/sync/close/reopen,
 partial read, EOF, forced close failure, and repeated drop under both profiles. A separate checked-in
 FY source pair then executes safe write/sync/read/EOF, consuming close, and implicit-drop release at
-both profiles. It also compiles the catcher, stack-owning
+both profiles. It also compiles the raw owned-text caller and target-specific implementation as
+separate translation units, exercises the failure-preservation and repeated-lifecycle matrix under
+both profiles, and inspects both objects plus each linked image. It also compiles the catcher, stack-owning
 termination frame, and private exception raiser as three separate translation units, links and
 executes them under both profiles, and requires exact exception payload, ordered
 `RtlVirtualUnwind` frame discovery, and one abnormal `__finally` execution. Before execution, the
 same intent parses the target-neutral product image, both declared-target profile images, the two
 safe FY File lifecycle images, the two safe FY owned-text lifecycle images, both direct run-target temporary images, both exec-target temporary
-images, and all eight probe images
+images, and all ten raw Windows File, owned-text, layout, ABI, and unwind probe images
 and requires bounded AMD64 PE32+ non-DLL console
 identity, aligned image/header/section ranges, a readable executable `.text`, and an executable
 entry point. This does not inspect object symbols or relocations, unwind/debug payloads, imported
@@ -186,7 +192,7 @@ uninitialized-data characteristic. Object bytes are not uploaded or retained. Ex
 COMDAT, relocation-type, unwind, debug, and hosted object expectations remain unconfigured.
 The ordinary Go tests include a 154-section positive regression object and reject 4,097 sections;
 the exact section count emitted by a future MSVC version remains unstabilized.
-All nineteen linked target or probe PE images additionally traverse the Microsoft x64 exception directory before
+All twenty-one linked target or probe PE images additionally traverse the Microsoft x64 exception directory before
 execution. The local gate requires sorted nonoverlapping `.pdata` runtime-function ranges,
 executable code coverage, DWORD-aligned file-backed unwind records, bounded version 1 prolog slots,
 bounded version 2 epilog descriptors, and minimum handler/chained tails. The receipt reports the

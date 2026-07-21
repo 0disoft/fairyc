@@ -210,7 +210,9 @@ loan past the call, including across argument reordering and acyclic wrapper cha
 results without a complete proof remain fail-closed.
 Buffer-backed String and CString C helpers now preserve ownership on failed UTF-8 conversion,
 support overlap-safe String append, expose immutable bounded views, reject interior NUL, and append
-exactly one C terminator. Their C-only native probe is configured but unobserved. A separate
+exactly one C terminator. Their C-only native probe remains configured for the four Linux
+compiler/profile executions and now also runs as two separate-translation-unit x64 MSVC
+executions. A separate
 generated FY caller now crosses the exact CStr view record into the real bounded validator for valid,
 interior-NUL, and unterminated storage while checking failure leaves the prior view unchanged. A
 second generated FY caller uses exact nested heap/buffer/String/CString/result records to call the
@@ -225,8 +227,10 @@ five-byte UTF-8 literal is copied into String, viewed at length five, appended t
 dropped to normalized storage; the same input becomes a six-byte terminated CString whose view has
 logical length five before normalized drop. A direct compiler-owned `c"Fairy"` storage block also
 passes bounded CStr validation. The FY path observes statuses, lengths, non-null pointers, alignment,
-and cleanup but cannot dereference returned storage, so exact copied bytes, terminator contents, and
-the failure matrix remain owned by the Linux probes.
+and cleanup but cannot dereference returned storage. The independent raw C probe now supplies
+Windows evidence for exact copied bytes, the terminator, null and malformed storage rejection,
+failure preservation, self-overlap, size overflow, and repeated drop at both MSVC profiles; forced
+allocation failure remains unforced in the configured native lanes.
 The separate `examples/owned_text/` program exercises only the safe wrapper surface. Low and
 optimized x64 MSVC builds prove String copy and append, CString creation for nonempty and empty
 text, interior-NUL rejection, scalar lengths, and implicit cleanup while keeping raw pointers and
@@ -289,8 +293,9 @@ translation units at both profiles. A third three-object probe raises and catche
 exception, virtual-walks raiser, termination, and catcher frames, and requires one abnormal
 `__finally` execution under both profiles. The target marker remains missing until broader layout
 and independent/source-level/hosted ABI and unwind evidence exists. A host-independent PE parser
-now validates the host-smoke product, both declared-target profile products, two direct run-target
-temporary products, two exec-target output products, and all eight probe images as bounded
+now validates the host-smoke product, both declared-target profile products, both safe File and
+safe owned-text profile products, two direct run-target temporary products, two exec-target output
+products, and all ten raw Windows File, owned-text, layout, ABI, and unwind probe images as bounded
 AMD64 PE32+ console executables
 with aligned headers and sections and an executable `.text` entry point. That linked-image path does not inspect
 object symbols, relocations, or Windows unwind records. The same package separately parses every

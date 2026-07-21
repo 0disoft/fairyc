@@ -129,7 +129,8 @@ without using the host loader and rejects non-AMD64, non-PE32+, DLL, non-console
 out-of-range, duplicate-section, missing-`.text`, and non-executable-entry images. The Windows smoke
 applies it to the retained target-neutral product, both declared-target profile products, two direct
 run-target temporary products (one driven through a separately built compiler process), both safe
-File and safe owned-text profile products, and both profiles of the layout, ABI, and unwind probes before
+File and safe owned-text profile products, and both profiles of the raw Windows File, raw owned-text,
+layout, ABI, and unwind probes before
 execution. COFF object records and unwind/debug payload semantics remain outside this linked-image
 branch.
 The same package has a distinct raw-COFF path used inside `internal/cdriver` before local linking
@@ -165,8 +166,11 @@ The Windows target example also crosses compiler-owned static UTF-8 and C-string
 real owned-text source. Private nested heap/Buffer/String/CString/view/result records carry String
 copy, view, append, second view, and drop plus CString construction, view, drop, and direct CStr
 validation. Status, length, alignment, pointer, and normalized-drop state execute at both profiles;
-the FY subset cannot dereference the returned view, so byte, terminator, and failure-matrix evidence
-remains in the Linux probes. This does not add safe source ownership or a public text API.
+the FY subset cannot dereference the returned view. A separate raw C caller now crosses the
+target-specific owned-text callee at both MSVC profiles and supplies byte, terminator, null/malformed
+storage, failure-preservation, self-overlap, size-overflow, and repeated-drop evidence. Forced
+allocation failure remains unforced in both native lanes. This does not add safe source ownership or
+a public text API.
 An independent checked-in safe owned-text module now keeps those raw declarations and opaque casts
 behind move-only FY resources. Its storage bridges use `memcpy` over `void *`, and low/optimized
 source builds execute Result mapping, length reads, interior-NUL rejection, and verified cleanup.
