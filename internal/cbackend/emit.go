@@ -1033,6 +1033,13 @@ func canonicalCValueType(value hir.Type) hir.Type {
 	return value
 }
 
+func fieldAggregateType(value hir.Type) hir.Type {
+	if element, _, borrow := hir.BorrowElement(value); borrow {
+		return element
+	}
+	return value
+}
+
 func isOptionI32(value hir.Type) bool {
 	element, ok := hir.OptionElement(value)
 	return ok && element == hir.TypeI32
@@ -1253,7 +1260,7 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 					return err
 				}
 			case mir.OperationFieldRead:
-				if _, structure := e.structByType[operation.OwnerType]; structure {
+				if _, structure := e.structByType[fieldAggregateType(operation.OwnerType)]; structure {
 					if err := e.inspectStructOperation(functionIndex, *operation); err != nil {
 						return err
 					}
@@ -2058,7 +2065,7 @@ func (e *emitter) inspectStructOperation(functionIndex int, operation mir.Operat
 			}
 		}
 	case mir.OperationFieldRead:
-		index, found := e.structByType[operation.OwnerType]
+		index, found := e.structByType[fieldAggregateType(operation.OwnerType)]
 		if !found {
 			return CapabilityError{Function: function.Name, Feature: "field-read owner type " + strconv.Quote(string(operation.OwnerType))}
 		}
@@ -2277,7 +2284,7 @@ func (e *emitter) inspectResourceOperation(functionIndex int, operation mir.Oper
 			}
 		}
 	case mir.OperationFieldRead:
-		index, found := e.resourceByType[operation.OwnerType]
+		index, found := e.resourceByType[fieldAggregateType(operation.OwnerType)]
 		if !found {
 			return CapabilityError{Function: function.Name, Feature: "field-read owner type " + strconv.Quote(string(operation.OwnerType))}
 		}
@@ -2300,7 +2307,7 @@ func (e *emitter) inspectResourceOperation(functionIndex int, operation mir.Oper
 		if err != nil {
 			return fmt.Errorf("resource field read in %s: %w", function.Name, err)
 		}
-		if canonicalCValueType(receiverType) != canonicalCValueType(operation.OwnerType) {
+		if receiverType != operation.OwnerType {
 			return fmt.Errorf("resource field read in %s has receiver type %q, want %q", function.Name, receiverType, operation.OwnerType)
 		}
 	}
@@ -3071,7 +3078,9 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		}
 		output.WriteString(" };\n")
 	case mir.OperationFieldRead:
-		if index, found := e.structByType[operation.OwnerType]; found {
+		aggregateType := fieldAggregateType(operation.OwnerType)
+		_, _, borrowed := hir.BorrowElement(operation.OwnerType)
+		if index, found := e.structByType[aggregateType]; found {
 			fieldIndex, fieldFound := e.structTypes[index].fieldIndex[operation.Field]
 			if !fieldFound {
 				return fmt.Errorf("struct field read in %s names missing field %q", function, operation.Field)
@@ -3084,10 +3093,14 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			if err != nil {
 				return fmt.Errorf("struct field read in %s: %w", function, err)
 			}
-			fmt.Fprintf(output, "    fy_l_%d = (%s).%s;\n", operation.DestinationLocal, value, e.structCFieldName(index, fieldIndex))
+			if borrowed {
+				fmt.Fprintf(output, "    fy_l_%d = (%s)->%s;\n", operation.DestinationLocal, value, e.structCFieldName(index, fieldIndex))
+			} else {
+				fmt.Fprintf(output, "    fy_l_%d = (%s).%s;\n", operation.DestinationLocal, value, e.structCFieldName(index, fieldIndex))
+			}
 			break
 		}
-		index, found := e.resourceByType[operation.OwnerType]
+		index, found := e.resourceByType[aggregateType]
 		if !found {
 			return CapabilityError{Function: function, Feature: "field-read owner type " + strconv.Quote(string(operation.OwnerType))}
 		}
@@ -3103,7 +3116,11 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		if err != nil {
 			return fmt.Errorf("resource field read in %s: %w", function, err)
 		}
-		fmt.Fprintf(output, "    fy_l_%d = (%s).f_%d;\n", operation.DestinationLocal, value, fieldIndex)
+		if borrowed {
+			fmt.Fprintf(output, "    fy_l_%d = (%s)->f_%d;\n", operation.DestinationLocal, value, fieldIndex)
+		} else {
+			fmt.Fprintf(output, "    fy_l_%d = (%s).f_%d;\n", operation.DestinationLocal, value, fieldIndex)
+		}
 	case mir.OperationViewLength:
 		receiver, err := oneOperand(operation.Operands)
 		if err != nil {

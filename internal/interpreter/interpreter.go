@@ -534,6 +534,13 @@ func (v runtimeValue) structField(definition *mir.StructType, name string) (runt
 	return value, nil
 }
 
+func fieldAggregateType(value hir.Type) hir.Type {
+	if element, _, borrow := hir.BorrowElement(value); borrow {
+		return element
+	}
+	return value
+}
+
 func (v runtimeValue) enumPayload(definition *mir.EnumType, variant, field string) (runtimeValue, error) {
 	if v.kind != valueEnum || v.enum == nil || v.enum.definition == nil {
 		return runtimeValue{}, capabilityError("enum payload received a non-enum value")
@@ -872,10 +879,11 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					return callCompletion{}, fmt.Errorf("field read in %q: %w", function.Name, err)
 				}
 				var value runtimeValue
-				if definition := r.structTypes[operation.OwnerType]; definition != nil {
+				aggregateType := fieldAggregateType(operation.OwnerType)
+				if definition := r.structTypes[aggregateType]; definition != nil {
 					value, err = receiver.structField(definition, operation.Field)
 				} else {
-					value, err = receiver.field(r.resourceTypes[operation.OwnerType], operation.Field)
+					value, err = receiver.field(r.resourceTypes[aggregateType], operation.Field)
 				}
 				if err != nil {
 					return callCompletion{}, fmt.Errorf("field read in %q: %w", function.Name, err)

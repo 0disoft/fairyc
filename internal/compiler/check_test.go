@@ -2,6 +2,8 @@ package compiler_test
 
 import (
 	"errors"
+	"os"
+	"path/filepath"
 	"slices"
 	"testing"
 
@@ -21,6 +23,20 @@ func TestCheckProducesVerifiedMIR(t *testing.T) {
 		t.Fatalf("Check() error = %v", err)
 	}
 	if !result.Verified || result.Semantic.CompletedThrough != semantic.PhaseFlow || len(result.MIR.Functions) != 1 || result.MIR.Functions[0].Name != "main::main" {
+		t.Fatalf("Check() result = %+v", result)
+	}
+}
+
+func TestCheckProducesVerifiedMIRForOwnedTextExample(t *testing.T) {
+	t.Parallel()
+	result, err := compiler.Check([]semantic.File{
+		parseCompilerFileFromPath(t, filepath.Join("..", "..", "examples", "owned_text", "main.fy")),
+		parseCompilerFileFromPath(t, filepath.Join("..", "..", "examples", "owned_text", "owned_text.fy")),
+	})
+	if err != nil {
+		t.Fatalf("Check() error = %v", err)
+	}
+	if !result.Verified || result.Semantic.CompletedThrough != semantic.PhaseFlow {
 		t.Fatalf("Check() result = %+v", result)
 	}
 }
@@ -89,4 +105,14 @@ func parseCompilerFile(t *testing.T, packageID hir.PackageID, path, text string)
 		t.Fatalf("AnalyzeSyntax(%s) diagnostics = %+v, AST = %+v", path, parsed.Tree.Diagnostics, parsed.AST)
 	}
 	return semantic.File{Package: packageID, Path: path, Module: parsed.AST}
+}
+
+func parseCompilerFileFromPath(t *testing.T, path string) semantic.File {
+	t.Helper()
+	text, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("ReadFile(%s) error = %v", path, err)
+	}
+	logicalPath := filepath.ToSlash(filepath.Join("examples", "owned_text", filepath.Base(path)))
+	return parseCompilerFile(t, hir.DefaultPackage, logicalPath, string(text))
 }

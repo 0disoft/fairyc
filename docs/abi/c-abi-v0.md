@@ -120,6 +120,11 @@ transport from the separately compiled C unit for String and CString operations 
 That is one closed same-toolchain source crossing, not a stable record ABI, broad aggregate-return
 conformance, byte-content proof, or permission for by-value aggregate parameters.
 
+The safe owned-text example uses a separate opaque storage bridge rather than passing those records
+as public Fairy types. C loads and stores the private record bytes with `memcpy`; the bridge proves
+the current example-private layout crossing but does not assign a C effective type to generated
+resource storage or stabilize that storage as ABI.
+
 The implemented foreign-result slice admits those same nonempty acyclic `@repr(C)` records by value.
 Generated C emits the exact public struct return type and ordinary assignment. A generated Fairy
 caller is configured to receive both an 8-byte INTEGER-class result and a 20-byte MEMORY-class
@@ -221,7 +226,7 @@ closed subset only. It does not prove source-level Fairy lowering, an independen
 register-level oracle, exact stack/shadow-store placement, complete PE/COFF object or unwind
 metadata, or hosted evidence.
 
-The Windows smoke additionally parses all seventeen linked target or probe executable images without
+The Windows smoke additionally parses all nineteen linked target or probe executable images without
 invoking the host loader as the parser. The target-neutral product, both declared-target profile
 products, both safe FY File lifecycle products, two direct run-target temporary products, two
 exec-target temporary output products, plus both profiles of the raw Windows File, layout, ABI,

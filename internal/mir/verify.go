@@ -676,10 +676,11 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationFieldRead:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
-				resourceDefinition := resourceTypes[operation.OwnerType]
-				structDefinition := structTypes[operation.OwnerType]
+				aggregateType := fieldAggregateType(operation.OwnerType)
+				resourceDefinition := resourceTypes[aggregateType]
+				structDefinition := structTypes[aggregateType]
 				if resourceDefinition == nil && structDefinition == nil {
-					failures = append(failures, VerificationError{Code: "V1001", Entity: structTypeEntity(operation.OwnerType), Detail: "field-read owner type has no aggregate definition"})
+					failures = append(failures, VerificationError{Code: "V1001", Entity: structTypeEntity(aggregateType), Detail: "field-read owner type has no aggregate definition"})
 				}
 				if operation.DestinationLocal == NoLocal || operation.OwnerType == "" || operation.OwnerType == hir.TypeInvalid || operation.Type == "" || operation.Type == hir.TypeInvalid || operation.Field == "" || len(operation.Operands) != 1 {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "field read shape is invalid"})
@@ -1485,6 +1486,13 @@ func structField(fields []StructField, name string) (StructField, bool) {
 		}
 	}
 	return StructField{}, false
+}
+
+func fieldAggregateType(value hir.Type) hir.Type {
+	if element, _, borrow := hir.BorrowElement(value); borrow {
+		return element
+	}
+	return value
 }
 
 func cloneVerificationState(input verificationState) verificationState {

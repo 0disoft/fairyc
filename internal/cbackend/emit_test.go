@@ -1150,6 +1150,32 @@ fn main() -> i32 {
 	}
 }
 
+func TestEmitBorrowedResourceFieldReadsThroughPointers(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+resource Token { value: u32; drop fn(self: &mut Self) {} }
+fn read(token: &Token) -> u32 { token.value }
+fn read_mut(token: &mut Token) -> u32 { token.value }
+fn main() -> i32 {
+    var token: Token = Token { value: 42 };
+    if read(&token) == 42 && read_mut(&mut token) == 42 { 42 } else { 1 }
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, required := range []string{
+		"const fy_resource_0 *",
+		"fy_resource_0 *",
+		")->f_0;",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+}
+
 func TestEmitRejectsOtherNestedRawPointerMutabilityShapes(t *testing.T) {
 	t.Parallel()
 	for _, typeRef := range []string{"**void", "**mut void", "*mut *void"} {

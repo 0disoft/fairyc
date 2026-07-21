@@ -216,14 +216,21 @@ interior-NUL, and unterminated storage while checking failure leaves the prior v
 second generated FY caller uses exact nested heap/buffer/String/CString/result records to call the
 real String copy, view, append, and drop helpers plus CString creation, CStr view, and drop. Its C
 observers require exact bytes, repeated append, one terminator, and normalized release. These are raw
-internal transports; public safe String/CString types and source `Result` mapping remain absent.
-Windows `build-target` now admits the eight exact owned-text and CStr entry points. A compiler-owned
+internal transports. A separate checked-in example now wraps opaque storage bridges in move-only
+Fairy `String` and `CString` resources, maps operation failures into source `Result`, exposes only
+length and typed error metadata, and runs its C release through verified resource drop glue. This is
+an example-level safe boundary, not a stable public `std::text` module, ABI, or borrowed-view API.
+Windows `build-target` now admits the exact owned-text, CStr, and opaque storage-bridge entry points. A compiler-owned
 five-byte UTF-8 literal is copied into String, viewed at length five, appended to length ten, and
 dropped to normalized storage; the same input becomes a six-byte terminated CString whose view has
 logical length five before normalized drop. A direct compiler-owned `c"Fairy"` storage block also
 passes bounded CStr validation. The FY path observes statuses, lengths, non-null pointers, alignment,
 and cleanup but cannot dereference returned storage, so exact copied bytes, terminator contents, and
 the failure matrix remain owned by the Linux probes.
+The separate `examples/owned_text/` program exercises only the safe wrapper surface. Low and
+optimized x64 MSVC builds prove String copy and append, CString creation for nonempty and empty
+text, interior-NUL rejection, scalar lengths, and implicit cleanup while keeping raw pointers and
+foreign calls out of its entry module.
 The Linux File C slice now exposes partial I/O, write-all progress, sync, and consuming close that
 is never retried, even after failure. Its C-only four-way probe remains configured but unobserved.
 A separate generated FY caller now crosses exact result, File, and open-option records into the real
@@ -342,6 +349,7 @@ go run ./cmd/fairyc experimental emit-c examples/c/resource.fy
 go run ./cmd/fairyc experimental emit-c examples/c/resource_tagged.fy
 go run ./cmd/fairyc experimental emit-c examples/run/modules/main.fy --source examples/run/modules/math.fy
 go run ./cmd/fairyc experimental build examples/c/tagged.fy --cc clang --profile optimized --output build/fairyc-example
+go run ./cmd/fairyc experimental build-target examples/owned_text/main.fy --source examples/owned_text/owned_text.fy --target x86_64-windows-msvc --profile optimized --output build/owned-text.exe
 go run ./cmd/fairyc experimental run examples/run/main.fy
 go run ./cmd/fairyc experimental run examples/run/resource_option.fy
 go run ./cmd/fairyc experimental run examples/run/modules/main.fy --source examples/run/modules/math.fy

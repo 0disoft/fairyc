@@ -62,6 +62,38 @@ fn main() -> i32 {
 	}
 }
 
+func TestLowerVerifiesBorrowedResourceFieldReads(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+resource Token {
+    value: u32;
+    drop fn(self: &mut Self) {}
+}
+fn read(token: &Token) -> u32 { token.value }
+fn read_mut(token: &mut Token) -> u32 { token.value }
+fn main() -> i32 {
+    var token: Token = Token { value: 42 };
+    if read(&token) == 42 && read_mut(&mut token) == 42 { 42 } else { 1 }
+}
+`)
+	owners := make(map[hir.Type]bool)
+	for _, function := range program.Functions {
+		for _, block := range function.Blocks {
+			for _, operation := range block.Operations {
+				if operation.Kind == OperationFieldRead {
+					owners[operation.OwnerType] = true
+				}
+			}
+		}
+	}
+	if !owners[hir.SharedBorrow(hir.Type("main::Token"))] || !owners[hir.MutableBorrow(hir.Type("main::Token"))] {
+		t.Fatalf("borrowed field-read owner types = %v", owners)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+}
+
 func TestLowerPreservesResourceDropEffectsOnDefinitionAndGlue(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;

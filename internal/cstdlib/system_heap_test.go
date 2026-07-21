@@ -163,6 +163,13 @@ func TestOwnedTextSourcesPreserveOwnershipAndNULTermination(t *testing.T) {
 		"fy_std_cstr_validate_v0",
 		"FY_STD_OWNED_TEXT_INTERIOR_NUL_V0",
 		"fy_std_cstring_from_text_v0",
+		"fy_std_string_copy_storage_v0",
+		"fy_std_string_append_storage_v0",
+		"fy_std_string_drop_storage_v0",
+		"fy_std_cstring_from_text_storage_v0",
+		"fy_std_cstring_drop_storage_v0",
+		"memcpy(output_storage, &output, sizeof output)",
+		"memcpy(value_storage, &value, sizeof value)",
 	} {
 		if !strings.Contains(implementation, required) {
 			t.Errorf("owned text implementation is missing %q", required)
@@ -363,6 +370,11 @@ func TestWindowsMSVCSourceForSymbolsKeepsClosedRuntimeSlice(t *testing.T) {
 		"fy_std_cstring_from_text_v0",
 		"fy_std_cstring_as_view_v0",
 		"fy_std_cstring_drop_v0",
+		"fy_std_string_copy_storage_v0",
+		"fy_std_string_append_storage_v0",
+		"fy_std_string_drop_storage_v0",
+		"fy_std_cstring_from_text_storage_v0",
+		"fy_std_cstring_drop_storage_v0",
 		"fy_std_system_heap_allocate_v0",
 		"fy_std_system_heap_deallocate_v0",
 	})
@@ -385,6 +397,9 @@ func TestWindowsMSVCSourceForSymbolsKeepsClosedRuntimeSlice(t *testing.T) {
 		"fy_std_cstr_validate_v0", "fy_std_string_copy_v0", "fy_std_string_as_view_v0",
 		"fy_std_string_append_v0", "fy_std_string_drop_v0", "fy_std_cstring_from_text_v0",
 		"fy_std_cstring_as_view_v0", "fy_std_cstring_drop_v0",
+		"fy_std_string_copy_storage_v0", "fy_std_string_append_storage_v0",
+		"fy_std_string_drop_storage_v0", "fy_std_cstring_from_text_storage_v0",
+		"fy_std_cstring_drop_storage_v0",
 	} {
 		if !strings.Contains(source, required) {
 			t.Errorf("Windows source is missing %q", required)

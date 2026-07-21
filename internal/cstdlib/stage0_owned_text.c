@@ -220,3 +220,101 @@ struct fy_std_owned_text_result_v0 fy_std_cstring_drop_v0(struct fy_std_cstring_
     }
     return fy_std_owned_text_from_alloc_v0(fy_std_buffer_drop_v0(&value->bytes));
 }
+
+static int fy_std_owned_text_buffer_empty_v0(const struct fy_std_buffer_v0 *value) {
+    return value != NULL && value->block.data == NULL && value->block.size == 0 &&
+           value->block.alignment == 0 && value->length == 0;
+}
+
+struct fy_std_owned_text_result_v0 fy_std_string_copy_storage_v0(
+    const struct fy_std_text_view_v0 *input,
+    void *output_storage
+) {
+    if (output_storage == NULL) {
+        return fy_std_owned_text_error_v0(FY_STD_OWNED_TEXT_INVALID_ARGUMENT_V0, FY_STD_ALLOC_OK_V0);
+    }
+    struct fy_std_string_v0 output;
+    memcpy(&output, output_storage, sizeof output);
+    if (!fy_std_owned_text_buffer_empty_v0(&output.bytes)) {
+        return fy_std_owned_text_error_v0(FY_STD_OWNED_TEXT_INVALID_ARGUMENT_V0, FY_STD_ALLOC_OK_V0);
+    }
+    struct fy_std_owned_text_result_v0 result = fy_std_string_copy_v0(input, &output);
+    if (result.status == FY_STD_OWNED_TEXT_OK_V0) {
+        memcpy(output_storage, &output, sizeof output);
+    }
+    return result;
+}
+
+struct fy_std_owned_text_result_v0 fy_std_string_append_storage_v0(
+    void *value_storage,
+    const struct fy_std_text_view_v0 *suffix
+) {
+    if (value_storage == NULL) {
+        return fy_std_owned_text_error_v0(FY_STD_OWNED_TEXT_INVALID_ARGUMENT_V0, FY_STD_ALLOC_OK_V0);
+    }
+    struct fy_std_string_v0 value;
+    memcpy(&value, value_storage, sizeof value);
+    if (!fy_std_string_valid_v0(&value)) {
+        return fy_std_owned_text_error_v0(FY_STD_OWNED_TEXT_INVALID_ARGUMENT_V0, FY_STD_ALLOC_OK_V0);
+    }
+    struct fy_std_owned_text_result_v0 result = fy_std_string_append_v0(&value, suffix);
+    memcpy(value_storage, &value, sizeof value);
+    return result;
+}
+
+struct fy_std_owned_text_result_v0 fy_std_string_drop_storage_v0(void *value_storage) {
+    if (value_storage == NULL) {
+        return fy_std_owned_text_error_v0(FY_STD_OWNED_TEXT_INVALID_ARGUMENT_V0, FY_STD_ALLOC_OK_V0);
+    }
+    struct fy_std_string_v0 value;
+    memcpy(&value, value_storage, sizeof value);
+    if (fy_std_owned_text_buffer_empty_v0(&value.bytes)) {
+        return fy_std_owned_text_ok_v0();
+    }
+    if (!fy_std_string_valid_v0(&value)) {
+        return fy_std_owned_text_error_v0(FY_STD_OWNED_TEXT_INVALID_ARGUMENT_V0, FY_STD_ALLOC_OK_V0);
+    }
+    struct fy_std_owned_text_result_v0 result = fy_std_string_drop_v0(&value);
+    if (result.status == FY_STD_OWNED_TEXT_OK_V0) {
+        memcpy(value_storage, &value, sizeof value);
+    }
+    return result;
+}
+
+struct fy_std_owned_text_result_v0 fy_std_cstring_from_text_storage_v0(
+    const struct fy_std_text_view_v0 *input,
+    void *output_storage
+) {
+    if (output_storage == NULL) {
+        return fy_std_owned_text_error_v0(FY_STD_OWNED_TEXT_INVALID_ARGUMENT_V0, FY_STD_ALLOC_OK_V0);
+    }
+    struct fy_std_cstring_v0 output;
+    memcpy(&output, output_storage, sizeof output);
+    if (!fy_std_owned_text_buffer_empty_v0(&output.bytes)) {
+        return fy_std_owned_text_error_v0(FY_STD_OWNED_TEXT_INVALID_ARGUMENT_V0, FY_STD_ALLOC_OK_V0);
+    }
+    struct fy_std_owned_text_result_v0 result = fy_std_cstring_from_text_v0(input, &output);
+    if (result.status == FY_STD_OWNED_TEXT_OK_V0) {
+        memcpy(output_storage, &output, sizeof output);
+    }
+    return result;
+}
+
+struct fy_std_owned_text_result_v0 fy_std_cstring_drop_storage_v0(void *value_storage) {
+    if (value_storage == NULL) {
+        return fy_std_owned_text_error_v0(FY_STD_OWNED_TEXT_INVALID_ARGUMENT_V0, FY_STD_ALLOC_OK_V0);
+    }
+    struct fy_std_cstring_v0 value;
+    memcpy(&value, value_storage, sizeof value);
+    if (fy_std_owned_text_buffer_empty_v0(&value.bytes)) {
+        return fy_std_owned_text_ok_v0();
+    }
+    if (!fy_std_cstring_valid_v0(&value)) {
+        return fy_std_owned_text_error_v0(FY_STD_OWNED_TEXT_INVALID_ARGUMENT_V0, FY_STD_ALLOC_OK_V0);
+    }
+    struct fy_std_owned_text_result_v0 result = fy_std_cstring_drop_v0(&value);
+    if (result.status == FY_STD_OWNED_TEXT_OK_V0) {
+        memcpy(value_storage, &value, sizeof value);
+    }
+    return result;
+}

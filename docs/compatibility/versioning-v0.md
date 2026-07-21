@@ -154,6 +154,10 @@ ADR 0127 adds the provisional `experimental check` spelling, explicit primary-pl
 and one human verified-MIR count line. These are prototype CLI contracts only. They do not stabilize
 the future package-aware `fairyc check`, configuration, target selection, JSON, exit codes, or
 function-count meaning.
+ADR 0131 adds example-level move-only String/CString wrappers, typed source errors, and five opaque
+storage bridges plus borrowed-resource field-read transport. These are pre-1 source, MIR, and
+runtime-example contracts. They do not stabilize `std::text`, public layouts, C ABI, owned-to-
+borrowed views, Unicode behavior, allocator selection, or bridge symbol compatibility.
 ADR 0113 admits branch-aware safe-borrow reassignment with right-hand-side-first replacement,
 loan-generation preservation across aliases, reachable `if`/`match` origin joins, and path-aware
 loan liveness. Those rules and fail-closed multi-origin returns are pre-1 semantics. ADR 0114 adds compiler-internal fixed-point return-origin

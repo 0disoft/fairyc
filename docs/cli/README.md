@@ -116,7 +116,8 @@ permits target declarations such as unused `c::long` and automatically links exa
 move-only resource transport over Fairy copy scalars or raw pointers, plus
 SystemHeap allocate/deallocate, Buffer initialize/zeroed-resize/drop, Arena initialize/Region
 begin/zeroed-allocation/reset/Arena-drop, CStr validation, String copy/view/append/drop, CString
-from-text/view/drop, and `fy_std_text_utf8_valid_v0` project-owned components when called. Buffer,
+from-text/view/drop, the five opaque String/CString storage bridges, and
+`fy_std_text_utf8_valid_v0` project-owned components when called. Buffer,
 Arena, and owned text pull in their declared dependencies once;
 the Windows x64 SystemHeap ceiling is 16-byte fundamental alignment. Every other foreign symbol or
 unproven standard-library component fails before toolchain discovery; foreign companion inputs and user
@@ -124,6 +125,9 @@ linker options remain absent. Its receipt is target-emission and one-way closed-
 complete ABI/runtime conformance, zeroed Arena-byte or owned-text byte/terminator observation,
 owned-text failure behavior, hosted support, a distributable
 artifact promise, or self-hosting.
+The checked-in `examples/owned_text/` pair uses those storage bridges only behind safe move-only FY
+resources and is built and executed at both MSVC profiles by the configured smoke. This does not
+stabilize a `std::text` package, resource layout, or owned-to-borrowed view API.
 `experimental run-target` shares that exact target compilation and support-link contract, validates
 the temporary PE and x64 unwind structure, executes it with bounded captured output, and removes it.
 Success writes `native result: <i32> (x86_64-windows-msvc, msvc <version>, <profile>)`; a product

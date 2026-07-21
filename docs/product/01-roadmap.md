@@ -180,16 +180,15 @@ assignment. Bounds are proven before right-hand-side evaluation. Mutable slicing
 retained foreign pointers remain missing.
 Owned String and CString now have provisional Buffer-backed C transport with immutable views,
 successful-only Buffer moves, failure ownership preservation, self-source append, interior-NUL
-rejection, and exact termination. Four C-only native runs are configured but unobserved. A separate
-four-way generated-Fairy crossing now calls the real bounded CStr validator with valid, interior-NUL,
-and unterminated nonempty storage and requires failure to preserve the prior output view. Another
-four-way generated-Fairy crossing calls the real String copy/view/append/drop and CString
-from-text/view/drop helpers with exact nested records and by-value result records. Public safe
-String/CString resources, Result error resources, and ownership-aware calls remain missing. The
-Windows target build now executes those seven lifecycle calls plus direct CStr validation at both
-MSVC profiles. It observes String lengths five and ten, six-byte CString storage with a logical
-length-five view, successful statuses, non-null pointers, and normalized drops; exact bytes,
-terminator contents, and failure cases remain Linux-probe responsibilities.
+rejection, and exact termination. Four C-only native runs are configured but unobserved. Separate
+generated-Fairy crossings call the real bounded CStr validator and exact raw String/CString records.
+An additional example-level safe FY module now confines five opaque storage bridges behind move-only
+`String`/`CString` resources, source `Result` errors, scalar lengths, and verified nonempty drop glue.
+Its low and optimized Windows target builds cover append, empty CString, interior-NUL rejection, and
+implicit cleanup with result 42. The existing raw Windows target lifecycle still observes lengths,
+pointers, alignment, statuses, and normalized drops. Exact bytes, terminator contents, allocation-
+failure rollback, invalid UTF-8, self-overlap, malformed state, safe owned-to-borrowed views, and a
+stable `std::text` surface remain later gates.
 The Linux File C slice now also covers partial read/write, write-all progress, sync, and consuming
 close including forced close failure. Its four C-only native runs remain configured but unobserved.
 A second four-way generated-Fairy crossing uses exact result, File, and open-option records to call
@@ -244,8 +243,9 @@ its 12 pass plans now cross separate caller and callee C11 translation units thr
 at both profiles. Independent compiler or assembly/register inspection, source-level Fairy
 crossings, and a hosted Windows receipt remain absent. PE/COFF objects, runtime, standard library,
 supported distribution artifacts, and conformance remain later gates. A bounded parser now checks
-the host-smoke product, both declared-target profile products, two direct run-target temporary
-products, two exec-target temporary output products, and eight native probe executables for AMD64
+the host-smoke product, both declared-target profile products, both safe File and safe owned-text
+profile products, two direct run-target temporary products, two exec-target temporary output
+products, and eight native probe executables for AMD64
 PE32+ console identity, aligned
 headers/sections, and an executable entry point, but does not inspect `.obj` symbols, relocations,
 unwind payloads, or CodeView/PDB data.
@@ -253,7 +253,7 @@ Every local MSVC compile in the same lane now also parses its intermediate `.obj
 before cleanup, including `.text$...`, `.bss`, symbol-table, and relocation-index structure. Exact
 versioned symbol names, COMDAT selection, relocation types, unwind records, and a hosted object
 receipt remain absent, so the target evidence marker stays fail-closed.
-The fifteen local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
+The nineteen local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
 runtime-function ordering and code coverage plus referenced version 1 and version 2 unwind-record
 bounds, including handler/chained minimum tails. A separate three-object probe now raises a private
 noncontinuable exception at both profiles, validates its payload in an outer SEH filter, walks the
@@ -291,8 +291,9 @@ example, requires no output and native result 42, and removes the image. The min
 quickstart iterates two bytes with typed `usize` ordering and checked addition, performs checked byte
 indexing, and safely converts each `u8` to `i32` through a separately built compiler process. The
 host smoke also proves maximum-`usize` addition traps under both MSVC profiles. The configured Windows
-smoke therefore covers two retained target builds plus two direct target executions and thirteen total
-target or probe PE images. The second direct execution comes from a separately built temporary
+smoke therefore covers two retained target builds, two safe File builds, two safe owned-text builds,
+two direct target executions, two exec-target executions, and nineteen total target or probe PE
+images. The second direct execution comes from a separately built temporary
 `fairyc.exe` compiling the minimal Windows quickstart, so the standalone compiler process boundary
 is exercised without retaining or distributing it. This improves the developer execution path
 without changing target maturity or claiming self-hosting.

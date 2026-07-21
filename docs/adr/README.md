@@ -140,6 +140,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0128-build-local-package-identity.md`: resolved package identity carried through semantic lookup, typed HIR types, source identities, and MIR names without stabilizing a public package ID.
 - `0129-shared-verified-mir-pipeline.md`: one compiler-owned semantic-to-MIR coordinator shared by explicit source closures and already-resolved package input.
 - `0130-package-aware-source-spans.md`: build-local package identity stored separately from relative source display paths across semantic HIR, MIR, provenance, and drop traces.
+- `0131-safe-owned-text-fy-lifecycle.md`: example-level move-only String/CString wrappers, alias-safe opaque storage bridges, typed errors, verified borrowed-resource field reads, and native Windows cleanup proof without stabilizing `std::text`.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

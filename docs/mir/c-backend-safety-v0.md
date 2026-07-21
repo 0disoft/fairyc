@@ -107,6 +107,13 @@ MIR field types select target-laid-out private C fields; raw pointers remain non
 typed body explicitly acts on them. Numeric translation-unit types and fields prevent source
 identifiers from becoming C symbols.
 
+Verified field reads may retain a shared or mutable safe-resource borrow as their receiver. MIR
+resolves the field against the borrow's underlying resource definition while preserving the borrow
+type for code generation. The C backend therefore emits `pointer->field` for a borrowed receiver and
+`value.field` for an owned receiver, and rejects a mismatched definition, receiver type, or field
+type. This opens no foreign safe-borrow ABI and does not permit pointer retention or ownership
+transfer.
+
 Generic `Option` and `Result` values are accepted when each payload is a canonical Fairy copy scalar
 (`bool`, `u8`, `i32`, `u32`, or `usize`), an admitted inert struct, or a direct admitted resource.
 The compact `Option<i32>` and `Result<i32, i32>` transports remain distinct. Other concrete types
@@ -121,7 +128,8 @@ The emitter rejects empty, nested-struct/array/C-scalar/borrow/Region/nested-res
 initialized resources, and nonempty drops without verifier-matched glue;
 nested tags, user-enum/array/raw-pointer/C-scalar tagged payloads, and other tagged payload
 combinations; Region operations;
-safe-borrow operations other than exact verified array-view construction, view metadata, immutable
+safe-borrow operations other than exact verified array-view construction, view metadata, borrowed
+resource field reads, immutable
 byte indexing, and immutable byte slicing; unsafe operations
 outside the admitted scalar foreign-call form; complete runtime and
 standard-library lowering; malformed
@@ -219,7 +227,8 @@ exceptions to the generated `fy_` namespace are the exact allowlisted internal s
 symbols for SystemHeap allocate/deallocate, Buffer initialize/zeroed-resize/drop, Arena initialize,
 Region begin/zeroed-allocation/reset, Arena drop, text validation/output initialization, bounded
 CStr validation, String copy/view/append/drop, CString from-text/view/drop, and Linux File
-open/read/write-all/sync/close. The Windows target separately admits File
+open/read/write-all/sync/close. The Windows target additionally admits the five opaque String/CString
+storage bridges used by the safe owned-text example and separately admits File
 open/read/write-all/sync/close/drop; its single-write helper retains internal C linkage. Direct
 Linux File write/drop and the rest of the prefix remain closed.
 Typed null, an exact or opaque direct-local borrow-to-raw-pointer cast, and opaque erasure of one

@@ -204,6 +204,8 @@ const checkedInWindowsOutputPath = "examples/windows_output/main.fy"
 const checkedInWindowsOutputSupportPath = "examples/windows_output/windows_console.fy"
 const checkedInWindowsFilePath = "examples/windows_file/main.fy"
 const checkedInWindowsFileSupportPath = "examples/windows_file/windows_file.fy"
+const checkedInOwnedTextPath = "examples/owned_text/main.fy"
+const checkedInOwnedTextSupportPath = "examples/owned_text/owned_text.fy"
 const windowsLayoutManifestPath = "spec/fixtures/layout/manifest-windows-msvc-v0.json"
 const windowsABIManifestPath = "spec/fixtures/c-abi/manifest-windows-msvc-v0.json"
 const subprocessOutputLimit = 64 * 1024
@@ -256,6 +258,14 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("read checked-in Windows File support source: %w", err)
 	}
+	ownedTextSource, err := os.ReadFile(filepath.FromSlash(checkedInOwnedTextPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in owned-text source: %w", err)
+	}
+	ownedTextSupportSource, err := os.ReadFile(filepath.FromSlash(checkedInOwnedTextSupportPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in owned-text support source: %w", err)
+	}
 	root, err := os.MkdirTemp("", "fairyc-windows-host-smoke-")
 	if err != nil {
 		return fmt.Errorf("create temporary source root: %w", err)
@@ -271,6 +281,8 @@ func run() error {
 		checkedInWindowsOutputSupportPath: string(windowsOutputSupportSource),
 		checkedInWindowsFilePath:          string(windowsFileSource),
 		checkedInWindowsFileSupportPath:   string(windowsFileSupportSource),
+		checkedInOwnedTextPath:            string(ownedTextSource),
+		checkedInOwnedTextSupportPath:     string(ownedTextSupportSource),
 		"negative.fy":                     negativeSource,
 		"division_by_zero.fy":             divisionByZeroSource,
 		"remainder_by_zero.fy":            remainderByZeroSource,
@@ -385,6 +397,36 @@ func run() error {
 		}
 		windowsFileSourceExecutions++
 	}
+	ownedTextSourceExecutions := 0
+	for _, profile := range []string{"low", "optimized"} {
+		output := fmt.Sprintf("build/owned-text-%s.exe", profile)
+		var ownedTextBuildStdout bytes.Buffer
+		var ownedTextBuildStderr bytes.Buffer
+		ownedTextBuildCode := cli.Run([]string{
+			"experimental", "build-target", checkedInOwnedTextPath,
+			"--source", checkedInOwnedTextSupportPath,
+			"--target", "x86_64-windows-msvc", "--profile", profile,
+			"--output", output,
+		}, root, &ownedTextBuildStdout, &ownedTextBuildStderr)
+		if ownedTextBuildCode != cli.ExitSuccess || ownedTextBuildStderr.Len() != 0 || !strings.HasPrefix(ownedTextBuildStdout.String(), "built: "+output+" (x86_64-windows-msvc, msvc ") {
+			return fmt.Errorf("owned-text build-target %s returned code %d, stdout %q, stderr %q", profile, ownedTextBuildCode, ownedTextBuildStdout.String(), ownedTextBuildStderr.String())
+		}
+		ownedTextArtifactPath := filepath.Join(root, filepath.FromSlash(output))
+		ownedTextArtifact, err := os.ReadFile(ownedTextArtifactPath)
+		if err != nil {
+			return fmt.Errorf("read owned-text build-target %s artifact: %w", profile, err)
+		}
+		if _, err := pecoff.InspectExecutable(ownedTextArtifact); err != nil {
+			return fmt.Errorf("inspect owned-text build-target %s PE executable image: %w", profile, err)
+		}
+		if _, err := pecoff.InspectAMD64Unwind(ownedTextArtifact); err != nil {
+			return fmt.Errorf("inspect owned-text build-target %s Microsoft x64 unwind data: %w", profile, err)
+		}
+		if err := executeExpectResult(ownedTextArtifactPath, 42); err != nil {
+			return fmt.Errorf("execute owned-text build-target %s artifact: %w", profile, err)
+		}
+		ownedTextSourceExecutions++
+	}
 	targetRunExecutions := 0
 	var targetRunStdout bytes.Buffer
 	var targetRunStderr bytes.Buffer
@@ -489,7 +531,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds plus %d source-level safe File lifecycle builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls, checked reads and mutable indexed stores, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart and output execution, 40 run-host outcomes covered fixed arrays, byte-view iteration and slicing, checked indexed stores, assertions in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, windowsFileSourceExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, windowsFileExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, unwindCases, unwindExecutions, 1+targetBuildExecutions+windowsFileSourceExecutions+targetRunExecutions+targetExecExecutions+windowsFileExecutions+layoutExecutions+abiExecutions+unwindExecutions, toolchain.Version)
+	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds plus %d source-level safe File lifecycle builds and %d source-level safe owned-text lifecycle builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls, checked reads and mutable indexed stores, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart and output execution, 40 run-host outcomes covered fixed arrays, byte-view iteration and slicing, checked indexed stores, assertions in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, windowsFileSourceExecutions, ownedTextSourceExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, windowsFileExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, unwindCases, unwindExecutions, 1+targetBuildExecutions+windowsFileSourceExecutions+ownedTextSourceExecutions+targetRunExecutions+targetExecExecutions+windowsFileExecutions+layoutExecutions+abiExecutions+unwindExecutions, toolchain.Version)
 	return nil
 }
 

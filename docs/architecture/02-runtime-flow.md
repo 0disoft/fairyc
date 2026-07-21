@@ -85,7 +85,8 @@ instrumentation unavailable. `experimental build-target` and `experimental run-t
 been selected. Its target-specific support resolver admits only exact project-owned SystemHeap
 allocate/deallocate, Buffer initialize/zeroed-resize/drop, Arena initialize/Region begin/zeroed
 allocation/reset/Arena drop, CStr validation, String copy/view/append/drop, CString
-from-text/view/drop, and `fy_std_text_utf8_valid_v0` calls. Buffer and Arena selection each
+from-text/view/drop, the five opaque String/CString storage bridges, and
+`fy_std_text_utf8_valid_v0` calls. Buffer and Arena selection each
 close over SystemHeap in deterministic component order; the resolver combines SystemHeap, Buffer,
 Arena, text-view, owned-text, and scalar runtime at most once each. It also owns independent
 target-bound Windows console and Windows File components; the File slice is selected only by one of
@@ -127,8 +128,8 @@ evidence.
 without using the host loader and rejects non-AMD64, non-PE32+, DLL, non-console, misaligned,
 out-of-range, duplicate-section, missing-`.text`, and non-executable-entry images. The Windows smoke
 applies it to the retained target-neutral product, both declared-target profile products, two direct
-run-target temporary products (one driven through a separately built compiler process), and both
-profiles of the layout, ABI, and unwind probes before
+run-target temporary products (one driven through a separately built compiler process), both safe
+File and safe owned-text profile products, and both profiles of the layout, ABI, and unwind probes before
 execution. COFF object records and unwind/debug payload semantics remain outside this linked-image
 branch.
 The same package has a distinct raw-COFF path used inside `internal/cdriver` before local linking
@@ -166,6 +167,10 @@ copy, view, append, second view, and drop plus CString construction, view, drop,
 validation. Status, length, alignment, pointer, and normalized-drop state execute at both profiles;
 the FY subset cannot dereference the returned view, so byte, terminator, and failure-matrix evidence
 remains in the Linux probes. This does not add safe source ownership or a public text API.
+An independent checked-in safe owned-text module now keeps those raw declarations and opaque casts
+behind move-only FY resources. Its storage bridges use `memcpy` over `void *`, and low/optimized
+source builds execute Result mapping, length reads, interior-NUL rejection, and verified cleanup.
+It still cannot reconstruct safe borrowed text views and therefore remains an example boundary.
 `internal/cstdlibcontract` owns the exact-symbol/component maps used by backend admission and
 target-specific product linking. The emitted C unit records only actually called foreign names;
 `experimental build` and `build-target` link only the permitted minimal dependency-closed C source

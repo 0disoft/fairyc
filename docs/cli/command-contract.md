@@ -177,7 +177,10 @@ before C is emitted. Exact `fy_std_system_heap_allocate_v0`,
 `fy_std_region_allocate_zeroed_v0`, `fy_std_region_reset_v0`, `fy_std_arena_drop_v0`, and
 `fy_std_cstr_validate_v0`, `fy_std_string_copy_v0`, `fy_std_string_as_view_v0`,
 `fy_std_string_append_v0`, `fy_std_string_drop_v0`, `fy_std_cstring_from_text_v0`,
-`fy_std_cstring_as_view_v0`, `fy_std_cstring_drop_v0`, and `fy_std_text_utf8_valid_v0` calls select
+`fy_std_cstring_as_view_v0`, `fy_std_cstring_drop_v0`,
+`fy_std_string_copy_storage_v0`, `fy_std_string_append_storage_v0`,
+`fy_std_string_drop_storage_v0`, `fy_std_cstring_from_text_storage_v0`,
+`fy_std_cstring_drop_storage_v0`, and `fy_std_text_utf8_valid_v0` calls select
 project-owned SystemHeap/Buffer/Arena/text-view/owned-text C components and scalar runtime. Buffer,
 Arena, and owned text close over their declared dependencies and every component is emitted once in
 deterministic order. Windows x64 SystemHeap admits fundamental
@@ -193,7 +196,10 @@ lifecycle but cannot dereference the returned storage, so it does not independen
 payload bytes, copied placement, failure handling, or safe lexical Region lowering. It also executes
 String and CString success lifecycles plus direct CStr validation, but observes only statuses,
 lengths, alignment, pointers, and normalized drops; returned bytes, terminator contents, rollback,
-and safe ownership remain outside the command contract.
+and safe ownership remain outside that raw target example. A separate explicit two-source
+`examples/owned_text/` build uses only safe entry calls over the storage bridges, executes at both
+profiles in the configured Windows smoke, and still does not establish stable `std::text`, layout,
+or borrowed-view contracts.
 
 `experimental run-target` accepts the same explicit FY source closure but no output path, foreign companion input, linker option, ambient target,
 or compiler override. It shares `build-target` lowering, exact standard-library resolution, local
