@@ -444,6 +444,7 @@ type Function struct {
 	Symbol      SymbolID
 	Name        string
 	OwnerType   Type
+	Receiver    string
 	Unsafe      bool
 	Span        Span
 	Effects     []Effect

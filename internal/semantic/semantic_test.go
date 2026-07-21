@@ -486,6 +486,72 @@ fn i32 main() { return Counter::double(21); }
 	}
 }
 
+func TestAnalyzeOwnerQualifiedMethodCallSynthesizesReceiverBorrow(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+struct Counter { i32 value; }
+fn i32 Counter::get(ref Counter this) { return this.value; }
+fn i32 main() {
+    let Counter counter = Counter { .value = 42 };
+    return counter.get();
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+	method := result.HIR.Modules[0].Functions[0]
+	if method.Name != "Counter::get" || method.Receiver != "shared" || method.OwnerType != hir.Type("main::Counter") {
+		t.Fatalf("method = %+v", method)
+	}
+	main := result.HIR.Modules[0].Functions[1]
+	call := main.Body.Statements[1].Expression
+	if call == nil || call.Kind != "call" || call.Symbol != method.Symbol || len(call.Children) != 2 || call.Children[1].Kind != "prefix" || call.Children[1].Operator != "&" {
+		t.Fatalf("method call = %+v", call)
+	}
+}
+
+func TestAnalyzeOwnerQualifiedExclusiveMethodRequiresMutableReceiver(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+struct Counter { i32 value; }
+fn void Counter::set(ref mut Counter this, i32 value) { this.value = value; }
+fn i32 main() {
+    var Counter counter = Counter { .value = 0 };
+    counter.set(42);
+    return counter.value;
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+	method := result.HIR.Modules[0].Functions[0]
+	if method.Receiver != "exclusive" {
+		t.Fatalf("method = %+v", method)
+	}
+	call := result.HIR.Modules[0].Functions[1].Body.Statements[1].Expression
+	if call == nil || len(call.Children) != 3 || call.Children[1].Operator != "&mut" {
+		t.Fatalf("method call = %+v", call)
+	}
+}
+
+func TestAnalyzeOwnerQualifiedConsumingMethodMovesReceiver(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+resource Token { i32 value; cleanup {} }
+fn i32 Token::take(Token this) { return this.value; }
+fn i32 main() {
+    let Token token = Token { .value = 42 };
+    let i32 value = token.take();
+    return value + token.value;
+}
+`,
+	})
+	if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E1101" {
+		t.Fatalf("diagnostics = %+v, unsupported = %+v", result.Diagnostics, result.Unsupported)
+	}
+}
+
 func TestAnalyzePreservesReprCStructAndTypesAggregateExpressions(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{

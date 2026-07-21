@@ -391,6 +391,8 @@ func (a *analyzer) canonicalNamedType(module *moduleScope, reference ast.TypeRef
 		return hir.TypeInvalid, false
 	}
 	switch reference.Path {
+	case "void":
+		return hir.TypeVoid, true
 	case "bool":
 		return hir.TypeBool, true
 	case "u8":

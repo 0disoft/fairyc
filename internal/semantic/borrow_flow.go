@@ -170,7 +170,7 @@ func (a *analyzer) borrowReturnDependencies(function *ast.Function, targets map[
 		if expression == nil || expression.Kind != syntax.KindCall || len(expression.Children) == 0 {
 			continue
 		}
-		callee := a.resolved[expression.Children[0]]
+		callee := a.callableForCall(expression)
 		if targets[callee] == nil || seen[callee] {
 			continue
 		}
@@ -432,7 +432,8 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 		if len(expression.Children) == 0 {
 			return borrowValueState{known: false}, true
 		}
-		if _, reachable := f.evaluateExpression(expression.Children[0], environment); !reachable {
+		calleeValue, reachable := f.evaluateExpression(expression.Children[0], environment)
+		if !reachable {
 			return borrowValueState{}, false
 		}
 		arguments := expression.Children[1:]
@@ -443,6 +444,13 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 				return borrowValueState{}, false
 			}
 			argumentValues = append(argumentValues, value)
+		}
+		if f.analyzer.methodCalls[expression] != nil {
+			callee := expression.Children[0]
+			if callee != nil && len(callee.Children) == 1 {
+				arguments = append([]*ast.Expression{callee.Children[0]}, arguments...)
+				argumentValues = append([]borrowValueState{calleeValue}, argumentValues...)
+			}
 		}
 		if f.expressionReturnsBorrow(expression) {
 			return f.callBorrowValue(expression, arguments, argumentValues), true
@@ -469,7 +477,7 @@ func (f *borrowFlowAnalyzer) callBorrowValue(call *ast.Expression, arguments []*
 	if call == nil || len(call.Children) == 0 {
 		return borrowValueState{known: false}
 	}
-	callee := f.analyzer.resolved[call.Children[0]]
+	callee := f.analyzer.callableForCall(call)
 	summary, found := f.analyzer.borrowReturns[callee]
 	if !found || !summary.known || len(summary.sources) == 0 {
 		return borrowValueState{known: false}
@@ -760,14 +768,14 @@ func (f *borrowFlowAnalyzer) checkCallOwnerMoves(statement *ast.Statement, expre
 		return
 	}
 	if expression.Kind == syntax.KindCall && len(expression.Children) > 0 {
-		callee := f.analyzer.resolved[expression.Children[0]]
-		for index, argument := range expression.Children[1:] {
+		callee := f.analyzer.callableForCall(expression)
+		for index, argument := range f.analyzer.callArguments(expression) {
 			movesResource := false
 			if callee != nil && callee.function != nil && index < len(callee.function.Parameters) {
 				parameter := &callee.function.Parameters[index]
 				value := f.analyzer.parameter[parameter]
 				movesResource = value != nil && f.analyzer.isResource(value.typ)
-			} else if isBuiltinVariantPath(expression.Children[0].Text) {
+			} else if f.analyzer.methodCalls[expression] == nil && isBuiltinVariantPath(expression.Children[0].Text) {
 				movesResource = f.analyzer.isResource(f.analyzer.expressionTypes[argument])
 			}
 			if movesResource {

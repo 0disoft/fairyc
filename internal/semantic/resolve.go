@@ -101,6 +101,7 @@ type analyzer struct {
 	borrowReturns         map[*symbol]borrowReturnSummary
 	dropFunctions         map[*ast.Resource]*ast.Function
 	dropOwners            map[*ast.Function]*ast.Resource
+	methodCalls           map[*ast.Expression]*symbol
 }
 
 func newAnalyzer(files []File, packageImports map[packageImportKey]hir.PackageID) *analyzer {
@@ -126,6 +127,7 @@ func newAnalyzer(files []File, packageImports map[packageImportKey]hir.PackageID
 		borrowReturns:    make(map[*symbol]borrowReturnSummary),
 		dropFunctions:    make(map[*ast.Resource]*ast.Function),
 		dropOwners:       make(map[*ast.Function]*ast.Resource),
+		methodCalls:      make(map[*ast.Expression]*symbol),
 		regionType:       &symbol{id: hir.NoSymbol, kind: "capability", name: "Region", typ: hir.TypeRegion},
 	}
 }

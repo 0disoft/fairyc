@@ -282,10 +282,26 @@ func (a *analyzer) resourceCall(module *moduleScope, expression *ast.Expression,
 		return
 	}
 	callee := a.resolved[expression.Children[0]]
+	parameterOffset := 0
+	if method := a.methodCalls[expression]; method != nil {
+		callee = method
+		parameterOffset = 1
+		if field := expression.Children[0]; field != nil && len(field.Children) == 1 {
+			mode := resourceRead
+			if len(callee.function.Parameters) > 0 {
+				parameter := &callee.function.Parameters[0]
+				if value := a.parameter[parameter]; value != nil && a.isResource(value.typ) {
+					mode = resourceMove
+				}
+			}
+			a.resourceExpression(module, field.Children[0], environment, mode)
+		}
+	}
 	for index, argument := range expression.Children[1:] {
 		mode := resourceRead
-		if callee != nil && callee.function != nil && index < len(callee.function.Parameters) {
-			parameter := &callee.function.Parameters[index]
+		parameterIndex := index + parameterOffset
+		if callee != nil && callee.function != nil && parameterIndex < len(callee.function.Parameters) {
+			parameter := &callee.function.Parameters[parameterIndex]
 			if value := a.parameter[parameter]; value != nil && a.isResource(value.typ) {
 				mode = resourceMove
 			}

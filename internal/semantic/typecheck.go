@@ -233,6 +233,7 @@ func (c *typeChecker) checkFunction() hir.Function {
 	if c.function.Owner != "" {
 		if owner := c.analyzer.ownerSymbol(c.module, c.function.Owner); owner != nil {
 			result.OwnerType = owner.typ
+			result.Receiver = c.checkOwnerReceiver(owner)
 		}
 	}
 	c.hir = &result
@@ -635,6 +636,16 @@ func (c *typeChecker) mutableAssignmentTarget(source *ast.Expression, target *hi
 		return fixedArray && resolved != nil && resolved.mutable
 	case "view-index":
 		return len(target.Children) == 2 && target.Children[0].Type == hir.MutableBorrow(hir.TypeByteSlice)
+	case "field-expression":
+		if len(source.Children) != 1 || len(target.Children) != 1 {
+			return false
+		}
+		if _, mutable, borrow := hir.BorrowElement(target.Children[0].Type); borrow {
+			return mutable
+		}
+		receiver := assignmentRootPath(source.Children[0])
+		resolved := c.analyzer.resolved[receiver]
+		return resolved != nil && resolved.mutable
 	default:
 		return false
 	}
@@ -1077,6 +1088,9 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 		return hir.TypeInvalid
 	}
 	calleeExpression := expression.Children[0]
+	if calleeExpression != nil && calleeExpression.Kind == syntax.KindFieldExpr && !isRegionPlaceCall(expression) {
+		return c.checkMethodCall(expression, result)
+	}
 	if calleeExpression != nil && calleeExpression.Kind == syntax.KindPath {
 		if variant, ok := resultVariantPath(calleeExpression.Text); ok {
 			return c.checkResultConstructor(expression, result, expected, variant)
@@ -1143,6 +1157,153 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 		callee.resultError = errorSpan
 	}
 	return callee.typ
+}
+
+func (c *typeChecker) checkOwnerReceiver(owner *symbol) string {
+	for index := range c.function.Parameters {
+		parameter := &c.function.Parameters[index]
+		if parameter.Name != "this" {
+			continue
+		}
+		if index != 0 {
+			c.analyzer.addUnsupported(c.module.file.Path, parameter.NameSpan, "method receiver that is not the first parameter")
+			return "invalid"
+		}
+		receiverType := c.canonicalType(parameter.Type)
+		baseType := receiverType
+		mode := "value"
+		if element, mutable, borrow := hir.BorrowElement(receiverType); borrow {
+			baseType = element
+			mode = "shared"
+			if mutable {
+				mode = "exclusive"
+			}
+		}
+		if baseType != owner.typ {
+			c.analyzer.addUnsupported(c.module.file.Path, parameter.Type.Span, "method receiver type that does not match its owner")
+			return "invalid"
+		}
+		return mode
+	}
+	return ""
+}
+
+func (c *typeChecker) checkMethodCall(expression *ast.Expression, result *hir.Expression) hir.Type {
+	calleeExpression := expression.Children[0]
+	if len(calleeExpression.Children) != 1 {
+		return hir.TypeInvalid
+	}
+	receiverExpression := calleeExpression.Children[0]
+	receiver, receiverType := c.checkExpression(receiverExpression, hir.TypeInvalid)
+	ownerType := receiverType
+	if element, _, borrow := hir.BorrowElement(ownerType); borrow {
+		ownerType = element
+	}
+	callee := c.analyzer.methodSymbol(ownerType, calleeExpression.Text)
+	if callee == nil || callee.function == nil || len(callee.function.Parameters) == 0 || callee.function.Parameters[0].Name != "this" {
+		c.analyzer.addUnsupported(c.module.file.Path, calleeExpression.Span, "unknown method "+calleeExpression.Text)
+		return hir.TypeInvalid
+	}
+	if callee.module != c.module.file.Module.Path && !callee.public {
+		c.analyzer.addDiagnostic("E0103", span(c.module.file.Path, calleeExpression.Span), RelatedSpan{
+			Role: "declaration", Span: span(callee.source, callee.declaration),
+		})
+		return hir.TypeInvalid
+	}
+	expectedReceiver := c.analyzer.canonicalType(c.analyzer.symbolModule(callee), callee.function.Parameters[0].Type)
+	if element, mutable, borrow := hir.BorrowElement(expectedReceiver); borrow && receiverType == element {
+		target := c.analyzer.resolved[receiverExpression]
+		if target == nil || mutable && !target.mutable {
+			c.analyzer.addDiagnostic("E1008", span(c.module.file.Path, receiverExpression.Span))
+			return hir.TypeInvalid
+		}
+		operator := "&"
+		if mutable {
+			operator = "&mut"
+		}
+		borrowExpression := &ast.Expression{
+			Kind: syntax.KindPrefix, Span: receiverExpression.Span, Text: operator, Children: []*ast.Expression{receiverExpression},
+		}
+		calleeExpression.Children[0] = borrowExpression
+		receiver = &hir.Expression{
+			Kind: string(syntax.KindPrefix), Span: span(c.module.file.Path, receiverExpression.Span), Operator: operator,
+			Type: expectedReceiver, Symbol: hir.NoSymbol, Children: []hir.Expression{*receiver},
+		}
+		receiverType = expectedReceiver
+	}
+	c.requireType("E1006", span(c.module.file.Path, receiverExpression.Span), receiverType, expectedReceiver, span(callee.source, callee.function.Parameters[0].Type.Span))
+	c.analyzer.methodCalls[expression] = callee
+	result.Symbol = callee.id
+	c.checkCallEffects(calleeExpression, result, callee)
+	result.Children = append(result.Children, hir.Expression{
+		Kind: string(syntax.KindPath), Type: hir.TypeInvalid, Span: span(c.module.file.Path, calleeExpression.Span), Symbol: callee.id,
+	})
+	result.Children = appendExpression(result.Children, receiver)
+	arguments := expression.Children[1:]
+	if len(arguments)+1 != len(callee.function.Parameters) {
+		c.analyzer.addDiagnostic("E1010", span(c.module.file.Path, expression.Span), RelatedSpan{
+			Role: "declaration", Span: span(callee.source, callee.declaration),
+		})
+	}
+	for index, argument := range arguments {
+		parameterIndex := index + 1
+		expectedType := hir.TypeInvalid
+		expectedSpan := callee.typeSpan
+		if parameterIndex < len(callee.function.Parameters) {
+			expectedType = c.analyzer.canonicalType(c.analyzer.symbolModule(callee), callee.function.Parameters[parameterIndex].Type)
+			expectedSpan = callee.function.Parameters[parameterIndex].Type.Span
+		}
+		child, actual := c.checkExpression(argument, expectedType)
+		result.Children = appendExpression(result.Children, child)
+		if expectedType != hir.TypeInvalid {
+			c.requireType("E1006", span(c.module.file.Path, argument.Span), actual, expectedType, span(callee.source, expectedSpan))
+		}
+	}
+	callee.typ = c.analyzer.canonicalType(c.analyzer.symbolModule(callee), callee.function.ResultType)
+	return callee.typ
+}
+
+func (a *analyzer) methodSymbol(ownerType hir.Type, name string) *symbol {
+	for _, module := range a.moduleOrder {
+		for index := range module.file.Module.Functions {
+			function := &module.file.Module.Functions[index]
+			if function.Owner == "" || function.Name != name || len(function.Parameters) == 0 || function.Parameters[0].Name != "this" {
+				continue
+			}
+			owner := a.ownerSymbol(module, function.Owner)
+			if owner != nil && owner.typ == ownerType {
+				return a.functions[function]
+			}
+		}
+	}
+	return nil
+}
+
+func (a *analyzer) callableForCall(expression *ast.Expression) *symbol {
+	if expression == nil || expression.Kind != syntax.KindCall || len(expression.Children) == 0 {
+		return nil
+	}
+	if method := a.methodCalls[expression]; method != nil {
+		return method
+	}
+	return a.resolved[expression.Children[0]]
+}
+
+func (a *analyzer) callArguments(expression *ast.Expression) []*ast.Expression {
+	if expression == nil || expression.Kind != syntax.KindCall || len(expression.Children) == 0 {
+		return nil
+	}
+	arguments := expression.Children[1:]
+	if a.methodCalls[expression] == nil {
+		return arguments
+	}
+	callee := expression.Children[0]
+	if callee == nil || callee.Kind != syntax.KindFieldExpr || len(callee.Children) != 1 {
+		return arguments
+	}
+	result := make([]*ast.Expression, 0, len(arguments)+1)
+	result = append(result, callee.Children[0])
+	return append(result, arguments...)
 }
 
 func (c *typeChecker) checkForeignCall(expression *ast.Expression, result *hir.Expression, callee *symbol) hir.Type {
