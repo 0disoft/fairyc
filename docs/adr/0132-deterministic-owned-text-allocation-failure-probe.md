@@ -4,7 +4,8 @@
 - Date: 2026-07-21
 - Product source: `docs/product/02-spec.md`
 - Runtime source: `docs/runtime/runtime-stdlib-v0.md`
-- Related decision: `docs/adr/0131-safe-owned-text-fy-lifecycle.md`
+- Related decisions: `docs/adr/0131-safe-owned-text-fy-lifecycle.md`,
+  `docs/adr/0133-deterministic-arena-allocation-failure-probe.md`
 
 ## Context
 
@@ -21,11 +22,12 @@ one deterministic failure point without changing product linkage or the standard
 
 1. `SystemHeap` routes its internal allocation and release calls through two compile-time macros.
    Their defaults remain the C runtime `malloc` and `free`; product behavior and symbols are unchanged.
-2. `stage0_owned_text_probe_allocator.c` is a probe-only prefix. It overrides those macros with a
-   one-shot failing allocator and exposes only probe control plus a live-allocation count to the
-   separately compiled caller.
+2. `stage0_system_heap_probe_allocator.c` is a shared probe-only prefix. It overrides those macros
+   with a one-shot fail-after-N-successful-allocations adapter and exposes only probe control plus a
+   live-allocation count to the separately compiled caller.
 3. Product support resolution never includes the adapter or its control symbols. The adapter is
-   concatenated only by `OwnedTextProbeImplementationSource` and its Windows MSVC counterpart.
+   concatenated only by closed probe implementation constructors; owned-text uses
+   `OwnedTextProbeImplementationSource` and its Windows MSVC counterpart.
 4. The raw probe forces initial String and CString allocation failure and requires canonical empty
    output plus zero live allocations. It then forces String append reallocation failure and requires
    the original pointer, fields, bytes, and one live allocation to remain unchanged before drop

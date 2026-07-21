@@ -1810,8 +1810,12 @@ func Run(manifestPath string) (Report, error) {
 	if err != nil {
 		return Report{}, fmt.Errorf("load Arena probe: %w", err)
 	}
+	arenaProbeImplementation, err := cstdlib.ArenaProbeImplementationSource()
+	if err != nil {
+		return Report{}, fmt.Errorf("load instrumented Arena implementation: %w", err)
+	}
 	arenaExecutions, err := runStandardLibraryProbe(
-		temporaryRoot, toolchains, "Arena", "arena-probe", arenaProbe, arenaSource,
+		temporaryRoot, toolchains, "Arena", "arena-probe", arenaProbe, arenaProbeImplementation,
 	)
 	if err != nil {
 		return Report{}, err

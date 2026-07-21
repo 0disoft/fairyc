@@ -255,6 +255,13 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   repeated drop. A probe-only allocator must force String/CString initial allocation failure and
   String append reallocation failure, preserve canonical or prior storage and bytes, and return the
   live-allocation count to zero after cleanup. Product linkage must not include that adapter.
+- The same Windows smoke must separately compile the raw Arena probe and target-specific Arena plus
+  SystemHeap implementation as caller and callee translation units at low and optimized profiles.
+  It must observe zeroed and copied bytes, simultaneous and stale Region rejection, active-drop
+  preservation, and final cleanup. Probe control must force failure before payload allocation and
+  after payload allocation but before tracking-node publication; both failures must preserve the
+  Arena head and caller output, the second must release its payload, and the live-allocation count
+  must return to zero. Product linkage must retain the ordinary allocator and no probe controls.
 - The constrained C unit records sorted unique link names used by actual foreign calls. The
   experimental product build resolves exact project-owned standard-library names through one shared
   symbol/component contract and links only their dependency closure plus the scalar runtime; unused
@@ -424,6 +431,9 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
+  ADR 0133 strengthens the existing `arenaExecutions` success condition with deterministic
+  first-stage and second-stage allocation failure plus live-allocation cleanup. It adds no report
+  field or counter and therefore does not create report v32.
   Its closed
   `drop-trace-v0` emission profile assigns source/type/span identities to dense site IDs and compares
   exact four-byte native records with the MIR interpreter trace. This instrumentation is absent from
@@ -465,7 +475,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   closure, observes initialization generation 1, one active Region and non-null allocation/node,
   reset generation 2 with invalidated Region state, and drop generation 3. Private Windows generation
   fields use target-width `usize` only as a layout-compatible transport, not a public representation.
-  Neither Buffer nor Arena reads the zeroed bytes on this path. Owned text copies a compiler-owned
+  Neither Buffer nor Arena reads the zeroed bytes on this FY path. The separate raw Arena probe
+  supplies Windows byte-level and allocation-failure evidence. Owned text copies a compiler-owned
   five-byte UTF-8 literal, observes String length five then ten after append, normalized drop,
   six-byte CString storage with logical CStr length five, normalized drop, and direct validation of
   compiler-owned terminated storage. It observes only status, length, alignment, and pointer state,

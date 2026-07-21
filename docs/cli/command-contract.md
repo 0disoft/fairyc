@@ -174,7 +174,8 @@ before C is emitted. Exact `fy_std_system_heap_allocate_v0`,
 `fy_std_system_heap_deallocate_v0`, `fy_std_buffer_initialize_v0`,
 `fy_std_buffer_resize_zeroed_v0`, `fy_std_buffer_drop_v0`,
 `fy_std_arena_initialize_v0`, `fy_std_region_begin_v0`,
-`fy_std_region_allocate_zeroed_v0`, `fy_std_region_reset_v0`, `fy_std_arena_drop_v0`, and
+`fy_std_region_allocate_zeroed_v0`, `fy_std_region_copy_bytes_v0`,
+`fy_std_region_reset_v0`, `fy_std_arena_drop_v0`, and
 `fy_std_cstr_validate_v0`, `fy_std_string_copy_v0`, `fy_std_string_as_view_v0`,
 `fy_std_string_append_v0`, `fy_std_string_drop_v0`, `fy_std_cstring_from_text_v0`,
 `fy_std_cstring_as_view_v0`, `fy_std_cstring_drop_v0`,

@@ -161,19 +161,26 @@ invalidated Region. This does not expose those records as the public representat
 `region` lowering, or add safe allocation methods. Product builds now select Arena plus SystemHeap
 for actual admitted calls only.
 
-Windows `build-target` now admits exactly initialization, begin, zeroed allocation, reset, and drop.
+Windows target resolution now admits initialization, begin, zeroed allocation, copied placement,
+reset, and drop. The checked-in `build-target` example exercises the five lifecycle calls other than
+copied placement.
 Its checked-in FY program uses private 32/24/32-byte node/Arena/Region records and target-width
 `usize` generation fields, which are layout-compatible with the selected Windows x64 C provider but
 are not a public ABI. Both MSVC profiles observe generation 1 after initialization, one active Region
 and non-null allocation/node state, generation 2 with cleared Region state after reset, and generation
 3 after drop. The FY subset cannot safely dereference the returned raw storage, so this Windows path
-does not inspect zeroed payload bytes; the Linux C-only and source probes retain that responsibility.
-Copied placement, simultaneous and stale Region failures, active-drop rejection, safe lexical
-`region` lowering, and public `std::alloc` construction remain outside this Windows slice.
+does not inspect zeroed payload bytes. A separate raw C caller supplies Windows evidence for zeroed
+and copied bytes, simultaneous and stale Region rejection, and active-drop preservation. Its shared
+probe-only allocator forces payload failure before publication and tracking-node failure after
+payload allocation, requiring unchanged Arena/output state and zero live allocations after rollback.
+Safe lexical `region` lowering and public `std::alloc` construction remain outside this Windows slice.
 
 Its four-way C-only native probe is configured for exclusive begin, zeroed allocation, copy, allocation
 rollback, empty normalization, active-drop rejection, reset, stale-use rejection, and final drop,
-but no Linux execution receipt has been observed.
+but no Linux execution receipt has been observed. The same caller and target-specific implementation
+execute as separate translation units at low and optimized x64 MSVC profiles, including both forced
+allocation stages, recovery zeroing, and final live-allocation cleanup. Product linkage retains the
+ordinary allocator and contains no probe controls.
 
 ## Text types
 

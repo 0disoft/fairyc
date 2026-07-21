@@ -84,7 +84,7 @@ semantic C emitter but selects Windows scalar providers and layout facts, identi
 instrumentation unavailable. `experimental build-target` and `experimental run-target` resolve MSVC only after that profile has
 been selected. Its target-specific support resolver admits only exact project-owned SystemHeap
 allocate/deallocate, Buffer initialize/zeroed-resize/drop, Arena initialize/Region begin/zeroed
-allocation/reset/Arena drop, CStr validation, String copy/view/append/drop, CString
+allocation/copied placement/reset/Arena drop, CStr validation, String copy/view/append/drop, CString
 from-text/view/drop, the five opaque String/CString storage bridges, and
 `fy_std_text_utf8_valid_v0` calls. Buffer and Arena selection each
 close over SystemHeap in deterministic component order; the resolver combines SystemHeap, Buffer,
@@ -130,7 +130,7 @@ out-of-range, duplicate-section, missing-`.text`, and non-executable-entry image
 applies it to the retained target-neutral product, both declared-target profile products, two direct
 run-target temporary products (one driven through a separately built compiler process), both safe
 File and safe owned-text profile products, and both profiles of the raw Windows File, raw owned-text,
-layout, ABI, and unwind probes before
+raw Arena, layout, ABI, and unwind probes before
 execution. COFF object records and unwind/debug payload semantics remain outside this linked-image
 branch.
 The same package has a distinct raw-COFF path used inside `internal/cdriver` before local linking
@@ -162,6 +162,11 @@ Arena, Region, and `void **` transport. It observes initialization, active attac
 allocation/node, reset invalidation, and drop generation transitions at both profiles without
 dereferencing the returned storage. This is lifecycle and dependency-closure evidence, not safe
 lexical Region lowering, zeroed-byte observation, a public representation, or a public allocator API.
+A distinct raw Arena caller links against an instrumented target-specific dependency closure at both
+MSVC profiles. It observes zeroed and copied payloads, forces failure at the payload and tracking-node
+allocation boundaries, requires rollback to zero live allocations, and verifies stale Region and
+active-drop rejection. The adapter is prepended only to probe implementations; product resolution
+continues to select the ordinary SystemHeap source.
 The Windows target example also crosses compiler-owned static UTF-8 and C-string storage into the
 real owned-text source. Private nested heap/Buffer/String/CString/view/result records carry String
 copy, view, append, second view, and drop plus CString construction, view, drop, and direct CStr

@@ -145,11 +145,15 @@ copied byte placement, reset invalidation, stale-use rejection, and active-drop 
 C-only executions and four generated-Fairy source-call executions are configured but unobserved.
 The internal caller crosses exact self-linked node, Arena, and Region records, obtains zeroed bytes
 through `void **`, and verifies reset/drop generations; lexical Region lowering, source-level
-`std::alloc` construction, and safe calls remain missing. The declared Windows target build now
-executes the five exact Arena/Region lifecycle calls at both MSVC profiles, observes non-null
+`std::alloc` construction, and safe calls remain missing. Windows target resolution now admits six
+exact Arena/Region calls, including copied placement. The declared target build executes five
+lifecycle calls at both MSVC profiles, observes non-null
 allocation plus node/active/generation state, reset invalidation, and final drop, and closes Arena
 over SystemHeap exactly once. Its FY path cannot inspect returned bytes, so byte-level zeroing and
-the broader failure matrix remain Linux-probe responsibilities.
+the broader failure matrix remain outside that source example. A separate raw Arena caller now
+executes against the target-specific implementation at both MSVC profiles, observes zeroed and
+copied bytes, forces payload and node allocation failure independently, proves rollback to zero live
+allocations, and rechecks stale Region and active-drop rejection.
 The allocation-free text-view slice now checks canonical UTF-8 and code-point byte boundaries,
 including overlong, surrogate, out-of-range, truncated, and obsolete forms. Its four native runs
 are configured but unobserved. A separate four-way Fairy-source crossing now calls the actual
@@ -249,7 +253,8 @@ crossings, and a hosted Windows receipt remain absent. PE/COFF objects, runtime,
 supported distribution artifacts, and conformance remain later gates. A bounded parser now checks
 the host-smoke product, both declared-target profile products, both safe File and safe owned-text
 profile products, two direct run-target temporary products, two exec-target temporary output
-products, and ten native probe executables for raw Windows File, raw owned text, layout, ABI, and
+products, and twelve native probe executables for raw Windows File, raw owned text, raw Arena,
+layout, ABI, and
 unwind behavior for AMD64
 PE32+ console identity, aligned
 headers/sections, and an executable entry point, but does not inspect `.obj` symbols, relocations,
@@ -258,7 +263,7 @@ Every local MSVC compile in the same lane now also parses its intermediate `.obj
 before cleanup, including `.text$...`, `.bss`, symbol-table, and relocation-index structure. Exact
 versioned symbol names, COMDAT selection, relocation types, unwind records, and a hosted object
 receipt remain absent, so the target evidence marker stays fail-closed.
-The twenty-one local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
+The twenty-three local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
 runtime-function ordering and code coverage plus referenced version 1 and version 2 unwind-record
 bounds, including handler/chained minimum tails. A separate three-object probe now raises a private
 noncontinuable exception at both profiles, validates its payload in an outer SEH filter, walks the
@@ -289,6 +294,10 @@ both profiles. It observes exact bytes and termination, invalid UTF-8 and interi
 malformed opaque storage, failure preservation, self-overlap, deterministic size overflow, and
 normal plus repeated drop. It also forces initial and append-reallocation failure with a probe-only
 allocator, preserves prior storage and bytes, and observes zero leaked live allocations after cleanup.
+A parallel raw Arena probe links its caller and target-specific dependency closure separately at both
+profiles. It observes zeroed and copied payloads, forces failure before payload allocation and after
+payload allocation but before node publication, requires unchanged outputs, and proves reset returns
+the shared probe allocator's live count to zero.
 The Windows target commands now admit one entry plus a bounded explicit repeated-`--source` FY
 module closure; the driver performs no manifest or implicit source discovery. Every foreign
 companion input, unproven Windows standard-library component, user linker argument, debug output,
@@ -302,7 +311,7 @@ quickstart iterates two bytes with typed `usize` ordering and checked addition, 
 indexing, and safely converts each `u8` to `i32` through a separately built compiler process. The
 host smoke also proves maximum-`usize` addition traps under both MSVC profiles. The configured Windows
 smoke therefore covers two retained target builds, two safe File builds, two safe owned-text builds,
-two direct target executions, two exec-target executions, and twenty-one total target or probe PE
+two direct target executions, two exec-target executions, and twenty-three total target or probe PE
 images. The second direct execution comes from a separately built temporary
 `fairyc.exe` compiling the minimal Windows quickstart, so the standalone compiler process boundary
 is exercised without retaining or distributing it. This improves the developer execution path

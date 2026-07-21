@@ -114,6 +114,7 @@ func TestWindowsMSVCComponentsForSymbolsAdmitsOnlyProvenRuntimeSlice(t *testing.
 		"fy_std_buffer_initialize_v0",
 		"fy_std_buffer_drop_v0",
 		"fy_std_region_allocate_zeroed_v0",
+		"fy_std_region_copy_bytes_v0",
 		"fy_std_arena_initialize_v0",
 		"fy_std_region_begin_v0",
 		"fy_std_region_reset_v0",

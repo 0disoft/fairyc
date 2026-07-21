@@ -91,6 +91,14 @@ func TestArenaSourcesRejectConcurrentAndStaleRegions(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	probeImplementation, err := ArenaProbeImplementationSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	windowsProbeImplementation, err := WindowsMSVCArenaProbeImplementationSource()
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, required := range []string{
 		"fy_std_region_begin_v0",
 		"fy_std_region_allocate_zeroed_v0",
@@ -103,13 +111,58 @@ func TestArenaSourcesRejectConcurrentAndStaleRegions(t *testing.T) {
 			t.Errorf("Arena implementation is missing %q", required)
 		}
 	}
-	if !strings.Contains(probe, "fy_std_region_begin_v0(&arena, &second)") ||
-		!strings.Contains(probe, "fy_std_region_allocate_zeroed_v0(&region, 1, 1, &empty)") {
-		t.Fatal("Arena probe does not exercise concurrent and stale Region rejection")
+	for _, required := range []string{
+		"fy_std_region_begin_v0(&arena, &second)",
+		"fy_std_region_allocate_zeroed_v0(&region, 1, 1, &empty)",
+		"fy_std_system_heap_probe_fail_after_allocations_v0(0)",
+		"fy_std_system_heap_probe_fail_after_allocations_v0(1)",
+		"fy_std_system_heap_probe_live_allocations_v0() != 4",
+		"failed_output != (void *)(uintptr_t)1",
+	} {
+		if !strings.Contains(probe, required) {
+			t.Errorf("Arena probe is missing %q", required)
+		}
 	}
 	repeated, err := ArenaSource()
 	if err != nil || repeated != implementation || strings.Contains(implementation, "\r") || !strings.HasSuffix(implementation, "\n") {
 		t.Fatalf("ArenaSource() is not deterministic canonical C: %v", err)
+	}
+	for _, candidate := range []struct {
+		name   string
+		source string
+	}{
+		{name: "portable", source: probeImplementation},
+		{name: "Windows MSVC", source: windowsProbeImplementation},
+	} {
+		for _, required := range []string{
+			"fy_std_system_heap_probe_fail_after_allocations_v0",
+			"fy_std_system_heap_probe_live_allocations_v0",
+			"#define FY_STD_SYSTEM_HEAP_MALLOC_V0(size) fy_std_system_heap_probe_malloc_v0(size)",
+			"fy_std_region_allocate_zeroed_v0",
+			"fy_std_region_reset_v0",
+		} {
+			if !strings.Contains(candidate.source, required) {
+				t.Errorf("%s Arena probe implementation is missing %q", candidate.name, required)
+			}
+		}
+		if strings.Index(candidate.source, "#define FY_STD_SYSTEM_HEAP_MALLOC_V0(size) fy_std_system_heap_probe_malloc_v0(size)") >
+			strings.Index(candidate.source, "#ifndef FY_STD_SYSTEM_HEAP_MALLOC_V0") {
+			t.Errorf("%s Arena probe allocator adapter follows the SystemHeap fallback", candidate.name)
+		}
+	}
+	if !strings.Contains(windowsProbeImplementation, "#define FY_STD_SYSTEM_HEAP_MAX_ALIGNMENT_V0 ((size_t)16)") {
+		t.Error("Windows MSVC Arena probe implementation is missing its target alignment contract")
+	}
+	if strings.Contains(implementation, "fy_std_system_heap_probe_fail_after_allocations_v0") {
+		t.Error("product Arena implementation leaked the probe-only allocator controls")
+	}
+	repeatedProbeImplementation, err := ArenaProbeImplementationSource()
+	if err != nil || repeatedProbeImplementation != probeImplementation {
+		t.Fatalf("ArenaProbeImplementationSource() is not deterministic canonical C: %v", err)
+	}
+	repeatedWindowsProbeImplementation, err := WindowsMSVCArenaProbeImplementationSource()
+	if err != nil || repeatedWindowsProbeImplementation != windowsProbeImplementation {
+		t.Fatalf("WindowsMSVCArenaProbeImplementationSource() is not deterministic canonical C: %v", err)
 	}
 }
 
@@ -205,8 +258,8 @@ func TestOwnedTextSourcesPreserveOwnershipAndNULTermination(t *testing.T) {
 		"preserved_nonempty_cstring_output",
 		"malformed_cstring",
 		"allocation_failed",
-		"fy_std_owned_text_probe_fail_next_allocation_v0",
-		"fy_std_owned_text_probe_live_allocations_v0() != 1",
+		"fy_std_system_heap_probe_fail_after_allocations_v0",
+		"fy_std_system_heap_probe_live_allocations_v0() != 1",
 	} {
 		if !strings.Contains(probe, required) {
 			t.Errorf("owned text probe is missing %q", required)
@@ -228,10 +281,10 @@ func TestOwnedTextSourcesPreserveOwnershipAndNULTermination(t *testing.T) {
 		{name: "Windows MSVC", source: windowsProbeImplementation},
 	} {
 		for _, required := range []string{
-			"fy_std_owned_text_probe_fail_next_allocation_v0",
-			"fy_std_owned_text_probe_live_allocations_v0",
-			"#define FY_STD_SYSTEM_HEAP_MALLOC_V0(size) fy_std_owned_text_probe_malloc_v0(size)",
-			"#define FY_STD_SYSTEM_HEAP_FREE_V0(data) fy_std_owned_text_probe_free_v0(data)",
+			"fy_std_system_heap_probe_fail_after_allocations_v0",
+			"fy_std_system_heap_probe_live_allocations_v0",
+			"#define FY_STD_SYSTEM_HEAP_MALLOC_V0(size) fy_std_system_heap_probe_malloc_v0(size)",
+			"#define FY_STD_SYSTEM_HEAP_FREE_V0(data) fy_std_system_heap_probe_free_v0(data)",
 			"fy_std_string_copy_storage_v0",
 			"fy_std_cstring_from_text_storage_v0",
 		} {
@@ -239,7 +292,7 @@ func TestOwnedTextSourcesPreserveOwnershipAndNULTermination(t *testing.T) {
 				t.Errorf("%s owned-text probe implementation is missing %q", candidate.name, required)
 			}
 		}
-		if strings.Index(candidate.source, "#define FY_STD_SYSTEM_HEAP_MALLOC_V0(size) fy_std_owned_text_probe_malloc_v0(size)") >
+		if strings.Index(candidate.source, "#define FY_STD_SYSTEM_HEAP_MALLOC_V0(size) fy_std_system_heap_probe_malloc_v0(size)") >
 			strings.Index(candidate.source, "#ifndef FY_STD_SYSTEM_HEAP_MALLOC_V0") {
 			t.Errorf("%s owned-text probe allocator adapter follows the SystemHeap fallback", candidate.name)
 		}
@@ -250,7 +303,7 @@ func TestOwnedTextSourcesPreserveOwnershipAndNULTermination(t *testing.T) {
 	if !strings.Contains(windowsProbeImplementation, "#define FY_STD_SYSTEM_HEAP_MAX_ALIGNMENT_V0 ((size_t)16)") {
 		t.Error("Windows MSVC owned-text probe implementation is missing its target alignment contract")
 	}
-	if strings.Contains(implementation, "fy_std_owned_text_probe_fail_next_allocation_v0") {
+	if strings.Contains(implementation, "fy_std_system_heap_probe_fail_after_allocations_v0") {
 		t.Error("product owned-text implementation leaked the probe-only allocator controls")
 	}
 	repeatedProbeImplementation, err := OwnedTextProbeImplementationSource()
@@ -437,6 +490,7 @@ func TestWindowsMSVCSourceForSymbolsKeepsClosedRuntimeSlice(t *testing.T) {
 		"fy_std_arena_initialize_v0",
 		"fy_std_region_begin_v0",
 		"fy_std_region_allocate_zeroed_v0",
+		"fy_std_region_copy_bytes_v0",
 		"fy_std_region_reset_v0",
 		"fy_std_arena_drop_v0",
 		"fy_std_string_copy_v0",
@@ -469,7 +523,8 @@ func TestWindowsMSVCSourceForSymbolsKeepsClosedRuntimeSlice(t *testing.T) {
 		"fy_std_system_heap_allocate_v0", "fy_std_system_heap_deallocate_v0",
 		"fy_std_buffer_initialize_v0", "fy_std_buffer_resize_zeroed_v0", "fy_std_buffer_drop_v0",
 		"fy_std_arena_initialize_v0", "fy_std_region_begin_v0",
-		"fy_std_region_allocate_zeroed_v0", "fy_std_region_reset_v0", "fy_std_arena_drop_v0",
+		"fy_std_region_allocate_zeroed_v0", "fy_std_region_copy_bytes_v0",
+		"fy_std_region_reset_v0", "fy_std_arena_drop_v0",
 		"fy_std_text_utf8_valid_v0", "fy_std_text_validate_utf8_v0",
 		"fy_std_cstr_validate_v0", "fy_std_string_copy_v0", "fy_std_string_as_view_v0",
 		"fy_std_string_append_v0", "fy_std_string_drop_v0", "fy_std_cstring_from_text_v0",

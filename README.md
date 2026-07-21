@@ -159,12 +159,16 @@ rejection. Its closed C-only probe and an internal generated FY caller using the
 node, Arena, and Region records each have four configured native executions. The generated caller
 crosses real initialization, begin, zeroed allocation through a `void **` output slot, reset, and
 drop. Used-symbol product linkage selects Arena plus SystemHeap, but lexical Region lowering and a
-public `std::alloc` API remain absent. Windows `build-target` now admits the five exact lifecycle
+public `std::alloc` API remain absent. Windows target resolution now admits the six exact Arena
+symbols, including copied placement, while the checked-in `build-target` example uses five lifecycle
 symbols used by that example and observes non-null allocation plus node, active-state, and generation
 transitions at both MSVC profiles. Its private generation transport is target-width `usize`, which
 matches the selected Windows x64 C layout without becoming a public representation promise. This
 Windows path does not dereference the returned storage or independently inspect its zeroed bytes;
-the Linux probes retain byte-level evidence.
+an independent raw caller now supplies that byte-level evidence at both MSVC profiles. It also
+forces payload-allocation and tracking-node-allocation failure separately, requires unchanged Arena
+and caller output, proves payload rollback with zero leaked live allocations, and rechecks stale
+Region plus active-drop rejection. The shared probe adapter remains absent from product linkage.
 The first text slice now validates canonical UTF-8 without allocation and rejects slicing through a
 multibyte sequence. Its native probe includes overlong forms, surrogates, values above U+10FFFF,
 truncation, and obsolete leaders and remains unobserved; raw source transports follow below.
@@ -297,7 +301,7 @@ exception, virtual-walks raiser, termination, and catcher frames, and requires o
 and independent/source-level/hosted ABI and unwind evidence exists. A host-independent PE parser
 now validates the host-smoke product, both declared-target profile products, both safe File and
 safe owned-text profile products, two direct run-target temporary products, two exec-target output
-products, and all ten raw Windows File, owned-text, layout, ABI, and unwind probe images as bounded
+products, and all twelve raw Windows File, owned-text, Arena, layout, ABI, and unwind probe images as bounded
 AMD64 PE32+ console executables
 with aligned headers and sections and an executable `.text` entry point. That linked-image path does not inspect
 object symbols, relocations, or Windows unwind records. The same package separately parses every

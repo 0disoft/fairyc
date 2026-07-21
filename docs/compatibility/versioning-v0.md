@@ -292,7 +292,11 @@ view retains exact valid UTF-8 bytes and byte length before C reads its data, pl
 under both compilers and profiles. The
 runner's existing `ownedTextExecutions` condition is strengthened by ADR 0132 to require
 probe-only deterministic initial-allocation and append-reallocation failure plus live-allocation
-cleanup; this adds no report field or counter and therefore does not create v32. The
+cleanup. ADR 0133 similarly strengthens `arenaExecutions` with deterministic payload and
+tracking-node allocation failure, rollback, zeroing, and live-allocation cleanup. It also admits the
+existing internal `fy_std_region_copy_bytes_v0` entry point in the closed target resolvers without
+stabilizing a public source or ABI contract. Neither change adds a report field or counter, so they
+do not create v32. The
 runner emits one exact version and does not pretend the report shapes are interchangeable.
 
 ## Runtime and standard library

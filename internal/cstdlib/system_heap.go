@@ -39,8 +39,8 @@ var stage0OwnedText string
 //go:embed stage0_owned_text_probe.c
 var stage0OwnedTextProbe string
 
-//go:embed stage0_owned_text_probe_allocator.c
-var stage0OwnedTextProbeAllocator string
+//go:embed stage0_system_heap_probe_allocator.c
+var stage0SystemHeapProbeAllocator string
 
 //go:embed stage0_linux_file.c
 var stage0LinuxFile string
@@ -103,6 +103,26 @@ func ArenaProbeSource() (string, error) {
 	return canonicalSource("Arena probe", stage0ArenaProbe)
 }
 
+// ArenaProbeImplementationSource returns the portable Arena implementation with the probe-only
+// deterministic SystemHeap allocator adapter. The adapter is never part of product linkage.
+func ArenaProbeImplementationSource() (string, error) {
+	implementation, err := ArenaSource()
+	if err != nil {
+		return "", err
+	}
+	return systemHeapProbeImplementationSource("Arena", implementation)
+}
+
+// WindowsMSVCArenaProbeImplementationSource returns the target-specific Windows Arena closure with
+// the same probe-only deterministic SystemHeap allocator adapter.
+func WindowsMSVCArenaProbeImplementationSource() (string, error) {
+	implementation, err := WindowsMSVCSourceForSymbols(arenaProbeSymbols())
+	if err != nil {
+		return "", err
+	}
+	return systemHeapProbeImplementationSource("Windows MSVC Arena", implementation)
+}
+
 // TextViewSource returns the allocation-free UTF-8 validation and slicing implementation.
 func TextViewSource() (string, error) {
 	return canonicalSource("text view", stage0TextView)
@@ -142,7 +162,7 @@ func OwnedTextProbeImplementationSource() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return ownedTextProbeImplementationSource(implementation)
+	return systemHeapProbeImplementationSource("owned text", implementation)
 }
 
 // WindowsMSVCOwnedTextProbeImplementationSource returns the target-specific Windows owned-text
@@ -152,7 +172,7 @@ func WindowsMSVCOwnedTextProbeImplementationSource() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return ownedTextProbeImplementationSource(implementation)
+	return systemHeapProbeImplementationSource("Windows MSVC owned text", implementation)
 }
 
 // LinuxFileSource returns the target-specific partial-I/O and consuming-close implementation.
@@ -219,13 +239,24 @@ func ownedTextStorageBridgeSymbols() []string {
 	}
 }
 
-func ownedTextProbeImplementationSource(implementation string) (string, error) {
-	adapter, err := canonicalSource("owned text probe allocator", stage0OwnedTextProbeAllocator)
+func arenaProbeSymbols() []string {
+	return []string{
+		"fy_std_arena_initialize_v0",
+		"fy_std_region_begin_v0",
+		"fy_std_region_allocate_zeroed_v0",
+		"fy_std_region_copy_bytes_v0",
+		"fy_std_region_reset_v0",
+		"fy_std_arena_drop_v0",
+	}
+}
+
+func systemHeapProbeImplementationSource(name, implementation string) (string, error) {
+	adapter, err := canonicalSource("SystemHeap probe allocator", stage0SystemHeapProbeAllocator)
 	if err != nil {
 		return "", err
 	}
 	if implementation == "" || strings.Contains(implementation, "\r") || !strings.HasSuffix(implementation, "\n") {
-		return "", fmt.Errorf("owned text probe implementation C source is empty or non-canonical")
+		return "", fmt.Errorf("%s probe implementation C source is empty or non-canonical", name)
 	}
 	return adapter + "\n" + implementation, nil
 }
