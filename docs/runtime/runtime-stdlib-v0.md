@@ -12,8 +12,8 @@
 The compiler and MIR directly own checked, wrapping, saturating, and checked-result arithmetic; division and shift validation; bounds checks and traps; layout queries; bit copy and bit cast; built-in `Option` and `Result` tags and active-payload movement; resource move and drop glue; borrow and region markers; raw memory operations; and slice construction and indexing.
 
 The compiler also owns the current bounded scalar fixed-array value, list-construction, internal
-copy transport, exact length observation, checked indexing, and contextual shared `[u8; N]` to
-`&[u8]` view construction. They require no runtime allocation or library entry point. The
+copy transport, exact length observation, checked indexing, and contextual shared `u8[N]` to
+`ref u8[]` view construction. They require no runtime allocation or library entry point. The
 provisional Stage 0 by-value implementation admits `1..=4096` elements; that ceiling is not a
 stable language or ABI limit. Empty/repeated literals, array fields, mutation, general slicing,
 properties other than `.len`, other array borrows, and ABI exposure remain outside this slice.
@@ -150,7 +150,7 @@ linkage contains no probe controls.
 
 There is no safe uninitialized byte allocation, generic `alloc<T>` syntax, resource placement, resource-aware reset, or fallible reset.
 
-The bounded Stage 0 fixture surface exports `std::alloc::Arena` as an opaque resource. `region name in expression` accepts an expression of type `&mut std::alloc::Arena` and holds that exclusive borrow for the lexical block. The fixture defines no constructor, capacity query, growth policy, ordinary allocation method, or representation guarantee; those remain public-library decisions.
+The bounded Stage 0 fixture surface exports `std::alloc::Arena` as an opaque resource. `region name in expression` accepts an expression of type `ref mut std::alloc::Arena` and holds that exclusive borrow for the lexical block. The fixture defines no constructor, capacity query, growth policy, ordinary allocation method, or representation guarantee; those remain public-library decisions.
 
 The provisional C Arena slice now models one active Region per Arena. Begin captures a private mark
 and generation; allocation publishes a tracking node only after both byte storage and node storage
@@ -190,7 +190,7 @@ ordinary allocator and contains no probe controls.
 
 ## Text types
 
-`str` is an unsized, immutable, valid-UTF-8 language type used as `&str`. UTF-8 validation of `&[u8]` returns a borrow with the input's origin and performs no copy or allocation. Byte slices never convert implicitly to text.
+`str` is an unsized, immutable, valid-UTF-8 language type used as `ref str`. UTF-8 validation of `ref u8[]` returns a borrow with the input's origin and performs no copy or allocation. Byte slices never convert implicitly to text.
 
 The provisional text-view C slice performs a complete allocation-free UTF-8 scan. It rejects stray
 continuations, overlong forms, surrogate encodings, values above U+10FFFF, truncated sequences, and
@@ -207,7 +207,7 @@ with zero. Both link the actual text-view C unit. This is not the public safe `s
 does not implement a borrowed `str` result, nonempty input storage, owned text, Unicode normalization,
 grapheme segmentation, case conversion, or locale behavior.
 
-`String` is a resource owning a UTF-8 `Buffer`. It can copy from `&str`, consume a `Buffer` after validation, expose `&str`, and append fallibly. A failed consuming UTF-8 conversion returns ownership of the original `Buffer` in its error resource. Mutable raw bytes are not exposed.
+`String` is a resource owning a UTF-8 `Buffer`. It can copy from `ref str`, consume a `Buffer` after validation, expose `ref str`, and append fallibly. A failed consuming UTF-8 conversion returns ownership of the original `Buffer` in its error resource. Mutable raw bytes are not exposed.
 
 The provisional String C slice copies from valid text, appends through overlap-safe Buffer growth,
 and exposes only immutable text. Buffer conversion validates the initialized prefix and moves the
@@ -216,7 +216,7 @@ wrapper can return the original Buffer in its error resource. The internal opera
 high-level text failure separate from the underlying allocation status without freezing source
 `Result` representation.
 
-`CStr` is an unsized borrowed NUL-terminated byte sequence with no interior NUL and no UTF-8 promise. `CString` is the owned resource form. Conversion from `&str` copies bytes, rejects interior NUL, appends one terminator, and performs no locale conversion.
+`CStr` is an unsized borrowed NUL-terminated byte sequence with no interior NUL and no UTF-8 promise. `CString` is the owned resource form. Conversion from `ref str` copies bytes, rejects interior NUL, appends one terminator, and performs no locale conversion.
 
 The provisional CStr validator consumes a bounded storage length, requires exactly the final byte
 to be NUL, rejects earlier NUL, and reports a view length excluding the terminator. CString creation
@@ -276,14 +276,14 @@ empty state back. Both local MSVC profiles execute nonempty and empty constructi
 interior-NUL status 3, ordinary return cleanup, and implicit cleanup with native result 42. The
 wrappers use exact unsafe compiler built-ins that require the shared owner borrow alongside the raw
 pointer and extent. The C path constructs no new allocation or copy, normalizes an empty String to
-a private non-null `&str` sentinel, and preserves the existing pointer-only `&CStr` transport. This
+a private non-null `ref str` sentinel, and preserves the existing pointer-only `ref CStr` transport. This
 remains example-level evidence rather than a stable `std::text` API or public layout.
 
-A `c"..."` literal provides allocation-free immutable `&CStr` storage with one compiler-appended trailing NUL and rejects a decoded interior NUL. The implemented C path emits exact `static const uint8_t[]` bytes, deduplicates equal storage, and permits only an explicit unsafe conversion to immutable `*u8` for the direct-literal raw FFI form. It is source syntax, not a runtime constructor.
+A `c"..."` literal provides allocation-free immutable `ref CStr` storage with one compiler-appended trailing NUL and rejects a decoded interior NUL. The implemented C path emits exact `static const uint8_t[]` bytes, deduplicates equal storage, and permits only an explicit unsafe conversion to immutable `ptr u8` for the direct-literal raw FFI form. It is source syntax, not a runtime constructor.
 
-A `b"..."` literal provides allocation-free immutable `&[u8]` storage with exact decoded bytes, no UTF-8 promise, no appended terminator, and hidden `Static` origin. MIR retains the byte count as the logical length. The generated-C path uses a private non-null `{ data, length }` value, deduplicated immutable arrays for nonempty values, and a one-byte sentinel with length zero for empty values. The source property `.len` returns that byte count as `usize`, while `.is_empty` returns its exact zero comparison as `bool`; neither scans, allocates, calls, or traps. Matching `usize` values support typed equality, ordering, checked ordinary arithmetic, bitwise operations, and exact-width checked shifts without promotion. Immutable indexing evaluates the receiver and `usize` index once from left to right, returns the exact `u8` byte when in bounds, and traps with `bounds` otherwise. End-exclusive slicing evaluates the receiver and every written `usize` bound once in source order, normalizes an omitted start to zero and an omitted end to the retained receiver length, proves `start <= end && end <= len`, and returns a zero-copy immutable subview with the same borrow origin; invalid bounds trap before pointer derivation. The target-independent `u8 as i32`, `u8 as u32`, and `u8 as usize` conversions may widen an indexed result without a trap or unsafe scope. The checked-in Windows quickstart combines omitted-end slicing, indexing, metadata operations, fixed-array stores, and mutable-view stores. An explicit unsafe conversion may expose a literal or typed shared local's immutable `*u8` data address. Separately, a contextual `&mut [u8]` over a mutable fixed `[u8; N]` local aliases the array with the same exclusive origin and exact length, supports checked `u8` reads and stores, and may expose `*mut u8`; literals and shared views can never strengthen mutability. Fixed arrays remain value copies across ordinary assignment and calls, while views retain backing identity. Indexed stores check bounds before evaluating the value. Mutable slicing, text slicing, a public slice ABI, and implicit text conversion remain unimplemented.
+A `b"..."` literal provides allocation-free immutable `ref u8[]` storage with exact decoded bytes, no UTF-8 promise, no appended terminator, and hidden `Static` origin. MIR retains the byte count as the logical length. The generated-C path uses a private non-null `{ data, length }` value, deduplicated immutable arrays for nonempty values, and a one-byte sentinel with length zero for empty values. The source property `.len` returns that byte count as `usize`, while `.is_empty` returns its exact zero comparison as `bool`; neither scans, allocates, calls, or traps. Matching `usize` values support typed equality, ordering, checked ordinary arithmetic, bitwise operations, and exact-width checked shifts without promotion. Immutable indexing evaluates the receiver and `usize` index once from left to right, returns the exact `u8` byte when in bounds, and traps with `bounds` otherwise. End-exclusive slicing evaluates the receiver and every written `usize` bound once in source order, normalizes an omitted start to zero and an omitted end to the retained receiver length, proves `start <= end && end <= len`, and returns a zero-copy immutable subview with the same borrow origin; invalid bounds trap before pointer derivation. The target-independent `u8 as i32`, `u8 as u32`, and `u8 as usize` conversions may widen an indexed result without a trap or unsafe scope. The checked-in Windows quickstart combines omitted-end slicing, indexing, metadata operations, fixed-array stores, and mutable-view stores. An explicit unsafe conversion may expose a literal or typed shared local's immutable `ptr u8` data address. Separately, a contextual `ref mut u8[]` over a mutable fixed `u8[N]` local aliases the array with the same exclusive origin and exact length, supports checked `u8` reads and stores, and may expose `ptr mut u8`; literals and shared views can never strengthen mutability. Fixed arrays remain value copies across ordinary assignment and calls, while views retain backing identity. Indexed stores check bounds before evaluating the value. Mutable slicing, text slicing, a public slice ABI, and implicit text conversion remain unimplemented.
 
-A `"..."` literal provides allocation-free immutable `&str` storage after the complete decoded byte sequence passes UTF-8 validation. MIR retains a distinct text operand and byte length rather than reusing byte-string or C-string meaning. The generated-C path uses a private non-null `fy_str { data, length }` value, deduplicated exact immutable UTF-8 arrays for nonempty values, and a one-byte sentinel with length zero for empty values. The source property `.len` returns the UTF-8 byte count as `usize`, and `.is_empty` returns whether that byte count is zero; neither counts scalar values or graphemes. An explicit unsafe conversion may expose a literal or typed local's immutable `*u8` data address; mutable extraction, indexing, slicing, a public string ABI, implicit byte-to-text conversion, and implicit C termination remain unimplemented.
+A `"..."` literal provides allocation-free immutable `ref str` storage after the complete decoded byte sequence passes UTF-8 validation. MIR retains a distinct text operand and byte length rather than reusing byte-string or C-string meaning. The generated-C path uses a private non-null `fy_str { data, length }` value, deduplicated exact immutable UTF-8 arrays for nonempty values, and a one-byte sentinel with length zero for empty values. The source property `.len` returns the UTF-8 byte count as `usize`, and `.is_empty` returns whether that byte count is zero; neither counts scalar values or graphemes. An explicit unsafe conversion may expose a literal or typed local's immutable `ptr u8` data address; mutable extraction, indexing, slicing, a public string ABI, implicit byte-to-text conversion, and implicit C termination remain unimplemented.
 
 ## Windows stdout write-all v0
 
@@ -311,14 +311,14 @@ unproven or unimplemented.
 
 This raw function is admitted only by the `x86_64-windows-msvc` support resolver and must be called
 inside `unsafe`. The checked-in example confines the call to a safe function in an explicitly listed
-support module; that function accepts `&str`, derives the raw length from `.len`, declares
+support module; that function accepts `ref str`, derives the raw length from `.len`, declares
 `@effects(console)`, and reports success
 only after checking status and completed progress. This is an example of unsafe containment, not a
 public `std::io` module, portable console API, stable error type, or stable result layout.
 
 ## Linux `File` v0
 
-The initial API is explicitly tied to the `x86_64-linux-gnu` target and accepts `&CStr`, not a purported portable UTF-8 path.
+The initial API is explicitly tied to the `x86_64-linux-gnu` target and accepts `ref CStr`, not a purported portable UTF-8 path.
 
 The minimum operations are fallible open, partial read, partial write, `write_all`, `sync`, and consuming `close`. `write` returns the actual byte count. A `write_all` error reports the number already written.
 
@@ -370,7 +370,7 @@ executes create/truncate, write-all, sync, normal and repeated close, three-byte
 
 The example-level `examples/windows_file/windows_file.fy` module now connects that raw contract to
 an effect-checked move-only FY `File`, typed `FileError`, create/truncate and read opens, write-all,
-sync, consuming close, and `read(&mut [u8])`. A mutable fixed array supplies a contextual exclusive
+sync, consuming close, and `read(ref mut u8[])`. A mutable fixed array supplies a contextual exclusive
 view with its canonical length and private writable data pointer. Runtime state crosses the private
 opaque boundary through bytewise `memcpy` load/store so the C unit does not dereference generated
 resource storage through an incompatible struct type. Low and optimized source builds write and

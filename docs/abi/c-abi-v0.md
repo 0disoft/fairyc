@@ -58,7 +58,7 @@ admitted for exact `void **` calls; it does not open arbitrary pointer nesting. 
 source/link identity, prototype emission, typed null, separate-object cross-compiler linking, and process-status
 observation are wired. Source struct construction and field reads reach verified MIR, the MIR
 interpreter for its executable scalar subset, and generated C. Inside an explicit unsafe boundary,
-an exact `&T -> *T`, `&mut T -> *T`, or `&mut T -> *mut T` cast may take the address of a direct
+an exact `ref T -> ptr T`, `ref mut T -> ptr T`, or `ref mut T -> ptr mut T` cast may take the address of a direct
 local place without inventing alias promises. Raw dereference, pointer arithmetic, integer-pointer
 conversion, mutability strengthening, and other raw-pointer or C-scalar casts remain unsupported.
 The safe language-level value-preserving integer subset is defined separately by ADR 0098 and does
@@ -147,7 +147,7 @@ Fairy source TLS, C TLS symbol import or export, C++ ABI, and foreign unwinding 
 
 ## Startup, linking, and debugging
 
-The C compiler driver owns compilation, CRT startup objects, default libraries, and linking. The generated program uses a small C entry shim that calls `fn main() -> i32`. Stage 0 does not directly invoke `ld`, `lld`, or a native object writer.
+The C compiler driver owns compilation, CRT startup objects, default libraries, and linking. The generated program uses a small C entry shim that calls Fairy source `fn i32 main()`. Stage 0 does not directly invoke `ld`, `lld`, or a native object writer.
 
 The native differential lane's `drop-trace-v0` observer and four-byte stderr records are
 conformance instrumentation, not a Fairy ABI, C ABI, runtime ABI, source-visible hook, or product
@@ -281,7 +281,7 @@ four-byte `c::long` assertions, rejects unavailable `c::ssize_t`, and is execute
 checked-in `build-target` example. That example crosses SystemHeap allocate/deallocate with a
 24-byte pointer/`usize`/`usize` record, crosses Buffer initialize/zeroed-resize/drop with a nested
 32-byte record, crosses private Arena/Region records, crosses String/CString/CStr lifecycle with
-private views and 8-byte result returns, then calls `fy_std_text_utf8_valid_v0` using a null `*u8`
+private views and 8-byte result returns, then calls `fy_std_text_utf8_valid_v0` using a null `ptr u8`
 and zero `usize`. Buffer, Arena, and owned text close over their declared dependencies; the Windows
 support resolver links only SystemHeap, Buffer, Arena, text
 view, owned text, and scalar runtime, while every other foreign symbol fails closed. The SystemHeap C source receives a target-only

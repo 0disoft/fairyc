@@ -82,12 +82,12 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
   Its product-build count separately requires the ordinary CLI artifact to contain nonempty
   compiler-owned storage and execute with exit 42 under all four compiler/profile combinations.
   The byte-string literal source-call count separately requires exact non-terminated `fairy`
-  storage, a private non-null `&[u8]` view with length five, typed-local immutable data-address
+  storage, a private non-null `ref u8[]` view with length five, typed-local immutable data-address
   extraction, and a separate C callee reading all five bytes. Its product-build count requires the
   same view path to execute with exit 42 under all four compiler/profile combinations. Empty-slice
   sentinel behavior remains covered by host-independent emitter tests.
   The UTF-8 string literal source-call count requires exact `Fairy λ` storage, a distinct private
-  non-null `&str` view with byte length eight, typed-local immutable data-address extraction, and a
+  non-null `ref str` view with byte length eight, typed-local immutable data-address extraction, and a
   separate C callee reading all eight UTF-8 bytes. Its product-build count requires the same text-view
   path to execute with exit 42 under all four compiler/profile combinations. Invalid decoded UTF-8
   and empty-text sentinel behavior remain covered by host-independent lexer and emitter tests.

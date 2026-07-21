@@ -19,10 +19,10 @@ and local Flow cases, including integer-literal range rejection, branch- and loo
 exact interprocedural borrow-return summaries, last-use loans, borrow-return origins, canonical
 `@effects(...)` sets, and caller-superset enforcement. Whole-root resource Flow
   also executes all 12 v0 cases for moves, cleanup obligations, branch joins, normal, break, and continue loop edges,
-consuming tagged matches, and live/dead resource reassignment. The
+consuming tagged switches, and live/dead resource reassignment. The
 Region runner executes all 6 v1 cases, including package-proven `std::alloc::Arena`, hidden
 allocation origins, lexical escape, capability storage, and plain-region resource rejection. The
-  Result runner executes all 24 v0 cases for qualified construction, exhaustive shallow matching,
+  Result runner executes all 24 v0 cases for contextual leading-dot construction, exhaustive shallow switching,
   must-use return/discard/propagation, local and parameter transfer, branch joins, loop back-edges and control exits,
 overwrite and early-return rejection, exactly-once classification, non-Result `?`, and propagated
 error compatibility. The MIR runner executes all
@@ -32,7 +32,7 @@ left-to-right call evaluation, complete-root moves, normal-exit cleanup order, `
   baselines and proves all 21 isolated `V1001` through `V1701` rejection recipes. The first MIR
   interpreter slice executes all 92 v0 cases for literal return, direct `i32` minimum constants, scalar fixed-array calls, contextual immutable and mutable byte-view borrowing, exact lengths, checked reads and indexed stores, function-call arithmetic,
 boolean branches and logical not, source `&&` and `||` short-circuiting, scalar `while`, scalar
-`Option` construction/matching, scalar `Result` construction/matching/propagation,
+`Option` construction/switching, scalar `Result` construction/switching/propagation,
 resource construction, field reads, call moves, resource-bearing `Option` and `Result` payload moves,
 resource returns and propagation, ordered reassignment, consuming-close success/failure,
 nested active-variant cleanup, deterministic drop traces,
@@ -132,7 +132,7 @@ without a compiler banner and preserves the program's full Windows process statu
 stdout write-all symbol inside a checked local helper. The raw declaration, safe text wrapper, and
 `main` propagate `@effects(console)` while the byte-view helper remains pure. The wrapper returns
 `Result<usize, ConsoleError>`, preserving either the exact byte count or the runtime status plus
-completed prefix. Its `main` passes `&str` and `&[u8]` through safe internal calls; the
+completed prefix. Its `main` passes `ref str` and `ref u8[]` through safe internal calls; the
 byte helper observes the exact NUL and `A` bytes through checked read-only indexing while the entry contains no raw pointer or `unsafe`,
 prints `Fairy C says hi`, and exits 42. That is real
 FY-to-MSVC process output, unsafe containment, and source-effect enforcement, but it is not yet a
@@ -182,35 +182,35 @@ four-way crossings: direct validation and `@repr(C)` output-record initializatio
 raw address. The self-contained empty validator call is also the first configured product-build
 smoke that requires automatic standard-library linkage. Compiler-owned `c"..."` storage now reaches
 the C backend as immutable static bytes, and an explicit unsafe direct-literal conversion can expose
-its read-only `*u8` address to raw FFI. Compiler-owned `b"..."` storage now independently reaches a
+its read-only `ptr u8` address to raw FFI. Compiler-owned `b"..."` storage now independently reaches a
 private non-null `{ data, length }` byte-slice transport, including an empty length-zero sentinel;
 typed locals may expose only the immutable data address through explicit unsafe conversion. Plain
 `"..."` literals now independently reach a private non-null `fy_str` view after complete decoded
 UTF-8 validation, with deduplicated immutable storage and the same empty length-zero sentinel rule;
 typed locals can expose only immutable data through explicit unsafe conversion. Safe borrowed
-`&str` and `&[u8]` views expose `.len` as their `usize` byte count and `.is_empty` as its exact
+`ref str` and `ref u8[]` views expose `.len` as their `usize` byte count and `.is_empty` as its exact
 zero-length `bool` without scanning or allocation.
-Immutable `&[u8]` additionally supports read-only `usize` indexing to `u8` and end-exclusive
+Immutable `ref u8[]` additionally supports read-only `usize` indexing to `u8` and end-exclusive
 `bytes[start..end]`, `bytes[..end]`, `bytes[start..]`, and `bytes[..]` subviews behind verified
 `bounds` traps. Omitted bounds normalize to zero or the retained receiver length; written operands
-evaluate once left to right and preserve the receiver's borrow origin. Mutable `&mut [u8]` also
+evaluate once left to right and preserve the receiver's borrow origin. Mutable `ref mut u8[]` also
 supports checked `u8` reads and indexed stores; the place is checked before the right-hand side is
 evaluated. Text indexing or slicing, a stable public string ABI, and the general safe text API still
 do not exist.
 Fixed arrays of `bool`, `i32`, `u8`, `u32`, or `usize` with `1 <= N <= 4096` now construct from
 nonempty list literals, cross internal calls and returns as inert copy values, expose exact
 zero-cost `usize` `.len`, and support checked read-only `usize` indexing. A direct shared borrow of
-`[u8; N]` contextually becomes `&[u8]` where that type is expected, so local arrays can use the
+`u8[N]` contextually becomes `ref u8[]` where that type is expected, so local arrays can use the
 existing immutable byte-view calls and operations without unsafe code. A direct exclusive borrow
-of a mutable `[u8; N]` likewise becomes `&mut [u8]` only where that internal parameter type is
-expected. It carries exact length and may expose `*mut u8` only inside unsafe wrapper code; safe
+of a mutable `u8[N]` likewise becomes `ref mut u8[]` only where that internal parameter type is
+expected. It carries exact length and may expose `ptr mut u8` only inside unsafe wrapper code; safe
 checked reads and indexed `u8` stores are available, while mutable slicing remains absent. Mutable
 fixed scalar-array locals and `mut` parameters likewise support checked element assignment. The ceiling is a provisional Stage 0
 implementation guard, not a stable language or ABI limit. A mutable safe-borrow local may
 be reassigned through straight-line, branch, and `while` control flow; Flow replaces its provenance
 after evaluating the right-hand side, joins reachable branch/header/`continue`/`break` origins
 without guessing, and releases old owners only after their last reachable loan use. Exact whole-
-array `&[T; N]` and `&mut [T; N]` types may now cross internal calls without becoming copyable
+array `ref T[N]` and `ref mut T[N]` types may now cross internal calls without becoming copyable
 aliases. Empty and repeated literals, fields, nesting, general mutable projections and slicing,
 and public or foreign ABI use remain closed.
 Internal borrow-returning calls now infer one exact formal borrow parameter, region parameter, or
@@ -229,7 +229,7 @@ real String copy, view, append, and drop helpers plus CString creation, CStr vie
 observers require exact bytes, repeated append, one terminator, and normalized release. These are raw
 internal transports. A separate checked-in example now wraps opaque storage bridges in move-only
 Fairy `String` and `CString` resources, maps operation failures into source `Result`, exposes scalar
-metadata plus owner-bound `&str` and `&CStr` views, and runs its C release through verified resource
+metadata plus owner-bound `ref str` and `ref CStr` views, and runs its C release through verified resource
 drop glue. Exact unsafe raw-parts built-ins remain private to the support module, and Flow rejects
 moving an owner before the derived view's last use. This is an example-level safe boundary, not a
 stable public `std::text` module, layout, or foreign borrowed-view ABI.
@@ -264,7 +264,7 @@ closes, reopens, reads in three-byte chunks, observes EOF, forces `ERROR_INVALID
 repeated close and drop at low and optimized local MSVC profiles. The six raw calls are target-bound
 through the closed resolver. A checked-in two-module FY example now wraps that exact component in a
 move-only `File`, preserves status, Win32 code, and completed bytes in `FileError`, carries
-`filesystem` effects, writes and synchronizes `FairyFile`, reads it through `read(&mut [u8])`
+`filesystem` effects, writes and synchronizes `FairyFile`, reads it through `read(ref mut u8[])`
 backed by a mutable fixed array, observes EOF, consumes explicit close, and proves implicit drop by
 successfully reopening a path whose live write handle would deny sharing. Low and optimized MSVC builds both
 return 42 after object, PE, and unwind inspection. This is usable Stage 0 source evidence, not yet a

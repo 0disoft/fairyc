@@ -10,6 +10,10 @@ MIR is the only executable semantic contract consumed by backends. It records ev
 
 MIR v0 is a mutable-local control-flow graph rather than SSA. SSA conversion is a backend or optimization concern after the semantic form is verified.
 
+Current source spells borrows, raw pointers, and arrays as `ref T`, `ref mut T`, `ptr T`,
+`ptr mut T`, and `T[N]`. Quoted `&...`, `*...`, and `[T; N]` forms in this document name existing
+compiler-internal HIR/MIR type strings only; they are not alternate source syntax.
+
 For an already-resolved multi-package build, typed HIR carries a deterministic build-local package
 discriminator. MIR function and user-defined type identities retain that discriminator through a
 compiler-private qualified module path, so isolated package instances may both own `util` without
@@ -27,8 +31,8 @@ The current Go prototype implements the source-linked subset exercised by all el
 Scalar fixed arrays lower to an explicit construction operation followed by ordinary local value
 transport. Exact length observation lowers to `array-length`: it keeps the already-evaluated local
 receiver as an operand but returns canonical `N` as `usize` without reading storage. A contextual
-shared or mutable `[u8; N]` borrow lowers to `array-borrow-view`, retaining one local owner operand
-and the exact `&[u8]`/`&` or `&mut [u8]`/`&mut` pair. Indexing lowers to an `array-index-check`, a two-way
+shared or mutable `u8[N]` borrow lowers to `array-borrow-view`, retaining one local owner operand
+and the internal exact `&[u8]`/`&` or `&mut [u8]`/`&mut` pair. Indexing lowers to an `array-index-check`, a two-way
 `checked-array-index` terminator, the non-returning `bounds` edge, and an `array-index` operation on
 the success edge. The verifier matches the canonical positive length, every scalar element
 operand, the exact byte-view mutability pair, the length shape, the `usize` index, and the dominating
@@ -38,14 +42,14 @@ access survives verified MIR.
 Mutable fixed-array assignment lowers its receiver and `usize` index before the value, freezes the
 scalar index, and emits `array-index-check` plus `checked-array-index` before any right-hand-side
 blocks. The success region evaluates the value and ends with no-result `array-index-store`.
-`&mut [u8]` uses the parallel `view-index-check`, `checked-view-index`, and `view-index-store` path;
+Source `ref mut u8[]` uses the parallel `view-index-check`, `checked-view-index`, and `view-index-store` path;
 ordinary `view-index` also admits mutable owners for reads. The verifier proves the complete checked
 success edge dominates the store even when a call or branch evaluates the right-hand side. It matches
 the frozen place operands and rejects any path, type, mutability, operator, value, or trap drift.
 
 The mutable byte view has metadata, checked read/store, and internal-call semantics. Inside verified
-unsafe provenance, `byte-slice-data-address` may produce `*mut u8` from `&mut [u8]`; the shared
-owner produces only immutable `*u8`. The verifier rejects a mismatched owner, element type, pointer
+unsafe provenance, `byte-slice-data-address` may produce internal `*mut u8` from source `ref mut u8[]`; the shared
+owner produces only internal immutable `*u8`. The verifier rejects a mismatched owner, element type, pointer
 mutability, static mutable storage request, or missing source operand as `V1001`. Mutable slicing and
 general projections still have no MIR operation.
 

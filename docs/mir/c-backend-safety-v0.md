@@ -15,6 +15,10 @@ and cannot authorize newer-dialect syntax.
 
 The first planned profile is `x86_64-linux-gnu` compiled and linked through declared Clang and GCC drivers. Emission alone is not conformance or support evidence.
 
+Current Fairy source spells borrows, raw pointers, and arrays as `ref T`, `ref mut T`, `ptr T`,
+`ptr mut T`, and `T[N]`. This backend document names those source forms unless it explicitly says
+that a spelling is an internal HIR/MIR type string or generated C syntax.
+
 The profile ID now comes from the validated `fairyc.target-spec/v0` object in `internal/target`.
 The backend does not read Go `unsafe.Sizeof`, local C compiler probes, or SDK paths to decide target
 semantics. The target object reports the existing scalar, flat-resource, and resource-tagged emission subset while leaving all three
@@ -25,7 +29,7 @@ maturity claims false.
 `internal/cbackend` currently emits one deterministic C11 translation unit from verified MIR
 for a deliberately narrow subset. It accepts `i32`, `bool`, `Option<i32>`, and
 `Result<i32, i32>` parameters and internal results, `void` internal results, a zero-argument
-`main() -> i32` entry, calls and control flow, scalar tag construction, match and Result `?`,
+`fn i32 main()` entry, calls and control flow, scalar tag construction, lowered switch and Result `?`,
 comparisons, bitwise operations, and the implemented checked arithmetic families. Private numeric C
 function names prevent source identifiers from becoming ABI or injection surfaces.
 
@@ -50,24 +54,24 @@ the C shift. `i32` uses the defined arithmetic-shift helper; unsigned types use 
 Unsigned unary complement is explicitly cast back to the verified `uint8_t`, `uint32_t`, or
 `uintptr_t` representation after C integer promotion; `i32` retains bit-preserving `uint32_t` transport.
 
-The same internal-value subset now admits compiler-owned immutable `&[u8]` literals. MIR retains
+The same internal-value subset now admits compiler-owned immutable `ref u8[]` literals. MIR retains
 their exact bytes and logical length, including empty and embedded-NUL values. Generated C uses a
 private `fy_byte_slice { const uint8_t *data; uintptr_t length; }`, exact deduplicated immutable
 storage for nonempty values, and a one-byte immutable sentinel with length zero for empty values.
 This private shape is neither a public Fairy layout nor a foreign-call ABI.
 
-A contextual exclusive borrow of a mutable fixed `[u8; N]` uses a distinct private
+A contextual exclusive borrow of a mutable fixed `u8[N]` uses a distinct private
 `fy_mut_byte_slice { uint8_t *data; uintptr_t length; }`. The descriptor takes the verified array
 local's data address and canonical `N` without allocation or copying. It never originates from
 immutable literal storage, and generated C does not add `restrict` or infer non-retention.
 
 The same private view transport admits verified `view-length` and `view-empty` operations for safe
-borrows of `str` and shared or mutable `[u8]`. Generated C either copies the descriptor's `length` member into a
+borrows of `str` and shared or mutable `u8[]`. Generated C either copies the descriptor's `length` member into a
 `uintptr_t`-backed Fairy `usize` or compares it with zero and normalizes a Fairy `bool`; it does not
 call a helper, scan storage, allocate, trap, or expose the descriptor layout.
 The verifier fixes the owner family and result type before emission.
 
-Verified shared or mutable `&[u8]` indexing compares the `uintptr_t`-backed index against the descriptor's
+Verified shared or mutable `ref u8[]` indexing compares the `uintptr_t`-backed index against the descriptor's
 byte length, routes failure to the canonical `FY_TRAP_BOUNDS` path, and only then emits one
 `data[index]` load into a `uint8_t`-backed Fairy `u8`. Receiver and index operands are evaluated once
 before the check and reused unchanged by the load. The C backend rejects missing or mismatched MIR
@@ -173,7 +177,7 @@ Nested MIR effects are emitted as separate C statements and temporaries. Functio
 | Shift | Check the amount against the exact operand width before any C shift. Right shift uses the bit-preserving arithmetic helper for `i32` and exact unsigned C operations otherwise. Left shift then checks mathematical representability, reports overflow only after a valid amount, performs signed transport through `uint32_t`, and reconstructs `i32` from bits. |
 | Value-preserving integer cast | Verify one admitted source/result pair, then emit an explicit C cast to `int32_t`, `uint32_t`, or `uintptr_t`. Every source value is representable, so no trap, truncation, wrapping, or implementation-defined signed conversion occurs. |
 | Typed scalar and raw-pointer comparison | Verify two matching operands and the exact `bool` result before emission. Scalar equality is limited to `bool`, `i32`, `u8`, `u32`, and `usize`; scalar ordering excludes `bool`. Matching raw pointers admit equality only, with no dereference or ordering. Generated C normalizes the result to `INT32_C(0)` or `INT32_C(1)`. |
-| Scalar fixed-array construction, byte-view borrowing, length, indexing, and stores | Verify one canonical length inside the provisional `1..=4096` executable bound and the exact copy-scalar element type. Emit a private assignable struct wrapper, materialize list elements left to right, construct a `const` shared or writable mutable byte view only from the matching verified local `[u8; N]` using its `.data` address and canonical `N`, emit `.len` from canonical `N` rather than `sizeof` or storage, and check every read or store against that same length. Access or assignment to `.data[index]` occurs only on the success edge; store indices are materialized so a host C frontend cannot reject an always-trapping source before the checked edge runs. The borrow allocates and copies nothing; mutable slicing remains absent; the bound, wrapper, and descriptors are private implementation guards, not a public Fairy or C ABI. |
+| Scalar fixed-array construction, byte-view borrowing, length, indexing, and stores | Verify one canonical length inside the provisional `1..=4096` executable bound and the exact copy-scalar element type. Emit a private assignable struct wrapper, materialize list elements left to right, construct a `const` shared or writable mutable byte view only from the matching verified source `u8[N]` local using its generated `.data` address and canonical `N`, emit `.len` from canonical `N` rather than `sizeof` or storage, and check every read or store against that same length. Access or assignment to `.data[index]` occurs only on the success edge; store indices are materialized so a host C frontend cannot reject an always-trapping source before the checked edge runs. The borrow allocates and copies nothing; mutable slicing remains absent; the bound, wrapper, and descriptors are private implementation guards, not a public Fairy or C ABI. |
 | Assert | Verify one exact `bool` operand and canonical failure edge, compare with zero in every profile, and dispatch `FY_TRAP_ASSERTION_FAILED` through the trap runtime. Never emit or include the C library `assert` macro. |
 
 The backend cannot add C or LLVM overflow, exactness, alignment, or alias promises unless the verified MIR fact explicitly proves them.
@@ -254,12 +258,12 @@ The two owner-bound text raw-parts operations are separate from pointer casts. T
 unsafe provenance plus a shared safe owner operand, and their result origin remains a semantic Flow
 fact rather than a C pointer attribute.
 A separate verified `byte-slice-data-address` operation may expose the immutable data pointer of a
-compiler-owned `&[u8]` literal or typed shared local inside unsafe code. A typed `&mut [u8]` local
-may instead expose `*mut u8`. The operation requires the matching owner and raw-pointer mutability,
+compiler-owned source `ref u8[]` literal or typed shared local inside unsafe code. A typed source
+`ref mut u8[]` local may instead expose `ptr mut u8`. The operation requires the matching owner and raw-pointer mutability,
 cannot strengthen a shared view, cannot request mutable static storage, and cannot pass the safe
 view itself through a foreign signature.
 The corresponding CStr-data operation accepts static literal storage or a local borrowed CStr.
-Static storage emits its compiler-owned address. A local `&CStr` is already transported as
+Static storage emits its compiler-owned address. A local source `ref CStr` is already transported as
 `const uint8_t *` and is forwarded unchanged; emitting a nonexistent `.data` member is rejected by
 the native C compiler and its regression test.
 Successful emission also records the sorted unique external link names used by actual foreign call
@@ -270,7 +274,8 @@ Windows File names are rejected for Linux and select one independent inline-hand
 for `x86_64-windows-msvc`. ADRs 0124 and 0125 connect an example-level safe FY wrapper plus a
 length-generic fixed-array byte view while keeping stable `std::fs`, portable paths, general mutable
 buffer operations, retained pointers, and public layout outside this boundary.
-The sole nested-pointer exception is exactly `*mut *mut void`, so `&mut *mut void` can become a C
+The sole nested-pointer exception is exactly source `ptr mut ptr mut void`, so source
+`ref mut ptr mut void` can become a C
 `void **` output slot. Immutable outer or inner layers fail closed instead of risking incorrect C
 qualifier placement. Nested pointers to C scalars, structs, or other pointer types remain rejected.
 Source `@repr(C)` construction, field reads, exact public names, layout assertions, pointer
@@ -339,13 +344,13 @@ Four `standardLibraryBuildSmokeExecutions` additionally require the ordinary pro
 the text-view C component from an actual called symbol, link it with the scalar runtime, and execute
 the resulting uninstrumented product under both compilers and profiles.
 Four `byteStringLiteralSourceCallExecutions` require a generated Fairy caller to construct a
-private `&[u8]` view over exact non-terminated `fairy` storage, preserve length five, extract the
+private `ref u8[]` view over exact non-terminated `fairy` storage, preserve length five, extract the
 typed local's immutable data address, and have a separate C callee verify all five bytes. Four
 `byteStringLiteralBuildSmokeExecutions` separately require the ordinary product CLI to carry that
 view into an executable returning 42 under both compilers and profiles. Empty literals instead use
 the non-null one-byte sentinel with logical length zero.
 Four `utf8StringLiteralSourceCallExecutions` require a generated Fairy caller to construct a private
-`&str` view over exact `Fairy λ` UTF-8 storage, preserve byte length eight, extract a typed local's
+`ref str` view over exact `Fairy λ` UTF-8 storage, preserve byte length eight, extract a typed local's
 immutable data address, and have a separate C callee verify all eight bytes. Four
 `utf8StringLiteralBuildSmokeExecutions` separately require the ordinary product CLI to carry that
 view into an executable returning 42 under both compilers and profiles. Empty text uses a non-null
@@ -353,7 +358,7 @@ one-byte sentinel with logical length zero, and invalid decoded UTF-8 never reac
 Four `cStringLiteralSourceCallExecutions` require a generated Fairy caller to create exact
 `fairy\0` storage, cross the dedicated unsafe immutable-byte-pointer operation, and have a separate C
 callee verify all six bytes. Four `cStringLiteralBuildSmokeExecutions` separately require the
-ordinary product CLI to carry nonempty compiler-owned `&CStr` storage into an executable returning
+ordinary product CLI to carry nonempty compiler-owned `ref CStr` storage into an executable returning
 42 under both compilers and profiles. The C emitter materializes each unique byte sequence once as
 sorted translation-unit `static const uint8_t[]` storage; MIR never delegates literal meaning to C
 string-token spelling.

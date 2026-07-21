@@ -80,7 +80,7 @@ exact transport-only TargetSpec C scalars, raw pointers to
 the fixed-width Fairy scalar set or opaque `void`, and raw pointers to admitted nonempty acyclic
 `@repr(C)` structs whose fields may include exact C scalars or nested `@repr(C)` records. Those
 records may also be returned by value from a foreign C function. One
-pointer-to-opaque-pointer output slot such as `*mut *mut void` is admitted without general pointer
+pointer-to-opaque-pointer output slot such as `ptr mut ptr mut void` is admitted without general pointer
 nesting. It uses its source
 identifier as the C symbol by default or accepts one nonempty `@link_name("symbol")`, and requires
 an explicit unsafe boundary. Raw pointers can be null,
@@ -138,7 +138,7 @@ and does not use WSL.
 program stdout and stderr stay on their matching streams and the program's 32-bit Windows status
 becomes the CLI status. The shared 64 KiB capture ceiling remains fail-closed, and cross-stream order
 is unspecified. The checked-in output example reaches only the unsafe internal Windows stdout
-write-all symbol, but confines it to a checked local function accepting `&str`. Its `main` passes
+write-all symbol, but confines it to a checked local function accepting `ref str`. Its `main` passes
 borrowed text and byte views only through safe internal calls and contains no raw pointer or
 `unsafe`. The entry and helper are separate modules passed through one explicit `--source`; this
 still is not a portable `std::io` surface or public package build.

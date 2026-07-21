@@ -101,7 +101,7 @@ commands. The entry is the positional file module's zero-argument `main() -> i32
 values, resource construction and field reads, whole-root and tagged-payload moves, resource-bearing
 built-in `Option` and `Result` values, ordered resource reassignment, consuming-close ownership,
 nearest-loop `break` and `continue`, lexical Region placement and reset on fallthrough, direct
-return, Result propagation, nested, break, and continue exits from a direct `&mut` Arena local,
+return, Result propagation, nested, break, and continue exits from a direct `ref mut` Arena local,
 cleanup drop events, checked `i32` negation, addition,
 subtraction, multiplication, division, remainder, matching-type bitwise operations, and signed or
 unsigned right shift are
@@ -124,14 +124,14 @@ resources over Fairy copy scalars or raw pointers with empty or pure nonempty dr
 resource-bearing tags whose payloads are exactly `i32` or direct admitted resources use private
 numeric structs whose size, alignment, and field offsets are asserted against target-layout results.
 Restricted user enums use private numeric tags and private union payload storage. Payloadless and
-named-field variants, exact exhaustive shallow matching, and admitted scalar/raw-pointer/flat-struct
+named-field variants, exact exhaustive shallow switching, and admitted scalar/raw-pointer/flat-struct
 payload fields are supported; nested user enums and built-in tags inside their payloads fail closed.
 Nonempty source `@repr(C)` structs over `u8`, `i32`, `u32`, `usize`, exact C scalars, admitted raw
 pointers, and acyclic nested `@repr(C)` records preserve their public C tag and field names, emit
 dependencies before users, and receive target-computed layout assertions. The same records may be
 foreign results by value; foreign aggregate parameters remain rejected. An exact direct-
-local `&T -> *T`, `&mut T -> *T`, or `&mut T -> *mut T` cast inside `unsafe` lowers to verified
-raw-address MIR and generated `&local`; the exact `&mut *mut void` output slot is included. Nested
+local `ref T -> ptr T`, `ref mut T -> ptr T`, or `ref mut T -> ptr mut T` cast inside `unsafe` lowers to verified
+raw-address MIR and generated C `&local`; the exact `ref mut ptr mut void` output slot is included. Nested
 tags, empty or non-`i32` resources, partial
 initialization, user drop effects, Region, retained safe borrows, raw dereference or arithmetic,
 arbitrary casts, by-value aggregate parameters, complete runtime, and general standard-library lowering fail with the provisional capability
@@ -219,10 +219,10 @@ cross-stream ordering. Toolchain, compilation, structure, timeout, capture-limit
 write failures remain compiler failures rather than program statuses. The current source-callable
 slice exposes only unsafe `fy_std_windows_stdout_write_all_v0`; stdin, stderr writes, arguments,
 Unicode console policy, and a safe public `std::io` wrapper remain absent.
-The checked-in output example confines that raw call to a safe local `&str` helper, supplies the
+The checked-in output example confines that raw call to a safe local `ref str` helper, supplies the
 length through the view's `usize` byte-count `.len`, and verifies status plus completed progress.
 The raw declaration, wrapper, and `main` propagate `@effects(console)`; `unsafe` remains an
-independent support-module boundary. `main` contains no raw pointer, foreign call, or `unsafe`, and a safe `&[u8]` helper separately
+independent support-module boundary. `main` contains no raw pointer, foreign call, or `unsafe`, and a safe `ref u8[]` helper separately
 proves byte-view internal-call transport.
 
 For the admitted foreign-call slice, `emit-c` writes a plain external prototype and call using the

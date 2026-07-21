@@ -85,9 +85,10 @@ follow-up decisions rather than implicit parts of that spelling migration.
 `struct` represents passive data. It has no implicit constructor or destructor. A struct is copyable only when all fields are copyable. It cannot contain a resource or a safe borrow in Stage 0. Hidden heap allocation and user-defined implicit conversion are not allowed.
 
 A restricted user `enum` may contain only inert copyable payload fields. A payloadless variant is
-constructed as `Enum::Variant`; a payload variant uses `Enum::Variant { field: value }`. Shallow
-matching names every payload field and covers every declared variant exactly once. Local enum paths
-and public enum paths through one import alias are implemented. Built-in `Option` and `Result` may
+constructed contextually as `.Variant`; a payload variant uses `.Variant { .field = value }`.
+Shallow switching names every payload field and covers every declared variant exactly once. The
+expected enum type resolves the leading-dot form; global best-fit variant lookup is forbidden.
+Built-in `Option` and `Result` may
 contain resources because the compiler owns active-variant move and drop behavior. General
 resource-bearing enums are deferred.
 
@@ -110,12 +111,12 @@ Whole-root `Live`, `Dead`, and rejected `MaybeLive` transitions, live replacemen
 
 ### Borrows and raw pointers
 
-- `&T` is a non-null shared read-only borrow.
-- `&mut T` is a non-null exclusive mutable borrow.
-- `*T` is a raw pointer. Inside `unsafe`, a direct borrow may erase its pointee to `*void` without
+- `ref T` is a non-null shared read-only borrow.
+- `ref mut T` is a non-null exclusive mutable borrow.
+- `ptr T` is a raw pointer. Inside `unsafe`, a direct borrow may erase its pointee to `ptr void` without
   strengthening mutability while MIR retains the concrete owner type. Null values, pointer
   arithmetic, every other pointee-changing cast, and dereference remain outside safe code.
-- Nullable borrows use `Option<&T>` rather than a nullable reference representation.
+- Nullable borrows use `Option<ref T>` rather than a nullable reference representation.
 
 The Stage 0 borrow model uses local last-use loans and whole-root overlap. It does not infer disjoint mutable field borrows or two-phase borrows. A returned safe borrow must have one unambiguous origin. Stored borrows, self-reference, and multiple-origin returns must use an index or generation handle, a redesigned API, a lexical region, or a narrow unsafe module.
 
@@ -155,20 +156,20 @@ not external effects. Full rules are in `docs/language/0008-effects-and-capabili
 - Error variants may carry payloads.
 - `?` is defined only for `Result` in Stage 0 and lowers to an explicit result branch.
 - Results must be handled, returned, or explicitly discarded.
-- Result variants are constructed only as `Result::Ok(expression)` and
-  `Result::Err(expression)` in a context with one known `Result<T, E>` type.
-- A shallow Result match contains exactly one `Result::Ok(binding)` arm and one
-  `Result::Err(binding)` arm; both arms produce one compatible type.
-- Stage 0 constructs Option with `Option::Some(expression)` or bare `Option::None`. A shallow
-  Option match contains exactly one `Option::Some(binding)` arm and one bare `Option::None` arm;
-  both arms produce one compatible type.
+- Result variants are constructed only as contextual `.ok(expression)` and `.err(expression)`
+  where one `Result<T, E>` type is known.
+- A shallow Result switch contains exactly one `case .ok(binding): { ... }` and one
+  `case .err(binding): { ... }`; both cases produce one compatible type.
+- Stage 0 constructs Option with contextual `.some(expression)` or bare `.none`. A shallow Option
+  switch contains exactly one `case .some(binding): { ... }` and one bare
+  `case .none: { ... }`; both cases produce one compatible type.
 - Exceptions and stack unwinding are not part of the language.
 - `break` and `continue` target only the nearest enclosing `while`; labelled or value-producing
   loop control is not part of Stage 0.
 
 Changing a value from `T` to `Option<T>` must not silently turn a normal function call into conditional execution. Stage 0 return types contain at most one safe-borrow leaf. Full control-flow behavior is defined in `docs/language/0004-results-traps-and-control-flow.md`.
 
-Result return, discard, propagation, local and parameter transfer, branch and loop must-use dataflow, `break` and `continue` edge obligations, non-Result `?`, and error-compatibility assertions are versioned in `spec/fixtures/result/manifest-v0.json`. Qualified Result syntax is fixed by ADR 0017, qualified Option syntax by ADR 0018, complete Stage 0 Result obligations by ADR 0019, and loop-control cleanup by ADR 0024. Scalar and resource-bearing built-in constructors and shallow matches execute through the MIR interpreter. Restricted user-enum construction, named inert payload extraction, and exhaustive multi-way matching execute through verified MIR and the interpreter; one C-emission fixture carries the same behavior into the native matrix. Whole resources execute construction, field reads, call moves, tagged-payload ownership transfer, active-variant cleanup, and source-linked drop events. User-defined resource-bearing enums remain excluded.
+Result return, discard, propagation, local and parameter transfer, branch and loop must-use dataflow, `break` and `continue` edge obligations, non-Result `?`, and error-compatibility assertions are versioned in `spec/fixtures/result/manifest-v0.json`. ADR 0017 and ADR 0018 record the superseded qualified spellings; ADR 0136 makes leading-dot Result, Option, and user-enum variants current. Complete Stage 0 Result obligations are fixed by ADR 0019 and loop-control cleanup by ADR 0024. Scalar and resource-bearing built-in constructors and shallow switches execute through the MIR interpreter. Restricted user-enum construction, named inert payload extraction, and exhaustive multi-way switches execute through verified MIR and the interpreter; one C-emission fixture carries the same behavior into the native matrix. Whole resources execute construction, field reads, call moves, tagged-payload ownership transfer, active-variant cleanup, and source-linked drop events. User-defined resource-bearing enums remain excluded.
 
 ## Safe-code semantics
 
@@ -179,13 +180,13 @@ Optimization level and backend must not change the meaning of safe code. Express
   literals, and `1 <= N <= 4096`. The ceiling is a provisional implementation guard, not a stable
   language or ABI limit. Elements evaluate once left to right, arrays copy across internal calls
   and results, `.len` returns exact canonical `N` as `usize` without a scan or trap, and a `usize`
-  index returns `T` or traps with `bounds`. A direct shared borrow of an admitted `[u8; N]` place
-  contextually becomes an immutable `&[u8]` with the same local origin and exact `N`, so existing
+  index returns `T` or traps with `bounds`. A direct shared borrow of an admitted `u8[N]` place
+  contextually becomes an immutable `ref u8[]` with the same local origin and exact `N`, so existing
   byte-view calls, metadata, indexing, and slicing can consume locally assembled bytes. A mutable
   safe-borrow local may switch owners after right-hand-side evaluation; Flow joins reachable
   branch and loop-edge origins and keeps every reachable loan generation live. Empty or repeated
   literals, other fields, nesting, mutation, general slicing, escaping local views, and foreign ABI
-  use remain deferred. Exact whole-array `&[T; N]` and `&mut [T; N]` internal parameters are
+  use remain deferred. Exact whole-array `ref T[N]` and `ref mut T[N]` internal parameters are
   admitted without creating a slice or public representation.
 - Division by zero, signed minimum divided by negative one, invalid shifts, and ordinary integer overflow trap.
 - Matching-type shifts accept `i32`, `u8`, `u32`, or `usize`. Right shift is arithmetic for `i32`
@@ -227,7 +228,7 @@ C is a boundary contract rather than the default internal representation.
   distinct from coincidentally represented Fairy scalars; C-scalar literals, operators,
   conversions, and raw pointers remain deferred. Exact C-scalar fields are admitted only in
   nonempty `@repr(C)` structs; an acyclic nested field is admitted only when its type is also
-  `@repr(C)`. Opaque `*void` and `*mut void` are admitted without dereference or conversion
+  `@repr(C)`. Opaque `ptr void` and `ptr mut void` are admitted without dereference or conversion
   semantics. One pointer-to-opaque-pointer output-slot shape is admitted without opening arbitrary
   raw-pointer nesting.
 - Foreign calls and generated raw bindings are unsafe by default and use raw pointers rather than safe references.
@@ -246,10 +247,10 @@ Compiler intrinsics, the thin runtime, and standard-library APIs are separate bo
 
 Stage 0 allocation supports only explicit `SystemHeap` and lexical `Arena` or `Region`. Allocation is fallible, zero-size behavior is normalized by Fairy C, and no hidden default allocator or user allocator protocol exists.
 
-`Buffer` is the only growable owned collection. `Vec<T>` is deferred with user generics. Positive scalar fixed arrays are compiler-owned inert values but are not growable collections or public ABI records. `[u8]`, `str`, and `CStr` are compiler-known unsized views; `String` and `CString` are owned resources. Compiler-owned `b"..."` literals implement immutable static `&[u8]` construction and private generated-C transport. Safe borrowed `&[u8]` and `&str` views expose `.len` as a `usize` byte count and `.is_empty` as the exact zero-length `bool` by reading existing metadata; neither access scans, allocates, calls, traps, or counts Unicode characters. Immutable `&[u8]` additionally supports read-only `usize` indexing with a `u8` result and end-exclusive slicing with an immutable `&[u8]` result. Slice starts and ends may be omitted, normalizing to zero and the retained receiver length without re-evaluating the receiver. Written operands evaluate once left to right and trap with `bounds` before access or pointer derivation when their bounds fail; slicing preserves the receiver's borrow origin. Mutable fixed scalar-array places support checked exact-type element assignment. A direct contextual `&mut` borrow of a mutable fixed `[u8; N]` place may produce `&mut [u8]` for an exact internal parameter. It preserves the exclusive origin, exposes canonical `.len`, supports checked `u8` reads and stores, and may derive `*mut u8` only inside unsafe code. Indexed assignment checks the receiver and `usize` index before evaluating its right-hand side, so an invalid place traps without value-side effects. It does not add mutable slicing, resizing, temporary borrowing, retained foreign pointers, or public ABI. The initial Linux `File` API accepts `&CStr`, preserves partial I/O, and uses a consuming non-retried Linux close contract. A separate Windows component plus example-level safe FY wrapper stores inline `HANDLE` state, maps typed errors and filesystem effects, preserves partial counts, syncs explicitly, consumes state before one `CloseHandle` attempt, and reads through the restricted mutable byte view. It is target-bound evidence rather than a stable `std::fs` API. Portable paths, embedded support, and resource-aware arenas remain deferred.
+`Buffer` is the only growable owned collection. `Vec<T>` is deferred with user generics. Positive scalar fixed arrays are compiler-owned inert values but are not growable collections or public ABI records. `u8[]`, `str`, and `CStr` are compiler-known unsized views; `String` and `CString` are owned resources. Compiler-owned `b"..."` literals implement immutable static `ref u8[]` construction and private generated-C transport. Safe borrowed `ref u8[]` and `ref str` views expose `.len` as a `usize` byte count and `.is_empty` as the exact zero-length `bool` by reading existing metadata; neither access scans, allocates, calls, traps, or counts Unicode characters. Immutable `ref u8[]` additionally supports read-only `usize` indexing with a `u8` result and end-exclusive slicing with an immutable `ref u8[]` result. Slice starts and ends may be omitted, normalizing to zero and the retained receiver length without re-evaluating the receiver. Written operands evaluate once left to right and trap with `bounds` before access or pointer derivation when their bounds fail; slicing preserves the receiver's borrow origin. Mutable fixed scalar-array places support checked exact-type element assignment. A direct contextual `ref mut` borrow of a mutable fixed `u8[N]` place may produce `ref mut u8[]` for an exact internal parameter. It preserves the exclusive origin, exposes canonical `.len`, supports checked `u8` reads and stores, and may derive `ptr mut u8` only inside unsafe code. Indexed assignment checks the receiver and `usize` index before evaluating its right-hand side, so an invalid place traps without value-side effects. It does not add mutable slicing, resizing, temporary borrowing, retained foreign pointers, or public ABI. The initial Linux `File` API accepts `ref CStr`, preserves partial I/O, and uses a consuming non-retried Linux close contract. A separate Windows component plus example-level safe FY wrapper stores inline `HANDLE` state, maps typed errors and filesystem effects, preserves partial counts, syncs explicitly, consumes state before one `CloseHandle` attempt, and reads through the restricted mutable byte view. It is target-bound evidence rather than a stable `std::fs` API. Portable paths, embedded support, and resource-aware arenas remain deferred.
 
 An independent example-level owned-text wrapper exposes move-only Fairy `String` and `CString`
-resources, source `Result` errors, scalar length access, owner-bound `&str` and `&CStr` views, and
+resources, source `Result` errors, scalar length access, owner-bound `ref str` and `ref CStr` views, and
 verified drop cleanup over alias-safe opaque C storage bridges. Two exact unsafe compiler built-ins
 accept a shared owner borrow, raw storage pointer, and `usize` extent; the returned view inherits
 only the owner's origin. Safe wrappers confine those operations, and Flow rejects a by-value owner
@@ -327,11 +328,11 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   `i32`, `u32`, `usize`, all sixteen exact TargetSpec C scalars, admitted raw pointers including
   opaque `void`, and nested types that are themselves `@repr(C)`. Dependencies are emitted before
   their users; recursive value types and broader contracted field families remain fail-closed.
-- The executable raw-address slice accepts only an exact direct-local `&T -> *T`, `&mut T -> *T`,
-  or `&mut T -> *mut T` cast inside `unsafe`. AST keeps the target type separate, typed HIR keeps
+- The executable raw-address slice accepts only an exact direct-local `ref T -> ptr T`,
+  `ref mut T -> ptr T`, or `ref mut T -> ptr mut T` cast inside `unsafe`. AST keeps the target type separate, typed HIR keeps
   unsafe scope, MIR verifies pointee/mutability/provenance, generated C emits `&local`, and the
   interpreter fails closed instead of inventing an address. The admitted `T` surface now includes
-  opaque raw pointers, enabling only the exact `&mut *mut void -> *mut *mut void` output slot needed
+  opaque raw pointers, enabling only the exact `ref mut ptr mut void -> ptr mut ptr mut void` output slot needed
   by the Arena source probe.
 - An `unsafe extern C fn` may keep its Fairy name as the external symbol or use exactly one
   nonempty `@link_name("symbol")`. AST preserves raw and cooked attribute evidence, typed HIR and
@@ -461,11 +462,11 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   validator through automatic used-symbol linkage. It additionally records
   `cStringLiteralSourceCallExecutions` when generated source-owned `fairy\0` storage is read by a C
   callee and `cStringLiteralBuildSmokeExecutions` when the ordinary product build carries nonempty
-  compiler-owned `&CStr` storage into an executed binary. It additionally records
-  `byteStringLiteralSourceCallExecutions` when a generated private `&[u8]` view preserves five exact
+  compiler-owned `ref CStr` storage into an executed binary. It additionally records
+  `byteStringLiteralSourceCallExecutions` when a generated private `ref u8[]` view preserves five exact
   `fairy` bytes and its length before C reads the data, and `byteStringLiteralBuildSmokeExecutions`
   when the ordinary product build carries the same view path into an executed binary. It additionally
-  records `utf8StringLiteralSourceCallExecutions` when a generated private `&str` view preserves the
+  records `utf8StringLiteralSourceCallExecutions` when a generated private `ref str` view preserves the
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
@@ -507,7 +508,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   pointer-width raw handle plus `u32` state, then calls exact project-owned SystemHeap allocate/deallocate,
   Buffer initialize/zeroed-resize/drop, Arena initialize/Region begin/zeroed allocation/reset/Arena
   drop, CStr validation, String copy/view/append/drop, CString from-text/view/drop, and
-  `fy_std_text_utf8_valid_v0(*u8, usize) -> u32` C
+  `fy_std_text_utf8_valid_v0(ptr u8, usize) -> u32` Fairy foreign declaration backed by the C
   implementations before the generated PE can return 42. The heap crossing requires an eight-byte
   block, observes its size and alignment, frees it, and observes normalized zero state. The Buffer
   crossing selects the Buffer-to-SystemHeap dependency closure, observes capacity eight and length
@@ -528,7 +529,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   present. A separate-translation-unit native probe exercises normal lifecycle, three-byte reads,
   EOF, repeated close, forced invalid-handle close failure, and repeated drop at both local MSVC
   profiles after COFF, PE, and unwind inspection. A second checked-in two-module FY example now
-  wraps this raw component in an effect-checked move-only File, typed errors, `read(&mut [u8])`
+  wraps this raw component in an effect-checked move-only File, typed errors, `read(ref mut u8[])`
   backed by fixed-array storage, consuming close, and implicit drop, then returns 42 at both MSVC profiles. This is an
   example-level Stage 0 boundary rather than a stable public standard-library package. The
   SystemHeap path fixes its fundamental-alignment ceiling at the documented
@@ -546,12 +547,12 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - `experimental exec-target` uses the same validated temporary Windows target but forwards its
   separated stdout and stderr byte sequences without a compiler receipt and preserves the full
   32-bit program status. One target-only unsafe
-  `fy_std_windows_stdout_write_all_v0(*u8, usize) -> { status: u32, written: usize }` call loops over
+  `fy_std_windows_stdout_write_all_v0(ptr u8, usize) -> { status: u32, written: usize }` call loops over
   `WriteFile`, reports partial progress on failure, normalizes empty input, rejects nonempty null
   input, and is admitted only by the Windows support resolver. The raw declaration, safe local
-  `&str` helper, and `main` each carry `@effects(console)`, while the independent `unsafe` boundary
+  `ref str` helper, and `main` each carry `@effects(console)`, while the independent `unsafe` boundary
   remains confined to the support module. The wrapper validates status and progress and keeps raw
-  pointers, foreign calls, and `unsafe` out of `main`. A second pure `&[u8]` helper proves byte-view parameter
+  pointers, foreign calls, and `unsafe` out of `main`. A second pure `ref u8[]` helper proves byte-view parameter
   transport. This is executable process I/O and local unsafe containment, not
   a safe or portable `std::io` package, Unicode console policy, stdin, stderr writing, arguments, or
   target maturity evidence.
