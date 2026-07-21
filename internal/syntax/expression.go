@@ -191,7 +191,24 @@ func (p *parser) parsePrimary(allowRecord bool) NodeID {
 	if text == "." {
 		p.advance()
 		name := p.parseName()
-		return p.addNode(KindPath, start, nil, "."+name, "")
+		path := p.addNode(KindPath, start, nil, "."+name, "")
+		if allowRecord && p.match("{") {
+			children := []NodeID{path}
+			for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
+				fieldStart := p.currentFullIndex()
+				p.expect(".")
+				field, fieldSpan := p.parseNameWithSpan()
+				p.expect("=")
+				value := p.parseExpression(0, true)
+				children = append(children, p.addNamedNode(KindField, fieldStart, []NodeID{value}, field, "", fieldSpan))
+				if !p.match(",") {
+					break
+				}
+			}
+			p.expect("}")
+			return p.addNode(KindRecord, start, children, "."+name, "")
+		}
+		return path
 	}
 	if token.Kind == lexer.Identifier {
 		pathID, value, _ := p.pathNode()
@@ -281,8 +298,11 @@ func (p *parser) parseSwitchPattern() NodeID {
 	} else if p.match("{") {
 		for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 			fieldStart := p.currentFullIndex()
+			p.match(".")
 			field := p.parseName()
-			p.expect(":")
+			if !p.match("=") {
+				p.expect(":")
+			}
 			binding := p.parseName()
 			children = append(children, p.addNode(KindField, fieldStart, nil, field, binding))
 			if !p.match(",") {

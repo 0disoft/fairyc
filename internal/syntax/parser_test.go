@@ -281,6 +281,28 @@ func TestParseOwnerQualifiedFunction(t *testing.T) {
 	}
 }
 
+func TestParseContextualUserEnumVariants(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nenum Message { Empty; Pair { i32 left; i32 right; }; }\nfn Message make() { return .Pair { .left = 20, .right = 22 }; }\nfn i32 score(Message value) { return switch (value) { case .Empty: { 0 } case .Pair { .left = first, .right = second }: { first + second } }; }\n")
+	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	var contextualRecords int
+	var contextualPatterns int
+	for _, node := range tree.Nodes {
+		if node.Kind == KindRecord && node.Text == ".Pair" {
+			contextualRecords++
+		}
+		if node.Kind == KindPattern && node.Text == ".Pair" {
+			contextualPatterns++
+		}
+	}
+	if contextualRecords != 1 || contextualPatterns != 1 {
+		t.Fatalf("contextual records = %d, patterns = %d", contextualRecords, contextualPatterns)
+	}
+}
+
 func TestNestedTypeCloseChargesContextualTokenBudget(t *testing.T) {
 	t.Parallel()
 	input := []byte("module main;\nfn wrap(value: Token) -> Option<Option<Token>> { value }\n")

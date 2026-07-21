@@ -545,6 +545,27 @@ func (a *analyzer) resolveMatch(module *moduleScope, scope *lexicalScope, expres
 				a.resolveExpression(module, armScope, body)
 				continue
 			}
+			if strings.HasPrefix(pattern.Text, ".") && !isBuiltinVariantPath(pattern.Text) {
+				for _, field := range pattern.Children[1:] {
+					if field == nil || field.Kind != syntax.KindField || field.Cooked == "" {
+						continue
+					}
+					if previous := armScope.names[field.Cooked]; previous != nil {
+						a.addDiagnostic("E0102", span(module.file.Path, field.Span), RelatedSpan{
+							Role: "previous-declaration", Span: span(previous.source, previous.declaration),
+						})
+						continue
+					}
+					value := &symbol{
+						id: a.allocateSymbol(), packageID: module.key.packageID, kind: "match-binding", name: field.Cooked,
+						module: module.file.Module.Path, source: module.file.Path, declaration: field.Span,
+					}
+					armScope.names[field.Cooked] = value
+					a.resolved[field] = value
+				}
+				a.resolveExpression(module, armScope, body)
+				continue
+			}
 		}
 		if pattern == nil || pattern.Kind != syntax.KindPattern || !isBuiltinVariantPath(pattern.Text) {
 			a.resolveExpression(module, armScope, pattern)

@@ -457,6 +457,8 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 			actual = symbol.typ
 		} else if variant, option := optionVariantPath(expression.Text); option {
 			actual = c.checkOptionPath(expression, result, expected, variant)
+		} else if strings.HasPrefix(expression.Text, ".") {
+			actual = c.checkContextualEnumPath(expression, result, expected)
 		} else if isResultVariantPath(expression.Text) {
 			c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "Result variant used without construction or pattern")
 			actual = hir.TypeInvalid
@@ -495,7 +497,7 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 	case syntax.KindWhile:
 		actual = c.checkWhile(expression, result)
 	case syntax.KindRecord:
-		actual = c.checkRecord(expression, result)
+		actual = c.checkRecord(expression, result, expected)
 	case syntax.KindFieldExpr:
 		actual = c.checkField(expression, result)
 	case syntax.KindBlock:
@@ -770,12 +772,15 @@ func (c *typeChecker) checkWhile(expression *ast.Expression, result *hir.Express
 	return hir.TypeVoid
 }
 
-func (c *typeChecker) checkRecord(expression *ast.Expression, result *hir.Expression) hir.Type {
+func (c *typeChecker) checkRecord(expression *ast.Expression, result *hir.Expression, expected hir.Type) hir.Type {
 	if len(expression.Children) == 0 {
 		return hir.TypeInvalid
 	}
 	if reference, found := c.analyzer.enumVariantPaths[expression.Children[0]]; found {
 		return c.checkEnumRecord(expression, result, reference)
+	}
+	if path := expression.Children[0]; path != nil && strings.HasPrefix(path.Text, ".") {
+		return c.checkContextualEnumRecord(expression, result, expected)
 	}
 	constructor := c.analyzer.resolved[expression.Children[0]]
 	if constructor != nil && constructor.typ == hir.TypeRegion {
@@ -818,6 +823,69 @@ func (c *typeChecker) checkRecord(expression *ast.Expression, result *hir.Expres
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "resource construction with missing fields")
 	}
 	return constructor.typ
+}
+
+func (c *typeChecker) checkContextualEnumPath(expression *ast.Expression, result *hir.Expression, expected hir.Type) hir.Type {
+	info := c.analyzer.enumTypes[expected]
+	name := strings.TrimPrefix(expression.Text, ".")
+	if info == nil || name == "" {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "contextual enum variant without an expected enum type")
+		return hir.TypeInvalid
+	}
+	variant, found := info.variants[name]
+	if !found {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "unknown contextual enum variant "+name)
+		return hir.TypeInvalid
+	}
+	if len(variant.orderedFields) != 0 {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "enum payload variant used without record construction")
+		return hir.TypeInvalid
+	}
+	result.Kind = "enum-variant"
+	result.Symbol = info.symbol.id
+	result.Variant = name
+	return expected
+}
+
+func (c *typeChecker) checkContextualEnumRecord(expression *ast.Expression, result *hir.Expression, expected hir.Type) hir.Type {
+	if len(expression.Children) == 0 {
+		return hir.TypeInvalid
+	}
+	info := c.analyzer.enumTypes[expected]
+	name := strings.TrimPrefix(expression.Children[0].Text, ".")
+	if info == nil || name == "" {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "contextual enum construction without an expected enum type")
+		return hir.TypeInvalid
+	}
+	variant, found := info.variants[name]
+	if !found {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "unknown contextual enum variant "+name)
+		return hir.TypeInvalid
+	}
+	result.Kind = "enum-variant"
+	result.Symbol = info.symbol.id
+	result.Variant = name
+	seen := make(map[string]struct{}, len(expression.Children)-1)
+	for _, fieldExpression := range expression.Children[1:] {
+		field, declared := variant.fields[fieldExpression.Text]
+		if !declared || len(fieldExpression.Children) != 1 {
+			c.analyzer.addUnsupported(c.module.file.Path, fieldExpression.Span, "unknown or malformed enum payload field "+fieldExpression.Text)
+			continue
+		}
+		if _, duplicate := seen[fieldExpression.Text]; duplicate {
+			c.analyzer.addUnsupported(c.module.file.Path, fieldExpression.Span, "duplicate enum payload field "+fieldExpression.Text)
+			continue
+		}
+		seen[fieldExpression.Text] = struct{}{}
+		value, actual := c.checkExpression(fieldExpression.Children[0], field.typ)
+		result.Children = appendExpression(result.Children, value)
+		result.Fields = append(result.Fields, fieldExpression.Text)
+		c.requireType("E1006", span(c.module.file.Path, fieldExpression.Children[0].Span), actual, field.typ, field.declaration)
+	}
+	if len(seen) != len(variant.fields) {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "enum payload construction with missing fields")
+	}
+	return expected
 }
 
 func (c *typeChecker) checkEnumPath(expression *ast.Expression, result *hir.Expression, reference enumVariantReference) hir.Type {
@@ -1441,12 +1509,15 @@ func (c *typeChecker) checkEnumMatch(expression *ast.Expression, result *hir.Exp
 			return hir.TypeInvalid
 		}
 		pattern := armExpression.Children[0]
-		reference, found := c.analyzer.enumVariantPaths[pattern]
-		if !found || reference.enumeration != info.symbol || reference.variant == nil {
+		variantName := strings.TrimPrefix(pattern.Text, ".")
+		if reference, found := c.analyzer.enumVariantPaths[pattern]; found && reference.enumeration == info.symbol && reference.variant != nil {
+			variantName = reference.variant.Name
+		}
+		variant, found := info.variants[variantName]
+		if !found {
 			c.analyzer.addUnsupported(c.module.file.Path, pattern.Span, "pattern from a different or unresolved enum")
 			return hir.TypeInvalid
 		}
-		variant := info.variants[reference.variant.Name]
 		if _, duplicate := seen[variant.name]; duplicate {
 			c.analyzer.addUnsupported(c.module.file.Path, pattern.Span, "duplicate enum match variant")
 			return hir.TypeInvalid

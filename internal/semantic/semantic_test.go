@@ -552,6 +552,37 @@ fn i32 main() {
 	}
 }
 
+func TestAnalyzeContextualUserEnumConstructionAndSwitch(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+enum Message {
+    Empty;
+    Pair { i32 left; i32 right; };
+}
+fn Message make() { return .Pair { .left = 20, .right = 22 }; }
+fn i32 score(Message value) {
+    return switch (value) {
+        case .Empty: { 0 }
+        case .Pair { .left = first, .right = second }: { first + second }
+    };
+}
+fn i32 main() { return score(make()); }
+`,
+	})
+	assertCleanTypeResult(t, result)
+	makeFunction := result.HIR.Modules[0].Functions[0]
+	constructed := makeFunction.Body.Statements[0].Expression
+	if constructed == nil || constructed.Kind != "enum-variant" || constructed.Variant != "Pair" || !slices.Equal(constructed.Fields, []string{"left", "right"}) {
+		t.Fatalf("constructed enum = %+v", constructed)
+	}
+	score := result.HIR.Modules[0].Functions[1]
+	lowered := score.Body.Statements[0].Expression
+	if lowered == nil || lowered.Kind != "match" || len(lowered.Arms) != 2 || lowered.Arms[0].Variant != "Empty" || lowered.Arms[1].Variant != "Pair" {
+		t.Fatalf("lowered switch = %+v", lowered)
+	}
+}
+
 func TestAnalyzePreservesReprCStructAndTypesAggregateExpressions(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{
