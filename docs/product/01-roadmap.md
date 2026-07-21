@@ -420,6 +420,8 @@ spelling and package-aware build/run still remain.
   accepted manifest, workspace loader, and lockfile library.
 - Wire whole-package reuse into package compilation, then adopt persistent content-addressed storage
   and default limits only from measured clean/warm workload evidence.
+- ADR 0146 explicitly defers persistent storage until compiler-owned artifact bytes, package-aware
+  Windows builds, and configured cold/warm measurements satisfy that evidence gate.
 - Stabilize the minimal `fairyc check`, `build`, `run`, `test`, `emit`, `explain`, and `targets` contracts.
 - Move to function-level reuse only when measured package rebuild or storage evidence justifies the complexity.
 

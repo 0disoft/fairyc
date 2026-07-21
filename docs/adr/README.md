@@ -155,6 +155,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0143-local-exact-project-manifest-v1.md`: strict `fairy.toml`, exact local-only dependency semantics, and an isolated pinned TOML adapter.
 - `0144-local-workspace-loader-v1.md`: explicit local members, fail-closed filesystem discovery, exact path dependencies, and feature-distinct graph construction.
 - `0145-generated-lockfile-v1.md`: canonical JSON resolved graph, strict identity revalidation, stale detection, and atomic replacement.
+- `0146-defer-persistent-package-cache.md`: evidence gate that prevents speculative disk cache formats and unmeasured default limits.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

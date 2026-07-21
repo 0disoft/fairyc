@@ -57,3 +57,8 @@ The store is process-local. Persistence, cross-process locking, crash-safe write
 compiler builds, default limits, command-line inspection, and remote transport remain unimplemented.
 Those features must preserve the v1 miss/fallback behavior but require measured policy and a separate
 storage-format decision.
+
+ADR 0146 records the current evidence result: persistence is deliberately deferred. No real
+typed-HIR, MIR, or object byte codec exists, no package-aware object is produced, and no configured
+cold/warm measurement intent owns comparable evidence. Fixture payload sizes cannot justify a disk
+format or default budget.

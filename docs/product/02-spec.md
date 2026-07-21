@@ -592,6 +592,10 @@ SDK standard-library selection remain separate decisions.
 binds resolved imports, runs package-aware semantic, Flow, MIR lowering, and verification, and either
 refreshes the canonical lock or requires an exact no-write `--locked` match. It emits no native code.
 
+ADR 0146 rejects speculative persistent caching at this point. The workspace path produces no
+compiler-owned serialized HIR/MIR/object artifact and has no configured comparable cold/warm
+measurement, so disk format, defaults, and cleanup policy remain `UNDECIDED`.
+
 The resolved-graph paragraph's separation from public manifest syntax describes fixture ownership,
 not current product status: ADR 0143 owns syntax, ADR 0144 owns local workspace I/O, and ADR 0145
 owns generated lock bytes independently. SDK selection, public lock-update policy, registry, and
