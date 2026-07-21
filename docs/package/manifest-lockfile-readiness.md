@@ -1,6 +1,6 @@
 # Manifest and lockfile readiness audit
 
-- Status: Manifest, local workspace loader, and lockfile format accepted; SDK and CLI policy remain
+- Status: Local-exact manifest, workspace, lockfile, SDK injection, and experimental lock modes accepted
 - Date: 2026-07-21
 - Product source: `docs/product/02-spec.md`
 - Resolved graph source: `docs/package/package-graph-v0.md`
@@ -14,7 +14,9 @@ human-authored `fairy.toml` v1 byte/parser and local-exact declaration semantics
 explicit member loading, fail-closed path/source discovery, exact dependency consistency, local
 source identity, and root-reachable feature-distinct graph construction. ADR 0145 now fixes a
 separate canonical generated `fairy.lock` v1 with identity revalidation, stale comparison, and
-atomic replacement. SDK standard-library selection and public CLI lock-update policy remain.
+atomic replacement. ADR 0147 fixes exact compiler-bundled SDK standard-library injection and its
+closed lock record. `experimental check-workspace` supplies ordinary refresh and no-write
+`--locked` behavior; stable package command spelling remains open.
 
 ## Facts already fixed
 
@@ -35,18 +37,18 @@ Any future manifest/lockfile design must preserve these existing contracts:
 - package dependency edges are acyclic after exact-instance deduplication; cycles reject before
   module lookup under ADR 0142.
 
-## Decisions that are still missing
+## Remaining package-manager decisions
 
 | Area | Required decision | Why code cannot guess it |
 | --- | --- | --- |
-| Standard library | how compiler/SDK selection injects and locks its package | Host installation paths must not become semantic identity |
-| Lock updates | frozen mode, ordinary update mode, stale local paths, merge policy | Silent rewrite would damage reproducibility; never rewriting would hurt local work |
+| SDK evolution | versioning and capability policy for any surface beyond opaque `std::alloc::Arena` | Bundled bytes cannot silently become a broader public library contract |
+| Stable lock commands | promotion path from experimental ordinary/`--locked` behavior | Stable spelling, diagnostics, and compatibility need an explicit CLI contract |
 
 ## Recommended Stage 0 local-exact profile
 
 The smallest coherent profile is intentionally less ambitious than Cargo, Go modules, or npm:
 
-1. Use the accepted `fairy.toml` v1 project manifest and one future generated `fairy.lock`.
+1. Use the accepted `fairy.toml` v1 project manifest and generated `fairy.lock` v1.
 2. Admit only workspace-relative path dependencies in the first implementation. Reject absolute
    paths, root escape, symlinks that escape, Git, URL, archive, and registry sources. The compiler
    performs no network access.
@@ -79,9 +81,10 @@ discovery, vendoring commands, and package publication.
 
 ## Acceptance evidence retained for SDK and CLI integration
 
-- ADR 0143 accepts the manifest parser, ADR 0144 accepts local resolution, and ADR 0145 accepts lock bytes;
+- ADR 0143 accepts the manifest parser, ADR 0144 accepts local resolution, ADR 0145 accepts lock
+  bytes, and ADR 0147 accepts compiler-bundled SDK selection;
 - existing positive fixtures cover one package, explicit workspace members, direct path
-  dependencies, and feature-distinct instances; exact standard-library injection remains required;
+  dependencies, feature-distinct instances, and exact standard-library injection;
 - existing negative fixtures cover unknown/duplicate fields, path escape, absolute paths,
   symlinks, duplicate UID, module ambiguity, dependency cycles, and unsorted/duplicate features;
   stale lock and contradictory `PackageInstanceId` lock records are covered by lock unit tests;

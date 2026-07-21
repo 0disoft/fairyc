@@ -7,6 +7,9 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/0disoft/fairyc/internal/packagegraph"
+	"github.com/0disoft/fairyc/internal/sdkstdlib"
 )
 
 func TestLoadBuildsFeatureDistinctLocalGraph(t *testing.T) {
@@ -50,6 +53,39 @@ features = []
 	}
 	if len(featureSets) != 2 || !slices.Equal(featureSets[0], []string{"base"}) || len(featureSets[1]) != 0 {
 		t.Fatalf("feature sets = %v", featureSets)
+	}
+}
+
+func TestLoadInjectsExactCompilerBundledStandardLibrary(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writePackage(t, root, ".", rootManifest(""), map[string]string{
+		"src/main.fy": "module main;\n\nimport std::alloc as alloc;\n\nfn i32 inspect(ref mut alloc::Arena arena) {\n    return 1;\n}\n",
+	})
+
+	workspace, err := Load(root)
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+	if len(workspace.Packages) != 2 || len(workspace.Graph.Nodes) != 2 || len(workspace.Graph.Dependencies) != 1 {
+		t.Fatalf("workspace sizes = packages %d, nodes %d, dependencies %d", len(workspace.Packages), len(workspace.Graph.Nodes), len(workspace.Graph.Dependencies))
+	}
+	standardLibrary, found := workspace.Package(sdkstdlib.PackagePath)
+	if !found || standardLibrary.SourceKind != SourceKindSDK || standardLibrary.SDKIdentity != sdkstdlib.SDKIdentity ||
+		standardLibrary.RuntimeABI != sdkstdlib.RuntimeABI || standardLibrary.Directory != "" || standardLibrary.SourceRoot != "" ||
+		standardLibrary.Manifest.Package.UID != sdkstdlib.PackageUID || standardLibrary.Manifest.Package.Version != sdkstdlib.Version ||
+		len(standardLibrary.Sources) != 1 || standardLibrary.Sources[0].Module.Path != "std::alloc" {
+		t.Fatalf("standard library = %+v, found = %v", standardLibrary, found)
+	}
+	if workspace.Graph.Nodes[1].Role != packagegraph.RoleStandardLibrary || workspace.Graph.Nodes[1].Identity.SourceIdentity != sdkstdlib.SourceIdentity(sdkstdlib.SDKIdentity, sdkstdlib.RuntimeABI, standardLibrary.Digest) {
+		t.Fatalf("standard library node = %+v", workspace.Graph.Nodes[1])
+	}
+	edge := workspace.Graph.Dependencies[0]
+	if edge.Owner != "pkg:root[]" || edge.Binding != "stdlib" || edge.Target != "sdk:stdlib[]" {
+		t.Fatalf("standard library edge = %+v", edge)
+	}
+	if len(workspace.Resolution.Lookups) != 1 || workspace.Resolution.Lookups[0].ImportPath != "std::alloc" || !slices.Equal(workspace.Resolution.Lookups[0].ProviderMembers, []string{"sdk:stdlib[]"}) {
+		t.Fatalf("standard library lookups = %+v", workspace.Resolution.Lookups)
 	}
 }
 
@@ -117,6 +153,31 @@ func TestLoadRejectsWorkspaceContractFailures(t *testing.T) {
 			name: "overlapping members", reason: ReasonOverlappingMember,
 			setup: func(t *testing.T, root string) {
 				writePackage(t, root, ".", rootManifest("\n[workspace]\nmembers = [\"libs\", \"libs/net\"]\n"), validRootSource())
+			},
+		},
+		{
+			name: "reserved standard library uid", reason: ReasonStandardLibrary,
+			setup: func(t *testing.T, root string) {
+				writePackage(t, root, ".", strings.Replace(rootManifest(""), `uid = "example.app"`, `uid = "fairyc.std"`, 1), validRootSource())
+			},
+		},
+		{
+			name: "reserved standard library dependency binding", reason: ReasonStandardLibrary,
+			setup: func(t *testing.T, root string) {
+				writePackage(t, root, ".", rootManifest("\n[workspace]\nmembers = [\"libs/net\"]\n\n[dependencies.stdlib]\npath = \"libs/net\"\nversion = \"1.0.0\"\nfeatures = []\n"), validRootSource())
+				writePackage(t, root, "libs/net", memberManifest("example.libs.net", "net", "1.0.0", "fairyc-language/0", ""), validMemberSource("net"))
+			},
+		},
+		{
+			name: "reserved standard library module namespace", reason: ReasonStandardLibrary,
+			setup: func(t *testing.T, root string) {
+				writePackage(t, root, ".", rootManifest(""), map[string]string{"src/std/alloc.fy": "module std::alloc;\n"})
+			},
+		},
+		{
+			name: "missing standard library module", reason: ReasonPackageGraph,
+			setup: func(t *testing.T, root string) {
+				writePackage(t, root, ".", rootManifest(""), map[string]string{"src/main.fy": "module main;\nimport std::bytes as bytes;\n"})
 			},
 		},
 	}

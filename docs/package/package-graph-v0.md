@@ -42,7 +42,7 @@ initialization, partial-interface, or cache semantics to package cycles.
 
 The standard library is a normal explicit package instance with the fixture role `standard-library`. It is injected as a direct dependency when a fixture needs `std::*`. There is no implicit prelude, magical host installation lookup, or type created merely because a user package declares the same name.
 
-The initial package fixture proves that `std::alloc` belongs to the declared standard-library instance. The dedicated `pass.package.stdlib-arena-region` case additionally exports an opaque `Arena` resource used as `ref mut std::alloc::Arena` by Region v1. It deliberately defines no constructor, capacity operation, representation promise, or public standard-library package metadata. A package-graph pass says resolution succeeds even when a later Flow-owned Region assertion intentionally rejects the source.
+The initial package fixture proves that `std::alloc` belongs to the declared standard-library instance. The dedicated `pass.package.stdlib-arena-region` case additionally exports an opaque `Arena` resource used as `ref mut std::alloc::Arena` by Region v1. ADR 0147 now gives the local workspace path the same explicit shape through one exact compiler-bundled SDK instance and a reserved direct `stdlib` edge. It deliberately defines no constructor, capacity operation, representation promise, or broader public standard-library API. A package-graph pass says resolution succeeds even when a later Flow-owned Region assertion intentionally rejects the source.
 
 ## Graph validation
 
@@ -87,9 +87,9 @@ MIR lowering, and MIR verification. This proves compiler-pipeline consumption of
 it still does not prove package discovery, a package-aware CLI, or backend support for package names.
 
 This fixture path remains compiler-side consumption of an already-resolved graph. The separately
-owned project-manifest parser and local workspace loader now construct the same reusable graph under
-ADRs 0143 and 0144. None of those paths proves a package solver, lockfile, source downloader,
-registry, persistent cache, or stable diagnostic surface.
+owned project-manifest parser, local workspace loader, generated lockfile, and compiler-bundled SDK
+now construct and preserve the same reusable graph under ADRs 0143 through 0147. None of those paths
+proves a package solver, source downloader, registry, persistent cache, or stable diagnostic surface.
 
 ## Deferred surface
 
@@ -99,6 +99,6 @@ cache storage remain separate decisions. The local-exact human manifest is owned
 package cycles are rejected by ADR 0142. `PackageInstanceId` v1 and public-interface hash v1 are
 fixed independently and do not settle the remaining formats.
 
-`manifest-lockfile-readiness.md` audits the remaining lock and SDK-selection gaps. ADR 0143
-authorizes the strict `fairy.toml` byte parser and ADR 0144 turns explicit local paths into a
-filesystem-validated graph. No current code writes `fairy.lock`.
+`manifest-lockfile-readiness.md` records the accepted local-exact profile. ADR 0143 authorizes the
+strict `fairy.toml` byte parser, ADR 0144 turns explicit local paths into a filesystem-validated
+graph, ADR 0145 defines `fairy.lock`, and ADR 0147 fixes exact SDK injection.

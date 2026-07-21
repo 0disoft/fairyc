@@ -29,7 +29,7 @@ prototype and do not define stable language limits.
 
 ## Deterministic output
 
-Each loaded package retains:
+Each local package retains:
 
 - canonical workspace-relative package path (`.` for the root);
 - parsed manifest;
@@ -44,8 +44,15 @@ resolution supplies full PackageInstanceId classes, cycle rejection, and direct-
 `SemanticInput` assigns disposable build-local package numbers and binds every resolved import to
 its exact provider for `compiler.CheckPackages`.
 
+When any root-reachable package imports `std` or `std::*`, ADR 0147 injects one exact compiler-bundled
+SDK package as a direct `stdlib` dependency. The SDK source bytes, package UID, version, language,
+runtime ABI, source digest, and composed source identity are compiler-owned and host-path-free.
+`fairyc.std`, the `stdlib` dependency binding, and local `std` module namespace are reserved. A
+missing SDK module still rejects through ordinary package-graph lookup; no prelude or installation
+search exists.
+
 ## Deferred boundary
 
-This loader does not select or inject an SDK standard library, compile a semantic package input
-through the CLI, access a registry, solve ranges, fetch sources, or persist a cache. ADR 0145's
-separate lockfile library may project this result, but absolute paths remain unserialized.
+This loader does not access a registry, solve ranges, fetch sources, link target standard-library C
+objects, or persist a cache. The separate lockfile library projects both local and SDK source
+origins, but absolute paths remain unserialized.

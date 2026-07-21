@@ -15,6 +15,7 @@ import (
 	"github.com/0disoft/fairyc/internal/packagecontent"
 	"github.com/0disoft/fairyc/internal/packagegraph"
 	"github.com/0disoft/fairyc/internal/projectmanifest"
+	"github.com/0disoft/fairyc/internal/sdkstdlib"
 	"github.com/0disoft/fairyc/internal/source"
 )
 
@@ -40,6 +41,12 @@ const (
 	ReasonSourceSyntax        = "invalid-source-syntax"
 	ReasonDuplicateModule     = "duplicate-module-path"
 	ReasonPackageGraph        = "invalid-package-graph"
+	ReasonStandardLibrary     = "invalid-standard-library"
+)
+
+const (
+	SourceKindLocal = "local"
+	SourceKindSDK   = "sdk"
 )
 
 // LoadError provides stable internal failure categories without freezing public diagnostics.
@@ -63,15 +70,19 @@ type SourceFile struct {
 	Module *ast.Module
 }
 
-// Package is one explicitly declared local workspace package.
+// Package is one source catalog package, either an explicitly declared local member or an exact
+// compiler-bundled SDK package.
 type Package struct {
-	Path       string
-	Directory  string
-	SourceRoot string
-	Manifest   projectmanifest.Manifest
-	Sources    []SourceFile
-	Modules    []packagegraph.Module
-	Digest     packagecontent.Digest
+	Path        string
+	Directory   string
+	SourceRoot  string
+	Manifest    projectmanifest.Manifest
+	Sources     []SourceFile
+	Modules     []packagegraph.Module
+	Digest      packagecontent.Digest
+	SourceKind  string
+	SDKIdentity string
+	RuntimeABI  string
 }
 
 // Workspace is the validated catalog and root-reachable, feature-distinct resolved graph.
@@ -165,6 +176,10 @@ func Load(root string) (Workspace, error) {
 		return Workspace{}, err
 	}
 	graph, instances := buildGraph(packages, pathIndexes)
+	packages, graph, instances, err = injectStandardLibrary(packages, graph, instances)
+	if err != nil {
+		return Workspace{}, err
+	}
 	resolution, rejection, err := packagegraph.Resolve(graph)
 	if err != nil {
 		return Workspace{}, &LoadError{Reason: ReasonPackageGraph, Detail: err.Error()}
@@ -332,16 +347,75 @@ func loadPackage(packagePath, directory, sourceRoot string, manifest projectmani
 	if err != nil {
 		return Package{}, &LoadError{Reason: ReasonSourceRoot, Path: packagePath, Detail: err.Error()}
 	}
-	return Package{Path: packagePath, Directory: directory, SourceRoot: sourceRoot, Manifest: manifest, Sources: sources, Modules: modules, Digest: digest}, nil
+	return Package{Path: packagePath, Directory: directory, SourceRoot: sourceRoot, Manifest: manifest, Sources: sources, Modules: modules, Digest: digest, SourceKind: SourceKindLocal}, nil
+}
+
+func injectStandardLibrary(packages []Package, graph packagegraph.Graph, instances []Instance) ([]Package, packagegraph.Graph, []Instance, error) {
+	owners := make([]string, 0)
+	for _, node := range graph.Nodes {
+		needsStandardLibrary := false
+		for _, module := range node.Modules {
+			for _, imported := range module.Imports {
+				if imported == "std" || strings.HasPrefix(imported, "std::") {
+					needsStandardLibrary = true
+				}
+			}
+		}
+		if needsStandardLibrary {
+			owners = append(owners, node.ID)
+		}
+	}
+	if len(owners) == 0 {
+		return packages, graph, instances, nil
+	}
+	if packages[0].Manifest.Package.Language != sdkstdlib.LanguageRevision {
+		return nil, packagegraph.Graph{}, nil, &LoadError{Reason: ReasonStandardLibrary, Detail: fmt.Sprintf("SDK requires %s", sdkstdlib.LanguageRevision)}
+	}
+	definition, err := sdkstdlib.Load()
+	if err != nil {
+		return nil, packagegraph.Graph{}, nil, &LoadError{Reason: ReasonStandardLibrary, Detail: err.Error()}
+	}
+	manifest := projectmanifest.Manifest{Schema: projectmanifest.SchemaVersion, Package: projectmanifest.Package{UID: sdkstdlib.PackageUID, Name: sdkstdlib.PackageName, Version: sdkstdlib.Version, Language: sdkstdlib.LanguageRevision, Source: "src"}}
+	sources := make([]SourceFile, len(definition.Sources))
+	for index, file := range definition.Sources {
+		sources[index] = SourceFile{Path: file.Path, Bytes: slices.Clone(file.Bytes), Module: file.Module}
+	}
+	packages = append(packages, Package{
+		Path: sdkstdlib.PackagePath, Manifest: manifest, Sources: sources,
+		Modules: slices.Clone(definition.Modules), Digest: definition.Digest,
+		SourceKind: SourceKindSDK, SDKIdentity: sdkstdlib.SDKIdentity, RuntimeABI: sdkstdlib.RuntimeABI,
+	})
+	const standardLibraryNode = "sdk:stdlib[]"
+	graph.Nodes = append(graph.Nodes, packagegraph.Node{
+		ID: standardLibraryNode, Role: packagegraph.RoleStandardLibrary,
+		Identity: packagegraph.Identity{PackageUID: sdkstdlib.PackageUID, SourceIdentity: definition.SourceIdentity, VersionIdentity: sdkstdlib.Version, Features: []string{}},
+		Modules:  slices.Clone(definition.Modules),
+	})
+	instances = append(instances, Instance{NodeID: standardLibraryNode, PackagePath: sdkstdlib.PackagePath, Features: []string{}})
+	for _, owner := range owners {
+		graph.Dependencies = append(graph.Dependencies, packagegraph.Dependency{Owner: owner, Binding: "stdlib", Target: standardLibraryNode})
+	}
+	return packages, graph, instances, nil
 }
 
 func validateDependencyDeclarations(packages []Package, pathIndexes map[string]int) error {
 	rootLanguage := packages[0].Manifest.Package.Language
 	for _, loaded := range packages {
+		if loaded.Manifest.Package.UID == sdkstdlib.PackageUID {
+			return &LoadError{Reason: ReasonStandardLibrary, Path: loaded.Path, Detail: fmt.Sprintf("package UID %q is reserved by the SDK", sdkstdlib.PackageUID)}
+		}
+		for _, module := range loaded.Modules {
+			if module.Path == "std" || strings.HasPrefix(module.Path, "std::") {
+				return &LoadError{Reason: ReasonStandardLibrary, Path: loaded.Path + ":" + module.Path, Detail: "module namespace is reserved by the SDK"}
+			}
+		}
 		if loaded.Manifest.Package.Language != rootLanguage {
 			return &LoadError{Reason: ReasonLanguageMismatch, Path: loaded.Path, Detail: fmt.Sprintf("got %q, root requires %q", loaded.Manifest.Package.Language, rootLanguage)}
 		}
 		for _, dependency := range loaded.Manifest.Dependencies {
+			if dependency.Binding == "stdlib" {
+				return &LoadError{Reason: ReasonStandardLibrary, Path: loaded.Path + ":" + dependency.Binding, Detail: "dependency binding is reserved for SDK injection"}
+			}
 			targetIndex, found := pathIndexes[dependency.Path]
 			if !found || dependency.Path == "." {
 				return &LoadError{Reason: ReasonUnknownDependency, Path: loaded.Path + ":" + dependency.Binding, Detail: fmt.Sprintf("path %q is not an explicit workspace member", dependency.Path)}

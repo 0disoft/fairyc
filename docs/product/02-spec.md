@@ -580,17 +580,21 @@ ADR 0144 separately fixes the first filesystem consumer of that manifest. It loa
 caller-selected root plus explicit nonoverlapping members, rejects nested workspaces, symlinks,
 nonexact path case, duplicate package UIDs, language/version mismatches, source collisions, invalid
 sources, and dependency cycles, and uses package-source digest v1 as local source identity. Per-edge
-features remain distinct and only root-reachable instances enter the resolved graph. This loader
-does not inject an SDK standard library or read/write a lockfile.
+features remain distinct and only root-reachable instances enter the resolved graph.
 
-ADR 0145 fixes generated `fairy.lock` as canonical JSON. It records root-reachable local instance
-tuples and edges, recomputes every PackageInstanceId and source digest, detects workspace staleness,
-and atomically replaces only canonical validated bytes. Public CLI refresh/`--locked` policy and
-SDK standard-library selection remain separate decisions.
+ADR 0145 fixes generated `fairy.lock` as canonical JSON. It records root-reachable local and SDK
+instance tuples and edges, recomputes every PackageInstanceId and source digest, detects workspace
+staleness, and atomically replaces only canonical validated bytes.
 
 `experimental check-workspace` is the first end-to-end consumer: it assigns build-local package IDs,
 binds resolved imports, runs package-aware semantic, Flow, MIR lowering, and verification, and either
 refreshes the canonical lock or requires an exact no-write `--locked` match. It emits no native code.
+
+ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
+compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
+version, source digest, and lock fields. The current source surface exports only opaque
+`std::alloc::Arena`; it performs no host installation lookup and does not settle target C linkage or
+the broader planned standard-library API.
 
 ADR 0146 rejects speculative persistent caching at this point. The workspace path produces no
 compiler-owned serialized HIR/MIR/object artifact and has no configured comparable cold/warm
@@ -598,8 +602,8 @@ measurement, so disk format, defaults, and cleanup policy remain `UNDECIDED`.
 
 The resolved-graph paragraph's separation from public manifest syntax describes fixture ownership,
 not current product status: ADR 0143 owns syntax, ADR 0144 owns local workspace I/O, and ADR 0145
-owns generated lock bytes independently. SDK selection, public lock-update policy, registry, and
-solver behavior remain outside those fixture contracts.
+owns generated lock bytes independently. ADR 0147 owns current SDK selection. Stable public command
+policy, registry, and solver behavior remain outside those fixture contracts.
 
 Target layout assertions are versioned in `spec/fixtures/layout/manifest-v0.json` for Linux and
 `spec/fixtures/layout/manifest-windows-msvc-v0.json` for Windows. They fix the closed layout input

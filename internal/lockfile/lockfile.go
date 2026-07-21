@@ -13,6 +13,7 @@ import (
 
 	"github.com/0disoft/fairyc/internal/packagecontent"
 	"github.com/0disoft/fairyc/internal/packagegraph"
+	"github.com/0disoft/fairyc/internal/sdkstdlib"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
@@ -36,7 +37,10 @@ type PackageRecord struct {
 	ID             string   `json:"id"`
 	Role           string   `json:"role"`
 	PackageUID     string   `json:"packageUid"`
+	SourceKind     string   `json:"sourceKind"`
 	LocalPath      string   `json:"localPath"`
+	SDKIdentity    string   `json:"sdkIdentity"`
+	RuntimeABI     string   `json:"runtimeAbi"`
 	SourceIdentity string   `json:"sourceIdentity"`
 	SourceDigest   string   `json:"sourceDigest"`
 	Version        string   `json:"version"`
@@ -82,8 +86,14 @@ func FromWorkspace(workspace workspaceloader.Workspace) (Document, error) {
 		if !found {
 			return Document{}, fmt.Errorf("workspace node %q has no instance id", node.ID)
 		}
+		localPath := ""
+		if loaded.SourceKind == workspaceloader.SourceKindLocal {
+			localPath = mapping.PackagePath
+		}
 		record := PackageRecord{
-			ID: id, Role: node.Role, PackageUID: node.Identity.PackageUID, LocalPath: mapping.PackagePath,
+			ID: id, Role: node.Role, PackageUID: node.Identity.PackageUID,
+			SourceKind: loaded.SourceKind, LocalPath: localPath,
+			SDKIdentity: loaded.SDKIdentity, RuntimeABI: loaded.RuntimeABI,
 			SourceIdentity: node.Identity.SourceIdentity, SourceDigest: loaded.Digest.String(),
 			Version: node.Identity.VersionIdentity, Features: cloneStrings(node.Identity.Features),
 		}
@@ -171,6 +181,7 @@ func Validate(document Document) error {
 	}
 	known := make(map[string]struct{}, len(document.Packages))
 	rootCount := 0
+	standardLibraryCount := 0
 	validationGraph := packagegraph.Graph{Nodes: make([]packagegraph.Node, 0, len(document.Packages))}
 	for index, record := range document.Packages {
 		if index > 0 && document.Packages[index-1].ID == record.ID {
@@ -189,11 +200,31 @@ func Validate(document Document) error {
 			return fmt.Errorf("lock package %q has contradictory identity", record.ID)
 		}
 		digest, err := packagecontent.ParseDigest(record.SourceDigest)
-		if err != nil || digest.String() != record.SourceIdentity {
-			return fmt.Errorf("lock package %q has contradictory local source identity", record.ID)
+		if err != nil {
+			return fmt.Errorf("lock package %q has invalid source digest", record.ID)
 		}
-		if !validLocalPath(record.LocalPath) {
-			return fmt.Errorf("lock package %q has invalid local path", record.ID)
+		switch record.SourceKind {
+		case workspaceloader.SourceKindLocal:
+			if digest.String() != record.SourceIdentity {
+				return fmt.Errorf("lock package %q has contradictory local source identity", record.ID)
+			}
+			if !validLocalPath(record.LocalPath) {
+				return fmt.Errorf("lock package %q has invalid local path", record.ID)
+			}
+			if record.SDKIdentity != "" || record.RuntimeABI != "" || record.Role == packagegraph.RoleStandardLibrary {
+				return fmt.Errorf("lock package %q has contradictory local source origin", record.ID)
+			}
+		case workspaceloader.SourceKindSDK:
+			standardLibraryCount++
+			if record.Role != packagegraph.RoleStandardLibrary || record.LocalPath != "" ||
+				record.PackageUID != sdkstdlib.PackageUID || record.Version != sdkstdlib.Version ||
+				record.SDKIdentity != sdkstdlib.SDKIdentity || record.RuntimeABI != sdkstdlib.RuntimeABI ||
+				document.Language != sdkstdlib.LanguageRevision || len(record.Features) != 0 ||
+				record.SourceIdentity != sdkstdlib.SourceIdentity(record.SDKIdentity, record.RuntimeABI, digest) {
+				return fmt.Errorf("lock package %q has contradictory SDK source origin", record.ID)
+			}
+		default:
+			return fmt.Errorf("lock package %q has invalid source kind", record.ID)
 		}
 		switch record.Role {
 		case packagegraph.RoleRoot:
@@ -210,6 +241,9 @@ func Validate(document Document) error {
 	}
 	if rootCount != 1 {
 		return fmt.Errorf("lockfile must contain exactly one root package")
+	}
+	if standardLibraryCount > 1 {
+		return fmt.Errorf("lockfile contains multiple SDK standard-library packages")
 	}
 	if !slices.IsSortedFunc(document.Dependencies, compareDependencies) {
 		return fmt.Errorf("lock dependencies are not sorted")

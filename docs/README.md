@@ -28,6 +28,7 @@
 - Whole-package cache-key v1 fixtures and bounded store runner: spec/fixtures/package-cache/manifest-v1.json, internal/packagecache/, internal/packagecachefixture/
 - Project manifest v1 fixtures and strict TOML parser: spec/fixtures/project-manifest/manifest-v1.json, internal/projectmanifest/, internal/projectmanifestfixture/
 - Local workspace loader v1 fixtures and implementation: spec/fixtures/workspace-loader/manifest-v1.json, internal/workspaceloader/, internal/workspaceloaderfixture/
+- Compiler-bundled Stage 0 standard-library source package: internal/sdkstdlib/
 - Generated lockfile v1 implementation: internal/lockfile/
 - Windows MSVC layout fixture manifest: spec/fixtures/layout/manifest-windows-msvc-v0.json
 - Windows MSVC C ABI fixture manifest: spec/fixtures/c-abi/manifest-windows-msvc-v0.json

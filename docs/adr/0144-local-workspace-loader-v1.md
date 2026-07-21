@@ -16,7 +16,8 @@ fixed distinction between one source digest and feature-distinct package instanc
 
 Stage 0 needs a smaller contract than a general package manager: one explicitly selected local root,
 explicit members, exact path dependencies, deterministic source discovery, and a reusable resolved
-graph. Registry acquisition, a solver, SDK selection, and lockfile writes remain later boundaries.
+graph. Registry acquisition, a solver, SDK selection, and lockfile writes were left as later
+boundaries; ADRs 0145 and 0147 subsequently close the lock and compiler-bundled SDK parts.
 
 ## Decision
 
@@ -43,8 +44,9 @@ graph. Registry acquisition, a solver, SDK selection, and lockfile writes remain
    edge's exact feature set creates or reuses one `(member path, feature set)` instance; features are
    not unified. The existing package graph then rejects cycles, duplicate bindings, missing modules,
    and ambiguous visible providers.
-9. The loader performs no network access, standard-library injection, version solving, lockfile
-   read/write, cache write, environment expansion, or Git inspection.
+9. The local member/source portion performs no network access, version solving, lockfile read/write,
+   cache write, environment expansion, or Git inspection. ADR 0147 extends its graph output with
+   conditional compiler-bundled standard-library injection without weakening those boundaries.
 
 ## Consequences
 
@@ -53,7 +55,7 @@ graph. Registry acquisition, a solver, SDK selection, and lockfile writes remain
 - Rejecting all symlinks is intentionally blunt. A later manifest schema may admit a separately
   specified contained-link policy without weakening v1.
 - Unreachable workspace members are still parsed and source-validated as catalog members, but only
-  root-reachable instances enter the resolved graph and future root lockfile.
+  root-reachable instances enter the resolved graph and generated root lockfile.
 - Rolling back this loader removes `internal/workspaceloader` without changing manifest byte
   parsing or the reusable resolved-graph contract.
 

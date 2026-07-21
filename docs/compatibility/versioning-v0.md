@@ -341,10 +341,10 @@ The standard library has an independent version and declares required language r
 Manifest schema, lockfile schema, source archive schema, and any future binary artifact schema are independent. Stage 0 needs manifest and lockfile schemas only. A stable binary package format would falsely imply a stable native Fairy ABI and is deferred.
 
 `fairyc.lock/v1` is the first generated lock schema. ADR 0145 fixes canonical JSON bytes, complete
-root-reachable local package tuples and edges, identity-algorithm declarations, strict
-PackageInstanceId/source-digest recomputation, and stale-workspace comparison. It is independently
-versioned from `fairyc.manifest/v1`, and its local relative paths are refresh facts rather than
-absolute source identity.
+root-reachable package tuples and edges, closed local/SDK source-origin records,
+identity-algorithm declarations, strict PackageInstanceId/source-digest recomputation, and
+stale-workspace comparison. It is independently versioned from `fairyc.manifest/v1`; local paths
+are refresh facts, while SDK identity and runtime ABI are exact host-path-free compatibility facts.
 
 `fairyc.manifest/v1` is the first human project-manifest schema. It uses the exact `fairy.toml`
 field set and local-only semantics in ADR 0143: required package UID/name/exact SemVer/language/source,
@@ -356,8 +356,10 @@ workspace-loader, source-acquisition, registry, or solver compatibility.
 ADR 0144 fixes the first loader behavior for this manifest schema: explicit root/member closure,
 exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, one language revision,
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
-instances. Loader behavior is independently versioned from future `fairy.lock`; absolute host paths
-and implementation guard values are not serialized compatibility data.
+instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
+`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, version `0.0.0-stage0.1`, language
+`fairyc-language/0`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
+guard values are not serialized compatibility data.
 
 `fairyc.project-manifest-fixtures/v1` versions the complete-file parser observations for that schema.
 The pinned TOML library version is an implementation dependency, not the manifest schema version;

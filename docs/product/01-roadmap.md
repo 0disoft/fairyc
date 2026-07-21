@@ -397,27 +397,28 @@ proving order stability plus content, path, and line-ending invalidation. The fi
 cache key combines those identities with every declared compiler, language, MIR, target, ABI,
 toolchain, backend, runtime, standard-library, feature, and profile compatibility member. A
 caller-bounded process-local LRU store proves byte/entry bounds, deep-copy isolation, and safe
-eviction without inventing an unmeasured default. Public manifests, lockfiles, coordinates, source
-acquisition, serialized module interfaces, persistent cross-process storage, measurements, and
-stable package commands remain Phase 3 work.
+eviction without inventing an unmeasured default. Registry coordinates, source acquisition,
+serialized module interfaces, persistent cross-process storage, measurements, and stable package
+commands remain Phase 3 work.
 
-The manifest/lockfile readiness audit now separates the fixed compiler graph contract from ten
-unresolved package-manager choices. Its recommended first profile is local-only, exact-version,
-per-edge-feature, explicit-workspace, cycle-free, and network-free; it remains a recommendation
-until an ADR accepts the wire format and parser strategy.
+The manifest/lockfile readiness audit separates the fixed compiler graph contract from broader
+package-manager choices. Its local-only, exact-version, per-edge-feature, explicit-workspace,
+cycle-free, and network-free profile is now implemented through the manifest, workspace, lock,
+experimental check command, and compiler-bundled SDK boundaries.
 
 ADR 0142 and package fixture v1 now enforce the cycle-free part at the reusable resolved-graph
 boundary, including self-cycles created only after exact-instance deduplication. ADR 0143 fixes the
 strict `fairy.toml` v1 declaration surface through a pinned isolated TOML adapter. ADR 0144 adds
 explicit filesystem-safe workspace/member/source loading and root-reachable feature-distinct graph
 construction. ADR 0145 then fixes canonical generated `fairy.lock` v1, full identity revalidation,
-stale-workspace comparison, and atomic replacement. SDK selection and public CLI lock modes remain.
+stale-workspace comparison, and atomic replacement. ADR 0147 adds exact compiler-bundled SDK
+standard-library injection and closed SDK lock records.
 The unstable `experimental check-workspace` now connects those contracts to package-aware semantic
 analysis and verified MIR with ordinary refresh and no-write `--locked` behavior. Stable command
 spelling and package-aware build/run still remain.
 
-- Add exact SDK standard-library injection and public ordinary/`--locked` CLI policy on top of the
-  accepted manifest, workspace loader, and lockfile library.
+- Add package-aware Windows native build/run on top of the accepted manifest, workspace, lock,
+  compiler-bundled SDK, and experimental lock-mode behavior.
 - Wire whole-package reuse into package compilation, then adopt persistent content-addressed storage
   and default limits only from measured clean/warm workload evidence.
 - ADR 0146 explicitly defers persistent storage until compiler-owned artifact bytes, package-aware

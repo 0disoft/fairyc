@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/0disoft/fairyc/internal/packagegraph"
+	"github.com/0disoft/fairyc/internal/sdkstdlib"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
@@ -103,4 +105,94 @@ func TestLockRejectsContradictionsAndStaleness(t *testing.T) {
 			t.Fatalf("Parse() error = %v", err)
 		}
 	})
+}
+
+func TestLockRecordsAndValidatesExactSDKOrigin(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeSDKWorkspace(t, root)
+	workspace, err := workspaceloader.Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	document, err := FromWorkspace(workspace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var sdkIndex = -1
+	for index, record := range document.Packages {
+		if record.SourceKind == workspaceloader.SourceKindSDK {
+			sdkIndex = index
+		}
+	}
+	if sdkIndex < 0 {
+		t.Fatalf("lock packages = %+v", document.Packages)
+	}
+	record := document.Packages[sdkIndex]
+	if record.Role != packagegraph.RoleStandardLibrary || record.PackageUID != sdkstdlib.PackageUID ||
+		record.LocalPath != "" || record.SDKIdentity != sdkstdlib.SDKIdentity || record.RuntimeABI != sdkstdlib.RuntimeABI ||
+		record.Version != sdkstdlib.Version || len(record.Features) != 0 {
+		t.Fatalf("SDK lock record = %+v", record)
+	}
+	contents, err := Marshal(document)
+	if err != nil {
+		t.Fatal(err)
+	}
+	parsed, err := Parse(contents)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := MatchesWorkspace(parsed, workspace); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, mutation := range []struct {
+		name     string
+		contains string
+		change   func(*PackageRecord)
+	}{
+		{name: "sdk identity", contains: "source origin", change: func(record *PackageRecord) { record.SDKIdentity = "fairyc-sdk-stdlib/99" }},
+		{name: "runtime abi", contains: "source origin", change: func(record *PackageRecord) { record.RuntimeABI = "fairyc-runtime/99" }},
+		{name: "local path", contains: "source origin", change: func(record *PackageRecord) { record.LocalPath = "vendor/stdlib" }},
+		{name: "source kind", contains: "invalid source kind", change: func(record *PackageRecord) { record.SourceKind = "registry" }},
+	} {
+		mutation := mutation
+		t.Run(mutation.name, func(t *testing.T) {
+			mutated := document
+			mutated.Packages = append([]PackageRecord(nil), document.Packages...)
+			mutation.change(&mutated.Packages[sdkIndex])
+			if err := Validate(mutated); err == nil || !strings.Contains(err.Error(), mutation.contains) {
+				t.Fatalf("Validate() error = %v", err)
+			}
+		})
+	}
+}
+
+func writeSDKWorkspace(t *testing.T, root string) {
+	t.Helper()
+	manifest := `schema = "fairyc.manifest/v1"
+[package]
+uid = "example.app"
+name = "app"
+version = "1.0.0"
+language = "fairyc-language/0"
+source = "src"
+`
+	source := `module main;
+
+import std::alloc as alloc;
+
+fn i32 inspect(ref mut alloc::Arena arena) {
+    return 1;
+}
+`
+	if err := os.MkdirAll(filepath.Join(root, "src"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "fairy.toml"), []byte(manifest), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "src", "main.fy"), []byte(source), 0o600); err != nil {
+		t.Fatal(err)
+	}
 }

@@ -5,6 +5,10 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/0disoft/fairyc/internal/lockfile"
+	"github.com/0disoft/fairyc/internal/sdkstdlib"
+	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
 func TestExperimentalWorkspaceCheckUpdatesAndVerifiesLock(t *testing.T) {
@@ -67,6 +71,39 @@ func TestExperimentalWorkspaceCheckRejectsInvocationAndMissingManifest(t *testin
 	code, stdout, stderr = runForTest([]string{"experimental", "check-workspace"}, t.TempDir())
 	if code != ExitPackageFailure || stdout != "" || !strings.Contains(stderr, "fairy.toml") {
 		t.Fatalf("missing manifest = (%d, %q, %q)", code, stdout, stderr)
+	}
+}
+
+func TestExperimentalWorkspaceCheckLocksBundledStandardLibrary(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeWorkspaceFile(t, root, "fairy.toml", `schema = "fairyc.manifest/v1"
+[package]
+uid = "example.workspace.app"
+name = "app"
+version = "1.0.0"
+language = "fairyc-language/0"
+source = "src"
+`)
+	writeWorkspaceFile(t, root, "src/main.fy", "module main;\n\nimport std::alloc as alloc;\n\nfn i32 inspect(ref mut alloc::Arena arena) {\n    return 1;\n}\n")
+
+	code, stdout, stderr := runForTest([]string{"experimental", "check-workspace"}, root)
+	if code != ExitSuccess || !strings.Contains(stdout, "2 instance(s), 2 source file(s)") || !strings.HasSuffix(stdout, "lock updated\n") || stderr != "" {
+		t.Fatalf("workspace check = (%d, %q, %q)", code, stdout, stderr)
+	}
+	document, _, err := lockfile.Read(filepath.Join(root, lockfile.FileName))
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, record := range document.Packages {
+		if record.SourceKind != workspaceloader.SourceKindSDK {
+			continue
+		}
+		found = record.PackageUID == sdkstdlib.PackageUID && record.SDKIdentity == sdkstdlib.SDKIdentity && record.RuntimeABI == sdkstdlib.RuntimeABI && record.LocalPath == ""
+	}
+	if !found {
+		t.Fatalf("SDK lock record missing: %+v", document.Packages)
 	}
 }
 
