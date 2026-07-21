@@ -85,6 +85,26 @@ func BufferProbeSource() (string, error) {
 	return canonicalSource("Buffer probe", stage0BufferProbe)
 }
 
+// BufferProbeImplementationSource returns the portable Buffer implementation with the probe-only
+// deterministic SystemHeap allocator adapter. The adapter is never part of product linkage.
+func BufferProbeImplementationSource() (string, error) {
+	implementation, err := StorageSource()
+	if err != nil {
+		return "", err
+	}
+	return systemHeapProbeImplementationSource("Buffer", implementation)
+}
+
+// WindowsMSVCBufferProbeImplementationSource returns the target-specific Windows Buffer closure
+// with the same probe-only deterministic SystemHeap allocator adapter.
+func WindowsMSVCBufferProbeImplementationSource() (string, error) {
+	implementation, err := WindowsMSVCSourceForSymbols([]string{"fy_std_buffer_initialize_v0"})
+	if err != nil {
+		return "", err
+	}
+	return systemHeapProbeImplementationSource("Windows MSVC Buffer", implementation)
+}
+
 // ArenaSource returns the provisional SystemHeap and Arena implementation as one C unit.
 func ArenaSource() (string, error) {
 	heap, err := SystemHeapSource()

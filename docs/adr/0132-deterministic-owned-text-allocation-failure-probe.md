@@ -5,7 +5,8 @@
 - Product source: `docs/product/02-spec.md`
 - Runtime source: `docs/runtime/runtime-stdlib-v0.md`
 - Related decisions: `docs/adr/0131-safe-owned-text-fy-lifecycle.md`,
-  `docs/adr/0133-deterministic-arena-allocation-failure-probe.md`
+  `docs/adr/0133-deterministic-arena-allocation-failure-probe.md`,
+  `docs/adr/0134-deterministic-buffer-allocation-failure-probe.md`
 
 ## Context
 

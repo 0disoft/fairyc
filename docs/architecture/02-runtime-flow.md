@@ -129,8 +129,8 @@ without using the host loader and rejects non-AMD64, non-PE32+, DLL, non-console
 out-of-range, duplicate-section, missing-`.text`, and non-executable-entry images. The Windows smoke
 applies it to the retained target-neutral product, both declared-target profile products, two direct
 run-target temporary products (one driven through a separately built compiler process), both safe
-File and safe owned-text profile products, and both profiles of the raw Windows File, raw owned-text,
-raw Arena, layout, ABI, and unwind probes before
+File and safe owned-text profile products, and both profiles of the raw Windows File, raw Buffer,
+raw owned-text, raw Arena, layout, ABI, and unwind probes before
 execution. COFF object records and unwind/debug payload semantics remain outside this linked-image
 branch.
 The same package has a distinct raw-COFF path used inside `internal/cdriver` before local linking
@@ -157,6 +157,11 @@ block when copy-and-release resize fails. A closed C probe reaches the existing 
 matrix. Internal generated Fairy transports call the real allocate/deallocate symbols with exact
 C-layout blocks on Linux and a private layout-equivalent `usize` block on Windows. The Windows path
 uses the target's 16-byte x64 `malloc` alignment ceiling and executes at both MSVC profiles.
+A distinct raw Buffer caller links against an instrumented target-specific dependency closure at
+both profiles. It forces construction plus reserve, self-overlap append, and zeroed-resize growth
+failures, requires exact storage preservation, observes recovery bytes and zero-fill, and requires
+drop to return the live-allocation count to zero. Product and generated-Fairy source paths continue
+to use the uninstrumented Buffer closure.
 The same Windows target example now reaches the real Arena source through private self-linked node,
 Arena, Region, and `void **` transport. It observes initialization, active attachment, a non-null
 allocation/node, reset invalidation, and drop generation transitions at both profiles without

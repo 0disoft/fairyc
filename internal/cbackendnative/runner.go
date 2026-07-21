@@ -1790,8 +1790,12 @@ func Run(manifestPath string) (Report, error) {
 	if err != nil {
 		return Report{}, fmt.Errorf("load Buffer probe: %w", err)
 	}
+	bufferProbeImplementation, err := cstdlib.BufferProbeImplementationSource()
+	if err != nil {
+		return Report{}, fmt.Errorf("load instrumented Buffer implementation: %w", err)
+	}
 	bufferExecutions, err := runStandardLibraryProbe(
-		temporaryRoot, toolchains, "Buffer", "buffer-probe", bufferProbe, storageSource,
+		temporaryRoot, toolchains, "Buffer", "buffer-probe", bufferProbe, bufferProbeImplementation,
 	)
 	if err != nil {
 		return Report{}, err

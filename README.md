@@ -152,7 +152,12 @@ Its closed C-only probe and an internal generated FY caller using the exact nest
 plus `size_t` record each have four configured Clang/GCC low/optimized executions. Neither has an
 observed hosted receipt. Three exact Buffer helpers are now admitted by the constrained source
 backend and exercised by the closed native fixture. Used-symbol product linkage selects the Buffer
-plus SystemHeap dependency closure; the public standard-library package remains absent.
+plus SystemHeap dependency closure; the public standard-library package remains absent. An
+independent raw caller now links the target-specific Buffer closure as a separate MSVC translation
+unit at both profiles. Its probe-only allocator forces initialization, reserve, relocating
+self-overlap append, and zeroed-resize allocation failures, requires exact pointer/metadata/byte
+preservation, proves normal recovery and zeroed growth, and returns live allocations to zero after
+drop. Product linkage retains the ordinary allocator.
 A third slice implements Arena-owned byte nodes with one active generation-checked Region,
 failure-atomic zeroed or copied placement, reset invalidation, stale-use rejection, and active-drop
 rejection. Its closed C-only probe and an internal generated FY caller using the exact self-linked
@@ -301,7 +306,7 @@ exception, virtual-walks raiser, termination, and catcher frames, and requires o
 and independent/source-level/hosted ABI and unwind evidence exists. A host-independent PE parser
 now validates the host-smoke product, both declared-target profile products, both safe File and
 safe owned-text profile products, two direct run-target temporary products, two exec-target output
-products, and all twelve raw Windows File, owned-text, Arena, layout, ABI, and unwind probe images as bounded
+products, and all fourteen raw Windows File, Buffer, owned-text, Arena, layout, ABI, and unwind probe images as bounded
 AMD64 PE32+ console executables
 with aligned headers and sections and an executable `.text` entry point. That linked-image path does not inspect
 object symbols, relocations, or Windows unwind records. The same package separately parses every

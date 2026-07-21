@@ -132,7 +132,13 @@ wrapper exists.
 
 The closed C-only native probe configures four Clang/GCC low/optimized executions for construction,
 ordinary and self-overlap append, overflow rollback, no-op reserve, zeroed growth, truncate, clear,
-malformed-state rejection, and drop. Those executions remain unobserved on this Windows host.
+malformed-state rejection, and drop. The shared probe-only allocator now additionally forces
+nonempty construction, reserve, self-overlap append growth, and zeroed-resize growth failure. Each
+growth failure must preserve pointer, capacity, alignment, initialized length, bytes, and one live
+allocation; recovery plus final drop must return the live count to zero. The raw caller and
+target-specific implementation execute as separate translation units at low and optimized x64 MSVC
+profiles. The four configured Linux executions remain unobserved on this Windows host, and product
+linkage contains no probe controls.
 
 ## `Arena` and `Region`
 

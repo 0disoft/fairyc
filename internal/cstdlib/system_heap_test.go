@@ -60,6 +60,14 @@ func TestBufferSourcesOwnFailureAtomicOverlapSafeStorage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	probeImplementation, err := BufferProbeImplementationSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	windowsProbeImplementation, err := WindowsMSVCBufferProbeImplementationSource()
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, required := range []string{
 		"fy_std_buffer_reserve_v0",
 		"fy_std_buffer_append_v0",
@@ -72,12 +80,60 @@ func TestBufferSourcesOwnFailureAtomicOverlapSafeStorage(t *testing.T) {
 			t.Errorf("Buffer implementation is missing %q", required)
 		}
 	}
-	if !strings.Contains(probe, "abcdefbcde") || !strings.Contains(probe, "SIZE_MAX") {
-		t.Fatal("Buffer probe does not exercise overlap and overflow rollback")
+	for _, required := range []string{
+		"abcdefbcde",
+		"SIZE_MAX",
+		"fy_std_system_heap_probe_fail_after_allocations_v0(0)",
+		"failed_initialize.block.data != (void *)(uintptr_t)1",
+		"fy_std_system_heap_probe_live_allocations_v0() != 1",
+		"buffer.block.data != preserved_data",
+		"buffer.length != preserved_length",
+	} {
+		if !strings.Contains(probe, required) {
+			t.Errorf("Buffer probe is missing %q", required)
+		}
 	}
 	repeated, err := StorageSource()
 	if err != nil || repeated != implementation || strings.Contains(implementation, "\r") || !strings.HasSuffix(implementation, "\n") {
 		t.Fatalf("StorageSource() is not deterministic canonical C: %v", err)
+	}
+	for _, candidate := range []struct {
+		name   string
+		source string
+	}{
+		{name: "portable", source: probeImplementation},
+		{name: "Windows MSVC", source: windowsProbeImplementation},
+	} {
+		for _, required := range []string{
+			"fy_std_system_heap_probe_fail_after_allocations_v0",
+			"fy_std_system_heap_probe_live_allocations_v0",
+			"#define FY_STD_SYSTEM_HEAP_MALLOC_V0(size) fy_std_system_heap_probe_malloc_v0(size)",
+			"fy_std_buffer_initialize_v0",
+			"fy_std_buffer_resize_zeroed_v0",
+			"fy_std_buffer_drop_v0",
+		} {
+			if !strings.Contains(candidate.source, required) {
+				t.Errorf("%s Buffer probe implementation is missing %q", candidate.name, required)
+			}
+		}
+		if strings.Index(candidate.source, "#define FY_STD_SYSTEM_HEAP_MALLOC_V0(size) fy_std_system_heap_probe_malloc_v0(size)") >
+			strings.Index(candidate.source, "#ifndef FY_STD_SYSTEM_HEAP_MALLOC_V0") {
+			t.Errorf("%s Buffer probe allocator adapter follows the SystemHeap fallback", candidate.name)
+		}
+	}
+	if !strings.Contains(windowsProbeImplementation, "#define FY_STD_SYSTEM_HEAP_MAX_ALIGNMENT_V0 ((size_t)16)") {
+		t.Error("Windows MSVC Buffer probe implementation is missing its target alignment contract")
+	}
+	if strings.Contains(implementation, "fy_std_system_heap_probe_fail_after_allocations_v0") {
+		t.Error("product Buffer implementation leaked the probe-only allocator controls")
+	}
+	repeatedProbeImplementation, err := BufferProbeImplementationSource()
+	if err != nil || repeatedProbeImplementation != probeImplementation {
+		t.Fatalf("BufferProbeImplementationSource() is not deterministic canonical C: %v", err)
+	}
+	repeatedWindowsProbeImplementation, err := WindowsMSVCBufferProbeImplementationSource()
+	if err != nil || repeatedWindowsProbeImplementation != windowsProbeImplementation {
+		t.Fatalf("WindowsMSVCBufferProbeImplementationSource() is not deterministic canonical C: %v", err)
 	}
 }
 

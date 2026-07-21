@@ -139,7 +139,11 @@ overlap-safe append across relocation, overflow rollback, zeroed growth, truncat
 Its four C-only native probe executions and four generated-Fairy source-call executions are
 configured but unobserved. The internal caller uses the exact nested SystemHeap-block record and
 reaches initialize, zeroed resize, and drop. Used-symbol product linkage now supplies the exact
-Buffer/SystemHeap closure, but public `std::bytes` and safe ownership methods remain missing.
+Buffer/SystemHeap closure, but public `std::bytes` and safe ownership methods remain missing. A raw
+Buffer caller now executes against an instrumented target-specific closure at both MSVC profiles.
+It forces initialization, reserve, relocating self-overlap append, and zeroed-resize allocation
+failure, preserves exact storage state and initialized bytes, proves recovery zeroing, and returns
+the live-allocation count to zero after drop.
 The Arena storage slice now adds a single-active-Region generation check, failure-atomic zeroed and
 copied byte placement, reset invalidation, stale-use rejection, and active-drop rejection. Its four
 C-only executions and four generated-Fairy source-call executions are configured but unobserved.
@@ -253,8 +257,8 @@ crossings, and a hosted Windows receipt remain absent. PE/COFF objects, runtime,
 supported distribution artifacts, and conformance remain later gates. A bounded parser now checks
 the host-smoke product, both declared-target profile products, both safe File and safe owned-text
 profile products, two direct run-target temporary products, two exec-target temporary output
-products, and twelve native probe executables for raw Windows File, raw owned text, raw Arena,
-layout, ABI, and
+products, and fourteen native probe executables for raw Windows File, raw Buffer, raw owned text,
+raw Arena, layout, ABI, and
 unwind behavior for AMD64
 PE32+ console identity, aligned
 headers/sections, and an executable entry point, but does not inspect `.obj` symbols, relocations,
@@ -263,7 +267,7 @@ Every local MSVC compile in the same lane now also parses its intermediate `.obj
 before cleanup, including `.text$...`, `.bss`, symbol-table, and relocation-index structure. Exact
 versioned symbol names, COMDAT selection, relocation types, unwind records, and a hosted object
 receipt remain absent, so the target evidence marker stays fail-closed.
-The twenty-three local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
+The twenty-five local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
 runtime-function ordering and code coverage plus referenced version 1 and version 2 unwind-record
 bounds, including handler/chained minimum tails. A separate three-object probe now raises a private
 noncontinuable exception at both profiles, validates its payload in an outer SEH filter, walks the
@@ -294,6 +298,9 @@ both profiles. It observes exact bytes and termination, invalid UTF-8 and interi
 malformed opaque storage, failure preservation, self-overlap, deterministic size overflow, and
 normal plus repeated drop. It also forces initial and append-reallocation failure with a probe-only
 allocator, preserves prior storage and bytes, and observes zero leaked live allocations after cleanup.
+A raw Buffer probe independently links its caller and target-specific dependency closure at both
+profiles. It forces initialization, reserve, self-overlap append growth, and zeroed-resize growth
+failure, preserves exact pointer/metadata/bytes, then proves recovery content and final cleanup.
 A parallel raw Arena probe links its caller and target-specific dependency closure separately at both
 profiles. It observes zeroed and copied payloads, forces failure before payload allocation and after
 payload allocation but before node publication, requires unchanged outputs, and proves reset returns
@@ -311,7 +318,7 @@ quickstart iterates two bytes with typed `usize` ordering and checked addition, 
 indexing, and safely converts each `u8` to `i32` through a separately built compiler process. The
 host smoke also proves maximum-`usize` addition traps under both MSVC profiles. The configured Windows
 smoke therefore covers two retained target builds, two safe File builds, two safe owned-text builds,
-two direct target executions, two exec-target executions, and twenty-three total target or probe PE
+two direct target executions, two exec-target executions, and twenty-five total target or probe PE
 images. The second direct execution comes from a separately built temporary
 `fairyc.exe` compiling the minimal Windows quickstart, so the standalone compiler process boundary
 is exercised without retaining or distributing it. This improves the developer execution path

@@ -255,6 +255,14 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   repeated drop. A probe-only allocator must force String/CString initial allocation failure and
   String append reallocation failure, preserve canonical or prior storage and bytes, and return the
   live-allocation count to zero after cleanup. Product linkage must not include that adapter.
+- The same Windows smoke must separately compile the raw Buffer probe and target-specific Buffer
+  plus SystemHeap implementation as caller and callee translation units at low and optimized
+  profiles. It must force nonempty initialization, reserve growth, relocating self-overlap append
+  growth, and zeroed-resize growth allocation failure. Construction failure must preserve caller
+  output; every growth failure must preserve the exact pointer, capacity, alignment, initialized
+  length, and bytes with one live allocation. Normal recovery must produce the expected overlap
+  append bytes, expose zero-filled growth, and return the live count to zero after drop. Product
+  linkage must retain the ordinary allocator and no probe controls.
 - The same Windows smoke must separately compile the raw Arena probe and target-specific Arena plus
   SystemHeap implementation as caller and callee translation units at low and optimized profiles.
   It must observe zeroed and copied bytes, simultaneous and stale Region rejection, active-drop
@@ -432,8 +440,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
   ADR 0133 strengthens the existing `arenaExecutions` success condition with deterministic
-  first-stage and second-stage allocation failure plus live-allocation cleanup. It adds no report
-  field or counter and therefore does not create report v32.
+  first-stage and second-stage allocation failure plus live-allocation cleanup. ADR 0134 strengthens
+  `bufferExecutions` with deterministic construction and three growth-allocation failures, exact
+  storage preservation, recovery zeroing, and live-allocation cleanup. Neither adds a report field
+  or counter, so report v32 is not created.
   Its closed
   `drop-trace-v0` emission profile assigns source/type/span identities to dense site IDs and compares
   exact four-byte native records with the MIR interpreter trace. This instrumentation is absent from
@@ -475,8 +485,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   closure, observes initialization generation 1, one active Region and non-null allocation/node,
   reset generation 2 with invalidated Region state, and drop generation 3. Private Windows generation
   fields use target-width `usize` only as a layout-compatible transport, not a public representation.
-  Neither Buffer nor Arena reads the zeroed bytes on this FY path. The separate raw Arena probe
-  supplies Windows byte-level and allocation-failure evidence. Owned text copies a compiler-owned
+  Neither Buffer nor Arena reads the zeroed bytes on this FY path. Separate raw Buffer and Arena
+  probes supply Windows byte-level and allocation-failure evidence. Owned text copies a compiler-owned
   five-byte UTF-8 literal, observes String length five then ten after append, normalized drop,
   six-byte CString storage with logical CStr length five, normalized drop, and direct validation of
   compiler-owned terminated storage. It observes only status, length, alignment, and pointer state,

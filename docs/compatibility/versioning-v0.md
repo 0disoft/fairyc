@@ -295,7 +295,10 @@ probe-only deterministic initial-allocation and append-reallocation failure plus
 cleanup. ADR 0133 similarly strengthens `arenaExecutions` with deterministic payload and
 tracking-node allocation failure, rollback, zeroing, and live-allocation cleanup. It also admits the
 existing internal `fy_std_region_copy_bytes_v0` entry point in the closed target resolvers without
-stabilizing a public source or ABI contract. Neither change adds a report field or counter, so they
+stabilizing a public source or ABI contract. ADR 0134 strengthens `bufferExecutions` with
+deterministic construction, reserve, self-overlap append growth, and zeroed-resize growth failure,
+exact storage preservation, recovery zeroing, and live-allocation cleanup. None of these changes
+adds a report field or counter, so they
 do not create v32. The
 runner emits one exact version and does not pretend the report shapes are interchangeable.
 

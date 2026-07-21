@@ -28,6 +28,8 @@ uint32_t fy_std_buffer_resize_zeroed_v0(struct fy_std_buffer_v0 *buffer, size_t 
 uint32_t fy_std_buffer_truncate_v0(struct fy_std_buffer_v0 *buffer, size_t new_length);
 uint32_t fy_std_buffer_clear_v0(struct fy_std_buffer_v0 *buffer);
 uint32_t fy_std_buffer_drop_v0(struct fy_std_buffer_v0 *buffer);
+void fy_std_system_heap_probe_fail_after_allocations_v0(size_t successful_allocations);
+size_t fy_std_system_heap_probe_live_allocations_v0(void);
 
 int main(void) {
     struct fy_std_buffer_v0 buffer = {{NULL, 0, 0}, 0};
@@ -84,8 +86,80 @@ int main(void) {
         return 10;
     }
     if (fy_std_buffer_drop_v0(&buffer) != FY_STD_ALLOC_OK_V0 ||
-        buffer.block.data != NULL || buffer.block.size != 0 || buffer.length != 0) {
+        buffer.block.data != NULL || buffer.block.size != 0 || buffer.length != 0 ||
+        fy_std_system_heap_probe_live_allocations_v0() != 0) {
         return 11;
+    }
+
+    struct fy_std_buffer_v0 failed_initialize = {{(void *)(uintptr_t)1, 7, 1}, 3};
+    fy_std_system_heap_probe_fail_after_allocations_v0(0);
+    if (fy_std_buffer_initialize_v0(8, &failed_initialize) != FY_STD_ALLOC_OUT_OF_MEMORY_V0 ||
+        failed_initialize.block.data != (void *)(uintptr_t)1 || failed_initialize.block.size != 7 ||
+        failed_initialize.block.alignment != 1 || failed_initialize.length != 3 ||
+        fy_std_system_heap_probe_live_allocations_v0() != 0) {
+        return 12;
+    }
+
+    if (fy_std_buffer_initialize_v0(8, &buffer) != FY_STD_ALLOC_OK_V0 ||
+        fy_std_buffer_append_v0(&buffer, prefix, sizeof prefix) != FY_STD_ALLOC_OK_V0 ||
+        buffer.length != sizeof prefix || memcmp(buffer.block.data, prefix, sizeof prefix) != 0 ||
+        fy_std_system_heap_probe_live_allocations_v0() != 1) {
+        return 13;
+    }
+    void *preserved_data = buffer.block.data;
+    size_t preserved_size = buffer.block.size;
+    size_t preserved_alignment = buffer.block.alignment;
+    size_t preserved_length = buffer.length;
+
+    fy_std_system_heap_probe_fail_after_allocations_v0(0);
+    if (fy_std_buffer_reserve_v0(&buffer, 16) != FY_STD_ALLOC_OUT_OF_MEMORY_V0 ||
+        buffer.block.data != preserved_data || buffer.block.size != preserved_size ||
+        buffer.block.alignment != preserved_alignment || buffer.length != preserved_length ||
+        memcmp(buffer.block.data, prefix, sizeof prefix) != 0 ||
+        fy_std_system_heap_probe_live_allocations_v0() != 1) {
+        return 14;
+    }
+
+    overlap = (const uint8_t *)buffer.block.data + 1;
+    fy_std_system_heap_probe_fail_after_allocations_v0(0);
+    if (fy_std_buffer_append_v0(&buffer, overlap, 4) != FY_STD_ALLOC_OUT_OF_MEMORY_V0 ||
+        buffer.block.data != preserved_data || buffer.block.size != preserved_size ||
+        buffer.block.alignment != preserved_alignment || buffer.length != preserved_length ||
+        memcmp(buffer.block.data, prefix, sizeof prefix) != 0 ||
+        fy_std_system_heap_probe_live_allocations_v0() != 1) {
+        return 15;
+    }
+
+    fy_std_system_heap_probe_fail_after_allocations_v0(0);
+    if (fy_std_buffer_resize_zeroed_v0(&buffer, 16) != FY_STD_ALLOC_OUT_OF_MEMORY_V0 ||
+        buffer.block.data != preserved_data || buffer.block.size != preserved_size ||
+        buffer.block.alignment != preserved_alignment || buffer.length != preserved_length ||
+        memcmp(buffer.block.data, prefix, sizeof prefix) != 0 ||
+        fy_std_system_heap_probe_live_allocations_v0() != 1) {
+        return 16;
+    }
+
+    overlap = (const uint8_t *)buffer.block.data + 1;
+    if (fy_std_buffer_append_v0(&buffer, overlap, 4) != FY_STD_ALLOC_OK_V0 ||
+        buffer.length != 10 || memcmp(buffer.block.data, "abcdefbcde", 10) != 0 ||
+        fy_std_system_heap_probe_live_allocations_v0() != 1) {
+        return 17;
+    }
+    if (fy_std_buffer_resize_zeroed_v0(&buffer, 16) != FY_STD_ALLOC_OK_V0 ||
+        buffer.length != 16 || memcmp(buffer.block.data, "abcdefbcde", 10) != 0 ||
+        fy_std_system_heap_probe_live_allocations_v0() != 1) {
+        return 18;
+    }
+    bytes = (const uint8_t *)buffer.block.data;
+    for (size_t index = 10; index < 16; ++index) {
+        if (bytes[index] != 0) {
+            return 19;
+        }
+    }
+    if (fy_std_buffer_drop_v0(&buffer) != FY_STD_ALLOC_OK_V0 ||
+        buffer.block.data != NULL || buffer.block.size != 0 || buffer.block.alignment != 0 ||
+        buffer.length != 0 || fy_std_system_heap_probe_live_allocations_v0() != 0) {
+        return 20;
     }
     return 0;
 }
