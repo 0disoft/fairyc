@@ -64,7 +64,7 @@ regenerate, or override compiler source.
 - Windows MSVC native ABI probe generator: internal/windowsabiprobe/
 - Windows x64 native exception and virtual-unwind probe generator: internal/windowsunwindprobe/
 - Windows AMD64 PE, COFF object, and x64 unwind structure inspector: internal/pecoff/
-- Resolved package graph fixtures: spec/fixtures/package/manifest-v0.json
+- Resolved package graph fixtures: spec/fixtures/package/manifest-v1.json with historical manifest-v0.json coverage
 - Resolved package graph validation and lookup: internal/packagegraph/
 - Resolved package graph fixture runner: internal/packagefixture/
 - PackageInstanceId v1 fixtures: spec/fixtures/package-identity/manifest-v1.json

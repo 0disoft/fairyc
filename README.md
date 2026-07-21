@@ -472,7 +472,7 @@ or arbitrary link-input option.
 - Windows MSVC native ABI probe generator: `internal/windowsabiprobe/`
 - Windows x64 native exception and virtual-unwind probe generator: `internal/windowsunwindprobe/`
 - Windows AMD64 PE, COFF object, and x64 unwind structure inspector: `internal/pecoff/`
-- Resolved package graph engine, fixture runner, and fixtures: `internal/packagegraph/`, `internal/packagefixture/`, `spec/fixtures/package/manifest-v0.json`
+- Resolved acyclic package graph engine, fixture runner, and v1/v0 fixtures: `internal/packagegraph/`, `internal/packagefixture/`, `spec/fixtures/package/manifest-v1.json`
 - PackageInstanceId v1 encoding, vectors, and runner: `internal/packagegraph/identity.go`, `spec/fixtures/package-identity/manifest-v1.json`, `internal/packageidentityfixture/`
 - Public-interface hash v1 extraction, fixtures, and runner: `internal/moduleinterface/`, `spec/fixtures/module-interface/manifest-v1.json`, `internal/moduleinterfacefixture/`
 - Package-source digest v1 encoding, fixtures, and runner: `internal/packagecontent/`, `spec/fixtures/package-source/manifest-v1.json`, `internal/packagecontentfixture/`

@@ -1,0 +1,58 @@
+{
+  "$schema": "./schema-v1.json",
+  "schemaVersion": "fairyc.package-fixtures/v1",
+  "includes": ["manifest-v0.json"],
+  "deferred": [
+    "public package coordinate and manifest syntax",
+    "version-range solving and feature-unification policy",
+    "public lockfile encoding and PackageInstanceId v1 adoption",
+    "registry, path, Git, archive, and network source acquisition",
+    "workspace member discovery",
+    "serialized module-interface artifacts and cache adoption"
+  ],
+  "contracts": [
+    "docs/product/02-spec.md",
+    "docs/adr/0014-resolved-package-graph-fixture-contract.md",
+    "docs/adr/0142-reject-package-dependency-cycles.md",
+    "docs/package/package-graph-v0.md",
+    "docs/package/manifest-lockfile-readiness.md",
+    "docs/compatibility/versioning-v0.md"
+  ],
+  "cases": [
+    {
+      "id": "fail.package.dependency-cycle",
+      "caseRoot": "cases/fail/dependency-cycle",
+      "packages": [
+        {
+          "node": "app",
+          "role": "root",
+          "packageUid": "fixture.cycle.app",
+          "sourceIdentity": "fixture-source:cycle-app",
+          "versionIdentity": "fixture-version:workspace",
+          "features": [],
+          "sourceRoot": "packages/app/src",
+          "sources": ["app.fy"]
+        },
+        {
+          "node": "helper",
+          "role": "dependency",
+          "packageUid": "fixture.cycle.helper",
+          "sourceIdentity": "fixture-source:cycle-helper",
+          "versionIdentity": "fixture-version:1",
+          "features": [],
+          "sourceRoot": "packages/helper/src",
+          "sources": ["helper.fy"]
+        }
+      ],
+      "dependencies": [
+        { "owner": "app", "binding": "helper", "target": "helper" },
+        { "owner": "helper", "binding": "app", "target": "app" }
+      ],
+      "expect": {
+        "status": "reject",
+        "reason": "package-dependency-cycle",
+        "subjects": ["app", "helper"]
+      }
+    }
+  ]
+}

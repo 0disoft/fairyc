@@ -3,7 +3,7 @@
 - Status: Draft Stage 0 fixture contract
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0014-resolved-package-graph-fixture-contract.md`
-- Fixture source: `spec/fixtures/package/manifest-v0.json`
+- Fixture source: `spec/fixtures/package/manifest-v1.json`, including historical v0 cases
 - Implementation sources: `internal/packagegraph/`, `internal/packagefixture/`
 
 ## Boundary
@@ -33,6 +33,11 @@ Module identity is `(PackageInstanceId, module path)`. Two isolated package inst
 
 Transitive dependency modules are not visible. Direct edges that resolve to the same logical package instance are deduplicated before lookup. Zero visible instance providers rejects the lookup as missing; more than one distinct visible instance provider rejects it as ambiguous. The dependency binding in the resolved graph is lockfile-edge identity and does not silently rewrite source module paths.
 
+After exact-instance deduplication, the dependency graph must be acyclic. A self-edge created by two
+fixture handles collapsing to one instance also rejects. Duplicate bindings reject before cycle
+analysis; cycles reject before module lookup. Stage 0 therefore never assigns build order,
+initialization, partial-interface, or cache semantics to package cycles.
+
 ## Standard library
 
 The standard library is a normal explicit package instance with the fixture role `standard-library`. It is injected as a direct dependency when a fixture needs `std::*`. There is no implicit prelude, magical host installation lookup, or type created merely because a user package declares the same name.
@@ -52,9 +57,9 @@ Reject reasons in this fixture schema are test-rule identities, not released use
 
 ## Executable evidence
 
-`internal/packagefixture` strictly decodes the v0 manifest, rejects duplicate JSON keys and unknown
+`internal/packagefixture` strictly decodes the v1 manifest and its exact v0 include, rejects duplicate JSON keys and unknown
 fields, proves that each declared source list exactly matches the contained regular `.fy` files,
-parses every source with its package-local module identity, and executes all eight manifest cases
+parses every source with its package-local module identity, and executes all nine manifest cases
 through `internal/packagegraph`. The graph engine compares the exact resolved-instance tuple,
 deduplicates equal instances, validates unique direct bindings, and resolves imports through only
 the current instance and direct dependency instances. Passing graphs can then produce build-local
@@ -86,7 +91,7 @@ solver, public manifest, lockfile, source downloader, registry, cache, or stable
 
 ## Deferred surface
 
-Public coordinates, manifest and lockfile schemas, source kinds and checksums, registry policy, offline and vendored behavior, version selection, feature unification, dependency cycles, workspace discovery, package signing, serialized module interfaces, and cache storage remain separate decisions. `PackageInstanceId` v1 and public-interface hash v1 are fixed independently and do not settle those formats.
+Public coordinates, manifest and lockfile schemas, source kinds and checksums, registry policy, offline and vendored behavior, version selection, feature unification, workspace discovery, package signing, serialized module interfaces, and persistent cache storage remain separate decisions. Package cycles are rejected by ADR 0142. `PackageInstanceId` v1 and public-interface hash v1 are fixed independently and do not settle the remaining formats.
 
 `manifest-lockfile-readiness.md` audits those gaps and records a smallest local-exact recommendation.
 That audit is not a public schema and does not authorize the compiler to accept `fairy.toml` or

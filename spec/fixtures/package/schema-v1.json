@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fairyc:package-fixtures:v1",
+  "title": "Fairy C resolved package graph fixture manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "includes", "deferred", "contracts", "cases"],
+  "properties": {
+    "$schema": { "const": "./schema-v1.json" },
+    "schemaVersion": { "const": "fairyc.package-fixtures/v1" },
+    "includes": {
+      "type": "array",
+      "prefixItems": [{ "const": "manifest-v0.json" }],
+      "minItems": 1,
+      "maxItems": 1
+    },
+    "deferred": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "contracts": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/case" }
+    }
+  },
+  "$defs": {
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "caseRoot", "packages", "dependencies", "expect"],
+      "properties": {
+        "id": { "const": "fail.package.dependency-cycle" },
+        "caseRoot": { "$ref": "./schema-v0.json#/$defs/relativeDirectory" },
+        "packages": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "./schema-v0.json#/$defs/packageNode" }
+        },
+        "dependencies": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "./schema-v0.json#/$defs/dependency" }
+        },
+        "expect": { "$ref": "#/$defs/failExpectation" }
+      }
+    },
+    "failExpectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reason", "subjects"],
+      "properties": {
+        "status": { "const": "reject" },
+        "reason": { "const": "package-dependency-cycle" },
+        "subjects": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "./schema-v0.json#/$defs/nodeId" }
+        },
+        "importPath": { "$ref": "./schema-v0.json#/$defs/modulePath" }
+      }
+    }
+  }
+}

@@ -20,7 +20,7 @@
 - Embedded scalar C runtime: internal/cruntime/
 - Provisional target standard-library C sources: internal/cstdlib/
 - Linux scalar C differential runner: internal/cbackendnative/
-- Resolved package graph fixture manifest: spec/fixtures/package/manifest-v0.json
+- Resolved package graph fixture manifest: spec/fixtures/package/manifest-v1.json, including historical v0 cases
 - Resolved package graph engine and fixture runner: internal/packagegraph/, internal/packagefixture/
 - PackageInstanceId v1 vectors and runner: spec/fixtures/package-identity/manifest-v1.json, internal/packageidentityfixture/
 - Public-interface hash v1 fixtures and runner: spec/fixtures/module-interface/manifest-v1.json, internal/moduleinterface/, internal/moduleinterfacefixture/

@@ -52,7 +52,7 @@
 - Windows MSVC native ABI probe route: internal/windowsabiprobe/, internal/cdriver/, cmd/fairyc-windows-host-smoke/
 - Windows x64 native exception and virtual-unwind probe route: internal/windowsunwindprobe/, internal/cdriver/, cmd/fairyc-windows-host-smoke/
 - Windows AMD64 PE, COFF object, and x64 unwind inspection route: internal/pecoff/, internal/cdriver/, cmd/fairyc-windows-host-smoke/
-- Resolved package graph fixture route: spec/fixtures/package/manifest-v0.json
+- Resolved package graph fixture route: spec/fixtures/package/manifest-v1.json and historical manifest-v0.json
 - Resolved package graph implementation route: internal/packagegraph/
 - Resolved package graph fixture runner route: internal/packagefixture/
 - PackageInstanceId v1 fixture route: spec/fixtures/package-identity/manifest-v1.json

@@ -338,7 +338,12 @@ The standard library has an independent version and declares required language r
 
 Manifest schema, lockfile schema, source archive schema, and any future binary artifact schema are independent. Stage 0 needs manifest and lockfile schemas only. A stable binary package format would falsely imply a stable native Fairy ABI and is deferred.
 
-`fairyc.package-fixtures/v0` versions repository input and expectation data for an already-resolved graph. It is not the public manifest schema, lockfile schema, solver protocol, or concrete `PackageInstanceId` encoding, and compatibility with it does not imply compatibility with any future package-manager format.
+`fairyc.package-fixtures/v0` versions the eight historical repository cases for an already-resolved
+graph. `fairyc.package-fixtures/v1` explicitly includes those cases and adds the closed
+`package-dependency-cycle` rejection after exact-instance deduplication. The runner retains direct
+v0 readability. Neither version is the public manifest schema, lockfile schema, solver protocol, or
+concrete `PackageInstanceId` encoding, and compatibility with either does not imply compatibility
+with any future package-manager format.
 
 `fairyc.package-identity-fixtures/v1` independently fixes `PackageInstanceId` v1 as SHA-256 over
 the domain-separated, tagged, network-order-length encoding in

@@ -13,7 +13,8 @@ Module paths also contain no package coordinate. If dependency visibility is lef
 
 ## Decision
 
-1. `spec/fixtures/package/manifest-v0.json` owns Stage 0 resolved-package-graph acceptance data.
+1. `spec/fixtures/package/manifest-v1.json` owns current Stage 0 resolved-package-graph acceptance
+   data and explicitly includes the historical v0 cases.
 2. The fixture input begins after dependency resolution and uses opaque identity tokens. It is not a public manifest, lockfile, registry, or solver format.
 3. Package-instance equality uses package UID, resolved source identity, version identity, and the sorted feature set. This fixture did not originally choose a concrete ID; ADR 0138 later fixes the independent `PackageInstanceId` v1 contract without changing tuple equality.
 4. Every package instance owns one source root. File-to-module mapping remains package-local and unchanged.
@@ -23,7 +24,11 @@ Module paths also contain no package coordinate. If dependency visibility is lef
 8. The standard library is an explicit package instance and direct dependency, never an implicit prelude or host-discovered magical namespace.
 9. The dedicated `pass.package.stdlib-arena-region` graph owns the bounded opaque `std::alloc::Arena` fixture type used by Region v1. Package pass means resolution succeeds; later Flow rejection remains owned by the Region fixture.
 10. Pass cases assert instance-equivalence classes and successful module lookups. Reject cases use fixture-rule reasons rather than reserving user diagnostic codes prematurely.
-11. The first cases cover explicit standard-library injection, bounded Arena resolution, identical-instance deduplication, feature-split instances, isolated equal module paths, ambiguous direct providers, hidden transitive modules, and duplicate dependency bindings.
+11. The first v0 cases cover explicit standard-library injection, bounded Arena resolution,
+    identical-instance deduplication, feature-split instances, isolated equal module paths,
+    ambiguous direct providers, hidden transitive modules, and duplicate dependency bindings.
+12. ADR 0142 adds v1 cycle rejection after exact-instance deduplication and before import lookup while
+    retaining direct v0 readability.
 
 ## Consequences
 
@@ -34,4 +39,4 @@ Module paths also contain no package coordinate. If dependency visibility is lef
 
 ## Revisit conditions
 
-Version or replace this schema when public manifest or lockfile input is accepted, dependency bindings enter source syntax, feature unification changes resolved identity, workspace members gain shared lookup, or resolved-graph expectations need facts beyond the separately versioned package-identity and public-interface fixtures.
+Version or replace this schema when public manifest or lockfile input is accepted, dependency bindings enter source syntax, feature unification changes resolved identity, workspace members gain shared lookup, package cycles gain semantics, or resolved-graph expectations need facts beyond the separately versioned package-identity and public-interface fixtures.

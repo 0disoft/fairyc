@@ -31,6 +31,8 @@ Any future manifest/lockfile design must preserve these existing contracts:
 - manifest schema, lockfile schema, source identity, cache key, and package identity versions remain
   separate compatibility dimensions;
 - unknown or contradictory identities fail closed; caches remain disposable misses.
+- package dependency edges are acyclic after exact-instance deduplication; cycles reject before
+  module lookup under ADR 0142.
 
 ## Decisions that are still missing
 
@@ -45,7 +47,6 @@ Any future manifest/lockfile design must preserve these existing contracts:
 | Source discovery | default root, include/exclude rules, symlinks, case collisions | These rules define source identity and security boundaries |
 | Standard library | how compiler/SDK selection injects and locks its package | Host installation paths must not become semantic identity |
 | Lock updates | frozen mode, ordinary update mode, stale local paths, merge policy | Silent rewrite would damage reproducibility; never rewriting would hurt local work |
-| Cycles | package-cycle policy and diagnostics | The current resolved graph does not yet reject all cycle forms |
 
 ## Recommended Stage 0 local-exact profile
 
@@ -66,8 +67,7 @@ The smallest coherent profile is intentionally less ambitious than Cargo, Go mod
 6. Use one explicit contained source root per package, defaulting only if the schema says so. Walk
    `.fy` files deterministically, reject path/case collisions and escaping links, and feed exact
    canonical paths to package-source digest v1.
-7. Reject package dependency cycles in Stage 0. Initialization and duplicate mutable package state
-   semantics are not mature enough to make cycles useful.
+7. Preserve ADR 0142 package-cycle rejection in every manifest and lockfile input path.
 8. Have the selected SDK inject one exact standard-library lock entry. Record its package instance,
    language requirement, runtime ABI, and source/content verification without recording the local
    SDK path as identity.

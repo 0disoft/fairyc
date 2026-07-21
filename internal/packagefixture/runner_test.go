@@ -12,24 +12,36 @@ import (
 	"github.com/0disoft/fairyc/internal/semantic"
 )
 
-func TestPackageManifestV0(t *testing.T) {
+func TestPackageManifestV1IncludesV0(t *testing.T) {
 	t.Parallel()
-	manifestPath := filepath.Join("..", "..", "spec", "fixtures", "package", "manifest-v0.json")
+	manifestPath := filepath.Join("..", "..", "spec", "fixtures", "package", "manifest-v1.json")
 	report, err := Run(manifestPath)
 	if err != nil {
 		t.Fatalf("Run() error = %v", err)
 	}
-	if report.CasesRun != 8 {
-		t.Fatalf("Run() cases = %d, want 8", report.CasesRun)
+	if report.CasesRun != 9 {
+		t.Fatalf("Run() cases = %d, want 9", report.CasesRun)
 	}
 	for _, failure := range report.Failures {
 		t.Errorf("%s: %s", failure.CaseID, failure.Detail)
 	}
 }
 
-func TestResolveCaseReturnsValidatedStdlibGraph(t *testing.T) {
+func TestPackageManifestV0RemainsReadable(t *testing.T) {
 	t.Parallel()
 	manifestPath := filepath.Join("..", "..", "spec", "fixtures", "package", "manifest-v0.json")
+	report, err := Run(manifestPath)
+	if err != nil {
+		t.Fatalf("Run() error = %v", err)
+	}
+	if report.CasesRun != 8 || len(report.Failures) != 0 {
+		t.Fatalf("Run() report = %+v", report)
+	}
+}
+
+func TestResolveCaseReturnsValidatedStdlibGraph(t *testing.T) {
+	t.Parallel()
+	manifestPath := filepath.Join("..", "..", "spec", "fixtures", "package", "manifest-v1.json")
 	resolved, err := ResolveCase(manifestPath, "pass.package.stdlib-arena-region")
 	if err != nil {
 		t.Fatalf("ResolveCase() error = %v", err)
@@ -45,7 +57,7 @@ func TestResolveCaseReturnsValidatedStdlibGraph(t *testing.T) {
 
 func TestResolvedModulePathIsolationReachesSemanticAnalysis(t *testing.T) {
 	t.Parallel()
-	manifestPath := filepath.Join("..", "..", "spec", "fixtures", "package", "manifest-v0.json")
+	manifestPath := filepath.Join("..", "..", "spec", "fixtures", "package", "manifest-v1.json")
 	resolved, err := ResolveCase(manifestPath, "pass.package.module-path-isolation")
 	if err != nil {
 		t.Fatalf("ResolveCase() error = %v", err)

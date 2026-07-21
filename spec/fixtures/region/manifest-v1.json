@@ -66,7 +66,7 @@
       "sourceRoot": "../package/cases/pass/stdlib-arena-region/packages/app/src",
       "sources": ["main.fy"],
       "packageGraph": {
-        "manifest": "../package/manifest-v0.json",
+        "manifest": "../package/manifest-v1.json",
         "caseId": "pass.package.stdlib-arena-region",
         "rootNode": "app"
       },

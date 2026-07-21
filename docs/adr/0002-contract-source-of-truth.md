@@ -25,7 +25,7 @@ Contract ownership is layered as follows:
 | Effects and external capabilities | `docs/language/0008-effects-and-capabilities-v0.md` and `spec/fixtures/semantic/manifest-v0.json` | Typed HIR effect sets, direct-call checks, safe wrappers, and Atlas effect facts |
 | Executable control flow | `docs/mir/mir-v0.md` and `spec/fixtures/mir/manifest-v0.json` | Interpreter, C, later native, object, and assembly output |
 | MIR verifier defects | `docs/mir/verifier-mutation-v0.md` and `spec/fixtures/mir-verifier/manifest-v0.json` | Go seed constructors, mutation application, internal compiler error evidence, and fuzz seeds |
-| Resolved package graph | `docs/package/package-graph-v0.md` and `spec/fixtures/package/manifest-v0.json` | Resolver instances, module lookup, lockfile records, cache keys, and Atlas package edges |
+| Resolved package graph | `docs/package/package-graph-v0.md` and `spec/fixtures/package/manifest-v1.json` | Resolver instances, acyclic dependency edges, module lookup, lockfile records, cache keys, and Atlas package edges |
 | Target layout and C ABI | `docs/abi/*.md`, then versioned target descriptions and ABI fixtures | Backend attributes, generated headers, and toolchain receipts |
 | Runtime and standard library | `docs/runtime/*.md`, then versioned runtime and library contracts | Target runtime bundles, headers, and executable fixtures |
 | Compatibility and artifact identity | `docs/compatibility/*.md` | Build receipts, cache keys, package metadata, and compatibility diagnostics |

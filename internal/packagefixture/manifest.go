@@ -9,6 +9,7 @@ import (
 type manifest struct {
 	Schema        string           `json:"$schema"`
 	SchemaVersion string           `json:"schemaVersion"`
+	Includes      []string         `json:"includes,omitempty"`
 	Deferred      []string         `json:"deferred"`
 	Contracts     []string         `json:"contracts"`
 	Cases         []caseDefinition `json:"cases"`

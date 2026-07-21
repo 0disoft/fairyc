@@ -16,6 +16,7 @@ const (
 	RoleStandardLibrary = "standard-library"
 
 	ReasonAmbiguousVisibleModule = "ambiguous-visible-module"
+	ReasonDependencyCycle        = "package-dependency-cycle"
 	ReasonDuplicateBinding       = "duplicate-dependency-binding"
 	ReasonMissingVisibleModule   = "missing-visible-module"
 )
@@ -187,6 +188,16 @@ func Resolve(graph Graph) (Result, *Rejection, error) {
 			outgoing[dependency.ownerClass] = append(outgoing[dependency.ownerClass], dependency.targetClass)
 		}
 	}
+	for owner := range outgoing {
+		slices.Sort(outgoing[owner])
+	}
+	if cycle := findDependencyCycle(outgoing, len(classes)); len(cycle) != 0 {
+		var subjects []string
+		for _, classIndex := range cycle {
+			subjects = appendUnique(subjects, classes[classIndex].members...)
+		}
+		return result, &Rejection{Reason: ReasonDependencyCycle, Subjects: subjects}, nil
+	}
 	for classIndex, class := range classes {
 		representative := graph.Nodes[class.nodes[0]]
 		visible := []int{classIndex}
@@ -227,6 +238,50 @@ func Resolve(graph Graph) (Result, *Rejection, error) {
 		}
 	}
 	return result, nil, nil
+}
+
+// findDependencyCycle returns the first deterministic simple cycle as unique class indexes. Class
+// and edge order are canonicalized by the caller; the repeated closing node is deliberately omitted.
+func findDependencyCycle(outgoing map[int][]int, count int) []int {
+	const (
+		unvisited uint8 = iota
+		visiting
+		visited
+	)
+	state := make([]uint8, count)
+	positions := make([]int, count)
+	for index := range positions {
+		positions[index] = -1
+	}
+	stack := make([]int, 0, count)
+	var cycle []int
+	var visit func(int) bool
+	visit = func(node int) bool {
+		state[node] = visiting
+		positions[node] = len(stack)
+		stack = append(stack, node)
+		for _, target := range outgoing[node] {
+			switch state[target] {
+			case unvisited:
+				if visit(target) {
+					return true
+				}
+			case visiting:
+				cycle = slices.Clone(stack[positions[target]:])
+				return true
+			}
+		}
+		stack = stack[:len(stack)-1]
+		positions[node] = -1
+		state[node] = visited
+		return false
+	}
+	for node := 0; node < count; node++ {
+		if state[node] == unvisited && visit(node) {
+			return cycle
+		}
+	}
+	return nil
 }
 
 func validateNode(node Node) error {

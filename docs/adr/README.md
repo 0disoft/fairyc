@@ -151,6 +151,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0139-public-interface-hash-v1.md`: semantic public-interface projection, stable self/dependency type names, full SHA-256 hash, and bounded invalidation classes.
 - `0140-package-source-digest-v1.md`: canonical relative source paths plus exact bytes, full SHA-256 digest, and source/interface invalidation separation.
 - `0141-whole-package-cache-key-and-bounds-v1.md`: exact compatibility-vector cache keys plus mandatory byte/entry bounds and process-local LRU behavior.
+- `0142-reject-package-dependency-cycles.md`: post-deduplication acyclic package graphs, deterministic cycle rejection, and v1-over-v0 fixture evolution.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

@@ -19,12 +19,15 @@ import (
 )
 
 const (
-	fixtureSchemaVersion = "fairyc.package-fixtures/v0"
-	fixtureSchemaPath    = "./schema-v0.json"
-	maxManifestBytes     = 2 << 20
-	maxFixtureCases      = 1024
-	maxCaseSources       = 4096
-	maxCaseSourceBytes   = 64 << 20
+	fixtureSchemaVersionV0 = "fairyc.package-fixtures/v0"
+	fixtureSchemaVersionV1 = "fairyc.package-fixtures/v1"
+	fixtureSchemaPathV0    = "./schema-v0.json"
+	fixtureSchemaPathV1    = "./schema-v1.json"
+	baseManifestV0         = "manifest-v0.json"
+	maxManifestBytes       = 2 << 20
+	maxFixtureCases        = 1024
+	maxCaseSources         = 4096
+	maxCaseSourceBytes     = 64 << 20
 )
 
 var (
@@ -89,6 +92,44 @@ func ResolveCase(manifestPath, caseID string) (ResolvedCase, error) {
 }
 
 func loadManifest(path string) (manifest, error) {
+	definition, err := loadManifestFile(path)
+	if err != nil {
+		return manifest{}, err
+	}
+	switch definition.SchemaVersion {
+	case fixtureSchemaVersionV0:
+		if definition.Schema != fixtureSchemaPathV0 || len(definition.Includes) != 0 {
+			return manifest{}, fmt.Errorf("invalid package fixture v0 contract header")
+		}
+	case fixtureSchemaVersionV1:
+		if definition.Schema != fixtureSchemaPathV1 || !slices.Equal(definition.Includes, []string{baseManifestV0}) {
+			return manifest{}, fmt.Errorf("invalid package fixture v1 contract header")
+		}
+		basePath, err := resolveWithin(filepath.Dir(path), filepath.Dir(path), baseManifestV0)
+		if err != nil {
+			return manifest{}, fmt.Errorf("resolve package fixture v0 include: %w", err)
+		}
+		base, err := loadManifestFile(basePath)
+		if err != nil {
+			return manifest{}, err
+		}
+		if base.Schema != fixtureSchemaPathV0 || base.SchemaVersion != fixtureSchemaVersionV0 || len(base.Includes) != 0 {
+			return manifest{}, fmt.Errorf("invalid included package fixture v0 contract header")
+		}
+		if err := validateManifestListsAndCases(base); err != nil {
+			return manifest{}, fmt.Errorf("invalid included package fixture v0: %w", err)
+		}
+		definition.Cases = append(slices.Clone(base.Cases), definition.Cases...)
+	default:
+		return manifest{}, fmt.Errorf("unsupported package fixture schema version %q", definition.SchemaVersion)
+	}
+	if err := validateManifestListsAndCases(definition); err != nil {
+		return manifest{}, err
+	}
+	return definition, nil
+}
+
+func loadManifestFile(path string) (manifest, error) {
 	contents, err := readBoundedRegularFile(path, maxManifestBytes)
 	if err != nil {
 		return manifest{}, fmt.Errorf("read package manifest: %w", err)
@@ -97,23 +138,24 @@ func loadManifest(path string) (manifest, error) {
 	if err := decodeStrictJSON(contents, &definition); err != nil {
 		return manifest{}, fmt.Errorf("decode package manifest: %w", err)
 	}
-	if definition.Schema != fixtureSchemaPath || definition.SchemaVersion != fixtureSchemaVersion {
-		return manifest{}, fmt.Errorf("invalid package fixture contract header")
-	}
+	return definition, nil
+}
+
+func validateManifestListsAndCases(definition manifest) error {
 	if len(definition.Cases) == 0 || len(definition.Cases) > maxFixtureCases {
-		return manifest{}, fmt.Errorf("package fixture case count is outside the implementation guard")
+		return fmt.Errorf("package fixture case count is outside the implementation guard")
 	}
 	if !nonemptyUnique(definition.Deferred, true) || !nonemptyUnique(definition.Contracts, false) {
-		return manifest{}, fmt.Errorf("invalid package fixture contract lists")
+		return fmt.Errorf("invalid package fixture contract lists")
 	}
 	seenCases := make(map[string]struct{}, len(definition.Cases))
 	for _, fixture := range definition.Cases {
 		if _, duplicate := seenCases[fixture.ID]; duplicate {
-			return manifest{}, fmt.Errorf("duplicate package fixture case %q", fixture.ID)
+			return fmt.Errorf("duplicate package fixture case %q", fixture.ID)
 		}
 		seenCases[fixture.ID] = struct{}{}
 	}
-	return definition, nil
+	return nil
 }
 
 func runCase(manifestDirectory string, fixture caseDefinition) []Failure {
@@ -239,9 +281,9 @@ func validateCaseShape(fixture caseDefinition) error {
 		if !modulePattern.MatchString(fixture.Expect.ImportPath) {
 			return fmt.Errorf("reject expectation has invalid import path")
 		}
-	case packagegraph.ReasonDuplicateBinding:
+	case packagegraph.ReasonDuplicateBinding, packagegraph.ReasonDependencyCycle:
 		if fixture.Expect.ImportPath != "" {
-			return fmt.Errorf("duplicate-binding expectation must omit importPath")
+			return fmt.Errorf("graph-structure rejection must omit importPath")
 		}
 	default:
 		return fmt.Errorf("unknown reject reason %q", fixture.Expect.Reason)

@@ -79,6 +79,40 @@ func TestResolveRejectsDuplicateBindingBeforeImports(t *testing.T) {
 	}
 }
 
+func TestResolveRejectsDependencyCycleBeforeImports(t *testing.T) {
+	t.Parallel()
+	_, rejection, err := Resolve(Graph{
+		Nodes: []Node{
+			{ID: "app", Role: RoleRoot, Identity: testIdentity("app"), Modules: []Module{{Path: "app", Imports: []string{"missing"}}}},
+			{ID: "middle", Role: RoleDependency, Identity: testIdentity("middle"), Modules: []Module{{Path: "middle"}}},
+			{ID: "leaf", Role: RoleDependency, Identity: testIdentity("leaf"), Modules: []Module{{Path: "leaf"}}},
+		},
+		Dependencies: []Dependency{
+			{Owner: "app", Binding: "middle", Target: "middle"},
+			{Owner: "middle", Binding: "leaf", Target: "leaf"},
+			{Owner: "leaf", Binding: "app", Target: "app"},
+		},
+	})
+	if err != nil || rejection == nil || rejection.Reason != ReasonDependencyCycle || !slices.Equal(rejection.Subjects, []string{"app", "middle", "leaf"}) || rejection.ImportPath != "" {
+		t.Fatalf("Resolve() rejection = %+v, error = %v", rejection, err)
+	}
+}
+
+func TestResolveRejectsSelfDependencyAfterInstanceDeduplication(t *testing.T) {
+	t.Parallel()
+	shared := testIdentity("shared")
+	_, rejection, err := Resolve(Graph{
+		Nodes: []Node{
+			{ID: "shared-left", Role: RoleRoot, Identity: shared, Modules: []Module{{Path: "shared"}}},
+			{ID: "shared-right", Role: RoleDependency, Identity: shared, Modules: []Module{{Path: "shared"}}},
+		},
+		Dependencies: []Dependency{{Owner: "shared-left", Binding: "self", Target: "shared-right"}},
+	})
+	if err != nil || rejection == nil || rejection.Reason != ReasonDependencyCycle || !slices.Equal(rejection.Subjects, []string{"shared-left", "shared-right"}) {
+		t.Fatalf("Resolve() rejection = %+v, error = %v", rejection, err)
+	}
+}
+
 func testIdentity(name string) Identity {
 	return Identity{PackageUID: name, SourceIdentity: "source-" + name, VersionIdentity: "1"}
 }

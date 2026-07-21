@@ -29,7 +29,7 @@ This directory contains versioned normative data that future compiler tests can 
 - `fixtures/mir-verifier/schema-v0.json`: named valid-seed and one-mutation verifier expectation schema;
 - `fixtures/mir-verifier/manifest-v0.json`: one isolated negative recipe for every current `Vxxxx` invariant.
 - `fixtures/package/schema-v0.json`: already-resolved package graph expectation schema;
-- `fixtures/package/manifest-v0.json`: package-instance equality, direct visibility, module ownership, and explicit standard-library injection cases.
+- `fixtures/package/manifest-v1.json`: historical v0 package identity/visibility cases plus post-deduplication dependency-cycle rejection.
 - `fixtures/package-identity/manifest-v1.json`: canonical resolved-instance bytes, full SHA-256 IDs, component boundaries, and identity validation cases.
 - `fixtures/module-interface/manifest-v1.json`: source-visible interface digest and same/different invalidation cases.
 - `fixtures/package-source/manifest-v1.json`: exact canonical path/source-byte digest and invalidation cases.
