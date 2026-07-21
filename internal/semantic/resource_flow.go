@@ -235,7 +235,7 @@ func (a *analyzer) resourceExpression(module *moduleScope, expression *ast.Expre
 		reachable = a.resourceIf(module, expression, environment, mode)
 	case syntax.KindWhile:
 		a.resourceWhile(module, expression, environment)
-	case syntax.KindMatch:
+	case syntax.KindMatch, syntax.KindSwitch:
 		reachable = a.resourceMatch(module, expression, environment, mode)
 	case syntax.KindBlock:
 		reachable = a.resourceBlock(module, expression.Block, environment, true, mode)

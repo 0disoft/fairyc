@@ -15,7 +15,7 @@ var keywords = map[string]struct{}{
 	"fn": {}, "if": {}, "impl": {}, "import": {}, "in": {}, "let": {},
 	"match": {}, "module": {}, "mut": {}, "null": {}, "pub": {},
 	"ptr": {}, "ref": {}, "region": {}, "resource": {}, "return": {}, "self": {}, "struct": {},
-	"true": {}, "unsafe": {}, "var": {}, "while": {},
+	"switch": {}, "case": {}, "true": {}, "unsafe": {}, "var": {}, "while": {},
 }
 
 var symbols = []string{

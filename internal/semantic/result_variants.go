@@ -7,9 +7,9 @@ const (
 
 func resultVariantPath(value string) (string, bool) {
 	switch value {
-	case "Result::Ok":
+	case "Result::Ok", ".ok":
 		return resultVariantOK, true
-	case "Result::Err":
+	case "Result::Err", ".err":
 		return resultVariantErr, true
 	default:
 		return "", false

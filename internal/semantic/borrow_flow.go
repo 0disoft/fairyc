@@ -402,7 +402,7 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 		return f.evaluateBlock(expression.Block, environment, false)
 	case syntax.KindIf:
 		return f.evaluateIf(expression, environment)
-	case syntax.KindMatch:
+	case syntax.KindMatch, syntax.KindSwitch:
 		return f.evaluateMatch(expression, environment)
 	case syntax.KindWhile:
 		return f.evaluateWhile(expression, environment)
@@ -1198,7 +1198,7 @@ func (f *borrowFlowAnalyzer) liveExpression(expression *ast.Expression, liveOut 
 			branchLive = append(branchLive, cloneBorrowLive(liveOut))
 		}
 		return f.liveExpression(expression.Children[0], mergeBorrowLive(branchLive...), context)
-	case syntax.KindMatch:
+	case syntax.KindMatch, syntax.KindSwitch:
 		if len(expression.Children) < 2 {
 			return f.liveChildren(expression.Children, liveOut, context)
 		}

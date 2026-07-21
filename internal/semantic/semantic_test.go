@@ -389,6 +389,35 @@ fn unwrap(input: Option<i32>) -> i32 {
 	}
 }
 
+func TestAnalyzeLowersCShapedSwitchAndLeadingDotVariants(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn Result<i32, i32> classify(i32 value) {
+    if (value >= 0) { return .ok(value); } else { return .err(-value); }
+}
+fn i32 unwrap(Result<i32, i32> input) {
+    return switch (input) {
+        case .ok(value): { value }
+        case .err(error): { -error }
+    };
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+	if len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].Functions) != 2 {
+		t.Fatalf("HIR modules = %+v", result.HIR.Modules)
+	}
+	unwrap := result.HIR.Modules[0].Functions[1]
+	if len(unwrap.Body.Statements) != 1 || unwrap.Body.Statements[0].Expression == nil {
+		t.Fatalf("unwrap body = %+v", unwrap.Body)
+	}
+	lowered := unwrap.Body.Statements[0].Expression
+	if lowered.Kind != "match" || len(lowered.Arms) != 2 || lowered.Arms[0].Variant != "ok" || lowered.Arms[1].Variant != "err" {
+		t.Fatalf("lowered switch = %+v", lowered)
+	}
+}
+
 func TestAnalyzePreservesOrderedResourceDefinitionWithEmptyDrop(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{

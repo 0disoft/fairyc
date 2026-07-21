@@ -473,7 +473,7 @@ func (a *analyzer) resolveExpression(module *moduleScope, scope *lexicalScope, e
 	if expression == nil {
 		return
 	}
-	if expression.Kind == syntax.KindMatch {
+	if expression.Kind == syntax.KindMatch || expression.Kind == syntax.KindSwitch {
 		a.resolveMatch(module, scope, expression)
 		return
 	}
@@ -481,7 +481,7 @@ func (a *analyzer) resolveExpression(module *moduleScope, scope *lexicalScope, e
 		a.resolveRegion(module, scope, expression)
 		return
 	}
-	if expression.Kind == syntax.KindPath && !isCompilerBuiltinPath(expression.Text) {
+	if expression.Kind == syntax.KindPath && !strings.HasPrefix(expression.Text, ".") && !isCompilerBuiltinPath(expression.Text) {
 		if _, recognized := a.resolveEnumVariantPath(module, expression); !recognized {
 			a.resolvePath(module, scope, expression)
 		}

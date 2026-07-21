@@ -188,6 +188,11 @@ func (p *parser) parsePrimary(allowRecord bool) NodeID {
 		p.advance()
 		return p.addNode(KindPath, start, nil, text, "")
 	}
+	if text == "." {
+		p.advance()
+		name := p.parseName()
+		return p.addNode(KindPath, start, nil, "."+name, "")
+	}
 	if token.Kind == lexer.Identifier {
 		pathID, value, _ := p.pathNode()
 		if allowRecord && p.match("{") {
@@ -231,6 +236,8 @@ func (p *parser) parsePrimary(allowRecord bool) NodeID {
 		return p.parseIf()
 	case "match":
 		return p.parseMatch()
+	case "switch":
+		return p.parseSwitch()
 	case "unsafe":
 		p.advance()
 		block := p.parseBlock()
@@ -238,6 +245,53 @@ func (p *parser) parsePrimary(allowRecord bool) NodeID {
 	default:
 		return p.unexpected()
 	}
+}
+
+func (p *parser) parseSwitch() NodeID {
+	start := p.currentFullIndex()
+	p.advance()
+	p.expect("(")
+	scrutinee := p.parseExpression(0, true)
+	p.expect(")")
+	p.expect("{")
+	children := []NodeID{scrutinee}
+	for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
+		armStart := p.currentFullIndex()
+		p.expect("case")
+		pattern := p.parseSwitchPattern()
+		p.expect(":")
+		body := p.parseBlock()
+		children = append(children, p.addNode(KindPattern, armStart, []NodeID{pattern, body}, "arm", ""))
+	}
+	p.expect("}")
+	return p.addNode(KindSwitch, start, children, "", "")
+}
+
+func (p *parser) parseSwitchPattern() NodeID {
+	start := p.currentFullIndex()
+	p.expect(".")
+	name := p.parseName()
+	path := p.addNode(KindPath, start, nil, "."+name, "")
+	children := []NodeID{path}
+	if p.match("(") {
+		nameStart := p.currentFullIndex()
+		binding := p.parseName()
+		children = append(children, p.addNode(KindPath, nameStart, nil, binding, ""))
+		p.expect(")")
+	} else if p.match("{") {
+		for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
+			fieldStart := p.currentFullIndex()
+			field := p.parseName()
+			p.expect(":")
+			binding := p.parseName()
+			children = append(children, p.addNode(KindField, fieldStart, nil, field, binding))
+			if !p.match(",") {
+				break
+			}
+		}
+		p.expect("}")
+	}
+	return p.addNode(KindPattern, start, children, "."+name, "")
 }
 
 func (p *parser) parseLiteral() NodeID {
@@ -344,7 +398,7 @@ func isPrefixOperator(value string) bool {
 
 func isExpressionTerminator(value string) bool {
 	switch value {
-	case "", ";", ",", ")", "]", "}", "=", "=>", "..", "let", "var", "return", "discard", "while", "break", "continue", "region":
+	case "", ";", ",", ")", "]", "}", "=", "=>", ":", "case", "..", "let", "var", "return", "discard", "while", "break", "continue", "region":
 		return true
 	default:
 		return false
@@ -356,7 +410,7 @@ func canStartExpression(token lexer.Token, text string) bool {
 		return true
 	}
 	switch text {
-	case "true", "false", "null", "self", "(", "[", "{", "if", "match", "unsafe", "-", "+", "!", "~", "&", "*", "ref":
+	case "true", "false", "null", "self", ".", "(", "[", "{", "if", "match", "switch", "unsafe", "-", "+", "!", "~", "&", "*", "ref":
 		return true
 	default:
 		return false

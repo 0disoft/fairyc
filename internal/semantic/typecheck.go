@@ -16,6 +16,7 @@ type typeChecker struct {
 	module       *moduleScope
 	function     *ast.Function
 	hir          *hir.Function
+	resultType   hir.Type
 	loopDepth    int
 	unsafeScopes []hir.Span
 }
@@ -216,6 +217,7 @@ func (c *typeChecker) checkFunction() hir.Function {
 	if c.analyzer.dropOwners[c.function] == nil {
 		resultType = c.canonicalType(c.function.ResultType)
 	}
+	c.resultType = resultType
 	functionSymbol.typ = resultType
 	if errorSpan, ok := resultFailureSpan(c.function.ResultType); ok {
 		functionSymbol.resultError = errorSpan
@@ -354,7 +356,7 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 			c.addType(localSpan, symbol.typ)
 		case statement.Kind == syntax.KindReturn:
 			hasReturn = true
-			expression, actual := c.checkExpression(statement.Expression, expectedTail)
+			expression, actual := c.checkExpression(statement.Expression, c.resultType)
 			hirStatement.Expression = expression
 			if statement.Expression == nil {
 				actual = hir.TypeVoid
@@ -367,7 +369,7 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 				"E1009",
 				span(c.module.file.Path, primary),
 				actual,
-				expectedTail,
+				c.resultType,
 				span(c.module.file.Path, c.function.ResultType.Span),
 			)
 		case statement.Kind == syntax.KindAssignment:
@@ -481,6 +483,9 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 		actual = c.checkIf(expression, result, expected)
 	case syntax.KindMatch:
 		actual = c.checkMatch(expression, result, expected)
+	case syntax.KindSwitch:
+		actual = c.checkMatch(expression, result, expected)
+		result.Kind = string(syntax.KindMatch)
 	case syntax.KindWhile:
 		actual = c.checkWhile(expression, result)
 	case syntax.KindRecord:

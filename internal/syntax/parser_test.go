@@ -213,6 +213,32 @@ func TestParseCShapedControlBorrowAndRecordDesignators(t *testing.T) {
 	}
 }
 
+func TestParseCShapedSwitchAndLeadingDotVariants(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nfn Result<i32, i32> increment(Result<i32, i32> input) { return switch (input) { case .ok(value): { .ok(value + 1) } case .err(error): { .err(error) } }; }\n")
+	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	var switchCount int
+	paths := make(map[string]int)
+	for _, node := range tree.Nodes {
+		if node.Kind == KindSwitch {
+			switchCount++
+		}
+		if node.Kind == KindPath && strings.HasPrefix(node.Text, ".") {
+			paths[node.Text]++
+		}
+	}
+	if switchCount != 1 || paths[".ok"] != 2 || paths[".err"] != 2 {
+		t.Fatalf("switches = %d, leading-dot paths = %+v", switchCount, paths)
+	}
+	reconstructed, ok := tree.Reconstruct()
+	if !ok || !slices.Equal(reconstructed, input) {
+		t.Fatalf("Reconstruct() = %q, %v; want %q, true", reconstructed, ok, input)
+	}
+}
+
 func TestNestedTypeCloseChargesContextualTokenBudget(t *testing.T) {
 	t.Parallel()
 	input := []byte("module main;\nfn wrap(value: Token) -> Option<Option<Token>> { value }\n")

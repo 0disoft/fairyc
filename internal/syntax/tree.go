@@ -78,6 +78,7 @@ const (
 	KindRecord     Kind = "record"
 	KindIf         Kind = "if"
 	KindMatch      Kind = "match"
+	KindSwitch     Kind = "switch"
 	KindUnsafe     Kind = "unsafe"
 	KindPattern    Kind = "pattern"
 	KindError      Kind = "error"
