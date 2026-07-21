@@ -349,6 +349,9 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 				if value.Kind == OperandInvalid {
 					return false, fmt.Errorf("resource binding %d has no value", statement.Binding)
 				}
+				if path := l.liveResourcePath(statement.Expression); path != nil {
+					value = l.materializeMove(path, value, "binding-value", true)
+				}
 				l.appendOperation(Operation{
 					Kind: OperationInitialize, Span: binding.span, Symbol: statement.Binding,
 					DestinationLocal: LocalID(statement.Binding), Operands: []Operand{value},

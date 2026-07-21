@@ -2113,6 +2113,60 @@ fn i32 main() {
 	}
 }
 
+func TestLowerMovesResourceParameterIntoLocalBinding(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+resource Token {
+    i32 value;
+    cleanup {}
+}
+fn i32 consume(Token input) {
+    var Token value = input;
+    return value.value;
+}
+fn i32 main() {
+    return consume(Token { .value = 42 });
+}
+`)
+	var consume *Function
+	for index := range program.Functions {
+		if program.Functions[index].Name == "main::consume" {
+			consume = &program.Functions[index]
+			break
+		}
+	}
+	if consume == nil || len(consume.Resources) != 2 {
+		t.Fatalf("consume resources = %+v", consume)
+	}
+	input := consume.Resources[0]
+	value := consume.Resources[1]
+	var inputMoves, inputDrops, valueDrops int
+	for _, block := range consume.Blocks {
+		for _, operation := range block.Operations {
+			switch {
+			case operation.Kind == OperationMove && operation.Symbol == input.Symbol:
+				inputMoves++
+				if operation.Destination != "binding-value" {
+					t.Errorf("input move = %+v", operation)
+				}
+			case operation.Kind == OperationDrop && operation.Symbol == input.Symbol:
+				inputDrops++
+			case operation.Kind == OperationDrop && operation.Symbol == value.Symbol:
+				valueDrops++
+			}
+		}
+	}
+	if inputMoves != 1 || inputDrops != 0 || valueDrops != 1 {
+		t.Fatalf("consume ownership operations = input moves %d, input drops %d, value drops %d; moves=%+v", inputMoves, inputDrops, valueDrops, consume.Moves)
+	}
+	if len(consume.Moves) != 1 || consume.Moves[0].Destination != "binding-value" || !consume.Moves[0].CleanupObligationTransferred {
+		t.Fatalf("consume moves = %+v", consume.Moves)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+}
+
 func lowerTestSource(t *testing.T, text string) Program {
 	t.Helper()
 	parsed, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(text)), source.DefaultLimits())
