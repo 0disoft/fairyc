@@ -61,6 +61,8 @@
 - Public-interface extraction and runner route: internal/moduleinterface/, internal/moduleinterfacefixture/
 - Package-source digest v1 fixture route: spec/fixtures/package-source/manifest-v1.json
 - Package-source digest and runner route: internal/packagecontent/, internal/packagecontentfixture/
+- Whole-package cache-key v1 fixture route: spec/fixtures/package-cache/manifest-v1.json
+- Whole-package cache key, store, and runner route: internal/packagecache/, internal/packagecachefixture/
 - MIR and C backend route: docs/mir/
 - Package identity and visibility route: docs/package/
 - Target and C ABI route: docs/abi/

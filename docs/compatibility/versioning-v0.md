@@ -58,6 +58,13 @@ Internal MIR accepts an exact version only. It is mutable compiler state, not a 
 
 A cache key includes the full compiler build identity, language and MIR versions, target schema and ABI profile, toolchain fingerprint, backend and profile flags, runtime ABI, standard-library instance, source digest, dependency interface digests, feature set, and interface-hash algorithm. Incompatibility is a cache miss followed by lazy collection.
 
+`fairyc.package-cache-fixtures/v1` fixes the domain-separated full SHA-256 key under the canonical
+`fycache1-sha256-...` text form. The encoding includes the PackageInstanceId, source-digest, and
+public-interface encoding/algorithm names in addition to their full digest bytes. A key-version or
+component-algorithm mismatch is a miss. The first bounded store is process-local and the opaque
+typed-HIR, MIR, and object payloads remain exact-compiler disposable state rather than serialized
+compatibility formats. Persistent storage format and default limits remain undecided.
+
 ## Target and ABI
 
 ISO C11 is the only normative constrained-source transport dialect under ADR 0137. The Windows

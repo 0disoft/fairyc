@@ -26,12 +26,12 @@
 | `internal/packagegraph` and `internal/packageidentityfixture` | resolved-instance equality, canonical PackageInstanceId encoding, graph visibility, and versioned identity vectors | dependency solving, source acquisition, public manifest or lockfile syntax |
 | `internal/moduleinterface` and `internal/moduleinterfacefixture` | source-visible typed-HIR projection, stable nominal type names, interface hashing, and invalidation fixtures | HIR serialization, private layout, native ABI, cache storage, manifests, or lockfiles |
 | `internal/packagecontent` and `internal/packagecontentfixture` | exact canonical package source graph encoding, hashing, and invalidation vectors | source discovery, filesystem authority, archives, manifests, lockfiles, or cache storage |
-| `internal/cache` | deterministic cache keys, storage policy, collection | source-of-truth semantics |
+| `internal/packagecache` and `internal/packagecachefixture` | deterministic whole-package compatibility keys, caller-bounded process-local LRU storage, and invalidation fixtures | persistent format, public CLI policy, default limits, remote cache, or source-of-truth semantics |
 | `internal/snapshot` | immutable deterministic projection of analyzed HIR and verified MIR | Atlas query policy or free text |
 | `internal/atlas` | versioned semantic-map export and bounded queries over snapshots | frontend dependencies, LLM execution authority, embeddings, or source reparsing |
 | `runtime` | traps, process entry, empty storage, and required low-level memory helpers | allocators, files, strings, collections, logging, unwinding, or garbage collection |
 | `std` | `SystemHeap`, `Arena`, `Buffer`, text, Linux file, and safe C wrappers | compiler internals, hidden allocation, deferred generic collections, or portable-path claims |
-| `spec` | versioned normative grammar plus parser, semantic, resource, Region, Result, MIR, MIR-verifier, interpreter, C-emission, target-layout, C ABI, resolved-package-graph, PackageInstanceId, package-source, and public-interface fixture schemas and executable contract data | generated compiler output, build-local IDs, textual MIR snapshots, arbitrary MIR exchange, public package-manager syntax, or implementation-owned snapshots |
+| `spec` | versioned normative grammar plus parser, semantic, resource, Region, Result, MIR, MIR-verifier, interpreter, C-emission, target-layout, C ABI, resolved-package-graph, PackageInstanceId, package-source, public-interface, and whole-package-cache fixture schemas and executable contract data | generated compiler output, build-local IDs, textual MIR snapshots, arbitrary MIR exchange, public package-manager syntax, or implementation-owned snapshots |
 | `tests` | executable language, backend, ABI, and diagnostic contracts | production implementation logic |
 
 ## Public-contract policy

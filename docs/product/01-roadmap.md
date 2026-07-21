@@ -393,12 +393,17 @@ normalizes self and dependency nominal types independently from build-local numb
 canonical bytes with full SHA-256, and executes eight source-level invalidation fixtures. This closes
 package-instance encoding and the first source-interface hash. An independent exact package-source
 digest now sorts canonical relative paths and hashes every source byte, with five versioned cases
-proving order stability plus content, path, and line-ending invalidation. Public manifests, lockfiles,
-coordinates, source acquisition, serialized module interfaces, cache storage, measurements, and stable package
-commands remain Phase 3 work.
+proving order stability plus content, path, and line-ending invalidation. The first whole-package
+cache key combines those identities with every declared compiler, language, MIR, target, ABI,
+toolchain, backend, runtime, standard-library, feature, and profile compatibility member. A
+caller-bounded process-local LRU store proves byte/entry bounds, deep-copy isolation, and safe
+eviction without inventing an unmeasured default. Public manifests, lockfiles, coordinates, source
+acquisition, serialized module interfaces, persistent cross-process storage, measurements, and
+stable package commands remain Phase 3 work.
 
 - Add public package manifests, lockfiles, and serialized module interfaces on top of the resolved graph, concrete package-instance encoding, and public-interface hash contracts.
-- Start with whole-package reuse and a bounded content-addressed cache whose limits are derived from measurements.
+- Wire whole-package reuse into package compilation, then adopt persistent content-addressed storage
+  and default limits only from measured clean/warm workload evidence.
 - Stabilize the minimal `fairyc check`, `build`, `run`, `test`, `emit`, `explain`, and `targets` contracts.
 - Move to function-level reuse only when measured package rebuild or storage evidence justifies the complexity.
 

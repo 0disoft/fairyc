@@ -232,7 +232,7 @@ Safe-code bounds, null, division, shift, and overflow behavior remains stable ac
 
 ## Incremental build flow
 
-Early versions cache whole-package source fingerprints, interfaces, typed HIR, generic-free MIR, and target objects as their implementations become stable. Public interface and private implementation identities are kept separate. Function-level reuse, packed storage, and remote caching require measurements and an explicit adoption decision.
+Early versions cache whole-package source fingerprints, interfaces, typed HIR, generic-free MIR, and target objects as their implementations become stable. Public interface and private implementation identities are kept separate. The first executable cache boundary now provides a full compatibility-vector key and a caller-bounded process-local LRU store for opaque whole-package records. It does not yet persist across compiler processes. Persistent storage, default numeric limits, function-level reuse, packed storage, and remote caching require measurements and an explicit adoption decision.
 
 ## Failure and recovery
 

@@ -81,6 +81,11 @@ High-retention candidates are module interfaces, source fingerprints, dependency
 
 Low-retention candidates are generated C, assembly, full-debug objects, optimized bitcode, old compiler-version entries, verbose MIR dumps, and cheap-to-recompute intermediates. Atlas maps are replaceable outputs with independent compatibility, inspection, and collection rules.
 
+The executable v1 memory store requires caller-supplied positive entry and byte bounds and performs
+LRU collection under both. It establishes bounded behavior but does not choose product defaults.
+Persistent cache limits, age policy, and high/low-retention quotas remain UNDECIDED until the
+benchmark protocol above produces representative growth and reuse evidence.
+
 ## Review blockers
 
 - An exact target has no owner, workload, baseline, configured measurement, or failure action.

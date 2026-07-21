@@ -73,6 +73,8 @@ regenerate, or override compiler source.
 - Public-interface extraction, hashing, and fixture runner: internal/moduleinterface/, internal/moduleinterfacefixture/
 - Package-source digest v1 fixtures: spec/fixtures/package-source/manifest-v1.json
 - Package-source digest and fixture runner: internal/packagecontent/, internal/packagecontentfixture/
+- Whole-package cache-key v1 fixtures: spec/fixtures/package-cache/manifest-v1.json
+- Whole-package cache key, bounded memory store, and fixture runner: internal/packagecache/, internal/packagecachefixture/
 - Executable MIR semantics: docs/mir/*.md
 - Package identity and visibility: docs/package/*.md
 - Target and C ABI: docs/abi/*.md

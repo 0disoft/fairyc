@@ -30,6 +30,39 @@ func (hash Hash) String() string {
 	return HashPrefix + hex.EncodeToString(hash[:])
 }
 
+// MarshalText implements encoding.TextMarshaler for cache and map metadata.
+func (hash Hash) MarshalText() ([]byte, error) {
+	return []byte(hash.String()), nil
+}
+
+// UnmarshalText accepts only the complete canonical lowercase representation.
+func (hash *Hash) UnmarshalText(text []byte) error {
+	parsed, err := ParseHash(string(text))
+	if err != nil {
+		return err
+	}
+	*hash = parsed
+	return nil
+}
+
+// ParseHash parses the complete canonical public-interface hash.
+func ParseHash(value string) (Hash, error) {
+	var result Hash
+	if !strings.HasPrefix(value, HashPrefix) {
+		return result, fmt.Errorf("public interface hash has invalid prefix")
+	}
+	digestText := strings.TrimPrefix(value, HashPrefix)
+	if len(digestText) != sha256.Size*2 || digestText != strings.ToLower(digestText) {
+		return result, fmt.Errorf("public interface hash must contain %d lowercase hexadecimal digits", sha256.Size*2)
+	}
+	decoded, err := hex.DecodeString(digestText)
+	if err != nil {
+		return result, fmt.Errorf("decode public interface hash: %w", err)
+	}
+	copy(result[:], decoded)
+	return result, nil
+}
+
 // Descriptor is the declaration-order-independent public source interface of one package.
 type Descriptor struct {
 	Modules []Module

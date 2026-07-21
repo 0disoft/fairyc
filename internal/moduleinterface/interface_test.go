@@ -12,6 +12,25 @@ import (
 	"github.com/0disoft/fairyc/internal/source"
 )
 
+func TestParseHashRejectsNoncanonicalText(t *testing.T) {
+	t.Parallel()
+	valid := HashPrefix + strings.Repeat("a", 64)
+	parsed, err := ParseHash(valid)
+	if err != nil || parsed.String() != valid {
+		t.Fatalf("ParseHash(%q) = %v, %v", valid, parsed, err)
+	}
+	for _, value := range []string{
+		strings.TrimPrefix(valid, HashPrefix),
+		valid[:len(valid)-1],
+		strings.ToUpper(valid),
+		HashPrefix + strings.Repeat("g", 64),
+	} {
+		if _, err := ParseHash(value); err == nil {
+			t.Fatalf("ParseHash(%q) accepted", value)
+		}
+	}
+}
+
 func TestExtractConsumesTypedSourceHIR(t *testing.T) {
 	t.Parallel()
 	self := testInstanceID(t, "source-package")
