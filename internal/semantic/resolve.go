@@ -321,7 +321,15 @@ func (a *analyzer) declareCallables() {
 }
 
 func (a *analyzer) declareFunction(module *moduleScope, function *ast.Function) {
-	if previous := module.item(function.Name); previous != nil {
+	name := function.Name
+	if function.Owner != "" {
+		name = function.Owner + "::" + function.Name
+		if a.ownerSymbol(module, function.Owner) == nil {
+			a.addDiagnostic("E0101", span(module.file.Path, function.OwnerSpan))
+			return
+		}
+	}
+	if previous := module.item(name); previous != nil {
 		a.addDiagnostic("E0102", span(module.file.Path, function.NameSpan), RelatedSpan{
 			Role: "previous-declaration",
 			Span: span(previous.source, previous.declaration),
@@ -332,7 +340,7 @@ func (a *analyzer) declareFunction(module *moduleScope, function *ast.Function) 
 		id:          a.allocateSymbol(),
 		packageID:   module.key.packageID,
 		kind:        "function",
-		name:        function.Name,
+		name:        name,
 		module:      module.file.Module.Path,
 		source:      module.file.Path,
 		declaration: function.NameSpan,
@@ -340,7 +348,7 @@ func (a *analyzer) declareFunction(module *moduleScope, function *ast.Function) 
 		public:      function.Public,
 		function:    function,
 	}
-	module.functions[function.Name] = value
+	module.functions[name] = value
 	a.functions[function] = value
 }
 
@@ -647,12 +655,24 @@ func (a *analyzer) resolvePath(module *moduleScope, scope *lexicalScope, express
 			}
 		}
 	} else if len(parts) == 2 {
-		if imported := module.imports[parts[0]]; imported != nil {
+		if local := module.functions[expression.Text]; local != nil {
+			target = local
+		} else if imported := module.imports[parts[0]]; imported != nil {
 			target = imported.item(parts[1])
 			if target != nil && imported != module && !target.public {
 				a.addDiagnostic("E0103", span(module.file.Path, expression.Span), RelatedSpan{
 					Role: "declaration",
 					Span: span(target.source, target.declaration),
+				})
+				return
+			}
+		}
+	} else if len(parts) == 3 {
+		if imported := module.imports[parts[0]]; imported != nil {
+			target = imported.functions[parts[1]+"::"+parts[2]]
+			if target != nil && imported != module && !target.public {
+				a.addDiagnostic("E0103", span(module.file.Path, expression.Span), RelatedSpan{
+					Role: "declaration", Span: span(target.source, target.declaration),
 				})
 				return
 			}
@@ -679,6 +699,19 @@ func (a *analyzer) resolvePath(module *moduleScope, scope *lexicalScope, express
 			Declaration: span(target.source, target.declaration),
 		},
 	})
+}
+
+func (a *analyzer) ownerSymbol(module *moduleScope, name string) *symbol {
+	if module == nil {
+		return nil
+	}
+	if value := module.structs[name]; value != nil {
+		return value
+	}
+	if value := module.resources[name]; value != nil {
+		return value
+	}
+	return module.enums[name]
 }
 
 func (m *moduleScope) item(name string) *symbol {

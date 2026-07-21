@@ -224,11 +224,16 @@ func (c *typeChecker) checkFunction() hir.Function {
 	}
 	result := hir.Function{
 		Symbol:     functionSymbol.id,
-		Name:       c.function.Name,
+		Name:       functionSymbol.name,
 		Unsafe:     c.function.Unsafe,
 		Span:       span(c.module.file.Path, c.function.Span),
 		Effects:    slices.Clone(functionSymbol.effects),
 		ResultType: resultType,
+	}
+	if c.function.Owner != "" {
+		if owner := c.analyzer.ownerSymbol(c.module, c.function.Owner); owner != nil {
+			result.OwnerType = owner.typ
+		}
 	}
 	c.hir = &result
 	for index := range c.function.Parameters {

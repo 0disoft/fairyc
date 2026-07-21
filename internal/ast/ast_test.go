@@ -152,6 +152,22 @@ func TestLowerPreservesNonEmptyResourceDropBody(t *testing.T) {
 	}
 }
 
+func TestLowerPreservesOwnerQualifiedFunction(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nstruct Counter { i32 value; }\nfn i32 Counter::double(i32 value) { return value * 2; }\n")
+	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	module, err := Lower(tree)
+	if err != nil {
+		t.Fatalf("Lower() error = %v", err)
+	}
+	if len(module.Functions) != 1 || module.Functions[0].Owner != "Counter" || module.Functions[0].Name != "double" {
+		t.Fatalf("functions = %+v", module.Functions)
+	}
+	if module.Functions[0].OwnerSpan.EndByte <= module.Functions[0].OwnerSpan.StartByte {
+		t.Fatalf("owner span = %+v", module.Functions[0].OwnerSpan)
+	}
+}
+
 func TestLowerCapturesStructFields(t *testing.T) {
 	t.Parallel()
 	input := []byte("module main;\nstruct Holder { scratch: Region; }\n")

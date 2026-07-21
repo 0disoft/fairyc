@@ -443,6 +443,7 @@ type ResourceField struct {
 type Function struct {
 	Symbol      SymbolID
 	Name        string
+	OwnerType   Type
 	Unsafe      bool
 	Span        Span
 	Effects     []Effect

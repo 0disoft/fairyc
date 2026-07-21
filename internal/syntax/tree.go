@@ -46,6 +46,7 @@ const (
 	KindEnum       Kind = "enum"
 	KindImpl       Kind = "impl"
 	KindFunction   Kind = "function"
+	KindOwner      Kind = "owner"
 	KindForeign    Kind = "foreign-function"
 	KindField      Kind = "field"
 	KindVariant    Kind = "variant"

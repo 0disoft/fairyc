@@ -262,6 +262,25 @@ func TestParseCShapedResourceCleanup(t *testing.T) {
 	}
 }
 
+func TestParseOwnerQualifiedFunction(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nstruct Counter { i32 value; }\nfn i32 Counter::double(i32 value) { return value * 2; }\n")
+	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	var owner *Node
+	for index := range tree.Nodes {
+		if tree.Nodes[index].Kind == KindOwner {
+			owner = &tree.Nodes[index]
+			break
+		}
+	}
+	if owner == nil || owner.Text != "Counter" || owner.NameSpan.EndByte <= owner.NameSpan.StartByte {
+		t.Fatalf("owner = %+v", owner)
+	}
+}
+
 func TestNestedTypeCloseChargesContextualTokenBudget(t *testing.T) {
 	t.Parallel()
 	input := []byte("module main;\nfn wrap(value: Token) -> Option<Option<Token>> { value }\n")

@@ -266,6 +266,7 @@ func (p *parser) parseFunction(start int, leading []NodeID, method bool) NodeID 
 	var nameSpan diagnostic.Span
 	var resultType NodeID
 	var parameters []NodeID
+	owner := NoNode
 	cShaped := false
 	if p.atKind(lexer.Identifier) && p.peekText(1) == "(" {
 		name, nameSpan = p.parseNameWithSpan()
@@ -275,11 +276,21 @@ func (p *parser) parseFunction(start int, leading []NodeID, method bool) NodeID 
 	} else {
 		cShaped = true
 		resultType = p.parseType()
-		name, nameSpan = p.parseNameWithSpan()
+		firstName, firstSpan := p.parseNameWithSpan()
+		if p.match("::") {
+			owner = p.addNamedNode(KindOwner, start, nil, firstName, "", firstSpan)
+			name, nameSpan = p.parseNameWithSpan()
+		} else {
+			name, nameSpan = firstName, firstSpan
+		}
 		parameters = p.parseParameters(method, true)
 	}
 	body := p.parseBlockWithTail(!cShaped)
-	children := append(append([]NodeID(nil), leading...), parameters...)
+	children := append([]NodeID(nil), leading...)
+	if owner != NoNode {
+		children = append(children, owner)
+	}
+	children = append(children, parameters...)
 	children = append(children, resultType, body)
 	return p.addNamedNode(KindFunction, start, children, name, "", nameSpan)
 }

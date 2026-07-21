@@ -107,10 +107,12 @@ type Import struct {
 // Function records a source function before name resolution and typing.
 type Function struct {
 	Name       string
+	Owner      string
 	Public     bool
 	Unsafe     bool
 	Span       diagnostic.Span
 	NameSpan   diagnostic.Span
+	OwnerSpan  diagnostic.Span
 	Attributes []Attribute
 	Parameters []Parameter
 	ResultType TypeReference
@@ -401,6 +403,9 @@ func lowerFunction(tree *syntax.Tree, node syntax.Node) Function {
 			continue
 		}
 		switch child.Kind {
+		case syntax.KindOwner:
+			value.Owner = child.Text
+			value.OwnerSpan = child.NameSpan
 		case syntax.KindParameter:
 			value.Parameters = append(value.Parameters, lowerParameter(tree, child))
 		case syntax.KindType:

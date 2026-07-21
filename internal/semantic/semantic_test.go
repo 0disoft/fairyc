@@ -463,6 +463,29 @@ fn i32 main() { return 0; }
 	t.Fatal("cleanup glue function not found")
 }
 
+func TestAnalyzeOwnerQualifiedAssociatedFunction(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+struct Counter { i32 value; }
+fn i32 Counter::double(i32 value) { return value * 2; }
+fn i32 main() { return Counter::double(21); }
+`,
+	})
+	assertCleanTypeResult(t, result)
+	if len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].Functions) != 2 {
+		t.Fatalf("HIR modules = %+v", result.HIR.Modules)
+	}
+	associated := result.HIR.Modules[0].Functions[0]
+	if associated.Name != "Counter::double" || associated.OwnerType != hir.Type("main::Counter") {
+		t.Fatalf("associated function = %+v", associated)
+	}
+	main := result.HIR.Modules[0].Functions[1]
+	if len(main.Body.Statements) != 1 || main.Body.Statements[0].Expression == nil || main.Body.Statements[0].Expression.Symbol != associated.Symbol {
+		t.Fatalf("main = %+v", main)
+	}
+}
+
 func TestAnalyzePreservesReprCStructAndTypesAggregateExpressions(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{
