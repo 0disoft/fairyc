@@ -224,6 +224,16 @@ The Windows matrix now configures that same smoke after its ordinary Go test sui
 alone is not a hosted receipt: `hosted-windows-receipt` remains missing until GitHub records an
 exit-zero run for the exact commit, and a later code or runner-image change requires a fresh run.
 
+All Go jobs set `CGO_ENABLED=0`. The checked-in `.c` files are constrained-backend and runtime
+inputs loaded by Go code as data; they are not cgo translation units. This keeps `go vet`, `go
+test`, the external-driver Windows smoke, and the Linux C differential independent from whether a
+runner image happens to expose a default C compiler. The native lanes still invoke their declared
+Clang, GCC, or MSVC executables explicitly through `internal/cdriver`.
+
+Third-party workflow execution is limited to official `actions/checkout` and `actions/setup-go`
+v6 commits pinned by full SHA. Moving to a newer major version is a separate compatibility change,
+not an automatic side effect of this CI repair.
+
 ## Owners
 
 - Primary owner: UNASSIGNED

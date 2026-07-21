@@ -27,6 +27,9 @@ const child = Bun.spawn({
   stderr: "inherit",
   env: {
     ...process.env,
+    // Project-owned C files are compiler inputs loaded as data. Disabling cgo
+    // keeps Go from treating them as package-native sources on hosts with a C compiler.
+    CGO_ENABLED: "0",
     GOCACHE: goCache,
     GOMODCACHE: goModCache,
     GOPATH: goPath,
