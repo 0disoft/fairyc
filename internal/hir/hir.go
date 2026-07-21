@@ -357,6 +357,7 @@ type Module struct {
 // Enum is one resolved restricted inert tagged definition in declaration order.
 type Enum struct {
 	Name     string
+	Public   bool
 	Type     Type
 	Span     Span
 	Variants []EnumVariant
@@ -379,6 +380,7 @@ type EnumField struct {
 // Struct is one inert aggregate definition in declaration order.
 type Struct struct {
 	Name   string
+	Public bool
 	Type   Type
 	Span   Span
 	ReprC  bool
@@ -396,6 +398,7 @@ type StructField struct {
 type ForeignFunction struct {
 	Symbol     SymbolID
 	Name       string
+	Public     bool
 	LinkName   string
 	ABI        string
 	Span       Span
@@ -423,6 +426,7 @@ const (
 // Resource is one resolved move-only aggregate definition in declaration order.
 type Resource struct {
 	Name        string
+	Public      bool
 	Type        Type
 	Span        Span
 	Fields      []ResourceField
@@ -443,6 +447,7 @@ type ResourceField struct {
 type Function struct {
 	Symbol      SymbolID
 	Name        string
+	Public      bool
 	OwnerType   Type
 	Receiver    string
 	Unsafe      bool

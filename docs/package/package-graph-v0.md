@@ -72,6 +72,11 @@ store the numeric discriminator separately while retaining their original relati
 render `$pN` as part of that path. Neither representation is the deferred public
 `PackageInstanceId`, a lockfile encoding, an ABI name, or a stable diagnostic path.
 
+Typed HIR separately preserves whether each current source item was declared `pub`. Structs, enums,
+resources, ordinary functions, and foreign functions retain that bit; compiler-created resource
+cleanup functions remain private. This is an interface-extraction prerequisite, not a module
+interface format or hash. Source visibility still grants no native symbol or layout promise.
+
 The module-path-isolation result additionally crosses `internal/compiler` through semantic analysis,
 MIR lowering, and MIR verification. This proves compiler-pipeline consumption of the resolved graph;
 it still does not prove package discovery, a package-aware CLI, or backend support for package names.
@@ -81,4 +86,4 @@ solver, public manifest, lockfile, source downloader, registry, cache, or stable
 
 ## Deferred surface
 
-Public coordinates, manifest and lockfile schemas, source kinds and checksums, registry policy, offline and vendored behavior, version selection, feature unification, dependency cycles, workspace discovery, package signing, interface hashes, and the concrete `PackageInstanceId` algorithm remain separate decisions.
+Public coordinates, manifest and lockfile schemas, source kinds and checksums, registry policy, offline and vendored behavior, version selection, feature unification, dependency cycles, workspace discovery, package signing, and interface hashes remain separate decisions. `PackageInstanceId` v1 is fixed independently and does not settle those formats.

@@ -386,7 +386,9 @@ Current implementation status: the first concrete `PackageInstanceId` is now exe
 the already-resolved package tuple with a domain-separated, length-prefixed v1 encoding and full
 SHA-256, exposes one canonical lowercase text form, rejects malformed feature sets, and rechecks the
 complete tuple before digest-based deduplication. Versioned vectors cover component boundaries and
-feature-set failures. This closes only package-instance encoding; public manifests, lockfiles,
+feature-set failures. Typed HIR also preserves source `pub` visibility for structs, enums,
+resources, ordinary functions, and foreign functions while keeping compiler-created cleanup glue
+private. This closes package-instance encoding and one interface-extraction prerequisite only; public manifests, lockfiles,
 coordinates, source acquisition, interface hashing, cache storage, measurements, and stable package
 commands remain Phase 3 work.
 
