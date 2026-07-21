@@ -1,0 +1,56 @@
+{
+  "$schema": "./schema-v1.json",
+  "schemaVersion": "fairyc.package-source-fixtures/v1",
+  "contracts": [
+    "docs/adr/0140-package-source-digest-v1.md",
+    "docs/package/package-source-digest-v1.md",
+    "docs/compatibility/versioning-v0.md"
+  ],
+  "cases": [
+    {
+      "id": "baseline",
+      "files": [
+        { "path": "src/a.fy", "contentHex": "6d6f64756c6520613b0a" },
+        { "path": "src/z.fy", "contentHex": "6d6f64756c65207a3b0a" }
+      ],
+      "relation": "baseline",
+      "expectHash": "fysrc1-sha256-dd19fc7a8f93795ca7bf1abb70fa2f7bbbb0a8849fe410f6b4c080b55817e9a3"
+    },
+    {
+      "id": "input-order",
+      "files": [
+        { "path": "src/z.fy", "contentHex": "6d6f64756c65207a3b0a" },
+        { "path": "src/a.fy", "contentHex": "6d6f64756c6520613b0a" }
+      ],
+      "compareTo": "baseline",
+      "relation": "same"
+    },
+    {
+      "id": "content-change",
+      "files": [
+        { "path": "src/a.fy", "contentHex": "6d6f64756c6520613b0a2f2f206368616e6765640a" },
+        { "path": "src/z.fy", "contentHex": "6d6f64756c65207a3b0a" }
+      ],
+      "compareTo": "baseline",
+      "relation": "different"
+    },
+    {
+      "id": "path-change",
+      "files": [
+        { "path": "src/b.fy", "contentHex": "6d6f64756c6520613b0a" },
+        { "path": "src/z.fy", "contentHex": "6d6f64756c65207a3b0a" }
+      ],
+      "compareTo": "baseline",
+      "relation": "different"
+    },
+    {
+      "id": "line-ending-change",
+      "files": [
+        { "path": "src/a.fy", "contentHex": "6d6f64756c6520613b0d0a" },
+        { "path": "src/z.fy", "contentHex": "6d6f64756c65207a3b0a" }
+      ],
+      "compareTo": "baseline",
+      "relation": "different"
+    }
+  ]
+}

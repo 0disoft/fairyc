@@ -59,6 +59,8 @@
 - PackageInstanceId v1 runner route: internal/packageidentityfixture/
 - Public-interface hash v1 fixture route: spec/fixtures/module-interface/manifest-v1.json
 - Public-interface extraction and runner route: internal/moduleinterface/, internal/moduleinterfacefixture/
+- Package-source digest v1 fixture route: spec/fixtures/package-source/manifest-v1.json
+- Package-source digest and runner route: internal/packagecontent/, internal/packagecontentfixture/
 - MIR and C backend route: docs/mir/
 - Package identity and visibility route: docs/package/
 - Target and C ABI route: docs/abi/

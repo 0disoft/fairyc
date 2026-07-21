@@ -72,7 +72,7 @@ Free text is excluded by default. When included:
 
 ## Source excerpts
 
-Source excerpts are opt-in, span-bounded views into the caller-authorized workspace. `.fymap` stores spans and digests, not source bodies. If the source digest no longer matches the map, the excerpt is omitted and reported stale.
+Source excerpts are opt-in, span-bounded views into the caller-authorized workspace. `.fymap` stores spans and the independent `fysrc1-sha256` package source digest, not source bodies. If the digest no longer matches the current package source graph, the excerpt is omitted and reported stale.
 
 ## Determinism and privacy
 

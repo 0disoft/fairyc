@@ -475,8 +475,9 @@ or arbitrary link-input option.
 - Resolved package graph engine, fixture runner, and fixtures: `internal/packagegraph/`, `internal/packagefixture/`, `spec/fixtures/package/manifest-v0.json`
 - PackageInstanceId v1 encoding, vectors, and runner: `internal/packagegraph/identity.go`, `spec/fixtures/package-identity/manifest-v1.json`, `internal/packageidentityfixture/`
 - Public-interface hash v1 extraction, fixtures, and runner: `internal/moduleinterface/`, `spec/fixtures/module-interface/manifest-v1.json`, `internal/moduleinterfacefixture/`
+- Package-source digest v1 encoding, fixtures, and runner: `internal/packagecontent/`, `spec/fixtures/package-source/manifest-v1.json`, `internal/packagecontentfixture/`
 - MIR and C backend contracts: `docs/mir/`
-- Package identity, visibility, and interface hashing: `docs/package/package-graph-v0.md`, `docs/package/package-instance-id-v1.md`, `docs/package/public-interface-hash-v1.md`
+- Package identity, visibility, source digest, and interface hashing: `docs/package/package-graph-v0.md`, `docs/package/package-instance-id-v1.md`, `docs/package/package-source-digest-v1.md`, `docs/package/public-interface-hash-v1.md`
 - Target and C ABI: `docs/abi/c-abi-v0.md`
 - Runtime and standard library: `docs/runtime/runtime-stdlib-v0.md`
 - Compatibility and versioning: `docs/compatibility/versioning-v0.md`

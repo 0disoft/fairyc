@@ -391,7 +391,9 @@ resources, ordinary functions, and foreign functions while keeping compiler-crea
 private. A deterministic public-interface v1 projection now sorts modules and public items,
 normalizes self and dependency nominal types independently from build-local numbering, hashes the
 canonical bytes with full SHA-256, and executes eight source-level invalidation fixtures. This closes
-package-instance encoding and the first source-interface hash; public manifests, lockfiles,
+package-instance encoding and the first source-interface hash. An independent exact package-source
+digest now sorts canonical relative paths and hashes every source byte, with five versioned cases
+proving order stability plus content, path, and line-ending invalidation. Public manifests, lockfiles,
 coordinates, source acquisition, serialized module interfaces, cache storage, measurements, and stable package
 commands remain Phase 3 work.
 

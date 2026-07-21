@@ -348,6 +348,12 @@ dependency nominal identities. A cache records this algorithm explicitly and com
 own schema and compatibility vector. Changing interface inputs, canonical encoding, stable type
 spelling, digest, or prefix requires a new interface-hash version.
 
+`fairyc.package-source-fixtures/v1` independently fixes the exact package-source graph digest as
+SHA-256 over sorted canonical relative paths and exact source bytes. Its text form is
+`fysrc1-sha256-...`. The source digest invalidates the current package implementation; dependency
+public-interface hashes decide whether dependents invalidate. Changing path validation, canonical
+bytes, digest, or prefix requires a new source-digest version.
+
 ## `.fymap` compatibility
 
 The map header records schema, compiler build, language revision, package UID, package instance, source-graph digest, target scope, feature flags, `SymbolId` algorithm, and interface-hash algorithm.

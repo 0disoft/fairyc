@@ -71,6 +71,8 @@ regenerate, or override compiler source.
 - PackageInstanceId v1 encoding and fixture runner: internal/packagegraph/identity.go, internal/packageidentityfixture/
 - Public-interface hash v1 fixtures: spec/fixtures/module-interface/manifest-v1.json
 - Public-interface extraction, hashing, and fixture runner: internal/moduleinterface/, internal/moduleinterfacefixture/
+- Package-source digest v1 fixtures: spec/fixtures/package-source/manifest-v1.json
+- Package-source digest and fixture runner: internal/packagecontent/, internal/packagecontentfixture/
 - Executable MIR semantics: docs/mir/*.md
 - Package identity and visibility: docs/package/*.md
 - Target and C ABI: docs/abi/*.md

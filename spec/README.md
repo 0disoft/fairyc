@@ -32,5 +32,6 @@ This directory contains versioned normative data that future compiler tests can 
 - `fixtures/package/manifest-v0.json`: package-instance equality, direct visibility, module ownership, and explicit standard-library injection cases.
 - `fixtures/package-identity/manifest-v1.json`: canonical resolved-instance bytes, full SHA-256 IDs, component boundaries, and identity validation cases.
 - `fixtures/module-interface/manifest-v1.json`: source-visible interface digest and same/different invalidation cases.
+- `fixtures/package-source/manifest-v1.json`: exact canonical path/source-byte digest and invalidation cases.
 
 Explanatory language documents may summarize these files but cannot silently change spelling, grouping, module identity, semantic phase ownership, canonical facts, spans, recovery acceptance, or verified MIR observations. A contract change updates the normative data, ADR, diagnostics when applicable, and affected fixtures together.
