@@ -15,7 +15,7 @@ Module paths also contain no package coordinate. If dependency visibility is lef
 
 1. `spec/fixtures/package/manifest-v0.json` owns Stage 0 resolved-package-graph acceptance data.
 2. The fixture input begins after dependency resolution and uses opaque identity tokens. It is not a public manifest, lockfile, registry, or solver format.
-3. Package-instance equality uses package UID, resolved source identity, version identity, and the sorted feature set. The concrete `PackageInstanceId` algorithm remains undecided.
+3. Package-instance equality uses package UID, resolved source identity, version identity, and the sorted feature set. This fixture did not originally choose a concrete ID; ADR 0138 later fixes the independent `PackageInstanceId` v1 contract without changing tuple equality.
 4. Every package instance owns one source root. File-to-module mapping remains package-local and unchanged.
 5. Module identity includes the package instance. Equal module paths in isolated dependency sets do not collide.
 6. Imports see the current package plus direct dependencies only. Equal-instance edges are deduplicated first. Transitive modules are hidden; zero instance providers is missing and multiple distinct instance providers are ambiguous.
@@ -34,4 +34,4 @@ Module paths also contain no package coordinate. If dependency visibility is lef
 
 ## Revisit conditions
 
-Version or replace this schema when public manifest or lockfile input is accepted, dependency bindings enter source syntax, feature unification changes resolved identity, workspace members gain shared lookup, or the compiler needs a serialized concrete `PackageInstanceId`.
+Version or replace this schema when public manifest or lockfile input is accepted, dependency bindings enter source syntax, feature unification changes resolved identity, workspace members gain shared lookup, or resolved-graph expectations need facts beyond the separately versioned package-identity and public-interface fixtures.

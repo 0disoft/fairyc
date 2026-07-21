@@ -86,4 +86,4 @@ solver, public manifest, lockfile, source downloader, registry, cache, or stable
 
 ## Deferred surface
 
-Public coordinates, manifest and lockfile schemas, source kinds and checksums, registry policy, offline and vendored behavior, version selection, feature unification, dependency cycles, workspace discovery, package signing, and interface hashes remain separate decisions. `PackageInstanceId` v1 is fixed independently and does not settle those formats.
+Public coordinates, manifest and lockfile schemas, source kinds and checksums, registry policy, offline and vendored behavior, version selection, feature unification, dependency cycles, workspace discovery, package signing, serialized module interfaces, and cache storage remain separate decisions. `PackageInstanceId` v1 and public-interface hash v1 are fixed independently and do not settle those formats.

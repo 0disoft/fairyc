@@ -388,11 +388,14 @@ SHA-256, exposes one canonical lowercase text form, rejects malformed feature se
 complete tuple before digest-based deduplication. Versioned vectors cover component boundaries and
 feature-set failures. Typed HIR also preserves source `pub` visibility for structs, enums,
 resources, ordinary functions, and foreign functions while keeping compiler-created cleanup glue
-private. This closes package-instance encoding and one interface-extraction prerequisite only; public manifests, lockfiles,
-coordinates, source acquisition, interface hashing, cache storage, measurements, and stable package
+private. A deterministic public-interface v1 projection now sorts modules and public items,
+normalizes self and dependency nominal types independently from build-local numbering, hashes the
+canonical bytes with full SHA-256, and executes eight source-level invalidation fixtures. This closes
+package-instance encoding and the first source-interface hash; public manifests, lockfiles,
+coordinates, source acquisition, serialized module interfaces, cache storage, measurements, and stable package
 commands remain Phase 3 work.
 
-- Add public package manifests, lockfiles, module interfaces, concrete package-instance encoding, and public-interface hashing on top of the resolved-graph fixture contract.
+- Add public package manifests, lockfiles, and serialized module interfaces on top of the resolved graph, concrete package-instance encoding, and public-interface hash contracts.
 - Start with whole-package reuse and a bounded content-addressed cache whose limits are derived from measurements.
 - Stabilize the minimal `fairyc check`, `build`, `run`, `test`, `emit`, `explain`, and `targets` contracts.
 - Move to function-level reuse only when measured package rebuild or storage evidence justifies the complexity.

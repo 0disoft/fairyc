@@ -23,6 +23,7 @@
 - Resolved package graph fixture manifest: spec/fixtures/package/manifest-v0.json
 - Resolved package graph engine and fixture runner: internal/packagegraph/, internal/packagefixture/
 - PackageInstanceId v1 vectors and runner: spec/fixtures/package-identity/manifest-v1.json, internal/packageidentityfixture/
+- Public-interface hash v1 fixtures and runner: spec/fixtures/module-interface/manifest-v1.json, internal/moduleinterface/, internal/moduleinterfacefixture/
 - Windows MSVC layout fixture manifest: spec/fixtures/layout/manifest-windows-msvc-v0.json
 - Windows MSVC C ABI fixture manifest: spec/fixtures/c-abi/manifest-windows-msvc-v0.json
 - Executable semantics and C transport: docs/mir/*.md

@@ -57,6 +57,8 @@
 - Resolved package graph fixture runner route: internal/packagefixture/
 - PackageInstanceId v1 fixture route: spec/fixtures/package-identity/manifest-v1.json
 - PackageInstanceId v1 runner route: internal/packageidentityfixture/
+- Public-interface hash v1 fixture route: spec/fixtures/module-interface/manifest-v1.json
+- Public-interface extraction and runner route: internal/moduleinterface/, internal/moduleinterfacefixture/
 - MIR and C backend route: docs/mir/
 - Package identity and visibility route: docs/package/
 - Target and C ABI route: docs/abi/

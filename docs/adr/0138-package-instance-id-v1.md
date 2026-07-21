@@ -47,8 +47,8 @@ Digest throughput is not the current build bottleneck.
   creates a different versioned identity contract.
 - The current implementation materializes one small canonical byte slice per graph node. A streaming
   implementation may replace that allocation only if it produces identical fixture bytes.
-- Public manifest limits, source acquisition, dependency solving, and interface hashing remain
-  separate Phase 3 decisions.
+- Public manifest limits, source acquisition, and dependency solving remain separate Phase 3
+  decisions. ADR 0139 subsequently fixes the independent public-interface hash.
 
 ## Verification
 

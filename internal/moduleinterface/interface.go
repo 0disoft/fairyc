@@ -1,0 +1,461 @@
+// Package moduleinterface extracts and hashes the source-visible interface of one typed package.
+package moduleinterface
+
+import (
+	"bytes"
+	"crypto/sha256"
+	"encoding/binary"
+	"encoding/hex"
+	"fmt"
+	"slices"
+	"strconv"
+	"strings"
+
+	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/packagegraph"
+)
+
+const (
+	HashAlgorithm = "sha256"
+	HashEncoding  = "fairyc.public-interface/v1"
+	HashPrefix    = "fyif1-sha256-"
+)
+
+const interfaceDomain = "fairyc.public-interface"
+
+// Hash is the full digest of one canonical public-interface descriptor.
+type Hash [sha256.Size]byte
+
+func (hash Hash) String() string {
+	return HashPrefix + hex.EncodeToString(hash[:])
+}
+
+// Descriptor is the declaration-order-independent public source interface of one package.
+type Descriptor struct {
+	Modules []Module
+}
+
+// Module names one source-visible module and its sorted public items.
+type Module struct {
+	Path  string
+	Items []Item
+}
+
+// Item contains only source-visible facts that can affect another package.
+type Item struct {
+	Kind       string
+	Name       string
+	ReprC      bool
+	Unsafe     bool
+	ABI        string
+	LinkName   string
+	OwnerType  string
+	Effects    []string
+	Parameters []string
+	ResultType string
+	Fields     []Field
+	Variants   []Variant
+}
+
+// Field is one ordered public aggregate or enum-payload field.
+type Field struct {
+	Name string
+	Type string
+}
+
+// Variant is one ordered public enum variant.
+type Variant struct {
+	Name   string
+	Fields []Field
+}
+
+// Extract projects one fully typed package into its deterministic public interface. instances maps
+// disposable HIR package numbers to concrete package identities; the current package is rendered as
+// self so private source or version changes do not invalidate an unchanged interface.
+func Extract(value hir.Package, packageID hir.PackageID, instances map[hir.PackageID]packagegraph.InstanceID) (Descriptor, error) {
+	if _, found := instances[packageID]; !found {
+		return Descriptor{}, fmt.Errorf("package %d has no PackageInstanceId", packageID)
+	}
+	publicTypes := make(map[hir.Type]bool)
+	for _, module := range value.Modules {
+		if module.Package != packageID {
+			continue
+		}
+		for _, structure := range module.Structs {
+			publicTypes[structure.Type] = structure.Public
+		}
+		for _, enumeration := range module.Enums {
+			publicTypes[enumeration.Type] = enumeration.Public
+		}
+		for _, resource := range module.Resources {
+			publicTypes[resource.Type] = resource.Public
+		}
+	}
+
+	descriptor := Descriptor{}
+	seenModules := make(map[string]struct{})
+	for _, sourceModule := range value.Modules {
+		if sourceModule.Package != packageID {
+			continue
+		}
+		if sourceModule.Path == "" {
+			return Descriptor{}, fmt.Errorf("package %d contains an empty module path", packageID)
+		}
+		if _, duplicate := seenModules[sourceModule.Path]; duplicate {
+			return Descriptor{}, fmt.Errorf("package %d contains duplicate module %q", packageID, sourceModule.Path)
+		}
+		seenModules[sourceModule.Path] = struct{}{}
+		module, err := extractModule(sourceModule, packageID, instances, publicTypes)
+		if err != nil {
+			return Descriptor{}, fmt.Errorf("module %q: %w", sourceModule.Path, err)
+		}
+		descriptor.Modules = append(descriptor.Modules, module)
+	}
+	if len(descriptor.Modules) == 0 {
+		return Descriptor{}, fmt.Errorf("package %d has no typed modules", packageID)
+	}
+	slices.SortFunc(descriptor.Modules, func(left, right Module) int {
+		return strings.Compare(left.Path, right.Path)
+	})
+	return descriptor, nil
+}
+
+func extractModule(source hir.Module, packageID hir.PackageID, instances map[hir.PackageID]packagegraph.InstanceID, publicTypes map[hir.Type]bool) (Module, error) {
+	result := Module{Path: source.Path}
+	for _, structure := range source.Structs {
+		if !structure.Public {
+			continue
+		}
+		item := Item{Kind: "struct", Name: structure.Name, ReprC: structure.ReprC}
+		fields, err := stableStructFields(structure.Fields, packageID, instances, publicTypes)
+		if err != nil {
+			return Module{}, fmt.Errorf("public struct %q: %w", structure.Name, err)
+		}
+		item.Fields = fields
+		result.Items = append(result.Items, item)
+	}
+	for _, enumeration := range source.Enums {
+		if !enumeration.Public {
+			continue
+		}
+		item := Item{Kind: "enum", Name: enumeration.Name}
+		for _, variant := range enumeration.Variants {
+			stableVariant := Variant{Name: variant.Name}
+			for _, field := range variant.Fields {
+				stable, err := stableType(field.Type, packageID, instances, publicTypes)
+				if err != nil {
+					return Module{}, fmt.Errorf("public enum %q variant %q field %q: %w", enumeration.Name, variant.Name, field.Name, err)
+				}
+				stableVariant.Fields = append(stableVariant.Fields, Field{Name: field.Name, Type: stable})
+			}
+			item.Variants = append(item.Variants, stableVariant)
+		}
+		result.Items = append(result.Items, item)
+	}
+	for _, resource := range source.Resources {
+		if !resource.Public {
+			continue
+		}
+		effects, err := stableEffects(resource.DropEffects)
+		if err != nil {
+			return Module{}, fmt.Errorf("public resource %q: %w", resource.Name, err)
+		}
+		item := Item{Kind: "resource", Name: resource.Name, Effects: effects}
+		result.Items = append(result.Items, item)
+	}
+	for _, foreign := range source.ForeignFunctions {
+		if !foreign.Public {
+			continue
+		}
+		effects, err := stableEffects(foreign.Effects)
+		if err != nil {
+			return Module{}, fmt.Errorf("public foreign function %q: %w", foreign.Name, err)
+		}
+		item := Item{
+			Kind: "foreign-function", Name: foreign.Name, Unsafe: true, ABI: foreign.ABI,
+			LinkName: foreign.LinkName, Effects: effects,
+		}
+		for _, parameter := range foreign.Parameters {
+			stable, err := stableType(parameter.Type, packageID, instances, publicTypes)
+			if err != nil {
+				return Module{}, fmt.Errorf("public foreign function %q parameter: %w", foreign.Name, err)
+			}
+			item.Parameters = append(item.Parameters, stable)
+		}
+		stable, err := stableType(foreign.ResultType, packageID, instances, publicTypes)
+		if err != nil {
+			return Module{}, fmt.Errorf("public foreign function %q result: %w", foreign.Name, err)
+		}
+		item.ResultType = stable
+		result.Items = append(result.Items, item)
+	}
+	for _, function := range source.Functions {
+		if !function.Public || function.DropGlueFor != "" {
+			continue
+		}
+		effects, err := stableEffects(function.Effects)
+		if err != nil {
+			return Module{}, fmt.Errorf("public function %q: %w", function.Name, err)
+		}
+		item := Item{Kind: "function", Name: function.Name, Unsafe: function.Unsafe, Effects: effects}
+		if function.OwnerType != "" {
+			stable, err := stableType(function.OwnerType, packageID, instances, publicTypes)
+			if err != nil {
+				return Module{}, fmt.Errorf("public function %q owner: %w", function.Name, err)
+			}
+			item.OwnerType = stable
+		}
+		for _, parameter := range function.Parameters {
+			stable, err := stableType(parameter.Type, packageID, instances, publicTypes)
+			if err != nil {
+				return Module{}, fmt.Errorf("public function %q parameter: %w", function.Name, err)
+			}
+			item.Parameters = append(item.Parameters, stable)
+		}
+		stable, err := stableType(function.ResultType, packageID, instances, publicTypes)
+		if err != nil {
+			return Module{}, fmt.Errorf("public function %q result: %w", function.Name, err)
+		}
+		item.ResultType = stable
+		result.Items = append(result.Items, item)
+	}
+	slices.SortFunc(result.Items, func(left, right Item) int {
+		if byKind := strings.Compare(left.Kind, right.Kind); byKind != 0 {
+			return byKind
+		}
+		return strings.Compare(left.Name, right.Name)
+	})
+	for index := 1; index < len(result.Items); index++ {
+		if result.Items[index-1].Kind == result.Items[index].Kind && result.Items[index-1].Name == result.Items[index].Name {
+			return Module{}, fmt.Errorf("duplicate public %s %q", result.Items[index].Kind, result.Items[index].Name)
+		}
+	}
+	return result, nil
+}
+
+func stableStructFields(fields []hir.StructField, packageID hir.PackageID, instances map[hir.PackageID]packagegraph.InstanceID, publicTypes map[hir.Type]bool) ([]Field, error) {
+	result := make([]Field, 0, len(fields))
+	for _, field := range fields {
+		stable, err := stableType(field.Type, packageID, instances, publicTypes)
+		if err != nil {
+			return nil, fmt.Errorf("field %q: %w", field.Name, err)
+		}
+		result = append(result, Field{Name: field.Name, Type: stable})
+	}
+	return result, nil
+}
+
+func stableType(value hir.Type, packageID hir.PackageID, instances map[hir.PackageID]packagegraph.InstanceID, publicTypes map[hir.Type]bool) (string, error) {
+	if value == hir.TypeByteSlice {
+		return "u8[]", nil
+	}
+	if builtinType(value) {
+		return string(value), nil
+	}
+	if element, mutable, ok := hir.BorrowElement(value); ok {
+		stable, err := stableType(element, packageID, instances, publicTypes)
+		if err != nil {
+			return "", err
+		}
+		if mutable {
+			return "ref mut " + stable, nil
+		}
+		return "ref " + stable, nil
+	}
+	if element, mutable, ok := hir.RawPointerElement(value); ok {
+		stable, err := stableType(element, packageID, instances, publicTypes)
+		if err != nil {
+			return "", err
+		}
+		if mutable {
+			return "ptr mut " + stable, nil
+		}
+		return "ptr " + stable, nil
+	}
+	if element, length, ok := hir.FixedArrayParts(value); ok {
+		stable, err := stableType(element, packageID, instances, publicTypes)
+		if err != nil {
+			return "", err
+		}
+		return stable + "[" + strconv.FormatUint(length, 10) + "]", nil
+	}
+	if element, ok := hir.OptionElement(value); ok {
+		stable, err := stableType(element, packageID, instances, publicTypes)
+		if err != nil {
+			return "", err
+		}
+		return "Option<" + stable + ">", nil
+	}
+	if success, failure, ok := hir.ResultElements(value); ok {
+		stableSuccess, err := stableType(success, packageID, instances, publicTypes)
+		if err != nil {
+			return "", err
+		}
+		stableFailure, err := stableType(failure, packageID, instances, publicTypes)
+		if err != nil {
+			return "", err
+		}
+		return "Result<" + stableSuccess + ", " + stableFailure + ">", nil
+	}
+
+	typePackage, name, ok := userTypeParts(value, packageID)
+	if !ok {
+		return "", fmt.Errorf("unsupported canonical type %q", value)
+	}
+	if typePackage == packageID {
+		if public, known := publicTypes[value]; !known || !public {
+			return "", fmt.Errorf("type %q is not a public type of package %d", value, packageID)
+		}
+		return "self::" + name, nil
+	}
+	instance, found := instances[typePackage]
+	if !found {
+		return "", fmt.Errorf("type %q references package %d without PackageInstanceId", value, typePackage)
+	}
+	return "dep[" + instance.String() + "]::" + name, nil
+}
+
+func userTypeParts(value hir.Type, current hir.PackageID) (hir.PackageID, string, bool) {
+	text := string(value)
+	if strings.HasPrefix(text, "$p") {
+		separator := strings.Index(text, "::")
+		if separator <= 2 || separator+2 >= len(text) {
+			return 0, "", false
+		}
+		parsed, err := strconv.ParseUint(text[2:separator], 10, 32)
+		if err != nil || parsed == 0 {
+			return 0, "", false
+		}
+		return hir.PackageID(parsed), text[separator+2:], true
+	}
+	if !strings.Contains(text, "::") {
+		return 0, "", false
+	}
+	return current, text, true
+}
+
+func builtinType(value hir.Type) bool {
+	return value == hir.TypeVoid || value == hir.TypeBool || value == hir.TypeU8 || value == hir.TypeI32 ||
+		value == hir.TypeU32 || value == hir.TypeUSize || value == hir.TypeByteSlice || value == hir.TypeStr ||
+		value == hir.TypeCStr || value == hir.TypeRegion || hir.IsCScalar(value)
+}
+
+func stableEffects(values []hir.Effect) ([]string, error) {
+	if !slices.IsSorted(values) {
+		return nil, fmt.Errorf("effects are not sorted")
+	}
+	result := make([]string, len(values))
+	for index, value := range values {
+		if index > 0 && values[index-1] == value {
+			return nil, fmt.Errorf("effects are not unique")
+		}
+		result[index] = string(value)
+	}
+	return result, nil
+}
+
+// Encode returns the deterministic v1 bytes hashed for cache invalidation.
+func Encode(value Descriptor) ([]byte, error) {
+	if err := validateDescriptor(value); err != nil {
+		return nil, err
+	}
+	var encoded bytes.Buffer
+	encoded.WriteString(interfaceDomain)
+	encoded.WriteByte(0)
+	encoded.WriteByte(1)
+	writeUint64(&encoded, uint64(len(value.Modules)))
+	for _, module := range value.Modules {
+		writeString(&encoded, module.Path)
+		writeUint64(&encoded, uint64(len(module.Items)))
+		for _, item := range module.Items {
+			writeItem(&encoded, item)
+		}
+	}
+	return encoded.Bytes(), nil
+}
+
+// Compute validates and hashes one canonical descriptor.
+func Compute(value Descriptor) (Hash, error) {
+	encoded, err := Encode(value)
+	if err != nil {
+		return Hash{}, err
+	}
+	return sha256.Sum256(encoded), nil
+}
+
+func validateDescriptor(value Descriptor) error {
+	if len(value.Modules) == 0 {
+		return fmt.Errorf("public interface has no modules")
+	}
+	for index, module := range value.Modules {
+		if module.Path == "" || index > 0 && value.Modules[index-1].Path >= module.Path {
+			return fmt.Errorf("public interface modules are not sorted and unique")
+		}
+		for itemIndex, item := range module.Items {
+			if item.Kind == "" || item.Name == "" || itemIndex > 0 && compareItem(module.Items[itemIndex-1], item) >= 0 {
+				return fmt.Errorf("module %q public items are not sorted and unique", module.Path)
+			}
+		}
+	}
+	return nil
+}
+
+func compareItem(left, right Item) int {
+	if byKind := strings.Compare(left.Kind, right.Kind); byKind != 0 {
+		return byKind
+	}
+	return strings.Compare(left.Name, right.Name)
+}
+
+func writeItem(buffer *bytes.Buffer, item Item) {
+	writeString(buffer, item.Kind)
+	writeString(buffer, item.Name)
+	writeBool(buffer, item.ReprC)
+	writeBool(buffer, item.Unsafe)
+	writeString(buffer, item.ABI)
+	writeString(buffer, item.LinkName)
+	writeString(buffer, item.OwnerType)
+	writeStrings(buffer, item.Effects)
+	writeStrings(buffer, item.Parameters)
+	writeString(buffer, item.ResultType)
+	writeUint64(buffer, uint64(len(item.Fields)))
+	for _, field := range item.Fields {
+		writeString(buffer, field.Name)
+		writeString(buffer, field.Type)
+	}
+	writeUint64(buffer, uint64(len(item.Variants)))
+	for _, variant := range item.Variants {
+		writeString(buffer, variant.Name)
+		writeUint64(buffer, uint64(len(variant.Fields)))
+		for _, field := range variant.Fields {
+			writeString(buffer, field.Name)
+			writeString(buffer, field.Type)
+		}
+	}
+}
+
+func writeStrings(buffer *bytes.Buffer, values []string) {
+	writeUint64(buffer, uint64(len(values)))
+	for _, value := range values {
+		writeString(buffer, value)
+	}
+}
+
+func writeString(buffer *bytes.Buffer, value string) {
+	writeUint64(buffer, uint64(len(value)))
+	buffer.WriteString(value)
+}
+
+func writeBool(buffer *bytes.Buffer, value bool) {
+	if value {
+		buffer.WriteByte(1)
+		return
+	}
+	buffer.WriteByte(0)
+}
+
+func writeUint64(buffer *bytes.Buffer, value uint64) {
+	var raw [8]byte
+	binary.BigEndian.PutUint64(raw[:], value)
+	buffer.Write(raw[:])
+}

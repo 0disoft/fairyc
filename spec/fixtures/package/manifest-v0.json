@@ -7,7 +7,7 @@
     "public lockfile encoding and PackageInstanceId v1 adoption",
     "registry, path, Git, archive, and network source acquisition",
     "package dependency cycles and workspace member discovery",
-    "public-interface hash inputs and module-interface serialization"
+    "serialized module-interface artifacts and cache adoption"
   ],
   "contracts": [
     "docs/product/02-spec.md",
