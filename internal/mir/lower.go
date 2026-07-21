@@ -382,8 +382,8 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 			}
 			binding, found := l.bindings[statement.Target.Symbol]
 			if found && l.properties.NeedsDrop(binding.typ) {
-				if l.isLiveResourcePath(statement.Expression) {
-					value = l.materializeMove(statement.Expression, value, "reassignment-value", true)
+				if path := l.liveResourcePath(statement.Expression); path != nil {
+					value = l.materializeMove(path, value, "reassignment-value", true)
 				}
 				droppedOld := l.live[statement.Target.Symbol]
 				if droppedOld {
@@ -1173,8 +1173,8 @@ func (l *functionLowerer) lowerAggregateConstruction(expression *hir.Expression)
 		if value.Kind == OperandInvalid {
 			return Operand{}, fmt.Errorf("aggregate field %q has no value", expression.Fields[index])
 		}
-		if isResource && l.isLiveResourcePath(&expression.Children[index]) {
-			value = l.materializeMove(&expression.Children[index], value, "resource-field", true)
+		if path := l.liveResourcePath(&expression.Children[index]); isResource && path != nil {
+			value = l.materializeMove(path, value, "resource-field", true)
 		}
 		operands = append(operands, value)
 	}
@@ -1393,8 +1393,8 @@ func (l *functionLowerer) lowerResultVariant(expression *hir.Expression) (Operan
 	if payload.Kind == OperandInvalid {
 		return Operand{}, fmt.Errorf("Result::%s payload has no value", expression.Variant)
 	}
-	if l.isLiveResourcePath(&expression.Children[0]) {
-		payload = l.materializeMove(&expression.Children[0], payload, "result-payload", true)
+	if path := l.liveResourcePath(&expression.Children[0]); path != nil {
+		payload = l.materializeMove(path, payload, "result-payload", true)
 	}
 	destination := l.newTemporary()
 	l.appendOperation(Operation{
@@ -1420,8 +1420,8 @@ func (l *functionLowerer) lowerOptionVariant(expression *hir.Expression) (Operan
 		if payload.Kind == OperandInvalid {
 			return Operand{}, fmt.Errorf("Option::Some payload has no value")
 		}
-		if l.isLiveResourcePath(&expression.Children[0]) {
-			payload = l.materializeMove(&expression.Children[0], payload, "option-payload", true)
+		if path := l.liveResourcePath(&expression.Children[0]); path != nil {
+			payload = l.materializeMove(path, payload, "option-payload", true)
 		}
 		operands = append(operands, payload)
 	} else if len(expression.Children) != 0 {
@@ -1494,8 +1494,8 @@ func (l *functionLowerer) lowerBuiltinMatch(expression *hir.Expression) (Operand
 	if scrutinee.Kind == OperandInvalid {
 		return Operand{}, fmt.Errorf("%s match scrutinee has no value", family)
 	}
-	if l.isLiveResourcePath(&expression.Children[0]) {
-		scrutinee = l.materializeMove(&expression.Children[0], scrutinee, family+"-match", true)
+	if path := l.liveResourcePath(&expression.Children[0]); path != nil {
+		scrutinee = l.materializeMove(path, scrutinee, family+"-match", true)
 	}
 	branchLive := cloneLive(l.live)
 	firstBlock := l.newBlock()
@@ -1560,8 +1560,8 @@ func (l *functionLowerer) lowerBuiltinMatch(expression *hir.Expression) (Operand
 			if armValue.Kind == OperandInvalid {
 				return Operand{}, fmt.Errorf("value-producing %s match arm %q has no value", family, arm.Variant)
 			}
-			if l.properties.NeedsDrop(expression.Type) && l.isLiveResourcePath(&arm.Expression) {
-				armValue = l.materializeMove(&arm.Expression, armValue, family+"-match-result", true)
+			if path := l.liveResourcePath(&arm.Expression); l.properties.NeedsDrop(expression.Type) && path != nil {
+				armValue = l.materializeMove(path, armValue, family+"-match-result", true)
 			}
 			l.appendOperation(Operation{Kind: OperationAssign, Span: arm.Expression.Span, DestinationLocal: destination, Operands: []Operand{armValue}})
 		}
@@ -1675,8 +1675,8 @@ func (l *functionLowerer) lowerEnumMatch(expression *hir.Expression) (Operand, e
 			if armValue.Kind == OperandInvalid {
 				return Operand{}, fmt.Errorf("value-producing enum match arm %q has no value", arm.Variant)
 			}
-			if l.properties.NeedsDrop(expression.Type) && l.isLiveResourcePath(&arm.Expression) {
-				armValue = l.materializeMove(&arm.Expression, armValue, "enum-match-result", true)
+			if path := l.liveResourcePath(&arm.Expression); l.properties.NeedsDrop(expression.Type) && path != nil {
+				armValue = l.materializeMove(path, armValue, "enum-match-result", true)
 			}
 			l.appendOperation(Operation{Kind: OperationAssign, Span: arm.Expression.Span, DestinationLocal: destination, Operands: []Operand{armValue}})
 		}
@@ -1985,8 +1985,8 @@ func (l *functionLowerer) lowerCall(expression *hir.Expression) (Operand, error)
 			return Operand{}, err
 		}
 		argumentSpans = append(argumentSpans, argument.Span)
-		if l.isLiveResourcePath(argument) {
-			value = l.materializeMove(argument, value, "call-argument", true)
+		if path := l.liveResourcePath(argument); path != nil {
+			value = l.materializeMove(path, value, "call-argument", true)
 		}
 		argumentValues = append(argumentValues, value)
 	}
@@ -2096,8 +2096,8 @@ func (l *functionLowerer) lowerPropagate(expression *hir.Expression) (Operand, e
 	if resultValue.Kind == OperandInvalid {
 		return Operand{}, fmt.Errorf("propagate operand has no value")
 	}
-	if l.isLiveResourcePath(operand) {
-		resultValue = l.materializeMove(operand, resultValue, "result-branch", false)
+	if path := l.liveResourcePath(operand); path != nil {
+		resultValue = l.materializeMove(path, resultValue, "result-branch", false)
 	}
 	l.appendOperation(Operation{Kind: OperationResultSwitch, Span: expression.Span, Operands: []Operand{resultValue}})
 	success := l.newBlock()
@@ -2155,8 +2155,8 @@ func (l *functionLowerer) lowerReturn(expression *hir.Expression, exit hir.Span)
 	if err != nil {
 		return err
 	}
-	if l.isLiveResourcePath(expression) {
-		value = l.materializeMove(expression, value, "return-value", true)
+	if path := l.liveResourcePath(expression); path != nil {
+		value = l.materializeMove(path, value, "return-value", true)
 	}
 	actions := l.emitFunctionExitCleanup(l.live, exit, "return")
 	l.result.CleanupPaths = append(l.result.CleanupPaths, CleanupPathFact{Exit: exit, ExitKind: "return", Actions: actions})
@@ -2265,12 +2265,31 @@ func (l *functionLowerer) leaveLexicalRegion(symbol hir.SymbolID) error {
 	return nil
 }
 
-func (l *functionLowerer) isLiveResourcePath(expression *hir.Expression) bool {
-	if expression == nil || expression.Kind != "path" || expression.Symbol == hir.NoSymbol || !l.live[expression.Symbol] {
-		return false
+func (l *functionLowerer) liveResourcePath(expression *hir.Expression) *hir.Expression {
+	if expression == nil {
+		return nil
 	}
-	binding, found := l.bindings[expression.Symbol]
-	return found && l.properties.NeedsDrop(binding.typ)
+	switch expression.Kind {
+	case "group", "unsafe":
+		if len(expression.Children) == 1 {
+			return l.liveResourcePath(&expression.Children[0])
+		}
+		return nil
+	case "block":
+		if expression.Block != nil && expression.Block.Tail != nil {
+			return l.liveResourcePath(expression.Block.Tail)
+		}
+		return nil
+	case "path":
+		if expression.Symbol == hir.NoSymbol || !l.live[expression.Symbol] {
+			return nil
+		}
+		binding, found := l.bindings[expression.Symbol]
+		if found && l.properties.NeedsDrop(binding.typ) {
+			return expression
+		}
+	}
+	return nil
 }
 
 func (l *functionLowerer) newBlock() BlockID {

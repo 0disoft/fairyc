@@ -26,14 +26,14 @@
             "operation": "place",
             "allocation": {
               "source": "main.fy",
-              "startByte": 83,
-              "endByte": 103
+              "startByte": 80,
+              "endByte": 100
             },
             "origin": "RegionParam(0)",
             "lastUse": {
               "source": "main.fy",
-              "startByte": 110,
-              "endByte": 116
+              "startByte": 114,
+              "endByte": 120
             },
             "escapes": false
           }
@@ -52,8 +52,8 @@
             "operation": "place",
             "allocation": {
               "source": "main.fy",
-              "startByte": 66,
-              "endByte": 86
+              "startByte": 71,
+              "endByte": 91
             },
             "origin": "RegionParam(0)",
             "escapes": true
@@ -78,16 +78,16 @@
             "code": "E3101",
             "primary": {
               "source": "main.fy",
-              "startByte": 196,
-              "endByte": 202
+              "startByte": 199,
+              "endByte": 205
             },
             "related": [
               {
                 "role": "allocation",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 159,
-                  "endByte": 179
+                  "startByte": 162,
+                  "endByte": 182
                 }
               }
             ]
@@ -107,8 +107,8 @@
             "code": "E3102",
             "primary": {
               "source": "main.fy",
-              "startByte": 159,
-              "endByte": 179
+              "startByte": 138,
+              "endByte": 158
             },
             "related": [
               {
@@ -136,16 +136,16 @@
             "code": "E3103",
             "primary": {
               "source": "main.fy",
-              "startByte": 43,
-              "endByte": 49
+              "startByte": 34,
+              "endByte": 40
             },
             "related": [
               {
                 "role": "capability",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 34,
-                  "endByte": 41
+                  "startByte": 41,
+                  "endByte": 48
                 }
               }
             ]
@@ -165,8 +165,8 @@
             "code": "E3104",
             "primary": {
               "source": "main.fy",
-              "startByte": 62,
-              "endByte": 71
+              "startByte": 58,
+              "endByte": 67
             },
             "related": []
           }

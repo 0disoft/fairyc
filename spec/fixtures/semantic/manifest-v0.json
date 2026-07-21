@@ -36,8 +36,8 @@
           {
             "use": {
               "source": "main.fy",
-              "startByte": 58,
-              "endByte": 70
+              "startByte": 62,
+              "endByte": 74
             },
             "target": {
               "module": "math",
@@ -45,8 +45,8 @@
               "kind": "function",
               "declaration": {
                 "source": "math.fy",
-                "startByte": 21,
-                "endByte": 30
+                "startByte": 25,
+                "endByte": 34
               }
             }
           }
@@ -64,16 +64,16 @@
           {
             "expression": {
               "source": "main.fy",
-              "startByte": 24,
-              "endByte": 28
+              "startByte": 33,
+              "endByte": 37
             },
             "canonicalType": "bool"
           },
           {
             "expression": {
               "source": "main.fy",
-              "startByte": 73,
-              "endByte": 101
+              "startByte": 75,
+              "endByte": 105
             },
             "canonicalType": "i32"
           }
@@ -91,15 +91,15 @@
           {
             "borrow": {
               "source": "main.fy",
-              "startByte": 124,
-              "endByte": 130
+              "startByte": 129,
+              "endByte": 138
             },
             "kind": "shared",
             "origin": "Local(value)",
             "lastUse": {
               "source": "main.fy",
-              "startByte": 159,
-              "endByte": 163
+              "startByte": 166,
+              "endByte": 170
             },
             "escapes": false
           }
@@ -117,15 +117,15 @@
           {
             "borrow": {
               "source": "main.fy",
-              "startByte": 53,
-              "endByte": 58
+              "startByte": 62,
+              "endByte": 67
             },
             "kind": "shared",
             "origin": "Param(0)",
             "lastUse": {
               "source": "main.fy",
-              "startByte": 53,
-              "endByte": 58
+              "startByte": 62,
+              "endByte": 67
             },
             "escapes": true
           }
@@ -143,15 +143,15 @@
           {
             "borrow": {
               "source": "main.fy",
-              "startByte": 169,
-              "endByte": 176
+              "startByte": 183,
+              "endByte": 190
             },
             "kind": "shared",
             "origin": "Param(2)",
             "lastUse": {
               "source": "main.fy",
-              "startByte": 169,
-              "endByte": 176
+              "startByte": 183,
+              "endByte": 190
             },
             "escapes": true
           }
@@ -169,15 +169,15 @@
           {
             "borrow": {
               "source": "main.fy",
-              "startByte": 283,
-              "endByte": 290
+              "startByte": 296,
+              "endByte": 303
             },
             "kind": "shared",
             "origin": "Param(1)",
             "lastUse": {
               "source": "main.fy",
-              "startByte": 283,
-              "endByte": 290
+              "startByte": 296,
+              "endByte": 303
             },
             "escapes": true
           }
@@ -195,30 +195,30 @@
           {
             "borrow": {
               "source": "main.fy",
-              "startByte": 62,
-              "endByte": 81
+              "startByte": 73,
+              "endByte": 92
             },
             "kind": "shared",
             "origin": "Param(0)",
             "lastUse": {
               "source": "main.fy",
-              "startByte": 62,
-              "endByte": 81
+              "startByte": 73,
+              "endByte": 92
             },
             "escapes": true
           },
           {
             "borrow": {
               "source": "main.fy",
-              "startByte": 134,
-              "endByte": 139
+              "startByte": 157,
+              "endByte": 162
             },
             "kind": "shared",
             "origin": "Param(1)",
             "lastUse": {
               "source": "main.fy",
-              "startByte": 134,
-              "endByte": 139
+              "startByte": 157,
+              "endByte": 162
             },
             "escapes": true
           }
@@ -234,18 +234,18 @@
         "completedThrough": "flow",
         "resolutions": [
           {
-            "use": { "source": "main.fy", "startByte": 131, "endByte": 138 },
+            "use": { "source": "main.fy", "startByte": 132, "endByte": 139 },
             "target": {
               "module": "main",
               "name": "add_one",
               "kind": "foreign-function",
-              "declaration": { "source": "main.fy", "startByte": 70, "endByte": 77 }
+              "declaration": { "source": "main.fy", "startByte": 74, "endByte": 81 }
             }
           }
         ],
         "types": [
           {
-            "expression": { "source": "main.fy", "startByte": 131, "endByte": 142 },
+            "expression": { "source": "main.fy", "startByte": 132, "endByte": 143 },
             "canonicalType": "i32"
           }
         ]
@@ -308,8 +308,8 @@
             "code": "E0101",
             "primary": {
               "source": "main.fy",
-              "startByte": 39,
-              "endByte": 46
+              "startByte": 43,
+              "endByte": 50
             },
             "related": []
           }
@@ -328,16 +328,16 @@
             "code": "E0102",
             "primary": {
               "source": "main.fy",
-              "startByte": 46,
-              "endByte": 51
+              "startByte": 55,
+              "endByte": 60
             },
             "related": [
               {
                 "role": "previous-declaration",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 17,
-                  "endByte": 22
+                  "startByte": 21,
+                  "endByte": 26
                 }
               }
             ]
@@ -357,16 +357,16 @@
             "code": "E1006",
             "primary": {
               "source": "main.fy",
-              "startByte": 57,
-              "endByte": 58
+              "startByte": 53,
+              "endByte": 54
             },
             "related": [
               {
                 "role": "expected-type",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 50,
-                  "endByte": 54
+                  "startByte": 40,
+                  "endByte": 44
                 }
               }
             ]
@@ -384,7 +384,7 @@
         "diagnostics": [
           {
             "code": "E1013",
-            "primary": { "source": "main.fy", "startByte": 52, "endByte": 57 },
+            "primary": { "source": "main.fy", "startByte": 48, "endByte": 53 },
             "related": []
           }
         ]
@@ -402,8 +402,8 @@
             "code": "E1007",
             "primary": {
               "source": "main.fy",
-              "startByte": 42,
-              "endByte": 43
+              "startByte": 47,
+              "endByte": 48
             },
             "related": []
           }
@@ -420,12 +420,12 @@
         "diagnostics": [
           {
             "code": "E1012",
-            "primary": { "source": "main.fy", "startByte": 40, "endByte": 46 },
+            "primary": { "source": "main.fy", "startByte": 37, "endByte": 43 },
             "related": []
           },
           {
             "code": "E1012",
-            "primary": { "source": "main.fy", "startByte": 51, "endByte": 60 },
+            "primary": { "source": "main.fy", "startByte": 48, "endByte": 57 },
             "related": []
           }
         ]
@@ -441,11 +441,11 @@
         "diagnostics": [
           {
             "code": "E5101",
-            "primary": { "source": "main.fy", "startByte": 85, "endByte": 96 },
+            "primary": { "source": "main.fy", "startByte": 86, "endByte": 97 },
             "related": [
               {
                 "role": "declaration",
-                "span": { "source": "main.fy", "startByte": 33, "endByte": 40 }
+                "span": { "source": "main.fy", "startByte": 37, "endByte": 44 }
               }
             ]
           }
@@ -462,11 +462,11 @@
         "diagnostics": [
           {
             "code": "E5102",
-            "primary": { "source": "main.fy", "startByte": 48, "endByte": 52 },
+            "primary": { "source": "main.fy", "startByte": 45, "endByte": 52 },
             "related": [
               {
                 "role": "declaration",
-                "span": { "source": "main.fy", "startByte": 33, "endByte": 40 }
+                "span": { "source": "main.fy", "startByte": 37, "endByte": 44 }
               }
             ]
           }
@@ -485,24 +485,24 @@
             "code": "E2101",
             "primary": {
               "source": "main.fy",
-              "startByte": 94,
-              "endByte": 99
+              "startByte": 95,
+              "endByte": 100
             },
             "related": [
               {
                 "role": "last-use",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 110,
-                  "endByte": 114
+                  "startByte": 118,
+                  "endByte": 122
                 }
               },
               {
                 "role": "loan",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 82,
-                  "endByte": 88
+                  "startByte": 80,
+                  "endByte": 89
                 }
               }
             ]
@@ -522,16 +522,16 @@
             "code": "E2102",
             "primary": {
               "source": "main.fy",
-              "startByte": 65,
-              "endByte": 71
+              "startByte": 71,
+              "endByte": 80
             },
             "related": [
               {
                 "role": "origin",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 45,
-                  "endByte": 50
+                  "startByte": 49,
+                  "endByte": 54
                 }
               }
             ]
@@ -540,16 +540,16 @@
             "code": "E2102",
             "primary": {
               "source": "main.fy",
-              "startByte": 122,
-              "endByte": 128
+              "startByte": 138,
+              "endByte": 147
             },
             "related": [
               {
                 "role": "origin",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 96,
-                  "endByte": 101
+                  "startByte": 118,
+                  "endByte": 123
                 }
               }
             ]
@@ -569,24 +569,24 @@
             "code": "E2103",
             "primary": {
               "source": "main.fy",
-              "startByte": 168,
-              "endByte": 175
+              "startByte": 182,
+              "endByte": 189
             },
             "related": [
               {
                 "role": "candidate-origin",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 36,
-                  "endByte": 40
+                  "startByte": 51,
+                  "endByte": 55
                 }
               },
               {
                 "role": "candidate-origin",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 48,
-                  "endByte": 53
+                  "startByte": 65,
+                  "endByte": 70
                 }
               }
             ]
@@ -606,24 +606,24 @@
             "code": "E2103",
             "primary": {
               "source": "main.fy",
-              "startByte": 166,
-              "endByte": 173
+              "startByte": 180,
+              "endByte": 187
             },
             "related": [
               {
                 "role": "candidate-origin",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 35,
-                  "endByte": 39
+                  "startByte": 50,
+                  "endByte": 54
                 }
               },
               {
                 "role": "candidate-origin",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 47,
-                  "endByte": 52
+                  "startByte": 64,
+                  "endByte": 69
                 }
               }
             ]
@@ -643,24 +643,24 @@
             "code": "E2101",
             "primary": {
               "source": "main.fy",
-              "startByte": 207,
-              "endByte": 212
+              "startByte": 218,
+              "endByte": 223
             },
             "related": [
               {
                 "role": "last-use",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 224,
-                  "endByte": 232
+                  "startByte": 242,
+                  "endByte": 250
                 }
               },
               {
                 "role": "loan",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 194,
-                  "endByte": 200
+                  "startByte": 202,
+                  "endByte": 211
                 }
               }
             ]
@@ -680,24 +680,24 @@
             "code": "E2103",
             "primary": {
               "source": "main.fy",
-              "startByte": 75,
-              "endByte": 106
+              "startByte": 85,
+              "endByte": 118
             },
             "related": [
               {
                 "role": "candidate-origin",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 36,
-                  "endByte": 40
+                  "startByte": 51,
+                  "endByte": 55
                 }
               },
               {
                 "role": "candidate-origin",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 48,
-                  "endByte": 53
+                  "startByte": 65,
+                  "endByte": 70
                 }
               }
             ]
@@ -719,7 +719,7 @@
             "related": [
               {
                 "role": "declaration",
-                "span": { "source": "main.fy", "startByte": 47, "endByte": 54 }
+                "span": { "source": "main.fy", "startByte": 51, "endByte": 58 }
               }
             ]
           }
@@ -740,7 +740,7 @@
             "related": [
               {
                 "role": "declaration",
-                "span": { "source": "main.fy", "startByte": 88, "endByte": 95 }
+                "span": { "source": "main.fy", "startByte": 92, "endByte": 99 }
               }
             ]
           }
@@ -756,11 +756,11 @@
         "completedThrough": "flow",
         "effects": [
           {
-            "declaration": { "source": "main.fy", "startByte": 38, "endByte": 42 },
+            "declaration": { "source": "main.fy", "startByte": 42, "endByte": 46 },
             "effects": ["filesystem"]
           },
           {
-            "declaration": { "source": "main.fy", "startByte": 93, "endByte": 97 },
+            "declaration": { "source": "main.fy", "startByte": 102, "endByte": 106 },
             "effects": ["console", "filesystem"]
           }
         ]
@@ -779,11 +779,11 @@
             "effects": ["filesystem"]
           },
           {
-            "declaration": { "source": "main.fy", "startByte": 168, "endByte": 173 },
+            "declaration": { "source": "main.fy", "startByte": 153, "endByte": 158 },
             "effects": ["filesystem"]
           },
           {
-            "declaration": { "source": "main.fy", "startByte": 218, "endByte": 222 },
+            "declaration": { "source": "main.fy", "startByte": 208, "endByte": 212 },
             "effects": ["filesystem"]
           }
         ]
@@ -799,7 +799,7 @@
         "diagnostics": [
           {
             "code": "E7102",
-            "primary": { "source": "main.fy", "startByte": 79, "endByte": 83 },
+            "primary": { "source": "main.fy", "startByte": 88, "endByte": 92 },
             "related": [
               {
                 "role": "effect-declaration",
@@ -820,7 +820,7 @@
         "diagnostics": [
           {
             "code": "E7102",
-            "primary": { "source": "main.fy", "startByte": 164, "endByte": 217 },
+            "primary": { "source": "main.fy", "startByte": 193, "endByte": 202 },
             "related": [
               {
                 "role": "effect-declaration",
@@ -845,7 +845,7 @@
             "related": [
               {
                 "role": "declaration",
-                "span": { "source": "main.fy", "startByte": 36, "endByte": 40 }
+                "span": { "source": "main.fy", "startByte": 40, "endByte": 44 }
               }
             ]
           }
@@ -866,7 +866,7 @@
             "related": [
               {
                 "role": "declaration",
-                "span": { "source": "main.fy", "startByte": 44, "endByte": 48 }
+                "span": { "source": "main.fy", "startByte": 48, "endByte": 52 }
               }
             ]
           }
@@ -901,7 +901,7 @@
         "diagnostics": [
           {
             "code": "E1008",
-            "primary": { "source": "main.fy", "startByte": 48, "endByte": 53 },
+            "primary": { "source": "main.fy", "startByte": 44, "endByte": 49 },
             "related": []
           }
         ]
@@ -926,7 +926,7 @@
         "diagnostics": [
           {
             "code": "E5101",
-            "primary": { "source": "main.fy", "startByte": 148, "endByte": 200 },
+            "primary": { "source": "main.fy", "startByte": 141, "endByte": 193 },
             "related": []
           }
         ]
@@ -942,19 +942,19 @@
         "diagnostics": [
           {
             "code": "E2105",
-            "primary": { "source": "main.fy", "startByte": 429, "endByte": 434 },
+            "primary": { "source": "main.fy", "startByte": 431, "endByte": 436 },
             "related": [
               {
                 "role": "last-use",
-                "span": { "source": "main.fy", "startByte": 444, "endByte": 448 }
+                "span": { "source": "main.fy", "startByte": 454, "endByte": 458 }
               },
               {
                 "role": "loan",
-                "span": { "source": "main.fy", "startByte": 382, "endByte": 388 }
+                "span": { "source": "main.fy", "startByte": 382, "endByte": 391 }
               },
               {
                 "role": "owner",
-                "span": { "source": "main.fy", "startByte": 304, "endByte": 309 }
+                "span": { "source": "main.fy", "startByte": 306, "endByte": 311 }
               }
             ]
           }

@@ -27,8 +27,8 @@
           {
             "expression": {
               "source": "main.fy",
-              "startByte": 108,
-              "endByte": 113
+              "startByte": 111,
+              "endByte": 116
             },
             "mode": "return",
             "resultType": "Result<i32, Error>",
@@ -50,8 +50,8 @@
           {
             "expression": {
               "source": "main.fy",
-              "startByte": 100,
-              "endByte": 105
+              "startByte": 96,
+              "endByte": 101
             },
             "mode": "discard",
             "resultType": "Result<i32, Error>",
@@ -73,8 +73,8 @@
           {
             "expression": {
               "source": "main.fy",
-              "startByte": 168,
-              "endByte": 174
+              "startByte": 151,
+              "endByte": 157
             },
             "mode": "propagate",
             "resultType": "Result<i32, Error>",
@@ -96,8 +96,8 @@
           {
             "expression": {
               "source": "main.fy",
-              "startByte": 51,
-              "endByte": 65
+              "startByte": 55,
+              "endByte": 62
             },
             "mode": "return",
             "resultType": "Result<i32, i32>",
@@ -119,8 +119,8 @@
           {
             "expression": {
               "source": "main.fy",
-              "startByte": 68,
-              "endByte": 73
+              "startByte": 73,
+              "endByte": 78
             },
             "mode": "match",
             "resultType": "Result<i32, i32>",
@@ -142,8 +142,8 @@
           {
             "expression": {
               "source": "main.fy",
-              "startByte": 98,
-              "endByte": 105
+              "startByte": 87,
+              "endByte": 94
             },
             "mode": "discard",
             "resultType": "Result<i32, i32>",
@@ -165,8 +165,8 @@
           {
             "expression": {
               "source": "main.fy",
-              "startByte": 99,
-              "endByte": 104
+              "startByte": 96,
+              "endByte": 101
             },
             "mode": "discard",
             "resultType": "Result<i32, i32>",
@@ -177,8 +177,8 @@
           {
             "expression": {
               "source": "main.fy",
-              "startByte": 135,
-              "endByte": 140
+              "startByte": 132,
+              "endByte": 137
             },
             "mode": "discard",
             "resultType": "Result<i32, i32>",
@@ -200,8 +200,8 @@
           {
             "expression": {
               "source": "main.fy",
-              "startByte": 71,
-              "endByte": 76
+              "startByte": 67,
+              "endByte": 72
             },
             "mode": "discard",
             "resultType": "Result<i32, i32>",
@@ -223,8 +223,8 @@
           {
             "expression": {
               "source": "main.fy",
-              "startByte": 168,
-              "endByte": 175
+              "startByte": 151,
+              "endByte": 158
             },
             "mode": "discard",
             "resultType": "Result<i32, i32>",
@@ -246,8 +246,8 @@
           {
             "expression": {
               "source": "main.fy",
-              "startByte": 114,
-              "endByte": 123
+              "startByte": 109,
+              "endByte": 118
             },
             "mode": "discard",
             "resultType": "Result<i32, i32>",
@@ -269,8 +269,8 @@
           {
             "expression": {
               "source": "main.fy",
-              "startByte": 97,
-              "endByte": 104
+              "startByte": 86,
+              "endByte": 93
             },
             "mode": "discard",
             "resultType": "Result<i32, i32>",
@@ -281,8 +281,8 @@
           {
             "expression": {
               "source": "main.fy",
-              "startByte": 147,
-              "endByte": 154
+              "startByte": 129,
+              "endByte": 136
             },
             "mode": "discard",
             "resultType": "Result<i32, i32>",
@@ -305,8 +305,8 @@
             "code": "E4101",
             "primary": {
               "source": "main.fy",
-              "startByte": 93,
-              "endByte": 98
+              "startByte": 89,
+              "endByte": 94
             },
             "related": []
           }
@@ -325,8 +325,8 @@
             "code": "E4101",
             "primary": {
               "source": "main.fy",
-              "startByte": 72,
-              "endByte": 86
+              "startByte": 68,
+              "endByte": 75
             },
             "related": []
           }
@@ -345,8 +345,8 @@
             "code": "E4101",
             "primary": {
               "source": "main.fy",
-              "startByte": 25,
-              "endByte": 30
+              "startByte": 46,
+              "endByte": 51
             },
             "related": []
           }
@@ -365,8 +365,8 @@
             "code": "E4101",
             "primary": {
               "source": "main.fy",
-              "startByte": 72,
-              "endByte": 85
+              "startByte": 68,
+              "endByte": 74
             },
             "related": []
           }
@@ -385,8 +385,8 @@
             "code": "E4101",
             "primary": {
               "source": "main.fy",
-              "startByte": 25,
-              "endByte": 30
+              "startByte": 46,
+              "endByte": 51
             },
             "related": []
           }
@@ -405,8 +405,8 @@
             "code": "E4101",
             "primary": {
               "source": "main.fy",
-              "startByte": 153,
-              "endByte": 166
+              "startByte": 143,
+              "endByte": 149
             },
             "related": []
           }
@@ -425,8 +425,8 @@
             "code": "E4101",
             "primary": {
               "source": "main.fy",
-              "startByte": 82,
-              "endByte": 96
+              "startByte": 77,
+              "endByte": 84
             },
             "related": []
           }
@@ -445,16 +445,16 @@
             "code": "E4102",
             "primary": {
               "source": "main.fy",
-              "startByte": 55,
-              "endByte": 56
+              "startByte": 58,
+              "endByte": 59
             },
             "related": [
               {
                 "role": "result-expression",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 50,
-                  "endByte": 55
+                  "startByte": 53,
+                  "endByte": 58
                 }
               }
             ]
@@ -474,24 +474,24 @@
             "code": "E4103",
             "primary": {
               "source": "main.fy",
-              "startByte": 229,
-              "endByte": 230
+              "startByte": 212,
+              "endByte": 213
             },
             "related": [
               {
                 "role": "actual-error",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 117,
-                  "endByte": 128
+                  "startByte": 130,
+                  "endByte": 141
                 }
               },
               {
                 "role": "expected-error",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 188,
-                  "endByte": 199
+                  "startByte": 97,
+                  "endByte": 108
                 }
               }
             ]
@@ -508,7 +508,7 @@
         "completedThrough": "flow",
         "handling": [
           {
-            "expression": { "source": "main.fy", "startByte": 204, "endByte": 211 },
+            "expression": { "source": "main.fy", "startByte": 187, "endByte": 194 },
             "mode": "discard",
             "resultType": "Result<i32, i32>",
             "successType": "i32",
@@ -516,7 +516,7 @@
             "evaluationCount": 1
           },
           {
-            "expression": { "source": "main.fy", "startByte": 398, "endByte": 405 },
+            "expression": { "source": "main.fy", "startByte": 372, "endByte": 379 },
             "mode": "discard",
             "resultType": "Result<i32, i32>",
             "successType": "i32",
@@ -536,7 +536,7 @@
         "diagnostics": [
           {
             "code": "E4101",
-            "primary": { "source": "main.fy", "startByte": 103, "endByte": 116 },
+            "primary": { "source": "main.fy", "startByte": 100, "endByte": 106 },
             "related": []
           }
         ]
@@ -552,7 +552,7 @@
         "diagnostics": [
           {
             "code": "E4101",
-            "primary": { "source": "main.fy", "startByte": 103, "endByte": 116 },
+            "primary": { "source": "main.fy", "startByte": 100, "endByte": 106 },
             "related": []
           }
         ]
@@ -568,7 +568,7 @@
         "diagnostics": [
           {
             "code": "E4101",
-            "primary": { "source": "main.fy", "startByte": 153, "endByte": 166 },
+            "primary": { "source": "main.fy", "startByte": 143, "endByte": 149 },
             "related": []
           }
         ]

@@ -2063,6 +2063,56 @@ fn as_str(value: &String) -> &str {
 	}
 }
 
+func TestLowerMovesResourceThroughBlockTailInOptionArm(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+resource Token {
+    i32 value;
+    cleanup {}
+}
+fn Token unwrap(Option<Token> input) {
+    return switch (input) {
+        case .some(token): { token }
+        case .none: { Token { .value = 0 } }
+    };
+}
+fn i32 main() {
+    let Token token = unwrap(.some(Token { .value = 42 }));
+    return token.value;
+}
+`)
+	var unwrap *Function
+	for index := range program.Functions {
+		if program.Functions[index].Name == "main::unwrap" {
+			unwrap = &program.Functions[index]
+			break
+		}
+	}
+	if unwrap == nil {
+		t.Fatal("lowered program has no main::unwrap")
+	}
+	var transferred *MoveFact
+	for index := range unwrap.Moves {
+		if unwrap.Moves[index].Destination == "option-match-result" {
+			transferred = &unwrap.Moves[index]
+			break
+		}
+	}
+	if transferred == nil || !transferred.CleanupObligationTransferred {
+		t.Fatalf("option arm moves = %+v", unwrap.Moves)
+	}
+	for _, block := range unwrap.Blocks {
+		for _, operation := range block.Operations {
+			if operation.Kind == OperationDrop && operation.Span == transferred.Binding {
+				t.Fatalf("moved option payload was dropped in its arm: %+v", operation)
+			}
+		}
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+}
+
 func lowerTestSource(t *testing.T, text string) Program {
 	t.Helper()
 	parsed, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(text)), source.DefaultLimits())

@@ -98,11 +98,37 @@ func parseMigrationSource(path string, input []byte) *syntax.Tree {
 		}
 		break
 	}
-	virtualPath := path
-	if module != "" {
-		virtualPath = strings.ReplaceAll(module, "::", "/") + ".fy"
-	}
+	virtualPath := migrationVirtualPathForModule(path, module)
 	return syntax.Parse(source.NewFile(virtualPath, input), source.DefaultLimits())
+}
+
+func migrationVirtualPath(path string, input []byte) string {
+	lexed := lexer.Lex(source.NewFile(path, input), source.NewBudget(source.DefaultLimits(), len(input)))
+	module := ""
+	for index := 0; index < len(lexed.Tokens); index++ {
+		if lexed.Tokens[index].Text(lexed.Source) != "module" {
+			continue
+		}
+		for index++; index < len(lexed.Tokens); index++ {
+			token := lexed.Tokens[index]
+			text := token.Text(lexed.Source)
+			if text == ";" {
+				break
+			}
+			if token.Kind != lexer.Trivia {
+				module += text
+			}
+		}
+		break
+	}
+	return migrationVirtualPathForModule(path, module)
+}
+
+func migrationVirtualPathForModule(path, module string) string {
+	if module == "" {
+		return path
+	}
+	return strings.ReplaceAll(module, "::", "/") + ".fy"
 }
 
 func declarationEdits(tree *syntax.Tree) ([]edit, error) {
@@ -135,6 +161,20 @@ func declarationEdits(tree *syntax.Tree) ([]edit, error) {
 				return nil, err
 			}
 			edits = append(edits, edit{start: tree.Tokens[fnToken].Span.EndByte, end: block.Span.StartByte, replacement: header})
+			for _, childID := range node.Children {
+				parameter, ok := tree.Node(childID)
+				if !ok || parameter.Kind != syntax.KindParameter || parameter.Cooked != "mut" {
+					continue
+				}
+				parameterType, ok := childOfKind(tree, parameter, syntax.KindType)
+				if !ok {
+					return nil, fmt.Errorf("mutable parameter %q has no type", parameter.Text)
+				}
+				edits = append(edits, edit{
+					start: block.Span.StartByte + 1, end: block.Span.StartByte + 1,
+					replacement: "\n    var " + renderType(tree, parameterType) + " " + parameter.Text + " = input;",
+				})
+			}
 			if tail, found := childOfKind(tree, block, syntax.KindTail); found && len(tail.Children) == 1 {
 				expression, ok := tree.Node(tail.Children[0])
 				if ok {
@@ -394,14 +434,15 @@ func renderFunctionHeader(tree *syntax.Tree, node syntax.Node) (string, error) {
 		if !ok || child.Kind != syntax.KindParameter {
 			continue
 		}
-		if child.Cooked == "mut" {
-			return "", fmt.Errorf("function %q has mutable parameter %q and requires manual migration", node.Text, child.Text)
-		}
 		parameterType, ok := childOfKind(tree, child, syntax.KindType)
 		if !ok {
 			return "", fmt.Errorf("parameter %q has no type", child.Text)
 		}
-		parameters = append(parameters, renderType(tree, parameterType)+" "+child.Text)
+		name := child.Text
+		if child.Cooked == "mut" {
+			name = "input"
+		}
+		parameters = append(parameters, renderType(tree, parameterType)+" "+name)
 	}
 	return " " + renderType(tree, resultType) + " " + node.Text + "(" + strings.Join(parameters, ", ") + ") ", nil
 }

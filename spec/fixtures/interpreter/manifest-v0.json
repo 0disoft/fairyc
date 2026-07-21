@@ -387,7 +387,7 @@
         "drops": [
           {
             "resourceType": "main::Token",
-            "binding": { "source": "main.fy", "startByte": 110, "endByte": 115 }
+            "binding": { "source": "main.fy", "startByte": 95, "endByte": 100 }
           }
         ]
       }
@@ -405,7 +405,7 @@
         "drops": [
           {
             "resourceType": "main::Token",
-            "binding": { "source": "main.fy", "startByte": 94, "endByte": 99 }
+            "binding": { "source": "main.fy", "startByte": 86, "endByte": 91 }
           }
         ]
       }
@@ -423,7 +423,7 @@
         "drops": [
           {
             "resourceType": "main::Token",
-            "binding": { "source": "main.fy", "startByte": 243, "endByte": 248 }
+            "binding": { "source": "main.fy", "startByte": 223, "endByte": 228 }
           }
         ]
       }
@@ -441,7 +441,7 @@
         "drops": [
           {
             "resourceType": "main::Token",
-            "binding": { "source": "main.fy", "startByte": 110, "endByte": 117 }
+            "binding": { "source": "main.fy", "startByte": 103, "endByte": 110 }
           }
         ]
       }
@@ -471,7 +471,7 @@
         "drops": [
           {
             "resourceType": "main::Token",
-            "binding": { "source": "main.fy", "startByte": 212, "endByte": 217 }
+            "binding": { "source": "main.fy", "startByte": 193, "endByte": 198 }
           }
         ]
       }
@@ -489,7 +489,7 @@
         "drops": [
           {
             "resourceType": "main::Token",
-            "binding": { "source": "main.fy", "startByte": 250, "endByte": 255 }
+            "binding": { "source": "main.fy", "startByte": 231, "endByte": 236 }
           }
         ]
       }
@@ -507,7 +507,7 @@
         "drops": [
           {
             "resourceType": "main::Token",
-            "binding": { "source": "main.fy", "startByte": 262, "endByte": 267 }
+            "binding": { "source": "main.fy", "startByte": 256, "endByte": 261 }
           }
         ]
       }
@@ -525,7 +525,7 @@
         "drops": [
           {
             "resourceType": "main::Token",
-            "binding": { "source": "main.fy", "startByte": 148, "endByte": 153 }
+            "binding": { "source": "main.fy", "startByte": 132, "endByte": 137 }
           }
         ]
       }
@@ -543,7 +543,7 @@
         "drops": [
           {
             "resourceType": "main::Token",
-            "binding": { "source": "main.fy", "startByte": 322, "endByte": 327 }
+            "binding": { "source": "main.fy", "startByte": 300, "endByte": 305 }
           }
         ]
       }
@@ -561,7 +561,7 @@
         "drops": [
           {
             "resourceType": "main::Token",
-            "binding": { "source": "main.fy", "startByte": 110, "endByte": 117 }
+            "binding": { "source": "main.fy", "startByte": 111, "endByte": 118 }
           }
         ]
       }
@@ -579,11 +579,11 @@
         "drops": [
           {
             "resourceType": "main::Token",
-            "binding": { "source": "main.fy", "startByte": 110, "endByte": 115 }
+            "binding": { "source": "main.fy", "startByte": 95, "endByte": 100 }
           },
           {
             "resourceType": "main::Token",
-            "binding": { "source": "main.fy", "startByte": 110, "endByte": 115 }
+            "binding": { "source": "main.fy", "startByte": 95, "endByte": 100 }
           }
         ]
       }
@@ -601,11 +601,11 @@
         "drops": [
           {
             "resourceType": "main::Token",
-            "binding": { "source": "main.fy", "startByte": 94, "endByte": 99 }
+            "binding": { "source": "main.fy", "startByte": 86, "endByte": 91 }
           },
           {
             "resourceType": "main::Token",
-            "binding": { "source": "main.fy", "startByte": 163, "endByte": 168 }
+            "binding": { "source": "main.fy", "startByte": 152, "endByte": 157 }
           }
         ]
       }
@@ -623,15 +623,15 @@
         "drops": [
           {
             "resourceType": "main::Probe",
-            "binding": { "source": "main.fy", "startByte": 211, "endByte": 216 }
+            "binding": { "source": "main.fy", "startByte": 177, "endByte": 182 }
           },
           {
             "resourceType": "main::Token",
-            "binding": { "source": "main.fy", "startByte": 397, "endByte": 402 }
+            "binding": { "source": "main.fy", "startByte": 358, "endByte": 363 }
           },
           {
             "resourceType": "main::Token",
-            "binding": { "source": "main.fy", "startByte": 397, "endByte": 402 }
+            "binding": { "source": "main.fy", "startByte": 358, "endByte": 363 }
           }
         ]
       }
@@ -649,11 +649,11 @@
         "drops": [
           {
             "resourceType": "main::Probe",
-            "binding": { "source": "main.fy", "startByte": 211, "endByte": 216 }
+            "binding": { "source": "main.fy", "startByte": 177, "endByte": 182 }
           },
           {
             "resourceType": "main::Token",
-            "binding": { "source": "main.fy", "startByte": 397, "endByte": 402 }
+            "binding": { "source": "main.fy", "startByte": 358, "endByte": 363 }
           }
         ]
       }
@@ -671,7 +671,7 @@
         "drops": [
           {
             "resourceType": "main::Token",
-            "binding": { "source": "main.fy", "startByte": 93, "endByte": 98 }
+            "binding": { "source": "main.fy", "startByte": 85, "endByte": 90 }
           }
         ]
       }
@@ -689,7 +689,7 @@
         "drops": [
           {
             "resourceType": "main::Token",
-            "binding": { "source": "main.fy", "startByte": 441, "endByte": 449 }
+            "binding": { "source": "main.fy", "startByte": 424, "endByte": 432 }
           }
         ]
       }
@@ -707,7 +707,7 @@
         "drops": [
           {
             "resourceType": "main::Token",
-            "binding": { "source": "main.fy", "startByte": 110, "endByte": 115 }
+            "binding": { "source": "main.fy", "startByte": 95, "endByte": 100 }
           }
         ]
       }
@@ -725,24 +725,24 @@
         "drops": [
           {
             "resourceType": "std::alloc::Token",
-            "binding": { "source": "std/alloc.fy", "startByte": 174, "endByte": 179 }
+            "binding": { "source": "std/alloc.fy", "startByte": 148, "endByte": 153 }
           },
           {
             "resourceType": "std::alloc::Token",
-            "binding": { "source": "std/alloc.fy", "startByte": 442, "endByte": 447 }
+            "binding": { "source": "std/alloc.fy", "startByte": 419, "endByte": 424 }
           },
           {
             "resourceType": "std::alloc::Token",
-            "binding": { "source": "std/alloc.fy", "startByte": 287, "endByte": 291 }
+            "binding": { "source": "std/alloc.fy", "startByte": 259, "endByte": 263 }
           },
           {
             "resourceType": "std::alloc::Arena",
-            "binding": { "source": "std/alloc.fy", "startByte": 243, "endByte": 248 }
+            "binding": { "source": "std/alloc.fy", "startByte": 214, "endByte": 219 }
           }
         ],
         "regions": [
           {
-            "region": { "source": "std/alloc.fy", "startByte": 364, "endByte": 528 },
+            "region": { "source": "std/alloc.fy", "startByte": 330, "endByte": 502 },
             "exitKind": "fallthrough",
             "placements": 1,
             "dropCountBeforeReset": 2
@@ -763,20 +763,20 @@
         "drops": [
           {
             "resourceType": "std::alloc::Token",
-            "binding": { "source": "std/alloc.fy", "startByte": 333, "endByte": 338 }
+            "binding": { "source": "std/alloc.fy", "startByte": 305, "endByte": 310 }
           },
           {
             "resourceType": "std::alloc::Token",
-            "binding": { "source": "std/alloc.fy", "startByte": 248, "endByte": 255 }
+            "binding": { "source": "std/alloc.fy", "startByte": 216, "endByte": 223 }
           },
           {
             "resourceType": "std::alloc::Arena",
-            "binding": { "source": "std/alloc.fy", "startByte": 204, "endByte": 209 }
+            "binding": { "source": "std/alloc.fy", "startByte": 171, "endByte": 176 }
           }
         ],
         "regions": [
           {
-            "region": { "source": "std/alloc.fy", "startByte": 290, "endByte": 463 },
+            "region": { "source": "std/alloc.fy", "startByte": 253, "endByte": 432 },
             "exitKind": "return",
             "placements": 1,
             "dropCountBeforeReset": 1
@@ -797,20 +797,20 @@
         "drops": [
           {
             "resourceType": "std::alloc::Token",
-            "binding": { "source": "std/alloc.fy", "startByte": 676, "endByte": 681 }
+            "binding": { "source": "std/alloc.fy", "startByte": 652, "endByte": 657 }
           },
           {
             "resourceType": "std::alloc::Token",
-            "binding": { "source": "std/alloc.fy", "startByte": 591, "endByte": 598 }
+            "binding": { "source": "std/alloc.fy", "startByte": 563, "endByte": 570 }
           },
           {
             "resourceType": "std::alloc::Arena",
-            "binding": { "source": "std/alloc.fy", "startByte": 547, "endByte": 552 }
+            "binding": { "source": "std/alloc.fy", "startByte": 518, "endByte": 523 }
           }
         ],
         "regions": [
           {
-            "region": { "source": "std/alloc.fy", "startByte": 633, "endByte": 859 },
+            "region": { "source": "std/alloc.fy", "startByte": 600, "endByte": 824 },
             "exitKind": "propagate",
             "placements": 1,
             "dropCountBeforeReset": 1
@@ -831,34 +831,34 @@
         "drops": [
           {
             "resourceType": "std::alloc::Token",
-            "binding": { "source": "std/alloc.fy", "startByte": 1407, "endByte": 1418 }
+            "binding": { "source": "std/alloc.fy", "startByte": 1388, "endByte": 1399 }
           },
           {
             "resourceType": "std::alloc::Token",
-            "binding": { "source": "std/alloc.fy", "startByte": 1257, "endByte": 1268 }
+            "binding": { "source": "std/alloc.fy", "startByte": 1232, "endByte": 1243 }
           },
           {
             "resourceType": "std::alloc::Token",
-            "binding": { "source": "std/alloc.fy", "startByte": 1162, "endByte": 1176 }
+            "binding": { "source": "std/alloc.fy", "startByte": 1133, "endByte": 1147 }
           },
           {
             "resourceType": "std::alloc::Arena",
-            "binding": { "source": "std/alloc.fy", "startByte": 1112, "endByte": 1123 }
+            "binding": { "source": "std/alloc.fy", "startByte": 1082, "endByte": 1093 }
           },
           {
             "resourceType": "std::alloc::Arena",
-            "binding": { "source": "std/alloc.fy", "startByte": 1062, "endByte": 1073 }
+            "binding": { "source": "std/alloc.fy", "startByte": 1031, "endByte": 1042 }
           }
         ],
         "regions": [
           {
-            "region": { "source": "std/alloc.fy", "startByte": 1356, "endByte": 1592 },
+            "region": { "source": "std/alloc.fy", "startByte": 1328, "endByte": 1570 },
             "exitKind": "return",
             "placements": 1,
             "dropCountBeforeReset": 1
           },
           {
-            "region": { "source": "std/alloc.fy", "startByte": 1210, "endByte": 1598 },
+            "region": { "source": "std/alloc.fy", "startByte": 1176, "endByte": 1576 },
             "exitKind": "return",
             "placements": 1,
             "dropCountBeforeReset": 2
@@ -879,20 +879,20 @@
         "drops": [
           {
             "resourceType": "std::alloc::Token",
-            "binding": { "source": "std/alloc.fy", "startByte": 1782, "endByte": 1787 }
+            "binding": { "source": "std/alloc.fy", "startByte": 1767, "endByte": 1772 }
           },
           {
             "resourceType": "std::alloc::Token",
-            "binding": { "source": "std/alloc.fy", "startByte": 1697, "endByte": 1704 }
+            "binding": { "source": "std/alloc.fy", "startByte": 1678, "endByte": 1685 }
           },
           {
             "resourceType": "std::alloc::Arena",
-            "binding": { "source": "std/alloc.fy", "startByte": 1653, "endByte": 1658 }
+            "binding": { "source": "std/alloc.fy", "startByte": 1633, "endByte": 1638 }
           }
         ],
         "regions": [
           {
-            "region": { "source": "std/alloc.fy", "startByte": 1739, "endByte": 1944 },
+            "region": { "source": "std/alloc.fy", "startByte": 1715, "endByte": 1928 },
             "exitKind": "fallthrough",
             "placements": 1,
             "dropCountBeforeReset": 1
@@ -936,14 +936,14 @@
         "outcome": "return",
         "value": 41,
         "drops": [
-          { "resourceType": "std::alloc::Token", "binding": { "source": "std/alloc.fy", "startByte": 432, "endByte": 437 } },
-          { "resourceType": "std::alloc::Token", "binding": { "source": "std/alloc.fy", "startByte": 343, "endByte": 347 } },
-          { "resourceType": "std::alloc::Token", "binding": { "source": "std/alloc.fy", "startByte": 247, "endByte": 254 } },
-          { "resourceType": "std::alloc::Arena", "binding": { "source": "std/alloc.fy", "startByte": 203, "endByte": 208 } }
+          { "resourceType": "std::alloc::Token", "binding": { "source": "std/alloc.fy", "startByte": 406, "endByte": 411 } },
+          { "resourceType": "std::alloc::Token", "binding": { "source": "std/alloc.fy", "startByte": 313, "endByte": 317 } },
+          { "resourceType": "std::alloc::Token", "binding": { "source": "std/alloc.fy", "startByte": 215, "endByte": 222 } },
+          { "resourceType": "std::alloc::Arena", "binding": { "source": "std/alloc.fy", "startByte": 170, "endByte": 175 } }
         ],
         "regions": [
           {
-            "region": { "source": "std/alloc.fy", "startByte": 385, "endByte": 626 },
+            "region": { "source": "std/alloc.fy", "startByte": 350, "endByte": 599 },
             "exitKind": "break",
             "placements": 1,
             "dropCountBeforeReset": 1
@@ -962,22 +962,22 @@
         "outcome": "return",
         "value": 42,
         "drops": [
-          { "resourceType": "std::alloc::Token", "binding": { "source": "std/alloc.fy", "startByte": 934, "endByte": 939 } },
-          { "resourceType": "std::alloc::Token", "binding": { "source": "std/alloc.fy", "startByte": 845, "endByte": 849 } },
-          { "resourceType": "std::alloc::Token", "binding": { "source": "std/alloc.fy", "startByte": 934, "endByte": 939 } },
-          { "resourceType": "std::alloc::Token", "binding": { "source": "std/alloc.fy", "startByte": 845, "endByte": 849 } },
-          { "resourceType": "std::alloc::Token", "binding": { "source": "std/alloc.fy", "startByte": 749, "endByte": 756 } },
-          { "resourceType": "std::alloc::Arena", "binding": { "source": "std/alloc.fy", "startByte": 705, "endByte": 710 } }
+          { "resourceType": "std::alloc::Token", "binding": { "source": "std/alloc.fy", "startByte": 925, "endByte": 930 } },
+          { "resourceType": "std::alloc::Token", "binding": { "source": "std/alloc.fy", "startByte": 832, "endByte": 836 } },
+          { "resourceType": "std::alloc::Token", "binding": { "source": "std/alloc.fy", "startByte": 925, "endByte": 930 } },
+          { "resourceType": "std::alloc::Token", "binding": { "source": "std/alloc.fy", "startByte": 832, "endByte": 836 } },
+          { "resourceType": "std::alloc::Token", "binding": { "source": "std/alloc.fy", "startByte": 734, "endByte": 741 } },
+          { "resourceType": "std::alloc::Arena", "binding": { "source": "std/alloc.fy", "startByte": 689, "endByte": 694 } }
         ],
         "regions": [
           {
-            "region": { "source": "std/alloc.fy", "startByte": 887, "endByte": 1084 },
+            "region": { "source": "std/alloc.fy", "startByte": 869, "endByte": 1072 },
             "exitKind": "continue",
             "placements": 1,
             "dropCountBeforeReset": 1
           },
           {
-            "region": { "source": "std/alloc.fy", "startByte": 887, "endByte": 1084 },
+            "region": { "source": "std/alloc.fy", "startByte": 869, "endByte": 1072 },
             "exitKind": "continue",
             "placements": 1,
             "dropCountBeforeReset": 3

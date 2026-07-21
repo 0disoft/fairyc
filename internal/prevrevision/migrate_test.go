@@ -33,11 +33,14 @@ fn add(left: i32, right: i32) -> i32 {
 	}
 }
 
-func TestMigrateDeclarationsRejectsMutableParameters(t *testing.T) {
+func TestMigrateDeclarationsLowersMutableParametersToLocals(t *testing.T) {
 	t.Parallel()
-	_, err := MigrateDeclarations("main.fy", []byte("module main;\nfn update(mut value: i32) -> i32 { value }\n"))
-	if err == nil || !strings.Contains(err.Error(), "requires manual migration") {
+	result, err := MigrateDeclarations("main.fy", []byte("module main;\nfn update(mut value: i32) -> i32 { value }\n"))
+	if err != nil {
 		t.Fatalf("MigrateDeclarations() error = %v", err)
+	}
+	if !strings.Contains(string(result.Source), "fn i32 update(i32 input) {\n    var i32 value = input; return value; }") {
+		t.Fatalf("migrated source = %s", result.Source)
 	}
 }
 
@@ -108,5 +111,20 @@ func TestMigrateCleanupReceiver(t *testing.T) {
 	}
 	if !strings.Contains(string(result.Source), "cleanup { let i32 seen = this.value; }") {
 		t.Fatalf("migrated source = %s", result.Source)
+	}
+}
+
+func TestSpanMapperKeepsHalfOpenBoundariesAroundInsertions(t *testing.T) {
+	t.Parallel()
+	edits := []edit{
+		{start: 0, end: 0, replacement: "return "},
+		{start: 5, end: 5, replacement: ";"},
+	}
+	start, end, err := mapSpan([]byte("value"), []byte("return value;"), edits, 0, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if start != 7 || end != 12 {
+		t.Fatalf("mapped span = %d..%d, want 7..12", start, end)
 	}
 }

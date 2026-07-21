@@ -20,13 +20,13 @@
           {
             "binding": {
               "source": "main.fy",
-              "startByte": 162,
-              "endByte": 167
+              "startByte": 151,
+              "endByte": 156
             },
             "at": {
               "source": "main.fy",
-              "startByte": 209,
-              "endByte": 214
+              "startByte": 200,
+              "endByte": 205
             },
             "observation": "before",
             "state": "Live",
@@ -35,13 +35,13 @@
           {
             "binding": {
               "source": "main.fy",
-              "startByte": 162,
-              "endByte": 167
+              "startByte": 151,
+              "endByte": 156
             },
             "at": {
               "source": "main.fy",
-              "startByte": 209,
-              "endByte": 214
+              "startByte": 200,
+              "endByte": 205
             },
             "observation": "after",
             "state": "Dead",
@@ -60,13 +60,13 @@
           {
             "binding": {
               "source": "main.fy",
-              "startByte": 160,
-              "endByte": 165
+              "startByte": 152,
+              "endByte": 157
             },
             "at": {
               "source": "main.fy",
-              "startByte": 205,
-              "endByte": 210
+              "startByte": 202,
+              "endByte": 207
             },
             "observation": "after",
             "state": "Live",
@@ -85,13 +85,13 @@
           {
             "binding": {
               "source": "main.fy",
-              "startByte": 172,
-              "endByte": 177
+              "startByte": 160,
+              "endByte": 165
             },
             "at": {
               "source": "main.fy",
-              "startByte": 285,
-              "endByte": 291
+              "startByte": 276,
+              "endByte": 282
             },
             "observation": "before",
             "state": "Dead",
@@ -110,13 +110,13 @@
           {
             "binding": {
               "source": "main.fy",
-              "startByte": 110,
-              "endByte": 115
+              "startByte": 95,
+              "endByte": 100
             },
             "at": {
               "source": "main.fy",
-              "startByte": 149,
-              "endByte": 154
+              "startByte": 129,
+              "endByte": 134
             },
             "observation": "before",
             "state": "Live",
@@ -125,13 +125,13 @@
           {
             "binding": {
               "source": "main.fy",
-              "startByte": 110,
-              "endByte": 115
+              "startByte": 95,
+              "endByte": 100
             },
             "at": {
               "source": "main.fy",
-              "startByte": 149,
-              "endByte": 154
+              "startByte": 129,
+              "endByte": 134
             },
             "observation": "after",
             "state": "Live",
@@ -150,13 +150,13 @@
           {
             "binding": {
               "source": "main.fy",
-              "startByte": 163,
-              "endByte": 168
+              "startByte": 152,
+              "endByte": 157
             },
             "at": {
               "source": "main.fy",
-              "startByte": 241,
-              "endByte": 246
+              "startByte": 224,
+              "endByte": 229
             },
             "observation": "before",
             "state": "Dead",
@@ -165,13 +165,13 @@
           {
             "binding": {
               "source": "main.fy",
-              "startByte": 163,
-              "endByte": 168
+              "startByte": 152,
+              "endByte": 157
             },
             "at": {
               "source": "main.fy",
-              "startByte": 241,
-              "endByte": 246
+              "startByte": 224,
+              "endByte": 229
             },
             "observation": "after",
             "state": "Live",
@@ -190,13 +190,13 @@
           {
             "binding": {
               "source": "main.fy",
-              "startByte": 166,
-              "endByte": 171
+              "startByte": 155,
+              "endByte": 160
             },
             "at": {
               "source": "main.fy",
-              "startByte": 230,
-              "endByte": 235
+              "startByte": 213,
+              "endByte": 218
             },
             "observation": "before",
             "state": "Live",
@@ -205,13 +205,13 @@
           {
             "binding": {
               "source": "main.fy",
-              "startByte": 166,
-              "endByte": 171
+              "startByte": 155,
+              "endByte": 160
             },
             "at": {
               "source": "main.fy",
-              "startByte": 230,
-              "endByte": 235
+              "startByte": 213,
+              "endByte": 218
             },
             "observation": "after",
             "state": "Dead",
@@ -223,24 +223,24 @@
             "code": "E1101",
             "primary": {
               "source": "main.fy",
-              "startByte": 250,
-              "endByte": 255
+              "startByte": 240,
+              "endByte": 245
             },
             "related": [
               {
                 "role": "declaration",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 166,
-                  "endByte": 171
+                  "startByte": 155,
+                  "endByte": 160
                 }
               },
               {
                 "role": "move",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 230,
-                  "endByte": 235
+                  "startByte": 213,
+                  "endByte": 218
                 }
               }
             ]
@@ -258,13 +258,13 @@
           {
             "binding": {
               "source": "main.fy",
-              "startByte": 110,
-              "endByte": 117
+              "startByte": 103,
+              "endByte": 110
             },
             "at": {
               "source": "main.fy",
-              "startByte": 197,
-              "endByte": 204
+              "startByte": 171,
+              "endByte": 178
             },
             "observation": "before",
             "state": "Live",
@@ -273,13 +273,13 @@
           {
             "binding": {
               "source": "main.fy",
-              "startByte": 110,
-              "endByte": 117
+              "startByte": 103,
+              "endByte": 110
             },
             "at": {
               "source": "main.fy",
-              "startByte": 197,
-              "endByte": 204
+              "startByte": 171,
+              "endByte": 178
             },
             "observation": "after",
             "state": "Dead",
@@ -291,24 +291,24 @@
             "code": "E1101",
             "primary": {
               "source": "main.fy",
-              "startByte": 289,
-              "endByte": 296
+              "startByte": 264,
+              "endByte": 271
             },
             "related": [
               {
                 "role": "declaration",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 110,
-                  "endByte": 117
+                  "startByte": 103,
+                  "endByte": 110
                 }
               },
               {
                 "role": "move",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 197,
-                  "endByte": 204
+                  "startByte": 171,
+                  "endByte": 178
                 }
               }
             ]
@@ -328,24 +328,24 @@
             "code": "E1103",
             "primary": {
               "source": "main.fy",
-              "startByte": 323,
-              "endByte": 332
+              "startByte": 289,
+              "endByte": 298
             },
             "related": [
               {
                 "role": "field",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 103,
-                  "endByte": 107
+                  "startByte": 91,
+                  "endByte": 95
                 }
               },
               {
                 "role": "owner",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 200,
-                  "endByte": 204
+                  "startByte": 165,
+                  "endByte": 169
                 }
               }
             ]
@@ -363,13 +363,13 @@
           {
             "binding": {
               "source": "main.fy",
-              "startByte": 176,
-              "endByte": 181
+              "startByte": 164,
+              "endByte": 169
             },
             "at": {
               "source": "main.fy",
-              "startByte": 233,
-              "endByte": 270
+              "startByte": 215,
+              "endByte": 254
             },
             "observation": "after",
             "state": "MaybeLive",
@@ -381,24 +381,24 @@
             "code": "E1104",
             "primary": {
               "source": "main.fy",
-              "startByte": 233,
-              "endByte": 270
+              "startByte": 215,
+              "endByte": 254
             },
             "related": [
               {
                 "role": "declaration",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 176,
-                  "endByte": 181
+                  "startByte": 164,
+                  "endByte": 169
                 }
               },
               {
                 "role": "move",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 251,
-                  "endByte": 256
+                  "startByte": 235,
+                  "endByte": 240
                 }
               }
             ]
@@ -416,13 +416,13 @@
           {
             "binding": {
               "source": "main.fy",
-              "startByte": 176,
-              "endByte": 181
+              "startByte": 164,
+              "endByte": 169
             },
             "at": {
               "source": "main.fy",
-              "startByte": 215,
-              "endByte": 225
+              "startByte": 198,
+              "endByte": 209
             },
             "observation": "before",
             "state": "Live",
@@ -431,13 +431,13 @@
           {
             "binding": {
               "source": "main.fy",
-              "startByte": 176,
-              "endByte": 181
+              "startByte": 164,
+              "endByte": 169
             },
             "at": {
               "source": "main.fy",
-              "startByte": 244,
-              "endByte": 249
+              "startByte": 229,
+              "endByte": 234
             },
             "observation": "after",
             "state": "Dead",
@@ -449,32 +449,32 @@
             "code": "E1105",
             "primary": {
               "source": "main.fy",
-              "startByte": 215,
-              "endByte": 257
+              "startByte": 198,
+              "endByte": 242
             },
             "related": [
               {
                 "role": "declaration",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 176,
-                  "endByte": 181
+                  "startByte": 164,
+                  "endByte": 169
                 }
               },
               {
                 "role": "loop-header",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 215,
-                  "endByte": 225
+                  "startByte": 198,
+                  "endByte": 209
                 }
               },
               {
                 "role": "move",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 244,
-                  "endByte": 249
+                  "startByte": 229,
+                  "endByte": 234
                 }
               }
             ]
@@ -492,11 +492,11 @@
         "diagnostics": [
           {
             "code": "E1105",
-            "primary": { "source": "main.fy", "startByte": 215, "endByte": 272 },
+            "primary": { "source": "main.fy", "startByte": 198, "endByte": 257 },
             "related": [
-              { "role": "declaration", "span": { "source": "main.fy", "startByte": 176, "endByte": 181 } },
-              { "role": "loop-header", "span": { "source": "main.fy", "startByte": 215, "endByte": 225 } },
-              { "role": "move", "span": { "source": "main.fy", "startByte": 244, "endByte": 249 } }
+              { "role": "declaration", "span": { "source": "main.fy", "startByte": 164, "endByte": 169 } },
+              { "role": "loop-header", "span": { "source": "main.fy", "startByte": 198, "endByte": 209 } },
+              { "role": "move", "span": { "source": "main.fy", "startByte": 229, "endByte": 234 } }
             ]
           }
         ]
@@ -512,11 +512,11 @@
         "diagnostics": [
           {
             "code": "E1105",
-            "primary": { "source": "main.fy", "startByte": 215, "endByte": 275 },
+            "primary": { "source": "main.fy", "startByte": 198, "endByte": 260 },
             "related": [
-              { "role": "declaration", "span": { "source": "main.fy", "startByte": 176, "endByte": 181 } },
-              { "role": "loop-header", "span": { "source": "main.fy", "startByte": 215, "endByte": 225 } },
-              { "role": "move", "span": { "source": "main.fy", "startByte": 244, "endByte": 249 } }
+              { "role": "declaration", "span": { "source": "main.fy", "startByte": 164, "endByte": 169 } },
+              { "role": "loop-header", "span": { "source": "main.fy", "startByte": 198, "endByte": 209 } },
+              { "role": "move", "span": { "source": "main.fy", "startByte": 229, "endByte": 234 } }
             ]
           }
         ]
