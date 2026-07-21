@@ -273,6 +273,7 @@ func (f *borrowFlowAnalyzer) evaluateStatement(statement *ast.Statement, environ
 		return true
 	}
 	if statement.Binding != nil {
+		f.checkCallOwnerMoves(statement, statement.Binding.Expression, environment)
 		value, reachable := f.evaluateExpression(statement.Binding.Expression, environment)
 		binding := f.analyzer.bindingSymbols[statement.Binding]
 		if reachable && isSafeBorrowSymbol(binding) {
@@ -290,10 +291,12 @@ func (f *borrowFlowAnalyzer) evaluateStatement(statement *ast.Statement, environ
 
 	switch statement.Kind {
 	case syntax.KindReturn:
+		f.checkCallOwnerMoves(statement, statement.Expression, environment)
 		value, _ := f.evaluateExpression(statement.Expression, environment)
 		f.checkReturn(statement.Expression, value)
 		return false
 	case syntax.KindAssignment:
+		f.checkCallOwnerMoves(statement, statement.Expression, environment)
 		if indexedAssignmentTarget(statement.Target) {
 			if _, reachable := f.evaluateExpression(statement.Target, environment); !reachable {
 				return false
@@ -329,6 +332,7 @@ func (f *borrowFlowAnalyzer) evaluateStatement(statement *ast.Statement, environ
 		f.captureLoopEdge(statement.Kind, environment)
 		return false
 	default:
+		f.checkCallOwnerMoves(statement, statement.Expression, environment)
 		_, reachable := f.evaluateExpression(statement.Expression, environment)
 		return reachable
 	}
@@ -403,6 +407,20 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 	case syntax.KindWhile:
 		return f.evaluateWhile(expression, environment)
 	case syntax.KindCall:
+		if isBorrowedViewConstructorCall(expression) {
+			if len(expression.Children) != 4 {
+				return borrowValueState{known: false}, true
+			}
+			argumentValues := make([]borrowValueState, 0, 3)
+			for _, argument := range expression.Children[1:] {
+				value, reachable := f.evaluateExpression(argument, environment)
+				if !reachable {
+					return borrowValueState{}, false
+				}
+				argumentValues = append(argumentValues, value)
+			}
+			return cloneBorrowValue(argumentValues[0]), true
+		}
 		if isRegionPlaceCall(expression) {
 			for index := range expression.Children {
 				if _, reachable := f.evaluateExpression(expression.Children[index], environment); !reachable {
@@ -730,6 +748,78 @@ func (f *borrowFlowAnalyzer) checkOwnerAssignment(statement *ast.Statement, owne
 			}
 			seen[loanID] = struct{}{}
 			f.analyzer.addDiagnostic("E2101", span(f.module.file.Path, statement.Target.Span),
+				RelatedSpan{Role: "loan", Span: f.loans[loanID].fact.Borrow},
+				RelatedSpan{Role: "last-use", Span: lastUse},
+			)
+		}
+	}
+}
+
+func (f *borrowFlowAnalyzer) checkCallOwnerMoves(statement *ast.Statement, expression *ast.Expression, environment borrowEnvironment) {
+	if f.summarizing || f.probing() || statement == nil || expression == nil {
+		return
+	}
+	if expression.Kind == syntax.KindCall && len(expression.Children) > 0 {
+		callee := f.analyzer.resolved[expression.Children[0]]
+		for index, argument := range expression.Children[1:] {
+			movesResource := false
+			if callee != nil && callee.function != nil && index < len(callee.function.Parameters) {
+				parameter := &callee.function.Parameters[index]
+				value := f.analyzer.parameter[parameter]
+				movesResource = value != nil && f.analyzer.isResource(value.typ)
+			} else if isBuiltinVariantPath(expression.Children[0].Text) {
+				movesResource = f.analyzer.isResource(f.analyzer.expressionTypes[argument])
+			}
+			if movesResource {
+				f.checkOwnerMove(statement, movedResourceOwner(f.analyzer, argument), argument, environment)
+			}
+			f.checkCallOwnerMoves(statement, argument, environment)
+		}
+		return
+	}
+	if expression.Block != nil {
+		return
+	}
+	for _, child := range expression.Children {
+		f.checkCallOwnerMoves(statement, child, environment)
+	}
+}
+
+func movedResourceOwner(analyzer *analyzer, expression *ast.Expression) *symbol {
+	for expression != nil && expression.Kind == syntax.KindGroup && len(expression.Children) == 1 {
+		expression = expression.Children[0]
+	}
+	if analyzer == nil || expression == nil || expression.Kind != syntax.KindPath {
+		return nil
+	}
+	owner := analyzer.resolved[expression]
+	if owner == nil || !analyzer.isResource(owner.typ) {
+		return nil
+	}
+	return owner
+}
+
+func (f *borrowFlowAnalyzer) checkOwnerMove(statement *ast.Statement, owner *symbol, expression *ast.Expression, environment borrowEnvironment) {
+	if owner == nil || expression == nil {
+		return
+	}
+	live := f.liveAfter[statement]
+	seen := make(map[int]struct{})
+	for binding, lastUse := range live {
+		value, found := environment[binding]
+		if !found {
+			continue
+		}
+		for _, loanID := range value.loans {
+			if loanID < 0 || loanID >= len(f.loans) || f.loans[loanID].owner != owner {
+				continue
+			}
+			if _, duplicate := seen[loanID]; duplicate {
+				continue
+			}
+			seen[loanID] = struct{}{}
+			f.analyzer.addDiagnostic("E2105", span(f.module.file.Path, expression.Span),
+				RelatedSpan{Role: "owner", Span: span(owner.source, owner.declaration)},
 				RelatedSpan{Role: "loan", Span: f.loans[loanID].fact.Borrow},
 				RelatedSpan{Role: "last-use", Span: lastUse},
 			)

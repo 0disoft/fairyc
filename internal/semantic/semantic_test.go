@@ -2365,6 +2365,91 @@ func TestAnalyzeKeepsAmplifyingFixedArrayFormsClosed(t *testing.T) {
 	}
 }
 
+func TestAnalyzeBindsRawPartsBorrowedViewToOwnerOrigin(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+resource String {
+    data: *mut void;
+    length: usize;
+    drop fn(self: &mut Self) {}
+}
+fn as_str(value: &String) -> &str {
+    unsafe { str::from_raw_parts(value, value.data, value.length) }
+}
+fn relay(value: &String) -> &str { as_str(value) }
+`,
+	})
+	assertCleanTypeResult(t, result)
+
+	var constructor *hir.Expression
+	for functionIndex := range result.HIR.Modules[0].Functions {
+		function := &result.HIR.Modules[0].Functions[functionIndex]
+		if function.Name != "as_str" || function.Body.Tail == nil || len(function.Body.Tail.Children) != 1 || function.Body.Tail.Children[0].Block == nil {
+			continue
+		}
+		constructor = function.Body.Tail.Children[0].Block.Tail
+	}
+	if constructor == nil || constructor.Kind != "borrowed-view-from-raw-parts" || constructor.Type != hir.SharedBorrow(hir.TypeStr) ||
+		constructor.Operator != "str::from_raw_parts" || constructor.UnsafeScope == nil || len(constructor.Children) != 3 {
+		t.Fatalf("constructor = %+v", constructor)
+	}
+	var escaping []string
+	for _, fact := range result.Borrows {
+		if fact.Escapes {
+			escaping = append(escaping, fact.Origin)
+		}
+	}
+	if !slices.Equal(escaping, []string{"Param(0)", "Param(0)"}) {
+		t.Fatalf("escaping origins = %v, borrows = %+v", escaping, result.Borrows)
+	}
+}
+
+func TestAnalyzeRejectsRawPartsBorrowedViewOutsideUnsafe(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+resource String {
+    data: *mut void;
+    length: usize;
+    drop fn(self: &mut Self) {}
+}
+fn as_str(value: &String) -> &str {
+    str::from_raw_parts(value, value.data, value.length)
+}
+`,
+	})
+	if result.FailedPhase != semantic.PhaseType || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E5101" {
+		t.Fatalf("result = %+v", result)
+	}
+}
+
+func TestAnalyzeRejectsOwnerMoveBeforeRawPartsViewLastUse(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+resource String {
+    data: *mut void;
+    length: usize;
+    drop fn(self: &mut Self) {}
+}
+fn as_str(value: &String) -> &str {
+    unsafe { str::from_raw_parts(value, value.data, value.length) }
+}
+fn consume_owned(value: String) -> i32 { 0 }
+fn main() -> i32 {
+    let value: String = String { data: null, length: 0 };
+    let view: &str = as_str(&value);
+    let consumed: i32 = consume_owned(value);
+    if view.len == 0 { 0 } else { 1 }
+}
+`,
+	})
+	if result.FailedPhase != semantic.PhaseFlow || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E2105" {
+		t.Fatalf("result = %+v", result)
+	}
+}
+
 func TestAnalyzeRejectsFixedArrayBeyondExecutableElementLimit(t *testing.T) {
 	t.Parallel()
 	length := hir.MaxExecutableFixedArrayElements + 1

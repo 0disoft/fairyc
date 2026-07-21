@@ -140,6 +140,9 @@ func (a *analyzer) expressionOrigins(module *moduleScope, expression *ast.Expres
 		}
 		return compactOrigins(result)
 	case syntax.KindCall:
+		if isBorrowedViewConstructorCall(expression) && len(expression.Children) == 4 {
+			return a.expressionOrigins(module, expression.Children[1], origins)
+		}
 		if isRegionPlaceCall(expression) {
 			receiver := expression.Children[0].Children[0]
 			value := a.resolved[receiver]

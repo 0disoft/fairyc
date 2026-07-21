@@ -582,6 +582,34 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 					failures = append(failures, VerificationError{Code: "V1701", Entity: entity, Detail: "raw borrow pointer lacks matching unsafe provenance"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
+			case OperationStrFromRawParts, OperationCStrFromRawParts:
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				_, ownerMutable, ownerBorrow := hir.BorrowElement(operation.OwnerType)
+				wantType := hir.SharedBorrow(hir.TypeStr)
+				wantOperator := "str::from_raw_parts"
+				entityKind := "str-from-raw-parts"
+				if operation.Kind == OperationCStrFromRawParts {
+					wantType = hir.SharedBorrow(hir.TypeCStr)
+					wantOperator = "CStr::from_raw_parts"
+					entityKind = "cstr-from-raw-parts"
+				}
+				shapeValid := operation.DestinationLocal != NoLocal && len(operation.Operands) == 3 &&
+					operation.Operands[0].Kind == OperandLocal && ownerBorrow && !ownerMutable &&
+					operation.Type == wantType && operation.Operator == wantOperator
+				if !shapeValid {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "borrowed-view raw-parts shape is invalid"})
+				}
+				provenance, hasProvenance := unsafeByEntity[operation.Entity]
+				expectedEntity := sourceEntity(entityKind, operation.Span)
+				sourceSpanEntity := sourceEntity("span", operation.Span)
+				scopeEntity := sourceEntity("unsafe-scope", operation.UnsafeScope)
+				scopeContainsOperation := sameSpanSource(operation.UnsafeScope, operation.Span) &&
+					operation.UnsafeScope.StartByte <= operation.Span.StartByte && operation.UnsafeScope.EndByte >= operation.Span.EndByte
+				if operation.Entity != expectedEntity || !scopeContainsOperation || !hasProvenance ||
+					provenance.SourceSpanEntity != sourceSpanEntity || provenance.ScopeEntity != scopeEntity {
+					failures = append(failures, VerificationError{Code: "V1701", Entity: entity, Detail: "borrowed-view raw-parts construction lacks matching unsafe provenance"})
+				}
+				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationStrDataAddress:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				element, mutable, pointer := hir.RawPointerElement(operation.Type)

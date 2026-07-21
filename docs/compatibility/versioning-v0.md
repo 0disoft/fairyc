@@ -156,8 +156,11 @@ the future package-aware `fairyc check`, configuration, target selection, JSON, 
 function-count meaning.
 ADR 0131 adds example-level move-only String/CString wrappers, typed source errors, and five opaque
 storage bridges plus borrowed-resource field-read transport. These are pre-1 source, MIR, and
-runtime-example contracts. They do not stabilize `std::text`, public layouts, C ABI, owned-to-
-borrowed views, Unicode behavior, allocator selection, or bridge symbol compatibility.
+runtime-example contracts. ADR 0135 adds the two exact owner-bound text raw-parts built-ins,
+their unsafe provenance, `E2105` owner-move rejection, and private C transports as pre-1 language
+and internal-MIR semantics. Neither decision stabilizes `std::text`, public layouts, a foreign
+safe-borrow ABI, Unicode algorithms, allocator selection, bridge symbol compatibility, or a general
+user-defined raw-parts protocol.
 ADR 0113 admits branch-aware safe-borrow reassignment with right-hand-side-first replacement,
 loan-generation preservation across aliases, reachable `if`/`match` origin joins, and path-aware
 loan liveness. Those rules and fail-closed multi-origin returns are pre-1 semantics. ADR 0114 adds compiler-internal fixed-point return-origin

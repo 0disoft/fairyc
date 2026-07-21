@@ -144,6 +144,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0132-deterministic-owned-text-allocation-failure-probe.md`: probe-only allocator substitution that forces String/CString allocation failure and proves rollback plus live-allocation cleanup without entering product linkage.
 - `0133-deterministic-arena-allocation-failure-probe.md`: shared probe-only allocator substitution that forces both Arena allocation stages and proves rollback, zeroing, and cleanup through native MSVC execution.
 - `0134-deterministic-buffer-allocation-failure-probe.md`: shared probe-only allocator substitution that forces Buffer construction and growth failures while proving exact storage preservation and cleanup through native MSVC execution.
+- `0135-owner-bound-owned-text-views.md`: unsafe owner-token raw-parts primitives behind safe example String/CString views, exact borrow provenance, `E2105` move rejection, and native MSVC execution.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

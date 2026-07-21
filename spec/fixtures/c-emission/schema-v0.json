@@ -65,6 +65,8 @@
         "scalar-result",
         "static-byte-string",
         "static-utf8-string",
+        "utf8-string-view",
+        "c-string-view",
         "trap",
         "view-empty",
         "view-index",

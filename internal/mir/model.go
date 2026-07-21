@@ -267,6 +267,8 @@ const (
 	OperationEnumPayload       OperationKind = "enum-payload"
 	OperationRawAddress        OperationKind = "raw-address"
 	OperationRawBorrowPointer  OperationKind = "raw-borrow-pointer"
+	OperationStrFromRawParts   OperationKind = "str-from-raw-parts"
+	OperationCStrFromRawParts  OperationKind = "cstr-from-raw-parts"
 	OperationCStrDataAddress   OperationKind = "cstr-data-address"
 	OperationStructConstruct   OperationKind = "struct-construct"
 	OperationResourceConstruct OperationKind = "resource-construct"

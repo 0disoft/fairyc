@@ -124,6 +124,12 @@ pub fn string_len(value: &String) -> usize {
     value.length
 }
 
+pub fn string_as_str(value: &String) -> &str {
+    unsafe {
+        str::from_raw_parts(value, value.data, value.length)
+    }
+}
+
 pub fn cstring_from_text(value: &str) -> Result<CString, TextError> {
     var output: CString = CString {
         data: null,
@@ -145,6 +151,12 @@ pub fn cstring_from_text(value: &str) -> Result<CString, TextError> {
 
 pub fn cstring_len(value: &CString) -> usize {
     value.storage_length - 1
+}
+
+pub fn cstring_as_cstr(value: &CString) -> &CStr {
+    unsafe {
+        CStr::from_raw_parts(value, value.data, value.storage_length)
+    }
 }
 
 pub fn error_status(error: TextError) -> u32 {

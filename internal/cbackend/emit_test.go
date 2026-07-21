@@ -2213,6 +2213,54 @@ func TestEmitAlwaysCheckedAssert(t *testing.T) {
 	}
 }
 
+func TestEmitBorrowedTextViewsFromRawParts(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+resource String {
+    data: *mut void;
+    length: usize;
+    drop fn(self: &mut Self) {}
+}
+resource CString {
+    data: *u8;
+    storage_length: usize;
+    drop fn(self: &mut Self) {}
+}
+fn as_str(value: &String) -> &str {
+    unsafe { str::from_raw_parts(value, value.data, value.length) }
+}
+fn as_cstr(value: &CString) -> &CStr {
+    unsafe { CStr::from_raw_parts(value, value.data, value.storage_length) }
+}
+fn consume_str(value: &str) -> usize { value.len }
+fn consume_cstr(value: &CStr) -> i32 { 42 }
+fn main() -> i32 {
+    let text: String = String { data: null, length: 0 };
+    let ctext: CString = CString { data: unsafe { c"" as *u8 }, storage_length: 1 };
+    if consume_str(as_str(&text)) == 0 { consume_cstr(as_cstr(&ctext)) } else { 1 }
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0WindowsMSVCProfile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, feature := range []string{"c-string-view", "utf8-string-view"} {
+		if !slices.Contains(unit.Features, feature) {
+			t.Errorf("features %v are missing %q", unit.Features, feature)
+		}
+	}
+	for _, required := range []string{
+		"typedef struct fy_str {",
+		"!= (const uint8_t *)0 ?",
+		": (const uint8_t *)\"\"",
+		"= (const uint8_t *)(fy_l_",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+}
+
 func lowerSource(t *testing.T, contents string) mir.Program {
 	t.Helper()
 	return lowerSources(t, map[string]string{"main.fy": contents})

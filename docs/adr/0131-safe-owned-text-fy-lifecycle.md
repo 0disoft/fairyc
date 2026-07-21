@@ -36,9 +36,10 @@ representation without claiming that generated Fairy storage has a C struct effe
 6. A field read whose receiver is `&Resource` or `&mut Resource` retains the borrow type in MIR while
    resolving its field definition through the underlying resource type. The C backend emits pointer
    member access for that borrowed receiver and value member access for an owned receiver.
-7. This slice does not create `std::text`, stable public layouts, a public ABI, safe `&str` or
-   `&CStr` reconstruction from owned storage, Unicode algorithms, allocator selection, or a general
-   collection API. Those require additional borrow-construction and package-surface decisions.
+7. This initial slice did not create `std::text`, stable public layouts, a public ABI, safe `&str`
+   or `&CStr` reconstruction from owned storage, Unicode algorithms, allocator selection, or a
+   general collection API. ADR 0135 later admits only example-level owner-bound borrowed views;
+   every other exclusion remains.
 
 ## Consequences
 
@@ -51,8 +52,8 @@ representation without claiming that generated Fairy storage has a C struct effe
   failure preservation, size overflow, and repeated-drop behavior remain owned by the independent
   native C probe. ADR 0132 adds deterministic initial-allocation and append-reallocation failure
   rollback without placing its allocator adapter in product linkage.
-- Safe borrowed views remain deferred instead of being faked as raw pointers or copied descriptors
-  with unproven lifetime provenance.
+- ADR 0135 supersedes the initial borrowed-view deferral with compiler-verified owner-bound
+  reconstruction. Raw-pointer-only or copied-descriptor reconstruction remains forbidden.
 
 ## Verification
 

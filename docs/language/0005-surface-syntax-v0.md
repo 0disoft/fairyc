@@ -123,6 +123,13 @@ ownership. A safe function may contain an explicit lexical `unsafe` block and ex
 result to safe callers, but foreign declarations themselves still reject safe-borrow parameters and
 the internal view transport is not a public ABI.
 
+Unsafe code may call exactly `str::from_raw_parts(owner, data, length)` or
+`CStr::from_raw_parts(owner, data, storage_length)`. The first argument is a shared safe borrow and
+defines the returned view's origin; the second is a raw `u8` or opaque `void` pointer; the third is
+`usize`. These are compiler-known operations, not user functions or general constructors. Safe
+wrappers may return their result, but raw-pointer-only construction, mutable text views, arbitrary
+view element types, and a public raw-parts protocol remain unavailable.
+
 `assert(condition);` is a statement with mandatory parentheses and semicolon. Its condition is
 exactly `bool`; true continues and false traps as `assertion-failed`. It remains active in every
 build profile and is neither a C macro nor an unsafe optimizer assumption.

@@ -192,15 +192,15 @@ rejection, and exact termination. Four Linux C-only native runs remain configure
 unobserved; the same probe now executes as two separate-translation-unit x64 MSVC runs. Separate
 generated-Fairy crossings call the real bounded CStr validator and exact raw String/CString records.
 An additional example-level safe FY module now confines five opaque storage bridges behind move-only
-`String`/`CString` resources, source `Result` errors, scalar lengths, and verified nonempty drop glue.
-Its low and optimized Windows target builds cover append, empty CString, interior-NUL rejection, and
-implicit cleanup with result 42. The existing raw Windows target lifecycle still observes lengths,
+`String`/`CString` resources, source `Result` errors, scalar lengths, owner-bound `&str`/`&CStr`
+views, and verified nonempty drop glue. Its low and optimized Windows target builds cover borrowed
+view calls, append, empty CString, interior-NUL rejection, and implicit cleanup with result 42. The existing raw Windows target lifecycle still observes lengths,
 pointers, alignment, statuses, and normalized drops. The raw Windows probe additionally observes
 exact bytes, terminator contents, invalid UTF-8, self-overlap, null/malformed storage, failure
 preservation, size overflow, and repeated drop. A probe-only allocator now deterministically forces
 initial String/CString allocation and String append reallocation failures, proves preservation, and
-returns its live-allocation count to zero. Safe owned-to-borrowed views and a stable `std::text`
-surface remain later gates.
+returns its live-allocation count to zero. Stable `std::text`, public layouts, and general
+user-defined raw-parts reconstruction remain later gates.
 The Linux File C slice now also covers partial read/write, write-all progress, sync, and consuming
 close including forced close failure. Its four C-only native runs remain configured but unobserved.
 A second four-way generated-Fairy crossing uses exact result, File, and open-option records to call

@@ -646,6 +646,8 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		return l.lowerScalarCast(expression)
 	case "cast":
 		return l.lowerRawAddressCast(expression)
+	case "borrowed-view-from-raw-parts":
+		return l.lowerBorrowedViewFromRawParts(expression)
 	case "prefix":
 		if len(expression.Children) != 1 {
 			return Operand{}, fmt.Errorf("prefix expression has %d children", len(expression.Children))
@@ -1027,6 +1029,56 @@ func (l *functionLowerer) lowerRawAddressCast(expression *hir.Expression) (Opera
 		Type:             expression.Type,
 		OwnerType:        place.Type,
 		Operator:         borrow.Operator,
+		UnsafeScope:      *expression.UnsafeScope,
+	})
+	l.result.UnsafeOperations = append(l.result.UnsafeOperations, UnsafeOperation{
+		Entity:           entity,
+		SourceSpanEntity: sourceEntity("span", expression.Span),
+		ScopeEntity:      sourceEntity("unsafe-scope", *expression.UnsafeScope),
+	})
+	return Operand{Kind: OperandLocal, Local: destination}, nil
+}
+
+func (l *functionLowerer) lowerBorrowedViewFromRawParts(expression *hir.Expression) (Operand, error) {
+	if expression.UnsafeScope == nil || len(expression.Children) != 3 {
+		return Operand{}, fmt.Errorf("malformed borrowed-view raw-parts construction")
+	}
+	operationKind := OperationKind("")
+	entityKind := ""
+	switch {
+	case expression.Operator == "str::from_raw_parts" && expression.Type == hir.SharedBorrow(hir.TypeStr):
+		operationKind = OperationStrFromRawParts
+		entityKind = "str-from-raw-parts"
+	case expression.Operator == "CStr::from_raw_parts" && expression.Type == hir.SharedBorrow(hir.TypeCStr):
+		operationKind = OperationCStrFromRawParts
+		entityKind = "cstr-from-raw-parts"
+	default:
+		return Operand{}, fmt.Errorf("unsupported borrowed-view raw-parts constructor %q with result %q", expression.Operator, expression.Type)
+	}
+
+	operands := make([]Operand, 0, len(expression.Children))
+	for index := range expression.Children {
+		operand, err := l.lowerExpression(&expression.Children[index])
+		if err != nil {
+			return Operand{}, err
+		}
+		if operand.Kind == OperandInvalid {
+			return Operand{}, fmt.Errorf("borrowed-view raw-parts argument %d has no value", index)
+		}
+		operands = append(operands, operand)
+	}
+
+	destination := l.newTemporary()
+	entity := sourceEntity(entityKind, expression.Span)
+	l.appendOperation(Operation{
+		Kind:             operationKind,
+		Entity:           entity,
+		Span:             expression.Span,
+		DestinationLocal: destination,
+		Operands:         operands,
+		Type:             expression.Type,
+		OwnerType:        expression.Children[0].Type,
+		Operator:         expression.Operator,
 		UnsafeScope:      *expression.UnsafeScope,
 	})
 	l.result.UnsafeOperations = append(l.result.UnsafeOperations, UnsafeOperation{

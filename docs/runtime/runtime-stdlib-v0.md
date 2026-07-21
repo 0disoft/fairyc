@@ -246,10 +246,10 @@ drop helpers. C observers require `Fairy`, `FairyFairy`, the CString terminator 
 logical view, and canonical empty storage after both drops. All operation and allocation statuses
 must be zero. The C-only owned-text probe remains responsible for invalid UTF-8, failed Buffer moves,
 self-overlap, interior-NUL rollback, empty CString, malformed-state negatives, opaque-storage
-failure preservation, and repeated drop. General `&str`
-and wrapper-produced `&CStr` borrow origins plus the stable `std::text` API remain disconnected. A
-separate example-level safe wrapper described below now owns source resources and `Result` mapping;
-it does not replace those missing borrowed-view or package contracts. A source `c"..."` literal now has a
+failure preservation, and repeated drop. That raw probe does not define wrapper-produced borrow
+origins or a stable `std::text` API. A separate example-level safe wrapper described below owns
+source resources, `Result` mapping, and owner-bound borrowed views; it does not create the missing
+package contract. A source `c"..."` literal now has a
 verified `Static` origin and compiler-owned C storage. Product build linkage is now automatic only for actual calls to the closed
 internal symbols; that raw link transport does not supply the missing safe API.
 
@@ -267,14 +267,17 @@ not create safe source resources, source `Result` mapping, stable record layouts
 `examples/owned_text/owned_text.fy` now adds a separate safe source boundary over five opaque
 storage bridges: String copy, String append, String drop, CString from text, and CString drop. The
 public example resources are move-only and keep their raw pointers private; constructors and append
-return source `Result`, and callers can read only byte lengths and the two typed error status fields.
+return source `Result`, callers can read byte lengths and the two typed error status fields, and
+safe `string_as_str` plus `cstring_as_cstr` wrappers return owner-bound internal views.
 The C bridges move flat storage through `void *` plus `memcpy` rather than dereferencing generated
 Fairy resource storage through an incompatible C struct pointer. Constructors require canonical
 empty output, append preserves the prior owner on failure, and successful drop stores canonical
 empty state back. Both local MSVC profiles execute nonempty and empty construction, append,
 interior-NUL status 3, ordinary return cleanup, and implicit cleanup with native result 42. The
-wrapper deliberately cannot construct `&str` or `&CStr` from its returned storage yet, so it remains
-example-level evidence rather than a stable `std::text` API or public layout.
+wrappers use exact unsafe compiler built-ins that require the shared owner borrow alongside the raw
+pointer and extent. The C path constructs no new allocation or copy, normalizes an empty String to
+a private non-null `&str` sentinel, and preserves the existing pointer-only `&CStr` transport. This
+remains example-level evidence rather than a stable `std::text` API or public layout.
 
 A `c"..."` literal provides allocation-free immutable `&CStr` storage with one compiler-appended trailing NUL and rejects a decoded interior NUL. The implemented C path emits exact `static const uint8_t[]` bytes, deduplicates equal storage, and permits only an explicit unsafe conversion to immutable `*u8` for the direct-literal raw FFI form. It is source syntax, not a runtime constructor.
 

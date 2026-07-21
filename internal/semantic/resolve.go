@@ -481,7 +481,7 @@ func (a *analyzer) resolveExpression(module *moduleScope, scope *lexicalScope, e
 		a.resolveRegion(module, scope, expression)
 		return
 	}
-	if expression.Kind == syntax.KindPath && !isBuiltinVariantPath(expression.Text) {
+	if expression.Kind == syntax.KindPath && !isCompilerBuiltinPath(expression.Text) {
 		if _, recognized := a.resolveEnumVariantPath(module, expression); !recognized {
 			a.resolvePath(module, scope, expression)
 		}

@@ -738,7 +738,8 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 				case mir.OperationResultConstruct, mir.OperationOptionConstruct,
 					mir.OperationResultPayload, mir.OperationOptionPayload,
 					mir.OperationEnumConstruct, mir.OperationEnumPayload,
-					mir.OperationRawAddress, mir.OperationRawBorrowPointer, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
+					mir.OperationRawAddress, mir.OperationRawBorrowPointer, mir.OperationStrFromRawParts, mir.OperationCStrFromRawParts,
+					mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice,
 					mir.OperationScalarCast, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex:
 					inferred = operation.Type
@@ -1229,6 +1230,16 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 				}
 				allowedUnsafeEntities[operation.Entity] = struct{}{}
 				e.features["raw-borrow-pointer"] = struct{}{}
+			case mir.OperationStrFromRawParts, mir.OperationCStrFromRawParts:
+				if err := e.inspectBorrowedViewFromRawParts(functionIndex, *operation); err != nil {
+					return err
+				}
+				allowedUnsafeEntities[operation.Entity] = struct{}{}
+				if operation.Kind == mir.OperationStrFromRawParts {
+					e.features["utf8-string-view"] = struct{}{}
+				} else {
+					e.features["c-string-view"] = struct{}{}
+				}
 			case mir.OperationStrDataAddress:
 				if err := e.inspectStrDataAddress(functionIndex, *operation); err != nil {
 					return err
@@ -1481,7 +1492,7 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 	}
 	for _, operation := range function.UnsafeOperations {
 		if _, admitted := allowedUnsafeEntities[operation.Entity]; !admitted {
-			return CapabilityError{Function: function.Name, Feature: "unsafe operation outside the admitted raw-address and foreign-call subset"}
+			return CapabilityError{Function: function.Name, Feature: "unsafe operation outside the admitted constrained-C subset"}
 		}
 	}
 	return nil
@@ -1502,7 +1513,8 @@ func (e *emitter) callSignature(symbol hir.SymbolID) (hir.Type, []hir.Type, bool
 func validateOperationShape(function string, operation mir.Operation) error {
 	switch operation.Kind {
 	case mir.OperationAssign, mir.OperationInitialize, mir.OperationUnary, mir.OperationBinary,
-		mir.OperationRawAddress, mir.OperationRawBorrowPointer, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
+		mir.OperationRawAddress, mir.OperationRawBorrowPointer, mir.OperationStrFromRawParts, mir.OperationCStrFromRawParts,
+		mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationEnumConstruct, mir.OperationEnumPayload,
 		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice, mir.OperationScalarCast,
 		mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex:
@@ -1955,6 +1967,43 @@ func (e *emitter) inspectRawBorrowPointer(functionIndex int, operation mir.Opera
 	}
 	if _, err := e.cValueType(operation.Type); err != nil {
 		return CapabilityError{Function: function.Name, Feature: "raw borrow pointer type " + strconv.Quote(string(operation.Type))}
+	}
+	return nil
+}
+
+func (e *emitter) inspectBorrowedViewFromRawParts(functionIndex int, operation mir.Operation) error {
+	function := &e.functions[functionIndex]
+	if len(operation.Operands) != 3 || operation.Entity == "" || operation.UnsafeScope.Source == "" {
+		return fmt.Errorf("borrowed-view raw-parts construction in %s has incomplete operands or unsafe provenance", function.Name)
+	}
+	_, ownerMutable, ownerBorrow := hir.BorrowElement(operation.OwnerType)
+	wantType := hir.SharedBorrow(hir.TypeStr)
+	wantOperator := "str::from_raw_parts"
+	if operation.Kind == mir.OperationCStrFromRawParts {
+		wantType = hir.SharedBorrow(hir.TypeCStr)
+		wantOperator = "CStr::from_raw_parts"
+	}
+	if !ownerBorrow || ownerMutable || operation.Type != wantType || operation.Operator != wantOperator {
+		return fmt.Errorf("borrowed-view raw-parts construction in %s has incompatible owner or result type", function.Name)
+	}
+	ownerType, err := e.operandType(functionIndex, operation.Operands[0])
+	if err != nil || ownerType != operation.OwnerType {
+		return fmt.Errorf("borrowed-view raw-parts owner in %s has type %q, want %q", function.Name, ownerType, operation.OwnerType)
+	}
+	dataType, err := e.operandType(functionIndex, operation.Operands[1])
+	if err != nil {
+		return fmt.Errorf("borrowed-view raw-parts data in %s: %w", function.Name, err)
+	}
+	dataElement, _, dataPointer := hir.RawPointerElement(dataType)
+	if !dataPointer || dataElement != hir.TypeU8 && dataElement != hir.TypeVoid {
+		return fmt.Errorf("borrowed-view raw-parts data in %s has incompatible type %q", function.Name, dataType)
+	}
+	lengthType, err := e.operandType(functionIndex, operation.Operands[2])
+	if err != nil || lengthType != hir.TypeUSize {
+		return fmt.Errorf("borrowed-view raw-parts length in %s has type %q, want %q", function.Name, lengthType, hir.TypeUSize)
+	}
+	if _, err := e.cValueType(operation.Type); err != nil {
+		return CapabilityError{Function: function.Name, Feature: "borrowed-view raw-parts result type " + strconv.Quote(string(operation.Type))}
 	}
 	return nil
 }
@@ -2671,7 +2720,9 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 		output.WriteString("    uintptr_t length;\n")
 		output.WriteString("} fy_mut_byte_slice;\n\n")
 	}
-	if _, used := e.features["static-utf8-string"]; used {
+	_, usesStaticUTF8String := e.features["static-utf8-string"]
+	_, usesUTF8StringView := e.features["utf8-string-view"]
+	if usesStaticUTF8String || usesUTF8StringView {
 		output.WriteString("typedef struct fy_str {\n")
 		output.WriteString("    const uint8_t *data;\n")
 		output.WriteString("    uintptr_t length;\n")
@@ -2956,6 +3007,29 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			return fmt.Errorf("raw borrow pointer in %s has invalid local operand", function)
 		}
 		fmt.Fprintf(output, "    fy_l_%d = fy_l_%d;\n", operation.DestinationLocal, operand.Local)
+	case mir.OperationStrFromRawParts, mir.OperationCStrFromRawParts:
+		if len(operation.Operands) != 3 {
+			return fmt.Errorf("borrowed-view raw-parts construction in %s has invalid operands", function)
+		}
+		owner, err := cOperand(operation.Operands[0])
+		if err != nil {
+			return fmt.Errorf("borrowed-view raw-parts owner in %s: %w", function, err)
+		}
+		data, err := cOperand(operation.Operands[1])
+		if err != nil {
+			return fmt.Errorf("borrowed-view raw-parts data in %s: %w", function, err)
+		}
+		length, err := cOperand(operation.Operands[2])
+		if err != nil {
+			return fmt.Errorf("borrowed-view raw-parts length in %s: %w", function, err)
+		}
+		fmt.Fprintf(output, "    (void)%s;\n", owner)
+		if operation.Kind == mir.OperationStrFromRawParts {
+			fmt.Fprintf(output, "    fy_l_%d = (fy_str){ .data = ((const uint8_t *)(%s) != (const uint8_t *)0 ? (const uint8_t *)(%s) : (const uint8_t *)\"\"), .length = %s };\n", operation.DestinationLocal, data, data, length)
+		} else {
+			fmt.Fprintf(output, "    (void)%s;\n", length)
+			fmt.Fprintf(output, "    fy_l_%d = (const uint8_t *)(%s);\n", operation.DestinationLocal, data)
+		}
 	case mir.OperationStrDataAddress:
 		operand, err := oneOperand(operation.Operands)
 		if err != nil || operand.Kind != mir.OperandString && operand.Kind != mir.OperandLocal {
@@ -3854,7 +3928,8 @@ func operationHasDestination(kind mir.OperationKind) bool {
 		mir.OperationResultConstruct, mir.OperationResultPayload,
 		mir.OperationOptionConstruct, mir.OperationOptionPayload,
 		mir.OperationEnumConstruct, mir.OperationEnumPayload,
-		mir.OperationRawAddress, mir.OperationRawBorrowPointer, mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
+		mir.OperationRawAddress, mir.OperationRawBorrowPointer, mir.OperationStrFromRawParts, mir.OperationCStrFromRawParts,
+		mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice,
 		mir.OperationScalarCast, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex, mir.OperationRegionPlace:
 		return true

@@ -81,6 +81,14 @@ private descriptor unchanged, preserving data and byte length without granting o
 creating a foreign ABI. Function declarations, call operands, and inferred local types must agree;
 foreign declarations continue to reject safe borrows before emission.
 
+Distinct verified `str-from-raw-parts` and `cstr-from-raw-parts` operations accept one shared safe
+owner borrow, one raw byte or opaque pointer, and one `usize` extent. Their unsafe provenance must
+name the exact source span and a containing unsafe scope. The UTF-8 path builds the private `fy_str`
+descriptor without allocation or copying and substitutes a private non-null empty sentinel when
+the data pointer is null with a zero extent. The CStr path forwards the immutable pointer while the
+extent operand remains already evaluated. Neither operation creates a foreign safe-borrow ABI or
+derives lifetime from the raw pointer.
+
 The foreign-call transport additionally accepts all sixteen exact TargetSpec C scalars as results
 and parameters. HIR and MIR keep those types distinct from coincidentally represented Fairy
 scalars; one ordered backend table maps them to exact C spellings, TargetSpec keys, features, and
@@ -128,10 +136,10 @@ The emitter rejects empty, nested-struct/array/C-scalar/borrow/Region/nested-res
 initialized resources, and nonempty drops without verifier-matched glue;
 nested tags, user-enum/array/raw-pointer/C-scalar tagged payloads, and other tagged payload
 combinations; Region operations;
-safe-borrow operations other than exact verified array-view construction, view metadata, borrowed
-resource field reads, immutable
-byte indexing, and immutable byte slicing; unsafe operations
-outside the admitted scalar foreign-call form; complete runtime and
+safe-borrow operations other than exact verified array-view construction, owner-bound text
+raw-parts construction, view metadata, borrowed resource field reads, immutable
+byte indexing, and immutable byte slicing; unsafe operations outside the admitted raw-address,
+owner-bound text construction, and scalar foreign-call forms; complete runtime and
 standard-library lowering; malformed
 destinations; and non-canonical block shapes. Empty-drop discharge produces no invented cleanup
 call. Nonempty direct and admitted active tagged payloads invoke verified private glue before field
@@ -238,6 +246,9 @@ verified `raw-borrow-pointer` and emits the referent pointer unchanged. Both req
 provenance, retain the concrete owner type, permit only the exact referent or `void`, and forbid
 mutability strengthening, `restrict`, and `noalias`. Pointer dereference, arithmetic, integer
 conversion, and arbitrary casts remain rejected.
+The two owner-bound text raw-parts operations are separate from pointer casts. They require matching
+unsafe provenance plus a shared safe owner operand, and their result origin remains a semantic Flow
+fact rather than a C pointer attribute.
 A separate verified `byte-slice-data-address` operation may expose the immutable data pointer of a
 compiler-owned `&[u8]` literal or typed shared local inside unsafe code. A typed `&mut [u8]` local
 may instead expose `*mut u8`. The operation requires the matching owner and raw-pointer mutability,

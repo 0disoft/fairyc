@@ -3,12 +3,14 @@ module examples::owned_text::main;
 import examples::owned_text::owned_text as text;
 
 fn check_string(mut value: text::String) -> i32 {
-    if text::string_len(&value) != 5 {
+    let initial_view: &str = text::string_as_str(&value);
+    if initial_view.len != 5 {
         10
     } else {
         match text::append(&mut value, "Fairy") {
             Result::Ok(length) => if length == 10 && text::string_len(&value) == 10 {
-                0
+                let appended_view: &str = text::string_as_str(&value);
+                if appended_view.len == 10 { 0 } else { 13 }
             } else {
                 11
             },
@@ -17,16 +19,23 @@ fn check_string(mut value: text::String) -> i32 {
     }
 }
 
+fn consume_cstr(value: &CStr) -> i32 {
+    0
+}
+
 fn check_cstring(value: text::CString, expected: usize) -> i32 {
-    if text::cstring_len(&value) == expected { 0 } else { 20 }
+    let view: &CStr = text::cstring_as_cstr(&value);
+    if text::cstring_len(&value) == expected { consume_cstr(view) } else { 20 }
 }
 
 fn implicit_string_drop(value: text::String) -> i32 {
-    if text::string_len(&value) == 4 { 0 } else { 30 }
+    let view: &str = text::string_as_str(&value);
+    if view.len == 4 { 0 } else { 30 }
 }
 
 fn implicit_cstring_drop(value: text::CString) -> i32 {
-    if text::cstring_len(&value) == 4 { 0 } else { 31 }
+    let view: &CStr = text::cstring_as_cstr(&value);
+    if text::cstring_len(&value) == 4 { consume_cstr(view) } else { 31 }
 }
 
 fn main() -> i32 {

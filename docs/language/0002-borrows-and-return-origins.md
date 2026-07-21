@@ -45,6 +45,12 @@ right-hand side first and then replaces the target's origin and retained-loan se
 borrow creates a loan generation; copying a borrow preserves that generation, so replacing one
 alias does not release an owner while another alias can still reach a later use.
 
+The unsafe built-ins `str::from_raw_parts(owner, data, length)` and
+`CStr::from_raw_parts(owner, data, storage_length)` require `owner` to be a shared safe borrow. The
+returned view copies the owner's hidden origin and retained loans; the raw pointer contributes no
+origin. A safe wrapper therefore returns `Param(i)` only when its owner argument already has that
+origin. Moving the owner through a by-value resource call before the view's last use is `E2105`.
+
 `if` and `match` analyze each branch with an independent borrow environment and join only reachable
 exits. Equal origins compact to one fact. Different possible origins remain a disjunction and a
 return of that value is `E2103`; source order never chooses a winning branch. Loan liveness is also
@@ -95,7 +101,7 @@ User-defined interior mutability is not available in Stage 0. `&T` therefore pre
 
 ## Raw and foreign boundaries
 
-Raw pointers do not acquire a safe origin automatically. Foreign signatures expose raw pointers and scalar ABI values. A safe wrapper may construct a borrow only after it establishes non-nullness, extent, alignment, aliasing, and lifetime for the duration promised by its API.
+Raw pointers do not acquire a safe origin automatically. Foreign signatures expose raw pointers and scalar ABI values. The two exact owner-bound text built-ins are the only current raw-parts reconstruction path: they take provenance from their separate safe owner argument and still require the unsafe wrapper to establish non-nullness or the admitted empty-string case, extent, alignment, aliasing, UTF-8 or CStr invariants, and lifetime for the duration promised by its API.
 
 The C backend must not emit `restrict`, LLVM `noalias`, or related alias promises merely because a pointer came from safe-looking source syntax. Such attributes require proof from the final borrow analysis and are disabled for the Stage 0 reference backend.
 

@@ -906,6 +906,60 @@
           }
         ]
       }
+    },
+    {
+      "id": "pass.flow.borrowed-view-raw-parts",
+      "sourceRoot": "cases/pass/borrowed-view-raw-parts/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow"
+      }
+    },
+    {
+      "id": "fail.type.borrowed-view-raw-parts-outside-unsafe",
+      "sourceRoot": "cases/fail/borrowed-view-raw-parts-outside-unsafe/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          {
+            "code": "E5101",
+            "primary": { "source": "main.fy", "startByte": 148, "endByte": 200 },
+            "related": []
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.flow.borrowed-view-owner-move",
+      "sourceRoot": "cases/fail/borrowed-view-owner-move/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "flow",
+        "diagnostics": [
+          {
+            "code": "E2105",
+            "primary": { "source": "main.fy", "startByte": 429, "endByte": 434 },
+            "related": [
+              {
+                "role": "last-use",
+                "span": { "source": "main.fy", "startByte": 444, "endByte": 448 }
+              },
+              {
+                "role": "loan",
+                "span": { "source": "main.fy", "startByte": 382, "endByte": 388 }
+              },
+              {
+                "role": "owner",
+                "span": { "source": "main.fy", "startByte": 304, "endByte": 309 }
+              }
+            ]
+          }
+        ]
+      }
     }
   ]
 }

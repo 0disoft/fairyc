@@ -227,11 +227,15 @@ Stage 0 allocation supports only explicit `SystemHeap` and lexical `Arena` or `R
 `Buffer` is the only growable owned collection. `Vec<T>` is deferred with user generics. Positive scalar fixed arrays are compiler-owned inert values but are not growable collections or public ABI records. `[u8]`, `str`, and `CStr` are compiler-known unsized views; `String` and `CString` are owned resources. Compiler-owned `b"..."` literals implement immutable static `&[u8]` construction and private generated-C transport. Safe borrowed `&[u8]` and `&str` views expose `.len` as a `usize` byte count and `.is_empty` as the exact zero-length `bool` by reading existing metadata; neither access scans, allocates, calls, traps, or counts Unicode characters. Immutable `&[u8]` additionally supports read-only `usize` indexing with a `u8` result and end-exclusive slicing with an immutable `&[u8]` result. Slice starts and ends may be omitted, normalizing to zero and the retained receiver length without re-evaluating the receiver. Written operands evaluate once left to right and trap with `bounds` before access or pointer derivation when their bounds fail; slicing preserves the receiver's borrow origin. Mutable fixed scalar-array places support checked exact-type element assignment. A direct contextual `&mut` borrow of a mutable fixed `[u8; N]` place may produce `&mut [u8]` for an exact internal parameter. It preserves the exclusive origin, exposes canonical `.len`, supports checked `u8` reads and stores, and may derive `*mut u8` only inside unsafe code. Indexed assignment checks the receiver and `usize` index before evaluating its right-hand side, so an invalid place traps without value-side effects. It does not add mutable slicing, resizing, temporary borrowing, retained foreign pointers, or public ABI. The initial Linux `File` API accepts `&CStr`, preserves partial I/O, and uses a consuming non-retried Linux close contract. A separate Windows component plus example-level safe FY wrapper stores inline `HANDLE` state, maps typed errors and filesystem effects, preserves partial counts, syncs explicitly, consumes state before one `CloseHandle` attempt, and reads through the restricted mutable byte view. It is target-bound evidence rather than a stable `std::fs` API. Portable paths, embedded support, and resource-aware arenas remain deferred.
 
 An independent example-level owned-text wrapper exposes move-only Fairy `String` and `CString`
-resources, source `Result` errors, scalar length access, and verified drop cleanup over alias-safe
-opaque C storage bridges. Low and optimized Windows target builds execute String copy/append,
-nonempty and empty CString construction, interior-NUL rejection, and implicit cleanup. It does not
-stabilize `std::text`, public resource layout, a foreign ABI, safe owned-to-`&str`/`&CStr` views,
-Unicode algorithms, or allocator selection.
+resources, source `Result` errors, scalar length access, owner-bound `&str` and `&CStr` views, and
+verified drop cleanup over alias-safe opaque C storage bridges. Two exact unsafe compiler built-ins
+accept a shared owner borrow, raw storage pointer, and `usize` extent; the returned view inherits
+only the owner's origin. Safe wrappers confine those operations, and Flow rejects a by-value owner
+move before the derived view's last use with `E2105`. Low and optimized Windows target builds
+execute String copy/append, nonempty and empty CString construction, internal borrowed-view calls,
+interior-NUL rejection, and implicit cleanup. This does not stabilize `std::text`, public resource
+layout, the private generated-C view transport, a foreign safe-borrow ABI, Unicode algorithms, or
+allocator selection.
 
 The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 

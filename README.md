@@ -228,9 +228,11 @@ second generated FY caller uses exact nested heap/buffer/String/CString/result r
 real String copy, view, append, and drop helpers plus CString creation, CStr view, and drop. Its C
 observers require exact bytes, repeated append, one terminator, and normalized release. These are raw
 internal transports. A separate checked-in example now wraps opaque storage bridges in move-only
-Fairy `String` and `CString` resources, maps operation failures into source `Result`, exposes only
-length and typed error metadata, and runs its C release through verified resource drop glue. This is
-an example-level safe boundary, not a stable public `std::text` module, ABI, or borrowed-view API.
+Fairy `String` and `CString` resources, maps operation failures into source `Result`, exposes scalar
+metadata plus owner-bound `&str` and `&CStr` views, and runs its C release through verified resource
+drop glue. Exact unsafe raw-parts built-ins remain private to the support module, and Flow rejects
+moving an owner before the derived view's last use. This is an example-level safe boundary, not a
+stable public `std::text` module, layout, or foreign borrowed-view ABI.
 Windows `build-target` now admits the exact owned-text, CStr, and opaque storage-bridge entry points. A compiler-owned
 five-byte UTF-8 literal is copied into String, viewed at length five, appended to length ten, and
 dropped to normalized storage; the same input becomes a six-byte terminated CString whose view has
@@ -244,8 +246,8 @@ append reallocation failure, verifies exact storage/byte preservation and live-a
 and remains absent from product linkage.
 The separate `examples/owned_text/` program exercises only the safe wrapper surface. Low and
 optimized x64 MSVC builds prove String copy and append, CString creation for nonempty and empty
-text, interior-NUL rejection, scalar lengths, and implicit cleanup while keeping raw pointers and
-foreign calls out of its entry module.
+text, interior-NUL rejection, safe internal borrowed-view calls, scalar lengths, and implicit
+cleanup while keeping raw pointers and foreign calls out of its entry module.
 The Linux File C slice now exposes partial I/O, write-all progress, sync, and consuming close that
 is never retried, even after failure. Its C-only four-way probe remains configured but unobserved.
 A separate generated FY caller now crosses exact result, File, and open-option records into the real

@@ -2018,6 +2018,51 @@ fn main() -> i32 {
 	}
 }
 
+func TestLowerVerifiesBorrowedViewRawPartsUnsafeProvenance(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+resource String {
+    data: *mut void;
+    length: usize;
+    drop fn(self: &mut Self) {}
+}
+fn as_str(value: &String) -> &str {
+    unsafe { str::from_raw_parts(value, value.data, value.length) }
+}
+`)
+	var functionIndex = -1
+	var constructor *Operation
+	for index := range program.Functions {
+		function := &program.Functions[index]
+		if function.Name != "main::as_str" {
+			continue
+		}
+		functionIndex = index
+		for blockIndex := range function.Blocks {
+			for operationIndex := range function.Blocks[blockIndex].Operations {
+				operation := &function.Blocks[blockIndex].Operations[operationIndex]
+				if operation.Kind == OperationStrFromRawParts {
+					constructor = operation
+				}
+			}
+		}
+	}
+	if functionIndex < 0 || constructor == nil || constructor.Type != hir.SharedBorrow(hir.TypeStr) ||
+		constructor.OwnerType != hir.SharedBorrow(hir.Type("main::String")) || len(constructor.Operands) != 3 || constructor.UnsafeScope.Source != "main.fy" {
+		t.Fatalf("raw-parts constructor = %+v", constructor)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+
+	mutated := Clone(program)
+	mutated.Functions[functionIndex].UnsafeOperations = nil
+	failures := Verify(mutated)
+	if len(failures) != 1 || failures[0].Code != "V1701" {
+		t.Fatalf("Verify() missing raw-parts provenance failures = %+v", failures)
+	}
+}
+
 func lowerTestSource(t *testing.T, text string) Program {
 	t.Helper()
 	parsed, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(text)), source.DefaultLimits())
