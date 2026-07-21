@@ -216,7 +216,9 @@ UTF-8, NUL, terminator, and empty-value cases but remains locally unobserved. Th
 links against the target-specific owned-text closure as separate caller and callee translation units
 and executes at low and optimized x64 MSVC profiles. It additionally checks opaque storage null and
 malformed rejection, failure preservation, self-overlap, deterministic size overflow, normal drop,
-and repeated drop. Forced allocation failure remains unforced in both configured native lanes. A
+and repeated drop. Its probe-only one-shot allocator also forces String/CString initial allocation
+failure and String append reallocation failure, requires exact storage/byte preservation, and tracks
+live allocations back to zero. Product linkage retains the ordinary target allocator. A
 separate generated-Fairy source
 probe constructs the exact CStr view transport, obtains three bounded nonempty storage cases from
 the companion C unit, and calls the real `fy_std_cstr_validate_v0`. It requires valid storage to

@@ -39,7 +39,9 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
   exclusive Region attachment, zeroed allocation, copy, rollback, reset invalidation, stale-use
   rejection, and drop. A fourth four-run text-view probe covers canonical UTF-8 acceptance and
   rejection plus code-point-boundary slicing. A fifth four-run owned-text probe covers String
-  copy/move/append/drop and CString interior-NUL, termination, and empty-value behavior. It
+  copy/move/append/drop, CString interior-NUL, termination, empty-value behavior, deterministic
+  initial-allocation and append-reallocation failure, storage preservation, and live-allocation
+  cleanup through a probe-only adapter. It
   then drives a resource-bearing Option-and-Result program through uninstrumented
   `experimental build` with Clang/GCC and low/optimized, executes all four resulting temporary
   products, and requires exit `42` with no output. A missing compiler or libc identity fails the job
@@ -132,7 +134,9 @@ The same Windows intent separately compiles the raw owned-text probe and target-
 implementation as caller and callee translation units at low and optimized profiles. Those
 executions observe exact bytes, the terminator, invalid UTF-8, interior NUL, empty CString, null and
 malformed opaque storage, failure preservation, self-overlap, deterministic size overflow, and
-normal plus repeated drop. Forced allocation failure remains unforced in both configured native lanes.
+normal plus repeated drop. The probe-only allocator also forces String/CString initial allocation
+failure and String append reallocation failure, preserves the prior storage and bytes, and observes
+the live-allocation count returning to zero. Product support source contains no probe controls.
 A separate checked-in two-module owned-text program keeps every raw declaration and unsafe cast in
 its support module. Its safe entry constructs move-only String/CString resources, appends text,
 checks byte lengths, accepts empty CString, rejects interior NUL with status 3, and relies on

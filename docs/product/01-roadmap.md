@@ -189,8 +189,10 @@ Its low and optimized Windows target builds cover append, empty CString, interio
 implicit cleanup with result 42. The existing raw Windows target lifecycle still observes lengths,
 pointers, alignment, statuses, and normalized drops. The raw Windows probe additionally observes
 exact bytes, terminator contents, invalid UTF-8, self-overlap, null/malformed storage, failure
-preservation, size overflow, and repeated drop. Deterministic forced allocation-failure rollback, safe
-owned-to-borrowed views, and a stable `std::text` surface remain later gates.
+preservation, size overflow, and repeated drop. A probe-only allocator now deterministically forces
+initial String/CString allocation and String append reallocation failures, proves preservation, and
+returns its live-allocation count to zero. Safe owned-to-borrowed views and a stable `std::text`
+surface remain later gates.
 The Linux File C slice now also covers partial read/write, write-all progress, sync, and consuming
 close including forced close failure. Its four C-only native runs remain configured but unobserved.
 A second four-way generated-Fairy crossing uses exact result, File, and open-option records to call
@@ -285,7 +287,8 @@ because MSVC C does not expose `max_align_t` in `<stddef.h>`.
 A separate raw probe now links the owned-text closure as a second translation unit and executes at
 both profiles. It observes exact bytes and termination, invalid UTF-8 and interior NUL, null and
 malformed opaque storage, failure preservation, self-overlap, deterministic size overflow, and
-normal plus repeated drop. Forced allocation failure remains unforced in both native lanes.
+normal plus repeated drop. It also forces initial and append-reallocation failure with a probe-only
+allocator, preserves prior storage and bytes, and observes zero leaked live allocations after cleanup.
 The Windows target commands now admit one entry plus a bounded explicit repeated-`--source` FY
 module closure; the driver performs no manifest or implicit source discovery. Every foreign
 companion input, unproven Windows standard-library component, user linker argument, debug output,

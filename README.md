@@ -229,8 +229,10 @@ logical length five before normalized drop. A direct compiler-owned `c"Fairy"` s
 passes bounded CStr validation. The FY path observes statuses, lengths, non-null pointers, alignment,
 and cleanup but cannot dereference returned storage. The independent raw C probe now supplies
 Windows evidence for exact copied bytes, the terminator, null and malformed storage rejection,
-failure preservation, self-overlap, size overflow, and repeated drop at both MSVC profiles; forced
-allocation failure remains unforced in the configured native lanes.
+failure preservation, self-overlap, size overflow, and repeated drop at both MSVC profiles. A
+probe-only one-shot allocator also forces String and CString initial allocation failure plus String
+append reallocation failure, verifies exact storage/byte preservation and live-allocation cleanup,
+and remains absent from product linkage.
 The separate `examples/owned_text/` program exercises only the safe wrapper surface. Low and
 optimized x64 MSVC builds prove String copy and append, CString creation for nonempty and empty
 text, interior-NUL rejection, scalar lengths, and implicit cleanup while keeping raw pointers and

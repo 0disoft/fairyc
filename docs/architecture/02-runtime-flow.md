@@ -168,9 +168,11 @@ copy, view, append, second view, and drop plus CString construction, view, drop,
 validation. Status, length, alignment, pointer, and normalized-drop state execute at both profiles;
 the FY subset cannot dereference the returned view. A separate raw C caller now crosses the
 target-specific owned-text callee at both MSVC profiles and supplies byte, terminator, null/malformed
-storage, failure-preservation, self-overlap, size-overflow, and repeated-drop evidence. Forced
-allocation failure remains unforced in both native lanes. This does not add safe source ownership or
-a public text API.
+storage, failure-preservation, self-overlap, size-overflow, and repeated-drop evidence. A probe-only
+adapter overrides the SystemHeap allocation macros in that callee, forces initial and append
+reallocation failures, and observes live allocations returning to zero. The ordinary target support
+source retains CRT allocation and no probe controls. This does not add safe source ownership or a
+public text API.
 An independent checked-in safe owned-text module now keeps those raw declarations and opaque casts
 behind move-only FY resources. Its storage bridges use `memcpy` over `void *`, and low/optimized
 source builds execute Result mapping, length reads, interior-NUL rejection, and verified cleanup.

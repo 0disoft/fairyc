@@ -7,6 +7,14 @@
 #define FY_STD_SYSTEM_HEAP_MAX_ALIGNMENT_V0 _Alignof(max_align_t)
 #endif
 
+#ifndef FY_STD_SYSTEM_HEAP_MALLOC_V0
+#define FY_STD_SYSTEM_HEAP_MALLOC_V0(size) malloc(size)
+#endif
+
+#ifndef FY_STD_SYSTEM_HEAP_FREE_V0
+#define FY_STD_SYSTEM_HEAP_FREE_V0(data) free(data)
+#endif
+
 enum fy_std_alloc_status_v0 {
     FY_STD_ALLOC_OK_V0 = 0,
     FY_STD_ALLOC_OUT_OF_MEMORY_V0 = 1,
@@ -54,7 +62,7 @@ uint32_t fy_std_system_heap_allocate_v0(
         output->alignment = 0;
         return FY_STD_ALLOC_OK_V0;
     }
-    void *data = malloc(size);
+    void *data = FY_STD_SYSTEM_HEAP_MALLOC_V0(size);
     if (data == NULL) {
         return FY_STD_ALLOC_OUT_OF_MEMORY_V0;
     }
@@ -76,7 +84,7 @@ uint32_t fy_std_system_heap_resize_v0(
         return FY_STD_ALLOC_UNSUPPORTED_ALIGNMENT_V0;
     }
     if (new_size == 0) {
-        free(block->data);
+        FY_STD_SYSTEM_HEAP_FREE_V0(block->data);
         block->data = NULL;
         block->size = 0;
         block->alignment = 0;
@@ -92,7 +100,7 @@ uint32_t fy_std_system_heap_resize_v0(
         size_t copy_size = block->size < new_size ? block->size : new_size;
         memcpy(replacement.data, block->data, copy_size);
     }
-    free(block->data);
+    FY_STD_SYSTEM_HEAP_FREE_V0(block->data);
     *block = replacement;
     return FY_STD_ALLOC_OK_V0;
 }
@@ -101,7 +109,7 @@ uint32_t fy_std_system_heap_deallocate_v0(struct fy_std_system_heap_block_v0 *bl
     if (!fy_std_system_heap_block_valid_v0(block)) {
         return FY_STD_ALLOC_INVALID_ARGUMENT_V0;
     }
-    free(block->data);
+    FY_STD_SYSTEM_HEAP_FREE_V0(block->data);
     block->data = NULL;
     block->size = 0;
     block->alignment = 0;

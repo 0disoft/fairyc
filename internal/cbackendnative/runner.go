@@ -1845,8 +1845,12 @@ func Run(manifestPath string) (Report, error) {
 	if err != nil {
 		return Report{}, fmt.Errorf("load owned text probe: %w", err)
 	}
+	ownedTextProbeImplementation, err := cstdlib.OwnedTextProbeImplementationSource()
+	if err != nil {
+		return Report{}, fmt.Errorf("load instrumented owned text implementation: %w", err)
+	}
 	ownedTextExecutions, err := runStandardLibraryProbe(
-		temporaryRoot, toolchains, "owned text", "owned-text-probe", ownedTextProbe, ownedTextSource,
+		temporaryRoot, toolchains, "owned text", "owned-text-probe", ownedTextProbe, ownedTextProbeImplementation,
 	)
 	if err != nil {
 		return Report{}, err

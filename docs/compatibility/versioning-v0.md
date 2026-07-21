@@ -290,6 +290,9 @@ for the ordinary product-build path carrying that view under both compilers and 
 view retains exact valid UTF-8 bytes and byte length before C reads its data, plus
 `utf8StringLiteralBuildSmokeExecutions` for the ordinary product-build path carrying that text view
 under both compilers and profiles. The
+runner's existing `ownedTextExecutions` condition is strengthened by ADR 0132 to require
+probe-only deterministic initial-allocation and append-reallocation failure plus live-allocation
+cleanup; this adds no report field or counter and therefore does not create v32. The
 runner emits one exact version and does not pretend the report shapes are interchangeable.
 
 ## Runtime and standard library

@@ -54,6 +54,8 @@ struct fy_std_owned_text_result_v0 fy_std_string_append_storage_v0(void *value_s
 struct fy_std_owned_text_result_v0 fy_std_string_drop_storage_v0(void *value_storage);
 struct fy_std_owned_text_result_v0 fy_std_cstring_from_text_storage_v0(const struct fy_std_text_view_v0 *input, void *output_storage);
 struct fy_std_owned_text_result_v0 fy_std_cstring_drop_storage_v0(void *value_storage);
+void fy_std_owned_text_probe_fail_next_allocation_v0(void);
+size_t fy_std_owned_text_probe_live_allocations_v0(void);
 
 static int ok(struct fy_std_owned_text_result_v0 result) {
     return result.status == FY_STD_OWNED_TEXT_OK_V0 && result.allocation_status == FY_STD_ALLOC_OK_V0;
@@ -62,6 +64,11 @@ static int ok(struct fy_std_owned_text_result_v0 result) {
 static int invalid_argument(struct fy_std_owned_text_result_v0 result) {
     return result.status == FY_STD_OWNED_TEXT_INVALID_ARGUMENT_V0 &&
            result.allocation_status == FY_STD_ALLOC_OK_V0;
+}
+
+static int allocation_failed(struct fy_std_owned_text_result_v0 result) {
+    return result.status == FY_STD_OWNED_TEXT_ALLOCATION_FAILED_V0 &&
+           result.allocation_status == FY_STD_ALLOC_OUT_OF_MEMORY_V0;
 }
 
 static int string_storage_empty(const struct fy_std_string_storage_v0 *storage) {
@@ -288,6 +295,43 @@ int main(void) {
     if (!invalid_argument(fy_std_cstring_drop_storage_v0(&malformed_cstring)) ||
         !cstring_storage_equal(&malformed_cstring, &preserved_cstring)) {
         return 28;
+    }
+
+    if (fy_std_owned_text_probe_live_allocations_v0() != 0) {
+        return 31;
+    }
+    fy_std_owned_text_probe_fail_next_allocation_v0();
+    conversion = fy_std_string_copy_storage_v0(&hello_view, &string_storage);
+    if (!allocation_failed(conversion) || !string_storage_empty(&string_storage) ||
+        fy_std_owned_text_probe_live_allocations_v0() != 0) {
+        return 32;
+    }
+
+    if (!ok(fy_std_string_copy_storage_v0(&hello_view, &string_storage)) ||
+        fy_std_owned_text_probe_live_allocations_v0() != 1) {
+        return 33;
+    }
+    preserved_string = string_storage;
+    memcpy(preserved_string_bytes, string_storage.data, sizeof preserved_string_bytes);
+    fy_std_owned_text_probe_fail_next_allocation_v0();
+    conversion = fy_std_string_append_storage_v0(&string_storage, &emoji_view);
+    if (!allocation_failed(conversion) ||
+        !string_storage_equal(&string_storage, &preserved_string) ||
+        memcmp(string_storage.data, preserved_string_bytes, sizeof preserved_string_bytes) != 0 ||
+        fy_std_owned_text_probe_live_allocations_v0() != 1) {
+        return 34;
+    }
+    if (!ok(fy_std_string_drop_storage_v0(&string_storage)) ||
+        !string_storage_empty(&string_storage) ||
+        fy_std_owned_text_probe_live_allocations_v0() != 0) {
+        return 35;
+    }
+
+    fy_std_owned_text_probe_fail_next_allocation_v0();
+    conversion = fy_std_cstring_from_text_storage_v0(&hello_view, &cstring_storage);
+    if (!allocation_failed(conversion) || !cstring_storage_empty(&cstring_storage) ||
+        fy_std_owned_text_probe_live_allocations_v0() != 0) {
+        return 36;
     }
     return 0;
 }

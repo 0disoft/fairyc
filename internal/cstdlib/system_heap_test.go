@@ -20,7 +20,11 @@ func TestSystemHeapSourcesAreClosedAndCanonical(t *testing.T) {
 		"fy_std_system_heap_resize_v0",
 		"fy_std_system_heap_deallocate_v0",
 		"#define FY_STD_SYSTEM_HEAP_MAX_ALIGNMENT_V0 _Alignof(max_align_t)",
+		"#define FY_STD_SYSTEM_HEAP_MALLOC_V0(size) malloc(size)",
+		"#define FY_STD_SYSTEM_HEAP_FREE_V0(data) free(data)",
 		"alignment <= FY_STD_SYSTEM_HEAP_MAX_ALIGNMENT_V0",
+		"void *data = FY_STD_SYSTEM_HEAP_MALLOC_V0(size)",
+		"FY_STD_SYSTEM_HEAP_FREE_V0(block->data)",
 		"memcpy(replacement.data, block->data, copy_size)",
 	} {
 		if !strings.Contains(implementation, required) {
@@ -156,6 +160,14 @@ func TestOwnedTextSourcesPreserveOwnershipAndNULTermination(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	probeImplementation, err := OwnedTextProbeImplementationSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	windowsProbeImplementation, err := WindowsMSVCOwnedTextProbeImplementationSource()
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, required := range []string{
 		"fy_std_string_from_buffer_v0",
 		"FY_STD_OWNED_TEXT_INVALID_UTF8_V0",
@@ -192,6 +204,9 @@ func TestOwnedTextSourcesPreserveOwnershipAndNULTermination(t *testing.T) {
 		"overflow_text",
 		"preserved_nonempty_cstring_output",
 		"malformed_cstring",
+		"allocation_failed",
+		"fy_std_owned_text_probe_fail_next_allocation_v0",
+		"fy_std_owned_text_probe_live_allocations_v0() != 1",
 	} {
 		if !strings.Contains(probe, required) {
 			t.Errorf("owned text probe is missing %q", required)
@@ -204,6 +219,47 @@ func TestOwnedTextSourcesPreserveOwnershipAndNULTermination(t *testing.T) {
 	repeatedProbe, err := OwnedTextProbeSource()
 	if err != nil || repeatedProbe != probe || strings.Contains(probe, "\r") || !strings.HasSuffix(probe, "\n") {
 		t.Fatalf("OwnedTextProbeSource() is not deterministic canonical C: %v", err)
+	}
+	for _, candidate := range []struct {
+		name   string
+		source string
+	}{
+		{name: "portable", source: probeImplementation},
+		{name: "Windows MSVC", source: windowsProbeImplementation},
+	} {
+		for _, required := range []string{
+			"fy_std_owned_text_probe_fail_next_allocation_v0",
+			"fy_std_owned_text_probe_live_allocations_v0",
+			"#define FY_STD_SYSTEM_HEAP_MALLOC_V0(size) fy_std_owned_text_probe_malloc_v0(size)",
+			"#define FY_STD_SYSTEM_HEAP_FREE_V0(data) fy_std_owned_text_probe_free_v0(data)",
+			"fy_std_string_copy_storage_v0",
+			"fy_std_cstring_from_text_storage_v0",
+		} {
+			if !strings.Contains(candidate.source, required) {
+				t.Errorf("%s owned-text probe implementation is missing %q", candidate.name, required)
+			}
+		}
+		if strings.Index(candidate.source, "#define FY_STD_SYSTEM_HEAP_MALLOC_V0(size) fy_std_owned_text_probe_malloc_v0(size)") >
+			strings.Index(candidate.source, "#ifndef FY_STD_SYSTEM_HEAP_MALLOC_V0") {
+			t.Errorf("%s owned-text probe allocator adapter follows the SystemHeap fallback", candidate.name)
+		}
+		if strings.Contains(candidate.source, "\r") || !strings.HasSuffix(candidate.source, "\n") {
+			t.Errorf("%s owned-text probe implementation is not canonical C", candidate.name)
+		}
+	}
+	if !strings.Contains(windowsProbeImplementation, "#define FY_STD_SYSTEM_HEAP_MAX_ALIGNMENT_V0 ((size_t)16)") {
+		t.Error("Windows MSVC owned-text probe implementation is missing its target alignment contract")
+	}
+	if strings.Contains(implementation, "fy_std_owned_text_probe_fail_next_allocation_v0") {
+		t.Error("product owned-text implementation leaked the probe-only allocator controls")
+	}
+	repeatedProbeImplementation, err := OwnedTextProbeImplementationSource()
+	if err != nil || repeatedProbeImplementation != probeImplementation {
+		t.Fatalf("OwnedTextProbeImplementationSource() is not deterministic canonical C: %v", err)
+	}
+	repeatedWindowsProbeImplementation, err := WindowsMSVCOwnedTextProbeImplementationSource()
+	if err != nil || repeatedWindowsProbeImplementation != windowsProbeImplementation {
+		t.Fatalf("WindowsMSVCOwnedTextProbeImplementationSource() is not deterministic canonical C: %v", err)
 	}
 }
 

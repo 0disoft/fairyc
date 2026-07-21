@@ -39,6 +39,9 @@ var stage0OwnedText string
 //go:embed stage0_owned_text_probe.c
 var stage0OwnedTextProbe string
 
+//go:embed stage0_owned_text_probe_allocator.c
+var stage0OwnedTextProbeAllocator string
+
 //go:embed stage0_linux_file.c
 var stage0LinuxFile string
 
@@ -132,6 +135,26 @@ func OwnedTextProbeSource() (string, error) {
 	return canonicalSource("owned text probe", stage0OwnedTextProbe)
 }
 
+// OwnedTextProbeImplementationSource returns the portable owned-text implementation with the
+// probe-only deterministic allocator adapter. The adapter is never part of product linkage.
+func OwnedTextProbeImplementationSource() (string, error) {
+	implementation, err := OwnedTextSource()
+	if err != nil {
+		return "", err
+	}
+	return ownedTextProbeImplementationSource(implementation)
+}
+
+// WindowsMSVCOwnedTextProbeImplementationSource returns the target-specific Windows owned-text
+// closure with the same probe-only deterministic allocator adapter.
+func WindowsMSVCOwnedTextProbeImplementationSource() (string, error) {
+	implementation, err := WindowsMSVCSourceForSymbols(ownedTextStorageBridgeSymbols())
+	if err != nil {
+		return "", err
+	}
+	return ownedTextProbeImplementationSource(implementation)
+}
+
 // LinuxFileSource returns the target-specific partial-I/O and consuming-close implementation.
 func LinuxFileSource() (string, error) {
 	return canonicalSource("Linux File", stage0LinuxFile)
@@ -184,6 +207,27 @@ func WindowsMSVCSourceForSymbols(symbols []string) (string, error) {
 		}
 	}
 	return source, nil
+}
+
+func ownedTextStorageBridgeSymbols() []string {
+	return []string{
+		"fy_std_string_copy_storage_v0",
+		"fy_std_string_append_storage_v0",
+		"fy_std_string_drop_storage_v0",
+		"fy_std_cstring_from_text_storage_v0",
+		"fy_std_cstring_drop_storage_v0",
+	}
+}
+
+func ownedTextProbeImplementationSource(implementation string) (string, error) {
+	adapter, err := canonicalSource("owned text probe allocator", stage0OwnedTextProbeAllocator)
+	if err != nil {
+		return "", err
+	}
+	if implementation == "" || strings.Contains(implementation, "\r") || !strings.HasSuffix(implementation, "\n") {
+		return "", fmt.Errorf("owned text probe implementation C source is empty or non-canonical")
+	}
+	return adapter + "\n" + implementation, nil
 }
 
 func sourceForComponents(components []cstdlibcontract.Component) (string, error) {

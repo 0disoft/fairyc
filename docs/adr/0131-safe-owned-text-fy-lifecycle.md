@@ -49,7 +49,8 @@ representation without claiming that generated Fairy storage has a C struct effe
   this contract together.
 - Exact copied bytes, terminator contents, invalid UTF-8, self-overlap, null and malformed storage,
   failure preservation, size overflow, and repeated-drop behavior remain owned by the independent
-  native C probe. Forced allocation-failure rollback still lacks a deterministic native oracle.
+  native C probe. ADR 0132 adds deterministic initial-allocation and append-reallocation failure
+  rollback without placing its allocator adapter in product linkage.
 - Safe borrowed views remain deferred instead of being faked as raw pointers or copied descriptors
   with unproven lifetime provenance.
 
@@ -65,4 +66,4 @@ representation without claiming that generated Fairy storage has a C struct effe
 - the same smoke separately compiles the raw probe and target-specific owned-text closure into two
   MSVC translation units per profile, inspects both COFF objects plus the linked PE/unwind data, and
   executes exact bytes, termination, null/malformed rejection, failure preservation, self-overlap,
-  deterministic size overflow, normal drop, and repeated drop without WSL.
+  deterministic size overflow, forced allocation rollback, normal drop, and repeated drop without WSL.
