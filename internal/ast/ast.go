@@ -135,12 +135,6 @@ type Parameter struct {
 	Type     TypeReference
 }
 
-// TypeReference preserves the canonicalizable source spelling and exact source span.
-type TypeReference struct {
-	Text string
-	Span diagnostic.Span
-}
-
 // Block owns one lexical statement scope and an optional tail expression.
 type Block struct {
 	Span       diagnostic.Span
@@ -360,7 +354,7 @@ func lowerFields(tree *syntax.Tree, node syntax.Node) []FieldDeclaration {
 		}
 		if len(child.Children) > 0 {
 			if typeNode, ok := tree.Node(child.Children[0]); ok && typeNode.Kind == syntax.KindType {
-				field.Type = lowerType(typeNode)
+				field.Type = lowerType(tree, typeNode)
 			}
 		}
 		fields = append(fields, field)
@@ -401,7 +395,7 @@ func lowerFunction(tree *syntax.Tree, node syntax.Node) Function {
 		case syntax.KindParameter:
 			value.Parameters = append(value.Parameters, lowerParameter(tree, child))
 		case syntax.KindType:
-			value.ResultType = lowerType(child)
+			value.ResultType = lowerType(tree, child)
 		case syntax.KindBlock:
 			value.Body = lowerBlock(tree, child)
 		}
@@ -427,7 +421,7 @@ func lowerForeignFunction(tree *syntax.Tree, node syntax.Node) ForeignFunction {
 		case syntax.KindParameter:
 			value.Parameters = append(value.Parameters, lowerParameter(tree, child))
 		case syntax.KindType:
-			value.ResultType = lowerType(child)
+			value.ResultType = lowerType(tree, child)
 		}
 	}
 	return value
@@ -442,14 +436,10 @@ func lowerParameter(tree *syntax.Tree, node syntax.Node) Parameter {
 	}
 	if len(node.Children) > 0 {
 		if typeNode, found := tree.Node(node.Children[0]); found && typeNode.Kind == syntax.KindType {
-			value.Type = lowerType(typeNode)
+			value.Type = lowerType(tree, typeNode)
 		}
 	}
 	return value
-}
-
-func lowerType(node syntax.Node) TypeReference {
-	return TypeReference{Text: strings.TrimSpace(node.Text), Span: node.Span}
 }
 
 func lowerBlock(tree *syntax.Tree, node syntax.Node) *Block {
@@ -506,7 +496,7 @@ func lowerBinding(tree *syntax.Tree, node syntax.Node) Binding {
 			continue
 		}
 		if child.Kind == syntax.KindType {
-			typeReference := lowerType(child)
+			typeReference := lowerType(tree, child)
 			binding.Type = &typeReference
 			continue
 		}
@@ -537,7 +527,7 @@ func lowerExpressionNode(tree *syntax.Tree, node syntax.Node) *Expression {
 	for _, child := range node.Children {
 		if node.Kind == syntax.KindCast {
 			if typeNode, found := tree.Node(child); found && typeNode.Kind == syntax.KindType {
-				target := lowerType(typeNode)
+				target := lowerType(tree, typeNode)
 				expression.Type = &target
 				continue
 			}

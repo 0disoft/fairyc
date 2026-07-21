@@ -17,6 +17,22 @@ const NoNode NodeID = -1
 // Kind classifies compact CST nodes without exposing Go implementation types as a public AST.
 type Kind string
 
+// TypeForm records the parser-owned shape of a type node so AST lowering never has to reparse its
+// raw source spelling. Text on the node remains the exact source slice used by diagnostics and
+// source-aware tools.
+type TypeForm string
+
+const (
+	TypeFormNamed           TypeForm = "named"
+	TypeFormReference       TypeForm = "reference"
+	TypeFormReferenceMut    TypeForm = "reference-mut"
+	TypeFormPointer         TypeForm = "pointer"
+	TypeFormPointerMut      TypeForm = "pointer-mut"
+	TypeFormSlice           TypeForm = "slice"
+	TypeFormArray           TypeForm = "array"
+	TypeFormForeignFunction TypeForm = "foreign-function"
+)
+
 const (
 	KindSource     Kind = "source"
 	KindModule     Kind = "module"

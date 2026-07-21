@@ -40,6 +40,11 @@ func TestLowerPreservesFixedArrayLiteralForm(t *testing.T) {
 	if len(module.Bindings) != 1 || module.Bindings[0].Type == nil || module.Bindings[0].Type.Text != "[i32; 3]" {
 		t.Fatalf("bindings = %+v", module.Bindings)
 	}
+	typeReference := module.Bindings[0].Type
+	if typeReference.Kind != TypeKindArray || typeReference.Element == nil || typeReference.Element.Kind != TypeKindNamed ||
+		typeReference.Element.Path != "i32" || typeReference.Length == nil || typeReference.Length.Text != "3" {
+		t.Fatalf("array type = %+v", typeReference)
+	}
 	if got, want := NormalizeExpression(module.Bindings[0].Expression), "(array 1 2 3)"; got != want {
 		t.Fatalf("NormalizeExpression() = %q, want %q", got, want)
 	}
@@ -264,7 +269,48 @@ func TestLowerPreservesCastTargetTypeSeparatelyFromOperand(t *testing.T) {
 	if cast == nil || cast.Kind != syntax.KindCast || cast.Type == nil || cast.Type.Text != "*mut i32" || len(cast.Children) != 1 || cast.Children[0].Kind != syntax.KindPrefix {
 		t.Fatalf("cast = %+v", cast)
 	}
+	if cast.Type.Kind != TypeKindRawPointer || !cast.Type.Mutable || cast.Type.Element == nil || cast.Type.Element.Path != "i32" {
+		t.Fatalf("cast target type = %+v", cast.Type)
+	}
 	if got, want := NormalizeExpression(cast), "(as (&mut value) *mut i32)"; got != want {
 		t.Fatalf("NormalizeExpression() = %q, want %q", got, want)
+	}
+}
+
+func TestLowerPreservesNestedTypeStructure(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nfn inspect(value: Result<Option<&mut [u8]>, *void>) -> unsafe extern C fn(i32, *mut u8) -> u32 { callback }\n")
+	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	module, err := Lower(tree)
+	if err != nil {
+		t.Fatalf("Lower() error = %v", err)
+	}
+	if len(module.Functions) != 1 || len(module.Functions[0].Parameters) != 1 {
+		t.Fatalf("functions = %+v", module.Functions)
+	}
+	parameter := module.Functions[0].Parameters[0].Type
+	if parameter.Kind != TypeKindNamed || parameter.Path != "Result" || len(parameter.Arguments) != 2 {
+		t.Fatalf("parameter type = %+v", parameter)
+	}
+	option := parameter.Arguments[0]
+	if option.Kind != TypeKindNamed || option.Path != "Option" || len(option.Arguments) != 1 {
+		t.Fatalf("option type = %+v", option)
+	}
+	reference := option.Arguments[0]
+	if reference.Kind != TypeKindReference || !reference.Mutable || reference.Element == nil ||
+		reference.Element.Kind != TypeKindSlice || reference.Element.Element == nil || reference.Element.Element.Path != "u8" {
+		t.Fatalf("reference type = %+v", reference)
+	}
+	pointer := parameter.Arguments[1]
+	if pointer.Kind != TypeKindRawPointer || pointer.Mutable || pointer.Element == nil || pointer.Element.Path != "void" {
+		t.Fatalf("pointer type = %+v", pointer)
+	}
+	result := module.Functions[0].ResultType
+	if result.Kind != TypeKindForeignFunction || result.ABI != "C" || len(result.Parameters) != 2 || result.Result == nil || result.Result.Path != "u32" ||
+		result.Parameters[0].Path != "i32" || result.Parameters[1].Kind != TypeKindRawPointer || !result.Parameters[1].Mutable {
+		t.Fatalf("function result type = %+v", result)
 	}
 }

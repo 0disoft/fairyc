@@ -321,20 +321,28 @@ func (p *parser) parseType() NodeID {
 	start := p.currentFullIndex()
 	switch {
 	case p.match("&"):
-		p.match("mut")
+		form := TypeFormReference
+		if p.match("mut") {
+			form = TypeFormReferenceMut
+		}
 		child := p.parseType()
-		return p.addTypeNode(start, []NodeID{child})
+		return p.addTypeNode(start, []NodeID{child}, form)
 	case p.match("*"):
-		p.match("mut")
+		form := TypeFormPointer
+		if p.match("mut") {
+			form = TypeFormPointerMut
+		}
 		child := p.parseType()
-		return p.addTypeNode(start, []NodeID{child})
+		return p.addTypeNode(start, []NodeID{child}, form)
 	case p.match("["):
 		children := []NodeID{p.parseType()}
+		form := TypeFormSlice
 		if p.match(";") {
+			form = TypeFormArray
 			children = append(children, p.parseConstExpression())
 		}
 		p.expect("]")
-		return p.addTypeNode(start, children)
+		return p.addTypeNode(start, children, form)
 	case p.match("unsafe"):
 		p.expect("extern")
 		if p.at("C") {
@@ -354,7 +362,7 @@ func (p *parser) parseType() NodeID {
 		p.expect(")")
 		p.expect("->")
 		children = append(children, p.parseType())
-		return p.addTypeNode(start, children)
+		return p.addTypeNode(start, children, TypeFormForeignFunction)
 	default:
 		pathID, _, _ := p.pathNode()
 		children := []NodeID{pathID}
@@ -367,7 +375,7 @@ func (p *parser) parseType() NodeID {
 			}
 			p.expectTypeClose()
 		}
-		return p.addTypeNode(start, children)
+		return p.addTypeNode(start, children, TypeFormNamed)
 	}
 }
 
@@ -379,8 +387,8 @@ func (p *parser) parseConstExpression() NodeID {
 	return pathID
 }
 
-func (p *parser) addTypeNode(start int, children []NodeID) NodeID {
-	return p.addNode(KindType, start, children, p.rawFrom(start), "")
+func (p *parser) addTypeNode(start int, children []NodeID, form TypeForm) NodeID {
+	return p.addNode(KindType, start, children, p.rawFrom(start), string(form))
 }
 
 func (p *parser) rawFrom(startFull int) string {

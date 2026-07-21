@@ -9,9 +9,10 @@ import (
 
 func TestResultFailureSpanTracksSecondTypeArgument(t *testing.T) {
 	t.Parallel()
-	reference := ast.TypeReference{
-		Text: "Result<i32, SourceError>",
-		Span: diagnostic.Span{StartByte: 105, EndByte: 129},
+	reference := ast.NamedTypeReference("Result", diagnostic.Span{StartByte: 105, EndByte: 129})
+	reference.Arguments = []ast.TypeReference{
+		ast.NamedTypeReference("i32", diagnostic.Span{StartByte: 112, EndByte: 115}),
+		ast.NamedTypeReference("SourceError", diagnostic.Span{StartByte: 117, EndByte: 128}),
 	}
 	actual, ok := resultFailureSpan(reference)
 	if !ok || actual.StartByte != 117 || actual.EndByte != 128 {
@@ -19,10 +20,10 @@ func TestResultFailureSpanTracksSecondTypeArgument(t *testing.T) {
 	}
 }
 
-func TestParseResultTypeHandlesNestedSuccess(t *testing.T) {
+func TestResultFailureSpanRejectsNonResultType(t *testing.T) {
 	t.Parallel()
-	actual, ok := parseResultType("Result<Result<i32, Inner>, Outer>")
-	if !ok || actual.success != "Result<i32, Inner>" || actual.failure != "Outer" {
-		t.Fatalf("parseResultType() = %+v, %v", actual, ok)
+	actual, ok := resultFailureSpan(ast.NamedTypeReference("Option", diagnostic.Span{StartByte: 10, EndByte: 21}))
+	if ok || actual != (diagnostic.Span{}) {
+		t.Fatalf("resultFailureSpan() = %+v, %v", actual, ok)
 	}
 }

@@ -8,77 +8,11 @@ import (
 	"github.com/0disoft/fairyc/internal/hir"
 )
 
-type resultTypeText struct {
-	success      string
-	failure      string
-	failureStart int
-	failureEnd   int
-}
-
-func parseResultType(text string) (resultTypeText, bool) {
-	trimmed := strings.TrimSpace(text)
-	leading := len(text) - len(strings.TrimLeft(text, " \t\r\n"))
-	const prefix = "Result<"
-	if len(trimmed) <= len(prefix)+1 || !strings.HasPrefix(trimmed, prefix) || trimmed[len(trimmed)-1] != '>' {
-		return resultTypeText{}, false
-	}
-	insideStart := len(prefix)
-	inside := trimmed[insideStart : len(trimmed)-1]
-	depth := 0
-	comma := -1
-	for index := 0; index < len(inside); index++ {
-		switch inside[index] {
-		case '<':
-			depth++
-		case '>':
-			depth--
-			if depth < 0 {
-				return resultTypeText{}, false
-			}
-		case ',':
-			if depth == 0 {
-				if comma >= 0 {
-					return resultTypeText{}, false
-				}
-				comma = index
-			}
-		}
-	}
-	if depth != 0 || comma < 0 {
-		return resultTypeText{}, false
-	}
-	leftStart, leftEnd := trimRange(inside, 0, comma)
-	rightStart, rightEnd := trimRange(inside, comma+1, len(inside))
-	if leftStart == leftEnd || rightStart == rightEnd {
-		return resultTypeText{}, false
-	}
-	return resultTypeText{
-		success:      inside[leftStart:leftEnd],
-		failure:      inside[rightStart:rightEnd],
-		failureStart: leading + insideStart + rightStart,
-		failureEnd:   leading + insideStart + rightEnd,
-	}, true
-}
-
-func trimRange(text string, start, end int) (int, int) {
-	for start < end && strings.ContainsRune(" \t\r\n", rune(text[start])) {
-		start++
-	}
-	for end > start && strings.ContainsRune(" \t\r\n", rune(text[end-1])) {
-		end--
-	}
-	return start, end
-}
-
 func resultFailureSpan(reference ast.TypeReference) (diagnostic.Span, bool) {
-	parsed, ok := parseResultType(reference.Text)
-	if !ok {
+	if reference.Kind != ast.TypeKindNamed || reference.Path != "Result" || len(reference.Arguments) != 2 {
 		return diagnostic.Span{}, false
 	}
-	return diagnostic.Span{
-		StartByte: reference.Span.StartByte + parsed.failureStart,
-		EndByte:   reference.Span.StartByte + parsed.failureEnd,
-	}, true
+	return reference.Arguments[1].Span, true
 }
 
 func displayResultType(module string, value hir.Type) string {

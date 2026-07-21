@@ -171,9 +171,9 @@ func (a *analyzer) declareResourceDropFunctions() {
 					Mutable:  true,
 					Span:     resource.Drop.Span,
 					NameSpan: resource.Drop.Span,
-					Type:     ast.TypeReference{Text: resource.Name, Span: resource.NameSpan},
+					Type:     ast.NamedTypeReference(resource.Name, resource.NameSpan),
 				}},
-				ResultType: ast.TypeReference{Text: "void", Span: resource.Drop.Span},
+				ResultType: ast.NamedTypeReference("void", resource.Drop.Span),
 				Body:       resource.Drop.Body,
 			}
 			value := &symbol{

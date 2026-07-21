@@ -80,6 +80,37 @@ func TestNestedTypeCloseKeepsShiftTokenLossless(t *testing.T) {
 	}
 }
 
+func TestTypeNodesRecordParserOwnedForms(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nfn inspect(value: Result<Option<&mut [u8]>, *void>) -> unsafe extern C fn(i32, *mut u8) -> u32 { callback }\n")
+	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	want := map[string]TypeForm{
+		"Result<Option<&mut [u8]>, *void>": TypeFormNamed,
+		"Option<&mut [u8]>":                TypeFormNamed,
+		"&mut [u8]":                        TypeFormReferenceMut,
+		"[u8]":                             TypeFormSlice,
+		"*void":                            TypeFormPointer,
+		"unsafe extern C fn(i32, *mut u8) -> u32": TypeFormForeignFunction,
+		"*mut u8": TypeFormPointerMut,
+	}
+	found := make(map[string]TypeForm, len(want))
+	for _, node := range tree.Nodes {
+		if node.Kind == KindType {
+			if _, tracked := want[node.Text]; tracked {
+				found[node.Text] = TypeForm(node.Cooked)
+			}
+		}
+	}
+	for text, form := range want {
+		if found[text] != form {
+			t.Fatalf("type %q form = %q, want %q; found = %+v", text, found[text], form, found)
+		}
+	}
+}
+
 func TestNestedTypeCloseChargesContextualTokenBudget(t *testing.T) {
 	t.Parallel()
 	input := []byte("module main;\nfn wrap(value: Token) -> Option<Option<Token>> { value }\n")

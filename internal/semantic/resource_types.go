@@ -294,7 +294,7 @@ func (a *analyzer) structType(value hir.Type) (*structInfo, bool) {
 }
 
 func (a *analyzer) canonicalType(module *moduleScope, reference ast.TypeReference) hir.Type {
-	value, ok := a.canonicalTypeText(module, reference.Text)
+	value, ok := a.canonicalTypeReference(module, reference, true)
 	if ok && validUnsizedTypeUse(value) {
 		return value
 	}
@@ -302,37 +302,90 @@ func (a *analyzer) canonicalType(module *moduleScope, reference ast.TypeReferenc
 	return hir.TypeInvalid
 }
 
-func (a *analyzer) canonicalTypeText(module *moduleScope, text string) (hir.Type, bool) {
-	return a.canonicalTypeTextMode(module, text, true)
+func (a *analyzer) canonicalTypeReference(module *moduleScope, reference ast.TypeReference, allowFixedArray bool) (hir.Type, bool) {
+	switch reference.Kind {
+	case ast.TypeKindArray:
+		if !allowFixedArray || reference.Element == nil || reference.Length == nil {
+			return hir.TypeInvalid, false
+		}
+		element, elementOK := a.canonicalTypeReference(module, *reference.Element, false)
+		length, lengthOK := parsePositiveArrayLength(reference.Length.Text)
+		if !elementOK || !lengthOK || !hir.ExecutableFixedArrayShape(element, length) {
+			return hir.TypeInvalid, false
+		}
+		return hir.FixedArray(element, length), true
+	case ast.TypeKindSlice:
+		if reference.Element == nil {
+			return hir.TypeInvalid, false
+		}
+		element, ok := a.canonicalTypeReference(module, *reference.Element, false)
+		if !ok || element != hir.TypeU8 {
+			return hir.TypeInvalid, false
+		}
+		return hir.TypeByteSlice, true
+	case ast.TypeKindReference:
+		if reference.Element == nil {
+			return hir.TypeInvalid, false
+		}
+		// A safe borrow may name one executable fixed array. The array branch still
+		// rejects nested fixed arrays by canonicalizing its element with
+		// allowFixedArray=false.
+		element, ok := a.canonicalTypeReference(module, *reference.Element, true)
+		if !ok {
+			return hir.TypeInvalid, false
+		}
+		if reference.Mutable {
+			return hir.MutableBorrow(element), true
+		}
+		return hir.SharedBorrow(element), true
+	case ast.TypeKindRawPointer:
+		if reference.Element == nil {
+			return hir.TypeInvalid, false
+		}
+		element := hir.TypeInvalid
+		ok := false
+		if reference.Element.Kind == ast.TypeKindNamed && reference.Element.Path == "void" && len(reference.Element.Arguments) == 0 {
+			element, ok = hir.TypeVoid, true
+		} else {
+			element, ok = a.canonicalTypeReference(module, *reference.Element, false)
+		}
+		if !ok {
+			return hir.TypeInvalid, false
+		}
+		return hir.RawPointer(element, reference.Mutable), true
+	case ast.TypeKindNamed:
+		return a.canonicalNamedType(module, reference, allowFixedArray)
+	default:
+		return hir.TypeInvalid, false
+	}
 }
 
-func (a *analyzer) canonicalTypeTextMode(module *moduleScope, text string, allowFixedArray bool) (hir.Type, bool) {
-	trimmed := strings.TrimSpace(text)
-	if allowFixedArray {
-		if elementText, length, ok := parseFixedArrayTypeText(trimmed); ok {
-			element, elementOK := a.canonicalTypeTextMode(module, elementText, false)
-			if !elementOK || !hir.ExecutableFixedArrayShape(element, length) {
-				return hir.TypeInvalid, false
-			}
-			return hir.FixedArray(element, length), true
+func (a *analyzer) canonicalNamedType(module *moduleScope, reference ast.TypeReference, allowFixedArray bool) (hir.Type, bool) {
+	if reference.Path == "Option" {
+		if len(reference.Arguments) != 1 {
+			return hir.TypeInvalid, false
 		}
-	}
-	if option, ok := parseOptionType(trimmed); ok {
-		element, elementOK := a.canonicalTypeTextMode(module, option, false)
-		if !elementOK {
+		element, ok := a.canonicalTypeReference(module, reference.Arguments[0], false)
+		if !ok {
 			return hir.TypeInvalid, false
 		}
 		return hir.Option(element), true
 	}
-	if result, ok := parseResultType(trimmed); ok {
-		success, successOK := a.canonicalTypeTextMode(module, result.success, false)
-		failure, failureOK := a.canonicalTypeTextMode(module, result.failure, false)
+	if reference.Path == "Result" {
+		if len(reference.Arguments) != 2 {
+			return hir.TypeInvalid, false
+		}
+		success, successOK := a.canonicalTypeReference(module, reference.Arguments[0], false)
+		failure, failureOK := a.canonicalTypeReference(module, reference.Arguments[1], false)
 		if !successOK || !failureOK {
 			return hir.TypeInvalid, false
 		}
 		return hir.Result(success, failure), true
 	}
-	switch trimmed {
+	if len(reference.Arguments) != 0 {
+		return hir.TypeInvalid, false
+	}
+	switch reference.Path {
 	case "bool":
 		return hir.TypeBool, true
 	case "u8":
@@ -343,8 +396,6 @@ func (a *analyzer) canonicalTypeTextMode(module *moduleScope, text string, allow
 		return hir.TypeU32, true
 	case "usize":
 		return hir.TypeUSize, true
-	case "[u8]":
-		return hir.TypeByteSlice, true
 	case "str":
 		return hir.TypeStr, true
 	case "CStr":
@@ -352,48 +403,11 @@ func (a *analyzer) canonicalTypeTextMode(module *moduleScope, text string, allow
 	case "Region":
 		return hir.TypeRegion, true
 	}
-	candidate := hir.Type(trimmed)
+	candidate := hir.Type(reference.Path)
 	if hir.IsCScalar(candidate) {
 		return candidate, true
 	}
-	if strings.HasPrefix(trimmed, "*") {
-		remainder := strings.TrimSpace(trimmed[1:])
-		mutable := strings.HasPrefix(remainder, "mut") &&
-			(len(remainder) == len("mut") || remainder[len("mut")] == ' ' || remainder[len("mut")] == '&' || remainder[len("mut")] == '*')
-		if mutable {
-			remainder = strings.TrimSpace(remainder[len("mut"):])
-		}
-		element, ok := hir.TypeInvalid, false
-		if remainder == "void" {
-			element, ok = hir.TypeVoid, true
-		} else {
-			element, ok = a.canonicalTypeTextMode(module, remainder, false)
-		}
-		if !ok {
-			return hir.TypeInvalid, false
-		}
-		return hir.RawPointer(element, mutable), true
-	}
-	if strings.HasPrefix(trimmed, "&") {
-		remainder := strings.TrimSpace(trimmed[1:])
-		mutable := strings.HasPrefix(remainder, "mut") &&
-			(len(remainder) == len("mut") || remainder[len("mut")] == ' ' || remainder[len("mut")] == '&')
-		if mutable {
-			remainder = strings.TrimSpace(remainder[len("mut"):])
-		}
-		// A safe borrow may name one executable fixed array. The array parser still
-		// rejects nested fixed arrays because it canonicalizes its element with
-		// allowFixedArray=false.
-		element, ok := a.canonicalTypeTextMode(module, remainder, true)
-		if !ok {
-			return hir.TypeInvalid, false
-		}
-		if mutable {
-			return hir.MutableBorrow(element), true
-		}
-		return hir.SharedBorrow(element), true
-	}
-	parts := strings.Split(trimmed, "::")
+	parts := strings.Split(reference.Path, "::")
 	var target *symbol
 	switch len(parts) {
 	case 1:
@@ -407,42 +421,6 @@ func (a *analyzer) canonicalTypeTextMode(module *moduleScope, text string, allow
 		return hir.TypeInvalid, false
 	}
 	return target.typ, true
-}
-
-func parseFixedArrayTypeText(text string) (string, uint64, bool) {
-	if len(text) < 5 || text[0] != '[' || text[len(text)-1] != ']' {
-		return "", 0, false
-	}
-	inside := text[1 : len(text)-1]
-	depth := 0
-	separator := -1
-	for index := 0; index < len(inside); index++ {
-		switch inside[index] {
-		case '[', '<':
-			depth++
-		case ']', '>':
-			depth--
-			if depth < 0 {
-				return "", 0, false
-			}
-		case ';':
-			if depth == 0 {
-				if separator >= 0 {
-					return "", 0, false
-				}
-				separator = index
-			}
-		}
-	}
-	if depth != 0 || separator <= 0 || separator == len(inside)-1 {
-		return "", 0, false
-	}
-	element := strings.TrimSpace(inside[:separator])
-	length, ok := parsePositiveArrayLength(strings.TrimSpace(inside[separator+1:]))
-	if element == "" || !ok {
-		return "", 0, false
-	}
-	return element, length, true
 }
 
 func parsePositiveArrayLength(raw string) (uint64, bool) {
