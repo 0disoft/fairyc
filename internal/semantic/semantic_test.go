@@ -61,6 +61,20 @@ func TestAnalyzeCShapedDeclarationsAndInferredBindings(t *testing.T) {
 	}
 }
 
+func TestAnalyzeCShapedBorrowAndRecordDesignators(t *testing.T) {
+	t.Parallel()
+	text := "module main;\n\nstruct Pair { i32 left; i32 right; }\nfn usize length(ref u8[] bytes) { return bytes.len; }\nfn usize main() { let u8[3] values = [1, 2, 3]; let Pair pair = Pair { .left = 20, .right = 22 }; if (pair.left == 20) { return length(ref values); } else { return 0; } }\n"
+	result := analyzeText(t, map[string]string{"main.fy": text})
+	assertCleanTypeResult(t, result)
+	if len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].Functions) != 2 {
+		t.Fatalf("HIR = %+v", result.HIR)
+	}
+	main := result.HIR.Modules[0].Functions[1]
+	if main.ResultType != hir.TypeUSize || len(main.Locals) != 2 || main.Locals[0].Type != hir.FixedArray(hir.TypeU8, 3) {
+		t.Fatalf("main = %+v", main)
+	}
+}
+
 func TestAnalyzeReportsUnresolvedNameWithoutTypeCascade(t *testing.T) {
 	t.Parallel()
 	text := "module main;\n\nfn answer() -> i32 {\n    missing\n}\n"

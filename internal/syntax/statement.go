@@ -6,6 +6,10 @@ import (
 )
 
 func (p *parser) parseBlock() NodeID {
+	return p.parseBlockWithTail(true)
+}
+
+func (p *parser) parseBlockWithTail(allowTail bool) NodeID {
 	if !p.enter() {
 		return NoNode
 	}
@@ -50,8 +54,21 @@ func (p *parser) parseBlock() NodeID {
 				children = append(children, p.addNode(KindExprStmt, statementStart, []NodeID{expression}, "", ""))
 				continue
 			}
+			expressionNode, expressionFound := p.tree.Node(expression)
+			if expressionFound && expressionNode.Kind == KindIf && (!p.at("}") || !allowTail) {
+				children = append(children, p.addNode(KindExprStmt, statementStart, []NodeID{expression}, "", ""))
+				if p.at("}") {
+					break
+				}
+				continue
+			}
 			if p.at("}") {
-				children = append(children, p.addNode(KindTail, statementStart, []NodeID{expression}, "", ""))
+				if allowTail {
+					children = append(children, p.addNode(KindTail, statementStart, []NodeID{expression}, "", ""))
+					break
+				}
+				p.expectStatementTerminator()
+				children = append(children, p.addNode(KindExprStmt, statementStart, []NodeID{expression}, "", ""))
 				break
 			}
 			p.expectStatementTerminator()
@@ -117,9 +134,44 @@ func (p *parser) parseDiscard() NodeID {
 func (p *parser) parseWhile() NodeID {
 	start := p.currentFullIndex()
 	p.advance()
-	condition := p.parseExpression(0, false)
+	condition := p.parseControlExpression()
 	body := p.parseBlock()
 	return p.addNode(KindWhile, start, []NodeID{condition, body}, "", "")
+}
+
+func (p *parser) parseControlExpression() NodeID {
+	if p.parenthesizedControlHeader() {
+		p.expect("(")
+		condition := p.parseExpression(0, true)
+		p.expect(")")
+		return condition
+	}
+	return p.parseExpression(0, false)
+}
+
+func (p *parser) parenthesizedControlHeader() bool {
+	if !p.at("(") {
+		return false
+	}
+	depth := 0
+	for offset := 0; ; offset++ {
+		token := p.peek(offset)
+		if token.Kind == lexer.EOF {
+			return false
+		}
+		switch token.Text(p.tree.Source) {
+		case "(":
+			depth++
+		case ")":
+			depth--
+			if depth == 0 {
+				return p.peekText(offset+1) == "{"
+			}
+			if depth < 0 {
+				return false
+			}
+		}
+	}
 }
 
 func (p *parser) parseRegion() NodeID {

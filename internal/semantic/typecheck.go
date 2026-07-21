@@ -256,7 +256,7 @@ func (c *typeChecker) checkFunction() hir.Function {
 	if c.function.Unsafe {
 		c.unsafeScopes = append(c.unsafeScopes, span(c.module.file.Path, c.function.Span))
 	}
-	body, bodyType, hasReturn := c.checkBlock(c.function.Body, resultType)
+	body, bodyType, _ := c.checkBlock(c.function.Body, resultType)
 	if c.function.Unsafe {
 		c.unsafeScopes = c.unsafeScopes[:len(c.unsafeScopes)-1]
 	}
@@ -269,10 +269,46 @@ func (c *typeChecker) checkFunction() hir.Function {
 			resultType,
 			span(c.module.file.Path, c.function.ResultType.Span),
 		)
-	} else if resultType != hir.TypeVoid && !hasReturn {
+	} else if resultType != hir.TypeVoid && !blockAlwaysReturns(c.function.Body) {
 		c.analyzer.addUnsupported(c.module.file.Path, c.function.Body.Span, "non-void function without a checked return value")
 	}
 	return result
+}
+
+func blockAlwaysReturns(block *ast.Block) bool {
+	if block == nil {
+		return false
+	}
+	for index := range block.Statements {
+		statement := &block.Statements[index]
+		if statement.Kind == syntax.KindReturn || expressionAlwaysReturns(statement.Expression) {
+			return true
+		}
+	}
+	return block.Tail != nil
+}
+
+func expressionAlwaysReturns(expression *ast.Expression) bool {
+	if expression == nil {
+		return false
+	}
+	switch expression.Kind {
+	case syntax.KindIf:
+		if len(expression.Children) < 3 {
+			return false
+		}
+		thenBranch := expression.Children[1]
+		elseBranch := expression.Children[2]
+		return thenBranch != nil && elseBranch != nil && blockAlwaysReturns(thenBranch.Block) &&
+			(elseBranch.Kind == syntax.KindIf && expressionAlwaysReturns(elseBranch) || blockAlwaysReturns(elseBranch.Block))
+	case syntax.KindUnsafe, syntax.KindRegion:
+		for _, child := range expression.Children {
+			if child != nil && blockAlwaysReturns(child.Block) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.Block, hir.Type, bool) {

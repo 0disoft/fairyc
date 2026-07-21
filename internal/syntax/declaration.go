@@ -242,17 +242,19 @@ func (p *parser) parseFunction(start int, leading []NodeID, method bool) NodeID 
 	var nameSpan diagnostic.Span
 	var resultType NodeID
 	var parameters []NodeID
+	cShaped := false
 	if p.atKind(lexer.Identifier) && p.peekText(1) == "(" {
 		name, nameSpan = p.parseNameWithSpan()
 		parameters = p.parseParameters(method, true)
 		p.expect("->")
 		resultType = p.parseType()
 	} else {
+		cShaped = true
 		resultType = p.parseType()
 		name, nameSpan = p.parseNameWithSpan()
 		parameters = p.parseParameters(method, true)
 	}
-	body := p.parseBlock()
+	body := p.parseBlockWithTail(!cShaped)
 	children := append(append([]NodeID(nil), leading...), parameters...)
 	children = append(children, resultType, body)
 	return p.addNamedNode(KindFunction, start, children, name, "", nameSpan)

@@ -179,6 +179,40 @@ func TestParseCShapedDeclarationsAndNameSpans(t *testing.T) {
 	}
 }
 
+func TestCShapedFunctionRequiresExplicitReturn(t *testing.T) {
+	t.Parallel()
+	tree := Parse(source.NewFile("main.fy", []byte("module main;\nfn i32 main() { 0 }\n")), source.DefaultLimits())
+	if len(tree.Diagnostics) != 1 || tree.Diagnostics[0].Code != "E0007" || tree.Diagnostics[0].Token != ";" {
+		t.Fatalf("Parse() diagnostics = %+v, want missing statement terminator", tree.Diagnostics)
+	}
+}
+
+func TestParseCShapedControlBorrowAndRecordDesignators(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nstruct Pair { i32 left; i32 right; }\nfn i32 main() { var u8[2] values = [1, 2]; let ref mut u8[] view = ref mut values; let Pair pair = Pair { .left = 20, .right = 22 }; while (view.len == 2) { break; } if (true) { return pair.left; } else { return 0; } }\n")
+	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	var mutableBorrow bool
+	var designatedFields int
+	for _, node := range tree.Nodes {
+		if node.Kind == KindPrefix && node.Text == "&mut" {
+			mutableBorrow = true
+		}
+		if node.Kind == KindField && node.NameSpan.EndByte > node.NameSpan.StartByte && (node.Text == "left" || node.Text == "right") {
+			designatedFields++
+		}
+	}
+	if !mutableBorrow || designatedFields < 2 {
+		t.Fatalf("mutable borrow = %v, designated fields = %d", mutableBorrow, designatedFields)
+	}
+	reconstructed, ok := tree.Reconstruct()
+	if !ok || !slices.Equal(reconstructed, input) {
+		t.Fatalf("Reconstruct() = %q, %v; want %q, true", reconstructed, ok, input)
+	}
+}
+
 func TestNestedTypeCloseChargesContextualTokenBudget(t *testing.T) {
 	t.Parallel()
 	input := []byte("module main;\nfn wrap(value: Token) -> Option<Option<Token>> { value }\n")

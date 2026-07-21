@@ -160,8 +160,12 @@ func (p *parser) parsePrefix(allowRecord bool) NodeID {
 	if isPrefixOperator(operator) {
 		start := p.currentFullIndex()
 		p.advance()
-		if operator == "&" && p.match("mut") {
-			operator = "&mut"
+		if operator == "&" || operator == "ref" {
+			if p.match("mut") {
+				operator = "&mut"
+			} else {
+				operator = "&"
+			}
 		}
 		operand := p.parseExpression(130, allowRecord)
 		return p.addNode(KindPrefix, start, []NodeID{operand}, operator, "")
@@ -190,10 +194,20 @@ func (p *parser) parsePrimary(allowRecord bool) NodeID {
 			children := []NodeID{pathID}
 			for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 				fieldStart := p.currentFullIndex()
-				name := p.parseName()
+				if p.match(".") {
+					name, nameSpan := p.parseNameWithSpan()
+					p.expect("=")
+					valueID := p.parseExpression(0, true)
+					children = append(children, p.addNamedNode(KindField, fieldStart, []NodeID{valueID}, name, "", nameSpan))
+					if !p.match(",") {
+						break
+					}
+					continue
+				}
+				name, nameSpan := p.parseNameWithSpan()
 				p.expect(":")
 				valueID := p.parseExpression(0, true)
-				children = append(children, p.addNode(KindField, fieldStart, []NodeID{valueID}, name, ""))
+				children = append(children, p.addNamedNode(KindField, fieldStart, []NodeID{valueID}, name, "", nameSpan))
 				if !p.match(",") {
 					break
 				}
@@ -256,7 +270,7 @@ func (p *parser) parseArray() NodeID {
 func (p *parser) parseIf() NodeID {
 	start := p.currentFullIndex()
 	p.advance()
-	condition := p.parseExpression(0, false)
+	condition := p.parseControlExpression()
 	thenBlock := p.parseBlock()
 	children := []NodeID{condition, thenBlock}
 	if p.match("else") {
@@ -321,7 +335,7 @@ func (p *parser) nodeStart(id NodeID) int {
 
 func isPrefixOperator(value string) bool {
 	switch value {
-	case "-", "+", "!", "~", "&", "*":
+	case "-", "+", "!", "~", "&", "*", "ref":
 		return true
 	default:
 		return false
@@ -342,7 +356,7 @@ func canStartExpression(token lexer.Token, text string) bool {
 		return true
 	}
 	switch text {
-	case "true", "false", "null", "self", "(", "[", "{", "if", "match", "unsafe", "-", "+", "!", "~", "&", "*":
+	case "true", "false", "null", "self", "(", "[", "{", "if", "match", "unsafe", "-", "+", "!", "~", "&", "*", "ref":
 		return true
 	default:
 		return false
