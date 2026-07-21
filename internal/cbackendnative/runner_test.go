@@ -14,6 +14,7 @@ import (
 	"github.com/0disoft/fairyc/internal/cbackendfixture"
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/cli"
+	"github.com/0disoft/fairyc/internal/foreignstructprobe"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/interpreter"
 	"github.com/0disoft/fairyc/internal/layoutfixture"
@@ -67,7 +68,8 @@ func TestForeignPointerCallSmokeSourceReachesCEmission(t *testing.T) {
 func TestForeignCStructResultCallSmokeSourceReachesCEmission(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	if err := os.WriteFile(filepath.Join(root, "main.fy"), []byte(foreignCStructResultCallSmokeSource), 0o600); err != nil {
+	unit := foreignstructprobe.Generate()
+	if err := os.WriteFile(filepath.Join(root, "main.fy"), []byte(unit.FairySource), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	var stdout bytes.Buffer
@@ -76,7 +78,7 @@ func TestForeignCStructResultCallSmokeSourceReachesCEmission(t *testing.T) {
 	if code != cli.ExitSuccess || stderr.Len() != 0 {
 		t.Fatalf("foreign C struct-result call C emission = code %d, stderr %q", code, stderr.String())
 	}
-	for _, required := range foreignCStructResultCallExpectedCFragments {
+	for _, required := range unit.RequiredCFragments {
 		if !strings.Contains(stdout.String(), required) {
 			t.Errorf("foreign C struct-result call C emission is missing %q", required)
 		}

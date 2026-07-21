@@ -11,10 +11,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/cli"
+	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/cstdlib"
+	"github.com/0disoft/fairyc/internal/foreignstructprobe"
+	"github.com/0disoft/fairyc/internal/frontend"
 	"github.com/0disoft/fairyc/internal/pecoff"
+	"github.com/0disoft/fairyc/internal/semantic"
+	"github.com/0disoft/fairyc/internal/source"
 	"github.com/0disoft/fairyc/internal/windowsabiprobe"
 	"github.com/0disoft/fairyc/internal/windowslayoutprobe"
 	"github.com/0disoft/fairyc/internal/windowsunwindprobe"
@@ -539,11 +545,16 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	structResultExecutions, err := runFairyStructResultProbe(toolchain)
+	if err != nil {
+		return err
+	}
 	unwindExecutions, unwindCases, err := runWindowsUnwindProbe(toolchain)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds plus %d source-level safe File lifecycle builds and %d source-level safe owned-text lifecycle builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls, checked reads and mutable indexed stores, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart and output execution, 40 run-host outcomes covered fixed arrays, byte-view iteration and slicing, checked indexed stores, assertions in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, Buffer initialization, reserve, self-overlap append, and zeroed-resize allocation rollback passed %d separate-translation-unit MSVC executions, owned-text opaque-storage failure preservation, forced allocation rollback, and repeated drop passed %d separate-translation-unit MSVC executions, Arena zeroing, two-stage allocation rollback, stale Region rejection, and active-drop preservation passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, windowsFileSourceExecutions, ownedTextSourceExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, windowsFileExecutions, bufferProbeExecutions, ownedTextProbeExecutions, arenaProbeExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, unwindCases, unwindExecutions, 1+targetBuildExecutions+windowsFileSourceExecutions+ownedTextSourceExecutions+targetRunExecutions+targetExecExecutions+windowsFileExecutions+bufferProbeExecutions+ownedTextProbeExecutions+arenaProbeExecutions+layoutExecutions+abiExecutions+unwindExecutions, toolchain.Version)
+	inspectedPEImages := 1 + targetBuildExecutions + windowsFileSourceExecutions + ownedTextSourceExecutions + targetRunExecutions + targetExecExecutions + windowsFileExecutions + bufferProbeExecutions + ownedTextProbeExecutions + arenaProbeExecutions + layoutExecutions + abiExecutions + structResultExecutions + unwindExecutions
+	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds plus %d source-level safe File lifecycle builds and %d source-level safe owned-text lifecycle builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls, checked reads and mutable indexed stores, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart and output execution, 40 run-host outcomes covered fixed arrays, byte-view iteration and slicing, checked indexed stores, assertions in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, Buffer initialization, reserve, self-overlap append, and zeroed-resize allocation rollback passed %d separate-translation-unit MSVC executions, owned-text opaque-storage failure preservation, forced allocation rollback, and repeated drop passed %d separate-translation-unit MSVC executions, Arena zeroing, two-stage allocation rollback, stale Region rejection, and active-drop preservation passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, generated-Fairy small and large struct results passed %d separate-translation-unit MSVC executions, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, windowsFileSourceExecutions, ownedTextSourceExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, windowsFileExecutions, bufferProbeExecutions, ownedTextProbeExecutions, arenaProbeExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, structResultExecutions, unwindCases, unwindExecutions, inspectedPEImages, toolchain.Version)
 	return nil
 }
 
@@ -722,7 +733,7 @@ func runWindowsFileProbe(toolchain cdriver.WindowsHostToolchain) (int, error) {
 	if err != nil {
 		return 0, fmt.Errorf("load Windows File probe: %w", err)
 	}
-	return runWindowsSeparateTranslationUnitProbe(toolchain, "Windows File", probe, implementation)
+	return runWindowsSeparateTranslationUnitProbe(toolchain, "Windows File", probe, implementation, 0)
 }
 
 func runOwnedTextStorageProbe(toolchain cdriver.WindowsHostToolchain) (int, error) {
@@ -734,7 +745,7 @@ func runOwnedTextStorageProbe(toolchain cdriver.WindowsHostToolchain) (int, erro
 	if err != nil {
 		return 0, fmt.Errorf("load owned-text storage probe: %w", err)
 	}
-	return runWindowsSeparateTranslationUnitProbe(toolchain, "owned-text storage", probe, implementation)
+	return runWindowsSeparateTranslationUnitProbe(toolchain, "owned-text storage", probe, implementation, 0)
 }
 
 func runBufferFailureProbe(toolchain cdriver.WindowsHostToolchain) (int, error) {
@@ -746,7 +757,7 @@ func runBufferFailureProbe(toolchain cdriver.WindowsHostToolchain) (int, error) 
 	if err != nil {
 		return 0, fmt.Errorf("load Buffer failure probe: %w", err)
 	}
-	return runWindowsSeparateTranslationUnitProbe(toolchain, "Buffer failure", probe, implementation)
+	return runWindowsSeparateTranslationUnitProbe(toolchain, "Buffer failure", probe, implementation, 0)
 }
 
 func runArenaFailureProbe(toolchain cdriver.WindowsHostToolchain) (int, error) {
@@ -758,7 +769,40 @@ func runArenaFailureProbe(toolchain cdriver.WindowsHostToolchain) (int, error) {
 	if err != nil {
 		return 0, fmt.Errorf("load Arena failure probe: %w", err)
 	}
-	return runWindowsSeparateTranslationUnitProbe(toolchain, "Arena failure", probe, implementation)
+	return runWindowsSeparateTranslationUnitProbe(toolchain, "Arena failure", probe, implementation, 0)
+}
+
+func runFairyStructResultProbe(toolchain cdriver.WindowsHostToolchain) (int, error) {
+	probe := foreignstructprobe.Generate()
+	parsed, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(probe.FairySource)), source.DefaultLimits())
+	if err != nil {
+		return 0, fmt.Errorf("parse generated-Fairy struct-result source: %w", err)
+	}
+	if parsed.AST == nil || len(parsed.Tree.Diagnostics) != 0 {
+		return 0, fmt.Errorf("generated-Fairy struct-result source is not parser-valid: %+v", parsed.Tree.Diagnostics)
+	}
+	checked, err := compiler.Check([]semantic.File{{Path: "main.fy", Module: parsed.AST}})
+	if err != nil {
+		return 0, fmt.Errorf("compile generated-Fairy struct-result source: %w", err)
+	}
+	semanticResult := checked.Semantic
+	if semanticResult.CompletedThrough != semantic.PhaseFlow || semanticResult.FailedPhase != semantic.PhaseNone ||
+		len(semanticResult.Diagnostics) != 0 || len(semanticResult.Unsupported) != 0 {
+		return 0, fmt.Errorf("generated-Fairy struct-result source did not complete Flow: phase=%q failed=%q diagnostics=%+v unsupported=%+v", semanticResult.CompletedThrough, semanticResult.FailedPhase, semanticResult.Diagnostics, semanticResult.Unsupported)
+	}
+	if !checked.Verified {
+		return 0, fmt.Errorf("generated-Fairy struct-result source did not produce verified MIR")
+	}
+	caller, err := cbackend.Emit(checked.MIR, "main::main", cbackend.Stage0WindowsMSVCProfile())
+	if err != nil {
+		return 0, fmt.Errorf("emit generated-Fairy Windows struct-result C: %w", err)
+	}
+	for _, required := range probe.RequiredCFragments {
+		if !strings.Contains(caller.Source, required) {
+			return 0, fmt.Errorf("generated-Fairy Windows struct-result C lost required fragment %q", required)
+		}
+	}
+	return runWindowsSeparateTranslationUnitProbe(toolchain, "generated-Fairy struct-result", caller.Source, probe.CompanionC, probe.ExpectedExit)
 }
 
 func runWindowsSeparateTranslationUnitProbe(
@@ -766,6 +810,7 @@ func runWindowsSeparateTranslationUnitProbe(
 	name string,
 	probe string,
 	implementation string,
+	expectedExit int,
 ) (int, error) {
 	if name == "" || probe == "" || implementation == "" {
 		return 0, fmt.Errorf("Windows separate-translation-unit probe identity and sources must be non-empty")
@@ -789,7 +834,7 @@ func runWindowsSeparateTranslationUnitProbe(
 		if err != nil {
 			return executions, fmt.Errorf("execute %s probe with %s: %w", name, profile.Name, err)
 		}
-		if outcome.ExitCode != 0 || outcome.Stdout != "" || outcome.Stderr != "" {
+		if outcome.ExitCode != int32(expectedExit) || outcome.Stdout != "" || outcome.Stderr != "" {
 			return executions, fmt.Errorf("%s probe with %s returned %d, stdout %q, and stderr %q", name, profile.Name, outcome.ExitCode, outcome.Stdout, outcome.Stderr)
 		}
 		executions++

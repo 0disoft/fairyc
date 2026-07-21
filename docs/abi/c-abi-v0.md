@@ -228,11 +228,20 @@ closed subset only. It does not prove source-level Fairy lowering, an independen
 register-level oracle, exact stack/shadow-store placement, complete PE/COFF object or unwind
 metadata, or hosted evidence.
 
-The Windows smoke additionally parses all twenty-five linked target or probe executable images without
+A separate shared generated-Fairy probe does cover one source-level result boundary. The Windows
+backend emits its `@repr(C)` 8-byte two-`u32` and 20-byte five-`u32` foreign results, then local x64
+MSVC compiles that caller and a hand-written C callee as separate objects at low and optimized
+profiles. Both executions return 42, and both objects, linked images, and unwind structures pass the
+bounded inspectors. This proves the same-MSVC source-to-C return path for those two shapes only; it
+does not provide an independent compiler or register oracle, aggregate parameters, callbacks,
+exports, nested results, or hosted evidence.
+
+The Windows smoke additionally parses all twenty-seven linked target or probe executable images without
 invoking the host loader as the parser. The target-neutral product, both declared-target profile
 products, both safe FY File lifecycle products, both safe FY owned-text lifecycle products, two
 direct run-target temporary products, two exec-target temporary output products, plus both profiles
-of the raw Windows File, raw Buffer, raw owned-text, raw Arena, layout, ABI, and unwind probes must be
+of the raw Windows File, raw Buffer, raw owned-text, raw Arena, layout, ABI, generated-Fairy
+struct-result, and unwind probes must be
 bounded AMD64 PE32+ large-address-aware non-DLL console images with aligned headers and sections, a
 readable executable `.text` section, and an entry point inside executable code. Import payloads are
 not interpreted. The exception directory, `.pdata`, and referenced unwind records separately cross
@@ -246,7 +255,8 @@ MSVC `.obj` as raw AMD64 COFF. It rejects optional PE headers and linked-image f
 bounded raw and relocation ranges, readable executable `.text` or `.text$...` code, valid
 relocation symbol indexes, and named symbols; and permits storage-free uninitialized `.bss` only
 when its section characteristic says so. This covers every `build-host`, `build-target`, `run-host`,
-Windows-File-probe, layout-probe, ABI-probe, and unwind-probe compilation in the local smoke. It still does not define exact exported/imported
+Windows-File-probe, layout-probe, ABI-probe, generated-Fairy struct-result probe, and unwind-probe
+compilation in the local smoke. It still does not define exact exported/imported
 symbols, COMDAT selection, permitted relocation types, `.pdata`/`.xdata` content, or a hosted
 object-fixture receipt, so `pe-coff-object-fixtures` remains missing.
 
@@ -291,7 +301,8 @@ independently inspected Microsoft x64 crossings,
 PE/COFF object and unwind fixtures, complete runtime and standard library, hosted
 Windows receipt, toolchain baseline, and provisioning gates. The local
 eight-case layout probe, twelve-case same-MSVC C crossing, and three-case native unwind probe are
-deliberately insufficient to clear those markers.
+joined by one same-MSVC generated-Fairy small/large struct-result crossing and remain deliberately
+insufficient to clear those markers.
 
 `experimental run-target` consumes the same Windows target unit and closed support closure, then
 validates and executes a temporary PE. Its exact signed `i32` result and product-trap mapping are
@@ -315,9 +326,10 @@ Native source-level call fixtures are eventually bidirectional: Fairy-to-C and C
 classification fixtures already cover integer and floating register exhaustion, mixed arguments,
 pointers, by-value structs, and hidden aggregate returns. Native crossings must additionally cover
 narrow signed and unsigned values, nested aggregates, null raw pointers, and the permitted callback
-form before the target can claim that source-level gate. The current generated-Fairy struct-result
-probe covers one register and one hidden return in both compiler directions; it does not yet cover
-aggregate parameters, mixed INTEGER/SSE source records, or nested-result interaction.
+form before the target can claim that source-level gate. The current shared generated-Fairy
+struct-result probe covers one register and one hidden return in both Linux compiler directions and
+in both local MSVC profiles; it does not yet cover aggregate parameters, mixed INTEGER/SSE source
+records, nested-result interaction, or a C-to-Fairy export direction.
 
 The planned transport matrix uses Clang as the primary compiler and GCC as an independent compiler, each at low and optimized profiles. Sanitizers supplement but do not define conformance.
 

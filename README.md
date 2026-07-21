@@ -91,8 +91,10 @@ versioned cases cover shared ordinal RCX/RDX/R8/R9 or XMM0-3 slots, fifth-argume
 small aggregate integer transport, odd-size and 16-byte aggregate indirection, and hidden-return
 slot shifting. The 12 pass plans additionally generate separate caller and callee C11 translation
 units that local x64 MSVC compiles, links, and executes at low and optimized profiles. Independent
-compiler or assembly/register inspection, broader and bidirectional source-level Fairy crossings,
-and a hosted receipt remain missing;
+compiler or assembly/register inspection and a hosted receipt remain missing. A shared
+generated-Fairy caller now also crosses one 8-byte register-sized and one 20-byte hidden-result
+`@repr(C)` return from an independently compiled C callee at both MSVC profiles. Broader and
+bidirectional source-level Fairy crossings remain missing;
 stack/shadow-store observations, callbacks, exports, and hosted evidence remain absent.
 The 14 valid plans now generate separate caller and callee objects for Clang-to-GCC and
 GCC-to-Clang at `-O0` and `-O2`, for 56 configured crossings. This Windows host cannot execute
@@ -308,7 +310,8 @@ exception, virtual-walks raiser, termination, and catcher frames, and requires o
 and independent/source-level/hosted ABI and unwind evidence exists. A host-independent PE parser
 now validates the host-smoke product, both declared-target profile products, both safe File and
 safe owned-text profile products, two direct run-target temporary products, two exec-target output
-products, and all fourteen raw Windows File, Buffer, owned-text, Arena, layout, ABI, and unwind probe images as bounded
+products, and all sixteen raw or generated-Fairy Windows File, Buffer, owned-text, Arena, layout,
+ABI, struct-result, and unwind probe images as bounded
 AMD64 PE32+ console executables
 with aligned headers and sections and an executable `.text` entry point. That linked-image path does not inspect
 object symbols, relocations, or Windows unwind records. The same package separately parses every
@@ -462,6 +465,7 @@ or arbitrary link-input option.
 - Experimental target JSON schema: `spec/cli/experimental-target-spec-v0.schema.json`
 - Target layout engine and fixtures: `internal/layout/`, `spec/fixtures/layout/manifest-v0.json`, `spec/fixtures/layout/manifest-windows-msvc-v0.json`
 - Shared Windows MSVC C probe type emitter: `internal/msvccprobe/`
+- Shared generated-Fairy/C aggregate-result probe: `internal/foreignstructprobe/`
 - Windows MSVC native layout probe generator: `internal/windowslayoutprobe/`
 - Target C ABI classifiers and fixtures: `internal/cabi/`, `spec/fixtures/c-abi/manifest-v0.json`, `spec/fixtures/c-abi/manifest-windows-msvc-v0.json`
 - Windows MSVC native ABI probe generator: `internal/windowsabiprobe/`
