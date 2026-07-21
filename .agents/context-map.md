@@ -65,6 +65,7 @@
 - Whole-package cache key, store, and runner route: internal/packagecache/, internal/packagecachefixture/
 - Human project-manifest v1 route: internal/projectmanifest/, internal/projectmanifestfixture/, spec/fixtures/project-manifest/manifest-v1.json
 - Local workspace loader v1 route: internal/workspaceloader/, internal/workspaceloaderfixture/, spec/fixtures/workspace-loader/manifest-v1.json
+- Generated lockfile v1 route: internal/lockfile/, docs/package/lockfile-v1.md
 - MIR and C backend route: docs/mir/
 - Package identity and visibility route: docs/package/
 - Target and C ABI route: docs/abi/

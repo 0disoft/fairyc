@@ -44,6 +44,6 @@ resolution supplies full PackageInstanceId classes, cycle rejection, and direct-
 
 ## Deferred boundary
 
-This loader does not select or inject an SDK standard library, read or write `fairy.lock`, compile a
-semantic package input through the CLI, access a registry, solve ranges, fetch sources, or persist a
-cache. Absolute paths are never serializable identity.
+This loader does not select or inject an SDK standard library, compile a semantic package input
+through the CLI, access a registry, solve ranges, fetch sources, or persist a cache. ADR 0145's
+separate lockfile library may project this result, but absolute paths remain unserialized.

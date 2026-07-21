@@ -32,7 +32,7 @@ features = []
 	if err != nil {
 		t.Fatalf("Load() error = %v", err)
 	}
-	if len(workspace.Packages) != 2 || len(workspace.Graph.Nodes) != 3 || len(workspace.Graph.Dependencies) != 2 {
+	if len(workspace.Packages) != 2 || len(workspace.Instances) != 3 || len(workspace.Graph.Nodes) != 3 || len(workspace.Graph.Dependencies) != 2 {
 		t.Fatalf("workspace sizes = packages %d, nodes %d, dependencies %d", len(workspace.Packages), len(workspace.Graph.Nodes), len(workspace.Graph.Dependencies))
 	}
 	loaded, found := workspace.Package("libs/net")

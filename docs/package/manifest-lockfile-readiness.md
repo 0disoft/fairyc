@@ -1,6 +1,6 @@
 # Manifest and lockfile readiness audit
 
-- Status: Manifest and local workspace loader accepted; lockfile remains UNDECIDED
+- Status: Manifest, local workspace loader, and lockfile format accepted; SDK and CLI policy remain
 - Date: 2026-07-21
 - Product source: `docs/product/02-spec.md`
 - Resolved graph source: `docs/package/package-graph-v0.md`
@@ -12,9 +12,9 @@
 The compiler side is ready to consume a resolved local package graph. ADR 0143 fixes the
 human-authored `fairy.toml` v1 byte/parser and local-exact declaration semantics. ADR 0144 now fixes
 explicit member loading, fail-closed path/source discovery, exact dependency consistency, local
-source identity, and root-reachable feature-distinct graph construction. The repository is not yet
-ready to claim a generated lockfile schema. Reusing the resolved-graph fixture as that lockfile
-would still expose fixture node handles and post-resolution test layout as authorable data.
+source identity, and root-reachable feature-distinct graph construction. ADR 0145 now fixes a
+separate canonical generated `fairy.lock` v1 with identity revalidation, stale comparison, and
+atomic replacement. SDK standard-library selection and public CLI lock-update policy remain.
 
 ## Facts already fixed
 
@@ -41,7 +41,6 @@ Any future manifest/lockfile design must preserve these existing contracts:
 | --- | --- | --- |
 | Standard library | how compiler/SDK selection injects and locks its package | Host installation paths must not become semantic identity |
 | Lock updates | frozen mode, ordinary update mode, stale local paths, merge policy | Silent rewrite would damage reproducibility; never rewriting would hurt local work |
-| Lock wire format | canonical bytes, integrity fields, graph ordering, atomic replacement | Human TOML syntax does not imply a machine-generated lock encoding |
 
 ## Recommended Stage 0 local-exact profile
 
@@ -73,21 +72,20 @@ The smallest coherent profile is intentionally less ambitious than Cargo, Go mod
     or missing lock is an error. The ordinary command may replace the lock atomically only after a
     complete valid graph is produced.
 
-ADR 0143 accepts the manifest-facing parts and ADR 0144 accepts local workspace loading through
-resolved graph construction. The lockfile remains separate work. The profile deliberately postpones public registry coordinates,
+ADR 0143 accepts the manifest-facing parts, ADR 0144 accepts local workspace loading through
+resolved graph construction, and ADR 0145 accepts the generated lock representation. The profile deliberately postpones public registry coordinates,
 network acquisition, signatures, version-range solving, feature unification, implicit workspace
 discovery, vendoring commands, and package publication.
 
-## Acceptance evidence retained for the remaining lockfile implementation
+## Acceptance evidence retained for SDK and CLI integration
 
-- ADR 0143 accepts the manifest parser and ADR 0144 accepts local workspace resolution;
+- ADR 0143 accepts the manifest parser, ADR 0144 accepts local resolution, and ADR 0145 accepts lock bytes;
 - existing positive fixtures cover one package, explicit workspace members, direct path
   dependencies, and feature-distinct instances; exact standard-library injection remains required;
 - existing negative fixtures cover unknown/duplicate fields, path escape, absolute paths,
   symlinks, duplicate UID, module ambiguity, dependency cycles, and unsorted/duplicate features;
-  stale lock and contradictory `PackageInstanceId` lock records remain required;
-- lock output is byte-deterministic across input enumeration order and uses atomic no-partial-write
-  replacement;
+  stale lock and contradictory `PackageInstanceId` lock records are covered by lock unit tests;
+- lock output is byte-deterministic, strictly revalidated, stale-detecting, and atomically replaced;
 - Windows path, case, separator, and rename behavior is tested without WSL;
 - the CLI distinguishes parse, resolve, locked, integrity, and source-containment failures;
 - no cache, generated output, timestamp, absolute host path, credential, or environment variable is

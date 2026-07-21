@@ -78,8 +78,16 @@ type Package struct {
 type Workspace struct {
 	Root       string
 	Packages   []Package
+	Instances  []Instance
 	Graph      packagegraph.Graph
 	Resolution packagegraph.Result
+}
+
+// Instance maps one internal graph node to its canonical local package path and feature set.
+type Instance struct {
+	NodeID      string
+	PackagePath string
+	Features    []string
 }
 
 // Package returns one catalog package by its canonical workspace-relative path.
@@ -156,7 +164,7 @@ func Load(root string) (Workspace, error) {
 	if err := validateDependencyDeclarations(packages, pathIndexes); err != nil {
 		return Workspace{}, err
 	}
-	graph := buildGraph(packages, pathIndexes)
+	graph, instances := buildGraph(packages, pathIndexes)
 	resolution, rejection, err := packagegraph.Resolve(graph)
 	if err != nil {
 		return Workspace{}, &LoadError{Reason: ReasonPackageGraph, Detail: err.Error()}
@@ -164,7 +172,7 @@ func Load(root string) (Workspace, error) {
 	if rejection != nil {
 		return Workspace{}, &LoadError{Reason: ReasonPackageGraph, Detail: fmt.Sprintf("%s: %v", rejection.Reason, rejection.Subjects)}
 	}
-	return Workspace{Root: workspaceRoot, Packages: packages, Graph: graph, Resolution: resolution}, nil
+	return Workspace{Root: workspaceRoot, Packages: packages, Instances: instances, Graph: graph, Resolution: resolution}, nil
 }
 
 func resolveRoot(root string) (string, error) {
@@ -347,7 +355,7 @@ func validateDependencyDeclarations(packages []Package, pathIndexes map[string]i
 	return nil
 }
 
-func buildGraph(packages []Package, pathIndexes map[string]int) packagegraph.Graph {
+func buildGraph(packages []Package, pathIndexes map[string]int) (packagegraph.Graph, []Instance) {
 	type instance struct {
 		path     string
 		features []string
@@ -356,6 +364,7 @@ func buildGraph(packages []Package, pathIndexes map[string]int) packagegraph.Gra
 	queue := []instance{root}
 	seen := map[string]string{instanceKey(root): nodeID(root)}
 	graph := packagegraph.Graph{}
+	instances := make([]Instance, 0)
 	for next := 0; next < len(queue); next++ {
 		current := queue[next]
 		loaded := packages[pathIndexes[current.path]]
@@ -371,6 +380,7 @@ func buildGraph(packages []Package, pathIndexes map[string]int) packagegraph.Gra
 			},
 			Modules: slices.Clone(loaded.Modules),
 		})
+		instances = append(instances, Instance{NodeID: nodeID(current), PackagePath: current.path, Features: slices.Clone(current.features)})
 		for _, dependency := range loaded.Manifest.Dependencies {
 			target := instance{path: dependency.Path, features: slices.Clone(dependency.Features)}
 			key := instanceKey(target)
@@ -383,7 +393,7 @@ func buildGraph(packages []Package, pathIndexes map[string]int) packagegraph.Gra
 			graph.Dependencies = append(graph.Dependencies, packagegraph.Dependency{Owner: nodeID(current), Binding: dependency.Binding, Target: targetID})
 		}
 	}
-	return graph
+	return graph, instances
 }
 
 func instanceKey(value struct {

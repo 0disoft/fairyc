@@ -583,10 +583,15 @@ sources, and dependency cycles, and uses package-source digest v1 as local sourc
 features remain distinct and only root-reachable instances enter the resolved graph. This loader
 does not inject an SDK standard library or read/write a lockfile.
 
+ADR 0145 fixes generated `fairy.lock` as canonical JSON. It records root-reachable local instance
+tuples and edges, recomputes every PackageInstanceId and source digest, detects workspace staleness,
+and atomically replaces only canonical validated bytes. Public CLI refresh/`--locked` policy and
+SDK standard-library selection remain separate decisions.
+
 The resolved-graph paragraph's separation from public manifest syntax describes fixture ownership,
-not current product status: ADR 0143 now owns syntax and ADR 0144 owns local workspace I/O
-independently. Lockfile, SDK selection, registry, and solver behavior remain outside those fixture
-contracts.
+not current product status: ADR 0143 owns syntax, ADR 0144 owns local workspace I/O, and ADR 0145
+owns generated lock bytes independently. SDK selection, public lock-update policy, registry, and
+solver behavior remain outside those fixture contracts.
 
 Target layout assertions are versioned in `spec/fixtures/layout/manifest-v0.json` for Linux and
 `spec/fixtures/layout/manifest-windows-msvc-v0.json` for Windows. They fix the closed layout input

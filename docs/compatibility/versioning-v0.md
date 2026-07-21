@@ -340,6 +340,12 @@ The standard library has an independent version and declares required language r
 
 Manifest schema, lockfile schema, source archive schema, and any future binary artifact schema are independent. Stage 0 needs manifest and lockfile schemas only. A stable binary package format would falsely imply a stable native Fairy ABI and is deferred.
 
+`fairyc.lock/v1` is the first generated lock schema. ADR 0145 fixes canonical JSON bytes, complete
+root-reachable local package tuples and edges, identity-algorithm declarations, strict
+PackageInstanceId/source-digest recomputation, and stale-workspace comparison. It is independently
+versioned from `fairyc.manifest/v1`, and its local relative paths are refresh facts rather than
+absolute source identity.
+
 `fairyc.manifest/v1` is the first human project-manifest schema. It uses the exact `fairy.toml`
 field set and local-only semantics in ADR 0143: required package UID/name/exact SemVer/language/source,
 optional explicit sorted workspace members, and path dependencies with exact version plus explicit

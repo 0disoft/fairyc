@@ -410,10 +410,11 @@ ADR 0142 and package fixture v1 now enforce the cycle-free part at the reusable 
 boundary, including self-cycles created only after exact-instance deduplication. ADR 0143 fixes the
 strict `fairy.toml` v1 declaration surface through a pinned isolated TOML adapter. ADR 0144 adds
 explicit filesystem-safe workspace/member/source loading and root-reachable feature-distinct graph
-construction. SDK standard-library selection and the lockfile remain separate work.
+construction. ADR 0145 then fixes canonical generated `fairy.lock` v1, full identity revalidation,
+stale-workspace comparison, and atomic replacement. SDK selection and public CLI lock modes remain.
 
-- Add deterministic lockfile v1 and exact SDK standard-library injection on top of the accepted
-  project manifest, local workspace loader, resolved graph, package identity, and interface hash.
+- Add exact SDK standard-library injection and public ordinary/`--locked` CLI policy on top of the
+  accepted manifest, workspace loader, and lockfile library.
 - Wire whole-package reuse into package compilation, then adopt persistent content-addressed storage
   and default limits only from measured clean/warm workload evidence.
 - Stabilize the minimal `fairyc check`, `build`, `run`, `test`, `emit`, `explain`, and `targets` contracts.

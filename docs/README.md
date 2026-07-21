@@ -28,6 +28,7 @@
 - Whole-package cache-key v1 fixtures and bounded store runner: spec/fixtures/package-cache/manifest-v1.json, internal/packagecache/, internal/packagecachefixture/
 - Project manifest v1 fixtures and strict TOML parser: spec/fixtures/project-manifest/manifest-v1.json, internal/projectmanifest/, internal/projectmanifestfixture/
 - Local workspace loader v1 fixtures and implementation: spec/fixtures/workspace-loader/manifest-v1.json, internal/workspaceloader/, internal/workspaceloaderfixture/
+- Generated lockfile v1 implementation: internal/lockfile/
 - Windows MSVC layout fixture manifest: spec/fixtures/layout/manifest-windows-msvc-v0.json
 - Windows MSVC C ABI fixture manifest: spec/fixtures/c-abi/manifest-windows-msvc-v0.json
 - Executable semantics and C transport: docs/mir/*.md
@@ -35,6 +36,7 @@
 - Manifest/lockfile readiness and local-exact recommendation: docs/package/manifest-lockfile-readiness.md
 - Human project manifest v1: docs/package/project-manifest-v1.md
 - Local workspace loader v1: docs/package/workspace-loader-v1.md
+- Generated lockfile v1: docs/package/lockfile-v1.md
 - Target and C ABI contract: docs/abi/*.md
 - Runtime and standard-library contract: docs/runtime/*.md
 - Compatibility and versioning contract: docs/compatibility/*.md
