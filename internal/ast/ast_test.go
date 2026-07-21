@@ -9,7 +9,7 @@ import (
 
 func TestLowerPreservesExplicitGrouping(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\nfn main() -> i32 {\n  let value = (1 + 2) * 3;\n  value\n}\n")
+	input := []byte("module main;\nfn i32 main() {\n  let value = (1 + 2) * 3;\n  return value;\n}\n")
 	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
 	if len(tree.Diagnostics) != 0 {
 		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
@@ -28,7 +28,7 @@ func TestLowerPreservesExplicitGrouping(t *testing.T) {
 
 func TestLowerPreservesFixedArrayLiteralForm(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\nfn main() -> i32 { let values: [i32; 3] = [1, 2, 3]; values[1] }\n")
+	input := []byte("module main;\nfn i32 main() { let i32[3] values = [1, 2, 3]; return values[1]; }\n")
 	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
 	if len(tree.Diagnostics) != 0 {
 		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
@@ -37,7 +37,7 @@ func TestLowerPreservesFixedArrayLiteralForm(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Lower() error = %v", err)
 	}
-	if len(module.Bindings) != 1 || module.Bindings[0].Type == nil || module.Bindings[0].Type.Text != "[i32; 3]" {
+	if len(module.Bindings) != 1 || module.Bindings[0].Type == nil || module.Bindings[0].Type.Text != "i32[3]" {
 		t.Fatalf("bindings = %+v", module.Bindings)
 	}
 	typeReference := module.Bindings[0].Type
@@ -61,7 +61,7 @@ func TestLowerRejectsDiagnosticTree(t *testing.T) {
 
 func TestLowerPreservesFunctionSemanticStructure(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\nfn choose(flag: bool) -> i32 {\n  let value: i32 = 1;\n  return value;\n}\n")
+	input := []byte("module main;\nfn i32 choose(bool flag) {\n  let i32 value = 1;\n  return value;\n}\n")
 	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
 	if len(tree.Diagnostics) != 0 {
 		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
@@ -85,9 +85,9 @@ func TestLowerPreservesFunctionSemanticStructure(t *testing.T) {
 	}
 }
 
-func TestLowerPreservesMutableParameterModifier(t *testing.T) {
+func TestLowerPreservesMigratedMutableParameterAsLocal(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\nfn close(mut file: File, status: u32) -> i32 { 0 }\n")
+	input := []byte("module main;\nfn i32 close(File input, u32 status) {\n    var File file = input; return 0; }\n")
 	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
 	if len(tree.Diagnostics) != 0 {
 		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
@@ -100,19 +100,20 @@ func TestLowerPreservesMutableParameterModifier(t *testing.T) {
 		t.Fatalf("functions = %+v", module.Functions)
 	}
 	parameters := module.Functions[0].Parameters
-	if parameters[0].Name != "file" || !parameters[0].Mutable || parameters[0].Type.Text != "File" ||
+	if parameters[0].Name != "input" || parameters[0].Mutable || parameters[0].Type.Text != "File" ||
 		parameters[1].Name != "status" || parameters[1].Mutable || parameters[1].Type.Text != "u32" {
 		t.Fatalf("parameters = %+v", parameters)
 	}
-	wantStart := len("module main;\nfn close(mut ")
-	if parameters[0].NameSpan.StartByte != wantStart || parameters[0].NameSpan.EndByte != wantStart+len("file") {
-		t.Fatalf("mutable parameter name span = %+v", parameters[0].NameSpan)
+	body := module.Functions[0].Body
+	if body == nil || len(body.Statements) != 2 || body.Statements[0].Binding == nil ||
+		body.Statements[0].Binding.Name != "file" || !body.Statements[0].Binding.Mutable {
+		t.Fatalf("migrated mutable local = %+v", body)
 	}
 }
 
 func TestLowerCapturesResourceFields(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\nresource Pair { left: i32; right: i32; drop fn(self: &mut Self) {} }\n")
+	input := []byte("module main;\nresource Pair { i32 left; i32 right; cleanup {} }\n")
 	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
 	if len(tree.Diagnostics) != 0 {
 		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
@@ -134,7 +135,7 @@ func TestLowerCapturesResourceFields(t *testing.T) {
 
 func TestLowerPreservesNonEmptyResourceDropBody(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\nresource Token { value: i32; drop fn(self: &mut Self) { let marker: i32 = 1; } }\n")
+	input := []byte("module main;\nresource Token { i32 value; cleanup { let i32 marker = 1; } }\n")
 	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
 	if len(tree.Diagnostics) != 0 {
 		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
@@ -235,7 +236,7 @@ func TestLowerCapturesEnumType(t *testing.T) {
 
 func TestLowerPreservesForeignDeclarationAndUnsafeBoundaries(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\n@link_name(\"fairyc_fixture_add_\\x6fne\")\nunsafe extern C fn add_one(value: i32) -> i32;\nunsafe fn wrapper(value: i32) -> i32 { add_one(value) }\nfn main() -> i32 { unsafe { add_one(41) } }\n")
+	input := []byte("module main;\n@link_name(\"fairyc_fixture_add_\\x6fne\")\nunsafe extern C fn i32 add_one(i32 value) ;\nunsafe fn i32 wrapper(i32 value) { return add_one(value); }\nfn i32 main() { return unsafe { add_one(41) }; }\n")
 	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
 	if len(tree.Diagnostics) != 0 {
 		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
@@ -258,14 +259,16 @@ func TestLowerPreservesForeignDeclarationAndUnsafeBoundaries(t *testing.T) {
 	if len(module.Functions) != 2 || !module.Functions[0].Unsafe || module.Functions[1].Unsafe {
 		t.Fatalf("functions = %+v", module.Functions)
 	}
-	if module.Functions[1].Body == nil || module.Functions[1].Body.Tail == nil || module.Functions[1].Body.Tail.Kind != syntax.KindUnsafe {
-		t.Fatalf("main tail = %+v", module.Functions[1].Body)
+	mainBody := module.Functions[1].Body
+	if mainBody == nil || len(mainBody.Statements) != 1 || mainBody.Statements[0].Kind != syntax.KindReturn ||
+		mainBody.Statements[0].Expression == nil || mainBody.Statements[0].Expression.Kind != syntax.KindUnsafe {
+		t.Fatalf("main return = %+v", mainBody)
 	}
 }
 
 func TestLowerPreservesCastTargetTypeSeparatelyFromOperand(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\nfn main() -> i32 { var value: i32 = 0; let pointer: *mut i32 = unsafe { &mut value as *mut i32 }; 0 }\n")
+	input := []byte("module main;\nfn i32 main() { var i32 value = 0; let ptr mut i32 pointer = unsafe { ref mut value as ptr mut i32 }; return 0; }\n")
 	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
 	if len(tree.Diagnostics) != 0 {
 		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
@@ -274,7 +277,7 @@ func TestLowerPreservesCastTargetTypeSeparatelyFromOperand(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Lower() error = %v", err)
 	}
-	if len(module.Functions) != 1 || module.Functions[0].Body == nil || len(module.Functions[0].Body.Statements) != 2 {
+	if len(module.Functions) != 1 || module.Functions[0].Body == nil || len(module.Functions[0].Body.Statements) != 3 {
 		t.Fatalf("functions = %+v", module.Functions)
 	}
 	unsafeExpression := module.Functions[0].Body.Statements[1].Binding.Expression
@@ -282,20 +285,20 @@ func TestLowerPreservesCastTargetTypeSeparatelyFromOperand(t *testing.T) {
 		t.Fatalf("unsafe expression = %+v", unsafeExpression)
 	}
 	cast := unsafeExpression.Children[0].Block.Tail
-	if cast == nil || cast.Kind != syntax.KindCast || cast.Type == nil || cast.Type.Text != "*mut i32" || len(cast.Children) != 1 || cast.Children[0].Kind != syntax.KindPrefix {
+	if cast == nil || cast.Kind != syntax.KindCast || cast.Type == nil || cast.Type.Text != "ptr mut i32" || len(cast.Children) != 1 || cast.Children[0].Kind != syntax.KindPrefix {
 		t.Fatalf("cast = %+v", cast)
 	}
 	if cast.Type.Kind != TypeKindRawPointer || !cast.Type.Mutable || cast.Type.Element == nil || cast.Type.Element.Path != "i32" {
 		t.Fatalf("cast target type = %+v", cast.Type)
 	}
-	if got, want := NormalizeExpression(cast), "(as (&mut value) *mut i32)"; got != want {
+	if got, want := NormalizeExpression(cast), "(as (&mut value) ptr mut i32)"; got != want {
 		t.Fatalf("NormalizeExpression() = %q, want %q", got, want)
 	}
 }
 
 func TestLowerPreservesNestedTypeStructure(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\nfn inspect(value: Result<Option<&mut [u8]>, *void>) -> unsafe extern C fn(i32, *mut u8) -> u32 { callback }\n")
+	input := []byte("module main;\nfn unsafe extern C fn u32(i32, ptr mut u8) inspect(Result<Option<ref mut u8[]>, ptr void> value) { return callback; }\n")
 	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
 	if len(tree.Diagnostics) != 0 {
 		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
@@ -333,7 +336,7 @@ func TestLowerPreservesNestedTypeStructure(t *testing.T) {
 
 func TestLowerPreservesCShapedTypeBinding(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\nfn inspect(values: ref mut u8[], callbacks: (ptr u8)[16]) -> ptr u8[16] { callback }\n")
+	input := []byte("module main;\nfn ptr u8[16] inspect(ref mut u8[] values, (ptr u8)[16] callbacks) { return callback; }\n")
 	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
 	if len(tree.Diagnostics) != 0 {
 		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)

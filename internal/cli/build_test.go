@@ -231,7 +231,7 @@ func TestExperimentalBuildFailsClosedOnIneligibleHost(t *testing.T) {
 		t.Skip("eligible-host execution belongs to the configured native C command")
 	}
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { 42 }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 main() { return 42; }\n")
 	code, stdout, stderr := runForTest([]string{
 		"experimental", "build", "main.fy",
 		"--cc", "clang",

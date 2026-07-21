@@ -17,7 +17,7 @@ import (
 func TestCheckProducesVerifiedMIR(t *testing.T) {
 	t.Parallel()
 	result, err := compiler.Check([]semantic.File{
-		parseCompilerFile(t, hir.DefaultPackage, "main.fy", "module main;\nfn main() -> i32 { 42 }\n"),
+		parseCompilerFile(t, hir.DefaultPackage, "main.fy", "module main;\nfn i32 main() { return 42; }\n"),
 	})
 	if err != nil {
 		t.Fatalf("Check() error = %v", err)
@@ -44,7 +44,7 @@ func TestCheckProducesVerifiedMIRForOwnedTextExample(t *testing.T) {
 func TestCheckReturnsSourceDiagnosticsWithoutMIR(t *testing.T) {
 	t.Parallel()
 	result, err := compiler.Check([]semantic.File{
-		parseCompilerFile(t, hir.DefaultPackage, "main.fy", "module main;\nfn main() -> i32 { missing }\n"),
+		parseCompilerFile(t, hir.DefaultPackage, "main.fy", "module main;\nfn i32 main() { return missing; }\n"),
 	})
 	if err != nil {
 		t.Fatalf("Check() error = %v", err)
@@ -57,7 +57,7 @@ func TestCheckReturnsSourceDiagnosticsWithoutMIR(t *testing.T) {
 func TestCheckPackagesClassifiesInputFailure(t *testing.T) {
 	t.Parallel()
 	_, err := compiler.CheckPackages(semantic.PackageInput{
-		Files: []semantic.File{parseCompilerFile(t, 1, "main.fy", "module main;\nimport util as u;\nfn main() -> i32 { u::value() }\n")},
+		Files: []semantic.File{parseCompilerFile(t, 1, "main.fy", "module main;\nimport util as u;\nfn i32 main() { return u::value(); }\n")},
 	})
 	var pipelineError *compiler.Error
 	if !errors.As(err, &pipelineError) || pipelineError.Stage != compiler.StagePackageInput {
@@ -69,10 +69,10 @@ func TestCheckPackagesVerifiesIsolatedModulePaths(t *testing.T) {
 	t.Parallel()
 	result, err := compiler.CheckPackages(semantic.PackageInput{
 		Files: []semantic.File{
-			parseCompilerFile(t, 1, "app_a.fy", "module app_a;\nimport util as u;\nfn main() -> i32 { u::value() }\n"),
-			parseCompilerFile(t, 2, "app_b.fy", "module app_b;\nimport util as u;\nfn main() -> i32 { u::value() }\n"),
-			parseCompilerFile(t, 3, "util.fy", "module util;\npub fn value() -> i32 { 1 }\n"),
-			parseCompilerFile(t, 4, "util.fy", "module util;\npub fn value() -> i32 { 2 }\n"),
+			parseCompilerFile(t, 1, "app_a.fy", "module app_a;\nimport util as u;\nfn i32 main() { return u::value(); }\n"),
+			parseCompilerFile(t, 2, "app_b.fy", "module app_b;\nimport util as u;\nfn i32 main() { return u::value(); }\n"),
+			parseCompilerFile(t, 3, "util.fy", "module util;\npub fn i32 value() { return 1; }\n"),
+			parseCompilerFile(t, 4, "util.fy", "module util;\npub fn i32 value() { return 2; }\n"),
 		},
 		Imports: []semantic.PackageImport{
 			{FromPackage: 1, ImportPath: "util", ToPackage: 3},

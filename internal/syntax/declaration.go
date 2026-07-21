@@ -451,8 +451,13 @@ func (p *parser) parseType() NodeID {
 			p.expect("C")
 		}
 		p.expect("fn")
-		p.expect("(")
 		children := make([]NodeID, 0, 4)
+		cShaped := !p.at("(")
+		var resultType NodeID
+		if cShaped {
+			resultType = p.parseType()
+		}
+		p.expect("(")
 		for !p.at(")") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 			children = append(children, p.parseType())
 			if !p.match(",") {
@@ -460,8 +465,12 @@ func (p *parser) parseType() NodeID {
 			}
 		}
 		p.expect(")")
-		p.expect("->")
-		children = append(children, p.parseType())
+		if cShaped {
+			children = append(children, resultType)
+		} else {
+			p.expect("->")
+			children = append(children, p.parseType())
+		}
 		result = p.addTypeNode(start, children, TypeFormForeignFunction)
 	default:
 		pathID, _, _ := p.pathNode()

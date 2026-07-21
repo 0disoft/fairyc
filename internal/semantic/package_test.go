@@ -14,10 +14,10 @@ func TestAnalyzePackagesResolvesEqualModulePathsByPackage(t *testing.T) {
 	t.Parallel()
 	input := semantic.PackageInput{
 		Files: []semantic.File{
-			parsePackageFile(t, 1, "app_a.fy", "module app_a;\nimport util as u;\nfn main() -> i32 { u::value() }\n"),
-			parsePackageFile(t, 2, "app_b.fy", "module app_b;\nimport util as u;\nfn main() -> i32 { u::value() }\n"),
-			parsePackageFile(t, 3, "util.fy", "module util;\npub struct Token { value: i32; }\npub fn value() -> i32 { 1 }\n"),
-			parsePackageFile(t, 4, "util.fy", "module util;\npub struct Token { value: i32; }\npub fn value() -> i32 { 2 }\n"),
+			parsePackageFile(t, 1, "app_a.fy", "module app_a;\nimport util as u;\nfn i32 main() { return u::value(); }\n"),
+			parsePackageFile(t, 2, "app_b.fy", "module app_b;\nimport util as u;\nfn i32 main() { return u::value(); }\n"),
+			parsePackageFile(t, 3, "util.fy", "module util;\npub struct Token { i32 value; }\npub fn i32 value() { return 1; }\n"),
+			parsePackageFile(t, 4, "util.fy", "module util;\npub struct Token { i32 value; }\npub fn i32 value() { return 2; }\n"),
 		},
 		Imports: []semantic.PackageImport{
 			{FromPackage: 1, ImportPath: "util", ToPackage: 3},
@@ -75,8 +75,8 @@ func TestAnalyzePackagesKeepsDiagnosticPathsUnqualified(t *testing.T) {
 	t.Parallel()
 	result, err := semantic.AnalyzePackages(semantic.PackageInput{
 		Files: []semantic.File{
-			parsePackageFile(t, 1, "app.fy", "module app;\nimport util as u;\nfn main() -> i32 { u::private_value() }\n"),
-			parsePackageFile(t, 2, "util.fy", "module util;\nfn private_value() -> i32 { 1 }\n"),
+			parsePackageFile(t, 1, "app.fy", "module app;\nimport util as u;\nfn i32 main() { return u::private_value(); }\n"),
+			parsePackageFile(t, 2, "util.fy", "module util;\nfn i32 private_value() { return 1; }\n"),
 		},
 		Imports: []semantic.PackageImport{{FromPackage: 1, ImportPath: "util", ToPackage: 2}},
 	})
@@ -97,8 +97,8 @@ func TestAnalyzePackagesKeepsDiagnosticPathsUnqualified(t *testing.T) {
 func TestAnalyzePackagesRejectsInvalidImportBindings(t *testing.T) {
 	t.Parallel()
 	files := []semantic.File{
-		parsePackageFile(t, 1, "app.fy", "module app;\nimport util as u;\nfn main() -> i32 { u::value() }\n"),
-		parsePackageFile(t, 2, "util.fy", "module util;\npub fn value() -> i32 { 1 }\n"),
+		parsePackageFile(t, 1, "app.fy", "module app;\nimport util as u;\nfn i32 main() { return u::value(); }\n"),
+		parsePackageFile(t, 2, "util.fy", "module util;\npub fn i32 value() { return 1; }\n"),
 	}
 	tests := []struct {
 		name     string

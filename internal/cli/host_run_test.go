@@ -69,7 +69,7 @@ func TestExperimentalRunHostFailsClosedOutsideWindowsAMD64(t *testing.T) {
 		t.Skip("live MSVC execution belongs to the configured Windows host-smoke intent")
 	}
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { 42 }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 main() { return 42; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "run-host", "main.fy", "--profile", "low"}, root)
 	if code != ExitBuildFailure || stdout != "" || !strings.Contains(stderr, "requires windows/amd64") {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)

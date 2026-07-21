@@ -8,7 +8,7 @@ import (
 
 func TestAnalyzeSyntaxLowersDiagnosticFreeInput(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\nfn main() -> i32 { return 0; }\n")
+	input := []byte("module main;\nfn i32 main() { return 0; }\n")
 	result, err := AnalyzeSyntax(source.NewFile("main.fy", input), source.DefaultLimits())
 	if err != nil {
 		t.Fatalf("AnalyzeSyntax() error = %v", err)

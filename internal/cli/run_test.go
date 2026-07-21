@@ -16,7 +16,7 @@ import (
 func TestExperimentalParseEmitsDeterministicContentSafeJSON(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\n// SENSITIVE_SENTINEL\nfn main() -> i32 { return 0; }\n")
+	writeTestSource(t, root, "main.fy", "module main;\n// SENSITIVE_SENTINEL\nfn i32 main() { return 0; }\n")
 	firstCode, firstOut, firstErr := runForTest([]string{"experimental", "parse", "main.fy"}, root)
 	secondCode, secondOut, secondErr := runForTest([]string{"experimental", "parse", "main.fy"}, root)
 	if firstCode != ExitSuccess || secondCode != ExitSuccess {
@@ -73,7 +73,7 @@ func TestExperimentalParseReturnsDiagnosticsAsJSON(t *testing.T) {
 func TestExperimentalCheckSyntaxReportsHumanDiagnostics(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 {\n  return 0\n}\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 main() {\n  return 0\n}\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "check-syntax", "main.fy"}, root)
 	if code != ExitSourceDiagnostics || stdout != "" {
 		t.Fatalf("Run() = code %d, stdout %q; want diagnostics and empty stdout", code, stdout)
@@ -86,7 +86,7 @@ func TestExperimentalCheckSyntaxReportsHumanDiagnostics(t *testing.T) {
 func TestExperimentalCheckSyntaxAcceptsCleanInput(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { return 0; }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 main() { return 0; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "check-syntax", "main.fy"}, root)
 	if code != ExitSuccess || stdout != "syntax ok: main.fy\n" || stderr != "" {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
@@ -96,7 +96,7 @@ func TestExperimentalCheckSyntaxAcceptsCleanInput(t *testing.T) {
 func TestExperimentalCheckSemanticsBuildsTypedHIR(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn choose(flag: bool) -> i32 { if flag { 1 } else { 2 } }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 choose(bool flag) { return if (flag) { 1 } else { 2 }; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "check-semantics", "main.fy"}, root)
 	if code != ExitSuccess || stdout != "semantics ok: main.fy (typed HIR: 1 function(s))\n" || stderr != "" {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
@@ -106,8 +106,8 @@ func TestExperimentalCheckSemanticsBuildsTypedHIR(t *testing.T) {
 func TestExperimentalCheckSemanticsAcceptsExplicitModuleSet(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nimport math as m;\nfn answer() -> i32 { m::forty_two() }\n")
-	writeTestSource(t, root, "math.fy", "module math;\npub fn forty_two() -> i32 { 42 }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nimport math as m;\nfn i32 answer() { return m::forty_two(); }\n")
+	writeTestSource(t, root, "math.fy", "module math;\npub fn i32 forty_two() { return 42; }\n")
 	firstCode, firstOut, firstErr := runForTest([]string{"experimental", "check-semantics", "main.fy", "math.fy"}, root)
 	secondCode, secondOut, secondErr := runForTest([]string{"experimental", "check-semantics", "math.fy", "main.fy"}, root)
 	want := "semantics ok: 2 file(s), 2 module(s) (typed HIR: 2 function(s))\n"
@@ -121,8 +121,8 @@ func TestExperimentalCheckBuildsVerifiedMIRWithoutExecuting(t *testing.T) {
 	root := t.TempDir()
 	writeTestSource(t, root, "library.fy", `module library;
 @link_name("fairyc_fixture_add_one")
-unsafe extern C fn add_one(value: i32) -> i32;
-pub fn answer() -> i32 { unsafe { add_one(41) } }
+unsafe extern C fn i32 add_one(i32 value) ;
+pub fn i32 answer() { return unsafe { add_one(41) }; }
 `)
 	code, stdout, stderr := runForTest([]string{"experimental", "check", "library.fy"}, root)
 	want := "check ok: 1 file(s) (verified MIR: 1 function(s), 1 foreign declaration(s))\n"
@@ -134,8 +134,8 @@ pub fn answer() -> i32 { unsafe { add_one(41) } }
 func TestExperimentalCheckAcceptsExplicitSourceClosure(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nimport helper as h;\nfn main() -> i32 { h::answer() }\n")
-	writeTestSource(t, root, "helper.fy", "module helper;\npub fn answer() -> i32 { 42 }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nimport helper as h;\nfn i32 main() { return h::answer(); }\n")
+	writeTestSource(t, root, "helper.fy", "module helper;\npub fn i32 answer() { return 42; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "check", "main.fy", "--source", "helper.fy"}, root)
 	want := "check ok: 2 file(s) (verified MIR: 2 function(s), 0 foreign declaration(s))\n"
 	if code != ExitSuccess || stdout != want || stderr != "" {
@@ -146,7 +146,7 @@ func TestExperimentalCheckAcceptsExplicitSourceClosure(t *testing.T) {
 func TestExperimentalCheckReportsSourceDiagnostics(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { missing }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 main() { return missing; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "check", "main.fy"}, root)
 	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "E0101: unresolved name or path") {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
@@ -173,7 +173,7 @@ func TestParseCheckSourcesRejectsInvalidClosureArguments(t *testing.T) {
 func TestExperimentalCheckOutputFailureReturnsInternalFailure(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { 42 }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 main() { return 42; }\n")
 	var stderr bytes.Buffer
 	code := Run([]string{"experimental", "check", "main.fy"}, root, failingWriter{}, &stderr)
 	if code != ExitInternalFailure || !strings.Contains(stderr.String(), "write output failed") {
@@ -184,8 +184,8 @@ func TestExperimentalCheckOutputFailureReturnsInternalFailure(t *testing.T) {
 func TestLowerProgramSourcesBuildsExplicitModuleClosure(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nimport helper as h;\nfn main() -> i32 { h::answer() }\n")
-	writeTestSource(t, root, "helper.fy", "module helper;\npub fn answer() -> i32 { 42 }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nimport helper as h;\nfn i32 main() { return h::answer(); }\n")
+	writeTestSource(t, root, "helper.fy", "module helper;\npub fn i32 answer() { return 42; }\n")
 	var stderr bytes.Buffer
 	lowered, code := lowerProgramSources([]string{"main.fy", "helper.fy"}, root, &stderr, "test C-emission")
 	if code != ExitSuccess || stderr.Len() != 0 {
@@ -199,7 +199,7 @@ func TestLowerProgramSourcesBuildsExplicitModuleClosure(t *testing.T) {
 func TestLowerProgramSourcesRejectsDuplicateInput(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { 42 }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 main() { return 42; }\n")
 	var stderr bytes.Buffer
 	_, code := lowerProgramSources([]string{"main.fy", "main.fy"}, root, &stderr, "test C-emission")
 	if code != ExitInvalidInvocation || !strings.Contains(stderr.String(), "program source \"main.fy\" is listed more than once") {
@@ -210,8 +210,8 @@ func TestLowerProgramSourcesRejectsDuplicateInput(t *testing.T) {
 func TestLowerProgramSourcesDoesNotDiscoverUnlistedModule(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nimport helper as h;\nfn main() -> i32 { h::answer() }\n")
-	writeTestSource(t, root, "helper.fy", "module helper;\npub fn answer() -> i32 { 42 }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nimport helper as h;\nfn i32 main() { return h::answer(); }\n")
+	writeTestSource(t, root, "helper.fy", "module helper;\npub fn i32 answer() { return 42; }\n")
 	var stderr bytes.Buffer
 	_, code := lowerProgramSources([]string{"main.fy"}, root, &stderr, "test C-emission")
 	if code != ExitSourceDiagnostics || !strings.Contains(stderr.String(), "E0101: unresolved name or path") {
@@ -222,8 +222,8 @@ func TestLowerProgramSourcesDoesNotDiscoverUnlistedModule(t *testing.T) {
 func TestExperimentalCheckSemanticsReportsCrossFileVisibility(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nimport math as m;\nfn answer() -> i32 { m::hidden() }\n")
-	writeTestSource(t, root, "math.fy", "module math;\nfn hidden() -> i32 { 42 }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nimport math as m;\nfn i32 answer() { return m::hidden(); }\n")
+	writeTestSource(t, root, "math.fy", "module math;\nfn i32 hidden() { return 42; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "check-semantics", "main.fy", "math.fy"}, root)
 	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "E0103: item is not visible from this module") || !strings.Contains(stderr, "declaration: math.fy") {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
@@ -233,7 +233,7 @@ func TestExperimentalCheckSemanticsReportsCrossFileVisibility(t *testing.T) {
 func TestExperimentalCheckSemanticsRejectsDuplicateAndOversizedModuleSets(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { 0 }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 main() { return 0; }\n")
 	duplicateCode, duplicateOut, duplicateErr := runForTest([]string{"experimental", "check-semantics", "main.fy", "main.fy"}, root)
 	if duplicateCode != ExitInvalidInvocation || duplicateOut != "" || !strings.Contains(duplicateErr, "listed more than once") {
 		t.Fatalf("duplicate Run() = code %d, stdout %q, stderr %q", duplicateCode, duplicateOut, duplicateErr)
@@ -251,9 +251,9 @@ func TestExperimentalCheckSemanticsRejectsDuplicateAndOversizedModuleSets(t *tes
 func TestExperimentalCheckSemanticsReportsResolveDiagnostic(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn answer() -> i32 { missing }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 answer() { return missing; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "check-semantics", "main.fy"}, root)
-	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "main.fy:2:22: E0101: unresolved name or path") {
+	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "main.fy:2:26: E0101: unresolved name or path") {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
 	}
 }
@@ -261,7 +261,7 @@ func TestExperimentalCheckSemanticsReportsResolveDiagnostic(t *testing.T) {
 func TestExperimentalCheckSemanticsRejectsUnsupportedSubset(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn value() -> i32 { 1.5 }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 value() { return 1.5; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "check-semantics", "main.fy"}, root)
 	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "experimental semantic subset does not support literal float") {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
@@ -271,7 +271,7 @@ func TestExperimentalCheckSemanticsRejectsUnsupportedSubset(t *testing.T) {
 func TestExperimentalCheckSemanticsAcceptsNonEmptyResourceDropBody(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nresource Token { value: i32; drop fn(self: &mut Self) { let marker: i32 = self.value; } }\nfn main() -> i32 { 0 }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nresource Token { i32 value; cleanup { let i32 marker = this.value; } }\nfn i32 main() { return 0; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "check-semantics", "main.fy"}, root)
 	if code != ExitSuccess || stdout != "semantics ok: main.fy (typed HIR: 2 function(s))\n" || stderr != "" {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
@@ -283,14 +283,14 @@ func TestExperimentalCheckSemanticsChecksResourceFlow(t *testing.T) {
 	root := t.TempDir()
 	writeTestSource(t, root, "main.fy", `module main;
 resource Token {
-    value: i32;
-    drop fn(self: &mut Self) {}
+    i32 value;
+    cleanup {}
 }
-fn consume(token: Token) -> i32 { token.value }
-fn invalid() -> i32 {
-    let token: Token = Token { value: 1 };
-    let first: i32 = consume(token);
-    consume(token)
+fn i32 consume(Token token) { return token.value; }
+fn i32 invalid() {
+    let Token token = Token { .value = 1 };
+    let i32 first = consume(token);
+    return consume(token);
 }
 `)
 	code, stdout, stderr := runForTest([]string{"experimental", "check-semantics", "main.fy"}, root)
@@ -314,7 +314,7 @@ func TestExperimentalCheckSemanticsReportsRegionCapabilityStorage(t *testing.T) 
 func TestExperimentalCheckSemanticsReportsQuestionOnNonResult(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn invalid(input: i32) -> i32 { input? }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 invalid(i32 input) { return input?; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "check-semantics", "main.fy"}, root)
 	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "E4102: postfix ? requires a Result value") ||
 		!strings.Contains(stderr, "result-expression: main.fy") {
@@ -326,9 +326,9 @@ func TestExperimentalCheckSemanticsReportsStoredUnusedResult(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
 	writeTestSource(t, root, "main.fy", `module main;
-fn invalid() -> i32 {
-    let pending: Result<i32, i32> = Result::Ok(42);
-    0
+fn i32 invalid() {
+    let Result<i32, i32> pending = .ok(42);
+    return 0;
 }
 `)
 	code, stdout, stderr := runForTest([]string{"experimental", "check-semantics", "main.fy"}, root)
@@ -341,7 +341,7 @@ fn invalid() -> i32 {
 func TestExperimentalEmitCWritesDeterministicTranslationUnit(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\n// SOURCE_SENTINEL\nfn add(left: i32, right: i32) -> i32 { left + right }\nfn main() -> i32 { add(20, 22) }\n")
+	writeTestSource(t, root, "main.fy", "module main;\n// SOURCE_SENTINEL\nfn i32 add(i32 left, i32 right) { return left + right; }\nfn i32 main() { return add(20, 22); }\n")
 	firstCode, firstOut, firstErr := runForTest([]string{"experimental", "emit-c", "main.fy"}, root)
 	secondCode, secondOut, secondErr := runForTest([]string{"experimental", "emit-c", "main.fy"}, root)
 	if firstCode != ExitSuccess || secondCode != ExitSuccess || firstErr != "" || secondErr != "" {
@@ -367,7 +367,7 @@ func TestExperimentalEmitCWritesDeterministicTranslationUnit(t *testing.T) {
 func TestExperimentalEmitCEmitsScalarForeignCall(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\n@link_name(\"fairyc_fixture_add_one\")\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n")
+	writeTestSource(t, root, "main.fy", "module main;\n@link_name(\"fairyc_fixture_add_one\")\nunsafe extern C fn i32 add_one(i32 value) ;\nfn i32 main() { return unsafe { add_one(41) }; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "emit-c", "main.fy"}, root)
 	if code != ExitSuccess || stderr != "" || !strings.Contains(stdout, "extern int32_t fairyc_fixture_add_one(int32_t fy_a_0);") || !strings.Contains(stdout, "fairyc_fixture_add_one(INT32_C(41))") || strings.Contains(stdout, "extern int32_t add_one(") {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
@@ -377,7 +377,7 @@ func TestExperimentalEmitCEmitsScalarForeignCall(t *testing.T) {
 func TestExperimentalRunRejectsForeignCallWithoutHostBinding(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\n@link_name(\"fairyc_fixture_add_one\")\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n")
+	writeTestSource(t, root, "main.fy", "module main;\n@link_name(\"fairyc_fixture_add_one\")\nunsafe extern C fn i32 add_one(i32 value) ;\nfn i32 main() { return unsafe { add_one(41) }; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
 	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "outside the experimental interpreter subset") || !strings.Contains(stderr, "cannot execute foreign ABI \"C\" call") {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
@@ -389,12 +389,12 @@ func TestExperimentalEmitCEmitsFlatI32Resource(t *testing.T) {
 	root := t.TempDir()
 	writeTestSource(t, root, "main.fy", `module main;
 resource Token {
-    value: i32;
-    drop fn(self: &mut Self) {}
+    i32 value;
+    cleanup {}
 }
-fn main() -> i32 {
-    let token: Token = Token { value: 42 };
-    token.value
+fn i32 main() {
+    let Token token = Token { .value = 42 };
+    return token.value;
 }
 `)
 	code, stdout, stderr := runForTest([]string{"experimental", "emit-c", "main.fy"}, root)
@@ -409,8 +409,8 @@ fn main() -> i32 {
 func TestExperimentalEmitCEmitsExplicitModuleClosure(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nimport helper as h;\nfn main() -> i32 { h::answer() }\n")
-	writeTestSource(t, root, "helper.fy", "module helper;\npub fn answer() -> i32 { 42 }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nimport helper as h;\nfn i32 main() { return h::answer(); }\n")
+	writeTestSource(t, root, "helper.fy", "module helper;\npub fn i32 answer() { return 42; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "emit-c", "main.fy", "--source", "helper.fy"}, root)
 	if code != ExitSuccess || stderr != "" || strings.Count(stdout, "static int32_t fy_fn_") != 4 || !strings.Contains(stdout, "fy_l_1 = fy_fn_0();") {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
@@ -425,13 +425,13 @@ func TestExperimentalEmitCRejectsUnsupportedBackendSubset(t *testing.T) {
 	root := t.TempDir()
 	writeTestSource(t, root, "main.fy", `module main;
 struct Marker {
-    value: u32;
+    u32 value;
 }
 resource Holder {
-    marker: Marker;
-    drop fn(self: &mut Self) {}
+    Marker marker;
+    cleanup {}
 }
-fn main() -> i32 { 0 }
+fn i32 main() { return 0; }
 `)
 	code, stdout, stderr := runForTest([]string{"experimental", "emit-c", "main.fy"}, root)
 	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "experimental C-emission subset") || !strings.Contains(stderr, "field \"marker\" of type \"main::Marker\"") {
@@ -442,7 +442,7 @@ fn main() -> i32 { 0 }
 func TestExperimentalRunInterpretsScalarProgram(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn add(left: i32, right: i32) -> i32 { left + right }\nfn main() -> i32 { add(20, 22) }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 add(i32 left, i32 right) { return left + right; }\nfn i32 main() { return add(20, 22); }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
 	if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
@@ -452,8 +452,8 @@ func TestExperimentalRunInterpretsScalarProgram(t *testing.T) {
 func TestExperimentalRunInterpretsExplicitModuleClosure(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nimport helper as h;\nfn main() -> i32 { h::answer() }\n")
-	writeTestSource(t, root, "helper.fy", "module helper;\npub fn answer() -> i32 { 42 }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nimport helper as h;\nfn i32 main() { return h::answer(); }\n")
+	writeTestSource(t, root, "helper.fy", "module helper;\npub fn i32 answer() { return 42; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy", "--source", "helper.fy"}, root)
 	if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
@@ -489,8 +489,8 @@ func TestExperimentalRunDoesNotAuthorizeTestIntrinsicByName(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
 	writeTestSource(t, root, "main.fy", `module main;
-fn write_stdout_byte(value: i32) -> i32 { value }
-fn main() -> i32 { write_stdout_byte(42) }
+fn i32 write_stdout_byte(i32 value) { return value; }
+fn i32 main() { return write_stdout_byte(42); }
 `)
 	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
 	if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {
@@ -502,15 +502,15 @@ func TestExperimentalRunInterpretsResultMatchAndPropagation(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
 	writeTestSource(t, root, "main.fy", `module main;
-fn increment(input: Result<i32, i32>) -> Result<i32, i32> {
-    let value: i32 = input?;
-    Result::Ok(value + 1)
+fn Result<i32, i32> increment(Result<i32, i32> input) {
+    let i32 value = input?;
+    return .ok(value + 1);
 }
-fn main() -> i32 {
-    match increment(Result::Ok(41)) {
-        Result::Ok(value) => value,
-        Result::Err(error) => -error,
-    }
+fn i32 main() {
+    return switch (increment(.ok(41))) {
+        case .ok(value) : { value }
+        case .err(error) : { -error }
+    };
 }
 `)
 	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
@@ -523,14 +523,14 @@ func TestExperimentalRunInterpretsOptionVariants(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
 	writeTestSource(t, root, "main.fy", `module main;
-fn choose(present: bool) -> Option<i32> {
-    if present { Option::Some(42) } else { Option::None }
+fn Option<i32> choose(bool present) {
+    return if (present) { .some(42) } else { .none };
 }
-fn main() -> i32 {
-    match choose(false) {
-        Option::Some(value) => value,
-        Option::None => 42,
-    }
+fn i32 main() {
+    return switch (choose(false)) {
+        case .some(value) : { value }
+        case .none : { 42 }
+    };
 }
 `)
 	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
@@ -542,7 +542,7 @@ fn main() -> i32 {
 func TestExperimentalRunReportsCanonicalTrap(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { 42 / 0 }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 main() { return 42 / 0; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
 	if code != ExitProgramTrap || stdout != "" || stderr != "trap: division-by-zero\n" {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
@@ -564,7 +564,7 @@ func TestExperimentalRunReportsCheckedArithmeticTraps(t *testing.T) {
 		t.Run(fixture.name, func(t *testing.T) {
 			t.Parallel()
 			root := t.TempDir()
-			writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { "+fixture.expression+" }\n")
+			writeTestSource(t, root, "main.fy", "module main;\nfn i32 main() { return "+fixture.expression+"; }\n")
 			code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
 			if code != ExitProgramTrap || stdout != "" || stderr != "trap: "+fixture.category+"\n" {
 				t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
@@ -576,7 +576,7 @@ func TestExperimentalRunReportsCheckedArithmeticTraps(t *testing.T) {
 func TestExperimentalRunExecutesCheckedLeftShift(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { 1 << 1 }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 main() { return 1 << 1; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
 	if code != ExitSuccess || stdout != "result: 2\n" || stderr != "" {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
@@ -586,7 +586,7 @@ func TestExperimentalRunExecutesCheckedLeftShift(t *testing.T) {
 func TestExperimentalRunInterpretsBooleanBranch(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn choose(flag: bool) -> i32 { if flag { 42 } else { 0 } }\nfn main() -> i32 { choose(true) }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 choose(bool flag) { return if (flag) { 42 } else { 0 }; }\nfn i32 main() { return choose(true); }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
 	if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
@@ -596,7 +596,7 @@ func TestExperimentalRunInterpretsBooleanBranch(t *testing.T) {
 func TestExperimentalRunShortCircuitsTrap(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { if (false && (1 / 0 == 0)) || (true || (1 / 0 == 0)) { 42 } else { 0 } }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 main() { return if (false && (1 / 0 == 0)) || (true || (1 / 0 == 0)) { 42 } else { 0 }; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
 	if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
@@ -606,7 +606,7 @@ func TestExperimentalRunShortCircuitsTrap(t *testing.T) {
 func TestExperimentalRunInterpretsLogicalNot(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { if !false { 42 } else { 0 } }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 main() { return if (!false) { 42 } else { 0 }; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
 	if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
@@ -616,7 +616,7 @@ func TestExperimentalRunInterpretsLogicalNot(t *testing.T) {
 func TestExperimentalRunInterpretsBoundedLoop(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { var count: i32 = 0; var total: i32 = 0; while count < 6 { total = total + 7; count = count + 1; } total }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 main() { var i32 count = 0; var i32 total = 0; while (count < 6) { total = total + 7; count = count + 1; } return total; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
 	if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
@@ -632,12 +632,12 @@ func TestExperimentalRunInterpretsLoopControl(t *testing.T) {
 	}{
 		{
 			name:   "break",
-			source: "module main;\nfn main() -> i32 { var count: i32 = 0; while count < 5 { count = count + 1; if count == 2 { break; }; } count }\n",
+			source: "module main;\nfn i32 main() { var i32 count = 0; while (count < 5) { count = count + 1; if (count == 2) { break; }; } return count; }\n",
 			value:  "result: 2\n",
 		},
 		{
 			name:   "continue",
-			source: "module main;\nfn main() -> i32 { var count: i32 = 0; var total: i32 = 0; while count < 5 { count = count + 1; if count < 3 { continue; }; total = total + count; } total + 30 }\n",
+			source: "module main;\nfn i32 main() { var i32 count = 0; var i32 total = 0; while (count < 5) { count = count + 1; if (count < 3) { continue; }; total = total + count; } return total + 30; }\n",
 			value:  "result: 42\n",
 		},
 	}
@@ -658,7 +658,7 @@ func TestExperimentalRunInterpretsLoopControl(t *testing.T) {
 func TestExperimentalRunRejectsLoopControlOutsideLoop(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { break; 0 }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 main() { break; return 0; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
 	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "E1012: break and continue require an enclosing while loop") {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
@@ -668,7 +668,7 @@ func TestExperimentalRunRejectsLoopControlOutsideLoop(t *testing.T) {
 func TestExperimentalRunReportsStepLimitAsCapability(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { while true {} 0 }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 main() { while (true) {} return 0; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
 	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "outside the experimental interpreter subset: interpreter step limit exceeded") {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
@@ -678,7 +678,7 @@ func TestExperimentalRunReportsStepLimitAsCapability(t *testing.T) {
 func TestExperimentalRunRequiresScalarEntry(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn main(value: i32) -> i32 { value }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 main(i32 value) { return value; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
 	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "main::main must have type fn() -> i32") {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
@@ -690,12 +690,12 @@ func TestExperimentalRunExecutesResourceAndDrop(t *testing.T) {
 	root := t.TempDir()
 	writeTestSource(t, root, "main.fy", `module main;
 resource Token {
-    value: i32;
-    drop fn(self: &mut Self) {}
+    i32 value;
+    cleanup {}
 }
-fn main() -> i32 {
-    let token: Token = Token { value: 42 };
-    token.value
+fn i32 main() {
+    let Token token = Token { .value = 42 };
+    return token.value;
 }
 `)
 	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
@@ -710,22 +710,22 @@ func TestExperimentalRunExecutesRegionReset(t *testing.T) {
 	writeTestSource(t, root, "std/alloc.fy", `module std::alloc;
 
 pub resource Arena {
-    opaque: i32;
-    drop fn(self: &mut Self) {}
+    i32 opaque;
+    cleanup {}
 }
 
 resource Token {
-    value: i32;
-    drop fn(self: &mut Self) {}
+    i32 value;
+    cleanup {}
 }
 
-fn main() -> i32 {
-    var arena: Arena = Arena { opaque: 0 };
-    region scratch in &mut arena {
-        let token: Token = Token { value: 7 };
-        let stored: &i32 = scratch.place(42);
+fn i32 main() {
+    var Arena arena = Arena { .opaque = 0 };
+    region scratch in ref mut arena {
+        let Token token = Token { .value = 7 };
+        let ref i32 stored = scratch.place(42);
     }
-    42
+    return 42;
 }
 `)
 	code, stdout, stderr := runForTest([]string{"experimental", "run", "std/alloc.fy"}, root)
@@ -740,21 +740,21 @@ func TestExperimentalRunExecutesRegionEarlyReturnReset(t *testing.T) {
 	writeTestSource(t, root, "std/alloc.fy", `module std::alloc;
 
 pub resource Arena {
-    opaque: i32;
-    drop fn(self: &mut Self) {}
+    i32 opaque;
+    cleanup {}
 }
 
 resource Token {
-    value: i32;
-    drop fn(self: &mut Self) {}
+    i32 value;
+    cleanup {}
 }
 
-fn main() -> i32 {
-    var arena: Arena = Arena { opaque: 0 };
-    let outside: Token = Token { value: 20 };
-    region scratch in &mut arena {
-        let inner: Token = Token { value: 22 };
-        let stored: &i32 = scratch.place(1);
+fn i32 main() {
+    var Arena arena = Arena { .opaque = 0 };
+    let Token outside = Token { .value = 20 };
+    region scratch in ref mut arena {
+        let Token inner = Token { .value = 22 };
+        let ref i32 stored = scratch.place(1);
         return outside.value + inner.value;
     }
 }
@@ -770,15 +770,15 @@ func TestExperimentalRunExecutesResourceBearingOption(t *testing.T) {
 	root := t.TempDir()
 	writeTestSource(t, root, "main.fy", `module main;
 resource Token {
-    value: i32;
-    drop fn(self: &mut Self) {}
+    i32 value;
+    cleanup {}
 }
-fn main() -> i32 {
-    let wrapped: Option<Token> = Option::Some(Token { value: 42 });
-    match wrapped {
-        Option::Some(token) => token.value,
-        Option::None => 0,
-    }
+fn i32 main() {
+    let Option<Token> wrapped = .some(Token { .value = 42 });
+    return switch (wrapped) {
+        case .some(token) : { token.value }
+        case .none : { 0 }
+    };
 }
 `)
 	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)

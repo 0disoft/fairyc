@@ -19,7 +19,7 @@ import (
 
 func TestEmitScalarControlUnit(t *testing.T) {
 	t.Parallel()
-	program := lowerSource(t, "module main;\nfn add(left: i32, right: i32) -> i32 { left + right }\nfn main() -> i32 { var count: i32 = 0; while count < 3 { count = count + 1; } add(count, 39) }\n")
+	program := lowerSource(t, "module main;\nfn i32 add(i32 left, i32 right) { return left + right; }\nfn i32 main() { var i32 count = 0; while (count < 3) { count = count + 1; } return add(count, 39); }\n")
 	outcome, err := interpreter.Execute(program, "main::main")
 	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
 		t.Fatalf("interpreter = %+v, %v", outcome, err)
@@ -61,16 +61,16 @@ func TestEmitScalarControlUnit(t *testing.T) {
 func TestEmitNonEmptyResourceDropBodyAsVerifiedGlue(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-fn observe(value: i32) -> i32 { value }
+fn i32 observe(i32 value) { return value; }
 resource Token {
-    value: i32;
-    drop fn(self: &mut Self) {
-        let observed: i32 = observe(self.value);
+    i32 value;
+    cleanup {
+        let i32 observed = observe(this.value);
     }
 }
-fn main() -> i32 {
-    let token: Token = Token { value: 65 };
-    42
+fn i32 main() {
+    let Token token = Token { .value = 65 };
+    return 42;
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0WindowsMSVCProfile())
@@ -92,8 +92,8 @@ func TestEmitWindowsMSVCProfileUsesLLP64TargetFacts(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 @link_name("fairyc_unused_long")
-unsafe extern C fn unused_long(value: c::long) -> c::long;
-fn main() -> i32 { 42 }
+unsafe extern C fn c::long unused_long(c::long value) ;
+fn i32 main() { return 42; }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0WindowsMSVCProfile())
 	if err != nil {
@@ -121,8 +121,8 @@ func TestEmitWindowsMSVCProfileRejectsUnavailablePOSIXScalar(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 @link_name("fairyc_unused_ssize")
-unsafe extern C fn unused_ssize(value: c::ssize_t) -> c::ssize_t;
-fn main() -> i32 { 42 }
+unsafe extern C fn c::ssize_t unused_ssize(c::ssize_t value) ;
+fn i32 main() { return 42; }
 `)
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0WindowsMSVCProfile())
 	var capability cbackend.CapabilityError
@@ -133,7 +133,7 @@ fn main() -> i32 { 42 }
 
 func TestEmitScalarForeignCall(t *testing.T) {
 	t.Parallel()
-	program := lowerSource(t, "module main;\n@link_name(\"fairyc_fixture_add_one\")\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n")
+	program := lowerSource(t, "module main;\n@link_name(\"fairyc_fixture_add_one\")\nunsafe extern C fn i32 add_one(i32 value) ;\nfn i32 main() { return unsafe { add_one(41) }; }\n")
 	_, interpreterErr := interpreter.Execute(program, "main::main")
 	var interpreterCapability interpreter.CapabilityError
 	if !errors.As(interpreterErr, &interpreterCapability) || interpreterCapability.Kind != "foreign-call" {
@@ -169,15 +169,15 @@ func TestEmitTracksOnlyCalledForeignSymbolsInSortedOrder(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 @link_name("fairyc_fixture_z")
-unsafe extern C fn call_z(value: i32) -> i32;
+unsafe extern C fn i32 call_z(i32 value) ;
 @link_name("fairyc_fixture_a")
-unsafe extern C fn call_a(value: i32) -> i32;
+unsafe extern C fn i32 call_a(i32 value) ;
 @link_name("fairyc_fixture_unused")
-unsafe extern C fn unused(value: i32) -> i32;
-fn main() -> i32 {
-    let first: i32 = unsafe { call_z(20) };
-    let second: i32 = unsafe { call_a(first) };
-    unsafe { call_a(second) }
+unsafe extern C fn i32 unused(i32 value) ;
+fn i32 main() {
+    let i32 first = unsafe { call_z(20) };
+    let i32 second = unsafe { call_a(first) };
+    return unsafe { call_a(second) };
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -193,10 +193,10 @@ fn main() -> i32 {
 func TestEmitDeduplicatesCompilerOwnedCStringStorage(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-fn main() -> i32 {
-    let first: &CStr = c"fairy";
-    let second: &CStr = c"fairy";
-    42
+fn i32 main() {
+    let ref CStr first = c"fairy";
+    let ref CStr second = c"fairy";
+    return 42;
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -228,9 +228,9 @@ func TestEmitCStringLiteralDataAddressForForeignCall(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 @link_name("fairyc_fixture_is_fairy")
-unsafe extern C fn is_fairy(value: *u8) -> u32;
-fn main() -> i32 {
-    if unsafe { is_fairy(c"fairy" as *u8) } == 1 { 42 } else { 1 }
+unsafe extern C fn u32 is_fairy(ptr u8 value) ;
+fn i32 main() {
+    return if (unsafe { is_fairy(c"fairy" as ptr u8) } == 1) { 42 } else { 1 };
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -260,11 +260,11 @@ fn main() -> i32 {
 func TestEmitDeduplicatesCompilerOwnedByteStringStorage(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-fn main() -> i32 {
-    let first: &[u8] = b"fairy";
-    let second: &[u8] = b"fairy";
-    let empty: &[u8] = b"";
-    42
+fn i32 main() {
+    let ref u8[] first = b"fairy";
+    let ref u8[] second = b"fairy";
+    let ref u8[] empty = b"";
+    return 42;
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -301,9 +301,9 @@ fn main() -> i32 {
 func TestEmitCheckedImmutableByteViewIndex(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-fn main() -> i32 {
-    let value: u8 = b"\x00A"[1];
-    if value == 65 { 42 } else { 1 }
+fn i32 main() {
+    let u8 value = b"\x00A"[1];
+    return if (value == 65) { 42 } else { 1 };
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -329,11 +329,11 @@ fn main() -> i32 {
 func TestEmitCheckedScalarFixedArrayIndex(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-fn pick(values: [u8; 3], index: usize) -> u8 { values[index] }
-fn view_pick(values: &[u8], index: usize) -> u8 { values[index] }
-fn main() -> i32 {
-    let values: [u8; 3] = [40, 41, 42];
-    if values.len == 3 && view_pick(&values, 0) == 40 { pick(values, 2) as i32 } else { 1 }
+fn u8 pick(u8[3] values, usize index) { return values[index]; }
+fn u8 view_pick(ref u8[] values, usize index) { return values[index]; }
+fn i32 main() {
+    let u8[3] values = [40, 41, 42];
+    return if (values.len == 3 && view_pick(ref values, 0) == 40) { pick(values, 2) as i32 } else { 1 };
 }
 
 `)
@@ -367,14 +367,14 @@ fn main() -> i32 {
 func TestEmitCheckedMutableIndexedStores(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-fn update(bytes: &mut [u8]) -> u8 {
+fn u8 update(ref mut u8[] bytes) {
     bytes[1] = 42;
-    bytes[1]
+    return bytes[1];
 }
-fn main() -> i32 {
-    var values: [u8; 3] = [1, 2, 3];
+fn i32 main() {
+    var u8[3] values = [1, 2, 3];
     values[0] = 40;
-    update(&mut values) as i32
+    return update(ref mut values) as i32;
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -400,12 +400,12 @@ fn main() -> i32 {
 func TestEmitReassignedFixedArrayByteView(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-fn main() -> i32 {
-    let first: [u8; 3] = [1, 2, 3];
-    let second: [u8; 3] = [40, 41, 42];
-    var bytes: &[u8] = &first;
-    bytes = &second;
-    bytes[2] as i32
+fn i32 main() {
+    let u8[3] first = [1, 2, 3];
+    let u8[3] second = [40, 41, 42];
+    var ref u8[] bytes = ref first;
+    bytes = ref second;
+    return bytes[2] as i32;
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -425,13 +425,13 @@ fn main() -> i32 {
 func TestEmitMutableFixedArrayByteViewDataAddress(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-unsafe extern C fn fill(data: *mut u8, length: usize) -> u32;
-fn fill_safe(bytes: &mut [u8]) -> u32 {
-    unsafe { fill(bytes as *mut u8, bytes.len) }
+unsafe extern C fn u32 fill(ptr mut u8 data, usize length) ;
+fn u32 fill_safe(ref mut u8[] bytes) {
+    return unsafe { fill(bytes as ptr mut u8, bytes.len) };
 }
-fn main() -> i32 {
-    var values: [u8; 3] = [0, 0, 0];
-    if fill_safe(&mut values) == 0 { 42 } else { 1 }
+fn i32 main() {
+    var u8[3] values = [0, 0, 0];
+    return if (fill_safe(ref mut values) == 0) { 42 } else { 1 };
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -456,10 +456,10 @@ fn main() -> i32 {
 func TestEmitArrayByteViewDeclaresTransportWithoutLiteralStorage(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-fn length(bytes: &[u8]) -> usize { bytes.len }
-fn main() -> i32 {
-    let values: [u8; 3] = [40, 41, 42];
-    if length(&values) == 3 { 42 } else { 1 }
+fn usize length(ref u8[] bytes) { return bytes.len; }
+fn i32 main() {
+    let u8[3] values = [40, 41, 42];
+    return if (length(ref values) == 3) { 42 } else { 1 };
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -473,7 +473,7 @@ fn main() -> i32 {
 
 func TestEmitRejectsFixedArrayBeyondExecutableElementLimit(t *testing.T) {
 	t.Parallel()
-	program := lowerSource(t, "module main;\nfn main() -> i32 { 42 }\n")
+	program := lowerSource(t, "module main;\nfn i32 main() { return 42; }\n")
 	program.Functions[0].ParameterTypes = []hir.Type{
 		hir.FixedArray(hir.TypeU8, hir.MaxExecutableFixedArrayElements+1),
 	}
@@ -486,9 +486,9 @@ func TestEmitRejectsFixedArrayBeyondExecutableElementLimit(t *testing.T) {
 func TestEmitCheckedImmutableByteViewSlice(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-fn main() -> i32 {
-    let bytes: &[u8] = b"fairy"[1..4];
-    if bytes.len == 3 && bytes[0] == 97 && bytes[2] == 114 { 42 } else { 1 }
+fn i32 main() {
+    let ref u8[] bytes = b"fairy"[1..4];
+    return if (bytes.len == 3 && bytes[0] == 97 && bytes[2] == 114) { 42 } else { 1 };
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -518,9 +518,9 @@ fn main() -> i32 {
 func TestEmitImmutableByteViewSliceWithOmittedBounds(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-fn main() -> i32 {
-    let bytes: &[u8] = b"fairy"[1..];
-    if bytes.len == 4 && bytes[3] == 121 { 42 } else { 1 }
+fn i32 main() {
+    let ref u8[] bytes = b"fairy"[1..];
+    return if (bytes.len == 4 && bytes[3] == 121) { 42 } else { 1 };
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -540,7 +540,7 @@ fn main() -> i32 {
 func TestEmitValuePreservingIntegerCast(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-fn main() -> i32 { b"*"[0] as i32 }
+fn i32 main() { return b"*"[0] as i32; }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil {
@@ -559,12 +559,12 @@ fn main() -> i32 { b"*"[0] as i32 }
 func TestEmitTypedUnsignedOrderedComparisons(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-fn main() -> i32 {
-    let byte: u8 = b"*"[0];
-    let word: u32 = byte as u32;
-    let size: usize = word as usize;
-    let pointer: *u8 = null;
-    if byte > 41 && word >= 42 && size <= 42 && pointer == null { 42 } else { 1 }
+fn i32 main() {
+    let u8 byte = b"*"[0];
+    let u32 word = byte as u32;
+    let usize size = word as usize;
+    let ptr u8 pointer = null;
+    return if (byte > 41 && word >= 42 && size <= 42 && pointer == null) { 42 } else { 1 };
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -586,14 +586,14 @@ fn main() -> i32 {
 func TestEmitCheckedUnsignedArithmetic(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-fn main() -> i32 {
-    let byte: u8 = 6;
-    let byte_product: u8 = byte * 7;
-    let word: u32 = 50;
-    let word_difference: u32 = word - 8;
-    let size: usize = 41;
-    let size_sum: usize = size + 1;
-    if byte_product == 42 && word_difference == 42 && size_sum == 42 { 42 } else { 1 }
+fn i32 main() {
+    let u8 byte = 6;
+    let u8 byte_product = byte * 7;
+    let u32 word = 50;
+    let u32 word_difference = word - 8;
+    let usize size = 41;
+    let usize size_sum = size + 1;
+    return if (byte_product == 42 && word_difference == 42 && size_sum == 42) { 42 } else { 1 };
 }
 
 `)
@@ -621,14 +621,14 @@ fn main() -> i32 {
 func TestEmitCheckedUnsignedDivision(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-fn main() -> i32 {
-    let byte_input: u8 = 84;
-    let byte: u8 = byte_input / 2;
-    let word_input: u32 = 85;
-    let word: u32 = word_input % 43;
-    let size_input: usize = 84;
-    let size: usize = size_input / 2;
-    if byte == 42 && word == 42 && size == 42 { 42 } else { 1 }
+fn i32 main() {
+    let u8 byte_input = 84;
+    let u8 byte = byte_input / 2;
+    let u32 word_input = 85;
+    let u32 word = word_input % 43;
+    let usize size_input = 84;
+    let usize size = size_input / 2;
+    return if (byte == 42 && word == 42 && size == 42) { 42 } else { 1 };
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -655,24 +655,24 @@ fn main() -> i32 {
 func TestEmitUnsignedBitwiseAndCheckedRightShift(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-fn main() -> i32 {
-    let byte_input: u8 = 84;
-    let byte: u8 = byte_input >> 1;
-    let byte_not_input: u8 = 213;
-    let byte_not: u8 = ~byte_not_input;
-    let word_input: u32 = 43;
-    let word: u32 = word_input & 63;
-    let word_not_input: u32 = 4294967253;
-    let word_not: u32 = ~word_not_input;
-    let word_shift_input: u32 = 84;
-    let word_shift: u32 = word_shift_input >> 1;
-    let size_input: usize = 43;
-    let size: usize = (size_input ^ 1) | 0;
-    let size_not_input: usize = 18446744073709551573;
-    let size_not: usize = ~size_not_input;
-    let size_shift_input: usize = 84;
-    let size_shift: usize = size_shift_input >> 1;
-    if byte == 42 && byte_not == 42 && word == 43 && word_not == 42 && word_shift == 42 && size == 42 && size_not == 42 && size_shift == 42 { 42 } else { 1 }
+fn i32 main() {
+    let u8 byte_input = 84;
+    let u8 byte = byte_input >> 1;
+    let u8 byte_not_input = 213;
+    let u8 byte_not = ~byte_not_input;
+    let u32 word_input = 43;
+    let u32 word = word_input & 63;
+    let u32 word_not_input = 4294967253;
+    let u32 word_not = ~word_not_input;
+    let u32 word_shift_input = 84;
+    let u32 word_shift = word_shift_input >> 1;
+    let usize size_input = 43;
+    let usize size = (size_input ^ 1) | 0;
+    let usize size_not_input = 18446744073709551573;
+    let usize size_not = ~size_not_input;
+    let usize size_shift_input = 84;
+    let usize size_shift = size_shift_input >> 1;
+    return if (byte == 42 && byte_not == 42 && word == 43 && word_not == 42 && word_shift == 42 && size == 42 && size_not == 42 && size_shift == 42) { 42 } else { 1 };
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -708,16 +708,16 @@ fn main() -> i32 {
 func TestEmitCheckedLeftShiftWithoutSignedCUndefinedBehavior(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-fn main() -> i32 {
-    let signed_input: i32 = 21;
-    let signed: i32 = signed_input << 1;
-    let byte_input: u8 = 21;
-    let byte: u8 = byte_input << 1;
-    let word_input: u32 = 21;
-    let word: u32 = word_input << 1;
-    let size_input: usize = 21;
-    let size: usize = size_input << 1;
-    if signed == 42 && byte == 42 && word == 42 && size == 42 { 42 } else { 1 }
+fn i32 main() {
+    let i32 signed_input = 21;
+    let i32 signed = signed_input << 1;
+    let u8 byte_input = 21;
+    let u8 byte = byte_input << 1;
+    let u32 word_input = 21;
+    let u32 word = word_input << 1;
+    let usize size_input = 21;
+    let usize size = size_input << 1;
+    return if (signed == 42 && byte == 42 && word == 42 && size == 42) { 42 } else { 1 };
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -748,10 +748,10 @@ fn main() -> i32 {
 func TestEmitBorrowedViewEmptinessFromLengthMetadata(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-fn main() -> i32 {
-    let text: &str = "fairy";
-    let empty: &[u8] = b"";
-    if !text.is_empty && empty.is_empty { 42 } else { 1 }
+fn i32 main() {
+    let ref str text = "fairy";
+    let ref u8[] empty = b"";
+    return if (!text.is_empty && empty.is_empty) { 42 } else { 1 };
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -777,10 +777,10 @@ func TestEmitByteStringLiteralDataAddressForForeignCall(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 @link_name("fairyc_fixture_is_fairy_bytes")
-unsafe extern C fn is_fairy_bytes(value: *u8) -> u32;
-fn main() -> i32 {
-    let bytes: &[u8] = b"fairy";
-    if unsafe { is_fairy_bytes(bytes as *u8) } == 1 { 42 } else { 1 }
+unsafe extern C fn u32 is_fairy_bytes(ptr u8 value) ;
+fn i32 main() {
+    let ref u8[] bytes = b"fairy";
+    return if (unsafe { is_fairy_bytes(bytes as ptr u8) } == 1) { 42 } else { 1 };
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -812,10 +812,10 @@ func TestEmitDistinctCIntForeignTransport(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 @link_name("fairyc_fixture_make_c_int")
-unsafe extern C fn make_c_int() -> c::int;
+unsafe extern C fn c::int make_c_int() ;
 @link_name("fairyc_fixture_consume_c_int")
-unsafe extern C fn consume_c_int(value: c::int) -> i32;
-fn main() -> i32 { unsafe { consume_c_int(make_c_int()) } }
+unsafe extern C fn i32 consume_c_int(c::int value) ;
+fn i32 main() { return unsafe { consume_c_int(make_c_int()) }; }
 `)
 	_, interpreterErr := interpreter.Execute(program, "main::main")
 	var interpreterCapability interpreter.CapabilityError
@@ -847,10 +847,10 @@ func TestEmitDistinctCSizeTForeignTransport(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 @link_name("fairyc_fixture_make_c_size_t")
-unsafe extern C fn make_c_size_t() -> c::size_t;
+unsafe extern C fn c::size_t make_c_size_t() ;
 @link_name("fairyc_fixture_consume_c_size_t")
-unsafe extern C fn consume_c_size_t(value: c::size_t) -> i32;
-fn main() -> i32 { unsafe { consume_c_size_t(make_c_size_t()) } }
+unsafe extern C fn i32 consume_c_size_t(c::size_t value) ;
+fn i32 main() { return unsafe { consume_c_size_t(make_c_size_t()) }; }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil {
@@ -878,10 +878,10 @@ func TestEmitDistinctCLongForeignTransport(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 @link_name("fairyc_fixture_make_c_long")
-unsafe extern C fn make_c_long() -> c::long;
+unsafe extern C fn c::long make_c_long() ;
 @link_name("fairyc_fixture_consume_c_long")
-unsafe extern C fn consume_c_long(value: c::long) -> i32;
-fn main() -> i32 { unsafe { consume_c_long(make_c_long()) } }
+unsafe extern C fn i32 consume_c_long(c::long value) ;
+fn i32 main() { return unsafe { consume_c_long(make_c_long()) }; }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil {
@@ -908,10 +908,10 @@ func TestEmitDistinctCSSizeTForeignTransport(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 @link_name("fairyc_fixture_make_c_ssize_t")
-unsafe extern C fn make_c_ssize_t() -> c::ssize_t;
+unsafe extern C fn c::ssize_t make_c_ssize_t() ;
 @link_name("fairyc_fixture_consume_c_ssize_t")
-unsafe extern C fn consume_c_ssize_t(value: c::ssize_t) -> i32;
-fn main() -> i32 { unsafe { consume_c_ssize_t(make_c_ssize_t()) } }
+unsafe extern C fn i32 consume_c_ssize_t(c::ssize_t value) ;
+fn i32 main() { return unsafe { consume_c_ssize_t(make_c_ssize_t()) }; }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil {
@@ -966,10 +966,10 @@ func TestEmitRemainingCScalarForeignTransport(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			program := lowerSource(t, fmt.Sprintf(`module main;
 @link_name("fairyc_fixture_make_c_%[1]s")
-unsafe extern C fn make_%[1]s() -> %[2]s;
+unsafe extern C fn %[2]s make_%[1]s();
 @link_name("fairyc_fixture_consume_c_%[1]s")
-unsafe extern C fn consume_%[1]s(value: %[2]s) -> i32;
-fn main() -> i32 { unsafe { consume_%[1]s(make_%[1]s()) } }
+unsafe extern C fn i32 consume_%[1]s(%[2]s value);
+fn i32 main() { return unsafe { consume_%[1]s(make_%[1]s()) }; }
 `, test.name, test.typeRef))
 			unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 			if err != nil {
@@ -1007,7 +1007,7 @@ func TestEmitKeepsCScalarPointersOutsideByValueTransportSlice(t *testing.T) {
 	for _, cScalar := range hir.CScalarTypes() {
 		typeRef := string(cScalar)
 		t.Run(typeRef, func(t *testing.T) {
-			program := lowerSource(t, "module main;\nunsafe extern C fn consume_pointer(value: *"+typeRef+") -> i32;\nfn main() -> i32 { unsafe { consume_pointer(null) } }\n")
+			program := lowerSource(t, "module main;\nunsafe extern C fn i32 consume_pointer(ptr "+typeRef+" value);\nfn i32 main() { return unsafe { consume_pointer(null) }; }\n")
 			_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 			var capability cbackend.CapabilityError
 			if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "foreign raw-pointer element type \""+typeRef+"\"") {
@@ -1019,7 +1019,7 @@ func TestEmitKeepsCScalarPointersOutsideByValueTransportSlice(t *testing.T) {
 
 func TestEmitRawPointerAndTargetScalarForeignCall(t *testing.T) {
 	t.Parallel()
-	program := lowerSource(t, "module main;\nunsafe extern C fn foreign_probe(data: *u8, output: *mut u32, length: usize, marker: u8) -> u32;\nfn main() -> i32 { if unsafe { foreign_probe(null, null, 0, 7) } == 42 { 0 } else { 1 } }\n")
+	program := lowerSource(t, "module main;\nunsafe extern C fn u32 foreign_probe(ptr u8 data, ptr mut u32 output, usize length, u8 marker) ;\nfn i32 main() { return if (unsafe { foreign_probe(null, null, 0, 7) } == 42) { 0 } else { 1 }; }\n")
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil {
 		t.Fatalf("Emit() error = %v", err)
@@ -1038,10 +1038,10 @@ func TestEmitRawPointerAndTargetScalarForeignCall(t *testing.T) {
 func TestEmitMutableVoidPointerOutputSlot(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-unsafe extern C fn fill(output: *mut *mut void) -> u32;
-fn main() -> i32 {
-    var output: *mut void = null;
-    if unsafe { fill(&mut output as *mut *mut void) } == 0 { 42 } else { 1 }
+unsafe extern C fn u32 fill(ptr mut ptr mut void output) ;
+fn i32 main() {
+    var ptr mut void output = null;
+    return if (unsafe { fill(ref mut output as ptr mut ptr mut void) } == 0) { 42 } else { 1 };
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -1065,11 +1065,11 @@ func TestEmitOpaqueAddressOfMutableLocal(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 @repr(C)
-struct Packet { code: u32; }
-unsafe extern C fn sink(output: *mut void) -> u32;
-fn main() -> i32 {
-    var output: Packet = Packet { code: 0 };
-    if unsafe { sink(&mut output as *mut void) } == 0 { 42 } else { 1 }
+struct Packet { u32 code; }
+unsafe extern C fn u32 sink(ptr mut void output) ;
+fn i32 main() {
+    var Packet output = Packet { .code = 0 };
+    return if (unsafe { sink(ref mut output as ptr mut void) } == 0) { 42 } else { 1 };
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -1091,9 +1091,9 @@ fn main() -> i32 {
 func TestEmitCStrParameterDataAddress(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-unsafe extern C fn inspect_raw(path: *u8) -> u32;
-fn inspect(path: &CStr) -> u32 { unsafe { inspect_raw(path as *u8) } }
-fn main() -> i32 { if inspect(c"fairy") == 0 { 42 } else { 1 } }
+unsafe extern C fn u32 inspect_raw(ptr u8 path) ;
+fn u32 inspect(ref CStr path) { return unsafe { inspect_raw(path as ptr u8) }; }
+fn i32 main() { return if (inspect(c"fairy") == 0) { 42 } else { 1 }; }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil {
@@ -1117,15 +1117,15 @@ fn main() -> i32 { if inspect(c"fairy") == 0 { 42 } else { 1 } }
 func TestEmitResourceAndArraySafeBorrowsToOpaquePointers(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-resource Token { value: u32; drop fn(self: &mut Self) {} }
-unsafe extern C fn inspect_raw(token: *mut void, bytes: *mut void) -> u32;
-fn inspect(token: &mut Token, bytes: &mut [u8; 4]) -> u32 {
-    unsafe { inspect_raw(token as *mut void, bytes as *mut void) }
+resource Token { u32 value; cleanup {} }
+unsafe extern C fn u32 inspect_raw(ptr mut void token, ptr mut void bytes) ;
+fn u32 inspect(ref mut Token token, ref mut u8[4] bytes) {
+    return unsafe { inspect_raw(token as ptr mut void, bytes as ptr mut void) };
 }
-fn main() -> i32 {
-    var token: Token = Token { value: 42 };
-    var bytes: [u8; 4] = [0, 0, 0, 0];
-    if inspect(&mut token, &mut bytes) == 0 { 42 } else { 1 }
+fn i32 main() {
+    var Token token = Token { .value = 42 };
+    var u8[4] bytes = [0, 0, 0, 0];
+    return if (inspect(ref mut token, ref mut bytes) == 0) { 42 } else { 1 };
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -1153,12 +1153,12 @@ fn main() -> i32 {
 func TestEmitBorrowedResourceFieldReadsThroughPointers(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-resource Token { value: u32; drop fn(self: &mut Self) {} }
-fn read(token: &Token) -> u32 { token.value }
-fn read_mut(token: &mut Token) -> u32 { token.value }
-fn main() -> i32 {
-    var token: Token = Token { value: 42 };
-    if read(&token) == 42 && read_mut(&mut token) == 42 { 42 } else { 1 }
+resource Token { u32 value; cleanup {} }
+fn u32 read(ref Token token) { return token.value; }
+fn u32 read_mut(ref mut Token token) { return token.value; }
+fn i32 main() {
+    var Token token = Token { .value = 42 };
+    return if (read(ref token) == 42 && read_mut(ref mut token) == 42) { 42 } else { 1 };
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -1178,9 +1178,9 @@ fn main() -> i32 {
 
 func TestEmitRejectsOtherNestedRawPointerMutabilityShapes(t *testing.T) {
 	t.Parallel()
-	for _, typeRef := range []string{"**void", "**mut void", "*mut *void"} {
+	for _, typeRef := range []string{"ptr ptr void", "ptr ptr mut void", "ptr mut ptr void"} {
 		t.Run(typeRef, func(t *testing.T) {
-			program := lowerSource(t, "module main;\nunsafe extern C fn inspect(value: "+typeRef+") -> u32;\nfn main() -> i32 { if unsafe { inspect(null) } == 0 { 42 } else { 1 } }\n")
+			program := lowerSource(t, "module main;\nunsafe extern C fn u32 inspect("+typeRef+" value);\nfn i32 main() { return if (unsafe { inspect(null) } == 0) { 42 } else { 1 }; }\n")
 			_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 			var capability cbackend.CapabilityError
 			if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "foreign raw-pointer nesting type") {
@@ -1192,7 +1192,7 @@ func TestEmitRejectsOtherNestedRawPointerMutabilityShapes(t *testing.T) {
 
 func TestEmitRejectsReservedExternalSymbol(t *testing.T) {
 	t.Parallel()
-	program := lowerSource(t, "module main;\n@link_name(\"main\")\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n")
+	program := lowerSource(t, "module main;\n@link_name(\"main\")\nunsafe extern C fn i32 add_one(i32 value) ;\nfn i32 main() { return unsafe { add_one(41) }; }\n")
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	var capability cbackend.CapabilityError
 	if !errors.As(err, &capability) || capability.Function != "main::add_one" || capability.Feature != "external C symbol \"main\"" {
@@ -1202,7 +1202,7 @@ func TestEmitRejectsReservedExternalSymbol(t *testing.T) {
 
 func TestEmitRejectsUnrecognizedStandardLibrarySymbol(t *testing.T) {
 	t.Parallel()
-	program := lowerSource(t, "module main;\n@link_name(\"fy_std_unrecognized_v0\")\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n")
+	program := lowerSource(t, "module main;\n@link_name(\"fy_std_unrecognized_v0\")\nunsafe extern C fn i32 add_one(i32 value) ;\nfn i32 main() { return unsafe { add_one(41) }; }\n")
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	var capability cbackend.CapabilityError
 	if !errors.As(err, &capability) || capability.Function != "main::add_one" || capability.Feature != "external C symbol \"fy_std_unrecognized_v0\"" {
@@ -1216,7 +1216,7 @@ func TestEmitKeepsUnexercisedLinuxFileSymbolsClosed(t *testing.T) {
 		symbol := symbol
 		t.Run(symbol, func(t *testing.T) {
 			t.Parallel()
-			program := lowerSource(t, "module main;\n@link_name(\""+symbol+"\")\nunsafe extern C fn file_operation(value: i32) -> i32;\nfn main() -> i32 { unsafe { file_operation(41) } }\n")
+			program := lowerSource(t, "module main;\n@link_name(\""+symbol+"\")\nunsafe extern C fn i32 file_operation(i32 value);\nfn i32 main() { return unsafe { file_operation(41) }; }\n")
 			_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 			var capability cbackend.CapabilityError
 			if !errors.As(err, &capability) || capability.Function != "main::file_operation" || capability.Feature != "external C symbol \""+symbol+"\"" {
@@ -1228,7 +1228,7 @@ func TestEmitKeepsUnexercisedLinuxFileSymbolsClosed(t *testing.T) {
 
 func TestEmitRejectsLinkNameThatIsNotAC11Identifier(t *testing.T) {
 	t.Parallel()
-	program := lowerSource(t, "module main;\n@link_name(\"bad-name\")\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n")
+	program := lowerSource(t, "module main;\n@link_name(\"bad-name\")\nunsafe extern C fn i32 add_one(i32 value) ;\nfn i32 main() { return unsafe { add_one(41) }; }\n")
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	var capability cbackend.CapabilityError
 	if !errors.As(err, &capability) || capability.Function != "main::add_one" || capability.Feature != "external C symbol \"bad-name\"" {
@@ -1238,7 +1238,7 @@ func TestEmitRejectsLinkNameThatIsNotAC11Identifier(t *testing.T) {
 
 func TestEmitGuardsExternalSymbolAgainstHeaderMacro(t *testing.T) {
 	t.Parallel()
-	program := lowerSource(t, "module main;\nunsafe extern C fn INT64_MIN(value: i32) -> i32;\nfn main() -> i32 { unsafe { INT64_MIN(41) } }\n")
+	program := lowerSource(t, "module main;\nunsafe extern C fn i32 INT64_MIN(i32 value) ;\nfn i32 main() { return unsafe { INT64_MIN(41) }; }\n")
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil {
 		t.Fatalf("Emit() error = %v", err)
@@ -1257,9 +1257,9 @@ func TestEmitGuardsExternalSymbolAgainstHeaderMacro(t *testing.T) {
 func TestEmitCoalescesCompatibleExternalDeclarations(t *testing.T) {
 	t.Parallel()
 	program := lowerSources(t, map[string]string{
-		"bindingsa.fy": "module bindingsa;\n@link_name(\"shared_add_one\")\npub unsafe extern C fn add_from_a(value: i32) -> i32;\n",
-		"bindingsb.fy": "module bindingsb;\n@link_name(\"shared_add_one\")\npub unsafe extern C fn add_from_b(value: i32) -> i32;\n",
-		"main.fy":      "module main;\nimport bindingsb as b;\nfn main() -> i32 { unsafe { b::add_from_b(41) } }\n",
+		"bindingsa.fy": "module bindingsa;\n@link_name(\"shared_add_one\")\npub unsafe extern C fn i32 add_from_a(i32 value) ;\n",
+		"bindingsb.fy": "module bindingsb;\n@link_name(\"shared_add_one\")\npub unsafe extern C fn i32 add_from_b(i32 value) ;\n",
+		"main.fy":      "module main;\nimport bindingsb as b;\nfn i32 main() { return unsafe { b::add_from_b(41) }; }\n",
 	})
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil {
@@ -1274,9 +1274,9 @@ func TestEmitCoalescesCompatibleExternalDeclarations(t *testing.T) {
 func TestEmitRejectsConflictingExternalDeclarations(t *testing.T) {
 	t.Parallel()
 	program := lowerSources(t, map[string]string{
-		"bindingsa.fy": "module bindingsa;\n@link_name(\"shared_symbol\")\npub unsafe extern C fn accepts_value(value: i32) -> i32;\n",
-		"bindingsb.fy": "module bindingsb;\n@link_name(\"shared_symbol\")\npub unsafe extern C fn no_arguments() -> i32;\n",
-		"main.fy":      "module main;\nfn main() -> i32 { 0 }\n",
+		"bindingsa.fy": "module bindingsa;\n@link_name(\"shared_symbol\")\npub unsafe extern C fn i32 accepts_value(i32 value) ;\n",
+		"bindingsb.fy": "module bindingsb;\n@link_name(\"shared_symbol\")\npub unsafe extern C fn i32 no_arguments() ;\n",
+		"main.fy":      "module main;\nfn i32 main() { return 0; }\n",
 	})
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err == nil || !strings.Contains(err.Error(), "C emission requires verified MIR: V1001") {
@@ -1317,7 +1317,7 @@ func TestEmitMaterializesCheckedDivisionDivisor(t *testing.T) {
 	} {
 		t.Run(testCase.name, func(t *testing.T) {
 			t.Parallel()
-			program := lowerSource(t, fmt.Sprintf("module main;\nfn main() -> i32 { 42 %s 0 }\n", testCase.operator))
+			program := lowerSource(t, fmt.Sprintf("module main;\nfn i32 main() { return 42 %s 0; }\n", testCase.operator))
 			unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 			if err != nil {
 				t.Fatalf("Emit() error = %v", err)
@@ -1341,9 +1341,9 @@ func TestEmitMaterializesCheckedDivisionDivisor(t *testing.T) {
 func TestEmitConstructsCheckedArithmeticWithoutSignedCOperations(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-fn main() -> i32 {
-    let added: i32 = 2147483647 + 1;
-    -added
+fn i32 main() {
+    let i32 added = 2147483647 + 1;
+    return -added;
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -1368,15 +1368,15 @@ func TestEmitFlatI32Resource(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 resource Pair {
-    left: i32;
-    right: i32;
-    drop fn(self: &mut Self) {}
+    i32 left;
+    i32 right;
+    cleanup {}
 }
-fn transfer(pair: Pair) -> Pair { pair }
-fn main() -> i32 {
-    let pair: Pair = Pair { left: 1, right: 42 };
-    let moved: Pair = transfer(pair);
-    moved.right
+fn Pair transfer(Pair pair) { return pair; }
+fn i32 main() {
+    let Pair pair = Pair { .left = 1, .right = 42 };
+    let Pair moved = transfer(pair);
+    return moved.right;
 }
 `)
 	outcome, err := interpreter.Execute(program, "main::main")
@@ -1416,17 +1416,17 @@ func TestEmitFlatCopyResourceWithRawPointer(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 resource Handle {
-    raw: *mut void;
-    state: u32;
-    drop fn(self: &mut Self) {}
+    ptr mut void raw;
+    u32 state;
+    cleanup {}
 }
-fn main() -> i32 {
-    let handle: Handle = Handle { raw: null, state: 42 };
-    if handle.raw == null {
-        if handle.state == 42 { 42 } else { 1 }
+fn i32 main() {
+    let Handle handle = Handle { .raw = null, .state = 42 };
+    return if (handle.raw == null) {
+        if (handle.state == 42) { 42 } else { 1 }
     } else {
         2
-    }
+    };
 }
 `)
 	outcome, err := interpreter.Execute(program, "main::main")
@@ -1460,7 +1460,7 @@ fn main() -> i32 {
 
 func TestEmitRejectsNestedStructResourceField(t *testing.T) {
 	t.Parallel()
-	program := lowerSource(t, "module main;\nstruct Marker { value: u32; }\nresource Holder { marker: Marker; drop fn(self: &mut Self) {} }\nfn main() -> i32 { 0 }\n")
+	program := lowerSource(t, "module main;\nstruct Marker { u32 value; }\nresource Holder { Marker marker; cleanup {} }\nfn i32 main() { return 0; }\n")
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	var capability cbackend.CapabilityError
 	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "field \"marker\" of type \"main::Marker\"") || capability.Function != "" {
@@ -1472,11 +1472,11 @@ func TestEmitReprCStructPreservesPublicTagFieldsAndLayout(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 @repr(C)
-struct fy_std_text_view_v0 { data: *u8; length: usize; }
-unsafe extern C fn foreign_take(output: *mut fy_std_text_view_v0) -> u32;
-fn main() -> i32 {
-    var view: fy_std_text_view_v0 = fy_std_text_view_v0 { data: null, length: 0 };
-    if unsafe { foreign_take(&mut view as *mut fy_std_text_view_v0) } == 0 { 0 } else { 1 }
+struct fy_std_text_view_v0 { ptr u8 data; usize length; }
+unsafe extern C fn u32 foreign_take(ptr mut fy_std_text_view_v0 output) ;
+fn i32 main() {
+    var fy_std_text_view_v0 view = fy_std_text_view_v0 { .data = null, .length = 0 };
+    return if (unsafe { foreign_take(ref mut view as ptr mut fy_std_text_view_v0) } == 0) { 0 } else { 1 };
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -1510,14 +1510,14 @@ func TestEmitReprCStructForeignResult(t *testing.T) {
 	program := lowerSource(t, `module main;
 @repr(C)
 struct fairyc_fixture_status {
-    status: u32;
-    detail: u32;
+    u32 status;
+    u32 detail;
 }
 @link_name("fairyc_fixture_make_status")
-unsafe extern C fn make_status() -> fairyc_fixture_status;
-fn main() -> i32 {
-    let result: fairyc_fixture_status = unsafe { make_status() };
-    if result.status == 41 && result.detail == 1 { 42 } else { 0 }
+unsafe extern C fn fairyc_fixture_status make_status() ;
+fn i32 main() {
+    let fairyc_fixture_status result = unsafe { make_status() };
+    return if (result.status == 41 && result.detail == 1) { 42 } else { 0 };
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -1547,11 +1547,11 @@ func TestEmitRejectsReprCStructForeignParameter(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 @repr(C)
-struct fairyc_fixture_status { status: u32; detail: u32; }
-unsafe extern C fn consume_status(value: fairyc_fixture_status) -> i32;
-fn main() -> i32 {
-    let value: fairyc_fixture_status = fairyc_fixture_status { status: 41, detail: 1 };
-    unsafe { consume_status(value) }
+struct fairyc_fixture_status { u32 status; u32 detail; }
+unsafe extern C fn i32 consume_status(fairyc_fixture_status value) ;
+fn i32 main() {
+    let fairyc_fixture_status value = fairyc_fixture_status { .status = 41, .detail = 1 };
+    return unsafe { consume_status(value) };
 }
 `)
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -1564,11 +1564,11 @@ fn main() -> i32 {
 func TestEmitRejectsNonReprCStructForeignResult(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-struct PrivateStatus { status: u32; detail: u32; }
-unsafe extern C fn make_status() -> PrivateStatus;
-fn main() -> i32 {
-    let result: PrivateStatus = unsafe { make_status() };
-    if result.status == 41 { 42 } else { 0 }
+struct PrivateStatus { u32 status; u32 detail; }
+unsafe extern C fn PrivateStatus make_status() ;
+fn i32 main() {
+    let PrivateStatus result = unsafe { make_status() };
+    return if (result.status == 41) { 42 } else { 0 };
 }
 `)
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -1583,11 +1583,11 @@ func TestEmitReprCStructPreservesVoidPointerAndExactCScalarFields(t *testing.T) 
 	program := lowerSource(t, `module main;
 @repr(C)
 struct fy_std_system_heap_block_v0 {
-    data: *mut void;
-    size: c::size_t;
-    alignment: c::size_t;
+    ptr mut void data;
+    c::size_t size;
+    c::size_t alignment;
 }
-fn main() -> i32 { 0 }
+fn i32 main() { return 0; }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil {
@@ -1620,16 +1620,16 @@ func TestEmitNestedReprCStructsInDependencyOrderWithExactLayout(t *testing.T) {
 	program := lowerSource(t, `module main;
 @repr(C)
 struct fy_std_buffer_v0 {
-    block: fy_std_system_heap_block_v0;
-    length: c::size_t;
+    fy_std_system_heap_block_v0 block;
+    c::size_t length;
 }
 @repr(C)
 struct fy_std_system_heap_block_v0 {
-    data: *mut void;
-    size: c::size_t;
-    alignment: c::size_t;
+    ptr mut void data;
+    c::size_t size;
+    c::size_t alignment;
 }
-fn main() -> i32 { 0 }
+fn i32 main() { return 0; }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil {
@@ -1666,10 +1666,10 @@ func TestEmitRejectsRecursiveStructDependency(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 @repr(C)
-struct First { second: Second; }
+struct First { Second second; }
 @repr(C)
-struct Second { first: First; }
-fn main() -> i32 { 0 }
+struct Second { First first; }
+fn i32 main() { return 0; }
 `)
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	var capability cbackend.CapabilityError
@@ -1681,10 +1681,10 @@ fn main() -> i32 { 0 }
 func TestEmitRejectsNonReprCNestedStruct(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-struct Private { value: u32; }
+struct Private { u32 value; }
 @repr(C)
-struct Public { inner: Private; }
-fn main() -> i32 { 0 }
+struct Public { Private inner; }
+fn i32 main() { return 0; }
 `)
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	var capability cbackend.CapabilityError
@@ -1695,7 +1695,7 @@ fn main() -> i32 { 0 }
 
 func TestEmitKeepsCScalarFieldsInsideReprCStructs(t *testing.T) {
 	t.Parallel()
-	program := lowerSource(t, "module main;\nstruct Private { size: c::size_t; }\nfn main() -> i32 { 0 }\n")
+	program := lowerSource(t, "module main;\nstruct Private { c::size_t size; }\nfn i32 main() { return 0; }\n")
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	var capability cbackend.CapabilityError
 	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "struct type \"main::Private\" field \"size\" of type \"c::size_t\"") {
@@ -1708,17 +1708,17 @@ func TestEmitRestrictedEnumConstructionPayloadAndSwitch(t *testing.T) {
 	program := lowerSource(t, `module main;
 enum Message {
     Empty;
-    Value { amount: i32; };
-    Pair { left: i32; right: i32; };
+    Value { i32 amount; };
+    Pair { i32 left; i32 right; };
 }
-fn score(message: Message) -> i32 {
-    match message {
-        Message::Empty => 0,
-        Message::Value { amount: value } => value,
-        Message::Pair { left: first, right: second } => first + second,
-    }
+fn i32 score(Message message) {
+    return switch (message) {
+        case .Empty : { 0 }
+        case .Value { .amount = value } : { value }
+        case .Pair { .left = first, .right = second } : { first + second }
+    };
 }
-fn main() -> i32 { score(Message::Pair { left: 20, right: 22 }) }
+fn i32 main() { return score(.Pair { .left = 20, .right = 22 }); }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil {
@@ -1750,7 +1750,7 @@ fn main() -> i32 { score(Message::Pair { left: 20, right: 22 }) }
 
 func TestEmitRejectsNestedEnumPayloadUntilDependencyOrderingExists(t *testing.T) {
 	t.Parallel()
-	program := lowerSource(t, "module main;\nenum Inner { Ready; }\nenum Outer { Wrapped { value: Inner; }; }\nfn main() -> i32 { 0 }\n")
+	program := lowerSource(t, "module main;\nenum Inner { Ready; }\nenum Outer { Wrapped { Inner value; }; }\nfn i32 main() { return 0; }\n")
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	var capability cbackend.CapabilityError
 	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "enum type \"main::Outer\"") || !strings.Contains(capability.Feature, "field \"value\" of type \"main::Inner\"") {
@@ -1760,7 +1760,7 @@ func TestEmitRejectsNestedEnumPayloadUntilDependencyOrderingExists(t *testing.T)
 
 func TestEmitRejectsInvalidReprCStructName(t *testing.T) {
 	t.Parallel()
-	program := lowerSource(t, "module main;\n@repr(C)\nstruct Packet { value: u32; }\nfn main() -> i32 { 0 }\n")
+	program := lowerSource(t, "module main;\n@repr(C)\nstruct Packet { u32 value; }\nfn i32 main() { return 0; }\n")
 	program.StructTypes[0].Name = "bad-name"
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	var capability cbackend.CapabilityError
@@ -1771,7 +1771,7 @@ func TestEmitRejectsInvalidReprCStructName(t *testing.T) {
 
 func TestEmitRejectsNonScalarParameterType(t *testing.T) {
 	t.Parallel()
-	program := lowerSource(t, "module main;\nfn inspect(value: &i32) -> i32 { 0 }\nfn main() -> i32 { 0 }\n")
+	program := lowerSource(t, "module main;\nfn i32 inspect(ref i32 value) { return 0; }\nfn i32 main() { return 0; }\n")
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	var capability cbackend.CapabilityError
 	if !errors.As(err, &capability) || capability.Feature != "parameter type \"&i32\"" || capability.Function != "main::inspect" {
@@ -1781,7 +1781,7 @@ func TestEmitRejectsNonScalarParameterType(t *testing.T) {
 
 func TestEmitAcceptsBoolFunctionResult(t *testing.T) {
 	t.Parallel()
-	program := lowerSource(t, "module main;\nfn positive(value: i32) -> bool { value > 0 }\nfn main() -> i32 { if positive(1) { 42 } else { 0 } }\n")
+	program := lowerSource(t, "module main;\nfn bool positive(i32 value) { return value > 0; }\nfn i32 main() { return if (positive(1)) { 42 } else { 0 }; }\n")
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil {
 		t.Fatalf("Emit() error = %v", err)
@@ -1794,22 +1794,22 @@ func TestEmitAcceptsBoolFunctionResult(t *testing.T) {
 func TestEmitScalarOptionAndResult(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-fn choose(present: bool) -> Option<i32> {
-    if present { Option::Some(41) } else { Option::None }
+fn Option<i32> choose(bool present) {
+    return if (present) { .some(41) } else { .none };
 }
-fn increment(input: Result<i32, i32>) -> Result<i32, i32> {
-    let value: i32 = input?;
-    Result::Ok(value + 1)
+fn Result<i32, i32> increment(Result<i32, i32> input) {
+    let i32 value = input?;
+    return .ok(value + 1);
 }
-fn main() -> i32 {
-    let base: i32 = match choose(true) {
-        Option::Some(value) => value,
-        Option::None => 0,
+fn i32 main() {
+    let i32 base = switch (choose(true)) {
+        case .some(value) : { value }
+        case .none : { 0 }
     };
-    match increment(Result::Ok(base)) {
-        Result::Ok(value) => value,
-        Result::Err(error) => -error,
-    }
+    return switch (increment(.ok(base))) {
+        case .ok(value) : { value }
+        case .err(error) : { -error }
+    };
 }
 `)
 	outcome, err := interpreter.Execute(program, "main::main")
@@ -1844,15 +1844,15 @@ fn main() -> i32 {
 func TestEmitRejectsNestedScalarTag(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-fn main() -> i32 {
-    let nested: Option<Option<i32>> = Option::Some(Option::Some(42));
-    match nested {
-        Option::Some(value) => match value {
-            Option::Some(inner) => inner,
-            Option::None => 0,
-        },
-        Option::None => 0,
-    }
+fn i32 main() {
+    let Option<Option<i32>> nested = .some(.some(42));
+    return switch (nested) {
+        case .some(value) : { switch (value) {
+            case .some(inner) : { inner }
+            case .none : { 0 }
+        } }
+        case .none : { 0 }
+    };
 }
 `)
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -1866,21 +1866,21 @@ func TestEmitCopyResultWithStructError(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 struct ConsoleError {
-    status: u32;
-    written: usize;
+    u32 status;
+    usize written;
 }
-fn write(accept: bool) -> Result<usize, ConsoleError> {
-    if accept {
-        Result::Ok(42)
+fn Result<usize, ConsoleError> write(bool accept) {
+    return if (accept) {
+        .ok(42)
     } else {
-        Result::Err(ConsoleError { status: 3, written: 7 })
-    }
+        .err(ConsoleError { .status = 3, .written = 7 })
+    };
 }
-fn main() -> i32 {
-    match write(false) {
-        Result::Ok(_) => 0,
-        Result::Err(error) => if error.status == 3 { 42 } else { 0 },
-    }
+fn i32 main() {
+    return switch (write(false)) {
+        case .ok(_) : { 0 }
+        case .err(error) : { if (error.status == 3) { 42 } else { 0 } }
+    };
 }
 `)
 	outcome, err := interpreter.Execute(program, "main::main")
@@ -1913,12 +1913,12 @@ func TestEmitRejectsResultWithEnumError(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 enum Failure { Denied; }
-fn main() -> i32 {
-    let result: Result<i32, Failure> = Result::Err(Failure::Denied);
-    match result {
-        Result::Ok(value) => value,
-        Result::Err(_) => 42,
-    }
+fn i32 main() {
+    let Result<i32, Failure> result = .err(.Denied);
+    return switch (result) {
+        case .ok(value) : { value }
+        case .err(_) : { 42 }
+    };
 }
 `)
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -1932,15 +1932,15 @@ func TestEmitResourceBearingOption(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 resource Token {
-    value: i32;
-    drop fn(self: &mut Self) {}
+    i32 value;
+    cleanup {}
 }
-fn main() -> i32 {
-    let wrapped: Option<Token> = Option::Some(Token { value: 42 });
-    match wrapped {
-        Option::Some(token) => token.value,
-        Option::None => 0,
-    }
+fn i32 main() {
+    let Option<Token> wrapped = .some(Token { .value = 42 });
+    return switch (wrapped) {
+        case .some(token) : { token.value }
+        case .none : { 0 }
+    };
 }
 `)
 	outcome, err := interpreter.Execute(program, "main::main")
@@ -1972,12 +1972,12 @@ func TestEmitRejectsNestedResourceTag(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 resource Token {
-    value: i32;
-    drop fn(self: &mut Self) {}
+    i32 value;
+    cleanup {}
 }
-fn main() -> i32 {
-    let wrapped: Option<Option<Token>> = Option::Some(Option::Some(Token { value: 42 }));
-    42
+fn i32 main() {
+    let Option<Option<Token>> wrapped = .some(.some(Token { .value = 42 }));
+    return 42;
 }
 `)
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -1991,15 +1991,15 @@ func TestEmitResourceBearingResultLayout(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 resource Token {
-    value: i32;
-    drop fn(self: &mut Self) {}
+    i32 value;
+    cleanup {}
 }
-fn main() -> i32 {
-    let wrapped: Result<Token, i32> = Result::Ok(Token { value: 42 });
-    match wrapped {
-        Result::Ok(token) => token.value,
-        Result::Err(error) => -error,
-    }
+fn i32 main() {
+    let Result<Token, i32> wrapped = .ok(Token { .value = 42 });
+    return switch (wrapped) {
+        case .ok(token) : { token.value }
+        case .err(error) : { -error }
+    };
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -2024,15 +2024,15 @@ func TestEmitDropTraceProfileKeepsInstrumentationClosed(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 resource Token {
-    value: i32;
-    drop fn(self: &mut Self) {}
+    i32 value;
+    cleanup {}
 }
-fn main() -> i32 {
-    let direct: Token = Token { value: 1 };
+fn i32 main() {
+    let Token direct = Token { .value = 1 };
     discard direct;
-    let wrapped: Option<Token> = Option::Some(Token { value: 2 });
+    let Option<Token> wrapped = .some(Token { .value = 2 });
     discard wrapped;
-    42
+    return 42;
 }
 `)
 	production, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -2068,7 +2068,7 @@ fn main() -> i32 {
 
 func TestEmitRejectsMalformedScalarDestination(t *testing.T) {
 	t.Parallel()
-	program := lowerSource(t, "module main;\nfn main() -> i32 { let unused: i32 = 1; 42 }\n")
+	program := lowerSource(t, "module main;\nfn i32 main() { let i32 unused = 1; return 42; }\n")
 	mutated := mir.Clone(program)
 	changed := false
 	for functionIndex := range mutated.Functions {
@@ -2104,7 +2104,7 @@ func TestEmitRejectsUnverifiedMIRAndUnknownProfile(t *testing.T) {
 	if _, err := cbackend.Emit(invalid, "main::main", cbackend.Stage0Profile()); err == nil || !strings.Contains(err.Error(), "verified MIR") {
 		t.Fatalf("Emit(unverified) error = %v", err)
 	}
-	program := lowerSource(t, "module main;\nfn main() -> i32 { 0 }\n")
+	program := lowerSource(t, "module main;\nfn i32 main() { return 0; }\n")
 	if _, err := cbackend.Emit(program, "main::main", cbackend.Profile{Target: "host", Dialect: cbackend.DialectC11}); err == nil || !strings.Contains(err.Error(), "unsupported C emission profile") {
 		t.Fatalf("Emit(profile) error = %v", err)
 	}
@@ -2118,11 +2118,11 @@ func TestEmitRejectsUnverifiedMIRAndUnknownProfile(t *testing.T) {
 func TestEmitDeduplicatesCompilerOwnedUTF8StringStorage(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-fn main() -> i32 {
-    let first: &str = "λ";
-    let second: &str = "λ";
-    let empty: &str = "";
-    42
+fn i32 main() {
+    let ref str first = "λ";
+    let ref str second = "λ";
+    let ref str empty = "";
+    return 42;
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -2160,10 +2160,10 @@ func TestEmitUTF8StringLocalDataAddressForForeignCall(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 @link_name("fairyc_fixture_is_fairy_text")
-unsafe extern C fn is_fairy_text(value: *u8) -> u32;
-fn main() -> i32 {
-    let text: &str = "fairy";
-    if unsafe { is_fairy_text(text as *u8) } == 1 { 42 } else { 1 }
+unsafe extern C fn u32 is_fairy_text(ptr u8 value) ;
+fn i32 main() {
+    let ref str text = "fairy";
+    return if (unsafe { is_fairy_text(text as ptr u8) } == 1) { 42 } else { 1 };
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
@@ -2193,7 +2193,7 @@ fn main() -> i32 {
 
 func TestEmitAlwaysCheckedAssert(t *testing.T) {
 	t.Parallel()
-	program := lowerSource(t, "module main;\nfn main() -> i32 { let ready: bool = true; assert(ready); 42 }\n")
+	program := lowerSource(t, "module main;\nfn i32 main() { let bool ready = true; assert(ready); return 42; }\n")
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil {
 		t.Fatalf("Emit() error = %v", err)
@@ -2217,27 +2217,27 @@ func TestEmitBorrowedTextViewsFromRawParts(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 resource String {
-    data: *mut void;
-    length: usize;
-    drop fn(self: &mut Self) {}
+    ptr mut void data;
+    usize length;
+    cleanup {}
 }
 resource CString {
-    data: *u8;
-    storage_length: usize;
-    drop fn(self: &mut Self) {}
+    ptr u8 data;
+    usize storage_length;
+    cleanup {}
 }
-fn as_str(value: &String) -> &str {
-    unsafe { str::from_raw_parts(value, value.data, value.length) }
+fn ref str as_str(ref String value) {
+    return unsafe { str::from_raw_parts(value, value.data, value.length) };
 }
-fn as_cstr(value: &CString) -> &CStr {
-    unsafe { CStr::from_raw_parts(value, value.data, value.storage_length) }
+fn ref CStr as_cstr(ref CString value) {
+    return unsafe { CStr::from_raw_parts(value, value.data, value.storage_length) };
 }
-fn consume_str(value: &str) -> usize { value.len }
-fn consume_cstr(value: &CStr) -> i32 { 42 }
-fn main() -> i32 {
-    let text: String = String { data: null, length: 0 };
-    let ctext: CString = CString { data: unsafe { c"" as *u8 }, storage_length: 1 };
-    if consume_str(as_str(&text)) == 0 { consume_cstr(as_cstr(&ctext)) } else { 1 }
+fn usize consume_str(ref str value) { return value.len; }
+fn i32 consume_cstr(ref CStr value) { return 42; }
+fn i32 main() {
+    let String text = String { .data = null, .length = 0 };
+    let CString ctext = CString { .data = unsafe { c"" as ptr u8 }, .storage_length = 1 };
+    return if (consume_str(as_str(ref text)) == 0) { consume_cstr(as_cstr(ref ctext)) } else { 1 };
 }
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0WindowsMSVCProfile())

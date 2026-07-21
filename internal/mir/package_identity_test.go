@@ -15,10 +15,10 @@ func TestLowerPreservesBuildLocalPackageIdentity(t *testing.T) {
 	t.Parallel()
 	input := semantic.PackageInput{
 		Files: []semantic.File{
-			parseMIRPackageFile(t, 1, "app_a.fy", "module app_a;\nimport util as u;\nfn main() -> i32 { u::value() }\n"),
-			parseMIRPackageFile(t, 2, "app_b.fy", "module app_b;\nimport util as u;\nfn main() -> i32 { u::value() }\n"),
-			parseMIRPackageFile(t, 3, "util.fy", "module util;\npub struct Token { value: i32; }\npub fn value() -> i32 { 1 }\n"),
-			parseMIRPackageFile(t, 4, "util.fy", "module util;\npub struct Token { value: i32; }\npub fn value() -> i32 { 2 }\n"),
+			parseMIRPackageFile(t, 1, "app_a.fy", "module app_a;\nimport util as u;\nfn i32 main() { return u::value(); }\n"),
+			parseMIRPackageFile(t, 2, "app_b.fy", "module app_b;\nimport util as u;\nfn i32 main() { return u::value(); }\n"),
+			parseMIRPackageFile(t, 3, "util.fy", "module util;\npub struct Token { i32 value; }\npub fn i32 value() { return 1; }\n"),
+			parseMIRPackageFile(t, 4, "util.fy", "module util;\npub struct Token { i32 value; }\npub fn i32 value() { return 2; }\n"),
 		},
 		Imports: []semantic.PackageImport{
 			{FromPackage: 1, ImportPath: "util", ToPackage: 3},

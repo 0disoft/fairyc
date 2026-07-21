@@ -16,13 +16,13 @@ func TestLowerPreservesResourceDefinitionAndFieldTypes(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
 resource Pair {
-    left: i32;
-    ready: bool;
-    drop fn(self: &mut Self) {}
+    i32 left;
+    bool ready;
+    cleanup {}
 }
-fn main() -> i32 {
-    let pair: Pair = Pair { left: 42, ready: true };
-    pair.left
+fn i32 main() {
+    let Pair pair = Pair { .left = 42, .ready = true };
+    return pair.left;
 }
 `)
 	if len(program.ResourceTypes) != 1 {
@@ -66,14 +66,14 @@ func TestLowerVerifiesBorrowedResourceFieldReads(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
 resource Token {
-    value: u32;
-    drop fn(self: &mut Self) {}
+    u32 value;
+    cleanup {}
 }
-fn read(token: &Token) -> u32 { token.value }
-fn read_mut(token: &mut Token) -> u32 { token.value }
-fn main() -> i32 {
-    var token: Token = Token { value: 42 };
-    if read(&token) == 42 && read_mut(&mut token) == 42 { 42 } else { 1 }
+fn u32 read(ref Token token) { return token.value; }
+fn u32 read_mut(ref mut Token token) { return token.value; }
+fn i32 main() {
+    var Token token = Token { .value = 42 };
+    return if (read(ref token) == 42 && read_mut(ref mut token) == 42) { 42 } else { 1 };
 }
 `)
 	owners := make(map[hir.Type]bool)
@@ -99,13 +99,13 @@ func TestLowerPreservesResourceDropEffectsOnDefinitionAndGlue(t *testing.T) {
 	program := lowerTestSource(t, `module main;
 @effects(filesystem)
 resource Token {
-    value: i32;
-    drop fn(self: &mut Self) { let marker: i32 = self.value; }
+    i32 value;
+    cleanup { let i32 marker = this.value; }
 }
 @effects(filesystem)
-fn main() -> i32 {
-    let token: Token = Token { value: 42 };
-    0
+fn i32 main() {
+    let Token token = Token { .value = 42 };
+    return 0;
 }
 `)
 	if len(program.ResourceTypes) != 1 || !slices.Equal(program.ResourceTypes[0].DropEffects, []hir.Effect{hir.EffectFilesystem}) {
@@ -129,10 +129,10 @@ func TestLowerPreservesReprCStructDefinitionConstructionAndFieldRead(t *testing.
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
 @repr(C)
-struct Packet { code: u32; length: usize; }
-fn main() -> i32 {
-    let packet: Packet = Packet { code: 42, length: 0 };
-    if packet.code == 42 { 0 } else { 1 }
+struct Packet { u32 code; usize length; }
+fn i32 main() {
+    let Packet packet = Packet { .code = 42, .length = 0 };
+    return if (packet.code == 42) { 0 } else { 1 };
 }
 `)
 	if len(program.StructTypes) != 1 {
@@ -188,7 +188,7 @@ func TestLowerRejectsNonEmptyResourceWithoutDropGlue(t *testing.T) {
 
 func TestLowerPreservesForeignCallABIAndUnsafeProvenance(t *testing.T) {
 	t.Parallel()
-	program := lowerTestSource(t, "module main;\n@link_name(\"fairyc_fixture_add_one\")\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { unsafe { add_one(41) } }\n")
+	program := lowerTestSource(t, "module main;\n@link_name(\"fairyc_fixture_add_one\")\nunsafe extern C fn i32 add_one(i32 value) ;\nfn i32 main() { return unsafe { add_one(41) }; }\n")
 	if len(program.ForeignFunctions) != 1 {
 		t.Fatalf("foreign functions = %+v", program.ForeignFunctions)
 	}
@@ -259,10 +259,10 @@ func TestLowerPreservesCIntAcrossForeignCallResultAndArgument(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
 @link_name("fairyc_fixture_make_c_int")
-unsafe extern C fn make_c_int() -> c::int;
+unsafe extern C fn c::int make_c_int() ;
 @link_name("fairyc_fixture_consume_c_int")
-unsafe extern C fn consume_c_int(value: c::int) -> i32;
-fn main() -> i32 { unsafe { consume_c_int(make_c_int()) } }
+unsafe extern C fn i32 consume_c_int(c::int value) ;
+fn i32 main() { return unsafe { consume_c_int(make_c_int()) }; }
 `)
 	if len(program.ForeignFunctions) != 2 {
 		t.Fatalf("foreign functions = %+v", program.ForeignFunctions)
@@ -304,10 +304,10 @@ func TestLowerPreservesCSizeTAcrossForeignCallResultAndArgument(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
 @link_name("fairyc_fixture_make_c_size_t")
-unsafe extern C fn make_c_size_t() -> c::size_t;
+unsafe extern C fn c::size_t make_c_size_t() ;
 @link_name("fairyc_fixture_consume_c_size_t")
-unsafe extern C fn consume_c_size_t(value: c::size_t) -> i32;
-fn main() -> i32 { unsafe { consume_c_size_t(make_c_size_t()) } }
+unsafe extern C fn i32 consume_c_size_t(c::size_t value) ;
+fn i32 main() { return unsafe { consume_c_size_t(make_c_size_t()) }; }
 `)
 	var producer, consumer ForeignFunction
 	for _, foreign := range program.ForeignFunctions {
@@ -346,10 +346,10 @@ func TestLowerPreservesCLongAcrossForeignCallResultAndArgument(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
 @link_name("fairyc_fixture_make_c_long")
-unsafe extern C fn make_c_long() -> c::long;
+unsafe extern C fn c::long make_c_long() ;
 @link_name("fairyc_fixture_consume_c_long")
-unsafe extern C fn consume_c_long(value: c::long) -> i32;
-fn main() -> i32 { unsafe { consume_c_long(make_c_long()) } }
+unsafe extern C fn i32 consume_c_long(c::long value) ;
+fn i32 main() { return unsafe { consume_c_long(make_c_long()) }; }
 `)
 	var producer, consumer ForeignFunction
 	for _, foreign := range program.ForeignFunctions {
@@ -388,10 +388,10 @@ func TestLowerPreservesCSSizeTAcrossForeignCallResultAndArgument(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
 @link_name("fairyc_fixture_make_c_ssize_t")
-unsafe extern C fn make_c_ssize_t() -> c::ssize_t;
+unsafe extern C fn c::ssize_t make_c_ssize_t() ;
 @link_name("fairyc_fixture_consume_c_ssize_t")
-unsafe extern C fn consume_c_ssize_t(value: c::ssize_t) -> i32;
-fn main() -> i32 { unsafe { consume_c_ssize_t(make_c_ssize_t()) } }
+unsafe extern C fn i32 consume_c_ssize_t(c::ssize_t value) ;
+fn i32 main() { return unsafe { consume_c_ssize_t(make_c_ssize_t()) }; }
 `)
 	var producer, consumer ForeignFunction
 	for _, foreign := range program.ForeignFunctions {
@@ -449,9 +449,9 @@ func TestLowerPreservesRemainingCScalarsAcrossForeignCalls(t *testing.T) {
 		test := test
 		t.Run(test.name, func(t *testing.T) {
 			text := fmt.Sprintf(`module main;
-unsafe extern C fn make_%[1]s() -> %[2]s;
-unsafe extern C fn consume_%[1]s(value: %[2]s) -> i32;
-fn main() -> i32 { unsafe { consume_%[1]s(make_%[1]s()) } }
+unsafe extern C fn %[2]s make_%[1]s();
+unsafe extern C fn i32 consume_%[1]s(%[2]s value);
+fn i32 main() { return unsafe { consume_%[1]s(make_%[1]s()) }; }
 `, test.name, test.typ)
 			program := lowerTestSource(t, text)
 			if len(program.ForeignFunctions) != 2 {
@@ -497,7 +497,7 @@ fn main() -> i32 { unsafe { consume_%[1]s(make_%[1]s()) } }
 
 func TestVerifyKeepsI32AndCIntForeignSignaturesDistinct(t *testing.T) {
 	t.Parallel()
-	program := lowerTestSource(t, "module main;\n@link_name(\"shared_symbol\")\nunsafe extern C fn with_c_int(value: c::int) -> i32;\nfn main() -> i32 { 0 }\n")
+	program := lowerTestSource(t, "module main;\n@link_name(\"shared_symbol\")\nunsafe extern C fn i32 with_c_int(c::int value) ;\nfn i32 main() { return 0; }\n")
 	conflict := program.ForeignFunctions[0]
 	conflict.Symbol = hir.SymbolID(999)
 	conflict.Name = "other::with_i32"
@@ -512,7 +512,7 @@ func TestVerifyKeepsI32AndCIntForeignSignaturesDistinct(t *testing.T) {
 
 func TestVerifyRejectsConflictingForeignSignaturesForOneLinkName(t *testing.T) {
 	t.Parallel()
-	program := lowerTestSource(t, "module main;\n@link_name(\"shared_symbol\")\nunsafe extern C fn with_value(value: i32) -> i32;\nfn main() -> i32 { 0 }\n")
+	program := lowerTestSource(t, "module main;\n@link_name(\"shared_symbol\")\nunsafe extern C fn i32 with_value(i32 value) ;\nfn i32 main() { return 0; }\n")
 	conflict := program.ForeignFunctions[0]
 	conflict.Symbol = hir.SymbolID(999)
 	conflict.Name = "other::without_value"
@@ -527,7 +527,7 @@ func TestVerifyRejectsConflictingForeignSignaturesForOneLinkName(t *testing.T) {
 
 func TestVerifyRejectsEmptyForeignLinkName(t *testing.T) {
 	t.Parallel()
-	program := lowerTestSource(t, "module main;\nunsafe extern C fn add_one(value: i32) -> i32;\nfn main() -> i32 { 0 }\n")
+	program := lowerTestSource(t, "module main;\nunsafe extern C fn i32 add_one(i32 value) ;\nfn i32 main() { return 0; }\n")
 	entity := program.ForeignFunctions[0].Entity
 	program.ForeignFunctions[0].LinkName = ""
 	failures := Verify(program)
@@ -538,7 +538,7 @@ func TestVerifyRejectsEmptyForeignLinkName(t *testing.T) {
 
 func TestLowerPreservesRawPointerAndTargetScalarForeignOperands(t *testing.T) {
 	t.Parallel()
-	program := lowerTestSource(t, "module main;\nunsafe extern C fn foreign_probe(data: *u8, output: *mut u32, length: usize, marker: u8) -> u32;\nfn main() -> i32 { if unsafe { foreign_probe(null, null, 0, 7) } == 42 { 0 } else { 1 } }\n")
+	program := lowerTestSource(t, "module main;\nunsafe extern C fn u32 foreign_probe(ptr u8 data, ptr mut u32 output, usize length, u8 marker) ;\nfn i32 main() { return if (unsafe { foreign_probe(null, null, 0, 7) } == 42) { 0 } else { 1 }; }\n")
 	foreign := program.ForeignFunctions[0]
 	wantParameters := []hir.Type{
 		hir.RawPointer(hir.TypeU8, false),
@@ -589,11 +589,11 @@ func TestLowerPreservesRawAddressUnsafeProvenance(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
 @repr(C)
-struct Packet { code: u32; }
-unsafe extern C fn sink(output: *mut Packet) -> u32;
-fn main() -> i32 {
-    var output: Packet = Packet { code: 0 };
-    if unsafe { sink(&mut output as *mut Packet) } == 0 { 0 } else { 1 }
+struct Packet { u32 code; }
+unsafe extern C fn u32 sink(ptr mut Packet output) ;
+fn i32 main() {
+    var Packet output = Packet { .code = 0 };
+    return if (unsafe { sink(ref mut output as ptr mut Packet) } == 0) { 0 } else { 1 };
 }
 `)
 	function := program.Functions[0]
@@ -646,11 +646,11 @@ func TestLowerPreservesOpaqueRawAddressOwnerType(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
 @repr(C)
-struct Packet { code: u32; }
-unsafe extern C fn sink(output: *mut void) -> u32;
-fn main() -> i32 {
-    var output: Packet = Packet { code: 0 };
-    if unsafe { sink(&mut output as *mut void) } == 0 { 42 } else { 1 }
+struct Packet { u32 code; }
+unsafe extern C fn u32 sink(ptr mut void output) ;
+fn i32 main() {
+    var Packet output = Packet { .code = 0 };
+    return if (unsafe { sink(ref mut output as ptr mut void) } == 0) { 42 } else { 1 };
 }
 `)
 	var address *Operation
@@ -686,12 +686,12 @@ fn main() -> i32 {
 func TestLowerPreservesSafeBorrowToOpaquePointer(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
-resource Token { value: u32; drop fn(self: &mut Self) {} }
-unsafe extern C fn sink(output: *mut void) -> u32;
-fn inspect(token: &mut Token) -> u32 { unsafe { sink(token as *mut void) } }
-fn main() -> i32 {
-    var token: Token = Token { value: 42 };
-    if inspect(&mut token) == 0 { 42 } else { 1 }
+resource Token { u32 value; cleanup {} }
+unsafe extern C fn u32 sink(ptr mut void output) ;
+fn u32 inspect(ref mut Token token) { return unsafe { sink(token as ptr mut void) }; }
+fn i32 main() {
+    var Token token = Token { .value = 42 };
+    return if (inspect(ref mut token) == 0) { 42 } else { 1 };
 }
 `)
 	var borrow *Operation
@@ -740,9 +740,9 @@ fn main() -> i32 {
 func TestLowerPreservesCStringStaticStorageOperand(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
-fn main() -> i32 {
-    let name: &CStr = c"fairy";
-    42
+fn i32 main() {
+    let ref CStr name = c"fairy";
+    return 42;
 }
 `)
 	function := program.Functions[0]
@@ -780,9 +780,9 @@ func TestLowerPreservesCStringDataAddressUnsafeProvenance(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
 @link_name("fairyc_fixture_is_fairy")
-unsafe extern C fn is_fairy(value: *u8) -> u32;
-fn main() -> i32 {
-    if unsafe { is_fairy(c"fairy" as *u8) } == 1 { 42 } else { 1 }
+unsafe extern C fn u32 is_fairy(ptr u8 value) ;
+fn i32 main() {
+    return if (unsafe { is_fairy(c"fairy" as ptr u8) } == 1) { 42 } else { 1 };
 }
 `)
 	function := program.Functions[0]
@@ -810,9 +810,9 @@ fn main() -> i32 {
 func TestLowerPreservesByteStringStaticStorageOperand(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
-fn main() -> i32 {
-    let bytes: &[u8] = b"\x00A";
-    42
+fn i32 main() {
+    let ref u8[] bytes = b"\x00A";
+    return 42;
 }
 `)
 	function := program.Functions[0]
@@ -849,9 +849,9 @@ fn main() -> i32 {
 func TestLowerPreservesBorrowedViewEmptiness(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
-fn main() -> i32 {
-    let empty: bool = b"".is_empty;
-    if empty { 42 } else { 1 }
+fn i32 main() {
+    let bool empty = b"".is_empty;
+    return if (empty) { 42 } else { 1 };
 }
 `)
 	var operation *Operation
@@ -888,9 +888,9 @@ fn main() -> i32 {
 func TestLowerPreservesCheckedImmutableByteViewIndex(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
-fn main() -> i32 {
-    let value: u8 = b"\x00A"[1];
-    42
+fn i32 main() {
+    let u8 value = b"\x00A"[1];
+    return 42;
 }
 `)
 	function := &program.Functions[0]
@@ -962,9 +962,9 @@ fn main() -> i32 {
 func TestLowerPreservesCheckedImmutableByteViewSlice(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
-fn main() -> i32 {
-    let bytes: &[u8] = b"fairy"[1..4];
-    42
+fn i32 main() {
+    let ref u8[] bytes = b"fairy"[1..4];
+    return 42;
 }
 `)
 	function := &program.Functions[0]
@@ -1035,9 +1035,9 @@ fn main() -> i32 {
 func TestLowerNormalizesOmittedImmutableByteViewSliceBounds(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
-fn main() -> i32 {
-    let bytes: &[u8] = b"fairy"[..];
-    if bytes.len == 5 { 42 } else { 1 }
+fn i32 main() {
+    let ref u8[] bytes = b"fairy"[..];
+    return if (bytes.len == 5) { 42 } else { 1 };
 }
 `)
 	function := &program.Functions[0]
@@ -1069,10 +1069,10 @@ fn main() -> i32 {
 func TestLowerOmittedSliceEndDoesNotReevaluateReceiver(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
-fn identity(bytes: &[u8]) -> &[u8] { bytes }
-fn main() -> i32 {
-    let bytes: &[u8] = identity(b"fairy")[1..];
-    if bytes.len == 4 { 42 } else { 1 }
+fn ref u8[] identity(ref u8[] bytes) { return bytes; }
+fn i32 main() {
+    let ref u8[] bytes = identity(b"fairy")[1..];
+    return if (bytes.len == 4) { 42 } else { 1 };
 }
 `)
 	var function *Function
@@ -1109,7 +1109,7 @@ fn main() -> i32 {
 func TestLowerPreservesValuePreservingIntegerCast(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
-fn main() -> i32 { b"*"[0] as i32 }
+fn i32 main() { return b"*"[0] as i32; }
 `)
 	function := &program.Functions[0]
 	var cast *Operation
@@ -1145,9 +1145,9 @@ fn main() -> i32 { b"*"[0] as i32 }
 func TestLowerPreservesTypedUnsignedOrderedComparison(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
-fn main() -> i32 {
-    let size: usize = 42;
-    if size > 41 { 42 } else { 1 }
+fn i32 main() {
+    let usize size = 42;
+    return if (size > 41) { 42 } else { 1 };
 }
 `)
 	function := &program.Functions[0]
@@ -1184,10 +1184,10 @@ fn main() -> i32 {
 func TestLowerPreservesCheckedUSizeArithmeticType(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
-fn main() -> i32 {
-    let size: usize = 41;
-    let next: usize = size + 1;
-    if next == 42 { 42 } else { 1 }
+fn i32 main() {
+    let usize size = 41;
+    let usize next = size + 1;
+    return if (next == 42) { 42 } else { 1 };
 }
 
 `)
@@ -1233,10 +1233,10 @@ fn main() -> i32 {
 func TestLowerPreservesCheckedUSizeDivisionType(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
-fn main() -> i32 {
-    let numerator: usize = 84;
-    let quotient: usize = numerator / 2;
-    if quotient == 42 { 42 } else { 1 }
+fn i32 main() {
+    let usize numerator = 84;
+    let usize quotient = numerator / 2;
+    return if (quotient == 42) { 42 } else { 1 };
 }
 `)
 	function := &program.Functions[0]
@@ -1281,10 +1281,10 @@ fn main() -> i32 {
 func TestLowerPreservesCheckedUSizeRightShiftType(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
-fn main() -> i32 {
-    let value: usize = 84;
-    let shifted: usize = value >> 1;
-    if shifted == 42 { 42 } else { 1 }
+fn i32 main() {
+    let usize value = 84;
+    let usize shifted = value >> 1;
+    return if (shifted == 42) { 42 } else { 1 };
 }
 `)
 	function := &program.Functions[0]
@@ -1329,10 +1329,10 @@ fn main() -> i32 {
 func TestLowerPreservesCheckedUSizeLeftShiftTypeAndTrapOrder(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
-fn main() -> i32 {
-    let value: usize = 21;
-    let shifted: usize = value << 1;
-    if shifted == 42 { 42 } else { 1 }
+fn i32 main() {
+    let usize value = 21;
+    let usize shifted = value << 1;
+    return if (shifted == 42) { 42 } else { 1 };
 }
 `)
 	function := &program.Functions[0]
@@ -1378,10 +1378,10 @@ fn main() -> i32 {
 func TestLowerPreservesUnsignedBitwiseNotType(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
-fn main() -> i32 {
-    let input: u32 = 4294967253;
-    let value: u32 = ~input;
-    if value == 42 { 42 } else { 1 }
+fn i32 main() {
+    let u32 input = 4294967253;
+    let u32 value = ~input;
+    return if (value == 42) { 42 } else { 1 };
 }
 `)
 	function := &program.Functions[0]
@@ -1419,9 +1419,9 @@ func TestLowerPreservesByteStringDataAddressUnsafeProvenance(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
 @link_name("fairyc_fixture_is_fairy_bytes")
-unsafe extern C fn is_fairy_bytes(value: *u8) -> u32;
-fn main() -> i32 {
-    if unsafe { is_fairy_bytes(b"fairy" as *u8) } == 1 { 42 } else { 1 }
+unsafe extern C fn u32 is_fairy_bytes(ptr u8 value) ;
+fn i32 main() {
+    return if (unsafe { is_fairy_bytes(b"fairy" as ptr u8) } == 1) { 42 } else { 1 };
 }
 `)
 	function := program.Functions[0]
@@ -1476,18 +1476,18 @@ func TestLowerPropagateRebuildsDeclaredResultType(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
 resource Token {
-    value: i32;
-    drop fn(self: &mut Self) {}
+    i32 value;
+    cleanup {}
 }
-fn read(input: Result<Token, i32>) -> Result<i32, i32> {
-    let token: Token = input?;
-    Result::Ok(token.value)
+fn Result<i32, i32> read(Result<Token, i32> input) {
+    let Token token = input?;
+    return .ok(token.value);
 }
-fn main() -> i32 {
-    match read(Result::Ok(Token { value: 42 })) {
-        Result::Ok(value) => value,
-        Result::Err(error) => -error,
-    }
+fn i32 main() {
+    return switch (read(.ok(Token { .value = 42 }))) {
+        case .ok(value) : { value }
+        case .err(error) : { -error }
+    };
 }
 `)
 	wantResultType := hir.Result(hir.TypeI32, hir.TypeI32)
@@ -1529,14 +1529,14 @@ func TestLowerRestrictedEnumConstructionPayloadAndSwitch(t *testing.T) {
 	program := lowerTestSource(t, `module main;
 enum Message {
     Empty;
-    Pair { left: i32; right: i32; };
+    Pair { i32 left; i32 right; };
 }
-fn main() -> i32 {
-    let message: Message = Message::Pair { left: 20, right: 22 };
-    match message {
-        Message::Empty => 0,
-        Message::Pair { left: first, right: second } => first + second,
-    }
+fn i32 main() {
+    let Message message = .Pair { .left = 20, .right = 22 };
+    return switch (message) {
+        case .Empty : { 0 }
+        case .Pair { .left = first, .right = second } : { first + second }
+    };
 }
 `)
 	if len(program.EnumTypes) != 1 || program.EnumTypes[0].Type != hir.Type("main::Message") || len(program.EnumTypes[0].Variants) != 2 {
@@ -1579,10 +1579,10 @@ fn main() -> i32 {
 func TestVerifyRejectsMutatedRestrictedEnumOperations(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
-enum Message { Empty; Value { amount: i32; }; }
-fn main() -> i32 {
-    let message: Message = Message::Value { amount: 42 };
-    match message { Message::Empty => 0, Message::Value { amount: value } => value, }
+enum Message { Empty; Value { i32 amount; }; }
+fn i32 main() {
+    let Message message = .Value { .amount = 42 };
+    return switch (message) { case .Empty : { 0 } case .Value { .amount = value } : { value } };
 }
 `)
 	mutations := []struct {
@@ -1647,9 +1647,9 @@ fn main() -> i32 {
 func TestLowerPreservesUTF8StringStaticStorageOperand(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
-fn main() -> i32 {
-    let text: &str = "λ";
-    42
+fn i32 main() {
+    let ref str text = "λ";
+    return 42;
 }
 `)
 	function := program.Functions[0]
@@ -1687,10 +1687,10 @@ func TestLowerPreservesUTF8StringDataAddressUnsafeProvenance(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
 @link_name("fairyc_fixture_is_fairy_text")
-unsafe extern C fn is_fairy_text(value: *u8) -> u32;
-fn main() -> i32 {
-    let text: &str = "fairy";
-    if unsafe { is_fairy_text(text as *u8) } == 1 { 42 } else { 1 }
+unsafe extern C fn u32 is_fairy_text(ptr u8 value) ;
+fn i32 main() {
+    let ref str text = "fairy";
+    return if (unsafe { is_fairy_text(text as ptr u8) } == 1) { 42 } else { 1 };
 }
 `)
 	function := program.Functions[0]
@@ -1717,7 +1717,7 @@ fn main() -> i32 {
 
 func TestLowerPreservesAlwaysCheckedAssert(t *testing.T) {
 	t.Parallel()
-	program := lowerTestSource(t, "module main;\nfn main() -> i32 { let ready: bool = true; assert(ready); 42 }\n")
+	program := lowerTestSource(t, "module main;\nfn i32 main() { let bool ready = true; assert(ready); return 42; }\n")
 	function := &program.Functions[0]
 	var assertion *Terminator
 	for blockIndex := range function.Blocks {
@@ -1763,10 +1763,10 @@ func TestLowerPreservesAlwaysCheckedAssert(t *testing.T) {
 func TestLowerPreservesCheckedScalarFixedArrayIndex(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
-fn pick(values: [u8; 3], index: usize) -> u8 { values[index] }
-fn main() -> i32 {
-    let values: [u8; 3] = [40, 41, 42];
-    pick(values, 2) as i32
+fn u8 pick(u8[3] values, usize index) { return values[index]; }
+fn i32 main() {
+    let u8[3] values = [40, 41, 42];
+    return pick(values, 2) as i32;
 }
 
 `)
@@ -1827,14 +1827,14 @@ fn main() -> i32 {
 func TestLowerPreservesCheckedIndexedStores(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
-fn update_view(bytes: &mut [u8], value: u8) -> u8 {
+fn u8 update_view(ref mut u8[] bytes, u8 value) {
     bytes[1] = value;
-    bytes[1]
+    return bytes[1];
 }
-fn main() -> i32 {
-    var values: [u8; 3] = [1, 2, 3];
+fn i32 main() {
+    var u8[3] values = [1, 2, 3];
     values[0] = 40;
-    update_view(&mut values, 42) as i32
+    return update_view(ref mut values, 42) as i32;
 }
 `)
 	var arrayStore, viewStore *Operation
@@ -1881,8 +1881,8 @@ fn main() -> i32 {
 func TestLowerPreservesScalarFixedArrayLength(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
-fn make() -> [u32; 3] { [40, 41, 42] }
-fn main() -> i32 { if make().len == 3 { 42 } else { 1 } }
+fn u32[3] make() { return [40, 41, 42]; }
+fn i32 main() { return if (make().len == 3) { 42 } else { 1 }; }
 `)
 	var mainFunction *Function
 	for functionIndex := range program.Functions {
@@ -1931,10 +1931,10 @@ fn main() -> i32 { if make().len == 3 { 42 } else { 1 } }
 func TestLowerPreservesFixedU8ArrayByteViewBorrow(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
-fn first(bytes: &[u8]) -> i32 { bytes[2] as i32 }
-fn main() -> i32 {
-    let values: [u8; 3] = [40, 41, 42];
-    first(&values)
+fn i32 first(ref u8[] bytes) { return bytes[2] as i32; }
+fn i32 main() {
+    let u8[3] values = [40, 41, 42];
+    return first(ref values);
 }
 `)
 	var borrow *Operation
@@ -1977,10 +1977,10 @@ fn main() -> i32 {
 func TestLowerPreservesMutableFixedU8ArrayByteViewBorrow(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
-fn length(bytes: &mut [u8]) -> usize { bytes.len }
-fn main() -> i32 {
-    var values: [u8; 3] = [40, 41, 42];
-    if length(&mut values) == 3 { 42 } else { 1 }
+fn usize length(ref mut u8[] bytes) { return bytes.len; }
+fn i32 main() {
+    var u8[3] values = [40, 41, 42];
+    return if (length(ref mut values) == 3) { 42 } else { 1 };
 }
 `)
 	var borrow *Operation
@@ -2022,12 +2022,12 @@ func TestLowerVerifiesBorrowedViewRawPartsUnsafeProvenance(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
 resource String {
-    data: *mut void;
-    length: usize;
-    drop fn(self: &mut Self) {}
+    ptr mut void data;
+    usize length;
+    cleanup {}
 }
-fn as_str(value: &String) -> &str {
-    unsafe { str::from_raw_parts(value, value.data, value.length) }
+fn ref str as_str(ref String value) {
+    return unsafe { str::from_raw_parts(value, value.data, value.length) };
 }
 `)
 	var functionIndex = -1

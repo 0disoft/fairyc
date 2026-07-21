@@ -48,7 +48,7 @@ func TestExperimentalBuildTargetFailsClosedOutsideWindowsAMD64(t *testing.T) {
 		t.Skip("live MSVC target build belongs to the configured Windows host-smoke environment")
 	}
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { 42 }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 main() { return 42; }\n")
 	code, stdout, stderr := runForTest([]string{
 		"experimental", "build-target", "main.fy",
 		"--target", string(target.X8664WindowsMSVC),
@@ -121,8 +121,8 @@ func TestExperimentalBuildTargetRejectsUncontractedForeignSymbolBeforeToolchainR
 	root := t.TempDir()
 	writeTestSource(t, root, "main.fy", `module main;
 @link_name("fairyc_missing")
-unsafe extern C fn missing(value: i32) -> i32;
-fn main() -> i32 { unsafe { missing(0) } }
+unsafe extern C fn i32 missing(i32 value) ;
+fn i32 main() { return unsafe { missing(0) }; }
 `)
 	code, stdout, stderr := runForTest([]string{
 		"experimental", "build-target", "main.fy",
@@ -139,8 +139,8 @@ func TestExperimentalBuildTargetRejectsUnprovenWindowsStandardLibrarySymbolBefor
 	root := t.TempDir()
 	writeTestSource(t, root, "main.fy", `module main;
 @link_name("fy_std_linux_file_open_v0")
-unsafe extern C fn open(path: *void, options: *void, output: *mut void) -> u32;
-fn main() -> i32 { if unsafe { open(null, null, null) } == 0 { 42 } else { 1 } }
+unsafe extern C fn u32 open(ptr void path, ptr void options, ptr mut void output) ;
+fn i32 main() { return if (unsafe { open(null, null, null) } == 0) { 42 } else { 1 }; }
 `)
 	code, stdout, stderr := runForTest([]string{
 		"experimental", "build-target", "main.fy",

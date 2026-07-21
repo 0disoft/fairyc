@@ -211,13 +211,13 @@ func TestVerifyRejectsResourceDropGlueEffectMismatch(t *testing.T) {
 	program := lowerTestSource(t, `module main;
 @effects(filesystem)
 resource Token {
-    value: i32;
-    drop fn(self: &mut Self) { let marker: i32 = self.value; }
+    i32 value;
+    cleanup { let i32 marker = this.value; }
 }
 @effects(filesystem)
-fn main() -> i32 {
-    let token: Token = Token { value: 42 };
-    0
+fn i32 main() {
+    let Token token = Token { .value = 42 };
+    return 0;
 }
 `)
 	for index := range program.Functions {

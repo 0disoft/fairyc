@@ -20,9 +20,9 @@ func TestParseBudgetFailsClosed(t *testing.T) {
 	}
 }
 
-func TestParseMutableOrdinaryParameterLosslessly(t *testing.T) {
+func TestParseCShapedParametersAndMigratedMutableLocalLosslessly(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\nfn close(mut file: File, status: u32) -> i32 { 0 }\n")
+	input := []byte("module main;\nfn i32 close(File input, u32 status) {\n    var File file = input; return 0; }\n")
 	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
 	if len(tree.Diagnostics) != 0 {
 		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
@@ -33,9 +33,19 @@ func TestParseMutableOrdinaryParameterLosslessly(t *testing.T) {
 			parameters = append(parameters, node)
 		}
 	}
-	if len(parameters) != 2 || parameters[0].Text != "file" || parameters[0].Cooked != "mut" ||
+	if len(parameters) != 2 || parameters[0].Text != "input" || parameters[0].Cooked != "" ||
 		parameters[1].Text != "status" || parameters[1].Cooked != "" {
 		t.Fatalf("parameters = %+v", parameters)
+	}
+	foundMutableLocal := false
+	for _, node := range tree.Nodes {
+		if node.Kind == KindBinding && node.Text == "file" && node.Cooked == "var" {
+			foundMutableLocal = true
+			break
+		}
+	}
+	if !foundMutableLocal {
+		t.Fatalf("nodes contain no migrated var local: %+v", tree.Nodes)
 	}
 	reconstructed, ok := tree.Reconstruct()
 	if !ok || !slices.Equal(reconstructed, input) {
@@ -45,7 +55,7 @@ func TestParseMutableOrdinaryParameterLosslessly(t *testing.T) {
 
 func TestNestedTypeCloseKeepsShiftTokenLossless(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\nfn wrap(value: Token) -> Option<Option<Token>> { value }\n")
+	input := []byte("module main;\nfn Option<Option<Token>> wrap(Token value) { return value; }\n")
 	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
 	if len(tree.Diagnostics) != 0 {
 		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
@@ -83,19 +93,19 @@ func TestNestedTypeCloseKeepsShiftTokenLossless(t *testing.T) {
 
 func TestTypeNodesRecordParserOwnedForms(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\nfn inspect(value: Result<Option<&mut [u8]>, *void>) -> unsafe extern C fn(i32, *mut u8) -> u32 { callback }\n")
+	input := []byte("module main;\nfn unsafe extern C fn u32(i32, ptr mut u8) inspect(Result<Option<ref mut u8[]>, ptr void> value) { return callback; }\n")
 	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
 	if len(tree.Diagnostics) != 0 {
 		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
 	}
 	want := map[string]TypeForm{
-		"Result<Option<&mut [u8]>, *void>": TypeFormNamed,
-		"Option<&mut [u8]>":                TypeFormNamed,
-		"&mut [u8]":                        TypeFormReferenceMut,
-		"[u8]":                             TypeFormSlice,
-		"*void":                            TypeFormPointer,
-		"unsafe extern C fn(i32, *mut u8) -> u32": TypeFormForeignFunction,
-		"*mut u8": TypeFormPointerMut,
+		"Result<Option<ref mut u8[]>, ptr void>": TypeFormNamed,
+		"Option<ref mut u8[]>":                   TypeFormNamed,
+		"ref mut u8[]":                           TypeFormReferenceMut,
+		"u8[]":                                   TypeFormSlice,
+		"ptr void":                               TypeFormPointer,
+		"unsafe extern C fn u32(i32, ptr mut u8)": TypeFormForeignFunction,
+		"ptr mut u8": TypeFormPointerMut,
 	}
 	found := make(map[string]TypeForm, len(want))
 	for _, node := range tree.Nodes {
@@ -114,7 +124,7 @@ func TestTypeNodesRecordParserOwnedForms(t *testing.T) {
 
 func TestParseCShapedTypeForms(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\nfn inspect(values: ref mut u8[], callbacks: (ptr u8)[16]) -> ptr u8[16] { callback }\n")
+	input := []byte("module main;\nfn ptr u8[16] inspect(ref mut u8[] values, (ptr u8)[16] callbacks) { return callback; }\n")
 	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
 	if len(tree.Diagnostics) != 0 {
 		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
@@ -305,7 +315,7 @@ func TestParseContextualUserEnumVariants(t *testing.T) {
 
 func TestNestedTypeCloseChargesContextualTokenBudget(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\nfn wrap(value: Token) -> Option<Option<Token>> { value }\n")
+	input := []byte("module main;\nfn Option<Option<Token>> wrap(Token value) { return value; }\n")
 	file := source.NewFile("main.fy", input)
 	baseline := source.DefaultLimits()
 	lexed := lexer.Lex(file, source.NewBudget(baseline, len(input)))
@@ -326,7 +336,7 @@ func TestNestedTypeCloseChargesContextualTokenBudget(t *testing.T) {
 
 func TestMissingSemicolonRecoversWithoutConsumingNextStatement(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\nfn main() -> i32 {\n  let value = 1\n  return value;\n}\n")
+	input := []byte("module main;\nfn i32 main() {\n  let value = 1\n  return value;\n}\n")
 	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
 	if len(tree.Diagnostics) != 1 {
 		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
@@ -335,7 +345,7 @@ func TestMissingSemicolonRecoversWithoutConsumingNextStatement(t *testing.T) {
 	if diagnostic.Code != "E0007" || diagnostic.Repair != "insert" || diagnostic.Token != ";" {
 		t.Fatalf("Parse() diagnostic = %+v", diagnostic)
 	}
-	position := len("module main;\nfn main() -> i32 {\n  let value = 1")
+	position := len("module main;\nfn i32 main() {\n  let value = 1")
 	if diagnostic.Span.StartByte != position || diagnostic.Span.EndByte != position {
 		t.Fatalf("Parse() span = %+v, want zero-width at %d", diagnostic.Span, position)
 	}
@@ -343,7 +353,7 @@ func TestMissingSemicolonRecoversWithoutConsumingNextStatement(t *testing.T) {
 
 func TestParseImmutableByteViewSlice(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\nfn main() -> &[u8] { b\"fairy\"[1..4] }\n")
+	input := []byte("module main;\nfn ref u8[] main() { return b\"fairy\"[1..4]; }\n")
 	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
 	if len(tree.Diagnostics) != 0 {
 		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
@@ -369,7 +379,7 @@ func TestParseImmutableByteViewSliceWithOmittedBounds(t *testing.T) {
 	for _, bounds := range []string{"..4", "1..", ".."} {
 		bounds := bounds
 		t.Run(bounds, func(t *testing.T) {
-			input := []byte("module main;\nfn main() -> &[u8] { b\"fairy\"[" + bounds + "] }\n")
+			input := []byte("module main;\nfn ref u8[] main() { return b\"fairy\"[" + bounds + "]; }\n")
 			tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
 			if len(tree.Diagnostics) != 0 {
 				t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
@@ -404,7 +414,7 @@ func TestParseImmutableByteViewSliceWithOmittedBounds(t *testing.T) {
 
 func TestParseAlwaysCheckedAssertStatement(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\nfn main() -> i32 { assert(true); 42 }\n")
+	input := []byte("module main;\nfn i32 main() { assert(true); return 42; }\n")
 	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
 	if len(tree.Diagnostics) != 0 {
 		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
@@ -427,7 +437,7 @@ func TestParseAlwaysCheckedAssertStatement(t *testing.T) {
 
 func TestParseDistinguishesFixedArrayLiteralForms(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\nfn main() -> i32 { let list = [1, 2, 3]; let repeated = [4; 2]; let empty = []; list[0] }\n")
+	input := []byte("module main;\nfn i32 main() { let list = [1, 2, 3]; let repeated = [4; 2]; let empty = []; return list[0]; }\n")
 	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
 	if len(tree.Diagnostics) != 0 {
 		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)

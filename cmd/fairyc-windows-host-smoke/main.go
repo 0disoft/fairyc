@@ -22,177 +22,177 @@ import (
 
 const negativeSource = `module negative;
 
-fn main() -> i32 {
-    -1
+fn i32 main() {
+    return -1;
 }
 `
 
 const divisionByZeroSource = `module division_by_zero;
 
-fn main() -> i32 {
-    42 / 0
+fn i32 main() {
+    return 42 / 0;
 }
 `
 
 const remainderByZeroSource = `module remainder_by_zero;
 
-fn main() -> i32 {
-    42 % 0
+fn i32 main() {
+    return 42 % 0;
 }
 `
 
 const signedDivisionOverflowSource = `module signed_division_overflow;
 
-fn main() -> i32 {
-    (-2147483647 - 1) / -1
+fn i32 main() {
+    return (-2147483647 - 1) / -1;
 }
 `
 
 const integerOverflowSource = `module integer_overflow;
 
-fn main() -> i32 {
-    2147483647 + 1
+fn i32 main() {
+    return 2147483647 + 1;
 }
 `
 
 const usizeOverflowSource = `module usize_overflow;
 
-fn main() -> i32 {
-    let value: usize = 18446744073709551615;
-    let overflow: usize = value + 1;
-    42
+fn i32 main() {
+    let usize value = 18446744073709551615;
+    let usize overflow = value + 1;
+    return 42;
 }
 `
 
 const unsignedDivisionSource = `module unsigned_division;
 
-fn main() -> i32 {
-    let byte_input: u8 = 84;
-    let byte: u8 = byte_input / 2;
-    let word_input: u32 = 85;
-    let word: u32 = word_input % 43;
-    let size_input: usize = 84;
-    let size: usize = size_input / 2;
-    if byte == 42 && word == 42 && size == 42 { 42 } else { 1 }
+fn i32 main() {
+    let u8 byte_input = 84;
+    let u8 byte = byte_input / 2;
+    let u32 word_input = 85;
+    let u32 word = word_input % 43;
+    let usize size_input = 84;
+    let usize size = size_input / 2;
+    return if (byte == 42 && word == 42 && size == 42) { 42 } else { 1 };
 }
 `
 
 const unsignedDivisionZeroSource = `module unsigned_division_zero;
 
-fn main() -> i32 {
-    let numerator: usize = 42;
-    let zero: usize = 0;
-    let value: usize = numerator / zero;
-    42
+fn i32 main() {
+    let usize numerator = 42;
+    let usize zero = 0;
+    let usize value = numerator / zero;
+    return 42;
 }
 `
 
 const unsignedBitwiseShiftSource = `module unsigned_bitwise_shift;
 
-fn main() -> i32 {
-    let byte_input: u8 = 84;
-    let byte: u8 = byte_input >> 1;
-    let byte_not_input: u8 = 213;
-    let byte_not: u8 = ~byte_not_input;
-    let word_input: u32 = 43;
-    let word: u32 = word_input & 63;
-    let word_not_input: u32 = 4294967253;
-    let word_not: u32 = ~word_not_input;
-    let word_shift_input: u32 = 84;
-    let word_shift: u32 = word_shift_input >> 1;
-    let size_input: usize = 43;
-    let size: usize = (size_input ^ 1) | 0;
-    let size_not_input: usize = 18446744073709551573;
-    let size_not: usize = ~size_not_input;
-    let size_shift_input: usize = 84;
-    let size_shift: usize = size_shift_input >> 1;
-    if byte == 42 && byte_not == 42 && word == 43 && word_not == 42 && word_shift == 42 && size == 42 && size_not == 42 && size_shift == 42 { 42 } else { 1 }
+fn i32 main() {
+    let u8 byte_input = 84;
+    let u8 byte = byte_input >> 1;
+    let u8 byte_not_input = 213;
+    let u8 byte_not = ~byte_not_input;
+    let u32 word_input = 43;
+    let u32 word = word_input & 63;
+    let u32 word_not_input = 4294967253;
+    let u32 word_not = ~word_not_input;
+    let u32 word_shift_input = 84;
+    let u32 word_shift = word_shift_input >> 1;
+    let usize size_input = 43;
+    let usize size = (size_input ^ 1) | 0;
+    let usize size_not_input = 18446744073709551573;
+    let usize size_not = ~size_not_input;
+    let usize size_shift_input = 84;
+    let usize size_shift = size_shift_input >> 1;
+    return if (byte == 42 && byte_not == 42 && word == 43 && word_not == 42 && word_shift == 42 && size == 42 && size_not == 42 && size_shift == 42) { 42 } else { 1 };
 }
 `
 
 const unsignedInvalidShiftSource = `module unsigned_invalid_shift;
 
-fn main() -> i32 {
-    let value: usize = 42;
-    let amount: usize = 64;
-    let shifted: usize = value >> amount;
-    42
+fn i32 main() {
+    let usize value = 42;
+    let usize amount = 64;
+    let usize shifted = value >> amount;
+    return 42;
 }
 `
 
 const leftShiftSource = `module left_shift;
 
-fn main() -> i32 {
-    let signed_input: i32 = 21;
-    let signed: i32 = signed_input << 1;
-    let byte_input: u8 = 21;
-    let byte: u8 = byte_input << 1;
-    let word_input: u32 = 21;
-    let word: u32 = word_input << 1;
-    let size_input: usize = 21;
-    let size: usize = size_input << 1;
-    if signed == 42 && byte == 42 && word == 42 && size == 42 { 42 } else { 1 }
+fn i32 main() {
+    let i32 signed_input = 21;
+    let i32 signed = signed_input << 1;
+    let u8 byte_input = 21;
+    let u8 byte = byte_input << 1;
+    let u32 word_input = 21;
+    let u32 word = word_input << 1;
+    let usize size_input = 21;
+    let usize size = size_input << 1;
+    return if (signed == 42 && byte == 42 && word == 42 && size == 42) { 42 } else { 1 };
 }
 `
 
 const leftShiftOverflowSource = `module left_shift_overflow;
 
-fn main() -> i32 {
-    let value: i32 = 1073741824;
-    value << 1
+fn i32 main() {
+    let i32 value = 1073741824;
+    return value << 1;
 }
 `
 
 const invalidShiftSource = `module invalid_shift;
 
-fn main() -> i32 {
-    1 >> -1
+fn i32 main() {
+    return 1 >> -1;
 }
 `
 
 const boundsSource = `module bounds;
 
-fn main() -> i32 {
-    let value: u8 = b"A"[1];
-    42
+fn i32 main() {
+    let u8 value = b"A"[1];
+    return 42;
 }
 `
 
 const arrayBoundsSource = `module array_bounds;
 
-fn main() -> i32 {
-    let values: [i32; 2] = [40, 42];
-    values[2]
+fn i32 main() {
+    let i32[2] values = [40, 42];
+    return values[2];
 }
 `
 
 const arrayStoreBoundsSource = `module array_store_bounds;
 
-fn main() -> i32 {
-    var values: [u8; 2] = [40, 41];
+fn i32 main() {
+    var u8[2] values = [40, 41];
     values[2] = 42;
-    0
+    return 0;
 }
 `
 
 const sliceBoundsSource = `module slice_bounds;
 
-fn slice(start: usize, end: usize) -> i32 {
-    let value: &[u8] = b"fairy"[start..end];
-    if value.is_empty { 42 } else { 1 }
+fn i32 slice(usize start, usize end) {
+    let ref u8[] value = b"fairy"[start..end];
+    return if (value.is_empty) { 42 } else { 1 };
 }
 
-fn main() -> i32 { slice(4, 2) }
+fn i32 main() { return slice(4, 2); }
 `
 
 const assertionFailureSource = `module assertion_failure;
 
-fn check(condition: bool) -> i32 {
+fn i32 check(bool condition) {
     assert(condition);
-    42
+    return 42;
 }
 
-fn main() -> i32 { check(false) }
+fn i32 main() { return check(false); }
 `
 
 const checkedInSuccessPath = "examples/windows_smoke/main.fy"

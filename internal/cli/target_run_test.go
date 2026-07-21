@@ -54,7 +54,7 @@ func TestExperimentalRunTargetFailsClosedOutsideWindowsAMD64(t *testing.T) {
 		t.Skip("live MSVC target execution belongs to the configured Windows host-smoke environment")
 	}
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn main() -> i32 { 42 }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 main() { return 42; }\n")
 	code, stdout, stderr := runForTest([]string{
 		"experimental", "run-target", "main.fy",
 		"--target", string(target.X8664WindowsMSVC), "--profile", "low",

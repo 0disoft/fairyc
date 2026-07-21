@@ -44,54 +44,54 @@ var nativeProfiles = []cdriver.Profile{
 
 const buildSmokeSource = `module main;
 resource Token {
-    value: i32;
-    drop fn(self: &mut Self) {}
+    i32 value;
+    cleanup {}
 }
-fn choose() -> Option<Token> { Option::Some(Token { value: 41 }) }
-fn increment(input: Result<Token, i32>) -> Result<Token, i32> {
-	let token: Token = input?;
-	Result::Ok(Token { value: token.value + 1 })
+fn Option<Token> choose() { return .some(Token { .value = 41 }); }
+fn Result<Token, i32> increment(Result<Token, i32> input) {
+	let Token token = input?;
+	return .ok(Token { .value = token.value + 1 });
 }
-fn main() -> i32 {
-	let token: Token = match choose() {
-		Option::Some(token) => token,
-		Option::None => Token { value: 0 },
+fn i32 main() {
+	let Token token = switch (choose()) {
+		case .some(token) : { token }
+		case .none : { Token { .value = 0 } }
 	};
-	match increment(Result::Ok(token)) {
-		Result::Ok(token) => token.value,
-		Result::Err(error) => -error,
-    }
+	return switch (increment(.ok(token))) {
+		case .ok(token) : { token.value }
+		case .err(error) : { -error }
+    };
 }
 `
 
 const cStringLiteralBuildSmokeSource = `module main;
-fn main() -> i32 {
-    if unsafe { c"fairy" as *u8 } != null { 42 } else { 1 }
+fn i32 main() {
+    return if (unsafe { c"fairy" as ptr u8 } != null) { 42 } else { 1 };
 }
 `
 
 const byteStringLiteralBuildSmokeSource = `module main;
-fn main() -> i32 {
-    let empty: &[u8] = b"";
-    let bytes: &[u8] = b"fairy";
-    if unsafe { bytes as *u8 } != null { 42 } else { 1 }
+fn i32 main() {
+    let ref u8[] empty = b"";
+    let ref u8[] bytes = b"fairy";
+    return if (unsafe { bytes as ptr u8 } != null) { 42 } else { 1 };
 }
 `
 
 const utf8StringLiteralBuildSmokeSource = `module main;
-fn main() -> i32 {
-    let empty: &str = "";
-    let text: &str = "Fairy λ";
-    if unsafe { text as *u8 } != null { 42 } else { 1 }
+fn i32 main() {
+    let ref str empty = "";
+    let ref str text = "Fairy λ";
+    return if (unsafe { text as ptr u8 } != null) { 42 } else { 1 };
 }
 `
 
 const utf8StringLiteralSourceCallSmokeSource = `module main;
 @link_name("fairyc_fixture_is_fairy_utf8")
-unsafe extern C fn is_fairy_utf8(value: *u8) -> u32;
-fn main() -> i32 {
-    let text: &str = "Fairy λ";
-    if unsafe { is_fairy_utf8(text as *u8) } == 1 { 42 } else { 1 }
+unsafe extern C fn u32 is_fairy_utf8(ptr u8 value) ;
+fn i32 main() {
+    let ref str text = "Fairy λ";
+    return if (unsafe { is_fairy_utf8(text as ptr u8) } == 1) { 42 } else { 1 };
 }
 `
 
@@ -126,10 +126,10 @@ var utf8StringLiteralSourceCallExpectedCFragments = []string{
 
 const byteStringLiteralSourceCallSmokeSource = `module main;
 @link_name("fairyc_fixture_is_fairy_bytes")
-unsafe extern C fn is_fairy_bytes(value: *u8) -> u32;
-fn main() -> i32 {
-    let bytes: &[u8] = b"fairy";
-    if unsafe { is_fairy_bytes(bytes as *u8) } == 1 { 42 } else { 1 }
+unsafe extern C fn u32 is_fairy_bytes(ptr u8 value) ;
+fn i32 main() {
+    let ref u8[] bytes = b"fairy";
+    return if (unsafe { is_fairy_bytes(bytes as ptr u8) } == 1) { 42 } else { 1 };
 }
 `
 
@@ -163,9 +163,9 @@ var byteStringLiteralSourceCallExpectedCFragments = []string{
 
 const cStringLiteralSourceCallSmokeSource = `module main;
 @link_name("fairyc_fixture_is_fairy")
-unsafe extern C fn is_fairy(value: *u8) -> u32;
-fn main() -> i32 {
-    if unsafe { is_fairy(c"fairy" as *u8) } == 1 { 42 } else { 1 }
+unsafe extern C fn u32 is_fairy(ptr u8 value) ;
+fn i32 main() {
+    return if (unsafe { is_fairy(c"fairy" as ptr u8) } == 1) { 42 } else { 1 };
 }
 `
 
@@ -197,8 +197,8 @@ var cStringLiteralSourceCallExpectedCFragments = []string{
 
 const foreignCallSmokeSource = `module main;
 @link_name("fairyc_fixture_add_one")
-unsafe extern C fn add_one(value: i32) -> i32;
-fn main() -> i32 { unsafe { add_one(41) } }
+unsafe extern C fn i32 add_one(i32 value) ;
+fn i32 main() { return unsafe { add_one(41) }; }
 `
 
 const foreignCallCompanionSource = `#include <stdint.h>
@@ -210,10 +210,10 @@ int32_t fairyc_fixture_add_one(int32_t value) {
 
 const foreignCIntCallSmokeSource = `module main;
 @link_name("fairyc_fixture_make_c_int")
-unsafe extern C fn make_c_int() -> c::int;
+unsafe extern C fn c::int make_c_int() ;
 @link_name("fairyc_fixture_consume_c_int")
-unsafe extern C fn consume_c_int(value: c::int) -> i32;
-fn main() -> i32 { unsafe { consume_c_int(make_c_int()) } }
+unsafe extern C fn i32 consume_c_int(c::int value) ;
+fn i32 main() { return unsafe { consume_c_int(make_c_int()) }; }
 `
 
 const foreignCIntCallCompanionSource = `#include <stdint.h>
@@ -229,10 +229,10 @@ int32_t fairyc_fixture_consume_c_int(int value) {
 
 const foreignCLongCallSmokeSource = `module main;
 @link_name("fairyc_fixture_make_c_long")
-unsafe extern C fn make_c_long() -> c::long;
+unsafe extern C fn c::long make_c_long() ;
 @link_name("fairyc_fixture_consume_c_long")
-unsafe extern C fn consume_c_long(value: c::long) -> i32;
-fn main() -> i32 { unsafe { consume_c_long(make_c_long()) } }
+unsafe extern C fn i32 consume_c_long(c::long value) ;
+fn i32 main() { return unsafe { consume_c_long(make_c_long()) }; }
 `
 
 const foreignCLongCallCompanionSource = `#include <stdint.h>
@@ -248,10 +248,10 @@ int32_t fairyc_fixture_consume_c_long(long value) {
 
 const foreignCSizeTCallSmokeSource = `module main;
 @link_name("fairyc_fixture_make_c_size_t")
-unsafe extern C fn make_c_size_t() -> c::size_t;
+unsafe extern C fn c::size_t make_c_size_t() ;
 @link_name("fairyc_fixture_consume_c_size_t")
-unsafe extern C fn consume_c_size_t(value: c::size_t) -> i32;
-fn main() -> i32 { unsafe { consume_c_size_t(make_c_size_t()) } }
+unsafe extern C fn i32 consume_c_size_t(c::size_t value) ;
+fn i32 main() { return unsafe { consume_c_size_t(make_c_size_t()) }; }
 `
 
 const foreignCSizeTCallCompanionSource = `#include <stddef.h>
@@ -268,10 +268,10 @@ int32_t fairyc_fixture_consume_c_size_t(size_t value) {
 
 const foreignCSSizeTCallSmokeSource = `module main;
 @link_name("fairyc_fixture_make_c_ssize_t")
-unsafe extern C fn make_c_ssize_t() -> c::ssize_t;
+unsafe extern C fn c::ssize_t make_c_ssize_t() ;
 @link_name("fairyc_fixture_consume_c_ssize_t")
-unsafe extern C fn consume_c_ssize_t(value: c::ssize_t) -> i32;
-fn main() -> i32 { unsafe { consume_c_ssize_t(make_c_ssize_t()) } }
+unsafe extern C fn i32 consume_c_ssize_t(c::ssize_t value) ;
+fn i32 main() { return unsafe { consume_c_ssize_t(make_c_ssize_t()) }; }
 `
 
 const foreignCSSizeTCallCompanionSource = `#define _POSIX_C_SOURCE 200809L
@@ -289,49 +289,49 @@ int32_t fairyc_fixture_consume_c_ssize_t(ssize_t value) {
 `
 
 const foreignCScalarFamilyCallSmokeSource = `module main;
-unsafe extern C fn fairyc_fixture_make_c_bool() -> c::bool;
-unsafe extern C fn fairyc_fixture_consume_c_bool(value: c::bool) -> i32;
-unsafe extern C fn fairyc_fixture_make_c_char() -> c::char;
-unsafe extern C fn fairyc_fixture_consume_c_char(value: c::char) -> i32;
-unsafe extern C fn fairyc_fixture_make_c_double() -> c::double;
-unsafe extern C fn fairyc_fixture_consume_c_double(value: c::double) -> i32;
-unsafe extern C fn fairyc_fixture_make_c_float() -> c::float;
-unsafe extern C fn fairyc_fixture_consume_c_float(value: c::float) -> i32;
-unsafe extern C fn fairyc_fixture_make_c_longlong() -> c::longlong;
-unsafe extern C fn fairyc_fixture_consume_c_longlong(value: c::longlong) -> i32;
-unsafe extern C fn fairyc_fixture_make_c_schar() -> c::schar;
-unsafe extern C fn fairyc_fixture_consume_c_schar(value: c::schar) -> i32;
-unsafe extern C fn fairyc_fixture_make_c_short() -> c::short;
-unsafe extern C fn fairyc_fixture_consume_c_short(value: c::short) -> i32;
-unsafe extern C fn fairyc_fixture_make_c_uchar() -> c::uchar;
-unsafe extern C fn fairyc_fixture_consume_c_uchar(value: c::uchar) -> i32;
-unsafe extern C fn fairyc_fixture_make_c_uint() -> c::uint;
-unsafe extern C fn fairyc_fixture_consume_c_uint(value: c::uint) -> i32;
-unsafe extern C fn fairyc_fixture_make_c_ulong() -> c::ulong;
-unsafe extern C fn fairyc_fixture_consume_c_ulong(value: c::ulong) -> i32;
-unsafe extern C fn fairyc_fixture_make_c_ulonglong() -> c::ulonglong;
-unsafe extern C fn fairyc_fixture_consume_c_ulonglong(value: c::ulonglong) -> i32;
-unsafe extern C fn fairyc_fixture_make_c_ushort() -> c::ushort;
-unsafe extern C fn fairyc_fixture_consume_c_ushort(value: c::ushort) -> i32;
+unsafe extern C fn c::bool fairyc_fixture_make_c_bool() ;
+unsafe extern C fn i32 fairyc_fixture_consume_c_bool(c::bool value) ;
+unsafe extern C fn c::char fairyc_fixture_make_c_char() ;
+unsafe extern C fn i32 fairyc_fixture_consume_c_char(c::char value) ;
+unsafe extern C fn c::double fairyc_fixture_make_c_double() ;
+unsafe extern C fn i32 fairyc_fixture_consume_c_double(c::double value) ;
+unsafe extern C fn c::float fairyc_fixture_make_c_float() ;
+unsafe extern C fn i32 fairyc_fixture_consume_c_float(c::float value) ;
+unsafe extern C fn c::longlong fairyc_fixture_make_c_longlong() ;
+unsafe extern C fn i32 fairyc_fixture_consume_c_longlong(c::longlong value) ;
+unsafe extern C fn c::schar fairyc_fixture_make_c_schar() ;
+unsafe extern C fn i32 fairyc_fixture_consume_c_schar(c::schar value) ;
+unsafe extern C fn c::short fairyc_fixture_make_c_short() ;
+unsafe extern C fn i32 fairyc_fixture_consume_c_short(c::short value) ;
+unsafe extern C fn c::uchar fairyc_fixture_make_c_uchar() ;
+unsafe extern C fn i32 fairyc_fixture_consume_c_uchar(c::uchar value) ;
+unsafe extern C fn c::uint fairyc_fixture_make_c_uint() ;
+unsafe extern C fn i32 fairyc_fixture_consume_c_uint(c::uint value) ;
+unsafe extern C fn c::ulong fairyc_fixture_make_c_ulong() ;
+unsafe extern C fn i32 fairyc_fixture_consume_c_ulong(c::ulong value) ;
+unsafe extern C fn c::ulonglong fairyc_fixture_make_c_ulonglong() ;
+unsafe extern C fn i32 fairyc_fixture_consume_c_ulonglong(c::ulonglong value) ;
+unsafe extern C fn c::ushort fairyc_fixture_make_c_ushort() ;
+unsafe extern C fn i32 fairyc_fixture_consume_c_ushort(c::ushort value) ;
 
-fn check_bool() -> i32 { unsafe { fairyc_fixture_consume_c_bool(fairyc_fixture_make_c_bool()) } }
-fn check_char() -> i32 { unsafe { fairyc_fixture_consume_c_char(fairyc_fixture_make_c_char()) } }
-fn check_double() -> i32 { unsafe { fairyc_fixture_consume_c_double(fairyc_fixture_make_c_double()) } }
-fn check_float() -> i32 { unsafe { fairyc_fixture_consume_c_float(fairyc_fixture_make_c_float()) } }
-fn check_longlong() -> i32 { unsafe { fairyc_fixture_consume_c_longlong(fairyc_fixture_make_c_longlong()) } }
-fn check_schar() -> i32 { unsafe { fairyc_fixture_consume_c_schar(fairyc_fixture_make_c_schar()) } }
-fn check_short() -> i32 { unsafe { fairyc_fixture_consume_c_short(fairyc_fixture_make_c_short()) } }
-fn check_uchar() -> i32 { unsafe { fairyc_fixture_consume_c_uchar(fairyc_fixture_make_c_uchar()) } }
-fn check_uint() -> i32 { unsafe { fairyc_fixture_consume_c_uint(fairyc_fixture_make_c_uint()) } }
-fn check_ulong() -> i32 { unsafe { fairyc_fixture_consume_c_ulong(fairyc_fixture_make_c_ulong()) } }
-fn check_ulonglong() -> i32 { unsafe { fairyc_fixture_consume_c_ulonglong(fairyc_fixture_make_c_ulonglong()) } }
-fn check_ushort() -> i32 { unsafe { fairyc_fixture_consume_c_ushort(fairyc_fixture_make_c_ushort()) } }
+fn i32 check_bool() { return unsafe { fairyc_fixture_consume_c_bool(fairyc_fixture_make_c_bool()) }; }
+fn i32 check_char() { return unsafe { fairyc_fixture_consume_c_char(fairyc_fixture_make_c_char()) }; }
+fn i32 check_double() { return unsafe { fairyc_fixture_consume_c_double(fairyc_fixture_make_c_double()) }; }
+fn i32 check_float() { return unsafe { fairyc_fixture_consume_c_float(fairyc_fixture_make_c_float()) }; }
+fn i32 check_longlong() { return unsafe { fairyc_fixture_consume_c_longlong(fairyc_fixture_make_c_longlong()) }; }
+fn i32 check_schar() { return unsafe { fairyc_fixture_consume_c_schar(fairyc_fixture_make_c_schar()) }; }
+fn i32 check_short() { return unsafe { fairyc_fixture_consume_c_short(fairyc_fixture_make_c_short()) }; }
+fn i32 check_uchar() { return unsafe { fairyc_fixture_consume_c_uchar(fairyc_fixture_make_c_uchar()) }; }
+fn i32 check_uint() { return unsafe { fairyc_fixture_consume_c_uint(fairyc_fixture_make_c_uint()) }; }
+fn i32 check_ulong() { return unsafe { fairyc_fixture_consume_c_ulong(fairyc_fixture_make_c_ulong()) }; }
+fn i32 check_ulonglong() { return unsafe { fairyc_fixture_consume_c_ulonglong(fairyc_fixture_make_c_ulonglong()) }; }
+fn i32 check_ushort() { return unsafe { fairyc_fixture_consume_c_ushort(fairyc_fixture_make_c_ushort()) }; }
 
-fn main() -> i32 {
-    let failures: i32 = check_bool() + check_char() + check_double() + check_float() +
+fn i32 main() {
+    let i32 failures = check_bool() + check_char() + check_double() + check_float() +
         check_longlong() + check_schar() + check_short() + check_uchar() + check_uint() +
         check_ulong() + check_ulonglong() + check_ushort();
-    if failures == 0 { 42 } else { 1 }
+    return if (failures == 0) { 42 } else { 1 };
 }
 `
 
@@ -379,9 +379,9 @@ var foreignCScalarFamilyExpectedCFragments = []string{
 }
 
 const foreignPointerCallSmokeSource = `module main;
-unsafe extern C fn fairyc_fixture_pointer_scalars(data: *u8, output: *mut u32, length: usize, marker: u8) -> u32;
-fn main() -> i32 {
-    if unsafe { fairyc_fixture_pointer_scalars(null, null, 0, 7) } == 42 { 42 } else { 1 }
+unsafe extern C fn u32 fairyc_fixture_pointer_scalars(ptr u8 data, ptr mut u32 output, usize length, u8 marker) ;
+fn i32 main() {
+    return if (unsafe { fairyc_fixture_pointer_scalars(null, null, 0, 7) } == 42) { 42 } else { 1 };
 }
 `
 
@@ -404,31 +404,31 @@ uint32_t fairyc_fixture_pointer_scalars(
 const foreignCStructResultCallSmokeSource = `module main;
 @repr(C)
 struct fairyc_fixture_status_v0 {
-    status: u32;
-    allocation_status: u32;
+    u32 status;
+    u32 allocation_status;
 }
 @repr(C)
 struct fairyc_fixture_large_status_v0 {
-    first: u32;
-    second: u32;
-    third: u32;
-    fourth: u32;
-    fifth: u32;
+    u32 first;
+    u32 second;
+    u32 third;
+    u32 fourth;
+    u32 fifth;
 }
 @link_name("fairyc_fixture_make_status_v0")
-unsafe extern C fn make_status() -> fairyc_fixture_status_v0;
+unsafe extern C fn fairyc_fixture_status_v0 make_status() ;
 @link_name("fairyc_fixture_make_large_status_v0")
-unsafe extern C fn make_large_status() -> fairyc_fixture_large_status_v0;
-fn main() -> i32 {
-    let result: fairyc_fixture_status_v0 = unsafe { make_status() };
-    let large: fairyc_fixture_large_status_v0 = unsafe { make_large_status() };
-    if result.status == 41 && result.allocation_status == 1 &&
+unsafe extern C fn fairyc_fixture_large_status_v0 make_large_status() ;
+fn i32 main() {
+    let fairyc_fixture_status_v0 result = unsafe { make_status() };
+    let fairyc_fixture_large_status_v0 large = unsafe { make_large_status() };
+    return if (result.status == 41 && result.allocation_status == 1 &&
         large.first == 1 && large.second == 2 && large.third == 3 &&
-        large.fourth == 4 && large.fifth == 5 {
+        large.fourth == 4 && large.fifth == 5) {
         42
     } else {
         0
-    }
+    };
 }
 `
 
@@ -479,84 +479,76 @@ var foreignCStructResultCallExpectedCFragments = []string{
 
 const textValidationSourceCallSmokeSource = `module main;
 @link_name("fy_std_text_utf8_valid_v0")
-unsafe extern C fn utf8_valid(data: *u8, length: usize) -> u32;
-fn main() -> i32 {
-    if unsafe { utf8_valid(null, 0) } == 1 { 42 } else { 1 }
+unsafe extern C fn u32 utf8_valid(ptr u8 data, usize length) ;
+fn i32 main() {
+    return if (unsafe { utf8_valid(null, 0) } == 1) { 42 } else { 1 };
 }
 `
 
 const textViewOutputSourceCallSmokeSource = `module main;
 @repr(C)
 struct fy_std_text_view_v0 {
-    data: *u8;
-    length: usize;
+    ptr u8 data;
+    usize length;
 }
 @link_name("fy_std_text_validate_utf8_v0")
-unsafe extern C fn validate_utf8(
-    data: *u8,
-    length: usize,
-    output: *mut fy_std_text_view_v0
-) -> u32;
-fn main() -> i32 {
-    var output: fy_std_text_view_v0 = fy_std_text_view_v0 { data: null, length: 99 };
-    let status: u32 = unsafe {
+unsafe extern C fn u32 validate_utf8(ptr u8 data, usize length, ptr mut fy_std_text_view_v0 output) ;
+fn i32 main() {
+    var fy_std_text_view_v0 output = fy_std_text_view_v0 { .data = null, .length = 99 };
+    let u32 status = unsafe {
         validate_utf8(
             null,
             0,
-            &mut output as *mut fy_std_text_view_v0
+            ref mut output as ptr mut fy_std_text_view_v0
         )
     };
-    if status == 0 && output.length == 0 { 42 } else { 1 }
+    return if (status == 0 && output.length == 0) { 42 } else { 1 };
 }
 `
 
 const systemHeapSourceCallSmokeSource = `module main;
 @repr(C)
 struct fy_std_system_heap_block_v0 {
-    data: *mut void;
-    size: c::size_t;
-    alignment: c::size_t;
+    ptr mut void data;
+    c::size_t size;
+    c::size_t alignment;
 }
 
 @link_name("fairyc_fixture_zero_size_t")
-unsafe extern C fn zero_size_t() -> c::size_t;
+unsafe extern C fn c::size_t zero_size_t() ;
 @link_name("fairyc_fixture_eight_size_t")
-unsafe extern C fn eight_size_t() -> c::size_t;
+unsafe extern C fn c::size_t eight_size_t() ;
 @link_name("fy_std_system_heap_allocate_v0")
-unsafe extern C fn allocate(
-    size: c::size_t,
-    alignment: c::size_t,
-    output: *mut fy_std_system_heap_block_v0
-) -> u32;
+unsafe extern C fn u32 allocate(c::size_t size, c::size_t alignment, ptr mut fy_std_system_heap_block_v0 output) ;
 @link_name("fairyc_fixture_block_is_allocated")
-unsafe extern C fn block_is_allocated(block: *fy_std_system_heap_block_v0) -> u32;
+unsafe extern C fn u32 block_is_allocated(ptr fy_std_system_heap_block_v0 block) ;
 @link_name("fy_std_system_heap_deallocate_v0")
-unsafe extern C fn deallocate(block: *mut fy_std_system_heap_block_v0) -> u32;
+unsafe extern C fn u32 deallocate(ptr mut fy_std_system_heap_block_v0 block) ;
 @link_name("fairyc_fixture_block_is_empty")
-unsafe extern C fn block_is_empty(block: *fy_std_system_heap_block_v0) -> u32;
+unsafe extern C fn u32 block_is_empty(ptr fy_std_system_heap_block_v0 block) ;
 
-fn main() -> i32 {
-    let zero: c::size_t = unsafe { zero_size_t() };
-    var block: fy_std_system_heap_block_v0 = fy_std_system_heap_block_v0 {
-        data: null,
-        size: zero,
-        alignment: zero,
+fn i32 main() {
+    let c::size_t zero = unsafe { zero_size_t() };
+    var fy_std_system_heap_block_v0 block = fy_std_system_heap_block_v0 {
+        .data = null,
+        .size = zero,
+        .alignment = zero,
     };
-    let size: c::size_t = unsafe { eight_size_t() };
-    let alignment: c::size_t = unsafe { eight_size_t() };
-    let allocated: u32 = unsafe {
-        allocate(size, alignment, &mut block as *mut fy_std_system_heap_block_v0)
+    let c::size_t size = unsafe { eight_size_t() };
+    let c::size_t alignment = unsafe { eight_size_t() };
+    let u32 allocated = unsafe {
+        allocate(size, alignment, ref mut block as ptr mut fy_std_system_heap_block_v0)
     };
-    let observed: u32 = unsafe {
-        block_is_allocated(&block as *fy_std_system_heap_block_v0)
+    let u32 observed = unsafe {
+        block_is_allocated(ref block as ptr fy_std_system_heap_block_v0)
     };
-    let deallocated: u32 = unsafe {
-        deallocate(&mut block as *mut fy_std_system_heap_block_v0)
+    let u32 deallocated = unsafe {
+        deallocate(ref mut block as ptr mut fy_std_system_heap_block_v0)
     };
-    let cleared: u32 = unsafe {
-        block_is_empty(&block as *fy_std_system_heap_block_v0)
+    let u32 cleared = unsafe {
+        block_is_empty(ref block as ptr fy_std_system_heap_block_v0)
     };
-    if allocated == 0 && observed == 1 && deallocated == 0 && cleared == 1 { 42 } else { 1 }
+    return if (allocated == 0 && observed == 1 && deallocated == 0 && cleared == 1) { 42 } else { 1 };
 }
 `
 
@@ -590,72 +582,66 @@ var systemHeapSourceCallExpectedCFragments = []string{
 const bufferSourceCallSmokeSource = `module main;
 @repr(C)
 struct fy_std_buffer_v0 {
-    block: fy_std_system_heap_block_v0;
-    length: c::size_t;
+    fy_std_system_heap_block_v0 block;
+    c::size_t length;
 }
 @repr(C)
 struct fy_std_system_heap_block_v0 {
-    data: *mut void;
-    size: c::size_t;
-    alignment: c::size_t;
+    ptr mut void data;
+    c::size_t size;
+    c::size_t alignment;
 }
 
 @link_name("fairyc_fixture_zero_size_t")
-unsafe extern C fn zero_size_t() -> c::size_t;
+unsafe extern C fn c::size_t zero_size_t() ;
 @link_name("fairyc_fixture_four_size_t")
-unsafe extern C fn four_size_t() -> c::size_t;
+unsafe extern C fn c::size_t four_size_t() ;
 @link_name("fairyc_fixture_eight_size_t")
-unsafe extern C fn eight_size_t() -> c::size_t;
+unsafe extern C fn c::size_t eight_size_t() ;
 @link_name("fy_std_buffer_initialize_v0")
-unsafe extern C fn initialize(
-    capacity: c::size_t,
-    output: *mut fy_std_buffer_v0
-) -> u32;
+unsafe extern C fn u32 initialize(c::size_t capacity, ptr mut fy_std_buffer_v0 output) ;
 @link_name("fy_std_buffer_resize_zeroed_v0")
-unsafe extern C fn resize_zeroed(
-    buffer: *mut fy_std_buffer_v0,
-    new_length: c::size_t
-) -> u32;
+unsafe extern C fn u32 resize_zeroed(ptr mut fy_std_buffer_v0 buffer, c::size_t new_length) ;
 @link_name("fairyc_fixture_buffer_is_zeroed")
-unsafe extern C fn buffer_is_zeroed(buffer: *fy_std_buffer_v0) -> u32;
+unsafe extern C fn u32 buffer_is_zeroed(ptr fy_std_buffer_v0 buffer) ;
 @link_name("fy_std_buffer_drop_v0")
-unsafe extern C fn drop_buffer(buffer: *mut fy_std_buffer_v0) -> u32;
+unsafe extern C fn u32 drop_buffer(ptr mut fy_std_buffer_v0 buffer) ;
 @link_name("fairyc_fixture_buffer_is_empty")
-unsafe extern C fn buffer_is_empty(buffer: *fy_std_buffer_v0) -> u32;
+unsafe extern C fn u32 buffer_is_empty(ptr fy_std_buffer_v0 buffer) ;
 
-fn main() -> i32 {
-    let zero: c::size_t = unsafe { zero_size_t() };
-    let empty_block: fy_std_system_heap_block_v0 = fy_std_system_heap_block_v0 {
-        data: null,
-        size: zero,
-        alignment: zero,
+fn i32 main() {
+    let c::size_t zero = unsafe { zero_size_t() };
+    let fy_std_system_heap_block_v0 empty_block = fy_std_system_heap_block_v0 {
+        .data = null,
+        .size = zero,
+        .alignment = zero,
     };
-    var buffer: fy_std_buffer_v0 = fy_std_buffer_v0 {
-        block: empty_block,
-        length: zero,
+    var fy_std_buffer_v0 buffer = fy_std_buffer_v0 {
+        .block = empty_block,
+        .length = zero,
     };
-    let capacity: c::size_t = unsafe { eight_size_t() };
-    let initialized: u32 = unsafe {
-        initialize(capacity, &mut buffer as *mut fy_std_buffer_v0)
+    let c::size_t capacity = unsafe { eight_size_t() };
+    let u32 initialized = unsafe {
+        initialize(capacity, ref mut buffer as ptr mut fy_std_buffer_v0)
     };
-    let length: c::size_t = unsafe { four_size_t() };
-    let resized: u32 = unsafe {
-        resize_zeroed(&mut buffer as *mut fy_std_buffer_v0, length)
+    let c::size_t length = unsafe { four_size_t() };
+    let u32 resized = unsafe {
+        resize_zeroed(ref mut buffer as ptr mut fy_std_buffer_v0, length)
     };
-    let observed: u32 = unsafe {
-        buffer_is_zeroed(&buffer as *fy_std_buffer_v0)
+    let u32 observed = unsafe {
+        buffer_is_zeroed(ref buffer as ptr fy_std_buffer_v0)
     };
-    let dropped: u32 = unsafe {
-        drop_buffer(&mut buffer as *mut fy_std_buffer_v0)
+    let u32 dropped = unsafe {
+        drop_buffer(ref mut buffer as ptr mut fy_std_buffer_v0)
     };
-    let cleared: u32 = unsafe {
-        buffer_is_empty(&buffer as *fy_std_buffer_v0)
+    let u32 cleared = unsafe {
+        buffer_is_empty(ref buffer as ptr fy_std_buffer_v0)
     };
-    if initialized == 0 && resized == 0 && observed == 1 && dropped == 0 && cleared == 1 {
+    return if (initialized == 0 && resized == 0 && observed == 1 && dropped == 0 && cleared == 1) {
         42
     } else {
         1
-    }
+    };
 }
 `
 
@@ -702,126 +688,111 @@ var bufferSourceCallExpectedCFragments = []string{
 const arenaSourceCallSmokeSource = `module main;
 @repr(C)
 struct fy_std_arena_v0 {
-    head: *mut fy_std_arena_node_v0;
-    generation: c::ulong;
-    active_region: u8;
+    ptr mut fy_std_arena_node_v0 head;
+    c::ulong generation;
+    u8 active_region;
 }
 @repr(C)
 struct fy_std_region_v0 {
-    arena: *mut fy_std_arena_v0;
-    mark: *mut fy_std_arena_node_v0;
-    generation: c::ulong;
-    active: u8;
+    ptr mut fy_std_arena_v0 arena;
+    ptr mut fy_std_arena_node_v0 mark;
+    c::ulong generation;
+    u8 active;
 }
 @repr(C)
 struct fy_std_arena_node_v0 {
-    storage: fy_std_system_heap_block_v0;
-    next: *mut fy_std_arena_node_v0;
+    fy_std_system_heap_block_v0 storage;
+    ptr mut fy_std_arena_node_v0 next;
 }
 @repr(C)
 struct fy_std_system_heap_block_v0 {
-    data: *mut void;
-    size: c::size_t;
-    alignment: c::size_t;
+    ptr mut void data;
+    c::size_t size;
+    c::size_t alignment;
 }
 
 @link_name("fairyc_fixture_zero_c_ulong")
-unsafe extern C fn zero_c_ulong() -> c::ulong;
+unsafe extern C fn c::ulong zero_c_ulong() ;
 @link_name("fairyc_fixture_eight_size_t")
-unsafe extern C fn eight_size_t() -> c::size_t;
+unsafe extern C fn c::size_t eight_size_t() ;
 @link_name("fy_std_arena_initialize_v0")
-unsafe extern C fn initialize_arena(output: *mut fy_std_arena_v0) -> u32;
+unsafe extern C fn u32 initialize_arena(ptr mut fy_std_arena_v0 output) ;
 @link_name("fy_std_region_begin_v0")
-unsafe extern C fn begin_region(
-    arena: *mut fy_std_arena_v0,
-    output: *mut fy_std_region_v0
-) -> u32;
+unsafe extern C fn u32 begin_region(ptr mut fy_std_arena_v0 arena, ptr mut fy_std_region_v0 output) ;
 @link_name("fy_std_region_allocate_zeroed_v0")
-unsafe extern C fn allocate_zeroed(
-    scope: *mut fy_std_region_v0,
-    size: c::size_t,
-    alignment: c::size_t,
-    output: *mut *mut void
-) -> u32;
+unsafe extern C fn u32 allocate_zeroed(ptr mut fy_std_region_v0 scope, c::size_t size, c::size_t alignment, ptr mut ptr mut void output) ;
 @link_name("fairyc_fixture_arena_allocation_is_zeroed")
-unsafe extern C fn allocation_is_zeroed(
-    arena: *mut fy_std_arena_v0,
-    scope: *mut fy_std_region_v0,
-    data: *mut void
-) -> u32;
+unsafe extern C fn u32 allocation_is_zeroed(ptr mut fy_std_arena_v0 arena, ptr mut fy_std_region_v0 scope, ptr mut void data) ;
 @link_name("fy_std_region_reset_v0")
-unsafe extern C fn reset_region(scope: *mut fy_std_region_v0) -> u32;
+unsafe extern C fn u32 reset_region(ptr mut fy_std_region_v0 scope) ;
 @link_name("fairyc_fixture_arena_region_is_reset")
-unsafe extern C fn region_is_reset(
-    arena: *mut fy_std_arena_v0,
-    scope: *mut fy_std_region_v0
-) -> u32;
+unsafe extern C fn u32 region_is_reset(ptr mut fy_std_arena_v0 arena, ptr mut fy_std_region_v0 scope) ;
 @link_name("fy_std_arena_drop_v0")
-unsafe extern C fn drop_arena(arena: *mut fy_std_arena_v0) -> u32;
+unsafe extern C fn u32 drop_arena(ptr mut fy_std_arena_v0 arena) ;
 @link_name("fairyc_fixture_arena_is_dropped")
-unsafe extern C fn arena_is_dropped(arena: *mut fy_std_arena_v0) -> u32;
+unsafe extern C fn u32 arena_is_dropped(ptr mut fy_std_arena_v0 arena) ;
 
-fn main() -> i32 {
-    let zero_generation: c::ulong = unsafe { zero_c_ulong() };
-    var arena: fy_std_arena_v0 = fy_std_arena_v0 {
-        head: null,
-        generation: zero_generation,
-        active_region: 0,
+fn i32 main() {
+    let c::ulong zero_generation = unsafe { zero_c_ulong() };
+    var fy_std_arena_v0 arena = fy_std_arena_v0 {
+        .head = null,
+        .generation = zero_generation,
+        .active_region = 0,
     };
-    var scope: fy_std_region_v0 = fy_std_region_v0 {
-        arena: null,
-        mark: null,
-        generation: zero_generation,
-        active: 0,
+    var fy_std_region_v0 scope = fy_std_region_v0 {
+        .arena = null,
+        .mark = null,
+        .generation = zero_generation,
+        .active = 0,
     };
-    let initialized: u32 = unsafe {
-        initialize_arena(&mut arena as *mut fy_std_arena_v0)
+    let u32 initialized = unsafe {
+        initialize_arena(ref mut arena as ptr mut fy_std_arena_v0)
     };
-    let began: u32 = unsafe {
+    let u32 began = unsafe {
         begin_region(
-            &mut arena as *mut fy_std_arena_v0,
-            &mut scope as *mut fy_std_region_v0
+            ref mut arena as ptr mut fy_std_arena_v0,
+            ref mut scope as ptr mut fy_std_region_v0
         )
     };
-    let size: c::size_t = unsafe { eight_size_t() };
-    let alignment: c::size_t = unsafe { eight_size_t() };
-    var data: *mut void = null;
-    let allocated: u32 = unsafe {
+    let c::size_t size = unsafe { eight_size_t() };
+    let c::size_t alignment = unsafe { eight_size_t() };
+    var ptr mut void data = null;
+    let u32 allocated = unsafe {
         allocate_zeroed(
-            &mut scope as *mut fy_std_region_v0,
+            ref mut scope as ptr mut fy_std_region_v0,
             size,
             alignment,
-            &mut data as *mut *mut void
+            ref mut data as ptr mut ptr mut void
         )
     };
-    let observed: u32 = unsafe {
+    let u32 observed = unsafe {
         allocation_is_zeroed(
-            &mut arena as *mut fy_std_arena_v0,
-            &mut scope as *mut fy_std_region_v0,
+            ref mut arena as ptr mut fy_std_arena_v0,
+            ref mut scope as ptr mut fy_std_region_v0,
             data
         )
     };
-    let reset: u32 = unsafe {
-        reset_region(&mut scope as *mut fy_std_region_v0)
+    let u32 reset = unsafe {
+        reset_region(ref mut scope as ptr mut fy_std_region_v0)
     };
-    let cleared: u32 = unsafe {
+    let u32 cleared = unsafe {
         region_is_reset(
-            &mut arena as *mut fy_std_arena_v0,
-            &mut scope as *mut fy_std_region_v0
+            ref mut arena as ptr mut fy_std_arena_v0,
+            ref mut scope as ptr mut fy_std_region_v0
         )
     };
-    let dropped: u32 = unsafe {
-        drop_arena(&mut arena as *mut fy_std_arena_v0)
+    let u32 dropped = unsafe {
+        drop_arena(ref mut arena as ptr mut fy_std_arena_v0)
     };
-    let finalized: u32 = unsafe {
-        arena_is_dropped(&mut arena as *mut fy_std_arena_v0)
+    let u32 finalized = unsafe {
+        arena_is_dropped(ref mut arena as ptr mut fy_std_arena_v0)
     };
-    if initialized == 0 && began == 0 && allocated == 0 && observed == 1 &&
-        reset == 0 && cleared == 1 && dropped == 0 && finalized == 1 {
+    return if (initialized == 0 && began == 0 && allocated == 0 && observed == 1 &&
+        reset == 0 && cleared == 1 && dropped == 0 && finalized == 1) {
         42
     } else {
         1
-    }
+    };
 }
 `
 
@@ -909,78 +880,74 @@ var arenaSourceCallExpectedCFragments = []string{
 const cStrValidationSourceCallSmokeSource = `module main;
 @repr(C)
 struct fy_std_cstr_view_v0 {
-    data: *u8;
-    length: c::size_t;
+    ptr u8 data;
+    c::size_t length;
 }
 
 @link_name("fairyc_fixture_cstr_valid_storage")
-unsafe extern C fn valid_storage() -> *u8;
+unsafe extern C fn ptr u8 valid_storage() ;
 @link_name("fairyc_fixture_cstr_valid_storage_length")
-unsafe extern C fn valid_storage_length() -> c::size_t;
+unsafe extern C fn c::size_t valid_storage_length() ;
 @link_name("fairyc_fixture_cstr_interior_nul_storage")
-unsafe extern C fn interior_nul_storage() -> *u8;
+unsafe extern C fn ptr u8 interior_nul_storage() ;
 @link_name("fairyc_fixture_cstr_interior_nul_storage_length")
-unsafe extern C fn interior_nul_storage_length() -> c::size_t;
+unsafe extern C fn c::size_t interior_nul_storage_length() ;
 @link_name("fairyc_fixture_cstr_unterminated_storage")
-unsafe extern C fn unterminated_storage() -> *u8;
+unsafe extern C fn ptr u8 unterminated_storage() ;
 @link_name("fairyc_fixture_cstr_unterminated_storage_length")
-unsafe extern C fn unterminated_storage_length() -> c::size_t;
+unsafe extern C fn c::size_t unterminated_storage_length() ;
 @link_name("fy_std_cstr_validate_v0")
-unsafe extern C fn validate_cstr(
-    storage: *u8,
-    storage_length: c::size_t,
-    output: *mut fy_std_cstr_view_v0
-) -> u32;
+unsafe extern C fn u32 validate_cstr(ptr u8 storage, c::size_t storage_length, ptr mut fy_std_cstr_view_v0 output) ;
 @link_name("fairyc_fixture_cstr_view_is_valid")
-unsafe extern C fn view_is_valid(view: *fy_std_cstr_view_v0) -> u32;
+unsafe extern C fn u32 view_is_valid(ptr fy_std_cstr_view_v0 view) ;
 
-fn main() -> i32 {
-    let valid: *u8 = unsafe { valid_storage() };
-    let valid_length: c::size_t = unsafe { valid_storage_length() };
-    var output: fy_std_cstr_view_v0 = fy_std_cstr_view_v0 {
-        data: null,
-        length: valid_length,
+fn i32 main() {
+    let ptr u8 valid = unsafe { valid_storage() };
+    let c::size_t valid_length = unsafe { valid_storage_length() };
+    var fy_std_cstr_view_v0 output = fy_std_cstr_view_v0 {
+        .data = null,
+        .length = valid_length,
     };
-    let accepted: u32 = unsafe {
-        validate_cstr(valid, valid_length, &mut output as *mut fy_std_cstr_view_v0)
+    let u32 accepted = unsafe {
+        validate_cstr(valid, valid_length, ref mut output as ptr mut fy_std_cstr_view_v0)
     };
-    let valid_observed: u32 = unsafe {
-        view_is_valid(&output as *fy_std_cstr_view_v0)
+    let u32 valid_observed = unsafe {
+        view_is_valid(ref output as ptr fy_std_cstr_view_v0)
     };
 
-    let interior_nul: *u8 = unsafe { interior_nul_storage() };
-    let interior_nul_length: c::size_t = unsafe { interior_nul_storage_length() };
-    let interior_nul_status: u32 = unsafe {
+    let ptr u8 interior_nul = unsafe { interior_nul_storage() };
+    let c::size_t interior_nul_length = unsafe { interior_nul_storage_length() };
+    let u32 interior_nul_status = unsafe {
         validate_cstr(
             interior_nul,
             interior_nul_length,
-            &mut output as *mut fy_std_cstr_view_v0
+            ref mut output as ptr mut fy_std_cstr_view_v0
         )
     };
-    let interior_failure_preserved_output: u32 = unsafe {
-        view_is_valid(&output as *fy_std_cstr_view_v0)
+    let u32 interior_failure_preserved_output = unsafe {
+        view_is_valid(ref output as ptr fy_std_cstr_view_v0)
     };
 
-    let unterminated: *u8 = unsafe { unterminated_storage() };
-    let unterminated_length: c::size_t = unsafe { unterminated_storage_length() };
-    let unterminated_status: u32 = unsafe {
+    let ptr u8 unterminated = unsafe { unterminated_storage() };
+    let c::size_t unterminated_length = unsafe { unterminated_storage_length() };
+    let u32 unterminated_status = unsafe {
         validate_cstr(
             unterminated,
             unterminated_length,
-            &mut output as *mut fy_std_cstr_view_v0
+            ref mut output as ptr mut fy_std_cstr_view_v0
         )
     };
-    let unterminated_failure_preserved_output: u32 = unsafe {
-        view_is_valid(&output as *fy_std_cstr_view_v0)
+    let u32 unterminated_failure_preserved_output = unsafe {
+        view_is_valid(ref output as ptr fy_std_cstr_view_v0)
     };
 
-    if accepted == 0 && valid_observed == 1 &&
+    return if (accepted == 0 && valid_observed == 1 &&
         interior_nul_status == 4 && interior_failure_preserved_output == 1 &&
-        unterminated_status == 3 && unterminated_failure_preserved_output == 1 {
+        unterminated_status == 3 && unterminated_failure_preserved_output == 1) {
         42
     } else {
         1
-    }
+    };
 }
 `
 
@@ -1045,196 +1012,181 @@ var cStrValidationSourceCallExpectedCFragments = []string{
 const ownedTextSourceCallSmokeSource = `module main;
 @repr(C)
 struct fy_std_system_heap_block_v0 {
-    data: *mut void;
-    size: c::size_t;
-    alignment: c::size_t;
+    ptr mut void data;
+    c::size_t size;
+    c::size_t alignment;
 }
 @repr(C)
 struct fy_std_buffer_v0 {
-    block: fy_std_system_heap_block_v0;
-    length: c::size_t;
+    fy_std_system_heap_block_v0 block;
+    c::size_t length;
 }
 @repr(C)
 struct fy_std_text_view_v0 {
-    data: *u8;
-    length: c::size_t;
+    ptr u8 data;
+    c::size_t length;
 }
 @repr(C)
 struct fy_std_string_v0 {
-    bytes: fy_std_buffer_v0;
+    fy_std_buffer_v0 bytes;
 }
 @repr(C)
 struct fy_std_cstr_view_v0 {
-    data: *u8;
-    length: c::size_t;
+    ptr u8 data;
+    c::size_t length;
 }
 @repr(C)
 struct fy_std_cstring_v0 {
-    bytes: fy_std_buffer_v0;
+    fy_std_buffer_v0 bytes;
 }
 @repr(C)
 struct fy_std_owned_text_result_v0 {
-    status: u32;
-    allocation_status: u32;
+    u32 status;
+    u32 allocation_status;
 }
 
 @link_name("fairyc_fixture_owned_text_zero_size_t")
-unsafe extern C fn zero_size_t() -> c::size_t;
+unsafe extern C fn c::size_t zero_size_t() ;
 @link_name("fairyc_fixture_owned_text_storage")
-unsafe extern C fn text_storage() -> *u8;
+unsafe extern C fn ptr u8 text_storage() ;
 @link_name("fairyc_fixture_owned_text_storage_length")
-unsafe extern C fn text_storage_length() -> c::size_t;
+unsafe extern C fn c::size_t text_storage_length() ;
 
 @link_name("fy_std_string_copy_v0")
-unsafe extern C fn string_copy(
-    input: *fy_std_text_view_v0,
-    output: *mut fy_std_string_v0
-) -> fy_std_owned_text_result_v0;
+unsafe extern C fn fy_std_owned_text_result_v0 string_copy(ptr fy_std_text_view_v0 input, ptr mut fy_std_string_v0 output) ;
 @link_name("fy_std_string_as_view_v0")
-unsafe extern C fn string_as_view(
-    input: *fy_std_string_v0,
-    output: *mut fy_std_text_view_v0
-) -> fy_std_owned_text_result_v0;
+unsafe extern C fn fy_std_owned_text_result_v0 string_as_view(ptr fy_std_string_v0 input, ptr mut fy_std_text_view_v0 output) ;
 @link_name("fy_std_string_append_v0")
-unsafe extern C fn string_append(
-    value: *mut fy_std_string_v0,
-    suffix: *fy_std_text_view_v0
-) -> fy_std_owned_text_result_v0;
+unsafe extern C fn fy_std_owned_text_result_v0 string_append(ptr mut fy_std_string_v0 value, ptr fy_std_text_view_v0 suffix) ;
 @link_name("fy_std_string_drop_v0")
-unsafe extern C fn string_drop(value: *mut fy_std_string_v0) -> fy_std_owned_text_result_v0;
+unsafe extern C fn fy_std_owned_text_result_v0 string_drop(ptr mut fy_std_string_v0 value) ;
 
 @link_name("fy_std_cstring_from_text_v0")
-unsafe extern C fn cstring_from_text(
-    input: *fy_std_text_view_v0,
-    output: *mut fy_std_cstring_v0
-) -> fy_std_owned_text_result_v0;
+unsafe extern C fn fy_std_owned_text_result_v0 cstring_from_text(ptr fy_std_text_view_v0 input, ptr mut fy_std_cstring_v0 output) ;
 @link_name("fy_std_cstring_as_view_v0")
-unsafe extern C fn cstring_as_view(
-    input: *fy_std_cstring_v0,
-    output: *mut fy_std_cstr_view_v0
-) -> fy_std_owned_text_result_v0;
+unsafe extern C fn fy_std_owned_text_result_v0 cstring_as_view(ptr fy_std_cstring_v0 input, ptr mut fy_std_cstr_view_v0 output) ;
 @link_name("fy_std_cstring_drop_v0")
-unsafe extern C fn cstring_drop(value: *mut fy_std_cstring_v0) -> fy_std_owned_text_result_v0;
+unsafe extern C fn fy_std_owned_text_result_v0 cstring_drop(ptr mut fy_std_cstring_v0 value) ;
 
 @link_name("fairyc_fixture_string_view_is_fairy")
-unsafe extern C fn string_view_is_fairy(view: *fy_std_text_view_v0) -> u32;
+unsafe extern C fn u32 string_view_is_fairy(ptr fy_std_text_view_v0 view) ;
 @link_name("fairyc_fixture_string_view_is_fairy_twice")
-unsafe extern C fn string_view_is_fairy_twice(view: *fy_std_text_view_v0) -> u32;
+unsafe extern C fn u32 string_view_is_fairy_twice(ptr fy_std_text_view_v0 view) ;
 @link_name("fairyc_fixture_string_is_empty")
-unsafe extern C fn string_is_empty(value: *fy_std_string_v0) -> u32;
+unsafe extern C fn u32 string_is_empty(ptr fy_std_string_v0 value) ;
 @link_name("fairyc_fixture_cstr_view_is_fairy")
-unsafe extern C fn cstr_view_is_fairy(view: *fy_std_cstr_view_v0) -> u32;
+unsafe extern C fn u32 cstr_view_is_fairy(ptr fy_std_cstr_view_v0 view) ;
 @link_name("fairyc_fixture_cstring_is_empty")
-unsafe extern C fn cstring_is_empty(value: *fy_std_cstring_v0) -> u32;
+unsafe extern C fn u32 cstring_is_empty(ptr fy_std_cstring_v0 value) ;
 
-fn main() -> i32 {
-    let zero: c::size_t = unsafe { zero_size_t() };
-    let storage: *u8 = unsafe { text_storage() };
-    let storage_length: c::size_t = unsafe { text_storage_length() };
-    let input: fy_std_text_view_v0 = fy_std_text_view_v0 {
-        data: storage,
-        length: storage_length,
+fn i32 main() {
+    let c::size_t zero = unsafe { zero_size_t() };
+    let ptr u8 storage = unsafe { text_storage() };
+    let c::size_t storage_length = unsafe { text_storage_length() };
+    let fy_std_text_view_v0 input = fy_std_text_view_v0 {
+        .data = storage,
+        .length = storage_length,
     };
 
-    let string_block: fy_std_system_heap_block_v0 = fy_std_system_heap_block_v0 {
-        data: null,
-        size: zero,
-        alignment: zero,
+    let fy_std_system_heap_block_v0 string_block = fy_std_system_heap_block_v0 {
+        .data = null,
+        .size = zero,
+        .alignment = zero,
     };
-    let string_buffer: fy_std_buffer_v0 = fy_std_buffer_v0 {
-        block: string_block,
-        length: zero,
+    let fy_std_buffer_v0 string_buffer = fy_std_buffer_v0 {
+        .block = string_block,
+        .length = zero,
     };
-    var owned_string: fy_std_string_v0 = fy_std_string_v0 { bytes: string_buffer };
-    var string_view: fy_std_text_view_v0 = fy_std_text_view_v0 {
-        data: null,
-        length: zero,
+    var fy_std_string_v0 owned_string = fy_std_string_v0 { .bytes = string_buffer };
+    var fy_std_text_view_v0 string_view = fy_std_text_view_v0 {
+        .data = null,
+        .length = zero,
     };
-    let copied: fy_std_owned_text_result_v0 = unsafe {
+    let fy_std_owned_text_result_v0 copied = unsafe {
         string_copy(
-            &input as *fy_std_text_view_v0,
-            &mut owned_string as *mut fy_std_string_v0
+            ref input as ptr fy_std_text_view_v0,
+            ref mut owned_string as ptr mut fy_std_string_v0
         )
     };
-    let viewed_once: fy_std_owned_text_result_v0 = unsafe {
+    let fy_std_owned_text_result_v0 viewed_once = unsafe {
         string_as_view(
-            &owned_string as *fy_std_string_v0,
-            &mut string_view as *mut fy_std_text_view_v0
+            ref owned_string as ptr fy_std_string_v0,
+            ref mut string_view as ptr mut fy_std_text_view_v0
         )
     };
-    let observed_once: u32 = unsafe {
-        string_view_is_fairy(&string_view as *fy_std_text_view_v0)
+    let u32 observed_once = unsafe {
+        string_view_is_fairy(ref string_view as ptr fy_std_text_view_v0)
     };
-    let appended: fy_std_owned_text_result_v0 = unsafe {
+    let fy_std_owned_text_result_v0 appended = unsafe {
         string_append(
-            &mut owned_string as *mut fy_std_string_v0,
-            &input as *fy_std_text_view_v0
+            ref mut owned_string as ptr mut fy_std_string_v0,
+            ref input as ptr fy_std_text_view_v0
         )
     };
-    let viewed_twice: fy_std_owned_text_result_v0 = unsafe {
+    let fy_std_owned_text_result_v0 viewed_twice = unsafe {
         string_as_view(
-            &owned_string as *fy_std_string_v0,
-            &mut string_view as *mut fy_std_text_view_v0
+            ref owned_string as ptr fy_std_string_v0,
+            ref mut string_view as ptr mut fy_std_text_view_v0
         )
     };
-    let observed_twice: u32 = unsafe {
-        string_view_is_fairy_twice(&string_view as *fy_std_text_view_v0)
+    let u32 observed_twice = unsafe {
+        string_view_is_fairy_twice(ref string_view as ptr fy_std_text_view_v0)
     };
-    let dropped_string: fy_std_owned_text_result_v0 = unsafe {
-        string_drop(&mut owned_string as *mut fy_std_string_v0)
+    let fy_std_owned_text_result_v0 dropped_string = unsafe {
+        string_drop(ref mut owned_string as ptr mut fy_std_string_v0)
     };
-    let string_empty: u32 = unsafe {
-        string_is_empty(&owned_string as *fy_std_string_v0)
+    let u32 string_empty = unsafe {
+        string_is_empty(ref owned_string as ptr fy_std_string_v0)
     };
 
-    let cstring_block: fy_std_system_heap_block_v0 = fy_std_system_heap_block_v0 {
-        data: null,
-        size: zero,
-        alignment: zero,
+    let fy_std_system_heap_block_v0 cstring_block = fy_std_system_heap_block_v0 {
+        .data = null,
+        .size = zero,
+        .alignment = zero,
     };
-    let cstring_buffer: fy_std_buffer_v0 = fy_std_buffer_v0 {
-        block: cstring_block,
-        length: zero,
+    let fy_std_buffer_v0 cstring_buffer = fy_std_buffer_v0 {
+        .block = cstring_block,
+        .length = zero,
     };
-    var owned_cstring: fy_std_cstring_v0 = fy_std_cstring_v0 { bytes: cstring_buffer };
-    var cstr_view: fy_std_cstr_view_v0 = fy_std_cstr_view_v0 {
-        data: null,
-        length: zero,
+    var fy_std_cstring_v0 owned_cstring = fy_std_cstring_v0 { .bytes = cstring_buffer };
+    var fy_std_cstr_view_v0 cstr_view = fy_std_cstr_view_v0 {
+        .data = null,
+        .length = zero,
     };
-    let created_cstring: fy_std_owned_text_result_v0 = unsafe {
+    let fy_std_owned_text_result_v0 created_cstring = unsafe {
         cstring_from_text(
-            &input as *fy_std_text_view_v0,
-            &mut owned_cstring as *mut fy_std_cstring_v0
+            ref input as ptr fy_std_text_view_v0,
+            ref mut owned_cstring as ptr mut fy_std_cstring_v0
         )
     };
-    let viewed_cstring: fy_std_owned_text_result_v0 = unsafe {
+    let fy_std_owned_text_result_v0 viewed_cstring = unsafe {
         cstring_as_view(
-            &owned_cstring as *fy_std_cstring_v0,
-            &mut cstr_view as *mut fy_std_cstr_view_v0
+            ref owned_cstring as ptr fy_std_cstring_v0,
+            ref mut cstr_view as ptr mut fy_std_cstr_view_v0
         )
     };
-    let observed_cstring: u32 = unsafe {
-        cstr_view_is_fairy(&cstr_view as *fy_std_cstr_view_v0)
+    let u32 observed_cstring = unsafe {
+        cstr_view_is_fairy(ref cstr_view as ptr fy_std_cstr_view_v0)
     };
-    let dropped_cstring: fy_std_owned_text_result_v0 = unsafe {
-        cstring_drop(&mut owned_cstring as *mut fy_std_cstring_v0)
+    let fy_std_owned_text_result_v0 dropped_cstring = unsafe {
+        cstring_drop(ref mut owned_cstring as ptr mut fy_std_cstring_v0)
     };
-    let cstring_empty: u32 = unsafe {
-        cstring_is_empty(&owned_cstring as *fy_std_cstring_v0)
+    let u32 cstring_empty = unsafe {
+        cstring_is_empty(ref owned_cstring as ptr fy_std_cstring_v0)
     };
 
-    if copied.status == 0 && copied.allocation_status == 0 &&
+    return if (copied.status == 0 && copied.allocation_status == 0 &&
         viewed_once.status == 0 && viewed_once.allocation_status == 0 && observed_once == 1 &&
         appended.status == 0 && appended.allocation_status == 0 &&
         viewed_twice.status == 0 && viewed_twice.allocation_status == 0 && observed_twice == 1 &&
         dropped_string.status == 0 && dropped_string.allocation_status == 0 && string_empty == 1 &&
         created_cstring.status == 0 && created_cstring.allocation_status == 0 &&
         viewed_cstring.status == 0 && viewed_cstring.allocation_status == 0 && observed_cstring == 1 &&
-        dropped_cstring.status == 0 && dropped_cstring.allocation_status == 0 && cstring_empty == 1 {
+        dropped_cstring.status == 0 && dropped_cstring.allocation_status == 0 && cstring_empty == 1) {
         42
     } else {
         0
-    }
+    };
 }
 `
 
@@ -1311,212 +1263,190 @@ var ownedTextSourceCallExpectedCFragments = []string{
 const linuxFileSourceCallSmokeSource = `module main;
 @repr(C)
 struct fy_std_file_result_v0 {
-    status: u32;
-    error_number: i32;
-    count: c::size_t;
+    u32 status;
+    i32 error_number;
+    c::size_t count;
 }
 @repr(C)
 struct fy_std_linux_file_v0 {
-    descriptor: c::int;
-    open: u8;
+    c::int descriptor;
+    u8 open;
 }
 @repr(C)
 struct fy_std_linux_open_options_v0 {
-    read: u8;
-    write: u8;
-    create: u8;
-    truncate: u8;
-    mode: u32;
+    u8 read;
+    u8 write;
+    u8 create;
+    u8 truncate;
+    u32 mode;
 }
 
 @link_name("fairyc_fixture_file_prepare_path")
-unsafe extern C fn prepare_path() -> u32;
+unsafe extern C fn u32 prepare_path() ;
 @link_name("fairyc_fixture_file_path")
-unsafe extern C fn file_path() -> *u8;
+unsafe extern C fn ptr u8 file_path() ;
 @link_name("fairyc_fixture_file_path_storage_length")
-unsafe extern C fn file_path_storage_length() -> c::size_t;
+unsafe extern C fn c::size_t file_path_storage_length() ;
 @link_name("fairyc_fixture_file_payload")
-unsafe extern C fn file_payload() -> *u8;
+unsafe extern C fn ptr u8 file_payload() ;
 @link_name("fairyc_fixture_file_payload_length")
-unsafe extern C fn file_payload_length() -> c::size_t;
+unsafe extern C fn c::size_t file_payload_length() ;
 @link_name("fairyc_fixture_file_three_size_t")
-unsafe extern C fn three_size_t() -> c::size_t;
+unsafe extern C fn c::size_t three_size_t() ;
 @link_name("fairyc_fixture_file_zero_size_t")
-unsafe extern C fn zero_size_t() -> c::size_t;
+unsafe extern C fn c::size_t zero_size_t() ;
 @link_name("fairyc_fixture_file_closed_descriptor")
-unsafe extern C fn closed_descriptor() -> c::int;
+unsafe extern C fn c::int closed_descriptor() ;
 @link_name("fairyc_fixture_file_read_segment_one")
-unsafe extern C fn read_segment_one() -> *mut u8;
+unsafe extern C fn ptr mut u8 read_segment_one() ;
 @link_name("fairyc_fixture_file_read_segment_two")
-unsafe extern C fn read_segment_two() -> *mut u8;
+unsafe extern C fn ptr mut u8 read_segment_two() ;
 @link_name("fairyc_fixture_file_read_segment_three")
-unsafe extern C fn read_segment_three() -> *mut u8;
+unsafe extern C fn ptr mut u8 read_segment_three() ;
 
 @link_name("fy_std_linux_file_open_v0")
-unsafe extern C fn linux_file_open(
-    path: *u8,
-    path_storage_length: c::size_t,
-    options: *fy_std_linux_open_options_v0,
-    output: *mut fy_std_linux_file_v0
-) -> fy_std_file_result_v0;
+unsafe extern C fn fy_std_file_result_v0 linux_file_open(ptr u8 path, c::size_t path_storage_length, ptr fy_std_linux_open_options_v0 options, ptr mut fy_std_linux_file_v0 output) ;
 @link_name("fy_std_linux_file_read_v0")
-unsafe extern C fn linux_file_read(
-    file: *mut fy_std_linux_file_v0,
-    buffer: *mut u8,
-    length: c::size_t
-) -> fy_std_file_result_v0;
+unsafe extern C fn fy_std_file_result_v0 linux_file_read(ptr mut fy_std_linux_file_v0 file, ptr mut u8 buffer, c::size_t length) ;
 @link_name("fy_std_linux_file_write_all_v0")
-unsafe extern C fn linux_file_write_all(
-    file: *mut fy_std_linux_file_v0,
-    buffer: *u8,
-    length: c::size_t
-) -> fy_std_file_result_v0;
+unsafe extern C fn fy_std_file_result_v0 linux_file_write_all(ptr mut fy_std_linux_file_v0 file, ptr u8 buffer, c::size_t length) ;
 @link_name("fy_std_linux_file_sync_v0")
-unsafe extern C fn linux_file_sync(
-    file: *mut fy_std_linux_file_v0
-) -> fy_std_file_result_v0;
+unsafe extern C fn fy_std_file_result_v0 linux_file_sync(ptr mut fy_std_linux_file_v0 file) ;
 @link_name("fy_std_linux_file_close_v0")
-unsafe extern C fn linux_file_close(
-    file: *mut fy_std_linux_file_v0
-) -> fy_std_file_result_v0;
+unsafe extern C fn fy_std_file_result_v0 linux_file_close(ptr mut fy_std_linux_file_v0 file) ;
 
 @link_name("fairyc_fixture_file_result_matches")
-unsafe extern C fn result_matches(
-    result: *fy_std_file_result_v0,
-    status: u32,
-    error_number: i32,
-    count: c::size_t
-) -> u32;
+unsafe extern C fn u32 result_matches(ptr fy_std_file_result_v0 result, u32 status, i32 error_number, c::size_t count) ;
 @link_name("fairyc_fixture_file_is_closed")
-unsafe extern C fn file_is_closed(file: *fy_std_linux_file_v0) -> u32;
+unsafe extern C fn u32 file_is_closed(ptr fy_std_linux_file_v0 file) ;
 @link_name("fairyc_fixture_file_buffers_match_and_cleanup")
-unsafe extern C fn buffers_match_and_cleanup() -> u32;
+unsafe extern C fn u32 buffers_match_and_cleanup() ;
 
-fn main() -> i32 {
-    let prepared: u32 = unsafe { prepare_path() };
-    let path: *u8 = unsafe { file_path() };
-    let path_length: c::size_t = unsafe { file_path_storage_length() };
-    let payload: *u8 = unsafe { file_payload() };
-    let payload_length: c::size_t = unsafe { file_payload_length() };
-    let three: c::size_t = unsafe { three_size_t() };
-    let zero: c::size_t = unsafe { zero_size_t() };
-    let closed: c::int = unsafe { closed_descriptor() };
+fn i32 main() {
+    let u32 prepared = unsafe { prepare_path() };
+    let ptr u8 path = unsafe { file_path() };
+    let c::size_t path_length = unsafe { file_path_storage_length() };
+    let ptr u8 payload = unsafe { file_payload() };
+    let c::size_t payload_length = unsafe { file_payload_length() };
+    let c::size_t three = unsafe { three_size_t() };
+    let c::size_t zero = unsafe { zero_size_t() };
+    let c::int closed = unsafe { closed_descriptor() };
 
-    var file: fy_std_linux_file_v0 = fy_std_linux_file_v0 {
-        descriptor: closed,
-        open: 0,
+    var fy_std_linux_file_v0 file = fy_std_linux_file_v0 {
+        .descriptor = closed,
+        .open = 0,
     };
-    let write_options: fy_std_linux_open_options_v0 = fy_std_linux_open_options_v0 {
-        read: 0,
-        write: 1,
-        create: 0,
-        truncate: 1,
-        mode: 384,
+    let fy_std_linux_open_options_v0 write_options = fy_std_linux_open_options_v0 {
+        .read = 0,
+        .write = 1,
+        .create = 0,
+        .truncate = 1,
+        .mode = 384,
     };
-    let opened_for_write: fy_std_file_result_v0 = unsafe {
+    let fy_std_file_result_v0 opened_for_write = unsafe {
         linux_file_open(
             path,
             path_length,
-            &write_options as *fy_std_linux_open_options_v0,
-            &mut file as *mut fy_std_linux_file_v0
+            ref write_options as ptr fy_std_linux_open_options_v0,
+            ref mut file as ptr mut fy_std_linux_file_v0
         )
     };
-    let opened_for_write_ok: u32 = unsafe {
-        result_matches(&opened_for_write as *fy_std_file_result_v0, 0, 0, zero)
+    let u32 opened_for_write_ok = unsafe {
+        result_matches(ref opened_for_write as ptr fy_std_file_result_v0, 0, 0, zero)
     };
-    let written: fy_std_file_result_v0 = unsafe {
-        linux_file_write_all(&mut file as *mut fy_std_linux_file_v0, payload, payload_length)
+    let fy_std_file_result_v0 written = unsafe {
+        linux_file_write_all(ref mut file as ptr mut fy_std_linux_file_v0, payload, payload_length)
     };
-    let written_ok: u32 = unsafe {
-        result_matches(&written as *fy_std_file_result_v0, 0, 0, payload_length)
+    let u32 written_ok = unsafe {
+        result_matches(ref written as ptr fy_std_file_result_v0, 0, 0, payload_length)
     };
-    let synced: fy_std_file_result_v0 = unsafe {
-        linux_file_sync(&mut file as *mut fy_std_linux_file_v0)
+    let fy_std_file_result_v0 synced = unsafe {
+        linux_file_sync(ref mut file as ptr mut fy_std_linux_file_v0)
     };
-    let synced_ok: u32 = unsafe {
-        result_matches(&synced as *fy_std_file_result_v0, 0, 0, zero)
+    let u32 synced_ok = unsafe {
+        result_matches(ref synced as ptr fy_std_file_result_v0, 0, 0, zero)
     };
-    let closed_after_write: fy_std_file_result_v0 = unsafe {
-        linux_file_close(&mut file as *mut fy_std_linux_file_v0)
+    let fy_std_file_result_v0 closed_after_write = unsafe {
+        linux_file_close(ref mut file as ptr mut fy_std_linux_file_v0)
     };
-    let closed_after_write_ok: u32 = unsafe {
-        result_matches(&closed_after_write as *fy_std_file_result_v0, 0, 0, zero)
+    let u32 closed_after_write_ok = unsafe {
+        result_matches(ref closed_after_write as ptr fy_std_file_result_v0, 0, 0, zero)
     };
-    let closed_state_after_write: u32 = unsafe {
-        file_is_closed(&file as *fy_std_linux_file_v0)
+    let u32 closed_state_after_write = unsafe {
+        file_is_closed(ref file as ptr fy_std_linux_file_v0)
     };
-    let closed_twice: fy_std_file_result_v0 = unsafe {
-        linux_file_close(&mut file as *mut fy_std_linux_file_v0)
+    let fy_std_file_result_v0 closed_twice = unsafe {
+        linux_file_close(ref mut file as ptr mut fy_std_linux_file_v0)
     };
-    let closed_twice_ok: u32 = unsafe {
-        result_matches(&closed_twice as *fy_std_file_result_v0, 3, 0, zero)
+    let u32 closed_twice_ok = unsafe {
+        result_matches(ref closed_twice as ptr fy_std_file_result_v0, 3, 0, zero)
     };
 
-    let read_options: fy_std_linux_open_options_v0 = fy_std_linux_open_options_v0 {
-        read: 1,
-        write: 0,
-        create: 0,
-        truncate: 0,
-        mode: 0,
+    let fy_std_linux_open_options_v0 read_options = fy_std_linux_open_options_v0 {
+        .read = 1,
+        .write = 0,
+        .create = 0,
+        .truncate = 0,
+        .mode = 0,
     };
-    let opened_for_read: fy_std_file_result_v0 = unsafe {
+    let fy_std_file_result_v0 opened_for_read = unsafe {
         linux_file_open(
             path,
             path_length,
-            &read_options as *fy_std_linux_open_options_v0,
-            &mut file as *mut fy_std_linux_file_v0
+            ref read_options as ptr fy_std_linux_open_options_v0,
+            ref mut file as ptr mut fy_std_linux_file_v0
         )
     };
-    let opened_for_read_ok: u32 = unsafe {
-        result_matches(&opened_for_read as *fy_std_file_result_v0, 0, 0, zero)
+    let u32 opened_for_read_ok = unsafe {
+        result_matches(ref opened_for_read as ptr fy_std_file_result_v0, 0, 0, zero)
     };
-    let first_buffer: *mut u8 = unsafe { read_segment_one() };
-    let second_buffer: *mut u8 = unsafe { read_segment_two() };
-    let third_buffer: *mut u8 = unsafe { read_segment_three() };
-    let read_first: fy_std_file_result_v0 = unsafe {
-        linux_file_read(&mut file as *mut fy_std_linux_file_v0, first_buffer, three)
+    let ptr mut u8 first_buffer = unsafe { read_segment_one() };
+    let ptr mut u8 second_buffer = unsafe { read_segment_two() };
+    let ptr mut u8 third_buffer = unsafe { read_segment_three() };
+    let fy_std_file_result_v0 read_first = unsafe {
+        linux_file_read(ref mut file as ptr mut fy_std_linux_file_v0, first_buffer, three)
     };
-    let read_first_ok: u32 = unsafe {
-        result_matches(&read_first as *fy_std_file_result_v0, 0, 0, three)
+    let u32 read_first_ok = unsafe {
+        result_matches(ref read_first as ptr fy_std_file_result_v0, 0, 0, three)
     };
-    let read_second: fy_std_file_result_v0 = unsafe {
-        linux_file_read(&mut file as *mut fy_std_linux_file_v0, second_buffer, three)
+    let fy_std_file_result_v0 read_second = unsafe {
+        linux_file_read(ref mut file as ptr mut fy_std_linux_file_v0, second_buffer, three)
     };
-    let read_second_ok: u32 = unsafe {
-        result_matches(&read_second as *fy_std_file_result_v0, 0, 0, three)
+    let u32 read_second_ok = unsafe {
+        result_matches(ref read_second as ptr fy_std_file_result_v0, 0, 0, three)
     };
-    let read_third: fy_std_file_result_v0 = unsafe {
-        linux_file_read(&mut file as *mut fy_std_linux_file_v0, third_buffer, three)
+    let fy_std_file_result_v0 read_third = unsafe {
+        linux_file_read(ref mut file as ptr mut fy_std_linux_file_v0, third_buffer, three)
     };
-    let read_third_ok: u32 = unsafe {
-        result_matches(&read_third as *fy_std_file_result_v0, 0, 0, three)
+    let u32 read_third_ok = unsafe {
+        result_matches(ref read_third as ptr fy_std_file_result_v0, 0, 0, three)
     };
-    let read_eof: fy_std_file_result_v0 = unsafe {
-        linux_file_read(&mut file as *mut fy_std_linux_file_v0, first_buffer, three)
+    let fy_std_file_result_v0 read_eof = unsafe {
+        linux_file_read(ref mut file as ptr mut fy_std_linux_file_v0, first_buffer, three)
     };
-    let read_eof_ok: u32 = unsafe {
-        result_matches(&read_eof as *fy_std_file_result_v0, 0, 0, zero)
+    let u32 read_eof_ok = unsafe {
+        result_matches(ref read_eof as ptr fy_std_file_result_v0, 0, 0, zero)
     };
-    let closed_after_read: fy_std_file_result_v0 = unsafe {
-        linux_file_close(&mut file as *mut fy_std_linux_file_v0)
+    let fy_std_file_result_v0 closed_after_read = unsafe {
+        linux_file_close(ref mut file as ptr mut fy_std_linux_file_v0)
     };
-    let closed_after_read_ok: u32 = unsafe {
-        result_matches(&closed_after_read as *fy_std_file_result_v0, 0, 0, zero)
+    let u32 closed_after_read_ok = unsafe {
+        result_matches(ref closed_after_read as ptr fy_std_file_result_v0, 0, 0, zero)
     };
-    let closed_state_after_read: u32 = unsafe {
-        file_is_closed(&file as *fy_std_linux_file_v0)
+    let u32 closed_state_after_read = unsafe {
+        file_is_closed(ref file as ptr fy_std_linux_file_v0)
     };
-    let observed: u32 = unsafe { buffers_match_and_cleanup() };
+    let u32 observed = unsafe { buffers_match_and_cleanup() };
 
-    if prepared == 1 && opened_for_write_ok == 1 && written_ok == 1 && synced_ok == 1 &&
+    return if (prepared == 1 && opened_for_write_ok == 1 && written_ok == 1 && synced_ok == 1 &&
         closed_after_write_ok == 1 && closed_state_after_write == 1 && closed_twice_ok == 1 &&
         opened_for_read_ok == 1 && read_first_ok == 1 && read_second_ok == 1 &&
         read_third_ok == 1 && read_eof_ok == 1 && closed_after_read_ok == 1 &&
-        closed_state_after_read == 1 && observed == 1 {
+        closed_state_after_read == 1 && observed == 1) {
         42
     } else {
         0
-    }
+    };
 }
 `
 

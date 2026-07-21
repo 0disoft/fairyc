@@ -25,8 +25,8 @@ func TestParseDeterministicForHostileCorpus(t *testing.T) {
 	}{
 		{name: "invalid-utf8-and-nul", input: append([]byte("module main;\n"), 0xff, 0x00, 0xc3, 0x28)},
 		{name: "nested-comments", input: []byte("module main;\n/* " + strings.Repeat("/* ", 64) + strings.Repeat("*/ ", 64) + "*/")},
-		{name: "delimiter-bomb", input: []byte("module main;\nfn main() -> i32 { " + strings.Repeat("(", 128) + "0;")},
-		{name: "repair-heavy", input: []byte("module main fn main( -> { let = @ return ((( ;")},
+		{name: "delimiter-bomb", input: []byte("module main;\nfn i32 main() { " + strings.Repeat("(", 128) + "0;")},
+		{name: "repair-heavy", input: []byte("module main fn i32 main( { let = @ return ((( ;")},
 	}
 	for _, testCase := range cases {
 		t.Run(testCase.name, func(t *testing.T) {
@@ -43,8 +43,8 @@ func TestParseDeterministicForHostileCorpus(t *testing.T) {
 
 func TestParseBudgetExhaustionIsSingleAndLossless(t *testing.T) {
 	t.Parallel()
-	valid := []byte("module main;\nfn main() -> i32 { return 0; }\n")
-	repairHeavy := []byte("module main;\nfn main() -> i32 { let value = 1 return value; }\n")
+	valid := []byte("module main;\nfn i32 main() { return 0; }\n")
+	repairHeavy := []byte("module main;\nfn i32 main() { let value = 1 return value; }\n")
 	cases := []struct {
 		name   string
 		input  []byte
@@ -73,8 +73,8 @@ func TestParseBudgetExhaustionIsSingleAndLossless(t *testing.T) {
 func FuzzParseDeterministicAndBounded(f *testing.F) {
 	for _, seed := range [][]byte{
 		{},
-		[]byte("module main;\nfn main() -> i32 { return 0; }\n"),
-		[]byte("module main;\nfn main() -> i32 { let x = (((1 + 2; }"),
+		[]byte("module main;\nfn i32 main() { return 0; }\n"),
+		[]byte("module main;\nfn i32 main() { let x = (((1 + 2; }"),
 		[]byte("\xef\xbb\xbfmodule main;\r\n/* outer /* inner */ done */"),
 		{0xff, 0x00, 0xc3, 0x28},
 	} {
