@@ -30,6 +30,7 @@
 - Windows MSVC C ABI fixture manifest: spec/fixtures/c-abi/manifest-windows-msvc-v0.json
 - Executable semantics and C transport: docs/mir/*.md
 - Package identity and visibility: docs/package/*.md
+- Manifest/lockfile readiness and local-exact recommendation: docs/package/manifest-lockfile-readiness.md
 - Target and C ABI contract: docs/abi/*.md
 - Runtime and standard-library contract: docs/runtime/*.md
 - Compatibility and versioning contract: docs/compatibility/*.md

@@ -87,3 +87,7 @@ solver, public manifest, lockfile, source downloader, registry, cache, or stable
 ## Deferred surface
 
 Public coordinates, manifest and lockfile schemas, source kinds and checksums, registry policy, offline and vendored behavior, version selection, feature unification, dependency cycles, workspace discovery, package signing, serialized module interfaces, and cache storage remain separate decisions. `PackageInstanceId` v1 and public-interface hash v1 are fixed independently and do not settle those formats.
+
+`manifest-lockfile-readiness.md` audits those gaps and records a smallest local-exact recommendation.
+That audit is not a public schema and does not authorize the compiler to accept `fairy.toml` or
+write `fairy.lock` yet.

@@ -401,6 +401,11 @@ eviction without inventing an unmeasured default. Public manifests, lockfiles, c
 acquisition, serialized module interfaces, persistent cross-process storage, measurements, and
 stable package commands remain Phase 3 work.
 
+The manifest/lockfile readiness audit now separates the fixed compiler graph contract from ten
+unresolved package-manager choices. Its recommended first profile is local-only, exact-version,
+per-edge-feature, explicit-workspace, cycle-free, and network-free; it remains a recommendation
+until an ADR accepts the wire format and parser strategy.
+
 - Add public package manifests, lockfiles, and serialized module interfaces on top of the resolved graph, concrete package-instance encoding, and public-interface hash contracts.
 - Wire whole-package reuse into package compilation, then adopt persistent content-addressed storage
   and default limits only from measured clean/warm workload evidence.

@@ -479,6 +479,7 @@ or arbitrary link-input option.
 - Whole-package cache-key v1, bounded memory store, fixtures, and runner: `internal/packagecache/`, `spec/fixtures/package-cache/manifest-v1.json`, `internal/packagecachefixture/`
 - MIR and C backend contracts: `docs/mir/`
 - Package identity, visibility, source/interface hashing, and bounded whole-package cache: `docs/package/package-graph-v0.md`, `docs/package/package-instance-id-v1.md`, `docs/package/package-source-digest-v1.md`, `docs/package/public-interface-hash-v1.md`, `docs/package/whole-package-cache-v1.md`
+- Manifest and lockfile readiness audit: `docs/package/manifest-lockfile-readiness.md`
 - Target and C ABI: `docs/abi/c-abi-v0.md`
 - Runtime and standard library: `docs/runtime/runtime-stdlib-v0.md`
 - Compatibility and versioning: `docs/compatibility/versioning-v0.md`
