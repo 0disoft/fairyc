@@ -59,19 +59,29 @@ A C23 output dialect can be reconsidered only when all of the following are demo
 - C11 and C23 caller/callee crossings preserve layout, symbols, and observed results;
 - deterministic fixtures contain output that is materially and intentionally different from C11.
 
+## Current prototype evidence
+
+The shared C driver records consumer mode independently from optimization profile and emission
+dialect. The Windows host smoke emits one unchanged C11 generated-Fairy aggregate-result caller and
+compiles it with its hand-written C callee under MSVC `/std:c11` and `/std:c17`, each at low and
+optimized profiles. All four executions return 42 after COFF, PE, and unwind inspection. This is a
+focused C17 forward-compatibility receipt for the existing C11 output, not a C17 emitter or broad
+runtime validation. C23 is rejected by the closed consumer-mode API.
+
 ## Consequences
 
 - Current generated source, drivers, target evidence, and native probes keep one small baseline.
-- C17 and C23 validation can be added without multiplying backend identities or cache keys for
+- C17 validation is recorded without multiplying backend identities or cache keys for
   byte-identical source.
 - Newer compiler modes cannot be mistaken for new Fairy C source features or ABI support.
-- The current C11-only keyword checker remains sufficient for current C11 execution. Expanding
-  consumer modes creates a separate implementation and language-compatibility task.
+- The current C11 keyword checker remains sufficient for the C17 evidence lane because C17 adds no
+  keywords. Enabling C23 remains a separate implementation and language-compatibility task.
 
 ## Verification
 
 - the emitter records `c11` as its only accepted dialect;
 - GCC and Clang driver arguments require strict C11 for the Linux lane;
 - the Windows host driver requests C11 from MSVC;
+- the focused Windows struct-result lane requests both C11 and C17 while retaining identical C11 source;
 - target, ABI, runtime, and instrumentation identities remain independent of the source dialect;
 - no document or CLI claims a currently implemented C17 or C23 output profile.

@@ -93,7 +93,8 @@ slot shifting. The 12 pass plans additionally generate separate caller and calle
 units that local x64 MSVC compiles, links, and executes at low and optimized profiles. Independent
 compiler or assembly/register inspection and a hosted receipt remain missing. A shared
 generated-Fairy caller now also crosses one 8-byte register-sized and one 20-byte hidden-result
-`@repr(C)` return from an independently compiled C callee at both MSVC profiles. Broader and
+`@repr(C)` return from an independently compiled C callee at both MSVC profiles. The identical C11
+units repeat those crossings under MSVC's C17 consumer mode without creating a C17 emitter. Broader and
 bidirectional source-level Fairy crossings remain missing;
 stack/shadow-store observations, callbacks, exports, and hosted evidence remain absent.
 The 14 valid plans now generate separate caller and callee objects for Clang-to-GCC and
@@ -310,7 +311,7 @@ exception, virtual-walks raiser, termination, and catcher frames, and requires o
 and independent/source-level/hosted ABI and unwind evidence exists. A host-independent PE parser
 now validates the host-smoke product, both declared-target profile products, both safe File and
 safe owned-text profile products, two direct run-target temporary products, two exec-target output
-products, and all sixteen raw or generated-Fairy Windows File, Buffer, owned-text, Arena, layout,
+products, and all eighteen raw or generated-Fairy Windows File, Buffer, owned-text, Arena, layout,
 ABI, struct-result, and unwind probe images as bounded
 AMD64 PE32+ console executables
 with aligned headers and sections and an executable `.text` entry point. That linked-image path does not inspect

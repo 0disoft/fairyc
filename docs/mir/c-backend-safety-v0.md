@@ -9,9 +9,10 @@
 
 Generated C is a reference and differential-test transport for a declared `TargetSpec` and `ToolchainSpec`. It is not universally portable C and it is not the Fairy C semantic model. The backend must preserve verified MIR without inheriting C expression-order, signed-overflow, shift, aliasing, layout, foreign-control-flow, compiler-family, libc, or host accidents.
 
-ADR 0137 fixes ISO C11 as the only normative transport dialect. A future C17 or C23 consumer lane
-may compile the identical C11 unit as compatibility evidence, but it is not a new emitter profile
-and cannot authorize newer-dialect syntax.
+ADR 0137 fixes ISO C11 as the only normative transport dialect. The Windows struct-result probe now
+compiles identical C11 units under distinct C11 and C17 MSVC consumer modes as compatibility
+evidence, but this is not a new emitter profile and cannot authorize newer-dialect syntax. C23
+consumer validation remains disabled.
 
 The first planned profile is `x86_64-linux-gnu` compiled and linked through declared Clang and GCC drivers. Emission alone is not conformance or support evidence.
 

@@ -266,7 +266,9 @@ The same shared generated-Fairy struct-result vector now also emits with the dec
 profile and crosses an independently compiled C callee through local x64 MSVC at low and optimized
 profiles. Its 8-byte two-`u32` result exercises register-sized return transport and its 20-byte
 five-`u32` result exercises the hidden-result-pointer path; both return 42 and both objects, linked
-images, and unwind data pass the bounded Windows inspectors. This is one same-MSVC source-level
+images, and unwind data pass the bounded Windows inspectors. The identical emitted C11 caller and
+callee also repeat both profiles under the distinct C17 consumer mode, for four source executions
+without creating a C17 output profile. This is one same-MSVC source-level
 crossing, not independent compiler, register-inspection, broad aggregate, callback, export, or
 hosted evidence.
 
@@ -286,7 +288,7 @@ source-level Fairy crossings, and a hosted Windows receipt remain absent. PE/COF
 supported distribution artifacts, and conformance remain later gates. A bounded parser now checks
 the host-smoke product, both declared-target profile products, both safe File and safe owned-text
 profile products, two direct run-target temporary products, two exec-target temporary output
-products, and sixteen native probe executables for raw Windows File, raw Buffer, raw owned text,
+products, and eighteen native probe executables for raw Windows File, raw Buffer, raw owned text,
 raw Arena, layout, ABI, generated-Fairy struct results, and
 unwind behavior for AMD64
 PE32+ console identity, aligned
@@ -296,7 +298,7 @@ Every local MSVC compile in the same lane now also parses its intermediate `.obj
 before cleanup, including `.text$...`, `.bss`, symbol-table, and relocation-index structure. Exact
 versioned symbol names, COMDAT selection, relocation types, unwind records, and a hosted object
 receipt remain absent, so the target evidence marker stays fail-closed.
-The twenty-seven local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
+The twenty-nine local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
 runtime-function ordering and code coverage plus referenced version 1 and version 2 unwind-record
 bounds, including handler/chained minimum tails. A separate three-object probe now raises a private
 noncontinuable exception at both profiles, validates its payload in an outer SEH filter, walks the
@@ -347,7 +349,7 @@ quickstart iterates two bytes with typed `usize` ordering and checked addition, 
 indexing, and safely converts each `u8` to `i32` through a separately built compiler process. The
 host smoke also proves maximum-`usize` addition traps under both MSVC profiles. The configured Windows
 smoke therefore covers two retained target builds, two safe File builds, two safe owned-text builds,
-two direct target executions, two exec-target executions, and twenty-seven total target or probe PE
+two direct target executions, two exec-target executions, and twenty-nine total target or probe PE
 images. The second direct execution comes from a separately built temporary
 `fairyc.exe` compiling the minimal Windows quickstart, so the standalone compiler process boundary
 is exercised without retaining or distributing it. This improves the developer execution path
@@ -399,7 +401,7 @@ Exit gate: Atlas failure cannot change compilation; stale or incompatible maps f
 ## Later capability gates
 
 - `x86_64-linux-musl`: requires a separate libc, sysroot, startup, loader, and static-distribution profile.
-- `x86_64-windows-msvc`: the TargetSpec, scalar/LLP64 C-emission product builds at both profiles, closed FY-to-project-C SystemHeap, Buffer, Arena/Region lifecycle, and UTF-8 calls, an eight-case local layout probe, 15-case host-independent Microsoft x64 classifier, 12-case same-MSVC native crossing, one generated-Fairy small/large struct-result crossing, bounded PE32+ executable inspection, structural live-COFF object inspection, static version-1/version-2 unwind-structure inspection, and a three-case native exception/virtual-walk probe exist, but complete hosted LLP64 layout evidence, broader and bidirectional source-level Fairy crossings, independent or inspected call evidence, versioned exact COFF symbol/COMDAT/relocation fixtures, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, complete UCRT/VCRuntime and deployment evidence, distribution, and debug fixtures remain required.
+- `x86_64-windows-msvc`: the TargetSpec, scalar/LLP64 C-emission product builds at both profiles, closed FY-to-project-C SystemHeap, Buffer, Arena/Region lifecycle, and UTF-8 calls, an eight-case local layout probe, 15-case host-independent Microsoft x64 classifier, 12-case same-MSVC native crossing, one generated-Fairy small/large struct-result crossing under C11 and C17 consumer modes, bounded PE32+ executable inspection, structural live-COFF object inspection, static version-1/version-2 unwind-structure inspection, and a three-case native exception/virtual-walk probe exist, but complete hosted LLP64 layout evidence, broader and bidirectional source-level Fairy crossings, independent or inspected call evidence, versioned exact COFF symbol/COMDAT/relocation fixtures, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, complete UCRT/VCRuntime and deployment evidence, distribution, and debug fixtures remain required.
 - QBE or another fast backend: requires stable internal semantics, interpreter and C oracles, ABI coverage, and measured edit-build benefit.
 - LLVM backend: requires representative workloads that justify optimization and distribution cost after simpler paths are exhausted.
 - Generics and `Vec<T>`: require non-generic stability plus compile-time, code-size, active-payload, and diagnostics fixtures.

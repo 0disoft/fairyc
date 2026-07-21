@@ -60,10 +60,10 @@ A cache key includes the full compiler build identity, language and MIR versions
 
 ## Target and ABI
 
-ISO C11 is the only normative constrained-source transport dialect under ADR 0137. A C17 or C23
-consumer mode may compile the identical C11 unit as forward-compatibility evidence, but it is not a
-new emission profile, target, ABI, or runtime baseline. Enabling a newer consumer requires its
-external-keyword guard and validation evidence first. Emitting C23-only syntax or changing a C
+ISO C11 is the only normative constrained-source transport dialect under ADR 0137. The Windows
+struct-result evidence lane compiles the identical C11 units under explicit C11 and C17 MSVC
+consumer identities; this is not a new emission profile, target, ABI, or runtime baseline. C23
+remains disabled until its external-keyword guard and validation evidence exist. Emitting C23-only syntax or changing a C
 representation requires a separate accepted decision and the corresponding compatibility change.
 
 Target schema versions the structure of target descriptions. ABI profile versions the meaning of layout, calling convention, return classification, and target-visible representation. Fixing an implementation to match an unchanged profile changes the compiler build and invalidates cache; changing the specified meaning creates a new ABI profile major.

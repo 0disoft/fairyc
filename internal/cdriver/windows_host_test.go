@@ -102,6 +102,25 @@ func TestWindowsHostDriverFailsClosedOnIneligibleHost(t *testing.T) {
 	}
 }
 
+func TestMSVCStandardFlagKeepsConsumerModesClosed(t *testing.T) {
+	t.Parallel()
+	for _, testCase := range []struct {
+		mode ConsumerMode
+		want string
+	}{
+		{mode: C11ConsumerMode, want: "/std:c11"},
+		{mode: C17ConsumerMode, want: "/std:c17"},
+	} {
+		got, err := msvcStandardFlag(testCase.mode)
+		if err != nil || got != testCase.want {
+			t.Fatalf("msvcStandardFlag(%q) = %q, %v", testCase.mode, got, err)
+		}
+	}
+	if _, err := msvcStandardFlag("c23"); err == nil || !strings.Contains(err.Error(), "unsupported C consumer mode") {
+		t.Fatalf("msvcStandardFlag(c23) error = %v", err)
+	}
+}
+
 func TestResolveProgramFilesX86FindsVisualStudioInstallerWhenAvailable(t *testing.T) {
 	if runtime.GOOS != "windows" {
 		t.Skip("Program Files discovery is Windows-specific")

@@ -231,12 +231,14 @@ metadata, or hosted evidence.
 A separate shared generated-Fairy probe does cover one source-level result boundary. The Windows
 backend emits its `@repr(C)` 8-byte two-`u32` and 20-byte five-`u32` foreign results, then local x64
 MSVC compiles that caller and a hand-written C callee as separate objects at low and optimized
-profiles. Both executions return 42, and both objects, linked images, and unwind structures pass the
-bounded inspectors. This proves the same-MSVC source-to-C return path for those two shapes only; it
+profiles. The identical C11 units repeat under explicit C11 and C17 consumer identities. All four
+executions return 42, and every object, linked image, and unwind structure passes the bounded
+inspectors. This proves the same-MSVC source-to-C return path and focused C17 consumer compatibility
+for those two shapes only; it
 does not provide an independent compiler or register oracle, aggregate parameters, callbacks,
 exports, nested results, or hosted evidence.
 
-The Windows smoke additionally parses all twenty-seven linked target or probe executable images without
+The Windows smoke additionally parses all twenty-nine linked target or probe executable images without
 invoking the host loader as the parser. The target-neutral product, both declared-target profile
 products, both safe FY File lifecycle products, both safe FY owned-text lifecycle products, two
 direct run-target temporary products, two exec-target temporary output products, plus both profiles
@@ -301,7 +303,8 @@ independently inspected Microsoft x64 crossings,
 PE/COFF object and unwind fixtures, complete runtime and standard library, hosted
 Windows receipt, toolchain baseline, and provisioning gates. The local
 eight-case layout probe, twelve-case same-MSVC C crossing, and three-case native unwind probe are
-joined by one same-MSVC generated-Fairy small/large struct-result crossing and remain deliberately
+joined by one same-MSVC generated-Fairy small/large struct-result crossing under C11 and C17
+consumer modes and remain deliberately
 insufficient to clear those markers.
 
 `experimental run-target` consumes the same Windows target unit and closed support closure, then
@@ -328,7 +331,7 @@ pointers, by-value structs, and hidden aggregate returns. Native crossings must 
 narrow signed and unsigned values, nested aggregates, null raw pointers, and the permitted callback
 form before the target can claim that source-level gate. The current shared generated-Fairy
 struct-result probe covers one register and one hidden return in both Linux compiler directions and
-in both local MSVC profiles; it does not yet cover aggregate parameters, mixed INTEGER/SSE source
+in both local MSVC profiles under C11 and C17 consumer modes; it does not yet cover aggregate parameters, mixed INTEGER/SSE source
 records, nested-result interaction, or a C-to-Fairy export direction.
 
 The planned transport matrix uses Clang as the primary compiler and GCC as an independent compiler, each at low and optimized profiles. Sanitizers supplement but do not define conformance.

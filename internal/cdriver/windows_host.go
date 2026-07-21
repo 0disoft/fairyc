@@ -33,10 +33,11 @@ type WindowsHostObject struct {
 // WindowsHostArtifact is one bounded PE executable plus its validated COFF objects.
 // It is not a distributable target artifact or a target-conformance receipt.
 type WindowsHostArtifact struct {
-	Bytes     []byte
-	Objects   []WindowsHostObject
-	Toolchain WindowsHostToolchain
-	Profile   Profile
+	Bytes        []byte
+	Objects      []WindowsHostObject
+	Toolchain    WindowsHostToolchain
+	Profile      Profile
+	ConsumerMode ConsumerMode
 }
 
 // WindowsHostOutcome is one bounded local MSVC execution result. ExitCode preserves the program's i32 bits.
@@ -132,7 +133,7 @@ func BuildWindowsHost(toolchain WindowsHostToolchain, profile Profile, unitSourc
 	if unitSource == "" || runtimeSource == "" {
 		return WindowsHostArtifact{}, fmt.Errorf("C unit and runtime source must be non-empty")
 	}
-	return buildWindowsMSVC(toolchain, profile, []windowsMSVCSource{
+	return buildWindowsMSVC(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{
 		{Name: "unit.c", Contents: unitSource},
 		{Name: "runtime.c", Contents: runtimeSource},
 	})
@@ -147,7 +148,7 @@ func BuildWindowsMSVCTarget(toolchain WindowsHostToolchain, profile Profile, uni
 	if unitSource == "" || runtimeSource == "" {
 		return WindowsHostArtifact{}, fmt.Errorf("target C unit and runtime source must be non-empty")
 	}
-	return buildWindowsMSVC(toolchain, profile, []windowsMSVCSource{
+	return buildWindowsMSVC(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{
 		{Name: "unit.c", Contents: unitSource},
 		{Name: "runtime.c", Contents: runtimeSource},
 	})
@@ -161,19 +162,26 @@ func BuildWindowsMSVCProbe(toolchain WindowsHostToolchain, profile Profile, prob
 	if probeSource == "" {
 		return WindowsHostArtifact{}, fmt.Errorf("MSVC layout probe source must be non-empty")
 	}
-	return buildWindowsMSVC(toolchain, profile, []windowsMSVCSource{{Name: "probe.c", Contents: probeSource}})
+	return buildWindowsMSVC(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{{Name: "probe.c", Contents: probeSource}})
 }
 
 // BuildWindowsMSVCABIProbe compiles one caller and one callee translation unit
 // separately before linking them with local x64 MSVC.
 func BuildWindowsMSVCABIProbe(toolchain WindowsHostToolchain, profile Profile, callerSource, calleeSource string) (WindowsHostArtifact, error) {
+	return BuildWindowsMSVCABIProbeWithConsumerMode(toolchain, profile, C11ConsumerMode, callerSource, calleeSource)
+}
+
+// BuildWindowsMSVCABIProbeWithConsumerMode compiles one unchanged C11 caller
+// and callee under an explicit validation consumer mode. C17 is evidence only
+// and does not create another Fairy C emission profile.
+func BuildWindowsMSVCABIProbeWithConsumerMode(toolchain WindowsHostToolchain, profile Profile, consumerMode ConsumerMode, callerSource, calleeSource string) (WindowsHostArtifact, error) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		return WindowsHostArtifact{}, fmt.Errorf("MSVC ABI probe requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
 	}
 	if callerSource == "" || calleeSource == "" {
 		return WindowsHostArtifact{}, fmt.Errorf("MSVC ABI caller and callee sources must be non-empty")
 	}
-	return buildWindowsMSVC(toolchain, profile, []windowsMSVCSource{
+	return buildWindowsMSVC(toolchain, profile, consumerMode, []windowsMSVCSource{
 		{Name: "caller.c", Contents: callerSource},
 		{Name: "callee.c", Contents: calleeSource},
 	})
@@ -188,7 +196,7 @@ func BuildWindowsMSVCUnwindProbe(toolchain WindowsHostToolchain, profile Profile
 	if catcherSource == "" || frameSource == "" || raiserSource == "" {
 		return WindowsHostArtifact{}, fmt.Errorf("MSVC unwind catcher, frame, and raiser sources must be non-empty")
 	}
-	return buildWindowsMSVC(toolchain, profile, []windowsMSVCSource{
+	return buildWindowsMSVC(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{
 		{Name: "catcher.c", Contents: catcherSource},
 		{Name: "frame.c", Contents: frameSource},
 		{Name: "raiser.c", Contents: raiserSource},
@@ -200,9 +208,13 @@ type windowsMSVCSource struct {
 	Contents string
 }
 
-func buildWindowsMSVC(toolchain WindowsHostToolchain, profile Profile, sources []windowsMSVCSource) (WindowsHostArtifact, error) {
+func buildWindowsMSVC(toolchain WindowsHostToolchain, profile Profile, consumerMode ConsumerMode, sources []windowsMSVCSource) (WindowsHostArtifact, error) {
 	if profile != LowProfile && profile != OptimizedProfile {
 		return WindowsHostArtifact{}, fmt.Errorf("unsupported C profile %q", profile.Name)
+	}
+	standardFlag, err := msvcStandardFlag(consumerMode)
+	if err != nil {
+		return WindowsHostArtifact{}, err
 	}
 	if toolchain.Name != "msvc" || toolchain.Path == "" || toolchain.Version == "" || len(toolchain.Environment) == 0 {
 		return WindowsHostArtifact{}, fmt.Errorf("invalid resolved MSVC host toolchain")
@@ -240,7 +252,7 @@ func buildWindowsMSVC(toolchain WindowsHostToolchain, profile Profile, sources [
 		optimization = "/O2"
 	}
 	arguments := []string{
-		"/nologo", "/std:c11", "/TC", "/W4", "/WX", "/MT", optimization,
+		"/nologo", standardFlag, "/TC", "/W4", "/WX", "/MT", optimization,
 	}
 	arguments = append(arguments, sourcePaths...)
 	arguments = append(arguments, "/Fe:"+executablePath, "/link", "/INCREMENTAL:NO")
@@ -262,7 +274,18 @@ func buildWindowsMSVC(toolchain WindowsHostToolchain, profile Profile, sources [
 		}
 		objects = append(objects, WindowsHostObject{Name: name, Bytes: objectBytes})
 	}
-	return WindowsHostArtifact{Bytes: contents, Objects: objects, Toolchain: toolchain, Profile: profile}, nil
+	return WindowsHostArtifact{Bytes: contents, Objects: objects, Toolchain: toolchain, Profile: profile, ConsumerMode: consumerMode}, nil
+}
+
+func msvcStandardFlag(mode ConsumerMode) (string, error) {
+	switch mode {
+	case C11ConsumerMode:
+		return "/std:c11", nil
+	case C17ConsumerMode:
+		return "/std:c17", nil
+	default:
+		return "", fmt.Errorf("unsupported C consumer mode %q", mode)
+	}
 }
 
 // ExecuteWindowsHost runs one temporary PE and returns its exact i32 exit bits and bounded output.

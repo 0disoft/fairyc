@@ -31,6 +31,18 @@ type Profile struct {
 	optimizationFlag string
 }
 
+// ConsumerMode identifies the C language mode used to validate one unchanged
+// generated translation unit. It is separate from the emission dialect,
+// target ABI, optimization profile, and validation instrumentation.
+type ConsumerMode string
+
+const (
+	// C11ConsumerMode is the normative Stage 0 transport consumer mode.
+	C11ConsumerMode ConsumerMode = "c11"
+	// C17ConsumerMode validates forward compatibility of identical C11 source.
+	C17ConsumerMode ConsumerMode = "c17"
+)
+
 var (
 	// LowProfile preserves the low-optimization differential and development path.
 	LowProfile = Profile{Name: "low", optimizationFlag: "-O0"}
@@ -50,9 +62,10 @@ type Toolchain struct {
 
 // Artifact is one bounded linked executable image and its build identity.
 type Artifact struct {
-	Bytes     []byte
-	Toolchain Toolchain
-	Profile   Profile
+	Bytes        []byte
+	Toolchain    Toolchain
+	Profile      Profile
+	ConsumerMode ConsumerMode
 }
 
 // CrossArtifact is one executable whose caller and callee objects came from different compilers.
@@ -61,6 +74,7 @@ type CrossArtifact struct {
 	CallerToolchain Toolchain
 	CalleeToolchain Toolchain
 	Profile         Profile
+	ConsumerMode    ConsumerMode
 }
 
 // Resolve requires the declared Linux/amd64 glibc host and one closed compiler identity.
@@ -160,7 +174,7 @@ func BuildCrossCompiler(caller, callee Toolchain, profile Profile, callerSource,
 	if err != nil {
 		return CrossArtifact{}, err
 	}
-	return CrossArtifact{Bytes: contents, CallerToolchain: caller, CalleeToolchain: callee, Profile: profile}, nil
+	return CrossArtifact{Bytes: contents, CallerToolchain: caller, CalleeToolchain: callee, Profile: profile, ConsumerMode: C11ConsumerMode}, nil
 }
 
 func validateCrossToolchains(caller, callee Toolchain) error {
@@ -235,7 +249,7 @@ func build(toolchain Toolchain, profile Profile, instrumentationFlags []string, 
 	if err != nil {
 		return Artifact{}, err
 	}
-	return Artifact{Bytes: contents, Toolchain: toolchain, Profile: profile}, nil
+	return Artifact{Bytes: contents, Toolchain: toolchain, Profile: profile, ConsumerMode: C11ConsumerMode}, nil
 }
 
 func buildArguments(profile Profile, instrumentationFlags []string, unitPath, runtimePath, executablePath string) []string {

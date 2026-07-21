@@ -183,7 +183,7 @@ host evidence only; they are not Linux native parity, a hosted Windows receipt, 
 layout coverage, independent compiler/register inspection, PE/COFF object conformance, or complete
 Windows call/ABI conformance. The same intent also emits one generated-Fairy caller for an 8-byte
 and a 20-byte `@repr(C)` result, compiles its hand-written C callee separately, and requires exit 42
-at both profiles. That is one same-MSVC source-level result crossing, not broad or bidirectional
+at both profiles under both C11 and C17 consumer modes. That is one same-MSVC source-level result crossing plus focused C17 compatibility evidence, not broad or bidirectional
 Fairy FFI. It separately compiles the project-owned
 Windows File implementation and its caller probe, then executes create/write/sync/close/reopen,
 partial read, EOF, forced close failure, and repeated drop under both profiles. A separate checked-in
@@ -196,7 +196,7 @@ executes them under both profiles, and requires exact exception payload, ordered
 `RtlVirtualUnwind` frame discovery, and one abnormal `__finally` execution. Before execution, the
 same intent parses the target-neutral product image, both declared-target profile images, the two
 safe FY File lifecycle images, the two safe FY owned-text lifecycle images, both direct run-target temporary images, both exec-target temporary
-images, and all sixteen raw or generated-Fairy Windows File, Buffer, owned-text, Arena, layout, ABI,
+images, and all eighteen raw or generated-Fairy Windows File, Buffer, owned-text, Arena, layout, ABI,
 struct-result, and unwind probe images
 and requires bounded AMD64 PE32+ non-DLL console
 identity, aligned image/header/section ranges, a readable executable `.text`, and an executable
@@ -211,7 +211,7 @@ uninitialized-data characteristic. Object bytes are not uploaded or retained. Ex
 COMDAT, relocation-type, unwind, debug, and hosted object expectations remain unconfigured.
 The ordinary Go tests include a 154-section positive regression object and reject 4,097 sections;
 the exact section count emitted by a future MSVC version remains unstabilized.
-All twenty-seven linked target or probe PE images additionally traverse the Microsoft x64 exception directory before
+All twenty-nine linked target or probe PE images additionally traverse the Microsoft x64 exception directory before
 execution. The local gate requires sorted nonoverlapping `.pdata` runtime-function ranges,
 executable code coverage, DWORD-aligned file-backed unwind records, bounded version 1 prolog slots,
 bounded version 2 epilog descriptors, and minimum handler/chained tails. The receipt reports the

@@ -20,6 +20,13 @@ func TestProfilesAreClosedAndDistinct(t *testing.T) {
 	}
 }
 
+func TestConsumerModesAreSeparateFromOptimizationProfiles(t *testing.T) {
+	t.Parallel()
+	if C11ConsumerMode != "c11" || C17ConsumerMode != "c17" || C11ConsumerMode == C17ConsumerMode {
+		t.Fatalf("consumer modes = %q, %q", C11ConsumerMode, C17ConsumerMode)
+	}
+}
+
 func TestBuildArgumentsKeepSanitizersOutOfProductProfiles(t *testing.T) {
 	t.Parallel()
 	product := buildArguments(LowProfile, nil, "unit.c", "runtime.c", "program")

@@ -354,8 +354,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - The C backend is the only committed Stage 0 product backend and emits a constrained target/toolchain profile rather than universally portable C.
 - ISO C11 is the only normative constrained-C transport dialect. C17 or C23 compiler modes, if
   added, validate the identical C11 source as consumers and do not create product emission profiles
-  or authorize C23-only output. Target ABI, runtime capabilities, and instrumentation remain
-  separate compatibility axes as fixed by ADR 0137.
+  or authorize C23-only output. The Windows ABI evidence lane now repeats its generated-Fairy
+  small/large struct-result crossing under explicit C11 and C17 MSVC consumer identities; C23
+  remains disabled. Target ABI, runtime capabilities, and instrumentation remain separate
+  compatibility axes as fixed by ADR 0137.
 - `internal/target` owns executable `fairyc.target-spec/v0` descriptions. The first Linux target
   records host-independent LP64, scalar, pointer, SysV AMD64, ELF, unwind, debug, and C-layout facts.
   The provisional Windows target records LLP64, four-byte C `long`, 32-byte shadow space, Microsoft
