@@ -1,8 +1,8 @@
 module main;
 
-fn invalid() -> i32 {
-    var pending: Result<i32, i32> = Result::Ok(1);
-    pending = Result::Ok(2);
+fn i32 invalid() {
+    var Result<i32, i32> pending = .ok(1);
+    pending = .ok(2);
     discard pending;
-    0
+    return 0;
 }

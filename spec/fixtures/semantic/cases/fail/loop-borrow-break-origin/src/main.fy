@@ -1,10 +1,10 @@
 module main;
 
-fn select(run: bool, left: &i32, right: &i32) -> &i32 {
-    var current: &i32 = left;
-    while run {
+fn ref i32 select(bool run, ref i32 left, ref i32 right) {
+    var ref i32 current = left;
+    while (run) {
         current = right;
         break;
     }
-    current
+    return current;
 }

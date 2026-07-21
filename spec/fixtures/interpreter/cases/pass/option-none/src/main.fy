@@ -1,12 +1,12 @@
 module main;
 
-fn choose() -> Option<i32> {
-    Option::None
+fn Option<i32> choose() {
+    return .none;
 }
 
-fn main() -> i32 {
-    match choose() {
-        Option::Some(value) => value,
-        Option::None => 42,
-    }
+fn i32 main() {
+    return switch (choose()) {
+        case .some(value) : { value }
+        case .none : { 42 }
+    };
 }

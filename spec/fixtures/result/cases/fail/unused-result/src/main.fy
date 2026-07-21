@@ -4,7 +4,7 @@ enum Error {
     Failed;
 }
 
-fn invalid(input: Result<i32, Error>) -> i32 {
+fn i32 invalid(Result<i32, Error> input) {
     input;
-    0
+    return 0;
 }

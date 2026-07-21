@@ -1,5 +1,5 @@
 module main;
 
-fn answer() -> i32 {
-    missing
+fn i32 answer() {
+    return missing;
 }

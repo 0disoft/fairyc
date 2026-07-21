@@ -1,12 +1,12 @@
 module main;
 
 resource String {
-    data: *mut void;
-    length: usize;
+    ptr mut void data;
+    usize length;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
-fn as_str(value: &String) -> &str {
-    str::from_raw_parts(value, value.data, value.length)
+fn ref str as_str(ref String value) {
+    return str::from_raw_parts(value, value.data, value.length);
 }

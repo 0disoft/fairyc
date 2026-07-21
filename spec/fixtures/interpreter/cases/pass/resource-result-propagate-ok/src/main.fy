@@ -1,19 +1,19 @@
 module main;
 
 resource Token {
-    value: i32;
+    i32 value;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
-fn read(input: Result<Token, i32>) -> Result<i32, i32> {
-    let token: Token = input?;
-    Result::Ok(token.value)
+fn Result<i32, i32> read(Result<Token, i32> input) {
+    let Token token = input?;
+    return .ok(token.value);
 }
 
-fn main() -> i32 {
-    match read(Result::Ok(Token { value: 42 })) {
-        Result::Ok(value) => value,
-        Result::Err(error) => -error,
-    }
+fn i32 main() {
+    return switch (read(.ok(Token { .value = 42 }))) {
+        case .ok(value) : { value }
+        case .err(error) : { -error }
+    };
 }

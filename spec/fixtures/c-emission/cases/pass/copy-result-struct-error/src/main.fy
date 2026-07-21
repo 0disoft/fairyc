@@ -1,21 +1,21 @@
 module main;
 
 struct ConsoleError {
-    status: u32;
-    written: usize;
+    u32 status;
+    usize written;
 }
 
-fn write(accept: bool) -> Result<usize, ConsoleError> {
-    if accept {
-        Result::Ok(42)
+fn Result<usize, ConsoleError> write(bool accept) {
+    return if (accept) {
+        .ok(42)
     } else {
-        Result::Err(ConsoleError { status: 3, written: 7 })
-    }
+        .err(ConsoleError { .status = 3, .written = 7 })
+    };
 }
 
-fn main() -> i32 {
-    match write(false) {
-        Result::Ok(_) => 0,
-        Result::Err(error) => if error.status == 3 { 42 } else { 0 },
-    }
+fn i32 main() {
+    return switch (write(false)) {
+        case .ok(_) : { 0 }
+        case .err(error) : { if (error.status == 3) { 42 } else { 0 } }
+    };
 }

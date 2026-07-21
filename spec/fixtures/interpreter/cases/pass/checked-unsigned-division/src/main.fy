@@ -1,32 +1,32 @@
 module main;
 
-fn divide() -> i32 {
-    let byte_input: u8 = 84;
-    let byte: u8 = byte_input / 2;
-    let word_input: u32 = 85;
-    let word: u32 = word_input % 43;
-    let size_input: usize = 84;
-    let size: usize = size_input / 2;
-    if byte == 42 && word == 42 && size == 42 { 42 } else { 1 }
+fn i32 divide() {
+    let u8 byte_input = 84;
+    let u8 byte = byte_input / 2;
+    let u32 word_input = 85;
+    let u32 word = word_input % 43;
+    let usize size_input = 84;
+    let usize size = size_input / 2;
+    return if (byte == 42 && word == 42 && size == 42) { 42 } else { 1 };
 }
 
-fn u8_zero() -> i32 {
-    let numerator: u8 = 42;
-    let zero: u8 = 0;
-    let value: u8 = numerator / zero;
-    42
+fn i32 u8_zero() {
+    let u8 numerator = 42;
+    let u8 zero = 0;
+    let u8 value = numerator / zero;
+    return 42;
 }
 
-fn u32_zero() -> i32 {
-    let numerator: u32 = 42;
-    let zero: u32 = 0;
-    let value: u32 = numerator % zero;
-    42
+fn i32 u32_zero() {
+    let u32 numerator = 42;
+    let u32 zero = 0;
+    let u32 value = numerator % zero;
+    return 42;
 }
 
-fn usize_zero() -> i32 {
-    let numerator: usize = 42;
-    let zero: usize = 0;
-    let value: usize = numerator / zero;
-    42
+fn i32 usize_zero() {
+    let usize numerator = 42;
+    let usize zero = 0;
+    let usize value = numerator / zero;
+    return 42;
 }

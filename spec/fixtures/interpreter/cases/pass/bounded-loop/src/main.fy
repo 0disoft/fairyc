@@ -1,11 +1,11 @@
 module main;
 
-fn main() -> i32 {
-    var count: i32 = 0;
-    var total: i32 = 0;
-    while count < 6 {
+fn i32 main() {
+    var i32 count = 0;
+    var i32 total = 0;
+    while (count < 6) {
         total = total + 7;
         count = count + 1;
     }
-    total
+    return total;
 }

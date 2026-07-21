@@ -1,25 +1,25 @@
 module main;
 
-fn add(left: i32, right: i32) -> i32 {
-    left + right
+fn i32 add(i32 left, i32 right) {
+    return left + right;
 }
 
-fn subtract(left: i32, right: i32) -> i32 {
-    left - right
+fn i32 subtract(i32 left, i32 right) {
+    return left - right;
 }
 
-fn multiply(left: i32, right: i32) -> i32 {
-    left * right
+fn i32 multiply(i32 left, i32 right) {
+    return left * right;
 }
 
-fn negate(value: i32) -> i32 {
-    -value
+fn i32 negate(i32 value) {
+    return -value;
 }
 
-fn shift_right(value: i32, amount: i32) -> i32 {
-    value >> amount
+fn i32 shift_right(i32 value, i32 amount) {
+    return value >> amount;
 }
 
-fn remainder(left: i32, right: i32) -> i32 {
-    left % right
+fn i32 remainder(i32 left, i32 right) {
+    return left % right;
 }

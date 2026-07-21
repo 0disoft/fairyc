@@ -1,13 +1,13 @@
 module main;
 
 resource Pair {
-    left: i32;
-    right: i32;
+    i32 left;
+    i32 right;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
-fn main() -> i32 {
-    let pair: Pair = Pair { left: 1, right: 42 };
-    pair.right
+fn i32 main() {
+    let Pair pair = Pair { .left = 1, .right = 42 };
+    return pair.right;
 }

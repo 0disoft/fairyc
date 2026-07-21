@@ -1,16 +1,16 @@
 module main;
 
 resource Token {
-    value: i32;
+    i32 value;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
-fn read(token: &Token) -> i32 {
-    token.value
+fn i32 read(ref Token token) {
+    return token.value;
 }
 
-fn run() -> i32 {
-    let token: Token = Token { value: 1 };
-    read(&token)
+fn i32 run() {
+    let Token token = Token { .value = 1 };
+    return read(ref token);
 }

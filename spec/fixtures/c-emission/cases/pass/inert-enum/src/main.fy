@@ -2,18 +2,18 @@ module main;
 
 enum Message {
     Empty;
-    Value { amount: i32; };
-    Pair { left: i32; right: i32; };
+    Value { i32 amount; };
+    Pair { i32 left; i32 right; };
 }
 
-fn score(message: Message) -> i32 {
-    match message {
-        Message::Empty => 0,
-        Message::Value { amount: value } => value,
-        Message::Pair { left: first, right: second } => first + second,
-    }
+fn i32 score(Message message) {
+    return switch (message) {
+        case .Empty : { 0 }
+        case .Value { .amount = value } : { value }
+        case .Pair { .left = first, .right = second } : { first + second }
+    };
 }
 
-fn main() -> i32 {
-    score(Message::Pair { left: 20, right: 22 })
+fn i32 main() {
+    return score(.Pair { .left = 20, .right = 22 });
 }

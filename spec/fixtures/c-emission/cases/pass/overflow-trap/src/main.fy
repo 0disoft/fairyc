@@ -1,5 +1,5 @@
 module main;
 
-fn main() -> i32 {
-    2147483647 + 1
+fn i32 main() {
+    return 2147483647 + 1;
 }

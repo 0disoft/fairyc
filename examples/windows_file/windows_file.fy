@@ -2,171 +2,157 @@ module examples::windows_file::windows_file;
 
 @repr(C)
 struct fy_std_windows_file_result_v0 {
-    status: u32;
-    os_code: u32;
-    count: usize;
+    u32 status;
+    u32 os_code;
+    usize count;
 }
 
 @repr(C)
 struct fy_std_windows_open_options_v0 {
-    read: u8;
-    write: u8;
-    create: u8;
-    truncate: u8;
+    u8 read;
+    u8 write;
+    u8 create;
+    u8 truncate;
 }
 
 pub struct FileError {
-    status: u32;
-    os_code: u32;
-    completed: usize;
+    u32 status;
+    u32 os_code;
+    usize completed;
 }
 
 @effects(filesystem)
 pub resource File {
-    handle: *mut void;
-    open: u8;
+    ptr mut void handle;
+    u8 open;
 
-    drop fn(self: &mut Self) {
-        let dropped: u32 = unsafe {
-            file_drop_raw(&mut self as *mut void)
+    cleanup {
+        let u32 dropped = unsafe {
+            file_drop_raw(ref mut this as ptr mut void)
         };
     }
 }
 
 @effects(filesystem)
 @link_name("fy_std_windows_file_open_v0")
-unsafe extern C fn file_open_raw(
-    path: *u8,
-    options: *fy_std_windows_open_options_v0,
-    output: *mut void
-) -> fy_std_windows_file_result_v0;
+unsafe extern C fn fy_std_windows_file_result_v0 file_open_raw(ptr u8 path, ptr fy_std_windows_open_options_v0 options, ptr mut void output) ;
 
 @effects(filesystem)
 @link_name("fy_std_windows_file_read_v0")
-unsafe extern C fn file_read_raw(
-    file: *mut void,
-    buffer: *mut u8,
-    length: usize
-) -> fy_std_windows_file_result_v0;
+unsafe extern C fn fy_std_windows_file_result_v0 file_read_raw(ptr mut void file, ptr mut u8 buffer, usize length) ;
 
 @effects(filesystem)
 @link_name("fy_std_windows_file_write_all_v0")
-unsafe extern C fn file_write_all_raw(
-    file: *mut void,
-    data: *u8,
-    length: usize
-) -> fy_std_windows_file_result_v0;
+unsafe extern C fn fy_std_windows_file_result_v0 file_write_all_raw(ptr mut void file, ptr u8 data, usize length) ;
 
 @effects(filesystem)
 @link_name("fy_std_windows_file_sync_v0")
-unsafe extern C fn file_sync_raw(file: *mut void) -> fy_std_windows_file_result_v0;
+unsafe extern C fn fy_std_windows_file_result_v0 file_sync_raw(ptr mut void file) ;
 
 @effects(filesystem)
 @link_name("fy_std_windows_file_close_v0")
-unsafe extern C fn file_close_raw(file: *mut void) -> fy_std_windows_file_result_v0;
+unsafe extern C fn fy_std_windows_file_result_v0 file_close_raw(ptr mut void file) ;
 
 @effects(filesystem)
 @link_name("fy_std_windows_file_drop_v0")
-unsafe extern C fn file_drop_raw(file: *mut void) -> u32;
+unsafe extern C fn u32 file_drop_raw(ptr mut void file) ;
 
-fn to_error(result: fy_std_windows_file_result_v0) -> FileError {
-    FileError {
-        status: result.status,
-        os_code: result.os_code,
-        completed: result.count,
-    }
+fn FileError to_error(fy_std_windows_file_result_v0 result) {
+    return FileError {
+        .status = result.status,
+        .os_code = result.os_code,
+        .completed = result.count,
+    };
 }
 
 @effects(filesystem)
-fn discard_closed(file: File) -> i32 {
-    0
+fn i32 discard_closed(File file) {
+    return 0;
 }
 
 @effects(filesystem)
-fn open_with(
-    path: &CStr,
-    options: fy_std_windows_open_options_v0
-) -> Result<File, FileError> {
-    var file: File = File { handle: null, open: 0 };
-    let result: fy_std_windows_file_result_v0 = unsafe {
+fn Result<File, FileError> open_with(ref CStr path, fy_std_windows_open_options_v0 options) {
+    var File file = File { .handle = null, .open = 0 };
+    let fy_std_windows_file_result_v0 result = unsafe {
         file_open_raw(
-            path as *u8,
-            &options as *fy_std_windows_open_options_v0,
-            &mut file as *mut void
+            path as ptr u8,
+            ref options as ptr fy_std_windows_open_options_v0,
+            ref mut file as ptr mut void
         )
     };
-    if result.status == 0 {
-        Result::Ok(file)
+    return if (result.status == 0) {
+        .ok(file)
     } else {
-        let discarded: i32 = discard_closed(file);
-        Result::Err(to_error(result))
-    }
-}
-
-@effects(filesystem)
-pub fn create_truncate(path: &CStr) -> Result<File, FileError> {
-    open_with(path, fy_std_windows_open_options_v0 {
-        read: 0,
-        write: 1,
-        create: 1,
-        truncate: 1,
-    })
-}
-
-@effects(filesystem)
-pub fn open_read(path: &CStr) -> Result<File, FileError> {
-    open_with(path, fy_std_windows_open_options_v0 {
-        read: 1,
-        write: 0,
-        create: 0,
-        truncate: 0,
-    })
-}
-
-@effects(filesystem)
-pub fn write_all(file: &mut File, bytes: &[u8]) -> Result<usize, FileError> {
-    let result: fy_std_windows_file_result_v0 = unsafe {
-        file_write_all_raw(file as *mut void, bytes as *u8, bytes.len)
+        let i32 discarded = discard_closed(file);
+        .err(to_error(result))
     };
-    if result.status == 0 {
-        Result::Ok(result.count)
-    } else {
-        Result::Err(to_error(result))
-    }
 }
 
 @effects(filesystem)
-pub fn read(file: &mut File, buffer: &mut [u8]) -> Result<usize, FileError> {
-    let result: fy_std_windows_file_result_v0 = unsafe {
-        file_read_raw(file as *mut void, buffer as *mut u8, buffer.len)
-    };
-    if result.status == 0 {
-        Result::Ok(result.count)
-    } else {
-        Result::Err(to_error(result))
-    }
+pub fn Result<File, FileError> create_truncate(ref CStr path) {
+    return open_with(path, fy_std_windows_open_options_v0 {
+        .read = 0,
+        .write = 1,
+        .create = 1,
+        .truncate = 1,
+    });
 }
 
 @effects(filesystem)
-pub fn sync(file: &mut File) -> Result<i32, FileError> {
-    let result: fy_std_windows_file_result_v0 = unsafe {
-        file_sync_raw(file as *mut void)
-    };
-    if result.status == 0 {
-        Result::Ok(0)
-    } else {
-        Result::Err(to_error(result))
-    }
+pub fn Result<File, FileError> open_read(ref CStr path) {
+    return open_with(path, fy_std_windows_open_options_v0 {
+        .read = 1,
+        .write = 0,
+        .create = 0,
+        .truncate = 0,
+    });
 }
 
 @effects(filesystem)
-pub fn close(mut file: File) -> Result<i32, FileError> {
-    let result: fy_std_windows_file_result_v0 = unsafe {
-        file_close_raw(&mut file as *mut void)
+pub fn Result<usize, FileError> write_all(ref mut File file, ref u8[] bytes) {
+    let fy_std_windows_file_result_v0 result = unsafe {
+        file_write_all_raw(file as ptr mut void, bytes as ptr u8, bytes.len)
     };
-    if result.status == 0 {
-        Result::Ok(0)
+    return if (result.status == 0) {
+        .ok(result.count)
     } else {
-        Result::Err(to_error(result))
-    }
+        .err(to_error(result))
+    };
+}
+
+@effects(filesystem)
+pub fn Result<usize, FileError> read(ref mut File file, ref mut u8[] buffer) {
+    let fy_std_windows_file_result_v0 result = unsafe {
+        file_read_raw(file as ptr mut void, buffer as ptr mut u8, buffer.len)
+    };
+    return if (result.status == 0) {
+        .ok(result.count)
+    } else {
+        .err(to_error(result))
+    };
+}
+
+@effects(filesystem)
+pub fn Result<i32, FileError> sync(ref mut File file) {
+    let fy_std_windows_file_result_v0 result = unsafe {
+        file_sync_raw(file as ptr mut void)
+    };
+    return if (result.status == 0) {
+        .ok(0)
+    } else {
+        .err(to_error(result))
+    };
+}
+
+@effects(filesystem)
+pub fn Result<i32, FileError> close(File input) {
+    var File file = input;
+    let fy_std_windows_file_result_v0 result = unsafe {
+        file_close_raw(ref mut file as ptr mut void)
+    };
+    return if (result.status == 0) {
+        .ok(0)
+    } else {
+        .err(to_error(result))
+    };
 }

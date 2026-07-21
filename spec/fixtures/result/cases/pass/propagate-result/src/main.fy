@@ -4,10 +4,7 @@ enum Error {
     Failed;
 }
 
-fn propagate(
-    input: Result<i32, Error>,
-    fallback: Result<i32, Error>,
-) -> Result<i32, Error> {
-    let value: i32 = input?;
-    fallback
+fn Result<i32, Error> propagate(Result<i32, Error> input, Result<i32, Error> fallback) {
+    let i32 value = input?;
+    return fallback;
 }

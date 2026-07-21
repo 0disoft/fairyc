@@ -1,19 +1,19 @@
 module main;
 
 resource Token {
-    value: i32;
+    i32 value;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
-fn unwrap(input: Option<Token>) -> Token {
-    match input {
-        Option::Some(token) => token,
-        Option::None => Token { value: 0 },
-    }
+fn Token unwrap(Option<Token> input) {
+    return switch (input) {
+        case .some(token) : { token }
+        case .none : { Token { .value = 0 } }
+    };
 }
 
-fn main() -> i32 {
-    let token: Token = unwrap(Option::Some(Token { value: 42 }));
-    token.value
+fn i32 main() {
+    let Token token = unwrap(.some(Token { .value = 42 }));
+    return token.value;
 }

@@ -1,7 +1,7 @@
 module std::alloc;
 
 pub resource Arena {
-    opaque: i32;
+    i32 opaque;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }

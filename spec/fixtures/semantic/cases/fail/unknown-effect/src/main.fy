@@ -1,4 +1,4 @@
 module main;
 
 @effects(teleport)
-fn main() -> i32 { 0 }
+fn i32 main() { return 0; }

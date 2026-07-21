@@ -1,10 +1,10 @@
 module main;
 
-fn valid(input: Result<i32, i32>, flag: bool) -> i32 {
-    if flag {
+fn i32 valid(Result<i32, i32> input, bool flag) {
+    if (flag) {
         discard input;
     } else {
         discard input;
     };
-    0
+    return 0;
 }

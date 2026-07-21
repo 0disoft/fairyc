@@ -1,18 +1,18 @@
 module main;
 
 resource String {
-    data: *mut void;
-    length: usize;
+    ptr mut void data;
+    usize length;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
-fn as_str(value: &String) -> &str {
-    unsafe {
+fn ref str as_str(ref String value) {
+    return unsafe {
         str::from_raw_parts(value, value.data, value.length)
-    }
+    };
 }
 
-fn relay(value: &String) -> &str {
-    as_str(value)
+fn ref str relay(ref String value) {
+    return as_str(value);
 }

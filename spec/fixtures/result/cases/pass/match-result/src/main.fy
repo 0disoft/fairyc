@@ -1,8 +1,8 @@
 module main;
 
-fn unwrap(input: Result<i32, i32>) -> i32 {
-    match input {
-        Result::Ok(value) => value,
-        Result::Err(error) => -error,
-    }
+fn i32 unwrap(Result<i32, i32> input) {
+    return switch (input) {
+        case .ok(value) : { value }
+        case .err(error) : { -error }
+    };
 }

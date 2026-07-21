@@ -1,11 +1,11 @@
 module nested;
 
 resource Token {
-    value: i32;
+    i32 value;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
-fn wrap(value: Token) -> Option<Option<Token>> {
-    Option::Some(Option::Some(value))
+fn Option<Option<Token>> wrap(Token value) {
+    return .some(.some(value));
 }

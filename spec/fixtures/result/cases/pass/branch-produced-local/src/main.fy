@@ -1,11 +1,11 @@
 module main;
 
-fn valid(flag: bool) -> i32 {
-    let pending: Result<i32, i32> = if flag {
-        Result::Ok(42)
+fn i32 valid(bool flag) {
+    let Result<i32, i32> pending = if (flag) {
+        .ok(42)
     } else {
-        Result::Err(7)
+        .err(7)
     };
     discard pending;
-    0
+    return 0;
 }

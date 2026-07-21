@@ -1,12 +1,12 @@
 module main;
 
 resource Token {
-    value: i32;
+    i32 value;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
-fn invalid(scratch: Region, token: Token) -> i32 {
-    let stored: &Token = scratch.place(token);
-    stored.value
+fn i32 invalid(Region scratch, Token token) {
+    let ref Token stored = scratch.place(token);
+    return stored.value;
 }

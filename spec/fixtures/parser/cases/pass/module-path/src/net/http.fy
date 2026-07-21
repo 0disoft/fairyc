@@ -1,5 +1,5 @@
 module net::http;
 
-pub fn status() -> i32 {
-  200
+pub fn i32 status() {
+  return 200;
 }

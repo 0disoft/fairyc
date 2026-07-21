@@ -1,44 +1,44 @@
 module examples::windows_quickstart::main;
 
-fn second(left: &[u8], right: &[u8]) -> &[u8] {
-    right
+fn ref u8[] second(ref u8[] left, ref u8[] right) {
+    return right;
 }
 
-fn set_last(bytes: &mut [u8]) -> u8 {
+fn u8 set_last(ref mut u8[] bytes) {
     bytes[2] = 42;
-    bytes[2]
+    return bytes[2];
 }
 
-fn main() -> i32 {
-    let bytes: &[u8] = b"\x00\x13\x17\x00"[1..];
-    var index: usize = 0b0;
-    var total: i32 = 0x0;
-    while index < bytes.len {
+fn i32 main() {
+    let ref u8[] bytes = b"\x00\x13\x17\x00"[1..];
+    var usize index = 0b0;
+    var i32 total = 0x0;
+    while (index < bytes.len) {
         total = total + (bytes[index] as i32);
         index = index + 1;
     }
     assert(total == 0x2A);
     assert(-0x8000_0000 + 0x7FFF_FFFF + 0b1 == 0);
-    var answers: [u8; 3] = [0, 0, 0];
+    var u8[3] answers = [0, 0, 0];
     answers[0] = 40;
     answers[1] = 41;
-    let changed: u8 = set_last(&mut answers);
-    let flags: [bool; 2] = [false, true];
-    let signed: [i32; 1] = [42];
-    let wide: [u32; 1] = [42];
-    let offsets: [usize; 1] = [2];
-    let answer_bytes: &[u8] = &answers;
-    let backup: [u8; 3] = [1, 2, 3];
-    var selected_bytes: &[u8] = &backup;
-    selected_bytes = &answers;
-    var loop_selected: &[u8] = &backup;
-    var loop_count: usize = 0;
-    while loop_count < 1 {
-        loop_selected = &answers;
+    let u8 changed = set_last(ref mut answers);
+    let bool[2] flags = [false, true];
+    let i32[1] signed = [42];
+    let u32[1] wide = [42];
+    let usize[1] offsets = [2];
+    let ref u8[] answer_bytes = ref answers;
+    let u8[3] backup = [1, 2, 3];
+    var ref u8[] selected_bytes = ref backup;
+    selected_bytes = ref answers;
+    var ref u8[] loop_selected = ref backup;
+    var usize loop_count = 0;
+    while (loop_count < 1) {
+        loop_selected = ref answers;
         loop_count = loop_count + 1;
     }
-    var decoy: [u8; 3] = [4, 5, 6];
-    let selected_by_call: &[u8] = second(&decoy, &answers);
+    var u8[3] decoy = [4, 5, 6];
+    let ref u8[] selected_by_call = second(ref decoy, ref answers);
     decoy = [7, 8, 9];
     assert(answers.len == 3);
     assert(flags.len == 2);
@@ -56,5 +56,5 @@ fn main() -> i32 {
     assert(signed[0] == total);
     assert(wide[0] == 42);
     assert(offsets[0] == 2);
-    if !bytes.is_empty && b"".is_empty { total } else { 0b1 }
+    return if (!bytes.is_empty && b"".is_empty) { total } else { 0b1 };
 }

@@ -1,8 +1,8 @@
 module main;
 
-fn conflict() -> i32 {
-    var value: i32 = 1;
-    let view: &i32 = &value;
+fn i32 conflict() {
+    var i32 value = 1;
+    let ref i32 view = ref value;
     value = 2;
-    *view
+    return *view;
 }

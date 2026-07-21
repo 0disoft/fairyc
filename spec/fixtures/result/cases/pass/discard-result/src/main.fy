@@ -4,7 +4,7 @@ enum Error {
     Failed;
 }
 
-fn ignore(input: Result<i32, Error>) -> i32 {
+fn i32 ignore(Result<i32, Error> input) {
     discard input;
-    0
+    return 0;
 }

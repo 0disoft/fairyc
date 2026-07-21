@@ -1,10 +1,10 @@
 module main;
 
-fn invalid(flag: bool) -> i32 {
-    let pending: Result<i32, i32> = Result::Ok(42);
-    if flag {
+fn i32 invalid(bool flag) {
+    let Result<i32, i32> pending = .ok(42);
+    if (flag) {
         return 1;
     };
     discard pending;
-    0
+    return 0;
 }

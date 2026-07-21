@@ -1,5 +1,5 @@
 module examples::semantic::math;
 
-pub fn forty_two() -> i32 {
-    42
+pub fn i32 forty_two() {
+    return 42;
 }

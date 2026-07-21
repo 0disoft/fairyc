@@ -1,35 +1,35 @@
 module main;
 
 resource Token {
-    value: i32;
+    i32 value;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
 resource Probe {
-    value: i32;
+    i32 value;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
-fn replacement(fail: bool) -> Result<Token, i32> {
-    let probe: Probe = Probe { value: 0 };
-    if fail {
-        Result::Err(7)
+fn Result<Token, i32> replacement(bool fail) {
+    let Probe probe = Probe { .value = 0 };
+    return if (fail) {
+        .err(7)
     } else {
-        Result::Ok(Token { value: 42 })
-    }
+        .ok(Token { .value = 42 })
+    };
 }
 
-fn update(fail: bool) -> Result<i32, i32> {
-    var token: Token = Token { value: 1 };
+fn Result<i32, i32> update(bool fail) {
+    var Token token = Token { .value = 1 };
     token = replacement(fail)?;
-    Result::Ok(token.value)
+    return .ok(token.value);
 }
 
-fn main() -> i32 {
-    match update(false) {
-        Result::Ok(value) => value,
-        Result::Err(error) => -error,
-    }
+fn i32 main() {
+    return switch (update(false)) {
+        case .ok(value) : { value }
+        case .err(error) : { -error }
+    };
 }

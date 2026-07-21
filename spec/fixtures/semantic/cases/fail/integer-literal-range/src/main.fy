@@ -1,6 +1,6 @@
 module main;
 
-fn main() -> i32 {
-    let byte: u8 = 0x100;
-    0
+fn i32 main() {
+    let u8 byte = 0x100;
+    return 0;
 }

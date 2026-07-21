@@ -1,5 +1,5 @@
 module main;
 
-fn answer() -> i32 {
-    if 1 { 2 } else { 3 }
+fn i32 answer() {
+    return if (1) { 2 } else { 3 };
 }

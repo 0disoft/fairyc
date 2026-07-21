@@ -32,7 +32,7 @@ func Migrate(path string, input []byte) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	tree := syntax.Parse(source.NewFile(path, declarations.Source), source.DefaultLimits())
+	tree := parseMigrationSource(path, declarations.Source)
 	if len(tree.Diagnostics) != 0 {
 		return Result{}, fmt.Errorf("surface migration input produced %d diagnostics", len(tree.Diagnostics))
 	}
@@ -47,7 +47,7 @@ func Migrate(path string, input []byte) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	verified := syntax.Parse(source.NewFile(path, output), source.DefaultLimits())
+	verified := parseMigrationSource(path, output)
 	if len(verified.Diagnostics) != 0 {
 		return Result{}, fmt.Errorf("migrated surface parse produced %d diagnostics: %+v\n%s", len(verified.Diagnostics), verified.Diagnostics, output)
 	}
@@ -57,7 +57,7 @@ func Migrate(path string, input []byte) (Result, error) {
 // MigrateDeclarations converts declaration order, structural type spelling, resource cleanup,
 // and function tail returns. It refuses syntax-invalid input and overlapping edits.
 func MigrateDeclarations(path string, input []byte) (Result, error) {
-	tree := syntax.Parse(source.NewFile(path, input), source.DefaultLimits())
+	tree := parseMigrationSource(path, input)
 	if len(tree.Diagnostics) != 0 {
 		return Result{}, fmt.Errorf("previous revision parse produced %d diagnostics", len(tree.Diagnostics))
 	}
@@ -72,11 +72,37 @@ func MigrateDeclarations(path string, input []byte) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	verified := syntax.Parse(source.NewFile(path, output), source.DefaultLimits())
+	verified := parseMigrationSource(path, output)
 	if len(verified.Diagnostics) != 0 {
 		return Result{}, fmt.Errorf("migrated declaration parse produced %d diagnostics", len(verified.Diagnostics))
 	}
 	return Result{Source: output, Changed: true}, nil
+}
+
+func parseMigrationSource(path string, input []byte) *syntax.Tree {
+	lexed := lexer.Lex(source.NewFile(path, input), source.NewBudget(source.DefaultLimits(), len(input)))
+	module := ""
+	for index := 0; index < len(lexed.Tokens); index++ {
+		if lexed.Tokens[index].Text(lexed.Source) != "module" {
+			continue
+		}
+		for index++; index < len(lexed.Tokens); index++ {
+			token := lexed.Tokens[index]
+			text := token.Text(lexed.Source)
+			if text == ";" {
+				break
+			}
+			if token.Kind != lexer.Trivia {
+				module += text
+			}
+		}
+		break
+	}
+	virtualPath := path
+	if module != "" {
+		virtualPath = strings.ReplaceAll(module, "::", "/") + ".fy"
+	}
+	return syntax.Parse(source.NewFile(virtualPath, input), source.DefaultLimits())
 }
 
 func declarationEdits(tree *syntax.Tree) ([]edit, error) {
@@ -297,6 +323,10 @@ func surfaceEdits(tree *syntax.Tree) ([]edit, error) {
 				}
 			}
 		case syntax.KindPath:
+			if node.Text == "self" {
+				edits = append(edits, edit{start: node.Span.StartByte, end: node.Span.EndByte, replacement: "this"})
+				continue
+			}
 			replacement, ok := migratedVariantPath(node.Text, localEnums)
 			if ok {
 				edits = append(edits, edit{start: node.Span.StartByte, end: node.Span.EndByte, replacement: replacement})

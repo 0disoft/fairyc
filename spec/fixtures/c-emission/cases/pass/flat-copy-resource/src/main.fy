@@ -1,17 +1,17 @@
 module main;
 
 resource Handle {
-    raw: *mut void;
-    state: u32;
+    ptr mut void raw;
+    u32 state;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
-fn main() -> i32 {
-    let handle: Handle = Handle { raw: null, state: 42 };
-    if handle.raw == null {
-        if handle.state == 42 { 42 } else { 1 }
+fn i32 main() {
+    let Handle handle = Handle { .raw = null, .state = 42 };
+    return if (handle.raw == null) {
+        if (handle.state == 42) { 42 } else { 1 }
     } else {
         2
-    }
+    };
 }

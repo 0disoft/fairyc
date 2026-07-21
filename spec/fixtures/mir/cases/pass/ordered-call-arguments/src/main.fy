@@ -1,17 +1,17 @@
 module main;
 
-fn first() -> i32 {
-    1
+fn i32 first() {
+    return 1;
 }
 
-fn second() -> i32 {
-    2
+fn i32 second() {
+    return 2;
 }
 
-fn choose(left: i32, right: i32) -> i32 {
-    left
+fn i32 choose(i32 left, i32 right) {
+    return left;
 }
 
-fn run() -> i32 {
-    choose(first(), second())
+fn i32 run() {
+    return choose(first(), second());
 }

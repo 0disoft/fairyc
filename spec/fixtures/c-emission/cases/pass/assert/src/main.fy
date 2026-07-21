@@ -1,7 +1,7 @@
 module main;
 
-fn main() -> i32 {
-    let ready: bool = true;
+fn i32 main() {
+    let bool ready = true;
     assert(ready);
-    42
+    return 42;
 }

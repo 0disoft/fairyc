@@ -4,6 +4,6 @@ enum Error {
     Failed;
 }
 
-fn forward(input: Result<i32, Error>) -> Result<i32, Error> {
-    input
+fn Result<i32, Error> forward(Result<i32, Error> input) {
+    return input;
 }

@@ -1,7 +1,7 @@
 module main;
 
-unsafe extern C fn add_one(value: i32) -> i32;
+unsafe extern C fn i32 add_one(i32 value) ;
 
-fn main() -> i32 {
-    add_one(41)
+fn i32 main() {
+    return add_one(41);
 }

@@ -1,6 +1,6 @@
 module main;
 
-fn answer() -> i32 {
-    let value: bool = 1;
-    0
+fn i32 answer() {
+    let bool value = 1;
+    return 0;
 }

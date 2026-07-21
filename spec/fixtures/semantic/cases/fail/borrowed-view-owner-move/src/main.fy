@@ -1,25 +1,25 @@
 module main;
 
 resource String {
-    data: *mut void;
-    length: usize;
+    ptr mut void data;
+    usize length;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
-fn as_str(value: &String) -> &str {
-    unsafe {
+fn ref str as_str(ref String value) {
+    return unsafe {
         str::from_raw_parts(value, value.data, value.length)
-    }
+    };
 }
 
-fn consume_owned(value: String) -> i32 {
-    0
+fn i32 consume_owned(String value) {
+    return 0;
 }
 
-fn main() -> i32 {
-    let value: String = String { data: null, length: 0 };
-    let view: &str = as_str(&value);
-    let consumed: i32 = consume_owned(value);
-    if view.len == 0 { 0 } else { 1 }
+fn i32 main() {
+    let String value = String { .data = null, .length = 0 };
+    let ref str view = as_str(ref value);
+    let i32 consumed = consume_owned(value);
+    return if (view.len == 0) { 0 } else { 1 };
 }

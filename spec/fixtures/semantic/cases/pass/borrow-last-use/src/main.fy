@@ -1,13 +1,13 @@
 module main;
 
-fn read(value: &i32) -> i32 {
-    *value
+fn i32 read(ref i32 value) {
+    return *value;
 }
 
-fn update() -> i32 {
-    var value: i32 = 1;
-    let view: &i32 = &value;
-    let before: i32 = read(view);
+fn i32 update() {
+    var i32 value = 1;
+    let ref i32 view = ref value;
+    let i32 before = read(view);
     value = 2;
-    before + value
+    return before + value;
 }

@@ -1,13 +1,13 @@
 module main;
 
 @link_name("fairyc_fixture_make_c_int")
-unsafe extern C fn make_c_int() -> c::int;
+unsafe extern C fn c::int make_c_int() ;
 
 @link_name("fairyc_fixture_consume_c_int")
-unsafe extern C fn consume_c_int(value: c::int) -> i32;
+unsafe extern C fn i32 consume_c_int(c::int value) ;
 
-fn main() -> i32 {
-    unsafe {
+fn i32 main() {
+    return unsafe {
         consume_c_int(make_c_int())
-    }
+    };
 }

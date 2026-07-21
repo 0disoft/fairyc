@@ -1,324 +1,296 @@
 module examples::windows_target::main;
 
 @link_name("fairyc_unused_windows_long")
-unsafe extern C fn unused_windows_long(value: c::long) -> c::long;
+unsafe extern C fn c::long unused_windows_long(c::long value) ;
 
 @link_name("fy_std_text_utf8_valid_v0")
-unsafe extern C fn utf8_valid(data: *u8, length: usize) -> u32;
+unsafe extern C fn u32 utf8_valid(ptr u8 data, usize length) ;
 
 resource native_handle {
-    raw: *mut void;
-    state: u32;
+    ptr mut void raw;
+    u32 state;
 
-    drop fn(self: &mut Self) {
-        let final_state: u32 = self.state;
+    cleanup {
+        let u32 final_state = this.state;
     }
 }
 
 @repr(C)
 struct system_heap_block {
-    data: *mut void;
-    size: usize;
-    alignment: usize;
+    ptr mut void data;
+    usize size;
+    usize alignment;
 }
 
 @repr(C)
 struct buffer {
-    block: system_heap_block;
-    length: usize;
+    system_heap_block block;
+    usize length;
 }
 
 @repr(C)
 struct arena_node {
-    storage: system_heap_block;
-    next: *mut arena_node;
+    system_heap_block storage;
+    ptr mut arena_node next;
 }
 
 @repr(C)
 struct arena {
-    head: *mut arena_node;
-    generation: usize;
-    active_region: u8;
+    ptr mut arena_node head;
+    usize generation;
+    u8 active_region;
 }
 
 @repr(C)
 struct arena_region {
-    owner: *mut arena;
-    mark: *mut arena_node;
-    generation: usize;
-    active: u8;
+    ptr mut arena owner;
+    ptr mut arena_node mark;
+    usize generation;
+    u8 active;
 }
 
 @repr(C)
 struct text_view {
-    data: *u8;
-    length: usize;
+    ptr u8 data;
+    usize length;
 }
 
 @repr(C)
 struct owned_string {
-    bytes: buffer;
+    buffer bytes;
 }
 
 @repr(C)
 struct cstr_view {
-    data: *u8;
-    length: usize;
+    ptr u8 data;
+    usize length;
 }
 
 @repr(C)
 struct owned_cstring {
-    bytes: buffer;
+    buffer bytes;
 }
 
 @repr(C)
 struct owned_text_result {
-    status: u32;
-    allocation_status: u32;
+    u32 status;
+    u32 allocation_status;
 }
 
 @link_name("fy_std_system_heap_allocate_v0")
-unsafe extern C fn allocate(
-    size: usize,
-    alignment: usize,
-    output: *mut system_heap_block
-) -> u32;
+unsafe extern C fn u32 allocate(usize size, usize alignment, ptr mut system_heap_block output) ;
 
 @link_name("fy_std_system_heap_deallocate_v0")
-unsafe extern C fn deallocate(block: *mut system_heap_block) -> u32;
+unsafe extern C fn u32 deallocate(ptr mut system_heap_block block) ;
 
 @link_name("fy_std_buffer_initialize_v0")
-unsafe extern C fn initialize_buffer(capacity: usize, output: *mut buffer) -> u32;
+unsafe extern C fn u32 initialize_buffer(usize capacity, ptr mut buffer output) ;
 
 @link_name("fy_std_buffer_resize_zeroed_v0")
-unsafe extern C fn resize_buffer_zeroed(value: *mut buffer, new_length: usize) -> u32;
+unsafe extern C fn u32 resize_buffer_zeroed(ptr mut buffer value, usize new_length) ;
 
 @link_name("fy_std_buffer_drop_v0")
-unsafe extern C fn drop_buffer(value: *mut buffer) -> u32;
+unsafe extern C fn u32 drop_buffer(ptr mut buffer value) ;
 
 @link_name("fy_std_arena_initialize_v0")
-unsafe extern C fn initialize_arena(output: *mut arena) -> u32;
+unsafe extern C fn u32 initialize_arena(ptr mut arena output) ;
 
 @link_name("fy_std_region_begin_v0")
-unsafe extern C fn begin_region(owner: *mut arena, output: *mut arena_region) -> u32;
+unsafe extern C fn u32 begin_region(ptr mut arena owner, ptr mut arena_region output) ;
 
 @link_name("fy_std_region_allocate_zeroed_v0")
-unsafe extern C fn allocate_region_zeroed(
-    scope: *mut arena_region,
-    size: usize,
-    alignment: usize,
-    output: *mut *mut void
-) -> u32;
+unsafe extern C fn u32 allocate_region_zeroed(ptr mut arena_region scope, usize size, usize alignment, ptr mut ptr mut void output) ;
 
 @link_name("fy_std_region_reset_v0")
-unsafe extern C fn reset_region(scope: *mut arena_region) -> u32;
+unsafe extern C fn u32 reset_region(ptr mut arena_region scope) ;
 
 @link_name("fy_std_arena_drop_v0")
-unsafe extern C fn drop_arena(value: *mut arena) -> u32;
+unsafe extern C fn u32 drop_arena(ptr mut arena value) ;
 
 @link_name("fy_std_cstr_validate_v0")
-unsafe extern C fn validate_cstr(
-    storage: *u8,
-    storage_length: usize,
-    output: *mut cstr_view
-) -> u32;
+unsafe extern C fn u32 validate_cstr(ptr u8 storage, usize storage_length, ptr mut cstr_view output) ;
 
 @link_name("fy_std_string_copy_v0")
-unsafe extern C fn copy_string(
-    input: *text_view,
-    output: *mut owned_string
-) -> owned_text_result;
+unsafe extern C fn owned_text_result copy_string(ptr text_view input, ptr mut owned_string output) ;
 
 @link_name("fy_std_string_as_view_v0")
-unsafe extern C fn view_string(
-    input: *owned_string,
-    output: *mut text_view
-) -> owned_text_result;
+unsafe extern C fn owned_text_result view_string(ptr owned_string input, ptr mut text_view output) ;
 
 @link_name("fy_std_string_append_v0")
-unsafe extern C fn append_string(
-    value: *mut owned_string,
-    suffix: *text_view
-) -> owned_text_result;
+unsafe extern C fn owned_text_result append_string(ptr mut owned_string value, ptr text_view suffix) ;
 
 @link_name("fy_std_string_drop_v0")
-unsafe extern C fn drop_string(value: *mut owned_string) -> owned_text_result;
+unsafe extern C fn owned_text_result drop_string(ptr mut owned_string value) ;
 
 @link_name("fy_std_cstring_from_text_v0")
-unsafe extern C fn create_cstring(
-    input: *text_view,
-    output: *mut owned_cstring
-) -> owned_text_result;
+unsafe extern C fn owned_text_result create_cstring(ptr text_view input, ptr mut owned_cstring output) ;
 
 @link_name("fy_std_cstring_as_view_v0")
-unsafe extern C fn view_cstring(
-    input: *owned_cstring,
-    output: *mut cstr_view
-) -> owned_text_result;
+unsafe extern C fn owned_text_result view_cstring(ptr owned_cstring input, ptr mut cstr_view output) ;
 
 @link_name("fy_std_cstring_drop_v0")
-unsafe extern C fn drop_cstring(value: *mut owned_cstring) -> owned_text_result;
+unsafe extern C fn owned_text_result drop_cstring(ptr mut owned_cstring value) ;
 
-fn main() -> i32 {
-    let handle: native_handle = native_handle { raw: null, state: 42 };
-    let handle_valid: bool = handle.raw == null && handle.state == 42;
-    var block: system_heap_block = system_heap_block {
-        data: null,
-        size: 0,
-        alignment: 0,
+fn i32 main() {
+    let native_handle handle = native_handle { .raw = null, .state = 42 };
+    let bool handle_valid = handle.raw == null && handle.state == 42;
+    var system_heap_block block = system_heap_block {
+        .data = null,
+        .size = 0,
+        .alignment = 0,
     };
-    let allocated: u32 = unsafe {
-        allocate(8, 8, &mut block as *mut system_heap_block)
+    let u32 allocated = unsafe {
+        allocate(8, 8, ref mut block as ptr mut system_heap_block)
     };
-    let allocation_valid: bool = block.size == 8 && block.alignment == 8;
-    let deallocated: u32 = unsafe {
-        deallocate(&mut block as *mut system_heap_block)
+    let bool allocation_valid = block.size == 8 && block.alignment == 8;
+    let u32 deallocated = unsafe {
+        deallocate(ref mut block as ptr mut system_heap_block)
     };
-    let deallocation_valid: bool = block.size == 0 && block.alignment == 0;
-    let empty_block: system_heap_block = system_heap_block {
-        data: null,
-        size: 0,
-        alignment: 0,
+    let bool deallocation_valid = block.size == 0 && block.alignment == 0;
+    let system_heap_block empty_block = system_heap_block {
+        .data = null,
+        .size = 0,
+        .alignment = 0,
     };
-    var bytes: buffer = buffer {
-        block: empty_block,
-        length: 0,
+    var buffer bytes = buffer {
+        .block = empty_block,
+        .length = 0,
     };
-    let initialized: u32 = unsafe {
-        initialize_buffer(8, &mut bytes as *mut buffer)
+    let u32 initialized = unsafe {
+        initialize_buffer(8, ref mut bytes as ptr mut buffer)
     };
-    let resized: u32 = unsafe {
-        resize_buffer_zeroed(&mut bytes as *mut buffer, 4)
+    let u32 resized = unsafe {
+        resize_buffer_zeroed(ref mut bytes as ptr mut buffer, 4)
     };
-    let buffer_valid: bool = bytes.block.size == 8 && bytes.block.alignment == 1 &&
+    let bool buffer_valid = bytes.block.size == 8 && bytes.block.alignment == 1 &&
         bytes.length == 4;
-    let dropped: u32 = unsafe {
-        drop_buffer(&mut bytes as *mut buffer)
+    let u32 dropped = unsafe {
+        drop_buffer(ref mut bytes as ptr mut buffer)
     };
-    let buffer_dropped: bool = bytes.block.size == 0 && bytes.block.alignment == 0 &&
+    let bool buffer_dropped = bytes.block.size == 0 && bytes.block.alignment == 0 &&
         bytes.length == 0;
-    var storage: arena = arena {
-        head: null,
-        generation: 0,
-        active_region: 0,
+    var arena storage = arena {
+        .head = null,
+        .generation = 0,
+        .active_region = 0,
     };
-    var scope: arena_region = arena_region {
-        owner: null,
-        mark: null,
-        generation: 0,
-        active: 0,
+    var arena_region scope = arena_region {
+        .owner = null,
+        .mark = null,
+        .generation = 0,
+        .active = 0,
     };
-    let arena_initialized: u32 = unsafe {
-        initialize_arena(&mut storage as *mut arena)
+    let u32 arena_initialized = unsafe {
+        initialize_arena(ref mut storage as ptr mut arena)
     };
-    let arena_initial_state: bool = storage.head == null && storage.generation == 1 &&
+    let bool arena_initial_state = storage.head == null && storage.generation == 1 &&
         storage.active_region == 0;
-    let region_started: u32 = unsafe {
-        begin_region(&mut storage as *mut arena, &mut scope as *mut arena_region)
+    let u32 region_started = unsafe {
+        begin_region(ref mut storage as ptr mut arena, ref mut scope as ptr mut arena_region)
     };
-    let region_active: bool = storage.active_region == 1 && scope.owner != null &&
+    let bool region_active = storage.active_region == 1 && scope.owner != null &&
         scope.mark == null && scope.generation == 1 && scope.active == 1;
-    var region_data: *mut void = null;
-    let region_allocated: u32 = unsafe {
+    var ptr mut void region_data = null;
+    let u32 region_allocated = unsafe {
         allocate_region_zeroed(
-            &mut scope as *mut arena_region,
+            ref mut scope as ptr mut arena_region,
             8,
             8,
-            &mut region_data as *mut *mut void
+            ref mut region_data as ptr mut ptr mut void
         )
     };
-    let region_allocation_state: bool = storage.head != null && region_data != null &&
+    let bool region_allocation_state = storage.head != null && region_data != null &&
         storage.generation == 1 && storage.active_region == 1;
-    let region_reset: u32 = unsafe {
-        reset_region(&mut scope as *mut arena_region)
+    let u32 region_reset = unsafe {
+        reset_region(ref mut scope as ptr mut arena_region)
     };
-    let region_reset_state: bool = storage.head == null && storage.generation == 2 &&
+    let bool region_reset_state = storage.head == null && storage.generation == 2 &&
         storage.active_region == 0 && scope.owner == null && scope.mark == null &&
         scope.generation == 0 && scope.active == 0;
-    let arena_dropped: u32 = unsafe {
-        drop_arena(&mut storage as *mut arena)
+    let u32 arena_dropped = unsafe {
+        drop_arena(ref mut storage as ptr mut arena)
     };
-    let arena_drop_state: bool = storage.head == null && storage.generation == 3 &&
+    let bool arena_drop_state = storage.head == null && storage.generation == 3 &&
         storage.active_region == 0;
-    let text: &str = "Fairy";
-    let input: text_view = text_view {
-        data: unsafe { text as *u8 },
-        length: 5,
+    let ref str text = "Fairy";
+    let text_view input = text_view {
+        .data = unsafe { text as ptr u8 },
+        .length = 5,
     };
-    let empty_string_buffer: buffer = buffer {
-        block: system_heap_block {
-            data: null,
-            size: 0,
-            alignment: 0,
+    let buffer empty_string_buffer = buffer {
+        .block = system_heap_block {
+            .data = null,
+            .size = 0,
+            .alignment = 0,
         },
-        length: 0,
+        .length = 0,
     };
-    var string_value: owned_string = owned_string { bytes: empty_string_buffer };
-    var string_view: text_view = text_view {
-        data: null,
-        length: 0,
+    var owned_string string_value = owned_string { .bytes = empty_string_buffer };
+    var text_view string_view = text_view {
+        .data = null,
+        .length = 0,
     };
-    let string_copied: owned_text_result = unsafe {
-        copy_string(&input as *text_view, &mut string_value as *mut owned_string)
+    let owned_text_result string_copied = unsafe {
+        copy_string(ref input as ptr text_view, ref mut string_value as ptr mut owned_string)
     };
-    let string_copy_state: bool = string_value.bytes.block.data != null &&
+    let bool string_copy_state = string_value.bytes.block.data != null &&
         string_value.bytes.block.alignment == 1 && string_value.bytes.length == 5;
-    let string_viewed_once: owned_text_result = unsafe {
-        view_string(&string_value as *owned_string, &mut string_view as *mut text_view)
+    let owned_text_result string_viewed_once = unsafe {
+        view_string(ref string_value as ptr owned_string, ref mut string_view as ptr mut text_view)
     };
-    let string_view_once_state: bool = string_view.data != null && string_view.length == 5;
-    let string_appended: owned_text_result = unsafe {
-        append_string(&mut string_value as *mut owned_string, &input as *text_view)
+    let bool string_view_once_state = string_view.data != null && string_view.length == 5;
+    let owned_text_result string_appended = unsafe {
+        append_string(ref mut string_value as ptr mut owned_string, ref input as ptr text_view)
     };
-    let string_append_state: bool = string_value.bytes.block.data != null &&
+    let bool string_append_state = string_value.bytes.block.data != null &&
         string_value.bytes.length == 10;
-    let string_viewed_twice: owned_text_result = unsafe {
-        view_string(&string_value as *owned_string, &mut string_view as *mut text_view)
+    let owned_text_result string_viewed_twice = unsafe {
+        view_string(ref string_value as ptr owned_string, ref mut string_view as ptr mut text_view)
     };
-    let string_view_twice_state: bool = string_view.data != null && string_view.length == 10;
-    let string_dropped: owned_text_result = unsafe {
-        drop_string(&mut string_value as *mut owned_string)
+    let bool string_view_twice_state = string_view.data != null && string_view.length == 10;
+    let owned_text_result string_dropped = unsafe {
+        drop_string(ref mut string_value as ptr mut owned_string)
     };
-    let string_drop_state: bool = string_value.bytes.block.data == null &&
+    let bool string_drop_state = string_value.bytes.block.data == null &&
         string_value.bytes.block.size == 0 && string_value.bytes.block.alignment == 0 &&
         string_value.bytes.length == 0;
-    let empty_cstring_buffer: buffer = buffer {
-        block: system_heap_block {
-            data: null,
-            size: 0,
-            alignment: 0,
+    let buffer empty_cstring_buffer = buffer {
+        .block = system_heap_block {
+            .data = null,
+            .size = 0,
+            .alignment = 0,
         },
-        length: 0,
+        .length = 0,
     };
-    var cstring_value: owned_cstring = owned_cstring { bytes: empty_cstring_buffer };
-    var cstring_view: cstr_view = cstr_view {
-        data: null,
-        length: 0,
+    var owned_cstring cstring_value = owned_cstring { .bytes = empty_cstring_buffer };
+    var cstr_view cstring_view = cstr_view {
+        .data = null,
+        .length = 0,
     };
-    let cstring_created: owned_text_result = unsafe {
-        create_cstring(&input as *text_view, &mut cstring_value as *mut owned_cstring)
+    let owned_text_result cstring_created = unsafe {
+        create_cstring(ref input as ptr text_view, ref mut cstring_value as ptr mut owned_cstring)
     };
-    let cstring_create_state: bool = cstring_value.bytes.block.data != null &&
+    let bool cstring_create_state = cstring_value.bytes.block.data != null &&
         cstring_value.bytes.block.alignment == 1 && cstring_value.bytes.length == 6;
-    let cstring_viewed: owned_text_result = unsafe {
-        view_cstring(&cstring_value as *owned_cstring, &mut cstring_view as *mut cstr_view)
+    let owned_text_result cstring_viewed = unsafe {
+        view_cstring(ref cstring_value as ptr owned_cstring, ref mut cstring_view as ptr mut cstr_view)
     };
-    let cstring_view_state: bool = cstring_view.data != null && cstring_view.length == 5;
-    let cstring_dropped: owned_text_result = unsafe {
-        drop_cstring(&mut cstring_value as *mut owned_cstring)
+    let bool cstring_view_state = cstring_view.data != null && cstring_view.length == 5;
+    let owned_text_result cstring_dropped = unsafe {
+        drop_cstring(ref mut cstring_value as ptr mut owned_cstring)
     };
-    let cstring_drop_state: bool = cstring_value.bytes.block.data == null &&
+    let bool cstring_drop_state = cstring_value.bytes.block.data == null &&
         cstring_value.bytes.block.size == 0 && cstring_value.bytes.block.alignment == 0 &&
         cstring_value.bytes.length == 0;
-    var direct_cstr_view: cstr_view = cstr_view {
-        data: null,
-        length: 0,
+    var cstr_view direct_cstr_view = cstr_view {
+        .data = null,
+        .length = 0,
     };
-    let direct_cstr_validated: u32 = unsafe {
-        validate_cstr(c"Fairy" as *u8, 6, &mut direct_cstr_view as *mut cstr_view)
+    let u32 direct_cstr_validated = unsafe {
+        validate_cstr(c"Fairy" as ptr u8, 6, ref mut direct_cstr_view as ptr mut cstr_view)
     };
-    let direct_cstr_state: bool = direct_cstr_view.data != null && direct_cstr_view.length == 5;
-    if handle_valid && allocated == 0 && allocation_valid &&
+    let bool direct_cstr_state = direct_cstr_view.data != null && direct_cstr_view.length == 5;
+    return if (handle_valid && allocated == 0 && allocation_valid &&
         deallocated == 0 && deallocation_valid &&
         initialized == 0 && resized == 0 && buffer_valid && dropped == 0 && buffer_dropped &&
         arena_initialized == 0 && arena_initial_state && region_started == 0 && region_active &&
@@ -336,9 +308,9 @@ fn main() -> i32 {
         cstring_viewed.allocation_status == 0 && cstring_view_state &&
         cstring_dropped.status == 0 && cstring_dropped.allocation_status == 0 &&
         cstring_drop_state && direct_cstr_validated == 0 && direct_cstr_state &&
-        unsafe { utf8_valid(null, 0) } == 1 {
+        unsafe { utf8_valid(null, 0) } == 1) {
         42
     } else {
         1
-    }
+    };
 }

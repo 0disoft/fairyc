@@ -1,9 +1,9 @@
 module main;
 
-fn add(left: i32, right: i32) -> i32 {
-    left + right
+fn i32 add(i32 left, i32 right) {
+    return left + right;
 }
 
-fn main() -> i32 {
-    add(20, 22)
+fn i32 main() {
+    return add(20, 22);
 }

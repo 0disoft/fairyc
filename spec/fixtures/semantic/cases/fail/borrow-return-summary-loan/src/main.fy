@@ -1,13 +1,13 @@
 module main;
 
-fn second(left: &[u8], right: &[u8]) -> &[u8] {
-    right
+fn ref u8[] second(ref u8[] left, ref u8[] right) {
+    return right;
 }
 
-fn main() -> i32 {
-    let left: [u8; 1] = [1];
-    var right: [u8; 1] = [42];
-    let selected: &[u8] = second(&left, &right);
+fn i32 main() {
+    let u8[1] left = [1];
+    var u8[1] right = [42];
+    let ref u8[] selected = second(ref left, ref right);
     right = [0];
-    selected[0] as i32
+    return selected[0] as i32;
 }

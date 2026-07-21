@@ -1,5 +1,5 @@
 module main;
 
-unsafe extern C fn inspect(value: &i32) -> i32;
+unsafe extern C fn i32 inspect(ref i32 value) ;
 
-fn main() -> i32 { 0 }
+fn i32 main() { return 0; }

@@ -1,8 +1,8 @@
 module main;
 
 @link_name("fairyc_fixture_add_one")
-unsafe extern C fn add_one(value: i32) -> i32;
+unsafe extern C fn i32 add_one(i32 value) ;
 
-fn main() -> i32 {
-    unsafe { add_one(41) }
+fn i32 main() {
+    return unsafe { add_one(41) };
 }

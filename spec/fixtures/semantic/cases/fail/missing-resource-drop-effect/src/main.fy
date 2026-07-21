@@ -2,14 +2,14 @@ module main;
 
 @effects(filesystem)
 resource Token {
-    value: i32;
+    i32 value;
 
-    drop fn(self: &mut Self) {
-        let marker: i32 = self.value;
+    cleanup {
+        let i32 marker = this.value;
     }
 }
 
-fn main() -> i32 {
-    let token: Token = Token { value: 42 };
-    0
+fn i32 main() {
+    let Token token = Token { .value = 42 };
+    return 0;
 }

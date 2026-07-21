@@ -1,5 +1,5 @@
 module main;
 
-fn main() -> i32 {
-    if !false { 42 } else { 0 }
+fn i32 main() {
+    return if (!false) { 42 } else { 0 };
 }

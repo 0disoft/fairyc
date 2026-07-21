@@ -2,9 +2,9 @@ module main;
 
 import std::alloc as alloc;
 
-fn invalid(arena: &mut alloc::Arena, value: i32) -> &i32 {
+fn ref i32 invalid(ref mut alloc::Arena arena, i32 value) {
     region scratch in arena {
-        let stored: &i32 = scratch.place(value);
+        let ref i32 stored = scratch.place(value);
         return stored;
     }
 }

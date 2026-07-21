@@ -1,7 +1,7 @@
 module main;
 
-fn invalid() -> i32 {
+fn i32 invalid() {
     break;
     continue;
-    0
+    return 0;
 }

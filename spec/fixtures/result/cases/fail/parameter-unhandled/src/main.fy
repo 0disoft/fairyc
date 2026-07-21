@@ -1,5 +1,5 @@
 module main;
 
-fn invalid(input: Result<i32, i32>) -> i32 {
-    0
+fn i32 invalid(Result<i32, i32> input) {
+    return 0;
 }

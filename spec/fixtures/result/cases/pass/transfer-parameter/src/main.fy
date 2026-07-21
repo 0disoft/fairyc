@@ -1,10 +1,10 @@
 module main;
 
-fn consume(input: Result<i32, i32>) -> i32 {
+fn i32 consume(Result<i32, i32> input) {
     discard input;
-    0
+    return 0;
 }
 
-fn valid() -> i32 {
-    consume(Result::Ok(42))
+fn i32 valid() {
+    return consume(.ok(42));
 }

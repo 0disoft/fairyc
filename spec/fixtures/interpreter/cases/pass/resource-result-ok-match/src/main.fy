@@ -1,15 +1,15 @@
 module main;
 
 resource Token {
-    value: i32;
+    i32 value;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
-fn main() -> i32 {
-    let wrapped: Result<Token, i32> = Result::Ok(Token { value: 42 });
-    match wrapped {
-        Result::Ok(token) => token.value,
-        Result::Err(error) => -error,
-    }
+fn i32 main() {
+    let Result<Token, i32> wrapped = .ok(Token { .value = 42 });
+    return switch (wrapped) {
+        case .ok(token) : { token.value }
+        case .err(error) : { -error }
+    };
 }

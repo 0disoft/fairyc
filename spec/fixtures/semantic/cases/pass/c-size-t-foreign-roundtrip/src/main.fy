@@ -1,13 +1,13 @@
 module main;
 
 @link_name("fairyc_fixture_make_c_size_t")
-unsafe extern C fn make_c_size_t() -> c::size_t;
+unsafe extern C fn c::size_t make_c_size_t() ;
 
 @link_name("fairyc_fixture_consume_c_size_t")
-unsafe extern C fn consume_c_size_t(value: c::size_t) -> i32;
+unsafe extern C fn i32 consume_c_size_t(c::size_t value) ;
 
-fn main() -> i32 {
-    unsafe {
+fn i32 main() {
+    return unsafe {
         consume_c_size_t(make_c_size_t())
-    }
+    };
 }

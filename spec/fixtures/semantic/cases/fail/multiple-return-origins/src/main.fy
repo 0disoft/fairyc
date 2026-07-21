@@ -1,5 +1,5 @@
 module main;
 
-fn choose(flag: bool, left: &i32, right: &i32) -> &i32 {
-    if flag { left } else { right }
+fn ref i32 choose(bool flag, ref i32 left, ref i32 right) {
+    return if (flag) { left } else { right };
 }

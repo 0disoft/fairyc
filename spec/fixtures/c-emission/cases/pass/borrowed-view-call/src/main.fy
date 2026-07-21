@@ -1,13 +1,13 @@
 module main;
 
-fn text_length(text: &str) -> usize {
-    text.len
+fn usize text_length(ref str text) {
+    return text.len;
 }
 
-fn byte_length(bytes: &[u8]) -> usize {
-    bytes.len
+fn usize byte_length(ref u8[] bytes) {
+    return bytes.len;
 }
 
-fn main() -> i32 {
-    if text_length("λx") == 3 && byte_length(b"\x00ABC") == 4 { 42 } else { 1 }
+fn i32 main() {
+    return if (text_length("λx") == 3 && byte_length(b"\x00ABC") == 4) { 42 } else { 1 };
 }

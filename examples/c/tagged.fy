@@ -1,21 +1,21 @@
 module examples::c::tagged;
 
-fn choose() -> Option<i32> {
-    Option::Some(41)
+fn Option<i32> choose() {
+    return .some(41);
 }
 
-fn increment(input: Result<i32, i32>) -> Result<i32, i32> {
-    let value: i32 = input?;
-    Result::Ok(value + 1)
+fn Result<i32, i32> increment(Result<i32, i32> input) {
+    let i32 value = input?;
+    return .ok(value + 1);
 }
 
-fn main() -> i32 {
-    let base: i32 = match choose() {
-        Option::Some(value) => value,
-        Option::None => 0,
+fn i32 main() {
+    let i32 base = switch (choose()) {
+        case .some(value) : { value }
+        case .none : { 0 }
     };
-    match increment(Result::Ok(base)) {
-        Result::Ok(value) => value,
-        Result::Err(error) => -error,
-    }
+    return switch (increment(.ok(base))) {
+        case .ok(value) : { value }
+        case .err(error) : { -error }
+    };
 }

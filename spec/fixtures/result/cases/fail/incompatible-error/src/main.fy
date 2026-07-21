@@ -8,10 +8,7 @@ enum TargetError {
     Failed;
 }
 
-fn invalid(
-    input: Result<i32, SourceError>,
-    fallback: Result<i32, TargetError>,
-) -> Result<i32, TargetError> {
-    let value: i32 = input?;
-    fallback
+fn Result<i32, TargetError> invalid(Result<i32, SourceError> input, Result<i32, TargetError> fallback) {
+    let i32 value = input?;
+    return fallback;
 }

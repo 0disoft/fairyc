@@ -1,23 +1,23 @@
 module main;
 
 resource Token {
-    value: i32;
+    i32 value;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
 resource Pair {
-    left: Token;
-    right: Token;
+    Token left;
+    Token right;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
-fn invalid() -> i32 {
-    let pair: Pair = Pair {
-        left: Token { value: 1 },
-        right: Token { value: 2 },
+fn i32 invalid() {
+    let Pair pair = Pair {
+        .left = Token { .value = 1 },
+        .right = Token { .value = 2 },
     };
-    let extracted: Token = pair.left;
-    extracted.value
+    let Token extracted = pair.left;
+    return extracted.value;
 }

@@ -1,9 +1,9 @@
 module main;
 
-fn value() -> i32 {
-    1
+fn i32 value() {
+    return 1;
 }
 
-fn value() -> i32 {
-    2
+fn i32 value() {
+    return 2;
 }

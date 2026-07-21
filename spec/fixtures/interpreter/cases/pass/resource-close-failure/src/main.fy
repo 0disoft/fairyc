@@ -1,27 +1,27 @@
 module main;
 
 resource Token {
-    value: i32;
+    i32 value;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
-fn finish(token: Token) -> i32 {
-    token.value
+fn i32 finish(Token token) {
+    return token.value;
 }
 
-fn close(token: Token, fail: bool) -> Result<i32, Token> {
-    if fail {
-        Result::Err(token)
+fn Result<i32, Token> close(Token token, bool fail) {
+    return if (fail) {
+        .err(token)
     } else {
-        Result::Ok(finish(token))
-    }
+        .ok(finish(token))
+    };
 }
 
-fn main() -> i32 {
-    let token: Token = Token { value: 42 };
-    match close(token, true) {
-        Result::Ok(value) => value,
-        Result::Err(returned) => returned.value,
-    }
+fn i32 main() {
+    let Token token = Token { .value = 42 };
+    return switch (close(token, true)) {
+        case .ok(value) : { value }
+        case .err(returned) : { returned.value }
+    };
 }

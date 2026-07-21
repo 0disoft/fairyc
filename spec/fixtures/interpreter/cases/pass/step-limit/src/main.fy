@@ -1,6 +1,6 @@
 module main;
 
-fn main() -> i32 {
-    while true {}
-    0
+fn i32 main() {
+    while (true) {}
+    return 0;
 }

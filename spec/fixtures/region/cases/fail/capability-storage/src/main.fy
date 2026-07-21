@@ -1,5 +1,5 @@
 module main;
 
 struct Holder {
-    scratch: Region;
+    Region scratch;
 }

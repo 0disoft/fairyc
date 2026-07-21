@@ -1,6 +1,6 @@
 module main;
 
-fn main() -> i32 {
-    let value: u8 = b"\x00A"[1];
-    if value == 65 { 42 } else { 1 }
+fn i32 main() {
+    let u8 value = b"\x00A"[1];
+    return if (value == 65) { 42 } else { 1 };
 }

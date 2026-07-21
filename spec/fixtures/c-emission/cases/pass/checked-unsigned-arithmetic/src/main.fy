@@ -1,11 +1,11 @@
 module main;
 
-fn main() -> i32 {
-    let byte: u8 = 6;
-    let byte_product: u8 = byte * 7;
-    let word: u32 = 50;
-    let word_difference: u32 = word - 8;
-    let size: usize = 41;
-    let size_sum: usize = size + 1;
-    if byte_product == 42 && word_difference == 42 && size_sum == 42 { 42 } else { 1 }
+fn i32 main() {
+    let u8 byte = 6;
+    let u8 byte_product = byte * 7;
+    let u32 word = 50;
+    let u32 word_difference = word - 8;
+    let usize size = 41;
+    let usize size_sum = size + 1;
+    return if (byte_product == 42 && word_difference == 42 && size_sum == 42) { 42 } else { 1 };
 }

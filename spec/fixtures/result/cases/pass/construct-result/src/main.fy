@@ -1,5 +1,5 @@
 module main;
 
-fn build() -> Result<i32, i32> {
-    Result::Ok(42)
+fn Result<i32, i32> build() {
+    return .ok(42);
 }

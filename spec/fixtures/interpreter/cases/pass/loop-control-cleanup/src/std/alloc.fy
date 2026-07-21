@@ -1,63 +1,63 @@
 module std::alloc;
 
 pub resource Arena {
-    opaque: i32;
+    i32 opaque;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
 resource Token {
-    value: i32;
+    i32 value;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
-fn break_from_region() -> i32 {
-    var arena: Arena = Arena { opaque: 0 };
-    let outside: Token = Token { value: 40 };
-    var count: i32 = 0;
-    while count < 3 {
-        let body: Token = Token { value: 1 };
-        region scratch in &mut arena {
-            let inner: Token = Token { value: 1 };
-            let stored: &i32 = scratch.place(count);
+fn i32 break_from_region() {
+    var Arena arena = Arena { .opaque = 0 };
+    let Token outside = Token { .value = 40 };
+    var i32 count = 0;
+    while (count < 3) {
+        let Token body = Token { .value = 1 };
+        region scratch in ref mut arena {
+            let Token inner = Token { .value = 1 };
+            let ref i32 stored = scratch.place(count);
             count = count + 1;
-            if count == 1 {
+            if (count == 1) {
                 break;
             };
         }
     }
-    outside.value + count
+    return outside.value + count;
 }
 
-fn continue_from_region() -> i32 {
-    var arena: Arena = Arena { opaque: 0 };
-    let outside: Token = Token { value: 40 };
-    var count: i32 = 0;
-    while count < 2 {
-        let body: Token = Token { value: 1 };
-        region scratch in &mut arena {
-            let inner: Token = Token { value: 1 };
-            let stored: &i32 = scratch.place(count);
+fn i32 continue_from_region() {
+    var Arena arena = Arena { .opaque = 0 };
+    let Token outside = Token { .value = 40 };
+    var i32 count = 0;
+    while (count < 2) {
+        let Token body = Token { .value = 1 };
+        region scratch in ref mut arena {
+            let Token inner = Token { .value = 1 };
+            let ref i32 stored = scratch.place(count);
             count = count + 1;
             continue;
         }
     }
-    outside.value + count
+    return outside.value + count;
 }
 
-fn nested_loop_targets_nearest() -> i32 {
-    var outer: i32 = 0;
-    while outer < 2 {
-        var inner: i32 = 0;
-        while inner < 3 {
+fn i32 nested_loop_targets_nearest() {
+    var i32 outer = 0;
+    while (outer < 2) {
+        var i32 inner = 0;
+        while (inner < 3) {
             inner = inner + 1;
-            if inner == 1 {
+            if (inner == 1) {
                 continue;
             };
             break;
         }
         outer = outer + 1;
     }
-    outer + 40
+    return outer + 40;
 }

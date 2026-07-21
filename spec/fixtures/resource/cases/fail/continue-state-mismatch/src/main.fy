@@ -1,20 +1,20 @@
 module main;
 
 resource Token {
-    value: i32;
+    i32 value;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
-fn consume(token: Token) -> i32 {
-    token.value
+fn i32 consume(Token token) {
+    return token.value;
 }
 
-fn invalid(flag: bool) -> i32 {
-    let token: Token = Token { value: 1 };
-    while flag {
+fn i32 invalid(bool flag) {
+    let Token token = Token { .value = 1 };
+    while (flag) {
         consume(token);
         continue;
     }
-    0
+    return 0;
 }

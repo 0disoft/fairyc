@@ -1,11 +1,11 @@
 module main;
 
-fn passes() -> i32 {
+fn i32 passes() {
     assert(true);
-    42
+    return 42;
 }
 
-fn fails() -> i32 {
+fn i32 fails() {
     assert(false);
-    42
+    return 42;
 }

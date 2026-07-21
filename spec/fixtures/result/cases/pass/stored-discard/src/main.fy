@@ -1,7 +1,7 @@
 module main;
 
-fn valid() -> i32 {
-    let pending: Result<i32, i32> = Result::Ok(42);
+fn i32 valid() {
+    let Result<i32, i32> pending = .ok(42);
     discard pending;
-    0
+    return 0;
 }

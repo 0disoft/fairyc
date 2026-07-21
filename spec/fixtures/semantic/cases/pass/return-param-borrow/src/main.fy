@@ -1,5 +1,5 @@
 module main;
 
-fn identity(value: &i32) -> &i32 {
-    value
+fn ref i32 identity(ref i32 value) {
+    return value;
 }

@@ -2,48 +2,48 @@ module examples::windows_output::windows_console;
 
 @repr(C)
 struct write_result {
-    status: u32;
-    written: usize;
+    u32 status;
+    usize written;
 }
 
 pub struct ConsoleError {
-    status: u32;
-    written: usize;
+    u32 status;
+    usize written;
 }
 
 @effects(console)
 @link_name("fy_std_windows_stdout_write_all_v0")
-unsafe extern C fn stdout_write_all(data: *u8, length: usize) -> write_result;
+unsafe extern C fn write_result stdout_write_all(ptr u8 data, usize length) ;
 
 @effects(console)
-pub fn stdout_contract_edge_states() -> bool {
-    let empty: write_result = unsafe {
+pub fn bool stdout_contract_edge_states() {
+    let write_result empty = unsafe {
         stdout_write_all(null, 0)
     };
-    let invalid: write_result = unsafe {
+    let write_result invalid = unsafe {
         stdout_write_all(null, 1)
     };
-    empty.status == 0 && empty.written == 0 &&
-        invalid.status == 1 && invalid.written == 0
+    return empty.status == 0 && empty.written == 0 &&
+        invalid.status == 1 && invalid.written == 0;
 }
 
 @effects(console)
-pub fn stdout_write_text(text: &str) -> Result<usize, ConsoleError> {
-    let result: write_result = unsafe {
-        stdout_write_all(text as *u8, text.len)
+pub fn Result<usize, ConsoleError> stdout_write_text(ref str text) {
+    let write_result result = unsafe {
+        stdout_write_all(text as ptr u8, text.len)
     };
-    if result.status == 0 {
-        Result::Ok(result.written)
+    return if (result.status == 0) {
+        .ok(result.written)
     } else {
-        Result::Err(ConsoleError {
-            status: result.status,
-            written: result.written,
+        .err(ConsoleError {
+            .status = result.status,
+            .written = result.written,
         })
-    }
+    };
 }
 
-pub fn byte_view_ready(bytes: &[u8]) -> bool {
-    let first: u8 = bytes[0];
-    let second: u8 = bytes[1];
-    first == 0 && second == 65 && bytes.len == 2
+pub fn bool byte_view_ready(ref u8[] bytes) {
+    let u8 first = bytes[0];
+    let u8 second = bytes[1];
+    return first == 0 && second == 65 && bytes.len == 2;
 }

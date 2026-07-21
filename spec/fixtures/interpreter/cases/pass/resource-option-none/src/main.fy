@@ -1,12 +1,12 @@
 module main;
 
 resource Token {
-    value: i32;
+    i32 value;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
-fn main() -> i32 {
-    let wrapped: Option<Token> = Option::None;
-    42
+fn i32 main() {
+    let Option<Token> wrapped = .none;
+    return 42;
 }

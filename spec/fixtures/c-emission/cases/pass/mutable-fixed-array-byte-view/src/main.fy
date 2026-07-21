@@ -1,23 +1,23 @@
 module main;
 
-fn update(bytes: &mut [u8]) -> u8 {
+fn u8 update(ref mut u8[] bytes) {
     bytes[1] = 42;
-    bytes[1]
+    return bytes[1];
 }
 
-fn bounds_trap() -> i32 {
-    var values: [u8; 3] = [1, 2, 3];
+fn i32 bounds_trap() {
+    var u8[3] values = [1, 2, 3];
     values[3] = 42;
-    0
+    return 0;
 }
 
-fn main() -> i32 {
-    var values: [u8; 3] = [1, 2, 3];
+fn i32 main() {
+    var u8[3] values = [1, 2, 3];
     values[0] = 40;
-    let changed: u8 = update(&mut values);
-    if values[0] == 40 && values[1] == changed && values[1] == 42 {
+    let u8 changed = update(ref mut values);
+    return if (values[0] == 40 && values[1] == changed && values[1] == 42) {
         42
     } else {
         1
-    }
+    };
 }

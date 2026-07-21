@@ -1,7 +1,7 @@
 module main;
 
-fn valid(input: Result<i32, i32>) -> i32 {
-    let forwarded: Result<i32, i32> = input;
+fn i32 valid(Result<i32, i32> input) {
+    let Result<i32, i32> forwarded = input;
     discard forwarded;
-    0
+    return 0;
 }

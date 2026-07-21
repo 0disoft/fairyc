@@ -1,16 +1,16 @@
 module main;
 
 resource Token {
-    value: i32;
+    i32 value;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
-fn main() -> i32 {
-    let source: Token = Token { value: 42 };
-    let wrapped: Option<Token> = Option::Some(source);
-    match wrapped {
-        Option::Some(token) => token.value,
-        Option::None => 0,
-    }
+fn i32 main() {
+    let Token source = Token { .value = 42 };
+    let Option<Token> wrapped = .some(source);
+    return switch (wrapped) {
+        case .some(token) : { token.value }
+        case .none : { 0 }
+    };
 }

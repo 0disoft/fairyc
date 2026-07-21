@@ -1,12 +1,12 @@
 module main;
 
-fn invalid(flag: bool) -> i32 {
-    var pending: Result<i32, i32> = Result::Ok(0);
+fn i32 invalid(bool flag) {
+    var Result<i32, i32> pending = .ok(0);
     discard pending;
-    while flag {
-        pending = Result::Ok(1);
+    while (flag) {
+        pending = .ok(1);
         continue;
     }
     discard pending;
-    0
+    return 0;
 }

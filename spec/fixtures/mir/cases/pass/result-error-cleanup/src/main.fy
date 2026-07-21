@@ -1,22 +1,19 @@
 module main;
 
 resource Error {
-    code: i32;
+    i32 code;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
 resource Token {
-    value: i32;
+    i32 value;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
-fn run(
-    input: Result<i32, Error>,
-    fallback: Result<i32, Error>,
-) -> Result<i32, Error> {
-    let token: Token = Token { value: 1 };
-    let value: i32 = input?;
-    fallback
+fn Result<i32, Error> run(Result<i32, Error> input, Result<i32, Error> fallback) {
+    let Token token = Token { .value = 1 };
+    let i32 value = input?;
+    return fallback;
 }

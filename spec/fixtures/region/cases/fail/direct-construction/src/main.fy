@@ -1,6 +1,6 @@
 module main;
 
-fn invalid() -> i32 {
-    let scratch: Region = Region {};
-    0
+fn i32 invalid() {
+    let Region scratch = Region {};
+    return 0;
 }

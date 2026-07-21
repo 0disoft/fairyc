@@ -98,3 +98,15 @@ func TestMigrateBorrowExpressions(t *testing.T) {
 		t.Fatalf("migrated source = %s", result.Source)
 	}
 }
+
+func TestMigrateCleanupReceiver(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nresource Token { value: i32; drop fn(self: &mut Self) { let seen: i32 = self.value; } }\n")
+	result, err := Migrate("main.fy", input)
+	if err != nil {
+		t.Fatalf("Migrate() error = %v", err)
+	}
+	if !strings.Contains(string(result.Source), "cleanup { let i32 seen = this.value; }") {
+		t.Fatalf("migrated source = %s", result.Source)
+	}
+}

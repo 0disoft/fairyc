@@ -1,5 +1,5 @@
 module main;
 
-fn store(scratch: Region, value: i32) -> &i32 {
-    scratch.place(value)
+fn ref i32 store(Region scratch, i32 value) {
+    return scratch.place(value);
 }

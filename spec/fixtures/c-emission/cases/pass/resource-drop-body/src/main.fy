@@ -1,16 +1,16 @@
 module main;
 
-fn observe(value: i32) -> i32 { value }
+fn i32 observe(i32 value) { return value; }
 
 resource Token {
-    value: i32;
+    i32 value;
 
-    drop fn(self: &mut Self) {
-        let observed: i32 = observe(self.value);
+    cleanup {
+        let i32 observed = observe(this.value);
     }
 }
 
-fn main() -> i32 {
-    let token: Token = Token { value: 65 };
-    42
+fn i32 main() {
+    let Token token = Token { .value = 65 };
+    return 42;
 }

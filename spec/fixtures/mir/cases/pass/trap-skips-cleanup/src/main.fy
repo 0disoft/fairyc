@@ -1,12 +1,12 @@
 module main;
 
 resource Token {
-    value: i32;
+    i32 value;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
-fn divide(divisor: i32) -> i32 {
-    let token: Token = Token { value: 12 };
-    token.value / divisor
+fn i32 divide(i32 divisor) {
+    let Token token = Token { .value = 12 };
+    return token.value / divisor;
 }

@@ -1,13 +1,13 @@
 module main;
 
 resource Token {
-    value: i32;
+    i32 value;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
-fn main() -> i32 {
-    var token: Token = Token { value: 42 };
+fn i32 main() {
+    var Token token = Token { .value = 42 };
     token = token;
-    token.value
+    return token.value;
 }

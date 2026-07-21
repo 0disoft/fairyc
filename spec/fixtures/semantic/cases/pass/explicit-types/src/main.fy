@@ -1,6 +1,6 @@
 module main;
 
-fn choose(flag: bool) -> i32 {
-    let value: i32 = 1;
-    if flag { value } else { 2 }
+fn i32 choose(bool flag) {
+    let i32 value = 1;
+    return if (flag) { value } else { 2 };
 }

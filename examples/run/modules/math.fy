@@ -1,5 +1,5 @@
 module examples::run::modules::math;
 
-pub fn answer() -> i32 {
-    42
+pub fn i32 answer() {
+    return 42;
 }

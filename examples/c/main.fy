@@ -1,13 +1,13 @@
 module examples::c::main;
 
-fn add(left: i32, right: i32) -> i32 {
-    left + right
+fn i32 add(i32 left, i32 right) {
+    return left + right;
 }
 
-fn main() -> i32 {
-    var count: i32 = 0;
-    while count < 3 {
+fn i32 main() {
+    var i32 count = 0;
+    while (count < 3) {
         count = count + 1;
     }
-    add(count, 39)
+    return add(count, 39);
 }

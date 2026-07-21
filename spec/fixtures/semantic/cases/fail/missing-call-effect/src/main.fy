@@ -1,6 +1,6 @@
 module main;
 
 @effects(filesystem)
-fn load() -> i32 { 42 }
+fn i32 load() { return 42; }
 
-fn main() -> i32 { load() }
+fn i32 main() { return load(); }

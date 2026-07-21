@@ -1,10 +1,10 @@
 module main;
 
-fn invalid() -> &i32 {
-    let value: i32 = 1;
-    &value
+fn ref i32 invalid() {
+    let i32 value = 1;
+    return ref value;
 }
 
-fn invalid_parameter(input: i32) -> &i32 {
-    &input
+fn ref i32 invalid_parameter(i32 input) {
+    return ref input;
 }

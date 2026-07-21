@@ -1,29 +1,29 @@
 module std::alloc;
 
 pub resource Arena {
-    opaque: i32;
+    i32 opaque;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
 resource Token {
-    value: i32;
+    i32 value;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
-fn consume(token: Token) -> i32 {
-    token.value
+fn i32 consume(Token token) {
+    return token.value;
 }
 
-fn main() -> i32 {
-    var arena: Arena = Arena { opaque: 0 };
-    var kept: Token = Token { value: 1 };
-    let consumed: i32 = consume(kept);
-    region scratch in &mut arena {
-        kept = Token { value: 9 };
-        let inner: Token = Token { value: 7 };
-        let stored: &i32 = scratch.place(42);
+fn i32 main() {
+    var Arena arena = Arena { .opaque = 0 };
+    var Token kept = Token { .value = 1 };
+    let i32 consumed = consume(kept);
+    region scratch in ref mut arena {
+        kept = Token { .value = 9 };
+        let Token inner = Token { .value = 7 };
+        let ref i32 stored = scratch.place(42);
     }
-    kept.value
+    return kept.value;
 }

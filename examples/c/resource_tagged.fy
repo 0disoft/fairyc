@@ -1,24 +1,24 @@
 module main;
 
 resource Token {
-    value: i32;
+    i32 value;
 
-    drop fn(self: &mut Self) {}
+    cleanup {}
 }
 
-fn read(input: Result<Token, i32>) -> Result<i32, i32> {
-    let token: Token = input?;
-    Result::Ok(token.value)
+fn Result<i32, i32> read(Result<Token, i32> input) {
+    let Token token = input?;
+    return .ok(token.value);
 }
 
-fn main() -> i32 {
-    let wrapped: Option<Token> = Option::Some(Token { value: 42 });
-    let token: Token = match wrapped {
-        Option::Some(token) => token,
-        Option::None => Token { value: 0 },
+fn i32 main() {
+    let Option<Token> wrapped = .some(Token { .value = 42 });
+    let Token token = switch (wrapped) {
+        case .some(token) : { token }
+        case .none : { Token { .value = 0 } }
     };
-    match read(Result::Ok(token)) {
-        Result::Ok(value) => value,
-        Result::Err(error) => -error,
-    }
+    return switch (read(.ok(token))) {
+        case .ok(value) : { value }
+        case .err(error) : { -error }
+    };
 }
