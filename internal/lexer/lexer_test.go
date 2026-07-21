@@ -7,6 +7,32 @@ import (
 	"github.com/0disoft/fairyc/internal/source"
 )
 
+func TestPreviousRevisionKeywordsAreIdentifiersInCurrentSource(t *testing.T) {
+	t.Parallel()
+	input := []byte("impl match drop self switch")
+	file := source.NewFile("main.fy", input)
+	current := Lex(file, source.NewBudget(source.DefaultLimits(), len(input)))
+	previous := LexPreviousRevision(file, source.NewBudget(source.DefaultLimits(), len(input)))
+	currentKinds := significantKinds(current.Tokens)
+	previousKinds := significantKinds(previous.Tokens)
+	if !slices.Equal(currentKinds, []Kind{Identifier, Identifier, Identifier, Identifier, Keyword, EOF}) {
+		t.Fatalf("Lex() kinds = %v", currentKinds)
+	}
+	if !slices.Equal(previousKinds, []Kind{Keyword, Keyword, Keyword, Keyword, Keyword, EOF}) {
+		t.Fatalf("LexPreviousRevision() kinds = %v", previousKinds)
+	}
+}
+
+func significantKinds(tokens []Token) []Kind {
+	result := make([]Kind, 0, len(tokens))
+	for _, token := range tokens {
+		if token.Kind != Trivia {
+			result = append(result, token.Kind)
+		}
+	}
+	return result
+}
+
 func TestLosslessTokenStreamPreservesBOMCRLFAndNestedComments(t *testing.T) {
 	t.Parallel()
 	input := append([]byte{0xef, 0xbb, 0xbf}, []byte("module main;\r\n/* outer /* nested */ done */\r\n")...)

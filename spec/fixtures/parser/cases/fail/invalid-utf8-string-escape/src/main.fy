@@ -1,3 +1,3 @@
 module main;
 
-const BAD: &str = "\xFF";
+const ref str BAD = "\xFF";

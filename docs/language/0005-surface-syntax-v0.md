@@ -14,7 +14,8 @@
 ## Lexical and declaration rules
 
 - Source files use `.fy` and UTF-8. Stage 0 identifiers are ASCII letters, digits, and underscore and cannot start with a digit.
-- Statements end with explicit semicolons. There is no automatic insertion.
+- Simple statements end with explicit semicolons. Compound `if`, standalone `{ ... }`, and
+  standalone `unsafe { ... }` block statements do not; there is no automatic insertion.
 - Written declarations put one complete `Type` before one name. C name-splitting declarators,
   multiple declarators, and `typedef`-dependent parsing do not exist.
 - Functions use `fn Result name(Parameters)`. Every result type is explicit; `void` explicitly marks

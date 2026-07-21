@@ -55,7 +55,7 @@ func (p *parser) parseBlockWithTail(allowTail bool) NodeID {
 				continue
 			}
 			expressionNode, expressionFound := p.tree.Node(expression)
-			if expressionFound && expressionNode.Kind == KindIf && (!p.at("}") || !allowTail) {
+			if expressionFound && isBlockStatement(expressionNode.Kind) && (!p.at("}") || !allowTail) {
 				children = append(children, p.addNode(KindExprStmt, statementStart, []NodeID{expression}, "", ""))
 				if p.at("}") {
 					break
@@ -79,6 +79,15 @@ func (p *parser) parseBlockWithTail(allowTail bool) NodeID {
 	return p.addNode(KindBlock, start, children, "", "")
 }
 
+func isBlockStatement(kind Kind) bool {
+	switch kind {
+	case KindBlock, KindIf, KindUnsafe:
+		return true
+	default:
+		return false
+	}
+}
+
 func (p *parser) parseAssert() NodeID {
 	start := p.currentFullIndex()
 	p.advance()
@@ -98,7 +107,7 @@ func (p *parser) parseBinding() NodeID {
 	children := make([]NodeID, 0, 2)
 	if p.atKind(lexer.Identifier) && p.peekText(1) == "=" {
 		name, nameSpan = p.parseNameWithSpan()
-	} else if p.atKind(lexer.Identifier) && p.peekText(1) == ":" {
+	} else if p.acceptsPreviousRevision() && p.atKind(lexer.Identifier) && p.peekText(1) == ":" {
 		name, nameSpan = p.parseNameWithSpan()
 		p.expect(":")
 		children = append(children, p.parseType())
@@ -135,11 +144,17 @@ func (p *parser) parseWhile() NodeID {
 	start := p.currentFullIndex()
 	p.advance()
 	condition := p.parseControlExpression()
-	body := p.parseBlock()
+	body := p.parseBlockForStatement()
 	return p.addNode(KindWhile, start, []NodeID{condition, body}, "", "")
 }
 
 func (p *parser) parseControlExpression() NodeID {
+	if !p.acceptsPreviousRevision() {
+		p.expect("(")
+		condition := p.parseExpression(0, true)
+		p.expect(")")
+		return condition
+	}
 	if p.parenthesizedControlHeader() {
 		p.expect("(")
 		condition := p.parseExpression(0, true)
@@ -180,6 +195,13 @@ func (p *parser) parseRegion() NodeID {
 	name := p.parseName()
 	p.expect("in")
 	arena := p.parseExpression(0, false)
-	body := p.parseBlock()
+	body := p.parseBlockForStatement()
 	return p.addNode(KindRegion, start, []NodeID{arena, body}, name, "")
+}
+
+func (p *parser) parseBlockForStatement() NodeID {
+	if p.acceptsPreviousRevision() {
+		return p.parseBlock()
+	}
+	return p.parseBlockWithTail(false)
 }

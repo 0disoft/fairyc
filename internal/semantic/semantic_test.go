@@ -324,7 +324,7 @@ func TestAnalyzeTypesByteStringLiteralWithStaticBorrowOrigin(t *testing.T) {
 	assertSpan(t, result.Borrows[0].Borrow, "main.fy", start, start+len(`b"\x00A"`))
 }
 
-func TestAnalyzeBuildsQualifiedResultConstructorsAndMatch(t *testing.T) {
+func TestAnalyzeBuildsContextualResultConstructorsAndSwitch(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{
 		"main.fy": `module main;
@@ -358,7 +358,7 @@ fn i32 unwrap(Result<i32, i32> input) {
 	}
 }
 
-func TestAnalyzeBuildsQualifiedOptionConstructorsAndMatch(t *testing.T) {
+func TestAnalyzeBuildsContextualOptionConstructorsAndSwitch(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{
 		"main.fy": `module main;
@@ -391,6 +391,25 @@ fn i32 unwrap(Option<i32> input) {
 	}
 	if unwrapReturn.Arms[0].Variant != "some" || unwrapReturn.Arms[1].Variant != "none" || unwrapReturn.Arms[1].Binding != hir.NoSymbol {
 		t.Fatalf("Option match arms = %+v", unwrapReturn.Arms)
+	}
+}
+
+func TestAnalyzeRejectsPreviousRevisionQualifiedVariants(t *testing.T) {
+	t.Parallel()
+	tests := map[string]string{
+		"built-in Result": "fn Result<i32, i32> main() { return Result::Ok(42); }\n",
+		"user enum":       "enum Status { Ready; }\nfn Status main() { return Status::Ready; }\n",
+	}
+	for name, body := range tests {
+		name, body := name, body
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			input := "module main;\n" + body
+			result := analyzeText(t, map[string]string{"main.fy": input})
+			if result.FailedPhase != semantic.PhaseResolve || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E0101" {
+				t.Fatalf("result = %+v", result)
+			}
+		})
 	}
 }
 
@@ -2273,7 +2292,7 @@ func TestAnalyzeTracksSequentialAndBranchSafeBorrowReassignment(t *testing.T) {
 		branch string
 	}{
 		{name: "sequential", branch: "current = right;"},
-		{name: "same branch origin", branch: "if flag { current = right; 0 } else { current = right; 0 };"},
+		{name: "same branch origin", branch: "if (flag) { current = right; 0 } else { current = right; 0 };"},
 	} {
 		t.Run(fixture.name, func(t *testing.T) {
 			result := analyzeText(t, map[string]string{

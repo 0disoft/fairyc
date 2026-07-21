@@ -8,17 +8,40 @@ import (
 	"github.com/0disoft/fairyc/internal/source"
 )
 
-// Parse performs UTF-8-aware lexing, lossless CST construction, recovery, and module validation.
+type parseMode uint8
+
+const (
+	parseCurrent parseMode = iota
+	parsePreviousRevision
+)
+
+// Parse performs UTF-8-aware lexing, lossless CST construction, recovery, and module validation
+// for the current product grammar.
 func Parse(file source.File, limits source.Limits) *Tree {
+	return parse(file, limits, parseCurrent)
+}
+
+// ParsePreviousRevision accepts the immediately preceding source grammar for the standalone
+// migration package. Product compilation must call Parse instead.
+func ParsePreviousRevision(file source.File, limits source.Limits) *Tree {
+	return parse(file, limits, parsePreviousRevision)
+}
+
+func parse(file source.File, limits source.Limits, mode parseMode) *Tree {
 	budget := source.NewBudget(limits, len(file.Bytes))
-	lexed := lexer.Lex(file, budget)
+	var lexed lexer.Result
+	if mode == parsePreviousRevision {
+		lexed = lexer.LexPreviousRevision(file, budget)
+	} else {
+		lexed = lexer.Lex(file, budget)
+	}
 	tree := &Tree{
 		Source:      lexed.Source,
 		Tokens:      lexed.Tokens,
 		Root:        NoNode,
 		Diagnostics: append([]diagnostic.Diagnostic(nil), lexed.Diagnostics...),
 	}
-	parser := newParser(file, tree, budget)
+	parser := newParser(file, tree, budget, mode)
 	if !budget.Exhausted() {
 		tree.Root = parser.parseSource()
 	}
@@ -33,6 +56,7 @@ type parser struct {
 	file          source.File
 	tree          *Tree
 	budget        *source.Budget
+	mode          parseMode
 	significant   []int
 	position      int
 	lastFullIndex int
@@ -41,7 +65,7 @@ type parser struct {
 	hasExhausted  bool
 }
 
-func newParser(file source.File, tree *Tree, budget *source.Budget) *parser {
+func newParser(file source.File, tree *Tree, budget *source.Budget, mode parseMode) *parser {
 	significant := make([]int, 0, len(tree.Tokens))
 	for index, token := range tree.Tokens {
 		if token.Kind != lexer.Trivia {
@@ -52,10 +76,15 @@ func newParser(file source.File, tree *Tree, budget *source.Budget) *parser {
 		file:          file,
 		tree:          tree,
 		budget:        budget,
+		mode:          mode,
 		significant:   significant,
 		lastFullIndex: -1,
 		lastEndByte:   -1,
 	}
+}
+
+func (p *parser) acceptsPreviousRevision() bool {
+	return p.mode == parsePreviousRevision
 }
 
 func (p *parser) current() lexer.Token {

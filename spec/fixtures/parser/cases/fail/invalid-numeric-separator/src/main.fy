@@ -1,6 +1,6 @@
 module main;
 
-fn main() -> i32 {
+fn i32 main() {
   let value = 1__0;
   return value;
 }

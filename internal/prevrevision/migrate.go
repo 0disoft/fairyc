@@ -26,7 +26,7 @@ type edit struct {
 }
 
 // Migrate converts every implemented previous-revision spelling and verifies that the result is
-// accepted by the transitional parser. Product cutover removes those old parse branches later.
+// accepted by the current product parser.
 func Migrate(path string, input []byte) (Result, error) {
 	declarations, err := MigrateDeclarations(path, input)
 	if err != nil {
@@ -47,7 +47,7 @@ func Migrate(path string, input []byte) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	verified := parseMigrationSource(path, output)
+	verified := parseCurrentSource(path, output)
 	if len(verified.Diagnostics) != 0 {
 		return Result{}, fmt.Errorf("migrated surface parse produced %d diagnostics: %+v\n%s", len(verified.Diagnostics), verified.Diagnostics, output)
 	}
@@ -99,7 +99,11 @@ func parseMigrationSource(path string, input []byte) *syntax.Tree {
 		break
 	}
 	virtualPath := migrationVirtualPathForModule(path, module)
-	return syntax.Parse(source.NewFile(virtualPath, input), source.DefaultLimits())
+	return syntax.ParsePreviousRevision(source.NewFile(virtualPath, input), source.DefaultLimits())
+}
+
+func parseCurrentSource(path string, input []byte) *syntax.Tree {
+	return syntax.Parse(source.NewFile(migrationVirtualPath(path, input), input), source.DefaultLimits())
 }
 
 func migrationVirtualPath(path string, input []byte) string {
@@ -388,8 +392,24 @@ func controlHeaderParenthesized(tree *syntax.Tree, node syntax.Node) bool {
 	if keyword < 0 {
 		return false
 	}
-	next := nextSignificant(tree, keyword+1, node.TokenEnd)
-	return next >= 0 && tree.Tokens[next].Text(tree.Source) == "("
+	open := nextSignificant(tree, keyword+1, node.TokenEnd)
+	if open < 0 || tree.Tokens[open].Text(tree.Source) != "(" {
+		return false
+	}
+	depth := 0
+	for index := open; index >= 0 && index < node.TokenEnd; index = nextSignificant(tree, index+1, node.TokenEnd) {
+		switch tree.Tokens[index].Text(tree.Source) {
+		case "(":
+			depth++
+		case ")":
+			depth--
+			if depth == 0 {
+				next := nextSignificant(tree, index+1, node.TokenEnd)
+				return next >= 0 && tree.Tokens[next].Text(tree.Source) == "{"
+			}
+		}
+	}
+	return false
 }
 
 func migratedVariantPath(value string, localEnums map[string]struct{}) (string, bool) {

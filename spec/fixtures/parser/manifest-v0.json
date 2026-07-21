@@ -159,8 +159,8 @@
           {
             "code": "E0004",
             "span": {
-              "startByte": 47,
-              "endByte": 51
+              "startByte": 44,
+              "endByte": 48
             },
             "repair": "none"
           }
@@ -195,8 +195,8 @@
           {
             "code": "E0005",
             "span": {
-              "startByte": 32,
-              "endByte": 38
+              "startByte": 34,
+              "endByte": 40
             },
             "repair": "none"
           }
@@ -231,8 +231,8 @@
           {
             "code": "E0007",
             "span": {
-              "startByte": 48,
-              "endByte": 48
+              "startByte": 45,
+              "endByte": 45
             },
             "repair": "insert",
             "token": ";"
@@ -250,8 +250,8 @@
           {
             "code": "E0009",
             "span": {
-              "startByte": 56,
-              "endByte": 57
+              "startByte": 53,
+              "endByte": 54
             },
             "repair": "none"
           }
@@ -305,8 +305,8 @@
           {
             "code": "E0007",
             "span": {
-              "startByte": 53,
-              "endByte": 53
+              "startByte": 50,
+              "endByte": 50
             },
             "repair": "insert",
             "token": ")"
@@ -324,8 +324,8 @@
           {
             "code": "E0008",
             "span": {
-              "startByte": 49,
-              "endByte": 50
+              "startByte": 46,
+              "endByte": 47
             },
             "repair": "skip",
             "token": "@"

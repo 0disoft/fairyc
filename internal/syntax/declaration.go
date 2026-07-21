@@ -85,7 +85,9 @@ func (p *parser) parseItem() NodeID {
 	case "enum":
 		return p.parseEnum(start, children)
 	case "impl":
-		return p.parseImpl(start, children)
+		if p.acceptsPreviousRevision() {
+			return p.parseImpl(start, children)
+		}
 	case "fn":
 		return p.parseFunction(start, children, false)
 	case "extern":
@@ -126,7 +128,7 @@ func (p *parser) parseConst(start int, leading []NodeID) NodeID {
 	var name string
 	var nameSpan diagnostic.Span
 	var typeID NodeID
-	if p.atKind(lexer.Identifier) && p.peekText(1) == ":" {
+	if p.acceptsPreviousRevision() && p.atKind(lexer.Identifier) && p.peekText(1) == ":" {
 		name, nameSpan = p.parseNameWithSpan()
 		p.expect(":")
 		typeID = p.parseType()
@@ -175,7 +177,7 @@ func (p *parser) parseResource(start int, leading []NodeID) NodeID {
 			children = append(children, attributes...)
 			continue
 		}
-		if p.at("drop") {
+		if p.acceptsPreviousRevision() && p.at("drop") {
 			children = append(children, p.parseDrop())
 			break
 		}
@@ -188,7 +190,7 @@ func (p *parser) parseResource(start int, leading []NodeID) NodeID {
 func (p *parser) parseCleanup(leading []NodeID) NodeID {
 	start := p.currentFullIndex()
 	p.advance()
-	block := p.parseBlock()
+	block := p.parseBlockWithTail(false)
 	children := append(append([]NodeID(nil), leading...), block)
 	return p.addNode(KindCleanup, start, children, "cleanup", "")
 }
@@ -267,14 +269,13 @@ func (p *parser) parseFunction(start int, leading []NodeID, method bool) NodeID 
 	var resultType NodeID
 	var parameters []NodeID
 	owner := NoNode
-	cShaped := false
-	if p.atKind(lexer.Identifier) && p.peekText(1) == "(" {
+	legacyHeader := p.acceptsPreviousRevision() && p.atKind(lexer.Identifier) && p.peekText(1) == "("
+	if legacyHeader {
 		name, nameSpan = p.parseNameWithSpan()
 		parameters = p.parseParameters(method, true)
 		p.expect("->")
 		resultType = p.parseType()
 	} else {
-		cShaped = true
 		resultType = p.parseType()
 		firstName, firstSpan := p.parseNameWithSpan()
 		if p.match("::") {
@@ -285,7 +286,7 @@ func (p *parser) parseFunction(start int, leading []NodeID, method bool) NodeID 
 		}
 		parameters = p.parseParameters(method, true)
 	}
-	body := p.parseBlockWithTail(!cShaped)
+	body := p.parseBlockWithTail(legacyHeader)
 	children := append([]NodeID(nil), leading...)
 	if owner != NoNode {
 		children = append(children, owner)
@@ -307,7 +308,7 @@ func (p *parser) parseForeignFunction(start int, leading []NodeID) NodeID {
 	var nameSpan diagnostic.Span
 	var resultType NodeID
 	var parameters []NodeID
-	if p.atKind(lexer.Identifier) && p.peekText(1) == "(" {
+	if p.acceptsPreviousRevision() && p.atKind(lexer.Identifier) && p.peekText(1) == "(" {
 		name, nameSpan = p.parseNameWithSpan()
 		parameters = p.parseParameters(false, false)
 		p.expect("->")
@@ -326,7 +327,7 @@ func (p *parser) parseForeignFunction(start int, leading []NodeID) NodeID {
 func (p *parser) parseParameters(method bool, allowMutable bool) []NodeID {
 	p.expect("(")
 	parameters := make([]NodeID, 0, 4)
-	if method && p.at("self") {
+	if p.acceptsPreviousRevision() && method && p.at("self") {
 		parameters = append(parameters, p.parseReceiver())
 		if !p.match(",") {
 			p.expect(")")
@@ -339,7 +340,7 @@ func (p *parser) parseParameters(method bool, allowMutable bool) []NodeID {
 		var name string
 		var nameSpan diagnostic.Span
 		var typeID NodeID
-		legacy := allowMutable && p.at("mut") || p.atKind(lexer.Identifier) && p.peekText(1) == ":"
+		legacy := p.acceptsPreviousRevision() && (allowMutable && p.at("mut") || p.atKind(lexer.Identifier) && p.peekText(1) == ":")
 		if legacy {
 			if allowMutable && p.match("mut") {
 				modifier = "mut"
@@ -384,7 +385,7 @@ func (p *parser) parseField() NodeID {
 }
 
 func (p *parser) parseFieldHead() (string, diagnostic.Span, NodeID) {
-	if p.atKind(lexer.Identifier) && p.peekText(1) == ":" {
+	if p.acceptsPreviousRevision() && p.atKind(lexer.Identifier) && p.peekText(1) == ":" {
 		name, nameSpan := p.parseNameWithSpan()
 		p.expect(":")
 		return name, nameSpan, p.parseType()
@@ -416,21 +417,21 @@ func (p *parser) parseType() NodeID {
 		}
 		child := p.parseType()
 		result = p.addTypeNode(start, []NodeID{child}, form)
-	case p.match("&"):
+	case p.acceptsPreviousRevision() && p.match("&"):
 		form := TypeFormReference
 		if p.match("mut") {
 			form = TypeFormReferenceMut
 		}
 		child := p.parseType()
 		result = p.addTypeNode(start, []NodeID{child}, form)
-	case p.match("*"):
+	case p.acceptsPreviousRevision() && p.match("*"):
 		form := TypeFormPointer
 		if p.match("mut") {
 			form = TypeFormPointerMut
 		}
 		child := p.parseType()
 		result = p.addTypeNode(start, []NodeID{child}, form)
-	case p.match("["):
+	case p.acceptsPreviousRevision() && p.match("["):
 		children := []NodeID{p.parseType()}
 		form := TypeFormSlice
 		if p.match(";") {
@@ -452,9 +453,9 @@ func (p *parser) parseType() NodeID {
 		}
 		p.expect("fn")
 		children := make([]NodeID, 0, 4)
-		cShaped := !p.at("(")
+		legacyFunctionType := p.acceptsPreviousRevision() && p.at("(")
 		var resultType NodeID
-		if cShaped {
+		if !legacyFunctionType {
 			resultType = p.parseType()
 		}
 		p.expect("(")
@@ -465,7 +466,7 @@ func (p *parser) parseType() NodeID {
 			}
 		}
 		p.expect(")")
-		if cShaped {
+		if !legacyFunctionType {
 			children = append(children, resultType)
 		} else {
 			p.expect("->")

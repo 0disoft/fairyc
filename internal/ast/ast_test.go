@@ -171,7 +171,7 @@ func TestLowerPreservesOwnerQualifiedFunction(t *testing.T) {
 
 func TestLowerCapturesStructFields(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\nstruct Holder { scratch: Region; }\n")
+	input := []byte("module main;\nstruct Holder { Region scratch; }\n")
 	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
 	if len(tree.Diagnostics) != 0 {
 		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
@@ -190,7 +190,7 @@ func TestLowerCapturesStructFields(t *testing.T) {
 
 func TestLowerPreservesStructAttributesAndArgumentOrder(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\n@repr(C)\nstruct Packet { data: *u8; length: usize; }\n")
+	input := []byte("module main;\n@repr(C)\nstruct Packet { ptr u8 data; usize length; }\n")
 	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
 	if len(tree.Diagnostics) != 0 {
 		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
@@ -213,7 +213,7 @@ func TestLowerPreservesStructAttributesAndArgumentOrder(t *testing.T) {
 
 func TestLowerCapturesEnumType(t *testing.T) {
 	t.Parallel()
-	input := []byte("module main;\nenum Error { Failed; Os { code: i32; retryable: bool; }; }\n")
+	input := []byte("module main;\nenum Error { Failed; Os { i32 code; bool retryable; }; }\n")
 	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
 	if len(tree.Diagnostics) != 0 {
 		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)

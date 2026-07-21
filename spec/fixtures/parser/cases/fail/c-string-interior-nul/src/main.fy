@@ -1,6 +1,6 @@
 module main;
 
-fn main() -> &CStr {
+fn ref CStr main() {
   let name = c"fairy\0c";
   return name;
 }

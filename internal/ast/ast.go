@@ -329,15 +329,11 @@ func lowerResource(tree *syntax.Tree, node syntax.Node) Resource {
 	value.Fields = lowerFields(tree, node)
 	for _, childID := range node.Children {
 		child, found := tree.Node(childID)
-		if !found || child.Kind != syntax.KindCleanup && (child.Kind != syntax.KindFunction || child.Text != "drop") {
+		if !found || child.Kind != syntax.KindCleanup {
 			continue
 		}
-		receiverName := "this"
-		if child.Kind == syntax.KindFunction {
-			receiverName = "self"
-		}
 		value.Cleanup = &ResourceCleanup{
-			Span: child.Span, ReceiverName: receiverName, Attributes: lowerAttributes(tree, child),
+			Span: child.Span, ReceiverName: "this", Attributes: lowerAttributes(tree, child),
 		}
 		for _, dropChildID := range child.Children {
 			dropChild, ok := tree.Node(dropChildID)

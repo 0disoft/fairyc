@@ -32,7 +32,7 @@ func BuildSpanMapper(path string, input []byte) ([]byte, SpanMapper, error) {
 	if err != nil {
 		return nil, SpanMapper{}, err
 	}
-	intermediateTree := syntax.Parse(source.NewFile(migrationVirtualPath(path, intermediate), intermediate), source.DefaultLimits())
+	intermediateTree := syntax.ParsePreviousRevision(source.NewFile(migrationVirtualPath(path, intermediate), intermediate), source.DefaultLimits())
 	if len(intermediateTree.Diagnostics) != 0 {
 		return nil, SpanMapper{}, fmt.Errorf("intermediate parse produced %d diagnostics", len(intermediateTree.Diagnostics))
 	}
@@ -43,6 +43,10 @@ func BuildSpanMapper(path string, input []byte) ([]byte, SpanMapper, error) {
 	final, err := applyEdits(intermediate, slices.Clone(surface))
 	if err != nil {
 		return nil, SpanMapper{}, err
+	}
+	finalTree := syntax.Parse(source.NewFile(migrationVirtualPath(path, final), final), source.DefaultLimits())
+	if len(finalTree.Diagnostics) != 0 {
+		return nil, SpanMapper{}, fmt.Errorf("final parse produced %d diagnostics", len(finalTree.Diagnostics))
 	}
 	return final, SpanMapper{
 		original: slices.Clone(input), intermediate: intermediate, final: final,

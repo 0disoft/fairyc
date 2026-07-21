@@ -167,7 +167,7 @@ func completePreviousFairySource(value string) bool {
 	if !strings.HasPrefix(trimmed, "module ") || !strings.Contains(trimmed, ";") {
 		return false
 	}
-	markers := []string{" -> ", "drop fn", "match ", "=>", "Result::", "Option::", "&mut ", "*mut ", "fn main("}
+	markers := []string{" -> ", ": ", "drop fn", "if ", "while ", "match ", "=>", "Result::", "Option::", "&mut ", "*mut ", "fn main("}
 	for _, marker := range markers {
 		if strings.Contains(value, marker) {
 			return true

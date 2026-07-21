@@ -40,7 +40,8 @@ Name resolution, canonical type selection, phase ownership, cascade suppression,
 - Source files use `.fy`, source is UTF-8, and Stage 0 identifiers are ASCII.
 - Written declarations put one complete type before one name. C name-splitting declarators, C casts,
   preprocessing, and textual includes are absent.
-- Statements use explicit semicolons. Assignment is a statement, and integer values are not implicit booleans.
+- Simple statements use explicit semicolons; compound `if`, standalone blocks, and standalone
+  `unsafe` blocks do not. Assignment is a statement, and integer values are not implicit booleans.
 - Every file declares one module. Imports require aliases and cannot be wildcard, selective, cyclic, or re-exported.
 - `let` prevents reassignment, `var` permits reassignment and mutable borrowing, and both require initializers.
 - Parameters use `Type name`. A callee that needs an assignable place initializes a `var` local from

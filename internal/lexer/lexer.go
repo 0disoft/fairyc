@@ -9,13 +9,17 @@ import (
 	"github.com/0disoft/fairyc/internal/source"
 )
 
-var keywords = map[string]struct{}{
+var currentKeywords = map[string]struct{}{
 	"as": {}, "assert": {}, "break": {}, "case": {}, "cleanup": {}, "const": {}, "continue": {}, "discard": {},
-	"drop": {}, "else": {}, "enum": {}, "extern": {}, "false": {},
-	"fn": {}, "if": {}, "impl": {}, "import": {}, "in": {}, "let": {},
-	"match": {}, "module": {}, "mut": {}, "null": {}, "pub": {},
-	"ptr": {}, "ref": {}, "region": {}, "resource": {}, "return": {}, "self": {}, "struct": {},
+	"else": {}, "enum": {}, "extern": {}, "false": {},
+	"fn": {}, "if": {}, "import": {}, "in": {}, "let": {},
+	"module": {}, "mut": {}, "null": {}, "pub": {},
+	"ptr": {}, "ref": {}, "region": {}, "resource": {}, "return": {}, "struct": {},
 	"switch": {}, "true": {}, "unsafe": {}, "var": {}, "while": {},
+}
+
+var previousRevisionKeywords = map[string]struct{}{
+	"drop": {}, "impl": {}, "match": {}, "self": {},
 }
 
 var symbols = []string{
@@ -26,9 +30,20 @@ var symbols = []string{
 
 // Lex performs one bounded, batch lex over the file's original bytes.
 func Lex(file source.File, budget *source.Budget) Result {
+	return lex(file, budget, false)
+}
+
+// LexPreviousRevision classifies the retired grammar's extra keywords for the standalone source
+// migrator. Product compilation must call Lex.
+func LexPreviousRevision(file source.File, budget *source.Budget) Result {
+	return lex(file, budget, true)
+}
+
+func lex(file source.File, budget *source.Budget, previousRevision bool) Result {
 	lexer := scanner{
-		source: append([]byte(nil), file.Bytes...),
-		budget: budget,
+		source:           append([]byte(nil), file.Bytes...),
+		budget:           budget,
+		previousRevision: previousRevision,
 	}
 	lexer.run()
 	return Result{
@@ -39,12 +54,13 @@ func Lex(file source.File, budget *source.Budget) Result {
 }
 
 type scanner struct {
-	source       []byte
-	position     int
-	budget       *source.Budget
-	tokens       []Token
-	diagnostics  []diagnostic.Diagnostic
-	hasExhausted bool
+	source           []byte
+	position         int
+	budget           *source.Budget
+	tokens           []Token
+	diagnostics      []diagnostic.Diagnostic
+	hasExhausted     bool
+	previousRevision bool
 }
 
 func (s *scanner) run() {
@@ -273,7 +289,9 @@ func (s *scanner) scanIdentifier() {
 	}
 	text := string(s.source[start:s.position])
 	kind := Identifier
-	if _, found := keywords[text]; found {
+	if _, found := currentKeywords[text]; found {
+		kind = Keyword
+	} else if _, found := previousRevisionKeywords[text]; found && s.previousRevision {
 		kind = Keyword
 	}
 	s.emit(kind, start, s.position, literalKeywordCooked(text))

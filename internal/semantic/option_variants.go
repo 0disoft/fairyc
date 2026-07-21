@@ -7,9 +7,9 @@ const (
 
 func optionVariantPath(value string) (string, bool) {
 	switch value {
-	case "Option::Some", ".some":
+	case ".some":
 		return optionVariantSome, true
-	case "Option::None", ".none":
+	case ".none":
 		return optionVariantNone, true
 	default:
 		return "", false

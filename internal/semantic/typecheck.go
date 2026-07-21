@@ -450,9 +450,7 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 			actual = hir.TypeInvalid
 		}
 	case syntax.KindPath:
-		if reference, found := c.analyzer.enumVariantPaths[expression]; found {
-			actual = c.checkEnumPath(expression, result, reference)
-		} else if symbol := c.analyzer.resolved[expression]; symbol != nil {
+		if symbol := c.analyzer.resolved[expression]; symbol != nil {
 			result.Symbol = symbol.id
 			actual = symbol.typ
 		} else if variant, option := optionVariantPath(expression.Text); option {
@@ -489,8 +487,6 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 		actual = c.checkSlice(expression, result)
 	case syntax.KindIf:
 		actual = c.checkIf(expression, result, expected)
-	case syntax.KindMatch:
-		actual = c.checkMatch(expression, result, expected)
 	case syntax.KindSwitch:
 		actual = c.checkMatch(expression, result, expected)
 		result.Kind = string(syntax.KindMatch)
@@ -776,9 +772,6 @@ func (c *typeChecker) checkRecord(expression *ast.Expression, result *hir.Expres
 	if len(expression.Children) == 0 {
 		return hir.TypeInvalid
 	}
-	if reference, found := c.analyzer.enumVariantPaths[expression.Children[0]]; found {
-		return c.checkEnumRecord(expression, result, reference)
-	}
 	if path := expression.Children[0]; path != nil && strings.HasPrefix(path.Text, ".") {
 		return c.checkContextualEnumRecord(expression, result, expected)
 	}
@@ -886,64 +879,6 @@ func (c *typeChecker) checkContextualEnumRecord(expression *ast.Expression, resu
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "enum payload construction with missing fields")
 	}
 	return expected
-}
-
-func (c *typeChecker) checkEnumPath(expression *ast.Expression, result *hir.Expression, reference enumVariantReference) hir.Type {
-	variant, found := c.enumVariant(reference)
-	if !found {
-		return hir.TypeInvalid
-	}
-	if len(variant.orderedFields) != 0 {
-		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "enum payload variant used without record construction")
-		return hir.TypeInvalid
-	}
-	result.Kind = "enum-variant"
-	result.Symbol = reference.enumeration.id
-	result.Variant = variant.name
-	return reference.enumeration.typ
-}
-
-func (c *typeChecker) checkEnumRecord(expression *ast.Expression, result *hir.Expression, reference enumVariantReference) hir.Type {
-	variant, found := c.enumVariant(reference)
-	if !found {
-		return hir.TypeInvalid
-	}
-	result.Kind = "enum-variant"
-	result.Symbol = reference.enumeration.id
-	result.Variant = variant.name
-	seen := make(map[string]struct{}, len(expression.Children)-1)
-	for _, fieldExpression := range expression.Children[1:] {
-		field, declared := variant.fields[fieldExpression.Text]
-		if !declared || len(fieldExpression.Children) != 1 {
-			c.analyzer.addUnsupported(c.module.file.Path, fieldExpression.Span, "unknown or malformed enum payload field "+fieldExpression.Text)
-			continue
-		}
-		if _, duplicate := seen[fieldExpression.Text]; duplicate {
-			c.analyzer.addUnsupported(c.module.file.Path, fieldExpression.Span, "duplicate enum payload field "+fieldExpression.Text)
-			continue
-		}
-		seen[fieldExpression.Text] = struct{}{}
-		value, actual := c.checkExpression(fieldExpression.Children[0], field.typ)
-		result.Children = appendExpression(result.Children, value)
-		result.Fields = append(result.Fields, fieldExpression.Text)
-		c.requireType("E1006", span(c.module.file.Path, fieldExpression.Children[0].Span), actual, field.typ, field.declaration)
-	}
-	if len(seen) != len(variant.fields) {
-		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "enum payload construction with missing fields")
-	}
-	return reference.enumeration.typ
-}
-
-func (c *typeChecker) enumVariant(reference enumVariantReference) (enumVariant, bool) {
-	if reference.enumeration == nil || reference.variant == nil {
-		return enumVariant{}, false
-	}
-	info := c.analyzer.enumTypes[reference.enumeration.typ]
-	if info == nil {
-		return enumVariant{}, false
-	}
-	variant, found := info.variants[reference.variant.Name]
-	return variant, found
 }
 
 func (c *typeChecker) checkField(expression *ast.Expression, result *hir.Expression) hir.Type {
@@ -1415,12 +1350,12 @@ func (c *typeChecker) checkForeignCall(expression *ast.Expression, result *hir.E
 
 func (c *typeChecker) checkOptionPath(expression *ast.Expression, result *hir.Expression, expected hir.Type, variant string) hir.Type {
 	if variant != optionVariantNone {
-		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "Option::Some used without one payload")
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, ".some used without one payload")
 		return hir.TypeInvalid
 	}
 	_, ok := hir.OptionElement(expected)
 	if !ok {
-		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "Option::None without contextual Option type")
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, ".none without contextual Option type")
 		return hir.TypeInvalid
 	}
 	result.Kind = "option-variant"
@@ -1430,7 +1365,7 @@ func (c *typeChecker) checkOptionPath(expression *ast.Expression, result *hir.Ex
 
 func (c *typeChecker) checkOptionConstructor(expression *ast.Expression, result *hir.Expression, expected hir.Type, variant string) hir.Type {
 	if variant != optionVariantSome {
-		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "Option::None is a bare variant, not a call")
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, ".none is a bare variant, not a call")
 		return hir.TypeInvalid
 	}
 	payloadType, ok := hir.OptionElement(expected)
@@ -1439,7 +1374,7 @@ func (c *typeChecker) checkOptionConstructor(expression *ast.Expression, result 
 		return hir.TypeInvalid
 	}
 	if len(expression.Children) != 2 {
-		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "Option::Some arity other than one")
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, ".some arity other than one")
 		return hir.TypeInvalid
 	}
 	payload, actual := c.checkExpression(expression.Children[1], payloadType)
@@ -1510,9 +1445,6 @@ func (c *typeChecker) checkEnumMatch(expression *ast.Expression, result *hir.Exp
 		}
 		pattern := armExpression.Children[0]
 		variantName := strings.TrimPrefix(pattern.Text, ".")
-		if reference, found := c.analyzer.enumVariantPaths[pattern]; found && reference.enumeration == info.symbol && reference.variant != nil {
-			variantName = reference.variant.Name
-		}
 		variant, found := info.variants[variantName]
 		if !found {
 			c.analyzer.addUnsupported(c.module.file.Path, pattern.Span, "pattern from a different or unresolved enum")
@@ -1582,7 +1514,7 @@ func (c *typeChecker) checkResultMatch(expression *ast.Expression, result *hir.E
 		}
 		variant, variantOK := resultVariantPath(pattern.Text)
 		if !variantOK {
-			c.analyzer.addUnsupported(c.module.file.Path, pattern.Span, "pattern that is not a qualified Result variant")
+			c.analyzer.addUnsupported(c.module.file.Path, pattern.Span, "pattern that is not a contextual Result variant")
 			return hir.TypeInvalid
 		}
 		if _, duplicate := seen[variant]; duplicate {
@@ -1634,7 +1566,7 @@ func (c *typeChecker) checkOptionMatch(expression *ast.Expression, result *hir.E
 		}
 		variant, variantOK := optionVariantPath(pattern.Text)
 		if !variantOK {
-			c.analyzer.addUnsupported(c.module.file.Path, pattern.Span, "pattern that is not a qualified Option variant")
+			c.analyzer.addUnsupported(c.module.file.Path, pattern.Span, "pattern that is not a contextual Option variant")
 			return hir.TypeInvalid
 		}
 		if _, duplicate := seen[variant]; duplicate {
@@ -1646,7 +1578,7 @@ func (c *typeChecker) checkOptionMatch(expression *ast.Expression, result *hir.E
 		switch variant {
 		case optionVariantSome:
 			if len(pattern.Children) != 2 {
-				c.analyzer.addUnsupported(c.module.file.Path, pattern.Span, "Option::Some pattern without one payload binding")
+				c.analyzer.addUnsupported(c.module.file.Path, pattern.Span, ".some pattern without one payload binding")
 				return hir.TypeInvalid
 			}
 			bindingExpression := pattern.Children[1]
@@ -1662,7 +1594,7 @@ func (c *typeChecker) checkOptionMatch(expression *ast.Expression, result *hir.E
 			arm.BindingSpan = bindingSpan
 		case optionVariantNone:
 			if len(pattern.Children) != 1 {
-				c.analyzer.addUnsupported(c.module.file.Path, pattern.Span, "Option::None pattern with a payload binding")
+				c.analyzer.addUnsupported(c.module.file.Path, pattern.Span, ".none pattern with a payload binding")
 				return hir.TypeInvalid
 			}
 		}

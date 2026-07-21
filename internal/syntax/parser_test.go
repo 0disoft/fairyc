@@ -20,6 +20,38 @@ func TestParseBudgetFailsClosed(t *testing.T) {
 	}
 }
 
+func TestCurrentParserRejectsEveryPreviousRevisionSpelling(t *testing.T) {
+	t.Parallel()
+	tests := map[string]string{
+		"function header and tail": "fn main() -> i32 { 0 }\n",
+		"colon declarations":       "struct Pair { value: i32; }\nfn read(pair: Pair) -> i32 { let value: i32 = pair.value; value }\n",
+		"resource drop":            "resource File { handle: i32; drop fn(self: &mut Self) { let seen: i32 = self.handle; } }\n",
+		"impl receiver":            "struct Pair { value: i32; }\nimpl Pair { fn read(self: &Self) -> i32 { self.value } }\n",
+		"unparenthesized control":  "fn i32 choose(bool flag) { if flag { return 1; } else { return 0; } }\n",
+		"match expression":         "fn i32 choose(Result<i32, i32> value) { return match value { Result::ok(ok) => ok, Result::err(err) => err, }; }\n",
+		"record field colon":       "struct Pair { i32 value; }\nfn Pair make() { return Pair { value: 1 }; }\n",
+		"prefix structural types":  "fn i32 read(&mut [i32] values, *mut u8 output) { return 0; }\n",
+		"foreign function":         "unsafe extern C fn read(value: *mut u8) -> i32;\n",
+		"foreign function type":    "fn i32 call(callback: unsafe extern C fn(i32) -> i32) { return 0; }\n",
+	}
+	for name, body := range tests {
+		name, body := name, body
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			input := "module main;\n" + body
+			file := source.NewFile("main.fy", []byte(input))
+			previous := ParsePreviousRevision(file, source.DefaultLimits())
+			if len(previous.Diagnostics) != 0 {
+				t.Fatalf("ParsePreviousRevision() diagnostics = %+v", previous.Diagnostics)
+			}
+			current := Parse(file, source.DefaultLimits())
+			if len(current.Diagnostics) == 0 {
+				t.Fatal("Parse() accepted previous-revision syntax")
+			}
+		})
+	}
+}
+
 func TestParseCShapedParametersAndMigratedMutableLocalLosslessly(t *testing.T) {
 	t.Parallel()
 	input := []byte("module main;\nfn i32 close(File input, u32 status) {\n    var File file = input; return 0; }\n")

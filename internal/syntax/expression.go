@@ -157,7 +157,7 @@ func (p *parser) parseExpression(minBindingPower int, allowRecord bool) NodeID {
 
 func (p *parser) parsePrefix(allowRecord bool) NodeID {
 	operator := p.currentText()
-	if isPrefixOperator(operator) {
+	if isPrefixOperator(operator) && (operator != "&" || p.acceptsPreviousRevision()) {
 		start := p.currentFullIndex()
 		p.advance()
 		if operator == "&" || operator == "ref" {
@@ -184,7 +184,7 @@ func (p *parser) parsePrimary(allowRecord bool) NodeID {
 		p.advance()
 		return p.addNode(KindError, start, nil, text, "")
 	}
-	if text == "self" {
+	if p.acceptsPreviousRevision() && text == "self" {
 		p.advance()
 		return p.addNode(KindPath, start, nil, text, "")
 	}
@@ -226,6 +226,12 @@ func (p *parser) parsePrimary(allowRecord bool) NodeID {
 					}
 					continue
 				}
+				if !p.acceptsPreviousRevision() {
+					children = append(children, p.unexpected())
+					p.synchronize(",", "}")
+					p.match(",")
+					continue
+				}
 				name, nameSpan := p.parseNameWithSpan()
 				p.expect(":")
 				valueID := p.parseExpression(0, true)
@@ -252,7 +258,10 @@ func (p *parser) parsePrimary(allowRecord bool) NodeID {
 	case "if":
 		return p.parseIf()
 	case "match":
-		return p.parseMatch()
+		if p.acceptsPreviousRevision() {
+			return p.parseMatch()
+		}
+		return p.unexpected()
 	case "switch":
 		return p.parseSwitch()
 	case "unsafe":
@@ -298,10 +307,16 @@ func (p *parser) parseSwitchPattern() NodeID {
 	} else if p.match("{") {
 		for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
 			fieldStart := p.currentFullIndex()
-			p.match(".")
+			if p.acceptsPreviousRevision() {
+				p.match(".")
+			} else {
+				p.expect(".")
+			}
 			field := p.parseName()
-			if !p.match("=") {
+			if p.acceptsPreviousRevision() && !p.match("=") {
 				p.expect(":")
+			} else if !p.acceptsPreviousRevision() {
+				p.expect("=")
 			}
 			binding := p.parseName()
 			children = append(children, p.addNode(KindField, fieldStart, nil, field, binding))

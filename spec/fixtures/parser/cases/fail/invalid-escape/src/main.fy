@@ -1,6 +1,6 @@
 module main;
 
-fn main() -> &str {
+fn ref str main() {
   let text = "bad\q";
   return text;
 }

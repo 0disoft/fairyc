@@ -97,6 +97,7 @@ statement = binding_stmt
           | return_stmt
           | discard_stmt
           | if_statement
+          | block_statement
           | while_stmt
           | break_stmt
           | continue_stmt
@@ -117,6 +118,7 @@ return_stmt = "return" expression? ";" ;
 assert_stmt = "assert" "(" expression ")" ";" ;
 discard_stmt = "discard" expression ";" ;
 if_statement = if_expression ;
+block_statement = block | unsafe_expression ;
 while_stmt = "while" "(" expression ")" statement_block ;
 break_stmt = "break" ";" ;
 continue_stmt = "continue" ";" ;

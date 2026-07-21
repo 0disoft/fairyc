@@ -149,7 +149,7 @@ func (a *analyzer) resultFlowExpression(module *moduleScope, expression *ast.Exp
 		return true
 	case syntax.KindIf:
 		return a.resultFlowIf(module, expression, environment, use)
-	case syntax.KindMatch, syntax.KindSwitch:
+	case syntax.KindSwitch:
 		return a.resultFlowMatch(module, expression, environment, use)
 	case syntax.KindWhile:
 		return a.resultFlowWhile(module, expression, environment)

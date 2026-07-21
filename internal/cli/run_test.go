@@ -303,7 +303,7 @@ fn i32 invalid() {
 func TestExperimentalCheckSemanticsReportsRegionCapabilityStorage(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nstruct Holder { scratch: Region; }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nstruct Holder { Region scratch; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "check-semantics", "main.fy"}, root)
 	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "E3103: compiler-owned Region capability cannot be stored") ||
 		!strings.Contains(stderr, "capability: main.fy") {
@@ -596,7 +596,7 @@ func TestExperimentalRunInterpretsBooleanBranch(t *testing.T) {
 func TestExperimentalRunShortCircuitsTrap(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
-	writeTestSource(t, root, "main.fy", "module main;\nfn i32 main() { return if (false && (1 / 0 == 0)) || (true || (1 / 0 == 0)) { 42 } else { 0 }; }\n")
+	writeTestSource(t, root, "main.fy", "module main;\nfn i32 main() { return if ((false && (1 / 0 == 0)) || (true || (1 / 0 == 0))) { 42 } else { 0 }; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
 	if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
