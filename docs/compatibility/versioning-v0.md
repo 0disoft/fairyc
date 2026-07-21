@@ -25,7 +25,9 @@ SymbolId algorithm
 interface-hash algorithm
 ```
 
-No concrete current values exist because no compiler or released schema exists. Examples use families such as `L0.n`, `M0.n`, `RT0.n`, and algorithm IDs such as `SID1`; they are formats, not release claims.
+The prototype now has concrete internal and manifest-family values documented below, including
+`fairyc.manifest/v1`; there is still no released compiler compatibility promise. Examples such as
+`L0.n`, `M0.n`, `RT0.n`, and `SID1` remain format illustrations rather than release claims.
 
 ## Compiler and language
 
@@ -337,6 +339,18 @@ The standard library has an independent version and declares required language r
 ## Package formats
 
 Manifest schema, lockfile schema, source archive schema, and any future binary artifact schema are independent. Stage 0 needs manifest and lockfile schemas only. A stable binary package format would falsely imply a stable native Fairy ABI and is deferred.
+
+`fairyc.manifest/v1` is the first human project-manifest schema. It uses the exact `fairy.toml`
+field set and local-only semantics in ADR 0143: required package UID/name/exact SemVer/language/source,
+optional explicit sorted workspace members, and path dependencies with exact version plus explicit
+sorted per-edge features. Unknown or missing fields, duplicate TOML keys, unsupported schema,
+noncanonical paths/sets, and malformed identities reject. This schema does not imply lockfile,
+workspace-loader, source-acquisition, registry, or solver compatibility.
+
+`fairyc.project-manifest-fixtures/v1` versions the complete-file parser observations for that schema.
+The pinned TOML library version is an implementation dependency, not the manifest schema version;
+upgrading or replacing it requires proving the same accepted/rejected fixture surface or explicitly
+versioning the manifest contract.
 
 `fairyc.package-fixtures/v0` versions the eight historical repository cases for an already-resolved
 graph. `fairyc.package-fixtures/v1` explicitly includes those cases and adds the closed

@@ -1,6 +1,6 @@
 # Manifest and lockfile readiness audit
 
-- Status: Design audit; wire formats remain UNDECIDED
+- Status: Manifest parser accepted; workspace loading and lockfile remain UNDECIDED
 - Date: 2026-07-21
 - Product source: `docs/product/02-spec.md`
 - Resolved graph source: `docs/package/package-graph-v0.md`
@@ -9,11 +9,11 @@
 
 ## Result
 
-The compiler side is ready to consume a resolved local package graph, but the repository is not yet
-ready to claim a public manifest or lockfile schema. The missing pieces are product semantics, not
-JSON/TOML field spelling. Reusing the resolved-graph fixture as a user format would expose fixture
-node handles, source-root test layout, and post-solver identities as if users were meant to author
-them.
+The compiler side is ready to consume a resolved local package graph. ADR 0143 now fixes the
+human-authored `fairy.toml` v1 byte/parser and local-exact declaration semantics. The repository is
+not yet ready to claim workspace filesystem loading or a generated lockfile schema. Reusing the
+resolved-graph fixture as that lockfile would still expose fixture node handles, source-root test
+layout, and post-solver identities as if users were meant to author them.
 
 ## Facts already fixed
 
@@ -38,22 +38,17 @@ Any future manifest/lockfile design must preserve these existing contracts:
 
 | Area | Required decision | Why code cannot guess it |
 | --- | --- | --- |
-| Human file | file name, syntax, comment and rewrite policy | Choosing JSON, TOML, or a custom grammar changes UX and dependencies |
-| Package coordinate | legal `PackageUid`, display name, and rename rules | Identity persistence and registry naming cannot be inferred from module paths |
-| Version request | exact versions, ranges, prereleases, and solver ordering | Different solvers can produce different graphs from the same text |
-| Source kinds | workspace/path, registry, Git, archive, vendor, checksums | Network trust and reproducibility differ by source kind |
-| Features | per-edge instances, unification, defaults, weak/optional dependencies | Existing fixtures only preserve the resolved set; they do not choose it |
-| Workspace | member discovery, shared dependencies, duplicate UID handling | Filesystem walking and parent lookup can make builds ambient and slow |
+| Workspace loader | member containment, duplicate UID handling, member manifest consistency | The byte parser intentionally performs no filesystem access |
 | Source discovery | default root, include/exclude rules, symlinks, case collisions | These rules define source identity and security boundaries |
 | Standard library | how compiler/SDK selection injects and locks its package | Host installation paths must not become semantic identity |
 | Lock updates | frozen mode, ordinary update mode, stale local paths, merge policy | Silent rewrite would damage reproducibility; never rewriting would hurt local work |
+| Lock wire format | canonical bytes, integrity fields, graph ordering, atomic replacement | Human TOML syntax does not imply a machine-generated lock encoding |
 
 ## Recommended Stage 0 local-exact profile
 
 The smallest coherent profile is intentionally less ambitious than Cargo, Go modules, or npm:
 
-1. Use one project-root manifest and one generated lockfile. Prefer `fairy.toml` and `fairy.lock`
-   only after the parser/dependency cost and lossless human-file rewrite policy are accepted.
+1. Use the accepted `fairy.toml` v1 project manifest and one future generated `fairy.lock`.
 2. Admit only workspace-relative path dependencies in the first implementation. Reject absolute
    paths, root escape, symlinks that escape, Git, URL, archive, and registry sources. The compiler
    performs no network access.
@@ -79,13 +74,14 @@ The smallest coherent profile is intentionally less ambitious than Cargo, Go mod
     or missing lock is an error. The ordinary command may replace the lock atomically only after a
     complete valid graph is produced.
 
-This profile is a recommendation, not an accepted wire contract. It deliberately postpones public
-registry coordinates, network acquisition, signatures, version-range solving, feature unification,
-implicit workspace discovery, vendoring commands, and package publication.
+ADR 0143 accepts the manifest-facing parts of this profile. Workspace filesystem loading and the
+lockfile remain separate work. The profile deliberately postpones public registry coordinates,
+network acquisition, signatures, version-range solving, feature unification, implicit workspace
+discovery, vendoring commands, and package publication.
 
 ## Minimum acceptance evidence before implementation
 
-- an ADR accepts the ten local-exact choices and the manifest parser strategy;
+- ADR 0143 accepts the manifest parser strategy and declaration-level local-exact choices;
 - positive fixtures cover one package, explicit workspace members, a direct path dependency,
   feature-distinct instances, and exact standard-library injection;
 - negative fixtures cover unknown/duplicate fields, path escape, absolute paths, escaping symlinks,

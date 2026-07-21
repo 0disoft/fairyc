@@ -274,9 +274,9 @@ or unwinding. Error conversion continues to require an explicit switch.
 qualification; `.` owns runtime member access. Wildcard imports, namespace reopening, textual
 includes, and implicit transitive visibility remain forbidden.
 
-Provider-qualified dependency imports are a promising package design, but their exact source
-spelling depends on a public manifest and lock contract that does not yet exist. They are not fixed
-by this ADR. Classic and range `for`, lexical `defer`, checked narrowing conversions, generic
+Provider-qualified dependency imports are a promising package design. ADR 0143 later fixes the
+project manifest, but their exact source spelling still depends on the unresolved lock and binding
+integration contract. They are not fixed by this ADR. Classic and range `for`, lexical `defer`, checked narrowing conversions, generic
 iterators, and formatter behavior are also separate follow-up decisions rather than cutover
 requirements.
 

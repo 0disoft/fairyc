@@ -477,9 +477,11 @@ or arbitrary link-input option.
 - Public-interface hash v1 extraction, fixtures, and runner: `internal/moduleinterface/`, `spec/fixtures/module-interface/manifest-v1.json`, `internal/moduleinterfacefixture/`
 - Package-source digest v1 encoding, fixtures, and runner: `internal/packagecontent/`, `spec/fixtures/package-source/manifest-v1.json`, `internal/packagecontentfixture/`
 - Whole-package cache-key v1, bounded memory store, fixtures, and runner: `internal/packagecache/`, `spec/fixtures/package-cache/manifest-v1.json`, `internal/packagecachefixture/`
+- Strict local-exact `fairy.toml` v1 parser, fixtures, and runner: `internal/projectmanifest/`, `spec/fixtures/project-manifest/manifest-v1.json`, `internal/projectmanifestfixture/`
 - MIR and C backend contracts: `docs/mir/`
 - Package identity, visibility, source/interface hashing, and bounded whole-package cache: `docs/package/package-graph-v0.md`, `docs/package/package-instance-id-v1.md`, `docs/package/package-source-digest-v1.md`, `docs/package/public-interface-hash-v1.md`, `docs/package/whole-package-cache-v1.md`
 - Manifest and lockfile readiness audit: `docs/package/manifest-lockfile-readiness.md`
+- Project manifest v1: `docs/package/project-manifest-v1.md`
 - Target and C ABI: `docs/abi/c-abi-v0.md`
 - Runtime and standard library: `docs/runtime/runtime-stdlib-v0.md`
 - Compatibility and versioning: `docs/compatibility/versioning-v0.md`

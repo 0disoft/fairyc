@@ -9,8 +9,11 @@ GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
 
 - Token permissions are limited to `contents: read`.
 - Concurrent runs for the same workflow and ref cancel the older run.
-- Go dependency and build caching is disabled because the current module has no external dependency
-  graph and the project has not justified retained CI cache storage.
+- Retained GitHub Actions dependency and build caching remains disabled. The compiler has one small
+  pinned TOML parser dependency, and clean runners may fetch it through ordinary `go -mod=readonly`
+  resolution; no retained CI cache budget has been justified yet. Local configured validation keeps
+  `GOPROXY=off`, reuses only the user's checksum-verified Go module download cache, and retains its
+  build and temporary caches under the repository-local ignored `.cache/` root.
 - `go vet -mod=readonly ./...` runs before `go test -mod=readonly -count=1 ./...`.
 - After those ordinary checks, only the Windows matrix entry runs
   `cmd/fairyc-windows-host-smoke`. The command discovers the hosted runner's local x64 MSVC and

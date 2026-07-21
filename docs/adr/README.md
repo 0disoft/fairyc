@@ -23,7 +23,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0011-stage-0-resource-flow-fixture-contract.md`: whole-root resource states, cleanup obligations, moves, joins, and loop mismatch fixtures.
 - `0012-stage-0-region-and-result-fixture-contracts.md`: Region origins and restrictions plus Result handling and propagation fixture boundaries.
 - `0013-stage-0-mir-fixture-contract.md`: source-linked verified-MIR observations without freezing internal graph identity.
-- `0014-resolved-package-graph-fixture-contract.md`: package-instance equality, direct dependency visibility, and explicit standard-library injection without public manifest syntax.
+- `0014-resolved-package-graph-fixture-contract.md`: package-instance equality, direct dependency visibility, and explicit standard-library injection independently from the later project manifest.
 - `0015-mir-verifier-mutation-fixture-contract.md`: verified named seeds and isolated mutation recipes covering every current `Vxxxx` invariant.
 - `0016-stage-0-interpreter-fixture-contract.md`: verified-MIR scalar returns and canonical traps as the first executable semantics oracle.
 - `0017-stage-0-result-constructors-and-match.md`: qualified compiler-known Result construction and exhaustive shallow Result matching.
@@ -152,6 +152,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0140-package-source-digest-v1.md`: canonical relative source paths plus exact bytes, full SHA-256 digest, and source/interface invalidation separation.
 - `0141-whole-package-cache-key-and-bounds-v1.md`: exact compatibility-vector cache keys plus mandatory byte/entry bounds and process-local LRU behavior.
 - `0142-reject-package-dependency-cycles.md`: post-deduplication acyclic package graphs, deterministic cycle rejection, and v1-over-v0 fixture evolution.
+- `0143-local-exact-project-manifest-v1.md`: strict `fairy.toml`, exact local-only dependency semantics, and an isolated pinned TOML adapter.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

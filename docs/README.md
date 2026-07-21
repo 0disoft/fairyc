@@ -26,11 +26,13 @@
 - Public-interface hash v1 fixtures and runner: spec/fixtures/module-interface/manifest-v1.json, internal/moduleinterface/, internal/moduleinterfacefixture/
 - Package-source digest v1 fixtures and runner: spec/fixtures/package-source/manifest-v1.json, internal/packagecontent/, internal/packagecontentfixture/
 - Whole-package cache-key v1 fixtures and bounded store runner: spec/fixtures/package-cache/manifest-v1.json, internal/packagecache/, internal/packagecachefixture/
+- Project manifest v1 fixtures and strict TOML parser: spec/fixtures/project-manifest/manifest-v1.json, internal/projectmanifest/, internal/projectmanifestfixture/
 - Windows MSVC layout fixture manifest: spec/fixtures/layout/manifest-windows-msvc-v0.json
 - Windows MSVC C ABI fixture manifest: spec/fixtures/c-abi/manifest-windows-msvc-v0.json
 - Executable semantics and C transport: docs/mir/*.md
 - Package identity and visibility: docs/package/*.md
 - Manifest/lockfile readiness and local-exact recommendation: docs/package/manifest-lockfile-readiness.md
+- Human project manifest v1: docs/package/project-manifest-v1.md
 - Target and C ABI contract: docs/abi/*.md
 - Runtime and standard-library contract: docs/runtime/*.md
 - Compatibility and versioning contract: docs/compatibility/*.md

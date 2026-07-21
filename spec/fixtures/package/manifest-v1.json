@@ -3,7 +3,7 @@
   "schemaVersion": "fairyc.package-fixtures/v1",
   "includes": ["manifest-v0.json"],
   "deferred": [
-    "public package coordinate and manifest syntax",
+    "workspace loader and public lockfile integration",
     "version-range solving and feature-unification policy",
     "public lockfile encoding and PackageInstanceId v1 adoption",
     "registry, path, Git, archive, and network source acquisition",

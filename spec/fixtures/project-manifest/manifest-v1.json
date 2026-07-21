@@ -1,0 +1,83 @@
+{
+  "$schema": "./schema-v1.json",
+  "schemaVersion": "fairyc.project-manifest-fixtures/v1",
+  "contracts": [
+    "docs/adr/0143-local-exact-project-manifest-v1.md",
+    "docs/package/project-manifest-v1.md",
+    "docs/package/manifest-lockfile-readiness.md",
+    "docs/compatibility/versioning-v0.md"
+  ],
+  "cases": [
+    {
+      "id": "pass-minimal",
+      "file": "cases/pass-minimal/fairy.toml",
+      "expect": {
+        "status": "pass",
+        "packageUid": "example.app"
+      }
+    },
+    {
+      "id": "pass-workspace",
+      "file": "cases/pass-workspace/fairy.toml",
+      "expect": {
+        "status": "pass",
+        "packageUid": "example.tools.app",
+        "members": ["libs/net", "libs/util"],
+        "dependencies": ["net", "util"]
+      }
+    },
+    {
+      "id": "reject-unknown-field",
+      "file": "cases/reject-unknown-field/fairy.toml",
+      "expect": {
+        "status": "reject",
+        "reason": "unknown-field",
+        "field": "mystery"
+      }
+    },
+    {
+      "id": "reject-duplicate-field",
+      "file": "cases/reject-duplicate-field/fairy.toml",
+      "expect": {
+        "status": "reject",
+        "reason": "parse-error"
+      }
+    },
+    {
+      "id": "reject-missing-features",
+      "file": "cases/reject-missing-features/fairy.toml",
+      "expect": {
+        "status": "reject",
+        "reason": "missing-field",
+        "field": "dependencies.util.features"
+      }
+    },
+    {
+      "id": "reject-path-escape",
+      "file": "cases/reject-path-escape/fairy.toml",
+      "expect": {
+        "status": "reject",
+        "reason": "invalid-path",
+        "field": "dependencies.util.path"
+      }
+    },
+    {
+      "id": "reject-feature-order",
+      "file": "cases/reject-feature-order/fairy.toml",
+      "expect": {
+        "status": "reject",
+        "reason": "not-sorted-unique",
+        "field": "dependencies.util.features"
+      }
+    },
+    {
+      "id": "reject-schema",
+      "file": "cases/reject-schema/fairy.toml",
+      "expect": {
+        "status": "reject",
+        "reason": "unsupported-schema",
+        "field": "schema"
+      }
+    }
+  ]
+}

@@ -37,7 +37,8 @@ The literal set covers low-level bytes, static UTF-8 text, raw-pointer nullabili
 
 - `.fy` is no longer a proposal inside the Stage 0 prototype contract.
 - Parser fixtures may be syntactically valid while intentionally failing later semantic analysis.
-- Package coordinates and manifest syntax remain undecided; they select a source root but do not change file-to-module mapping within it.
+- ADR 0143 later selects `fairy.toml` v1 package identity and source-root declarations; they do not
+  change this ADR's file-to-module mapping within a resolved source root.
 - Exact parser resource limits remain uncommitted until an implementation can measure work, but the implementation must use one bounded parse budget before it accepts untrusted source.
 - Formatter and incremental-parser work must preserve the same token, grouping, span, and recovery contracts rather than defining parallel syntax.
 

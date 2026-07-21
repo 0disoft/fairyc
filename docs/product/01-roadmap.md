@@ -407,10 +407,13 @@ per-edge-feature, explicit-workspace, cycle-free, and network-free; it remains a
 until an ADR accepts the wire format and parser strategy.
 
 ADR 0142 and package fixture v1 now enforce the cycle-free part at the reusable resolved-graph
-boundary, including self-cycles created only after exact-instance deduplication. Public manifest
-syntax and the remaining local-exact choices are still separate work.
+boundary, including self-cycles created only after exact-instance deduplication. ADR 0143 then fixes
+the strict `fairy.toml` v1 declaration surface and executes eight complete-file fixtures through a
+pinned isolated TOML adapter. Workspace filesystem loading, resolved graph construction, and the
+lockfile remain separate work.
 
-- Add public package manifests, lockfiles, and serialized module interfaces on top of the resolved graph, concrete package-instance encoding, and public-interface hash contracts.
+- Add workspace/path loading and a deterministic lockfile on top of the accepted project manifest,
+  resolved graph, concrete package-instance encoding, and public-interface hash contracts.
 - Wire whole-package reuse into package compilation, then adopt persistent content-addressed storage
   and default limits only from measured clean/warm workload evidence.
 - Stabilize the minimal `fairyc check`, `build`, `run`, `test`, `emit`, `explain`, and `targets` contracts.

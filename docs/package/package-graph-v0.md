@@ -86,13 +86,18 @@ The module-path-isolation result additionally crosses `internal/compiler` throug
 MIR lowering, and MIR verification. This proves compiler-pipeline consumption of the resolved graph;
 it still does not prove package discovery, a package-aware CLI, or backend support for package names.
 
-This is compiler-side consumption of an already-resolved graph. It is not evidence for a package
-solver, public manifest, lockfile, source downloader, registry, cache, or stable diagnostic surface.
+This is compiler-side consumption of an already-resolved graph. It is not evidence for the
+separately owned project-manifest parser, workspace loader, package solver, lockfile, source
+downloader, registry, cache, or stable diagnostic surface.
 
 ## Deferred surface
 
-Public coordinates, manifest and lockfile schemas, source kinds and checksums, registry policy, offline and vendored behavior, version selection, feature unification, workspace discovery, package signing, serialized module interfaces, and persistent cache storage remain separate decisions. Package cycles are rejected by ADR 0142. `PackageInstanceId` v1 and public-interface hash v1 are fixed independently and do not settle the remaining formats.
+Lockfile schema, workspace loading, source checksums, registry policy, offline and vendored behavior,
+version solving, feature unification, package signing, serialized module interfaces, and persistent
+cache storage remain separate decisions. The local-exact human manifest is owned by ADR 0143 and
+package cycles are rejected by ADR 0142. `PackageInstanceId` v1 and public-interface hash v1 are
+fixed independently and do not settle the remaining formats.
 
-`manifest-lockfile-readiness.md` audits those gaps and records a smallest local-exact recommendation.
-That audit is not a public schema and does not authorize the compiler to accept `fairy.toml` or
-write `fairy.lock` yet.
+`manifest-lockfile-readiness.md` audits the remaining loader and lock gaps. ADR 0143 authorizes the
+strict `fairy.toml` byte parser; no current code writes `fairy.lock` or turns parsed paths into a
+filesystem graph yet.

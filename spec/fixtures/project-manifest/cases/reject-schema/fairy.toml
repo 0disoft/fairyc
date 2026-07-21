@@ -1,0 +1,8 @@
+schema = "fairyc.manifest/v2"
+
+[package]
+uid = "example.app"
+name = "app"
+version = "0.1.0"
+language = "fairyc-language/0"
+source = "src"

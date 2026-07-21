@@ -568,6 +568,18 @@ MIR verifier rejection recipes are versioned in `spec/fixtures/mir-verifier/mani
 
 Resolved package graph assertions are versioned in `spec/fixtures/package/manifest-v1.json`, which includes all eight historical v0 cases and adds deterministic package-cycle rejection. They fix package-instance equality, one source root per instance, acyclic direct dependency structure, direct-only dependency visibility, module-provider ambiguity, and explicit standard-library injection without choosing public manifest, lockfile, coordinate, registry, or solver syntax. `internal/packagefixture` executes all nine cases through the reusable `internal/packagegraph` validator and resolver, converts passing graphs into build-local semantic package input, and proves isolated equal module paths complete semantic Flow. Region v1 consumes the same validated graph result. The independently versioned `spec/fixtures/package-identity/manifest-v1.json` now freezes the canonical resolved-tuple byte encoding, full SHA-256 `PackageInstanceId`, text form, component boundaries, and feature-set rejection reasons without choosing any package-manager format. Typed HIR retains source `pub` state for every current item category. `spec/fixtures/module-interface/manifest-v1.json` then compiles eight source variants and freezes the first public-interface digest plus same/different invalidation behavior for bodies, private representation, declaration order, public signatures, public field order, and foreign link names. `spec/fixtures/package-source/manifest-v1.json` separately freezes the exact path-and-source-byte digest used for the current package's own implementation invalidation. `spec/fixtures/package-cache/manifest-v1.json` combines those identities with the exact compiler/language/MIR/target/ABI/toolchain/backend/runtime/standard-library/profile compatibility vector and the first caller-bounded process-local LRU store.
 
+ADR 0143 fixes the first human project file as strict `fairy.toml` schema
+`fairyc.manifest/v1`. It requires explicit package UID, kebab name, exact SemVer, exact language
+revision, and source root; optional workspaces list sorted explicit members; local path dependencies
+require exact versions and explicit sorted per-edge features. Eight complete-file fixtures cover
+minimal/workspace success and closed-field, duplicate-key, missing-field, path, ordering, and schema
+rejection. The parser performs no filesystem access and does not yet construct the resolved graph or
+write a lockfile.
+
+The resolved-graph paragraph's separation from public manifest syntax describes fixture ownership,
+not current product status: ADR 0143 now owns that syntax independently. Lockfile, workspace I/O,
+registry, and solver behavior remain outside both fixture contracts.
+
 Target layout assertions are versioned in `spec/fixtures/layout/manifest-v0.json` for Linux and
 `spec/fixtures/layout/manifest-windows-msvc-v0.json` for Windows. They fix the closed layout input
 vocabulary, size/alignment arithmetic, declaration-order offsets, top-level padding, and failure
@@ -607,7 +619,7 @@ Source text and documentation cannot grant an LLM, IDE, or agent filesystem, pro
 
 ## Open decisions
 
-Package coordinates and manifest syntax, provider-qualified import spelling, classic and range
+Registry coordinates, provider-qualified import spelling, classic and range
 `for`, lexical `defer`, checked narrowing conversion syntax, expression-bodied function shorthand,
 public `Arena` construction and capacity APIs, exact parser resource limits, glibc and toolchain
 baselines, portable path model, targets beyond the declared Linux GNU and Windows MSVC profiles,

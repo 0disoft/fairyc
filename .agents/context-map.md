@@ -63,6 +63,7 @@
 - Package-source digest and runner route: internal/packagecontent/, internal/packagecontentfixture/
 - Whole-package cache-key v1 fixture route: spec/fixtures/package-cache/manifest-v1.json
 - Whole-package cache key, store, and runner route: internal/packagecache/, internal/packagecachefixture/
+- Human project-manifest v1 route: internal/projectmanifest/, internal/projectmanifestfixture/, spec/fixtures/project-manifest/manifest-v1.json
 - MIR and C backend route: docs/mir/
 - Package identity and visibility route: docs/package/
 - Target and C ABI route: docs/abi/
