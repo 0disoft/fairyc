@@ -111,6 +111,41 @@ func TestTypeNodesRecordParserOwnedForms(t *testing.T) {
 	}
 }
 
+func TestParseCShapedTypeForms(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nfn inspect(values: ref mut u8[], callbacks: (ptr u8)[16]) -> ptr u8[16] { callback }\n")
+	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	want := map[string]TypeForm{
+		"ref mut u8[]": TypeFormReferenceMut,
+		"u8[]":         TypeFormSlice,
+		"(ptr u8)":     TypeFormGrouped,
+		"(ptr u8)[16]": TypeFormArray,
+		"ptr u8":       TypeFormPointer,
+		"ptr u8[16]":   TypeFormPointer,
+		"u8[16]":       TypeFormArray,
+	}
+	found := make(map[string]TypeForm, len(want))
+	for _, node := range tree.Nodes {
+		if node.Kind == KindType {
+			if _, tracked := want[node.Text]; tracked {
+				found[node.Text] = TypeForm(node.Cooked)
+			}
+		}
+	}
+	for text, form := range want {
+		if found[text] != form {
+			t.Fatalf("type %q form = %q, want %q; found = %+v", text, found[text], form, found)
+		}
+	}
+	reconstructed, ok := tree.Reconstruct()
+	if !ok || !slices.Equal(reconstructed, input) {
+		t.Fatalf("Reconstruct() = %q, %v; want %q, true", reconstructed, ok, input)
+	}
+}
+
 func TestNestedTypeCloseChargesContextualTokenBudget(t *testing.T) {
 	t.Parallel()
 	input := []byte("module main;\nfn wrap(value: Token) -> Option<Option<Token>> { value }\n")

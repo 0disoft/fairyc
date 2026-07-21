@@ -14,7 +14,7 @@ var keywords = map[string]struct{}{
 	"drop": {}, "else": {}, "enum": {}, "extern": {}, "false": {},
 	"fn": {}, "if": {}, "impl": {}, "import": {}, "in": {}, "let": {},
 	"match": {}, "module": {}, "mut": {}, "null": {}, "pub": {},
-	"region": {}, "resource": {}, "return": {}, "self": {}, "struct": {},
+	"ptr": {}, "ref": {}, "region": {}, "resource": {}, "return": {}, "self": {}, "struct": {},
 	"true": {}, "unsafe": {}, "var": {}, "while": {},
 }
 

@@ -30,6 +30,7 @@ const (
 	TypeFormPointerMut      TypeForm = "pointer-mut"
 	TypeFormSlice           TypeForm = "slice"
 	TypeFormArray           TypeForm = "array"
+	TypeFormGrouped         TypeForm = "grouped"
 	TypeFormForeignFunction TypeForm = "foreign-function"
 )
 

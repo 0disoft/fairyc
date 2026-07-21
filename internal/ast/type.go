@@ -17,6 +17,7 @@ const (
 	TypeKindRawPointer      TypeKind = "raw-pointer"
 	TypeKindSlice           TypeKind = "slice"
 	TypeKindArray           TypeKind = "array"
+	TypeKindGrouped         TypeKind = "grouped"
 	TypeKindForeignFunction TypeKind = "foreign-function"
 )
 
@@ -86,6 +87,9 @@ func lowerType(tree *syntax.Tree, node syntax.Node) TypeReference {
 				result.Length = &TypeLength{Text: strings.TrimSpace(length.Text), Span: length.Span, Kind: length.Kind}
 			}
 		}
+	case syntax.TypeFormGrouped:
+		result.Kind = TypeKindGrouped
+		result.Element = lowerTypeElement(tree, node)
 	case syntax.TypeFormForeignFunction:
 		result.Kind = TypeKindForeignFunction
 		result.ABI = "C"

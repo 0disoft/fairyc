@@ -353,6 +353,11 @@ func (a *analyzer) canonicalTypeReference(module *moduleScope, reference ast.Typ
 			return hir.TypeInvalid, false
 		}
 		return hir.RawPointer(element, reference.Mutable), true
+	case ast.TypeKindGrouped:
+		if reference.Element == nil {
+			return hir.TypeInvalid, false
+		}
+		return a.canonicalTypeReference(module, *reference.Element, allowFixedArray)
 	case ast.TypeKindNamed:
 		return a.canonicalNamedType(module, reference, allowFixedArray)
 	default:

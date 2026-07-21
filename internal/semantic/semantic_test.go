@@ -33,6 +33,20 @@ func TestAnalyzeBuildsTypedHIRForScalarFunction(t *testing.T) {
 	assertTypeFact(t, result, "main.fy", ifStart, ifEnd, hir.TypeI32)
 }
 
+func TestAnalyzeCanonicalizesCShapedReferenceAndSliceTypes(t *testing.T) {
+	t.Parallel()
+	text := "module main;\n\nfn length(bytes: ref u8[]) -> usize { bytes.len }\nfn main() -> usize { length(b\"fairy\") }\n"
+	result := analyzeText(t, map[string]string{"main.fy": text})
+	assertCleanTypeResult(t, result)
+	if len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].Functions) != 2 {
+		t.Fatalf("HIR = %+v", result.HIR)
+	}
+	function := result.HIR.Modules[0].Functions[0]
+	if len(function.Parameters) != 1 || function.Parameters[0].Type != hir.SharedBorrow(hir.TypeByteSlice) || function.ResultType != hir.TypeUSize {
+		t.Fatalf("function = %+v", function)
+	}
+}
+
 func TestAnalyzeReportsUnresolvedNameWithoutTypeCascade(t *testing.T) {
 	t.Parallel()
 	text := "module main;\n\nfn answer() -> i32 {\n    missing\n}\n"

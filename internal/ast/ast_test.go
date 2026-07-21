@@ -314,3 +314,33 @@ func TestLowerPreservesNestedTypeStructure(t *testing.T) {
 		t.Fatalf("function result type = %+v", result)
 	}
 }
+
+func TestLowerPreservesCShapedTypeBinding(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nfn inspect(values: ref mut u8[], callbacks: (ptr u8)[16]) -> ptr u8[16] { callback }\n")
+	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	module, err := Lower(tree)
+	if err != nil {
+		t.Fatalf("Lower() error = %v", err)
+	}
+	if len(module.Functions) != 1 || len(module.Functions[0].Parameters) != 2 {
+		t.Fatalf("functions = %+v", module.Functions)
+	}
+	values := module.Functions[0].Parameters[0].Type
+	if values.Kind != TypeKindReference || !values.Mutable || values.Element == nil || values.Element.Kind != TypeKindSlice ||
+		values.Element.Element == nil || values.Element.Element.Path != "u8" {
+		t.Fatalf("values type = %+v", values)
+	}
+	callbacks := module.Functions[0].Parameters[1].Type
+	if callbacks.Kind != TypeKindArray || callbacks.Length == nil || callbacks.Length.Text != "16" || callbacks.Element == nil ||
+		callbacks.Element.Kind != TypeKindGrouped || callbacks.Element.Element == nil || callbacks.Element.Element.Kind != TypeKindRawPointer {
+		t.Fatalf("callbacks type = %+v", callbacks)
+	}
+	result := module.Functions[0].ResultType
+	if result.Kind != TypeKindRawPointer || result.Element == nil || result.Element.Kind != TypeKindArray || result.Element.Length == nil || result.Element.Length.Text != "16" {
+		t.Fatalf("result type = %+v", result)
+	}
+}

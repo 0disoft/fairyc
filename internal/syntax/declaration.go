@@ -319,21 +319,36 @@ func (p *parser) parseType() NodeID {
 	}
 	defer p.leave()
 	start := p.currentFullIndex()
+	var result NodeID
 	switch {
+	case p.match("ref"):
+		form := TypeFormReference
+		if p.match("mut") {
+			form = TypeFormReferenceMut
+		}
+		child := p.parseType()
+		result = p.addTypeNode(start, []NodeID{child}, form)
+	case p.match("ptr"):
+		form := TypeFormPointer
+		if p.match("mut") {
+			form = TypeFormPointerMut
+		}
+		child := p.parseType()
+		result = p.addTypeNode(start, []NodeID{child}, form)
 	case p.match("&"):
 		form := TypeFormReference
 		if p.match("mut") {
 			form = TypeFormReferenceMut
 		}
 		child := p.parseType()
-		return p.addTypeNode(start, []NodeID{child}, form)
+		result = p.addTypeNode(start, []NodeID{child}, form)
 	case p.match("*"):
 		form := TypeFormPointer
 		if p.match("mut") {
 			form = TypeFormPointerMut
 		}
 		child := p.parseType()
-		return p.addTypeNode(start, []NodeID{child}, form)
+		result = p.addTypeNode(start, []NodeID{child}, form)
 	case p.match("["):
 		children := []NodeID{p.parseType()}
 		form := TypeFormSlice
@@ -342,7 +357,11 @@ func (p *parser) parseType() NodeID {
 			children = append(children, p.parseConstExpression())
 		}
 		p.expect("]")
-		return p.addTypeNode(start, children, form)
+		result = p.addTypeNode(start, children, form)
+	case p.match("("):
+		child := p.parseType()
+		p.expect(")")
+		result = p.addTypeNode(start, []NodeID{child}, TypeFormGrouped)
 	case p.match("unsafe"):
 		p.expect("extern")
 		if p.at("C") {
@@ -362,7 +381,7 @@ func (p *parser) parseType() NodeID {
 		p.expect(")")
 		p.expect("->")
 		children = append(children, p.parseType())
-		return p.addTypeNode(start, children, TypeFormForeignFunction)
+		result = p.addTypeNode(start, children, TypeFormForeignFunction)
 	default:
 		pathID, _, _ := p.pathNode()
 		children := []NodeID{pathID}
@@ -375,8 +394,24 @@ func (p *parser) parseType() NodeID {
 			}
 			p.expectTypeClose()
 		}
-		return p.addTypeNode(start, children, TypeFormNamed)
+		result = p.addTypeNode(start, children, TypeFormNamed)
 	}
+	return p.parseTypePostfix(result)
+}
+
+func (p *parser) parseTypePostfix(base NodeID) NodeID {
+	for !p.budget.Exhausted() && p.match("[") {
+		start := p.nodeStart(base)
+		children := []NodeID{base}
+		form := TypeFormSlice
+		if !p.at("]") {
+			form = TypeFormArray
+			children = append(children, p.parseConstExpression())
+		}
+		p.expect("]")
+		base = p.addTypeNode(start, children, form)
+	}
+	return base
 }
 
 func (p *parser) parseConstExpression() NodeID {
