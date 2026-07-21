@@ -473,8 +473,9 @@ or arbitrary link-input option.
 - Windows x64 native exception and virtual-unwind probe generator: `internal/windowsunwindprobe/`
 - Windows AMD64 PE, COFF object, and x64 unwind structure inspector: `internal/pecoff/`
 - Resolved package graph engine, fixture runner, and fixtures: `internal/packagegraph/`, `internal/packagefixture/`, `spec/fixtures/package/manifest-v0.json`
+- PackageInstanceId v1 encoding, vectors, and runner: `internal/packagegraph/identity.go`, `spec/fixtures/package-identity/manifest-v1.json`, `internal/packageidentityfixture/`
 - MIR and C backend contracts: `docs/mir/`
-- Package identity and visibility: `docs/package/package-graph-v0.md`
+- Package identity and visibility: `docs/package/package-graph-v0.md`, `docs/package/package-instance-id-v1.md`
 - Target and C ABI: `docs/abi/c-abi-v0.md`
 - Runtime and standard library: `docs/runtime/runtime-stdlib-v0.md`
 - Compatibility and versioning: `docs/compatibility/versioning-v0.md`

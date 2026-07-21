@@ -147,6 +147,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0135-owner-bound-owned-text-views.md`: unsafe owner-token raw-parts primitives behind safe example String/CString views, exact borrow provenance, `E2105` move rejection, and native MSVC execution.
 - `0136-c-shaped-source-surface.md`: next-revision C-shaped declarations, safe-default handle access, explicit returns, parenthesized control headers, owner-qualified methods, exhaustive switch, cleanup blocks, and one-shot migration without C declarators.
 - `0137-c11-transport-baseline.md`: ISO C11 as the only normative transport dialect, with newer compiler modes separated as consumer validation rather than output profiles.
+- `0138-package-instance-id-v1.md`: domain-separated canonical resolved-package bytes, full SHA-256 identity, canonical text, and fail-closed collision handling.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

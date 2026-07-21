@@ -1,0 +1,107 @@
+{
+  "$schema": "./schema-v1.json",
+  "schemaVersion": "fairyc.package-identity-fixtures/v1",
+  "contracts": [
+    "docs/adr/0138-package-instance-id-v1.md",
+    "docs/package/package-instance-id-v1.md",
+    "docs/package/package-graph-v0.md",
+    "docs/compatibility/versioning-v0.md"
+  ],
+  "cases": [
+    {
+      "id": "pass.identity.empty-features",
+      "identity": {
+        "packageUid": "pkg",
+        "sourceIdentity": "src",
+        "versionIdentity": "1",
+        "features": []
+      },
+      "expect": {
+        "status": "pass",
+        "encodingHex": "6661697279632e7061636b6167652d696e7374616e63650001750000000000000003706b6773000000000000000373726376000000000000000131660000000000000000",
+        "instanceId": "fypi1-sha256-e8756812ba7956f1f997a35a522b7f1735d8679c99c48b140570f4cd690c1a91"
+      }
+    },
+    {
+      "id": "pass.identity.two-features",
+      "identity": {
+        "packageUid": "pkg",
+        "sourceIdentity": "src",
+        "versionIdentity": "1",
+        "features": ["base", "tls"]
+      },
+      "expect": {
+        "status": "pass",
+        "encodingHex": "6661697279632e7061636b6167652d696e7374616e63650001750000000000000003706b67730000000000000003737263760000000000000001316600000000000000020000000000000004626173650000000000000003746c73",
+        "instanceId": "fypi1-sha256-04fc4400f5e875c5c22ab2d50765d721df38a12a19ef3508deb432c7f4da92f3"
+      }
+    },
+    {
+      "id": "pass.identity.component-boundary-left",
+      "identity": {
+        "packageUid": "ab",
+        "sourceIdentity": "c",
+        "versionIdentity": "d",
+        "features": []
+      },
+      "expect": {
+        "status": "pass",
+        "encodingHex": "6661697279632e7061636b6167652d696e7374616e6365000175000000000000000261627300000000000000016376000000000000000164660000000000000000",
+        "instanceId": "fypi1-sha256-903a7b9974986cccf6166e8978ca9cb26273d4776af6d1a5dd3b04e7060e2f41"
+      }
+    },
+    {
+      "id": "pass.identity.component-boundary-right",
+      "identity": {
+        "packageUid": "a",
+        "sourceIdentity": "bc",
+        "versionIdentity": "d",
+        "features": []
+      },
+      "expect": {
+        "status": "pass",
+        "encodingHex": "6661697279632e7061636b6167652d696e7374616e6365000175000000000000000161730000000000000002626376000000000000000164660000000000000000",
+        "instanceId": "fypi1-sha256-6bc1357cd5e6123675e19cd57ac54db0917fa3e8dc2c1acf3fb05b49eb84cf95"
+      }
+    },
+    {
+      "id": "fail.identity.unsorted-features",
+      "identity": {
+        "packageUid": "pkg",
+        "sourceIdentity": "src",
+        "versionIdentity": "1",
+        "features": ["tls", "base"]
+      },
+      "expect": {
+        "status": "reject",
+        "reason": "features-not-sorted-unique"
+      }
+    },
+    {
+      "id": "fail.identity.duplicate-features",
+      "identity": {
+        "packageUid": "pkg",
+        "sourceIdentity": "src",
+        "versionIdentity": "1",
+        "features": ["base", "base"]
+      },
+      "expect": {
+        "status": "reject",
+        "reason": "features-not-sorted-unique"
+      }
+    },
+    {
+      "id": "fail.identity.empty-feature",
+      "identity": {
+        "packageUid": "pkg",
+        "sourceIdentity": "src",
+        "versionIdentity": "1",
+        "features": [""]
+      },
+      "expect": {
+        "status": "reject",
+        "reason": "empty-feature"
+      }
+    }
+  ]
+}

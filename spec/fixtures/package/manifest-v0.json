@@ -4,7 +4,7 @@
   "deferred": [
     "public package coordinate and manifest syntax",
     "version-range solving and feature-unification policy",
-    "lockfile encoding and concrete PackageInstanceId algorithm",
+    "public lockfile encoding and PackageInstanceId v1 adoption",
     "registry, path, Git, archive, and network source acquisition",
     "package dependency cycles and workspace member discovery",
     "public-interface hash inputs and module-interface serialization"

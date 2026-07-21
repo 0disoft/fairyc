@@ -333,6 +333,14 @@ Manifest schema, lockfile schema, source archive schema, and any future binary a
 
 `fairyc.package-fixtures/v0` versions repository input and expectation data for an already-resolved graph. It is not the public manifest schema, lockfile schema, solver protocol, or concrete `PackageInstanceId` encoding, and compatibility with it does not imply compatibility with any future package-manager format.
 
+`fairyc.package-identity-fixtures/v1` independently fixes `PackageInstanceId` v1 as SHA-256 over
+the domain-separated, tagged, network-order-length encoding in
+`docs/package/package-instance-id-v1.md`. The only text form is the full lowercase
+`fypi1-sha256-...` digest. A future manifest or lockfile declares this identity version rather than
+silently inheriting it from its own schema. Changing the digest, canonical bytes, prefix, or
+validation rules requires a new package-identity version. Caches using another version are safe
+misses; contradictory lockfile or map records are corruption.
+
 ## `.fymap` compatibility
 
 The map header records schema, compiler build, language revision, package UID, package instance, source-graph digest, target scope, feature flags, `SymbolId` algorithm, and interface-hash algorithm.

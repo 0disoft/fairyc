@@ -382,6 +382,14 @@ Exit gate: the target reaches `conformant`: interpreter and generated-C runs agr
 
 ## Phase 3: modules, package builds, and bounded caching
 
+Current implementation status: the first concrete `PackageInstanceId` is now executable. It hashes
+the already-resolved package tuple with a domain-separated, length-prefixed v1 encoding and full
+SHA-256, exposes one canonical lowercase text form, rejects malformed feature sets, and rechecks the
+complete tuple before digest-based deduplication. Versioned vectors cover component boundaries and
+feature-set failures. This closes only package-instance encoding; public manifests, lockfiles,
+coordinates, source acquisition, interface hashing, cache storage, measurements, and stable package
+commands remain Phase 3 work.
+
 - Add public package manifests, lockfiles, module interfaces, concrete package-instance encoding, and public-interface hashing on top of the resolved-graph fixture contract.
 - Start with whole-package reuse and a bounded content-addressed cache whose limits are derived from measurements.
 - Stabilize the minimal `fairyc check`, `build`, `run`, `test`, `emit`, `explain`, and `targets` contracts.

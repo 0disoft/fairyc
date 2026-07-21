@@ -30,5 +30,6 @@ This directory contains versioned normative data that future compiler tests can 
 - `fixtures/mir-verifier/manifest-v0.json`: one isolated negative recipe for every current `Vxxxx` invariant.
 - `fixtures/package/schema-v0.json`: already-resolved package graph expectation schema;
 - `fixtures/package/manifest-v0.json`: package-instance equality, direct visibility, module ownership, and explicit standard-library injection cases.
+- `fixtures/package-identity/manifest-v1.json`: canonical resolved-instance bytes, full SHA-256 IDs, component boundaries, and identity validation cases.
 
 Explanatory language documents may summarize these files but cannot silently change spelling, grouping, module identity, semantic phase ownership, canonical facts, spans, recovery acceptance, or verified MIR observations. A contract change updates the normative data, ADR, diagnostics when applicable, and affected fixtures together.

@@ -8,7 +8,7 @@
 
 Analyzed typed HIR and verified MIR produce an immutable `SemanticSnapshot`. The Atlas exporter converts that snapshot into `.fymap`. It does not reparse source or feed decisions back into type checking.
 
-The first implementation writes one deterministic map per package. Chunking, compression, and symbol-level incremental rewrites require measured evidence. The normative binary encoding, byte order, and hash algorithm remain UNDECIDED; this document fixes the logical records and trust behavior first.
+The first implementation writes one deterministic map per package. Chunking, compression, and symbol-level incremental rewrites require measured evidence. The normative binary encoding, byte order, and map-checksum algorithm remain UNDECIDED; this document fixes the logical records and trust behavior first. Package-instance references use the independent `PackageInstanceId` v1 contract and do not choose the map encoding or `SymbolId` algorithm.
 
 ## Identity
 

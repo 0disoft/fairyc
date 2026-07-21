@@ -25,6 +25,13 @@ func TestResolveDeduplicatesIdenticalDependencyInstances(t *testing.T) {
 	if len(result.InstanceClasses) != 2 || len(result.Lookups) != 1 || !slices.Equal(result.Lookups[0].ProviderMembers, []string{"shared-left", "shared-right"}) {
 		t.Fatalf("Resolve() = %+v", result)
 	}
+	sharedID, err := ComputeInstanceID(shared)
+	if err != nil {
+		t.Fatalf("ComputeInstanceID() error = %v", err)
+	}
+	if result.InstanceClasses[1].ID != sharedID {
+		t.Fatalf("shared instance id = %s, want %s", result.InstanceClasses[1].ID, sharedID)
+	}
 }
 
 func TestResolveRejectsAmbiguousDirectProviders(t *testing.T) {

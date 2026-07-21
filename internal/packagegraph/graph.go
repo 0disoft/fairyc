@@ -20,8 +20,8 @@ const (
 	ReasonMissingVisibleModule   = "missing-visible-module"
 )
 
-// Identity is the exact Stage 0 resolved-instance equality tuple. It is not a serialized
-// PackageInstanceId and intentionally defines no hash or external encoding.
+// Identity is the exact Stage 0 resolved-instance equality tuple. PackageInstanceId v1 hashes its
+// canonical encoding; source resolution still owns the meaning of each opaque component.
 type Identity struct {
 	PackageUID      string
 	SourceIdentity  string
@@ -59,6 +59,7 @@ type Graph struct {
 
 // InstanceClass lists all node handles that denote one exact resolved instance.
 type InstanceClass struct {
+	ID      InstanceID
 	Members []string
 }
 
@@ -84,6 +85,7 @@ type Result struct {
 }
 
 type resolvedClass struct {
+	id      InstanceID
 	members []string
 	nodes   []int
 }
@@ -96,6 +98,7 @@ func Resolve(graph Graph) (Result, *Rejection, error) {
 	}
 	nodeIndexes := make(map[string]int, len(graph.Nodes))
 	classes := make([]resolvedClass, 0, len(graph.Nodes))
+	classByID := make(map[InstanceID]int, len(graph.Nodes))
 	nodeClasses := make([]int, len(graph.Nodes))
 	for index, node := range graph.Nodes {
 		if err := validateNode(node); err != nil {
@@ -105,20 +108,23 @@ func Resolve(graph Graph) (Result, *Rejection, error) {
 			return Result{}, nil, fmt.Errorf("duplicate package node %q", node.ID)
 		}
 		nodeIndexes[node.ID] = index
-		classIndex := -1
-		for candidate := range classes {
-			representative := graph.Nodes[classes[candidate].nodes[0]]
-			if identitiesEqual(node.Identity, representative.Identity) {
-				classIndex = candidate
-				if !modulesEqual(node.Modules, representative.Modules) {
-					return Result{}, nil, fmt.Errorf("equal package instance nodes %q and %q expose different module sets", representative.ID, node.ID)
-				}
-				break
-			}
+		instanceID, err := ComputeInstanceID(node.Identity)
+		if err != nil {
+			return Result{}, nil, fmt.Errorf("node %q: %w", node.ID, err)
 		}
-		if classIndex < 0 {
+		classIndex, foundClass := classByID[instanceID]
+		if foundClass {
+			representative := graph.Nodes[classes[classIndex].nodes[0]]
+			if !identitiesEqual(node.Identity, representative.Identity) {
+				return Result{}, nil, fmt.Errorf("package instance id collision between nodes %q and %q", representative.ID, node.ID)
+			}
+			if !modulesEqual(node.Modules, representative.Modules) {
+				return Result{}, nil, fmt.Errorf("equal package instance nodes %q and %q expose different module sets", representative.ID, node.ID)
+			}
+		} else {
 			classIndex = len(classes)
-			classes = append(classes, resolvedClass{})
+			classByID[instanceID] = classIndex
+			classes = append(classes, resolvedClass{id: instanceID})
 		}
 		classes[classIndex].members = append(classes[classIndex].members, node.ID)
 		classes[classIndex].nodes = append(classes[classIndex].nodes, index)
@@ -126,7 +132,7 @@ func Resolve(graph Graph) (Result, *Rejection, error) {
 	}
 	result := Result{InstanceClasses: make([]InstanceClass, len(classes))}
 	for index, class := range classes {
-		result.InstanceClasses[index] = InstanceClass{Members: slices.Clone(class.members)}
+		result.InstanceClasses[index] = InstanceClass{ID: class.id, Members: slices.Clone(class.members)}
 	}
 
 	type resolvedDependency struct {
@@ -232,11 +238,8 @@ func validateNode(node Node) error {
 	default:
 		return fmt.Errorf("unknown role %q", node.Role)
 	}
-	if node.Identity.PackageUID == "" || node.Identity.SourceIdentity == "" || node.Identity.VersionIdentity == "" {
-		return fmt.Errorf("instance identity has an empty component")
-	}
-	if !sortedUnique(node.Identity.Features, true) {
-		return fmt.Errorf("feature set is not sorted and unique")
+	if err := ValidateIdentity(node.Identity); err != nil {
+		return err
 	}
 	if len(node.Modules) == 0 {
 		return fmt.Errorf("module set is empty")

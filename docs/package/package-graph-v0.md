@@ -18,7 +18,7 @@ This contract starts after dependency resolution. It does not define public pack
 (PackageUid, resolved source identity, version identity, sorted feature set)
 ```
 
-Equal tuples denote one logical package instance inside a resolved graph. A different tuple member denotes a different instance even if all source module paths happen to match. Fixture instance-class labels are local comparison names, not serialized `PackageInstanceId` values. The concrete digest, encoding, collision policy, and lockfile representation remain UNDECIDED.
+Equal tuples denote one logical package instance inside a resolved graph. A different tuple member denotes a different instance even if all source module paths happen to match. Fixture instance-class labels remain local comparison names. ADR 0138 and `package-instance-id-v1.md` now define the independently versioned canonical encoding, full SHA-256 identity, text form, and fail-closed collision policy. Public lockfile representation remains UNDECIDED.
 
 Feature sets are sorted unique strings. This contract does not decide whether a future solver unifies features; it only requires the resolved result supplied to the compiler to preserve the chosen set in instance identity.
 
