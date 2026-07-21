@@ -76,6 +76,7 @@ regenerate, or override compiler source.
 - Whole-package cache-key v1 fixtures: spec/fixtures/package-cache/manifest-v1.json
 - Whole-package cache key, bounded memory store, and fixture runner: internal/packagecache/, internal/packagecachefixture/
 - Human project-manifest v1 parser and fixtures: internal/projectmanifest/, internal/projectmanifestfixture/, spec/fixtures/project-manifest/manifest-v1.json
+- Local workspace loader and fixtures: internal/workspaceloader/, internal/workspaceloaderfixture/, spec/fixtures/workspace-loader/manifest-v1.json
 - Executable MIR semantics: docs/mir/*.md
 - Package identity and visibility: docs/package/*.md
 - Target and C ABI: docs/abi/*.md

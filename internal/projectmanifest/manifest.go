@@ -70,6 +70,7 @@ type Package struct {
 }
 
 type Workspace struct {
+	Present bool
 	Members []string
 }
 
@@ -180,7 +181,10 @@ func Parse(contents []byte) (Manifest, error) {
 			UID: raw.Package.UID, Name: raw.Package.Name, Version: raw.Package.Version,
 			Language: raw.Package.Language, Source: raw.Package.Source,
 		},
-		Workspace:    Workspace{Members: slices.Clone(raw.Workspace.Members)},
+		Workspace: Workspace{
+			Present: metadata.IsDefined("workspace"),
+			Members: slices.Clone(raw.Workspace.Members),
+		},
 		Dependencies: dependencies,
 	}, nil
 }

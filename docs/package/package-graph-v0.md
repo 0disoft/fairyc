@@ -86,9 +86,10 @@ The module-path-isolation result additionally crosses `internal/compiler` throug
 MIR lowering, and MIR verification. This proves compiler-pipeline consumption of the resolved graph;
 it still does not prove package discovery, a package-aware CLI, or backend support for package names.
 
-This is compiler-side consumption of an already-resolved graph. It is not evidence for the
-separately owned project-manifest parser, workspace loader, package solver, lockfile, source
-downloader, registry, cache, or stable diagnostic surface.
+This fixture path remains compiler-side consumption of an already-resolved graph. The separately
+owned project-manifest parser and local workspace loader now construct the same reusable graph under
+ADRs 0143 and 0144. None of those paths proves a package solver, lockfile, source downloader,
+registry, persistent cache, or stable diagnostic surface.
 
 ## Deferred surface
 
@@ -98,6 +99,6 @@ cache storage remain separate decisions. The local-exact human manifest is owned
 package cycles are rejected by ADR 0142. `PackageInstanceId` v1 and public-interface hash v1 are
 fixed independently and do not settle the remaining formats.
 
-`manifest-lockfile-readiness.md` audits the remaining loader and lock gaps. ADR 0143 authorizes the
-strict `fairy.toml` byte parser; no current code writes `fairy.lock` or turns parsed paths into a
-filesystem graph yet.
+`manifest-lockfile-readiness.md` audits the remaining lock and SDK-selection gaps. ADR 0143
+authorizes the strict `fairy.toml` byte parser and ADR 0144 turns explicit local paths into a
+filesystem-validated graph. No current code writes `fairy.lock`.

@@ -35,5 +35,6 @@ This directory contains versioned normative data that future compiler tests can 
 - `fixtures/package-source/manifest-v1.json`: exact canonical path/source-byte digest and invalidation cases.
 - `fixtures/package-cache/manifest-v1.json`: exact whole-package compatibility key and independent invalidation cases.
 - `fixtures/project-manifest/manifest-v1.json`: complete strict `fairy.toml` local-exact parser cases.
+- `fixtures/workspace-loader/manifest-v1.json`: complete local workspace trees for filesystem-safe graph construction.
 
 Explanatory language documents may summarize these files but cannot silently change spelling, grouping, module identity, semantic phase ownership, canonical facts, spans, recovery acceptance, or verified MIR observations. A contract change updates the normative data, ADR, diagnostics when applicable, and affected fixtures together.

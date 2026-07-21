@@ -1,0 +1,16 @@
+{
+  "$schema": "./schema-v1.json",
+  "schemaVersion": "fairyc.workspace-loader-fixtures/v1",
+  "contracts": [
+    "docs/adr/0144-local-workspace-loader-v1.md",
+    "docs/package/workspace-loader-v1.md",
+    "docs/package/project-manifest-v1.md"
+  ],
+  "cases": [
+    { "id": "pass-feature-distinct", "root": "cases/pass-feature-distinct", "expect": { "status": "pass", "packageCount": 2, "nodeCount": 3, "edgeCount": 2 } },
+    { "id": "reject-version-mismatch", "root": "cases/reject-version-mismatch", "expect": { "status": "reject", "reason": "dependency-version-mismatch" } },
+    { "id": "reject-duplicate-uid", "root": "cases/reject-duplicate-uid", "expect": { "status": "reject", "reason": "duplicate-package-uid" } },
+    { "id": "reject-path-case", "root": "cases/reject-path-case", "expect": { "status": "reject", "reason": "noncanonical-path-case" } },
+    { "id": "reject-cycle", "root": "cases/reject-cycle", "expect": { "status": "reject", "reason": "invalid-package-graph" } }
+  ]
+}

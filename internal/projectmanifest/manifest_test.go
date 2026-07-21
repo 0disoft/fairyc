@@ -40,8 +40,29 @@ features = []
 	if !slices.Equal(manifest.Workspace.Members, []string{"libs/net", "libs/util"}) {
 		t.Fatalf("members = %v", manifest.Workspace.Members)
 	}
+	if !manifest.Workspace.Present {
+		t.Fatal("workspace table presence was not retained")
+	}
 	if len(manifest.Dependencies) != 2 || manifest.Dependencies[0].Binding != "net" || manifest.Dependencies[1].Binding != "util" {
 		t.Fatalf("dependencies = %+v", manifest.Dependencies)
+	}
+}
+
+func TestParseRetainsAbsentWorkspace(t *testing.T) {
+	t.Parallel()
+	manifest, err := Parse([]byte(`schema = "fairyc.manifest/v1"
+[package]
+uid = "example.app"
+name = "app"
+version = "1.0.0"
+language = "fairyc-language/0"
+source = "src"
+`))
+	if err != nil {
+		t.Fatalf("Parse() error = %v", err)
+	}
+	if manifest.Workspace.Present || len(manifest.Workspace.Members) != 0 {
+		t.Fatalf("workspace = %+v", manifest.Workspace)
 	}
 }
 

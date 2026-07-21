@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fairyc:workspace-loader-fixtures:v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "contracts", "cases"],
+  "properties": {
+    "$schema": { "const": "./schema-v1.json" },
+    "schemaVersion": { "const": "fairyc.workspace-loader-fixtures/v1" },
+    "contracts": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "root", "expect"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^(pass|reject)-[a-z0-9]+(?:-[a-z0-9]+)*$" },
+          "root": { "type": "string", "pattern": "^cases/(?:pass|reject)-[a-z0-9-]+$" },
+          "expect": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["status"],
+            "properties": {
+              "status": { "enum": ["pass", "reject"] },
+              "reason": { "type": "string", "minLength": 1 },
+              "packageCount": { "type": "integer", "minimum": 1 },
+              "nodeCount": { "type": "integer", "minimum": 1 },
+              "edgeCount": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      }
+    }
+  }
+}

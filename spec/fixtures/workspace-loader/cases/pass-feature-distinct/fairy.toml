@@ -1,0 +1,21 @@
+schema = "fairyc.manifest/v1"
+
+[package]
+uid = "fixture.workspace.app"
+name = "app"
+version = "1.0.0"
+language = "fairyc-language/0"
+source = "src"
+
+[workspace]
+members = ["libs/net"]
+
+[dependencies.net-base]
+path = "libs/net"
+version = "1.2.0"
+features = ["base"]
+
+[dependencies.net-plain]
+path = "libs/net"
+version = "1.2.0"
+features = []

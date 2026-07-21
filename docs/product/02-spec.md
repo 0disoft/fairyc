@@ -576,9 +576,17 @@ minimal/workspace success and closed-field, duplicate-key, missing-field, path, 
 rejection. The parser performs no filesystem access and does not yet construct the resolved graph or
 write a lockfile.
 
+ADR 0144 separately fixes the first filesystem consumer of that manifest. It loads only one
+caller-selected root plus explicit nonoverlapping members, rejects nested workspaces, symlinks,
+nonexact path case, duplicate package UIDs, language/version mismatches, source collisions, invalid
+sources, and dependency cycles, and uses package-source digest v1 as local source identity. Per-edge
+features remain distinct and only root-reachable instances enter the resolved graph. This loader
+does not inject an SDK standard library or read/write a lockfile.
+
 The resolved-graph paragraph's separation from public manifest syntax describes fixture ownership,
-not current product status: ADR 0143 now owns that syntax independently. Lockfile, workspace I/O,
-registry, and solver behavior remain outside both fixture contracts.
+not current product status: ADR 0143 now owns syntax and ADR 0144 owns local workspace I/O
+independently. Lockfile, SDK selection, registry, and solver behavior remain outside those fixture
+contracts.
 
 Target layout assertions are versioned in `spec/fixtures/layout/manifest-v0.json` for Linux and
 `spec/fixtures/layout/manifest-windows-msvc-v0.json` for Windows. They fix the closed layout input

@@ -1,6 +1,6 @@
 # Manifest and lockfile readiness audit
 
-- Status: Manifest parser accepted; workspace loading and lockfile remain UNDECIDED
+- Status: Manifest and local workspace loader accepted; lockfile remains UNDECIDED
 - Date: 2026-07-21
 - Product source: `docs/product/02-spec.md`
 - Resolved graph source: `docs/package/package-graph-v0.md`
@@ -9,11 +9,12 @@
 
 ## Result
 
-The compiler side is ready to consume a resolved local package graph. ADR 0143 now fixes the
-human-authored `fairy.toml` v1 byte/parser and local-exact declaration semantics. The repository is
-not yet ready to claim workspace filesystem loading or a generated lockfile schema. Reusing the
-resolved-graph fixture as that lockfile would still expose fixture node handles, source-root test
-layout, and post-solver identities as if users were meant to author them.
+The compiler side is ready to consume a resolved local package graph. ADR 0143 fixes the
+human-authored `fairy.toml` v1 byte/parser and local-exact declaration semantics. ADR 0144 now fixes
+explicit member loading, fail-closed path/source discovery, exact dependency consistency, local
+source identity, and root-reachable feature-distinct graph construction. The repository is not yet
+ready to claim a generated lockfile schema. Reusing the resolved-graph fixture as that lockfile
+would still expose fixture node handles and post-resolution test layout as authorable data.
 
 ## Facts already fixed
 
@@ -38,8 +39,6 @@ Any future manifest/lockfile design must preserve these existing contracts:
 
 | Area | Required decision | Why code cannot guess it |
 | --- | --- | --- |
-| Workspace loader | member containment, duplicate UID handling, member manifest consistency | The byte parser intentionally performs no filesystem access |
-| Source discovery | default root, include/exclude rules, symlinks, case collisions | These rules define source identity and security boundaries |
 | Standard library | how compiler/SDK selection injects and locks its package | Host installation paths must not become semantic identity |
 | Lock updates | frozen mode, ordinary update mode, stale local paths, merge policy | Silent rewrite would damage reproducibility; never rewriting would hurt local work |
 | Lock wire format | canonical bytes, integrity fields, graph ordering, atomic replacement | Human TOML syntax does not imply a machine-generated lock encoding |
@@ -74,19 +73,19 @@ The smallest coherent profile is intentionally less ambitious than Cargo, Go mod
     or missing lock is an error. The ordinary command may replace the lock atomically only after a
     complete valid graph is produced.
 
-ADR 0143 accepts the manifest-facing parts of this profile. Workspace filesystem loading and the
-lockfile remain separate work. The profile deliberately postpones public registry coordinates,
+ADR 0143 accepts the manifest-facing parts and ADR 0144 accepts local workspace loading through
+resolved graph construction. The lockfile remains separate work. The profile deliberately postpones public registry coordinates,
 network acquisition, signatures, version-range solving, feature unification, implicit workspace
 discovery, vendoring commands, and package publication.
 
-## Minimum acceptance evidence before implementation
+## Acceptance evidence retained for the remaining lockfile implementation
 
-- ADR 0143 accepts the manifest parser strategy and declaration-level local-exact choices;
-- positive fixtures cover one package, explicit workspace members, a direct path dependency,
-  feature-distinct instances, and exact standard-library injection;
-- negative fixtures cover unknown/duplicate fields, path escape, absolute paths, escaping symlinks,
-  duplicate UID, module ambiguity, dependency cycles, unsorted/duplicate features, stale lock,
-  contradictory `PackageInstanceId`, and unsupported network sources;
+- ADR 0143 accepts the manifest parser and ADR 0144 accepts local workspace resolution;
+- existing positive fixtures cover one package, explicit workspace members, direct path
+  dependencies, and feature-distinct instances; exact standard-library injection remains required;
+- existing negative fixtures cover unknown/duplicate fields, path escape, absolute paths,
+  symlinks, duplicate UID, module ambiguity, dependency cycles, and unsorted/duplicate features;
+  stale lock and contradictory `PackageInstanceId` lock records remain required;
 - lock output is byte-deterministic across input enumeration order and uses atomic no-partial-write
   replacement;
 - Windows path, case, separator, and rename behavior is tested without WSL;

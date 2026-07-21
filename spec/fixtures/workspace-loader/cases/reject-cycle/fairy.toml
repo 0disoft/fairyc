@@ -1,0 +1,16 @@
+schema = "fairyc.manifest/v1"
+
+[package]
+uid = "fixture.cycle.app"
+name = "app"
+version = "1.0.0"
+language = "fairyc-language/0"
+source = "src"
+
+[workspace]
+members = ["libs/a", "libs/b"]
+
+[dependencies.a]
+path = "libs/a"
+version = "1.0.0"
+features = []

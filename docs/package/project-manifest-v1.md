@@ -70,7 +70,7 @@ duplicate-key failures, rejects undecoded fields, proves every required field, a
 dependencies sorted by binding. It emits internal reason/field categories without reserving final
 public diagnostic codes.
 
-It performs no filesystem access. A successfully parsed manifest does not yet prove that member or
-source directories exist, stay inside the workspace, avoid symlinks/case collisions, contain a
-complete `.fy` set, match declared versions, form an acyclic graph, or match a lockfile. Those facts
-belong to the workspace loader and lockfile v1.
+It performs no filesystem access. ADR 0144 and `workspace-loader-v1.md` separately prove that member
+and source directories exist, obey the exact-case/no-symlink boundary, contain the complete `.fy`
+set, match declared versions and language, and form a valid root-reachable graph. Neither the byte
+parser nor that loader proves or writes a lockfile.

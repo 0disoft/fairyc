@@ -347,6 +347,12 @@ sorted per-edge features. Unknown or missing fields, duplicate TOML keys, unsupp
 noncanonical paths/sets, and malformed identities reject. This schema does not imply lockfile,
 workspace-loader, source-acquisition, registry, or solver compatibility.
 
+ADR 0144 fixes the first loader behavior for this manifest schema: explicit root/member closure,
+exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, one language revision,
+exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
+instances. Loader behavior is independently versioned from future `fairy.lock`; absolute host paths
+and implementation guard values are not serialized compatibility data.
+
 `fairyc.project-manifest-fixtures/v1` versions the complete-file parser observations for that schema.
 The pinned TOML library version is an implementation dependency, not the manifest schema version;
 upgrading or replacing it requires proving the same accepted/rejected fixture surface or explicitly
