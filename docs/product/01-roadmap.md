@@ -15,15 +15,20 @@ This roadmap defines capability gates, not calendar promises. Exact durations, f
 
 Exit gate: the written contracts have no contradictory syntax, initialization, ownership, cleanup, package identity, visibility, target, runtime, or compatibility rule, and every mandatory rule has an observable fixture class or an explicit dependency-gated deferral. Parser, semantic, resource, Region, Result, MIR, and package manifest cases must pass their full runners with no unlisted independent diagnostics or observation drift.
 
-### Planned breaking surface-revision gate
+### Completed breaking surface-revision gate
 
-ADR 0136 defines a C-shaped replacement surface for the next pre-1 language revision while the
-current grammar remains executable. The cutover is not a rolling mixture of two syntaxes. Before it
-lands, the compiler must replace string-reparsed type syntax with structural AST and semantic type
-identities, freeze the prior lossless grammar for a separate fail-closed migrator, update the
-normative grammar and diagnostics, convert syntactically valid fixtures and examples, manually
-rewrite recovery fixtures, and remove the prior parse path from product compilation. The migrator's
-CLI remains undecided until an executable command contract exists.
+ADR 0136's C-shaped pre-1 surface is now the only product parse path. The normative grammar,
+diagnostics, fixtures, examples, embedded source literals, and current documentation use
+return-type-first function headers, type-first declarations, `ref`/`ptr` types, parenthesized
+control headers, `switch`/`case`, contextual leading-dot variants, and resource `cleanup` blocks.
+The immediately preceding lossless grammar is isolated behind the fail-closed
+`fairyc-migrate-prev` tool and cannot enter ordinary lexing, parsing, semantic analysis, or code
+generation. The migration checker, embedded-source checker, and fixture-span checker all require a
+zero-write result after the cutover.
+
+This gate deliberately did not add package manifests, provider-qualified imports, `for`, `defer`,
+or expression-bodied functions. Those remain separate capability decisions with their own
+contracts and fixture requirements.
 
 Classic and range `for`, lexical `defer`, provider-qualified package imports, and other new semantic
 features do not ride this gate merely because they appeared in the same design review. Expression-
