@@ -29,6 +29,8 @@
 - Target and C ABI contract: docs/abi/*.md
 - Runtime and standard-library contract: docs/runtime/*.md
 - Compatibility and versioning contract: docs/compatibility/*.md
+- Planned C-shaped pre-1 source cutover: docs/adr/0136-c-shaped-source-surface.md
+- Constrained C11 transport baseline: docs/adr/0137-c11-transport-baseline.md
 - Diagnostic meanings: docs/diagnostics/catalog-v0.md
 - Atlas logical schemas: docs/atlas/*.md
 - Operational standard source: docs/ops/00-operational-contract.md

@@ -4,6 +4,10 @@
 - Owner: UNASSIGNED
 - Date: 2026-07-17
 - Product source: `docs/product/02-spec.md`
+- Planned successor: `docs/adr/0136-c-shaped-source-surface.md`
+
+The grammar named by this ADR remains current until the next pre-1 revision completes the atomic
+cutover required by ADR 0136.
 
 ## Context
 

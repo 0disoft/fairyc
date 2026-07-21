@@ -5,6 +5,12 @@
 - Decision source: `docs/adr/0005-stage-0-surface-and-module-boundary.md`
 - Grammar decision: `docs/adr/0009-stage-0-grammar-and-parser-contract.md`
 - Normative grammar: `spec/grammar/stage0.ebnf`
+- Planned replacement: `docs/adr/0136-c-shaped-source-surface.md`
+
+> This document and the normative grammar describe the surface accepted by the current compiler.
+> ADR 0136 records the coordinated replacement for the next pre-1 language revision; none of its
+> spellings are accepted until the grammar, parser, fixtures, examples, diagnostics, and compatibility
+> metadata cut over together.
 
 ## Lexical and declaration rules
 

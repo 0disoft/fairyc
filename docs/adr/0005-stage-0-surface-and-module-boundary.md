@@ -4,6 +4,10 @@
 - Owner: UNASSIGNED
 - Date: 2026-07-17
 - Product source: `docs/product/02-spec.md`
+- Planned successor: `docs/adr/0136-c-shaped-source-surface.md`
+
+This ADR continues to describe the surface accepted by the current compiler. ADR 0136 owns the
+coordinated replacement for the next pre-1 language revision and does not authorize mixed parsing.
 
 ## Context
 

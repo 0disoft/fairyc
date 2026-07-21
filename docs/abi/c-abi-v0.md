@@ -26,6 +26,8 @@ preserves the public C tag and field names, emits dependencies before their user
 computed size, alignment, and offset assertions. Private `Option<i32>`, `Result<i32, i32>`,
 all-`i32` resources, and resource-bearing tags remain compiler-private; resources are still
 forbidden from `@repr(C)` and the public C ABI.
+ADR 0137 keeps that ISO C11 spelling as the transport baseline and separates any future newer-mode
+consumer validation from target ABI, runtime capability, and product emission identity.
 A separate Linux/amd64 runner is configured to require glibc, Clang, and GCC, link the embedded
 scalar runtime, compare process status at low and optimized profiles, probe valid target layouts,
 and run each production unit under a closed ASan+UBSan mode. No hosted success receipt has been

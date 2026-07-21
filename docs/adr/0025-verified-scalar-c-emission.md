@@ -6,6 +6,7 @@
 - MIR sources: `docs/mir/mir-v0.md` and `docs/mir/c-backend-safety-v0.md`
 - Target source: `docs/abi/c-abi-v0.md`
 - Fixture source: `spec/fixtures/c-emission/manifest-v0.json`
+- Transport policy: `docs/adr/0137-c11-transport-baseline.md`
 
 ## Context
 

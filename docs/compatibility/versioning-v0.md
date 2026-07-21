@@ -35,6 +35,16 @@ Pre-1 language revisions are exact pins. A compiler may implement several revisi
 
 Grammar spelling, keyword status, literal cooking, precedence, module-path identity, recovery acceptance, resolution, canonical typing, resource and Region Flow rejection, Result handling, declared effects, call-effect acceptance, and whether a diagnostic blocks HIR are language-revision semantics. Parser-, semantic-, resource-, Region-, and Result-fixture schemas version their expectation-file shapes; they do not make two different language revisions source-compatible.
 
+ADR 0136's C-shaped surface is therefore a new pre-1 language revision, not a compiler patch. The
+product compiler cuts over atomically and does not accept both source spellings, infer a source
+revision, or rewrite source during compilation. A separate lossless-CST migrator may support only
+the immediately preceding revision and must fail without modifying a file when it cannot preserve
+that file completely. Its command spelling is not a public contract until implemented and declared
+by the command contract. Creating the design record alone changes no released compiler or language
+revision; the implemented source cutover requires a language-revision increment and at least a
+compiler minor release. C ABI, runtime ABI, target schema, and MIR version change only if their own
+observable contracts change.
+
 For one function contract, removing a declared effect preserves every existing caller accepted by
 the effect checker. Adding an effect or replacing it with another can invalidate callers and is a
 source-compatibility change. Reordering or deduplicating the same set is not a semantic change
@@ -49,6 +59,12 @@ Internal MIR accepts an exact version only. It is mutable compiler state, not a 
 A cache key includes the full compiler build identity, language and MIR versions, target schema and ABI profile, toolchain fingerprint, backend and profile flags, runtime ABI, standard-library instance, source digest, dependency interface digests, feature set, and interface-hash algorithm. Incompatibility is a cache miss followed by lazy collection.
 
 ## Target and ABI
+
+ISO C11 is the only normative constrained-source transport dialect under ADR 0137. A C17 or C23
+consumer mode may compile the identical C11 unit as forward-compatibility evidence, but it is not a
+new emission profile, target, ABI, or runtime baseline. Enabling a newer consumer requires its
+external-keyword guard and validation evidence first. Emitting C23-only syntax or changing a C
+representation requires a separate accepted decision and the corresponding compatibility change.
 
 Target schema versions the structure of target descriptions. ABI profile versions the meaning of layout, calling convention, return classification, and target-visible representation. Fixing an implementation to match an unchanged profile changes the compiler build and invalidates cache; changing the specified meaning creates a new ABI profile major.
 

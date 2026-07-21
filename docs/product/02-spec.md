@@ -2,7 +2,7 @@
 
 - Status: Draft
 - Owner: UNASSIGNED
-- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0130-package-aware-source-spans.md`
+- Related ADRs: `docs/adr/0001-initial-architecture-boundaries.md` through `docs/adr/0137-c11-transport-baseline.md`
 
 This file owns the intended Fairy C language and toolchain behavior at the product level. The detailed Stage 0 contracts under `docs/language/`, `docs/mir/`, `docs/abi/`, `docs/runtime/`, `docs/compatibility/`, `docs/diagnostics/`, and `docs/atlas/` refine this file and cannot silently broaden it. Their v0 forms are prototype contracts rather than released compatibility promises.
 
@@ -55,6 +55,22 @@ Name resolution, canonical type selection, phase ownership, cascade suppression,
 - Parser recovery preserves byte spans and error nodes but never permits a recovered file to reach HIR.
 
 The explanatory surface is in `docs/language/0005-surface-syntax-v0.md`; exact spelling is owned by `spec/grammar/stage0.ebnf`, and lexing, precedence, module identity, and recovery are defined in `docs/language/0006-lexing-parsing-and-recovery-v0.md`.
+
+### Planned C-shaped pre-1 cutover
+
+ADR 0136 accepts a coordinated breaking source revision aimed at C programmers without adopting C
+declarators. Its target uses explicit declaration introducers, type-before-name declarations,
+`let name = value;` inference without `auto`, `T[N]` and `T[]` postfix type constructors,
+read-only-by-default `ref T` and `ptr T` handles with explicit `mut` write capability, C99-shaped
+`.field = value` record designators, parenthesized control headers, explicit function returns,
+owner-qualified functions with explicit receivers, non-callable resource cleanup blocks,
+contextual leading-dot variants, exhaustive no-fallthrough `switch`, and unchanged exact-error `?`
+propagation. The current grammar and examples remain the only accepted surface until the complete
+cutover gate passes; dual parsing and compile-time source rewrites are forbidden.
+
+Classic or range `for`, lexical `defer`, checked narrowing conversions, provider-qualified package
+imports, generic iterators, expression-bodied function shorthand, and formatter behavior are
+follow-up decisions rather than implicit parts of that spelling migration.
 
 ## Value categories
 
@@ -329,6 +345,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   configured source probe crosses one 8-byte INTEGER-class result and one 20-byte MEMORY-class
   hidden result between separate Clang/GCC objects in both directions and profiles.
 - The C backend is the only committed Stage 0 product backend and emits a constrained target/toolchain profile rather than universally portable C.
+- ISO C11 is the only normative constrained-C transport dialect. C17 or C23 compiler modes, if
+  added, validate the identical C11 source as consumers and do not create product emission profiles
+  or authorize C23-only output. Target ABI, runtime capabilities, and instrumentation remain
+  separate compatibility axes as fixed by ADR 0137.
 - `internal/target` owns executable `fairyc.target-spec/v0` descriptions. The first Linux target
   records host-independent LP64, scalar, pointer, SysV AMD64, ELF, unwind, debug, and C-layout facts.
   The provisional Windows target records LLP64, four-byte C `long`, 32-byte shadow space, Microsoft
@@ -578,4 +598,9 @@ Source text and documentation cannot grant an LLM, IDE, or agent filesystem, pro
 
 ## Open decisions
 
-Package coordinates and manifest syntax, public `Arena` construction and capacity APIs, exact parser resource limits, glibc and toolchain baselines, portable path model, targets beyond the declared Linux GNU and Windows MSVC profiles, package registry, `.fymap` binary encoding, and the concrete `SymbolId` hash algorithm remain UNDECIDED.
+Package coordinates and manifest syntax, provider-qualified import spelling, classic and range
+`for`, lexical `defer`, checked narrowing conversion syntax, expression-bodied function shorthand,
+public `Arena` construction and capacity APIs, exact parser resource limits, glibc and toolchain
+baselines, portable path model, targets beyond the declared Linux GNU and Windows MSVC profiles,
+package registry, `.fymap` binary encoding, and the concrete `SymbolId` hash algorithm remain
+UNDECIDED.
