@@ -37,7 +37,7 @@ stabilization.
 
 ## Implemented experimental compiler surface
 
-The current Go prototype implements thirteen deliberately unstable developer commands:
+The current Go prototype implements fourteen deliberately unstable developer commands:
 
 | Command | Purpose | Output |
 | --- | --- | --- |
@@ -45,6 +45,7 @@ The current Go prototype implements thirteen deliberately unstable developer com
 | `fairyc experimental check-syntax <file.fy>` | Check lexing, parsing, recovery, module identity, lossless reconstruction, and error-free AST lowering | Success line on stdout or human diagnostics on stderr |
 | `fairyc experimental check-semantics <file.fy> [<file.fy>...]` | Resolve names, type-check declared effects and direct-call supersets, and analyze local safe-borrow, whole-resource, Region, and complete Stage 0 Result must-use Flow for an explicit module set in the implemented subset | Typed-HIR module and function counts on stdout, human source diagnostics on stderr, or an explicit unsupported-subset error |
 | `fairyc experimental check <primary.fy> [--source <file.fy>]...` | Run syntax, semantic, Flow, MIR-lowering, and MIR-verifier stages over one explicit source closure without requiring an executable entry | One verified-MIR function and foreign-declaration count line, source diagnostics, or an explicit unsupported-subset error |
+| `fairyc experimental check-workspace [--locked]` | Load the current directory's strict `fairy.toml`, explicit local members and sources, validate or refresh canonical `fairy.lock`, then run package-aware semantic and verified MIR | Deterministic instance/source/MIR counts and lock state, diagnostics, or prototype package failure code `7` |
 | `fairyc experimental target-spec <x86_64-linux-gnu\|x86_64-windows-msvc>` | Inspect one known host-independent target description without resolving a local toolchain | Deterministic `fairyc.target-spec/v0` JSON on stdout, defined by `spec/cli/experimental-target-spec-v0.schema.json` |
 | `fairyc experimental emit-c <entry.fy> [--source <file.fy>]...` | Lower one explicit FY module closure in the admitted constrained-C subset through verified MIR and emit the provisional transport without invoking a toolchain | Exactly one deterministic C11 translation unit, with an explicit POSIX.1-2008 typedef profile only when required, on stdout; source-set diagnostics or capability errors on stderr |
 | `fairyc experimental build <entry.fy> [--source <file.fy>]... --cc <clang\|gcc> --profile <low\|optimized> --output <build/path>` | Compile and link one explicitly closed verified program in that constrained subset for the host `x86_64-linux-gnu` profile with an explicit C compiler, optimization profile, and ignored output path | A no-overwrite executable below `build/` plus one relative-path receipt, or source-set, capability, toolchain, link, or artifact diagnostics |
@@ -64,6 +65,11 @@ Every program command accepts one positional entry plus repeatable `--source` va
 64-file and aggregate-byte ceilings. They analyze only that explicit FY set, require
 source-root-relative module identity, and perform no source discovery. The flag never denotes a C,
 object, archive, library, or linker input.
+
+`experimental check-workspace` accepts only optional `--locked`. It loads only the current source
+root, explicit members, and their complete sources. Ordinary mode replaces `fairy.lock` only when
+missing, invalid, or byte-different; `--locked` requires an exact match and never writes. It selects
+no SDK, target, backend, toolchain, persistent cache, or executable.
 
 `experimental check` uses the same repeated-`--source` closure syntax and limits, but its first file
 is a primary source rather than an executable entry. It requires no `main`, runs no interpreter or
@@ -247,8 +253,8 @@ wrapper from only those symbols; it does not stabilize `std::fs` or open linker 
 never binds host symbols and reports the interpreter capability boundary.
 
 The release-stable `fairyc check` remains unimplemented. It must not be aliased to `check-syntax`,
-`check-semantics`, or `experimental check`: the experimental verified-MIR closure does not decide
-package discovery, target-aware checks, configuration, JSON, stable output, or release exit codes.
+`check-semantics`, `experimental check`, or `experimental check-workspace`: these paths do not decide
+SDK selection, target-aware checks, configuration, JSON, stable output, or release exit codes.
 
 ## Stage 0 surface
 

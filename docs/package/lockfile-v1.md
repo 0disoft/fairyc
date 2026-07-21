@@ -25,3 +25,7 @@ temporary file and rename.
 The library does not decide whether a CLI invocation may refresh a missing/stale lock. It also does
 not yet select an SDK standard library. Those policies must be explicit before `fairyc build
 --locked` becomes a public claim.
+
+The unstable `experimental check-workspace` supplies the first narrow policy: ordinary mode
+refreshes after a valid graph exists; `--locked` requires an exact match and never writes. This does
+not settle the future stable build/check policy.

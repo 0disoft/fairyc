@@ -41,6 +41,8 @@ Each loaded package retains:
 The root-reachable graph uses the source digest text as local source identity and creates one node
 per exact member path and per-edge feature set. It does not unify features. Existing package-graph
 resolution supplies full PackageInstanceId classes, cycle rejection, and direct-only module lookup.
+`SemanticInput` assigns disposable build-local package numbers and binds every resolved import to
+its exact provider for `compiler.CheckPackages`.
 
 ## Deferred boundary
 

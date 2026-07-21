@@ -25,6 +25,8 @@ plus `fairyc experimental parse <file.fy>`,
 `fairyc experimental check-syntax <file.fy>`, and
 `fairyc experimental check-semantics <file.fy> [<file.fy>...]`. The complete implemented
 non-executing pipeline is `fairyc experimental check <primary.fy> [--source <file.fy>]...`.
+The package-aware sibling is `fairyc experimental check-workspace [--locked]`; it consumes the
+current directory's `fairy.toml`, explicit members, and canonical `fairy.lock`.
 The compiler prototype also exposes
 `fairyc experimental target-spec <x86_64-linux-gnu|x86_64-windows-msvc>` for deterministic
 host-independent target inspection,

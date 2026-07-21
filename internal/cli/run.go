@@ -25,6 +25,7 @@ const (
 	ExitInternalFailure   = 4
 	ExitProgramTrap       = 5
 	ExitBuildFailure      = 6
+	ExitPackageFailure    = 7
 	maxExplicitInputFiles = 64
 )
 
@@ -37,6 +38,7 @@ Usage:
   fairyc experimental check-syntax <file.fy>
   fairyc experimental check-semantics <file.fy> [<file.fy>...]
   fairyc experimental check <primary.fy> [--source <file.fy>]...
+  fairyc experimental check-workspace [--locked]
   fairyc experimental target-spec <target-id>
   fairyc experimental emit-c <entry.fy> [--source <file.fy>]...
   fairyc experimental build <entry.fy> [--source <file.fy>]... --cc <clang|gcc> --profile <low|optimized> --output <build/path>
@@ -150,6 +152,8 @@ func runExperimental(args []string, sourceRoot string, stdout, stderr io.Writer)
 		return runCheckSemantics(args[1:], sourceRoot, stdout, stderr)
 	case "check":
 		return runCheck(args[1:], sourceRoot, stdout, stderr)
+	case "check-workspace":
+		return runWorkspaceCheck(args[1:], sourceRoot, stdout, stderr)
 	case "run":
 		return runInterpreter(args[1:], sourceRoot, stdout, stderr)
 	case "target-spec":

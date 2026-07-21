@@ -412,6 +412,9 @@ strict `fairy.toml` v1 declaration surface through a pinned isolated TOML adapte
 explicit filesystem-safe workspace/member/source loading and root-reachable feature-distinct graph
 construction. ADR 0145 then fixes canonical generated `fairy.lock` v1, full identity revalidation,
 stale-workspace comparison, and atomic replacement. SDK selection and public CLI lock modes remain.
+The unstable `experimental check-workspace` now connects those contracts to package-aware semantic
+analysis and verified MIR with ordinary refresh and no-write `--locked` behavior. Stable command
+spelling and package-aware build/run still remain.
 
 - Add exact SDK standard-library injection and public ordinary/`--locked` CLI policy on top of the
   accepted manifest, workspace loader, and lockfile library.

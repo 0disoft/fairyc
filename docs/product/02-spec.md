@@ -588,6 +588,10 @@ tuples and edges, recomputes every PackageInstanceId and source digest, detects 
 and atomically replaces only canonical validated bytes. Public CLI refresh/`--locked` policy and
 SDK standard-library selection remain separate decisions.
 
+`experimental check-workspace` is the first end-to-end consumer: it assigns build-local package IDs,
+binds resolved imports, runs package-aware semantic, Flow, MIR lowering, and verification, and either
+refreshes the canonical lock or requires an exact no-write `--locked` match. It emits no native code.
+
 The resolved-graph paragraph's separation from public manifest syntax describes fixture ownership,
 not current product status: ADR 0143 owns syntax, ADR 0144 owns local workspace I/O, and ADR 0145
 owns generated lock bytes independently. SDK selection, public lock-update policy, registry, and

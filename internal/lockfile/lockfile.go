@@ -137,6 +137,31 @@ func Parse(contents []byte) (Document, error) {
 	return document, nil
 }
 
+// Read loads one bounded regular lockfile without following a final symlink.
+func Read(path string) (Document, []byte, error) {
+	info, err := os.Lstat(path)
+	if err != nil {
+		return Document{}, nil, err
+	}
+	if info.Mode()&os.ModeSymlink != 0 || !info.Mode().IsRegular() || info.Size() > MaxBytes {
+		return Document{}, nil, fmt.Errorf("lockfile is not a bounded regular file")
+	}
+	file, err := os.Open(path)
+	if err != nil {
+		return Document{}, nil, err
+	}
+	defer file.Close()
+	contents, err := io.ReadAll(io.LimitReader(file, MaxBytes+1))
+	if err != nil {
+		return Document{}, nil, fmt.Errorf("read bounded lockfile: %w", err)
+	}
+	if len(contents) > MaxBytes {
+		return Document{}, nil, fmt.Errorf("lockfile exceeds %d bytes", MaxBytes)
+	}
+	document, err := Parse(contents)
+	return document, contents, err
+}
+
 func Validate(document Document) error {
 	if document.Schema != SchemaVersion || document.PackageInstanceAlgorithm != packagegraph.InstanceIDEncoding || document.SourceDigestAlgorithm != packagecontent.DigestEncoding || document.Language == "" {
 		return fmt.Errorf("invalid lockfile header")

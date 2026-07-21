@@ -363,6 +363,8 @@ go run ./cmd/fairyc experimental check-semantics examples/resources/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/regions/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/results/main.fy
 go run ./cmd/fairyc experimental check examples/run/modules/main.fy --source examples/run/modules/math.fy
+go run ./cmd/fairyc experimental check-workspace
+go run ./cmd/fairyc experimental check-workspace --locked
 go run ./cmd/fairyc experimental target-spec x86_64-linux-gnu
 go run ./cmd/fairyc experimental target-spec x86_64-windows-msvc
 go run ./cmd/fairyc experimental emit-c examples/c/main.fy
