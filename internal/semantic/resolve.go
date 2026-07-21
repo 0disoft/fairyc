@@ -158,23 +158,27 @@ func (a *analyzer) declareResourceDropFunctions() {
 	for _, module := range a.moduleOrder {
 		for index := range module.file.Module.Resources {
 			resource := &module.file.Module.Resources[index]
-			if a.resources[resource] == nil || resource.Drop == nil || resource.Drop.Body == nil ||
-				len(resource.Drop.Body.Statements) == 0 && resource.Drop.Body.Tail == nil {
+			if a.resources[resource] == nil || resource.Cleanup == nil || resource.Cleanup.Body == nil ||
+				len(resource.Cleanup.Body.Statements) == 0 && resource.Cleanup.Body.Tail == nil {
 				continue
+			}
+			receiverName := resource.Cleanup.ReceiverName
+			if receiverName == "" {
+				receiverName = "this"
 			}
 			function := &ast.Function{
 				Name:     "$drop$" + resource.Name,
-				Span:     resource.Drop.Span,
-				NameSpan: resource.Drop.Span,
+				Span:     resource.Cleanup.Span,
+				NameSpan: resource.Cleanup.Span,
 				Parameters: []ast.Parameter{{
-					Name:     "self",
+					Name:     receiverName,
 					Mutable:  true,
-					Span:     resource.Drop.Span,
-					NameSpan: resource.Drop.Span,
+					Span:     resource.Cleanup.Span,
+					NameSpan: resource.Cleanup.Span,
 					Type:     ast.NamedTypeReference(resource.Name, resource.NameSpan),
 				}},
-				ResultType: ast.NamedTypeReference("void", resource.Drop.Span),
-				Body:       resource.Drop.Body,
+				ResultType: ast.NamedTypeReference("void", resource.Cleanup.Span),
+				Body:       resource.Cleanup.Body,
 			}
 			value := &symbol{
 				id:          a.allocateSymbol(),
@@ -183,8 +187,8 @@ func (a *analyzer) declareResourceDropFunctions() {
 				name:        function.Name,
 				module:      module.file.Module.Path,
 				source:      module.file.Path,
-				declaration: resource.Drop.Span,
-				typeSpan:    resource.Drop.Span,
+				declaration: resource.Cleanup.Span,
+				typeSpan:    resource.Cleanup.Span,
 				function:    function,
 			}
 			a.functions[function] = value

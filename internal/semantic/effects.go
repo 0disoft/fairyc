@@ -50,10 +50,16 @@ func (a *analyzer) prepareCallableEffects() {
 			if resourceValue == nil {
 				continue
 			}
+			effectAttributes := resource.Attributes
+			effectDeclaration := resource.NameSpan
+			if resource.Cleanup != nil && len(resource.Cleanup.Attributes) > 0 {
+				effectAttributes = resource.Cleanup.Attributes
+				effectDeclaration = resource.Cleanup.Span
+			}
 			resourceValue.effects, resourceValue.effectSpan, resourceValue.effectsValid = a.parseEffects(
 				module.file.Path,
-				resource.NameSpan,
-				resource.Attributes,
+				effectDeclaration,
+				effectAttributes,
 			)
 			a.effectFacts = append(a.effectFacts, EffectFact{
 				Declaration: span(module.file.Path, resource.NameSpan),

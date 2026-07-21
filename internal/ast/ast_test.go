@@ -127,8 +127,8 @@ func TestLowerCapturesResourceFields(t *testing.T) {
 	if module.Resources[0].Fields[0].Name != "left" || module.Resources[0].Fields[0].Type.Text != "i32" {
 		t.Fatalf("first field = %+v", module.Resources[0].Fields[0])
 	}
-	if module.Resources[0].Drop == nil || module.Resources[0].Drop.Body == nil || len(module.Resources[0].Drop.Body.Statements) != 0 || module.Resources[0].Drop.Body.Tail != nil {
-		t.Fatalf("drop = %+v, want preserved empty body", module.Resources[0].Drop)
+	if module.Resources[0].Cleanup == nil || module.Resources[0].Cleanup.Body == nil || len(module.Resources[0].Cleanup.Body.Statements) != 0 || module.Resources[0].Cleanup.Body.Tail != nil {
+		t.Fatalf("cleanup = %+v, want preserved empty body", module.Resources[0].Cleanup)
 	}
 }
 
@@ -143,10 +143,10 @@ func TestLowerPreservesNonEmptyResourceDropBody(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Lower() error = %v", err)
 	}
-	if len(module.Resources) != 1 || module.Resources[0].Drop == nil || module.Resources[0].Drop.Body == nil {
+	if len(module.Resources) != 1 || module.Resources[0].Cleanup == nil || module.Resources[0].Cleanup.Body == nil {
 		t.Fatalf("resources = %+v", module.Resources)
 	}
-	body := module.Resources[0].Drop.Body
+	body := module.Resources[0].Cleanup.Body
 	if len(body.Statements) != 1 || body.Statements[0].Binding == nil || body.Statements[0].Binding.Name != "marker" {
 		t.Fatalf("drop body = %+v", body)
 	}

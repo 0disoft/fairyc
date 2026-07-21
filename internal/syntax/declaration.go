@@ -159,6 +159,22 @@ func (p *parser) parseResource(start int, leading []NodeID) NodeID {
 	p.expect("{")
 	children := append([]NodeID(nil), leading...)
 	for !p.at("}") && p.current().Kind != lexer.EOF && !p.budget.Exhausted() {
+		if p.at("cleanup") {
+			children = append(children, p.parseCleanup(nil))
+			break
+		}
+		if p.at("@") {
+			attributes := make([]NodeID, 0, 2)
+			for p.at("@") && !p.budget.Exhausted() {
+				attributes = append(attributes, p.parseAttribute())
+			}
+			if p.at("cleanup") {
+				children = append(children, p.parseCleanup(attributes))
+				break
+			}
+			children = append(children, attributes...)
+			continue
+		}
 		if p.at("drop") {
 			children = append(children, p.parseDrop())
 			break
@@ -167,6 +183,14 @@ func (p *parser) parseResource(start int, leading []NodeID) NodeID {
 	}
 	p.expect("}")
 	return p.addNamedNode(KindResource, start, children, name, "", nameSpan)
+}
+
+func (p *parser) parseCleanup(leading []NodeID) NodeID {
+	start := p.currentFullIndex()
+	p.advance()
+	block := p.parseBlock()
+	children := append(append([]NodeID(nil), leading...), block)
+	return p.addNode(KindCleanup, start, children, "cleanup", "")
 }
 
 func (p *parser) parseDrop() NodeID {

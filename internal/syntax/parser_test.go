@@ -239,6 +239,29 @@ func TestParseCShapedSwitchAndLeadingDotVariants(t *testing.T) {
 	}
 }
 
+func TestParseCShapedResourceCleanup(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nresource File { c::int handle; @effects(filesystem) cleanup { unsafe { close(this.handle); } } }\n")
+	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	var cleanup *Node
+	for index := range tree.Nodes {
+		if tree.Nodes[index].Kind == KindCleanup {
+			cleanup = &tree.Nodes[index]
+			break
+		}
+	}
+	if cleanup == nil || cleanup.Text != "cleanup" || len(cleanup.Children) != 2 {
+		t.Fatalf("cleanup = %+v", cleanup)
+	}
+	reconstructed, ok := tree.Reconstruct()
+	if !ok || !slices.Equal(reconstructed, input) {
+		t.Fatalf("Reconstruct() = %q, %v; want %q, true", reconstructed, ok, input)
+	}
+}
+
 func TestNestedTypeCloseChargesContextualTokenBudget(t *testing.T) {
 	t.Parallel()
 	input := []byte("module main;\nfn wrap(value: Token) -> Option<Option<Token>> { value }\n")

@@ -436,6 +436,33 @@ func TestAnalyzePreservesOrderedResourceDefinitionWithEmptyDrop(t *testing.T) {
 	}
 }
 
+func TestAnalyzeLowersCShapedCleanupWithContextualThis(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+resource Token {
+    i32 value;
+    cleanup { let i32 marker = this.value; }
+}
+fn i32 main() { return 0; }
+`,
+	})
+	assertCleanTypeResult(t, result)
+	resource := result.HIR.Modules[0].Resources[0]
+	if resource.DropKind != hir.ResourceDropNonEmpty || resource.DropSymbol == hir.NoSymbol {
+		t.Fatalf("resource = %+v", resource)
+	}
+	for _, function := range result.HIR.Modules[0].Functions {
+		if function.Symbol == resource.DropSymbol {
+			if len(function.Parameters) != 1 || function.Parameters[0].Name != "this" {
+				t.Fatalf("cleanup glue parameters = %+v", function.Parameters)
+			}
+			return
+		}
+	}
+	t.Fatal("cleanup glue function not found")
+}
+
 func TestAnalyzePreservesReprCStructAndTypesAggregateExpressions(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{

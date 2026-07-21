@@ -75,13 +75,16 @@ type Resource struct {
 	NameSpan   diagnostic.Span
 	Attributes []Attribute
 	Fields     []FieldDeclaration
-	Drop       *ResourceDrop
+	Cleanup    *ResourceCleanup
 }
 
-// ResourceDrop preserves the source declaration and body until semantic support is selected.
-type ResourceDrop struct {
-	Span diagnostic.Span
-	Body *Block
+// ResourceCleanup preserves the non-callable cleanup declaration until semantic lowering creates
+// compiler-private drop glue.
+type ResourceCleanup struct {
+	Span         diagnostic.Span
+	ReceiverName string
+	Attributes   []Attribute
+	Body         *Block
 }
 
 // FieldDeclaration records one named aggregate field and its written type.
@@ -324,14 +327,20 @@ func lowerResource(tree *syntax.Tree, node syntax.Node) Resource {
 	value.Fields = lowerFields(tree, node)
 	for _, childID := range node.Children {
 		child, found := tree.Node(childID)
-		if !found || child.Kind != syntax.KindFunction || child.Text != "drop" {
+		if !found || child.Kind != syntax.KindCleanup && (child.Kind != syntax.KindFunction || child.Text != "drop") {
 			continue
 		}
-		value.Drop = &ResourceDrop{Span: child.Span}
+		receiverName := "this"
+		if child.Kind == syntax.KindFunction {
+			receiverName = "self"
+		}
+		value.Cleanup = &ResourceCleanup{
+			Span: child.Span, ReceiverName: receiverName, Attributes: lowerAttributes(tree, child),
+		}
 		for _, dropChildID := range child.Children {
 			dropChild, ok := tree.Node(dropChildID)
 			if ok && dropChild.Kind == syntax.KindBlock {
-				value.Drop.Body = lowerBlock(tree, dropChild)
+				value.Cleanup.Body = lowerBlock(tree, dropChild)
 				break
 			}
 		}

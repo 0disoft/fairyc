@@ -10,12 +10,12 @@ import (
 )
 
 var keywords = map[string]struct{}{
-	"as": {}, "assert": {}, "break": {}, "const": {}, "continue": {}, "discard": {},
+	"as": {}, "assert": {}, "break": {}, "case": {}, "cleanup": {}, "const": {}, "continue": {}, "discard": {},
 	"drop": {}, "else": {}, "enum": {}, "extern": {}, "false": {},
 	"fn": {}, "if": {}, "impl": {}, "import": {}, "in": {}, "let": {},
 	"match": {}, "module": {}, "mut": {}, "null": {}, "pub": {},
 	"ptr": {}, "ref": {}, "region": {}, "resource": {}, "return": {}, "self": {}, "struct": {},
-	"switch": {}, "case": {}, "true": {}, "unsafe": {}, "var": {}, "while": {},
+	"switch": {}, "true": {}, "unsafe": {}, "var": {}, "while": {},
 }
 
 var symbols = []string{

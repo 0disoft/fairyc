@@ -42,6 +42,7 @@ const (
 	KindConst      Kind = "const"
 	KindStruct     Kind = "struct"
 	KindResource   Kind = "resource"
+	KindCleanup    Kind = "cleanup"
 	KindEnum       Kind = "enum"
 	KindImpl       Kind = "impl"
 	KindFunction   Kind = "function"

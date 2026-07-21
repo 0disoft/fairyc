@@ -182,15 +182,15 @@ func (a *analyzer) checkResource(module *moduleScope, resource *ast.Resource) hi
 			result.Fields = append(result.Fields, hir.ResourceField{Name: field.name, Type: field.typ, Span: field.span})
 		}
 	}
-	if resource.Drop == nil || resource.Drop.Body == nil {
-		a.addUnsupported(module.file.Path, resource.Span, "resource without a drop body")
+	if resource.Cleanup == nil || resource.Cleanup.Body == nil {
+		a.addUnsupported(module.file.Path, resource.Span, "resource without a cleanup block")
 		return result
 	}
-	result.DropSpan = span(module.file.Path, resource.Drop.Span)
-	if len(resource.Drop.Body.Statements) == 0 && resource.Drop.Body.Tail == nil {
+	result.DropSpan = span(module.file.Path, resource.Cleanup.Span)
+	if len(resource.Cleanup.Body.Statements) == 0 && resource.Cleanup.Body.Tail == nil {
 		if len(value.effects) > 0 && value.effectsValid {
 			a.addDiagnostic("E7101", span(module.file.Path, value.effectSpan), RelatedSpan{
-				Role: "drop-declaration", Span: span(module.file.Path, resource.Drop.Span),
+				Role: "cleanup-declaration", Span: span(module.file.Path, resource.Cleanup.Span),
 			})
 		}
 		result.DropKind = hir.ResourceDropEmpty
