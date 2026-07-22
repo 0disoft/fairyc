@@ -205,6 +205,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0193-experimental-symbol-catalog-command.md`: explicit package, kind, cursor, and count/byte bounds for canonical current SymbolId catalog pages on stdout.
 - `0194-experimental-atlas-show-around-pack-commands.md`: exact visible/full SymbolId selection plus explicit direction, relation, record, relation, depth, and byte budgets for canonical show/around packs.
 - `0195-attributed-text-boundary-v0.md`: separate untrusted-text origin, exact-current attribution, fragment integrity, control validation, atomic budget, and non-authority policy without enabling text output.
+- `0196-exact-retained-source-excerpt-extraction.md`: internal attributed-text validation and exact local source slicing from revalidated retained workspace bytes without path reopening, encoding, or CLI exposure.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

@@ -49,9 +49,10 @@ declaration documentation would invent a language rule the grammar and frontend 
 
 ## Consequences
 
-- The policy closes the security and compatibility decisions without claiming text import works.
-- The first executable slice can be a narrow internal source-excerpt model instead of a broad parser,
-  map-format, command, and model-integration change.
+- The policy closed the security and compatibility decisions without itself claiming text import
+  worked; ADR 0196 now supplies the narrow internal source-excerpt implementation evidence.
+- The first executable slice remains an internal source-excerpt model instead of a broad parser,
+  map-format, command, or model-integration change.
 - Documentation comments need a separate grammar/frontend attachment contract before admission.
 - Dependency and generated text remain unavailable even when their bytes are signed or bundled.
 - Checksums detect mutation but do not prove authorship, review, truth, or safety.

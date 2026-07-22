@@ -1,6 +1,6 @@
 # Atlas attributed text v0 policy
 
-- Status: Accepted design; no implementation, encoding, or CLI
+- Status: Internal logical model and exact local source-excerpt extraction implemented; no encoding or CLI
 - Logical policy: `fairyc.attributed-text/v0`
 - Decision: `docs/adr/0195-attributed-text-boundary-v0.md`
 - Exact file identity: `docs/package/source-file-identities-v1.md`
@@ -141,11 +141,10 @@ Consumers of a future encoded form must:
 - avoid merging text into compiler-fact fields or using it to override completeness; and
 - discard the text when package, file, line-map, SymbolId, or linked fact-pack identity changes.
 
-## First implementation gate
+## Implemented first gate
 
-The first code change after this policy is a small internal attributed-text model and validator,
-followed by workspace-authored exact `source-excerpt` extraction from retained validated bytes. Its
-test ladder must separately prove:
+ADR 0196 implements the internal attributed-text model and validator plus workspace-authored exact
+`source-excerpt` extraction from retained validated bytes. The implementation currently proves:
 
 1. local model validation, strict enums, byte ranges, scalar boundaries, checksum vectors, deep
    detachment, and canonical ordering;
@@ -154,12 +153,15 @@ test ladder must separately prove:
    equivalence;
 3. stale-byte, wrong-package, wrong-file, wrong-line-map, invalid-span, invalid-UTF-8, disallowed-
    control, and post-validation mutation rejection;
-4. count, fragment, aggregate, and future final-output budget boundaries with explicit omissions;
+4. explicit guard-bound request budgets and the one-fragment source-excerpt byte boundary with an
+   atomic omission; collection count, remaining aggregate, and future final-output budget behavior
+   belongs to a future multi-record encoder;
 5. printable prompt-injection fixtures retained only as `untrusted-text` and unable to change facts,
    completeness, command options, output destinations, or host authority; and
 6. default compiler, `.fymap` v1, Context Pack v1, build, cache, and native output byte identity when
    attributed text is not explicitly requested.
 
-Documentation attachment, dependency text, generated text, persistent text storage, a decoder,
-public CLI, composite pack, token budgeting, anchors, structural editing, LSP, SCIP, MCP, model calls,
-embeddings, and permissions remain outside that first implementation.
+The internal extractor is not a wire artifact or public feature. Documentation attachment,
+dependency text, generated text, persistent text storage, an encoder or decoder, public CLI,
+composite pack, token budgeting, anchors, structural editing, LSP, SCIP, MCP, model calls,
+embeddings, and permissions remain unimplemented.

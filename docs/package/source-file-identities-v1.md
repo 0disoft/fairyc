@@ -73,9 +73,10 @@ source bytes.
 
 The implemented `.fymap` current-source reader recomputes the package-source digest and every
 relevant file identity from caller-authorized current source before serving spans. Mismatch rejects
-stale evidence; it is not downgraded to a guessed position. ADR 0195 requires a future excerpt
-extractor to repeat that proof against retained validated bytes. Excerpt loading remains
-unimplemented and cannot be inferred from map publication or span-query success.
+stale evidence; it is not downgraded to a guessed position. ADR 0195 requires excerpt extraction to
+repeat that proof against retained validated bytes. ADR 0196 implements the internal local-workspace
+gate by recomputing the package digest and selected file/line-map identities before slicing, without
+reopening a path. No encoded excerpt artifact or command can be inferred from that internal gate.
 
 ## Compatibility and evidence
 

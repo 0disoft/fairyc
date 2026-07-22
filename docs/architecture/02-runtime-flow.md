@@ -251,8 +251,10 @@ source match. The package-local query index repeats that current-state check and
 `overview`, exact-SymbolId `show`, and breadth-first `around` without source text or dependency
 discovery. `internal/contextpack` runs those queries directly and emits a separately byte-bounded,
 checksummed canonical compiler-fact envelope with empty documentation and source-excerpt sections.
-Dependency-map loading, commands, source excerpts, text import, and pack decoding remain
-unimplemented and cannot feed back into these boundaries.
+`internal/attributedtext` separately resolves one exact query subject and slices its declaration
+from revalidated retained local-workspace bytes. Dependency-map loading, attributed-text encoding
+or commands, documentation import, and pack decoding remain unimplemented and cannot feed back into
+these boundaries.
 
 ## Runtime behavior
 

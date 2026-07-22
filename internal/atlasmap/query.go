@@ -235,6 +235,14 @@ type AroundResult struct {
 	Omissions     []QueryOmission `json:"omissions"`
 }
 
+// AttributionSubject is a detached exact-current handoff for a downstream source-attribution
+// boundary. It is not a standalone query result and contains no source text or filesystem authority.
+type AttributionSubject struct {
+	Context QueryContext
+	Subject QueryNode
+	File    semanticsnapshot.File
+}
+
 type indexedQueryNode struct {
 	symbol             Symbol
 	declaration        semanticsnapshot.Declaration
@@ -248,6 +256,7 @@ type QueryIndex struct {
 	header       Header
 	modules      []semanticsnapshot.Module
 	completeness []semanticsnapshot.Completeness
+	files        map[string]semanticsnapshot.File
 	nodes        []indexedQueryNode
 	relations    []QueryRelation
 	byVisible    map[string]int
@@ -296,9 +305,13 @@ func NewQueryIndex(partition Partition, expectation LoadExpectation) (*QueryInde
 	}
 	index := &QueryIndex{
 		header: partition.Header(), modules: partition.Modules(), completeness: partition.Completeness(),
+		files:     make(map[string]semanticsnapshot.File, partition.Header().Counts.Files),
 		byVisible: make(map[string]int, len(declarations)), byFull: make(map[string]int, len(declarations)),
 		byKey:    make(map[semanticsnapshot.DeclarationKey]int, len(declarations)),
 		outgoing: make(map[string][]int), incoming: make(map[string][]int),
+	}
+	for _, file := range partition.Files() {
+		index.files[file.Path] = file
 	}
 	for _, symbol := range partition.Symbols() {
 		declaration := declarationsByKey[symbol.Declaration]
@@ -557,6 +570,21 @@ func (index *QueryIndex) Around(symbolID string, request RelationRequest) (Aroun
 	result.Omissions = appendJoinOmissions(result.Omissions, result.Relations, request.Direction, filter)
 	result.Usage = selection.usage
 	return result, nil
+}
+
+// ResolveAttributionSubject resolves either canonical SymbolId form without inventing a name search
+// or requiring an unrelated relation query. The returned node and context are detached copies.
+func (index *QueryIndex) ResolveAttributionSubject(symbolID string) (AttributionSubject, error) {
+	position, err := index.resolveSymbol(symbolID)
+	if err != nil {
+		return AttributionSubject{}, err
+	}
+	subject := index.node(position)
+	file, found := index.files[subject.Declaration.Span.Source]
+	if !found {
+		return AttributionSubject{}, fmt.Errorf("Atlas attribution subject references an unknown current source")
+	}
+	return AttributionSubject{Context: index.contextFor(nil), Subject: subject, File: file}, nil
 }
 
 func (index *QueryIndex) buildRelations(functions []semanticsnapshot.FunctionSummary) []QueryRelation {

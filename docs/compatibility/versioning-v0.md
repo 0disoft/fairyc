@@ -555,6 +555,12 @@ not change `.fymap` v1 or Context Pack v1, whose source/documentation bodies rem
 encoding, decoder, composite pack, CLI, documentation attachment rule, dependency origin, or
 generated-text lineage requires an independent compatibility decision.
 
+ADR 0196 implements those logical records and workspace-authored exact source excerpts as an
+internal Go boundary. Its validation and omission spellings are pre-release internal policy, not a
+wire schema or command promise. The implementation revalidates retained package/file/line-map
+identities and adds no cross-version acceptance, persistent text artifact, default budget, or
+public consumer contract.
+
 Dependency handling is relation-specific:
 
 | Condition | Atlas behavior |

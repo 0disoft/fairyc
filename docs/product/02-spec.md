@@ -772,15 +772,17 @@ Atlas exports deterministic, model-neutral facts such as symbols, calls, types, 
 borrows, errors, effects, allocations, unsafe and FFI reachability, source spans, and related tests.
 Unknown or incomplete edges remain explicit rather than being guessed.
 
-ADR 0195 accepts a separate `fairyc.attributed-text/v0` logical policy but enables no text output.
-`.fymap` v1 remains body-free and Context Pack v1 retains empty text arrays. A future text record is
-always `untrusted-text` and binds both SymbolId forms, exact package identity, canonical relative
+ADR 0195 accepts a separate `fairyc.attributed-text/v0` logical policy, and ADR 0196 implements its
+first internal source-excerpt gate without enabling encoded or command output. `.fymap` v1 remains
+body-free and Context Pack v1 retains empty text arrays. Every internal text record is
+`untrusted-text` and binds both SymbolId forms, exact package identity, canonical relative
 file, content and line-map identities, half-open byte span, origin, exact UTF-8 bytes, explicit
 fragment/count/aggregate budgets, omissions, and a domain-separated fragment checksum. Text is
 selected only from already validated retained bytes; file reopening, discovery, URL fetching,
 silent normalization, phrase filtering, fact replacement, completeness changes, and authority
-grants are forbidden. The current frontend has no declaration-documentation attachment contract, so
-the first implementation gate is workspace-authored exact source excerpts only.
+grants are forbidden. The implemented extractor admits one workspace-authored exact declaration
+source excerpt from revalidated retained bytes. The current frontend has no declaration-
+documentation attachment contract.
 
 Stage 0 Atlas now exposes `experimental atlas-pack overview` for one exact manifest package UID with
 mandatory record, selection-byte, and final-output-byte limits plus optional locked no-write mode.
@@ -819,8 +821,8 @@ plan are specified in `docs/atlas/semantic-snapshot-v0.md`, `docs/atlas/symbol-i
 `docs/atlas/context-pack-v1.md`; the experimental overview command is fixed by ADR 0190, the
 rewrite measurement boundary by ADR 0191, the internal exact symbol catalog by ADR 0192, and its
 experimental output command by ADR 0193. ADR 0194 fixes experimental show/around. Stable commands,
-map publication, and attributed-text implementation remain future work; ADR 0195 fixes the
-attributed-text policy and first implementation gate.
+map publication and attributed-text encoding/CLI remain future work; ADR 0195 fixes the attributed-
+text policy and ADR 0196 implements its internal exact retained-source gate.
 
 ## Explicit non-goals
 

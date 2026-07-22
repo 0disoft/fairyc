@@ -112,7 +112,7 @@ func canonicalFiles(files []File) ([]File, error) {
 		return strings.Compare(left.Path, right.Path)
 	})
 	for index, file := range ordered {
-		if err := validatePath(file.Path); err != nil {
+		if err := ValidatePath(file.Path); err != nil {
 			return nil, err
 		}
 		if index > 0 && ordered[index-1].Path == file.Path {
@@ -122,7 +122,9 @@ func canonicalFiles(files []File) ([]File, error) {
 	return ordered, nil
 }
 
-func validatePath(value string) error {
+// ValidatePath accepts the single canonical package-relative Fairy C source spelling shared by
+// package-source identities and downstream exact-source attribution.
+func ValidatePath(value string) error {
 	if value == "" || !utf8.ValidString(value) || strings.Contains(value, "\\") || strings.HasPrefix(value, "/") || strings.Contains(value, ":") {
 		return fmt.Errorf("invalid canonical package source path %q", value)
 	}

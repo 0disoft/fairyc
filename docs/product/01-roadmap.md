@@ -599,8 +599,8 @@ an exact package UID and explicit record/selection/output bounds; it writes cano
 and no map-store path. ADR 0191 now measures nine in-memory canonical rewrites of the complete fixed
 quickstart package set after planning, with source/record/encoded-byte denominators and exact byte
 identity. It makes no format, chunking, compression, incremental-update, or latency decision. No
-default store path, ordinary-command publication, dependency-map join, source excerpt,
-documentation import, or pack decoder exists yet.
+default store path, ordinary-command publication, dependency-map join, encoded source-excerpt
+output, documentation import, or pack decoder exists yet.
 ADR 0192 supplies the internal exact discovery prerequisite: full-SymbolId ordering, exact module
 and kind filters, explicit count/byte bounds, and full-ID stateless cursors all have real-workspace
 regressions without fuzzy name inference. ADR 0193 exposes those pages through bounded canonical
@@ -608,11 +608,11 @@ regressions without fuzzy name inference. ADR 0193 exposes those pages through b
 ADR 0194 now exposes exact visible/full SymbolId `atlas-pack show` and `around` with mandatory
 direction, relation, record, relation, depth, selection-byte, and output-byte policy. The commands
 preserve package-local join omissions and add no text, decoder, store, or safe-change claim.
-ADR 0195 now closes the attributed-text origin, exact-current identity, UTF-8/control, atomic
-fragment budget, integrity, omission, and non-authority policy without enabling text output. It
-preserves body-free `.fymap` v1 and empty-text Context Pack v1, rejects file reopening and phrase
-filtering as security boundaries, and restricts the first implementation gate to workspace-authored
-exact source excerpts from retained validated bytes.
+ADR 0195 closes the attributed-text origin, exact-current identity, UTF-8/control, atomic fragment
+budget, integrity, omission, and non-authority policy without enabling public text output. ADR 0196
+implements the first internal gate: one workspace-authored exact source excerpt from revalidated
+retained bytes, with no file reopen, encoder, command, or change to body-free `.fymap` v1 and empty-
+text Context Pack v1.
 
 - Preserve the implemented immutable `SemanticSnapshot` and per-package logical map plan.
 - Preserve the implemented bounded canonical `.fymap` codec and semantic revalidation boundary.
@@ -622,7 +622,7 @@ exact source excerpts from retained validated bytes.
 - Preserve the explicit overview/show/around experimental commands and keep map publication policy separate.
 - Preserve the raw whole-package rewrite harness; require representative failure before adding chunks or compression.
 - Preserve the implemented exact SymbolId catalog output as the discovery path for experimental `show` and `around`.
-- Implement and validate the accepted attributed-text v0 internal model and workspace-source excerpt gate before defining an encoding or command.
+- Preserve the implemented attributed-text v0 model and exact retained workspace-source excerpt gate; define a canonical encoding in a separate decision before any command.
 
 Exit gate: Atlas failure cannot change compilation; stale or incompatible maps fail closed; unknown graph edges remain explicit; text cannot grant authority.
 
