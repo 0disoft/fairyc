@@ -38,6 +38,14 @@ failure, toolchain/link/artifact failure, and package/manifest/lock failure. Suc
 the prior default artifact. An output-stream failure after replacement returns `4` but does not
 delete the successfully built artifact. No stable JSON mode exists.
 
+`fairyc run [--release] [--locked]` additionally stabilizes code `5` for a recognized language
+trap. A normal return writes exactly `result: <i32> (x86_64-windows-msvc,
+<development|release>, lock <updated|unchanged|verified>)` and returns compiler status `0`; the
+program result is not reused as compiler status. A trap writes exactly `trap: <category>` to stderr
+and emits no result line. Native program streams and arguments are not stable surfaces; captured
+program output is a code `6` execution failure. A compiler-output write failure after execution is
+code `4` and does not undo program effects. No temporary executable is retained.
+
 The implemented `fairyc explain`, `fairyc targets`, and `fairyc experimental` commands use
 provisional process codes only for prototype automation. They are not the stable exit-code taxonomy:
 
@@ -106,7 +114,9 @@ every other foreign or unproven standard-library symbol fails with code `2` befo
 resolution. An existing output is never replaced.
 `experimental run-target` writes
 `native result: <i32> (x86_64-windows-msvc, msvc <version>, <profile>)` on a zero-output ordinary
-execution. Reserved product-trap statuses write `trap: <category>` to stderr and return code `5`.
+execution outside the reserved product-trap status range. Reserved statuses write
+`trap: <category>` to stderr and return code `5`; this experimental command cannot distinguish a
+normal result in that range.
 Source and target-subset failures use codes `3` and `2`; toolchain, compile, link, PE/unwind
 inspection, unexpected program output, and execution failures use code `6`. It writes no artifact
 below the source root.
@@ -117,7 +127,8 @@ then writes `built workspace: <relative-path> (x86_64-windows-msvc, msvc <versio
 `unchanged`, or `verified`. Package/lock failures use code `7`; source diagnostics use code `3`;
 entry or backend capability failures use code `2`; toolchain, compile, link, PE/COFF/unwind,
 unexpected-output, and execution failures use code `6`; canonical traps use code `5`. Neither
-command emits partial success output.
+command emits partial success output. Workspace run consumes a compiler-private trap token, so all
+normal `i32` results remain distinct from code-5 traps.
 `experimental exec-target` instead writes the program's captured stdout and stderr bytes to their
 matching streams without a compiler receipt, then returns the program's full 32-bit Windows process
 status. A nonzero status in this command is a program result, not automatically a compiler failure.

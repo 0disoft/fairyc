@@ -59,6 +59,10 @@ func compileWindowsTarget(sources []string, targetID target.ID, profile cdriver.
 }
 
 func compileWindowsProgram(program mir.Program, entryName string, targetID target.ID, profile cdriver.Profile, stderr io.Writer) (cdriver.WindowsHostArtifact, int) {
+	return compileWindowsProgramWithRunReceipt(program, entryName, targetID, profile, false, stderr)
+}
+
+func compileWindowsProgramWithRunReceipt(program mir.Program, entryName string, targetID target.ID, profile cdriver.Profile, runReceipt bool, stderr io.Writer) (cdriver.WindowsHostArtifact, int) {
 	if targetID != target.X8664WindowsMSVC {
 		return cdriver.WindowsHostArtifact{}, invocationError(stderr, fmt.Sprintf("Windows target compilation requires %s", target.X8664WindowsMSVC))
 	}
@@ -73,7 +77,12 @@ func compileWindowsProgram(program mir.Program, entryName string, targetID targe
 	if err := validateWindowsTargetUnit(unit); err != nil {
 		return cdriver.WindowsHostArtifact{}, subsetCapabilityError(stderr, "Windows target build", err)
 	}
-	supportSource, err := windowsTargetSupportSource(unit.ForeignSymbols)
+	var supportSource string
+	if runReceipt {
+		supportSource, err = windowsTargetRunSupportSource(unit.ForeignSymbols)
+	} else {
+		supportSource, err = windowsTargetSupportSource(unit.ForeignSymbols)
+	}
 	if err != nil {
 		return cdriver.WindowsHostArtifact{}, subsetCapabilityError(stderr, "Windows target support linkage", err)
 	}
@@ -170,4 +179,12 @@ func windowsTargetSupportSource(foreignSymbols []string) (string, error) {
 		return "", err
 	}
 	return combineProductSupportSource(standardLibrarySource)
+}
+
+func windowsTargetRunSupportSource(foreignSymbols []string) (string, error) {
+	standardLibrarySource, err := cstdlib.WindowsMSVCSourceForSymbols(foreignSymbols)
+	if err != nil {
+		return "", err
+	}
+	return combineWindowsRunSupportSource(standardLibrarySource)
 }

@@ -123,12 +123,14 @@ lock, semantic, Flow, MIR, and diagnostic path. They accept no positional entry 
 the entry is the root package's exact build-local `main::main`, and it must be `fn() -> i32`.
 Both require the declared `x86_64-windows-msvc` target plus an explicit low or optimized profile.
 Build additionally requires a canonical no-overwrite `.exe` path below the current root's ignored
-`build/` directory. Run retains no artifact and rejects program output. Both use ordinary lock
+`build/` directory. Run retains no artifact, rejects program output, and consumes the same
+compiler-private trap token as stable workspace run so every normal `i32` remains distinct from a
+trap. Both use ordinary lock
 refresh unless `--locked` requires a valid exact no-write match. They perform no registry access,
 version solving, source download, environment expansion, WSL invocation, persistent cache write, or
 user linker-input discovery. The checked-in `examples/workspace_quickstart` proves one direct local
 dependency and native result 42; configurable entries, multiple binaries, program stream forwarding,
-and stable command names remain deferred.
+and multiple binaries remain deferred; stable check/build/run have separate closed spellings.
 
 `experimental check` uses the same repeated-`--source` closure syntax and limits, but its first file
 is a primary source rather than an executable entry. It requires no `main`, runs no interpreter or
@@ -270,8 +272,10 @@ or borrowed-view contracts.
 `experimental run-target` accepts the same explicit FY source closure but no output path, foreign companion input, linker option, ambient target,
 or compiler override. It shares `build-target` lowering, exact standard-library resolution, local
 MSVC discovery, object inspection, PE inspection, and unwind inspection before execution. The
-temporary executable must produce no stdout or stderr; ordinary results preserve signed `i32` exit
-bits, while reserved product-trap statuses map to canonical categories and exit code `5`. Temporary
+temporary executable must produce no stdout or stderr; ordinary results outside the reserved
+product-trap status range preserve signed `i32` exit bits, while that reserved range maps to
+canonical categories and exit code `5`. This experimental command cannot distinguish equal normal
+results from traps. Temporary
 files are removed by the driver. This is direct target execution, not target support, installation,
 distribution, or self-hosting.
 
@@ -345,20 +349,44 @@ Success is exactly `built: <path> (x86_64-windows-msvc, <development|release>, l
 stability does not promote the target's independent `emittable`, `conformant`, or `supported`
 status and does not select persistent-cache defaults.
 
+## Stable workspace run v1
+
+`fairyc run [--release] [--locked]` compiles and executes the current workspace through the same
+manifest, lock, root `main::main`, development/release profile, and closed local Windows pipeline as
+stable build. The complete PE and unwind image is inspected before execution, exists only in
+compiler-owned temporary storage, and is removed afterward. It does not create, replace, read, or
+execute the retained `build/<package-name>.exe` artifact.
+
+The command accepts no positional source, output, target, compiler, linker, profile value, cache,
+JSON, configuration, network, stdin, program argument, or program-stream delimiter. Captured program
+stdout or stderr is rejected because native program streams are not a Stage 0 stable contract.
+
+A normal return across the full `i32` range writes exactly `result: <i32> (x86_64-windows-msvc,
+<development|release>, lock <updated|unchanged|verified>)` and returns compiler status 0; the `i32`
+value is result data. A compiler-private, run-only trap token distinguishes reserved trap statuses
+from equal normal results and is consumed before user-visible output. A recognized language trap
+writes `trap: <category>` and returns 5. The
+command freezes codes 0, 2, 3, 4, 5, 6, and 7 without promoting target maturity, program I/O,
+argument transport, or persistent-cache defaults.
+
+Ordinary mode may update `fairy.lock` after a valid graph is loaded even when later compilation,
+execution, or a program trap fails. `--locked` performs no write. A compiler-output write failure
+after program execution returns code 4 but cannot undo program effects; no executable is retained.
+
 ## Stage 0 surface
 
 | Command | Purpose | Code generation |
 | --- | --- | --- |
 | `fairyc check [--locked]` | Check the current manifest-owned workspace through verified MIR | No |
 | `fairyc build [--release] [--locked]` | Build or replace the current root package's one Windows executable | Yes |
-| `fairyc run [target] -- [args...]` | Build and run a program while preserving the program exit status | Yes |
+| `fairyc run [--release] [--locked]` | Build and run the current workspace as one temporary Windows image | Yes |
 | `fairyc test [target]` | Build and run semantic test targets | Yes |
 | `fairyc emit <ast|hir|mir|c> [target]` | Emit a requested compiler representation for inspection | Requested form only |
 | `fairyc explain <diagnostic-code>` | Explain a stable diagnostic code | No |
 | `fairyc targets` | Report known target profiles, status, evidence, and unavailable requirements | No |
 
 Stable positional syntax for the remaining commands, alternate package/workspace selection, target
-triples beyond build v1's fixed local Windows path, feature flags, and configuration precedence
+triples beyond build/run v1's fixed local Windows path, program I/O and arguments, feature flags, and configuration precedence
 remain UNDECIDED. The implemented `experimental` spellings do not settle those decisions.
 
 ## General requirements

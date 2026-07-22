@@ -11,12 +11,31 @@ func TestScalarSourceBindsTrapBase(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if strings.Contains(source, trapBasePlaceholder) || !strings.Contains(source, "UINT32_C(192)") || !strings.Contains(source, "fy_runtime_trap") {
+	if strings.Contains(source, trapBasePlaceholder) || strings.Contains(source, trapReceiptIncludePlaceholder) ||
+		strings.Contains(source, trapReceiptWritePlaceholder) || strings.Contains(source, RunTrapReceiptPrefix) ||
+		!strings.Contains(source, "UINT32_C(192)") || !strings.Contains(source, "fy_runtime_trap") {
 		t.Fatalf("ScalarSource() = %q", source)
 	}
 	repeated, err := ScalarSource(192)
 	if err != nil || repeated != source || strings.Contains(source, "\r") || !strings.HasSuffix(source, "\n") {
 		t.Fatalf("repeated ScalarSource() = %q, %v", repeated, err)
+	}
+}
+
+func TestWindowsRunSourceAddsClosedTrapReceipt(t *testing.T) {
+	t.Parallel()
+	source, err := WindowsRunSource(128)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(source, trapBasePlaceholder) || strings.Contains(source, trapReceiptIncludePlaceholder) ||
+		strings.Contains(source, trapReceiptWritePlaceholder) || !strings.Contains(source, "#include <io.h>") ||
+		strings.Count(source, RunTrapReceiptPrefix) != 1 || !strings.Contains(source, "_write(2,") {
+		t.Fatalf("WindowsRunSource() = %q", source)
+	}
+	repeated, err := WindowsRunSource(128)
+	if err != nil || repeated != source || strings.Contains(source, "\r") || !strings.HasSuffix(source, "\n") {
+		t.Fatalf("repeated WindowsRunSource() = %q, %v", repeated, err)
 	}
 }
 

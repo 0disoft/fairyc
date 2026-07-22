@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/cdriver"
+	"github.com/0disoft/fairyc/internal/cruntime"
 )
 
 func TestParseBuildOptionsRequiresExplicitClosedChoices(t *testing.T) {
@@ -24,6 +25,23 @@ func TestParseBuildOptionsRequiresExplicitClosedChoices(t *testing.T) {
 	}
 	if options.source != "main.fy" || strings.Join(options.additionalSources, ",") != "helper.fy" || options.compilerName != "clang" || options.profile != cdriver.OptimizedProfile || options.output != "build/hello" {
 		t.Fatalf("options = %+v", options)
+	}
+}
+
+func TestProductRunSupportSourceAddsReceiptOnlyToRunRuntime(t *testing.T) {
+	t.Parallel()
+	ordinary, err := productSupportSource(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	run, err := combineWindowsRunSupportSource("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(ordinary, cruntime.RunTrapReceiptPrefix) ||
+		strings.Count(run, cruntime.RunTrapReceiptPrefix) != 1 ||
+		!strings.Contains(run, "_write(2,") {
+		t.Fatalf("ordinary/run support receipt boundary is not closed")
 	}
 }
 

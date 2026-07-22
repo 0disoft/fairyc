@@ -127,17 +127,20 @@ repeated `--source`; every foreign companion input, unproven standard-library co
 option, distribution promise, and self-hosting path remains closed.
 The sibling `experimental run-target` command uses the same declared target, emission profile,
 closed support linkage, MSVC resolution, and PE/unwind validation, but executes a temporary image
-instead of retaining it. It reports the exact signed `i32` result or the same canonical product-trap
-category and rejects program output. This is the first direct Windows target execution command; it
-is still experimental and does not promote target maturity.
+instead of retaining it. It reports signed `i32` results outside the runtime's reserved trap-status
+range or the corresponding canonical product-trap category and rejects program output. The
+reserved-result collision remains an experimental-command limitation; stable workspace run uses a
+separate run-only trap receipt and has no such collision. This direct target command remains
+experimental and does not promote target maturity.
 The package-aware `experimental build-workspace` and `run-workspace` commands now start from the
 current directory's strict `fairy.toml` instead of a positional source list. They resolve local
 members, exact direct imports, the compiler-bundled SDK, and `fairy.lock`, then select only the root
 package's qualified `main::main` for the same closed Windows target pipeline. The checked-in
 `examples/workspace_quickstart` imports a public function from one local dependency and returns 42
 under both MSVC profiles, a direct locked run, and a locked run through a separately built
-`fairyc.exe`. This is real package-aware native compilation without WSL, not Go interpretation,
-but the command spelling and single-entry convention remain experimental.
+`fairyc.exe`. This is real package-aware native compilation without WSL, not Go interpretation.
+Those target/profile/output-heavy spellings remain experimental; stable check/build/run reuse the
+same root-entry convention without promoting target maturity.
 `experimental exec-target` is the program-facing sibling: it forwards bounded stdout and stderr
 without a compiler banner and preserves the program's full Windows process status. The checked-in
 `examples/windows_output/main.fy` uses a support module containing the one exact unsafe Windows
@@ -320,13 +323,14 @@ exception, virtual-walks raiser, termination, and catcher frames, and requires o
 and independent/source-level/hosted ABI and unwind evidence exists. A host-independent PE parser
 now validates the host-smoke product, both declared-target profile products, both safe File and
 safe owned-text profile products, seven package-workspace build products including four measured
-experimental and three stable builds, two package-workspace run
+experimental and three stable builds, seven package-workspace run
 products, two direct run-target temporary products, two exec-target output products, and all
 eighteen raw or generated-Fairy Windows File, Buffer, owned-text, Arena, layout,
 ABI, struct-result, and unwind probe images as bounded
 AMD64 PE32+ console executables
-with aligned headers and sections and an executable `.text` entry point. That linked-image path does not inspect
-object symbols, relocations, or Windows unwind records. The same package separately parses every
+with aligned headers and sections, an executable `.text` entry point, and bounded Microsoft x64
+unwind records. That linked-image path does not inspect object symbols or relocations or establish
+hosted API compatibility, signing, installation, or distribution. The same package separately parses every
 intermediate MSVC `.obj` before its temporary build root is removed. It requires raw AMD64 COFF,
 bounded section and relocation ranges, readable executable `.text` or `.text$...` code, valid
 relocation symbol indexes, and a nonempty symbol table while admitting raw-storage-free `.bss`.
@@ -355,9 +359,10 @@ verified-MIR cache across sequential caller-triggered checks; it is not a daemon
 persistent cache, or stable editor protocol. Program commands use one entry plus repeated
 `--source`; semantic checking uses its explicit positional module set. The stable workspace commands
 are `fairyc check [--locked]` and the Windows/amd64-local
-`fairyc build [--release] [--locked]`. Stable run/test/emit commands, user drop-body execution, a
-complete runtime, safe standard library, package manager, supported target, release-stable CLI as a
-whole, and a stable language revision do not exist yet.
+`fairyc build [--release] [--locked]`, and the Windows/amd64-local
+`fairyc run [--release] [--locked]`. Stable test/emit commands, native program I/O and arguments,
+user drop-body execution, a complete runtime, safe standard library, package manager, supported
+target, release-stable CLI as a whole, and a stable language revision do not exist yet.
 
 ## Try the current prototype
 
@@ -386,6 +391,7 @@ go run ../../cmd/fairyc check --locked
 go run ../../cmd/fairyc build
 go run ../../cmd/fairyc build --release --locked
 & ./build/workspace-quickstart.exe
+go run ../../cmd/fairyc run --release --locked
 go run ../../cmd/fairyc experimental check-workspace
 go run ../../cmd/fairyc experimental run-workspace --locked --target x86_64-windows-msvc --profile optimized
 Pop-Location

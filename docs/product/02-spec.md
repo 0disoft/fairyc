@@ -267,10 +267,12 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - The Stage 0 compiler is implemented in Go.
 - The Windows smoke must also build `cmd/fairyc` as a standalone temporary `fairyc.exe`, execute its
   help surface, verify the checked-in workspace with stable `check --locked`, replace and execute its
-  default artifact with stable `build --release --locked`, and use that separate process to compile
+  default artifact with stable `build --release --locked`, execute the workspace through stable
+  `run --release --locked` without changing that artifact, and use that separate process to compile
   and run both the checked-in scalar quickstart through `run-target` and exact-output example through
-  `exec-target` for `x86_64-windows-msvc`. The latter must expose exact stdout and process status 42
-  to the parent.
+  `exec-target` for `x86_64-windows-msvc`. Stable run must report result 42 with compiler status 0;
+  the latter experimental output command must expose exact stdout and process status 42 to the
+  parent.
   This proves the bootstrap process boundary only: the compiler is still Go-built, the artifacts
   are removed, and no self-hosting, installation, distribution, or WSL contract follows.
 - The same smoke must build `examples/owned_text/main.fy` with its explicit safe support module at
@@ -443,6 +445,15 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   preserves the prior successful executable. No user output/target/compiler/linker/profile-value,
   cache, JSON, configuration, network, or stdin surface is admitted. Command stability does not
   change the target's independent maturity state.
+- Stable `fairyc run [--release] [--locked]` uses the same workspace, root entry, lock policy,
+  development/release profiles, and closed local Windows target pipeline. It executes an inspected
+  compiler-temporary image and retains no executable. Every normal `i32` return is printed as result
+  data while the compiler returns 0; a recognized language trap returns 5 even when its reserved OS
+  status equals a normal result. A compiler-private run-only trap token provides that separation and
+  is never exposed as program stderr. The command accepts no program streams,
+  arguments, stdin, `--` delimiter, retained artifact, target, toolchain, profile-value, cache, JSON,
+  configuration, or network surface. It never creates, replaces, reads, or executes the stable build
+  artifact. Command stability does not change target maturity.
 - Its fixture-only output hooks require explicit manifest bindings, capture bytes in memory under a
   shared limit, and never authorize source names, the CLI, or host streams.
 - The current C backend emits deterministic C11 only for verified scalar, inert-struct,
@@ -633,7 +644,12 @@ configurable entry, new backend capability, or persistent artifact format.
 ADR 0176 promotes only the ordinary Windows-local build workflow to
 `fairyc build [--release] [--locked]`. It derives one replace-on-success artifact path from the root
 package name and hides prototype target, profile-value, and output flags. Experimental workspace
-build/run remain available for explicit evidence and compatibility; stable run remains separate.
+build/run remain available for explicit evidence and compatibility.
+
+ADR 0177 independently promotes the ordinary temporary execution workflow to
+`fairyc run [--release] [--locked]`. It separates the program's `i32` result from compiler status,
+retains no image, preserves an existing stable-build artifact, and keeps program I/O, arguments,
+target choice, cache policy, and target support outside the stable contract.
 
 ADR 0146 rejects speculative persistent caching at this point. ADR 0149 supplies deterministic,
 bounded, verifier-checked bytes for a complete MIR program, but the workspace path still produces

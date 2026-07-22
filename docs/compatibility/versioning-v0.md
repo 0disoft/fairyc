@@ -376,6 +376,14 @@ replace-on-success rule, lock behavior, success receipt, and codes 0, 2, 3, 4, 6
 compatibility data. This does not stabilize the generated C, native ABI, MSVC version, distributable
 runtime, target maturity, or persistent-cache policy.
 
+ADR 0177 stabilizes `fairyc run [--release] [--locked]` over the same current-workspace and local
+Windows boundary. Its temporary-image rule, development/release meanings, normal-result receipt,
+trap receipt, and codes 0, 2, 3, 4, 5, 6, and 7 are CLI compatibility data. It does not stabilize
+the generated C, native ABI, MSVC version, target maturity, program streams or arguments, runtime
+distribution, or persistent-cache policy. Its compiler-private trap token is an implementation
+detail rather than program stderr or serialized compatibility data; the observable obligation is
+that all normal `i32` results remain distinct from traps.
+
 ADR 0159 adds the independent `fairyc.experimental.workspace-check-session/v0` NDJSON request and
 response schema. The schema versions this experimental machine boundary and rejects unknown or
 duplicate request fields, but it does not make the command spelling, numeric limits, process exit

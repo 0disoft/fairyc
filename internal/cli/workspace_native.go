@@ -9,6 +9,7 @@ import (
 
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/compiler"
+	"github.com/0disoft/fairyc/internal/cruntime"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/target"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
@@ -21,7 +22,7 @@ type workspaceTargetOptions struct {
 	locked   bool
 }
 
-type stableBuildOptions struct {
+type stableNativeOptions struct {
 	locked  bool
 	release bool
 }
@@ -32,8 +33,13 @@ type compiledWorkspace struct {
 	rootPackageName string
 }
 
+type workspaceCompilePolicy struct {
+	stableDiagnostics bool
+	runTrapReceipt    bool
+}
+
 func runStableBuild(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
-	options, err := parseStableBuildOptions(arguments)
+	options, err := parseStableNativeOptions("build", arguments)
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
@@ -47,7 +53,7 @@ func runStableBuild(arguments []string, sourceRoot string, stdout, stderr io.Wri
 		targetID: target.X8664WindowsMSVC,
 		profile:  profile,
 		locked:   options.locked,
-	}, true, stderr)
+	}, workspaceCompilePolicy{stableDiagnostics: true}, stderr)
 	if code != ExitSuccess {
 		return code
 	}
@@ -68,15 +74,61 @@ func runStableBuild(arguments []string, sourceRoot string, stdout, stderr io.Wri
 	return ExitSuccess
 }
 
-func parseStableBuildOptions(arguments []string) (stableBuildOptions, error) {
-	options := stableBuildOptions{}
+func runStableRun(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
+	options, err := parseStableNativeOptions("run", arguments)
+	if err != nil {
+		return invocationError(stderr, err.Error())
+	}
+	profile := cdriver.LowProfile
+	profileName := "development"
+	if options.release {
+		profile = cdriver.OptimizedProfile
+		profileName = "release"
+	}
+	compiled, code := compileWindowsWorkspace(sourceRoot, workspaceTargetOptions{
+		targetID: target.X8664WindowsMSVC,
+		profile:  profile,
+		locked:   options.locked,
+	}, workspaceCompilePolicy{stableDiagnostics: true, runTrapReceipt: true}, stderr)
+	if code != ExitSuccess {
+		return code
+	}
+	outcome, err := cdriver.ExecuteWindowsMSVCTarget(compiled.artifact)
+	if err != nil {
+		return buildFailure(stderr, err)
+	}
+	result, category, err := classifyWorkspaceRunOutcome(outcome)
+	if err != nil {
+		return buildFailure(stderr, err)
+	}
+	if category != "" {
+		if _, err := fmt.Fprintf(stderr, "trap: %s\n", category); err != nil {
+			return ExitInternalFailure
+		}
+		return ExitProgramTrap
+	}
+	if _, err := fmt.Fprintf(
+		stdout,
+		"result: %d (%s, %s, lock %s)\n",
+		result,
+		target.X8664WindowsMSVC,
+		profileName,
+		compiled.lockState,
+	); err != nil {
+		return outputError(stderr)
+	}
+	return ExitSuccess
+}
+
+func parseStableNativeOptions(command string, arguments []string) (stableNativeOptions, error) {
+	options := stableNativeOptions{}
 	seen := make(map[string]bool, 2)
 	for _, argument := range arguments {
 		if argument != "--locked" && argument != "--release" {
-			return stableBuildOptions{}, fmt.Errorf(`command "build" accepts only optional --release and --locked`)
+			return stableNativeOptions{}, fmt.Errorf(`command %q accepts only optional --release and --locked`, command)
 		}
 		if seen[argument] {
-			return stableBuildOptions{}, fmt.Errorf(`command "build" received %s more than once`, argument)
+			return stableNativeOptions{}, fmt.Errorf(`command %q received %s more than once`, command, argument)
 		}
 		seen[argument] = true
 		switch argument {
@@ -94,7 +146,7 @@ func runWorkspaceBuild(arguments []string, sourceRoot string, stdout, stderr io.
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	compiled, code := compileWindowsWorkspace(sourceRoot, options, false, stderr)
+	compiled, code := compileWindowsWorkspace(sourceRoot, options, workspaceCompilePolicy{}, stderr)
 	if code != ExitSuccess {
 		return code
 	}
@@ -120,7 +172,7 @@ func runWorkspaceTarget(arguments []string, sourceRoot string, stdout, stderr io
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	compiled, code := compileWindowsWorkspace(sourceRoot, options, false, stderr)
+	compiled, code := compileWindowsWorkspace(sourceRoot, options, workspaceCompilePolicy{runTrapReceipt: true}, stderr)
 	if code != ExitSuccess {
 		return code
 	}
@@ -128,10 +180,11 @@ func runWorkspaceTarget(arguments []string, sourceRoot string, stdout, stderr io
 	if err != nil {
 		return buildFailure(stderr, err)
 	}
-	if outcome.Stdout != "" || outcome.Stderr != "" {
-		return buildFailure(stderr, fmt.Errorf("Windows workspace executable produced unexpected output"))
+	result, category, err := classifyWorkspaceRunOutcome(outcome)
+	if err != nil {
+		return buildFailure(stderr, err)
 	}
-	if category, trapped := windowsHostTrapCategory(outcome.ExitCode); trapped {
+	if category != "" {
 		if _, err := fmt.Fprintf(stderr, "trap: %s\n", category); err != nil {
 			return ExitInternalFailure
 		}
@@ -140,7 +193,7 @@ func runWorkspaceTarget(arguments []string, sourceRoot string, stdout, stderr io
 	if _, err := fmt.Fprintf(
 		stdout,
 		"native workspace result: %d (%s, msvc %s, %s, lock %s)\n",
-		outcome.ExitCode,
+		result,
 		options.targetID,
 		compiled.artifact.Toolchain.Version,
 		compiled.artifact.Profile.Name,
@@ -214,10 +267,10 @@ func parseWorkspaceTargetOptions(command string, arguments []string, requireOutp
 	return options, nil
 }
 
-func compileWindowsWorkspace(sourceRoot string, options workspaceTargetOptions, stableDiagnostics bool, stderr io.Writer) (compiledWorkspace, int) {
+func compileWindowsWorkspace(sourceRoot string, options workspaceTargetOptions, policy workspaceCompilePolicy, stderr io.Writer) (compiledWorkspace, int) {
 	workspace, lockState, err := loadWorkspaceWithLock(sourceRoot, options.locked)
 	if err != nil {
-		if stableDiagnostics {
+		if policy.stableDiagnostics {
 			if code, handled := stableWorkspaceLoadFailure(stderr, err); handled {
 				return compiledWorkspace{}, code
 			}
@@ -259,7 +312,7 @@ func compileWindowsWorkspace(sourceRoot string, options workspaceTargetOptions, 
 	if !found || len(entry.Parameters) != 0 || entry.ResultType != hir.TypeI32 {
 		return compiledWorkspace{}, subsetCapabilityError(stderr, "Windows workspace C-emission", fmt.Errorf("root entry %s must have type fn() -> i32", entryName))
 	}
-	artifact, code := compileWindowsProgram(checked.MIR, entryName, options.targetID, options.profile, stderr)
+	artifact, code := compileWindowsProgramWithRunReceipt(checked.MIR, entryName, options.targetID, options.profile, policy.runTrapReceipt, stderr)
 	if code != ExitSuccess {
 		return compiledWorkspace{}, code
 	}
@@ -270,6 +323,25 @@ func compileWindowsWorkspace(sourceRoot string, options workspaceTargetOptions, 
 	return compiledWorkspace{
 		artifact: artifact, lockState: lockState, rootPackageName: rootPackage.Manifest.Package.Name,
 	}, ExitSuccess
+}
+
+func classifyWorkspaceRunOutcome(outcome cdriver.WindowsHostOutcome) (int32, string, error) {
+	if outcome.Stdout != "" {
+		return 0, "", fmt.Errorf("Windows workspace executable produced unexpected output")
+	}
+	if outcome.Stderr == "" {
+		return outcome.ExitCode, "", nil
+	}
+	category, trapped := windowsHostTrapCategory(outcome.ExitCode)
+	if !trapped {
+		return 0, "", fmt.Errorf("Windows workspace executable produced unexpected output")
+	}
+	trapCode := int(outcome.ExitCode) - productTrapExitBase
+	expected := fmt.Sprintf("%s%d", cruntime.RunTrapReceiptPrefix, trapCode)
+	if outcome.Stderr != expected {
+		return 0, "", fmt.Errorf("Windows workspace executable produced an invalid trap receipt")
+	}
+	return 0, category, nil
 }
 
 func workspaceEntryName(workspace workspaceloader.Workspace) (string, error) {

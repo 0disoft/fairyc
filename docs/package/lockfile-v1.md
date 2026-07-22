@@ -30,6 +30,7 @@ policy remains separate.
 
 The unstable `experimental check-workspace` supplied the first narrow policy: ordinary mode
 refreshes after a valid graph exists; `--locked` requires an exact match and never writes. ADR 0175
-adopts exactly that policy for stable `fairyc check [--locked]`, and ADR 0176 applies it unchanged to
-stable `fairyc build [--release] [--locked]`. ADR 0148's experimental `build-workspace` and
+adopts exactly that policy for stable `fairyc check [--locked]`; ADR 0176 and ADR 0177 apply it
+unchanged to stable `fairyc build [--release] [--locked]` and `fairyc run [--release] [--locked]`.
+ADR 0148's experimental `build-workspace` and
 `run-workspace` reuse the same lock behavior before package-aware Windows compilation.

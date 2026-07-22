@@ -93,10 +93,22 @@ func combineProductSupportSource(standardLibrarySource string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if standardLibrarySource == "" {
-		return runtimeSource, nil
+	return combineStandardLibraryAndRuntime(standardLibrarySource, runtimeSource), nil
+}
+
+func combineWindowsRunSupportSource(standardLibrarySource string) (string, error) {
+	runtimeSource, err := cruntime.WindowsRunSource(productTrapExitBase)
+	if err != nil {
+		return "", err
 	}
-	return standardLibrarySource + "\n" + runtimeSource, nil
+	return combineStandardLibraryAndRuntime(standardLibrarySource, runtimeSource), nil
+}
+
+func combineStandardLibraryAndRuntime(standardLibrarySource, runtimeSource string) string {
+	if standardLibrarySource == "" {
+		return runtimeSource
+	}
+	return standardLibrarySource + "\n" + runtimeSource
 }
 
 func parseBuildOptions(arguments []string) (buildOptions, error) {

@@ -44,10 +44,14 @@ implementation boundary, not a stable public runtime ABI or C header.
 
 `internal/cruntime/stage0_scalar.c` is the embedded provisional scalar implementation shared by the
 experimental build and native differential runner. It maps those codes to caller-bound reserved
-process statuses with `_Exit`, performs no cleanup, and emits no output. Product builds currently
-bind base `128`; differential fixtures bind base `192` so their small ordinary-return oracle stays
-disjoint. The complete product runtime, bounded source-location payload, runtime ABI version suffix,
-and distribution bundle remain unimplemented.
+process statuses with `_Exit` and performs no cleanup. Receipt-free product builds emit no runtime
+output and currently bind base `128`; differential fixtures bind base `192` so their small
+ordinary-return oracle stays disjoint. The Windows workspace-run rendering alone inserts one
+unbuffered compiler-private trap token before `_Exit`. The CLI consumes and validates that token so
+a normal `i32` sharing a reserved OS status is not mistaken for a trap. The token is not program
+stderr, a public runtime ABI, a C header, or serialized compatibility data. The complete product
+runtime, bounded source-location payload, runtime ABI version suffix, and distribution bundle remain
+unimplemented.
 
 `internal/cruntime/stage0_drop_trace.c` is a separate Linux-only conformance observer appended only
 for the native differential lane. It records one fixed little-endian `uint32_t` site ID to stderr

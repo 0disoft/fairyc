@@ -20,7 +20,8 @@ Only `check`, a minimal `build`, compiler inspection, and semantic test executio
 ## Current prototype
 
 The Go frontend currently exposes stable current-workspace commands
-`fairyc check [--locked]` and `fairyc build [--release] [--locked]`, the source-independent
+`fairyc check [--locked]`, `fairyc build [--release] [--locked]`, and
+`fairyc run [--release] [--locked]`, the source-independent
 `fairyc explain <diagnostic-code>` lookup, the host-independent `fairyc targets` maturity report,
 plus `fairyc experimental parse <file.fy>`,
 `fairyc experimental check-syntax <file.fy>`, and
@@ -196,8 +197,15 @@ the low-optimization development profile; `--release` selects ordinary optimizat
 It accepts no source, target, output, compiler, linker, profile-value, cache, JSON, configuration,
 network, or stdin input. A complete inspected image replaces the prior artifact only after successful
 compilation; a failed build leaves the previous executable intact. Build v1 currently requires
-Windows/amd64 and local x64 MSVC. That stable spelling does not promote target support. Stable run,
-test, and emit commands remain unimplemented.
+Windows/amd64 and local x64 MSVC. That stable spelling does not promote target support.
+
+`fairyc run [--release] [--locked]` uses the same workspace, entry, lock, profiles, and native
+pipeline, but executes an inspected compiler-temporary image and retains no executable. Every
+normal `i32` return is program data printed in one `result:` receipt while the compiler returns
+success; a run-only internal token keeps reserved normal results distinct from recognized language
+traps, which use the stable category and code 5. Program stdout/stderr, arguments,
+stdin, a `--` delimiter, retained build output, and cache policy are not admitted in v1. Stable test
+and emit commands remain unimplemented.
 
 `fairyc explain` accepts one exact uppercase `Edddd`, `Adddd`, or `Vdddd` code and writes its
 prototype meaning, category, and catalog identity without reading source, configuration, or the

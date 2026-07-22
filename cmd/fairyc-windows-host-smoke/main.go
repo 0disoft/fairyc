@@ -599,6 +599,11 @@ func run() error {
 		return fmt.Errorf("run-workspace returned code %d, stdout %q, stderr %q", workspaceRunCode, workspaceRunStdout.String(), workspaceRunStderr.String())
 	}
 	workspaceRunExecutions++
+	stableRunExecutions, err := runStableWorkspaceRunProof(root)
+	if err != nil {
+		return err
+	}
+	workspaceRunExecutions += stableRunExecutions
 	targetExecExecutions := 0
 	var targetExecStdout bytes.Buffer
 	var targetExecStderr bytes.Buffer
@@ -618,7 +623,7 @@ func run() error {
 	targetRunExecutions++
 	targetExecExecutions++
 	workspaceBuildExecutions++
-	workspaceRunExecutions++
+	workspaceRunExecutions += 2
 
 	for _, testCase := range []struct {
 		name         string
@@ -790,6 +795,81 @@ func runStableWorkspaceBuildProof(root string) (int, error) {
 		return 0, fmt.Errorf("stable build left staging files: %v", staging)
 	}
 	return 2, nil
+}
+
+func runStableWorkspaceRunProof(root string) (int, error) {
+	artifactPath := filepath.Join(root, filepath.FromSlash(stableWorkspaceOutputPath))
+	retainedArtifact, err := os.ReadFile(artifactPath)
+	if err != nil {
+		return 0, fmt.Errorf("read retained stable build before run proof: %w", err)
+	}
+	lockPath := filepath.Join(root, "fairy.lock")
+	originalLock, err := os.ReadFile(lockPath)
+	if err != nil {
+		return 0, fmt.Errorf("read lock before stable run proof: %w", err)
+	}
+
+	var developmentStdout bytes.Buffer
+	var developmentStderr bytes.Buffer
+	developmentCode := cli.Run([]string{"run"}, root, &developmentStdout, &developmentStderr)
+	if developmentCode != cli.ExitSuccess || developmentStderr.Len() != 0 ||
+		developmentStdout.String() != "result: 42 (x86_64-windows-msvc, development, lock unchanged)\n" {
+		return 0, fmt.Errorf("stable development run returned code %d, stdout %q, stderr %q", developmentCode, developmentStdout.String(), developmentStderr.String())
+	}
+
+	sourcePath := filepath.Join(root, filepath.FromSlash(workspaceMainPath))
+	originalSource, err := os.ReadFile(sourcePath)
+	if err != nil {
+		return 0, fmt.Errorf("read source before stable run trap proof: %w", err)
+	}
+	reservedResultSource := []byte("module main;\n\nfn i32 main() {\n    return 131;\n}\n")
+	if err := os.WriteFile(sourcePath, reservedResultSource, 0o600); err != nil {
+		return 0, fmt.Errorf("write stable run reserved-result source: %w", err)
+	}
+	var reservedStdout bytes.Buffer
+	var reservedStderr bytes.Buffer
+	reservedCode := cli.Run([]string{"run"}, root, &reservedStdout, &reservedStderr)
+	if reservedCode != cli.ExitSuccess || reservedStderr.Len() != 0 ||
+		reservedStdout.String() != "result: 131 (x86_64-windows-msvc, development, lock updated)\n" {
+		return 0, fmt.Errorf("stable reserved-result run returned code %d, stdout %q, stderr %q", reservedCode, reservedStdout.String(), reservedStderr.String())
+	}
+	trapSource := []byte("module main;\n\nfn i32 main() {\n    return 42 / 0;\n}\n")
+	if err := os.WriteFile(sourcePath, trapSource, 0o600); err != nil {
+		return 0, fmt.Errorf("write stable run trap source: %w", err)
+	}
+	var trapStdout bytes.Buffer
+	var trapStderr bytes.Buffer
+	trapCode := cli.Run([]string{"run"}, root, &trapStdout, &trapStderr)
+	restoreErr := os.WriteFile(sourcePath, originalSource, 0o600)
+	if restoreErr != nil {
+		return 0, fmt.Errorf("restore source after stable run trap proof: %w", restoreErr)
+	}
+	if trapCode != cli.ExitProgramTrap || trapStdout.Len() != 0 || trapStderr.String() != "trap: division-by-zero\n" {
+		return 0, fmt.Errorf("stable trap run returned code %d, stdout %q, stderr %q", trapCode, trapStdout.String(), trapStderr.String())
+	}
+
+	var releaseStdout bytes.Buffer
+	var releaseStderr bytes.Buffer
+	releaseCode := cli.Run([]string{"run", "--release"}, root, &releaseStdout, &releaseStderr)
+	if releaseCode != cli.ExitSuccess || releaseStderr.Len() != 0 ||
+		releaseStdout.String() != "result: 42 (x86_64-windows-msvc, release, lock updated)\n" {
+		return 0, fmt.Errorf("stable release run returned code %d, stdout %q, stderr %q", releaseCode, releaseStdout.String(), releaseStderr.String())
+	}
+	restoredLock, err := os.ReadFile(lockPath)
+	if err != nil {
+		return 0, fmt.Errorf("read restored lock after stable run proof: %w", err)
+	}
+	if !bytes.Equal(restoredLock, originalLock) {
+		return 0, fmt.Errorf("stable run proof did not restore the original canonical lock")
+	}
+	afterRun, err := os.ReadFile(artifactPath)
+	if err != nil {
+		return 0, fmt.Errorf("read retained stable build after run proof: %w", err)
+	}
+	if !bytes.Equal(afterRun, retainedArtifact) {
+		return 0, fmt.Errorf("stable run modified the retained build artifact")
+	}
+	return 4, nil
 }
 
 func measureWorkspaceProcessCache(root string, clockResolution int64) (buildmeasure.CacheReport, error) {
@@ -1070,6 +1150,7 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string, clockResolution in
 	if helpCode != cli.ExitSuccess || helpStderr != "" ||
 		!strings.Contains(helpStdout, "fairyc check [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc build [--release] [--locked]") ||
+		!strings.Contains(helpStdout, "fairyc run [--release] [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc experimental run-target") ||
 		!strings.Contains(helpStdout, "fairyc experimental exec-target") ||
 		!strings.Contains(helpStdout, "fairyc experimental check-workspace-session") ||
@@ -1116,6 +1197,25 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string, clockResolution in
 	}
 	if err := executeExpectResult(stableArtifactPath, 42); err != nil {
 		return 0, fmt.Errorf("execute standalone compiler stable build artifact: %w", err)
+	}
+	stableRunCode, stableRunStdout, stableRunStderr, err := runStandaloneCommand(
+		sourceRoot,
+		executablePath,
+		"run", "--release", "--locked",
+	)
+	if err != nil {
+		return 0, fmt.Errorf("execute standalone compiler stable workspace run: %w", err)
+	}
+	if stableRunCode != cli.ExitSuccess || stableRunStderr != "" ||
+		stableRunStdout != "result: 42 (x86_64-windows-msvc, release, lock verified)\n" {
+		return 0, fmt.Errorf("standalone compiler stable run returned code %d, stdout %q, stderr %q", stableRunCode, stableRunStdout, stableRunStderr)
+	}
+	stableArtifactAfterRun, err := os.ReadFile(stableArtifactPath)
+	if err != nil {
+		return 0, fmt.Errorf("read stable build artifact after standalone run: %w", err)
+	}
+	if !bytes.Equal(stableArtifactAfterRun, stableArtifact) {
+		return 0, fmt.Errorf("standalone stable run modified the retained build artifact")
 	}
 
 	runCode, runStdout, runStderr, err := runStandaloneCommand(

@@ -10,6 +10,7 @@ import (
 	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/compiler"
+	"github.com/0disoft/fairyc/internal/cruntime"
 	"github.com/0disoft/fairyc/internal/target"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
@@ -56,33 +57,63 @@ func TestParseWorkspaceTargetOptions(t *testing.T) {
 	}
 }
 
-func TestParseStableBuildOptions(t *testing.T) {
+func TestParseStableNativeOptions(t *testing.T) {
 	t.Parallel()
-	development, err := parseStableBuildOptions(nil)
-	if err != nil || development.locked || development.release {
-		t.Fatalf("development options = %+v, %v", development, err)
-	}
-	release, err := parseStableBuildOptions([]string{"--locked", "--release"})
-	if err != nil || !release.locked || !release.release {
-		t.Fatalf("release options = %+v, %v", release, err)
-	}
-	for _, arguments := range [][]string{
-		{"main.fy"},
-		{"--profile", "optimized"},
-		{"--release", "--release"},
-		{"--locked", "--locked"},
-	} {
-		if _, err := parseStableBuildOptions(arguments); err == nil {
-			t.Errorf("parseStableBuildOptions(%q) succeeded", arguments)
+	for _, command := range []string{"build", "run"} {
+		development, err := parseStableNativeOptions(command, nil)
+		if err != nil || development.locked || development.release {
+			t.Fatalf("%s development options = %+v, %v", command, development, err)
+		}
+		release, err := parseStableNativeOptions(command, []string{"--locked", "--release"})
+		if err != nil || !release.locked || !release.release {
+			t.Fatalf("%s release options = %+v, %v", command, release, err)
+		}
+		for _, arguments := range [][]string{
+			{"main.fy"},
+			{"--profile", "optimized"},
+			{"--release", "--release"},
+			{"--locked", "--locked"},
+		} {
+			if _, err := parseStableNativeOptions(command, arguments); err == nil {
+				t.Errorf("parseStableNativeOptions(%q, %q) succeeded", command, arguments)
+			}
 		}
 	}
 }
 
-func TestStableBuildPreservesWorkspaceFailureCategories(t *testing.T) {
+func TestClassifyWorkspaceRunOutcomeSeparatesNormalReservedResultFromTrap(t *testing.T) {
 	t.Parallel()
-	code, stdout, stderr := runForTest([]string{"build"}, t.TempDir())
-	if code != ExitPackageFailure || stdout != "" || !strings.Contains(stderr, "fairy.toml") {
-		t.Fatalf("missing stable workspace = (%d, %q, %q)", code, stdout, stderr)
+	normalResult := int32(productTrapExitBase + 3)
+	result, category, err := classifyWorkspaceRunOutcome(cdriver.WindowsHostOutcome{ExitCode: normalResult})
+	if err != nil || result != normalResult || category != "" {
+		t.Fatalf("normal reserved result = (%d, %q, %v)", result, category, err)
+	}
+	result, category, err = classifyWorkspaceRunOutcome(cdriver.WindowsHostOutcome{
+		ExitCode: normalResult,
+		Stderr:   cruntime.RunTrapReceiptPrefix + "3",
+	})
+	if err != nil || result != 0 || category != "division-by-zero" {
+		t.Fatalf("receipt trap = (%d, %q, %v)", result, category, err)
+	}
+	for _, outcome := range []cdriver.WindowsHostOutcome{
+		{ExitCode: normalResult, Stdout: "program output"},
+		{ExitCode: normalResult, Stderr: cruntime.RunTrapReceiptPrefix + "2"},
+		{ExitCode: 42, Stderr: cruntime.RunTrapReceiptPrefix + "3"},
+		{ExitCode: normalResult, Stderr: "forged\n"},
+	} {
+		if _, _, err := classifyWorkspaceRunOutcome(outcome); err == nil {
+			t.Errorf("classifyWorkspaceRunOutcome(%+v) succeeded", outcome)
+		}
+	}
+}
+
+func TestStableNativeCommandsPreserveWorkspaceFailureCategories(t *testing.T) {
+	t.Parallel()
+	for _, command := range []string{"build", "run"} {
+		code, stdout, stderr := runForTest([]string{command}, t.TempDir())
+		if code != ExitPackageFailure || stdout != "" || !strings.Contains(stderr, "fairy.toml") {
+			t.Fatalf("%s missing stable workspace = (%d, %q, %q)", command, code, stdout, stderr)
+		}
 	}
 
 	root := t.TempDir()
@@ -95,9 +126,11 @@ language = "fairyc-language/0"
 source = "src"
 `)
 	writeWorkspaceFile(t, root, "src/main.fy", "module main;\nfn i32 broken( { return 0; }\n")
-	code, stdout, stderr = runForTest([]string{"build"}, root)
-	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "E0007") {
-		t.Fatalf("stable build source diagnostics = (%d, %q, %q)", code, stdout, stderr)
+	for _, command := range []string{"build", "run"} {
+		code, stdout, stderr := runForTest([]string{command}, root)
+		if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "E0007") {
+			t.Fatalf("stable %s source diagnostics = (%d, %q, %q)", command, code, stdout, stderr)
+		}
 	}
 	if _, err := os.Stat(filepath.Join(root, "build")); !os.IsNotExist(err) {
 		t.Fatalf("build path after source failure = %v", err)
@@ -162,6 +195,19 @@ func TestStableWorkspaceBuildRejectsMissingRootEntryBeforeToolchain(t *testing.T
 	}
 	if _, err := os.Stat(filepath.Join(root, "build", "app.exe")); !os.IsNotExist(err) {
 		t.Fatalf("stable build artifact after missing entry = %v", err)
+	}
+}
+
+func TestStableWorkspaceRunRejectsMissingRootEntryBeforeToolchain(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeNativeWorkspace(t, root, false)
+	code, stdout, stderr := runForTest([]string{"run"}, root)
+	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "root entry") {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+	if matches, err := filepath.Glob(filepath.Join(root, "build", "*.exe")); err != nil || len(matches) != 0 {
+		t.Fatalf("stable run artifacts after missing entry = %v, %v", matches, err)
 	}
 }
 
