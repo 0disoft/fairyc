@@ -4,6 +4,7 @@
 - Decision: `docs/adr/0153-process-local-package-mir-artifacts.md`
 - Process codec decision: `docs/adr/0154-process-bound-package-artifact-codec.md`
 - Stable context decision: `docs/adr/0161-stable-type-context-artifact.md`
+- Stable package MIR decision: `docs/adr/0162-stable-package-mir-artifact.md`
 - Implementation source: `internal/packageartifact/artifact.go`, `internal/packageartifact/codec.go`, `internal/workspacecompiler/session.go`
 
 ## Scope
@@ -61,10 +62,11 @@ compatibility promise across compiler processes. The shared type context prevent
 storage savings. The reuse coordinator still performs workspace loading and semantic analysis on
 every request; only MIR lowering and its first whole-program verification can be skipped.
 
-The stable type-context v1 encoding now exists, but persistent package reuse still requires stable
-function-body encoding and checked rebinding, corruption-safe disk policy, cross-process
-coordination, and measured clean/warm evidence. A mismatch remains a safe miss followed by ordinary
-compilation.
+The separate stable package MIR v1 encoding now removes process-local package, function, foreign,
+local, block, type, span-prefix, and call identities. Independently decoded packages rebuild a fresh
+context, re-enter `mir.Verify`, execute, and re-encode identically. The existing cache still uses
+the process codec only; corruption-safe disk policy, cross-process coordination, and measured
+clean/warm evidence remain absent. A mismatch remains a safe miss followed by ordinary compilation.
 
 ## Bounded cache integration
 

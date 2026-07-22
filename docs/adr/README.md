@@ -170,6 +170,8 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0158-process-cache-edit-distributions.md`: 36 raw no-op and edit-class observations with isolated Sessions, clock-resolution censoring, and no speedup conclusion.
 - `0159-bounded-workspace-check-session.md`: foreground bounded NDJSON checks that reuse one caller-budgeted process-local MIR Session without a daemon or persistent cache.
 - `0160-editor-shaped-session-process-measurement.md`: one eight-step standalone compiler session with raw round-trip timings, Windows process-memory peaks, and no reference-budget or speedup claim.
+- `0161-stable-type-context-artifact.md`: package-number-independent type/foreign context, stable bodies, call bindings, and checked context reconstruction prerequisites.
+- `0162-stable-package-mir-artifact.md`: bounded canonical cross-process package MIR bytes with exact imports, fresh identity rebinding, verifier re-entry, execution, and byte-identical re-encoding.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 
