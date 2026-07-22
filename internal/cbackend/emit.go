@@ -1381,7 +1381,9 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 				case "==", "!=", "<", "<=", ">", ">=":
 					e.features["scalar-comparison"] = struct{}{}
 				case "+", "-", "*":
-					e.needsBitcast = true
+					if operation.OwnerType == hir.TypeI32 {
+						e.needsBitcast = true
+					}
 				case "&", "^", "|":
 					e.features["scalar-bitwise"] = struct{}{}
 					if operation.OwnerType == hir.TypeI32 {

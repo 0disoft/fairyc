@@ -705,6 +705,28 @@ fn i32 main() {
 	}
 }
 
+func TestEmitCheckedUnsignedArithmeticOmitsSignedBitcastHelper(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn i32 main() {
+    let u8 byte = 6;
+    let u8 byte_product = byte * 7;
+    let u32 word = 50;
+    let u32 word_difference = word - 8;
+    let usize size = 41;
+    let usize size_sum = size + 1;
+    return if (byte_product == 42 && word_difference == 42 && size_sum == 42) { 42 } else { 1 };
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	if strings.Contains(unit.Source, "fy_bits_to_i32") || strings.Contains(unit.Source, "#include <string.h>") {
+		t.Fatalf("unsigned arithmetic C unit includes signed bitcast machinery:\n%s", unit.Source)
+	}
+}
+
 func TestEmitCheckedLeftShiftWithoutSignedCUndefinedBehavior(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

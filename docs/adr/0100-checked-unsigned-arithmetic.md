@@ -44,6 +44,9 @@ backend behavior drift at exactly the integer boundary where optimization bugs a
 - Unsigned division and remainder are admitted later by ADR 0101, and matching-type bitwise
   operations plus checked right shift by ADR 0102. Mixed arithmetic and wider integer families
   remain deliberate future slices.
+- The emitter records signed bitcast-helper demand only for `i32` binary arithmetic. Unsigned-only
+  units therefore do not emit unused `fy_bits_to_i32` or `<string.h>` machinery under the native
+  `-Werror` lane.
 
 ## References
 
