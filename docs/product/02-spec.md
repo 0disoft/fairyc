@@ -604,9 +604,10 @@ two-package quickstart returns 42 under both build profiles, direct temporary ex
 separately built compiler process. The commands add no registry, solver, source download,
 configurable entry, new backend capability, or persistent artifact format.
 
-ADR 0146 rejects speculative persistent caching at this point. The workspace path produces no
-compiler-owned serialized HIR/MIR/object artifact and has no configured comparable cold/warm
-measurement, so disk format, defaults, and cleanup policy remain `UNDECIDED`.
+ADR 0146 rejects speculative persistent caching at this point. ADR 0149 supplies deterministic,
+bounded, verifier-checked bytes for a complete MIR program, but the workspace path still produces
+no independently reusable per-package MIR/object artifact and has no configured comparable
+cold/warm measurement. Disk format, defaults, and cleanup policy therefore remain `UNDECIDED`.
 
 The resolved-graph paragraph's separation from public manifest syntax describes fixture ownership,
 not current product status: ADR 0143 owns syntax, ADR 0144 owns local workspace I/O, ADR 0145 owns

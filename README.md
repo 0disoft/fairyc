@@ -494,6 +494,7 @@ or arbitrary link-input option.
 - Public-interface hash v1 extraction, fixtures, and runner: `internal/moduleinterface/`, `spec/fixtures/module-interface/manifest-v1.json`, `internal/moduleinterfacefixture/`
 - Package-source digest v1 encoding, fixtures, and runner: `internal/packagecontent/`, `spec/fixtures/package-source/manifest-v1.json`, `internal/packagecontentfixture/`
 - Whole-package cache-key v1, bounded memory store, fixtures, and runner: `internal/packagecache/`, `spec/fixtures/package-cache/manifest-v1.json`, `internal/packagecachefixture/`
+- Exact-version verified whole-program MIR artifact codec: `internal/mircodec/`
 - Strict local-exact `fairy.toml` v1 parser, fixtures, and runner: `internal/projectmanifest/`, `spec/fixtures/project-manifest/manifest-v1.json`, `internal/projectmanifestfixture/`
 - Filesystem-safe local workspace loader, fixtures, and runner: `internal/workspaceloader/`, `spec/fixtures/workspace-loader/manifest-v1.json`, `internal/workspaceloaderfixture/`
 - Canonical generated `fairy.lock` v1 with strict parsing, stale comparison, and atomic replacement: `internal/lockfile/`

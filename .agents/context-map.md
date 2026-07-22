@@ -63,6 +63,7 @@
 - Package-source digest and runner route: internal/packagecontent/, internal/packagecontentfixture/
 - Whole-package cache-key v1 fixture route: spec/fixtures/package-cache/manifest-v1.json
 - Whole-package cache key, store, and runner route: internal/packagecache/, internal/packagecachefixture/
+- Verified whole-program MIR artifact codec route: internal/mircodec/, docs/adr/0149-verified-mir-artifact-codec.md
 - Human project-manifest v1 route: internal/projectmanifest/, internal/projectmanifestfixture/, spec/fixtures/project-manifest/manifest-v1.json
 - Local workspace loader v1 route: internal/workspaceloader/, internal/workspaceloaderfixture/, spec/fixtures/workspace-loader/manifest-v1.json
 - Compiler-bundled Stage 0 standard-library route: internal/sdkstdlib/, docs/adr/0147-compiler-bundled-stage0-standard-library.md

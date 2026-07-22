@@ -423,8 +423,9 @@ spelling still remains.
 
 - Wire whole-package reuse into package compilation, then adopt persistent content-addressed storage
   and default limits only from measured clean/warm workload evidence.
-- ADR 0146 explicitly defers persistent storage until compiler-owned artifact bytes, package-aware
-  Windows builds, and configured cold/warm measurements satisfy that evidence gate.
+- ADR 0146 explicitly defers persistent storage. Package-aware Windows builds and the bounded
+  whole-program MIR codec now exist; independently reusable package artifacts plus configured
+  cold/warm measurements still gate cache integration and disk policy.
 - Stabilize the minimal `fairyc check`, `build`, `run`, `test`, `emit`, `explain`, and `targets` contracts.
 - Move to function-level reuse only when measured package rebuild or storage evidence justifies the complexity.
 

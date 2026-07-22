@@ -58,7 +58,8 @@ compiler builds, default limits, command-line inspection, and remote transport r
 Those features must preserve the v1 miss/fallback behavior but require measured policy and a separate
 storage-format decision.
 
-ADR 0146 records the current evidence result: persistence is deliberately deferred. No real
-typed-HIR, MIR, or object byte codec exists, no package-aware object is produced, and no configured
-cold/warm measurement intent owns comparable evidence. Fixture payload sizes cannot justify a disk
-format or default budget.
+ADR 0146 records the current evidence result: persistence is deliberately deferred. ADR 0149 adds a
+real exact-version codec for one verified whole-program MIR value, but that payload is not yet a
+package-granular cache artifact and no package-aware object is produced. No configured cold/warm
+measurement intent owns comparable evidence. Fixture or codec payload sizes alone cannot justify a
+disk format or default budget.

@@ -158,6 +158,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0146-defer-persistent-package-cache.md`: evidence gate that prevents speculative disk cache formats and unmeasured default limits.
 - `0147-compiler-bundled-stage0-standard-library.md`: exact embedded SDK source identity, conditional `std::*` injection, and lockfile origin validation.
 - `0148-package-aware-windows-build-run.md`: local-exact workspace entry selection, locked Windows MSVC builds, and native package execution.
+- `0149-verified-mir-artifact-codec.md`: bounded exact-version whole-program MIR encoding with canonical decode and verifier re-entry.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 
