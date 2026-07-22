@@ -505,6 +505,12 @@ hit or safe miss, never accepted partial cache truth. No ordinary-command cache,
 path or quota, universal storage-retention guarantee, reference-machine comparison, or speed claim
 exists yet.
 
+ADR 0170 adds a nine-process edit staircase over one six-entry cache. It proves bounded eviction,
+conflict quarantine, and final healed reuse, but also exposes extra generations caused by duplicating
+the complete workspace type context in every package artifact. Package-scoped stable contexts or an
+equivalent exact key-to-bytes design now block ordinary-command cache defaults; last-writer-wins is
+not an acceptable substitute.
+
 - Repeat the bounded session on a declared reference machine with controlled distributions, private
   or live-heap evidence, and an accepted noise policy before selecting defaults or claiming
   developer-loop speedup. The current local run has process peaks, an editor-shaped workload, and

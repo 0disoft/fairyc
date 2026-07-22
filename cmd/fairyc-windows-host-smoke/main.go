@@ -700,7 +700,7 @@ func run() error {
 		return err
 	}
 	inspectedPEImages := 1 + targetBuildExecutions + workspaceBuildExecutions + windowsFileSourceExecutions + ownedTextSourceExecutions + targetRunExecutions + workspaceRunExecutions + targetExecExecutions + windowsFileExecutions + bufferProbeExecutions + ownedTextProbeExecutions + arenaProbeExecutions + layoutExecutions + abiExecutions + structResultExecutions + unwindExecutions
-	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds, %d package-workspace builds, %d package-workspace runs, %d source-level safe File lifecycle builds, %d source-level safe owned-text lifecycle builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls, checked reads and mutable indexed stores, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart, output, locked workspace execution, nine paired cold/warm persistent-cache process measurements, and an eight-request editor-shaped workspace session with Windows process-memory peaks, 40 run-host outcomes covered fixed arrays, byte-view iteration and slicing, checked indexed stores, assertions in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, Buffer initialization, reserve, self-overlap append, and zeroed-resize allocation rollback passed %d separate-translation-unit MSVC executions, owned-text opaque-storage failure preservation, forced allocation rollback, and repeated drop passed %d separate-translation-unit MSVC executions, Arena zeroing, two-stage allocation rollback, stale Region rejection, and active-drop preservation passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, generated-Fairy small and large struct results passed %d separate-translation-unit MSVC executions across C11 and C17 consumer modes, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, workspaceBuildExecutions, workspaceRunExecutions, windowsFileSourceExecutions, ownedTextSourceExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, windowsFileExecutions, bufferProbeExecutions, ownedTextProbeExecutions, arenaProbeExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, structResultExecutions, unwindCases, unwindExecutions, inspectedPEImages, toolchain.Version)
+	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds, %d package-workspace builds, %d package-workspace runs, %d source-level safe File lifecycle builds, %d source-level safe owned-text lifecycle builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls, checked reads and mutable indexed stores, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart, output, locked workspace execution, nine paired cold/warm persistent-cache process measurements, one nine-process bounded persistent-cache growth staircase, and an eight-request editor-shaped workspace session with Windows process-memory peaks, 40 run-host outcomes covered fixed arrays, byte-view iteration and slicing, checked indexed stores, assertions in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, Buffer initialization, reserve, self-overlap append, and zeroed-resize allocation rollback passed %d separate-translation-unit MSVC executions, owned-text opaque-storage failure preservation, forced allocation rollback, and repeated drop passed %d separate-translation-unit MSVC executions, Arena zeroing, two-stage allocation rollback, stale Region rejection, and active-drop preservation passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, generated-Fairy small and large struct results passed %d separate-translation-unit MSVC executions across C11 and C17 consumer modes, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, workspaceBuildExecutions, workspaceRunExecutions, windowsFileSourceExecutions, ownedTextSourceExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, windowsFileExecutions, bufferProbeExecutions, ownedTextProbeExecutions, arenaProbeExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, structResultExecutions, unwindCases, unwindExecutions, inspectedPEImages, toolchain.Version)
 	return nil
 }
 
@@ -1037,6 +1037,15 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string, clockResolution in
 		return 0, fmt.Errorf("encode standalone persistent-cache process measurement: %w", err)
 	}
 	fmt.Printf("Fairy C persistent-cache process measurement: %s\n", persistentCacheMeasurementJSON)
+	persistentCacheGrowth, err := measureStandaloneWorkspaceCacheGrowth(executablePath, sourceRoot)
+	if err != nil {
+		return 0, err
+	}
+	persistentCacheGrowthJSON, err := buildmeasure.MarshalPersistentCacheGrowth(persistentCacheGrowth)
+	if err != nil {
+		return 0, fmt.Errorf("encode standalone persistent-cache growth measurement: %w", err)
+	}
+	fmt.Printf("Fairy C persistent-cache growth measurement: %s\n", persistentCacheGrowthJSON)
 
 	sessionMeasurement, err := measureStandaloneWorkspaceSession(executablePath, sourceRoot)
 	if err != nil {
@@ -1171,6 +1180,138 @@ func measureStandaloneWorkspaceCache(executablePath, sourceRoot string, clockRes
 		return buildmeasure.PersistentCacheProcessReport{}, err
 	}
 	return measurement, nil
+}
+
+func measureStandaloneWorkspaceCacheGrowth(executablePath, sourceRoot string) (buildmeasure.PersistentCacheGrowthReport, error) {
+	workspaceRoot, err := copyWorkspaceMeasurementFixture(sourceRoot)
+	if err != nil {
+		return buildmeasure.PersistentCacheGrowthReport{}, fmt.Errorf("copy standalone persistent-cache growth fixture: %w", err)
+	}
+	defer os.RemoveAll(workspaceRoot)
+	prepareCode, prepareStdout, prepareStderr, err := runStandaloneCommand(workspaceRoot, executablePath, "experimental", "check-workspace")
+	if err != nil {
+		return buildmeasure.PersistentCacheGrowthReport{}, fmt.Errorf("prepare standalone persistent-cache growth lockfile: %w", err)
+	}
+	if prepareCode != cli.ExitSuccess || prepareStderr != "" {
+		return buildmeasure.PersistentCacheGrowthReport{}, fmt.Errorf("prepare standalone persistent-cache growth lockfile returned code %d, stdout %q, stderr %q", prepareCode, prepareStdout, prepareStderr)
+	}
+	baseRoot, err := os.ReadFile(filepath.Join(workspaceRoot, filepath.FromSlash(workspaceMainPath)))
+	if err != nil {
+		return buildmeasure.PersistentCacheGrowthReport{}, fmt.Errorf("read persistent-cache growth root source: %w", err)
+	}
+	baseDependency, err := os.ReadFile(filepath.Join(workspaceRoot, filepath.FromSlash(workspaceMemberSourcePath)))
+	if err != nil {
+		return buildmeasure.PersistentCacheGrowthReport{}, fmt.Errorf("read persistent-cache growth dependency source: %w", err)
+	}
+	report := buildmeasure.PersistentCacheGrowthReport{
+		Schema: buildmeasure.PersistentCacheGrowthSchema, Workload: "workspace_quickstart-retention-sequence",
+		Scope:               "retained-disk-state-after-completed-process;source-mutation-excluded",
+		CacheImplementation: "bounded-immutable-disk-package-mir-v1", Decision: "bounded-growth-control-only-no-default-policy",
+		Setup: "one-cache;separate-fairyc-process-per-sample;mutation-before-process", RetryPolicy: "none;preserve-first-observation",
+		Environment: buildmeasure.CacheEnvironment{OS: runtime.GOOS, Arch: runtime.GOARCH, Target: "x86_64-windows-msvc"},
+		Policy: buildmeasure.PersistentCachePolicy{
+			MaxEntries: 6, MaxBytes: 67108864, MaxRecordBytes: 8388608,
+			MaxArtifactBytes: 4194304, TempMaxAgeSecs: 60,
+		},
+	}
+	conditions := []string{
+		buildmeasure.PersistentGrowthBaselineCold,
+		buildmeasure.PersistentGrowthPrivateRootOne,
+		buildmeasure.PersistentGrowthPrivateRootTwo,
+		buildmeasure.PersistentGrowthPrivateDependency,
+		buildmeasure.PersistentGrowthPublicDependency,
+		buildmeasure.PersistentGrowthPublicNoOp,
+		buildmeasure.PersistentGrowthPrivateRootPublic,
+		buildmeasure.PersistentGrowthConflictRecoveryNoOp,
+		buildmeasure.PersistentGrowthHealedNoOp,
+	}
+	arguments := []string{
+		"experimental", "check-workspace-cache",
+		"--target", "x86_64-windows-msvc",
+		"--cache-dir", "build/persistent-cache-growth",
+		"--cache-max-entries", "6",
+		"--cache-max-bytes", "67108864",
+		"--cache-max-record-bytes", "8388608",
+		"--cache-max-artifact-bytes", "4194304",
+		"--cache-temp-max-age-seconds", "60",
+	}
+	previousEntries := 0
+	previousBytes := uint64(0)
+	for index, condition := range conditions {
+		if err := writePersistentCacheGrowthSources(workspaceRoot, condition, baseRoot, baseDependency); err != nil {
+			return buildmeasure.PersistentCacheGrowthReport{}, err
+		}
+		code, stdout, stderr, runErr := runStandaloneCommand(workspaceRoot, executablePath, arguments...)
+		if runErr != nil {
+			return buildmeasure.PersistentCacheGrowthReport{}, fmt.Errorf("execute standalone persistent-cache growth sample %d %s: %w", index+1, condition, runErr)
+		}
+		if code != cli.ExitSuccess || stderr != "" {
+			return buildmeasure.PersistentCacheGrowthReport{}, fmt.Errorf("standalone persistent-cache growth sample %d %s returned code %d, stdout %q, stderr %q", index+1, condition, code, stdout, stderr)
+		}
+		var observation standaloneWorkspaceCacheReport
+		if err := json.Unmarshal([]byte(stdout), &observation); err != nil {
+			return buildmeasure.PersistentCacheGrowthReport{}, fmt.Errorf("decode standalone persistent-cache growth sample %d %s: %w", index+1, condition, err)
+		}
+		if observation.SchemaVersion != "fairyc.experimental.workspace-cache-check/v0" || observation.Cache.Storage != workspacecompiler.StorageDisk {
+			return buildmeasure.PersistentCacheGrowthReport{}, fmt.Errorf("standalone persistent-cache growth sample %d %s is incompatible: %+v", index+1, condition, observation)
+		}
+		if report.CompilerBuild == "" {
+			report.CompilerBuild = observation.CompilerBuild
+		} else if report.CompilerBuild != observation.CompilerBuild {
+			return buildmeasure.PersistentCacheGrowthReport{}, fmt.Errorf("standalone persistent-cache compiler identity changed within growth measurement")
+		}
+		byteDelta := int64(observation.Cache.RetainedBytes) - int64(previousBytes)
+		report.Samples = append(report.Samples, buildmeasure.PersistentCacheGrowthSample{
+			Sequence: index + 1, Condition: condition,
+			Outcome: observation.Cache.Outcome, Packages: observation.Cache.Packages,
+			Hits: observation.Cache.Hits, Misses: observation.Cache.Misses, Rejected: observation.Cache.Rejected,
+			Stored: observation.Cache.Stored, StoreSkipped: observation.Cache.StoreSkipped, StoreFailed: observation.Cache.StoreFailed,
+			Lowered: observation.Cache.Lowered, ReassemblyFallback: observation.Cache.ReassemblyFallback,
+			MIRFunctions: observation.MIRFunctions, RetainedEntries: observation.Cache.RetainedEntries,
+			RetainedBytes:      observation.Cache.RetainedBytes,
+			RetainedEntryDelta: observation.Cache.RetainedEntries - previousEntries, RetainedByteDelta: byteDelta,
+			RecordHits: observation.Cache.RecordHits, RecordMisses: observation.Cache.RecordMisses,
+			RecordRejected: observation.Cache.RecordRejected, Evictions: observation.Cache.Evictions,
+			VerifiedHits: observation.Cache.VerifiedHits,
+		})
+		previousEntries = observation.Cache.RetainedEntries
+		previousBytes = observation.Cache.RetainedBytes
+	}
+	if err := buildmeasure.ValidatePersistentCacheGrowth(report); err != nil {
+		return buildmeasure.PersistentCacheGrowthReport{}, err
+	}
+	return report, nil
+}
+
+func writePersistentCacheGrowthSources(root, condition string, baseRoot, baseDependency []byte) error {
+	rootSource := string(baseRoot)
+	dependencySource := string(baseDependency)
+	switch condition {
+	case buildmeasure.PersistentGrowthBaselineCold:
+	case buildmeasure.PersistentGrowthPrivateRootOne:
+		rootSource = strings.Replace(rootSource, "\nfn i32 main()", "\nstruct retention_root_v1 { i32 value; }\n\nfn i32 main()", 1)
+	case buildmeasure.PersistentGrowthPrivateRootTwo:
+		rootSource = strings.Replace(rootSource, "\nfn i32 main()", "\nstruct retention_root_v2 { i32 first; i32 second; }\n\nfn i32 main()", 1)
+	case buildmeasure.PersistentGrowthPrivateDependency:
+		dependencySource = strings.Replace(dependencySource, "\npub fn i32 value()", "\nstruct retention_dependency_v1 { i32 value; }\n\npub fn i32 value()", 1)
+	case buildmeasure.PersistentGrowthPublicDependency, buildmeasure.PersistentGrowthPublicNoOp:
+		dependencySource += "\npub fn i32 retention_public_v1() {\n    return 7;\n}\n"
+	case buildmeasure.PersistentGrowthPrivateRootPublic, buildmeasure.PersistentGrowthConflictRecoveryNoOp, buildmeasure.PersistentGrowthHealedNoOp:
+		rootSource = strings.Replace(rootSource, "\nfn i32 main()", "\nstruct retention_root_public_v1 { i32 value; }\n\nfn i32 main()", 1)
+		dependencySource += "\npub fn i32 retention_public_v1() {\n    return 7;\n}\n"
+	default:
+		return fmt.Errorf("unknown persistent-cache growth condition %q", condition)
+	}
+	if !strings.Contains(rootSource, "fn i32 main()") || !strings.Contains(dependencySource, "pub fn i32 value()") {
+		return fmt.Errorf("persistent-cache growth condition %q did not preserve required entry functions", condition)
+	}
+	if err := os.WriteFile(filepath.Join(root, filepath.FromSlash(workspaceMainPath)), []byte(rootSource), 0o600); err != nil {
+		return fmt.Errorf("write persistent-cache growth root source: %w", err)
+	}
+	if err := os.WriteFile(filepath.Join(root, filepath.FromSlash(workspaceMemberSourcePath)), []byte(dependencySource), 0o600); err != nil {
+		return fmt.Errorf("write persistent-cache growth dependency source: %w", err)
+	}
+	return nil
 }
 
 func measureStandaloneWorkspaceSession(executablePath, sourceRoot string) (buildmeasure.SessionProcessReport, error) {

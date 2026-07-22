@@ -3,7 +3,7 @@
 - Status: Draft
 - Owner: UNASSIGNED
 - Product contract: `docs/product/02-spec.md`
-- Evidence status: Configured local Windows no-cache calibration, two-sample process-cache control-flow receipt, 36-sample edit-class raw distributions, one eight-step standalone session with process-memory peaks, and nine paired cold/warm persistent-cache process observations exist; no reference machine, cache speedup decision, or regression threshold exists
+- Evidence status: Configured local Windows no-cache calibration, two-sample process-cache control-flow receipt, 36-sample edit-class raw distributions, one eight-step standalone session with process-memory peaks, nine paired cold/warm persistent-cache process observations, and one nine-process bounded retention staircase exist; no reference machine, cache speedup decision, default cache policy, or regression threshold exists
 
 Stage 0 has no numeric performance, storage, or Atlas budget. Proposed millisecond, percentage, MiB, GiB, map-size, and context-size thresholds are removed until a maintained harness produces a baseline. This document fixes what must be measured and how a later budget becomes enforceable.
 
@@ -129,6 +129,11 @@ The executable v1 memory store requires caller-supplied positive entry and byte 
 LRU collection under both. It establishes bounded behavior but does not choose product defaults.
 Persistent cache limits, age policy, and high/low-retention quotas remain UNDECIDED until the
 benchmark protocol above produces representative growth and reuse evidence.
+
+ADR 0170 adds one control-workload retention staircase under an explicit six-entry harness ceiling.
+It proves bounded eviction, conflict quarantine, and healed reuse, while also proving that the
+current workspace-wide duplicated stable context creates extra generations after private edits.
+That result is blocker evidence, not representative growth or a product-default justification.
 
 ## Review blockers
 
