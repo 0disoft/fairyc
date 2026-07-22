@@ -20,7 +20,7 @@ one cold and one warm sample.
 
 ## Decision
 
-1. Add `fairyc.process-cache-measurement/v0` alongside the existing no-cache schema rather than
+1. Add `fairyc.process-cache-measurement/v1` alongside the existing no-cache schema rather than
    changing the meaning of `fairyc.build-measurement/v0`.
 2. The scope is exactly `semantic-through-verified-mir`. Workspace filesystem loading, lockfile
    handling, C emission, native compilation, linking, PE inspection, and execution time are outside
@@ -28,13 +28,16 @@ one cold and one warm sample.
 3. One configured Windows smoke process loads the checked-in two-package quickstart, creates one
    `workspacecompiler.Session`, and records exactly two raw observations: `cold-fallback` followed
    by `warm-all-hit`.
-4. Each sample records monotonic nanoseconds, cache outcome, package hit/miss/reject/store counts,
+4. The cache receipt and edit-distribution receipt share one bounded monotonic-clock calibration.
+   Each sample records raw nonnegative nanoseconds and whether it is below that observed resolution,
+   plus cache outcome, package hit/miss/reject/store counts,
    whether MIR lowering or reassembly fallback occurred, MIR function count, interpreter result,
    retained entries and bytes, and cumulative verified hits.
 5. The report records its cache limits. The current `8` entries, `33,554,432` bytes, and `8,388,608`
    artifact bytes are harness-local measurement inputs, not product defaults or recommended limits.
 6. Validation requires cold complete fallback and population, warm complete verified reuse without
-   lowering, positive durations, result `42`, retained state within bounds, and no rejection,
+   lowering, nonnegative durations with exact clock-resolution classification, result `42`, retained
+   state within bounds, and no rejection,
    skipped admission, or reassembly fallback. `decision` is fixed to
    `observed-only-no-speedup-claim`.
 
@@ -48,6 +51,11 @@ The configured Windows/MSVC smoke passed on 2026-07-22. Its raw local observatio
 
 These numbers are one host-local execution, not a distribution. No ratio, percentage, regression
 threshold, or claim that the cache makes Fairy C builds faster is adopted from them.
+
+A later hosted Windows run observed a valid warm request within one coarse clock tick. The v0
+receipt rejected its raw `0 ns` duration because it had no resolution field. Version 1 shares the
+same bounded calibration used by ADR 0158, preserves zero without retry or replacement, and marks it
+`belowClockResolution: true`; control-flow and result requirements remain unchanged.
 
 ## Consequences
 

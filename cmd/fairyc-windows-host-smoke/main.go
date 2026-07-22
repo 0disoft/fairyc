@@ -422,7 +422,11 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("resolve Windows MSVC probe toolchain: %w", err)
 	}
-	cacheMeasurement, err := measureWorkspaceProcessCache(root)
+	clockResolution, err := observeMonotonicClockResolution()
+	if err != nil {
+		return fmt.Errorf("observe process-cache measurement clock: %w", err)
+	}
+	cacheMeasurement, err := measureWorkspaceProcessCache(root, clockResolution)
 	if err != nil {
 		return fmt.Errorf("measure process-local workspace cache: %w", err)
 	}
@@ -431,7 +435,7 @@ func run() error {
 		return fmt.Errorf("encode process-local workspace cache measurement: %w", err)
 	}
 	fmt.Printf("Fairy C process-cache measurement: %s\n", cacheMeasurementJSON)
-	cacheEditMeasurement, err := measureWorkspaceProcessCacheEdits(root)
+	cacheEditMeasurement, err := measureWorkspaceProcessCacheEdits(root, clockResolution)
 	if err != nil {
 		return fmt.Errorf("measure process-local workspace cache edits: %w", err)
 	}
@@ -700,7 +704,7 @@ func run() error {
 	return nil
 }
 
-func measureWorkspaceProcessCache(root string) (buildmeasure.CacheReport, error) {
+func measureWorkspaceProcessCache(root string, clockResolution int64) (buildmeasure.CacheReport, error) {
 	workspace, err := workspaceloader.Load(root)
 	if err != nil {
 		return buildmeasure.CacheReport{}, err
@@ -720,7 +724,7 @@ func measureWorkspaceProcessCache(root string) (buildmeasure.CacheReport, error)
 	entry := hir.QualifiedModulePath(rootPackage, "main") + "::main"
 	report := buildmeasure.CacheReport{
 		Schema: buildmeasure.CacheSchema, Workload: "workspace_quickstart",
-		Scope: "semantic-through-verified-mir", Clock: "process-monotonic-wall-nanoseconds",
+		Scope: "semantic-through-verified-mir", Clock: "process-monotonic-wall-nanoseconds", ClockResolutionNS: clockResolution,
 		CacheImplementation: "bounded-process-package-mir-v0", Decision: "observed-only-no-speedup-claim",
 		Environment: buildmeasure.CacheEnvironment{OS: runtime.GOOS, Arch: runtime.GOARCH, Target: string(target.X8664WindowsMSVC)},
 		Policy: buildmeasure.CachePolicy{
@@ -742,9 +746,11 @@ func measureWorkspaceProcessCache(root string) (buildmeasure.CacheReport, error)
 			return buildmeasure.CacheReport{}, err
 		}
 		stats := session.Stats()
+		durationNS := duration.Nanoseconds()
 		report.Samples = append(report.Samples, buildmeasure.CacheSample{
 			Sequence: index + 1, Condition: condition, DurationNS: duration.Nanoseconds(),
-			Outcome: checked.Cache.Outcome, Packages: checked.Cache.Packages,
+			BelowClockResolution: durationNS < clockResolution,
+			Outcome:              checked.Cache.Outcome, Packages: checked.Cache.Packages,
 			Hits: checked.Cache.Hits, Misses: checked.Cache.Misses, Rejected: checked.Cache.Rejected,
 			Stored: checked.Cache.Stored, StoreSkipped: checked.Cache.StoreSkipped,
 			Lowered: checked.Cache.Lowered, ReassemblyFallback: checked.Cache.ReassemblyFallback,
@@ -755,11 +761,7 @@ func measureWorkspaceProcessCache(root string) (buildmeasure.CacheReport, error)
 	return report, nil
 }
 
-func measureWorkspaceProcessCacheEdits(sourceRoot string) (buildmeasure.CacheEditReport, error) {
-	clockResolution, err := observeMonotonicClockResolution()
-	if err != nil {
-		return buildmeasure.CacheEditReport{}, err
-	}
+func measureWorkspaceProcessCacheEdits(sourceRoot string, clockResolution int64) (buildmeasure.CacheEditReport, error) {
 	report := buildmeasure.CacheEditReport{
 		Schema: buildmeasure.CacheEditSchema, Workload: "workspace_quickstart",
 		Scope: "semantic-through-verified-mir", Clock: "process-monotonic-wall-nanoseconds", ClockResolutionNS: clockResolution,

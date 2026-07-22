@@ -10,7 +10,11 @@ import (
 func TestMeasureWorkspaceProcessCacheEditsProducesValidRawDistributions(t *testing.T) {
 	t.Parallel()
 	root := filepath.Join("..", "..", "examples", "workspace_quickstart")
-	report, err := measureWorkspaceProcessCacheEdits(root)
+	clockResolution, err := observeMonotonicClockResolution()
+	if err != nil {
+		t.Fatal(err)
+	}
+	report, err := measureWorkspaceProcessCacheEdits(root, clockResolution)
 	if err != nil {
 		t.Fatal(err)
 	}

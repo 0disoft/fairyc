@@ -18,7 +18,7 @@ func TestCacheReportMarshalPreservesRawControlFlowEvidence(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if string(first) != string(second) || !strings.HasPrefix(string(first), `{"schema":"fairyc.process-cache-measurement/v0"`) ||
+	if string(first) != string(second) || !strings.HasPrefix(string(first), `{"schema":"fairyc.process-cache-measurement/v1"`) ||
 		strings.Contains(string(first), "C:\\") || strings.Contains(string(first), "speedup\"") {
 		t.Fatalf("cache measurement JSON = %s", first)
 	}
@@ -35,6 +35,7 @@ func TestCacheReportRejectsMisleadingOrIncompleteEvidence(t *testing.T) {
 		{name: "partial warm hit", mutate: func(value *buildmeasure.CacheReport) { value.Samples[1].Hits = 1 }},
 		{name: "cold hit", mutate: func(value *buildmeasure.CacheReport) { value.Samples[0].Hits = 1 }},
 		{name: "wrong result", mutate: func(value *buildmeasure.CacheReport) { value.Samples[1].InterpreterResult = 0 }},
+		{name: "clock classification", mutate: func(value *buildmeasure.CacheReport) { value.Samples[1].BelowClockResolution = true }},
 		{name: "oversize retention", mutate: func(value *buildmeasure.CacheReport) { value.Samples[1].RetainedBytes = value.Policy.MaxBytes + 1 }},
 		{name: "reassembly fallback", mutate: func(value *buildmeasure.CacheReport) { value.Samples[1].ReassemblyFallback = true }},
 	}
@@ -49,10 +50,20 @@ func TestCacheReportRejectsMisleadingOrIncompleteEvidence(t *testing.T) {
 	}
 }
 
+func TestCacheReportPreservesZeroDurationBelowClockResolution(t *testing.T) {
+	t.Parallel()
+	report := validCacheReport()
+	report.Samples[1].DurationNS = 0
+	report.Samples[1].BelowClockResolution = true
+	if _, err := buildmeasure.MarshalCache(report); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func validCacheReport() buildmeasure.CacheReport {
 	return buildmeasure.CacheReport{
 		Schema: buildmeasure.CacheSchema, Workload: "workspace_quickstart",
-		Scope: "semantic-through-verified-mir", Clock: "process-monotonic-wall-nanoseconds",
+		Scope: "semantic-through-verified-mir", Clock: "process-monotonic-wall-nanoseconds", ClockResolutionNS: 2,
 		CacheImplementation: "bounded-process-package-mir-v0", Decision: "observed-only-no-speedup-claim",
 		Environment: buildmeasure.CacheEnvironment{OS: "windows", Arch: "amd64", Target: "x86_64-windows-msvc"},
 		Policy:      buildmeasure.CachePolicy{MaxEntries: 8, MaxBytes: 1024, MaxArtifactBytes: 512},

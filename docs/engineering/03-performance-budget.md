@@ -32,11 +32,13 @@ and native result 42. `cacheImplementation: none` and `decision: baseline-only` 
 calibrates the schema and workload; it is not cold/warm cache evidence, a timing distribution, a
 cross-machine comparison, or a numeric budget.
 
-The same configured smoke also emits `fairyc.process-cache-measurement/v0` for the semantic-through-
+The same configured smoke also emits `fairyc.process-cache-measurement/v1` for the semantic-through-
 verified-MIR portion of that workload. One bounded Session records a cold fallback followed by one
 complete verified hit. The receipt includes raw monotonic durations, package hit/miss/store counts,
 whether lowering ran, MIR function count, interpreter result, retained entries and bytes, and the
-harness-local bounds. Validation requires result `42`, rejects partial or rejected warm hits, and
+harness-local bounds. It shares one bounded clock calibration with the edit measurement, preserves
+zero-duration observations, and marks whether each sample is below the observed resolution.
+Validation requires result `42`, rejects partial or rejected warm hits, and
 fixes `decision` to `observed-only-no-speedup-claim`. The two observations prove the selected control
 paths and comparable phase scope; they are not a distribution or a speedup conclusion.
 
@@ -44,7 +46,7 @@ The smoke additionally emits `fairyc.process-cache-edit-measurement/v0`. It reco
 fresh-Session observations for each of no-op warm, private root edit, private dependency edit, and
 public dependency edit. One untimed request warms each Session; mutation and workspace loading stay
 outside the timer. The report preserves the 36 raw durations, observes the smallest of 32 positive
-monotonic transitions within a bounded one-million-read calibration, and marks rather than replaces
+monotonic transitions within a bounded ten-million-read calibration, and marks rather than replaces
 samples below that resolution. It proves the current invalidation paths and result `42`; it does not define a speedup,
 percentile, retry rule, reference-machine baseline, process-memory budget, or regression threshold.
 

@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	CacheSchema        = "fairyc.process-cache-measurement/v0"
+	CacheSchema        = "fairyc.process-cache-measurement/v1"
 	CacheConditionCold = "cold-fallback"
 	CacheConditionWarm = "warm-all-hit"
 )
@@ -27,23 +27,24 @@ type CacheEnvironment struct {
 
 // CacheSample is one raw semantic-through-verified-MIR observation from the same Session.
 type CacheSample struct {
-	Sequence           int    `json:"sequence"`
-	Condition          string `json:"condition"`
-	DurationNS         int64  `json:"durationNs"`
-	Outcome            string `json:"outcome"`
-	Packages           int    `json:"packages"`
-	Hits               int    `json:"hits"`
-	Misses             int    `json:"misses"`
-	Rejected           int    `json:"rejected"`
-	Stored             int    `json:"stored"`
-	StoreSkipped       int    `json:"storeSkipped"`
-	Lowered            bool   `json:"lowered"`
-	ReassemblyFallback bool   `json:"reassemblyFallback"`
-	MIRFunctions       int    `json:"mirFunctions"`
-	InterpreterResult  int    `json:"interpreterResult"`
-	RetainedEntries    int    `json:"retainedEntries"`
-	RetainedBytes      uint64 `json:"retainedBytes"`
-	VerifiedHits       uint64 `json:"verifiedHits"`
+	Sequence             int    `json:"sequence"`
+	Condition            string `json:"condition"`
+	DurationNS           int64  `json:"durationNs"`
+	BelowClockResolution bool   `json:"belowClockResolution"`
+	Outcome              string `json:"outcome"`
+	Packages             int    `json:"packages"`
+	Hits                 int    `json:"hits"`
+	Misses               int    `json:"misses"`
+	Rejected             int    `json:"rejected"`
+	Stored               int    `json:"stored"`
+	StoreSkipped         int    `json:"storeSkipped"`
+	Lowered              bool   `json:"lowered"`
+	ReassemblyFallback   bool   `json:"reassemblyFallback"`
+	MIRFunctions         int    `json:"mirFunctions"`
+	InterpreterResult    int    `json:"interpreterResult"`
+	RetainedEntries      int    `json:"retainedEntries"`
+	RetainedBytes        uint64 `json:"retainedBytes"`
+	VerifiedHits         uint64 `json:"verifiedHits"`
 }
 
 // CacheReport preserves two raw observations and explicitly forbids a speedup conclusion.
@@ -52,6 +53,7 @@ type CacheReport struct {
 	Workload            string           `json:"workload"`
 	Scope               string           `json:"scope"`
 	Clock               string           `json:"clock"`
+	ClockResolutionNS   int64            `json:"clockResolutionNs"`
 	CacheImplementation string           `json:"cacheImplementation"`
 	Decision            string           `json:"decision"`
 	Environment         CacheEnvironment `json:"environment"`
@@ -79,6 +81,9 @@ func ValidateCache(report CacheReport) error {
 	if report.Workload == "" || report.Scope != "semantic-through-verified-mir" || report.Clock != "process-monotonic-wall-nanoseconds" {
 		return fmt.Errorf("process-cache measurement requires workload, phase scope, and monotonic wall clock semantics")
 	}
+	if report.ClockResolutionNS <= 0 {
+		return fmt.Errorf("process-cache measurement requires a positive observed clock resolution")
+	}
 	if report.CacheImplementation != "bounded-process-package-mir-v0" || report.Decision != "observed-only-no-speedup-claim" {
 		return fmt.Errorf("process-cache measurement has an unsupported implementation or decision")
 	}
@@ -96,7 +101,8 @@ func ValidateCache(report CacheReport) error {
 		return fmt.Errorf("process-cache measurement samples are not canonical cold then warm observations")
 	}
 	for _, sample := range report.Samples {
-		if sample.DurationNS <= 0 || sample.Packages <= 0 || sample.MIRFunctions <= 0 || sample.InterpreterResult != 42 {
+		if sample.DurationNS < 0 || sample.BelowClockResolution != (sample.DurationNS < report.ClockResolutionNS) ||
+			sample.Packages <= 0 || sample.MIRFunctions <= 0 || sample.InterpreterResult != 42 {
 			return fmt.Errorf("process-cache measurement sample %d has incomplete outcome data", sample.Sequence)
 		}
 		if sample.Rejected != 0 || sample.StoreSkipped != 0 || sample.ReassemblyFallback {
