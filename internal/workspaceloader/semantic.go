@@ -5,9 +5,24 @@ import (
 	"slices"
 
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/packagecontent"
 	"github.com/0disoft/fairyc/internal/packagegraph"
 	"github.com/0disoft/fairyc/internal/semantic"
 )
+
+// SemanticPackage binds one disposable semantic package number to the exact resolved inputs used
+// by package interface hashing and process-local compilation caches.
+type SemanticPackage struct {
+	ID           hir.PackageID
+	Instance     packagegraph.InstanceID
+	Path         string
+	Source       packagecontent.Digest
+	SourceKind   string
+	RuntimeABI   string
+	Features     []string
+	Role         string
+	Dependencies []hir.PackageID
+}
 
 // SemanticInput converts the validated, root-reachable instance graph into build-local package
 // numbers and exact import-provider bindings. Numeric ids never enter lockfiles or diagnostics.
@@ -98,6 +113,76 @@ func (workspace Workspace) PackageIdentities() (map[hir.PackageID]packagegraph.I
 	return identities, nil
 }
 
+// SemanticPackages returns one detached metadata record per resolved instance class, in the exact
+// package-number order used by SemanticInput. Dependencies are direct, sorted, and deduplicated.
+func (workspace Workspace) SemanticPackages() ([]SemanticPackage, error) {
+	nodePackages := make(map[string]hir.PackageID, len(workspace.Graph.Nodes))
+	for index, class := range workspace.Resolution.InstanceClasses {
+		if len(class.Members) == 0 {
+			return nil, fmt.Errorf("workspace has an empty package instance class")
+		}
+		packageID := hir.PackageID(index + 1)
+		if packageID == hir.DefaultPackage {
+			return nil, fmt.Errorf("workspace package id overflow")
+		}
+		for _, member := range class.Members {
+			if _, duplicate := nodePackages[member]; duplicate {
+				return nil, fmt.Errorf("workspace node %q belongs to multiple instance classes", member)
+			}
+			nodePackages[member] = packageID
+		}
+	}
+
+	result := make([]SemanticPackage, 0, len(workspace.Resolution.InstanceClasses))
+	for index, class := range workspace.Resolution.InstanceClasses {
+		packageID := hir.PackageID(index + 1)
+		mapping, found := workspace.instance(class.Members[0])
+		if !found {
+			return nil, fmt.Errorf("workspace node %q has no package mapping", class.Members[0])
+		}
+		loaded, found := workspace.Package(mapping.PackagePath)
+		if !found {
+			return nil, fmt.Errorf("workspace package %q is missing", mapping.PackagePath)
+		}
+		node, found := workspace.graphNode(class.Members[0])
+		if !found {
+			return nil, fmt.Errorf("workspace graph node %q is missing", class.Members[0])
+		}
+		for _, member := range class.Members[1:] {
+			other, mapped := workspace.instance(member)
+			if !mapped || other.PackagePath != mapping.PackagePath || !slices.Equal(other.Features, mapping.Features) {
+				return nil, fmt.Errorf("workspace instance class %s has inconsistent package mappings", class.ID)
+			}
+		}
+
+		dependencySet := make(map[hir.PackageID]struct{})
+		for _, dependency := range workspace.Graph.Dependencies {
+			if nodePackages[dependency.Owner] != packageID {
+				continue
+			}
+			target, found := nodePackages[dependency.Target]
+			if !found {
+				return nil, fmt.Errorf("workspace dependency target %q has no package id", dependency.Target)
+			}
+			if target == packageID {
+				return nil, fmt.Errorf("workspace package %d depends on itself", packageID)
+			}
+			dependencySet[target] = struct{}{}
+		}
+		dependencies := make([]hir.PackageID, 0, len(dependencySet))
+		for dependency := range dependencySet {
+			dependencies = append(dependencies, dependency)
+		}
+		slices.Sort(dependencies)
+		result = append(result, SemanticPackage{
+			ID: packageID, Instance: class.ID, Path: mapping.PackagePath, Source: loaded.Digest,
+			SourceKind: loaded.SourceKind, RuntimeABI: loaded.RuntimeABI,
+			Features: slices.Clone(mapping.Features), Role: node.Role, Dependencies: dependencies,
+		})
+	}
+	return result, nil
+}
+
 func (workspace Workspace) instance(nodeID string) (Instance, bool) {
 	for _, instance := range workspace.Instances {
 		if instance.NodeID == nodeID {
@@ -105,6 +190,15 @@ func (workspace Workspace) instance(nodeID string) (Instance, bool) {
 		}
 	}
 	return Instance{}, false
+}
+
+func (workspace Workspace) graphNode(nodeID string) (packagegraph.Node, bool) {
+	for _, node := range workspace.Graph.Nodes {
+		if node.ID == nodeID {
+			return node, true
+		}
+	}
+	return packagegraph.Node{}, false
 }
 
 // RootPackageID returns the disposable semantic package number assigned to the one root graph

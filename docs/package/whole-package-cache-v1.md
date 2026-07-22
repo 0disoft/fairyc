@@ -72,5 +72,8 @@ cannot justify a disk format or default budget.
 
 ADR 0155 connects those bytes to the bounded LRU and distinguishes verified hits from raw store
 hits, misses, and rejected entries. Rejection uses complete-record compare-and-delete so a stale
-reader cannot remove a concurrent replacement. This is a usable storage boundary, but without a
-compiler coordinator consulting it there is still no compilation reuse or speedup claim.
+reader cannot remove a concurrent replacement. ADR 0156 adds a semantic-first workspace compiler
+session that computes v1 keys and skips MIR lowering only after complete verified hits plus exact
+reassembly. Partial hits, rejected payloads, and incompatible mixed-generation contexts all fall
+back to ordinary lowering and refresh current artifacts. The session remains process-local and has
+no elapsed-time speedup, persistent storage, CLI lifetime, or default-limit claim.

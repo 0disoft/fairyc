@@ -53,6 +53,13 @@ type Result struct {
 	Verified bool
 }
 
+// Analysis is the completed semantic half of one compiler request. It deliberately contains no
+// executable MIR, so process-local cache coordinators can inspect typed package interfaces before
+// deciding whether ordinary MIR lowering is necessary.
+type Analysis struct {
+	Semantic semantic.Result
+}
+
 // Check analyzes one explicit single-package source closure and verifies its lowered MIR when
 // semantic analysis completes successfully.
 func Check(files []semantic.File) (Result, error) {
@@ -62,11 +69,27 @@ func Check(files []semantic.File) (Result, error) {
 // CheckPackages analyzes one already-resolved package input and verifies its lowered MIR without
 // choosing a manifest, solver, source-acquisition, or stable package-identity format.
 func CheckPackages(input semantic.PackageInput) (Result, error) {
+	analysis, err := AnalyzePackages(input)
+	if err != nil {
+		return Result{}, err
+	}
+	return LowerAnalyzed(analysis)
+}
+
+// AnalyzePackages runs the package-aware semantic pipeline without lowering MIR. Package input
+// failures remain internal pipeline errors; ordinary source diagnostics remain in Analysis.
+func AnalyzePackages(input semantic.PackageInput) (Analysis, error) {
 	semanticResult, err := semantic.AnalyzePackages(input)
 	if err != nil {
-		return Result{}, &Error{Stage: StagePackageInput, Cause: err}
+		return Analysis{}, &Error{Stage: StagePackageInput, Cause: err}
 	}
-	return lowerVerified(semanticResult)
+	return Analysis{Semantic: semanticResult}, nil
+}
+
+// LowerAnalyzed lowers one semantic result and publishes MIR only after the ordinary closed-world
+// verifier accepts it. Cache coordinators must call this exact boundary on every fallback path.
+func LowerAnalyzed(analysis Analysis) (Result, error) {
+	return lowerVerified(analysis.Semantic)
 }
 
 func lowerVerified(semanticResult semantic.Result) (Result, error) {

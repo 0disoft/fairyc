@@ -2,10 +2,12 @@ package workspaceloader
 
 import (
 	"path/filepath"
+	"slices"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/packagegraph"
 )
 
 func TestSemanticInputReachesVerifiedCompiler(t *testing.T) {
@@ -69,5 +71,22 @@ func TestBundledStandardLibraryReachesVerifiedCompiler(t *testing.T) {
 	}
 	if !result.Verified {
 		t.Fatalf("workspace did not reach verified MIR: phase=%s failed=%s diagnostics=%v unsupported=%v", result.Semantic.CompletedThrough, result.Semantic.FailedPhase, result.Semantic.Diagnostics, result.Semantic.Unsupported)
+	}
+	packages, err := workspace.SemanticPackages()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(packages) != 2 || packages[0].Role != packagegraph.RoleRoot || packages[1].Role != packagegraph.RoleStandardLibrary ||
+		!slices.Equal(packages[0].Dependencies, []hir.PackageID{packages[1].ID}) || packages[1].RuntimeABI == "" {
+		t.Fatalf("SemanticPackages() = %+v", packages)
+	}
+	identities, err := workspace.PackageIdentities()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, loaded := range packages {
+		if loaded.Instance != identities[loaded.ID] || loaded.Source == ([32]byte{}) || loaded.Path == "" {
+			t.Fatalf("SemanticPackages() package = %+v, identities = %+v", loaded, identities)
+		}
 	}
 }

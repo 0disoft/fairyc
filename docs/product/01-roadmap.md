@@ -439,13 +439,18 @@ cache-hit measurement.
 
 ADR 0155 connects the codec to the bounded LRU with expected-interface validation, verified hit
 accounting, rejected-entry quarantine, and compare-and-delete protection for concurrent replacement.
-No compiler coordinator consults it yet, so no MIR lowering is skipped and no speedup is claimed.
+ADR 0156 adds a semantic-first workspace compiler session. It computes every package interface and
+v1 cache key, skips MIR lowering only after all function-owning packages are verified hits and exact
+reassembly succeeds, and otherwise lowers normally and refreshes the cache. Tests prove one lowering
+call across a cold and immediate warm two-package compile, source invalidation, mixed-generation
+fallback, self-healing, and result `42`. This is deterministic control-flow evidence, not an elapsed
+speedup claim, persistent cache, default policy, or one-shot CLI reuse.
 
-- Wire whole-package reuse into package compilation, then adopt persistent content-addressed storage
-  and default limits only from measured clean/warm workload evidence.
+- Measure the process-local all-hit path on declared workloads, then decide which long-lived compiler
+  command or service can honestly reuse one Session before considering persistent storage.
 - ADR 0146 explicitly defers persistent storage. Package-aware Windows builds, the bounded
   whole-program MIR codec, and process-local package function slices now exist; stable type-context
-  artifacts, compiler cache wiring, and configured cold/warm hit measurements still gate disk policy.
+  artifacts, cross-process corruption policy, and configured cold/warm timing evidence still gate disk policy.
 - Stabilize the minimal `fairyc check`, `build`, `run`, `test`, `emit`, `explain`, and `targets` contracts.
 - Move to function-level reuse only when measured package rebuild or storage evidence justifies the complexity.
 

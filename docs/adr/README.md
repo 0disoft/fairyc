@@ -165,6 +165,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0153-process-local-package-mir-artifacts.md`: independently verified package function slices with explicit imports and fresh-symbol reassembly.
 - `0154-process-bound-package-artifact-codec.md`: bounded canonical package bytes rejected outside their creating compiler process.
 - `0155-bounded-process-package-artifact-cache.md`: verified artifact hits and race-safe rejection quarantine over the bounded byte LRU.
+- `0156-all-hit-process-mir-reuse.md`: semantic-first workspace compilation that skips MIR lowering only after complete verified process-cache hits and successful reassembly.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

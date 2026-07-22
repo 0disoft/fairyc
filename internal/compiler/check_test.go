@@ -65,6 +65,45 @@ func TestCheckPackagesClassifiesInputFailure(t *testing.T) {
 	}
 }
 
+func TestAnalyzePackagesSeparatesSemanticAnalysisFromVerifiedMIRLowering(t *testing.T) {
+	t.Parallel()
+	input := semantic.PackageInput{Files: []semantic.File{
+		parseCompilerFile(t, 1, "main.fy", "module main;\nfn i32 main() { return 42; }\n"),
+	}}
+	analysis, err := compiler.AnalyzePackages(input)
+	if err != nil {
+		t.Fatalf("AnalyzePackages() error = %v", err)
+	}
+	if analysis.Semantic.CompletedThrough != semantic.PhaseFlow || analysis.Semantic.FailedPhase != semantic.PhaseNone ||
+		len(analysis.Semantic.Diagnostics) != 0 || len(analysis.Semantic.Unsupported) != 0 {
+		t.Fatalf("AnalyzePackages() analysis = %+v", analysis)
+	}
+	result, err := compiler.LowerAnalyzed(analysis)
+	if err != nil {
+		t.Fatalf("LowerAnalyzed() error = %v", err)
+	}
+	if !result.Verified || len(result.MIR.Functions) != 1 || result.MIR.Functions[0].Name != "$p1::main::main" {
+		t.Fatalf("LowerAnalyzed() result = %+v", result)
+	}
+}
+
+func TestLowerAnalyzedPreservesSourceDiagnosticsWithoutMIR(t *testing.T) {
+	t.Parallel()
+	analysis, err := compiler.AnalyzePackages(semantic.PackageInput{Files: []semantic.File{
+		parseCompilerFile(t, 1, "main.fy", "module main;\nfn i32 main() { return missing; }\n"),
+	}})
+	if err != nil {
+		t.Fatalf("AnalyzePackages() error = %v", err)
+	}
+	result, err := compiler.LowerAnalyzed(analysis)
+	if err != nil {
+		t.Fatalf("LowerAnalyzed() error = %v", err)
+	}
+	if result.Verified || result.Semantic.FailedPhase != semantic.PhaseResolve || len(result.Semantic.Diagnostics) != 1 || len(result.MIR.Functions) != 0 {
+		t.Fatalf("LowerAnalyzed() result = %+v", result)
+	}
+}
+
 func TestCheckPackagesVerifiesIsolatedModulePaths(t *testing.T) {
 	t.Parallel()
 	result, err := compiler.CheckPackages(semantic.PackageInput{
