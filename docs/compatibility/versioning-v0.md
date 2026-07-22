@@ -384,6 +384,12 @@ distribution, or persistent-cache policy. Its compiler-private trap token is an 
 detail rather than program stderr or serialized compatibility data; the observable obligation is
 that all normal `i32` results remain distinct from traps.
 
+ADR 0178 stabilizes `fairyc explain <diagnostic-code>` independently from the provisional catalog
+lifecycle. Exact lookup, the three-line shape, code/category/catalog identities, and codes 0, 2, and
+4 are CLI compatibility data. Meaning prose may improve under the existing diagnostic policy, but
+a code is never silently reassigned; implementation, fixture, release, JSON, and span claims remain
+separate.
+
 ADR 0159 adds the independent `fairyc.experimental.workspace-check-session/v0` NDJSON request and
 response schema. The schema versions this experimental machine boundary and rejects unknown or
 duplicate request fields, but it does not make the command spelling, numeric limits, process exit

@@ -24,6 +24,9 @@ separately built `fairyc.exe`, requiring exact success lines, native result 42, 
 retained build artifact. Direct stable-run proof additionally covers development and release success,
 normal-result/trap collision separation at result 131, division-by-zero trap classification,
 canonical-lock restoration, and artifact immutability.
+Stable explain tests execute every catalog entry through the exact three-line CLI shape after the
+diagnostic package proves canonical unique lookup and exact parity with both owning Markdown tables;
+they also cover all namespaces, malformed and unknown codes, missing roots, help, and output failure.
 Target-description tests separately cover structural validation, power-of-two layouts, closed and
 sorted scalar and feature sets, immutable lookup copies, unknown-target rejection, deterministic
 host-independent JSON, false maturity claims, and top-level JSON-schema synchronization.

@@ -14,7 +14,7 @@
 - Parser fixture route: spec/fixtures/parser/manifest-v0.json
 - Frontend implementation route: internal/source/, internal/lexer/, internal/syntax/, internal/ast/, internal/frontend/, internal/semantic/, internal/hir/
 - Verified-MIR compiler coordinator route: internal/compiler/
-- Stable workspace check/build/run and experimental compiler CLI route: cmd/fairyc/, internal/cli/, docs/adr/0175-stable-workspace-check-v1.md, docs/adr/0176-stable-windows-workspace-build-v1.md, docs/adr/0177-stable-windows-workspace-run-v1.md
+- Stable workspace check/build/run and diagnostic explanation plus experimental compiler CLI route: cmd/fairyc/, internal/cli/, docs/adr/0175-stable-workspace-check-v1.md, docs/adr/0176-stable-windows-workspace-build-v1.md, docs/adr/0177-stable-windows-workspace-run-v1.md, docs/adr/0178-stable-diagnostic-explain-v1.md
 - Parser runner route: internal/parserfixture/
 - Semantic fixture route: spec/fixtures/semantic/manifest-v0.json
 - Semantic runner route: internal/semanticfixture/

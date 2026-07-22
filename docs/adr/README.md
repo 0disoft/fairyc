@@ -187,6 +187,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0175-stable-workspace-check-v1.md`: stable `fairyc check [--locked]` owns current-workspace discovery, lock maintenance, package-aware verified MIR, deterministic output, and source/package failure separation.
 - `0176-stable-windows-workspace-build-v1.md`: stable `fairyc build [--release] [--locked]` derives one replace-on-success artifact from the root package while retaining the closed local Windows/MSVC capability boundary.
 - `0177-stable-windows-workspace-run-v1.md`: stable `fairyc run [--release] [--locked]` executes one inspected temporary workspace image, separates result from CLI status, and retains neither that image nor program I/O.
+- `0178-stable-diagnostic-explain-v1.md`: stable `fairyc explain <diagnostic-code>` fixes exact lookup, three-line human shape, side-effect-free behavior, and codes 0, 2, and 4 without promoting the provisional catalog to a released language.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

@@ -348,8 +348,9 @@ at `-O0` and `-O2`, link a closed conformance runtime, and compare process outco
 source-linked resource-drop sequences. Product emission and product builds contain no trace observer. It cannot run on
 this Windows host because no Linux Clang/GCC execution environment is installed, and its hosted CI result
 has not yet been observed. The target therefore remains unsupported.
-A provisional source-independent `fairyc explain <diagnostic-code>` lookup reports reserved Stage 0
-meanings and categories without reading source or invoking a toolchain. A provisional `fairyc targets`
+A stable source-independent `fairyc explain <diagnostic-code>` lookup reports reserved Stage 0
+meanings and categories without reading source or invoking a toolchain while still marking the
+catalog provisional. A provisional `fairyc targets`
 report lists declared target maturity and missing evidence without probing this Windows host. An unstable
 `fairyc experimental` CLI can inspect syntax, syntax-check, semantic-check, emit the
 scalar, flat-resource, and resource-tagged C11 translation unit, build that subset into a Linux executable on an eligible host,
@@ -360,7 +361,8 @@ persistent cache, or stable editor protocol. Program commands use one entry plus
 `--source`; semantic checking uses its explicit positional module set. The stable workspace commands
 are `fairyc check [--locked]` and the Windows/amd64-local
 `fairyc build [--release] [--locked]`, and the Windows/amd64-local
-`fairyc run [--release] [--locked]`. Stable test/emit commands, native program I/O and arguments,
+`fairyc run [--release] [--locked]`, plus source-independent
+`fairyc explain <diagnostic-code>`. Stable test/emit commands, native program I/O and arguments,
 user drop-body execution, a complete runtime, safe standard library, package manager, supported
 target, release-stable CLI as a whole, and a stable language revision do not exist yet.
 

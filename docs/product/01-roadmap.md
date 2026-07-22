@@ -545,8 +545,9 @@ quarantines, without selecting a default policy or making a speed claim.
   distributions now exist; physical media retention remains storage-stack-specific.
 - Keep the implemented `fairyc check [--locked]`, Windows-local
   `fairyc build [--release] [--locked]`, and Windows-local
-  `fairyc run [--release] [--locked]` v1 contracts narrow, then stabilize minimal `test`, `emit`,
-  `explain`, and `targets` contracts independently.
+  `fairyc run [--release] [--locked]` v1 contracts narrow. Keep the source-independent
+  `fairyc explain <diagnostic-code>` v1 contract separate from catalog lifecycle, then stabilize
+  minimal `test`, `emit`, and `targets` contracts independently when their evidence exists.
 - Move to function-level reuse only when measured package rebuild or storage evidence justifies the complexity.
 
 Exit gate: clean and warm build evidence is reproducible on a declared machine and workload; invalidation fixtures distinguish public interface, inline body, and private implementation; incompatible caches are safe misses.

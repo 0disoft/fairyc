@@ -651,6 +651,10 @@ ADR 0177 independently promotes the ordinary temporary execution workflow to
 retains no image, preserves an existing stable-build artifact, and keeps program I/O, arguments,
 target choice, cache policy, and target support outside the stable contract.
 
+ADR 0178 stabilizes the source-independent `fairyc explain <diagnostic-code>` lookup, its exact
+three-line human shape, and codes 0, 2, and 4. It keeps catalog lifecycle, wording improvement,
+diagnostic implementation and fixture status, JSON, and span compatibility as separate contracts.
+
 ADR 0146 rejects speculative persistent caching at this point. ADR 0149 supplies deterministic,
 bounded, verifier-checked bytes for a complete MIR program, but the workspace path still produces
 no independently reusable per-package MIR/object artifact and has no configured comparable
@@ -671,8 +675,9 @@ feed a separate local x64 MSVC C11 probe at low and optimized profiles; this is 
 layout coverage or a hosted receipt.
 
 Formatting, testing, documentation, vendoring, binding generation, and ABI inspection remain planned
-tool surfaces rather than claims of current implementation. Checking has one implemented stable
-surface: the bounded current-workspace `fairyc check [--locked]` contract above.
+tool surfaces rather than claims of current implementation. Checking has the bounded stable
+current-workspace `fairyc check [--locked]` surface; diagnostic explanation has its independent
+stable source-free surface above.
 
 ## Compatibility
 

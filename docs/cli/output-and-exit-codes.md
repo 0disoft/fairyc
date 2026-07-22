@@ -46,8 +46,13 @@ and emits no result line. Native program streams and arguments are not stable su
 program output is a code `6` execution failure. A compiler-output write failure after execution is
 code `4` and does not undo program effects. No temporary executable is retained.
 
-The implemented `fairyc explain`, `fairyc targets`, and `fairyc experimental` commands use
-provisional process codes only for prototype automation. They are not the stable exit-code taxonomy:
+`fairyc explain <diagnostic-code>` stabilizes codes `0`, `2`, and `4` for successful exact lookup,
+invalid invocation or unknown code, and output failure. Success writes exactly three ANSI-free lines
+with code/meaning, category, and the provisional Stage 0 catalog identity. Failure emits no partial
+stdout. The command has no filesystem, process, network, target, or toolchain side effect.
+
+The implemented `fairyc targets` and `fairyc experimental` commands use provisional process codes
+only for prototype automation. They are not the stable exit-code taxonomy:
 
 | Code | Prototype meaning |
 | ---: | --- |
@@ -59,12 +64,12 @@ provisional process codes only for prototype automation. They are not the stable
 | `6` | The experimental native build could not resolve or run its toolchain, link the scalar runtime, or safely materialize its artifact. |
 | `7` | The package workspace, lockfile, package graph, or package-to-build mapping failed before native compilation. |
 
-`fairyc explain` writes exactly three deterministic, ANSI-free lines to stdout on success: the
+The stable `fairyc explain` output is exactly three deterministic, ANSI-free lines on success: the
 canonical code and meaning, its category, and `fairyc.diagnostic-catalog/v0 (provisional Stage 0)`.
 It reads no source or configuration and has no filesystem, process, network, toolchain, target, or
 write side effect. Missing, extra, malformed, and unknown codes use code `2` with empty stdout.
-Output-write failure uses code `4`. The successful output reserves a prototype meaning and does not
-claim implementation, fixture coverage, release, or stability.
+Output-write failure uses code `4`. The successful output reserves a catalog meaning and does not
+claim implementation, fixture coverage, or release status.
 
 `fairyc targets` writes one deterministic, ANSI-free human block per validated TargetSpec in
 canonical ID order. Each block includes schema, emission subset, three independent maturity states,

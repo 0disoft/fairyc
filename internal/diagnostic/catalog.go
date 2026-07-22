@@ -3,11 +3,11 @@ package diagnostic
 
 import "slices"
 
-// CatalogVersion identifies the prototype diagnostic rule catalog.
+// CatalogVersion identifies the independently versioned Stage 0 diagnostic rule catalog.
 const CatalogVersion = "fairyc.diagnostic-catalog/v0"
 
 // CatalogEntry is the human-facing, source-independent explanation of one diagnostic code.
-// It deliberately does not claim that the diagnostic is implemented or release-stable.
+// It deliberately does not claim that the diagnostic is implemented or fixture-backed.
 type CatalogEntry struct {
 	Code     string
 	Category string

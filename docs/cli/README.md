@@ -21,8 +21,8 @@ Only `check`, a minimal `build`, compiler inspection, and semantic test executio
 
 The Go frontend currently exposes stable current-workspace commands
 `fairyc check [--locked]`, `fairyc build [--release] [--locked]`, and
-`fairyc run [--release] [--locked]`, the source-independent
-`fairyc explain <diagnostic-code>` lookup, the host-independent `fairyc targets` maturity report,
+`fairyc run [--release] [--locked]`, plus the stable source-independent
+`fairyc explain <diagnostic-code>` lookup. The host-independent `fairyc targets` maturity report,
 plus `fairyc experimental parse <file.fy>`,
 `fairyc experimental check-syntax <file.fy>`, and
 `fairyc experimental check-semantics <file.fy> [<file.fy>...]`. The complete implemented
@@ -208,10 +208,10 @@ stdin, a `--` delimiter, retained build output, and cache policy are not admitte
 and emit commands remain unimplemented.
 
 `fairyc explain` accepts one exact uppercase `Edddd`, `Adddd`, or `Vdddd` code and writes its
-prototype meaning, category, and catalog identity without reading source, configuration, or the
+reserved meaning, category, and catalog identity without reading source, configuration, or the
 current directory. It performs no toolchain discovery, target probe, process execution, network
 request, or write. The output explicitly marks the catalog provisional; a successful lookup does
-not claim that the diagnostic is implemented, fixture-backed, released, or stable. Listing, fuzzy
+not claim that the diagnostic is implemented, fixture-backed, or released. Listing, fuzzy
 search, JSON, localization, and repair guidance remain unimplemented.
 
 `fairyc targets` accepts no arguments and deterministically lists every declared TargetSpec with

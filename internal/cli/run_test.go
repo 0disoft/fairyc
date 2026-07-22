@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/0disoft/fairyc/internal/diagnostic"
 	"github.com/0disoft/fairyc/internal/source"
 )
 
@@ -921,6 +922,23 @@ func TestExplainReportsReservedDiagnosticWithoutReadingSource(t *testing.T) {
 		"Catalog: fairyc.diagnostic-catalog/v0 (provisional Stage 0)\n"
 	if code != ExitSuccess || stdout != want || stderr != "" {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
+func TestExplainRendersEveryCatalogEntryThroughStableShape(t *testing.T) {
+	t.Parallel()
+	for _, entry := range diagnostic.CatalogEntries() {
+		code, stdout, stderr := runForTest([]string{"explain", entry.Code}, t.TempDir())
+		want := fmt.Sprintf(
+			"%s: %s\nCategory: %s\nCatalog: %s (provisional Stage 0)\n",
+			entry.Code,
+			entry.Meaning,
+			entry.Category,
+			diagnostic.CatalogVersion,
+		)
+		if code != ExitSuccess || stdout != want || stderr != "" {
+			t.Fatalf("Run(%s) = code %d, stdout %q, stderr %q; want %q", entry.Code, code, stdout, stderr, want)
+		}
 	}
 }
 
