@@ -73,4 +73,11 @@ The first implementation prerequisite now exists: stable type spellings rebind r
 fresh build's canonical HIR types through an exact one-to-one `PackageInstanceId` map. Built-ins,
 borrows, raw pointers, fixed arrays, `Option`, `Result`, and nominal types round-trip across package
 renumbering; unknown, duplicate, or malformed identities fail closed. Function-body encoding,
-local-ID allocation, call rebinding, and cross-process execution evidence remain in this gate.
+call rebinding, and cross-process execution evidence remain in this gate.
+
+Function-local graph numbering is now independently normalizable as the next prerequisite. Locals
+become dense by semantic traversal order and can be rebound into a caller-selected fresh range with
+overflow and closure checks. Blocks normalize to the zero-based dense indexes required by verified
+MIR and are not shifted. The checked-in package workspace still passes `mir.Verify`, executes to
+`42`, and preserves region-local entity links after local rebinding. These helpers are not yet a
+serialized function-body artifact.
