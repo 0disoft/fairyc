@@ -3797,7 +3797,11 @@ func (e *emitter) emitSwitch(output *strings.Builder, functionIndex int, termina
 		if err != nil {
 			return fmt.Errorf("checked byte-view slice end in %s: %w", function.Name, err)
 		}
-		fmt.Fprintf(output, "    if ((%s) > (%s) || (%s) > (%s).length) { fy_pending_trap = FY_TRAP_BOUNDS; goto fy_b_%d; }\n", startValue, endValue, endValue, receiverValue, failure)
+		if start.Kind == mir.OperandUSize && start.U64 == 0 {
+			fmt.Fprintf(output, "    if ((%s) > (%s).length) { fy_pending_trap = FY_TRAP_BOUNDS; goto fy_b_%d; }\n", endValue, receiverValue, failure)
+		} else {
+			fmt.Fprintf(output, "    if ((%s) > (%s) || (%s) > (%s).length) { fy_pending_trap = FY_TRAP_BOUNDS; goto fy_b_%d; }\n", startValue, endValue, endValue, receiverValue, failure)
+		}
 		fmt.Fprintf(output, "    goto fy_b_%d;\n", success)
 	case "checked-shift":
 		_, amount, err := twoOperands(terminator.SwitchOperands)

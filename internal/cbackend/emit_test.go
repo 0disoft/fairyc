@@ -537,6 +537,33 @@ fn i32 main() {
 	}
 }
 
+func TestEmitWholeImmutableByteViewSliceOmitsTautologicalZeroStartCheck(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn i32 main() {
+    let ref u8[] bytes = b"fairy"[..];
+    return if (bytes.len == 5 && bytes[0] == 102) { 42 } else { 1 };
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, required := range []string{
+		").length) { fy_pending_trap = FY_TRAP_BOUNDS;",
+		"(fy_byte_slice){ .data = ",
+		".data + (",
+		".length = (",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+	if strings.Contains(unit.Source, "((uintptr_t)UINT64_C(0))) >") {
+		t.Fatalf("generated C retains an always-false unsigned zero-start comparison:\n%s", unit.Source)
+	}
+}
+
 func TestEmitValuePreservingIntegerCast(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

@@ -28,6 +28,9 @@ materialized once.
    does not create an unchecked or optimizer-only path.
 6. The interpreter and C emitter consume only normalized MIR. Generated C reads the receiver length
    into a local before the existing bounds checks and performs no pointer derivation on failure.
+   When normalized MIR carries the literal `usize` zero for an omitted start, the C emitter omits
+   the tautological unsigned `0 > end` comparison and retains the required `end > len` check. This
+   target-level simplification does not weaken the verified MIR contract.
 7. Inclusive ranges, omitted-range syntax outside immutable byte-view slicing, mutable slicing,
    indexed assignment, `str` slicing or indexing, and general collection slicing remain deferred.
 8. The interpreter fixture contract grows from 84 to 87 cases. C emission remains 29 cases and the
@@ -40,6 +43,7 @@ materialized once.
 - Prefix, suffix, and whole-view slicing no longer require boilerplate bounds.
 - Omitted-end lowering remains single-evaluation even when receivers later become effectful.
 - The verified MIR and generated-C safety shape do not gain a second slice operation family.
+- Whole-view and prefix slices compile cleanly under GCC `-Wtype-limits` with warnings as errors.
 
 ## References
 
