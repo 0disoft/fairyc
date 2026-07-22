@@ -78,7 +78,8 @@ unsigned right shift execute across trapping and
 The sibling `experimental check` command accepts the same bounded explicit source closure but
 requires no executable entry and stops after MIR verification. It validates admitted libraries and
 FFI wrappers without interpreter, backend, target, toolchain, process, network, or artifact access;
-release-stable `fairyc check` semantics remain a later gate.
+ADR 0175 later promotes the package-aware current-workspace spelling to stable `fairyc check` while
+retaining this explicit-source command as an experimental developer surface.
 
 Verified resource definitions now preserve ordered fields and
   drop classification from AST through HIR into MIR; nonempty user drop bodies now lower to
@@ -415,12 +416,13 @@ explicit filesystem-safe workspace/member/source loading and root-reachable feat
 construction. ADR 0145 then fixes canonical generated `fairy.lock` v1, full identity revalidation,
 stale-workspace comparison, and atomic replacement. ADR 0147 adds exact compiler-bundled SDK
 standard-library injection and closed SDK lock records.
-The unstable `experimental check-workspace` now connects those contracts to package-aware semantic
-analysis and verified MIR with ordinary refresh and no-write `--locked` behavior. ADR 0148 adds
+The unstable `experimental check-workspace` first connected those contracts to package-aware
+semantic analysis and verified MIR with ordinary refresh and no-write `--locked` behavior. ADR 0175
+now exposes that bounded current-workspace policy as stable `fairyc check [--locked]`. ADR 0148 adds
 `experimental build-workspace` and `run-workspace`: the root package's qualified `main::main`
 crosses the existing Windows C/MSVC path, both profiles produce and execute the checked-in
-two-package quickstart, and a separately built compiler performs a locked run. Stable command
-spelling still remains.
+two-package quickstart, and a separately built compiler performs a locked run. Their stable command
+spellings and policies still remain.
 
 ADR 0152 now removes disposable HIR package numbering from compiler-private function identities.
 The exact package-instance map, logical name, canonical signature types, effects, and drop-glue type
@@ -537,7 +539,8 @@ quarantines, without selecting a default policy or making a speed claim.
   declared reference environment, and an accepted decision rule justify an ordinary-command cache
   path and defaults. The crash/power-interruption safety boundary and configured local cold/warm
   distributions now exist; physical media retention remains storage-stack-specific.
-- Stabilize the minimal `fairyc check`, `build`, `run`, `test`, `emit`, `explain`, and `targets` contracts.
+- Keep the implemented `fairyc check [--locked]` v1 contract narrow, then stabilize minimal
+  `build`, `run`, `test`, `emit`, `explain`, and `targets` contracts independently.
 - Move to function-level reuse only when measured package rebuild or storage evidence justifies the complexity.
 
 Exit gate: clean and warm build evidence is reproducible on a declared machine and workload; invalidation fixtures distinguish public interface, inline body, and private implementation; incompatible caches are safe misses.

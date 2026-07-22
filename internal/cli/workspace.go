@@ -2,6 +2,7 @@ package cli
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"path/filepath"
@@ -13,12 +14,33 @@ import (
 )
 
 func runWorkspaceCheck(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
-	locked, err := parseOptionalLocked("check-workspace", arguments)
+	locked, err := parseOptionalLocked(`experimental command "check-workspace"`, arguments)
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
+	return checkWorkspace(sourceRoot, locked, false, "workspace check ok", stdout, stderr)
+}
+
+func runStableCheck(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
+	locked, err := parseOptionalLocked(`command "check"`, arguments)
+	if err != nil {
+		return invocationError(stderr, err.Error())
+	}
+	return checkWorkspace(sourceRoot, locked, true, "check ok", stdout, stderr)
+}
+
+func checkWorkspace(sourceRoot string, locked, stable bool, successLabel string, stdout, stderr io.Writer) int {
 	workspace, lockState, err := loadWorkspaceWithLock(sourceRoot, locked)
 	if err != nil {
+		if stable {
+			var loadError *workspaceloader.LoadError
+			if errors.As(err, &loadError) && loadError.Reason == workspaceloader.ReasonSourceSyntax && len(loadError.Diagnostics) != 0 {
+				if writeErr := writeDiagnostics(stderr, loadError.Path, loadError.Source, loadError.Diagnostics); writeErr != nil {
+					return ExitInternalFailure
+				}
+				return ExitSourceDiagnostics
+			}
+		}
 		return packageFailure(stderr, err)
 	}
 	input, err := workspace.SemanticInput()
@@ -44,7 +66,7 @@ func runWorkspaceCheck(arguments []string, sourceRoot string, stdout, stderr io.
 	if !result.Verified {
 		return internalError(stderr)
 	}
-	if _, err := fmt.Fprintf(stdout, "workspace check ok: %d instance(s), %d source file(s), %d MIR function(s), lock %s\n", len(workspace.Graph.Nodes), len(input.Files), len(result.MIR.Functions), lockState); err != nil {
+	if _, err := fmt.Fprintf(stdout, "%s: %d instance(s), %d source file(s), %d MIR function(s), lock %s\n", successLabel, len(workspace.Graph.Nodes), len(input.Files), len(result.MIR.Functions), lockState); err != nil {
 		return outputError(stderr)
 	}
 	return ExitSuccess
@@ -57,7 +79,7 @@ func parseOptionalLocked(command string, arguments []string) (bool, error) {
 	case len(arguments) == 1 && arguments[0] == "--locked":
 		return true, nil
 	default:
-		return false, fmt.Errorf("experimental command %q accepts only optional --locked", command)
+		return false, fmt.Errorf("%s accepts only optional --locked", command)
 	}
 }
 

@@ -311,9 +311,20 @@ C component only for `x86_64-windows-msvc`. The checked-in ADR 0124 module build
 wrapper from only those symbols; it does not stabilize `std::fs` or open linker inputs. `experimental run`
 never binds host symbols and reports the interpreter capability boundary.
 
-The release-stable `fairyc check` remains unimplemented. It must not be aliased to `check-syntax`,
-`check-semantics`, `experimental check`, or `experimental check-workspace`: these paths do not decide
-SDK selection, target-aware checks, configuration, JSON, stable output, or release exit codes.
+## Stable workspace check v1
+
+`fairyc check [--locked]` is the stable current-workspace verification command. It accepts no
+positional sources and loads the strict `fairy.toml` closure under the process source root. Ordinary
+mode creates or refreshes canonical `fairy.lock`; `--locked` requires an exact existing lock and
+writes nothing. The loader selects the bundled SDK only for actual `std::*` imports, and the compiler
+runs package-aware syntax, semantic, Flow, MIR lowering, and MIR verification without requiring an
+entry point or invoking a target, backend, toolchain, cache, network, or child process.
+
+Success is exactly `check ok: <instances> instance(s), <sources> source file(s), <functions> MIR
+function(s), lock <updated|unchanged|verified>`. The command freezes codes 0, 2, 3, 4, and 7 for
+success, invalid invocation, source diagnostics, internal/output failure, and package/manifest/lock
+failure. Stable JSON, target-specific validation, feature selection flags, persistent-cache defaults,
+and configuration precedence remain outside v1.
 
 ## Stage 0 surface
 

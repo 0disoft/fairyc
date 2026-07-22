@@ -27,7 +27,7 @@ regenerate, or override compiler source.
 - Normative Stage 0 grammar: spec/grammar/stage0.ebnf
 - Parser acceptance fixtures: spec/fixtures/parser/manifest-v0.json
 - Stage 0 frontend, verified-MIR coordinator, and MIR implementation: internal/source/, internal/lexer/, internal/syntax/, internal/ast/, internal/frontend/, internal/semantic/, internal/hir/, internal/compiler/, internal/mir/
-- Experimental compiler CLI implementation: cmd/fairyc/, internal/cli/
+- Stable workspace check and experimental compiler CLI implementation: cmd/fairyc/, internal/cli/, docs/adr/0175-stable-workspace-check-v1.md
 - Parser fixture runner: internal/parserfixture/
 - Semantic acceptance fixtures: spec/fixtures/semantic/manifest-v0.json
 - Semantic fixture runner: internal/semanticfixture/

@@ -266,9 +266,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 
 - The Stage 0 compiler is implemented in Go.
 - The Windows smoke must also build `cmd/fairyc` as a standalone temporary `fairyc.exe`, execute its
-  help surface, and use that separate process to compile and run both the checked-in scalar
-  quickstart through `run-target` and exact-output example through `exec-target` for
-  `x86_64-windows-msvc`. The latter must expose exact stdout and process status 42 to the parent.
+  help surface, verify the checked-in workspace with stable `check --locked`, and use that separate
+  process to compile and run both the checked-in scalar quickstart through `run-target` and
+  exact-output example through `exec-target` for `x86_64-windows-msvc`. The latter must expose exact
+  stdout and process status 42 to the parent.
   This proves the bootstrap process boundary only: the compiler is still Go-built, the artifacts
   are removed, and no self-hosting, installation, distribution, or WSL contract follows.
 - The same smoke must build `examples/owned_text/main.fy` with its explicit safe support module at
@@ -424,8 +425,14 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   closure, selects the entry module's `main() -> i32`, and performs no source discovery.
 - Its unstable `experimental check` path accepts one primary source plus the same bounded repeated
   `--source` closure, requires no executable entry, and stops after MIR verification. It performs no
-  backend, target, toolchain, process, network, or artifact action and does not stabilize the future
-  package-aware `fairyc check` command.
+  backend, target, toolchain, process, network, or artifact action. It remains distinct from stable
+  package-aware `fairyc check`.
+- Stable `fairyc check [--locked]` loads the current directory's strict manifest-owned local
+  workspace, selects the compiler-bundled SDK only when imported, maintains canonical `fairy.lock`
+  in ordinary mode or requires an exact no-write lock in `--locked` mode, and runs the complete
+  package-aware frontend through verified MIR without requiring `main`. Its first version accepts no
+  source paths, target, backend, toolchain, profile, cache, JSON, network, stdin, or configuration
+  override.
 - Its fixture-only output hooks require explicit manifest bindings, capture bytes in memory under a
   shared limit, and never authorize source names, the CLI, or host streams.
 - The current C backend emits deterministic C11 only for verified scalar, inert-struct,
@@ -593,9 +600,11 @@ ADR 0145 fixes generated `fairy.lock` as canonical JSON. It records root-reachab
 instance tuples and edges, recomputes every PackageInstanceId and source digest, detects workspace
 staleness, and atomically replaces only canonical validated bytes.
 
-`experimental check-workspace` is the first end-to-end consumer: it assigns build-local package IDs,
-binds resolved imports, runs package-aware semantic, Flow, MIR lowering, and verification, and either
-refreshes the canonical lock or requires an exact no-write `--locked` match. It emits no native code.
+`experimental check-workspace` was the first end-to-end consumer: it assigns build-local package
+IDs, binds resolved imports, runs package-aware semantic, Flow, MIR lowering, and verification, and
+either refreshes the canonical lock or requires an exact no-write `--locked` match. ADR 0175 exposes
+the same current-workspace boundary as stable `fairyc check [--locked]` with a versioned narrow
+argument, output, and exit-code contract. It emits no native code.
 
 ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
@@ -630,7 +639,9 @@ receipt. Linux pass cases feed the configured Clang/GCC native probe. The eight 
 feed a separate local x64 MSVC C11 probe at low and optimized profiles; this is not complete Windows
 layout coverage or a hosted receipt.
 
-Formatting, checking, testing, documentation, vendoring, binding generation, and ABI inspection are planned tool surfaces, not claims of current implementation.
+Formatting, testing, documentation, vendoring, binding generation, and ABI inspection remain planned
+tool surfaces rather than claims of current implementation. Checking has one implemented stable
+surface: the bounded current-workspace `fairyc check [--locked]` contract above.
 
 ## Compatibility
 

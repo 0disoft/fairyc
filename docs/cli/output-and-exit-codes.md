@@ -24,6 +24,12 @@ This repository type owns command behavior, arguments, flags, config loading, ex
 
 ## Prototype frontend v0
 
+`fairyc check [--locked]` stabilizes a bounded subset of the numeric taxonomy: `0` success, `2`
+invalid invocation, `3` source diagnostics, `4` internal or output failure, and `7` package,
+manifest, or lock failure. Success writes exactly one `check ok:` line documented by ADR 0175;
+failures emit no partial success. Workspace syntax errors retain their ordinary diagnostic codes and
+positions on stderr instead of being collapsed into package failure text. No stable JSON mode exists.
+
 The implemented `fairyc explain`, `fairyc targets`, and `fairyc experimental` commands use
 provisional process codes only for prototype automation. They are not the stable exit-code taxonomy:
 

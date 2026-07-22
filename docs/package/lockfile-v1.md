@@ -28,7 +28,8 @@ The library does not decide whether a CLI invocation may refresh a missing/stale
 selects one compiler-bundled Stage 0 SDK package without filesystem discovery; public stable build
 policy remains separate.
 
-The unstable `experimental check-workspace` supplies the first narrow policy: ordinary mode
-refreshes after a valid graph exists; `--locked` requires an exact match and never writes. This does
-not settle the future stable build/check policy. ADR 0148's `build-workspace` and `run-workspace`
-reuse exactly that policy before package-aware Windows compilation.
+The unstable `experimental check-workspace` supplied the first narrow policy: ordinary mode
+refreshes after a valid graph exists; `--locked` requires an exact match and never writes. ADR 0175
+adopts exactly that policy for stable `fairyc check [--locked]`. Stable build policy remains
+separate. ADR 0148's experimental `build-workspace` and `run-workspace` reuse the same lock behavior
+before package-aware Windows compilation.

@@ -352,9 +352,10 @@ inspect the declared target specification, or interpret an explicit source-root-
 closure. Its bounded foreground `check-workspace-session` command can keep one process-local
 verified-MIR cache across sequential caller-triggered checks; it is not a daemon, watcher,
 persistent cache, or stable editor protocol. Program commands use one entry plus repeated
-`--source`; semantic checking uses its explicit positional module set. There is no stable CLI, user drop-body execution, complete runtime,
-safe standard library, package manager, supported target, release-stable CLI, or stable language
-revision yet.
+`--source`; semantic checking uses its explicit positional module set. The first stable workspace
+command is `fairyc check [--locked]`; stable build/run/test/emit commands, user drop-body execution,
+a complete runtime, safe standard library, package manager, supported target, release-stable CLI as
+a whole, and a stable language revision do not exist yet.
 
 ## Try the current prototype
 
@@ -378,6 +379,8 @@ go run ./cmd/fairyc experimental check examples/run/modules/main.fy --source exa
 go run ./cmd/fairyc experimental check-workspace
 go run ./cmd/fairyc experimental check-workspace --locked
 Push-Location examples/workspace_quickstart
+go run ../../cmd/fairyc check
+go run ../../cmd/fairyc check --locked
 go run ../../cmd/fairyc experimental check-workspace
 go run ../../cmd/fairyc experimental run-workspace --locked --target x86_64-windows-msvc --profile optimized
 Pop-Location
@@ -447,8 +450,9 @@ addition, subtraction, multiplication, negation, matching-type bitwise operation
 signed or unsigned right shift. It performs no source
 discovery and needs no C toolchain, MSVC, WSL, or host subprocess, and reports either `result: <i32>` or a canonical
 trap. The official
-release-stable `fairyc check` command remains unavailable; `experimental check` does not settle
-package discovery, targets, configuration, JSON, or stable output and exit codes.
+stable `fairyc check [--locked]` command now checks the current `fairy.toml` workspace through
+verified MIR and maintains or verifies `fairy.lock`. `experimental check` remains the explicit-file
+developer surface; stable targets, JSON, and broader configuration are still separate work.
 
 `experimental target-spec` accepts exactly one known Linux GNU or Windows MSVC ID and writes
 deterministic `fairyc.target-spec/v0` JSON. The result separates target semantics from local

@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/ast"
+	"github.com/0disoft/fairyc/internal/diagnostic"
 	"github.com/0disoft/fairyc/internal/frontend"
 	"github.com/0disoft/fairyc/internal/packagecontent"
 	"github.com/0disoft/fairyc/internal/packagegraph"
@@ -51,9 +52,11 @@ const (
 
 // LoadError provides stable internal failure categories without freezing public diagnostics.
 type LoadError struct {
-	Reason string
-	Path   string
-	Detail string
+	Reason      string
+	Path        string
+	Detail      string
+	Source      []byte
+	Diagnostics []diagnostic.Diagnostic
 }
 
 func (e *LoadError) Error() string {
@@ -328,7 +331,11 @@ func loadPackage(packagePath, directory, sourceRoot string, manifest projectmani
 			return Package{}, &LoadError{Reason: ReasonSourceSyntax, Path: portablePath(packagePath, sourceRoot, absolute), Detail: err.Error()}
 		}
 		if analysis.AST == nil || len(analysis.Tree.Diagnostics) != 0 {
-			return Package{}, &LoadError{Reason: ReasonSourceSyntax, Path: portablePath(packagePath, sourceRoot, absolute), Detail: fmt.Sprintf("parser diagnostics: %+v", analysis.Tree.Diagnostics)}
+			return Package{}, &LoadError{
+				Reason: ReasonSourceSyntax, Path: portablePath(packagePath, sourceRoot, absolute),
+				Detail: fmt.Sprintf("parser diagnostics: %+v", analysis.Tree.Diagnostics),
+				Source: slices.Clone(contents), Diagnostics: slices.Clone(analysis.Tree.Diagnostics),
+			}
 		}
 		if previous, duplicate := modulePaths[analysis.AST.Path]; duplicate {
 			return Package{}, &LoadError{Reason: ReasonDuplicateModule, Path: analysis.AST.Path, Detail: fmt.Sprintf("declared by %q and %q", previous, relative)}

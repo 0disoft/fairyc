@@ -14,9 +14,9 @@ interpreter-supported behavior. A library module or FFI wrapper can therefore be
 while `run` rejects execution. Using `emit-c` as a check would add backend capability requirements
 and dump a translation unit.
 
-The future release-stable `fairyc check` still needs target, configuration, package, output, and
-compatibility decisions. An experimental command can expose the implemented verified-MIR boundary
-without pretending those decisions are settled.
+At the time of this decision, release-stable `fairyc check` still needed target, configuration,
+package, output, and compatibility decisions. An experimental command could expose the implemented
+verified-MIR boundary without pretending those decisions were settled.
 
 ## Decision
 
@@ -51,3 +51,9 @@ without pretending those decisions are settled.
 - complete Go test, build, and vet intents cover shared-pipeline regressions;
 - the Windows standalone compiler smoke checks the synchronized help surface without WSL;
 - no Linux, network, artifact, database, or release action is required.
+
+## Follow-up
+
+ADR 0175 later stabilizes the distinct package-aware `fairyc check [--locked]` current-workspace
+command. This ADR continues to own only the explicit-source experimental spelling and remains
+historical evidence for why it did not silently become the stable command.

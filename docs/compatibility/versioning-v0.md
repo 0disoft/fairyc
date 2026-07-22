@@ -178,8 +178,11 @@ forms. These are pre-1 source and internal-IR additions; mutable slicing, public
 safe references, and stable MIR serialization remain absent.
 ADR 0127 adds the provisional `experimental check` spelling, explicit primary-plus-source closure,
 and one human verified-MIR count line. These are prototype CLI contracts only. They do not stabilize
-the future package-aware `fairyc check`, configuration, target selection, JSON, exit codes, or
-function-count meaning.
+the later package-aware command, configuration, target selection, JSON, exit codes, or
+function-count meaning. ADR 0175 separately stabilizes only `fairyc check [--locked]` as a
+current-workspace command, its one count-and-lock-state success line, and exit codes 0, 2, 3, 4, and
+7. Adding target/config/cache/JSON flags, changing lock writes, or changing those meanings requires a
+new compatibility decision.
 ADR 0131 adds example-level move-only String/CString wrappers, typed source errors, and five opaque
 storage bridges plus borrowed-resource field-read transport. These are pre-1 source, MIR, and
 runtime-example contracts. ADR 0135 adds the two exact owner-bound text raw-parts built-ins,

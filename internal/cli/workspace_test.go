@@ -1,10 +1,12 @@
 package cli
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/0disoft/fairyc/internal/lockfile"
 	"github.com/0disoft/fairyc/internal/sdkstdlib"
@@ -59,6 +61,81 @@ source = "src"
 	code, stdout, stderr = runForTest([]string{"experimental", "check-workspace"}, root)
 	if code != ExitSuccess || !strings.HasSuffix(stdout, "lock updated\n") || stderr != "" {
 		t.Fatalf("refresh check = (%d, %q, %q)", code, stdout, stderr)
+	}
+}
+
+func TestStableCheckOwnsTheCurrentWorkspaceAndLockContract(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeWorkspaceFile(t, root, "fairy.toml", `schema = "fairyc.manifest/v1"
+[package]
+uid = "example.stable-check.app"
+name = "app"
+version = "1.0.0"
+language = "fairyc-language/0"
+source = "src"
+`)
+	writeWorkspaceFile(t, root, "src/main.fy", "module main;\nfn i32 answer() { return 42; }\n")
+
+	code, stdout, stderr := runForTest([]string{"check"}, root)
+	if code != ExitSuccess || stdout != "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock updated\n" || stderr != "" {
+		t.Fatalf("stable check = (%d, %q, %q)", code, stdout, stderr)
+	}
+	lockPath := filepath.Join(root, lockfile.FileName)
+	lockBytes, err := os.ReadFile(lockPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	lockTimestamp := time.Unix(1_700_000_000, 0)
+	if err := os.Chtimes(lockPath, lockTimestamp, lockTimestamp); err != nil {
+		t.Fatal(err)
+	}
+	code, stdout, stderr = runForTest([]string{"check", "--locked"}, root)
+	if code != ExitSuccess || stdout != "check ok: 1 instance(s), 1 source file(s), 1 MIR function(s), lock verified\n" || stderr != "" {
+		t.Fatalf("stable locked check = (%d, %q, %q)", code, stdout, stderr)
+	}
+	lockedBytes, err := os.ReadFile(lockPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	lockedInfo, err := os.Stat(lockPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(lockedBytes, lockBytes) || !lockedInfo.ModTime().Equal(lockTimestamp) {
+		t.Fatalf("locked check modified fairy.lock: bytesEqual=%t modTime=%s", bytes.Equal(lockedBytes, lockBytes), lockedInfo.ModTime())
+	}
+	var outputError bytes.Buffer
+	code = Run([]string{"check", "--locked"}, root, failingWriter{}, &outputError)
+	if code != ExitInternalFailure || !strings.Contains(outputError.String(), "write output failed") {
+		t.Fatalf("stable check output failure = (%d, %q)", code, outputError.String())
+	}
+	code, stdout, stderr = runForTest([]string{"check", "extra"}, root)
+	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, `command "check" accepts only optional --locked`) {
+		t.Fatalf("invalid stable check = (%d, %q, %q)", code, stdout, stderr)
+	}
+}
+
+func TestStableCheckPreservesPackageAndSourceFailureCategories(t *testing.T) {
+	t.Parallel()
+	code, stdout, stderr := runForTest([]string{"check"}, t.TempDir())
+	if code != ExitPackageFailure || stdout != "" || !strings.Contains(stderr, "fairy.toml") {
+		t.Fatalf("missing stable workspace = (%d, %q, %q)", code, stdout, stderr)
+	}
+
+	root := t.TempDir()
+	writeWorkspaceFile(t, root, "fairy.toml", `schema = "fairyc.manifest/v1"
+[package]
+uid = "example.stable-check.invalid"
+name = "invalid"
+version = "1.0.0"
+language = "fairyc-language/0"
+source = "src"
+`)
+	writeWorkspaceFile(t, root, "src/main.fy", "module main;\nfn i32 broken( { return 0; }\n")
+	code, stdout, stderr = runForTest([]string{"check"}, root)
+	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "E0007") {
+		t.Fatalf("stable source diagnostics = (%d, %q, %q)", code, stdout, stderr)
 	}
 }
 

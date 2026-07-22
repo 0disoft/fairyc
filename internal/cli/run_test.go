@@ -901,14 +901,13 @@ func TestRepositoryResourceOptionExampleStaysRunnable(t *testing.T) {
 	}
 }
 
-func TestStableCheckRemainsReserved(t *testing.T) {
+func TestStableCheckRejectsExplicitSourceArguments(t *testing.T) {
 	t.Parallel()
 	code, stdout, stderr := runForTest([]string{"check", "main.fy"}, t.TempDir())
 	if code != ExitInvalidInvocation || stdout != "" {
 		t.Fatalf("Run() = code %d, stdout %q", code, stdout)
 	}
-	if !strings.Contains(stderr, "reserved for the release-stable package-aware pipeline") ||
-		!strings.Contains(stderr, `use "experimental check"`) {
+	if !strings.Contains(stderr, `command "check" accepts only optional --locked`) {
 		t.Fatalf("stderr = %q", stderr)
 	}
 }
@@ -986,7 +985,7 @@ func TestExplainOutputFailureReturnsInternalFailure(t *testing.T) {
 func TestHelpAndInvocationErrorsAreSeparated(t *testing.T) {
 	t.Parallel()
 	helpCode, helpOut, helpErr := runForTest([]string{"--help"}, t.TempDir())
-	if helpCode != ExitSuccess || !strings.Contains(helpOut, "fairyc explain") || !strings.Contains(helpOut, "experimental parse") || !strings.Contains(helpOut, "experimental check <primary.fy>") || !strings.Contains(helpOut, "experimental check-workspace") || !strings.Contains(helpOut, "experimental check-workspace-session") || !strings.Contains(helpOut, "experimental build-workspace") || !strings.Contains(helpOut, "experimental run-workspace") || !strings.Contains(helpOut, "experimental target-spec") || !strings.Contains(helpOut, "experimental emit-c") || !strings.Contains(helpOut, "experimental build") || !strings.Contains(helpOut, "experimental build-target") || !strings.Contains(helpOut, "experimental run-target") || !strings.Contains(helpOut, "experimental exec-target") || !strings.Contains(helpOut, "experimental build-host") || !strings.Contains(helpOut, "experimental run-host") || helpErr != "" {
+	if helpCode != ExitSuccess || !strings.Contains(helpOut, "fairyc check [--locked]") || !strings.Contains(helpOut, "fairyc explain") || !strings.Contains(helpOut, "experimental parse") || !strings.Contains(helpOut, "experimental check <primary.fy>") || !strings.Contains(helpOut, "experimental check-workspace") || !strings.Contains(helpOut, "experimental check-workspace-session") || !strings.Contains(helpOut, "experimental build-workspace") || !strings.Contains(helpOut, "experimental run-workspace") || !strings.Contains(helpOut, "experimental target-spec") || !strings.Contains(helpOut, "experimental emit-c") || !strings.Contains(helpOut, "experimental build") || !strings.Contains(helpOut, "experimental build-target") || !strings.Contains(helpOut, "experimental run-target") || !strings.Contains(helpOut, "experimental exec-target") || !strings.Contains(helpOut, "experimental build-host") || !strings.Contains(helpOut, "experimental run-host") || helpErr != "" {
 		t.Fatalf("help = code %d, stdout %q, stderr %q", helpCode, helpOut, helpErr)
 	}
 	errorCode, errorOut, errorErr := runForTest(nil, t.TempDir())

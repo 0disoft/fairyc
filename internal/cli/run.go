@@ -1,4 +1,4 @@
-// Package cli owns the experimental Stage 0 command-line boundary.
+// Package cli owns the Stage 0 command-line boundary.
 package cli
 
 import (
@@ -32,6 +32,7 @@ const (
 const usage = `Fairy C Stage 0 compiler prototype
 
 Usage:
+  fairyc check [--locked]
   fairyc explain <diagnostic-code>
   fairyc targets
   fairyc experimental parse <file.fy>
@@ -54,8 +55,8 @@ Usage:
   fairyc experimental run <entry.fy> [--source <file.fy>]...
   fairyc --help
 
-The experimental commands are unstable. The release-stable "fairyc check" command remains reserved;
-use "fairyc experimental check" for the current verified-MIR source-closure check.
+The experimental commands are unstable. "fairyc check" is the stable local-workspace verification
+command; it reads fairy.toml and refreshes fairy.lock unless --locked is supplied.
 `
 
 // Run executes one bounded command with an already-closed input stream. Commands that explicitly
@@ -89,7 +90,10 @@ func RunWithInput(args []string, sourceRoot string, stdin io.Reader, stdout, std
 		return runTargets(args[1:], stdout, stderr)
 	}
 	if args[0] == "check" {
-		return invocationError(stderr, `"check" is reserved for the release-stable package-aware pipeline; use "experimental check" for the current verified-MIR source closure`)
+		if len(args) == 2 && isHelp(args[1]) {
+			return writeHelp(stdout, stderr)
+		}
+		return runStableCheck(args[1:], sourceRoot, stdout, stderr)
 	}
 	if args[0] != "experimental" {
 		return invocationError(stderr, fmt.Sprintf("unknown command %q", args[0]))

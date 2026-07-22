@@ -980,6 +980,7 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string, clockResolution in
 		return 0, fmt.Errorf("execute standalone compiler help: %w", err)
 	}
 	if helpCode != cli.ExitSuccess || helpStderr != "" ||
+		!strings.Contains(helpStdout, "fairyc check [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc experimental run-target") ||
 		!strings.Contains(helpStdout, "fairyc experimental exec-target") ||
 		!strings.Contains(helpStdout, "fairyc experimental check-workspace-session") ||
@@ -987,6 +988,19 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string, clockResolution in
 		!strings.Contains(helpStdout, "fairyc experimental build-workspace") ||
 		!strings.Contains(helpStdout, "fairyc experimental run-workspace") {
 		return 0, fmt.Errorf("standalone compiler help returned code %d, stdout %q, stderr %q", helpCode, helpStdout, helpStderr)
+	}
+
+	checkCode, checkStdout, checkStderr, err := runStandaloneCommand(
+		sourceRoot,
+		executablePath,
+		"check", "--locked",
+	)
+	if err != nil {
+		return 0, fmt.Errorf("execute standalone compiler stable workspace check: %w", err)
+	}
+	if checkCode != cli.ExitSuccess || checkStderr != "" ||
+		checkStdout != "check ok: 2 instance(s), 2 source file(s), 2 MIR function(s), lock verified\n" {
+		return 0, fmt.Errorf("standalone compiler stable check returned code %d, stdout %q, stderr %q", checkCode, checkStdout, checkStderr)
 	}
 
 	runCode, runStdout, runStderr, err := runStandaloneCommand(

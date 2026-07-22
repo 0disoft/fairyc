@@ -19,9 +19,9 @@ Only `check`, a minimal `build`, compiler inspection, and semantic test executio
 
 ## Current prototype
 
-The Go frontend currently exposes the source-independent
-`fairyc explain <diagnostic-code>` lookup, the host-independent `fairyc targets` maturity report,
-plus `fairyc experimental parse <file.fy>`,
+The Go frontend currently exposes the stable current-workspace command
+`fairyc check [--locked]`, the source-independent `fairyc explain <diagnostic-code>` lookup, the
+host-independent `fairyc targets` maturity report, plus `fairyc experimental parse <file.fy>`,
 `fairyc experimental check-syntax <file.fy>`, and
 `fairyc experimental check-semantics <file.fy> [<file.fy>...]`. The complete implemented
 non-executing pipeline is `fairyc experimental check <primary.fy> [--source <file.fy>]...`.
@@ -177,8 +177,17 @@ subset. Windows reports `scalar-and-llp64-c-scalar-c11`. Both keep `emittable`, 
 their own missing evidence.
 The interpreter fixture's in-memory byte hooks require manifest options that this CLI never accepts;
 declaring a similarly named Fairy C function does not grant output authority.
-Infinite execution is stopped by the bounded interpreter and reported as an unsupported-capability result rather than a language trap. In
-particular, it does not satisfy the planned `fairyc check` contract.
+Infinite execution is stopped by the bounded interpreter and reported as an unsupported-capability
+result rather than a language trap. It is separate from stable `fairyc check`, which never executes
+the program.
+
+`fairyc check [--locked]` loads the current directory's strict `fairy.toml`, its explicit local
+members, complete source closure, and compiler-bundled SDK package when imported. It runs the
+package-aware frontend through verified MIR without requiring `main`, selecting a target, invoking a
+backend or toolchain, starting a subprocess, using a cache, or accessing the network. Ordinary mode
+creates or updates canonical `fairy.lock` only after a valid workspace exists; `--locked` requires an
+exact existing lock and writes nothing. No positional source, target, profile, JSON, cache, or config
+flag is accepted in v1. Stable build, run, test, and emit commands remain unimplemented.
 
 `fairyc explain` accepts one exact uppercase `Edddd`, `Adddd`, or `Vdddd` code and writes its
 prototype meaning, category, and catalog identity without reading source, configuration, or the
