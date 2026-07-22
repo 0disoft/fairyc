@@ -28,7 +28,7 @@ sample appears would corrupt the distribution.
    timer, and times exactly one subsequent `Session.Check` request.
 4. Preserve all 36 raw observations. Do not emit a percentile, ratio, speedup, regression threshold,
    retry-selected value, or preferred summary.
-5. Observe the clock by collecting 32 positive monotonic transitions within at most 1,000,000
+5. Observe the clock by collecting 32 positive monotonic transitions within at most 10,000,000
    readings and retaining the smallest interval. The loop cooperatively yields to the scheduler
    every 4,096 unchanged observations so a fast busy loop cannot consume the entire observation
    bound before a coarse Windows clock advances. It does not sleep, retry a measured compiler
@@ -68,9 +68,11 @@ values remain observations rather than a reference-machine baseline or speedup d
 
 The same date's first hosted Windows run exposed a calibration defect before any compiler sample:
 the runner consumed 1,000,000 tight-loop reads while observing only 11 of 32 coarse-clock
-transitions. Cooperative scheduler yields now make the observation bound cover clock progress
-instead of assuming loop iterations imply elapsed time. Linux was already green, and this change
-does not select, retry, or rewrite any measured compiler duration.
+transitions. Cooperative scheduler yields improved that to 18, proving the original observation
+bound still encoded host loop speed rather than clock adequacy. The ten-million-read fail-closed
+bound leaves margin for that observed hosted clock without adding sleeps or an elapsed-time guess.
+Linux was already green, and this change does not select, retry, or rewrite any measured compiler
+duration.
 
 This is controlled local invalidation and raw-distribution evidence. It is not a claim that warm
 Fairy C compilation is faster, a representative-machine baseline, a process-memory measurement, a

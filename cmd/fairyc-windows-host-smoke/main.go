@@ -858,7 +858,7 @@ func measureWorkspaceProcessCacheEditSample(sourceRoot, condition string, iterat
 
 func observeMonotonicClockResolution() (int64, error) {
 	const (
-		maximumObservations      = 1_000_000
+		maximumObservations      = 10_000_000
 		requiredTransitions      = 32
 		cooperativeYieldInterval = 4_096
 	)
