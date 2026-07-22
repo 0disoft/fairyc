@@ -198,6 +198,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0186-bounded-canonical-fymap-transport-v1.md`: caller-bounded canonical JSON maps, domain-separated checksums, strict decoding, and declaration-to-SymbolId revalidation.
 - `0187-contained-fymap-store-and-current-source-validation.md`: opened-root immutable map generations, caller retention bounds, interruption-safe observation, and exact current-workspace acceptance.
 - `0188-bounded-current-fymap-queries.md`: exact-current SymbolId lookup plus record/relation/depth/byte-bounded package-local overview, show, and around queries with explicit incomplete joins.
+- `0189-canonical-compiler-fact-context-pack-v1.md`: output-only bounded canonical JSON packs with exact query provenance, explicit omissions, empty text sections, and domain-separated integrity checksums.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

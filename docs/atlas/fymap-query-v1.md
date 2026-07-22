@@ -72,7 +72,8 @@ or safe-change claims.
 
 ## Not enabled
 
-- no Context Pack encoder or stable query wire schema;
+- no query-result decoder or standalone stable query wire schema; the output-only compiler-fact
+  Context Pack is separately owned by `docs/atlas/context-pack-v1.md`;
 - no source excerpt or documentation import;
 - no dependency-map join or workspace-wide reverse index;
 - no `impact`, semantic `diff`, LSP, SCIP, MCP, or structural edit behavior;

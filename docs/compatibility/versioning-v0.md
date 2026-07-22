@@ -518,6 +518,13 @@ codes, and compact-JSON selection accounting are pre-release internal policy, no
 CLI promise. Dependency joins, Context Pack encoding, source excerpts, and cross-version query
 migration remain absent.
 
+ADR 0189 independently fixes output version `fairyc.context-pack/v1`, encoding
+`fairyc.context-pack-json/v1`, checksum `fairyc.context-pack-checksum/v1-sha256`, and the exact
+compiler-fact envelope field order. The output retains package/map/query/budget/completeness and
+omission identity while requiring empty documentation, source-excerpt, and warning arrays. It is
+pre-release internal output: no decoder, cross-version acceptance, text import, default location, or
+CLI stability is promised.
+
 Dependency handling is relation-specific:
 
 | Condition | Atlas behavior |

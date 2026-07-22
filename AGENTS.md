@@ -109,6 +109,7 @@ regenerate, or override compiler source.
 - Bounded canonical `.fymap` transport and checksum: internal/atlasmap/codec*.go, docs/atlas/fymap-transport-v1.md, docs/adr/0186-bounded-canonical-fymap-transport-v1.md
 - Contained bounded `.fymap` store and current-source validation: internal/atlasmap/store.go, internal/atlasmap/current.go, docs/atlas/fymap-store-v1.md, docs/adr/0187-contained-fymap-store-and-current-source-validation.md
 - Bounded exact-current package-local Atlas queries: internal/atlasmap/query.go, docs/atlas/fymap-query-v1.md, docs/adr/0188-bounded-current-fymap-queries.md
+- Canonical compiler-fact-only Atlas Context Pack output: internal/contextpack/, docs/atlas/context-pack-v1.md, docs/adr/0189-canonical-compiler-fact-context-pack-v1.md
 - Validation: VALIDATION.md
 - Agent routing: .agents/context-map.md
 - Repository hygiene: .editorconfig, .gitattributes, .gitignore

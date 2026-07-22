@@ -1,88 +1,124 @@
 # Atlas Context Pack v1
 
-- Status: Proposed; bounded query inputs exist, but no Context Pack implementation exists
-- Map source: `docs/atlas/fymap-v1.md`
-- Decision source: `docs/adr/0004-atlas-semantic-snapshot-boundary.md`
+- Status: Implemented internal compiler-fact-only encoder
+- Pack version: `fairyc.context-pack/v1`
+- Encoding: `fairyc.context-pack-json/v1`
+- Checksum: `fairyc.context-pack-checksum/v1-sha256`
+- Implementation: `internal/contextpack/`
+- Decision: `docs/adr/0189-canonical-compiler-fact-context-pack-v1.md`
+- Query source: `docs/atlas/fymap-query-v1.md`
 
-## Purpose
+## Purpose and boundary
 
-A context pack is a deterministic, bounded query result for a human, IDE, CI job, or LLM tool. It makes included facts, optional text, uncertainty, and omitted material explicit. It is data, not an instruction or authority token.
+A Context Pack is deterministic bounded data for a human, IDE, CI job, or LLM-facing tool. It is
+not an instruction, prompt, permission, tool authority, or claim that an incomplete graph is
+complete.
 
-## Logical shape
+The v1 encoder accepts a current `atlasmap.QueryIndex`, a query request, the query's mandatory
+record/relation/depth/selection-byte budget, and a separate positive final-pack byte limit. It runs
+`overview`, `show`, or `around` itself; it does not accept a caller-mutated result presented as
+compiler truth. Query-index construction has already required exact map transport, source, file,
+line-map, compiler, and public-interface compatibility.
 
-A pack contains:
+The encoder performs no filesystem access, source loading, dependency discovery, process execution,
+network request, model call, tokenizer call, or compiler feedback.
+
+## Canonical envelope
+
+The exact top-level field order is:
 
 ```text
 pack_version
-map_version
-package_identity
-query
-budget
-completeness
-facts[]
-relations[]
-documentation[]
-source_excerpts[]
-omissions[]
-warnings[]
+encoding
+checksum_algorithm
+checksum
+pack
 ```
 
-`facts` and `relations` come from compiler provenance. `documentation` and `source_excerpts` remain separately attributed untrusted text. `omissions` identifies budget truncation, missing dependency maps, opaque foreign calls, unsupported relation analysis, and stale or incompatible maps.
+`pack` contains, in order:
 
-## Budget model
+```text
+map_version
+package_identity
+compatibility
+query
+budget
+usage
+completeness
+facts
+relations
+documentation
+source_excerpts
+omissions
+warnings
+```
 
-The pack builder uses deterministic units such as encoded bytes, record count, relation depth, and source-excerpt bytes. It does not claim exact model-token usage or depend on a provider tokenizer. A caller may impose a smaller output limit, but the pack records the budget that actually governed selection.
+`package_identity` retains package UID, exact instance, coordinate, and source digest.
+`compatibility` retains compiler build, language revision, public-interface hash, map generation
+status, and map-level omissions. `query` records kind, canonical subject, direction, and relation
+filter. Exactly one of `facts.overview`, `facts.show`, or `facts.around` is non-null. Relations remain
+separate compiler-observed records rather than being rewritten into prose.
 
-Selection order is deterministic:
+Go's compact JSON encoder over fixed structs defines the only current byte representation. Arrays
+that have no entries encode as `[]`, and disabled fact variants encode as `null`. Field omission,
+pretty printing, key reordering, or another JSON spelling is not this encoding.
 
-1. exact query subject and signature;
-2. direct compiler facts required to interpret it;
-3. bounded incoming and outgoing relations in stable order;
-4. explicitly requested related tests and error paths;
-5. optional source excerpts;
-6. optional documentation, only when requested.
+## Checksum and bounds
 
-When a budget is exhausted, the builder stops at a record boundary and emits an omission. It never silently presents a truncated graph as complete.
+The checksum is `fyctx1-sha256-` plus 64 lowercase hexadecimal digits. SHA-256 hashes a domain and
+version prefix followed by length-prefixed pack version, encoding, and canonical logical `pack`
+bytes. The checksum field itself is excluded. It provides canonical-integrity and corruption
+evidence, not authentication or signer identity.
 
-## Completeness
+Two independent bounds apply:
 
-Completeness reports:
+1. the query budget limits selected logical records, relations, traversal depth, and deterministic
+   selection bytes; and
+2. the pack encoder rejects the complete canonical envelope when it exceeds the caller's positive
+   final byte limit.
 
-- map generation status;
-- resolved, candidate, external, and unknown edge counts;
-- missing or incompatible dependency maps;
-- query depth reached;
-- relation kinds excluded by request or implementation;
-- source or documentation sections omitted by policy or budget.
-
-Completeness is relation-specific. A pack may have complete local ownership facts while calls or unsafe reachability are partial or unavailable because a dependency map, indirect call target, target profile, language revision, or symbol identity is incompatible.
-
-An `impact`-style consumer must propagate this status. It cannot convert `Partial` or `Opaque` evidence into a definitive safe-change claim.
+Selection bytes are not final envelope bytes and neither value claims model-token equivalence.
+Budget stops, relation filters, depth stops, unjoined dependency targets, and unavailable incoming
+package maps remain machine-readable omissions with known counts only where proven.
 
 ## Text safety
 
-Free text is excluded by default. When included:
+Compiler-fact-only v1 always emits empty `documentation`, `source_excerpts`, and `warnings` arrays.
+It does not accept even locally sourced prose. This makes the absence of free text visible and keeps
+source comments, generated summaries, prompt injection, control characters, secrets, absolute host
+paths, and unrelated files outside the first output contract.
 
-- every fragment carries provenance, package identity, file identity, and span or document reference;
-- control characters and invalid encoding are removed or rejected;
-- per-fragment and total byte caps are enforced;
-- no remote URL is fetched;
-- no text is interpreted as permission, tool authority, or a command to execute;
-- model-generated summaries remain `GeneratedDocumentation`, never `CompilerObserved`.
-
-## Source excerpts
-
-Source excerpts are opt-in, span-bounded views into the caller-authorized workspace. `.fymap` stores spans and the independent `fysrc1-sha256` package source digest, not source bodies. If the digest no longer matches the current package source graph, the excerpt is omitted and reported stale.
+A later attributed-text capability requires a new explicit schema decision covering source/file
+identity, span or document reference, UTF-8 and control filtering, per-fragment and total byte caps,
+stale-source rejection, provenance, and the rule that text grants no authority. It cannot silently
+start populating these v1 arrays.
 
 ## Determinism and privacy
 
-Identical map, query, policy, and budget inputs produce byte-identical logical content before optional transport formatting. Stable ordering uses semantic identity, not filesystem traversal or Go map order.
+Identical current map, query, budgets, and encoder version produce byte-identical output and
+checksum. Query ordering uses semantic identity and deterministic breadth-first traversal, never Go
+map iteration or filesystem order.
 
-Packs exclude absolute local paths, credentials, environment variables, build logs, cache locations, unrelated source, and generated artifacts unless a separate explicit product contract permits a bounded field.
+Packs exclude source bodies, documentation bodies, absolute local paths, credentials, environment
+variables, build logs, cache locations, timestamps, unrelated source, and generated artifacts.
 
-## Initial query support
+## Implemented query support
 
-The implemented package-local `overview`, `show`, and `around` results may feed a future Context Pack
-builder. They already expose deterministic selection budgets and omissions, but no pack envelope,
-source excerpt, documentation section, or stable pack encoding exists. `impact` and `diff` remain
-schema consumers under design, not Stage 0 implementation promises.
+- `overview` packs the exact header and declaration-kind counts plus budget-selected completeness
+  and module records.
+- `show` packs one exact visible SymbolId subject, its declaration/function facts, completeness, and
+  bounded relations.
+- `around` packs one exact subject, bounded breadth-first local nodes, relations, completeness, and
+  omissions.
+
+Dependency-map joins and workspace-wide reverse callers remain absent, so their omissions survive
+unchanged into the pack. `impact` and semantic `diff` remain deferred.
+
+## Not enabled
+
+- no Context Pack decoder or acceptance of untrusted pack bytes;
+- no source excerpt, documentation import, generated summary, or warning producer;
+- no dependency-map join, workspace-wide index, name search, fuzzy match, or rename inference;
+- no stable or experimental CLI command, default map path, or automatic publication;
+- no LSP, SCIP, MCP, structural edit, agent permission, embedding, or vector database behavior; and
+- no output-token, latency, retained-size, rewrite-speed, or safe-change claim.

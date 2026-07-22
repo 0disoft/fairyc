@@ -513,8 +513,10 @@ conflicting generations, and requires exact current workspace package/file/line-
 and interface identities before returning spans. The internal query index repeats that freshness
 check, accepts only exact SymbolIds, and implements deterministic caller-bounded `overview`, `show`,
 and package-local `around` queries with explicit filter, depth, byte, dependency-join, and incoming-
-map omissions. No Atlas command, default store policy, dependency-map join, source excerpt, or
-Context Pack encoder exists yet.
+map omissions. `internal/contextpack` now runs those queries directly and emits caller-bounded,
+checksummed canonical `fairyc.context-pack-json/v1` with exact package/compatibility/query/budget/
+usage/completeness/fact/relation/omission fields and visibly empty text sections. No Atlas command,
+default store policy, dependency-map join, source excerpt, pack decoder, or text importer exists yet.
 
 `experimental target-spec` accepts exactly one known Linux GNU or Windows MSVC ID and writes
 deterministic `fairyc.target-spec/v0` JSON. The result separates target semantics from local
@@ -597,7 +599,7 @@ or arbitrary link-input option.
 - Runtime and standard library: `docs/runtime/runtime-stdlib-v0.md`
 - Compatibility and versioning: `docs/compatibility/versioning-v0.md`
 - Diagnostic catalog: `docs/diagnostics/catalog-v0.md`
-- Atlas semantic snapshot, provisional SymbolId, logical planning, canonical transport, contained current-source-validated store, and bounded package-local queries: `docs/atlas/`, `internal/atlasmap/`
+- Atlas semantic snapshot, provisional SymbolId, logical planning, canonical transport, contained current-source-validated store, bounded package-local queries, and canonical compiler-fact Context Packs: `docs/atlas/`, `internal/atlasmap/`, `internal/contextpack/`
 - CLI contract: `docs/cli/command-contract.md`
 - Workspace ownership: `docs/monorepo/package-ownership.md`
 

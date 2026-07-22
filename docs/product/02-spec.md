@@ -758,12 +758,21 @@ has explicit record, relation, traversal-depth, and deterministic selection-byte
 targets may extend traversal; dependency targets retain exact declaration descriptors without an
 invented SymbolId, and unavailable cross-package incoming calls remain explicit omissions. Results
 contain compiler facts only and are detached from the index. No source excerpt, documentation text,
-dependency join, Context Pack envelope, stable query transport, or command is enabled.
+dependency join, stable standalone query transport, or command is enabled.
+
+The first Context Pack encoder now runs those exact-current queries itself and emits one separately
+byte-bounded compact `fairyc.context-pack-json/v1` envelope. It retains exact package, map,
+compiler/interface, query, budget, usage, completeness, typed fact, relation, and omission data;
+`fairyc.context-pack-checksum/v1-sha256` binds the version, encoding, and canonical logical pack.
+Documentation, source-excerpt, and warning arrays are explicitly empty, so no caller prose can be
+relabelled as compiler truth. The checksum is integrity rather than authentication. No decoder,
+untrusted pack input, text import, model call, token estimate, permission, or command is enabled.
 
 Atlas exports deterministic, model-neutral facts such as symbols, calls, types, ownership transfers, borrows, errors, effects, allocations, unsafe and FFI reachability, source spans, and related tests. Compiler facts and free-text documentation are physically separated and carry provenance. Unknown or incomplete edges remain explicit rather than being guessed.
 
-Stage 0 Atlas work continues from the implemented versioned `.fymap` codec, contained store, and
-bounded package-local queries to a deterministic Context Pack and an explicit command policy.
+Stage 0 Atlas work continues from the implemented versioned `.fymap` codec, contained store,
+bounded package-local queries, and compiler-fact Context Pack to an explicit command policy and a
+separately reviewed attributed-text boundary.
 `impact`, semantic
 `diff`, stable anchor syntax, LSP, SCIP, MCP, structural edits, embeddings, model-generated
 summaries, and a vector database are deferred behind usage and completeness evidence.
@@ -774,8 +783,8 @@ plan are specified in `docs/atlas/semantic-snapshot-v0.md`, `docs/atlas/symbol-i
 `docs/atlas/fymap-logical-plan-v1.md`. The implemented transport is specified in
 `docs/atlas/fymap-transport-v1.md`; the implemented store is specified in
 `docs/atlas/fymap-store-v1.md`; the implemented query layer is specified in
-`docs/atlas/fymap-query-v1.md`, while future command and pack behavior is described by
-`docs/atlas/context-pack-v1.md`.
+`docs/atlas/fymap-query-v1.md`; compiler-fact pack output is specified in
+`docs/atlas/context-pack-v1.md`. Command and attributed-text behavior remain future work.
 
 ## Explicit non-goals
 

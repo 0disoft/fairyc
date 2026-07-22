@@ -137,11 +137,17 @@ type QueryRelation struct {
 }
 
 type QueryContext struct {
-	LogicalSchema   string                          `json:"logical_schema"`
-	PackageInstance string                          `json:"package_instance"`
-	Generation      string                          `json:"generation"`
-	MapOmissions    []string                        `json:"map_omissions"`
-	Completeness    []semanticsnapshot.Completeness `json:"completeness"`
+	LogicalSchema     string                          `json:"logical_schema"`
+	CompilerBuild     string                          `json:"compiler_build"`
+	Language          string                          `json:"language"`
+	PackageUID        string                          `json:"package_uid"`
+	PackageInstance   string                          `json:"package_instance"`
+	PackageCoordinate string                          `json:"package_coordinate"`
+	PackageSource     string                          `json:"package_source"`
+	InterfaceHash     string                          `json:"interface_hash"`
+	Generation        string                          `json:"generation"`
+	MapOmissions      []string                        `json:"map_omissions"`
+	Completeness      []semanticsnapshot.Completeness `json:"completeness"`
 }
 
 type PackageOverview struct {
@@ -530,7 +536,10 @@ func (index *QueryIndex) contextFor(relations []RelationKind) QueryContext {
 		wanted[completenessRelation(relation)] = struct{}{}
 	}
 	context := QueryContext{
-		LogicalSchema: index.header.LogicalSchema, PackageInstance: index.header.PackageInstance,
+		LogicalSchema: index.header.LogicalSchema, CompilerBuild: index.header.CompilerBuild,
+		Language: index.header.Language, PackageUID: index.header.PackageUID,
+		PackageInstance: index.header.PackageInstance, PackageCoordinate: index.header.PackageCoordinate,
+		PackageSource: index.header.PackageSource, InterfaceHash: index.header.InterfaceHash,
 		Generation: index.header.GenerationStatus, MapOmissions: slices.Clone(index.header.Omissions),
 	}
 	for _, completeness := range index.completeness {

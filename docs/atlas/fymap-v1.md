@@ -1,6 +1,6 @@
 # `.fymap` v1 Logical Schema
 
-- Status: Canonical transport, contained current-source-validated store, and bounded package-local queries implemented; commands and Context Pack output remain future work
+- Status: Canonical transport, contained current-source-validated store, bounded package-local queries, and compiler-fact Context Pack output implemented; commands and text import remain future work
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0004-atlas-semantic-snapshot-boundary.md`
 - Snapshot source: `docs/atlas/semantic-snapshot-v0.md`
@@ -8,6 +8,7 @@
 - Transport source: `docs/atlas/fymap-transport-v1.md`
 - Store source: `docs/atlas/fymap-store-v1.md`
 - Query source: `docs/atlas/fymap-query-v1.md`
+- Context Pack source: `docs/atlas/context-pack-v1.md`
 
 ## Boundary
 
@@ -18,7 +19,8 @@ checking. The logical plan itself does not choose transport, while ADR 0186 sepa
 bounded canonical JSON encoding and checksum. ADR 0187 separately fixes an internal opt-in
 contained store and current-source acceptance without choosing a default path or command. ADR 0188
 fixes exact-current package-local `overview`, `show`, and `around` selection without choosing a
-command or Context Pack transport. The separate
+command. ADR 0189 fixes a separate output-only compiler-fact Context Pack encoding without source
+or documentation text. The separate
 `fairyc.symbol-id/v1-sha256-128+256` implementation now fixes the provisional declaration join key
 described in `docs/atlas/symbol-id-v1.md`.
 

@@ -591,16 +591,19 @@ process-interruption miss-or-verified-hit behavior, and exact current compiler/i
 line-map acceptance all have executable regressions. ADR 0188 now adds exact-current package-local
 `overview`, `show`, and `around`: canonical SymbolId selection, typed relation expansion,
 deterministic breadth-first traversal, mandatory record/relation/depth/selection-byte limits, detached
-results, and explicit filter/dependency/incoming omissions have executable regressions. No default
-path, ordinary-command publication, dependency-map join, Context Pack, source excerpt, query wire
-schema, or rewrite measurement exists yet.
+results, and explicit filter/dependency/incoming omissions have executable regressions. ADR 0189 now
+adds output-only canonical compiler-fact Context Packs for all three queries, with exact package and
+compatibility identity, echoed budgets and usage, empty text sections, a separate final byte bound,
+and a domain-separated checksum. No default path, ordinary-command publication, dependency-map join,
+source excerpt, documentation import, pack decoder, public command, or rewrite measurement exists yet.
 
 - Preserve the implemented immutable `SemanticSnapshot` and per-package logical map plan.
 - Preserve the implemented bounded canonical `.fymap` codec and semantic revalidation boundary.
 - Preserve the implemented contained immutable store and current-source rejection boundary.
 - Preserve the implemented bounded exact-current package-local query boundary.
+- Preserve the implemented canonical compiler-fact-only Context Pack boundary.
 - Select an explicit experimental command/path/limit policy before exposing map publication.
-- Implement deterministic Context Pack output over the bounded query results.
+- Design attributed source-excerpt and documentation policy before admitting any free text.
 - Measure whole-package map rewrite cost before considering chunks or compression.
 
 Exit gate: Atlas failure cannot change compilation; stale or incompatible maps fail closed; unknown graph edges remain explicit; text cannot grant authority.

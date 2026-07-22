@@ -30,6 +30,7 @@
 - Bounded canonical `.fymap` v1 codec and checksum: docs/atlas/fymap-transport-v1.md, internal/atlasmap/codec*.go
 - Contained caller-bounded `.fymap` store and current-source reader: docs/atlas/fymap-store-v1.md, internal/atlasmap/store.go, internal/atlasmap/current.go
 - Bounded exact-current package-local `.fymap` queries: docs/atlas/fymap-query-v1.md, internal/atlasmap/query.go
+- Canonical compiler-fact-only Context Pack output: docs/atlas/context-pack-v1.md, internal/contextpack/
 - Whole-package cache-key v2 fixtures and bounded store runner: spec/fixtures/package-cache/manifest-v2.json with historical v1, internal/packagecache/, internal/packagecachefixture/
 - Package-stable function IDs, process-local MIR slice reassembly, process-bound codec, and all-hit reuse coordinator: internal/packageartifact/, internal/workspacecompiler/, docs/package/package-function-id-v1.md, docs/package/process-local-mir-artifact-v0.md
 - Bounded workspace check-session CLI and NDJSON schema: internal/cli/workspace_session.go, spec/cli/experimental-workspace-check-session-v0.schema.json, docs/adr/0159-bounded-workspace-check-session.md
@@ -65,7 +66,7 @@
 - Planned C-shaped pre-1 source cutover: docs/adr/0136-c-shaped-source-surface.md
 - Constrained C11 transport baseline: docs/adr/0137-c11-transport-baseline.md
 - Diagnostic meanings: docs/diagnostics/catalog-v0.md
-- Atlas semantic snapshot, SymbolId, logical package-map plan, transport, contained store, implemented package-local queries, and proposed Context Pack: docs/atlas/*.md, internal/semanticsnapshot/, internal/symbolidentity/, internal/atlasmap/
+- Atlas semantic snapshot, SymbolId, logical package-map plan, transport, contained store, package-local queries, and canonical compiler-fact Context Pack: docs/atlas/*.md, internal/semanticsnapshot/, internal/symbolidentity/, internal/atlasmap/, internal/contextpack/
 - Operational standard source: docs/ops/00-operational-contract.md
 - Validation source: VALIDATION.md
 - Agent routing source: .agents/context-map.md

@@ -229,7 +229,7 @@ typed HIR + verified MIR
   -> checksummed .fymap bytes
   -> contained immutable publication + current-source validation
   -> bounded overview/show/around queries
-  -> optional Context Pack
+  -> optional canonical compiler-fact Context Pack
 ```
 
 The compiler frontend cannot import Atlas. Atlas does not reparse source to invent semantic facts. Its failure does not change diagnostics or build results.
@@ -249,7 +249,9 @@ before returning immutable facts. `MapStore` now publishes content-addressed gen
 opened root, applies caller retention bounds, and returns only one exact compiler/interface/current-
 source match. The package-local query index repeats that current-state check and implements bounded
 `overview`, exact-SymbolId `show`, and breadth-first `around` without source text or dependency
-discovery. Dependency-map loading, commands, source excerpts, and Context Pack output remain
+discovery. `internal/contextpack` runs those queries directly and emits a separately byte-bounded,
+checksummed canonical compiler-fact envelope with empty documentation and source-excerpt sections.
+Dependency-map loading, commands, source excerpts, text import, and pack decoding remain
 unimplemented and cannot feed back into these boundaries.
 
 ## Runtime behavior
