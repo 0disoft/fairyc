@@ -71,10 +71,11 @@ and rejects an in-memory workspace whose bytes no longer match its package ident
 typed module for every file and vice versa, removes build-local package numbers, and stores no
 source bytes.
 
-A future `.fymap` reader must recompute the package-source digest and relevant file identities from
-caller-authorized current source before serving spans or excerpts. Mismatch rejects stale evidence;
-it is not downgraded to a guessed position. This contract does not yet implement map bytes,
-publication, current-source lookup, excerpt loading, or stale-map diagnostics.
+The implemented `.fymap` current-source reader recomputes the package-source digest and every
+relevant file identity from caller-authorized current source before serving spans. Mismatch rejects
+stale evidence; it is not downgraded to a guessed position. ADR 0195 requires a future excerpt
+extractor to repeat that proof against retained validated bytes. Excerpt loading remains
+unimplemented and cannot be inferred from map publication or span-query success.
 
 ## Compatibility and evidence
 

@@ -549,6 +549,12 @@ record/relation/depth/selection/output policy are experimental CLI behavior. Thi
 SymbolId across a future identity family, a cross-version query migration, graph completeness,
 dependency joins, text import, default map storage, or either command spelling.
 
+ADR 0195 fixes logical policy `fairyc.attributed-text/v0` and fragment checksum family
+`fairyc.attributed-text-fragment/v0-sha256` without defining an encoded artifact or command. It does
+not change `.fymap` v1 or Context Pack v1, whose source/documentation bodies remain absent. A future
+encoding, decoder, composite pack, CLI, documentation attachment rule, dependency origin, or
+generated-text lineage requires an independent compatibility decision.
+
 Dependency handling is relation-specific:
 
 | Condition | Atlas behavior |

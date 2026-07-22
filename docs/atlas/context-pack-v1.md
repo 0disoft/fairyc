@@ -117,7 +117,8 @@ unchanged into the pack. `impact` and semantic `diff` remain deferred.
 ## Not enabled
 
 - no Context Pack decoder or acceptance of untrusted pack bytes;
-- no source excerpt, documentation import, generated summary, or warning producer;
+- no source excerpt, documentation import, generated summary, or warning producer; ADR 0195 defines
+  a separate unimplemented attributed-text policy and does not relax these empty v1 arrays;
 - no dependency-map join, workspace-wide index, name search, fuzzy match, or rename inference;
 - no stable command, default map path, or automatic publication; experimental CLI exposure is
   limited to the explicit overview contract in ADR 0190 and exact-SymbolId show/around contract in

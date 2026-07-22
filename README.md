@@ -529,6 +529,14 @@ host smoke now also records nine raw whole-package canonical rewrite samples aft
 byte identity, and reports fixed source/record/encoded-byte denominators without choosing chunking,
 compression, incremental updates, or a performance budget.
 
+ADR 0195 now closes the attributed-text policy without claiming implementation. `.fymap` v1 stays
+body-free and Context Pack v1 keeps its text arrays empty. Any future source excerpt is a separate
+explicitly requested `untrusted-text` artifact bound to both SymbolId forms, exact package/file/line-
+map identities, byte span, origin, byte budgets, and a fragment checksum. The first implementation
+is limited to workspace-authored exact source slices from retained validated bytes; documentation
+attachment, dependency text, file reopening, network fetch, model calls, and agent authority remain
+disabled.
+
 `experimental target-spec` accepts exactly one known Linux GNU or Windows MSVC ID and writes
 deterministic `fairyc.target-spec/v0` JSON. The result separates target semantics from local
 toolchain discovery and lists the profile-specific missing evidence that keeps all three target
@@ -610,7 +618,7 @@ or arbitrary link-input option.
 - Runtime and standard library: `docs/runtime/runtime-stdlib-v0.md`
 - Compatibility and versioning: `docs/compatibility/versioning-v0.md`
 - Diagnostic catalog: `docs/diagnostics/catalog-v0.md`
-- Atlas semantic snapshot, provisional SymbolId, logical planning, canonical transport, contained current-source-validated store, bounded package-local queries, canonical compiler-fact Context Packs, exact catalog plus overview/show/around CLI, and whole-package rewrite measurement: `docs/atlas/`, `internal/atlasmap/`, `internal/contextpack/`, `internal/cli/atlas_pack*.go`, `internal/buildmeasure/atlas_rewrite.go`
+- Atlas semantic snapshot, provisional SymbolId, logical planning, canonical transport, contained current-source-validated store, bounded package-local queries, canonical compiler-fact Context Packs, accepted attributed-text policy, exact catalog plus overview/show/around CLI, and whole-package rewrite measurement: `docs/atlas/`, `internal/atlasmap/`, `internal/contextpack/`, `internal/cli/atlas_pack*.go`, `internal/buildmeasure/atlas_rewrite.go`
 - CLI contract: `docs/cli/command-contract.md`
 - Workspace ownership: `docs/monorepo/package-ownership.md`
 

@@ -608,6 +608,11 @@ regressions without fuzzy name inference. ADR 0193 exposes those pages through b
 ADR 0194 now exposes exact visible/full SymbolId `atlas-pack show` and `around` with mandatory
 direction, relation, record, relation, depth, selection-byte, and output-byte policy. The commands
 preserve package-local join omissions and add no text, decoder, store, or safe-change claim.
+ADR 0195 now closes the attributed-text origin, exact-current identity, UTF-8/control, atomic
+fragment budget, integrity, omission, and non-authority policy without enabling text output. It
+preserves body-free `.fymap` v1 and empty-text Context Pack v1, rejects file reopening and phrase
+filtering as security boundaries, and restricts the first implementation gate to workspace-authored
+exact source excerpts from retained validated bytes.
 
 - Preserve the implemented immutable `SemanticSnapshot` and per-package logical map plan.
 - Preserve the implemented bounded canonical `.fymap` codec and semantic revalidation boundary.
@@ -617,7 +622,7 @@ preserve package-local join omissions and add no text, decoder, store, or safe-c
 - Preserve the explicit overview/show/around experimental commands and keep map publication policy separate.
 - Preserve the raw whole-package rewrite harness; require representative failure before adding chunks or compression.
 - Preserve the implemented exact SymbolId catalog output as the discovery path for experimental `show` and `around`.
-- Design attributed source-excerpt and documentation policy before admitting any free text.
+- Implement and validate the accepted attributed-text v0 internal model and workspace-source excerpt gate before defining an encoding or command.
 
 Exit gate: Atlas failure cannot change compilation; stale or incompatible maps fail closed; unknown graph edges remain explicit; text cannot grant authority.
 

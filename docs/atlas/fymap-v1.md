@@ -1,6 +1,6 @@
 # `.fymap` v1 Logical Schema
 
-- Status: Canonical transport, contained current-source-validated store, bounded package-local queries, compiler-fact Context Pack and SymbolId catalog output, and experimental overview/catalog/show/around commands implemented; text import remains future work
+- Status: Canonical transport, contained current-source-validated store, bounded package-local queries, compiler-fact Context Pack and SymbolId catalog output, and experimental overview/catalog/show/around commands implemented; attributed-text policy accepted but text output remains unimplemented
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0004-atlas-semantic-snapshot-boundary.md`
 - Snapshot source: `docs/atlas/semantic-snapshot-v0.md`
@@ -9,6 +9,7 @@
 - Store source: `docs/atlas/fymap-store-v1.md`
 - Query source: `docs/atlas/fymap-query-v1.md`
 - Context Pack source: `docs/atlas/context-pack-v1.md`
+- Attributed text policy source: `docs/atlas/attributed-text-v0.md`
 
 ## Boundary
 
@@ -128,17 +129,17 @@ Completeness reasons include missing dependency map, unknown indirect call, newe
 
 ## Provenance and trust
 
-Every record or text reference uses one provenance class:
+Every implemented `.fymap` fact uses one provenance class:
 
 - `CompilerObserved` for facts derived from analyzed IR;
-- `CompilerDeclared` for explicit source declarations;
-- `WorkspaceDocumentation` for local free text;
-- `DependencyDocumentation` for dependency free text;
-- `GeneratedDocumentation` for tool- or model-generated text.
+- `CompilerDeclared` for explicit source declarations.
 
-Compiler facts and free text occupy separate sections. Documentation is excluded from queries by default unless requested. Documentation cannot replace a compiler fact, change completeness, or grant filesystem, process, network, credential, approval, or execution authority.
-
-Text import performs size caps, control-character filtering, encoding validation, and source attribution. Atlas performs no URL fetch while building a map.
+`.fymap` v1 stores no source body, documentation body, generated prose, or text reference that can
+be mistaken for a fact. ADR 0195 instead defines a separate unimplemented attributed-text companion
+whose fixed authority is `untrusted-text` and whose origin, SymbolId, package/file/line-map identity,
+span, exact bytes, checksum, budgets, and omissions must remain explicit. Text cannot replace a
+compiler fact, change completeness, or grant filesystem, process, network, credential, approval,
+model, or execution authority. Atlas performs no URL fetch while building a map or selecting text.
 
 ## Initial queries
 

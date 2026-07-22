@@ -34,6 +34,7 @@
 - Canonical SymbolId catalog output and experimental command: docs/atlas/symbol-catalog-v0.md, internal/symbolcatalog/, internal/cli/atlas_symbols.go
 - Canonical compiler-fact-only Context Pack output: docs/atlas/context-pack-v1.md, internal/contextpack/
 - Experimental exact-package Atlas overview, show, and around Context Pack commands: internal/cli/atlas_pack.go, internal/cli/atlas_pack_relations.go, docs/adr/0190-experimental-atlas-overview-pack-command.md, docs/adr/0194-experimental-atlas-show-around-pack-commands.md
+- Accepted unimplemented attributed-text origin, integrity, safety, budget, and non-authority policy: docs/atlas/attributed-text-v0.md, docs/adr/0195-attributed-text-boundary-v0.md
 - Whole-package Atlas rewrite measurement schema and Windows harness: internal/buildmeasure/atlas_rewrite.go, cmd/fairyc-windows-host-smoke/, docs/adr/0191-atlas-whole-package-rewrite-measurement.md
 - Whole-package cache-key v2 fixtures and bounded store runner: spec/fixtures/package-cache/manifest-v2.json with historical v1, internal/packagecache/, internal/packagecachefixture/
 - Package-stable function IDs, process-local MIR slice reassembly, process-bound codec, and all-hit reuse coordinator: internal/packageartifact/, internal/workspacecompiler/, docs/package/package-function-id-v1.md, docs/package/process-local-mir-artifact-v0.md
@@ -70,7 +71,7 @@
 - Planned C-shaped pre-1 source cutover: docs/adr/0136-c-shaped-source-surface.md
 - Constrained C11 transport baseline: docs/adr/0137-c11-transport-baseline.md
 - Diagnostic meanings: docs/diagnostics/catalog-v0.md
-- Atlas semantic snapshot, SymbolId, logical package-map plan, transport, contained store, package-local queries, and canonical compiler-fact Context Pack: docs/atlas/*.md, internal/semanticsnapshot/, internal/symbolidentity/, internal/atlasmap/, internal/contextpack/
+- Atlas semantic snapshot, SymbolId, logical package-map plan, transport, contained store, package-local queries, canonical compiler-fact Context Pack, and attributed-text policy: docs/atlas/*.md, internal/semanticsnapshot/, internal/symbolidentity/, internal/atlasmap/, internal/contextpack/
 - Operational standard source: docs/ops/00-operational-contract.md
 - Validation source: VALIDATION.md
 - Agent routing source: .agents/context-map.md

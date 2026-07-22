@@ -18,10 +18,12 @@ Fairy Atlas should help humans and tools navigate compiler facts without turning
 5. Stable symbol identity is derived from semantic coordinates and a separately versioned
    algorithm. ADR 0183 implements the first provisional algorithm with collision and compatibility
    regressions; released cross-version stability remains deferred.
-6. Compiler facts and free-text documentation are stored in separate sections with explicit provenance and trust classes.
+6. Compiler facts remain in body-free map and pack contracts. ADR 0195 refines free text into a
+   separate attributed companion with fixed `untrusted-text` authority and explicit origin.
 7. Unknown, candidate, external, and opaque graph edges remain explicit. Atlas does not invent a complete call graph.
 8. Transitive closure is computed at query time rather than stored eagerly.
-9. Context packs report their budget, completeness, omissions, and untrusted-text sources.
+9. Compiler-fact Context Packs report budget, completeness, and omissions. Any future attributed-
+   text companion separately reports origin, byte budgets, usage, and omissions.
 10. Embeddings, model calls, vector databases, automatic rename certainty, structural edits, agent permission annotations, and source-body duplication are outside the initial schema.
 
 ## Rationale
@@ -32,7 +34,8 @@ The one-way snapshot boundary keeps compiler correctness independent of Atlas an
 
 - Whole-package `.fymap` rewrites are acceptable initially.
 - Atlas queries may be conservative when foreign or indirect calls are opaque.
-- Documentation can improve a context pack but cannot override compiler facts or grant authority.
+- A future attributed-text companion may improve navigation but cannot override compiler facts,
+  completeness, prompt roles, or host authority; Context Pack v1 remains text-free.
 - `impact` and semantic `diff` remain deferred until uncertainty reporting is demonstrated.
 
 ## Revisit conditions
