@@ -75,6 +75,7 @@ regenerate, or override compiler source.
 - Package-source digest and fixture runner: internal/packagecontent/, internal/packagecontentfixture/
 - Whole-package cache-key v1 fixtures: spec/fixtures/package-cache/manifest-v1.json
 - Whole-package cache key, bounded memory store, and fixture runner: internal/packagecache/, internal/packagecachefixture/
+- Bounded immutable disk cache storage primitive: internal/packagecache/disk.go, docs/adr/0163-bounded-immutable-disk-cache-store.md
 - Compiler-private verified whole-program MIR artifact codec: internal/mircodec/, docs/adr/0149-verified-mir-artifact-codec.md
 - Compiler-private package-stable function identity: internal/packageartifact/, docs/package/package-function-id-v1.md
 - Process-local package MIR artifact extraction, verification, and reassembly: internal/packageartifact/artifact.go, docs/package/process-local-mir-artifact-v0.md

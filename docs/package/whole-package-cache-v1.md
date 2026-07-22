@@ -53,10 +53,12 @@ unique. Their byte encoding is intentionally unspecified outside the exact compi
 the record. The output public-interface hash is metadata for dependent invalidation, not proof that
 the opaque payload is compatible.
 
-The store is process-local. Persistence, cross-process locking, crash-safe writes, collection across
-compiler builds, default limits, command-line inspection, and remote transport remain unimplemented.
-Those features must preserve the v1 miss/fallback behavior but require measured policy and a separate
-storage-format decision.
+`MemoryStore` remains process-local. ADR 0163 separately adds a caller-bounded immutable-generation
+`DiskStore`: canonical records live under key and payload digests, concurrent identical writers
+converge without a lock file, conflicting valid generations are safe misses, corrupt generations
+are rejected, and collection enforces entry/byte/temp-age limits. No compiler command or Session
+uses it yet. Default limits, a user-facing path, abrupt-termination evidence, cold/warm disk
+measurement, command-line inspection, and remote transport remain unimplemented.
 
 ADR 0146 records the current evidence result: persistence is deliberately deferred. ADR 0149 adds a
 real exact-version codec for one verified whole-program MIR value, but that payload is not yet a
@@ -69,6 +71,10 @@ byte-bounded LRU to own the full payload without claiming persistence. Every sli
 same workspace-wide type context and no compiler path reads it from `MemoryStore`. No configured
 cold/warm measurement intent owns comparable cache-hit evidence. Process-codec payload sizes alone
 cannot justify a disk format or default budget.
+
+ADR 0162 supplies the stable package MIR payload required by a truthful disk record. ADR 0163 adds
+only the disposable bounded storage primitive; it deliberately does not turn persistence on or
+claim that a disk hit is faster than ordinary lowering.
 
 ADR 0155 connects those bytes to the bounded LRU and distinguishes verified hits from raw store
 hits, misses, and rejected entries. Rejection uses complete-record compare-and-delete so a stale

@@ -172,6 +172,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0160-editor-shaped-session-process-measurement.md`: one eight-step standalone compiler session with raw round-trip timings, Windows process-memory peaks, and no reference-budget or speedup claim.
 - `0161-stable-type-context-artifact.md`: package-number-independent type/foreign context, stable bodies, call bindings, and checked context reconstruction prerequisites.
 - `0162-stable-package-mir-artifact.md`: bounded canonical cross-process package MIR bytes with exact imports, fresh identity rebinding, verifier re-entry, execution, and byte-identical re-encoding.
+- `0163-bounded-immutable-disk-cache-store.md`: caller-bounded immutable cache generations, canonical records, safe conflict misses, stale-temp recovery, and deterministic collection without lock files.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

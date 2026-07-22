@@ -63,6 +63,7 @@
 - Package-source digest and runner route: internal/packagecontent/, internal/packagecontentfixture/
 - Whole-package cache-key v1 fixture route: spec/fixtures/package-cache/manifest-v1.json
 - Whole-package cache key, store, and runner route: internal/packagecache/, internal/packagecachefixture/
+- Bounded immutable disk cache route: internal/packagecache/disk.go, docs/adr/0163-bounded-immutable-disk-cache-store.md
 - Verified whole-program MIR artifact codec route: internal/mircodec/, docs/adr/0149-verified-mir-artifact-codec.md
 - Package-stable function identity route: internal/packageartifact/, docs/package/package-function-id-v1.md
 - Process-local package MIR artifact route: internal/packageartifact/artifact.go, docs/package/process-local-mir-artifact-v0.md
