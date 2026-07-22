@@ -1,0 +1,93 @@
+# ADR 0158: Preserve raw process-cache edit distributions
+
+- Status: Accepted for prototype evidence
+- Date: 2026-07-22
+- Measurement source: `internal/buildmeasure/cache_edit.go`
+- Configured owner: `fairyc_windows_host_smoke`
+- Workload: `examples/workspace_quickstart/`
+
+## Context
+
+ADR 0157 records one cold fallback and one immediate all-hit request. That receipt proves the
+selected control-flow paths, but two observations cannot describe timing noise or show how source
+edits invalidate package artifacts. A follow-up measurement must preserve repeated raw observations,
+keep edit setup outside the timed region, and distinguish a cache decision from a speedup claim.
+
+The Windows monotonic clock can also return the same timestamp for work shorter than its observable
+resolution. Replacing a zero duration with an invented positive value or retrying until a preferred
+sample appears would corrupt the distribution.
+
+## Decision
+
+1. Add `fairyc.process-cache-edit-measurement/v0` without changing either existing measurement
+   schema. Its phase scope remains exactly `semantic-through-verified-mir`.
+2. Record four conditions in canonical order: `no-op-warm`, `private-root-edit`,
+   `private-dependency-edit`, and `public-dependency-edit`.
+3. Record nine independent samples per condition. Every sample creates a fresh bounded Session,
+   performs one untimed verified warmup, applies any edit and reloads the workspace outside the
+   timer, and times exactly one subsequent `Session.Check` request.
+4. Preserve all 36 raw observations. Do not emit a percentile, ratio, speedup, regression threshold,
+   retry-selected value, or preferred summary.
+5. Observe the clock by collecting 32 positive monotonic transitions within at most 1,000,000
+   consecutive readings and retaining the smallest interval. Calibration fails closed if that
+   bounded sample is incomplete. Record the interval as `clockResolutionNs`. A sample records
+   `belowClockResolution: true` exactly when its nonnegative duration is smaller than that observed
+   interval, including a zero-duration observation; the raw duration is not altered or discarded.
+6. Every sample records the cache path, package hit/miss/reject/store counts, lowering and reassembly
+   decisions, MIR function count, interpreter result, retained entries and bytes, and cumulative
+   verified hits. Validation requires result `42`, bounds compliance, and no rejected entry,
+   skipped admission, or reassembly fallback.
+7. The harness-local limits remain eight entries, 33,554,432 retained bytes, and 8,388,608 bytes per
+   artifact. They are measurement inputs, not product defaults.
+
+## Invalidation contract
+
+- `no-op-warm` is a complete all-hit request: two verified hits, zero misses, no lowering, and two
+  retained entries.
+- `private-root-edit` reuses the unchanged dependency and invalidates the root: one hit, one miss,
+  normal lowering, and three retained entries.
+- `private-dependency-edit` invalidates both packages: zero hits, two misses, normal lowering, and
+  four retained entries. The root key currently contains the dependency's exact
+  `PackageInstanceId`, so a private dependency source change conservatively invalidates its caller
+  even when the public-interface hash is unchanged.
+- `public-dependency-edit` also invalidates both packages and adds one public function to the
+  verified program: zero hits, two misses, normal lowering, four retained entries, and three MIR
+  functions rather than two.
+
+## Evidence
+
+Evidence on 2026-07-22 is deliberately split. A configured Windows/MSVC smoke completed all 36
+invalidation samples with every interpreted result equal to `42` and every condition matching the
+contract above; that run exposed that the first calibration implementation classified only zero
+durations and used one first-positive interval. After replacing it with the bounded 32-transition
+calibration, the complete Go suite's `cmd/fairyc-windows-host-smoke` test executed and validated all
+36 samples through the corrected report path. A final full MSVC smoke receipt for the corrected
+calibration was not adopted after the configured intent reached its failure cap. Samples shorter
+than the observed clock interval remain marked rather than repaired into synthetic timing data.
+
+This is controlled local invalidation and raw-distribution evidence. It is not a claim that warm
+Fairy C compilation is faster, a representative-machine baseline, a process-memory measurement, a
+product cache policy, or a regression gate.
+
+## Consequences
+
+- edit classes are now exercised by the same configured Windows path that owns the earlier cache
+  receipt;
+- fresh Sessions prevent one sample's retained state from contaminating another sample;
+- source mutation and workspace loading cannot be mistaken for measured compiler-phase time;
+- the conservative private-dependency invalidation is visible rather than silently described as
+  interface-only reuse;
+- reference-machine controls, process memory, noise/retry policy, a product-facing long-lived
+  Session boundary, and an explicit threshold decision remain open;
+- separate one-shot CLI invocations still do not share this process-local cache.
+
+## Rejected alternatives
+
+- Reusing one Session across all 36 samples was rejected because cache history would make later
+  observations depend on earlier condition order.
+- Timing file mutation or workspace loading was rejected because the cache receipt owns only the
+  semantic-through-verified-MIR phase.
+- Repeating a zero-duration observation until it became positive was rejected because that would
+  select measurements after seeing the result.
+- Treating a private dependency edit as an immediate caller hit was rejected because the current v1
+  cache key deliberately includes the exact dependency instance identity.

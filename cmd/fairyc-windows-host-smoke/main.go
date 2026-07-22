@@ -232,6 +232,12 @@ const windowsLayoutManifestPath = "spec/fixtures/layout/manifest-windows-msvc-v0
 const windowsABIManifestPath = "spec/fixtures/c-abi/manifest-windows-msvc-v0.json"
 const subprocessOutputLimit = 64 * 1024
 
+const (
+	processCacheMaxEntries       = 8
+	processCacheMaxBytes         = 32 << 20
+	processCacheMaxArtifactBytes = 8 << 20
+)
+
 func main() {
 	if err := run(); err != nil {
 		fmt.Fprintf(os.Stderr, "fairyc Windows host smoke failed: %v\n", err)
@@ -422,6 +428,15 @@ func run() error {
 		return fmt.Errorf("encode process-local workspace cache measurement: %w", err)
 	}
 	fmt.Printf("Fairy C process-cache measurement: %s\n", cacheMeasurementJSON)
+	cacheEditMeasurement, err := measureWorkspaceProcessCacheEdits(root)
+	if err != nil {
+		return fmt.Errorf("measure process-local workspace cache edits: %w", err)
+	}
+	cacheEditMeasurementJSON, err := buildmeasure.MarshalCacheEdits(cacheEditMeasurement)
+	if err != nil {
+		return fmt.Errorf("encode process-local workspace cache edit measurement: %w", err)
+	}
+	fmt.Printf("Fairy C process-cache edit measurement: %s\n", cacheEditMeasurementJSON)
 	measurement := buildmeasure.Report{
 		Schema:              buildmeasure.Schema,
 		Workload:            "workspace_quickstart",
@@ -683,19 +698,14 @@ func run() error {
 }
 
 func measureWorkspaceProcessCache(root string) (buildmeasure.CacheReport, error) {
-	const (
-		maxEntries       = 8
-		maxBytes         = 32 << 20
-		maxArtifactBytes = 8 << 20
-	)
 	workspace, err := workspaceloader.Load(root)
 	if err != nil {
 		return buildmeasure.CacheReport{}, err
 	}
 	session, err := workspacecompiler.NewSession(workspacecompiler.Configuration{
 		Target:           target.X8664WindowsMSVC,
-		Cache:            packagecache.Limits{MaxEntries: maxEntries, MaxBytes: maxBytes},
-		MaxArtifactBytes: maxArtifactBytes,
+		Cache:            packagecache.Limits{MaxEntries: processCacheMaxEntries, MaxBytes: processCacheMaxBytes},
+		MaxArtifactBytes: processCacheMaxArtifactBytes,
 	})
 	if err != nil {
 		return buildmeasure.CacheReport{}, err
@@ -710,7 +720,9 @@ func measureWorkspaceProcessCache(root string) (buildmeasure.CacheReport, error)
 		Scope: "semantic-through-verified-mir", Clock: "process-monotonic-wall-nanoseconds",
 		CacheImplementation: "bounded-process-package-mir-v0", Decision: "observed-only-no-speedup-claim",
 		Environment: buildmeasure.CacheEnvironment{OS: runtime.GOOS, Arch: runtime.GOARCH, Target: string(target.X8664WindowsMSVC)},
-		Policy:      buildmeasure.CachePolicy{MaxEntries: maxEntries, MaxBytes: maxBytes, MaxArtifactBytes: maxArtifactBytes},
+		Policy: buildmeasure.CachePolicy{
+			MaxEntries: processCacheMaxEntries, MaxBytes: processCacheMaxBytes, MaxArtifactBytes: processCacheMaxArtifactBytes,
+		},
 	}
 	for index, condition := range []string{buildmeasure.CacheConditionCold, buildmeasure.CacheConditionWarm} {
 		started := time.Now()
@@ -738,6 +750,184 @@ func measureWorkspaceProcessCache(root string) (buildmeasure.CacheReport, error)
 		})
 	}
 	return report, nil
+}
+
+func measureWorkspaceProcessCacheEdits(sourceRoot string) (buildmeasure.CacheEditReport, error) {
+	clockResolution, err := observeMonotonicClockResolution()
+	if err != nil {
+		return buildmeasure.CacheEditReport{}, err
+	}
+	report := buildmeasure.CacheEditReport{
+		Schema: buildmeasure.CacheEditSchema, Workload: "workspace_quickstart",
+		Scope: "semantic-through-verified-mir", Clock: "process-monotonic-wall-nanoseconds", ClockResolutionNS: clockResolution,
+		CacheImplementation: "bounded-process-package-mir-v0", Decision: "raw-distributions-only-no-speedup-claim",
+		Setup: "fresh-session-per-sample;edit-and-load-outside-timer", WarmupRequests: 1,
+		IterationsPerCondition: buildmeasure.CacheEditIterationsPerCondition,
+		Environment:            buildmeasure.CacheEnvironment{OS: runtime.GOOS, Arch: runtime.GOARCH, Target: string(target.X8664WindowsMSVC)},
+		Policy: buildmeasure.CachePolicy{
+			MaxEntries: processCacheMaxEntries, MaxBytes: processCacheMaxBytes, MaxArtifactBytes: processCacheMaxArtifactBytes,
+		},
+	}
+	conditions := []string{
+		buildmeasure.CacheEditNoOpWarm,
+		buildmeasure.CacheEditPrivateRoot,
+		buildmeasure.CacheEditPrivateDependency,
+		buildmeasure.CacheEditPublicDependency,
+	}
+	for _, condition := range conditions {
+		for iteration := 1; iteration <= buildmeasure.CacheEditIterationsPerCondition; iteration++ {
+			sample, err := measureWorkspaceProcessCacheEditSample(sourceRoot, condition, iteration, clockResolution)
+			if err != nil {
+				return buildmeasure.CacheEditReport{}, fmt.Errorf("%s iteration %d: %w", condition, iteration, err)
+			}
+			sample.Sequence = len(report.Samples) + 1
+			report.Samples = append(report.Samples, sample)
+		}
+	}
+	return report, nil
+}
+
+func measureWorkspaceProcessCacheEditSample(sourceRoot, condition string, iteration int, clockResolution int64) (buildmeasure.CacheEditSample, error) {
+	measurementRoot, err := copyWorkspaceMeasurementFixture(sourceRoot)
+	if err != nil {
+		return buildmeasure.CacheEditSample{}, err
+	}
+	defer os.RemoveAll(measurementRoot)
+
+	workspace, err := workspaceloader.Load(measurementRoot)
+	if err != nil {
+		return buildmeasure.CacheEditSample{}, err
+	}
+	session, err := workspacecompiler.NewSession(workspacecompiler.Configuration{
+		Target:           target.X8664WindowsMSVC,
+		Cache:            packagecache.Limits{MaxEntries: processCacheMaxEntries, MaxBytes: processCacheMaxBytes},
+		MaxArtifactBytes: processCacheMaxArtifactBytes,
+	})
+	if err != nil {
+		return buildmeasure.CacheEditSample{}, err
+	}
+	warmup, err := session.Check(workspace)
+	if err != nil {
+		return buildmeasure.CacheEditSample{}, err
+	}
+	if !warmup.Compiler.Verified || warmup.Cache.Outcome != workspacecompiler.OutcomeFallback || !warmup.Cache.Lowered {
+		return buildmeasure.CacheEditSample{}, fmt.Errorf("untimed warmup did not populate a verified fallback")
+	}
+	if condition != buildmeasure.CacheEditNoOpWarm {
+		if err := mutateWorkspaceMeasurementFixture(measurementRoot, condition); err != nil {
+			return buildmeasure.CacheEditSample{}, err
+		}
+		workspace, err = workspaceloader.Load(measurementRoot)
+		if err != nil {
+			return buildmeasure.CacheEditSample{}, err
+		}
+	}
+	started := time.Now()
+	checked, err := session.Check(workspace)
+	duration := time.Since(started)
+	if err != nil {
+		return buildmeasure.CacheEditSample{}, err
+	}
+	if !checked.Compiler.Verified {
+		return buildmeasure.CacheEditSample{}, fmt.Errorf("measured request did not produce verified MIR")
+	}
+	rootPackage, err := workspace.RootPackageID()
+	if err != nil {
+		return buildmeasure.CacheEditSample{}, err
+	}
+	entry := hir.QualifiedModulePath(rootPackage, "main") + "::main"
+	outcome, err := interpreter.Execute(checked.Compiler.MIR, entry)
+	if err != nil {
+		return buildmeasure.CacheEditSample{}, err
+	}
+	stats := session.Stats()
+	durationNS := duration.Nanoseconds()
+	return buildmeasure.CacheEditSample{
+		Condition: condition, Iteration: iteration, DurationNS: durationNS, BelowClockResolution: durationNS < clockResolution,
+		Outcome: checked.Cache.Outcome, Packages: checked.Cache.Packages,
+		Hits: checked.Cache.Hits, Misses: checked.Cache.Misses, Rejected: checked.Cache.Rejected,
+		Stored: checked.Cache.Stored, StoreSkipped: checked.Cache.StoreSkipped,
+		Lowered: checked.Cache.Lowered, ReassemblyFallback: checked.Cache.ReassemblyFallback,
+		MIRFunctions: len(checked.Compiler.MIR.Functions), InterpreterResult: int(outcome.Value),
+		RetainedEntries: stats.Store.Entries, RetainedBytes: stats.Store.Bytes, VerifiedHits: stats.VerifiedHits,
+	}, nil
+}
+
+func observeMonotonicClockResolution() (int64, error) {
+	const (
+		maximumObservations = 1_000_000
+		requiredTransitions = 32
+	)
+	var minimumPositive int64
+	transitions := 0
+	previous := time.Now()
+	for attempts := 0; attempts < maximumObservations && transitions < requiredTransitions; attempts++ {
+		current := time.Now()
+		if elapsed := current.Sub(previous).Nanoseconds(); elapsed > 0 {
+			if minimumPositive == 0 || elapsed < minimumPositive {
+				minimumPositive = elapsed
+			}
+			transitions++
+		}
+		previous = current
+	}
+	if transitions < requiredTransitions {
+		return 0, fmt.Errorf("monotonic clock produced %d of %d required positive transitions during %d resolution observations", transitions, requiredTransitions, maximumObservations)
+	}
+	return minimumPositive, nil
+}
+
+func copyWorkspaceMeasurementFixture(sourceRoot string) (string, error) {
+	root, err := os.MkdirTemp("", "fairyc-process-cache-edit-")
+	if err != nil {
+		return "", err
+	}
+	for _, name := range []string{workspaceManifestPath, workspaceMainPath, workspaceMemberManifestPath, workspaceMemberSourcePath} {
+		contents, readErr := os.ReadFile(filepath.Join(sourceRoot, filepath.FromSlash(name)))
+		if readErr != nil {
+			os.RemoveAll(root)
+			return "", readErr
+		}
+		destination := filepath.Join(root, filepath.FromSlash(name))
+		if mkdirErr := os.MkdirAll(filepath.Dir(destination), 0o700); mkdirErr != nil {
+			os.RemoveAll(root)
+			return "", mkdirErr
+		}
+		if writeErr := os.WriteFile(destination, contents, 0o600); writeErr != nil {
+			os.RemoveAll(root)
+			return "", writeErr
+		}
+	}
+	return root, nil
+}
+
+func mutateWorkspaceMeasurementFixture(root, condition string) error {
+	path := workspaceMainPath
+	needle := "\nfn i32 main()"
+	replacement := "\nstruct cache_private_root { i32 value; }\n\nfn i32 main()"
+	if condition == buildmeasure.CacheEditPrivateDependency || condition == buildmeasure.CacheEditPublicDependency {
+		path = workspaceMemberSourcePath
+		needle = "\npub fn i32 value()"
+		replacement = "\nstruct cache_private_dependency { i32 value; }\n\npub fn i32 value()"
+	}
+	absolute := filepath.Join(root, filepath.FromSlash(path))
+	contents, err := os.ReadFile(absolute)
+	if err != nil {
+		return err
+	}
+	updated := string(contents)
+	switch condition {
+	case buildmeasure.CacheEditPrivateRoot, buildmeasure.CacheEditPrivateDependency:
+		updated = strings.Replace(updated, needle, replacement, 1)
+	case buildmeasure.CacheEditPublicDependency:
+		updated += "\npub fn i32 cache_public_probe() {\n    return 7;\n}\n"
+	default:
+		return fmt.Errorf("unknown cache edit condition %q", condition)
+	}
+	if updated == string(contents) {
+		return fmt.Errorf("cache edit condition %q did not change its source", condition)
+	}
+	return os.WriteFile(absolute, []byte(updated), 0o600)
 }
 
 func runStandaloneCompiler(repositoryRoot, sourceRoot string) (int64, error) {

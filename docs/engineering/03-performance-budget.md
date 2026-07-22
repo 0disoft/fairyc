@@ -3,7 +3,7 @@
 - Status: Draft
 - Owner: UNASSIGNED
 - Product contract: `docs/product/02-spec.md`
-- Evidence status: Configured local Windows no-cache calibration and two-sample process-cache control-flow receipt exist; no timing distribution, reference machine, cache speedup decision, or regression threshold exists
+- Evidence status: Configured local Windows no-cache calibration, two-sample process-cache control-flow receipt, and 36-sample edit-class raw distributions exist; no reference machine, process-memory evidence, cache speedup decision, or regression threshold exists
 
 Stage 0 has no numeric performance, storage, or Atlas budget. Proposed millisecond, percentage, MiB, GiB, map-size, and context-size thresholds are removed until a maintained harness produces a baseline. This document fixes what must be measured and how a later budget becomes enforceable.
 
@@ -39,6 +39,14 @@ whether lowering ran, MIR function count, interpreter result, retained entries a
 harness-local bounds. Validation requires result `42`, rejects partial or rejected warm hits, and
 fixes `decision` to `observed-only-no-speedup-claim`. The two observations prove the selected control
 paths and comparable phase scope; they are not a distribution or a speedup conclusion.
+
+The smoke additionally emits `fairyc.process-cache-edit-measurement/v0`. It records nine independent
+fresh-Session observations for each of no-op warm, private root edit, private dependency edit, and
+public dependency edit. One untimed request warms each Session; mutation and workspace loading stay
+outside the timer. The report preserves the 36 raw durations, observes the smallest of 32 positive
+monotonic transitions within a bounded one-million-read calibration, and marks rather than replaces
+samples below that resolution. It proves the current invalidation paths and result `42`; it does not define a speedup,
+percentile, retry rule, reference-machine baseline, process-memory budget, or regression threshold.
 
 ## Runtime metrics
 

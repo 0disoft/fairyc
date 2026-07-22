@@ -69,7 +69,7 @@
 - Process-bound package MIR artifact codec route: internal/packageartifact/codec.go, docs/adr/0154-process-bound-package-artifact-codec.md
 - Bounded process-local package artifact cache route: internal/packageartifact/cache.go, internal/packagecache/store.go, docs/adr/0155-bounded-process-package-artifact-cache.md
 - Package-aware process-local MIR reuse route: internal/compiler/, internal/workspaceloader/semantic.go, internal/workspacecompiler/, docs/adr/0156-all-hit-process-mir-reuse.md
-- Build-measurement integrity route: internal/buildmeasure/, cmd/fairyc-windows-host-smoke/, docs/adr/0150-no-cache-windows-build-calibration.md, docs/adr/0157-process-cache-measurement-receipt.md
+- Build-measurement integrity route: internal/buildmeasure/, cmd/fairyc-windows-host-smoke/, docs/adr/0150-no-cache-windows-build-calibration.md, docs/adr/0157-process-cache-measurement-receipt.md, docs/adr/0158-process-cache-edit-distributions.md
 - Human project-manifest v1 route: internal/projectmanifest/, internal/projectmanifestfixture/, spec/fixtures/project-manifest/manifest-v1.json
 - Local workspace loader v1 route: internal/workspaceloader/, internal/workspaceloaderfixture/, spec/fixtures/workspace-loader/manifest-v1.json
 - Compiler-bundled Stage 0 standard-library route: internal/sdkstdlib/, docs/adr/0147-compiler-bundled-stage0-standard-library.md
