@@ -510,8 +510,11 @@ record relationship, and rederives every SymbolId from the stored declaration an
 namespace references. The opt-in `MapStore` now publishes checksum-named immutable generations under
 an opened root with mandatory retention bounds, recovers abandoned temporaries, rejects corrupt or
 conflicting generations, and requires exact current workspace package/file/line-map plus compiler
-and interface identities before returning spans. No Atlas command, default store policy,
-`overview`/`show`/`around` query, or Context Pack exists yet.
+and interface identities before returning spans. The internal query index repeats that freshness
+check, accepts only exact SymbolIds, and implements deterministic caller-bounded `overview`, `show`,
+and package-local `around` queries with explicit filter, depth, byte, dependency-join, and incoming-
+map omissions. No Atlas command, default store policy, dependency-map join, source excerpt, or
+Context Pack encoder exists yet.
 
 `experimental target-spec` accepts exactly one known Linux GNU or Windows MSVC ID and writes
 deterministic `fairyc.target-spec/v0` JSON. The result separates target semantics from local
@@ -594,7 +597,7 @@ or arbitrary link-input option.
 - Runtime and standard library: `docs/runtime/runtime-stdlib-v0.md`
 - Compatibility and versioning: `docs/compatibility/versioning-v0.md`
 - Diagnostic catalog: `docs/diagnostics/catalog-v0.md`
-- Atlas semantic snapshot, provisional SymbolId, logical planning, canonical transport, contained current-source-validated store, and proposed query schemas: `docs/atlas/`, `internal/atlasmap/`
+- Atlas semantic snapshot, provisional SymbolId, logical planning, canonical transport, contained current-source-validated store, and bounded package-local queries: `docs/atlas/`, `internal/atlasmap/`
 - CLI contract: `docs/cli/command-contract.md`
 - Workspace ownership: `docs/monorepo/package-ownership.md`
 

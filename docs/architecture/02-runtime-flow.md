@@ -247,7 +247,9 @@ explicit relation omissions. The same package now implements the caller-bounded 
 transport and domain-separated checksum, then strictly decodes, revalidates, and rederives SymbolIds
 before returning immutable facts. `MapStore` now publishes content-addressed generations beneath an
 opened root, applies caller retention bounds, and returns only one exact compiler/interface/current-
-source match. Dependency-map loading, commands, queries, and Context Pack arrows remain
+source match. The package-local query index repeats that current-state check and implements bounded
+`overview`, exact-SymbolId `show`, and breadth-first `around` without source text or dependency
+discovery. Dependency-map loading, commands, source excerpts, and Context Pack output remain
 unimplemented and cannot feed back into these boundaries.
 
 ## Runtime behavior

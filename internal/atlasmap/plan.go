@@ -1,5 +1,6 @@
-// Package atlasmap owns the deterministic logical planning boundary for future .fymap transport.
-// It does not encode, publish, read, query, or revalidate map files.
+// Package atlasmap owns deterministic .fymap planning, transport, contained storage, current-source
+// validation, and bounded package-local queries. The logical planner itself performs none of the
+// filesystem or query operations owned by the later layers in this package.
 package atlasmap
 
 import (

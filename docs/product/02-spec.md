@@ -751,10 +751,20 @@ aggregate source digest, and every file content/line-map identity before returni
 Interruption before or after publication yields a miss or one fully verified hit. No default path,
 ordinary-command writer, public CLI, watcher, daemon, or background cleanup is selected.
 
+The internal query layer now requires that same exact current workspace/compiler/interface vector
+before indexing a partition. It accepts only canonical visible or full SymbolId v1 selectors and
+implements package-local `overview`, `show`, and deterministic breadth-first `around`. Every request
+has explicit record, relation, traversal-depth, and deterministic selection-byte limits. Local
+targets may extend traversal; dependency targets retain exact declaration descriptors without an
+invented SymbolId, and unavailable cross-package incoming calls remain explicit omissions. Results
+contain compiler facts only and are detached from the index. No source excerpt, documentation text,
+dependency join, Context Pack envelope, stable query transport, or command is enabled.
+
 Atlas exports deterministic, model-neutral facts such as symbols, calls, types, ownership transfers, borrows, errors, effects, allocations, unsafe and FFI reachability, source spans, and related tests. Compiler facts and free-text documentation are physically separated and carry provenance. Unknown or incomplete edges remain explicit rather than being guessed.
 
-Stage 0 Atlas work continues from the implemented versioned `.fymap` codec and contained store to an
-explicit command policy and the `overview`, `show`, and `around` queries. `impact`, semantic
+Stage 0 Atlas work continues from the implemented versioned `.fymap` codec, contained store, and
+bounded package-local queries to a deterministic Context Pack and an explicit command policy.
+`impact`, semantic
 `diff`, stable anchor syntax, LSP, SCIP, MCP, structural edits, embeddings, model-generated
 summaries, and a vector database are deferred behind usage and completeness evidence.
 
@@ -763,8 +773,9 @@ credential, or approval authority. The implemented snapshot, provisional identit
 plan are specified in `docs/atlas/semantic-snapshot-v0.md`, `docs/atlas/symbol-id-v1.md`, and
 `docs/atlas/fymap-logical-plan-v1.md`. The implemented transport is specified in
 `docs/atlas/fymap-transport-v1.md`; the implemented store is specified in
-`docs/atlas/fymap-store-v1.md`, while future command and pack behavior is described by
-`docs/atlas/fymap-v1.md` and `docs/atlas/context-pack-v1.md`.
+`docs/atlas/fymap-store-v1.md`; the implemented query layer is specified in
+`docs/atlas/fymap-query-v1.md`, while future command and pack behavior is described by
+`docs/atlas/context-pack-v1.md`.
 
 ## Explicit non-goals
 

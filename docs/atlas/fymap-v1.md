@@ -1,12 +1,13 @@
 # `.fymap` v1 Logical Schema
 
-- Status: Canonical transport and contained current-source-validated store implemented; commands and queries remain future work
+- Status: Canonical transport, contained current-source-validated store, and bounded package-local queries implemented; commands and Context Pack output remain future work
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0004-atlas-semantic-snapshot-boundary.md`
 - Snapshot source: `docs/atlas/semantic-snapshot-v0.md`
 - Logical-plan source: `docs/atlas/fymap-logical-plan-v1.md`
 - Transport source: `docs/atlas/fymap-transport-v1.md`
 - Store source: `docs/atlas/fymap-store-v1.md`
+- Query source: `docs/atlas/fymap-query-v1.md`
 
 ## Boundary
 
@@ -15,7 +16,9 @@ Analyzed typed HIR and verified MIR now produce the immutable in-memory `Semanti
 immutable logical partition per package. It does not reparse source or feed decisions back into type
 checking. The logical plan itself does not choose transport, while ADR 0186 separately fixes the
 bounded canonical JSON encoding and checksum. ADR 0187 separately fixes an internal opt-in
-contained store and current-source acceptance without choosing a default path or command. The separate
+contained store and current-source acceptance without choosing a default path or command. ADR 0188
+fixes exact-current package-local `overview`, `show`, and `around` selection without choosing a
+command or Context Pack transport. The separate
 `fairyc.symbol-id/v1-sha256-128+256` implementation now fixes the provisional declaration join key
 described in `docs/atlas/symbol-id-v1.md`.
 
@@ -131,11 +134,16 @@ Text import performs size caps, control-character filtering, encoding validation
 
 ## Initial queries
 
-The initial query surface is:
+The implemented internal package-local query surface is:
 
 - `overview`: package structure, counts derived from the current map, and completeness;
-- `show`: one symbol's signature, facts, relations, uncertainty, and optional attributed text;
+- `show`: one exact SymbolId's signature, facts, bounded relations, and uncertainty without free text;
 - `around`: a bounded neighborhood with direction, relation filter, depth, and omissions.
+
+Every query requires explicit record, relation, depth, and deterministic selection-byte policy and
+repeats current source/compiler/interface acceptance. Dependency targets and cross-package incoming
+calls remain explicit unjoined omissions. Exact behavior is defined in
+`docs/atlas/fymap-query-v1.md`.
 
 `impact` and semantic `diff` are deferred until incomplete-edge behavior and identity stability are validated. Semantic diff eventually reports one of `Exact`, `Bounded`, `Partial`, `Heuristic`, or `Unavailable`; a heuristic rename is never applied as fact.
 

@@ -108,6 +108,7 @@ regenerate, or override compiler source.
 - Deterministic per-package Atlas logical map planning: internal/atlasmap/, docs/atlas/fymap-logical-plan-v1.md, docs/adr/0185-fymap-logical-package-plan-v1.md
 - Bounded canonical `.fymap` transport and checksum: internal/atlasmap/codec*.go, docs/atlas/fymap-transport-v1.md, docs/adr/0186-bounded-canonical-fymap-transport-v1.md
 - Contained bounded `.fymap` store and current-source validation: internal/atlasmap/store.go, internal/atlasmap/current.go, docs/atlas/fymap-store-v1.md, docs/adr/0187-contained-fymap-store-and-current-source-validation.md
+- Bounded exact-current package-local Atlas queries: internal/atlasmap/query.go, docs/atlas/fymap-query-v1.md, docs/adr/0188-bounded-current-fymap-queries.md
 - Validation: VALIDATION.md
 - Agent routing: .agents/context-map.md
 - Repository hygiene: .editorconfig, .gitattributes, .gitignore

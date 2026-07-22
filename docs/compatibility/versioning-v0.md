@@ -511,6 +511,13 @@ identities, and complete package plus per-file source identities. Stale, incompa
 conflicting generations are distinct rejection outcomes. The layout is pre-release internal state;
 no default path, CLI location, retention policy, or cross-version migration promise exists.
 
+ADR 0188 adds the internal package-local query contract. Query construction requires the same exact
+current source/compiler/interface vector, selectors require canonical SymbolId v1 text, and every
+request fixes record, relation, depth, and selection-byte bounds. Relation kind spellings, omission
+codes, and compact-JSON selection accounting are pre-release internal policy, not a stable wire or
+CLI promise. Dependency joins, Context Pack encoding, source excerpts, and cross-version query
+migration remain absent.
+
 Dependency handling is relation-specific:
 
 | Condition | Atlas behavior |

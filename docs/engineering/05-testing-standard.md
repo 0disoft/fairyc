@@ -91,7 +91,8 @@ parser, compiler, assembler, linker, executable, sanitizer, layout probe, or ABI
 behavior belongs to `internal/cbackendnative`, which consumes the same emitted units through the
 shared C driver and scalar runtime. ABI and complete-runtime runners remain separate evidence
 requirements. `internal/semanticsnapshot` now owns the in-memory Atlas producer tests; publication,
-query, stale-map, and Context Pack runners remain future evidence. `internal/symbolidentity` owns
+current-source acceptance, and package-local query evidence are owned downstream, while Context
+Pack runners remain future evidence. `internal/symbolidentity` owns
 the provisional identity byte-vector, stability/sensitivity, path validation, strict text form,
 package-UID nominal normalization, and visible/full collision regressions.
 `internal/atlasmap` owns real-workspace logical planning tests for exact compiler identity,
@@ -101,7 +102,11 @@ accessors. Its transport tests additionally own exact canonical bytes, the froze
 bounds, strict fields, corruption rejection, semantic cross-record validation, and declaration-to-
 SymbolId rederivation. Store tests own opened-root containment, immutable convergence, current-source
 matching, corruption/conflict rejection, retention bounds, temporary recovery, and process-kill
-outcomes. They do not exercise a public command, dependency-map loading, queries, or rewrite cost.
+outcomes. Query tests build a real three-function workspace, require exact-current construction,
+visible/full SymbolId equivalence, deterministic detached `overview`/`show`/`around` results, local
+breadth-first traversal, record/relation/depth/selection-byte truncation, explicit dependency and
+incoming-map omissions, and malformed request rejection. They do not exercise a public command,
+dependency-map join, Context Pack, source excerpt, or rewrite cost.
 
 `internal/cstdlib` separately embeds the provisional SystemHeap implementation and its closed C
 probe. Ordinary Go tests prove deterministic, LF-only source ownership and forbid raw `realloc` or
@@ -253,11 +258,12 @@ dependency closure remain host-independent Go tests.
 | ABI | Target layout, calls, callbacks, raw bindings, and boundary shims for candidate target profiles |
 | Runtime and stdlib | Zero-size normalization, allocation failure, reserve rollback, UTF-8 invariants, partial I/O, Linux descriptor and Windows handle close consumption, and retained-pointer wrappers |
 | Compatibility | Exact pre-1 matching, cache misses, runtime mismatch, diagnostic identity, stale maps, target mismatch, and relation-specific completeness |
-| Atlas semantic snapshot | Current unit and pipeline tests require Flow-plus-verified-MIR admission, complete package and file metadata, file/module bijection, build-local package-renumbering invariance, deep input/output detachment, stable ordering, structured path-free type identity, exact local calls/traps/unsafe/ownership facts, foreign-call-only partial completeness, unavailable relation disclosure, and fail-closed invalid MIR or package mappings. No encoded map, current-source validation, or query evidence is implied. |
+| Atlas semantic snapshot | Current unit and pipeline tests require Flow-plus-verified-MIR admission, complete package and file metadata, file/module bijection, build-local package-renumbering invariance, deep input/output detachment, stable ordering, structured path-free type identity, exact local calls/traps/unsafe/ownership facts, foreign-call-only partial completeness, unavailable relation disclosure, and fail-closed invalid MIR or package mappings. These tests alone imply no encoded map, current-source validation, or query evidence; those are separate `internal/atlasmap` lanes. |
 | Atlas SymbolId | Current unit and compiler-pipeline tests freeze tagged length-delimited bytes, visible/full digest derivation, strict text forms, path/kind validation, tuple boundaries, body/span/version/build-number stability, coordinate/signature sensitivity, nominal package-UID normalization, deterministic ordering, pair integrity, and synthetic compact-ID collision rejection. No encoded map or released cross-version promise is implied. |
 | Atlas logical map plan | Current real-workspace and unit tests require exact compiler identity, a complete public-interface-hash set, all independent algorithm identifiers, package-stable headers, exact namespace references, complete file/module/declaration/SymbolId/function assignment, deterministic package order, immutable accessors, and explicit omissions. Current-source validation, dependency-map joins, queries, and whole-package rewrite measurements remain future evidence. |
 | Atlas transport | Current real-workspace and mutation tests require repeated canonical JSON identity, exact schema/encoding/checksum algorithms, a frozen checksum vector, positive caller bounds, unknown/trailing/noncanonical rejection, canonical identities and record order, exact counts and ownership, bounded type depth, checksummed-payload revalidation, and declaration-to-SymbolId rederivation. Authentication, alternate encodings, compression, and rewrite performance remain future evidence; storage evidence is owned by the separate Atlas-store row. |
 | Atlas store | Current real-workspace, storage, containment, and process-interruption tests require caller limits, opened-root relative paths, checksum-derived immutable names, identical convergence, close/reopen loading, exact compiler/interface/package/file/line-map acceptance, stale/incompatible/corrupt/conflict separation, corrupt quarantine, bounded eviction, expired temporary recovery, external-symlink rejection, and pre/post-publication miss-or-verified-hit outcomes. Default policy, public CLI behavior, physical power-cut retention, dependency joins, and query performance remain future evidence. |
+| Atlas package-local queries | Current real-workspace tests require exact-current constructor admission, canonical visible/full SymbolId lookup, deterministic and detached overview/show/around output, explicit relation filters and directions, local breadth-first traversal, record/relation/depth/selection-byte limits, stable budget/filter/join omissions, and fail-closed malformed partitions, selectors, requests, and compatibility inputs. Context Pack encoding, excerpts, dependency joins, public CLI behavior, representative latency, and workspace-wide graph claims remain future evidence. |
 | Atlas context | Budgets, stable ordering, omissions, stale source, text caps, and prompt-injection isolation |
 
 ## Diagnostic assertions

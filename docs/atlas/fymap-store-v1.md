@@ -99,6 +99,7 @@ outside the portable guarantee.
 - no stable or experimental CLI command yet;
 - no automatic write during `check`, `build`, `run`, `test`, or `emit`;
 - no dependency-map discovery or transitive join;
-- no `overview`, `show`, `around`, Context Pack, LSP, SCIP, or MCP reader;
+- no dependency-map join, Context Pack, source-excerpt, LSP, SCIP, or MCP reader; package-local
+  `overview`, `show`, and `around` are separately owned by `docs/atlas/fymap-query-v1.md`;
 - no remote store, signing, authentication, watcher, daemon, or background cleanup; and
 - no rewrite-speed, retained-size, or default-policy claim.

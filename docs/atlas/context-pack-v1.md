@@ -1,6 +1,6 @@
 # Atlas Context Pack v1
 
-- Status: Proposed; no implementation exists
+- Status: Proposed; bounded query inputs exist, but no Context Pack implementation exists
 - Map source: `docs/atlas/fymap-v1.md`
 - Decision source: `docs/adr/0004-atlas-semantic-snapshot-boundary.md`
 
@@ -82,4 +82,7 @@ Packs exclude absolute local paths, credentials, environment variables, build lo
 
 ## Initial query support
 
-`overview`, `show`, and `around` may produce context packs in the first Atlas slice. `impact` and `diff` remain schema consumers under design, not Stage 0 implementation promises.
+The implemented package-local `overview`, `show`, and `around` results may feed a future Context Pack
+builder. They already expose deterministic selection budgets and omissions, but no pack envelope,
+source excerpt, documentation section, or stable pack encoding exists. `impact` and `diff` remain
+schema consumers under design, not Stage 0 implementation promises.

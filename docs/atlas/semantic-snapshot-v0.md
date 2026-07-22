@@ -3,7 +3,7 @@
 - Status: Implemented in memory
 - Decision: `docs/adr/0182-immutable-semantic-snapshot-v0.md`
 - Implementation: `internal/semanticsnapshot/`
-- Consumers: implemented provisional SymbolId derivation, per-package logical planning, transport codec, and contained store, plus future command and query layers
+- Consumers: implemented provisional SymbolId derivation, per-package logical planning, transport codec, contained store, and bounded package-local queries, plus future command and Context Pack layers
 
 ## Boundary
 
@@ -89,7 +89,7 @@ ordinary semantic analysis.
 ## Deferred
 
 This model itself does not implement `.fymap` transport, current-source recomputation, dependency
-map joins, stale-map validation, documentation import, source
-excerpts, `overview`, `show`, `around`, Context Packs, map rewrite measurements, anchors, `impact`,
-semantic diff, LSP, SCIP, MCP, embeddings, or structural edits. Each remains a later Atlas boundary
-with its own compatibility and failure contract.
+map joins, stale-map validation, documentation import, source excerpts, queries, Context Packs, map
+rewrite measurements, anchors, `impact`, semantic diff, LSP, SCIP, MCP, embeddings, or structural
+edits. Transport, current-source validation, and package-local queries are now separate downstream
+Atlas boundaries; the remaining surfaces still require their own compatibility and failure contracts.

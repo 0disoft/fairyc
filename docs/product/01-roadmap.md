@@ -588,14 +588,19 @@ JSON and malformed records, and rederives every SymbolId from the declaration pl
 namespace references. ADR 0187 now adds the internal opened-root `MapStore`: checksum-named immutable
 generations, mandatory caller retention bounds, corrupt/conflict rejection, stale temporary recovery,
 process-interruption miss-or-verified-hit behavior, and exact current compiler/interface/package/file/
-line-map acceptance all have executable regressions. No default path, ordinary-command publication,
-dependency-map join, query, Context Pack, or rewrite measurement exists yet.
+line-map acceptance all have executable regressions. ADR 0188 now adds exact-current package-local
+`overview`, `show`, and `around`: canonical SymbolId selection, typed relation expansion,
+deterministic breadth-first traversal, mandatory record/relation/depth/selection-byte limits, detached
+results, and explicit filter/dependency/incoming omissions have executable regressions. No default
+path, ordinary-command publication, dependency-map join, Context Pack, source excerpt, query wire
+schema, or rewrite measurement exists yet.
 
 - Preserve the implemented immutable `SemanticSnapshot` and per-package logical map plan.
 - Preserve the implemented bounded canonical `.fymap` codec and semantic revalidation boundary.
 - Preserve the implemented contained immutable store and current-source rejection boundary.
+- Preserve the implemented bounded exact-current package-local query boundary.
 - Select an explicit experimental command/path/limit policy before exposing map publication.
-- Implement bounded `overview`, `show`, and `around` queries and Context Pack output.
+- Implement deterministic Context Pack output over the bounded query results.
 - Measure whole-package map rewrite cost before considering chunks or compression.
 
 Exit gate: Atlas failure cannot change compilation; stale or incompatible maps fail closed; unknown graph edges remain explicit; text cannot grant authority.
