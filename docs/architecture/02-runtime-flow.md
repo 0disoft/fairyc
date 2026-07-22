@@ -227,7 +227,7 @@ typed HIR + verified MIR
   -> immutable per-package logical map plan
   -> bounded canonical Atlas transport encoder/decoder
   -> checksummed .fymap bytes
-  -> filesystem publication + current-source validation
+  -> contained immutable publication + current-source validation
   -> bounded overview/show/around queries
   -> optional Context Pack
 ```
@@ -245,9 +245,10 @@ function summary to one immutable package partition. Its target-independent head
 independent identity algorithms, the exact compiler executable identity, package compatibility, and
 explicit relation omissions. The same package now implements the caller-bounded canonical JSON
 transport and domain-separated checksum, then strictly decodes, revalidates, and rederives SymbolIds
-before returning immutable facts. Filesystem publication, current-source validation, dependency-map
-loading, queries, and Context Pack arrows remain unimplemented and cannot feed back into these
-boundaries.
+before returning immutable facts. `MapStore` now publishes content-addressed generations beneath an
+opened root, applies caller retention bounds, and returns only one exact compiler/interface/current-
+source match. Dependency-map loading, commands, queries, and Context Pack arrows remain
+unimplemented and cannot feed back into these boundaries.
 
 ## Runtime behavior
 

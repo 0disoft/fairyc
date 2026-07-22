@@ -1,11 +1,12 @@
 # `.fymap` v1 Logical Schema
 
-- Status: Canonical transport implemented in memory; filesystem publication and queries remain future work
+- Status: Canonical transport and contained current-source-validated store implemented; commands and queries remain future work
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0004-atlas-semantic-snapshot-boundary.md`
 - Snapshot source: `docs/atlas/semantic-snapshot-v0.md`
 - Logical-plan source: `docs/atlas/fymap-logical-plan-v1.md`
 - Transport source: `docs/atlas/fymap-transport-v1.md`
+- Store source: `docs/atlas/fymap-store-v1.md`
 
 ## Boundary
 
@@ -13,12 +14,12 @@ Analyzed typed HIR and verified MIR now produce the immutable in-memory `Semanti
 `internal/atlasmap` validates the complete package/interface set and converts that snapshot into one
 immutable logical partition per package. It does not reparse source or feed decisions back into type
 checking. The logical plan itself does not choose transport, while ADR 0186 separately fixes the
-bounded canonical JSON encoding and checksum. Neither contract chooses a file location,
-publication protocol, current-source authority, or command behavior. The separate
+bounded canonical JSON encoding and checksum. ADR 0187 separately fixes an internal opt-in
+contained store and current-source acceptance without choosing a default path or command. The separate
 `fairyc.symbol-id/v1-sha256-128+256` implementation now fixes the provisional declaration join key
 described in `docs/atlas/symbol-id-v1.md`.
 
-The first implementation plans and encodes one deterministic map per package without publishing it.
+The first implementation plans, encodes, and optionally publishes one deterministic map per package.
 Chunking, compression, and symbol-level incremental rewrites require measured evidence. Transport
 v1 is compact canonical JSON with a domain-separated SHA-256 checksum; another encoding requires a
 new explicit identifier. Package-instance references use the independent `PackageInstanceId` v1
@@ -80,8 +81,8 @@ Absolute local paths, timestamps that break reproducibility, source bodies, cred
 A file record contains a package-relative normalized path, content digest, source kind, and line-map
 identity. The implemented snapshot prerequisite uses `fairyc.source-file/v1` and
 `fairyc.source-line-map/v1` as defined in `docs/package/source-file-identities-v1.md`. Source text is
-not duplicated into `.fymap`; current-source recomputation and stale-map rejection remain
-publication/reader work.
+not duplicated into `.fymap`; the store reader recomputes current package and per-file identities
+through the validated workspace boundary before returning stored spans.
 
 ### Type record
 

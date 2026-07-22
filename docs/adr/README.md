@@ -196,6 +196,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0184-source-file-integrity-identities-v1.md`: exact per-file content and LF-derived line-map identities carried from validated workspace bytes into Atlas snapshots.
 - `0185-fymap-logical-package-plan-v1.md`: immutable per-package Atlas planning with exact compatibility headers, complete record assignment, and explicit omissions before transport encoding.
 - `0186-bounded-canonical-fymap-transport-v1.md`: caller-bounded canonical JSON maps, domain-separated checksums, strict decoding, and declaration-to-SymbolId revalidation.
+- `0187-contained-fymap-store-and-current-source-validation.md`: opened-root immutable map generations, caller retention bounds, interruption-safe observation, and exact current-workspace acceptance.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

@@ -507,7 +507,10 @@ and incomplete relations become explicit stable omissions. The same package now 
 partition as caller-bounded canonical `fairyc.fymap-json/v1`, binds it with the domain-separated
 `fymap1-sha256` checksum, rejects unknown or noncanonical JSON, revalidates every identity and
 record relationship, and rederives every SymbolId from the stored declaration and exact package
-namespace references. No filesystem publication, current-source validator, Atlas command,
+namespace references. The opt-in `MapStore` now publishes checksum-named immutable generations under
+an opened root with mandatory retention bounds, recovers abandoned temporaries, rejects corrupt or
+conflicting generations, and requires exact current workspace package/file/line-map plus compiler
+and interface identities before returning spans. No Atlas command, default store policy,
 `overview`/`show`/`around` query, or Context Pack exists yet.
 
 `experimental target-spec` accepts exactly one known Linux GNU or Windows MSVC ID and writes
@@ -591,7 +594,7 @@ or arbitrary link-input option.
 - Runtime and standard library: `docs/runtime/runtime-stdlib-v0.md`
 - Compatibility and versioning: `docs/compatibility/versioning-v0.md`
 - Diagnostic catalog: `docs/diagnostics/catalog-v0.md`
-- Atlas semantic snapshot, provisional SymbolId, logical package-map planning, canonical transport codec, and proposed query schemas: `docs/atlas/`, `internal/atlasmap/`
+- Atlas semantic snapshot, provisional SymbolId, logical planning, canonical transport, contained current-source-validated store, and proposed query schemas: `docs/atlas/`, `internal/atlasmap/`
 - CLI contract: `docs/cli/command-contract.md`
 - Workspace ownership: `docs/monorepo/package-ownership.md`
 

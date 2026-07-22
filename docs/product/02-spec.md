@@ -715,8 +715,9 @@ Atlas failure cannot change `fairyc check` results.
 Validated workspace source bytes now produce independent `fairyc.source-file/v1` exact-content and
 `fairyc.source-line-map/v1` byte-geometry identities. Snapshot file records retain those identities,
 package instance, canonical relative path, and source/test kind while excluding source text and host
-paths. Construction requires a one-to-one file/module match. A later map reader must recompute them
-before trusting stored spans or excerpts; that current-source validator is not implemented yet.
+paths. Construction requires a one-to-one file/module match. The implemented map-store reader
+recomputes them through the validated workspace boundary before trusting stored spans; source
+excerpt loading remains future query work.
 
 The first snapshot consumer now derives provisional `SymbolId` values with the independently
 versioned `fairyc.symbol-id/v1-sha256-128+256` algorithm. Package UID, module, declaration kind and
@@ -740,12 +741,20 @@ encoding, and logical document. Readers reject unknown fields, trailing or nonca
 malformed or zero identities, contradictory counts and ownership, excessive type nesting, invalid
 completeness, and declarations whose stored SymbolIds do not rederive through the exact self/direct-
 dependency package namespace references. The checksum detects corruption; it does not authenticate
-the author or grant authority. No filesystem publication or current-source acceptance exists yet.
+the author or grant authority.
+
+The internal opt-in `MapStore` now publishes canonical maps as checksum-named immutable generations
+under an opened filesystem root. Every store requires caller-selected generation, total-byte,
+per-map, and temporary-age bounds. Readers quarantine corrupt maps, reject multiple compatible
+generations, and require the exact compiler build, public-interface hash, current package identity,
+aggregate source digest, and every file content/line-map identity before returning spans.
+Interruption before or after publication yields a miss or one fully verified hit. No default path,
+ordinary-command writer, public CLI, watcher, daemon, or background cleanup is selected.
 
 Atlas exports deterministic, model-neutral facts such as symbols, calls, types, ownership transfers, borrows, errors, effects, allocations, unsafe and FFI reachability, source spans, and related tests. Compiler facts and free-text documentation are physically separated and carry provenance. Unknown or incomplete edges remain explicit rather than being guessed.
 
-Stage 0 Atlas work continues from the implemented versioned `.fymap` codec to safe publication,
-current-source validation, and the `overview`, `show`, and `around` queries. `impact`, semantic
+Stage 0 Atlas work continues from the implemented versioned `.fymap` codec and contained store to an
+explicit command policy and the `overview`, `show`, and `around` queries. `impact`, semantic
 `diff`, stable anchor syntax, LSP, SCIP, MCP, structural edits, embeddings, model-generated
 summaries, and a vector database are deferred behind usage and completeness evidence.
 
@@ -753,7 +762,8 @@ Source text and documentation cannot grant an LLM, IDE, or agent filesystem, pro
 credential, or approval authority. The implemented snapshot, provisional identity, and logical map
 plan are specified in `docs/atlas/semantic-snapshot-v0.md`, `docs/atlas/symbol-id-v1.md`, and
 `docs/atlas/fymap-logical-plan-v1.md`. The implemented transport is specified in
-`docs/atlas/fymap-transport-v1.md`; future publication and pack behavior is described by
+`docs/atlas/fymap-transport-v1.md`; the implemented store is specified in
+`docs/atlas/fymap-store-v1.md`, while future command and pack behavior is described by
 `docs/atlas/fymap-v1.md` and `docs/atlas/context-pack-v1.md`.
 
 ## Explicit non-goals
@@ -773,7 +783,7 @@ Registry coordinates, provider-qualified import spelling, classic and range
 `for`, lexical `defer`, checked narrowing conversion syntax, expression-bodied function shorthand,
 public `Arena` construction and capacity APIs, exact parser resource limits, glibc and toolchain
 baselines, portable path model, targets beyond the declared Linux GNU and Windows MSVC profiles,
-package registry, and `.fymap` publication/current-source policy remain UNDECIDED. Alternate map
-encodings, compression, and chunking remain evidence-gated. The
+package registry, and the `.fymap` default path, limits, and public command policy remain UNDECIDED.
+Alternate map encodings, compression, and chunking remain evidence-gated. The
 provisional pre-release SymbolId hash algorithm is now implemented by ADR 0183; its eventual stable
 release and cross-version migration policy remain open.

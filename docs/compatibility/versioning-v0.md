@@ -503,8 +503,13 @@ meanings and adds independently versioned encoding and integrity fields.
 Transport v1 readers require an exact schema, encoding, checksum, logical model, and algorithm
 match. They reject unknown fields, noncanonical bytes, contradictory records, a SymbolId that does
 not rederive from its declaration, and any corrupt checksum. A future version may define optional
-sections, but v1 never silently skips one. A current-source digest mismatch will reject the map once
-the separately owned stale-source reader is implemented. Atlas failure never fails compilation.
+sections, but v1 never silently skips one. Atlas failure never fails compilation.
+
+ADR 0187 adds the internal content-addressed `fymap-v1` store layout and exact current-source reader.
+It requires caller-selected storage bounds, the exact compiler executable and public-interface
+identities, and complete package plus per-file source identities. Stale, incompatible, corrupt, and
+conflicting generations are distinct rejection outcomes. The layout is pre-release internal state;
+no default path, CLI location, retention policy, or cross-version migration promise exists.
 
 Dependency handling is relation-specific:
 

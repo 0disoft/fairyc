@@ -28,6 +28,7 @@
 - Source-file content and line-map identities: docs/package/source-file-identities-v1.md, internal/packagecontent/file_identity.go
 - Deterministic per-package Atlas logical map plan: docs/atlas/fymap-logical-plan-v1.md, internal/atlasmap/
 - Bounded canonical `.fymap` v1 codec and checksum: docs/atlas/fymap-transport-v1.md, internal/atlasmap/codec*.go
+- Contained caller-bounded `.fymap` store and current-source reader: docs/atlas/fymap-store-v1.md, internal/atlasmap/store.go, internal/atlasmap/current.go
 - Whole-package cache-key v2 fixtures and bounded store runner: spec/fixtures/package-cache/manifest-v2.json with historical v1, internal/packagecache/, internal/packagecachefixture/
 - Package-stable function IDs, process-local MIR slice reassembly, process-bound codec, and all-hit reuse coordinator: internal/packageartifact/, internal/workspacecompiler/, docs/package/package-function-id-v1.md, docs/package/process-local-mir-artifact-v0.md
 - Bounded workspace check-session CLI and NDJSON schema: internal/cli/workspace_session.go, spec/cli/experimental-workspace-check-session-v0.schema.json, docs/adr/0159-bounded-workspace-check-session.md

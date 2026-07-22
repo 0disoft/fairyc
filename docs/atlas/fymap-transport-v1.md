@@ -88,11 +88,15 @@ consumer may need different budgets.
 Any transport error rejects the entire package map. No partial record set is returned as semantic
 truth, and compilation remains unaffected.
 
+## Separately implemented storage
+
+`docs/atlas/fymap-store-v1.md` now owns the opened-root layout, immutable publication, caller
+retention bounds, corruption quarantine, interruption outcomes, and current-source acceptance.
+Those policies remain outside the transport codec itself.
+
 ## Not implemented here
 
-- output path and naming policy;
-- root containment, temporary files, atomic replacement, directory durability, or retention;
-- current-source digest recomputation and stale-map rejection;
+- default output path, CLI naming policy, or ordinary-command integration;
 - dependency-map discovery and cross-map joins;
 - `overview`, `show`, `around`, Context Pack, LSP, SCIP, or MCP behavior;
 - compression, chunking, incremental rewrites, or performance budgets; and

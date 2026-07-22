@@ -107,6 +107,7 @@ regenerate, or override compiler source.
 - Provisional deterministic Atlas SymbolId: internal/symbolidentity/, docs/atlas/symbol-id-v1.md, docs/adr/0183-provisional-symbol-id-v1.md
 - Deterministic per-package Atlas logical map planning: internal/atlasmap/, docs/atlas/fymap-logical-plan-v1.md, docs/adr/0185-fymap-logical-package-plan-v1.md
 - Bounded canonical `.fymap` transport and checksum: internal/atlasmap/codec*.go, docs/atlas/fymap-transport-v1.md, docs/adr/0186-bounded-canonical-fymap-transport-v1.md
+- Contained bounded `.fymap` store and current-source validation: internal/atlasmap/store.go, internal/atlasmap/current.go, docs/atlas/fymap-store-v1.md, docs/adr/0187-contained-fymap-store-and-current-source-validation.md
 - Validation: VALIDATION.md
 - Agent routing: .agents/context-map.md
 - Repository hygiene: .editorconfig, .gitattributes, .gitignore

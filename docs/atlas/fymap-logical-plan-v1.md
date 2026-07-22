@@ -82,12 +82,13 @@ set or a false claim that a relation does not exist.
 This model does not define:
 
 - alternate `.fymap` encodings, section offsets, alignment, compression, or chunking;
-- file names, output directories, atomic replacement, retention, or cache policy;
-- current-source recomputation and stale-map rejection;
+- default file location, public command behavior, or default retention policy;
 - dependency-map loading or cross-map joins;
 - `overview`, `show`, `around`, Context Pack, LSP, SCIP, or MCP output;
 - source text, documentation text, embeddings, or execution authority; or
 - rewrite-size, rewrite-time, or chunking performance claims.
 
-Canonical JSON transport and checksums are now owned by `docs/atlas/fymap-transport-v1.md`. The
-remaining items require independently versioned contracts and their own executable evidence.
+Canonical JSON transport and checksums are now owned by `docs/atlas/fymap-transport-v1.md`.
+Contained immutable publication, caller retention bounds, and current-source rejection are owned by
+`docs/atlas/fymap-store-v1.md`. The remaining items require independently versioned contracts and
+their own executable evidence.

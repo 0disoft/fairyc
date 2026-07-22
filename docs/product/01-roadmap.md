@@ -585,12 +585,16 @@ SymbolId, and function summary is assigned; relation gaps become stable omission
 encodes those partitions as positive-caller-bounded canonical `fairyc.fymap-json/v1`, protects the
 schema/encoding/document tuple with `fairyc.fymap-checksum/v1-sha256`, strictly rejects alternate
 JSON and malformed records, and rederives every SymbolId from the declaration plus exact package
-namespace references. No filesystem publication, current-source recomputation, dependency-map
-join, stale-map validator, query, Context Pack, or rewrite measurement exists yet.
+namespace references. ADR 0187 now adds the internal opened-root `MapStore`: checksum-named immutable
+generations, mandatory caller retention bounds, corrupt/conflict rejection, stale temporary recovery,
+process-interruption miss-or-verified-hit behavior, and exact current compiler/interface/package/file/
+line-map acceptance all have executable regressions. No default path, ordinary-command publication,
+dependency-map join, query, Context Pack, or rewrite measurement exists yet.
 
 - Preserve the implemented immutable `SemanticSnapshot` and per-package logical map plan.
 - Preserve the implemented bounded canonical `.fymap` codec and semantic revalidation boundary.
-- Publish `.fymap` atomically, then reject stale current-source identities before exposing facts.
+- Preserve the implemented contained immutable store and current-source rejection boundary.
+- Select an explicit experimental command/path/limit policy before exposing map publication.
 - Implement bounded `overview`, `show`, and `around` queries and Context Pack output.
 - Measure whole-package map rewrite cost before considering chunks or compression.
 
