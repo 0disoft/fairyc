@@ -16,7 +16,7 @@ func TestKeyRoundTripAndInvalidation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Compute() error = %v", err)
 	}
-	if got, want := key.String(), "fycache1-sha256-0de88695e942b91df482e3b570371107f7b6725d94242e66e9e7cfc52a7dd8fc"; got != want {
+	if got, want := key.String(), "fycache1-sha256-06bec376bb87eb9922fd88d3d635d73e80f236ec7290137ea36742df8bfebca5"; got != want {
 		t.Fatalf("key = %q, want %q", got, want)
 	}
 	parsed, err := ParseKey(key.String())
@@ -115,7 +115,7 @@ func testInputs(t *testing.T) Inputs {
 		Source:               mustSource(t, "fysrc1-sha256-dd19fc7a8f93795ca7bf1abb70fa2f7bbbb0a8849fe410f6b4c080b55817e9a3"),
 		Dependencies: []Dependency{{
 			Instance:  mustInstance(t, "fypi1-sha256-903a7b9974986cccf6166e8978ca9cb26273d4776af6d1a5dd3b04e7060e2f41"),
-			Interface: mustInterface(t, "fyif1-sha256-a5e79db9b105ffac6d57d0ff054b75813344fdf4e9f9a5c1873da8907ae281b9"),
+			Interface: mustInterface(t, "fyif2-sha256-a5e79db9b105ffac6d57d0ff054b75813344fdf4e9f9a5c1873da8907ae281b9"),
 		}},
 		Features: []string{"base", "tls"},
 	}

@@ -23,7 +23,7 @@
     "dependencies": [
       {
         "instance": "fypi1-sha256-903a7b9974986cccf6166e8978ca9cb26273d4776af6d1a5dd3b04e7060e2f41",
-        "interface": "fyif1-sha256-a5e79db9b105ffac6d57d0ff054b75813344fdf4e9f9a5c1873da8907ae281b9"
+        "interface": "fyif2-sha256-a5e79db9b105ffac6d57d0ff054b75813344fdf4e9f9a5c1873da8907ae281b9"
       }
     ],
     "features": ["base", "tls"]
@@ -33,7 +33,7 @@
       "id": "baseline",
       "override": {},
       "relation": "baseline",
-      "expectKey": "fycache1-sha256-0de88695e942b91df482e3b570371107f7b6725d94242e66e9e7cfc52a7dd8fc"
+      "expectKey": "fycache1-sha256-06bec376bb87eb9922fd88d3d635d73e80f236ec7290137ea36742df8bfebca5"
     },
     {
       "id": "compiler-build",
@@ -53,7 +53,7 @@
         "dependencies": [
           {
             "instance": "fypi1-sha256-903a7b9974986cccf6166e8978ca9cb26273d4776af6d1a5dd3b04e7060e2f41",
-            "interface": "fyif1-sha256-b5e79db9b105ffac6d57d0ff054b75813344fdf4e9f9a5c1873da8907ae281b9"
+            "interface": "fyif2-sha256-b5e79db9b105ffac6d57d0ff054b75813344fdf4e9f9a5c1873da8907ae281b9"
           }
         ]
       },

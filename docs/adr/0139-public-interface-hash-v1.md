@@ -1,6 +1,6 @@
 # ADR 0139: Hash the source-visible package interface independently from implementation
 
-- Status: Accepted for prototype
+- Status: Superseded by ADR 0173
 - Date: 2026-07-21
 - Product source: `docs/product/02-spec.md`
 - Package source: `docs/package/public-interface-hash-v1.md`

@@ -70,7 +70,7 @@ regenerate, or override compiler source.
 - PackageInstanceId v1 fixtures: spec/fixtures/package-identity/manifest-v1.json
 - PackageInstanceId v1 encoding and fixture runner: internal/packagegraph/identity.go, internal/packageidentityfixture/
 - PackageCoordinateId v1 encoding and workspace mapping: internal/packagegraph/coordinate.go, internal/workspaceloader/semantic.go, docs/package/package-coordinate-id-v1.md
-- Public-interface hash v1 fixtures: spec/fixtures/module-interface/manifest-v1.json
+- Public-interface hash v2 fixtures: spec/fixtures/module-interface/manifest-v2.json with historical manifest-v1.json coverage
 - Public-interface extraction, hashing, and fixture runner: internal/moduleinterface/, internal/moduleinterfacefixture/
 - Package-source digest v1 fixtures: spec/fixtures/package-source/manifest-v1.json
 - Package-source digest and fixture runner: internal/packagecontent/, internal/packagecontentfixture/

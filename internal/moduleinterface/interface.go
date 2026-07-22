@@ -17,8 +17,8 @@ import (
 
 const (
 	HashAlgorithm = "sha256"
-	HashEncoding  = "fairyc.public-interface/v1"
-	HashPrefix    = "fyif1-sha256-"
+	HashEncoding  = "fairyc.public-interface/v2"
+	HashPrefix    = "fyif2-sha256-"
 )
 
 const interfaceDomain = "fairyc.public-interface"
@@ -103,11 +103,11 @@ type Variant struct {
 }
 
 // Extract projects one fully typed package into its deterministic public interface. instances maps
-// disposable HIR package numbers to concrete package identities; the current package is rendered as
+// disposable HIR package numbers to source-independent package coordinates; the current package is rendered as
 // self so private source or version changes do not invalidate an unchanged interface.
-func Extract(value hir.Package, packageID hir.PackageID, instances map[hir.PackageID]packagegraph.InstanceID) (Descriptor, error) {
-	if _, found := instances[packageID]; !found {
-		return Descriptor{}, fmt.Errorf("package %d has no PackageInstanceId", packageID)
+func Extract(value hir.Package, packageID hir.PackageID, coordinates map[hir.PackageID]packagegraph.CoordinateID) (Descriptor, error) {
+	if _, found := coordinates[packageID]; !found {
+		return Descriptor{}, fmt.Errorf("package %d has no PackageCoordinateId", packageID)
 	}
 	publicTypes := make(map[hir.Type]bool)
 	for _, module := range value.Modules {
@@ -138,7 +138,7 @@ func Extract(value hir.Package, packageID hir.PackageID, instances map[hir.Packa
 			return Descriptor{}, fmt.Errorf("package %d contains duplicate module %q", packageID, sourceModule.Path)
 		}
 		seenModules[sourceModule.Path] = struct{}{}
-		module, err := extractModule(sourceModule, packageID, instances, publicTypes)
+		module, err := extractModule(sourceModule, packageID, coordinates, publicTypes)
 		if err != nil {
 			return Descriptor{}, fmt.Errorf("module %q: %w", sourceModule.Path, err)
 		}
@@ -153,14 +153,14 @@ func Extract(value hir.Package, packageID hir.PackageID, instances map[hir.Packa
 	return descriptor, nil
 }
 
-func extractModule(source hir.Module, packageID hir.PackageID, instances map[hir.PackageID]packagegraph.InstanceID, publicTypes map[hir.Type]bool) (Module, error) {
+func extractModule(source hir.Module, packageID hir.PackageID, coordinates map[hir.PackageID]packagegraph.CoordinateID, publicTypes map[hir.Type]bool) (Module, error) {
 	result := Module{Path: source.Path}
 	for _, structure := range source.Structs {
 		if !structure.Public {
 			continue
 		}
 		item := Item{Kind: "struct", Name: structure.Name, ReprC: structure.ReprC}
-		fields, err := stableStructFields(structure.Fields, packageID, instances, publicTypes)
+		fields, err := stableStructFields(structure.Fields, packageID, coordinates, publicTypes)
 		if err != nil {
 			return Module{}, fmt.Errorf("public struct %q: %w", structure.Name, err)
 		}
@@ -175,7 +175,7 @@ func extractModule(source hir.Module, packageID hir.PackageID, instances map[hir
 		for _, variant := range enumeration.Variants {
 			stableVariant := Variant{Name: variant.Name}
 			for _, field := range variant.Fields {
-				stable, err := stableType(field.Type, packageID, instances, publicTypes)
+				stable, err := stableType(field.Type, packageID, coordinates, publicTypes)
 				if err != nil {
 					return Module{}, fmt.Errorf("public enum %q variant %q field %q: %w", enumeration.Name, variant.Name, field.Name, err)
 				}
@@ -209,13 +209,13 @@ func extractModule(source hir.Module, packageID hir.PackageID, instances map[hir
 			LinkName: foreign.LinkName, Effects: effects,
 		}
 		for _, parameter := range foreign.Parameters {
-			stable, err := stableType(parameter.Type, packageID, instances, publicTypes)
+			stable, err := stableType(parameter.Type, packageID, coordinates, publicTypes)
 			if err != nil {
 				return Module{}, fmt.Errorf("public foreign function %q parameter: %w", foreign.Name, err)
 			}
 			item.Parameters = append(item.Parameters, stable)
 		}
-		stable, err := stableType(foreign.ResultType, packageID, instances, publicTypes)
+		stable, err := stableType(foreign.ResultType, packageID, coordinates, publicTypes)
 		if err != nil {
 			return Module{}, fmt.Errorf("public foreign function %q result: %w", foreign.Name, err)
 		}
@@ -232,20 +232,20 @@ func extractModule(source hir.Module, packageID hir.PackageID, instances map[hir
 		}
 		item := Item{Kind: "function", Name: function.Name, Unsafe: function.Unsafe, Effects: effects}
 		if function.OwnerType != "" {
-			stable, err := stableType(function.OwnerType, packageID, instances, publicTypes)
+			stable, err := stableType(function.OwnerType, packageID, coordinates, publicTypes)
 			if err != nil {
 				return Module{}, fmt.Errorf("public function %q owner: %w", function.Name, err)
 			}
 			item.OwnerType = stable
 		}
 		for _, parameter := range function.Parameters {
-			stable, err := stableType(parameter.Type, packageID, instances, publicTypes)
+			stable, err := stableType(parameter.Type, packageID, coordinates, publicTypes)
 			if err != nil {
 				return Module{}, fmt.Errorf("public function %q parameter: %w", function.Name, err)
 			}
 			item.Parameters = append(item.Parameters, stable)
 		}
-		stable, err := stableType(function.ResultType, packageID, instances, publicTypes)
+		stable, err := stableType(function.ResultType, packageID, coordinates, publicTypes)
 		if err != nil {
 			return Module{}, fmt.Errorf("public function %q result: %w", function.Name, err)
 		}
@@ -266,10 +266,10 @@ func extractModule(source hir.Module, packageID hir.PackageID, instances map[hir
 	return result, nil
 }
 
-func stableStructFields(fields []hir.StructField, packageID hir.PackageID, instances map[hir.PackageID]packagegraph.InstanceID, publicTypes map[hir.Type]bool) ([]Field, error) {
+func stableStructFields(fields []hir.StructField, packageID hir.PackageID, coordinates map[hir.PackageID]packagegraph.CoordinateID, publicTypes map[hir.Type]bool) ([]Field, error) {
 	result := make([]Field, 0, len(fields))
 	for _, field := range fields {
-		stable, err := stableType(field.Type, packageID, instances, publicTypes)
+		stable, err := stableType(field.Type, packageID, coordinates, publicTypes)
 		if err != nil {
 			return nil, fmt.Errorf("field %q: %w", field.Name, err)
 		}
@@ -278,7 +278,7 @@ func stableStructFields(fields []hir.StructField, packageID hir.PackageID, insta
 	return result, nil
 }
 
-func stableType(value hir.Type, packageID hir.PackageID, instances map[hir.PackageID]packagegraph.InstanceID, publicTypes map[hir.Type]bool) (string, error) {
+func stableType(value hir.Type, packageID hir.PackageID, coordinates map[hir.PackageID]packagegraph.CoordinateID, publicTypes map[hir.Type]bool) (string, error) {
 	if value == hir.TypeByteSlice {
 		return "u8[]", nil
 	}
@@ -286,7 +286,7 @@ func stableType(value hir.Type, packageID hir.PackageID, instances map[hir.Packa
 		return string(value), nil
 	}
 	if element, mutable, ok := hir.BorrowElement(value); ok {
-		stable, err := stableType(element, packageID, instances, publicTypes)
+		stable, err := stableType(element, packageID, coordinates, publicTypes)
 		if err != nil {
 			return "", err
 		}
@@ -296,7 +296,7 @@ func stableType(value hir.Type, packageID hir.PackageID, instances map[hir.Packa
 		return "ref " + stable, nil
 	}
 	if element, mutable, ok := hir.RawPointerElement(value); ok {
-		stable, err := stableType(element, packageID, instances, publicTypes)
+		stable, err := stableType(element, packageID, coordinates, publicTypes)
 		if err != nil {
 			return "", err
 		}
@@ -306,25 +306,25 @@ func stableType(value hir.Type, packageID hir.PackageID, instances map[hir.Packa
 		return "ptr " + stable, nil
 	}
 	if element, length, ok := hir.FixedArrayParts(value); ok {
-		stable, err := stableType(element, packageID, instances, publicTypes)
+		stable, err := stableType(element, packageID, coordinates, publicTypes)
 		if err != nil {
 			return "", err
 		}
 		return stable + "[" + strconv.FormatUint(length, 10) + "]", nil
 	}
 	if element, ok := hir.OptionElement(value); ok {
-		stable, err := stableType(element, packageID, instances, publicTypes)
+		stable, err := stableType(element, packageID, coordinates, publicTypes)
 		if err != nil {
 			return "", err
 		}
 		return "Option<" + stable + ">", nil
 	}
 	if success, failure, ok := hir.ResultElements(value); ok {
-		stableSuccess, err := stableType(success, packageID, instances, publicTypes)
+		stableSuccess, err := stableType(success, packageID, coordinates, publicTypes)
 		if err != nil {
 			return "", err
 		}
-		stableFailure, err := stableType(failure, packageID, instances, publicTypes)
+		stableFailure, err := stableType(failure, packageID, coordinates, publicTypes)
 		if err != nil {
 			return "", err
 		}
@@ -341,11 +341,11 @@ func stableType(value hir.Type, packageID hir.PackageID, instances map[hir.Packa
 		}
 		return "self::" + name, nil
 	}
-	instance, found := instances[typePackage]
+	coordinate, found := coordinates[typePackage]
 	if !found {
-		return "", fmt.Errorf("type %q references package %d without PackageInstanceId", value, typePackage)
+		return "", fmt.Errorf("type %q references package %d without PackageCoordinateId", value, typePackage)
 	}
-	return "dep[" + instance.String() + "]::" + name, nil
+	return "dep[" + coordinate.String() + "]::" + name, nil
 }
 
 func userTypeParts(value hir.Type, current hir.PackageID) (hir.PackageID, string, bool) {
@@ -387,7 +387,7 @@ func stableEffects(values []hir.Effect) ([]string, error) {
 	return result, nil
 }
 
-// Encode returns the deterministic v1 bytes hashed for cache invalidation.
+// Encode returns the deterministic v2 bytes hashed for cache invalidation.
 func Encode(value Descriptor) ([]byte, error) {
 	if err := validateDescriptor(value); err != nil {
 		return nil, err
@@ -395,7 +395,7 @@ func Encode(value Descriptor) ([]byte, error) {
 	var encoded bytes.Buffer
 	encoded.WriteString(interfaceDomain)
 	encoded.WriteByte(0)
-	encoded.WriteByte(1)
+	encoded.WriteByte(2)
 	writeUint64(&encoded, uint64(len(value.Modules)))
 	for _, module := range value.Modules {
 		writeString(&encoded, module.Path)

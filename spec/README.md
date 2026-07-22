@@ -31,7 +31,7 @@ This directory contains versioned normative data that future compiler tests can 
 - `fixtures/package/schema-v0.json`: already-resolved package graph expectation schema;
 - `fixtures/package/manifest-v1.json`: historical v0 package identity/visibility cases plus post-deduplication dependency-cycle rejection.
 - `fixtures/package-identity/manifest-v1.json`: canonical resolved-instance bytes, full SHA-256 IDs, component boundaries, and identity validation cases.
-- `fixtures/module-interface/manifest-v1.json`: source-visible interface digest and same/different invalidation cases.
+- `fixtures/module-interface/manifest-v2.json`: current coordinate-based source-visible interface digest and same/different invalidation cases; historical v1 remains frozen.
 - `fixtures/package-source/manifest-v1.json`: exact canonical path/source-byte digest and invalidation cases.
 - `fixtures/package-cache/manifest-v1.json`: exact whole-package compatibility key and independent invalidation cases.
 - `fixtures/project-manifest/manifest-v1.json`: complete strict `fairy.toml` local-exact parser cases.

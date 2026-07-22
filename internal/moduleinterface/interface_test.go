@@ -33,8 +33,8 @@ func TestParseHashRejectsNoncanonicalText(t *testing.T) {
 
 func TestExtractConsumesTypedSourceHIR(t *testing.T) {
 	t.Parallel()
-	self := testInstanceID(t, "source-package")
-	instances := map[hir.PackageID]packagegraph.InstanceID{hir.DefaultPackage: self}
+	self := testCoordinateID(t, "source-package")
+	instances := map[hir.PackageID]packagegraph.CoordinateID{hir.DefaultPackage: self}
 	base := analyzeSource(t, `module api;
 pub struct Packet { i32 value; }
 pub fn i32 read(ref Packet packet) { return packet.value; }
@@ -62,8 +62,8 @@ fn i32 private_helper() { return 1; }
 
 func TestExtractIgnoresPrivateItemsBodiesAndDeclarationOrder(t *testing.T) {
 	t.Parallel()
-	self := testInstanceID(t, "self")
-	instances := map[hir.PackageID]packagegraph.InstanceID{1: self}
+	self := testCoordinateID(t, "self")
+	instances := map[hir.PackageID]packagegraph.CoordinateID{1: self}
 	first := hir.Package{Modules: []hir.Module{{
 		Package: 1,
 		Path:    "api",
@@ -97,18 +97,18 @@ func TestExtractIgnoresPrivateItemsBodiesAndDeclarationOrder(t *testing.T) {
 
 func TestExtractIsStableAcrossBuildLocalPackageNumbers(t *testing.T) {
 	t.Parallel()
-	self := testInstanceID(t, "self")
-	dependency := testInstanceID(t, "dependency")
+	self := testCoordinateID(t, "self")
+	dependency := testCoordinateID(t, "dependency")
 	left := interfacePackage(1, 2)
 	right := interfacePackage(7, 9)
-	leftHash := extractHash(t, left, 1, map[hir.PackageID]packagegraph.InstanceID{1: self, 2: dependency})
-	rightHash := extractHash(t, right, 7, map[hir.PackageID]packagegraph.InstanceID{7: self, 9: dependency})
+	leftHash := extractHash(t, left, 1, map[hir.PackageID]packagegraph.CoordinateID{1: self, 2: dependency})
+	rightHash := extractHash(t, right, 7, map[hir.PackageID]packagegraph.CoordinateID{7: self, 9: dependency})
 	if leftHash != rightHash {
 		t.Fatalf("build-local numbering changed interface: %s != %s", leftHash, rightHash)
 	}
 
-	otherDependency := testInstanceID(t, "other-dependency")
-	changed := extractHash(t, right, 7, map[hir.PackageID]packagegraph.InstanceID{7: self, 9: otherDependency})
+	otherDependency := testCoordinateID(t, "other-dependency")
+	changed := extractHash(t, right, 7, map[hir.PackageID]packagegraph.CoordinateID{7: self, 9: otherDependency})
 	if changed == leftHash {
 		t.Fatalf("dependency identity change did not invalidate interface: %s", changed)
 	}
@@ -116,7 +116,7 @@ func TestExtractIsStableAcrossBuildLocalPackageNumbers(t *testing.T) {
 
 func TestExtractRejectsPublicSignatureUsingPrivateLocalType(t *testing.T) {
 	t.Parallel()
-	self := testInstanceID(t, "self")
+	self := testCoordinateID(t, "self")
 	value := hir.Package{Modules: []hir.Module{{
 		Package: 1,
 		Path:    "api",
@@ -125,7 +125,7 @@ func TestExtractRejectsPublicSignatureUsingPrivateLocalType(t *testing.T) {
 			Name: "leak", Public: true, Parameters: []hir.Parameter{{Type: "$p1::api::Hidden"}}, ResultType: hir.TypeVoid,
 		}},
 	}}}
-	_, err := Extract(value, 1, map[hir.PackageID]packagegraph.InstanceID{1: self})
+	_, err := Extract(value, 1, map[hir.PackageID]packagegraph.CoordinateID{1: self})
 	if err == nil || !strings.Contains(err.Error(), "is not a public type") {
 		t.Fatalf("Extract() error = %v", err)
 	}
@@ -133,8 +133,8 @@ func TestExtractRejectsPublicSignatureUsingPrivateLocalType(t *testing.T) {
 
 func TestExtractTracksPublicShapesEffectsAndForeignLinks(t *testing.T) {
 	t.Parallel()
-	self := testInstanceID(t, "self")
-	instances := map[hir.PackageID]packagegraph.InstanceID{1: self}
+	self := testCoordinateID(t, "self")
+	instances := map[hir.PackageID]packagegraph.CoordinateID{1: self}
 	base := hir.Package{Modules: []hir.Module{{
 		Package: 1,
 		Path:    "api",
@@ -193,7 +193,7 @@ func interfacePackage(self, dependency hir.PackageID) hir.Package {
 	}}}
 }
 
-func extractHash(t *testing.T, value hir.Package, packageID hir.PackageID, instances map[hir.PackageID]packagegraph.InstanceID) Hash {
+func extractHash(t *testing.T, value hir.Package, packageID hir.PackageID, instances map[hir.PackageID]packagegraph.CoordinateID) Hash {
 	t.Helper()
 	descriptor, err := Extract(value, packageID, instances)
 	if err != nil {
@@ -206,11 +206,11 @@ func extractHash(t *testing.T, value hir.Package, packageID hir.PackageID, insta
 	return hash
 }
 
-func testInstanceID(t *testing.T, name string) packagegraph.InstanceID {
+func testCoordinateID(t *testing.T, name string) packagegraph.CoordinateID {
 	t.Helper()
-	id, err := packagegraph.ComputeInstanceID(packagegraph.Identity{PackageUID: name, SourceIdentity: "source-" + name, VersionIdentity: "1"})
+	id, err := packagegraph.ComputeCoordinateID(packagegraph.Coordinate{PackageUID: name, VersionIdentity: "1"})
 	if err != nil {
-		t.Fatalf("ComputeInstanceID() error = %v", err)
+		t.Fatalf("ComputeCoordinateID() error = %v", err)
 	}
 	return id
 }

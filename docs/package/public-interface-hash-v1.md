@@ -1,6 +1,6 @@
 # Public interface hash v1
 
-- Status: Executable prototype contract
+- Status: Historical; superseded by public-interface hash v2
 - Decision: `docs/adr/0139-public-interface-hash-v1.md`
 - Fixture source: `spec/fixtures/module-interface/manifest-v1.json`
 - Implementation source: `internal/moduleinterface/`
@@ -50,9 +50,8 @@ The first form deliberately omits the current package instance, letting a privat
 change preserve an equal interface. The dependency form deliberately includes the complete external
 instance because nominal types from different resolved instances are not interchangeable.
 
-ADR 0172 now provides a separate source-independent package coordinate, but public-interface v1
-does not consume it. Moving external type spellings to coordinates requires a new interface-hash
-version and synchronized stable-symbol/cache-key changes.
+ADR 0173 now provides that new interface-hash version. This file remains the historical v1 byte and
+type-spelling contract.
 
 ## Canonical bytes and digest
 

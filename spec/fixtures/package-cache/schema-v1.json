@@ -44,7 +44,7 @@
       "required": ["instance", "interface"],
       "properties": {
         "instance": { "type": "string", "pattern": "^fypi1-sha256-[0-9a-f]{64}$" },
-        "interface": { "type": "string", "pattern": "^fyif1-sha256-[0-9a-f]{64}$" }
+        "interface": { "type": "string", "pattern": "^fyif2-sha256-[0-9a-f]{64}$" }
       }
     },
     "dependencies": {

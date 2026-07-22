@@ -10,7 +10,7 @@ import (
 
 func TestModuleInterfaceSchemaRequiresClosedRoot(t *testing.T) {
 	t.Parallel()
-	path := filepath.Join("..", "..", "spec", "fixtures", "module-interface", "schema-v1.json")
+	path := filepath.Join("..", "..", "spec", "fixtures", "module-interface", "schema-v2.json")
 	body, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("read schema: %v", err)

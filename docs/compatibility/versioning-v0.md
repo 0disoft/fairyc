@@ -398,8 +398,8 @@ silently inheriting it from its own schema. Changing the digest, canonical bytes
 validation rules requires a new package-identity version. Caches using another version are safe
 misses; contradictory lockfile or map records are corruption.
 
-`fairyc.module-interface-fixtures/v1` independently fixes the public-interface descriptor and
-`fyif1-sha256-...` hash. It excludes ordinary bodies and private implementation while including
+`fairyc.module-interface-fixtures/v2` independently fixes the public-interface descriptor and
+`fyif2-sha256-...` hash. It excludes ordinary bodies and private implementation while including
 public type shape, callable signatures and effects, foreign link contracts, module paths, and
 dependency nominal identities. A cache records this algorithm explicitly and combines it with its
 own schema and compatibility vector. Changing interface inputs, canonical encoding, stable type

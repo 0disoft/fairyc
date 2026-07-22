@@ -38,7 +38,7 @@ The logical header contains:
 - package UID, package instance, and the independent `fysrc1-sha256` package source digest;
 - target identity when facts are target-dependent;
 - identity-algorithm version;
-- interface-hash algorithm version, currently the independent `fyif1-sha256` contract;
+- interface-hash algorithm version, currently the independent `fyif2-sha256` contract;
 - deterministic feature flags;
 - section directory and record counts;
 - generation completeness and omission reasons.

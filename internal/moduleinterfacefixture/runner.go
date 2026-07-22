@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	schemaVersion = "fairyc.module-interface-fixtures/v1"
+	schemaVersion = "fairyc.module-interface-fixtures/v2"
 	maximumSource = 1 << 20
 )
 
@@ -34,9 +34,8 @@ func Run(path string) (Report, error) {
 	if definition.Schema == "" || definition.SchemaVersion != schemaVersion || len(definition.Contracts) == 0 || len(definition.Cases) == 0 {
 		return Report{}, fmt.Errorf("invalid module interface fixture contract header")
 	}
-	instanceID, err := packagegraph.ComputeInstanceID(packagegraph.Identity{
+	coordinateID, err := packagegraph.ComputeCoordinateID(packagegraph.Coordinate{
 		PackageUID:      definition.Identity.PackageUID,
-		SourceIdentity:  definition.Identity.SourceIdentity,
 		VersionIdentity: definition.Identity.VersionIdentity,
 		Features:        definition.Identity.Features,
 	})
@@ -56,7 +55,7 @@ func Run(path string) (Report, error) {
 			return Report{}, fmt.Errorf("duplicate module interface fixture %q", fixture.ID)
 		}
 		seen[fixture.ID] = struct{}{}
-		hash, failure := runCase(manifestDirectory, fixture, instanceID)
+		hash, failure := runCase(manifestDirectory, fixture, coordinateID)
 		if failure != nil {
 			report.Failures = append(report.Failures, *failure)
 			continue
@@ -116,7 +115,7 @@ func loadManifest(path string) (manifest, error) {
 	return definition, nil
 }
 
-func runCase(root string, fixture caseDefinition, instanceID packagegraph.InstanceID) (moduleinterface.Hash, *Failure) {
+func runCase(root string, fixture caseDefinition, coordinateID packagegraph.CoordinateID) (moduleinterface.Hash, *Failure) {
 	path, err := containedSource(root, fixture.Source)
 	if err != nil {
 		return moduleinterface.Hash{}, &Failure{CaseID: fixture.ID, Detail: err.Error()}
@@ -137,7 +136,7 @@ func runCase(root string, fixture caseDefinition, instanceID packagegraph.Instan
 	if semanticResult.CompletedThrough != semantic.PhaseFlow || semanticResult.FailedPhase != semantic.PhaseNone || len(semanticResult.Diagnostics) != 0 || len(semanticResult.Unsupported) != 0 {
 		return moduleinterface.Hash{}, &Failure{CaseID: fixture.ID, Detail: fmt.Sprintf("semantic analysis failed: phase=%s diagnostics=%v unsupported=%v", semanticResult.FailedPhase, semanticResult.Diagnostics, semanticResult.Unsupported)}
 	}
-	descriptor, err := moduleinterface.Extract(semanticResult.HIR, hir.DefaultPackage, map[hir.PackageID]packagegraph.InstanceID{hir.DefaultPackage: instanceID})
+	descriptor, err := moduleinterface.Extract(semanticResult.HIR, hir.DefaultPackage, map[hir.PackageID]packagegraph.CoordinateID{hir.DefaultPackage: coordinateID})
 	if err != nil {
 		return moduleinterface.Hash{}, &Failure{CaseID: fixture.ID, Detail: fmt.Sprintf("extract interface: %v", err)}
 	}

@@ -18,7 +18,7 @@ One already-resolved package build supplies:
 - runtime ABI and exact standard-library `PackageInstanceId`;
 - current package `PackageInstanceId` and exact `fysrc1-sha256` source digest;
 - dependency pairs sorted uniquely by full instance ID, each paired with the consumed
-  `fyif1-sha256` public-interface hash;
+  `fyif2-sha256` public-interface hash;
 - sorted unique resolved feature set.
 
 The key also writes the v1 identity/source/interface encoding and digest names. This is deliberate

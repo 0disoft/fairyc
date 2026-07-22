@@ -172,6 +172,10 @@ func (session *Session) Check(workspace workspaceloader.Workspace) (Result, erro
 	if err != nil {
 		return Result{}, err
 	}
+	coordinates, err := workspace.PackageCoordinates()
+	if err != nil {
+		return Result{}, err
+	}
 	analysis, err := compiler.AnalyzePackages(input)
 	if err != nil {
 		return Result{}, err
@@ -181,7 +185,7 @@ func (session *Session) Check(workspace workspaceloader.Workspace) (Result, erro
 		return Result{Compiler: compiled, Cache: Report{Outcome: OutcomeNotEligible, Storage: session.storage}}, lowerErr
 	}
 
-	interfaces, err := packageInterfaces(analysis.Semantic.HIR, metadata, identities)
+	interfaces, err := packageInterfaces(analysis.Semantic.HIR, metadata, coordinates)
 	if err != nil {
 		return Result{}, err
 	}
@@ -411,10 +415,10 @@ func (session *Session) packageKeys(metadata []workspaceloader.SemanticPackage, 
 	return result, nil
 }
 
-func packageInterfaces(value hir.Package, metadata []workspaceloader.SemanticPackage, identities map[hir.PackageID]packagegraph.InstanceID) (map[hir.PackageID]moduleinterface.Hash, error) {
+func packageInterfaces(value hir.Package, metadata []workspaceloader.SemanticPackage, coordinates map[hir.PackageID]packagegraph.CoordinateID) (map[hir.PackageID]moduleinterface.Hash, error) {
 	result := make(map[hir.PackageID]moduleinterface.Hash, len(metadata))
 	for _, loaded := range metadata {
-		descriptor, err := moduleinterface.Extract(value, loaded.ID, identities)
+		descriptor, err := moduleinterface.Extract(value, loaded.ID, coordinates)
 		if err != nil {
 			return nil, fmt.Errorf("extract public interface for package %d: %w", loaded.ID, err)
 		}

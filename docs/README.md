@@ -23,7 +23,7 @@
 - Resolved package graph fixture manifest: spec/fixtures/package/manifest-v1.json, including historical v0 cases
 - Resolved package graph engine and fixture runner: internal/packagegraph/, internal/packagefixture/
 - PackageInstanceId v1 vectors and runner: spec/fixtures/package-identity/manifest-v1.json, internal/packageidentityfixture/
-- Public-interface hash v1 fixtures and runner: spec/fixtures/module-interface/manifest-v1.json, internal/moduleinterface/, internal/moduleinterfacefixture/
+- Public-interface hash v2 fixtures and runner: spec/fixtures/module-interface/manifest-v2.json, with historical v1 vectors, internal/moduleinterface/, internal/moduleinterfacefixture/
 - Package-source digest v1 fixtures and runner: spec/fixtures/package-source/manifest-v1.json, internal/packagecontent/, internal/packagecontentfixture/
 - Whole-package cache-key v1 fixtures and bounded store runner: spec/fixtures/package-cache/manifest-v1.json, internal/packagecache/, internal/packagecachefixture/
 - Package-stable function IDs, process-local MIR slice reassembly, process-bound codec, and all-hit reuse coordinator: internal/packageartifact/, internal/workspacecompiler/, docs/package/package-function-id-v1.md, docs/package/process-local-mir-artifact-v0.md

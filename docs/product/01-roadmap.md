@@ -389,10 +389,11 @@ SHA-256, exposes one canonical lowercase text form, rejects malformed feature se
 complete tuple before digest-based deduplication. Versioned vectors cover component boundaries and
 feature-set failures. Typed HIR also preserves source `pub` visibility for structs, enums,
 resources, ordinary functions, and foreign functions while keeping compiler-created cleanup glue
-private. A deterministic public-interface v1 projection now sorts modules and public items,
-normalizes self and dependency nominal types independently from build-local numbering, hashes the
-canonical bytes with full SHA-256, and executes eight source-level invalidation fixtures. This closes
-package-instance encoding and the first source-interface hash. An independent exact package-source
+private. A deterministic public-interface v2 projection now sorts modules and public items,
+normalizes self nominal types independently from build-local numbering, renders dependency nominal
+types through source-independent package coordinates, hashes the canonical bytes with full SHA-256,
+and executes eight source-level invalidation fixtures. This closes package-instance and coordinate
+encoding plus the current source-interface hash. An independent exact package-source
 digest now sorts canonical relative paths and hashes every source byte, with five versioned cases
 proving order stability plus content, path, and line-ending invalidation. The first whole-package
 cache key combines those identities with every declared compiler, language, MIR, target, ABI,
@@ -521,6 +522,11 @@ public link namespace in dependency cache pairs and `FunctionID`. It adds a sepa
 features `PackageCoordinateId` prerequisite while leaving cache behavior unchanged. Interface hash,
 stable symbol identity, and cache keys must adopt that coordinate together before private dependency
 reuse is truthful.
+
+ADR 0173 completes the first of those consumers: public-interface hash v2 keeps the v1 public
+semantic projection but renders external nominal types through `PackageCoordinateId`. Stable MIR
+symbol/type identity and whole-package dependency keys remain on the exact instance boundary, so
+new cache reuse is still intentionally closed.
 
 - Repeat the bounded session on a declared reference machine with controlled distributions, private
   or live-heap evidence, and an accepted noise policy before selecting defaults or claiming
