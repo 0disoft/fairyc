@@ -48,6 +48,7 @@ Usage:
   fairyc experimental atlas-pack show --package-uid <uid> --symbol <symbol-id> --direction <outgoing|incoming|both> --relation <kind> [--relation <kind>]... --max-records <count> --max-relations <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--locked]
   fairyc experimental atlas-pack around --package-uid <uid> --symbol <symbol-id> --direction <outgoing|incoming|both> --relation <kind> [--relation <kind>]... --max-records <count> --max-relations <count> --max-depth <depth> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--locked]
   fairyc experimental atlas-symbols list --package-uid <uid> --kind <kind> [--kind <kind>]... [--module <module>] [--after <full-symbol-id>] --max-symbols <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--locked]
+  fairyc experimental atlas-text source --package-uid <uid> --symbol <symbol-id> --origin workspace-authored --max-fragments <count> --max-fragment-bytes <bytes> --max-text-bytes <bytes> --max-output-bytes <bytes> [--locked]
   fairyc experimental check-workspace-cache --target <target-id> --cache-dir <build/path> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-record-bytes <bytes> --cache-max-artifact-bytes <bytes> --cache-temp-max-age-seconds <seconds> [--locked]
   fairyc experimental check-workspace-session --target <target-id> --max-requests <count> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-artifact-bytes <bytes> [--locked]
   fairyc experimental build-workspace --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe> [--locked]
@@ -210,6 +211,8 @@ func runExperimental(args []string, sourceRoot string, stdin io.Reader, stdout, 
 		return runAtlasPack(args[1:], sourceRoot, stdout, stderr)
 	case "atlas-symbols":
 		return runAtlasSymbols(args[1:], sourceRoot, stdout, stderr)
+	case "atlas-text":
+		return runAtlasText(args[1:], sourceRoot, stdout, stderr)
 	case "check-workspace-cache":
 		return runWorkspaceCacheCheck(args[1:], sourceRoot, stdout, stderr)
 	case "check-workspace-session":

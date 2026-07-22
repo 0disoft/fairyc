@@ -66,6 +66,17 @@ automation. They are not the stable exit-code taxonomy:
 | `6` | The experimental native build could not resolve or run its toolchain, link the scalar runtime, or safely materialize its artifact. |
 | `7` | The package workspace, lockfile, package graph, or package-to-build mapping failed before native compilation. |
 
+`experimental atlas-text source` writes exactly one compact canonical
+`fairyc.attributed-text-json/v0` value without a trailing newline on success. An admitted source
+fragment that exceeds the explicit fragment or aggregate text limit is still code `0`: the document
+contains one checksummed `fragment-byte-limit` omission and no source record. Missing, duplicate,
+unknown, noncanonical, or unsupported options; an unknown package or exact SymbolId; and a complete
+envelope that exceeds `--max-output-bytes` use code `2` with empty stdout. Source diagnostics use
+`3`; internal identity/invariant and output-write failures use `4`; manifest, workspace, graph, and
+lock failures use `7`. Ordinary mode may update `fairy.lock` before a later selector or budget
+failure; `--locked` does not write. An external writer can accept a prefix before returning code `4`,
+so stream rollback is impossible even though encoder-side size failure is atomic.
+
 The stable `fairyc explain` output is exactly three deterministic, ANSI-free lines on success: the
 canonical code and meaning, its category, and `fairyc.diagnostic-catalog/v0 (provisional Stage 0)`.
 It reads no source or configuration and has no filesystem, process, network, toolchain, target, or

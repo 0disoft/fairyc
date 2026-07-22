@@ -88,8 +88,9 @@ It does not accept even locally sourced prose. This makes the absence of free te
 source comments, generated summaries, prompt injection, control characters, secrets, absolute host
 paths, and unrelated files outside the first output contract.
 
-The separately encoded attributed-text capability implemented by ADR 0196 and ADR 0197 remains
-outside this schema. Linking or embedding that artifact requires a new explicit Context Pack schema
+The separately encoded attributed-text capability implemented by ADR 0196 and ADR 0197, and exposed
+only by the ADR 0198 experimental source command, remains outside this schema. Linking or embedding
+that artifact requires a new explicit Context Pack schema
 decision covering the exact relationship and compatibility behavior. It cannot silently start
 populating these v1 arrays.
 
@@ -118,7 +119,7 @@ unchanged into the pack. `impact` and semantic `diff` remain deferred.
 
 - no Context Pack decoder or acceptance of untrusted pack bytes;
 - no source excerpt, documentation import, generated summary, or warning producer in this pack;
-  ADR 0195 through ADR 0197 keep separate attributed-text extraction and output outside these empty
+  ADR 0195 through ADR 0198 keep separate attributed-text extraction and output outside these empty
   v1 arrays;
 - no dependency-map join, workspace-wide index, name search, fuzzy match, or rename inference;
 - no stable command, default map path, or automatic publication; experimental CLI exposure is

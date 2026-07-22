@@ -59,11 +59,11 @@ let arbitrary text or forged omissions impersonate compiler-selected output.
 
 ## Consequences
 
-Internal callers now have a deterministic, separately versioned attributed-text artifact without
-changing compiler-fact formats. It is still not reachable from the public compiler CLI and has no
-decoder. Any public command must separately fix selector flow, output policy, exit codes, and
-default-free bounds; any decoder must strictly reject alternate JSON and revalidate all identities,
-checksums, budgets, and canonical bytes.
+Internal callers have a deterministic, separately versioned attributed-text artifact without
+changing compiler-fact formats. ADR 0198 now exposes that artifact through one experimental,
+default-free source command; no decoder exists. Any additional public command must separately fix
+selector flow, output policy, exit codes, and bounds; any decoder must strictly reject alternate
+JSON and revalidate all identities, checksums, budgets, and canonical bytes.
 
 ## Rejected alternatives
 

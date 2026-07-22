@@ -1,6 +1,6 @@
 # `.fymap` v1 Logical Schema
 
-- Status: Canonical transport, contained current-source-validated store, bounded package-local queries, compiler-fact Context Pack and SymbolId catalog output, experimental overview/catalog/show/around commands, and separate exact retained-source attributed-text JSON implemented; no attributed-text decoder or command
+- Status: Canonical transport, contained current-source-validated store, bounded package-local queries, compiler-fact Context Pack and SymbolId catalog output, experimental overview/catalog/show/around/source-text commands, and separate exact retained-source attributed-text JSON implemented; no attributed-text decoder
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0004-atlas-semantic-snapshot-boundary.md`
 - Snapshot source: `docs/atlas/semantic-snapshot-v0.md`
@@ -28,6 +28,8 @@ described in `docs/atlas/symbol-id-v1.md`.
 ADR 0190 exposes exact package overview packs, ADR 0193 exposes an exact SymbolId catalog, and ADR
 0194 connects that discovery path to exact-symbol `show` and `around` packs. All remain experimental,
 require explicit limits, and rebuild exact-current compiler facts without selecting a map-store path.
+ADR 0198 separately exposes one exact workspace-authored source excerpt with explicit text and final
+output bounds; it does not add source bodies to this schema or to Context Pack v1.
 
 The first implementation plans, encodes, and optionally publishes one deterministic map per package.
 ADR 0191 adds a narrow raw quickstart rewrite distribution after planning, but it does not show a
@@ -136,7 +138,8 @@ Every implemented `.fymap` fact uses one provenance class:
 
 `.fymap` v1 stores no source body, documentation body, generated prose, or text reference that can
 be mistaken for a fact. ADR 0195 defines a separate attributed-text companion, ADR 0196 implements
-its retained-source extraction gate, and ADR 0197 encodes it separately outside `.fymap` v1. The companion
+its retained-source extraction gate, ADR 0197 encodes it separately outside `.fymap` v1, and ADR
+0198 exposes only that separate artifact through an experimental source command. The companion
 whose fixed authority is `untrusted-text` and whose origin, SymbolId, package/file/line-map identity,
 span, exact bytes, checksum, budgets, and omissions must remain explicit. Text cannot replace a
 compiler fact, change completeness, or grant filesystem, process, network, credential, approval,

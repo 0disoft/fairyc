@@ -12,6 +12,7 @@ import (
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/contextpack"
 	"github.com/0disoft/fairyc/internal/projectmanifest"
+	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
 const (
@@ -67,44 +68,53 @@ func runAtlasPackOverview(arguments []string, sourceRoot string, stdout, stderr 
 }
 
 func prepareAtlasQueryIndex(sourceRoot, packageUID string, locked bool, stderr io.Writer) (*atlasmap.QueryIndex, int) {
+	_, index, code := prepareAtlasQuery(sourceRoot, packageUID, locked, stderr)
+	return index, code
+}
+
+func prepareAtlasQuery(
+	sourceRoot, packageUID string,
+	locked bool,
+	stderr io.Writer,
+) (workspaceloader.Workspace, *atlasmap.QueryIndex, int) {
 	workspace, _, err := loadWorkspaceWithLock(sourceRoot, locked)
 	if err != nil {
-		return nil, packageFailure(stderr, err)
+		return workspaceloader.Workspace{}, nil, packageFailure(stderr, err)
 	}
 	input, err := workspace.SemanticInput()
 	if err != nil {
-		return nil, packageFailure(stderr, err)
+		return workspaceloader.Workspace{}, nil, packageFailure(stderr, err)
 	}
 	result, err := compiler.CheckPackages(input)
 	if err != nil {
-		return nil, internalError(stderr)
+		return workspaceloader.Workspace{}, nil, internalError(stderr)
 	}
 	if len(result.Semantic.Diagnostics) != 0 {
 		if err := writeWorkspaceDiagnostics(stderr, workspace, result.Semantic.Diagnostics); err != nil {
-			return nil, ExitInternalFailure
+			return workspaceloader.Workspace{}, nil, ExitInternalFailure
 		}
-		return nil, ExitSourceDiagnostics
+		return workspaceloader.Workspace{}, nil, ExitSourceDiagnostics
 	}
 	if len(result.Semantic.Unsupported) != 0 {
 		if err := writeUnsupportedSemantics(stderr, result.Semantic.Unsupported); err != nil {
-			return nil, ExitInternalFailure
+			return workspaceloader.Workspace{}, nil, ExitInternalFailure
 		}
-		return nil, ExitSourceDiagnostics
+		return workspaceloader.Workspace{}, nil, ExitSourceDiagnostics
 	}
 	if !result.Verified {
-		return nil, internalError(stderr)
+		return workspaceloader.Workspace{}, nil, internalError(stderr)
 	}
 	compilerBuild, err := buildidentity.Current()
 	if err != nil {
-		return nil, internalError(stderr)
+		return workspaceloader.Workspace{}, nil, internalError(stderr)
 	}
 	_, partitions, err := atlasmap.PrepareWorkspace(workspace, result, compilerBuild)
 	if err != nil {
-		return nil, internalError(stderr)
+		return workspaceloader.Workspace{}, nil, internalError(stderr)
 	}
 	expectations, err := atlasmap.CurrentWorkspaceExpectations(workspace, result, compilerBuild)
 	if err != nil {
-		return nil, internalError(stderr)
+		return workspaceloader.Workspace{}, nil, internalError(stderr)
 	}
 	var selected atlasmap.Partition
 	found := false
@@ -115,17 +125,17 @@ func prepareAtlasQueryIndex(sourceRoot, packageUID string, locked bool, stderr i
 		}
 	}
 	if !found {
-		return nil, invocationError(stderr, fmt.Sprintf("workspace has no package UID %q", packageUID))
+		return workspaceloader.Workspace{}, nil, invocationError(stderr, fmt.Sprintf("workspace has no package UID %q", packageUID))
 	}
 	expectation, found := expectations[selected.Header().PackageInstance]
 	if !found {
-		return nil, internalError(stderr)
+		return workspaceloader.Workspace{}, nil, internalError(stderr)
 	}
 	index, err := atlasmap.NewQueryIndex(selected, expectation)
 	if err != nil {
-		return nil, internalError(stderr)
+		return workspaceloader.Workspace{}, nil, internalError(stderr)
 	}
-	return index, ExitSuccess
+	return workspace, index, ExitSuccess
 }
 
 func parseAtlasPackOverviewOptions(arguments []string) (atlasPackOverviewOptions, error) {

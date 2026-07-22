@@ -1,9 +1,10 @@
 # Atlas attributed text v0 policy
 
-- Status: Internal logical model, exact local source-excerpt extraction, and canonical output-only JSON encoding implemented; no decoder or CLI
+- Status: Internal logical model, exact local source-excerpt extraction, canonical output-only JSON encoding, and experimental source CLI implemented; no decoder
 - Logical policy: `fairyc.attributed-text/v0`
 - Decision: `docs/adr/0195-attributed-text-boundary-v0.md`
 - Encoding decision: `docs/adr/0197-canonical-attributed-text-json-v0.md`
+- CLI decision: `docs/adr/0198-experimental-atlas-text-source-command.md`
 - Exact file identity: `docs/package/source-file-identities-v1.md`
 - Compiler-fact pack: `docs/atlas/context-pack-v1.md`
 
@@ -27,10 +28,10 @@ and must keep tool authorization in host-owned deterministic policy.
 `fairyc.context-pack/v1` continues to require empty `documentation`, `source_excerpts`, and
 `warnings` arrays. Neither format may begin carrying text under its existing identifier.
 
-ADR 0197 implements the separately versioned `fairyc.attributed-text-json/v0` output. A future
-composite Context Pack still requires a new pack version and an explicit decision about embedding
-versus checksum-linking this companion artifact. The encoding does not reserve a composite version
-or command spelling.
+ADR 0197 implements the separately versioned `fairyc.attributed-text-json/v0` output. ADR 0198
+assigns that exact artifact only to `experimental atlas-text source`; it does not reserve a
+composite version. A future composite Context Pack still requires a new pack version and an explicit
+decision about embedding versus checksum-linking this companion artifact.
 
 ## Admitted content
 
@@ -207,7 +208,11 @@ ADR 0196 implements the internal attributed-text model and validator plus worksp
 6. default compiler, `.fymap` v1, Context Pack v1, build, cache, and native output byte identity when
    attributed text is not explicitly requested.
 
-The canonical encoder remains an internal output-only feature. Documentation attachment, dependency
-text, generated text, persistent text storage, a decoder, public CLI, composite pack, token
-budgeting, anchors, structural editing, LSP, SCIP, MCP, model calls, embeddings, and permissions
-remain unimplemented.
+The canonical encoder is exposed only through `fairyc experimental atlas-text source`. That command
+requires exact package and visible/full SymbolId selectors, `workspace-authored` origin, explicit
+fragment/count/text/final-output budgets, and optional locked no-write mode. It emits a checksummed
+omission successfully when the exact source does not fit the text budget, but atomically rejects a
+final envelope that does not fit the output budget. Documentation attachment, dependency text,
+generated text, persistent text storage, a decoder, stable CLI, composite pack, token budgeting,
+anchors, structural editing, LSP, SCIP, MCP, model calls, embeddings, and permissions remain
+unimplemented.

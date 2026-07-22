@@ -253,8 +253,10 @@ discovery. `internal/contextpack` runs those queries directly and emits a separa
 checksummed canonical compiler-fact envelope with empty documentation and source-excerpt sections.
 `internal/attributedtext` separately resolves one exact query subject, slices its declaration from
 revalidated retained local-workspace bytes, and emits separately bounded canonical output-only JSON.
-Dependency-map loading, attributed-text decoding or commands, documentation import, and pack
-decoding remain unimplemented and cannot feed back into these boundaries.
+`experimental atlas-text source` exposes that separate output with explicit package, exact SymbolId,
+origin, count, text, and final-output policy; it does not populate Context Pack v1. Dependency-map
+loading, attributed-text decoding, documentation import, and pack decoding remain unimplemented and
+cannot feed back into these boundaries.
 
 ## Runtime behavior
 

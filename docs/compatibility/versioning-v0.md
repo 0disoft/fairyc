@@ -564,9 +564,15 @@ public consumer contract.
 ADR 0197 independently fixes output encoding `fairyc.attributed-text-json/v0`, document checksum
 `fairyc.attributed-text-checksum/v0-sha256`, prefix `fytextdoc0-sha256-`, exact envelope/document
 field order, explicit source kind/origin selection, exact subject linkage, and positive final-output
-limit. It adds no decoder, untrusted input, default limit, storage, composite-pack, or CLI promise.
+limit. It adds no decoder, untrusted input, default limit, storage, or composite-pack promise.
 Changing field meaning/order, JSON spelling, checksum input, authority, subject identity, selection,
 usage, or omission semantics requires an explicit compatibility decision.
+
+ADR 0198 adds only the unstable `experimental atlas-text source` spelling. Its mandatory exact
+package/SymbolId selectors, `workspace-authored` origin, count/text/output budgets, optional locked
+mode, canonical no-newline stdout, successful omission behavior, and provisional failure mapping are
+experimental CLI policy. It does not stabilize the command, SymbolId across identity families,
+cross-version text acceptance, defaults, dependency or SDK text, decoding, storage, or permissions.
 
 Dependency handling is relation-specific:
 

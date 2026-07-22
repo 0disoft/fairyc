@@ -611,8 +611,10 @@ preserve package-local join omissions and add no text, decoder, store, or safe-c
 ADR 0195 closes the attributed-text origin, exact-current identity, UTF-8/control, atomic fragment
 budget, integrity, omission, and non-authority policy. ADR 0196 implements one workspace-authored
 exact source excerpt from revalidated retained bytes, and ADR 0197 adds its separately bounded
-canonical output-only JSON with exact subject/selection evidence and document checksum. There is no
-file reopen, decoder, command, or change to body-free `.fymap` v1 and empty-text Context Pack v1.
+canonical output-only JSON with exact subject/selection evidence and document checksum. ADR 0198
+exposes it through default-free `experimental atlas-text source` with exact SymbolId selection,
+explicit origin/count/text/output policy, and checksummed omissions. There is no file reopen,
+decoder, persistent text store, or change to body-free `.fymap` v1 and empty-text Context Pack v1.
 
 - Preserve the implemented immutable `SemanticSnapshot` and per-package logical map plan.
 - Preserve the implemented bounded canonical `.fymap` codec and semantic revalidation boundary.
@@ -622,7 +624,7 @@ file reopen, decoder, command, or change to body-free `.fymap` v1 and empty-text
 - Preserve the explicit overview/show/around experimental commands and keep map publication policy separate.
 - Preserve the raw whole-package rewrite harness; require representative failure before adding chunks or compression.
 - Preserve the implemented exact SymbolId catalog output as the discovery path for experimental `show` and `around`.
-- Preserve the implemented attributed-text v0 model, exact retained workspace-source gate, and canonical output-only JSON; require a separate experimental command decision before CLI exposure.
+- Preserve the implemented attributed-text v0 model, exact retained workspace-source gate, canonical output-only JSON, and explicit experimental source command; keep decoders, stores, and additional text kinds behind separate decisions.
 
 Exit gate: Atlas failure cannot change compilation; stale or incompatible maps fail closed; unknown graph edges remain explicit; text cannot grant authority.
 

@@ -773,8 +773,9 @@ borrows, errors, effects, allocations, unsafe and FFI reachability, source spans
 Unknown or incomplete edges remain explicit rather than being guessed.
 
 ADR 0195 accepts a separate `fairyc.attributed-text/v0` logical policy, ADR 0196 implements its first
-internal source-excerpt gate, and ADR 0197 implements separately bounded canonical
-`fairyc.attributed-text-json/v0` output without enabling a command. `.fymap` v1 remains body-free and
+internal source-excerpt gate, ADR 0197 implements separately bounded canonical
+`fairyc.attributed-text-json/v0` output, and ADR 0198 exposes only that artifact through
+default-free `experimental atlas-text source`. `.fymap` v1 remains body-free and
 Context Pack v1 retains empty text arrays. Every text record is
 `untrusted-text` and binds both SymbolId forms, exact package identity, canonical relative
 file, content and line-map identities, half-open byte span, origin, exact UTF-8 bytes, explicit
@@ -784,8 +785,10 @@ silent normalization, phrase filtering, fact replacement, completeness changes, 
 grants are forbidden. The implemented extractor admits one workspace-authored exact declaration
 source excerpt from revalidated retained bytes. Its output builder requires explicit kind/origin and
 text/final-byte budgets, binds exact subject identity even for an omission, runs extraction itself,
-and includes independent fragment and document checksums. The current frontend has no declaration-
-documentation attachment contract, decoder, or attributed-text CLI.
+and includes independent fragment and document checksums. The command requires exact package and
+visible/full SymbolId selection, `workspace-authored` origin, explicit count/text/final-output
+limits, and optional locked no-write mode. The current frontend has no declaration-documentation
+attachment contract, decoder, text store, or stable attributed-text CLI.
 
 Stage 0 Atlas now exposes `experimental atlas-pack overview` for one exact manifest package UID with
 mandatory record, selection-byte, and final-output-byte limits plus optional locked no-write mode.
@@ -801,8 +804,8 @@ Those exact visible or full SymbolIds now drive `experimental atlas-pack show` a
 Both require explicit direction, exact relation filters, record/relation/selection/output limits,
 and package UID; `around` additionally requires explicit depth. They emit Context Pack v1 bytes,
 retain incomplete dependency and incoming-package joins as omissions, and add no name search, text
-import, default store, or safe-change inference. A separate map-publication policy and attributed-
-text implementation remain future work.
+import, default store, or safe-change inference. A separate map-publication policy, decoder,
+additional text origin/kind support, and composite pack remain future work.
 
 The configured Windows host smoke separately measures whole-package canonical rewrite cost after
 workspace analysis and map planning. It performs one untimed warmup and nine raw rewrites of every
@@ -824,9 +827,9 @@ plan are specified in `docs/atlas/semantic-snapshot-v0.md`, `docs/atlas/symbol-i
 `docs/atlas/context-pack-v1.md`; the experimental overview command is fixed by ADR 0190, the
 rewrite measurement boundary by ADR 0191, the internal exact symbol catalog by ADR 0192, and its
 experimental output command by ADR 0193. ADR 0194 fixes experimental show/around. Stable commands,
-map publication and attributed-text CLI/decoder remain future work; ADR 0195 fixes the attributed-
-text policy, ADR 0196 implements its internal exact retained-source gate, and ADR 0197 fixes its
-canonical output-only JSON.
+map publication and attributed-text decoding remain future work; ADR 0195 fixes the attributed-text
+policy, ADR 0196 implements its internal exact retained-source gate, ADR 0197 fixes its canonical
+output-only JSON, and ADR 0198 fixes its first experimental source command.
 
 ## Explicit non-goals
 

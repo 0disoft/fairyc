@@ -8,7 +8,7 @@
 
 | Boundary | Owns | Must not own |
 | --- | --- | --- |
-| `cmd/fairyc` and `internal/cli` | process exit plus command parsing, dispatch, workspace orchestration, user-facing output, and explicitly selected experimental artifact assembly | language semantics, Atlas query or Context Pack encoding, target layout, backend-specific lowering, hidden paths, or hidden resource limits |
+| `cmd/fairyc` and `internal/cli` | process exit plus command parsing, dispatch, workspace orchestration, user-facing output, explicit Atlas artifact selection, and caller-visible experimental limits | language semantics, Atlas query, attributed-text extraction/encoding, Context Pack encoding, target layout, backend-specific lowering, hidden paths, or hidden resource limits |
 | `internal/source` | files, spans, line maps, source identity | syntax or semantic decisions |
 | `internal/lexer` and `internal/syntax` | tokens, trivia, parsing, recovery, and compact arena-backed syntax | type checking, immutable editor trees, or code generation |
 | `internal/ast` | error-free lowering and implementation-private parser assertions | accepting recovered syntax, type checking, or public serialization |
