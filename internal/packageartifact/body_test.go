@@ -150,6 +150,93 @@ func TestStableLeafBodyRejectsCallsAndContextDrift(t *testing.T) {
 	}
 }
 
+func TestStableBodiesRebindCallsVerifyAndPreserveWorkspaceExecution(t *testing.T) {
+	t.Parallel()
+	workspace, original, identities := checkedWorkspaceProgram(t)
+	artifacts, err := ExtractAll(original, identities)
+	if err != nil {
+		t.Fatal(err)
+	}
+	stableContext := artifacts[0].StableContext
+	type ownedBody struct {
+		body StableBodyArtifact
+	}
+	bodies := make([]ownedBody, 0, len(original.Functions))
+	functionSymbols := make(map[FunctionID]hir.SymbolID, len(original.Functions))
+	maxOriginalSymbol := hir.SymbolID(0)
+	for _, function := range original.Functions {
+		maxOriginalSymbol = max(maxOriginalSymbol, function.Symbol)
+	}
+	internalCalls := 0
+	foreignCalls := 0
+	for _, artifact := range artifacts {
+		if !reflect.DeepEqual(artifact.StableContext, stableContext) {
+			t.Fatal("package artifacts do not share one stable context")
+		}
+		for _, record := range artifact.Functions {
+			body, err := DescribeStableBody(record, artifact, stableBodyLimit)
+			if err != nil {
+				t.Fatalf("DescribeStableBody(%q): %v", record.Body.Name, err)
+			}
+			encoded, err := EncodeStableBody(body, stableBodyLimit)
+			if err != nil {
+				t.Fatal(err)
+			}
+			body, err = DecodeStableBody(encoded, stableBodyLimit)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, call := range body.Calls {
+				if strings.HasPrefix(call.Target, bodyInternalCallPrefix) {
+					internalCalls++
+				} else if strings.HasPrefix(call.Target, bodyForeignCallPrefix) {
+					foreignCalls++
+				}
+			}
+			functionSymbols[body.ID] = maxOriginalSymbol + 1 + hir.SymbolID(len(bodies))
+			bodies = append(bodies, ownedBody{body: body})
+		}
+	}
+	if internalCalls == 0 {
+		t.Fatal("workspace stable bodies contain no internal calls")
+	}
+
+	reboundContext, err := rebindStableContextFunctionSymbols(artifacts[0].Context, stableContext, identities, functionSymbols)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for index, item := range bodies {
+		function, err := RebindStableBody(
+			item.body, stableContext, artifacts[0].Context, identities, functionSymbols,
+			mir.LocalID(1000+index*1000), stableBodyLimit,
+		)
+		if err != nil {
+			t.Fatalf("RebindStableBody(%q): %v", item.body.Function.Name, err)
+		}
+		reboundContext.Functions = append(reboundContext.Functions, function)
+	}
+	if failures := mir.Verify(reboundContext); len(failures) != 0 {
+		t.Fatalf("stable body workspace failed MIR verification: %v", failures[0])
+	}
+	rootPackage, err := workspace.RootPackageID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	entry := hir.QualifiedModulePath(rootPackage, "main") + "::main"
+	originalOutcome, err := interpreter.Execute(original, entry)
+	if err != nil {
+		t.Fatal(err)
+	}
+	reboundOutcome, err := interpreter.Execute(reboundContext, entry)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(reboundOutcome, originalOutcome) || reboundOutcome.Value != 42 {
+		t.Fatalf("stable body workspace execution = %+v, original = %+v", reboundOutcome, originalOutcome)
+	}
+	t.Logf("rebound %d internal and %d foreign calls", internalCalls, foreignCalls)
+}
+
 func callFreeI32Record(t *testing.T, artifacts []Artifact) (FunctionRecord, ContextDescriptor) {
 	t.Helper()
 	for _, artifact := range artifacts {

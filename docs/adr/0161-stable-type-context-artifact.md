@@ -82,10 +82,13 @@ MIR and are not shifted. The checked-in package workspace still passes `mir.Veri
 `42`, and preserves region-local entity links after local rebinding. These helpers are not yet a
 serialized function-body artifact.
 
-An exact-version `fairyc.package-function-body/v0` format now covers call-free leaf bodies. It binds
+An exact-version `fairyc.package-function-body/v1` format now covers complete function bodies. It binds
 canonical JSON to `FunctionID`, `PackageInstanceId`, and `ContextID`; removes function symbols,
 package numbers, source-entity prefixes, local numbering, and incidental block numbering; and
 strictly rebinds package, function-symbol, type, span, entity, and local identities in a fresh
 build. A checked-in workspace leaf decodes, rebinds, passes `mir.Verify`, preserves its interpreter
-outcome, and re-encodes to identical bytes. Internal and foreign call references remain the next
-format revision and persistent storage remains closed.
+outcome, and re-encodes to identical bytes. Internal calls use `FunctionID`; foreign calls use the
+sorted declaration index inside the exact `ContextID`. Rebinding every checked-in workspace body to
+fresh function and local symbols, rewriting resource drop links, re-entering `mir.Verify`, and
+executing to `42` now close the in-process stable-body semantic proof. Independent-process decode
+and persistent storage policy remain closed.

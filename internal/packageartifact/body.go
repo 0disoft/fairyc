@@ -17,8 +17,13 @@ import (
 )
 
 const (
-	BodySchema  = "fairyc.package-function-body/v0"
-	BodyVersion = "fairyc-package-function-body/0"
+	BodySchema  = "fairyc.package-function-body/v1"
+	BodyVersion = "fairyc-package-function-body/1"
+)
+
+const (
+	bodyInternalCallPrefix = "fn:"
+	bodyForeignCallPrefix  = "foreign:"
 )
 
 var (
@@ -26,9 +31,8 @@ var (
 	ErrBodyArtifactEncoding = errors.New("stable function-body artifact is not canonically encoded")
 )
 
-// StableBodyArtifact is the first cross-process function-body format. Version 0 intentionally
-// admits only call-free bodies so type, span, entity, local, block, and context rebinding can be
-// verified independently before stable internal and foreign call references are added.
+// StableBodyArtifact is the first cross-process function-body format. Internal calls bind through
+// FunctionID, while foreign calls bind through the sorted foreign declaration in ContextID.
 type StableBodyArtifact struct {
 	ID         FunctionID              `json:"id"`
 	Package    packagegraph.InstanceID `json:"package"`
@@ -36,6 +40,13 @@ type StableBodyArtifact struct {
 	LocalCount uint64                  `json:"localCount"`
 	BlockCount uint64                  `json:"blockCount"`
 	Function   mir.Function            `json:"function"`
+	Calls      []StableBodyCall        `json:"calls"`
+}
+
+// StableBodyCall replaces one call terminator's build-local Callee symbol.
+type StableBodyCall struct {
+	Block  uint64 `json:"block"`
+	Target string `json:"target"`
 }
 
 type bodyEnvelope struct {
@@ -45,8 +56,36 @@ type bodyEnvelope struct {
 }
 
 // DescribeStableLeafBody removes build-local numbering from one independently verified function
-// record and binds the result to the exact stable type context. Calls fail closed in v0.
+// record and binds the result to the exact stable type context. This narrow entry point still
+// rejects calls when a caller only wants the independently executable leaf subset.
 func DescribeStableLeafBody(record FunctionRecord, context ContextDescriptor, identities map[hir.PackageID]packagegraph.InstanceID, maxBytes uint64) (StableBodyArtifact, error) {
+	return describeStableBody(record, context, identities, nil, nil, false, maxBytes)
+}
+
+// DescribeStableBody projects one artifact-owned function, including stable internal and foreign
+// call targets. The complete package artifact is verified before its bindings are trusted.
+func DescribeStableBody(record FunctionRecord, artifact Artifact, maxBytes uint64) (StableBodyArtifact, error) {
+	if err := Verify(artifact); err != nil {
+		return StableBodyArtifact{}, fmt.Errorf("verify package artifact before stable body projection: %w", err)
+	}
+	found := false
+	for _, candidate := range artifact.Functions {
+		if candidate.ID == record.ID && reflect.DeepEqual(candidate, record) {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return StableBodyArtifact{}, fmt.Errorf("stable body record is not owned by the package artifact")
+	}
+	foreign, err := contextForeignIndices(artifact.Context, artifact.StableContext, artifact.PackageIdentities)
+	if err != nil {
+		return StableBodyArtifact{}, err
+	}
+	return describeStableBody(record, artifact.StableContext, artifact.PackageIdentities, artifactBindings(artifact), foreign, true, maxBytes)
+}
+
+func describeStableBody(record FunctionRecord, context ContextDescriptor, identities map[hir.PackageID]packagegraph.InstanceID, bindings map[hir.SymbolID]FunctionID, foreign map[hir.SymbolID]uint64, allowCalls bool, maxBytes uint64) (StableBodyArtifact, error) {
 	if err := verifyBinding(record.ID, record.Descriptor, record.Body, identities); err != nil {
 		return StableBodyArtifact{}, fmt.Errorf("verify function binding before stable body projection: %w", err)
 	}
@@ -58,10 +97,31 @@ func DescribeStableLeafBody(record FunctionRecord, context ContextDescriptor, id
 	if err != nil {
 		return StableBodyArtifact{}, err
 	}
-	for _, block := range function.Blocks {
-		if block.Terminator.Kind == mir.TerminatorCall {
-			return StableBodyArtifact{}, fmt.Errorf("stable function-body v0 does not admit calls")
+	calls := make([]StableBodyCall, 0)
+	for blockIndex := range function.Blocks {
+		terminator := &function.Blocks[blockIndex].Terminator
+		if terminator.Kind != mir.TerminatorCall {
+			continue
 		}
+		if !allowCalls {
+			return StableBodyArtifact{}, fmt.Errorf("stable leaf function-body projection does not admit calls")
+		}
+		target := ""
+		if terminator.ForeignABI == "" {
+			id, found := bindings[terminator.Callee]
+			if !found {
+				return StableBodyArtifact{}, fmt.Errorf("function %q call symbol %d has no stable FunctionID", record.Body.Name, terminator.Callee)
+			}
+			target = bodyInternalCallPrefix + id.String()
+		} else {
+			index, found := foreign[terminator.Callee]
+			if !found {
+				return StableBodyArtifact{}, fmt.Errorf("function %q foreign call symbol %d has no stable context entry", record.Body.Name, terminator.Callee)
+			}
+			target = bodyForeignCallPrefix + strconv.FormatUint(index, 10)
+		}
+		terminator.Callee = hir.NoSymbol
+		calls = append(calls, StableBodyCall{Block: uint64(blockIndex), Target: target})
 	}
 	owner := record.Body.Span.Package
 	function.Symbol = hir.NoSymbol
@@ -91,7 +151,7 @@ func DescribeStableLeafBody(record FunctionRecord, context ContextDescriptor, id
 	}
 	body := StableBodyArtifact{
 		ID: record.ID, Package: record.Descriptor.Package, ContextID: contextID,
-		LocalCount: uint64(shape.LocalCount), BlockCount: uint64(shape.BlockCount), Function: function,
+		LocalCount: uint64(shape.LocalCount), BlockCount: uint64(shape.BlockCount), Function: function, Calls: calls,
 	}
 	if err := ValidateStableBody(body); err != nil {
 		return StableBodyArtifact{}, err
@@ -99,9 +159,44 @@ func DescribeStableLeafBody(record FunctionRecord, context ContextDescriptor, id
 	return body, nil
 }
 
-// RebindStableLeafBody restores one decoded v0 body into fresh package, function-symbol, and local
+// RebindStableLeafBody restores one decoded leaf body into fresh package, function-symbol, and local
 // namespaces. The returned function must still enter mir.Verify in its caller-owned closed world.
 func RebindStableLeafBody(body StableBodyArtifact, context ContextDescriptor, identities map[hir.PackageID]packagegraph.InstanceID, functionSymbol hir.SymbolID, firstLocal mir.LocalID, maxBytes uint64) (mir.Function, error) {
+	if len(body.Calls) != 0 {
+		return mir.Function{}, fmt.Errorf("stable leaf function body contains calls")
+	}
+	return rebindStableBody(body, context, identities, map[FunctionID]hir.SymbolID{body.ID: functionSymbol}, nil, firstLocal, maxBytes)
+}
+
+// RebindStableBody checks the current process-local context against its stable descriptor, then
+// restores every internal and foreign call through caller-supplied fresh function symbols.
+func RebindStableBody(body StableBodyArtifact, context ContextDescriptor, processContext mir.Program, identities map[hir.PackageID]packagegraph.InstanceID, functionSymbols map[FunctionID]hir.SymbolID, firstLocal mir.LocalID, maxBytes uint64) (mir.Function, error) {
+	contextBindings, err := bindingsForStableContext(processContext, context, identities)
+	if err != nil {
+		return mir.Function{}, err
+	}
+	actualContext, err := DescribeContext(processContext, identities, contextBindings)
+	if err != nil {
+		return mir.Function{}, fmt.Errorf("describe process-local context before body rebind: %w", err)
+	}
+	if !reflect.DeepEqual(actualContext, context) {
+		return mir.Function{}, fmt.Errorf("process-local type context does not match stable function body context")
+	}
+	localForeign, err := contextForeignIndices(processContext, context, identities)
+	if err != nil {
+		return mir.Function{}, err
+	}
+	foreignSymbols := make(map[uint64]hir.SymbolID, len(localForeign))
+	for symbol, index := range localForeign {
+		if _, duplicate := foreignSymbols[index]; duplicate {
+			return mir.Function{}, fmt.Errorf("stable foreign context index %d maps to multiple local symbols", index)
+		}
+		foreignSymbols[index] = symbol
+	}
+	return rebindStableBody(body, context, identities, functionSymbols, foreignSymbols, firstLocal, maxBytes)
+}
+
+func rebindStableBody(body StableBodyArtifact, context ContextDescriptor, identities map[hir.PackageID]packagegraph.InstanceID, functionSymbols map[FunctionID]hir.SymbolID, foreignSymbols map[uint64]hir.SymbolID, firstLocal mir.LocalID, maxBytes uint64) (mir.Function, error) {
 	if err := ValidateStableBody(body); err != nil {
 		return mir.Function{}, err
 	}
@@ -112,7 +207,8 @@ func RebindStableLeafBody(body StableBodyArtifact, context ContextDescriptor, id
 	if contextID != body.ContextID {
 		return mir.Function{}, fmt.Errorf("stable function body context does not match the requested type context")
 	}
-	if functionSymbol == hir.NoSymbol {
+	functionSymbol, found := functionSymbols[body.ID]
+	if !found || functionSymbol == hir.NoSymbol {
 		return mir.Function{}, fmt.Errorf("stable function body requires a fresh function symbol")
 	}
 	owner, err := packageForInstance(body.Package, identities)
@@ -129,6 +225,33 @@ func RebindStableLeafBody(body StableBodyArtifact, context ContextDescriptor, id
 	}
 	function.Symbol = functionSymbol
 	function.Name = hir.QualifiedModulePath(owner, body.Function.Name)
+	for _, call := range body.Calls {
+		terminator := &function.Blocks[call.Block].Terminator
+		switch {
+		case strings.HasPrefix(call.Target, bodyInternalCallPrefix):
+			id, parseErr := ParseFunctionID(strings.TrimPrefix(call.Target, bodyInternalCallPrefix))
+			if parseErr != nil {
+				return mir.Function{}, parseErr
+			}
+			symbol, exists := functionSymbols[id]
+			if !exists || symbol == hir.NoSymbol {
+				return mir.Function{}, fmt.Errorf("stable internal call target %s is unresolved", id)
+			}
+			terminator.Callee = symbol
+		case strings.HasPrefix(call.Target, bodyForeignCallPrefix):
+			index, parseErr := parseForeignCallTarget(call.Target)
+			if parseErr != nil {
+				return mir.Function{}, parseErr
+			}
+			symbol, exists := foreignSymbols[index]
+			if !exists || symbol == hir.NoSymbol {
+				return mir.Function{}, fmt.Errorf("stable foreign call context index %d is unresolved", index)
+			}
+			terminator.Callee = symbol
+		default:
+			return mir.Function{}, fmt.Errorf("stable call target %q is invalid", call.Target)
+		}
+	}
 	if err := mapFunctionTypes(&function, func(value hir.Type) (hir.Type, error) {
 		return rebindStableType(string(value), identities)
 	}); err != nil {
@@ -240,10 +363,41 @@ func ValidateStableBody(body StableBodyArtifact) error {
 	if canonicalShape != shape || !reflect.DeepEqual(canonical, body.Function) {
 		return fmt.Errorf("stable function body graph is not canonical")
 	}
-	for _, block := range body.Function.Blocks {
-		if block.Terminator.Kind == mir.TerminatorCall {
-			return fmt.Errorf("stable function-body v0 does not admit calls")
+	callIndex := 0
+	for blockIndex, block := range body.Function.Blocks {
+		if block.Terminator.Kind != mir.TerminatorCall {
+			continue
 		}
+		if block.Terminator.Callee != hir.NoSymbol {
+			return fmt.Errorf("stable function body call retains a build-local callee symbol")
+		}
+		if callIndex >= len(body.Calls) || body.Calls[callIndex].Block != uint64(blockIndex) {
+			return fmt.Errorf("stable function body call bindings do not match call terminators")
+		}
+		call := body.Calls[callIndex]
+		switch {
+		case strings.HasPrefix(call.Target, bodyInternalCallPrefix):
+			if block.Terminator.ForeignABI != "" {
+				return fmt.Errorf("stable internal call target has a foreign ABI")
+			}
+			id, err := ParseFunctionID(strings.TrimPrefix(call.Target, bodyInternalCallPrefix))
+			if err != nil || id == (FunctionID{}) {
+				return fmt.Errorf("stable internal call target is invalid")
+			}
+		case strings.HasPrefix(call.Target, bodyForeignCallPrefix):
+			if block.Terminator.ForeignABI != "C" {
+				return fmt.Errorf("stable foreign call target has an invalid ABI")
+			}
+			if _, err := parseForeignCallTarget(call.Target); err != nil {
+				return err
+			}
+		default:
+			return fmt.Errorf("stable call target %q is invalid", call.Target)
+		}
+		callIndex++
+	}
+	if callIndex != len(body.Calls) {
+		return fmt.Errorf("stable function body has an extra or unsorted call binding")
 	}
 	if err := mapFunctionTypes(&canonical, func(value hir.Type) (hir.Type, error) {
 		if !validStableType(string(value)) {
@@ -311,6 +465,88 @@ func packageForInstance(instance packagegraph.InstanceID, identities map[hir.Pac
 	}
 	if !found {
 		return 0, fmt.Errorf("PackageInstanceId %s has no local package", instance)
+	}
+	return result, nil
+}
+
+func parseForeignCallTarget(target string) (uint64, error) {
+	text := strings.TrimPrefix(target, bodyForeignCallPrefix)
+	if text == target || text == "" {
+		return 0, fmt.Errorf("stable foreign call target %q is invalid", target)
+	}
+	index, err := strconv.ParseUint(text, 10, 64)
+	if err != nil || strconv.FormatUint(index, 10) != text {
+		return 0, fmt.Errorf("stable foreign call target %q is invalid", target)
+	}
+	return index, nil
+}
+
+func contextForeignIndices(processContext mir.Program, stable ContextDescriptor, identities map[hir.PackageID]packagegraph.InstanceID) (map[hir.SymbolID]uint64, error) {
+	result := make(map[hir.SymbolID]uint64, len(processContext.ForeignFunctions))
+	for _, foreign := range processContext.ForeignFunctions {
+		described, err := DescribeContext(mir.Program{ForeignFunctions: []mir.ForeignFunction{foreign}}, identities, nil)
+		if err != nil {
+			return nil, fmt.Errorf("describe foreign function %q for stable body: %w", foreign.Name, err)
+		}
+		if len(described.ForeignFunctions) != 1 {
+			return nil, fmt.Errorf("foreign function %q did not produce one stable context entry", foreign.Name)
+		}
+		index := slices.IndexFunc(stable.ForeignFunctions, func(candidate ContextForeignFunction) bool {
+			return reflect.DeepEqual(candidate, described.ForeignFunctions[0])
+		})
+		if index < 0 {
+			return nil, fmt.Errorf("foreign function %q is absent from the stable type context", foreign.Name)
+		}
+		result[foreign.Symbol] = uint64(index)
+	}
+	return result, nil
+}
+
+func bindingsForStableContext(processContext mir.Program, stable ContextDescriptor, identities map[hir.PackageID]packagegraph.InstanceID) (map[hir.SymbolID]FunctionID, error) {
+	bindings := make(map[hir.SymbolID]FunctionID)
+	for _, resource := range processContext.ResourceTypes {
+		if resource.DropSymbol == hir.NoSymbol {
+			continue
+		}
+		stableTypeName, err := stableType(resource.Type, identities)
+		if err != nil {
+			return nil, err
+		}
+		index := slices.IndexFunc(stable.Resources, func(candidate ContextResource) bool { return candidate.Type == stableTypeName })
+		if index < 0 || stable.Resources[index].DropFunctionID == (FunctionID{}) {
+			return nil, fmt.Errorf("resource %q has no stable drop-function binding", resource.Type)
+		}
+		bindings[resource.DropSymbol] = stable.Resources[index].DropFunctionID
+	}
+	return bindings, nil
+}
+
+// rebindStableContextFunctionSymbols rewrites only internal resource-drop links. Type and foreign
+// declaration rebinding remain owned by the current process-local context supplied by the caller.
+func rebindStableContextFunctionSymbols(processContext mir.Program, stable ContextDescriptor, identities map[hir.PackageID]packagegraph.InstanceID, functionSymbols map[FunctionID]hir.SymbolID) (mir.Program, error) {
+	bindings, err := bindingsForStableContext(processContext, stable, identities)
+	if err != nil {
+		return mir.Program{}, err
+	}
+	actual, err := DescribeContext(processContext, identities, bindings)
+	if err != nil {
+		return mir.Program{}, err
+	}
+	if !reflect.DeepEqual(actual, stable) {
+		return mir.Program{}, fmt.Errorf("process-local type context does not match stable context before function-symbol rebind")
+	}
+	result := mir.Clone(processContext)
+	for index := range result.ResourceTypes {
+		resource := &result.ResourceTypes[index]
+		if resource.DropSymbol == hir.NoSymbol {
+			continue
+		}
+		id := bindings[resource.DropSymbol]
+		symbol, found := functionSymbols[id]
+		if !found || symbol == hir.NoSymbol {
+			return mir.Program{}, fmt.Errorf("stable resource drop target %s is unresolved", id)
+		}
+		resource.DropSymbol = symbol
 	}
 	return result, nil
 }
