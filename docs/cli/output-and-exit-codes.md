@@ -66,10 +66,11 @@ automation. They are not the stable exit-code taxonomy:
 | `6` | The experimental native build could not resolve or run its toolchain, link the scalar runtime, or safely materialize its artifact. |
 | `7` | The package workspace, lockfile, package graph, or package-to-build mapping failed before native compilation. |
 
-`experimental atlas-text source` writes exactly one compact canonical
-`fairyc.attributed-text-json/v0` value without a trailing newline on success. An admitted source
-fragment that exceeds the explicit fragment or aggregate text limit is still code `0`: the document
-contains one checksummed `fragment-byte-limit` omission and no source record. Missing, duplicate,
+`experimental atlas-text source` and `documentation` write exactly one compact canonical
+`fairyc.attributed-text-json/v0` value without a trailing newline on success. An admitted fragment
+that exceeds the explicit fragment or aggregate text limit is still code `0`: the document contains
+one checksummed `fragment-byte-limit` omission and no text record. An undocumented declaration under
+the documentation action is also code `0` with one `kind-unavailable` omission. Missing, duplicate,
 unknown, noncanonical, or unsupported options; an unknown package or exact SymbolId; and a complete
 envelope that exceeds `--max-output-bytes` use code `2` with empty stdout. Source diagnostics use
 `3`; internal identity/invariant and output-write failures use `4`; manifest, workspace, graph, and

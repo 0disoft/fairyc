@@ -5,6 +5,7 @@
 - Product source: `docs/product/02-spec.md`
 - Lexer source: `docs/language/0006-lexing-parsing-and-recovery-v0.md`
 - Attributed-text policy: `docs/atlas/attributed-text-v0.md`
+- Output follow-up: `docs/adr/0200-exact-declaration-documentation-attributed-text-command.md`
 
 ## Context
 

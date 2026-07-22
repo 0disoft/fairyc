@@ -87,6 +87,29 @@ func EncodeWorkspaceSource(
 	if err != nil {
 		return nil, err
 	}
+	return encodeResult(result, maxBytes)
+}
+
+// EncodeWorkspaceDocumentation performs exact-current documentation extraction itself and emits
+// the same canonical attributed-text envelope without accepting caller-authored text or results.
+func EncodeWorkspaceDocumentation(
+	workspace workspaceloader.Workspace,
+	index *atlasmap.QueryIndex,
+	snapshot semanticsnapshot.Snapshot,
+	request Request,
+	maxBytes uint64,
+) ([]byte, error) {
+	if maxBytes == 0 {
+		return nil, fmt.Errorf("Atlas attributed-text document byte limit must be positive")
+	}
+	result, err := ExtractWorkspaceDocumentation(workspace, index, snapshot, request)
+	if err != nil {
+		return nil, err
+	}
+	return encodeResult(result, maxBytes)
+}
+
+func encodeResult(result Result, maxBytes uint64) ([]byte, error) {
 	document, err := documentFromResult(result)
 	if err != nil {
 		return nil, err
@@ -131,10 +154,12 @@ func validateResult(result Result) error {
 	if err := ValidateBudget(result.Budget); err != nil {
 		return err
 	}
-	if len(result.Selection.Kinds) != 1 || result.Selection.Kinds[0] != KindSourceExcerpt ||
+	if len(result.Selection.Kinds) != 1 ||
+		result.Selection.Kinds[0] != KindSourceExcerpt && result.Selection.Kinds[0] != KindDeclarationDocumentation ||
 		len(result.Selection.Origins) != 1 || result.Selection.Origins[0] != OriginWorkspaceAuthored {
 		return fmt.Errorf("Atlas attributed-text result has a noncanonical selection")
 	}
+	selectedKind := result.Selection.Kinds[0]
 	if err := validateSubject(result.Subject); err != nil {
 		return err
 	}
@@ -147,7 +172,7 @@ func validateResult(result Result) error {
 			return fmt.Errorf("validate Atlas attributed-text result record: %w", err)
 		}
 		view := record.View()
-		if !recordMatchesSubject(view, result.Subject) || view.Kind != KindSourceExcerpt ||
+		if !recordMatchesSubject(view, result.Subject) || view.Kind != selectedKind ||
 			view.Origin != OriginWorkspaceAuthored || view.Authority != AuthorityNone {
 			return fmt.Errorf("Atlas attributed-text result record does not match its subject and selection")
 		}
@@ -161,9 +186,21 @@ func validateResult(result Result) error {
 		return fmt.Errorf("Atlas attributed-text result usage does not match its records")
 	}
 	for _, omission := range result.Omissions {
-		if !validOmissionCode(omission.Code) || omission.Kind != KindSourceExcerpt ||
-			omission.SymbolVisible != result.Subject.SymbolVisible || omission.Bytes != result.Subject.EndByte-result.Subject.StartByte {
+		if !validOmissionCode(omission.Code) || omission.Kind != selectedKind ||
+			omission.SymbolVisible != result.Subject.SymbolVisible {
 			return fmt.Errorf("Atlas attributed-text result has an invalid omission")
+		}
+		expectedBytes := result.Subject.EndByte - result.Subject.StartByte
+		if omission.Code == OmissionKindUnavailable {
+			if selectedKind != KindDeclarationDocumentation || omission.Bytes != 0 ||
+				omission.Origin != OriginWorkspaceAuthored && omission.Origin != OriginCompilerBundled &&
+					omission.Origin != OriginExternalDependency && omission.Origin != OriginGenerated {
+				return fmt.Errorf("Atlas attributed-text unavailable-kind omission is invalid")
+			}
+			continue
+		}
+		if omission.Bytes != expectedBytes {
+			return fmt.Errorf("Atlas attributed-text omission byte count does not match its subject")
 		}
 		if omission.Code == OmissionOriginNotAdmitted {
 			if omission.Origin != OriginCompilerBundled {
@@ -224,7 +261,7 @@ func recordMatchesSubject(view View, subject Subject) bool {
 }
 
 func validOmissionCode(code OmissionCode) bool {
-	return code == OmissionOriginNotAdmitted || code == OmissionInvalidUTF8 ||
+	return code == OmissionOriginNotAdmitted || code == OmissionKindUnavailable || code == OmissionInvalidUTF8 ||
 		code == OmissionDisallowedControl || code == OmissionFragmentByteLimit
 }
 

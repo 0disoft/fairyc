@@ -96,6 +96,59 @@ func TestBuildIsImmutableDeterministicAndIndependentOfBuildLocalPackageNumbers(t
 	}
 }
 
+func TestBuildRetainsExactDeclarationDocumentationAsDetachedNonDeclarationSidecar(t *testing.T) {
+	t.Parallel()
+	text := `module docs;
+/// Packet docs.
+struct Packet { i32 value; }
+/// Error docs.
+enum Error { Failed; }
+/// Handle docs.
+resource Handle { ptr void raw; cleanup {} }
+/// Foreign docs.
+unsafe extern C fn i32 raw(i32 value);
+/// Function docs.
+fn i32 run() { return 0; }
+`
+	result := compileSinglePackage(t, hir.DefaultPackage, "docs.fy", text)
+	input := packageInput(t, hir.DefaultPackage, "example.snapshot.docs", "docs", "1.0.0", "docs.fy", text, "root")
+	snapshot, err := semanticsnapshot.Build(result.Semantic, result.MIR, []semanticsnapshot.PackageInput{input})
+	if err != nil {
+		t.Fatalf("Build() error = %v", err)
+	}
+	documentation := snapshot.DocumentationSpans()
+	if len(documentation) != 5 || len(snapshot.Declarations()) != 5 {
+		t.Fatalf("documentation/declarations = %d/%d: %+v", len(documentation), len(snapshot.Declarations()), documentation)
+	}
+	wants := map[semanticsnapshot.DeclarationKind]string{
+		semanticsnapshot.DeclarationStruct:          "/// Packet docs.",
+		semanticsnapshot.DeclarationEnum:            "/// Error docs.",
+		semanticsnapshot.DeclarationResource:        "/// Handle docs.",
+		semanticsnapshot.DeclarationForeignFunction: "/// Foreign docs.",
+		semanticsnapshot.DeclarationFunction:        "/// Function docs.",
+	}
+	for _, item := range documentation {
+		want, found := wants[item.Declaration.Kind]
+		if !found || item.DeclarationSpan.PackageInstance != input.Instance.String() ||
+			item.Documentation.PackageInstance != input.Instance.String() ||
+			item.Documentation.Source != "docs.fy" || item.Documentation.EndByte > item.DeclarationSpan.StartByte ||
+			text[item.Documentation.StartByte:item.Documentation.EndByte] != want {
+			t.Fatalf("documentation sidecar = %+v, want %q", item, want)
+		}
+	}
+	documentation[0].Documentation.Source = "corrupted.fy"
+	if snapshot.DocumentationSpans()[0].Documentation.Source == "corrupted.fy" {
+		t.Fatal("documentation accessor mutation escaped into immutable snapshot")
+	}
+
+	mutated := result.Semantic
+	mutated.HIR.Modules[0].Functions[0].DocumentationSpan.EndByte = mutated.HIR.Modules[0].Functions[0].Span.StartByte + 1
+	if _, err := semanticsnapshot.Build(mutated, result.MIR, []semanticsnapshot.PackageInput{input}); err == nil ||
+		!strings.Contains(err.Error(), "not a preceding span") {
+		t.Fatalf("overlapping documentation Build() error = %v", err)
+	}
+}
+
 func TestBuildMarksForeignCallsOpaqueWithoutDegradingLocalRelations(t *testing.T) {
 	t.Parallel()
 	text := `module main;
@@ -485,7 +538,8 @@ func findCompleteness(t *testing.T, values []semanticsnapshot.Completeness, rela
 func assertSnapshotsEqual(t *testing.T, left, right semanticsnapshot.Snapshot) {
 	t.Helper()
 	if !reflect.DeepEqual(left.Packages(), right.Packages()) || !reflect.DeepEqual(left.Files(), right.Files()) || !reflect.DeepEqual(left.Modules(), right.Modules()) ||
-		!reflect.DeepEqual(left.Declarations(), right.Declarations()) || !reflect.DeepEqual(left.Functions(), right.Functions()) ||
+		!reflect.DeepEqual(left.Declarations(), right.Declarations()) || !reflect.DeepEqual(left.DocumentationSpans(), right.DocumentationSpans()) ||
+		!reflect.DeepEqual(left.Functions(), right.Functions()) ||
 		!reflect.DeepEqual(left.Completeness(), right.Completeness()) {
 		t.Fatalf("snapshots differ:\nleft=%s\nright=%s", strings.Join(snapshotStrings(left), "\n"), strings.Join(snapshotStrings(right), "\n"))
 	}
@@ -497,6 +551,7 @@ func snapshotStrings(value semanticsnapshot.Snapshot) []string {
 		fmt.Sprintf("%+v", value.Files()),
 		fmt.Sprintf("%+v", value.Modules()),
 		fmt.Sprintf("%+v", value.Declarations()),
+		fmt.Sprintf("%+v", value.DocumentationSpans()),
 		fmt.Sprintf("%+v", value.Functions()),
 		fmt.Sprintf("%+v", value.Completeness()),
 	}

@@ -14,6 +14,7 @@ import (
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/packagecontent"
 	"github.com/0disoft/fairyc/internal/sdkstdlib"
+	"github.com/0disoft/fairyc/internal/semanticsnapshot"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
@@ -198,6 +199,7 @@ type attributedTextFixture struct {
 	sourcePath string
 	workspace  workspaceloader.Workspace
 	index      *atlasmap.QueryIndex
+	snapshot   semanticsnapshot.Snapshot
 	visible    string
 	full       string
 }
@@ -206,11 +208,16 @@ type preparedAttributedTextWorkspace struct {
 	root         string
 	sourcePath   string
 	workspace    workspaceloader.Workspace
+	snapshot     semanticsnapshot.Snapshot
 	partitions   []atlasmap.Partition
 	expectations map[string]atlasmap.LoadExpectation
 }
 
 func loadAttributedTextFixture(t *testing.T, sourceBytes []byte) attributedTextFixture {
+	return loadAttributedTextFixtureForSymbol(t, sourceBytes, "middle")
+}
+
+func loadAttributedTextFixtureForSymbol(t *testing.T, sourceBytes []byte, name string) attributedTextFixture {
 	t.Helper()
 	prepared := prepareAttributedTextWorkspace(t, sourceBytes)
 	for _, partition := range prepared.partitions {
@@ -222,15 +229,15 @@ func loadAttributedTextFixture(t *testing.T, sourceBytes []byte) attributedTextF
 			t.Fatal(err)
 		}
 		for _, symbol := range partition.Symbols() {
-			if symbol.Declaration.Name == "middle" {
+			if symbol.Declaration.Name == name {
 				return attributedTextFixture{
 					root: prepared.root, sourcePath: prepared.sourcePath, workspace: prepared.workspace, index: index,
-					visible: symbol.Visible, full: symbol.Full,
+					snapshot: prepared.snapshot, visible: symbol.Visible, full: symbol.Full,
 				}
 			}
 		}
 	}
-	t.Fatal("attributed-text fixture has no middle symbol")
+	t.Fatalf("attributed-text fixture has no %s symbol", name)
 	return attributedTextFixture{}
 }
 
@@ -265,7 +272,7 @@ source = "src"
 		t.Fatalf("CheckPackages() = verified %t error %v", checked.Verified, err)
 	}
 	compilerBuild := attributedTextCompilerBuild()
-	_, partitions, err := atlasmap.PrepareWorkspace(workspace, checked, compilerBuild)
+	snapshot, partitions, err := atlasmap.PrepareWorkspace(workspace, checked, compilerBuild)
 	if err != nil || len(partitions) == 0 {
 		t.Fatalf("PrepareWorkspace() = %d, %v", len(partitions), err)
 	}
@@ -275,7 +282,7 @@ source = "src"
 	}
 	return preparedAttributedTextWorkspace{
 		root: root, sourcePath: sourcePath, workspace: workspace,
-		partitions: partitions, expectations: expectations,
+		snapshot: snapshot, partitions: partitions, expectations: expectations,
 	}
 }
 

@@ -1,6 +1,8 @@
 package atlasmap
 
 import (
+	"bytes"
+	"os"
 	"path/filepath"
 	"reflect"
 	"slices"
@@ -9,6 +11,7 @@ import (
 
 	"github.com/0disoft/fairyc/internal/buildidentity"
 	"github.com/0disoft/fairyc/internal/compiler"
+	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/moduleinterface"
 	"github.com/0disoft/fairyc/internal/packagecontent"
 	"github.com/0disoft/fairyc/internal/packagegraph"
@@ -124,6 +127,66 @@ func TestPrepareWorkspaceBuildsDeterministicCompletePackagePlans(t *testing.T) {
 	if totalFiles != len(snapshot.Files()) || totalModules != len(snapshot.Modules()) ||
 		totalSymbols != len(snapshot.Declarations()) || totalFunctions != len(snapshot.Functions()) {
 		t.Fatalf("partition totals = files %d modules %d symbols %d functions %d", totalFiles, totalModules, totalSymbols, totalFunctions)
+	}
+}
+
+func TestDocumentationSidecarDoesNotEnterFymapV1PlanOrEncoding(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	if err := os.Mkdir(filepath.Join(root, "src"), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	manifest := `schema = "fairyc.manifest/v1"
+
+[package]
+uid = "test.atlas.documentation-sidecar"
+name = "documentation-sidecar"
+version = "1.0.0"
+language = "fairyc-language/0"
+source = "src"
+`
+	sourceText := "module main;\n/// Returns the answer.\nfn i32 main() { return 42; }\n"
+	if err := os.WriteFile(filepath.Join(root, "fairy.toml"), []byte(manifest), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "src", "main.fy"), []byte(sourceText), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	workspace, err := workspaceloader.Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	input, err := workspace.SemanticInput()
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := compiler.CheckPackages(input)
+	if err != nil || !result.Verified {
+		t.Fatalf("CheckPackages() = verified %t error %v", result.Verified, err)
+	}
+	compilerBuild := testCompilerBuild()
+	withDocumentation, withPlans, err := PrepareWorkspace(workspace, result, compilerBuild)
+	if err != nil || len(withDocumentation.DocumentationSpans()) != 1 {
+		t.Fatalf("documented PrepareWorkspace() = (%d spans, %v)", len(withDocumentation.DocumentationSpans()), err)
+	}
+	for moduleIndex := range result.Semantic.HIR.Modules {
+		for functionIndex := range result.Semantic.HIR.Modules[moduleIndex].Functions {
+			result.Semantic.HIR.Modules[moduleIndex].Functions[functionIndex].DocumentationSpan = hir.Span{}
+		}
+	}
+	withoutDocumentation, withoutPlans, err := PrepareWorkspace(workspace, result, compilerBuild)
+	if err != nil || len(withoutDocumentation.DocumentationSpans()) != 0 || len(withPlans) != len(withoutPlans) {
+		t.Fatalf("undocumented PrepareWorkspace() = (%d spans, %d/%d plans, %v)", len(withoutDocumentation.DocumentationSpans()), len(withPlans), len(withoutPlans), err)
+	}
+	for index := range withPlans {
+		withBytes, err := Encode(withPlans[index], 2<<20)
+		if err != nil {
+			t.Fatal(err)
+		}
+		withoutBytes, err := Encode(withoutPlans[index], 2<<20)
+		if err != nil || !bytes.Equal(withBytes, withoutBytes) {
+			t.Fatalf(".fymap v1 changed when only the documentation sidecar changed: %v", err)
+		}
 	}
 }
 

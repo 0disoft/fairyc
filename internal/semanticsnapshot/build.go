@@ -33,6 +33,10 @@ func Build(semanticResult semantic.Result, program mir.Program, packages []Packa
 	if err != nil {
 		return Snapshot{}, err
 	}
+	documentation, err := buildDocumentationSpans(semanticResult.HIR, metadata, declarations)
+	if err != nil {
+		return Snapshot{}, err
+	}
 	if err := validatePackageCoverage(stablePackages, files, modules); err != nil {
 		return Snapshot{}, err
 	}
@@ -45,7 +49,7 @@ func Build(semanticResult semantic.Result, program mir.Program, packages []Packa
 	completeness := buildCompleteness(resolvedCalls, externalCalls)
 	return Snapshot{data: snapshotData{
 		packages: stablePackages, files: files, modules: modules, declarations: declarations,
-		functions: functions, completeness: completeness,
+		documentation: documentation, functions: functions, completeness: completeness,
 	}}, nil
 }
 
@@ -302,6 +306,109 @@ func buildDeclarations(hirPackage hir.Package, metadata map[hir.PackageID]packag
 	slices.SortFunc(result.modules, compareModule)
 	slices.SortFunc(result.declarations, func(left, right Declaration) int { return compareDeclarationKey(left.Key, right.Key) })
 	return result.modules, result.declarations, result.symbols, result.foreignSymbols, result.privateSymbols, result.bounds, nil
+}
+
+type documentationOwner struct {
+	packageInstance string
+	source          string
+	kind            DeclarationKind
+	startByte       int
+	endByte         int
+}
+
+func buildDocumentationSpans(
+	hirPackage hir.Package,
+	metadata map[hir.PackageID]packageMetadata,
+	declarations []Declaration,
+) ([]DeclarationDocumentation, error) {
+	owners := make(map[documentationOwner]DeclarationKey, len(declarations))
+	for _, declaration := range declarations {
+		owner := documentationOwner{
+			packageInstance: declaration.Span.PackageInstance,
+			source:          declaration.Span.Source, kind: declaration.Key.Kind,
+			startByte: declaration.Span.StartByte, endByte: declaration.Span.EndByte,
+		}
+		if _, duplicate := owners[owner]; duplicate {
+			return nil, fmt.Errorf("semantic snapshot documentation owner is duplicated")
+		}
+		owners[owner] = declaration.Key
+	}
+
+	result := make([]DeclarationDocumentation, 0)
+	seen := make(map[DeclarationKey]struct{})
+	appendDocumentation := func(kind DeclarationKind, declarationSpan, documentationSpan hir.Span) error {
+		if documentationSpan == (hir.Span{}) {
+			return nil
+		}
+		stableDeclaration, err := normalizeSpan(declarationSpan, metadata)
+		if err != nil {
+			return fmt.Errorf("normalize documented declaration span: %w", err)
+		}
+		stableDocumentation, err := normalizeSpan(documentationSpan, metadata)
+		if err != nil {
+			return fmt.Errorf("normalize declaration documentation span: %w", err)
+		}
+		if stableDocumentation.PackageInstance != stableDeclaration.PackageInstance ||
+			stableDocumentation.Source != stableDeclaration.Source ||
+			stableDocumentation.EndByte <= stableDocumentation.StartByte ||
+			stableDocumentation.EndByte > stableDeclaration.StartByte {
+			return fmt.Errorf("declaration documentation span is not a preceding span in the declaration source")
+		}
+		owner := documentationOwner{
+			packageInstance: stableDeclaration.PackageInstance,
+			source:          stableDeclaration.Source, kind: kind,
+			startByte: stableDeclaration.StartByte, endByte: stableDeclaration.EndByte,
+		}
+		key, found := owners[owner]
+		if !found {
+			return fmt.Errorf("declaration documentation span has no exact snapshot declaration owner")
+		}
+		if _, duplicate := seen[key]; duplicate {
+			return fmt.Errorf("snapshot declaration %+v repeats documentation", key)
+		}
+		seen[key] = struct{}{}
+		result = append(result, DeclarationDocumentation{
+			Declaration: key, DeclarationSpan: stableDeclaration, Documentation: stableDocumentation,
+		})
+		return nil
+	}
+
+	for _, module := range hirPackage.Modules {
+		for _, value := range module.Structs {
+			if err := appendDocumentation(DeclarationStruct, value.Span, value.DocumentationSpan); err != nil {
+				return nil, err
+			}
+		}
+		for _, value := range module.Enums {
+			if err := appendDocumentation(DeclarationEnum, value.Span, value.DocumentationSpan); err != nil {
+				return nil, err
+			}
+		}
+		for _, value := range module.Resources {
+			if err := appendDocumentation(DeclarationResource, value.Span, value.DocumentationSpan); err != nil {
+				return nil, err
+			}
+		}
+		for _, value := range module.Functions {
+			if value.DropGlueFor != "" && value.DocumentationSpan != (hir.Span{}) {
+				return nil, fmt.Errorf("compiler-private drop glue carries declaration documentation")
+			}
+			if value.DropGlueFor == "" {
+				if err := appendDocumentation(DeclarationFunction, value.Span, value.DocumentationSpan); err != nil {
+					return nil, err
+				}
+			}
+		}
+		for _, value := range module.ForeignFunctions {
+			if err := appendDocumentation(DeclarationForeignFunction, value.Span, value.DocumentationSpan); err != nil {
+				return nil, err
+			}
+		}
+	}
+	slices.SortFunc(result, func(left, right DeclarationDocumentation) int {
+		return compareDeclarationKey(left.Declaration, right.Declaration)
+	})
+	return result, nil
 }
 
 func validateModule(modulePath, sourcePath string) error {

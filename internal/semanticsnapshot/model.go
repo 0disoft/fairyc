@@ -201,6 +201,15 @@ type Declaration struct {
 	DropEffects []string
 }
 
+// DeclarationDocumentation is an ephemeral compiler-fact sidecar. It binds one declaration's
+// exact source span to its frontend-attached documentation span without placing either text or the
+// attachment in the body-free .fymap v1 declaration record.
+type DeclarationDocumentation struct {
+	Declaration     DeclarationKey
+	DeclarationSpan Span
+	Documentation   Span
+}
+
 type Call struct {
 	Span       Span
 	TargetKind CallTargetKind
@@ -242,12 +251,13 @@ type Completeness struct {
 }
 
 type snapshotData struct {
-	packages     []Package
-	files        []File
-	modules      []Module
-	declarations []Declaration
-	functions    []FunctionSummary
-	completeness []Completeness
+	packages      []Package
+	files         []File
+	modules       []Module
+	declarations  []Declaration
+	documentation []DeclarationDocumentation
+	functions     []FunctionSummary
+	completeness  []Completeness
 }
 
 // Snapshot is immutable by construction. Accessors return deep detached copies.
@@ -282,6 +292,12 @@ func (snapshot Snapshot) Declarations() []Declaration {
 		result[index] = cloneDeclaration(declaration)
 	}
 	return result
+}
+
+// DocumentationSpans returns detached frontend-owned attachment facts. Atlas map planning does not
+// consume this sidecar, so the accepted .fymap v1 transport remains body- and attachment-free.
+func (snapshot Snapshot) DocumentationSpans() []DeclarationDocumentation {
+	return slices.Clone(snapshot.data.documentation)
 }
 
 func (snapshot Snapshot) Functions() []FunctionSummary {

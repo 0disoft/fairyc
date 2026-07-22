@@ -697,8 +697,10 @@ receipt. Linux pass cases feed the configured Clang/GCC native probe. The eight 
 feed a separate local x64 MSVC C11 probe at low and optimized profiles; this is not complete Windows
 layout coverage or a hosted receipt.
 
-Formatting, documentation, vendoring, binding generation, and ABI inspection remain planned tool
-surfaces rather than claims of current implementation. Testing has the bounded stable root semantic
+Formatting, rendered/general documentation generation, vendoring, binding generation, and ABI
+inspection remain planned tool surfaces rather than claims of current implementation. The narrow
+Atlas exact declaration-documentation extractor described below is not a documentation generator.
+Testing has the bounded stable root semantic
 surface above but no native, recursive, filtered, benchmark, or fixture runner. Checking has the bounded stable
 current-workspace `fairyc check [--locked]` surface; diagnostic explanation has its independent
 stable source-free surface; C emission has the target-explicit workspace surface above.
@@ -779,8 +781,9 @@ Unknown or incomplete edges remain explicit rather than being guessed.
 
 ADR 0195 accepts a separate `fairyc.attributed-text/v0` logical policy, ADR 0196 implements its first
 internal source-excerpt gate, ADR 0197 implements separately bounded canonical
-`fairyc.attributed-text-json/v0` output, and ADR 0198 exposes only that artifact through
-default-free `experimental atlas-text source`. `.fymap` v1 remains body-free and
+`fairyc.attributed-text-json/v0` output, ADR 0198 exposes its source selection through default-free
+`experimental atlas-text source`, and ADR 0200 exposes exact frontend-attached text through the
+parallel `documentation` action. `.fymap` v1 remains body-free and
 Context Pack v1 retains empty text arrays. Every text record is
 `untrusted-text` and binds both SymbolId forms, exact package identity, canonical relative
 file, content and line-map identities, half-open byte span, origin, exact UTF-8 bytes, explicit
@@ -792,9 +795,11 @@ source excerpt from revalidated retained bytes. Its output builder requires expl
 text/final-byte budgets, binds exact subject identity even for an omission, runs extraction itself,
 and includes independent fragment and document checksums. The command requires exact package and
 visible/full SymbolId selection, `workspace-authored` origin, explicit count/text/final-output
-limits, and optional locked no-write mode. ADR 0199 now fixes the C-friendly `///` frontend
-attachment contract and retains exact spans through typed HIR, but the current attributed-text
-producer still has no documentation extraction, decoder, text store, or stable CLI.
+limits, and optional locked no-write mode. ADR 0199 fixes the C-friendly `///` frontend attachment
+contract and retains exact spans through typed HIR. ADR 0200 carries those spans through an
+in-memory-only snapshot sidecar and emits exact marker-bearing retained bytes or an explicit
+`kind-unavailable` omission. The current implementation still has no decoder, text store, stable
+CLI, rendered documentation model, or dependency/generated text admission.
 
 Stage 0 Atlas now exposes `experimental atlas-pack overview` for one exact manifest package UID with
 mandatory record, selection-byte, and final-output-byte limits plus optional locked no-write mode.
@@ -835,8 +840,9 @@ rewrite measurement boundary by ADR 0191, the internal exact symbol catalog by A
 experimental output command by ADR 0193. ADR 0194 fixes experimental show/around. Stable commands,
 map publication and attributed-text decoding remain future work; ADR 0195 fixes the attributed-text
 policy, ADR 0196 implements its internal exact retained-source gate, ADR 0197 fixes its canonical
-output-only JSON, ADR 0198 fixes its first experimental source command, and ADR 0199 fixes exact
-frontend documentation attachment without yet emitting documentation text.
+output-only JSON, ADR 0198 fixes its first experimental source command, ADR 0199 fixes exact
+frontend documentation attachment, and ADR 0200 fixes exact documentation extraction and its
+experimental action without changing compiler-fact transports.
 
 ## Explicit non-goals
 

@@ -5,6 +5,7 @@
 - Product source: `docs/product/02-spec.md`
 - Encoding prerequisite: `docs/adr/0197-canonical-attributed-text-json-v0.md`
 - CLI contract: `docs/cli/command-contract.md`
+- Documentation-action follow-up: `docs/adr/0200-exact-declaration-documentation-attributed-text-command.md`
 
 ## Context
 

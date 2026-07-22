@@ -5,6 +5,7 @@
 - Product source: `docs/product/02-spec.md`
 - Policy prerequisite: `docs/adr/0195-attributed-text-boundary-v0.md`
 - Extraction prerequisite: `docs/adr/0196-exact-retained-source-excerpt-extraction.md`
+- Documentation follow-up: `docs/adr/0200-exact-declaration-documentation-attributed-text-command.md`
 
 ## Context
 

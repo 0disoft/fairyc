@@ -580,6 +580,14 @@ existing token kind output, SymbolId, MIR, C emission, `.fymap` v1, Context Pack
 `atlas-text source` encodings do not change. Alternative documentation spellings, additional
 attachment targets, rendering, Atlas extraction, and post-1 stability require separate decisions.
 
+ADR 0200 activates the already reserved `declaration-documentation` kind and
+`fairyc-declaration-doc-utf8` format in canonical `fairyc.attributed-text-json/v0` without adding or
+reordering fields. It adds the unstable `experimental atlas-text documentation` action and
+`kind-unavailable` omission, while existing source-command bytes and the frozen checksum vector
+remain unchanged. The in-memory snapshot sidecar is not part of `.fymap` v1, SymbolId, Context Pack
+v1, or a persisted compatibility surface. Additional origins, attachment targets, rendering,
+decoding, storage, and stable command behavior require later decisions.
+
 Dependency handling is relation-specific:
 
 | Condition | Atlas behavior |

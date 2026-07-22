@@ -12,6 +12,7 @@ import (
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/contextpack"
 	"github.com/0disoft/fairyc/internal/projectmanifest"
+	"github.com/0disoft/fairyc/internal/semanticsnapshot"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
@@ -68,53 +69,59 @@ func runAtlasPackOverview(arguments []string, sourceRoot string, stdout, stderr 
 }
 
 func prepareAtlasQueryIndex(sourceRoot, packageUID string, locked bool, stderr io.Writer) (*atlasmap.QueryIndex, int) {
-	_, index, code := prepareAtlasQuery(sourceRoot, packageUID, locked, stderr)
-	return index, code
+	prepared, code := prepareAtlasQuery(sourceRoot, packageUID, locked, stderr)
+	return prepared.index, code
+}
+
+type preparedAtlasQuery struct {
+	workspace workspaceloader.Workspace
+	index     *atlasmap.QueryIndex
+	snapshot  semanticsnapshot.Snapshot
 }
 
 func prepareAtlasQuery(
 	sourceRoot, packageUID string,
 	locked bool,
 	stderr io.Writer,
-) (workspaceloader.Workspace, *atlasmap.QueryIndex, int) {
+) (preparedAtlasQuery, int) {
 	workspace, _, err := loadWorkspaceWithLock(sourceRoot, locked)
 	if err != nil {
-		return workspaceloader.Workspace{}, nil, packageFailure(stderr, err)
+		return preparedAtlasQuery{}, packageFailure(stderr, err)
 	}
 	input, err := workspace.SemanticInput()
 	if err != nil {
-		return workspaceloader.Workspace{}, nil, packageFailure(stderr, err)
+		return preparedAtlasQuery{}, packageFailure(stderr, err)
 	}
 	result, err := compiler.CheckPackages(input)
 	if err != nil {
-		return workspaceloader.Workspace{}, nil, internalError(stderr)
+		return preparedAtlasQuery{}, internalError(stderr)
 	}
 	if len(result.Semantic.Diagnostics) != 0 {
 		if err := writeWorkspaceDiagnostics(stderr, workspace, result.Semantic.Diagnostics); err != nil {
-			return workspaceloader.Workspace{}, nil, ExitInternalFailure
+			return preparedAtlasQuery{}, ExitInternalFailure
 		}
-		return workspaceloader.Workspace{}, nil, ExitSourceDiagnostics
+		return preparedAtlasQuery{}, ExitSourceDiagnostics
 	}
 	if len(result.Semantic.Unsupported) != 0 {
 		if err := writeUnsupportedSemantics(stderr, result.Semantic.Unsupported); err != nil {
-			return workspaceloader.Workspace{}, nil, ExitInternalFailure
+			return preparedAtlasQuery{}, ExitInternalFailure
 		}
-		return workspaceloader.Workspace{}, nil, ExitSourceDiagnostics
+		return preparedAtlasQuery{}, ExitSourceDiagnostics
 	}
 	if !result.Verified {
-		return workspaceloader.Workspace{}, nil, internalError(stderr)
+		return preparedAtlasQuery{}, internalError(stderr)
 	}
 	compilerBuild, err := buildidentity.Current()
 	if err != nil {
-		return workspaceloader.Workspace{}, nil, internalError(stderr)
+		return preparedAtlasQuery{}, internalError(stderr)
 	}
-	_, partitions, err := atlasmap.PrepareWorkspace(workspace, result, compilerBuild)
+	snapshot, partitions, err := atlasmap.PrepareWorkspace(workspace, result, compilerBuild)
 	if err != nil {
-		return workspaceloader.Workspace{}, nil, internalError(stderr)
+		return preparedAtlasQuery{}, internalError(stderr)
 	}
 	expectations, err := atlasmap.CurrentWorkspaceExpectations(workspace, result, compilerBuild)
 	if err != nil {
-		return workspaceloader.Workspace{}, nil, internalError(stderr)
+		return preparedAtlasQuery{}, internalError(stderr)
 	}
 	var selected atlasmap.Partition
 	found := false
@@ -125,17 +132,17 @@ func prepareAtlasQuery(
 		}
 	}
 	if !found {
-		return workspaceloader.Workspace{}, nil, invocationError(stderr, fmt.Sprintf("workspace has no package UID %q", packageUID))
+		return preparedAtlasQuery{}, invocationError(stderr, fmt.Sprintf("workspace has no package UID %q", packageUID))
 	}
 	expectation, found := expectations[selected.Header().PackageInstance]
 	if !found {
-		return workspaceloader.Workspace{}, nil, internalError(stderr)
+		return preparedAtlasQuery{}, internalError(stderr)
 	}
 	index, err := atlasmap.NewQueryIndex(selected, expectation)
 	if err != nil {
-		return workspaceloader.Workspace{}, nil, internalError(stderr)
+		return preparedAtlasQuery{}, internalError(stderr)
 	}
-	return workspace, index, ExitSuccess
+	return preparedAtlasQuery{workspace: workspace, index: index, snapshot: snapshot}, ExitSuccess
 }
 
 func parseAtlasPackOverviewOptions(arguments []string) (atlasPackOverviewOptions, error) {

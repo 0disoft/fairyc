@@ -618,6 +618,9 @@ decoder, persistent text store, or change to body-free `.fymap` v1 and empty-tex
 ADR 0199 now establishes the prerequisite documentation fact: consecutive physical-line-leading
 `///` trivia attaches conservatively to supported top-level declarations and survives CST, AST, and
 typed HIR as an exact byte span without entering executable semantics or Atlas transports.
+ADR 0200 now carries that fact through an immutable in-memory snapshot sidecar and exposes exact
+retained marker-bearing bytes through default-free `experimental atlas-text documentation`.
+Undocumented declarations produce `kind-unavailable`; map and Context Pack v1 bytes stay unchanged.
 
 - Preserve the implemented immutable `SemanticSnapshot` and per-package logical map plan.
 - Preserve the implemented bounded canonical `.fymap` codec and semantic revalidation boundary.
@@ -627,7 +630,7 @@ typed HIR as an exact byte span without entering executable semantics or Atlas t
 - Preserve the explicit overview/show/around experimental commands and keep map publication policy separate.
 - Preserve the raw whole-package rewrite harness; require representative failure before adding chunks or compression.
 - Preserve the implemented exact SymbolId catalog output as the discovery path for experimental `show` and `around`.
-- Preserve the implemented attributed-text v0 model, exact retained workspace-source gate, canonical output-only JSON, explicit experimental source command, and exact `///` frontend attachment span; require a separate extractor/encoder decision before documentation text reaches Atlas output.
+- Preserve the implemented attributed-text v0 model, exact retained source/documentation gates, canonical output-only JSON, explicit experimental source/documentation commands, and exact `///` frontend attachment sidecar; keep additional origins, multi-record composition, decoding, and rendering behind separate decisions.
 
 Exit gate: Atlas failure cannot change compilation; stale or incompatible maps fail closed; unknown graph edges remain explicit; text cannot grant authority.
 

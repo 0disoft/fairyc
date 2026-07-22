@@ -251,13 +251,14 @@ source match. The package-local query index repeats that current-state check and
 `overview`, exact-SymbolId `show`, and breadth-first `around` without source text or dependency
 discovery. `internal/contextpack` runs those queries directly and emits a separately byte-bounded,
 checksummed canonical compiler-fact envelope with empty documentation and source-excerpt sections.
-`internal/attributedtext` separately resolves one exact query subject, slices its declaration from
-revalidated retained local-workspace bytes, and emits separately bounded canonical output-only JSON.
-`experimental atlas-text source` exposes that separate output with explicit package, exact SymbolId,
-origin, count, text, and final-output policy; it does not populate Context Pack v1. The frontend now
-retains exact attached `///` spans through HIR under ADR 0199, but attributed-text extraction of
-those spans and a documentation CLI remain unimplemented. Dependency-map loading, attributed-text
-decoding, documentation import, and pack decoding cannot feed back into these boundaries.
+`internal/attributedtext` separately resolves one exact query subject, slices either its declaration
+or its frontend-attached documentation from revalidated retained local-workspace bytes, and emits
+separately bounded canonical output-only JSON. `experimental atlas-text source` and
+`documentation` expose those distinct selections with explicit package, exact SymbolId, origin,
+count, text, and final-output policy; neither populates Context Pack v1. Documentation attachment
+travels through an immutable in-memory snapshot sidecar that map planning ignores, so Atlas does not
+reparse source and `.fymap` v1 remains unchanged. Dependency-map loading, attributed-text decoding,
+additional documentation import, and pack decoding cannot feed back into these boundaries.
 
 ## Runtime behavior
 

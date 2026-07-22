@@ -3,7 +3,7 @@
 - Status: Implemented in memory
 - Decision: `docs/adr/0182-immutable-semantic-snapshot-v0.md`
 - Implementation: `internal/semanticsnapshot/`
-- Consumers: implemented provisional SymbolId derivation, per-package logical planning, transport codec, contained store, bounded package-local queries, compiler-fact Context Pack output, experimental query commands, and separate canonical exact retained-source attributed-text output
+- Consumers: implemented provisional SymbolId derivation, per-package logical planning, transport codec, contained store, bounded package-local queries, compiler-fact Context Pack output, experimental query commands, and separate canonical exact retained-source/documentation attributed-text output
 
 ## Boundary
 
@@ -38,7 +38,10 @@ That declaration tuple is a join key inside one snapshot, not an Atlas `SymbolId
 ## Records
 
 The v0 snapshot contains detached, canonically sorted package, file, module, declaration,
-function-summary, and relation-completeness records. File records contain exact package instance,
+function-summary, and relation-completeness records. It also carries an in-memory-only declaration-
+documentation sidecar containing exact declaration keys, declaration spans, and frontend-attached
+documentation spans. Map planning deliberately does not consume that sidecar, so `.fymap` v1 and
+SymbolId remain attachment-free. File records contain exact package instance,
 canonical relative path, source/test kind, content digest, and byte line-map identity without source
 text. Every file has exactly one typed module and every typed module has exactly one file.
 Declarations preserve source-declared
@@ -58,8 +61,8 @@ Verified function summaries currently retain:
 - semantic shared or mutable borrow sites and escape status.
 
 Every fact carries either `compiler-declared` or `compiler-observed` provenance. Source bodies,
-comments, documentation, generated summaries, credentials, environment data, build logs, and local
-paths are absent.
+documentation bodies, ordinary comments, generated summaries, credentials, environment data, build
+logs, and local paths are absent.
 
 ## Immutability and determinism
 
@@ -71,8 +74,10 @@ map iteration or input discovery order.
 Regression tests rebuild one two-package program with different disposable package numbers and
 require identical records. They also mutate compiler inputs and accessor results, require the
 snapshot to remain unchanged, canonicalize file input order, require complete file/module coverage,
-reject unverified MIR and incomplete package maps, and forbid private package qualification or
-host-path leakage.
+reject unverified MIR, incomplete package maps, and overlapping documentation spans, and forbid
+private package qualification or host-path leakage. Documentation-sidecar tests cover every
+supported declaration family and require `.fymap` v1 bytes to remain identical when only that
+in-memory sidecar is removed.
 
 ## Completeness
 
@@ -89,7 +94,7 @@ ordinary semantic analysis.
 ## Deferred
 
 This model itself does not implement `.fymap` transport, current-source recomputation, dependency
-map joins, stale-map validation, documentation import, source excerpts, queries, Context Packs, map
+map joins, stale-map validation, documentation text import, source excerpts, queries, Context Packs, map
 rewrite measurements, anchors, `impact`, semantic diff, LSP, SCIP, MCP, embeddings, or structural
 edits. Transport, current-source validation, and package-local queries are now separate downstream
 Atlas boundaries; the remaining surfaces still require their own compatibility and failure contracts.

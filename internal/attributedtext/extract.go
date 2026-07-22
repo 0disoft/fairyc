@@ -14,6 +14,7 @@ type OmissionCode string
 
 const (
 	OmissionOriginNotAdmitted OmissionCode = "origin-not-admitted"
+	OmissionKindUnavailable   OmissionCode = "kind-unavailable"
 	OmissionInvalidUTF8       OmissionCode = "invalid-utf8"
 	OmissionDisallowedControl OmissionCode = "disallowed-control"
 	OmissionFragmentByteLimit OmissionCode = "fragment-byte-limit"
@@ -82,7 +83,7 @@ func ExtractWorkspaceSource(
 		Selection: Selection{Kinds: slices.Clone(request.Kinds), Origins: slices.Clone(request.Origins)},
 		Budget:    request.Budget, Records: make([]Record, 0, 1), Omissions: make([]Omission, 0, 1),
 	}
-	if err := validateRequest(request); err != nil {
+	if err := validateSourceRequest(request); err != nil {
 		return result, err
 	}
 	subject, err := index.ResolveAttributionSubject(request.SymbolID)
@@ -163,7 +164,7 @@ func ExtractWorkspaceSource(
 	return result, nil
 }
 
-func validateRequest(request Request) error {
+func validateSourceRequest(request Request) error {
 	if request.SymbolID == "" {
 		return fmt.Errorf("Atlas attributed source request requires an exact SymbolId")
 	}

@@ -1,11 +1,12 @@
 # Atlas attributed text v0 policy
 
-- Status: Internal logical model, exact local source-excerpt extraction, canonical output-only JSON encoding, and experimental source CLI implemented; no decoder
+- Status: Internal logical model, exact local source and declaration-documentation extraction, canonical output-only JSON encoding, and experimental source/documentation CLI implemented; no decoder
 - Logical policy: `fairyc.attributed-text/v0`
 - Decision: `docs/adr/0195-attributed-text-boundary-v0.md`
 - Encoding decision: `docs/adr/0197-canonical-attributed-text-json-v0.md`
 - CLI decision: `docs/adr/0198-experimental-atlas-text-source-command.md`
 - Documentation attachment decision: `docs/adr/0199-c-friendly-declaration-documentation-attachment.md`
+- Documentation output decision: `docs/adr/0200-exact-declaration-documentation-attributed-text-command.md`
 - Exact file identity: `docs/package/source-file-identities-v1.md`
 - Compiler-fact pack: `docs/atlas/context-pack-v1.md`
 
@@ -43,12 +44,12 @@ The logical `kind` set is closed:
   frontend-owned attachment contract.
 
 Ordinary implementation comments, repository Markdown, issue text, build logs, generated summaries,
-model output, URLs, environment values, and arbitrary caller strings are not admitted. ADR 0199 now
+model output, URLs, environment values, and arbitrary caller strings are not admitted. ADR 0199
 distinguishes physical-line-leading `///` as documentation trivia and carries a conservative exact
 attachment span through CST, AST, and typed HIR. Blank lines, ordinary comments, block comments,
-same-line trailing comments, and nested declarations detach. Attributed-text extraction and CLI
-selection for this kind remain unavailable; the existing source producer still selects only
-`source-excerpt` and never pretends all trivia is documentation.
+same-line trailing comments, and nested declarations detach. ADR 0200 carries that span through an
+in-memory snapshot sidecar and exposes exact retained bytes; neither producer pretends all trivia is
+documentation.
 
 The closed `origin` set is:
 
@@ -72,8 +73,8 @@ Each record carries all of the following before text can cross the boundary:
 - canonical package-relative `.fy` path and source/test classification;
 - `fairyc.source-file/v1` content identity and `fairyc.source-line-map/v1` identity;
 - zero-based half-open start and end byte offsets;
-- format `fairyc-source-utf8` or the future `fairyc-declaration-doc-utf8`;
-- exact text bytes represented as a UTF-8 string value in any future encoding; and
+- format `fairyc-source-utf8` or `fairyc-declaration-doc-utf8`;
+- exact text bytes represented as a UTF-8 string value in the canonical output encoding; and
 - a full fragment checksum.
 
 The fragment checksum algorithm is
@@ -101,6 +102,13 @@ returns a best-effort line, a same-length replacement, or text from a different 
 The requested span must be in range and begin and end on UTF-8 scalar boundaries. The emitted bytes
 are the exact slice: no newline conversion, Unicode normalization, trimming, indentation rewriting,
 comment-marker removal, HTML rendering, or Markdown expansion occurs.
+
+For `declaration-documentation`, the immutable snapshot sidecar must bind the same exact declaration
+key and declaration span selected by the query to one preceding documentation span in the same
+package instance and source. The sidecar contains no text and is never encoded into `.fymap` v1.
+An absent attachment produces `kind-unavailable`; its subject retains the queried declaration span
+and the omission reports zero text bytes. Atlas never scans backward or reparses source to
+manufacture an attachment.
 
 ## Canonical output-only encoding
 
@@ -165,8 +173,9 @@ Every request must explicitly select admitted origins and kinds and provide posi
 `max_fragments`, `max_fragment_bytes`, and `max_text_bytes`. There are no configuration,
 environment, or command defaults. Implementation guards may not exceed the already admitted
 workspace closure: 4,096 fragments, 8 MiB for one fragment, and 64 MiB aggregate text. Any future
-wire encoder additionally requires its own positive final-output byte limit. The current source-
-only producer requires exactly `source-excerpt` and `workspace-authored`; it does not infer them.
+wire encoder additionally requires its own positive final-output byte limit. Each current single-
+record producer requires exactly its action-selected kind and `workspace-authored`; neither infers
+origin, kind, or numeric policy.
 
 Records follow the exact query's canonical subject/node order, then kind order
 `declaration-documentation`, `source-excerpt`. A fragment is atomic. If it exceeds the per-fragment
@@ -180,7 +189,7 @@ units. A future relevance or token estimator is a separate non-authoritative lay
 
 ## Consumer obligations
 
-Consumers of a future encoded form must:
+Consumers of the encoded form must:
 
 - verify its strict version, checksum, canonical form, record invariants, and fact-pack linkage;
 - preserve the authority and origin labels beside rendered text;
@@ -190,10 +199,12 @@ Consumers of a future encoded form must:
 - avoid merging text into compiler-fact fields or using it to override completeness; and
 - discard the text when package, file, line-map, SymbolId, or linked fact-pack identity changes.
 
-## Implemented first gate
+## Implemented gates
 
 ADR 0196 implements the internal attributed-text model and validator plus workspace-authored exact
-`source-excerpt` extraction from retained validated bytes. The implementation currently proves:
+`source-excerpt` extraction from retained validated bytes. ADR 0200 adds exact
+`declaration-documentation` extraction from the immutable attachment sidecar. The implementation
+currently proves:
 
 1. local model validation, strict enums, byte ranges, scalar boundaries, checksum vectors, deep
    detachment, and canonical ordering;
@@ -202,19 +213,20 @@ ADR 0196 implements the internal attributed-text model and validator plus worksp
    equivalence;
 3. stale-byte, wrong-package, wrong-file, wrong-line-map, invalid-span, invalid-UTF-8, disallowed-
    control, and post-validation mutation rejection;
-4. explicit guard-bound request budgets, the one-fragment source-excerpt byte boundary, a separate
-   final-output limit, and atomic omissions; collection count and remaining aggregate behavior
-   belongs to a future multi-record producer;
+4. explicit guard-bound request budgets, one-fragment source or documentation boundaries, a
+   separate final-output limit, and atomic unavailable, safety, and size omissions; collection count
+   and remaining aggregate behavior belongs to a future multi-record producer;
 5. printable prompt-injection fixtures retained only as `untrusted-text` and unable to change facts,
    completeness, command options, output destinations, or host authority; and
 6. default compiler, `.fymap` v1, Context Pack v1, build, cache, and native output byte identity when
    attributed text is not explicitly requested.
 
-The canonical encoder is exposed only through `fairyc experimental atlas-text source`. That command
-requires exact package and visible/full SymbolId selectors, `workspace-authored` origin, explicit
-fragment/count/text/final-output budgets, and optional locked no-write mode. It emits a checksummed
-omission successfully when the exact source does not fit the text budget, but atomically rejects a
-final envelope that does not fit the output budget. Documentation attachment, dependency text,
-generated text, persistent text storage, a decoder, stable CLI, composite pack, token budgeting,
-anchors, structural editing, LSP, SCIP, MCP, model calls, embeddings, and permissions remain
-unimplemented.
+The canonical encoder is exposed through `fairyc experimental atlas-text source` and
+`fairyc experimental atlas-text documentation`. Both require exact package and visible/full
+SymbolId selectors, `workspace-authored` origin, explicit fragment/count/text/final-output budgets,
+and optional locked no-write mode. The documentation action emits only the exact frontend-attached
+marker-bearing bytes or a checksummed `kind-unavailable` omission. Both emit size and safety
+omissions successfully but atomically reject a final envelope that does not fit the output budget.
+Dependency text, generated text, persistent text storage, a decoder, stable CLI, composite pack,
+token budgeting, anchors, structural editing, LSP, SCIP, MCP, model calls, embeddings, and
+permissions remain unimplemented.

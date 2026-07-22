@@ -64,8 +64,10 @@ The same exact ID can drive `fairyc experimental atlas-text source --package-uid
 --symbol <symbol-id> --origin workspace-authored --max-fragments <count>
 --max-fragment-bytes <bytes> --max-text-bytes <bytes> --max-output-bytes <bytes> [--locked]`.
 This separate command returns one canonical checksummed untrusted source-excerpt document or a
-checksummed text-budget omission. It has no default limits, name search, SDK or dependency text,
-output path, decoder, model call, or permission authority, and it does not populate Context Pack v1.
+checksummed text-budget omission. Replacing action `source` with `documentation` selects only the
+exact frontend-attached marker-bearing `///` block and returns `kind-unavailable` when none exists.
+Neither action has default limits, name search, SDK or dependency text, output path, decoder, model
+call, or permission authority, and neither populates Context Pack v1.
 
 The persistent command is deliberately not another session mode. Every invocation is a fresh
 process and hashes its executable before constructing a stable disk Session. The cache path must be

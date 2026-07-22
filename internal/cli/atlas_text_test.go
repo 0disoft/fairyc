@@ -46,6 +46,59 @@ func TestExperimentalAtlasTextSourceEmitsExactUntrustedCurrentSource(t *testing.
 	}
 }
 
+func TestExperimentalAtlasTextDocumentationEmitsOnlyExactFrontendAttachment(t *testing.T) {
+	const documentation = "/// " + atlasTextPromptLikeComment + "\n  /// Exact second line."
+	const source = "module main;\nimport answer as answer;\n" + documentation + "\nfn i32 helper() { return 1; }\nfn i32 main() { return answer::value() + helper() - 1; }\n"
+	root := writeWorkspaceSessionFixture(t, source)
+	helper := atlasTextSymbolByName(t, root, "helper")
+	arguments := atlasTextArgumentsForAction("documentation", "example.session.app", helper.Visible)
+
+	code, first, stderr := runForTest(append([]string{"experimental", "atlas-text"}, arguments...), root)
+	if code != ExitSuccess || stderr != "" || !json.Valid([]byte(first)) || strings.HasSuffix(first, "\n") {
+		t.Fatalf("first attributed documentation = (%d, %q, %q)", code, first, stderr)
+	}
+	document := decodeAtlasText(t, first)
+	if document.Text.Authority != "untrusted-text" || document.Text.Subject.SymbolVisible != helper.Visible ||
+		document.Text.Subject.SymbolFull != helper.Full || len(document.Text.Selection.Kinds) != 1 ||
+		document.Text.Selection.Kinds[0] != "declaration-documentation" || len(document.Text.Records) != 1 ||
+		document.Text.Records[0].Kind != "declaration-documentation" ||
+		document.Text.Records[0].Format != "fairyc-declaration-doc-utf8" ||
+		document.Text.Records[0].Text != documentation || len(document.Text.Omissions) != 0 ||
+		strings.Contains(first, "fn i32 helper") || strings.Contains(first, root) {
+		t.Fatalf("attributed documentation = %+v", document)
+	}
+
+	fullArguments := atlasTextArgumentsForAction("documentation", "example.session.app", helper.Full)
+	code, full, stderr := runForTest(append([]string{"experimental", "atlas-text"}, fullArguments...), root)
+	if code != ExitSuccess || stderr != "" || full != first {
+		t.Fatalf("full documentation SymbolId output = (%d, equal %t, %q)", code, full == first, stderr)
+	}
+	lockedArguments := append(atlasTextArgumentsForAction("documentation", "example.session.app", helper.Visible), "--locked")
+	code, locked, stderr := runForTest(append([]string{"experimental", "atlas-text"}, lockedArguments...), root)
+	if code != ExitSuccess || stderr != "" || locked != first {
+		t.Fatalf("locked documentation output = (%d, equal %t, %q)", code, locked == first, stderr)
+	}
+
+	main := atlasTextSymbolByName(t, root, "main")
+	missingArguments := atlasTextArgumentsForAction("documentation", "example.session.app", main.Visible)
+	code, missing, stderr := runForTest(append([]string{"experimental", "atlas-text"}, missingArguments...), root)
+	missingDocument := decodeAtlasText(t, missing)
+	if code != ExitSuccess || stderr != "" || len(missingDocument.Text.Records) != 0 ||
+		len(missingDocument.Text.Omissions) != 1 || missingDocument.Text.Omissions[0].Code != "kind-unavailable" ||
+		missingDocument.Text.Omissions[0].Bytes != 0 || strings.Contains(missing, documentation) {
+		t.Fatalf("missing attributed documentation = (%d, %+v, %q)", code, missingDocument, stderr)
+	}
+
+	limitedArguments := replaceAtlasPackArgument(arguments, "--max-fragment-bytes", "1")
+	code, limited, stderr := runForTest(append([]string{"experimental", "atlas-text"}, limitedArguments...), root)
+	limitedDocument := decodeAtlasText(t, limited)
+	if code != ExitSuccess || stderr != "" || len(limitedDocument.Text.Records) != 0 ||
+		len(limitedDocument.Text.Omissions) != 1 || limitedDocument.Text.Omissions[0].Code != "fragment-byte-limit" ||
+		limitedDocument.Text.Omissions[0].Bytes <= 1 || strings.Contains(limited, atlasTextPromptLikeComment) {
+		t.Fatalf("limited attributed documentation = (%d, %+v, %q)", code, limitedDocument, stderr)
+	}
+}
+
 func TestExperimentalAtlasTextSourceReportsOmissionAndSeparatesFailures(t *testing.T) {
 	root := writeWorkspaceSessionFixture(t, workspaceSessionRootSource)
 	main := atlasTextSymbolByName(t, root, "main")
@@ -109,8 +162,12 @@ func TestExperimentalAtlasTextSourceReportsOmissionAndSeparatesFailures(t *testi
 }
 
 func atlasTextArguments(packageUID, symbol string) []string {
+	return atlasTextArgumentsForAction("source", packageUID, symbol)
+}
+
+func atlasTextArgumentsForAction(action, packageUID, symbol string) []string {
 	return []string{
-		"source", "--package-uid", packageUID, "--symbol", symbol,
+		action, "--package-uid", packageUID, "--symbol", symbol,
 		"--origin", "workspace-authored", "--max-fragments", "1",
 		"--max-fragment-bytes", "1048576", "--max-text-bytes", "1048576",
 		"--max-output-bytes", "2097152",
@@ -168,11 +225,15 @@ type atlasTextEnvelope struct {
 			Origins []string `json:"origins"`
 		} `json:"selection"`
 		Records []struct {
-			Text string `json:"text"`
+			Kind   string `json:"kind"`
+			Format string `json:"format"`
+			Text   string `json:"text"`
 		} `json:"records"`
 		Omissions []struct {
-			Code  string `json:"code"`
-			Bytes uint64 `json:"bytes"`
+			Code   string `json:"code"`
+			Kind   string `json:"kind"`
+			Origin string `json:"origin"`
+			Bytes  uint64 `json:"bytes"`
 		} `json:"omissions"`
 	} `json:"text"`
 }

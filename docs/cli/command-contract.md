@@ -80,6 +80,7 @@ The current Go prototype implements twenty-two deliberately unstable developer c
 | `fairyc experimental atlas-pack around --package-uid <uid> --symbol <symbol-id> --direction <outgoing\|incoming\|both> --relation <kind> [--relation <kind>]... --max-records <count> --max-relations <count> --max-depth <depth> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--locked]` | Run deterministic package-local breadth-first traversal from one exact visible/full SymbolId under explicit direction, relation, depth, and size policy | Exact canonical `fairyc.context-pack-json/v1` bytes with explicit incompleteness and no inferred names, dependency joins, free text, or hidden limit |
 | `fairyc experimental atlas-symbols list --package-uid <uid> --kind <kind> [--kind <kind>]... [--module <module>] [--after <full-symbol-id>] --max-symbols <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--locked]` | Compile the manifest-owned workspace and page exact current declarations in full-SymbolId order with exact filters | One canonical checksummed `fairyc.symbol-catalog-json/v0` value with no newline, source body, fuzzy rank, map-store path, or hidden limit |
 | `fairyc experimental atlas-text source --package-uid <uid> --symbol <symbol-id> --origin workspace-authored --max-fragments <count> --max-fragment-bytes <bytes> --max-text-bytes <bytes> --max-output-bytes <bytes> [--locked]` | Compile the manifest-owned workspace, resolve one exact current visible/full SymbolId, and select its workspace-authored declaration bytes under explicit count and byte policy | One canonical checksummed `fairyc.attributed-text-json/v0` value with no newline or host path; a text-budget exclusion is an explicit successful omission, while final-output overflow is atomic failure |
+| `fairyc experimental atlas-text documentation --package-uid <uid> --symbol <symbol-id> --origin workspace-authored --max-fragments <count> --max-fragment-bytes <bytes> --max-text-bytes <bytes> --max-output-bytes <bytes> [--locked]` | Compile the same workspace, resolve one exact current declaration plus its immutable frontend attachment sidecar, and select only exact marker-bearing `///` bytes | The same canonical attributed-text envelope with `declaration-documentation`, or a successful checksummed `kind-unavailable`, safety, or text-budget omission; no source scan, declaration body, map-format change, or host path |
 | `fairyc experimental check-workspace-session --target <target-id> --max-requests <count> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-artifact-bytes <bytes> [--locked]` | Keep one bounded process-local verified-MIR Session while a caller submits sequential versioned NDJSON check requests on stdin | One `fairyc.experimental.workspace-check-session/v0` JSON response per completed request, human diagnostics on stderr, and the last completed request's prototype exit code |
 | `fairyc experimental check-workspace-cache --target <target-id> --cache-dir <build/path> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-record-bytes <bytes> --cache-max-artifact-bytes <bytes> --cache-temp-max-age-seconds <seconds> [--locked]` | Run one package-aware semantic and verified-MIR check with explicit bounded cross-process stable disk reuse keyed by the exact executable image | One `fairyc.experimental.workspace-cache-check/v0` JSON object, human diagnostics on stderr, or prototype invocation/package/internal failure |
 | `fairyc experimental build-workspace --target x86_64-windows-msvc --profile <low\|optimized> --output <build/path.exe> [--locked]` | Compile the current local-exact workspace's root `main::main` through package-aware verified MIR and the closed Windows target pipeline | A no-overwrite `.exe`, target/toolchain/profile/lock receipt, or package, source, capability, toolchain, link, and artifact diagnostics |
@@ -140,17 +141,20 @@ returned by the same filtered current catalog. The command writes no `.fymap`, c
 file and performs no fuzzy search. Ordinary mode may refresh `fairy.lock` before a later filter or
 budget failure; locked mode is exact and no-write.
 
-`experimental atlas-text source` shares the exact workspace/compiler/currentness preparation but
-emits the separate attributed-text artifact, never a Context Pack. Package UID, canonical visible or
-full SymbolId, exact origin `workspace-authored`, maximum fragment count, per-fragment bytes,
-aggregate text bytes, and final output bytes are mandatory; only `--locked` is optional. There are
-no inferred defaults, name search, SDK-text admission, or redundant kind flag because action
-`source` fixes `source-excerpt`. Count is capped at 4,096, fragment bytes at 8,388,608, aggregate
+`experimental atlas-text source` and `documentation` share the exact workspace/compiler/currentness
+preparation but emit the separate attributed-text artifact, never a Context Pack. Package UID,
+canonical visible or full SymbolId, exact origin `workspace-authored`, maximum fragment count,
+per-fragment bytes, aggregate text bytes, and final output bytes are mandatory; only `--locked` is
+optional. There are no inferred defaults, name search, SDK-text admission, or redundant kind flag:
+action `source` fixes `source-excerpt`, while `documentation` fixes
+`declaration-documentation`. Count is capped at 4,096, fragment bytes at 8,388,608, aggregate
 text bytes at 67,108,864, and final output bytes at 1,073,741,824; fragment bytes cannot exceed
-aggregate text bytes. A selected declaration that exceeds a text budget produces a successful
-checksummed `fragment-byte-limit` omission with no source bytes. An unknown exact symbol or a final
-envelope that exceeds its output budget is code `2` with no stdout. Ordinary mode may maintain the
-lock before such a later failure; locked mode verifies it without writing. The command reopens no
+aggregate text bytes. A selected fragment that exceeds a text budget produces a successful
+checksummed `fragment-byte-limit` omission with no text. A declaration without attached
+documentation similarly produces successful `kind-unavailable` with zero text bytes. An unknown
+exact symbol or a final envelope that exceeds its output budget is code `2` with no stdout. Ordinary
+mode may maintain the lock before such a later failure; locked mode verifies it without writing.
+The commands reopen no
 source path, accepts no encoded input or output path, and starts no toolchain, process, network
 request, model call, or persistent store.
 
