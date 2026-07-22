@@ -521,7 +521,8 @@ record/selection/output limits and no map-store default. No `show`/`around` comm
 policy, dependency-map join, source excerpt, pack decoder, or text importer exists yet. The internal
 query index now also provides exact full-SymbolId-ordered catalog pages with exact module/kind
 filters, explicit symbol/byte limits, and full-ID-only continuation; its output schema and CLI are
-still deliberately absent. The Windows
+now exposed through `experimental atlas-symbols list` as checksummed
+`fairyc.symbol-catalog-json/v0`, with every filter and output limit explicit. The Windows
 host smoke now also records nine raw whole-package canonical rewrite samples after planning, checks
 byte identity, and reports fixed source/record/encoded-byte denominators without choosing chunking,
 compression, incremental updates, or a performance budget.

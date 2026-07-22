@@ -49,6 +49,11 @@ stdout without a trailing newline. Every size limit is explicit. The command nei
 writes a `.fymap` store, imports source or documentation text, discovers symbols by name, nor exposes
 `show` or `around`; those commands require a separate exact SymbolId discovery contract.
 
+`fairyc experimental atlas-symbols list --package-uid <uid> --kind <kind> [--kind <kind>]...
+[--module <module>] [--after <full-symbol-id>] --max-symbols <count>
+--max-selection-bytes <bytes> --max-output-bytes <bytes> [--locked]` is that exact discovery path.
+It emits a checksummed, full-SymbolId-ordered catalog page with no fuzzy search or hidden defaults.
+
 The persistent command is deliberately not another session mode. Every invocation is a fresh
 process and hashes its executable before constructing a stable disk Session. The cache path must be
 canonical, use forward slashes, and remain under ignored `build/`. All entry, retained-byte,

@@ -38,63 +38,9 @@ func runAtlasPack(arguments []string, sourceRoot string, stdout, stderr io.Write
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	workspace, _, err := loadWorkspaceWithLock(sourceRoot, options.locked)
-	if err != nil {
-		return packageFailure(stderr, err)
-	}
-	input, err := workspace.SemanticInput()
-	if err != nil {
-		return packageFailure(stderr, err)
-	}
-	result, err := compiler.CheckPackages(input)
-	if err != nil {
-		return internalError(stderr)
-	}
-	if len(result.Semantic.Diagnostics) != 0 {
-		if err := writeWorkspaceDiagnostics(stderr, workspace, result.Semantic.Diagnostics); err != nil {
-			return ExitInternalFailure
-		}
-		return ExitSourceDiagnostics
-	}
-	if len(result.Semantic.Unsupported) != 0 {
-		if err := writeUnsupportedSemantics(stderr, result.Semantic.Unsupported); err != nil {
-			return ExitInternalFailure
-		}
-		return ExitSourceDiagnostics
-	}
-	if !result.Verified {
-		return internalError(stderr)
-	}
-	compilerBuild, err := buildidentity.Current()
-	if err != nil {
-		return internalError(stderr)
-	}
-	_, partitions, err := atlasmap.PrepareWorkspace(workspace, result, compilerBuild)
-	if err != nil {
-		return internalError(stderr)
-	}
-	expectations, err := atlasmap.CurrentWorkspaceExpectations(workspace, result, compilerBuild)
-	if err != nil {
-		return internalError(stderr)
-	}
-	var selected atlasmap.Partition
-	found := false
-	for _, partition := range partitions {
-		if partition.Header().PackageUID == options.packageUID {
-			selected, found = partition, true
-			break
-		}
-	}
-	if !found {
-		return invocationError(stderr, fmt.Sprintf("workspace has no package UID %q", options.packageUID))
-	}
-	expectation, found := expectations[selected.Header().PackageInstance]
-	if !found {
-		return internalError(stderr)
-	}
-	index, err := atlasmap.NewQueryIndex(selected, expectation)
-	if err != nil {
-		return internalError(stderr)
+	index, code := prepareAtlasQueryIndex(sourceRoot, options.packageUID, options.locked, stderr)
+	if code != ExitSuccess {
+		return code
 	}
 	encoded, err := contextpack.EncodeOverview(index, atlasmap.QueryBudget{
 		MaxRecords: options.maxRecords, MaxRelations: 0, MaxDepth: 0,
@@ -110,6 +56,68 @@ func runAtlasPack(arguments []string, sourceRoot string, stdout, stderr io.Write
 		return outputError(stderr)
 	}
 	return ExitSuccess
+}
+
+func prepareAtlasQueryIndex(sourceRoot, packageUID string, locked bool, stderr io.Writer) (*atlasmap.QueryIndex, int) {
+	workspace, _, err := loadWorkspaceWithLock(sourceRoot, locked)
+	if err != nil {
+		return nil, packageFailure(stderr, err)
+	}
+	input, err := workspace.SemanticInput()
+	if err != nil {
+		return nil, packageFailure(stderr, err)
+	}
+	result, err := compiler.CheckPackages(input)
+	if err != nil {
+		return nil, internalError(stderr)
+	}
+	if len(result.Semantic.Diagnostics) != 0 {
+		if err := writeWorkspaceDiagnostics(stderr, workspace, result.Semantic.Diagnostics); err != nil {
+			return nil, ExitInternalFailure
+		}
+		return nil, ExitSourceDiagnostics
+	}
+	if len(result.Semantic.Unsupported) != 0 {
+		if err := writeUnsupportedSemantics(stderr, result.Semantic.Unsupported); err != nil {
+			return nil, ExitInternalFailure
+		}
+		return nil, ExitSourceDiagnostics
+	}
+	if !result.Verified {
+		return nil, internalError(stderr)
+	}
+	compilerBuild, err := buildidentity.Current()
+	if err != nil {
+		return nil, internalError(stderr)
+	}
+	_, partitions, err := atlasmap.PrepareWorkspace(workspace, result, compilerBuild)
+	if err != nil {
+		return nil, internalError(stderr)
+	}
+	expectations, err := atlasmap.CurrentWorkspaceExpectations(workspace, result, compilerBuild)
+	if err != nil {
+		return nil, internalError(stderr)
+	}
+	var selected atlasmap.Partition
+	found := false
+	for _, partition := range partitions {
+		if partition.Header().PackageUID == packageUID {
+			selected, found = partition, true
+			break
+		}
+	}
+	if !found {
+		return nil, invocationError(stderr, fmt.Sprintf("workspace has no package UID %q", packageUID))
+	}
+	expectation, found := expectations[selected.Header().PackageInstance]
+	if !found {
+		return nil, internalError(stderr)
+	}
+	index, err := atlasmap.NewQueryIndex(selected, expectation)
+	if err != nil {
+		return nil, internalError(stderr)
+	}
+	return index, ExitSuccess
 }
 
 func parseAtlasPackOverviewOptions(arguments []string) (atlasPackOverviewOptions, error) {
@@ -145,19 +153,19 @@ func parseAtlasPackOverviewOptions(arguments []string) (atlasPackOverviewOptions
 			}
 			options.packageUID = value
 		case "--max-records":
-			parsed, err := parseAtlasPackLimit(flag, value, maxAtlasPackRecords)
+			parsed, err := parseAtlasPositiveLimit("atlas-pack overview", flag, value, maxAtlasPackRecords)
 			if err != nil {
 				return atlasPackOverviewOptions{}, err
 			}
 			options.maxRecords = int(parsed)
 		case "--max-selection-bytes":
-			parsed, err := parseAtlasPackLimit(flag, value, maxAtlasPackBytes)
+			parsed, err := parseAtlasPositiveLimit("atlas-pack overview", flag, value, maxAtlasPackBytes)
 			if err != nil {
 				return atlasPackOverviewOptions{}, err
 			}
 			options.maxSelectionBytes = parsed
 		case "--max-output-bytes":
-			parsed, err := parseAtlasPackLimit(flag, value, maxAtlasPackBytes)
+			parsed, err := parseAtlasPositiveLimit("atlas-pack overview", flag, value, maxAtlasPackBytes)
 			if err != nil {
 				return atlasPackOverviewOptions{}, err
 			}
@@ -173,10 +181,10 @@ func parseAtlasPackOverviewOptions(arguments []string) (atlasPackOverviewOptions
 	return options, nil
 }
 
-func parseAtlasPackLimit(flag, value string, maximum uint64) (uint64, error) {
+func parseAtlasPositiveLimit(command, flag, value string, maximum uint64) (uint64, error) {
 	parsed, err := strconv.ParseUint(value, 10, 64)
 	if err != nil || parsed == 0 || parsed > maximum || value != strconv.FormatUint(parsed, 10) {
-		return 0, fmt.Errorf("experimental command \"atlas-pack overview\" requires %s as a canonical decimal from 1 through %d", flag, maximum)
+		return 0, fmt.Errorf("experimental command %q requires %s as a canonical decimal from 1 through %d", command, flag, maximum)
 	}
 	return parsed, nil
 }

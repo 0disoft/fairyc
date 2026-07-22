@@ -778,8 +778,9 @@ reviewed attributed-text boundary.
 
 The internal exact-current query layer now also provides full-SymbolId-ordered declaration catalog
 pages with explicit kind filters, optional exact module selection, positive symbol/byte limits, and
-full-ID-only continuation. It exposes no fuzzy rank, guessed rename, source text, output schema, or
-CLI yet; those output and command boundaries remain separate from the identity query.
+full-ID-only continuation. ADR 0193 exposes the result as checksummed
+`fairyc.symbol-catalog-json/v0` through `experimental atlas-symbols list`. It retains no fuzzy rank,
+guessed rename, source text, map-store path, or hidden limit.
 
 The configured Windows host smoke separately measures whole-package canonical rewrite cost after
 workspace analysis and map planning. It performs one untimed warmup and nine raw rewrites of every
@@ -799,9 +800,9 @@ plan are specified in `docs/atlas/semantic-snapshot-v0.md`, `docs/atlas/symbol-i
 `docs/atlas/fymap-store-v1.md`; the implemented query layer is specified in
 `docs/atlas/fymap-query-v1.md`; compiler-fact pack output is specified in
 `docs/atlas/context-pack-v1.md`; the experimental overview command is fixed by ADR 0190, the
-rewrite measurement boundary by ADR 0191, and the internal exact symbol catalog by ADR 0192. Stable
-commands, a symbol-catalog output, experimental show/around, map publication, and attributed-text
-behavior remain future work.
+rewrite measurement boundary by ADR 0191, the internal exact symbol catalog by ADR 0192, and its
+experimental output command by ADR 0193. Stable commands, experimental show/around, map publication,
+and attributed-text behavior remain future work.
 
 ## Explicit non-goals
 

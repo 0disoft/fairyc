@@ -66,7 +66,7 @@ form.
 
 ## Implemented experimental compiler surface
 
-The current Go prototype implements nineteen deliberately unstable developer commands:
+The current Go prototype implements twenty deliberately unstable developer commands:
 
 | Command | Purpose | Output |
 | --- | --- | --- |
@@ -76,6 +76,7 @@ The current Go prototype implements nineteen deliberately unstable developer com
 | `fairyc experimental check <primary.fy> [--source <file.fy>]...` | Run syntax, semantic, Flow, MIR-lowering, and MIR-verifier stages over one explicit source closure without requiring an executable entry | One verified-MIR function and foreign-declaration count line, source diagnostics, or an explicit unsupported-subset error |
 | `fairyc experimental check-workspace [--locked]` | Load the current directory's strict `fairy.toml`, explicit local members and sources, validate or refresh canonical `fairy.lock`, then run package-aware semantic and verified MIR | Deterministic instance/source/MIR counts and lock state, diagnostics, or prototype package failure code `7` |
 | `fairyc experimental atlas-pack overview --package-uid <uid> --max-records <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--locked]` | Compile the manifest-owned workspace, select one exact unique package UID, and run the bounded current Atlas overview query | Exact canonical `fairyc.context-pack-json/v1` bytes with no trailing newline, free text, source body, host path, map-store write, or hidden numeric limit |
+| `fairyc experimental atlas-symbols list --package-uid <uid> --kind <kind> [--kind <kind>]... [--module <module>] [--after <full-symbol-id>] --max-symbols <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--locked]` | Compile the manifest-owned workspace and page exact current declarations in full-SymbolId order with exact filters | One canonical checksummed `fairyc.symbol-catalog-json/v0` value with no newline, source body, fuzzy rank, map-store path, or hidden limit |
 | `fairyc experimental check-workspace-session --target <target-id> --max-requests <count> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-artifact-bytes <bytes> [--locked]` | Keep one bounded process-local verified-MIR Session while a caller submits sequential versioned NDJSON check requests on stdin | One `fairyc.experimental.workspace-check-session/v0` JSON response per completed request, human diagnostics on stderr, and the last completed request's prototype exit code |
 | `fairyc experimental check-workspace-cache --target <target-id> --cache-dir <build/path> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-record-bytes <bytes> --cache-max-artifact-bytes <bytes> --cache-temp-max-age-seconds <seconds> [--locked]` | Run one package-aware semantic and verified-MIR check with explicit bounded cross-process stable disk reuse keyed by the exact executable image | One `fairyc.experimental.workspace-cache-check/v0` JSON object, human diagnostics on stderr, or prototype invocation/package/internal failure |
 | `fairyc experimental build-workspace --target x86_64-windows-msvc --profile <low\|optimized> --output <build/path.exe> [--locked]` | Compile the current local-exact workspace's root `main::main` through package-aware verified MIR and the closed Windows target pipeline | A no-overwrite `.exe`, target/toolchain/profile/lock receipt, or package, source, capability, toolchain, link, and artifact diagnostics |
@@ -115,7 +116,14 @@ Overview fixes its unused relation and depth budgets to zero. The command hashes
 compiler image, produces current package maps, and writes exactly one canonical compiler-fact
 Context Pack to stdout without a newline. It writes no map store, source, artifact, cache, or default
 path and starts no toolchain, process, watcher, daemon, network request, or model call. `show`,
-`around`, symbol discovery, free text, and pack decoding remain unavailable.
+`around`, free text, and pack decoding remain unavailable.
+
+`experimental atlas-symbols list` shares that exact workspace/compiler/currentness preparation. It
+requires one or more exact declaration kinds and explicit symbol, selection-byte, and final-output-
+byte limits. Optional module matching is exact; continuation accepts only a canonical full SymbolId
+returned by the same filtered current catalog. The command writes no `.fymap`, cache, or catalog
+file and performs no fuzzy search. Ordinary mode may refresh `fairy.lock` before a later filter or
+budget failure; locked mode is exact and no-write.
 
 `experimental check-workspace-session` exposes that workspace check through one foreground
 process-local Session. It requires an explicit known target and caller-selected positive cache entry,

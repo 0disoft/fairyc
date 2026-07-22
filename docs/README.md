@@ -31,6 +31,7 @@
 - Contained caller-bounded `.fymap` store and current-source reader: docs/atlas/fymap-store-v1.md, internal/atlasmap/store.go, internal/atlasmap/current.go
 - Bounded exact-current package-local `.fymap` queries: docs/atlas/fymap-query-v1.md, internal/atlasmap/query.go
 - Exact-current full-SymbolId-ordered package catalog query: internal/atlasmap/query.go, docs/adr/0192-exact-current-symbol-catalog-query.md
+- Canonical SymbolId catalog output and experimental command: docs/atlas/symbol-catalog-v0.md, internal/symbolcatalog/, internal/cli/atlas_symbols.go
 - Canonical compiler-fact-only Context Pack output: docs/atlas/context-pack-v1.md, internal/contextpack/
 - Experimental exact-package Atlas overview Context Pack command: internal/cli/atlas_pack.go, docs/adr/0190-experimental-atlas-overview-pack-command.md
 - Whole-package Atlas rewrite measurement schema and Windows harness: internal/buildmeasure/atlas_rewrite.go, cmd/fairyc-windows-host-smoke/, docs/adr/0191-atlas-whole-package-rewrite-measurement.md

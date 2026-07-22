@@ -1,6 +1,6 @@
 # `.fymap` v1 Logical Schema
 
-- Status: Canonical transport, contained current-source-validated store, bounded package-local queries, compiler-fact Context Pack output, and experimental overview command implemented; show/around commands and text import remain future work
+- Status: Canonical transport, contained current-source-validated store, bounded package-local queries, compiler-fact Context Pack and SymbolId catalog output, and experimental overview/catalog commands implemented; show/around commands and text import remain future work
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0004-atlas-semantic-snapshot-boundary.md`
 - Snapshot source: `docs/atlas/semantic-snapshot-v0.md`

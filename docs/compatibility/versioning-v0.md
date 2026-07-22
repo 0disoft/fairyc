@@ -538,6 +538,11 @@ ADR 0192 adds an internal exact-current symbol catalog ordered and paged by full
 filters, cursor, budget accounting, and omission codes are pre-release query policy. No standalone
 wire schema, CLI spelling, name-search behavior, stable anchor, or cross-version cursor is promised.
 
+ADR 0193 independently fixes output version `fairyc.symbol-catalog/v0`, encoding
+`fairyc.symbol-catalog-json/v0`, checksum `fairyc.symbol-catalog-checksum/v0-sha256`, and the
+unstable `experimental atlas-symbols list` spelling. This does not stabilize the CLI, cross-version
+cursors, exact-name or fuzzy search, dependency joins, source text, or a catalog decoder.
+
 Dependency handling is relation-specific:
 
 | Condition | Atlas behavior |

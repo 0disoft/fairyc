@@ -136,6 +136,12 @@ use `3`; manifest, workspace, source-loading, graph, and lock failures use `7`; 
 compiler invariant, and output failures use `4`. Ordinary lock maintenance may precede a later
 failure; `--locked` is no-write. No partial pack is intentionally emitted, though an external writer
 may accept a prefix before returning an output failure.
+`experimental atlas-symbols list` writes exactly one canonical
+`fairyc.symbol-catalog-json/v0` value with no trailing newline. Invalid or duplicate kinds,
+malformed full-ID cursors, unknown packages or modules, and insufficient symbol, selection-byte, or
+final-output budgets are invocation failure `2`. Workspace/lock failures are `7`, source diagnostics
+are `3`, and compiler invariants or output failures are `4`. No partial catalog is intentionally
+written on pre-output failure; an external writer may retain a prefix when its own write fails.
 `experimental target-spec` writes one deterministic `fairyc.target-spec/v0` JSON document, defined
 by `spec/cli/experimental-target-spec-v0.schema.json`, to stdout. Missing, extra, or unknown target
 IDs produce code `2`, no JSON, and a bounded invocation diagnostic on stderr.
