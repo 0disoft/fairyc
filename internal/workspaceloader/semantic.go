@@ -15,6 +15,7 @@ import (
 type SemanticPackage struct {
 	ID           hir.PackageID
 	Instance     packagegraph.InstanceID
+	Coordinate   packagegraph.CoordinateID
 	Path         string
 	Source       packagecontent.Digest
 	SourceKind   string
@@ -113,6 +114,27 @@ func (workspace Workspace) PackageIdentities() (map[hir.PackageID]packagegraph.I
 	return identities, nil
 }
 
+// PackageCoordinates maps disposable semantic package numbers to source-content-independent
+// package coordinates. Coordinates are public-link namespaces, never exact source identities.
+func (workspace Workspace) PackageCoordinates() (map[hir.PackageID]packagegraph.CoordinateID, error) {
+	coordinates := make(map[hir.PackageID]packagegraph.CoordinateID, len(workspace.Resolution.InstanceClasses))
+	for index, class := range workspace.Resolution.InstanceClasses {
+		if len(class.Members) == 0 {
+			return nil, fmt.Errorf("workspace has an empty package instance class")
+		}
+		node, found := workspace.graphNode(class.Members[0])
+		if !found {
+			return nil, fmt.Errorf("workspace graph node %q is missing", class.Members[0])
+		}
+		coordinate, err := packagegraph.ComputeCoordinateID(packagegraph.CoordinateOf(node.Identity))
+		if err != nil {
+			return nil, fmt.Errorf("compute package %q coordinate: %w", node.ID, err)
+		}
+		coordinates[hir.PackageID(index+1)] = coordinate
+	}
+	return coordinates, nil
+}
+
 // SemanticPackages returns one detached metadata record per resolved instance class, in the exact
 // package-number order used by SemanticInput. Dependencies are direct, sorted, and deduplicated.
 func (workspace Workspace) SemanticPackages() ([]SemanticPackage, error) {
@@ -174,8 +196,12 @@ func (workspace Workspace) SemanticPackages() ([]SemanticPackage, error) {
 			dependencies = append(dependencies, dependency)
 		}
 		slices.Sort(dependencies)
+		coordinate, err := packagegraph.ComputeCoordinateID(packagegraph.CoordinateOf(node.Identity))
+		if err != nil {
+			return nil, fmt.Errorf("compute package %q coordinate: %w", node.ID, err)
+		}
 		result = append(result, SemanticPackage{
-			ID: packageID, Instance: class.ID, Path: mapping.PackagePath, Source: loaded.Digest,
+			ID: packageID, Instance: class.ID, Coordinate: coordinate, Path: mapping.PackagePath, Source: loaded.Digest,
 			SourceKind: loaded.SourceKind, RuntimeABI: loaded.RuntimeABI,
 			Features: slices.Clone(mapping.Features), Role: node.Role, Dependencies: dependencies,
 		})

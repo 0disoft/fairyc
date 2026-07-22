@@ -181,6 +181,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0169-opened-root-cache-containment.md`: opened workspace and cache roots, root-relative I/O, explicit handle lifetime, junction/symlink escape rejection, and platform-specific flush limits.
 - `0170-persistent-cache-retention-staircase.md`: superseded v0 nine-process measurement that exposed context-coupled generation conflicts and deterministic recovery.
 - `0171-package-scoped-stable-context.md`: stable package MIR v2 projects closed package contexts, conflict-checks mixed-context merge, removes private-root generation conflicts, and records the v1 bounded-growth staircase without selecting defaults.
+- `0172-source-independent-package-coordinate.md`: separate UID/version/features coordinate identity for future public linking without weakening exact source-sensitive package instances.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

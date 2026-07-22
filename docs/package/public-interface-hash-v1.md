@@ -50,6 +50,10 @@ The first form deliberately omits the current package instance, letting a privat
 change preserve an equal interface. The dependency form deliberately includes the complete external
 instance because nominal types from different resolved instances are not interchangeable.
 
+ADR 0172 now provides a separate source-independent package coordinate, but public-interface v1
+does not consume it. Moving external type spellings to coordinates requires a new interface-hash
+version and synchronized stable-symbol/cache-key changes.
+
 ## Canonical bytes and digest
 
 The byte stream begins with ASCII `fairyc.public-interface`, a zero byte, version byte `01`, and an

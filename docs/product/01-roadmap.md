@@ -516,6 +516,12 @@ immutable conflict detection. The v1 measurement now follows `2, 3, 4, 6, 6, 6, 
 three evictions, and records zero quarantines. Private dependency edits still miss both packages,
 showing that public-interface projection remains broader than the actual reusable boundary.
 
+ADR 0172 identifies the deeper cause: exact source-sensitive `PackageInstanceId` is also used as the
+public link namespace in dependency cache pairs and `FunctionID`. It adds a separate UID/version/
+features `PackageCoordinateId` prerequisite while leaving cache behavior unchanged. Interface hash,
+stable symbol identity, and cache keys must adopt that coordinate together before private dependency
+reuse is truthful.
+
 - Repeat the bounded session on a declared reference machine with controlled distributions, private
   or live-heap evidence, and an accepted noise policy before selecting defaults or claiming
   developer-loop speedup. The current local run has process peaks, an editor-shaped workload, and

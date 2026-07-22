@@ -57,6 +57,7 @@
 - Resolved package graph fixture runner route: internal/packagefixture/
 - PackageInstanceId v1 fixture route: spec/fixtures/package-identity/manifest-v1.json
 - PackageInstanceId v1 runner route: internal/packageidentityfixture/
+- PackageCoordinateId v1 route: internal/packagegraph/coordinate.go, internal/workspaceloader/semantic.go, docs/package/package-coordinate-id-v1.md, docs/adr/0172-source-independent-package-coordinate.md
 - Public-interface hash v1 fixture route: spec/fixtures/module-interface/manifest-v1.json
 - Public-interface extraction and runner route: internal/moduleinterface/, internal/moduleinterfacefixture/
 - Package-source digest v1 fixture route: spec/fixtures/package-source/manifest-v1.json

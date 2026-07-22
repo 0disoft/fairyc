@@ -30,9 +30,16 @@ func TestSemanticInputReachesVerifiedCompiler(t *testing.T) {
 	if len(identities) != len(workspace.Resolution.InstanceClasses) {
 		t.Fatalf("PackageIdentities() has %d entries for %d classes", len(identities), len(workspace.Resolution.InstanceClasses))
 	}
+	coordinates, err := workspace.PackageCoordinates()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(coordinates) != len(identities) {
+		t.Fatalf("PackageCoordinates() has %d entries for %d identities", len(coordinates), len(identities))
+	}
 	for _, file := range input.Files {
-		if file.Package == hir.DefaultPackage || identities[file.Package] == ([32]byte{}) {
-			t.Fatalf("semantic file package %d has no exact identity", file.Package)
+		if file.Package == hir.DefaultPackage || identities[file.Package] == ([32]byte{}) || coordinates[file.Package] == ([32]byte{}) {
+			t.Fatalf("semantic file package %d has no exact and coordinate identities", file.Package)
 		}
 	}
 	rootPackage, err := workspace.RootPackageID()
@@ -84,9 +91,13 @@ func TestBundledStandardLibraryReachesVerifiedCompiler(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	coordinates, err := workspace.PackageCoordinates()
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, loaded := range packages {
-		if loaded.Instance != identities[loaded.ID] || loaded.Source == ([32]byte{}) || loaded.Path == "" {
-			t.Fatalf("SemanticPackages() package = %+v, identities = %+v", loaded, identities)
+		if loaded.Instance != identities[loaded.ID] || loaded.Coordinate != coordinates[loaded.ID] || loaded.Source == ([32]byte{}) || loaded.Path == "" {
+			t.Fatalf("SemanticPackages() package = %+v, identities = %+v, coordinates = %+v", loaded, identities, coordinates)
 		}
 	}
 }
