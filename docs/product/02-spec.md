@@ -706,13 +706,20 @@ No v0 document creates a stable language, native ABI, MIR exchange, binary packa
 
 ## Fairy Atlas
 
-The compiler analysis layer produces an immutable `SemanticSnapshot` from typed HIR and analyzed MIR. Atlas consumes that snapshot through a one-way boundary. The compiler frontend cannot import Atlas, and Atlas failure cannot change `fairyc check` results.
+The compiler analysis layer now produces an immutable `SemanticSnapshot` from typed HIR, semantic
+facts, verified MIR, and exact package metadata. It removes disposable compiler identities, retains
+structured types and source-relative spans, and reports relation-specific completeness. Atlas
+consumes that snapshot through a one-way boundary. The compiler frontend cannot import Atlas, and
+Atlas failure cannot change `fairyc check` results.
 
 Atlas exports deterministic, model-neutral facts such as symbols, calls, types, ownership transfers, borrows, errors, effects, allocations, unsafe and FFI reachability, source spans, and related tests. Compiler facts and free-text documentation are physically separated and carry provenance. Unknown or incomplete edges remain explicit rather than being guessed.
 
 Stage 0 Atlas work starts with a versioned `.fymap` schema and the `overview`, `show`, and `around` queries. `impact`, semantic `diff`, stable anchor syntax, LSP, SCIP, MCP, structural edits, embeddings, model-generated summaries, and a vector database are deferred behind usage and completeness evidence.
 
-Source text and documentation cannot grant an LLM, IDE, or agent filesystem, process, network, credential, or approval authority. Detailed contracts are in `docs/atlas/fymap-v1.md` and `docs/atlas/context-pack-v1.md`.
+Source text and documentation cannot grant an LLM, IDE, or agent filesystem, process, network,
+credential, or approval authority. The implemented in-memory boundary is specified in
+`docs/atlas/semantic-snapshot-v0.md`; future map and pack contracts are in
+`docs/atlas/fymap-v1.md` and `docs/atlas/context-pack-v1.md`.
 
 ## Explicit non-goals
 

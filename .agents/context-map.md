@@ -89,7 +89,7 @@
 - Runtime and standard-library route: docs/runtime/
 - Compatibility route: docs/compatibility/
 - Diagnostics route: docs/diagnostics/catalog-v0.md
-- Atlas route: docs/atlas/
+- Atlas route: docs/atlas/, internal/semanticsnapshot/, docs/adr/0182-immutable-semantic-snapshot-v0.md
 - Documentation update route: docs/README.md
 - CLI tool route: .agents/skills/cli-tool/SKILL.md
 - Monorepo route: .agents/skills/monorepo/SKILL.md

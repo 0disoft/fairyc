@@ -102,6 +102,7 @@ regenerate, or override compiler source.
 - Compatibility and versioning: docs/compatibility/*.md
 - Diagnostic meanings: docs/diagnostics/catalog-v0.md
 - Atlas map and context contracts: docs/atlas/*.md
+- Immutable Atlas compiler-fact snapshot: internal/semanticsnapshot/, docs/atlas/semantic-snapshot-v0.md, docs/adr/0182-immutable-semantic-snapshot-v0.md
 - Validation: VALIDATION.md
 - Agent routing: .agents/context-map.md
 - Repository hygiene: .editorconfig, .gitattributes, .gitignore

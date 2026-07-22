@@ -191,6 +191,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0179-stable-target-maturity-report-v1.md`: stable `fairyc targets` fixes the host-independent human report grammar, canonical ordering, atomic failure, and codes 0, 2, and 4 while TargetSpec evidence continues to evolve independently.
 - `0180-stable-workspace-c-emission-v1.md`: stable `fairyc emit c --target <target-id> [--locked]` emits one target-selected raw C11 application unit without choosing a host, toolchain, support unit, or output file.
 - `0181-stable-workspace-semantic-test-v1.md`: stable `fairyc test [--locked]` overlays isolated root `tests/`, validates `@test fn void` entries, and runs each through a fresh semantic interpreter without native artifacts.
+- `0182-immutable-semantic-snapshot-v0.md`: one-way path-free HIR/MIR compiler facts, deep immutability, and relation-specific Atlas completeness.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

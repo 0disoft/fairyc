@@ -409,6 +409,12 @@ fresh semantic-interpreter execution, human result grammar, production-lock isol
 codes 0, 2, 3, 4, 5, and 7. Target-native execution, member recursion, filters, setup/teardown,
 benchmarks, host I/O, machine output, and test bytes in release package identities remain outside v1.
 
+ADR 0182 introduces the independently identified in-memory
+`fairyc.semantic-snapshot/v0` model. It removes build-local package and symbol numbering from
+detached compiler facts and fixes provenance plus relation-specific completeness behavior, but it
+does not stabilize `.fymap`, `SymbolId`, a serialized type spelling, query output, or CLI behavior.
+Those boundaries require their own versions rather than inheriting the snapshot model number.
+
 ADR 0159 adds the independent `fairyc.experimental.workspace-check-session/v0` NDJSON request and
 response schema. The schema versions this experimental machine boundary and rejects unknown or
 duplicate request fields, but it does not make the command spelling, numeric limits, process exit

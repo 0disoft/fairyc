@@ -14,6 +14,10 @@ import (
 // by package interface hashing and process-local compilation caches.
 type SemanticPackage struct {
 	ID           hir.PackageID
+	PackageUID   string
+	Name         string
+	Version      string
+	Language     string
 	Instance     packagegraph.InstanceID
 	Coordinate   packagegraph.CoordinateID
 	Path         string
@@ -201,7 +205,9 @@ func (workspace Workspace) SemanticPackages() ([]SemanticPackage, error) {
 			return nil, fmt.Errorf("compute package %q coordinate: %w", node.ID, err)
 		}
 		result = append(result, SemanticPackage{
-			ID: packageID, Instance: class.ID, Coordinate: coordinate, Path: mapping.PackagePath, Source: loaded.Digest,
+			ID: packageID, PackageUID: loaded.Manifest.Package.UID, Name: loaded.Manifest.Package.Name,
+			Version: loaded.Manifest.Package.Version, Language: loaded.Manifest.Package.Language,
+			Instance: class.ID, Coordinate: coordinate, Path: mapping.PackagePath, Source: loaded.Digest,
 			SourceKind: loaded.SourceKind, RuntimeABI: loaded.RuntimeABI,
 			Features: slices.Clone(mapping.Features), Role: node.Role, Dependencies: dependencies,
 		})

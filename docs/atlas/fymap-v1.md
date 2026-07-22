@@ -1,12 +1,16 @@
 # `.fymap` v1 Logical Schema
 
-- Status: Proposed; no implementation exists
+- Status: Proposed encoding; the in-memory `SemanticSnapshot` v0 producer exists
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0004-atlas-semantic-snapshot-boundary.md`
+- Snapshot source: `docs/atlas/semantic-snapshot-v0.md`
 
 ## Boundary
 
-Analyzed typed HIR and verified MIR produce an immutable `SemanticSnapshot`. The Atlas exporter converts that snapshot into `.fymap`. It does not reparse source or feed decisions back into type checking.
+Analyzed typed HIR and verified MIR now produce the immutable in-memory `SemanticSnapshot` v0. The
+future Atlas exporter converts that snapshot into `.fymap`. It does not reparse source or feed
+decisions back into type checking. Snapshot implementation does not choose or imply the map's
+encoding, checksum, `SymbolId`, file location, or command behavior.
 
 The first implementation writes one deterministic map per package. Chunking, compression, and symbol-level incremental rewrites require measured evidence. The normative binary encoding, byte order, and map-checksum algorithm remain UNDECIDED; this document fixes the logical records and trust behavior first. Package-instance references use the independent `PackageInstanceId` v1 contract and do not choose the map encoding or `SymbolId` algorithm.
 

@@ -96,7 +96,8 @@ func TestBundledStandardLibraryReachesVerifiedCompiler(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, loaded := range packages {
-		if loaded.Instance != identities[loaded.ID] || loaded.Coordinate != coordinates[loaded.ID] || loaded.Source == ([32]byte{}) || loaded.Path == "" {
+		if loaded.PackageUID == "" || loaded.Name == "" || loaded.Version == "" || loaded.Language != "fairyc-language/0" ||
+			loaded.Instance != identities[loaded.ID] || loaded.Coordinate != coordinates[loaded.ID] || loaded.Source == ([32]byte{}) || loaded.Path == "" {
 			t.Fatalf("SemanticPackages() package = %+v, identities = %+v, coordinates = %+v", loaded, identities, coordinates)
 		}
 	}

@@ -560,6 +560,15 @@ Exit gate: clean and warm build evidence is reproducible on a declared machine a
 
 ## Phase 4: Atlas fact export
 
+Current implementation status: ADR 0182 adds the first executable one-way compiler-fact boundary.
+`internal/semanticsnapshot` accepts only semantic Flow success, reverified MIR, and complete exact
+package metadata; removes disposable package/symbol qualification; emits detached canonically
+ordered package, module, declaration, function-summary, and relation-completeness records; and
+keeps foreign-call uncertainty local to the call relation. Package-renumbering, input/accessor
+mutation, incomplete metadata, unverified MIR, and host/build-local identity leakage have direct
+regressions. No `.fymap` encoding, `SymbolId`, exporter, dependency-map join, stale-map validator,
+query, Context Pack, or rewrite measurement exists yet.
+
 - Produce an immutable `SemanticSnapshot` from analyzed HIR and verified MIR.
 - Export `.fymap` with package UID and instance identity, compatibility vector, provenance, relation-specific completeness, and deterministic symbol identity.
 - Implement bounded `overview`, `show`, and `around` queries and Context Pack output.

@@ -492,6 +492,13 @@ artifact. A trap fails that test and later tests still run. This is the fast sem
 claim that native ABI, foreign calls, host I/O, benchmarks, filters, or workspace-member test
 discovery exist.
 
+Phase 4 now has its first executable boundary: `internal/semanticsnapshot` turns successful typed
+HIR, semantic facts, verified MIR, and exact package metadata into detached, path-free compiler
+facts. It is invariant under build-local package renumbering, keeps external C calls explicitly
+opaque without degrading unrelated local facts, and publishes no source text or authority-bearing
+documentation. No `.fymap` file, `SymbolId`, Atlas command, `overview`/`show`/`around` query, or
+Context Pack exists yet.
+
 `experimental target-spec` accepts exactly one known Linux GNU or Windows MSVC ID and writes
 deterministic `fairyc.target-spec/v0` JSON. The result separates target semantics from local
 toolchain discovery and lists the profile-specific missing evidence that keeps all three target
@@ -573,7 +580,7 @@ or arbitrary link-input option.
 - Runtime and standard library: `docs/runtime/runtime-stdlib-v0.md`
 - Compatibility and versioning: `docs/compatibility/versioning-v0.md`
 - Diagnostic catalog: `docs/diagnostics/catalog-v0.md`
-- Atlas schemas: `docs/atlas/`
+- Atlas semantic snapshot and proposed schemas: `docs/atlas/`
 - CLI contract: `docs/cli/command-contract.md`
 - Workspace ownership: `docs/monorepo/package-ownership.md`
 

@@ -230,6 +230,11 @@ typed HIR + verified MIR
 
 The compiler frontend cannot import Atlas. Atlas does not reparse source to invent semantic facts. Its failure does not change diagnostics or build results.
 
+`internal/semanticsnapshot` now implements only the first arrow. It re-verifies MIR, consumes exact
+package metadata, removes build-local identities, deep-detaches its records, and reports
+relation-specific completeness. The exporter, encoded map, queries, and Context Pack arrows remain
+unimplemented and cannot feed back into this boundary.
+
 ## Runtime behavior
 
 The executable contains only the selected Fairy C runtime and linked platform libraries. The Go runtime belongs to the compiler process and is never linked into compiled Fairy C programs.
