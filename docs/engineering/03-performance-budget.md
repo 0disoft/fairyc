@@ -3,7 +3,7 @@
 - Status: Draft
 - Owner: UNASSIGNED
 - Product contract: `docs/product/02-spec.md`
-- Evidence status: Configured local Windows no-cache calibration exists; no dedicated benchmark corpus, reference machine, cache-hit comparison, or regression command exists
+- Evidence status: Configured local Windows no-cache calibration and two-sample process-cache control-flow receipt exist; no timing distribution, reference machine, cache speedup decision, or regression threshold exists
 
 Stage 0 has no numeric performance, storage, or Atlas budget. Proposed millisecond, percentage, MiB, GiB, map-size, and context-size thresholds are removed until a maintained harness produces a baseline. This document fixes what must be measured and how a later budget becomes enforceable.
 
@@ -31,6 +31,14 @@ and locked-repeat builds at both Windows profiles, artifact bytes, lock states, 
 and native result 42. `cacheImplementation: none` and `decision: baseline-only` are mandatory. This
 calibrates the schema and workload; it is not cold/warm cache evidence, a timing distribution, a
 cross-machine comparison, or a numeric budget.
+
+The same configured smoke also emits `fairyc.process-cache-measurement/v0` for the semantic-through-
+verified-MIR portion of that workload. One bounded Session records a cold fallback followed by one
+complete verified hit. The receipt includes raw monotonic durations, package hit/miss/store counts,
+whether lowering ran, MIR function count, interpreter result, retained entries and bytes, and the
+harness-local bounds. Validation requires result `42`, rejects partial or rejected warm hits, and
+fixes `decision` to `observed-only-no-speedup-claim`. The two observations prove the selected control
+paths and comparable phase scope; they are not a distribution or a speedup conclusion.
 
 ## Runtime metrics
 

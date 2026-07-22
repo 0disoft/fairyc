@@ -166,6 +166,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0154-process-bound-package-artifact-codec.md`: bounded canonical package bytes rejected outside their creating compiler process.
 - `0155-bounded-process-package-artifact-cache.md`: verified artifact hits and race-safe rejection quarantine over the bounded byte LRU.
 - `0156-all-hit-process-mir-reuse.md`: semantic-first workspace compilation that skips MIR lowering only after complete verified process-cache hits and successful reassembly.
+- `0157-process-cache-measurement-receipt.md`: configured path-free cold/fallback and warm/all-hit control-flow receipts with raw timings and no speedup conclusion.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

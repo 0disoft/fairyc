@@ -20,12 +20,18 @@ import (
 	"github.com/0disoft/fairyc/internal/cstdlib"
 	"github.com/0disoft/fairyc/internal/foreignstructprobe"
 	"github.com/0disoft/fairyc/internal/frontend"
+	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/interpreter"
+	"github.com/0disoft/fairyc/internal/packagecache"
 	"github.com/0disoft/fairyc/internal/pecoff"
 	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/source"
+	"github.com/0disoft/fairyc/internal/target"
 	"github.com/0disoft/fairyc/internal/windowsabiprobe"
 	"github.com/0disoft/fairyc/internal/windowslayoutprobe"
 	"github.com/0disoft/fairyc/internal/windowsunwindprobe"
+	"github.com/0disoft/fairyc/internal/workspacecompiler"
+	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
 const negativeSource = `module negative;
@@ -407,6 +413,15 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("resolve Windows MSVC probe toolchain: %w", err)
 	}
+	cacheMeasurement, err := measureWorkspaceProcessCache(root)
+	if err != nil {
+		return fmt.Errorf("measure process-local workspace cache: %w", err)
+	}
+	cacheMeasurementJSON, err := buildmeasure.MarshalCache(cacheMeasurement)
+	if err != nil {
+		return fmt.Errorf("encode process-local workspace cache measurement: %w", err)
+	}
+	fmt.Printf("Fairy C process-cache measurement: %s\n", cacheMeasurementJSON)
 	measurement := buildmeasure.Report{
 		Schema:              buildmeasure.Schema,
 		Workload:            "workspace_quickstart",
@@ -665,6 +680,64 @@ func run() error {
 	inspectedPEImages := 1 + targetBuildExecutions + workspaceBuildExecutions + windowsFileSourceExecutions + ownedTextSourceExecutions + targetRunExecutions + workspaceRunExecutions + targetExecExecutions + windowsFileExecutions + bufferProbeExecutions + ownedTextProbeExecutions + arenaProbeExecutions + layoutExecutions + abiExecutions + structResultExecutions + unwindExecutions
 	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds, %d package-workspace builds, %d package-workspace runs, %d source-level safe File lifecycle builds, %d source-level safe owned-text lifecycle builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls, checked reads and mutable indexed stores, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart, output, and locked workspace execution, 40 run-host outcomes covered fixed arrays, byte-view iteration and slicing, checked indexed stores, assertions in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, Buffer initialization, reserve, self-overlap append, and zeroed-resize allocation rollback passed %d separate-translation-unit MSVC executions, owned-text opaque-storage failure preservation, forced allocation rollback, and repeated drop passed %d separate-translation-unit MSVC executions, Arena zeroing, two-stage allocation rollback, stale Region rejection, and active-drop preservation passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, generated-Fairy small and large struct results passed %d separate-translation-unit MSVC executions across C11 and C17 consumer modes, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, workspaceBuildExecutions, workspaceRunExecutions, windowsFileSourceExecutions, ownedTextSourceExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, windowsFileExecutions, bufferProbeExecutions, ownedTextProbeExecutions, arenaProbeExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, structResultExecutions, unwindCases, unwindExecutions, inspectedPEImages, toolchain.Version)
 	return nil
+}
+
+func measureWorkspaceProcessCache(root string) (buildmeasure.CacheReport, error) {
+	const (
+		maxEntries       = 8
+		maxBytes         = 32 << 20
+		maxArtifactBytes = 8 << 20
+	)
+	workspace, err := workspaceloader.Load(root)
+	if err != nil {
+		return buildmeasure.CacheReport{}, err
+	}
+	session, err := workspacecompiler.NewSession(workspacecompiler.Configuration{
+		Target:           target.X8664WindowsMSVC,
+		Cache:            packagecache.Limits{MaxEntries: maxEntries, MaxBytes: maxBytes},
+		MaxArtifactBytes: maxArtifactBytes,
+	})
+	if err != nil {
+		return buildmeasure.CacheReport{}, err
+	}
+	rootPackage, err := workspace.RootPackageID()
+	if err != nil {
+		return buildmeasure.CacheReport{}, err
+	}
+	entry := hir.QualifiedModulePath(rootPackage, "main") + "::main"
+	report := buildmeasure.CacheReport{
+		Schema: buildmeasure.CacheSchema, Workload: "workspace_quickstart",
+		Scope: "semantic-through-verified-mir", Clock: "process-monotonic-wall-nanoseconds",
+		CacheImplementation: "bounded-process-package-mir-v0", Decision: "observed-only-no-speedup-claim",
+		Environment: buildmeasure.CacheEnvironment{OS: runtime.GOOS, Arch: runtime.GOARCH, Target: string(target.X8664WindowsMSVC)},
+		Policy:      buildmeasure.CachePolicy{MaxEntries: maxEntries, MaxBytes: maxBytes, MaxArtifactBytes: maxArtifactBytes},
+	}
+	for index, condition := range []string{buildmeasure.CacheConditionCold, buildmeasure.CacheConditionWarm} {
+		started := time.Now()
+		checked, err := session.Check(workspace)
+		duration := time.Since(started)
+		if err != nil {
+			return buildmeasure.CacheReport{}, err
+		}
+		if !checked.Compiler.Verified {
+			return buildmeasure.CacheReport{}, fmt.Errorf("%s process-cache sample did not produce verified MIR", condition)
+		}
+		outcome, err := interpreter.Execute(checked.Compiler.MIR, entry)
+		if err != nil {
+			return buildmeasure.CacheReport{}, err
+		}
+		stats := session.Stats()
+		report.Samples = append(report.Samples, buildmeasure.CacheSample{
+			Sequence: index + 1, Condition: condition, DurationNS: duration.Nanoseconds(),
+			Outcome: checked.Cache.Outcome, Packages: checked.Cache.Packages,
+			Hits: checked.Cache.Hits, Misses: checked.Cache.Misses, Rejected: checked.Cache.Rejected,
+			Stored: checked.Cache.Stored, StoreSkipped: checked.Cache.StoreSkipped,
+			Lowered: checked.Cache.Lowered, ReassemblyFallback: checked.Cache.ReassemblyFallback,
+			MIRFunctions: len(checked.Compiler.MIR.Functions), InterpreterResult: int(outcome.Value),
+			RetainedEntries: stats.Store.Entries, RetainedBytes: stats.Store.Bytes, VerifiedHits: stats.VerifiedHits,
+		})
+	}
+	return report, nil
 }
 
 func runStandaloneCompiler(repositoryRoot, sourceRoot string) (int64, error) {

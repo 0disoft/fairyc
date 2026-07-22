@@ -446,8 +446,15 @@ call across a cold and immediate warm two-package compile, source invalidation, 
 fallback, self-healing, and result `42`. This is deterministic control-flow evidence, not an elapsed
 speedup claim, persistent cache, default policy, or one-shot CLI reuse.
 
-- Measure the process-local all-hit path on declared workloads, then decide which long-lived compiler
-  command or service can honestly reuse one Session before considering persistent storage.
+ADR 0157 adds a second path-free measurement schema to the configured Windows smoke. It records one
+cold fallback and one immediate all-hit request over the same Session, including raw durations,
+lowering decisions, package counts, retained bytes, and interpreter result `42`. Validation forbids
+a speedup decision. One local receipt observed two cold misses followed by two verified hits with no
+warm lowering; this closes the control-flow measurement gap but not the distribution, reference-
+machine, edit-class, memory, or long-lived command gates.
+
+- Collect repeated distributions and private/public/dependency edit classes, then decide which
+  long-lived compiler command or service can honestly reuse one Session before persistent storage.
 - ADR 0146 explicitly defers persistent storage. Package-aware Windows builds, the bounded
   whole-program MIR codec, and process-local package function slices now exist; stable type-context
   artifacts, cross-process corruption policy, and configured cold/warm timing evidence still gate disk policy.
