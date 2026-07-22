@@ -46,16 +46,18 @@ Unit tests write through one stable-cache adapter and read through another, requ
 artifacts, and quarantine wrong-interface, wrong-package, and malformed stable payloads. Workspace
 tests compile the checked-in two-package shape with one Session, construct a completely independent
 Session over the same directory, require two stable hits and zero lowering calls, rebind and verify
-the program, and execute it to `42`. Changing only the exact compiler-build identity produces two
-misses and ordinary lowering.
+the program, and execute it to `42`. A separate-process test then runs a writer test process and a
+fresh reader test process over one workspace and cache directory; the reader reports two hits, zero
+lowering, and result `42`. Changing only the exact compiler-build identity produces two misses and
+ordinary lowering.
 
 ## Consequences and limits
 
 - Cross-Session stable disk reuse is now executable through an internal explicit policy surface.
 - No public CLI flag, cache-location default, compiler-build-ID derivation, L1 memory layer, daemon,
   background cleanup, or speed claim is added.
-- Same-process independent Sessions exercise filesystem persistence, but a real separately built
-  writer/reader process and abrupt-termination recovery remain required evidence.
+- Separate writer and reader OS processes now exercise cross-process Session reuse. A public
+  separately built `fairyc` command, automatic build identity, and power-loss evidence remain absent.
 - Each package still duplicates the complete workspace type context. Partial hits therefore lower
   normally; function-level reuse and package-scoped contexts remain measurement-gated.
 - The cache is disposable derived state. Deletion or rejection can only cause ordinary compilation.

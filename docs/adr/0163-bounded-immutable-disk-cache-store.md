@@ -34,9 +34,11 @@ hint, never correctness or source truth.
 ## Evidence
 
 Tests use independent store instances and concurrent writers over one directory, then require a
-deep-copy hit. They inject a corrupt digest-named file, inject two distinct valid generations for
-one key, verify safe misses and rejection accounting, recover an expired temporary, enforce entry
-bounds, and prove oversized rejection preserves an existing hit.
+deep-copy hit. Separate OS processes additionally publish identical payloads concurrently and must
+converge on one generation; conflicting process writers must produce a rejected safe miss. A helper
+process exits after leaving an unpublished temporary, which caller-aged collection removes. Tests
+also inject corruption, enforce entry bounds, and prove oversized rejection preserves an existing
+hit.
 
 ## Consequences and limits
 
@@ -47,5 +49,6 @@ bounds, and prove oversized rejection preserves an existing hit.
   every hit.
 - The store is not yet connected to `workspacecompiler.Session`, has no user-facing path or default
   policy, and has no cold/warm disk performance claim.
-- Real separate-process contention, abrupt process termination, cleanup recovery, and retained-byte
-  measurements remain required before enabling persistence in a compiler command.
+- Power-loss directory durability and retained-byte/performance measurements remain required before
+  enabling persistence in a compiler command. Process-exit temporary recovery is covered, but it is
+  not a filesystem power-cut guarantee.

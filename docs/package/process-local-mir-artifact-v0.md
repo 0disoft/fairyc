@@ -96,5 +96,6 @@ speedup evidence.
 ADR 0164 adds a mutually exclusive persistent Session mode. Its caller supplies the exact compiler
 build identity and every disk/artifact bound. A stable hit additionally checks the current package
 instance and public interface; a complete hit set is rebound into fresh identities and reruns
-`mir.Verify`. Independent Sessions over the same directory execute result `42` without a second
-lowering call. No command chooses this mode yet, and no timing result justifies a default.
+`mir.Verify`. Independent Sessions and separate writer/reader test processes over the same directory
+execute result `42` without a second lowering call. No command chooses this mode yet, and no timing
+result justifies a default.
