@@ -523,10 +523,11 @@ features `PackageCoordinateId` prerequisite while leaving cache behavior unchang
 stable symbol identity, and cache keys must adopt that coordinate together before private dependency
 reuse is truthful.
 
-ADR 0173 completes the first of those consumers: public-interface hash v2 keeps the v1 public
-semantic projection but renders external nominal types through `PackageCoordinateId`. Stable MIR
-symbol/type identity and whole-package dependency keys remain on the exact instance boundary, so
-new cache reuse is still intentionally closed.
+ADR 0173 completes the interface consumer. ADR 0174 then migrates stable MIR function/type/foreign
+identity and whole-package dependency keys as one versioned boundary. Private dependency edits now
+reuse the verified caller while rebuilding the provider; public interface edits still invalidate
+both. The measured six-entry staircase is `2, 3, 4, 5, 6, 6, 6, 6, 6`, with two evictions and zero
+quarantines, without selecting a default policy or making a speed claim.
 
 - Repeat the bounded session on a declared reference machine with controlled distributions, private
   or live-heap evidence, and an accepted noise policy before selecting defaults or claiming

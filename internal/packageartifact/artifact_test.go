@@ -16,8 +16,8 @@ import (
 
 func TestPackageArtifactsReassembleWithFreshSymbolsAndPreserveExecution(t *testing.T) {
 	t.Parallel()
-	workspace, original, identities := checkedWorkspaceProgram(t)
-	artifacts, err := ExtractAll(original, identities)
+	workspace, original, identities, coordinates := checkedWorkspaceProgram(t)
+	artifacts, err := ExtractAll(original, identities, coordinates)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -61,8 +61,8 @@ func TestPackageArtifactsReassembleWithFreshSymbolsAndPreserveExecution(t *testi
 
 func TestPackageArtifactRejectsCorruptBodyAndIdentity(t *testing.T) {
 	t.Parallel()
-	_, program, identities := checkedWorkspaceProgram(t)
-	artifacts, err := ExtractAll(program, identities)
+	_, program, identities, coordinates := checkedWorkspaceProgram(t)
+	artifacts, err := ExtractAll(program, identities, coordinates)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -80,8 +80,8 @@ func TestPackageArtifactRejectsCorruptBodyAndIdentity(t *testing.T) {
 
 func TestPackageArtifactReassemblyRejectsMissingProviderAndContextDrift(t *testing.T) {
 	t.Parallel()
-	_, program, identities := checkedWorkspaceProgram(t)
-	artifacts, err := ExtractAll(program, identities)
+	_, program, identities, coordinates := checkedWorkspaceProgram(t)
+	artifacts, err := ExtractAll(program, identities, coordinates)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -102,7 +102,7 @@ func TestPackageArtifactReassemblyRejectsMissingProviderAndContextDrift(t *testi
 	})
 	drifted[driftIndex].StableContext, err = DescribeContext(
 		drifted[driftIndex].Context,
-		drifted[driftIndex].PackageIdentities,
+		drifted[driftIndex].PackageCoordinates,
 		artifactBindings(drifted[driftIndex]),
 	)
 	if err != nil {
@@ -113,7 +113,7 @@ func TestPackageArtifactReassemblyRejectsMissingProviderAndContextDrift(t *testi
 	}
 }
 
-func checkedWorkspaceProgram(t *testing.T) (workspaceloader.Workspace, mir.Program, map[hir.PackageID]packagegraph.InstanceID) {
+func checkedWorkspaceProgram(t *testing.T) (workspaceloader.Workspace, mir.Program, map[hir.PackageID]packagegraph.InstanceID, map[hir.PackageID]packagegraph.CoordinateID) {
 	t.Helper()
 	workspace, err := workspaceloader.Load(filepath.Join("..", "..", "examples", "workspace_quickstart"))
 	if err != nil {
@@ -127,6 +127,10 @@ func checkedWorkspaceProgram(t *testing.T) (workspaceloader.Workspace, mir.Progr
 	if err != nil {
 		t.Fatal(err)
 	}
+	coordinates, err := workspace.PackageCoordinates()
+	if err != nil {
+		t.Fatal(err)
+	}
 	result, err := compiler.CheckPackages(input)
 	if err != nil {
 		t.Fatal(err)
@@ -134,7 +138,7 @@ func checkedWorkspaceProgram(t *testing.T) (workspaceloader.Workspace, mir.Progr
 	if !result.Verified {
 		t.Fatalf("workspace is not verified: %+v", result.Semantic)
 	}
-	return workspace, result.MIR, identities
+	return workspace, result.MIR, identities, coordinates
 }
 
 func cloneArtifactsForTest(values []Artifact) []Artifact {
@@ -148,6 +152,7 @@ func cloneArtifactsForTest(values []Artifact) []Artifact {
 func cloneArtifactForTest(value Artifact) Artifact {
 	result := value
 	result.PackageIdentities = cloneIdentities(value.PackageIdentities)
+	result.PackageCoordinates = cloneCoordinates(value.PackageCoordinates)
 	result.StableContext = cloneContextDescriptor(value.StableContext)
 	result.Context = mir.Clone(value.Context)
 	result.Functions = make([]FunctionRecord, len(value.Functions))

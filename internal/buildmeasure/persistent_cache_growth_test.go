@@ -81,9 +81,9 @@ func validPersistentCacheGrowthReport() buildmeasure.PersistentCacheGrowthReport
 		buildmeasure.PersistentGrowthPrivateRootNoOp,
 		buildmeasure.PersistentGrowthRepeatedNoOp,
 	}
-	entries := []int{2, 3, 4, 6, 6, 6, 6, 6, 6}
-	deltas := []int{2, 1, 1, 2, 0, 0, 0, 0, 0}
-	bytes := []uint64{6000, 9000, 12000, 18000, 21000, 21000, 22000, 22000, 22000}
+	entries := []int{2, 3, 4, 5, 6, 6, 6, 6, 6}
+	deltas := []int{2, 1, 1, 1, 1, 0, 0, 0, 0}
+	bytes := []uint64{6000, 9000, 12000, 15000, 21000, 21000, 22000, 22000, 22000}
 	previousBytes := uint64(0)
 	for index, condition := range conditions {
 		sample := buildmeasure.PersistentCacheGrowthSample{
@@ -93,11 +93,11 @@ func validPersistentCacheGrowthReport() buildmeasure.PersistentCacheGrowthReport
 			RetainedByteDelta: int64(bytes[index]) - int64(previousBytes), RecordHits: 1, RecordMisses: 1, VerifiedHits: 1,
 		}
 		previousBytes = bytes[index]
-		if condition == buildmeasure.PersistentGrowthBaselineCold || condition == buildmeasure.PersistentGrowthPrivateDependency || condition == buildmeasure.PersistentGrowthPublicDependency {
+		if condition == buildmeasure.PersistentGrowthBaselineCold || condition == buildmeasure.PersistentGrowthPublicDependency {
 			sample.Hits, sample.Misses, sample.RecordHits, sample.RecordMisses, sample.VerifiedHits = 0, 2, 0, 2, 0
 		}
 		if condition == buildmeasure.PersistentGrowthPublicDependency {
-			sample.Evictions = 2
+			sample.Evictions = 1
 		}
 		if condition == buildmeasure.PersistentGrowthPrivateRootPublic {
 			sample.Evictions = 1

@@ -16,8 +16,8 @@ func TestStableContextRebindsWithoutProcessLocalTypeOrForeignState(t *testing.T)
 	if err != nil {
 		t.Fatal(err)
 	}
-	instance := leftIdentities[3]
-	rightIdentities := map[hir.PackageID]packagegraph.InstanceID{9: instance}
+	coordinate := leftIdentities[3]
+	rightIdentities := map[hir.PackageID]packagegraph.CoordinateID{9: coordinate}
 	dropID := leftBindings[41]
 	rebound, err := RebindContextDescriptor(descriptor, rightIdentities, map[FunctionID]hir.SymbolID{dropID: 801}, 901)
 	if err != nil {
@@ -45,15 +45,15 @@ func TestStableContextRebindRejectsMissingAmbiguousAndCollidingBindings(t *testi
 	if err != nil {
 		t.Fatal(err)
 	}
-	instance := identities[3]
+	coordinate := identities[3]
 	dropID := bindings[41]
-	if _, err := RebindContextDescriptor(descriptor, map[hir.PackageID]packagegraph.InstanceID{9: instance}, nil, 901); err == nil || !strings.Contains(err.Error(), "drop target") {
+	if _, err := RebindContextDescriptor(descriptor, map[hir.PackageID]packagegraph.CoordinateID{9: coordinate}, nil, 901); err == nil || !strings.Contains(err.Error(), "drop target") {
 		t.Fatalf("missing drop binding error = %v", err)
 	}
-	if _, err := RebindContextDescriptor(descriptor, map[hir.PackageID]packagegraph.InstanceID{9: instance, 10: instance}, map[FunctionID]hir.SymbolID{dropID: 801}, 901); err == nil || !strings.Contains(err.Error(), "multiple local packages") {
+	if _, err := RebindContextDescriptor(descriptor, map[hir.PackageID]packagegraph.CoordinateID{9: coordinate, 10: coordinate}, map[FunctionID]hir.SymbolID{dropID: 801}, 901); err == nil || !strings.Contains(err.Error(), "multiple local packages") {
 		t.Fatalf("ambiguous package error = %v", err)
 	}
-	if _, err := RebindContextDescriptor(descriptor, map[hir.PackageID]packagegraph.InstanceID{9: instance}, map[FunctionID]hir.SymbolID{dropID: 901}, 901); err == nil || !strings.Contains(err.Error(), "collides") {
+	if _, err := RebindContextDescriptor(descriptor, map[hir.PackageID]packagegraph.CoordinateID{9: coordinate}, map[FunctionID]hir.SymbolID{dropID: 901}, 901); err == nil || !strings.Contains(err.Error(), "collides") {
 		t.Fatalf("symbol collision error = %v", err)
 	}
 }

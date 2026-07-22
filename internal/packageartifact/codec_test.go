@@ -12,8 +12,8 @@ const processArtifactLimit = 8 << 20
 
 func TestProcessCodecRoundTripsVerifiedArtifact(t *testing.T) {
 	t.Parallel()
-	_, program, identities := checkedWorkspaceProgram(t)
-	artifacts, err := ExtractAll(program, identities)
+	_, program, identities, coordinates := checkedWorkspaceProgram(t)
+	artifacts, err := ExtractAll(program, identities, coordinates)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -22,7 +22,7 @@ func TestProcessCodecRoundTripsVerifiedArtifact(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !bytes.HasPrefix(encoded, []byte(`{"schema":"fairyc.package-mir-process/v1"`)) {
+	if !bytes.HasPrefix(encoded, []byte(`{"schema":"fairyc.package-mir-process/v2"`)) {
 		t.Fatalf("encoded prefix = %q", encoded[:min(len(encoded), 80)])
 	}
 	decoded, err := codec.Decode(encoded)
@@ -36,8 +36,8 @@ func TestProcessCodecRoundTripsVerifiedArtifact(t *testing.T) {
 
 func TestProcessCodecRejectsForeignNoncanonicalAndCorruptBytes(t *testing.T) {
 	t.Parallel()
-	_, program, identities := checkedWorkspaceProgram(t)
-	artifacts, err := ExtractAll(program, identities)
+	_, program, identities, coordinates := checkedWorkspaceProgram(t)
+	artifacts, err := ExtractAll(program, identities, coordinates)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -80,8 +80,8 @@ func TestProcessCodecRequiresIdentityAndBounds(t *testing.T) {
 	if err != nil || parsed != codec.identity {
 		t.Fatalf("parseProcessIdentity() = %x, %v", parsed, err)
 	}
-	_, program, identities := checkedWorkspaceProgram(t)
-	artifacts, err := ExtractAll(program, identities)
+	_, program, identities, coordinates := checkedWorkspaceProgram(t)
+	artifacts, err := ExtractAll(program, identities, coordinates)
 	if err != nil {
 		t.Fatal(err)
 	}

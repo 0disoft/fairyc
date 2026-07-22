@@ -62,7 +62,7 @@
 - Public-interface extraction and runner route: internal/moduleinterface/, internal/moduleinterfacefixture/
 - Package-source digest v1 fixture route: spec/fixtures/package-source/manifest-v1.json
 - Package-source digest and runner route: internal/packagecontent/, internal/packagecontentfixture/
-- Whole-package cache-key v1 fixture route: spec/fixtures/package-cache/manifest-v1.json
+- Whole-package cache-key v2 fixture route: spec/fixtures/package-cache/manifest-v2.json and historical manifest-v1.json
 - Whole-package cache key, store, and runner route: internal/packagecache/, internal/packagecachefixture/
 - Exact running-compiler executable identity route: internal/buildidentity/, docs/adr/0165-executable-digest-compiler-build-identity.md
 - Experimental persistent workspace-cache command route: internal/cli/workspace_cache.go, spec/cli/experimental-workspace-cache-check-v0.schema.json, docs/adr/0166-experimental-persistent-workspace-cache-command.md

@@ -201,7 +201,7 @@ func (session *Session) Check(workspace workspaceloader.Workspace) (Result, erro
 		return Result{}, err
 	}
 	if session.stableCache != nil {
-		return session.checkPersistent(analysis, identities, interfaces, owners, keys, report)
+		return session.checkPersistent(analysis, identities, coordinates, interfaces, owners, keys, report)
 	}
 
 	artifacts := make([]packageartifact.Artifact, 0, len(owners))
@@ -239,7 +239,7 @@ func (session *Session) Check(workspace workspaceloader.Workspace) (Result, erro
 		return Result{Compiler: compiled, Cache: report}, nil
 	}
 	report.Lowered = true
-	extracted, err := packageartifact.ExtractAll(compiled.MIR, identities)
+	extracted, err := packageartifact.ExtractAll(compiled.MIR, identities, coordinates)
 	if err != nil {
 		return Result{}, fmt.Errorf("extract package MIR artifacts: %w", err)
 	}
@@ -283,7 +283,7 @@ func (session *Session) PersistentStats() (packageartifact.StableCacheStats, err
 	return session.stableCache.Stats()
 }
 
-func (session *Session) checkPersistent(analysis compiler.Analysis, identities map[hir.PackageID]packagegraph.InstanceID, interfaces map[hir.PackageID]moduleinterface.Hash, owners []hir.PackageID, keys map[hir.PackageID]packagecache.Key, report Report) (Result, error) {
+func (session *Session) checkPersistent(analysis compiler.Analysis, identities map[hir.PackageID]packagegraph.InstanceID, coordinates map[hir.PackageID]packagegraph.CoordinateID, interfaces map[hir.PackageID]moduleinterface.Hash, owners []hir.PackageID, keys map[hir.PackageID]packagecache.Key, report Report) (Result, error) {
 	artifacts := make([]packageartifact.StableArtifact, 0, len(owners))
 	allHit := true
 	for _, packageID := range owners {
@@ -307,7 +307,7 @@ func (session *Session) checkPersistent(analysis compiler.Analysis, identities m
 		}
 	}
 	if allHit {
-		program, reassemblyErr := rebindPersistentArtifacts(artifacts, identities)
+		program, reassemblyErr := rebindPersistentArtifacts(artifacts, coordinates)
 		if reassemblyErr == nil {
 			report.Outcome = OutcomeAllHit
 			return Result{Compiler: compiler.Result{Semantic: analysis.Semantic, MIR: program, Verified: true}, Cache: report}, nil
@@ -323,7 +323,7 @@ func (session *Session) checkPersistent(analysis compiler.Analysis, identities m
 		return Result{Compiler: compiled, Cache: report}, nil
 	}
 	report.Lowered = true
-	extracted, err := packageartifact.ExtractAll(compiled.MIR, identities)
+	extracted, err := packageartifact.ExtractAll(compiled.MIR, identities, coordinates)
 	if err != nil {
 		return Result{}, fmt.Errorf("extract stable package MIR artifacts: %w", err)
 	}
@@ -355,7 +355,7 @@ func (session *Session) checkPersistent(analysis compiler.Analysis, identities m
 	return Result{Compiler: compiled, Cache: report}, nil
 }
 
-func rebindPersistentArtifacts(artifacts []packageartifact.StableArtifact, identities map[hir.PackageID]packagegraph.InstanceID) (mir.Program, error) {
+func rebindPersistentArtifacts(artifacts []packageartifact.StableArtifact, coordinates map[hir.PackageID]packagegraph.CoordinateID) (mir.Program, error) {
 	functionCount := 0
 	for _, artifact := range artifacts {
 		if len(artifact.Functions) > int(^uint(0)>>1)-functionCount {
@@ -368,7 +368,7 @@ func rebindPersistentArtifacts(artifacts []packageartifact.StableArtifact, ident
 	if firstForeign < firstFunction {
 		return mir.Program{}, fmt.Errorf("stable package symbol namespace overflows")
 	}
-	return packageartifact.RebindStableArtifacts(artifacts, identities, firstFunction, firstForeign, mir.LocalID(1))
+	return packageartifact.RebindStableArtifacts(artifacts, coordinates, firstFunction, firstForeign, mir.LocalID(1))
 }
 
 func (session *Session) packageKeys(metadata []workspaceloader.SemanticPackage, interfaces map[hir.PackageID]moduleinterface.Hash, owners []hir.PackageID) (map[hir.PackageID]packagecache.Key, error) {
@@ -392,7 +392,7 @@ func (session *Session) packageKeys(metadata []workspaceloader.SemanticPackage, 
 			if !found {
 				return nil, fmt.Errorf("package %d dependency %d has no public interface", packageID, dependencyID)
 			}
-			dependencies = append(dependencies, packagecache.Dependency{Instance: dependency.Instance, Interface: interfaceHash})
+			dependencies = append(dependencies, packagecache.Dependency{Coordinate: dependency.Coordinate, Interface: interfaceHash})
 		}
 		dependencies, err := packagecache.CanonicalizeDependencies(dependencies)
 		if err != nil {

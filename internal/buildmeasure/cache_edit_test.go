@@ -37,7 +37,7 @@ func TestCacheEditReportRejectsIncomparableOrMisclassifiedSamples(t *testing.T) 
 			value.Samples[0].Condition = buildmeasure.CacheEditPrivateRoot
 		}},
 		{name: "private root over-invalidates", mutate: func(value *buildmeasure.CacheEditReport) { value.Samples[9].Hits = 0 }},
-		{name: "private dependency under-invalidates", mutate: func(value *buildmeasure.CacheEditReport) { value.Samples[18].Hits = 1 }},
+		{name: "private dependency over-invalidates", mutate: func(value *buildmeasure.CacheEditReport) { value.Samples[18].Hits = 0 }},
 		{name: "public dependency under-invalidates", mutate: func(value *buildmeasure.CacheEditReport) { value.Samples[27].Misses = 1 }},
 		{name: "sub-resolution sample not marked", mutate: func(value *buildmeasure.CacheEditReport) {
 			value.Samples[1].DurationNS = value.ClockResolutionNS - 1
@@ -85,6 +85,9 @@ func validCacheEditReport() buildmeasure.CacheEditReport {
 			case buildmeasure.CacheEditNoOpWarm:
 				sample.Outcome, sample.Hits, sample.VerifiedHits, sample.RetainedEntries = "all-hit", 2, 2, 2
 			case buildmeasure.CacheEditPrivateRoot:
+				sample.Outcome, sample.Hits, sample.Misses, sample.Stored, sample.Lowered = "fallback", 1, 1, 2, true
+				sample.VerifiedHits, sample.RetainedEntries = 1, 3
+			case buildmeasure.CacheEditPrivateDependency:
 				sample.Outcome, sample.Hits, sample.Misses, sample.Stored, sample.Lowered = "fallback", 1, 1, 2, true
 				sample.VerifiedHits, sample.RetainedEntries = 1, 3
 			default:

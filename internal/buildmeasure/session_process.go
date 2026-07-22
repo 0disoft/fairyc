@@ -129,9 +129,13 @@ func validateSessionProcessOutcome(sample SessionProcessSample) error {
 		if sample.Outcome != "fallback" || sample.Hits != 1 || sample.Misses != 1 || !sample.Lowered || sample.RetainedEntries != 3 {
 			return fmt.Errorf("private root edit does not prove one-package invalidation")
 		}
-	case SessionProcessPrivateDependency, SessionProcessPublicDependency:
+	case SessionProcessPrivateDependency:
+		if sample.Outcome != "fallback" || sample.Hits != 1 || sample.Misses != 1 || !sample.Lowered || sample.RetainedEntries != 4 {
+			return fmt.Errorf("private dependency edit does not prove provider-only invalidation")
+		}
+	case SessionProcessPublicDependency:
 		if sample.Outcome != "fallback" || sample.Hits != 0 || sample.Misses != 2 || !sample.Lowered {
-			return fmt.Errorf("dependency edit does not prove dependency-and-dependent invalidation")
+			return fmt.Errorf("public dependency edit does not prove dependency-and-dependent invalidation")
 		}
 	default:
 		if sample.Outcome != "all-hit" || sample.Hits != 2 || sample.Misses != 0 || sample.Lowered {

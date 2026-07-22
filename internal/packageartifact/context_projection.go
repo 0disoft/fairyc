@@ -18,7 +18,7 @@ import (
 func projectArtifactContext(artifact Artifact) (ContextDescriptor, map[hir.SymbolID]uint64, error) {
 	usedTypes := make(map[string]struct{})
 	collectType := func(value hir.Type) (hir.Type, error) {
-		stable, err := stableType(value, artifact.PackageIdentities)
+		stable, err := stableType(value, artifact.PackageCoordinates)
 		if err != nil {
 			return hir.TypeInvalid, err
 		}
@@ -41,7 +41,7 @@ func projectArtifactContext(artifact Artifact) (ContextDescriptor, map[hir.Symbo
 
 	foreignBySymbol := make(map[hir.SymbolID]ContextForeignFunction, len(artifact.Context.ForeignFunctions))
 	for _, foreign := range artifact.Context.ForeignFunctions {
-		described, err := DescribeContext(mir.Program{ForeignFunctions: []mir.ForeignFunction{foreign}}, artifact.PackageIdentities, nil)
+		described, err := DescribeContext(mir.Program{ForeignFunctions: []mir.ForeignFunction{foreign}}, artifact.PackageCoordinates, nil)
 		if err != nil {
 			return ContextDescriptor{}, nil, fmt.Errorf("describe foreign function %q for package context: %w", foreign.Name, err)
 		}
@@ -120,7 +120,7 @@ func projectArtifactContext(artifact Artifact) (ContextDescriptor, map[hir.Symbo
 	if err := ValidateContextDescriptor(result); err != nil {
 		return ContextDescriptor{}, nil, fmt.Errorf("validate projected package context: %w", err)
 	}
-	foreignIndices, err := contextForeignIndicesForSymbols(artifact.Context, result, artifact.PackageIdentities, usedForeign)
+	foreignIndices, err := contextForeignIndicesForSymbols(artifact.Context, result, artifact.PackageCoordinates, usedForeign)
 	if err != nil {
 		return ContextDescriptor{}, nil, err
 	}
@@ -157,13 +157,13 @@ func collectStableNominalTypes(value string, result map[string]struct{}) {
 	}
 }
 
-func contextForeignIndicesForSymbols(processContext mir.Program, stable ContextDescriptor, identities map[hir.PackageID]packagegraph.InstanceID, required map[hir.SymbolID]struct{}) (map[hir.SymbolID]uint64, error) {
+func contextForeignIndicesForSymbols(processContext mir.Program, stable ContextDescriptor, coordinates map[hir.PackageID]packagegraph.CoordinateID, required map[hir.SymbolID]struct{}) (map[hir.SymbolID]uint64, error) {
 	result := make(map[hir.SymbolID]uint64, len(required))
 	for _, foreign := range processContext.ForeignFunctions {
 		if _, needed := required[foreign.Symbol]; !needed {
 			continue
 		}
-		described, err := DescribeContext(mir.Program{ForeignFunctions: []mir.ForeignFunction{foreign}}, identities, nil)
+		described, err := DescribeContext(mir.Program{ForeignFunctions: []mir.ForeignFunction{foreign}}, coordinates, nil)
 		if err != nil {
 			return nil, fmt.Errorf("describe foreign function %q for stable body: %w", foreign.Name, err)
 		}
@@ -294,14 +294,14 @@ func stableArtifactImports(artifact Artifact, context ContextDescriptor) ([]Func
 	return result, nil
 }
 
-func foreignSymbolsForContext(processContext mir.Program, local ContextDescriptor, identities map[hir.PackageID]packagegraph.InstanceID) (map[uint64]hir.SymbolID, error) {
+func foreignSymbolsForContext(processContext mir.Program, local ContextDescriptor, coordinates map[hir.PackageID]packagegraph.CoordinateID) (map[uint64]hir.SymbolID, error) {
 	type binding struct {
 		declaration ContextForeignFunction
 		symbol      hir.SymbolID
 	}
 	available := make(map[string]binding, len(processContext.ForeignFunctions))
 	for _, foreign := range processContext.ForeignFunctions {
-		described, err := DescribeContext(mir.Program{ForeignFunctions: []mir.ForeignFunction{foreign}}, identities, nil)
+		described, err := DescribeContext(mir.Program{ForeignFunctions: []mir.ForeignFunction{foreign}}, coordinates, nil)
 		if err != nil {
 			return nil, err
 		}

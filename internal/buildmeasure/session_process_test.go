@@ -35,7 +35,7 @@ func TestSessionProcessReportRejectsMisleadingOrIncompleteEvidence(t *testing.T)
 		}},
 		{name: "no-op miss", mutate: func(value *buildmeasure.SessionProcessReport) { value.Samples[1].Misses = 1 }},
 		{name: "root over-invalidation", mutate: func(value *buildmeasure.SessionProcessReport) { value.Samples[2].Hits = 0 }},
-		{name: "dependency under-invalidation", mutate: func(value *buildmeasure.SessionProcessReport) { value.Samples[4].Hits = 1 }},
+		{name: "private dependency over-invalidation", mutate: func(value *buildmeasure.SessionProcessReport) { value.Samples[4].Hits = 0 }},
 		{name: "wrong public functions", mutate: func(value *buildmeasure.SessionProcessReport) { value.Samples[6].MIRFunctions = 2 }},
 		{name: "retention over bound", mutate: func(value *buildmeasure.SessionProcessReport) { value.Samples[7].RetainedEntries = 9 }},
 	}
@@ -79,17 +79,17 @@ func validSessionProcessReport() buildmeasure.SessionProcessReport {
 		case buildmeasure.SessionProcessPrivateRoot:
 			sample.Outcome, sample.Hits, sample.Misses, sample.Lowered, sample.RetainedEntries = "fallback", 1, 1, true, 3
 		case buildmeasure.SessionProcessPrivateDependency:
-			sample.Outcome, sample.Misses, sample.Lowered, sample.RetainedEntries = "fallback", 2, true, 5
+			sample.Outcome, sample.Hits, sample.Misses, sample.Lowered, sample.RetainedEntries = "fallback", 1, 1, true, 4
 		case buildmeasure.SessionProcessPublicDependency:
-			sample.Outcome, sample.Misses, sample.Lowered, sample.RetainedEntries, sample.MIRFunctions = "fallback", 2, true, 7, 3
+			sample.Outcome, sample.Misses, sample.Lowered, sample.RetainedEntries, sample.MIRFunctions = "fallback", 2, true, 6, 3
 		default:
 			sample.Outcome, sample.Hits = "all-hit", 2
 			if condition == buildmeasure.SessionProcessNoOpAfterRoot {
 				sample.RetainedEntries = 3
 			} else if condition == buildmeasure.SessionProcessNoOpAfterPrivate {
-				sample.RetainedEntries = 5
+				sample.RetainedEntries = 4
 			} else if condition == buildmeasure.SessionProcessNoOpAfterPublic {
-				sample.RetainedEntries, sample.MIRFunctions = 7, 3
+				sample.RetainedEntries, sample.MIRFunctions = 6, 3
 			}
 		}
 		report.Samples = append(report.Samples, sample)

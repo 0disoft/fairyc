@@ -13,7 +13,7 @@ import (
 // RebindContextDescriptor reconstructs process-local MIR type and foreign declarations solely
 // from a stable descriptor. Internal drop functions and foreign declarations receive explicit,
 // collision-free caller-owned symbols; no source span or entity is invented as semantic truth.
-func RebindContextDescriptor(descriptor ContextDescriptor, identities map[hir.PackageID]packagegraph.InstanceID, functionSymbols map[FunctionID]hir.SymbolID, firstForeignSymbol hir.SymbolID) (mir.Program, error) {
+func RebindContextDescriptor(descriptor ContextDescriptor, coordinates map[hir.PackageID]packagegraph.CoordinateID, functionSymbols map[FunctionID]hir.SymbolID, firstForeignSymbol hir.SymbolID) (mir.Program, error) {
 	if err := ValidateContextDescriptor(descriptor); err != nil {
 		return mir.Program{}, err
 	}
@@ -33,17 +33,17 @@ func RebindContextDescriptor(descriptor ContextDescriptor, identities map[hir.Pa
 
 	program := mir.Program{}
 	for _, item := range descriptor.Structs {
-		typeRef, err := rebindStableType(item.Type, identities)
+		typeRef, err := rebindStableType(item.Type, coordinates)
 		if err != nil {
 			return mir.Program{}, fmt.Errorf("rebind struct %q type: %w", item.Type, err)
 		}
-		owner, err := packageForStableNominal(item.Type, identities)
+		owner, err := packageForStableNominal(item.Type, coordinates)
 		if err != nil {
 			return mir.Program{}, err
 		}
 		structure := mir.StructType{Type: typeRef, Name: item.Name, Span: hir.Span{Package: owner}, ReprC: item.ReprC}
 		for _, field := range item.Fields {
-			fieldType, fieldErr := rebindStableType(field.Type, identities)
+			fieldType, fieldErr := rebindStableType(field.Type, coordinates)
 			if fieldErr != nil {
 				return mir.Program{}, fmt.Errorf("rebind struct %q field %q: %w", item.Type, field.Name, fieldErr)
 			}
@@ -52,11 +52,11 @@ func RebindContextDescriptor(descriptor ContextDescriptor, identities map[hir.Pa
 		program.StructTypes = append(program.StructTypes, structure)
 	}
 	for _, item := range descriptor.Enums {
-		typeRef, err := rebindStableType(item.Type, identities)
+		typeRef, err := rebindStableType(item.Type, coordinates)
 		if err != nil {
 			return mir.Program{}, fmt.Errorf("rebind enum %q type: %w", item.Type, err)
 		}
-		owner, err := packageForStableNominal(item.Type, identities)
+		owner, err := packageForStableNominal(item.Type, coordinates)
 		if err != nil {
 			return mir.Program{}, err
 		}
@@ -64,7 +64,7 @@ func RebindContextDescriptor(descriptor ContextDescriptor, identities map[hir.Pa
 		for _, variant := range item.Variants {
 			reboundVariant := mir.EnumVariant{Name: variant.Name, Span: hir.Span{Package: owner}}
 			for _, field := range variant.Fields {
-				fieldType, fieldErr := rebindStableType(field.Type, identities)
+				fieldType, fieldErr := rebindStableType(field.Type, coordinates)
 				if fieldErr != nil {
 					return mir.Program{}, fmt.Errorf("rebind enum %q variant %q field %q: %w", item.Type, variant.Name, field.Name, fieldErr)
 				}
@@ -75,17 +75,17 @@ func RebindContextDescriptor(descriptor ContextDescriptor, identities map[hir.Pa
 		program.EnumTypes = append(program.EnumTypes, enumeration)
 	}
 	for _, item := range descriptor.Resources {
-		typeRef, err := rebindStableType(item.Type, identities)
+		typeRef, err := rebindStableType(item.Type, coordinates)
 		if err != nil {
 			return mir.Program{}, fmt.Errorf("rebind resource %q type: %w", item.Type, err)
 		}
-		owner, err := packageForStableNominal(item.Type, identities)
+		owner, err := packageForStableNominal(item.Type, coordinates)
 		if err != nil {
 			return mir.Program{}, err
 		}
 		resource := mir.ResourceType{Type: typeRef, Span: hir.Span{Package: owner}, DropKind: hir.ResourceDropKind(item.DropKind), DropSymbol: hir.NoSymbol}
 		for _, field := range item.Fields {
-			fieldType, fieldErr := rebindStableType(field.Type, identities)
+			fieldType, fieldErr := rebindStableType(field.Type, coordinates)
 			if fieldErr != nil {
 				return mir.Program{}, fmt.Errorf("rebind resource %q field %q: %w", item.Type, field.Name, fieldErr)
 			}
@@ -108,7 +108,7 @@ func RebindContextDescriptor(descriptor ContextDescriptor, identities map[hir.Pa
 		program.ResourceTypes = append(program.ResourceTypes, resource)
 	}
 	for index, item := range descriptor.ForeignFunctions {
-		owner, err := packageForInstance(item.Package, identities)
+		owner, err := packageForCoordinate(item.Package, coordinates)
 		if err != nil {
 			return mir.Program{}, err
 		}
@@ -125,13 +125,13 @@ func RebindContextDescriptor(descriptor ContextDescriptor, identities map[hir.Pa
 			ABI: item.ABI, Span: hir.Span{Package: owner}, ResultType: hir.TypeInvalid,
 		}
 		for _, parameterType := range item.ParameterTypes {
-			rebound, parameterErr := rebindStableType(parameterType, identities)
+			rebound, parameterErr := rebindStableType(parameterType, coordinates)
 			if parameterErr != nil {
 				return mir.Program{}, fmt.Errorf("rebind foreign function %q parameter: %w", item.Name, parameterErr)
 			}
 			foreign.ParameterTypes = append(foreign.ParameterTypes, rebound)
 		}
-		foreign.ResultType, err = rebindStableType(item.ResultType, identities)
+		foreign.ResultType, err = rebindStableType(item.ResultType, coordinates)
 		if err != nil {
 			return mir.Program{}, fmt.Errorf("rebind foreign function %q result: %w", item.Name, err)
 		}
@@ -143,7 +143,7 @@ func RebindContextDescriptor(descriptor ContextDescriptor, identities map[hir.Pa
 		if resource.DropSymbol == hir.NoSymbol {
 			continue
 		}
-		stableTypeName, err := stableType(resource.Type, identities)
+		stableTypeName, err := stableType(resource.Type, coordinates)
 		if err != nil {
 			return mir.Program{}, err
 		}
@@ -154,7 +154,7 @@ func RebindContextDescriptor(descriptor ContextDescriptor, identities map[hir.Pa
 			}
 		}
 	}
-	roundTrip, err := DescribeContext(program, identities, bindings)
+	roundTrip, err := DescribeContext(program, coordinates, bindings)
 	if err != nil {
 		return mir.Program{}, fmt.Errorf("describe rebound stable type context: %w", err)
 	}
@@ -164,15 +164,34 @@ func RebindContextDescriptor(descriptor ContextDescriptor, identities map[hir.Pa
 	return program, nil
 }
 
-func packageForStableNominal(value string, identities map[hir.PackageID]packagegraph.InstanceID) (hir.PackageID, error) {
+func packageForStableNominal(value string, coordinates map[hir.PackageID]packagegraph.CoordinateID) (hir.PackageID, error) {
 	const prefix = "pkg["
 	separator := strings.Index(value, "]::")
 	if !strings.HasPrefix(value, prefix) || separator <= len(prefix) {
 		return 0, fmt.Errorf("stable nominal type %q is invalid", value)
 	}
-	instance, err := packagegraph.ParseInstanceID(value[len(prefix):separator])
+	coordinate, err := packagegraph.ParseCoordinateID(value[len(prefix):separator])
 	if err != nil {
 		return 0, fmt.Errorf("parse stable nominal type %q: %w", value, err)
 	}
-	return packageForInstance(instance, identities)
+	return packageForCoordinate(coordinate, coordinates)
+}
+
+func packageForCoordinate(coordinate packagegraph.CoordinateID, coordinates map[hir.PackageID]packagegraph.CoordinateID) (hir.PackageID, error) {
+	var packageID hir.PackageID
+	found := false
+	for candidate, candidateCoordinate := range coordinates {
+		if candidateCoordinate != coordinate {
+			continue
+		}
+		if found && candidate != packageID {
+			return 0, fmt.Errorf("PackageCoordinateId %s maps to multiple local packages", coordinate)
+		}
+		packageID = candidate
+		found = true
+	}
+	if !found {
+		return 0, fmt.Errorf("PackageCoordinateId %s has no local package", coordinate)
+	}
+	return packageID, nil
 }

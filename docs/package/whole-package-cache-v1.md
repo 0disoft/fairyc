@@ -1,6 +1,6 @@
 # Whole-package cache key and bounded memory store v1
 
-- Status: Executable prototype contract
+- Status: Historical; superseded by `whole-package-cache-v2.md`
 - Decision: `docs/adr/0141-whole-package-cache-key-and-bounds-v1.md`
 - Fixture source: `spec/fixtures/package-cache/manifest-v1.json`
 - Implementation source: `internal/packagecache/`

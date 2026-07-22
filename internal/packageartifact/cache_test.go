@@ -110,8 +110,8 @@ func TestCachePreservesExistingEntryWhenOversizePutFails(t *testing.T) {
 
 func cacheFixture(t *testing.T) (Artifact, packagecache.Key, moduleinterface.Hash) {
 	t.Helper()
-	_, program, identities := checkedWorkspaceProgram(t)
-	artifacts, err := ExtractAll(program, identities)
+	_, program, identities, coordinates := checkedWorkspaceProgram(t)
+	artifacts, err := ExtractAll(program, identities, coordinates)
 	if err != nil {
 		t.Fatal(err)
 	}

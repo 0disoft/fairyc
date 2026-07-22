@@ -15,13 +15,15 @@ import (
 // build-local type and symbol numbering, while Context retains the exact workspace snapshot needed
 // to verify and reassemble the current process-local MIR bodies.
 type Artifact struct {
-	PackageID         hir.PackageID
-	Package           packagegraph.InstanceID
-	PackageIdentities map[hir.PackageID]packagegraph.InstanceID
-	StableContext     ContextDescriptor
-	Context           mir.Program
-	Functions         []FunctionRecord
-	Imports           []FunctionImport
+	PackageID          hir.PackageID
+	Package            packagegraph.InstanceID
+	PackageCoordinate  packagegraph.CoordinateID
+	PackageIdentities  map[hir.PackageID]packagegraph.InstanceID
+	PackageCoordinates map[hir.PackageID]packagegraph.CoordinateID
+	StableContext      ContextDescriptor
+	Context            mir.Program
+	Functions          []FunctionRecord
+	Imports            []FunctionImport
 }
 
 // FunctionRecord binds one package-owned body to its package-stable descriptor and identity.
@@ -52,7 +54,7 @@ type FunctionSignature struct {
 }
 
 // ExtractAll slices every function-owning package from one closed, verified whole program.
-func ExtractAll(program mir.Program, identities map[hir.PackageID]packagegraph.InstanceID) ([]Artifact, error) {
+func ExtractAll(program mir.Program, identities map[hir.PackageID]packagegraph.InstanceID, coordinates map[hir.PackageID]packagegraph.CoordinateID) ([]Artifact, error) {
 	if failures := mir.Verify(program); len(failures) != 0 {
 		return nil, fmt.Errorf("verify whole program before package extraction: %w", failures[0])
 	}
@@ -67,7 +69,7 @@ func ExtractAll(program mir.Program, identities map[hir.PackageID]packagegraph.I
 	slices.Sort(packageIDs)
 	artifacts := make([]Artifact, 0, len(packageIDs))
 	for _, packageID := range packageIDs {
-		artifact, err := extractVerified(program, packageID, identities)
+		artifact, err := extractVerified(program, packageID, identities, coordinates)
 		if err != nil {
 			return nil, err
 		}
@@ -78,17 +80,21 @@ func ExtractAll(program mir.Program, identities map[hir.PackageID]packagegraph.I
 
 // Extract creates one package-owned function slice with explicit internal imports. The program is
 // verified before slicing, and the resulting artifact is independently verified before return.
-func Extract(program mir.Program, packageID hir.PackageID, identities map[hir.PackageID]packagegraph.InstanceID) (Artifact, error) {
+func Extract(program mir.Program, packageID hir.PackageID, identities map[hir.PackageID]packagegraph.InstanceID, coordinates map[hir.PackageID]packagegraph.CoordinateID) (Artifact, error) {
 	if failures := mir.Verify(program); len(failures) != 0 {
 		return Artifact{}, fmt.Errorf("verify whole program before package extraction: %w", failures[0])
 	}
-	return extractVerified(program, packageID, identities)
+	return extractVerified(program, packageID, identities, coordinates)
 }
 
-func extractVerified(program mir.Program, packageID hir.PackageID, identities map[hir.PackageID]packagegraph.InstanceID) (Artifact, error) {
+func extractVerified(program mir.Program, packageID hir.PackageID, identities map[hir.PackageID]packagegraph.InstanceID, coordinates map[hir.PackageID]packagegraph.CoordinateID) (Artifact, error) {
 	packageIdentity, found := identities[packageID]
 	if !found {
 		return Artifact{}, fmt.Errorf("package %d has no PackageInstanceId", packageID)
+	}
+	packageCoordinate, found := coordinates[packageID]
+	if !found {
+		return Artifact{}, fmt.Errorf("package %d has no PackageCoordinateId", packageID)
 	}
 
 	type functionMetadata struct {
@@ -99,7 +105,7 @@ func extractVerified(program mir.Program, packageID hir.PackageID, identities ma
 	}
 	bySymbol := make(map[hir.SymbolID]functionMetadata, len(program.Functions))
 	for _, function := range program.Functions {
-		descriptor, err := DescribeFunction(function, identities)
+		descriptor, err := DescribeFunction(function, coordinates)
 		if err != nil {
 			return Artifact{}, err
 		}
@@ -116,8 +122,8 @@ func extractVerified(program mir.Program, packageID hir.PackageID, identities ma
 	}
 
 	artifact := Artifact{
-		PackageID: packageID, Package: packageIdentity,
-		PackageIdentities: cloneIdentities(identities), Context: contextOf(program),
+		PackageID: packageID, Package: packageIdentity, PackageCoordinate: packageCoordinate,
+		PackageIdentities: cloneIdentities(identities), PackageCoordinates: cloneCoordinates(coordinates), Context: contextOf(program),
 	}
 	ownedSymbols := make(map[hir.SymbolID]struct{})
 	for _, function := range program.Functions {
@@ -167,7 +173,7 @@ func extractVerified(program mir.Program, packageID hir.PackageID, identities ma
 	}
 	sortRecords(artifact.Functions)
 	sortImports(artifact.Imports)
-	stableContext, err := DescribeContext(artifact.Context, artifact.PackageIdentities, artifactBindings(artifact))
+	stableContext, err := DescribeContext(artifact.Context, artifact.PackageCoordinates, artifactBindings(artifact))
 	if err != nil {
 		return Artifact{}, fmt.Errorf("describe package %d type context: %w", packageID, err)
 	}
@@ -184,8 +190,14 @@ func Verify(artifact Artifact) error {
 	if artifact.Package == (packagegraph.InstanceID{}) {
 		return fmt.Errorf("package artifact has an empty PackageInstanceId")
 	}
+	if artifact.PackageCoordinate == (packagegraph.CoordinateID{}) {
+		return fmt.Errorf("package artifact has an empty PackageCoordinateId")
+	}
 	if identity, found := artifact.PackageIdentities[artifact.PackageID]; !found || identity != artifact.Package {
 		return fmt.Errorf("package artifact owner mapping is missing or inconsistent")
+	}
+	if coordinate, found := artifact.PackageCoordinates[artifact.PackageID]; !found || coordinate != artifact.PackageCoordinate {
+		return fmt.Errorf("package artifact coordinate mapping is missing or inconsistent")
 	}
 	if len(artifact.Context.Functions) != 0 {
 		return fmt.Errorf("package artifact context contains executable functions")
@@ -204,7 +216,7 @@ func Verify(artifact Artifact) error {
 		if record.Body.Span.Package != artifact.PackageID {
 			return fmt.Errorf("owned function %q belongs to package %d, want %d", record.Body.Name, record.Body.Span.Package, artifact.PackageID)
 		}
-		if err := verifyBinding(record.ID, record.Descriptor, record.Body, artifact.PackageIdentities); err != nil {
+		if err := verifyBinding(record.ID, record.Descriptor, record.Body, artifact.PackageCoordinates); err != nil {
 			return err
 		}
 		if err := recordBinding(seenSymbols, seenIDs, record.Body.Symbol, record.ID, record.Body.Name); err != nil {
@@ -214,7 +226,7 @@ func Verify(artifact Artifact) error {
 	}
 	for _, imported := range artifact.Imports {
 		stub := imported.Signature.stub()
-		if err := verifyBinding(imported.ID, imported.Descriptor, stub, artifact.PackageIdentities); err != nil {
+		if err := verifyBinding(imported.ID, imported.Descriptor, stub, artifact.PackageCoordinates); err != nil {
 			return fmt.Errorf("import %q: %w", imported.Signature.Name, err)
 		}
 		if err := recordBinding(seenSymbols, seenIDs, imported.Signature.Symbol, imported.ID, imported.Signature.Name); err != nil {
@@ -222,7 +234,7 @@ func Verify(artifact Artifact) error {
 		}
 		program.Functions = append(program.Functions, stub)
 	}
-	expectedContext, err := DescribeContext(artifact.Context, artifact.PackageIdentities, artifactBindings(artifact))
+	expectedContext, err := DescribeContext(artifact.Context, artifact.PackageCoordinates, artifactBindings(artifact))
 	if err != nil {
 		return fmt.Errorf("describe stable type context: %w", err)
 	}
@@ -255,7 +267,7 @@ func Reassemble(artifacts []Artifact) (mir.Program, error) {
 		if !reflect.DeepEqual(artifact.StableContext, base.StableContext) {
 			return mir.Program{}, fmt.Errorf("package artifacts do not share one stable type context")
 		}
-		if !reflect.DeepEqual(artifact.Context, base.Context) || !reflect.DeepEqual(artifact.PackageIdentities, base.PackageIdentities) {
+		if !reflect.DeepEqual(artifact.Context, base.Context) || !reflect.DeepEqual(artifact.PackageCoordinates, base.PackageCoordinates) {
 			return mir.Program{}, fmt.Errorf("package artifacts do not share one exact process-local context")
 		}
 		if _, duplicate := seenPackages[artifact.Package]; duplicate {
@@ -368,8 +380,8 @@ func Reassemble(artifacts []Artifact) (mir.Program, error) {
 	return program, nil
 }
 
-func verifyBinding(id FunctionID, descriptor FunctionDescriptor, function mir.Function, identities map[hir.PackageID]packagegraph.InstanceID) error {
-	actual, err := DescribeFunction(function, identities)
+func verifyBinding(id FunctionID, descriptor FunctionDescriptor, function mir.Function, coordinates map[hir.PackageID]packagegraph.CoordinateID) error {
+	actual, err := DescribeFunction(function, coordinates)
 	if err != nil {
 		return err
 	}
@@ -447,6 +459,14 @@ func cloneIdentities(identities map[hir.PackageID]packagegraph.InstanceID) map[h
 	result := make(map[hir.PackageID]packagegraph.InstanceID, len(identities))
 	for packageID, identity := range identities {
 		result[packageID] = identity
+	}
+	return result
+}
+
+func cloneCoordinates(coordinates map[hir.PackageID]packagegraph.CoordinateID) map[hir.PackageID]packagegraph.CoordinateID {
+	result := make(map[hir.PackageID]packagegraph.CoordinateID, len(coordinates))
+	for packageID, coordinate := range coordinates {
+		result[packageID] = coordinate
 	}
 	return result
 }

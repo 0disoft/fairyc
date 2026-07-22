@@ -16,7 +16,7 @@ func TestKeyRoundTripAndInvalidation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Compute() error = %v", err)
 	}
-	if got, want := key.String(), "fycache1-sha256-06bec376bb87eb9922fd88d3d635d73e80f236ec7290137ea36742df8bfebca5"; got != want {
+	if got, want := key.String(), "fycache2-sha256-0f654f4799af274607eb56d9f8fdc8d0707dd91b81054172a9fd4668c8279908"; got != want {
 		t.Fatalf("key = %q, want %q", got, want)
 	}
 	parsed, err := ParseKey(key.String())
@@ -84,13 +84,13 @@ func TestCanonicalizeDependenciesSortsWithoutMutating(t *testing.T) {
 	t.Parallel()
 	inputs := testInputs(t)
 	first := inputs.Dependencies[0]
-	second := Dependency{Instance: mustInstance(t, "fypi1-sha256-e8756812ba7956f1f997a35a522b7f1735d8679c99c48b140570f4cd690c1a91"), Interface: first.Interface}
+	second := Dependency{Coordinate: mustCoordinate(t, "fypc1-sha256-e8756812ba7956f1f997a35a522b7f1735d8679c99c48b140570f4cd690c1a91"), Interface: first.Interface}
 	values := []Dependency{second, first}
 	ordered, err := CanonicalizeDependencies(values)
 	if err != nil {
 		t.Fatalf("CanonicalizeDependencies() error = %v", err)
 	}
-	if ordered[0].Instance != first.Instance || values[0].Instance != second.Instance {
+	if ordered[0].Coordinate != first.Coordinate || values[0].Coordinate != second.Coordinate {
 		t.Fatalf("ordered=%v input=%v", ordered, values)
 	}
 	if _, err := CanonicalizeDependencies([]Dependency{first, first}); err == nil {
@@ -114,11 +114,20 @@ func testInputs(t *testing.T) Inputs {
 		Package:              mustInstance(t, "fypi1-sha256-04fc4400f5e875c5c22ab2d50765d721df38a12a19ef3508deb432c7f4da92f3"),
 		Source:               mustSource(t, "fysrc1-sha256-dd19fc7a8f93795ca7bf1abb70fa2f7bbbb0a8849fe410f6b4c080b55817e9a3"),
 		Dependencies: []Dependency{{
-			Instance:  mustInstance(t, "fypi1-sha256-903a7b9974986cccf6166e8978ca9cb26273d4776af6d1a5dd3b04e7060e2f41"),
-			Interface: mustInterface(t, "fyif2-sha256-a5e79db9b105ffac6d57d0ff054b75813344fdf4e9f9a5c1873da8907ae281b9"),
+			Coordinate: mustCoordinate(t, "fypc1-sha256-903a7b9974986cccf6166e8978ca9cb26273d4776af6d1a5dd3b04e7060e2f41"),
+			Interface:  mustInterface(t, "fyif2-sha256-a5e79db9b105ffac6d57d0ff054b75813344fdf4e9f9a5c1873da8907ae281b9"),
 		}},
 		Features: []string{"base", "tls"},
 	}
+}
+
+func mustCoordinate(t *testing.T, value string) packagegraph.CoordinateID {
+	t.Helper()
+	parsed, err := packagegraph.ParseCoordinateID(value)
+	if err != nil {
+		t.Fatalf("ParseCoordinateID(%q): %v", value, err)
+	}
+	return parsed
 }
 
 func mustInstance(t *testing.T, value string) packagegraph.InstanceID {

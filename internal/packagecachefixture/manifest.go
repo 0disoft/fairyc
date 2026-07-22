@@ -27,8 +27,8 @@ type inputDefinition struct {
 }
 
 type dependencyDefinition struct {
-	Instance  string `json:"instance"`
-	Interface string `json:"interface"`
+	Coordinate string `json:"coordinate"`
+	Interface  string `json:"interface"`
 }
 
 type inputOverride struct {

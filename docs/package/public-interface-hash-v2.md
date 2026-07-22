@@ -37,6 +37,6 @@ V1 hashes are incompatible and fail parsing under the v2 consumer.
 ## Boundary
 
 Coordinate plus interface equality is a public compatibility fact, not source equality. Exact
-package source and provider artifacts still use `PackageInstanceId` and source digest. Cache reuse
-across a private dependency edit remains disabled until stable function/type identity and dependency
-cache keys adopt the same coordinate boundary together.
+package source and provider records still use `PackageInstanceId` and source digest. ADR 0174 carries
+the coordinate boundary through stable function/type identity and dependency cache keys, enabling
+verified caller reuse across a private dependency edit.

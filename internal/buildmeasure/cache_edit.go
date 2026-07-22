@@ -141,9 +141,13 @@ func validateCacheEditOutcome(sample CacheEditSample) error {
 		if sample.Outcome != "fallback" || sample.Hits != 1 || sample.Misses != 1 || sample.Stored != 2 || !sample.Lowered || sample.VerifiedHits != 1 || sample.RetainedEntries != 3 {
 			return fmt.Errorf("private root edit does not prove one-package invalidation")
 		}
-	case CacheEditPrivateDependency, CacheEditPublicDependency:
+	case CacheEditPrivateDependency:
+		if sample.Outcome != "fallback" || sample.Hits != 1 || sample.Misses != 1 || sample.Stored != 2 || !sample.Lowered || sample.VerifiedHits != 1 || sample.RetainedEntries != 3 {
+			return fmt.Errorf("private dependency edit does not prove provider-only invalidation")
+		}
+	case CacheEditPublicDependency:
 		if sample.Outcome != "fallback" || sample.Hits != 0 || sample.Misses != 2 || sample.Stored != 2 || !sample.Lowered || sample.VerifiedHits != 0 || sample.RetainedEntries != 4 {
-			return fmt.Errorf("dependency edit does not prove dependency-and-dependent invalidation")
+			return fmt.Errorf("public dependency edit does not prove dependency-and-dependent invalidation")
 		}
 	default:
 		return fmt.Errorf("unknown edit condition %q", sample.Condition)

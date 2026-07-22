@@ -1,6 +1,6 @@
 # Package function identity v1
 
-- Status: Executable compiler-private contract
+- Status: Historical; superseded by ADR 0174 FunctionID v2
 - Decision: `docs/adr/0152-package-stable-function-identity.md`
 - Implementation source: `internal/packageartifact/function_identity.go`
 

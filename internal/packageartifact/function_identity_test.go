@@ -22,7 +22,7 @@ func TestCheckedInWorkspaceFunctionsHaveUniqueStableIdentities(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	identities, err := workspace.PackageIdentities()
+	coordinates, err := workspace.PackageCoordinates()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -35,7 +35,7 @@ func TestCheckedInWorkspaceFunctionsHaveUniqueStableIdentities(t *testing.T) {
 	}
 	seen := make(map[FunctionID]string, len(result.MIR.Functions))
 	for _, function := range result.MIR.Functions {
-		descriptor, describeErr := DescribeFunction(function, identities)
+		descriptor, describeErr := DescribeFunction(function, coordinates)
 		if describeErr != nil {
 			t.Fatalf("DescribeFunction(%q): %v", function.Name, describeErr)
 		}
@@ -49,8 +49,8 @@ func TestCheckedInWorkspaceFunctionsHaveUniqueStableIdentities(t *testing.T) {
 
 func TestFunctionIdentityIsStableAcrossBuildLocalPackageNumbers(t *testing.T) {
 	t.Parallel()
-	owner := testInstanceID(t, "owner")
-	dependency := testInstanceID(t, "dependency")
+	owner := testCoordinateID(t, "owner")
+	dependency := testCoordinateID(t, "dependency")
 	left := mir.Function{
 		Name: "$p1::api::Reader::read", Span: hir.Span{Package: 1},
 		ParameterTypes: []hir.Type{hir.SharedBorrow("$p1::api::Reader")},
@@ -63,11 +63,11 @@ func TestFunctionIdentityIsStableAcrossBuildLocalPackageNumbers(t *testing.T) {
 	right.ParameterTypes = []hir.Type{hir.SharedBorrow("$p7::api::Reader")}
 	right.ResultType = hir.Result("$p9::model::Packet", hir.TypeI32)
 
-	leftDescriptor, err := DescribeFunction(left, map[hir.PackageID]packagegraph.InstanceID{1: owner, 2: dependency})
+	leftDescriptor, err := DescribeFunction(left, map[hir.PackageID]packagegraph.CoordinateID{1: owner, 2: dependency})
 	if err != nil {
 		t.Fatal(err)
 	}
-	rightDescriptor, err := DescribeFunction(right, map[hir.PackageID]packagegraph.InstanceID{7: owner, 9: dependency})
+	rightDescriptor, err := DescribeFunction(right, map[hir.PackageID]packagegraph.CoordinateID{7: owner, 9: dependency})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -83,11 +83,11 @@ func TestFunctionIdentityIsStableAcrossBuildLocalPackageNumbers(t *testing.T) {
 
 func TestFunctionIdentityTracksPackageSignatureEffectsAndDropGlue(t *testing.T) {
 	t.Parallel()
-	owner := testInstanceID(t, "owner")
+	owner := testCoordinateID(t, "owner")
 	base := FunctionDescriptor{Package: owner, Name: "api::read", ParameterTypes: []string{"i32"}, ResultType: "i32"}
 	baseID := mustFunctionID(t, base)
 	changes := []FunctionDescriptor{
-		{Package: testInstanceID(t, "other"), Name: base.Name, ParameterTypes: base.ParameterTypes, ResultType: base.ResultType},
+		{Package: testCoordinateID(t, "other"), Name: base.Name, ParameterTypes: base.ParameterTypes, ResultType: base.ResultType},
 		{Package: owner, Name: "api::write", ParameterTypes: base.ParameterTypes, ResultType: base.ResultType},
 		{Package: owner, Name: base.Name, ParameterTypes: []string{"u32"}, ResultType: base.ResultType},
 		{Package: owner, Name: base.Name, ParameterTypes: base.ParameterTypes, ResultType: "u32"},
@@ -103,10 +103,10 @@ func TestFunctionIdentityTracksPackageSignatureEffectsAndDropGlue(t *testing.T) 
 
 func TestStableTypeRebindsAcrossFreshPackageNumbers(t *testing.T) {
 	t.Parallel()
-	owner := testInstanceID(t, "owner")
-	dependency := testInstanceID(t, "dependency")
-	leftInstances := map[hir.PackageID]packagegraph.InstanceID{1: owner, 2: dependency}
-	rightInstances := map[hir.PackageID]packagegraph.InstanceID{7: owner, 9: dependency}
+	owner := testCoordinateID(t, "owner")
+	dependency := testCoordinateID(t, "dependency")
+	leftInstances := map[hir.PackageID]packagegraph.CoordinateID{1: owner, 2: dependency}
+	rightInstances := map[hir.PackageID]packagegraph.CoordinateID{7: owner, 9: dependency}
 	types := []hir.Type{
 		hir.TypeI32,
 		hir.SharedBorrow("$p1::api::Reader"),
@@ -140,16 +140,16 @@ func TestStableTypeRebindsAcrossFreshPackageNumbers(t *testing.T) {
 
 func TestStableTypeRebindRejectsUnknownAmbiguousAndMalformedIdentity(t *testing.T) {
 	t.Parallel()
-	owner := testInstanceID(t, "owner")
+	owner := testCoordinateID(t, "owner")
 	stable := "pkg[" + owner.String() + "]::api::Reader"
-	if _, err := rebindStableType(stable, nil); err == nil || !strings.Contains(err.Error(), "unknown PackageInstanceId") {
+	if _, err := rebindStableType(stable, nil); err == nil || !strings.Contains(err.Error(), "unknown PackageCoordinateId") {
 		t.Fatalf("unknown identity error = %v", err)
 	}
-	if _, err := rebindStableType(stable, map[hir.PackageID]packagegraph.InstanceID{3: owner, 8: owner}); err == nil || !strings.Contains(err.Error(), "multiple local packages") {
+	if _, err := rebindStableType(stable, map[hir.PackageID]packagegraph.CoordinateID{3: owner, 8: owner}); err == nil || !strings.Contains(err.Error(), "multiple local packages") {
 		t.Fatalf("ambiguous identity error = %v", err)
 	}
 	for _, value := range []string{"$p3::api::Reader", "pkg[broken]::api::Reader", "u8[0]", "Result<i32>"} {
-		if _, err := rebindStableType(value, map[hir.PackageID]packagegraph.InstanceID{3: owner}); err == nil {
+		if _, err := rebindStableType(value, map[hir.PackageID]packagegraph.CoordinateID{3: owner}); err == nil {
 			t.Fatalf("rebindStableType(%q) accepted malformed input", value)
 		}
 	}
@@ -157,11 +157,11 @@ func TestStableTypeRebindRejectsUnknownAmbiguousAndMalformedIdentity(t *testing.
 
 func TestFunctionIdentityRejectsIncompleteOrBuildLocalInputs(t *testing.T) {
 	t.Parallel()
-	owner := testInstanceID(t, "owner")
-	if _, err := DescribeFunction(mir.Function{Name: "$p2::api::read", Span: hir.Span{Package: 1}, ResultType: hir.TypeVoid}, map[hir.PackageID]packagegraph.InstanceID{1: owner}); err == nil {
+	owner := testCoordinateID(t, "owner")
+	if _, err := DescribeFunction(mir.Function{Name: "$p2::api::read", Span: hir.Span{Package: 1}, ResultType: hir.TypeVoid}, map[hir.PackageID]packagegraph.CoordinateID{1: owner}); err == nil {
 		t.Fatal("DescribeFunction accepted mismatched function owner prefix")
 	}
-	if _, err := DescribeFunction(mir.Function{Name: "$p1::api::read", Span: hir.Span{Package: 1}, ParameterTypes: []hir.Type{"$p2::dep::Token"}, ResultType: hir.TypeVoid}, map[hir.PackageID]packagegraph.InstanceID{1: owner}); err == nil {
+	if _, err := DescribeFunction(mir.Function{Name: "$p1::api::read", Span: hir.Span{Package: 1}, ParameterTypes: []hir.Type{"$p2::dep::Token"}, ResultType: hir.TypeVoid}, map[hir.PackageID]packagegraph.CoordinateID{1: owner}); err == nil {
 		t.Fatal("DescribeFunction accepted an unmapped nominal type")
 	}
 	if _, err := ComputeFunctionID(FunctionDescriptor{Package: owner, Name: "$p1::api::read", ResultType: "void"}); err == nil {
@@ -206,9 +206,9 @@ func mustFunctionID(t *testing.T, descriptor FunctionDescriptor) FunctionID {
 	return id
 }
 
-func testInstanceID(t *testing.T, name string) packagegraph.InstanceID {
+func testCoordinateID(t *testing.T, name string) packagegraph.CoordinateID {
 	t.Helper()
-	id, err := packagegraph.ComputeInstanceID(packagegraph.Identity{PackageUID: name, SourceIdentity: "source-" + name, VersionIdentity: "1"})
+	id, err := packagegraph.ComputeCoordinateID(packagegraph.Coordinate{PackageUID: name, VersionIdentity: "1"})
 	if err != nil {
 		t.Fatal(err)
 	}

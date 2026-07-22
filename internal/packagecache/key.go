@@ -18,16 +18,16 @@ import (
 
 const (
 	KeyAlgorithm = "sha256"
-	KeyEncoding  = "fairyc.package-cache-key/v1"
-	KeyPrefix    = "fycache1-sha256-"
+	KeyEncoding  = "fairyc.package-cache-key/v2"
+	KeyPrefix    = "fycache2-sha256-"
 )
 
 const keyDomain = "fairyc.package-cache-key"
 
-// Dependency binds one exact nominal dependency instance to the public interface consumed from it.
+// Dependency binds one source-independent dependency coordinate to the public interface consumed from it.
 type Dependency struct {
-	Instance  packagegraph.InstanceID
-	Interface moduleinterface.Hash
+	Coordinate packagegraph.CoordinateID
+	Interface  moduleinterface.Hash
 }
 
 // Inputs contains every compatibility and invalidation member needed for whole-package reuse.
@@ -69,7 +69,7 @@ func (key *Key) UnmarshalText(text []byte) error {
 	return nil
 }
 
-// ParseKey accepts only the complete lowercase v1 representation.
+// ParseKey accepts only the complete lowercase v2 representation.
 func ParseKey(value string) (Key, error) {
 	var result Key
 	if !strings.HasPrefix(value, KeyPrefix) {
@@ -105,9 +105,11 @@ func Encode(inputs Inputs) ([]byte, error) {
 	var encoded bytes.Buffer
 	encoded.WriteString(keyDomain)
 	encoded.WriteByte(0)
-	encoded.WriteByte(1)
+	encoded.WriteByte(2)
 	writeString(&encoded, packagegraph.InstanceIDEncoding)
 	writeString(&encoded, packagegraph.InstanceIDAlgorithm)
+	writeString(&encoded, packagegraph.CoordinateIDEncoding)
+	writeString(&encoded, packagegraph.CoordinateIDAlgorithm)
 	writeString(&encoded, packagecontent.DigestEncoding)
 	writeString(&encoded, packagecontent.DigestAlgorithm)
 	writeString(&encoded, moduleinterface.HashEncoding)
@@ -126,7 +128,7 @@ func Encode(inputs Inputs) ([]byte, error) {
 	encoded.Write(inputs.Source[:])
 	writeUint64(&encoded, uint64(len(inputs.Dependencies)))
 	for _, dependency := range inputs.Dependencies {
-		encoded.Write(dependency.Instance[:])
+		encoded.Write(dependency.Coordinate[:])
 		encoded.Write(dependency.Interface[:])
 	}
 	writeStrings(&encoded, inputs.Features)
@@ -168,11 +170,11 @@ func validateInputs(inputs Inputs) error {
 		return err
 	}
 	for index, dependency := range inputs.Dependencies {
-		if isZero(dependency.Instance[:]) || isZero(dependency.Interface[:]) {
-			return fmt.Errorf("package cache dependency %d must contain an instance and interface hash", index)
+		if isZero(dependency.Coordinate[:]) || isZero(dependency.Interface[:]) {
+			return fmt.Errorf("package cache dependency %d must contain a coordinate and interface hash", index)
 		}
-		if index > 0 && bytes.Compare(inputs.Dependencies[index-1].Instance[:], dependency.Instance[:]) >= 0 {
-			return fmt.Errorf("package cache dependencies must be sorted and unique by PackageInstanceId")
+		if index > 0 && bytes.Compare(inputs.Dependencies[index-1].Coordinate[:], dependency.Coordinate[:]) >= 0 {
+			return fmt.Errorf("package cache dependencies must be sorted and unique by PackageCoordinateId")
 		}
 	}
 	return nil
@@ -218,15 +220,15 @@ func writeUint64(buffer *bytes.Buffer, value uint64) {
 }
 
 // CanonicalizeDependencies returns a sorted copy for callers assembling a key from graph edges.
-// Duplicate package instances reject because one instance cannot expose two interface hashes.
+// Duplicate package coordinates reject because one coordinate cannot expose two interface hashes.
 func CanonicalizeDependencies(values []Dependency) ([]Dependency, error) {
 	result := slices.Clone(values)
 	slices.SortFunc(result, func(left, right Dependency) int {
-		return bytes.Compare(left.Instance[:], right.Instance[:])
+		return bytes.Compare(left.Coordinate[:], right.Coordinate[:])
 	})
 	for index := 1; index < len(result); index++ {
-		if result[index-1].Instance == result[index].Instance {
-			return nil, fmt.Errorf("duplicate package cache dependency %s", result[index].Instance)
+		if result[index-1].Coordinate == result[index].Coordinate {
+			return nil, fmt.Errorf("duplicate package cache dependency %s", result[index].Coordinate)
 		}
 	}
 	return result, nil

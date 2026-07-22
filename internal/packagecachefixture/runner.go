@@ -13,7 +13,7 @@ import (
 	"github.com/0disoft/fairyc/internal/packagegraph"
 )
 
-const schemaVersion = "fairyc.package-cache-fixtures/v1"
+const schemaVersion = "fairyc.package-cache-fixtures/v2"
 
 // Run decodes and compares all whole-package cache-key fixtures.
 func Run(path string) (Report, error) {
@@ -91,15 +91,15 @@ func parseInput(value inputDefinition) (packagecache.Inputs, error) {
 	}
 	dependencies := make([]packagecache.Dependency, 0, len(value.Dependencies))
 	for index, definition := range value.Dependencies {
-		instance, err := packagegraph.ParseInstanceID(definition.Instance)
+		coordinate, err := packagegraph.ParseCoordinateID(definition.Coordinate)
 		if err != nil {
-			return packagecache.Inputs{}, fmt.Errorf("parse dependency %d instance: %w", index, err)
+			return packagecache.Inputs{}, fmt.Errorf("parse dependency %d coordinate: %w", index, err)
 		}
 		interfaceHash, err := moduleinterface.ParseHash(definition.Interface)
 		if err != nil {
 			return packagecache.Inputs{}, fmt.Errorf("parse dependency %d interface: %w", index, err)
 		}
-		dependencies = append(dependencies, packagecache.Dependency{Instance: instance, Interface: interfaceHash})
+		dependencies = append(dependencies, packagecache.Dependency{Coordinate: coordinate, Interface: interfaceHash})
 	}
 	return packagecache.Inputs{
 		CompilerBuild:        value.CompilerBuild,

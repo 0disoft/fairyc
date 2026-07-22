@@ -132,8 +132,8 @@ func TestStableContextRejectsOrderingTypeAndDropContradictions(t *testing.T) {
 	}
 }
 
-func stableContextFixture(packageID hir.PackageID, dropSymbol, foreignSymbol hir.SymbolID) (mir.Program, map[hir.PackageID]packagegraph.InstanceID, map[hir.SymbolID]FunctionID) {
-	instance := packagegraph.InstanceID{1, 2, 3}
+func stableContextFixture(packageID hir.PackageID, dropSymbol, foreignSymbol hir.SymbolID) (mir.Program, map[hir.PackageID]packagegraph.CoordinateID, map[hir.SymbolID]FunctionID) {
+	coordinate := packagegraph.CoordinateID{1, 2, 3}
 	dropID := FunctionID{9, 8, 7}
 	packageText := strconv.FormatUint(uint64(packageID), 10)
 	prefix := "$p" + packageText + "::types::"
@@ -163,5 +163,5 @@ func stableContextFixture(packageID hir.PackageID, dropSymbol, foreignSymbol hir
 			ParameterTypes: []hir.Type{hir.TypeUSize}, ResultType: hir.TypeI32,
 		}},
 	}
-	return context, map[hir.PackageID]packagegraph.InstanceID{packageID: instance}, map[hir.SymbolID]FunctionID{dropSymbol: dropID}
+	return context, map[hir.PackageID]packagegraph.CoordinateID{packageID: coordinate}, map[hir.SymbolID]FunctionID{dropSymbol: dropID}
 }

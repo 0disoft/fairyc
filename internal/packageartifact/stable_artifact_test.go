@@ -18,8 +18,8 @@ const stablePackageArtifactLimit = 64 << 20
 
 func TestStablePackageArtifactsDecodeRebindExecuteAndReencodeAcrossFreshProcessNumbers(t *testing.T) {
 	t.Parallel()
-	workspace, original, identities := checkedWorkspaceProgram(t)
-	processArtifacts, err := ExtractAll(original, identities)
+	workspace, original, identities, coordinates := checkedWorkspaceProgram(t)
+	processArtifacts, err := ExtractAll(original, identities, coordinates)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,13 +48,15 @@ func TestStablePackageArtifactsDecodeRebindExecuteAndReencodeAcrossFreshProcessN
 	}
 	slices.Sort(oldPackageIDs)
 	freshIdentities := make(map[hir.PackageID]packagegraph.InstanceID, len(identities))
+	freshCoordinates := make(map[hir.PackageID]packagegraph.CoordinateID, len(coordinates))
 	oldToFresh := make(map[hir.PackageID]hir.PackageID, len(identities))
 	for index, old := range oldPackageIDs {
 		fresh := hir.PackageID(100 + index)
 		freshIdentities[fresh] = identities[old]
+		freshCoordinates[fresh] = coordinates[old]
 		oldToFresh[old] = fresh
 	}
-	rebound, err := RebindStableArtifacts(decoded, freshIdentities, 1000, 10000, 500)
+	rebound, err := RebindStableArtifacts(decoded, freshCoordinates, 1000, 10000, 500)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -76,7 +78,7 @@ func TestStablePackageArtifactsDecodeRebindExecuteAndReencodeAcrossFreshProcessN
 		t.Fatalf("rebound stable packages = %+v, original = %+v", reboundOutcome, originalOutcome)
 	}
 
-	reextracted, err := ExtractAll(rebound, freshIdentities)
+	reextracted, err := ExtractAll(rebound, freshIdentities, freshCoordinates)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -97,8 +99,8 @@ func TestStablePackageArtifactsDecodeRebindExecuteAndReencodeAcrossFreshProcessN
 
 func TestStablePackageArtifactCodecRejectsBoundsUnknownFieldsAndImportCorruption(t *testing.T) {
 	t.Parallel()
-	_, program, identities := checkedWorkspaceProgram(t)
-	processArtifacts, err := ExtractAll(program, identities)
+	_, program, identities, coordinates := checkedWorkspaceProgram(t)
+	processArtifacts, err := ExtractAll(program, identities, coordinates)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -133,12 +135,12 @@ func TestStablePackageArtifactCodecRejectsBoundsUnknownFieldsAndImportCorruption
 
 func TestStablePackageArtifactBytesIgnoreUnreferencedWorkspaceDeclarations(t *testing.T) {
 	t.Parallel()
-	workspace, original, identities := checkedWorkspaceProgram(t)
+	workspace, original, identities, coordinates := checkedWorkspaceProgram(t)
 	rootPackage, err := workspace.RootPackageID()
 	if err != nil {
 		t.Fatal(err)
 	}
-	baseline, err := ExtractAll(original, identities)
+	baseline, err := ExtractAll(original, identities, coordinates)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -153,7 +155,7 @@ func TestStablePackageArtifactBytesIgnoreUnreferencedWorkspaceDeclarations(t *te
 	if failures := mir.Verify(mutated); len(failures) != 0 {
 		t.Fatalf("verify private-declaration mutation: %v", failures[0])
 	}
-	changed, err := ExtractAll(mutated, identities)
+	changed, err := ExtractAll(mutated, identities, coordinates)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -165,8 +167,8 @@ func TestStablePackageArtifactBytesIgnoreUnreferencedWorkspaceDeclarations(t *te
 
 func TestStablePackageArtifactsMergeDistinctPackageContexts(t *testing.T) {
 	t.Parallel()
-	workspace, program, identities := checkedWorkspaceProgram(t)
-	processArtifacts, err := ExtractAll(program, identities)
+	workspace, program, identities, coordinates := checkedWorkspaceProgram(t)
+	processArtifacts, err := ExtractAll(program, identities, coordinates)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -182,7 +184,7 @@ func TestStablePackageArtifactsMergeDistinctPackageContexts(t *testing.T) {
 		t.Fatal("test workspace must contain at least two package artifacts")
 	}
 	marker := ContextStruct{
-		Type: "pkg[" + stable[0].Package.String() + "]::private::MergeMarker",
+		Type: "pkg[" + stable[0].Coordinate.String() + "]::private::MergeMarker",
 		Name: "MergeMarker",
 	}
 	stable[0].Context.Structs = append(stable[0].Context.Structs, marker)
@@ -198,7 +200,7 @@ func TestStablePackageArtifactsMergeDistinctPackageContexts(t *testing.T) {
 		t.Fatal("test setup did not create distinct package contexts")
 	}
 
-	rebound, err := RebindStableArtifacts(stable, identities, 1000, 10000, 500)
+	rebound, err := RebindStableArtifacts(stable, coordinates, 1000, 10000, 500)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -217,13 +219,13 @@ func TestStablePackageArtifactsMergeDistinctPackageContexts(t *testing.T) {
 
 func TestMergeContextDescriptorsRejectsConflictingDefinitions(t *testing.T) {
 	t.Parallel()
-	_, _, identities := checkedWorkspaceProgram(t)
-	var instance packagegraph.InstanceID
-	for _, candidate := range identities {
-		instance = candidate
+	_, _, _, coordinates := checkedWorkspaceProgram(t)
+	var coordinate packagegraph.CoordinateID
+	for _, candidate := range coordinates {
+		coordinate = candidate
 		break
 	}
-	typeName := "pkg[" + instance.String() + "]::shared::Value"
+	typeName := "pkg[" + coordinate.String() + "]::shared::Value"
 	left := ContextDescriptor{Structs: []ContextStruct{{
 		Type: typeName, Name: "Value", Fields: []ContextField{{Name: "value", Type: "i32"}},
 	}}}

@@ -19,9 +19,9 @@ import (
 )
 
 const (
-	ContextSchema    = "fairyc.package-type-context/v1"
-	ContextVersion   = "fairyc-package-type-context/1"
-	ContextIDPrefix  = "fyctx1-sha256-"
+	ContextSchema    = "fairyc.package-type-context/v2"
+	ContextVersion   = "fairyc-package-type-context/2"
+	ContextIDPrefix  = "fyctx2-sha256-"
 	ContextAlgorithm = "sha256"
 )
 
@@ -104,12 +104,12 @@ type ContextResource struct {
 }
 
 type ContextForeignFunction struct {
-	Package        packagegraph.InstanceID `json:"package"`
-	Name           string                  `json:"name"`
-	LinkName       string                  `json:"linkName"`
-	ABI            string                  `json:"abi"`
-	ParameterTypes []string                `json:"parameterTypes"`
-	ResultType     string                  `json:"resultType"`
+	Package        packagegraph.CoordinateID `json:"package"`
+	Name           string                    `json:"name"`
+	LinkName       string                    `json:"linkName"`
+	ABI            string                    `json:"abi"`
+	ParameterTypes []string                  `json:"parameterTypes"`
+	ResultType     string                    `json:"resultType"`
 }
 
 type ContextField struct {
@@ -125,19 +125,19 @@ type contextEnvelope struct {
 
 // DescribeContext projects one function-free MIR context into stable package and function
 // identities. bindings resolves non-empty resource drop symbols to package-stable FunctionIDs.
-func DescribeContext(context mir.Program, identities map[hir.PackageID]packagegraph.InstanceID, bindings map[hir.SymbolID]FunctionID) (ContextDescriptor, error) {
+func DescribeContext(context mir.Program, coordinates map[hir.PackageID]packagegraph.CoordinateID, bindings map[hir.SymbolID]FunctionID) (ContextDescriptor, error) {
 	if len(context.Functions) != 0 {
 		return ContextDescriptor{}, fmt.Errorf("stable type-context source contains executable functions")
 	}
 	result := ContextDescriptor{}
 	for _, value := range context.StructTypes {
-		typeName, err := stableType(value.Type, identities)
+		typeName, err := stableType(value.Type, coordinates)
 		if err != nil {
 			return ContextDescriptor{}, fmt.Errorf("struct %q type: %w", value.Name, err)
 		}
 		item := ContextStruct{Type: typeName, Name: value.Name, ReprC: value.ReprC}
 		for _, field := range value.Fields {
-			stable, stableErr := stableType(field.Type, identities)
+			stable, stableErr := stableType(field.Type, coordinates)
 			if stableErr != nil {
 				return ContextDescriptor{}, fmt.Errorf("struct %q field %q: %w", value.Name, field.Name, stableErr)
 			}
@@ -146,7 +146,7 @@ func DescribeContext(context mir.Program, identities map[hir.PackageID]packagegr
 		result.Structs = append(result.Structs, item)
 	}
 	for _, value := range context.EnumTypes {
-		typeName, err := stableType(value.Type, identities)
+		typeName, err := stableType(value.Type, coordinates)
 		if err != nil {
 			return ContextDescriptor{}, fmt.Errorf("enum %q type: %w", value.Name, err)
 		}
@@ -154,7 +154,7 @@ func DescribeContext(context mir.Program, identities map[hir.PackageID]packagegr
 		for _, variant := range value.Variants {
 			stableVariant := ContextVariant{Name: variant.Name}
 			for _, field := range variant.Fields {
-				stable, stableErr := stableType(field.Type, identities)
+				stable, stableErr := stableType(field.Type, coordinates)
 				if stableErr != nil {
 					return ContextDescriptor{}, fmt.Errorf("enum %q variant %q field %q: %w", value.Name, variant.Name, field.Name, stableErr)
 				}
@@ -165,13 +165,13 @@ func DescribeContext(context mir.Program, identities map[hir.PackageID]packagegr
 		result.Enums = append(result.Enums, item)
 	}
 	for _, value := range context.ResourceTypes {
-		typeName, err := stableType(value.Type, identities)
+		typeName, err := stableType(value.Type, coordinates)
 		if err != nil {
 			return ContextDescriptor{}, fmt.Errorf("resource %q type: %w", value.Type, err)
 		}
 		item := ContextResource{Type: typeName, DropKind: string(value.DropKind)}
 		for _, field := range value.Fields {
-			stable, stableErr := stableType(field.Type, identities)
+			stable, stableErr := stableType(field.Type, coordinates)
 			if stableErr != nil {
 				return ContextDescriptor{}, fmt.Errorf("resource %q field %q: %w", value.Type, field.Name, stableErr)
 			}
@@ -190,23 +190,23 @@ func DescribeContext(context mir.Program, identities map[hir.PackageID]packagegr
 		result.Resources = append(result.Resources, item)
 	}
 	for _, value := range context.ForeignFunctions {
-		instance, found := identities[value.Span.Package]
+		coordinate, found := coordinates[value.Span.Package]
 		if !found {
-			return ContextDescriptor{}, fmt.Errorf("foreign function %q owner package %d has no PackageInstanceId", value.Name, value.Span.Package)
+			return ContextDescriptor{}, fmt.Errorf("foreign function %q owner package %d has no PackageCoordinateId", value.Name, value.Span.Package)
 		}
 		name, err := logicalFunctionName(value.Name, value.Span.Package)
 		if err != nil {
 			return ContextDescriptor{}, err
 		}
-		item := ContextForeignFunction{Package: instance, Name: name, LinkName: value.LinkName, ABI: value.ABI}
+		item := ContextForeignFunction{Package: coordinate, Name: name, LinkName: value.LinkName, ABI: value.ABI}
 		for _, parameterType := range value.ParameterTypes {
-			stable, stableErr := stableType(parameterType, identities)
+			stable, stableErr := stableType(parameterType, coordinates)
 			if stableErr != nil {
 				return ContextDescriptor{}, fmt.Errorf("foreign function %q parameter type: %w", value.Name, stableErr)
 			}
 			item.ParameterTypes = append(item.ParameterTypes, stable)
 		}
-		item.ResultType, err = stableType(value.ResultType, identities)
+		item.ResultType, err = stableType(value.ResultType, coordinates)
 		if err != nil {
 			return ContextDescriptor{}, fmt.Errorf("foreign function %q result type: %w", value.Name, err)
 		}
@@ -370,7 +370,7 @@ func ValidateContextDescriptor(value ContextDescriptor) error {
 		if index > 0 && compareContextForeign(value.ForeignFunctions[index-1], item) >= 0 {
 			return fmt.Errorf("stable type-context foreign functions are not sorted and unique")
 		}
-		if item.Package == (packagegraph.InstanceID{}) || !validLogicalFunctionName(item.Name) ||
+		if item.Package == (packagegraph.CoordinateID{}) || !validLogicalFunctionName(item.Name) ||
 			item.LinkName == "" || !utf8.ValidString(item.LinkName) || item.ABI != "C" || !validStableType(item.ResultType) {
 			return fmt.Errorf("stable type-context has an invalid foreign function %q", item.Name)
 		}

@@ -12,7 +12,7 @@ import (
 
 func TestFunctionGraphIDsCanonicalizeAfterFreshRebindAndPreserveExecution(t *testing.T) {
 	t.Parallel()
-	workspace, program, _ := checkedWorkspaceProgram(t)
+	workspace, program, _, _ := checkedWorkspaceProgram(t)
 	reboundProgram := mir.Clone(program)
 	for index, function := range program.Functions {
 		canonical, shape, err := canonicalizeFunctionGraphIDs(function)

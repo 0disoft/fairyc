@@ -115,8 +115,8 @@ func ValidatePersistentCacheGrowth(report PersistentCacheGrowthReport) error {
 		PersistentGrowthPrivateRootNoOp,
 		PersistentGrowthRepeatedNoOp,
 	}
-	wantEntries := []int{2, 3, 4, 6, 6, 6, 6, 6, 6}
-	wantDeltas := []int{2, 1, 1, 2, 0, 0, 0, 0, 0}
+	wantEntries := []int{2, 3, 4, 5, 6, 6, 6, 6, 6}
+	wantDeltas := []int{2, 1, 1, 1, 1, 0, 0, 0, 0}
 	if len(report.Samples) != len(conditions) {
 		return fmt.Errorf("persistent-cache growth measurement requires %d samples", len(conditions))
 	}
@@ -149,7 +149,7 @@ func validatePersistentCacheGrowthOutcome(sample PersistentCacheGrowthSample) er
 	noOp := sample.Condition == PersistentGrowthPublicNoOp || sample.Condition == PersistentGrowthPrivateRootNoOp || sample.Condition == PersistentGrowthRepeatedNoOp
 	expectedEvictions := uint64(0)
 	if sample.Condition == PersistentGrowthPublicDependency {
-		expectedEvictions = 2
+		expectedEvictions = 1
 	}
 	if sample.Condition == PersistentGrowthPrivateRootPublic {
 		expectedEvictions = 1
@@ -169,7 +169,7 @@ func validatePersistentCacheGrowthOutcome(sample PersistentCacheGrowthSample) er
 		return nil
 	}
 	wantHits := 1
-	if sample.Condition == PersistentGrowthBaselineCold || sample.Condition == PersistentGrowthPrivateDependency || sample.Condition == PersistentGrowthPublicDependency {
+	if sample.Condition == PersistentGrowthBaselineCold || sample.Condition == PersistentGrowthPublicDependency {
 		wantHits = 0
 	}
 	wantMisses := sample.Packages - wantHits

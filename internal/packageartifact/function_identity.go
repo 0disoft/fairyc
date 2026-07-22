@@ -22,8 +22,8 @@ import (
 
 const (
 	FunctionIDAlgorithm = "sha256"
-	FunctionIDEncoding  = "fairyc.package-function/v1"
-	FunctionIDPrefix    = "fyfn1-sha256-"
+	FunctionIDEncoding  = "fairyc.package-function/v2"
+	FunctionIDPrefix    = "fyfn2-sha256-"
 )
 
 const functionIDDomain = "fairyc.package-function"
@@ -73,7 +73,7 @@ func ParseFunctionID(value string) (FunctionID, error) {
 // FunctionDescriptor contains the build-number-independent signature facts required to identify
 // one package-owned MIR function. Types use an artifact-private stable spelling.
 type FunctionDescriptor struct {
-	Package        packagegraph.InstanceID
+	Package        packagegraph.CoordinateID
 	Name           string
 	ParameterTypes []string
 	ResultType     string
@@ -82,26 +82,26 @@ type FunctionDescriptor struct {
 }
 
 // DescribeFunction removes disposable HIR package numbers from one MIR function and every type in
-// its signature. instances must contain the owner and every package referenced by a nominal type.
-func DescribeFunction(function mir.Function, instances map[hir.PackageID]packagegraph.InstanceID) (FunctionDescriptor, error) {
+// its signature. coordinates must contain the owner and every package referenced by a nominal type.
+func DescribeFunction(function mir.Function, coordinates map[hir.PackageID]packagegraph.CoordinateID) (FunctionDescriptor, error) {
 	owner := function.Span.Package
-	instance, found := instances[owner]
+	coordinate, found := coordinates[owner]
 	if !found {
-		return FunctionDescriptor{}, fmt.Errorf("function %q owner package %d has no PackageInstanceId", function.Name, owner)
+		return FunctionDescriptor{}, fmt.Errorf("function %q owner package %d has no PackageCoordinateId", function.Name, owner)
 	}
 	name, err := logicalFunctionName(function.Name, owner)
 	if err != nil {
 		return FunctionDescriptor{}, err
 	}
-	descriptor := FunctionDescriptor{Package: instance, Name: name}
+	descriptor := FunctionDescriptor{Package: coordinate, Name: name}
 	for _, parameterType := range function.ParameterTypes {
-		stable, stableErr := stableType(parameterType, instances)
+		stable, stableErr := stableType(parameterType, coordinates)
 		if stableErr != nil {
 			return FunctionDescriptor{}, fmt.Errorf("function %q parameter type: %w", function.Name, stableErr)
 		}
 		descriptor.ParameterTypes = append(descriptor.ParameterTypes, stable)
 	}
-	descriptor.ResultType, err = stableType(function.ResultType, instances)
+	descriptor.ResultType, err = stableType(function.ResultType, coordinates)
 	if err != nil {
 		return FunctionDescriptor{}, fmt.Errorf("function %q result type: %w", function.Name, err)
 	}
@@ -115,7 +115,7 @@ func DescribeFunction(function mir.Function, instances map[hir.PackageID]package
 		descriptor.Effects = append(descriptor.Effects, string(effect))
 	}
 	if function.DropGlueFor != "" {
-		descriptor.DropGlueFor, err = stableType(function.DropGlueFor, instances)
+		descriptor.DropGlueFor, err = stableType(function.DropGlueFor, coordinates)
 		if err != nil {
 			return FunctionDescriptor{}, fmt.Errorf("function %q drop-glue type: %w", function.Name, err)
 		}
@@ -132,7 +132,7 @@ func ComputeFunctionID(descriptor FunctionDescriptor) (FunctionID, error) {
 	return sha256.Sum256(encoded), nil
 }
 
-// EncodeFunctionDescriptor returns the exact v1 byte stream hashed by ComputeFunctionID.
+// EncodeFunctionDescriptor returns the exact v2 byte stream hashed by ComputeFunctionID.
 func EncodeFunctionDescriptor(descriptor FunctionDescriptor) ([]byte, error) {
 	if err := validateFunctionDescriptor(descriptor); err != nil {
 		return nil, err
@@ -140,7 +140,7 @@ func EncodeFunctionDescriptor(descriptor FunctionDescriptor) ([]byte, error) {
 	var encoded bytes.Buffer
 	encoded.WriteString(functionIDDomain)
 	encoded.WriteByte(0)
-	encoded.WriteByte(1)
+	encoded.WriteByte(2)
 	encoded.Write(descriptor.Package[:])
 	writeString(&encoded, descriptor.Name)
 	writeStrings(&encoded, descriptor.ParameterTypes)
@@ -151,8 +151,8 @@ func EncodeFunctionDescriptor(descriptor FunctionDescriptor) ([]byte, error) {
 }
 
 func validateFunctionDescriptor(descriptor FunctionDescriptor) error {
-	if descriptor.Package == (packagegraph.InstanceID{}) {
-		return fmt.Errorf("package function descriptor has an empty PackageInstanceId")
+	if descriptor.Package == (packagegraph.CoordinateID{}) {
+		return fmt.Errorf("package function descriptor has an empty PackageCoordinateId")
 	}
 	if !validLogicalFunctionName(descriptor.Name) {
 		return fmt.Errorf("package function descriptor has an invalid logical name")
@@ -233,7 +233,7 @@ func validStableType(value string) bool {
 	if separator <= len(nominalPrefix) || separator+3 >= len(value) {
 		return false
 	}
-	if _, err := packagegraph.ParseInstanceID(value[len(nominalPrefix):separator]); err != nil {
+	if _, err := packagegraph.ParseCoordinateID(value[len(nominalPrefix):separator]); err != nil {
 		return false
 	}
 	for _, segment := range strings.Split(value[separator+3:], "::") {
@@ -258,12 +258,12 @@ func logicalFunctionName(name string, owner hir.PackageID) (string, error) {
 	return strings.TrimPrefix(name, prefix), nil
 }
 
-func stableType(value hir.Type, instances map[hir.PackageID]packagegraph.InstanceID) (string, error) {
+func stableType(value hir.Type, coordinates map[hir.PackageID]packagegraph.CoordinateID) (string, error) {
 	if builtinType(value) {
 		return string(value), nil
 	}
 	if element, mutable, ok := hir.BorrowElement(value); ok {
-		stable, err := stableType(element, instances)
+		stable, err := stableType(element, coordinates)
 		if err != nil {
 			return "", err
 		}
@@ -273,7 +273,7 @@ func stableType(value hir.Type, instances map[hir.PackageID]packagegraph.Instanc
 		return "ref " + stable, nil
 	}
 	if element, mutable, ok := hir.RawPointerElement(value); ok {
-		stable, err := stableType(element, instances)
+		stable, err := stableType(element, coordinates)
 		if err != nil {
 			return "", err
 		}
@@ -283,25 +283,25 @@ func stableType(value hir.Type, instances map[hir.PackageID]packagegraph.Instanc
 		return "ptr " + stable, nil
 	}
 	if element, length, ok := hir.FixedArrayParts(value); ok {
-		stable, err := stableType(element, instances)
+		stable, err := stableType(element, coordinates)
 		if err != nil {
 			return "", err
 		}
 		return stable + "[" + strconv.FormatUint(length, 10) + "]", nil
 	}
 	if element, ok := hir.OptionElement(value); ok {
-		stable, err := stableType(element, instances)
+		stable, err := stableType(element, coordinates)
 		if err != nil {
 			return "", err
 		}
 		return "Option<" + stable + ">", nil
 	}
 	if success, failure, ok := hir.ResultElements(value); ok {
-		stableSuccess, err := stableType(success, instances)
+		stableSuccess, err := stableType(success, coordinates)
 		if err != nil {
 			return "", err
 		}
-		stableFailure, err := stableType(failure, instances)
+		stableFailure, err := stableType(failure, coordinates)
 		if err != nil {
 			return "", err
 		}
@@ -311,24 +311,24 @@ func stableType(value hir.Type, instances map[hir.PackageID]packagegraph.Instanc
 	if !ok {
 		return "", fmt.Errorf("unsupported canonical type %q", value)
 	}
-	instance, found := instances[packageID]
+	coordinate, found := coordinates[packageID]
 	if !found {
-		return "", fmt.Errorf("type %q references package %d without PackageInstanceId", value, packageID)
+		return "", fmt.Errorf("type %q references package %d without PackageCoordinateId", value, packageID)
 	}
-	return "pkg[" + instance.String() + "]::" + logicalName, nil
+	return "pkg[" + coordinate.String() + "]::" + logicalName, nil
 }
 
 // rebindStableType resolves one validated artifact-private type spelling into the canonical HIR
-// spelling for a fresh build. PackageInstanceId values must map one-to-one to build-local package
+// spelling for a fresh build. PackageCoordinateId values must map one-to-one to build-local package
 // numbers; an absent or ambiguous identity fails closed instead of guessing a package.
-func rebindStableType(value string, instances map[hir.PackageID]packagegraph.InstanceID) (hir.Type, error) {
+func rebindStableType(value string, coordinates map[hir.PackageID]packagegraph.CoordinateID) (hir.Type, error) {
 	if !validStableType(value) {
 		return hir.TypeInvalid, fmt.Errorf("invalid stable type %q", value)
 	}
-	return rebindValidatedStableType(value, instances)
+	return rebindValidatedStableType(value, coordinates)
 }
 
-func rebindValidatedStableType(value string, instances map[hir.PackageID]packagegraph.InstanceID) (hir.Type, error) {
+func rebindValidatedStableType(value string, coordinates map[hir.PackageID]packagegraph.CoordinateID) (hir.Type, error) {
 	if builtinType(hir.Type(value)) {
 		return hir.Type(value), nil
 	}
@@ -345,7 +345,7 @@ func rebindValidatedStableType(value string, instances map[hir.PackageID]package
 		if !strings.HasPrefix(value, prefix.stable) {
 			continue
 		}
-		element, err := rebindValidatedStableType(strings.TrimPrefix(value, prefix.stable), instances)
+		element, err := rebindValidatedStableType(strings.TrimPrefix(value, prefix.stable), coordinates)
 		if err != nil {
 			return hir.TypeInvalid, err
 		}
@@ -358,18 +358,18 @@ func rebindValidatedStableType(value string, instances map[hir.PackageID]package
 		return hir.SharedBorrow(element), nil
 	}
 	if element, ok := hir.OptionElement(hir.Type(value)); ok {
-		rebound, err := rebindValidatedStableType(string(element), instances)
+		rebound, err := rebindValidatedStableType(string(element), coordinates)
 		if err != nil {
 			return hir.TypeInvalid, err
 		}
 		return hir.Option(rebound), nil
 	}
 	if success, failure, ok := hir.ResultElements(hir.Type(value)); ok {
-		reboundSuccess, err := rebindValidatedStableType(string(success), instances)
+		reboundSuccess, err := rebindValidatedStableType(string(success), coordinates)
 		if err != nil {
 			return hir.TypeInvalid, err
 		}
-		reboundFailure, err := rebindValidatedStableType(string(failure), instances)
+		reboundFailure, err := rebindValidatedStableType(string(failure), coordinates)
 		if err != nil {
 			return hir.TypeInvalid, err
 		}
@@ -382,7 +382,7 @@ func rebindValidatedStableType(value string, instances map[hir.PackageID]package
 			if err != nil || length == 0 {
 				return hir.TypeInvalid, fmt.Errorf("invalid stable fixed-array type %q", value)
 			}
-			element, err := rebindValidatedStableType(value[:separator], instances)
+			element, err := rebindValidatedStableType(value[:separator], coordinates)
 			if err != nil {
 				return hir.TypeInvalid, err
 			}
@@ -392,24 +392,24 @@ func rebindValidatedStableType(value string, instances map[hir.PackageID]package
 
 	const nominalPrefix = "pkg["
 	separator := strings.Index(value, "]::")
-	instance, err := packagegraph.ParseInstanceID(value[len(nominalPrefix):separator])
+	coordinate, err := packagegraph.ParseCoordinateID(value[len(nominalPrefix):separator])
 	if err != nil {
 		return hir.TypeInvalid, fmt.Errorf("parse stable nominal type %q: %w", value, err)
 	}
 	var packageID hir.PackageID
 	found := false
-	for candidate, candidateInstance := range instances {
-		if candidateInstance != instance {
+	for candidate, candidateCoordinate := range coordinates {
+		if candidateCoordinate != coordinate {
 			continue
 		}
 		if found && candidate != packageID {
-			return hir.TypeInvalid, fmt.Errorf("stable type %q maps PackageInstanceId %s to multiple local packages", value, instance)
+			return hir.TypeInvalid, fmt.Errorf("stable type %q maps PackageCoordinateId %s to multiple local packages", value, coordinate)
 		}
 		packageID = candidate
 		found = true
 	}
 	if !found {
-		return hir.TypeInvalid, fmt.Errorf("stable type %q references unknown PackageInstanceId %s", value, instance)
+		return hir.TypeInvalid, fmt.Errorf("stable type %q references unknown PackageCoordinateId %s", value, coordinate)
 	}
 	logicalName := value[separator+3:]
 	return hir.Type(hir.QualifiedModulePath(packageID, logicalName)), nil

@@ -132,9 +132,10 @@ benchmark protocol above produces representative growth and reuse evidence.
 
 ADR 0170 added one control-workload retention staircase under an explicit six-entry harness ceiling.
 ADR 0171 replaces its conflict-producing package format with package-scoped stable contexts. The
-current staircase reaches six entries, performs three evictions, records zero quarantines, and ends
-with repeated verified all-hit reuse. A private dependency edit still invalidates both packages,
-and the result remains control evidence rather than a product-default justification.
+current v2 staircase reaches six entries through `2, 3, 4, 5, 6, 6, 6, 6, 6`, performs two
+evictions, records zero quarantines, and ends with repeated verified all-hit reuse. A private
+dependency edit now reuses the verified caller and rebuilds only the provider. The result remains
+control evidence rather than a product-default justification.
 
 ## Review blockers
 

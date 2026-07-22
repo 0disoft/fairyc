@@ -18,13 +18,13 @@ const stableBodyLimit = 8 << 20
 
 func TestStableLeafBodyRoundTripsRebindsAndExecutesAcrossFreshNumbers(t *testing.T) {
 	t.Parallel()
-	_, program, identities := checkedWorkspaceProgram(t)
-	artifacts, err := ExtractAll(program, identities)
+	_, program, identities, coordinates := checkedWorkspaceProgram(t)
+	artifacts, err := ExtractAll(program, identities, coordinates)
 	if err != nil {
 		t.Fatal(err)
 	}
 	record, context := callFreeI32Record(t, artifacts)
-	body, err := DescribeStableLeafBody(record, context, identities, stableBodyLimit)
+	body, err := DescribeStableLeafBody(record, context, coordinates, stableBodyLimit)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -40,8 +40,8 @@ func TestStableLeafBodyRoundTripsRebindsAndExecutesAcrossFreshNumbers(t *testing
 		t.Fatal("decoded stable body differs from source")
 	}
 
-	freshIdentities := map[hir.PackageID]packagegraph.InstanceID{77: body.Package}
-	rebound, err := RebindStableLeafBody(decoded, context, freshIdentities, 900, 500, stableBodyLimit)
+	freshCoordinates := map[hir.PackageID]packagegraph.CoordinateID{77: body.Package}
+	rebound, err := RebindStableLeafBody(decoded, context, freshCoordinates, 900, 500, stableBodyLimit)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,7 +62,7 @@ func TestStableLeafBodyRoundTripsRebindsAndExecutesAcrossFreshNumbers(t *testing
 	}
 
 	freshRecord := FunctionRecord{ID: record.ID, Descriptor: record.Descriptor, Body: rebound}
-	freshBody, err := DescribeStableLeafBody(freshRecord, context, freshIdentities, stableBodyLimit)
+	freshBody, err := DescribeStableLeafBody(freshRecord, context, freshCoordinates, stableBodyLimit)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,13 +77,13 @@ func TestStableLeafBodyRoundTripsRebindsAndExecutesAcrossFreshNumbers(t *testing
 
 func TestStableLeafBodyCodecRejectsBoundsUnknownFieldsAndNoncanonicalBytes(t *testing.T) {
 	t.Parallel()
-	_, program, identities := checkedWorkspaceProgram(t)
-	artifacts, err := ExtractAll(program, identities)
+	_, program, identities, coordinates := checkedWorkspaceProgram(t)
+	artifacts, err := ExtractAll(program, identities, coordinates)
 	if err != nil {
 		t.Fatal(err)
 	}
 	record, context := callFreeI32Record(t, artifacts)
-	body, err := DescribeStableLeafBody(record, context, identities, stableBodyLimit)
+	body, err := DescribeStableLeafBody(record, context, coordinates, stableBodyLimit)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -114,8 +114,8 @@ func TestStableLeafBodyCodecRejectsBoundsUnknownFieldsAndNoncanonicalBytes(t *te
 
 func TestStableLeafBodyRejectsCallsAndContextDrift(t *testing.T) {
 	t.Parallel()
-	_, program, identities := checkedWorkspaceProgram(t)
-	artifacts, err := ExtractAll(program, identities)
+	_, program, identities, coordinates := checkedWorkspaceProgram(t)
+	artifacts, err := ExtractAll(program, identities, coordinates)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -133,27 +133,27 @@ func TestStableLeafBodyRejectsCallsAndContextDrift(t *testing.T) {
 	if !found {
 		t.Fatal("workspace has no function containing a call")
 	}
-	if _, err := DescribeStableLeafBody(called, calledContext, identities, stableBodyLimit); err == nil || !strings.Contains(err.Error(), "does not admit calls") {
+	if _, err := DescribeStableLeafBody(called, calledContext, coordinates, stableBodyLimit); err == nil || !strings.Contains(err.Error(), "does not admit calls") {
 		t.Fatalf("call rejection error = %v", err)
 	}
 
 	record, context := callFreeI32Record(t, artifacts)
-	body, err := DescribeStableLeafBody(record, context, identities, stableBodyLimit)
+	body, err := DescribeStableLeafBody(record, context, coordinates, stableBodyLimit)
 	if err != nil {
 		t.Fatal(err)
 	}
 	drifted := cloneContextDescriptor(context)
 	drifted.Structs = append(drifted.Structs, ContextStruct{Type: "pkg[" + body.Package.String() + "]::drift::Type", Name: "Type"})
 	slices.SortFunc(drifted.Structs, func(left, right ContextStruct) int { return strings.Compare(left.Type, right.Type) })
-	if _, err := RebindStableLeafBody(body, drifted, map[hir.PackageID]packagegraph.InstanceID{77: body.Package}, 900, 500, stableBodyLimit); err == nil || !strings.Contains(err.Error(), "context does not match") {
+	if _, err := RebindStableLeafBody(body, drifted, map[hir.PackageID]packagegraph.CoordinateID{77: body.Package}, 900, 500, stableBodyLimit); err == nil || !strings.Contains(err.Error(), "context does not match") {
 		t.Fatalf("context drift error = %v", err)
 	}
 }
 
 func TestStableBodiesRebindCallsVerifyAndPreserveWorkspaceExecution(t *testing.T) {
 	t.Parallel()
-	workspace, original, identities := checkedWorkspaceProgram(t)
-	artifacts, err := ExtractAll(original, identities)
+	workspace, original, identities, coordinates := checkedWorkspaceProgram(t)
+	artifacts, err := ExtractAll(original, identities, coordinates)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -201,13 +201,13 @@ func TestStableBodiesRebindCallsVerifyAndPreserveWorkspaceExecution(t *testing.T
 		t.Fatal("workspace stable bodies contain no internal calls")
 	}
 
-	reboundContext, err := rebindStableContextFunctionSymbols(artifacts[0].Context, stableContext, identities, functionSymbols)
+	reboundContext, err := rebindStableContextFunctionSymbols(artifacts[0].Context, stableContext, coordinates, functionSymbols)
 	if err != nil {
 		t.Fatal(err)
 	}
 	for index, item := range bodies {
 		function, err := RebindStableBody(
-			item.body, stableContext, artifacts[0].Context, identities, functionSymbols,
+			item.body, stableContext, artifacts[0].Context, coordinates, functionSymbols,
 			mir.LocalID(1000+index*1000), stableBodyLimit,
 		)
 		if err != nil {
