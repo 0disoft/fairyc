@@ -2,7 +2,7 @@
 
 - Status: Accepted storage hardening
 - Date: 2026-07-22
-- Implementation: `internal/cli/workspace_cache.go`, `internal/packagecache/disk.go`, `internal/packagecache/durability_*.go`
+- Implementation: `internal/cli/workspace_cache.go`, `internal/packagecache/disk.go`, `internal/durablefile/`
 - Supersedes: Windows publication primitive in `docs/adr/0168-platform-durable-cache-publication.md`
 
 ## Context
@@ -37,6 +37,11 @@ Windows has no documented portable directory-handle flush contract here, so the 
 a verified hit or safe miss after interruption rather than retention after every physical power
 loss. This supersedes the absolute-path `MoveFileExW` implementation and its stronger write-through
 request.
+
+The opened-root temporary creation, immutable convergence/repair, same-directory publication, and
+platform sync mechanics now live in `internal/durablefile`. The package cache remains responsible
+for cache keys, generations, bounds, collection, and verification. This extraction changes no cache
+layout or failure policy and lets other derived artifacts reuse the same containment primitive.
 
 ## Evidence
 

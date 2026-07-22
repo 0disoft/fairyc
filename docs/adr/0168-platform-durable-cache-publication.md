@@ -2,7 +2,7 @@
 
 - Status: Superseded by ADR 0169
 - Date: 2026-07-22
-- Implementation: `internal/packagecache/disk.go`, `internal/packagecache/durability_*.go`
+- Historical implementation now shared through: `internal/packagecache/disk.go`, `internal/durablefile/`
 - Storage prerequisite: `docs/adr/0163-bounded-immutable-disk-cache-store.md`
 
 ## Context

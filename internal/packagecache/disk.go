@@ -2,7 +2,6 @@ package packagecache
 
 import (
 	"bytes"
-	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -16,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/0disoft/fairyc/internal/durablefile"
 	"github.com/0disoft/fairyc/internal/moduleinterface"
 )
 
@@ -186,13 +186,13 @@ func (store *DiskStore) put(record Record, hooks diskPutHooks) error {
 		createdKeyDirectory = true
 	}
 	if createdKeyDirectory {
-		if err := syncCacheDirectory(store.root, "."); err != nil {
+		if err := durablefile.SyncDirectory(store.root, "."); err != nil {
 			return fmt.Errorf("sync package cache key-directory parent: %w", err)
 		}
 	}
 	digest := sha256.Sum256(encoded)
 	finalPath := filepath.Join(keyDirectory, hex.EncodeToString(digest[:])+".json")
-	temporary, temporaryPath, err := createCacheTemporary(store.root, keyDirectory)
+	temporary, temporaryPath, err := durablefile.CreateTemporary(store.root, keyDirectory)
 	if err != nil {
 		return fmt.Errorf("create package cache temporary file: %w", err)
 	}
@@ -219,7 +219,7 @@ func (store *DiskStore) put(record Record, hooks diskPutHooks) error {
 	if hooks.afterTemporaryClosed != nil {
 		hooks.afterTemporaryClosed(store.absolutePath(temporaryPath))
 	}
-	if err := publishImmutableGeneration(store.root, temporaryPath, finalPath, encoded); err != nil {
+	if err := durablefile.PublishImmutable(store.root, temporaryPath, finalPath, encoded); err != nil {
 		return err
 	}
 	if hooks.afterPublished != nil {
@@ -449,22 +449,6 @@ func (store *DiskStore) absolutePath(relative string) string {
 	return filepath.Join(store.rootName, relative)
 }
 
-func createCacheTemporary(root *os.Root, directory string) (*os.File, string, error) {
-	for range 100 {
-		var nonce [16]byte
-		if _, err := rand.Read(nonce[:]); err != nil {
-			return nil, "", err
-		}
-		name := filepath.Join(directory, ".tmp-"+hex.EncodeToString(nonce[:]))
-		file, err := root.OpenFile(name, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0o600)
-		if errors.Is(err, os.ErrExist) {
-			continue
-		}
-		return file, name, err
-	}
-	return nil, "", fmt.Errorf("exhausted package cache temporary names")
-}
-
 func readCacheDirectory(root *os.Root, name string) ([]os.DirEntry, error) {
 	directory, err := root.Open(name)
 	if err != nil {
@@ -479,37 +463,6 @@ func readCacheDirectory(root *os.Root, name string) ([]os.DirEntry, error) {
 		return nil, closeErr
 	}
 	return entries, nil
-}
-
-func publishImmutableGeneration(root *os.Root, temporaryPath, finalPath string, expected []byte) error {
-	if err := renameCacheGeneration(root, temporaryPath, finalPath); err == nil {
-		if syncErr := syncPublishedCacheGeneration(root, finalPath, filepath.Dir(finalPath)); syncErr != nil {
-			return fmt.Errorf("sync published package cache directory: %w", syncErr)
-		}
-		return nil
-	}
-	existing, readErr := root.ReadFile(finalPath)
-	if readErr == nil && bytes.Equal(existing, expected) {
-		if syncErr := syncPublishedCacheGeneration(root, finalPath, filepath.Dir(finalPath)); syncErr != nil {
-			return fmt.Errorf("sync converged package cache directory: %w", syncErr)
-		}
-		return nil
-	}
-	// A digest-named valid destination can contain only expected. Replacing any other bytes is safe:
-	// a racing valid writer has the same payload, and losing cache state is never a build failure.
-	if removeErr := root.Remove(finalPath); removeErr == nil || errors.Is(removeErr, os.ErrNotExist) {
-		if renameErr := renameCacheGeneration(root, temporaryPath, finalPath); renameErr == nil {
-			if syncErr := syncPublishedCacheGeneration(root, finalPath, filepath.Dir(finalPath)); syncErr != nil {
-				return fmt.Errorf("sync replaced package cache directory: %w", syncErr)
-			}
-			return nil
-		}
-		existing, readErr = root.ReadFile(finalPath)
-		if readErr == nil && bytes.Equal(existing, expected) {
-			return nil
-		}
-	}
-	return fmt.Errorf("publish immutable package cache generation: destination conflict")
 }
 
 func encodeDiskRecord(record Record, maxBytes uint64) ([]byte, error) {

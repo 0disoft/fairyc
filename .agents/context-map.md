@@ -67,7 +67,7 @@
 - Whole-package cache key, store, and runner route: internal/packagecache/, internal/packagecachefixture/
 - Exact running-compiler executable identity route: internal/buildidentity/, docs/adr/0165-executable-digest-compiler-build-identity.md
 - Experimental persistent workspace-cache command route: internal/cli/workspace_cache.go, spec/cli/experimental-workspace-cache-check-v0.schema.json, docs/adr/0166-experimental-persistent-workspace-cache-command.md
-- Bounded immutable disk cache route: internal/packagecache/disk.go, internal/packagecache/durability_*.go, docs/adr/0163-bounded-immutable-disk-cache-store.md, docs/adr/0169-opened-root-cache-containment.md
+- Bounded immutable disk cache route: internal/packagecache/disk.go, internal/durablefile/, docs/adr/0163-bounded-immutable-disk-cache-store.md, docs/adr/0169-opened-root-cache-containment.md
 - Verified whole-program MIR artifact codec route: internal/mircodec/, docs/adr/0149-verified-mir-artifact-codec.md
 - Package-stable function identity route: internal/packageartifact/, docs/package/package-function-id-v1.md
 - Process-local package MIR artifact route: internal/packageartifact/artifact.go, docs/package/process-local-mir-artifact-v0.md
