@@ -162,6 +162,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0150-no-cache-windows-build-calibration.md`: path-free raw Windows workspace build samples that explicitly claim no compiler cache or speedup.
 - `0151-verify-internal-call-linkage.md`: closed-world MIR function symbols and internal call signature shape verified before artifact or backend handoff.
 - `0152-package-stable-function-identity.md`: package-stable function descriptors independent from disposable HIR package and symbol numbering.
+- `0153-process-local-package-mir-artifacts.md`: independently verified package function slices with explicit imports and fresh-symbol reassembly.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

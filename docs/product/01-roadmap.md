@@ -426,11 +426,17 @@ The exact package-instance map, logical name, canonical signature types, effects
 produce one full-digest `FunctionID`; package renumbering does not. This is a prerequisite for
 explicit package-artifact imports, not evidence that a reusable package MIR or object exists.
 
+ADR 0153 adds the first independently verified package MIR boundary. Package-owned functions and
+explicit cross-package signatures are sliced from verified MIR, checked with verifier-only import
+stubs, rebound to fresh internal symbols, reassembled, verified again, and executed through the
+checked-in workspace to result `42`. The boundary is process-local and still duplicates the exact
+workspace type context; it is not a persistent or compiler-integrated cache hit.
+
 - Wire whole-package reuse into package compilation, then adopt persistent content-addressed storage
   and default limits only from measured clean/warm workload evidence.
-- ADR 0146 explicitly defers persistent storage. Package-aware Windows builds and the bounded
-  whole-program MIR codec now exist; independently reusable package artifacts plus configured
-  cold/warm measurements still gate cache integration and disk policy.
+- ADR 0146 explicitly defers persistent storage. Package-aware Windows builds, the bounded
+  whole-program MIR codec, and process-local package function slices now exist; stable type-context
+  artifacts, compiler cache wiring, and configured cold/warm hit measurements still gate disk policy.
 - Stabilize the minimal `fairyc check`, `build`, `run`, `test`, `emit`, `explain`, and `targets` contracts.
 - Move to function-level reuse only when measured package rebuild or storage evidence justifies the complexity.
 

@@ -62,6 +62,8 @@ ADR 0146 records the current evidence result: persistence is deliberately deferr
 real exact-version codec for one verified whole-program MIR value, but that payload is not yet a
 package-granular cache artifact and no package-aware object is produced. ADR 0152 establishes a
 package-stable function identity so a later artifact can name explicit imports without serializing
-build-local HIR symbols or MIR order. It does not yet make any payload reusable. No configured cold/warm
-measurement intent owns comparable evidence. Fixture or codec payload sizes alone cannot justify a
-disk format or default budget.
+build-local HIR symbols or MIR order. ADR 0153 now adds independently verified process-local package
+function slices and fresh-symbol reassembly, but every slice still carries the same workspace-wide
+type context and no compiler path reads it from `MemoryStore`. No configured cold/warm measurement
+intent owns comparable cache-hit evidence. Fixture or codec payload sizes alone cannot justify a disk
+format or default budget.

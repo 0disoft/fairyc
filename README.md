@@ -500,7 +500,7 @@ or arbitrary link-input option.
 - Filesystem-safe local workspace loader, fixtures, and runner: `internal/workspaceloader/`, `spec/fixtures/workspace-loader/manifest-v1.json`, `internal/workspaceloaderfixture/`
 - Canonical generated `fairy.lock` v1 with strict parsing, stale comparison, and atomic replacement: `internal/lockfile/`
 - MIR and C backend contracts: `docs/mir/`
-- Package identity, visibility, source/interface hashing, stable function identity, and bounded whole-package cache: `docs/package/package-graph-v0.md`, `docs/package/package-instance-id-v1.md`, `docs/package/package-source-digest-v1.md`, `docs/package/public-interface-hash-v1.md`, `docs/package/package-function-id-v1.md`, `docs/package/whole-package-cache-v1.md`
+- Package identity, visibility, source/interface hashing, stable function identity, process-local MIR slices, and bounded whole-package cache: `docs/package/package-graph-v0.md`, `docs/package/package-instance-id-v1.md`, `docs/package/package-source-digest-v1.md`, `docs/package/public-interface-hash-v1.md`, `docs/package/package-function-id-v1.md`, `docs/package/process-local-mir-artifact-v0.md`, `docs/package/whole-package-cache-v1.md`
 - Manifest and lockfile readiness audit: `docs/package/manifest-lockfile-readiness.md`
 - Project manifest v1: `docs/package/project-manifest-v1.md`
 - Local workspace loader v1: `docs/package/workspace-loader-v1.md`
