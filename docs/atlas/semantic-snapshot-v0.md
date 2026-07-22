@@ -3,7 +3,7 @@
 - Status: Implemented in memory
 - Decision: `docs/adr/0182-immutable-semantic-snapshot-v0.md`
 - Implementation: `internal/semanticsnapshot/`
-- Consumers: future Atlas exporter and query layers only
+- Consumers: implemented provisional SymbolId derivation plus future Atlas exporter and query layers
 
 ## Boundary
 
@@ -29,9 +29,10 @@ with existing independently versioned identities:
 - declarations use an exact-snapshot tuple of package instance, module, declaration kind, and
   source name.
 
-That declaration tuple is a join key inside one snapshot, not the future Atlas `SymbolId`. The
-concrete `SymbolId` algorithm and `.fymap` binary encoding remain undecided and cannot be inferred
-from this model.
+That declaration tuple is a join key inside one snapshot, not an Atlas `SymbolId`.
+`internal/symbolidentity` now converts declarations to the separately versioned provisional
+`fairyc.symbol-id/v1-sha256-128+256` contract. `.fymap` encoding remains undecided and cannot be
+inferred from this model.
 
 ## Records
 
@@ -82,7 +83,7 @@ ordinary semantic analysis.
 
 ## Deferred
 
-This model does not implement `.fymap` encoding or checksums, `SymbolId`, file content hashes,
+This model does not implement `.fymap` encoding or checksums, file content hashes,
 dependency map joins, stale-map validation, collision diagnostics, documentation import, source
 excerpts, `overview`, `show`, `around`, Context Packs, map rewrite measurements, anchors, `impact`,
 semantic diff, LSP, SCIP, MCP, embeddings, or structural edits. Each remains a later Atlas boundary

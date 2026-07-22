@@ -415,6 +415,13 @@ detached compiler facts and fixes provenance plus relation-specific completeness
 does not stabilize `.fymap`, `SymbolId`, a serialized type spelling, query output, or CLI behavior.
 Those boundaries require their own versions rather than inheriting the snapshot model number.
 
+ADR 0183 adds the independent provisional `fairyc.symbol-id/v1-sha256-128+256` algorithm and its
+`fairyc.symbol-identity/v1` plus `fairyc.symbol-signature/v1` encodings. Its visible 128-bit prefix
+must be accompanied by the full 256-bit digest and collisions reject. It deliberately excludes
+package instances, versions, bodies, spans, language, compiler, and target identity; a future map
+records those compatibility dimensions separately. This executable pre-release contract does not
+stabilize `.fymap`, map migration, anchors, query output, or a post-1 SymbolId promise.
+
 ADR 0159 adds the independent `fairyc.experimental.workspace-check-session/v0` NDJSON request and
 response schema. The schema versions this experimental machine boundary and rejects unknown or
 duplicate request fields, but it does not make the command spelling, numeric limits, process exit
@@ -483,7 +490,11 @@ Canonical identity includes package UID, module path, declaration kind, canonica
 
 Graph edges identify a package instance plus symbol. `PackageUid` names the long-lived project; `PackageInstanceId` distinguishes resolved source, version, and feature instances.
 
-The provisional representation uses a compact 128-bit visible identifier plus a stored 256-bit full identity digest. Different full digests under the same visible identifier are a hard collision error. Random salt is forbidden because it would destroy deterministic identity.
+The implemented provisional v1 representation uses the first 128 SHA-256 bits as
+`fysym1-sha256-128-...` plus the stored complete digest as `fysym1-sha256-256-...`. Different full
+digests under the same visible identifier are a hard collision error. Random salt is forbidden
+because it would destroy deterministic identity. Exact tuple and signature bytes are defined in
+`docs/atlas/symbol-id-v1.md`.
 
 Different `SymbolId` algorithms do not exact-join. Future cross-version matching may use a stable anchor, canonical declaration comparison, or explicitly heuristic similarity, never silent equality.
 

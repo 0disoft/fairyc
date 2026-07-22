@@ -15,7 +15,9 @@ Fairy Atlas should help humans and tools navigate compiler facts without turning
 2. Atlas exporters and queries consume that snapshot. Frontend, analysis, and MIR packages cannot import Atlas packages.
 3. Atlas failure cannot change diagnostics, type-check success, or generated program semantics.
 4. Build-local node identity is never serialized as stable external identity.
-5. Stable symbol identity is derived from semantic coordinates and a versioned algorithm; the algorithm remains provisional until collision and compatibility fixtures exist.
+5. Stable symbol identity is derived from semantic coordinates and a separately versioned
+   algorithm. ADR 0183 implements the first provisional algorithm with collision and compatibility
+   regressions; released cross-version stability remains deferred.
 6. Compiler facts and free-text documentation are stored in separate sections with explicit provenance and trust classes.
 7. Unknown, candidate, external, and opaque graph edges remain explicit. Atlas does not invent a complete call graph.
 8. Transitive closure is computed at query time rather than stored eagerly.

@@ -496,8 +496,10 @@ Phase 4 now has its first executable boundary: `internal/semanticsnapshot` turns
 HIR, semantic facts, verified MIR, and exact package metadata into detached, path-free compiler
 facts. It is invariant under build-local package renumbering, keeps external C calls explicitly
 opaque without degrading unrelated local facts, and publishes no source text or authority-bearing
-documentation. No `.fymap` file, `SymbolId`, Atlas command, `overview`/`show`/`around` query, or
-Context Pack exists yet.
+documentation. `internal/symbolidentity` now turns those declarations into provisional
+source-instance-independent SymbolIds with canonical signature hashing and mandatory visible/full
+collision checks. No `.fymap` file, Atlas command, `overview`/`show`/`around` query, or Context Pack
+exists yet.
 
 `experimental target-spec` accepts exactly one known Linux GNU or Windows MSVC ID and writes
 deterministic `fairyc.target-spec/v0` JSON. The result separates target semantics from local
@@ -580,7 +582,7 @@ or arbitrary link-input option.
 - Runtime and standard library: `docs/runtime/runtime-stdlib-v0.md`
 - Compatibility and versioning: `docs/compatibility/versioning-v0.md`
 - Diagnostic catalog: `docs/diagnostics/catalog-v0.md`
-- Atlas semantic snapshot and proposed schemas: `docs/atlas/`
+- Atlas semantic snapshot, provisional SymbolId, and proposed schemas: `docs/atlas/`
 - CLI contract: `docs/cli/command-contract.md`
 - Workspace ownership: `docs/monorepo/package-ownership.md`
 

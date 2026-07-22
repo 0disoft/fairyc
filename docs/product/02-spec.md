@@ -712,14 +712,22 @@ structured types and source-relative spans, and reports relation-specific comple
 consumes that snapshot through a one-way boundary. The compiler frontend cannot import Atlas, and
 Atlas failure cannot change `fairyc check` results.
 
+The first snapshot consumer now derives provisional `SymbolId` values with the independently
+versioned `fairyc.symbol-id/v1-sha256-128+256` algorithm. Package UID, module, declaration kind and
+path, zero generic arity, and a canonical structured signature form the hash input. Package
+instances, versions, source positions, bodies, build-local numbers, compiler identity, target, and
+language revision do not. Nominal signature types use package UID and logical path; exact instance
+compatibility remains a future map/header and graph-edge concern. Each visible 128-bit prefix is
+stored with its full 256-bit digest, and a mismatch or collision rejects the symbol set.
+
 Atlas exports deterministic, model-neutral facts such as symbols, calls, types, ownership transfers, borrows, errors, effects, allocations, unsafe and FFI reachability, source spans, and related tests. Compiler facts and free-text documentation are physically separated and carry provenance. Unknown or incomplete edges remain explicit rather than being guessed.
 
 Stage 0 Atlas work starts with a versioned `.fymap` schema and the `overview`, `show`, and `around` queries. `impact`, semantic `diff`, stable anchor syntax, LSP, SCIP, MCP, structural edits, embeddings, model-generated summaries, and a vector database are deferred behind usage and completeness evidence.
 
 Source text and documentation cannot grant an LLM, IDE, or agent filesystem, process, network,
-credential, or approval authority. The implemented in-memory boundary is specified in
-`docs/atlas/semantic-snapshot-v0.md`; future map and pack contracts are in
-`docs/atlas/fymap-v1.md` and `docs/atlas/context-pack-v1.md`.
+credential, or approval authority. The implemented in-memory boundary and provisional identity are
+specified in `docs/atlas/semantic-snapshot-v0.md` and `docs/atlas/symbol-id-v1.md`; future map and
+pack contracts are in `docs/atlas/fymap-v1.md` and `docs/atlas/context-pack-v1.md`.
 
 ## Explicit non-goals
 
@@ -738,5 +746,6 @@ Registry coordinates, provider-qualified import spelling, classic and range
 `for`, lexical `defer`, checked narrowing conversion syntax, expression-bodied function shorthand,
 public `Arena` construction and capacity APIs, exact parser resource limits, glibc and toolchain
 baselines, portable path model, targets beyond the declared Linux GNU and Windows MSVC profiles,
-package registry, `.fymap` binary encoding, and the concrete `SymbolId` hash algorithm remain
-UNDECIDED.
+package registry, and `.fymap` encoding/checksum/publication policy remain UNDECIDED. The
+provisional pre-release SymbolId hash algorithm is now implemented by ADR 0183; its eventual stable
+release and cross-version migration policy remain open.

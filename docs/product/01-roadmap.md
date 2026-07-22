@@ -566,8 +566,15 @@ package metadata; removes disposable package/symbol qualification; emits detache
 ordered package, module, declaration, function-summary, and relation-completeness records; and
 keeps foreign-call uncertainty local to the call relation. Package-renumbering, input/accessor
 mutation, incomplete metadata, unverified MIR, and host/build-local identity leakage have direct
-regressions. No `.fymap` encoding, `SymbolId`, exporter, dependency-map join, stale-map validator,
-query, Context Pack, or rewrite measurement exists yet.
+regressions. ADR 0183 and `internal/symbolidentity` now derive a provisional deterministic
+`fairyc.symbol-id/v1-sha256-128+256` from package UID, semantic declaration coordinates, and a
+canonical structured signature. The implementation deliberately ignores package instances,
+versions, bodies, spans, and build numbering; normalizes nominal types through package UID; retains
+both a 128-bit visible prefix and full 256-bit digest; and rejects malformed pairs or visible
+collisions. Canonical encoding, component-boundary, rename/signature sensitivity,
+body/span/version/build-number stability, path rejection, and collision behavior have direct
+regressions. No `.fymap` encoding, exporter, dependency-map join, stale-map validator, query,
+Context Pack, or rewrite measurement exists yet.
 
 - Produce an immutable `SemanticSnapshot` from analyzed HIR and verified MIR.
 - Export `.fymap` with package UID and instance identity, compatibility vector, provenance, relation-specific completeness, and deterministic symbol identity.

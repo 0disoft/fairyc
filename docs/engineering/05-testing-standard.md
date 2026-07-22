@@ -91,7 +91,9 @@ parser, compiler, assembler, linker, executable, sanitizer, layout probe, or ABI
 behavior belongs to `internal/cbackendnative`, which consumes the same emitted units through the
 shared C driver and scalar runtime. ABI and complete-runtime runners remain separate evidence
 requirements. `internal/semanticsnapshot` now owns the in-memory Atlas producer tests; encoded-map,
-query, stale-map, and Context Pack runners remain future evidence.
+query, stale-map, and Context Pack runners remain future evidence. `internal/symbolidentity` owns
+the provisional identity byte-vector, stability/sensitivity, path validation, strict text form,
+package-UID nominal normalization, and visible/full collision regressions.
 
 `internal/cstdlib` separately embeds the provisional SystemHeap implementation and its closed C
 probe. Ordinary Go tests prove deterministic, LF-only source ownership and forbid raw `realloc` or
@@ -243,7 +245,8 @@ dependency closure remain host-independent Go tests.
 | Runtime and stdlib | Zero-size normalization, allocation failure, reserve rollback, UTF-8 invariants, partial I/O, Linux descriptor and Windows handle close consumption, and retained-pointer wrappers |
 | Compatibility | Exact pre-1 matching, cache misses, runtime mismatch, diagnostic identity, stale maps, target mismatch, and relation-specific completeness |
 | Atlas semantic snapshot | Current unit and pipeline tests require Flow-plus-verified-MIR admission, complete package metadata, build-local package-renumbering invariance, deep input/output detachment, stable ordering, structured path-free type identity, exact local calls/traps/unsafe/ownership facts, foreign-call-only partial completeness, unavailable relation disclosure, and fail-closed invalid MIR or package mappings. No encoded map or query evidence is implied. |
-| Atlas schema | Deterministic identity, record compatibility, unknown edges, provenance, and whole-package rewrite; remains future evidence after the in-memory snapshot |
+| Atlas SymbolId | Current unit and compiler-pipeline tests freeze tagged length-delimited bytes, visible/full digest derivation, strict text forms, path/kind validation, tuple boundaries, body/span/version/build-number stability, coordinate/signature sensitivity, nominal package-UID normalization, deterministic ordering, pair integrity, and synthetic compact-ID collision rejection. No encoded map or released cross-version promise is implied. |
+| Atlas schema | Record compatibility, unknown edges, provenance, stale/corrupt rejection, and whole-package rewrite remain future evidence after the in-memory snapshot and identity algorithm. |
 | Atlas context | Budgets, stable ordering, omissions, stale source, text caps, and prompt-injection isolation |
 
 ## Diagnostic assertions

@@ -1,6 +1,6 @@
 # `.fymap` v1 Logical Schema
 
-- Status: Proposed encoding; the in-memory `SemanticSnapshot` v0 producer exists
+- Status: Proposed map encoding; the in-memory snapshot and provisional SymbolId producer exist
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0004-atlas-semantic-snapshot-boundary.md`
 - Snapshot source: `docs/atlas/semantic-snapshot-v0.md`
@@ -10,9 +10,11 @@
 Analyzed typed HIR and verified MIR now produce the immutable in-memory `SemanticSnapshot` v0. The
 future Atlas exporter converts that snapshot into `.fymap`. It does not reparse source or feed
 decisions back into type checking. Snapshot implementation does not choose or imply the map's
-encoding, checksum, `SymbolId`, file location, or command behavior.
+encoding, checksum, file location, or command behavior. The separate
+`fairyc.symbol-id/v1-sha256-128+256` implementation now fixes the provisional declaration join key
+described in `docs/atlas/symbol-id-v1.md`.
 
-The first implementation writes one deterministic map per package. Chunking, compression, and symbol-level incremental rewrites require measured evidence. The normative binary encoding, byte order, and map-checksum algorithm remain UNDECIDED; this document fixes the logical records and trust behavior first. Package-instance references use the independent `PackageInstanceId` v1 contract and do not choose the map encoding or `SymbolId` algorithm.
+The first implementation writes one deterministic map per package. Chunking, compression, and symbol-level incremental rewrites require measured evidence. The normative map encoding, byte order, and map-checksum algorithm remain UNDECIDED; this document fixes the logical records and trust behavior first. Package-instance references use the independent `PackageInstanceId` v1 contract. The map records the SymbolId algorithm independently rather than inheriting it from map schema.
 
 ## Identity
 
@@ -22,9 +24,17 @@ The first implementation writes one deterministic map per package. Chunking, com
 
 ### `SymbolId`
 
-`SymbolId` identifies a semantic declaration across deterministic rebuilds. Its input tuple includes package UID, module path, symbol kind, declaration path, generic arity when generics exist, and normalized public signature. Language revision belongs in the map header rather than the identity input so a compatible revision does not renumber every declaration.
+`SymbolId` identifies a semantic declaration across deterministic rebuilds. The implemented
+provisional v1 tuple includes package UID, module path, symbol kind, declaration path, generic arity,
+and a canonical structured signature. Language revision belongs in the map header rather than the
+identity input so a compatible revision does not renumber every declaration.
 
-The provisional external representation is an opaque 128-bit visible identifier accompanied in the map by a 256-bit full identity digest. A visible collision with different full digests rejects the map; random salt is forbidden. The concrete digest algorithm remains UNDECIDED until collision, path-normalization, rename, and compatibility fixtures exist.
+The external representation is an opaque 128-bit visible SHA-256 prefix accompanied in the map by
+the 256-bit full identity digest. Exact encodings and text forms are fixed by
+`docs/atlas/symbol-id-v1.md`. A visible collision with different full digests rejects the map;
+random salt is forbidden. Regression coverage includes tuple boundaries, qualified-path rejection,
+rename/signature sensitivity, version/body/span/build-number stability, and synthetic collision
+handling.
 
 `PackageUid` names a long-lived source project. `PackageInstanceId` identifies the resolved source, version, and feature instance in one lockfile. Cross-package edges use both package instance and symbol identity.
 
