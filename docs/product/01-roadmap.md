@@ -421,6 +421,11 @@ crosses the existing Windows C/MSVC path, both profiles produce and execute the 
 two-package quickstart, and a separately built compiler performs a locked run. Stable command
 spelling still remains.
 
+ADR 0152 now removes disposable HIR package numbering from compiler-private function identities.
+The exact package-instance map, logical name, canonical signature types, effects, and drop-glue type
+produce one full-digest `FunctionID`; package renumbering does not. This is a prerequisite for
+explicit package-artifact imports, not evidence that a reusable package MIR or object exists.
+
 - Wire whole-package reuse into package compilation, then adopt persistent content-addressed storage
   and default limits only from measured clean/warm workload evidence.
 - ADR 0146 explicitly defers persistent storage. Package-aware Windows builds and the bounded

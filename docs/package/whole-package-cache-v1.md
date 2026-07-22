@@ -60,6 +60,8 @@ storage-format decision.
 
 ADR 0146 records the current evidence result: persistence is deliberately deferred. ADR 0149 adds a
 real exact-version codec for one verified whole-program MIR value, but that payload is not yet a
-package-granular cache artifact and no package-aware object is produced. No configured cold/warm
+package-granular cache artifact and no package-aware object is produced. ADR 0152 establishes a
+package-stable function identity so a later artifact can name explicit imports without serializing
+build-local HIR symbols or MIR order. It does not yet make any payload reusable. No configured cold/warm
 measurement intent owns comparable evidence. Fixture or codec payload sizes alone cannot justify a
 disk format or default budget.

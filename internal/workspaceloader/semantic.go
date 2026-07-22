@@ -80,6 +80,24 @@ func (workspace Workspace) SemanticInput() (semantic.PackageInput, error) {
 	return input, nil
 }
 
+// PackageIdentities maps the disposable semantic PackageID assigned by SemanticInput to the exact
+// PackageInstanceId of the same resolved instance class. The returned map is detached from the
+// workspace and is suitable for stable interface and compiler-private artifact encoders.
+func (workspace Workspace) PackageIdentities() (map[hir.PackageID]packagegraph.InstanceID, error) {
+	identities := make(map[hir.PackageID]packagegraph.InstanceID, len(workspace.Resolution.InstanceClasses))
+	for index, class := range workspace.Resolution.InstanceClasses {
+		if len(class.Members) == 0 {
+			return nil, fmt.Errorf("workspace has an empty package instance class")
+		}
+		packageID := hir.PackageID(index + 1)
+		if packageID == hir.DefaultPackage {
+			return nil, fmt.Errorf("workspace package id overflow")
+		}
+		identities[packageID] = class.ID
+	}
+	return identities, nil
+}
+
 func (workspace Workspace) instance(nodeID string) (Instance, bool) {
 	for _, instance := range workspace.Instances {
 		if instance.NodeID == nodeID {
