@@ -92,3 +92,10 @@ sorted declaration index inside the exact `ContextID`. Rebinding every checked-i
 fresh function and local symbols, rewriting resource drop links, re-entering `mir.Verify`, and
 executing to `42` now close the in-process stable-body semantic proof. Independent-process decode
 and persistent storage policy remain closed.
+
+The stable context can now reconstruct process-local struct, enum, resource, and foreign MIR
+declarations without borrowing an earlier process's context. The caller supplies a one-to-one fresh
+package map, complete `FunctionID` bindings for non-empty drop glue, and a collision-free foreign
+symbol range. Re-projecting that rebuilt context must reproduce the exact descriptor. Missing,
+ambiguous, overflowing, or colliding bindings fail closed. Combining decoded package bodies and
+this rebuilt context into one cross-process package codec remains the next gate.
