@@ -7,6 +7,30 @@ import (
 	"testing"
 )
 
+func TestValidPackageUID(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		name  string
+		value string
+		want  bool
+	}{
+		{name: "two segments", value: "example.app", want: true},
+		{name: "multiple segments and hyphens", value: "org.example.fairy-tools", want: true},
+		{name: "one segment", value: "example", want: false},
+		{name: "uppercase", value: "Example.app", want: false},
+		{name: "empty segment", value: "example..app", want: false},
+		{name: "leading hyphen", value: "example.-app", want: false},
+	} {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			if got := ValidPackageUID(test.value); got != test.want {
+				t.Fatalf("ValidPackageUID(%q) = %t, want %t", test.value, got, test.want)
+			}
+		})
+	}
+}
+
 func TestParseCanonicalLocalExactManifest(t *testing.T) {
 	t.Parallel()
 	manifest, err := Parse([]byte(`schema = "fairyc.manifest/v1"

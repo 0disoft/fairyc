@@ -770,9 +770,11 @@ untrusted pack input, text import, model call, token estimate, permission, or co
 
 Atlas exports deterministic, model-neutral facts such as symbols, calls, types, ownership transfers, borrows, errors, effects, allocations, unsafe and FFI reachability, source spans, and related tests. Compiler facts and free-text documentation are physically separated and carry provenance. Unknown or incomplete edges remain explicit rather than being guessed.
 
-Stage 0 Atlas work continues from the implemented versioned `.fymap` codec, contained store,
-bounded package-local queries, and compiler-fact Context Pack to an explicit command policy and a
-separately reviewed attributed-text boundary.
+Stage 0 Atlas now exposes `experimental atlas-pack overview` for one exact manifest package UID with
+mandatory record, selection-byte, and final-output-byte limits plus optional locked no-write mode.
+It emits canonical pack bytes without a newline or map-store write. Stage 0 work continues toward an
+exact SymbolId discovery path for `show`/`around`, a separate map-publication policy, and a separately
+reviewed attributed-text boundary.
 `impact`, semantic
 `diff`, stable anchor syntax, LSP, SCIP, MCP, structural edits, embeddings, model-generated
 summaries, and a vector database are deferred behind usage and completeness evidence.
@@ -784,7 +786,8 @@ plan are specified in `docs/atlas/semantic-snapshot-v0.md`, `docs/atlas/symbol-i
 `docs/atlas/fymap-transport-v1.md`; the implemented store is specified in
 `docs/atlas/fymap-store-v1.md`; the implemented query layer is specified in
 `docs/atlas/fymap-query-v1.md`; compiler-fact pack output is specified in
-`docs/atlas/context-pack-v1.md`. Command and attributed-text behavior remain future work.
+`docs/atlas/context-pack-v1.md`; the experimental overview command is fixed by ADR 0190. Stable
+commands, experimental show/around, map publication, and attributed-text behavior remain future work.
 
 ## Explicit non-goals
 

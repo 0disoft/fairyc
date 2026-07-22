@@ -42,6 +42,13 @@ protocol; every limit is mandatory and caller-selected.
 is the separate one-shot persistent proof. It identifies the exact running executable, reads and
 writes only the explicit ignored workspace cache directory, and reports versioned JSON.
 
+`fairyc experimental atlas-pack overview --package-uid <uid> --max-records <count>
+--max-selection-bytes <bytes> --max-output-bytes <bytes> [--locked]` compiles the manifest-owned
+workspace, selects one exact package UID, and writes one canonical compiler-fact Context Pack to
+stdout without a trailing newline. Every size limit is explicit. The command neither reads nor
+writes a `.fymap` store, imports source or documentation text, discovers symbols by name, nor exposes
+`show` or `around`; those commands require a separate exact SymbolId discovery contract.
+
 The persistent command is deliberately not another session mode. Every invocation is a fresh
 process and hashes its executable before constructing a stable disk Session. The cache path must be
 canonical, use forward slashes, and remain under ignored `build/`. All entry, retained-byte,

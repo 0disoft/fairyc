@@ -39,6 +39,11 @@ var (
 	pathSegment     = regexp.MustCompile(`^[A-Za-z0-9_][A-Za-z0-9._-]*$`)
 )
 
+// ValidPackageUID reports whether value has the exact manifest-v1 package UID spelling.
+func ValidPackageUID(value string) bool {
+	return uidPattern.MatchString(value)
+}
+
 // ValidationError exposes fixture-stable categories without freezing final user diagnostics.
 type ValidationError struct {
 	Reason string
@@ -130,7 +135,7 @@ func Parse(contents []byte) (Manifest, error) {
 	if raw.Schema != SchemaVersion {
 		return Manifest{}, &ValidationError{Reason: ReasonUnsupportedSchema, Field: "schema", Detail: fmt.Sprintf("got %q", raw.Schema)}
 	}
-	if !uidPattern.MatchString(raw.Package.UID) {
+	if !ValidPackageUID(raw.Package.UID) {
 		return Manifest{}, &ValidationError{Reason: ReasonInvalidPackageUID, Field: "package.uid", Detail: "expected at least two lowercase dot-separated segments"}
 	}
 	if !kebabPattern.MatchString(raw.Package.Name) {

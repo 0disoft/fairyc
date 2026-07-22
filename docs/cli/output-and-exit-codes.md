@@ -128,6 +128,14 @@ relative cache directory, target/lock/workspace/MIR counts, verified reuse, reta
 counters, and skipped or failed stores. Source or package diagnostics produce no partial JSON and use
 the existing codes `3` or `7`; invalid flags and limits use `2`; invariant, executable-identity, or
 output failures use `4`.
+`experimental atlas-pack overview` writes exactly one canonical
+`fairyc.context-pack-json/v1` value with no trailing newline. It requires an exact manifest-v1
+package UID plus explicit record, query-selection-byte, and final-output-byte limits. Invalid or
+unknown selectors, malformed limits, and insufficient budgets use code `2`; semantic diagnostics
+use `3`; manifest, workspace, source-loading, graph, and lock failures use `7`; executable identity,
+compiler invariant, and output failures use `4`. Ordinary lock maintenance may precede a later
+failure; `--locked` is no-write. No partial pack is intentionally emitted, though an external writer
+may accept a prefix before returning an output failure.
 `experimental target-spec` writes one deterministic `fairyc.target-spec/v0` JSON document, defined
 by `spec/cli/experimental-target-spec-v0.schema.json`, to stdout. Missing, extra, or unknown target
 IDs produce code `2`, no JSON, and a bounded invocation diagnostic on stderr.

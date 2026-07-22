@@ -515,8 +515,10 @@ check, accepts only exact SymbolIds, and implements deterministic caller-bounded
 and package-local `around` queries with explicit filter, depth, byte, dependency-join, and incoming-
 map omissions. `internal/contextpack` now runs those queries directly and emits caller-bounded,
 checksummed canonical `fairyc.context-pack-json/v1` with exact package/compatibility/query/budget/
-usage/completeness/fact/relation/omission fields and visibly empty text sections. No Atlas command,
-default store policy, dependency-map join, source excerpt, pack decoder, or text importer exists yet.
+usage/completeness/fact/relation/omission fields and visibly empty text sections. The first
+`experimental atlas-pack overview` command exposes one explicitly selected package UID with explicit
+record/selection/output limits and no map-store default. No `show`/`around` command, default store
+policy, dependency-map join, source excerpt, pack decoder, or text importer exists yet.
 
 `experimental target-spec` accepts exactly one known Linux GNU or Windows MSVC ID and writes
 deterministic `fairyc.target-spec/v0` JSON. The result separates target semantics from local

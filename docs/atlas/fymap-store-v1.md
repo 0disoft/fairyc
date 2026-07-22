@@ -96,7 +96,9 @@ outside the portable guarantee.
 ## Not enabled
 
 - no default store path, generation count, byte quota, or recovery age;
-- no stable or experimental CLI command yet;
+- no stable or experimental CLI command reads, writes, lists, or maintains this store; the separate
+  `experimental atlas-pack overview` command builds an in-memory current partition and emits a
+  Context Pack without selecting a store path;
 - no automatic write during `check`, `build`, `run`, `test`, or `emit`;
 - no dependency-map discovery or transitive join;
 - no dependency-map join, Context Pack, source-excerpt, LSP, SCIP, or MCP reader; package-local

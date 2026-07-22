@@ -119,6 +119,7 @@ unchanged into the pack. `impact` and semantic `diff` remain deferred.
 - no Context Pack decoder or acceptance of untrusted pack bytes;
 - no source excerpt, documentation import, generated summary, or warning producer;
 - no dependency-map join, workspace-wide index, name search, fuzzy match, or rename inference;
-- no stable or experimental CLI command, default map path, or automatic publication;
+- no stable command, default map path, or automatic publication; experimental CLI exposure is
+  limited to the explicit overview-only contract in ADR 0190;
 - no LSP, SCIP, MCP, structural edit, agent permission, embedding, or vector database behavior; and
 - no output-token, latency, retained-size, rewrite-speed, or safe-change claim.

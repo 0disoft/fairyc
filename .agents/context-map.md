@@ -90,7 +90,7 @@
 - Runtime and standard-library route: docs/runtime/
 - Compatibility route: docs/compatibility/
 - Diagnostics route: docs/diagnostics/catalog-v0.md
-- Atlas route: docs/atlas/, internal/semanticsnapshot/, internal/symbolidentity/, internal/atlasmap/, internal/contextpack/, internal/packagecontent/file_identity.go, docs/adr/0182-immutable-semantic-snapshot-v0.md, docs/adr/0183-provisional-symbol-id-v1.md, docs/adr/0184-source-file-integrity-identities-v1.md, docs/adr/0185-fymap-logical-package-plan-v1.md, docs/adr/0186-bounded-canonical-fymap-transport-v1.md, docs/adr/0187-contained-fymap-store-and-current-source-validation.md, docs/adr/0188-bounded-current-fymap-queries.md, docs/adr/0189-canonical-compiler-fact-context-pack-v1.md
+- Atlas route: docs/atlas/, internal/semanticsnapshot/, internal/symbolidentity/, internal/atlasmap/, internal/contextpack/, internal/packagecontent/file_identity.go, internal/cli/atlas_pack.go, docs/adr/0182-immutable-semantic-snapshot-v0.md, docs/adr/0183-provisional-symbol-id-v1.md, docs/adr/0184-source-file-integrity-identities-v1.md, docs/adr/0185-fymap-logical-package-plan-v1.md, docs/adr/0186-bounded-canonical-fymap-transport-v1.md, docs/adr/0187-contained-fymap-store-and-current-source-validation.md, docs/adr/0188-bounded-current-fymap-queries.md, docs/adr/0189-canonical-compiler-fact-context-pack-v1.md, docs/adr/0190-experimental-atlas-overview-pack-command.md
 - Documentation update route: docs/README.md
 - CLI tool route: .agents/skills/cli-tool/SKILL.md
 - Monorepo route: .agents/skills/monorepo/SKILL.md

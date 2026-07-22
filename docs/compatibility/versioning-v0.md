@@ -525,6 +525,11 @@ omission identity while requiring empty documentation, source-excerpt, and warni
 pre-release internal output: no decoder, cross-version acceptance, text import, default location, or
 CLI stability is promised.
 
+ADR 0190 adds only the unstable `experimental atlas-pack overview` spelling. Its exact package-UID
+selector, mandatory record/selection/output limits, optional locked mode, canonical no-newline
+stdout, and failure-code mapping are experimental CLI policy. It does not stabilize `.fymap` store
+layout or policy, `show`/`around`, SymbolId discovery, text import, or any Atlas compatibility family.
+
 Dependency handling is relation-specific:
 
 | Condition | Atlas behavior |

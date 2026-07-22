@@ -44,6 +44,7 @@ Usage:
   fairyc experimental check-semantics <file.fy> [<file.fy>...]
   fairyc experimental check <primary.fy> [--source <file.fy>]...
   fairyc experimental check-workspace [--locked]
+  fairyc experimental atlas-pack overview --package-uid <uid> --max-records <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--locked]
   fairyc experimental check-workspace-cache --target <target-id> --cache-dir <build/path> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-record-bytes <bytes> --cache-max-artifact-bytes <bytes> --cache-temp-max-age-seconds <seconds> [--locked]
   fairyc experimental check-workspace-session --target <target-id> --max-requests <count> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-artifact-bytes <bytes> [--locked]
   fairyc experimental build-workspace --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe> [--locked]
@@ -202,6 +203,8 @@ func runExperimental(args []string, sourceRoot string, stdin io.Reader, stdout, 
 		return runCheck(args[1:], sourceRoot, stdout, stderr)
 	case "check-workspace":
 		return runWorkspaceCheck(args[1:], sourceRoot, stdout, stderr)
+	case "atlas-pack":
+		return runAtlasPack(args[1:], sourceRoot, stdout, stderr)
 	case "check-workspace-cache":
 		return runWorkspaceCacheCheck(args[1:], sourceRoot, stdout, stderr)
 	case "check-workspace-session":

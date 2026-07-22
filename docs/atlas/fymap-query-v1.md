@@ -77,5 +77,6 @@ or safe-change claims.
 - no source excerpt or documentation import;
 - no dependency-map join or workspace-wide reverse index;
 - no `impact`, semantic `diff`, LSP, SCIP, MCP, or structural edit behavior;
-- no stable or experimental CLI command, default map path, or automatic publication; and
+- no stable CLI or experimental `show`/`around` command, default map path, or automatic publication;
+  ADR 0190 exposes only explicitly bounded package-UID overview packs; and
 - no token-count, latency, retained-size, or rewrite-speed claim.

@@ -594,15 +594,18 @@ deterministic breadth-first traversal, mandatory record/relation/depth/selection
 results, and explicit filter/dependency/incoming omissions have executable regressions. ADR 0189 now
 adds output-only canonical compiler-fact Context Packs for all three queries, with exact package and
 compatibility identity, echoed budgets and usage, empty text sections, a separate final byte bound,
-and a domain-separated checksum. No default path, ordinary-command publication, dependency-map join,
-source excerpt, documentation import, pack decoder, public command, or rewrite measurement exists yet.
+and a domain-separated checksum. ADR 0190 now exposes only `experimental atlas-pack overview` with
+an exact package UID and explicit record/selection/output bounds; it writes canonical stdout bytes
+and no map-store path. No default store path, ordinary-command publication, dependency-map join,
+source excerpt, documentation import, pack decoder, show/around command, or rewrite measurement exists yet.
 
 - Preserve the implemented immutable `SemanticSnapshot` and per-package logical map plan.
 - Preserve the implemented bounded canonical `.fymap` codec and semantic revalidation boundary.
 - Preserve the implemented contained immutable store and current-source rejection boundary.
 - Preserve the implemented bounded exact-current package-local query boundary.
 - Preserve the implemented canonical compiler-fact-only Context Pack boundary.
-- Select an explicit experimental command/path/limit policy before exposing map publication.
+- Preserve the explicit overview-only experimental command and keep map publication policy separate.
+- Design exact SymbolId discovery before exposing experimental `show` or `around`.
 - Design attributed source-excerpt and documentation policy before admitting any free text.
 - Measure whole-package map rewrite cost before considering chunks or compression.
 
