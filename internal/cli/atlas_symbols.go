@@ -8,6 +8,7 @@ import (
 
 	"github.com/0disoft/fairyc/internal/atlasmap"
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
+	"github.com/0disoft/fairyc/internal/source"
 	"github.com/0disoft/fairyc/internal/symbolcatalog"
 	"github.com/0disoft/fairyc/internal/symbolidentity"
 )
@@ -15,6 +16,7 @@ import (
 type atlasSymbolsOptions struct {
 	packageUID        string
 	module            string
+	name              string
 	kinds             []semanticsnapshot.DeclarationKind
 	after             string
 	maxSymbols        int
@@ -39,7 +41,7 @@ func runAtlasSymbols(arguments []string, sourceRoot string, stdout, stderr io.Wr
 		return code
 	}
 	encoded, err := symbolcatalog.Encode(index, atlasmap.SymbolCatalogRequest{
-		Module: options.module, Kinds: options.kinds, After: options.after,
+		Module: options.module, Name: options.name, Kinds: options.kinds, After: options.after,
 		Budget: atlasmap.SymbolCatalogBudget{
 			MaxSymbols: options.maxSymbols, MaxSelectionBytes: options.maxSelectionBytes,
 		},
@@ -55,7 +57,7 @@ func runAtlasSymbols(arguments []string, sourceRoot string, stdout, stderr io.Wr
 
 func parseAtlasSymbolsOptions(arguments []string) (atlasSymbolsOptions, error) {
 	options := atlasSymbolsOptions{}
-	seen := make(map[string]bool, 8)
+	seen := make(map[string]bool, 9)
 	for position := 0; position < len(arguments); {
 		flag := arguments[position]
 		if flag == "--locked" {
@@ -67,7 +69,7 @@ func parseAtlasSymbolsOptions(arguments []string) (atlasSymbolsOptions, error) {
 			continue
 		}
 		switch flag {
-		case "--package-uid", "--module", "--kind", "--after", "--max-symbols", "--max-selection-bytes", "--max-output-bytes":
+		case "--package-uid", "--module", "--name", "--kind", "--after", "--max-symbols", "--max-selection-bytes", "--max-output-bytes":
 		default:
 			return atlasSymbolsOptions{}, fmt.Errorf("experimental command \"atlas-symbols list\" does not accept flag %q", flag)
 		}
@@ -90,6 +92,11 @@ func parseAtlasSymbolsOptions(arguments []string) (atlasSymbolsOptions, error) {
 				return atlasSymbolsOptions{}, fmt.Errorf("experimental command \"atlas-symbols list\" requires --module as 1 through 512 bytes")
 			}
 			options.module = value
+		case "--name":
+			if len(value) > 512 || !source.ValidIdentifier(value) {
+				return atlasSymbolsOptions{}, fmt.Errorf("experimental command \"atlas-symbols list\" requires --name as an exact Stage 0 identifier of at most 512 bytes")
+			}
+			options.name = value
 		case "--kind":
 			kind := semanticsnapshot.DeclarationKind(value)
 			if !slices.Contains(atlasmap.AllDeclarationKinds(), kind) {

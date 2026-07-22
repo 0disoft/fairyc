@@ -157,6 +157,34 @@ func TestQueryIndexCatalogSymbolsIsExactFilteredAndPageable(t *testing.T) {
 			t.Fatalf("filtered catalog leaked %+v", entry)
 		}
 	}
+
+	namedRequest := request
+	namedRequest.Name = "leaf"
+	named, err := index.CatalogSymbols(namedRequest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !named.Complete || named.Name != "leaf" || named.Total != 2 || len(named.Symbols) != 2 ||
+		named.Symbols[0].Module == named.Symbols[1].Module {
+		t.Fatalf("exact-name catalog = %+v", named)
+	}
+	for _, entry := range named.Symbols {
+		if entry.Name != "leaf" {
+			t.Fatalf("exact-name catalog leaked %+v", entry)
+		}
+	}
+	moduleNamed := namedRequest
+	moduleNamed.Module = named.Symbols[0].Module
+	one, err := index.CatalogSymbols(moduleNamed)
+	if err != nil || one.Total != 1 || len(one.Symbols) != 1 || one.Symbols[0].Module != moduleNamed.Module {
+		t.Fatalf("module and exact-name catalog = %+v, %v", one, err)
+	}
+	missingName := request
+	missingName.Name = "absent"
+	empty, err := index.CatalogSymbols(missingName)
+	if err != nil || !empty.Complete || empty.Total != 0 || len(empty.Symbols) != 0 || empty.Name != "absent" {
+		t.Fatalf("missing exact-name catalog = %+v, %v", empty, err)
+	}
 }
 
 func TestQueryIndexCatalogSymbolsRejectsAmbiguousOrUnpageableRequests(t *testing.T) {
@@ -179,9 +207,19 @@ func TestQueryIndexCatalogSymbolsRejectsAmbiguousOrUnpageableRequests(t *testing
 		{name: "duplicate kind", mutate: func(value *SymbolCatalogRequest) { value.Kinds = append(value.Kinds, value.Kinds[0]) }},
 		{name: "unknown kind", mutate: func(value *SymbolCatalogRequest) { value.Kinds = []semanticsnapshot.DeclarationKind{"variable"} }},
 		{name: "unknown module", mutate: func(value *SymbolCatalogRequest) { value.Module = "missing" }, want: ErrModuleNotFound},
+		{name: "invalid exact name", mutate: func(value *SymbolCatalogRequest) { value.Name = "not::an_identifier" }},
 		{name: "visible cursor", mutate: func(value *SymbolCatalogRequest) { value.After = index.nodes[0].symbol.Visible }},
 		{name: "foreign full cursor", mutate: func(value *SymbolCatalogRequest) {
 			value.After = "fysym1-sha256-256-" + strings.Repeat("a", 64)
+		}},
+		{name: "cursor outside exact-name filter", mutate: func(value *SymbolCatalogRequest) {
+			value.Name = "leaf"
+			for _, node := range index.nodes {
+				if node.declaration.Key.Name != value.Name {
+					value.After = node.symbol.Full
+					return
+				}
+			}
 		}},
 		{name: "zero symbols", mutate: func(value *SymbolCatalogRequest) { value.Budget.MaxSymbols = 0 }},
 		{name: "zero bytes", mutate: func(value *SymbolCatalogRequest) { value.Budget.MaxSelectionBytes = 0 }},
@@ -394,6 +432,12 @@ fn i32 middle() {
 
 fn i32 main() {
     return middle() + 1;
+}
+`)
+	writeQueryFixture(t, filepath.Join(root, "src", "other.fy"), `module other;
+
+fn i32 leaf() {
+    return 7;
 }
 `)
 	workspace, err := workspaceloader.Load(root)

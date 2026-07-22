@@ -543,6 +543,13 @@ ADR 0193 independently fixes output version `fairyc.symbol-catalog/v0`, encoding
 unstable `experimental atlas-symbols list` spelling. This does not stabilize the CLI, cross-version
 cursors, exact-name or fuzzy search, dependency joins, source text, or a catalog decoder.
 
+ADR 0201 supersedes that output-only writer with `fairyc.symbol-catalog/v1`, encoding
+`fairyc.symbol-catalog-json/v1`, checksum `fairyc.symbol-catalog-checksum/v1-sha256`, and prefix
+`fyscat1-sha256-`. V1 adds one echoed optional exact Stage 0 declaration-name filter to the closed
+result shape, applies module/name/kind filters before totals and cursor validation, and retains all
+same-name records. Current code emits only v1 and accepts neither version as input. This does not
+promise v0 migration, cross-version cursors, fuzzy matching, name normalization, or stable CLI.
+
 ADR 0194 adds the unstable `experimental atlas-pack show` and `around` spellings over the existing
 Context Pack v1 output. Visible/full selectors, directions, exact relation filters, and mandatory
 record/relation/depth/selection/output policy are experimental CLI behavior. This does not stabilize

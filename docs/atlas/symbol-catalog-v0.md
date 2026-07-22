@@ -1,9 +1,13 @@
 # Atlas Symbol Catalog v0
 
-- Status: Implemented output-only catalog
+- Status: Historical output-only catalog; superseded by v1
 - Query prerequisite: `docs/adr/0192-exact-current-symbol-catalog-query.md`
-- Implementation: `internal/symbolcatalog/`
+- Historical implementation: retired; `internal/symbolcatalog/` now emits v1
 - CLI decision: `docs/adr/0193-experimental-symbol-catalog-command.md`
+- Successor: `docs/atlas/symbol-catalog-v1.md`
+
+Current writers emit Symbol Catalog v1 under ADR 0201. This page records the previously emitted v0
+shape; no current decoder accepts it and no cross-version cursor migration is promised.
 
 ## Envelope
 

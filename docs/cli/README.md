@@ -49,9 +49,11 @@ stdout without a trailing newline. Every size limit is explicit. The command nei
 writes a `.fymap` store, imports source or documentation text, nor discovers symbols by name.
 
 `fairyc experimental atlas-symbols list --package-uid <uid> --kind <kind> [--kind <kind>]...
-[--module <module>] [--after <full-symbol-id>] --max-symbols <count>
+[--module <module>] [--name <identifier>] [--after <full-symbol-id>] --max-symbols <count>
 --max-selection-bytes <bytes> --max-output-bytes <bytes> [--locked]` is that exact discovery path.
-It emits a checksummed, full-SymbolId-ordered catalog page with no fuzzy search or hidden defaults.
+It emits a checksummed Symbol Catalog v1 page in full-SymbolId order. Optional module and name
+filters are exact; same-name declarations remain separate and there is no fuzzy search or hidden
+default.
 
 The resulting visible or full ID can drive `fairyc experimental atlas-pack show` or `around`.
 Both require explicit direction, one or more exact relation kinds, record/relation/selection/output

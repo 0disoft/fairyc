@@ -4,6 +4,7 @@
 - Date: 2026-07-23
 - Query source: `docs/atlas/fymap-query-v1.md`
 - Identity source: `docs/atlas/symbol-id-v1.md`
+- Follow-up: `docs/adr/0201-exact-name-symbol-catalog-v1.md`
 
 ## Context
 

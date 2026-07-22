@@ -4,6 +4,7 @@
 - Date: 2026-07-23
 - Catalog source: `docs/atlas/symbol-catalog-v0.md`
 - CLI source: `docs/cli/command-contract.md`
+- Follow-up: `docs/adr/0201-exact-name-symbol-catalog-v1.md`
 
 ## Context
 

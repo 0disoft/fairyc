@@ -154,9 +154,11 @@ unknown exact symbols, and insufficient record/relation/depth/selection/output b
 `around` accepts canonical depth zero through 64; `show` rejects a depth option. Both emit no partial
 pack before output begins and preserve the same external-writer prefix caveat.
 `experimental atlas-symbols list` writes exactly one canonical
-`fairyc.symbol-catalog-json/v0` value with no trailing newline. Invalid or duplicate kinds,
-malformed full-ID cursors, unknown packages or modules, and insufficient symbol, selection-byte, or
-final-output budgets are invocation failure `2`. Workspace/lock failures are `7`, source diagnostics
+`fairyc.symbol-catalog-json/v1` value with no trailing newline. Invalid or duplicate kinds,
+malformed or duplicate exact names, malformed full-ID cursors, cursors outside the complete
+module/name/kind-filtered set, unknown packages or modules, and insufficient symbol,
+selection-byte, or final-output budgets are invocation failure `2`. Zero exact-name matches are
+successful complete output. Workspace/lock failures are `7`, source diagnostics
 are `3`, and compiler invariants or output failures are `4`. No partial catalog is intentionally
 written on pre-output failure; an external writer may retain a prefix when its own write fails.
 `experimental target-spec` writes one deterministic `fairyc.target-spec/v0` JSON document, defined

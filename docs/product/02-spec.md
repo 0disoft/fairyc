@@ -806,10 +806,12 @@ mandatory record, selection-byte, and final-output-byte limits plus optional loc
 It emits canonical pack bytes without a newline or map-store write.
 
 The internal exact-current query layer now also provides full-SymbolId-ordered declaration catalog
-pages with explicit kind filters, optional exact module selection, positive symbol/byte limits, and
-full-ID-only continuation. ADR 0193 exposes the result as checksummed
-`fairyc.symbol-catalog-json/v0` through `experimental atlas-symbols list`. It retains no fuzzy rank,
-guessed rename, source text, map-store path, or hidden limit.
+pages with explicit kind filters, optional exact module and Stage 0 declaration-name selection,
+positive symbol/byte limits, and full-ID-only continuation. Exact names use byte equality and retain
+all same-name records across modules or kinds. ADR 0193 exposes the command, while ADR 0201 moves
+the closed result to checksummed `fairyc.symbol-catalog-json/v1` through `experimental
+atlas-symbols list`. It retains no fuzzy rank, normalization, guessed uniqueness or rename, source
+text, map-store path, or hidden limit.
 
 Those exact visible or full SymbolIds now drive `experimental atlas-pack show` and `around`.
 Both require explicit direction, exact relation filters, record/relation/selection/output limits,
@@ -836,8 +838,9 @@ plan are specified in `docs/atlas/semantic-snapshot-v0.md`, `docs/atlas/symbol-i
 `docs/atlas/fymap-store-v1.md`; the implemented query layer is specified in
 `docs/atlas/fymap-query-v1.md`; compiler-fact pack output is specified in
 `docs/atlas/context-pack-v1.md`; the experimental overview command is fixed by ADR 0190, the
-rewrite measurement boundary by ADR 0191, the internal exact symbol catalog by ADR 0192, and its
-experimental output command by ADR 0193. ADR 0194 fixes experimental show/around. Stable commands,
+rewrite measurement boundary by ADR 0191, the internal exact symbol catalog by ADR 0192, its
+experimental output command by ADR 0193, and exact-name Symbol Catalog v1 by ADR 0201. ADR 0194
+fixes experimental show/around. Stable commands,
 map publication and attributed-text decoding remain future work; ADR 0195 fixes the attributed-text
 policy, ADR 0196 implements its internal exact retained-source gate, ADR 0197 fixes its canonical
 output-only JSON, ADR 0198 fixes its first experimental source command, ADR 0199 fixes exact

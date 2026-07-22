@@ -521,10 +521,11 @@ record/selection/output limits and no map-store default. Exact SymbolIds obtaine
 catalog command can now drive `experimental atlas-pack show` and `around` with explicit direction,
 relation, record, relation, depth, selection-byte, and output-byte policy. Those commands add no
 default store policy, dependency-map join, source-excerpt output, pack decoder, or text importer. The internal
-query index now also provides exact full-SymbolId-ordered catalog pages with exact module/kind
-filters, explicit symbol/byte limits, and full-ID-only continuation; its output schema and CLI are
-now exposed through `experimental atlas-symbols list` as checksummed
-`fairyc.symbol-catalog-json/v0`, with every filter and output limit explicit. The Windows
+query index now also provides exact full-SymbolId-ordered catalog pages with exact module/name/kind
+filters, explicit symbol/byte limits, and full-ID-only continuation. Exact-name matches retain every
+same-name declaration across modules rather than guessing one winner. Symbol Catalog v1 exposes
+those pages through `experimental atlas-symbols list` as checksummed
+`fairyc.symbol-catalog-json/v1`, with every filter and output limit explicit. The Windows
 host smoke now also records nine raw whole-package canonical rewrite samples after planning, checks
 byte identity, and reports fixed source/record/encoded-byte denominators without choosing chunking,
 compression, incremental updates, or a performance budget.

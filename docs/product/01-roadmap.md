@@ -604,7 +604,10 @@ those commands, documentation import, or pack decoder exists yet.
 ADR 0192 supplies the internal exact discovery prerequisite: full-SymbolId ordering, exact module
 and kind filters, explicit count/byte bounds, and full-ID stateless cursors all have real-workspace
 regressions without fuzzy name inference. ADR 0193 exposes those pages through bounded canonical
-`experimental atlas-symbols list` output with no store path, fuzzy search, or hidden default.
+`experimental atlas-symbols list` output with no store path, fuzzy search, or hidden default. ADR
+0201 adds an optional exact Stage 0 declaration-name filter, retains every same-name match across
+modules and kinds, rejects cursors outside the filtered set, and moves the closed output contract to
+Symbol Catalog v1 instead of mutating v0.
 ADR 0194 now exposes exact visible/full SymbolId `atlas-pack show` and `around` with mandatory
 direction, relation, record, relation, depth, selection-byte, and output-byte policy. The commands
 preserve package-local join omissions and add no text, decoder, store, or safe-change claim.
@@ -629,7 +632,7 @@ Undocumented declarations produce `kind-unavailable`; map and Context Pack v1 by
 - Preserve the implemented canonical compiler-fact-only Context Pack boundary.
 - Preserve the explicit overview/show/around experimental commands and keep map publication policy separate.
 - Preserve the raw whole-package rewrite harness; require representative failure before adding chunks or compression.
-- Preserve the implemented exact SymbolId catalog output as the discovery path for experimental `show` and `around`.
+- Preserve the implemented exact module/name/kind SymbolId Catalog v1 output as the discovery path for experimental `show` and `around`; keep fuzzy ranking and guessed uniqueness out.
 - Preserve the implemented attributed-text v0 model, exact retained source/documentation gates, canonical output-only JSON, explicit experimental source/documentation commands, and exact `///` frontend attachment sidecar; keep additional origins, multi-record composition, decoding, and rendering behind separate decisions.
 
 Exit gate: Atlas failure cannot change compilation; stale or incompatible maps fail closed; unknown graph edges remain explicit; text cannot grant authority.

@@ -1,5 +1,6 @@
 // Package symbolcatalog owns canonical output-only exact-current Atlas SymbolId catalog pages.
-// It accepts no source text, paths, documentation, untrusted encoded input, or fuzzy search terms.
+// It accepts no source text, paths, documentation, untrusted encoded input, or fuzzy search terms;
+// its optional declaration-name filter is exact and compiler-validated.
 package symbolcatalog
 
 import (
@@ -17,10 +18,10 @@ import (
 )
 
 const (
-	CatalogVersion    = "fairyc.symbol-catalog/v0"
-	CatalogEncoding   = "fairyc.symbol-catalog-json/v0"
-	ChecksumAlgorithm = "fairyc.symbol-catalog-checksum/v0-sha256"
-	ChecksumPrefix    = "fyscat0-sha256-"
+	CatalogVersion    = "fairyc.symbol-catalog/v1"
+	CatalogEncoding   = "fairyc.symbol-catalog-json/v1"
+	ChecksumAlgorithm = "fairyc.symbol-catalog-checksum/v1-sha256"
+	ChecksumPrefix    = "fyscat1-sha256-"
 	checksumDomain    = "fairyc.symbol-catalog-checksum"
 )
 

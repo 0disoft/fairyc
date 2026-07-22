@@ -16,7 +16,7 @@ func TestExperimentalAtlasSymbolsListsAndPagesExactCurrentIDs(t *testing.T) {
 		t.Fatalf("first symbol catalog = (%d, %q, %q)", code, first, stderr)
 	}
 	catalog := decodeAtlasSymbols(t, first)
-	if catalog.CatalogVersion != "fairyc.symbol-catalog/v0" || catalog.Catalog.Context.PackageUID != "example.session.app" ||
+	if catalog.CatalogVersion != "fairyc.symbol-catalog/v1" || catalog.Catalog.Context.PackageUID != "example.session.app" ||
 		len(catalog.Catalog.Symbols) != 1 || catalog.Catalog.Complete || catalog.Catalog.NextAfter == "" {
 		t.Fatalf("symbol catalog = %+v", catalog)
 	}
@@ -37,6 +37,21 @@ func TestExperimentalAtlasSymbolsListsAndPagesExactCurrentIDs(t *testing.T) {
 	if code != ExitSuccess || stderr != "" || lockedOutput != first {
 		t.Fatalf("locked symbol catalog = (%d, equal %t, %q)", code, lockedOutput == first, stderr)
 	}
+
+	namedArguments := append(atlasSymbolsArguments("example.session.app"), "--name", "helper")
+	code, namedOutput, stderr := runForTest(append([]string{"experimental", "atlas-symbols"}, namedArguments...), root)
+	named := decodeAtlasSymbols(t, namedOutput)
+	if code != ExitSuccess || stderr != "" || named.Catalog.Name != "helper" || named.Catalog.Total != 1 ||
+		len(named.Catalog.Symbols) != 1 || named.Catalog.Symbols[0].Name != "helper" || !named.Catalog.Complete {
+		t.Fatalf("exact-name symbol catalog = (%d, %+v, %q)", code, named, stderr)
+	}
+	missingArguments := append(atlasSymbolsArguments("example.session.app"), "--name", "absent")
+	code, missingOutput, stderr := runForTest(append([]string{"experimental", "atlas-symbols"}, missingArguments...), root)
+	missing := decodeAtlasSymbols(t, missingOutput)
+	if code != ExitSuccess || stderr != "" || missing.Catalog.Name != "absent" || missing.Catalog.Total != 0 ||
+		len(missing.Catalog.Symbols) != 0 || !missing.Catalog.Complete {
+		t.Fatalf("missing exact-name symbol catalog = (%d, %+v, %q)", code, missing, stderr)
+	}
 }
 
 func TestExperimentalAtlasSymbolsRejectsInvalidFiltersBudgetsAndOutput(t *testing.T) {
@@ -50,6 +65,9 @@ func TestExperimentalAtlasSymbolsRejectsInvalidFiltersBudgetsAndOutput(t *testin
 		{name: "duplicate kind", arguments: append(atlasSymbolsArguments("example.session.app"), "--kind", "function"), contains: "repeats declaration kind"},
 		{name: "unknown kind", arguments: replaceAtlasPackArgument(atlasSymbolsArguments("example.session.app"), "--kind", "variable"), contains: "does not support declaration kind"},
 		{name: "unknown module", arguments: append(atlasSymbolsArguments("example.session.app"), "--module", "missing"), contains: "module was not found"},
+		{name: "invalid exact name", arguments: append(atlasSymbolsArguments("example.session.app"), "--name", "not-a-name"), contains: "exact Stage 0 identifier"},
+		{name: "oversized exact name", arguments: append(atlasSymbolsArguments("example.session.app"), "--name", strings.Repeat("a", 513)), contains: "at most 512 bytes"},
+		{name: "duplicate exact name", arguments: append(atlasSymbolsArguments("example.session.app"), "--name", "helper", "--name", "main"), contains: "received --name more than once"},
 		{name: "visible cursor", arguments: append(atlasSymbolsArguments("example.session.app"), "--after", "fysym1-sha256-128-"+strings.Repeat("0", 32)), contains: "canonical full SymbolId"},
 		{name: "zero symbols", arguments: replaceAtlasPackArgument(atlasSymbolsArguments("example.session.app"), "--max-symbols", "0"), contains: "canonical decimal"},
 		{name: "tiny selection", arguments: replaceAtlasPackArgument(atlasSymbolsArguments("example.session.app"), "--max-selection-bytes", "1"), contains: "cannot contain"},
@@ -95,6 +113,8 @@ type atlasSymbolsEnvelope struct {
 		Context struct {
 			PackageUID string `json:"package_uid"`
 		} `json:"context"`
+		Name    string `json:"name"`
+		Total   int    `json:"total"`
 		Symbols []struct {
 			Symbol struct {
 				Visible string `json:"Visible"`

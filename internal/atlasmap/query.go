@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
+	"github.com/0disoft/fairyc/internal/source"
 	"github.com/0disoft/fairyc/internal/symbolidentity"
 )
 
@@ -118,6 +119,7 @@ type SymbolCatalogUsage struct {
 
 type SymbolCatalogRequest struct {
 	Module string                             `json:"module,omitempty"`
+	Name   string                             `json:"name,omitempty"`
 	Kinds  []semanticsnapshot.DeclarationKind `json:"kinds"`
 	After  string                             `json:"after,omitempty"`
 	Budget SymbolCatalogBudget                `json:"budget"`
@@ -136,6 +138,7 @@ type SymbolCatalogEntry struct {
 type SymbolCatalogResult struct {
 	Context   QueryContext                       `json:"context"`
 	Module    string                             `json:"module,omitempty"`
+	Name      string                             `json:"name,omitempty"`
 	Kinds     []semanticsnapshot.DeclarationKind `json:"kinds"`
 	After     string                             `json:"after,omitempty"`
 	Total     int                                `json:"total"`
@@ -384,7 +387,8 @@ func (index *QueryIndex) Overview(budget QueryBudget) (OverviewResult, error) {
 }
 
 // CatalogSymbols returns an exact, full-SymbolId-ordered, statelessly pageable declaration catalog.
-// It performs no fuzzy name matching and never treats a compact visible ID as a page cursor.
+// An optional name is matched byte-for-byte as a Stage 0 identifier; the query performs no fuzzy
+// matching and never treats a compact visible ID as a page cursor.
 func (index *QueryIndex) CatalogSymbols(request SymbolCatalogRequest) (SymbolCatalogResult, error) {
 	if index == nil {
 		return SymbolCatalogResult{}, fmt.Errorf("Atlas query index is not initialized")
@@ -393,7 +397,7 @@ func (index *QueryIndex) CatalogSymbols(request SymbolCatalogRequest) (SymbolCat
 	if err != nil {
 		return SymbolCatalogResult{}, err
 	}
-	candidates := index.catalogCandidates(request.Module, filter)
+	candidates := index.catalogCandidates(request.Module, request.Name, filter)
 	start := 0
 	if request.After != "" {
 		start = slices.IndexFunc(candidates, func(position int) bool { return index.nodes[position].symbol.Full == request.After })
@@ -406,10 +410,14 @@ func (index *QueryIndex) CatalogSymbols(request SymbolCatalogRequest) (SymbolCat
 	mandatory := struct {
 		Context QueryContext                       `json:"context"`
 		Module  string                             `json:"module,omitempty"`
+		Name    string                             `json:"name,omitempty"`
 		Kinds   []semanticsnapshot.DeclarationKind `json:"kinds"`
 		After   string                             `json:"after,omitempty"`
 		Total   int                                `json:"total"`
-	}{Context: context, Module: request.Module, Kinds: kinds, After: request.After, Total: len(candidates)}
+	}{
+		Context: context, Module: request.Module, Name: request.Name,
+		Kinds: kinds, After: request.After, Total: len(candidates),
+	}
 	mandatoryBytes, err := selectionRecordCost(mandatory)
 	if err != nil {
 		return SymbolCatalogResult{}, err
@@ -418,7 +426,7 @@ func (index *QueryIndex) CatalogSymbols(request SymbolCatalogRequest) (SymbolCat
 		return SymbolCatalogResult{}, ErrQueryBudgetTooSmall
 	}
 	result := SymbolCatalogResult{
-		Context: context, Module: request.Module, Kinds: kinds, After: request.After,
+		Context: context, Module: request.Module, Name: request.Name, Kinds: kinds, After: request.After,
 		Total: len(candidates), Budget: request.Budget,
 		Usage: SymbolCatalogUsage{SelectionBytes: mandatoryBytes},
 	}
@@ -691,6 +699,9 @@ func validateSymbolCatalogRequest(
 			return nil, nil, fmt.Errorf("%w: %s", ErrModuleNotFound, request.Module)
 		}
 	}
+	if request.Name != "" && !source.ValidIdentifier(request.Name) {
+		return nil, nil, fmt.Errorf("Atlas symbol catalog name must be an exact Stage 0 identifier")
+	}
 	kinds := slices.Clone(request.Kinds)
 	if len(kinds) == 0 {
 		return nil, nil, fmt.Errorf("Atlas symbol catalog requires an explicit nonempty declaration-kind filter")
@@ -717,11 +728,15 @@ func validateSymbolCatalogRequest(
 
 func (index *QueryIndex) catalogCandidates(
 	module string,
+	name string,
 	kinds map[semanticsnapshot.DeclarationKind]struct{},
 ) []int {
 	result := make([]int, 0, len(index.nodes))
 	for position, node := range index.nodes {
 		if module != "" && node.declaration.Key.Module != module {
+			continue
+		}
+		if name != "" && node.declaration.Key.Name != name {
 			continue
 		}
 		if _, found := kinds[node.declaration.Key.Kind]; !found {

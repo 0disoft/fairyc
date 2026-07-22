@@ -210,6 +210,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0198-experimental-atlas-text-source-command.md`: exact visible/full SymbolId source-text selection with explicit origin and count/text/output budgets, canonical no-newline stdout, checksummed omissions, and provisional failure classes; documentation remains a distinct later action.
 - `0199-c-friendly-declaration-documentation-attachment.md`: physical-line-leading consecutive `///` trivia attached by exact byte span to selected top-level declarations without changing executable grammar or compiler-fact transports.
 - `0200-exact-declaration-documentation-attributed-text-command.md`: immutable snapshot-sidecar handoff, exact retained-byte documentation extraction, successful unavailable/safety/budget omissions, and default-free experimental documentation output without changing `.fymap` or Context Pack v1.
+- `0201-exact-name-symbol-catalog-v1.md`: exact Stage 0 declaration-name filtering, ambiguity-preserving pagination, and an explicit Symbol Catalog v1 output transition.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

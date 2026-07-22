@@ -1,6 +1,6 @@
 # `.fymap` v1 Logical Schema
 
-- Status: Canonical transport, contained current-source-validated store, bounded package-local queries, compiler-fact Context Pack and SymbolId catalog output, experimental overview/catalog/show/around/source-text commands, and separate exact retained-source attributed-text JSON implemented; no attributed-text decoder
+- Status: Canonical transport, contained current-source-validated store, bounded package-local queries, compiler-fact Context Pack and exact-name SymbolId Catalog v1 output, experimental overview/catalog/show/around/source-text commands, and separate exact retained-source attributed-text JSON implemented; no attributed-text decoder
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0004-atlas-semantic-snapshot-boundary.md`
 - Snapshot source: `docs/atlas/semantic-snapshot-v0.md`
@@ -26,8 +26,10 @@ or documentation text. The separate
 described in `docs/atlas/symbol-id-v1.md`.
 
 ADR 0190 exposes exact package overview packs, ADR 0193 exposes an exact SymbolId catalog, and ADR
-0194 connects that discovery path to exact-symbol `show` and `around` packs. All remain experimental,
-require explicit limits, and rebuild exact-current compiler facts without selecting a map-store path.
+0194 connects that discovery path to exact-symbol `show` and `around` packs. ADR 0201 upgrades the
+catalog output to v1 and adds optional exact declaration-name filtering without fuzzy matching or
+guessed uniqueness. All remain experimental, require explicit limits, and rebuild exact-current
+compiler facts without selecting a map-store path.
 ADR 0198 separately exposes one exact workspace-authored source excerpt with explicit text and final
 output bounds; it does not add source bodies to this schema or to Context Pack v1.
 
@@ -153,7 +155,8 @@ The implemented internal package-local query surface is:
 - `show`: one exact SymbolId's signature, facts, bounded relations, and uncertainty without free text;
 - `around`: a bounded neighborhood with direction, relation filter, depth, and omissions.
 - `catalog symbols`: exact declaration identity records ordered and paged only by full SymbolId,
-  with explicit declaration-kind and optional exact module filters.
+  with explicit declaration-kind and optional exact module/name filters. Names use exact Stage 0
+  identifier byte equality and do not collapse same-name declarations.
 
 Every query requires explicit record, relation, depth, and deterministic selection-byte policy and
 repeats current source/compiler/interface acceptance. Dependency targets and cross-package incoming

@@ -60,6 +60,27 @@ func TestEncodeIsCanonicalChecksummedBoundedAndTextFree(t *testing.T) {
 	if _, err := ParseChecksum(ChecksumPrefix + strings.Repeat("A", 64)); err == nil {
 		t.Fatal("uppercase checksum succeeded")
 	}
+	if _, err := ParseChecksum("fyscat0-sha256-" + strings.Repeat("0", 64)); err == nil {
+		t.Fatal("v0 checksum succeeded under the v1 parser")
+	}
+	namedRequest := request
+	namedRequest.Name = "leaf"
+	named, err := Encode(index, namedRequest, 2<<20)
+	if err != nil {
+		t.Fatalf("exact-name catalog = %s, %v", named, err)
+	}
+	var decodedNamed envelope
+	if err := json.Unmarshal(named, &decodedNamed); err != nil {
+		t.Fatal(err)
+	}
+	if decodedNamed.Catalog.Name != "leaf" || decodedNamed.Catalog.Total != 1 ||
+		len(decodedNamed.Catalog.Symbols) != 1 || decodedNamed.Catalog.Symbols[0].Name != "leaf" {
+		t.Fatalf("exact-name catalog = %+v", decodedNamed.Catalog)
+	}
+	namedChecksum, err := ParseChecksum(decodedNamed.Checksum)
+	if err != nil || namedChecksum != independentChecksum(t, decodedNamed.Catalog) {
+		t.Fatalf("exact-name checksum = %s, %v", namedChecksum, err)
+	}
 	emptyRequest := request
 	emptyRequest.Kinds = []semanticsnapshot.DeclarationKind{semanticsnapshot.DeclarationEnum}
 	empty, err := Encode(index, emptyRequest, 2<<20)
