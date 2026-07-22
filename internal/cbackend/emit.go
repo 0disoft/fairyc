@@ -438,7 +438,13 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 			return Unit{}, err
 		}
 	}
-	fmt.Fprintf(&output, "int main(void) {\n    return (int)fy_fn_%d();\n}\n", value.entryIndex)
+	output.WriteString("int main(void) {\n")
+	for index := range functions {
+		if index != value.entryIndex {
+			fmt.Fprintf(&output, "    (void)&fy_fn_%d;\n", index)
+		}
+	}
+	fmt.Fprintf(&output, "    return (int)fy_fn_%d();\n}\n", value.entryIndex)
 
 	names := make([]string, len(functions))
 	for index := range functions {

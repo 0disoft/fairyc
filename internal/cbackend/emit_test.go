@@ -58,6 +58,24 @@ func TestEmitScalarControlUnit(t *testing.T) {
 	}
 }
 
+func TestEmitRetainedNonEntryFunctionIsReferencedByGeneratedMain(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, "module main;\nfn i32 dormant() { return 7; }\nfn i32 main() { return 42; }\n")
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, required := range []string{
+		"static int32_t fy_fn_0(void);",
+		"static int32_t fy_fn_0(void) {",
+		"int main(void) {\n    (void)&fy_fn_0;\n    return (int)fy_fn_1();",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+}
+
 func TestEmitNonEmptyResourceDropBodyAsVerifiedGlue(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
