@@ -65,6 +65,15 @@ statement that every source `extern C` form is absent.
 - Real Fairy-to-C and C-to-Fairy fixtures remain necessary after source `@repr(C)` and `extern C`
   lowering exists.
 
+## Source-level runtime closure correction (2026-07-22)
+
+Later source-level foreign-call probes reuse the cross-compiler driver with generated Fairy caller
+code. Checked scalar conversions in that caller can reference `fy_runtime_trap`; compiling only the
+caller and foreign callee objects left that symbol unresolved. `BuildCrossCompilerWithRuntime` now
+compiles the exact scalar runtime as a third caller-toolchain object and links all three objects.
+The foreign callee remains an independent translation unit compiled by the other toolchain. Raw C
+ABI probes that do not use generated Fairy support continue through the original two-object API.
+
 ## Rejected alternatives
 
 - Compile caller and callee together: permits inlining and one-compiler self-agreement.

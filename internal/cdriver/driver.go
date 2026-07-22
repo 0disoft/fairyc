@@ -136,6 +136,19 @@ func BuildSanitized(toolchain Toolchain, unitSource, runtimeSource string) (Arti
 // BuildCrossCompiler compiles caller and callee translation units with different closed
 // toolchains, then links them through the caller driver for native C ABI conformance checks.
 func BuildCrossCompiler(caller, callee Toolchain, profile Profile, callerSource, calleeSource string) (CrossArtifact, error) {
+	return buildCrossCompiler(caller, callee, profile, callerSource, calleeSource, "")
+}
+
+// BuildCrossCompilerWithRuntime adds one caller-compiled runtime translation unit to the same
+// closed cross-compiler link. This keeps generated caller support separate from the foreign callee.
+func BuildCrossCompilerWithRuntime(caller, callee Toolchain, profile Profile, callerSource, calleeSource, runtimeSource string) (CrossArtifact, error) {
+	if runtimeSource == "" {
+		return CrossArtifact{}, fmt.Errorf("C ABI cross build runtime source must be non-empty")
+	}
+	return buildCrossCompiler(caller, callee, profile, callerSource, calleeSource, runtimeSource)
+}
+
+func buildCrossCompiler(caller, callee Toolchain, profile Profile, callerSource, calleeSource, runtimeSource string) (CrossArtifact, error) {
 	if profile != LowProfile && profile != OptimizedProfile {
 		return CrossArtifact{}, fmt.Errorf("unsupported C profile %q", profile.Name)
 	}
@@ -154,6 +167,8 @@ func BuildCrossCompiler(caller, callee Toolchain, profile Profile, callerSource,
 	calleePath := filepath.Join(temporaryRoot, "callee.c")
 	callerObject := filepath.Join(temporaryRoot, "caller.o")
 	calleeObject := filepath.Join(temporaryRoot, "callee.o")
+	runtimePath := filepath.Join(temporaryRoot, "runtime.c")
+	runtimeObject := filepath.Join(temporaryRoot, "runtime.o")
 	executablePath := filepath.Join(temporaryRoot, "program")
 	if err := os.WriteFile(callerPath, []byte(callerSource), 0o600); err != nil {
 		return CrossArtifact{}, fmt.Errorf("write C ABI caller: %w", err)
@@ -167,7 +182,18 @@ func BuildCrossCompiler(caller, callee Toolchain, profile Profile, callerSource,
 	if _, err := runBounded(callee.Path, objectArguments(profile, calleePath, calleeObject)...); err != nil {
 		return CrossArtifact{}, fmt.Errorf("compile callee with %s: %s", callee.Name, strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
 	}
-	if _, err := runBounded(caller.Path, callerObject, calleeObject, "-o", executablePath); err != nil {
+	linkInputs := []string{callerObject, calleeObject}
+	if runtimeSource != "" {
+		if err := os.WriteFile(runtimePath, []byte(runtimeSource), 0o600); err != nil {
+			return CrossArtifact{}, fmt.Errorf("write C ABI caller runtime: %w", err)
+		}
+		if _, err := runBounded(caller.Path, objectArguments(profile, runtimePath, runtimeObject)...); err != nil {
+			return CrossArtifact{}, fmt.Errorf("compile caller runtime with %s: %s", caller.Name, strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
+		}
+		linkInputs = append(linkInputs, runtimeObject)
+	}
+	linkArguments := append(linkInputs, "-o", executablePath)
+	if _, err := runBounded(caller.Path, linkArguments...); err != nil {
 		return CrossArtifact{}, fmt.Errorf("link cross-compiler executable with %s: %s", caller.Name, strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
 	}
 	contents, err := readArtifact(executablePath)

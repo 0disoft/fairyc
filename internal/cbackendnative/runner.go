@@ -2217,13 +2217,17 @@ func runForeignSourceProbe(
 			return 0, fmt.Errorf("%s C emission lost required fragment %q", probeID, required)
 		}
 	}
+	runtimeSource, err := cruntime.ScalarSource(trapExitBase)
+	if err != nil {
+		return 0, fmt.Errorf("bind %s scalar runtime: %w", probeID, err)
+	}
 	directions := [][2]int{{0, 1}, {1, 0}}
 	executions := 0
 	for directionIndex, direction := range directions {
 		caller := toolchains[direction[0]]
 		callee := toolchains[direction[1]]
 		for profileIndex, profile := range nativeProfiles {
-			artifact, buildErr := cdriver.BuildCrossCompiler(caller, callee, profile, unit.Source, companionSource)
+			artifact, buildErr := cdriver.BuildCrossCompilerWithRuntime(caller, callee, profile, unit.Source, companionSource, runtimeSource)
 			if buildErr != nil {
 				return 0, fmt.Errorf("%s probe with %s caller/%s callee/%s: %w", probeID, caller.Name, callee.Name, profile.Name, buildErr)
 			}

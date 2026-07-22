@@ -102,6 +102,9 @@ func TestResolveRejectsUnknownCompilerBeforeLookup(t *testing.T) {
 }
 
 func TestBuildRejectsIneligibleHost(t *testing.T) {
+	if _, err := BuildCrossCompilerWithRuntime(Toolchain{}, Toolchain{}, LowProfile, "caller", "callee", ""); err == nil || !strings.Contains(err.Error(), "runtime source") {
+		t.Fatalf("BuildCrossCompilerWithRuntime(empty runtime) error = %v", err)
+	}
 	if runtime.GOOS == "linux" && runtime.GOARCH == "amd64" {
 		t.Skip("eligible host build execution belongs to the native differential command")
 	}
@@ -120,5 +123,13 @@ func TestBuildRejectsIneligibleHost(t *testing.T) {
 	)
 	if err == nil || !strings.Contains(err.Error(), "requires linux/amd64") {
 		t.Fatalf("BuildCrossCompiler() error = %v", err)
+	}
+	_, err = BuildCrossCompilerWithRuntime(
+		Toolchain{Target: target.X8664LinuxGNU, Name: "clang", Path: "clang", Libc: "glibc test"},
+		Toolchain{Target: target.X8664LinuxGNU, Name: "gcc", Path: "gcc", Libc: "glibc test"},
+		LowProfile, "caller", "callee", "runtime",
+	)
+	if err == nil || !strings.Contains(err.Error(), "requires linux/amd64") {
+		t.Fatalf("BuildCrossCompilerWithRuntime() error = %v", err)
 	}
 }
