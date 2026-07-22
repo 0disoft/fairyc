@@ -1,27 +1,29 @@
 # `.fymap` v1 Logical Schema
 
-- Status: Proposed transport encoding; the immutable snapshot, SymbolId producer, and logical per-package plan exist
+- Status: Canonical transport implemented in memory; filesystem publication and queries remain future work
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0004-atlas-semantic-snapshot-boundary.md`
 - Snapshot source: `docs/atlas/semantic-snapshot-v0.md`
 - Logical-plan source: `docs/atlas/fymap-logical-plan-v1.md`
+- Transport source: `docs/atlas/fymap-transport-v1.md`
 
 ## Boundary
 
 Analyzed typed HIR and verified MIR now produce the immutable in-memory `SemanticSnapshot` v0.
 `internal/atlasmap` validates the complete package/interface set and converts that snapshot into one
 immutable logical partition per package. It does not reparse source or feed decisions back into type
-checking. The logical plan does not choose or imply the map's encoding, checksum, section offsets,
-byte order, file location, publication protocol, or command behavior. The separate
+checking. The logical plan itself does not choose transport, while ADR 0186 separately fixes the
+bounded canonical JSON encoding and checksum. Neither contract chooses a file location,
+publication protocol, current-source authority, or command behavior. The separate
 `fairyc.symbol-id/v1-sha256-128+256` implementation now fixes the provisional declaration join key
 described in `docs/atlas/symbol-id-v1.md`.
 
-The first implementation plans one deterministic map per package without writing it. Chunking,
-compression, and symbol-level incremental rewrites require measured evidence. The normative map
-encoding, byte order, and map-checksum algorithm remain UNDECIDED; this document fixes the logical
-records and trust behavior first. Package-instance references use the independent
-`PackageInstanceId` v1 contract. The logical header records every identity algorithm independently
-rather than inheriting them from the map schema.
+The first implementation plans and encodes one deterministic map per package without publishing it.
+Chunking, compression, and symbol-level incremental rewrites require measured evidence. Transport
+v1 is compact canonical JSON with a domain-separated SHA-256 checksum; another encoding requires a
+new explicit identifier. Package-instance references use the independent `PackageInstanceId` v1
+contract. The logical header records every identity algorithm independently rather than inheriting
+them from the map schema.
 
 ## Identity
 
@@ -61,11 +63,13 @@ The implemented `fairyc.fymap-logical/v1` header contains:
 - package-instance, package-coordinate, package-source, source-file, line-map, SymbolId, and
   interface-hash algorithms;
 - the exact package public-interface hash, deterministic features, and direct package instances;
+- canonical UID/instance/coordinate namespace references for self and direct dependencies;
 - logical record counts;
 - generation completeness and omission reasons.
 
-It has no section directory because there are no transport bytes yet. A future target-dependent plan
-must use a new explicit target scope and value rather than silently reinterpreting this header.
+Transport v1 has no section directory: its exact JSON object contains header, file, module, symbol,
+declaration, function, and completeness arrays. A future target-dependent plan must use a new
+explicit target scope and value rather than silently reinterpreting this header.
 
 Absolute local paths, timestamps that break reproducibility, source bodies, credentials, and machine-specific cache paths are excluded.
 
@@ -76,8 +80,8 @@ Absolute local paths, timestamps that break reproducibility, source bodies, cred
 A file record contains a package-relative normalized path, content digest, source kind, and line-map
 identity. The implemented snapshot prerequisite uses `fairyc.source-file/v1` and
 `fairyc.source-line-map/v1` as defined in `docs/package/source-file-identities-v1.md`. Source text is
-not duplicated into `.fymap`; current-source recomputation and stale-map rejection remain exporter
-and reader work.
+not duplicated into `.fymap`; current-source recomputation and stale-map rejection remain
+publication/reader work.
 
 ### Type record
 
@@ -95,7 +99,7 @@ A function summary contains parameter and return type references, borrow-return 
 
 An edge contains source symbol, relation kind, target description, certainty, source span, provenance, and optional reason for uncertainty.
 
-Initial relation kinds may include `Calls`, `Reads`, `Writes`, `BorrowsShared`, `BorrowsMutable`, `Moves`, `Drops`, `Allocates`, `ReturnsError`, `MayTrap`, `UsesUnsafe`, `CallsForeign`, `Implements`, and `TestCalls`. This list is a proposed open enum until an encoded schema is implemented.
+Initial relation kinds may include `Calls`, `Reads`, `Writes`, `BorrowsShared`, `BorrowsMutable`, `Moves`, `Drops`, `Allocates`, `ReturnsError`, `MayTrap`, `UsesUnsafe`, `CallsForeign`, `Implements`, and `TestCalls`. Transport v1 encodes only the relations currently present in function summaries and the completeness ledger; adding a record kind requires an explicit schema decision.
 
 ## Incomplete graph model
 
@@ -134,7 +138,10 @@ The initial query surface is:
 
 `impact` and semantic `diff` are deferred until incomplete-edge behavior and identity stability are validated. Semantic diff eventually reports one of `Exact`, `Bounded`, `Partial`, `Heuristic`, or `Unavailable`; a heuristic rename is never applied as fact.
 
-Before schema 1, readers require an exact schema and identity-algorithm match. Future compatible minor readers may skip an unknown optional section only while lowering every affected relation's completeness. A different major is not parsed as semantic evidence. Atlas incompatibility never fails compilation.
+Transport v1 readers require exact schema, encoding, checksum, logical-model, and identity-algorithm
+matches and reject unknown fields. A future compatible reader may introduce a separately versioned
+policy, but v1 never skips an unknown section. A different version is not parsed as semantic
+evidence. Atlas incompatibility never fails compilation.
 
 ## Explicit exclusions
 

@@ -37,7 +37,16 @@ func FromSnapshot(snapshot semanticsnapshot.Snapshot) ([]Symbol, error) {
 		coordinateUIDs[packageValue.Coordinate] = packageValue.UID
 	}
 
-	declarations := snapshot.Declarations()
+	return FromDeclarations(snapshot.Declarations(), instanceUIDs, coordinateUIDs)
+}
+
+// FromDeclarations derives and collision-checks SymbolIds from detached declarations and the
+// exact package namespace maps required by their nominal types. It is used by map readers to
+// reject a checksummed declaration/identity contradiction without rebuilding a compiler snapshot.
+func FromDeclarations(declarations []semanticsnapshot.Declaration, instanceUIDs, coordinateUIDs map[string]string) ([]Symbol, error) {
+	if len(declarations) == 0 || len(instanceUIDs) == 0 || len(coordinateUIDs) == 0 {
+		return nil, fmt.Errorf("symbol identity requires declarations and package namespace mappings")
+	}
 	result := make([]Symbol, 0, len(declarations))
 	ids := make([]ID, 0, len(declarations))
 	for _, declaration := range declarations {

@@ -90,6 +90,7 @@ text parsing, invalid path and metadata rejection, visible/full consistency, syn
 collision rejection, body/span/version/build-number stability, nominal package-UID normalization,
 semantic-change sensitivity, and deterministic ordering.
 
-This implementation does not create `.fymap` bytes, a checksum, package-local map partitioning,
-dependency-map joins, a stale-map validator, Atlas queries, Context Packs, anchors, rename
-heuristics, LSP/SCIP identity, or a stable post-1 compatibility promise.
+The Atlas transport now stores and rederives this identity under
+`docs/atlas/fymap-transport-v1.md`. This package itself does not own map partitioning, bytes,
+checksums, dependency-map joins, a stale-map validator, Atlas queries, Context Packs, anchors,
+rename heuristics, LSP/SCIP identity, or a stable post-1 compatibility promise.

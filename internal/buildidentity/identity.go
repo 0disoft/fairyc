@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"runtime"
+	"strings"
 )
 
 const Encoding = "fairyc.compiler-executable-sha256/v1"
@@ -17,6 +18,28 @@ type Identity [sha256.Size]byte
 
 func (identity Identity) String() string {
 	return Encoding + ":" + hex.EncodeToString(identity[:])
+}
+
+// Parse accepts only the canonical exact-width lowercase executable identity.
+func Parse(value string) (Identity, error) {
+	var result Identity
+	prefix := Encoding + ":"
+	if !strings.HasPrefix(value, prefix) {
+		return result, fmt.Errorf("compiler executable identity has invalid prefix")
+	}
+	digestText := strings.TrimPrefix(value, prefix)
+	if len(digestText) != sha256.Size*2 || digestText != strings.ToLower(digestText) {
+		return result, fmt.Errorf("compiler executable identity must contain %d lowercase hexadecimal digits", sha256.Size*2)
+	}
+	decoded, err := hex.DecodeString(digestText)
+	if err != nil {
+		return result, fmt.Errorf("decode compiler executable identity: %w", err)
+	}
+	copy(result[:], decoded)
+	if result == (Identity{}) {
+		return Identity{}, fmt.Errorf("compiler executable identity is zero")
+	}
+	return result, nil
 }
 
 // Current streams the executable image backing this process into SHA-256. Linux prefers

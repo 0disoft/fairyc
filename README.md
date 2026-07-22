@@ -503,9 +503,12 @@ validated workspace into the immutable snapshot without source bodies or host pa
 stale-span metadata prerequisite. `internal/atlasmap` now validates the complete workspace input and
 builds one immutable, deterministic logical partition per exact package. Each header carries the
 exact compiler build, language, package, source, interface, file, line-map, and SymbolId algorithms,
-and incomplete relations become explicit stable omissions. This is not a `.fymap` byte format: no
-encoded file, checksum, current-source validator, Atlas command, `overview`/`show`/`around` query, or
-Context Pack exists yet.
+and incomplete relations become explicit stable omissions. The same package now encodes each
+partition as caller-bounded canonical `fairyc.fymap-json/v1`, binds it with the domain-separated
+`fymap1-sha256` checksum, rejects unknown or noncanonical JSON, revalidates every identity and
+record relationship, and rederives every SymbolId from the stored declaration and exact package
+namespace references. No filesystem publication, current-source validator, Atlas command,
+`overview`/`show`/`around` query, or Context Pack exists yet.
 
 `experimental target-spec` accepts exactly one known Linux GNU or Windows MSVC ID and writes
 deterministic `fairyc.target-spec/v0` JSON. The result separates target semantics from local
@@ -588,7 +591,7 @@ or arbitrary link-input option.
 - Runtime and standard library: `docs/runtime/runtime-stdlib-v0.md`
 - Compatibility and versioning: `docs/compatibility/versioning-v0.md`
 - Diagnostic catalog: `docs/diagnostics/catalog-v0.md`
-- Atlas semantic snapshot, provisional SymbolId, logical package-map planning, and proposed transport schemas: `docs/atlas/`, `internal/atlasmap/`
+- Atlas semantic snapshot, provisional SymbolId, logical package-map planning, canonical transport codec, and proposed query schemas: `docs/atlas/`, `internal/atlasmap/`
 - CLI contract: `docs/cli/command-contract.md`
 - Workspace ownership: `docs/monorepo/package-ownership.md`
 

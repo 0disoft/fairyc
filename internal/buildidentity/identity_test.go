@@ -39,6 +39,24 @@ func TestComputeIsExactAndDomainLabeled(t *testing.T) {
 	}
 }
 
+func TestParseAcceptsOnlyCanonicalNonzeroIdentity(t *testing.T) {
+	t.Parallel()
+	var identity Identity
+	identity[0] = 1
+	parsed, err := Parse(identity.String())
+	if err != nil || parsed != identity {
+		t.Fatalf("Parse() = %s, %v", parsed, err)
+	}
+	for _, value := range []string{
+		"", Encoding + ":" + strings.Repeat("0", 64), Encoding + ":01",
+		Encoding + ":" + strings.Repeat("A", 64), "other:" + strings.Repeat("1", 64),
+	} {
+		if _, parseErr := Parse(value); parseErr == nil {
+			t.Fatalf("Parse(%q) succeeded", value)
+		}
+	}
+}
+
 func TestCurrentMatchesIndependentProcessUsingSameExecutable(t *testing.T) {
 	parent, err := Current()
 	if err != nil {

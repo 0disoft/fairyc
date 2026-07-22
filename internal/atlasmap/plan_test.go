@@ -64,6 +64,26 @@ func TestPrepareWorkspaceBuildsDeterministicCompletePackagePlans(t *testing.T) {
 		if _, err := packagegraph.ParseCoordinateID(header.PackageCoordinate); err != nil {
 			t.Fatalf("package coordinate = %q: %v", header.PackageCoordinate, err)
 		}
+		if len(header.PackageReferences) != len(header.Dependencies)+1 || !slices.IsSortedFunc(header.PackageReferences, func(left, right PackageReference) int {
+			return strings.Compare(left.Instance, right.Instance)
+		}) {
+			t.Fatalf("package references = %+v", header.PackageReferences)
+		}
+		selfReference := false
+		for _, reference := range header.PackageReferences {
+			if _, err := packagegraph.ParseInstanceID(reference.Instance); err != nil {
+				t.Fatalf("reference instance = %q: %v", reference.Instance, err)
+			}
+			if _, err := packagegraph.ParseCoordinateID(reference.Coordinate); err != nil {
+				t.Fatalf("reference coordinate = %q: %v", reference.Coordinate, err)
+			}
+			if reference.Instance == header.PackageInstance {
+				selfReference = reference.UID == header.PackageUID && reference.Coordinate == header.PackageCoordinate
+			}
+		}
+		if !selfReference {
+			t.Fatalf("package references lack exact self identity: %+v", header.PackageReferences)
+		}
 		if _, err := packagecontent.ParseDigest(header.PackageSource); err != nil {
 			t.Fatalf("package source = %q: %v", header.PackageSource, err)
 		}
@@ -123,12 +143,13 @@ func TestPartitionAccessorsAreDetached(t *testing.T) {
 		t.Fatalf("partition lacks mutation fixtures: %+v", partition)
 	}
 	header.Features = append(header.Features, "corrupted")
+	header.PackageReferences[0].UID = "corrupted"
 	header.Omissions = nil
 	files[0].Path = "corrupted.fy"
 	symbols[0].Full = "corrupted"
 	completeness[0].Reasons = append(completeness[0].Reasons, "corrupted")
 	freshHeader := partition.Header()
-	if slices.Contains(freshHeader.Features, "corrupted") || len(freshHeader.Omissions) == 0 ||
+	if slices.Contains(freshHeader.Features, "corrupted") || freshHeader.PackageReferences[0].UID == "corrupted" || len(freshHeader.Omissions) == 0 ||
 		partition.Files()[0].Path == "corrupted.fy" || partition.Symbols()[0].Full == "corrupted" ||
 		slices.Contains(partition.Completeness()[0].Reasons, "corrupted") {
 		t.Fatalf("partition accessor mutation escaped into immutable plan")

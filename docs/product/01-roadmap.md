@@ -581,12 +581,16 @@ regressions exist. ADR 0185 and `internal/atlasmap` now close the next in-memory
 validated workspace, compiler result, exact executable identity, and reusable complete package
 interface-hash set produce one immutable deterministic logical partition per package. Headers retain
 every independent identity algorithm and exact interface hash; every file, module, declaration,
-SymbolId, and function summary is assigned; relation gaps become stable omissions. No `.fymap`
-transport encoding, checksum, publication, current-source recomputation, dependency-map join,
-stale-map validator, query, Context Pack, or rewrite measurement exists yet.
+SymbolId, and function summary is assigned; relation gaps become stable omissions. ADR 0186 now
+encodes those partitions as positive-caller-bounded canonical `fairyc.fymap-json/v1`, protects the
+schema/encoding/document tuple with `fairyc.fymap-checksum/v1-sha256`, strictly rejects alternate
+JSON and malformed records, and rederives every SymbolId from the declaration plus exact package
+namespace references. No filesystem publication, current-source recomputation, dependency-map
+join, stale-map validator, query, Context Pack, or rewrite measurement exists yet.
 
 - Preserve the implemented immutable `SemanticSnapshot` and per-package logical map plan.
-- Encode and publish `.fymap` with the planned compatibility vector, provenance, completeness, and deterministic symbol identity.
+- Preserve the implemented bounded canonical `.fymap` codec and semantic revalidation boundary.
+- Publish `.fymap` atomically, then reject stale current-source identities before exposing facts.
 - Implement bounded `overview`, `show`, and `around` queries and Context Pack output.
 - Measure whole-package map rewrite cost before considering chunks or compression.
 

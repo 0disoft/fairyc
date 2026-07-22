@@ -723,7 +723,7 @@ versioned `fairyc.symbol-id/v1-sha256-128+256` algorithm. Package UID, module, d
 path, zero generic arity, and a canonical structured signature form the hash input. Package
 instances, versions, source positions, bodies, build-local numbers, compiler identity, target, and
 language revision do not. Nominal signature types use package UID and logical path; exact instance
-compatibility remains a future map/header and graph-edge concern. Each visible 128-bit prefix is
+compatibility now lives in the map header while dependency graph-edge joins remain future work. Each visible 128-bit prefix is
 stored with its full 256-bit digest, and a mismatch or collision rejects the symbol set.
 
 The next in-memory boundary now produces one immutable `fairyc.fymap-logical/v1` partition for every
@@ -734,14 +734,26 @@ package, and exposes partial or unavailable relations as stable omissions. The i
 target-independent and performs no filesystem, executable discovery, transport encoding, or map
 publication.
 
+Transport schema `fairyc.fymap/v1` now encodes each logical partition as one caller-bounded compact
+canonical `fairyc.fymap-json/v1` object. `fairyc.fymap-checksum/v1-sha256` binds the exact schema,
+encoding, and logical document. Readers reject unknown fields, trailing or noncanonical JSON,
+malformed or zero identities, contradictory counts and ownership, excessive type nesting, invalid
+completeness, and declarations whose stored SymbolIds do not rederive through the exact self/direct-
+dependency package namespace references. The checksum detects corruption; it does not authenticate
+the author or grant authority. No filesystem publication or current-source acceptance exists yet.
+
 Atlas exports deterministic, model-neutral facts such as symbols, calls, types, ownership transfers, borrows, errors, effects, allocations, unsafe and FFI reachability, source spans, and related tests. Compiler facts and free-text documentation are physically separated and carry provenance. Unknown or incomplete edges remain explicit rather than being guessed.
 
-Stage 0 Atlas work starts with a versioned `.fymap` schema and the `overview`, `show`, and `around` queries. `impact`, semantic `diff`, stable anchor syntax, LSP, SCIP, MCP, structural edits, embeddings, model-generated summaries, and a vector database are deferred behind usage and completeness evidence.
+Stage 0 Atlas work continues from the implemented versioned `.fymap` codec to safe publication,
+current-source validation, and the `overview`, `show`, and `around` queries. `impact`, semantic
+`diff`, stable anchor syntax, LSP, SCIP, MCP, structural edits, embeddings, model-generated
+summaries, and a vector database are deferred behind usage and completeness evidence.
 
 Source text and documentation cannot grant an LLM, IDE, or agent filesystem, process, network,
 credential, or approval authority. The implemented snapshot, provisional identity, and logical map
 plan are specified in `docs/atlas/semantic-snapshot-v0.md`, `docs/atlas/symbol-id-v1.md`, and
-`docs/atlas/fymap-logical-plan-v1.md`; future transport and pack contracts are in
+`docs/atlas/fymap-logical-plan-v1.md`. The implemented transport is specified in
+`docs/atlas/fymap-transport-v1.md`; future publication and pack behavior is described by
 `docs/atlas/fymap-v1.md` and `docs/atlas/context-pack-v1.md`.
 
 ## Explicit non-goals
@@ -761,6 +773,7 @@ Registry coordinates, provider-qualified import spelling, classic and range
 `for`, lexical `defer`, checked narrowing conversion syntax, expression-bodied function shorthand,
 public `Arena` construction and capacity APIs, exact parser resource limits, glibc and toolchain
 baselines, portable path model, targets beyond the declared Linux GNU and Windows MSVC profiles,
-package registry, and `.fymap` transport encoding/checksum/publication policy remain UNDECIDED. The
+package registry, and `.fymap` publication/current-source policy remain UNDECIDED. Alternate map
+encodings, compression, and chunking remain evidence-gated. The
 provisional pre-release SymbolId hash algorithm is now implemented by ADR 0183; its eventual stable
 release and cross-version migration policy remain open.

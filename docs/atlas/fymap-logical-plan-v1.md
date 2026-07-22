@@ -47,12 +47,13 @@ Each package header records these independent compatibility dimensions:
 | Package | UID, instance, coordinate, source digest, source kind, runtime ABI |
 | Target | `target-independent` scope and empty target |
 | Algorithms | package instance, package coordinate, package source, source file, line map, SymbolId, public interface |
-| Graph | exact interface hash, canonical features, direct package instances |
+| Graph | exact interface hash, canonical features, direct package instances, self/direct-dependency UID-instance-coordinate references |
 | Completeness | generation status, sorted explicit omissions |
 | Inventory | file, module, symbol, function, relation, and completeness counts |
 
-An algorithm field never inherits its meaning from another schema version. Changing an algorithm
-does not silently reinterpret old data.
+The package references give a reader the stable namespace mapping needed to rederive every SymbolId
+from its declaration. An algorithm field never inherits its meaning from another schema version.
+Changing an algorithm does not silently reinterpret old data.
 
 ## Package partition
 
@@ -80,7 +81,7 @@ set or a false claim that a relation does not exist.
 
 This model does not define:
 
-- encoded `.fymap` bytes, byte order, section offsets, alignment, compression, or checksum;
+- alternate `.fymap` encodings, section offsets, alignment, compression, or chunking;
 - file names, output directories, atomic replacement, retention, or cache policy;
 - current-source recomputation and stale-map rejection;
 - dependency-map loading or cross-map joins;
@@ -88,4 +89,5 @@ This model does not define:
 - source text, documentation text, embeddings, or execution authority; or
 - rewrite-size, rewrite-time, or chunking performance claims.
 
-Those require independently versioned contracts and their own executable evidence.
+Canonical JSON transport and checksums are now owned by `docs/atlas/fymap-transport-v1.md`. The
+remaining items require independently versioned contracts and their own executable evidence.

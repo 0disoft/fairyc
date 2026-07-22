@@ -418,8 +418,8 @@ Those boundaries require their own versions rather than inheriting the snapshot 
 ADR 0183 adds the independent provisional `fairyc.symbol-id/v1-sha256-128+256` algorithm and its
 `fairyc.symbol-identity/v1` plus `fairyc.symbol-signature/v1` encodings. Its visible 128-bit prefix
 must be accompanied by the full 256-bit digest and collisions reject. It deliberately excludes
-package instances, versions, bodies, spans, language, compiler, and target identity; a future map
-records those compatibility dimensions separately. This executable pre-release contract does not
+package instances, versions, bodies, spans, language, compiler, and target identity; the implemented
+map header records those compatibility dimensions separately. This executable pre-release contract does not
 stabilize `.fymap`, map migration, anchors, query output, or a post-1 SymbolId promise.
 
 ADR 0184 adds independent `fairyc.source-file/v1` exact-content and
@@ -484,18 +484,27 @@ ADR 0185 adds the internal `fairyc.fymap-logical/v1` planning model. It requires
 executable identity, exact current package set, one `fyif2-sha256` public-interface hash per package,
 all independent identity-algorithm identifiers, and explicit relation omissions. The model is
 target-independent and immutable. It is not the `.fymap` transport schema and therefore makes no
-promise about encoded bytes, byte order, checksums, section layout, file naming, publication, or
-reader compatibility.
+promise by itself about encoded bytes, file naming, publication, or reader compatibility.
+
+ADR 0186 independently fixes `fairyc.fymap/v1`, `fairyc.fymap-json/v1`, and
+`fairyc.fymap-checksum/v1-sha256`. The only accepted representation is one compact canonical JSON
+value with strict fields and a domain-separated full SHA-256 checksum. Changing field meaning,
+field order, JSON record shape, number representation, checksum input, digest, or text prefix
+requires a new schema, encoding, or checksum algorithm identifier as appropriate.
 
 ## `.fymap` compatibility
 
 The logical plan already records schema, snapshot model, compiler build, language revision, package
 UID, package instance, package coordinate, source digest and kind, runtime ABI, target scope,
 features, dependencies, each identity algorithm, exact interface hash, record counts, and explicit
-omissions. The future transport header must preserve those meanings and add its independently
-versioned encoding and integrity fields.
+omissions plus exact self/direct-dependency namespace references. Transport v1 preserves those
+meanings and adds independently versioned encoding and integrity fields.
 
-Before schema 1, readers require an exact match. A future major or minor policy may skip unknown optional sections, but every skipped semantic section lowers relation-specific completeness. A source digest mismatch or corrupt checksum rejects the map. Atlas failure never fails compilation.
+Transport v1 readers require an exact schema, encoding, checksum, logical model, and algorithm
+match. They reject unknown fields, noncanonical bytes, contradictory records, a SymbolId that does
+not rederive from its declaration, and any corrupt checksum. A future version may define optional
+sections, but v1 never silently skips one. A current-source digest mismatch will reject the map once
+the separately owned stale-source reader is implemented. Atlas failure never fails compilation.
 
 Dependency handling is relation-specific:
 

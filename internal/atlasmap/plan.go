@@ -38,6 +38,13 @@ type RecordCounts struct {
 	Completeness int
 }
 
+// PackageReference supplies the stable namespace mapping required to rederive declaration IDs.
+type PackageReference struct {
+	UID        string
+	Instance   string
+	Coordinate string
+}
+
 // Header is transport-neutral compatibility and record-count data for one exact package map.
 type Header struct {
 	LogicalSchema              string
@@ -63,6 +70,7 @@ type Header struct {
 	InterfaceHash              string
 	Features                   []string
 	Dependencies               []string
+	PackageReferences          []PackageReference
 	GenerationStatus           string
 	Omissions                  []string
 	Counts                     RecordCounts
@@ -94,6 +102,7 @@ func (partition Partition) Header() Header {
 	result := partition.data.header
 	result.Features = slices.Clone(result.Features)
 	result.Dependencies = slices.Clone(result.Dependencies)
+	result.PackageReferences = slices.Clone(result.PackageReferences)
 	result.Omissions = slices.Clone(result.Omissions)
 	return result
 }
@@ -187,6 +196,14 @@ func BuildPlan(snapshot semanticsnapshot.Snapshot, input Input) ([]Partition, er
 				return nil, fmt.Errorf("package %q references unknown dependency %q", builder.packageValue.Instance, dependency)
 			}
 		}
+		references := make([]PackageReference, 0, len(builder.packageValue.Dependencies)+1)
+		instances := append([]string{builder.packageValue.Instance}, builder.packageValue.Dependencies...)
+		for _, instance := range instances {
+			packageValue := builders[instance].packageValue
+			references = append(references, PackageReference{UID: packageValue.UID, Instance: packageValue.Instance, Coordinate: packageValue.Coordinate})
+		}
+		slices.SortFunc(references, func(left, right PackageReference) int { return cmp.Compare(left.Instance, right.Instance) })
+		builder.data.header.PackageReferences = references
 	}
 
 	for _, file := range snapshot.Files() {

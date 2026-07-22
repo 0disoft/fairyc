@@ -225,8 +225,9 @@ typed HIR + verified MIR
      + exact file content/line-map identities
   -> provisional SymbolId derivation
   -> immutable per-package logical map plan
-  -> Atlas transport encoder
-  -> .fymap
+  -> bounded canonical Atlas transport encoder/decoder
+  -> checksummed .fymap bytes
+  -> filesystem publication + current-source validation
   -> bounded overview/show/around queries
   -> optional Context Pack
 ```
@@ -242,8 +243,11 @@ signatures while retaining full collision evidence. `internal/atlasmap` then val
 workspace package/interface set and assigns every snapshot file, module, declaration, SymbolId, and
 function summary to one immutable package partition. Its target-independent header records all
 independent identity algorithms, the exact compiler executable identity, package compatibility, and
-explicit relation omissions. The transport encoder, encoded map, checksum, current-source validator,
-queries, and Context Pack arrows remain unimplemented and cannot feed back into these boundaries.
+explicit relation omissions. The same package now implements the caller-bounded canonical JSON
+transport and domain-separated checksum, then strictly decodes, revalidates, and rederives SymbolIds
+before returning immutable facts. Filesystem publication, current-source validation, dependency-map
+loading, queries, and Context Pack arrows remain unimplemented and cannot feed back into these
+boundaries.
 
 ## Runtime behavior
 

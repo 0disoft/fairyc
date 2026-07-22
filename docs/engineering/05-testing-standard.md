@@ -90,14 +90,17 @@ names, feature families, LF-only path-clean text, and repeated byte identity. It
 parser, compiler, assembler, linker, executable, sanitizer, layout probe, or ABI probe. Native C
 behavior belongs to `internal/cbackendnative`, which consumes the same emitted units through the
 shared C driver and scalar runtime. ABI and complete-runtime runners remain separate evidence
-requirements. `internal/semanticsnapshot` now owns the in-memory Atlas producer tests; encoded-map,
+requirements. `internal/semanticsnapshot` now owns the in-memory Atlas producer tests; publication,
 query, stale-map, and Context Pack runners remain future evidence. `internal/symbolidentity` owns
 the provisional identity byte-vector, stability/sensitivity, path validation, strict text form,
 package-UID nominal normalization, and visible/full collision regressions.
 `internal/atlasmap` owns real-workspace logical planning tests for exact compiler identity,
 one-interface-per-package closure, algorithm-rich target-independent headers, complete package
-partitioning, stable omissions, deterministic ordering, and detached accessors. Those tests do not
-exercise a transport codec, checksum, publication, current-source reader, query, or rewrite cost.
+partitioning, namespace references, stable omissions, deterministic ordering, and detached
+accessors. Its transport tests additionally own exact canonical bytes, the frozen checksum vector,
+bounds, strict fields, corruption rejection, semantic cross-record validation, and declaration-to-
+SymbolId rederivation. They do not exercise filesystem publication, a current-source reader,
+dependency-map loading, queries, or rewrite cost.
 
 `internal/cstdlib` separately embeds the provisional SystemHeap implementation and its closed C
 probe. Ordinary Go tests prove deterministic, LF-only source ownership and forbid raw `realloc` or
@@ -251,8 +254,8 @@ dependency closure remain host-independent Go tests.
 | Compatibility | Exact pre-1 matching, cache misses, runtime mismatch, diagnostic identity, stale maps, target mismatch, and relation-specific completeness |
 | Atlas semantic snapshot | Current unit and pipeline tests require Flow-plus-verified-MIR admission, complete package and file metadata, file/module bijection, build-local package-renumbering invariance, deep input/output detachment, stable ordering, structured path-free type identity, exact local calls/traps/unsafe/ownership facts, foreign-call-only partial completeness, unavailable relation disclosure, and fail-closed invalid MIR or package mappings. No encoded map, current-source validation, or query evidence is implied. |
 | Atlas SymbolId | Current unit and compiler-pipeline tests freeze tagged length-delimited bytes, visible/full digest derivation, strict text forms, path/kind validation, tuple boundaries, body/span/version/build-number stability, coordinate/signature sensitivity, nominal package-UID normalization, deterministic ordering, pair integrity, and synthetic compact-ID collision rejection. No encoded map or released cross-version promise is implied. |
-| Atlas logical map plan | Current real-workspace and unit tests require exact compiler identity, a complete public-interface-hash set, all independent algorithm identifiers, package-stable headers, complete file/module/declaration/SymbolId/function assignment, deterministic package order, immutable accessors, and explicit omissions. Transport bytes, checksums, current-source validation, dependency-map joins, queries, and whole-package rewrite measurements remain future evidence. |
-| Atlas schema | Transport record compatibility, corruption rejection, byte-order and section invariants remain future evidence after the logical plan. |
+| Atlas logical map plan | Current real-workspace and unit tests require exact compiler identity, a complete public-interface-hash set, all independent algorithm identifiers, package-stable headers, exact namespace references, complete file/module/declaration/SymbolId/function assignment, deterministic package order, immutable accessors, and explicit omissions. Current-source validation, dependency-map joins, queries, and whole-package rewrite measurements remain future evidence. |
+| Atlas transport | Current real-workspace and mutation tests require repeated canonical JSON identity, exact schema/encoding/checksum algorithms, a frozen checksum vector, positive caller bounds, unknown/trailing/noncanonical rejection, canonical identities and record order, exact counts and ownership, bounded type depth, checksummed-payload revalidation, and declaration-to-SymbolId rederivation. Filesystem publication, current-source validation, authentication, alternate encodings, compression, and rewrite performance remain future evidence. |
 | Atlas context | Budgets, stable ordering, omissions, stale source, text caps, and prompt-injection isolation |
 
 ## Diagnostic assertions
