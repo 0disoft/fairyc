@@ -615,6 +615,9 @@ canonical output-only JSON with exact subject/selection evidence and document ch
 exposes it through default-free `experimental atlas-text source` with exact SymbolId selection,
 explicit origin/count/text/output policy, and checksummed omissions. There is no file reopen,
 decoder, persistent text store, or change to body-free `.fymap` v1 and empty-text Context Pack v1.
+ADR 0199 now establishes the prerequisite documentation fact: consecutive physical-line-leading
+`///` trivia attaches conservatively to supported top-level declarations and survives CST, AST, and
+typed HIR as an exact byte span without entering executable semantics or Atlas transports.
 
 - Preserve the implemented immutable `SemanticSnapshot` and per-package logical map plan.
 - Preserve the implemented bounded canonical `.fymap` codec and semantic revalidation boundary.
@@ -624,7 +627,7 @@ decoder, persistent text store, or change to body-free `.fymap` v1 and empty-tex
 - Preserve the explicit overview/show/around experimental commands and keep map publication policy separate.
 - Preserve the raw whole-package rewrite harness; require representative failure before adding chunks or compression.
 - Preserve the implemented exact SymbolId catalog output as the discovery path for experimental `show` and `around`.
-- Preserve the implemented attributed-text v0 model, exact retained workspace-source gate, canonical output-only JSON, and explicit experimental source command; keep decoders, stores, and additional text kinds behind separate decisions.
+- Preserve the implemented attributed-text v0 model, exact retained workspace-source gate, canonical output-only JSON, explicit experimental source command, and exact `///` frontend attachment span; require a separate extractor/encoder decision before documentation text reaches Atlas output.
 
 Exit gate: Atlas failure cannot change compilation; stale or incompatible maps fail closed; unknown graph edges remain explicit; text cannot grant authority.
 

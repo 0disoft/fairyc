@@ -574,6 +574,12 @@ mode, canonical no-newline stdout, successful omission behavior, and provisional
 experimental CLI policy. It does not stabilize the command, SymbolId across identity families,
 cross-version text acceptance, defaults, dependency or SDK text, decoding, storage, or permissions.
 
+ADR 0199 assigns physical-line-leading `///` the pre-release documentation-trivia role and fixes
+its conservative top-level attachment span through typed HIR. The comment remains grammar trivia;
+existing token kind output, SymbolId, MIR, C emission, `.fymap` v1, Context Pack v1, and
+`atlas-text source` encodings do not change. Alternative documentation spellings, additional
+attachment targets, rendering, Atlas extraction, and post-1 stability require separate decisions.
+
 Dependency handling is relation-specific:
 
 | Condition | Atlas behavior |

@@ -702,6 +702,13 @@ func span(source string, value diagnostic.Span) hir.Span {
 	return sourceSpan(source, value.StartByte, value.EndByte)
 }
 
+func optionalSpan(source string, value diagnostic.Span) hir.Span {
+	if value.EndByte <= value.StartByte {
+		return hir.Span{}
+	}
+	return span(source, value)
+}
+
 func sourceSpan(source string, start, end int) hir.Span {
 	packageID, sourcePath := hir.SourcePathParts(source)
 	return hir.Span{Package: packageID, Source: sourcePath, StartByte: start, EndByte: end}

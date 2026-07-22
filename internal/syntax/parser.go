@@ -267,8 +267,22 @@ func (p *parser) addNamedNode(kind Kind, startFull int, children []NodeID, text,
 	id := p.addNode(kind, startFull, children, text, cooked)
 	if id != NoNode && int(id) < len(p.tree.Nodes) {
 		p.tree.Nodes[id].NameSpan = nameSpan
+		if supportsDeclarationDocumentation(kind) {
+			if span, found := lexer.AttachedDocumentationSpan(p.tree.Tokens, p.tree.Source, startFull); found {
+				p.tree.Nodes[id].DocumentationSpan = span
+			}
+		}
 	}
 	return id
+}
+
+func supportsDeclarationDocumentation(kind Kind) bool {
+	switch kind {
+	case KindStruct, KindResource, KindEnum, KindFunction, KindForeign:
+		return true
+	default:
+		return false
+	}
 }
 
 func (p *parser) enter() bool {

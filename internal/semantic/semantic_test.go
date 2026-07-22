@@ -34,6 +34,65 @@ func TestAnalyzeBuildsTypedHIRForScalarFunction(t *testing.T) {
 	assertTypeFact(t, result, "main.fy", ifStart, ifEnd, hir.TypeI32)
 }
 
+func TestAnalyzeCarriesExactTopLevelDocumentationSpansIntoHIR(t *testing.T) {
+	t.Parallel()
+	text := strings.Join([]string{
+		"module main;",
+		"/// Structure docs.",
+		"struct Packet { i32 value; }",
+		"/// Enum docs.",
+		"enum Error { Failed; }",
+		"/// Resource docs.",
+		"resource Handle { i32 value; cleanup {} }",
+		"/// Foreign docs.",
+		"unsafe extern C fn i32 raw(i32 value);",
+		"/// Function docs.",
+		"fn i32 run() { return 0; }",
+		"",
+	}, "\n")
+	result := analyzeText(t, map[string]string{"main.fy": text})
+	assertCleanTypeResult(t, result)
+	if len(result.HIR.Modules) != 1 {
+		t.Fatalf("HIR modules = %+v", result.HIR.Modules)
+	}
+	module := result.HIR.Modules[0]
+	if len(module.Structs) != 1 || len(module.Enums) != 1 || len(module.Resources) != 1 ||
+		len(module.ForeignFunctions) != 1 {
+		t.Fatalf("documented HIR declarations = %+v", module)
+	}
+	spans := []struct {
+		name string
+		span hir.Span
+		want string
+	}{
+		{name: "struct", span: module.Structs[0].DocumentationSpan, want: "/// Structure docs."},
+		{name: "enum", span: module.Enums[0].DocumentationSpan, want: "/// Enum docs."},
+		{name: "resource", span: module.Resources[0].DocumentationSpan, want: "/// Resource docs."},
+		{name: "foreign", span: module.ForeignFunctions[0].DocumentationSpan, want: "/// Foreign docs."},
+	}
+	for _, function := range module.Functions {
+		if function.Name == "run" && function.DropGlueFor == "" {
+			spans = append(spans, struct {
+				name string
+				span hir.Span
+				want string
+			}{name: "function", span: function.DocumentationSpan, want: "/// Function docs."})
+		}
+		if function.DropGlueFor != "" && function.DocumentationSpan != (hir.Span{}) {
+			t.Fatalf("compiler-private drop glue inherited documentation: %+v", function)
+		}
+	}
+	if len(spans) != 5 {
+		t.Fatalf("documentation observations = %+v", spans)
+	}
+	for _, item := range spans {
+		if item.span.Source != "main.fy" || item.span.EndByte <= item.span.StartByte ||
+			text[item.span.StartByte:item.span.EndByte] != item.want {
+			t.Fatalf("%s documentation = %+v (%q), want %q", item.name, item.span, text[item.span.StartByte:item.span.EndByte], item.want)
+		}
+	}
+}
+
 func TestAnalyzeCanonicalizesCShapedReferenceAndSliceTypes(t *testing.T) {
 	t.Parallel()
 	text := "module main;\n\nfn usize length(ref u8[] bytes) { return bytes.len; }\nfn usize main() { return length(b\"fairy\"); }\n"

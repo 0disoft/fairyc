@@ -208,6 +208,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0196-exact-retained-source-excerpt-extraction.md`: internal attributed-text validation and exact local source slicing from revalidated retained workspace bytes without path reopening, encoding, or CLI exposure.
 - `0197-canonical-attributed-text-json-v0.md`: canonical bounded output-only attributed-text JSON with exact subject/selection evidence, independent document integrity, no caller-result forgery, and no decoder or CLI exposure.
 - `0198-experimental-atlas-text-source-command.md`: exact visible/full SymbolId source-text selection with explicit origin and count/text/output budgets, canonical no-newline stdout, checksummed omissions, and provisional failure classes.
+- `0199-c-friendly-declaration-documentation-attachment.md`: physical-line-leading consecutive `///` trivia attached by exact byte span to selected top-level declarations without changing executable grammar or compiler-fact transports.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

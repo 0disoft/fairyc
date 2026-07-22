@@ -81,7 +81,7 @@ func (s *scanner) run() {
 			s.emitEOF()
 			return
 		}
-		s.emit(Trivia, 0, 3, "")
+		s.emitTrivia(TriviaPreamble, 0, 3)
 		s.position = 3
 	}
 	for s.position < len(s.source) && !s.budget.Exhausted() {
@@ -211,7 +211,7 @@ func (s *scanner) scanWhitespace() {
 			}
 		case current == '\r':
 			if start < s.position {
-				s.emit(Trivia, start, s.position, "")
+				s.emitTrivia(TriviaWhitespace, start, s.position)
 			}
 			invalidStart := s.position
 			if !s.advanceCharged(1) {
@@ -221,12 +221,12 @@ func (s *scanner) scanWhitespace() {
 			s.emitDiagnostic("E0001", invalidStart, s.position, diagnostic.RepairNone, "")
 			return
 		default:
-			s.emit(Trivia, start, s.position, "")
+			s.emitTrivia(TriviaWhitespace, start, s.position)
 			return
 		}
 	}
 	if start < s.position {
-		s.emit(Trivia, start, s.position, "")
+		s.emitTrivia(TriviaWhitespace, start, s.position)
 	}
 }
 
@@ -241,7 +241,11 @@ func (s *scanner) scanLineComment() {
 			break
 		}
 	}
-	s.emit(Trivia, start, s.position, "")
+	kind := TriviaLineComment
+	if s.matchAt(start, "///") {
+		kind = TriviaDocumentationLine
+	}
+	s.emitTrivia(kind, start, s.position)
 }
 
 func (s *scanner) scanBlockComment() {
@@ -269,7 +273,7 @@ func (s *scanner) scanBlockComment() {
 			}
 		}
 	}
-	s.emit(Trivia, start, s.position, "")
+	s.emitTrivia(TriviaBlockComment, start, s.position)
 	if depth != 0 {
 		s.emitDiagnostic("E0001", start, s.position, diagnostic.RepairExit, "*/")
 	}
@@ -305,6 +309,18 @@ func (s *scanner) emit(kind Kind, start, end int, cooked string) {
 		return
 	}
 	s.emitWithoutBudget(kind, start, end, cooked)
+}
+
+func (s *scanner) emitTrivia(kind TriviaKind, start, end int) {
+	if !s.budget.ChargeToken() {
+		if start < end {
+			s.emitWithoutBudget(Invalid, start, end, "")
+		}
+		return
+	}
+	s.tokens = append(s.tokens, Token{
+		Kind: Trivia, Trivia: kind, Span: diagnostic.Span{StartByte: start, EndByte: end},
+	})
 }
 
 func (s *scanner) emitWithoutBudget(kind Kind, start, end int, cooked string) {

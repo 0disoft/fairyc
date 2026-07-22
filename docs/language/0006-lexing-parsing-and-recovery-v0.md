@@ -25,7 +25,18 @@ Incremental parsing, streaming input, formatter-grade immutable green trees, and
 - Line, Unicode scalar, UTF-16, grapheme, and display-column positions are derived explicitly. They cannot be compared to or stored as byte offsets.
 - Identifiers use ASCII letters, digits, and underscore, cannot begin with a digit, and are case-sensitive. Source text is not Unicode-normalized.
 
-Line comments begin with `//`. Block comments begin with `/*`, end with `*/`, and may nest. Comments and whitespace are trivia, not discarded input. An unterminated block comment is a lexer error and consumes through EOF so lexing still advances.
+Line comments begin with `//`. Block comments begin with `/*`, end with `*/`, and may nest. Comments
+and whitespace are trivia, not discarded input. An unterminated block comment is a lexer error and
+consumes through EOF so lexing still advances.
+
+A physical-line-leading line comment whose first three bytes are `///` is documentation trivia. It
+remains an ordinary grammar-skipped trivia token, but its subtype is retained in the lossless stream.
+ADR 0199 attaches only consecutive `///` physical lines immediately above a supported top-level
+declaration, with exactly one LF or CRLF plus optional ASCII indentation between lines and before
+the declaration's first attribute, modifier, or keyword. A blank line, ordinary line comment,
+block comment including `/**`, code before `///` on the same physical line, or another token breaks
+attachment. The exact attachment span retains markers, intermediate line endings, and intermediate
+indentation; no marker removal, trimming, normalization, or Markdown interpretation occurs.
 
 ## Tokenization and progress
 

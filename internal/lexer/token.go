@@ -24,9 +24,23 @@ const (
 	Symbol
 )
 
+// TriviaKind preserves the raw trivia role without turning documentation comments into grammar
+// tokens. None is required for every non-trivia token.
+type TriviaKind uint8
+
+const (
+	TriviaNone TriviaKind = iota
+	TriviaPreamble
+	TriviaWhitespace
+	TriviaLineComment
+	TriviaBlockComment
+	TriviaDocumentationLine
+)
+
 // Token refers into Result.Source. Cooked is populated only for literal tokens.
 type Token struct {
 	Kind   Kind
+	Trivia TriviaKind
 	Span   diagnostic.Span
 	Cooked string
 }

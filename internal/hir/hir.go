@@ -356,11 +356,12 @@ type Module struct {
 
 // Enum is one resolved restricted inert tagged definition in declaration order.
 type Enum struct {
-	Name     string
-	Public   bool
-	Type     Type
-	Span     Span
-	Variants []EnumVariant
+	Name              string
+	Public            bool
+	Type              Type
+	Span              Span
+	DocumentationSpan Span
+	Variants          []EnumVariant
 }
 
 // EnumVariant is one resolved tag with ordered named payload fields.
@@ -379,12 +380,13 @@ type EnumField struct {
 
 // Struct is one inert aggregate definition in declaration order.
 type Struct struct {
-	Name   string
-	Public bool
-	Type   Type
-	Span   Span
-	ReprC  bool
-	Fields []StructField
+	Name              string
+	Public            bool
+	Type              Type
+	Span              Span
+	DocumentationSpan Span
+	ReprC             bool
+	Fields            []StructField
 }
 
 // StructField is one resolved inert aggregate field.
@@ -396,15 +398,16 @@ type StructField struct {
 
 // ForeignFunction is one typed raw C declaration with an exact external symbol name.
 type ForeignFunction struct {
-	Symbol     SymbolID
-	Name       string
-	Public     bool
-	LinkName   string
-	ABI        string
-	Span       Span
-	Effects    []Effect
-	Parameters []ForeignParameter
-	ResultType Type
+	Symbol            SymbolID
+	Name              string
+	Public            bool
+	LinkName          string
+	ABI               string
+	Span              Span
+	DocumentationSpan Span
+	Effects           []Effect
+	Parameters        []ForeignParameter
+	ResultType        Type
 }
 
 // ForeignParameter is one named C ABI parameter in declaration order.
@@ -425,15 +428,16 @@ const (
 
 // Resource is one resolved move-only aggregate definition in declaration order.
 type Resource struct {
-	Name        string
-	Public      bool
-	Type        Type
-	Span        Span
-	Fields      []ResourceField
-	DropKind    ResourceDropKind
-	DropSpan    Span
-	DropSymbol  SymbolID
-	DropEffects []Effect
+	Name              string
+	Public            bool
+	Type              Type
+	Span              Span
+	DocumentationSpan Span
+	Fields            []ResourceField
+	DropKind          ResourceDropKind
+	DropSpan          Span
+	DropSymbol        SymbolID
+	DropEffects       []Effect
 }
 
 // ResourceField is one resolved resource field with source identity.
@@ -445,19 +449,20 @@ type ResourceField struct {
 
 // Function is one typed function body.
 type Function struct {
-	Symbol      SymbolID
-	Name        string
-	Public      bool
-	OwnerType   Type
-	Receiver    string
-	Unsafe      bool
-	Span        Span
-	Effects     []Effect
-	Parameters  []Parameter
-	Locals      []Local
-	ResultType  Type
-	Body        Block
-	DropGlueFor Type
+	Symbol            SymbolID
+	Name              string
+	Public            bool
+	OwnerType         Type
+	Receiver          string
+	Unsafe            bool
+	Span              Span
+	DocumentationSpan Span
+	Effects           []Effect
+	Parameters        []Parameter
+	Locals            []Local
+	ResultType        Type
+	Body              Block
+	DropGlueFor       Type
 }
 
 // Parameter is one resolved function parameter.

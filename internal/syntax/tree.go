@@ -88,14 +88,15 @@ const (
 
 // Node is one compact arena entry. Text and Cooked are populated only when the kind needs them.
 type Node struct {
-	Kind       Kind
-	Span       diagnostic.Span
-	NameSpan   diagnostic.Span
-	TokenStart int
-	TokenEnd   int
-	Text       string
-	Cooked     string
-	Children   []NodeID
+	Kind              Kind
+	Span              diagnostic.Span
+	NameSpan          diagnostic.Span
+	DocumentationSpan diagnostic.Span
+	TokenStart        int
+	TokenEnd          int
+	Text              string
+	Cooked            string
+	Children          []NodeID
 }
 
 // Tree preserves every lexer token and indexes parsed structure over the same source snapshot.

@@ -5,6 +5,7 @@
 - Decision: `docs/adr/0195-attributed-text-boundary-v0.md`
 - Encoding decision: `docs/adr/0197-canonical-attributed-text-json-v0.md`
 - CLI decision: `docs/adr/0198-experimental-atlas-text-source-command.md`
+- Documentation attachment decision: `docs/adr/0199-c-friendly-declaration-documentation-attachment.md`
 - Exact file identity: `docs/package/source-file-identities-v1.md`
 - Compiler-fact pack: `docs/atlas/context-pack-v1.md`
 
@@ -39,14 +40,15 @@ The logical `kind` set is closed:
 
 - `source-excerpt`: exact validated Fairy C source bytes for one compiler-selected declaration span;
 - `declaration-documentation`: exact documentation-comment bytes attached to one declaration by a
-  future frontend-owned attachment contract.
+  frontend-owned attachment contract.
 
 Ordinary implementation comments, repository Markdown, issue text, build logs, generated summaries,
-model output, URLs, environment values, and arbitrary caller strings are not admitted. The current
-lexer retains comments only as undifferentiated trivia, so `declaration-documentation` remains
-unavailable until the grammar/frontend defines exact attachment, detachment, and source-span rules.
-The first executable slice may therefore implement `source-excerpt` only without pretending that
-all trivia is documentation.
+model output, URLs, environment values, and arbitrary caller strings are not admitted. ADR 0199 now
+distinguishes physical-line-leading `///` as documentation trivia and carries a conservative exact
+attachment span through CST, AST, and typed HIR. Blank lines, ordinary comments, block comments,
+same-line trailing comments, and nested declarations detach. Attributed-text extraction and CLI
+selection for this kind remain unavailable; the existing source producer still selects only
+`source-excerpt` and never pretends all trivia is documentation.
 
 The closed `origin` set is:
 

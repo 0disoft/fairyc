@@ -88,7 +88,11 @@ func (a *analyzer) checkEnum(module *moduleScope, enumeration *ast.Enum) hir.Enu
 	for _, attribute := range enumeration.Attributes {
 		a.addUnsupported(module.file.Path, attribute.Span, "enum attribute @"+attribute.Name)
 	}
-	result := hir.Enum{Name: enumeration.Name, Public: enumeration.Public, Type: value.typ, Span: span(module.file.Path, enumeration.Span)}
+	result := hir.Enum{
+		Name: enumeration.Name, Public: enumeration.Public, Type: value.typ,
+		Span:              span(module.file.Path, enumeration.Span),
+		DocumentationSpan: optionalSpan(module.file.Path, enumeration.DocumentationSpan),
+	}
 	if info := a.enumTypes[value.typ]; info != nil {
 		for _, variant := range info.orderedVariants {
 			hirVariant := hir.EnumVariant{Name: variant.name, Span: variant.span}
@@ -103,7 +107,11 @@ func (a *analyzer) checkEnum(module *moduleScope, enumeration *ast.Enum) hir.Enu
 
 func (a *analyzer) checkStruct(module *moduleScope, structure *ast.Struct) hir.Struct {
 	value := a.structs[structure]
-	result := hir.Struct{Name: structure.Name, Public: structure.Public, Type: value.typ, Span: span(module.file.Path, structure.Span)}
+	result := hir.Struct{
+		Name: structure.Name, Public: structure.Public, Type: value.typ,
+		Span:              span(module.file.Path, structure.Span),
+		DocumentationSpan: optionalSpan(module.file.Path, structure.DocumentationSpan),
+	}
 	if info := a.structTypes[value.typ]; info != nil {
 		result.ReprC = info.reprC
 		for _, field := range info.orderedFields {
@@ -135,8 +143,10 @@ func (a *analyzer) checkForeignFunction(module *moduleScope, function *ast.Forei
 	}
 	result := hir.ForeignFunction{
 		Symbol: symbol.id, Name: function.Name, Public: function.Public, LinkName: linkName, ABI: function.ABI,
-		Span: span(module.file.Path, function.Span), Effects: slices.Clone(symbol.effects),
-		ResultType: a.canonicalType(module, function.ResultType),
+		Span:              span(module.file.Path, function.Span),
+		DocumentationSpan: optionalSpan(module.file.Path, function.DocumentationSpan),
+		Effects:           slices.Clone(symbol.effects),
+		ResultType:        a.canonicalType(module, function.ResultType),
 	}
 	symbol.typ = result.ResultType
 	if _, _, borrow := hir.BorrowElement(result.ResultType); borrow {
@@ -169,13 +179,14 @@ func (a *analyzer) checkResource(module *moduleScope, resource *ast.Resource) hi
 		a.addUnsupported(module.file.Path, attribute.Span, "resource attribute @"+attribute.Name)
 	}
 	result := hir.Resource{
-		Name:        resource.Name,
-		Public:      resource.Public,
-		Type:        value.typ,
-		Span:        span(module.file.Path, resource.Span),
-		DropKind:    hir.ResourceDropMissing,
-		DropSymbol:  hir.NoSymbol,
-		DropEffects: slices.Clone(value.effects),
+		Name:              resource.Name,
+		Public:            resource.Public,
+		Type:              value.typ,
+		Span:              span(module.file.Path, resource.Span),
+		DocumentationSpan: optionalSpan(module.file.Path, resource.DocumentationSpan),
+		DropKind:          hir.ResourceDropMissing,
+		DropSymbol:        hir.NoSymbol,
+		DropEffects:       slices.Clone(value.effects),
 	}
 	if info := a.resourceTypes[value.typ]; info != nil {
 		result.Fields = make([]hir.ResourceField, 0, len(info.orderedFields))
@@ -224,13 +235,14 @@ func (c *typeChecker) checkFunction() hir.Function {
 		functionSymbol.resultError = errorSpan
 	}
 	result := hir.Function{
-		Symbol:     functionSymbol.id,
-		Name:       functionSymbol.name,
-		Public:     c.function.Public,
-		Unsafe:     c.function.Unsafe,
-		Span:       span(c.module.file.Path, c.function.Span),
-		Effects:    slices.Clone(functionSymbol.effects),
-		ResultType: resultType,
+		Symbol:            functionSymbol.id,
+		Name:              functionSymbol.name,
+		Public:            c.function.Public,
+		Unsafe:            c.function.Unsafe,
+		Span:              span(c.module.file.Path, c.function.Span),
+		DocumentationSpan: optionalSpan(c.module.file.Path, c.function.DocumentationSpan),
+		Effects:           slices.Clone(functionSymbol.effects),
+		ResultType:        resultType,
 	}
 	if c.function.Owner != "" {
 		if owner := c.analyzer.ownerSymbol(c.module, c.function.Owner); owner != nil {

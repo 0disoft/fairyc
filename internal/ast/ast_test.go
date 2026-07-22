@@ -1,11 +1,55 @@
 package ast
 
 import (
+	"strings"
 	"testing"
 
+	"github.com/0disoft/fairyc/internal/diagnostic"
 	"github.com/0disoft/fairyc/internal/source"
 	"github.com/0disoft/fairyc/internal/syntax"
 )
+
+func TestLowerPreservesTopLevelDeclarationDocumentationSpans(t *testing.T) {
+	t.Parallel()
+	input := []byte(strings.Join([]string{
+		"module main;",
+		"/// Structure docs.",
+		"struct Packet { i32 value; }",
+		"/// Enum docs.",
+		"enum Error { Failed; }",
+		"/// Resource docs.",
+		"resource Handle { i32 value; cleanup {} }",
+		"/// Foreign docs.",
+		"unsafe extern C fn i32 raw(i32 value);",
+		"/// Function docs.",
+		"fn i32 run() { return 0; }",
+		"",
+	}, "\n"))
+	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	module, err := Lower(tree)
+	if err != nil {
+		t.Fatalf("Lower() error = %v", err)
+	}
+	spans := []struct {
+		name string
+		span diagnostic.Span
+		want string
+	}{
+		{name: "struct", span: module.Structs[0].DocumentationSpan, want: "/// Structure docs."},
+		{name: "enum", span: module.Enums[0].DocumentationSpan, want: "/// Enum docs."},
+		{name: "resource", span: module.Resources[0].DocumentationSpan, want: "/// Resource docs."},
+		{name: "foreign", span: module.ForeignFunctions[0].DocumentationSpan, want: "/// Foreign docs."},
+		{name: "function", span: module.Functions[0].DocumentationSpan, want: "/// Function docs."},
+	}
+	for _, item := range spans {
+		if item.span.EndByte <= item.span.StartByte || string(input[item.span.StartByte:item.span.EndByte]) != item.want {
+			t.Fatalf("%s documentation = %+v (%q), want %q", item.name, item.span, string(input[item.span.StartByte:item.span.EndByte]), item.want)
+		}
+	}
+}
 
 func TestLowerPreservesExplicitGrouping(t *testing.T) {
 	t.Parallel()

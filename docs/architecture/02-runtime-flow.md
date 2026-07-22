@@ -33,7 +33,7 @@ probe fixture producers enter that boundary through `compiler.Check` or `compile
 Verifier-mutation fixtures call `mir.Verify` directly because rejection is their oracle, while the
 interpreter and C backend re-verify caller-provided MIR as a downstream defense.
 
-Parsing consumes original UTF-8 source bytes, preserves trivia and invalid-input provenance in compact lossless syntax, and recovers enough structure for deterministic diagnostics without accepting malformed programs as valid. Canonical spans remain half-open byte ranges. Only an error-free batch parse lowers to AST and HIR. Type checking operates on Fairy C target types, not Go host types. Arbitrary-size integer and exact-decimal literals remain exact until their target type and overflow behavior are known.
+Parsing consumes original UTF-8 source bytes, preserves typed trivia and invalid-input provenance in compact lossless syntax, and recovers enough structure for deterministic diagnostics without accepting malformed programs as valid. The lexer classifies physical-line-leading `///` trivia, and syntax attaches only an immediately adjacent consecutive group to a supported top-level declaration. AST and HIR retain the exact half-open documentation span, not a normalized body or rendered meaning. Canonical spans remain half-open byte ranges. Only an error-free batch parse lowers to AST and HIR. Type checking operates on Fairy C target types, not Go host types. Arbitrary-size integer and exact-decimal literals remain exact until their target type and overflow behavior are known.
 
 In a resolved multi-package compilation, every semantic and MIR span carries the build-local package
 discriminator separately from its original relative source path. Sorting, compaction, unsafe
@@ -254,9 +254,10 @@ checksummed canonical compiler-fact envelope with empty documentation and source
 `internal/attributedtext` separately resolves one exact query subject, slices its declaration from
 revalidated retained local-workspace bytes, and emits separately bounded canonical output-only JSON.
 `experimental atlas-text source` exposes that separate output with explicit package, exact SymbolId,
-origin, count, text, and final-output policy; it does not populate Context Pack v1. Dependency-map
-loading, attributed-text decoding, documentation import, and pack decoding remain unimplemented and
-cannot feed back into these boundaries.
+origin, count, text, and final-output policy; it does not populate Context Pack v1. The frontend now
+retains exact attached `///` spans through HIR under ADR 0199, but attributed-text extraction of
+those spans and a documentation CLI remain unimplemented. Dependency-map loading, attributed-text
+decoding, documentation import, and pack decoding cannot feed back into these boundaries.
 
 ## Runtime behavior
 

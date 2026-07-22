@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/0disoft/fairyc/internal/diagnostic"
 	"github.com/0disoft/fairyc/internal/lexer"
 	"github.com/0disoft/fairyc/internal/source"
 )
@@ -82,6 +83,97 @@ func TestParseCShapedParametersAndMigratedMutableLocalLosslessly(t *testing.T) {
 	reconstructed, ok := tree.Reconstruct()
 	if !ok || !slices.Equal(reconstructed, input) {
 		t.Fatalf("Reconstruct() = %q, %v; want %q, true", reconstructed, ok, input)
+	}
+}
+
+func TestDeclarationDocumentationAttachmentIsExactAndConservative(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name string
+		body string
+		want string
+	}{
+		{name: "single line", body: "/// Returns one.\nfn i32 one() { return 1; }\n", want: "/// Returns one."},
+		{name: "owner qualified function", body: "/// Reads a value.\nfn i32 File::value(File this) { return 1; }\n", want: "/// Reads a value."},
+		{name: "consecutive CRLF and attribute", body: "\t/// First.\r\n  /// Second.\r\n@effects(io)\r\npub fn i32 value() { return 1; }\r\n", want: "/// First.\r\n  /// Second."},
+		{name: "blank line detaches", body: "/// Detached.\n\nfn i32 value() { return 1; }\n"},
+		{name: "ordinary comment detaches", body: "/// Detached.\n// ordinary\nfn i32 value() { return 1; }\n"},
+		{name: "block comment is not documentation", body: "/** not admitted */\nfn i32 value() { return 1; }\n"},
+		{name: "same physical line is not leading documentation", body: "/// trailing after module\nfn i32 value() { return 1; }\n"},
+	}
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			prefix := "module main;\n"
+			if test.name == "same physical line is not leading documentation" {
+				prefix = "module main; "
+			}
+			input := []byte(prefix + test.body)
+			tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+			if len(tree.Diagnostics) != 0 {
+				t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+			}
+			var function *Node
+			for index := range tree.Nodes {
+				if tree.Nodes[index].Kind == KindFunction {
+					function = &tree.Nodes[index]
+					break
+				}
+			}
+			if function == nil {
+				t.Fatal("function node was not produced")
+			}
+			got := ""
+			if function.DocumentationSpan.EndByte > function.DocumentationSpan.StartByte {
+				got = string(input[function.DocumentationSpan.StartByte:function.DocumentationSpan.EndByte])
+			}
+			if got != test.want {
+				t.Fatalf("documentation = %q, want %q; span = %+v", got, test.want, function.DocumentationSpan)
+			}
+		})
+	}
+}
+
+func TestDocumentationDoesNotAttachToUnsupportedTopLevelConst(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\n/// Constant text remains unattached.\nconst i32 value = 1;\n")
+	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	for index := range tree.Nodes {
+		if tree.Nodes[index].Kind == KindConst {
+			if tree.Nodes[index].DocumentationSpan != (diagnostic.Span{}) {
+				t.Fatalf("const documentation = %+v", tree.Nodes[index].DocumentationSpan)
+			}
+			return
+		}
+	}
+	t.Fatal("const node was not produced")
+}
+
+func TestDocumentationDoesNotAttachToNestedFields(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\n/// Type docs.\nstruct Pair {\n  /// Field text remains ordinary trivia.\n  i32 value;\n}\n")
+	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	var structure, field *Node
+	for index := range tree.Nodes {
+		switch tree.Nodes[index].Kind {
+		case KindStruct:
+			structure = &tree.Nodes[index]
+		case KindField:
+			field = &tree.Nodes[index]
+		}
+	}
+	if structure == nil || structure.DocumentationSpan.EndByte <= structure.DocumentationSpan.StartByte {
+		t.Fatalf("struct documentation = %+v", structure)
+	}
+	if field == nil || field.DocumentationSpan != (diagnostic.Span{}) {
+		t.Fatalf("field documentation = %+v", field)
 	}
 }
 

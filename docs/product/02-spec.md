@@ -306,7 +306,12 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   symbol/component contract and links only their dependency closure plus the scalar runtime; unused
   declarations and unrelated library components are not linked.
 - Modules follow the one-file, explicit-alias import contract and do not use textual include expansion.
-- Parsing starts from original source bytes, preserves trivia and error provenance in compact lossless syntax, and lowers to AST only after an error-free batch parse. An immutable green tree and incremental reparse are deferred until formatter or IDE work requires them.
+- Parsing starts from original source bytes, preserves typed trivia and error provenance in compact
+  lossless syntax, and lowers to AST only after an error-free batch parse. Physical-line-leading
+  consecutive `///` comments attach by exact byte span only to the selected top-level declaration
+  families through typed HIR; they remain grammar trivia and carry no rendered or semantic meaning.
+  An immutable green tree and incremental reparse are deferred until formatter or IDE work requires
+  them.
 - Semantic checking proceeds through resolver, type, and Flow phases. Fixtures compare stable source coordinates and canonical facts rather than build-local AST or HIR dumps.
 - Already-resolved multi-package input carries a deterministic build-local package discriminator and
   exact import-provider bindings. Semantic module identity is package plus source-visible module
@@ -787,8 +792,9 @@ source excerpt from revalidated retained bytes. Its output builder requires expl
 text/final-byte budgets, binds exact subject identity even for an omission, runs extraction itself,
 and includes independent fragment and document checksums. The command requires exact package and
 visible/full SymbolId selection, `workspace-authored` origin, explicit count/text/final-output
-limits, and optional locked no-write mode. The current frontend has no declaration-documentation
-attachment contract, decoder, text store, or stable attributed-text CLI.
+limits, and optional locked no-write mode. ADR 0199 now fixes the C-friendly `///` frontend
+attachment contract and retains exact spans through typed HIR, but the current attributed-text
+producer still has no documentation extraction, decoder, text store, or stable CLI.
 
 Stage 0 Atlas now exposes `experimental atlas-pack overview` for one exact manifest package UID with
 mandatory record, selection-byte, and final-output-byte limits plus optional locked no-write mode.
@@ -829,7 +835,8 @@ rewrite measurement boundary by ADR 0191, the internal exact symbol catalog by A
 experimental output command by ADR 0193. ADR 0194 fixes experimental show/around. Stable commands,
 map publication and attributed-text decoding remain future work; ADR 0195 fixes the attributed-text
 policy, ADR 0196 implements its internal exact retained-source gate, ADR 0197 fixes its canonical
-output-only JSON, and ADR 0198 fixes its first experimental source command.
+output-only JSON, ADR 0198 fixes its first experimental source command, and ADR 0199 fixes exact
+frontend documentation attachment without yet emitting documentation text.
 
 ## Explicit non-goals
 

@@ -27,12 +27,13 @@ type Module struct {
 
 // Enum is one restricted inert tagged type declaration.
 type Enum struct {
-	Name       string
-	Public     bool
-	Span       diagnostic.Span
-	NameSpan   diagnostic.Span
-	Attributes []Attribute
-	Variants   []EnumVariant
+	Name              string
+	Public            bool
+	Span              diagnostic.Span
+	NameSpan          diagnostic.Span
+	DocumentationSpan diagnostic.Span
+	Attributes        []Attribute
+	Variants          []EnumVariant
 }
 
 // EnumVariant preserves one declared tag and its ordered named payload fields.
@@ -45,12 +46,13 @@ type EnumVariant struct {
 
 // Struct is one inert named aggregate without compiler-owned cleanup.
 type Struct struct {
-	Name       string
-	Public     bool
-	Span       diagnostic.Span
-	NameSpan   diagnostic.Span
-	Attributes []Attribute
-	Fields     []FieldDeclaration
+	Name              string
+	Public            bool
+	Span              diagnostic.Span
+	NameSpan          diagnostic.Span
+	DocumentationSpan diagnostic.Span
+	Attributes        []Attribute
+	Fields            []FieldDeclaration
 }
 
 // Attribute preserves one item attribute until semantic ownership selects its meaning.
@@ -69,13 +71,14 @@ type AttributeArgument struct {
 
 // Resource is one move-only named aggregate with compiler-owned cleanup.
 type Resource struct {
-	Name       string
-	Public     bool
-	Span       diagnostic.Span
-	NameSpan   diagnostic.Span
-	Attributes []Attribute
-	Fields     []FieldDeclaration
-	Cleanup    *ResourceCleanup
+	Name              string
+	Public            bool
+	Span              diagnostic.Span
+	NameSpan          diagnostic.Span
+	DocumentationSpan diagnostic.Span
+	Attributes        []Attribute
+	Fields            []FieldDeclaration
+	Cleanup           *ResourceCleanup
 }
 
 // ResourceCleanup preserves the non-callable cleanup declaration until semantic lowering creates
@@ -106,29 +109,31 @@ type Import struct {
 
 // Function records a source function before name resolution and typing.
 type Function struct {
-	Name       string
-	Owner      string
-	Public     bool
-	Unsafe     bool
-	Span       diagnostic.Span
-	NameSpan   diagnostic.Span
-	OwnerSpan  diagnostic.Span
-	Attributes []Attribute
-	Parameters []Parameter
-	ResultType TypeReference
-	Body       *Block
+	Name              string
+	Owner             string
+	Public            bool
+	Unsafe            bool
+	Span              diagnostic.Span
+	NameSpan          diagnostic.Span
+	OwnerSpan         diagnostic.Span
+	DocumentationSpan diagnostic.Span
+	Attributes        []Attribute
+	Parameters        []Parameter
+	ResultType        TypeReference
+	Body              *Block
 }
 
 // ForeignFunction records one raw C declaration before name resolution and ABI validation.
 type ForeignFunction struct {
-	Name       string
-	Public     bool
-	ABI        string
-	Span       diagnostic.Span
-	NameSpan   diagnostic.Span
-	Attributes []Attribute
-	Parameters []Parameter
-	ResultType TypeReference
+	Name              string
+	Public            bool
+	ABI               string
+	Span              diagnostic.Span
+	NameSpan          diagnostic.Span
+	DocumentationSpan diagnostic.Span
+	Attributes        []Attribute
+	Parameters        []Parameter
+	ResultType        TypeReference
 }
 
 // Parameter records one function parameter and its written type.
@@ -252,11 +257,12 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 
 func lowerEnum(tree *syntax.Tree, node syntax.Node) Enum {
 	value := Enum{
-		Name:       node.Text,
-		Public:     containsKeywordBeforeName(tree, node, "pub", node.Text),
-		Span:       node.Span,
-		NameSpan:   findIdentifierSpan(tree, node, node.Text, "enum"),
-		Attributes: lowerAttributes(tree, node),
+		Name:              node.Text,
+		Public:            containsKeywordBeforeName(tree, node, "pub", node.Text),
+		Span:              node.Span,
+		NameSpan:          findIdentifierSpan(tree, node, node.Text, "enum"),
+		DocumentationSpan: node.DocumentationSpan,
+		Attributes:        lowerAttributes(tree, node),
 	}
 	for _, childID := range node.Children {
 		child, found := tree.Node(childID)
@@ -275,11 +281,12 @@ func lowerEnum(tree *syntax.Tree, node syntax.Node) Enum {
 
 func lowerStruct(tree *syntax.Tree, node syntax.Node) Struct {
 	value := Struct{
-		Name:       node.Text,
-		Public:     containsKeywordBeforeName(tree, node, "pub", node.Text),
-		Span:       node.Span,
-		NameSpan:   findIdentifierSpan(tree, node, node.Text, "struct"),
-		Attributes: lowerAttributes(tree, node),
+		Name:              node.Text,
+		Public:            containsKeywordBeforeName(tree, node, "pub", node.Text),
+		Span:              node.Span,
+		NameSpan:          findIdentifierSpan(tree, node, node.Text, "struct"),
+		DocumentationSpan: node.DocumentationSpan,
+		Attributes:        lowerAttributes(tree, node),
 	}
 	value.Fields = lowerFields(tree, node)
 	return value
@@ -320,11 +327,12 @@ func decodedAttributeArgument(argument syntax.Node) string {
 
 func lowerResource(tree *syntax.Tree, node syntax.Node) Resource {
 	value := Resource{
-		Name:       node.Text,
-		Public:     containsKeywordBeforeName(tree, node, "pub", node.Text),
-		Span:       node.Span,
-		NameSpan:   findIdentifierSpan(tree, node, node.Text, "resource"),
-		Attributes: lowerAttributes(tree, node),
+		Name:              node.Text,
+		Public:            containsKeywordBeforeName(tree, node, "pub", node.Text),
+		Span:              node.Span,
+		NameSpan:          findIdentifierSpan(tree, node, node.Text, "resource"),
+		DocumentationSpan: node.DocumentationSpan,
+		Attributes:        lowerAttributes(tree, node),
 	}
 	value.Fields = lowerFields(tree, node)
 	for _, childID := range node.Children {
@@ -386,12 +394,13 @@ func lowerImport(tree *syntax.Tree, node syntax.Node) Import {
 
 func lowerFunction(tree *syntax.Tree, node syntax.Node) Function {
 	value := Function{
-		Name:       node.Text,
-		Public:     containsKeywordBeforeName(tree, node, "pub", node.Text),
-		Unsafe:     containsKeywordBeforeName(tree, node, "unsafe", node.Text),
-		Span:       node.Span,
-		NameSpan:   findIdentifierSpan(tree, node, node.Text, "fn"),
-		Attributes: lowerAttributes(tree, node),
+		Name:              node.Text,
+		Public:            containsKeywordBeforeName(tree, node, "pub", node.Text),
+		Unsafe:            containsKeywordBeforeName(tree, node, "unsafe", node.Text),
+		Span:              node.Span,
+		NameSpan:          findIdentifierSpan(tree, node, node.Text, "fn"),
+		DocumentationSpan: node.DocumentationSpan,
+		Attributes:        lowerAttributes(tree, node),
 	}
 	for _, childID := range node.Children {
 		child, found := tree.Node(childID)
@@ -415,12 +424,13 @@ func lowerFunction(tree *syntax.Tree, node syntax.Node) Function {
 
 func lowerForeignFunction(tree *syntax.Tree, node syntax.Node) ForeignFunction {
 	value := ForeignFunction{
-		Name:       node.Text,
-		Public:     containsKeywordBeforeName(tree, node, "pub", node.Text),
-		ABI:        "C",
-		Span:       node.Span,
-		NameSpan:   findIdentifierSpan(tree, node, node.Text, "fn"),
-		Attributes: lowerAttributes(tree, node),
+		Name:              node.Text,
+		Public:            containsKeywordBeforeName(tree, node, "pub", node.Text),
+		ABI:               "C",
+		Span:              node.Span,
+		NameSpan:          findIdentifierSpan(tree, node, node.Text, "fn"),
+		DocumentationSpan: node.DocumentationSpan,
+		Attributes:        lowerAttributes(tree, node),
 	}
 	for _, childID := range node.Children {
 		child, found := tree.Node(childID)

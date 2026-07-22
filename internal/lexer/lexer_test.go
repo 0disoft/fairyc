@@ -46,6 +46,37 @@ func TestLosslessTokenStreamPreservesBOMCRLFAndNestedComments(t *testing.T) {
 	}
 }
 
+func TestTriviaClassificationPreservesDocumentationWithoutChangingTokenKind(t *testing.T) {
+	t.Parallel()
+	input := append([]byte{0xef, 0xbb, 0xbf}, []byte(" \n// ordinary\n  /// declaration docs\n/* block */")...)
+	result := Lex(source.NewFile("main.fy", input), source.NewBudget(source.DefaultLimits(), len(input)))
+	if len(result.Diagnostics) != 0 {
+		t.Fatalf("Lex() diagnostics = %+v", result.Diagnostics)
+	}
+	var kinds []TriviaKind
+	var documentation string
+	for _, token := range result.Tokens {
+		if token.Kind != Trivia {
+			continue
+		}
+		kinds = append(kinds, token.Trivia)
+		if token.Trivia == TriviaDocumentationLine {
+			documentation = token.Text(result.Source)
+		}
+	}
+	want := []TriviaKind{
+		TriviaPreamble, TriviaWhitespace, TriviaLineComment, TriviaWhitespace,
+		TriviaDocumentationLine, TriviaWhitespace, TriviaBlockComment,
+	}
+	if !slices.Equal(kinds, want) || documentation != "/// declaration docs" {
+		t.Fatalf("trivia = %v, documentation = %q, want %v", kinds, documentation, want)
+	}
+	reconstructed, ok := result.Reconstruct()
+	if !ok || !slices.Equal(reconstructed, input) {
+		t.Fatalf("Reconstruct() = %q, %v; want exact input", reconstructed, ok)
+	}
+}
+
 func TestInvalidUTF8PreservesRawByteAndReportsE0001(t *testing.T) {
 	t.Parallel()
 	input := []byte{'m', 'o', 'd', 'u', 'l', 'e', ' ', 0xff, ';'}
