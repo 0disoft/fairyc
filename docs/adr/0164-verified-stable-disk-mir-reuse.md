@@ -54,10 +54,11 @@ ordinary lowering.
 ## Consequences and limits
 
 - Cross-Session stable disk reuse is now executable through an internal explicit policy surface.
-- No public CLI flag, cache-location default, compiler-build-ID derivation, L1 memory layer, daemon,
-  background cleanup, or speed claim is added.
-- Separate writer and reader OS processes now exercise cross-process Session reuse. A public
-  separately built `fairyc` command, automatic build identity, and power-loss evidence remain absent.
+- ADR 0166 later adds one explicit experimental CLI command and ADR 0165 supplies its executable
+  identity. No ordinary-command cache, location default, L1 layer, daemon, background cleanup, or
+  speed claim is added.
+- Separate writer and reader OS processes exercise cross-process Session reuse, and a separately
+  built `fairyc.exe` now exercises the experimental command. Power-loss evidence remains absent.
 - Each package still duplicates the complete workspace type context. Partial hits therefore lower
   normally; function-level reuse and package-scoped contexts remain measurement-gated.
 - The cache is disposable derived state. Deletion or rejection can only cause ordinary compilation.

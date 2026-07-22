@@ -501,6 +501,7 @@ or arbitrary link-input option.
 - Executable target description: `internal/target/`
 - Experimental target JSON schema: `spec/cli/experimental-target-spec-v0.schema.json`
 - Experimental bounded workspace-session schema: `spec/cli/experimental-workspace-check-session-v0.schema.json`
+- Experimental persistent workspace-cache schema: `spec/cli/experimental-workspace-cache-check-v0.schema.json`
 - Target layout engine and fixtures: `internal/layout/`, `spec/fixtures/layout/manifest-v0.json`, `spec/fixtures/layout/manifest-windows-msvc-v0.json`
 - Shared Windows MSVC C probe type emitter: `internal/msvccprobe/`
 - Shared generated-Fairy/C aggregate-result probe: `internal/foreignstructprobe/`

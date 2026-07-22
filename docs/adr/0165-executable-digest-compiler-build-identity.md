@@ -33,8 +33,8 @@ identity. Hosted Go tests provide the corresponding Linux observation; local tes
 ## Consequences and limits
 
 - A separately invoked unchanged `fairyc` executable can safely share persistent cache keys.
-- Hashing the executable adds one sequential read per command that opts into this identity. It is not
-  used by ordinary commands and has no performance claim yet.
+- Hashing the executable adds one sequential read to the experimental persistent-cache command. It
+  is not used by ordinary commands and has no performance claim yet.
 - Reproducible source builds may still miss if their executable metadata differs. Safe misses are
   preferred to claiming compatibility across byte-distinct compiler builds.
 - The identity says which executable bytes ran; it does not sign or authenticate the executable.

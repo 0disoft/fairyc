@@ -148,6 +148,37 @@ func TestWorkspaceSessionResponseMatchesSchema(t *testing.T) {
 	assertJSONFieldsMatchSchema(t, cacheBytes, schema.Defs.Cache.Properties, schema.Defs.Cache.Required)
 }
 
+func TestWorkspaceCacheReportMatchesSchema(t *testing.T) {
+	t.Parallel()
+	schemaBytes, err := os.ReadFile(filepath.Join("..", "..", "spec", "cli", "experimental-workspace-cache-check-v0.schema.json"))
+	if err != nil {
+		t.Fatalf("read schema: %v", err)
+	}
+	var schema struct {
+		Properties map[string]json.RawMessage `json:"properties"`
+		Required   []string                   `json:"required"`
+		Defs       struct {
+			Cache struct {
+				Properties map[string]json.RawMessage `json:"properties"`
+				Required   []string                   `json:"required"`
+			} `json:"cache"`
+		} `json:"$defs"`
+	}
+	if err := json.Unmarshal(schemaBytes, &schema); err != nil {
+		t.Fatalf("decode schema contract: %v", err)
+	}
+	reportBytes, err := json.Marshal(workspaceCacheReportForSchema())
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertJSONFieldsMatchSchema(t, reportBytes, schema.Properties, schema.Required)
+	cacheBytes, err := json.Marshal(workspaceCacheReuseReport{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertJSONFieldsMatchSchema(t, cacheBytes, schema.Defs.Cache.Properties, schema.Defs.Cache.Required)
+}
+
 func assertJSONFieldsMatchSchema(t *testing.T, encoded []byte, properties map[string]json.RawMessage, required []string) {
 	t.Helper()
 	var fields map[string]json.RawMessage

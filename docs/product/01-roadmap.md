@@ -494,16 +494,18 @@ entry/byte collection. ADR 0164 connects it to stable package MIR through an int
 The caller must supply an exact compiler-build identity and every bound; complete hits rebuild fresh
 identities, rerun `mir.Verify`, and execute result `42` across independent Sessions and separate
 writer/reader test processes. Disk tests also cover concurrent process publication and process-exit
-temporary recovery. No public command, default cache path, automatic build identity, power-loss
-guarantee, or speed claim exists yet.
+temporary recovery. ADR 0165 adds exact executable-byte build identity, and ADR 0166 adds one
+explicit experimental command with a versioned JSON receipt. A separately built Windows `fairyc.exe`
+now proves cold fallback followed by two verified disk hits. No ordinary-command cache, default
+path or quota, power-loss guarantee, or speed claim exists yet.
 
 - Repeat the bounded session on a declared reference machine with controlled distributions, private
   or live-heap evidence, and an accepted noise policy before selecting defaults or claiming
   developer-loop speedup. The current local run has process peaks, an editor-shaped workload, and
   an explicit zero-retry policy but is not reference evidence.
-- Keep persistent storage internal and opt-in until a separately built public `fairyc` writer/reader,
-  exact build-ID derivation, power-loss boundary, retained-byte observations, and configured cold/warm
-  disk evidence justify a public cache path and defaults.
+- Keep persistent storage experimental and opt-in until the power-loss boundary, retained-byte
+  observations, and configured cold/warm disk evidence justify an ordinary-command cache path and
+  defaults.
 - Stabilize the minimal `fairyc check`, `build`, `run`, `test`, `emit`, `explain`, and `targets` contracts.
 - Move to function-level reuse only when measured package rebuild or storage evidence justifies the complexity.
 

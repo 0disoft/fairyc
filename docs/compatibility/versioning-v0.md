@@ -65,7 +65,8 @@ A cache key includes the full compiler build identity, language and MIR versions
 public-interface encoding/algorithm names in addition to their full digest bytes. A key-version or
 component-algorithm mismatch is a miss. The first bounded store is process-local and the opaque
 typed-HIR, MIR, and object payloads remain exact-compiler disposable state rather than serialized
-compatibility formats. The bounded persistent storage format now exists internally; public command policy and default limits remain undecided.
+compatibility formats. The bounded persistent storage format and one exact-version experimental
+command now exist; ordinary-command policy and default limits remain undecided.
 
 ## Target and ABI
 
@@ -371,6 +372,11 @@ response schema. The schema versions this experimental machine boundary and reje
 duplicate request fields, but it does not make the command spelling, numeric limits, process exit
 policy, or cache behavior release-stable. An incompatible field, kind, sequence, status, or unit
 change requires a new protocol schema even before stable CLI promotion.
+
+ADR 0166 adds the independent `fairyc.experimental.workspace-cache-check/v0` one-shot response
+schema. Its exact executable identity, explicit cache path, counters, and store outcomes are an
+unstable experimental machine boundary; changing field meaning or units requires another schema
+even though the command and cache policy are not release-stable.
 
 `fairyc.project-manifest-fixtures/v1` versions the complete-file parser observations for that schema.
 The pinned TOML library version is an implementation dependency, not the manifest schema version;

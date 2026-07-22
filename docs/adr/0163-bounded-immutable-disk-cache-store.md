@@ -47,8 +47,8 @@ hit.
   power loss on every filesystem. Losing a cache entry remains a safe miss.
 - Eviction is creation/modification-time ordered rather than access-time LRU, avoiding a write on
   every hit.
-- The store is not yet connected to `workspacecompiler.Session`, has no user-facing path or default
-  policy, and has no cold/warm disk performance claim.
+- ADR 0164 connects the store to explicit Sessions and ADR 0166 adds one experimental command. No
+  ordinary command, default policy, or cold/warm disk performance claim exists.
 - Power-loss directory durability and retained-byte/performance measurements remain required before
   enabling persistence in a compiler command. Process-exit temporary recovery is covered, but it is
   not a filesystem power-cut guarantee.

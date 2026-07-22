@@ -195,25 +195,29 @@ func isWindowsVolumePath(value string) bool {
 }
 
 func validateBuildComponent(component string) error {
+	return validatePortablePathComponent("experimental build output", component)
+}
+
+func validatePortablePathComponent(label, component string) error {
 	if component == "" || component == "." || component == ".." {
-		return fmt.Errorf("experimental build output contains an invalid path component")
+		return fmt.Errorf("%s contains an invalid path component", label)
 	}
 	if len([]byte(component)) > maxBuildComponentSize {
-		return fmt.Errorf("experimental build output component exceeds %d UTF-8 bytes", maxBuildComponentSize)
+		return fmt.Errorf("%s component exceeds %d UTF-8 bytes", label, maxBuildComponentSize)
 	}
 	if strings.HasSuffix(component, ".") || strings.HasSuffix(component, " ") {
-		return fmt.Errorf("experimental build output components cannot end with a dot or space")
+		return fmt.Errorf("%s components cannot end with a dot or space", label)
 	}
 	for _, character := range component {
 		if character < 0x20 || strings.ContainsRune(`<>:"|?*`, character) {
-			return fmt.Errorf("experimental build output contains a platform-reserved character")
+			return fmt.Errorf("%s contains a platform-reserved character", label)
 		}
 	}
 	base, _, _ := strings.Cut(component, ".")
 	upper := strings.ToUpper(base)
 	if upper == "CON" || upper == "PRN" || upper == "AUX" || upper == "NUL" ||
 		(len(upper) == 4 && (strings.HasPrefix(upper, "COM") || strings.HasPrefix(upper, "LPT")) && upper[3] >= '1' && upper[3] <= '9') {
-		return fmt.Errorf("experimental build output contains the reserved name %q", component)
+		return fmt.Errorf("%s contains the reserved name %q", label, component)
 	}
 	return nil
 }

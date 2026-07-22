@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fairyc.dev/schema/experimental-workspace-cache-check-v0.schema.json",
+  "title": "Fairy C experimental persistent workspace cache check v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "target",
+    "compilerBuild",
+    "cacheDirectory",
+    "lockState",
+    "instances",
+    "sourceFiles",
+    "mirFunctions",
+    "cache"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "fairyc.experimental.workspace-cache-check/v0" },
+    "target": { "type": "string", "minLength": 1 },
+    "compilerBuild": { "type": "string", "pattern": "^fairyc\\.compiler-executable-sha256/v1:[0-9a-f]{64}$" },
+    "cacheDirectory": { "type": "string", "pattern": "^build/[^\\\\]*$" },
+    "lockState": { "enum": ["updated", "unchanged", "verified"] },
+    "instances": { "type": "integer", "minimum": 1 },
+    "sourceFiles": { "type": "integer", "minimum": 1 },
+    "mirFunctions": { "type": "integer", "minimum": 0 },
+    "cache": { "$ref": "#/$defs/cache" }
+  },
+  "$defs": {
+    "cache": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "storage",
+        "outcome",
+        "packages",
+        "hits",
+        "misses",
+        "rejected",
+        "stored",
+        "storeSkipped",
+        "storeFailed",
+        "lowered",
+        "reassemblyFallback",
+        "retainedEntries",
+        "retainedBytes",
+        "recordHits",
+        "recordMisses",
+        "recordRejected",
+        "evictions",
+        "verifiedHits"
+      ],
+      "properties": {
+        "storage": { "const": "disk" },
+        "outcome": { "enum": ["not-eligible", "fallback", "all-hit"] },
+        "packages": { "type": "integer", "minimum": 0 },
+        "hits": { "type": "integer", "minimum": 0 },
+        "misses": { "type": "integer", "minimum": 0 },
+        "rejected": { "type": "integer", "minimum": 0 },
+        "stored": { "type": "integer", "minimum": 0 },
+        "storeSkipped": { "type": "integer", "minimum": 0 },
+        "storeFailed": { "type": "integer", "minimum": 0 },
+        "lowered": { "type": "boolean" },
+        "reassemblyFallback": { "type": "boolean" },
+        "retainedEntries": { "type": "integer", "minimum": 0 },
+        "retainedBytes": { "type": "integer", "minimum": 0 },
+        "recordHits": { "type": "integer", "minimum": 0 },
+        "recordMisses": { "type": "integer", "minimum": 0 },
+        "recordRejected": { "type": "integer", "minimum": 0 },
+        "evictions": { "type": "integer", "minimum": 0 },
+        "verifiedHits": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

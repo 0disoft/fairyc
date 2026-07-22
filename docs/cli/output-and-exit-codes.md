@@ -66,6 +66,13 @@ each completed request. Response status/code pairs are `ok`/`0`, `source-diagnos
 code `2` with no response for the rejected request; internal, stdin-read, and stdout-write failures
 use code `4` and terminate. EOF or the request bound returns the last completed request code, so a
 later successful repair can make the session process return `0`. Empty input uses code `2`.
+`experimental check-workspace-cache` writes exactly one
+`fairyc.experimental.workspace-cache-check/v0` object on success, defined by
+`spec/cli/experimental-workspace-cache-check-v0.schema.json`. It reports exact executable identity,
+relative cache directory, target/lock/workspace/MIR counts, verified reuse, retained state, raw record
+counters, and skipped or failed stores. Source or package diagnostics produce no partial JSON and use
+the existing codes `3` or `7`; invalid flags and limits use `2`; invariant, executable-identity, or
+output failures use `4`.
 `experimental target-spec` writes one deterministic `fairyc.target-spec/v0` JSON document, defined
 by `spec/cli/experimental-target-spec-v0.schema.json`, to stdout. Missing, extra, or unknown target
 IDs produce code `2`, no JSON, and a bounded invocation diagnostic on stderr.

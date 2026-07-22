@@ -32,6 +32,24 @@ current directory's `fairy.toml`, explicit members, and canonical `fairy.lock`.
 keeps one bounded verified-MIR Session while a caller submits sequential versioned NDJSON checks.
 It is a foreground experimental process, not a daemon, watcher, persistent cache, or stable editor
 protocol; every limit is mandatory and caller-selected.
+`fairyc experimental check-workspace-cache --target <target-id> --cache-dir <build/path>
+--cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-record-bytes <bytes>
+--cache-max-artifact-bytes <bytes> --cache-temp-max-age-seconds <seconds> [--locked]`
+is the separate one-shot persistent proof. It identifies the exact running executable, reads and
+writes only the explicit ignored workspace cache directory, and reports versioned JSON.
+
+The persistent command is deliberately not another session mode. Every invocation is a fresh
+process and hashes its executable before constructing a stable disk Session. The cache path must be
+canonical, use forward slashes, and remain under ignored `build/`. All entry, retained-byte,
+record-byte, artifact-byte, and abandoned-temp-age values are mandatory canonical positive decimals;
+artifact bytes cannot exceed record bytes and record bytes cannot exceed retained bytes. There is no
+config file, environment override, remote cache, implicit source discovery, default, watcher, or
+daemon. Its output schema is
+`spec/cli/experimental-workspace-cache-check-v0.schema.json`. A raw record is never an executable
+hit: the public interface, package instance, stable codec, complete package set, fresh identity
+rebind, and ordinary MIR verifier must all succeed. Corruption and incompatibility fall back to
+lowering. Oversized admission and failed disk writes are reported separately and cannot turn cache
+state into source truth.
 `fairyc experimental build-workspace --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe> [--locked]`
 retains a package-aware Windows PE, while
 `fairyc experimental run-workspace --target x86_64-windows-msvc --profile <low|optimized> [--locked]`
@@ -183,6 +201,7 @@ examples do not grant agent command authority.
 `DEVELOPMENT.md` also documents the manual WSL-free build of ignored `build/fairyc.exe` for repeated
 Windows use. The configured Windows smoke independently builds and removes a temporary compiler
 executable, verifies its help surface, drives the scalar quickstart through that separate process,
+invokes the persistent cache command twice to require cold fallback followed by a verified disk hit,
 and sends eight editor-shaped workspace checks through one stdin/stdout session while recording
 Windows process-memory peaks; none of those paths is self-hosting, a distribution promise, a
 reference-machine baseline, or a performance budget.

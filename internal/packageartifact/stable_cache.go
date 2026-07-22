@@ -1,6 +1,7 @@
 package packageartifact
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 
@@ -8,6 +9,8 @@ import (
 	"github.com/0disoft/fairyc/internal/packagecache"
 	"github.com/0disoft/fairyc/internal/packagegraph"
 )
+
+var ErrStableCacheStore = errors.New("stable package artifact disk store failed")
 
 // StableLookup is one cross-process cache result. A hit has passed the disk record checks, stable
 // artifact codec, expected public-interface check, and expected package-instance check.
@@ -66,10 +69,13 @@ func (cache *StableCache) Put(key packagecache.Key, publicInterface moduleinterf
 	if err != nil {
 		return err
 	}
-	return cache.store.Put(packagecache.Record{
+	if err := cache.store.Put(packagecache.Record{
 		Key: key, PublicInterface: publicInterface,
 		Artifacts: []packagecache.Artifact{{Kind: packagecache.ArtifactMIR, Data: encoded}},
-	})
+	}); err != nil {
+		return fmt.Errorf("%w: %w", ErrStableCacheStore, err)
+	}
+	return nil
 }
 
 // Get returns only a stable artifact for the exact expected interface and package instance. Every

@@ -175,6 +175,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0163-bounded-immutable-disk-cache-store.md`: caller-bounded immutable cache generations, canonical records, safe conflict misses, stale-temp recovery, and deterministic collection without lock files.
 - `0164-verified-stable-disk-mir-reuse.md`: explicit disk-cache sessions require an exact compiler-build identity and skip lowering only after complete stable package hits rebind and re-enter MIR verification.
 - `0165-executable-digest-compiler-build-identity.md`: full running-executable SHA-256 identity with fail-closed reads and separate-process equality for persistent cache keys.
+- `0166-experimental-persistent-workspace-cache-command.md`: one-shot explicit persistent workspace check with exact executable identity, mandatory bounds, versioned JSON, corruption fallback, and separately built Windows proof.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

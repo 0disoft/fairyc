@@ -65,6 +65,7 @@ type Report struct {
 	Rejected           int
 	Stored             int
 	StoreSkipped       int
+	StoreFailed        int
 	Lowered            bool
 	ReassemblyFallback bool
 }
@@ -320,6 +321,10 @@ func (session *Session) checkPersistent(analysis compiler.Analysis, identities m
 		if err := session.stableCache.Put(keys[packageID], interfaces[packageID], artifact); err != nil {
 			if errors.Is(err, packageartifact.ErrStableArtifactTooLarge) || errors.Is(err, packageartifact.ErrBodyArtifactTooLarge) || errors.Is(err, packagecache.ErrRecordTooLarge) {
 				report.StoreSkipped++
+				continue
+			}
+			if errors.Is(err, packageartifact.ErrStableCacheStore) {
+				report.StoreFailed++
 				continue
 			}
 			return Result{}, fmt.Errorf("store package %d stable MIR artifact: %w", packageID, err)

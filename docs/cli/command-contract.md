@@ -37,7 +37,7 @@ stabilization.
 
 ## Implemented experimental compiler surface
 
-The current Go prototype implements seventeen deliberately unstable developer commands:
+The current Go prototype implements eighteen deliberately unstable developer commands:
 
 | Command | Purpose | Output |
 | --- | --- | --- |
@@ -47,6 +47,7 @@ The current Go prototype implements seventeen deliberately unstable developer co
 | `fairyc experimental check <primary.fy> [--source <file.fy>]...` | Run syntax, semantic, Flow, MIR-lowering, and MIR-verifier stages over one explicit source closure without requiring an executable entry | One verified-MIR function and foreign-declaration count line, source diagnostics, or an explicit unsupported-subset error |
 | `fairyc experimental check-workspace [--locked]` | Load the current directory's strict `fairy.toml`, explicit local members and sources, validate or refresh canonical `fairy.lock`, then run package-aware semantic and verified MIR | Deterministic instance/source/MIR counts and lock state, diagnostics, or prototype package failure code `7` |
 | `fairyc experimental check-workspace-session --target <target-id> --max-requests <count> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-artifact-bytes <bytes> [--locked]` | Keep one bounded process-local verified-MIR Session while a caller submits sequential versioned NDJSON check requests on stdin | One `fairyc.experimental.workspace-check-session/v0` JSON response per completed request, human diagnostics on stderr, and the last completed request's prototype exit code |
+| `fairyc experimental check-workspace-cache --target <target-id> --cache-dir <build/path> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-record-bytes <bytes> --cache-max-artifact-bytes <bytes> --cache-temp-max-age-seconds <seconds> [--locked]` | Run one package-aware semantic and verified-MIR check with explicit bounded cross-process stable disk reuse keyed by the exact executable image | One `fairyc.experimental.workspace-cache-check/v0` JSON object, human diagnostics on stderr, or prototype invocation/package/internal failure |
 | `fairyc experimental build-workspace --target x86_64-windows-msvc --profile <low\|optimized> --output <build/path.exe> [--locked]` | Compile the current local-exact workspace's root `main::main` through package-aware verified MIR and the closed Windows target pipeline | A no-overwrite `.exe`, target/toolchain/profile/lock receipt, or package, source, capability, toolchain, link, and artifact diagnostics |
 | `fairyc experimental run-workspace --target x86_64-windows-msvc --profile <low\|optimized> [--locked]` | Compile and execute the same package-aware root entry as a temporary inspected Windows PE | `native workspace result: <i32>` with target/toolchain/profile/lock receipt, a canonical trap, or package/build diagnostics |
 | `fairyc experimental target-spec <x86_64-linux-gnu\|x86_64-windows-msvc>` | Inspect one known host-independent target description without resolving a local toolchain | Deterministic `fairyc.target-spec/v0` JSON on stdout, defined by `spec/cli/experimental-target-spec-v0.schema.json` |
@@ -99,6 +100,23 @@ them. Internal, stdin-read, and stdout-write failures terminate. EOF or the expl
 ends a nonempty session with its last response's exit code; EOF before any request is code `2`.
 This is an unstable sequential compiler-process protocol, not a stable JSON mode, LSP, watcher,
 concurrent service, persistent cache, or performance claim.
+
+`experimental check-workspace-cache` is a separate one-shot process contract. It accepts no source
+arguments or stdin protocol. Target, ignored `build/` cache directory, entry count, retained bytes,
+record bytes, artifact bytes, and abandoned-temp age in seconds are all explicit. Numeric values are
+canonical positive decimals; the hard ceilings are 65,536 entries, 1,073,741,824 bytes for each byte
+class, and 31,536,000 seconds. Artifact bytes cannot exceed record bytes; record bytes cannot exceed
+retained bytes. The executable's complete SHA-256 bytes supply the compiler-build key member.
+
+Success writes exactly one object from
+`spec/cli/experimental-workspace-cache-check-v0.schema.json`. It includes the relative cache path,
+target, executable identity, lock/workspace/MIR counts, verified cache outcome, retained entries and
+bytes, record hit/miss/rejection/eviction counters, verified hits, and distinct skipped versus failed
+stores. It includes no source text, absolute path, artifact bytes, or toolchain path. Any miss,
+corruption, incompatible schema/build/package/interface, or incomplete stable package set falls back
+to ordinary lowering. A verified result survives a failed cache write and reports `storeFailed`;
+failure to initialize the explicitly requested cache is a package failure. The command starts no
+daemon, watcher, network request, toolchain, backend, or concurrent worker and makes no speed claim.
 
 `experimental build-workspace` and `experimental run-workspace` reuse that exact workspace, SDK,
 lock, semantic, Flow, MIR, and diagnostic path. They accept no positional entry or repeated source:
