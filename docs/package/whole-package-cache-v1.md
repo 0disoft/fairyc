@@ -57,8 +57,10 @@ the opaque payload is compatible.
 `DiskStore`: canonical records live under key and payload digests, concurrent identical writers
 converge without a lock file, conflicting valid generations are safe misses, corrupt generations
 are rejected, and collection enforces entry/byte/temp-age limits. No compiler command or Session
-uses it yet. Default limits, a user-facing path, abrupt-termination evidence, cold/warm disk
-measurement, command-line inspection, and remote transport remain unimplemented.
+uses it by default. ADR 0164 adds an internal opt-in Session path with mandatory caller policy and
+exact compiler-build identity. Default limits, a user-facing path, automatic build-ID derivation,
+abrupt-termination evidence, cold/warm disk measurement, command-line inspection, and remote
+transport remain unimplemented.
 
 ADR 0146 records the current evidence result: persistence is deliberately deferred. ADR 0149 adds a
 real exact-version codec for one verified whole-program MIR value, but that payload is not yet a
@@ -73,8 +75,9 @@ cold/warm measurement intent owns comparable cache-hit evidence. Process-codec p
 cannot justify a disk format or default budget.
 
 ADR 0162 supplies the stable package MIR payload required by a truthful disk record. ADR 0163 adds
-only the disposable bounded storage primitive; it deliberately does not turn persistence on or
-claim that a disk hit is faster than ordinary lowering.
+the disposable bounded storage primitive. ADR 0164 connects both only through explicit internal
+configuration; it deliberately does not turn persistence on in a command or claim that a disk hit
+is faster than ordinary lowering.
 
 ADR 0155 connects those bytes to the bounded LRU and distinguishes verified hits from raw store
 hits, misses, and rejected entries. Rejection uses complete-record compare-and-delete so a stale
@@ -82,4 +85,4 @@ reader cannot remove a concurrent replacement. ADR 0156 adds a semantic-first wo
 session that computes v1 keys and skips MIR lowering only after complete verified hits plus exact
 reassembly. Partial hits, rejected payloads, and incompatible mixed-generation contexts all fall
 back to ordinary lowering and refresh current artifacts. The session remains process-local and has
-no elapsed-time speedup, persistent storage, CLI lifetime, or default-limit claim.
+no elapsed-time speedup, public persistent-cache CLI, default path, or default-limit claim.

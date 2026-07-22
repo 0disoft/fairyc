@@ -84,6 +84,7 @@ regenerate, or override compiler source.
 - Process-bound package MIR artifact codec: internal/packageartifact/codec.go, docs/adr/0154-process-bound-package-artifact-codec.md
 - Bounded process-local package artifact cache: internal/packageartifact/cache.go, internal/packagecache/store.go, docs/adr/0155-bounded-process-package-artifact-cache.md
 - Package-aware process-local MIR reuse coordinator: internal/workspacecompiler/, docs/adr/0156-all-hit-process-mir-reuse.md
+- Explicit stable disk MIR reuse coordinator: internal/workspacecompiler/, internal/packageartifact/stable_cache.go, docs/adr/0164-verified-stable-disk-mir-reuse.md
 - Bounded workspace check-session CLI and protocol schema: internal/cli/workspace_session.go, spec/cli/experimental-workspace-check-session-v0.schema.json, docs/adr/0159-bounded-workspace-check-session.md
 - Build-measurement report schemas and configured Windows calibrations: internal/buildmeasure/, cmd/fairyc-windows-host-smoke/, docs/adr/0150-no-cache-windows-build-calibration.md, docs/adr/0157-process-cache-measurement-receipt.md, docs/adr/0158-process-cache-edit-distributions.md, docs/adr/0160-editor-shaped-session-process-measurement.md
 - Human project-manifest v1 parser and fixtures: internal/projectmanifest/, internal/projectmanifestfixture/, spec/fixtures/project-manifest/manifest-v1.json

@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/hir"
@@ -162,6 +163,103 @@ func TestSessionInvalidatesSourceAndFallsBackFromMixedArtifactContexts(t *testin
 		t.Fatalf("healed Check() = %+v, lower calls = %d", healed, lowerCalls)
 	}
 	assertWorkspaceResult(t, reverted, healed.Compiler, 42)
+}
+
+func TestPersistentSessionReusesStableMIRAcrossIndependentSessions(t *testing.T) {
+	root := writeCacheWorkspace(t, testAnswer42)
+	diskRoot := t.TempDir()
+	configuration := persistentTestConfiguration(diskRoot, "test-compiler-build-a")
+	firstSession, err := NewSession(configuration)
+	if err != nil {
+		t.Fatal(err)
+	}
+	firstLower := firstSession.lower
+	firstLowerCalls := 0
+	firstSession.lower = func(analysis compiler.Analysis) (compiler.Result, error) {
+		firstLowerCalls++
+		return firstLower(analysis)
+	}
+	workspace := loadCacheWorkspace(t, root)
+	first, err := firstSession.Check(workspace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if first.Cache.Storage != StorageDisk || first.Cache.Outcome != OutcomeFallback || !first.Cache.Lowered ||
+		first.Cache.Misses != 2 || first.Cache.Stored != 2 || firstLowerCalls != 1 {
+		t.Fatalf("persistent cold Check() = %+v, lower calls = %d", first, firstLowerCalls)
+	}
+	assertWorkspaceResult(t, workspace, first.Compiler, 42)
+
+	secondSession, err := NewSession(configuration)
+	if err != nil {
+		t.Fatal(err)
+	}
+	secondLowerCalls := 0
+	secondSession.lower = func(analysis compiler.Analysis) (compiler.Result, error) {
+		secondLowerCalls++
+		return compiler.LowerAnalyzed(analysis)
+	}
+	second, err := secondSession.Check(workspace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if second.Cache.Storage != StorageDisk || second.Cache.Outcome != OutcomeAllHit || second.Cache.Lowered ||
+		second.Cache.Hits != 2 || second.Cache.Misses != 0 || secondLowerCalls != 0 {
+		t.Fatalf("persistent warm Check() = %+v, lower calls = %d", second, secondLowerCalls)
+	}
+	assertWorkspaceResult(t, workspace, second.Compiler, 42)
+	stats, err := secondSession.PersistentStats()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stats.VerifiedHits != 2 || stats.Misses != 0 || stats.Rejected != 0 || stats.Store.Entries != 2 {
+		t.Fatalf("persistent Stats() = %+v", stats)
+	}
+
+	incompatibleSession, err := NewSession(persistentTestConfiguration(diskRoot, "test-compiler-build-b"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	incompatibleLower := incompatibleSession.lower
+	incompatibleLowerCalls := 0
+	incompatibleSession.lower = func(analysis compiler.Analysis) (compiler.Result, error) {
+		incompatibleLowerCalls++
+		return incompatibleLower(analysis)
+	}
+	incompatible, err := incompatibleSession.Check(workspace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if incompatible.Cache.Outcome != OutcomeFallback || incompatible.Cache.Misses != 2 || !incompatible.Cache.Lowered || incompatibleLowerCalls != 1 {
+		t.Fatalf("incompatible persistent Check() = %+v, lower calls = %d", incompatible, incompatibleLowerCalls)
+	}
+}
+
+func TestPersistentSessionRejectsAmbiguousConfiguration(t *testing.T) {
+	t.Parallel()
+	configuration := persistentTestConfiguration(t.TempDir(), "build")
+	configuration.Cache = packagecache.Limits{MaxEntries: 1, MaxBytes: 1024}
+	if _, err := NewSession(configuration); err == nil {
+		t.Fatal("combined memory and persistent cache policies were accepted")
+	}
+	configuration = persistentTestConfiguration(t.TempDir(), "")
+	if _, err := NewSession(configuration); err == nil {
+		t.Fatal("empty persistent compiler build identity was accepted")
+	}
+}
+
+func persistentTestConfiguration(root, compilerBuild string) Configuration {
+	return Configuration{
+		Target:           target.X8664WindowsMSVC,
+		MaxArtifactBytes: 8 << 20,
+		Persistent: &PersistentConfiguration{
+			Root: root,
+			Limits: packagecache.DiskLimits{
+				MaxEntries: 8, MaxBytes: 32 << 20, MaxRecordBytes: 8 << 20, TempMaxAge: time.Minute,
+			},
+			CompilerBuild: compilerBuild,
+		},
+	}
 }
 
 func writeCacheWorkspace(t *testing.T, answerSource string) string {

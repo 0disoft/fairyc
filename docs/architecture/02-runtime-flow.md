@@ -64,6 +64,12 @@ later fast path:       verified MIR -> measured fast backend -> object -> linker
 later optimized path:  verified/optimized MIR -> LLVM IR -> object -> linker
 ```
 
+Package-aware workspace checks always perform loading and semantic analysis. Memory-cache mode can
+reuse process-bound package MIR inside one Session. Explicit persistent mode instead keys stable
+package MIR by the exact compiler build and complete compatibility vector, accepts only complete
+verified disk hits, rebuilds fresh MIR identities, and reruns the ordinary verifier before the
+interpreter or backend can observe the program. Any cache failure returns to ordinary lowering.
+
 The interpreter, `x86_64-linux-gnu` C path, and first provisional
 `x86_64-windows-msvc` scalar/LLP64 C-emission path are committed. Later target and backend
 expansions remain separate capability decisions.

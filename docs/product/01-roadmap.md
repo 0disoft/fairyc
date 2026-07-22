@@ -486,16 +486,22 @@ ADR 0162 adds stable package MIR v1. Canonical package bytes carry complete stab
 function bodies, `FunctionID` calls/imports, and context-indexed foreign calls. Decoded packages can
 rebuild the context and all functions under fresh package, function, foreign, and local numbers,
 pass `mir.Verify`, execute the workspace to `42`, and re-encode identically. The complete workspace
-context is still duplicated per package and the persistent store remains deferred.
+context is still duplicated per package.
+
+ADR 0163 adds a caller-bounded immutable disk-record store with canonical digest-named generations,
+safe conflicting-generation misses, corrupt-record rejection, stale-temp recovery, and deterministic
+entry/byte collection. ADR 0164 connects it to stable package MIR through an internal opt-in Session.
+The caller must supply an exact compiler-build identity and every bound; complete hits rebuild fresh
+identities, rerun `mir.Verify`, and execute result `42` across independent Sessions. No public command,
+default cache path, automatic build identity, or speed claim exists yet.
 
 - Repeat the bounded session on a declared reference machine with controlled distributions, private
   or live-heap evidence, and an accepted noise policy before selecting defaults or claiming
   developer-loop speedup. The current local run has process peaks, an editor-shaped workload, and
   an explicit zero-retry policy but is not reference evidence.
-- ADR 0146 explicitly defers persistent storage. Package-aware Windows builds, the bounded
-  whole-program MIR codec, process-local package function slices, stable type-context bytes, and
-  stable package MIR v1 rebind now exist; cross-process corruption/coordination policy and
-  configured cold/warm disk evidence still gate storage policy.
+- Keep persistent storage internal and opt-in until a separately built writer/reader process,
+  abrupt-termination recovery, retained-byte observations, and configured cold/warm disk evidence
+  justify a public cache path, exact build-ID derivation, and defaults.
 - Stabilize the minimal `fairyc check`, `build`, `run`, `test`, `emit`, `explain`, and `targets` contracts.
 - Move to function-level reuse only when measured package rebuild or storage evidence justifies the complexity.
 

@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/mircodec"
 	"github.com/0disoft/fairyc/internal/moduleinterface"
 	"github.com/0disoft/fairyc/internal/packageartifact"
@@ -24,23 +26,39 @@ const (
 	OutcomeNotEligible = "not-eligible"
 	OutcomeFallback    = "fallback"
 	OutcomeAllHit      = "all-hit"
+	StorageMemory      = "memory"
+	StorageDisk        = "disk"
 
 	compilerProcessEncoding = "fairyc.compiler-process/0:"
+	compilerStableEncoding  = "fairyc.compiler-stable-package-cache/1"
 	backendIdentity         = "verified-mir"
-	toolchainIdentity       = "not-applicable:process-local-mir-v0"
+	toolchainIdentity       = "not-applicable:verified-mir"
 )
 
-// Configuration supplies the explicit target and mandatory cache bounds. The first cache reuses
-// verified MIR only, so native toolchain and optimization identities are deliberately inapplicable.
+const maxCompilerBuildIdentityBytes = 512
+
+// PersistentConfiguration opts one Session into cross-process stable MIR reuse. CompilerBuild
+// must identify the exact compiler build; using a release family or moving label is unsafe.
+type PersistentConfiguration struct {
+	Root          string
+	Limits        packagecache.DiskLimits
+	CompilerBuild string
+}
+
+// Configuration supplies the explicit target, artifact bound, and exactly one cache policy.
+// Persistent nil selects the bounded process-local LRU. Persistent nonnil selects the bounded disk
+// store and requires Cache to remain zero so callers cannot assume an unimplemented L1/L2 policy.
 type Configuration struct {
 	Target           target.ID
 	Cache            packagecache.Limits
 	MaxArtifactBytes uint64
+	Persistent       *PersistentConfiguration
 }
 
 // Report describes one cache decision without treating raw byte-store hits as executable reuse.
 type Report struct {
 	Outcome            string
+	Storage            string
 	Packages           int
 	Hits               int
 	Misses             int
@@ -57,10 +75,12 @@ type Result struct {
 	Cache    Report
 }
 
-// Session owns one bounded, process-private cache. A Session can never read artifacts written by
-// another process or by another Session instance.
+// Session owns exactly one bounded artifact cache: either process-local MIR or stable disk MIR.
 type Session struct {
 	cache           *packageartifact.Cache
+	stableCache     *packageartifact.StableCache
+	compilerBuild   string
+	storage         string
 	target          target.Spec
 	standardLibrary packagegraph.InstanceID
 	lower           func(compiler.Analysis) (compiler.Result, error)
@@ -75,16 +95,43 @@ func NewSession(configuration Configuration) (*Session, error) {
 	if err := target.Validate(targetSpec); err != nil {
 		return nil, fmt.Errorf("workspace compiler target %q: %w", configuration.Target, err)
 	}
-	cache, err := packageartifact.NewCache(configuration.Cache, configuration.MaxArtifactBytes)
-	if err != nil {
-		return nil, err
+	var processCache *packageartifact.Cache
+	var stableCache *packageartifact.StableCache
+	var err error
+	compilerBuild := ""
+	storage := StorageMemory
+	if configuration.Persistent == nil {
+		processCache, err = packageartifact.NewCache(configuration.Cache, configuration.MaxArtifactBytes)
+		if err != nil {
+			return nil, err
+		}
+		compilerBuild = compilerProcessEncoding + processCache.Identity()
+	} else {
+		if configuration.Cache != (packagecache.Limits{}) {
+			return nil, fmt.Errorf("workspace compiler cannot combine memory and persistent cache policies")
+		}
+		if configuration.Persistent.CompilerBuild == "" || !utf8.ValidString(configuration.Persistent.CompilerBuild) || len(configuration.Persistent.CompilerBuild) > maxCompilerBuildIdentityBytes {
+			return nil, fmt.Errorf("persistent cache compiler build identity must be 1..%d bytes of valid UTF-8", maxCompilerBuildIdentityBytes)
+		}
+		stableCache, err = packageartifact.NewStableCache(configuration.Persistent.Root, configuration.Persistent.Limits, configuration.MaxArtifactBytes)
+		if err != nil {
+			return nil, err
+		}
+		compilerBuild = strings.Join([]string{
+			compilerStableEncoding,
+			configuration.Persistent.CompilerBuild,
+			packageartifact.StableArtifactVersion,
+			packagecache.DiskRecordVersion,
+		}, ";")
+		storage = StorageDisk
 	}
 	standardLibrary, err := standardLibraryInstance()
 	if err != nil {
 		return nil, err
 	}
 	return &Session{
-		cache: cache, target: targetSpec, standardLibrary: standardLibrary,
+		cache: processCache, stableCache: stableCache, compilerBuild: compilerBuild, storage: storage,
+		target: targetSpec, standardLibrary: standardLibrary,
 		lower: compiler.LowerAnalyzed,
 	}, nil
 }
@@ -92,7 +139,7 @@ func NewSession(configuration Configuration) (*Session, error) {
 // Check performs semantic analysis on every request. It skips MIR lowering only when every
 // function-owning package is a verified cache hit and the complete artifact set reassembles.
 func (session *Session) Check(workspace workspaceloader.Workspace) (Result, error) {
-	if session == nil || session.cache == nil || session.lower == nil {
+	if session == nil || session.cache == nil && session.stableCache == nil || session.lower == nil {
 		return Result{}, fmt.Errorf("workspace compiler session is not initialized")
 	}
 	input, err := workspace.SemanticInput()
@@ -113,7 +160,7 @@ func (session *Session) Check(workspace workspaceloader.Workspace) (Result, erro
 	}
 	if !semanticReady(analysis.Semantic) {
 		compiled, lowerErr := session.lower(analysis)
-		return Result{Compiler: compiled, Cache: Report{Outcome: OutcomeNotEligible}}, lowerErr
+		return Result{Compiler: compiled, Cache: Report{Outcome: OutcomeNotEligible, Storage: session.storage}}, lowerErr
 	}
 
 	interfaces, err := packageInterfaces(analysis.Semantic.HIR, metadata, identities)
@@ -121,7 +168,7 @@ func (session *Session) Check(workspace workspaceloader.Workspace) (Result, erro
 		return Result{}, err
 	}
 	owners := functionOwners(analysis.Semantic.HIR)
-	report := Report{Outcome: OutcomeFallback, Packages: len(owners)}
+	report := Report{Outcome: OutcomeFallback, Storage: session.storage, Packages: len(owners)}
 	if len(owners) == 0 {
 		compiled, lowerErr := session.lower(analysis)
 		report.Lowered = compiled.Verified
@@ -130,6 +177,9 @@ func (session *Session) Check(workspace workspaceloader.Workspace) (Result, erro
 	keys, err := session.packageKeys(metadata, interfaces, owners)
 	if err != nil {
 		return Result{}, err
+	}
+	if session.stableCache != nil {
+		return session.checkPersistent(analysis, identities, interfaces, owners, keys, report)
 	}
 
 	artifacts := make([]packageartifact.Artifact, 0, len(owners))
@@ -203,6 +253,98 @@ func (session *Session) Stats() packageartifact.CacheStats {
 	return session.cache.Stats()
 }
 
+// PersistentStats returns stable-disk observations when the Session selected persistent storage.
+func (session *Session) PersistentStats() (packageartifact.StableCacheStats, error) {
+	if session == nil || session.stableCache == nil {
+		return packageartifact.StableCacheStats{}, fmt.Errorf("workspace compiler session does not use persistent cache storage")
+	}
+	return session.stableCache.Stats()
+}
+
+func (session *Session) checkPersistent(analysis compiler.Analysis, identities map[hir.PackageID]packagegraph.InstanceID, interfaces map[hir.PackageID]moduleinterface.Hash, owners []hir.PackageID, keys map[hir.PackageID]packagecache.Key, report Report) (Result, error) {
+	artifacts := make([]packageartifact.StableArtifact, 0, len(owners))
+	allHit := true
+	for _, packageID := range owners {
+		instance, found := identities[packageID]
+		if !found {
+			return Result{}, fmt.Errorf("function-owning package %d has no stable package identity", packageID)
+		}
+		lookup := session.stableCache.Get(keys[packageID], interfaces[packageID], instance)
+		switch lookup.Status {
+		case packageartifact.LookupHit:
+			report.Hits++
+			artifacts = append(artifacts, lookup.Artifact)
+		case packageartifact.LookupMiss:
+			report.Misses++
+			allHit = false
+		case packageartifact.LookupRejected:
+			report.Rejected++
+			allHit = false
+		default:
+			return Result{}, fmt.Errorf("workspace compiler persistent cache returned unknown status %q", lookup.Status)
+		}
+	}
+	if allHit {
+		program, reassemblyErr := rebindPersistentArtifacts(artifacts, identities)
+		if reassemblyErr == nil {
+			report.Outcome = OutcomeAllHit
+			return Result{Compiler: compiler.Result{Semantic: analysis.Semantic, MIR: program, Verified: true}, Cache: report}, nil
+		}
+		report.ReassemblyFallback = true
+	}
+
+	compiled, err := session.lower(analysis)
+	if err != nil {
+		return Result{}, err
+	}
+	if !compiled.Verified {
+		return Result{Compiler: compiled, Cache: report}, nil
+	}
+	report.Lowered = true
+	extracted, err := packageartifact.ExtractAll(compiled.MIR, identities)
+	if err != nil {
+		return Result{}, fmt.Errorf("extract stable package MIR artifacts: %w", err)
+	}
+	byPackage := make(map[hir.PackageID]packageartifact.Artifact, len(extracted))
+	for _, artifact := range extracted {
+		if _, duplicate := byPackage[artifact.PackageID]; duplicate {
+			return Result{}, fmt.Errorf("lowered MIR produced duplicate package artifact %d", artifact.PackageID)
+		}
+		byPackage[artifact.PackageID] = artifact
+	}
+	for _, packageID := range owners {
+		artifact, found := byPackage[packageID]
+		if !found {
+			return Result{}, fmt.Errorf("lowered MIR has no artifact for function-owning package %d", packageID)
+		}
+		if err := session.stableCache.Put(keys[packageID], interfaces[packageID], artifact); err != nil {
+			if errors.Is(err, packageartifact.ErrStableArtifactTooLarge) || errors.Is(err, packageartifact.ErrBodyArtifactTooLarge) || errors.Is(err, packagecache.ErrRecordTooLarge) {
+				report.StoreSkipped++
+				continue
+			}
+			return Result{}, fmt.Errorf("store package %d stable MIR artifact: %w", packageID, err)
+		}
+		report.Stored++
+	}
+	return Result{Compiler: compiled, Cache: report}, nil
+}
+
+func rebindPersistentArtifacts(artifacts []packageartifact.StableArtifact, identities map[hir.PackageID]packagegraph.InstanceID) (mir.Program, error) {
+	functionCount := 0
+	for _, artifact := range artifacts {
+		if len(artifact.Functions) > int(^uint(0)>>1)-functionCount {
+			return mir.Program{}, fmt.Errorf("stable package function namespace overflows")
+		}
+		functionCount += len(artifact.Functions)
+	}
+	firstFunction := hir.SymbolID(1)
+	firstForeign := firstFunction + hir.SymbolID(functionCount)
+	if firstForeign < firstFunction {
+		return mir.Program{}, fmt.Errorf("stable package symbol namespace overflows")
+	}
+	return packageartifact.RebindStableArtifacts(artifacts, identities, firstFunction, firstForeign, mir.LocalID(1))
+}
+
 func (session *Session) packageKeys(metadata []workspaceloader.SemanticPackage, interfaces map[hir.PackageID]moduleinterface.Hash, owners []hir.PackageID) (map[hir.PackageID]packagecache.Key, error) {
 	byID := make(map[hir.PackageID]workspaceloader.SemanticPackage, len(metadata))
 	for _, loaded := range metadata {
@@ -231,7 +373,7 @@ func (session *Session) packageKeys(metadata []workspaceloader.SemanticPackage, 
 			return nil, err
 		}
 		key, err := packagecache.Compute(packagecache.Inputs{
-			CompilerBuild:    compilerProcessEncoding + session.cache.Identity(),
+			CompilerBuild:    session.compilerBuild,
 			LanguageRevision: sdkstdlib.LanguageRevision, MIRVersion: mircodec.MIRVersion,
 			TargetSchema: session.target.SchemaVersion, ABIProfile: abiProfile(session.target),
 			ToolchainFingerprint: toolchainIdentity, Backend: backendIdentity,

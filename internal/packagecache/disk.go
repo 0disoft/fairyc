@@ -198,6 +198,31 @@ func (store *DiskStore) Get(key Key) (Record, bool) {
 	return cloneRecord(valid[0]), true
 }
 
+// DeleteIfMatch removes only the immutable generation whose canonical bytes exactly match
+// expected. A cache consumer can therefore quarantine a semantically rejected payload without
+// deleting another generation that a concurrent producer published for the same key.
+func (store *DiskStore) DeleteIfMatch(expected Record) bool {
+	if store == nil {
+		return false
+	}
+	encoded, err := encodeDiskRecord(expected, store.limits.MaxRecordBytes)
+	if err != nil {
+		return false
+	}
+	digest := sha256.Sum256(encoded)
+	path := filepath.Join(store.keyDirectory(expected.Key), hex.EncodeToString(digest[:])+".json")
+	file, err := os.Open(path)
+	if err != nil {
+		return false
+	}
+	actual, readErr := io.ReadAll(io.LimitReader(file, int64(store.limits.MaxRecordBytes)+1))
+	closeErr := file.Close()
+	if readErr != nil || closeErr != nil || !bytes.Equal(actual, encoded) {
+		return false
+	}
+	return os.Remove(path) == nil
+}
+
 // Sweep removes expired temporary files and oldest immutable generations until both caller bounds
 // hold. Creation/modification time is only an eviction hint; cache correctness never depends on it.
 func (store *DiskStore) Sweep() error {

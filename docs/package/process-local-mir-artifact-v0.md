@@ -65,8 +65,9 @@ every request; only MIR lowering and its first whole-program verification can be
 The separate stable package MIR v1 encoding now removes process-local package, function, foreign,
 local, block, type, span-prefix, and call identities. Independently decoded packages rebuild a fresh
 context, re-enter `mir.Verify`, execute, and re-encode identically. The existing cache still uses
-the process codec only; corruption-safe disk policy, cross-process coordination, and measured
-clean/warm evidence remain absent. A mismatch remains a safe miss followed by ordinary compilation.
+the process codec when memory mode is selected. Explicit persistent mode instead uses the stable
+codec and immutable disk records; measured clean/warm evidence and a public command policy remain
+absent. A mismatch remains a safe miss followed by ordinary compilation.
 
 ## Bounded cache integration
 
@@ -89,3 +90,11 @@ partial miss and ordinary lowering. Reverting that edit can expose individually 
 from different generations; exact-context reassembly rejects the mixture, ordinary lowering runs,
 and the next request becomes a complete hit. These are deterministic reuse checks, not elapsed-time
 speedup evidence.
+
+## Explicit stable disk integration
+
+ADR 0164 adds a mutually exclusive persistent Session mode. Its caller supplies the exact compiler
+build identity and every disk/artifact bound. A stable hit additionally checks the current package
+instance and public interface; a complete hit set is rebound into fresh identities and reruns
+`mir.Verify`. Independent Sessions over the same directory execute result `42` without a second
+lowering call. No command chooses this mode yet, and no timing result justifies a default.

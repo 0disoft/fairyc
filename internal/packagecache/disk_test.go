@@ -181,3 +181,33 @@ func TestDiskStoreRejectsMissingLimitsAndOversizedRecordWithoutDisturbingHit(t *
 		t.Fatal("oversize rejection disturbed an existing disk generation")
 	}
 }
+
+func TestDiskStoreDeleteIfMatchPreservesDifferentGeneration(t *testing.T) {
+	t.Parallel()
+	limits := DiskLimits{MaxEntries: 4, MaxBytes: 1 << 20, MaxRecordBytes: 256 << 10, TempMaxAge: time.Minute}
+	store, err := NewDiskStore(t.TempDir(), limits)
+	if err != nil {
+		t.Fatal(err)
+	}
+	key, err := Compute(testInputs(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	oldRecord := testRecord(t, key, "old")
+	currentRecord := testRecord(t, key, "current")
+	if err := store.Put(currentRecord); err != nil {
+		t.Fatal(err)
+	}
+	if store.DeleteIfMatch(oldRecord) {
+		t.Fatal("DeleteIfMatch removed a different generation")
+	}
+	if got, found := store.Get(key); !found || !recordsEqual(got, currentRecord) {
+		t.Fatalf("current generation after mismatched delete = %+v, %v", got, found)
+	}
+	if !store.DeleteIfMatch(currentRecord) {
+		t.Fatal("DeleteIfMatch did not remove the expected generation")
+	}
+	if _, found := store.Get(key); found {
+		t.Fatal("deleted generation still returned a hit")
+	}
+}
