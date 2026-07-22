@@ -36,20 +36,25 @@ New-Item -ItemType Directory -Force build | Out-Null
 bun tools/run-go.ts build -mod=readonly -trimpath -o build/fairyc.exe ./cmd/fairyc
 .\build\fairyc.exe experimental run-target examples/windows_quickstart/main.fy --target x86_64-windows-msvc --profile optimized
 .\build\fairyc.exe experimental exec-target examples/windows_output/main.fy --target x86_64-windows-msvc --profile optimized
+Push-Location examples/workspace_quickstart
+..\..\build\fairyc.exe experimental check-workspace
+..\..\build\fairyc.exe experimental run-workspace --locked --target x86_64-windows-msvc --profile optimized
+Pop-Location
 ```
 
 The first command creates only the ignored output directory. The wrapper keeps Go caches under the
 ignored `.cache/go-*` roots and disables module and checksum network access. The expected final
 `run-target` receipt starts with `native result: 42`; `exec-target` prints `Fairy C says hi` and
-returns the FY program's status 42. In both cases the FY program itself is compiled into and
-executed as a temporary MSVC PE. WSL is neither installed nor invoked by this path. Delete
-`build/fairyc.exe` to undo the local bootstrap output.
+returns the FY program's status 42. The workspace check writes `fairy.lock`, and the locked run
+receipt starts with `native workspace result: 42`. In every native case the FY program is compiled
+into and executed as an MSVC PE. WSL is neither installed nor invoked by this path. Delete
+`build/fairyc.exe`, the example `fairy.lock`, and any example `build/` output to undo local outputs.
 
 The configured Windows smoke independently builds `fairyc.exe` into a temporary directory, invokes
 its help surface, runs the checked-in quickstart through `run-target`, requires `exec-target` to
-forward the checked-in output example and return process status 42, and removes the compiler and
-target images. That proves both standalone process paths without treating an ignored local build
-artifact as source truth.
+forward the checked-in output example and return process status 42, and runs the checked-in local
+workspace through an exact existing lock. It removes the compiler and target images. That proves
+all three standalone process paths without treating an ignored local build artifact as source truth.
 
 ## Implementation boundaries
 

@@ -35,6 +35,7 @@ provisional process codes only for prototype automation. They are not the stable
 | `4` | An internal invariant or output write failed. |
 | `5` | The experimental MIR interpreter reached a canonical language trap. |
 | `6` | The experimental native build could not resolve or run its toolchain, link the scalar runtime, or safely materialize its artifact. |
+| `7` | The package workspace, lockfile, package graph, or package-to-build mapping failed before native compilation. |
 
 `fairyc explain` writes exactly three deterministic, ANSI-free lines to stdout on success: the
 canonical code and meaning, its category, and `fairyc.diagnostic-catalog/v0 (provisional Stage 0)`.
@@ -81,6 +82,14 @@ execution. Reserved product-trap statuses write `trap: <category>` to stderr and
 Source and target-subset failures use codes `3` and `2`; toolchain, compile, link, PE/unwind
 inspection, unexpected program output, and execution failures use code `6`. It writes no artifact
 below the source root.
+`experimental build-workspace` writes a successful PE only to the explicit ignored `.exe` path,
+then writes `built workspace: <relative-path> (x86_64-windows-msvc, msvc <version>, <profile>, lock
+<state>)`. `experimental run-workspace` retains no PE and writes `native workspace result: <i32>
+(x86_64-windows-msvc, msvc <version>, <profile>, lock <state>)`. Lock state is `updated`,
+`unchanged`, or `verified`. Package/lock failures use code `7`; source diagnostics use code `3`;
+entry or backend capability failures use code `2`; toolchain, compile, link, PE/COFF/unwind,
+unexpected-output, and execution failures use code `6`; canonical traps use code `5`. Neither
+command emits partial success output.
 `experimental exec-target` instead writes the program's captured stdout and stderr bytes to their
 matching streams without a compiler receipt, then returns the program's full 32-bit Windows process
 status. A nonzero status in this command is a program result, not automatically a compiler failure.

@@ -67,6 +67,7 @@
 - Local workspace loader v1 route: internal/workspaceloader/, internal/workspaceloaderfixture/, spec/fixtures/workspace-loader/manifest-v1.json
 - Compiler-bundled Stage 0 standard-library route: internal/sdkstdlib/, docs/adr/0147-compiler-bundled-stage0-standard-library.md
 - Generated lockfile v1 route: internal/lockfile/, docs/package/lockfile-v1.md
+- Package-aware Windows workspace build/run route: internal/cli/workspace_native.go, cmd/fairyc-windows-host-smoke/, examples/workspace_quickstart/, docs/adr/0148-package-aware-windows-build-run.md
 - MIR and C backend route: docs/mir/
 - Package identity and visibility route: docs/package/
 - Target and C ABI route: docs/abi/

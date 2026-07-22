@@ -30,4 +30,5 @@ policy remains separate.
 
 The unstable `experimental check-workspace` supplies the first narrow policy: ordinary mode
 refreshes after a valid graph exists; `--locked` requires an exact match and never writes. This does
-not settle the future stable build/check policy.
+not settle the future stable build/check policy. ADR 0148's `build-workspace` and `run-workspace`
+reuse exactly that policy before package-aware Windows compilation.

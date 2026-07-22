@@ -129,6 +129,14 @@ closed support linkage, MSVC resolution, and PE/unwind validation, but executes 
 instead of retaining it. It reports the exact signed `i32` result or the same canonical product-trap
 category and rejects program output. This is the first direct Windows target execution command; it
 is still experimental and does not promote target maturity.
+The package-aware `experimental build-workspace` and `run-workspace` commands now start from the
+current directory's strict `fairy.toml` instead of a positional source list. They resolve local
+members, exact direct imports, the compiler-bundled SDK, and `fairy.lock`, then select only the root
+package's qualified `main::main` for the same closed Windows target pipeline. The checked-in
+`examples/workspace_quickstart` imports a public function from one local dependency and returns 42
+under both MSVC profiles, a direct locked run, and a locked run through a separately built
+`fairyc.exe`. This is real package-aware native compilation without WSL, not Go interpretation,
+but the command spelling and single-entry convention remain experimental.
 `experimental exec-target` is the program-facing sibling: it forwards bounded stdout and stderr
 without a compiler banner and preserves the program's full Windows process status. The checked-in
 `examples/windows_output/main.fy` uses a support module containing the one exact unsafe Windows
@@ -310,8 +318,9 @@ exception, virtual-walks raiser, termination, and catcher frames, and requires o
 `__finally` execution under both profiles. The target marker remains missing until broader layout
 and independent/source-level/hosted ABI and unwind evidence exists. A host-independent PE parser
 now validates the host-smoke product, both declared-target profile products, both safe File and
-safe owned-text profile products, two direct run-target temporary products, two exec-target output
-products, and all eighteen raw or generated-Fairy Windows File, Buffer, owned-text, Arena, layout,
+safe owned-text profile products, two package-workspace build products, two package-workspace run
+products, two direct run-target temporary products, two exec-target output products, and all
+eighteen raw or generated-Fairy Windows File, Buffer, owned-text, Arena, layout,
 ABI, struct-result, and unwind probe images as bounded
 AMD64 PE32+ console executables
 with aligned headers and sections and an executable `.text` entry point. That linked-image path does not inspect
@@ -365,6 +374,10 @@ go run ./cmd/fairyc experimental check-semantics examples/results/main.fy
 go run ./cmd/fairyc experimental check examples/run/modules/main.fy --source examples/run/modules/math.fy
 go run ./cmd/fairyc experimental check-workspace
 go run ./cmd/fairyc experimental check-workspace --locked
+Push-Location examples/workspace_quickstart
+go run ../../cmd/fairyc experimental check-workspace
+go run ../../cmd/fairyc experimental run-workspace --locked --target x86_64-windows-msvc --profile optimized
+Pop-Location
 go run ./cmd/fairyc experimental target-spec x86_64-linux-gnu
 go run ./cmd/fairyc experimental target-spec x86_64-windows-msvc
 go run ./cmd/fairyc experimental emit-c examples/c/main.fy
@@ -386,7 +399,9 @@ process and requires that executable to run `examples/windows_quickstart/main.fy
 native result 42 by iterating two bytes with checked `usize` arithmetic and safely converting each
 indexed `u8` value to `i32`,
 then execute `examples/windows_output/main.fy` with exact stdout and process status
-42 while explicitly supplying its separate `windows_console.fy` module. The compiler binary is
+42 while explicitly supplying its separate `windows_console.fy` module, and finally run the
+two-package `examples/workspace_quickstart` graph through an exact generated lock with native result
+42. The compiler binary is
 still built from Go; only the input programs and resulting temporary
 target executables are Fairy C.
 

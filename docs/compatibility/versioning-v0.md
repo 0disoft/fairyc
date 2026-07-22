@@ -361,6 +361,11 @@ instances. ADR 0147 adds one exact compiler-bundled SDK source origin with packa
 `fairyc-language/0`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 
+ADR 0148 consumes those independently versioned manifest, lock, package-instance, language, SDK,
+runtime, target, and ABI identities without merging them. `experimental build-workspace` and
+`run-workspace` are pre-stable command spellings; their root `main::main` convention and human
+receipts are not a released compatibility promise.
+
 `fairyc.project-manifest-fixtures/v1` versions the complete-file parser observations for that schema.
 The pinned TOML library version is an implementation dependency, not the manifest schema version;
 upgrading or replacing it requires proving the same accepted/rejected fixture surface or explicitly

@@ -27,6 +27,10 @@ plus `fairyc experimental parse <file.fy>`,
 non-executing pipeline is `fairyc experimental check <primary.fy> [--source <file.fy>]...`.
 The package-aware sibling is `fairyc experimental check-workspace [--locked]`; it consumes the
 current directory's `fairy.toml`, explicit members, and canonical `fairy.lock`.
+`fairyc experimental build-workspace --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe> [--locked]`
+retains a package-aware Windows PE, while
+`fairyc experimental run-workspace --target x86_64-windows-msvc --profile <low|optimized> [--locked]`
+compiles and executes the root package's exact `main::main` without retaining an artifact.
 The compiler prototype also exposes
 `fairyc experimental target-spec <x86_64-linux-gnu|x86_64-windows-msvc>` for deterministic
 host-independent target inspection,

@@ -37,7 +37,7 @@ stabilization.
 
 ## Implemented experimental compiler surface
 
-The current Go prototype implements fourteen deliberately unstable developer commands:
+The current Go prototype implements sixteen deliberately unstable developer commands:
 
 | Command | Purpose | Output |
 | --- | --- | --- |
@@ -46,6 +46,8 @@ The current Go prototype implements fourteen deliberately unstable developer com
 | `fairyc experimental check-semantics <file.fy> [<file.fy>...]` | Resolve names, type-check declared effects and direct-call supersets, and analyze local safe-borrow, whole-resource, Region, and complete Stage 0 Result must-use Flow for an explicit module set in the implemented subset | Typed-HIR module and function counts on stdout, human source diagnostics on stderr, or an explicit unsupported-subset error |
 | `fairyc experimental check <primary.fy> [--source <file.fy>]...` | Run syntax, semantic, Flow, MIR-lowering, and MIR-verifier stages over one explicit source closure without requiring an executable entry | One verified-MIR function and foreign-declaration count line, source diagnostics, or an explicit unsupported-subset error |
 | `fairyc experimental check-workspace [--locked]` | Load the current directory's strict `fairy.toml`, explicit local members and sources, validate or refresh canonical `fairy.lock`, then run package-aware semantic and verified MIR | Deterministic instance/source/MIR counts and lock state, diagnostics, or prototype package failure code `7` |
+| `fairyc experimental build-workspace --target x86_64-windows-msvc --profile <low\|optimized> --output <build/path.exe> [--locked]` | Compile the current local-exact workspace's root `main::main` through package-aware verified MIR and the closed Windows target pipeline | A no-overwrite `.exe`, target/toolchain/profile/lock receipt, or package, source, capability, toolchain, link, and artifact diagnostics |
+| `fairyc experimental run-workspace --target x86_64-windows-msvc --profile <low\|optimized> [--locked]` | Compile and execute the same package-aware root entry as a temporary inspected Windows PE | `native workspace result: <i32>` with target/toolchain/profile/lock receipt, a canonical trap, or package/build diagnostics |
 | `fairyc experimental target-spec <x86_64-linux-gnu\|x86_64-windows-msvc>` | Inspect one known host-independent target description without resolving a local toolchain | Deterministic `fairyc.target-spec/v0` JSON on stdout, defined by `spec/cli/experimental-target-spec-v0.schema.json` |
 | `fairyc experimental emit-c <entry.fy> [--source <file.fy>]...` | Lower one explicit FY module closure in the admitted constrained-C subset through verified MIR and emit the provisional transport without invoking a toolchain | Exactly one deterministic C11 translation unit, with an explicit POSIX.1-2008 typedef profile only when required, on stdout; source-set diagnostics or capability errors on stderr |
 | `fairyc experimental build <entry.fy> [--source <file.fy>]... --cc <clang\|gcc> --profile <low\|optimized> --output <build/path>` | Compile and link one explicitly closed verified program in that constrained subset for the host `x86_64-linux-gnu` profile with an explicit C compiler, optimization profile, and ignored output path | A no-overwrite executable below `build/` plus one relative-path receipt, or source-set, capability, toolchain, link, or artifact diagnostics |
@@ -61,15 +63,29 @@ These commands treat the current directory as their temporary source root. `pars
 explicit relative regular files under bounded file-count and aggregate-byte budgets. All reject root
 escape including escaping symbolic links and read no more than the current implementation budget.
 Their spelling and numeric exit codes are prototype-only.
-Every program command accepts one positional entry plus repeatable `--source` values under the same
-64-file and aggregate-byte ceilings. They analyze only that explicit FY set, require
-source-root-relative module identity, and perform no source discovery. The flag never denotes a C,
-object, archive, library, or linker input.
+Explicit source-closure program commands accept one positional entry plus repeatable `--source`
+values under the same 64-file and aggregate-byte ceilings. They analyze only that explicit FY set,
+require source-root-relative module identity, and perform no source discovery. The flag never
+denotes a C, object, archive, library, or linker input. Workspace commands instead accept no source
+arguments and use the bounded manifest-owned source closure described below.
 
 `experimental check-workspace` accepts only optional `--locked`. It loads only the current source
 root, explicit members, and their complete sources. Ordinary mode replaces `fairy.lock` only when
 missing, invalid, or byte-different; `--locked` requires an exact match and never writes. It selects
-no SDK, target, backend, toolchain, persistent cache, or executable.
+the exact compiler-bundled SDK only for actual `std::*` imports but selects no target, backend,
+toolchain, persistent cache, or executable.
+
+`experimental build-workspace` and `experimental run-workspace` reuse that exact workspace, SDK,
+lock, semantic, Flow, MIR, and diagnostic path. They accept no positional entry or repeated source:
+the entry is the root package's exact build-local `main::main`, and it must be `fn() -> i32`.
+Both require the declared `x86_64-windows-msvc` target plus an explicit low or optimized profile.
+Build additionally requires a canonical no-overwrite `.exe` path below the current root's ignored
+`build/` directory. Run retains no artifact and rejects program output. Both use ordinary lock
+refresh unless `--locked` requires a valid exact no-write match. They perform no registry access,
+version solving, source download, environment expansion, WSL invocation, persistent cache write, or
+user linker-input discovery. The checked-in `examples/workspace_quickstart` proves one direct local
+dependency and native result 42; configurable entries, multiple binaries, program stream forwarding,
+and stable command names remain deferred.
 
 `experimental check` uses the same repeated-`--source` closure syntax and limits, but its first file
 is a primary source rather than an executable entry. It requires no `main`, runs no interpreter or

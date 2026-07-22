@@ -19,7 +19,9 @@ This repository type owns workspace boundaries, package ownership, dependency po
 - Detailed ownership and import direction live in `docs/monorepo/package-ownership.md` and `docs/monorepo/workspace-boundaries.md`.
 - Internal Go packages are not public APIs before a stable language revision. Public contracts are the documented CLI, language revision, explicit C ABI, runtime ABI, standard-library APIs, and emitted schema families.
 - Internal MIR and caches use exact compatibility and are discarded rather than migrated. Runtime, standard-library, package, target, and Atlas formats follow `docs/compatibility/versioning-v0.md`.
-- No workspace runner or implementation package currently exists; validation remains design-document and scaffold validation.
+- `internal/workspaceloader` owns local-exact graph construction; `experimental build-workspace`
+  and `run-workspace` consume that graph through the closed Windows native path without creating a
+  general monorepo task runner.
 
 ## Review Blockers
 

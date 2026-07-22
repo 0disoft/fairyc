@@ -212,6 +212,14 @@ const checkedInWindowsFilePath = "examples/windows_file/main.fy"
 const checkedInWindowsFileSupportPath = "examples/windows_file/windows_file.fy"
 const checkedInOwnedTextPath = "examples/owned_text/main.fy"
 const checkedInOwnedTextSupportPath = "examples/owned_text/owned_text.fy"
+const checkedInWorkspaceManifestPath = "examples/workspace_quickstart/fairy.toml"
+const checkedInWorkspaceMainPath = "examples/workspace_quickstart/src/main.fy"
+const checkedInWorkspaceMemberManifestPath = "examples/workspace_quickstart/libs/answer/fairy.toml"
+const checkedInWorkspaceMemberSourcePath = "examples/workspace_quickstart/libs/answer/src/answer.fy"
+const workspaceManifestPath = "fairy.toml"
+const workspaceMainPath = "src/main.fy"
+const workspaceMemberManifestPath = "libs/answer/fairy.toml"
+const workspaceMemberSourcePath = "libs/answer/src/answer.fy"
 const windowsLayoutManifestPath = "spec/fixtures/layout/manifest-windows-msvc-v0.json"
 const windowsABIManifestPath = "spec/fixtures/c-abi/manifest-windows-msvc-v0.json"
 const subprocessOutputLimit = 64 * 1024
@@ -272,12 +280,32 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("read checked-in owned-text support source: %w", err)
 	}
+	workspaceManifest, err := os.ReadFile(filepath.FromSlash(checkedInWorkspaceManifestPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in workspace manifest: %w", err)
+	}
+	workspaceMain, err := os.ReadFile(filepath.FromSlash(checkedInWorkspaceMainPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in workspace entry: %w", err)
+	}
+	workspaceMemberManifest, err := os.ReadFile(filepath.FromSlash(checkedInWorkspaceMemberManifestPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in workspace member manifest: %w", err)
+	}
+	workspaceMemberSource, err := os.ReadFile(filepath.FromSlash(checkedInWorkspaceMemberSourcePath))
+	if err != nil {
+		return fmt.Errorf("read checked-in workspace member source: %w", err)
+	}
 	root, err := os.MkdirTemp("", "fairyc-windows-host-smoke-")
 	if err != nil {
 		return fmt.Errorf("create temporary source root: %w", err)
 	}
 	defer os.RemoveAll(root)
 	for name, source := range map[string]string{
+		workspaceManifestPath:             string(workspaceManifest),
+		workspaceMainPath:                 string(workspaceMain),
+		workspaceMemberManifestPath:       string(workspaceMemberManifest),
+		workspaceMemberSourcePath:         string(workspaceMemberSource),
 		checkedInSuccessPath:              string(successSource),
 		checkedInModuleMainPath:           string(moduleMainSource),
 		checkedInModuleSupportPath:        string(moduleSupportSource),
@@ -373,6 +401,39 @@ func run() error {
 		}
 		targetBuildExecutions++
 	}
+	workspaceBuildExecutions := 0
+	for index, profile := range []string{"low", "optimized"} {
+		output := fmt.Sprintf("build/workspace-%s.exe", profile)
+		arguments := []string{
+			"experimental", "build-workspace",
+			"--target", "x86_64-windows-msvc", "--profile", profile,
+			"--output", output,
+		}
+		if index != 0 {
+			arguments = append(arguments, "--locked")
+		}
+		var workspaceBuildStdout bytes.Buffer
+		var workspaceBuildStderr bytes.Buffer
+		workspaceBuildCode := cli.Run(arguments, root, &workspaceBuildStdout, &workspaceBuildStderr)
+		if workspaceBuildCode != cli.ExitSuccess || workspaceBuildStderr.Len() != 0 || !strings.HasPrefix(workspaceBuildStdout.String(), "built workspace: "+output+" (x86_64-windows-msvc, msvc ") {
+			return fmt.Errorf("build-workspace %s returned code %d, stdout %q, stderr %q", profile, workspaceBuildCode, workspaceBuildStdout.String(), workspaceBuildStderr.String())
+		}
+		workspaceArtifactPath := filepath.Join(root, filepath.FromSlash(output))
+		workspaceArtifact, err := os.ReadFile(workspaceArtifactPath)
+		if err != nil {
+			return fmt.Errorf("read build-workspace %s artifact: %w", profile, err)
+		}
+		if _, err := pecoff.InspectExecutable(workspaceArtifact); err != nil {
+			return fmt.Errorf("inspect build-workspace %s PE executable image: %w", profile, err)
+		}
+		if _, err := pecoff.InspectAMD64Unwind(workspaceArtifact); err != nil {
+			return fmt.Errorf("inspect build-workspace %s Microsoft x64 unwind data: %w", profile, err)
+		}
+		if err := executeExpectResult(workspaceArtifactPath, 42); err != nil {
+			return fmt.Errorf("execute build-workspace %s artifact: %w", profile, err)
+		}
+		workspaceBuildExecutions++
+	}
 	windowsFileSourceExecutions := 0
 	for _, profile := range []string{"low", "optimized"} {
 		output := fmt.Sprintf("build/windows-file-%s.exe", profile)
@@ -444,6 +505,17 @@ func run() error {
 		return fmt.Errorf("run-target returned code %d, stdout %q, stderr %q", targetRunCode, targetRunStdout.String(), targetRunStderr.String())
 	}
 	targetRunExecutions++
+	workspaceRunExecutions := 0
+	var workspaceRunStdout bytes.Buffer
+	var workspaceRunStderr bytes.Buffer
+	workspaceRunCode := cli.Run([]string{
+		"experimental", "run-workspace", "--locked",
+		"--target", "x86_64-windows-msvc", "--profile", "optimized",
+	}, root, &workspaceRunStdout, &workspaceRunStderr)
+	if workspaceRunCode != cli.ExitSuccess || workspaceRunStderr.Len() != 0 || !strings.HasPrefix(workspaceRunStdout.String(), "native workspace result: 42 (x86_64-windows-msvc, msvc ") {
+		return fmt.Errorf("run-workspace returned code %d, stdout %q, stderr %q", workspaceRunCode, workspaceRunStdout.String(), workspaceRunStderr.String())
+	}
+	workspaceRunExecutions++
 	targetExecExecutions := 0
 	var targetExecStdout bytes.Buffer
 	var targetExecStderr bytes.Buffer
@@ -462,6 +534,7 @@ func run() error {
 	}
 	targetRunExecutions++
 	targetExecExecutions++
+	workspaceRunExecutions++
 
 	for _, testCase := range []struct {
 		name         string
@@ -553,8 +626,8 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	inspectedPEImages := 1 + targetBuildExecutions + windowsFileSourceExecutions + ownedTextSourceExecutions + targetRunExecutions + targetExecExecutions + windowsFileExecutions + bufferProbeExecutions + ownedTextProbeExecutions + arenaProbeExecutions + layoutExecutions + abiExecutions + structResultExecutions + unwindExecutions
-	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds plus %d source-level safe File lifecycle builds and %d source-level safe owned-text lifecycle builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls, checked reads and mutable indexed stores, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart and output execution, 40 run-host outcomes covered fixed arrays, byte-view iteration and slicing, checked indexed stores, assertions in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, Buffer initialization, reserve, self-overlap append, and zeroed-resize allocation rollback passed %d separate-translation-unit MSVC executions, owned-text opaque-storage failure preservation, forced allocation rollback, and repeated drop passed %d separate-translation-unit MSVC executions, Arena zeroing, two-stage allocation rollback, stale Region rejection, and active-drop preservation passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, generated-Fairy small and large struct results passed %d separate-translation-unit MSVC executions across C11 and C17 consumer modes, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, windowsFileSourceExecutions, ownedTextSourceExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, windowsFileExecutions, bufferProbeExecutions, ownedTextProbeExecutions, arenaProbeExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, structResultExecutions, unwindCases, unwindExecutions, inspectedPEImages, toolchain.Version)
+	inspectedPEImages := 1 + targetBuildExecutions + workspaceBuildExecutions + windowsFileSourceExecutions + ownedTextSourceExecutions + targetRunExecutions + workspaceRunExecutions + targetExecExecutions + windowsFileExecutions + bufferProbeExecutions + ownedTextProbeExecutions + arenaProbeExecutions + layoutExecutions + abiExecutions + structResultExecutions + unwindExecutions
+	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds, %d package-workspace builds, %d package-workspace runs, %d source-level safe File lifecycle builds, %d source-level safe owned-text lifecycle builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls, checked reads and mutable indexed stores, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart, output, and locked workspace execution, 40 run-host outcomes covered fixed arrays, byte-view iteration and slicing, checked indexed stores, assertions in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, Buffer initialization, reserve, self-overlap append, and zeroed-resize allocation rollback passed %d separate-translation-unit MSVC executions, owned-text opaque-storage failure preservation, forced allocation rollback, and repeated drop passed %d separate-translation-unit MSVC executions, Arena zeroing, two-stage allocation rollback, stale Region rejection, and active-drop preservation passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, generated-Fairy small and large struct results passed %d separate-translation-unit MSVC executions across C11 and C17 consumer modes, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, workspaceBuildExecutions, workspaceRunExecutions, windowsFileSourceExecutions, ownedTextSourceExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, windowsFileExecutions, bufferProbeExecutions, ownedTextProbeExecutions, arenaProbeExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, structResultExecutions, unwindCases, unwindExecutions, inspectedPEImages, toolchain.Version)
 	return nil
 }
 
@@ -600,7 +673,9 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string) (int64, error) {
 	}
 	if helpCode != cli.ExitSuccess || helpStderr != "" ||
 		!strings.Contains(helpStdout, "fairyc experimental run-target") ||
-		!strings.Contains(helpStdout, "fairyc experimental exec-target") {
+		!strings.Contains(helpStdout, "fairyc experimental exec-target") ||
+		!strings.Contains(helpStdout, "fairyc experimental build-workspace") ||
+		!strings.Contains(helpStdout, "fairyc experimental run-workspace") {
 		return 0, fmt.Errorf("standalone compiler help returned code %d, stdout %q, stderr %q", helpCode, helpStdout, helpStderr)
 	}
 
@@ -629,6 +704,19 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string) (int64, error) {
 	}
 	if execCode != 42 || execStdout != "Fairy C says hi\n" || execStderr != "" {
 		return 0, fmt.Errorf("standalone compiler exec-target returned code %d, stdout %q, stderr %q", execCode, execStdout, execStderr)
+	}
+
+	workspaceCode, workspaceStdout, workspaceStderr, err := runStandaloneCommand(
+		sourceRoot,
+		executablePath,
+		"experimental", "run-workspace", "--locked",
+		"--target", "x86_64-windows-msvc", "--profile", "optimized",
+	)
+	if err != nil {
+		return 0, fmt.Errorf("execute standalone compiler workspace: %w", err)
+	}
+	if workspaceCode != cli.ExitSuccess || workspaceStderr != "" || !strings.HasPrefix(workspaceStdout, "native workspace result: 42 (x86_64-windows-msvc, msvc ") {
+		return 0, fmt.Errorf("standalone compiler run-workspace returned code %d, stdout %q, stderr %q", workspaceCode, workspaceStdout, workspaceStderr)
 	}
 	return info.Size(), nil
 }

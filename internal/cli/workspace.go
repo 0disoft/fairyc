@@ -13,45 +13,13 @@ import (
 )
 
 func runWorkspaceCheck(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
-	locked := false
-	switch {
-	case len(arguments) == 0:
-	case len(arguments) == 1 && arguments[0] == "--locked":
-		locked = true
-	default:
-		return invocationError(stderr, `experimental command "check-workspace" accepts only optional --locked`)
+	locked, err := parseOptionalLocked("check-workspace", arguments)
+	if err != nil {
+		return invocationError(stderr, err.Error())
 	}
-	workspace, err := workspaceloader.Load(sourceRoot)
+	workspace, lockState, err := loadWorkspaceWithLock(sourceRoot, locked)
 	if err != nil {
 		return packageFailure(stderr, err)
-	}
-	document, err := lockfile.FromWorkspace(workspace)
-	if err != nil {
-		return packageFailure(stderr, err)
-	}
-	canonical, err := lockfile.Marshal(document)
-	if err != nil {
-		return packageFailure(stderr, err)
-	}
-	lockPath := filepath.Join(sourceRoot, lockfile.FileName)
-	lockState := "unchanged"
-	if locked {
-		existing, _, err := lockfile.Read(lockPath)
-		if err != nil {
-			return packageFailure(stderr, fmt.Errorf("locked workspace requires a valid %s: %w", lockfile.FileName, err))
-		}
-		if err := lockfile.MatchesWorkspace(existing, workspace); err != nil {
-			return packageFailure(stderr, err)
-		}
-		lockState = "verified"
-	} else {
-		_, existingBytes, readErr := lockfile.Read(lockPath)
-		if readErr != nil || !bytes.Equal(existingBytes, canonical) {
-			if err := lockfile.WriteAtomic(lockPath, canonical); err != nil {
-				return packageFailure(stderr, err)
-			}
-			lockState = "updated"
-		}
 	}
 	input, err := workspace.SemanticInput()
 	if err != nil {
@@ -80,6 +48,53 @@ func runWorkspaceCheck(arguments []string, sourceRoot string, stdout, stderr io.
 		return outputError(stderr)
 	}
 	return ExitSuccess
+}
+
+func parseOptionalLocked(command string, arguments []string) (bool, error) {
+	switch {
+	case len(arguments) == 0:
+		return false, nil
+	case len(arguments) == 1 && arguments[0] == "--locked":
+		return true, nil
+	default:
+		return false, fmt.Errorf("experimental command %q accepts only optional --locked", command)
+	}
+}
+
+func loadWorkspaceWithLock(sourceRoot string, locked bool) (workspaceloader.Workspace, string, error) {
+	workspace, err := workspaceloader.Load(sourceRoot)
+	if err != nil {
+		return workspaceloader.Workspace{}, "", err
+	}
+	document, err := lockfile.FromWorkspace(workspace)
+	if err != nil {
+		return workspaceloader.Workspace{}, "", err
+	}
+	canonical, err := lockfile.Marshal(document)
+	if err != nil {
+		return workspaceloader.Workspace{}, "", err
+	}
+	lockPath := filepath.Join(sourceRoot, lockfile.FileName)
+	lockState := "unchanged"
+	if locked {
+		existing, _, err := lockfile.Read(lockPath)
+		if err != nil {
+			return workspaceloader.Workspace{}, "", fmt.Errorf("locked workspace requires a valid %s: %w", lockfile.FileName, err)
+		}
+		if err := lockfile.MatchesWorkspace(existing, workspace); err != nil {
+			return workspaceloader.Workspace{}, "", err
+		}
+		lockState = "verified"
+	} else {
+		_, existingBytes, readErr := lockfile.Read(lockPath)
+		if readErr != nil || !bytes.Equal(existingBytes, canonical) {
+			if err := lockfile.WriteAtomic(lockPath, canonical); err != nil {
+				return workspaceloader.Workspace{}, "", err
+			}
+			lockState = "updated"
+		}
+	}
+	return workspace, lockState, nil
 }
 
 func writeWorkspaceDiagnostics(writer io.Writer, workspace workspaceloader.Workspace, diagnostics []semantic.Diagnostic) error {

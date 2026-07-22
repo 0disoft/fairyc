@@ -596,14 +596,23 @@ version, source digest, and lock fields. The current source surface exports only
 `std::alloc::Arena`; it performs no host installation lookup and does not settle target C linkage or
 the broader planned standard-library API.
 
+ADR 0148 adds the first package-aware native project path. `experimental build-workspace` and
+`run-workspace` load the current `fairy.toml`, apply ordinary or exact no-write `--locked` policy,
+select the root instance's build-local `main::main`, require `fn() -> i32`, and reuse the closed
+`x86_64-windows-msvc` C emission, support-link, MSVC, PE, and unwind pipeline. The checked-in
+two-package quickstart returns 42 under both build profiles, direct temporary execution, and a
+separately built compiler process. The commands add no registry, solver, source download,
+configurable entry, new backend capability, or persistent artifact format.
+
 ADR 0146 rejects speculative persistent caching at this point. The workspace path produces no
 compiler-owned serialized HIR/MIR/object artifact and has no configured comparable cold/warm
 measurement, so disk format, defaults, and cleanup policy remain `UNDECIDED`.
 
 The resolved-graph paragraph's separation from public manifest syntax describes fixture ownership,
-not current product status: ADR 0143 owns syntax, ADR 0144 owns local workspace I/O, and ADR 0145
-owns generated lock bytes independently. ADR 0147 owns current SDK selection. Stable public command
-policy, registry, and solver behavior remain outside those fixture contracts.
+not current product status: ADR 0143 owns syntax, ADR 0144 owns local workspace I/O, ADR 0145 owns
+generated lock bytes, ADR 0147 owns current SDK selection, and ADR 0148 owns the experimental
+Windows project commands. Stable public command policy, registry, and solver behavior remain
+outside those fixture contracts.
 
 Target layout assertions are versioned in `spec/fixtures/layout/manifest-v0.json` for Linux and
 `spec/fixtures/layout/manifest-windows-msvc-v0.json` for Windows. They fix the closed layout input

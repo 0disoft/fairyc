@@ -79,6 +79,7 @@ regenerate, or override compiler source.
 - Local workspace loader and fixtures: internal/workspaceloader/, internal/workspaceloaderfixture/, spec/fixtures/workspace-loader/manifest-v1.json
 - Compiler-bundled Stage 0 standard-library source package: internal/sdkstdlib/
 - Generated lockfile v1: internal/lockfile/, docs/package/lockfile-v1.md
+- Package-aware Windows workspace build/run CLI and native smoke: internal/cli/workspace_native.go, cmd/fairyc-windows-host-smoke/, examples/workspace_quickstart/, docs/adr/0148-package-aware-windows-build-run.md
 - Executable MIR semantics: docs/mir/*.md
 - Package identity and visibility: docs/package/*.md
 - Target and C ABI: docs/abi/*.md

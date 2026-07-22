@@ -9,6 +9,7 @@ import (
 	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/cstdlib"
+	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/pecoff"
 	"github.com/0disoft/fairyc/internal/target"
 )
@@ -54,7 +55,14 @@ func compileWindowsTarget(sources []string, targetID target.ID, profile cdriver.
 	if code != ExitSuccess {
 		return cdriver.WindowsHostArtifact{}, code
 	}
-	unit, err := cbackend.Emit(lowered.program, lowered.entryName, cbackend.Stage0WindowsMSVCProfile())
+	return compileWindowsProgram(lowered.program, lowered.entryName, targetID, profile, stderr)
+}
+
+func compileWindowsProgram(program mir.Program, entryName string, targetID target.ID, profile cdriver.Profile, stderr io.Writer) (cdriver.WindowsHostArtifact, int) {
+	if targetID != target.X8664WindowsMSVC {
+		return cdriver.WindowsHostArtifact{}, invocationError(stderr, fmt.Sprintf("Windows target compilation requires %s", target.X8664WindowsMSVC))
+	}
+	unit, err := cbackend.Emit(program, entryName, cbackend.Stage0WindowsMSVCProfile())
 	if err != nil {
 		var capability cbackend.CapabilityError
 		if errors.As(err, &capability) {

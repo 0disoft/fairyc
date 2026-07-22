@@ -130,6 +130,13 @@ documented Windows x64 `malloc` guarantee of 16 bytes. The resolver rejects ever
 unproven standard-library symbol before discovering MSVC, so these are closed source-level
 crossings rather than broad Windows FFI/runtime evidence. No WSL installation or execution is part
 of this lane.
+The same smoke copies the checked-in `examples/workspace_quickstart` into its bounded temporary
+root, generates one canonical lock in ordinary mode, requires exact `--locked` reuse thereafter,
+and compiles its root-to-dependency call through package-aware verified MIR. Low and optimized
+`build-workspace` products are retained long enough for independent PE/unwind inspection and native
+result 42. `run-workspace` then returns 42 once through the in-process CLI boundary and once through
+the separately built `fairyc.exe`, retaining no target image. This adds no registry, solver,
+network, WSL, or persistent cache path.
 The owned-text path closes over SystemHeap, Buffer, and text view once. Compiler-owned `"Fairy"`
 storage is copied to a length-five String, viewed, appended to length ten, viewed again, and dropped
 to normalized storage. The same input produces six-byte CString storage, a logical length-five CStr
@@ -198,8 +205,8 @@ termination frame, and private exception raiser as three separate translation un
 executes them under both profiles, and requires exact exception payload, ordered
 `RtlVirtualUnwind` frame discovery, and one abnormal `__finally` execution. Before execution, the
 same intent parses the target-neutral product image, both declared-target profile images, the two
-safe FY File lifecycle images, the two safe FY owned-text lifecycle images, both direct run-target temporary images, both exec-target temporary
-images, and all eighteen raw or generated-Fairy Windows File, Buffer, owned-text, Arena, layout, ABI,
+package-workspace build images, both package-workspace run images, the two safe FY File lifecycle
+images, the two safe FY owned-text lifecycle images, both direct run-target temporary images, both exec-target temporary images, and all eighteen raw or generated-Fairy Windows File, Buffer, owned-text, Arena, layout, ABI,
 struct-result, and unwind probe images
 and requires bounded AMD64 PE32+ non-DLL console
 identity, aligned image/header/section ranges, a readable executable `.text`, and an executable
@@ -214,7 +221,7 @@ uninitialized-data characteristic. Object bytes are not uploaded or retained. Ex
 COMDAT, relocation-type, unwind, debug, and hosted object expectations remain unconfigured.
 The ordinary Go tests include a 154-section positive regression object and reject 4,097 sections;
 the exact section count emitted by a future MSVC version remains unstabilized.
-All twenty-nine linked target or probe PE images additionally traverse the Microsoft x64 exception directory before
+All thirty-three linked target or probe PE images additionally traverse the Microsoft x64 exception directory before
 execution. The local gate requires sorted nonoverlapping `.pdata` runtime-function ranges,
 executable code coverage, DWORD-aligned file-backed unwind records, bounded version 1 prolog slots,
 bounded version 2 epilog descriptors, and minimum handler/chained tails. The receipt reports the

@@ -5,6 +5,7 @@ import (
 	"slices"
 
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/packagegraph"
 	"github.com/0disoft/fairyc/internal/semantic"
 )
 
@@ -86,6 +87,30 @@ func (workspace Workspace) instance(nodeID string) (Instance, bool) {
 		}
 	}
 	return Instance{}, false
+}
+
+// RootPackageID returns the disposable semantic package number assigned to the one root graph
+// instance. It is valid only for this Workspace value and must not enter a lockfile or ABI name.
+func (workspace Workspace) RootPackageID() (hir.PackageID, error) {
+	rootNode := ""
+	for _, node := range workspace.Graph.Nodes {
+		if node.Role != packagegraph.RoleRoot {
+			continue
+		}
+		if rootNode != "" {
+			return hir.DefaultPackage, fmt.Errorf("workspace has multiple root graph nodes")
+		}
+		rootNode = node.ID
+	}
+	if rootNode == "" {
+		return hir.DefaultPackage, fmt.Errorf("workspace has no root graph node")
+	}
+	for index, class := range workspace.Resolution.InstanceClasses {
+		if slices.Contains(class.Members, rootNode) {
+			return hir.PackageID(index + 1), nil
+		}
+	}
+	return hir.DefaultPackage, fmt.Errorf("workspace root graph node has no instance class")
 }
 
 // DiagnosticSource resolves one build-local semantic span back to a host-path-free workspace path

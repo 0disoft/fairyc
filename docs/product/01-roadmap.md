@@ -298,7 +298,7 @@ Every local MSVC compile in the same lane now also parses its intermediate `.obj
 before cleanup, including `.text$...`, `.bss`, symbol-table, and relocation-index structure. Exact
 versioned symbol names, COMDAT selection, relocation types, unwind records, and a hosted object
 receipt remain absent, so the target evidence marker stays fail-closed.
-The twenty-nine local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
+The thirty-three local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
 runtime-function ordering and code coverage plus referenced version 1 and version 2 unwind-record
 bounds, including handler/chained minimum tails. A separate three-object probe now raises a private
 noncontinuable exception at both profiles, validates its payload in an outer SEH filter, walks the
@@ -348,9 +348,10 @@ example, requires no output and native result 42, and removes the image. The min
 quickstart iterates two bytes with typed `usize` ordering and checked addition, performs checked byte
 indexing, and safely converts each `u8` to `i32` through a separately built compiler process. The
 host smoke also proves maximum-`usize` addition traps under both MSVC profiles. The configured Windows
-smoke therefore covers two retained target builds, two safe File builds, two safe owned-text builds,
-two direct target executions, two exec-target executions, and twenty-nine total target or probe PE
-images. The second direct execution comes from a separately built temporary
+smoke therefore covers two retained target builds, two package-workspace builds, two
+package-workspace runs, two safe File builds, two safe owned-text builds, two direct target
+executions, two exec-target executions, and thirty-three total target or probe PE images. The
+second direct target and workspace executions come from a separately built temporary
 `fairyc.exe` compiling the minimal Windows quickstart, so the standalone compiler process boundary
 is exercised without retaining or distributing it. This improves the developer execution path
 without changing target maturity or claiming self-hosting.
@@ -414,11 +415,12 @@ construction. ADR 0145 then fixes canonical generated `fairy.lock` v1, full iden
 stale-workspace comparison, and atomic replacement. ADR 0147 adds exact compiler-bundled SDK
 standard-library injection and closed SDK lock records.
 The unstable `experimental check-workspace` now connects those contracts to package-aware semantic
-analysis and verified MIR with ordinary refresh and no-write `--locked` behavior. Stable command
-spelling and package-aware build/run still remain.
+analysis and verified MIR with ordinary refresh and no-write `--locked` behavior. ADR 0148 adds
+`experimental build-workspace` and `run-workspace`: the root package's qualified `main::main`
+crosses the existing Windows C/MSVC path, both profiles produce and execute the checked-in
+two-package quickstart, and a separately built compiler performs a locked run. Stable command
+spelling still remains.
 
-- Add package-aware Windows native build/run on top of the accepted manifest, workspace, lock,
-  compiler-bundled SDK, and experimental lock-mode behavior.
 - Wire whole-package reuse into package compilation, then adopt persistent content-addressed storage
   and default limits only from measured clean/warm workload evidence.
 - ADR 0146 explicitly defers persistent storage until compiler-owned artifact bytes, package-aware

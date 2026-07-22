@@ -20,6 +20,10 @@ func TestSemanticInputReachesVerifiedCompiler(t *testing.T) {
 	if len(input.Files) != 3 || len(input.Imports) != 0 {
 		t.Fatalf("semantic input has %d files and %d imports", len(input.Files), len(input.Imports))
 	}
+	rootPackage, err := workspace.RootPackageID()
+	if err != nil || rootPackage == 0 {
+		t.Fatalf("RootPackageID() = %d, %v", rootPackage, err)
+	}
 	result, err := compiler.CheckPackages(input)
 	if err != nil {
 		t.Fatal(err)

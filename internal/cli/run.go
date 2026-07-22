@@ -39,6 +39,8 @@ Usage:
   fairyc experimental check-semantics <file.fy> [<file.fy>...]
   fairyc experimental check <primary.fy> [--source <file.fy>]...
   fairyc experimental check-workspace [--locked]
+  fairyc experimental build-workspace --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe> [--locked]
+  fairyc experimental run-workspace --target x86_64-windows-msvc --profile <low|optimized> [--locked]
   fairyc experimental target-spec <target-id>
   fairyc experimental emit-c <entry.fy> [--source <file.fy>]...
   fairyc experimental build <entry.fy> [--source <file.fy>]... --cc <clang|gcc> --profile <low|optimized> --output <build/path>
@@ -154,6 +156,10 @@ func runExperimental(args []string, sourceRoot string, stdout, stderr io.Writer)
 		return runCheck(args[1:], sourceRoot, stdout, stderr)
 	case "check-workspace":
 		return runWorkspaceCheck(args[1:], sourceRoot, stdout, stderr)
+	case "build-workspace":
+		return runWorkspaceBuild(args[1:], sourceRoot, stdout, stderr)
+	case "run-workspace":
+		return runWorkspaceTarget(args[1:], sourceRoot, stdout, stderr)
 	case "run":
 		return runInterpreter(args[1:], sourceRoot, stdout, stderr)
 	case "target-spec":
