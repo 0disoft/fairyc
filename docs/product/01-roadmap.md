@@ -488,6 +488,11 @@ rebuild the context and all functions under fresh package, function, foreign, an
 pass `mir.Verify`, execute the workspace to `42`, and re-encode identically. The complete workspace
 context is still duplicated per package.
 
+ADR 0171 supersedes that package-envelope rule with stable package MIR v2. Each package now stores
+only the type, resource, drop-link, and foreign declarations required by its owned bodies. Decoded
+package contexts merge only when repeated stable definitions agree exactly; each body retains its
+own context identity and foreign-index table before the final program re-enters `mir.Verify`.
+
 ADR 0163 adds a caller-bounded immutable disk-record store with canonical digest-named generations,
 safe conflicting-generation misses, corrupt-record rejection, stale-temp recovery, and deterministic
 entry/byte collection. ADR 0164 connects it to stable package MIR through an internal opt-in Session.
@@ -505,11 +510,11 @@ hit or safe miss, never accepted partial cache truth. No ordinary-command cache,
 path or quota, universal storage-retention guarantee, reference-machine comparison, or speed claim
 exists yet.
 
-ADR 0170 adds a nine-process edit staircase over one six-entry cache. It proves bounded eviction,
-conflict quarantine, and final healed reuse, but also exposes extra generations caused by duplicating
-the complete workspace type context in every package artifact. Package-scoped stable contexts or an
-equivalent exact key-to-bytes design now block ordinary-command cache defaults; last-writer-wins is
-not an acceptable substitute.
+ADR 0170 added a nine-process edit staircase over one six-entry cache and exposed valid-generation
+conflicts caused by duplicated workspace context. ADR 0171 removes that defect without weakening
+immutable conflict detection. The v1 measurement now follows `2, 3, 4, 6, 6, 6, 6, 6, 6`, performs
+three evictions, and records zero quarantines. Private dependency edits still miss both packages,
+showing that public-interface projection remains broader than the actual reusable boundary.
 
 - Repeat the bounded session on a declared reference machine with controlled distributions, private
   or live-heap evidence, and an accepted noise policy before selecting defaults or claiming

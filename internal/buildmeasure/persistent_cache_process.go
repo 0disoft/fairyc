@@ -99,7 +99,7 @@ func ValidatePersistentCacheProcess(report PersistentCacheProcessReport) error {
 	if report.ClockResolutionNS <= 0 {
 		return fmt.Errorf("persistent-cache process measurement requires a positive observed clock resolution")
 	}
-	if report.CacheImplementation != "bounded-immutable-disk-package-mir-v1" ||
+	if report.CacheImplementation != "bounded-immutable-disk-package-mir-v2" ||
 		report.Decision != "raw-paired-distributions-only-no-speedup-claim" {
 		return fmt.Errorf("persistent-cache process measurement has an unsupported implementation or decision")
 	}

@@ -6,20 +6,20 @@ import (
 )
 
 const (
-	PersistentCacheGrowthSchema = "fairyc.persistent-cache-growth-measurement/v0"
+	PersistentCacheGrowthSchema = "fairyc.persistent-cache-growth-measurement/v1"
 
-	PersistentGrowthBaselineCold         = "baseline-cold"
-	PersistentGrowthPrivateRootOne       = "private-root-v1"
-	PersistentGrowthPrivateRootTwo       = "private-root-v2"
-	PersistentGrowthPrivateDependency    = "private-dependency-v1"
-	PersistentGrowthPublicDependency     = "public-dependency-v1"
-	PersistentGrowthPublicNoOp           = "public-no-op"
-	PersistentGrowthPrivateRootPublic    = "private-root-on-public-dependency"
-	PersistentGrowthConflictRecoveryNoOp = "conflict-recovery-no-op"
-	PersistentGrowthHealedNoOp           = "healed-no-op"
-	PersistentCacheGrowthSampleCount     = 9
-	persistentCacheGrowthPackageCount    = 2
-	persistentCacheGrowthMaximumEntries  = 6
+	PersistentGrowthBaselineCold        = "baseline-cold"
+	PersistentGrowthPrivateRootOne      = "private-root-v1"
+	PersistentGrowthPrivateRootTwo      = "private-root-v2"
+	PersistentGrowthPrivateDependency   = "private-dependency-v1"
+	PersistentGrowthPublicDependency    = "public-dependency-v1"
+	PersistentGrowthPublicNoOp          = "public-no-op"
+	PersistentGrowthPrivateRootPublic   = "private-root-on-public-dependency"
+	PersistentGrowthPrivateRootNoOp     = "private-root-public-no-op"
+	PersistentGrowthRepeatedNoOp        = "repeated-private-root-public-no-op"
+	PersistentCacheGrowthSampleCount    = 9
+	persistentCacheGrowthPackageCount   = 2
+	persistentCacheGrowthMaximumEntries = 6
 )
 
 // PersistentCacheGrowthSample is one standalone compiler process in a fixed edit sequence. Entry
@@ -85,7 +85,7 @@ func ValidatePersistentCacheGrowth(report PersistentCacheGrowthReport) error {
 		report.Scope != "retained-disk-state-after-completed-process;source-mutation-excluded" {
 		return fmt.Errorf("persistent-cache growth measurement requires its closed schema, workload, and scope")
 	}
-	if report.CacheImplementation != "bounded-immutable-disk-package-mir-v1" ||
+	if report.CacheImplementation != "bounded-immutable-disk-package-mir-v2" ||
 		report.Decision != "bounded-growth-control-only-no-default-policy" ||
 		report.Setup != "one-cache;separate-fairyc-process-per-sample;mutation-before-process" ||
 		report.RetryPolicy != "none;preserve-first-observation" {
@@ -112,11 +112,11 @@ func ValidatePersistentCacheGrowth(report PersistentCacheGrowthReport) error {
 		PersistentGrowthPublicDependency,
 		PersistentGrowthPublicNoOp,
 		PersistentGrowthPrivateRootPublic,
-		PersistentGrowthConflictRecoveryNoOp,
-		PersistentGrowthHealedNoOp,
+		PersistentGrowthPrivateRootNoOp,
+		PersistentGrowthRepeatedNoOp,
 	}
-	wantEntries := []int{2, 4, 4, 6, 6, 6, 6, 5, 5}
-	wantDeltas := []int{2, 2, 0, 2, 0, 0, 0, -1, 0}
+	wantEntries := []int{2, 3, 4, 6, 6, 6, 6, 6, 6}
+	wantDeltas := []int{2, 1, 1, 2, 0, 0, 0, 0, 0}
 	if len(report.Samples) != len(conditions) {
 		return fmt.Errorf("persistent-cache growth measurement requires %d samples", len(conditions))
 	}
@@ -146,20 +146,19 @@ func ValidatePersistentCacheGrowth(report PersistentCacheGrowthReport) error {
 }
 
 func validatePersistentCacheGrowthOutcome(sample PersistentCacheGrowthSample) error {
-	noOp := sample.Condition == PersistentGrowthPublicNoOp || sample.Condition == PersistentGrowthHealedNoOp
+	noOp := sample.Condition == PersistentGrowthPublicNoOp || sample.Condition == PersistentGrowthPrivateRootNoOp || sample.Condition == PersistentGrowthRepeatedNoOp
 	expectedEvictions := uint64(0)
-	if sample.Condition == PersistentGrowthPublicDependency || sample.Condition == PersistentGrowthPrivateRootPublic {
+	if sample.Condition == PersistentGrowthPublicDependency {
 		expectedEvictions = 2
+	}
+	if sample.Condition == PersistentGrowthPrivateRootPublic {
+		expectedEvictions = 1
 	}
 	if sample.Evictions != expectedEvictions {
 		return fmt.Errorf("evictions = %d, want %d", sample.Evictions, expectedEvictions)
 	}
-	expectedRecordRejected := uint64(0)
-	if sample.Condition == PersistentGrowthPrivateRootTwo || sample.Condition == PersistentGrowthConflictRecoveryNoOp {
-		expectedRecordRejected = 2
-	}
-	if sample.RecordRejected != expectedRecordRejected {
-		return fmt.Errorf("record rejections = %d, want %d", sample.RecordRejected, expectedRecordRejected)
+	if sample.RecordRejected != 0 {
+		return fmt.Errorf("record rejections = %d, want 0", sample.RecordRejected)
 	}
 	if noOp {
 		if sample.Outcome != "all-hit" || sample.Hits != sample.Packages || sample.Misses != 0 ||
@@ -171,9 +170,6 @@ func validatePersistentCacheGrowthOutcome(sample PersistentCacheGrowthSample) er
 	}
 	wantHits := 1
 	if sample.Condition == PersistentGrowthBaselineCold || sample.Condition == PersistentGrowthPrivateDependency || sample.Condition == PersistentGrowthPublicDependency {
-		wantHits = 0
-	}
-	if sample.Condition == PersistentGrowthPrivateRootTwo {
 		wantHits = 0
 	}
 	wantMisses := sample.Packages - wantHits

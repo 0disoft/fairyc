@@ -17,7 +17,7 @@ import (
 
 const (
 	StableArtifactSchema  = "fairyc.stable-package-mir/v1"
-	StableArtifactVersion = "fairyc-stable-package-mir/1"
+	StableArtifactVersion = "fairyc-stable-package-mir/2"
 )
 
 var (
@@ -25,8 +25,8 @@ var (
 	ErrStableArtifactEncoding = errors.New("stable package MIR artifact is not canonically encoded")
 )
 
-// StableArtifact is one package-owned, cross-process MIR slice. It carries the complete stable
-// workspace type context until package-scoped context projection is separately proven.
+// StableArtifact is one package-owned, cross-process MIR slice. Context is the closed projection
+// required by this package's bodies, not a duplicate of the complete workspace type context.
 type StableArtifact struct {
 	Package   packagegraph.InstanceID `json:"package"`
 	Context   ContextDescriptor       `json:"context"`
@@ -46,16 +46,21 @@ func DescribeStableArtifact(artifact Artifact, maxBytes uint64) (StableArtifact,
 	if err := Verify(artifact); err != nil {
 		return StableArtifact{}, fmt.Errorf("verify process-local artifact before stable projection: %w", err)
 	}
-	result := StableArtifact{Package: artifact.Package, Context: cloneContextDescriptor(artifact.StableContext)}
+	context, foreign, err := projectArtifactContext(artifact)
+	if err != nil {
+		return StableArtifact{}, err
+	}
+	result := StableArtifact{Package: artifact.Package, Context: context}
 	for _, record := range artifact.Functions {
-		body, err := DescribeStableBody(record, artifact, maxBytes)
+		body, err := describeStableBody(record, context, artifact.PackageIdentities, artifactBindings(artifact), foreign, true, maxBytes)
 		if err != nil {
 			return StableArtifact{}, fmt.Errorf("describe stable function body %s: %w", record.ID, err)
 		}
 		result.Functions = append(result.Functions, body)
 	}
-	for _, imported := range artifact.Imports {
-		result.Imports = append(result.Imports, imported.ID)
+	result.Imports, err = stableArtifactImports(artifact, context)
+	if err != nil {
+		return StableArtifact{}, err
 	}
 	if err := ValidateStableArtifact(result); err != nil {
 		return StableArtifact{}, err
@@ -209,21 +214,23 @@ func DecodeStableArtifact(encoded []byte, maxBytes uint64) (StableArtifact, erro
 }
 
 // RebindStableArtifacts reconstructs one closed verified MIR program without any process-local
-// package artifact. All stable packages must share one context and resolve every import exactly.
+// package artifact. Package-scoped contexts are conflict-checked and merged before bodies bind.
 func RebindStableArtifacts(artifacts []StableArtifact, identities map[hir.PackageID]packagegraph.InstanceID, firstFunctionSymbol, firstForeignSymbol hir.SymbolID, firstLocal mir.LocalID) (mir.Program, error) {
 	if len(artifacts) == 0 {
 		return mir.Program{}, fmt.Errorf("no stable package MIR artifacts to rebind")
 	}
 	seenPackages := make(map[packagegraph.InstanceID]struct{}, len(artifacts))
-	owned := make(map[FunctionID]StableBodyArtifact)
-	baseContext := artifacts[0].Context
+	type ownedBody struct {
+		body    StableBodyArtifact
+		context ContextDescriptor
+	}
+	owned := make(map[FunctionID]ownedBody)
+	contexts := make([]ContextDescriptor, 0, len(artifacts))
 	for index, artifact := range artifacts {
 		if err := ValidateStableArtifact(artifact); err != nil {
 			return mir.Program{}, fmt.Errorf("stable artifact %d: %w", index, err)
 		}
-		if !reflect.DeepEqual(artifact.Context, baseContext) {
-			return mir.Program{}, fmt.Errorf("stable package MIR artifacts do not share one type context")
-		}
+		contexts = append(contexts, artifact.Context)
 		if _, duplicate := seenPackages[artifact.Package]; duplicate {
 			return mir.Program{}, fmt.Errorf("stable package MIR artifact %s is duplicated", artifact.Package)
 		}
@@ -232,7 +239,7 @@ func RebindStableArtifacts(artifacts []StableArtifact, identities map[hir.Packag
 			if _, duplicate := owned[body.ID]; duplicate {
 				return mir.Program{}, fmt.Errorf("stable owned FunctionID %s is duplicated", body.ID)
 			}
-			owned[body.ID] = body
+			owned[body.ID] = ownedBody{body: body, context: artifact.Context}
 		}
 	}
 	for _, artifact := range artifacts {
@@ -255,13 +262,22 @@ func RebindStableArtifacts(artifacts []StableArtifact, identities map[hir.Packag
 		}
 		functionSymbols[id] = symbol
 	}
-	program, err := RebindContextDescriptor(baseContext, identities, functionSymbols, firstForeignSymbol)
+	mergedContext, err := MergeContextDescriptors(contexts)
+	if err != nil {
+		return mir.Program{}, err
+	}
+	program, err := RebindContextDescriptor(mergedContext, identities, functionSymbols, firstForeignSymbol)
 	if err != nil {
 		return mir.Program{}, err
 	}
 	processContext := mir.Clone(program)
 	for _, id := range ids {
-		function, err := RebindStableBody(owned[id], baseContext, processContext, identities, functionSymbols, firstLocal, ^uint64(0))
+		item := owned[id]
+		foreignSymbols, foreignErr := foreignSymbolsForContext(processContext, item.context, identities)
+		if foreignErr != nil {
+			return mir.Program{}, fmt.Errorf("rebind stable function %s foreign context: %w", id, foreignErr)
+		}
+		function, err := rebindStableBody(item.body, item.context, identities, functionSymbols, foreignSymbols, firstLocal, ^uint64(0))
 		if err != nil {
 			return mir.Program{}, fmt.Errorf("rebind stable function %s: %w", id, err)
 		}

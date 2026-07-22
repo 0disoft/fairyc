@@ -130,10 +130,11 @@ LRU collection under both. It establishes bounded behavior but does not choose p
 Persistent cache limits, age policy, and high/low-retention quotas remain UNDECIDED until the
 benchmark protocol above produces representative growth and reuse evidence.
 
-ADR 0170 adds one control-workload retention staircase under an explicit six-entry harness ceiling.
-It proves bounded eviction, conflict quarantine, and healed reuse, while also proving that the
-current workspace-wide duplicated stable context creates extra generations after private edits.
-That result is blocker evidence, not representative growth or a product-default justification.
+ADR 0170 added one control-workload retention staircase under an explicit six-entry harness ceiling.
+ADR 0171 replaces its conflict-producing package format with package-scoped stable contexts. The
+current staircase reaches six entries, performs three evictions, records zero quarantines, and ends
+with repeated verified all-hit reuse. A private dependency edit still invalidates both packages,
+and the result remains control evidence rather than a product-default justification.
 
 ## Review blockers
 

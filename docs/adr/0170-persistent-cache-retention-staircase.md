@@ -1,6 +1,6 @@
 # ADR 0170: Preserve the persistent-cache retention staircase as blocker evidence
 
-- Status: Accepted measurement contract
+- Status: Superseded measurement contract
 - Date: 2026-07-22
 - Implementation: `internal/buildmeasure/persistent_cache_growth.go`, `cmd/fairyc-windows-host-smoke/main.go`
 - Storage prerequisite: `docs/adr/0163-bounded-immutable-disk-cache-store.md`
@@ -71,3 +71,11 @@ disk store, separate processes, and bounded collection.
 - A broader workspace distribution, declared reference environment, stored baseline distribution,
   accepted noise rule, and policy decision remain required before enabling persistent caching for
   ordinary commands.
+
+## Supersession
+
+ADR 0171 removes the measured key-to-artifact-byte conflict with package-scoped stable contexts and
+advances the report to `fairyc.persistent-cache-growth-measurement/v1`. The same nine-process control
+now retains `2, 3, 4, 6, 6, 6, 6, 6, 6` entries, performs three evictions, records zero quarantines,
+and finishes at 21,700 bytes. Private dependency edits still over-invalidate both packages, so the
+new evidence still does not authorize a default cache policy.

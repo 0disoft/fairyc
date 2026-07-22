@@ -60,6 +60,6 @@ ordinary lowering.
 - Separate writer and reader OS processes exercise cross-process Session reuse, and a separately
   built `fairyc.exe` now exercises the experimental command. ADR 0168 owns the publication-crash
   evidence, and ADR 0169 owns opened-root containment plus the current platform publication primitive.
-- Each package still duplicates the complete workspace type context. Partial hits therefore lower
-  normally; function-level reuse and package-scoped contexts remain measurement-gated.
+- ADR 0171 now gives each package a closed stable context projection and conflict-checked merge.
+  Partial hits still lower normally; function-level reuse remains measurement-gated.
 - The cache is disposable derived state. Deletion or rejection can only cause ordinary compilation.

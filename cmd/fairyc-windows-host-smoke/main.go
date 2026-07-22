@@ -1118,7 +1118,7 @@ func measureStandaloneWorkspaceCache(executablePath, sourceRoot string, clockRes
 	measurement := buildmeasure.PersistentCacheProcessReport{
 		Schema: buildmeasure.PersistentCacheProcessSchema, Workload: "workspace_quickstart",
 		Scope: "caller-process-run-through-exit;workspace-and-cache-io-included", Clock: "caller-monotonic-wall-nanoseconds",
-		ClockResolutionNS: clockResolution, CacheImplementation: "bounded-immutable-disk-package-mir-v1",
+		ClockResolutionNS: clockResolution, CacheImplementation: "bounded-immutable-disk-package-mir-v2",
 		Decision: "raw-paired-distributions-only-no-speedup-claim",
 		Setup:    "fresh-cache-per-pair;separate-fairyc-process-per-sample", RetryPolicy: "none;preserve-first-observation",
 		IterationsPerCondition: buildmeasure.PersistentCacheProcessIterations,
@@ -1206,7 +1206,7 @@ func measureStandaloneWorkspaceCacheGrowth(executablePath, sourceRoot string) (b
 	report := buildmeasure.PersistentCacheGrowthReport{
 		Schema: buildmeasure.PersistentCacheGrowthSchema, Workload: "workspace_quickstart-retention-sequence",
 		Scope:               "retained-disk-state-after-completed-process;source-mutation-excluded",
-		CacheImplementation: "bounded-immutable-disk-package-mir-v1", Decision: "bounded-growth-control-only-no-default-policy",
+		CacheImplementation: "bounded-immutable-disk-package-mir-v2", Decision: "bounded-growth-control-only-no-default-policy",
 		Setup: "one-cache;separate-fairyc-process-per-sample;mutation-before-process", RetryPolicy: "none;preserve-first-observation",
 		Environment: buildmeasure.CacheEnvironment{OS: runtime.GOOS, Arch: runtime.GOARCH, Target: "x86_64-windows-msvc"},
 		Policy: buildmeasure.PersistentCachePolicy{
@@ -1222,8 +1222,8 @@ func measureStandaloneWorkspaceCacheGrowth(executablePath, sourceRoot string) (b
 		buildmeasure.PersistentGrowthPublicDependency,
 		buildmeasure.PersistentGrowthPublicNoOp,
 		buildmeasure.PersistentGrowthPrivateRootPublic,
-		buildmeasure.PersistentGrowthConflictRecoveryNoOp,
-		buildmeasure.PersistentGrowthHealedNoOp,
+		buildmeasure.PersistentGrowthPrivateRootNoOp,
+		buildmeasure.PersistentGrowthRepeatedNoOp,
 	}
 	arguments := []string{
 		"experimental", "check-workspace-cache",
@@ -1296,7 +1296,7 @@ func writePersistentCacheGrowthSources(root, condition string, baseRoot, baseDep
 		dependencySource = strings.Replace(dependencySource, "\npub fn i32 value()", "\nstruct retention_dependency_v1 { i32 value; }\n\npub fn i32 value()", 1)
 	case buildmeasure.PersistentGrowthPublicDependency, buildmeasure.PersistentGrowthPublicNoOp:
 		dependencySource += "\npub fn i32 retention_public_v1() {\n    return 7;\n}\n"
-	case buildmeasure.PersistentGrowthPrivateRootPublic, buildmeasure.PersistentGrowthConflictRecoveryNoOp, buildmeasure.PersistentGrowthHealedNoOp:
+	case buildmeasure.PersistentGrowthPrivateRootPublic, buildmeasure.PersistentGrowthPrivateRootNoOp, buildmeasure.PersistentGrowthRepeatedNoOp:
 		rootSource = strings.Replace(rootSource, "\nfn i32 main()", "\nstruct retention_root_public_v1 { i32 value; }\n\nfn i32 main()", 1)
 		dependencySource += "\npub fn i32 retention_public_v1() {\n    return 7;\n}\n"
 	default:

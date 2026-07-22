@@ -54,9 +54,9 @@ continue through the integrated descriptor check.
 - A changed or forged stable descriptor is rejected before reuse.
 - This does not serialize or rebind function-body types, locals, spans, operations, terminators,
   foreign calls, or source provenance into a fresh compiler process.
-- The descriptor still covers the complete workspace context. It can therefore change when an
-  otherwise unrelated package instance changes, and it does not yet enable package-granular mixed
-  generation reuse.
+- The descriptor can represent either a complete workspace context or a validated subset. Stable
+  package MIR v1 used the complete form; ADR 0171 now projects closed package subsets and merges
+  them with conflict checks for stable package MIR v2.
 - `PackageInstanceId` includes the exact resolved package identity, so this contract promises
   stability across local numbering, not across source revisions.
 - There is still no cache directory, lock, cleanup policy, retained-byte budget, cross-process
@@ -97,5 +97,6 @@ The stable context can now reconstruct process-local struct, enum, resource, and
 declarations without borrowing an earlier process's context. The caller supplies a one-to-one fresh
 package map, complete `FunctionID` bindings for non-empty drop glue, and a collision-free foreign
 symbol range. Re-projecting that rebuilt context must reproduce the exact descriptor. Missing,
-ambiguous, overflowing, or colliding bindings fail closed. Combining decoded package bodies and
-this rebuilt context into one cross-process package codec remains the next gate.
+ambiguous, overflowing, or colliding bindings fail closed. ADR 0162 combined decoded bodies with
+one rebuilt workspace context. ADR 0171 later replaced that package-envelope rule with closed
+package projections and deterministic mixed-context merge.

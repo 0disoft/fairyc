@@ -82,13 +82,13 @@ regenerate, or override compiler source.
 - Compiler-private package-stable function identity: internal/packageartifact/, docs/package/package-function-id-v1.md
 - Process-local package MIR artifact extraction, verification, and reassembly: internal/packageartifact/artifact.go, docs/package/process-local-mir-artifact-v0.md
 - Stable package type-context artifact and identity: internal/packageartifact/context.go, docs/adr/0161-stable-type-context-artifact.md
-- Stable cross-process package MIR bodies, codec, and checked rebind: internal/packageartifact/body.go, internal/packageartifact/stable_artifact.go, docs/adr/0162-stable-package-mir-artifact.md
+- Stable cross-process package MIR bodies, package-scoped context projection/merge, codec, and checked rebind: internal/packageartifact/body.go, internal/packageartifact/context_projection.go, internal/packageartifact/stable_artifact.go, docs/adr/0171-package-scoped-stable-context.md
 - Process-bound package MIR artifact codec: internal/packageartifact/codec.go, docs/adr/0154-process-bound-package-artifact-codec.md
 - Bounded process-local package artifact cache: internal/packageartifact/cache.go, internal/packagecache/store.go, docs/adr/0155-bounded-process-package-artifact-cache.md
 - Package-aware process-local MIR reuse coordinator: internal/workspacecompiler/, docs/adr/0156-all-hit-process-mir-reuse.md
 - Explicit stable disk MIR reuse coordinator: internal/workspacecompiler/, internal/packageartifact/stable_cache.go, docs/adr/0164-verified-stable-disk-mir-reuse.md
 - Bounded workspace check-session CLI and protocol schema: internal/cli/workspace_session.go, spec/cli/experimental-workspace-check-session-v0.schema.json, docs/adr/0159-bounded-workspace-check-session.md
-- Build-measurement report schemas and configured Windows calibrations: internal/buildmeasure/, cmd/fairyc-windows-host-smoke/, docs/adr/0150-no-cache-windows-build-calibration.md, docs/adr/0157-process-cache-measurement-receipt.md, docs/adr/0158-process-cache-edit-distributions.md, docs/adr/0160-editor-shaped-session-process-measurement.md, docs/adr/0167-paired-persistent-cache-process-measurement.md
+- Build-measurement report schemas and configured Windows calibrations: internal/buildmeasure/, cmd/fairyc-windows-host-smoke/, docs/adr/0150-no-cache-windows-build-calibration.md, docs/adr/0157-process-cache-measurement-receipt.md, docs/adr/0158-process-cache-edit-distributions.md, docs/adr/0160-editor-shaped-session-process-measurement.md, docs/adr/0167-paired-persistent-cache-process-measurement.md, docs/adr/0171-package-scoped-stable-context.md
 - Human project-manifest v1 parser and fixtures: internal/projectmanifest/, internal/projectmanifestfixture/, spec/fixtures/project-manifest/manifest-v1.json
 - Local workspace loader and fixtures: internal/workspaceloader/, internal/workspaceloaderfixture/, spec/fixtures/workspace-loader/manifest-v1.json
 - Compiler-bundled Stage 0 standard-library source package: internal/sdkstdlib/

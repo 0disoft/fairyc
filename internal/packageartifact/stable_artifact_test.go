@@ -10,6 +10,7 @@ import (
 
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/interpreter"
+	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/packagegraph"
 )
 
@@ -128,4 +129,124 @@ func TestStablePackageArtifactCodecRejectsBoundsUnknownFieldsAndImportCorruption
 			t.Fatalf("corrupt import error = %v", err)
 		}
 	}
+}
+
+func TestStablePackageArtifactBytesIgnoreUnreferencedWorkspaceDeclarations(t *testing.T) {
+	t.Parallel()
+	workspace, original, identities := checkedWorkspaceProgram(t)
+	rootPackage, err := workspace.RootPackageID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	baseline, err := ExtractAll(original, identities)
+	if err != nil {
+		t.Fatal(err)
+	}
+	baselineBytes := encodeStableArtifactsByPackage(t, baseline)
+
+	mutated := mir.Clone(original)
+	mutated.StructTypes = append(mutated.StructTypes, mir.StructType{
+		Type: hir.Type(hir.QualifiedModulePath(rootPackage, "private::CacheNoise")),
+		Name: "CacheNoise",
+		Span: hir.Span{Package: rootPackage},
+	})
+	if failures := mir.Verify(mutated); len(failures) != 0 {
+		t.Fatalf("verify private-declaration mutation: %v", failures[0])
+	}
+	changed, err := ExtractAll(mutated, identities)
+	if err != nil {
+		t.Fatal(err)
+	}
+	changedBytes := encodeStableArtifactsByPackage(t, changed)
+	if !reflect.DeepEqual(changedBytes, baselineBytes) {
+		t.Fatalf("unreferenced private declaration changed stable package bytes")
+	}
+}
+
+func TestStablePackageArtifactsMergeDistinctPackageContexts(t *testing.T) {
+	t.Parallel()
+	workspace, program, identities := checkedWorkspaceProgram(t)
+	processArtifacts, err := ExtractAll(program, identities)
+	if err != nil {
+		t.Fatal(err)
+	}
+	stable := make([]StableArtifact, 0, len(processArtifacts))
+	for _, artifact := range processArtifacts {
+		projected, describeErr := DescribeStableArtifact(artifact, stablePackageArtifactLimit)
+		if describeErr != nil {
+			t.Fatal(describeErr)
+		}
+		stable = append(stable, projected)
+	}
+	if len(stable) < 2 {
+		t.Fatal("test workspace must contain at least two package artifacts")
+	}
+	marker := ContextStruct{
+		Type: "pkg[" + stable[0].Package.String() + "]::private::MergeMarker",
+		Name: "MergeMarker",
+	}
+	stable[0].Context.Structs = append(stable[0].Context.Structs, marker)
+	sortContextDescriptor(&stable[0].Context)
+	contextID, err := ComputeContextID(stable[0].Context, stablePackageArtifactLimit)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for index := range stable[0].Functions {
+		stable[0].Functions[index].ContextID = contextID
+	}
+	if reflect.DeepEqual(stable[0].Context, stable[1].Context) {
+		t.Fatal("test setup did not create distinct package contexts")
+	}
+
+	rebound, err := RebindStableArtifacts(stable, identities, 1000, 10000, 500)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rootPackage, err := workspace.RootPackageID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	outcome, err := interpreter.Execute(rebound, hir.QualifiedModulePath(rootPackage, "main")+"::main")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if outcome.Value != 42 {
+		t.Fatalf("mixed-context rebound value = %d, want 42", outcome.Value)
+	}
+}
+
+func TestMergeContextDescriptorsRejectsConflictingDefinitions(t *testing.T) {
+	t.Parallel()
+	_, _, identities := checkedWorkspaceProgram(t)
+	var instance packagegraph.InstanceID
+	for _, candidate := range identities {
+		instance = candidate
+		break
+	}
+	typeName := "pkg[" + instance.String() + "]::shared::Value"
+	left := ContextDescriptor{Structs: []ContextStruct{{
+		Type: typeName, Name: "Value", Fields: []ContextField{{Name: "value", Type: "i32"}},
+	}}}
+	right := cloneContextDescriptor(left)
+	right.Structs[0].Fields[0].Type = "u32"
+	if _, err := MergeContextDescriptors([]ContextDescriptor{left, right}); err == nil || !strings.Contains(err.Error(), "conflicting") {
+		t.Fatalf("conflicting package contexts error = %v", err)
+	}
+}
+
+func encodeStableArtifactsByPackage(t *testing.T, artifacts []Artifact) map[packagegraph.InstanceID]string {
+	t.Helper()
+	result := make(map[packagegraph.InstanceID]string, len(artifacts))
+	for _, artifact := range artifacts {
+		stable, err := DescribeStableArtifact(artifact, stablePackageArtifactLimit)
+		if err != nil {
+			t.Fatal(err)
+		}
+		encoded, err := EncodeStableArtifact(stable, stablePackageArtifactLimit)
+		if err != nil {
+			t.Fatal(err)
+		}
+		result[stable.Package] = string(encoded)
+	}
+	return result
 }

@@ -64,7 +64,7 @@ func validPersistentCacheProcessReport() buildmeasure.PersistentCacheProcessRepo
 	report := buildmeasure.PersistentCacheProcessReport{
 		Schema: buildmeasure.PersistentCacheProcessSchema, Workload: "workspace_quickstart",
 		Scope: "caller-process-run-through-exit;workspace-and-cache-io-included", Clock: "caller-monotonic-wall-nanoseconds",
-		ClockResolutionNS: 10, CacheImplementation: "bounded-immutable-disk-package-mir-v1",
+		ClockResolutionNS: 10, CacheImplementation: "bounded-immutable-disk-package-mir-v2",
 		Decision: "raw-paired-distributions-only-no-speedup-claim",
 		Setup:    "fresh-cache-per-pair;separate-fairyc-process-per-sample", RetryPolicy: "none;preserve-first-observation",
 		IterationsPerCondition: buildmeasure.PersistentCacheProcessIterations,

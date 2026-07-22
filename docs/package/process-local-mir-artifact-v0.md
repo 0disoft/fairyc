@@ -62,9 +62,10 @@ compatibility promise across compiler processes. The shared type context prevent
 storage savings. The reuse coordinator still performs workspace loading and semantic analysis on
 every request; only MIR lowering and its first whole-program verification can be skipped.
 
-The separate stable package MIR v1 encoding now removes process-local package, function, foreign,
-local, block, type, span-prefix, and call identities. Independently decoded packages rebuild a fresh
-context, re-enter `mir.Verify`, execute, and re-encode identically. The existing cache still uses
+The separate stable package MIR v2 encoding removes process-local package, function, foreign,
+local, block, type, span-prefix, and call identities, then projects the closed context used by each
+package. Independently decoded package contexts merge with exact conflict checks, rebuild a fresh
+program, re-enter `mir.Verify`, execute, and re-encode identically. The existing cache still uses
 the process codec when memory mode is selected. Explicit persistent mode instead uses the stable
 codec and immutable disk records; measured clean/warm evidence and a public command policy remain
 absent. A mismatch remains a safe miss followed by ordinary compilation.
@@ -80,7 +81,7 @@ replacement.
 The cache reports verified hits separately from raw byte-store hits. `workspacecompiler.Session`
 runs package semantic analysis, computes every public interface and whole-package key, and bypasses
 MIR lowering only when every function-owning package is a verified hit and the complete set
-reassembles. Any miss, rejected payload, or incompatible mixed-generation context falls back to the
+reassembles. Any miss, rejected payload, or contradictory mixed-package context falls back to the
 ordinary compiler boundary and refreshes current artifacts. Oversized cache admission is skipped
 without failing compilation.
 

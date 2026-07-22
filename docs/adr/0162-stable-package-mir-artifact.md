@@ -1,6 +1,6 @@
 # ADR 0162: Encode and rebind stable package MIR artifacts
 
-- Status: Accepted
+- Status: Superseded by ADR 0171
 - Date: 2026-07-22
 - Implementation: `internal/packageartifact/stable_artifact.go`
 - Prerequisite: `docs/adr/0161-stable-type-context-artifact.md`
@@ -43,3 +43,10 @@ unknown fields, noncanonical bytes, and import corruption.
   mixed-context package reuse.
 - Persistent-store corruption, concurrency, atomic replacement, retention, and measurement policy
   remain separate gates under ADR 0146.
+
+## Supersession
+
+ADR 0171 advances the package artifact version to v2. It replaces the duplicated workspace context
+with a closed package projection, merges compatible package contexts, rejects contradictory
+definitions, and rebinds each body against its own context identity. This document remains the
+historical contract for v1 bytes.

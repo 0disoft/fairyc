@@ -179,7 +179,8 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0167-paired-persistent-cache-process-measurement.md`: nine path-free cold/warm process pairs over fresh disk caches with raw durations, strict cache-state validation, zero retries, and no speedup conclusion.
 - `0168-platform-durable-cache-publication.md`: superseded absolute-path Windows publication decision; its deterministic publication crash points and verified-hit-or-safe-miss contract remain historical prerequisites.
 - `0169-opened-root-cache-containment.md`: opened workspace and cache roots, root-relative I/O, explicit handle lifetime, junction/symlink escape rejection, and platform-specific flush limits.
-- `0170-persistent-cache-retention-staircase.md`: nine separate-process edits over one bounded cache expose context-coupled generation conflicts, deterministic quarantine, eviction, and healed reuse without selecting defaults.
+- `0170-persistent-cache-retention-staircase.md`: superseded v0 nine-process measurement that exposed context-coupled generation conflicts and deterministic recovery.
+- `0171-package-scoped-stable-context.md`: stable package MIR v2 projects closed package contexts, conflict-checks mixed-context merge, removes private-root generation conflicts, and records the v1 bounded-growth staircase without selecting defaults.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

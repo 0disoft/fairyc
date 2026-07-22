@@ -19,7 +19,7 @@ func TestPersistentCacheGrowthReportPreservesBoundedRawEvidence(t *testing.T) {
 		t.Fatal(err)
 	}
 	if string(first) != string(second) ||
-		!strings.HasPrefix(string(first), `{"schema":"fairyc.persistent-cache-growth-measurement/v0"`) ||
+		!strings.HasPrefix(string(first), `{"schema":"fairyc.persistent-cache-growth-measurement/v1"`) ||
 		strings.Contains(string(first), `C:\`) || strings.Contains(string(first), "build/cache") ||
 		strings.Contains(string(first), `"duration`) || strings.Contains(string(first), `"speedup`) {
 		t.Fatalf("persistent-cache growth JSON = %s", first)
@@ -61,7 +61,7 @@ func validPersistentCacheGrowthReport() buildmeasure.PersistentCacheGrowthReport
 	report := buildmeasure.PersistentCacheGrowthReport{
 		Schema: buildmeasure.PersistentCacheGrowthSchema, Workload: "workspace_quickstart-retention-sequence",
 		Scope:               "retained-disk-state-after-completed-process;source-mutation-excluded",
-		CacheImplementation: "bounded-immutable-disk-package-mir-v1", Decision: "bounded-growth-control-only-no-default-policy",
+		CacheImplementation: "bounded-immutable-disk-package-mir-v2", Decision: "bounded-growth-control-only-no-default-policy",
 		Setup: "one-cache;separate-fairyc-process-per-sample;mutation-before-process", RetryPolicy: "none;preserve-first-observation",
 		CompilerBuild: "fairyc.compiler-executable-sha256/v1:" + strings.Repeat("a", 64),
 		Environment:   buildmeasure.CacheEnvironment{OS: "windows", Arch: "amd64", Target: "x86_64-windows-msvc"},
@@ -78,12 +78,12 @@ func validPersistentCacheGrowthReport() buildmeasure.PersistentCacheGrowthReport
 		buildmeasure.PersistentGrowthPublicDependency,
 		buildmeasure.PersistentGrowthPublicNoOp,
 		buildmeasure.PersistentGrowthPrivateRootPublic,
-		buildmeasure.PersistentGrowthConflictRecoveryNoOp,
-		buildmeasure.PersistentGrowthHealedNoOp,
+		buildmeasure.PersistentGrowthPrivateRootNoOp,
+		buildmeasure.PersistentGrowthRepeatedNoOp,
 	}
-	entries := []int{2, 4, 4, 6, 6, 6, 6, 5, 5}
-	deltas := []int{2, 2, 0, 2, 0, 0, 0, -1, 0}
-	bytes := []uint64{6000, 13000, 14000, 19000, 21000, 21000, 22000, 18000, 18000}
+	entries := []int{2, 3, 4, 6, 6, 6, 6, 6, 6}
+	deltas := []int{2, 1, 1, 2, 0, 0, 0, 0, 0}
+	bytes := []uint64{6000, 9000, 12000, 18000, 21000, 21000, 22000, 22000, 22000}
 	previousBytes := uint64(0)
 	for index, condition := range conditions {
 		sample := buildmeasure.PersistentCacheGrowthSample{
@@ -93,16 +93,16 @@ func validPersistentCacheGrowthReport() buildmeasure.PersistentCacheGrowthReport
 			RetainedByteDelta: int64(bytes[index]) - int64(previousBytes), RecordHits: 1, RecordMisses: 1, VerifiedHits: 1,
 		}
 		previousBytes = bytes[index]
-		if condition == buildmeasure.PersistentGrowthBaselineCold || condition == buildmeasure.PersistentGrowthPrivateRootTwo || condition == buildmeasure.PersistentGrowthPrivateDependency || condition == buildmeasure.PersistentGrowthPublicDependency {
+		if condition == buildmeasure.PersistentGrowthBaselineCold || condition == buildmeasure.PersistentGrowthPrivateDependency || condition == buildmeasure.PersistentGrowthPublicDependency {
 			sample.Hits, sample.Misses, sample.RecordHits, sample.RecordMisses, sample.VerifiedHits = 0, 2, 0, 2, 0
 		}
-		if condition == buildmeasure.PersistentGrowthPublicDependency || condition == buildmeasure.PersistentGrowthPrivateRootPublic {
+		if condition == buildmeasure.PersistentGrowthPublicDependency {
 			sample.Evictions = 2
 		}
-		if condition == buildmeasure.PersistentGrowthPrivateRootTwo || condition == buildmeasure.PersistentGrowthConflictRecoveryNoOp {
-			sample.RecordRejected = 2
+		if condition == buildmeasure.PersistentGrowthPrivateRootPublic {
+			sample.Evictions = 1
 		}
-		if condition == buildmeasure.PersistentGrowthPublicNoOp || condition == buildmeasure.PersistentGrowthHealedNoOp {
+		if condition == buildmeasure.PersistentGrowthPublicNoOp || condition == buildmeasure.PersistentGrowthPrivateRootNoOp || condition == buildmeasure.PersistentGrowthRepeatedNoOp {
 			sample.Outcome, sample.Hits, sample.Misses, sample.Stored, sample.Lowered = "all-hit", 2, 0, 0, false
 			sample.RecordHits, sample.RecordMisses, sample.VerifiedHits = 2, 0, 2
 		}
