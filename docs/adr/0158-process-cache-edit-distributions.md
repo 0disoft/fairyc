@@ -29,10 +29,13 @@ sample appears would corrupt the distribution.
 4. Preserve all 36 raw observations. Do not emit a percentile, ratio, speedup, regression threshold,
    retry-selected value, or preferred summary.
 5. Observe the clock by collecting 32 positive monotonic transitions within at most 1,000,000
-   consecutive readings and retaining the smallest interval. Calibration fails closed if that
-   bounded sample is incomplete. Record the interval as `clockResolutionNs`. A sample records
-   `belowClockResolution: true` exactly when its nonnegative duration is smaller than that observed
-   interval, including a zero-duration observation; the raw duration is not altered or discarded.
+   readings and retaining the smallest interval. The loop cooperatively yields to the scheduler
+   every 4,096 unchanged observations so a fast busy loop cannot consume the entire observation
+   bound before a coarse Windows clock advances. It does not sleep, retry a measured compiler
+   sample, or alter an observation. Calibration fails closed if that bounded sample is incomplete.
+   Record the interval as `clockResolutionNs`. A sample records `belowClockResolution: true` exactly
+   when its nonnegative duration is smaller than that observed interval, including a zero-duration
+   observation; the raw duration is not altered or discarded.
 6. Every sample records the cache path, package hit/miss/reject/store counts, lowering and reassembly
    decisions, MIR function count, interpreter result, retained entries and bytes, and cumulative
    verified hits. Validation requires result `42`, bounds compliance, and no rejected entry,
@@ -62,6 +65,12 @@ minimum positive clock interval for that run, marked six shorter zero-duration s
 altering them, produced result `42` for every sample, and matched every cache-path contract above.
 The same run also completed the native and separately built compiler process checks. These raw local
 values remain observations rather than a reference-machine baseline or speedup decision.
+
+The same date's first hosted Windows run exposed a calibration defect before any compiler sample:
+the runner consumed 1,000,000 tight-loop reads while observing only 11 of 32 coarse-clock
+transitions. Cooperative scheduler yields now make the observation bound cover clock progress
+instead of assuming loop iterations imply elapsed time. Linux was already green, and this change
+does not select, retry, or rewrite any measured compiler duration.
 
 This is controlled local invalidation and raw-distribution evidence. It is not a claim that warm
 Fairy C compilation is faster, a representative-machine baseline, a process-memory measurement, a

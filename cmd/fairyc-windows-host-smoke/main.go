@@ -858,13 +858,17 @@ func measureWorkspaceProcessCacheEditSample(sourceRoot, condition string, iterat
 
 func observeMonotonicClockResolution() (int64, error) {
 	const (
-		maximumObservations = 1_000_000
-		requiredTransitions = 32
+		maximumObservations      = 1_000_000
+		requiredTransitions      = 32
+		cooperativeYieldInterval = 4_096
 	)
 	var minimumPositive int64
 	transitions := 0
 	previous := time.Now()
 	for attempts := 0; attempts < maximumObservations && transitions < requiredTransitions; attempts++ {
+		if attempts != 0 && attempts%cooperativeYieldInterval == 0 {
+			runtime.Gosched()
+		}
 		current := time.Now()
 		if elapsed := current.Sub(previous).Nanoseconds(); elapsed > 0 {
 			if minimumPositive == 0 || elapsed < minimumPositive {
