@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 	"path"
 	"path/filepath"
 	"strconv"
@@ -87,12 +88,16 @@ func runWorkspaceCacheCheck(arguments []string, sourceRoot string, stdout, stder
 	if err != nil {
 		return packageFailure(stderr, fmt.Errorf("resolve workspace root: %w", err))
 	}
-	cacheRoot := filepath.Join(absoluteRoot, filepath.FromSlash(options.cacheDirectory))
+	workspaceRoot, err := os.OpenRoot(absoluteRoot)
+	if err != nil {
+		return packageFailure(stderr, fmt.Errorf("open workspace filesystem boundary: %w", err))
+	}
+	defer workspaceRoot.Close()
 	session, err := workspacecompiler.NewSession(workspacecompiler.Configuration{
 		Target:           options.target,
 		MaxArtifactBytes: options.maxArtifactBytes,
 		Persistent: &workspacecompiler.PersistentConfiguration{
-			Root: cacheRoot,
+			Root: filepath.FromSlash(options.cacheDirectory), RootBoundary: workspaceRoot,
 			Limits: packagecache.DiskLimits{
 				MaxEntries: options.cacheEntries, MaxBytes: options.cacheBytes,
 				MaxRecordBytes: options.maxRecordBytes, TempMaxAge: options.tempMaxAge,
@@ -103,6 +108,7 @@ func runWorkspaceCacheCheck(arguments []string, sourceRoot string, stdout, stder
 	if err != nil {
 		return packageFailure(stderr, fmt.Errorf("initialize persistent workspace cache: %w", err))
 	}
+	defer session.Close()
 	checked, err := session.Check(workspace)
 	if err != nil {
 		return internalError(stderr)

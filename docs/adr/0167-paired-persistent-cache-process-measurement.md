@@ -56,4 +56,5 @@ the contract intentionally derives no average, percentile, ratio, threshold, def
   workspaces.
 - A declared reference machine, interleaving policy, broader workspace distribution, retained-growth
   study, and accepted decision rule remain required before default enablement or a performance
-  claim. ADR 0168 owns the separate crash and power-interruption safety boundary.
+  claim. ADR 0168 owns the separate crash evidence, and ADR 0169 owns the current opened-root and
+  platform flush boundary.

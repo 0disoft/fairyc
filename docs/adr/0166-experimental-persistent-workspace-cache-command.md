@@ -35,6 +35,12 @@ directory. Entry and byte ceilings reuse the existing 65,536-entry and 1 GiB saf
 temporary age is a canonical positive integer no greater than one year. Artifact bytes may not
 exceed record bytes, and record bytes may not exceed retained bytes.
 
+The command opens the workspace directory once and creates and opens the cache through that
+filesystem boundary. Every cache operation remains relative to the resulting opened root. A
+symlink, Windows junction, parent traversal, or concurrent pathname replacement cannot redirect
+cache I/O outside the opened workspace tree. The displayed `cacheDirectory` remains the validated
+relative spelling and never exposes the host path.
+
 Each invocation hashes its own executable bytes for the compiler-build cache-key member, performs
 ordinary workspace loading, lock refresh or exact locked verification, and full semantic analysis.
 Only complete verified stable-package hits skip MIR lowering. Corrupt, incompatible, partial, or

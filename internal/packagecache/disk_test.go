@@ -210,6 +210,35 @@ func TestDiskStoreRejectsNonDirectoryKeyPathWithoutReplacingIt(t *testing.T) {
 	}
 }
 
+func TestDiskStoreInRootRejectsLexicalAndSymlinkEscape(t *testing.T) {
+	t.Parallel()
+	workspace := t.TempDir()
+	outside := t.TempDir()
+	boundary, err := os.OpenRoot(workspace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer boundary.Close()
+	limits := DiskLimits{MaxEntries: 2, MaxBytes: 4096, MaxRecordBytes: 1024, TempMaxAge: time.Minute}
+	if store, err := NewDiskStoreInRoot(boundary, filepath.Join("..", "escape"), limits); err == nil {
+		_ = store.Close()
+		t.Fatal("parent traversal escaped an opened cache boundary")
+	}
+	if err := os.Symlink(outside, filepath.Join(workspace, "build")); err != nil {
+		if os.IsPermission(err) {
+			t.Skipf("directory symlink creation is unavailable: %v", err)
+		}
+		t.Fatal(err)
+	}
+	if store, err := NewDiskStoreInRoot(boundary, filepath.Join("build", "cache"), limits); err == nil {
+		_ = store.Close()
+		t.Fatal("external directory symlink escaped an opened cache boundary")
+	}
+	if _, err := os.Stat(filepath.Join(outside, "cache")); !os.IsNotExist(err) {
+		t.Fatalf("outside cache path was touched: %v", err)
+	}
+}
+
 func TestDiskStoreDeleteIfMatchPreservesDifferentGeneration(t *testing.T) {
 	t.Parallel()
 	limits := DiskLimits{MaxEntries: 4, MaxBytes: 1 << 20, MaxRecordBytes: 256 << 10, TempMaxAge: time.Minute}

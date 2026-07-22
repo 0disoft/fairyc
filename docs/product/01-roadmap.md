@@ -498,9 +498,10 @@ temporary recovery. ADR 0165 adds exact executable-byte build identity, and ADR 
 explicit experimental command with a versioned JSON receipt. A separately built Windows `fairyc.exe`
 now proves cold fallback followed by two verified disk hits. ADR 0167 expands that probe into nine
 fresh-cache cold/warm pairs with separate compiler processes, raw caller-observed durations, strict
-state validation, and zero retries. ADR 0168 adds Windows write-through publication, non-Windows
-directory sync, and deterministic pre/post-publication process kills. Interruption may yield a
-verified hit or safe miss, never accepted partial cache truth. No ordinary-command cache, default
+state validation, and zero retries. ADR 0168 adds deterministic pre/post-publication process kills;
+ADR 0169 replaces its pathname-based Windows primitive with opened-root containment, handle-relative
+rename, Windows final-file flush, and non-Windows directory sync. Interruption may yield a verified
+hit or safe miss, never accepted partial cache truth. No ordinary-command cache, default
 path or quota, universal storage-retention guarantee, reference-machine comparison, or speed claim
 exists yet.
 

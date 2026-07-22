@@ -77,9 +77,9 @@ cannot justify a disk format or default budget.
 
 ADR 0162 supplies the stable package MIR payload required by a truthful disk record. ADR 0163 adds
 the disposable bounded storage primitive. ADR 0164 connects both through explicit configuration,
-ADR 0166 exposes only that explicit policy as an experimental command, and ADR 0168 defines
-platform publication durability plus verified-hit-or-safe-miss crash outcomes. None claims that a disk
-hit is faster than ordinary lowering.
+ADR 0166 exposes only that explicit policy as an experimental command, ADR 0168 defines the
+verified-hit-or-safe-miss crash outcomes, and ADR 0169 binds all workspace-cache I/O to opened roots.
+None claims that a disk hit is faster than ordinary lowering.
 
 ADR 0155 connects those bytes to the bounded LRU and distinguishes verified hits from raw store
 hits, misses, and rejected entries. Rejection uses complete-record compare-and-delete so a stale

@@ -2,6 +2,7 @@ package packagecache
 
 import (
 	"bytes"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -48,7 +49,8 @@ type DiskStats struct {
 // DiskStore persists immutable content-addressed record generations. It uses no lock file and no
 // mutable index; concurrent processes can only publish identical names or independent generations.
 type DiskStore struct {
-	root     string
+	root     *os.Root
+	rootName string
 	limits   DiskLimits
 	mu       sync.Mutex
 	hits     uint64
@@ -88,24 +90,64 @@ type diskPutHooks struct {
 
 // NewDiskStore creates the versioned root and rejects every missing bound.
 func NewDiskStore(root string, limits DiskLimits) (*DiskStore, error) {
-	if root == "" {
-		return nil, fmt.Errorf("package cache disk root must be nonempty")
-	}
-	if limits.MaxEntries <= 0 || limits.MaxBytes == 0 || limits.MaxRecordBytes == 0 || limits.TempMaxAge <= 0 {
-		return nil, fmt.Errorf("package cache disk limits must all be positive")
-	}
-	if limits.MaxRecordBytes > limits.MaxBytes {
-		return nil, fmt.Errorf("package cache MaxRecordBytes cannot exceed MaxBytes")
+	if err := validateDiskStoreInputs(root, limits); err != nil {
+		return nil, err
 	}
 	absolute, err := filepath.Abs(root)
 	if err != nil {
 		return nil, fmt.Errorf("resolve package cache disk root: %w", err)
 	}
-	versionRoot := filepath.Join(absolute, diskLayoutDirectory)
-	if err := os.MkdirAll(versionRoot, 0o700); err != nil {
+	if err := os.MkdirAll(absolute, 0o700); err != nil {
 		return nil, fmt.Errorf("create package cache disk root: %w", err)
 	}
-	return &DiskStore{root: versionRoot, limits: limits}, nil
+	boundary, err := os.OpenRoot(absolute)
+	if err != nil {
+		return nil, fmt.Errorf("open package cache disk root: %w", err)
+	}
+	defer boundary.Close()
+	return NewDiskStoreInRoot(boundary, ".", limits)
+}
+
+// NewDiskStoreInRoot creates the versioned cache beneath an already-open filesystem boundary.
+// Every later operation stays relative to the returned opened root, so a symlink, junction, or
+// rename race cannot redirect cache I/O outside the caller's boundary.
+func NewDiskStoreInRoot(boundary *os.Root, root string, limits DiskLimits) (*DiskStore, error) {
+	if boundary == nil {
+		return nil, fmt.Errorf("package cache filesystem boundary must be initialized")
+	}
+	if err := validateDiskStoreInputs(root, limits); err != nil {
+		return nil, err
+	}
+	versionRoot := filepath.Join(root, diskLayoutDirectory)
+	if err := boundary.MkdirAll(versionRoot, 0o700); err != nil {
+		return nil, fmt.Errorf("create package cache disk root in boundary: %w", err)
+	}
+	opened, err := boundary.OpenRoot(versionRoot)
+	if err != nil {
+		return nil, fmt.Errorf("open package cache disk root in boundary: %w", err)
+	}
+	return &DiskStore{root: opened, rootName: opened.Name(), limits: limits}, nil
+}
+
+func validateDiskStoreInputs(root string, limits DiskLimits) error {
+	if root == "" {
+		return fmt.Errorf("package cache disk root must be nonempty")
+	}
+	if limits.MaxEntries <= 0 || limits.MaxBytes == 0 || limits.MaxRecordBytes == 0 || limits.TempMaxAge <= 0 {
+		return fmt.Errorf("package cache disk limits must all be positive")
+	}
+	if limits.MaxRecordBytes > limits.MaxBytes {
+		return fmt.Errorf("package cache MaxRecordBytes cannot exceed MaxBytes")
+	}
+	return nil
+}
+
+// Close releases the opened cache-directory handle. Close must not race another store operation.
+func (store *DiskStore) Close() error {
+	if store == nil || store.root == nil {
+		return nil
+	}
+	return store.root.Close()
 }
 
 // Put validates and canonically encodes one record, durably publishes one immutable digest-named
@@ -127,13 +169,13 @@ func (store *DiskStore) put(record Record, hooks diskPutHooks) error {
 	if uint64(len(encoded)) > store.limits.MaxBytes {
 		return ErrRecordTooLarge
 	}
-	keyDirectory := store.keyDirectory(record.Key)
+	keyDirectory := store.keyDirectoryName(record.Key)
 	createdKeyDirectory := false
-	if err := os.Mkdir(keyDirectory, 0o700); err != nil {
+	if err := store.root.Mkdir(keyDirectory, 0o700); err != nil {
 		if !errors.Is(err, os.ErrExist) {
 			return fmt.Errorf("create package cache key directory: %w", err)
 		}
-		info, statErr := os.Lstat(keyDirectory)
+		info, statErr := store.root.Lstat(keyDirectory)
 		if statErr != nil {
 			return fmt.Errorf("inspect package cache key directory: %w", statErr)
 		}
@@ -144,23 +186,22 @@ func (store *DiskStore) put(record Record, hooks diskPutHooks) error {
 		createdKeyDirectory = true
 	}
 	if createdKeyDirectory {
-		if err := syncCacheDirectory(store.root); err != nil {
+		if err := syncCacheDirectory(store.root, "."); err != nil {
 			return fmt.Errorf("sync package cache key-directory parent: %w", err)
 		}
 	}
 	digest := sha256.Sum256(encoded)
 	finalPath := filepath.Join(keyDirectory, hex.EncodeToString(digest[:])+".json")
-	temporary, err := os.CreateTemp(keyDirectory, ".tmp-")
+	temporary, temporaryPath, err := createCacheTemporary(store.root, keyDirectory)
 	if err != nil {
 		return fmt.Errorf("create package cache temporary file: %w", err)
 	}
-	temporaryPath := temporary.Name()
 	closed := false
 	defer func() {
 		if !closed {
 			_ = temporary.Close()
 		}
-		_ = os.Remove(temporaryPath)
+		_ = store.root.Remove(temporaryPath)
 	}()
 	if err := temporary.Chmod(0o600); err != nil {
 		return fmt.Errorf("protect package cache temporary file: %w", err)
@@ -176,13 +217,13 @@ func (store *DiskStore) put(record Record, hooks diskPutHooks) error {
 	}
 	closed = true
 	if hooks.afterTemporaryClosed != nil {
-		hooks.afterTemporaryClosed(temporaryPath)
+		hooks.afterTemporaryClosed(store.absolutePath(temporaryPath))
 	}
-	if err := publishImmutableGeneration(temporaryPath, finalPath, encoded); err != nil {
+	if err := publishImmutableGeneration(store.root, temporaryPath, finalPath, encoded); err != nil {
 		return err
 	}
 	if hooks.afterPublished != nil {
-		hooks.afterPublished(finalPath)
+		hooks.afterPublished(store.absolutePath(finalPath))
 	}
 	if err := store.Sweep(); err != nil {
 		return fmt.Errorf("collect package cache after put: %w", err)
@@ -196,7 +237,8 @@ func (store *DiskStore) Get(key Key) (Record, bool) {
 	if store == nil || isZero(key[:]) {
 		return Record{}, false
 	}
-	entries, err := os.ReadDir(store.keyDirectory(key))
+	keyDirectory := store.keyDirectoryName(key)
+	entries, err := readCacheDirectory(store.root, keyDirectory)
 	if err != nil {
 		store.recordMiss()
 		return Record{}, false
@@ -207,11 +249,11 @@ func (store *DiskStore) Get(key Key) (Record, bool) {
 		if entry.IsDir() || !validGenerationName(entry.Name()) {
 			continue
 		}
-		path := filepath.Join(store.keyDirectory(key), entry.Name())
+		path := filepath.Join(keyDirectory, entry.Name())
 		record, readErr := store.readGeneration(path, entry.Name(), key)
 		if readErr != nil {
 			store.recordRejected()
-			_ = os.Remove(path)
+			_ = store.root.Remove(path)
 			continue
 		}
 		valid = append(valid, record)
@@ -221,7 +263,7 @@ func (store *DiskStore) Get(key Key) (Record, bool) {
 			store.recordRejectedBy(uint64(len(valid)))
 			for _, entry := range entries {
 				if validGenerationName(entry.Name()) {
-					_ = os.Remove(filepath.Join(store.keyDirectory(key), entry.Name()))
+					_ = store.root.Remove(filepath.Join(keyDirectory, entry.Name()))
 				}
 			}
 		}
@@ -244,8 +286,8 @@ func (store *DiskStore) DeleteIfMatch(expected Record) bool {
 		return false
 	}
 	digest := sha256.Sum256(encoded)
-	path := filepath.Join(store.keyDirectory(expected.Key), hex.EncodeToString(digest[:])+".json")
-	file, err := os.Open(path)
+	path := filepath.Join(store.keyDirectoryName(expected.Key), hex.EncodeToString(digest[:])+".json")
+	file, err := store.root.Open(path)
 	if err != nil {
 		return false
 	}
@@ -254,7 +296,7 @@ func (store *DiskStore) DeleteIfMatch(expected Record) bool {
 	if readErr != nil || closeErr != nil || !bytes.Equal(actual, encoded) {
 		return false
 	}
-	return os.Remove(path) == nil
+	return store.root.Remove(path) == nil
 }
 
 // Sweep removes expired temporary files and oldest immutable generations until both caller bounds
@@ -286,7 +328,7 @@ func (store *DiskStore) Sweep() error {
 	for len(generations) > store.limits.MaxEntries || total > store.limits.MaxBytes {
 		oldest := generations[0]
 		generations = generations[1:]
-		if err := os.Remove(oldest.path); err != nil && !errors.Is(err, os.ErrNotExist) {
+		if err := store.root.Remove(oldest.path); err != nil && !errors.Is(err, os.ErrNotExist) {
 			return fmt.Errorf("evict package cache generation: %w", err)
 		}
 		if total >= oldest.size {
@@ -322,7 +364,7 @@ func (store *DiskStore) Stats() (DiskStats, error) {
 }
 
 func (store *DiskStore) scan(clean bool) ([]diskGeneration, error) {
-	keyDirectories, err := os.ReadDir(store.root)
+	keyDirectories, err := readCacheDirectory(store.root, ".")
 	if err != nil {
 		return nil, fmt.Errorf("scan package cache root: %w", err)
 	}
@@ -332,8 +374,8 @@ func (store *DiskStore) scan(clean bool) ([]diskGeneration, error) {
 		if !keyDirectory.IsDir() || !validDigestDirectory(keyDirectory.Name()) {
 			continue
 		}
-		directoryPath := filepath.Join(store.root, keyDirectory.Name())
-		entries, readErr := os.ReadDir(directoryPath)
+		directoryPath := keyDirectory.Name()
+		entries, readErr := readCacheDirectory(store.root, directoryPath)
 		if readErr != nil {
 			continue
 		}
@@ -348,7 +390,7 @@ func (store *DiskStore) scan(clean bool) ([]diskGeneration, error) {
 			}
 			if strings.HasPrefix(entry.Name(), ".tmp-") {
 				if clean && now.Sub(info.ModTime()) >= store.limits.TempMaxAge {
-					_ = os.Remove(path)
+					_ = store.root.Remove(path)
 				}
 				continue
 			}
@@ -357,7 +399,7 @@ func (store *DiskStore) scan(clean bool) ([]diskGeneration, error) {
 			}
 			if info.Size() <= 0 || uint64(info.Size()) > store.limits.MaxRecordBytes {
 				if clean {
-					_ = os.Remove(path)
+					_ = store.root.Remove(path)
 					store.rejected++
 				}
 				continue
@@ -369,7 +411,7 @@ func (store *DiskStore) scan(clean bool) ([]diskGeneration, error) {
 }
 
 func (store *DiskStore) readGeneration(path, name string, expected Key) (Record, error) {
-	file, err := os.Open(path)
+	file, err := store.root.Open(path)
 	if err != nil {
 		return Record{}, err
 	}
@@ -396,33 +438,73 @@ func (store *DiskStore) readGeneration(path, name string, expected Key) (Record,
 }
 
 func (store *DiskStore) keyDirectory(key Key) string {
-	return filepath.Join(store.root, hex.EncodeToString(key[:]))
+	return store.absolutePath(store.keyDirectoryName(key))
 }
 
-func publishImmutableGeneration(temporaryPath, finalPath string, expected []byte) error {
-	if err := renameCacheGeneration(temporaryPath, finalPath); err == nil {
-		if syncErr := syncCacheDirectory(filepath.Dir(finalPath)); syncErr != nil {
+func (store *DiskStore) keyDirectoryName(key Key) string {
+	return hex.EncodeToString(key[:])
+}
+
+func (store *DiskStore) absolutePath(relative string) string {
+	return filepath.Join(store.rootName, relative)
+}
+
+func createCacheTemporary(root *os.Root, directory string) (*os.File, string, error) {
+	for range 100 {
+		var nonce [16]byte
+		if _, err := rand.Read(nonce[:]); err != nil {
+			return nil, "", err
+		}
+		name := filepath.Join(directory, ".tmp-"+hex.EncodeToString(nonce[:]))
+		file, err := root.OpenFile(name, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0o600)
+		if errors.Is(err, os.ErrExist) {
+			continue
+		}
+		return file, name, err
+	}
+	return nil, "", fmt.Errorf("exhausted package cache temporary names")
+}
+
+func readCacheDirectory(root *os.Root, name string) ([]os.DirEntry, error) {
+	directory, err := root.Open(name)
+	if err != nil {
+		return nil, err
+	}
+	entries, readErr := directory.ReadDir(-1)
+	closeErr := directory.Close()
+	if readErr != nil {
+		return nil, readErr
+	}
+	if closeErr != nil {
+		return nil, closeErr
+	}
+	return entries, nil
+}
+
+func publishImmutableGeneration(root *os.Root, temporaryPath, finalPath string, expected []byte) error {
+	if err := renameCacheGeneration(root, temporaryPath, finalPath); err == nil {
+		if syncErr := syncPublishedCacheGeneration(root, finalPath, filepath.Dir(finalPath)); syncErr != nil {
 			return fmt.Errorf("sync published package cache directory: %w", syncErr)
 		}
 		return nil
 	}
-	existing, readErr := os.ReadFile(finalPath)
+	existing, readErr := root.ReadFile(finalPath)
 	if readErr == nil && bytes.Equal(existing, expected) {
-		if syncErr := syncCacheDirectory(filepath.Dir(finalPath)); syncErr != nil {
+		if syncErr := syncPublishedCacheGeneration(root, finalPath, filepath.Dir(finalPath)); syncErr != nil {
 			return fmt.Errorf("sync converged package cache directory: %w", syncErr)
 		}
 		return nil
 	}
 	// A digest-named valid destination can contain only expected. Replacing any other bytes is safe:
 	// a racing valid writer has the same payload, and losing cache state is never a build failure.
-	if removeErr := os.Remove(finalPath); removeErr == nil || errors.Is(removeErr, os.ErrNotExist) {
-		if renameErr := renameCacheGeneration(temporaryPath, finalPath); renameErr == nil {
-			if syncErr := syncCacheDirectory(filepath.Dir(finalPath)); syncErr != nil {
+	if removeErr := root.Remove(finalPath); removeErr == nil || errors.Is(removeErr, os.ErrNotExist) {
+		if renameErr := renameCacheGeneration(root, temporaryPath, finalPath); renameErr == nil {
+			if syncErr := syncPublishedCacheGeneration(root, finalPath, filepath.Dir(finalPath)); syncErr != nil {
 				return fmt.Errorf("sync replaced package cache directory: %w", syncErr)
 			}
 			return nil
 		}
-		existing, readErr = os.ReadFile(finalPath)
+		existing, readErr = root.ReadFile(finalPath)
 		if readErr == nil && bytes.Equal(existing, expected) {
 			return nil
 		}

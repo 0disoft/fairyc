@@ -3,6 +3,7 @@ package packageartifact
 import (
 	"errors"
 	"fmt"
+	"os"
 	"sync"
 
 	"github.com/0disoft/fairyc/internal/moduleinterface"
@@ -42,17 +43,43 @@ type StableCache struct {
 
 // NewStableCache creates a cross-process cache adapter with mandatory record and artifact bounds.
 func NewStableCache(root string, limits packagecache.DiskLimits, maxArtifactBytes uint64) (*StableCache, error) {
+	return newStableCache(nil, root, limits, maxArtifactBytes)
+}
+
+// NewStableCacheInRoot creates the cache beneath an already-open filesystem boundary.
+func NewStableCacheInRoot(boundary *os.Root, root string, limits packagecache.DiskLimits, maxArtifactBytes uint64) (*StableCache, error) {
+	if boundary == nil {
+		return nil, fmt.Errorf("stable package artifact filesystem boundary must be initialized")
+	}
+	return newStableCache(boundary, root, limits, maxArtifactBytes)
+}
+
+func newStableCache(boundary *os.Root, root string, limits packagecache.DiskLimits, maxArtifactBytes uint64) (*StableCache, error) {
 	if maxArtifactBytes == 0 {
 		return nil, fmt.Errorf("stable package artifact byte limit must be positive")
 	}
 	if maxArtifactBytes > limits.MaxRecordBytes {
 		return nil, fmt.Errorf("stable package artifact byte limit cannot exceed the disk record byte limit")
 	}
-	store, err := packagecache.NewDiskStore(root, limits)
+	var store *packagecache.DiskStore
+	var err error
+	if boundary == nil {
+		store, err = packagecache.NewDiskStore(root, limits)
+	} else {
+		store, err = packagecache.NewDiskStoreInRoot(boundary, root, limits)
+	}
 	if err != nil {
 		return nil, err
 	}
 	return &StableCache{store: store, maxArtifactBytes: maxArtifactBytes}, nil
+}
+
+// Close releases the persistent cache filesystem handle.
+func (cache *StableCache) Close() error {
+	if cache == nil || cache.store == nil {
+		return nil
+	}
+	return cache.store.Close()
 }
 
 // Put verifies a process-local artifact, projects it to stable identities, canonically encodes the

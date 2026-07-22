@@ -4,12 +4,16 @@ package packagecache
 
 import "os"
 
-func renameCacheGeneration(temporaryPath, finalPath string) error {
-	return os.Rename(temporaryPath, finalPath)
+func renameCacheGeneration(root *os.Root, temporaryPath, finalPath string) error {
+	return root.Rename(temporaryPath, finalPath)
 }
 
-func syncCacheDirectory(path string) error {
-	directory, err := os.Open(path)
+func syncPublishedCacheGeneration(root *os.Root, _, directory string) error {
+	return syncCacheDirectory(root, directory)
+}
+
+func syncCacheDirectory(root *os.Root, path string) error {
+	directory, err := root.Open(path)
 	if err != nil {
 		return err
 	}

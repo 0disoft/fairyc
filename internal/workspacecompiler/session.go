@@ -4,6 +4,7 @@ package workspacecompiler
 import (
 	"errors"
 	"fmt"
+	"os"
 	"slices"
 	"strings"
 	"unicode/utf8"
@@ -41,6 +42,7 @@ const maxCompilerBuildIdentityBytes = 512
 // must identify the exact compiler build; using a release family or moving label is unsafe.
 type PersistentConfiguration struct {
 	Root          string
+	RootBoundary  *os.Root
 	Limits        packagecache.DiskLimits
 	CompilerBuild string
 }
@@ -114,7 +116,11 @@ func NewSession(configuration Configuration) (*Session, error) {
 		if configuration.Persistent.CompilerBuild == "" || !utf8.ValidString(configuration.Persistent.CompilerBuild) || len(configuration.Persistent.CompilerBuild) > maxCompilerBuildIdentityBytes {
 			return nil, fmt.Errorf("persistent cache compiler build identity must be 1..%d bytes of valid UTF-8", maxCompilerBuildIdentityBytes)
 		}
-		stableCache, err = packageartifact.NewStableCache(configuration.Persistent.Root, configuration.Persistent.Limits, configuration.MaxArtifactBytes)
+		if configuration.Persistent.RootBoundary == nil {
+			stableCache, err = packageartifact.NewStableCache(configuration.Persistent.Root, configuration.Persistent.Limits, configuration.MaxArtifactBytes)
+		} else {
+			stableCache, err = packageartifact.NewStableCacheInRoot(configuration.Persistent.RootBoundary, configuration.Persistent.Root, configuration.Persistent.Limits, configuration.MaxArtifactBytes)
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -128,6 +134,9 @@ func NewSession(configuration Configuration) (*Session, error) {
 	}
 	standardLibrary, err := standardLibraryInstance()
 	if err != nil {
+		if stableCache != nil {
+			_ = stableCache.Close()
+		}
 		return nil, err
 	}
 	return &Session{
@@ -135,6 +144,14 @@ func NewSession(configuration Configuration) (*Session, error) {
 		target: targetSpec, standardLibrary: standardLibrary,
 		lower: compiler.LowerAnalyzed,
 	}, nil
+}
+
+// Close releases persistent filesystem resources. Process-local sessions have nothing to close.
+func (session *Session) Close() error {
+	if session == nil || session.stableCache == nil {
+		return nil
+	}
+	return session.stableCache.Close()
 }
 
 // Check performs semantic analysis on every request. It skips MIR lowering only when every

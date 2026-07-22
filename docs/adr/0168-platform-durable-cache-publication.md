@@ -1,6 +1,6 @@
 # ADR 0168: Define platform-specific durable publication and crash-safe cache outcomes
 
-- Status: Accepted storage hardening
+- Status: Superseded by ADR 0169
 - Date: 2026-07-22
 - Implementation: `internal/packagecache/disk.go`, `internal/packagecache/durability_*.go`
 - Storage prerequisite: `docs/adr/0163-bounded-immutable-disk-cache-store.md`
@@ -67,6 +67,11 @@ particular filesystem, controller, hypervisor, or network share honors its flush
   evidence. This ADR does not enable the cache for ordinary commands.
 - Physical power-cut testing may be added for a declared reference storage stack, but it is not a
   portable correctness prerequisite for a disposable verified cache.
+
+ADR 0169 supersedes the pathname-based Windows publication mechanism. `MoveFileExW` could request
+write-through durability, but its absolute path lookup was not bound to the already-open workspace
+directory and therefore could not close a concurrent junction or rename escape. The interruption
+tests and verified-hit-or-safe-miss contract remain current; the Windows primitive does not.
 
 ## References
 

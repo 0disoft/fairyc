@@ -21,8 +21,8 @@ temporary-file age. There are no defaults.
 
 The v1 layout is `<root>/v1/<cache-key-digest>/<record-sha256>.json`. Record files are canonical,
 strict, exact-version JSON and immutable after publication. Writers create, restrict, write, sync,
-and close a unique temporary file before durably publishing it to the content digest. ADR 0168
-defines Windows write-through rename and non-Windows directory sync. Concurrent writers of
+and close a unique temporary file before publishing it to the content digest. ADR 0169 defines the
+opened-root containment boundary, Windows post-rename file flush, and non-Windows directory sync. Concurrent writers of
 the same bytes converge on the same name. Different valid generations for one cache key are a
 producer conflict and therefore a miss; neither is selected by timestamp or filesystem order.
 
@@ -46,7 +46,7 @@ oversized rejection preserves an existing hit.
 ## Consequences and limits
 
 - No lock file, mutable index, daemon, watcher, background cleanup, or source-of-truth state exists.
-- ADR 0168 requests host-specific publication durability but deliberately guarantees only verified
+- ADR 0169 requests host-specific publication durability but deliberately guarantees only verified
   hit or safe miss after interruption. No portable contract can force a filesystem, controller,
   hypervisor, or network share to honor flushes.
 - Eviction is creation/modification-time ordered rather than access-time LRU, avoiding a write on
