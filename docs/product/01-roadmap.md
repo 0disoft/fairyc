@@ -476,13 +476,22 @@ private-root, private-dependency, and public-dependency cache paths, and records
 process-reported peak working-set and pagefile-use bytes before exit. The run uses no retries and
 makes no speedup, memory-budget, or reference-machine claim.
 
+ADR 0161 adds the first cross-process-stable type-context representation. Structs, enums, resources,
+foreign declarations, nested types, effects, and drop links project through `PackageInstanceId` and
+`FunctionID`; bounded canonical decoding rejects malformed or noncanonical data, and equivalent
+contexts retain identical bytes and IDs after build-local package and symbol renumbering. Existing
+package artifacts recompute and verify that projection. Function bodies still carry local IDs and
+source provenance, exact process-local context equality remains required for reassembly, and the
+complete workspace projection still prevents package-granular mixed-generation reuse.
+
 - Repeat the bounded session on a declared reference machine with controlled distributions, private
   or live-heap evidence, and an accepted noise policy before selecting defaults or claiming
   developer-loop speedup. The current local run has process peaks, an editor-shaped workload, and
   an explicit zero-retry policy but is not reference evidence.
 - ADR 0146 explicitly defers persistent storage. Package-aware Windows builds, the bounded
-  whole-program MIR codec, and process-local package function slices now exist; stable type-context
-  artifacts, cross-process corruption policy, and configured cold/warm timing evidence still gate disk policy.
+  whole-program MIR codec, process-local package function slices, and stable type-context v1 bytes
+  now exist; stable function-body rebinding, cross-process corruption policy, and configured
+  cold/warm timing evidence still gate disk policy.
 - Stabilize the minimal `fairyc check`, `build`, `run`, `test`, `emit`, `explain`, and `targets` contracts.
 - Move to function-level reuse only when measured package rebuild or storage evidence justifies the complexity.
 

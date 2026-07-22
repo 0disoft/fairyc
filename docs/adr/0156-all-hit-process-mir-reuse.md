@@ -53,8 +53,8 @@ valid artifacts from different compilation generations may be incompatible with 
 - ordinary one-shot CLI commands create no long-lived Session, so separate invocations do not share
   this cache; ADR 0159 later exposes one explicit bounded foreground session for repeated workspace
   checks;
-- persistence, remote reuse, stable type-context encoding, default cache limits, and cross-process
-  compatibility remain deferred.
+- ADR 0161 adds stable type-context encoding, but stable body encoding and rebinding, persistence,
+  remote reuse, default cache limits, and cross-process compatibility remain deferred.
 
 ## Rejected alternatives
 

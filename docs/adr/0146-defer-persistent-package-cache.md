@@ -53,7 +53,9 @@ would directly conflict with Fairy C's small-build-artifact goal.
 
 ADR 0149 now supplies a bounded verified whole-program MIR codec, ADRs 0157-0158 preserve
 process-local cold, warm, and edit-class observations, and ADR 0159 exposes that reuse through a
-bounded foreground workspace-check session. None of this writes or reads cache state across a
-process boundary. Process-memory measurement, representative workloads, corrupt persistent-entry
+bounded foreground workspace-check session. ADR 0161 now supplies stable type-context bytes and an
+identity across build-local package and symbol renumbering, but function bodies still have no stable
+cross-process encoding or checked rebind operation. None of this writes or reads cache state across
+a process boundary. Process-memory measurement, representative workloads, corrupt persistent-entry
 recovery, concurrent-process behavior, cleanup recovery, and a justified retained-disk policy
 therefore keep the persistence gate closed.

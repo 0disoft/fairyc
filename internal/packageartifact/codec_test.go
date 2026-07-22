@@ -22,7 +22,7 @@ func TestProcessCodecRoundTripsVerifiedArtifact(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !bytes.HasPrefix(encoded, []byte(`{"schema":"fairyc.package-mir-process/v0"`)) {
+	if !bytes.HasPrefix(encoded, []byte(`{"schema":"fairyc.package-mir-process/v1"`)) {
 		t.Fatalf("encoded prefix = %q", encoded[:min(len(encoded), 80)])
 	}
 	decoded, err := codec.Decode(encoded)

@@ -11,13 +11,14 @@ import (
 	"github.com/0disoft/fairyc/internal/packagegraph"
 )
 
-// Artifact is one independently verified, process-local package MIR slice. Context deliberately
-// retains the exact workspace-wide type and foreign-function snapshot for this first boundary; it
-// is not a persistent or cross-process format.
+// Artifact is one independently verified, process-local package MIR slice. StableContext removes
+// build-local type and symbol numbering, while Context retains the exact workspace snapshot needed
+// to verify and reassemble the current process-local MIR bodies.
 type Artifact struct {
 	PackageID         hir.PackageID
 	Package           packagegraph.InstanceID
 	PackageIdentities map[hir.PackageID]packagegraph.InstanceID
+	StableContext     ContextDescriptor
 	Context           mir.Program
 	Functions         []FunctionRecord
 	Imports           []FunctionImport
@@ -166,6 +167,11 @@ func extractVerified(program mir.Program, packageID hir.PackageID, identities ma
 	}
 	sortRecords(artifact.Functions)
 	sortImports(artifact.Imports)
+	stableContext, err := DescribeContext(artifact.Context, artifact.PackageIdentities, artifactBindings(artifact))
+	if err != nil {
+		return Artifact{}, fmt.Errorf("describe package %d type context: %w", packageID, err)
+	}
+	artifact.StableContext = stableContext
 	if err := Verify(artifact); err != nil {
 		return Artifact{}, fmt.Errorf("verify extracted package %d: %w", packageID, err)
 	}
@@ -216,6 +222,13 @@ func Verify(artifact Artifact) error {
 		}
 		program.Functions = append(program.Functions, stub)
 	}
+	expectedContext, err := DescribeContext(artifact.Context, artifact.PackageIdentities, artifactBindings(artifact))
+	if err != nil {
+		return fmt.Errorf("describe stable type context: %w", err)
+	}
+	if !reflect.DeepEqual(artifact.StableContext, expectedContext) {
+		return fmt.Errorf("package artifact stable type context does not match its process-local context")
+	}
 	if failures := mir.Verify(program); len(failures) != 0 {
 		return fmt.Errorf("verify package MIR closure: %w", failures[0])
 	}
@@ -239,6 +252,9 @@ func Reassemble(artifacts []Artifact) (mir.Program, error) {
 	owned := make(map[FunctionID]FunctionRecord)
 	owners := make(map[FunctionID]int)
 	for artifactIndex, artifact := range artifacts {
+		if !reflect.DeepEqual(artifact.StableContext, base.StableContext) {
+			return mir.Program{}, fmt.Errorf("package artifacts do not share one stable type context")
+		}
 		if !reflect.DeepEqual(artifact.Context, base.Context) || !reflect.DeepEqual(artifact.PackageIdentities, base.PackageIdentities) {
 			return mir.Program{}, fmt.Errorf("package artifacts do not share one exact process-local context")
 		}

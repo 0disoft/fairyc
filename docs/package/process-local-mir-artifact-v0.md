@@ -3,6 +3,7 @@
 - Status: Executable provisional boundary
 - Decision: `docs/adr/0153-process-local-package-mir-artifacts.md`
 - Process codec decision: `docs/adr/0154-process-bound-package-artifact-codec.md`
+- Stable context decision: `docs/adr/0161-stable-type-context-artifact.md`
 - Implementation source: `internal/packageartifact/artifact.go`, `internal/packageartifact/codec.go`, `internal/workspacecompiler/session.go`
 
 ## Scope
@@ -14,12 +15,14 @@ slices. Each slice carries:
 - the exact package-number-to-instance map used by the compilation;
 - package-owned MIR function bodies paired with `FunctionID` v1 descriptors;
 - explicit body-free signatures for called functions owned by other packages;
+- a stable type-context v1 projection without build-local package or symbol numbers;
 - the exact workspace-wide type and foreign-function context from that compilation.
 
-The last item is intentionally conservative. Type definitions still contain build-local package
-numbers and resource drop links. Sharing the complete immutable context lets the ordinary MIR
-verifier check each function slice now without pretending that type metadata already has a stable
-persistent encoding.
+The stable projection renders nominal types through `PackageInstanceId`, resource drop links through
+`FunctionID`, and foreign declarations through stable owner/name/signature facts. The exact context
+remains intentionally conservative: bodies still refer to build-local types, symbols, spans, and
+entities. Sharing it lets the ordinary MIR verifier check each function slice without pretending
+that function bodies can already cross a process boundary.
 
 ## Extraction and verification
 
@@ -30,13 +33,15 @@ context, non-empty resource drop functions referenced anywhere in that context a
 owned functions or imports.
 
 Artifact verification rejects inconsistent owner maps, executable functions hidden in the context,
-unsorted or duplicate bindings, changed descriptors or IDs, missing imports, and corrupt bodies. It
+stable-context projection drift, unsorted or duplicate bindings, changed descriptors or IDs,
+missing imports, and corrupt bodies. It
 then creates unreachable verifier-only stubs from imported signatures and reruns the ordinary closed
 MIR verifier. Those stubs are never returned to a backend or interpreter.
 
 ## Reassembly
 
-Reassembly requires every slice to have the same exact process-local identity and type context.
+Reassembly requires every slice to have the same stable type-context projection and the same exact
+process-local identity and type context.
 Every import must resolve to exactly one owned `FunctionID` with the same descriptor. The assembler
 allocates internal symbols strictly above every original internal and foreign symbol, rewrites
 internal calls and resource drop links, sorts functions by name, and reruns `mir.Verify` before
@@ -48,7 +53,7 @@ context.
 
 ## Explicit exclusions
 
-Artifact v0 has a bounded canonical process codec solely so `packagecache.MemoryStore` can own and
+Artifact v0 has a bounded canonical v1 process codec solely so `packagecache.MemoryStore` can own and
 account for the complete payload. Every codec instance embeds a random process identity. Bytes from
 another codec fail closed, so this is not a disk or cross-process format. There is still no disk
 path, cross-process lock, default size limit, cache lifetime, CLI surface, remote transport, or
@@ -56,9 +61,10 @@ compatibility promise across compiler processes. The shared type context prevent
 storage savings. The reuse coordinator still performs workspace loading and semantic analysis on
 every request; only MIR lowering and its first whole-program verification can be skipped.
 
-Persistent package reuse requires a later stable type/context encoding, corruption-safe disk policy,
-cross-process coordination, and measured clean/warm evidence. A mismatch remains a safe miss
-followed by ordinary compilation.
+The stable type-context v1 encoding now exists, but persistent package reuse still requires stable
+function-body encoding and checked rebinding, corruption-safe disk policy, cross-process
+coordination, and measured clean/warm evidence. A mismatch remains a safe miss followed by ordinary
+compilation.
 
 ## Bounded cache integration
 

@@ -66,6 +66,7 @@
 - Verified whole-program MIR artifact codec route: internal/mircodec/, docs/adr/0149-verified-mir-artifact-codec.md
 - Package-stable function identity route: internal/packageartifact/, docs/package/package-function-id-v1.md
 - Process-local package MIR artifact route: internal/packageartifact/artifact.go, docs/package/process-local-mir-artifact-v0.md
+- Stable package type-context artifact route: internal/packageartifact/context.go, docs/adr/0161-stable-type-context-artifact.md
 - Process-bound package MIR artifact codec route: internal/packageartifact/codec.go, docs/adr/0154-process-bound-package-artifact-codec.md
 - Bounded process-local package artifact cache route: internal/packageartifact/cache.go, internal/packagecache/store.go, docs/adr/0155-bounded-process-package-artifact-cache.md
 - Package-aware process-local MIR reuse route: internal/compiler/, internal/workspaceloader/semantic.go, internal/workspacecompiler/, docs/adr/0156-all-hit-process-mir-reuse.md

@@ -30,7 +30,8 @@ It is isolation, not authentication or a secret.
 - copied bytes cannot be treated as compatible by a later compiler process;
 - corruption still fails before reassembly, execution, or backend emission;
 - the encoded byte size is valid process-cache accounting evidence but not a disk-format size claim;
-- persistent storage still requires a separate stable type-context codec and compatibility decision.
+- ADR 0161 supplies a separate stable type-context codec, but persistent storage still requires
+  stable body encoding, checked local-ID rebinding, and a compatibility and disk-policy decision.
 
 ## Rejected alternatives
 

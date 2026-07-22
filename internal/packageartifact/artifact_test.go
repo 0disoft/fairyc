@@ -97,9 +97,18 @@ func TestPackageArtifactReassemblyRejectsMissingProviderAndContextDrift(t *testi
 	drifted := cloneArtifactsForTest(artifacts)
 	driftIndex := 1
 	drifted[driftIndex].Context.StructTypes = append(drifted[driftIndex].Context.StructTypes, mir.StructType{
-		Type: "drift::Type", Name: "Type", Entity: "struct-type:drift-type",
+		Type: hir.Type(hir.QualifiedModulePath(drifted[driftIndex].PackageID, "drift") + "::Type"),
+		Name: "Type", Span: hir.Span{Package: drifted[driftIndex].PackageID}, Entity: "struct-type:drift-type",
 	})
-	if _, err := Reassemble(drifted); err == nil || !strings.Contains(err.Error(), "exact process-local context") {
+	drifted[driftIndex].StableContext, err = DescribeContext(
+		drifted[driftIndex].Context,
+		drifted[driftIndex].PackageIdentities,
+		artifactBindings(drifted[driftIndex]),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Reassemble(drifted); err == nil || !strings.Contains(err.Error(), "stable type context") {
 		t.Fatalf("context drift error = %v", err)
 	}
 }
@@ -139,6 +148,7 @@ func cloneArtifactsForTest(values []Artifact) []Artifact {
 func cloneArtifactForTest(value Artifact) Artifact {
 	result := value
 	result.PackageIdentities = cloneIdentities(value.PackageIdentities)
+	result.StableContext = cloneContextDescriptor(value.StableContext)
 	result.Context = mir.Clone(value.Context)
 	result.Functions = make([]FunctionRecord, len(value.Functions))
 	for index, record := range value.Functions {
