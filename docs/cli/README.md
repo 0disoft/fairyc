@@ -22,8 +22,8 @@ Only `check`, a minimal `build`, compiler inspection, and semantic test executio
 The Go frontend currently exposes stable current-workspace commands
 `fairyc check [--locked]`, `fairyc build [--release] [--locked]`, and
 `fairyc run [--release] [--locked]`, plus the stable source-independent
-`fairyc explain <diagnostic-code>` lookup. The host-independent `fairyc targets` maturity report,
-plus `fairyc experimental parse <file.fy>`,
+`fairyc explain <diagnostic-code>` lookup and stable host-independent `fairyc targets` maturity
+report, plus `fairyc experimental parse <file.fy>`,
 `fairyc experimental check-syntax <file.fy>`, and
 `fairyc experimental check-semantics <file.fy> [<file.fy>...]`. The complete implemented
 non-executing pipeline is `fairyc experimental check <primary.fy> [--source <file.fy>]...`.
@@ -220,7 +220,9 @@ and sorted missing evidence. It reads no source or configuration and performs no
 SDK, sysroot, WSL, process, network, or write operation. The declared `x86_64-windows-msvc`
 TargetSpec is host-independent; only `build-target` later resolves a local toolchain after selecting
 the declared Windows profile. It remains separate from the target-neutral Windows MSVC smoke.
-JSON, filters, target selection, and release-stable output remain unimplemented.
+The human block grammar, canonical ordering, atomic rendering, and codes 0, 2, and 4 are stable.
+Target rows and evidence evolve under TargetSpec compatibility. JSON, filters, target selection, and
+local-toolchain availability remain outside this command.
 
 Human developers can run the examples shown in the repository `README.md`. Agent verification uses
 the configured `fairyc_go_build`, `fairyc_go_vet`, and `fairyc_go_test` intents; the manual `go run`
@@ -233,10 +235,10 @@ and sends eight editor-shaped workspace checks through one stdin/stdout session 
 Windows process-memory peaks; none of those paths is self-hosting, a distribution promise, a
 reference-machine baseline, or a performance budget.
 
-The future stable `targets` command must distinguish `emittable`, `conformant`, and `supported`.
-The experimental single-target JSON does not settle its stable list or filtering syntax. The
-planned `x86_64-linux-gnu` profile cannot be promoted before its runtime, standard-library, ABI,
-toolchain, and clean-CI fixtures pass without skips.
+The stable human `targets` command distinguishes `emittable`, `conformant`, and `supported` without
+turning the experimental single-target JSON into a stable machine contract. The planned
+`x86_64-linux-gnu` profile cannot be promoted before its runtime, standard-library, ABI, toolchain,
+and clean-CI fixtures pass without skips.
 
 ## Profile principle
 

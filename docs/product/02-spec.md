@@ -513,7 +513,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - The experimental target-inspection command emits that target description without probing the
   host. It reports `scalar-and-flat-copy-resource-tagged-c11` separately while keeping `emittable`,
   `conformant`, and `supported` false and listing the evidence still missing.
-- The provisional top-level `targets` command renders every validated TargetSpec in canonical ID
+- The stable top-level `targets` human command renders every validated TargetSpec in canonical ID
   order with its schema, admitted emission subset, independent maturity states, and sorted missing
   evidence. It performs no host or toolchain probe. The Windows entry reports emission subset
   `scalar-and-llp64-c-scalar-c11` and remains independent from the target-neutral MSVC host smoke.
@@ -654,6 +654,10 @@ target choice, cache policy, and target support outside the stable contract.
 ADR 0178 stabilizes the source-independent `fairyc explain <diagnostic-code>` lookup, its exact
 three-line human shape, and codes 0, 2, and 4. It keeps catalog lifecycle, wording improvement,
 diagnostic implementation and fixture status, JSON, and span compatibility as separate contracts.
+
+ADR 0179 stabilizes the source-independent `fairyc targets` human report grammar, canonical ordering,
+atomic failure, and codes 0, 2, and 4 without freezing TargetSpec rows, evidence, or maturity. The
+report remains distinct from local toolchain availability and experimental target JSON.
 
 ADR 0146 rejects speculative persistent caching at this point. ADR 0149 supplies deterministic,
 bounded, verifier-checked bytes for a complete MIR program, but the workspace path still produces

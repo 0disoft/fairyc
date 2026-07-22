@@ -27,6 +27,9 @@ canonical-lock restoration, and artifact immutability.
 Stable explain tests execute every catalog entry through the exact three-line CLI shape after the
 diagnostic package proves canonical unique lookup and exact parity with both owning Markdown tables;
 they also cover all namespaces, malformed and unknown codes, missing roots, help, and output failure.
+Stable targets tests freeze the current complete human report, canonical target and missing-evidence
+ordering, indentation, separation, final newline, missing-root independence, argument rejection,
+help, output failure, and absence of host-local paths while target tests own maturity invariants.
 Target-description tests separately cover structural validation, power-of-two layouts, closed and
 sorted scalar and feature sets, immutable lookup copies, unknown-target rejection, deterministic
 host-independent JSON, false maturity claims, and top-level JSON-schema synchronization.

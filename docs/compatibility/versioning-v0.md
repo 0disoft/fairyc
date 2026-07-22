@@ -390,6 +390,12 @@ lifecycle. Exact lookup, the three-line shape, code/category/catalog identities,
 a code is never silently reassigned; implementation, fixture, release, JSON, and span claims remain
 separate.
 
+ADR 0179 stabilizes the source-independent `fairyc targets` human report grammar, canonical ordering,
+atomic output, and codes 0, 2, and 4. Additive target rows, evidence removal, and maturity changes are
+TargetSpec data evolution rather than CLI grammar changes; target removal or reidentification still
+requires an explicit compatibility decision. Local availability and experimental target JSON remain
+separate.
+
 ADR 0159 adds the independent `fairyc.experimental.workspace-check-session/v0` NDJSON request and
 response schema. The schema versions this experimental machine boundary and rejects unknown or
 duplicate request fields, but it does not make the command spelling, numeric limits, process exit

@@ -350,8 +350,8 @@ this Windows host because no Linux Clang/GCC execution environment is installed,
 has not yet been observed. The target therefore remains unsupported.
 A stable source-independent `fairyc explain <diagnostic-code>` lookup reports reserved Stage 0
 meanings and categories without reading source or invoking a toolchain while still marking the
-catalog provisional. A provisional `fairyc targets`
-report lists declared target maturity and missing evidence without probing this Windows host. An unstable
+catalog provisional. A stable `fairyc targets` human report lists declared target maturity and
+missing evidence without probing this Windows host. An unstable
 `fairyc experimental` CLI can inspect syntax, syntax-check, semantic-check, emit the
 scalar, flat-resource, and resource-tagged C11 translation unit, build that subset into a Linux executable on an eligible host,
 inspect the declared target specification, or interpret an explicit source-root-relative FY module
@@ -362,7 +362,7 @@ persistent cache, or stable editor protocol. Program commands use one entry plus
 are `fairyc check [--locked]` and the Windows/amd64-local
 `fairyc build [--release] [--locked]`, and the Windows/amd64-local
 `fairyc run [--release] [--locked]`, plus source-independent
-`fairyc explain <diagnostic-code>`. Stable test/emit commands, native program I/O and arguments,
+`fairyc explain <diagnostic-code>` and `fairyc targets`. Stable test/emit commands, native program I/O and arguments,
 user drop-body execution, a complete runtime, safe standard library, package manager, supported
 target, release-stable CLI as a whole, and a stable language revision do not exist yet.
 
@@ -442,9 +442,9 @@ default-cache claim. The compiler binary is
 still built from Go; only the input programs and resulting temporary
 target executables are Fairy C.
 
-`explain` and `targets` do not read the current directory or source tree. The former marks its
-diagnostic catalog as provisional; the latter reports declared TargetSpec evidence without probing
-local MSVC, SDK, WSL, or any other toolchain. The experimental source commands treat the current directory as the temporary source
+The stable `explain` and `targets` commands do not read the current directory or source tree. The
+former marks its diagnostic catalog as provisional; the latter reports declared TargetSpec evidence
+without probing local MSVC, SDK, WSL, or any other toolchain. The experimental source commands treat the current directory as the temporary source
 root. `parse` emits versioned,
 deterministic JSON containing token and CST kinds and byte spans, but not source text, token text,
 literal values, or absolute paths. `check-semantics` accepts an explicit bounded list of source files
@@ -465,7 +465,7 @@ discovery and needs no C toolchain, MSVC, WSL, or host subprocess, and reports e
 trap. The official
 stable `fairyc check [--locked]` command now checks the current `fairy.toml` workspace through
 verified MIR and maintains or verifies `fairy.lock`. `experimental check` remains the explicit-file
-developer surface; stable targets, JSON, and broader configuration are still separate work.
+developer surface; stable machine-readable target JSON and broader configuration are still separate work.
 
 `experimental target-spec` accepts exactly one known Linux GNU or Windows MSVC ID and writes
 deterministic `fairyc.target-spec/v0` JSON. The result separates target semantics from local

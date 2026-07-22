@@ -21,9 +21,9 @@ fixture-backed, or released. The exact three-line shape, code/category/catalog i
 0, 2, and 4 are stable; human meaning prose may improve without reassigning a code. JSON output,
 listing, fuzzy search, localization, and repair guidance remain unimplemented.
 
-## Implemented target maturity surface
+## Stable target maturity report v1
 
-`fairyc targets` is implemented as a provisional, source-independent human report over the
+`fairyc targets` is a stable, source-independent human report over the
 validated values returned by `target.All()`. It accepts no arguments. For every target in canonical
 ID order it writes the TargetSpec schema, admitted emission subset, independent `emittable`,
 `conformant`, and `supported` yes/no states, and the sorted missing-evidence markers.
@@ -31,9 +31,10 @@ ID order it writes the TargetSpec schema, admitted emission subset, independent 
 The command performs no source or configuration read, directory scan, executable lookup, toolchain,
 SDK, sysroot, or WSL probe, process execution, network request, or write. It reports declared target
 contracts rather than local host capabilities. The `x86_64-windows-msvc` entry therefore reports
-LLP64 facts and missing evidence independently from the target-neutral MSVC host smoke. JSON,
-filtering, target selection, and release-stable output remain unimplemented; Phase 3 still owns
-stabilization.
+LLP64 facts and missing evidence independently from the target-neutral MSVC host smoke. The block
+grammar, canonical ordering, atomic output, final newline, and codes 0, 2, and 4 are stable. Target
+rows and maturity evidence evolve under TargetSpec compatibility. JSON, filtering, target selection,
+and local-toolchain availability remain outside v1.
 
 ## Implemented experimental compiler surface
 

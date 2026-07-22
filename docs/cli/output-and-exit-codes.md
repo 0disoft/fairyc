@@ -51,8 +51,8 @@ invalid invocation or unknown code, and output failure. Success writes exactly t
 with code/meaning, category, and the provisional Stage 0 catalog identity. Failure emits no partial
 stdout. The command has no filesystem, process, network, target, or toolchain side effect.
 
-The implemented `fairyc targets` and `fairyc experimental` commands use provisional process codes
-only for prototype automation. They are not the stable exit-code taxonomy:
+The implemented `fairyc experimental` commands use provisional process codes only for prototype
+automation. They are not the stable exit-code taxonomy:
 
 | Code | Prototype meaning |
 | ---: | --- |
@@ -75,7 +75,10 @@ claim implementation, fixture coverage, or release status.
 canonical ID order. Each block includes schema, emission subset, three independent maturity states,
 and sorted missing-evidence markers. The command accepts no arguments and has no source,
 configuration, filesystem, process, network, toolchain, target-probe, WSL, or write side effect.
-Unexpected arguments use code `2`; output-write failure uses code `4`.
+The block grammar, blank-line separation, final newline, and canonical ordering are stable while
+TargetSpec rows and evidence evolve independently. Success uses code `0`; unexpected arguments use
+code `2`; invalid compiler-owned target data and output-write failure use code `4`, without partial
+stdout.
 
 `experimental parse` writes one `fairyc.experimental.parse/v0` JSON document, defined by
 `spec/cli/experimental-parse-v0.schema.json`, to stdout even when source diagnostics exist.

@@ -40,7 +40,7 @@ func TestExperimentalTargetSpecEmitsDeterministicHostIndependentJSON(t *testing.
 	}
 }
 
-func TestTargetsReportsKnownMaturityWithoutReadingSource(t *testing.T) {
+func TestStableTargetsReportsKnownMaturityWithoutReadingSource(t *testing.T) {
 	t.Parallel()
 	missingRoot := filepath.Join(t.TempDir(), "missing")
 	firstCode, firstOut, firstErr := runForTest([]string{"targets"}, missingRoot)
@@ -93,7 +93,7 @@ x86_64-windows-msvc
 	}
 }
 
-func TestTargetsRejectsArgumentsAndHandlesHelpAndOutputFailure(t *testing.T) {
+func TestStableTargetsRejectsArgumentsAndHandlesHelpAndOutputFailure(t *testing.T) {
 	t.Parallel()
 	code, stdout, stderr := runForTest([]string{"targets", "x86_64-linux-gnu"}, t.TempDir())
 	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "does not accept arguments") {
