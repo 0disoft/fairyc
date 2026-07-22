@@ -60,6 +60,6 @@ experiment. A separate package-aware command keeps the boundary explicit.
 - unit tests cover closed option parsing, root-entry ownership/signature, package-qualified C
   emission, missing entry, non-Windows failure, and existing lock behavior;
 - the full Go test, build, and vet suites cover the refactored shared Windows compilation path;
-- the configured Windows smoke observes two package builds and two package runs returning 42,
+- the configured Windows smoke observes four package builds and two package runs returning 42,
   including a separately built compiler process, and inspects all resulting PE, COFF, and unwind
   structures.

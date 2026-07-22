@@ -8,9 +8,11 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
+	"github.com/0disoft/fairyc/internal/buildmeasure"
 	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/cli"
@@ -401,39 +403,77 @@ func run() error {
 		}
 		targetBuildExecutions++
 	}
-	workspaceBuildExecutions := 0
-	for index, profile := range []string{"low", "optimized"} {
-		output := fmt.Sprintf("build/workspace-%s.exe", profile)
-		arguments := []string{
-			"experimental", "build-workspace",
-			"--target", "x86_64-windows-msvc", "--profile", profile,
-			"--output", output,
-		}
-		if index != 0 {
-			arguments = append(arguments, "--locked")
-		}
-		var workspaceBuildStdout bytes.Buffer
-		var workspaceBuildStderr bytes.Buffer
-		workspaceBuildCode := cli.Run(arguments, root, &workspaceBuildStdout, &workspaceBuildStderr)
-		if workspaceBuildCode != cli.ExitSuccess || workspaceBuildStderr.Len() != 0 || !strings.HasPrefix(workspaceBuildStdout.String(), "built workspace: "+output+" (x86_64-windows-msvc, msvc ") {
-			return fmt.Errorf("build-workspace %s returned code %d, stdout %q, stderr %q", profile, workspaceBuildCode, workspaceBuildStdout.String(), workspaceBuildStderr.String())
-		}
-		workspaceArtifactPath := filepath.Join(root, filepath.FromSlash(output))
-		workspaceArtifact, err := os.ReadFile(workspaceArtifactPath)
-		if err != nil {
-			return fmt.Errorf("read build-workspace %s artifact: %w", profile, err)
-		}
-		if _, err := pecoff.InspectExecutable(workspaceArtifact); err != nil {
-			return fmt.Errorf("inspect build-workspace %s PE executable image: %w", profile, err)
-		}
-		if _, err := pecoff.InspectAMD64Unwind(workspaceArtifact); err != nil {
-			return fmt.Errorf("inspect build-workspace %s Microsoft x64 unwind data: %w", profile, err)
-		}
-		if err := executeExpectResult(workspaceArtifactPath, 42); err != nil {
-			return fmt.Errorf("execute build-workspace %s artifact: %w", profile, err)
-		}
-		workspaceBuildExecutions++
+	toolchain, err := cdriver.ResolveWindowsHostMSVC()
+	if err != nil {
+		return fmt.Errorf("resolve Windows MSVC probe toolchain: %w", err)
 	}
+	measurement := buildmeasure.Report{
+		Schema:              buildmeasure.Schema,
+		Workload:            "workspace_quickstart",
+		Clock:               "process-monotonic-wall-nanoseconds",
+		CacheImplementation: "none",
+		Decision:            "baseline-only",
+		Environment: buildmeasure.Environment{
+			OS: runtime.GOOS, Arch: runtime.GOARCH, Target: "x86_64-windows-msvc", Toolchain: "msvc " + toolchain.Version,
+		},
+	}
+	workspaceBuildExecutions := 0
+	for _, profile := range []string{"low", "optimized"} {
+		for _, condition := range []string{buildmeasure.ConditionOrdinary, buildmeasure.ConditionLocked} {
+			label := "ordinary"
+			arguments := []string{
+				"experimental", "build-workspace",
+				"--target", "x86_64-windows-msvc", "--profile", profile,
+			}
+			if condition == buildmeasure.ConditionLocked {
+				label = "locked"
+				arguments = append(arguments, "--locked")
+			}
+			output := fmt.Sprintf("build/workspace-%s-%s.exe", profile, label)
+			arguments = append(arguments, "--output", output)
+			var workspaceBuildStdout bytes.Buffer
+			var workspaceBuildStderr bytes.Buffer
+			started := time.Now()
+			workspaceBuildCode := cli.Run(arguments, root, &workspaceBuildStdout, &workspaceBuildStderr)
+			duration := time.Since(started)
+			lockState := "verified"
+			if condition == buildmeasure.ConditionOrdinary {
+				lockState = "unchanged"
+				if profile == "low" {
+					lockState = "updated"
+				}
+			}
+			if workspaceBuildCode != cli.ExitSuccess || workspaceBuildStderr.Len() != 0 ||
+				!strings.HasPrefix(workspaceBuildStdout.String(), "built workspace: "+output+" (x86_64-windows-msvc, msvc ") ||
+				!strings.Contains(workspaceBuildStdout.String(), ", lock "+lockState+")") {
+				return fmt.Errorf("build-workspace %s %s returned code %d, stdout %q, stderr %q", profile, label, workspaceBuildCode, workspaceBuildStdout.String(), workspaceBuildStderr.String())
+			}
+			workspaceArtifactPath := filepath.Join(root, filepath.FromSlash(output))
+			workspaceArtifact, err := os.ReadFile(workspaceArtifactPath)
+			if err != nil {
+				return fmt.Errorf("read build-workspace %s %s artifact: %w", profile, label, err)
+			}
+			if _, err := pecoff.InspectExecutable(workspaceArtifact); err != nil {
+				return fmt.Errorf("inspect build-workspace %s %s PE executable image: %w", profile, label, err)
+			}
+			if _, err := pecoff.InspectAMD64Unwind(workspaceArtifact); err != nil {
+				return fmt.Errorf("inspect build-workspace %s %s Microsoft x64 unwind data: %w", profile, label, err)
+			}
+			if err := executeExpectResult(workspaceArtifactPath, 42); err != nil {
+				return fmt.Errorf("execute build-workspace %s %s artifact: %w", profile, label, err)
+			}
+			measurement.Samples = append(measurement.Samples, buildmeasure.Sample{
+				Sequence: len(measurement.Samples) + 1, Profile: profile, Condition: condition,
+				LockState: lockState, DurationNS: duration.Nanoseconds(), ArtifactBytes: int64(len(workspaceArtifact)), NativeResult: 42,
+			})
+			workspaceBuildExecutions++
+		}
+	}
+	measurementJSON, err := buildmeasure.Marshal(measurement)
+	if err != nil {
+		return fmt.Errorf("encode Windows workspace build measurement: %w", err)
+	}
+	fmt.Printf("Fairy C build measurement: %s\n", measurementJSON)
 	windowsFileSourceExecutions := 0
 	for _, profile := range []string{"low", "optimized"} {
 		output := fmt.Sprintf("build/windows-file-%s.exe", profile)
@@ -589,10 +629,6 @@ func run() error {
 		if err := runHostCase(root, testCase.name, testCase.source, testCase.support, testCase.profile, testCase.code, testCase.stdoutPrefix, testCase.stderr); err != nil {
 			return err
 		}
-	}
-	toolchain, err := cdriver.ResolveWindowsHostMSVC()
-	if err != nil {
-		return fmt.Errorf("resolve Windows MSVC probe toolchain: %w", err)
 	}
 	windowsFileExecutions, err := runWindowsFileProbe(toolchain)
 	if err != nil {

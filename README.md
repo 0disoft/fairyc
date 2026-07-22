@@ -318,7 +318,7 @@ exception, virtual-walks raiser, termination, and catcher frames, and requires o
 `__finally` execution under both profiles. The target marker remains missing until broader layout
 and independent/source-level/hosted ABI and unwind evidence exists. A host-independent PE parser
 now validates the host-smoke product, both declared-target profile products, both safe File and
-safe owned-text profile products, two package-workspace build products, two package-workspace run
+safe owned-text profile products, four measured package-workspace build products, two package-workspace run
 products, two direct run-target temporary products, two exec-target output products, and all
 eighteen raw or generated-Fairy Windows File, Buffer, owned-text, Arena, layout,
 ABI, struct-result, and unwind probe images as bounded

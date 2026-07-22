@@ -298,7 +298,7 @@ Every local MSVC compile in the same lane now also parses its intermediate `.obj
 before cleanup, including `.text$...`, `.bss`, symbol-table, and relocation-index structure. Exact
 versioned symbol names, COMDAT selection, relocation types, unwind records, and a hosted object
 receipt remain absent, so the target evidence marker stays fail-closed.
-The thirty-three local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
+The thirty-five local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
 runtime-function ordering and code coverage plus referenced version 1 and version 2 unwind-record
 bounds, including handler/chained minimum tails. A separate three-object probe now raises a private
 noncontinuable exception at both profiles, validates its payload in an outer SEH filter, walks the
@@ -348,9 +348,9 @@ example, requires no output and native result 42, and removes the image. The min
 quickstart iterates two bytes with typed `usize` ordering and checked addition, performs checked byte
 indexing, and safely converts each `u8` to `i32` through a separately built compiler process. The
 host smoke also proves maximum-`usize` addition traps under both MSVC profiles. The configured Windows
-smoke therefore covers two retained target builds, two package-workspace builds, two
+smoke therefore covers two retained target builds, four measured package-workspace builds, two
 package-workspace runs, two safe File builds, two safe owned-text builds, two direct target
-executions, two exec-target executions, and thirty-three total target or probe PE images. The
+executions, two exec-target executions, and thirty-five total target or probe PE images. The
 second direct target and workspace executions come from a separately built temporary
 `fairyc.exe` compiling the minimal Windows quickstart, so the standalone compiler process boundary
 is exercised without retaining or distributing it. This improves the developer execution path

@@ -221,7 +221,7 @@ uninitialized-data characteristic. Object bytes are not uploaded or retained. Ex
 COMDAT, relocation-type, unwind, debug, and hosted object expectations remain unconfigured.
 The ordinary Go tests include a 154-section positive regression object and reject 4,097 sections;
 the exact section count emitted by a future MSVC version remains unstabilized.
-All thirty-three linked target or probe PE images additionally traverse the Microsoft x64 exception directory before
+All thirty-five linked target or probe PE images additionally traverse the Microsoft x64 exception directory before
 execution. The local gate requires sorted nonoverlapping `.pdata` runtime-function ranges,
 executable code coverage, DWORD-aligned file-backed unwind records, bounded version 1 prolog slots,
 bounded version 2 epilog descriptors, and minimum handler/chained tails. The receipt reports the

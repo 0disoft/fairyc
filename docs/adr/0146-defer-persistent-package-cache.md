@@ -48,3 +48,11 @@ would directly conflict with Fairy C's small-build-artifact goal.
 - a configured measurement intent captures comparable cold/warm time, allocations, reads/writes,
   retained bytes, and correctness outcomes;
 - the proposed persistent policy shows bounded positive ROI instead of merely producing a hit.
+
+## Current evidence update (2026-07-22)
+
+ADR 0149 now supplies a bounded verified whole-program MIR codec, and ADR 0150 makes the configured
+Windows smoke emit four raw no-cache workspace build observations. Neither is a reusable
+package-cache hit or a comparable cold/warm distribution. Package partitioning, invalidation and
+corruption runs, retained-byte policy, cross-process behavior, and cleanup recovery therefore keep
+the persistence gate closed.

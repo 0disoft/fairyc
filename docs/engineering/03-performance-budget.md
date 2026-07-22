@@ -3,7 +3,7 @@
 - Status: Draft
 - Owner: UNASSIGNED
 - Product contract: `docs/product/02-spec.md`
-- Evidence status: No compiler, benchmark corpus, reference machine, or measurement command exists
+- Evidence status: Configured local Windows no-cache calibration exists; no dedicated benchmark corpus, reference machine, cache-hit comparison, or regression command exists
 
 Stage 0 has no numeric performance, storage, or Atlas budget. Proposed millisecond, percentage, MiB, GiB, map-size, and context-size thresholds are removed until a maintained harness produces a baseline. This document fixes what must be measured and how a later budget becomes enforceable.
 
@@ -24,6 +24,13 @@ Measure these dimensions independently:
 - requested final artifact size and regenerable intermediate size.
 
 The C transport adds a second frontend and cannot be advertised as intrinsically faster than C. Function-level caching begins only after whole-package traces demonstrate a measured bottleneck.
+
+The configured `fairyc_windows_host_smoke` emits `fairyc.build-measurement/v0` for
+`examples/workspace_quickstart`. It preserves four raw monotonic wall-time samples across ordinary
+and locked-repeat builds at both Windows profiles, artifact bytes, lock states, environment identity,
+and native result 42. `cacheImplementation: none` and `decision: baseline-only` are mandatory. This
+calibrates the schema and workload; it is not cold/warm cache evidence, a timing distribution, a
+cross-machine comparison, or a numeric budget.
 
 ## Runtime metrics
 
