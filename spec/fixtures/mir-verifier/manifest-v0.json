@@ -264,6 +264,12 @@
       "expect": { "status": "reject", "codes": ["V1502"], "primaryEntity": "terminator:call" }
     },
     {
+      "id": "fail.mir-verify.v1001.internal-call-target-missing",
+      "seed": "normal-call",
+      "mutation": { "kind": "replace-call-callee-with-missing", "target": "terminator:call" },
+      "expect": { "status": "reject", "codes": ["V1001"], "primaryEntity": "terminator:call" }
+    },
+    {
       "id": "fail.mir-verify.v1601.source-form-remains",
       "seed": "normalized-control",
       "mutation": { "kind": "insert-source-form", "target": "operation:result-switch" },

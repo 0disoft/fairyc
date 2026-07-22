@@ -29,7 +29,8 @@ error compatibility. The MIR runner executes all
   11 v0 normalization cases through mutable-local block lowering and the MIR verifier, covering
 left-to-right call evaluation, complete-root moves, normal-exit cleanup order, `Result` error
   cleanup, nearest-loop control, explicit checked arithmetic, and non-unwinding trap paths. The verifier mutation runner constructs all 10 named
-  baselines and proves all 21 isolated `V1001` through `V1701` rejection recipes. The first MIR
+  baselines and proves all 22 isolated `V1001` through `V1701` rejection recipes, including a
+  missing internal call target rejected before artifact or backend handoff. The first MIR
   interpreter slice executes all 92 v0 cases for literal return, direct `i32` minimum constants, scalar fixed-array calls, contextual immutable and mutable byte-view borrowing, exact lengths, checked reads and indexed stores, function-call arithmetic,
 boolean branches and logical not, source `&&` and `||` short-circuiting, scalar `while`, scalar
 `Option` construction/switching, scalar `Result` construction/switching/propagation,

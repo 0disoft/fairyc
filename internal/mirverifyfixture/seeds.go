@@ -260,11 +260,12 @@ func checkedArithmeticSeed() mir.Function {
 
 func normalCallSeed() mir.Function {
 	return mir.Function{
-		Name:     "seed::normal-call",
-		Entry:    0,
-		Entities: []string{"block:continuation", "terminator:call"},
+		Name:       "seed::normal-call",
+		ResultType: hir.TypeVoid,
+		Entry:      0,
+		Entities:   []string{"block:continuation", "terminator:call"},
 		Blocks: []mir.Block{
-			{ID: 0, Terminator: mir.Terminator{Kind: mir.TerminatorCall, Entity: "terminator:call", Successors: []mir.BlockID{1}, UnwindSuccessor: mir.NoBlock}},
+			{ID: 0, Terminator: mir.Terminator{Kind: mir.TerminatorCall, Entity: "terminator:call", DestinationLocal: mir.NoLocal, Successors: []mir.BlockID{1}, UnwindSuccessor: mir.NoBlock}},
 			{ID: 1, Entity: "block:continuation", Terminator: mir.Terminator{Kind: mir.TerminatorReturn, UnwindSuccessor: mir.NoBlock}},
 		},
 	}

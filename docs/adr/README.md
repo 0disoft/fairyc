@@ -160,6 +160,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0148-package-aware-windows-build-run.md`: local-exact workspace entry selection, locked Windows MSVC builds, and native package execution.
 - `0149-verified-mir-artifact-codec.md`: bounded exact-version whole-program MIR encoding with canonical decode and verifier re-entry.
 - `0150-no-cache-windows-build-calibration.md`: path-free raw Windows workspace build samples that explicitly claim no compiler cache or speedup.
+- `0151-verify-internal-call-linkage.md`: closed-world MIR function symbols and internal call signature shape verified before artifact or backend handoff.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

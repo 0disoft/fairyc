@@ -35,6 +35,7 @@ var mutationKinds = []string{
 	"remove-tagged-operation-type",
 	"remove-terminator",
 	"remove-unsafe-provenance",
+	"replace-call-callee-with-missing",
 	"use-before-initialize",
 }
 
@@ -297,6 +298,11 @@ func applyMutation(program *mir.Program, mutation mutation) (int, error) {
 				function.UnsafeOperations[index].ScopeEntity = ""
 				return 1, nil
 			}
+		}
+	case "replace-call-callee-with-missing":
+		if terminator := findTerminator(function, mutation.Target); terminator != nil && terminator.Kind == mir.TerminatorCall {
+			terminator.Callee = 999
+			return 1, nil
 		}
 	default:
 		return 0, fmt.Errorf("unsupported mutation kind %q", mutation.Kind)

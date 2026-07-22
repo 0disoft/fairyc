@@ -80,6 +80,7 @@
             "remove-tagged-operation-type",
             "remove-terminator",
             "remove-unsafe-provenance",
+            "replace-call-callee-with-missing",
             "use-before-initialize"
           ]
         },

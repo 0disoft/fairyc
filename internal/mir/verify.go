@@ -52,9 +52,11 @@ func Verify(program Program) []VerificationError {
 	}
 	foreignFunctions, foreignFailures := verifyForeignFunctions(program.ForeignFunctions)
 	failures = append(failures, foreignFailures...)
-	failures = append(failures, verifyDropGlueLinks(program.ResourceTypes, program.Functions)...)
+	functions, functionFailures := verifyFunctionDefinitions(program.Functions, foreignFunctions)
+	failures = append(failures, functionFailures...)
+	failures = append(failures, verifyDropGlueLinks(program.ResourceTypes, program.Functions, functions)...)
 	for index := range program.Functions {
-		failures = append(failures, verifyFunction(&program.Functions[index], structTypes, enumTypes, resourceTypes, foreignFunctions)...)
+		failures = append(failures, verifyFunction(&program.Functions[index], structTypes, enumTypes, resourceTypes, foreignFunctions, functions)...)
 	}
 	slices.SortFunc(failures, func(left, right VerificationError) int {
 		if value := cmp.Compare(left.Code, right.Code); value != 0 {
@@ -67,17 +69,33 @@ func Verify(program Program) []VerificationError {
 	})
 }
 
-func verifyDropGlueLinks(resources []ResourceType, functions []Function) []VerificationError {
+func verifyFunctionDefinitions(functions []Function, foreignFunctions map[hir.SymbolID]*ForeignFunction) (map[hir.SymbolID]*Function, []VerificationError) {
 	bySymbol := make(map[hir.SymbolID]*Function, len(functions))
+	var failures []VerificationError
+	for index := range functions {
+		function := &functions[index]
+		if function.Symbol == hir.NoSymbol {
+			failures = append(failures, VerificationError{Code: "V1001", Entity: function.Name, Detail: "function symbol is missing"})
+			continue
+		}
+		if previous := bySymbol[function.Symbol]; previous != nil {
+			failures = append(failures, VerificationError{Code: "V1001", Entity: function.Name, Detail: "function symbol is duplicated"})
+			continue
+		}
+		if foreignFunctions[function.Symbol] != nil {
+			failures = append(failures, VerificationError{Code: "V1001", Entity: function.Name, Detail: "symbol is both internal and foreign"})
+			continue
+		}
+		bySymbol[function.Symbol] = function
+	}
+	return bySymbol, failures
+}
+
+func verifyDropGlueLinks(resources []ResourceType, functions []Function, bySymbol map[hir.SymbolID]*Function) []VerificationError {
 	byResource := make(map[hir.Type]*Function)
 	var failures []VerificationError
 	for index := range functions {
 		function := &functions[index]
-		if previous := bySymbol[function.Symbol]; previous != nil {
-			failures = append(failures, VerificationError{Code: "V1001", Entity: function.Name, Detail: "function symbol is duplicated"})
-		} else {
-			bySymbol[function.Symbol] = function
-		}
 		if function.DropGlueFor == "" {
 			continue
 		}
@@ -276,7 +294,7 @@ func verifyResourceTypes(definitions []ResourceType) (map[hir.Type]*ResourceType
 	return resources, failures
 }
 
-func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, enumTypes map[hir.Type]*EnumType, resourceTypes map[hir.Type]*ResourceType, foreignFunctions map[hir.SymbolID]*ForeignFunction) []VerificationError {
+func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, enumTypes map[hir.Type]*EnumType, resourceTypes map[hir.Type]*ResourceType, foreignFunctions map[hir.SymbolID]*ForeignFunction, functions map[hir.SymbolID]*Function) []VerificationError {
 	if int(function.Entry) < 0 || int(function.Entry) >= len(function.Blocks) {
 		return []VerificationError{{Code: "V1001", Entity: function.Name, Detail: "entry block is missing"}}
 	}
@@ -806,10 +824,12 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 			failures = append(failures, VerificationError{Code: "V1502", Entity: terminatorEntity(item.id, terminator), Detail: "Stage 0 call has an unwind successor"})
 		}
 		if terminator.Kind == TerminatorCall {
-			failures = append(failures, verifyOperands(state, terminator.Arguments, terminatorEntity(item.id, terminator))...)
+			entity := terminatorEntity(item.id, terminator)
+			failures = append(failures, verifyOperands(state, terminator.Arguments, entity)...)
 			foreign := foreignFunctions[terminator.Callee]
+			internal := functions[terminator.Callee]
 			if terminator.ForeignABI != "" {
-				provenance, hasProvenance := unsafeByEntity[terminatorEntity(item.id, terminator)]
+				provenance, hasProvenance := unsafeByEntity[entity]
 				callEntity := sourceEntity("call", terminator.Span)
 				sourceSpanEntity := sourceEntity("span", terminator.Span)
 				scopeEntity := sourceEntity("unsafe-scope", terminator.UnsafeScope)
@@ -817,10 +837,20 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 					terminator.UnsafeScope.StartByte <= terminator.Span.StartByte && terminator.UnsafeScope.EndByte >= terminator.Span.EndByte
 				if foreign == nil || terminator.ForeignABI != "C" || terminator.Entity != callEntity || !scopeContainsCall ||
 					!hasProvenance || provenance.SourceSpanEntity != sourceSpanEntity || provenance.ScopeEntity != scopeEntity {
-					failures = append(failures, VerificationError{Code: "V1701", Entity: terminatorEntity(item.id, terminator), Detail: "foreign call lacks a matching declaration or unsafe provenance"})
+					failures = append(failures, VerificationError{Code: "V1701", Entity: entity, Detail: "foreign call lacks a matching declaration or unsafe provenance"})
 				}
 			} else if foreign != nil {
-				failures = append(failures, VerificationError{Code: "V1701", Entity: terminatorEntity(item.id, terminator), Detail: "foreign call is missing its ABI and unsafe provenance"})
+				failures = append(failures, VerificationError{Code: "V1701", Entity: entity, Detail: "foreign call is missing its ABI and unsafe provenance"})
+			} else if internal == nil {
+				failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "internal call names a missing function"})
+			} else {
+				if len(terminator.Arguments) != len(internal.ParameterTypes) {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "internal call argument count does not match the callee signature"})
+				}
+				if (internal.ResultType == hir.TypeVoid && terminator.DestinationLocal != NoLocal) ||
+					(internal.ResultType != hir.TypeVoid && terminator.DestinationLocal == NoLocal) {
+					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "internal call destination does not match the callee result"})
+				}
 			}
 			if terminator.DestinationLocal != NoLocal {
 				state.live[hir.SymbolID(terminator.DestinationLocal)] = true

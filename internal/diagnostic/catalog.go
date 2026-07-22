@@ -89,7 +89,7 @@ var catalogEntries = []CatalogEntry{
 	{Code: "E8002", Category: categoryCompatibility, Meaning: "Requested language revision is unsupported by this compiler."},
 	{Code: "A2001", Category: categoryAtlas, Meaning: "Dependency map is incompatible; affected Atlas relations are partial or unavailable while compilation remains valid."},
 	{Code: "A9001", Category: categoryAtlas, Meaning: "Deterministic symbol identity collision or corrupt identity evidence; the map is rejected."},
-	{Code: "V1001", Category: categoryVerifier, Meaning: "Every reachable block ends in exactly one terminator; each operation has its required shape and concrete type identity; every executable aggregate use agrees with one valid program-level definition; and foreign declarations mapped to one link name have compatible signatures."},
+	{Code: "V1001", Category: categoryVerifier, Meaning: "Every reachable block ends in exactly one terminator; each operation has its required shape and concrete type identity; every executable aggregate use agrees with one valid program-level definition; internal function symbols and call signature shapes are closed and consistent; and foreign declarations mapped to one link name have compatible signatures."},
 	{Code: "V1002", Category: categoryVerifier, Meaning: "Every use is dominated by an initialized assignment on all incoming paths."},
 	{Code: "V1101", Category: categoryVerifier, Meaning: "A resource root is moved or dropped at most once."},
 	{Code: "V1102", Category: categoryVerifier, Meaning: "A live resource on a normal exiting edge has exactly one cleanup obligation."},

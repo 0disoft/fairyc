@@ -7,6 +7,21 @@ import (
 	"github.com/0disoft/fairyc/internal/hir"
 )
 
+func TestVerifyRejectsMissingInternalCallTarget(t *testing.T) {
+	t.Parallel()
+	program := Program{Functions: []Function{{
+		Symbol: 1, Name: "test::caller", ResultType: hir.TypeVoid, Entry: 0,
+		Blocks: []Block{
+			{ID: 0, Terminator: Terminator{Kind: TerminatorCall, Entity: "terminator:call", Callee: 2, Successors: []BlockID{1}, UnwindSuccessor: NoBlock}},
+			{ID: 1, Terminator: Terminator{Kind: TerminatorReturn, UnwindSuccessor: NoBlock}},
+		},
+	}}}
+	failures := Verify(program)
+	if len(failures) != 1 || failures[0].Code != "V1001" || failures[0].Entity != "terminator:call" {
+		t.Fatalf("Verify() = %+v", failures)
+	}
+}
+
 func TestVerifyMergesBranchLocalInitializationByIntersection(t *testing.T) {
 	t.Parallel()
 	program := Program{Functions: []Function{{
