@@ -66,7 +66,7 @@ form.
 
 ## Implemented experimental compiler surface
 
-The current Go prototype implements twenty deliberately unstable developer commands:
+The current Go prototype implements twenty-two deliberately unstable developer commands:
 
 | Command | Purpose | Output |
 | --- | --- | --- |
@@ -76,6 +76,8 @@ The current Go prototype implements twenty deliberately unstable developer comma
 | `fairyc experimental check <primary.fy> [--source <file.fy>]...` | Run syntax, semantic, Flow, MIR-lowering, and MIR-verifier stages over one explicit source closure without requiring an executable entry | One verified-MIR function and foreign-declaration count line, source diagnostics, or an explicit unsupported-subset error |
 | `fairyc experimental check-workspace [--locked]` | Load the current directory's strict `fairy.toml`, explicit local members and sources, validate or refresh canonical `fairy.lock`, then run package-aware semantic and verified MIR | Deterministic instance/source/MIR counts and lock state, diagnostics, or prototype package failure code `7` |
 | `fairyc experimental atlas-pack overview --package-uid <uid> --max-records <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--locked]` | Compile the manifest-owned workspace, select one exact unique package UID, and run the bounded current Atlas overview query | Exact canonical `fairyc.context-pack-json/v1` bytes with no trailing newline, free text, source body, host path, map-store write, or hidden numeric limit |
+| `fairyc experimental atlas-pack show --package-uid <uid> --symbol <symbol-id> --direction <outgoing\|incoming\|both> --relation <kind> [--relation <kind>]... --max-records <count> --max-relations <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--locked]` | Compile the manifest-owned workspace, select one exact package and visible/full SymbolId, then retrieve bounded subject facts and filtered relations | Exact canonical `fairyc.context-pack-json/v1` bytes with the same no-newline, compiler-fact-only, no-store, and explicit-limit boundary |
+| `fairyc experimental atlas-pack around --package-uid <uid> --symbol <symbol-id> --direction <outgoing\|incoming\|both> --relation <kind> [--relation <kind>]... --max-records <count> --max-relations <count> --max-depth <depth> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--locked]` | Run deterministic package-local breadth-first traversal from one exact visible/full SymbolId under explicit direction, relation, depth, and size policy | Exact canonical `fairyc.context-pack-json/v1` bytes with explicit incompleteness and no inferred names, dependency joins, free text, or hidden limit |
 | `fairyc experimental atlas-symbols list --package-uid <uid> --kind <kind> [--kind <kind>]... [--module <module>] [--after <full-symbol-id>] --max-symbols <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--locked]` | Compile the manifest-owned workspace and page exact current declarations in full-SymbolId order with exact filters | One canonical checksummed `fairyc.symbol-catalog-json/v0` value with no newline, source body, fuzzy rank, map-store path, or hidden limit |
 | `fairyc experimental check-workspace-session --target <target-id> --max-requests <count> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-artifact-bytes <bytes> [--locked]` | Keep one bounded process-local verified-MIR Session while a caller submits sequential versioned NDJSON check requests on stdin | One `fairyc.experimental.workspace-check-session/v0` JSON response per completed request, human diagnostics on stderr, and the last completed request's prototype exit code |
 | `fairyc experimental check-workspace-cache --target <target-id> --cache-dir <build/path> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-record-bytes <bytes> --cache-max-artifact-bytes <bytes> --cache-temp-max-age-seconds <seconds> [--locked]` | Run one package-aware semantic and verified-MIR check with explicit bounded cross-process stable disk reuse keyed by the exact executable image | One `fairyc.experimental.workspace-cache-check/v0` JSON object, human diagnostics on stderr, or prototype invocation/package/internal failure |
@@ -115,8 +117,20 @@ positive decimals are capped at 65,536 records and 1,073,741,824 bytes for each 
 Overview fixes its unused relation and depth budgets to zero. The command hashes the running
 compiler image, produces current package maps, and writes exactly one canonical compiler-fact
 Context Pack to stdout without a newline. It writes no map store, source, artifact, cache, or default
-path and starts no toolchain, process, watcher, daemon, network request, or model call. `show`,
-`around`, free text, and pack decoding remain unavailable.
+path and starts no toolchain, process, watcher, daemon, network request, or model call. Free text and
+pack decoding remain unavailable.
+
+`experimental atlas-pack show` and `experimental atlas-pack around` reuse that exact workspace,
+compiler-identity, current-partition, package-UID, output, lock, and failure boundary. Both require a
+canonical visible or full SymbolId, one explicit outgoing, incoming, or bidirectional direction, one
+or more implemented relation kinds, positive record/relation/selection/output limits, and no hidden
+defaults. Relation filters reject duplicates and are canonicalized. Counts are capped at 65,536 and
+byte classes at 1,073,741,824. `show` fixes depth to zero and rejects `--max-depth`; `around` requires
+a canonical decimal depth from zero through 64. Full IDs are accepted for collision-checking lookup,
+while the canonical pack records the matched visible ID. These package-local commands retain filter,
+dependency-map, incoming-package-map, and caller-budget omissions. They perform no name or fuzzy
+search, dependency-map join, workspace-wide reverse indexing, source-text import, or safe-change
+inference. Callers obtain exact IDs separately through `experimental atlas-symbols list`.
 
 `experimental atlas-symbols list` shares that exact workspace/compiler/currentness preparation. It
 requires one or more exact declaration kinds and explicit symbol, selection-byte, and final-output-

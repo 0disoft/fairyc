@@ -758,7 +758,7 @@ has explicit record, relation, traversal-depth, and deterministic selection-byte
 targets may extend traversal; dependency targets retain exact declaration descriptors without an
 invented SymbolId, and unavailable cross-package incoming calls remain explicit omissions. Results
 contain compiler facts only and are detached from the index. No source excerpt, documentation text,
-dependency join, stable standalone query transport, or command is enabled.
+dependency join, or stable standalone query transport is enabled.
 
 The first Context Pack encoder now runs those exact-current queries itself and emits one separately
 byte-bounded compact `fairyc.context-pack-json/v1` envelope. It retains exact package, map,
@@ -766,21 +766,26 @@ compiler/interface, query, budget, usage, completeness, typed fact, relation, an
 `fairyc.context-pack-checksum/v1-sha256` binds the version, encoding, and canonical logical pack.
 Documentation, source-excerpt, and warning arrays are explicitly empty, so no caller prose can be
 relabelled as compiler truth. The checksum is integrity rather than authentication. No decoder,
-untrusted pack input, text import, model call, token estimate, permission, or command is enabled.
+untrusted pack input, text import, model call, token estimate, or permission is enabled.
 
 Atlas exports deterministic, model-neutral facts such as symbols, calls, types, ownership transfers, borrows, errors, effects, allocations, unsafe and FFI reachability, source spans, and related tests. Compiler facts and free-text documentation are physically separated and carry provenance. Unknown or incomplete edges remain explicit rather than being guessed.
 
 Stage 0 Atlas now exposes `experimental atlas-pack overview` for one exact manifest package UID with
 mandatory record, selection-byte, and final-output-byte limits plus optional locked no-write mode.
-It emits canonical pack bytes without a newline or map-store write. Stage 0 work continues toward an
-exact SymbolId discovery path for `show`/`around`, a separate map-publication policy, and a separately
-reviewed attributed-text boundary.
+It emits canonical pack bytes without a newline or map-store write.
 
 The internal exact-current query layer now also provides full-SymbolId-ordered declaration catalog
 pages with explicit kind filters, optional exact module selection, positive symbol/byte limits, and
 full-ID-only continuation. ADR 0193 exposes the result as checksummed
 `fairyc.symbol-catalog-json/v0` through `experimental atlas-symbols list`. It retains no fuzzy rank,
 guessed rename, source text, map-store path, or hidden limit.
+
+Those exact visible or full SymbolIds now drive `experimental atlas-pack show` and `around`.
+Both require explicit direction, exact relation filters, record/relation/selection/output limits,
+and package UID; `around` additionally requires explicit depth. They emit Context Pack v1 bytes,
+retain incomplete dependency and incoming-package joins as omissions, and add no name search, text
+import, default store, or safe-change inference. A separate map-publication policy and separately
+reviewed attributed-text boundary remain future work.
 
 The configured Windows host smoke separately measures whole-package canonical rewrite cost after
 workspace analysis and map planning. It performs one untimed warmup and nine raw rewrites of every
@@ -801,8 +806,8 @@ plan are specified in `docs/atlas/semantic-snapshot-v0.md`, `docs/atlas/symbol-i
 `docs/atlas/fymap-query-v1.md`; compiler-fact pack output is specified in
 `docs/atlas/context-pack-v1.md`; the experimental overview command is fixed by ADR 0190, the
 rewrite measurement boundary by ADR 0191, the internal exact symbol catalog by ADR 0192, and its
-experimental output command by ADR 0193. Stable commands, experimental show/around, map publication,
-and attributed-text behavior remain future work.
+experimental output command by ADR 0193. ADR 0194 fixes experimental show/around. Stable commands,
+map publication, and attributed-text behavior remain future work.
 
 ## Explicit non-goals
 

@@ -528,7 +528,7 @@ CLI stability is promised.
 ADR 0190 adds only the unstable `experimental atlas-pack overview` spelling. Its exact package-UID
 selector, mandatory record/selection/output limits, optional locked mode, canonical no-newline
 stdout, and failure-code mapping are experimental CLI policy. It does not stabilize `.fymap` store
-layout or policy, `show`/`around`, SymbolId discovery, text import, or any Atlas compatibility family.
+layout or policy, SymbolId discovery, text import, or any Atlas compatibility family.
 
 ADR 0191 adds path-free measurement schema `fairyc.atlas-rewrite-measurement/v0`. It versions the
 local evidence envelope and exact encode-only denominator, not `.fymap` compatibility, a product
@@ -542,6 +542,12 @@ ADR 0193 independently fixes output version `fairyc.symbol-catalog/v0`, encoding
 `fairyc.symbol-catalog-json/v0`, checksum `fairyc.symbol-catalog-checksum/v0-sha256`, and the
 unstable `experimental atlas-symbols list` spelling. This does not stabilize the CLI, cross-version
 cursors, exact-name or fuzzy search, dependency joins, source text, or a catalog decoder.
+
+ADR 0194 adds the unstable `experimental atlas-pack show` and `around` spellings over the existing
+Context Pack v1 output. Visible/full selectors, directions, exact relation filters, and mandatory
+record/relation/depth/selection/output policy are experimental CLI behavior. This does not stabilize
+SymbolId across a future identity family, a cross-version query migration, graph completeness,
+dependency joins, text import, default map storage, or either command spelling.
 
 Dependency handling is relation-specific:
 

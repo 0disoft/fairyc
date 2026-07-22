@@ -1,6 +1,6 @@
 # Atlas Context Pack v1
 
-- Status: Implemented internal compiler-fact-only encoder
+- Status: Implemented internal compiler-fact-only encoder with experimental overview/show/around CLI exposure
 - Pack version: `fairyc.context-pack/v1`
 - Encoding: `fairyc.context-pack-json/v1`
 - Checksum: `fairyc.context-pack-checksum/v1-sha256`
@@ -120,6 +120,7 @@ unchanged into the pack. `impact` and semantic `diff` remain deferred.
 - no source excerpt, documentation import, generated summary, or warning producer;
 - no dependency-map join, workspace-wide index, name search, fuzzy match, or rename inference;
 - no stable command, default map path, or automatic publication; experimental CLI exposure is
-  limited to the explicit overview-only contract in ADR 0190;
+  limited to the explicit overview contract in ADR 0190 and exact-SymbolId show/around contract in
+  ADR 0194;
 - no LSP, SCIP, MCP, structural edit, agent permission, embedding, or vector database behavior; and
 - no output-token, latency, retained-size, rewrite-speed, or safe-change claim.

@@ -136,6 +136,11 @@ use `3`; manifest, workspace, source-loading, graph, and lock failures use `7`; 
 compiler invariant, and output failures use `4`. Ordinary lock maintenance may precede a later
 failure; `--locked` is no-write. No partial pack is intentionally emitted, though an external writer
 may accept a prefix before returning an output failure.
+`experimental atlas-pack show` and `experimental atlas-pack around` use the same output and code
+families. Malformed visible/full SymbolIds, unsupported directions or relations, duplicate policy,
+unknown exact symbols, and insufficient record/relation/depth/selection/output budgets use code `2`.
+`around` accepts canonical depth zero through 64; `show` rejects a depth option. Both emit no partial
+pack before output begins and preserve the same external-writer prefix caveat.
 `experimental atlas-symbols list` writes exactly one canonical
 `fairyc.symbol-catalog-json/v0` value with no trailing newline. Invalid or duplicate kinds,
 malformed full-ID cursors, unknown packages or modules, and insufficient symbol, selection-byte, or

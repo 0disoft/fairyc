@@ -97,8 +97,10 @@ type atlasSymbolsEnvelope struct {
 		} `json:"context"`
 		Symbols []struct {
 			Symbol struct {
-				Full string `json:"Full"`
+				Visible string `json:"Visible"`
+				Full    string `json:"Full"`
 			} `json:"symbol"`
+			Name string `json:"name"`
 		} `json:"symbols"`
 		NextAfter string `json:"next_after"`
 		Complete  bool   `json:"complete"`

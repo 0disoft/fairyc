@@ -31,10 +31,18 @@ func runAtlasPack(arguments []string, sourceRoot string, stdout, stderr io.Write
 	if len(arguments) == 0 {
 		return invocationError(stderr, `experimental command "atlas-pack" requires a query kind`)
 	}
-	if arguments[0] != "overview" {
+	switch arguments[0] {
+	case "overview":
+		return runAtlasPackOverview(arguments[1:], sourceRoot, stdout, stderr)
+	case "show", "around":
+		return runAtlasPackRelations(arguments[0], arguments[1:], sourceRoot, stdout, stderr)
+	default:
 		return invocationError(stderr, fmt.Sprintf("experimental command \"atlas-pack\" does not support query %q", arguments[0]))
 	}
-	options, err := parseAtlasPackOverviewOptions(arguments[1:])
+}
+
+func runAtlasPackOverview(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
+	options, err := parseAtlasPackOverviewOptions(arguments)
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
@@ -148,7 +156,7 @@ func parseAtlasPackOverviewOptions(arguments []string) (atlasPackOverviewOptions
 		value := arguments[index+1]
 		switch flag {
 		case "--package-uid":
-			if err := validateAtlasPackageUID(value); err != nil {
+			if err := validateAtlasPackageUID("atlas-pack overview", value); err != nil {
 				return atlasPackOverviewOptions{}, err
 			}
 			options.packageUID = value
@@ -189,9 +197,17 @@ func parseAtlasPositiveLimit(command, flag, value string, maximum uint64) (uint6
 	return parsed, nil
 }
 
-func validateAtlasPackageUID(value string) error {
+func parseAtlasNonnegativeLimit(command, flag, value string, maximum uint64) (uint64, error) {
+	parsed, err := strconv.ParseUint(value, 10, 64)
+	if err != nil || parsed > maximum || value != strconv.FormatUint(parsed, 10) {
+		return 0, fmt.Errorf("experimental command %q requires %s as a canonical decimal from 0 through %d", command, flag, maximum)
+	}
+	return parsed, nil
+}
+
+func validateAtlasPackageUID(command, value string) error {
 	if len(value) > 256 || !projectmanifest.ValidPackageUID(value) {
-		return fmt.Errorf("experimental command \"atlas-pack overview\" requires --package-uid as at most 256 bytes in manifest-v1 lowercase dotted form")
+		return fmt.Errorf("experimental command %q requires --package-uid as at most 256 bytes in manifest-v1 lowercase dotted form", command)
 	}
 	return nil
 }

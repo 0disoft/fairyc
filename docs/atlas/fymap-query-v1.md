@@ -86,7 +86,7 @@ or safe-change claims.
 - no source excerpt or documentation import;
 - no dependency-map join or workspace-wide reverse index;
 - no `impact`, semantic `diff`, LSP, SCIP, MCP, or structural edit behavior;
-- no stable CLI or experimental `show`/`around` command, default map path, or automatic publication;
-  ADR 0190 exposes bounded package-UID overview packs and ADR 0193 exposes the separately versioned
-  exact symbol catalog; and
+- no stable CLI, default map path, or automatic publication; ADR 0190 exposes bounded package-UID
+  overview packs, ADR 0193 exposes the separately versioned exact symbol catalog, and ADR 0194
+  exposes exact-SymbolId `show` and `around` packs; and
 - no token-count, latency, retained-size, or rewrite-speed claim.

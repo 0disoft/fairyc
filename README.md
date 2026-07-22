@@ -517,8 +517,10 @@ map omissions. `internal/contextpack` now runs those queries directly and emits 
 checksummed canonical `fairyc.context-pack-json/v1` with exact package/compatibility/query/budget/
 usage/completeness/fact/relation/omission fields and visibly empty text sections. The first
 `experimental atlas-pack overview` command exposes one explicitly selected package UID with explicit
-record/selection/output limits and no map-store default. No `show`/`around` command, default store
-policy, dependency-map join, source excerpt, pack decoder, or text importer exists yet. The internal
+record/selection/output limits and no map-store default. Exact SymbolIds obtained from the separate
+catalog command can now drive `experimental atlas-pack show` and `around` with explicit direction,
+relation, record, relation, depth, selection-byte, and output-byte policy. No default store policy,
+dependency-map join, source excerpt, pack decoder, or text importer exists yet. The internal
 query index now also provides exact full-SymbolId-ordered catalog pages with exact module/kind
 filters, explicit symbol/byte limits, and full-ID-only continuation; its output schema and CLI are
 now exposed through `experimental atlas-symbols list` as checksummed
@@ -608,7 +610,7 @@ or arbitrary link-input option.
 - Runtime and standard library: `docs/runtime/runtime-stdlib-v0.md`
 - Compatibility and versioning: `docs/compatibility/versioning-v0.md`
 - Diagnostic catalog: `docs/diagnostics/catalog-v0.md`
-- Atlas semantic snapshot, provisional SymbolId, logical planning, canonical transport, contained current-source-validated store, bounded package-local queries, canonical compiler-fact Context Packs, and whole-package rewrite measurement: `docs/atlas/`, `internal/atlasmap/`, `internal/contextpack/`, `internal/buildmeasure/atlas_rewrite.go`
+- Atlas semantic snapshot, provisional SymbolId, logical planning, canonical transport, contained current-source-validated store, bounded package-local queries, canonical compiler-fact Context Packs, exact catalog plus overview/show/around CLI, and whole-package rewrite measurement: `docs/atlas/`, `internal/atlasmap/`, `internal/contextpack/`, `internal/cli/atlas_pack*.go`, `internal/buildmeasure/atlas_rewrite.go`
 - CLI contract: `docs/cli/command-contract.md`
 - Workspace ownership: `docs/monorepo/package-ownership.md`
 

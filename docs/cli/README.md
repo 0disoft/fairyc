@@ -46,13 +46,19 @@ writes only the explicit ignored workspace cache directory, and reports versione
 --max-selection-bytes <bytes> --max-output-bytes <bytes> [--locked]` compiles the manifest-owned
 workspace, selects one exact package UID, and writes one canonical compiler-fact Context Pack to
 stdout without a trailing newline. Every size limit is explicit. The command neither reads nor
-writes a `.fymap` store, imports source or documentation text, discovers symbols by name, nor exposes
-`show` or `around`; those commands require a separate exact SymbolId discovery contract.
+writes a `.fymap` store, imports source or documentation text, nor discovers symbols by name.
 
 `fairyc experimental atlas-symbols list --package-uid <uid> --kind <kind> [--kind <kind>]...
 [--module <module>] [--after <full-symbol-id>] --max-symbols <count>
 --max-selection-bytes <bytes> --max-output-bytes <bytes> [--locked]` is that exact discovery path.
 It emits a checksummed, full-SymbolId-ordered catalog page with no fuzzy search or hidden defaults.
+
+The resulting visible or full ID can drive `fairyc experimental atlas-pack show` or `around`.
+Both require explicit direction, one or more exact relation kinds, record/relation/selection/output
+limits, and an exact package UID; `around` additionally requires a depth from zero through 64. They
+emit the same checksummed compiler-fact Context Pack version and preserve incomplete dependency or
+incoming-package joins as omissions. They do not search names, read or write a map store, import
+source/documentation text, or infer that a change is safe.
 
 The persistent command is deliberately not another session mode. Every invocation is a fresh
 process and hashes its executable before constructing a stable disk Session. The cache path must be

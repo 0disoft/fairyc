@@ -112,7 +112,7 @@ regenerate, or override compiler source.
 - Exact-current full-SymbolId-ordered catalog query: internal/atlasmap/query.go, docs/adr/0192-exact-current-symbol-catalog-query.md
 - Canonical Atlas SymbolId catalog output and experimental CLI: internal/symbolcatalog/, internal/cli/atlas_symbols.go, docs/atlas/symbol-catalog-v0.md, docs/adr/0193-experimental-symbol-catalog-command.md
 - Canonical compiler-fact-only Atlas Context Pack output: internal/contextpack/, docs/atlas/context-pack-v1.md, docs/adr/0189-canonical-compiler-fact-context-pack-v1.md
-- Experimental Atlas overview Context Pack CLI: internal/cli/atlas_pack.go, docs/adr/0190-experimental-atlas-overview-pack-command.md
+- Experimental Atlas overview, show, and around Context Pack CLI: internal/cli/atlas_pack.go, internal/cli/atlas_pack_relations.go, docs/adr/0190-experimental-atlas-overview-pack-command.md, docs/adr/0194-experimental-atlas-show-around-pack-commands.md
 - Atlas whole-package rewrite measurement: internal/buildmeasure/atlas_rewrite.go, cmd/fairyc-windows-host-smoke/, docs/adr/0191-atlas-whole-package-rewrite-measurement.md
 - Validation: VALIDATION.md
 - Agent routing: .agents/context-map.md

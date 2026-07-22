@@ -594,26 +594,29 @@ deterministic breadth-first traversal, mandatory record/relation/depth/selection
 results, and explicit filter/dependency/incoming omissions have executable regressions. ADR 0189 now
 adds output-only canonical compiler-fact Context Packs for all three queries, with exact package and
 compatibility identity, echoed budgets and usage, empty text sections, a separate final byte bound,
-and a domain-separated checksum. ADR 0190 now exposes only `experimental atlas-pack overview` with
+and a domain-separated checksum. ADR 0190 exposes `experimental atlas-pack overview` with
 an exact package UID and explicit record/selection/output bounds; it writes canonical stdout bytes
 and no map-store path. ADR 0191 now measures nine in-memory canonical rewrites of the complete fixed
 quickstart package set after planning, with source/record/encoded-byte denominators and exact byte
 identity. It makes no format, chunking, compression, incremental-update, or latency decision. No
 default store path, ordinary-command publication, dependency-map join, source excerpt,
-documentation import, pack decoder, or show/around command exists yet.
+documentation import, or pack decoder exists yet.
 ADR 0192 supplies the internal exact discovery prerequisite: full-SymbolId ordering, exact module
 and kind filters, explicit count/byte bounds, and full-ID stateless cursors all have real-workspace
 regressions without fuzzy name inference. ADR 0193 exposes those pages through bounded canonical
 `experimental atlas-symbols list` output with no store path, fuzzy search, or hidden default.
+ADR 0194 now exposes exact visible/full SymbolId `atlas-pack show` and `around` with mandatory
+direction, relation, record, relation, depth, selection-byte, and output-byte policy. The commands
+preserve package-local join omissions and add no text, decoder, store, or safe-change claim.
 
 - Preserve the implemented immutable `SemanticSnapshot` and per-package logical map plan.
 - Preserve the implemented bounded canonical `.fymap` codec and semantic revalidation boundary.
 - Preserve the implemented contained immutable store and current-source rejection boundary.
 - Preserve the implemented bounded exact-current package-local query boundary.
 - Preserve the implemented canonical compiler-fact-only Context Pack boundary.
-- Preserve the explicit overview-only experimental command and keep map publication policy separate.
+- Preserve the explicit overview/show/around experimental commands and keep map publication policy separate.
 - Preserve the raw whole-package rewrite harness; require representative failure before adding chunks or compression.
-- Preserve the implemented exact SymbolId catalog output as the only discovery path before experimental `show` or `around`.
+- Preserve the implemented exact SymbolId catalog output as the discovery path for experimental `show` and `around`.
 - Design attributed source-excerpt and documentation policy before admitting any free text.
 
 Exit gate: Atlas failure cannot change compilation; stale or incompatible maps fail closed; unknown graph edges remain explicit; text cannot grant authority.

@@ -203,6 +203,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0191-atlas-whole-package-rewrite-measurement.md`: nine raw in-memory canonical all-package rewrite samples with fixed workload denominators and no format or incremental-update conclusion.
 - `0192-exact-current-symbol-catalog-query.md`: full-SymbolId-ordered exact module/kind filtering and stateless bounded pagination without fuzzy name inference.
 - `0193-experimental-symbol-catalog-command.md`: explicit package, kind, cursor, and count/byte bounds for canonical current SymbolId catalog pages on stdout.
+- `0194-experimental-atlas-show-around-pack-commands.md`: exact visible/full SymbolId selection plus explicit direction, relation, record, relation, depth, and byte budgets for canonical show/around packs.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

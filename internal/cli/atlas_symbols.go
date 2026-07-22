@@ -81,7 +81,7 @@ func parseAtlasSymbolsOptions(arguments []string) (atlasSymbolsOptions, error) {
 		value := arguments[position+1]
 		switch flag {
 		case "--package-uid":
-			if err := validateAtlasPackageUID(value); err != nil {
+			if err := validateAtlasPackageUID("atlas-symbols list", value); err != nil {
 				return atlasSymbolsOptions{}, err
 			}
 			options.packageUID = value

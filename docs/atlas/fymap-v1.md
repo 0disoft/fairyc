@@ -1,6 +1,6 @@
 # `.fymap` v1 Logical Schema
 
-- Status: Canonical transport, contained current-source-validated store, bounded package-local queries, compiler-fact Context Pack and SymbolId catalog output, and experimental overview/catalog commands implemented; show/around commands and text import remain future work
+- Status: Canonical transport, contained current-source-validated store, bounded package-local queries, compiler-fact Context Pack and SymbolId catalog output, and experimental overview/catalog/show/around commands implemented; text import remains future work
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0004-atlas-semantic-snapshot-boundary.md`
 - Snapshot source: `docs/atlas/semantic-snapshot-v0.md`
@@ -23,6 +23,10 @@ command. ADR 0189 fixes a separate output-only compiler-fact Context Pack encodi
 or documentation text. The separate
 `fairyc.symbol-id/v1-sha256-128+256` implementation now fixes the provisional declaration join key
 described in `docs/atlas/symbol-id-v1.md`.
+
+ADR 0190 exposes exact package overview packs, ADR 0193 exposes an exact SymbolId catalog, and ADR
+0194 connects that discovery path to exact-symbol `show` and `around` packs. All remain experimental,
+require explicit limits, and rebuild exact-current compiler facts without selecting a map-store path.
 
 The first implementation plans, encodes, and optionally publishes one deterministic map per package.
 ADR 0191 adds a narrow raw quickstart rewrite distribution after planning, but it does not show a
