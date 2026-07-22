@@ -530,6 +530,10 @@ selector, mandatory record/selection/output limits, optional locked mode, canoni
 stdout, and failure-code mapping are experimental CLI policy. It does not stabilize `.fymap` store
 layout or policy, `show`/`around`, SymbolId discovery, text import, or any Atlas compatibility family.
 
+ADR 0191 adds path-free measurement schema `fairyc.atlas-rewrite-measurement/v0`. It versions the
+local evidence envelope and exact encode-only denominator, not `.fymap` compatibility, a product
+byte or latency limit, a default path, a format decision, or an incremental-update promise.
+
 Dependency handling is relation-specific:
 
 | Condition | Atlas behavior |

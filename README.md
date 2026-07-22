@@ -518,7 +518,10 @@ checksummed canonical `fairyc.context-pack-json/v1` with exact package/compatibi
 usage/completeness/fact/relation/omission fields and visibly empty text sections. The first
 `experimental atlas-pack overview` command exposes one explicitly selected package UID with explicit
 record/selection/output limits and no map-store default. No `show`/`around` command, default store
-policy, dependency-map join, source excerpt, pack decoder, or text importer exists yet.
+policy, dependency-map join, source excerpt, pack decoder, or text importer exists yet. The Windows
+host smoke now also records nine raw whole-package canonical rewrite samples after planning, checks
+byte identity, and reports fixed source/record/encoded-byte denominators without choosing chunking,
+compression, incremental updates, or a performance budget.
 
 `experimental target-spec` accepts exactly one known Linux GNU or Windows MSVC ID and writes
 deterministic `fairyc.target-spec/v0` JSON. The result separates target semantics from local
@@ -601,7 +604,7 @@ or arbitrary link-input option.
 - Runtime and standard library: `docs/runtime/runtime-stdlib-v0.md`
 - Compatibility and versioning: `docs/compatibility/versioning-v0.md`
 - Diagnostic catalog: `docs/diagnostics/catalog-v0.md`
-- Atlas semantic snapshot, provisional SymbolId, logical planning, canonical transport, contained current-source-validated store, bounded package-local queries, and canonical compiler-fact Context Packs: `docs/atlas/`, `internal/atlasmap/`, `internal/contextpack/`
+- Atlas semantic snapshot, provisional SymbolId, logical planning, canonical transport, contained current-source-validated store, bounded package-local queries, canonical compiler-fact Context Packs, and whole-package rewrite measurement: `docs/atlas/`, `internal/atlasmap/`, `internal/contextpack/`, `internal/buildmeasure/atlas_rewrite.go`
 - CLI contract: `docs/cli/command-contract.md`
 - Workspace ownership: `docs/monorepo/package-ownership.md`
 

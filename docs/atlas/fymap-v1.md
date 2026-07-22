@@ -25,7 +25,9 @@ or documentation text. The separate
 described in `docs/atlas/symbol-id-v1.md`.
 
 The first implementation plans, encodes, and optionally publishes one deterministic map per package.
-Chunking, compression, and symbol-level incremental rewrites require measured evidence. Transport
+ADR 0191 adds a narrow raw quickstart rewrite distribution after planning, but it does not show a
+representative failure of the whole-package design. Chunking, compression, and symbol-level
+incremental rewrites still require that evidence. Transport
 v1 is compact canonical JSON with a domain-separated SHA-256 checksum; another encoding requires a
 new explicit identifier. Package-instance references use the independent `PackageInstanceId` v1
 contract. The logical header records every identity algorithm independently rather than inheriting

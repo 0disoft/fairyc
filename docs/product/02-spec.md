@@ -775,6 +775,13 @@ mandatory record, selection-byte, and final-output-byte limits plus optional loc
 It emits canonical pack bytes without a newline or map-store write. Stage 0 work continues toward an
 exact SymbolId discovery path for `show`/`around`, a separate map-publication policy, and a separately
 reviewed attributed-text boundary.
+
+The configured Windows host smoke separately measures whole-package canonical rewrite cost after
+workspace analysis and map planning. It performs one untimed warmup and nine raw rewrites of every
+fixed quickstart package partition, requires exact byte identity, and reports path-free package,
+source-file, source-byte, record, and encoded-byte denominators. This control fixture selects no
+format replacement, chunking, compression, incremental-update policy, product limit, or regression
+threshold.
 `impact`, semantic
 `diff`, stable anchor syntax, LSP, SCIP, MCP, structural edits, embeddings, model-generated
 summaries, and a vector database are deferred behind usage and completeness evidence.
@@ -786,8 +793,9 @@ plan are specified in `docs/atlas/semantic-snapshot-v0.md`, `docs/atlas/symbol-i
 `docs/atlas/fymap-transport-v1.md`; the implemented store is specified in
 `docs/atlas/fymap-store-v1.md`; the implemented query layer is specified in
 `docs/atlas/fymap-query-v1.md`; compiler-fact pack output is specified in
-`docs/atlas/context-pack-v1.md`; the experimental overview command is fixed by ADR 0190. Stable
-commands, experimental show/around, map publication, and attributed-text behavior remain future work.
+`docs/atlas/context-pack-v1.md`; the experimental overview command is fixed by ADR 0190 and the
+rewrite measurement boundary by ADR 0191. Stable commands, experimental show/around, map
+publication, and attributed-text behavior remain future work.
 
 ## Explicit non-goals
 

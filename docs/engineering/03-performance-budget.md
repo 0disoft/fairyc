@@ -3,7 +3,7 @@
 - Status: Draft
 - Owner: UNASSIGNED
 - Product contract: `docs/product/02-spec.md`
-- Evidence status: Configured local Windows no-cache calibration, two-sample process-cache control-flow receipt, 36-sample edit-class raw distributions, one eight-step standalone session with process-memory peaks, nine paired cold/warm persistent-cache process observations, and one nine-process bounded retention staircase exist; no reference machine, cache speedup decision, default cache policy, or regression threshold exists
+- Evidence status: Configured local Windows no-cache calibration, two-sample process-cache control-flow receipt, 36-sample edit-class raw distributions, one eight-step standalone session with process-memory peaks, nine paired cold/warm persistent-cache process observations, one nine-process bounded retention staircase, and nine raw whole-package Atlas rewrite observations exist; no reference machine, cache speedup decision, Atlas format decision, default cache policy, or regression threshold exists
 
 Stage 0 has no numeric performance, storage, or Atlas budget. Proposed millisecond, percentage, MiB, GiB, map-size, and context-size thresholds are removed until a maintained harness produces a baseline. This document fixes what must be measured and how a later budget becomes enforceable.
 
@@ -95,6 +95,14 @@ Measure map generation separately from compiler checking and queries:
 - cost caused by missing, stale, or incompatible dependency maps.
 
 Chunking, compression, and fine-grained map updates require a measured failure of the whole-package design.
+
+ADR 0191 adds the first narrow rewrite control. The configured Windows smoke prepares verified
+partitions before timing, performs one untimed warmup, then records nine complete canonical encodes
+with fixed source and record denominators. It includes transport validation, checksum, and JSON
+serialization but excludes workspace analysis, map planning, queries, and disk publication. The
+quickstart is a control fixture, not a representative repository or a numeric budget. Because this
+encoder is target-independent and invokes no C toolchain or libc, its report records OS, architecture,
+and exact running executable identity rather than inventing target or toolchain fields.
 
 ## Benchmark protocol
 

@@ -90,7 +90,7 @@ regenerate, or override compiler source.
 - Package-aware process-local MIR reuse coordinator: internal/workspacecompiler/, docs/adr/0156-all-hit-process-mir-reuse.md
 - Explicit stable disk MIR reuse coordinator: internal/workspacecompiler/, internal/packageartifact/stable_cache.go, docs/adr/0164-verified-stable-disk-mir-reuse.md
 - Bounded workspace check-session CLI and protocol schema: internal/cli/workspace_session.go, spec/cli/experimental-workspace-check-session-v0.schema.json, docs/adr/0159-bounded-workspace-check-session.md
-- Build-measurement report schemas and configured Windows calibrations: internal/buildmeasure/, cmd/fairyc-windows-host-smoke/, docs/adr/0150-no-cache-windows-build-calibration.md, docs/adr/0157-process-cache-measurement-receipt.md, docs/adr/0158-process-cache-edit-distributions.md, docs/adr/0160-editor-shaped-session-process-measurement.md, docs/adr/0167-paired-persistent-cache-process-measurement.md, docs/adr/0171-package-scoped-stable-context.md
+- Build-measurement report schemas and configured Windows calibrations: internal/buildmeasure/, cmd/fairyc-windows-host-smoke/, docs/adr/0150-no-cache-windows-build-calibration.md, docs/adr/0157-process-cache-measurement-receipt.md, docs/adr/0158-process-cache-edit-distributions.md, docs/adr/0160-editor-shaped-session-process-measurement.md, docs/adr/0167-paired-persistent-cache-process-measurement.md, docs/adr/0171-package-scoped-stable-context.md, docs/adr/0191-atlas-whole-package-rewrite-measurement.md
 - Human project-manifest v1 parser and fixtures: internal/projectmanifest/, internal/projectmanifestfixture/, spec/fixtures/project-manifest/manifest-v1.json
 - Local workspace loader and fixtures: internal/workspaceloader/, internal/workspaceloaderfixture/, spec/fixtures/workspace-loader/manifest-v1.json
 - Compiler-bundled Stage 0 standard-library source package: internal/sdkstdlib/
@@ -111,6 +111,7 @@ regenerate, or override compiler source.
 - Bounded exact-current package-local Atlas queries: internal/atlasmap/query.go, docs/atlas/fymap-query-v1.md, docs/adr/0188-bounded-current-fymap-queries.md
 - Canonical compiler-fact-only Atlas Context Pack output: internal/contextpack/, docs/atlas/context-pack-v1.md, docs/adr/0189-canonical-compiler-fact-context-pack-v1.md
 - Experimental Atlas overview Context Pack CLI: internal/cli/atlas_pack.go, docs/adr/0190-experimental-atlas-overview-pack-command.md
+- Atlas whole-package rewrite measurement: internal/buildmeasure/atlas_rewrite.go, cmd/fairyc-windows-host-smoke/, docs/adr/0191-atlas-whole-package-rewrite-measurement.md
 - Validation: VALIDATION.md
 - Agent routing: .agents/context-map.md
 - Repository hygiene: .editorconfig, .gitattributes, .gitignore

@@ -596,8 +596,11 @@ adds output-only canonical compiler-fact Context Packs for all three queries, wi
 compatibility identity, echoed budgets and usage, empty text sections, a separate final byte bound,
 and a domain-separated checksum. ADR 0190 now exposes only `experimental atlas-pack overview` with
 an exact package UID and explicit record/selection/output bounds; it writes canonical stdout bytes
-and no map-store path. No default store path, ordinary-command publication, dependency-map join,
-source excerpt, documentation import, pack decoder, show/around command, or rewrite measurement exists yet.
+and no map-store path. ADR 0191 now measures nine in-memory canonical rewrites of the complete fixed
+quickstart package set after planning, with source/record/encoded-byte denominators and exact byte
+identity. It makes no format, chunking, compression, incremental-update, or latency decision. No
+default store path, ordinary-command publication, dependency-map join, source excerpt,
+documentation import, pack decoder, or show/around command exists yet.
 
 - Preserve the implemented immutable `SemanticSnapshot` and per-package logical map plan.
 - Preserve the implemented bounded canonical `.fymap` codec and semantic revalidation boundary.
@@ -605,9 +608,9 @@ source excerpt, documentation import, pack decoder, show/around command, or rewr
 - Preserve the implemented bounded exact-current package-local query boundary.
 - Preserve the implemented canonical compiler-fact-only Context Pack boundary.
 - Preserve the explicit overview-only experimental command and keep map publication policy separate.
+- Preserve the raw whole-package rewrite harness; require representative failure before adding chunks or compression.
 - Design exact SymbolId discovery before exposing experimental `show` or `around`.
 - Design attributed source-excerpt and documentation policy before admitting any free text.
-- Measure whole-package map rewrite cost before considering chunks or compression.
 
 Exit gate: Atlas failure cannot change compilation; stale or incompatible maps fail closed; unknown graph edges remain explicit; text cannot grant authority.
 
