@@ -68,3 +68,9 @@ Define a stable function-body artifact whose types and internal/foreign calls re
 context entries and function identities, plus a checked rebind operation into fresh local IDs.
 Only after independently produced bytes decode, rebind, pass `mir.Verify`, and execute the same
 result may the persistent-store corruption and coordination policy be reopened.
+
+The first implementation prerequisite now exists: stable type spellings rebind recursively into a
+fresh build's canonical HIR types through an exact one-to-one `PackageInstanceId` map. Built-ins,
+borrows, raw pointers, fixed arrays, `Option`, `Result`, and nominal types round-trip across package
+renumbering; unknown, duplicate, or malformed identities fail closed. Function-body encoding,
+local-ID allocation, call rebinding, and cross-process execution evidence remain in this gate.

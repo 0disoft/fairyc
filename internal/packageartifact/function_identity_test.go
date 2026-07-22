@@ -101,6 +101,60 @@ func TestFunctionIdentityTracksPackageSignatureEffectsAndDropGlue(t *testing.T) 
 	}
 }
 
+func TestStableTypeRebindsAcrossFreshPackageNumbers(t *testing.T) {
+	t.Parallel()
+	owner := testInstanceID(t, "owner")
+	dependency := testInstanceID(t, "dependency")
+	leftInstances := map[hir.PackageID]packagegraph.InstanceID{1: owner, 2: dependency}
+	rightInstances := map[hir.PackageID]packagegraph.InstanceID{7: owner, 9: dependency}
+	types := []hir.Type{
+		hir.TypeI32,
+		hir.SharedBorrow("$p1::api::Reader"),
+		hir.MutableBorrow(hir.Option("$p2::model::Packet")),
+		hir.RawPointer("$p2::model::Packet", true),
+		hir.FixedArray(hir.TypeU8, 32),
+		hir.Result(hir.Option("$p2::model::Packet"), hir.SharedBorrow("$p1::api::Reader")),
+	}
+	want := []hir.Type{
+		hir.TypeI32,
+		hir.SharedBorrow("$p7::api::Reader"),
+		hir.MutableBorrow(hir.Option("$p9::model::Packet")),
+		hir.RawPointer("$p9::model::Packet", true),
+		hir.FixedArray(hir.TypeU8, 32),
+		hir.Result(hir.Option("$p9::model::Packet"), hir.SharedBorrow("$p7::api::Reader")),
+	}
+	for index, sourceType := range types {
+		stable, err := stableType(sourceType, leftInstances)
+		if err != nil {
+			t.Fatalf("stableType(%q): %v", sourceType, err)
+		}
+		rebound, err := rebindStableType(stable, rightInstances)
+		if err != nil {
+			t.Fatalf("rebindStableType(%q): %v", stable, err)
+		}
+		if rebound != want[index] {
+			t.Errorf("rebindStableType(%q) = %q, want %q", stable, rebound, want[index])
+		}
+	}
+}
+
+func TestStableTypeRebindRejectsUnknownAmbiguousAndMalformedIdentity(t *testing.T) {
+	t.Parallel()
+	owner := testInstanceID(t, "owner")
+	stable := "pkg[" + owner.String() + "]::api::Reader"
+	if _, err := rebindStableType(stable, nil); err == nil || !strings.Contains(err.Error(), "unknown PackageInstanceId") {
+		t.Fatalf("unknown identity error = %v", err)
+	}
+	if _, err := rebindStableType(stable, map[hir.PackageID]packagegraph.InstanceID{3: owner, 8: owner}); err == nil || !strings.Contains(err.Error(), "multiple local packages") {
+		t.Fatalf("ambiguous identity error = %v", err)
+	}
+	for _, value := range []string{"$p3::api::Reader", "pkg[broken]::api::Reader", "u8[0]", "Result<i32>"} {
+		if _, err := rebindStableType(value, map[hir.PackageID]packagegraph.InstanceID{3: owner}); err == nil {
+			t.Fatalf("rebindStableType(%q) accepted malformed input", value)
+		}
+	}
+}
+
 func TestFunctionIdentityRejectsIncompleteOrBuildLocalInputs(t *testing.T) {
 	t.Parallel()
 	owner := testInstanceID(t, "owner")

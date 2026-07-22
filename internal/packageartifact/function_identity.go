@@ -318,6 +318,103 @@ func stableType(value hir.Type, instances map[hir.PackageID]packagegraph.Instanc
 	return "pkg[" + instance.String() + "]::" + logicalName, nil
 }
 
+// rebindStableType resolves one validated artifact-private type spelling into the canonical HIR
+// spelling for a fresh build. PackageInstanceId values must map one-to-one to build-local package
+// numbers; an absent or ambiguous identity fails closed instead of guessing a package.
+func rebindStableType(value string, instances map[hir.PackageID]packagegraph.InstanceID) (hir.Type, error) {
+	if !validStableType(value) {
+		return hir.TypeInvalid, fmt.Errorf("invalid stable type %q", value)
+	}
+	return rebindValidatedStableType(value, instances)
+}
+
+func rebindValidatedStableType(value string, instances map[hir.PackageID]packagegraph.InstanceID) (hir.Type, error) {
+	if builtinType(hir.Type(value)) {
+		return hir.Type(value), nil
+	}
+	for _, prefix := range []struct {
+		stable  string
+		mutable bool
+		raw     bool
+	}{
+		{stable: "ref mut ", mutable: true},
+		{stable: "ref "},
+		{stable: "ptr mut ", mutable: true, raw: true},
+		{stable: "ptr ", raw: true},
+	} {
+		if !strings.HasPrefix(value, prefix.stable) {
+			continue
+		}
+		element, err := rebindValidatedStableType(strings.TrimPrefix(value, prefix.stable), instances)
+		if err != nil {
+			return hir.TypeInvalid, err
+		}
+		if prefix.raw {
+			return hir.RawPointer(element, prefix.mutable), nil
+		}
+		if prefix.mutable {
+			return hir.MutableBorrow(element), nil
+		}
+		return hir.SharedBorrow(element), nil
+	}
+	if element, ok := hir.OptionElement(hir.Type(value)); ok {
+		rebound, err := rebindValidatedStableType(string(element), instances)
+		if err != nil {
+			return hir.TypeInvalid, err
+		}
+		return hir.Option(rebound), nil
+	}
+	if success, failure, ok := hir.ResultElements(hir.Type(value)); ok {
+		reboundSuccess, err := rebindValidatedStableType(string(success), instances)
+		if err != nil {
+			return hir.TypeInvalid, err
+		}
+		reboundFailure, err := rebindValidatedStableType(string(failure), instances)
+		if err != nil {
+			return hir.TypeInvalid, err
+		}
+		return hir.Result(reboundSuccess, reboundFailure), nil
+	}
+	if strings.HasSuffix(value, "]") {
+		separator := strings.LastIndexByte(value, '[')
+		if separator > 0 {
+			length, err := strconv.ParseUint(value[separator+1:len(value)-1], 10, 64)
+			if err != nil || length == 0 {
+				return hir.TypeInvalid, fmt.Errorf("invalid stable fixed-array type %q", value)
+			}
+			element, err := rebindValidatedStableType(value[:separator], instances)
+			if err != nil {
+				return hir.TypeInvalid, err
+			}
+			return hir.FixedArray(element, length), nil
+		}
+	}
+
+	const nominalPrefix = "pkg["
+	separator := strings.Index(value, "]::")
+	instance, err := packagegraph.ParseInstanceID(value[len(nominalPrefix):separator])
+	if err != nil {
+		return hir.TypeInvalid, fmt.Errorf("parse stable nominal type %q: %w", value, err)
+	}
+	var packageID hir.PackageID
+	found := false
+	for candidate, candidateInstance := range instances {
+		if candidateInstance != instance {
+			continue
+		}
+		if found && candidate != packageID {
+			return hir.TypeInvalid, fmt.Errorf("stable type %q maps PackageInstanceId %s to multiple local packages", value, instance)
+		}
+		packageID = candidate
+		found = true
+	}
+	if !found {
+		return hir.TypeInvalid, fmt.Errorf("stable type %q references unknown PackageInstanceId %s", value, instance)
+	}
+	logicalName := value[separator+3:]
+	return hir.Type(hir.QualifiedModulePath(packageID, logicalName)), nil
+}
+
 func nominalTypeParts(value hir.Type) (hir.PackageID, string, bool) {
 	text := string(value)
 	if strings.HasPrefix(text, "$p") {
