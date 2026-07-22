@@ -61,8 +61,8 @@ socket-security policy before Stage 0 has evidence that it needs those costs.
 - lockfile writes remain the existing ordinary-mode behavior and `--locked` remains exact and
   no-write;
 - cache memory is bounded twice by entry/total-byte limits and once by artifact-byte admission;
-- the configured standalone Windows compiler smoke proves two requests cross the real process
-  stdin/stdout boundary and that the second request is an all-hit reuse;
+- the configured standalone Windows compiler smoke proves eight editor-shaped requests cross the
+  real process stdin/stdout boundary; ADR 0160 owns its raw timing and memory receipt;
 - reference-machine timing, process peak memory, noise policy, cancellation, editor integration,
   and stable command naming remain separate gates.
 

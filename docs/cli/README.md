@@ -183,8 +183,9 @@ examples do not grant agent command authority.
 `DEVELOPMENT.md` also documents the manual WSL-free build of ignored `build/fairyc.exe` for repeated
 Windows use. The configured Windows smoke independently builds and removes a temporary compiler
 executable, verifies its help surface, drives the scalar quickstart through that separate process,
-and sends two workspace checks through one stdin/stdout session to require cold fallback followed
-by an all-hit response; none of those paths is self-hosting or a distribution promise.
+and sends eight editor-shaped workspace checks through one stdin/stdout session while recording
+Windows process-memory peaks; none of those paths is self-hosting, a distribution promise, a
+reference-machine baseline, or a performance budget.
 
 The future stable `targets` command must distinguish `emittable`, `conformant`, and `supported`.
 The experimental single-target JSON does not settle its stable list or filtering syntax. The

@@ -3,7 +3,7 @@
 - Status: Draft
 - Owner: UNASSIGNED
 - Product contract: `docs/product/02-spec.md`
-- Evidence status: Configured local Windows no-cache calibration, two-sample process-cache control-flow receipt, and 36-sample edit-class raw distributions exist; no reference machine, process-memory evidence, cache speedup decision, or regression threshold exists
+- Evidence status: Configured local Windows no-cache calibration, two-sample process-cache control-flow receipt, 36-sample edit-class raw distributions, and one eight-step standalone session with process-memory peaks exist; no reference machine, repeated process distribution, cache speedup decision, or regression threshold exists
 
 Stage 0 has no numeric performance, storage, or Atlas budget. Proposed millisecond, percentage, MiB, GiB, map-size, and context-size thresholds are removed until a maintained harness produces a baseline. This document fixes what must be measured and how a later budget becomes enforceable.
 
@@ -49,11 +49,13 @@ samples below that resolution. It proves the current invalidation paths and resu
 percentile, retry rule, reference-machine baseline, process-memory budget, or regression threshold.
 
 `experimental check-workspace-session` now supplies the first actual foreground process boundary
-that can reuse one verified-MIR Session across caller-triggered checks. Its entry, byte, artifact,
-and request budgets are explicit caller inputs rather than measured defaults. This closes the
-one-shot integration gap, but the command has no declared-machine timing distribution, peak process
-memory observation, editor workload, cancellation measurement, or regression threshold. Its
-existence therefore does not convert the earlier raw harness distributions into a speedup claim.
+that can reuse one verified-MIR Session across caller-triggered checks. ADR 0160 drives one
+separately built `fairyc.exe` through an eight-request editor-shaped sequence and preserves raw
+request-write-through-response-read durations plus Windows process-reported peak working-set and
+pagefile-use bytes. Mutations stay outside the timer and retries are forbidden. This closes the first
+process-memory and editor-workload evidence gaps, but one uncontrolled local sequence is not a
+declared-machine distribution, memory budget, cancellation measurement, regression threshold, or
+speedup claim. Its cache limits remain explicit harness inputs rather than measured defaults.
 
 ## Runtime metrics
 

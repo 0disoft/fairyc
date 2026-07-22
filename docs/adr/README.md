@@ -169,6 +169,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0157-process-cache-measurement-receipt.md`: configured path-free cold/fallback and warm/all-hit control-flow receipts with raw timings and no speedup conclusion.
 - `0158-process-cache-edit-distributions.md`: 36 raw no-op and edit-class observations with isolated Sessions, clock-resolution censoring, and no speedup conclusion.
 - `0159-bounded-workspace-check-session.md`: foreground bounded NDJSON checks that reuse one caller-budgeted process-local MIR Session without a daemon or persistent cache.
+- `0160-editor-shaped-session-process-measurement.md`: one eight-step standalone compiler session with raw round-trip timings, Windows process-memory peaks, and no reference-budget or speedup claim.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

@@ -467,12 +467,19 @@ the workspace for every request, keeps one verified-MIR Session, reports per-req
 and terminates at EOF or its required request bound. Callers choose every cache limit explicitly;
 there is no daemon, watcher, socket, concurrency, persistent storage, or default policy. In-process
 tests prove no-op all-hit reuse, private-root partial invalidation, and recovery from transient source
-diagnostics. The configured Windows smoke also drives two requests through a separately built
-`fairyc.exe` and requires fallback followed by all-hit.
+diagnostics. Its initial configured Windows smoke drove two requests through a separately built
+`fairyc.exe` and required fallback followed by all-hit.
 
-- Measure the bounded session on a declared reference machine with process-memory evidence, an
-  editor-shaped edit workload, and a predeclared noise and retry policy before selecting defaults or
-  claiming developer-loop speedup.
+ADR 0160 replaces that minimal process probe with one eight-request editor-shaped sequence over a
+temporary workspace. It preserves caller-observed round-trip durations, validates cold, no-op,
+private-root, private-dependency, and public-dependency cache paths, and records Windows
+process-reported peak working-set and pagefile-use bytes before exit. The run uses no retries and
+makes no speedup, memory-budget, or reference-machine claim.
+
+- Repeat the bounded session on a declared reference machine with controlled distributions, private
+  or live-heap evidence, and an accepted noise policy before selecting defaults or claiming
+  developer-loop speedup. The current local run has process peaks, an editor-shaped workload, and
+  an explicit zero-retry policy but is not reference evidence.
 - ADR 0146 explicitly defers persistent storage. Package-aware Windows builds, the bounded
   whole-program MIR codec, and process-local package function slices now exist; stable type-context
   artifacts, cross-process corruption policy, and configured cold/warm timing evidence still gate disk policy.

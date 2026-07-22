@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -693,7 +696,7 @@ func run() error {
 		return err
 	}
 	inspectedPEImages := 1 + targetBuildExecutions + workspaceBuildExecutions + windowsFileSourceExecutions + ownedTextSourceExecutions + targetRunExecutions + workspaceRunExecutions + targetExecExecutions + windowsFileExecutions + bufferProbeExecutions + ownedTextProbeExecutions + arenaProbeExecutions + layoutExecutions + abiExecutions + structResultExecutions + unwindExecutions
-	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds, %d package-workspace builds, %d package-workspace runs, %d source-level safe File lifecycle builds, %d source-level safe owned-text lifecycle builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls, checked reads and mutable indexed stores, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart, output, locked workspace execution, and a two-request workspace check session with cold fallback followed by an all-hit response, 40 run-host outcomes covered fixed arrays, byte-view iteration and slicing, checked indexed stores, assertions in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, Buffer initialization, reserve, self-overlap append, and zeroed-resize allocation rollback passed %d separate-translation-unit MSVC executions, owned-text opaque-storage failure preservation, forced allocation rollback, and repeated drop passed %d separate-translation-unit MSVC executions, Arena zeroing, two-stage allocation rollback, stale Region rejection, and active-drop preservation passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, generated-Fairy small and large struct results passed %d separate-translation-unit MSVC executions across C11 and C17 consumer modes, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, workspaceBuildExecutions, workspaceRunExecutions, windowsFileSourceExecutions, ownedTextSourceExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, windowsFileExecutions, bufferProbeExecutions, ownedTextProbeExecutions, arenaProbeExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, structResultExecutions, unwindCases, unwindExecutions, inspectedPEImages, toolchain.Version)
+	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds, %d package-workspace builds, %d package-workspace runs, %d source-level safe File lifecycle builds, %d source-level safe owned-text lifecycle builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls, checked reads and mutable indexed stores, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart, output, locked workspace execution, and an eight-request editor-shaped workspace session with Windows process-memory peaks, 40 run-host outcomes covered fixed arrays, byte-view iteration and slicing, checked indexed stores, assertions in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, Buffer initialization, reserve, self-overlap append, and zeroed-resize allocation rollback passed %d separate-translation-unit MSVC executions, owned-text opaque-storage failure preservation, forced allocation rollback, and repeated drop passed %d separate-translation-unit MSVC executions, Arena zeroing, two-stage allocation rollback, stale Region rejection, and active-drop preservation passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, generated-Fairy small and large struct results passed %d separate-translation-unit MSVC executions across C11 and C17 consumer modes, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, workspaceBuildExecutions, workspaceRunExecutions, windowsFileSourceExecutions, ownedTextSourceExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, windowsFileExecutions, bufferProbeExecutions, ownedTextProbeExecutions, arenaProbeExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, structResultExecutions, unwindCases, unwindExecutions, inspectedPEImages, toolchain.Version)
 	return nil
 }
 
@@ -1019,26 +1022,164 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string) (int64, error) {
 		return 0, fmt.Errorf("standalone compiler run-workspace returned code %d, stdout %q, stderr %q", workspaceCode, workspaceStdout, workspaceStderr)
 	}
 
-	sessionInput := "{\"schemaVersion\":\"fairyc.experimental.workspace-check-session/v0\",\"kind\":\"check\",\"sequence\":1}\n" +
-		"{\"schemaVersion\":\"fairyc.experimental.workspace-check-session/v0\",\"kind\":\"check\",\"sequence\":2}\n"
-	sessionCode, sessionStdout, sessionStderr, err := runStandaloneCommandWithInput(
-		sourceRoot,
+	sessionMeasurement, err := measureStandaloneWorkspaceSession(executablePath, sourceRoot)
+	if err != nil {
+		return 0, err
+	}
+	sessionMeasurementJSON, err := buildmeasure.MarshalSessionProcess(sessionMeasurement)
+	if err != nil {
+		return 0, fmt.Errorf("encode standalone workspace-session process measurement: %w", err)
+	}
+	fmt.Printf("Fairy C workspace-session process measurement: %s\n", sessionMeasurementJSON)
+	return info.Size(), nil
+}
+
+type standaloneWorkspaceSessionResponse struct {
+	Sequence     int    `json:"sequence"`
+	Status       string `json:"status"`
+	ExitCode     int    `json:"exitCode"`
+	MIRFunctions int    `json:"mirFunctions"`
+	Cache        struct {
+		Outcome         string `json:"outcome"`
+		Hits            int    `json:"hits"`
+		Misses          int    `json:"misses"`
+		Lowered         bool   `json:"lowered"`
+		RetainedEntries int    `json:"retainedEntries"`
+		RetainedBytes   uint64 `json:"retainedBytes"`
+		VerifiedHits    uint64 `json:"verifiedHits"`
+	} `json:"cache"`
+}
+
+func measureStandaloneWorkspaceSession(executablePath, sourceRoot string) (buildmeasure.SessionProcessReport, error) {
+	workspaceRoot, err := copyWorkspaceMeasurementFixture(sourceRoot)
+	if err != nil {
+		return buildmeasure.SessionProcessReport{}, fmt.Errorf("copy standalone workspace-session fixture: %w", err)
+	}
+	defer os.RemoveAll(workspaceRoot)
+
+	contextValue, cancel := context.WithTimeout(context.Background(), 45*time.Second)
+	defer cancel()
+	command := exec.CommandContext(
+		contextValue,
 		executablePath,
-		sessionInput,
-		"experimental", "check-workspace-session", "--locked",
-		"--target", "x86_64-windows-msvc", "--max-requests", "2",
+		"experimental", "check-workspace-session",
+		"--target", "x86_64-windows-msvc", "--max-requests", "8",
 		"--cache-max-entries", "8", "--cache-max-bytes", "33554432", "--cache-max-artifact-bytes", "8388608",
 	)
+	command.Dir = workspaceRoot
+	stdin, err := command.StdinPipe()
 	if err != nil {
-		return 0, fmt.Errorf("execute standalone compiler workspace session: %w", err)
+		return buildmeasure.SessionProcessReport{}, fmt.Errorf("open standalone workspace-session stdin: %w", err)
 	}
-	sessionLines := strings.Split(strings.TrimSuffix(sessionStdout, "\n"), "\n")
-	if sessionCode != cli.ExitSuccess || sessionStderr != "" || len(sessionLines) != 2 ||
-		!strings.Contains(sessionLines[0], `"sequence":1`) || !strings.Contains(sessionLines[0], `"outcome":"fallback"`) ||
-		!strings.Contains(sessionLines[1], `"sequence":2`) || !strings.Contains(sessionLines[1], `"outcome":"all-hit"`) {
-		return 0, fmt.Errorf("standalone compiler check-workspace-session returned code %d, stdout %q, stderr %q", sessionCode, sessionStdout, sessionStderr)
+	stdout, err := command.StdoutPipe()
+	if err != nil {
+		return buildmeasure.SessionProcessReport{}, fmt.Errorf("open standalone workspace-session stdout: %w", err)
 	}
-	return info.Size(), nil
+	var stderr boundedBuffer
+	stderr.limit = subprocessOutputLimit
+	command.Stderr = &stderr
+	if err := command.Start(); err != nil {
+		return buildmeasure.SessionProcessReport{}, fmt.Errorf("start standalone workspace session: %w", err)
+	}
+	waited := false
+	defer func() {
+		if !waited {
+			_ = stdin.Close()
+			_ = command.Process.Kill()
+			_ = command.Wait()
+		}
+	}()
+	probe, err := openProcessMemoryProbe(command.Process.Pid)
+	if err != nil {
+		return buildmeasure.SessionProcessReport{}, err
+	}
+	defer probe.close()
+
+	report := buildmeasure.SessionProcessReport{
+		Schema: buildmeasure.SessionProcessSchema, Workload: "workspace_quickstart-editor-sequence",
+		Scope: "request-write-through-response-read;mutation-excluded", Clock: "caller-monotonic-wall-nanoseconds",
+		Setup: "one-standalone-fairyc-process;sequential-requests", RetryPolicy: "none;preserve-first-observation",
+		MemoryMetric:        "windows-process-memory-counters-peak-working-set-and-pagefile-bytes",
+		CacheImplementation: "bounded-process-package-mir-v0", Decision: "local-observation-only-no-reference-budget-or-speedup-claim",
+		Environment: buildmeasure.CacheEnvironment{OS: runtime.GOOS, Arch: runtime.GOARCH, Target: "x86_64-windows-msvc"},
+		Policy:      buildmeasure.CachePolicy{MaxEntries: 8, MaxBytes: 33554432, MaxArtifactBytes: 8388608},
+	}
+	conditions := []string{
+		buildmeasure.SessionProcessCold,
+		buildmeasure.SessionProcessNoOp,
+		buildmeasure.SessionProcessPrivateRoot,
+		buildmeasure.SessionProcessNoOpAfterRoot,
+		buildmeasure.SessionProcessPrivateDependency,
+		buildmeasure.SessionProcessNoOpAfterPrivate,
+		buildmeasure.SessionProcessPublicDependency,
+		buildmeasure.SessionProcessNoOpAfterPublic,
+	}
+	reader := bufio.NewReaderSize(stdout, subprocessOutputLimit)
+	for index, condition := range conditions {
+		switch condition {
+		case buildmeasure.SessionProcessPrivateRoot:
+			err = mutateWorkspaceMeasurementFixture(workspaceRoot, buildmeasure.CacheEditPrivateRoot)
+		case buildmeasure.SessionProcessPrivateDependency:
+			err = mutateWorkspaceMeasurementFixture(workspaceRoot, buildmeasure.CacheEditPrivateDependency)
+		case buildmeasure.SessionProcessPublicDependency:
+			err = mutateWorkspaceMeasurementFixture(workspaceRoot, buildmeasure.CacheEditPublicDependency)
+		default:
+			err = nil
+		}
+		if err != nil {
+			return buildmeasure.SessionProcessReport{}, fmt.Errorf("prepare standalone workspace-session %s: %w", condition, err)
+		}
+		sequence := index + 1
+		request := fmt.Sprintf("{\"schemaVersion\":\"fairyc.experimental.workspace-check-session/v0\",\"kind\":\"check\",\"sequence\":%d}\n", sequence)
+		started := time.Now()
+		if _, err := io.WriteString(stdin, request); err != nil {
+			return buildmeasure.SessionProcessReport{}, fmt.Errorf("write standalone workspace-session request %d: %w", sequence, err)
+		}
+		line, err := reader.ReadBytes('\n')
+		duration := time.Since(started).Nanoseconds()
+		if err != nil {
+			return buildmeasure.SessionProcessReport{}, fmt.Errorf("read standalone workspace-session response %d: %w", sequence, err)
+		}
+		var response standaloneWorkspaceSessionResponse
+		if err := json.Unmarshal(line, &response); err != nil {
+			return buildmeasure.SessionProcessReport{}, fmt.Errorf("decode standalone workspace-session response %d: %w", sequence, err)
+		}
+		if response.Sequence != sequence || response.Status != "ok" || response.ExitCode != cli.ExitSuccess {
+			return buildmeasure.SessionProcessReport{}, fmt.Errorf("standalone workspace-session response %d is not successful: %s", sequence, line)
+		}
+		report.Samples = append(report.Samples, buildmeasure.SessionProcessSample{
+			Sequence: sequence, Condition: condition, DurationNS: duration,
+			Outcome: response.Cache.Outcome, Hits: response.Cache.Hits, Misses: response.Cache.Misses,
+			Lowered: response.Cache.Lowered, MIRFunctions: response.MIRFunctions,
+			RetainedEntries: response.Cache.RetainedEntries, RetainedBytes: response.Cache.RetainedBytes,
+			VerifiedHits: response.Cache.VerifiedHits,
+		})
+		workingSet, pagefile, err := probe.snapshot()
+		if err != nil {
+			return buildmeasure.SessionProcessReport{}, err
+		}
+		if workingSet > report.Memory.PeakWorkingSetBytes {
+			report.Memory.PeakWorkingSetBytes = workingSet
+		}
+		if pagefile > report.Memory.PeakPagefileBytes {
+			report.Memory.PeakPagefileBytes = pagefile
+		}
+	}
+	if err := stdin.Close(); err != nil {
+		return buildmeasure.SessionProcessReport{}, fmt.Errorf("close standalone workspace-session stdin: %w", err)
+	}
+	if err := command.Wait(); err != nil {
+		waited = true
+		if errors.Is(contextValue.Err(), context.DeadlineExceeded) {
+			return buildmeasure.SessionProcessReport{}, fmt.Errorf("standalone workspace session exceeded timeout")
+		}
+		return buildmeasure.SessionProcessReport{}, fmt.Errorf("standalone workspace session failed: %w; stderr %q", err, stderr.String())
+	}
+	waited = true
+	if stderr.Len() != 0 {
+		return buildmeasure.SessionProcessReport{}, fmt.Errorf("standalone workspace session produced stderr %q", stderr.String())
+	}
+	return report, nil
 }
 
 func runStandaloneCommand(directory, executablePath string, arguments ...string) (int, string, string, error) {

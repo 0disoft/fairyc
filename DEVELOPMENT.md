@@ -59,9 +59,10 @@ invoked by this path. Delete
 The configured Windows smoke independently builds `fairyc.exe` into a temporary directory, invokes
 its help surface, runs the checked-in quickstart through `run-target`, requires `exec-target` to
 forward the checked-in output example and return process status 42, runs the checked-in local
-workspace through an exact existing lock, and sends two checks through one foreground session. It
-removes the compiler and target images. That proves the standalone process paths and process-local
-reuse without treating an ignored local build artifact as source truth.
+workspace through an exact existing lock, and sends eight editor-shaped checks through one
+foreground session while reading Windows process-memory peaks. It removes the compiler and target
+images. That proves the standalone process paths and process-local reuse without treating an
+ignored local build artifact as source truth or one local measurement as a budget.
 
 ## Implementation boundaries
 
