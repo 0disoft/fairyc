@@ -58,14 +58,14 @@ Internal MIR accepts an exact version only. It is mutable compiler state, not a 
 
 `fairyc.mir-verifier-fixtures/v0` versions named seed vocabulary and mutation recipes. It does not serialize arbitrary MIR, stabilize compiler-local IDs, authorize external graph input, or make old MIR migratable.
 
-A cache key includes the full compiler build identity, language and MIR versions, target schema and ABI profile, toolchain fingerprint, backend and profile flags, runtime ABI, standard-library instance, source digest, dependency interface digests, feature set, and interface-hash algorithm. Incompatibility is a cache miss followed by lazy collection.
+A cache key includes the full compiler build identity, language and MIR versions, target schema and ABI profile, toolchain fingerprint, backend and profile flags, runtime ABI, standard-library instance, source digest, dependency interface digests, feature set, and interface-hash algorithm. Incompatibility is a cache miss followed by lazy collection. ADR 0165 defines the first executable build identity as `fairyc.compiler-executable-sha256/v1:` plus the full SHA-256 of the running executable bytes; no release string, branch, or filename fallback is compatible with that identity.
 
 `fairyc.package-cache-fixtures/v1` fixes the domain-separated full SHA-256 key under the canonical
 `fycache1-sha256-...` text form. The encoding includes the PackageInstanceId, source-digest, and
 public-interface encoding/algorithm names in addition to their full digest bytes. A key-version or
 component-algorithm mismatch is a miss. The first bounded store is process-local and the opaque
 typed-HIR, MIR, and object payloads remain exact-compiler disposable state rather than serialized
-compatibility formats. Persistent storage format and default limits remain undecided.
+compatibility formats. The bounded persistent storage format now exists internally; public command policy and default limits remain undecided.
 
 ## Target and ABI
 
