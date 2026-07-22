@@ -437,6 +437,10 @@ different codec or compiler process, while canonical decode and verifier re-entr
 byte-bounded LRU own the complete allocation. This is cache plumbing, not a persistent format or
 cache-hit measurement.
 
+ADR 0155 connects the codec to the bounded LRU with expected-interface validation, verified hit
+accounting, rejected-entry quarantine, and compare-and-delete protection for concurrent replacement.
+No compiler coordinator consults it yet, so no MIR lowering is skipped and no speedup is claimed.
+
 - Wire whole-package reuse into package compilation, then adopt persistent content-addressed storage
   and default limits only from measured clean/warm workload evidence.
 - ADR 0146 explicitly defers persistent storage. Package-aware Windows builds, the bounded

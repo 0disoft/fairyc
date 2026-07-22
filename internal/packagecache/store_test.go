@@ -108,6 +108,43 @@ func TestMemoryStoreRejectsInvalidPolicyAndRecords(t *testing.T) {
 	}
 }
 
+func TestMemoryStoreDeleteIfMatchPreservesConcurrentReplacement(t *testing.T) {
+	t.Parallel()
+	key, err := Compute(testInputs(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	store, err := NewMemoryStore(Limits{MaxEntries: 1, MaxBytes: 4096})
+	if err != nil {
+		t.Fatal(err)
+	}
+	old := testRecord(t, key, "old")
+	if err := store.Put(old); err != nil {
+		t.Fatal(err)
+	}
+	observed, found := store.Get(key)
+	if !found {
+		t.Fatal("Get() missed old record")
+	}
+	replacement := testRecord(t, key, "replacement")
+	if err := store.Put(replacement); err != nil {
+		t.Fatal(err)
+	}
+	if store.DeleteIfMatch(observed) {
+		t.Fatal("DeleteIfMatch removed a newer replacement")
+	}
+	current, found := store.Get(key)
+	if !found || string(current.Artifacts[0].Data) != "replacement" {
+		t.Fatalf("current record = %+v, %v", current, found)
+	}
+	if !store.DeleteIfMatch(current) {
+		t.Fatal("DeleteIfMatch did not remove the matching record")
+	}
+	if _, found := store.Get(key); found {
+		t.Fatal("matching record survived DeleteIfMatch")
+	}
+}
+
 func testRecord(t *testing.T, key Key, data string) Record {
 	t.Helper()
 	return Record{

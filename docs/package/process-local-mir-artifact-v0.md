@@ -58,3 +58,15 @@ storage savings. The artifact also does not skip workspace loading or semantic a
 Persistent package reuse requires a later stable type/context encoding, bounded codec, corruption
 handling, cache-key integration, and measured clean/warm evidence. A mismatch must remain a safe
 miss followed by ordinary compilation.
+
+## Bounded cache integration
+
+`packageartifact.Cache` now connects the process codec to `packagecache.MemoryStore`. A verified hit
+requires the expected output-interface hash, exactly one MIR payload, same-process canonical decode,
+and full artifact verification. Misses and rejected payloads are distinct. Rejected entries are
+removed only if the complete stored record still matches the failed copy, preserving a concurrent
+replacement.
+
+The cache reports verified hits separately from raw byte-store hits. No compiler coordinator calls
+this cache yet, so current tests prove retained-byte ownership, safe lookup, and quarantine rather
+than skipped MIR lowering or faster builds.

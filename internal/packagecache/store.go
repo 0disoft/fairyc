@@ -129,6 +129,20 @@ func (store *MemoryStore) Delete(key Key) bool {
 	return true
 }
 
+// DeleteIfMatch removes key only when the complete currently stored record still equals expected.
+// Cache consumers use this to quarantine a rejected payload without deleting a valid concurrent
+// replacement that arrived after Get returned its deep copy.
+func (store *MemoryStore) DeleteIfMatch(expected Record) bool {
+	store.mu.Lock()
+	defer store.mu.Unlock()
+	element, found := store.entries[expected.Key]
+	if !found || !recordsEqual(element.Value.(*storedRecord).record, expected) {
+		return false
+	}
+	store.remove(element, false)
+	return true
+}
+
 // Stats returns a consistent snapshot.
 func (store *MemoryStore) Stats() Stats {
 	store.mu.Lock()
@@ -194,4 +208,16 @@ func cloneRecord(record Record) Record {
 		result.Artifacts[index] = Artifact{Kind: artifact.Kind, Data: slices.Clone(artifact.Data)}
 	}
 	return result
+}
+
+func recordsEqual(left, right Record) bool {
+	if left.Key != right.Key || left.PublicInterface != right.PublicInterface || len(left.Artifacts) != len(right.Artifacts) {
+		return false
+	}
+	for index := range left.Artifacts {
+		if left.Artifacts[index].Kind != right.Artifacts[index].Kind || !slices.Equal(left.Artifacts[index].Data, right.Artifacts[index].Data) {
+			return false
+		}
+	}
+	return true
 }

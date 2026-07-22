@@ -164,6 +164,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0152-package-stable-function-identity.md`: package-stable function descriptors independent from disposable HIR package and symbol numbering.
 - `0153-process-local-package-mir-artifacts.md`: independently verified package function slices with explicit imports and fresh-symbol reassembly.
 - `0154-process-bound-package-artifact-codec.md`: bounded canonical package bytes rejected outside their creating compiler process.
+- `0155-bounded-process-package-artifact-cache.md`: verified artifact hits and race-safe rejection quarantine over the bounded byte LRU.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

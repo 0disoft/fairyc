@@ -69,3 +69,8 @@ byte-bounded LRU to own the full payload without claiming persistence. Every sli
 same workspace-wide type context and no compiler path reads it from `MemoryStore`. No configured
 cold/warm measurement intent owns comparable cache-hit evidence. Process-codec payload sizes alone
 cannot justify a disk format or default budget.
+
+ADR 0155 connects those bytes to the bounded LRU and distinguishes verified hits from raw store
+hits, misses, and rejected entries. Rejection uses complete-record compare-and-delete so a stale
+reader cannot remove a concurrent replacement. This is a usable storage boundary, but without a
+compiler coordinator consulting it there is still no compilation reuse or speedup claim.
