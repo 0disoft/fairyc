@@ -35,6 +35,7 @@ Usage:
   fairyc check [--locked]
   fairyc build [--release] [--locked]
   fairyc run [--release] [--locked]
+  fairyc emit c --target <target-id> [--locked]
   fairyc explain <diagnostic-code>
   fairyc targets
   fairyc experimental parse <file.fy>
@@ -59,8 +60,9 @@ Usage:
 
 The experimental commands are unstable. "fairyc check" verifies the local workspace. "fairyc build"
 creates or replaces build/<package-name>.exe on Windows. "fairyc run" builds and executes a temporary
-Windows image without retaining it. Pass --release for optimization. All three read fairy.toml and
-refresh fairy.lock unless --locked is supplied.
+Windows image without retaining it. "fairyc emit c" writes one explicitly targeted C11 application
+unit to stdout without invoking a toolchain. Pass --release to build or run for optimization. All
+four workspace commands read fairy.toml and refresh fairy.lock unless --locked is supplied.
 `
 
 // Run executes one bounded command with an already-closed input stream. Commands that explicitly
@@ -110,6 +112,12 @@ func RunWithInput(args []string, sourceRoot string, stdin io.Reader, stdout, std
 			return writeHelp(stdout, stderr)
 		}
 		return runStableRun(args[1:], sourceRoot, stdout, stderr)
+	}
+	if args[0] == "emit" {
+		if len(args) == 2 && isHelp(args[1]) {
+			return writeHelp(stdout, stderr)
+		}
+		return runStableEmit(args[1:], sourceRoot, stdout, stderr)
 	}
 	if args[0] != "experimental" {
 		return invocationError(stderr, fmt.Sprintf("unknown command %q", args[0]))

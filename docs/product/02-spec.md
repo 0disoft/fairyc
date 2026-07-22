@@ -659,6 +659,12 @@ ADR 0179 stabilizes the source-independent `fairyc targets` human report grammar
 atomic failure, and codes 0, 2, and 4 without freezing TargetSpec rows, evidence, or maturity. The
 report remains distinct from local toolchain availability and experimental target JSON.
 
+ADR 0180 stabilizes `fairyc emit c --target <target-id> [--locked]` for the current executable
+workspace. It requires explicit Linux GNU or Windows MSVC TargetSpec selection and writes one raw
+deterministic ISO C11 application translation unit to stdout without a toolchain or output artifact.
+The runtime/support unit, exact private generated names and bytes across releases, AST/HIR/MIR
+inspection, and target maturity remain separate contracts.
+
 ADR 0146 rejects speculative persistent caching at this point. ADR 0149 supplies deterministic,
 bounded, verifier-checked bytes for a complete MIR program, but the workspace path still produces
 no independently reusable per-package MIR/object artifact and has no configured comparable
@@ -681,7 +687,7 @@ layout coverage or a hosted receipt.
 Formatting, testing, documentation, vendoring, binding generation, and ABI inspection remain planned
 tool surfaces rather than claims of current implementation. Checking has the bounded stable
 current-workspace `fairyc check [--locked]` surface; diagnostic explanation has its independent
-stable source-free surface above.
+stable source-free surface; C emission has the target-explicit workspace surface above.
 
 ## Compatibility
 

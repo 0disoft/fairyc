@@ -11,13 +11,14 @@ This repository type owns command behavior, arguments, flags, config loading, ex
 
 - Product decision: `docs/cli/command-contract.md`
 - Technical owner: UNASSIGNED
-- Related ADRs: `docs/adr/0027-experimental-c-emission-cli.md` and
-  `docs/adr/0028-experimental-linux-scalar-build-cli.md`
+- Related ADRs: `docs/adr/0027-experimental-c-emission-cli.md`,
+  `docs/adr/0028-experimental-linux-scalar-build-cli.md`, and
+  `docs/adr/0180-stable-workspace-c-emission-v1.md`
 
 ## Required Decisions
 
-- Command list and flag ownership: UNDECIDED
-- Exit-code taxonomy: UNDECIDED
+- Broader command list and remaining flag ownership: UNDECIDED
+- Exit-code taxonomy outside the stabilized command subsets: UNDECIDED
 - Machine-readable output contract: UNDECIDED
 - Config precedence and default behavior: UNDECIDED
 - Runtime compatibility floor: UNDECIDED
@@ -79,6 +80,17 @@ The block grammar, blank-line separation, final newline, and canonical ordering 
 TargetSpec rows and evidence evolve independently. Success uses code `0`; unexpected arguments use
 code `2`; invalid compiler-owned target data and output-write failure use code `4`, without partial
 stdout.
+
+`fairyc emit c --target <target-id> [--locked]` writes exactly one raw deterministic ISO C11
+application translation unit to stdout. It adds no banner, receipt, JSON envelope, ANSI escape,
+absolute path, or FY source text. Compilation and emission failures write no unit; an output writer
+may accept a prefix before returning a code-`4` transport error, and that stream cannot be rolled
+back. Success uses code `0`;
+invalid form/flags, missing or unknown target, missing/invalid root entry, and unsupported backend
+capability use code `2`; source diagnostics use code `3`; internal and output failures use code `4`;
+manifest, workspace, graph, and lock failures use code `7`. The command writes no output artifact,
+but ordinary lock maintenance may precede emission or an output failure. `--locked` verifies the
+lock without writing.
 
 `experimental parse` writes one `fairyc.experimental.parse/v0` JSON document, defined by
 `spec/cli/experimental-parse-v0.schema.json`, to stdout even when source diagnostics exist.

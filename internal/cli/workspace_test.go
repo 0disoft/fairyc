@@ -137,6 +137,14 @@ source = "src"
 	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "E0007") {
 		t.Fatalf("stable source diagnostics = (%d, %q, %q)", code, stdout, stderr)
 	}
+
+	writeWorkspaceFile(t, root, "src/main.fy", "module main;\n@mystery\nfn i32 main() { return 42; }\n")
+	code, stdout, stderr = runForTest([]string{"check"}, root)
+	if code != ExitSourceDiagnostics || stdout != "" ||
+		!strings.Contains(stderr, "semantic subset does not support function attribute @mystery") ||
+		strings.Contains(stderr, "experimental semantic subset") {
+		t.Fatalf("stable unsupported semantics = (%d, %q, %q)", code, stdout, stderr)
+	}
 }
 
 func TestExperimentalWorkspaceCheckRejectsInvocationAndMissingManifest(t *testing.T) {

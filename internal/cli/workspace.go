@@ -54,7 +54,11 @@ func checkWorkspace(sourceRoot string, locked, stable bool, successLabel string,
 		return ExitSourceDiagnostics
 	}
 	if len(result.Semantic.Unsupported) != 0 {
-		if err := writeUnsupportedSemantics(stderr, result.Semantic.Unsupported); err != nil {
+		writeUnsupported := writeUnsupportedSemantics
+		if stable {
+			writeUnsupported = writeStableUnsupportedSemantics
+		}
+		if err := writeUnsupported(stderr, result.Semantic.Unsupported); err != nil {
 			return ExitInternalFailure
 		}
 		return ExitSourceDiagnostics

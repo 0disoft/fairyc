@@ -69,10 +69,19 @@ func writeSemanticDiagnostics(writer io.Writer, sources map[string][]byte, value
 }
 
 func writeUnsupportedSemantics(writer io.Writer, values []semantic.Unsupported) error {
+	return writeUnsupportedSemanticsWithLabel(writer, values, "experimental semantic subset")
+}
+
+func writeStableUnsupportedSemantics(writer io.Writer, values []semantic.Unsupported) error {
+	return writeUnsupportedSemanticsWithLabel(writer, values, "semantic subset")
+}
+
+func writeUnsupportedSemanticsWithLabel(writer io.Writer, values []semantic.Unsupported, label string) error {
 	for _, value := range values {
 		if _, err := fmt.Fprintf(
 			writer,
-			"fairyc: experimental semantic subset does not support %s at %s [bytes %d..%d]\n",
+			"fairyc: %s does not support %s at %s [bytes %d..%d]\n",
+			label,
 			value.Feature,
 			safeDisplayPath(value.Span.Source),
 			value.Span.StartByte,

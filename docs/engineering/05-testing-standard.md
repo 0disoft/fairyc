@@ -30,6 +30,10 @@ they also cover all namespaces, malformed and unknown codes, missing roots, help
 Stable targets tests freeze the current complete human report, canonical target and missing-evidence
 ordering, indentation, separation, final newline, missing-root independence, argument rejection,
 help, output failure, and absence of host-local paths while target tests own maturity invariants.
+Stable emit tests run one manifest-owned workspace through both declared targets, require repeated
+byte identity, LP64/LLP64 `long` assertions, raw C11 stdout, canonical lock update/verification,
+stable source/package/capability/output failure separation, no experimental wording, and no build
+directory. Backend and fixture tests continue to own the translation-unit contents and safety rules.
 Target-description tests separately cover structural validation, power-of-two layouts, closed and
 sorted scalar and feature sets, immutable lookup copies, unknown-target rejection, deterministic
 host-independent JSON, false maturity claims, and top-level JSON-schema synchronization.

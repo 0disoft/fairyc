@@ -11,15 +11,30 @@ This repository type owns command behavior, arguments, flags, config loading, ex
 
 - Product decision: UNDECIDED
 - Technical owner: UNASSIGNED
-- Related ADRs: `docs/adr/0159-bounded-workspace-check-session.md` and `docs/adr/0166-experimental-persistent-workspace-cache-command.md`
+- Related ADRs: `docs/adr/0159-bounded-workspace-check-session.md`,
+  `docs/adr/0166-experimental-persistent-workspace-cache-command.md`, and
+  `docs/adr/0180-stable-workspace-c-emission-v1.md`
 
 ## Required Decisions
 
-- Command list and flag ownership: UNDECIDED
+- Broader command list and remaining flag ownership: UNDECIDED
 - Exit-code taxonomy: UNDECIDED
 - Machine-readable output contract: UNDECIDED
 - Config precedence and default behavior: UNDECIDED
 - Runtime compatibility floor: UNDECIDED
+
+## Stable workspace inputs
+
+`check`, `build`, `run`, and `emit c` read the exact `fairy.toml` in the current directory and use
+its explicit local workspace closure. They do not search parent directories, read an environment
+override, or consult another configuration file. All four maintain the canonical `fairy.lock` in
+ordinary mode and verify it without writing under `--locked`.
+
+`build` and `run` alone accept `--release`; their v1 target remains the fixed local
+`x86_64-windows-msvc` path. `emit c` instead requires one explicit `--target` value and accepts the
+declared `x86_64-linux-gnu` and `x86_64-windows-msvc` profiles without probing the host. There is no
+default emit target, target environment variable, C dialect flag, output-path flag, or implicit
+redirection. These stable inputs do not settle broader configuration precedence.
 
 ## Implemented provisional cache inputs
 

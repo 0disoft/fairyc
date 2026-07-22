@@ -36,6 +36,34 @@ grammar, canonical ordering, atomic output, final newline, and codes 0, 2, and 4
 rows and maturity evidence evolve under TargetSpec compatibility. JSON, filtering, target selection,
 and local-toolchain availability remain outside v1.
 
+## Stable workspace C emission v1
+
+`fairyc emit c --target <target-id> [--locked]` emits one target-selected application translation
+unit from the current manifest-owned workspace. `c` is the only stable form and `--target` is
+mandatory; the accepted current IDs are `x86_64-linux-gnu` and `x86_64-windows-msvc`. Host target
+inference, default targets, AST/HIR/MIR output, JSON, source maps, headers, objects, and executables
+are outside v1.
+
+The command uses the stable workspace/lock boundary and requires root `main::main fn() -> i32`.
+Ordinary mode atomically refreshes a missing or stale canonical `fairy.lock`; `--locked` verifies it
+without writing. Success writes exactly one deterministic, ANSI-free ISO C11 application unit to
+stdout with no banner, receipt, JSON envelope, absolute path, or FY source text. No partial unit is
+written for compilation or emission failures. An external stdout writer may accept a prefix before
+returning an output error; that transport failure is code 4 and the byte stream cannot be rolled
+back.
+
+The output is the target-selected application unit consumed by the backend, but excludes the
+separate runtime and dependency-closed standard-library support unit. It may contain external
+references and is not a standalone build artifact. The command writes no source, header, object,
+executable, cache, or build directory and performs no compiler, linker, SDK, sysroot, WSL, process,
+or network probe. Whole-unit bytes and private symbols are deterministic for one exact compiler,
+input, and target but are disposable transport rather than a cross-release C API.
+
+Stable codes are 0 for success, 2 for invocation, entry, target, or backend-capability rejection, 3
+for source diagnostics, 4 for internal or output failure, and 7 for manifest, workspace, graph, or
+lock failure. An output failure may follow ordinary lock maintenance; `--locked` is the no-write
+form.
+
 ## Implemented experimental compiler surface
 
 The current Go prototype implements eighteen deliberately unstable developer commands:
@@ -382,12 +410,13 @@ after program execution returns code 4 but cannot undo program effects; no execu
 | `fairyc build [--release] [--locked]` | Build or replace the current root package's one Windows executable | Yes |
 | `fairyc run [--release] [--locked]` | Build and run the current workspace as one temporary Windows image | Yes |
 | `fairyc test [target]` | Build and run semantic test targets | Yes |
-| `fairyc emit <ast|hir|mir|c> [target]` | Emit a requested compiler representation for inspection | Requested form only |
+| `fairyc emit c --target <target-id> [--locked]` | Emit the current executable workspace's target-selected C11 application unit | C only, stdout |
 | `fairyc explain <diagnostic-code>` | Explain a stable diagnostic code | No |
 | `fairyc targets` | Report known target profiles, status, evidence, and unavailable requirements | No |
 
-Stable positional syntax for the remaining commands, alternate package/workspace selection, target
-triples beyond build/run v1's fixed local Windows path, program I/O and arguments, feature flags, and configuration precedence
+Stable positional syntax for `test`, alternate package/workspace selection, target triples beyond
+the declared emit profiles and build/run v1's fixed local Windows path, program I/O and arguments,
+feature flags, and configuration precedence
 remain UNDECIDED. The implemented `experimental` spellings do not settle those decisions.
 
 ## General requirements

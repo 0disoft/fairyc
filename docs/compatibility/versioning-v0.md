@@ -396,6 +396,13 @@ TargetSpec data evolution rather than CLI grammar changes; target removal or rei
 requires an explicit compatibility decision. Local availability and experimental target JSON remain
 separate.
 
+ADR 0180 stabilizes `fairyc emit c --target <target-id> [--locked]`, mandatory explicit target
+selection, raw stdout publication, the C11 transport identity, lock behavior, and codes 0, 2, 3, 4,
+and 7. Exact whole-unit bytes and private symbols are deterministic only for one exact compiler,
+input, and target and remain disposable transport; public `@repr(C)` and `extern C` contracts,
+TargetSpec data, runtime/support units, and generated-C consumer evidence remain independently
+versioned.
+
 ADR 0159 adds the independent `fairyc.experimental.workspace-check-session/v0` NDJSON request and
 response schema. The schema versions this experimental machine boundary and rejects unknown or
 duplicate request fields, but it does not make the command spelling, numeric limits, process exit

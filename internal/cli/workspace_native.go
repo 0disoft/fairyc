@@ -11,6 +11,7 @@ import (
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/cruntime"
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/target"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
@@ -29,6 +30,13 @@ type stableNativeOptions struct {
 
 type compiledWorkspace struct {
 	artifact        cdriver.WindowsHostArtifact
+	lockState       string
+	rootPackageName string
+}
+
+type loweredWorkspace struct {
+	program         mir.Program
+	entryName       string
 	lockState       string
 	rootPackageName string
 }
@@ -268,61 +276,90 @@ func parseWorkspaceTargetOptions(command string, arguments []string, requireOutp
 }
 
 func compileWindowsWorkspace(sourceRoot string, options workspaceTargetOptions, policy workspaceCompilePolicy, stderr io.Writer) (compiledWorkspace, int) {
-	workspace, lockState, err := loadWorkspaceWithLock(sourceRoot, options.locked)
+	lowered, code := lowerWorkspaceExecutable(sourceRoot, options.locked, policy, "Windows workspace C-emission", stderr)
+	if code != ExitSuccess {
+		return compiledWorkspace{}, code
+	}
+	artifact, code := compileWindowsProgramWithRunReceipt(lowered.program, lowered.entryName, options.targetID, options.profile, policy.runTrapReceipt, stderr)
+	if code != ExitSuccess {
+		return compiledWorkspace{}, code
+	}
+	return compiledWorkspace{
+		artifact: artifact, lockState: lowered.lockState, rootPackageName: lowered.rootPackageName,
+	}, ExitSuccess
+}
+
+func lowerWorkspaceExecutable(sourceRoot string, locked bool, policy workspaceCompilePolicy, subset string, stderr io.Writer) (loweredWorkspace, int) {
+	workspace, lockState, err := loadWorkspaceWithLock(sourceRoot, locked)
 	if err != nil {
 		if policy.stableDiagnostics {
 			if code, handled := stableWorkspaceLoadFailure(stderr, err); handled {
-				return compiledWorkspace{}, code
+				return loweredWorkspace{}, code
 			}
 		}
-		return compiledWorkspace{}, packageFailure(stderr, err)
+		return loweredWorkspace{}, packageFailure(stderr, err)
 	}
 	input, err := workspace.SemanticInput()
 	if err != nil {
-		return compiledWorkspace{}, packageFailure(stderr, err)
+		return loweredWorkspace{}, packageFailure(stderr, err)
 	}
 	checked, pipelineErr := compiler.CheckPackages(input)
 	if len(checked.Semantic.Diagnostics) != 0 {
 		if err := writeWorkspaceDiagnostics(stderr, workspace, checked.Semantic.Diagnostics); err != nil {
-			return compiledWorkspace{}, ExitInternalFailure
+			return loweredWorkspace{}, ExitInternalFailure
 		}
-		return compiledWorkspace{}, ExitSourceDiagnostics
+		return loweredWorkspace{}, ExitSourceDiagnostics
 	}
 	if len(checked.Semantic.Unsupported) != 0 {
-		if err := writeUnsupportedSemantics(stderr, checked.Semantic.Unsupported); err != nil {
-			return compiledWorkspace{}, ExitInternalFailure
+		writeUnsupported := writeUnsupportedSemantics
+		if policy.stableDiagnostics {
+			writeUnsupported = writeStableUnsupportedSemantics
 		}
-		return compiledWorkspace{}, ExitSourceDiagnostics
+		if err := writeUnsupported(stderr, checked.Semantic.Unsupported); err != nil {
+			return loweredWorkspace{}, ExitInternalFailure
+		}
+		return loweredWorkspace{}, ExitSourceDiagnostics
 	}
 	if pipelineErr != nil {
 		var failure *compiler.Error
 		if errors.As(pipelineErr, &failure) && failure.Stage == compiler.StageMIRLower {
-			return compiledWorkspace{}, subsetCapabilityError(stderr, "Windows workspace C-emission", failure.Cause)
+			return loweredWorkspace{}, workspaceSubsetCapabilityError(policy, stderr, subset, failure.Cause)
 		}
-		return compiledWorkspace{}, internalError(stderr)
+		return loweredWorkspace{}, internalError(stderr)
 	}
 	if !checked.Verified {
-		return compiledWorkspace{}, internalError(stderr)
+		return loweredWorkspace{}, internalError(stderr)
 	}
 	entryName, err := workspaceEntryName(workspace)
 	if err != nil {
-		return compiledWorkspace{}, packageFailure(stderr, err)
+		return loweredWorkspace{}, packageFailure(stderr, err)
 	}
 	entry, found := programEntry(checked.MIR, entryName)
 	if !found || len(entry.Parameters) != 0 || entry.ResultType != hir.TypeI32 {
-		return compiledWorkspace{}, subsetCapabilityError(stderr, "Windows workspace C-emission", fmt.Errorf("root entry %s must have type fn() -> i32", entryName))
-	}
-	artifact, code := compileWindowsProgramWithRunReceipt(checked.MIR, entryName, options.targetID, options.profile, policy.runTrapReceipt, stderr)
-	if code != ExitSuccess {
-		return compiledWorkspace{}, code
+		return loweredWorkspace{}, workspaceSubsetCapabilityError(policy, stderr, subset, fmt.Errorf("root entry %s must have type fn() -> i32", entryName))
 	}
 	rootPackage, found := workspace.Package(".")
 	if !found {
-		return compiledWorkspace{}, packageFailure(stderr, fmt.Errorf("workspace root package is missing"))
+		return loweredWorkspace{}, packageFailure(stderr, fmt.Errorf("workspace root package is missing"))
 	}
-	return compiledWorkspace{
-		artifact: artifact, lockState: lockState, rootPackageName: rootPackage.Manifest.Package.Name,
+	return loweredWorkspace{
+		program: checked.MIR, entryName: entryName, lockState: lockState,
+		rootPackageName: rootPackage.Manifest.Package.Name,
 	}, ExitSuccess
+}
+
+func workspaceSubsetCapabilityError(policy workspaceCompilePolicy, stderr io.Writer, subset string, err error) int {
+	if !policy.stableDiagnostics {
+		return subsetCapabilityError(stderr, subset, err)
+	}
+	message := fmt.Sprintf("requested workspace is outside the %s subset", subset)
+	if err != nil {
+		message += ": " + strings.TrimSpace(err.Error())
+	}
+	if _, writeErr := fmt.Fprintf(stderr, "fairyc: %s\n", message); writeErr != nil {
+		return ExitInternalFailure
+	}
+	return ExitInvalidInvocation
 }
 
 func classifyWorkspaceRunOutcome(outcome cdriver.WindowsHostOutcome) (int32, string, error) {

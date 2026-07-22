@@ -362,7 +362,8 @@ persistent cache, or stable editor protocol. Program commands use one entry plus
 are `fairyc check [--locked]` and the Windows/amd64-local
 `fairyc build [--release] [--locked]`, and the Windows/amd64-local
 `fairyc run [--release] [--locked]`, plus source-independent
-`fairyc explain <diagnostic-code>` and `fairyc targets`. Stable test/emit commands, native program I/O and arguments,
+`fairyc explain <diagnostic-code>` and `fairyc targets`, and target-explicit
+`fairyc emit c --target <target-id> [--locked]`. A stable test command, native program I/O and arguments,
 user drop-body execution, a complete runtime, safe standard library, package manager, supported
 target, release-stable CLI as a whole, and a stable language revision do not exist yet.
 
@@ -394,6 +395,8 @@ go run ../../cmd/fairyc build
 go run ../../cmd/fairyc build --release --locked
 & ./build/workspace-quickstart.exe
 go run ../../cmd/fairyc run --release --locked
+go run ../../cmd/fairyc emit c --target x86_64-windows-msvc --locked
+go run ../../cmd/fairyc emit c --target x86_64-linux-gnu --locked
 go run ../../cmd/fairyc experimental check-workspace
 go run ../../cmd/fairyc experimental run-workspace --locked --target x86_64-windows-msvc --profile optimized
 Pop-Location
@@ -434,7 +437,8 @@ indexed `u8` value to `i32`,
 then execute `examples/windows_output/main.fy` with exact stdout and process status
 42 while explicitly supplying its separate `windows_console.fy` module, and finally run the
 two-package `examples/workspace_quickstart` graph through an exact generated lock with native result
-42. It then measures nine fresh-cache cold/warm pairs with one new compiler process per sample,
+42. The same standalone compiler emits locked Windows and Linux C11 application units without
+changing the retained executable. It then measures nine fresh-cache cold/warm pairs with one new compiler process per sample,
 sends eight editor-shaped workspace checks to one compiler process, validates the cold, no-op,
 private-root, private-dependency, and public-dependency cache paths, and records Windows
 process-memory peaks. Raw paired timings are local observations with zero retries, not a speedup or
@@ -466,6 +470,15 @@ trap. The official
 stable `fairyc check [--locked]` command now checks the current `fairy.toml` workspace through
 verified MIR and maintains or verifies `fairy.lock`. `experimental check` remains the explicit-file
 developer surface; stable machine-readable target JSON and broader configuration are still separate work.
+
+The stable `fairyc emit c --target <target-id> [--locked]` command consumes that same manifest-owned
+workspace and root `main::main fn() -> i32`, then writes only the selected Linux GNU or Windows MSVC
+ISO C11 application translation unit to stdout. Target selection is mandatory because LP64 and
+LLP64 are different contracts; the command never guesses from this host. It invokes no C compiler,
+linker, SDK, WSL, subprocess, or network and creates no build artifact. The separate runtime and
+standard-library support unit is intentionally absent, so redirected output is inspection/transport
+input rather than a promised standalone C package. Ordinary mode maintains `fairy.lock`;
+`--locked` verifies it without writing.
 
 `experimental target-spec` accepts exactly one known Linux GNU or Windows MSVC ID and writes
 deterministic `fairyc.target-spec/v0` JSON. The result separates target semantics from local

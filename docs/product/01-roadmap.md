@@ -547,8 +547,9 @@ quarantines, without selecting a default policy or making a speed claim.
   `fairyc build [--release] [--locked]`, and Windows-local
   `fairyc run [--release] [--locked]` v1 contracts narrow. Keep the source-independent
   `fairyc explain <diagnostic-code>` and `fairyc targets` v1 contracts separate from catalog and
-  TargetSpec data lifecycle, then stabilize minimal `test` and `emit` contracts independently when
-  their evidence exists.
+  TargetSpec data lifecycle. Keep target-explicit `fairyc emit c --target <target-id> [--locked]`
+  separate from private generated-C bytes and support units, then stabilize a minimal `test`
+  contract only after test-source isolation and declaration semantics exist.
 - Move to function-level reuse only when measured package rebuild or storage evidence justifies the complexity.
 
 Exit gate: clean and warm build evidence is reproducible on a declared machine and workload; invalidation fixtures distinguish public interface, inline body, and private implementation; incompatible caches are safe misses.

@@ -23,7 +23,8 @@ The Go frontend currently exposes stable current-workspace commands
 `fairyc check [--locked]`, `fairyc build [--release] [--locked]`, and
 `fairyc run [--release] [--locked]`, plus the stable source-independent
 `fairyc explain <diagnostic-code>` lookup and stable host-independent `fairyc targets` maturity
-report, plus `fairyc experimental parse <file.fy>`,
+report, and stable target-explicit
+`fairyc emit c --target <target-id> [--locked]`, plus `fairyc experimental parse <file.fy>`,
 `fairyc experimental check-syntax <file.fy>`, and
 `fairyc experimental check-semantics <file.fy> [<file.fy>...]`. The complete implemented
 non-executing pipeline is `fairyc experimental check <primary.fy> [--source <file.fy>]...`.
@@ -205,7 +206,18 @@ normal `i32` return is program data printed in one `result:` receipt while the c
 success; a run-only internal token keeps reserved normal results distinct from recognized language
 traps, which use the stable category and code 5. Program stdout/stderr, arguments,
 stdin, a `--` delimiter, retained build output, and cache policy are not admitted in v1. Stable test
-and emit commands remain unimplemented.
+commands remain unimplemented.
+
+`fairyc emit c --target <target-id> [--locked]` accepts exactly the `c` form and one mandatory
+`x86_64-linux-gnu` or `x86_64-windows-msvc` target. It loads the current manifest-owned workspace,
+maintains or verifies the canonical lock, requires root `main::main fn() -> i32`, and writes exactly
+one raw deterministic ISO C11 application translation unit to stdout. It emits no banner or
+metadata, never infers a target from the host, creates no `.c` or build artifact, and invokes no
+toolchain, SDK, WSL, subprocess, or network. The separate runtime and dependency-closed
+standard-library support unit is not included. Whole-unit bytes and private names may change with
+the compiler even though identical compiler/input/target requests are deterministic; public C ABI
+contracts remain independently versioned. AST, HIR, MIR, JSON, source maps, headers, objects, and
+executables are not stable emit forms.
 
 `fairyc explain` accepts one exact uppercase `Edddd`, `Adddd`, or `Vdddd` code and writes its
 reserved meaning, category, and catalog identity without reading source, configuration, or the
@@ -230,6 +242,7 @@ examples do not grant agent command authority.
 `DEVELOPMENT.md` also documents the manual WSL-free build of ignored `build/fairyc.exe` for repeated
 Windows use. The configured Windows smoke independently builds and removes a temporary compiler
 executable, verifies its help surface, drives the scalar quickstart through that separate process,
+emits locked Windows and Linux C11 application units without changing the retained executable,
 invokes the persistent cache command in nine fresh cold/warm process pairs and preserves raw durations,
 and sends eight editor-shaped workspace checks through one stdin/stdout session while recording
 Windows process-memory peaks; none of those paths is self-hosting, a distribution promise, a

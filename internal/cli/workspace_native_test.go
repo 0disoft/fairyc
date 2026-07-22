@@ -135,6 +135,16 @@ source = "src"
 	if _, err := os.Stat(filepath.Join(root, "build")); !os.IsNotExist(err) {
 		t.Fatalf("build path after source failure = %v", err)
 	}
+
+	writeWorkspaceFile(t, root, "src/main.fy", "module main;\n@mystery\nfn i32 main() { return 42; }\n")
+	for _, command := range []string{"build", "run"} {
+		code, stdout, stderr := runForTest([]string{command}, root)
+		if code != ExitSourceDiagnostics || stdout != "" ||
+			!strings.Contains(stderr, "semantic subset does not support function attribute @mystery") ||
+			strings.Contains(stderr, "experimental semantic subset") {
+			t.Fatalf("stable %s unsupported semantics = (%d, %q, %q)", command, code, stdout, stderr)
+		}
+	}
 }
 
 func TestPackageWorkspaceReachesQualifiedWindowsCEmission(t *testing.T) {
