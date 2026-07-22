@@ -143,6 +143,8 @@ The implemented internal package-local query surface is:
 - `overview`: package structure, counts derived from the current map, and completeness;
 - `show`: one exact SymbolId's signature, facts, bounded relations, and uncertainty without free text;
 - `around`: a bounded neighborhood with direction, relation filter, depth, and omissions.
+- `catalog symbols`: exact declaration identity records ordered and paged only by full SymbolId,
+  with explicit declaration-kind and optional exact module filters.
 
 Every query requires explicit record, relation, depth, and deterministic selection-byte policy and
 repeats current source/compiler/interface acceptance. Dependency targets and cross-package incoming

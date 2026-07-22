@@ -518,7 +518,10 @@ checksummed canonical `fairyc.context-pack-json/v1` with exact package/compatibi
 usage/completeness/fact/relation/omission fields and visibly empty text sections. The first
 `experimental atlas-pack overview` command exposes one explicitly selected package UID with explicit
 record/selection/output limits and no map-store default. No `show`/`around` command, default store
-policy, dependency-map join, source excerpt, pack decoder, or text importer exists yet. The Windows
+policy, dependency-map join, source excerpt, pack decoder, or text importer exists yet. The internal
+query index now also provides exact full-SymbolId-ordered catalog pages with exact module/kind
+filters, explicit symbol/byte limits, and full-ID-only continuation; its output schema and CLI are
+still deliberately absent. The Windows
 host smoke now also records nine raw whole-package canonical rewrite samples after planning, checks
 byte identity, and reports fixed source/record/encoded-byte denominators without choosing chunking,
 compression, incremental updates, or a performance budget.

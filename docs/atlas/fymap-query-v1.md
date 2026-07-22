@@ -26,6 +26,9 @@ index. Symbol selectors accept only canonical visible or full SymbolId v1 text.
 - `around` performs deterministic breadth-first traversal from one exact symbol. It returns the root
   first, stable relation order within each depth, and stable full-SymbolId node order within the next
   frontier.
+- `catalog symbols` returns exact declaration identity records ordered by full SymbolId. It requires
+  an explicit declaration-kind filter, permits one exact module filter, and pages only after a full
+  SymbolId present in the same current filtered set.
 
 The explicit relation filter supports `allocates`, `borrows-mutable`, `borrows-shared`, `calls`,
 `calls-foreign`, `drops`, `may-trap`, `moves`, `returns-error`, and `uses-unsafe`. An unrequested
@@ -57,6 +60,12 @@ depth, relation-filter, dependency-join, and unavailable-incoming-map omissions 
 codes with known counts where the index can prove them. An unknown count remains explicitly
 unknown.
 
+The symbol catalog has separate positive symbol-count and selection-byte limits. Its mandatory
+context/request/total record counts toward selection bytes, while the symbol limit counts emitted
+identity records. A partial page reports a known remaining count and the last emitted full SymbolId
+as the exclusive next cursor. A request that cannot fit its first candidate fails instead of
+returning an empty page that cannot advance.
+
 ## Completeness and dependency boundary
 
 Query context carries the map generation status, map omissions, and the completeness records that
@@ -77,6 +86,7 @@ or safe-change claims.
 - no source excerpt or documentation import;
 - no dependency-map join or workspace-wide reverse index;
 - no `impact`, semantic `diff`, LSP, SCIP, MCP, or structural edit behavior;
-- no stable CLI or experimental `show`/`around` command, default map path, or automatic publication;
-  ADR 0190 exposes only explicitly bounded package-UID overview packs; and
+- no stable CLI, symbol-catalog output encoding, or experimental catalog/`show`/`around` command,
+  default map path, or automatic publication; ADR 0190 exposes only explicitly bounded package-UID
+  overview packs; and
 - no token-count, latency, retained-size, or rewrite-speed claim.

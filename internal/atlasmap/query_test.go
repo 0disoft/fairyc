@@ -99,6 +99,107 @@ func TestQueryIndexOverviewShowAndAroundAreDeterministicAndDetached(t *testing.T
 	}
 }
 
+func TestQueryIndexCatalogSymbolsIsExactFilteredAndPageable(t *testing.T) {
+	t.Parallel()
+	fixture := localCallGraphFixture(t)
+	index, err := NewQueryIndex(fixture.partition, fixture.expectation)
+	if err != nil {
+		t.Fatal(err)
+	}
+	request := SymbolCatalogRequest{
+		Kinds:  AllDeclarationKinds(),
+		Budget: SymbolCatalogBudget{MaxSymbols: 512, MaxSelectionBytes: 8 << 20},
+	}
+	first, err := index.CatalogSymbols(request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := index.CatalogSymbols(request)
+	if err != nil || !reflect.DeepEqual(first, second) {
+		t.Fatalf("repeated catalog = %+v, %v", second, err)
+	}
+	if !first.Complete || first.Total != fixture.partition.Header().Counts.Symbols ||
+		len(first.Symbols) != first.Total || first.NextAfter != "" || first.Usage.Symbols != first.Total {
+		t.Fatalf("catalog = %+v", first)
+	}
+	if !slices.IsSortedFunc(first.Symbols, func(left, right SymbolCatalogEntry) int {
+		return strings.Compare(left.Symbol.Full, right.Symbol.Full)
+	}) {
+		t.Fatalf("catalog symbols are not full-SymbolId ordered: %+v", first.Symbols)
+	}
+
+	pageRequest := request
+	pageRequest.Budget.MaxSymbols = 1
+	page, err := index.CatalogSymbols(pageRequest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if page.Complete || len(page.Symbols) != 1 || page.NextAfter != page.Symbols[0].Symbol.Full ||
+		!hasOmission(page.Omissions, OmissionBudgetSymbols) {
+		t.Fatalf("first catalog page = %+v", page)
+	}
+	pageRequest.After = page.NextAfter
+	next, err := index.CatalogSymbols(pageRequest)
+	if err != nil || len(next.Symbols) != 1 || next.Symbols[0].Symbol.Full == page.Symbols[0].Symbol.Full {
+		t.Fatalf("next catalog page = %+v, %v", next, err)
+	}
+
+	selected := first.Symbols[0]
+	filtered, err := index.CatalogSymbols(SymbolCatalogRequest{
+		Module: selected.Module, Kinds: []semanticsnapshot.DeclarationKind{selected.Kind},
+		Budget: request.Budget,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, entry := range filtered.Symbols {
+		if entry.Module != selected.Module || entry.Kind != selected.Kind {
+			t.Fatalf("filtered catalog leaked %+v", entry)
+		}
+	}
+}
+
+func TestQueryIndexCatalogSymbolsRejectsAmbiguousOrUnpageableRequests(t *testing.T) {
+	t.Parallel()
+	fixture := localCallGraphFixture(t)
+	index, err := NewQueryIndex(fixture.partition, fixture.expectation)
+	if err != nil {
+		t.Fatal(err)
+	}
+	valid := SymbolCatalogRequest{
+		Kinds:  AllDeclarationKinds(),
+		Budget: SymbolCatalogBudget{MaxSymbols: 512, MaxSelectionBytes: 8 << 20},
+	}
+	tests := []struct {
+		name   string
+		mutate func(*SymbolCatalogRequest)
+		want   error
+	}{
+		{name: "missing kinds", mutate: func(value *SymbolCatalogRequest) { value.Kinds = nil }},
+		{name: "duplicate kind", mutate: func(value *SymbolCatalogRequest) { value.Kinds = append(value.Kinds, value.Kinds[0]) }},
+		{name: "unknown kind", mutate: func(value *SymbolCatalogRequest) { value.Kinds = []semanticsnapshot.DeclarationKind{"variable"} }},
+		{name: "unknown module", mutate: func(value *SymbolCatalogRequest) { value.Module = "missing" }, want: ErrModuleNotFound},
+		{name: "visible cursor", mutate: func(value *SymbolCatalogRequest) { value.After = index.nodes[0].symbol.Visible }},
+		{name: "foreign full cursor", mutate: func(value *SymbolCatalogRequest) {
+			value.After = "fysym1-sha256-256-" + strings.Repeat("a", 64)
+		}},
+		{name: "zero symbols", mutate: func(value *SymbolCatalogRequest) { value.Budget.MaxSymbols = 0 }},
+		{name: "zero bytes", mutate: func(value *SymbolCatalogRequest) { value.Budget.MaxSelectionBytes = 0 }},
+		{name: "mandatory too large", mutate: func(value *SymbolCatalogRequest) { value.Budget.MaxSelectionBytes = 1 }, want: ErrQueryBudgetTooSmall},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			request := valid
+			request.Kinds = slices.Clone(valid.Kinds)
+			test.mutate(&request)
+			_, catalogErr := index.CatalogSymbols(request)
+			if catalogErr == nil || test.want != nil && !errors.Is(catalogErr, test.want) {
+				t.Fatalf("CatalogSymbols() error = %v, want %v", catalogErr, test.want)
+			}
+		})
+	}
+}
+
 func TestQueriesEnforceRecordRelationDepthAndSelectionByteBudgets(t *testing.T) {
 	t.Parallel()
 	fixture := localCallGraphFixture(t)

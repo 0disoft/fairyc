@@ -201,6 +201,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0189-canonical-compiler-fact-context-pack-v1.md`: output-only bounded canonical JSON packs with exact query provenance, explicit omissions, empty text sections, and domain-separated integrity checksums.
 - `0190-experimental-atlas-overview-pack-command.md`: explicit package UID and count/byte budgets for one current compiler-fact overview pack on stdout without a map-store default.
 - `0191-atlas-whole-package-rewrite-measurement.md`: nine raw in-memory canonical all-package rewrite samples with fixed workload denominators and no format or incremental-update conclusion.
+- `0192-exact-current-symbol-catalog-query.md`: full-SymbolId-ordered exact module/kind filtering and stateless bounded pagination without fuzzy name inference.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

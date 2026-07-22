@@ -14,6 +14,7 @@ import (
 
 var (
 	ErrSymbolNotFound      = errors.New("Atlas symbol was not found in the current package map")
+	ErrModuleNotFound      = errors.New("Atlas module was not found in the current package map")
 	ErrQueryBudgetTooSmall = errors.New("Atlas query budget cannot contain the required subject")
 )
 
@@ -57,6 +58,7 @@ const (
 	OmissionBudgetBytes               = "selection-byte-budget"
 	OmissionBudgetRecords             = "record-budget"
 	OmissionBudgetRelations           = "relation-budget"
+	OmissionBudgetSymbols             = "symbol-budget"
 	OmissionDependencyMapNotJoined    = "dependency-map-not-joined"
 	OmissionDepthLimit                = "depth-limit"
 	OmissionIncomingPackagesNotJoined = "incoming-package-maps-not-joined"
@@ -102,6 +104,47 @@ type RelationKindCount struct {
 type DeclarationKindCount struct {
 	Kind  semanticsnapshot.DeclarationKind `json:"kind"`
 	Count int                              `json:"count"`
+}
+
+type SymbolCatalogBudget struct {
+	MaxSymbols        int    `json:"max_symbols"`
+	MaxSelectionBytes uint64 `json:"max_selection_bytes"`
+}
+
+type SymbolCatalogUsage struct {
+	Symbols        int    `json:"symbols"`
+	SelectionBytes uint64 `json:"selection_bytes"`
+}
+
+type SymbolCatalogRequest struct {
+	Module string                             `json:"module,omitempty"`
+	Kinds  []semanticsnapshot.DeclarationKind `json:"kinds"`
+	After  string                             `json:"after,omitempty"`
+	Budget SymbolCatalogBudget                `json:"budget"`
+}
+
+type SymbolCatalogEntry struct {
+	Symbol  Symbol                           `json:"symbol"`
+	Module  string                           `json:"module"`
+	Kind    semanticsnapshot.DeclarationKind `json:"kind"`
+	Name    string                           `json:"name"`
+	Public  bool                             `json:"public"`
+	Unsafe  bool                             `json:"unsafe"`
+	Foreign bool                             `json:"foreign"`
+}
+
+type SymbolCatalogResult struct {
+	Context   QueryContext                       `json:"context"`
+	Module    string                             `json:"module,omitempty"`
+	Kinds     []semanticsnapshot.DeclarationKind `json:"kinds"`
+	After     string                             `json:"after,omitempty"`
+	Total     int                                `json:"total"`
+	Symbols   []SymbolCatalogEntry               `json:"symbols"`
+	NextAfter string                             `json:"next_after,omitempty"`
+	Complete  bool                               `json:"complete"`
+	Budget    SymbolCatalogBudget                `json:"budget"`
+	Usage     SymbolCatalogUsage                 `json:"usage"`
+	Omissions []QueryOmission                    `json:"omissions"`
 }
 
 type QueryFunctionFacts struct {
@@ -219,6 +262,18 @@ func AllRelationKinds() []RelationKind {
 	return slices.Clone(supportedRelationKinds)
 }
 
+// AllDeclarationKinds returns the complete canonical declaration-kind filter supported by the
+// exact-current symbol catalog.
+func AllDeclarationKinds() []semanticsnapshot.DeclarationKind {
+	return []semanticsnapshot.DeclarationKind{
+		semanticsnapshot.DeclarationEnum,
+		semanticsnapshot.DeclarationForeignFunction,
+		semanticsnapshot.DeclarationFunction,
+		semanticsnapshot.DeclarationResource,
+		semanticsnapshot.DeclarationStruct,
+	}
+}
+
 func NewQueryIndex(partition Partition, expectation LoadExpectation) (*QueryIndex, error) {
 	if err := validateTransportPartition(partition); err != nil {
 		return nil, fmt.Errorf("build Atlas query index: %w", err)
@@ -312,6 +367,72 @@ func (index *QueryIndex) Overview(budget QueryBudget) (OverviewResult, error) {
 		result.Modules = append(result.Modules, module)
 	}
 	result.Usage = selection.usage
+	return result, nil
+}
+
+// CatalogSymbols returns an exact, full-SymbolId-ordered, statelessly pageable declaration catalog.
+// It performs no fuzzy name matching and never treats a compact visible ID as a page cursor.
+func (index *QueryIndex) CatalogSymbols(request SymbolCatalogRequest) (SymbolCatalogResult, error) {
+	if index == nil {
+		return SymbolCatalogResult{}, fmt.Errorf("Atlas query index is not initialized")
+	}
+	kinds, filter, err := validateSymbolCatalogRequest(index, request)
+	if err != nil {
+		return SymbolCatalogResult{}, err
+	}
+	candidates := index.catalogCandidates(request.Module, filter)
+	start := 0
+	if request.After != "" {
+		start = slices.IndexFunc(candidates, func(position int) bool { return index.nodes[position].symbol.Full == request.After })
+		if start < 0 {
+			return SymbolCatalogResult{}, fmt.Errorf("Atlas symbol catalog cursor is not present in the filtered current package")
+		}
+		start++
+	}
+	context := index.contextFor(nil)
+	mandatory := struct {
+		Context QueryContext                       `json:"context"`
+		Module  string                             `json:"module,omitempty"`
+		Kinds   []semanticsnapshot.DeclarationKind `json:"kinds"`
+		After   string                             `json:"after,omitempty"`
+		Total   int                                `json:"total"`
+	}{Context: context, Module: request.Module, Kinds: kinds, After: request.After, Total: len(candidates)}
+	mandatoryBytes, err := selectionRecordCost(mandatory)
+	if err != nil {
+		return SymbolCatalogResult{}, err
+	}
+	if mandatoryBytes > request.Budget.MaxSelectionBytes {
+		return SymbolCatalogResult{}, ErrQueryBudgetTooSmall
+	}
+	result := SymbolCatalogResult{
+		Context: context, Module: request.Module, Kinds: kinds, After: request.After,
+		Total: len(candidates), Budget: request.Budget,
+		Usage: SymbolCatalogUsage{SelectionBytes: mandatoryBytes},
+	}
+	for position := start; position < len(candidates); position++ {
+		entry := index.catalogEntry(candidates[position])
+		cost, costErr := selectionRecordCost(entry)
+		if costErr != nil {
+			return SymbolCatalogResult{}, costErr
+		}
+		if result.Usage.Symbols >= request.Budget.MaxSymbols ||
+			cost > request.Budget.MaxSelectionBytes-result.Usage.SelectionBytes {
+			if len(result.Symbols) == 0 {
+				return SymbolCatalogResult{}, ErrQueryBudgetTooSmall
+			}
+			code := OmissionBudgetSymbols
+			if result.Usage.Symbols < request.Budget.MaxSymbols {
+				code = OmissionBudgetBytes
+			}
+			result.NextAfter = result.Symbols[len(result.Symbols)-1].Symbol.Full
+			result.Omissions = append(result.Omissions, knownOmission(code, "symbols", len(candidates)-position))
+			return result, nil
+		}
+		result.Symbols = append(result.Symbols, entry)
+		result.Usage.Symbols++
+		result.Usage.SelectionBytes += cost
+	}
+	result.Complete = true
 	return result, nil
 }
 
@@ -528,6 +649,71 @@ func (index *QueryIndex) declarationKindCounts() []DeclarationKindCount {
 	}
 	slices.SortFunc(result, func(left, right DeclarationKindCount) int { return cmp.Compare(left.Kind, right.Kind) })
 	return result
+}
+
+func validateSymbolCatalogRequest(
+	index *QueryIndex,
+	request SymbolCatalogRequest,
+) ([]semanticsnapshot.DeclarationKind, map[semanticsnapshot.DeclarationKind]struct{}, error) {
+	if request.Budget.MaxSymbols <= 0 || request.Budget.MaxSelectionBytes == 0 {
+		return nil, nil, fmt.Errorf("Atlas symbol catalog requires positive symbol and selection-byte limits")
+	}
+	if request.Module != "" {
+		if !slices.ContainsFunc(index.modules, func(module semanticsnapshot.Module) bool { return module.Path == request.Module }) {
+			return nil, nil, fmt.Errorf("%w: %s", ErrModuleNotFound, request.Module)
+		}
+	}
+	kinds := slices.Clone(request.Kinds)
+	if len(kinds) == 0 {
+		return nil, nil, fmt.Errorf("Atlas symbol catalog requires an explicit nonempty declaration-kind filter")
+	}
+	slices.Sort(kinds)
+	filter := make(map[semanticsnapshot.DeclarationKind]struct{}, len(kinds))
+	supported := AllDeclarationKinds()
+	for index, kind := range kinds {
+		if index > 0 && kinds[index-1] == kind {
+			return nil, nil, fmt.Errorf("Atlas symbol catalog declaration-kind filter repeats %q", kind)
+		}
+		if _, found := slices.BinarySearch(supported, kind); !found {
+			return nil, nil, fmt.Errorf("Atlas symbol catalog declaration kind %q is unsupported", kind)
+		}
+		filter[kind] = struct{}{}
+	}
+	if request.After != "" {
+		if _, err := symbolidentity.ParseFullDigest(request.After); err != nil {
+			return nil, nil, fmt.Errorf("parse Atlas symbol catalog cursor: %w", err)
+		}
+	}
+	return kinds, filter, nil
+}
+
+func (index *QueryIndex) catalogCandidates(
+	module string,
+	kinds map[semanticsnapshot.DeclarationKind]struct{},
+) []int {
+	result := make([]int, 0, len(index.nodes))
+	for position, node := range index.nodes {
+		if module != "" && node.declaration.Key.Module != module {
+			continue
+		}
+		if _, found := kinds[node.declaration.Key.Kind]; !found {
+			continue
+		}
+		result = append(result, position)
+	}
+	slices.SortFunc(result, func(left, right int) int {
+		return cmp.Compare(index.nodes[left].symbol.Full, index.nodes[right].symbol.Full)
+	})
+	return result
+}
+
+func (index *QueryIndex) catalogEntry(position int) SymbolCatalogEntry {
+	node := index.nodes[position]
+	return SymbolCatalogEntry{
+		Symbol: node.symbol, Module: node.declaration.Key.Module, Kind: node.declaration.Key.Kind,
+		Name: node.declaration.Key.Name, Public: node.declaration.Public,
+		Unsafe: node.declaration.Unsafe, Foreign: node.declaration.Foreign,
+	}
 }
 
 func (index *QueryIndex) contextFor(relations []RelationKind) QueryContext {

@@ -600,7 +600,10 @@ and no map-store path. ADR 0191 now measures nine in-memory canonical rewrites o
 quickstart package set after planning, with source/record/encoded-byte denominators and exact byte
 identity. It makes no format, chunking, compression, incremental-update, or latency decision. No
 default store path, ordinary-command publication, dependency-map join, source excerpt,
-documentation import, pack decoder, or show/around command exists yet.
+documentation import, pack decoder, symbol-catalog output command, or show/around command exists yet.
+ADR 0192 supplies the internal exact discovery prerequisite: full-SymbolId ordering, exact module
+and kind filters, explicit count/byte bounds, and full-ID stateless cursors all have real-workspace
+regressions without fuzzy name inference.
 
 - Preserve the implemented immutable `SemanticSnapshot` and per-package logical map plan.
 - Preserve the implemented bounded canonical `.fymap` codec and semantic revalidation boundary.
@@ -609,7 +612,7 @@ documentation import, pack decoder, or show/around command exists yet.
 - Preserve the implemented canonical compiler-fact-only Context Pack boundary.
 - Preserve the explicit overview-only experimental command and keep map publication policy separate.
 - Preserve the raw whole-package rewrite harness; require representative failure before adding chunks or compression.
-- Design exact SymbolId discovery before exposing experimental `show` or `around`.
+- Expose the implemented exact SymbolId catalog through a separately versioned bounded output before experimental `show` or `around`.
 - Design attributed source-excerpt and documentation policy before admitting any free text.
 
 Exit gate: Atlas failure cannot change compilation; stale or incompatible maps fail closed; unknown graph edges remain explicit; text cannot grant authority.
