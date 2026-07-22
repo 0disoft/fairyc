@@ -299,7 +299,7 @@ Every local MSVC compile in the same lane now also parses its intermediate `.obj
 before cleanup, including `.text$...`, `.bss`, symbol-table, and relocation-index structure. Exact
 versioned symbol names, COMDAT selection, relocation types, unwind records, and a hosted object
 receipt remain absent, so the target evidence marker stays fail-closed.
-The thirty-five local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
+The thirty-eight local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
 runtime-function ordering and code coverage plus referenced version 1 and version 2 unwind-record
 bounds, including handler/chained minimum tails. A separate three-object probe now raises a private
 noncontinuable exception at both profiles, validates its payload in an outer SEH filter, walks the
@@ -349,13 +349,15 @@ example, requires no output and native result 42, and removes the image. The min
 quickstart iterates two bytes with typed `usize` ordering and checked addition, performs checked byte
 indexing, and safely converts each `u8` to `i32` through a separately built compiler process. The
 host smoke also proves maximum-`usize` addition traps under both MSVC profiles. The configured Windows
-smoke therefore covers two retained target builds, four measured package-workspace builds, two
+smoke therefore covers two retained target builds, four measured experimental plus three stable
+package-workspace builds, two
 package-workspace runs, two safe File builds, two safe owned-text builds, two direct target
-executions, two exec-target executions, and thirty-five total target or probe PE images. The
-second direct target and workspace executions come from a separately built temporary
-`fairyc.exe` compiling the minimal Windows quickstart, so the standalone compiler process boundary
-is exercised without retaining or distributing it. This improves the developer execution path
-without changing target maturity or claiming self-hosting.
+executions, two exec-target executions, and thirty-eight total target or probe PE images. Stable
+build proof covers development output, failed-build preservation, release replacement, and a locked
+release replacement from a separately built temporary `fairyc.exe`. The second direct target and
+workspace executions also come from that compiler, so the standalone process boundary is exercised
+without retaining or distributing it. This improves the developer execution path without changing
+target maturity or claiming self-hosting.
 The additional `experimental exec-target` path uses the same inspected temporary Windows target but
 forwards separated bounded stdout and stderr without a compiler receipt and preserves the program's
 32-bit Windows status. Its FY example now splits the safe entry and unsafe support boundary into two
@@ -539,8 +541,9 @@ quarantines, without selecting a default policy or making a speed claim.
   declared reference environment, and an accepted decision rule justify an ordinary-command cache
   path and defaults. The crash/power-interruption safety boundary and configured local cold/warm
   distributions now exist; physical media retention remains storage-stack-specific.
-- Keep the implemented `fairyc check [--locked]` v1 contract narrow, then stabilize minimal
-  `build`, `run`, `test`, `emit`, `explain`, and `targets` contracts independently.
+- Keep the implemented `fairyc check [--locked]` and Windows-local
+  `fairyc build [--release] [--locked]` v1 contracts narrow, then stabilize minimal `run`, `test`,
+  `emit`, `explain`, and `targets` contracts independently.
 - Move to function-level reuse only when measured package rebuild or storage evidence justifies the complexity.
 
 Exit gate: clean and warm build evidence is reproducible on a declared machine and workload; invalidation fixtures distinguish public interface, inline body, and private implementation; incompatible caches are safe misses.

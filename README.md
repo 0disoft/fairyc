@@ -319,7 +319,8 @@ exception, virtual-walks raiser, termination, and catcher frames, and requires o
 `__finally` execution under both profiles. The target marker remains missing until broader layout
 and independent/source-level/hosted ABI and unwind evidence exists. A host-independent PE parser
 now validates the host-smoke product, both declared-target profile products, both safe File and
-safe owned-text profile products, four measured package-workspace build products, two package-workspace run
+safe owned-text profile products, seven package-workspace build products including four measured
+experimental and three stable builds, two package-workspace run
 products, two direct run-target temporary products, two exec-target output products, and all
 eighteen raw or generated-Fairy Windows File, Buffer, owned-text, Arena, layout,
 ABI, struct-result, and unwind probe images as bounded
@@ -352,10 +353,11 @@ inspect the declared target specification, or interpret an explicit source-root-
 closure. Its bounded foreground `check-workspace-session` command can keep one process-local
 verified-MIR cache across sequential caller-triggered checks; it is not a daemon, watcher,
 persistent cache, or stable editor protocol. Program commands use one entry plus repeated
-`--source`; semantic checking uses its explicit positional module set. The first stable workspace
-command is `fairyc check [--locked]`; stable build/run/test/emit commands, user drop-body execution,
-a complete runtime, safe standard library, package manager, supported target, release-stable CLI as
-a whole, and a stable language revision do not exist yet.
+`--source`; semantic checking uses its explicit positional module set. The stable workspace commands
+are `fairyc check [--locked]` and the Windows/amd64-local
+`fairyc build [--release] [--locked]`. Stable run/test/emit commands, user drop-body execution, a
+complete runtime, safe standard library, package manager, supported target, release-stable CLI as a
+whole, and a stable language revision do not exist yet.
 
 ## Try the current prototype
 
@@ -381,6 +383,9 @@ go run ./cmd/fairyc experimental check-workspace --locked
 Push-Location examples/workspace_quickstart
 go run ../../cmd/fairyc check
 go run ../../cmd/fairyc check --locked
+go run ../../cmd/fairyc build
+go run ../../cmd/fairyc build --release --locked
+& ./build/workspace-quickstart.exe
 go run ../../cmd/fairyc experimental check-workspace
 go run ../../cmd/fairyc experimental run-workspace --locked --target x86_64-windows-msvc --profile optimized
 Pop-Location

@@ -204,6 +204,33 @@ func TestWriteBuildArtifactPromotesWithoutOverwrite(t *testing.T) {
 	}
 }
 
+func TestReplaceBuildArtifactPublishesOneLatestImage(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	output := "build/app.exe"
+	if err := replaceBuildArtifact(root, output, []byte("development-image")); err != nil {
+		t.Fatal(err)
+	}
+	if err := replaceBuildArtifact(root, output, []byte("release-image")); err != nil {
+		t.Fatal(err)
+	}
+	contents, err := os.ReadFile(filepath.Join(root, filepath.FromSlash(output)))
+	if err != nil || string(contents) != "release-image" {
+		t.Fatalf("replaced artifact = %q, %v", contents, err)
+	}
+	staged, err := filepath.Glob(filepath.Join(root, "build", ".fairyc-*.tmp"))
+	if err != nil || len(staged) != 0 {
+		t.Fatalf("replacement staging files = %v, %v", staged, err)
+	}
+	if err := replaceBuildArtifact(root, output, nil); err == nil {
+		t.Fatal("empty replacement succeeded")
+	}
+	contents, err = os.ReadFile(filepath.Join(root, filepath.FromSlash(output)))
+	if err != nil || string(contents) != "release-image" {
+		t.Fatalf("artifact after rejected replacement = %q, %v", contents, err)
+	}
+}
+
 func TestWriteBuildArtifactRejectsSymlinkEscape(t *testing.T) {
 	parent := t.TempDir()
 	root := filepath.Join(parent, "root")
@@ -220,6 +247,10 @@ func TestWriteBuildArtifactRejectsSymlinkEscape(t *testing.T) {
 	err := writeBuildArtifact(root, "build/main", []byte("native-image"))
 	if err == nil {
 		t.Fatal("writeBuildArtifact() followed a build-directory symlink outside the source root")
+	}
+	err = replaceBuildArtifact(root, "build/main", []byte("replacement-image"))
+	if err == nil {
+		t.Fatal("replaceBuildArtifact() followed a build-directory symlink outside the source root")
 	}
 	if _, statErr := os.Stat(filepath.Join(outside, "main")); !os.IsNotExist(statErr) {
 		t.Fatalf("outside artifact stat error = %v", statErr)

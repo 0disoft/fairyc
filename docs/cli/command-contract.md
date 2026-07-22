@@ -326,21 +326,40 @@ success, invalid invocation, source diagnostics, internal/output failure, and pa
 failure. Stable JSON, target-specific validation, feature selection flags, persistent-cache defaults,
 and configuration precedence remain outside v1.
 
+## Stable workspace build v1
+
+`fairyc build [--release] [--locked]` is the stable native build for the current workspace. It
+accepts no positional source, output path, target, compiler, linker, profile value, cache, JSON,
+configuration, network, or stdin input. The validated root package name selects
+`build/<package-name>.exe`. Default mode uses the low-optimization development profile;
+`--release` selects the ordinary optimized profile without LTO.
+
+The command applies the stable check lock policy, requires root `main::main` with type
+`fn() -> i32`, and reuses the closed package-aware `x86_64-windows-msvc` C11, project-owned support,
+MSVC, PE, and unwind pipeline. The complete new image is compiled and inspected before a synced
+staging file replaces the previous default artifact. Failures before successful replacement retain
+the previous artifact and remove staging state.
+
+Success is exactly `built: <path> (x86_64-windows-msvc, <development|release>, lock
+<updated|unchanged|verified>)`. The command freezes codes 0, 2, 3, 4, 6, and 7. This command
+stability does not promote the target's independent `emittable`, `conformant`, or `supported`
+status and does not select persistent-cache defaults.
+
 ## Stage 0 surface
 
 | Command | Purpose | Code generation |
 | --- | --- | --- |
-| `fairyc check [target]` | Parse, resolve, type-check, and run resource, borrow, region, and effect analysis | No |
-| `fairyc build [target]` | Compile and link the selected target with the configured backend | Yes |
+| `fairyc check [--locked]` | Check the current manifest-owned workspace through verified MIR | No |
+| `fairyc build [--release] [--locked]` | Build or replace the current root package's one Windows executable | Yes |
 | `fairyc run [target] -- [args...]` | Build and run a program while preserving the program exit status | Yes |
 | `fairyc test [target]` | Build and run semantic test targets | Yes |
 | `fairyc emit <ast|hir|mir|c> [target]` | Emit a requested compiler representation for inspection | Requested form only |
 | `fairyc explain <diagnostic-code>` | Explain a stable diagnostic code | No |
 | `fairyc targets` | Report known target profiles, status, evidence, and unavailable requirements | No |
 
-Stable positional syntax, package selection, workspace selection, target triples, feature flags,
-and configuration precedence remain UNDECIDED. The implemented `experimental` spellings do not
-settle those stable decisions.
+Stable positional syntax for the remaining commands, alternate package/workspace selection, target
+triples beyond build v1's fixed local Windows path, feature flags, and configuration precedence
+remain UNDECIDED. The implemented `experimental` spellings do not settle those decisions.
 
 ## General requirements
 

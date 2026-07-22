@@ -231,6 +231,7 @@ const workspaceManifestPath = "fairy.toml"
 const workspaceMainPath = "src/main.fy"
 const workspaceMemberManifestPath = "libs/answer/fairy.toml"
 const workspaceMemberSourcePath = "libs/answer/src/answer.fy"
+const stableWorkspaceOutputPath = "build/workspace-quickstart.exe"
 const windowsLayoutManifestPath = "spec/fixtures/layout/manifest-windows-msvc-v0.json"
 const windowsABIManifestPath = "spec/fixtures/c-abi/manifest-windows-msvc-v0.json"
 const subprocessOutputLimit = 64 * 1024
@@ -506,6 +507,11 @@ func run() error {
 			workspaceBuildExecutions++
 		}
 	}
+	stableBuildExecutions, err := runStableWorkspaceBuildProof(root)
+	if err != nil {
+		return err
+	}
+	workspaceBuildExecutions += stableBuildExecutions
 	measurementJSON, err := buildmeasure.Marshal(measurement)
 	if err != nil {
 		return fmt.Errorf("encode Windows workspace build measurement: %w", err)
@@ -611,6 +617,7 @@ func run() error {
 	}
 	targetRunExecutions++
 	targetExecExecutions++
+	workspaceBuildExecutions++
 	workspaceRunExecutions++
 
 	for _, testCase := range []struct {
@@ -702,6 +709,87 @@ func run() error {
 	inspectedPEImages := 1 + targetBuildExecutions + workspaceBuildExecutions + windowsFileSourceExecutions + ownedTextSourceExecutions + targetRunExecutions + workspaceRunExecutions + targetExecExecutions + windowsFileExecutions + bufferProbeExecutions + ownedTextProbeExecutions + arenaProbeExecutions + layoutExecutions + abiExecutions + structResultExecutions + unwindExecutions
 	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds, %d package-workspace builds, %d package-workspace runs, %d source-level safe File lifecycle builds, %d source-level safe owned-text lifecycle builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls, checked reads and mutable indexed stores, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart, output, locked workspace execution, nine paired cold/warm persistent-cache process measurements, one nine-process bounded persistent-cache growth staircase, and an eight-request editor-shaped workspace session with Windows process-memory peaks, 40 run-host outcomes covered fixed arrays, byte-view iteration and slicing, checked indexed stores, assertions in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, Buffer initialization, reserve, self-overlap append, and zeroed-resize allocation rollback passed %d separate-translation-unit MSVC executions, owned-text opaque-storage failure preservation, forced allocation rollback, and repeated drop passed %d separate-translation-unit MSVC executions, Arena zeroing, two-stage allocation rollback, stale Region rejection, and active-drop preservation passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, generated-Fairy small and large struct results passed %d separate-translation-unit MSVC executions across C11 and C17 consumer modes, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, workspaceBuildExecutions, workspaceRunExecutions, windowsFileSourceExecutions, ownedTextSourceExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, windowsFileExecutions, bufferProbeExecutions, ownedTextProbeExecutions, arenaProbeExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, structResultExecutions, unwindCases, unwindExecutions, inspectedPEImages, toolchain.Version)
 	return nil
+}
+
+func runStableWorkspaceBuildProof(root string) (int, error) {
+	const output = stableWorkspaceOutputPath
+	artifactPath := filepath.Join(root, filepath.FromSlash(output))
+
+	var developmentStdout bytes.Buffer
+	var developmentStderr bytes.Buffer
+	developmentCode := cli.Run([]string{"build"}, root, &developmentStdout, &developmentStderr)
+	if developmentCode != cli.ExitSuccess || developmentStderr.Len() != 0 ||
+		developmentStdout.String() != "built: "+stableWorkspaceOutputPath+" (x86_64-windows-msvc, development, lock unchanged)\n" {
+		return 0, fmt.Errorf("stable development build returned code %d, stdout %q, stderr %q", developmentCode, developmentStdout.String(), developmentStderr.String())
+	}
+	developmentArtifact, err := os.ReadFile(artifactPath)
+	if err != nil {
+		return 0, fmt.Errorf("read stable development build artifact: %w", err)
+	}
+	if _, err := pecoff.InspectExecutable(developmentArtifact); err != nil {
+		return 0, fmt.Errorf("inspect stable development PE executable image: %w", err)
+	}
+	if _, err := pecoff.InspectAMD64Unwind(developmentArtifact); err != nil {
+		return 0, fmt.Errorf("inspect stable development Microsoft x64 unwind data: %w", err)
+	}
+	if err := executeExpectResult(artifactPath, 42); err != nil {
+		return 0, fmt.Errorf("execute stable development build artifact: %w", err)
+	}
+
+	sourcePath := filepath.Join(root, filepath.FromSlash(workspaceMainPath))
+	originalSource, err := os.ReadFile(sourcePath)
+	if err != nil {
+		return 0, fmt.Errorf("read stable build source before failure proof: %w", err)
+	}
+	if err := os.WriteFile(sourcePath, []byte("module main;\nfn i32 broken( { return 0; }\n"), 0o600); err != nil {
+		return 0, fmt.Errorf("write invalid stable build source: %w", err)
+	}
+	var invalidStdout bytes.Buffer
+	var invalidStderr bytes.Buffer
+	invalidCode := cli.Run([]string{"build", "--locked"}, root, &invalidStdout, &invalidStderr)
+	restoreErr := os.WriteFile(sourcePath, originalSource, 0o600)
+	if restoreErr != nil {
+		return 0, fmt.Errorf("restore stable build source: %w", restoreErr)
+	}
+	if invalidCode != cli.ExitSourceDiagnostics || invalidStdout.Len() != 0 || !strings.Contains(invalidStderr.String(), "E0007") {
+		return 0, fmt.Errorf("invalid stable build returned code %d, stdout %q, stderr %q", invalidCode, invalidStdout.String(), invalidStderr.String())
+	}
+	afterFailure, err := os.ReadFile(artifactPath)
+	if err != nil {
+		return 0, fmt.Errorf("read stable artifact after failed replacement: %w", err)
+	}
+	if !bytes.Equal(afterFailure, developmentArtifact) {
+		return 0, fmt.Errorf("failed stable build modified the previous executable")
+	}
+
+	var releaseStdout bytes.Buffer
+	var releaseStderr bytes.Buffer
+	releaseCode := cli.Run([]string{"build", "--release", "--locked"}, root, &releaseStdout, &releaseStderr)
+	if releaseCode != cli.ExitSuccess || releaseStderr.Len() != 0 ||
+		releaseStdout.String() != "built: "+stableWorkspaceOutputPath+" (x86_64-windows-msvc, release, lock verified)\n" {
+		return 0, fmt.Errorf("stable release build returned code %d, stdout %q, stderr %q", releaseCode, releaseStdout.String(), releaseStderr.String())
+	}
+	releaseArtifact, err := os.ReadFile(artifactPath)
+	if err != nil {
+		return 0, fmt.Errorf("read stable release build artifact: %w", err)
+	}
+	if _, err := pecoff.InspectExecutable(releaseArtifact); err != nil {
+		return 0, fmt.Errorf("inspect stable release PE executable image: %w", err)
+	}
+	if _, err := pecoff.InspectAMD64Unwind(releaseArtifact); err != nil {
+		return 0, fmt.Errorf("inspect stable release Microsoft x64 unwind data: %w", err)
+	}
+	if err := executeExpectResult(artifactPath, 42); err != nil {
+		return 0, fmt.Errorf("execute stable release build artifact: %w", err)
+	}
+	staging, err := filepath.Glob(filepath.Join(root, "build", ".fairyc-*.tmp"))
+	if err != nil {
+		return 0, fmt.Errorf("inspect stable build staging files: %w", err)
+	}
+	if len(staging) != 0 {
+		return 0, fmt.Errorf("stable build left staging files: %v", staging)
+	}
+	return 2, nil
 }
 
 func measureWorkspaceProcessCache(root string, clockResolution int64) (buildmeasure.CacheReport, error) {
@@ -981,6 +1069,7 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string, clockResolution in
 	}
 	if helpCode != cli.ExitSuccess || helpStderr != "" ||
 		!strings.Contains(helpStdout, "fairyc check [--locked]") ||
+		!strings.Contains(helpStdout, "fairyc build [--release] [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc experimental run-target") ||
 		!strings.Contains(helpStdout, "fairyc experimental exec-target") ||
 		!strings.Contains(helpStdout, "fairyc experimental check-workspace-session") ||
@@ -1001,6 +1090,32 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string, clockResolution in
 	if checkCode != cli.ExitSuccess || checkStderr != "" ||
 		checkStdout != "check ok: 2 instance(s), 2 source file(s), 2 MIR function(s), lock verified\n" {
 		return 0, fmt.Errorf("standalone compiler stable check returned code %d, stdout %q, stderr %q", checkCode, checkStdout, checkStderr)
+	}
+	stableBuildCode, stableBuildStdout, stableBuildStderr, err := runStandaloneCommand(
+		sourceRoot,
+		executablePath,
+		"build", "--release", "--locked",
+	)
+	if err != nil {
+		return 0, fmt.Errorf("execute standalone compiler stable workspace build: %w", err)
+	}
+	if stableBuildCode != cli.ExitSuccess || stableBuildStderr != "" ||
+		stableBuildStdout != "built: "+stableWorkspaceOutputPath+" (x86_64-windows-msvc, release, lock verified)\n" {
+		return 0, fmt.Errorf("standalone compiler stable build returned code %d, stdout %q, stderr %q", stableBuildCode, stableBuildStdout, stableBuildStderr)
+	}
+	stableArtifactPath := filepath.Join(sourceRoot, filepath.FromSlash(stableWorkspaceOutputPath))
+	stableArtifact, err := os.ReadFile(stableArtifactPath)
+	if err != nil {
+		return 0, fmt.Errorf("read standalone compiler stable build artifact: %w", err)
+	}
+	if _, err := pecoff.InspectExecutable(stableArtifact); err != nil {
+		return 0, fmt.Errorf("inspect standalone compiler stable build PE image: %w", err)
+	}
+	if _, err := pecoff.InspectAMD64Unwind(stableArtifact); err != nil {
+		return 0, fmt.Errorf("inspect standalone compiler stable build unwind data: %w", err)
+	}
+	if err := executeExpectResult(stableArtifactPath, 42); err != nil {
+		return 0, fmt.Errorf("execute standalone compiler stable build artifact: %w", err)
 	}
 
 	runCode, runStdout, runStderr, err := runStandaloneCommand(

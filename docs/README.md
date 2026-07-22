@@ -39,6 +39,7 @@
 - Compiler-bundled Stage 0 standard-library source package: internal/sdkstdlib/
 - Generated lockfile v1 implementation: internal/lockfile/
 - Stable local-workspace check v1: internal/cli/workspace.go, docs/adr/0175-stable-workspace-check-v1.md
+- Stable local Windows workspace build v1: internal/cli/workspace_native.go, internal/cli/build.go, docs/adr/0176-stable-windows-workspace-build-v1.md
 - Package-aware Windows quickstart: examples/workspace_quickstart/
 - Windows MSVC layout fixture manifest: spec/fixtures/layout/manifest-windows-msvc-v0.json
 - Windows MSVC C ABI fixture manifest: spec/fixtures/c-abi/manifest-windows-msvc-v0.json

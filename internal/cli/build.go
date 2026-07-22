@@ -223,6 +223,14 @@ func validatePortablePathComponent(label, component string) error {
 }
 
 func writeBuildArtifact(sourceRoot, relativePath string, contents []byte) error {
+	return publishBuildArtifact(sourceRoot, relativePath, contents, false)
+}
+
+func replaceBuildArtifact(sourceRoot, relativePath string, contents []byte) error {
+	return publishBuildArtifact(sourceRoot, relativePath, contents, true)
+}
+
+func publishBuildArtifact(sourceRoot, relativePath string, contents []byte, replace bool) error {
 	if _, err := validateBuildOutput(relativePath); err != nil {
 		return err
 	}
@@ -263,6 +271,13 @@ func writeBuildArtifact(sourceRoot, relativePath string, contents []byte) error 
 	}
 	if err := file.Close(); err != nil {
 		return fmt.Errorf("close staged build output: %w", err)
+	}
+	if replace {
+		if err := root.Rename(temporaryPath, localPath); err != nil {
+			return fmt.Errorf("replace build output %q: %w", relativePath, err)
+		}
+		stagingExists = false
+		return nil
 	}
 	if err := root.Link(temporaryPath, localPath); err != nil {
 		if errors.Is(err, fs.ErrExist) {

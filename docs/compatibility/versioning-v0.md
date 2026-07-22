@@ -370,6 +370,12 @@ runtime, target, and ABI identities without merging them. `experimental build-wo
 `run-workspace` are pre-stable command spellings; their root `main::main` convention and human
 receipts are not a released compatibility promise.
 
+ADR 0176 separately stabilizes `fairyc build [--release] [--locked]` for the current workspace on
+Windows/amd64. Its root-package-derived `build/<name>.exe` path, development/release meanings,
+replace-on-success rule, lock behavior, success receipt, and codes 0, 2, 3, 4, 6, and 7 are CLI
+compatibility data. This does not stabilize the generated C, native ABI, MSVC version, distributable
+runtime, target maturity, or persistent-cache policy.
+
 ADR 0159 adds the independent `fairyc.experimental.workspace-check-session/v0` NDJSON request and
 response schema. The schema versions this experimental machine boundary and rejects unknown or
 duplicate request fields, but it does not make the command spelling, numeric limits, process exit

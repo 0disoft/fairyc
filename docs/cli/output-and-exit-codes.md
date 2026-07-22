@@ -30,6 +30,14 @@ manifest, or lock failure. Success writes exactly one `check ok:` line documente
 failures emit no partial success. Workspace syntax errors retain their ordinary diagnostic codes and
 positions on stderr instead of being collapsed into package failure text. No stable JSON mode exists.
 
+`fairyc build [--release] [--locked]` stabilizes codes `0`, `2`, `3`, `4`, `6`, and `7` for
+success, invalid invocation or unsupported admitted subset, source diagnostics, internal/output
+failure, toolchain/link/artifact failure, and package/manifest/lock failure. Success writes exactly
+`built: <path> (x86_64-windows-msvc, <development|release>, lock
+<updated|unchanged|verified>)`. No success line is emitted before the inspected executable replaces
+the prior default artifact. An output-stream failure after replacement returns `4` but does not
+delete the successfully built artifact. No stable JSON mode exists.
+
 The implemented `fairyc explain`, `fairyc targets`, and `fairyc experimental` commands use
 provisional process codes only for prototype automation. They are not the stable exit-code taxonomy:
 

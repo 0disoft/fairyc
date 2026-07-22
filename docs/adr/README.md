@@ -185,6 +185,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0173-public-interface-coordinate-hash-v2.md`: public-interface v2 uses package coordinates for external nominal types while preserving the v1 semantic projection.
 - `0174-coordinate-stable-linking-and-cache-key-v2.md`: coordinate-based stable symbols, types, foreign declarations, and dependency cache pairs enable verified caller reuse across private dependency edits.
 - `0175-stable-workspace-check-v1.md`: stable `fairyc check [--locked]` owns current-workspace discovery, lock maintenance, package-aware verified MIR, deterministic output, and source/package failure separation.
+- `0176-stable-windows-workspace-build-v1.md`: stable `fairyc build [--release] [--locked]` derives one replace-on-success artifact from the root package while retaining the closed local Windows/MSVC capability boundary.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

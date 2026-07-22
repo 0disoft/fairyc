@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"path"
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/cdriver"
@@ -20,16 +21,84 @@ type workspaceTargetOptions struct {
 	locked   bool
 }
 
+type stableBuildOptions struct {
+	locked  bool
+	release bool
+}
+
+type compiledWorkspace struct {
+	artifact        cdriver.WindowsHostArtifact
+	lockState       string
+	rootPackageName string
+}
+
+func runStableBuild(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
+	options, err := parseStableBuildOptions(arguments)
+	if err != nil {
+		return invocationError(stderr, err.Error())
+	}
+	profile := cdriver.LowProfile
+	profileName := "development"
+	if options.release {
+		profile = cdriver.OptimizedProfile
+		profileName = "release"
+	}
+	compiled, code := compileWindowsWorkspace(sourceRoot, workspaceTargetOptions{
+		targetID: target.X8664WindowsMSVC,
+		profile:  profile,
+		locked:   options.locked,
+	}, true, stderr)
+	if code != ExitSuccess {
+		return code
+	}
+	output := path.Join("build", compiled.rootPackageName+".exe")
+	if err := replaceBuildArtifact(sourceRoot, output, compiled.artifact.Bytes); err != nil {
+		return buildFailure(stderr, err)
+	}
+	if _, err := fmt.Fprintf(
+		stdout,
+		"built: %s (%s, %s, lock %s)\n",
+		output,
+		target.X8664WindowsMSVC,
+		profileName,
+		compiled.lockState,
+	); err != nil {
+		return outputError(stderr)
+	}
+	return ExitSuccess
+}
+
+func parseStableBuildOptions(arguments []string) (stableBuildOptions, error) {
+	options := stableBuildOptions{}
+	seen := make(map[string]bool, 2)
+	for _, argument := range arguments {
+		if argument != "--locked" && argument != "--release" {
+			return stableBuildOptions{}, fmt.Errorf(`command "build" accepts only optional --release and --locked`)
+		}
+		if seen[argument] {
+			return stableBuildOptions{}, fmt.Errorf(`command "build" received %s more than once`, argument)
+		}
+		seen[argument] = true
+		switch argument {
+		case "--locked":
+			options.locked = true
+		case "--release":
+			options.release = true
+		}
+	}
+	return options, nil
+}
+
 func runWorkspaceBuild(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
 	options, err := parseWorkspaceTargetOptions("build-workspace", arguments, true)
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	artifact, lockState, code := compileWindowsWorkspace(sourceRoot, options, stderr)
+	compiled, code := compileWindowsWorkspace(sourceRoot, options, false, stderr)
 	if code != ExitSuccess {
 		return code
 	}
-	if err := writeBuildArtifact(sourceRoot, options.output, artifact.Bytes); err != nil {
+	if err := writeBuildArtifact(sourceRoot, options.output, compiled.artifact.Bytes); err != nil {
 		return buildFailure(stderr, err)
 	}
 	if _, err := fmt.Fprintf(
@@ -37,9 +106,9 @@ func runWorkspaceBuild(arguments []string, sourceRoot string, stdout, stderr io.
 		"built workspace: %s (%s, msvc %s, %s, lock %s)\n",
 		options.output,
 		options.targetID,
-		artifact.Toolchain.Version,
-		artifact.Profile.Name,
-		lockState,
+		compiled.artifact.Toolchain.Version,
+		compiled.artifact.Profile.Name,
+		compiled.lockState,
 	); err != nil {
 		return outputError(stderr)
 	}
@@ -51,11 +120,11 @@ func runWorkspaceTarget(arguments []string, sourceRoot string, stdout, stderr io
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	artifact, lockState, code := compileWindowsWorkspace(sourceRoot, options, stderr)
+	compiled, code := compileWindowsWorkspace(sourceRoot, options, false, stderr)
 	if code != ExitSuccess {
 		return code
 	}
-	outcome, err := cdriver.ExecuteWindowsMSVCTarget(artifact)
+	outcome, err := cdriver.ExecuteWindowsMSVCTarget(compiled.artifact)
 	if err != nil {
 		return buildFailure(stderr, err)
 	}
@@ -73,9 +142,9 @@ func runWorkspaceTarget(arguments []string, sourceRoot string, stdout, stderr io
 		"native workspace result: %d (%s, msvc %s, %s, lock %s)\n",
 		outcome.ExitCode,
 		options.targetID,
-		artifact.Toolchain.Version,
-		artifact.Profile.Name,
-		lockState,
+		compiled.artifact.Toolchain.Version,
+		compiled.artifact.Profile.Name,
+		compiled.lockState,
 	); err != nil {
 		return outputError(stderr)
 	}
@@ -145,51 +214,62 @@ func parseWorkspaceTargetOptions(command string, arguments []string, requireOutp
 	return options, nil
 }
 
-func compileWindowsWorkspace(sourceRoot string, options workspaceTargetOptions, stderr io.Writer) (cdriver.WindowsHostArtifact, string, int) {
+func compileWindowsWorkspace(sourceRoot string, options workspaceTargetOptions, stableDiagnostics bool, stderr io.Writer) (compiledWorkspace, int) {
 	workspace, lockState, err := loadWorkspaceWithLock(sourceRoot, options.locked)
 	if err != nil {
-		return cdriver.WindowsHostArtifact{}, "", packageFailure(stderr, err)
+		if stableDiagnostics {
+			if code, handled := stableWorkspaceLoadFailure(stderr, err); handled {
+				return compiledWorkspace{}, code
+			}
+		}
+		return compiledWorkspace{}, packageFailure(stderr, err)
 	}
 	input, err := workspace.SemanticInput()
 	if err != nil {
-		return cdriver.WindowsHostArtifact{}, "", packageFailure(stderr, err)
+		return compiledWorkspace{}, packageFailure(stderr, err)
 	}
 	checked, pipelineErr := compiler.CheckPackages(input)
 	if len(checked.Semantic.Diagnostics) != 0 {
 		if err := writeWorkspaceDiagnostics(stderr, workspace, checked.Semantic.Diagnostics); err != nil {
-			return cdriver.WindowsHostArtifact{}, "", ExitInternalFailure
+			return compiledWorkspace{}, ExitInternalFailure
 		}
-		return cdriver.WindowsHostArtifact{}, "", ExitSourceDiagnostics
+		return compiledWorkspace{}, ExitSourceDiagnostics
 	}
 	if len(checked.Semantic.Unsupported) != 0 {
 		if err := writeUnsupportedSemantics(stderr, checked.Semantic.Unsupported); err != nil {
-			return cdriver.WindowsHostArtifact{}, "", ExitInternalFailure
+			return compiledWorkspace{}, ExitInternalFailure
 		}
-		return cdriver.WindowsHostArtifact{}, "", ExitSourceDiagnostics
+		return compiledWorkspace{}, ExitSourceDiagnostics
 	}
 	if pipelineErr != nil {
 		var failure *compiler.Error
 		if errors.As(pipelineErr, &failure) && failure.Stage == compiler.StageMIRLower {
-			return cdriver.WindowsHostArtifact{}, "", subsetCapabilityError(stderr, "Windows workspace C-emission", failure.Cause)
+			return compiledWorkspace{}, subsetCapabilityError(stderr, "Windows workspace C-emission", failure.Cause)
 		}
-		return cdriver.WindowsHostArtifact{}, "", internalError(stderr)
+		return compiledWorkspace{}, internalError(stderr)
 	}
 	if !checked.Verified {
-		return cdriver.WindowsHostArtifact{}, "", internalError(stderr)
+		return compiledWorkspace{}, internalError(stderr)
 	}
 	entryName, err := workspaceEntryName(workspace)
 	if err != nil {
-		return cdriver.WindowsHostArtifact{}, "", packageFailure(stderr, err)
+		return compiledWorkspace{}, packageFailure(stderr, err)
 	}
 	entry, found := programEntry(checked.MIR, entryName)
 	if !found || len(entry.Parameters) != 0 || entry.ResultType != hir.TypeI32 {
-		return cdriver.WindowsHostArtifact{}, "", subsetCapabilityError(stderr, "Windows workspace C-emission", fmt.Errorf("root entry %s must have type fn() -> i32", entryName))
+		return compiledWorkspace{}, subsetCapabilityError(stderr, "Windows workspace C-emission", fmt.Errorf("root entry %s must have type fn() -> i32", entryName))
 	}
 	artifact, code := compileWindowsProgram(checked.MIR, entryName, options.targetID, options.profile, stderr)
 	if code != ExitSuccess {
-		return cdriver.WindowsHostArtifact{}, "", code
+		return compiledWorkspace{}, code
 	}
-	return artifact, lockState, ExitSuccess
+	rootPackage, found := workspace.Package(".")
+	if !found {
+		return compiledWorkspace{}, packageFailure(stderr, fmt.Errorf("workspace root package is missing"))
+	}
+	return compiledWorkspace{
+		artifact: artifact, lockState: lockState, rootPackageName: rootPackage.Manifest.Package.Name,
+	}, ExitSuccess
 }
 
 func workspaceEntryName(workspace workspaceloader.Workspace) (string, error) {

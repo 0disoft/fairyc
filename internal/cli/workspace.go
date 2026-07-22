@@ -33,12 +33,8 @@ func checkWorkspace(sourceRoot string, locked, stable bool, successLabel string,
 	workspace, lockState, err := loadWorkspaceWithLock(sourceRoot, locked)
 	if err != nil {
 		if stable {
-			var loadError *workspaceloader.LoadError
-			if errors.As(err, &loadError) && loadError.Reason == workspaceloader.ReasonSourceSyntax && len(loadError.Diagnostics) != 0 {
-				if writeErr := writeDiagnostics(stderr, loadError.Path, loadError.Source, loadError.Diagnostics); writeErr != nil {
-					return ExitInternalFailure
-				}
-				return ExitSourceDiagnostics
+			if code, handled := stableWorkspaceLoadFailure(stderr, err); handled {
+				return code
 			}
 		}
 		return packageFailure(stderr, err)
@@ -70,6 +66,17 @@ func checkWorkspace(sourceRoot string, locked, stable bool, successLabel string,
 		return outputError(stderr)
 	}
 	return ExitSuccess
+}
+
+func stableWorkspaceLoadFailure(stderr io.Writer, err error) (int, bool) {
+	var loadError *workspaceloader.LoadError
+	if !errors.As(err, &loadError) || loadError.Reason != workspaceloader.ReasonSourceSyntax || len(loadError.Diagnostics) == 0 {
+		return 0, false
+	}
+	if writeErr := writeDiagnostics(stderr, loadError.Path, loadError.Source, loadError.Diagnostics); writeErr != nil {
+		return ExitInternalFailure, true
+	}
+	return ExitSourceDiagnostics, true
 }
 
 func parseOptionalLocked(command string, arguments []string) (bool, error) {

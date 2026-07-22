@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -55,6 +56,54 @@ func TestParseWorkspaceTargetOptions(t *testing.T) {
 	}
 }
 
+func TestParseStableBuildOptions(t *testing.T) {
+	t.Parallel()
+	development, err := parseStableBuildOptions(nil)
+	if err != nil || development.locked || development.release {
+		t.Fatalf("development options = %+v, %v", development, err)
+	}
+	release, err := parseStableBuildOptions([]string{"--locked", "--release"})
+	if err != nil || !release.locked || !release.release {
+		t.Fatalf("release options = %+v, %v", release, err)
+	}
+	for _, arguments := range [][]string{
+		{"main.fy"},
+		{"--profile", "optimized"},
+		{"--release", "--release"},
+		{"--locked", "--locked"},
+	} {
+		if _, err := parseStableBuildOptions(arguments); err == nil {
+			t.Errorf("parseStableBuildOptions(%q) succeeded", arguments)
+		}
+	}
+}
+
+func TestStableBuildPreservesWorkspaceFailureCategories(t *testing.T) {
+	t.Parallel()
+	code, stdout, stderr := runForTest([]string{"build"}, t.TempDir())
+	if code != ExitPackageFailure || stdout != "" || !strings.Contains(stderr, "fairy.toml") {
+		t.Fatalf("missing stable workspace = (%d, %q, %q)", code, stdout, stderr)
+	}
+
+	root := t.TempDir()
+	writeWorkspaceFile(t, root, "fairy.toml", `schema = "fairyc.manifest/v1"
+[package]
+uid = "example.stable-build.invalid"
+name = "invalid"
+version = "1.0.0"
+language = "fairyc-language/0"
+source = "src"
+`)
+	writeWorkspaceFile(t, root, "src/main.fy", "module main;\nfn i32 broken( { return 0; }\n")
+	code, stdout, stderr = runForTest([]string{"build"}, root)
+	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "E0007") {
+		t.Fatalf("stable build source diagnostics = (%d, %q, %q)", code, stdout, stderr)
+	}
+	if _, err := os.Stat(filepath.Join(root, "build")); !os.IsNotExist(err) {
+		t.Fatalf("build path after source failure = %v", err)
+	}
+}
+
 func TestPackageWorkspaceReachesQualifiedWindowsCEmission(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
@@ -100,6 +149,19 @@ func TestExperimentalWorkspaceBuildRejectsMissingRootEntryBeforeToolchain(t *tes
 	}, root)
 	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "root entry") {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
+func TestStableWorkspaceBuildRejectsMissingRootEntryBeforeToolchain(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeNativeWorkspace(t, root, false)
+	code, stdout, stderr := runForTest([]string{"build"}, root)
+	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "root entry") {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+	if _, err := os.Stat(filepath.Join(root, "build", "app.exe")); !os.IsNotExist(err) {
+		t.Fatalf("stable build artifact after missing entry = %v", err)
 	}
 }
 

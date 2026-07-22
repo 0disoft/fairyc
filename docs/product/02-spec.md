@@ -266,10 +266,11 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 
 - The Stage 0 compiler is implemented in Go.
 - The Windows smoke must also build `cmd/fairyc` as a standalone temporary `fairyc.exe`, execute its
-  help surface, verify the checked-in workspace with stable `check --locked`, and use that separate
-  process to compile and run both the checked-in scalar quickstart through `run-target` and
-  exact-output example through `exec-target` for `x86_64-windows-msvc`. The latter must expose exact
-  stdout and process status 42 to the parent.
+  help surface, verify the checked-in workspace with stable `check --locked`, replace and execute its
+  default artifact with stable `build --release --locked`, and use that separate process to compile
+  and run both the checked-in scalar quickstart through `run-target` and exact-output example through
+  `exec-target` for `x86_64-windows-msvc`. The latter must expose exact stdout and process status 42
+  to the parent.
   This proves the bootstrap process boundary only: the compiler is still Go-built, the artifacts
   are removed, and no self-hosting, installation, distribution, or WSL contract follows.
 - The same smoke must build `examples/owned_text/main.fy` with its explicit safe support module at
@@ -433,6 +434,15 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   package-aware frontend through verified MIR without requiring `main`. Its first version accepts no
   source paths, target, backend, toolchain, profile, cache, JSON, network, stdin, or configuration
   override.
+- Stable `fairyc build [--release] [--locked]` uses that workspace and lock boundary, fixes the
+  executable entry to root `main::main` with type `fn() -> i32`, and emits the closed C11 transport
+  through local x64 MSVC on Windows/amd64. The root manifest's validated package name selects the
+  sole retained path `build/<package-name>.exe`. Default mode is the low-optimization development
+  profile; `--release` is the ordinary optimized profile without LTO. The complete new PE and unwind
+  image is inspected and staged before replacing the previous artifact; failure before replacement
+  preserves the prior successful executable. No user output/target/compiler/linker/profile-value,
+  cache, JSON, configuration, network, or stdin surface is admitted. Command stability does not
+  change the target's independent maturity state.
 - Its fixture-only output hooks require explicit manifest bindings, capture bytes in memory under a
   shared limit, and never authorize source names, the CLI, or host streams.
 - The current C backend emits deterministic C11 only for verified scalar, inert-struct,
@@ -619,6 +629,11 @@ select the root instance's build-local `main::main`, require `fn() -> i32`, and 
 two-package quickstart returns 42 under both build profiles, direct temporary execution, and a
 separately built compiler process. The commands add no registry, solver, source download,
 configurable entry, new backend capability, or persistent artifact format.
+
+ADR 0176 promotes only the ordinary Windows-local build workflow to
+`fairyc build [--release] [--locked]`. It derives one replace-on-success artifact path from the root
+package name and hides prototype target, profile-value, and output flags. Experimental workspace
+build/run remain available for explicit evidence and compatibility; stable run remains separate.
 
 ADR 0146 rejects speculative persistent caching at this point. ADR 0149 supplies deterministic,
 bounded, verifier-checked bytes for a complete MIR program, but the workspace path still produces
