@@ -50,8 +50,9 @@ valid artifacts from different compilation generations may be incompatible with 
   hook is called once across those two requests;
 - there is still no claim that elapsed builds are faster, because no calibrated timing comparison
   exists;
-- the current one-shot CLI creates no long-lived Session, so separate CLI invocations do not share
-  this cache;
+- ordinary one-shot CLI commands create no long-lived Session, so separate invocations do not share
+  this cache; ADR 0159 later exposes one explicit bounded foreground session for repeated workspace
+  checks;
 - persistence, remote reuse, stable type-context encoding, default cache limits, and cross-process
   compatibility remain deferred.
 

@@ -56,10 +56,10 @@ threshold, or claim that the cache makes Fairy C builds faster is adopted from t
 - package reuse, lowering bypass, retained bytes, and result correctness appear in one path-free
   machine-readable receipt;
 - future samples can keep phase scope stable without rewriting the no-cache baseline contract;
-- ADR 0158 supplies the first repeated edit-class distributions; process memory, reference hardware,
-  noise rules, and a long-lived product command remain required before a speedup or default cache
-  policy;
-- separate one-shot CLI invocations still do not share this process-local cache.
+- ADR 0158 supplies the first repeated edit-class distributions and ADR 0159 supplies a bounded
+  foreground product boundary; process memory, reference hardware, noise rules, and measurements
+  through that real session workload remain required before a speedup or default cache policy;
+- ordinary one-shot CLI invocations still do not share this process-local cache.
 
 ## Rejected alternatives
 

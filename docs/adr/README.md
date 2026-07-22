@@ -168,6 +168,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0156-all-hit-process-mir-reuse.md`: semantic-first workspace compilation that skips MIR lowering only after complete verified process-cache hits and successful reassembly.
 - `0157-process-cache-measurement-receipt.md`: configured path-free cold/fallback and warm/all-hit control-flow receipts with raw timings and no speedup conclusion.
 - `0158-process-cache-edit-distributions.md`: 36 raw no-op and edit-class observations with isolated Sessions, clock-resolution censoring, and no speedup conclusion.
+- `0159-bounded-workspace-check-session.md`: foreground bounded NDJSON checks that reuse one caller-budgeted process-local MIR Session without a daemon or persistent cache.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

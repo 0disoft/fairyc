@@ -56,14 +56,12 @@ sample appears would corrupt the distribution.
 
 ## Evidence
 
-Evidence on 2026-07-22 is deliberately split. A configured Windows/MSVC smoke completed all 36
-invalidation samples with every interpreted result equal to `42` and every condition matching the
-contract above; that run exposed that the first calibration implementation classified only zero
-durations and used one first-positive interval. After replacing it with the bounded 32-transition
-calibration, the complete Go suite's `cmd/fairyc-windows-host-smoke` test executed and validated all
-36 samples through the corrected report path. A final full MSVC smoke receipt for the corrected
-calibration was not adopted after the configured intent reached its failure cap. Samples shorter
-than the observed clock interval remain marked rather than repaired into synthetic timing data.
+Evidence on 2026-07-22 includes a complete configured Windows/MSVC smoke through the corrected
+bounded 32-transition calibration. It preserved all 36 invalidation samples, observed a `333,500 ns`
+minimum positive clock interval for that run, marked six shorter zero-duration samples without
+altering them, produced result `42` for every sample, and matched every cache-path contract above.
+The same run also completed the native and separately built compiler process checks. These raw local
+values remain observations rather than a reference-machine baseline or speedup decision.
 
 This is controlled local invalidation and raw-distribution evidence. It is not a claim that warm
 Fairy C compilation is faster, a representative-machine baseline, a process-memory measurement, a
@@ -77,9 +75,10 @@ product cache policy, or a regression gate.
 - source mutation and workspace loading cannot be mistaken for measured compiler-phase time;
 - the conservative private-dependency invalidation is visible rather than silently described as
   interface-only reuse;
-- reference-machine controls, process memory, noise/retry policy, a product-facing long-lived
-  Session boundary, and an explicit threshold decision remain open;
-- separate one-shot CLI invocations still do not share this process-local cache.
+- ADR 0159 supplies a bounded foreground Session boundary, but reference-machine controls, process
+  memory, noise/retry policy, measurements through that real command, and an explicit threshold
+  decision remain open;
+- ordinary one-shot CLI invocations still do not share this process-local cache.
 
 ## Rejected alternatives
 

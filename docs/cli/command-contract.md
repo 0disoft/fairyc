@@ -37,7 +37,7 @@ stabilization.
 
 ## Implemented experimental compiler surface
 
-The current Go prototype implements sixteen deliberately unstable developer commands:
+The current Go prototype implements seventeen deliberately unstable developer commands:
 
 | Command | Purpose | Output |
 | --- | --- | --- |
@@ -46,6 +46,7 @@ The current Go prototype implements sixteen deliberately unstable developer comm
 | `fairyc experimental check-semantics <file.fy> [<file.fy>...]` | Resolve names, type-check declared effects and direct-call supersets, and analyze local safe-borrow, whole-resource, Region, and complete Stage 0 Result must-use Flow for an explicit module set in the implemented subset | Typed-HIR module and function counts on stdout, human source diagnostics on stderr, or an explicit unsupported-subset error |
 | `fairyc experimental check <primary.fy> [--source <file.fy>]...` | Run syntax, semantic, Flow, MIR-lowering, and MIR-verifier stages over one explicit source closure without requiring an executable entry | One verified-MIR function and foreign-declaration count line, source diagnostics, or an explicit unsupported-subset error |
 | `fairyc experimental check-workspace [--locked]` | Load the current directory's strict `fairy.toml`, explicit local members and sources, validate or refresh canonical `fairy.lock`, then run package-aware semantic and verified MIR | Deterministic instance/source/MIR counts and lock state, diagnostics, or prototype package failure code `7` |
+| `fairyc experimental check-workspace-session --target <target-id> --max-requests <count> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-artifact-bytes <bytes> [--locked]` | Keep one bounded process-local verified-MIR Session while a caller submits sequential versioned NDJSON check requests on stdin | One `fairyc.experimental.workspace-check-session/v0` JSON response per completed request, human diagnostics on stderr, and the last completed request's prototype exit code |
 | `fairyc experimental build-workspace --target x86_64-windows-msvc --profile <low\|optimized> --output <build/path.exe> [--locked]` | Compile the current local-exact workspace's root `main::main` through package-aware verified MIR and the closed Windows target pipeline | A no-overwrite `.exe`, target/toolchain/profile/lock receipt, or package, source, capability, toolchain, link, and artifact diagnostics |
 | `fairyc experimental run-workspace --target x86_64-windows-msvc --profile <low\|optimized> [--locked]` | Compile and execute the same package-aware root entry as a temporary inspected Windows PE | `native workspace result: <i32>` with target/toolchain/profile/lock receipt, a canonical trap, or package/build diagnostics |
 | `fairyc experimental target-spec <x86_64-linux-gnu\|x86_64-windows-msvc>` | Inspect one known host-independent target description without resolving a local toolchain | Deterministic `fairyc.target-spec/v0` JSON on stdout, defined by `spec/cli/experimental-target-spec-v0.schema.json` |
@@ -74,6 +75,30 @@ root, explicit members, and their complete sources. Ordinary mode replaces `fair
 missing, invalid, or byte-different; `--locked` requires an exact match and never writes. It selects
 the exact compiler-bundled SDK only for actual `std::*` imports but selects no target, backend,
 toolchain, persistent cache, or executable.
+
+`experimental check-workspace-session` exposes that workspace check through one foreground
+process-local Session. It requires an explicit known target and caller-selected positive cache entry,
+retained-byte, artifact-byte, and request-count limits. The command provides no cache defaults; its
+hard safety ceilings are 256 requests, 65,536 entries, 1,073,741,824 retained bytes, and
+1,073,741,824 artifact bytes, and one artifact may not exceed the total byte limit. It starts no
+watcher, daemon, socket, network request, toolchain, backend, or concurrent worker.
+
+Each stdin line is one UTF-8 object from
+`spec/cli/experimental-workspace-check-session-v0.schema.json` with exact
+`schemaVersion: "fairyc.experimental.workspace-check-session/v0"`, `kind: "check"`, and a contiguous
+`sequence` beginning at one. Lines are limited to 1,024 bytes. Duplicate, unknown, missing, mistyped,
+out-of-order, malformed, trailing, and oversized input terminates before that request with code `2`.
+Every accepted request reloads the current manifest-owned workspace and performs ordinary lock
+refresh or exact no-write `--locked` verification before checking through the shared Session.
+
+One compact `kind: "check-result"` response line reports the same sequence, status and per-request
+exit code, lock state, workspace/MIR/diagnostic counts, cache path counts, retained entries and bytes,
+and cumulative verified hits. It includes no source text, source path, artifact, or host tool path.
+Source diagnostics and package failures remain recoverable requests and the next input may repair
+them. Internal, stdin-read, and stdout-write failures terminate. EOF or the explicit request bound
+ends a nonempty session with its last response's exit code; EOF before any request is code `2`.
+This is an unstable sequential compiler-process protocol, not a stable JSON mode, LSP, watcher,
+concurrent service, persistent cache, or performance claim.
 
 `experimental build-workspace` and `experimental run-workspace` reuse that exact workspace, SDK,
 lock, semantic, Flow, MIR, and diagnostic path. They accept no positional entry or repeated source:

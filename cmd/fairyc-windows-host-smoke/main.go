@@ -693,7 +693,7 @@ func run() error {
 		return err
 	}
 	inspectedPEImages := 1 + targetBuildExecutions + workspaceBuildExecutions + windowsFileSourceExecutions + ownedTextSourceExecutions + targetRunExecutions + workspaceRunExecutions + targetExecExecutions + windowsFileExecutions + bufferProbeExecutions + ownedTextProbeExecutions + arenaProbeExecutions + layoutExecutions + abiExecutions + structResultExecutions + unwindExecutions
-	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds, %d package-workspace builds, %d package-workspace runs, %d source-level safe File lifecycle builds, %d source-level safe owned-text lifecycle builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls, checked reads and mutable indexed stores, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart, output, and locked workspace execution, 40 run-host outcomes covered fixed arrays, byte-view iteration and slicing, checked indexed stores, assertions in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, Buffer initialization, reserve, self-overlap append, and zeroed-resize allocation rollback passed %d separate-translation-unit MSVC executions, owned-text opaque-storage failure preservation, forced allocation rollback, and repeated drop passed %d separate-translation-unit MSVC executions, Arena zeroing, two-stage allocation rollback, stale Region rejection, and active-drop preservation passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, generated-Fairy small and large struct results passed %d separate-translation-unit MSVC executions across C11 and C17 consumer modes, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, workspaceBuildExecutions, workspaceRunExecutions, windowsFileSourceExecutions, ownedTextSourceExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, windowsFileExecutions, bufferProbeExecutions, ownedTextProbeExecutions, arenaProbeExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, structResultExecutions, unwindCases, unwindExecutions, inspectedPEImages, toolchain.Version)
+	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds, %d package-workspace builds, %d package-workspace runs, %d source-level safe File lifecycle builds, %d source-level safe owned-text lifecycle builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls, checked reads and mutable indexed stores, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart, output, locked workspace execution, and a two-request workspace check session with cold fallback followed by an all-hit response, 40 run-host outcomes covered fixed arrays, byte-view iteration and slicing, checked indexed stores, assertions in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, Buffer initialization, reserve, self-overlap append, and zeroed-resize allocation rollback passed %d separate-translation-unit MSVC executions, owned-text opaque-storage failure preservation, forced allocation rollback, and repeated drop passed %d separate-translation-unit MSVC executions, Arena zeroing, two-stage allocation rollback, stale Region rejection, and active-drop preservation passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, generated-Fairy small and large struct results passed %d separate-translation-unit MSVC executions across C11 and C17 consumer modes, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, workspaceBuildExecutions, workspaceRunExecutions, windowsFileSourceExecutions, ownedTextSourceExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, windowsFileExecutions, bufferProbeExecutions, ownedTextProbeExecutions, arenaProbeExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, structResultExecutions, unwindCases, unwindExecutions, inspectedPEImages, toolchain.Version)
 	return nil
 }
 
@@ -973,6 +973,7 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string) (int64, error) {
 	if helpCode != cli.ExitSuccess || helpStderr != "" ||
 		!strings.Contains(helpStdout, "fairyc experimental run-target") ||
 		!strings.Contains(helpStdout, "fairyc experimental exec-target") ||
+		!strings.Contains(helpStdout, "fairyc experimental check-workspace-session") ||
 		!strings.Contains(helpStdout, "fairyc experimental build-workspace") ||
 		!strings.Contains(helpStdout, "fairyc experimental run-workspace") {
 		return 0, fmt.Errorf("standalone compiler help returned code %d, stdout %q, stderr %q", helpCode, helpStdout, helpStderr)
@@ -1017,15 +1018,39 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string) (int64, error) {
 	if workspaceCode != cli.ExitSuccess || workspaceStderr != "" || !strings.HasPrefix(workspaceStdout, "native workspace result: 42 (x86_64-windows-msvc, msvc ") {
 		return 0, fmt.Errorf("standalone compiler run-workspace returned code %d, stdout %q, stderr %q", workspaceCode, workspaceStdout, workspaceStderr)
 	}
+
+	sessionInput := "{\"schemaVersion\":\"fairyc.experimental.workspace-check-session/v0\",\"kind\":\"check\",\"sequence\":1}\n" +
+		"{\"schemaVersion\":\"fairyc.experimental.workspace-check-session/v0\",\"kind\":\"check\",\"sequence\":2}\n"
+	sessionCode, sessionStdout, sessionStderr, err := runStandaloneCommandWithInput(
+		sourceRoot,
+		executablePath,
+		sessionInput,
+		"experimental", "check-workspace-session", "--locked",
+		"--target", "x86_64-windows-msvc", "--max-requests", "2",
+		"--cache-max-entries", "8", "--cache-max-bytes", "33554432", "--cache-max-artifact-bytes", "8388608",
+	)
+	if err != nil {
+		return 0, fmt.Errorf("execute standalone compiler workspace session: %w", err)
+	}
+	sessionLines := strings.Split(strings.TrimSuffix(sessionStdout, "\n"), "\n")
+	if sessionCode != cli.ExitSuccess || sessionStderr != "" || len(sessionLines) != 2 ||
+		!strings.Contains(sessionLines[0], `"sequence":1`) || !strings.Contains(sessionLines[0], `"outcome":"fallback"`) ||
+		!strings.Contains(sessionLines[1], `"sequence":2`) || !strings.Contains(sessionLines[1], `"outcome":"all-hit"`) {
+		return 0, fmt.Errorf("standalone compiler check-workspace-session returned code %d, stdout %q, stderr %q", sessionCode, sessionStdout, sessionStderr)
+	}
 	return info.Size(), nil
 }
 
 func runStandaloneCommand(directory, executablePath string, arguments ...string) (int, string, string, error) {
+	return runStandaloneCommandWithInput(directory, executablePath, "", arguments...)
+}
+
+func runStandaloneCommandWithInput(directory, executablePath, input string, arguments ...string) (int, string, string, error) {
 	contextValue, cancel := context.WithTimeout(context.Background(), 45*time.Second)
 	defer cancel()
 	command := exec.CommandContext(contextValue, executablePath, arguments...)
 	command.Dir = directory
-	command.Stdin = nil
+	command.Stdin = strings.NewReader(input)
 	var stdout boundedBuffer
 	var stderr boundedBuffer
 	stdout.limit = subprocessOutputLimit

@@ -59,6 +59,13 @@ a multi-file input, semantic diagnostics on stderr, or an explicit unsupported-s
 `check ok: <files> file(s) (verified MIR: <functions> function(s), <foreign> foreign declaration(s))`
 after the complete explicit closure passes MIR verification. It emits no partial success output on
 source diagnostics or subset failure and requires no executable entry, backend, toolchain, or write.
+`experimental check-workspace-session` reads at most the caller's bounded number of versioned NDJSON
+requests and writes exactly one `fairyc.experimental.workspace-check-session/v0` response line for
+each completed request. Response status/code pairs are `ok`/`0`, `source-diagnostics`/`3`, and
+`package-failure`/`7`. Human source and package diagnostics remain on stderr. Malformed framing uses
+code `2` with no response for the rejected request; internal, stdin-read, and stdout-write failures
+use code `4` and terminate. EOF or the request bound returns the last completed request code, so a
+later successful repair can make the session process return `0`. Empty input uses code `2`.
 `experimental target-spec` writes one deterministic `fairyc.target-spec/v0` JSON document, defined
 by `spec/cli/experimental-target-spec-v0.schema.json`, to stdout. Missing, extra, or unknown target
 IDs produce code `2`, no JSON, and a bounded invocation diagnostic on stderr.
@@ -111,9 +118,11 @@ uses ANSI escapes. `fairyc explain` and `fairyc targets` likewise use no ANSI es
 by the diagnostic's zero-based half-open byte span.
 
 The parse JSON schema intentionally excludes source text, token text, cooked literal values, and
-absolute paths. The target JSON schema excludes local compiler, SDK, and sysroot paths. These
-reports can therefore describe structure or target semantics without becoming a second source copy
-or a host inventory. Stable `--json` behavior remains UNDECIDED.
+absolute paths. The target JSON schema excludes local compiler, SDK, and sysroot paths. The
+workspace-session schema excludes source text, source paths, artifacts, and toolchain paths while
+reporting bounded cache and compiler decisions. These reports can therefore describe structure,
+target semantics, or sequential check outcomes without becoming a second source copy or host
+inventory. Stable `--json` behavior remains UNDECIDED.
 
 ## Review Blockers
 

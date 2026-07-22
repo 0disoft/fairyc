@@ -349,8 +349,10 @@ report lists declared target maturity and missing evidence without probing this 
 `fairyc experimental` CLI can inspect syntax, syntax-check, semantic-check, emit the
 scalar, flat-resource, and resource-tagged C11 translation unit, build that subset into a Linux executable on an eligible host,
 inspect the declared target specification, or interpret an explicit source-root-relative FY module
-closure. Program commands use one entry plus repeated `--source`; semantic checking uses its explicit
-positional module set. There is no stable CLI, user drop-body execution, complete runtime,
+closure. Its bounded foreground `check-workspace-session` command can keep one process-local
+verified-MIR cache across sequential caller-triggered checks; it is not a daemon, watcher,
+persistent cache, or stable editor protocol. Program commands use one entry plus repeated
+`--source`; semantic checking uses its explicit positional module set. There is no stable CLI, user drop-body execution, complete runtime,
 safe standard library, package manager, supported target, release-stable CLI, or stable language
 revision yet.
 
@@ -394,6 +396,20 @@ go run ./cmd/fairyc experimental run examples/run/modules/main.fy --source examp
 go run ./cmd/fairyc experimental parse examples/syntax/main.fy
 ```
 
+To exercise the bounded process-local workspace cache from PowerShell without WSL:
+
+```powershell
+Push-Location examples/workspace_quickstart
+@(
+  '{"schemaVersion":"fairyc.experimental.workspace-check-session/v0","kind":"check","sequence":1}'
+  '{"schemaVersion":"fairyc.experimental.workspace-check-session/v0","kind":"check","sequence":2}'
+) | go run ../../cmd/fairyc experimental check-workspace-session --locked --target x86_64-windows-msvc --max-requests 2 --cache-max-entries 8 --cache-max-bytes 33554432 --cache-max-artifact-bytes 8388608
+Pop-Location
+```
+
+The first response must report `fallback` and the second `all-hit`. These numeric limits are only
+explicit example inputs; they are not product defaults or tuning recommendations.
+
 For repeated Windows use, `DEVELOPMENT.md` gives the WSL-free manual bootstrap that creates ignored
 `build/fairyc.exe`. The configured Windows smoke separately builds a temporary standalone compiler
 process and requires that executable to run `examples/windows_quickstart/main.fy` through MSVC with
@@ -402,7 +418,8 @@ indexed `u8` value to `i32`,
 then execute `examples/windows_output/main.fy` with exact stdout and process status
 42 while explicitly supplying its separate `windows_console.fy` module, and finally run the
 two-package `examples/workspace_quickstart` graph through an exact generated lock with native result
-42. The compiler binary is
+42, then sends two workspace checks to one compiler process and requires cold fallback followed by
+an all-hit cache response. The compiler binary is
 still built from Go; only the input programs and resulting temporary
 target executables are Fairy C.
 
@@ -482,6 +499,7 @@ or arbitrary link-input option.
 - Linux scalar C differential runner: `internal/cbackendnative/`
 - Executable target description: `internal/target/`
 - Experimental target JSON schema: `spec/cli/experimental-target-spec-v0.schema.json`
+- Experimental bounded workspace-session schema: `spec/cli/experimental-workspace-check-session-v0.schema.json`
 - Target layout engine and fixtures: `internal/layout/`, `spec/fixtures/layout/manifest-v0.json`, `spec/fixtures/layout/manifest-windows-msvc-v0.json`
 - Shared Windows MSVC C probe type emitter: `internal/msvccprobe/`
 - Shared generated-Fairy/C aggregate-result probe: `internal/foreignstructprobe/`

@@ -27,6 +27,11 @@ plus `fairyc experimental parse <file.fy>`,
 non-executing pipeline is `fairyc experimental check <primary.fy> [--source <file.fy>]...`.
 The package-aware sibling is `fairyc experimental check-workspace [--locked]`; it consumes the
 current directory's `fairy.toml`, explicit members, and canonical `fairy.lock`.
+`fairyc experimental check-workspace-session --target <target-id> --max-requests <count>
+--cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-artifact-bytes <bytes> [--locked]`
+keeps one bounded verified-MIR Session while a caller submits sequential versioned NDJSON checks.
+It is a foreground experimental process, not a daemon, watcher, persistent cache, or stable editor
+protocol; every limit is mandatory and caller-selected.
 `fairyc experimental build-workspace --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe> [--locked]`
 retains a package-aware Windows PE, while
 `fairyc experimental run-workspace --target x86_64-windows-msvc --profile <low|optimized> [--locked]`
@@ -177,8 +182,9 @@ the configured `fairyc_go_build`, `fairyc_go_vet`, and `fairyc_go_test` intents;
 examples do not grant agent command authority.
 `DEVELOPMENT.md` also documents the manual WSL-free build of ignored `build/fairyc.exe` for repeated
 Windows use. The configured Windows smoke independently builds and removes a temporary compiler
-executable, verifies its help surface, and drives the scalar quickstart through that separate
-process; none of those paths is self-hosting or a distribution promise.
+executable, verifies its help surface, drives the scalar quickstart through that separate process,
+and sends two workspace checks through one stdin/stdout session to require cold fallback followed
+by an all-hit response; none of those paths is self-hosting or a distribution promise.
 
 The future stable `targets` command must distinguish `emittable`, `conformant`, and `supported`.
 The experimental single-target JSON does not settle its stable list or filtering syntax. The

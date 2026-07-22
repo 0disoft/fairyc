@@ -39,6 +39,7 @@ Usage:
   fairyc experimental check-semantics <file.fy> [<file.fy>...]
   fairyc experimental check <primary.fy> [--source <file.fy>]...
   fairyc experimental check-workspace [--locked]
+  fairyc experimental check-workspace-session --target <target-id> --max-requests <count> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-artifact-bytes <bytes> [--locked]
   fairyc experimental build-workspace --target x86_64-windows-msvc --profile <low|optimized> --output <build/path.exe> [--locked]
   fairyc experimental run-workspace --target x86_64-windows-msvc --profile <low|optimized> [--locked]
   fairyc experimental target-spec <target-id>
@@ -56,9 +57,16 @@ The experimental commands are unstable. The release-stable "fairyc check" comman
 use "fairyc experimental check" for the current verified-MIR source-closure check.
 `
 
-// Run executes one bounded command without reading global process arguments or exiting the process.
+// Run executes one bounded command with an already-closed input stream. Commands that explicitly
+// own stdin should use RunWithInput.
 func Run(args []string, sourceRoot string, stdout, stderr io.Writer) int {
-	if stdout == nil || stderr == nil {
+	return RunWithInput(args, sourceRoot, strings.NewReader(""), stdout, stderr)
+}
+
+// RunWithInput executes one bounded command without reading global process arguments or exiting
+// the process. Only commands whose contract explicitly owns stdin consume it.
+func RunWithInput(args []string, sourceRoot string, stdin io.Reader, stdout, stderr io.Writer) int {
+	if stdin == nil || stdout == nil || stderr == nil {
 		return ExitInternalFailure
 	}
 	if len(args) == 1 && isHelp(args[0]) {
@@ -85,7 +93,7 @@ func Run(args []string, sourceRoot string, stdout, stderr io.Writer) int {
 	if args[0] != "experimental" {
 		return invocationError(stderr, fmt.Sprintf("unknown command %q", args[0]))
 	}
-	return runExperimental(args[1:], sourceRoot, stdout, stderr)
+	return runExperimental(args[1:], sourceRoot, stdin, stdout, stderr)
 }
 
 func runExplain(args []string, stdout, stderr io.Writer) int {
@@ -125,7 +133,7 @@ func validDiagnosticCode(code string) bool {
 	return true
 }
 
-func runExperimental(args []string, sourceRoot string, stdout, stderr io.Writer) int {
+func runExperimental(args []string, sourceRoot string, stdin io.Reader, stdout, stderr io.Writer) int {
 	if len(args) == 1 && isHelp(args[0]) {
 		return writeHelp(stdout, stderr)
 	}
@@ -156,6 +164,8 @@ func runExperimental(args []string, sourceRoot string, stdout, stderr io.Writer)
 		return runCheck(args[1:], sourceRoot, stdout, stderr)
 	case "check-workspace":
 		return runWorkspaceCheck(args[1:], sourceRoot, stdout, stderr)
+	case "check-workspace-session":
+		return runWorkspaceCheckSession(args[1:], sourceRoot, stdin, stdout, stderr)
 	case "build-workspace":
 		return runWorkspaceBuild(args[1:], sourceRoot, stdout, stderr)
 	case "run-workspace":

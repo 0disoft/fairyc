@@ -51,8 +51,9 @@ would directly conflict with Fairy C's small-build-artifact goal.
 
 ## Current evidence update (2026-07-22)
 
-ADR 0149 now supplies a bounded verified whole-program MIR codec, and ADR 0150 makes the configured
-Windows smoke emit four raw no-cache workspace build observations. Neither is a reusable
-package-cache hit or a comparable cold/warm distribution. Package partitioning, invalidation and
-corruption runs, retained-byte policy, cross-process behavior, and cleanup recovery therefore keep
-the persistence gate closed.
+ADR 0149 now supplies a bounded verified whole-program MIR codec, ADRs 0157-0158 preserve
+process-local cold, warm, and edit-class observations, and ADR 0159 exposes that reuse through a
+bounded foreground workspace-check session. None of this writes or reads cache state across a
+process boundary. Process-memory measurement, representative workloads, corrupt persistent-entry
+recovery, concurrent-process behavior, cleanup recovery, and a justified retained-disk policy
+therefore keep the persistence gate closed.

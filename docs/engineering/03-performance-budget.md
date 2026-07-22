@@ -48,6 +48,13 @@ monotonic transitions within a bounded one-million-read calibration, and marks r
 samples below that resolution. It proves the current invalidation paths and result `42`; it does not define a speedup,
 percentile, retry rule, reference-machine baseline, process-memory budget, or regression threshold.
 
+`experimental check-workspace-session` now supplies the first actual foreground process boundary
+that can reuse one verified-MIR Session across caller-triggered checks. Its entry, byte, artifact,
+and request budgets are explicit caller inputs rather than measured defaults. This closes the
+one-shot integration gap, but the command has no declared-machine timing distribution, peak process
+memory observation, editor workload, cancellation measurement, or regression threshold. Its
+existence therefore does not convert the earlier raw harness distributions into a speedup claim.
+
 ## Runtime metrics
 
 Correct safe semantics are the first gate. Runtime comparisons then measure:

@@ -9,5 +9,5 @@ import (
 func main() {
 	// Source-consuming commands open this root inside cli.Run. Source-independent commands never
 	// touch it, so help, explain, and target inspection do not perform an eager filesystem query.
-	os.Exit(cli.Run(os.Args[1:], ".", os.Stdout, os.Stderr))
+	os.Exit(cli.RunWithInput(os.Args[1:], ".", os.Stdin, os.Stdout, os.Stderr))
 }

@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fairyc:experimental-workspace-check-session:v0",
+  "title": "Fairy C experimental workspace check session protocol v0",
+  "oneOf": [
+    { "$ref": "#/$defs/request" },
+    { "$ref": "#/$defs/response" }
+  ],
+  "$defs": {
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "kind", "sequence"],
+      "properties": {
+        "schemaVersion": { "const": "fairyc.experimental.workspace-check-session/v0" },
+        "kind": { "const": "check" },
+        "sequence": { "type": "integer", "minimum": 1, "maximum": 256 }
+      }
+    },
+    "response": {
+      "type": "object",
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": {
+            "status": { "const": "ok" },
+            "exitCode": { "const": 0 }
+          }
+        },
+        {
+          "properties": {
+            "status": { "const": "source-diagnostics" },
+            "exitCode": { "const": 3 }
+          }
+        },
+        {
+          "properties": {
+            "status": { "const": "package-failure" },
+            "exitCode": { "const": 7 }
+          }
+        }
+      ],
+      "required": [
+        "schemaVersion",
+        "kind",
+        "sequence",
+        "status",
+        "exitCode",
+        "lockState",
+        "instances",
+        "sourceFiles",
+        "mirFunctions",
+        "diagnostics",
+        "unsupported",
+        "cache"
+      ],
+      "properties": {
+        "schemaVersion": { "const": "fairyc.experimental.workspace-check-session/v0" },
+        "kind": { "const": "check-result" },
+        "sequence": { "type": "integer", "minimum": 1, "maximum": 256 },
+        "status": { "enum": ["ok", "source-diagnostics", "package-failure"] },
+        "exitCode": { "enum": [0, 3, 7] },
+        "lockState": { "enum": ["", "updated", "unchanged", "verified"] },
+        "instances": { "type": "integer", "minimum": 0 },
+        "sourceFiles": { "type": "integer", "minimum": 0 },
+        "mirFunctions": { "type": "integer", "minimum": 0 },
+        "diagnostics": { "type": "integer", "minimum": 0 },
+        "unsupported": { "type": "integer", "minimum": 0 },
+        "cache": { "$ref": "#/$defs/cache" }
+      }
+    },
+    "cache": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcome",
+        "packages",
+        "hits",
+        "misses",
+        "rejected",
+        "stored",
+        "storeSkipped",
+        "lowered",
+        "reassemblyFallback",
+        "retainedEntries",
+        "retainedBytes",
+        "verifiedHits"
+      ],
+      "properties": {
+        "outcome": { "enum": ["not-run", "not-eligible", "fallback", "all-hit"] },
+        "packages": { "type": "integer", "minimum": 0 },
+        "hits": { "type": "integer", "minimum": 0 },
+        "misses": { "type": "integer", "minimum": 0 },
+        "rejected": { "type": "integer", "minimum": 0 },
+        "stored": { "type": "integer", "minimum": 0 },
+        "storeSkipped": { "type": "integer", "minimum": 0 },
+        "lowered": { "type": "boolean" },
+        "reassemblyFallback": { "type": "boolean" },
+        "retainedEntries": { "type": "integer", "minimum": 0 },
+        "retainedBytes": { "type": "integer", "minimum": 0 },
+        "verifiedHits": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

@@ -450,8 +450,8 @@ ADR 0157 adds a second path-free measurement schema to the configured Windows sm
 cold fallback and one immediate all-hit request over the same Session, including raw durations,
 lowering decisions, package counts, retained bytes, and interpreter result `42`. Validation forbids
 a speedup decision. One local receipt observed two cold misses followed by two verified hits with no
-warm lowering; this closes the control-flow measurement gap but not the reference-machine, memory,
-or long-lived command gates.
+warm lowering; this closed the control-flow measurement gap but, at that stage, not the
+reference-machine, memory, or long-lived command gates.
 
 ADR 0158 adds nine independent fresh-Session samples for each of no-op warm, private root edit,
 private dependency edit, and public dependency edit. It keeps edit/load setup outside the measured
@@ -461,9 +461,18 @@ both dependency edit classes conservatively invalidate the root because its v1 k
 dependency's exact instance identity. This closes the first repeated edit-class gate without making
 a speedup, reference-machine, memory, or regression-threshold claim.
 
-- Decide which bounded long-lived compiler command or service can honestly reuse one Session before
-  persistent storage, then measure it on a declared reference machine with process-memory evidence
-  and a predeclared noise and retry policy.
+ADR 0159 adds the first real process boundary for that reuse. The foreground
+`experimental check-workspace-session` accepts a bounded versioned NDJSON request stream, reloads
+the workspace for every request, keeps one verified-MIR Session, reports per-request cache decisions,
+and terminates at EOF or its required request bound. Callers choose every cache limit explicitly;
+there is no daemon, watcher, socket, concurrency, persistent storage, or default policy. In-process
+tests prove no-op all-hit reuse, private-root partial invalidation, and recovery from transient source
+diagnostics. The configured Windows smoke also drives two requests through a separately built
+`fairyc.exe` and requires fallback followed by all-hit.
+
+- Measure the bounded session on a declared reference machine with process-memory evidence, an
+  editor-shaped edit workload, and a predeclared noise and retry policy before selecting defaults or
+  claiming developer-loop speedup.
 - ADR 0146 explicitly defers persistent storage. Package-aware Windows builds, the bounded
   whole-program MIR codec, and process-local package function slices now exist; stable type-context
   artifacts, cross-process corruption policy, and configured cold/warm timing evidence still gate disk policy.

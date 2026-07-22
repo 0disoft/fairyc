@@ -35,10 +35,14 @@ or redistributable. From the repository root in PowerShell:
 New-Item -ItemType Directory -Force build | Out-Null
 bun tools/run-go.ts build -mod=readonly -trimpath -o build/fairyc.exe ./cmd/fairyc
 .\build\fairyc.exe experimental run-target examples/windows_quickstart/main.fy --target x86_64-windows-msvc --profile optimized
-.\build\fairyc.exe experimental exec-target examples/windows_output/main.fy --target x86_64-windows-msvc --profile optimized
+.\build\fairyc.exe experimental exec-target examples/windows_output/main.fy --source examples/windows_output/windows_console.fy --target x86_64-windows-msvc --profile optimized
 Push-Location examples/workspace_quickstart
 ..\..\build\fairyc.exe experimental check-workspace
 ..\..\build\fairyc.exe experimental run-workspace --locked --target x86_64-windows-msvc --profile optimized
+@(
+  '{"schemaVersion":"fairyc.experimental.workspace-check-session/v0","kind":"check","sequence":1}'
+  '{"schemaVersion":"fairyc.experimental.workspace-check-session/v0","kind":"check","sequence":2}'
+) | ..\..\build\fairyc.exe experimental check-workspace-session --locked --target x86_64-windows-msvc --max-requests 2 --cache-max-entries 8 --cache-max-bytes 33554432 --cache-max-artifact-bytes 8388608
 Pop-Location
 ```
 
@@ -46,15 +50,18 @@ The first command creates only the ignored output directory. The wrapper keeps G
 ignored `.cache/go-*` roots and disables module and checksum network access. The expected final
 `run-target` receipt starts with `native result: 42`; `exec-target` prints `Fairy C says hi` and
 returns the FY program's status 42. The workspace check writes `fairy.lock`, and the locked run
-receipt starts with `native workspace result: 42`. In every native case the FY program is compiled
-into and executed as an MSVC PE. WSL is neither installed nor invoked by this path. Delete
+receipt starts with `native workspace result: 42`. The two session response lines report
+`fallback` and then `all-hit`; that session performs checks only and emits no PE. In every native
+case the FY program is compiled into and executed as an MSVC PE. WSL is neither installed nor
+invoked by this path. Delete
 `build/fairyc.exe`, the example `fairy.lock`, and any example `build/` output to undo local outputs.
 
 The configured Windows smoke independently builds `fairyc.exe` into a temporary directory, invokes
 its help surface, runs the checked-in quickstart through `run-target`, requires `exec-target` to
-forward the checked-in output example and return process status 42, and runs the checked-in local
-workspace through an exact existing lock. It removes the compiler and target images. That proves
-all three standalone process paths without treating an ignored local build artifact as source truth.
+forward the checked-in output example and return process status 42, runs the checked-in local
+workspace through an exact existing lock, and sends two checks through one foreground session. It
+removes the compiler and target images. That proves the standalone process paths and process-local
+reuse without treating an ignored local build artifact as source truth.
 
 ## Implementation boundaries
 

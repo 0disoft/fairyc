@@ -366,6 +366,12 @@ runtime, target, and ABI identities without merging them. `experimental build-wo
 `run-workspace` are pre-stable command spellings; their root `main::main` convention and human
 receipts are not a released compatibility promise.
 
+ADR 0159 adds the independent `fairyc.experimental.workspace-check-session/v0` NDJSON request and
+response schema. The schema versions this experimental machine boundary and rejects unknown or
+duplicate request fields, but it does not make the command spelling, numeric limits, process exit
+policy, or cache behavior release-stable. An incompatible field, kind, sequence, status, or unit
+change requires a new protocol schema even before stable CLI promotion.
+
 `fairyc.project-manifest-fixtures/v1` versions the complete-file parser observations for that schema.
 The pinned TOML library version is an implementation dependency, not the manifest schema version;
 upgrading or replacing it requires proving the same accepted/rejected fixture surface or explicitly

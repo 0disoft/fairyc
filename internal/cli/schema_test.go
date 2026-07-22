@@ -102,6 +102,77 @@ func TestTargetSpecTopLevelMatchesSchema(t *testing.T) {
 	}
 }
 
+func TestWorkspaceSessionResponseMatchesSchema(t *testing.T) {
+	t.Parallel()
+	schemaBytes, err := os.ReadFile(filepath.Join("..", "..", "spec", "cli", "experimental-workspace-check-session-v0.schema.json"))
+	if err != nil {
+		t.Fatalf("read schema: %v", err)
+	}
+	var schema struct {
+		Defs struct {
+			Request struct {
+				Properties map[string]json.RawMessage `json:"properties"`
+				Required   []string                   `json:"required"`
+			} `json:"request"`
+			Response struct {
+				Properties map[string]json.RawMessage `json:"properties"`
+				Required   []string                   `json:"required"`
+			} `json:"response"`
+			Cache struct {
+				Properties map[string]json.RawMessage `json:"properties"`
+				Required   []string                   `json:"required"`
+			} `json:"cache"`
+		} `json:"$defs"`
+	}
+	if err := json.Unmarshal(schemaBytes, &schema); err != nil {
+		t.Fatalf("decode schema contract: %v", err)
+	}
+	requestBytes, err := json.Marshal(struct {
+		SchemaVersion string `json:"schemaVersion"`
+		Kind          string `json:"kind"`
+		Sequence      int    `json:"sequence"`
+	}{SchemaVersion: workspaceSessionSchema, Kind: workspaceSessionRequestKind, Sequence: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	responseBytes, err := json.Marshal(workspaceSessionResponseForSchema())
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertJSONFieldsMatchSchema(t, requestBytes, schema.Defs.Request.Properties, schema.Defs.Request.Required)
+	assertJSONFieldsMatchSchema(t, responseBytes, schema.Defs.Response.Properties, schema.Defs.Response.Required)
+	cacheBytes, err := json.Marshal(workspaceSessionCacheReport{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertJSONFieldsMatchSchema(t, cacheBytes, schema.Defs.Cache.Properties, schema.Defs.Cache.Required)
+}
+
+func assertJSONFieldsMatchSchema(t *testing.T, encoded []byte, properties map[string]json.RawMessage, required []string) {
+	t.Helper()
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(encoded, &fields); err != nil {
+		t.Fatal(err)
+	}
+	schemaFields := make([]string, 0, len(properties))
+	for name := range properties {
+		schemaFields = append(schemaFields, name)
+	}
+	encodedFields := make([]string, 0, len(fields))
+	for name := range fields {
+		encodedFields = append(encodedFields, name)
+	}
+	slices.Sort(schemaFields)
+	slices.Sort(encodedFields)
+	if !slices.Equal(schemaFields, encodedFields) {
+		t.Fatalf("encoded fields = %v, schema fields = %v", encodedFields, schemaFields)
+	}
+	slices.Sort(required)
+	if !slices.Equal(required, schemaFields) {
+		t.Fatalf("required fields = %v, schema fields = %v", required, schemaFields)
+	}
+}
+
 func TestTargetSpecScalarProviderSchemaMatchesSemanticValidator(t *testing.T) {
 	t.Parallel()
 	schemaBytes, err := os.ReadFile(filepath.Join("..", "..", "spec", "cli", "experimental-target-spec-v0.schema.json"))
