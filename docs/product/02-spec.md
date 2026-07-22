@@ -712,6 +712,12 @@ structured types and source-relative spans, and reports relation-specific comple
 consumes that snapshot through a one-way boundary. The compiler frontend cannot import Atlas, and
 Atlas failure cannot change `fairyc check` results.
 
+Validated workspace source bytes now produce independent `fairyc.source-file/v1` exact-content and
+`fairyc.source-line-map/v1` byte-geometry identities. Snapshot file records retain those identities,
+package instance, canonical relative path, and source/test kind while excluding source text and host
+paths. Construction requires a one-to-one file/module match. A later map reader must recompute them
+before trusting stored spans or excerpts; that current-source validator is not implemented yet.
+
 The first snapshot consumer now derives provisional `SymbolId` values with the independently
 versioned `fairyc.symbol-id/v1-sha256-128+256` algorithm. Package UID, module, declaration kind and
 path, zero generic arity, and a canonical structured signature form the hash input. Package

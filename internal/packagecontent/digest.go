@@ -68,23 +68,9 @@ func ParseDigest(value string) (Digest, error) {
 // Encode returns the canonical bytes for the exact package source graph. Input order is ignored;
 // path and file bytes are not normalized.
 func Encode(files []File) ([]byte, error) {
-	ordered := make([]File, len(files))
-	for index, file := range files {
-		ordered[index] = File{Path: file.Path, Bytes: slices.Clone(file.Bytes)}
-	}
-	if len(ordered) == 0 {
-		return nil, fmt.Errorf("package source graph has no files")
-	}
-	slices.SortFunc(ordered, func(left, right File) int {
-		return strings.Compare(left.Path, right.Path)
-	})
-	for index, file := range ordered {
-		if err := validatePath(file.Path); err != nil {
-			return nil, err
-		}
-		if index > 0 && ordered[index-1].Path == file.Path {
-			return nil, fmt.Errorf("package source graph contains duplicate path %q", file.Path)
-		}
+	ordered, err := canonicalFiles(files)
+	if err != nil {
+		return nil, err
 	}
 
 	var encoded bytes.Buffer
@@ -101,11 +87,39 @@ func Encode(files []File) ([]byte, error) {
 
 // Compute validates and hashes one exact package source graph.
 func Compute(files []File) (Digest, error) {
-	encoded, err := Encode(files)
+	ordered, err := canonicalFiles(files)
 	if err != nil {
 		return Digest{}, err
 	}
-	return sha256.Sum256(encoded), nil
+	digest := sha256.New()
+	writeIdentityHeader(digest, sourceDomain)
+	writeHashUint64(digest, uint64(len(ordered)))
+	for _, file := range ordered {
+		writeHashUint64(digest, uint64(len(file.Path)))
+		_, _ = digest.Write([]byte(file.Path))
+		writeHashUint64(digest, uint64(len(file.Bytes)))
+		_, _ = digest.Write(file.Bytes)
+	}
+	return Digest(digestValue(digest)), nil
+}
+
+func canonicalFiles(files []File) ([]File, error) {
+	ordered := slices.Clone(files)
+	if len(ordered) == 0 {
+		return nil, fmt.Errorf("package source graph has no files")
+	}
+	slices.SortFunc(ordered, func(left, right File) int {
+		return strings.Compare(left.Path, right.Path)
+	})
+	for index, file := range ordered {
+		if err := validatePath(file.Path); err != nil {
+			return nil, err
+		}
+		if index > 0 && ordered[index-1].Path == file.Path {
+			return nil, fmt.Errorf("package source graph contains duplicate path %q", file.Path)
+		}
+	}
+	return ordered, nil
 }
 
 func validatePath(value string) error {

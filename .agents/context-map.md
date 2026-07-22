@@ -62,6 +62,7 @@
 - Public-interface extraction and runner route: internal/moduleinterface/, internal/moduleinterfacefixture/
 - Package-source digest v1 fixture route: spec/fixtures/package-source/manifest-v1.json
 - Package-source digest and runner route: internal/packagecontent/, internal/packagecontentfixture/
+- Source-file content and line-map identity route: internal/packagecontent/file_identity.go, docs/package/source-file-identities-v1.md, docs/adr/0184-source-file-integrity-identities-v1.md
 - Whole-package cache-key v2 fixture route: spec/fixtures/package-cache/manifest-v2.json and historical manifest-v1.json
 - Whole-package cache key, store, and runner route: internal/packagecache/, internal/packagecachefixture/
 - Exact running-compiler executable identity route: internal/buildidentity/, docs/adr/0165-executable-digest-compiler-build-identity.md
@@ -89,7 +90,7 @@
 - Runtime and standard-library route: docs/runtime/
 - Compatibility route: docs/compatibility/
 - Diagnostics route: docs/diagnostics/catalog-v0.md
-- Atlas route: docs/atlas/, internal/semanticsnapshot/, internal/symbolidentity/, docs/adr/0182-immutable-semantic-snapshot-v0.md, docs/adr/0183-provisional-symbol-id-v1.md
+- Atlas route: docs/atlas/, internal/semanticsnapshot/, internal/symbolidentity/, internal/packagecontent/file_identity.go, docs/adr/0182-immutable-semantic-snapshot-v0.md, docs/adr/0183-provisional-symbol-id-v1.md, docs/adr/0184-source-file-integrity-identities-v1.md
 - Documentation update route: docs/README.md
 - CLI tool route: .agents/skills/cli-tool/SKILL.md
 - Monorepo route: .agents/skills/monorepo/SKILL.md

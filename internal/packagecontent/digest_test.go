@@ -46,6 +46,9 @@ func TestDigestSortsFilesButPreservesExactPathsAndBytes(t *testing.T) {
 	if leftDigest != rightDigest {
 		t.Fatalf("input order changed digest: %s != %s", leftDigest, rightDigest)
 	}
+	if left[0].Path != "src/z.fy" || left[1].Path != "src/a.fy" {
+		t.Fatalf("Compute() reordered caller input: %+v", left)
+	}
 
 	changes := [][]File{
 		{{Path: "src/a.fy", Bytes: []byte("b")}, {Path: "src/z.fy", Bytes: []byte("z")}},

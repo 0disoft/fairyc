@@ -28,9 +28,11 @@ Implement `fairyc.semantic-snapshot/v0` as an in-memory, immutable, path-free co
 - Build-local package and symbol numbers are used only to join producer facts during construction.
   Output uses `PackageInstanceId`, `PackageCoordinateId`, `fysrc1-sha256`, source-visible module and
   declaration coordinates, and package-relative spans.
+- ADR 0184 extends the same model with exact `fyfile1-sha256` content and `fylm1-sha256` line-map
+  records supplied by the validated workspace. Every file and typed module match one-to-one.
 - Structured type references retain builtin, nominal, borrow, pointer, fixed-array, Option, and
   Result shape without exposing private `$pN` qualification or choosing a public type encoding.
-- The model retains declared packages, modules, aggregate/resource/function/foreign declarations,
+- The model retains declared packages, files, modules, aggregate/resource/function/foreign declarations,
   signatures, visibility, effects, ABI/link names, direct calls, traps, unsafe sites, moves, drops,
   Region placements, Result propagation, and borrow sites.
 - Compiler-created cleanup functions do not become source declarations. Their resource declaration
@@ -49,18 +51,18 @@ checksum, identity hash, command, file location, or query grammar.
 ## Evidence
 
 - A two-package source closure is compiled twice with different build-local package numbers and
-  produces identical package, module, declaration, function, and completeness records.
+  produces identical package, file, module, declaration, function, and completeness records.
 - The same case proves exact cross-package calls plus assertion trap identity without `$pN` or host
   path leakage.
 - Mutation of compiler inputs and detached accessor results cannot mutate the built snapshot.
 - A foreign C call is retained with ABI/link identity and opaque certainty while only call
   completeness becomes partial.
-- Incomplete semantic input, incomplete package metadata, and a mutated unverified call graph fail
-  before publishing a snapshot.
+- Incomplete semantic input, incomplete package/file metadata, a non-bijective file/module set, and
+  a mutated unverified call graph fail before publishing a snapshot.
 
 ## Consequences
 
-The next Atlas slice can design `.fymap` and `SymbolId` against a tested semantic seam instead of
-serializing compiler internals. It must still add encoded-schema validation, deterministic symbol
-identity and collision handling, stale-source rejection, dependency-map completeness, and proof
-that exporter failure cannot affect `fairyc check`.
+Later Atlas slices can design `.fymap` against tested semantic, file-integrity, and SymbolId seams
+instead of serializing compiler internals. They must still add encoded-schema validation,
+current-source recomputation, stale-source rejection, dependency-map completeness, and proof that
+exporter failure cannot affect `fairyc check`.

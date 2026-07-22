@@ -193,6 +193,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0181-stable-workspace-semantic-test-v1.md`: stable `fairyc test [--locked]` overlays isolated root `tests/`, validates `@test fn void` entries, and runs each through a fresh semantic interpreter without native artifacts.
 - `0182-immutable-semantic-snapshot-v0.md`: one-way path-free HIR/MIR compiler facts, deep immutability, and relation-specific Atlas completeness.
 - `0183-provisional-symbol-id-v1.md`: source-instance-independent declaration identity, canonical signature encoding, and visible/full collision rejection.
+- `0184-source-file-integrity-identities-v1.md`: exact per-file content and LF-derived line-map identities carried from validated workspace bytes into Atlas snapshots.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

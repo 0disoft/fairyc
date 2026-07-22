@@ -422,6 +422,14 @@ package instances, versions, bodies, spans, language, compiler, and target ident
 records those compatibility dimensions separately. This executable pre-release contract does not
 stabilize `.fymap`, map migration, anchors, query output, or a post-1 SymbolId promise.
 
+ADR 0184 adds independent `fairyc.source-file/v1` exact-content and
+`fairyc.source-line-map/v1` byte-geometry identities with canonical
+`fyfile1-sha256-...` and `fylm1-sha256-...` text forms. They supplement, never replace, the exact
+`fysrc1-sha256` package graph digest. Changing the domain, version byte, length/offset widths, LF
+line-start rule, digest, or text prefix requires a new identity version. Their presence in a
+snapshot does not by itself prove a future map is current; a map reader must recompute and compare
+them against caller-authorized current source.
+
 ADR 0159 adds the independent `fairyc.experimental.workspace-check-session/v0` NDJSON request and
 response schema. The schema versions this experimental machine boundary and rejects unknown or
 duplicate request fields, but it does not make the command spelling, numeric limits, process exit
@@ -465,6 +473,12 @@ SHA-256 over sorted canonical relative paths and exact source bytes. Its text fo
 `fysrc1-sha256-...`. The source digest invalidates the current package implementation; dependency
 public-interface hashes decide whether dependents invalidate. Changing path validation, canonical
 bytes, digest, or prefix requires a new source-digest version.
+
+The per-file identities are independently versioned because content staleness, line-map staleness,
+and package-graph staleness are different checks. `fairyc.source-file/v1` hashes exact bytes with a
+domain and byte length. `fairyc.source-line-map/v1` hashes byte length and every LF-derived
+zero-based line start, including EOF after a final LF. CR is not normalized. A mismatch invalidates
+stored spans for that file; no consumer may guess a remapped position.
 
 ## `.fymap` compatibility
 

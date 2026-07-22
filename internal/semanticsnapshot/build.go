@@ -25,7 +25,7 @@ func Build(semanticResult semantic.Result, program mir.Program, packages []Packa
 		return Snapshot{}, fmt.Errorf("semantic snapshot requires verified MIR: %s", failures[0])
 	}
 
-	metadata, stablePackages, err := normalizePackages(packages)
+	metadata, stablePackages, files, err := normalizePackages(packages)
 	if err != nil {
 		return Snapshot{}, err
 	}
@@ -33,7 +33,7 @@ func Build(semanticResult semantic.Result, program mir.Program, packages []Packa
 	if err != nil {
 		return Snapshot{}, err
 	}
-	if err := validatePackageCoverage(stablePackages, modules); err != nil {
+	if err := validatePackageCoverage(stablePackages, files, modules); err != nil {
 		return Snapshot{}, err
 	}
 	functions, resolvedCalls, externalCalls, err := buildFunctionSummaries(
@@ -44,20 +44,36 @@ func Build(semanticResult semantic.Result, program mir.Program, packages []Packa
 	}
 	completeness := buildCompleteness(resolvedCalls, externalCalls)
 	return Snapshot{data: snapshotData{
-		packages: stablePackages, modules: modules, declarations: declarations,
+		packages: stablePackages, files: files, modules: modules, declarations: declarations,
 		functions: functions, completeness: completeness,
 	}}, nil
 }
 
-func validatePackageCoverage(packages []Package, modules []Module) error {
+func validatePackageCoverage(packages []Package, files []File, modules []Module) error {
 	covered := make(map[string]struct{}, len(modules))
+	moduleFiles := make(map[string]struct{}, len(modules))
 	for _, module := range modules {
 		covered[module.PackageInstance] = struct{}{}
+		key := module.PackageInstance + "\x00" + module.Source
+		if _, duplicate := moduleFiles[key]; duplicate {
+			return fmt.Errorf("semantic snapshot source file %q has multiple typed modules", module.Source)
+		}
+		moduleFiles[key] = struct{}{}
 	}
 	for _, packageValue := range packages {
 		if _, found := covered[packageValue.Instance]; !found {
 			return fmt.Errorf("semantic snapshot package %s has no typed source module", packageValue.Instance)
 		}
+	}
+	for _, file := range files {
+		key := file.PackageInstance + "\x00" + file.Path
+		if _, found := moduleFiles[key]; !found {
+			return fmt.Errorf("semantic snapshot file %q has no typed source module", file.Path)
+		}
+		delete(moduleFiles, key)
+	}
+	if len(moduleFiles) != 0 {
+		return fmt.Errorf("semantic snapshot typed module has no exact file identity")
 	}
 	return nil
 }
@@ -68,58 +84,72 @@ type packageMetadata struct {
 	coord    string
 }
 
-func normalizePackages(inputs []PackageInput) (map[hir.PackageID]packageMetadata, []Package, error) {
+func normalizePackages(inputs []PackageInput) (map[hir.PackageID]packageMetadata, []Package, []File, error) {
 	if len(inputs) == 0 {
-		return nil, nil, fmt.Errorf("semantic snapshot requires package metadata")
+		return nil, nil, nil, fmt.Errorf("semantic snapshot requires package metadata")
 	}
 	metadata := make(map[hir.PackageID]packageMetadata, len(inputs))
 	instances := make(map[string]hir.PackageID, len(inputs))
 	for _, input := range inputs {
 		if _, duplicate := metadata[input.BuildID]; duplicate {
-			return nil, nil, fmt.Errorf("semantic snapshot package id %d is duplicated", input.BuildID)
+			return nil, nil, nil, fmt.Errorf("semantic snapshot package id %d is duplicated", input.BuildID)
 		}
 		if !validMetadataText(input.UID) || !validMetadataText(input.Name) || !validMetadataText(input.Version) ||
 			!validMetadataText(input.Language) || !validMetadataText(input.SourceKind) || !validMetadataText(input.Role) ||
 			input.RuntimeABI != "" && !validMetadataText(input.RuntimeABI) {
-			return nil, nil, fmt.Errorf("semantic snapshot package %d has invalid text metadata", input.BuildID)
+			return nil, nil, nil, fmt.Errorf("semantic snapshot package %d has invalid text metadata", input.BuildID)
 		}
 		if input.Instance == ([32]byte{}) || input.Coordinate == ([32]byte{}) || input.Source == ([32]byte{}) {
-			return nil, nil, fmt.Errorf("semantic snapshot package %d has an empty stable identity", input.BuildID)
+			return nil, nil, nil, fmt.Errorf("semantic snapshot package %d has an empty stable identity", input.BuildID)
 		}
 		if !slices.IsSorted(input.Features) {
-			return nil, nil, fmt.Errorf("semantic snapshot package %d features are not canonical", input.BuildID)
+			return nil, nil, nil, fmt.Errorf("semantic snapshot package %d features are not canonical", input.BuildID)
 		}
 		for index, feature := range input.Features {
 			if !validMetadataText(feature) || index > 0 && input.Features[index-1] == feature {
-				return nil, nil, fmt.Errorf("semantic snapshot package %d features are invalid or duplicated", input.BuildID)
+				return nil, nil, nil, fmt.Errorf("semantic snapshot package %d features are invalid or duplicated", input.BuildID)
 			}
 		}
 		dependencySet := make(map[hir.PackageID]struct{}, len(input.Dependencies))
 		for _, dependency := range input.Dependencies {
 			if dependency == input.BuildID {
-				return nil, nil, fmt.Errorf("semantic snapshot package %d depends on itself", input.BuildID)
+				return nil, nil, nil, fmt.Errorf("semantic snapshot package %d depends on itself", input.BuildID)
 			}
 			if _, duplicate := dependencySet[dependency]; duplicate {
-				return nil, nil, fmt.Errorf("semantic snapshot package %d repeats dependency %d", input.BuildID, dependency)
+				return nil, nil, nil, fmt.Errorf("semantic snapshot package %d repeats dependency %d", input.BuildID, dependency)
 			}
 			dependencySet[dependency] = struct{}{}
 		}
 		instance := input.Instance.String()
 		if previous, duplicate := instances[instance]; duplicate {
-			return nil, nil, fmt.Errorf("semantic snapshot packages %d and %d share PackageInstanceId %s", previous, input.BuildID, instance)
+			return nil, nil, nil, fmt.Errorf("semantic snapshot packages %d and %d share PackageInstanceId %s", previous, input.BuildID, instance)
+		}
+		if len(input.Files) == 0 {
+			return nil, nil, nil, fmt.Errorf("semantic snapshot package %d has no file identities", input.BuildID)
+		}
+		input.Files = slices.Clone(input.Files)
+		slices.SortFunc(input.Files, func(left, right FileInput) int { return cmp.Compare(left.Path, right.Path) })
+		for index, file := range input.Files {
+			if err := validateFileInput(file); err != nil {
+				return nil, nil, nil, fmt.Errorf("semantic snapshot package %d: %w", input.BuildID, err)
+			}
+			if index > 0 && input.Files[index-1].Path == file.Path {
+				return nil, nil, nil, fmt.Errorf("semantic snapshot package %d repeats file %q", input.BuildID, file.Path)
+			}
 		}
 		instances[instance] = input.BuildID
 		metadata[input.BuildID] = packageMetadata{input: input, instance: instance, coord: input.Coordinate.String()}
 	}
 
 	packages := make([]Package, 0, len(inputs))
+	files := make([]File, 0)
 	for _, input := range inputs {
 		item := metadata[input.BuildID]
 		dependencies := make([]string, 0, len(input.Dependencies))
 		for _, dependency := range input.Dependencies {
 			dependencyMetadata, found := metadata[dependency]
 			if !found {
-				return nil, nil, fmt.Errorf("semantic snapshot package %d references missing dependency %d", input.BuildID, dependency)
+				return nil, nil, nil, fmt.Errorf("semantic snapshot package %d references missing dependency %d", input.BuildID, dependency)
 			}
 			dependencies = append(dependencies, dependencyMetadata.instance)
 		}
@@ -130,9 +160,29 @@ func normalizePackages(inputs []PackageInput) (map[hir.PackageID]packageMetadata
 			SourceKind: input.SourceKind, RuntimeABI: input.RuntimeABI, Role: input.Role,
 			Features: slices.Clone(input.Features), Dependencies: dependencies,
 		})
+		for _, file := range item.input.Files {
+			files = append(files, File{
+				PackageInstance: item.instance, Path: file.Path, Digest: file.Digest.String(),
+				LineMap: file.LineMap.String(), Kind: file.Kind,
+			})
+		}
 	}
 	slices.SortFunc(packages, func(left, right Package) int { return cmp.Compare(left.Instance, right.Instance) })
-	return metadata, packages, nil
+	slices.SortFunc(files, compareFile)
+	return metadata, packages, files, nil
+}
+
+func validateFileInput(file FileInput) error {
+	if file.Digest == ([32]byte{}) || file.LineMap == ([32]byte{}) {
+		return fmt.Errorf("file %q has an empty content or line-map identity", file.Path)
+	}
+	if file.Kind != FileKindSource && file.Kind != FileKindTest {
+		return fmt.Errorf("file %q has invalid kind %q", file.Path, file.Kind)
+	}
+	if _, err := source.NewFile(file.Path, nil).ExpectedModule(); err != nil || strings.Contains(file.Path, "\\") {
+		return fmt.Errorf("file %q has a noncanonical source path", file.Path)
+	}
+	return nil
 }
 
 func validMetadataText(value string) bool {
@@ -799,6 +849,13 @@ func compareDeclarationKey(left, right DeclarationKey) int {
 }
 
 func compareModule(left, right Module) int {
+	if value := cmp.Compare(left.PackageInstance, right.PackageInstance); value != 0 {
+		return value
+	}
+	return cmp.Compare(left.Path, right.Path)
+}
+
+func compareFile(left, right File) int {
 	if value := cmp.Compare(left.PackageInstance, right.PackageInstance); value != 0 {
 		return value
 	}

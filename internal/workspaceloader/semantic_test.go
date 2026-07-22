@@ -3,10 +3,12 @@ package workspaceloader
 import (
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/packagecontent"
 	"github.com/0disoft/fairyc/internal/packagegraph"
 )
 
@@ -55,6 +57,23 @@ func TestSemanticInputReachesVerifiedCompiler(t *testing.T) {
 	}
 }
 
+func TestSemanticFilesRejectsSourceMutationAfterWorkspaceValidation(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writePackage(t, root, ".", rootManifest(""), validRootSource())
+	workspace, err := Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(workspace.Packages) == 0 || len(workspace.Packages[0].Sources) == 0 || len(workspace.Packages[0].Sources[0].Bytes) == 0 {
+		t.Fatalf("workspace source closure = %+v", workspace.Packages)
+	}
+	workspace.Packages[0].Sources[0].Bytes[0] ^= 0x20
+	if _, err := workspace.SemanticFiles(); err == nil || !strings.Contains(err.Error(), "source bytes changed after validation") {
+		t.Fatalf("SemanticFiles() error = %v", err)
+	}
+}
+
 func TestBundledStandardLibraryReachesVerifiedCompiler(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
@@ -95,10 +114,43 @@ func TestBundledStandardLibraryReachesVerifiedCompiler(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	packagePaths := make(map[hir.PackageID]string, len(packages))
 	for _, loaded := range packages {
 		if loaded.PackageUID == "" || loaded.Name == "" || loaded.Version == "" || loaded.Language != "fairyc-language/0" ||
 			loaded.Instance != identities[loaded.ID] || loaded.Coordinate != coordinates[loaded.ID] || loaded.Source == ([32]byte{}) || loaded.Path == "" {
 			t.Fatalf("SemanticPackages() package = %+v, identities = %+v, coordinates = %+v", loaded, identities, coordinates)
+		}
+		packagePaths[loaded.ID] = loaded.Path
+	}
+	files, err := workspace.SemanticFiles()
+	if err != nil {
+		t.Fatalf("SemanticFiles() error = %v", err)
+	}
+	if len(files) != 2 {
+		t.Fatalf("SemanticFiles() = %+v", files)
+	}
+	for index, file := range files {
+		if file.Package == hir.DefaultPackage || file.Path == "" || file.Digest == ([32]byte{}) || file.LineMap == ([32]byte{}) || file.Kind != SemanticFileSource ||
+			index > 0 && (files[index-1].Package > file.Package || files[index-1].Package == file.Package && files[index-1].Path >= file.Path) {
+			t.Fatalf("SemanticFiles() file = %+v", file)
+		}
+		sourcePackage, found := workspace.Package(packagePaths[file.Package])
+		if !found {
+			t.Fatalf("SemanticFiles() package %d is not loaded", file.Package)
+		}
+		matched := false
+		for _, sourceFile := range sourcePackage.Sources {
+			if sourceFile.Path != file.Path {
+				continue
+			}
+			digest, lineMap := packagecontent.ComputeFileIdentities(sourceFile.Bytes)
+			if digest != file.Digest || lineMap != file.LineMap {
+				t.Fatalf("SemanticFiles() identity = %+v, want %s / %s", file, digest, lineMap)
+			}
+			matched = true
+		}
+		if !matched {
+			t.Fatalf("SemanticFiles() file %q has no source bytes", file.Path)
 		}
 	}
 }

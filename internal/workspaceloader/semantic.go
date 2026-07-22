@@ -1,6 +1,7 @@
 package workspaceloader
 
 import (
+	"cmp"
 	"fmt"
 	"slices"
 
@@ -10,8 +11,23 @@ import (
 	"github.com/0disoft/fairyc/internal/semantic"
 )
 
+const (
+	SemanticFileSource = "source"
+	SemanticFileTest   = "test"
+)
+
+// SemanticFile is one exact package-relative source identity available to downstream immutable
+// compiler-fact consumers without exposing source text or an absolute path.
+type SemanticFile struct {
+	Package hir.PackageID
+	Path    string
+	Digest  packagecontent.FileDigest
+	LineMap packagecontent.LineMapID
+	Kind    string
+}
+
 // SemanticPackage binds one disposable semantic package number to the exact resolved inputs used
-// by package interface hashing and process-local compilation caches.
+// by package interface hashing, compilation caches, and immutable Atlas snapshots.
 type SemanticPackage struct {
 	ID           hir.PackageID
 	PackageUID   string
@@ -211,6 +227,67 @@ func (workspace Workspace) SemanticPackages() ([]SemanticPackage, error) {
 			SourceKind: loaded.SourceKind, RuntimeABI: loaded.RuntimeABI,
 			Features: slices.Clone(mapping.Features), Role: node.Role, Dependencies: dependencies,
 		})
+	}
+	return result, nil
+}
+
+// SemanticFiles computes detached exact file identities only for consumers that explicitly need
+// source-integrity metadata. The ordinary SemanticPackages/cache path pays no per-file Atlas hash
+// cost.
+func (workspace Workspace) SemanticFiles() ([]SemanticFile, error) {
+	result := make([]SemanticFile, 0)
+	for index, class := range workspace.Resolution.InstanceClasses {
+		if len(class.Members) == 0 {
+			return nil, fmt.Errorf("workspace has an empty package instance class")
+		}
+		packageID := hir.PackageID(index + 1)
+		if packageID == hir.DefaultPackage {
+			return nil, fmt.Errorf("workspace package id overflow")
+		}
+		mapping, found := workspace.instance(class.Members[0])
+		if !found {
+			return nil, fmt.Errorf("workspace node %q has no package mapping", class.Members[0])
+		}
+		loaded, found := workspace.Package(mapping.PackagePath)
+		if !found {
+			return nil, fmt.Errorf("workspace package %q is missing", mapping.PackagePath)
+		}
+		digestFiles := make([]packagecontent.File, 0, len(loaded.Sources))
+		for _, sourceFile := range loaded.Sources {
+			digestFiles = append(digestFiles, packagecontent.File{Path: sourceFile.Path, Bytes: sourceFile.Bytes})
+		}
+		currentDigest, err := packagecontent.Compute(digestFiles)
+		if err != nil {
+			return nil, fmt.Errorf("recompute workspace package %q source identity: %w", mapping.PackagePath, err)
+		}
+		if currentDigest != loaded.Digest {
+			return nil, fmt.Errorf("workspace package %q source bytes changed after validation", mapping.PackagePath)
+		}
+		for _, sourceFile := range loaded.Sources {
+			kind := SemanticFileSource
+			if sourceFile.Test {
+				kind = SemanticFileTest
+			}
+			digest, lineMap := packagecontent.ComputeFileIdentities(sourceFile.Bytes)
+			result = append(result, SemanticFile{
+				Package: packageID, Path: sourceFile.Path, Digest: digest, LineMap: lineMap, Kind: kind,
+			})
+		}
+	}
+	slices.SortFunc(result, func(left, right SemanticFile) int {
+		if value := cmp.Compare(left.Package, right.Package); value != 0 {
+			return value
+		}
+		return cmp.Compare(left.Path, right.Path)
+	})
+	for index, file := range result {
+		if file.Package == hir.DefaultPackage || file.Path == "" || file.Digest == ([32]byte{}) || file.LineMap == ([32]byte{}) ||
+			file.Kind != SemanticFileSource && file.Kind != SemanticFileTest {
+			return nil, fmt.Errorf("workspace has invalid semantic file metadata")
+		}
+		if index > 0 && result[index-1].Package == file.Package && result[index-1].Path == file.Path {
+			return nil, fmt.Errorf("workspace package %d repeats semantic file %q", file.Package, file.Path)
+		}
 	}
 	return result, nil
 }

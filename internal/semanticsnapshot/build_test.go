@@ -51,12 +51,18 @@ func TestBuildIsImmutableDeterministicAndIndependentOfBuildLocalPackageNumbers(t
 	assertSnapshotsEqual(t, left, right)
 
 	packagesBefore := left.Packages()
+	filesBefore := left.Files()
 	modulesBefore := left.Modules()
 	declarationsBefore := left.Declarations()
 	functionsBefore := left.Functions()
 	completenessBefore := left.Completeness()
-	if len(packagesBefore) != 2 || len(modulesBefore) != 2 || len(declarationsBefore) != 2 || len(functionsBefore) != 2 {
-		t.Fatalf("snapshot counts = packages %d modules %d declarations %d functions %d", len(packagesBefore), len(modulesBefore), len(declarationsBefore), len(functionsBefore))
+	if len(packagesBefore) != 2 || len(filesBefore) != 2 || len(modulesBefore) != 2 || len(declarationsBefore) != 2 || len(functionsBefore) != 2 {
+		t.Fatalf("snapshot counts = packages %d files %d modules %d declarations %d functions %d", len(packagesBefore), len(filesBefore), len(modulesBefore), len(declarationsBefore), len(functionsBefore))
+	}
+	for _, file := range filesBefore {
+		if file.Digest == "" || file.LineMap == "" || file.Kind != semanticsnapshot.FileKindSource || strings.Contains(file.Path, "\\") {
+			t.Fatalf("snapshot file = %+v", file)
+		}
 	}
 	main := findFunction(t, functionsBefore, "main", "main")
 	if len(main.Calls) != 2 || main.Calls[0].TargetKind != semanticsnapshot.CallTargetResolved ||
@@ -73,7 +79,9 @@ func TestBuildIsImmutableDeterministicAndIndependentOfBuildLocalPackageNumbers(t
 	// the immutable snapshot.
 	leftResult.Semantic.HIR.Modules[0].Path = "corrupted"
 	leftResult.MIR.Functions[0].Name = "corrupted"
+	leftPackages[0].Files[0].Path = "corrupted-input.fy"
 	packagesBefore[0].Features = append(packagesBefore[0].Features, "corrupted")
+	filesBefore[0].Path = "corrupted.fy"
 	declarationsBefore[0].Effects = append(declarationsBefore[0].Effects, "corrupted")
 	functionsBefore[0].Calls = nil
 	completenessBefore[0].Reasons = append(completenessBefore[0].Reasons, "corrupted")
@@ -220,6 +228,16 @@ func TestBuildConsumesTheRealWorkspaceMetadataBoundary(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SemanticPackages() error = %v", err)
 	}
+	fileMetadata, err := workspace.SemanticFiles()
+	if err != nil {
+		t.Fatalf("SemanticFiles() error = %v", err)
+	}
+	filesByPackage := make(map[hir.PackageID][]semanticsnapshot.FileInput)
+	for _, file := range fileMetadata {
+		filesByPackage[file.Package] = append(filesByPackage[file.Package], semanticsnapshot.FileInput{
+			Path: file.Path, Digest: file.Digest, LineMap: file.LineMap, Kind: semanticsnapshot.FileKind(file.Kind),
+		})
+	}
 	packages := make([]semanticsnapshot.PackageInput, 0, len(metadata))
 	for _, value := range metadata {
 		packages = append(packages, semanticsnapshot.PackageInput{
@@ -227,19 +245,82 @@ func TestBuildConsumesTheRealWorkspaceMetadataBoundary(t *testing.T) {
 			Language: value.Language, Instance: value.Instance, Coordinate: value.Coordinate,
 			Source: value.Source, SourceKind: value.SourceKind, RuntimeABI: value.RuntimeABI,
 			Role: value.Role, Features: slices.Clone(value.Features), Dependencies: slices.Clone(value.Dependencies),
+			Files: slices.Clone(filesByPackage[value.ID]),
 		})
 	}
 	snapshot, err := semanticsnapshot.Build(result.Semantic, result.MIR, packages)
 	if err != nil {
 		t.Fatalf("Build() error = %v", err)
 	}
-	if len(snapshot.Packages()) != 2 || len(snapshot.Modules()) != 2 || len(snapshot.Functions()) != 2 {
-		t.Fatalf("workspace snapshot counts = packages %d modules %d functions %d", len(snapshot.Packages()), len(snapshot.Modules()), len(snapshot.Functions()))
+	if len(snapshot.Packages()) != 2 || len(snapshot.Files()) != 2 || len(snapshot.Modules()) != 2 || len(snapshot.Functions()) != 2 {
+		t.Fatalf("workspace snapshot counts = packages %d files %d modules %d functions %d", len(snapshot.Packages()), len(snapshot.Files()), len(snapshot.Modules()), len(snapshot.Functions()))
 	}
 	for _, module := range snapshot.Modules() {
 		if strings.HasPrefix(module.Path, "tests::") {
 			t.Fatalf("ordinary workspace snapshot included isolated test module %+v", module)
 		}
+	}
+}
+
+func TestBuildCanonicalizesAndRequiresCompleteFileIdentityCoverage(t *testing.T) {
+	t.Parallel()
+	texts := map[string]string{
+		"a.fy": "module a;\nfn i32 alpha() { return 1; }\n",
+		"z.fy": "module z;\nfn i32 zed() { return 2; }\n",
+	}
+	result, err := compiler.CheckPackages(semantic.PackageInput{Files: []semantic.File{
+		{Package: hir.DefaultPackage, Path: "z.fy", Module: analyzeSyntax(t, "z.fy", texts["z.fy"])},
+		{Package: hir.DefaultPackage, Path: "a.fy", Module: analyzeSyntax(t, "a.fy", texts["a.fy"])},
+	}})
+	if err != nil || !result.Verified {
+		t.Fatalf("CheckPackages() = verified %t error %v", result.Verified, err)
+	}
+	digestFiles := []packagecontent.File{
+		{Path: "z.fy", Bytes: []byte(texts["z.fy"])},
+		{Path: "a.fy", Bytes: []byte(texts["a.fy"])},
+	}
+	digest, err := packagecontent.Compute(digestFiles)
+	if err != nil {
+		t.Fatal(err)
+	}
+	identity := packagegraph.Identity{PackageUID: "example.snapshot.files", SourceIdentity: digest.String(), VersionIdentity: "1.0.0"}
+	instance, err := packagegraph.ComputeInstanceID(identity)
+	if err != nil {
+		t.Fatal(err)
+	}
+	coordinate, err := packagegraph.ComputeCoordinateID(packagegraph.CoordinateOf(identity))
+	if err != nil {
+		t.Fatal(err)
+	}
+	files := make([]semanticsnapshot.FileInput, 0, len(digestFiles))
+	for _, file := range digestFiles {
+		fileDigest, lineMap := packagecontent.ComputeFileIdentities(file.Bytes)
+		files = append(files, semanticsnapshot.FileInput{Path: file.Path, Digest: fileDigest, LineMap: lineMap, Kind: semanticsnapshot.FileKindSource})
+	}
+	input := semanticsnapshot.PackageInput{
+		BuildID: hir.DefaultPackage, UID: identity.PackageUID, Name: "files", Version: identity.VersionIdentity,
+		Language: "fairyc-language/0", Instance: instance, Coordinate: coordinate, Source: digest,
+		SourceKind: "local", Role: "root", Files: files,
+	}
+	left, err := semanticsnapshot.Build(result.Semantic, result.MIR, []semanticsnapshot.PackageInput{input})
+	if err != nil {
+		t.Fatalf("Build(left) error = %v", err)
+	}
+	rightInput := input
+	rightInput.Files = slices.Clone(files)
+	slices.Reverse(rightInput.Files)
+	right, err := semanticsnapshot.Build(result.Semantic, result.MIR, []semanticsnapshot.PackageInput{rightInput})
+	if err != nil {
+		t.Fatalf("Build(right) error = %v", err)
+	}
+	assertSnapshotsEqual(t, left, right)
+	if actual := left.Files(); len(actual) != 2 || actual[0].Path != "a.fy" || actual[1].Path != "z.fy" {
+		t.Fatalf("canonical files = %+v", actual)
+	}
+	missing := input
+	missing.Files = slices.Clone(files[:1])
+	if _, err := semanticsnapshot.Build(result.Semantic, result.MIR, []semanticsnapshot.PackageInput{missing}); err == nil || !strings.Contains(err.Error(), "typed module has no exact file identity") {
+		t.Fatalf("partial-file Build() error = %v", err)
 	}
 }
 
@@ -290,6 +371,20 @@ func TestBuildFailsClosedBeforePublishingUnverifiedOrUnmappedFacts(t *testing.T)
 	}
 	if _, err := semanticsnapshot.Build(standalone.Semantic, standaloneProgram, []semanticsnapshot.PackageInput{standalonePackage}); err == nil || !strings.Contains(err.Error(), "has no verified MIR summary") {
 		t.Fatalf("function-elided Build() error = %v", err)
+	}
+
+	missingFile := standalonePackage
+	missingFile.Files = nil
+	if _, err := semanticsnapshot.Build(standalone.Semantic, standalone.MIR, []semanticsnapshot.PackageInput{missingFile}); err == nil || !strings.Contains(err.Error(), "has no file identities") {
+		t.Fatalf("missing-file Build() error = %v", err)
+	}
+	extraFile := standalonePackage
+	extraDigest, extraLineMap := packagecontent.ComputeFileIdentities([]byte("module extra;\n"))
+	extraFile.Files = append(slices.Clone(extraFile.Files), semanticsnapshot.FileInput{
+		Path: "extra.fy", Digest: extraDigest, LineMap: extraLineMap, Kind: semanticsnapshot.FileKindSource,
+	})
+	if _, err := semanticsnapshot.Build(standalone.Semantic, standalone.MIR, []semanticsnapshot.PackageInput{extraFile}); err == nil || !strings.Contains(err.Error(), "has no typed source module") {
+		t.Fatalf("extra-file Build() error = %v", err)
 	}
 }
 
@@ -346,9 +441,11 @@ func packageInput(t *testing.T, id hir.PackageID, uid, name, version, path, text
 	if err != nil {
 		t.Fatal(err)
 	}
+	fileDigest, lineMap := packagecontent.ComputeFileIdentities([]byte(text))
 	return semanticsnapshot.PackageInput{
 		BuildID: id, UID: uid, Name: name, Version: version, Language: "fairyc-language/0",
 		Instance: instance, Coordinate: coordinate, Source: digest, SourceKind: "local", Role: role,
+		Files: []semanticsnapshot.FileInput{{Path: path, Digest: fileDigest, LineMap: lineMap, Kind: semanticsnapshot.FileKindSource}},
 	}
 }
 
@@ -387,7 +484,7 @@ func findCompleteness(t *testing.T, values []semanticsnapshot.Completeness, rela
 
 func assertSnapshotsEqual(t *testing.T, left, right semanticsnapshot.Snapshot) {
 	t.Helper()
-	if !reflect.DeepEqual(left.Packages(), right.Packages()) || !reflect.DeepEqual(left.Modules(), right.Modules()) ||
+	if !reflect.DeepEqual(left.Packages(), right.Packages()) || !reflect.DeepEqual(left.Files(), right.Files()) || !reflect.DeepEqual(left.Modules(), right.Modules()) ||
 		!reflect.DeepEqual(left.Declarations(), right.Declarations()) || !reflect.DeepEqual(left.Functions(), right.Functions()) ||
 		!reflect.DeepEqual(left.Completeness(), right.Completeness()) {
 		t.Fatalf("snapshots differ:\nleft=%s\nright=%s", strings.Join(snapshotStrings(left), "\n"), strings.Join(snapshotStrings(right), "\n"))
@@ -397,6 +494,7 @@ func assertSnapshotsEqual(t *testing.T, left, right semanticsnapshot.Snapshot) {
 func snapshotStrings(value semanticsnapshot.Snapshot) []string {
 	return []string{
 		fmt.Sprintf("%+v", value.Packages()),
+		fmt.Sprintf("%+v", value.Files()),
 		fmt.Sprintf("%+v", value.Modules()),
 		fmt.Sprintf("%+v", value.Declarations()),
 		fmt.Sprintf("%+v", value.Functions()),

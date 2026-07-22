@@ -573,8 +573,12 @@ versions, bodies, spans, and build numbering; normalizes nominal types through p
 both a 128-bit visible prefix and full 256-bit digest; and rejects malformed pairs or visible
 collisions. Canonical encoding, component-boundary, rename/signature sensitivity,
 body/span/version/build-number stability, path rejection, and collision behavior have direct
-regressions. No `.fymap` encoding, exporter, dependency-map join, stale-map validator, query,
-Context Pack, or rewrite measurement exists yet.
+regressions. ADR 0184 now adds domain-separated `fyfile1-sha256` content and `fylm1-sha256`
+line-map identities, projects them from validated workspace bytes, and requires canonical complete
+file/module coverage in every snapshot without retaining source text. Exact LF/CRLF/final-newline,
+content-versus-geometry, source/test classification, order, detachment, and missing/extra coverage
+regressions exist. No `.fymap` encoding, exporter, current-source recomputation, dependency-map
+join, stale-map validator, query, Context Pack, or rewrite measurement exists yet.
 
 - Produce an immutable `SemanticSnapshot` from analyzed HIR and verified MIR.
 - Export `.fymap` with package UID and instance identity, compatibility vector, provenance, relation-specific completeness, and deterministic symbol identity.

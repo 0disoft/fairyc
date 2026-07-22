@@ -63,7 +63,11 @@ Absolute local paths, timestamps that break reproducibility, source bodies, cred
 
 ### File record
 
-A file record contains a package-relative normalized path, content digest, source kind, and line-map identity. Source text is not duplicated into `.fymap`.
+A file record contains a package-relative normalized path, content digest, source kind, and line-map
+identity. The implemented snapshot prerequisite uses `fairyc.source-file/v1` and
+`fairyc.source-line-map/v1` as defined in `docs/package/source-file-identities-v1.md`. Source text is
+not duplicated into `.fymap`; current-source recomputation and stale-map rejection remain exporter
+and reader work.
 
 ### Type record
 

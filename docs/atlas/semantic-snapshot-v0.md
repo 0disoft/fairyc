@@ -24,6 +24,7 @@ absolute host paths are build-local and never appear in a snapshot. Construction
 with existing independently versioned identities:
 
 - exact package records use `PackageInstanceId` and `fysrc1-sha256`;
+- file records use `fyfile1-sha256` content and `fylm1-sha256` line-map identities;
 - nominal type references use source-independent `PackageCoordinateId`;
 - source spans use exact package instance, package-relative `.fy` path, and half-open byte offsets;
 - declarations use an exact-snapshot tuple of package instance, module, declaration kind, and
@@ -36,8 +37,11 @@ inferred from this model.
 
 ## Records
 
-The v0 snapshot contains detached, canonically sorted package, module, declaration,
-function-summary, and relation-completeness records. Declarations preserve source-declared
+The v0 snapshot contains detached, canonically sorted package, file, module, declaration,
+function-summary, and relation-completeness records. File records contain exact package instance,
+canonical relative path, source/test kind, content digest, and byte line-map identity without source
+text. Every file has exactly one typed module and every typed module has exactly one file.
+Declarations preserve source-declared
 visibility, signatures, structured stable types, effects, C ABI/link names, aggregate fields and
 variants, representation, and resource cleanup classification. Compiler-created cleanup functions
 remain private; their source resource owns the corresponding declared facts.
@@ -66,8 +70,9 @@ map iteration or input discovery order.
 
 Regression tests rebuild one two-package program with different disposable package numbers and
 require identical records. They also mutate compiler inputs and accessor results, require the
-snapshot to remain unchanged, reject unverified MIR and incomplete package maps, and forbid private
-package qualification or host-path leakage.
+snapshot to remain unchanged, canonicalize file input order, require complete file/module coverage,
+reject unverified MIR and incomplete package maps, and forbid private package qualification or
+host-path leakage.
 
 ## Completeness
 
@@ -83,8 +88,8 @@ ordinary semantic analysis.
 
 ## Deferred
 
-This model does not implement `.fymap` encoding or checksums, file content hashes,
-dependency map joins, stale-map validation, collision diagnostics, documentation import, source
+This model does not implement `.fymap` encoding or checksums, current-source recomputation,
+dependency map joins, stale-map validation, documentation import, source
 excerpts, `overview`, `show`, `around`, Context Packs, map rewrite measurements, anchors, `impact`,
 semantic diff, LSP, SCIP, MCP, embeddings, or structural edits. Each remains a later Atlas boundary
 with its own compatibility and failure contract.

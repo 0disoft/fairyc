@@ -39,6 +39,10 @@ Lengths preserve boundaries even when two different path/content splits would ot
 to the same byte sequence. No native endianness, filesystem order, timestamp, permission, owner,
 inode, archive header, or absolute root enters the encoding.
 
+The executable `Compute` path streams these exact bytes into SHA-256 after sorting only detached
+file headers. It does not duplicate every source body or materialize the whole encoded package.
+`Encode` remains available for compatibility fixtures that need the complete canonical byte vector.
+
 ## Digest and compatibility
 
 SHA-256 hashes the complete encoding. The canonical text is:
@@ -55,3 +59,8 @@ This digest identifies exact package source only. An artifact cache key addition
 toolchain, runtime, standard-library identity, features, and dependency public-interface hashes.
 The current package's public-interface hash is stored as output metadata for dependent invalidation;
 it does not replace the exact source digest.
+
+Atlas file records additionally use the independent `fairyc.source-file/v1` content digest and
+`fairyc.source-line-map/v1` byte-geometry identity defined in
+`docs/package/source-file-identities-v1.md`. Those per-file identities do not replace this complete
+path-and-byte graph digest or change package identity.

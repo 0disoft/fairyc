@@ -63,6 +63,21 @@ const (
 	DeclarationForeignFunction DeclarationKind = "foreign-function"
 )
 
+type FileKind string
+
+const (
+	FileKindSource FileKind = "source"
+	FileKindTest   FileKind = "test"
+)
+
+// FileInput binds one package-relative source path to exact content and line-map identities.
+type FileInput struct {
+	Path    string
+	Digest  packagecontent.FileDigest
+	LineMap packagecontent.LineMapID
+	Kind    FileKind
+}
+
 // PackageInput binds disposable compiler package numbers to exact stable package metadata. BuildID
 // and Dependencies are consumed during construction and never appear in a Snapshot.
 type PackageInput struct {
@@ -79,6 +94,7 @@ type PackageInput struct {
 	Role         string
 	Features     []string
 	Dependencies []hir.PackageID
+	Files        []FileInput
 }
 
 // Package is one path-free exact package record in the analyzed closure.
@@ -111,6 +127,15 @@ type Module struct {
 	PackageInstance string
 	Path            string
 	Source          string
+}
+
+// File is a path-free source integrity record. It contains no source text or absolute path.
+type File struct {
+	PackageInstance string
+	Path            string
+	Digest          string
+	LineMap         string
+	Kind            FileKind
 }
 
 // DeclarationKey is an exact-snapshot join key, not the future stable Atlas SymbolId. It includes
@@ -218,6 +243,7 @@ type Completeness struct {
 
 type snapshotData struct {
 	packages     []Package
+	files        []File
 	modules      []Module
 	declarations []Declaration
 	functions    []FunctionSummary
@@ -244,6 +270,10 @@ func (snapshot Snapshot) Packages() []Package {
 
 func (snapshot Snapshot) Modules() []Module {
 	return slices.Clone(snapshot.data.modules)
+}
+
+func (snapshot Snapshot) Files() []File {
+	return slices.Clone(snapshot.data.files)
 }
 
 func (snapshot Snapshot) Declarations() []Declaration {

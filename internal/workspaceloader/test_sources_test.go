@@ -63,6 +63,24 @@ fn void dependency_returns_answer() { assert(answer::value() == 42); }
 	if !foundLookup {
 		t.Fatalf("test dependency lookup missing from %+v", testWorkspace.Resolution.Lookups)
 	}
+	files, err := testWorkspace.SemanticFiles()
+	if err != nil {
+		t.Fatalf("SemanticFiles() error = %v", err)
+	}
+	rootID, err := testWorkspace.RootPackageID()
+	if err != nil {
+		t.Fatalf("RootPackageID() error = %v", err)
+	}
+	foundTestFile := false
+	for _, file := range files {
+		if file.Package == rootID && file.Path == "tests/answer.fy" && file.Kind == SemanticFileTest &&
+			file.Digest != ([32]byte{}) && file.LineMap != ([32]byte{}) {
+			foundTestFile = true
+		}
+	}
+	if !foundTestFile {
+		t.Fatalf("root package lacks exact test-file metadata: %+v", files)
+	}
 }
 
 func TestWithRootTestsLeavesAnAbsentOrEmptyTreeOutOfTheWorkspace(t *testing.T) {

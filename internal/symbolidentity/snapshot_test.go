@@ -207,9 +207,17 @@ func snapshotPackage(t *testing.T, packageID hir.PackageID, uid, version string,
 	if err != nil {
 		t.Fatal(err)
 	}
+	fileInputs := make([]semanticsnapshot.FileInput, 0, len(files))
+	for _, file := range files {
+		fileDigest, lineMap := packagecontent.ComputeFileIdentities(file.Bytes)
+		fileInputs = append(fileInputs, semanticsnapshot.FileInput{
+			Path: file.Path, Digest: fileDigest, LineMap: lineMap, Kind: semanticsnapshot.FileKindSource,
+		})
+	}
 	return semanticsnapshot.PackageInput{
 		BuildID: packageID, UID: uid, Name: "fixture", Version: version, Language: "fairyc-language/0",
 		Instance: instance, Coordinate: coordinate, Source: digest, SourceKind: "local", Role: "root",
+		Files: fileInputs,
 	}
 }
 

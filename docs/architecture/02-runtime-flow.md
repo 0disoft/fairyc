@@ -222,6 +222,7 @@ observed yet. Complete runtime, public ABI, and supported-target gates remain un
 ```text
 typed HIR + verified MIR
   -> immutable SemanticSnapshot
+     + exact file content/line-map identities
   -> provisional SymbolId derivation
   -> Atlas exporter
   -> .fymap
@@ -233,9 +234,12 @@ The compiler frontend cannot import Atlas. Atlas does not reparse source to inve
 
 `internal/semanticsnapshot` implements the first arrow. It re-verifies MIR, consumes exact package
 metadata, removes build-local identities, deep-detaches its records, and reports relation-specific
-completeness. `internal/symbolidentity` implements the second arrow from stable semantic coordinates
-and canonical signatures while retaining full collision evidence. The exporter, encoded map,
-queries, and Context Pack arrows remain unimplemented and cannot feed back into either boundary.
+completeness. The validated workspace supplies exact source-file content and line-map identities;
+snapshot construction requires a file/module bijection without retaining source bytes.
+`internal/symbolidentity` implements the next arrow from stable semantic coordinates and canonical
+signatures while retaining full collision evidence. The exporter, encoded map, current-source
+validator, queries, and Context Pack arrows remain unimplemented and cannot feed back into these
+boundaries.
 
 ## Runtime behavior
 
