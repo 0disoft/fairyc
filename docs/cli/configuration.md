@@ -13,7 +13,8 @@ This repository type owns command behavior, arguments, flags, config loading, ex
 - Technical owner: UNASSIGNED
 - Related ADRs: `docs/adr/0159-bounded-workspace-check-session.md`,
   `docs/adr/0166-experimental-persistent-workspace-cache-command.md`, and
-  `docs/adr/0180-stable-workspace-c-emission-v1.md`
+  `docs/adr/0180-stable-workspace-c-emission-v1.md`, and
+  `docs/adr/0181-stable-workspace-semantic-test-v1.md`
 
 ## Required Decisions
 
@@ -25,10 +26,15 @@ This repository type owns command behavior, arguments, flags, config loading, ex
 
 ## Stable workspace inputs
 
-`check`, `build`, `run`, and `emit c` read the exact `fairy.toml` in the current directory and use
+`check`, `build`, `run`, `test`, and `emit c` read the exact `fairy.toml` in the current directory and use
 its explicit local workspace closure. They do not search parent directories, read an environment
-override, or consult another configuration file. All four maintain the canonical `fairy.lock` in
+override, or consult another configuration file. All five maintain the canonical `fairy.lock` in
 ordinary mode and verify it without writing under `--locked`.
+
+`test` alone overlays the root package's conventional exact-lowercase `tests/` directory after the
+production lock boundary. There is no manifest test-root field, environment override, member
+recursion, filter, target, profile, runner, or native-toolchain setting in v1. Test bytes are not
+production lock inputs.
 
 `build` and `run` alone accept `--release`; their v1 target remains the fixed local
 `x86_64-windows-msvc` path. `emit c` instead requires one explicit `--target` value and accepts the

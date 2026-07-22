@@ -665,6 +665,14 @@ deterministic ISO C11 application translation unit to stdout without a toolchain
 The runtime/support unit, exact private generated names and bytes across releases, AST/HIR/MIR
 inspection, and target maturity remain separate contracts.
 
+ADR 0181 stabilizes `fairyc test [--locked]` as a root-package semantic lane. Ordinary production
+loading and locking exclude `tests/`; the command overlays that exact contained directory in memory,
+maps paths into the `tests::` module namespace, validates argument-free `@test` on private safe
+zero-argument `void` functions, checks the combined package closure through verified MIR, and runs
+each selected entry in a fresh deterministic interpreter state. Test traps continue to later tests;
+native execution, member recursion, filters, setup/teardown, benchmarks, host I/O, and machine output
+remain separate contracts.
+
 ADR 0146 rejects speculative persistent caching at this point. ADR 0149 supplies deterministic,
 bounded, verifier-checked bytes for a complete MIR program, but the workspace path still produces
 no independently reusable per-package MIR/object artifact and has no configured comparable
@@ -684,8 +692,9 @@ receipt. Linux pass cases feed the configured Clang/GCC native probe. The eight 
 feed a separate local x64 MSVC C11 probe at low and optimized profiles; this is not complete Windows
 layout coverage or a hosted receipt.
 
-Formatting, testing, documentation, vendoring, binding generation, and ABI inspection remain planned
-tool surfaces rather than claims of current implementation. Checking has the bounded stable
+Formatting, documentation, vendoring, binding generation, and ABI inspection remain planned tool
+surfaces rather than claims of current implementation. Testing has the bounded stable root semantic
+surface above but no native, recursive, filtered, benchmark, or fixture runner. Checking has the bounded stable
 current-workspace `fairyc check [--locked]` surface; diagnostic explanation has its independent
 stable source-free surface; C emission has the target-explicit workspace surface above.
 

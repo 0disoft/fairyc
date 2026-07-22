@@ -425,8 +425,11 @@ semantic analysis and verified MIR with ordinary refresh and no-write `--locked`
 now exposes that bounded current-workspace policy as stable `fairyc check [--locked]`. ADR 0148 adds
 `experimental build-workspace` and `run-workspace`: the root package's qualified `main::main`
 crosses the existing Windows C/MSVC path, both profiles produce and execute the checked-in
-two-package quickstart, and a separately built compiler performs a locked run. Their stable command
-spellings and policies still remain.
+two-package quickstart, and a separately built compiler performs a locked run. ADRs 0176 and 0177
+stabilize the narrow Windows-local build and run spellings; ADR 0180 separately stabilizes
+target-explicit C application-unit emission. ADR 0181 now adds the root-only semantic test lane:
+production loading excludes `tests/`, the test overlay validates `@test fn void`, and each entry
+runs in a fresh interpreter state without a target toolchain or artifact.
 
 ADR 0152 now removes disposable HIR package numbering from compiler-private function identities.
 The exact package-instance map, logical name, canonical signature types, effects, and drop-glue type
@@ -548,8 +551,9 @@ quarantines, without selecting a default policy or making a speed claim.
   `fairyc run [--release] [--locked]` v1 contracts narrow. Keep the source-independent
   `fairyc explain <diagnostic-code>` and `fairyc targets` v1 contracts separate from catalog and
   TargetSpec data lifecycle. Keep target-explicit `fairyc emit c --target <target-id> [--locked]`
-  separate from private generated-C bytes and support units, then stabilize a minimal `test`
-  contract only after test-source isolation and declaration semantics exist.
+  separate from private generated-C bytes and support units. Keep implemented semantic
+  `fairyc test [--locked]` separate from future native tests, workspace-member recursion, filters,
+  fixtures, benchmarks, and host I/O.
 - Move to function-level reuse only when measured package rebuild or storage evidence justifies the complexity.
 
 Exit gate: clean and warm build evidence is reproducible on a declared machine and workload; invalidation fixtures distinguish public interface, inline body, and private implementation; incompatible caches are safe misses.

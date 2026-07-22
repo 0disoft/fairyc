@@ -90,6 +90,16 @@ func Execute(program mir.Program, entry string) (Outcome, error) {
 
 // ExecuteWithOptions runs verified MIR with explicitly configured, in-memory test intrinsics.
 func ExecuteWithOptions(program mir.Program, entry string, options Options) (Outcome, error) {
+	return executeEntry(program, entry, hir.TypeI32, options)
+}
+
+// ExecuteVoid verifies program and invokes one zero-argument void entry function in a fresh,
+// deterministic runtime. It is the semantic test-runner entry and exposes no fixture intrinsics.
+func ExecuteVoid(program mir.Program, entry string) (Outcome, error) {
+	return executeEntry(program, entry, hir.TypeVoid, Options{})
+}
+
+func executeEntry(program mir.Program, entry string, resultType hir.Type, options Options) (Outcome, error) {
 	if failures := mir.Verify(program); len(failures) != 0 {
 		return Outcome{}, fmt.Errorf("verify MIR before interpretation: %v", failures)
 	}
@@ -130,8 +140,8 @@ func ExecuteWithOptions(program mir.Program, entry string, options Options) (Out
 	if function == nil {
 		return Outcome{}, capabilityError("entry function %q is missing", entry)
 	}
-	if len(function.Parameters) != 0 || function.ResultType != hir.TypeI32 {
-		return Outcome{}, capabilityError("entry function %q must have type fn() -> i32", entry)
+	if len(function.Parameters) != 0 || function.ResultType != resultType {
+		return Outcome{}, capabilityError("entry function %q must have type fn() -> %s", entry, resultType)
 	}
 	if err := runtime.configureTestIntrinsics(entry, options); err != nil {
 		return Outcome{}, err
@@ -146,6 +156,9 @@ func ExecuteWithOptions(program mir.Program, entry string, options Options) (Out
 	}
 	if completion.trapCategory != "" {
 		return runtime.outcome(OutcomeTrap, 0, completion.trapCategory), nil
+	}
+	if resultType == hir.TypeVoid {
+		return runtime.outcome(OutcomeReturn, 0, ""), nil
 	}
 	value, err := completion.value.asI32()
 	if err != nil {
@@ -1134,13 +1147,13 @@ func evaluateBinary(locals map[mir.LocalID]runtimeValue, operation mir.Operation
 		if operation.Operator == "!=" {
 			equal = !equal
 		}
-		return i32Value(boolValue(equal)), "", nil
+		return boolRuntimeValue(equal), "", nil
 	case "<", "<=", ">", ">=":
 		if !hir.ScalarOrderedType(operation.OwnerType) || operation.Type != hir.TypeBool {
 			return runtimeValue{}, "", capabilityError("ordered comparison has incompatible owner or result type")
 		}
 		result, err := orderedScalarValues(operation.Operator, leftValue, rightValue, operation.OwnerType)
-		return i32Value(boolValue(result)), "", err
+		return boolRuntimeValue(result), "", err
 	case "+", "-", "*", "/", "%":
 		if !hir.CheckedDivisionType(operation.OwnerType) || operation.Type != operation.OwnerType {
 			return runtimeValue{}, "", capabilityError("checked integer operation has incompatible owner or result type")
@@ -1853,4 +1866,8 @@ func boolValue(value bool) int32 {
 		return 1
 	}
 	return 0
+}
+
+func boolRuntimeValue(value bool) runtimeValue {
+	return runtimeValue{kind: valueI32, i32: boolValue(value), typ: hir.TypeBool}
 }

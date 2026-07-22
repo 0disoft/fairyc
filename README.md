@@ -140,7 +140,8 @@ package's qualified `main::main` for the same closed Windows target pipeline. Th
 under both MSVC profiles, a direct locked run, and a locked run through a separately built
 `fairyc.exe`. This is real package-aware native compilation without WSL, not Go interpretation.
 Those target/profile/output-heavy spellings remain experimental; stable check/build/run reuse the
-same root-entry convention without promoting target maturity.
+same root-entry convention without promoting target maturity. Stable test instead overlays the
+checked-in `tests/answer.fy` and runs its `@test fn void` through the verified semantic interpreter.
 `experimental exec-target` is the program-facing sibling: it forwards bounded stdout and stderr
 without a compiler banner and preserves the program's full Windows process status. The checked-in
 `examples/windows_output/main.fy` uses a support module containing the one exact unsafe Windows
@@ -361,10 +362,11 @@ persistent cache, or stable editor protocol. Program commands use one entry plus
 `--source`; semantic checking uses its explicit positional module set. The stable workspace commands
 are `fairyc check [--locked]` and the Windows/amd64-local
 `fairyc build [--release] [--locked]`, and the Windows/amd64-local
-`fairyc run [--release] [--locked]`, plus source-independent
+`fairyc run [--release] [--locked]`, the target-independent semantic
+`fairyc test [--locked]`, plus source-independent
 `fairyc explain <diagnostic-code>` and `fairyc targets`, and target-explicit
-`fairyc emit c --target <target-id> [--locked]`. A stable test command, native program I/O and arguments,
-user drop-body execution, a complete runtime, safe standard library, package manager, supported
+`fairyc emit c --target <target-id> [--locked]`. Native test execution, native program I/O and arguments,
+a complete runtime, safe standard library, package manager, supported
 target, release-stable CLI as a whole, and a stable language revision do not exist yet.
 
 ## Try the current prototype
@@ -395,6 +397,7 @@ go run ../../cmd/fairyc build
 go run ../../cmd/fairyc build --release --locked
 & ./build/workspace-quickstart.exe
 go run ../../cmd/fairyc run --release --locked
+go run ../../cmd/fairyc test --locked
 go run ../../cmd/fairyc emit c --target x86_64-windows-msvc --locked
 go run ../../cmd/fairyc emit c --target x86_64-linux-gnu --locked
 go run ../../cmd/fairyc experimental check-workspace
@@ -437,7 +440,7 @@ indexed `u8` value to `i32`,
 then execute `examples/windows_output/main.fy` with exact stdout and process status
 42 while explicitly supplying its separate `windows_console.fy` module, and finally run the
 two-package `examples/workspace_quickstart` graph through an exact generated lock with native result
-42. The same standalone compiler emits locked Windows and Linux C11 application units without
+42. The same standalone compiler runs the isolated semantic test and emits locked Windows and Linux C11 application units without
 changing the retained executable. It then measures nine fresh-cache cold/warm pairs with one new compiler process per sample,
 sends eight editor-shaped workspace checks to one compiler process, validates the cold, no-op,
 private-root, private-dependency, and public-dependency cache paths, and records Windows
@@ -479,6 +482,15 @@ linker, SDK, WSL, subprocess, or network and creates no build artifact. The sepa
 standard-library support unit is intentionally absent, so redirected output is inspection/transport
 input rather than a promised standalone C package. Ordinary mode maintains `fairy.lock`;
 `--locked` verifies it without writing.
+
+The stable `fairyc test [--locked]` command keeps tests out of ordinary compilation. It overlays
+only the root package's optional lowercase `tests/` directory after the production lock is handled;
+`tests/answer.fy` therefore declares `module tests::answer;`. Mark a private safe zero-argument
+`void` function with argument-free `@test`. Each discovered test runs in canonical name order through
+a fresh verified-MIR interpreter state, so it needs no C compiler, MSVC, WSL, subprocess, or build
+artifact. A trap fails that test and later tests still run. This is the fast semantic lane, not a
+claim that native ABI, foreign calls, host I/O, benchmarks, filters, or workspace-member test
+discovery exist.
 
 `experimental target-spec` accepts exactly one known Linux GNU or Windows MSVC ID and writes
 deterministic `fairyc.target-spec/v0` JSON. The result separates target semantics from local

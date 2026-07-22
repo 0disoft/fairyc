@@ -26,6 +26,7 @@ const (
 	categoryABI           = "Target layout and ABI"
 	categoryEffect        = "Effects and external capabilities"
 	categoryCompatibility = "Compatibility and toolchain selection"
+	categoryTest          = "Test declarations and harness"
 	categoryAtlas         = "Atlas warnings or hard map-integrity errors"
 	categoryVerifier      = "MIR verifier defects"
 )
@@ -87,6 +88,7 @@ var catalogEntries = []CatalogEntry{
 	{Code: "E7102", Category: categoryEffect, Meaning: "A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function."},
 	{Code: "E8001", Category: categoryCompatibility, Meaning: "Selected runtime ABI is incompatible with generated code."},
 	{Code: "E8002", Category: categoryCompatibility, Meaning: "Requested language revision is unsupported by this compiler."},
+	{Code: "E9001", Category: categoryTest, Meaning: "`@test` must appear exactly once without arguments on a private safe zero-argument free function returning `void` in isolated test source."},
 	{Code: "A2001", Category: categoryAtlas, Meaning: "Dependency map is incompatible; affected Atlas relations are partial or unavailable while compilation remains valid."},
 	{Code: "A9001", Category: categoryAtlas, Meaning: "Deterministic symbol identity collision or corrupt identity evidence; the map is rejected."},
 	{Code: "V1001", Category: categoryVerifier, Meaning: "Every reachable block ends in exactly one terminator; each operation has its required shape and concrete type identity; every executable aggregate use agrees with one valid program-level definition; internal function symbols and call signature shapes are closed and consistent; and foreign declarations mapped to one link name have compatible signatures."},

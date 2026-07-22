@@ -403,6 +403,12 @@ input, and target and remain disposable transport; public `@repr(C)` and `extern
 TargetSpec data, runtime/support units, and generated-C consumer evidence remain independently
 versioned.
 
+ADR 0181 stabilizes `fairyc test [--locked]`, the root-only optional lowercase `tests/` overlay,
+`tests/`-prefixed module identity, argument-free `@test` declaration shape, canonical test ordering,
+fresh semantic-interpreter execution, human result grammar, production-lock isolation, `E9001`, and
+codes 0, 2, 3, 4, 5, and 7. Target-native execution, member recursion, filters, setup/teardown,
+benchmarks, host I/O, machine output, and test bytes in release package identities remain outside v1.
+
 ADR 0159 adds the independent `fairyc.experimental.workspace-check-session/v0` NDJSON request and
 response schema. The schema versions this experimental machine boundary and rejects unknown or
 duplicate request fields, but it does not make the command spelling, numeric limits, process exit

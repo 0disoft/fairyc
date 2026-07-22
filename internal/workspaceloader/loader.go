@@ -71,6 +71,7 @@ type SourceFile struct {
 	Path   string
 	Bytes  []byte
 	Module *ast.Module
+	Test   bool
 }
 
 // Package is one source catalog package, either an explicitly declared local member or an exact

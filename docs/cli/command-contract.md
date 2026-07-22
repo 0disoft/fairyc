@@ -402,6 +402,33 @@ Ordinary mode may update `fairy.lock` after a valid graph is loaded even when la
 execution, or a program trap fails. `--locked` performs no write. A compiler-output write failure
 after program execution returns code 4 but cannot undo program effects; no executable is retained.
 
+## Stable workspace semantic test v1
+
+`fairyc test [--locked]` first loads and locks the ordinary production workspace, then overlays only
+the root package's optional exact-lowercase `tests/` tree in memory. Ordinary check, build, run,
+emit, lock, interface, and cache inputs never include those files. The tree may not be a symlink or
+overlap the production source or a workspace member, shares the workspace source budgets, and maps
+`tests/path.fy` to `module tests::path;`. An absent or empty tree is valid. Member test trees are not
+recursively discovered.
+
+Argument-free `@test` selects exactly private safe zero-argument free functions returning `void`;
+invalid placements or shapes are `E9001`. Other functions in test modules are ordinary private
+helpers. After removing only validated harness markers from the in-memory AST, the command runs the
+package-aware semantic, Flow, MIR lowering, and verifier pipeline. Each test then executes by
+canonical `<module>::<function>` order in a fresh deterministic interpreter state. A trap fails that
+test and later tests continue. An interpreter capability or resource-limit rejection aborts as code
+2 rather than becoming a false test failure.
+
+Completed lines are `test <identity> ... ok` or
+`test <identity> ... FAILED (<trap-category>)`. The final line is
+`test result: <ok|FAILED>. <passed> passed; <failed> failed; lock <updated|unchanged|verified>`.
+Zero tests succeed with only the final line. Codes are 0 for all
+passing, 2 for invocation/capability rejection, 3 for source or declaration diagnostics, 4 for
+internal/output failure, 5 for one or more trapped tests, and 7 for workspace/test-source/lock
+failure. The command invokes no target backend, toolchain, WSL, process, network, or host I/O and
+creates no artifact. A report writer may accept a prefix before code 4; ordinary lock maintenance
+may precede later failure, while `--locked` writes nothing.
+
 ## Stage 0 surface
 
 | Command | Purpose | Code generation |
@@ -409,12 +436,12 @@ after program execution returns code 4 but cannot undo program effects; no execu
 | `fairyc check [--locked]` | Check the current manifest-owned workspace through verified MIR | No |
 | `fairyc build [--release] [--locked]` | Build or replace the current root package's one Windows executable | Yes |
 | `fairyc run [--release] [--locked]` | Build and run the current workspace as one temporary Windows image | Yes |
-| `fairyc test [target]` | Build and run semantic test targets | Yes |
+| `fairyc test [--locked]` | Run isolated root-package `@test fn void` entries through verified MIR and the semantic interpreter | No |
 | `fairyc emit c --target <target-id> [--locked]` | Emit the current executable workspace's target-selected C11 application unit | C only, stdout |
 | `fairyc explain <diagnostic-code>` | Explain a stable diagnostic code | No |
 | `fairyc targets` | Report known target profiles, status, evidence, and unavailable requirements | No |
 
-Stable positional syntax for `test`, alternate package/workspace selection, target triples beyond
+Alternate package/workspace selection, test filtering and native execution, target triples beyond
 the declared emit profiles and build/run v1's fixed local Windows path, program I/O and arguments,
 feature flags, and configuration precedence
 remain UNDECIDED. The implemented `experimental` spellings do not settle those decisions.

@@ -20,6 +20,7 @@ Diagnostic codes are stable identifiers for a semantic category. Exact wording a
 | `E61xx` | Target layout and ABI |
 | `E71xx` | Effects and external capabilities |
 | `E80xx` | Compatibility and toolchain selection |
+| `E90xx` | Test declarations and harness |
 | `Axxxx` | Atlas warnings or hard map-integrity errors |
 | `Vxxxx` | MIR verifier defects; never ordinary user diagnostics |
 
@@ -83,6 +84,7 @@ Diagnostic codes are stable identifiers for a semantic category. Exact wording a
 | `E7102` | A call or compiler-scheduled resource cleanup requires one or more effects not declared by the enclosing function. |
 | `E8001` | Selected runtime ABI is incompatible with generated code. |
 | `E8002` | Requested language revision is unsupported by this compiler. |
+| `E9001` | `@test` must appear exactly once without arguments on a private safe zero-argument free function returning `void` in isolated test source. |
 | `A2001` | Dependency map is incompatible; affected Atlas relations are partial or unavailable while compilation remains valid. |
 | `A9001` | Deterministic symbol identity collision or corrupt identity evidence; the map is rejected. |
 

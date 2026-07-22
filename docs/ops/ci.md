@@ -135,8 +135,10 @@ root, generates one canonical lock in ordinary mode, requires exact `--locked` r
 and compiles its root-to-dependency call through package-aware verified MIR. Low and optimized
 `build-workspace` products are retained long enough for independent PE/unwind inspection and native
 result 42. `run-workspace` then returns 42 once through the in-process CLI boundary and once through
-the separately built `fairyc.exe`, retaining no target image. This adds no registry, solver,
-network, WSL, or persistent cache path.
+the separately built `fairyc.exe`, retaining no target image. The same standalone compiler runs the
+root-only `tests/answer.fy` through stable `test --locked`, requires its exact one-pass report, and
+proves the retained stable build image remains byte-identical. This semantic lane invokes no target
+toolchain and adds no registry, solver, network, WSL, or persistent cache path.
 The owned-text path closes over SystemHeap, Buffer, and text view once. Compiler-owned `"Fairy"`
 storage is copied to a length-five String, viewed, appended to length ten, viewed again, and dropped
 to normalized storage. The same input produces six-byte CString storage, a logical length-five CStr

@@ -21,7 +21,8 @@ Only `check`, a minimal `build`, compiler inspection, and semantic test executio
 
 The Go frontend currently exposes stable current-workspace commands
 `fairyc check [--locked]`, `fairyc build [--release] [--locked]`, and
-`fairyc run [--release] [--locked]`, plus the stable source-independent
+`fairyc run [--release] [--locked]`, the stable target-independent semantic
+`fairyc test [--locked]`, plus the stable source-independent
 `fairyc explain <diagnostic-code>` lookup and stable host-independent `fairyc targets` maturity
 report, and stable target-explicit
 `fairyc emit c --target <target-id> [--locked]`, plus `fairyc experimental parse <file.fy>`,
@@ -205,8 +206,15 @@ pipeline, but executes an inspected compiler-temporary image and retains no exec
 normal `i32` return is program data printed in one `result:` receipt while the compiler returns
 success; a run-only internal token keeps reserved normal results distinct from recognized language
 traps, which use the stable category and code 5. Program stdout/stderr, arguments,
-stdin, a `--` delimiter, retained build output, and cache policy are not admitted in v1. Stable test
-commands remain unimplemented.
+stdin, a `--` delimiter, retained build output, and cache policy are not admitted in v1.
+
+`fairyc test [--locked]` overlays only the root package's optional exact-lowercase `tests/` tree
+after maintaining or verifying the production lock. Paths keep their `tests/` prefix for module
+identity, and argument-free `@test` selects private safe zero-argument `void` functions. Each test
+runs in canonical identity order through a fresh verified-MIR interpreter runtime. Traps are
+reported per test and do not stop later tests. The command invokes no target backend, toolchain,
+WSL, subprocess, network, or host I/O and creates no build artifact. Native tests, member recursion,
+filters, setup/teardown, benchmarks, and machine output remain outside v1.
 
 `fairyc emit c --target <target-id> [--locked]` accepts exactly the `c` form and one mandatory
 `x86_64-linux-gnu` or `x86_64-windows-msvc` target. It loads the current manifest-owned workspace,
@@ -242,6 +250,7 @@ examples do not grant agent command authority.
 `DEVELOPMENT.md` also documents the manual WSL-free build of ignored `build/fairyc.exe` for repeated
 Windows use. The configured Windows smoke independently builds and removes a temporary compiler
 executable, verifies its help surface, drives the scalar quickstart through that separate process,
+executes the checked-in isolated semantic test without changing the retained build artifact,
 emits locked Windows and Linux C11 application units without changing the retained executable,
 invokes the persistent cache command in nine fresh cold/warm process pairs and preserves raw durations,
 and sends eight editor-shaped workspace checks through one stdin/stdout session while recording

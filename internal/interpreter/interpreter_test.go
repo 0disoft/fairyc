@@ -1,6 +1,7 @@
 package interpreter_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/frontend"
@@ -9,6 +10,31 @@ import (
 	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/source"
 )
+
+func TestExecuteVoidOwnsTheZeroArgumentVoidEntryBoundary(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn void passes() {
+    let i32 value = 42;
+    assert(value == 42);
+    assert(value > 0);
+}
+fn void fails() { assert(false); }
+fn i32 wrong_result() { return 0; }
+`)
+	passed, err := interpreter.ExecuteVoid(program, "main::passes")
+	if err != nil || passed.Kind != interpreter.OutcomeReturn || passed.Value != 0 || passed.TrapCategory != "" {
+		t.Fatalf("ExecuteVoid(passes) = (%+v, %v)", passed, err)
+	}
+	failed, err := interpreter.ExecuteVoid(program, "main::fails")
+	if err != nil || failed.Kind != interpreter.OutcomeTrap || failed.TrapCategory != "assertion-failed" {
+		t.Fatalf("ExecuteVoid(fails) = (%+v, %v)", failed, err)
+	}
+	_, err = interpreter.ExecuteVoid(program, "main::wrong_result")
+	if err == nil || !strings.Contains(err.Error(), "fn() -> void") {
+		t.Fatalf("ExecuteVoid(wrong_result) error = %v", err)
+	}
+}
 
 func TestExecuteRestrictedEnumMatch(t *testing.T) {
 	t.Parallel()

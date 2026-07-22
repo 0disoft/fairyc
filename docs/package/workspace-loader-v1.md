@@ -51,8 +51,24 @@ runtime ABI, source digest, and composed source identity are compiler-owned and 
 missing SDK module still rejects through ordinary package-graph lookup; no prelude or installation
 search exists.
 
+## Isolated semantic-test overlay
+
+ADR 0181 adds an explicit in-memory overlay after an ordinary production workspace is already
+loaded and its lock is maintained or verified. Only the root package's exact-lowercase `tests/`
+directory is considered. Ordinary `Load`, check, build, run, emit, package identity, public
+interface, cache, and lock paths never read that directory.
+
+The optional directory is contained, non-symlink, disjoint from the production source root and
+workspace members, and shares the same aggregate source budgets. Each test path retains its
+`tests/` prefix before syntax analysis, so `tests/net/http.fy` declares
+`module tests::net::http;`. Test sources are marked in the ephemeral catalog, sorted with production
+sources, included in an ephemeral source digest, and used to rebuild module lookup and exact
+dependency visibility. That digest is compile-local test evidence and is never written to
+`fairy.lock`.
+
 ## Deferred boundary
 
 This loader does not access a registry, solve ranges, fetch sources, link target standard-library C
-objects, or persist a cache. The separate lockfile library projects both local and SDK source
-origins, but absolute paths remain unserialized.
+objects, persist a cache, recursively discover member test trees, or choose test declarations. The
+CLI harness owns `@test` validation. The separate lockfile library projects production local and SDK
+source origins, but absolute paths and test overlays remain unserialized.
