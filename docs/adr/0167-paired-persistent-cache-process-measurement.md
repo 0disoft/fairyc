@@ -55,5 +55,5 @@ the contract intentionally derives no average, percentile, ratio, threshold, def
 - The tiny two-package workload cannot select production cache limits or prove benefit on larger
   workspaces.
 - A declared reference machine, interleaving policy, broader workspace distribution, retained-growth
-  study, power-loss boundary, and accepted decision rule remain required before default enablement or
-  a performance claim.
+  study, and accepted decision rule remain required before default enablement or a performance
+  claim. ADR 0168 owns the separate crash and power-interruption safety boundary.

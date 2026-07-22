@@ -77,7 +77,7 @@ regenerate, or override compiler source.
 - Whole-package cache key, bounded memory store, and fixture runner: internal/packagecache/, internal/packagecachefixture/
 - Exact running-compiler executable identity: internal/buildidentity/, docs/adr/0165-executable-digest-compiler-build-identity.md
 - Experimental persistent workspace-cache CLI and schema: internal/cli/workspace_cache.go, spec/cli/experimental-workspace-cache-check-v0.schema.json, docs/adr/0166-experimental-persistent-workspace-cache-command.md
-- Bounded immutable disk cache storage primitive: internal/packagecache/disk.go, docs/adr/0163-bounded-immutable-disk-cache-store.md
+- Bounded immutable disk cache storage and durable publication boundary: internal/packagecache/disk.go, internal/packagecache/durability_*.go, docs/adr/0163-bounded-immutable-disk-cache-store.md, docs/adr/0168-platform-durable-cache-publication.md
 - Compiler-private verified whole-program MIR artifact codec: internal/mircodec/, docs/adr/0149-verified-mir-artifact-codec.md
 - Compiler-private package-stable function identity: internal/packageartifact/, docs/package/package-function-id-v1.md
 - Process-local package MIR artifact extraction, verification, and reassembly: internal/packageartifact/artifact.go, docs/package/process-local-mir-artifact-v0.md

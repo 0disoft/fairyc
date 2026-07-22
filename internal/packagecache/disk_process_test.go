@@ -1,6 +1,9 @@
 package packagecache
 
 import (
+	"bufio"
+	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -99,6 +102,43 @@ func TestDiskStoreRecoversTemporaryFileLeftByExitedProcess(t *testing.T) {
 	}
 }
 
+func TestDiskStoreProcessLossAtPublicationBoundariesYieldsOnlyMissOrVerifiedHit(t *testing.T) {
+	beforeRoot := t.TempDir()
+	killDiskProcessAtCheckpoint(t, beforeRoot, "pause-after-temp-close")
+	beforeStore, err := NewDiskStore(beforeRoot, diskProcessLimits)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, found := beforeStore.Get(Key{1}); found {
+		t.Fatal("process loss before publication produced a cache hit")
+	}
+	beforeStats, err := beforeStore.Stats()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if beforeStats.Entries != 0 || beforeStats.Misses != 1 {
+		t.Fatalf("pre-publication crash state = %+v", beforeStats)
+	}
+
+	afterRoot := t.TempDir()
+	killDiskProcessAtCheckpoint(t, afterRoot, "pause-after-publish")
+	afterStore, err := NewDiskStore(afterRoot, diskProcessLimits)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, found := afterStore.Get(Key{1})
+	if !found || len(got.Artifacts) != 1 || string(got.Artifacts[0].Data) != "checkpoint" {
+		t.Fatalf("post-publication crash state = %+v, %v", got, found)
+	}
+	afterStats, err := afterStore.Stats()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if afterStats.Entries != 1 || afterStats.Hits != 1 || afterStats.Rejected != 0 {
+		t.Fatalf("post-publication crash stats = %+v", afterStats)
+	}
+}
+
 func TestDiskStoreProcessHelper(t *testing.T) {
 	mode := os.Getenv(diskProcessModeEnv)
 	if mode == "" {
@@ -131,9 +171,28 @@ func TestDiskStoreProcessHelper(t *testing.T) {
 			t.Fatal(err)
 		}
 		// The process exit closes the handle without invoking DiskStore.Put cleanup.
+	case "pause-after-temp-close", "pause-after-publish":
+		record := Record{
+			Key: Key{1}, PublicInterface: moduleinterface.Hash{1},
+			Artifacts: []Artifact{{Kind: ArtifactMIR, Data: []byte("checkpoint")}},
+		}
+		hooks := diskPutHooks{}
+		if mode == "pause-after-temp-close" {
+			hooks.afterTemporaryClosed = func(string) { parkDiskProcessAtCheckpoint(mode) }
+		} else {
+			hooks.afterPublished = func(string) { parkDiskProcessAtCheckpoint(mode) }
+		}
+		if err := store.put(record, hooks); err != nil {
+			t.Fatal(err)
+		}
 	default:
 		t.Fatalf("unknown disk subprocess helper mode %q", mode)
 	}
+}
+
+func parkDiskProcessAtCheckpoint(name string) {
+	_, _ = fmt.Fprintln(os.Stdout, name)
+	_, _ = io.Copy(io.Discard, os.Stdin)
 }
 
 type diskProcess struct {
@@ -167,4 +226,53 @@ func waitDiskProcessHelper(t *testing.T, process diskProcess) {
 	if err := process.command.Wait(); err != nil {
 		t.Fatalf("disk subprocess failed: %v\n%s", err, process.output.String())
 	}
+}
+
+func killDiskProcessAtCheckpoint(t *testing.T, root, mode string) {
+	t.Helper()
+	executable, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	command := exec.Command(executable, "-test.run=^TestDiskStoreProcessHelper$", "-test.v=false")
+	command.Env = append(os.Environ(),
+		diskProcessModeEnv+"="+mode,
+		diskProcessRootEnv+"="+root,
+	)
+	stdout, err := command.StdoutPipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	stdin, err := command.StdinPipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer stdin.Close()
+	output := &strings.Builder{}
+	command.Stderr = output
+	if err := command.Start(); err != nil {
+		t.Fatal(err)
+	}
+	waited := false
+	defer func() {
+		if !waited {
+			_ = command.Process.Kill()
+			_ = command.Wait()
+		}
+	}()
+	line, err := bufio.NewReader(stdout).ReadString('\n')
+	if err != nil {
+		t.Fatalf("read disk subprocess checkpoint: %v; stderr %s", err, output.String())
+	}
+	if strings.TrimSpace(line) != mode {
+		t.Fatalf("disk subprocess checkpoint = %q, want %q", line, mode)
+	}
+	if err := command.Process.Kill(); err != nil {
+		t.Fatal(err)
+	}
+	if err := command.Wait(); err == nil {
+		waited = true
+		t.Fatal("killed disk subprocess exited successfully")
+	}
+	waited = true
 }

@@ -21,7 +21,8 @@ temporary-file age. There are no defaults.
 
 The v1 layout is `<root>/v1/<cache-key-digest>/<record-sha256>.json`. Record files are canonical,
 strict, exact-version JSON and immutable after publication. Writers create, restrict, write, sync,
-and close a unique temporary file before renaming it to the content digest. Concurrent writers of
+and close a unique temporary file before durably publishing it to the content digest. ADR 0168
+defines Windows write-through rename and non-Windows directory sync. Concurrent writers of
 the same bytes converge on the same name. Different valid generations for one cache key are a
 producer conflict and therefore a miss; neither is selected by timestamp or filesystem order.
 
@@ -36,19 +37,21 @@ hint, never correctness or source truth.
 Tests use independent store instances and concurrent writers over one directory, then require a
 deep-copy hit. Separate OS processes additionally publish identical payloads concurrently and must
 converge on one generation; conflicting process writers must produce a rejected safe miss. A helper
-process exits after leaving an unpublished temporary, which caller-aged collection removes. Tests
-also inject corruption, enforce entry bounds, and prove oversized rejection preserves an existing
-hit.
+process exits after leaving an unpublished temporary, which caller-aged collection removes.
+Deterministic real-`Put` crash checkpoints additionally kill a subprocess after its synced temporary
+closes and after publication: a fresh reader must observe respectively a miss with no immutable
+generation or one canonical hit. Tests also inject corruption, enforce entry bounds, and prove
+oversized rejection preserves an existing hit.
 
 ## Consequences and limits
 
 - No lock file, mutable index, daemon, watcher, background cleanup, or source-of-truth state exists.
-- Publication syncs file contents but does not yet claim directory-entry durability across sudden
-  power loss on every filesystem. Losing a cache entry remains a safe miss.
+- ADR 0168 requests host-specific publication durability but deliberately guarantees only verified
+  hit or safe miss after interruption. No portable contract can force a filesystem, controller,
+  hypervisor, or network share to honor flushes.
 - Eviction is creation/modification-time ordered rather than access-time LRU, avoiding a write on
   every hit.
 - ADR 0164 connects the store to explicit Sessions and ADR 0166 adds one experimental command. No
   ordinary command, default policy, or cold/warm disk performance claim exists.
-- Power-loss directory durability and retained-byte/performance measurements remain required before
-  enabling persistence in a compiler command. Process-exit temporary recovery is covered, but it is
-  not a filesystem power-cut guarantee.
+- Retained-growth, reference-environment, and accepted performance evidence remain required before
+  ordinary-command defaults. Process-crash checkpoints do not simulate physical device power cuts.

@@ -178,6 +178,10 @@ receipts must retain the same executable build identity and report two verified 
 lowering, rejection, eviction, skipped write, or store failure. The caller preserves all 18 raw
 process-start-through-exit durations with zero retries. This is configured local persistence and
 distribution evidence, not a reference-machine speedup or default-policy decision.
+The ordinary Go suite separately kills a helper process at the real disk-store boundary after
+temporary-file sync and after durable publication. A new store must see respectively a clean miss
+or one canonical hit. This checks process-crash outcomes and platform publication calls; CI does not
+cut power to runner storage or certify the runner's filesystem and controller flush behavior.
 Separate low and optimized `run-host` cases also require matching-type unsigned bitwise operations
 and right shifts to return 42, and require a `usize` shift amount of 64 to report `invalid-shift`.
 Together with the existing scalar and trap cases, the direct `run-host` table now has 40 outcomes,

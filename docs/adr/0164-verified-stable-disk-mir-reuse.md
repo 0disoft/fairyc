@@ -58,7 +58,8 @@ ordinary lowering.
   identity. No ordinary-command cache, location default, L1 layer, daemon, background cleanup, or
   speed claim is added.
 - Separate writer and reader OS processes exercise cross-process Session reuse, and a separately
-  built `fairyc.exe` now exercises the experimental command. Power-loss evidence remains absent.
+  built `fairyc.exe` now exercises the experimental command. ADR 0168 separately owns crash-safe
+  publication and the verified-hit-or-miss interruption boundary.
 - Each package still duplicates the complete workspace type context. Partial hits therefore lower
   normally; function-level reuse and package-scoped contexts remain measurement-gated.
 - The cache is disposable derived state. Deletion or rejection can only cause ordinary compilation.

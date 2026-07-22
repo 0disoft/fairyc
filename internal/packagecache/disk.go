@@ -81,6 +81,11 @@ type diskGeneration struct {
 	modTime time.Time
 }
 
+type diskPutHooks struct {
+	afterTemporaryClosed func(string)
+	afterPublished       func(string)
+}
+
 // NewDiskStore creates the versioned root and rejects every missing bound.
 func NewDiskStore(root string, limits DiskLimits) (*DiskStore, error) {
 	if root == "" {
@@ -103,9 +108,15 @@ func NewDiskStore(root string, limits DiskLimits) (*DiskStore, error) {
 	return &DiskStore{root: versionRoot, limits: limits}, nil
 }
 
-// Put validates and canonically encodes one record, publishes one immutable digest-named file, and
-// runs bounded collection. An oversized record cannot disturb an existing generation.
+// Put validates and canonically encodes one record, durably publishes one immutable digest-named
+// file through the host contract, and runs bounded collection. An oversized record cannot disturb
+// an existing generation. Durability failure is a cache-store failure even if a verifiable file
+// became visible; callers must never treat cache retention as source truth.
 func (store *DiskStore) Put(record Record) error {
+	return store.put(record, diskPutHooks{})
+}
+
+func (store *DiskStore) put(record Record, hooks diskPutHooks) error {
 	if store == nil {
 		return fmt.Errorf("package cache disk store is not initialized")
 	}
@@ -117,8 +128,25 @@ func (store *DiskStore) Put(record Record) error {
 		return ErrRecordTooLarge
 	}
 	keyDirectory := store.keyDirectory(record.Key)
-	if err := os.MkdirAll(keyDirectory, 0o700); err != nil {
-		return fmt.Errorf("create package cache key directory: %w", err)
+	createdKeyDirectory := false
+	if err := os.Mkdir(keyDirectory, 0o700); err != nil {
+		if !errors.Is(err, os.ErrExist) {
+			return fmt.Errorf("create package cache key directory: %w", err)
+		}
+		info, statErr := os.Lstat(keyDirectory)
+		if statErr != nil {
+			return fmt.Errorf("inspect package cache key directory: %w", statErr)
+		}
+		if !info.IsDir() || info.Mode()&os.ModeSymlink != 0 {
+			return fmt.Errorf("package cache key path is not a real directory")
+		}
+	} else {
+		createdKeyDirectory = true
+	}
+	if createdKeyDirectory {
+		if err := syncCacheDirectory(store.root); err != nil {
+			return fmt.Errorf("sync package cache key-directory parent: %w", err)
+		}
 	}
 	digest := sha256.Sum256(encoded)
 	finalPath := filepath.Join(keyDirectory, hex.EncodeToString(digest[:])+".json")
@@ -147,8 +175,14 @@ func (store *DiskStore) Put(record Record) error {
 		return fmt.Errorf("close package cache temporary file: %w", err)
 	}
 	closed = true
+	if hooks.afterTemporaryClosed != nil {
+		hooks.afterTemporaryClosed(temporaryPath)
+	}
 	if err := publishImmutableGeneration(temporaryPath, finalPath, encoded); err != nil {
 		return err
+	}
+	if hooks.afterPublished != nil {
+		hooks.afterPublished(finalPath)
 	}
 	if err := store.Sweep(); err != nil {
 		return fmt.Errorf("collect package cache after put: %w", err)
@@ -366,17 +400,26 @@ func (store *DiskStore) keyDirectory(key Key) string {
 }
 
 func publishImmutableGeneration(temporaryPath, finalPath string, expected []byte) error {
-	if err := os.Rename(temporaryPath, finalPath); err == nil {
+	if err := renameCacheGeneration(temporaryPath, finalPath); err == nil {
+		if syncErr := syncCacheDirectory(filepath.Dir(finalPath)); syncErr != nil {
+			return fmt.Errorf("sync published package cache directory: %w", syncErr)
+		}
 		return nil
 	}
 	existing, readErr := os.ReadFile(finalPath)
 	if readErr == nil && bytes.Equal(existing, expected) {
+		if syncErr := syncCacheDirectory(filepath.Dir(finalPath)); syncErr != nil {
+			return fmt.Errorf("sync converged package cache directory: %w", syncErr)
+		}
 		return nil
 	}
 	// A digest-named valid destination can contain only expected. Replacing any other bytes is safe:
 	// a racing valid writer has the same payload, and losing cache state is never a build failure.
 	if removeErr := os.Remove(finalPath); removeErr == nil || errors.Is(removeErr, os.ErrNotExist) {
-		if renameErr := os.Rename(temporaryPath, finalPath); renameErr == nil {
+		if renameErr := renameCacheGeneration(temporaryPath, finalPath); renameErr == nil {
+			if syncErr := syncCacheDirectory(filepath.Dir(finalPath)); syncErr != nil {
+				return fmt.Errorf("sync replaced package cache directory: %w", syncErr)
+			}
 			return nil
 		}
 		existing, readErr = os.ReadFile(finalPath)

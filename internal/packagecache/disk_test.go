@@ -182,6 +182,34 @@ func TestDiskStoreRejectsMissingLimitsAndOversizedRecordWithoutDisturbingHit(t *
 	}
 }
 
+func TestDiskStoreRejectsNonDirectoryKeyPathWithoutReplacingIt(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	limits := DiskLimits{MaxEntries: 2, MaxBytes: 4096, MaxRecordBytes: 1024, TempMaxAge: time.Minute}
+	store, err := NewDiskStore(root, limits)
+	if err != nil {
+		t.Fatal(err)
+	}
+	key, err := Compute(testInputs(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	keyPath := store.keyDirectory(key)
+	if err := os.WriteFile(keyPath, []byte("not-a-directory"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.Put(testRecord(t, key, "payload")); err == nil || !strings.Contains(err.Error(), "not a real directory") {
+		t.Fatalf("Put() error = %v", err)
+	}
+	contents, err := os.ReadFile(keyPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(contents) != "not-a-directory" {
+		t.Fatalf("key path contents = %q", contents)
+	}
+}
+
 func TestDiskStoreDeleteIfMatchPreservesDifferentGeneration(t *testing.T) {
 	t.Parallel()
 	limits := DiskLimits{MaxEntries: 4, MaxBytes: 1 << 20, MaxRecordBytes: 256 << 10, TempMaxAge: time.Minute}
