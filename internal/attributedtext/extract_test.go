@@ -1,6 +1,7 @@
 package attributedtext
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -12,6 +13,7 @@ import (
 	"github.com/0disoft/fairyc/internal/buildidentity"
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/packagecontent"
+	"github.com/0disoft/fairyc/internal/sdkstdlib"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
@@ -21,7 +23,7 @@ func TestExtractWorkspaceSourceBindsExactRetainedBytesAndBothSymbolForms(t *test
 	fixture := loadAttributedTextFixture(t, []byte(attributedTextSource))
 	budget := Budget{MaxFragments: 1, MaxFragmentBytes: 1 << 20, MaxTextBytes: 1 << 20}
 
-	visibleResult, err := ExtractWorkspaceSource(fixture.workspace, fixture.index, fixture.visible, budget)
+	visibleResult, err := ExtractWorkspaceSource(fixture.workspace, fixture.index, sourceRequest(fixture.visible, budget))
 	if err != nil || len(visibleResult.Records) != 1 || len(visibleResult.Omissions) != 0 {
 		t.Fatalf("visible extraction = (%+v, %v)", visibleResult, err)
 	}
@@ -43,7 +45,7 @@ func TestExtractWorkspaceSourceBindsExactRetainedBytesAndBothSymbolForms(t *test
 		t.Fatalf("record validation = %v", err)
 	}
 
-	fullResult, err := ExtractWorkspaceSource(fixture.workspace, fixture.index, fixture.full, budget)
+	fullResult, err := ExtractWorkspaceSource(fixture.workspace, fixture.index, sourceRequest(fixture.full, budget))
 	if err != nil || len(fullResult.Records) != 1 || !reflect.DeepEqual(fullResult.Records[0].View(), view) {
 		t.Fatalf("full extraction = (%+v, %v)", fullResult, err)
 	}
@@ -51,7 +53,7 @@ func TestExtractWorkspaceSourceBindsExactRetainedBytesAndBothSymbolForms(t *test
 	if err := os.WriteFile(fixture.sourcePath, []byte("module changed;\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	afterDiskEdit, err := ExtractWorkspaceSource(fixture.workspace, fixture.index, fixture.visible, budget)
+	afterDiskEdit, err := ExtractWorkspaceSource(fixture.workspace, fixture.index, sourceRequest(fixture.visible, budget))
 	if err != nil || len(afterDiskEdit.Records) != 1 || afterDiskEdit.Records[0].View().Text != view.Text {
 		t.Fatalf("post-disk-edit extraction = (%+v, %v)", afterDiskEdit, err)
 	}
@@ -66,12 +68,12 @@ func TestExtractWorkspaceSourceRejectsStaleOrMismatchedRetainedContext(t *testin
 	mutated.Packages[0].Sources = slices.Clone(fixture.workspace.Packages[0].Sources)
 	mutated.Packages[0].Sources[0].Bytes = slices.Clone(fixture.workspace.Packages[0].Sources[0].Bytes)
 	mutated.Packages[0].Sources[0].Bytes[len(mutated.Packages[0].Sources[0].Bytes)-3] ^= 1
-	if result, err := ExtractWorkspaceSource(mutated, fixture.index, fixture.visible, budget); err == nil || len(result.Records) != 0 {
+	if result, err := ExtractWorkspaceSource(mutated, fixture.index, sourceRequest(fixture.visible, budget)); err == nil || len(result.Records) != 0 {
 		t.Fatalf("mutated extraction = (%+v, %v)", result, err)
 	}
 
 	other := loadAttributedTextFixture(t, []byte(strings.Replace(attributedTextSource, "return 40", "return 39", 1)))
-	if result, err := ExtractWorkspaceSource(other.workspace, fixture.index, fixture.visible, budget); err == nil || len(result.Records) != 0 {
+	if result, err := ExtractWorkspaceSource(other.workspace, fixture.index, sourceRequest(fixture.visible, budget)); err == nil || len(result.Records) != 0 {
 		t.Fatalf("mismatched extraction = (%+v, %v)", result, err)
 	}
 }
@@ -79,25 +81,25 @@ func TestExtractWorkspaceSourceRejectsStaleOrMismatchedRetainedContext(t *testin
 func TestExtractWorkspaceSourceReportsAtomicBudgetAndTextSafetyOmissions(t *testing.T) {
 	fixture := loadAttributedTextFixture(t, []byte(attributedTextSource))
 	large := Budget{MaxFragments: 1, MaxFragmentBytes: 1 << 20, MaxTextBytes: 1 << 20}
-	baseline, err := ExtractWorkspaceSource(fixture.workspace, fixture.index, fixture.visible, large)
+	baseline, err := ExtractWorkspaceSource(fixture.workspace, fixture.index, sourceRequest(fixture.visible, large))
 	if err != nil || len(baseline.Records) != 1 {
 		t.Fatalf("baseline extraction = (%+v, %v)", baseline, err)
 	}
 	length := uint64(len(baseline.Records[0].View().Text))
-	limited, err := ExtractWorkspaceSource(fixture.workspace, fixture.index, fixture.visible, Budget{
+	limited, err := ExtractWorkspaceSource(fixture.workspace, fixture.index, sourceRequest(fixture.visible, Budget{
 		MaxFragments: 1, MaxFragmentBytes: length - 1, MaxTextBytes: length,
-	})
+	}))
 	if err != nil || len(limited.Records) != 0 || len(limited.Omissions) != 1 ||
 		limited.Omissions[0].Code != OmissionFragmentByteLimit || limited.Omissions[0].Bytes != length {
 		t.Fatalf("limited extraction = (%+v, %v)", limited, err)
 	}
-	if result, err := ExtractWorkspaceSource(fixture.workspace, fixture.index, fixture.visible, Budget{}); err == nil || len(result.Records) != 0 {
+	if result, err := ExtractWorkspaceSource(fixture.workspace, fixture.index, sourceRequest(fixture.visible, Budget{})); err == nil || len(result.Records) != 0 {
 		t.Fatalf("invalid budget extraction = (%+v, %v)", result, err)
 	}
 
 	bidiSource := strings.Replace(attributedTextSource, "λ:", "λ:\u202e", 1)
 	bidi := loadAttributedTextFixture(t, []byte(bidiSource))
-	bidiResult, err := ExtractWorkspaceSource(bidi.workspace, bidi.index, bidi.visible, large)
+	bidiResult, err := ExtractWorkspaceSource(bidi.workspace, bidi.index, sourceRequest(bidi.visible, large))
 	if err != nil || len(bidiResult.Records) != 0 || len(bidiResult.Omissions) != 1 ||
 		bidiResult.Omissions[0].Code != OmissionDisallowedControl {
 		t.Fatalf("bidi extraction = (%+v, %v)", bidiResult, err)
@@ -108,10 +110,86 @@ func TestExtractWorkspaceSourceReportsAtomicBudgetAndTextSafetyOmissions(t *test
 	position := strings.Index(string(invalidBytes), string(needle))
 	invalidBytes[position] = 0xff
 	invalid := loadAttributedTextFixture(t, invalidBytes)
-	invalidResult, err := ExtractWorkspaceSource(invalid.workspace, invalid.index, invalid.visible, large)
+	invalidResult, err := ExtractWorkspaceSource(invalid.workspace, invalid.index, sourceRequest(invalid.visible, large))
 	if err != nil || len(invalidResult.Records) != 0 || len(invalidResult.Omissions) != 1 ||
 		invalidResult.Omissions[0].Code != OmissionInvalidUTF8 {
 		t.Fatalf("invalid UTF-8 extraction = (%+v, %v)", invalidResult, err)
+	}
+}
+
+func TestExtractWorkspaceSourceRequiresExplicitSupportedSelection(t *testing.T) {
+	t.Parallel()
+	fixture := loadAttributedTextFixture(t, []byte(attributedTextSource))
+	budget := Budget{MaxFragments: 1, MaxFragmentBytes: 1 << 20, MaxTextBytes: 1 << 20}
+	tests := []Request{
+		{Kinds: []Kind{KindSourceExcerpt}, Origins: []Origin{OriginWorkspaceAuthored}, Budget: budget},
+		{SymbolID: fixture.visible, Origins: []Origin{OriginWorkspaceAuthored}, Budget: budget},
+		{SymbolID: fixture.visible, Kinds: []Kind{KindDeclarationDocumentation}, Origins: []Origin{OriginWorkspaceAuthored}, Budget: budget},
+		{SymbolID: fixture.visible, Kinds: []Kind{KindSourceExcerpt, KindSourceExcerpt}, Origins: []Origin{OriginWorkspaceAuthored}, Budget: budget},
+		{SymbolID: fixture.visible, Kinds: []Kind{KindSourceExcerpt}, Budget: budget},
+		{SymbolID: fixture.visible, Kinds: []Kind{KindSourceExcerpt}, Origins: []Origin{OriginCompilerBundled}, Budget: budget},
+		{SymbolID: fixture.visible, Kinds: []Kind{KindSourceExcerpt}, Origins: []Origin{OriginWorkspaceAuthored, OriginWorkspaceAuthored}, Budget: budget},
+	}
+	for index, request := range tests {
+		if result, err := ExtractWorkspaceSource(fixture.workspace, fixture.index, request); err == nil || len(result.Records) != 0 {
+			t.Fatalf("request %d = (%+v, %v)", index, result, err)
+		}
+	}
+	if origin, err := sourceOrigin(workspaceloader.SourceKindSDK); err != nil || origin != OriginCompilerBundled {
+		t.Fatalf("SDK origin = %q, %v", origin, err)
+	}
+	if _, err := sourceOrigin("registry"); err == nil {
+		t.Fatal("unknown source kind succeeded")
+	}
+}
+
+func TestExtractWorkspaceSourceReportsCompilerBundledActualOrigin(t *testing.T) {
+	t.Parallel()
+	prepared := prepareAttributedTextWorkspace(t, []byte(`module main;
+
+import std::alloc as alloc;
+
+fn i32 inspect(ref mut alloc::Arena arena) {
+    return 1;
+}
+`))
+	for _, partition := range prepared.partitions {
+		if partition.Header().PackageUID != sdkstdlib.PackageUID {
+			continue
+		}
+		index, err := atlasmap.NewQueryIndex(partition, prepared.expectations[partition.Header().PackageInstance])
+		if err != nil {
+			t.Fatal(err)
+		}
+		symbols := partition.Symbols()
+		if len(symbols) == 0 {
+			t.Fatal("compiler-bundled standard library has no attributed symbol")
+		}
+		budget := Budget{MaxFragments: 1, MaxFragmentBytes: 1 << 20, MaxTextBytes: 1 << 20}
+		result, err := ExtractWorkspaceSource(prepared.workspace, index, sourceRequest(symbols[0].Visible, budget))
+		if err != nil || len(result.Records) != 0 || len(result.Omissions) != 1 ||
+			result.Omissions[0].Code != OmissionOriginNotAdmitted ||
+			result.Omissions[0].Origin != OriginCompilerBundled || result.Subject.PackageUID != sdkstdlib.PackageUID {
+			t.Fatalf("compiler-bundled extraction = (%+v, %v)", result, err)
+		}
+		encoded, err := EncodeWorkspaceSource(prepared.workspace, index, sourceRequest(symbols[0].Full, budget), 2<<20)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var envelope encodedEnvelope
+		if err := json.Unmarshal(encoded, &envelope); err != nil || len(envelope.Text.Records) != 0 ||
+			len(envelope.Text.Omissions) != 1 || envelope.Text.Omissions[0].Origin != OriginCompilerBundled {
+			t.Fatalf("compiler-bundled omission encoding = (%+v, %v)", envelope, err)
+		}
+		return
+	}
+	t.Fatal("prepared workspace has no compiler-bundled standard-library partition")
+}
+
+func sourceRequest(symbolID string, budget Budget) Request {
+	return Request{
+		SymbolID: symbolID, Kinds: []Kind{KindSourceExcerpt},
+		Origins: []Origin{OriginWorkspaceAuthored}, Budget: budget,
 	}
 }
 
@@ -124,7 +202,39 @@ type attributedTextFixture struct {
 	full       string
 }
 
+type preparedAttributedTextWorkspace struct {
+	root         string
+	sourcePath   string
+	workspace    workspaceloader.Workspace
+	partitions   []atlasmap.Partition
+	expectations map[string]atlasmap.LoadExpectation
+}
+
 func loadAttributedTextFixture(t *testing.T, sourceBytes []byte) attributedTextFixture {
+	t.Helper()
+	prepared := prepareAttributedTextWorkspace(t, sourceBytes)
+	for _, partition := range prepared.partitions {
+		if partition.Header().PackageUID != "test.attributed-text" {
+			continue
+		}
+		index, err := atlasmap.NewQueryIndex(partition, prepared.expectations[partition.Header().PackageInstance])
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, symbol := range partition.Symbols() {
+			if symbol.Declaration.Name == "middle" {
+				return attributedTextFixture{
+					root: prepared.root, sourcePath: prepared.sourcePath, workspace: prepared.workspace, index: index,
+					visible: symbol.Visible, full: symbol.Full,
+				}
+			}
+		}
+	}
+	t.Fatal("attributed-text fixture has no middle symbol")
+	return attributedTextFixture{}
+}
+
+func prepareAttributedTextWorkspace(t *testing.T, sourceBytes []byte) preparedAttributedTextWorkspace {
 	t.Helper()
 	root := t.TempDir()
 	if err := os.Mkdir(filepath.Join(root, "src"), 0o700); err != nil {
@@ -156,28 +266,17 @@ source = "src"
 	}
 	compilerBuild := attributedTextCompilerBuild()
 	_, partitions, err := atlasmap.PrepareWorkspace(workspace, checked, compilerBuild)
-	if err != nil || len(partitions) != 1 {
+	if err != nil || len(partitions) == 0 {
 		t.Fatalf("PrepareWorkspace() = %d, %v", len(partitions), err)
 	}
 	expectations, err := atlasmap.CurrentWorkspaceExpectations(workspace, checked, compilerBuild)
 	if err != nil {
 		t.Fatal(err)
 	}
-	partition := partitions[0]
-	index, err := atlasmap.NewQueryIndex(partition, expectations[partition.Header().PackageInstance])
-	if err != nil {
-		t.Fatal(err)
+	return preparedAttributedTextWorkspace{
+		root: root, sourcePath: sourcePath, workspace: workspace,
+		partitions: partitions, expectations: expectations,
 	}
-	for _, symbol := range partition.Symbols() {
-		if symbol.Declaration.Name == "middle" {
-			return attributedTextFixture{
-				root: root, sourcePath: sourcePath, workspace: workspace, index: index,
-				visible: symbol.Visible, full: symbol.Full,
-			}
-		}
-	}
-	t.Fatal("attributed-text fixture has no middle symbol")
-	return attributedTextFixture{}
 }
 
 func writeAttributedTextFixture(t *testing.T, path string, contents []byte) {

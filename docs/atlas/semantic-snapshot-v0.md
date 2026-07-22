@@ -3,7 +3,7 @@
 - Status: Implemented in memory
 - Decision: `docs/adr/0182-immutable-semantic-snapshot-v0.md`
 - Implementation: `internal/semanticsnapshot/`
-- Consumers: implemented provisional SymbolId derivation, per-package logical planning, transport codec, contained store, bounded package-local queries, compiler-fact Context Pack output, experimental query commands, and a separate internal exact retained-source attributed-text gate
+- Consumers: implemented provisional SymbolId derivation, per-package logical planning, transport codec, contained store, bounded package-local queries, compiler-fact Context Pack output, experimental query commands, and separate canonical exact retained-source attributed-text output
 
 ## Boundary
 

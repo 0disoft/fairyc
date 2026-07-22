@@ -1,8 +1,9 @@
 # Atlas attributed text v0 policy
 
-- Status: Internal logical model and exact local source-excerpt extraction implemented; no encoding or CLI
+- Status: Internal logical model, exact local source-excerpt extraction, and canonical output-only JSON encoding implemented; no decoder or CLI
 - Logical policy: `fairyc.attributed-text/v0`
 - Decision: `docs/adr/0195-attributed-text-boundary-v0.md`
+- Encoding decision: `docs/adr/0197-canonical-attributed-text-json-v0.md`
 - Exact file identity: `docs/package/source-file-identities-v1.md`
 - Compiler-fact pack: `docs/atlas/context-pack-v1.md`
 
@@ -26,9 +27,9 @@ and must keep tool authorization in host-owned deterministic policy.
 `fairyc.context-pack/v1` continues to require empty `documentation`, `source_excerpts`, and
 `warnings` arrays. Neither format may begin carrying text under its existing identifier.
 
-The first implementation must produce a separately versioned attributed-text value. A future
-composite Context Pack requires a new pack version and an explicit decision about embedding versus
-checksum-linking the companion artifact. This policy does not reserve that version, wire encoding,
+ADR 0197 implements the separately versioned `fairyc.attributed-text-json/v0` output. A future
+composite Context Pack still requires a new pack version and an explicit decision about embedding
+versus checksum-linking this companion artifact. The encoding does not reserve a composite version
 or command spelling.
 
 ## Admitted content
@@ -98,6 +99,50 @@ The requested span must be in range and begin and end on UTF-8 scalar boundaries
 are the exact slice: no newline conversion, Unicode normalization, trimming, indentation rewriting,
 comment-marker removal, HTML rendering, or Markdown expansion occurs.
 
+## Canonical output-only encoding
+
+`fairyc.attributed-text-json/v0` is one compact UTF-8 JSON value. The exact top-level field order is:
+
+```text
+text_version
+encoding
+checksum_algorithm
+checksum
+text
+```
+
+The logical `text` field contains, in order:
+
+```text
+authority
+subject
+selection
+budget
+usage
+records
+omissions
+```
+
+`subject` repeats both SymbolId forms plus exact package, file, line-map, and span identity so an
+omission remains attributable without carrying rejected text. `selection` records the explicit kind
+and origin request. Each admitted record retains every logical field and its independent fragment
+checksum. Empty arrays are `[]`; Go's compact JSON encoder over fixed structs defines the current
+canonical bytes. Pretty printing, key reordering, `null` arrays, a trailing newline, or a second JSON
+value is not this encoding.
+
+The document checksum is `fairyc.attributed-text-checksum/v0-sha256`, rendered as
+`fytextdoc0-sha256-` plus 64 lowercase hexadecimal digits. SHA-256 hashes ASCII
+`fairyc.attributed-text-checksum`, bytes `00 00`, and unsigned 64-bit big-endian length-prefixed
+document version, encoding, and canonical logical `text` JSON. The frozen implementation vector is:
+
+```text
+fytextdoc0-sha256-ed3d884108140fa00e4fbf21ce12f6368fd723c9b09fe4de810b3a6050a2bea3
+```
+
+The output builder runs exact extraction itself and accepts no caller-authored result or source
+bytes. It requires a separate positive final-output byte limit and rejects the complete envelope
+atomically when it does not fit. No decoder or untrusted encoded input is accepted.
+
 ## Text safety validation
 
 A successful source compilation does not make prose safe for display or a model. Each selected
@@ -117,7 +162,8 @@ Every request must explicitly select admitted origins and kinds and provide posi
 `max_fragments`, `max_fragment_bytes`, and `max_text_bytes`. There are no configuration,
 environment, or command defaults. Implementation guards may not exceed the already admitted
 workspace closure: 4,096 fragments, 8 MiB for one fragment, and 64 MiB aggregate text. Any future
-wire encoder additionally requires its own positive final-output byte limit.
+wire encoder additionally requires its own positive final-output byte limit. The current source-
+only producer requires exactly `source-excerpt` and `workspace-authored`; it does not infer them.
 
 Records follow the exact query's canonical subject/node order, then kind order
 `declaration-documentation`, `source-excerpt`. A fragment is atomic. If it exceeds the per-fragment
@@ -153,15 +199,15 @@ ADR 0196 implements the internal attributed-text model and validator plus worksp
    equivalence;
 3. stale-byte, wrong-package, wrong-file, wrong-line-map, invalid-span, invalid-UTF-8, disallowed-
    control, and post-validation mutation rejection;
-4. explicit guard-bound request budgets and the one-fragment source-excerpt byte boundary with an
-   atomic omission; collection count, remaining aggregate, and future final-output budget behavior
-   belongs to a future multi-record encoder;
+4. explicit guard-bound request budgets, the one-fragment source-excerpt byte boundary, a separate
+   final-output limit, and atomic omissions; collection count and remaining aggregate behavior
+   belongs to a future multi-record producer;
 5. printable prompt-injection fixtures retained only as `untrusted-text` and unable to change facts,
    completeness, command options, output destinations, or host authority; and
 6. default compiler, `.fymap` v1, Context Pack v1, build, cache, and native output byte identity when
    attributed text is not explicitly requested.
 
-The internal extractor is not a wire artifact or public feature. Documentation attachment,
-dependency text, generated text, persistent text storage, an encoder or decoder, public CLI,
-composite pack, token budgeting, anchors, structural editing, LSP, SCIP, MCP, model calls,
-embeddings, and permissions remain unimplemented.
+The canonical encoder remains an internal output-only feature. Documentation attachment, dependency
+text, generated text, persistent text storage, a decoder, public CLI, composite pack, token
+budgeting, anchors, structural editing, LSP, SCIP, MCP, model calls, embeddings, and permissions
+remain unimplemented.

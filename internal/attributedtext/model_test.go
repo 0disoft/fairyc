@@ -156,10 +156,10 @@ func TestParseChecksumRejectsNoncanonicalText(t *testing.T) {
 	}
 	canonical := record.Checksum().String()
 	for _, value := range []string{
-		strings.TrimPrefix(canonical, ChecksumPrefix),
+		strings.TrimPrefix(canonical, FragmentChecksumPrefix),
 		strings.ToUpper(canonical),
 		canonical + "00",
-		ChecksumPrefix + strings.Repeat("z", 64),
+		FragmentChecksumPrefix + strings.Repeat("z", 64),
 	} {
 		if _, err := ParseChecksum(value); err == nil {
 			t.Fatalf("ParseChecksum(%q) succeeded", value)

@@ -206,6 +206,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0194-experimental-atlas-show-around-pack-commands.md`: exact visible/full SymbolId selection plus explicit direction, relation, record, relation, depth, and byte budgets for canonical show/around packs.
 - `0195-attributed-text-boundary-v0.md`: separate untrusted-text origin, exact-current attribution, fragment integrity, control validation, atomic budget, and non-authority policy without enabling text output.
 - `0196-exact-retained-source-excerpt-extraction.md`: internal attributed-text validation and exact local source slicing from revalidated retained workspace bytes without path reopening, encoding, or CLI exposure.
+- `0197-canonical-attributed-text-json-v0.md`: canonical bounded output-only attributed-text JSON with exact subject/selection evidence, independent document integrity, no caller-result forgery, and no decoder or CLI exposure.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

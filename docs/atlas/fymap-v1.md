@@ -1,6 +1,6 @@
 # `.fymap` v1 Logical Schema
 
-- Status: Canonical transport, contained current-source-validated store, bounded package-local queries, compiler-fact Context Pack and SymbolId catalog output, experimental overview/catalog/show/around commands, and the separate internal exact retained-source attributed-text gate implemented; no attributed-text encoding or command
+- Status: Canonical transport, contained current-source-validated store, bounded package-local queries, compiler-fact Context Pack and SymbolId catalog output, experimental overview/catalog/show/around commands, and separate exact retained-source attributed-text JSON implemented; no attributed-text decoder or command
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0004-atlas-semantic-snapshot-boundary.md`
 - Snapshot source: `docs/atlas/semantic-snapshot-v0.md`
@@ -135,8 +135,8 @@ Every implemented `.fymap` fact uses one provenance class:
 - `CompilerDeclared` for explicit source declarations.
 
 `.fymap` v1 stores no source body, documentation body, generated prose, or text reference that can
-be mistaken for a fact. ADR 0195 defines a separate attributed-text companion and ADR 0196
-implements only its internal retained-source extraction gate outside `.fymap` v1. The companion
+be mistaken for a fact. ADR 0195 defines a separate attributed-text companion, ADR 0196 implements
+its retained-source extraction gate, and ADR 0197 encodes it separately outside `.fymap` v1. The companion
 whose fixed authority is `untrusted-text` and whose origin, SymbolId, package/file/line-map identity,
 span, exact bytes, checksum, budgets, and omissions must remain explicit. Text cannot replace a
 compiler fact, change completeness, or grant filesystem, process, network, credential, approval,

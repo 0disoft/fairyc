@@ -519,8 +519,8 @@ usage/completeness/fact/relation/omission fields and visibly empty text sections
 `experimental atlas-pack overview` command exposes one explicitly selected package UID with explicit
 record/selection/output limits and no map-store default. Exact SymbolIds obtained from the separate
 catalog command can now drive `experimental atlas-pack show` and `around` with explicit direction,
-relation, record, relation, depth, selection-byte, and output-byte policy. No default store policy,
-dependency-map join, encoded source-excerpt output, pack decoder, or text importer exists yet. The internal
+relation, record, relation, depth, selection-byte, and output-byte policy. Those commands add no
+default store policy, dependency-map join, source-excerpt output, pack decoder, or text importer. The internal
 query index now also provides exact full-SymbolId-ordered catalog pages with exact module/kind
 filters, explicit symbol/byte limits, and full-ID-only continuation; its output schema and CLI are
 now exposed through `experimental atlas-symbols list` as checksummed
@@ -529,10 +529,11 @@ host smoke now also records nine raw whole-package canonical rewrite samples aft
 byte identity, and reports fixed source/record/encoded-byte denominators without choosing chunking,
 compression, incremental updates, or a performance budget.
 
-ADR 0195 closes the attributed-text policy, and ADR 0196 implements its first internal gate:
-validated `untrusted-text` records plus one exact workspace-authored declaration excerpt from
-revalidated retained compiler bytes. `.fymap` v1 stays body-free and Context Pack v1 keeps its text
-arrays empty. No attributed-text encoding or CLI exists yet; documentation
+ADR 0195 closes the attributed-text policy, ADR 0196 implements its exact retained-source gate, and
+ADR 0197 adds canonical bounded `fairyc.attributed-text-json/v0` output with explicit selection,
+exact subject identity, independent document integrity, and no caller-result forgery. `.fymap` v1
+stays body-free and Context Pack v1 keeps its text arrays empty. No decoder or attributed-text CLI
+exists yet; documentation
 attachment, dependency text, file reopening, network fetch, model calls, and agent authority remain
 disabled.
 
@@ -617,7 +618,7 @@ or arbitrary link-input option.
 - Runtime and standard library: `docs/runtime/runtime-stdlib-v0.md`
 - Compatibility and versioning: `docs/compatibility/versioning-v0.md`
 - Diagnostic catalog: `docs/diagnostics/catalog-v0.md`
-- Atlas semantic snapshot, provisional SymbolId, logical planning, canonical transport, contained current-source-validated store, bounded package-local queries, canonical compiler-fact Context Packs, exact retained-source attributed text, exact catalog plus overview/show/around CLI, and whole-package rewrite measurement: `docs/atlas/`, `internal/atlasmap/`, `internal/contextpack/`, `internal/attributedtext/`, `internal/workspaceloader/exact_source.go`, `internal/cli/atlas_pack*.go`, `internal/buildmeasure/atlas_rewrite.go`
+- Atlas semantic snapshot, provisional SymbolId, logical planning, canonical transport, contained current-source-validated store, bounded package-local queries, canonical compiler-fact Context Packs, canonical exact retained-source attributed-text output, exact catalog plus overview/show/around CLI, and whole-package rewrite measurement: `docs/atlas/`, `internal/atlasmap/`, `internal/contextpack/`, `internal/attributedtext/`, `internal/workspaceloader/exact_source.go`, `internal/cli/atlas_pack*.go`, `internal/buildmeasure/atlas_rewrite.go`
 - CLI contract: `docs/cli/command-contract.md`
 - Workspace ownership: `docs/monorepo/package-ownership.md`
 

@@ -1,6 +1,6 @@
-// Package attributedtext owns the closed, non-authoritative logical record, budget contract, and
-// exact retained-workspace source extraction gate for Atlas text. It performs no path reopening,
-// encoding, command handling, or model integration.
+// Package attributedtext owns the closed, non-authoritative logical record, budget contract, exact
+// retained-workspace source extraction gate, and canonical output-only JSON encoding for Atlas
+// text. It performs no path reopening, decoding, command handling, or model integration.
 package attributedtext
 
 import (
@@ -100,25 +100,25 @@ type Input struct {
 }
 
 type View struct {
-	Policy            string
-	Authority         Authority
-	Kind              Kind
-	Origin            Origin
-	SymbolVisible     string
-	SymbolFull        string
-	PackageUID        string
-	PackageInstance   string
-	PackageCoordinate string
-	PackageSource     string
-	Path              string
-	FileKind          semanticsnapshot.FileKind
-	FileIdentity      string
-	LineMapIdentity   string
-	StartByte         uint64
-	EndByte           uint64
-	Format            Format
-	Text              string
-	Checksum          string
+	Policy            string                    `json:"policy"`
+	Authority         Authority                 `json:"authority"`
+	Kind              Kind                      `json:"kind"`
+	Origin            Origin                    `json:"origin"`
+	SymbolVisible     string                    `json:"symbol_visible"`
+	SymbolFull        string                    `json:"symbol_full"`
+	PackageUID        string                    `json:"package_uid"`
+	PackageInstance   string                    `json:"package_instance"`
+	PackageCoordinate string                    `json:"package_coordinate"`
+	PackageSource     string                    `json:"package_source"`
+	Path              string                    `json:"path"`
+	FileKind          semanticsnapshot.FileKind `json:"file_kind"`
+	FileIdentity      string                    `json:"file_identity"`
+	LineMapIdentity   string                    `json:"line_map_identity"`
+	StartByte         uint64                    `json:"start_byte"`
+	EndByte           uint64                    `json:"end_byte"`
+	Format            Format                    `json:"format"`
+	Text              string                    `json:"text"`
+	Checksum          string                    `json:"checksum"`
 }
 
 type Record struct {
@@ -127,9 +127,9 @@ type Record struct {
 }
 
 type Budget struct {
-	MaxFragments     int
-	MaxFragmentBytes uint64
-	MaxTextBytes     uint64
+	MaxFragments     int    `json:"max_fragments"`
+	MaxFragmentBytes uint64 `json:"max_fragment_bytes"`
+	MaxTextBytes     uint64 `json:"max_text_bytes"`
 }
 
 func New(input Input) (Record, error) {

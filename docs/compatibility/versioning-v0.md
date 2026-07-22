@@ -561,6 +561,13 @@ wire schema or command promise. The implementation revalidates retained package/
 identities and adds no cross-version acceptance, persistent text artifact, default budget, or
 public consumer contract.
 
+ADR 0197 independently fixes output encoding `fairyc.attributed-text-json/v0`, document checksum
+`fairyc.attributed-text-checksum/v0-sha256`, prefix `fytextdoc0-sha256-`, exact envelope/document
+field order, explicit source kind/origin selection, exact subject linkage, and positive final-output
+limit. It adds no decoder, untrusted input, default limit, storage, composite-pack, or CLI promise.
+Changing field meaning/order, JSON spelling, checksum input, authority, subject identity, selection,
+usage, or omission semantics requires an explicit compatibility decision.
+
 Dependency handling is relation-specific:
 
 | Condition | Atlas behavior |

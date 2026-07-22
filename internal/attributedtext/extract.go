@@ -3,6 +3,7 @@ package attributedtext
 import (
 	"errors"
 	"fmt"
+	"slices"
 
 	"github.com/0disoft/fairyc/internal/atlasmap"
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
@@ -19,19 +20,51 @@ const (
 )
 
 type Omission struct {
-	Code          OmissionCode
-	Kind          Kind
-	Origin        Origin
-	SymbolVisible string
-	Bytes         uint64
+	Code          OmissionCode `json:"code"`
+	Kind          Kind         `json:"kind"`
+	Origin        Origin       `json:"origin"`
+	SymbolVisible string       `json:"symbol_visible"`
+	Bytes         uint64       `json:"bytes"`
 }
 
 type Usage struct {
-	Fragments int
-	TextBytes uint64
+	Fragments int    `json:"fragments"`
+	TextBytes uint64 `json:"text_bytes"`
+}
+
+// Request makes kind, origin, and byte policy explicit. No default selection is inferred.
+type Request struct {
+	SymbolID string
+	Kinds    []Kind
+	Origins  []Origin
+	Budget   Budget
+}
+
+// Subject binds successful text or an omission to the exact current compiler-selected source span.
+type Subject struct {
+	SymbolVisible     string                    `json:"symbol_visible"`
+	SymbolFull        string                    `json:"symbol_full"`
+	PackageUID        string                    `json:"package_uid"`
+	PackageInstance   string                    `json:"package_instance"`
+	PackageCoordinate string                    `json:"package_coordinate"`
+	PackageSource     string                    `json:"package_source"`
+	Path              string                    `json:"path"`
+	FileKind          semanticsnapshot.FileKind `json:"file_kind"`
+	FileIdentity      string                    `json:"file_identity"`
+	LineMapIdentity   string                    `json:"line_map_identity"`
+	StartByte         uint64                    `json:"start_byte"`
+	EndByte           uint64                    `json:"end_byte"`
+}
+
+type Selection struct {
+	Kinds   []Kind   `json:"kinds"`
+	Origins []Origin `json:"origins"`
 }
 
 type Result struct {
+	Subject   Subject
+	Selection Selection
+	Budget    Budget
 	Records   []Record
 	Usage     Usage
 	Omissions []Omission
@@ -43,14 +76,16 @@ type Result struct {
 func ExtractWorkspaceSource(
 	workspace workspaceloader.Workspace,
 	index *atlasmap.QueryIndex,
-	symbolID string,
-	budget Budget,
+	request Request,
 ) (Result, error) {
-	result := Result{Records: make([]Record, 0, 1), Omissions: make([]Omission, 0, 1)}
-	if err := ValidateBudget(budget); err != nil {
+	result := Result{
+		Selection: Selection{Kinds: slices.Clone(request.Kinds), Origins: slices.Clone(request.Origins)},
+		Budget:    request.Budget, Records: make([]Record, 0, 1), Omissions: make([]Omission, 0, 1),
+	}
+	if err := validateRequest(request); err != nil {
 		return result, err
 	}
-	subject, err := index.ResolveAttributionSubject(symbolID)
+	subject, err := index.ResolveAttributionSubject(request.SymbolID)
 	if err != nil {
 		return result, err
 	}
@@ -70,29 +105,40 @@ func ExtractWorkspaceSource(
 	if end > uint64(len(exact.Bytes)) {
 		return result, fmt.Errorf("Atlas attributed source span exceeds retained source bytes")
 	}
+	result.Subject = Subject{
+		SymbolVisible: subject.Subject.Symbol.Visible, SymbolFull: subject.Subject.Symbol.Full,
+		PackageUID: exact.Package.PackageUID, PackageInstance: exact.Package.Instance.String(),
+		PackageCoordinate: exact.Package.Coordinate.String(), PackageSource: exact.Package.Source.String(),
+		Path: exact.File.Path, FileKind: semanticsnapshot.FileKind(exact.File.Kind),
+		FileIdentity: exact.File.Digest.String(), LineMapIdentity: exact.File.LineMap.String(),
+		StartByte: start, EndByte: end,
+	}
 	fragmentBytes := exact.Bytes[start:end]
 	fragmentLength := uint64(len(fragmentBytes))
+	origin, err := sourceOrigin(exact.Package.SourceKind)
+	if err != nil {
+		return result, err
+	}
 	omission := Omission{
-		Kind: KindSourceExcerpt, Origin: OriginWorkspaceAuthored,
+		Kind: KindSourceExcerpt, Origin: origin,
 		SymbolVisible: subject.Subject.Symbol.Visible, Bytes: fragmentLength,
 	}
-	if exact.Package.SourceKind != workspaceloader.SourceKindLocal {
+	if origin != OriginWorkspaceAuthored {
 		omission.Code = OmissionOriginNotAdmitted
 		result.Omissions = append(result.Omissions, omission)
 		return result, nil
 	}
-	if fragmentLength > budget.MaxFragmentBytes || fragmentLength > budget.MaxTextBytes {
+	if fragmentLength > request.Budget.MaxFragmentBytes || fragmentLength > request.Budget.MaxTextBytes {
 		omission.Code = OmissionFragmentByteLimit
 		result.Omissions = append(result.Omissions, omission)
 		return result, nil
 	}
-	fileKind := semanticsnapshot.FileKind(exact.File.Kind)
 	record, err := New(Input{
-		Kind: KindSourceExcerpt, Origin: OriginWorkspaceAuthored,
+		Kind: KindSourceExcerpt, Origin: origin,
 		SymbolVisible: subject.Subject.Symbol.Visible, SymbolFull: subject.Subject.Symbol.Full,
 		PackageUID: exact.Package.PackageUID, PackageInstance: exact.Package.Instance.String(),
 		PackageCoordinate: exact.Package.Coordinate.String(), PackageSource: exact.Package.Source.String(),
-		Path: exact.File.Path, FileKind: fileKind,
+		Path: exact.File.Path, FileKind: result.Subject.FileKind,
 		FileIdentity: exact.File.Digest.String(), LineMapIdentity: exact.File.LineMap.String(),
 		StartByte: start, EndByte: end, Format: FormatFairySourceUTF8, Text: string(fragmentBytes),
 	})
@@ -115,6 +161,30 @@ func ExtractWorkspaceSource(
 	result.Records = append(result.Records, record)
 	result.Usage = Usage{Fragments: 1, TextBytes: fragmentLength}
 	return result, nil
+}
+
+func validateRequest(request Request) error {
+	if request.SymbolID == "" {
+		return fmt.Errorf("Atlas attributed source request requires an exact SymbolId")
+	}
+	if len(request.Kinds) != 1 || request.Kinds[0] != KindSourceExcerpt {
+		return fmt.Errorf("Atlas attributed source request must explicitly select only source-excerpt")
+	}
+	if len(request.Origins) != 1 || request.Origins[0] != OriginWorkspaceAuthored {
+		return fmt.Errorf("Atlas attributed source request must explicitly select only workspace-authored origin")
+	}
+	return ValidateBudget(request.Budget)
+}
+
+func sourceOrigin(sourceKind string) (Origin, error) {
+	switch sourceKind {
+	case workspaceloader.SourceKindLocal:
+		return OriginWorkspaceAuthored, nil
+	case workspaceloader.SourceKindSDK:
+		return OriginCompilerBundled, nil
+	default:
+		return "", fmt.Errorf("Atlas attributed source package has unsupported source kind %q", sourceKind)
+	}
 }
 
 func validateExactSourceContext(subject atlasmap.AttributionSubject, exact workspaceloader.ExactSource) error {
