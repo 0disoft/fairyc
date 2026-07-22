@@ -26,7 +26,7 @@
 - Public-interface hash v1 fixtures and runner: spec/fixtures/module-interface/manifest-v1.json, internal/moduleinterface/, internal/moduleinterfacefixture/
 - Package-source digest v1 fixtures and runner: spec/fixtures/package-source/manifest-v1.json, internal/packagecontent/, internal/packagecontentfixture/
 - Whole-package cache-key v1 fixtures and bounded store runner: spec/fixtures/package-cache/manifest-v1.json, internal/packagecache/, internal/packagecachefixture/
-- Package-stable function IDs and process-local MIR slice reassembly: internal/packageartifact/, docs/package/package-function-id-v1.md, docs/package/process-local-mir-artifact-v0.md
+- Package-stable function IDs, process-local MIR slice reassembly, and process-bound codec: internal/packageartifact/, docs/package/package-function-id-v1.md, docs/package/process-local-mir-artifact-v0.md
 - Project manifest v1 fixtures and strict TOML parser: spec/fixtures/project-manifest/manifest-v1.json, internal/projectmanifest/, internal/projectmanifestfixture/
 - Local workspace loader v1 fixtures and implementation: spec/fixtures/workspace-loader/manifest-v1.json, internal/workspaceloader/, internal/workspaceloaderfixture/
 - Compiler-bundled Stage 0 standard-library source package: internal/sdkstdlib/

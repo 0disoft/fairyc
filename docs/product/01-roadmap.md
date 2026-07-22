@@ -432,6 +432,11 @@ stubs, rebound to fresh internal symbols, reassembled, verified again, and execu
 checked-in workspace to result `42`. The boundary is process-local and still duplicates the exact
 workspace type context; it is not a persistent or compiler-integrated cache hit.
 
+ADR 0154 adds a mandatory-bounds process codec. Its random identity makes payloads unusable by a
+different codec or compiler process, while canonical decode and verifier re-entry let the existing
+byte-bounded LRU own the complete allocation. This is cache plumbing, not a persistent format or
+cache-hit measurement.
+
 - Wire whole-package reuse into package compilation, then adopt persistent content-addressed storage
   and default limits only from measured clean/warm workload evidence.
 - ADR 0146 explicitly defers persistent storage. Package-aware Windows builds, the bounded

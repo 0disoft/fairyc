@@ -2,7 +2,8 @@
 
 - Status: Executable provisional boundary
 - Decision: `docs/adr/0153-process-local-package-mir-artifacts.md`
-- Implementation source: `internal/packageartifact/artifact.go`
+- Process codec decision: `docs/adr/0154-process-bound-package-artifact-codec.md`
+- Implementation source: `internal/packageartifact/artifact.go`, `internal/packageartifact/codec.go`
 
 ## Scope
 
@@ -47,10 +48,12 @@ context.
 
 ## Explicit exclusions
 
-Artifact v0 is a Go in-memory value only. It has no byte encoding, disk path, cross-process lock,
-default size limit, cache lifetime, CLI surface, remote transport, or compatibility promise across
-compiler processes. Its shared type context prevents package-granular storage savings. It also does
-not skip workspace loading or semantic analysis yet.
+Artifact v0 has a bounded canonical process codec solely so `packagecache.MemoryStore` can own and
+account for the complete payload. Every codec instance embeds a random process identity. Bytes from
+another codec fail closed, so this is not a disk or cross-process format. There is still no disk
+path, cross-process lock, default size limit, cache lifetime, CLI surface, remote transport, or
+compatibility promise across compiler processes. The shared type context prevents package-granular
+storage savings. The artifact also does not skip workspace loading or semantic analysis yet.
 
 Persistent package reuse requires a later stable type/context encoding, bounded codec, corruption
 handling, cache-key integration, and measured clean/warm evidence. A mismatch must remain a safe
