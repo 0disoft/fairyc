@@ -416,6 +416,37 @@ func Compute(value Descriptor) (Hash, error) {
 	return sha256.Sum256(encoded), nil
 }
 
+// ComputePackages extracts and hashes one exact public interface per requested build-local package.
+// Input package order is ignored; duplicate IDs and missing coordinate metadata fail closed.
+func ComputePackages(value hir.Package, packageIDs []hir.PackageID, coordinates map[hir.PackageID]packagegraph.CoordinateID) (map[hir.PackageID]Hash, error) {
+	ordered := slices.Clone(packageIDs)
+	if len(ordered) == 0 {
+		return nil, fmt.Errorf("public interface package set is empty")
+	}
+	slices.Sort(ordered)
+	for index, packageID := range ordered {
+		if index > 0 && ordered[index-1] == packageID {
+			return nil, fmt.Errorf("public interface package %d is duplicated", packageID)
+		}
+		if _, found := coordinates[packageID]; !found {
+			return nil, fmt.Errorf("package %d has no PackageCoordinateId", packageID)
+		}
+	}
+	result := make(map[hir.PackageID]Hash, len(ordered))
+	for _, packageID := range ordered {
+		descriptor, err := Extract(value, packageID, coordinates)
+		if err != nil {
+			return nil, fmt.Errorf("extract public interface for package %d: %w", packageID, err)
+		}
+		hash, err := Compute(descriptor)
+		if err != nil {
+			return nil, fmt.Errorf("hash public interface for package %d: %w", packageID, err)
+		}
+		result[packageID] = hash
+	}
+	return result, nil
+}
+
 func validateDescriptor(value Descriptor) error {
 	if len(value.Modules) == 0 {
 		return fmt.Errorf("public interface has no modules")

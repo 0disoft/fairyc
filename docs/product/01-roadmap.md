@@ -577,11 +577,16 @@ regressions. ADR 0184 now adds domain-separated `fyfile1-sha256` content and `fy
 line-map identities, projects them from validated workspace bytes, and requires canonical complete
 file/module coverage in every snapshot without retaining source text. Exact LF/CRLF/final-newline,
 content-versus-geometry, source/test classification, order, detachment, and missing/extra coverage
-regressions exist. No `.fymap` encoding, exporter, current-source recomputation, dependency-map
-join, stale-map validator, query, Context Pack, or rewrite measurement exists yet.
+regressions exist. ADR 0185 and `internal/atlasmap` now close the next in-memory boundary: the
+validated workspace, compiler result, exact executable identity, and reusable complete package
+interface-hash set produce one immutable deterministic logical partition per package. Headers retain
+every independent identity algorithm and exact interface hash; every file, module, declaration,
+SymbolId, and function summary is assigned; relation gaps become stable omissions. No `.fymap`
+transport encoding, checksum, publication, current-source recomputation, dependency-map join,
+stale-map validator, query, Context Pack, or rewrite measurement exists yet.
 
-- Produce an immutable `SemanticSnapshot` from analyzed HIR and verified MIR.
-- Export `.fymap` with package UID and instance identity, compatibility vector, provenance, relation-specific completeness, and deterministic symbol identity.
+- Preserve the implemented immutable `SemanticSnapshot` and per-package logical map plan.
+- Encode and publish `.fymap` with the planned compatibility vector, provenance, completeness, and deterministic symbol identity.
 - Implement bounded `overview`, `show`, and `around` queries and Context Pack output.
 - Measure whole-package map rewrite cost before considering chunks or compression.
 

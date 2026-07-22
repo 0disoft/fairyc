@@ -1,20 +1,27 @@
 # `.fymap` v1 Logical Schema
 
-- Status: Proposed map encoding; the in-memory snapshot and provisional SymbolId producer exist
+- Status: Proposed transport encoding; the immutable snapshot, SymbolId producer, and logical per-package plan exist
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0004-atlas-semantic-snapshot-boundary.md`
 - Snapshot source: `docs/atlas/semantic-snapshot-v0.md`
+- Logical-plan source: `docs/atlas/fymap-logical-plan-v1.md`
 
 ## Boundary
 
-Analyzed typed HIR and verified MIR now produce the immutable in-memory `SemanticSnapshot` v0. The
-future Atlas exporter converts that snapshot into `.fymap`. It does not reparse source or feed
-decisions back into type checking. Snapshot implementation does not choose or imply the map's
-encoding, checksum, file location, or command behavior. The separate
+Analyzed typed HIR and verified MIR now produce the immutable in-memory `SemanticSnapshot` v0.
+`internal/atlasmap` validates the complete package/interface set and converts that snapshot into one
+immutable logical partition per package. It does not reparse source or feed decisions back into type
+checking. The logical plan does not choose or imply the map's encoding, checksum, section offsets,
+byte order, file location, publication protocol, or command behavior. The separate
 `fairyc.symbol-id/v1-sha256-128+256` implementation now fixes the provisional declaration join key
 described in `docs/atlas/symbol-id-v1.md`.
 
-The first implementation writes one deterministic map per package. Chunking, compression, and symbol-level incremental rewrites require measured evidence. The normative map encoding, byte order, and map-checksum algorithm remain UNDECIDED; this document fixes the logical records and trust behavior first. Package-instance references use the independent `PackageInstanceId` v1 contract. The map records the SymbolId algorithm independently rather than inheriting it from map schema.
+The first implementation plans one deterministic map per package without writing it. Chunking,
+compression, and symbol-level incremental rewrites require measured evidence. The normative map
+encoding, byte order, and map-checksum algorithm remain UNDECIDED; this document fixes the logical
+records and trust behavior first. Package-instance references use the independent
+`PackageInstanceId` v1 contract. The logical header records every identity algorithm independently
+rather than inheriting them from the map schema.
 
 ## Identity
 
@@ -44,18 +51,21 @@ handling.
 
 ## Header
 
-The logical header contains:
+The implemented `fairyc.fymap-logical/v1` header contains:
 
-- format major and minor version;
+- logical schema and semantic snapshot model;
 - language revision;
-- compiler identity;
-- package UID, package instance, and the independent `fysrc1-sha256` package source digest;
-- target identity when facts are target-dependent;
-- identity-algorithm version;
-- interface-hash algorithm version, currently the independent `fyif2-sha256` contract;
-- deterministic feature flags;
-- section directory and record counts;
+- exact compiler executable identity and its algorithm;
+- package UID, instance, coordinate, source digest, source kind, and runtime ABI;
+- the explicit `target-independent` scope and an empty target value;
+- package-instance, package-coordinate, package-source, source-file, line-map, SymbolId, and
+  interface-hash algorithms;
+- the exact package public-interface hash, deterministic features, and direct package instances;
+- logical record counts;
 - generation completeness and omission reasons.
+
+It has no section directory because there are no transport bytes yet. A future target-dependent plan
+must use a new explicit target scope and value rather than silently reinterpreting this header.
 
 Absolute local paths, timestamps that break reproducibility, source bodies, credentials, and machine-specific cache paths are excluded.
 

@@ -416,19 +416,11 @@ func (session *Session) packageKeys(metadata []workspaceloader.SemanticPackage, 
 }
 
 func packageInterfaces(value hir.Package, metadata []workspaceloader.SemanticPackage, coordinates map[hir.PackageID]packagegraph.CoordinateID) (map[hir.PackageID]moduleinterface.Hash, error) {
-	result := make(map[hir.PackageID]moduleinterface.Hash, len(metadata))
+	packageIDs := make([]hir.PackageID, 0, len(metadata))
 	for _, loaded := range metadata {
-		descriptor, err := moduleinterface.Extract(value, loaded.ID, coordinates)
-		if err != nil {
-			return nil, fmt.Errorf("extract public interface for package %d: %w", loaded.ID, err)
-		}
-		hash, err := moduleinterface.Compute(descriptor)
-		if err != nil {
-			return nil, fmt.Errorf("hash public interface for package %d: %w", loaded.ID, err)
-		}
-		result[loaded.ID] = hash
+		packageIDs = append(packageIDs, loaded.ID)
 	}
-	return result, nil
+	return moduleinterface.ComputePackages(value, packageIDs, coordinates)
 }
 
 func functionOwners(value hir.Package) []hir.PackageID {

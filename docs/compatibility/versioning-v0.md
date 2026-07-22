@@ -480,9 +480,20 @@ domain and byte length. `fairyc.source-line-map/v1` hashes byte length and every
 zero-based line start, including EOF after a final LF. CR is not normalized. A mismatch invalidates
 stored spans for that file; no consumer may guess a remapped position.
 
+ADR 0185 adds the internal `fairyc.fymap-logical/v1` planning model. It requires the exact compiler
+executable identity, exact current package set, one `fyif2-sha256` public-interface hash per package,
+all independent identity-algorithm identifiers, and explicit relation omissions. The model is
+target-independent and immutable. It is not the `.fymap` transport schema and therefore makes no
+promise about encoded bytes, byte order, checksums, section layout, file naming, publication, or
+reader compatibility.
+
 ## `.fymap` compatibility
 
-The map header records schema, compiler build, language revision, package UID, package instance, source-graph digest, target scope, feature flags, `SymbolId` algorithm, and interface-hash algorithm.
+The logical plan already records schema, snapshot model, compiler build, language revision, package
+UID, package instance, package coordinate, source digest and kind, runtime ABI, target scope,
+features, dependencies, each identity algorithm, exact interface hash, record counts, and explicit
+omissions. The future transport header must preserve those meanings and add its independently
+versioned encoding and integrity fields.
 
 Before schema 1, readers require an exact match. A future major or minor policy may skip unknown optional sections, but every skipped semantic section lowers relation-specific completeness. A source digest mismatch or corrupt checksum rejects the map. Atlas failure never fails compilation.
 

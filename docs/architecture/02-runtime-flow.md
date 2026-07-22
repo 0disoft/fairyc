@@ -224,7 +224,8 @@ typed HIR + verified MIR
   -> immutable SemanticSnapshot
      + exact file content/line-map identities
   -> provisional SymbolId derivation
-  -> Atlas exporter
+  -> immutable per-package logical map plan
+  -> Atlas transport encoder
   -> .fymap
   -> bounded overview/show/around queries
   -> optional Context Pack
@@ -237,9 +238,12 @@ metadata, removes build-local identities, deep-detaches its records, and reports
 completeness. The validated workspace supplies exact source-file content and line-map identities;
 snapshot construction requires a file/module bijection without retaining source bytes.
 `internal/symbolidentity` implements the next arrow from stable semantic coordinates and canonical
-signatures while retaining full collision evidence. The exporter, encoded map, current-source
-validator, queries, and Context Pack arrows remain unimplemented and cannot feed back into these
-boundaries.
+signatures while retaining full collision evidence. `internal/atlasmap` then validates the complete
+workspace package/interface set and assigns every snapshot file, module, declaration, SymbolId, and
+function summary to one immutable package partition. Its target-independent header records all
+independent identity algorithms, the exact compiler executable identity, package compatibility, and
+explicit relation omissions. The transport encoder, encoded map, checksum, current-source validator,
+queries, and Context Pack arrows remain unimplemented and cannot feed back into these boundaries.
 
 ## Runtime behavior
 

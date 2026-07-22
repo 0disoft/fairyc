@@ -1,6 +1,7 @@
 package moduleinterface
 
 import (
+	"maps"
 	"strconv"
 	"strings"
 	"testing"
@@ -128,6 +129,46 @@ func TestExtractRejectsPublicSignatureUsingPrivateLocalType(t *testing.T) {
 	_, err := Extract(value, 1, map[hir.PackageID]packagegraph.CoordinateID{1: self})
 	if err == nil || !strings.Contains(err.Error(), "is not a public type") {
 		t.Fatalf("Extract() error = %v", err)
+	}
+}
+
+func TestComputePackagesHashesCanonicalCompletePackageSet(t *testing.T) {
+	t.Parallel()
+	coordinates := map[hir.PackageID]packagegraph.CoordinateID{
+		1: testCoordinateID(t, "one"),
+		2: testCoordinateID(t, "two"),
+	}
+	value := hir.Package{Modules: []hir.Module{
+		{Package: 2, Path: "two", Functions: []hir.Function{{Name: "value", Public: true, ResultType: hir.TypeU32}}},
+		{Package: 1, Path: "one", Functions: []hir.Function{{Name: "value", Public: true, ResultType: hir.TypeI32}}},
+	}}
+	set, err := ComputePackages(value, []hir.PackageID{2, 1}, coordinates)
+	if err != nil {
+		t.Fatalf("ComputePackages() error = %v", err)
+	}
+	if len(set) != 2 || set[1] != extractHash(t, value, 1, coordinates) || set[2] != extractHash(t, value, 2, coordinates) {
+		t.Fatalf("ComputePackages() = %+v", set)
+	}
+	reordered, err := ComputePackages(value, []hir.PackageID{1, 2}, coordinates)
+	if err != nil || !maps.Equal(set, reordered) {
+		t.Fatalf("reordered ComputePackages() = %+v, %v", reordered, err)
+	}
+	for _, test := range []struct {
+		name        string
+		packageIDs  []hir.PackageID
+		coordinates map[hir.PackageID]packagegraph.CoordinateID
+		contains    string
+	}{
+		{name: "empty", coordinates: coordinates, contains: "empty"},
+		{name: "duplicate", packageIDs: []hir.PackageID{1, 1}, coordinates: coordinates, contains: "duplicated"},
+		{name: "missing coordinate", packageIDs: []hir.PackageID{1, 2}, coordinates: map[hir.PackageID]packagegraph.CoordinateID{1: coordinates[1]}, contains: "PackageCoordinateId"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			if _, computeErr := ComputePackages(value, test.packageIDs, test.coordinates); computeErr == nil || !strings.Contains(computeErr.Error(), test.contains) {
+				t.Fatalf("ComputePackages() error = %v", computeErr)
+			}
+		})
 	}
 }
 

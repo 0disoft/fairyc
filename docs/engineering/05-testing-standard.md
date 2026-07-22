@@ -94,6 +94,10 @@ requirements. `internal/semanticsnapshot` now owns the in-memory Atlas producer 
 query, stale-map, and Context Pack runners remain future evidence. `internal/symbolidentity` owns
 the provisional identity byte-vector, stability/sensitivity, path validation, strict text form,
 package-UID nominal normalization, and visible/full collision regressions.
+`internal/atlasmap` owns real-workspace logical planning tests for exact compiler identity,
+one-interface-per-package closure, algorithm-rich target-independent headers, complete package
+partitioning, stable omissions, deterministic ordering, and detached accessors. Those tests do not
+exercise a transport codec, checksum, publication, current-source reader, query, or rewrite cost.
 
 `internal/cstdlib` separately embeds the provisional SystemHeap implementation and its closed C
 probe. Ordinary Go tests prove deterministic, LF-only source ownership and forbid raw `realloc` or
@@ -247,7 +251,8 @@ dependency closure remain host-independent Go tests.
 | Compatibility | Exact pre-1 matching, cache misses, runtime mismatch, diagnostic identity, stale maps, target mismatch, and relation-specific completeness |
 | Atlas semantic snapshot | Current unit and pipeline tests require Flow-plus-verified-MIR admission, complete package and file metadata, file/module bijection, build-local package-renumbering invariance, deep input/output detachment, stable ordering, structured path-free type identity, exact local calls/traps/unsafe/ownership facts, foreign-call-only partial completeness, unavailable relation disclosure, and fail-closed invalid MIR or package mappings. No encoded map, current-source validation, or query evidence is implied. |
 | Atlas SymbolId | Current unit and compiler-pipeline tests freeze tagged length-delimited bytes, visible/full digest derivation, strict text forms, path/kind validation, tuple boundaries, body/span/version/build-number stability, coordinate/signature sensitivity, nominal package-UID normalization, deterministic ordering, pair integrity, and synthetic compact-ID collision rejection. No encoded map or released cross-version promise is implied. |
-| Atlas schema | Record compatibility, unknown edges, provenance, stale/corrupt rejection, and whole-package rewrite remain future evidence after the in-memory snapshot and identity algorithm. |
+| Atlas logical map plan | Current real-workspace and unit tests require exact compiler identity, a complete public-interface-hash set, all independent algorithm identifiers, package-stable headers, complete file/module/declaration/SymbolId/function assignment, deterministic package order, immutable accessors, and explicit omissions. Transport bytes, checksums, current-source validation, dependency-map joins, queries, and whole-package rewrite measurements remain future evidence. |
+| Atlas schema | Transport record compatibility, corruption rejection, byte-order and section invariants remain future evidence after the logical plan. |
 | Atlas context | Budgets, stable ordering, omissions, stale source, text caps, and prompt-injection isolation |
 
 ## Diagnostic assertions

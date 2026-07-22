@@ -3,7 +3,7 @@
 - Status: Implemented in memory
 - Decision: `docs/adr/0182-immutable-semantic-snapshot-v0.md`
 - Implementation: `internal/semanticsnapshot/`
-- Consumers: implemented provisional SymbolId derivation plus future Atlas exporter and query layers
+- Consumers: implemented provisional SymbolId derivation and per-package logical map planning, plus future transport and query layers
 
 ## Boundary
 

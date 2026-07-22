@@ -500,8 +500,12 @@ documentation. `internal/symbolidentity` now turns those declarations into provi
 source-instance-independent SymbolIds with canonical signature hashing and mandatory visible/full
 collision checks. Exact per-file content and LF-derived line-map identities now travel from the
 validated workspace into the immutable snapshot without source bodies or host paths, closing the
-stale-span metadata prerequisite. No `.fymap` file, current-source validator, Atlas command,
-`overview`/`show`/`around` query, or Context Pack exists yet.
+stale-span metadata prerequisite. `internal/atlasmap` now validates the complete workspace input and
+builds one immutable, deterministic logical partition per exact package. Each header carries the
+exact compiler build, language, package, source, interface, file, line-map, and SymbolId algorithms,
+and incomplete relations become explicit stable omissions. This is not a `.fymap` byte format: no
+encoded file, checksum, current-source validator, Atlas command, `overview`/`show`/`around` query, or
+Context Pack exists yet.
 
 `experimental target-spec` accepts exactly one known Linux GNU or Windows MSVC ID and writes
 deterministic `fairyc.target-spec/v0` JSON. The result separates target semantics from local
@@ -567,7 +571,7 @@ or arbitrary link-input option.
 - Windows AMD64 PE, COFF object, and x64 unwind structure inspector: `internal/pecoff/`
 - Resolved acyclic package graph engine, fixture runner, and v1/v0 fixtures: `internal/packagegraph/`, `internal/packagefixture/`, `spec/fixtures/package/manifest-v1.json`
 - PackageInstanceId v1 encoding, vectors, and runner: `internal/packagegraph/identity.go`, `spec/fixtures/package-identity/manifest-v1.json`, `internal/packageidentityfixture/`
-- Public-interface hash v1 extraction, fixtures, and runner: `internal/moduleinterface/`, `spec/fixtures/module-interface/manifest-v1.json`, `internal/moduleinterfacefixture/`
+- Public-interface hash v2 extraction, reusable package-set computation, fixtures, and runner: `internal/moduleinterface/`, `spec/fixtures/module-interface/manifest-v2.json`, `internal/moduleinterfacefixture/`
 - Package-source digest v1 encoding, fixtures, and runner: `internal/packagecontent/`, `spec/fixtures/package-source/manifest-v1.json`, `internal/packagecontentfixture/`
 - Whole-package cache-key v1, bounded memory store, fixtures, and runner: `internal/packagecache/`, `spec/fixtures/package-cache/manifest-v1.json`, `internal/packagecachefixture/`
 - Exact-version verified whole-program MIR artifact codec: `internal/mircodec/`
@@ -584,7 +588,7 @@ or arbitrary link-input option.
 - Runtime and standard library: `docs/runtime/runtime-stdlib-v0.md`
 - Compatibility and versioning: `docs/compatibility/versioning-v0.md`
 - Diagnostic catalog: `docs/diagnostics/catalog-v0.md`
-- Atlas semantic snapshot, provisional SymbolId, and proposed schemas: `docs/atlas/`
+- Atlas semantic snapshot, provisional SymbolId, logical package-map planning, and proposed transport schemas: `docs/atlas/`, `internal/atlasmap/`
 - CLI contract: `docs/cli/command-contract.md`
 - Workspace ownership: `docs/monorepo/package-ownership.md`
 

@@ -53,6 +53,11 @@ instance because nominal types from different resolved instances are not interch
 ADR 0173 now provides that new interface-hash version. This file remains the historical v1 byte and
 type-spelling contract.
 
+`internal/moduleinterface.ComputePackages` now applies the current v2 extraction and hash contract
+to an explicit complete package/coordinate set in deterministic order. It rejects empty, duplicate,
+or unmapped inputs and is shared by workspace-cache coordination and Atlas logical planning; it does
+not create a new interface-hash version.
+
 ## Canonical bytes and digest
 
 The byte stream begins with ASCII `fairyc.public-interface`, a zero byte, version byte `01`, and an

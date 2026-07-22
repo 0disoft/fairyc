@@ -105,6 +105,7 @@ regenerate, or override compiler source.
 - Atlas map and context contracts: docs/atlas/*.md
 - Immutable Atlas compiler-fact snapshot: internal/semanticsnapshot/, docs/atlas/semantic-snapshot-v0.md, docs/adr/0182-immutable-semantic-snapshot-v0.md
 - Provisional deterministic Atlas SymbolId: internal/symbolidentity/, docs/atlas/symbol-id-v1.md, docs/adr/0183-provisional-symbol-id-v1.md
+- Deterministic per-package Atlas logical map planning: internal/atlasmap/, docs/atlas/fymap-logical-plan-v1.md, docs/adr/0185-fymap-logical-package-plan-v1.md
 - Validation: VALIDATION.md
 - Agent routing: .agents/context-map.md
 - Repository hygiene: .editorconfig, .gitattributes, .gitignore
