@@ -201,7 +201,7 @@ examples do not grant agent command authority.
 `DEVELOPMENT.md` also documents the manual WSL-free build of ignored `build/fairyc.exe` for repeated
 Windows use. The configured Windows smoke independently builds and removes a temporary compiler
 executable, verifies its help surface, drives the scalar quickstart through that separate process,
-invokes the persistent cache command twice to require cold fallback followed by a verified disk hit,
+invokes the persistent cache command in nine fresh cold/warm process pairs and preserves raw durations,
 and sends eight editor-shaped workspace checks through one stdin/stdout session while recording
 Windows process-memory peaks; none of those paths is self-hosting, a distribution promise, a
 reference-machine baseline, or a performance budget.

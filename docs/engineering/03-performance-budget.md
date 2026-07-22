@@ -3,7 +3,7 @@
 - Status: Draft
 - Owner: UNASSIGNED
 - Product contract: `docs/product/02-spec.md`
-- Evidence status: Configured local Windows no-cache calibration, two-sample process-cache control-flow receipt, 36-sample edit-class raw distributions, and one eight-step standalone session with process-memory peaks exist; no reference machine, repeated process distribution, cache speedup decision, or regression threshold exists
+- Evidence status: Configured local Windows no-cache calibration, two-sample process-cache control-flow receipt, 36-sample edit-class raw distributions, one eight-step standalone session with process-memory peaks, and nine paired cold/warm persistent-cache process observations exist; no reference machine, cache speedup decision, or regression threshold exists
 
 Stage 0 has no numeric performance, storage, or Atlas budget. Proposed millisecond, percentage, MiB, GiB, map-size, and context-size thresholds are removed until a maintained harness produces a baseline. This document fixes what must be measured and how a later budget becomes enforceable.
 
@@ -58,6 +58,16 @@ pagefile-use bytes. Mutations stay outside the timer and retries are forbidden. 
 process-memory and editor-workload evidence gaps, but one uncontrolled local sequence is not a
 declared-machine distribution, memory budget, cancellation measurement, regression threshold, or
 speedup claim. Its cache limits remain explicit harness inputs rather than measured defaults.
+
+The configured smoke also emits `fairyc.persistent-cache-process-measurement/v0`. It prepares one
+temporary locked workspace outside the timer, then runs nine cold/warm pairs. Every pair uses a
+fresh disk cache and every sample starts a separate `fairyc.exe`. Caller-monotonic time spans child
+creation through exit and bounded output capture, so executable hashing, workspace work, cache I/O,
+and process overhead remain visible. Validation requires complete cold population followed by two
+verified warm hits, zero lowering on warm samples, no rejection, eviction, skipped or failed store,
+and one stable executable identity. Retries and derived speedup conclusions are forbidden. This is
+a repeated local distribution, not a declared-machine comparator, default-policy study, regression
+gate, or proof that warm is faster.
 
 ## Runtime metrics
 

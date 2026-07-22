@@ -418,9 +418,11 @@ indexed `u8` value to `i32`,
 then execute `examples/windows_output/main.fy` with exact stdout and process status
 42 while explicitly supplying its separate `windows_console.fy` module, and finally run the
 two-package `examples/workspace_quickstart` graph through an exact generated lock with native result
-42, then sends eight editor-shaped workspace checks to one compiler process, validates the cold,
-no-op, private-root, private-dependency, and public-dependency cache paths, and records Windows
-process-memory peaks. The compiler binary is
+42. It then measures nine fresh-cache cold/warm pairs with one new compiler process per sample,
+sends eight editor-shaped workspace checks to one compiler process, validates the cold, no-op,
+private-root, private-dependency, and public-dependency cache paths, and records Windows
+process-memory peaks. Raw paired timings are local observations with zero retries, not a speedup or
+default-cache claim. The compiler binary is
 still built from Go; only the input programs and resulting temporary
 target executables are Fairy C.
 

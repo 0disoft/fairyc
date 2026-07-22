@@ -171,11 +171,13 @@ separate compiler process to compile and execute `examples/windows_quickstart/ma
 validate temporary PE and unwind data, require the exact target-labelled native-result receipt for
 42, retain no artifact, and use no WSL. The quickstart iterates a byte view with checked `usize`
 arithmetic, while separate low and optimized cases require maximum-`usize` addition to trap.
-That same standalone executable invokes `experimental check-workspace-cache` twice against one
-explicit ignored directory and mandatory limits. The first receipt must report two misses, lowering,
-and two retained stable records; the second must retain the same executable build identity and
-report two verified hits with no lowering or store failure. This is control-flow and persistence
-evidence, not a speedup or default-policy measurement.
+That same standalone executable invokes `experimental check-workspace-cache` in nine cold/warm
+pairs with a fresh explicit cache directory per pair and mandatory limits. Each invocation is a new
+process. Cold receipts must report two misses, lowering, and two retained stable records; paired warm
+receipts must retain the same executable build identity and report two verified hits with no
+lowering, rejection, eviction, skipped write, or store failure. The caller preserves all 18 raw
+process-start-through-exit durations with zero retries. This is configured local persistence and
+distribution evidence, not a reference-machine speedup or default-policy decision.
 Separate low and optimized `run-host` cases also require matching-type unsigned bitwise operations
 and right shifts to return 42, and require a `usize` shift amount of 64 to report `invalid-shift`.
 Together with the existing scalar and trap cases, the direct `run-host` table now has 40 outcomes,
