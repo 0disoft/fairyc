@@ -219,6 +219,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0207-stable-windows-workspace-run-v2.md`: program-facing stable run with bounded stream forwarding, exact 32-bit normal status propagation, private trap-receipt removal, and no retained image.
 - `0208-starter-project-guide-v3.md`: conventional zero-status starter entry and generated guide aligned with direct safe stdout execution through stable run v2.
 - `0209-target-neutral-stage0-stderr-write.md`: safe `std::io::write_stderr`, shared target-owned console adapters, SDK stage0.3 identity, and exact separated Windows stream evidence.
+- `0210-target-neutral-stage0-byte-output.md`: safe immutable byte-view stdout/stderr operations, SDK stage0.4 identity, signature-only C transport declaration hardening, and exact Windows native binary-output evidence.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

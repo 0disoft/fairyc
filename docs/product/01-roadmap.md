@@ -96,8 +96,9 @@ Verified resource definitions now preserve ordered fields and
   `experimental emit-c` command exposes that exact verified translation unit on stdout
   without writing an artifact. On an eligible Linux/amd64 glibc host, `experimental build` can now
   compile and link that subset with explicit Clang or GCC and low or optimized profiles into
-  a no-overwrite `build/` artifact. Compiler-bundled `std::io::write` and `write_stderr` now provide
-  progress-preserving target-neutral output operations with exact separated Windows execution
+  a no-overwrite `build/` artifact. Compiler-bundled `std::io::write`, `write_stderr`,
+  `write_bytes`, and `write_stderr_bytes` now provide progress-preserving target-neutral text and
+  binary output operations with exact separated Windows execution
   evidence and configured-but-unobserved Linux probes. Stable portable files, broader console operations, effect-bearing function values,
   and every later Phase 1
   capability remain unimplemented.
@@ -301,7 +302,7 @@ Every local MSVC compile in the same lane now also parses its intermediate `.obj
 before cleanup, including `.text$...`, `.bss`, symbol-table, and relocation-index structure. Exact
 versioned symbol names, COMDAT selection, relocation types, unwind records, and a hosted object
 receipt remain absent, so the target evidence marker stays fail-closed.
-The forty-five local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
+The forty-seven local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
 runtime-function ordering and code coverage plus referenced version 1 and version 2 unwind-record
 bounds, including handler/chained minimum tails. A separate three-object probe now raises a private
 noncontinuable exception at both profiles, validates its payload in an outer SEH filter, walks the
@@ -576,6 +577,11 @@ ADR 0209 extends the compiler-bundled SDK to `0.0.0-stage0.3` with safe exact-by
 `std::io::write_stderr`. Both process-owned output streams now share one progress/error model and one
 target-owned loop per platform. The checked-in workspace has exact separated Windows stream evidence;
 formatting, stdin, arguments, terminal policy, and symbolic error kinds remain separate decisions.
+
+ADR 0210 extends the SDK to `0.0.0-stage0.4` with `write_bytes(ref u8[])` and
+`write_stderr_bytes(ref u8[])`. These calls reuse the existing stream symbols and error model while
+making the no-UTF-8-validation binary boundary explicit. Formatting, input, arguments, terminal
+rendering policy, and owned stream handles remain separate decisions.
 
 Exit gate: clean and warm build evidence is reproducible on a declared machine and workload; invalidation fixtures distinguish public interface, inline body, and private implementation; incompatible caches are safe misses.
 

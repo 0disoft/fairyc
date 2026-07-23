@@ -519,12 +519,13 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
-  The compiler-bundled SDK `0.0.0-stage0.3` exposes
-  `std::io::write(ref str) -> Result<usize, ConsoleError>` for stdout and a matching
-  `write_stderr` operation for stderr. Both declare `console`, keep raw pointers and target linkage
-  private, append no newline, preserve completed-prefix byte counts, and map one internal symbol per
+  The compiler-bundled SDK `0.0.0-stage0.4` exposes
+  `std::io::write(ref str) -> Result<usize, ConsoleError>` and a matching `write_stderr` operation
+  for text, plus `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` for exact binary output.
+  All four declare `console`, keep raw pointers and target linkage private, append no newline,
+  preserve completed-prefix byte counts, and map one internal symbol per
   stream to a shared target-owned Linux POSIX or Windows Win32 adapter. The checked-in safe workspace
-  has exact separated Windows stream evidence through stable build/run and a separately built
+  has exact text and byte-view Windows stream evidence through stable build/run and a separately built
   compiler; Linux native execution remains configured but unobserved on this host.
   ADR 0133 strengthens the existing `arenaExecutions` success condition with deterministic
   first-stage and second-stage allocation failure plus live-allocation cleanup. ADR 0134 strengthens
@@ -655,9 +656,9 @@ argument, output, and exit-code contract. It emits no native code.
 
 ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
-version, source digest, and lock fields. SDK `0.0.0-stage0.3` exports opaque `std::alloc::Arena`,
+version, source digest, and lock fields. SDK `0.0.0-stage0.4` exports opaque `std::alloc::Arena`,
 ADR 0205's `std::io::write(ref str) -> Result<usize, ConsoleError>`, and ADR 0209's matching
-`write_stderr` operation; it performs no host
+`write_stderr` operation plus ADR 0210's matching immutable byte-view operations; it performs no host
 installation lookup. The I/O wrapper keeps raw pointers and target linkage private while the broader
 planned standard-library API remains unsettled.
 

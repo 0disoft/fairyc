@@ -489,6 +489,51 @@ fn i32 main() {
 	}
 }
 
+func TestEmitDeclaresViewTransportUsedOnlyByInternalFunctionSignature(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name        string
+		declaration string
+		parameter   string
+		source      string
+	}{
+		{
+			name:        "immutable byte view",
+			declaration: "typedef struct fy_byte_slice {",
+			parameter:   "fy_byte_slice fy_l_",
+			source:      "fn usize byte_count(ref u8[] value) { return value.len; }",
+		},
+		{
+			name:        "mutable byte view",
+			declaration: "typedef struct fy_mut_byte_slice {",
+			parameter:   "fy_mut_byte_slice fy_l_",
+			source:      "fn usize byte_count_mut(ref mut u8[] value) { return value.len; }",
+		},
+		{
+			name:        "UTF-8 string view",
+			declaration: "typedef struct fy_str {",
+			parameter:   "fy_str fy_l_",
+			source:      "fn usize text_count(ref str value) { return value.len; }",
+		},
+	}
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			program := lowerSource(t, "module main;\n"+test.source+"\nfn i32 main() { return 42; }\n")
+			unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+			if err != nil {
+				t.Fatalf("Emit() error = %v", err)
+			}
+			declarationIndex := strings.Index(unit.Source, test.declaration)
+			parameterIndex := strings.Index(unit.Source, test.parameter)
+			if declarationIndex < 0 || parameterIndex < 0 || declarationIndex >= parameterIndex {
+				t.Fatalf("generated C does not declare %q before its first parameter use:\n%s", test.declaration, unit.Source)
+			}
+		})
+	}
+}
+
 func TestEmitRejectsFixedArrayBeyondExecutableElementLimit(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main;\nfn i32 main() { return 42; }\n")

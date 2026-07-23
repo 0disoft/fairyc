@@ -75,7 +75,7 @@ std::io     exact stdout and stderr byte writing with completed-prefix errors
 std::c      C scalar types and raw wrapper helpers
 ```
 
-The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.3` exports opaque `std::alloc::Arena`, ADR 0205's exact `std::io::write` surface, and ADR 0209's matching `write_stderr` surface; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
+The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.4` exports opaque `std::alloc::Arena`, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, and ADR 0210's matching immutable byte-view operations; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
 
 Built-in `Option`, `Result`, slices, `str`, and `CStr` get compiler-known view semantics; library modules provide operations over them.
 
@@ -294,9 +294,12 @@ A `"..."` literal provides allocation-free immutable `ref str` storage after the
 
 The compiler-bundled `std::io` module exposes
 `write(ref str) -> Result<usize, ConsoleError>` for stdout and
-`write_stderr(ref str) -> Result<usize, ConsoleError>` for stderr. Both declare
-`@effects(console)`, write the text's exact UTF-8 bytes, append no newline, allocate nothing, and
-retain no borrow. Success preserves the exact written byte count. Failure preserves a numeric status
+`write_stderr(ref str) -> Result<usize, ConsoleError>` for stderr. It also exposes
+`write_bytes(ref u8[]) -> Result<usize, ConsoleError>` and
+`write_stderr_bytes(ref u8[]) -> Result<usize, ConsoleError>` for exact binary output. All four
+declare `@effects(console)`, append no newline, allocate nothing, and retain no borrow. Text input
+writes its exact valid UTF-8 bytes; byte-view input writes its exact bytes without validation,
+transcoding, or terminator insertion. Success preserves the exact written byte count. Failure preserves a numeric status
 and completed-prefix byte count. The private raw declarations, `@repr(C)` transport, pointer
 conversion, and `fy_std_stdout_write_all_v0`/`fy_std_stderr_write_all_v0` symbols remain inside the
 SDK and target support units.
@@ -306,12 +309,14 @@ failure, and 4 is impossible zero progress. Empty input succeeds without consult
 stream. The Linux adapter routes both descriptors through one POSIX `write` loop, retries `EINTR`,
 and bounds requests by `SSIZE_MAX`. The Windows adapter routes both standard handles through one
 `WriteFile` loop in `DWORD`-bounded chunks. Both stop at the first non-retryable failure and return
-the completed prefix. The API does not format, transcode, append a newline, retry after a reported
-failure, or promise terminal-specific encoding behavior.
+the completed prefix. The API does not format, append a newline, retry after a reported failure, or
+promise terminal-specific encoding behavior. Byte-view calls deliberately make no claim that a
+terminal will render arbitrary bytes as readable text.
 
 The checked-in `examples/std_io_quickstart` contains no unsafe code or platform symbol. The Windows
-smoke runs it through stable `fairyc run --release --locked`, forwards exact `Fairy C says hi\n`
-to stdout and `Fairy C warns too\n` to stderr with status zero, builds and directly executes the
+smoke runs it through stable `fairyc run --release --locked`, forwards exact
+`Fairy C says hi\nbytes on stdout\n` to stdout and
+`Fairy C warns too\nbytes on stderr\n` to stderr with status zero, builds and directly executes the
 retained image with the same observation, and
 repeats both locked paths through a separately built compiler. Linux
 Clang/GCC low/optimized executions are configured through the native report v32

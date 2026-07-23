@@ -109,6 +109,9 @@ type emitter struct {
 	trapCategories     map[string]struct{}
 	dynamicTrapTargets map[int]map[mir.BlockID]struct{}
 	localTypes         []map[mir.LocalID]hir.Type
+	needsByteSlice     bool
+	needsMutByteSlice  bool
+	needsStringView    bool
 	needsBitcast       bool
 	needsShift         bool
 	cScalars           map[hir.Type]target.Scalar
@@ -1176,6 +1179,7 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 	if function.ResultType != hir.TypeVoid && !e.supportedCValueType(function.ResultType) {
 		return CapabilityError{Function: function.Name, Feature: "result type " + strconv.Quote(string(function.ResultType))}
 	}
+	e.recordCValueTypeRequirements(function.ResultType)
 	e.recordCScalarFeature(function.ResultType)
 	if len(function.ParameterTypes) != len(function.Parameters) {
 		return fmt.Errorf("MIR function %s has %d parameter types for %d parameters", function.Name, len(function.ParameterTypes), len(function.Parameters))
@@ -1184,6 +1188,7 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 		if !e.supportedCValueType(parameterType) {
 			return CapabilityError{Function: function.Name, Feature: "parameter type " + strconv.Quote(string(parameterType))}
 		}
+		e.recordCValueTypeRequirements(parameterType)
 		e.recordCScalarFeature(parameterType)
 	}
 	for _, resource := range function.Resources {
@@ -1504,6 +1509,17 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 		}
 	}
 	return nil
+}
+
+func (e *emitter) recordCValueTypeRequirements(value hir.Type) {
+	switch canonicalCValueType(value) {
+	case hir.SharedBorrow(hir.TypeByteSlice):
+		e.needsByteSlice = true
+	case hir.MutableBorrow(hir.TypeByteSlice):
+		e.needsMutByteSlice = true
+	case hir.SharedBorrow(hir.TypeStr):
+		e.needsStringView = true
+	}
 }
 
 func (e *emitter) callSignature(symbol hir.SymbolID) (hir.Type, []hir.Type, bool, bool) {
@@ -2716,13 +2732,13 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 	output.WriteByte('\n')
 	_, usesStaticByteString := e.features["static-byte-string"]
 	_, usesArrayByteView := e.features["array-byte-view-borrow"]
-	if usesStaticByteString || usesArrayByteView {
+	if usesStaticByteString || usesArrayByteView || e.needsByteSlice {
 		output.WriteString("typedef struct fy_byte_slice {\n")
 		output.WriteString("    const uint8_t *data;\n")
 		output.WriteString("    uintptr_t length;\n")
 		output.WriteString("} fy_byte_slice;\n\n")
 	}
-	if _, used := e.features["mutable-array-byte-view-borrow"]; used {
+	if _, used := e.features["mutable-array-byte-view-borrow"]; used || e.needsMutByteSlice {
 		output.WriteString("typedef struct fy_mut_byte_slice {\n")
 		output.WriteString("    uint8_t *data;\n")
 		output.WriteString("    uintptr_t length;\n")
@@ -2730,7 +2746,7 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 	}
 	_, usesStaticUTF8String := e.features["static-utf8-string"]
 	_, usesUTF8StringView := e.features["utf8-string-view"]
-	if usesStaticUTF8String || usesUTF8StringView {
+	if usesStaticUTF8String || usesUTF8StringView || e.needsStringView {
 		output.WriteString("typedef struct fy_str {\n")
 		output.WriteString("    const uint8_t *data;\n")
 		output.WriteString("    uintptr_t length;\n")

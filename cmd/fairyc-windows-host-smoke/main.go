@@ -665,14 +665,19 @@ func run() error {
 	if _, err := pecoff.InspectAMD64Unwind(stdIOArtifact); err != nil {
 		return fmt.Errorf("inspect std::io stable build unwind data: %w", err)
 	}
-	if err := executeExpectOutput(stdIOArtifactPath, 0, "Fairy C says hi\n", "Fairy C warns too\n"); err != nil {
+	if err := executeExpectOutput(
+		stdIOArtifactPath,
+		0,
+		"Fairy C says hi\nbytes on stdout\n",
+		"Fairy C warns too\nbytes on stderr\n",
+	); err != nil {
 		return fmt.Errorf("execute std::io stable build artifact: %w", err)
 	}
 	var stdIORunStdout bytes.Buffer
 	var stdIORunStderr bytes.Buffer
 	stdIORunCode := cli.Run([]string{"run", "--release", "--locked"}, stdIORoot, &stdIORunStdout, &stdIORunStderr)
-	if stdIORunCode != cli.ExitSuccess || stdIORunStdout.String() != "Fairy C says hi\n" ||
-		stdIORunStderr.String() != "Fairy C warns too\n" {
+	if stdIORunCode != cli.ExitSuccess || stdIORunStdout.String() != "Fairy C says hi\nbytes on stdout\n" ||
+		stdIORunStderr.String() != "Fairy C warns too\nbytes on stderr\n" {
 		return fmt.Errorf("std::io stable run returned code %d, stdout %q, stderr %q", stdIORunCode, stdIORunStdout.String(), stdIORunStderr.String())
 	}
 	workspaceRunExecutions++
@@ -1557,8 +1562,8 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string, clockResolution in
 	if err != nil {
 		return 0, fmt.Errorf("execute standalone compiler std::io workspace run: %w", err)
 	}
-	if stdIORunCode != cli.ExitSuccess || stdIORunStdout != "Fairy C says hi\n" ||
-		stdIORunStderr != "Fairy C warns too\n" {
+	if stdIORunCode != cli.ExitSuccess || stdIORunStdout != "Fairy C says hi\nbytes on stdout\n" ||
+		stdIORunStderr != "Fairy C warns too\nbytes on stderr\n" {
 		return 0, fmt.Errorf("standalone compiler std::io run returned code %d, stdout %q, stderr %q", stdIORunCode, stdIORunStdout, stdIORunStderr)
 	}
 	stdIOBuildCode, stdIOBuildStdout, stdIOBuildStderr, err := runStandaloneCommand(
@@ -1574,7 +1579,12 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string, clockResolution in
 		return 0, fmt.Errorf("standalone compiler std::io build returned code %d, stdout %q, stderr %q", stdIOBuildCode, stdIOBuildStdout, stdIOBuildStderr)
 	}
 	stdIOArtifactPath := filepath.Join(stdIORoot, "build", "std-io-quickstart.exe")
-	if err := executeExpectOutput(stdIOArtifactPath, 0, "Fairy C says hi\n", "Fairy C warns too\n"); err != nil {
+	if err := executeExpectOutput(
+		stdIOArtifactPath,
+		0,
+		"Fairy C says hi\nbytes on stdout\n",
+		"Fairy C warns too\nbytes on stderr\n",
+	); err != nil {
 		return 0, fmt.Errorf("execute standalone compiler std::io artifact: %w", err)
 	}
 

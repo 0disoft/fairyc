@@ -170,15 +170,17 @@ completed prefix. Its `main` passes `ref str` and `ref u8[]` through safe intern
 byte helper observes the exact NUL and `A` bytes through checked read-only indexing while the entry contains no raw pointer or `unsafe`,
 prints `Fairy C says hi`, and exits 42. That is real
 FY-to-MSVC process output, unsafe containment, and source-effect enforcement for the legacy example.
-The compiler-bundled SDK `0.0.0-stage0.3` exposes safe
-`std::io::write(ref str)` and `std::io::write_stderr(ref str)` operations returning
-`Result<usize, ConsoleError>` over target-neutral internal symbols. `examples/std_io_quickstart`
+The compiler-bundled SDK `0.0.0-stage0.4` exposes safe text
+`std::io::write(ref str)` and `std::io::write_stderr(ref str)` operations plus exact binary
+`write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` operations. All four return
+`Result<usize, ConsoleError>` over the same target-neutral internal symbols. `examples/std_io_quickstart`
 contains no raw pointer, unsafe block, foreign declaration, or platform name; stable run forwards
-its exact separated stdout and stderr and preserves success status zero, while
+its exact text and byte-view output on separated stdout and stderr and preserves success status zero, while
 stable build produces the same inspected Windows PE for direct execution. A separately built
 `fairyc.exe` repeats both locked paths. Linux owns a POSIX
 adapter and four configured native probes covering both streams, but this Windows host has not
-observed those executions. Formatting, implicit newlines, stdin, terminal encoding, and a final symbolic error taxonomy
+observed those executions. Byte-view output performs no UTF-8 validation. Formatting, implicit
+newlines, stdin, terminal encoding, and a final symbolic error taxonomy
 remain outside the API.
 A provisional SystemHeap implementation now lives in the target standard-library
 boundary rather than the thin runtime. It normalizes empty allocation, admits current fundamental
@@ -471,7 +473,8 @@ indexed `u8` value to `i32`,
 then execute `examples/windows_output/main.fy` with exact stdout and process status
 42 while explicitly supplying its separate `windows_console.fy` module, and finally run the
 two-package `examples/workspace_quickstart` graph through an exact generated lock with native result
-42, and runs the safe `std::io` workspace with exact separated stdout/stderr and status zero. The same standalone
+42, and runs the safe `std::io` workspace with exact text and byte-view lines on separated
+stdout/stderr and status zero. The same standalone
 compiler runs the isolated semantic test and emits locked Windows and Linux C11 application units without
 changing the retained executable. It then measures nine fresh-cache cold/warm pairs with one new compiler process per sample,
 sends eight editor-shaped workspace checks to one compiler process, validates the cold, no-op,

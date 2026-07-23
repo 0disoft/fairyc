@@ -40,11 +40,29 @@ pub fn Result<usize, ConsoleError> write(ref str text) {
     return checked_write_result(result.status, result.written);
 }
 
+/// Writes the exact bytes in data to stdout without UTF-8 validation or a newline.
+@effects(console)
+pub fn Result<usize, ConsoleError> write_bytes(ref u8[] data) {
+    let raw_console_write_result result = unsafe {
+        stdout_write_all_raw(data as ptr u8, data.len)
+    };
+    return checked_write_result(result.status, result.written);
+}
+
 /// Writes the exact UTF-8 bytes in text to stderr without adding a newline.
 @effects(console)
 pub fn Result<usize, ConsoleError> write_stderr(ref str text) {
     let raw_console_write_result result = unsafe {
         stderr_write_all_raw(text as ptr u8, text.len)
+    };
+    return checked_write_result(result.status, result.written);
+}
+
+/// Writes the exact bytes in data to stderr without UTF-8 validation or a newline.
+@effects(console)
+pub fn Result<usize, ConsoleError> write_stderr_bytes(ref u8[] data) {
+    let raw_console_write_result result = unsafe {
+        stderr_write_all_raw(data as ptr u8, data.len)
     };
     return checked_write_result(result.status, result.written);
 }

@@ -165,25 +165,11 @@ import std::io as io;
 
 @effects(console)
 fn i32 main() {
-    let ref str message = "Fairy C says hi\n";
-    let ref str warning = "Fairy C warns too\n";
-    return switch (io::write(message)) {
-        case .ok(written) : {
-            if (written == message.len) {
-                switch (io::write_stderr(warning)) {
-                    case .ok(error_written) : { if (error_written == warning.len) { 42 } else { 4 } }
-                    case .err(error) : {
-                        if (error.status != 0 && error.written <= warning.len) { 5 } else { 6 }
-                    }
-                }
-            } else {
-                1
-            }
-        }
-        case .err(error) : {
-            if (error.status != 0 && error.written <= message.len) { 2 } else { 3 }
-        }
-    };
+    discard io::write("Fairy C says hi\n");
+    discard io::write_bytes(b"\x00\xff");
+    discard io::write_stderr("Fairy C warns too\n");
+    discard io::write_stderr_bytes(b"\x80\x00");
+    return 42;
 }
 `,
 	})
@@ -209,20 +195,29 @@ fn i32 main() {
 
 func TestBundledStandardLibraryIORequiresConsoleEffect(t *testing.T) {
 	t.Parallel()
-	for _, function := range []string{"write", "write_stderr"} {
-		function := function
-		t.Run(function, func(t *testing.T) {
+	tests := []struct {
+		function string
+		argument string
+	}{
+		{function: "write", argument: `"Fairy C says hi\n"`},
+		{function: "write_bytes", argument: `b"\x00\xff"`},
+		{function: "write_stderr", argument: `"Fairy C warns too\n"`},
+		{function: "write_stderr_bytes", argument: `b"\x80\x00"`},
+	}
+	for _, test := range tests {
+		test := test
+		t.Run(test.function, func(t *testing.T) {
 			t.Parallel()
 			root := t.TempDir()
-			source := strings.ReplaceAll(`module main;
+			source := strings.NewReplacer("FUNCTION", test.function, "ARGUMENT", test.argument).Replace(`module main;
 
 import std::io as io;
 
 fn i32 main() {
-    discard io::FUNCTION("Fairy C says hi\n");
+    discard io::FUNCTION(ARGUMENT);
     return 0;
 }
-`, "FUNCTION", function)
+`)
 			writePackage(t, root, ".", rootManifest(""), map[string]string{
 				"src/main.fy": source,
 			})
