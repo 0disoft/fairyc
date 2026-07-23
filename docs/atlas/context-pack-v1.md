@@ -89,10 +89,10 @@ source comments, generated summaries, prompt injection, control characters, secr
 paths, and unrelated files outside the first output contract.
 
 The separately encoded attributed-text capability implemented by ADR 0196 and ADR 0197, and exposed
-only by the ADR 0198 experimental source command, remains outside this schema. Linking or embedding
-that artifact requires a new explicit Context Pack schema
-decision covering the exact relationship and compatibility behavior. It cannot silently start
-populating these v1 arrays.
+by the ADR 0198 source and ADR 0200 documentation commands, remains outside this schema. ADR 0202's
+Evidence Bundle v0 can wrap the complete unchanged Context Pack beside two independently checksummed
+attributed-text documents, but it does not link or embed text inside this pack. These v1 arrays cannot
+silently start carrying text.
 
 ## Determinism and privacy
 
@@ -119,8 +119,8 @@ unchanged into the pack. `impact` and semantic `diff` remain deferred.
 
 - no Context Pack decoder or acceptance of untrusted pack bytes;
 - no source excerpt, documentation import, generated summary, or warning producer in this pack;
-  ADR 0195 through ADR 0198 keep separate attributed-text extraction and output outside these empty
-  v1 arrays;
+  ADR 0195 through ADR 0200 keep separate attributed-text extraction and output outside these empty
+  v1 arrays, and ADR 0202 composes only the complete unchanged child outputs;
 - no dependency-map join, workspace-wide index, name search, fuzzy match, or rename inference;
 - no stable command, default map path, or automatic publication; experimental CLI exposure is
   limited to the explicit overview contract in ADR 0190 and exact-SymbolId show/around contract in

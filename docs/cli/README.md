@@ -71,6 +71,16 @@ exact frontend-attached marker-bearing `///` block and returns `kind-unavailable
 Neither action has default limits, name search, SDK or dependency text, output path, decoder, model
 call, or permission authority, and neither populates Context Pack v1.
 
+`fairyc experimental atlas-evidence show --package-uid <uid> --symbol <symbol-id> --direction
+<outgoing|incoming|both> --relation <kind> [--relation <kind>]... --max-records <count>
+--max-relations <count> --max-selection-bytes <bytes> --max-fragment-bytes <bytes>
+--max-text-bytes <bytes> --max-facts-bytes <bytes> --max-text-document-bytes <bytes>
+--max-output-bytes <bytes> [--locked]` compiles that exact workspace once and nests the complete
+unchanged Context Pack, source attributed-text, and documentation attributed-text documents in one
+checksummed Evidence Bundle v0. The wrapper has no authority; facts remain compiler facts and both
+text children remain untrusted. Every component and final bound is explicit, and the command adds no
+decoder, defaults, store, token estimate, model call, or Context Pack text population.
+
 The persistent command is deliberately not another session mode. Every invocation is a fresh
 process and hashes its executable before constructing a stable disk Session. The cache path must be
 canonical, use forward slashes, and remain under ignored `build/`. All entry, retained-byte,

@@ -1,6 +1,6 @@
 # `.fymap` v1 Logical Schema
 
-- Status: Canonical transport, contained current-source-validated store, bounded package-local queries, compiler-fact Context Pack and exact-name SymbolId Catalog v1 output, experimental overview/catalog/show/around/source-text commands, and separate exact retained-source attributed-text JSON implemented; no attributed-text decoder
+- Status: Canonical transport, contained current-source-validated store, bounded package-local queries, compiler-fact Context Pack and exact-name SymbolId Catalog v1 output, experimental overview/catalog/show/around/text/evidence commands, separate exact retained-source attributed-text JSON, and output-only single-symbol Evidence Bundle implemented; no attributed-text or bundle decoder
 - Product source: `docs/product/02-spec.md`
 - Decision source: `docs/adr/0004-atlas-semantic-snapshot-boundary.md`
 - Snapshot source: `docs/atlas/semantic-snapshot-v0.md`
@@ -10,6 +10,7 @@
 - Query source: `docs/atlas/fymap-query-v1.md`
 - Context Pack source: `docs/atlas/context-pack-v1.md`
 - Attributed text policy source: `docs/atlas/attributed-text-v0.md`
+- Evidence Bundle source: `docs/atlas/evidence-bundle-v0.md`
 
 ## Boundary
 
@@ -32,6 +33,10 @@ guessed uniqueness. All remain experimental, require explicit limits, and rebuil
 compiler facts without selecting a map-store path.
 ADR 0198 separately exposes one exact workspace-authored source excerpt with explicit text and final
 output bounds; it does not add source bodies to this schema or to Context Pack v1.
+ADR 0200 adds exact attached declaration documentation through the same separate attributed-text
+encoding. ADR 0202 can compose both complete text documents beside an unchanged exact-symbol Context
+Pack in a new checksummed wrapper. It does not add text, bundle records, or wrapper checksums to this
+schema.
 
 The first implementation plans, encodes, and optionally publishes one deterministic map per package.
 ADR 0191 adds a narrow raw quickstart rewrite distribution after planning, but it does not show a
@@ -140,12 +145,13 @@ Every implemented `.fymap` fact uses one provenance class:
 
 `.fymap` v1 stores no source body, documentation body, generated prose, or text reference that can
 be mistaken for a fact. ADR 0195 defines a separate attributed-text companion, ADR 0196 implements
-its retained-source extraction gate, ADR 0197 encodes it separately outside `.fymap` v1, and ADR
-0198 exposes only that separate artifact through an experimental source command. The companion
-whose fixed authority is `untrusted-text` and whose origin, SymbolId, package/file/line-map identity,
-span, exact bytes, checksum, budgets, and omissions must remain explicit. Text cannot replace a
-compiler fact, change completeness, or grant filesystem, process, network, credential, approval,
-model, or execution authority. Atlas performs no URL fetch while building a map or selecting text.
+its retained-source extraction gate, ADR 0197 encodes it separately outside `.fymap` v1, and ADRs
+0198 and 0200 expose only those separate artifacts through experimental text commands. ADR 0202's
+Evidence Bundle nests the complete child documents without changing this map. Each companion's fixed
+authority is `untrusted-text`; origin, SymbolId, package/file/line-map identity, span, exact bytes,
+checksum, budgets, and omissions remain explicit. Text cannot replace a compiler fact, change
+completeness, or grant filesystem, process, network, credential, approval, model, or execution
+authority. Atlas performs no URL fetch while building a map, selecting text, or composing a bundle.
 
 ## Initial queries
 

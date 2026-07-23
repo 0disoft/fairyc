@@ -81,6 +81,7 @@ The current Go prototype implements twenty-two deliberately unstable developer c
 | `fairyc experimental atlas-symbols list --package-uid <uid> --kind <kind> [--kind <kind>]... [--module <module>] [--name <identifier>] [--after <full-symbol-id>] --max-symbols <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--locked]` | Compile the manifest-owned workspace and page exact current declarations in full-SymbolId order with optional exact module/name filters | One canonical checksummed `fairyc.symbol-catalog-json/v1` value with no newline, source body, fuzzy rank, guessed unique match, map-store path, or hidden limit |
 | `fairyc experimental atlas-text source --package-uid <uid> --symbol <symbol-id> --origin workspace-authored --max-fragments <count> --max-fragment-bytes <bytes> --max-text-bytes <bytes> --max-output-bytes <bytes> [--locked]` | Compile the manifest-owned workspace, resolve one exact current visible/full SymbolId, and select its workspace-authored declaration bytes under explicit count and byte policy | One canonical checksummed `fairyc.attributed-text-json/v0` value with no newline or host path; a text-budget exclusion is an explicit successful omission, while final-output overflow is atomic failure |
 | `fairyc experimental atlas-text documentation --package-uid <uid> --symbol <symbol-id> --origin workspace-authored --max-fragments <count> --max-fragment-bytes <bytes> --max-text-bytes <bytes> --max-output-bytes <bytes> [--locked]` | Compile the same workspace, resolve one exact current declaration plus its immutable frontend attachment sidecar, and select only exact marker-bearing `///` bytes | The same canonical attributed-text envelope with `declaration-documentation`, or a successful checksummed `kind-unavailable`, safety, or text-budget omission; no source scan, declaration body, map-format change, or host path |
+| `fairyc experimental atlas-evidence show --package-uid <uid> --symbol <symbol-id> --direction <outgoing\|incoming\|both> --relation <kind> [--relation <kind>]... --max-records <count> --max-relations <count> --max-selection-bytes <bytes> --max-fragment-bytes <bytes> --max-text-bytes <bytes> --max-facts-bytes <bytes> --max-text-document-bytes <bytes> --max-output-bytes <bytes> [--locked]` | Compile the manifest-owned workspace once and compose exact-symbol compiler facts, declaration source, and attached documentation from the same retained exact-current state | One canonical checksummed `fairyc.atlas-evidence-json/v0` value whose unchanged independently checksummed children retain `compiler-fact` versus `untrusted-text` authority and explicit component/final bounds |
 | `fairyc experimental check-workspace-session --target <target-id> --max-requests <count> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-artifact-bytes <bytes> [--locked]` | Keep one bounded process-local verified-MIR Session while a caller submits sequential versioned NDJSON check requests on stdin | One `fairyc.experimental.workspace-check-session/v0` JSON response per completed request, human diagnostics on stderr, and the last completed request's prototype exit code |
 | `fairyc experimental check-workspace-cache --target <target-id> --cache-dir <build/path> --cache-max-entries <count> --cache-max-bytes <bytes> --cache-max-record-bytes <bytes> --cache-max-artifact-bytes <bytes> --cache-temp-max-age-seconds <seconds> [--locked]` | Run one package-aware semantic and verified-MIR check with explicit bounded cross-process stable disk reuse keyed by the exact executable image | One `fairyc.experimental.workspace-cache-check/v0` JSON object, human diagnostics on stderr, or prototype invocation/package/internal failure |
 | `fairyc experimental build-workspace --target x86_64-windows-msvc --profile <low\|optimized> --output <build/path.exe> [--locked]` | Compile the current local-exact workspace's root `main::main` through package-aware verified MIR and the closed Windows target pipeline | A no-overwrite `.exe`, target/toolchain/profile/lock receipt, or package, source, capability, toolchain, link, and artifact diagnostics |
@@ -158,8 +159,22 @@ documentation similarly produces successful `kind-unavailable` with zero text by
 exact symbol or a final envelope that exceeds its output budget is code `2` with no stdout. Ordinary
 mode may maintain the lock before such a later failure; locked mode verifies it without writing.
 The commands reopen no
-source path, accepts no encoded input or output path, and starts no toolchain, process, network
+source path, accept no encoded input or output path, and start no toolchain, process, network
 request, model call, or persistent store.
+
+`experimental atlas-evidence show` reuses that same exact workspace preparation once, then invokes
+the owning Context Pack v1 source, attributed-text source, and attributed-text documentation encoders
+for one exact symbol. It requires package UID, visible/full SymbolId, direction, at least one exact
+relation kind, positive record/relation/selection limits, positive fragment/text limits, positive
+facts and per-attributed-document limits, and a positive final bundle limit; only `--locked` is
+optional. Counts are capped at 65,536, fragment bytes at 8,388,608, aggregate text bytes at
+67,108,864, and all document/final byte classes at 1,073,741,824. The fixed one-fragment text budget
+and `--max-text-document-bytes` apply independently to source and documentation. The compact wrapper
+labels itself `none`, facts `compiler-fact`, and both text children `untrusted-text`; it grants no
+permission or authenticity. Successful text omissions remain inside their child, while query,
+component-document, and final-envelope overflow reject the whole output. There is no `overview`,
+`around`, default, name search, decoder, bundle store, dependency/generated text, token estimate,
+model call, or Context Pack text mutation.
 
 `experimental check-workspace-session` exposes that workspace check through one foreground
 process-local Session. It requires an explicit known target and caller-selected positive cache entry,

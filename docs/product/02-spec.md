@@ -707,7 +707,7 @@ stable source-free surface; C emission has the target-explicit workspace surface
 
 ## Compatibility
 
-Compiler release, language revision, internal MIR, target schema, ABI profile, diagnostic catalog and JSON, runtime ABI, standard library, package schemas, `PackageInstanceId`, `.fymap`, `SymbolId`, and interface hashes are independently versioned contracts. Pre-1 source and runtime contracts use exact compatibility. MIR and caches are disposable and are regenerated rather than migrated.
+Compiler release, language revision, internal MIR, target schema, ABI profile, diagnostic catalog and JSON, runtime ABI, standard library, package schemas, `PackageInstanceId`, `.fymap`, `SymbolId`, interface hashes, Context Pack, attributed text, Symbol Catalog, and Evidence Bundle are independently versioned contracts. Pre-1 source and runtime contracts use exact compatibility. MIR and caches are disposable and are regenerated rather than migrated.
 
 No v0 document creates a stable language, native ABI, MIR exchange, binary package, diagnostic-span, debugger, anchor, or `SymbolId` promise. The compatibility vector and failure behavior are defined in `docs/compatibility/versioning-v0.md`.
 
@@ -724,7 +724,8 @@ Validated workspace source bytes now produce independent `fairyc.source-file/v1`
 package instance, canonical relative path, and source/test kind while excluding source text and host
 paths. Construction requires a one-to-one file/module match. The implemented map-store reader
 recomputes them through the validated workspace boundary before trusting stored spans; source
-excerpt loading remains future query work.
+and documentation extraction instead uses those exact identities to revalidate already retained
+workspace bytes without reopening a path.
 
 The first snapshot consumer now derives provisional `SymbolId` values with the independently
 versioned `fairyc.symbol-id/v1-sha256-128+256` algorithm. Package UID, module, declaration kind and
@@ -801,6 +802,15 @@ in-memory-only snapshot sidecar and emits exact marker-bearing retained bytes or
 `kind-unavailable` omission. The current implementation still has no decoder, text store, stable
 CLI, rendered documentation model, or dependency/generated text admission.
 
+ADR 0202 adds independent output family `fairyc.atlas-evidence/v0` and experimental
+`atlas-evidence show`. One exact-current workspace preparation produces an unchanged Context Pack v1
+`show` child plus separate unchanged source and documentation attributed-text v0 children. The
+wrapper repeats canonical symbol/package identity, labels itself `none`, labels facts
+`compiler-fact`, labels both text children `untrusted-text`, checksums the exact nested values, and
+requires explicit query, text, child-document, and final-output limits. It accepts no caller JSON or
+text, does not populate Context Pack v1, and adds no decoder, authentication, model call, token
+budget, default policy, or authority.
+
 Stage 0 Atlas now exposes `experimental atlas-pack overview` for one exact manifest package UID with
 mandatory record, selection-byte, and final-output-byte limits plus optional locked no-write mode.
 It emits canonical pack bytes without a newline or map-store write.
@@ -818,7 +828,8 @@ Both require explicit direction, exact relation filters, record/relation/selecti
 and package UID; `around` additionally requires explicit depth. They emit Context Pack v1 bytes,
 retain incomplete dependency and incoming-package joins as omissions, and add no name search, text
 import, default store, or safe-change inference. A separate map-publication policy, decoder,
-additional text origin/kind support, and composite pack remain future work.
+additional text origin/kind support, and multi-symbol or neighborhood evidence composition remain
+future work.
 
 The configured Windows host smoke separately measures whole-package canonical rewrite cost after
 workspace analysis and map planning. It performs one untimed warmup and nine raw rewrites of every

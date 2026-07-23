@@ -7,6 +7,7 @@
 - CLI decision: `docs/adr/0198-experimental-atlas-text-source-command.md`
 - Documentation attachment decision: `docs/adr/0199-c-friendly-declaration-documentation-attachment.md`
 - Documentation output decision: `docs/adr/0200-exact-declaration-documentation-attributed-text-command.md`
+- Evidence Bundle consumer: `docs/atlas/evidence-bundle-v0.md`
 - Exact file identity: `docs/package/source-file-identities-v1.md`
 - Compiler-fact pack: `docs/atlas/context-pack-v1.md`
 
@@ -30,10 +31,11 @@ and must keep tool authorization in host-owned deterministic policy.
 `fairyc.context-pack/v1` continues to require empty `documentation`, `source_excerpts`, and
 `warnings` arrays. Neither format may begin carrying text under its existing identifier.
 
-ADR 0197 implements the separately versioned `fairyc.attributed-text-json/v0` output. ADR 0198
-assigns that exact artifact only to `experimental atlas-text source`; it does not reserve a
-composite version. A future composite Context Pack still requires a new pack version and an explicit
-decision about embedding versus checksum-linking this companion artifact.
+ADR 0197 implements the separately versioned `fairyc.attributed-text-json/v0` output. ADR 0198 and
+ADR 0200 assign that exact artifact to the separate source and documentation actions. ADR 0202 adds
+an independent `fairyc.atlas-evidence/v0` wrapper that nests the complete canonical source and
+documentation documents beside an unchanged Context Pack v1 document. It does not populate the
+pack's empty text arrays, revise this encoding, or accept attributed-text input.
 
 ## Admitted content
 
@@ -221,12 +223,16 @@ currently proves:
 6. default compiler, `.fymap` v1, Context Pack v1, build, cache, and native output byte identity when
    attributed text is not explicitly requested.
 
-The canonical encoder is exposed through `fairyc experimental atlas-text source` and
-`fairyc experimental atlas-text documentation`. Both require exact package and visible/full
-SymbolId selectors, `workspace-authored` origin, explicit fragment/count/text/final-output budgets,
-and optional locked no-write mode. The documentation action emits only the exact frontend-attached
-marker-bearing bytes or a checksummed `kind-unavailable` omission. Both emit size and safety
-omissions successfully but atomically reject a final envelope that does not fit the output budget.
-Dependency text, generated text, persistent text storage, a decoder, stable CLI, composite pack,
-token budgeting, anchors, structural editing, LSP, SCIP, MCP, model calls, embeddings, and
-permissions remain unimplemented.
+The canonical encoder is exposed directly through `fairyc experimental atlas-text source` and
+`fairyc experimental atlas-text documentation`, and indirectly as two independently checksummed
+children of `fairyc experimental atlas-evidence show`. The direct commands require exact package and
+visible/full SymbolId selectors, explicit `workspace-authored` origin, fragment/count/text/final-
+output budgets, and optional locked no-write mode. The Evidence command fixes the origin to
+`workspace-authored` and each child count to one, then requires explicit fragment/text,
+per-attributed-document, and final-bundle limits. The documentation producer emits only the exact
+frontend-attached marker-bearing bytes or a checksummed `kind-unavailable` omission. Both producers
+emit size and safety omissions successfully but atomically reject a child envelope that does not fit
+its output budget. The Evidence Bundle applies the text budget and document limit separately to each
+child and grants no new authority. Dependency text, generated text, persistent text storage, a
+decoder, stable CLI, Context Pack text population, token budgeting, anchors, structural editing,
+LSP, SCIP, MCP, model calls, embeddings, and permissions remain unimplemented.

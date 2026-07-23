@@ -63,7 +63,10 @@ func runAtlasPackRelations(query string, arguments []string, sourceRoot string, 
 }
 
 func parseAtlasPackRelationOptions(query string, arguments []string) (atlasPackRelationOptions, error) {
-	command := "atlas-pack " + query
+	return parseAtlasRelationOptions("atlas-pack "+query, query, arguments)
+}
+
+func parseAtlasRelationOptions(command, query string, arguments []string) (atlasPackRelationOptions, error) {
 	options := atlasPackRelationOptions{}
 	seen := make(map[string]bool, 10)
 	for position := 0; position < len(arguments); {

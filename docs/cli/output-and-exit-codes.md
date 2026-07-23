@@ -78,6 +78,17 @@ lock failures use `7`. Ordinary mode may update `fairy.lock` before a later sele
 failure; `--locked` does not write. An external writer can accept a prefix before returning code `4`,
 so stream rollback is impossible even though encoder-side size failure is atomic.
 
+`experimental atlas-evidence show` writes exactly one compact canonical
+`fairyc.atlas-evidence-json/v0` value without a trailing newline. Successful attributed-text
+`kind-unavailable`, safety, or size omissions keep code `0` and remain independently checksummed
+inside their child documents. Missing, duplicate, unknown, noncanonical, or unsupported options; an
+unknown package or exact SymbolId; insufficient query selection; and a facts, attributed-text child,
+or complete bundle exceeding its explicit bound use code `2` with empty stdout. Source diagnostics
+use `3`; internal identity/invariant and output-write failures use `4`; manifest, workspace, graph,
+and lock failures use `7`. Ordinary mode may update `fairy.lock` before a later failure; `--locked`
+does not write. Encoder-side failures are atomic, but an external writer can still retain a prefix
+before returning code `4`.
+
 The stable `fairyc explain` output is exactly three deterministic, ANSI-free lines on success: the
 canonical code and meaning, its category, and `fairyc.diagnostic-catalog/v0 (provisional Stage 0)`.
 It reads no source or configuration and has no filesystem, process, network, toolchain, target, or

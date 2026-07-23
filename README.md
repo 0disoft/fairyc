@@ -543,6 +543,12 @@ exposes exact marker-bearing bytes as `experimental atlas-text documentation`, i
 unchanged. No decoder, text store, stable attributed-text CLI, rendered documentation model,
 dependency text, file reopening, network fetch, model call, or agent authority exists.
 
+ADR 0202 adds `experimental atlas-evidence show` for one exact SymbolId. It prepares the workspace
+once and nests an unchanged compiler-fact Context Pack v1 plus unchanged source and documentation
+attributed-text v0 documents in canonical checksummed `fairyc.atlas-evidence-json/v0`. The wrapper
+has authority `none`, text remains `untrusted-text`, component and final limits are mandatory, and no
+decoder, default, store, token estimate, model call, or Context Pack text population is introduced.
+
 `experimental target-spec` accepts exactly one known Linux GNU or Windows MSVC ID and writes
 deterministic `fairyc.target-spec/v0` JSON. The result separates target semantics from local
 toolchain discovery and lists the profile-specific missing evidence that keeps all three target
@@ -624,7 +630,7 @@ or arbitrary link-input option.
 - Runtime and standard library: `docs/runtime/runtime-stdlib-v0.md`
 - Compatibility and versioning: `docs/compatibility/versioning-v0.md`
 - Diagnostic catalog: `docs/diagnostics/catalog-v0.md`
-- Atlas semantic snapshot and documentation sidecar, provisional SymbolId, logical planning, canonical transport, contained current-source-validated store, bounded package-local queries, canonical compiler-fact Context Packs, canonical exact retained-source/documentation attributed-text output, frontend-owned exact `///` attachment, exact catalog plus overview/show/around/text CLI, and whole-package rewrite measurement: `docs/atlas/`, `internal/lexer/documentation.go`, `internal/semanticsnapshot/`, `internal/atlasmap/`, `internal/contextpack/`, `internal/attributedtext/`, `internal/workspaceloader/exact_source.go`, `internal/cli/atlas_pack*.go`, `internal/cli/atlas_text.go`, `internal/buildmeasure/atlas_rewrite.go`
+- Atlas semantic snapshot and documentation sidecar, provisional SymbolId, logical planning, canonical transport, contained current-source-validated store, bounded package-local queries, canonical compiler-fact Context Packs, canonical exact retained-source/documentation attributed-text output, single-symbol Evidence Bundle v0, frontend-owned exact `///` attachment, exact catalog plus overview/show/around/text/evidence CLI, and whole-package rewrite measurement: `docs/atlas/`, `internal/lexer/documentation.go`, `internal/semanticsnapshot/`, `internal/atlasmap/`, `internal/contextpack/`, `internal/attributedtext/`, `internal/evidencebundle/`, `internal/workspaceloader/exact_source.go`, `internal/cli/atlas_pack*.go`, `internal/cli/atlas_text.go`, `internal/cli/atlas_evidence.go`, `internal/buildmeasure/atlas_rewrite.go`
 - CLI contract: `docs/cli/command-contract.md`
 - Workspace ownership: `docs/monorepo/package-ownership.md`
 

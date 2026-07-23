@@ -595,6 +595,17 @@ remain unchanged. The in-memory snapshot sidecar is not part of `.fymap` v1, Sym
 v1, or a persisted compatibility surface. Additional origins, attachment targets, rendering,
 decoding, storage, and stable command behavior require later decisions.
 
+ADR 0202 independently fixes output version `fairyc.atlas-evidence/v0`, encoding
+`fairyc.atlas-evidence-json/v0`, checksum `fairyc.atlas-evidence-checksum/v0-sha256`, prefix
+`fyevidence0-sha256-`, exact envelope/document field order, authority labels, canonical exact-symbol
+subject, three nested child positions, and component/final limit meanings. Each child remains a
+complete existing canonical document; the wrapper does not revise or decode Context Pack v1 or
+attributed-text v0. It also adds only the unstable `experimental atlas-evidence show` spelling.
+Changing wrapper field meaning/order, JSON spelling, authority labels, component set, checksum input,
+or limit semantics requires an explicit compatibility decision. No decoder, input migration,
+cross-version child acceptance, default limit, persistence, authentication, or stable CLI behavior
+is promised.
+
 Dependency handling is relation-specific:
 
 | Condition | Atlas behavior |

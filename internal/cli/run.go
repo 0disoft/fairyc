@@ -213,6 +213,8 @@ func runExperimental(args []string, sourceRoot string, stdin io.Reader, stdout, 
 		return runAtlasSymbols(args[1:], sourceRoot, stdout, stderr)
 	case "atlas-text":
 		return runAtlasText(args[1:], sourceRoot, stdout, stderr)
+	case "atlas-evidence":
+		return runAtlasEvidence(args[1:], sourceRoot, stdout, stderr)
 	case "check-workspace-cache":
 		return runWorkspaceCacheCheck(args[1:], sourceRoot, stdout, stderr)
 	case "check-workspace-session":

@@ -102,7 +102,7 @@ regenerate, or override compiler source.
 - Runtime and standard library: docs/runtime/*.md
 - Compatibility and versioning: docs/compatibility/*.md
 - Diagnostic meanings: docs/diagnostics/catalog-v0.md
-- Atlas map and context contracts: docs/atlas/*.md
+- Atlas map, context, attributed-text, and evidence-bundle contracts: docs/atlas/*.md
 - Immutable Atlas compiler-fact snapshot and in-memory declaration-documentation sidecar: internal/semanticsnapshot/, docs/atlas/semantic-snapshot-v0.md, docs/adr/0182-immutable-semantic-snapshot-v0.md, docs/adr/0200-exact-declaration-documentation-attributed-text-command.md
 - Provisional deterministic Atlas SymbolId: internal/symbolidentity/, docs/atlas/symbol-id-v1.md, docs/adr/0183-provisional-symbol-id-v1.md
 - Deterministic per-package Atlas logical map planning: internal/atlasmap/, docs/atlas/fymap-logical-plan-v1.md, docs/adr/0185-fymap-logical-package-plan-v1.md
@@ -112,6 +112,7 @@ regenerate, or override compiler source.
 - Exact-current full-SymbolId-ordered catalog query with optional exact declaration-name filtering: internal/atlasmap/query.go, docs/adr/0192-exact-current-symbol-catalog-query.md, docs/adr/0201-exact-name-symbol-catalog-v1.md
 - Canonical Atlas SymbolId Catalog v1 output and experimental CLI: internal/symbolcatalog/, internal/cli/atlas_symbols.go, docs/atlas/symbol-catalog-v1.md, docs/adr/0193-experimental-symbol-catalog-command.md, docs/adr/0201-exact-name-symbol-catalog-v1.md
 - Canonical compiler-fact-only Atlas Context Pack output: internal/contextpack/, docs/atlas/context-pack-v1.md, docs/adr/0189-canonical-compiler-fact-context-pack-v1.md
+- Canonical single-symbol Atlas Evidence Bundle v0 composition and experimental CLI: internal/evidencebundle/, internal/cli/atlas_evidence.go, docs/atlas/evidence-bundle-v0.md, docs/adr/0202-single-symbol-atlas-evidence-bundle-v0.md
 - Experimental Atlas overview, show, and around Context Pack CLI: internal/cli/atlas_pack.go, internal/cli/atlas_pack_relations.go, docs/adr/0190-experimental-atlas-overview-pack-command.md, docs/adr/0194-experimental-atlas-show-around-pack-commands.md
 - Atlas attributed-text policy, frontend-owned exact `///` declaration attachment, immutable snapshot sidecar, exact retained-workspace source/documentation gates, canonical output-only JSON, and experimental source/documentation CLI: internal/lexer/documentation.go, internal/semanticsnapshot/, internal/attributedtext/, internal/workspaceloader/exact_source.go, internal/cli/atlas_text.go, docs/atlas/attributed-text-v0.md, docs/adr/0195-attributed-text-boundary-v0.md, docs/adr/0196-exact-retained-source-excerpt-extraction.md, docs/adr/0197-canonical-attributed-text-json-v0.md, docs/adr/0198-experimental-atlas-text-source-command.md, docs/adr/0199-c-friendly-declaration-documentation-attachment.md, docs/adr/0200-exact-declaration-documentation-attributed-text-command.md
 - Atlas whole-package rewrite measurement: internal/buildmeasure/atlas_rewrite.go, cmd/fairyc-windows-host-smoke/, docs/adr/0191-atlas-whole-package-rewrite-measurement.md

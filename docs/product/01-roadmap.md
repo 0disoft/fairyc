@@ -624,16 +624,22 @@ typed HIR as an exact byte span without entering executable semantics or Atlas t
 ADR 0200 now carries that fact through an immutable in-memory snapshot sidecar and exposes exact
 retained marker-bearing bytes through default-free `experimental atlas-text documentation`.
 Undocumented declarations produce `kind-unavailable`; map and Context Pack v1 bytes stay unchanged.
+ADR 0202 now composes one exact-symbol Context Pack v1, source attributed-text v0, and documentation
+attributed-text v0 document through `experimental atlas-evidence show`. Each child remains complete
+and independently checksummed, the wrapper has no authority, facts and untrusted text remain visibly
+separate, all query/text/component/final limits are explicit, and the existing formats stay
+byte-unchanged.
 
 - Preserve the implemented immutable `SemanticSnapshot` and per-package logical map plan.
 - Preserve the implemented bounded canonical `.fymap` codec and semantic revalidation boundary.
 - Preserve the implemented contained immutable store and current-source rejection boundary.
 - Preserve the implemented bounded exact-current package-local query boundary.
 - Preserve the implemented canonical compiler-fact-only Context Pack boundary.
+- Preserve the output-only single-symbol Evidence Bundle v0 composition boundary; keep child authority and byte limits explicit and add no decoder or Context Pack text population.
 - Preserve the explicit overview/show/around experimental commands and keep map publication policy separate.
 - Preserve the raw whole-package rewrite harness; require representative failure before adding chunks or compression.
 - Preserve the implemented exact module/name/kind SymbolId Catalog v1 output as the discovery path for experimental `show` and `around`; keep fuzzy ranking and guessed uniqueness out.
-- Preserve the implemented attributed-text v0 model, exact retained source/documentation gates, canonical output-only JSON, explicit experimental source/documentation commands, and exact `///` frontend attachment sidecar; keep additional origins, multi-record composition, decoding, and rendering behind separate decisions.
+- Preserve the implemented attributed-text v0 model, exact retained source/documentation gates, canonical output-only JSON, explicit experimental source/documentation/evidence commands, and exact `///` frontend attachment sidecar; keep additional origins, multi-record composition, decoding, and rendering behind separate decisions.
 
 Exit gate: Atlas failure cannot change compilation; stale or incompatible maps fail closed; unknown graph edges remain explicit; text cannot grant authority.
 
