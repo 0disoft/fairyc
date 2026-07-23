@@ -87,6 +87,7 @@ type scaffoldFile struct {
 
 var scaffoldFiles = []scaffoldFile{
 	{path: ".gitignore", content: func(Spec) []byte { return []byte("/build/\n") }},
+	{path: "README.md", content: readmeBytes},
 	{path: projectmanifest.FileName, content: manifestBytes},
 	{path: "src/main.fy", content: func(Spec) []byte { return []byte(mainSource) }},
 	{path: "tests/main.fy", content: func(Spec) []byte { return []byte(testSource) }},
@@ -112,6 +113,75 @@ fn void answer_is_42() {
     assert(app::answer() == 42);
 }
 `
+
+func readmeBytes(spec Spec) []byte {
+	return []byte(fmt.Sprintf(`# %s
+
+A Fairy C starter package.
+
+## Check and test
+
+Run these commands manually from this directory. The first check validates the workspace and
+creates `+"`fairy.lock`"+`.
+
+`+"```text"+`
+fairyc check
+fairyc test --locked
+`+"```"+`
+
+## Run on Windows
+
+With x64 MSVC and a Windows SDK installed:
+
+`+"```text"+`
+fairyc run --locked
+fairyc build --release --locked
+.\build\%s.exe
+`+"```"+`
+
+`+"`fairyc run`"+` reports the returned `+"`i32`"+`; it does not forward program output. Run the
+retained executable when the program uses console I/O.
+
+## Write to standard output
+
+Replace `+"`src/main.fy`"+` with:
+
+`+"```fairyc"+`
+module main;
+
+import std::io as io;
+
+@effects(console)
+fn i32 main() {
+    let ref str message = "Fairy C says hi\n";
+    return switch (io::write(message)) {
+        case .ok(written) : {
+            if (written == message.len) {
+                0
+            } else {
+                1
+            }
+        }
+        case .err(error) : {
+            if (error.status != 0 && error.written <= message.len) {
+                2
+            } else {
+                3
+            }
+        }
+    };
+}
+`+"```"+`
+
+Then refresh the lock, build, and run the retained executable:
+
+`+"```text"+`
+fairyc check
+fairyc build --release --locked
+.\build\%s.exe
+`+"```"+`
+`, spec.Name, spec.Name, spec.Name))
+}
 
 // Create creates exactly one new child directory below parentPath. Existing targets are never
 // opened or modified. Any ordinary failure after directory creation attempts a contained rollback.

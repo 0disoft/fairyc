@@ -1361,6 +1361,16 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string, clockResolution in
 		return 0, fmt.Errorf("standalone compiler duplicate new returned code %d, stdout %q, stderr %q", duplicateCode, duplicateStdout, duplicateStderr)
 	}
 	starterRoot := filepath.Join(temporaryRoot, starterName)
+	starterReadme, err := os.ReadFile(filepath.Join(starterRoot, "README.md"))
+	if err != nil {
+		return 0, fmt.Errorf("read standalone compiler generated starter guide: %w", err)
+	}
+	const starterExecutableCommand = `.\build\starter-smoke.exe`
+	if bytes.Count(starterReadme, []byte(starterExecutableCommand)) != 2 ||
+		!bytes.Contains(starterReadme, []byte("```fairyc\nmodule main;\n\nimport std::io as io;\n")) ||
+		!bytes.Contains(starterReadme, []byte("`fairyc run` reports the returned `i32`; it does not forward program output.")) {
+		return 0, fmt.Errorf("standalone compiler generated an invalid starter guide: %q", starterReadme)
+	}
 	starterCheckCode, starterCheckStdout, starterCheckStderr, err := runStandaloneCommand(
 		starterRoot,
 		executablePath,

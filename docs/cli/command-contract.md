@@ -6,7 +6,7 @@
 
 This document owns planned `fairyc` command semantics. It does not claim that a command is implemented. Implemented commands must be marked with tests and a language revision before release.
 
-## Stable starter project creation v1
+## Stable starter project creation v2
 
 `fairyc new <package-name> --uid <package-uid>` creates one starter project as a direct child of the
 current process source root. The name must be one portable lowercase kebab-case manifest name and
@@ -15,10 +15,18 @@ dot-separated segments; it is never synthesized from the movable name.
 
 The target must not already exist as a file, directory, or symbolic link. The command accepts no
 destination path, current-directory mode, template, version, language, force, merge, target,
-toolchain, config, environment, network, stdin, or prompt surface. It writes exactly `.gitignore`,
-`fairy.toml`, `src/main.fy`, and `tests/main.fy` under the new directory. The manifest fixes version
-`0.1.0`, language `fairyc-language/0`, and source root `src`; the C-shaped source returns 42, and the
-semantic test imports its public `answer` function. `.gitignore` excludes only `/build/`.
+  toolchain, config, environment, network, stdin, or prompt surface. It writes exactly `.gitignore`,
+  `README.md`, `fairy.toml`, `src/main.fy`, and `tests/main.fy` under the new directory. The manifest
+  fixes version `0.1.0`, language `fairyc-language/0`, and source root `src`; the C-shaped source
+  returns 42, and the semantic test imports its public `answer` function. `.gitignore` excludes only
+  `/build/`.
+
+The generated README is exact compiler-owned starter content, not a selectable template. It labels
+its commands as manual steps, explains first-check lock publication and stable run's no-program-
+stream boundary, substitutes the validated package name into the retained Windows executable path,
+and includes one complete safe `std::io::write` source replacement. The source handles both Result
+variants and returns zero only after the complete message was written. It directs the user to run an
+ordinary check before a locked release build because changing source makes the old lock stale.
 
 No `fairy.lock` is generated: the first ordinary workspace command owns complete graph validation
 and lock publication. Files are exclusive creates under an opened root and synced before success.

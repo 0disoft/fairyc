@@ -30,6 +30,28 @@ func TestStableNewCreatesAWorkspaceThatChecksAndTests(t *testing.T) {
 	if code != ExitSuccess || stdout != "test tests::main::answer_is_42 ... ok\ntest result: ok. 1 passed; 0 failed; lock verified\n" || stderr != "" {
 		t.Fatalf("generated test = code %d, stdout %q, stderr %q", code, stdout, stderr)
 	}
+
+	readme, err := os.ReadFile(filepath.Join(root, "README.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	const fenceStart = "```fairyc\n"
+	start := strings.Index(string(readme), fenceStart)
+	if start < 0 {
+		t.Fatal("generated README is missing its Fairy C source fence")
+	}
+	start += len(fenceStart)
+	end := strings.Index(string(readme)[start:], "\n```\n")
+	if end < 0 {
+		t.Fatal("generated README has an unterminated Fairy C source fence")
+	}
+	if err := os.WriteFile(filepath.Join(root, "src", "main.fy"), []byte(string(readme)[start:start+end]+"\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	code, stdout, stderr = runForTest([]string{"check"}, root)
+	if code != ExitSuccess || !strings.HasPrefix(stdout, "check ok: ") || !strings.HasSuffix(stdout, "lock updated\n") || stderr != "" {
+		t.Fatalf("generated README console example check = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
 }
 
 func TestStableNewRejectsInvalidArgumentsBeforeFilesystemAccess(t *testing.T) {

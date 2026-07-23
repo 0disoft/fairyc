@@ -23,7 +23,9 @@ fairyc test --locked
 
 The first check validates the generated source and publishes `fairy.lock`. On Windows/amd64 with
 local x64 MSVC, `fairyc run --locked` then compiles the `.fy` program through generated C and runs
-the temporary native image. `fairyc new` never merges or overwrites an existing path.
+the temporary native image. The generated `README.md` contains the exact next steps and a safe
+`std::io::write` example for a retained executable. `fairyc new` never merges, upgrades, or
+overwrites an existing path.
 
 ## Current phase
 

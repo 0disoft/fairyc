@@ -437,6 +437,10 @@ ADR 0204 closes the first-project bootstrap gap with stable
 `fairyc new <package-name> --uid <package-uid>`: one explicit identity, one exclusive child
 directory, exact manifest/source/test bytes, ordinary-failure rollback, and generated-project
 check/locked-check/test evidence without adding a template engine or package manager.
+ADR 0206 moves that exact generated set to starter v2 with one compiler-owned README. It keeps the
+output-free source and stable run path unchanged while carrying manual check/test/build guidance,
+the run-v1 stream boundary, and a checked safe `std::io::write` replacement into the created
+project without adding template selection or upgrade behavior.
 
 ADR 0152 now removes disposable HIR package numbering from compiler-private function identities.
 The exact package-instance map, logical name, canonical signature types, effects, and drop-glue type
@@ -553,7 +557,7 @@ quarantines, without selecting a default policy or making a speed claim.
   declared reference environment, and an accepted decision rule justify an ordinary-command cache
   path and defaults. The crash/power-interruption safety boundary and configured local cold/warm
   distributions now exist; physical media retention remains storage-stack-specific.
-- Keep the implemented no-overwrite `fairyc new <package-name> --uid <package-uid>` bootstrap,
+- Keep the implemented no-overwrite `fairyc new <package-name> --uid <package-uid>` starter v2 bootstrap,
   `fairyc check [--locked]`, Windows-local
   `fairyc build [--release] [--locked]`, and Windows-local
   `fairyc run [--release] [--locked]` v1 contracts narrow. Keep the source-independent

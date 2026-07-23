@@ -2,6 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-07-23
+- Generated-file set: Superseded by ADR 0206
 - Command contract: `docs/cli/command-contract.md`
 - Manifest contract: `docs/package/project-manifest-v1.md`
 - Implementation: `internal/projectscaffold/`, `internal/cli/project_new.go`

@@ -215,6 +215,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0203-enforced-one-way-atlas-import-boundary.md`: inverse-allowlisted Go import parsing makes the compiler-to-Atlas dependency direction an executable, mutation-sensitive Phase 4 contract.
 - `0204-stable-starter-project-creation-v1.md`: explicit package identity, a contained no-overwrite child directory, exact starter bytes, ordinary-failure rollback, and generated-project check/test evidence for stable `fairyc new`.
 - `0205-target-neutral-stage0-stdout-write.md`: compiler-bundled safe `std::io::write`, progress-preserving target-neutral linkage, target-owned Linux/Windows adapters, and exact Windows native output evidence.
+- `0206-starter-project-guide-v2.md`: exact compiler-owned generated README with honest lock, run-stream, retained-artifact, and safe `std::io::write` guidance while preserving the output-free starter source.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

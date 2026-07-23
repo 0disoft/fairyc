@@ -12,7 +12,7 @@ import (
 	"github.com/0disoft/fairyc/internal/projectmanifest"
 )
 
-func TestCreateWritesExactManifestSourceTestAndIgnoreFiles(t *testing.T) {
+func TestCreateWritesExactGuideManifestSourceTestAndIgnoreFiles(t *testing.T) {
 	parent := t.TempDir()
 	spec := Spec{Name: "hello-fairy", UID: "example.hello-fairy"}
 	if err := Create(parent, spec); err != nil {
@@ -33,7 +33,7 @@ func TestCreateWritesExactManifestSourceTestAndIgnoreFiles(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-	wantPaths := []string{".", ".gitignore", "fairy.toml", "src", "src/main.fy", "tests", "tests/main.fy"}
+	wantPaths := []string{".", ".gitignore", "README.md", "fairy.toml", "src", "src/main.fy", "tests", "tests/main.fy"}
 	if !reflect.DeepEqual(paths, wantPaths) {
 		t.Fatalf("scaffold paths = %q, want %q", paths, wantPaths)
 	}
@@ -67,6 +67,75 @@ source = "src"
 	}
 	if got := readScaffoldFile(t, root, ".gitignore"); got != "/build/\n" {
 		t.Fatalf(".gitignore = %q", got)
+	}
+	wantReadme := `# hello-fairy
+
+A Fairy C starter package.
+
+## Check and test
+
+Run these commands manually from this directory. The first check validates the workspace and
+creates ` + "`fairy.lock`" + `.
+
+` + "```text" + `
+fairyc check
+fairyc test --locked
+` + "```" + `
+
+## Run on Windows
+
+With x64 MSVC and a Windows SDK installed:
+
+` + "```text" + `
+fairyc run --locked
+fairyc build --release --locked
+.\build\hello-fairy.exe
+` + "```" + `
+
+` + "`fairyc run`" + ` reports the returned ` + "`i32`" + `; it does not forward program output. Run the
+retained executable when the program uses console I/O.
+
+## Write to standard output
+
+Replace ` + "`src/main.fy`" + ` with:
+
+` + "```fairyc" + `
+module main;
+
+import std::io as io;
+
+@effects(console)
+fn i32 main() {
+    let ref str message = "Fairy C says hi\n";
+    return switch (io::write(message)) {
+        case .ok(written) : {
+            if (written == message.len) {
+                0
+            } else {
+                1
+            }
+        }
+        case .err(error) : {
+            if (error.status != 0 && error.written <= message.len) {
+                2
+            } else {
+                3
+            }
+        }
+    };
+}
+` + "```" + `
+
+Then refresh the lock, build, and run the retained executable:
+
+` + "```text" + `
+fairyc check
+fairyc build --release --locked
+.\build\hello-fairy.exe
+` + "```" + `
+`
+	if got := readScaffoldFile(t, root, "README.md"); got != wantReadme {
+		t.Fatalf("README = %q, want %q", got, wantReadme)
 	}
 }
 

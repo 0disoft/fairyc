@@ -15,7 +15,8 @@ This repository type owns command behavior, arguments, flags, config loading, ex
   `docs/adr/0028-experimental-linux-scalar-build-cli.md`, and
   `docs/adr/0180-stable-workspace-c-emission-v1.md`, and
   `docs/adr/0181-stable-workspace-semantic-test-v1.md`, and
-  `docs/adr/0204-stable-starter-project-creation-v1.md`
+  `docs/adr/0204-stable-starter-project-creation-v1.md`, and
+  `docs/adr/0206-starter-project-guide-v2.md`
 
 ## Required Decisions
 
@@ -27,8 +28,8 @@ This repository type owns command behavior, arguments, flags, config loading, ex
 
 ## Prototype frontend v0
 
-`fairyc new <package-name> --uid <package-uid>` writes one success line only after all starter files
-are created and synced. It stabilizes code `0` for success, `2` for argument or identity rejection,
+`fairyc new <package-name> --uid <package-uid>` writes one success line only after all five starter
+files, including the compiler-owned guide, are created and synced. It stabilizes code `0` for success, `2` for argument or identity rejection,
 `4` for internal/output failure, and `7` for parent, existing-target, permission, filesystem, or
 rollback failure. An existing target produces no stdout and is never opened or changed. Errors name
 only the relative requested child, never the absolute parent or raw host error. If stdout fails

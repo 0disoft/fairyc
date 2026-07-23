@@ -232,9 +232,11 @@ the program.
 
 `fairyc new <package-name> --uid <package-uid>` creates one direct child project and never touches
 an existing file, directory, or symbolic link. The explicit manifest UID is not guessed from the
-package name. The exact starter contains `.gitignore`, `fairy.toml`, `src/main.fy`, and
+package name. The exact starter contains `.gitignore`, `README.md`, `fairy.toml`, `src/main.fy`, and
 `tests/main.fy`; it omits `fairy.lock` so the first ordinary workspace command remains the owner of
-graph validation and lock publication. The command accepts no arbitrary destination, merge,
+graph validation and lock publication. The generated guide labels its commands as manual, preserves
+stable run's no-program-stream boundary, and includes one checked safe `std::io::write` source
+replacement plus the package-specific retained Windows executable path. The command accepts no arbitrary destination, merge,
 current-directory, force, template, prompt, stdin, network, or configuration surface. Ordinary
 post-create failures attempt rollback; a crash can leave a partial directory that still requires
 explicit user inspection and removal.
