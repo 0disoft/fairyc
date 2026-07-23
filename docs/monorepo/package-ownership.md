@@ -9,6 +9,7 @@
 | Boundary | Owns | Must not own |
 | --- | --- | --- |
 | `cmd/fairyc` and `internal/cli` | process exit plus command parsing, dispatch, workspace orchestration, user-facing output, explicit Atlas artifact selection, and caller-visible experimental limits | language semantics, Atlas query, attributed-text extraction/encoding, Context Pack encoding, target layout, backend-specific lowering, hidden paths, or hidden resource limits |
+| `internal/architecturecontract` | deterministic repository-local Go import parsing, the inverse Atlas/export consumer allowlist, canonical violation reporting, and mutation-sensitive one-way dependency tests | compiler behavior, general dependency linting, build-tag selection, `go list`, external dependency policy, CLI behavior, process isolation, or runtime permissions |
 | `internal/source` | files, spans, line maps, source identity | syntax or semantic decisions |
 | `internal/lexer` and `internal/syntax` | tokens, typed trivia, deterministic `///` attachment to supported top-level declarations, parsing, recovery, and compact arena-backed syntax | documentation rendering or authority, type checking, immutable editor trees, or code generation |
 | `internal/ast` | error-free lowering, exact attached-documentation span handoff, and implementation-private parser assertions | documentation bodies or rendering, accepting recovered syntax, type checking, or public serialization |
@@ -63,6 +64,7 @@ Before a stable language revision, internal Go packages are not public APIs. The
 - A target-layout change requires ABI fixtures and generated-header review.
 - A standard-library ownership change requires drop, allocation, and unsafe-wrapper review.
 - An Atlas schema change requires provenance, compatibility, size, and stale-map checks.
+- An Atlas/export package or adapter change requires the architecture import allowlist, mutation fixture, Phase 4 exit evidence, and compiler-core dependency direction to remain synchronized.
 - A declaration-documentation output change requires exact snapshot/query ownership, retained-byte revalidation, unavailable/safety/size omissions, and proof that `.fymap` and Context Pack v1 remain unchanged.
 - An Evidence Bundle change requires exact child-byte preservation, visible authority separation, one retained exact-current state, independent query/text/component/final bounds, checksum review, and proof that `.fymap`, Context Pack v1, and attributed-text v0 bytes remain unchanged.
 - A cache-key change requires invalidation and bounded-storage review.

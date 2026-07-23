@@ -40,7 +40,9 @@ Exact Go, Clang, GCC, glibc, sysroot, and runner baselines remain UNDECIDED. No 
 - The standard library cannot broaden unsafe behavior without an explicit safe-wrapper contract.
 - Stage 0 exposes no stable native Fairy ABI; only explicit C ABI v0 is external.
 - Build cache and generated output are derived state, never specification authority.
-- An immutable `SemanticSnapshot` is the only compiler-to-Atlas boundary; frontend packages cannot import Atlas.
+- An immutable `SemanticSnapshot` is the only compiler-to-Atlas boundary. ADR 0203 makes the
+  direction executable: only the Atlas/export layer, CLI orchestration, and Windows evidence harness
+  may directly import Atlas/export packages; every new consumer fails closed pending review.
 - Atlas facts come from analyzed compiler IR; free-text documentation remains separate untrusted metadata.
 
 ## Initial delivery boundary

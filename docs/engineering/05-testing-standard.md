@@ -92,9 +92,10 @@ names, feature families, LF-only path-clean text, and repeated byte identity. It
 parser, compiler, assembler, linker, executable, sanitizer, layout probe, or ABI probe. Native C
 behavior belongs to `internal/cbackendnative`, which consumes the same emitted units through the
 shared C driver and scalar runtime. ABI and complete-runtime runners remain separate evidence
-requirements. `internal/semanticsnapshot` now owns the in-memory Atlas producer tests; publication,
-current-source acceptance, and package-local query evidence are owned downstream, while Context
-Pack runners remain future evidence. `internal/symbolidentity` owns
+requirements. `internal/architecturecontract` parses every repository Go import and owns the
+mutation-sensitive one-way compiler-to-Atlas dependency oracle. `internal/semanticsnapshot` owns the
+in-memory Atlas producer tests; publication, current-source acceptance, and package-local query
+evidence are owned downstream. `internal/symbolidentity` owns
 the provisional identity byte-vector, stability/sensitivity, path validation, strict text form,
 package-UID nominal normalization, and visible/full collision regressions.
 `internal/atlasmap` owns real-workspace logical planning tests for exact compiler identity,
@@ -267,6 +268,7 @@ dependency closure remain host-independent Go tests.
 | ABI | Target layout, calls, callbacks, raw bindings, and boundary shims for candidate target profiles |
 | Runtime and stdlib | Zero-size normalization, allocation failure, reserve rollback, UTF-8 invariants, partial I/O, Linux descriptor and Windows handle close consumption, and retained-pointer wrappers |
 | Compatibility | Exact pre-1 matching, cache misses, runtime mismatch, diagnostic identity, stale maps, target mismatch, and relation-specific completeness |
+| Atlas one-way package boundary | `internal/architecturecontract` parses all `.go` imports below `cmd/` and `internal/`, requires zero current violations, and requires exact deterministic failures for injected compiler and MIR imports while preserving only the explicit Atlas/export, CLI, and Windows-evidence consumers. It includes tests and inactive build-tag files but proves direct dependency structure only, not process isolation, package initialization, or downstream model safety. |
 | Atlas semantic snapshot | Current unit and pipeline tests require Flow-plus-verified-MIR admission, complete package and file metadata, file/module bijection, build-local package-renumbering invariance, deep input/output detachment, stable ordering, structured path-free type identity, exact local calls/traps/unsafe/ownership facts, foreign-call-only partial completeness, unavailable relation disclosure, and fail-closed invalid MIR or package mappings. These tests alone imply no encoded map, current-source validation, or query evidence; those are separate `internal/atlasmap` lanes. |
 | Atlas SymbolId | Current unit and compiler-pipeline tests freeze tagged length-delimited bytes, visible/full digest derivation, strict text forms, path/kind validation, tuple boundaries, body/span/version/build-number stability, coordinate/signature sensitivity, nominal package-UID normalization, deterministic ordering, pair integrity, and synthetic compact-ID collision rejection. No encoded map or released cross-version promise is implied. |
 | Atlas logical map plan | Current real-workspace and unit tests require exact compiler identity, a complete public-interface-hash set, all independent algorithm identifiers, package-stable headers, exact namespace references, complete file/module/declaration/SymbolId/function assignment, deterministic package order, immutable accessors, and explicit omissions. Current-source validation, dependency-map joins, queries, and whole-package rewrite measurements remain future evidence. |

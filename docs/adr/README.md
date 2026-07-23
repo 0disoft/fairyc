@@ -212,6 +212,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0200-exact-declaration-documentation-attributed-text-command.md`: immutable snapshot-sidecar handoff, exact retained-byte documentation extraction, successful unavailable/safety/budget omissions, and default-free experimental documentation output without changing `.fymap` or Context Pack v1.
 - `0201-exact-name-symbol-catalog-v1.md`: exact Stage 0 declaration-name filtering, ambiguity-preserving pagination, and an explicit Symbol Catalog v1 output transition.
 - `0202-single-symbol-atlas-evidence-bundle-v0.md`: output-only exact-symbol composition of independently checksummed compiler facts, source, and documentation with explicit authority and byte-budget separation.
+- `0203-enforced-one-way-atlas-import-boundary.md`: inverse-allowlisted Go import parsing makes the compiler-to-Atlas dependency direction an executable, mutation-sensitive Phase 4 contract.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

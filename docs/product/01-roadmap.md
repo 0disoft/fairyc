@@ -629,6 +629,9 @@ attributed-text v0 document through `experimental atlas-evidence show`. Each chi
 and independently checksummed, the wrapper has no authority, facts and untrusted text remain visibly
 separate, all query/text/component/final limits are explicit, and the existing formats stay
 byte-unchanged.
+ADR 0203 now parses every repository `cmd/` and `internal/` Go import and permits Atlas/export imports
+only inside that layer, CLI orchestration, and the Windows evidence harness. Mutation-sensitive tests
+require compiler and MIR imports to fail, closing the previously prose-only dependency direction.
 
 - Preserve the implemented immutable `SemanticSnapshot` and per-package logical map plan.
 - Preserve the implemented bounded canonical `.fymap` codec and semantic revalidation boundary.
@@ -641,7 +644,10 @@ byte-unchanged.
 - Preserve the implemented exact module/name/kind SymbolId Catalog v1 output as the discovery path for experimental `show` and `around`; keep fuzzy ranking and guessed uniqueness out.
 - Preserve the implemented attributed-text v0 model, exact retained source/documentation gates, canonical output-only JSON, explicit experimental source/documentation/evidence commands, and exact `///` frontend attachment sidecar; keep additional origins, multi-record composition, decoding, and rendering behind separate decisions.
 
-Exit gate: Atlas failure cannot change compilation; stale or incompatible maps fail closed; unknown graph edges remain explicit; text cannot grant authority.
+Exit gate: satisfied for the current Stage 0 scope. `docs/atlas/phase4-exit-evidence.md` maps the
+one-way import boundary, stale/incompatible-map rejection, explicit unknown edges, and text
+non-authority to separate executable oracles and records what each still does not prove. Later
+`impact`, semantic `diff`, anchors, MCP, and structural edits remain gated below.
 
 ## Later capability gates
 

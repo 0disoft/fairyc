@@ -12,7 +12,9 @@ Fairy Atlas should help humans and tools navigate compiler facts without turning
 ## Decision
 
 1. Typed HIR and analyzed MIR produce an immutable, deterministic `SemanticSnapshot`.
-2. Atlas exporters and queries consume that snapshot. Frontend, analysis, and MIR packages cannot import Atlas packages.
+2. Atlas exporters and queries consume that snapshot. Frontend, analysis, and MIR packages cannot
+   import Atlas packages; ADR 0203 later makes this dependency direction an executable import
+   contract.
 3. Atlas failure cannot change diagnostics, type-check success, or generated program semantics.
 4. Build-local node identity is never serialized as stable external identity.
 5. Stable symbol identity is derived from semantic coordinates and a separately versioned

@@ -780,6 +780,13 @@ Atlas exports deterministic, model-neutral facts such as symbols, calls, types, 
 borrows, errors, effects, allocations, unsafe and FFI reachability, source spans, and related tests.
 Unknown or incomplete edges remain explicit rather than being guessed.
 
+ADR 0203 makes the one-way semantic boundary executable. The seven current Atlas/export package
+roots may be imported only inside that layer, by `internal/cli` orchestration, or by the Windows
+evidence harness. A repository test parses all `cmd/` and `internal/` Go files, including tests and
+inactive build-tag files, so a new compiler, backend, runtime, or library package cannot consume
+Atlas without an explicit allowlist and architecture update. This is a direct-import boundary, not a
+plugin, process-isolation, package-initialization, or separately buildable-Atlas promise.
+
 ADR 0195 accepts a separate `fairyc.attributed-text/v0` logical policy, ADR 0196 implements its first
 internal source-excerpt gate, ADR 0197 implements separately bounded canonical
 `fairyc.attributed-text-json/v0` output, ADR 0198 exposes its source selection through default-free
