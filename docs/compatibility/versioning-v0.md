@@ -322,7 +322,8 @@ for the ordinary product-build path carrying that view under both compilers and 
 view retains exact valid UTF-8 bytes and byte length before C reads its data, plus
 `utf8StringLiteralBuildSmokeExecutions` for the ordinary product-build path carrying that text view
 under both compilers and profiles. V32 adds `linuxConsoleExecutions` for the target-neutral POSIX
-stdout adapter under both compilers and profiles. The
+console adapter under both compilers and profiles; ADR 0209 later expands each execution to exercise
+both stdout and stderr without changing the report field or count. The
 runner's existing `ownedTextExecutions` condition is strengthened by ADR 0132 to require
 probe-only deterministic initial-allocation and append-reallocation failure plus live-allocation
 cleanup. ADR 0133 similarly strengthens `arenaExecutions` with deterministic payload and
@@ -346,6 +347,12 @@ digest. The SDK and runtime ABI identity strings remain unchanged. The target-ne
 symbol, numeric status meanings, and private result layout are pre-1 implementation compatibility
 data, not a public C ABI or stable Fairy native ABI.
 
+ADR 0209 moves the SDK to `0.0.0-stage0.3` because it adds public `std::io::write_stderr` and the
+private target-neutral stderr symbol. Existing source that does not call the new function remains
+valid, but the exact SDK digest, package instance, public interface hash, dependent identities, and
+generated lock bytes change. The runtime ABI identity string and numeric result layout remain
+unchanged; status 2 applies to whichever output stream was selected.
+
 ## Package formats
 
 Manifest schema, lockfile schema, source archive schema, and any future binary artifact schema are independent. Stage 0 needs manifest and lockfile schemas only. A stable binary package format would falsely imply a stable native Fairy ABI and is deferred.
@@ -367,7 +374,7 @@ ADR 0144 fixes the first loader behavior for this manifest schema: explicit root
 exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, one language revision,
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
 instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
-`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.2`, language
+`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.3`, language
 `fairyc-language/0`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 

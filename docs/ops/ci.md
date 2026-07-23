@@ -200,9 +200,9 @@ The raw declaration, safe text wrapper, and entry must all declare `console`; de
 wrapper declaration must fail semantic analysis with `E7102` before MSVC is invoked.
 The manifest-owned `examples/std_io_quickstart` is separate from that legacy target-only path. The
 smoke runs it through stable locked release execution both in-process and through a separately built
-compiler, requires exact stdout and status zero, and also builds and directly executes the retained
-PE with the same observation. Stable run's streams share the driver's 64 KiB capture ceiling and do
-not claim cross-stream ordering.
+compiler, requires exact `Fairy C says hi\n` stdout, exact `Fairy C warns too\n` stderr, and status
+zero, and also builds and directly executes the retained PE with the same observation. Stable run's
+streams share the driver's 64 KiB capture ceiling and do not claim cross-stream ordering.
 The same intent derives one non-POSIX C11 unit from the eight valid Windows layout cases, then
 compiles and executes it under low and optimized MSVC profiles. It also derives separate caller and
 callee C11 translation units from all twelve valid Microsoft x64 plans, compiles and links them

@@ -211,17 +211,17 @@ func LinuxFileProbeSource() (string, error) {
 	return canonicalSource("Linux File probe", stage0LinuxFileProbe)
 }
 
-// LinuxConsoleSource returns the target-specific bounded stdout implementation.
+// LinuxConsoleSource returns the target-specific bounded stdout and stderr implementation.
 func LinuxConsoleSource() (string, error) {
 	return canonicalSource("Linux console", stage0LinuxConsole)
 }
 
-// LinuxConsoleProbeSource returns the closed native conformance probe for Linux stdout.
+// LinuxConsoleProbeSource returns the closed native conformance probe for Linux stdout and stderr.
 func LinuxConsoleProbeSource() (string, error) {
 	return canonicalSource("Linux console probe", stage0LinuxConsoleProbe)
 }
 
-// WindowsConsoleSource returns the target-specific bounded stdout implementation.
+// WindowsConsoleSource returns the target-specific bounded stdout and stderr implementation.
 func WindowsConsoleSource() (string, error) {
 	return canonicalSource("Windows console", stage0WindowsConsole)
 }

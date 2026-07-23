@@ -12,12 +12,13 @@ struct fy_std_console_write_result_v0 {
 enum {
     FY_STD_WINDOWS_WRITE_OK_V0 = 0,
     FY_STD_WINDOWS_WRITE_INVALID_INPUT_V0 = 1,
-    FY_STD_WINDOWS_WRITE_STDOUT_UNAVAILABLE_V0 = 2,
+    FY_STD_WINDOWS_WRITE_STREAM_UNAVAILABLE_V0 = 2,
     FY_STD_WINDOWS_WRITE_FAILED_V0 = 3,
     FY_STD_WINDOWS_WRITE_NO_PROGRESS_V0 = 4
 };
 
-static struct fy_std_console_write_result_v0 fy_std_windows_stdout_write_all_impl_v0(
+static struct fy_std_console_write_result_v0 fy_std_windows_write_all_impl_v0(
+    DWORD standard_handle,
     const uint8_t *data,
     size_t length
 ) {
@@ -34,9 +35,9 @@ static struct fy_std_console_write_result_v0 fy_std_windows_stdout_write_all_imp
         result.status = FY_STD_WINDOWS_WRITE_INVALID_INPUT_V0;
         return result;
     }
-    output = GetStdHandle(STD_OUTPUT_HANDLE);
+    output = GetStdHandle(standard_handle);
     if (output == NULL || output == INVALID_HANDLE_VALUE) {
-        result.status = FY_STD_WINDOWS_WRITE_STDOUT_UNAVAILABLE_V0;
+        result.status = FY_STD_WINDOWS_WRITE_STREAM_UNAVAILABLE_V0;
         return result;
     }
     while (result.written < length) {
@@ -61,12 +62,19 @@ struct fy_std_console_write_result_v0 fy_std_stdout_write_all_v0(
     const uint8_t *data,
     size_t length
 ) {
-    return fy_std_windows_stdout_write_all_impl_v0(data, length);
+    return fy_std_windows_write_all_impl_v0(STD_OUTPUT_HANDLE, data, length);
+}
+
+struct fy_std_console_write_result_v0 fy_std_stderr_write_all_v0(
+    const uint8_t *data,
+    size_t length
+) {
+    return fy_std_windows_write_all_impl_v0(STD_ERROR_HANDLE, data, length);
 }
 
 struct fy_std_console_write_result_v0 fy_std_windows_stdout_write_all_v0(
     const uint8_t *data,
     size_t length
 ) {
-    return fy_std_windows_stdout_write_all_impl_v0(data, length);
+    return fy_std_windows_write_all_impl_v0(STD_OUTPUT_HANDLE, data, length);
 }

@@ -27,7 +27,7 @@ surface without changing the package-discovery boundary established here.
    generation.
 2. The current SDK identity is `fairyc-sdk-stdlib/0`; it requires language
    `fairyc-language/0`, runtime ABI `fairyc-runtime/0`, package UID `fairyc.std`, and version
-   `0.0.0-stage0.2` after ADR 0205.
+   `0.0.0-stage0.3` after ADR 0209.
 3. The workspace loader injects one `standard-library` node only when a root-reachable package
    imports `std` or `std::*`. Each such package receives a direct dependency with the reserved
    binding `stdlib`. User manifests may not claim that binding or package UID, and local packages
@@ -35,9 +35,10 @@ surface without changing the package-discovery boundary established here.
 4. The SDK source identity combines the exact SDK identity, runtime ABI, and package-source digest.
    PackageInstanceId v1 still hashes the ordinary package UID, source identity, version, and empty
    feature set; SDK location is never identity.
-5. The embedded source exports opaque `std::alloc::Arena` and ADR 0205's
-   `std::io::write(ref str) -> Result<usize, ConsoleError>`. It does not expose `SystemHeap`,
-   allocation, construction, capacity, layout, formatting, stderr, stdin, text ownership, or
+5. The embedded source exports opaque `std::alloc::Arena`, ADR 0205's
+   `std::io::write(ref str) -> Result<usize, ConsoleError>`, and ADR 0209's matching
+   `write_stderr` operation. It does not expose `SystemHeap`, allocation, construction, capacity,
+   layout, formatting, stdin, text ownership, or
    collection APIs.
 6. `fairy.lock` records `sourceKind: "sdk"`, empty `localPath`, exact `sdkIdentity`, exact
    `runtimeAbi`, source digest, composed source identity, package UID, version, role, and empty

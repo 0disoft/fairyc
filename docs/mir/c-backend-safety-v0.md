@@ -332,8 +332,8 @@ floating values and makes no NaN, infinity, signed-zero, rounding, or floating-e
 `bufferSourceCallExecutions`, four `arenaSourceCallExecutions`, and four
 `cStrValidationSourceCallExecutions`, plus four `ownedTextSourceCallExecutions` and four
 `linuxFileSourceCallExecutions`, and four `linuxConsoleExecutions`. The console count executes the
-target-neutral POSIX stdout adapter's empty, invalid, redirected-write, and unavailable-stdout
-states. The SystemHeap count
+target-neutral POSIX stdout and stderr adapter's empty, invalid, redirected-write, and unavailable-
+stream states. The SystemHeap count
 crosses an exact generated `void *`/`size_t` block into the real SystemHeap C unit. The Buffer count
 nests that block in the exact Buffer record, calls the real
 initialize, zeroed-resize, and drop helpers, and observes initialized bytes plus normalized release.

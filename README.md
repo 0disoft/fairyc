@@ -24,7 +24,7 @@ fairyc test --locked
 The first check validates the generated source and publishes `fairy.lock`. On Windows/amd64 with
 local x64 MSVC, `fairyc run --locked` then compiles the `.fy` program through generated C and runs
 the temporary native image. The generated `README.md` contains the exact next steps and a safe
-`std::io::write` example for a retained executable. `fairyc new` never merges, upgrades, or
+`std::io::write` example for direct stable execution. `fairyc new` never merges, upgrades, or
 overwrites an existing path.
 
 ## Current phase
@@ -170,14 +170,15 @@ completed prefix. Its `main` passes `ref str` and `ref u8[]` through safe intern
 byte helper observes the exact NUL and `A` bytes through checked read-only indexing while the entry contains no raw pointer or `unsafe`,
 prints `Fairy C says hi`, and exits 42. That is real
 FY-to-MSVC process output, unsafe containment, and source-effect enforcement for the legacy example.
-The compiler-bundled SDK `0.0.0-stage0.2` now exposes the safe
-`std::io::write(ref str) -> Result<usize, ConsoleError>` boundary over a target-neutral internal
-symbol. `examples/std_io_quickstart` contains no raw pointer, unsafe block, foreign declaration, or
-platform name; stable run now forwards its exact output and preserves success status zero, while
+The compiler-bundled SDK `0.0.0-stage0.3` exposes safe
+`std::io::write(ref str)` and `std::io::write_stderr(ref str)` operations returning
+`Result<usize, ConsoleError>` over target-neutral internal symbols. `examples/std_io_quickstart`
+contains no raw pointer, unsafe block, foreign declaration, or platform name; stable run forwards
+its exact separated stdout and stderr and preserves success status zero, while
 stable build produces the same inspected Windows PE for direct execution. A separately built
 `fairyc.exe` repeats both locked paths. Linux owns a POSIX
-adapter and four configured native probes, but this Windows host has not observed those executions.
-Formatting, implicit newlines, stderr, stdin, terminal encoding, and a final symbolic error taxonomy
+adapter and four configured native probes covering both streams, but this Windows host has not
+observed those executions. Formatting, implicit newlines, stdin, terminal encoding, and a final symbolic error taxonomy
 remain outside the API.
 A provisional SystemHeap implementation now lives in the target standard-library
 boundary rather than the thin runtime. It normalizes empty allocation, admits current fundamental
@@ -350,7 +351,7 @@ exception, virtual-walks raiser, termination, and catcher frames, and requires o
 and independent/source-level/hosted ABI and unwind evidence exists. A host-independent PE parser
 now validates the host-smoke product, both declared-target profile products, both safe File and
 safe owned-text profile products, nine package-workspace build products including four measured
-experimental, three stable quickstart builds, and two safe `std::io` builds, seven package-workspace run
+experimental, three stable quickstart builds, and two safe `std::io` builds, nine package-workspace run
 products, two direct run-target temporary products, two exec-target output products, and all
 eighteen raw or generated-Fairy Windows File, Buffer, owned-text, Arena, layout,
 ABI, struct-result, and unwind probe images as bounded
@@ -470,7 +471,7 @@ indexed `u8` value to `i32`,
 then execute `examples/windows_output/main.fy` with exact stdout and process status
 42 while explicitly supplying its separate `windows_console.fy` module, and finally run the
 two-package `examples/workspace_quickstart` graph through an exact generated lock with native result
-42, and runs the safe `std::io` workspace with exact stdout and status zero. The same standalone
+42, and runs the safe `std::io` workspace with exact separated stdout/stderr and status zero. The same standalone
 compiler runs the isolated semantic test and emits locked Windows and Linux C11 application units without
 changing the retained executable. It then measures nine fresh-cache cold/warm pairs with one new compiler process per sample,
 sends eight editor-shaped workspace checks to one compiler process, validates the cold, no-op,

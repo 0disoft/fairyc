@@ -61,6 +61,8 @@ inside `Result` without inventing an unsupported nested-enum layout.
 - At this decision's acceptance, stable `fairyc run` still rejected program streams. ADR 0207 later
   supersedes that execution boundary: stable run now forwards bounded program output and preserves
   ordinary program status without changing this standard-library API.
+- ADR 0209 later adds a separate safe `write_stderr` operation over the same progress and error
+  model without changing `write`.
 
 ## Verification
 

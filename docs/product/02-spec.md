@@ -270,9 +270,9 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   default artifact with stable `build --release --locked`, execute the workspace through stable
   `run --release --locked` without changing that artifact, and use that separate process to compile
   and run both the checked-in scalar quickstart through `run-target` and exact-output example through
-  `exec-target` for `x86_64-windows-msvc`. Stable run must report result 42 with compiler status 0;
-  the latter experimental output command must expose exact stdout and process status 42 to the
-  parent.
+  `exec-target` for `x86_64-windows-msvc`. Stable run must preserve the program's ordinary result
+  42 as process status 42; the latter experimental output command must expose exact stdout and the
+  same process status to the parent.
   This proves the bootstrap process boundary only: the compiler is still Go-built, the artifacts
   are removed, and no self-hosting, installation, distribution, or WSL contract follows.
 - The same smoke must build `examples/owned_text/main.fy` with its explicit safe support module at
@@ -503,8 +503,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   normalized release. Exact Linux File result, handle, and open-option records additionally cross
   the real open, write-all, sync, consuming-close, reopen, partial-read, EOF, and final-close helpers
   while observing counts, repeated-close status, normalized state, and bytes. Report v32 adds four
-  `linuxConsoleExecutions` for the target-neutral stdout adapter's empty, invalid, redirected-write,
-  and unavailable-stdout cases. It retains
+  `linuxConsoleExecutions` for the target-neutral stdout and stderr adapter's empty, invalid,
+  redirected-write, and unavailable-stream cases. It retains
   `linuxFileSourceCallExecutions` alongside the earlier standard-library source-call counters and
   `foreignCStructResultCallExecutions` for the register and hidden-memory result pair, plus
   `standardLibraryBuildSmokeExecutions` for a self-contained product build that calls the real UTF-8
@@ -519,12 +519,13 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
-  The compiler-bundled SDK `0.0.0-stage0.2` additionally exposes
-  `std::io::write(ref str) -> Result<usize, ConsoleError>`. It declares `console`, keeps raw pointers
-  and target linkage private, appends no newline, preserves completed-prefix byte counts, and maps
-  one internal symbol to Linux POSIX and Windows Win32 adapters. The checked-in safe workspace has
-  exact Windows stable-build and separately built compiler execution evidence; Linux native
-  execution remains configured but unobserved on this host.
+  The compiler-bundled SDK `0.0.0-stage0.3` exposes
+  `std::io::write(ref str) -> Result<usize, ConsoleError>` for stdout and a matching
+  `write_stderr` operation for stderr. Both declare `console`, keep raw pointers and target linkage
+  private, append no newline, preserve completed-prefix byte counts, and map one internal symbol per
+  stream to a shared target-owned Linux POSIX or Windows Win32 adapter. The checked-in safe workspace
+  has exact separated Windows stream evidence through stable build/run and a separately built
+  compiler; Linux native execution remains configured but unobserved on this host.
   ADR 0133 strengthens the existing `arenaExecutions` success condition with deterministic
   first-stage and second-stage allocation failure plus live-allocation cleanup. ADR 0134 strengthens
   `bufferExecutions` with deterministic construction and three growth-allocation failures, exact
@@ -654,8 +655,9 @@ argument, output, and exit-code contract. It emits no native code.
 
 ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
-version, source digest, and lock fields. SDK `0.0.0-stage0.2` exports opaque `std::alloc::Arena` and
-ADR 0205's `std::io::write(ref str) -> Result<usize, ConsoleError>`; it performs no host
+version, source digest, and lock fields. SDK `0.0.0-stage0.3` exports opaque `std::alloc::Arena`,
+ADR 0205's `std::io::write(ref str) -> Result<usize, ConsoleError>`, and ADR 0209's matching
+`write_stderr` operation; it performs no host
 installation lookup. The I/O wrapper keeps raw pointers and target linkage private while the broader
 planned standard-library API remains unsettled.
 

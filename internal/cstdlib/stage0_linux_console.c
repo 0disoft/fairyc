@@ -14,12 +14,13 @@ struct fy_std_console_write_result_v0 {
 enum {
     FY_STD_CONSOLE_WRITE_OK_V0 = 0,
     FY_STD_CONSOLE_WRITE_INVALID_INPUT_V0 = 1,
-    FY_STD_CONSOLE_WRITE_STDOUT_UNAVAILABLE_V0 = 2,
+    FY_STD_CONSOLE_WRITE_STREAM_UNAVAILABLE_V0 = 2,
     FY_STD_CONSOLE_WRITE_FAILED_V0 = 3,
     FY_STD_CONSOLE_WRITE_NO_PROGRESS_V0 = 4
 };
 
-struct fy_std_console_write_result_v0 fy_std_stdout_write_all_v0(
+static struct fy_std_console_write_result_v0 fy_std_console_write_all_v0(
+    int descriptor,
     const uint8_t *data,
     size_t length
 ) {
@@ -40,11 +41,11 @@ struct fy_std_console_write_result_v0 fy_std_stdout_write_all_v0(
         size_t requested = remaining > (size_t)SSIZE_MAX ? (size_t)SSIZE_MAX : remaining;
         ssize_t completed;
         do {
-            completed = write(STDOUT_FILENO, data + result.written, requested);
+            completed = write(descriptor, data + result.written, requested);
         } while (completed < 0 && errno == EINTR);
         if (completed < 0) {
             result.status = errno == EBADF
-                ? FY_STD_CONSOLE_WRITE_STDOUT_UNAVAILABLE_V0
+                ? FY_STD_CONSOLE_WRITE_STREAM_UNAVAILABLE_V0
                 : FY_STD_CONSOLE_WRITE_FAILED_V0;
             return result;
         }
@@ -55,4 +56,18 @@ struct fy_std_console_write_result_v0 fy_std_stdout_write_all_v0(
         result.written += (size_t)completed;
     }
     return result;
+}
+
+struct fy_std_console_write_result_v0 fy_std_stdout_write_all_v0(
+    const uint8_t *data,
+    size_t length
+) {
+    return fy_std_console_write_all_v0(STDOUT_FILENO, data, length);
+}
+
+struct fy_std_console_write_result_v0 fy_std_stderr_write_all_v0(
+    const uint8_t *data,
+    size_t length
+) {
+    return fy_std_console_write_all_v0(STDERR_FILENO, data, length);
 }

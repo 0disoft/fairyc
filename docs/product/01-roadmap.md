@@ -96,9 +96,9 @@ Verified resource definitions now preserve ordered fields and
   `experimental emit-c` command exposes that exact verified translation unit on stdout
   without writing an artifact. On an eligible Linux/amd64 glibc host, `experimental build` can now
   compile and link that subset with explicit Clang or GCC and low or optimized profiles into
-  a no-overwrite `build/` artifact. A compiler-bundled `std::io::write` now provides one
-  progress-preserving target-neutral stdout operation with Windows execution evidence and
-  configured-but-unobserved Linux probes. Stable portable files, broader console operations, effect-bearing function values,
+  a no-overwrite `build/` artifact. Compiler-bundled `std::io::write` and `write_stderr` now provide
+  progress-preserving target-neutral output operations with exact separated Windows execution
+  evidence and configured-but-unobserved Linux probes. Stable portable files, broader console operations, effect-bearing function values,
   and every later Phase 1
   capability remain unimplemented.
 
@@ -352,10 +352,10 @@ quickstart iterates two bytes with typed `usize` ordering and checked addition, 
 indexing, and safely converts each `u8` to `i32` through a separately built compiler process. The
 host smoke also proves maximum-`usize` addition traps under both MSVC profiles. The configured Windows
 smoke therefore covers two retained target builds, four measured experimental plus three stable
-quickstart and two safe `std::io` package-workspace builds, seven package-workspace runs, two safe File builds, two safe owned-text
-builds, two direct target executions, two exec-target executions, and forty-five total target or
+quickstart and two safe `std::io` package-workspace builds, nine package-workspace runs, two safe File builds, two safe owned-text
+builds, two direct target executions, two exec-target executions, and forty-seven total target or
 probe PE images. Stable build proof covers development output, failed-build preservation, release
-replacement, a safe `std::io` product with exact stdout/status, and locked replacements from a
+replacement, a safe `std::io` product with exact separated stdout/stderr and status, and locked replacements from a
 separately built temporary `fairyc.exe`.
 Stable run proof covers development and release result 42, a normal reserved-status result 131, a
 division-by-zero trap using that same OS status, canonical-lock restoration, retained-build
@@ -571,6 +571,11 @@ quarantines, without selecting a default policy or making a speed claim.
   `fairyc test [--locked]` separate from future native tests, workspace-member recursion, filters,
   fixtures, benchmarks, and host I/O.
 - Move to function-level reuse only when measured package rebuild or storage evidence justifies the complexity.
+
+ADR 0209 extends the compiler-bundled SDK to `0.0.0-stage0.3` with safe exact-byte
+`std::io::write_stderr`. Both process-owned output streams now share one progress/error model and one
+target-owned loop per platform. The checked-in workspace has exact separated Windows stream evidence;
+formatting, stdin, arguments, terminal policy, and symbolic error kinds remain separate decisions.
 
 Exit gate: clean and warm build evidence is reproducible on a declared machine and workload; invalidation fixtures distinguish public interface, inline body, and private implementation; incompatible caches are safe misses.
 

@@ -166,8 +166,20 @@ import std::io as io;
 @effects(console)
 fn i32 main() {
     let ref str message = "Fairy C says hi\n";
+    let ref str warning = "Fairy C warns too\n";
     return switch (io::write(message)) {
-        case .ok(written) : { if (written == message.len) { 42 } else { 1 } }
+        case .ok(written) : {
+            if (written == message.len) {
+                switch (io::write_stderr(warning)) {
+                    case .ok(error_written) : { if (error_written == warning.len) { 42 } else { 4 } }
+                    case .err(error) : {
+                        if (error.status != 0 && error.written <= warning.len) { 5 } else { 6 }
+                    }
+                }
+            } else {
+                1
+            }
+        }
         case .err(error) : {
             if (error.status != 0 && error.written <= message.len) { 2 } else { 3 }
         }
@@ -197,32 +209,39 @@ fn i32 main() {
 
 func TestBundledStandardLibraryIORequiresConsoleEffect(t *testing.T) {
 	t.Parallel()
-	root := t.TempDir()
-	writePackage(t, root, ".", rootManifest(""), map[string]string{
-		"src/main.fy": `module main;
+	for _, function := range []string{"write", "write_stderr"} {
+		function := function
+		t.Run(function, func(t *testing.T) {
+			t.Parallel()
+			root := t.TempDir()
+			source := strings.ReplaceAll(`module main;
 
 import std::io as io;
 
 fn i32 main() {
-    discard io::write("Fairy C says hi\n");
+    discard io::FUNCTION("Fairy C says hi\n");
     return 0;
 }
-`,
-	})
-	workspace, err := Load(root)
-	if err != nil {
-		t.Fatal(err)
-	}
-	input, err := workspace.SemanticInput()
-	if err != nil {
-		t.Fatal(err)
-	}
-	result, err := compiler.CheckPackages(input)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if result.Verified || len(result.Semantic.Diagnostics) != 1 || result.Semantic.Diagnostics[0].Code != "E7102" ||
-		len(result.Semantic.Diagnostics[0].Related) != 1 || result.Semantic.Diagnostics[0].Related[0].Role != "effect-declaration" {
-		t.Fatalf("missing-console-effect result = %+v", result.Semantic)
+`, "FUNCTION", function)
+			writePackage(t, root, ".", rootManifest(""), map[string]string{
+				"src/main.fy": source,
+			})
+			workspace, err := Load(root)
+			if err != nil {
+				t.Fatal(err)
+			}
+			input, err := workspace.SemanticInput()
+			if err != nil {
+				t.Fatal(err)
+			}
+			result, err := compiler.CheckPackages(input)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if result.Verified || len(result.Semantic.Diagnostics) != 1 || result.Semantic.Diagnostics[0].Code != "E7102" ||
+				len(result.Semantic.Diagnostics[0].Related) != 1 || result.Semantic.Diagnostics[0].Related[0].Role != "effect-declaration" {
+				t.Fatalf("missing-console-effect result = %+v", result.Semantic)
+			}
+		})
 	}
 }

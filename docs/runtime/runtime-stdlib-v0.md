@@ -71,11 +71,11 @@ std::alloc  SystemHeap, Arena, AllocError
 std::bytes  Buffer
 std::text   UTF-8 validation, String, CStr, CString
 std::fs     Linux File and open options
-std::io     exact stdout byte writing with completed-prefix errors
+std::io     exact stdout and stderr byte writing with completed-prefix errors
 std::c      C scalar types and raw wrapper helpers
 ```
 
-The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.2` exports opaque `std::alloc::Arena` and ADR 0205's exact `std::io::write` surface; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
+The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.3` exports opaque `std::alloc::Arena`, ADR 0205's exact `std::io::write` surface, and ADR 0209's matching `write_stderr` surface; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
 
 Built-in `Option`, `Result`, slices, `str`, and `CStr` get compiler-known view semantics; library modules provide operations over them.
 
@@ -290,28 +290,33 @@ A `b"..."` literal provides allocation-free immutable `ref u8[]` storage with ex
 
 A `"..."` literal provides allocation-free immutable `ref str` storage after the complete decoded byte sequence passes UTF-8 validation. MIR retains a distinct text operand and byte length rather than reusing byte-string or C-string meaning. The generated-C path uses a private non-null `fy_str { data, length }` value, deduplicated exact immutable UTF-8 arrays for nonempty values, and a one-byte sentinel with length zero for empty values. The source property `.len` returns the UTF-8 byte count as `usize`, and `.is_empty` returns whether that byte count is zero; neither counts scalar values or graphemes. An explicit unsafe conversion may expose a literal or typed local's immutable `ptr u8` data address; mutable extraction, indexing, slicing, a public string ABI, implicit byte-to-text conversion, and implicit C termination remain unimplemented.
 
-## Stdout write-all v0
+## Console write-all v0
 
-The compiler-bundled `std::io` module exposes exactly
-`write(ref str) -> Result<usize, ConsoleError>`. It declares `@effects(console)`, writes the text's
-exact UTF-8 bytes, appends no newline, allocates nothing, and retains no borrow. Success preserves
-the exact written byte count. Failure preserves a numeric status and completed-prefix byte count.
-The private raw declaration, `@repr(C)` transport, pointer conversion, and
-`fy_std_stdout_write_all_v0` symbol remain inside the SDK and target support units.
+The compiler-bundled `std::io` module exposes
+`write(ref str) -> Result<usize, ConsoleError>` for stdout and
+`write_stderr(ref str) -> Result<usize, ConsoleError>` for stderr. Both declare
+`@effects(console)`, write the text's exact UTF-8 bytes, append no newline, allocate nothing, and
+retain no borrow. Success preserves the exact written byte count. Failure preserves a numeric status
+and completed-prefix byte count. The private raw declarations, `@repr(C)` transport, pointer
+conversion, and `fy_std_stdout_write_all_v0`/`fy_std_stderr_write_all_v0` symbols remain inside the
+SDK and target support units.
 
-Status 1 is invalid input, 2 is unavailable stdout, 3 is an operating-system write failure, and 4
-is impossible zero progress. Empty input succeeds without consulting stdout. The Linux adapter
-uses POSIX `write`, retries `EINTR`, and bounds requests by `SSIZE_MAX`. The Windows adapter uses
-`WriteFile` in `DWORD`-bounded chunks. Both stop at the first non-retryable failure and return the
-completed prefix. The API does not format, transcode, append a newline, retry after a reported
+Status 1 is invalid input, 2 is an unavailable selected stream, 3 is an operating-system write
+failure, and 4 is impossible zero progress. Empty input succeeds without consulting the selected
+stream. The Linux adapter routes both descriptors through one POSIX `write` loop, retries `EINTR`,
+and bounds requests by `SSIZE_MAX`. The Windows adapter routes both standard handles through one
+`WriteFile` loop in `DWORD`-bounded chunks. Both stop at the first non-retryable failure and return
+the completed prefix. The API does not format, transcode, append a newline, retry after a reported
 failure, or promise terminal-specific encoding behavior.
 
 The checked-in `examples/std_io_quickstart` contains no unsafe code or platform symbol. The Windows
 smoke runs it through stable `fairyc run --release --locked`, forwards exact `Fairy C says hi\n`
-with status zero, builds and directly executes the retained image with the same observation, and
+to stdout and `Fairy C warns too\n` to stderr with status zero, builds and directly executes the
+retained image with the same observation, and
 repeats both locked paths through a separately built compiler. Linux
 Clang/GCC low/optimized executions are configured through the native report v32
-`linuxConsoleExecutions` field but remain unobserved on this Windows host.
+`linuxConsoleExecutions` field and exercise both descriptors, but remain unobserved on this Windows
+host.
 
 ### Legacy Windows example symbol
 
@@ -335,7 +340,7 @@ bytes are written or a failure reports the completed prefix. It does not allocat
 transcode, retain the input pointer, retry a failed operation, or hide partial progress. The call is
 synchronous: every input-pointer use ends before it returns. The configured Windows smoke verifies
 empty and invalid inputs plus exact ASCII bytes through a captured pipe; interactive Unicode console
-encoding, terminal modes, stdin, stderr writing, colors, formatting, and cancellation remain
+encoding, terminal modes, stdin, stderr writing through that legacy symbol, colors, formatting, and cancellation remain
 unproven or unimplemented.
 
 The legacy raw function is admitted only by the `x86_64-windows-msvc` support resolver and must be called
