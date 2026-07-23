@@ -32,6 +32,7 @@ const (
 const usage = `Fairy C Stage 0 compiler prototype
 
 Usage:
+  fairyc new <package-name> --uid <package-uid>
   fairyc check [--locked]
   fairyc build [--release] [--locked]
   fairyc run [--release] [--locked]
@@ -64,7 +65,8 @@ Usage:
   fairyc experimental run <entry.fy> [--source <file.fy>]...
   fairyc --help
 
-The experimental commands are unstable. "fairyc check" verifies the local workspace. "fairyc build"
+The experimental commands are unstable. "fairyc new" creates one no-overwrite child starter with
+an explicit package UID. "fairyc check" verifies the local workspace. "fairyc build"
 creates or replaces build/<package-name>.exe on Windows. "fairyc run" builds and executes a temporary
 Windows image without retaining it. "fairyc test" checks the root package plus isolated tests/
 sources and runs @test void functions through the semantic interpreter. "fairyc emit c" writes one
@@ -90,6 +92,12 @@ func RunWithInput(args []string, sourceRoot string, stdin io.Reader, stdout, std
 	}
 	if len(args) == 0 {
 		return invocationError(stderr, "a command is required")
+	}
+	if args[0] == "new" {
+		if len(args) == 2 && isHelp(args[1]) {
+			return writeHelp(stdout, stderr)
+		}
+		return runStableNew(args[1:], sourceRoot, stdout, stderr)
 	}
 	if args[0] == "explain" {
 		if len(args) == 2 && (args[1] == "-h" || args[1] == "--help") {

@@ -14,7 +14,7 @@
 - Parser fixture route: spec/fixtures/parser/manifest-v0.json
 - Frontend implementation route: internal/source/, internal/lexer/, internal/lexer/documentation.go, internal/syntax/, internal/ast/, internal/frontend/, internal/semantic/, internal/hir/, docs/adr/0199-c-friendly-declaration-documentation-attachment.md
 - Verified-MIR compiler coordinator route: internal/compiler/
-- Stable workspace check/build/run/test/C emission, diagnostic explanation, and target maturity report plus experimental compiler CLI route: cmd/fairyc/, internal/cli/, docs/adr/0175-stable-workspace-check-v1.md, docs/adr/0176-stable-windows-workspace-build-v1.md, docs/adr/0177-stable-windows-workspace-run-v1.md, docs/adr/0178-stable-diagnostic-explain-v1.md, docs/adr/0179-stable-target-maturity-report-v1.md, docs/adr/0180-stable-workspace-c-emission-v1.md, docs/adr/0181-stable-workspace-semantic-test-v1.md
+- Stable starter creation, workspace check/build/run/test/C emission, diagnostic explanation, and target maturity report plus experimental compiler CLI route: cmd/fairyc/, internal/cli/, internal/projectscaffold/, docs/adr/0175-stable-workspace-check-v1.md, docs/adr/0176-stable-windows-workspace-build-v1.md, docs/adr/0177-stable-windows-workspace-run-v1.md, docs/adr/0178-stable-diagnostic-explain-v1.md, docs/adr/0179-stable-target-maturity-report-v1.md, docs/adr/0180-stable-workspace-c-emission-v1.md, docs/adr/0181-stable-workspace-semantic-test-v1.md, docs/adr/0204-stable-starter-project-creation-v1.md
 - Parser runner route: internal/parserfixture/
 - Semantic fixture route: spec/fixtures/semantic/manifest-v0.json
 - Semantic runner route: internal/semanticfixture/
@@ -79,7 +79,7 @@
 - Explicit stable disk MIR reuse route: internal/packageartifact/stable_cache.go, internal/workspacecompiler/, docs/adr/0164-verified-stable-disk-mir-reuse.md
 - Bounded workspace check-session route: internal/cli/workspace_session.go, spec/cli/experimental-workspace-check-session-v0.schema.json, docs/adr/0159-bounded-workspace-check-session.md
 - Build-measurement integrity route: internal/buildmeasure/, cmd/fairyc-windows-host-smoke/, docs/adr/0150-no-cache-windows-build-calibration.md, docs/adr/0157-process-cache-measurement-receipt.md, docs/adr/0158-process-cache-edit-distributions.md, docs/adr/0160-editor-shaped-session-process-measurement.md, docs/adr/0167-paired-persistent-cache-process-measurement.md, docs/adr/0170-persistent-cache-retention-staircase.md, docs/adr/0171-package-scoped-stable-context.md, docs/adr/0191-atlas-whole-package-rewrite-measurement.md
-- Human project-manifest v1 route: internal/projectmanifest/, internal/projectmanifestfixture/, spec/fixtures/project-manifest/manifest-v1.json
+- Human project-manifest v1 and stable starter-project creation route: internal/projectmanifest/, internal/projectmanifestfixture/, internal/projectscaffold/, internal/cli/project_new.go, spec/fixtures/project-manifest/manifest-v1.json, docs/adr/0204-stable-starter-project-creation-v1.md
 - Local workspace loader v1 route: internal/workspaceloader/, internal/workspaceloaderfixture/, spec/fixtures/workspace-loader/manifest-v1.json
 - Compiler-bundled Stage 0 standard-library route: internal/sdkstdlib/, docs/adr/0147-compiler-bundled-stage0-standard-library.md
 - Generated lockfile v1 route: internal/lockfile/, docs/package/lockfile-v1.md

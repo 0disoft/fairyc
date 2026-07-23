@@ -6,6 +6,30 @@
 
 This document owns planned `fairyc` command semantics. It does not claim that a command is implemented. Implemented commands must be marked with tests and a language revision before release.
 
+## Stable starter project creation v1
+
+`fairyc new <package-name> --uid <package-uid>` creates one starter project as a direct child of the
+current process source root. The name must be one portable lowercase kebab-case manifest name and
+directory segment. The UID is mandatory manifest-v1 identity with at least two lowercase
+dot-separated segments; it is never synthesized from the movable name.
+
+The target must not already exist as a file, directory, or symbolic link. The command accepts no
+destination path, current-directory mode, template, version, language, force, merge, target,
+toolchain, config, environment, network, stdin, or prompt surface. It writes exactly `.gitignore`,
+`fairy.toml`, `src/main.fy`, and `tests/main.fy` under the new directory. The manifest fixes version
+`0.1.0`, language `fairyc-language/0`, and source root `src`; the C-shaped source returns 42, and the
+semantic test imports its public `answer` function. `.gitignore` excludes only `/build/`.
+
+No `fairy.lock` is generated: the first ordinary workspace command owns complete graph validation
+and lock publication. Files are exclusive creates under an opened root and synced before success.
+An ordinary post-create failure attempts contained rollback. A process or host crash may leave a
+partial directory, which a later invocation still refuses to merge or overwrite.
+
+Success is exactly `created Fairy C package "<name>" at <name>`. Codes are 0 for success, 2 for
+invocation or identity rejection, 4 for internal/output failure, and 7 for parent, target,
+permission, filesystem, or rollback failure. Output failure occurs after creation and cannot undo
+the project. No absolute parent path or raw operating-system error is part of stable output.
+
 ## Stable diagnostic explanation v1
 
 `fairyc explain <diagnostic-code>` is a stable, source-independent lookup over
@@ -503,6 +527,7 @@ may precede later failure, while `--locked` writes nothing.
 
 | Command | Purpose | Code generation |
 | --- | --- | --- |
+| `fairyc new <package-name> --uid <package-uid>` | Create one exact no-overwrite starter project below the current directory | Fairy C source only |
 | `fairyc check [--locked]` | Check the current manifest-owned workspace through verified MIR | No |
 | `fairyc build [--release] [--locked]` | Build or replace the current root package's one Windows executable | Yes |
 | `fairyc run [--release] [--locked]` | Build and run the current workspace as one temporary Windows image | Yes |

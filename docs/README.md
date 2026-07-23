@@ -48,6 +48,7 @@
 - Stable package type-context artifact and identity: internal/packageartifact/context.go, docs/adr/0161-stable-type-context-artifact.md
 - Source-independent package coordinate prerequisite: internal/packagegraph/coordinate.go, docs/package/package-coordinate-id-v1.md, docs/adr/0172-source-independent-package-coordinate.md
 - Project manifest v1 fixtures and strict TOML parser: spec/fixtures/project-manifest/manifest-v1.json, internal/projectmanifest/, internal/projectmanifestfixture/
+- Stable exact starter-project creation v1: internal/projectscaffold/, internal/cli/project_new.go, docs/adr/0204-stable-starter-project-creation-v1.md
 - Local workspace loader v1 fixtures and implementation: spec/fixtures/workspace-loader/manifest-v1.json, internal/workspaceloader/, internal/workspaceloaderfixture/
 - Compiler-bundled Stage 0 standard-library source package: internal/sdkstdlib/
 - Generated lockfile v1 implementation: internal/lockfile/

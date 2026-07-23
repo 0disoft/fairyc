@@ -9,12 +9,28 @@ Fairy C is an experimental systems programming language for new native software 
 
 The project is not trying to beat every hand-tuned C program or make every C ownership graph safe. Its intended advantage is that ordinary Fairy C code carries enough ownership, aliasing, bounds, and effect information for the compiler to reject common failures and generate competitive machine code without relying on build-mode-dependent undefined behavior.
 
+## Human quickstart
+
+With a built `fairyc` executable, run these product commands manually from a scratch parent
+directory to create one explicit-identity starter:
+
+```text
+fairyc new hello-fairy --uid example.hello-fairy
+cd hello-fairy
+fairyc check
+fairyc test --locked
+```
+
+The first check validates the generated source and publishes `fairy.lock`. On Windows/amd64 with
+local x64 MSVC, `fairyc run --locked` then compiles the `.fy` program through generated C and runs
+the temporary native image. `fairyc new` never merges or overwrites an existing path.
+
 ## Current phase
 
-The first Stage 0 frontend slice now exists in Go: immutable source bytes, a lossless lexer,
-compact recoverable syntax, error-free AST lowering, deterministic `E00xx` diagnostics, and a
-runner for all parser v0 fixtures. The next slice resolves names and produces typed HIR for the
-  fixture-backed scalar, safe-borrow, scalar foreign-call, and declared-effect subset. Its semantic runner executes all 38 v0 resolve, type,
+The Go Stage 0 compiler now implements immutable source bytes, a lossless lexer, compact recoverable
+syntax, error-free AST lowering, typed HIR, resource and borrow Flow, verified MIR, a bounded
+interpreter, deterministic C11 transport, strict local workspaces, stable new/check/build/run/test/C
+emission commands, and experimental Atlas fact export. The semantic runner executes all 38 v0 resolve, type,
 and local Flow cases, including integer-literal range rejection, branch- and loop-aware safe-borrow reassignment,
 exact interprocedural borrow-return summaries, last-use loans, borrow-return origins, canonical
 `@effects(...)` sets, and caller-superset enforcement. Whole-root resource Flow
@@ -359,8 +375,9 @@ inspect the declared target specification, or interpret an explicit source-root-
 closure. Its bounded foreground `check-workspace-session` command can keep one process-local
 verified-MIR cache across sequential caller-triggered checks; it is not a daemon, watcher,
 persistent cache, or stable editor protocol. Program commands use one entry plus repeated
-`--source`; semantic checking uses its explicit positional module set. The stable workspace commands
-are `fairyc check [--locked]` and the Windows/amd64-local
+`--source`; semantic checking uses its explicit positional module set. Stable project bootstrap is
+`fairyc new <package-name> --uid <package-uid>`. The stable workspace commands are
+`fairyc check [--locked]` and the Windows/amd64-local
 `fairyc build [--release] [--locked]`, and the Windows/amd64-local
 `fairyc run [--release] [--locked]`, the target-independent semantic
 `fairyc test [--locked]`, plus source-independent
@@ -434,7 +451,9 @@ explicit example inputs; they are not product defaults or tuning recommendations
 
 For repeated Windows use, `DEVELOPMENT.md` gives the WSL-free manual bootstrap that creates ignored
 `build/fairyc.exe`. The configured Windows smoke separately builds a temporary standalone compiler
-process and requires that executable to run `examples/windows_quickstart/main.fy` through MSVC with
+process, requires it to create a no-overwrite starter, check it, run its semantic test, and compile
+its generated source through MSVC to native result 42. The same executable runs
+`examples/windows_quickstart/main.fy` through MSVC with
 native result 42 by iterating two bytes with checked `usize` arithmetic and safely converting each
 indexed `u8` value to `i32`,
 then execute `examples/windows_output/main.fy` with exact stdout and process status

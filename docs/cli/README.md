@@ -15,11 +15,14 @@
 - interoperability: `bindgen`, `abi-check`;
 - semantic navigation: `atlas`.
 
-Only `check`, a minimal `build`, compiler inspection, and semantic test execution are Stage 0 candidates. The remaining commands are product commitments only after their contracts and implementations exist.
+Stable `new`, `check`, the minimal Windows `build` and `run`, compiler inspection, C emission, and
+semantic test execution now have Stage 0 contracts. The remaining command families are product
+commitments only after their own contracts and implementations exist.
 
 ## Current prototype
 
-The Go frontend currently exposes stable current-workspace commands
+The Go frontend currently exposes stable starter creation
+`fairyc new <package-name> --uid <package-uid>`, stable current-workspace commands
 `fairyc check [--locked]`, `fairyc build [--release] [--locked]`, and
 `fairyc run [--release] [--locked]`, the stable target-independent semantic
 `fairyc test [--locked]`, plus the stable source-independent
@@ -223,6 +226,15 @@ declaring a similarly named Fairy C function does not grant output authority.
 Infinite execution is stopped by the bounded interpreter and reported as an unsupported-capability
 result rather than a language trap. It is separate from stable `fairyc check`, which never executes
 the program.
+
+`fairyc new <package-name> --uid <package-uid>` creates one direct child project and never touches
+an existing file, directory, or symbolic link. The explicit manifest UID is not guessed from the
+package name. The exact starter contains `.gitignore`, `fairy.toml`, `src/main.fy`, and
+`tests/main.fy`; it omits `fairy.lock` so the first ordinary workspace command remains the owner of
+graph validation and lock publication. The command accepts no arbitrary destination, merge,
+current-directory, force, template, prompt, stdin, network, or configuration surface. Ordinary
+post-create failures attempt rollback; a crash can leave a partial directory that still requires
+explicit user inspection and removal.
 
 `fairyc check [--locked]` loads the current directory's strict `fairy.toml`, its explicit local
 members, complete source closure, and compiler-bundled SDK package when imported. It runs the

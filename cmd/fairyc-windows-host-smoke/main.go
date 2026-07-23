@@ -1285,6 +1285,7 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string, clockResolution in
 		return 0, fmt.Errorf("execute standalone compiler help: %w", err)
 	}
 	if helpCode != cli.ExitSuccess || helpStderr != "" ||
+		!strings.Contains(helpStdout, "fairyc new <package-name> --uid <package-uid>") ||
 		!strings.Contains(helpStdout, "fairyc check [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc build [--release] [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc run [--release] [--locked]") ||
@@ -1297,6 +1298,69 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string, clockResolution in
 		!strings.Contains(helpStdout, "fairyc experimental build-workspace") ||
 		!strings.Contains(helpStdout, "fairyc experimental run-workspace") {
 		return 0, fmt.Errorf("standalone compiler help returned code %d, stdout %q, stderr %q", helpCode, helpStdout, helpStderr)
+	}
+
+	const starterName = "starter-smoke"
+	newCode, newStdout, newStderr, err := runStandaloneCommand(
+		temporaryRoot,
+		executablePath,
+		"new", starterName, "--uid", "smoke.starter",
+	)
+	if err != nil {
+		return 0, fmt.Errorf("execute standalone compiler starter creation: %w", err)
+	}
+	if newCode != cli.ExitSuccess || newStderr != "" ||
+		newStdout != "created Fairy C package \"starter-smoke\" at starter-smoke\n" {
+		return 0, fmt.Errorf("standalone compiler new returned code %d, stdout %q, stderr %q", newCode, newStdout, newStderr)
+	}
+	duplicateCode, duplicateStdout, duplicateStderr, err := runStandaloneCommand(
+		temporaryRoot,
+		executablePath,
+		"new", starterName, "--uid", "smoke.starter",
+	)
+	if err != nil {
+		return 0, fmt.Errorf("execute standalone compiler duplicate starter rejection: %w", err)
+	}
+	if duplicateCode != cli.ExitPackageFailure || duplicateStdout != "" ||
+		duplicateStderr != "fairyc: project creation failed: project path \"starter-smoke\" already exists\n" {
+		return 0, fmt.Errorf("standalone compiler duplicate new returned code %d, stdout %q, stderr %q", duplicateCode, duplicateStdout, duplicateStderr)
+	}
+	starterRoot := filepath.Join(temporaryRoot, starterName)
+	starterCheckCode, starterCheckStdout, starterCheckStderr, err := runStandaloneCommand(
+		starterRoot,
+		executablePath,
+		"check",
+	)
+	if err != nil {
+		return 0, fmt.Errorf("execute standalone compiler generated starter check: %w", err)
+	}
+	if starterCheckCode != cli.ExitSuccess || starterCheckStderr != "" ||
+		starterCheckStdout != "check ok: 1 instance(s), 1 source file(s), 2 MIR function(s), lock updated\n" {
+		return 0, fmt.Errorf("standalone compiler starter check returned code %d, stdout %q, stderr %q", starterCheckCode, starterCheckStdout, starterCheckStderr)
+	}
+	starterTestCode, starterTestStdout, starterTestStderr, err := runStandaloneCommand(
+		starterRoot,
+		executablePath,
+		"test", "--locked",
+	)
+	if err != nil {
+		return 0, fmt.Errorf("execute standalone compiler generated starter test: %w", err)
+	}
+	if starterTestCode != cli.ExitSuccess || starterTestStderr != "" ||
+		starterTestStdout != "test tests::main::answer_is_42 ... ok\ntest result: ok. 1 passed; 0 failed; lock verified\n" {
+		return 0, fmt.Errorf("standalone compiler starter test returned code %d, stdout %q, stderr %q", starterTestCode, starterTestStdout, starterTestStderr)
+	}
+	starterRunCode, starterRunStdout, starterRunStderr, err := runStandaloneCommand(
+		starterRoot,
+		executablePath,
+		"run", "--locked",
+	)
+	if err != nil {
+		return 0, fmt.Errorf("execute standalone compiler generated starter run: %w", err)
+	}
+	if starterRunCode != cli.ExitSuccess || starterRunStderr != "" ||
+		starterRunStdout != "result: 42 (x86_64-windows-msvc, development, lock verified)\n" {
+		return 0, fmt.Errorf("standalone compiler starter run returned code %d, stdout %q, stderr %q", starterRunCode, starterRunStdout, starterRunStderr)
 	}
 
 	checkCode, checkStdout, checkStderr, err := runStandaloneCommand(

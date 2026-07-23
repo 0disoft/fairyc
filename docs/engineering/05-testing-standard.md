@@ -11,7 +11,12 @@ also have focused unit tests. Documentation-trivia tests require exact lossless 
 LF/CRLF attachment through attributes and modifiers, conservative detachment, and AST/HIR span
 preservation without compiler-private inheritance. Lexer and parser fuzz targets run their deterministic seed corpus
 during ordinary Go tests and assert lossless reconstruction, stable output, valid spans, bounded
-exhaustion, and error-free AST lowering. Stable workspace-check tests cover lock creation, exact
+exhaustion, and error-free AST lowering. Stable project-creation tests freeze the exact four-file
+starter bytes, manifest reparsing, portable identity rejection, no-overwrite behavior, path-clean
+errors, and a generated project's ordinary check, locked check, lock publication, and semantic test.
+The Windows smoke repeats new/duplicate/check/test/run through a separately built compiler process
+and requires native result 42 from the generated source.
+Stable workspace-check tests cover lock creation, exact
 no-write locked verification, rejected source arguments, missing manifests, parser diagnostics with
 source exit code 3, and deterministic success output. Experimental CLI tests cover argument routing,
 deterministic content-safe JSON, schema synchronization, human diagnostics,

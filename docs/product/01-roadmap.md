@@ -430,6 +430,10 @@ stabilize the narrow Windows-local build and run spellings; ADR 0180 separately 
 target-explicit C application-unit emission. ADR 0181 now adds the root-only semantic test lane:
 production loading excludes `tests/`, the test overlay validates `@test fn void`, and each entry
 runs in a fresh interpreter state without a target toolchain or artifact.
+ADR 0204 closes the first-project bootstrap gap with stable
+`fairyc new <package-name> --uid <package-uid>`: one explicit identity, one exclusive child
+directory, exact manifest/source/test bytes, ordinary-failure rollback, and generated-project
+check/locked-check/test evidence without adding a template engine or package manager.
 
 ADR 0152 now removes disposable HIR package numbering from compiler-private function identities.
 The exact package-instance map, logical name, canonical signature types, effects, and drop-glue type
@@ -546,7 +550,8 @@ quarantines, without selecting a default policy or making a speed claim.
   declared reference environment, and an accepted decision rule justify an ordinary-command cache
   path and defaults. The crash/power-interruption safety boundary and configured local cold/warm
   distributions now exist; physical media retention remains storage-stack-specific.
-- Keep the implemented `fairyc check [--locked]`, Windows-local
+- Keep the implemented no-overwrite `fairyc new <package-name> --uid <package-uid>` bootstrap,
+  `fairyc check [--locked]`, Windows-local
   `fairyc build [--release] [--locked]`, and Windows-local
   `fairyc run [--release] [--locked]` v1 contracts narrow. Keep the source-independent
   `fairyc explain <diagnostic-code>` and `fairyc targets` v1 contracts separate from catalog and

@@ -409,6 +409,12 @@ fresh semantic-interpreter execution, human result grammar, production-lock isol
 codes 0, 2, 3, 4, 5, and 7. Target-native execution, member recursion, filters, setup/teardown,
 benchmarks, host I/O, machine output, and test bytes in release package identities remain outside v1.
 
+ADR 0204 stabilizes `fairyc new <package-name> --uid <package-uid>`, its explicit non-derived UID,
+single direct-child destination, exact four-file starter, no-overwrite behavior, absence of an
+initial lockfile, success line, and codes 0, 2, 4, and 7. Adding templates, flags, merge behavior, an
+arbitrary destination, lock generation, or different default bytes requires a new compatibility
+decision; process-crash transactionality is not promised.
+
 ADR 0182 introduces the independently identified in-memory
 `fairyc.semantic-snapshot/v0` model. It removes build-local package and symbol numbering from
 detached compiler facts and fixes provenance plus relation-specific completeness behavior, but it

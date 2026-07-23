@@ -435,6 +435,12 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   `--source` closure, requires no executable entry, and stops after MIR verification. It performs no
   backend, target, toolchain, process, network, or artifact action. It remains distinct from stable
   package-aware `fairyc check`.
+- Stable `fairyc new <package-name> --uid <package-uid>` creates one no-overwrite direct-child
+  starter workspace with explicit durable UID, manifest v1, C-shaped source returning 42, one
+  semantic test, and a build-only ignore rule. It never guesses identity, merges an existing path,
+  generates a lockfile, accepts an arbitrary destination, or uses a template, prompt, stdin,
+  environment, config, process, toolchain, registry, or network. Ordinary creation failures attempt
+  contained rollback; crash-left partial directories remain user-owned recovery.
 - Stable `fairyc check [--locked]` loads the current directory's strict manifest-owned local
   workspace, selects the compiler-bundled SDK only when imported, maintains canonical `fairy.lock`
   in ordinary mode or requires an exact no-write lock in `--locked` mode, and runs the complete

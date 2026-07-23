@@ -39,6 +39,17 @@ var (
 	pathSegment     = regexp.MustCompile(`^[A-Za-z0-9_][A-Za-z0-9._-]*$`)
 )
 
+// ValidPackageName reports whether value has the exact manifest-v1 package-name spelling.
+func ValidPackageName(value string) bool {
+	return kebabPattern.MatchString(value)
+}
+
+// ValidPortablePathSegment reports whether value can name one manifest-v1 directory component on
+// every admitted host, including Windows reserved-device-name rejection.
+func ValidPortablePathSegment(value string) bool {
+	return validPathSegment(value)
+}
+
 // ValidPackageUID reports whether value has the exact manifest-v1 package UID spelling.
 func ValidPackageUID(value string) bool {
 	return uidPattern.MatchString(value)
@@ -138,7 +149,7 @@ func Parse(contents []byte) (Manifest, error) {
 	if !ValidPackageUID(raw.Package.UID) {
 		return Manifest{}, &ValidationError{Reason: ReasonInvalidPackageUID, Field: "package.uid", Detail: "expected at least two lowercase dot-separated segments"}
 	}
-	if !kebabPattern.MatchString(raw.Package.Name) {
+	if !ValidPackageName(raw.Package.Name) {
 		return Manifest{}, &ValidationError{Reason: ReasonInvalidName, Field: "package.name", Detail: "expected lowercase kebab-case"}
 	}
 	if !validSemver(raw.Package.Version) {
@@ -255,7 +266,7 @@ func validRelativeDirectory(value string) bool {
 		return false
 	}
 	for _, segment := range strings.Split(value, "/") {
-		if !validPathSegment(segment) {
+		if !ValidPortablePathSegment(segment) {
 			return false
 		}
 	}
