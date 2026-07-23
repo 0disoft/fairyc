@@ -19,11 +19,8 @@ func execTarget(arguments []string, sourceRoot string, stdout, stderr io.Writer)
 	if err != nil {
 		return buildFailure(stderr, err)
 	}
-	if _, err := io.WriteString(stdout, outcome.Stdout); err != nil {
-		return outputError(stderr)
-	}
-	if _, err := io.WriteString(stderr, outcome.Stderr); err != nil {
-		return ExitInternalFailure
+	if code := forwardProgramOutput(outcome.Stdout, outcome.Stderr, stdout, stderr); code != ExitSuccess {
+		return code
 	}
 	return int(uint32(outcome.ExitCode))
 }

@@ -100,7 +100,7 @@ pub fn i32 answer() {
 }
 
 fn i32 main() {
-    return answer();
+    return answer() - 42;
 }
 `
 
@@ -139,8 +139,8 @@ fairyc build --release --locked
 .\build\%s.exe
 `+"```"+`
 
-`+"`fairyc run`"+` reports the returned `+"`i32`"+`; it does not forward program output. Run the
-retained executable when the program uses console I/O.
+`+"`fairyc run`"+` forwards program output and returns `+"`main`"+`'s `+"`i32`"+` as the process status.
+The generated starter returns zero after checking that `+"`answer()`"+` is 42.
 
 ## Write to standard output
 
@@ -173,14 +173,13 @@ fn i32 main() {
 }
 `+"```"+`
 
-Then refresh the lock, build, and run the retained executable:
+Then refresh the lock and run the program directly:
 
 `+"```text"+`
 fairyc check
-fairyc build --release --locked
-.\build\%s.exe
+fairyc run --release --locked
 `+"```"+`
-`, spec.Name, spec.Name, spec.Name))
+`, spec.Name, spec.Name))
 }
 
 // Create creates exactly one new child directory below parentPath. Existing targets are never

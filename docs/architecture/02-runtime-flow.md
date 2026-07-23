@@ -115,6 +115,10 @@ separated bounded streams without a compiler receipt and preserves the program s
 source surface reaches only one unsafe Windows stdout write-all function. The checked-in program
 contains it behind a safe local `ref str` helper; `main` uses only safe borrowed-view calls while the
 private generated-C descriptors carry data and length between internal functions.
+Stable workspace run v2 uses the same bounded driver for manifest-owned programs and compiler-bundled
+SDK linkage. It forwards both streams, preserves ordinary status, and compiles one private trap suffix
+so the CLI can remove only control metadata while retaining preceding program stderr and a canonical
+trap line. It provides no live interleaving, stdin, arguments, or hostile-code isolation.
 `internal/layout` is the next boundary: it turns those facts into checked array and aggregate size,
 alignment, offset, and padding results before any backend chooses C syntax. Separate Linux GNU and
 Windows MSVC manifests hold host-independent expectations. The generated native C probe checks

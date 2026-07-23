@@ -88,10 +88,8 @@ func runStableRun(arguments []string, sourceRoot string, stdout, stderr io.Write
 		return invocationError(stderr, err.Error())
 	}
 	profile := cdriver.LowProfile
-	profileName := "development"
 	if options.release {
 		profile = cdriver.OptimizedProfile
-		profileName = "release"
 	}
 	compiled, code := compileWindowsWorkspace(sourceRoot, workspaceTargetOptions{
 		targetID: target.X8664WindowsMSVC,
@@ -105,27 +103,17 @@ func runStableRun(arguments []string, sourceRoot string, stdout, stderr io.Write
 	if err != nil {
 		return buildFailure(stderr, err)
 	}
-	result, category, err := classifyWorkspaceRunOutcome(outcome)
-	if err != nil {
-		return buildFailure(stderr, err)
+	programStderr, category := classifyStableRunOutcome(outcome)
+	if category != "" {
+		programStderr += fmt.Sprintf("trap: %s\n", category)
+	}
+	if code := forwardProgramOutput(outcome.Stdout, programStderr, stdout, stderr); code != ExitSuccess {
+		return code
 	}
 	if category != "" {
-		if _, err := fmt.Fprintf(stderr, "trap: %s\n", category); err != nil {
-			return ExitInternalFailure
-		}
 		return ExitProgramTrap
 	}
-	if _, err := fmt.Fprintf(
-		stdout,
-		"result: %d (%s, %s, lock %s)\n",
-		result,
-		target.X8664WindowsMSVC,
-		profileName,
-		compiled.lockState,
-	); err != nil {
-		return outputError(stderr)
-	}
-	return ExitSuccess
+	return int(uint32(outcome.ExitCode))
 }
 
 func parseStableNativeOptions(command string, arguments []string) (stableNativeOptions, error) {
@@ -360,6 +348,19 @@ func workspaceSubsetCapabilityError(policy workspaceCompilePolicy, stderr io.Wri
 		return ExitInternalFailure
 	}
 	return ExitInvalidInvocation
+}
+
+func classifyStableRunOutcome(outcome cdriver.WindowsHostOutcome) (string, string) {
+	category, trapped := windowsHostTrapCategory(outcome.ExitCode)
+	if !trapped {
+		return outcome.Stderr, ""
+	}
+	trapCode := int(outcome.ExitCode) - productTrapExitBase
+	receipt := fmt.Sprintf("%s%d", cruntime.RunTrapReceiptPrefix, trapCode)
+	if !strings.HasSuffix(outcome.Stderr, receipt) {
+		return outcome.Stderr, ""
+	}
+	return strings.TrimSuffix(outcome.Stderr, receipt), category
 }
 
 func classifyWorkspaceRunOutcome(outcome cdriver.WindowsHostOutcome) (int32, string, error) {

@@ -186,7 +186,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0174-coordinate-stable-linking-and-cache-key-v2.md`: coordinate-based stable symbols, types, foreign declarations, and dependency cache pairs enable verified caller reuse across private dependency edits.
 - `0175-stable-workspace-check-v1.md`: stable `fairyc check [--locked]` owns current-workspace discovery, lock maintenance, package-aware verified MIR, deterministic output, and source/package failure separation.
 - `0176-stable-windows-workspace-build-v1.md`: stable `fairyc build [--release] [--locked]` derives one replace-on-success artifact from the root package while retaining the closed local Windows/MSVC capability boundary.
-- `0177-stable-windows-workspace-run-v1.md`: stable `fairyc run [--release] [--locked]` executes one inspected temporary workspace image, separates result from CLI status, and retains neither that image nor program I/O.
+- `0177-stable-windows-workspace-run-v1.md`: superseded result-receipt form of stable `fairyc run`; ADR 0207 owns the current program-facing stream and status contract.
 - `0178-stable-diagnostic-explain-v1.md`: stable `fairyc explain <diagnostic-code>` fixes exact lookup, three-line human shape, side-effect-free behavior, and codes 0, 2, and 4 without promoting the provisional catalog to a released language.
 - `0179-stable-target-maturity-report-v1.md`: stable `fairyc targets` fixes the host-independent human report grammar, canonical ordering, atomic failure, and codes 0, 2, and 4 while TargetSpec evidence continues to evolve independently.
 - `0180-stable-workspace-c-emission-v1.md`: stable `fairyc emit c --target <target-id> [--locked]` emits one target-selected raw C11 application unit without choosing a host, toolchain, support unit, or output file.
@@ -216,6 +216,8 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0204-stable-starter-project-creation-v1.md`: explicit package identity, a contained no-overwrite child directory, exact starter bytes, ordinary-failure rollback, and generated-project check/test evidence for stable `fairyc new`.
 - `0205-target-neutral-stage0-stdout-write.md`: compiler-bundled safe `std::io::write`, progress-preserving target-neutral linkage, target-owned Linux/Windows adapters, and exact Windows native output evidence.
 - `0206-starter-project-guide-v2.md`: exact compiler-owned generated README with honest lock, run-stream, retained-artifact, and safe `std::io::write` guidance while preserving the output-free starter source.
+- `0207-stable-windows-workspace-run-v2.md`: program-facing stable run with bounded stream forwarding, exact 32-bit normal status propagation, private trap-receipt removal, and no retained image.
+- `0208-starter-project-guide-v3.md`: conventional zero-status starter entry and generated guide aligned with direct safe stdout execution through stable run v2.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

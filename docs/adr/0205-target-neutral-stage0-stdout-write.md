@@ -45,7 +45,8 @@ inside `Result` without inventing an unsupported nested-enum layout.
    behavior cannot drift.
 7. `examples/std_io_quickstart` is the safe user example. Its entry declares `@effects(console)`,
    calls only `std::io::write`, checks the returned byte count, prints `Fairy C says hi\n`, and
-   returns 42. It contains no raw pointer, `unsafe`, foreign declaration, or platform name.
+   originally returned 42. ADR 0207 later changes its conventional success status to zero while
+   preserving the API and exact bytes. It contains no raw pointer, `unsafe`, foreign declaration, or platform name.
 8. `println`, formatting, stderr, stdin, console encoding conversion, terminal capabilities,
    asynchronous I/O, cancellation, retry policy after a reported failure, symbolic error kinds, and
    a stable portable file package remain outside this decision.
@@ -57,9 +58,9 @@ inside `Result` without inventing an unsupported nested-enum layout.
 - A target-neutral source name does not imply equal host internals or complete target support.
 - Numeric errors are deliberately small and progress-preserving; a future symbolic taxonomy must
   preserve compatibility or introduce a separately versioned API.
-- Stable `fairyc run` still rejects program streams because it owns a compiler result receipt.
-  Users who need program output build and execute the retained artifact; the experimental
-  `exec-target` command remains the direct-output execution surface.
+- At this decision's acceptance, stable `fairyc run` still rejected program streams. ADR 0207 later
+  supersedes that execution boundary: stable run now forwards bounded program output and preserves
+  ordinary program status without changing this standard-library API.
 
 ## Verification
 
@@ -71,5 +72,6 @@ inside `Result` without inventing an unsupported nested-enum layout.
   and low/optimized profiles. Its probe covers empty, invalid, successful redirected output, and
   closed-stdout behavior. No Linux execution receipt has been observed on this Windows host.
 - The WSL-free Windows smoke builds the checked-in workspace through the stable command, executes
-  the inspected PE with exact stdout and status 42, then repeats the locked build and execution
-  through a separately built `fairyc.exe`.
+  the inspected PE with exact stdout and the then-current status. ADR 0207 extends that evidence to
+  stable run and status zero, then repeats locked run/build execution through a separately built
+  `fairyc.exe`.

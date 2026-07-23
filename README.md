@@ -173,8 +173,9 @@ FY-to-MSVC process output, unsafe containment, and source-effect enforcement for
 The compiler-bundled SDK `0.0.0-stage0.2` now exposes the safe
 `std::io::write(ref str) -> Result<usize, ConsoleError>` boundary over a target-neutral internal
 symbol. `examples/std_io_quickstart` contains no raw pointer, unsafe block, foreign declaration, or
-platform name; stable build produces an inspected Windows PE that prints the exact bytes and exits
-42, and a separately built `fairyc.exe` repeats the locked build and execution. Linux owns a POSIX
+platform name; stable run now forwards its exact output and preserves success status zero, while
+stable build produces the same inspected Windows PE for direct execution. A separately built
+`fairyc.exe` repeats both locked paths. Linux owns a POSIX
 adapter and four configured native probes, but this Windows host has not observed those executions.
 Formatting, implicit newlines, stderr, stdin, terminal encoding, and a final symbolic error taxonomy
 remain outside the API.
@@ -391,7 +392,8 @@ persistent cache, or stable editor protocol. Program commands use one entry plus
 `fairyc run [--release] [--locked]`, the target-independent semantic
 `fairyc test [--locked]`, plus source-independent
 `fairyc explain <diagnostic-code>` and `fairyc targets`, and target-explicit
-`fairyc emit c --target <target-id> [--locked]`. Native test execution, native program I/O and arguments,
+`fairyc emit c --target <target-id> [--locked]`. Stable run forwards bounded Windows program output
+and status; native test execution, program arguments and stdin,
 a complete runtime, safe standard library, package manager, supported
 target, release-stable CLI as a whole, and a stable language revision do not exist yet.
 
@@ -461,14 +463,15 @@ explicit example inputs; they are not product defaults or tuning recommendations
 For repeated Windows use, `DEVELOPMENT.md` gives the WSL-free manual bootstrap that creates ignored
 `build/fairyc.exe`. The configured Windows smoke separately builds a temporary standalone compiler
 process, requires it to create a no-overwrite starter, check it, run its semantic test, and compile
-its generated source through MSVC to native result 42. The same executable runs
+its generated source through MSVC with conventional program status zero. The same executable runs
 `examples/windows_quickstart/main.fy` through MSVC with
 native result 42 by iterating two bytes with checked `usize` arithmetic and safely converting each
 indexed `u8` value to `i32`,
 then execute `examples/windows_output/main.fy` with exact stdout and process status
 42 while explicitly supplying its separate `windows_console.fy` module, and finally run the
 two-package `examples/workspace_quickstart` graph through an exact generated lock with native result
-42. The same standalone compiler runs the isolated semantic test and emits locked Windows and Linux C11 application units without
+42, and runs the safe `std::io` workspace with exact stdout and status zero. The same standalone
+compiler runs the isolated semantic test and emits locked Windows and Linux C11 application units without
 changing the retained executable. It then measures nine fresh-cache cold/warm pairs with one new compiler process per sample,
 sends eight editor-shaped workspace checks to one compiler process, validates the cold, no-op,
 private-root, private-dependency, and public-dependency cache paths, and records Windows

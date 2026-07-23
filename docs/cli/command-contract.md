@@ -6,7 +6,7 @@
 
 This document owns planned `fairyc` command semantics. It does not claim that a command is implemented. Implemented commands must be marked with tests and a language revision before release.
 
-## Stable starter project creation v2
+## Stable starter project creation v3
 
 `fairyc new <package-name> --uid <package-uid>` creates one starter project as a direct child of the
 current process source root. The name must be one portable lowercase kebab-case manifest name and
@@ -17,16 +17,16 @@ The target must not already exist as a file, directory, or symbolic link. The co
 destination path, current-directory mode, template, version, language, force, merge, target,
   toolchain, config, environment, network, stdin, or prompt surface. It writes exactly `.gitignore`,
   `README.md`, `fairy.toml`, `src/main.fy`, and `tests/main.fy` under the new directory. The manifest
-  fixes version `0.1.0`, language `fairyc-language/0`, and source root `src`; the C-shaped source
-  returns 42, and the semantic test imports its public `answer` function. `.gitignore` excludes only
-  `/build/`.
+  fixes version `0.1.0`, language `fairyc-language/0`, and source root `src`; public `answer()` returns
+  42, private `main()` returns `answer() - 42`, and the semantic test imports and checks `answer`.
+  `.gitignore` excludes only `/build/`.
 
 The generated README is exact compiler-owned starter content, not a selectable template. It labels
-its commands as manual steps, explains first-check lock publication and stable run's no-program-
-stream boundary, substitutes the validated package name into the retained Windows executable path,
-and includes one complete safe `std::io::write` source replacement. The source handles both Result
-variants and returns zero only after the complete message was written. It directs the user to run an
-ordinary check before a locked release build because changing source makes the old lock stale.
+its commands as manual steps, explains first-check lock publication and stable run v2's stream and
+process-status behavior, substitutes the validated package name into the retained Windows executable
+path, and includes one complete safe `std::io::write` source replacement. The source handles both
+Result variants and returns zero only after the complete message was written. It directs the user to
+run an ordinary check before locked release execution because changing source makes the old lock stale.
 
 No `fairy.lock` is generated: the first ordinary workspace command owns complete graph validation
 and lock publication. Files are exclusive creates under an opened root and synced before success.
@@ -418,7 +418,8 @@ native-result or trap receipt. The two streams share one 64 KiB capture limit an
 cross-stream ordering. Toolchain, compilation, structure, timeout, capture-limit, and CLI output-
 write failures remain compiler failures rather than program statuses. The current source-callable
 slice exposes only unsafe `fy_std_windows_stdout_write_all_v0`; stdin, stderr writes, arguments,
-Unicode console policy, and a safe public `std::io` wrapper remain absent.
+and Unicode console policy remain absent. Compiler-bundled safe `std::io` belongs to manifest-owned
+workspace build/run and is not injected into this explicit-source target command.
 The checked-in output example confines that raw call to a safe local `ref str` helper, supplies the
 length through the view's `usize` byte-count `.len`, and verifies status plus completed progress.
 The raw declaration, wrapper, and `main` propagate `@effects(console)`; `unsafe` remains an
@@ -480,7 +481,7 @@ Success is exactly `built: <path> (x86_64-windows-msvc, <development|release>, l
 stability does not promote the target's independent `emittable`, `conformant`, or `supported`
 status and does not select persistent-cache defaults.
 
-## Stable workspace run v1
+## Stable workspace run v2
 
 `fairyc run [--release] [--locked]` compiles and executes the current workspace through the same
 manifest, lock, root `main::main`, development/release profile, and closed local Windows pipeline as
@@ -489,20 +490,23 @@ compiler-owned temporary storage, and is removed afterward. It does not create, 
 execute the retained `build/<package-name>.exe` artifact.
 
 The command accepts no positional source, output, target, compiler, linker, profile value, cache,
-JSON, configuration, network, stdin, program argument, or program-stream delimiter. Captured program
-stdout or stderr is rejected because native program streams are not a Stage 0 stable contract.
+JSON, configuration, network, stdin, program argument, or program-stream delimiter. After successful
+launch, bounded program stdout and stderr are forwarded to their matching compiler streams without a
+success banner. Capture uses separate OS pipes under one shared 64 KiB ceiling, so stream identity is
+preserved but cross-stream order is unspecified.
 
-A normal return across the full `i32` range writes exactly `result: <i32> (x86_64-windows-msvc,
-<development|release>, lock <updated|unchanged|verified>)` and returns compiler status 0; the `i32`
-value is result data. A compiler-private, run-only trap token distinguishes reserved trap statuses
-from equal normal results and is consumed before user-visible output. A recognized language trap
-writes `trap: <category>` and returns 5. The
-command freezes codes 0, 2, 3, 4, 5, 6, and 7 without promoting target maturity, program I/O,
-argument transport, or persistent-cache defaults.
+A normal return across the full `i32` range becomes the `fairyc` process status. After launch, a
+status numerically equal to 2, 3, 4, 5, 6, or 7 is still program-owned. A compiler-private run-only
+trap suffix distinguishes reserved trap statuses from equal normal results: the suffix alone is
+removed, preceding program stderr is forwarded, `trap: <category>` is appended, and the command
+returns 5. The receipt is not public runtime ABI, authentication, or hostile-code isolation.
+Pre-execution invocation, source, internal/output, build/execution, and package failures retain codes
+2, 3, 4, 6, and 7 respectively without promoting target maturity or persistent-cache defaults.
 
 Ordinary mode may update `fairy.lock` after a valid graph is loaded even when later compilation,
-execution, or a program trap fails. `--locked` performs no write. A compiler-output write failure
-after program execution returns code 4 but cannot undo program effects; no executable is retained.
+execution, a nonzero program status, or a program trap follows. `--locked` performs no write. A
+compiler-output write failure after program execution returns code 4 but cannot undo earlier bytes
+or program effects; no executable is retained.
 
 ## Stable workspace semantic test v1
 
@@ -545,7 +549,7 @@ may precede later failure, while `--locked` writes nothing.
 | `fairyc targets` | Report known target profiles, status, evidence, and unavailable requirements | No |
 
 Alternate package/workspace selection, test filtering and native execution, target triples beyond
-the declared emit profiles and build/run v1's fixed local Windows path, program I/O and arguments,
+  the declared emit profiles and build/run's fixed local Windows path, program arguments and stdin,
 feature flags, and configuration precedence
 remain UNDECIDED. The implemented `experimental` spellings do not settle those decisions.
 

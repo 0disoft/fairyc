@@ -81,28 +81,36 @@ func TestParseStableNativeOptions(t *testing.T) {
 	}
 }
 
-func TestClassifyWorkspaceRunOutcomeSeparatesNormalReservedResultFromTrap(t *testing.T) {
+func TestClassifyStableRunOutcomeSeparatesProgramStreamsAndReservedResultFromTrap(t *testing.T) {
 	t.Parallel()
 	normalResult := int32(productTrapExitBase + 3)
-	result, category, err := classifyWorkspaceRunOutcome(cdriver.WindowsHostOutcome{ExitCode: normalResult})
-	if err != nil || result != normalResult || category != "" {
-		t.Fatalf("normal reserved result = (%d, %q, %v)", result, category, err)
-	}
-	result, category, err = classifyWorkspaceRunOutcome(cdriver.WindowsHostOutcome{
+	programStderr, category := classifyStableRunOutcome(cdriver.WindowsHostOutcome{
 		ExitCode: normalResult,
-		Stderr:   cruntime.RunTrapReceiptPrefix + "3",
+		Stdout:   "program stdout\n",
+		Stderr:   "program stderr\n",
 	})
-	if err != nil || result != 0 || category != "division-by-zero" {
-		t.Fatalf("receipt trap = (%d, %q, %v)", result, category, err)
+	if programStderr != "program stderr\n" || category != "" {
+		t.Fatalf("normal reserved result = (%q, %q)", programStderr, category)
 	}
-	for _, outcome := range []cdriver.WindowsHostOutcome{
-		{ExitCode: normalResult, Stdout: "program output"},
-		{ExitCode: normalResult, Stderr: cruntime.RunTrapReceiptPrefix + "2"},
-		{ExitCode: 42, Stderr: cruntime.RunTrapReceiptPrefix + "3"},
-		{ExitCode: normalResult, Stderr: "forged\n"},
+	programStderr, category = classifyStableRunOutcome(cdriver.WindowsHostOutcome{
+		ExitCode: normalResult,
+		Stdout:   "program stdout\n",
+		Stderr:   "before trap\n" + cruntime.RunTrapReceiptPrefix + "3",
+	})
+	if programStderr != "before trap\n" || category != "division-by-zero" {
+		t.Fatalf("receipt trap = (%q, %q)", programStderr, category)
+	}
+	for _, test := range []struct {
+		outcome cdriver.WindowsHostOutcome
+		stderr  string
+	}{
+		{outcome: cdriver.WindowsHostOutcome{ExitCode: normalResult, Stderr: cruntime.RunTrapReceiptPrefix + "2"}, stderr: cruntime.RunTrapReceiptPrefix + "2"},
+		{outcome: cdriver.WindowsHostOutcome{ExitCode: 42, Stderr: cruntime.RunTrapReceiptPrefix + "3"}, stderr: cruntime.RunTrapReceiptPrefix + "3"},
+		{outcome: cdriver.WindowsHostOutcome{ExitCode: normalResult, Stderr: "ordinary\n"}, stderr: "ordinary\n"},
 	} {
-		if _, _, err := classifyWorkspaceRunOutcome(outcome); err == nil {
-			t.Errorf("classifyWorkspaceRunOutcome(%+v) succeeded", outcome)
+		programStderr, category := classifyStableRunOutcome(test.outcome)
+		if programStderr != test.stderr || category != "" {
+			t.Errorf("classifyStableRunOutcome(%+v) = (%q, %q)", test.outcome, programStderr, category)
 		}
 	}
 }

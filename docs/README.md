@@ -48,13 +48,13 @@
 - Stable package type-context artifact and identity: internal/packageartifact/context.go, docs/adr/0161-stable-type-context-artifact.md
 - Source-independent package coordinate prerequisite: internal/packagegraph/coordinate.go, docs/package/package-coordinate-id-v1.md, docs/adr/0172-source-independent-package-coordinate.md
 - Project manifest v1 fixtures and strict TOML parser: spec/fixtures/project-manifest/manifest-v1.json, internal/projectmanifest/, internal/projectmanifestfixture/
-- Stable exact starter-project creation v2: internal/projectscaffold/, internal/cli/project_new.go, docs/adr/0204-stable-starter-project-creation-v1.md, docs/adr/0206-starter-project-guide-v2.md
+- Stable exact starter-project creation v3: internal/projectscaffold/, internal/cli/project_new.go, docs/adr/0204-stable-starter-project-creation-v1.md, docs/adr/0206-starter-project-guide-v2.md, docs/adr/0208-starter-project-guide-v3.md
 - Local workspace loader v1 fixtures and implementation: spec/fixtures/workspace-loader/manifest-v1.json, internal/workspaceloader/, internal/workspaceloaderfixture/
 - Compiler-bundled Stage 0 standard-library source package: internal/sdkstdlib/
 - Generated lockfile v1 implementation: internal/lockfile/
 - Stable local-workspace check v1: internal/cli/workspace.go, docs/adr/0175-stable-workspace-check-v1.md
 - Stable local Windows workspace build v1: internal/cli/workspace_native.go, internal/cli/build.go, docs/adr/0176-stable-windows-workspace-build-v1.md
-- Stable local Windows workspace run v1: internal/cli/workspace_native.go, docs/adr/0177-stable-windows-workspace-run-v1.md
+- Stable local Windows workspace run v2: internal/cli/workspace_native.go, internal/cli/program_output.go, docs/adr/0177-stable-windows-workspace-run-v1.md, docs/adr/0207-stable-windows-workspace-run-v2.md
 - Stable diagnostic explanation v1: internal/cli/run.go, internal/diagnostic/catalog.go, docs/adr/0178-stable-diagnostic-explain-v1.md
 - Stable target maturity report v1: internal/cli/target.go, internal/target/spec.go, docs/adr/0179-stable-target-maturity-report-v1.md
 - Stable workspace C emission v1: internal/cli/workspace_emit.go, internal/cbackend/, docs/adr/0180-stable-workspace-c-emission-v1.md

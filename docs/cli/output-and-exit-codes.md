@@ -16,7 +16,9 @@ This repository type owns command behavior, arguments, flags, config loading, ex
   `docs/adr/0180-stable-workspace-c-emission-v1.md`, and
   `docs/adr/0181-stable-workspace-semantic-test-v1.md`, and
   `docs/adr/0204-stable-starter-project-creation-v1.md`, and
-  `docs/adr/0206-starter-project-guide-v2.md`
+  `docs/adr/0206-starter-project-guide-v2.md`, and
+  `docs/adr/0207-stable-windows-workspace-run-v2.md`, and
+  `docs/adr/0208-starter-project-guide-v3.md`
 
 ## Required Decisions
 
@@ -49,13 +51,15 @@ failure, toolchain/link/artifact failure, and package/manifest/lock failure. Suc
 the prior default artifact. An output-stream failure after replacement returns `4` but does not
 delete the successfully built artifact. No stable JSON mode exists.
 
-`fairyc run [--release] [--locked]` additionally stabilizes code `5` for a recognized language
-trap. A normal return writes exactly `result: <i32> (x86_64-windows-msvc,
-<development|release>, lock <updated|unchanged|verified>)` and returns compiler status `0`; the
-program result is not reused as compiler status. A trap writes exactly `trap: <category>` to stderr
-and emits no result line. Native program streams and arguments are not stable surfaces; captured
-program output is a code `6` execution failure. A compiler-output write failure after execution is
-code `4` and does not undo program effects. No temporary executable is retained.
+`fairyc run [--release] [--locked]` v2 emits no compiler success line. After successful launch it
+forwards bounded program stdout and stderr to their matching streams, then preserves an ordinary
+`main` return as the complete 32-bit process status. A recognized language trap removes its private
+receipt suffix, preserves preceding program stderr, appends exactly `trap: <category>\n`, and returns
+`5`. Therefore codes `2`, `3`, `4`, `5`, `6`, and `7` mean compiler failures only before launch; the
+same ordinary post-launch values are program statuses. A forwarding failure after execution is code
+`4` and does not undo earlier bytes or program effects. The shared captured-output ceiling is 64 KiB,
+cross-stream order is unspecified, program arguments and stdin remain absent, and no temporary
+executable is retained.
 
 `fairyc explain <diagnostic-code>` stabilizes codes `0`, `2`, and `4` for successful exact lookup,
 invalid invocation or unknown code, and output failure. Success writes exactly three ANSI-free lines

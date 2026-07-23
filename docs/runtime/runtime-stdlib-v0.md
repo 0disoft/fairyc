@@ -307,8 +307,9 @@ completed prefix. The API does not format, transcode, append a newline, retry af
 failure, or promise terminal-specific encoding behavior.
 
 The checked-in `examples/std_io_quickstart` contains no unsafe code or platform symbol. The Windows
-smoke builds it through stable `fairyc build --release`, executes exact `Fairy C says hi\n` with
-status 42, and repeats a locked build and execution through a separately built compiler. Linux
+smoke runs it through stable `fairyc run --release --locked`, forwards exact `Fairy C says hi\n`
+with status zero, builds and directly executes the retained image with the same observation, and
+repeats both locked paths through a separately built compiler. Linux
 Clang/GCC low/optimized executions are configured through the native report v32
 `linuxConsoleExecutions` field but remain unobserved on this Windows host.
 

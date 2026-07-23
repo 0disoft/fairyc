@@ -665,9 +665,16 @@ func run() error {
 	if _, err := pecoff.InspectAMD64Unwind(stdIOArtifact); err != nil {
 		return fmt.Errorf("inspect std::io stable build unwind data: %w", err)
 	}
-	if err := executeExpectOutput(stdIOArtifactPath, 42, "Fairy C says hi\n", ""); err != nil {
+	if err := executeExpectOutput(stdIOArtifactPath, 0, "Fairy C says hi\n", ""); err != nil {
 		return fmt.Errorf("execute std::io stable build artifact: %w", err)
 	}
+	var stdIORunStdout bytes.Buffer
+	var stdIORunStderr bytes.Buffer
+	stdIORunCode := cli.Run([]string{"run", "--release", "--locked"}, stdIORoot, &stdIORunStdout, &stdIORunStderr)
+	if stdIORunCode != cli.ExitSuccess || stdIORunStdout.String() != "Fairy C says hi\n" || stdIORunStderr.Len() != 0 {
+		return fmt.Errorf("std::io stable run returned code %d, stdout %q, stderr %q", stdIORunCode, stdIORunStdout.String(), stdIORunStderr.String())
+	}
+	workspaceRunExecutions++
 	workspaceBuildExecutions++
 	standaloneCompilerBytes, err := runStandaloneCompiler(repositoryRoot, root, clockResolution)
 	if err != nil {
@@ -676,7 +683,7 @@ func run() error {
 	targetRunExecutions++
 	targetExecExecutions++
 	workspaceBuildExecutions += 2
-	workspaceRunExecutions += 2
+	workspaceRunExecutions += 3
 
 	for _, testCase := range []struct {
 		name         string
@@ -865,8 +872,7 @@ func runStableWorkspaceRunProof(root string) (int, error) {
 	var developmentStdout bytes.Buffer
 	var developmentStderr bytes.Buffer
 	developmentCode := cli.Run([]string{"run"}, root, &developmentStdout, &developmentStderr)
-	if developmentCode != cli.ExitSuccess || developmentStderr.Len() != 0 ||
-		developmentStdout.String() != "result: 42 (x86_64-windows-msvc, development, lock unchanged)\n" {
+	if developmentCode != 42 || developmentStderr.Len() != 0 || developmentStdout.Len() != 0 {
 		return 0, fmt.Errorf("stable development run returned code %d, stdout %q, stderr %q", developmentCode, developmentStdout.String(), developmentStderr.String())
 	}
 
@@ -882,11 +888,22 @@ func runStableWorkspaceRunProof(root string) (int, error) {
 	var reservedStdout bytes.Buffer
 	var reservedStderr bytes.Buffer
 	reservedCode := cli.Run([]string{"run"}, root, &reservedStdout, &reservedStderr)
-	if reservedCode != cli.ExitSuccess || reservedStderr.Len() != 0 ||
-		reservedStdout.String() != "result: 131 (x86_64-windows-msvc, development, lock updated)\n" {
+	if reservedCode != 131 || reservedStderr.Len() != 0 || reservedStdout.Len() != 0 {
 		return 0, fmt.Errorf("stable reserved-result run returned code %d, stdout %q, stderr %q", reservedCode, reservedStdout.String(), reservedStderr.String())
 	}
-	trapSource := []byte("module main;\n\nfn i32 main() {\n    return 42 / 0;\n}\n")
+	trapSource := []byte(`module main;
+
+import std::io as io;
+
+@effects(console)
+fn i32 main() {
+    let ref str message = "before trap\n";
+    return switch (io::write(message)) {
+        case .ok(written) : { if (written == message.len) { 42 / 0 } else { 1 } }
+        case .err(error) : { if (error.status != 0) { 2 } else { 3 } }
+    };
+}
+`)
 	if err := os.WriteFile(sourcePath, trapSource, 0o600); err != nil {
 		return 0, fmt.Errorf("write stable run trap source: %w", err)
 	}
@@ -897,15 +914,14 @@ func runStableWorkspaceRunProof(root string) (int, error) {
 	if restoreErr != nil {
 		return 0, fmt.Errorf("restore source after stable run trap proof: %w", restoreErr)
 	}
-	if trapCode != cli.ExitProgramTrap || trapStdout.Len() != 0 || trapStderr.String() != "trap: division-by-zero\n" {
+	if trapCode != cli.ExitProgramTrap || trapStdout.String() != "before trap\n" || trapStderr.String() != "trap: division-by-zero\n" {
 		return 0, fmt.Errorf("stable trap run returned code %d, stdout %q, stderr %q", trapCode, trapStdout.String(), trapStderr.String())
 	}
 
 	var releaseStdout bytes.Buffer
 	var releaseStderr bytes.Buffer
 	releaseCode := cli.Run([]string{"run", "--release"}, root, &releaseStdout, &releaseStderr)
-	if releaseCode != cli.ExitSuccess || releaseStderr.Len() != 0 ||
-		releaseStdout.String() != "result: 42 (x86_64-windows-msvc, release, lock updated)\n" {
+	if releaseCode != 42 || releaseStderr.Len() != 0 || releaseStdout.Len() != 0 {
 		return 0, fmt.Errorf("stable release run returned code %d, stdout %q, stderr %q", releaseCode, releaseStdout.String(), releaseStderr.String())
 	}
 	restoredLock, err := os.ReadFile(lockPath)
@@ -1366,9 +1382,9 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string, clockResolution in
 		return 0, fmt.Errorf("read standalone compiler generated starter guide: %w", err)
 	}
 	const starterExecutableCommand = `.\build\starter-smoke.exe`
-	if bytes.Count(starterReadme, []byte(starterExecutableCommand)) != 2 ||
+	if bytes.Count(starterReadme, []byte(starterExecutableCommand)) != 1 ||
 		!bytes.Contains(starterReadme, []byte("```fairyc\nmodule main;\n\nimport std::io as io;\n")) ||
-		!bytes.Contains(starterReadme, []byte("`fairyc run` reports the returned `i32`; it does not forward program output.")) {
+		!bytes.Contains(starterReadme, []byte("`fairyc run` forwards program output and returns `main`'s `i32` as the process status.")) {
 		return 0, fmt.Errorf("standalone compiler generated an invalid starter guide: %q", starterReadme)
 	}
 	starterCheckCode, starterCheckStdout, starterCheckStderr, err := runStandaloneCommand(
@@ -1403,8 +1419,7 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string, clockResolution in
 	if err != nil {
 		return 0, fmt.Errorf("execute standalone compiler generated starter run: %w", err)
 	}
-	if starterRunCode != cli.ExitSuccess || starterRunStderr != "" ||
-		starterRunStdout != "result: 42 (x86_64-windows-msvc, development, lock verified)\n" {
+	if starterRunCode != cli.ExitSuccess || starterRunStderr != "" || starterRunStdout != "" {
 		return 0, fmt.Errorf("standalone compiler starter run returned code %d, stdout %q, stderr %q", starterRunCode, starterRunStdout, starterRunStderr)
 	}
 
@@ -1454,8 +1469,7 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string, clockResolution in
 	if err != nil {
 		return 0, fmt.Errorf("execute standalone compiler stable workspace run: %w", err)
 	}
-	if stableRunCode != cli.ExitSuccess || stableRunStderr != "" ||
-		stableRunStdout != "result: 42 (x86_64-windows-msvc, release, lock verified)\n" {
+	if stableRunCode != 42 || stableRunStderr != "" || stableRunStdout != "" {
 		return 0, fmt.Errorf("standalone compiler stable run returned code %d, stdout %q, stderr %q", stableRunCode, stableRunStdout, stableRunStderr)
 	}
 	stableArtifactAfterRun, err := os.ReadFile(stableArtifactPath)
@@ -1534,6 +1548,17 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string, clockResolution in
 		return 0, fmt.Errorf("standalone compiler exec-target returned code %d, stdout %q, stderr %q", execCode, execStdout, execStderr)
 	}
 	stdIORoot := filepath.Join(sourceRoot, "examples", "std_io_quickstart")
+	stdIORunCode, stdIORunStdout, stdIORunStderr, err := runStandaloneCommand(
+		stdIORoot,
+		executablePath,
+		"run", "--release", "--locked",
+	)
+	if err != nil {
+		return 0, fmt.Errorf("execute standalone compiler std::io workspace run: %w", err)
+	}
+	if stdIORunCode != cli.ExitSuccess || stdIORunStdout != "Fairy C says hi\n" || stdIORunStderr != "" {
+		return 0, fmt.Errorf("standalone compiler std::io run returned code %d, stdout %q, stderr %q", stdIORunCode, stdIORunStdout, stdIORunStderr)
+	}
 	stdIOBuildCode, stdIOBuildStdout, stdIOBuildStderr, err := runStandaloneCommand(
 		stdIORoot,
 		executablePath,
@@ -1547,7 +1572,7 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string, clockResolution in
 		return 0, fmt.Errorf("standalone compiler std::io build returned code %d, stdout %q, stderr %q", stdIOBuildCode, stdIOBuildStdout, stdIOBuildStderr)
 	}
 	stdIOArtifactPath := filepath.Join(stdIORoot, "build", "std-io-quickstart.exe")
-	if err := executeExpectOutput(stdIOArtifactPath, 42, "Fairy C says hi\n", ""); err != nil {
+	if err := executeExpectOutput(stdIOArtifactPath, 0, "Fairy C says hi\n", ""); err != nil {
 		return 0, fmt.Errorf("execute standalone compiler std::io artifact: %w", err)
 	}
 

@@ -441,6 +441,9 @@ ADR 0206 moves that exact generated set to starter v2 with one compiler-owned RE
 output-free source and stable run path unchanged while carrying manual check/test/build guidance,
 the run-v1 stream boundary, and a checked safe `std::io::write` replacement into the created
 project without adding template selection or upgrade behavior.
+ADR 0207 then replaces stable run's compiler receipt with bounded program-stream forwarding and
+ordinary 32-bit status propagation while retaining exact trap separation. ADR 0208 aligns starter
+v3 by returning zero after checking answer 42 and using stable locked run directly for safe stdout.
 
 ADR 0152 now removes disposable HIR package numbering from compiler-private function identities.
 The exact package-instance map, logical name, canonical signature types, effects, and drop-glue type
@@ -557,10 +560,11 @@ quarantines, without selecting a default policy or making a speed claim.
   declared reference environment, and an accepted decision rule justify an ordinary-command cache
   path and defaults. The crash/power-interruption safety boundary and configured local cold/warm
   distributions now exist; physical media retention remains storage-stack-specific.
-- Keep the implemented no-overwrite `fairyc new <package-name> --uid <package-uid>` starter v2 bootstrap,
+- Keep the implemented no-overwrite `fairyc new <package-name> --uid <package-uid>` starter v3 bootstrap,
   `fairyc check [--locked]`, Windows-local
   `fairyc build [--release] [--locked]`, and Windows-local
-  `fairyc run [--release] [--locked]` v1 contracts narrow. Keep the source-independent
+  `fairyc run [--release] [--locked]` v2 contract narrow: bounded stdout/stderr and program status,
+  but no arguments, stdin, target selection, retained artifact, or cache policy. Keep the source-independent
   `fairyc explain <diagnostic-code>` and `fairyc targets` v1 contracts separate from catalog and
   TargetSpec data lifecycle. Keep target-explicit `fairyc emit c --target <target-id> [--locked]`
   separate from private generated-C bytes and support units. Keep implemented semantic

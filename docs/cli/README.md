@@ -218,8 +218,8 @@ borrowed text and byte views only through safe internal calls and contains no ra
 `unsafe`. The entry and helper are separate modules passed through one explicit `--source`; this
 legacy target-only path is not the public package API. ADR 0205 separately adds compiler-bundled
 `std::io::write` for manifest-owned package builds; `examples/std_io_quickstart` uses it without
-unsafe code or a platform symbol. Stable `fairyc run` still rejects program streams, so direct
-program output uses a retained build artifact or this experimental `exec-target` surface.
+unsafe code or a platform symbol. ADR 0207 makes stable `fairyc run` the ordinary package-aware
+program-facing surface; the experimental command remains only the explicit-source target prototype.
 `experimental target-spec` emits `fairyc.target-spec/v0` JSON without probing the host or exposing
 local tool paths. Linux reports its current scalar, flat-resource, and resource-tagged emission
 subset. Windows reports `scalar-and-llp64-c-scalar-c11`. Both keep `emittable`, `conformant`, and `supported` false and list
@@ -235,8 +235,9 @@ an existing file, directory, or symbolic link. The explicit manifest UID is not 
 package name. The exact starter contains `.gitignore`, `README.md`, `fairy.toml`, `src/main.fy`, and
 `tests/main.fy`; it omits `fairy.lock` so the first ordinary workspace command remains the owner of
 graph validation and lock publication. The generated guide labels its commands as manual, preserves
-stable run's no-program-stream boundary, and includes one checked safe `std::io::write` source
-replacement plus the package-specific retained Windows executable path. The command accepts no arbitrary destination, merge,
+stable run v2's stream and process-status boundary, and includes one checked safe `std::io::write`
+source replacement plus the package-specific retained Windows executable path. Public `answer()`
+returns 42 while private `main()` returns zero when that answer is correct. The command accepts no arbitrary destination, merge,
 current-directory, force, template, prompt, stdin, network, or configuration surface. Ordinary
 post-create failures attempt rollback; a crash can leave a partial directory that still requires
 explicit user inspection and removal.
@@ -258,11 +259,13 @@ compilation; a failed build leaves the previous executable intact. Build v1 curr
 Windows/amd64 and local x64 MSVC. That stable spelling does not promote target support.
 
 `fairyc run [--release] [--locked]` uses the same workspace, entry, lock, profiles, and native
-pipeline, but executes an inspected compiler-temporary image and retains no executable. Every
-normal `i32` return is program data printed in one `result:` receipt while the compiler returns
-success; a run-only internal token keeps reserved normal results distinct from recognized language
-traps, which use the stable category and code 5. Program stdout/stderr, arguments,
-stdin, a `--` delimiter, retained build output, and cache policy are not admitted in v1.
+pipeline, but executes an inspected compiler-temporary image and retains no executable. V2 forwards
+captured stdout and stderr to matching streams with no success banner, then preserves every ordinary
+`i32` return as the 32-bit process status. A run-only internal suffix keeps equal reserved normal
+statuses distinct from recognized language traps; only that suffix is removed, preceding program
+stderr is preserved, and the canonical trap line uses code 5. The two captured streams share a
+64 KiB ceiling and retain no cross-stream ordering promise. Program arguments, stdin, a `--`
+delimiter, retained build output, and cache policy remain absent.
 
 `fairyc test [--locked]` overlays only the root package's optional exact-lowercase `tests/` tree
 after maintaining or verifying the production lock. Paths keep their `tests/` prefix for module

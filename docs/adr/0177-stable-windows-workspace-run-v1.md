@@ -2,6 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-07-22
+- Superseded by: ADR 0207
 - Product source: `docs/product/02-spec.md`
 - CLI sources: `docs/cli/command-contract.md`, `docs/cli/output-and-exit-codes.md`
 - Prerequisites: ADR 0148, ADR 0175, and ADR 0176

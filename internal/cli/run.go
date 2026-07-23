@@ -68,7 +68,8 @@ Usage:
 The experimental commands are unstable. "fairyc new" creates one no-overwrite child starter with
 an explicit package UID. "fairyc check" verifies the local workspace. "fairyc build"
 creates or replaces build/<package-name>.exe on Windows. "fairyc run" builds and executes a temporary
-Windows image without retaining it. "fairyc test" checks the root package plus isolated tests/
+Windows image, forwards bounded program output, preserves ordinary program status, and retains no
+artifact. "fairyc test" checks the root package plus isolated tests/
 sources and runs @test void functions through the semantic interpreter. "fairyc emit c" writes one
 explicitly targeted C11 application unit to stdout without invoking a toolchain. Pass --release to
 build or run for optimization. All five workspace commands read fairy.toml and refresh fairy.lock

@@ -436,9 +436,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   backend, target, toolchain, process, network, or artifact action. It remains distinct from stable
   package-aware `fairyc check`.
 - Stable `fairyc new <package-name> --uid <package-uid>` creates one no-overwrite direct-child
-  starter workspace with explicit durable UID, manifest v1, C-shaped source returning 42, one
-  semantic test, a build-only ignore rule, and one compiler-owned README. The README labels its
-  commands as manual, explains lock refresh and stable run's no-program-stream boundary, and carries
+  starter workspace with explicit durable UID, manifest v1, public `answer()` returning 42, a private
+  entry returning zero when that answer is correct, one semantic test, a build-only ignore rule, and
+  one compiler-owned README. The README labels its commands as manual, explains lock refresh and
+  stable run v2's stream/process-status boundary, and carries
   one complete safe `std::io::write` source replacement plus the package-specific retained Windows
   executable path. The command never guesses identity, merges or upgrades an existing path,
   generates a lockfile, accepts an arbitrary destination, or uses a selectable template, prompt,
@@ -461,13 +462,15 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   change the target's independent maturity state.
 - Stable `fairyc run [--release] [--locked]` uses the same workspace, root entry, lock policy,
   development/release profiles, and closed local Windows target pipeline. It executes an inspected
-  compiler-temporary image and retains no executable. Every normal `i32` return is printed as result
-  data while the compiler returns 0; a recognized language trap returns 5 even when its reserved OS
-  status equals a normal result. A compiler-private run-only trap token provides that separation and
-  is never exposed as program stderr. The command accepts no program streams,
+  compiler-temporary image and retains no executable. Bounded captured stdout and stderr are
+  forwarded to matching streams without a compiler success banner; an ordinary `i32` return becomes
+  the complete process status. A recognized language trap returns 5 even when its reserved OS status
+  equals a normal result. A compiler-private run-only suffix provides that separation; only the suffix
+  is removed, while preceding program stderr and a canonical trap line remain visible. The two OS
+  pipes share a 64 KiB ceiling without a cross-stream ordering promise. The command accepts no program
   arguments, stdin, `--` delimiter, retained artifact, target, toolchain, profile-value, cache, JSON,
   configuration, or network surface. It never creates, replaces, reads, or executes the stable build
-  artifact. Command stability does not change target maturity.
+  artifact. Command stability does not change target maturity or provide hostile-code isolation.
 - Its fixture-only output hooks require explicit manifest bindings, capture bytes in memory under a
   shared limit, and never authorize source names, the CLI, or host streams.
 - The current C backend emits deterministic C11 only for verified scalar, inert-struct,
@@ -673,6 +676,10 @@ ADR 0177 independently promotes the ordinary temporary execution workflow to
 `fairyc run [--release] [--locked]`. It separates the program's `i32` result from compiler status,
 retains no image, preserves an existing stable-build artifact, and keeps program I/O, arguments,
 target choice, cache policy, and target support outside the stable contract.
+
+ADR 0207 supersedes that v1 result-receipt boundary with program-facing run v2. It forwards bounded
+stdout/stderr, preserves ordinary 32-bit program status, strips only the exact private trap suffix,
+keeps canonical trap reporting, and still admits no program arguments or stdin.
 
 ADR 0178 stabilizes the source-independent `fairyc explain <diagnostic-code>` lookup, its exact
 three-line human shape, and codes 0, 2, and 4. It keeps catalog lifecycle, wording improvement,
