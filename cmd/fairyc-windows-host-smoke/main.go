@@ -221,6 +221,8 @@ const checkedInWindowsTargetPath = "examples/windows_target/main.fy"
 const checkedInWindowsQuickstartPath = "examples/windows_quickstart/main.fy"
 const checkedInWindowsOutputPath = "examples/windows_output/main.fy"
 const checkedInWindowsOutputSupportPath = "examples/windows_output/windows_console.fy"
+const checkedInStdIOManifestPath = "examples/std_io_quickstart/fairy.toml"
+const checkedInStdIOMainPath = "examples/std_io_quickstart/src/main.fy"
 const checkedInWindowsFilePath = "examples/windows_file/main.fy"
 const checkedInWindowsFileSupportPath = "examples/windows_file/windows_file.fy"
 const checkedInOwnedTextPath = "examples/owned_text/main.fy"
@@ -286,6 +288,14 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("read checked-in Windows output support source: %w", err)
 	}
+	stdIOManifest, err := os.ReadFile(filepath.FromSlash(checkedInStdIOManifestPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in std::io workspace manifest: %w", err)
+	}
+	stdIOMain, err := os.ReadFile(filepath.FromSlash(checkedInStdIOMainPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in std::io workspace entry: %w", err)
+	}
 	windowsFileSource, err := os.ReadFile(filepath.FromSlash(checkedInWindowsFilePath))
 	if err != nil {
 		return fmt.Errorf("read checked-in Windows File source: %w", err)
@@ -340,6 +350,8 @@ func run() error {
 		checkedInWindowsQuickstartPath:    string(windowsQuickstartSource),
 		checkedInWindowsOutputPath:        string(windowsOutputSource),
 		checkedInWindowsOutputSupportPath: string(windowsOutputSupportSource),
+		checkedInStdIOManifestPath:        string(stdIOManifest),
+		checkedInStdIOMainPath:            string(stdIOMain),
 		checkedInWindowsFilePath:          string(windowsFileSource),
 		checkedInWindowsFileSupportPath:   string(windowsFileSupportSource),
 		checkedInOwnedTextPath:            string(ownedTextSource),
@@ -634,13 +646,36 @@ func run() error {
 		return fmt.Errorf("exec-target returned code %d, stdout %q, stderr %q", targetExecCode, targetExecStdout.String(), targetExecStderr.String())
 	}
 	targetExecExecutions++
+	stdIORoot := filepath.Join(root, "examples", "std_io_quickstart")
+	var stdIOBuildStdout bytes.Buffer
+	var stdIOBuildStderr bytes.Buffer
+	stdIOBuildCode := cli.Run([]string{"build", "--release"}, stdIORoot, &stdIOBuildStdout, &stdIOBuildStderr)
+	if stdIOBuildCode != cli.ExitSuccess || stdIOBuildStderr.Len() != 0 ||
+		stdIOBuildStdout.String() != "built: build/std-io-quickstart.exe (x86_64-windows-msvc, release, lock updated)\n" {
+		return fmt.Errorf("std::io stable build returned code %d, stdout %q, stderr %q", stdIOBuildCode, stdIOBuildStdout.String(), stdIOBuildStderr.String())
+	}
+	stdIOArtifactPath := filepath.Join(stdIORoot, "build", "std-io-quickstart.exe")
+	stdIOArtifact, err := os.ReadFile(stdIOArtifactPath)
+	if err != nil {
+		return fmt.Errorf("read std::io stable build artifact: %w", err)
+	}
+	if _, err := pecoff.InspectExecutable(stdIOArtifact); err != nil {
+		return fmt.Errorf("inspect std::io stable build PE image: %w", err)
+	}
+	if _, err := pecoff.InspectAMD64Unwind(stdIOArtifact); err != nil {
+		return fmt.Errorf("inspect std::io stable build unwind data: %w", err)
+	}
+	if err := executeExpectOutput(stdIOArtifactPath, 42, "Fairy C says hi\n", ""); err != nil {
+		return fmt.Errorf("execute std::io stable build artifact: %w", err)
+	}
+	workspaceBuildExecutions++
 	standaloneCompilerBytes, err := runStandaloneCompiler(repositoryRoot, root, clockResolution)
 	if err != nil {
 		return err
 	}
 	targetRunExecutions++
 	targetExecExecutions++
-	workspaceBuildExecutions++
+	workspaceBuildExecutions += 2
 	workspaceRunExecutions += 2
 
 	for _, testCase := range []struct {
@@ -1488,6 +1523,23 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string, clockResolution in
 	if execCode != 42 || execStdout != "Fairy C says hi\n" || execStderr != "" {
 		return 0, fmt.Errorf("standalone compiler exec-target returned code %d, stdout %q, stderr %q", execCode, execStdout, execStderr)
 	}
+	stdIORoot := filepath.Join(sourceRoot, "examples", "std_io_quickstart")
+	stdIOBuildCode, stdIOBuildStdout, stdIOBuildStderr, err := runStandaloneCommand(
+		stdIORoot,
+		executablePath,
+		"build", "--release", "--locked",
+	)
+	if err != nil {
+		return 0, fmt.Errorf("execute standalone compiler std::io workspace build: %w", err)
+	}
+	if stdIOBuildCode != cli.ExitSuccess || stdIOBuildStderr != "" ||
+		stdIOBuildStdout != "built: build/std-io-quickstart.exe (x86_64-windows-msvc, release, lock verified)\n" {
+		return 0, fmt.Errorf("standalone compiler std::io build returned code %d, stdout %q, stderr %q", stdIOBuildCode, stdIOBuildStdout, stdIOBuildStderr)
+	}
+	stdIOArtifactPath := filepath.Join(stdIORoot, "build", "std-io-quickstart.exe")
+	if err := executeExpectOutput(stdIOArtifactPath, 42, "Fairy C says hi\n", ""); err != nil {
+		return 0, fmt.Errorf("execute standalone compiler std::io artifact: %w", err)
+	}
 
 	workspaceCode, workspaceStdout, workspaceStderr, err := runStandaloneCommand(
 		sourceRoot,
@@ -2255,6 +2307,35 @@ func executeExpectResult(path string, expected int32) error {
 			exitCode = command.ProcessState.ExitCode()
 		}
 		return fmt.Errorf("build-host artifact returned error %v, exit %d (i32 %d), output %q", err, exitCode, actual, output.String())
+	}
+	return nil
+}
+
+func executeExpectOutput(path string, expected int32, expectedStdout, expectedStderr string) error {
+	contextValue, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	command := exec.CommandContext(contextValue, path)
+	command.Dir = filepath.Dir(path)
+	command.Stdin = nil
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	command.Stdout = &stdout
+	command.Stderr = &stderr
+	err := command.Run()
+	if errors.Is(contextValue.Err(), context.DeadlineExceeded) {
+		return fmt.Errorf("artifact exceeded execution timeout")
+	}
+	exitCode := 0
+	if err != nil {
+		var exitError *exec.ExitError
+		if !errors.As(err, &exitError) {
+			return fmt.Errorf("artifact execution failed: %w", err)
+		}
+		exitCode = exitError.ExitCode()
+	}
+	actual := int32(uint32(exitCode))
+	if actual != expected || stdout.String() != expectedStdout || stderr.String() != expectedStderr {
+		return fmt.Errorf("artifact returned error %v, exit %d (i32 %d), stdout %q, stderr %q", err, exitCode, actual, stdout.String(), stderr.String())
 	}
 	return nil
 }

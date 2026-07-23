@@ -88,7 +88,7 @@ func TestBundledStandardLibraryReachesVerifiedCompiler(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(input.Files) != 2 || len(input.Imports) != 1 {
+	if len(input.Files) != 3 || len(input.Imports) != 1 {
 		t.Fatalf("semantic input has %d files and %d imports", len(input.Files), len(input.Imports))
 	}
 	result, err := compiler.CheckPackages(input)
@@ -126,7 +126,7 @@ func TestBundledStandardLibraryReachesVerifiedCompiler(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SemanticFiles() error = %v", err)
 	}
-	if len(files) != 2 {
+	if len(files) != 3 {
 		t.Fatalf("SemanticFiles() = %+v", files)
 	}
 	for index, file := range files {
@@ -152,5 +152,77 @@ func TestBundledStandardLibraryReachesVerifiedCompiler(t *testing.T) {
 		if !matched {
 			t.Fatalf("SemanticFiles() file %q has no source bytes", file.Path)
 		}
+	}
+}
+
+func TestBundledStandardLibraryIOReachesVerifiedCompiler(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writePackage(t, root, ".", rootManifest(""), map[string]string{
+		"src/main.fy": `module main;
+
+import std::io as io;
+
+@effects(console)
+fn i32 main() {
+    let ref str message = "Fairy C says hi\n";
+    return switch (io::write(message)) {
+        case .ok(written) : { if (written == message.len) { 42 } else { 1 } }
+        case .err(error) : {
+            if (error.status != 0 && error.written <= message.len) { 2 } else { 3 }
+        }
+    };
+}
+`,
+	})
+	workspace, err := Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	input, err := workspace.SemanticInput()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(input.Files) != 3 || len(input.Imports) != 1 {
+		t.Fatalf("semantic input has %d files and %d imports", len(input.Files), len(input.Imports))
+	}
+	result, err := compiler.CheckPackages(input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !result.Verified {
+		t.Fatalf("std::io workspace did not reach verified MIR: phase=%s failed=%s diagnostics=%v unsupported=%v", result.Semantic.CompletedThrough, result.Semantic.FailedPhase, result.Semantic.Diagnostics, result.Semantic.Unsupported)
+	}
+}
+
+func TestBundledStandardLibraryIORequiresConsoleEffect(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writePackage(t, root, ".", rootManifest(""), map[string]string{
+		"src/main.fy": `module main;
+
+import std::io as io;
+
+fn i32 main() {
+    discard io::write("Fairy C says hi\n");
+    return 0;
+}
+`,
+	})
+	workspace, err := Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	input, err := workspace.SemanticInput()
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := compiler.CheckPackages(input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Verified || len(result.Semantic.Diagnostics) != 1 || result.Semantic.Diagnostics[0].Code != "E7102" ||
+		len(result.Semantic.Diagnostics[0].Related) != 1 || result.Semantic.Diagnostics[0].Related[0].Role != "effect-declaration" {
+		t.Fatalf("missing-console-effect result = %+v", result.Semantic)
 	}
 }

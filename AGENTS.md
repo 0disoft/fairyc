@@ -94,9 +94,9 @@ regenerate, or override compiler source.
 - Human project-manifest v1 parser and fixtures: internal/projectmanifest/, internal/projectmanifestfixture/, spec/fixtures/project-manifest/manifest-v1.json
 - Stable exact starter-project creation: internal/projectscaffold/, internal/cli/project_new.go, docs/adr/0204-stable-starter-project-creation-v1.md
 - Local workspace loader and fixtures: internal/workspaceloader/, internal/workspaceloaderfixture/, spec/fixtures/workspace-loader/manifest-v1.json
-- Compiler-bundled Stage 0 standard-library source package: internal/sdkstdlib/
+- Compiler-bundled Stage 0 standard-library source package and safe stdout API: internal/sdkstdlib/, docs/adr/0205-target-neutral-stage0-stdout-write.md
 - Generated lockfile v1: internal/lockfile/, docs/package/lockfile-v1.md
-- Package-aware Windows workspace build/run CLI and native smoke: internal/cli/workspace_native.go, cmd/fairyc-windows-host-smoke/, examples/workspace_quickstart/, docs/adr/0148-package-aware-windows-build-run.md
+- Package-aware Windows workspace build/run CLI and native smoke: internal/cli/workspace_native.go, cmd/fairyc-windows-host-smoke/, examples/workspace_quickstart/, examples/std_io_quickstart/, docs/adr/0148-package-aware-windows-build-run.md, docs/adr/0205-target-neutral-stage0-stdout-write.md
 - Executable MIR semantics: docs/mir/*.md
 - Package identity and visibility: docs/package/*.md
 - Target and C ABI: docs/abi/*.md

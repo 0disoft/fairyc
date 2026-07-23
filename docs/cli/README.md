@@ -207,7 +207,7 @@ stabilize a `std::text` package, resource layout, or owned-to-borrowed view API.
 the temporary PE and x64 unwind structure, executes it with bounded captured output, and removes it.
 Success writes `native result: <i32> (x86_64-windows-msvc, msvc <version>, <profile>)`; a product
 trap writes its canonical category and exits with the trap code. Any program output is currently a
-build/execution failure because source-visible target I/O is not implemented. It retains no artifact
+build/execution failure because this command reserves a zero-output result-receipt contract. It retains no artifact
 and does not use WSL.
 `experimental exec-target` uses the same validated temporary target path but adds no result receipt:
 program stdout and stderr stay on their matching streams and the program's 32-bit Windows status
@@ -216,7 +216,10 @@ is unspecified. The checked-in output example reaches only the unsafe internal W
 write-all symbol, but confines it to a checked local function accepting `ref str`. Its `main` passes
 borrowed text and byte views only through safe internal calls and contains no raw pointer or
 `unsafe`. The entry and helper are separate modules passed through one explicit `--source`; this
-still is not a portable `std::io` surface or public package build.
+legacy target-only path is not the public package API. ADR 0205 separately adds compiler-bundled
+`std::io::write` for manifest-owned package builds; `examples/std_io_quickstart` uses it without
+unsafe code or a platform symbol. Stable `fairyc run` still rejects program streams, so direct
+program output uses a retained build artifact or this experimental `exec-target` surface.
 `experimental target-spec` emits `fairyc.target-spec/v0` JSON without probing the host or exposing
 local tool paths. Linux reports its current scalar, flat-resource, and resource-tagged emission
 subset. Windows reports `scalar-and-llp64-c-scalar-c11`. Both keep `emittable`, `conformant`, and `supported` false and list

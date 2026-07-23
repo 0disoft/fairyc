@@ -12,6 +12,7 @@ import (
 type Component string
 
 const (
+	ComponentLinuxConsole   Component = "linux-console"
 	ComponentLinuxFile      Component = "linux-file"
 	ComponentWindowsConsole Component = "windows-console"
 	ComponentWindowsFile    Component = "windows-file"
@@ -23,6 +24,7 @@ const (
 )
 
 var symbolComponents = map[string]Component{
+	"fy_std_stdout_write_all_v0":          ComponentLinuxConsole,
 	"fy_std_system_heap_allocate_v0":      ComponentSystemHeap,
 	"fy_std_system_heap_deallocate_v0":    ComponentSystemHeap,
 	"fy_std_buffer_initialize_v0":         ComponentBuffer,
@@ -67,6 +69,7 @@ var windowsOnlySymbolComponents = map[string]Component{
 }
 
 var windowsMSVCSymbolComponents = map[string]Component{
+	"fy_std_stdout_write_all_v0":          ComponentWindowsConsole,
 	"fy_std_windows_stdout_write_all_v0":  ComponentWindowsConsole,
 	"fy_std_windows_file_open_v0":         ComponentWindowsFile,
 	"fy_std_windows_file_read_v0":         ComponentWindowsFile,
@@ -102,6 +105,7 @@ var windowsMSVCSymbolComponents = map[string]Component{
 }
 
 var componentLinkOrder = []Component{
+	ComponentLinuxConsole,
 	ComponentLinuxFile,
 	ComponentWindowsConsole,
 	ComponentWindowsFile,

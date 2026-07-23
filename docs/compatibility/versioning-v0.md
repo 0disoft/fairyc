@@ -321,7 +321,8 @@ for the ordinary product-build path carrying that view under both compilers and 
 `utf8StringLiteralSourceCallExecutions` for a generated Fairy caller whose distinct private `&str`
 view retains exact valid UTF-8 bytes and byte length before C reads its data, plus
 `utf8StringLiteralBuildSmokeExecutions` for the ordinary product-build path carrying that text view
-under both compilers and profiles. The
+under both compilers and profiles. V32 adds `linuxConsoleExecutions` for the target-neutral POSIX
+stdout adapter under both compilers and profiles. The
 runner's existing `ownedTextExecutions` condition is strengthened by ADR 0132 to require
 probe-only deterministic initial-allocation and append-reallocation failure plus live-allocation
 cleanup. ADR 0133 similarly strengthens `arenaExecutions` with deterministic payload and
@@ -330,8 +331,7 @@ existing internal `fy_std_region_copy_bytes_v0` entry point in the closed target
 stabilizing a public source or ABI contract. ADR 0134 strengthens `bufferExecutions` with
 deterministic construction, reserve, self-overlap append growth, and zeroed-resize growth failure,
 exact storage preservation, recovery zeroing, and live-allocation cleanup. None of these changes
-adds a report field or counter, so they
-do not create v32. The
+adds a report field or counter, so they did not create a new report revision at the time. The
 runner emits one exact version and does not pretend the report shapes are interchangeable.
 
 ## Runtime and standard library
@@ -339,6 +339,12 @@ runner emits one exact version and does not pretend the report shapes are interc
 Pre-1 runtime ABI uses an exact match. Runtime helper symbols carry an ABI-major suffix. The driver diagnoses an incompatibility before invoking the linker.
 
 The standard library has an independent version and declares required language revision, runtime ABI, target profile, and package instance. Language and standard-library numbers do not move in lockstep.
+
+ADR 0205 moves the compiler-bundled SDK from `0.0.0-stage0.1` to `0.0.0-stage0.2` because it adds
+public `std::io::write` and `ConsoleError` source declarations and changes the exact SDK source
+digest. The SDK and runtime ABI identity strings remain unchanged. The target-neutral internal C
+symbol, numeric status meanings, and private result layout are pre-1 implementation compatibility
+data, not a public C ABI or stable Fairy native ABI.
 
 ## Package formats
 
@@ -361,7 +367,7 @@ ADR 0144 fixes the first loader behavior for this manifest schema: explicit root
 exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, one language revision,
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
 instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
-`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, version `0.0.0-stage0.1`, language
+`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.2`, language
 `fairyc-language/0`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 

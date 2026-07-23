@@ -394,6 +394,34 @@ func TestLinuxFileSourcesConsumeCloseAndExposePartialIO(t *testing.T) {
 	}
 }
 
+func TestLinuxConsoleSourcesPreserveProgressAndClosedStdoutStatus(t *testing.T) {
+	t.Parallel()
+	implementation, err := LinuxConsoleSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	probe, err := LinuxConsoleProbeSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, required := range []string{
+		"fy_std_stdout_write_all_v0", "SSIZE_MAX", "errno == EINTR", "errno == EBADF",
+		"result.written += (size_t)completed",
+	} {
+		if !strings.Contains(implementation, required) {
+			t.Errorf("Linux console implementation is missing %q", required)
+		}
+	}
+	for _, required := range []string{
+		"open(\"/dev/null\", O_WRONLY)", "dup2(sink, STDOUT_FILENO)",
+		"close(STDOUT_FILENO)", "unavailable.status != UINT32_C(2)",
+	} {
+		if !strings.Contains(probe, required) {
+			t.Errorf("Linux console probe is missing %q", required)
+		}
+	}
+}
+
 func TestWindowsFileSourcesConsumeCloseAndExposePartialIO(t *testing.T) {
 	t.Parallel()
 	implementation, err := WindowsFileSource()
@@ -467,6 +495,15 @@ func TestSourceForSymbolsSelectsMinimalDependencyClosure(t *testing.T) {
 			symbols: []string{"fairyc_external_helper"},
 		},
 		{
+			name:     "Linux console only",
+			symbols:  []string{"fy_std_stdout_write_all_v0"},
+			prefix:   "#define _POSIX_C_SOURCE 200809L\n",
+			required: []string{"fy_std_stdout_write_all_v0", "write(STDOUT_FILENO"},
+			forbidden: []string{
+				"fy_std_linux_file_open_v0", "fy_std_system_heap_allocate_v0",
+			},
+		},
+		{
 			name:     "text view only",
 			symbols:  []string{"fy_std_text_utf8_valid_v0"},
 			required: []string{"fy_std_text_utf8_valid_v0"},
@@ -532,6 +569,7 @@ func TestSourceForSymbolsRejectsUnknownStandardLibrarySymbol(t *testing.T) {
 func TestWindowsMSVCSourceForSymbolsKeepsClosedRuntimeSlice(t *testing.T) {
 	t.Parallel()
 	source, err := WindowsMSVCSourceForSymbols([]string{
+		"fy_std_stdout_write_all_v0",
 		"fy_std_windows_stdout_write_all_v0",
 		"fy_std_windows_file_open_v0",
 		"fy_std_windows_file_read_v0",
@@ -572,7 +610,7 @@ func TestWindowsMSVCSourceForSymbolsKeepsClosedRuntimeSlice(t *testing.T) {
 		t.Fatal("Windows SystemHeap source is missing its x64 malloc alignment contract")
 	}
 	for _, required := range []string{
-		"fy_std_windows_stdout_write_all_v0", "WriteFile", "GetStdHandle",
+		"fy_std_stdout_write_all_v0", "fy_std_windows_stdout_write_all_v0", "WriteFile", "GetStdHandle",
 		"fy_std_windows_file_open_v0", "fy_std_windows_file_read_v0",
 		"fy_std_windows_file_write_all_v0", "fy_std_windows_file_sync_v0",
 		"fy_std_windows_file_close_v0", "fy_std_windows_file_drop_v0", "CreateFileW",

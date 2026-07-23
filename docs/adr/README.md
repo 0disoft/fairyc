@@ -214,6 +214,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0202-single-symbol-atlas-evidence-bundle-v0.md`: output-only exact-symbol composition of independently checksummed compiler facts, source, and documentation with explicit authority and byte-budget separation.
 - `0203-enforced-one-way-atlas-import-boundary.md`: inverse-allowlisted Go import parsing makes the compiler-to-Atlas dependency direction an executable, mutation-sensitive Phase 4 contract.
 - `0204-stable-starter-project-creation-v1.md`: explicit package identity, a contained no-overwrite child directory, exact starter bytes, ordinary-failure rollback, and generated-project check/test evidence for stable `fairyc new`.
+- `0205-target-neutral-stage0-stdout-write.md`: compiler-bundled safe `std::io::write`, progress-preserving target-neutral linkage, target-owned Linux/Windows adapters, and exact Windows native output evidence.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

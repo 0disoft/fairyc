@@ -5,6 +5,7 @@ import (
 	"embed"
 	"fmt"
 	"slices"
+	"sort"
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/ast"
@@ -18,13 +19,13 @@ const (
 	SDKIdentity      = "fairyc-sdk-stdlib/0"
 	PackageUID       = "fairyc.std"
 	PackageName      = "fairyc-std"
-	Version          = "0.0.0-stage0.1"
+	Version          = "0.0.0-stage0.2"
 	LanguageRevision = "fairyc-language/0"
 	RuntimeABI       = "fairyc-runtime/0"
 	PackagePath      = "@sdk/stdlib"
 )
 
-//go:embed sources/std/alloc.fy
+//go:embed sources/std/*.fy
 var sourceFS embed.FS
 
 type Source struct {
@@ -41,27 +42,47 @@ type Definition struct {
 }
 
 func Load() (Definition, error) {
-	const relative = "std/alloc.fy"
-	contents, err := sourceFS.ReadFile("sources/" + relative)
+	entries, err := sourceFS.ReadDir("sources/std")
 	if err != nil {
 		return Definition{}, err
 	}
-	analysis, err := frontend.AnalyzeSyntax(source.NewFile(relative, contents), source.DefaultLimits())
-	if err != nil || analysis.AST == nil || len(analysis.Tree.Diagnostics) != 0 {
-		return Definition{}, fmt.Errorf("embedded standard library source is invalid")
+	sources := make([]Source, 0, len(entries))
+	modules := make([]packagegraph.Module, 0, len(entries))
+	digestFiles := make([]packagecontent.File, 0, len(entries))
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".fy") {
+			continue
+		}
+		relative := "std/" + entry.Name()
+		contents, readErr := sourceFS.ReadFile("sources/" + relative)
+		if readErr != nil {
+			return Definition{}, readErr
+		}
+		analysis, analyzeErr := frontend.AnalyzeSyntax(source.NewFile(relative, contents), source.DefaultLimits())
+		if analyzeErr != nil || analysis.AST == nil || len(analysis.Tree.Diagnostics) != 0 {
+			return Definition{}, fmt.Errorf("embedded standard library source %q is invalid", relative)
+		}
+		imports := make([]string, len(analysis.AST.Imports))
+		for index, imported := range analysis.AST.Imports {
+			imports[index] = imported.Path
+		}
+		sources = append(sources, Source{Path: relative, Bytes: slices.Clone(contents), Module: analysis.AST})
+		modules = append(modules, packagegraph.Module{Path: analysis.AST.Path, Imports: imports})
+		digestFiles = append(digestFiles, packagecontent.File{Path: relative, Bytes: contents})
 	}
-	imports := make([]string, len(analysis.AST.Imports))
-	for index, imported := range analysis.AST.Imports {
-		imports[index] = imported.Path
+	if len(sources) == 0 {
+		return Definition{}, fmt.Errorf("embedded standard library has no Fairy source files")
 	}
-	digest, err := packagecontent.Compute([]packagecontent.File{{Path: relative, Bytes: contents}})
+	sort.Slice(sources, func(left, right int) bool { return sources[left].Path < sources[right].Path })
+	sort.Slice(modules, func(left, right int) bool { return modules[left].Path < modules[right].Path })
+	sort.Slice(digestFiles, func(left, right int) bool { return digestFiles[left].Path < digestFiles[right].Path })
+	digest, err := packagecontent.Compute(digestFiles)
 	if err != nil {
 		return Definition{}, err
 	}
 	return Definition{
-		Sources: []Source{{Path: relative, Bytes: slices.Clone(contents), Module: analysis.AST}},
-		Modules: []packagegraph.Module{{Path: analysis.AST.Path, Imports: imports}},
-		Digest:  digest, SourceIdentity: SourceIdentity(SDKIdentity, RuntimeABI, digest),
+		Sources: sources, Modules: modules,
+		Digest: digest, SourceIdentity: SourceIdentity(SDKIdentity, RuntimeABI, digest),
 	}, nil
 }
 

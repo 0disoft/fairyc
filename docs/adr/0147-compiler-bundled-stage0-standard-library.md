@@ -16,10 +16,9 @@ declaring a fake local standard library. Searching PATH, installation directorie
 would make the same compiler binary resolve different source and would create an installer contract
 before Fairy C has one.
 
-The accepted Stage 0 source surface is intentionally smaller than the provisional target C library.
-Only the opaque `std::alloc::Arena` type is required by current package and Region semantics. Its
-constructor, capacity policy, allocation methods, representation, and target linkage are not yet
-source contracts.
+The first accepted Stage 0 source surface was intentionally smaller than the provisional target C
+library and exported only opaque `std::alloc::Arena`. ADR 0205 later adds the first safe I/O source
+surface without changing the package-discovery boundary established here.
 
 ## Decision
 
@@ -28,7 +27,7 @@ source contracts.
    generation.
 2. The current SDK identity is `fairyc-sdk-stdlib/0`; it requires language
    `fairyc-language/0`, runtime ABI `fairyc-runtime/0`, package UID `fairyc.std`, and version
-   `0.0.0-stage0.1`.
+   `0.0.0-stage0.2` after ADR 0205.
 3. The workspace loader injects one `standard-library` node only when a root-reachable package
    imports `std` or `std::*`. Each such package receives a direct dependency with the reserved
    binding `stdlib`. User manifests may not claim that binding or package UID, and local packages
@@ -36,8 +35,10 @@ source contracts.
 4. The SDK source identity combines the exact SDK identity, runtime ABI, and package-source digest.
    PackageInstanceId v1 still hashes the ordinary package UID, source identity, version, and empty
    feature set; SDK location is never identity.
-5. The embedded source exports only opaque `std::alloc::Arena`. It does not expose `SystemHeap`,
-   allocation, construction, capacity, layout, I/O, text, or collection APIs.
+5. The embedded source exports opaque `std::alloc::Arena` and ADR 0205's
+   `std::io::write(ref str) -> Result<usize, ConsoleError>`. It does not expose `SystemHeap`,
+   allocation, construction, capacity, layout, formatting, stderr, stdin, text ownership, or
+   collection APIs.
 6. `fairy.lock` records `sourceKind: "sdk"`, empty `localPath`, exact `sdkIdentity`, exact
    `runtimeAbi`, source digest, composed source identity, package UID, version, role, and empty
    features. Strict reading rejects any contradictory SDK field. Local packages use
@@ -60,7 +61,7 @@ source contracts.
 
 ## Verification
 
-- SDK tests parse the embedded source and assert its composed identity;
+- SDK tests parse every lexically ordered embedded source and assert its composed identity;
 - workspace tests prove conditional injection, reserved identity/binding/module-namespace
   rejection, missing-module rejection, exact provider lookup, host-path-free package metadata, and
   verified MIR consumption;

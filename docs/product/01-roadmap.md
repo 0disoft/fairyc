@@ -96,7 +96,9 @@ Verified resource definitions now preserve ordered fields and
   `experimental emit-c` command exposes that exact verified translation unit on stdout
   without writing an artifact. On an eligible Linux/amd64 glibc host, `experimental build` can now
   compile and link that subset with explicit Clang or GCC and low or optimized profiles into
-  a no-overwrite `build/` artifact. Stable portable file and console packages, effect-bearing function values,
+  a no-overwrite `build/` artifact. A compiler-bundled `std::io::write` now provides one
+  progress-preserving target-neutral stdout operation with Windows execution evidence and
+  configured-but-unobserved Linux probes. Stable portable files, broader console operations, effect-bearing function values,
   and every later Phase 1
   capability remain unimplemented.
 
@@ -299,7 +301,7 @@ Every local MSVC compile in the same lane now also parses its intermediate `.obj
 before cleanup, including `.text$...`, `.bss`, symbol-table, and relocation-index structure. Exact
 versioned symbol names, COMDAT selection, relocation types, unwind records, and a hosted object
 receipt remain absent, so the target evidence marker stays fail-closed.
-The forty-three local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
+The forty-five local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
 runtime-function ordering and code coverage plus referenced version 1 and version 2 unwind-record
 bounds, including handler/chained minimum tails. A separate three-object probe now raises a private
 noncontinuable exception at both profiles, validates its payload in an outer SEH filter, walks the
@@ -350,10 +352,11 @@ quickstart iterates two bytes with typed `usize` ordering and checked addition, 
 indexing, and safely converts each `u8` to `i32` through a separately built compiler process. The
 host smoke also proves maximum-`usize` addition traps under both MSVC profiles. The configured Windows
 smoke therefore covers two retained target builds, four measured experimental plus three stable
-package-workspace builds, seven package-workspace runs, two safe File builds, two safe owned-text
-builds, two direct target executions, two exec-target executions, and forty-three total target or
+quickstart and two safe `std::io` package-workspace builds, seven package-workspace runs, two safe File builds, two safe owned-text
+builds, two direct target executions, two exec-target executions, and forty-five total target or
 probe PE images. Stable build proof covers development output, failed-build preservation, release
-replacement, and a locked release replacement from a separately built temporary `fairyc.exe`.
+replacement, a safe `std::io` product with exact stdout/status, and locked replacements from a
+separately built temporary `fairyc.exe`.
 Stable run proof covers development and release result 42, a normal reserved-status result 131, a
 division-by-zero trap using that same OS status, canonical-lock restoration, retained-build
 immutability, and another locked release run from that compiler. The

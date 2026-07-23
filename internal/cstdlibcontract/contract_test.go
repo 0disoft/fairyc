@@ -74,6 +74,23 @@ func TestAdmittedForTargetKeepsWindowsConsoleTargetBound(t *testing.T) {
 	}
 }
 
+func TestTargetNeutralStdoutSelectsOneTargetOwnedConsoleComponent(t *testing.T) {
+	t.Parallel()
+	const symbol = "fy_std_stdout_write_all_v0"
+	if !Admitted(symbol) || !AdmittedForTarget(symbol, target.X8664LinuxGNU) ||
+		!AdmittedForTarget(symbol, target.X8664WindowsMSVC) {
+		t.Fatal("target-neutral stdout symbol is not admitted for both implemented targets")
+	}
+	linux, err := ComponentsForSymbols([]string{symbol})
+	if err != nil || !slices.Equal(linux, []Component{ComponentLinuxConsole}) {
+		t.Fatalf("Linux components = %v, %v", linux, err)
+	}
+	windows, err := WindowsMSVCComponentsForSymbols([]string{symbol})
+	if err != nil || !slices.Equal(windows, []Component{ComponentWindowsConsole}) {
+		t.Fatalf("Windows components = %v, %v", windows, err)
+	}
+}
+
 func TestAdmittedForTargetKeepsWindowsFileTargetBound(t *testing.T) {
 	t.Parallel()
 	for _, symbol := range []string{
@@ -102,6 +119,7 @@ func TestAdmittedForTargetKeepsWindowsFileTargetBound(t *testing.T) {
 func TestWindowsMSVCComponentsForSymbolsAdmitsOnlyProvenRuntimeSlice(t *testing.T) {
 	t.Parallel()
 	components, err := WindowsMSVCComponentsForSymbols([]string{
+		"fy_std_stdout_write_all_v0",
 		"fy_std_windows_stdout_write_all_v0",
 		"fy_std_windows_file_open_v0",
 		"fy_std_windows_file_read_v0",

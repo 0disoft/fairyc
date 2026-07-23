@@ -74,7 +74,8 @@ func TestLoadInjectsExactCompilerBundledStandardLibrary(t *testing.T) {
 	if !found || standardLibrary.SourceKind != SourceKindSDK || standardLibrary.SDKIdentity != sdkstdlib.SDKIdentity ||
 		standardLibrary.RuntimeABI != sdkstdlib.RuntimeABI || standardLibrary.Directory != "" || standardLibrary.SourceRoot != "" ||
 		standardLibrary.Manifest.Package.UID != sdkstdlib.PackageUID || standardLibrary.Manifest.Package.Version != sdkstdlib.Version ||
-		len(standardLibrary.Sources) != 1 || standardLibrary.Sources[0].Module.Path != "std::alloc" {
+		len(standardLibrary.Sources) != 2 || standardLibrary.Sources[0].Module.Path != "std::alloc" ||
+		standardLibrary.Sources[1].Module.Path != "std::io" {
 		t.Fatalf("standard library = %+v, found = %v", standardLibrary, found)
 	}
 	if workspace.Graph.Nodes[1].Role != packagegraph.RoleStandardLibrary || workspace.Graph.Nodes[1].Identity.SourceIdentity != sdkstdlib.SourceIdentity(sdkstdlib.SDKIdentity, sdkstdlib.RuntimeABI, standardLibrary.Digest) {

@@ -32,7 +32,7 @@ import (
 )
 
 const (
-	reportSchemaVersion = "fairyc.native-c-report/v31"
+	reportSchemaVersion = "fairyc.native-c-report/v32"
 	trapExitBase        = 192
 	maxProcessOutput    = 64 * 1024
 	executionTimeout    = 10 * time.Second
@@ -1503,6 +1503,7 @@ type Report struct {
 	TextViewExecutions                  int        `json:"textViewExecutions"`
 	OwnedTextExecutions                 int        `json:"ownedTextExecutions"`
 	OwnedTextSourceCallExecutions       int        `json:"ownedTextSourceCallExecutions"`
+	LinuxConsoleExecutions              int        `json:"linuxConsoleExecutions"`
 	LinuxFileExecutions                 int        `json:"linuxFileExecutions"`
 	LinuxFileSourceCallExecutions       int        `json:"linuxFileSourceCallExecutions"`
 	ForeignCallExecutions               int        `json:"foreignCallExecutions"`
@@ -1729,6 +1730,21 @@ func Run(manifestPath string) (Report, error) {
 		return Report{}, err
 	}
 	report.OwnedTextSourceCallExecutions = ownedTextSourceCallExecutions
+	linuxConsoleSource, err := cstdlib.LinuxConsoleSource()
+	if err != nil {
+		return Report{}, fmt.Errorf("load Linux console implementation: %w", err)
+	}
+	linuxConsoleProbe, err := cstdlib.LinuxConsoleProbeSource()
+	if err != nil {
+		return Report{}, fmt.Errorf("load Linux console probe: %w", err)
+	}
+	linuxConsoleExecutions, err := runStandardLibraryProbe(
+		temporaryRoot, toolchains, "Linux console", "linux-console-probe", linuxConsoleProbe, linuxConsoleSource,
+	)
+	if err != nil {
+		return Report{}, err
+	}
+	report.LinuxConsoleExecutions = linuxConsoleExecutions
 	linuxFileSource, err := cstdlib.LinuxFileSource()
 	if err != nil {
 		return Report{}, fmt.Errorf("load Linux File implementation: %w", err)

@@ -238,9 +238,9 @@ for those two shapes only; it
 does not provide an independent compiler or register oracle, aggregate parameters, callbacks,
 exports, nested results, or hosted evidence.
 
-The Windows smoke additionally parses all forty-three linked target or probe executable images without
+The Windows smoke additionally parses all forty-five linked target or probe executable images without
 invoking the host loader as the parser. The target-neutral product, both declared-target profile
-products, seven package-workspace build products, seven package-workspace run products, both safe FY
+products, nine package-workspace build products including two safe `std::io` products, seven package-workspace run products, both safe FY
 File lifecycle products, both safe FY owned-text lifecycle products, two direct run-target temporary
 products, two exec-target temporary output products, plus both profiles of the raw Windows File, raw Buffer, raw owned-text, raw Arena, layout, ABI, generated-Fairy
 struct-result, and unwind probes must be

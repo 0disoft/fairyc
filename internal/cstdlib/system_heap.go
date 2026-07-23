@@ -48,6 +48,12 @@ var stage0LinuxFile string
 //go:embed stage0_linux_file_probe.c
 var stage0LinuxFileProbe string
 
+//go:embed stage0_linux_console.c
+var stage0LinuxConsole string
+
+//go:embed stage0_linux_console_probe.c
+var stage0LinuxConsoleProbe string
+
 //go:embed stage0_windows_console.c
 var stage0WindowsConsole string
 
@@ -205,6 +211,16 @@ func LinuxFileProbeSource() (string, error) {
 	return canonicalSource("Linux File probe", stage0LinuxFileProbe)
 }
 
+// LinuxConsoleSource returns the target-specific bounded stdout implementation.
+func LinuxConsoleSource() (string, error) {
+	return canonicalSource("Linux console", stage0LinuxConsole)
+}
+
+// LinuxConsoleProbeSource returns the closed native conformance probe for Linux stdout.
+func LinuxConsoleProbeSource() (string, error) {
+	return canonicalSource("Linux console probe", stage0LinuxConsoleProbe)
+}
+
 // WindowsConsoleSource returns the target-specific bounded stdout implementation.
 func WindowsConsoleSource() (string, error) {
 	return canonicalSource("Windows console", stage0WindowsConsole)
@@ -302,6 +318,8 @@ func sourceForComponents(components []cstdlibcontract.Component) (string, error)
 
 func componentSource(component cstdlibcontract.Component) (string, string, error) {
 	switch component {
+	case cstdlibcontract.ComponentLinuxConsole:
+		return "Linux console", stage0LinuxConsole, nil
 	case cstdlibcontract.ComponentLinuxFile:
 		return "Linux File", stage0LinuxFile, nil
 	case cstdlibcontract.ComponentWindowsConsole:

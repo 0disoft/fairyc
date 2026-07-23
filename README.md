@@ -167,8 +167,15 @@ stdout write-all symbol inside a checked local helper. The raw declaration, safe
 completed prefix. Its `main` passes `ref str` and `ref u8[]` through safe internal calls; the
 byte helper observes the exact NUL and `A` bytes through checked read-only indexing while the entry contains no raw pointer or `unsafe`,
 prints `Fairy C says hi`, and exits 42. That is real
-FY-to-MSVC process output, unsafe containment, and source-effect enforcement, but it is not yet a
-portable `std::io` API or final symbolic error taxonomy.
+FY-to-MSVC process output, unsafe containment, and source-effect enforcement for the legacy example.
+The compiler-bundled SDK `0.0.0-stage0.2` now exposes the safe
+`std::io::write(ref str) -> Result<usize, ConsoleError>` boundary over a target-neutral internal
+symbol. `examples/std_io_quickstart` contains no raw pointer, unsafe block, foreign declaration, or
+platform name; stable build produces an inspected Windows PE that prints the exact bytes and exits
+42, and a separately built `fairyc.exe` repeats the locked build and execution. Linux owns a POSIX
+adapter and four configured native probes, but this Windows host has not observed those executions.
+Formatting, implicit newlines, stderr, stdin, terminal encoding, and a final symbolic error taxonomy
+remain outside the API.
 A provisional SystemHeap implementation now lives in the target standard-library
 boundary rather than the thin runtime. It normalizes empty allocation, admits current fundamental
 alignments, preserves bytes across copy-and-release growth or shrink, and leaves the old block
@@ -339,8 +346,8 @@ exception, virtual-walks raiser, termination, and catcher frames, and requires o
 `__finally` execution under both profiles. The target marker remains missing until broader layout
 and independent/source-level/hosted ABI and unwind evidence exists. A host-independent PE parser
 now validates the host-smoke product, both declared-target profile products, both safe File and
-safe owned-text profile products, seven package-workspace build products including four measured
-experimental and three stable builds, seven package-workspace run
+safe owned-text profile products, nine package-workspace build products including four measured
+experimental, three stable quickstart builds, and two safe `std::io` builds, seven package-workspace run
 products, two direct run-target temporary products, two exec-target output products, and all
 eighteen raw or generated-Fairy Windows File, Buffer, owned-text, Arena, layout,
 ABI, struct-result, and unwind probe images as bounded

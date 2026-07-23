@@ -71,14 +71,15 @@ std::alloc  SystemHeap, Arena, AllocError
 std::bytes  Buffer
 std::text   UTF-8 validation, String, CStr, CString
 std::fs     Linux File and open options
+std::io     exact stdout byte writing with completed-prefix errors
 std::c      C scalar types and raw wrapper helpers
 ```
 
-The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. The embedded surface currently exports only opaque `std::alloc::Arena`; the broader list above remains the planned library boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
+The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.2` exports opaque `std::alloc::Arena` and ADR 0205's exact `std::io::write` surface; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
 
 Built-in `Option`, `Result`, slices, `str`, and `CStr` get compiler-known view semantics; library modules provide operations over them.
 
-Future safe console, file, environment, process, network, clock, and random APIs must declare the
+Safe console, file, environment, process, network, clock, and random APIs must declare the
 matching source effect from `docs/language/0008-effects-and-capabilities-v0.md`. A target-specific
 raw foreign declaration and its safe wrapper carry the same external effect even though only the
 raw call also requires an `unsafe` boundary. The implemented effect checker does not itself expose
@@ -289,7 +290,29 @@ A `b"..."` literal provides allocation-free immutable `ref u8[]` storage with ex
 
 A `"..."` literal provides allocation-free immutable `ref str` storage after the complete decoded byte sequence passes UTF-8 validation. MIR retains a distinct text operand and byte length rather than reusing byte-string or C-string meaning. The generated-C path uses a private non-null `fy_str { data, length }` value, deduplicated exact immutable UTF-8 arrays for nonempty values, and a one-byte sentinel with length zero for empty values. The source property `.len` returns the UTF-8 byte count as `usize`, and `.is_empty` returns whether that byte count is zero; neither counts scalar values or graphemes. An explicit unsafe conversion may expose a literal or typed local's immutable `ptr u8` data address; mutable extraction, indexing, slicing, a public string ABI, implicit byte-to-text conversion, and implicit C termination remain unimplemented.
 
-## Windows stdout write-all v0
+## Stdout write-all v0
+
+The compiler-bundled `std::io` module exposes exactly
+`write(ref str) -> Result<usize, ConsoleError>`. It declares `@effects(console)`, writes the text's
+exact UTF-8 bytes, appends no newline, allocates nothing, and retains no borrow. Success preserves
+the exact written byte count. Failure preserves a numeric status and completed-prefix byte count.
+The private raw declaration, `@repr(C)` transport, pointer conversion, and
+`fy_std_stdout_write_all_v0` symbol remain inside the SDK and target support units.
+
+Status 1 is invalid input, 2 is unavailable stdout, 3 is an operating-system write failure, and 4
+is impossible zero progress. Empty input succeeds without consulting stdout. The Linux adapter
+uses POSIX `write`, retries `EINTR`, and bounds requests by `SSIZE_MAX`. The Windows adapter uses
+`WriteFile` in `DWORD`-bounded chunks. Both stop at the first non-retryable failure and return the
+completed prefix. The API does not format, transcode, append a newline, retry after a reported
+failure, or promise terminal-specific encoding behavior.
+
+The checked-in `examples/std_io_quickstart` contains no unsafe code or platform symbol. The Windows
+smoke builds it through stable `fairyc build --release`, executes exact `Fairy C says hi\n` with
+status 42, and repeats a locked build and execution through a separately built compiler. Linux
+Clang/GCC low/optimized executions are configured through the native report v32
+`linuxConsoleExecutions` field but remain unobserved on this Windows host.
+
+### Legacy Windows example symbol
 
 The target-only unsafe symbol `fy_std_windows_stdout_write_all_v0` accepts one immutable byte
 pointer and `usize` length and returns a private `@repr(C)` result containing `u32 status` and
@@ -302,8 +325,9 @@ Its FY raw declaration and the checked safe text wrapper both declare `@effects(
 wrapper returns `Result<usize, ConsoleError>`: success preserves the exact byte count, while failure
 preserves the nonzero raw status and completed-prefix count in an example-local typed record. The
 example entry must propagate the effect even though it contains no raw pointer or unsafe block.
-This is executable authority and typed-progress tracking for one Windows-only helper, not a stable
-`std::io` API, portable error taxonomy, or public tagged ABI.
+This remains executable authority and typed-progress tracking for the historical Windows-only
+example. ADR 0205's safe SDK API uses the target-neutral internal symbol; neither result record is a
+public tagged ABI.
 
 The implementation obtains `STD_OUTPUT_HANDLE` once and loops in `DWORD`-bounded chunks until all
 bytes are written or a failure reports the completed prefix. It does not allocate, append a newline,
@@ -313,12 +337,12 @@ empty and invalid inputs plus exact ASCII bytes through a captured pipe; interac
 encoding, terminal modes, stdin, stderr writing, colors, formatting, and cancellation remain
 unproven or unimplemented.
 
-This raw function is admitted only by the `x86_64-windows-msvc` support resolver and must be called
+The legacy raw function is admitted only by the `x86_64-windows-msvc` support resolver and must be called
 inside `unsafe`. The checked-in example confines the call to a safe function in an explicitly listed
 support module; that function accepts `ref str`, derives the raw length from `.len`, declares
 `@effects(console)`, and reports success
-only after checking status and completed progress. This is an example of unsafe containment, not a
-public `std::io` module, portable console API, stable error type, or stable result layout.
+only after checking status and completed progress. It remains an example of unsafe containment;
+new source should use `std::io::write`.
 
 ## Linux `File` v0
 
@@ -389,9 +413,9 @@ The constrained C unit records sorted unique external names used by actual calls
 resolve only exact `fy_std_*_v0` members through the shared standard-library contract, close their
 component dependencies, and combine those C sources with the scalar runtime. Unused foreign
 declarations do not select a component. Buffer and Arena require SystemHeap; owned text requires
-SystemHeap, Buffer, and text view. Linux File, Windows console, and Windows File are target-specific
-independent components; Linux File is placed first when selected so its feature-test macro precedes
-system headers.
+SystemHeap, Buffer, and text view. Linux console, Linux File, Windows console, and Windows File are
+target-specific independent components; POSIX components are ordered before portable sources so
+their feature-test macros precede system headers.
 
 This is a closed implementation link, not package discovery. Other foreign names receive no source,
 object, library, search path, or linker argument from Fairy C and remain ordinary unresolved-link

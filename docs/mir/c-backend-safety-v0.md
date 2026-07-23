@@ -327,11 +327,13 @@ report; they do not expand the twenty interpreter-owned differential cases.
 Every C-scalar probe uses hand-written C producers and consumers so each value crosses a generated
 typed local without requiring a Fairy C literal. The family probe uses exactly representable finite
 floating values and makes no NaN, infinity, signed-zero, rounding, or floating-environment claim.
-`fairyc.native-c-report/v31` separately records four `foreignCStructResultCallExecutions`, four
+`fairyc.native-c-report/v32` separately records four `foreignCStructResultCallExecutions`, four
 `systemHeapSourceCallExecutions`, four
 `bufferSourceCallExecutions`, four `arenaSourceCallExecutions`, and four
 `cStrValidationSourceCallExecutions`, plus four `ownedTextSourceCallExecutions` and four
-`linuxFileSourceCallExecutions`. The SystemHeap count
+`linuxFileSourceCallExecutions`, and four `linuxConsoleExecutions`. The console count executes the
+target-neutral POSIX stdout adapter's empty, invalid, redirected-write, and unavailable-stdout
+states. The SystemHeap count
 crosses an exact generated `void *`/`size_t` block into the real SystemHeap C unit. The Buffer count
 nests that block in the exact Buffer record, calls the real
 initialize, zeroed-resize, and drop helpers, and observes initialized bytes plus normalized release.

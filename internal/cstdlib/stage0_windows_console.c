@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-struct fy_std_windows_write_result_v0 {
+struct fy_std_console_write_result_v0 {
     uint32_t status;
     size_t written;
 };
@@ -17,11 +17,11 @@ enum {
     FY_STD_WINDOWS_WRITE_NO_PROGRESS_V0 = 4
 };
 
-struct fy_std_windows_write_result_v0 fy_std_windows_stdout_write_all_v0(
+static struct fy_std_console_write_result_v0 fy_std_windows_stdout_write_all_impl_v0(
     const uint8_t *data,
     size_t length
 ) {
-    struct fy_std_windows_write_result_v0 result = {
+    struct fy_std_console_write_result_v0 result = {
         FY_STD_WINDOWS_WRITE_OK_V0,
         (size_t)0
     };
@@ -55,4 +55,18 @@ struct fy_std_windows_write_result_v0 fy_std_windows_stdout_write_all_v0(
         result.written += (size_t)completed;
     }
     return result;
+}
+
+struct fy_std_console_write_result_v0 fy_std_stdout_write_all_v0(
+    const uint8_t *data,
+    size_t length
+) {
+    return fy_std_windows_stdout_write_all_impl_v0(data, length);
+}
+
+struct fy_std_console_write_result_v0 fy_std_windows_stdout_write_all_v0(
+    const uint8_t *data,
+    size_t length
+) {
+    return fy_std_windows_stdout_write_all_impl_v0(data, length);
 }
