@@ -71,11 +71,11 @@ std::alloc  SystemHeap, Arena, AllocError
 std::bytes  Buffer
 std::text   UTF-8 validation, String, CStr, CString
 std::fs     Linux File and open options
-std::io     exact stdout and stderr byte writing with completed-prefix errors
+std::io     exact stdout/stderr byte writes and one bounded stdin byte read
 std::c      C scalar types and raw wrapper helpers
 ```
 
-The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.4` exports opaque `std::alloc::Arena`, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, and ADR 0210's matching immutable byte-view operations; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
+The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.5` exports opaque `std::alloc::Arena`, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, ADR 0210's matching immutable byte-view output operations, and ADR 0211's bounded mutable-byte-view stdin read; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
 
 Built-in `Option`, `Result`, slices, `str`, and `CStr` get compiler-known view semantics; library modules provide operations over them.
 
@@ -290,7 +290,7 @@ A `b"..."` literal provides allocation-free immutable `ref u8[]` storage with ex
 
 A `"..."` literal provides allocation-free immutable `ref str` storage after the complete decoded byte sequence passes UTF-8 validation. MIR retains a distinct text operand and byte length rather than reusing byte-string or C-string meaning. The generated-C path uses a private non-null `fy_str { data, length }` value, deduplicated exact immutable UTF-8 arrays for nonempty values, and a one-byte sentinel with length zero for empty values. The source property `.len` returns the UTF-8 byte count as `usize`, and `.is_empty` returns whether that byte count is zero; neither counts scalar values or graphemes. An explicit unsafe conversion may expose a literal or typed local's immutable `ptr u8` data address; mutable extraction, indexing, slicing, a public string ABI, implicit byte-to-text conversion, and implicit C termination remain unimplemented.
 
-## Console write-all v0
+## Console byte I/O v0
 
 The compiler-bundled `std::io` module exposes
 `write(ref str) -> Result<usize, ConsoleError>` for stdout and
@@ -313,15 +313,38 @@ the completed prefix. The API does not format, append a newline, retry after a r
 promise terminal-specific encoding behavior. Byte-view calls deliberately make no claim that a
 terminal will render arbitrary bytes as readable text.
 
+The same module exposes
+`read_stdin(ref mut u8[] buffer) -> Result<usize, ConsoleReadError>`. It declares
+`@effects(console)`, allocates nothing, retains no borrow, and performs at most one operating-system
+read bounded by `buffer.len`. Success contains the exact initialized prefix length; success with zero
+is EOF. A short success is ordinary and callers that need to fill a buffer or consume a stream must
+loop. The operation writes only within `buffer[..read]`; the remaining suffix keeps its prior bytes.
+It does not validate UTF-8, scan for a delimiter, append a terminator, or retry to fill the buffer.
+
+`ConsoleReadError` has numeric `status` and `read` fields and is intentionally distinct from
+output's `ConsoleError`. Raw status 1 is invalid nonempty storage, 2 is unavailable stdin, and 3 is
+an operating-system read failure. Empty input succeeds with zero before consulting the stream. The
+safe wrapper cannot construct invalid nonempty storage. The private
+`fy_std_stdin_read_v0` declaration, mutable pointer conversion, and C transport remain inside the
+SDK and target support unit.
+
+The POSIX adapter makes one `read` request bounded by `SSIZE_MAX`, retries `EINTR`, maps `EBADF` to
+status 2, and treats a zero result as EOF. The Win32 adapter makes one `ReadFile` request bounded by
+`UINT32_MAX`, maps null, invalid, and `ERROR_INVALID_HANDLE` handles to status 2, and treats
+`ERROR_BROKEN_PIPE` and `ERROR_HANDLE_EOF` as EOF. Neither adapter buffers, owns the process handle,
+or changes terminal mode.
+
 The checked-in `examples/std_io_quickstart` contains no unsafe code or platform symbol. The Windows
-smoke runs it through stable `fairyc run --release --locked`, forwards exact
+smoke runs it through stable `fairyc run --release --locked` with closed stdin, forwards exact
 `Fairy C says hi\nbytes on stdout\n` to stdout and
 `Fairy C warns too\nbytes on stderr\n` to stderr with status zero, builds and directly executes the
-retained image with the same observation, and
-repeats both locked paths through a separately built compiler. Linux
-Clang/GCC low/optimized executions are configured through the native report v32
-`linuxConsoleExecutions` field and exercise both descriptors, but remain unobserved on this Windows
-host.
+retained image with EOF, short `stdin!\n`, and a longer nine-byte payload. The direct inputs produce
+respectively no echo, the exact short echo, and only the first eight bytes. A separately built
+compiler repeats both locked paths and the short-input artifact execution. Stable `fairyc run`
+still closes stdin; forwarding caller input through the compiler is not part of this API decision.
+Linux Clang/GCC low/optimized executions are configured through the native report v32
+`linuxConsoleExecutions` field and exercise stdin, stdout, and stderr, but remain unobserved on this
+Windows host.
 
 ### Legacy Windows example symbol
 

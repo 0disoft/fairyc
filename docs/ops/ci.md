@@ -202,8 +202,10 @@ The manifest-owned `examples/std_io_quickstart` is separate from that legacy tar
 smoke runs it through stable locked release execution both in-process and through a separately built
 compiler, requires exact `Fairy C says hi\nbytes on stdout\n` stdout, exact
 `Fairy C warns too\nbytes on stderr\n` stderr, and status zero, and also builds and directly
-executes the retained PE with the same observation. Stable run's
-streams share the driver's 64 KiB capture ceiling and do not claim cross-stream ordering.
+executes the retained PE with EOF, `stdin!\n`, and `123456789`. Those inputs must produce no echo,
+the exact short echo, and only `12345678`, respectively; a separately built compiler repeats the
+short-input artifact path. Stable run's streams share the driver's 64 KiB capture ceiling, keep
+stdin closed, and do not claim cross-stream ordering.
 The same intent derives one non-POSIX C11 unit from the eight valid Windows layout cases, then
 compiles and executes it under low and optimized MSVC profiles. It also derives separate caller and
 callee C11 translation units from all twelve valid Microsoft x64 plans, compiles and links them

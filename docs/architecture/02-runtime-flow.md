@@ -118,7 +118,9 @@ private generated-C descriptors carry data and length between internal functions
 Stable workspace run v2 uses the same bounded driver for manifest-owned programs and compiler-bundled
 SDK linkage. It forwards both streams, preserves ordinary status, and compiles one private trap suffix
 so the CLI can remove only control metadata while retaining preceding program stderr and a canonical
-trap line. It provides no live interleaving, stdin, arguments, or hostile-code isolation.
+trap line. It provides no live interleaving, stdin forwarding, arguments, or hostile-code isolation.
+The SDK's `read_stdin(ref mut u8[])` is therefore observable through direct execution of a built
+artifact, while stable run supplies immediate EOF until a separate CLI contract admits caller input.
 `internal/layout` is the next boundary: it turns those facts into checked array and aggregate size,
 alignment, offset, and padding results before any backend chooses C syntax. Separate Linux GNU and
 Windows MSVC manifests hold host-independent expectations. The generated native C probe checks

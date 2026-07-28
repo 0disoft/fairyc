@@ -35,10 +35,30 @@ fn bool write_bytes_to_stderr(ref u8[] value) {
 }
 
 @effects(console)
+fn bool echo_stdin() {
+    var u8[8] buffer = [0, 0, 0, 0, 0, 0, 0, 0];
+    return switch (io::read_stdin(ref mut buffer)) {
+        case .ok(read_count) : {
+            if (read_count <= buffer.len) {
+                let ref u8[] bytes = ref buffer;
+                switch (io::write_bytes(bytes[..read_count])) {
+                    case .ok(written) : { written == read_count }
+                    case .err(_) : { false }
+                }
+            } else {
+                false
+            }
+        }
+        case .err(_) : { false }
+    };
+}
+
+@effects(console)
 fn i32 main() {
     let bool stdout_text_ok = write_text_to_stdout("Fairy C says hi\n");
     let bool stdout_bytes_ok = write_bytes_to_stdout(b"bytes on stdout\n");
     let bool stderr_text_ok = write_text_to_stderr("Fairy C warns too\n");
     let bool stderr_bytes_ok = write_bytes_to_stderr(b"bytes on stderr\n");
-    return if (stdout_text_ok && stdout_bytes_ok && stderr_text_ok && stderr_bytes_ok) { 0 } else { 1 };
+    let bool stdin_ok = echo_stdin();
+    return if (stdout_text_ok && stdout_bytes_ok && stderr_text_ok && stderr_bytes_ok && stdin_ok) { 0 } else { 1 };
 }

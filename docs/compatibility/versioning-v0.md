@@ -359,6 +359,14 @@ two private raw console symbols are unchanged, but the exact SDK digest, package
 interface hash, dependent identities, and generated lock bytes change. The runtime ABI identity,
 numeric result layout, status meanings, and target C support-symbol set remain unchanged.
 
+ADR 0211 moves the SDK to `0.0.0-stage0.5` because it adds public
+`std::io::read_stdin(ref mut u8[]) -> Result<usize, ConsoleReadError>` and the private
+`fy_std_stdin_read_v0` target support symbol. Existing output calls and their raw result layout are
+unchanged, but the exact SDK digest, package instance, public interface hash, dependent identities,
+and generated lock bytes change. The runtime ABI identity remains unchanged. The input result uses
+its own private numeric layout and treats a successful zero count as EOF; the new C symbol is pre-1
+implementation compatibility data rather than a public C or Fairy native ABI.
+
 ## Package formats
 
 Manifest schema, lockfile schema, source archive schema, and any future binary artifact schema are independent. Stage 0 needs manifest and lockfile schemas only. A stable binary package format would falsely imply a stable native Fairy ABI and is deferred.
@@ -380,7 +388,7 @@ ADR 0144 fixes the first loader behavior for this manifest schema: explicit root
 exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, one language revision,
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
 instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
-`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.4`, language
+`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.5`, language
 `fairyc-language/0`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 

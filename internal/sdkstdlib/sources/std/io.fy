@@ -6,10 +6,22 @@ struct raw_console_write_result {
     usize written;
 }
 
+@repr(C)
+struct raw_console_read_result {
+    u32 status;
+    usize read;
+}
+
 /// Reports the raw failure status and the byte prefix completed before failure.
 pub struct ConsoleError {
     u32 status;
     usize written;
+}
+
+/// Reports the raw failure status without treating an ordinary end-of-file as an error.
+pub struct ConsoleReadError {
+    u32 status;
+    usize read;
 }
 
 @effects(console)
@@ -20,6 +32,10 @@ unsafe extern C fn raw_console_write_result stdout_write_all_raw(ptr u8 data, us
 @link_name("fy_std_stderr_write_all_v0")
 unsafe extern C fn raw_console_write_result stderr_write_all_raw(ptr u8 data, usize length) ;
 
+@effects(console)
+@link_name("fy_std_stdin_read_v0")
+unsafe extern C fn raw_console_read_result stdin_read_raw(ptr mut u8 data, usize length) ;
+
 fn Result<usize, ConsoleError> checked_write_result(u32 status, usize written) {
     return if (status == 0) {
         .ok(written)
@@ -27,6 +43,17 @@ fn Result<usize, ConsoleError> checked_write_result(u32 status, usize written) {
         .err(ConsoleError {
             .status = status,
             .written = written,
+        })
+    };
+}
+
+fn Result<usize, ConsoleReadError> checked_read_result(u32 status, usize read) {
+    return if (status == 0) {
+        .ok(read)
+    } else {
+        .err(ConsoleReadError {
+            .status = status,
+            .read = read,
         })
     };
 }
@@ -65,4 +92,13 @@ pub fn Result<usize, ConsoleError> write_stderr_bytes(ref u8[] data) {
         stderr_write_all_raw(data as ptr u8, data.len)
     };
     return checked_write_result(result.status, result.written);
+}
+
+/// Reads at most buffer.len exact bytes from stdin; a successful zero count is end-of-file.
+@effects(console)
+pub fn Result<usize, ConsoleReadError> read_stdin(ref mut u8[] buffer) {
+    let raw_console_read_result result = unsafe {
+        stdin_read_raw(buffer as ptr mut u8, buffer.len)
+    };
+    return checked_read_result(result.status, result.read);
 }

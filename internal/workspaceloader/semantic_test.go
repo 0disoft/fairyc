@@ -165,10 +165,12 @@ import std::io as io;
 
 @effects(console)
 fn i32 main() {
+    var u8[2] input = [0, 0];
     discard io::write("Fairy C says hi\n");
     discard io::write_bytes(b"\x00\xff");
     discard io::write_stderr("Fairy C warns too\n");
     discard io::write_stderr_bytes(b"\x80\x00");
+    discard io::read_stdin(ref mut input);
     return 42;
 }
 `,
@@ -198,22 +200,25 @@ func TestBundledStandardLibraryIORequiresConsoleEffect(t *testing.T) {
 	tests := []struct {
 		function string
 		argument string
+		setup    string
 	}{
 		{function: "write", argument: `"Fairy C says hi\n"`},
 		{function: "write_bytes", argument: `b"\x00\xff"`},
 		{function: "write_stderr", argument: `"Fairy C warns too\n"`},
 		{function: "write_stderr_bytes", argument: `b"\x80\x00"`},
+		{function: "read_stdin", argument: "ref mut input", setup: "    var u8[2] input = [0, 0];\n"},
 	}
 	for _, test := range tests {
 		test := test
 		t.Run(test.function, func(t *testing.T) {
 			t.Parallel()
 			root := t.TempDir()
-			source := strings.NewReplacer("FUNCTION", test.function, "ARGUMENT", test.argument).Replace(`module main;
+			source := strings.NewReplacer("FUNCTION", test.function, "ARGUMENT", test.argument, "SETUP", test.setup).Replace(`module main;
 
 import std::io as io;
 
 fn i32 main() {
+SETUP
     discard io::FUNCTION(ARGUMENT);
     return 0;
 }

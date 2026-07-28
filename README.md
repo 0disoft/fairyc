@@ -170,18 +170,21 @@ completed prefix. Its `main` passes `ref str` and `ref u8[]` through safe intern
 byte helper observes the exact NUL and `A` bytes through checked read-only indexing while the entry contains no raw pointer or `unsafe`,
 prints `Fairy C says hi`, and exits 42. That is real
 FY-to-MSVC process output, unsafe containment, and source-effect enforcement for the legacy example.
-The compiler-bundled SDK `0.0.0-stage0.4` exposes safe text
+The compiler-bundled SDK `0.0.0-stage0.5` exposes safe text
 `std::io::write(ref str)` and `std::io::write_stderr(ref str)` operations plus exact binary
 `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` operations. All four return
-`Result<usize, ConsoleError>` over the same target-neutral internal symbols. `examples/std_io_quickstart`
+`Result<usize, ConsoleError>`. The same module now exposes allocation-free
+`read_stdin(ref mut u8[]) -> Result<usize, ConsoleReadError>`; one call performs at most one bounded
+read, and success with zero bytes means EOF. `examples/std_io_quickstart`
 contains no raw pointer, unsafe block, foreign declaration, or platform name; stable run forwards
 its exact text and byte-view output on separated stdout and stderr and preserves success status zero, while
-stable build produces the same inspected Windows PE for direct execution. A separately built
-`fairyc.exe` repeats both locked paths. Linux owns a POSIX
-adapter and four configured native probes covering both streams, but this Windows host has not
-observed those executions. Byte-view output performs no UTF-8 validation. Formatting, implicit
-newlines, stdin, terminal encoding, and a final symbolic error taxonomy
-remain outside the API.
+stable build produces the same inspected Windows PE for direct execution. Direct execution proves
+EOF, a short input echo, and an eight-byte bounded prefix; stable `fairyc run` itself still closes
+stdin. A separately built `fairyc.exe` repeats the locked paths and short-input artifact execution.
+Linux owns a POSIX adapter and four configured native probes covering all three process streams, but
+this Windows host has not observed those executions. Byte input and output perform no UTF-8
+validation. Formatting, implicit newlines, text or line input, terminal encoding, stable CLI stdin
+forwarding, and a final symbolic error taxonomy remain outside the API.
 A provisional SystemHeap implementation now lives in the target standard-library
 boundary rather than the thin runtime. It normalizes empty allocation, admits current fundamental
 alignments, preserves bytes across copy-and-release growth or shrink, and leaves the old block

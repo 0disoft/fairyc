@@ -519,14 +519,18 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
-  The compiler-bundled SDK `0.0.0-stage0.4` exposes
+  The compiler-bundled SDK `0.0.0-stage0.5` exposes
   `std::io::write(ref str) -> Result<usize, ConsoleError>` and a matching `write_stderr` operation
   for text, plus `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` for exact binary output.
   All four declare `console`, keep raw pointers and target linkage private, append no newline,
   preserve completed-prefix byte counts, and map one internal symbol per
-  stream to a shared target-owned Linux POSIX or Windows Win32 adapter. The checked-in safe workspace
-  has exact text and byte-view Windows stream evidence through stable build/run and a separately built
-  compiler; Linux native execution remains configured but unobserved on this host.
+  output stream to a shared target-owned Linux POSIX or Windows Win32 adapter. The module additionally
+  exposes `read_stdin(ref mut u8[]) -> Result<usize, ConsoleReadError>`. It performs one
+  allocation-free bounded read, treats a successful zero count as EOF, and leaves text decoding,
+  line handling, buffering, and retry-to-fill to later APIs. The checked-in safe workspace has exact
+  text and byte-view Windows output evidence through stable build/run plus direct-artifact EOF,
+  short-input, and eight-byte-prefix evidence through a separately built compiler. Stable run still
+  closes stdin; Linux native execution remains configured but unobserved on this host.
   ADR 0133 strengthens the existing `arenaExecutions` success condition with deterministic
   first-stage and second-stage allocation failure plus live-allocation cleanup. ADR 0134 strengthens
   `bufferExecutions` with deterministic construction and three growth-allocation failures, exact
@@ -656,11 +660,12 @@ argument, output, and exit-code contract. It emits no native code.
 
 ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
-version, source digest, and lock fields. SDK `0.0.0-stage0.4` exports opaque `std::alloc::Arena`,
+version, source digest, and lock fields. SDK `0.0.0-stage0.5` exports opaque `std::alloc::Arena`,
 ADR 0205's `std::io::write(ref str) -> Result<usize, ConsoleError>`, and ADR 0209's matching
-`write_stderr` operation plus ADR 0210's matching immutable byte-view operations; it performs no host
-installation lookup. The I/O wrapper keeps raw pointers and target linkage private while the broader
-planned standard-library API remains unsettled.
+`write_stderr` operation, ADR 0210's matching immutable byte-view output operations, and ADR 0211's
+`read_stdin(ref mut u8[]) -> Result<usize, ConsoleReadError>`; it performs no host installation
+lookup. The I/O wrapper keeps raw pointers and target linkage private while the broader planned
+standard-library API remains unsettled.
 
 ADR 0148 adds the first package-aware native project path. `experimental build-workspace` and
 `run-workspace` load the current `fairy.toml`, apply ordinary or exact no-write `--locked` policy,
@@ -682,7 +687,7 @@ target choice, cache policy, and target support outside the stable contract.
 
 ADR 0207 supersedes that v1 result-receipt boundary with program-facing run v2. It forwards bounded
 stdout/stderr, preserves ordinary 32-bit program status, strips only the exact private trap suffix,
-keeps canonical trap reporting, and still admits no program arguments or stdin.
+keeps canonical trap reporting, and still admits no program arguments or stdin forwarding.
 
 ADR 0178 stabilizes the source-independent `fairyc explain <diagnostic-code>` lookup, its exact
 three-line human shape, and codes 0, 2, and 4. It keeps catalog lifecycle, wording improvement,

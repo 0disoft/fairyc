@@ -98,8 +98,10 @@ Verified resource definitions now preserve ordered fields and
   compile and link that subset with explicit Clang or GCC and low or optimized profiles into
   a no-overwrite `build/` artifact. Compiler-bundled `std::io::write`, `write_stderr`,
   `write_bytes`, and `write_stderr_bytes` now provide progress-preserving target-neutral text and
-  binary output operations with exact separated Windows execution
-  evidence and configured-but-unobserved Linux probes. Stable portable files, broader console operations, effect-bearing function values,
+  binary output operations. `read_stdin` adds one allocation-free bounded mutable-byte-view input
+  operation with EOF-as-success semantics. Windows has exact separated output plus direct-artifact
+  EOF, short-input, and bounded-prefix evidence; Linux probes remain configured but unobserved.
+  Stable CLI stdin forwarding, portable files, broader console operations, effect-bearing function values,
   and every later Phase 1
   capability remain unimplemented.
 
@@ -357,7 +359,9 @@ quickstart and two safe `std::io` package-workspace builds, nine package-workspa
 builds, two direct target executions, two exec-target executions, and forty-seven total target or
 probe PE images. Stable build proof covers development output, failed-build preservation, release
 replacement, a safe `std::io` product with exact separated stdout/stderr and status, and locked replacements from a
-separately built temporary `fairyc.exe`.
+separately built temporary `fairyc.exe`. Direct execution of that product additionally proves EOF,
+a short stdin echo, and an eight-byte prefix from longer input without changing stable run's
+closed-stdin contract.
 Stable run proof covers development and release result 42, a normal reserved-status result 131, a
 division-by-zero trap using that same OS status, canonical-lock restoration, retained-build
 immutability, and another locked release run from that compiler. The
@@ -582,6 +586,13 @@ ADR 0210 extends the SDK to `0.0.0-stage0.4` with `write_bytes(ref u8[])` and
 `write_stderr_bytes(ref u8[])`. These calls reuse the existing stream symbols and error model while
 making the no-UTF-8-validation binary boundary explicit. Formatting, input, arguments, terminal
 rendering policy, and owned stream handles remain separate decisions.
+
+ADR 0211 extends the SDK to `0.0.0-stage0.5` with
+`read_stdin(ref mut u8[]) -> Result<usize, ConsoleReadError>`. One call performs at most one bounded
+read, success with zero means EOF, and callers own retry or fill loops. Windows direct-artifact
+execution proves EOF, short input, and truncation at an eight-byte buffer; the Linux adapter has a
+configured but unobserved probe. Text decoding, line buffering, stable CLI stdin forwarding,
+arguments, terminal policy, and owned stream handles remain separate decisions.
 
 Exit gate: clean and warm build evidence is reproducible on a declared machine and workload; invalidation fixtures distinguish public interface, inline body, and private implementation; incompatible caches are safe misses.
 

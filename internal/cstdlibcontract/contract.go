@@ -26,6 +26,7 @@ const (
 var symbolComponents = map[string]Component{
 	"fy_std_stdout_write_all_v0":          ComponentLinuxConsole,
 	"fy_std_stderr_write_all_v0":          ComponentLinuxConsole,
+	"fy_std_stdin_read_v0":                ComponentLinuxConsole,
 	"fy_std_system_heap_allocate_v0":      ComponentSystemHeap,
 	"fy_std_system_heap_deallocate_v0":    ComponentSystemHeap,
 	"fy_std_buffer_initialize_v0":         ComponentBuffer,
@@ -72,6 +73,7 @@ var windowsOnlySymbolComponents = map[string]Component{
 var windowsMSVCSymbolComponents = map[string]Component{
 	"fy_std_stdout_write_all_v0":          ComponentWindowsConsole,
 	"fy_std_stderr_write_all_v0":          ComponentWindowsConsole,
+	"fy_std_stdin_read_v0":                ComponentWindowsConsole,
 	"fy_std_windows_stdout_write_all_v0":  ComponentWindowsConsole,
 	"fy_std_windows_file_open_v0":         ComponentWindowsFile,
 	"fy_std_windows_file_read_v0":         ComponentWindowsFile,

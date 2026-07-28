@@ -220,6 +220,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0208-starter-project-guide-v3.md`: conventional zero-status starter entry and generated guide aligned with direct safe stdout execution through stable run v2.
 - `0209-target-neutral-stage0-stderr-write.md`: safe `std::io::write_stderr`, shared target-owned console adapters, SDK stage0.3 identity, and exact separated Windows stream evidence.
 - `0210-target-neutral-stage0-byte-output.md`: safe immutable byte-view stdout/stderr operations, SDK stage0.4 identity, signature-only C transport declaration hardening, and exact Windows native binary-output evidence.
+- `0211-target-neutral-stage0-stdin-read.md`: safe allocation-free mutable-byte-view stdin reads, EOF-as-success semantics, SDK stage0.5 identity, target-owned POSIX/Win32 adapters, and direct Windows artifact input evidence.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 
