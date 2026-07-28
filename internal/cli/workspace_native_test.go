@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -220,13 +221,28 @@ func TestStableWorkspaceRunRejectsMissingRootEntryBeforeToolchain(t *testing.T) 
 	t.Parallel()
 	root := t.TempDir()
 	writeNativeWorkspace(t, root, false)
-	code, stdout, stderr := runForTest([]string{"run"}, root)
-	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "root entry") {
-		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	stdin := &countingReader{}
+	var stdout strings.Builder
+	var stderr strings.Builder
+	code := RunWithInput([]string{"run"}, root, stdin, &stdout, &stderr)
+	if code != ExitInvalidInvocation || stdout.String() != "" || !strings.Contains(stderr.String(), "root entry") {
+		t.Fatalf("RunWithInput() = code %d, stdout %q, stderr %q", code, stdout.String(), stderr.String())
+	}
+	if stdin.reads != 0 {
+		t.Fatalf("stable run consumed stdin %d time(s) before successful compilation", stdin.reads)
 	}
 	if matches, err := filepath.Glob(filepath.Join(root, "build", "*.exe")); err != nil || len(matches) != 0 {
 		t.Fatalf("stable run artifacts after missing entry = %v, %v", matches, err)
 	}
+}
+
+type countingReader struct {
+	reads int
+}
+
+func (reader *countingReader) Read([]byte) (int, error) {
+	reader.reads++
+	return 0, io.EOF
 }
 
 func TestExperimentalWorkspaceBuildFailsClosedOutsideWindowsAMD64(t *testing.T) {

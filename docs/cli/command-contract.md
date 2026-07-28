@@ -481,7 +481,7 @@ Success is exactly `built: <path> (x86_64-windows-msvc, <development|release>, l
 stability does not promote the target's independent `emittable`, `conformant`, or `supported`
 status and does not select persistent-cache defaults.
 
-## Stable workspace run v2
+## Stable workspace run v3
 
 `fairyc run [--release] [--locked]` compiles and executes the current workspace through the same
 manifest, lock, root `main::main`, development/release profile, and closed local Windows pipeline as
@@ -490,10 +490,13 @@ compiler-owned temporary storage, and is removed afterward. It does not create, 
 execute the retained `build/<package-name>.exe` artifact.
 
 The command accepts no positional source, output, target, compiler, linker, profile value, cache,
-JSON, configuration, network, stdin, program argument, or program-stream delimiter. After successful
-launch, bounded program stdout and stderr are forwarded to their matching compiler streams without a
-success banner. Capture uses separate OS pipes under one shared 64 KiB ceiling, so stream identity is
-preserved but cross-stream order is unspecified.
+JSON, configuration, network, program argument, or program-stream delimiter. After compilation,
+linking, and PE/unwind inspection succeed, the caller's stdin is attached directly to the temporary
+program without compiler-side pre-reading, decoding, retention, logging, replay, or a separate byte
+ceiling. Pre-launch failures consume no program input. Bounded program stdout and stderr are
+forwarded to their matching compiler streams without a success banner. Capture uses separate OS
+pipes under one shared 64 KiB ceiling, so stream identity is preserved but cross-stream order is
+unspecified. Input liveness remains bounded by the existing process timeout.
 
 A normal return across the full `i32` range becomes the `fairyc` process status. After launch, a
 status numerically equal to 2, 3, 4, 5, 6, or 7 is still program-owned. A compiler-private run-only
@@ -502,6 +505,8 @@ removed, preceding program stderr is forwarded, `trap: <category>` is appended, 
 returns 5. The receipt is not public runtime ABI, authentication, or hostile-code isolation.
 Pre-execution invocation, source, internal/output, build/execution, and package failures retain codes
 2, 3, 4, 6, and 7 respectively without promoting target maturity or persistent-cache defaults.
+An input transport failure after launch is an execution failure and cannot roll back program effects.
+The embedding helper `cli.Run` still supplies EOF; callers use `cli.RunWithInput` to provide a stream.
 
 Ordinary mode may update `fairy.lock` after a valid graph is loaded even when later compilation,
 execution, a nonzero program status, or a program trap follows. `--locked` performs no write. A
@@ -549,13 +554,15 @@ may precede later failure, while `--locked` writes nothing.
 | `fairyc targets` | Report known target profiles, status, evidence, and unavailable requirements | No |
 
 Alternate package/workspace selection, test filtering and native execution, target triples beyond
-  the declared emit profiles and build/run's fixed local Windows path, program arguments and stdin,
+  the declared emit profiles and build/run's fixed local Windows path, program arguments and
+additional program-input routing beyond stable run,
 feature flags, and configuration precedence
 remain UNDECIDED. The implemented `experimental` spellings do not settle those decisions.
 
 ## General requirements
 
-- Commands are non-interactive by default unless an explicit future subcommand states otherwise.
+- Compiler-owned prompts remain absent. Stable run may attach caller stdin to the launched program;
+  the compiler does not interpret those bytes as command interaction.
 - Input, output, and cache paths are resolved under documented roots and reject unsafe traversal.
 - Human diagnostics go to stderr; requested artifacts and machine-readable results go to stdout or an explicit output path.
 - `--json` output uses a versioned schema and contains no ANSI escapes.

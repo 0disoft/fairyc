@@ -54,7 +54,7 @@
 - Generated lockfile v1 implementation: internal/lockfile/
 - Stable local-workspace check v1: internal/cli/workspace.go, docs/adr/0175-stable-workspace-check-v1.md
 - Stable local Windows workspace build v1: internal/cli/workspace_native.go, internal/cli/build.go, docs/adr/0176-stable-windows-workspace-build-v1.md
-- Stable local Windows workspace run v2: internal/cli/workspace_native.go, internal/cli/program_output.go, docs/adr/0177-stable-windows-workspace-run-v1.md, docs/adr/0207-stable-windows-workspace-run-v2.md
+- Stable local Windows workspace run v3: internal/cli/workspace_native.go, internal/cli/program_output.go, internal/cdriver/windows_host.go, docs/adr/0177-stable-windows-workspace-run-v1.md, docs/adr/0207-stable-windows-workspace-run-v2.md, docs/adr/0212-stable-windows-workspace-run-v3.md
 - Stable diagnostic explanation v1: internal/cli/run.go, internal/diagnostic/catalog.go, docs/adr/0178-stable-diagnostic-explain-v1.md
 - Stable target maturity report v1: internal/cli/target.go, internal/target/spec.go, docs/adr/0179-stable-target-maturity-report-v1.md
 - Stable workspace C emission v1: internal/cli/workspace_emit.go, internal/cbackend/, docs/adr/0180-stable-workspace-c-emission-v1.md

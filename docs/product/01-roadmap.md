@@ -101,7 +101,7 @@ Verified resource definitions now preserve ordered fields and
   binary output operations. `read_stdin` adds one allocation-free bounded mutable-byte-view input
   operation with EOF-as-success semantics. Windows has exact separated output plus direct-artifact
   EOF, short-input, and bounded-prefix evidence; Linux probes remain configured but unobserved.
-  Stable CLI stdin forwarding, portable files, broader console operations, effect-bearing function values,
+  Input forwarding for other native commands, portable files, broader console operations, effect-bearing function values,
   and every later Phase 1
   capability remain unimplemented.
 
@@ -360,8 +360,8 @@ builds, two direct target executions, two exec-target executions, and forty-seve
 probe PE images. Stable build proof covers development output, failed-build preservation, release
 replacement, a safe `std::io` product with exact separated stdout/stderr and status, and locked replacements from a
 separately built temporary `fairyc.exe`. Direct execution of that product additionally proves EOF,
-a short stdin echo, and an eight-byte prefix from longer input without changing stable run's
-closed-stdin contract.
+a short stdin echo, and an eight-byte prefix from longer input. Stable run forwards that short input
+through both the in-process CLI boundary and a separately built compiler.
 Stable run proof covers development and release result 42, a normal reserved-status result 131, a
 division-by-zero trap using that same OS status, canonical-lock restoration, retained-build
 immutability, and another locked release run from that compiler. The
@@ -568,8 +568,9 @@ quarantines, without selecting a default policy or making a speed claim.
 - Keep the implemented no-overwrite `fairyc new <package-name> --uid <package-uid>` starter v3 bootstrap,
   `fairyc check [--locked]`, Windows-local
   `fairyc build [--release] [--locked]`, and Windows-local
-  `fairyc run [--release] [--locked]` v2 contract narrow: bounded stdout/stderr and program status,
-  but no arguments, stdin, target selection, retained artifact, or cache policy. Keep the source-independent
+  `fairyc run [--release] [--locked]` v3 contract narrow: caller stdin after successful compilation,
+  bounded stdout/stderr, and program status, but no arguments, input routing for other native
+  commands, target selection, retained artifact, or cache policy. Keep the source-independent
   `fairyc explain <diagnostic-code>` and `fairyc targets` v1 contracts separate from catalog and
   TargetSpec data lifecycle. Keep target-explicit `fairyc emit c --target <target-id> [--locked]`
   separate from private generated-C bytes and support units. Keep implemented semantic
@@ -593,6 +594,11 @@ read, success with zero means EOF, and callers own retry or fill loops. Windows 
 execution proves EOF, short input, and truncation at an eight-byte buffer; the Linux adapter has a
 configured but unobserved probe. Text decoding, line buffering, stable CLI stdin forwarding,
 arguments, terminal policy, and owned stream handles remain separate decisions.
+
+ADR 0212 promotes caller stdin forwarding into stable run v3 without changing its spelling. Input is
+attached only after compilation, linking, and image inspection, is neither pre-read nor retained by
+the compiler, and remains governed by the existing process timeout. Program arguments, input routing
+for other native commands, live output interleaving, and terminal policy remain separate decisions.
 
 Exit gate: clean and warm build evidence is reproducible on a declared machine and workload; invalidation fixtures distinguish public interface, inline body, and private implementation; incompatible caches are safe misses.
 

@@ -68,7 +68,7 @@ Usage:
 The experimental commands are unstable. "fairyc new" creates one no-overwrite child starter with
 an explicit package UID. "fairyc check" verifies the local workspace. "fairyc build"
 creates or replaces build/<package-name>.exe on Windows. "fairyc run" builds and executes a temporary
-Windows image, forwards bounded program output, preserves ordinary program status, and retains no
+Windows image, forwards program input and bounded program output, preserves ordinary program status, and retains no
 artifact. "fairyc test" checks the root package plus isolated tests/
 sources and runs @test void functions through the semantic interpreter. "fairyc emit c" writes one
 explicitly targeted C11 application unit to stdout without invoking a toolchain. Pass --release to
@@ -128,7 +128,7 @@ func RunWithInput(args []string, sourceRoot string, stdin io.Reader, stdout, std
 		if len(args) == 2 && isHelp(args[1]) {
 			return writeHelp(stdout, stderr)
 		}
-		return runStableRun(args[1:], sourceRoot, stdout, stderr)
+		return runStableRun(args[1:], sourceRoot, stdin, stdout, stderr)
 	}
 	if args[0] == "test" {
 		if len(args) == 2 && isHelp(args[1]) {

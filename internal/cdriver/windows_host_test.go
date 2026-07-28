@@ -8,6 +8,14 @@ import (
 	"testing"
 )
 
+func TestExecuteWindowsMSVCTargetWithInputRejectsNilInput(t *testing.T) {
+	t.Parallel()
+	if _, err := ExecuteWindowsMSVCTargetWithInput(WindowsHostArtifact{}, nil); err == nil ||
+		!strings.Contains(err.Error(), "input must not be nil") {
+		t.Fatalf("ExecuteWindowsMSVCTargetWithInput(nil) error = %v", err)
+	}
+}
+
 func TestLatestWindowsSDKVersionRequiresCompleteHighestVersion(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()

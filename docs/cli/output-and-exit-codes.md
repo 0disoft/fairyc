@@ -51,15 +51,17 @@ failure, toolchain/link/artifact failure, and package/manifest/lock failure. Suc
 the prior default artifact. An output-stream failure after replacement returns `4` but does not
 delete the successfully built artifact. No stable JSON mode exists.
 
-`fairyc run [--release] [--locked]` v2 emits no compiler success line. After successful launch it
-forwards bounded program stdout and stderr to their matching streams, then preserves an ordinary
+`fairyc run [--release] [--locked]` v3 emits no compiler success line. After successful compilation
+and image inspection it attaches caller stdin without pre-reading it. After launch it forwards
+bounded program stdout and stderr to their matching streams, then preserves an ordinary
 `main` return as the complete 32-bit process status. A recognized language trap removes its private
 receipt suffix, preserves preceding program stderr, appends exactly `trap: <category>\n`, and returns
 `5`. Therefore codes `2`, `3`, `4`, `5`, `6`, and `7` mean compiler failures only before launch; the
 same ordinary post-launch values are program statuses. A forwarding failure after execution is code
-`4` and does not undo earlier bytes or program effects. The shared captured-output ceiling is 64 KiB,
-cross-stream order is unspecified, program arguments and stdin remain absent, and no temporary
-executable is retained.
+`4` and does not undo earlier bytes or program effects. An input transport failure after launch is an
+execution failure with the same no-rollback limit. The shared captured-output ceiling is 64 KiB;
+stdin has no separate byte ceiling and is consumed only on program demand. Cross-stream order is
+unspecified, program arguments remain absent, and no temporary executable is retained.
 
 `fairyc explain <diagnostic-code>` stabilizes codes `0`, `2`, and `4` for successful exact lookup,
 invalid invocation or unknown code, and output failure. Success writes exactly three ANSI-free lines

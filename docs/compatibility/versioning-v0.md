@@ -418,6 +418,14 @@ private trap-suffix removal, preceding-stderr preservation, canonical trap statu
 remain unchanged, but equal post-launch values may be program-owned. Program arguments, stdin, live
 streaming, Linux stable execution, runtime distribution, and target maturity remain outside v2.
 
+ADR 0212 replaces guaranteed stdin EOF with stable run v3 caller-input forwarding. Attaching stdin
+only after successful compilation and image inspection, consuming no input on pre-launch failure,
+performing no compiler-side pre-read or retention, and keeping `cli.Run` as an EOF embedding helper
+are compatibility data. The command spelling, flags, output ceiling, timeout, status/trap rules, and
+pre-launch compiler codes remain unchanged. Program arguments, live output interleaving, input
+forwarding for other native commands, Linux stable execution, runtime distribution, and target
+maturity remain outside v3.
+
 ADR 0178 stabilizes `fairyc explain <diagnostic-code>` independently from the provisional catalog
 lifecycle. Exact lookup, the three-line shape, code/category/catalog identities, and codes 0, 2, and
 4 are CLI compatibility data. Meaning prose may improve under the existing diagnostic policy, but

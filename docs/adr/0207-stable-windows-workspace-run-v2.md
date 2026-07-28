@@ -3,6 +3,7 @@
 - Status: Accepted
 - Date: 2026-07-23
 - Supersedes: ADR 0177
+- Superseded by: ADR 0212
 - Product source: `docs/product/02-spec.md`
 - CLI sources: `docs/cli/command-contract.md`, `docs/cli/output-and-exit-codes.md`
 - Implementation: `internal/cli/workspace_native.go`, `internal/cli/program_output.go`

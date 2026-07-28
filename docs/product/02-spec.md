@@ -462,13 +462,15 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   change the target's independent maturity state.
 - Stable `fairyc run [--release] [--locked]` uses the same workspace, root entry, lock policy,
   development/release profiles, and closed local Windows target pipeline. It executes an inspected
-  compiler-temporary image and retains no executable. Bounded captured stdout and stderr are
+  compiler-temporary image and retains no executable. After successful compilation, linking, and
+  inspection, caller stdin is attached directly without compiler-side pre-reading, retention, or a
+  separate input byte ceiling; pre-launch failures consume no program input. Bounded captured stdout and stderr are
   forwarded to matching streams without a compiler success banner; an ordinary `i32` return becomes
   the complete process status. A recognized language trap returns 5 even when its reserved OS status
   equals a normal result. A compiler-private run-only suffix provides that separation; only the suffix
   is removed, while preceding program stderr and a canonical trap line remain visible. The two OS
   pipes share a 64 KiB ceiling without a cross-stream ordering promise. The command accepts no program
-  arguments, stdin, `--` delimiter, retained artifact, target, toolchain, profile-value, cache, JSON,
+  arguments, `--` delimiter, retained artifact, target, toolchain, profile-value, cache, JSON,
   configuration, or network surface. It never creates, replaces, reads, or executes the stable build
   artifact. Command stability does not change target maturity or provide hostile-code isolation.
 - Its fixture-only output hooks require explicit manifest bindings, capture bytes in memory under a
@@ -529,8 +531,9 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   allocation-free bounded read, treats a successful zero count as EOF, and leaves text decoding,
   line handling, buffering, and retry-to-fill to later APIs. The checked-in safe workspace has exact
   text and byte-view Windows output evidence through stable build/run plus direct-artifact EOF,
-  short-input, and eight-byte-prefix evidence through a separately built compiler. Stable run still
-  closes stdin; Linux native execution remains configured but unobserved on this host.
+  short-input, and eight-byte-prefix evidence through a separately built compiler. Stable run now
+  forwards the short input after successful compilation; Linux native execution remains configured
+  but unobserved on this host.
   ADR 0133 strengthens the existing `arenaExecutions` success condition with deterministic
   first-stage and second-stage allocation failure plus live-allocation cleanup. ADR 0134 strengthens
   `bufferExecutions` with deterministic construction and three growth-allocation failures, exact
@@ -688,6 +691,11 @@ target choice, cache policy, and target support outside the stable contract.
 ADR 0207 supersedes that v1 result-receipt boundary with program-facing run v2. It forwards bounded
 stdout/stderr, preserves ordinary 32-bit program status, strips only the exact private trap suffix,
 keeps canonical trap reporting, and still admits no program arguments or stdin forwarding.
+
+ADR 0212 supersedes run v2 with stable run v3. It attaches caller stdin only after compilation,
+linking, and PE/unwind inspection succeed, performs no compiler-side pre-read or retention, preserves
+the existing timeout/output/status/trap rules, and still admits no program arguments or input
+forwarding for other native commands.
 
 ADR 0178 stabilizes the source-independent `fairyc explain <diagnostic-code>` lookup, its exact
 three-line human shape, and codes 0, 2, and 4. It keeps catalog lifecycle, wording improvement,

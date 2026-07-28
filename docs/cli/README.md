@@ -259,13 +259,15 @@ compilation; a failed build leaves the previous executable intact. Build v1 curr
 Windows/amd64 and local x64 MSVC. That stable spelling does not promote target support.
 
 `fairyc run [--release] [--locked]` uses the same workspace, entry, lock, profiles, and native
-pipeline, but executes an inspected compiler-temporary image and retains no executable. V2 forwards
-captured stdout and stderr to matching streams with no success banner, then preserves every ordinary
+pipeline, but executes an inspected compiler-temporary image and retains no executable. V3 attaches
+the caller's stdin only after successful compilation and inspection, without pre-reading, retaining,
+or imposing a separate input byte ceiling. It forwards captured stdout and stderr to matching
+streams with no success banner, then preserves every ordinary
 `i32` return as the 32-bit process status. A run-only internal suffix keeps equal reserved normal
 statuses distinct from recognized language traps; only that suffix is removed, preceding program
 stderr is preserved, and the canonical trap line uses code 5. The two captured streams share a
-64 KiB ceiling and retain no cross-stream ordering promise. Program arguments, stdin, a `--`
-delimiter, retained build output, and cache policy remain absent.
+64 KiB ceiling and retain no cross-stream ordering promise. Program arguments, a `--` delimiter,
+retained build output, input forwarding for other native commands, and cache policy remain absent.
 
 `fairyc test [--locked]` overlays only the root package's optional exact-lowercase `tests/` tree
 after maintaining or verifying the production lock. Paths keep their `tests/` prefix for module

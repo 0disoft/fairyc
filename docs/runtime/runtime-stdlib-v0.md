@@ -335,13 +335,14 @@ status 2, and treats a zero result as EOF. The Win32 adapter makes one `ReadFile
 or changes terminal mode.
 
 The checked-in `examples/std_io_quickstart` contains no unsafe code or platform symbol. The Windows
-smoke runs it through stable `fairyc run --release --locked` with closed stdin, forwards exact
-`Fairy C says hi\nbytes on stdout\n` to stdout and
+smoke runs it through stable `fairyc run --release --locked` with `stdin!\n`, forwards exact
+`Fairy C says hi\nbytes on stdout\nstdin!\n` to stdout and
 `Fairy C warns too\nbytes on stderr\n` to stderr with status zero, builds and directly executes the
 retained image with EOF, short `stdin!\n`, and a longer nine-byte payload. The direct inputs produce
 respectively no echo, the exact short echo, and only the first eight bytes. A separately built
-compiler repeats both locked paths and the short-input artifact execution. Stable `fairyc run`
-still closes stdin; forwarding caller input through the compiler is not part of this API decision.
+compiler repeats the locked run with short input plus build and artifact execution. Stable run
+attaches input only after successful compilation and image inspection and does not pre-read or retain
+it.
 Linux Clang/GCC low/optimized executions are configured through the native report v32
 `linuxConsoleExecutions` field and exercise stdin, stdout, and stderr, but remain unobserved on this
 Windows host.

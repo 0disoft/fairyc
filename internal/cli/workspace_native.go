@@ -82,7 +82,7 @@ func runStableBuild(arguments []string, sourceRoot string, stdout, stderr io.Wri
 	return ExitSuccess
 }
 
-func runStableRun(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
+func runStableRun(arguments []string, sourceRoot string, stdin io.Reader, stdout, stderr io.Writer) int {
 	options, err := parseStableNativeOptions("run", arguments)
 	if err != nil {
 		return invocationError(stderr, err.Error())
@@ -99,7 +99,7 @@ func runStableRun(arguments []string, sourceRoot string, stdout, stderr io.Write
 	if code != ExitSuccess {
 		return code
 	}
-	outcome, err := cdriver.ExecuteWindowsMSVCTarget(compiled.artifact)
+	outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(compiled.artifact, stdin)
 	if err != nil {
 		return buildFailure(stderr, err)
 	}

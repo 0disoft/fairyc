@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -305,6 +306,18 @@ func ExecuteWindowsMSVCTarget(artifact WindowsHostArtifact) (WindowsHostOutcome,
 	return executeWindowsMSVCArtifact(artifact, "MSVC target")
 }
 
+// ExecuteWindowsMSVCTargetWithInput runs one temporary target PE with the caller-owned input
+// stream. The driver does not pre-read or retain input bytes.
+func ExecuteWindowsMSVCTargetWithInput(artifact WindowsHostArtifact, stdin io.Reader) (WindowsHostOutcome, error) {
+	if stdin == nil {
+		return WindowsHostOutcome{}, fmt.Errorf("MSVC target execution input must not be nil")
+	}
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		return WindowsHostOutcome{}, fmt.Errorf("MSVC target execution requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
+	return executeWindowsMSVCArtifactWithInput(artifact, "MSVC target", stdin)
+}
+
 // ExecuteWindowsMSVCProbe runs one locally compiled target-evidence probe.
 func ExecuteWindowsMSVCProbe(artifact WindowsHostArtifact) (WindowsHostOutcome, error) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
@@ -330,6 +343,10 @@ func ExecuteWindowsMSVCUnwindProbe(artifact WindowsHostArtifact) (WindowsHostOut
 }
 
 func executeWindowsMSVCArtifact(artifact WindowsHostArtifact, label string) (WindowsHostOutcome, error) {
+	return executeWindowsMSVCArtifactWithInput(artifact, label, nil)
+}
+
+func executeWindowsMSVCArtifactWithInput(artifact WindowsHostArtifact, label string, stdin io.Reader) (WindowsHostOutcome, error) {
 	if len(artifact.Bytes) == 0 || len(artifact.Bytes) > maxArtifactBytes {
 		return WindowsHostOutcome{}, fmt.Errorf("%s executable has invalid size %d", label, len(artifact.Bytes))
 	}
@@ -345,7 +362,7 @@ func executeWindowsMSVCArtifact(artifact WindowsHostArtifact, label string) (Win
 	contextValue, cancel := context.WithTimeout(context.Background(), commandTimeout)
 	defer cancel()
 	command := exec.CommandContext(contextValue, executablePath)
-	command.Stdin = nil
+	command.Stdin = stdin
 	command.Dir = temporaryRoot
 	output := newBoundedProcessOutput(maxProcessOutput)
 	command.Stdout = output.stdoutWriter()

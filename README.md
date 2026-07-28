@@ -23,7 +23,8 @@ fairyc test --locked
 
 The first check validates the generated source and publishes `fairy.lock`. On Windows/amd64 with
 local x64 MSVC, `fairyc run --locked` then compiles the `.fy` program through generated C and runs
-the temporary native image. The generated `README.md` contains the exact next steps and a safe
+the temporary native image with the caller's stdin attached after successful compilation. The
+generated `README.md` contains the exact next steps and a safe
 `std::io::write` example for direct stable execution. `fairyc new` never merges, upgrades, or
 overwrites an existing path.
 
@@ -179,12 +180,13 @@ read, and success with zero bytes means EOF. `examples/std_io_quickstart`
 contains no raw pointer, unsafe block, foreign declaration, or platform name; stable run forwards
 its exact text and byte-view output on separated stdout and stderr and preserves success status zero, while
 stable build produces the same inspected Windows PE for direct execution. Direct execution proves
-EOF, a short input echo, and an eight-byte bounded prefix; stable `fairyc run` itself still closes
-stdin. A separately built `fairyc.exe` repeats the locked paths and short-input artifact execution.
+EOF, a short input echo, and an eight-byte bounded prefix. Stable `fairyc run` forwards the short
+input after successful compilation, and a separately built `fairyc.exe` repeats that path plus the
+locked build and artifact execution.
 Linux owns a POSIX adapter and four configured native probes covering all three process streams, but
 this Windows host has not observed those executions. Byte input and output perform no UTF-8
-validation. Formatting, implicit newlines, text or line input, terminal encoding, stable CLI stdin
-forwarding, and a final symbolic error taxonomy remain outside the API.
+validation. Formatting, implicit newlines, text or line input, terminal encoding, live output
+interleaving, and a final symbolic error taxonomy remain outside the API.
 A provisional SystemHeap implementation now lives in the target standard-library
 boundary rather than the thin runtime. It normalizes empty allocation, admits current fundamental
 alignments, preserves bytes across copy-and-release growth or shrink, and leaves the old block
@@ -398,8 +400,9 @@ persistent cache, or stable editor protocol. Program commands use one entry plus
 `fairyc run [--release] [--locked]`, the target-independent semantic
 `fairyc test [--locked]`, plus source-independent
 `fairyc explain <diagnostic-code>` and `fairyc targets`, and target-explicit
-`fairyc emit c --target <target-id> [--locked]`. Stable run forwards bounded Windows program output
-and status; native test execution, program arguments and stdin,
+`fairyc emit c --target <target-id> [--locked]`. Stable run forwards caller stdin, bounded Windows
+program output, and status without pre-reading input; native test execution, program arguments,
+input forwarding for other native commands,
 a complete runtime, safe standard library, package manager, supported
 target, release-stable CLI as a whole, and a stable language revision do not exist yet.
 
