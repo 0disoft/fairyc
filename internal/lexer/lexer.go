@@ -18,6 +18,13 @@ var currentKeywords = map[string]struct{}{
 	"switch": {}, "true": {}, "unsafe": {}, "var": {}, "while": {},
 }
 
+// currentRevisionOnlyKeywords keeps newly reserved spellings out of the retired
+// grammar used by fairyc-migrate-prev. A previous-revision source may still use
+// these spellings as identifiers even after the product grammar reserves them.
+var currentRevisionOnlyKeywords = map[string]struct{}{
+	"for": {},
+}
+
 var previousRevisionKeywords = map[string]struct{}{
 	"drop": {}, "impl": {}, "match": {}, "self": {},
 }
@@ -294,6 +301,8 @@ func (s *scanner) scanIdentifier() {
 	text := string(s.source[start:s.position])
 	kind := Identifier
 	if _, found := currentKeywords[text]; found {
+		kind = Keyword
+	} else if _, found := currentRevisionOnlyKeywords[text]; found && !s.previousRevision {
 		kind = Keyword
 	} else if _, found := previousRevisionKeywords[text]; found && s.previousRevision {
 		kind = Keyword

@@ -22,6 +22,7 @@
     "docs/adr/0123-mutable-parameter-and-opaque-borrow-cast.md",
     "docs/adr/0125-mutable-fixed-u8-array-byte-view.md",
     "docs/adr/0126-checked-mutable-indexed-assignment.md",
+    "docs/adr/0213-classic-scalar-for-loop.md",
     "docs/diagnostics/catalog-v0.md"
   ],
   "cases": [
@@ -78,6 +79,15 @@
             "canonicalType": "i32"
           }
         ]
+      }
+    },
+    {
+      "id": "pass.flow.classic-for",
+      "sourceRoot": "cases/pass/classic-for/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow"
       }
     },
     {

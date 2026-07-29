@@ -63,7 +63,7 @@ between its two characters.
 The reserved keywords are:
 
 ```text
-as assert break case cleanup const continue discard else enum extern false fn
+as assert break case cleanup const continue discard else enum extern false fn for
 if import in let module mut null ptr pub ref region resource return
 struct switch true unsafe var while
 ```

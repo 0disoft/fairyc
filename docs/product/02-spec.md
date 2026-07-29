@@ -74,9 +74,9 @@ propagation. The grammar and examples named above are the only product-compiler 
 immediately preceding revision is accepted only by the separate migration tool; dual parsing and
 compile-time source rewrites remain forbidden.
 
-Classic or range `for`, lexical `defer`, checked narrowing conversions, provider-qualified package
-imports, generic iterators, expression-bodied function shorthand, and formatter behavior are
-follow-up decisions rather than implicit parts of that spelling migration.
+Classic scalar `for` is now the separate bounded decision in ADR 0213. Range `for`, lexical
+`defer`, checked narrowing conversions, provider-qualified package imports, generic iterators,
+expression-bodied function shorthand, and formatter behavior remain follow-up decisions.
 
 ## Value categories
 
@@ -130,8 +130,9 @@ Region-parameter origins, permitted returns, package-resolved local-region escap
 
 Verified MIR and interpreter fixtures additionally execute lexical Region entry, inert placement,
 inner-resource cleanup, and reset on fallthrough, direct `return`, Result `?` propagation, and
-nested Region exits. `break` and `continue` target the nearest `while` and execute scope-indexed
-resource cleanup and Region reset before their MIR goto; use outside a loop is `E1012`.
+nested Region exits. `break` and `continue` target the nearest `while` or classic `for` and execute
+scope-indexed resource cleanup and Region reset before their MIR goto; use outside a loop is
+`E1012`. In a classic `for`, `continue` transfers through the post clause while `break` skips it.
 
 ## Effects and external capabilities
 
@@ -164,8 +165,8 @@ not external effects. Full rules are in `docs/language/0008-effects-and-capabili
   switch contains exactly one `case .some(binding): { ... }` and one bare
   `case .none: { ... }`; both cases produce one compatible type.
 - Exceptions and stack unwinding are not part of the language.
-- `break` and `continue` target only the nearest enclosing `while`; labelled or value-producing
-  loop control is not part of Stage 0.
+- `break` and `continue` target only the nearest enclosing loop; labelled or value-producing loop
+  control is not part of Stage 0.
 
 Changing a value from `T` to `Option<T>` must not silently turn a normal function call into conditional execution. Stage 0 return types contain at most one safe-borrow leaf. Full control-flow behavior is defined in `docs/language/0004-results-traps-and-control-flow.md`.
 

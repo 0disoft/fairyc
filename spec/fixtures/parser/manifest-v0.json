@@ -141,6 +141,15 @@
       }
     },
     {
+      "id": "pass.classic-for",
+      "sourceRoot": "cases/pass/classic-for/src",
+      "source": "main.fy",
+      "expect": {
+        "status": "pass",
+        "module": "main"
+      }
+    },
+    {
       "id": "pass.foreign-call",
       "sourceRoot": "cases/pass/foreign-call/src",
       "source": "main.fy",

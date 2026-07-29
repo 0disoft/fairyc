@@ -142,7 +142,7 @@ exact scalar result or canonical division, integer-overflow, or invalid-shift tr
 negation, matching-type addition, subtraction, multiplication, division, remainder, bitwise
 operations, and checked left or right shift are executable. Invalid shift amounts trap before a
 left-shift overflow check; an unrepresentable left-shift result traps as `integer-overflow`;
-loop control without an enclosing `while` is rejected as `E1012`.
+loop control without an enclosing loop is rejected as `E1012`.
 It does not discover files, execute user drop bodies, implement effects, or provide host I/O.
 It also does not execute foreign calls: those fail with the interpreter capability boundary even
 when the same verified MIR is admissible to `emit-c`.

@@ -281,7 +281,7 @@
       "properties": {
         "kind": { "const": "eliminated-form" },
         "function": { "$ref": "#/$defs/functionName" },
-        "form": { "enum": ["implicit-drop", "nested-side-effect", "question", "source-short-circuit"] },
+        "form": { "enum": ["classic-for", "implicit-drop", "nested-side-effect", "question", "source-short-circuit"] },
         "remainingCount": { "const": 0 }
       }
     }

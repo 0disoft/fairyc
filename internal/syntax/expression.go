@@ -136,6 +136,14 @@ func (p *parser) parseExpression(minBindingPower int, allowRecord bool) NodeID {
 			continue
 		}
 
+		// A block-shaped expression may also be a semicolon-free statement. Once
+		// all legal postfix and infix continuations have been ruled out, leave the
+		// next token to the enclosing block parser instead of consuming the first
+		// token of the following statement as expression recovery.
+		if node, ok := p.tree.Node(left); ok && isBlockStatement(node.Kind) {
+			return left
+		}
+
 		if isExpressionTerminator(p.currentText()) {
 			return left
 		}
@@ -433,7 +441,7 @@ func isPrefixOperator(value string) bool {
 
 func isExpressionTerminator(value string) bool {
 	switch value {
-	case "", ";", ",", ")", "]", "}", "=", "=>", ":", "case", "..", "let", "var", "return", "discard", "while", "break", "continue", "region":
+	case "", ";", ",", ")", "]", "}", "=", "=>", ":", "case", "..", "let", "var", "return", "discard", "while", "for", "break", "continue", "region":
 		return true
 	default:
 		return false

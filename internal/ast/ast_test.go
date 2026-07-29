@@ -433,3 +433,25 @@ func TestLowerPreservesCShapedDeclarationOrder(t *testing.T) {
 		t.Fatalf("body = %+v", function.Body)
 	}
 }
+
+func TestLowerPreservesClassicForHeaderRoles(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nfn i32 main() { for (var i32 index = 0; index < 6; index = index + 1) { continue; } return 42; }\n")
+	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	module, err := Lower(tree)
+	if err != nil {
+		t.Fatalf("Lower() error = %v", err)
+	}
+	if len(module.Functions) != 1 || module.Functions[0].Body == nil || len(module.Functions[0].Body.Statements) != 2 {
+		t.Fatalf("module functions = %+v", module.Functions)
+	}
+	loop := module.Functions[0].Body.Statements[0].For
+	if loop == nil || loop.Initializer == nil || loop.Initializer.Binding == nil || loop.Initializer.Binding.Name != "index" ||
+		loop.Condition == nil || loop.Post == nil || loop.Post.Kind != syntax.KindAssignment || loop.Body == nil ||
+		len(loop.Body.Statements) != 1 || loop.Body.Statements[0].Kind != syntax.KindContinue {
+		t.Fatalf("lowered for = %+v", loop)
+	}
+}

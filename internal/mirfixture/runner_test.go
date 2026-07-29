@@ -13,8 +13,8 @@ func TestMIRManifestV0(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Run() error = %v", err)
 	}
-	if report.CasesRun != 11 {
-		t.Fatalf("Run() cases = %d, want 11", report.CasesRun)
+	if report.CasesRun != 12 {
+		t.Fatalf("Run() cases = %d, want 12", report.CasesRun)
 	}
 	for _, failure := range report.Failures {
 		t.Errorf("%s: %s", failure.CaseID, failure.Detail)

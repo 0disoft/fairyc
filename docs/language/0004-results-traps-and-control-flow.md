@@ -70,11 +70,13 @@ cleanup, and deterministic drop traces are covered by the MIR interpreter fixtur
 
 `return`, `break`, `continue`, and fallthrough clean only the lexical scopes they exit. Cleanup is reverse declaration and reverse field-initialization order. Cleanup obligations are elaborated before backend selection.
 
-`break` and `continue` target the nearest enclosing `while`; either form outside a loop is `E1012`.
-Both terminate the reachable portion of their block. Resource Flow requires every normal body,
-break, and continue edge to preserve the loop-header state of resources declared outside the loop.
-Result Flow requires pending locals in exited scopes to be handled, and continue edges participate
-in repeated-iteration overwrite checks. Labelled and value-producing loop exits are not Stage 0.
+`break` and `continue` target the nearest enclosing `while` or classic `for`; either form outside a
+loop is `E1012`. Both terminate the reachable portion of their block. In classic `for`, `continue`
+performs exited-scope cleanup and then executes the post clause before the next condition; `break`
+performs its cleanup and skips the post clause. Resource Flow requires every normal body, break,
+and continue edge to preserve the loop-header state of resources declared outside the loop. Result
+Flow requires pending locals in exited scopes to be handled, and continue edges participate in
+repeated-iteration overwrite checks. Labelled and value-producing loop exits are not Stage 0.
 
 ## Traps
 
@@ -100,4 +102,4 @@ MIR provenance. Messages and compile-time assertions are not part of this statem
 
 ## Required diagnostics
 
-The compiler must distinguish an unused `Result`, `?` on a non-`Result`, `?` in an incompatible return context, loop control without an enclosing `while` (`E1012`), and forbidden foreign nonlocal control flow.
+The compiler must distinguish an unused `Result`, `?` on a non-`Result`, `?` in an incompatible return context, loop control without an enclosing loop (`E1012`), and forbidden foreign nonlocal control flow.

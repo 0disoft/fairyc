@@ -444,36 +444,67 @@ func (a *analyzer) resolveBlock(module *moduleScope, block *ast.Block, parent *l
 	for index := range block.Statements {
 		statement := &block.Statements[index]
 		if statement.Binding != nil {
-			a.resolveExpression(module, scope, statement.Binding.Expression)
-			binding := statement.Binding
-			if previous, found := scope.names[binding.Name]; found {
-				a.addDiagnostic("E0102", span(module.file.Path, binding.NameSpan), RelatedSpan{
-					Role: "previous-declaration",
-					Span: span(previous.source, previous.declaration),
-				})
-				continue
-			}
-			value := &symbol{
-				id:          a.allocateSymbol(),
-				packageID:   module.key.packageID,
-				kind:        "local",
-				name:        binding.Name,
-				module:      module.file.Module.Path,
-				source:      module.file.Path,
-				declaration: binding.NameSpan,
-				mutable:     binding.Mutable,
-			}
-			if binding.Type != nil {
-				value.typeSpan = binding.Type.Span
-			}
-			scope.names[binding.Name] = value
-			a.bindingSymbols[binding] = value
+			a.resolveBinding(module, scope, statement.Binding)
+			continue
+		}
+		if statement.For != nil {
+			a.resolveFor(module, scope, statement.For)
 			continue
 		}
 		a.resolveExpression(module, scope, statement.Target)
 		a.resolveExpression(module, scope, statement.Expression)
 	}
 	a.resolveExpression(module, scope, block.Tail)
+}
+
+func (a *analyzer) resolveBinding(module *moduleScope, scope *lexicalScope, binding *ast.Binding) {
+	if binding == nil {
+		return
+	}
+	a.resolveExpression(module, scope, binding.Expression)
+	if previous, found := scope.names[binding.Name]; found {
+		a.addDiagnostic("E0102", span(module.file.Path, binding.NameSpan), RelatedSpan{
+			Role: "previous-declaration",
+			Span: span(previous.source, previous.declaration),
+		})
+		return
+	}
+	value := &symbol{
+		id:          a.allocateSymbol(),
+		packageID:   module.key.packageID,
+		kind:        "local",
+		name:        binding.Name,
+		module:      module.file.Module.Path,
+		source:      module.file.Path,
+		declaration: binding.NameSpan,
+		mutable:     binding.Mutable,
+	}
+	if binding.Type != nil {
+		value.typeSpan = binding.Type.Span
+	}
+	scope.names[binding.Name] = value
+	a.bindingSymbols[binding] = value
+}
+
+func (a *analyzer) resolveFor(module *moduleScope, parent *lexicalScope, loop *ast.ForLoop) {
+	if loop == nil {
+		return
+	}
+	scope := &lexicalScope{parent: parent, names: make(map[string]*symbol)}
+	if loop.Initializer != nil {
+		if loop.Initializer.Binding != nil {
+			a.resolveBinding(module, scope, loop.Initializer.Binding)
+		} else {
+			a.resolveExpression(module, scope, loop.Initializer.Target)
+			a.resolveExpression(module, scope, loop.Initializer.Expression)
+		}
+	}
+	a.resolveExpression(module, scope, loop.Condition)
+	if loop.Post != nil {
+		a.resolveExpression(module, scope, loop.Post.Target)
+		a.resolveExpression(module, scope, loop.Post.Expression)
+	}
+	a.resolveBlock(module, loop.Body, scope)
 }
 
 func (a *analyzer) resolveExpression(module *moduleScope, scope *lexicalScope, expression *ast.Expression) {

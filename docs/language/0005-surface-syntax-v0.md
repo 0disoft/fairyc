@@ -4,6 +4,7 @@
 - Product source: `docs/product/02-spec.md`
 - Original boundary decision: `docs/adr/0005-stage-0-surface-and-module-boundary.md`
 - Current surface decision: `docs/adr/0136-c-shaped-source-surface.md`
+- Classic loop decision: `docs/adr/0213-classic-scalar-for-loop.md`
 - Grammar decision: `docs/adr/0009-stage-0-grammar-and-parser-contract.md`
 - Normative grammar: `spec/grammar/stage0.ebnf`
 
@@ -28,6 +29,11 @@
 - A `let` resource may still be consumed. Binding immutability is not ownership immobility.
 - A by-value position consumes a resource. Stage 0 has no `move` expression or `move` argument keyword.
 - Globals are compile-time `const` only. Mutable globals are excluded.
+- Classic counter loops use `for (initializer; condition; post) { ... }`. Each clause is optional;
+  an omitted condition is `true`. The initializer owns a lexical scope covering the condition,
+  body, and post clause. The admitted v1 header subset is one scalar declaration or assignment,
+  one pure boolean condition, and one direct scalar assignment. Calls, borrows, indexing, blocks,
+  propagation, resource movement, `++`, `--`, and comma expressions are not header forms.
 - An ordinary or raw foreign function may declare one closed external-capability set with
   `@effects(clock, console, environment, filesystem, network, process, random)`. Arguments use only
   the effects actually required; omission is the empty set. Exact semantics are owned by
@@ -240,7 +246,9 @@ user-enum patterns use shallow named inert fields and exact exhaustiveness. Whol
 nested destructuring, guards, or-patterns, slice patterns, and resource-field extraction are
 excluded; `_` may discard only a selected payload.
 
-`if`, `while`, and `switch` require parenthesized conditions or scrutinees. Function bodies do not
+`if`, `while`, classic `for`, and `switch` require parenthesized headers, conditions, or scrutinees.
+In classic `for`, `continue` executes the post clause before the next condition and `break` skips
+the post clause. Function bodies do not
 return their final expression: a non-`void` function returns only through `return expression;`,
 while a `void` function may use `return;` or fall through. Value-producing `if` branches and
 `switch` case blocks may retain one unsemicolonized tail expression.

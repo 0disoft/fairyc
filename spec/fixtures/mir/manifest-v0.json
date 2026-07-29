@@ -13,6 +13,7 @@
     "docs/adr/0021-stage-0-region-early-exit-cleanup.md",
     "docs/adr/0023-explicit-checked-arithmetic-mir.md",
     "docs/adr/0024-stage-0-loop-control-and-cleanup.md",
+    "docs/adr/0213-classic-scalar-for-loop.md",
     "docs/language/0001-values-and-resources.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/mir-v0.md",
@@ -616,6 +617,23 @@
               { "kind": "region-reset", "binding": { "source": "std/alloc.fy", "startByte": 869, "endByte": 1072 } },
               { "kind": "drop", "binding": { "source": "std/alloc.fy", "startByte": 832, "endByte": 836 } }
             ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.mir.classic-for",
+      "sourceRoot": "cases/pass/classic-for/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "mir-verify",
+        "observations": [
+          {
+            "kind": "eliminated-form",
+            "function": "main::main",
+            "form": "classic-for",
+            "remainingCount": 0
           }
         ]
       }

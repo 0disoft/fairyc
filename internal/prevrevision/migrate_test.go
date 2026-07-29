@@ -102,6 +102,18 @@ func TestMigrateBorrowExpressions(t *testing.T) {
 	}
 }
 
+func TestMigrateRejectsNewlyReservedForIdentifier(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nfn for() -> i32 { 0 }\n")
+	result, err := Migrate("main.fy", input)
+	if err == nil {
+		t.Fatalf("Migrate() result = %+v, want fail-closed reserved-keyword error", result)
+	}
+	if result.Source != nil || result.Changed {
+		t.Fatalf("Migrate() returned writable result on error: %+v", result)
+	}
+}
+
 func TestMigrateWrapsEntirePartiallyParenthesizedControlHeader(t *testing.T) {
 	t.Parallel()
 	input := []byte("module main;\nfn main() -> i32 { if (false) || true { 42 } else { 0 } }\n")

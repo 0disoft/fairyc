@@ -40,18 +40,20 @@ func Migrate(path string, input []byte) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	if len(edits) == 0 {
-		return declarations, nil
-	}
-	output, err := applyEdits(declarations.Source, edits)
-	if err != nil {
-		return Result{}, err
+	output := declarations.Source
+	changed := declarations.Changed
+	if len(edits) != 0 {
+		output, err = applyEdits(declarations.Source, edits)
+		if err != nil {
+			return Result{}, err
+		}
+		changed = true
 	}
 	verified := parseCurrentSource(path, output)
 	if len(verified.Diagnostics) != 0 {
 		return Result{}, fmt.Errorf("migrated surface parse produced %d diagnostics: %+v\n%s", len(verified.Diagnostics), verified.Diagnostics, output)
 	}
-	return Result{Source: output, Changed: true}, nil
+	return Result{Source: output, Changed: changed}, nil
 }
 
 // MigrateDeclarations converts declaration order, structural type spelling, resource cleanup,

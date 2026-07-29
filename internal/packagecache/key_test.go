@@ -16,7 +16,7 @@ func TestKeyRoundTripAndInvalidation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Compute() error = %v", err)
 	}
-	if got, want := key.String(), "fycache2-sha256-0f654f4799af274607eb56d9f8fdc8d0707dd91b81054172a9fd4668c8279908"; got != want {
+	if got, want := key.String(), "fycache2-sha256-5440e48f4ccea21832cf266e27deabe613101bb48f2e7e4fda6d63451dbacac0"; got != want {
 		t.Fatalf("key = %q, want %q", got, want)
 	}
 	parsed, err := ParseKey(key.String())
@@ -102,7 +102,7 @@ func testInputs(t *testing.T) Inputs {
 	t.Helper()
 	return Inputs{
 		CompilerBuild:        "compiler:a",
-		LanguageRevision:     "fairyc-language/0",
+		LanguageRevision:     "fairyc-language/1",
 		MIRVersion:           "fairyc-mir/0",
 		TargetSchema:         "fairyc.target-spec/v0:x86_64-windows-msvc",
 		ABIProfile:           "microsoft-x64/v0",

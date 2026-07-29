@@ -152,7 +152,7 @@ func semanticDiagnosticSummary(code string) string {
 	case "E1010":
 		return "call argument count does not match the declaration"
 	case "E1012":
-		return "break and continue require an enclosing while loop"
+		return "break and continue require an enclosing loop"
 	case "E1101":
 		return "resource is used after ownership was moved"
 	case "E1103":

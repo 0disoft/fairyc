@@ -4,7 +4,7 @@ schema = "fairyc.manifest/v1"
 uid = "fixture.workspace.app"
 name = "app"
 version = "1.0.0"
-language = "fairyc-language/0"
+language = "fairyc-language/1"
 source = "src"
 
 [workspace]

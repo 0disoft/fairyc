@@ -231,11 +231,12 @@ type activeRegion struct {
 }
 
 type activeLoop struct {
-	header      BlockID
-	exit        BlockID
-	body        hir.Span
-	regionDepth int
-	headerLive  map[hir.SymbolID]bool
+	header         BlockID
+	continueTarget BlockID
+	exit           BlockID
+	body           hir.Span
+	regionDepth    int
+	headerLive     map[hir.SymbolID]bool
 }
 
 type functionLowerer struct {
@@ -411,6 +412,10 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 			}
 		case "while":
 			if _, err := l.lowerWhile(statement.Expression); err != nil {
+				return false, err
+			}
+		case "for":
+			if err := l.lowerFor(statement.For); err != nil {
 				return false, err
 			}
 		case "break", "continue":
@@ -1786,7 +1791,7 @@ func (l *functionLowerer) lowerWhile(expression *hir.Expression) (Operand, error
 	l.current = bodyBlock
 	l.live = cloneLive(headerLive)
 	l.loopStack = append(l.loopStack, activeLoop{
-		header: headerBlock, exit: exitBlock, body: expression.Children[1].Span,
+		header: headerBlock, continueTarget: headerBlock, exit: exitBlock, body: expression.Children[1].Span,
 		regionDepth: len(l.regionStack), headerLive: cloneLive(headerLive),
 	})
 	if _, err := l.lowerExpression(&expression.Children[1]); err != nil {
@@ -1823,11 +1828,99 @@ func (l *functionLowerer) lowerLoopControl(kind string, exit hir.Span) error {
 	if cleanupContainsDrop(actions) {
 		l.result.EliminatedForms = append(l.result.EliminatedForms, EliminatedFormFact{Form: "implicit-drop", RemainingCount: 0})
 	}
-	target := loop.header
+	target := loop.continueTarget
 	if kind == "break" {
 		target = loop.exit
 	}
 	l.terminate(Terminator{Kind: TerminatorGoto, Span: exit, Successors: []BlockID{target}, UnwindSuccessor: NoBlock})
+	return nil
+}
+
+func (l *functionLowerer) lowerFor(loop *hir.ForLoop) error {
+	if loop == nil {
+		return fmt.Errorf("for statement has no typed loop")
+	}
+	l.result.EliminatedForms = append(l.result.EliminatedForms, EliminatedFormFact{Form: "classic-for", RemainingCount: 0})
+	if loop.Initializer != nil {
+		terminated, err := l.lowerStatements([]hir.Statement{*loop.Initializer})
+		if err != nil {
+			return err
+		}
+		if terminated {
+			return fmt.Errorf("for initializer terminates control flow")
+		}
+	}
+
+	headerLive := cloneLive(l.live)
+	headerBlock := l.newBlock()
+	bodyBlock := l.newBlock()
+	postBlock := l.newBlock()
+	exitBlock := l.newBlock()
+	l.terminate(Terminator{Kind: TerminatorGoto, Span: loop.Span, Successors: []BlockID{headerBlock}, UnwindSuccessor: NoBlock})
+
+	l.current = headerBlock
+	l.live = cloneLive(headerLive)
+	conditionExpression := loop.Condition
+	if conditionExpression == nil {
+		conditionExpression = &hir.Expression{Kind: "literal", Type: hir.TypeBool, Span: loop.Span, Value: "true", Cooked: "true", Symbol: hir.NoSymbol}
+	}
+	condition, err := l.lowerExpression(conditionExpression)
+	if err != nil {
+		return err
+	}
+	if !sameLiveState(headerLive, l.live) {
+		return fmt.Errorf("for condition changes resource state after Flow validation")
+	}
+	l.terminate(Terminator{
+		Kind: TerminatorSwitch, Span: conditionExpression.Span,
+		Successors: []BlockID{bodyBlock, exitBlock}, UnwindSuccessor: NoBlock,
+		SwitchKind: "bool", SwitchType: hir.TypeBool, SwitchOperands: []Operand{condition},
+	})
+
+	l.current = bodyBlock
+	l.live = cloneLive(headerLive)
+	l.loopStack = append(l.loopStack, activeLoop{
+		header: headerBlock, continueTarget: postBlock, exit: exitBlock, body: loop.Body.Span,
+		regionDepth: len(l.regionStack), headerLive: cloneLive(headerLive),
+	})
+	_, bodyTerminated, err := l.lowerNestedBlock(loop.Body)
+	l.loopStack = l.loopStack[:len(l.loopStack)-1]
+	if err != nil {
+		return err
+	}
+	if !bodyTerminated && !l.blockTerminated(l.current) {
+		cleanup := l.emitCleanupDeclaredWithin(l.live, loop.Body.Span)
+		if cleanupContainsDrop(cleanup) {
+			l.result.EliminatedForms = append(l.result.EliminatedForms, EliminatedFormFact{Form: "implicit-drop", RemainingCount: 0})
+		}
+		if !matchesLoopHeader(headerLive, l.live) {
+			return fmt.Errorf("for body back-edge changes resource state after Flow validation")
+		}
+		l.terminate(Terminator{Kind: TerminatorGoto, Span: loop.Body.Span, Successors: []BlockID{postBlock}, UnwindSuccessor: NoBlock})
+	}
+
+	l.current = postBlock
+	l.live = cloneLive(headerLive)
+	if loop.Post != nil {
+		terminated, lowerErr := l.lowerStatements([]hir.Statement{*loop.Post})
+		if lowerErr != nil {
+			return lowerErr
+		}
+		if terminated {
+			return fmt.Errorf("for post clause terminates control flow")
+		}
+	}
+	if !sameLiveState(headerLive, l.live) {
+		return fmt.Errorf("for post clause changes resource state after Flow validation")
+	}
+	l.terminate(Terminator{Kind: TerminatorGoto, Span: loop.Span, Successors: []BlockID{headerBlock}, UnwindSuccessor: NoBlock})
+
+	l.current = exitBlock
+	l.live = cloneLive(headerLive)
+	cleanup := l.emitCleanupDeclaredWithin(l.live, loop.Span)
+	if cleanupContainsDrop(cleanup) {
+		l.result.EliminatedForms = append(l.result.EliminatedForms, EliminatedFormFact{Form: "implicit-drop", RemainingCount: 0})
+	}
 	return nil
 }
 

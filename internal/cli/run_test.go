@@ -624,6 +624,39 @@ func TestExperimentalRunInterpretsBoundedLoop(t *testing.T) {
 	}
 }
 
+func TestExperimentalRunInterpretsClassicForControl(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name   string
+		source string
+	}{
+		{
+			name:   "continue cleans body and executes post",
+			source: "module main;\nresource Token { i32 value; cleanup {} }\nfn i32 main() { var i32 total = 0; for (var i32 index = 0; index < 6; index = index + 1) { let Token token = Token { .value = index }; if (index < 2) { continue; }; total = total + 7; } return total + 14; }\n",
+		},
+		{
+			name:   "break skips post",
+			source: "module main;\nfn i32 main() { var i32 seen = 0; for (var i32 index = 0; index < 9; index = index + 10) { seen = index; break; } return seen + 42; }\n",
+		},
+		{
+			name:   "omitted condition",
+			source: "module main;\nfn i32 main() { var i32 value = 0; for (;;) { value = 42; break; } return value; }\n",
+		},
+	}
+	for _, test := range cases {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			root := t.TempDir()
+			writeTestSource(t, root, "main.fy", test.source)
+			code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
+			if code != ExitSuccess || stdout != "result: 42\n" || stderr != "" {
+				t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+			}
+		})
+	}
+}
+
 func TestExperimentalRunInterpretsLoopControl(t *testing.T) {
 	t.Parallel()
 	cases := []struct {
@@ -661,7 +694,7 @@ func TestExperimentalRunRejectsLoopControlOutsideLoop(t *testing.T) {
 	root := t.TempDir()
 	writeTestSource(t, root, "main.fy", "module main;\nfn i32 main() { break; return 0; }\n")
 	code, stdout, stderr := runForTest([]string{"experimental", "run", "main.fy"}, root)
-	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "E1012: break and continue require an enclosing while loop") {
+	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "E1012: break and continue require an enclosing loop") {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
 	}
 }

@@ -29,6 +29,8 @@ func (p *parser) parseBlockWithTail(allowTail bool) NodeID {
 			children = append(children, p.parseDiscard())
 		case "while":
 			children = append(children, p.parseWhile())
+		case "for":
+			children = append(children, p.parseFor())
 		case "break":
 			statementStart := p.currentFullIndex()
 			p.advance()
@@ -99,6 +101,10 @@ func (p *parser) parseAssert() NodeID {
 }
 
 func (p *parser) parseBinding() NodeID {
+	return p.parseBindingClause(true)
+}
+
+func (p *parser) parseBindingClause(terminated bool) NodeID {
 	start := p.currentFullIndex()
 	bindingKind := p.currentText()
 	p.advance()
@@ -117,7 +123,9 @@ func (p *parser) parseBinding() NodeID {
 	}
 	p.expect("=")
 	children = append(children, p.parseExpression(0, true))
-	p.expectStatementTerminator()
+	if terminated {
+		p.expectStatementTerminator()
+	}
 	return p.addNamedNode(KindBinding, start, children, name, bindingKind, nameSpan)
 }
 
@@ -146,6 +154,51 @@ func (p *parser) parseWhile() NodeID {
 	condition := p.parseControlExpression()
 	body := p.parseBlockForStatement()
 	return p.addNode(KindWhile, start, []NodeID{condition, body}, "", "")
+}
+
+func (p *parser) parseFor() NodeID {
+	start := p.currentFullIndex()
+	p.advance()
+	p.expect("(")
+
+	initStart := p.currentFullIndex()
+	var initChildren []NodeID
+	if !p.at(";") {
+		initChildren = append(initChildren, p.parseForClause(true))
+	}
+	p.expect(";")
+	init := p.addNode(KindForInit, initStart, initChildren, "", "")
+
+	conditionStart := p.currentFullIndex()
+	var conditionChildren []NodeID
+	if !p.at(";") {
+		conditionChildren = append(conditionChildren, p.parseExpression(0, true))
+	}
+	p.expect(";")
+	condition := p.addNode(KindForCond, conditionStart, conditionChildren, "", "")
+
+	postStart := p.currentFullIndex()
+	var postChildren []NodeID
+	if !p.at(")") {
+		postChildren = append(postChildren, p.parseForClause(false))
+	}
+	p.expect(")")
+	post := p.addNode(KindForPost, postStart, postChildren, "", "")
+	body := p.parseBlockForStatement()
+	return p.addNode(KindFor, start, []NodeID{init, condition, post, body}, "", "")
+}
+
+func (p *parser) parseForClause(allowBinding bool) NodeID {
+	if allowBinding && (p.at("let") || p.at("var")) {
+		return p.parseBindingClause(false)
+	}
+	start := p.currentFullIndex()
+	left := p.parseExpression(0, true)
+	if p.match("=") {
+		right := p.parseExpression(0, true)
+		return p.addNode(KindAssignment, start, []NodeID{left, right}, "", "")
+	}
+	return p.addNode(KindExprStmt, start, []NodeID{left}, "", "")
 }
 
 func (p *parser) parseControlExpression() NodeID {

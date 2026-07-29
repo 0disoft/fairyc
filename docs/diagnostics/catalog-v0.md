@@ -51,7 +51,7 @@ Diagnostic codes are stable identifiers for a semantic category. Exact wording a
 | `E1008` | Assignment target is not a mutable place. |
 | `E1009` | Return expression is incompatible with the declared return type. |
 | `E1010` | Call argument count does not match the resolved declaration. |
-| `E1012` | `break` or `continue` has no enclosing `while` loop. |
+| `E1012` | `break` or `continue` has no enclosing loop. |
 | `E1013` | Integer literal is outside the range of its selected `i32`, `u8`, `u32`, or `usize` type. |
 | `E1101` | Resource used after move or consumption. |
 | `E1102` | Operation would create or execute a second cleanup obligation. |

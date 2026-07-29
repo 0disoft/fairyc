@@ -288,6 +288,9 @@ func (f *borrowFlowAnalyzer) evaluateStatement(statement *ast.Statement, environ
 		}
 		return reachable
 	}
+	if statement.For != nil {
+		return f.evaluateFor(statement.For, environment)
+	}
 
 	switch statement.Kind {
 	case syntax.KindReturn:
@@ -336,6 +339,26 @@ func (f *borrowFlowAnalyzer) evaluateStatement(statement *ast.Statement, environ
 		_, reachable := f.evaluateExpression(statement.Expression, environment)
 		return reachable
 	}
+}
+
+func (f *borrowFlowAnalyzer) evaluateFor(loop *ast.ForLoop, environment borrowEnvironment) bool {
+	if loop == nil {
+		return true
+	}
+	outer := make(map[*symbol]struct{}, len(environment))
+	for value := range environment {
+		outer[value] = struct{}{}
+	}
+	if loop.Initializer != nil && !f.evaluateStatement(loop.Initializer, environment) {
+		return false
+	}
+	_, reachable := f.evaluateWhile(forAsWhile(loop), environment)
+	for value := range environment {
+		if _, retained := outer[value]; !retained {
+			delete(environment, value)
+		}
+	}
+	return reachable
 }
 
 func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, environment borrowEnvironment) (borrowValueState, bool) {
@@ -1148,8 +1171,28 @@ func (f *borrowFlowAnalyzer) liveBlock(block *ast.Block, liveOut borrowLiveMap, 
 			if indexedAssignmentTarget(statement.Target) {
 				live = f.liveExpression(statement.Target, live, context)
 			}
+		case statement.Kind == syntax.KindFor:
+			live = f.liveFor(statement.For, live, context)
 		default:
 			live = f.liveExpression(statement.Expression, live, context)
+		}
+	}
+	return live
+}
+
+func (f *borrowFlowAnalyzer) liveFor(loop *ast.ForLoop, liveOut borrowLiveMap, context borrowLiveContext) borrowLiveMap {
+	if loop == nil {
+		return cloneBorrowLive(liveOut)
+	}
+	live := f.liveWhile(forAsWhile(loop), liveOut, context)
+	if initializer := loop.Initializer; initializer != nil {
+		if initializer.Binding != nil {
+			if binding := f.analyzer.bindingSymbols[initializer.Binding]; isSafeBorrowSymbol(binding) {
+				delete(live, binding)
+			}
+			live = f.liveExpression(initializer.Binding.Expression, live, context)
+		} else {
+			live = f.liveExpression(initializer.Expression, live, context)
 		}
 	}
 	return live

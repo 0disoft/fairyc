@@ -497,6 +497,17 @@ type Statement struct {
 	Binding    SymbolID
 	Target     *Expression
 	Expression *Expression
+	For        *ForLoop
+}
+
+// ForLoop is the typed classic counter-loop boundary. The initializer owns a
+// lexical scope that includes Condition, Post, and Body but ends at Span.
+type ForLoop struct {
+	Span        Span
+	Initializer *Statement
+	Condition   *Expression
+	Post        *Statement
+	Body        Block
 }
 
 // Expression is one typed HIR expression.

@@ -112,7 +112,9 @@ For an assignment to a safe-borrow local, Flow evaluates the right-hand side bef
 replacing the target origin and retained-loan set. Reachable `if` and `switch` exits join origin
 facts; different origins remain a disjunction and cannot be returned as if one branch had won.
 Loan conflicts use branch-reachable later uses. `while` additionally computes a header fixed point
-from entry, fallthrough, and `continue`, then joins header and `break` exits after the loop.
+from entry, fallthrough, and `continue`, then joins header and `break` exits after the loop. The
+admitted classic-`for` header subset cannot borrow or change ownership state, so Flow uses the same
+fixed point while resolution keeps the initializer binding scoped through condition, body, and post.
 
 Before Flow applies those rules at call sites, it infers a fixed-point return-origin summary for
 each internal borrow-returning function. The summary maps one formal borrow or region parameter, or

@@ -143,6 +143,8 @@ func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environm
 			a.resourceAssignment(module, statement, environment)
 		case statement.Kind == syntax.KindWhile:
 			a.resourceWhile(module, statement.Expression, environment)
+		case statement.Kind == syntax.KindFor:
+			a.resourceFor(module, statement.For, environment)
 		case statement.Kind == syntax.KindReturn:
 			a.resourceExpression(module, statement.Expression, environment, resourceMove)
 			a.checkResourceEnvironmentEffects(environment, span(module.file.Path, statement.Span), nil)
@@ -169,6 +171,45 @@ func (a *analyzer) resourceBlock(module *moduleScope, block *ast.Block, environm
 		}
 	}
 	return reachable
+}
+
+func (a *analyzer) resourceFor(module *moduleScope, loop *ast.ForLoop, environment resourceEnvironment) {
+	if loop == nil {
+		return
+	}
+	existing := make(map[*symbol]struct{}, len(environment))
+	for value := range environment {
+		existing[value] = struct{}{}
+	}
+	a.resourceScopes = append(a.resourceScopes, make(map[*symbol]struct{}))
+	scopeIndex := len(a.resourceScopes) - 1
+	defer func() { a.resourceScopes = a.resourceScopes[:scopeIndex] }()
+	if initializer := loop.Initializer; initializer != nil {
+		if initializer.Binding != nil {
+			binding := initializer.Binding
+			value := a.bindingSymbols[binding]
+			mode := resourceRead
+			if value != nil && a.isResource(value.typ) {
+				mode = resourceMove
+			}
+			a.resourceExpression(module, binding.Expression, environment, mode)
+			if value != nil && a.isResource(value.typ) {
+				environment[value] = resourceValueState{state: ResourceLive, declaration: span(module.file.Path, binding.NameSpan)}
+				a.resourceScopes[scopeIndex][value] = struct{}{}
+			}
+		} else if initializer.Kind == syntax.KindAssignment {
+			a.resourceAssignment(module, initializer, environment)
+		} else {
+			a.resourceExpression(module, initializer.Expression, environment, resourceRead)
+		}
+	}
+	a.resourceWhile(module, forAsWhile(loop), environment)
+	a.checkResourceEnvironmentEffects(environment, span(module.file.Path, loop.Span), a.resourceScopes[scopeIndex])
+	for value := range environment {
+		if _, found := existing[value]; !found {
+			delete(environment, value)
+		}
+	}
 }
 
 func (a *analyzer) resourceAssignment(module *moduleScope, statement *ast.Statement, environment resourceEnvironment) {

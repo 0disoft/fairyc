@@ -581,3 +581,49 @@ func TestParseDistinguishesFixedArrayLiteralForms(t *testing.T) {
 		t.Fatalf("Reconstruct() = %q, %v; want %q, true", reconstructed, ok, input)
 	}
 }
+
+func TestParseClassicForClausesLosslessly(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nfn i32 main() { for (var i32 index = 0; index < 6; index = index + 1) { if (index == 2) { continue; }; } return 42; }\n")
+	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	var loop *Node
+	for index := range tree.Nodes {
+		if tree.Nodes[index].Kind == KindFor {
+			loop = &tree.Nodes[index]
+			break
+		}
+	}
+	if loop == nil || len(loop.Children) != 4 {
+		t.Fatalf("for node = %+v", loop)
+	}
+	want := []Kind{KindForInit, KindForCond, KindForPost, KindBlock}
+	for index, childID := range loop.Children {
+		child, found := tree.Node(childID)
+		if !found || child.Kind != want[index] {
+			t.Fatalf("for child %d = %+v, found %v; want %s", index, child, found, want[index])
+		}
+	}
+	reconstructed, ok := tree.Reconstruct()
+	if !ok || !slices.Equal(reconstructed, input) {
+		t.Fatalf("Reconstruct() = %q, %v; want exact input", reconstructed, ok)
+	}
+}
+
+func TestParseClassicForPreservesOmittedClauses(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nfn i32 main() { for (;;) { break; } return 42; }\n")
+	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	for _, node := range tree.Nodes {
+		if node.Kind == KindForInit || node.Kind == KindForCond || node.Kind == KindForPost {
+			if len(node.Children) != 0 {
+				t.Fatalf("omitted clause %s children = %v", node.Kind, node.Children)
+			}
+		}
+	}
+}

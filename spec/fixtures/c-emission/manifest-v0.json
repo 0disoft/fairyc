@@ -34,6 +34,7 @@
     "docs/adr/0111-scalar-fixed-array-length.md",
     "docs/adr/0112-fixed-u8-array-byte-view-borrow.md",
     "docs/adr/0118-copy-tagged-transport-and-typed-console-result.md",
+    "docs/adr/0213-classic-scalar-for-loop.md",
     "docs/adr/0119-flat-copy-resource-c-transport.md",
     "docs/adr/0120-verified-nonempty-resource-drop-glue.md",
     "docs/adr/0125-mutable-fixed-u8-array-byte-view.md",
@@ -110,6 +111,22 @@
         "dialect": "c11",
         "functions": ["main::add", "main::main"],
         "features": ["checked-arithmetic", "scalar-call", "scalar-comparison", "scalar-control-flow", "trap"]
+      }
+    },
+    {
+      "id": "pass.c-emission.classic-for",
+      "sourceRoot": "cases/pass/classic-for/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main"],
+        "features": ["checked-arithmetic", "scalar-comparison", "scalar-control-flow", "trap"]
       }
     },
     {

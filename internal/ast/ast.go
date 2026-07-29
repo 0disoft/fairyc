@@ -159,6 +159,18 @@ type Statement struct {
 	Binding    *Binding
 	Target     *Expression
 	Expression *Expression
+	For        *ForLoop
+}
+
+// ForLoop preserves the four source regions of one classic C-shaped loop.
+// Header clauses stay distinct so semantic lowering can keep initializer scope
+// and route continue through Post before reevaluating Condition.
+type ForLoop struct {
+	Span        diagnostic.Span
+	Initializer *Statement
+	Condition   *Expression
+	Post        *Statement
+	Body        *Block
 }
 
 // Binding records a source declaration and its expression tree.
@@ -497,10 +509,47 @@ func lowerStatement(tree *syntax.Tree, node syntax.Node) Statement {
 		if len(node.Children) > 0 {
 			statement.Expression = lowerExpression(tree, node.Children[0])
 		}
+	case syntax.KindFor:
+		statement.For = lowerForLoop(tree, node)
 	default:
 		statement.Expression = lowerExpressionNode(tree, node)
 	}
 	return statement
+}
+
+func lowerForLoop(tree *syntax.Tree, node syntax.Node) *ForLoop {
+	loop := &ForLoop{Span: node.Span}
+	for _, childID := range node.Children {
+		child, found := tree.Node(childID)
+		if !found {
+			continue
+		}
+		switch child.Kind {
+		case syntax.KindForInit:
+			if len(child.Children) == 1 {
+				value, ok := tree.Node(child.Children[0])
+				if ok {
+					statement := lowerStatement(tree, value)
+					loop.Initializer = &statement
+				}
+			}
+		case syntax.KindForCond:
+			if len(child.Children) == 1 {
+				loop.Condition = lowerExpression(tree, child.Children[0])
+			}
+		case syntax.KindForPost:
+			if len(child.Children) == 1 {
+				value, ok := tree.Node(child.Children[0])
+				if ok {
+					statement := lowerStatement(tree, value)
+					loop.Post = &statement
+				}
+			}
+		case syntax.KindBlock:
+			loop.Body = lowerBlock(tree, child)
+		}
+	}
+	return loop
 }
 
 func lowerBinding(tree *syntax.Tree, node syntax.Node) Binding {

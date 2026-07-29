@@ -2964,6 +2964,45 @@ func TestAnalyzeRejectsNonBooleanAssertCondition(t *testing.T) {
 	}
 }
 
+func TestAnalyzeTypesClassicScalarForAndScopesInitializer(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\nfn i32 main() { var i32 total = 0; for (var i32 index = 0; index < 6; index = index + 1) { total = total + 7; } return total; }\n",
+	})
+	assertCleanTypeResult(t, result)
+	function := result.HIR.Modules[0].Functions[0]
+	if len(function.Locals) != 2 || len(function.Body.Statements) != 3 {
+		t.Fatalf("function = %+v", function)
+	}
+	loop := function.Body.Statements[1].For
+	if loop == nil || loop.Initializer == nil || loop.Initializer.Expression == nil || loop.Initializer.Expression.Type != hir.TypeI32 ||
+		loop.Condition == nil || loop.Condition.Type != hir.TypeBool || loop.Post == nil || loop.Post.Target == nil || loop.Post.Target.Type != hir.TypeI32 ||
+		len(loop.Body.Statements) != 1 {
+		t.Fatalf("typed for = %+v", loop)
+	}
+
+	scopeResult := analyzeText(t, map[string]string{
+		"main.fy": "module main;\nfn i32 main() { for (var i32 index = 0; index < 1; index = index + 1) {} return index; }\n",
+	})
+	if scopeResult.FailedPhase != semantic.PhaseResolve || len(scopeResult.Diagnostics) != 1 || scopeResult.Diagnostics[0].Code != "E0101" {
+		t.Fatalf("scope result = %+v", scopeResult)
+	}
+}
+
+func TestAnalyzeRejectsNonScalarForHeaderBehavior(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\nfn i32 next(i32 value) { return value + 1; }\nfn i32 main() { for (var i32 index = next(0); index < 2; index = next(index)) {} return 42; }\n",
+	})
+	if len(result.Unsupported) != 2 {
+		t.Fatalf("result = %+v", result)
+	}
+	if result.Unsupported[0].Feature != "for initializer outside the scalar declaration or direct-assignment subset" ||
+		result.Unsupported[1].Feature != "for post clause outside direct scalar assignment" {
+		t.Fatalf("unsupported = %+v", result.Unsupported)
+	}
+}
+
 func analyzeText(t *testing.T, files map[string]string) semantic.Result {
 	t.Helper()
 	inputs := make([]semantic.File, 0, len(files))

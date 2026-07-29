@@ -111,6 +111,8 @@ func (a *analyzer) resultFlowBlock(module *moduleScope, block *ast.Block, enviro
 			}
 		case syntax.KindWhile:
 			reachable = a.resultFlowWhile(module, statement.Expression, environment)
+		case syntax.KindFor:
+			reachable = a.resultFlowFor(module, statement.For, environment)
 		case syntax.KindRegion:
 			reachable = a.resultFlowRegion(module, statement.Expression, environment)
 		default:
@@ -131,6 +133,40 @@ func (a *analyzer) resultFlowBlock(module *moduleScope, block *ast.Block, enviro
 		}
 	}
 	for _, local := range locals {
+		delete(environment, local)
+	}
+	return reachable
+}
+
+func (a *analyzer) resultFlowFor(module *moduleScope, loop *ast.ForLoop, environment resultEnvironment) bool {
+	if loop == nil {
+		return true
+	}
+	var locals []*symbol
+	if initializer := loop.Initializer; initializer != nil {
+		if initializer.Binding != nil {
+			binding := initializer.Binding
+			a.resultFlowExpression(module, binding.Expression, environment, resultUse{kind: resultUseStore})
+			value := a.bindingSymbols[binding]
+			if value != nil && isResultType(value.typ) {
+				producer := span(module.file.Path, binding.NameSpan)
+				if binding.Expression != nil {
+					producer = span(module.file.Path, binding.Expression.Span)
+				}
+				environment[value] = pendingResult(producer)
+				locals = append(locals, value)
+			}
+		} else if initializer.Kind == syntax.KindAssignment {
+			a.resultFlowExpression(module, initializer.Expression, environment, resultUse{kind: resultUseStore})
+		} else {
+			a.resultFlowExpression(module, initializer.Expression, environment, resultUse{kind: resultUseUnhandled})
+		}
+	}
+	reachable := a.resultFlowWhile(module, forAsWhile(loop), environment)
+	for _, local := range locals {
+		if reachable {
+			a.reportResultObligation(environment[local])
+		}
 		delete(environment, local)
 	}
 	return reachable
