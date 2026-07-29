@@ -3,32 +3,31 @@ package prevrevision
 import (
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 )
 
-func TestMigrateEmbeddedGoTreeRewritesCompletePrograms(t *testing.T) {
+func TestMigrateEmbeddedGoTreeLeavesRevisionOneProgramsUnchanged(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
 	path := filepath.Join(root, "fixture_test.go")
-	input := "package fixture\n\nconst source = `module main;\nfn main() -> i32 { 42 }\n`\n"
+	input := "package fixture\n\nconst source = `module main;\nfn i32 main() { return 42; }\n`\n"
 	if err := os.WriteFile(path, []byte(input), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	check, err := MigrateEmbeddedGoTree(root, false)
-	if err != nil || check.FilesChanged != 1 || check.LiteralsChanged != 1 || check.FilesWritten != 0 {
+	if err != nil || check.FilesChanged != 0 || check.LiteralsChanged != 0 || check.LiteralsSkipped != 0 || check.FilesWritten != 0 {
 		t.Fatalf("check = %+v, %v", check, err)
 	}
 	write, err := MigrateEmbeddedGoTree(root, true)
-	if err != nil || write.FilesWritten != 1 {
+	if err != nil || write.FilesWritten != 0 {
 		t.Fatalf("write = %+v, %v", write, err)
 	}
 	output, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(output), "fn i32 main() { return 42; }") {
-		t.Fatalf("migrated Go source:\n%s", output)
+	if string(output) != input {
+		t.Fatalf("identity migration changed Go source:\n%s", output)
 	}
 }
 

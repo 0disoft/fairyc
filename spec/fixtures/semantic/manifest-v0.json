@@ -23,6 +23,7 @@
     "docs/adr/0125-mutable-fixed-u8-array-byte-view.md",
     "docs/adr/0126-checked-mutable-indexed-assignment.md",
     "docs/adr/0213-classic-scalar-for-loop.md",
+    "docs/adr/0216-checked-compound-assignment.md",
     "docs/diagnostics/catalog-v0.md"
   ],
   "cases": [

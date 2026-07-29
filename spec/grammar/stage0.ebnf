@@ -109,10 +109,12 @@ statement = binding_stmt
 binding_stmt = binding_kind (IDENT | type IDENT) "=" expression ";" ;
 binding_kind = "let" | "var" ;
 
-(* The parser first reads the left expression. If '=' follows, it forms an
+(* The parser first reads the left expression. If an assignment operator follows, it forms an
    assignment statement; otherwise the expression statement requires ';'.
    Place validity is a semantic check. *)
-assignment_stmt = expression "=" expression ";" ;
+assignment_stmt = expression assignment_operator expression ";" ;
+assignment_operator = "=" | "+=" | "-=" | "*=" | "/=" | "%="
+                    | "<<=" | ">>=" | "&=" | "^=" | "|=" ;
 expression_stmt = expression ";" ;
 
 return_stmt = "return" expression? ";" ;
@@ -128,8 +130,8 @@ while_stmt = "while" "(" expression ")" statement_block ;
    Each clause is optional; an omitted condition is true. *)
 for_stmt = "for" "(" for_init? ";" expression? ";" for_post? ")" statement_block ;
 for_init = binding_kind (IDENT | type IDENT) "=" expression
-         | expression "=" expression ;
-for_post = expression "=" expression ;
+         | expression assignment_operator expression ;
+for_post = expression assignment_operator expression ;
 break_stmt = "break" ";" ;
 continue_stmt = "continue" ";" ;
 region_stmt = "region" IDENT "in" expression statement_block ;

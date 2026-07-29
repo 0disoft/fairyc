@@ -1831,6 +1831,7 @@ fn u8 update_view(ref mut u8[] bytes, u8 value) {
     bytes[1] = value;
     return bytes[1];
 }
+
 fn i32 main() {
     var u8[3] values = [1, 2, 3];
     values[0] = 40;
@@ -2161,6 +2162,50 @@ fn i32 main() {
 	}
 	if len(consume.Moves) != 1 || consume.Moves[0].Destination != "binding-value" || !consume.Moves[0].CleanupObligationTransferred {
 		t.Fatalf("consume moves = %+v", consume.Moves)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+}
+
+func TestLowerCompoundAssignmentsReuseCheckedBinaryAndSinglePlaceEvaluation(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+fn u8 update_view(ref mut u8[] bytes) {
+    bytes[1] += 2;
+    return bytes[1];
+}
+fn i32 main() {
+    var i32 value = 40;
+    value += 2;
+    var u8[3] values = [1, 40, 3];
+    values[1] += 2;
+    return update_view(ref mut values) as i32;
+}
+`)
+	var binaryCount, arrayLoadCount, arrayStoreCount, viewLoadCount, viewStoreCount int
+	for functionIndex := range program.Functions {
+		for blockIndex := range program.Functions[functionIndex].Blocks {
+			for _, operation := range program.Functions[functionIndex].Blocks[blockIndex].Operations {
+				switch operation.Kind {
+				case OperationBinary:
+					if operation.Operator == "+" {
+						binaryCount++
+					}
+				case OperationArrayIndex:
+					arrayLoadCount++
+				case OperationArrayIndexStore:
+					arrayStoreCount++
+				case OperationViewIndex:
+					viewLoadCount++
+				case OperationViewIndexStore:
+					viewStoreCount++
+				}
+			}
+		}
+	}
+	if binaryCount != 3 || arrayLoadCount < 1 || arrayStoreCount != 1 || viewLoadCount < 2 || viewStoreCount != 1 {
+		t.Fatalf("compound MIR counts: binary=%d array-load=%d array-store=%d view-load=%d view-store=%d", binaryCount, arrayLoadCount, arrayStoreCount, viewLoadCount, viewStoreCount)
 	}
 	if failures := Verify(program); len(failures) != 0 {
 		t.Fatalf("Verify() failures = %+v", failures)

@@ -84,6 +84,12 @@ func newParser(file source.File, tree *Tree, budget *source.Budget, mode parseMo
 }
 
 func (p *parser) acceptsPreviousRevision() bool {
+	// "Previous" now means fairyc-language/1, whose C-shaped grammar is shared with /2.
+	// These older branch points describe the retired /0 grammar and must stay unreachable.
+	return false
+}
+
+func (p *parser) isPreviousRevision() bool {
 	return p.mode == parsePreviousRevision
 }
 

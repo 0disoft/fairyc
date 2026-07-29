@@ -1,5 +1,7 @@
 module answer;
 
 pub fn i32 value() {
-    return 42;
+    var i32 result = 40;
+    result += 2;
+    return result;
 }

@@ -31,8 +31,9 @@
 - Globals are compile-time `const` only. Mutable globals are excluded.
 - Classic counter loops use `for (initializer; condition; post) { ... }`. Each clause is optional;
   an omitted condition is `true`. The initializer owns a lexical scope covering the condition,
-  body, and post clause. The admitted v1 header subset is one scalar declaration or assignment,
-  one pure boolean condition, and one direct scalar assignment. Calls, borrows, indexing, blocks,
+  body, and post clause. The admitted v2 header subset is one scalar declaration or assignment,
+  one pure boolean condition, and one direct scalar assignment. The post and direct-assignment
+  initializer may use ordinary `=` or an admitted compound assignment. Calls, borrows, indexing, blocks,
   propagation, resource movement, `++`, `--`, and comma expressions are not header forms.
 - An ordinary or raw foreign function may declare one closed external-capability set with
   `@effects(clock, console, environment, filesystem, network, process, random)`. Arguments use only
@@ -92,14 +93,15 @@ an unsuffixed integer literal receives that contextual type. The result has type
 and index evaluate once from left to right, and an index greater than or equal to `.len` traps with
 category `bounds` before any data access.
 
-A mutable fixed scalar-array place supports `values[index] = value` when the receiver is a `var`
+A mutable fixed scalar-array place supports `values[index] = value` and checked integer compound
+assignment when the receiver is a `var`
 local. A value of type `ref mut u8[]` supports both the same checked `u8`
 read and `bytes[index] = value`; the borrow binding itself may remain `let` because the borrow type,
 not binding reassignment, grants referent mutation. A shared view, immutable array place, literal,
 call result, or other non-place target is rejected. The receiver and `usize` index evaluate once from
-left to right, the complete `bounds` check runs before the right-hand side, and only the success path
-evaluates the value once and stores it. Mutable slicing, nested projections, resource elements,
-compound assignment, and user-defined indexing remain outside Stage 0.
+left to right, the complete `bounds` check and old-value read run before the right-hand side, and only
+the success path evaluates the value once and stores it. Mutable slicing, nested projections,
+resource elements, and user-defined indexing remain outside Stage 0.
 
 The same immutable view supports end-exclusive `bytes[start..end]`, `bytes[..end]`,
 `bytes[start..]`, and `bytes[..]`. Written bounds have type `usize`; an omitted start is zero and an
@@ -311,6 +313,15 @@ types support binary `&`, `^`, `|`, `<<`, and `>>`. Bitwise operations preserve 
 for `i32` and logical behavior for unsigned types. Both shifts trap on an amount outside the exact
 operand width; left shift additionally traps when the mathematical result is not representable.
 Mixed types and implicit promotions remain rejected.
+
+Assignment remains a statement, never an expression. Mutable `i32`, `u8`, `u32`, and `usize`
+locals and admitted mutable indexed scalar places support `+=`, `-=`, `*=`, `/=`, `%=`, `<<=`,
+`>>=`, `&=`, `^=`, and `|=`. A compound assignment evaluates its target place once, captures the
+old scalar value, evaluates the right-hand side once, applies the corresponding existing checked
+binary operation, and stores only on success. Bounds, overflow, division, remainder, and shift
+traps therefore leave the target unchanged. The right-hand side must have exactly the target type;
+there are no promotions, wrapping shortcuts, resource compound assignments, field-target support,
+or returned assignment value.
 
 Equality operators `==` and `!=` accept matching operands of `bool`, `i32`, `u8`, `u32`, or
 `usize`. Ordered comparison operators `<`, `<=`, `>`, and `>=` accept matching operands of `i32`,

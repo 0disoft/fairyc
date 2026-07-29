@@ -261,6 +261,7 @@ fn i32 main() {
     bytes = ref second;
     return bytes[2] as i32;
 }
+
 `)
 	outcome, err := interpreter.Execute(program, "main::main")
 	if err != nil {
@@ -482,6 +483,58 @@ fn i32 fails() { assert(false); return 42; }
 	failed, err := interpreter.Execute(program, "main::fails")
 	if err != nil || failed.Kind != interpreter.OutcomeTrap || failed.TrapCategory != "assertion-failed" {
 		t.Fatalf("Execute(fails) = %+v, %v", failed, err)
+	}
+}
+
+func TestExecuteCheckedCompoundAssignments(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn i32 main() {
+    var i32 value = 21;
+    value += 21;
+    value -= 2;
+    value *= 2;
+    value /= 4;
+    value %= 30;
+    value <<= 1;
+    value >>= 1;
+    value &= 31;
+    value ^= 1;
+    value |= 2;
+    for (var i32 index = 0; index < 1; index += 1) { value += index; }
+    var u8[1] bytes = [40];
+    bytes[0] += 2;
+    return bytes[0] as i32;
+}
+`)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("Execute() = %+v, %v", outcome, err)
+	}
+}
+
+func TestExecuteCompoundAssignmentPreservesTrapSemantics(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		name, statement, trap string
+	}{
+		{name: "overflow", statement: "value += 1;", trap: "integer-overflow"},
+		{name: "division", statement: "value /= 0;", trap: "division-by-zero"},
+		{name: "shift", statement: "value <<= 32;", trap: "invalid-shift"},
+	} {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			initial := "2147483647"
+			if test.name != "overflow" {
+				initial = "42"
+			}
+			program := lowerSource(t, "module main;\nfn i32 main() { var i32 value = "+initial+"; "+test.statement+" return value; }\n")
+			outcome, err := interpreter.Execute(program, "main::main")
+			if err != nil || outcome.Kind != interpreter.OutcomeTrap || outcome.TrapCategory != test.trap {
+				t.Fatalf("Execute() = %+v, %v", outcome, err)
+			}
+		})
 	}
 }
 

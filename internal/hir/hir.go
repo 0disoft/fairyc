@@ -199,6 +199,55 @@ func CheckedShiftType(value Type) bool {
 	return CheckedArithmeticType(value)
 }
 
+// CompoundAssignmentBinary maps one source compound assignment to the existing checked binary
+// operation that computes its replacement value. Assignment itself remains a statement.
+func CompoundAssignmentBinary(operator string) (string, bool) {
+	switch operator {
+	case "+=":
+		return "+", true
+	case "-=":
+		return "-", true
+	case "*=":
+		return "*", true
+	case "/=":
+		return "/", true
+	case "%=":
+		return "%", true
+	case "<<=":
+		return "<<", true
+	case ">>=":
+		return ">>", true
+	case "&=":
+		return "&", true
+	case "^=":
+		return "^", true
+	case "|=":
+		return "|", true
+	default:
+		return "", false
+	}
+}
+
+// CompoundAssignmentType reports whether the mapped binary operation is defined for value.
+func CompoundAssignmentType(operator string, value Type) bool {
+	binary, ok := CompoundAssignmentBinary(operator)
+	if !ok {
+		return false
+	}
+	switch binary {
+	case "+", "-", "*":
+		return CheckedArithmeticType(value)
+	case "/", "%":
+		return CheckedDivisionType(value)
+	case "<<", ">>":
+		return CheckedShiftType(value)
+	case "&", "^", "|":
+		return BitwiseIntegerType(value)
+	default:
+		return false
+	}
+}
+
 // OptionElement decomposes one canonical compiler-known Option type.
 func OptionElement(value Type) (element Type, ok bool) {
 	text := string(value)
@@ -494,6 +543,7 @@ type Block struct {
 type Statement struct {
 	Kind       string
 	Span       Span
+	Operator   string
 	Binding    SymbolID
 	Target     *Expression
 	Expression *Expression

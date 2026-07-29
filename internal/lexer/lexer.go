@@ -12,24 +12,15 @@ import (
 var currentKeywords = map[string]struct{}{
 	"as": {}, "assert": {}, "break": {}, "case": {}, "cleanup": {}, "const": {}, "continue": {}, "discard": {},
 	"else": {}, "enum": {}, "extern": {}, "false": {},
-	"fn": {}, "if": {}, "import": {}, "in": {}, "let": {},
+	"fn": {}, "for": {}, "if": {}, "import": {}, "in": {}, "let": {},
 	"module": {}, "mut": {}, "null": {}, "pub": {},
 	"ptr": {}, "ref": {}, "region": {}, "resource": {}, "return": {}, "struct": {},
 	"switch": {}, "true": {}, "unsafe": {}, "var": {}, "while": {},
 }
 
-// currentRevisionOnlyKeywords keeps newly reserved spellings out of the retired
-// grammar used by fairyc-migrate-prev. A previous-revision source may still use
-// these spellings as identifiers even after the product grammar reserves them.
-var currentRevisionOnlyKeywords = map[string]struct{}{
-	"for": {},
-}
-
-var previousRevisionKeywords = map[string]struct{}{
-	"drop": {}, "impl": {}, "match": {}, "self": {},
-}
-
 var symbols = []string{
+	"<<=", ">>=",
+	"+=", "-=", "*=", "/=", "%=", "&=", "^=", "|=",
 	"::", "->", "=>", "==", "!=", "<=", ">=", "<<", ">>", "&&", "||", "..",
 	"@", "(", ")", "{", "}", "[", "]", ",", ";", ":", ".", "?", "=",
 	"+", "-", "*", "/", "%", "!", "~", "&", "|", "^", "<", ">",
@@ -37,20 +28,19 @@ var symbols = []string{
 
 // Lex performs one bounded, batch lex over the file's original bytes.
 func Lex(file source.File, budget *source.Budget) Result {
-	return lex(file, budget, false)
+	return lex(file, budget)
 }
 
 // LexPreviousRevision classifies the retired grammar's extra keywords for the standalone source
 // migrator. Product compilation must call Lex.
 func LexPreviousRevision(file source.File, budget *source.Budget) Result {
-	return lex(file, budget, true)
+	return lex(file, budget)
 }
 
-func lex(file source.File, budget *source.Budget, previousRevision bool) Result {
+func lex(file source.File, budget *source.Budget) Result {
 	lexer := scanner{
-		source:           append([]byte(nil), file.Bytes...),
-		budget:           budget,
-		previousRevision: previousRevision,
+		source: append([]byte(nil), file.Bytes...),
+		budget: budget,
 	}
 	lexer.run()
 	return Result{
@@ -61,13 +51,12 @@ func lex(file source.File, budget *source.Budget, previousRevision bool) Result 
 }
 
 type scanner struct {
-	source           []byte
-	position         int
-	budget           *source.Budget
-	tokens           []Token
-	diagnostics      []diagnostic.Diagnostic
-	hasExhausted     bool
-	previousRevision bool
+	source       []byte
+	position     int
+	budget       *source.Budget
+	tokens       []Token
+	diagnostics  []diagnostic.Diagnostic
+	hasExhausted bool
 }
 
 func (s *scanner) run() {
@@ -301,10 +290,6 @@ func (s *scanner) scanIdentifier() {
 	text := string(s.source[start:s.position])
 	kind := Identifier
 	if _, found := currentKeywords[text]; found {
-		kind = Keyword
-	} else if _, found := currentRevisionOnlyKeywords[text]; found && !s.previousRevision {
-		kind = Keyword
-	} else if _, found := previousRevisionKeywords[text]; found && s.previousRevision {
 		kind = Keyword
 	}
 	s.emit(kind, start, s.position, literalKeywordCooked(text))

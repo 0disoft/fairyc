@@ -389,6 +389,7 @@ fn u8 update(ref mut u8[] bytes) {
     bytes[1] = 42;
     return bytes[1];
 }
+
 fn i32 main() {
     var u8[3] values = [1, 2, 3];
     values[0] = 40;
@@ -2370,6 +2371,31 @@ fn i32 main() {
 		if !strings.Contains(unit.Source, required) {
 			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
 		}
+	}
+}
+
+func TestEmitCompoundAssignmentsAsExistingCheckedMIR(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn i32 main() {
+    var i32 value = 40;
+    value += 2;
+    var u8[1] bytes = [40];
+    bytes[0] += 2;
+    return if (value == 42 && bytes[0] == 42) { 42 } else { 1 };
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0WindowsMSVCProfile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, feature := range []string{"array-index-store", "checked-arithmetic", "scalar-fixed-array"} {
+		if !slices.Contains(unit.Features, feature) {
+			t.Errorf("features %v are missing %q", unit.Features, feature)
+		}
+	}
+	if !strings.Contains(unit.Source, "FY_TRAP_INTEGER_OVERFLOW") || !strings.Contains(unit.Source, "] = ") {
+		t.Fatalf("generated C does not preserve checked compound assignment:\n%s", unit.Source)
 	}
 }
 

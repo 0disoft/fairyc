@@ -35,6 +35,7 @@
     "docs/adr/0112-fixed-u8-array-byte-view-borrow.md",
     "docs/adr/0118-copy-tagged-transport-and-typed-console-result.md",
     "docs/adr/0213-classic-scalar-for-loop.md",
+    "docs/adr/0216-checked-compound-assignment.md",
     "docs/adr/0119-flat-copy-resource-c-transport.md",
     "docs/adr/0120-verified-nonempty-resource-drop-glue.md",
     "docs/adr/0125-mutable-fixed-u8-array-byte-view.md",

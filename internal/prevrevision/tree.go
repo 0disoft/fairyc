@@ -69,6 +69,10 @@ func MigrateTree(root string, write bool) (TreeReport, error) {
 		}
 		result, err := Migrate(rel, input)
 		if err != nil {
+			if current := parseCurrentSource(rel, input); len(current.Diagnostics) == 0 {
+				report.Skipped++
+				return nil
+			}
 			report.Errors = append(report.Errors, rel+": "+err.Error())
 			return nil
 		}

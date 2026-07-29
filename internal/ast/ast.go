@@ -156,6 +156,7 @@ type Block struct {
 type Statement struct {
 	Kind       syntax.Kind
 	Span       diagnostic.Span
+	Operator   string
 	Binding    *Binding
 	Target     *Expression
 	Expression *Expression
@@ -499,6 +500,10 @@ func lowerStatement(tree *syntax.Tree, node syntax.Node) Statement {
 		binding := lowerBinding(tree, node)
 		statement.Binding = &binding
 	case syntax.KindAssignment:
+		statement.Operator = node.Text
+		if statement.Operator == "" {
+			statement.Operator = "="
+		}
 		if len(node.Children) > 0 {
 			statement.Target = lowerExpression(tree, node.Children[0])
 		}

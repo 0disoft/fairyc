@@ -395,6 +395,10 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 		case statement.Kind == syntax.KindAssignment:
 			target, targetType := c.checkExpression(statement.Target, hir.TypeInvalid)
 			value, actual := c.checkExpression(statement.Expression, targetType)
+			hirStatement.Operator = statement.Operator
+			if hirStatement.Operator == "" {
+				hirStatement.Operator = "="
+			}
 			hirStatement.Target = target
 			hirStatement.Expression = value
 			if statement.Target != nil && !c.mutableAssignmentTarget(statement.Target, target) {
@@ -408,6 +412,12 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 					targetType,
 					span(c.module.file.Path, statement.Target.Span),
 				)
+			}
+			if hirStatement.Operator != "=" {
+				validPlace := target != nil && (target.Kind == "path" || target.Kind == "array-index" || target.Kind == "view-index")
+				if !validPlace || !hir.CompoundAssignmentType(hirStatement.Operator, targetType) {
+					c.analyzer.addUnsupported(c.module.file.Path, statement.Span, "compound assignment "+hirStatement.Operator+" on "+string(targetType))
+				}
 			}
 		case statement.Kind == syntax.KindAssert:
 			expression, actual := c.checkExpression(statement.Expression, hir.TypeBool)

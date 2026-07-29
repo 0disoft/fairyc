@@ -455,3 +455,17 @@ func TestLowerPreservesClassicForHeaderRoles(t *testing.T) {
 		t.Fatalf("lowered for = %+v", loop)
 	}
 }
+
+func TestLowerPreservesCompoundAssignmentOperator(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nfn i32 main() { var i32 value = 40; value += 2; return value; }\n")
+	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	module, err := Lower(tree)
+	if err != nil {
+		t.Fatalf("Lower() error = %v, diagnostics = %+v", err, tree.Diagnostics)
+	}
+	statement := module.Functions[0].Body.Statements[1]
+	if statement.Kind != syntax.KindAssignment || statement.Operator != "+=" || statement.Target == nil || statement.Expression == nil {
+		t.Fatalf("compound assignment = %+v", statement)
+	}
+}

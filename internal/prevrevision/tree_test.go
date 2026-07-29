@@ -3,7 +3,6 @@ package prevrevision
 import (
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 )
 
@@ -15,11 +14,11 @@ func TestMigrateTreePlansBeforeWriting(t *testing.T) {
 	if err := os.MkdirAll(filepath.Dir(valid), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	original := "module main;\nfn main() -> i32 { 0 }\n"
+	original := "module main;\nfn i32 main() { return 0; }\n"
 	if err := os.WriteFile(valid, []byte(original), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(invalid, []byte("module broken;\nfn broken(value: i32) -> i32 {\n"), 0o644); err != nil {
+	if err := os.WriteFile(invalid, []byte("module broken;\nfn i32 broken(i32 value) {\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	report, err := MigrateTree(root, true)
@@ -32,7 +31,28 @@ func TestMigrateTreePlansBeforeWriting(t *testing.T) {
 	}
 }
 
-func TestMigrateTreeWritesEligibleSourcesAndSkipsParserFailures(t *testing.T) {
+func TestMigrateTreeSkipsAlreadyCurrentCompoundAssignment(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	path := filepath.Join(root, "src", "main.fy")
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	input := "module main;\nfn i32 main() { var i32 value = 40; value += 2; return value; }\n"
+	if err := os.WriteFile(path, []byte(input), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	report, err := MigrateTree(root, true)
+	if err != nil || report.Scanned != 1 || report.Skipped != 1 || report.Changed != 0 || report.Written != 0 {
+		t.Fatalf("MigrateTree() = %+v, %v", report, err)
+	}
+	contents, readErr := os.ReadFile(path)
+	if readErr != nil || string(contents) != input {
+		t.Fatalf("current source changed: %q, %v", contents, readErr)
+	}
+}
+
+func TestMigrateTreeKeepsEligibleSourcesAndSkipsParserFailures(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
 	valid := filepath.Join(root, "examples", "main.fy")
@@ -42,7 +62,8 @@ func TestMigrateTreeWritesEligibleSourcesAndSkipsParserFailures(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if err := os.WriteFile(valid, []byte("module main;\nfn main() -> i32 { 0 }\n"), 0o644); err != nil {
+	original := "module main;\nfn i32 main() { return 0; }\n"
+	if err := os.WriteFile(valid, []byte(original), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	broken := "this is intentionally invalid"
@@ -50,12 +71,12 @@ func TestMigrateTreeWritesEligibleSourcesAndSkipsParserFailures(t *testing.T) {
 		t.Fatal(err)
 	}
 	report, err := MigrateTree(root, true)
-	if err != nil || report.Changed != 1 || report.Written != 1 || report.Skipped != 1 {
+	if err != nil || report.Changed != 0 || report.Written != 0 || report.Skipped != 1 {
 		t.Fatalf("MigrateTree() = %+v, %v", report, err)
 	}
 	contents, _ := os.ReadFile(valid)
-	if !strings.Contains(string(contents), "fn i32 main() { return 0; }") {
-		t.Fatalf("migrated source = %s", contents)
+	if string(contents) != original {
+		t.Fatalf("identity migration changed source = %s", contents)
 	}
 	skippedContents, _ := os.ReadFile(skipped)
 	if string(skippedContents) != broken {

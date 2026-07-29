@@ -2015,7 +2015,12 @@ func measureStandaloneWorkspaceSession(executablePath, sourceRoot string) (build
 			return buildmeasure.SessionProcessReport{}, fmt.Errorf("decode standalone workspace-session response %d: %w", sequence, err)
 		}
 		if response.Sequence != sequence || response.Status != "ok" || response.ExitCode != cli.ExitSuccess {
-			return buildmeasure.SessionProcessReport{}, fmt.Errorf("standalone workspace-session response %d is not successful: %s", sequence, line)
+			return buildmeasure.SessionProcessReport{}, fmt.Errorf(
+				"standalone workspace-session response %d is not successful: %s; stderr %q",
+				sequence,
+				line,
+				stderr.String(),
+			)
 		}
 		report.Samples = append(report.Samples, buildmeasure.SessionProcessSample{
 			Sequence: sequence, Condition: condition, DurationNS: duration,

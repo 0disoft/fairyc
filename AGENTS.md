@@ -23,10 +23,10 @@ regenerate, or override compiler source.
 
 - Product scope: docs/product/02-spec.md
 - Architecture decisions: docs/adr/*.md
-- Stage 0 language semantics: docs/language/*.md, docs/adr/0213-classic-scalar-for-loop.md
+- Stage 0 language semantics: docs/language/*.md, docs/adr/0213-classic-scalar-for-loop.md, docs/adr/0216-checked-compound-assignment.md
 - Normative Stage 0 grammar: spec/grammar/stage0.ebnf
 - Parser acceptance fixtures: spec/fixtures/parser/manifest-v0.json
-- Stage 0 frontend, exact `///` declaration-documentation attachment, classic scalar `for`, verified-MIR coordinator, and MIR implementation: internal/source/, internal/lexer/, internal/lexer/documentation.go, internal/syntax/, internal/ast/, internal/frontend/, internal/semantic/, internal/hir/, internal/compiler/, internal/mir/, docs/adr/0199-c-friendly-declaration-documentation-attachment.md, docs/adr/0213-classic-scalar-for-loop.md
+- Stage 0 frontend, exact `///` declaration-documentation attachment, classic scalar `for`, checked compound assignment, verified-MIR coordinator, and MIR implementation: internal/source/, internal/lexer/, internal/lexer/documentation.go, internal/syntax/, internal/ast/, internal/frontend/, internal/semantic/, internal/hir/, internal/compiler/, internal/mir/, docs/adr/0199-c-friendly-declaration-documentation-attachment.md, docs/adr/0213-classic-scalar-for-loop.md, docs/adr/0216-checked-compound-assignment.md
 - Stable starter creation, workspace check/build/run/test/C emission, diagnostic explanation, and target maturity report plus experimental compiler CLI implementation: cmd/fairyc/, internal/cli/, internal/projectscaffold/, docs/adr/0175-stable-workspace-check-v1.md, docs/adr/0176-stable-windows-workspace-build-v1.md, docs/adr/0177-stable-windows-workspace-run-v1.md, docs/adr/0178-stable-diagnostic-explain-v1.md, docs/adr/0179-stable-target-maturity-report-v1.md, docs/adr/0180-stable-workspace-c-emission-v1.md, docs/adr/0181-stable-workspace-semantic-test-v1.md, docs/adr/0204-stable-starter-project-creation-v1.md, docs/adr/0206-starter-project-guide-v2.md, docs/adr/0207-stable-windows-workspace-run-v2.md, docs/adr/0208-starter-project-guide-v3.md, docs/adr/0212-stable-windows-workspace-run-v3.md
 - Parser fixture runner: internal/parserfixture/
 - Semantic acceptance fixtures: spec/fixtures/semantic/manifest-v0.json

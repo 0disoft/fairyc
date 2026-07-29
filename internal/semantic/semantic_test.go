@@ -2989,6 +2989,53 @@ func TestAnalyzeTypesClassicScalarForAndScopesInitializer(t *testing.T) {
 	}
 }
 
+func TestAnalyzeTypesCheckedCompoundAssignments(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn i32 main() {
+    var i32 value = 21;
+    value += 21;
+    value -= 2;
+    value *= 2;
+    value /= 4;
+    value %= 30;
+    value <<= 1;
+    value >>= 1;
+    value &= 31;
+    value ^= 1;
+    value |= 2;
+    var u8[1] bytes = [40];
+    bytes[0] += 2;
+    for (var i32 index = 0; index < 1; index += 1) { value += index; }
+    return bytes[0] as i32;
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+	function := result.HIR.Modules[0].Functions[0]
+	var operators []string
+	for _, statement := range function.Body.Statements {
+		if statement.Kind == "assignment" {
+			operators = append(operators, statement.Operator)
+		}
+	}
+	want := []string{"+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "&=", "^=", "|=", "+="}
+	if !slices.Equal(operators, want) || function.Body.Statements[len(function.Body.Statements)-2].For.Post.Operator != "+=" {
+		t.Fatalf("compound assignment operators = %v, function = %+v", operators, function)
+	}
+}
+
+func TestAnalyzeRejectsUnsupportedCompoundAssignmentType(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\nfn i32 main() { var bool flag = true; flag += true; return 0; }\n",
+	})
+	if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "compound assignment += on bool" {
+		t.Fatalf("result = %+v", result)
+	}
+}
+
 func TestAnalyzeRejectsNonScalarForHeaderBehavior(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{

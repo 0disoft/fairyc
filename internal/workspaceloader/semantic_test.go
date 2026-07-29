@@ -10,6 +10,7 @@ import (
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/packagecontent"
 	"github.com/0disoft/fairyc/internal/packagegraph"
+	"github.com/0disoft/fairyc/internal/sdkstdlib"
 )
 
 func TestSemanticInputReachesVerifiedCompiler(t *testing.T) {
@@ -116,7 +117,7 @@ func TestBundledStandardLibraryReachesVerifiedCompiler(t *testing.T) {
 	}
 	packagePaths := make(map[hir.PackageID]string, len(packages))
 	for _, loaded := range packages {
-		if loaded.PackageUID == "" || loaded.Name == "" || loaded.Version == "" || loaded.Language != "fairyc-language/1" ||
+		if loaded.PackageUID == "" || loaded.Name == "" || loaded.Version == "" || loaded.Language != sdkstdlib.LanguageRevision ||
 			loaded.Instance != identities[loaded.ID] || loaded.Coordinate != coordinates[loaded.ID] || loaded.Source == ([32]byte{}) || loaded.Path == "" {
 			t.Fatalf("SemanticPackages() package = %+v, identities = %+v, coordinates = %+v", loaded, identities, coordinates)
 		}

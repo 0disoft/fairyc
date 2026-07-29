@@ -377,7 +377,34 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 				}
 				continue
 			}
-			value, err := l.lowerExpression(statement.Expression)
+			operator := statement.Operator
+			if operator == "" {
+				operator = "="
+			}
+			var value Operand
+			var err error
+			if operator != "=" && statement.Target != nil && statement.Expression != nil {
+				binary, ok := hir.CompoundAssignmentBinary(operator)
+				if !ok || statement.Target.Kind != "path" || !hir.CompoundAssignmentType(operator, statement.Target.Type) {
+					return false, fmt.Errorf("malformed compound assignment %q", operator)
+				}
+				prior, lowerErr := l.lowerExpression(statement.Target)
+				if lowerErr != nil {
+					return false, lowerErr
+				}
+				prior = l.freezeScalarOperand(prior, statement.Target.Span)
+				right, lowerErr := l.lowerExpression(statement.Expression)
+				if lowerErr != nil {
+					return false, lowerErr
+				}
+				combined := &hir.Expression{
+					Kind: "binary", Type: statement.Target.Type, Span: statement.Span, Operator: binary,
+					Children: []hir.Expression{*statement.Target, *statement.Expression},
+				}
+				value, err = l.lowerBinaryOperands(combined, prior, right)
+			} else {
+				value, err = l.lowerExpression(statement.Expression)
+			}
 			if err != nil {
 				return false, err
 			}
@@ -436,9 +463,16 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 
 func (l *functionLowerer) lowerIndexedAssignment(statement hir.Statement) error {
 	target := statement.Target
+	operator := statement.Operator
+	if operator == "" {
+		operator = "="
+	}
 	if target == nil || statement.Expression == nil || len(target.Children) != 2 || target.Operator != "[]" ||
 		target.Children[1].Type != hir.TypeUSize || statement.Expression.Type != target.Type {
 		return fmt.Errorf("malformed indexed assignment")
+	}
+	if operator != "=" && !hir.CompoundAssignmentType(operator, target.Type) {
+		return fmt.Errorf("malformed indexed compound assignment %q", operator)
 	}
 	receiver, err := l.lowerExpression(&target.Children[0])
 	if err != nil {
@@ -492,12 +526,36 @@ func (l *functionLowerer) lowerIndexedAssignment(statement hir.Statement) error 
 		Operation: target.Span, Categories: []string{"bounds"}, CleanupActions: []CleanupAction{}, HasSuccessor: false,
 	})
 	l.current = continuation
+	var prior Operand
+	if operator != "=" {
+		loadKind := OperationArrayIndex
+		if target.Kind == "view-index" {
+			loadKind = OperationViewIndex
+		}
+		destination := l.newTemporary()
+		l.appendOperation(Operation{
+			Kind: loadKind, Span: target.Span, DestinationLocal: destination, Operands: slices.Clone(placeOperands),
+			OwnerType: target.Children[0].Type, IndexType: hir.TypeUSize, Type: target.Type, Operator: "[]",
+		})
+		prior = Operand{Kind: OperandLocal, Local: destination}
+	}
 	value, err := l.lowerExpression(statement.Expression)
 	if err != nil {
 		return err
 	}
 	if value.Kind == OperandInvalid {
 		return fmt.Errorf("indexed assignment has an invalid value operand")
+	}
+	if operator != "=" {
+		binary, _ := hir.CompoundAssignmentBinary(operator)
+		combined := &hir.Expression{
+			Kind: "binary", Type: target.Type, Span: statement.Span, Operator: binary,
+			Children: []hir.Expression{{Type: target.Type, Span: target.Span}, *statement.Expression},
+		}
+		value, err = l.lowerBinaryOperands(combined, prior, value)
+		if err != nil {
+			return err
+		}
 	}
 	l.appendOperation(Operation{
 		Kind: storeKind, Span: statement.Span, DestinationLocal: NoLocal,
@@ -705,27 +763,7 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 		if err != nil {
 			return Operand{}, err
 		}
-		if expression.Operator == "/" || expression.Operator == "%" {
-			if err := l.lowerCheckedDivision(expression, left, right); err != nil {
-				return Operand{}, err
-			}
-		} else {
-			switch expression.Operator {
-			case "+", "-", "*":
-				l.lowerCheckedArithmetic(expression, []Operand{left, right}, "checked-arithmetic", []string{"integer-overflow"})
-			case ">>":
-				l.lowerCheckedArithmetic(expression, []Operand{left, right}, "checked-shift", []string{"invalid-shift"})
-			case "<<":
-				l.lowerCheckedArithmetic(expression, []Operand{left, right}, "checked-shift", []string{"invalid-shift", "integer-overflow"})
-			}
-		}
-		destination := l.newTemporary()
-		l.appendOperation(Operation{
-			Kind: OperationBinary, Span: expression.Span, DestinationLocal: destination,
-			Operands: []Operand{left, right}, OwnerType: expression.Children[0].Type,
-			Type: expression.Type, Operator: expression.Operator,
-		})
-		return Operand{Kind: OperandLocal, Local: destination}, nil
+		return l.lowerBinaryOperands(expression, left, right)
 	case "propagate":
 		return l.lowerPropagate(expression)
 	case "if":
@@ -745,6 +783,33 @@ func (l *functionLowerer) lowerExpression(expression *hir.Expression) (Operand, 
 	default:
 		return Operand{}, fmt.Errorf("unsupported HIR expression %q", expression.Kind)
 	}
+}
+
+func (l *functionLowerer) lowerBinaryOperands(expression *hir.Expression, left, right Operand) (Operand, error) {
+	if expression == nil || len(expression.Children) != 2 || expression.Type == hir.TypeInvalid {
+		return Operand{}, fmt.Errorf("malformed binary operation")
+	}
+	if expression.Operator == "/" || expression.Operator == "%" {
+		if err := l.lowerCheckedDivision(expression, left, right); err != nil {
+			return Operand{}, err
+		}
+	} else {
+		switch expression.Operator {
+		case "+", "-", "*":
+			l.lowerCheckedArithmetic(expression, []Operand{left, right}, "checked-arithmetic", []string{"integer-overflow"})
+		case ">>":
+			l.lowerCheckedArithmetic(expression, []Operand{left, right}, "checked-shift", []string{"invalid-shift"})
+		case "<<":
+			l.lowerCheckedArithmetic(expression, []Operand{left, right}, "checked-shift", []string{"invalid-shift", "integer-overflow"})
+		}
+	}
+	destination := l.newTemporary()
+	l.appendOperation(Operation{
+		Kind: OperationBinary, Span: expression.Span, DestinationLocal: destination,
+		Operands: []Operand{left, right}, OwnerType: expression.Children[0].Type,
+		Type: expression.Type, Operator: expression.Operator,
+	})
+	return Operand{Kind: OperandLocal, Local: destination}, nil
 }
 
 func (l *functionLowerer) lowerArrayConstruction(expression *hir.Expression) (Operand, error) {

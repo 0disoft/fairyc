@@ -21,19 +21,15 @@ func TestParseBudgetFailsClosed(t *testing.T) {
 	}
 }
 
-func TestCurrentParserRejectsEveryPreviousRevisionSpelling(t *testing.T) {
+func TestPreviousRevisionAcceptsRevisionOneCShapedGrammar(t *testing.T) {
 	t.Parallel()
 	tests := map[string]string{
-		"function header and tail": "fn main() -> i32 { 0 }\n",
-		"colon declarations":       "struct Pair { value: i32; }\nfn read(pair: Pair) -> i32 { let value: i32 = pair.value; value }\n",
-		"resource drop":            "resource File { handle: i32; drop fn(self: &mut Self) { let seen: i32 = self.handle; } }\n",
-		"impl receiver":            "struct Pair { value: i32; }\nimpl Pair { fn read(self: &Self) -> i32 { self.value } }\n",
-		"unparenthesized control":  "fn i32 choose(bool flag) { if flag { return 1; } else { return 0; } }\n",
-		"match expression":         "fn i32 choose(Result<i32, i32> value) { return match value { Result::ok(ok) => ok, Result::err(err) => err, }; }\n",
-		"record field colon":       "struct Pair { i32 value; }\nfn Pair make() { return Pair { value: 1 }; }\n",
-		"prefix structural types":  "fn i32 read(&mut [i32] values, *mut u8 output) { return 0; }\n",
-		"foreign function":         "unsafe extern C fn read(value: *mut u8) -> i32;\n",
-		"foreign function type":    "fn i32 call(callback: unsafe extern C fn(i32) -> i32) { return 0; }\n",
+		"function":         "fn i32 answer() { return 42; }\n",
+		"declarations":     "struct Pair { i32 value; }\nfn i32 read(Pair pair) { let i32 value = pair.value; return value; }\n",
+		"resource cleanup": "resource File { i32 handle; cleanup { let i32 seen = this.handle; } }\n",
+		"control":          "fn i32 choose(bool flag) { if (flag) { return 1; } else { return 0; } }\n",
+		"switch":           "fn i32 choose(Result<i32, i32> value) { return switch (value) { case .ok(ok) : { ok } case .err(err) : { err } }; }\n",
+		"classic for":      "fn i32 count() { var i32 value = 0; for (var i32 index = 0; index < 2; index = index + 1) { value = value + 1; } return value; }\n",
 	}
 	for name, body := range tests {
 		name, body := name, body
@@ -46,8 +42,8 @@ func TestCurrentParserRejectsEveryPreviousRevisionSpelling(t *testing.T) {
 				t.Fatalf("ParsePreviousRevision() diagnostics = %+v", previous.Diagnostics)
 			}
 			current := Parse(file, source.DefaultLimits())
-			if len(current.Diagnostics) == 0 {
-				t.Fatal("Parse() accepted previous-revision syntax")
+			if len(current.Diagnostics) != 0 {
+				t.Fatalf("Parse() diagnostics = %+v", current.Diagnostics)
 			}
 		})
 	}
@@ -609,6 +605,39 @@ func TestParseClassicForClausesLosslessly(t *testing.T) {
 	reconstructed, ok := tree.Reconstruct()
 	if !ok || !slices.Equal(reconstructed, input) {
 		t.Fatalf("Reconstruct() = %q, %v; want exact input", reconstructed, ok)
+	}
+}
+
+func TestParseCompoundAssignmentsPreservesOperators(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nfn i32 main() { var i32 value = 1; value += 2; value <<= 1; for (var i32 index = 0; index < 2; index += 1) { value ^= index; } return value; }\n")
+	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	var operators []string
+	for _, node := range tree.Nodes {
+		if node.Kind == KindAssignment {
+			operators = append(operators, node.Text)
+		}
+	}
+	if !slices.Equal(operators, []string{"+=", "<<=", "+=", "^="}) {
+		t.Fatalf("assignment operators = %v", operators)
+	}
+	if reconstructed, ok := tree.Reconstruct(); !ok || !slices.Equal(reconstructed, input) {
+		t.Fatalf("Reconstruct() = %q, %v; want exact input", reconstructed, ok)
+	}
+}
+
+func TestPreviousRevisionRejectsCompoundAssignment(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nfn i32 main() { var i32 value = 40; value += 2; return value; }\n")
+	tree := ParsePreviousRevision(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) == 0 {
+		t.Fatal("ParsePreviousRevision() accepted current-only compound assignment")
+	}
+	if reconstructed, ok := tree.Reconstruct(); !ok || !slices.Equal(reconstructed, input) {
+		t.Fatalf("Reconstruct() = %q, %v; want exact rejected input", reconstructed, ok)
 	}
 }
 

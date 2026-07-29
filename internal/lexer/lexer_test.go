@@ -7,7 +7,7 @@ import (
 	"github.com/0disoft/fairyc/internal/source"
 )
 
-func TestPreviousRevisionKeywordsAreIdentifiersInCurrentSource(t *testing.T) {
+func TestRetiredLegacyKeywordsAreIdentifiersInBothCurrentRevisions(t *testing.T) {
 	t.Parallel()
 	input := []byte("impl match drop self switch")
 	file := source.NewFile("main.fy", input)
@@ -18,12 +18,12 @@ func TestPreviousRevisionKeywordsAreIdentifiersInCurrentSource(t *testing.T) {
 	if !slices.Equal(currentKinds, []Kind{Identifier, Identifier, Identifier, Identifier, Keyword, EOF}) {
 		t.Fatalf("Lex() kinds = %v", currentKinds)
 	}
-	if !slices.Equal(previousKinds, []Kind{Keyword, Keyword, Keyword, Keyword, Keyword, EOF}) {
+	if !slices.Equal(previousKinds, []Kind{Identifier, Identifier, Identifier, Identifier, Keyword, EOF}) {
 		t.Fatalf("LexPreviousRevision() kinds = %v", previousKinds)
 	}
 }
 
-func TestForIsReservedOnlyByCurrentRevision(t *testing.T) {
+func TestForIsReservedByCurrentAndImmediatelyPreviousRevision(t *testing.T) {
 	t.Parallel()
 	input := []byte("for format")
 	file := source.NewFile("main.fy", input)
@@ -32,7 +32,7 @@ func TestForIsReservedOnlyByCurrentRevision(t *testing.T) {
 	if got := significantKinds(current.Tokens); !slices.Equal(got, []Kind{Keyword, Identifier, EOF}) {
 		t.Fatalf("Lex() kinds = %v", got)
 	}
-	if got := significantKinds(previous.Tokens); !slices.Equal(got, []Kind{Identifier, Identifier, EOF}) {
+	if got := significantKinds(previous.Tokens); !slices.Equal(got, []Kind{Keyword, Identifier, EOF}) {
 		t.Fatalf("LexPreviousRevision() kinds = %v", got)
 	}
 }
@@ -141,6 +141,28 @@ func TestRangePunctuationIsOneLosslessToken(t *testing.T) {
 	reconstructed, ok := result.Reconstruct()
 	if !ok || !slices.Equal(reconstructed, input) {
 		t.Fatalf("Reconstruct() = %q, %v; want %q, true", reconstructed, ok, input)
+	}
+}
+
+func TestCompoundAssignmentUsesLongestLosslessTokens(t *testing.T) {
+	t.Parallel()
+	input := []byte("a += 1; b -= 1; c *= 2; d /= 2; e %= 3; f <<= 1; g >>= 1; h &= 7; i ^= 1; j |= 2;")
+	result := Lex(source.NewFile("assignment.fy", input), source.NewBudget(source.DefaultLimits(), len(input)))
+	if len(result.Diagnostics) != 0 {
+		t.Fatalf("Lex() diagnostics = %+v", result.Diagnostics)
+	}
+	var operators []string
+	for _, token := range result.Tokens {
+		if token.Kind == Symbol && slices.Contains([]string{"+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "&=", "^=", "|="}, token.Text(result.Source)) {
+			operators = append(operators, token.Text(result.Source))
+		}
+	}
+	want := []string{"+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "&=", "^=", "|="}
+	if !slices.Equal(operators, want) {
+		t.Fatalf("operators = %v, want %v", operators, want)
+	}
+	if reconstructed, ok := result.Reconstruct(); !ok || !slices.Equal(reconstructed, input) {
+		t.Fatalf("Reconstruct() = %q, %v; want exact input", reconstructed, ok)
 	}
 }
 

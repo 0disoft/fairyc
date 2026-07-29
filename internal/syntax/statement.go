@@ -46,10 +46,10 @@ func (p *parser) parseBlockWithTail(allowTail bool) NodeID {
 		default:
 			statementStart := p.currentFullIndex()
 			expression := p.parseExpression(0, true)
-			if p.match("=") {
+			if operator := p.matchAssignmentOperator(); operator != "" {
 				right := p.parseExpression(0, true)
 				p.expectStatementTerminator()
-				children = append(children, p.addNode(KindAssignment, statementStart, []NodeID{expression, right}, "", ""))
+				children = append(children, p.addNode(KindAssignment, statementStart, []NodeID{expression, right}, operator, ""))
 				continue
 			}
 			if p.match(";") {
@@ -194,11 +194,23 @@ func (p *parser) parseForClause(allowBinding bool) NodeID {
 	}
 	start := p.currentFullIndex()
 	left := p.parseExpression(0, true)
-	if p.match("=") {
+	if operator := p.matchAssignmentOperator(); operator != "" {
 		right := p.parseExpression(0, true)
-		return p.addNode(KindAssignment, start, []NodeID{left, right}, "", "")
+		return p.addNode(KindAssignment, start, []NodeID{left, right}, operator, "")
 	}
 	return p.addNode(KindExprStmt, start, []NodeID{left}, "", "")
+}
+
+func (p *parser) matchAssignmentOperator() string {
+	for _, operator := range []string{"=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "&=", "^=", "|="} {
+		if operator != "=" && p.isPreviousRevision() {
+			continue
+		}
+		if p.match(operator) {
+			return operator
+		}
+	}
+	return ""
 }
 
 func (p *parser) parseControlExpression() NodeID {

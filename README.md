@@ -34,7 +34,7 @@ The Go Stage 0 compiler now implements immutable source bytes, a lossless lexer,
 syntax, error-free AST lowering, typed HIR, resource and borrow Flow, verified MIR, a bounded
 interpreter, deterministic C11 transport, strict local workspaces, stable new/check/build/run/test/C
   emission commands, and experimental Atlas fact export. The semantic runner executes all 42 v0 resolve, type,
-and local Flow cases, including integer-literal range rejection, branch- and loop-aware safe-borrow reassignment,
+and local Flow cases, including integer-literal range rejection, checked compound assignment, branch- and loop-aware safe-borrow reassignment,
 exact interprocedural borrow-return summaries, last-use loans, borrow-return origins, canonical
 `@effects(...)` sets, and caller-superset enforcement. Whole-root resource Flow
   also executes all 12 v0 cases for moves, cleanup obligations, branch joins, normal, break, and continue loop edges,
@@ -248,7 +248,9 @@ Immutable `ref u8[]` additionally supports read-only `usize` indexing to `u8` an
 `bounds` traps. Omitted bounds normalize to zero or the retained receiver length; written operands
 evaluate once left to right and preserve the receiver's borrow origin. Mutable `ref mut u8[]` also
 supports checked `u8` reads and indexed stores; the place is checked before the right-hand side is
-evaluated. Text indexing or slicing, a stable public string ABI, and the general safe text API still
+evaluated. Mutable integer locals and admitted indexed scalar places support statement-only exact-type
+`+=`, `-=`, `*=`, `/=`, `%=`, `<<=`, `>>=`, `&=`, `^=`, and `|=` with the existing traps and no
+promotions. Text indexing or slicing, a stable public string ABI, and the general safe text API still
 do not exist.
 Fixed arrays of `bool`, `i32`, `u8`, `u32`, or `usize` with `1 <= N <= 4096` now construct from
 nonempty list literals, cross internal calls and returns as inert copy values, expose exact
@@ -258,7 +260,8 @@ existing immutable byte-view calls and operations without unsafe code. A direct 
 of a mutable `u8[N]` likewise becomes `ref mut u8[]` only where that internal parameter type is
 expected. It carries exact length and may expose `ptr mut u8` only inside unsafe wrapper code; safe
 checked reads and indexed `u8` stores are available, while mutable slicing remains absent. Mutable
-fixed scalar-array locals and `mut` parameters likewise support checked element assignment. The ceiling is a provisional Stage 0
+fixed scalar-array locals and `mut` parameters likewise support checked element assignment and
+checked integer compound assignment. The ceiling is a provisional Stage 0
 implementation guard, not a stable language or ABI limit. A mutable safe-borrow local may
 be reassigned through straight-line, branch, and `while` control flow; Flow replaces its provenance
 after evaluating the right-hand side, joins reachable branch/header/`continue`/`break` origins
@@ -508,7 +511,7 @@ therefore validate an admitted FFI wrapper that the interpreter cannot execute. 
 `experimental run` accepts one entry plus a bounded explicit repeated-`--source` module closure whose
 entry module contains `main() -> i32`, then executes its
 verified MIR in the bounded interpreter, including boolean `if`, short-circuit control, scalar
-`while`, classic scalar `for`,
+`while`, classic scalar `for`, checked compound assignment,
 resource construction, field reads, whole-root call moves, resource-bearing built-in tagged values,
 ordered resource reassignment, consuming-close ownership patterns, cleanup drop events, Region
 fallthrough, direct-return, Result-propagation, nested, break, and continue reset paths, checked

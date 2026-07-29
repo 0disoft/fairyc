@@ -78,6 +78,11 @@ and continue edge to preserve the loop-header state of resources declared outsid
 Flow requires pending locals in exited scopes to be handled, and continue edges participate in
 repeated-iteration overwrite checks. Labelled and value-producing loop exits are not Stage 0.
 
+Compound assignment reuses the same trap categories as its underlying binary operator. It captures
+the old scalar value and completes the checked operation before the final store, so any bounds,
+overflow, division, remainder, or shift trap leaves the destination unchanged and performs no
+language-level cleanup.
+
 ## Traps
 
 A trap is a non-returning, non-unwinding termination. It performs no language-level drop or region reset. Trap categories are stable semantic outcomes even when the platform-specific termination mechanism differs.

@@ -609,6 +609,13 @@ through the existing stdout progress contract, uses one 11-byte stack buffer, an
 `INT32_MIN` through unsigned magnitude arithmetic. General formatting, floating-point conversion,
 other integer widths, padding, bases, locale, and implicit newlines remain separate decisions.
 
+ADR 0216 cuts the exact language pin to `fairyc-language/2` and adds statement-only checked integer
+compound assignment. All ten arithmetic, division, remainder, shift, and bitwise forms reuse the
+existing exact-type trap semantics; mutable local and indexed places evaluate once and store only
+after success. Classic `for` post clauses may now use `index += 1`. Assignment expressions,
+increment operators, promotions, wrapping operations, resource targets, and general projections
+remain absent.
+
 Exit gate: clean and warm build evidence is reproducible on a declared machine and workload; invalidation fixtures distinguish public interface, inline body, and private implementation; incompatible caches are safe misses.
 
 ## Phase 4: Atlas fact export
