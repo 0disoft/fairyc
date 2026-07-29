@@ -28,11 +28,11 @@ all-`i32` resources, and resource-bearing tags remain compiler-private; resource
 forbidden from `@repr(C)` and the public C ABI.
 ADR 0137 keeps that ISO C11 spelling as the transport baseline and separates any future newer-mode
 consumer validation from target ABI, runtime capability, and product emission identity.
-A separate Linux/amd64 runner is configured to require glibc, Clang, and GCC, link the embedded
-scalar runtime, compare process status at low and optimized profiles, probe valid target layouts,
-and run each production unit under a closed ASan+UBSan mode. No hosted success receipt has been
-observed, and the runner does not inspect objects, exercise the public C ABI,
-provide the complete product runtime, or establish the complete target profile. That narrow
+A separate Linux/amd64 runner requires glibc, Clang, and GCC, links the embedded
+scalar runtime, compares process status at low and optimized profiles, probes valid target layouts,
+and runs each production unit under a closed ASan+UBSan mode. ADR 0214 records its first hosted
+success, including bidirectional Clang/GCC ABI probes. The runner does not provide a public C ABI,
+the complete product runtime, or the complete target profile. That narrow
 capability does not advance the target itself to `emittable`.
 
 ## No native Fairy ABI
@@ -283,8 +283,9 @@ remain absent; `windows-x64-unwind-fixtures` therefore remains missing.
 
 This executable description is target data, not conformance evidence. Its evidence block names the
 existing `scalar-and-flat-copy-resource-tagged-c11` subset, keeps `emittable`, `conformant`, and `supported` false, and
-lists the missing hosted native C layout-probe receipt, bidirectional ABI, runtime, standard-library, hosted-Linux, toolchain
-baseline, and provisioning gates. `fairyc experimental target-spec x86_64-linux-gnu` exposes that
+lists the missing complete C layout, bidirectional ABI, runtime, standard-library, toolchain
+baseline, and provisioning gates. ADR 0214 records the first hosted Linux receipt without closing
+those gates. `fairyc experimental target-spec x86_64-linux-gnu` exposes that
 same immutable data without probing the host.
 
 The Windows evidence block reports `scalar-and-llp64-c-scalar-c11` while keeping all maturity

@@ -359,7 +359,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
 - A foreign result may also be a nonempty acyclic `@repr(C)` struct from the admitted field subset.
   Generated C uses the exact public tag and ordinary C by-value assignment; target-derived size,
   alignment, and field offsets remain asserted. Foreign aggregate parameters remain rejected. The
-  configured source probe crosses one 8-byte INTEGER-class result and one 20-byte MEMORY-class
+  source probe crosses one 8-byte INTEGER-class result and one 20-byte MEMORY-class
   hidden result between separate Clang/GCC objects in both directions and profiles.
 - The C backend is the only committed Stage 0 product backend and emits a constrained target/toolchain profile rather than universally portable C.
 - ISO C11 is the only normative constrained-C transport dialect. C17 or C23 compiler modes, if
@@ -382,22 +382,22 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   including hidden returns and whole-aggregate rollback under integer or SSE register exhaustion.
   Direct array signatures fail because fixed arrays cross C only inside a representable struct.
   The 14 pass plans generate separate Clang/GCC caller and callee objects in both directions and
-  profiles for 56 configured native crossings. This does not implement source FFI or establish a
-  hosted result.
+  profiles for 56 native crossings. ADR 0214 records their first hosted success. This does not
+  implement source FFI.
 - For Windows the same engine selects a distinct Microsoft x64 planner. A separate 15-case
   manifest covers RCX/RDX/R8/R9 and XMM0-3 selection by shared declaration-order slot, later stack
   parameters, 1/2/4/8-byte record integer transport, larger or odd-size record indirection, and the
   hidden-return RCX slot. Its 12 pass plans generate separate caller and callee C11 translation
-  units that local x64 MSVC compiles, links, and executes at low and optimized profiles. This is a
-  same-compiler local crossing, not source-level Fairy FFI, independent ABI inspection, or hosted
-  evidence.
+  units that x64 MSVC compiles, links, and executes at low and optimized profiles. ADR 0214 records
+  the first hosted execution of that same-compiler crossing. It is not source-level Fairy FFI or
+  independent ABI inspection.
 - `internal/pecoff` parses every retained or temporary executable produced by the Windows host
   smoke. It requires a bounded AMD64 PE32+ non-DLL console image, large-address awareness, aligned
   image/header/section ranges, a readable executable `.text` section, and an entry point inside
   executable code. It records import and exception-directory presence without treating either as
   validated content. Exact COFF object symbols and relocation types, complete `.pdata`/`.xdata`
-  semantics, CodeView/PDB, broad source-level Windows FFI, and a hosted receipt remain separate
-  gates.
+  semantics, CodeView/PDB, and broad source-level Windows FFI remain separate gates. The generic
+  hosted-receipt marker is closed by ADR 0214; complete object and unwind fixture gates are not.
 - The Windows C driver retains each compiler-produced `.obj` only in its bounded temporary root,
   parses it as raw AMD64 COFF, and fails before returning the linked image when the object has an
   optional PE header, linked-image flags, no `.text`/`.text$...` code, invalid raw or relocation
@@ -428,7 +428,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   POSIX-typedef probe. The Linux
   native runner compiles, links, and executes it with Clang/GCC and low/optimized profiles, checking
   recursive size, alignment, field size, and offset assertions. Failure cases remain Go-owned input
-  rejections. No hosted success receipt follows from the configured path.
+  rejections. ADR 0214 records the first hosted success of the valid probes.
 - A small MIR interpreter is the semantic oracle before any second native backend.
 - Its unstable `experimental run` path accepts one entry plus an explicit bounded repeated-`--source`
   closure, selects the entry module's `main() -> i32`, and performs no source discovery.
@@ -543,8 +543,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   Its closed
   `drop-trace-v0` emission profile assigns source/type/span identities to dense site IDs and compares
   exact four-byte native records with the MIR interpreter trace. This instrumentation is absent from
-  product `emit-c` and `build`. No hosted success receipt or broader target
-  conformance follows from the command's presence.
+  product `emit-c` and `build`. ADR 0214 records the first hosted success; broader target
+  conformance does not follow from either the command or that bounded receipt.
 - The experimental target-inspection command emits that target description without probing the
   host. It reports `scalar-and-flat-copy-resource-tagged-c11` separately while keeping `emittable`,
   `conformant`, and `supported` false and listing the evidence still missing.
@@ -736,8 +736,8 @@ Target layout assertions are versioned in `spec/fixtures/layout/manifest-v0.json
 vocabulary, size/alignment arithmetic, declaration-order offsets, top-level padding, and failure
 codes without creating a serialized compiler IR, source-level aggregate promise, or native ABI
 receipt. Linux pass cases feed the configured Clang/GCC native probe. The eight Windows pass cases
-feed a separate local x64 MSVC C11 probe at low and optimized profiles; this is not complete Windows
-layout coverage or a hosted receipt.
+feed a separate x64 MSVC C11 probe at low and optimized profiles. ADR 0214 records its first hosted
+execution, but this is not complete Windows layout coverage.
 
 Formatting, rendered/general documentation generation, vendoring, binding generation, and ABI
 inspection remain planned tool surfaces rather than claims of current implementation. The narrow

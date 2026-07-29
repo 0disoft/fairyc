@@ -100,7 +100,7 @@ Verified resource definitions now preserve ordered fields and
   `write_bytes`, and `write_stderr_bytes` now provide progress-preserving target-neutral text and
   binary output operations. `read_stdin` adds one allocation-free bounded mutable-byte-view input
   operation with EOF-as-success semantics. Windows has exact separated output plus direct-artifact
-  EOF, short-input, and bounded-prefix evidence; Linux probes remain configured but unobserved.
+  EOF, short-input, and bounded-prefix evidence; ADR 0214 records the Linux probes' first hosted run.
   Input forwarding for other native commands, portable files, broader console operations, effect-bearing function values,
   and every later Phase 1
   capability remain unimplemented.
@@ -114,8 +114,8 @@ Exit gate: positive and negative fixtures agree with the source contracts, resou
 
 ## Phase 2: first hosted executable slice
 
-Current implementation status: a fail-closed Linux/amd64 constrained-C differential command now
-requires glibc, Clang, and GCC and is wired into a separate hosted Ubuntu CI job. It is designed to
+Current implementation status: a fail-closed Linux/amd64 constrained-C differential command
+requires glibc, Clang, and GCC and runs in a separate hosted Ubuntu CI job. It executes
 run all 37 emission cases at low and optimized profiles for 148 process-status and exact
 source-linked drop-trace comparisons, then drive
 the actual experimental build CLI with resource-bearing Option and Result plus a flat all-`i32` resource
@@ -125,9 +125,9 @@ private compiler-owned `ref u8[]` view, plus separate generated-Fairy-to-C calls
 of `fairy\0` and every non-terminated byte of `fairy` respectively. The same job
 also compiles and executes each production, uninstrumented C unit with Clang
   and GCC under the closed `address-undefined-o1` ASan+UBSan mode for 74 fail-closed sanitizer
-executions. The current Windows
-host has no eligible Linux toolchain, and no hosted run receipt has been observed, so this is a
-configured lane rather than native conformance evidence. A shared bounded C driver and embedded
+executions. GitHub Actions run `30442310794` passed the complete lane for exact commit `0bb4199`;
+ADR 0214 records that first hosted receipt. It closes the receipt marker only, not native
+conformance. A shared bounded C driver and embedded
 scalar runtime serve both that lane and the experimental explicit-source-closure build command, while a separate
 closed conformance runtime records four-byte drop-site IDs only for the native matrix. Product C and
 product-built artifacts contain no observer. This proves
@@ -162,8 +162,8 @@ remain unobserved on this Windows host; the later Arena, text ownership, and Lin
 exist and each has a raw generated-Fairy source crossing.
 The next storage slice now adds provisional Buffer construction, initialized-prefix-only reserve,
 overlap-safe append across relocation, overflow rollback, zeroed growth, truncate, clear, and drop.
-Its four C-only native probe executions and four generated-Fairy source-call executions are
-configured but unobserved. The internal caller uses the exact nested SystemHeap-block record and
+Its four C-only native probe executions and four generated-Fairy source-call executions are included
+in the hosted run recorded by ADR 0214. The internal caller uses the exact nested SystemHeap-block record and
 reaches initialize, zeroed resize, and drop. Used-symbol product linkage now supplies the exact
 Buffer/SystemHeap closure, but public `std::bytes` and safe ownership methods remain missing. A raw
 Buffer caller now executes against an instrumented target-specific closure at both MSVC profiles.
@@ -172,7 +172,7 @@ failure, preserves exact storage state and initialized bytes, proves recovery ze
 the live-allocation count to zero after drop.
 The Arena storage slice now adds a single-active-Region generation check, failure-atomic zeroed and
 copied byte placement, reset invalidation, stale-use rejection, and active-drop rejection. Its four
-C-only executions and four generated-Fairy source-call executions are configured but unobserved.
+C-only executions and four generated-Fairy source-call executions ran in ADR 0214's hosted receipt.
 The internal caller crosses exact self-linked node, Arena, and Region records, obtains zeroed bytes
 through `void **`, and verifies reset/drop generations; lexical Region lowering, source-level
 `std::alloc` construction, and safe calls remain missing. Windows target resolution now admits six
@@ -185,8 +185,8 @@ executes against the target-specific implementation at both MSVC profiles, obser
 copied bytes, forces payload and node allocation failure independently, proves rollback to zero live
 allocations, and rechecks stale Region and active-drop rejection.
 The allocation-free text-view slice now checks canonical UTF-8 and code-point byte boundaries,
-including overlong, surrogate, out-of-range, truncated, and obsolete forms. Its four native runs
-are configured but unobserved. A separate four-way Fairy-source crossing now calls the actual
+including overlong, surrogate, out-of-range, truncated, and obsolete forms. ADR 0214 records its
+four native runs. A separate four-way Fairy-source crossing now calls the actual
 empty-input UTF-8 validator in the text-view C unit; the public borrowed text result, nonempty
 source pointer path, and full wrapper remain missing.
 Compiler-owned `c"..."` storage now crosses semantic typing with `Static` origin, MIR as exact
@@ -228,11 +228,12 @@ initial String/CString allocation and String append reallocation failures, prove
 returns its live-allocation count to zero. Stable `std::text`, public layouts, and general
 user-defined raw-parts reconstruction remain later gates.
 The Linux File C slice now also covers partial read/write, write-all progress, sync, and consuming
-close including forced close failure. Its four C-only native runs remain configured but unobserved.
+close including forced close failure. ADR 0214 records its four C-only native runs.
 A second four-way generated-Fairy crossing uses exact result, File, and open-option records to call
 the real open, write-all, sync, close, reopen, partial-read, EOF, and final-close helpers. It checks
-exact counts, repeated-close status, normalized closed state, and reconstructed bytes. Public safe
-File ownership, source effects, typed errors, and hosted execution evidence remain missing.
+exact counts, repeated-close status, normalized closed state, and reconstructed bytes. ADR 0214
+records the hosted execution; public safe File ownership, source effects, and typed errors remain
+missing.
 Used-symbol product linkage now selects Linux File only for actual admitted calls.
 The Windows target now owns a separate raw File C component over inline `HANDLE` state. It has
 bounded ASCII-to-`WCHAR` open, one-call partial read, progress-preserving write-all, explicit sync,
@@ -345,7 +346,8 @@ the shared probe allocator's live count to zero.
 The Windows target commands now admit one entry plus a bounded explicit repeated-`--source` FY
 module closure; the driver performs no manifest or implicit source discovery. Every foreign
 companion input, unproven Windows standard-library component, user linker argument, debug output,
-packaging, and hosted receipt remains closed. The Windows TargetSpec therefore reports
+and packaging remain closed. ADR 0214 separately records the first hosted native receipt. The
+Windows TargetSpec therefore reports
 `scalar-and-llp64-c-scalar-c11` and no longer lists `target-c-emission-profile`, while all three
 maturity booleans remain false.
 The same target compilation is now exposed through `experimental run-target`. It validates PE and
@@ -380,10 +382,11 @@ emits the exact 16 ASCII bytes `Fairy C says hi\n`, and exits 42. Its `main` con
 foreign call, or `unsafe`. The same
 output/status contract is observed both in-process and through the separately built `fairyc.exe`.
 This does not establish a safe or portable `std::io` surface, target support, or self-hosting.
-The GitHub Actions Windows matrix is now configured to execute that full smoke after `go test`,
-using the hosted runner's local x64 MSVC and SDK with no WSL and retaining no artifacts. The
-`hosted-windows-receipt` marker deliberately remains missing until an exit-zero workflow run is
-observed for the exact commit; workflow text is not execution evidence.
+The GitHub Actions Windows matrix executes that full smoke after `go test`, using the hosted
+runner's local x64 MSVC and SDK with no WSL and retaining no artifacts. Run `30442310794` passed the
+Windows job for exact commit `0bb4199`; ADR 0214 records the receipt and removes only the
+`hosted-windows-receipt` marker. Incomplete ABI, object, unwind, runtime, standard-library,
+toolchain-baseline, and provisioning gates remain.
 
 - Implement `x86_64-linux-gnu` `TargetSpec`, toolchain resolution, constrained generated-C transport, and C-driver linking.
 - Implement the thin runtime and minimum `SystemHeap`, `Arena`, `Buffer`, text views, `String`, `CString`, and Linux `File` surface required by representative fixtures.
@@ -591,8 +594,8 @@ rendering policy, and owned stream handles remain separate decisions.
 ADR 0211 extends the SDK to `0.0.0-stage0.5` with
 `read_stdin(ref mut u8[]) -> Result<usize, ConsoleReadError>`. One call performs at most one bounded
 read, success with zero means EOF, and callers own retry or fill loops. Windows direct-artifact
-execution proves EOF, short input, and truncation at an eight-byte buffer; the Linux adapter has a
-configured but unobserved probe. Text decoding, line buffering, stable CLI stdin forwarding,
+execution proves EOF, short input, and truncation at an eight-byte buffer; ADR 0214 records the
+Linux adapter probe's first hosted execution. Text decoding, line buffering, stable CLI stdin forwarding,
 arguments, terminal policy, and owned stream handles remain separate decisions.
 
 ADR 0212 promotes caller stdin forwarding into stable run v3 without changing its spelling. Input is

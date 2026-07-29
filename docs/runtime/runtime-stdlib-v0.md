@@ -109,8 +109,8 @@ internal Linux generated Fairy caller
 declares the exact `void *`, `size_t`, `size_t` block and observes allocation plus normalized release
 through a bounded C test observer. Its independent closed Linux probe still checks empty normalization,
 alignment, prefix preservation, failure rollback, malformed-block rejection, shrink, and release
-under Clang/GCC at low and optimized profiles. Neither path deterministically forces host OOM, and
-no hosted success receipt has been observed.
+under Clang/GCC at low and optimized profiles. ADR 0214 records the first hosted success. Neither
+path deterministically forces host OOM.
 
 ## `Buffer`
 
@@ -142,8 +142,8 @@ nonempty construction, reserve, self-overlap append growth, and zeroed-resize gr
 growth failure must preserve pointer, capacity, alignment, initialized length, bytes, and one live
 allocation; recovery plus final drop must return the live count to zero. The raw caller and
 target-specific implementation execute as separate translation units at low and optimized x64 MSVC
-profiles. The four configured Linux executions remain unobserved on this Windows host, and product
-linkage contains no probe controls.
+profiles. The four Linux executions cannot run on this Windows host, but ADR 0214 records their
+first hosted success. Product linkage contains no probe controls.
 
 ## `Arena` and `Region`
 
@@ -203,8 +203,8 @@ obsolete leaders. ASCII NUL remains valid text. Slicing accepts only ordered in-
 that land on code-point boundaries and leaves output unchanged on failure. Empty storage identity
 is normalized but not observable; compiler borrow origins remain outside the C record.
 
-The four-way native probe for these validation and slicing cases is configured but unobserved on
-this Windows host. Its canonical validator additionally exposes the internal ABI-major symbols
+The four-way native probe for these validation and slicing cases cannot run on this Windows host,
+but ADR 0214 records its first hosted Linux execution. Its canonical validator additionally exposes the internal ABI-major symbols
 `fy_std_text_utf8_valid_v0` and `fy_std_text_validate_utf8_v0`. One Fairy source fixture calls the
 empty-input predicate through raw FFI; another constructs the exact flat `@repr(C)` view record,
 passes its verified direct-local raw address, and observes the C helper replace sentinel length 99

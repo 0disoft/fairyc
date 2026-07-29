@@ -14,7 +14,7 @@
   "deferred": [
     "source-level fixed arrays, inert structs, explicit C enums, raw pointers, and @repr(C) semantic lowering",
     "SysV AMD64 eightbyte argument and return class execution, register exhaustion, and hidden aggregate returns",
-    "hosted success receipts for the configured Clang and GCC layout probes, bidirectional C ABI calls, and object metadata",
+    "retained hosted receipt artifacts and versioned object-metadata fixtures",
     "resources, tagged values, safe borrows, slices, strings, packed layout, unions, bit fields, atomics, vectors, and additional targets"
   ],
   "cases": [

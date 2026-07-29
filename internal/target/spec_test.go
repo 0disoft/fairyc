@@ -44,6 +44,11 @@ func TestX8664LinuxGNUSpecIsValidAndHostIndependent(t *testing.T) {
 	if spec.Evidence.Emittable || spec.Evidence.Conformant || spec.Evidence.Supported || len(spec.Evidence.Missing) == 0 {
 		t.Fatalf("target evidence overclaims maturity = %+v", spec.Evidence)
 	}
+	for _, missing := range spec.Evidence.Missing {
+		if missing == "hosted-linux-receipt" || missing == "c-layout-probes" || missing == "bidirectional-c-abi-fixtures" {
+			t.Fatalf("observed Linux hosted evidence remains marked missing: %+v", spec.Evidence)
+		}
+	}
 	encoded, err := json.Marshal(spec)
 	if err != nil {
 		t.Fatal(err)
@@ -87,7 +92,7 @@ func TestX8664WindowsMSVCSpecIsValidLLP64AndFailClosed(t *testing.T) {
 		t.Fatalf("Windows target overclaims maturity = %+v", spec.Evidence)
 	}
 	for _, missing := range spec.Evidence.Missing {
-		if missing == "windows-x64-abi-classifier" || missing == "target-c-emission-profile" {
+		if missing == "windows-x64-abi-classifier" || missing == "target-c-emission-profile" || missing == "hosted-windows-receipt" {
 			t.Fatalf("implemented Windows evidence remains marked missing: %+v", spec.Evidence)
 		}
 	}

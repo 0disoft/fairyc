@@ -223,6 +223,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0211-target-neutral-stage0-stdin-read.md`: safe allocation-free mutable-byte-view stdin reads, EOF-as-success semantics, SDK stage0.5 identity, target-owned POSIX/Win32 adapters, and direct Windows artifact input evidence.
 - `0212-stable-windows-workspace-run-v3.md`: stable run stdin forwarding after successful compilation, no compiler-side input buffering, preserved embedding EOF behavior, and exact in-process plus standalone Windows evidence.
 - `0213-classic-scalar-for-loop.md`: C-shaped optional-clause scalar counter loops, loop-local initializer scope, continue-through-post control, explicit CST/AST/HIR shape, verified MIR elimination, and the exact language `/1` cutover.
+- `0214-first-hosted-native-ci-receipts.md`: exact green GitHub run evidence for Linux layout and bidirectional ABI probes plus the Windows native smoke, removal of only satisfied evidence markers, and no target maturity promotion.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

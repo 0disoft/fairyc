@@ -140,11 +140,8 @@ var x8664LinuxGNUSpec = Spec{
 	Evidence: Evidence{
 		EmissionSubset: "scalar-and-flat-copy-resource-tagged-c11",
 		Missing: []string{
-			"bidirectional-c-abi-fixtures",
-			"c-layout-probes",
 			"complete-runtime",
 			"complete-standard-library",
-			"hosted-linux-receipt",
 			"toolchain-baseline",
 			"toolchain-provisioning",
 		},
@@ -195,7 +192,6 @@ var x8664WindowsMSVCSpec = Spec{
 			"c-layout-probes",
 			"complete-runtime",
 			"complete-standard-library",
-			"hosted-windows-receipt",
 			"pe-coff-object-fixtures",
 			"toolchain-baseline",
 			"toolchain-provisioning",

@@ -58,11 +58,8 @@ func TestStableTargetsReportsKnownMaturityWithoutReadingSource(t *testing.T) {
   conformant: no
   supported: no
   missing evidence:
-    - bidirectional-c-abi-fixtures
-    - c-layout-probes
     - complete-runtime
     - complete-standard-library
-    - hosted-linux-receipt
     - toolchain-baseline
     - toolchain-provisioning
 
@@ -77,7 +74,6 @@ x86_64-windows-msvc
     - c-layout-probes
     - complete-runtime
     - complete-standard-library
-    - hosted-windows-receipt
     - pe-coff-object-fixtures
     - toolchain-baseline
     - toolchain-provisioning

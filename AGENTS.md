@@ -99,7 +99,7 @@ regenerate, or override compiler source.
 - Package-aware Windows workspace build/run CLI and native smoke: internal/cli/workspace_native.go, internal/cli/program_output.go, cmd/fairyc-windows-host-smoke/, examples/workspace_quickstart/, examples/std_io_quickstart/, docs/adr/0148-package-aware-windows-build-run.md, docs/adr/0205-target-neutral-stage0-stdout-write.md, docs/adr/0207-stable-windows-workspace-run-v2.md, docs/adr/0212-stable-windows-workspace-run-v3.md
 - Executable MIR semantics: docs/mir/*.md
 - Package identity and visibility: docs/package/*.md
-- Target and C ABI: docs/abi/*.md
+- Target and C ABI: docs/abi/*.md, docs/adr/0214-first-hosted-native-ci-receipts.md
 - Runtime and standard library: docs/runtime/*.md
 - Compatibility and versioning: docs/compatibility/*.md
 - Diagnostic meanings: docs/diagnostics/catalog-v0.md

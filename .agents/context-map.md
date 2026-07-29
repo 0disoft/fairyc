@@ -86,7 +86,7 @@
 - Package-aware Windows workspace build/run route: internal/cli/workspace_native.go, internal/cli/program_output.go, cmd/fairyc-windows-host-smoke/, examples/workspace_quickstart/, examples/std_io_quickstart/, docs/adr/0148-package-aware-windows-build-run.md, docs/adr/0207-stable-windows-workspace-run-v2.md, docs/adr/0212-stable-windows-workspace-run-v3.md
 - MIR and C backend route: docs/mir/
 - Package identity and visibility route: docs/package/
-- Target and C ABI route: docs/abi/
+- Target and C ABI route: docs/abi/, docs/adr/0214-first-hosted-native-ci-receipts.md
 - Runtime and standard-library route: docs/runtime/
 - Compatibility route: docs/compatibility/
 - Diagnostics route: docs/diagnostics/catalog-v0.md

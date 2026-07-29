@@ -86,6 +86,9 @@ unwind/debug contract, and C-layout feature vocabulary are compatibility data. I
 evidence is current capability evidence, not an ABI promise; promoting a status requires the named
 fixture and hosted receipts rather than only editing the booleans. The experimental CLI schema at
 `spec/cli/experimental-target-spec-v0.schema.json` must remain synchronized with the Go model.
+ADR 0214 records the first exact hosted Linux and Windows native run, removes the satisfied Linux
+layout/bidirectional-ABI and Linux/Windows hosted-receipt markers, and leaves every maturity boolean
+false. Runner labels and observed tool versions do not become compatibility baselines.
 The target entry's `emissionSubset` is compatibility data: it names what the selected backend
 profile may represent, not whether the target is conformant. The experimental `build-target`
 command currently admits only `x86_64-windows-msvc`, a fixed low/optimized profile choice, one

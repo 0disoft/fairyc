@@ -111,8 +111,9 @@ The same target-bound engine now selects a separate Microsoft x64 algorithm for 
 versioned cases cover shared ordinal RCX/RDX/R8/R9 or XMM0-3 slots, fifth-argument stack transport,
 small aggregate integer transport, odd-size and 16-byte aggregate indirection, and hidden-return
 slot shifting. The 12 pass plans additionally generate separate caller and callee C11 translation
-units that local x64 MSVC compiles, links, and executes at low and optimized profiles. Independent
-compiler or assembly/register inspection and a hosted receipt remain missing. A shared
+units that x64 MSVC compiles, links, and executes at low and optimized profiles. ADR 0214 records
+the first hosted same-MSVC execution; independent compiler or assembly/register inspection remains
+missing. A shared
 generated-Fairy caller now also crosses one 8-byte register-sized and one 20-byte hidden-result
 `@repr(C)` return from an independently compiled C callee at both MSVC profiles. The identical C11
 units repeat those crossings under MSVC's C17 consumer mode without creating a C17 emitter. Broader and
@@ -184,24 +185,24 @@ stable build produces the same inspected Windows PE for direct execution. Direct
 EOF, a short input echo, and an eight-byte bounded prefix. Stable `fairyc run` forwards the short
 input after successful compilation, and a separately built `fairyc.exe` repeats that path plus the
 locked build and artifact execution.
-Linux owns a POSIX adapter and four configured native probes covering all three process streams, but
-this Windows host has not observed those executions. Byte input and output perform no UTF-8
+Linux owns a POSIX adapter and four native probes covering all three process streams. The first
+hosted Linux receipt in ADR 0214 executed that configured lane successfully. Byte input and output perform no UTF-8
 validation. Formatting, implicit newlines, text or line input, terminal encoding, live output
 interleaving, and a final symbolic error taxonomy remain outside the API.
 A provisional SystemHeap implementation now lives in the target standard-library
 boundary rather than the thin runtime. It normalizes empty allocation, admits current fundamental
 alignments, preserves bytes across copy-and-release growth or shrink, and leaves the old block
 unchanged when validation or allocation fails. A closed C-only probe and an internal generated FY
-caller using the exact `void *`/`size_t` block each have four configured Clang/GCC low/optimized
-executions. Neither has an observed hosted receipt. `experimental build` now selects this helper
+caller using the exact `void *`/`size_t` block each have four Clang/GCC low/optimized executions in
+the hosted receipt recorded by ADR 0214. `experimental build` now selects this helper
 when an actual generated call requires it, but no public `std::alloc` API exists. Arena, text
 ownership, and Linux File now have their own C slices below; each now also has a raw generated-Fairy
 source crossing.
 A second provisional slice implements Buffer-owned initialized bytes, failure-atomic reserve,
 relocating self-overlap append, length-overflow rollback, zeroed growth, truncate, clear, and drop.
 Its closed C-only probe and an internal generated FY caller using the exact nested SystemHeap-block
-plus `size_t` record each have four configured Clang/GCC low/optimized executions. Neither has an
-observed hosted receipt. Three exact Buffer helpers are now admitted by the constrained source
+plus `size_t` record each have four Clang/GCC low/optimized executions in that hosted receipt.
+Three exact Buffer helpers are now admitted by the constrained source
 backend and exercised by the closed native fixture. Used-symbol product linkage selects the Buffer
 plus SystemHeap dependency closure; the public standard-library package remains absent. An
 independent raw caller now links the target-specific Buffer closure as a separate MSVC translation
@@ -300,7 +301,7 @@ optimized x64 MSVC builds prove String copy and append, CString creation for non
 text, interior-NUL rejection, safe internal borrowed-view calls, scalar lengths, and implicit
 cleanup while keeping raw pointers and foreign calls out of its entry module.
 The Linux File C slice now exposes partial I/O, write-all progress, sync, and consuming close that
-is never retried, even after failure. Its C-only four-way probe remains configured but unobserved.
+is never retried, even after failure. ADR 0214 records its C-only four-way probe's first hosted run.
 A separate generated FY caller now crosses exact result, File, and open-option records into the real
 open, write-all, sync, consuming-close, reopen, partial-read, EOF, and final-close helpers. It also
 requires a repeated close to report the closed status and both completed closes to normalize the
@@ -347,9 +348,8 @@ exact-symbol contract to link the minimal provisional standard-library dependenc
 declarations pull in nothing, while arbitrary foreign libraries and linker arguments remain closed.
 This enables raw internal calls, not yet a public `std::*` programming surface.
 A deterministic native C11 plus explicit POSIX-typedef probe now translates the eleven valid layout cases into private numeric
-types and is configured for Clang/GCC at `-O0` and `-O2`. This Windows host cannot execute those
-four probe runs, and no hosted success receipt has been observed, so `c-layout-probes` remains a
-missing target evidence marker.
+types for Clang/GCC at `-O0` and `-O2`. This Windows host cannot execute those four probe runs, but
+ADR 0214 records their first hosted success, so `c-layout-probes` is no longer missing for Linux.
 A separate Windows C11 probe translates the eight valid LLP64 cases into private numeric types and
 compiles and executes them twice with local x64 MSVC through the configured host smoke. The same
 smoke separately crosses all 12 validated Microsoft x64 call cases between caller and callee
@@ -378,12 +378,14 @@ slots, version-2 epilog descriptor bounds, and minimum handler or chained tails.
 product currently exposes both version 1 and version 2 records. The native unwind probe separately
 proves its closed exception payload, captured-context virtual walk, and handler-directed termination
 path. Version-2 epilog offset semantics, language-specific handler data, recursive chains,
-Fairy/foreign-frame crossings, object-level unwind relocations, and hosted fixtures remain open.
-A separate fail-closed Linux/amd64 command is now present to compile those cases with Clang and GCC
+Fairy/foreign-frame crossings, object-level unwind relocations, and a complete versioned unwind
+fixture contract remain open despite the observed generic Windows hosted receipt.
+A separate fail-closed Linux/amd64 command compiles those cases with Clang and GCC
 at `-O0` and `-O2`, link a closed conformance runtime, and compare process outcomes plus exact
-source-linked resource-drop sequences. Product emission and product builds contain no trace observer. It cannot run on
-this Windows host because no Linux Clang/GCC execution environment is installed, and its hosted CI result
-has not yet been observed. The target therefore remains unsupported.
+source-linked resource-drop sequences. Product emission and product builds contain no trace observer.
+This Windows host still has no Linux Clang/GCC execution environment, but GitHub Actions run
+`30442310794` passed the complete hosted Linux lane for commit `0bb4199` as recorded by ADR 0214.
+The remaining runtime, standard-library, ABI, baseline, and provisioning gaps keep the target unsupported.
 A stable source-independent `fairyc explain <diagnostic-code>` lookup reports reserved Stage 0
 meanings and categories without reading source or invoking a toolchain while still marking the
 catalog provisional. A stable `fairyc targets` human report lists declared target maturity and

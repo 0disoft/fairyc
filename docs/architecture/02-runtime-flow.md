@@ -132,10 +132,11 @@ low and optimized profiles. Neither local/configured path is a hosted receipt by
 SysV AMD64 eightbyte/register plans; Windows produces Microsoft x64 ordinal-slot, direct-small-
 aggregate, indirect-aggregate, and hidden-result plans. The Linux runner turns its validated pass plans into separate Clang/GCC
 caller and callee objects in both directions. Generated Fairy callers now cross scalar, pointer,
-register-result, and hidden-memory-result boundaries; an observed hosted result remains a later
-evidence layer. The Windows host smoke turns all twelve validated pass plans into separate caller
+register-result, and hidden-memory-result boundaries; ADR 0214 records the first hosted Linux
+result. The Windows host smoke turns all twelve validated pass plans into separate caller
 and callee C11 translation units and crosses them through local x64 MSVC at both profiles. That
-same-compiler probe remains below source-level Fairy FFI, independent ABI inspection, and hosted
+same-compiler probe remains below source-level Fairy FFI and independent ABI inspection; ADR 0214
+records its first hosted
 evidence.
 `internal/pecoff` is the next evidence boundary after local linking. It parses executable bytes
 without using the host loader and rejects non-AMD64, non-PE32+, DLL, non-console, misaligned,
@@ -221,8 +222,8 @@ and separately runs every production unit under a closed ASan+UBSan mode. The sa
 and runtime feed an explicit experimental source-closure build command whose artifact is confined to
 the ignored source-root `build/` directory. One product smoke remains scalar/resource-only; a second
 requires the ordinary build path to select and link the real text-view C component from an actual
-Fairy call. The current Windows host cannot execute either native path, and no hosted run has been
-observed yet. Complete runtime, public ABI, and supported-target gates remain unimplemented.
+Fairy call. The current Windows host cannot execute the Linux-native path, but ADR 0214 records its
+first hosted run. Complete runtime, public ABI, and supported-target gates remain unimplemented.
 
 ## Atlas flow
 

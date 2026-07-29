@@ -11,7 +11,7 @@
     "docs/compatibility/versioning-v0.md"
   ],
   "deferred": [
-    "bidirectional Clang and GCC ABI probe execution and hosted success receipts",
+    "retained hosted receipt artifacts and a stable Clang/GCC toolchain baseline",
     "exact stack argument-area offsets, call-site padding, object inspection, and assembly inspection",
     "source-level @repr(C), extern declaration, callback, binding, and unsafe FFI semantic lowering",
     "variadics, vectors, x87, unions, packed or custom alignment, bit fields, atomics, TLS, and foreign unwinding"

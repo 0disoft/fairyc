@@ -7,6 +7,11 @@
 `.github/workflows/frontend.yml` runs on pushes and pull requests. It validates the Go frontend on
 GitHub-hosted Ubuntu and Windows runners using the version declared by `go.mod`.
 
+The first exact hosted native receipt is GitHub Actions run `30442310794` for commit `0bb4199`,
+completed successfully on 2026-07-29. ADR 0214 records its Ubuntu frontend, Windows frontend/native,
+and Linux C-differential jobs. This observation removes the two hosted-receipt markers but does not
+pin a runner image or toolchain baseline and does not promote either target.
+
 - Token permissions are limited to `contents: read`.
 - Concurrent runs for the same workflow and ref cancel the older run.
 - Retained GitHub Actions dependency and build caching remains disabled. The compiler has one small
@@ -254,9 +259,9 @@ executes the closed synthetic exception and virtual-unwind walk described above,
 validate complete version-2 epilog semantics, language-specific handler payload parsing, recursive
 chains, Fairy/foreign-frame crossings, object-level unwind relocations, or hosted runner behavior.
 
-The Windows matrix now configures that same smoke after its ordinary Go test suite. Configuration
-alone is not a hosted receipt: `hosted-windows-receipt` remains missing until GitHub records an
-exit-zero run for the exact commit, and a later code or runner-image change requires a fresh run.
+The Windows matrix runs that same smoke after its ordinary Go test suite. Run `30442310794` is the
+first recorded exit-zero hosted receipt. A later native-code, workflow, or runner-image change
+requires fresh hosted evidence; the observation is not a stable MSVC or SDK baseline.
 
 All Go jobs set `CGO_ENABLED=0`. The checked-in `.c` files are constrained-backend and runtime
 inputs loaded by Go code as data; they are not cgo translation units. This keeps `go vet`, `go
@@ -279,6 +284,6 @@ not an automatic side effect of this CI repair.
 - Required validation names: VALIDATION.md
 - Release blocker status: UNDECIDED; branch protection is external repository state and is not
   claimed by this document.
-- Remaining operational risk: remote workflow execution, including the Linux native job and the
-  Windows native target smoke, has not been observed at the current commit, and no timed fuzz
-  campaign or coverage threshold exists.
+- Remaining operational risk: ADR 0214 records one exact green Linux/Windows native workflow run,
+  but future native-code, workflow, or runner-image changes require fresh receipts, and no timed
+  fuzz campaign or coverage threshold exists.
