@@ -168,6 +168,7 @@ fn i32 main() {
     var u8[2] input = [0, 0];
     discard io::write("Fairy C says hi\n");
     discard io::write_bytes(b"\x00\xff");
+    discard io::write_i32(-2147483647 - 1);
     discard io::write_stderr("Fairy C warns too\n");
     discard io::write_stderr_bytes(b"\x80\x00");
     discard io::read_stdin(ref mut input);
@@ -204,6 +205,7 @@ func TestBundledStandardLibraryIORequiresConsoleEffect(t *testing.T) {
 	}{
 		{function: "write", argument: `"Fairy C says hi\n"`},
 		{function: "write_bytes", argument: `b"\x00\xff"`},
+		{function: "write_i32", argument: `-2147483647 - 1`},
 		{function: "write_stderr", argument: `"Fairy C warns too\n"`},
 		{function: "write_stderr_bytes", argument: `b"\x80\x00"`},
 		{function: "read_stdin", argument: "ref mut input", setup: "    var u8[2] input = [0, 0];\n"},

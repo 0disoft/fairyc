@@ -71,11 +71,11 @@ std::alloc  SystemHeap, Arena, AllocError
 std::bytes  Buffer
 std::text   UTF-8 validation, String, CStr, CString
 std::fs     Linux File and open options
-std::io     exact stdout/stderr byte writes and one bounded stdin byte read
+std::io     exact stdout/stderr byte writes, decimal i32 output, and one bounded stdin byte read
 std::c      C scalar types and raw wrapper helpers
 ```
 
-The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.5` exports opaque `std::alloc::Arena`, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, ADR 0210's matching immutable byte-view output operations, and ADR 0211's bounded mutable-byte-view stdin read; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
+The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.6` exports opaque `std::alloc::Arena`, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, ADR 0210's matching immutable byte-view output operations, ADR 0211's bounded mutable-byte-view stdin read, and ADR 0215's allocation-free decimal `i32` output; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
 
 Built-in `Option`, `Result`, slices, `str`, and `CStr` get compiler-known view semantics; library modules provide operations over them.
 
@@ -304,6 +304,14 @@ and completed-prefix byte count. The private raw declarations, `@repr(C)` transp
 conversion, and `fy_std_stdout_write_all_v0`/`fy_std_stderr_write_all_v0` symbols remain inside the
 SDK and target support units.
 
+`write_i32(i32 value) -> Result<usize, ConsoleError>` uses the same stdout result and
+`@effects(console)` contract. It emits canonical locale-independent decimal ASCII with no newline:
+zero is `0`, negative values have one leading minus, positive values have no sign, and there are no
+leading zeroes. It formats the full `i32` domain into an 11-byte stack buffer and allocates nothing.
+The private `fy_std_stdout_write_i32_v0` target support symbol computes negative magnitude in
+unsigned arithmetic so `INT32_MIN` is defined, then delegates the exact resulting view to the
+existing target-owned write-all loop.
+
 Status 1 is invalid input, 2 is an unavailable selected stream, 3 is an operating-system write
 failure, and 4 is impossible zero progress. Empty input succeeds without consulting the selected
 stream. The Linux adapter routes both descriptors through one POSIX `write` loop, retries `EINTR`,
@@ -336,7 +344,7 @@ or changes terminal mode.
 
 The checked-in `examples/std_io_quickstart` contains no unsafe code or platform symbol. The Windows
 smoke runs it through stable `fairyc run --release --locked` with `stdin!\n`, forwards exact
-`Fairy C says hi\nbytes on stdout\nstdin!\n` to stdout and
+`Fairy C says hi\nbytes on stdout\n-2147483648\nstdin!\n` to stdout and
 `Fairy C warns too\nbytes on stderr\n` to stderr with status zero, builds and directly executes the
 retained image with EOF, short `stdin!\n`, and a longer nine-byte payload. The direct inputs produce
 respectively no echo, the exact short echo, and only the first eight bytes. A separately built
@@ -344,7 +352,8 @@ compiler repeats the locked run with short input plus build and artifact executi
 attaches input only after successful compilation and image inspection and does not pre-read or retain
 it.
 Linux Clang/GCC low/optimized executions are configured through the native report v32
-`linuxConsoleExecutions` field and exercise stdin, stdout, and stderr, but remain unobserved on this
+`linuxConsoleExecutions` field and exercise stdin, stdout, stderr, and the full-domain `i32` decimal
+boundaries, but remain unobserved on this
 Windows host.
 
 ### Legacy Windows example symbol

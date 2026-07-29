@@ -21,6 +21,8 @@ struct fy_std_console_write_result_v0 fy_std_stdout_write_all_v0(
     size_t length
 );
 
+struct fy_std_console_write_result_v0 fy_std_stdout_write_i32_v0(int32_t value);
+
 struct fy_std_console_write_result_v0 fy_std_stderr_write_all_v0(
     const uint8_t *data,
     size_t length
@@ -122,6 +124,51 @@ static int fy_std_probe_stdin_v0(void) {
     return 0;
 }
 
+static int fy_std_probe_stdout_i32_v0(void) {
+    static const uint8_t expected[] = "0-42123456789-21474836482147483647";
+    uint8_t observed[sizeof(expected) - 1];
+    int saved_descriptor = dup(STDOUT_FILENO);
+    int pipe_descriptors[2];
+    size_t total = (size_t)0;
+    struct fy_std_console_write_result_v0 results[5];
+
+    if (saved_descriptor < 0 || pipe(pipe_descriptors) != 0) {
+        return 31;
+    }
+    if (dup2(pipe_descriptors[1], STDOUT_FILENO) < 0 || close(pipe_descriptors[1]) != 0) {
+        return 32;
+    }
+    results[0] = fy_std_stdout_write_i32_v0(INT32_C(0));
+    results[1] = fy_std_stdout_write_i32_v0(-INT32_C(42));
+    results[2] = fy_std_stdout_write_i32_v0(INT32_C(123456789));
+    results[3] = fy_std_stdout_write_i32_v0(INT32_MIN);
+    results[4] = fy_std_stdout_write_i32_v0(INT32_MAX);
+    if (dup2(saved_descriptor, STDOUT_FILENO) < 0 || close(saved_descriptor) != 0) {
+        return 33;
+    }
+    for (size_t index = (size_t)0; index < (size_t)5; ++index) {
+        if (results[index].status != UINT32_C(0)) {
+            return 34;
+        }
+    }
+    if (results[0].written != (size_t)1 || results[1].written != (size_t)3 ||
+        results[2].written != (size_t)9 || results[3].written != (size_t)11 ||
+        results[4].written != (size_t)10) {
+        return 35;
+    }
+    while (total < sizeof(observed)) {
+        ssize_t completed = read(pipe_descriptors[0], observed + total, sizeof(observed) - total);
+        if (completed <= 0) {
+            return 36;
+        }
+        total += (size_t)completed;
+    }
+    if (close(pipe_descriptors[0]) != 0 || memcmp(observed, expected, sizeof(observed)) != 0) {
+        return 37;
+    }
+    return 0;
+}
+
 int main(void) {
     int stdout_result = fy_std_probe_console_stream_v0(
         STDOUT_FILENO,
@@ -139,6 +186,10 @@ int main(void) {
     );
     if (stderr_result != 0) {
         return stderr_result;
+    }
+    int i32_result = fy_std_probe_stdout_i32_v0();
+    if (i32_result != 0) {
+        return i32_result;
     }
     return fy_std_probe_stdin_v0();
 }

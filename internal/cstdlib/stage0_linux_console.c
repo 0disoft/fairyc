@@ -77,6 +77,28 @@ struct fy_std_console_write_result_v0 fy_std_stdout_write_all_v0(
     return fy_std_console_write_all_v0(STDOUT_FILENO, data, length);
 }
 
+struct fy_std_console_write_result_v0 fy_std_stdout_write_i32_v0(int32_t value) {
+    uint8_t buffer[11];
+    size_t position = sizeof(buffer);
+    uint32_t magnitude = value < INT32_C(0)
+        ? UINT32_C(0) - (uint32_t)value
+        : (uint32_t)value;
+
+    do {
+        uint32_t digit = magnitude % UINT32_C(10);
+        buffer[--position] = (uint8_t)(UINT8_C(48) + (uint8_t)digit);
+        magnitude /= UINT32_C(10);
+    } while (magnitude != UINT32_C(0));
+    if (value < INT32_C(0)) {
+        buffer[--position] = UINT8_C(45);
+    }
+    return fy_std_console_write_all_v0(
+        STDOUT_FILENO,
+        buffer + position,
+        sizeof(buffer) - position
+    );
+}
+
 struct fy_std_console_write_result_v0 fy_std_stderr_write_all_v0(
     const uint8_t *data,
     size_t length

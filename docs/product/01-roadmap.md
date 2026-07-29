@@ -603,6 +603,12 @@ attached only after compilation, linking, and image inspection, is neither pre-r
 the compiler, and remains governed by the existing process timeout. Program arguments, input routing
 for other native commands, live output interleaving, and terminal policy remain separate decisions.
 
+ADR 0215 extends the SDK to `0.0.0-stage0.6` with
+`write_i32(i32) -> Result<usize, ConsoleError>`. It emits canonical locale-independent decimal ASCII
+through the existing stdout progress contract, uses one 11-byte stack buffer, and defines
+`INT32_MIN` through unsigned magnitude arithmetic. General formatting, floating-point conversion,
+other integer widths, padding, bases, locale, and implicit newlines remain separate decisions.
+
 Exit gate: clean and warm build evidence is reproducible on a declared machine and workload; invalidation fixtures distinguish public interface, inline body, and private implementation; incompatible caches are safe misses.
 
 ## Phase 4: Atlas fact export

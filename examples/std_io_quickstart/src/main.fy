@@ -19,6 +19,14 @@ fn bool write_bytes_to_stdout(ref u8[] value) {
 }
 
 @effects(console)
+fn bool write_number_to_stdout(i32 value, usize expected_length) {
+    return switch (io::write_i32(value)) {
+        case .ok(written) : { written == expected_length }
+        case .err(_) : { false }
+    };
+}
+
+@effects(console)
 fn bool write_text_to_stderr(ref str value) {
     return switch (io::write_stderr(value)) {
         case .ok(written) : { written == value.len }
@@ -57,8 +65,10 @@ fn bool echo_stdin() {
 fn i32 main() {
     let bool stdout_text_ok = write_text_to_stdout("Fairy C says hi\n");
     let bool stdout_bytes_ok = write_bytes_to_stdout(b"bytes on stdout\n");
+    let bool stdout_number_ok = write_number_to_stdout(-2147483647 - 1, 11);
+    let bool stdout_number_newline_ok = write_text_to_stdout("\n");
     let bool stderr_text_ok = write_text_to_stderr("Fairy C warns too\n");
     let bool stderr_bytes_ok = write_bytes_to_stderr(b"bytes on stderr\n");
     let bool stdin_ok = echo_stdin();
-    return if (stdout_text_ok && stdout_bytes_ok && stderr_text_ok && stderr_bytes_ok && stdin_ok) { 0 } else { 1 };
+    return if (stdout_text_ok && stdout_bytes_ok && stdout_number_ok && stdout_number_newline_ok && stderr_text_ok && stderr_bytes_ok && stdin_ok) { 0 } else { 1 };
 }

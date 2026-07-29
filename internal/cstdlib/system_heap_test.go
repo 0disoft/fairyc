@@ -405,10 +405,11 @@ func TestLinuxConsoleSourcesPreserveWriteProgressAndReadEOF(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, required := range []string{
-		"fy_std_stdout_write_all_v0", "fy_std_stderr_write_all_v0", "STDOUT_FILENO", "STDERR_FILENO",
+		"fy_std_stdout_write_all_v0", "fy_std_stdout_write_i32_v0", "fy_std_stderr_write_all_v0", "STDOUT_FILENO", "STDERR_FILENO",
 		"fy_std_stdin_read_v0", "read(STDIN_FILENO, data, requested)",
 		"SSIZE_MAX", "errno == EINTR", "errno == EBADF",
 		"result.written += (size_t)completed",
+		"UINT32_C(0) - (uint32_t)value", "uint8_t buffer[11]",
 	} {
 		if !strings.Contains(implementation, required) {
 			t.Errorf("Linux console implementation is missing %q", required)
@@ -419,6 +420,7 @@ func TestLinuxConsoleSourcesPreserveWriteProgressAndReadEOF(t *testing.T) {
 		"close(descriptor)", "STDOUT_FILENO", "STDERR_FILENO",
 		"pipe(pipe_descriptors)", "memcmp(buffer, payload, sizeof(payload))",
 		"end.read != (size_t)0", "unavailable.status != UINT32_C(2)",
+		"fy_std_stdout_write_i32_v0(INT32_MIN)", "memcmp(observed, expected, sizeof(observed))",
 	} {
 		if !strings.Contains(probe, required) {
 			t.Errorf("Linux console probe is missing %q", required)
@@ -500,9 +502,9 @@ func TestSourceForSymbolsSelectsMinimalDependencyClosure(t *testing.T) {
 		},
 		{
 			name:     "Linux console only",
-			symbols:  []string{"fy_std_stdout_write_all_v0", "fy_std_stderr_write_all_v0", "fy_std_stdin_read_v0"},
+			symbols:  []string{"fy_std_stdout_write_all_v0", "fy_std_stdout_write_i32_v0", "fy_std_stderr_write_all_v0", "fy_std_stdin_read_v0"},
 			prefix:   "#define _POSIX_C_SOURCE 200809L\n",
-			required: []string{"fy_std_stdout_write_all_v0", "fy_std_stderr_write_all_v0", "fy_std_stdin_read_v0", "write(descriptor", "read(STDIN_FILENO"},
+			required: []string{"fy_std_stdout_write_all_v0", "fy_std_stdout_write_i32_v0", "fy_std_stderr_write_all_v0", "fy_std_stdin_read_v0", "write(descriptor", "read(STDIN_FILENO"},
 			forbidden: []string{
 				"fy_std_linux_file_open_v0", "fy_std_system_heap_allocate_v0",
 			},
@@ -574,6 +576,7 @@ func TestWindowsMSVCSourceForSymbolsKeepsClosedRuntimeSlice(t *testing.T) {
 	t.Parallel()
 	source, err := WindowsMSVCSourceForSymbols([]string{
 		"fy_std_stdout_write_all_v0",
+		"fy_std_stdout_write_i32_v0",
 		"fy_std_stderr_write_all_v0",
 		"fy_std_stdin_read_v0",
 		"fy_std_windows_stdout_write_all_v0",
@@ -616,7 +619,7 @@ func TestWindowsMSVCSourceForSymbolsKeepsClosedRuntimeSlice(t *testing.T) {
 		t.Fatal("Windows SystemHeap source is missing its x64 malloc alignment contract")
 	}
 	for _, required := range []string{
-		"fy_std_stdout_write_all_v0", "fy_std_stderr_write_all_v0", "fy_std_stdin_read_v0", "fy_std_windows_stdout_write_all_v0",
+		"fy_std_stdout_write_all_v0", "fy_std_stdout_write_i32_v0", "fy_std_stderr_write_all_v0", "fy_std_stdin_read_v0", "fy_std_windows_stdout_write_all_v0",
 		"STD_INPUT_HANDLE", "STD_OUTPUT_HANDLE", "STD_ERROR_HANDLE", "ReadFile", "WriteFile", "GetStdHandle",
 		"UINT32_MAX", "ERROR_BROKEN_PIPE", "ERROR_HANDLE_EOF", "ERROR_INVALID_HANDLE",
 		"fy_std_windows_file_open_v0", "fy_std_windows_file_read_v0",

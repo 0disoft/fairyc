@@ -205,10 +205,10 @@ The raw declaration, safe text wrapper, and entry must all declare `console`; de
 wrapper declaration must fail semantic analysis with `E7102` before MSVC is invoked.
 The manifest-owned `examples/std_io_quickstart` is separate from that legacy target-only path. The
 smoke runs it through stable locked release execution both in-process and through a separately built
-compiler, requires exact `Fairy C says hi\nbytes on stdout\n` stdout, exact
+compiler, requires exact `Fairy C says hi\nbytes on stdout\n-2147483648\n` stdout, exact
 `Fairy C warns too\nbytes on stderr\n` stderr, and status zero, and also builds and directly
 executes the retained PE with EOF, `stdin!\n`, and `123456789`. Those inputs must produce no echo,
-the exact short echo, and only `12345678`, respectively; a separately built compiler repeats the
+the exact short echo, and only `12345678`, respectively, after the integer line; a separately built compiler repeats the
 short-input artifact path. Stable run also receives `stdin!\n` through both the in-process CLI and
 the separately built compiler and must emit the exact echo. Input is attached only after successful
 compilation and inspection; a unit regression requires an invalid workspace to consume zero reads.

@@ -173,10 +173,11 @@ completed prefix. Its `main` passes `ref str` and `ref u8[]` through safe intern
 byte helper observes the exact NUL and `A` bytes through checked read-only indexing while the entry contains no raw pointer or `unsafe`,
 prints `Fairy C says hi`, and exits 42. That is real
 FY-to-MSVC process output, unsafe containment, and source-effect enforcement for the legacy example.
-The compiler-bundled SDK `0.0.0-stage0.5` exposes safe text
+The compiler-bundled SDK `0.0.0-stage0.6` exposes safe text
 `std::io::write(ref str)` and `std::io::write_stderr(ref str)` operations plus exact binary
 `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` operations. All four return
 `Result<usize, ConsoleError>`. The same module now exposes allocation-free
+`write_i32(i32) -> Result<usize, ConsoleError>` for canonical locale-independent decimal stdout and
 `read_stdin(ref mut u8[]) -> Result<usize, ConsoleReadError>`; one call performs at most one bounded
 read, and success with zero bytes means EOF. `examples/std_io_quickstart`
 contains no raw pointer, unsafe block, foreign declaration, or platform name; stable run forwards
@@ -187,7 +188,7 @@ input after successful compilation, and a separately built `fairyc.exe` repeats 
 locked build and artifact execution.
 Linux owns a POSIX adapter and four native probes covering all three process streams. The first
 hosted Linux receipt in ADR 0214 executed that configured lane successfully. Byte input and output perform no UTF-8
-validation. Formatting, implicit newlines, text or line input, terminal encoding, live output
+validation. General formatting, implicit newlines, text or line input, terminal encoding, live output
 interleaving, and a final symbolic error taxonomy remain outside the API.
 A provisional SystemHeap implementation now lives in the target standard-library
 boundary rather than the thin runtime. It normalizes empty allocation, admits current fundamental

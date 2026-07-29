@@ -76,7 +76,7 @@ func TestAdmittedForTargetKeepsWindowsConsoleTargetBound(t *testing.T) {
 
 func TestTargetNeutralConsoleIOSelectsOneTargetOwnedComponent(t *testing.T) {
 	t.Parallel()
-	symbols := []string{"fy_std_stdout_write_all_v0", "fy_std_stderr_write_all_v0", "fy_std_stdin_read_v0"}
+	symbols := []string{"fy_std_stdout_write_all_v0", "fy_std_stdout_write_i32_v0", "fy_std_stderr_write_all_v0", "fy_std_stdin_read_v0"}
 	for _, symbol := range symbols {
 		if !Admitted(symbol) || !AdmittedForTarget(symbol, target.X8664LinuxGNU) ||
 			!AdmittedForTarget(symbol, target.X8664WindowsMSVC) {
@@ -122,6 +122,7 @@ func TestWindowsMSVCComponentsForSymbolsAdmitsOnlyProvenRuntimeSlice(t *testing.
 	t.Parallel()
 	components, err := WindowsMSVCComponentsForSymbols([]string{
 		"fy_std_stdout_write_all_v0",
+		"fy_std_stdout_write_i32_v0",
 		"fy_std_stderr_write_all_v0",
 		"fy_std_stdin_read_v0",
 		"fy_std_windows_stdout_write_all_v0",

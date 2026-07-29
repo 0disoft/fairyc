@@ -668,7 +668,7 @@ func run() error {
 	if err := executeExpectOutput(
 		stdIOArtifactPath,
 		0,
-		"Fairy C says hi\nbytes on stdout\n",
+		"Fairy C says hi\nbytes on stdout\n-2147483648\n",
 		"Fairy C warns too\nbytes on stderr\n",
 	); err != nil {
 		return fmt.Errorf("execute std::io stable build artifact: %w", err)
@@ -677,7 +677,7 @@ func run() error {
 		stdIOArtifactPath,
 		"stdin!\n",
 		0,
-		"Fairy C says hi\nbytes on stdout\nstdin!\n",
+		"Fairy C says hi\nbytes on stdout\n-2147483648\nstdin!\n",
 		"Fairy C warns too\nbytes on stderr\n",
 	); err != nil {
 		return fmt.Errorf("execute std::io stable build artifact with short stdin: %w", err)
@@ -686,7 +686,7 @@ func run() error {
 		stdIOArtifactPath,
 		"123456789",
 		0,
-		"Fairy C says hi\nbytes on stdout\n12345678",
+		"Fairy C says hi\nbytes on stdout\n-2147483648\n12345678",
 		"Fairy C warns too\nbytes on stderr\n",
 	); err != nil {
 		return fmt.Errorf("execute std::io stable build artifact with bounded stdin: %w", err)
@@ -700,7 +700,7 @@ func run() error {
 		&stdIORunStdout,
 		&stdIORunStderr,
 	)
-	if stdIORunCode != cli.ExitSuccess || stdIORunStdout.String() != "Fairy C says hi\nbytes on stdout\nstdin!\n" ||
+	if stdIORunCode != cli.ExitSuccess || stdIORunStdout.String() != "Fairy C says hi\nbytes on stdout\n-2147483648\nstdin!\n" ||
 		stdIORunStderr.String() != "Fairy C warns too\nbytes on stderr\n" {
 		return fmt.Errorf("std::io stable run returned code %d, stdout %q, stderr %q", stdIORunCode, stdIORunStdout.String(), stdIORunStderr.String())
 	}
@@ -1587,7 +1587,7 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string, clockResolution in
 	if err != nil {
 		return 0, fmt.Errorf("execute standalone compiler std::io workspace run: %w", err)
 	}
-	if stdIORunCode != cli.ExitSuccess || stdIORunStdout != "Fairy C says hi\nbytes on stdout\nstdin!\n" ||
+	if stdIORunCode != cli.ExitSuccess || stdIORunStdout != "Fairy C says hi\nbytes on stdout\n-2147483648\nstdin!\n" ||
 		stdIORunStderr != "Fairy C warns too\nbytes on stderr\n" {
 		return 0, fmt.Errorf("standalone compiler std::io run returned code %d, stdout %q, stderr %q", stdIORunCode, stdIORunStdout, stdIORunStderr)
 	}
@@ -1607,7 +1607,7 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string, clockResolution in
 	if err := executeExpectOutput(
 		stdIOArtifactPath,
 		0,
-		"Fairy C says hi\nbytes on stdout\n",
+		"Fairy C says hi\nbytes on stdout\n-2147483648\n",
 		"Fairy C warns too\nbytes on stderr\n",
 	); err != nil {
 		return 0, fmt.Errorf("execute standalone compiler std::io artifact: %w", err)
@@ -1616,7 +1616,7 @@ func runStandaloneCompiler(repositoryRoot, sourceRoot string, clockResolution in
 		stdIOArtifactPath,
 		"stdin!\n",
 		0,
-		"Fairy C says hi\nbytes on stdout\nstdin!\n",
+		"Fairy C says hi\nbytes on stdout\n-2147483648\nstdin!\n",
 		"Fairy C warns too\nbytes on stderr\n",
 	); err != nil {
 		return 0, fmt.Errorf("execute standalone compiler std::io artifact with stdin: %w", err)

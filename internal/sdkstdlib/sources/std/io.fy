@@ -29,6 +29,10 @@ pub struct ConsoleReadError {
 unsafe extern C fn raw_console_write_result stdout_write_all_raw(ptr u8 data, usize length) ;
 
 @effects(console)
+@link_name("fy_std_stdout_write_i32_v0")
+unsafe extern C fn raw_console_write_result stdout_write_i32_raw(i32 value) ;
+
+@effects(console)
 @link_name("fy_std_stderr_write_all_v0")
 unsafe extern C fn raw_console_write_result stderr_write_all_raw(ptr u8 data, usize length) ;
 
@@ -72,6 +76,15 @@ pub fn Result<usize, ConsoleError> write(ref str text) {
 pub fn Result<usize, ConsoleError> write_bytes(ref u8[] data) {
     let raw_console_write_result result = unsafe {
         stdout_write_all_raw(data as ptr u8, data.len)
+    };
+    return checked_write_result(result.status, result.written);
+}
+
+/// Writes value as locale-independent decimal ASCII to stdout without adding a newline.
+@effects(console)
+pub fn Result<usize, ConsoleError> write_i32(i32 value) {
+    let raw_console_write_result result = unsafe {
+        stdout_write_i32_raw(value)
     };
     return checked_write_result(result.status, result.written);
 }
