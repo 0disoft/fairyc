@@ -47,12 +47,18 @@ revision; the implemented source cutover requires a language-revision increment 
 compiler minor release. C ABI, runtime ABI, target schema, and MIR version change only if their own
 observable contracts change.
 
-ADR 0216 cuts the current exact pin from `fairyc-language/1` to `fairyc-language/2` because it adds
+ADR 0216 cut the exact pin from `fairyc-language/1` to `fairyc-language/2` because it added
 ten compound-assignment tokens and statement forms. Valid `/1` source syntax remains valid `/2`
 syntax, but exact manifests, SDK requirements, locks, and cache inputs still change pins; the
-standalone previous-revision parser accepts `/1` and rejects compound assignment. Runtime ABI,
+standalone previous-revision parser at that cutover accepted `/1` and rejected compound assignment. Runtime ABI,
 target schema, C dialect, MIR version, diagnostic catalog, SDK version, and SDK source bytes remain
 unchanged.
+
+ADR 0217 cuts the current exact pin from `fairyc-language/2` to `fairyc-language/3` because it
+reserves `defer` and adds a statement form with explicit cleanup-edge behavior. Valid `/2` source
+remains valid `/3`; the previous-revision parser rejects `defer`, while source migration remains
+byte-identical and manifests require a manual exact-pin update. Runtime ABI, target schemas, C11
+transport, MIR version, diagnostic catalog, SDK version, and SDK source bytes remain unchanged.
 
 For one function contract, removing a declared effect preserves every existing caller accepted by
 the effect checker. Adding an effect or replacing it with another can invalidate callers and is a
@@ -405,7 +411,7 @@ exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, o
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
 instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
 `fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.6`, language
-`fairyc-language/2`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
+`fairyc-language/3`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 
 ADR 0148 consumes those independently versioned manifest, lock, package-instance, language, SDK,

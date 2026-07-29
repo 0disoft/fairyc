@@ -2212,6 +2212,35 @@ fn i32 main() {
 	}
 }
 
+func TestLowerLexicalDeferCapturesNowAndCallsOnReturn(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+fn void record(i32 value) { assert(value == 42); }
+fn i32 main() {
+    var i32 value = 40;
+    defer record(value + 2);
+    value = 0;
+    return 42;
+}
+`)
+	var mainFunction *Function
+	for index := range program.Functions {
+		if program.Functions[index].Name == "main::main" {
+			mainFunction = &program.Functions[index]
+		}
+	}
+	if mainFunction == nil || len(mainFunction.Calls) != 1 || len(mainFunction.CleanupPaths) != 1 ||
+		len(mainFunction.CleanupPaths[0].Actions) != 1 || mainFunction.CleanupPaths[0].Actions[0].Kind != "defer-call" {
+		t.Fatalf("deferred main function = %+v", mainFunction)
+	}
+	if len(mainFunction.EliminatedForms) == 0 || mainFunction.EliminatedForms[0].Form != "lexical-defer" {
+		t.Fatalf("eliminated forms = %+v", mainFunction.EliminatedForms)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+}
+
 func lowerTestSource(t *testing.T, text string) Program {
 	t.Helper()
 	parsed, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(text)), source.DefaultLimits())

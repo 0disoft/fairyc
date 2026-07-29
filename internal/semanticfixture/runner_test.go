@@ -12,7 +12,7 @@ func TestSemanticManifestV0(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Run() error = %v", err)
 	}
-	if report.CasesParsed != 42 || report.CasesRun != 42 || len(report.Deferred) != 0 {
+	if report.CasesParsed != 43 || report.CasesRun != 43 || len(report.Deferred) != 0 {
 		t.Fatalf("Run() report = %+v, want parsed=42 run=42 deferred=0", report)
 	}
 	if len(report.Failures) != 0 {

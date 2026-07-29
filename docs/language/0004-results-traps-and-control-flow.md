@@ -83,6 +83,13 @@ the old scalar value and completes the checked operation before the final store,
 overflow, division, remainder, or shift trap leaves the destination unchanged and performs no
 language-level cleanup.
 
+`defer call(...);` registers one bounded lexical cleanup call. Its copy-scalar arguments evaluate
+immediately from left to right and are retained by value. Calls registered in the same block execute
+in reverse order when that block falls through or is crossed by `return`, Result propagation,
+`break`, or `continue`. Return-value evaluation completes first; deferred calls then run before
+implicit resource drops and Region resets on the same edge. A trap never runs deferred calls, and a
+trap inside a deferred call stops the remaining cleanup chain because Stage 0 has no unwinding.
+
 ## Traps
 
 A trap is a non-returning, non-unwinding termination. It performs no language-level drop or region reset. Trap categories are stable semantic outcomes even when the platform-specific termination mechanism differs.

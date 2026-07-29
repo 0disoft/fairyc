@@ -201,6 +201,12 @@ Statements include local storage markers, assignment, drop-flag update, `Drop`, 
 
 Terminators include `Goto`, integer, boolean, or discriminant switch, `Call`, `Return`, `Trap`, and `Unreachable`. A boolean switch has exactly two successors ordered true then false. A restricted user-enum switch has one successor per declaration-ordered variant and carries that exact table. Source `&&` and `||` are lowered to boolean switches and branch-local assignments before verification. Source `break` and `continue` become cleanup followed by a goto to the nearest loop exit or header; neither source form remains in MIR. Stage 0 calls have normal successors only. There is no unwind successor.
 
+Bounded source `defer` captures copy-scalar arguments into ordinary temporaries at registration and
+is eliminated into existing `Call` terminators on each applicable lexical cleanup edge. Those calls
+are emitted in reverse registration order before resource drops and Region resets. Return-value
+evaluation precedes that chain. Trap blocks receive no deferred calls because MIR has no unwind
+edge.
+
 Fixture-visible trap categories use the canonical identities `bounds`, `integer-overflow`, `division-by-zero`, `signed-division-overflow`, `invalid-shift`, `assertion-failed`, and `unreachable`. A backend may choose a target-specific termination mechanism, but it cannot rename or merge the semantic outcome reported by the interpreter and differential harness.
 
 An `assert` statement lowers to a typed `assert` switch with one exact `bool` operand, continuation

@@ -226,6 +226,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0214-first-hosted-native-ci-receipts.md`: exact green GitHub run evidence for Linux layout and bidirectional ABI probes plus the Windows native smoke, removal of only satisfied evidence markers, and no target maturity promotion.
 - `0215-allocation-free-stage0-i32-output.md`: safe locale-independent decimal `i32` stdout output, an 11-byte stack formatter, SDK stage0.6 identity, and exact full-domain boundary evidence.
 - `0216-checked-compound-assignment.md`: statement-only checked integer compound assignment, single-evaluation mutable places, classic-for post integration, and the exact language `/2` cutover.
+- `0217-bounded-lexical-defer.md`: internal-void-call lexical defer, immediate copy-scalar capture, LIFO cleanup edges, trap skipping, and the exact language `/3` cutover.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

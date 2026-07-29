@@ -56,6 +56,7 @@ const (
 	KindBinding    Kind = "binding"
 	KindAssignment Kind = "assignment"
 	KindAssert     Kind = "assert"
+	KindDefer      Kind = "defer"
 	KindReturn     Kind = "return"
 	KindDiscard    Kind = "discard"
 	KindWhile      Kind = "while"

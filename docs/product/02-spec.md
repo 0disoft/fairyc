@@ -74,8 +74,8 @@ propagation. The grammar and examples named above are the only product-compiler 
 immediately preceding revision is accepted only by the separate migration tool; dual parsing and
 compile-time source rewrites remain forbidden.
 
-Classic scalar `for` is now the separate bounded decision in ADR 0213. Range `for`, lexical
-`defer`, checked narrowing conversions, provider-qualified package imports, generic iterators,
+Classic scalar `for` and bounded lexical `defer` are the separate decisions in ADR 0213 and ADR
+0217. Range `for`, checked narrowing conversions, provider-qualified package imports, generic iterators,
 expression-bodied function shorthand, and formatter behavior remain follow-up decisions.
 
 ## Value categories
@@ -923,8 +923,8 @@ experimental action without changing compiler-fact transports.
 
 ## Open decisions
 
-Registry coordinates, provider-qualified import spelling, classic and range
-`for`, lexical `defer`, checked narrowing conversion syntax, expression-bodied function shorthand,
+Registry coordinates, provider-qualified import spelling, range `for`, resource-aware or block-form
+`defer`, checked narrowing conversion syntax, expression-bodied function shorthand,
 public `Arena` construction and capacity APIs, exact parser resource limits, glibc and toolchain
 baselines, portable path model, targets beyond the declared Linux GNU and Windows MSVC profiles,
 package registry, and the `.fymap` default path, limits, and public command policy remain UNDECIDED.

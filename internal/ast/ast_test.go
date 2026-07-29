@@ -469,3 +469,17 @@ func TestLowerPreservesCompoundAssignmentOperator(t *testing.T) {
 		t.Fatalf("compound assignment = %+v", statement)
 	}
 }
+
+func TestLowerPreservesLexicalDeferCall(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nfn void record(i32 value) {}\nfn i32 main() { defer record(42); return 42; }\n")
+	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	module, err := Lower(tree)
+	if err != nil {
+		t.Fatalf("Lower() error = %v, diagnostics = %+v", err, tree.Diagnostics)
+	}
+	statement := module.Functions[1].Body.Statements[0]
+	if statement.Kind != syntax.KindDefer || statement.Expression == nil || statement.Expression.Kind != syntax.KindCall {
+		t.Fatalf("defer statement = %+v", statement)
+	}
+}

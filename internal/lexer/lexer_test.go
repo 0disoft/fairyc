@@ -37,6 +37,20 @@ func TestForIsReservedByCurrentAndImmediatelyPreviousRevision(t *testing.T) {
 	}
 }
 
+func TestDeferIsReservedOnlyByCurrentRevision(t *testing.T) {
+	t.Parallel()
+	input := []byte("defer record")
+	file := source.NewFile("main.fy", input)
+	current := Lex(file, source.NewBudget(source.DefaultLimits(), len(input)))
+	previous := LexPreviousRevision(file, source.NewBudget(source.DefaultLimits(), len(input)))
+	if got := significantKinds(current.Tokens); !slices.Equal(got, []Kind{Keyword, Identifier, EOF}) {
+		t.Fatalf("Lex() kinds = %v", got)
+	}
+	if got := significantKinds(previous.Tokens); !slices.Equal(got, []Kind{Identifier, Identifier, EOF}) {
+		t.Fatalf("LexPreviousRevision() kinds = %v", got)
+	}
+}
+
 func significantKinds(tokens []Token) []Kind {
 	result := make([]Kind, 0, len(tokens))
 	for _, token := range tokens {

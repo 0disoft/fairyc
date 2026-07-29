@@ -35,6 +35,7 @@
     "docs/adr/0126-checked-mutable-indexed-assignment.md",
     "docs/adr/0213-classic-scalar-for-loop.md",
     "docs/adr/0216-checked-compound-assignment.md",
+    "docs/adr/0217-bounded-lexical-defer.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/mir-v0.md",
     "docs/engineering/05-testing-standard.md"
@@ -314,6 +315,27 @@
         "completedThrough": "interpret",
         "outcome": "return",
         "value": 42
+      }
+    },
+    {
+      "id": "pass.interpreter.lexical-defer",
+      "sourceRoot": "cases/pass/lexical-defer/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "testIntrinsics": [
+        { "function": "main::observe", "kind": "write-stdout-byte" }
+      ],
+      "outputLimit": 2,
+      "expect": {
+        "status": "pass",
+        "completedThrough": "interpret",
+        "outcome": "return",
+        "value": 42,
+        "stdoutBytes": [66, 65],
+        "ioTrace": [
+          { "stream": "stdout", "byte": 66 },
+          { "stream": "stdout", "byte": 65 }
+        ]
       }
     },
     {

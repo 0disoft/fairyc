@@ -31,9 +31,18 @@ func TestMigrateDeclarationsPreservesRevisionOneTrivia(t *testing.T) {
 	}
 }
 
-func TestMigrateRejectsRevisionTwoCompoundAssignment(t *testing.T) {
+func TestMigratePreservesRevisionTwoCompoundAssignment(t *testing.T) {
 	t.Parallel()
 	input := []byte("module main;\nfn i32 main() { var i32 value = 40; value += 2; return value; }\n")
+	result, err := Migrate("main.fy", input)
+	if err != nil || result.Changed || !bytes.Equal(result.Source, input) {
+		t.Fatalf("Migrate() = %+v, %v", result, err)
+	}
+}
+
+func TestMigrateRejectsRevisionThreeDefer(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nfn void record(i32 value) {}\nfn i32 main() { defer record(42); return 42; }\n")
 	result, err := Migrate("main.fy", input)
 	if err == nil {
 		t.Fatalf("Migrate() result = %+v, want current-only syntax rejection", result)

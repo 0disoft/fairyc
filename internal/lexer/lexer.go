@@ -18,6 +18,10 @@ var currentKeywords = map[string]struct{}{
 	"switch": {}, "true": {}, "unsafe": {}, "var": {}, "while": {},
 }
 
+var currentRevisionOnlyKeywords = map[string]struct{}{
+	"defer": {},
+}
+
 var symbols = []string{
 	"<<=", ">>=",
 	"+=", "-=", "*=", "/=", "%=", "&=", "^=", "|=",
@@ -28,19 +32,20 @@ var symbols = []string{
 
 // Lex performs one bounded, batch lex over the file's original bytes.
 func Lex(file source.File, budget *source.Budget) Result {
-	return lex(file, budget)
+	return lex(file, budget, false)
 }
 
-// LexPreviousRevision classifies the retired grammar's extra keywords for the standalone source
-// migrator. Product compilation must call Lex.
+// LexPreviousRevision leaves current-only reserved words available to the immediately preceding
+// grammar used by the standalone source migrator. Product compilation must call Lex.
 func LexPreviousRevision(file source.File, budget *source.Budget) Result {
-	return lex(file, budget)
+	return lex(file, budget, true)
 }
 
-func lex(file source.File, budget *source.Budget) Result {
+func lex(file source.File, budget *source.Budget, previousRevision bool) Result {
 	lexer := scanner{
-		source: append([]byte(nil), file.Bytes...),
-		budget: budget,
+		source:           append([]byte(nil), file.Bytes...),
+		budget:           budget,
+		previousRevision: previousRevision,
 	}
 	lexer.run()
 	return Result{
@@ -51,12 +56,13 @@ func lex(file source.File, budget *source.Budget) Result {
 }
 
 type scanner struct {
-	source       []byte
-	position     int
-	budget       *source.Budget
-	tokens       []Token
-	diagnostics  []diagnostic.Diagnostic
-	hasExhausted bool
+	source           []byte
+	position         int
+	budget           *source.Budget
+	tokens           []Token
+	diagnostics      []diagnostic.Diagnostic
+	hasExhausted     bool
+	previousRevision bool
 }
 
 func (s *scanner) run() {
@@ -290,6 +296,8 @@ func (s *scanner) scanIdentifier() {
 	text := string(s.source[start:s.position])
 	kind := Identifier
 	if _, found := currentKeywords[text]; found {
+		kind = Keyword
+	} else if _, found := currentRevisionOnlyKeywords[text]; found && !s.previousRevision {
 		kind = Keyword
 	}
 	s.emit(kind, start, s.position, literalKeywordCooked(text))

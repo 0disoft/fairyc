@@ -94,6 +94,7 @@ function_body = statement_block ;
 statement = binding_stmt
           | assignment_stmt
           | assert_stmt
+          | defer_stmt
           | return_stmt
           | discard_stmt
           | if_statement
@@ -119,6 +120,7 @@ expression_stmt = expression ";" ;
 
 return_stmt = "return" expression? ";" ;
 assert_stmt = "assert" "(" expression ")" ";" ;
+defer_stmt = "defer" expression ";" ;
 discard_stmt = "discard" expression ";" ;
 if_statement = if_expression ;
 block_statement = block | unsafe_expression ;

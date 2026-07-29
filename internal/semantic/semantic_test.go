@@ -3036,6 +3036,31 @@ func TestAnalyzeRejectsUnsupportedCompoundAssignmentType(t *testing.T) {
 	}
 }
 
+func TestAnalyzeTypesLexicalDeferWithCopyScalarArguments(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\nfn void record(i32 value, bool enabled) {}\nfn i32 main() { defer record(42, true); return 42; }\n",
+	})
+	assertCleanTypeResult(t, result)
+	statement := result.HIR.Modules[0].Functions[1].Body.Statements[0]
+	if statement.Kind != "defer" || statement.Expression == nil || statement.Expression.Kind != "call" || statement.Expression.Type != hir.TypeVoid {
+		t.Fatalf("defer statement = %+v", statement)
+	}
+}
+
+func TestAnalyzeRejectsDeferredValueAndBorrowCalls(t *testing.T) {
+	t.Parallel()
+	for _, sourceText := range []string{
+		"module main;\nfn i32 value() { return 42; }\nfn i32 main() { defer value(); return 42; }\n",
+		"module main;\nfn void inspect(ref i32 value) {}\nfn i32 main() { let i32 value = 42; defer inspect(ref value); return value; }\n",
+	} {
+		result := analyzeText(t, map[string]string{"main.fy": sourceText})
+		if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "defer outside an internal void call with copy-scalar arguments" {
+			t.Fatalf("result = %+v", result)
+		}
+	}
+}
+
 func TestAnalyzeRejectsNonScalarForHeaderBehavior(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{

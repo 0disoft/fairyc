@@ -425,6 +425,12 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 			if statement.Expression != nil && actual != hir.TypeInvalid && actual != hir.TypeBool {
 				c.analyzer.addDiagnostic("E1007", span(c.module.file.Path, statement.Expression.Span))
 			}
+		case statement.Kind == syntax.KindDefer:
+			expression, actual := c.checkExpression(statement.Expression, hir.TypeVoid)
+			hirStatement.Expression = expression
+			if !validDeferredCall(statement.Expression, expression, actual) {
+				c.analyzer.addUnsupported(c.module.file.Path, statement.Span, "defer outside an internal void call with copy-scalar arguments")
+			}
 		case statement.Kind == syntax.KindExprStmt || statement.Kind == syntax.KindDiscard:
 			expression, _ := c.checkExpression(statement.Expression, hir.TypeInvalid)
 			hirStatement.Expression = expression
@@ -451,6 +457,19 @@ func (c *typeChecker) checkBlock(block *ast.Block, expectedTail hir.Type) (hir.B
 		result.Tail, resultType = c.checkExpression(block.Tail, expectedTail)
 	}
 	return result, resultType, hasReturn
+}
+
+func validDeferredCall(source *ast.Expression, checked *hir.Expression, actual hir.Type) bool {
+	if source == nil || source.Kind != syntax.KindCall || checked == nil || checked.Kind != string(syntax.KindCall) ||
+		actual != hir.TypeVoid || checked.Symbol == hir.NoSymbol || checked.ForeignABI != "" || len(checked.Children) == 0 {
+		return false
+	}
+	for index := 1; index < len(checked.Children); index++ {
+		if !hir.FixedArrayScalarElement(checked.Children[index].Type) {
+			return false
+		}
+	}
+	return true
 }
 
 func (c *typeChecker) checkFor(loop *ast.ForLoop) *hir.ForLoop {

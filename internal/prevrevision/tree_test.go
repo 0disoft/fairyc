@@ -31,7 +31,7 @@ func TestMigrateTreePlansBeforeWriting(t *testing.T) {
 	}
 }
 
-func TestMigrateTreeSkipsAlreadyCurrentCompoundAssignment(t *testing.T) {
+func TestMigrateTreePreservesPreviousCompoundAssignment(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
 	path := filepath.Join(root, "src", "main.fy")
@@ -39,6 +39,27 @@ func TestMigrateTreeSkipsAlreadyCurrentCompoundAssignment(t *testing.T) {
 		t.Fatal(err)
 	}
 	input := "module main;\nfn i32 main() { var i32 value = 40; value += 2; return value; }\n"
+	if err := os.WriteFile(path, []byte(input), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	report, err := MigrateTree(root, true)
+	if err != nil || report.Scanned != 1 || report.Skipped != 0 || report.Changed != 0 || report.Written != 0 {
+		t.Fatalf("MigrateTree() = %+v, %v", report, err)
+	}
+	contents, readErr := os.ReadFile(path)
+	if readErr != nil || string(contents) != input {
+		t.Fatalf("current source changed: %q, %v", contents, readErr)
+	}
+}
+
+func TestMigrateTreeSkipsCurrentDeferSource(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	path := filepath.Join(root, "src", "main.fy")
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	input := "module main;\nfn void record(i32 value) {}\nfn i32 main() { defer record(42); return 42; }\n"
 	if err := os.WriteFile(path, []byte(input), 0o644); err != nil {
 		t.Fatal(err)
 	}

@@ -35,6 +35,11 @@ ADR 0213 now adds a separate classic scalar `for` contract and executable fixtur
 deferred. Expression-bodied function shorthand is also deferred until real source justifies a
 second body form.
 
+ADR 0217 now adds a separate bounded lexical `defer` contract. Immediate copy-scalar capture,
+block-exit LIFO order, return and Result-propagation paths, loop-control exits, trap skipping, and
+ordinary-call MIR elimination are executable. Resource or borrow capture, foreign calls, method
+receivers, arbitrary deferred blocks, and abnormal-termination guarantees remain deferred.
+
 ## Phase 1: first interpreted semantic slice
 
 Current implementation status: the source, lexer, recoverable-syntax, parser-diagnostic, AST
@@ -42,7 +47,7 @@ lowering, and parser-fixture-runner portion of the first item exists. Name resol
 now cover the semantic fixture's scalar and safe-borrow subset. Local last-use loans, borrow
   conflicts, single-origin borrow returns, checked matching-type left shift, loop-context diagnostics,
   scalar foreign-call unsafe/signature boundaries, and `@link_name` shape diagnostics execute across
-  all 42 semantic v0 cases, including classic scalar `for`, branch- and loop-aware safe-borrow reassignment, exact
+  all 43 semantic v0 cases, including classic scalar `for`, bounded lexical `defer`, branch- and loop-aware safe-borrow reassignment, exact
   interprocedural borrow-return summaries, integer-literal range rejection before MIR, and exact
   transport for all sixteen TargetSpec C scalars. The type phase also canonicalizes the closed
   seven-name `@effects(...)` vocabulary and enforces caller supersets independently from unsafe. General
@@ -57,9 +62,9 @@ bindings into semantic analysis with deterministic build-local package identity;
 module and source paths remain distinct through typed HIR types and verified MIR names without
 choosing a public package ID. Package-aware spans keep that identity separate from the original
 relative source path so private numbering cannot leak into diagnostics. Mutable-local MIR lowering and verification
-  execute all 12 MIR normalization v0 cases for the current scalar, resource, tagged-payload, Result, Region, classic-`for` lowering, loop-control cleanup, call,
+  execute all 13 MIR normalization v0 cases for the current scalar, resource, tagged-payload, Result, Region, classic-`for` and lexical-`defer` lowering, loop-control cleanup, call,
   division, and checked-arithmetic trap subset. All 10 verifier baselines and 22 isolated mutation cases execute through
-  the same MIR verifier. The first MIR interpreter executes all 93 interpreter v0 cases, including classic scalar `for`, direct `i32` minimum constants, scalar fixed-array calls, contextual immutable and mutable byte-view borrowing, exact lengths, checked reads and indexed stores, and
+  the same MIR verifier. The first MIR interpreter executes all 94 interpreter v0 cases, including classic scalar `for`, bounded lexical `defer`, direct `i32` minimum constants, scalar fixed-array calls, contextual immutable and mutable byte-view borrowing, exact lengths, checked reads and indexed stores, and
 scalar `Option` and `Result` construction, exhaustive switching, and both Result `?` paths, and is
 exposed by the unstable `experimental run` command, which now accepts a bounded explicit entry-plus-
 repeated-`--source` module closure without discovery. Resource construction, field reads, whole-root
@@ -86,7 +91,7 @@ Verified resource definitions now preserve ordered fields and
   verifier-linked private functions and execute before reverse field cleanup. Resource-declared
   effects are preserved and required only at actual cleanup edges. Restricted inert enums now preserve named payloads,
   construct through contextual leading-dot variants, require exhaustive shallow switches, and execute through
-  verified MIR, the interpreter, and the constrained C backend. The C backend now emits deterministic C11 for 37
+  verified MIR, the interpreter, and the constrained C backend. The C backend now emits deterministic C11 for 38
   verified scalar, borrowed-view, typed-comparison, inert-enum, flat-resource, and resource-tagged cases under the provisional `x86_64-linux-gnu` profile,
   including `Option<i32>` and `Result<i32, i32>` construction, switch, calls, and propagation,
   copy-scalar/inert-struct tagged transport, private
@@ -116,7 +121,7 @@ Exit gate: positive and negative fixtures agree with the source contracts, resou
 
 Current implementation status: a fail-closed Linux/amd64 constrained-C differential command
 requires glibc, Clang, and GCC and runs in a separate hosted Ubuntu CI job. It executes
-run all 37 emission cases at low and optimized profiles for 148 process-status and exact
+run all 38 emission cases at low and optimized profiles for 152 process-status and exact
 source-linked drop-trace comparisons, then drive
 the actual experimental build CLI with resource-bearing Option and Result plus a flat all-`i32` resource
 through 4 compiler/profile executable
@@ -615,6 +620,11 @@ existing exact-type trap semantics; mutable local and indexed places evaluate on
 after success. Classic `for` post clauses may now use `index += 1`. Assignment expressions,
 increment operators, promotions, wrapping operations, resource targets, and general projections
 remain absent.
+
+ADR 0217 cuts the exact language pin to `fairyc-language/3` and adds bounded lexical `defer`.
+Internal `void` calls with copy-scalar arguments capture those arguments immediately and execute in
+LIFO order on fallthrough, return, Result propagation, break, or continue. Trap paths remain
+non-unwinding; resource, borrow, aggregate, pointer, method, and foreign-call capture stay closed.
 
 Exit gate: clean and warm build evidence is reproducible on a declared machine and workload; invalidation fixtures distinguish public interface, inline body, and private implementation; incompatible caches are safe misses.
 

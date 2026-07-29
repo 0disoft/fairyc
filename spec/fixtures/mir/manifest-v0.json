@@ -15,6 +15,7 @@
     "docs/adr/0024-stage-0-loop-control-and-cleanup.md",
     "docs/adr/0213-classic-scalar-for-loop.md",
     "docs/adr/0216-checked-compound-assignment.md",
+    "docs/adr/0217-bounded-lexical-defer.md",
     "docs/language/0001-values-and-resources.md",
     "docs/language/0004-results-traps-and-control-flow.md",
     "docs/mir/mir-v0.md",
@@ -634,6 +635,23 @@
             "kind": "eliminated-form",
             "function": "main::main",
             "form": "classic-for",
+            "remainingCount": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "pass.mir.lexical-defer",
+      "sourceRoot": "cases/pass/lexical-defer/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "mir-verify",
+        "observations": [
+          {
+            "kind": "eliminated-form",
+            "function": "main::main",
+            "form": "lexical-defer",
             "remainingCount": 0
           }
         ]

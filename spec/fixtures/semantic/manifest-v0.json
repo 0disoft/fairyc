@@ -24,6 +24,7 @@
     "docs/adr/0126-checked-mutable-indexed-assignment.md",
     "docs/adr/0213-classic-scalar-for-loop.md",
     "docs/adr/0216-checked-compound-assignment.md",
+    "docs/adr/0217-bounded-lexical-defer.md",
     "docs/diagnostics/catalog-v0.md"
   ],
   "cases": [
@@ -85,6 +86,15 @@
     {
       "id": "pass.flow.classic-for",
       "sourceRoot": "cases/pass/classic-for/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow"
+      }
+    },
+    {
+      "id": "pass.flow.lexical-defer",
+      "sourceRoot": "cases/pass/lexical-defer/src",
       "sources": ["main.fy"],
       "expect": {
         "status": "pass",

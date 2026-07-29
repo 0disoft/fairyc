@@ -30,7 +30,7 @@ pin a runner image or toolchain baseline and does not promote either target.
 - Ordinary tests execute the fixed lexer and parser fuzz seeds. Timed fuzz campaigns remain
   unconfigured rather than pretending a short CI sample proves coverage.
 - A separate Ubuntu native-C job invokes `cmd/fairyc-native-fixtures`. The command requires
-  Linux/amd64, glibc, Clang, and GCC; compiles all 37 current C-emission cases at `-O0` and
+  Linux/amd64, glibc, Clang, and GCC; compiles all 38 current C-emission cases at `-O0` and
   `-O2` with pedantic warnings as errors; links the scalar trap runtime plus the closed conformance
   drop recorder; plans 148 exact process-status and source-linked drop-sequence comparisons;
   exercises direct `i32` minimum transport plus explicit and omitted-bound immutable byte-view slicing through the same checked MIR and

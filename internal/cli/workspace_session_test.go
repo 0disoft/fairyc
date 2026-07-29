@@ -19,7 +19,7 @@ const (
 uid = "example.session.app"
 name = "app"
 version = "1.0.0"
-language = "fairyc-language/2"
+language = "fairyc-language/3"
 source = "src"
 [workspace]
 members = ["libs/answer"]
@@ -33,7 +33,7 @@ features = []
 uid = "example.session.answer"
 name = "answer"
 version = "1.0.0"
-language = "fairyc-language/2"
+language = "fairyc-language/3"
 source = "src"
 `
 	workspaceSessionRootSource      = "module main;\nimport answer as answer;\nfn i32 main() { return answer::value(); }\n"

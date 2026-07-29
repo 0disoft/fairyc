@@ -25,6 +25,14 @@ func (p *parser) parseBlockWithTail(allowTail bool) NodeID {
 			children = append(children, p.parseReturn())
 		case "assert":
 			children = append(children, p.parseAssert())
+		case "defer":
+			if p.isPreviousRevision() {
+				children = append(children, p.unexpected())
+				p.synchronize(";", "}")
+				p.match(";")
+				continue
+			}
+			children = append(children, p.parseDefer())
 		case "discard":
 			children = append(children, p.parseDiscard())
 		case "while":
@@ -98,6 +106,14 @@ func (p *parser) parseAssert() NodeID {
 	p.expect(")")
 	p.expectStatementTerminator()
 	return p.addNode(KindAssert, start, []NodeID{condition}, "", "")
+}
+
+func (p *parser) parseDefer() NodeID {
+	start := p.currentFullIndex()
+	p.advance()
+	call := p.parseExpression(0, true)
+	p.expectStatementTerminator()
+	return p.addNode(KindDefer, start, []NodeID{call}, "", "")
 }
 
 func (p *parser) parseBinding() NodeID {
@@ -203,9 +219,6 @@ func (p *parser) parseForClause(allowBinding bool) NodeID {
 
 func (p *parser) matchAssignmentOperator() string {
 	for _, operator := range []string{"=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "&=", "^=", "|="} {
-		if operator != "=" && p.isPreviousRevision() {
-			continue
-		}
 		if p.match(operator) {
 			return operator
 		}

@@ -150,6 +150,15 @@
       }
     },
     {
+      "id": "pass.lexical-defer",
+      "sourceRoot": "cases/pass/lexical-defer/src",
+      "source": "main.fy",
+      "expect": {
+        "status": "pass",
+        "module": "main"
+      }
+    },
+    {
       "id": "pass.foreign-call",
       "sourceRoot": "cases/pass/foreign-call/src",
       "source": "main.fy",

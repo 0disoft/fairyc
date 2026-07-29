@@ -2399,6 +2399,21 @@ fn i32 main() {
 	}
 }
 
+func TestEmitLexicalDeferAsOrdinaryVerifiedCall(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn void record(i32 value) { assert(value == 42); }
+fn i32 main() { defer record(42); return 42; }
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0WindowsMSVCProfile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	if !slices.Contains(unit.Features, "scalar-call") || !strings.Contains(unit.Source, "fy_l_1 = INT32_C(42);\n    fy_fn_1(fy_l_1);") {
+		t.Fatalf("generated C does not preserve deferred call:\n%s", unit.Source)
+	}
+}
+
 func lowerSource(t *testing.T, contents string) mir.Program {
 	t.Helper()
 	return lowerSources(t, map[string]string{"main.fy": contents})

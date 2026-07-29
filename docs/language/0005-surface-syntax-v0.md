@@ -31,10 +31,13 @@
 - Globals are compile-time `const` only. Mutable globals are excluded.
 - Classic counter loops use `for (initializer; condition; post) { ... }`. Each clause is optional;
   an omitted condition is `true`. The initializer owns a lexical scope covering the condition,
-  body, and post clause. The admitted v2 header subset is one scalar declaration or assignment,
+  body, and post clause. The admitted v3 header subset is one scalar declaration or assignment,
   one pure boolean condition, and one direct scalar assignment. The post and direct-assignment
   initializer may use ordinary `=` or an admitted compound assignment. Calls, borrows, indexing, blocks,
   propagation, resource movement, `++`, `--`, and comma expressions are not header forms.
+- Lexical cleanup uses `defer direct_void_call(copy_scalar_arguments...);`. Arguments evaluate
+  immediately and the retained calls execute LIFO when their block exits normally or through
+  `return`, `?`, `break`, or `continue`. Traps do not unwind through defers.
 - An ordinary or raw foreign function may declare one closed external-capability set with
   `@effects(clock, console, environment, filesystem, network, process, random)`. Arguments use only
   the effects actually required; omission is the empty set. Exact semantics are owned by
@@ -322,6 +325,13 @@ binary operation, and stores only on success. Bounds, overflow, division, remain
 traps therefore leave the target unchanged. The right-hand side must have exactly the target type;
 there are no promotions, wrapping shortcuts, resource compound assignments, field-target support,
 or returned assignment value.
+
+The first `defer` surface accepts only resolved internal calls returning `void`. Explicit arguments
+are limited to `bool`, `i32`, `u8`, `u32`, and `usize`; each is evaluated once at registration and
+copied into compiler-owned storage. Foreign calls, returned values, resources, aggregates, pointers,
+views, safe borrows, and method receivers are rejected. Deferred calls run before implicit resource
+drops and Region resets for the same lexical exit. Arbitrary deferred blocks and abnormal-exit
+guarantees do not exist.
 
 Equality operators `==` and `!=` accept matching operands of `bool`, `i32`, `u8`, `u32`, or
 `usize`. Ordered comparison operators `<`, `<=`, `>`, and `>=` accept matching operands of `i32`,

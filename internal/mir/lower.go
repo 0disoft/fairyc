@@ -239,18 +239,28 @@ type activeLoop struct {
 	headerLive     map[hir.SymbolID]bool
 }
 
+type deferredCall struct {
+	scope         hir.Span
+	span          hir.Span
+	callee        hir.SymbolID
+	arguments     []Operand
+	argumentSpans []hir.Span
+}
+
 type functionLowerer struct {
-	module      string
-	source      *hir.Function
-	properties  typeProperties
-	result      Function
-	current     BlockID
-	bindings    map[hir.SymbolID]bindingInfo
-	live        map[hir.SymbolID]bool
-	regions     map[hir.SymbolID]int
-	regionStack []activeRegion
-	loopStack   []activeLoop
-	nextLocal   LocalID
+	module       string
+	source       *hir.Function
+	properties   typeProperties
+	result       Function
+	current      BlockID
+	bindings     map[hir.SymbolID]bindingInfo
+	live         map[hir.SymbolID]bool
+	regions      map[hir.SymbolID]int
+	regionStack  []activeRegion
+	loopStack    []activeLoop
+	currentScope hir.Span
+	deferred     []deferredCall
+	nextLocal    LocalID
 }
 
 func newFunctionLowerer(module string, function *hir.Function, properties typeProperties) *functionLowerer {
@@ -306,7 +316,8 @@ func (l *functionLowerer) lower() (Function, error) {
 		return Function{}, err
 	}
 	if !terminated && l.source.ResultType == hir.TypeVoid {
-		actions := l.emitFunctionExitCleanup(l.live, l.source.Body.Span, "return")
+		actions := l.emitDeferredCallsForScope(l.source.Body.Span)
+		actions = append(actions, l.emitFunctionExitCleanup(l.live, l.source.Body.Span, "return")...)
 		l.result.CleanupPaths = append(l.result.CleanupPaths, CleanupPathFact{Exit: l.source.Body.Span, ExitKind: "return", Actions: actions})
 		if cleanupContainsDrop(actions) {
 			l.result.EliminatedForms = append(l.result.EliminatedForms, EliminatedFormFact{Form: "implicit-drop", RemainingCount: 0})
@@ -321,6 +332,9 @@ func (l *functionLowerer) lower() (Function, error) {
 }
 
 func (l *functionLowerer) lowerBlock(block hir.Block) (bool, error) {
+	previousScope := l.currentScope
+	l.currentScope = block.Span
+	defer func() { l.currentScope = previousScope }()
 	terminated, err := l.lowerStatements(block.Statements)
 	if err != nil || terminated {
 		return terminated, err
@@ -435,6 +449,10 @@ func (l *functionLowerer) lowerStatements(statements []hir.Statement) (bool, err
 			}
 		case "assert":
 			if err := l.lowerAssert(statement.Expression, statement.Span); err != nil {
+				return false, err
+			}
+		case "defer":
+			if err := l.lowerDefer(statement); err != nil {
 				return false, err
 			}
 		case "while":
@@ -574,6 +592,37 @@ func (l *functionLowerer) freezeScalarOperand(value Operand, at hir.Span) Operan
 	return Operand{Kind: OperandLocal, Local: destination}
 }
 
+func (l *functionLowerer) lowerDefer(statement hir.Statement) error {
+	expression := statement.Expression
+	if expression == nil || expression.Kind != "call" || expression.Type != hir.TypeVoid ||
+		expression.Symbol == hir.NoSymbol || expression.ForeignABI != "" || len(expression.Children) == 0 || l.currentScope.Source == "" {
+		return fmt.Errorf("malformed defer statement")
+	}
+	arguments := make([]Operand, 0, len(expression.Children)-1)
+	argumentSpans := make([]hir.Span, 0, len(expression.Children)-1)
+	for index := 1; index < len(expression.Children); index++ {
+		argument := &expression.Children[index]
+		if !hir.FixedArrayScalarElement(argument.Type) {
+			return fmt.Errorf("defer argument %d has unsupported type %q", index-1, argument.Type)
+		}
+		value, err := l.lowerExpression(argument)
+		if err != nil {
+			return err
+		}
+		if value.Kind == OperandInvalid {
+			return fmt.Errorf("defer argument %d has no executable value", index-1)
+		}
+		arguments = append(arguments, l.freezeScalarOperand(value, argument.Span))
+		argumentSpans = append(argumentSpans, argument.Span)
+	}
+	l.deferred = append(l.deferred, deferredCall{
+		scope: l.currentScope, span: expression.Span, callee: expression.Symbol,
+		arguments: arguments, argumentSpans: argumentSpans,
+	})
+	l.result.EliminatedForms = append(l.result.EliminatedForms, EliminatedFormFact{Form: "lexical-defer", RemainingCount: 0})
+	return nil
+}
+
 func (l *functionLowerer) lowerAssert(expression *hir.Expression, statementSpan hir.Span) error {
 	if expression == nil || expression.Type != hir.TypeBool {
 		return fmt.Errorf("malformed assert statement")
@@ -602,14 +651,21 @@ func (l *functionLowerer) lowerAssert(expression *hir.Expression, statementSpan 
 }
 
 func (l *functionLowerer) lowerNestedBlock(block hir.Block) (Operand, bool, error) {
+	previousScope := l.currentScope
+	l.currentScope = block.Span
+	defer func() { l.currentScope = previousScope }()
 	terminated, err := l.lowerStatements(block.Statements)
 	if err != nil || terminated {
 		return Operand{}, terminated, err
 	}
 	if block.Tail == nil {
+		l.emitDeferredCallsForScope(block.Span)
 		return Operand{}, false, nil
 	}
 	value, err := l.lowerExpression(block.Tail)
+	if err == nil && !l.blockTerminated(l.current) {
+		l.emitDeferredCallsForScope(block.Span)
+	}
 	return value, l.blockTerminated(l.current), err
 }
 
@@ -1885,7 +1941,8 @@ func (l *functionLowerer) lowerLoopControl(kind string, exit hir.Span) error {
 		return fmt.Errorf("%s has no enclosing loop after type validation", kind)
 	}
 	loop := l.loopStack[len(l.loopStack)-1]
-	actions := l.emitLoopControlCleanup(l.live, loop, exit, kind)
+	actions := l.emitDeferredCallsForLoopExit(loop, exit)
+	actions = append(actions, l.emitLoopControlCleanup(l.live, loop, exit, kind)...)
 	if !matchesLoopHeader(loop.headerLive, l.live) {
 		return fmt.Errorf("%s edge changes resource state after Flow validation", kind)
 	}
@@ -2285,7 +2342,8 @@ func (l *functionLowerer) lowerPropagate(expression *hir.Expression) (Operand, e
 		Kind: OperationResultConstruct, Span: expression.Span, DestinationLocal: propagatedResult,
 		Operands: []Operand{{Kind: OperandLocal, Local: errorPayload}}, Variant: "err", Type: l.source.ResultType,
 	})
-	errorActions := l.emitFunctionExitCleanup(errorLive, expression.Span, "propagate")
+	errorActions := l.emitDeferredCallsForFunctionExit(expression.Span)
+	errorActions = append(errorActions, l.emitFunctionExitCleanup(errorLive, expression.Span, "propagate")...)
 	l.terminate(Terminator{
 		Kind: TerminatorReturn, Span: expression.Span, UnwindSuccessor: NoBlock,
 		ReturnValue: Operand{Kind: OperandLocal, Local: propagatedResult},
@@ -2319,7 +2377,8 @@ func (l *functionLowerer) lowerReturn(expression *hir.Expression, exit hir.Span)
 	if path := l.liveResourcePath(expression); path != nil {
 		value = l.materializeMove(path, value, "return-value", true)
 	}
-	actions := l.emitFunctionExitCleanup(l.live, exit, "return")
+	actions := l.emitDeferredCallsForFunctionExit(exit)
+	actions = append(actions, l.emitFunctionExitCleanup(l.live, exit, "return")...)
 	l.result.CleanupPaths = append(l.result.CleanupPaths, CleanupPathFact{Exit: exit, ExitKind: "return", Actions: actions})
 	if cleanupContainsDrop(actions) {
 		l.result.EliminatedForms = append(l.result.EliminatedForms, EliminatedFormFact{Form: "implicit-drop", RemainingCount: 0})
@@ -2344,6 +2403,55 @@ func (l *functionLowerer) materializeMove(expression *hir.Expression, value Oper
 	l.appendOperation(Operation{Kind: OperationAssign, Span: expression.Span, DestinationLocal: temporary, Operands: []Operand{value}})
 	l.movePath(expression, destination, record)
 	return Operand{Kind: OperandLocal, Local: temporary}
+}
+
+func (l *functionLowerer) emitDeferredCallsForScope(scope hir.Span) []CleanupAction {
+	return l.emitDeferredCalls(func(call deferredCall) bool {
+		return sameHIRSpan(call.scope, scope)
+	})
+}
+
+func (l *functionLowerer) emitDeferredCallsForFunctionExit(exit hir.Span) []CleanupAction {
+	return l.emitDeferredCalls(func(call deferredCall) bool {
+		return spanContains(call.scope, exit) && call.span.StartByte < exit.EndByte
+	})
+}
+
+func (l *functionLowerer) emitDeferredCallsForLoopExit(loop activeLoop, exit hir.Span) []CleanupAction {
+	return l.emitDeferredCalls(func(call deferredCall) bool {
+		return spanContains(loop.body, call.scope) && spanContains(call.scope, exit) && call.span.StartByte < exit.EndByte
+	})
+}
+
+func (l *functionLowerer) emitDeferredCalls(selectCall func(deferredCall) bool) []CleanupAction {
+	actions := make([]CleanupAction, 0)
+	for index := len(l.deferred) - 1; index >= 0; index-- {
+		call := l.deferred[index]
+		if !selectCall(call) {
+			continue
+		}
+		l.result.Calls = append(l.result.Calls, CallFact{
+			Call: call.span, ArgumentOrder: slices.Clone(call.argumentSpans), NormalSuccessor: true,
+		})
+		continuation := l.newBlock()
+		l.terminate(Terminator{
+			Kind: TerminatorCall, Span: call.span, Successors: []BlockID{continuation}, UnwindSuccessor: NoBlock,
+			Callee: call.callee, Arguments: slices.Clone(call.arguments), DestinationLocal: NoLocal,
+		})
+		l.current = continuation
+		actions = append(actions, CleanupAction{Kind: "defer-call", Binding: call.span})
+	}
+	return actions
+}
+
+func sameHIRSpan(left, right hir.Span) bool {
+	return left.Package == right.Package && left.Source == right.Source &&
+		left.StartByte == right.StartByte && left.EndByte == right.EndByte
+}
+
+func spanContains(container, nested hir.Span) bool {
+	return container.Package == nested.Package && container.Source == nested.Source &&
+		container.StartByte <= nested.StartByte && container.EndByte >= nested.EndByte
 }
 
 func (l *functionLowerer) emitCleanup(live map[hir.SymbolID]bool) []CleanupAction {

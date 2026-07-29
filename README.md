@@ -33,7 +33,7 @@ overwrites an existing path.
 The Go Stage 0 compiler now implements immutable source bytes, a lossless lexer, compact recoverable
 syntax, error-free AST lowering, typed HIR, resource and borrow Flow, verified MIR, a bounded
 interpreter, deterministic C11 transport, strict local workspaces, stable new/check/build/run/test/C
-  emission commands, and experimental Atlas fact export. The semantic runner executes all 42 v0 resolve, type,
+  emission commands, and experimental Atlas fact export. The semantic runner executes all 43 v0 resolve, type,
 and local Flow cases, including integer-literal range rejection, checked compound assignment, branch- and loop-aware safe-borrow reassignment,
 exact interprocedural borrow-return summaries, last-use loans, borrow-return origins, canonical
 `@effects(...)` sets, and caller-superset enforcement. Whole-root resource Flow
@@ -45,12 +45,12 @@ allocation origins, lexical escape, capability storage, and plain-region resourc
   must-use return/discard/propagation, local and parameter transfer, branch joins, loop back-edges and control exits,
 overwrite and early-return rejection, exactly-once classification, non-Result `?`, and propagated
 error compatibility. The MIR runner executes all
-  12 v0 normalization cases through mutable-local block lowering and the MIR verifier, covering
+  13 v0 normalization cases through mutable-local block lowering and the MIR verifier, covering
 left-to-right call evaluation, complete-root moves, normal-exit cleanup order, `Result` error
   cleanup, nearest-loop control, explicit checked arithmetic, and non-unwinding trap paths. The verifier mutation runner constructs all 10 named
   baselines and proves all 22 isolated `V1001` through `V1701` rejection recipes, including a
   missing internal call target rejected before artifact or backend handoff. The first MIR
-  interpreter slice executes all 93 v0 cases for literal return, direct `i32` minimum constants, scalar fixed-array calls, contextual immutable and mutable byte-view borrowing, exact lengths, checked reads and indexed stores, function-call arithmetic,
+  interpreter slice executes all 94 v0 cases for literal return, bounded lexical `defer`, direct `i32` minimum constants, scalar fixed-array calls, contextual immutable and mutable byte-view borrowing, exact lengths, checked reads and indexed stores, function-call arithmetic,
 boolean branches and logical not, source `&&` and `||` short-circuiting, scalar `while`, classic
 scalar `for`, scalar
 `Option` construction/switching, scalar `Result` construction/switching/propagation,
@@ -69,7 +69,7 @@ cleanup. A nonempty resource may declare drop effects, and Resource Flow require
 actual cleanup edges; whole-root moves transfer the obligation without charging the sender.
 The interpreter constructs, reads, and recursively drops resources from the verified MIR definition;
 host effect implementations remain target-runtime work rather than interpreter emulation.
-The constrained C backend emits deterministic C11 for 37 verified fixtures across the scalar
+The constrained C backend emits deterministic C11 for 38 verified fixtures across the scalar
 payload surface, restricted inert user enums, flat nonempty move-only resources over Fairy copy
 scalars or raw pointers with empty or pure nonempty drop bodies, copy-scalar/inert-struct and resource-bearing
 built-in `Option` and `Result` values,
@@ -250,7 +250,9 @@ evaluate once left to right and preserve the receiver's borrow origin. Mutable `
 supports checked `u8` reads and indexed stores; the place is checked before the right-hand side is
 evaluated. Mutable integer locals and admitted indexed scalar places support statement-only exact-type
 `+=`, `-=`, `*=`, `/=`, `%=`, `<<=`, `>>=`, `&=`, `^=`, and `|=` with the existing traps and no
-promotions. Text indexing or slicing, a stable public string ABI, and the general safe text API still
+promotions. Bounded `defer` captures copy-scalar arguments immediately and executes internal `void`
+calls in LIFO order when their lexical block exits; traps do not unwind through those calls. Text
+indexing or slicing, a stable public string ABI, and the general safe text API still
 do not exist.
 Fixed arrays of `bool`, `i32`, `u8`, `u32`, or `usize` with `1 <= N <= 4096` now construct from
 nonempty list literals, cross internal calls and returns as inert copy values, expose exact

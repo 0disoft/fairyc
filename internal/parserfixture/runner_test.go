@@ -12,8 +12,8 @@ func TestParserManifestV0(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Run() error = %v", err)
 	}
-	if report.CasesRun != 19 {
-		t.Fatalf("Run() cases = %d, want 19", report.CasesRun)
+	if report.CasesRun != 20 {
+		t.Fatalf("Run() cases = %d, want 20", report.CasesRun)
 	}
 	if len(report.Failures) != 0 {
 		for _, failure := range report.Failures {

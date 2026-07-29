@@ -538,6 +538,117 @@ func TestExecuteCompoundAssignmentPreservesTrapSemantics(t *testing.T) {
 	}
 }
 
+func TestExecuteLexicalDeferInLIFOOrderWithImmediateCapture(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn i32 observe(i32 value) { return value; }
+fn void emit(i32 value) { discard observe(value); }
+fn i32 main() {
+    var i32 first = 65;
+    defer emit(first);
+    defer emit(66);
+    first = 1;
+    if (true) { defer emit(67); }
+    return 42;
+}
+`)
+	outcome, err := interpreter.ExecuteWithOptions(program, "main::main", interpreter.Options{
+		TestIntrinsics: map[string]interpreter.TestIntrinsicKind{
+			"main::observe": interpreter.TestIntrinsicWriteStdoutByte,
+		},
+		OutputLimit: 3,
+	})
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 || string(outcome.Stdout) != "CBA" {
+		t.Fatalf("ExecuteWithOptions() = %+v, %v", outcome, err)
+	}
+}
+
+func TestExecuteLexicalDeferOnVoidFallthrough(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn i32 observe(i32 value) { return value; }
+fn void emit(i32 value) { discard observe(value); }
+fn void work() { defer emit(65); }
+fn i32 main() { work(); return 42; }
+`)
+	outcome, err := interpreter.ExecuteWithOptions(program, "main::main", interpreter.Options{
+		TestIntrinsics: map[string]interpreter.TestIntrinsicKind{
+			"main::observe": interpreter.TestIntrinsicWriteStdoutByte,
+		},
+		OutputLimit: 1,
+	})
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 || string(outcome.Stdout) != "A" {
+		t.Fatalf("ExecuteWithOptions() = %+v, %v", outcome, err)
+	}
+}
+
+func TestTrapDoesNotRunLexicalDefer(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn i32 observe(i32 value) { return value; }
+fn void emit(i32 value) { discard observe(value); }
+fn i32 main() { defer emit(65); assert(false); return 42; }
+`)
+	outcome, err := interpreter.ExecuteWithOptions(program, "main::main", interpreter.Options{
+		TestIntrinsics: map[string]interpreter.TestIntrinsicKind{
+			"main::observe": interpreter.TestIntrinsicWriteStdoutByte,
+		},
+		OutputLimit: 1,
+	})
+	if err != nil || outcome.Kind != interpreter.OutcomeTrap || outcome.TrapCategory != "assertion-failed" || len(outcome.Stdout) != 0 {
+		t.Fatalf("ExecuteWithOptions() = %+v, %v", outcome, err)
+	}
+}
+
+func TestExecuteLexicalDeferOnContinueAndBreak(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn i32 observe(i32 value) { return value; }
+fn void emit(i32 value) { discard observe(value); }
+fn i32 main() {
+    for (var i32 index = 0; index < 2; index += 1) {
+        defer emit(65 + index);
+        if (index == 0) { continue; }
+        break;
+    }
+    return 42;
+}
+`)
+	outcome, err := interpreter.ExecuteWithOptions(program, "main::main", interpreter.Options{
+		TestIntrinsics: map[string]interpreter.TestIntrinsicKind{
+			"main::observe": interpreter.TestIntrinsicWriteStdoutByte,
+		},
+		OutputLimit: 2,
+	})
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 || string(outcome.Stdout) != "AB" {
+		t.Fatalf("ExecuteWithOptions() = %+v, %v", outcome, err)
+	}
+}
+
+func TestExecuteLexicalDeferOnResultPropagation(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn i32 observe(i32 value) { return value; }
+fn void emit(i32 value) { discard observe(value); }
+fn Result<i32, i32> fail() { return .err(1); }
+fn Result<i32, i32> run() {
+    defer emit(65);
+    let i32 value = fail()?;
+    return .ok(value);
+}
+fn i32 main() { discard run(); return 42; }
+`)
+	outcome, err := interpreter.ExecuteWithOptions(program, "main::main", interpreter.Options{
+		TestIntrinsics: map[string]interpreter.TestIntrinsicKind{
+			"main::observe": interpreter.TestIntrinsicWriteStdoutByte,
+		},
+		OutputLimit: 1,
+	})
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 || string(outcome.Stdout) != "A" {
+		t.Fatalf("ExecuteWithOptions() = %+v, %v", outcome, err)
+	}
+}
+
 func lowerSource(t *testing.T, contents string) mir.Program {
 	t.Helper()
 	parsed, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(contents)), source.DefaultLimits())
