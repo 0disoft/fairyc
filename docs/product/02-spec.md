@@ -437,8 +437,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   addend and preferred-image function addresses, recomputes `S + A - (P + 4)`, compares the linked
   `CALL rel32` displacement, and executes at low and optimized profiles. ADR 0234 preserves exact
   relocation section indexes and reuses those runs to bind one receipt `ADDR64` relocation to its
-  map-owned target address and one internal-label `.pdata` `ADDR32NB` begin relocation to its
-  map-owned source RVA and validated runtime-function entry. ADR 0233 adds a real
+  map-owned target address and all three `.pdata` `ADDR32NB` entry relocations to independently
+  mapped source and unwind-info RVAs and the validated runtime-function entry. ADR 0233 adds a real
   two-member Microsoft archive plus one direct pick-any COMDAT competitor. The bounded archive
   inspector validates both linker members and every contained object; the final proof requires the
   preferred index, demanded and unused member identities, a non-COMDAT unused sentinel absent from
@@ -446,7 +446,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   agree across four low/optimized input-order executions. The driver still removes every temporary
   object, archive, map, and image. This is not
   a stable product object or library format, proof of remaining relocation formulas or unwind
-  fields, broader archive/COMDAT policies, unwind fixture, or fresh hosted same-commit receipt.
+  tails, broader archive/COMDAT policies, unwind fixture, or fresh hosted same-commit receipt.
 - `internal/pecoff` additionally maps the exception directory through `.pdata` and every referenced
   file-backed unwind record. `RUNTIME_FUNCTION` entries must be 12-byte, sorted, nonoverlapping,
   executable-code ranges with DWORD-aligned unwind RVAs. Version 1 prolog operations use their
@@ -464,8 +464,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   linked-image structure validation. This is explicit Windows dispatcher and runtime-walk evidence,
   not a Fairy C language unwind feature: Stage 0 traps and calls remain non-unwinding. Version-2
   epilog offset semantics, language-specific handler payload parsing, recursive chain equivalence,
-  source-level Fairy or foreign-frame crossings, object-level unwind relocations beyond the one
-  proved `.pdata` begin field, and hosted
+  source-level Fairy or foreign-frame crossings, handler and chained-tail object relocations beyond
+  the proved three-field `.pdata` entry, and hosted
   fixtures remain fail-closed.
 - The eleven valid layout cases additionally generate one deterministic private C11 plus explicit
   POSIX-typedef probe. The Linux

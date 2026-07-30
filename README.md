@@ -385,7 +385,7 @@ slots, version-2 epilog descriptor bounds, and minimum handler or chained tails.
 product currently exposes both version 1 and version 2 records. The native unwind probe separately
 proves its closed exception payload, captured-context virtual walk, and handler-directed termination
 path. Version-2 epilog offset semantics, language-specific handler data, recursive chains,
-Fairy/foreign-frame crossings, object-level unwind relocations, and a complete versioned unwind
+Fairy/foreign-frame crossings, handler and chained-tail object relocations, and a complete versioned unwind
 fixture contract remain open despite the observed generic Windows hosted receipt.
 A separate fail-closed Linux/amd64 command compiles those cases with Clang and GCC
 at `-O0` and `-O2`, link a closed conformance runtime, and compare process outcomes plus exact

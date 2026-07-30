@@ -362,16 +362,16 @@ and exact COMDAT section-definition selection. ADR 0231 adds two versioned raw-o
 REL32, ANY, and associative COMDAT behavior. ADR 0232 separately proves one direct cross-object
 `CALL rel32` formula by reading the object addend and comparing the exact final-image displacement at
 both profiles.
-ADR 0234 reuses those objects and executions to bind one `ADDR64` receipt pointer and one unwind
-`.pdata` `ADDR32NB` begin field from exact section-indexed object relocations and raw addends through
-MSVC map identities to their final-image values.
+ADR 0234 reuses those objects and executions to bind one `ADDR64` receipt pointer and all three
+unwind `.pdata` `ADDR32NB` fields from exact section-indexed object relocations and raw addends
+through MSVC map identities to their final-image values.
 ADR 0233 additionally parses a real two-member Microsoft archive, proves the preferred index maps
 the demanded and unused functions to their exact members, requires the demanded function to be
 owned by the selected archive member in the final map, and requires the unused function to be a
 non-COMDAT sentinel absent from that map. It also reads both candidate object initializers and binds
 one pick-any COMDAT map owner to its final PE address and value across direct-first and
 archive-first links at both profiles. Whole compiler-produced object identity, remaining relocation
-formulas and unwind fields, broader archive retention and COMDAT selection policies, and a fresh hosted object receipt remain
+formulas and unwind tails, broader archive retention and COMDAT selection policies, and a fresh hosted object receipt remain
 absent, so the target evidence marker stays fail-closed.
 The fifty-three local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
 runtime-function ordering and code coverage plus referenced version 1 and version 2 unwind-record
@@ -828,7 +828,7 @@ non-authority to separate executable oracles and records what each still does no
 ## Later capability gates
 
 - `x86_64-linux-musl`: requires a separate libc, sysroot, startup, loader, and static-distribution profile.
-- `x86_64-windows-msvc`: the TargetSpec, scalar/LLP64 C-emission product builds at both profiles, closed FY-to-project-C SystemHeap, Buffer, Arena/Region lifecycle, and UTF-8 calls, an eight-case local layout probe, 15-case host-independent Microsoft x64 classifier, 12-case same-MSVC native crossing, one generated-Fairy small/large struct-result crossing under C11 and C17 consumer modes, bounded PE32+ executable inspection, structural live-COFF object/archive inspection, versioned exact synthetic COFF symbol/COMDAT/relocation fixtures, inspected cross-object `REL32`, `ADDR64`, and unwind `.pdata` `ADDR32NB` begin formulas, one exact archive extraction and pick-any COMDAT final-selection proof, static version-1/version-2 unwind-structure inspection, and a three-case native exception/virtual-walk probe exist, but complete hosted LLP64 and same-commit COFF evidence, broader and bidirectional source-level Fairy crossings, independent or register-inspected calls, remaining relocation formulas and unwind fields, broader archive/COMDAT policies, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, complete UCRT/VCRuntime and deployment evidence, distribution, and debug fixtures remain required.
+- `x86_64-windows-msvc`: the TargetSpec, scalar/LLP64 C-emission product builds at both profiles, closed FY-to-project-C SystemHeap, Buffer, Arena/Region lifecycle, and UTF-8 calls, an eight-case local layout probe, 15-case host-independent Microsoft x64 classifier, 12-case same-MSVC native crossing, one generated-Fairy small/large struct-result crossing under C11 and C17 consumer modes, bounded PE32+ executable inspection, structural live-COFF object/archive inspection, versioned exact synthetic COFF symbol/COMDAT/relocation fixtures, inspected cross-object `REL32`, `ADDR64`, and complete three-field unwind `.pdata` `ADDR32NB` formulas, one exact archive extraction and pick-any COMDAT final-selection proof, static version-1/version-2 unwind-structure inspection, and a three-case native exception/virtual-walk probe exist, but complete hosted LLP64 and same-commit COFF evidence, broader and bidirectional source-level Fairy crossings, independent or register-inspected calls, remaining relocation formulas and unwind tails, broader archive/COMDAT policies, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, complete UCRT/VCRuntime and deployment evidence, distribution, and debug fixtures remain required.
 - QBE or another fast backend: requires stable internal semantics, interpreter and C oracles, ABI coverage, and measured edit-build benefit.
 - LLVM backend: requires representative workloads that justify optimization and distribution cost after simpler paths are exhausted.
 - Generics and `Vec<T>`: require non-generic stability plus compile-time, code-size, active-payload, and diagnostics fixtures.

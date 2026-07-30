@@ -13,7 +13,7 @@ import (
 const amd64AddressReceiptTargetOffset = amd64REL32ReceiptMagicBytes + 8
 
 // AMD64AddressLinkSpec identifies the ADDR64 target pointer and the source function's
-// .pdata ADDR32NB begin relocation in one closed MSVC object-to-image proof.
+// .pdata ADDR32NB entry relocations in one closed MSVC object-to-image proof.
 type AMD64AddressLinkSpec struct {
 	SourceSymbol   string
 	TargetSymbol   string
@@ -34,8 +34,24 @@ type AMD64AddressLinkReport struct {
 	ADDR32NBObjectTarget     string
 	ADDR32NBLinkedBeginRVA   uint32
 	ADDR32NBExpectedBeginRVA uint32
+	ADDR32NBEndObjectAddend  uint32
+	ADDR32NBEndObjectTarget  string
 	RuntimeFunctionEndRVA    uint32
+	ExpectedFunctionEndRVA   uint32
+	ADDR32NBUnwindAddend     uint32
+	ADDR32NBUnwindTarget     string
 	UnwindInfoRVA            uint32
+	ExpectedUnwindInfoRVA    uint32
+}
+
+type amd64PDataEntryRelocations struct {
+	Section      *pe.Section
+	Begin        ObjectRelocation
+	BeginTarget  ObjectSymbol
+	End          ObjectRelocation
+	EndTarget    ObjectSymbol
+	Unwind       ObjectRelocation
+	UnwindTarget ObjectSymbol
 }
 
 // InspectAMD64AddressLink proves two existing MSVC relocation paths from the same caller object:
@@ -163,30 +179,79 @@ func InspectAMD64AddressLink(object, image, linkMap []byte, spec AMD64AddressLin
 		return AMD64AddressLinkReport{}, fmt.Errorf("AMD64 ADDR64 linked value is %#x, want %#x", addr64Linked, addr64Expected)
 	}
 
-	pdataRelocation, pdataSection, pdataTarget, err := exactPDataBeginRelocation(objectReport, objectFile, source)
+	pdataEntry, err := exactPDataEntryRelocations(objectReport, objectFile, source)
 	if err != nil {
 		return AMD64AddressLinkReport{}, err
 	}
-	pdataObjectOffset, err := objectRelocationRawOffset(object, pdataSection, pdataRelocation, 4)
+	beginObjectOffset, err := objectRelocationRawOffset(object, pdataEntry.Section, pdataEntry.Begin, 4)
 	if err != nil {
-		return AMD64AddressLinkReport{}, fmt.Errorf("AMD64 ADDR32NB: %w", err)
+		return AMD64AddressLinkReport{}, fmt.Errorf("AMD64 ADDR32NB begin: %w", err)
 	}
-	addr32Addend := binary.LittleEndian.Uint32(object[pdataObjectOffset:])
-	addr32Expected64 := uint64(sourceRVA) + uint64(addr32Addend)
-	if addr32Expected64 > math.MaxUint32 {
-		return AMD64AddressLinkReport{}, fmt.Errorf("AMD64 ADDR32NB expected RVA overflows")
+	endObjectOffset, err := objectRelocationRawOffset(object, pdataEntry.Section, pdataEntry.End, 4)
+	if err != nil {
+		return AMD64AddressLinkReport{}, fmt.Errorf("AMD64 ADDR32NB end: %w", err)
 	}
-	addr32Expected := uint32(addr32Expected64)
-	linkedBegin, linkedEnd, unwindRVA, err := exactRuntimeFunctionByBegin(image, imageReport, addr32Expected)
+	unwindObjectOffset, err := objectRelocationRawOffset(object, pdataEntry.Section, pdataEntry.Unwind, 4)
+	if err != nil {
+		return AMD64AddressLinkReport{}, fmt.Errorf("AMD64 ADDR32NB unwind-info: %w", err)
+	}
+	beginAddend := binary.LittleEndian.Uint32(object[beginObjectOffset:])
+	endAddend := binary.LittleEndian.Uint32(object[endObjectOffset:])
+	unwindAddend := binary.LittleEndian.Uint32(object[unwindObjectOffset:])
+	expectedBegin, err := addRVA(sourceRVA, beginAddend, "AMD64 ADDR32NB begin")
 	if err != nil {
 		return AMD64AddressLinkReport{}, err
+	}
+	expectedEnd, err := addRVA(sourceRVA, endAddend, "AMD64 ADDR32NB end")
+	if err != nil {
+		return AMD64AddressLinkReport{}, err
+	}
+	unwindMapSymbols, err := inspectMSVCMapSymbols(linkMap, pdataEntry.UnwindTarget.Name)
+	if err != nil {
+		return AMD64AddressLinkReport{}, err
+	}
+	unwindMap, found := unwindMapSymbols[pdataEntry.UnwindTarget.Name]
+	if !found {
+		return AMD64AddressLinkReport{}, fmt.Errorf("MSVC link map has no unwind-info symbol %q", pdataEntry.UnwindTarget.Name)
+	}
+	if !msvcMapOwnerIsObject(unwindMap.Owner, spec.SourceObject) {
+		return AMD64AddressLinkReport{}, fmt.Errorf("MSVC link map unwind-info owner is %q, want %q", unwindMap.Owner, spec.SourceObject)
+	}
+	unwindBaseRVA, err := preferredImageRVA(imageReport, unwindMap.PreferredAddress, "unwind-info map")
+	if err != nil {
+		return AMD64AddressLinkReport{}, err
+	}
+	expectedUnwind, err := addRVA(unwindBaseRVA, unwindAddend, "AMD64 ADDR32NB unwind-info")
+	if err != nil {
+		return AMD64AddressLinkReport{}, err
+	}
+	linkedBegin, linkedEnd, unwindRVA, err := exactRuntimeFunctionByBegin(image, imageReport, expectedBegin)
+	if err != nil {
+		return AMD64AddressLinkReport{}, err
+	}
+	if linkedEnd != expectedEnd {
+		return AMD64AddressLinkReport{}, fmt.Errorf("AMD64 ADDR32NB linked end RVA is %#x, want %#x", linkedEnd, expectedEnd)
+	}
+	if unwindRVA != expectedUnwind {
+		return AMD64AddressLinkReport{}, fmt.Errorf("AMD64 ADDR32NB linked unwind-info RVA is %#x, want %#x", unwindRVA, expectedUnwind)
 	}
 
 	return AMD64AddressLinkReport{
 		ADDR64ObjectAddend: addr64Addend, ADDR64LinkedValue: addr64Linked, ADDR64ExpectedValue: addr64Expected,
-		ADDR32NBObjectAddend: addr32Addend, ADDR32NBObjectTarget: pdataTarget.Name, ADDR32NBLinkedBeginRVA: linkedBegin,
-		ADDR32NBExpectedBeginRVA: addr32Expected, RuntimeFunctionEndRVA: linkedEnd, UnwindInfoRVA: unwindRVA,
+		ADDR32NBObjectAddend: beginAddend, ADDR32NBObjectTarget: pdataEntry.BeginTarget.Name, ADDR32NBLinkedBeginRVA: linkedBegin,
+		ADDR32NBExpectedBeginRVA: expectedBegin, ADDR32NBEndObjectAddend: endAddend, ADDR32NBEndObjectTarget: pdataEntry.EndTarget.Name,
+		RuntimeFunctionEndRVA: linkedEnd, ExpectedFunctionEndRVA: expectedEnd,
+		ADDR32NBUnwindAddend: unwindAddend, ADDR32NBUnwindTarget: pdataEntry.UnwindTarget.Name,
+		UnwindInfoRVA: unwindRVA, ExpectedUnwindInfoRVA: expectedUnwind,
 	}, nil
+}
+
+func addRVA(base, addend uint32, label string) (uint32, error) {
+	value := uint64(base) + uint64(addend)
+	if value > math.MaxUint32 {
+		return 0, fmt.Errorf("%s expected RVA overflows", label)
+	}
+	return uint32(value), nil
 }
 
 func validateAMD64AddressLinkSpec(spec AMD64AddressLinkSpec) error {
@@ -241,10 +306,8 @@ func objectRelocationRawOffset(object []byte, section *pe.Section, relocation Ob
 	return objectOffset, nil
 }
 
-func exactPDataBeginRelocation(report ObjectReport, file *pe.File, source ObjectSymbol) (ObjectRelocation, *pe.Section, ObjectSymbol, error) {
-	var result ObjectRelocation
-	var resultSection *pe.Section
-	var resultTarget ObjectSymbol
+func exactPDataEntryRelocations(report ObjectReport, file *pe.File, source ObjectSymbol) (amd64PDataEntryRelocations, error) {
+	var result amd64PDataEntryRelocations
 	found := false
 	candidates := make([]string, 0, 8)
 	symbols := make(map[uint32]ObjectSymbol, len(report.SymbolRecords))
@@ -270,19 +333,80 @@ func exactPDataBeginRelocation(report ObjectReport, file *pe.File, source Object
 			if entryOffset%runtimeFunctionBytes != 0 || uint64(entryOffset)+runtimeFunctionBytes > uint64(objectSection.Size) {
 				continue
 			}
-			if found {
-				return ObjectRelocation{}, nil, ObjectSymbol{}, fmt.Errorf("AMD64 ADDR32NB object repeats the source .pdata begin relocation")
+			if _, err := exactPDataSiteRelocation(report.RelocationRecords, index+1, section.Name, uint64(relocation.VirtualAddress)); err != nil {
+				return amd64PDataEntryRelocations{}, fmt.Errorf("AMD64 ADDR32NB source .pdata begin: %w", err)
 			}
-			result = relocation
-			resultSection = objectSection
-			resultTarget = target
+			end, endTarget, err := exactPDataFieldRelocation(report.RelocationRecords, symbols, index+1, section.Name, uint64(relocation.VirtualAddress)+4)
+			if err != nil {
+				return amd64PDataEntryRelocations{}, fmt.Errorf("AMD64 ADDR32NB source .pdata end: %w", err)
+			}
+			if endTarget.SectionNumber != source.SectionNumber || endTarget.Value != source.Value || endTarget.AuxiliaryRecords != 0 {
+				return amd64PDataEntryRelocations{}, fmt.Errorf("AMD64 ADDR32NB source .pdata end does not target the exact function alias")
+			}
+			unwind, unwindTarget, err := exactPDataFieldRelocation(report.RelocationRecords, symbols, index+1, section.Name, uint64(relocation.VirtualAddress)+8)
+			if err != nil {
+				return amd64PDataEntryRelocations{}, fmt.Errorf("AMD64 ADDR32NB source .pdata unwind-info: %w", err)
+			}
+			if unwindTarget.SectionNumber <= 0 || int(unwindTarget.SectionNumber) > len(report.Sections) || unwindTarget.AuxiliaryRecords != 0 {
+				return amd64PDataEntryRelocations{}, fmt.Errorf("AMD64 ADDR32NB source .pdata unwind-info target %q is not exact .xdata", unwindTarget.Name)
+			}
+			unwindSection := report.Sections[unwindTarget.SectionNumber-1]
+			if (unwindSection.Name != ".xdata" && !strings.HasPrefix(unwindSection.Name, ".xdata$")) ||
+				unwindSection.RawOffset == 0 || unwindSection.Characteristics&sectionInitializedData == 0 ||
+				unwindSection.Characteristics&sectionReadable == 0 ||
+				unwindSection.Characteristics&(sectionContainsCode|sectionUninitializedData|sectionExecutable|sectionWritable) != 0 ||
+				unwindTarget.Value >= unwindSection.RawSize {
+				return amd64PDataEntryRelocations{}, fmt.Errorf("AMD64 ADDR32NB source .pdata unwind-info target %q is not bounded read-only .xdata", unwindTarget.Name)
+			}
+			if found {
+				return amd64PDataEntryRelocations{}, fmt.Errorf("AMD64 ADDR32NB object repeats the source .pdata entry")
+			}
+			result = amd64PDataEntryRelocations{
+				Section: objectSection, Begin: relocation, BeginTarget: target,
+				End: end, EndTarget: endTarget, Unwind: unwind, UnwindTarget: unwindTarget,
+			}
 			found = true
 		}
 	}
 	if !found {
-		return ObjectRelocation{}, nil, ObjectSymbol{}, fmt.Errorf("AMD64 ADDR32NB object has no exact source .pdata begin relocation; candidates %v", candidates)
+		return amd64PDataEntryRelocations{}, fmt.Errorf("AMD64 ADDR32NB object has no exact source .pdata begin relocation; candidates %v", candidates)
 	}
-	return result, resultSection, resultTarget, nil
+	return result, nil
+}
+
+func exactPDataFieldRelocation(relocations []ObjectRelocation, symbols map[uint32]ObjectSymbol, sectionIndex int, section string, address uint64) (ObjectRelocation, ObjectSymbol, error) {
+	result, err := exactPDataSiteRelocation(relocations, sectionIndex, section, address)
+	if err != nil {
+		return ObjectRelocation{}, ObjectSymbol{}, err
+	}
+	if result.Type != ObjectRelocationAMD64Addr32NB {
+		return ObjectRelocation{}, ObjectSymbol{}, fmt.Errorf("relocation at %#x is not ADDR32NB", result.VirtualAddress)
+	}
+	target, ok := symbols[result.SymbolIndex]
+	if !ok {
+		return ObjectRelocation{}, ObjectSymbol{}, fmt.Errorf("relocation at %#x targets a missing symbol", result.VirtualAddress)
+	}
+	return result, target, nil
+}
+
+func exactPDataSiteRelocation(relocations []ObjectRelocation, sectionIndex int, section string, address uint64) (ObjectRelocation, error) {
+	if address > math.MaxUint32 {
+		return ObjectRelocation{}, fmt.Errorf("relocation address overflows")
+	}
+	wantAddress := uint32(address)
+	var result ObjectRelocation
+	count := 0
+	for _, relocation := range relocations {
+		if relocation.SectionIndex != sectionIndex || relocation.Section != section || relocation.VirtualAddress != wantAddress {
+			continue
+		}
+		result = relocation
+		count++
+	}
+	if count != 1 {
+		return ObjectRelocation{}, fmt.Errorf("object has %d relocations at %#x, want exactly one", count, wantAddress)
+	}
+	return result, nil
 }
 
 func exactRuntimeFunctionByBegin(image []byte, report Report, beginRVA uint32) (uint32, uint32, uint32, error) {

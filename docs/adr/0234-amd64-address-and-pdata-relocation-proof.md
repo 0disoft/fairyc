@@ -39,27 +39,34 @@ symbol-name matching alone is ambiguous.
    relocation must be `IMAGE_REL_AMD64_ADDR32NB` at a 12-byte entry boundary. Its target may be the
    public source symbol or one exact primary alias with the same section number and value and no
    auxiliary records. This admits observed `$LN...` labels without accepting a merely similar name.
-5. Read the raw unsigned 32-bit addend and require the final exception directory to contain exactly
-   one validated runtime-function entry whose begin RVA equals `S + A - ImageBase`. The map-derived
-   source RVA supplies `S - ImageBase`; the existing unwind inspector independently requires a
-   nonempty executable range and a valid file-backed `UNWIND_INFO` reference.
-6. Keep host-independent mutations for relocation type, exact site, duplicate relocation, receipt
+5. Require the next two fields at offsets four and eight to carry exact section-indexed
+   `IMAGE_REL_AMD64_ADDR32NB` relocations. The end target must have the same section/value identity
+   as the source function. The unwind-info target must be an exact primary symbol in `.xdata` or
+   `.xdata$...`; require its exact MSVC map row to belong to `caller.obj`.
+6. Read all three raw unsigned 32-bit addends. Require the final exception directory to contain
+   exactly one validated runtime-function entry whose begin and end RVAs equal the independently
+   recomputed source-map RVA plus their respective addends. Require the final unwind-info RVA to
+   equal the unwind target's independently mapped RVA plus its addend. The existing unwind inspector
+   separately requires a nonempty executable range and valid file-backed `UNWIND_INFO` content.
+7. Keep host-independent mutations for relocation type, exact site, duplicate relocation, receipt
    magic, ADDR64 addend and final value, map address and object owner, `.pdata` section identity,
-   begin-alias value, ADDR32NB addend, and final runtime-function begin. Execute the unchanged probe
-   at low and optimized profiles and require zero with no output.
-7. Keep `pe-coff-object-fixtures` fail-closed until a fresh hosted Windows job succeeds on the exact
+   begin/end alias identity, each ADDR32NB addend, unwind-map address and owner, and all three final
+   runtime-function fields. Execute the unchanged probe at low and optimized profiles and require
+   zero with no output.
+8. Keep `pe-coff-object-fixtures` fail-closed until a fresh hosted Windows job succeeds on the exact
    commit. Local MSVC evidence is not a hosted same-commit receipt.
 
 ## Evidence and limits
 
-The configured Windows smoke now proves REL32, ADDR64, and one unwind-bearing `.pdata` ADDR32NB
-begin relocation in the same two low/optimized executions. This does not increase the executable
-count: all 53 target or probe PE images still cross the structural and unwind inspectors. The
-synthetic tests use the same internal-label alias shape observed from current MSVC objects.
+The configured Windows smoke now proves REL32, ADDR64, and all three unwind-bearing `.pdata`
+`ADDR32NB` entry relocations in the same two low/optimized executions. This does not increase the
+executable count: all 53 target or probe PE images still cross the structural and unwind inspectors.
+The synthetic tests use the same internal-label alias and `$unwind$...` static-symbol shapes
+observed from current MSVC objects, including independent nonzero addends and field-specific deaths.
 
-This proof covers one absolute target pointer and one runtime-function begin field. It does not
-prove the `.pdata` end-address relocation, the `.pdata` unwind-info relocation, handler or chained
-tail relocations, `ADDR32`, `REL32_1` through `REL32_5`, `SECTION`, `SECREL`, import thunks, base
+This proof covers one absolute target pointer and one complete three-field runtime-function entry.
+It does not prove handler or chained-tail relocations, `ADDR32`, `REL32_1` through `REL32_5`,
+`SECTION`, `SECREL`, import thunks, base
 relocations, overflow records, incremental linking, LTCG, non-MSVC linkers, or a stable public
 Fairy C object format.
 

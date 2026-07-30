@@ -2449,7 +2449,8 @@ func runWindowsRelocationProbe(toolchain cdriver.WindowsHostToolchain) (int, err
 		}
 		if addressReport.ADDR64LinkedValue != addressReport.ADDR64ExpectedValue ||
 			addressReport.ADDR32NBLinkedBeginRVA != addressReport.ADDR32NBExpectedBeginRVA ||
-			addressReport.RuntimeFunctionEndRVA <= addressReport.ADDR32NBLinkedBeginRVA || addressReport.UnwindInfoRVA == 0 {
+			addressReport.RuntimeFunctionEndRVA != addressReport.ExpectedFunctionEndRVA ||
+			addressReport.UnwindInfoRVA != addressReport.ExpectedUnwindInfoRVA {
 			return executions, fmt.Errorf("Windows MSVC address-relocation probe with %s returned an incomplete link receipt", profile.Name)
 		}
 		outcome, err := cdriver.ExecuteWindowsMSVCRelocationProbe(artifact)
