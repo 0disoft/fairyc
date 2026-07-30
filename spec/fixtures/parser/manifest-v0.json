@@ -333,6 +333,15 @@
       }
     },
     {
+      "id": "pass.compile-time-items",
+      "sourceRoot": "cases/pass/compile-time-items/src",
+      "source": "compile_time_items.fy",
+      "expect": {
+        "status": "pass",
+        "module": "compile_time_items"
+      }
+    },
+    {
       "id": "fail.unexpected-token",
       "sourceRoot": "cases/fail/unexpected-token/src",
       "source": "main.fy",

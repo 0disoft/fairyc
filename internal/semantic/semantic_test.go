@@ -3155,20 +3155,6 @@ func TestAnalyzeRejectsInvalidMustUseDeclarations(t *testing.T) {
 	}
 }
 
-func TestAnalyzeFailsClosedForPreservedCompileTimeItemsBeforeADR0220Implementation(t *testing.T) {
-	t.Parallel()
-	result := analyzeText(t, map[string]string{
-		"main.fy": "module main;\nconst i32 ANSWER = 42;\nstatic_assert(ANSWER == 42);\nfn i32 main() { return 0; }\n",
-	})
-	if result.CompletedThrough != semantic.PhaseNone || result.FailedPhase != semantic.PhaseNone || len(result.Diagnostics) != 0 || len(result.Unsupported) != 2 {
-		t.Fatalf("result = %+v", result)
-	}
-	if result.Unsupported[0].Feature != "module constant pending ADR 0220 implementation" ||
-		result.Unsupported[1].Feature != "static_assert pending ADR 0220 implementation" {
-		t.Fatalf("unsupported = %+v", result.Unsupported)
-	}
-}
-
 func analyzeText(t *testing.T, files map[string]string) semantic.Result {
 	t.Helper()
 	inputs := make([]semantic.File, 0, len(files))

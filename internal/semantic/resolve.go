@@ -27,6 +27,7 @@ type symbol struct {
 	mustUseSpan  diagnostic.Span
 	mutable      bool
 	public       bool
+	constant     *ast.Constant
 	function     *ast.Function
 	foreign      *ast.ForeignFunction
 	structure    *ast.Struct
@@ -43,6 +44,7 @@ type moduleScope struct {
 	key       moduleKey
 	file      File
 	functions map[string]*symbol
+	constants map[string]*symbol
 	structs   map[string]*symbol
 	resources map[string]*symbol
 	enums     map[string]*symbol
@@ -69,6 +71,7 @@ type analyzer struct {
 	parameter             map[*ast.Parameter]*symbol
 	parameterIndex        map[*symbol]int
 	functions             map[*ast.Function]*symbol
+	constants             map[*ast.Constant]*symbol
 	foreignFunctions      map[*ast.ForeignFunction]*symbol
 	structs               map[*ast.Struct]*symbol
 	resources             map[*ast.Resource]*symbol
@@ -98,32 +101,38 @@ type analyzer struct {
 	dropFunctions         map[*ast.Resource]*ast.Function
 	dropOwners            map[*ast.Function]*ast.Resource
 	methodCalls           map[*ast.Expression]*symbol
+	constantFacts         []ConstantFact
+	constantValues        map[*symbol]compileTimeValue
+	constEvalFunctions    map[*symbol]bool
 }
 
 func newAnalyzer(files []File, packageImports map[packageImportKey]hir.PackageID) *analyzer {
 	return &analyzer{
-		files:            files,
-		modules:          make(map[moduleKey]*moduleScope, len(files)),
-		packageImports:   packageImports,
-		resolved:         make(map[*ast.Expression]*symbol),
-		bindingSymbols:   make(map[*ast.Binding]*symbol),
-		parameter:        make(map[*ast.Parameter]*symbol),
-		parameterIndex:   make(map[*symbol]int),
-		functions:        make(map[*ast.Function]*symbol),
-		foreignFunctions: make(map[*ast.ForeignFunction]*symbol),
-		structs:          make(map[*ast.Struct]*symbol),
-		resources:        make(map[*ast.Resource]*symbol),
-		enums:            make(map[*ast.Enum]*symbol),
-		regions:          make(map[*ast.Expression]*symbol),
-		resourceTypes:    make(map[hir.Type]*resourceInfo),
-		structTypes:      make(map[hir.Type]*structInfo),
-		enumTypes:        make(map[hir.Type]*enumInfo),
-		expressionTypes:  make(map[*ast.Expression]hir.Type),
-		borrowReturns:    make(map[*symbol]borrowReturnSummary),
-		dropFunctions:    make(map[*ast.Resource]*ast.Function),
-		dropOwners:       make(map[*ast.Function]*ast.Resource),
-		methodCalls:      make(map[*ast.Expression]*symbol),
-		regionType:       &symbol{id: hir.NoSymbol, kind: "capability", name: "Region", typ: hir.TypeRegion},
+		files:              files,
+		modules:            make(map[moduleKey]*moduleScope, len(files)),
+		packageImports:     packageImports,
+		resolved:           make(map[*ast.Expression]*symbol),
+		bindingSymbols:     make(map[*ast.Binding]*symbol),
+		parameter:          make(map[*ast.Parameter]*symbol),
+		parameterIndex:     make(map[*symbol]int),
+		functions:          make(map[*ast.Function]*symbol),
+		constants:          make(map[*ast.Constant]*symbol),
+		foreignFunctions:   make(map[*ast.ForeignFunction]*symbol),
+		structs:            make(map[*ast.Struct]*symbol),
+		resources:          make(map[*ast.Resource]*symbol),
+		enums:              make(map[*ast.Enum]*symbol),
+		regions:            make(map[*ast.Expression]*symbol),
+		resourceTypes:      make(map[hir.Type]*resourceInfo),
+		structTypes:        make(map[hir.Type]*structInfo),
+		enumTypes:          make(map[hir.Type]*enumInfo),
+		expressionTypes:    make(map[*ast.Expression]hir.Type),
+		borrowReturns:      make(map[*symbol]borrowReturnSummary),
+		dropFunctions:      make(map[*ast.Resource]*ast.Function),
+		dropOwners:         make(map[*ast.Function]*ast.Resource),
+		methodCalls:        make(map[*ast.Expression]*symbol),
+		constantValues:     make(map[*symbol]compileTimeValue),
+		constEvalFunctions: make(map[*symbol]bool),
+		regionType:         &symbol{id: hir.NoSymbol, kind: "capability", name: "Region", typ: hir.TypeRegion},
 	}
 }
 
@@ -132,6 +141,7 @@ func (a *analyzer) resolve() {
 	a.declareEnums()
 	a.declareStructs()
 	a.declareResources()
+	a.declareConstants()
 	a.declareCallables()
 	a.declareResourceDropFunctions()
 	a.resolveImports()
@@ -139,6 +149,13 @@ func (a *analyzer) resolve() {
 		return
 	}
 	for _, module := range a.moduleOrder {
+		constantScope := &lexicalScope{names: make(map[string]*symbol)}
+		for index := range module.file.Module.Constants {
+			a.resolveExpression(module, constantScope, module.file.Module.Constants[index].Expression)
+		}
+		for index := range module.file.Module.StaticAssertions {
+			a.resolveExpression(module, constantScope, module.file.Module.StaticAssertions[index].Expression)
+		}
 		for index := range module.file.Module.Resources {
 			resource := &module.file.Module.Resources[index]
 			if function := a.dropFunctions[resource]; function != nil {
@@ -147,6 +164,36 @@ func (a *analyzer) resolve() {
 		}
 		for index := range module.file.Module.Functions {
 			a.resolveFunction(module, &module.file.Module.Functions[index])
+		}
+	}
+}
+
+func (a *analyzer) declareConstants() {
+	for _, module := range a.moduleOrder {
+		for index := range module.file.Module.Constants {
+			constant := &module.file.Module.Constants[index]
+			if previous := module.item(constant.Name); previous != nil {
+				a.addDiagnostic("E4301", span(module.file.Path, constant.NameSpan), RelatedSpan{
+					Role: "previous-declaration", Span: span(previous.source, previous.declaration),
+				})
+				continue
+			}
+			value := &symbol{
+				id: a.allocateSymbol(), packageID: module.key.packageID, kind: "constant", name: constant.Name,
+				module: module.file.Module.Path, source: module.file.Path, declaration: constant.NameSpan,
+				typeSpan: constant.Type.Span, public: constant.Public, constant: constant,
+			}
+			module.constants[constant.Name] = value
+			a.constants[constant] = value
+			if constant.Public || len(constant.Attributes) != 0 || constant.Expression == nil {
+				a.addDiagnostic("E4301", span(module.file.Path, constant.Span))
+			}
+		}
+		for index := range module.file.Module.StaticAssertions {
+			assertion := &module.file.Module.StaticAssertions[index]
+			if assertion.Public || len(assertion.Attributes) != 0 || assertion.Expression == nil {
+				a.addDiagnostic("E4301", span(module.file.Path, assertion.Span))
+			}
 		}
 	}
 }
@@ -212,6 +259,7 @@ func (a *analyzer) declareModules() {
 			key:       key,
 			file:      file,
 			functions: make(map[string]*symbol),
+			constants: make(map[string]*symbol),
 			structs:   make(map[string]*symbol),
 			resources: make(map[string]*symbol),
 			enums:     make(map[string]*symbol),
@@ -327,7 +375,11 @@ func (a *analyzer) declareFunction(module *moduleScope, function *ast.Function) 
 		}
 	}
 	if previous := module.item(name); previous != nil {
-		a.addDiagnostic("E0102", span(module.file.Path, function.NameSpan), RelatedSpan{
+		code := "E0102"
+		if previous.kind == "constant" {
+			code = "E4301"
+		}
+		a.addDiagnostic(code, span(module.file.Path, function.NameSpan), RelatedSpan{
 			Role: "previous-declaration",
 			Span: span(previous.source, previous.declaration),
 		})
@@ -351,7 +403,11 @@ func (a *analyzer) declareFunction(module *moduleScope, function *ast.Function) 
 
 func (a *analyzer) declareForeignFunction(module *moduleScope, function *ast.ForeignFunction) {
 	if previous := module.item(function.Name); previous != nil {
-		a.addDiagnostic("E0102", span(module.file.Path, function.NameSpan), RelatedSpan{
+		code := "E0102"
+		if previous.kind == "constant" {
+			code = "E4301"
+		}
+		a.addDiagnostic(code, span(module.file.Path, function.NameSpan), RelatedSpan{
 			Role: "previous-declaration", Span: span(previous.source, previous.declaration),
 		})
 		return
@@ -689,6 +745,9 @@ func (a *analyzer) ownerSymbol(module *moduleScope, name string) *symbol {
 }
 
 func (m *moduleScope) item(name string) *symbol {
+	if value := m.constants[name]; value != nil {
+		return value
+	}
 	if value := m.functions[name]; value != nil {
 		return value
 	}

@@ -23,6 +23,7 @@ type expectation struct {
 	Types            []typeAssertion       `json:"types"`
 	Borrows          []borrowAssertion     `json:"borrows"`
 	Effects          []effectAssertion     `json:"effects"`
+	Constants        []constantAssertion   `json:"constants"`
 	Diagnostics      []diagnosticAssertion `json:"diagnostics"`
 }
 
@@ -60,6 +61,15 @@ type borrowAssertion struct {
 type effectAssertion struct {
 	Declaration spanAssertion `json:"declaration"`
 	Effects     []string      `json:"effects"`
+}
+
+type constantAssertion struct {
+	Module      string        `json:"module"`
+	Name        string        `json:"name"`
+	Declaration spanAssertion `json:"declaration"`
+	Type        string        `json:"type"`
+	Value       string        `json:"value"`
+	Span        spanAssertion `json:"span"`
 }
 
 type diagnosticAssertion struct {

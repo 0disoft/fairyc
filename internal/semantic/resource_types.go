@@ -246,6 +246,9 @@ func (a *analyzer) prepareStructTypes() {
 			}
 			info := a.structTypes[value.typ]
 			for _, attribute := range structure.Attributes {
+				if attribute.Name == constEvalAttribute {
+					continue
+				}
 				if attribute.Name == mustUseAttribute {
 					a.addDiagnostic("E4201", span(module.file.Path, attribute.Span), RelatedSpan{Role: "declaration", Span: span(module.file.Path, structure.NameSpan)})
 					continue

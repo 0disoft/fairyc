@@ -26,6 +26,7 @@
     "docs/adr/0216-checked-compound-assignment.md",
     "docs/adr/0217-bounded-lexical-defer.md",
     "docs/adr/0219-narrow-must-use-call-contract.md",
+    "docs/adr/0220-bounded-scalar-compile-time-evaluation.md",
     "docs/diagnostics/catalog-v0.md"
   ],
   "cases": [
@@ -1031,6 +1032,82 @@
               }
             ]
           }
+        ]
+      }
+    },
+    {
+      "id": "pass.type.compile-time-evaluation",
+      "sourceRoot": "cases/pass/compile-time-evaluation/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow",
+        "constants": [
+          { "module": "main", "name": "ANSWER", "declaration": { "source": "main.fy", "startByte": 157, "endByte": 163 }, "type": "i32", "value": "42", "span": { "source": "main.fy", "startByte": 147, "endByte": 180 } },
+          { "module": "main", "name": "BYTE", "declaration": { "source": "main.fy", "startByte": 190, "endByte": 194 }, "type": "u8", "value": "42", "span": { "source": "main.fy", "startByte": 181, "endByte": 204 } },
+          { "module": "main", "name": "WIDE", "declaration": { "source": "main.fy", "startByte": 215, "endByte": 219 }, "type": "u32", "value": "42", "span": { "source": "main.fy", "startByte": 205, "endByte": 234 } },
+          { "module": "main", "name": "READY", "declaration": { "source": "main.fy", "startByte": 246, "endByte": 251 }, "type": "bool", "value": "true", "span": { "source": "main.fy", "startByte": 235, "endByte": 292 } },
+          { "module": "main", "name": "SELECTED", "declaration": { "source": "main.fy", "startByte": 303, "endByte": 311 }, "type": "i32", "value": "42", "span": { "source": "main.fy", "startByte": 293, "endByte": 351 } }
+        ]
+      }
+    },
+    {
+      "id": "fail.resolve.compile-time-invalid",
+      "sourceRoot": "cases/fail/compile-time-invalid/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "resolve",
+        "diagnostics": [
+          { "code": "E4301", "primary": { "source": "main.fy", "startByte": 14, "endByte": 36 }, "related": [] }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.compile-time-excluded",
+      "sourceRoot": "cases/fail/compile-time-excluded/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          { "code": "E4302", "primary": { "source": "main.fy", "startByte": 67, "endByte": 77 }, "related": [] }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.compile-time-trap",
+      "sourceRoot": "cases/fail/compile-time-trap/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          { "code": "E4303", "primary": { "source": "main.fy", "startByte": 30, "endByte": 35 }, "related": [] }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.compile-time-cycle",
+      "sourceRoot": "cases/fail/compile-time-cycle/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          { "code": "E4304", "primary": { "source": "main.fy", "startByte": 24, "endByte": 29 }, "related": [] }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.compile-time-assert",
+      "sourceRoot": "cases/fail/compile-time-assert/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          { "code": "E4305", "primary": { "source": "main.fy", "startByte": 14, "endByte": 35 }, "related": [] }
         ]
       }
     }

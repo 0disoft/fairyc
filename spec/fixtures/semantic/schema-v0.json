@@ -105,6 +105,12 @@
           "items": {
             "$ref": "#/$defs/effectAssertion"
           }
+        },
+        "constants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/constantAssertion"
+          }
         }
       }
     },
@@ -196,6 +202,34 @@
         }
       }
     },
+    "constantAssertion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["module", "name", "declaration", "type", "value", "span"],
+      "properties": {
+        "module": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*(?:::[A-Za-z_][A-Za-z0-9_]*)*$"
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "declaration": {
+          "$ref": "#/$defs/span"
+        },
+        "type": {
+          "enum": ["bool", "u8", "i32", "u32"]
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1
+        },
+        "span": {
+          "$ref": "#/$defs/span"
+        }
+      }
+    },
     "failExpectation": {
       "type": "object",
       "additionalProperties": false,
@@ -223,7 +257,7 @@
       "properties": {
         "code": {
           "type": "string",
-          "pattern": "^E(?:01|10|11|21|31|41|42|51|71)[0-9]{2}$"
+          "pattern": "^E(?:01|10|11|21|31|41|42|43|51|71)[0-9]{2}$"
         },
         "primary": {
           "$ref": "#/$defs/span"

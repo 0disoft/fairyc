@@ -61,7 +61,19 @@ type Result struct {
 	ResultHandling   []ResultHandlingFact
 	Effects          []EffectFact
 	ResourceStates   []ResourceStateFact
+	Constants        []ConstantFact
 	Unsupported      []Unsupported
+}
+
+// ConstantFact retains one private module constant without adding an executable HIR declaration.
+type ConstantFact struct {
+	Package     hir.PackageID
+	Module      string
+	Name        string
+	Declaration hir.Span
+	Type        hir.Type
+	Value       string
+	Span        hir.Span
 }
 
 // Diagnostic is one semantic rejection with role-labelled related source spans.
@@ -184,21 +196,6 @@ func analyze(files []File, bindings map[packageImportKey]hir.PackageID) Result {
 		ordered[index].Path = hir.QualifiedSourcePath(ordered[index].Package, ordered[index].Path)
 	}
 	analyzer := newAnalyzer(ordered, bindings)
-	for _, file := range ordered {
-		if file.Module == nil {
-			continue
-		}
-		for _, constant := range file.Module.Constants {
-			analyzer.addUnsupported(file.Path, constant.Span, "module constant pending ADR 0220 implementation")
-		}
-		for _, assertion := range file.Module.StaticAssertions {
-			analyzer.addUnsupported(file.Path, assertion.Span, "static_assert pending ADR 0220 implementation")
-		}
-	}
-	if len(analyzer.unsupported) != 0 {
-		analyzer.finish()
-		return Result{Unsupported: analyzer.unsupported}
-	}
 	analyzer.resolve()
 	if len(analyzer.diagnostics) > 0 {
 		analyzer.finish()
@@ -222,6 +219,7 @@ func analyze(files []File, bindings map[packageImportKey]hir.PackageID) Result {
 	result.ResultHandling = analyzer.resultHandling
 	result.Effects = analyzer.effectFacts
 	result.ResourceStates = analyzer.resourceStates
+	result.Constants = analyzer.constantFacts
 	result.Unsupported = analyzer.unsupported
 	if len(result.Diagnostics) > 0 {
 		if analyzer.flowStarted {
@@ -354,6 +352,9 @@ func (a *analyzer) finish() {
 			return n
 		}
 		return cmp.Compare(left.Observation, right.Observation)
+	})
+	slices.SortFunc(a.constantFacts, func(left, right ConstantFact) int {
+		return compareSpan(left.Declaration, right.Declaration)
 	})
 	a.resourceStates = slices.CompactFunc(a.resourceStates, func(left, right ResourceStateFact) bool {
 		return compareSpan(left.Binding, right.Binding) == 0 && compareSpan(left.At, right.At) == 0 &&

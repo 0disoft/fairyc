@@ -29,6 +29,7 @@ func (a *analyzer) typeCheck() Result {
 	a.prepareEnumTypes()
 	a.prepareCallableMustUse()
 	a.prepareCallableEffects()
+	a.prepareCompileTime()
 	for _, module := range a.moduleOrder {
 		_, sourcePath := hir.SourcePathParts(module.file.Path)
 		hirModule := hir.Module{Package: module.key.packageID, Path: module.file.Module.Path, SourcePath: sourcePath}
@@ -87,6 +88,9 @@ func (a *analyzer) typeCheck() Result {
 func (a *analyzer) checkEnum(module *moduleScope, enumeration *ast.Enum) hir.Enum {
 	value := a.enums[enumeration]
 	for _, attribute := range enumeration.Attributes {
+		if attribute.Name == constEvalAttribute {
+			continue
+		}
 		if attribute.Name == mustUseAttribute {
 			a.addDiagnostic("E4201", span(module.file.Path, attribute.Span), RelatedSpan{Role: "declaration", Span: span(module.file.Path, enumeration.NameSpan)})
 			continue
@@ -131,6 +135,9 @@ func (a *analyzer) checkForeignFunction(module *moduleScope, function *ast.Forei
 	linkName := function.Name
 	seenLinkName := false
 	for _, attribute := range function.Attributes {
+		if attribute.Name == constEvalAttribute {
+			continue
+		}
 		if attribute.Name == effectsAttribute || attribute.Name == mustUseAttribute {
 			continue
 		}
@@ -179,6 +186,9 @@ func (a *analyzer) checkForeignFunction(module *moduleScope, function *ast.Forei
 func (a *analyzer) checkResource(module *moduleScope, resource *ast.Resource) hir.Resource {
 	value := a.resources[resource]
 	for _, attribute := range resource.Attributes {
+		if attribute.Name == constEvalAttribute {
+			continue
+		}
 		if attribute.Name == effectsAttribute {
 			continue
 		}
@@ -190,6 +200,9 @@ func (a *analyzer) checkResource(module *moduleScope, resource *ast.Resource) hi
 	}
 	if resource.Cleanup != nil {
 		for _, attribute := range resource.Cleanup.Attributes {
+			if attribute.Name == constEvalAttribute {
+				continue
+			}
 			if attribute.Name == effectsAttribute {
 				continue
 			}
@@ -240,7 +253,7 @@ func (a *analyzer) checkResource(module *moduleScope, resource *ast.Resource) hi
 func (c *typeChecker) checkFunction() hir.Function {
 	functionSymbol := c.analyzer.functions[c.function]
 	for _, attribute := range c.function.Attributes {
-		if attribute.Name == effectsAttribute || attribute.Name == mustUseAttribute {
+		if attribute.Name == effectsAttribute || attribute.Name == mustUseAttribute || attribute.Name == constEvalAttribute {
 			continue
 		}
 		c.analyzer.addUnsupported(c.module.file.Path, attribute.Span, "function attribute @"+attribute.Name)
@@ -617,8 +630,15 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 		}
 	case syntax.KindPath:
 		if symbol := c.analyzer.resolved[expression]; symbol != nil {
-			result.Symbol = symbol.id
-			actual = symbol.typ
+			if value, constant := c.analyzer.constantValues[symbol]; constant {
+				result.Kind = string(syntax.KindLiteral)
+				result.Value = value.canonical()
+				result.Cooked = ""
+				actual = value.typ
+			} else {
+				result.Symbol = symbol.id
+				actual = symbol.typ
+			}
 		} else if variant, option := optionVariantPath(expression.Text); option {
 			actual = c.checkOptionPath(expression, result, expected, variant)
 		} else if strings.HasPrefix(expression.Text, ".") {

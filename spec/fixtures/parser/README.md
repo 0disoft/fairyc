@@ -9,6 +9,8 @@ escape their declared roots, requires lossless source reconstruction for passing
 AST only after an error-free parse, and compares every listed diagnostic exactly.
 The pass corpus also pins contextual `>>`: the raw token remains lossless, expression use remains a
 right shift, and nested type arguments close without whitespace.
+It also retains module constants plus contextual module-item `static_assert` while proving that
+`static_assert` remains available as an ordinary non-item identifier.
 
 ## Result boundary
 

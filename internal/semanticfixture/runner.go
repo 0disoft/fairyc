@@ -170,6 +170,11 @@ func comparePass(fixture caseDefinition, actual semantic.Result) []Failure {
 			failures = append(failures, Failure{CaseID: fixture.ID, Detail: fmt.Sprintf("effect fact missing: %+v", expected)})
 		}
 	}
+	for _, expected := range fixture.Expect.Constants {
+		if !hasConstant(actual.Constants, expected) {
+			failures = append(failures, Failure{CaseID: fixture.ID, Detail: fmt.Sprintf("constant fact missing: %+v", expected)})
+		}
+	}
 	return failures
 }
 
@@ -241,6 +246,17 @@ func hasEffect(actual []semantic.EffectFact, expected effectAssertion) bool {
 			}
 		}
 		if matched {
+			return true
+		}
+	}
+	return false
+}
+
+func hasConstant(actual []semantic.ConstantFact, expected constantAssertion) bool {
+	for _, value := range actual {
+		if value.Package == hir.DefaultPackage && value.Module == expected.Module && value.Name == expected.Name &&
+			spanEqual(value.Declaration, expected.Declaration) && string(value.Type) == expected.Type &&
+			value.Value == expected.Value && spanEqual(value.Span, expected.Span) {
 			return true
 		}
 	}
