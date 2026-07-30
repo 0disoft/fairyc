@@ -162,6 +162,8 @@ A distinct `internal/windowsunwindprobe` execution layer then uses those platfor
 explicitly. Three separately compiled C units raise a private noncontinuable exception, inspect its
 payload and captured `CONTEXT` in an outer filter, virtual-walk the raiser, termination frame, and
 catcher, and require an abnormal `__finally` execution during the real handler-directed unwind.
+Before execution, the link inspector binds the frame's profile-specific handler-tail `ADDR32NB`
+relocation from raw object through exact map identities to an executable final-image RVA.
 This layer proves only those closed native C frames. It does not change Stage 0's non-unwinding MIR,
 trap, cleanup, or foreign-call rules.
 

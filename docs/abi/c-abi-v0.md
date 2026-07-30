@@ -248,7 +248,8 @@ bounded AMD64 PE32+ large-address-aware non-DLL console images with aligned head
 readable executable `.text` section, and an entry point inside executable code. Import payloads are
 not interpreted. The exception directory, `.pdata`, and referenced unwind records separately cross
 the bounded Microsoft x64 structural inspector; language-specific handler data, recursive chain
-equivalence, and unwind relocations beyond ADR 0234's complete three-field `.pdata` entry remain unproven. This is executable-image and
+equivalence, and chained-tail relocations remain unproven. ADR 0240 proves one profile-specific
+handler-tail relocation. This is executable-image and
 bounded unwind-structure evidence only, not complete COFF symbol/relocation, CodeView/PDB, or
 distribution conformance.
 
@@ -281,9 +282,10 @@ exact generated object and binds `REL32` through `REL32_5` to their distinct
 `S + A - (P + 4 + n)` final-image formulas at both profiles. ADR 0238 adds exact `/Z7`
 function-targeted CodeView `SECREL`/`SECTION` pairs and binds each final PE RSDS identity to its
 ephemeral MSF 7 PDB. ADR 0239 independently resolves that exact source function and its `caller.c`
-line through system DbgHelp at both profiles. It still does not define
-exported/imported product symbols, remaining relocation formulas, handler or
-chained-tail relocations, non-unwind or broader archive retention and COMDAT policies, complete `.pdata`/`.xdata`
+line through system DbgHelp at both profiles. ADR 0240 additionally binds the native unwind frame's
+low `__GSHandlerCheck_SEH` and optimized `__C_specific_handler` tail relocations through exact map
+rows to executable final RVAs. It still does not define exported/imported product symbols,
+remaining relocation formulas, chained-tail relocations, non-unwind or broader archive retention and COMDAT policies, complete `.pdata`/`.xdata`
 content, complete CodeView/PDB record semantics or broader symbolication, or a fresh hosted same-commit object receipt, so
 `pe-coff-object-fixtures` remains missing.
 
@@ -301,9 +303,10 @@ profiles. `RaiseException` carries two checked application values into an outer 
 the filter walks the captured `CONTEXT` with `RtlLookupFunctionEntry` and `RtlVirtualUnwind` and
 requires the raiser, termination frame, and catcher in order. Selecting the handler must then run
 the intervening `__finally` exactly once with `AbnormalTermination()` true. The probe is closed C
-target evidence and does not add source exceptions or unwind successors to Fairy C. Version-2
-epilog offset meaning, language-specific handler payload parsing, recursive chain equivalence,
-source-level Fairy or foreign-frame crossings, handler and chained-tail object relocations, and hosted fixtures
+target evidence and does not add source exceptions or unwind successors to Fairy C. ADR 0240 binds
+the frame's exact handler-tail `ADDR32NB` relocation to its final executable target at both
+profiles. Version-2 epilog offset meaning, language-specific handler payload parsing, recursive
+chain equivalence and chained-tail relocation, source-level Fairy or foreign-frame crossings, and hosted fixtures
 remain absent; `windows-x64-unwind-fixtures` therefore remains missing.
 
 This executable description is target data, not conformance evidence. Its evidence block names the
@@ -364,7 +367,7 @@ The planned transport matrix uses Clang as the primary compiler and GCC as an in
 
 ## Later profiles
 
-`x86_64-linux-musl` needs a separate libc, startup, sysroot, dynamic-loader, and static-distribution profile even though its CPU ABI is SysV-derived. The declared `x86_64-windows-msvc` TargetSpec still needs complete executable LLP64 layout coverage plus hosted evidence, independent or register-inspected four-slot call evidence, broader and bidirectional source-level Fairy crossings, a fresh hosted receipt for the exact synthetic COFF fixture and strengthened live-object/archive inspectors, remaining relocation formulas and unwind tails, non-unwind and broader archive/COMDAT policies, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, complete UCRT/VCRuntime and deployment evidence, and debug fixtures before any maturity promotion.
+`x86_64-linux-musl` needs a separate libc, startup, sysroot, dynamic-loader, and static-distribution profile even though its CPU ABI is SysV-derived. The declared `x86_64-windows-msvc` TargetSpec still needs complete executable LLP64 layout coverage plus hosted evidence, independent or register-inspected four-slot call evidence, broader and bidirectional source-level Fairy crossings, a fresh hosted receipt for the exact synthetic COFF fixture and strengthened live-object/archive inspectors, remaining relocation formulas and chained unwind tails, non-unwind and broader archive/COMDAT policies, complete version-2/handler-payload/chain and Fairy/foreign-frame unwind fixtures, complete UCRT/VCRuntime and deployment evidence, and debug fixtures before any maturity promotion.
 
 ## External references
 

@@ -11,8 +11,23 @@ func TestGenerateReturnsDeterministicClosedSources(t *testing.T) {
 	unit := Generate()
 	repeated := Generate()
 	if !slices.Equal(unit.Cases, repeated.Cases) || unit.CatcherSource != repeated.CatcherSource ||
-		unit.FrameSource != repeated.FrameSource || unit.RaiserSource != repeated.RaiserSource {
+		unit.FrameSource != repeated.FrameSource || unit.RaiserSource != repeated.RaiserSource ||
+		unit.FrameSymbol != repeated.FrameSymbol || unit.FrameObject != repeated.FrameObject ||
+		unit.LowHandlerSymbol != repeated.LowHandlerSymbol || unit.OptimizedHandlerSymbol != repeated.OptimizedHandlerSymbol {
 		t.Fatal("repeated Windows unwind probe generation drifted")
+	}
+	if unit.FrameSymbol != FrameSymbol || unit.FrameObject != FrameObject ||
+		unit.LowHandlerSymbol != LowHandlerSymbol || unit.OptimizedHandlerSymbol != OptimizedHandlerSymbol ||
+		!strings.Contains(unit.FrameSource, "void "+unit.FrameSymbol+"(") {
+		t.Fatalf("Windows unwind handler identities = %+v", unit)
+	}
+	for profile, want := range map[string]string{"low": LowHandlerSymbol, "optimized": OptimizedHandlerSymbol} {
+		if got, ok := unit.HandlerSymbolForProfile(profile); !ok || got != want {
+			t.Fatalf("HandlerSymbolForProfile(%q) = %q, %t; want %q, true", profile, got, ok, want)
+		}
+	}
+	if got, ok := unit.HandlerSymbolForProfile("other"); ok || got != "" {
+		t.Fatalf("HandlerSymbolForProfile(other) = %q, %t", got, ok)
 	}
 	if !slices.Equal(unit.Cases, []string{"abnormal-finally", "exception-filter-payload", "virtual-unwind-walk"}) {
 		t.Fatalf("Windows unwind cases = %q", unit.Cases)

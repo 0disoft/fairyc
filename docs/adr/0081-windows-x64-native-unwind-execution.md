@@ -31,11 +31,14 @@ rule that Fairy C calls and traps do not unwind.
    must execute exactly once, report `AbnormalTermination()` true, preserve its checked stack
    state, and never report a normal exit.
 6. Each build must first pass raw COFF inspection for all three objects and linked PE32+/unwind
-   structure inspection. The process must exit zero with no output under both profiles.
+   structure inspection. ADR 0240 additionally binds the low `__GSHandlerCheck_SEH` and optimized
+   `__C_specific_handler` frame-tail relocations from raw object through map to final executable RVA.
+   The process must exit zero with no output under both profiles.
 7. This fixture is explicit native Windows target evidence. It does not add source exceptions,
    unwind successors, or cleanup-on-trap to Fairy C. It does not prove version-2 epilog offsets,
-   language-specific handler payload parsing, recursive chain equivalence, object-level unwind
-   relocations, Fairy/foreign-frame crossings, hosted Windows execution, or debugger behavior.
+   language-specific handler payload parsing, recursive chain equivalence or chained-tail
+   relocations, remaining object-level unwind relocations, Fairy/foreign-frame crossings, hosted
+   Windows execution, or debugger behavior.
    `windows-x64-unwind-fixtures` remains fail-closed.
 
 ## Consequences

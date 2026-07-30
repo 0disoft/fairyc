@@ -455,10 +455,13 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   `.debug$S` `SECREL`/`SECTION` pairs and object-level formulas, and binds the final PE RSDS GUID/age
   to the bounded MSF 7 PDB information stream at both profiles. ADR 0239 then requires system
   DbgHelp to resolve the exact source-function start to its name and `caller.c` line with zero
-  displacement. The driver still removes every temporary
+  displacement. ADR 0240 separately locates the exact handler-bearing `frame.obj` unwind record,
+  requires the profile-specific tail relocation (`__GSHandlerCheck_SEH` for low and
+  `__C_specific_handler` for optimized) to be `ADDR32NB`, and binds its addend and MSVC map row to
+  the executable final handler RVA. The driver still removes every temporary
   object, archive, map, PDB, and image. This is not
-  a stable product object or library format, proof of remaining relocation formulas or unwind
-  tails, non-unwind or broader archive/COMDAT policies, complete CodeView/PDB semantics, broader
+  a stable product object or library format, proof of remaining relocation formulas or chained
+  unwind tails, non-unwind or broader archive/COMDAT policies, complete CodeView/PDB semantics, broader
   symbolication, unwind fixture, or fresh hosted same-commit receipt.
 - `internal/pecoff` additionally maps the exception directory through `.pdata` and every referenced
   file-backed unwind record. `RUNTIME_FUNCTION` entries must be 12-byte, sorted, nonoverlapping,
@@ -475,10 +478,11 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   `__finally` block to have executed exactly once with `AbnormalTermination()` true. Local x64
   MSVC compiles and executes this closed C probe at low and optimized profiles after COFF and
   linked-image structure validation. This is explicit Windows dispatcher and runtime-walk evidence,
-  not a Fairy C language unwind feature: Stage 0 traps and calls remain non-unwinding. Version-2
-  epilog offset semantics, language-specific handler payload parsing, recursive chain equivalence,
-  source-level Fairy or foreign-frame crossings, handler and chained-tail object relocations beyond
-  the proved three-field `.pdata` entry, and hosted
+  not a Fairy C language unwind feature: Stage 0 traps and calls remain non-unwinding. ADR 0240
+  additionally binds the frame's exact profile-specific handler-tail object relocation to the final
+  executable target before these executions. Version-2 epilog offset semantics, language-specific
+  handler payload parsing, recursive chain equivalence and chained-tail relocation, source-level
+  Fairy or foreign-frame crossings, and hosted
   fixtures remain fail-closed.
 - The eleven valid layout cases additionally generate one deterministic private C11 plus explicit
   POSIX-typedef probe. The Linux

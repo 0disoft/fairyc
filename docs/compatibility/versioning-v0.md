@@ -320,6 +320,10 @@ publish a PDB format, public debug mode, symbol store, debugger contract, or sou
 ADR 0239 keeps the system-DbgHelp function-and-line receipt equally private and ephemeral. Its exact
 probe name and file basename may evolve with synchronized canary and evidence updates; it does not
 stabilize a debugger API, public symbol surface, source path, PDB retention, or product debug mode.
+ADR 0240 keeps the profile-specific handler names, raw tail-addend report, MSVC map owners, and final
+RVA comparison equally private. Those identities may evolve with synchronized probe, inspector,
+mutation, and evidence updates; they do not stabilize a Fairy exception ABI, object format, runtime
+library owner, linker interface, or security-setting contract.
 Microsoft x64 unwind inspection is likewise an internal validation policy. Neither the observed
 runtime-function count nor version-1/version-2 mix is stable. Future semantic epilog, handler,
 or chain fixtures require an explicit unwind-contract decision before they can become target

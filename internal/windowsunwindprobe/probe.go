@@ -4,13 +4,24 @@ package windowsunwindprobe
 
 import "slices"
 
+const (
+	FrameSymbol            = "fy_unwind_frame"
+	FrameObject            = "frame.obj"
+	LowHandlerSymbol       = "__GSHandlerCheck_SEH"
+	OptimizedHandlerSymbol = "__C_specific_handler"
+)
+
 // Unit contains three separately compiled C translation units and the
 // observable runtime contracts they exercise.
 type Unit struct {
-	Cases         []string
-	CatcherSource string
-	FrameSource   string
-	RaiserSource  string
+	Cases                  []string
+	CatcherSource          string
+	FrameSource            string
+	RaiserSource           string
+	FrameSymbol            string
+	FrameObject            string
+	LowHandlerSymbol       string
+	OptimizedHandlerSymbol string
 }
 
 var cases = []string{
@@ -23,10 +34,26 @@ var cases = []string{
 // exception, walk its captured context, and then perform the real unwind.
 func Generate() Unit {
 	return Unit{
-		Cases:         slices.Clone(cases),
-		CatcherSource: catcherSource,
-		FrameSource:   frameSource,
-		RaiserSource:  raiserSource,
+		Cases:                  slices.Clone(cases),
+		CatcherSource:          catcherSource,
+		FrameSource:            frameSource,
+		RaiserSource:           raiserSource,
+		FrameSymbol:            FrameSymbol,
+		FrameObject:            FrameObject,
+		LowHandlerSymbol:       LowHandlerSymbol,
+		OptimizedHandlerSymbol: OptimizedHandlerSymbol,
+	}
+}
+
+// HandlerSymbolForProfile returns the exact MSVC handler emitted for the closed probe profile.
+func (unit Unit) HandlerSymbolForProfile(profile string) (string, bool) {
+	switch profile {
+	case "low":
+		return unit.LowHandlerSymbol, unit.LowHandlerSymbol != ""
+	case "optimized":
+		return unit.OptimizedHandlerSymbol, unit.OptimizedHandlerSymbol != ""
+	default:
+		return "", false
 	}
 }
 

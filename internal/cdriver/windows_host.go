@@ -218,6 +218,7 @@ func BuildWindowsMSVCRelocationProbe(toolchain WindowsHostToolchain, profile Pro
 	}, windowsMSVCBuildOptions{
 		CaptureMap:             true,
 		CaptureProgramDatabase: true,
+		DisableICF:             true,
 		EmbeddedCodeView:       true,
 		PrebuiltObjects:        []WindowsHostObject{{Name: "variants.obj", Bytes: slices.Clone(variantObject)}},
 	})
@@ -367,11 +368,11 @@ func BuildWindowsMSVCUnwindProbe(toolchain WindowsHostToolchain, profile Profile
 	if catcherSource == "" || frameSource == "" || raiserSource == "" {
 		return WindowsHostArtifact{}, fmt.Errorf("MSVC unwind catcher, frame, and raiser sources must be non-empty")
 	}
-	return buildWindowsMSVC(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{
+	return buildWindowsMSVCWithOptions(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{
 		{Name: "catcher.c", Contents: catcherSource},
 		{Name: "frame.c", Contents: frameSource},
 		{Name: "raiser.c", Contents: raiserSource},
-	})
+	}, windowsMSVCBuildOptions{CaptureMap: true})
 }
 
 type windowsMSVCSource struct {
@@ -382,6 +383,7 @@ type windowsMSVCSource struct {
 type windowsMSVCBuildOptions struct {
 	CaptureMap             bool
 	CaptureProgramDatabase bool
+	DisableICF             bool
 	EmbeddedCodeView       bool
 	PrebuiltObjects        []WindowsHostObject
 }
@@ -474,7 +476,10 @@ func buildWindowsMSVCWithOptions(toolchain WindowsHostToolchain, profile Profile
 	mapPath := ""
 	if options.CaptureMap {
 		mapPath = filepath.Join(temporaryRoot, "program.map")
-		arguments = append(arguments, "/OPT:NOICF", "/MAP:"+mapPath)
+		arguments = append(arguments, "/MAP:"+mapPath)
+	}
+	if options.DisableICF {
+		arguments = append(arguments, "/OPT:NOICF")
 	}
 	if _, err := runWindowsHostCommand(toolchain.Path, toolchain.Environment, temporaryRoot, arguments...); err != nil {
 		return WindowsHostArtifact{}, fmt.Errorf("%s", strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))

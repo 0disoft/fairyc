@@ -249,6 +249,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0237-amd64-rel32-variant-object-to-image-proof.md`: links one exact generated AMD64 object through real MSVC LINK and independently proves `REL32` through `REL32_5` as `S + A - (P + 4 + n)` at low and optimized profiles.
 - `0238-msvc-codeview-section-secrel-and-pdb-association.md`: proves exact function-targeted `.debug$S` SECTION/SECREL object pairs under `/Z7` and binds each final PE RSDS GUID/age to its bounded MSF 7 PDB information stream.
 - `0239-windows-dbghelp-symbolication-canary.md`: independently resolves the exact relocation-probe function name and `caller.c` source line through system DbgHelp for both low and optimized PE/PDB pairs.
+- `0240-amd64-unwind-handler-relocation-proof.md`: binds the low-profile `__GSHandlerCheck_SEH` and optimized `__C_specific_handler` ADDR32NB tails from raw `frame.obj` through exact MSVC map owners into the final PE before real exception dispatch.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

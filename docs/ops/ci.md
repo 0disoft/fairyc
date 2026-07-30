@@ -259,7 +259,10 @@ two low/optimized executions. ADR 0235 binds the selected archive function root 
 associative `.pdata` and `.xdata` children and final runtime-function entry across the existing four
 archive links. ADR 0236 proves both ANY-COMDAT function parents contributed, binds the winner, and
 requires the losing unwind payload to be absent from every final reference and file-backed section.
-Other relocation formulas and unwind tails, non-unwind and broader archive/COMDAT
+ADR 0240 additionally binds the low `__GSHandlerCheck_SEH` and optimized
+`__C_specific_handler` unwind tails from `frame.obj` through exact MSVC map rows to executable
+final-image RVAs before the native exception probe runs. Other relocation formulas and chained
+unwind tails, non-unwind and broader archive/COMDAT
 selection and retention modes,
 debug data, and a fresh hosted same-commit object receipt remain unconfigured.
 The ordinary Go tests include a 154-section positive regression object and reject 4,097 sections;
@@ -271,8 +274,7 @@ bounded version 2 epilog descriptors, and minimum handler/chained tails. The rec
 retained product's runtime-function and version-2 record counts without stabilizing them. It
 executes the closed synthetic exception and virtual-unwind walk described above, but does not
 validate complete version-2 epilog semantics, language-specific handler payload parsing, recursive
-chains, Fairy/foreign-frame crossings, handler and chained-tail object relocations beyond the proved
-three-field runtime-function entry, or hosted runner behavior.
+chains or chained-tail object relocations, Fairy/foreign-frame crossings, or hosted runner behavior.
 
 The Windows matrix runs that same smoke after its ordinary Go test suite. Run `30442310794` is the
 first recorded exit-zero hosted receipt. A later native-code, workflow, or runner-image change

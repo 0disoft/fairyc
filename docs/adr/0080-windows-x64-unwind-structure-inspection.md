@@ -42,10 +42,11 @@ Microsoft Learn x64 exception page still describes unwind version 1 as current, 
 8. The configured Windows smoke applies the inspector to the retained product and both profiles of
    the layout and ABI probes. Its text receipt reports the retained product's runtime-function and
    version-2 record counts dynamically; neither count is a stable contract.
-9. This does not clear `windows-x64-unwind-fixtures`. Complete version-2 epilog semantics,
-   language-specific handlers, recursive chain equivalence, object-level unwind relocations,
-   deliberate exception/unwind execution, hosted receipts, and debugger behavior remain separate
-   gates.
+9. This does not clear `windows-x64-unwind-fixtures`. ADR 0240 separately proves one
+   profile-specific handler-tail object relocation. Complete version-2 epilog semantics,
+   language-specific handler payloads, recursive chain equivalence and chained-tail relocation,
+   remaining object-level unwind relocations, deliberate exception/unwind execution, hosted
+   receipts, and debugger behavior remain separate gates.
 
 ## Consequences
 
