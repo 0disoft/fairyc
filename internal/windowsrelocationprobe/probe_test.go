@@ -1,0 +1,34 @@
+package windowsrelocationprobe
+
+import (
+	"strings"
+	"testing"
+)
+
+func TestGenerateReturnsClosedDeterministicREL32Probe(t *testing.T) {
+	t.Parallel()
+	first := Generate()
+	second := Generate()
+	if first != second {
+		t.Fatalf("Generate() is not deterministic")
+	}
+	if first.SourceSymbol != SourceSymbol || first.TargetSymbol != TargetSymbol ||
+		first.ReceiptSection != ReceiptSection || first.ReceiptMagic != ReceiptMagic ||
+		first.ExpectedExit != ExpectedExit {
+		t.Fatalf("Generate() identity = %+v", first)
+	}
+	for _, fragment := range []string{
+		"__declspec(noinline) int fy_rel32_source",
+		"fy_rel32_target(value)",
+		"#pragma section(\".fyreloc\", read)",
+		"__declspec(allocate(\".fyreloc\"))",
+		"fy_rel32_source(40) == 42",
+	} {
+		if !strings.Contains(first.CallerSource, fragment) {
+			t.Fatalf("caller source is missing %q", fragment)
+		}
+	}
+	if !strings.Contains(first.TargetSource, "__declspec(noinline) int fy_rel32_target") {
+		t.Fatalf("target source lost the cross-object target")
+	}
+}

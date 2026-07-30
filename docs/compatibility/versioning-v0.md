@@ -290,6 +290,10 @@ expectations for primary symbols, AMD64 relocation types, and COMDAT selection; 
 object format, serialized compiler receipt, or compiler-produced whole-object byte promise. Its
 4,096-section and 64 MiB object budgets bound parser work while admitting current MSVC function-level
 section fanout; the synthetic 154-section regression case is evidence, not a stable output count.
+ADR 0232's REL32 link spec and report are likewise compiler-private validation policy. Its symbol
+names, `.fyreloc` receipt, preferred-image addresses, raw addend, and displacement fields may change
+with synchronized inspector, probe, mutation tests, and evidence docs; they do not define a public
+object format, linker API, serialized receipt, or native Fairy calling convention.
 Microsoft x64 unwind inspection is likewise an internal validation policy. Neither the observed
 runtime-function count nor version-1/version-2 mix is stable. Future semantic epilog, handler,
 or chain fixtures require an explicit unwind-contract decision before they can become target

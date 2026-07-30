@@ -52,7 +52,7 @@
 - C ABI classification fixture runner route: internal/cabifixture/
 - Windows MSVC native ABI probe route: internal/windowsabiprobe/, internal/cdriver/, cmd/fairyc-windows-host-smoke/
 - Windows x64 native exception and virtual-unwind probe route: internal/windowsunwindprobe/, internal/cdriver/, cmd/fairyc-windows-host-smoke/
-- Windows AMD64 PE, COFF object, and x64 unwind inspection route: internal/pecoff/, internal/pecofffixture/, spec/fixtures/coff-object/manifest-v0.json, internal/cdriver/, cmd/fairyc-windows-host-smoke/, docs/adr/0231-versioned-amd64-coff-object-fixtures.md
+- Windows AMD64 PE, COFF object, REL32 link proof, and x64 unwind inspection route: internal/pecoff/, internal/pecofffixture/, internal/windowsrelocationprobe/, spec/fixtures/coff-object/manifest-v0.json, internal/cdriver/, cmd/fairyc-windows-host-smoke/, docs/adr/0231-versioned-amd64-coff-object-fixtures.md, docs/adr/0232-amd64-rel32-object-to-image-proof.md
 - Resolved package graph fixture route: spec/fixtures/package/manifest-v1.json and historical manifest-v0.json
 - Resolved package graph implementation route: internal/packagegraph/
 - Resolved package graph fixture runner route: internal/packagefixture/

@@ -21,6 +21,7 @@ const (
 	sectionUninitializedData   = 0x00000080
 	sectionExecutable          = 0x20000000
 	sectionReadable            = 0x40000000
+	sectionWritable            = 0x80000000
 	importDirectoryIndex       = 1
 	exceptionDirectoryIndex    = 3
 	minimumPEFileAlignment     = 512

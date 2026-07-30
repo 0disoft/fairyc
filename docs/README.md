@@ -45,6 +45,7 @@
 - Workspace-call post-GC retained-heap batch control: internal/buildmeasure/atlas_call_retained.go, cmd/fairyc-windows-host-smoke/atlas_call_retained_measure.go, docs/adr/0230-atlas-workspace-call-retained-heap-control.md
 - Atlas Phase 4 exit evidence and executable one-way package-import boundary: docs/atlas/phase4-exit-evidence.md, docs/adr/0203-enforced-one-way-atlas-import-boundary.md, internal/architecturecontract/
 - Versioned exact AMD64 COFF symbol, relocation, and COMDAT fixtures: spec/fixtures/coff-object/manifest-v0.json, internal/pecofffixture/, docs/adr/0231-versioned-amd64-coff-object-fixtures.md
+- Exact AMD64 REL32 object-to-image formula proof: internal/pecoff/relocation_link.go, internal/windowsrelocationprobe/, docs/adr/0232-amd64-rel32-object-to-image-proof.md
 - Whole-package cache-key v2 fixtures and bounded store runner: spec/fixtures/package-cache/manifest-v5.json with historical v1 through v4, internal/packagecache/, internal/packagecachefixture/
 - Package-stable function IDs, process-local MIR slice reassembly, process-bound codec, and all-hit reuse coordinator: internal/packageartifact/, internal/workspacecompiler/, docs/package/package-function-id-v1.md, docs/package/process-local-mir-artifact-v0.md
 - Bounded workspace check-session CLI and NDJSON schema: internal/cli/workspace_session.go, spec/cli/experimental-workspace-check-session-v0.schema.json, docs/adr/0159-bounded-workspace-check-session.md

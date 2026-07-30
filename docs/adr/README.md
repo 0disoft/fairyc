@@ -241,6 +241,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0229-atlas-workspace-call-topology-corpus.md`: compiles deterministic chain, diamond, and fan-in workspaces and verifies exact outgoing, incoming, bidirectional, usage, and canonical catalog behavior without calling them representative workloads.
 - `0230-atlas-workspace-call-retained-heap-control.md`: records forced-GC process live-heap deltas for fixed batches of retained workspace-call indexes without claiming exact Atlas ownership or a per-index budget.
 - `0231-versioned-amd64-coff-object-fixtures.md`: freezes exact primary-symbol, REL32, ANY-COMDAT, and associative-COMDAT receipts over two raw AMD64 COFF vectors and applies the strengthened inspector to every local MSVC object.
+- `0232-amd64-rel32-object-to-image-proof.md`: recomputes one direct cross-object `CALL rel32` from the raw object addend and final preferred-image addresses, then compares the exact linked displacement at low and optimized MSVC profiles.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

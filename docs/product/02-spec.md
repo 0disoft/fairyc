@@ -433,9 +433,11 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   unknown AMD64 relocation types, malformed COMDAT definitions, or no named symbols. Uninitialized
   `.bss` may have a nonzero logical size and zero raw pointer. ADR 0231 adds a versioned internal
   raw-object manifest for exact primary symbols, REL32, ANY COMDAT, and associative COMDAT parent
-  receipts. The driver still removes every temporary object. This is not a stable product object
-  format, relocation-formula proof, final-link COMDAT-selection proof, unwind fixture, or fresh
-  hosted same-commit object receipt.
+  receipts. ADR 0232 adds a separate two-translation-unit MSVC probe that reads the exact object
+  addend and preferred-image function addresses, recomputes `S + A - (P + 4)`, compares the linked
+  `CALL rel32` displacement, and executes at low and optimized profiles. The driver still removes
+  every temporary object. This is not a stable product object format, proof of other relocation
+  formulas, final-link COMDAT-selection proof, unwind fixture, or fresh hosted same-commit receipt.
 - `internal/pecoff` additionally maps the exception directory through `.pdata` and every referenced
   file-backed unwind record. `RUNTIME_FUNCTION` entries must be 12-byte, sorted, nonoverlapping,
   executable-code ranges with DWORD-aligned unwind RVAs. Version 1 prolog operations use their

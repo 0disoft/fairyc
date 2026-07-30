@@ -188,6 +188,21 @@ func BuildWindowsMSVCABIProbeWithConsumerMode(toolchain WindowsHostToolchain, pr
 	})
 }
 
+// BuildWindowsMSVCRelocationProbe compiles one caller and one target translation unit separately
+// before linking them with local x64 MSVC for object-to-image relocation inspection.
+func BuildWindowsMSVCRelocationProbe(toolchain WindowsHostToolchain, profile Profile, callerSource, targetSource string) (WindowsHostArtifact, error) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		return WindowsHostArtifact{}, fmt.Errorf("MSVC relocation probe requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
+	if callerSource == "" || targetSource == "" {
+		return WindowsHostArtifact{}, fmt.Errorf("MSVC relocation caller and target sources must be non-empty")
+	}
+	return buildWindowsMSVC(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{
+		{Name: "caller.c", Contents: callerSource},
+		{Name: "target.c", Contents: targetSource},
+	})
+}
+
 // BuildWindowsMSVCUnwindProbe compiles the catcher, termination frame, and
 // raiser as separate translation units before linking them with local x64 MSVC.
 func BuildWindowsMSVCUnwindProbe(toolchain WindowsHostToolchain, profile Profile, catcherSource, frameSource, raiserSource string) (WindowsHostArtifact, error) {
@@ -332,6 +347,14 @@ func ExecuteWindowsMSVCABIProbe(artifact WindowsHostArtifact) (WindowsHostOutcom
 		return WindowsHostOutcome{}, fmt.Errorf("MSVC ABI probe execution requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
 	}
 	return executeWindowsMSVCArtifact(artifact, "MSVC ABI probe")
+}
+
+// ExecuteWindowsMSVCRelocationProbe runs one linked caller/target relocation proof.
+func ExecuteWindowsMSVCRelocationProbe(artifact WindowsHostArtifact) (WindowsHostOutcome, error) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		return WindowsHostOutcome{}, fmt.Errorf("MSVC relocation probe execution requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
+	return executeWindowsMSVCArtifact(artifact, "MSVC relocation probe")
 }
 
 // ExecuteWindowsMSVCUnwindProbe runs one linked structured-exception fixture.
