@@ -202,12 +202,12 @@ func BuildWindowsMSVCABIProbeWithConsumerMode(toolchain WindowsHostToolchain, pr
 
 // BuildWindowsMSVCRelocationProbe compiles one caller and one target translation unit separately
 // before linking them with local x64 MSVC for object-to-image relocation inspection.
-func BuildWindowsMSVCRelocationProbe(toolchain WindowsHostToolchain, profile Profile, callerSource, targetSource string, variantObject, weakObject, overflowObject []byte) (WindowsHostArtifact, error) {
+func BuildWindowsMSVCRelocationProbe(toolchain WindowsHostToolchain, profile Profile, callerSource, targetSource string, variantObject, weakObject, overflowObject, bigObject []byte) (WindowsHostArtifact, error) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		return WindowsHostArtifact{}, fmt.Errorf("MSVC relocation probe requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
 	}
-	if callerSource == "" || targetSource == "" || len(variantObject) == 0 || len(weakObject) == 0 || len(overflowObject) == 0 {
-		return WindowsHostArtifact{}, fmt.Errorf("MSVC relocation caller, target, variant, weak, and overflow object inputs must be non-empty")
+	if callerSource == "" || targetSource == "" || len(variantObject) == 0 || len(weakObject) == 0 || len(overflowObject) == 0 || len(bigObject) == 0 {
+		return WindowsHostArtifact{}, fmt.Errorf("MSVC relocation caller, target, variant, weak, overflow, and bigobj inputs must be non-empty")
 	}
 	if _, err := pecoff.InspectObject(variantObject); err != nil {
 		return WindowsHostArtifact{}, fmt.Errorf("inspect generated MSVC REL32 variants object: %w", err)
@@ -217,6 +217,9 @@ func BuildWindowsMSVCRelocationProbe(toolchain WindowsHostToolchain, profile Pro
 	}
 	if _, err := pecoff.InspectObject(overflowObject); err != nil {
 		return WindowsHostArtifact{}, fmt.Errorf("inspect generated MSVC relocation-overflow object: %w", err)
+	}
+	if _, err := pecoff.InspectObject(bigObject); err != nil {
+		return WindowsHostArtifact{}, fmt.Errorf("inspect generated MSVC bigobj: %w", err)
 	}
 	return buildWindowsMSVCWithOptions(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{
 		{Name: "caller.c", Contents: callerSource},
@@ -230,6 +233,7 @@ func BuildWindowsMSVCRelocationProbe(toolchain WindowsHostToolchain, profile Pro
 			{Name: "variants.obj", Bytes: slices.Clone(variantObject)},
 			{Name: "weak.obj", Bytes: slices.Clone(weakObject)},
 			{Name: "overflow.obj", Bytes: slices.Clone(overflowObject)},
+			{Name: "bigobj.obj", Bytes: slices.Clone(bigObject)},
 		},
 	})
 }

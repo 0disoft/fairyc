@@ -457,7 +457,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   low and optimized profiles. ADR 0242 adds a third exact generated object with the smallest
   extended relocation table: one count sentinel, 65,534 semantic ABSOLUTE records, and one final
   REL32 record required by its executable result. Its exact map owner, final displacement, and
-  native result must agree at both profiles. ADR 0238 compiles the two C inputs with `/Z7`, requires exact function-targeted
+  native result must agree at both profiles. ADR 0243 adds a fourth exact generated object with a
+  version-2 bigobj header and 20-byte symbols. Its internal REL32, exact map owner, final
+  displacement, and native result must agree at both profiles while the 4,096-section inspection
+  budget stays unchanged. ADR 0238 compiles the two C inputs with `/Z7`, requires exact function-targeted
   `.debug$S` `SECREL`/`SECTION` pairs and object-level formulas, and binds the final PE RSDS GUID/age
   to the bounded MSF 7 PDB information stream at both profiles. ADR 0239 then requires system
   DbgHelp to resolve the exact source-function start to its name and `caller.c` line with zero
@@ -466,7 +469,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   `__C_specific_handler` for optimized) to be `ADDR32NB`, and binds its addend and MSVC map row to
   the executable final handler RVA. The driver still removes every temporary
   object, archive, map, PDB, and image. This is not
-  a stable product object or library format, proof of remaining relocation formulas or chained
+  a stable product object or library format, proof of high-section bigobj or auxiliary/COMDAT
+  layouts, remaining relocation formulas or chained
   unwind tails, non-unwind or broader archive/COMDAT policies, complete CodeView/PDB semantics, broader
   symbolication, unwind fixture, or fresh hosted same-commit receipt.
 - `internal/pecoff` additionally maps the exception directory through `.pdata` and every referenced

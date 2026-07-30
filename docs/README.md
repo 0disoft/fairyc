@@ -52,6 +52,7 @@
 - Exact profile-specific AMD64 unwind-handler ADDR32NB object-to-image proof: internal/pecoff/handler_link.go, internal/windowsunwindprobe/, docs/adr/0240-amd64-unwind-handler-relocation-proof.md
 - Exact AMD64 weak-external SEARCH_ALIAS fallback/strong-override proof: internal/pecoff/weak_external_object.go, internal/pecoff/weak_external_link.go, internal/windowsrelocationprobe/, docs/adr/0241-amd64-weak-external-link-proof.md
 - Exact AMD64 relocation-overflow sentinel and real-LINK proof: internal/pecoff/relocation_overflow_object.go, internal/pecoff/relocation_overflow_link.go, internal/windowsrelocationprobe/, docs/adr/0242-amd64-relocation-overflow-link-proof.md
+- Exact AMD64 bigobj header/symbol and real-LINK proof: internal/pecoff/big_object.go, internal/pecoff/big_object_probe.go, internal/pecoff/big_object_link.go, internal/windowsrelocationprobe/, docs/adr/0243-amd64-bigobj-link-proof.md
 - Exact MSVC archive extraction and pick-any COMDAT final-selection proof: internal/pecoff/archive.go, internal/pecoff/archive_link.go, internal/windowsarchiveprobe/, docs/adr/0233-msvc-archive-and-comdat-selection-proof.md
 - Exact selected-parent associative `.pdata`/`.xdata` COMDAT proof: internal/pecoff/associative_link.go, internal/windowsarchiveprobe/, docs/adr/0235-selected-associative-comdat-unwind-proof.md
 - Exact discarded-parent associative unwind elimination proof: internal/pecoff/discarded_associative_link.go, internal/windowsarchiveprobe/, docs/adr/0236-discarded-associative-comdat-elimination-proof.md

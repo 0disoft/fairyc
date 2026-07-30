@@ -265,7 +265,10 @@ final-image RVAs before the native exception probe runs. ADR 0241 reuses the rel
 bind one missing weak alias to its local fallback and one present alias to a strong `target.obj`
 definition, then executes both paths. ADR 0242 parses one 65,535-record extended relocation table,
 binds `overflow.obj` through the map to the final semantic REL32 displacement, and executes its leaf function
-in the same two images. Other relocation formulas and weak search modes, a versioned overflow fixture, bigobj, and chained
+in the same two images. ADR 0243 parses one bounded version-2 `bigobj.obj`, binds its 20-byte-symbol
+REL32 through the map, and executes its leaf function in the same images. Other relocation formulas
+and weak search modes, versioned overflow/bigobj fixtures, high-section and bigobj
+auxiliary/COMDAT evidence, and chained
 unwind tails, non-unwind and broader archive/COMDAT
 selection and retention modes,
 debug data, and a fresh hosted same-commit object receipt remain unconfigured.

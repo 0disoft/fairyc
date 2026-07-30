@@ -72,8 +72,11 @@ ADDR32NB calculations. ADR 0240 separately proves one profile-specific unwind-ha
 ADR 0241 proves generated weak-alias fallback and strong-override paths through real LINK.
 ADR 0242 proves one generated relocation-overflow sentinel and 65,535 semantic records through
 real LINK, while a versioned raw overflow vector remains absent.
+ADR 0243 proves one generated version-2 bigobj header and 20-byte-symbol REL32 through real LINK,
+while high-section, auxiliary/COMDAT, and versioned raw bigobj vectors remain absent.
 Whole-object MSVC identity, other relocation formulas and chained unwind tails, broader
-archive/COMDAT policies, versioned weak-external fixtures and other weak search modes, bigobj,
+archive/COMDAT policies, versioned weak-external fixtures and other weak search modes,
+high-section and bigobj auxiliary/COMDAT evidence,
 versioned relocation-overflow fixtures, imports/exports, CodeView/PDB, independent
 producer crossings, and hosted same-commit evidence remain separate gates.
 

@@ -14,6 +14,7 @@ const (
 	coffRelocationBytes          = 10
 	maxObjectSections            = 4096
 	maxObjectRelocations         = 1 << 20
+	maxObjectSymbols             = 1 << 18
 	sectionRelocationOverflow    = 0x01000000
 	sectionLinkCOMDAT            = 0x00001000
 	coffStorageClassStatic       = 3
@@ -75,7 +76,7 @@ type ObjectSymbol struct {
 	TableIndex        uint32
 	Name              string
 	Value             uint32
-	SectionNumber     int16
+	SectionNumber     int32
 	Type              uint16
 	StorageClass      uint8
 	AuxiliaryRecords  uint8
@@ -98,6 +99,8 @@ type ObjectRelocation struct {
 type ObjectReport struct {
 	Machine           uint16
 	Characteristics   uint16
+	BigObject         bool
+	BigObjectVersion  uint16
 	Sections          []ObjectSection
 	Symbols           []string
 	SymbolRecords     []ObjectSymbol
@@ -118,6 +121,9 @@ func InspectObject(object []byte) (ObjectReport, error) {
 	}
 	if len(object) >= 2 && object[0] == 'M' && object[1] == 'Z' {
 		return ObjectReport{}, fmt.Errorf("COFF object must not be a linked PE image")
+	}
+	if isBigCOFFObject(object) {
+		return inspectBigCOFFObject(object)
 	}
 	file, err := pe.NewFile(bytes.NewReader(object))
 	if err != nil {
@@ -160,7 +166,7 @@ func InspectObject(object []byte) (ObjectReport, error) {
 	relocationsBySection := make([][]rawCOFFRelocation, len(file.Sections))
 	totalRelocations := 0
 	for index, section := range file.Sections {
-		relocations, err := inspectCOFFSectionRelocations(object, headerEnd, index, section.Name)
+		relocations, err := inspectCOFFSectionRelocations(object, coffFileHeaderBytes, headerEnd, index, section.Name)
 		if err != nil {
 			return ObjectReport{}, err
 		}
@@ -246,8 +252,8 @@ func InspectObject(object []byte) (ObjectReport, error) {
 	return report, nil
 }
 
-func inspectCOFFSectionRelocations(object []byte, headerEnd uint64, sectionIndex int, sectionName string) ([]rawCOFFRelocation, error) {
-	headerOffset := uint64(coffFileHeaderBytes + sectionIndex*coffSectionHeaderBytes)
+func inspectCOFFSectionRelocations(object []byte, sectionTableOffset int, headerEnd uint64, sectionIndex int, sectionName string) ([]rawCOFFRelocation, error) {
+	headerOffset := uint64(sectionTableOffset + sectionIndex*coffSectionHeaderBytes)
 	if headerOffset+coffSectionHeaderBytes > uint64(len(object)) {
 		return nil, fmt.Errorf("COFF object section %q header is out of range", sectionName)
 	}
@@ -334,7 +340,7 @@ func inspectPrimaryCOFFSymbols(file *pe.File, object []byte) (inspectedCOFFSymbo
 		}
 		record := ObjectSymbol{
 			TableIndex: uint32(index), Name: name, Value: symbol.Value,
-			SectionNumber: symbol.SectionNumber, Type: symbol.Type,
+			SectionNumber: int32(symbol.SectionNumber), Type: symbol.Type,
 			StorageClass: symbol.StorageClass, AuxiliaryRecords: symbol.NumberOfAuxSymbols,
 		}
 		result.records = append(result.records, record)

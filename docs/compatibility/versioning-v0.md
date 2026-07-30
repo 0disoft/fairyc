@@ -331,6 +331,10 @@ declarations, arbitrary prebuilt objects, or a public object/linker compatibilit
 ADR 0242 likewise keeps the generated overflow-object bytes, 1,048,576-record inspection budget,
 map identity, and leaf code private. They may evolve with synchronized parser, mutation, and native
 evidence updates; they do not stabilize a Fairy object writer or public prebuilt-object contract.
+ADR 0243 keeps the bigobj header version/GUID, generated 161-byte object, 4,096-section and
+262,144-symbol inspection budgets, map identity, and internal REL32 proof private. It does not
+promise public bigobj emission, arbitrary prebuilt-object compatibility, or theoretical 2^32
+section capacity.
 Microsoft x64 unwind inspection is likewise an internal validation policy. Neither the observed
 runtime-function count nor version-1/version-2 mix is stable. Future semantic epilog, handler,
 or chain fixtures require an explicit unwind-contract decision before they can become target

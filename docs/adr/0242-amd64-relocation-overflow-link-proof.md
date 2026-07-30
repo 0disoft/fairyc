@@ -52,7 +52,8 @@ suite also kills each malformed sentinel combination independently.
 
 This is a compiler-private validation object, not a Fairy C object writer, public prebuilt-object
 API, or promise that arbitrary large objects are cheap. It does not prove a versioned raw overflow
-fixture, COMDAT section-definition overflow metadata, multiple overflow sections, bigobj,
+fixture, COMDAT section-definition overflow metadata, multiple overflow sections, bigobj combined
+with relocation overflow,
 incremental link, LTCG, non-MSVC linkers, another MSVC release, hosted same-commit evidence, or
 non-AMD64 COFF. `pe-coff-object-fixtures` therefore remains fail-closed.
 

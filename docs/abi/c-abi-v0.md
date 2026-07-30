@@ -288,8 +288,12 @@ function-targeted CodeView `SECREL`/`SECTION` pairs and binds each final PE RSDS
 ephemeral MSF 7 PDB. ADR 0239 independently resolves that exact source function and its `caller.c`
 line through system DbgHelp at both profiles. ADR 0240 additionally binds the native unwind frame's
 low `__GSHandlerCheck_SEH` and optimized `__C_specific_handler` tail relocations through exact map
-rows to executable final RVAs. It still does not define exported/imported product symbols,
-remaining relocation formulas and weak search modes, a versioned overflow fixture, bigobj, chained-tail relocations, non-unwind or broader archive retention and COMDAT policies, complete `.pdata`/`.xdata`
+rows to executable final RVAs.
+ADR 0243 additionally proves one bounded version-2 bigobj header, 20-byte static-symbol REL32,
+exact map owner, final displacement, and native result at both profiles. It still does not define
+exported/imported product symbols, remaining relocation formulas and weak search modes, versioned
+overflow/bigobj fixtures, high-section or bigobj auxiliary/COMDAT layouts, chained-tail relocations,
+non-unwind or broader archive retention and COMDAT policies, complete `.pdata`/`.xdata`
 content, complete CodeView/PDB record semantics or broader symbolication, or a fresh hosted same-commit object receipt, so
 `pe-coff-object-fixtures` remains missing.
 

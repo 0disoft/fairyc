@@ -66,7 +66,7 @@ type symbolExpectation struct {
 	TableIndex       uint32 `json:"tableIndex"`
 	Name             string `json:"name"`
 	Value            uint32 `json:"value"`
-	SectionNumber    int16  `json:"sectionNumber"`
+	SectionNumber    int32  `json:"sectionNumber"`
 	Type             uint16 `json:"type"`
 	StorageClass     uint8  `json:"storageClass"`
 	AuxiliaryRecords uint8  `json:"auxiliaryRecords"`
