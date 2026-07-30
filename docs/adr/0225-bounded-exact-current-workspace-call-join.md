@@ -28,7 +28,9 @@ file reopening, network request, model call, or guessed name match.
    exact load-expectation set, and explicit maximum package and call counts.
 2. Rebuild each package through `NewQueryIndex`, preserving its complete transport, compiler-build,
    public-interface, package-source, file-content, and line-map validation. The expectation and
-   partition package sets must be identical.
+   partition package sets must be identical. After construction, retain only detached call
+   completeness context and visible/full SymbolId canonicalization state per package; do not keep
+   the full package-local query indexes alive behind the call-only API.
 3. Sort packages by exact `PackageInstanceId` before joining. Input order must not affect the call
    ledger or either direction of lookup.
 4. Require every declared direct dependency to have an exact-current partition. A non-foreign call

@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/0disoft/fairyc/internal/semanticsnapshot"
+	"github.com/0disoft/fairyc/internal/symbolidentity"
 )
 
 var (
@@ -53,7 +55,16 @@ type WorkspaceCallIndex struct {
 	calls    []JoinedCall
 	outgoing map[WorkspaceSymbol][]int
 	incoming map[WorkspaceSymbol][]int
-	packages map[string]*QueryIndex
+	packages map[string]workspaceCallPackage
+}
+
+// workspaceCallPackage is the compact package state retained after construction. Full QueryIndex
+// values are needed while validating and joining, but keeping their files, declarations, and
+// relation indexes afterward would duplicate facts that the workspace call ledger cannot query.
+type workspaceCallPackage struct {
+	context   QueryContext
+	byVisible map[string]struct{}
+	byFull    map[string]string
 }
 
 // NewWorkspaceCallIndex validates every package through NewQueryIndex, requires the complete direct
@@ -81,8 +92,9 @@ func NewWorkspaceCallIndex(
 		budget:   budget,
 		usage:    WorkspaceCallUsage{Packages: len(ordered)},
 		outgoing: make(map[WorkspaceSymbol][]int), incoming: make(map[WorkspaceSymbol][]int),
-		packages: make(map[string]*QueryIndex, len(ordered)),
+		packages: make(map[string]workspaceCallPackage, len(ordered)),
 	}
+	packageIndexes := make(map[string]*QueryIndex, len(ordered))
 	for position, partition := range ordered {
 		header := partition.data.header
 		if position > 0 && ordered[position-1].data.header.PackageInstance == header.PackageInstance {
@@ -96,7 +108,8 @@ func NewWorkspaceCallIndex(
 		if err != nil {
 			return nil, fmt.Errorf("build Atlas workspace call join package %q: %w", header.PackageInstance, err)
 		}
-		index.packages[header.PackageInstance] = packageIndex
+		packageIndexes[header.PackageInstance] = packageIndex
+		index.packages[header.PackageInstance] = compactWorkspaceCallPackage(packageIndex)
 	}
 	if len(expectations) != len(index.packages) {
 		return nil, fmt.Errorf("%w: expectation and partition package sets differ", ErrWorkspaceJoinIncomplete)
@@ -108,7 +121,7 @@ func NewWorkspaceCallIndex(
 	}
 	for _, partition := range ordered {
 		header := partition.data.header
-		packageIndex := index.packages[header.PackageInstance]
+		packageIndex := packageIndexes[header.PackageInstance]
 		for _, dependency := range header.Dependencies {
 			if _, found := index.packages[dependency]; !found {
 				return nil, fmt.Errorf("%w: package %q dependency %q has no exact-current partition", ErrWorkspaceJoinIncomplete, header.PackageInstance, dependency)
@@ -131,7 +144,7 @@ func NewWorkspaceCallIndex(
 					return nil, fmt.Errorf("%w: package %q call target %q is not self or a direct dependency", ErrWorkspaceJoinIncomplete, header.PackageInstance, relation.Target.PackageInstance)
 				}
 			}
-			targetIndex, found := index.packages[relation.Target.PackageInstance]
+			targetIndex, found := packageIndexes[relation.Target.PackageInstance]
 			if !found {
 				return nil, fmt.Errorf("%w: call target package %q has no exact-current partition", ErrWorkspaceJoinIncomplete, relation.Target.PackageInstance)
 			}
@@ -202,11 +215,11 @@ func (index *WorkspaceCallIndex) PackageContext(packageInstance string) (QueryCo
 	if index == nil {
 		return QueryContext{}, fmt.Errorf("Atlas workspace call index is not initialized")
 	}
-	packageIndex, found := index.packages[packageInstance]
+	packageState, found := index.packages[packageInstance]
 	if !found {
 		return QueryContext{}, fmt.Errorf("Atlas workspace call package %q is unknown", packageInstance)
 	}
-	return packageIndex.contextFor([]RelationKind{RelationCalls}), nil
+	return cloneQueryContext(packageState.context), nil
 }
 
 func (index *WorkspaceCallIndex) Calls() []JoinedCall {
@@ -236,15 +249,50 @@ func (index *WorkspaceCallIndex) resolveWorkspaceSymbol(packageInstance, symbolI
 	if index == nil {
 		return WorkspaceSymbol{}, fmt.Errorf("Atlas workspace call index is not initialized")
 	}
-	packageIndex, found := index.packages[packageInstance]
+	packageState, found := index.packages[packageInstance]
 	if !found {
 		return WorkspaceSymbol{}, fmt.Errorf("Atlas workspace call package %q is unknown", packageInstance)
 	}
-	position, err := packageIndex.resolveSymbol(symbolID)
+	visible, err := packageState.resolveSymbol(symbolID)
 	if err != nil {
 		return WorkspaceSymbol{}, err
 	}
-	return WorkspaceSymbol{PackageInstance: packageInstance, Symbol: packageIndex.nodes[position].symbol.Visible}, nil
+	return WorkspaceSymbol{PackageInstance: packageInstance, Symbol: visible}, nil
+}
+
+func compactWorkspaceCallPackage(index *QueryIndex) workspaceCallPackage {
+	result := workspaceCallPackage{
+		context:   index.contextFor([]RelationKind{RelationCalls}),
+		byVisible: make(map[string]struct{}, len(index.nodes)),
+		byFull:    make(map[string]string, len(index.nodes)),
+	}
+	for _, node := range index.nodes {
+		result.byVisible[node.symbol.Visible] = struct{}{}
+		result.byFull[node.symbol.Full] = node.symbol.Visible
+	}
+	return result
+}
+
+func (state workspaceCallPackage) resolveSymbol(value string) (string, error) {
+	if strings.HasPrefix(value, symbolidentity.VisiblePrefix) {
+		if _, err := symbolidentity.ParseVisibleID(value); err != nil {
+			return "", fmt.Errorf("parse Atlas visible symbol: %w", err)
+		}
+		if _, found := state.byVisible[value]; found {
+			return value, nil
+		}
+		return "", fmt.Errorf("%w: %s", ErrSymbolNotFound, value)
+	}
+	if strings.HasPrefix(value, symbolidentity.DigestPrefix) {
+		if _, err := symbolidentity.ParseFullDigest(value); err != nil {
+			return "", fmt.Errorf("parse Atlas full symbol: %w", err)
+		}
+		if visible, found := state.byFull[value]; found {
+			return visible, nil
+		}
+		return "", fmt.Errorf("%w: %s", ErrSymbolNotFound, value)
+	}
+	return "", fmt.Errorf("Atlas symbol selector must be a canonical visible or full SymbolId")
 }
 
 func (index *WorkspaceCallIndex) selectCalls(positions []int) []JoinedCall {

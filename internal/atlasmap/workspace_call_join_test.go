@@ -39,8 +39,8 @@ func TestWorkspaceCallIndexJoinsQuickstartCallsBothDirections(t *testing.T) {
 	if rootInstance == "" || dependencyInstance == "" {
 		t.Fatal("quickstart partitions do not expose one root dependency")
 	}
-	rootSymbol := workspaceTestSymbol(t, index, rootInstance, "main", "main")
-	dependencySymbol := workspaceTestSymbol(t, index, dependencyInstance, "answer", "value")
+	rootSymbol := workspaceTestSymbol(t, partitions, rootInstance, "main", "main")
+	dependencySymbol := workspaceTestSymbol(t, partitions, dependencyInstance, "answer", "value")
 	outgoing, err := index.OutgoingCalls(rootInstance, rootSymbol.Visible)
 	if err != nil {
 		t.Fatal(err)
@@ -71,6 +71,21 @@ func TestWorkspaceCallIndexJoinsQuickstartCallsBothDirections(t *testing.T) {
 	if !reflect.DeepEqual(index.Calls(), reordered.Calls()) {
 		t.Fatalf("partition order changed joined calls\nfirst:  %+v\nsecond: %+v", index.Calls(), reordered.Calls())
 	}
+	context, err := index.PackageContext(rootInstance)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(context.Completeness) == 0 {
+		t.Fatal("workspace package context has no call completeness record")
+	}
+	context.Completeness[0].Relation = "corrupt"
+	freshContext, err := index.PackageContext(rootInstance)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if freshContext.Completeness[0].Relation == "corrupt" {
+		t.Fatalf("caller mutated workspace package context: %+v", freshContext)
+	}
 }
 
 func TestWorkspaceCallIndexJoinsLocalCallsWithoutCrossPackageClaims(t *testing.T) {
@@ -88,8 +103,8 @@ func TestWorkspaceCallIndexJoinsLocalCallsWithoutCrossPackageClaims(t *testing.T
 	if usage := index.Usage(); usage != (WorkspaceCallUsage{Packages: 1, Calls: 2}) {
 		t.Fatalf("Usage() = %+v", usage)
 	}
-	middle := workspaceTestSymbol(t, index, instance, "main", "middle")
-	leaf := workspaceTestSymbol(t, index, instance, "main", "leaf")
+	middle := workspaceTestSymbol(t, []Partition{fixture.partition}, instance, "main", "middle")
+	leaf := workspaceTestSymbol(t, []Partition{fixture.partition}, instance, "main", "leaf")
 	outgoing, err := index.OutgoingCalls(instance, middle.Visible)
 	if err != nil {
 		t.Fatal(err)
@@ -220,17 +235,19 @@ func TestWorkspaceCallIndexRejectsIncompleteStaleAndOverBudgetInputs(t *testing.
 	}
 }
 
-func workspaceTestSymbol(t *testing.T, index *WorkspaceCallIndex, packageInstance, module, name string) Symbol {
+func workspaceTestSymbol(t *testing.T, partitions []Partition, packageInstance, module, name string) Symbol {
 	t.Helper()
-	packageIndex := index.packages[packageInstance]
-	if packageIndex == nil {
-		t.Fatalf("workspace call index has no package %q", packageInstance)
-	}
-	for _, node := range packageIndex.nodes {
-		if node.declaration.Key.Module == module && node.declaration.Key.Name == name {
-			return node.symbol
+	for _, partition := range partitions {
+		if partition.data.header.PackageInstance != packageInstance {
+			continue
 		}
+		for _, symbol := range partition.data.symbols {
+			if symbol.Declaration.Module == module && symbol.Declaration.Name == name {
+				return symbol
+			}
+		}
+		t.Fatalf("package %q has no symbol %s::%s", packageInstance, module, name)
 	}
-	t.Fatalf("package %q has no symbol %s::%s", packageInstance, module, name)
+	t.Fatalf("partitions have no package %q", packageInstance)
 	return Symbol{}
 }

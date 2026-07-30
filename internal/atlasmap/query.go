@@ -1021,6 +1021,15 @@ func cloneCompletenessRecord(value semanticsnapshot.Completeness) semanticsnapsh
 	return value
 }
 
+func cloneQueryContext(value QueryContext) QueryContext {
+	value.MapOmissions = slices.Clone(value.MapOmissions)
+	value.Completeness = slices.Clone(value.Completeness)
+	for position := range value.Completeness {
+		value.Completeness[position] = cloneCompletenessRecord(value.Completeness[position])
+	}
+	return value
+}
+
 func cloneQueryHeader(value Header) Header {
 	value.Features = slices.Clone(value.Features)
 	value.Dependencies = slices.Clone(value.Dependencies)

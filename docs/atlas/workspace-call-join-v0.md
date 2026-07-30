@@ -70,8 +70,11 @@ empty result.
 The package and call maxima are construction budgets, not defaults or performance promises. The
 implementation sorts the supplied package set, builds one exact-current package index per package,
 uses each already validated canonical sorted direct-dependency list for logarithmic target-admission
-lookup, and stores one ledger record per resolved call. No latency, retained-memory, representative-project,
-or model-token threshold is currently accepted. ADR 0227 records only a tiny fresh-process Windows
+lookup, and stores one ledger record per resolved call. Full package-local query indexes exist only
+during construction; the returned index retains the call ledger plus detached call-completeness
+context and visible/full SymbolId canonicalization tables for each package. This structural reduction
+is not a measured retained-memory result. No latency, retained-memory, representative-project, or
+model-token threshold is currently accepted. ADR 0227 records only a tiny fresh-process Windows
 control whose whole-process peaks cannot be attributed to this index. ADR 0228 adds three generated
 star shapes around index construction plus outgoing encoding, but its process-wide allocation deltas
 are not retained-index memory and its shape growth proves no complexity law.

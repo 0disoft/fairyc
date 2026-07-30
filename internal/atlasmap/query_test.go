@@ -14,6 +14,26 @@ import (
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
+func TestCloneQueryContextDetachesNestedSlices(t *testing.T) {
+	t.Parallel()
+	original := QueryContext{
+		MapOmissions: []string{"original-omission"},
+		Completeness: []semanticsnapshot.Completeness{{
+			Relation: "calls",
+			Reasons:  []string{"original-reason"},
+		}},
+	}
+	cloned := cloneQueryContext(original)
+	cloned.MapOmissions[0] = "mutated-omission"
+	cloned.Completeness[0].Relation = "mutated-relation"
+	cloned.Completeness[0].Reasons[0] = "mutated-reason"
+	if original.MapOmissions[0] != "original-omission" ||
+		original.Completeness[0].Relation != "calls" ||
+		original.Completeness[0].Reasons[0] != "original-reason" {
+		t.Fatalf("cloneQueryContext shared caller-owned storage: %+v", original)
+	}
+}
+
 func TestQueryIndexOverviewShowAndAroundAreDeterministicAndDetached(t *testing.T) {
 	t.Parallel()
 	fixture := localCallGraphFixture(t)
