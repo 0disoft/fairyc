@@ -62,9 +62,10 @@ fields.
 
 This is one direct `CALL rel32` crossing between two MSVC C translation units. Archive extraction
 and pick-any COMDAT selection are separately proved by ADR 0233 and do not widen this arithmetic
-proof. This ADR does not prove
-`REL32_1` through `REL32_5`, RIP-relative data addressing, `ADDR64`, `ADDR32NB`, section-relative or
-token relocations, unwind relocations, overflow records, incremental linking, LTCG, weak externals,
+proof. ADR 0234 separately reuses the probe to prove one ADDR64 pointer and one unwind `.pdata`
+ADDR32NB begin field. This ADR does not prove
+`REL32_1` through `REL32_5`, RIP-relative data addressing, remaining absolute, image-relative,
+section-relative, token, or unwind relocations, overflow records, incremental linking, LTCG, weak externals,
 import thunks, ASLR rebasing at load time,
 independent producer compatibility, linker-map provenance, CodeView/PDB, or a public Fairy ABI.
 

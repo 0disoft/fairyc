@@ -253,8 +253,10 @@ profiles. ADR 0233 parses both Microsoft archive linker members, checks exact de
 member indexes and raw candidate values, requires the demanded function's final-map owner to be the
 indexed archive member, requires the unused non-COMDAT sentinel to be absent, and binds one pick-any
 COMDAT map owner to its final PE address and value across four low/optimized input-order executions.
-Other relocation formulas, broader archive/COMDAT
-selection and retention modes, unwind relocations,
+ADR 0234 preserves exact object section indexes, captures the relocation probe's MSVC map, and
+recomputes one receipt `ADDR64` value plus one unwind `.pdata` `ADDR32NB` begin RVA across the same
+two low/optimized executions. Other relocation formulas and unwind fields, broader archive/COMDAT
+selection and retention modes,
 debug data, and a fresh hosted same-commit object receipt remain unconfigured.
 The ordinary Go tests include a 154-section positive regression object and reject 4,097 sections;
 the exact section count emitted by a future MSVC version remains unstabilized.
@@ -265,7 +267,8 @@ bounded version 2 epilog descriptors, and minimum handler/chained tails. The rec
 retained product's runtime-function and version-2 record counts without stabilizing them. It
 executes the closed synthetic exception and virtual-unwind walk described above, but does not
 validate complete version-2 epilog semantics, language-specific handler payload parsing, recursive
-chains, Fairy/foreign-frame crossings, object-level unwind relocations, or hosted runner behavior.
+chains, Fairy/foreign-frame crossings, object-level unwind relocations beyond the one proved begin
+field, or hosted runner behavior.
 
 The Windows matrix runs that same smoke after its ordinary Go test suite. Run `30442310794` is the
 first recorded exit-zero hosted receipt. A later native-code, workflow, or runner-image change

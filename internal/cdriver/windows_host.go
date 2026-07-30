@@ -36,6 +36,7 @@ type WindowsHostObject struct {
 type WindowsHostArtifact struct {
 	Bytes        []byte
 	Objects      []WindowsHostObject
+	LinkMap      []byte
 	Toolchain    WindowsHostToolchain
 	Profile      Profile
 	ConsumerMode ConsumerMode
@@ -48,7 +49,6 @@ type WindowsMSVCArchiveArtifact struct {
 	Variant     string
 	ArchiveName string
 	Archive     []byte
-	LinkMap     []byte
 }
 
 // WindowsHostOutcome is one bounded local MSVC execution result. ExitCode preserves the program's i32 bits.
@@ -207,10 +207,10 @@ func BuildWindowsMSVCRelocationProbe(toolchain WindowsHostToolchain, profile Pro
 	if callerSource == "" || targetSource == "" {
 		return WindowsHostArtifact{}, fmt.Errorf("MSVC relocation caller and target sources must be non-empty")
 	}
-	return buildWindowsMSVC(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{
+	return buildWindowsMSVCWithOptions(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{
 		{Name: "caller.c", Contents: callerSource},
 		{Name: "target.c", Contents: targetSource},
-	})
+	}, windowsMSVCBuildOptions{CaptureMap: true})
 }
 
 // BuildWindowsMSVCArchiveProbe compiles four C11 translation units separately, archives the
@@ -329,10 +329,9 @@ func BuildWindowsMSVCArchiveProbe(toolchain WindowsHostToolchain, profile Profil
 		artifacts = append(artifacts, WindowsMSVCArchiveArtifact{
 			WindowsHostArtifact: WindowsHostArtifact{
 				Bytes: executableBytes, Objects: slices.Clone(objects), Toolchain: toolchain,
-				Profile: profile, ConsumerMode: C11ConsumerMode,
+				Profile: profile, ConsumerMode: C11ConsumerMode, LinkMap: mapBytes,
 			},
 			Variant: variant.name, ArchiveName: archiveName, Archive: slices.Clone(archiveBytes),
-			LinkMap: mapBytes,
 		})
 	}
 	return artifacts, nil
@@ -359,7 +358,15 @@ type windowsMSVCSource struct {
 	Contents string
 }
 
+type windowsMSVCBuildOptions struct {
+	CaptureMap bool
+}
+
 func buildWindowsMSVC(toolchain WindowsHostToolchain, profile Profile, consumerMode ConsumerMode, sources []windowsMSVCSource) (WindowsHostArtifact, error) {
+	return buildWindowsMSVCWithOptions(toolchain, profile, consumerMode, sources, windowsMSVCBuildOptions{})
+}
+
+func buildWindowsMSVCWithOptions(toolchain WindowsHostToolchain, profile Profile, consumerMode ConsumerMode, sources []windowsMSVCSource, options windowsMSVCBuildOptions) (WindowsHostArtifact, error) {
 	if profile != LowProfile && profile != OptimizedProfile {
 		return WindowsHostArtifact{}, fmt.Errorf("unsupported C profile %q", profile.Name)
 	}
@@ -407,6 +414,11 @@ func buildWindowsMSVC(toolchain WindowsHostToolchain, profile Profile, consumerM
 	}
 	arguments = append(arguments, sourcePaths...)
 	arguments = append(arguments, "/Fe:"+executablePath, "/link", "/INCREMENTAL:NO")
+	mapPath := ""
+	if options.CaptureMap {
+		mapPath = filepath.Join(temporaryRoot, "program.map")
+		arguments = append(arguments, "/OPT:NOICF", "/MAP:"+mapPath)
+	}
 	if _, err := runWindowsHostCommand(toolchain.Path, toolchain.Environment, temporaryRoot, arguments...); err != nil {
 		return WindowsHostArtifact{}, fmt.Errorf("%s", strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
 	}
@@ -425,7 +437,14 @@ func buildWindowsMSVC(toolchain WindowsHostToolchain, profile Profile, consumerM
 		}
 		objects = append(objects, WindowsHostObject{Name: name, Bytes: objectBytes})
 	}
-	return WindowsHostArtifact{Bytes: contents, Objects: objects, Toolchain: toolchain, Profile: profile, ConsumerMode: consumerMode}, nil
+	var linkMap []byte
+	if options.CaptureMap {
+		linkMap, err = readArtifact(mapPath)
+		if err != nil {
+			return WindowsHostArtifact{}, fmt.Errorf("read MSVC link map: %s", strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
+		}
+	}
+	return WindowsHostArtifact{Bytes: contents, Objects: objects, LinkMap: linkMap, Toolchain: toolchain, Profile: profile, ConsumerMode: consumerMode}, nil
 }
 
 func msvcStandardFlag(mode ConsumerMode) (string, error) {

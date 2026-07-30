@@ -298,6 +298,10 @@ ADR 0233 applies the same rule to the bounded archive report, preferred second-l
 MSVC map parser, `.fysel` receipt, input-order variants, and archive/direct candidate values. Those
 identities may evolve with synchronized probes and mutations; they do not stabilize Microsoft
 archive bytes, map syntax, a Fairy library format, or a linker-selection API.
+ADR 0234 likewise keeps relocation section indexes, the private ADDR64/ADDR32NB report, MSVC map
+rows, `$LN...` alias handling, and `.fyreloc` receipt compiler-private. They may change with the
+inspector, probe, mutations, and evidence docs and do not version the target ABI, object format,
+unwind ABI, or any serialized Fairy artifact.
 Microsoft x64 unwind inspection is likewise an internal validation policy. Neither the observed
 runtime-function count nor version-1/version-2 mix is stable. Future semantic epilog, handler,
 or chain fixtures require an explicit unwind-contract decision before they can become target

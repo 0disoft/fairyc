@@ -243,6 +243,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0231-versioned-amd64-coff-object-fixtures.md`: freezes exact primary-symbol, REL32, ANY-COMDAT, and associative-COMDAT receipts over two raw AMD64 COFF vectors and applies the strengthened inspector to every local MSVC object.
 - `0232-amd64-rel32-object-to-image-proof.md`: recomputes one direct cross-object `CALL rel32` from the raw object addend and final preferred-image addresses, then compares the exact linked displacement at low and optimized MSVC profiles.
 - `0233-msvc-archive-and-comdat-selection-proof.md`: binds the preferred Microsoft archive index, exact extracted and unused members, pick-any COMDAT candidates, MSVC map owners, final-image addresses and value, and four low/optimized input-order executions.
+- `0234-amd64-address-and-pdata-relocation-proof.md`: binds one receipt `ADDR64` pointer and one unwind `.pdata` `ADDR32NB` begin relocation from exact section-indexed object records and MSVC map symbols to the low/optimized final images.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

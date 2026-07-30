@@ -74,6 +74,7 @@ type ObjectSymbol struct {
 
 // ObjectRelocation identifies one object-section relocation and its primary symbol target.
 type ObjectRelocation struct {
+	SectionIndex   int
 	Section        string
 	VirtualAddress uint32
 	SymbolIndex    uint32
@@ -190,7 +191,7 @@ func InspectObject(object []byte) (ObjectReport, error) {
 				return ObjectReport{}, fmt.Errorf("COFF object section %q relocation references missing symbol %d", section.Name, relocation.SymbolTableIndex)
 			}
 			report.RelocationRecords = append(report.RelocationRecords, ObjectRelocation{
-				Section: section.Name, VirtualAddress: relocation.VirtualAddress,
+				SectionIndex: index + 1, Section: section.Name, VirtualAddress: relocation.VirtualAddress,
 				SymbolIndex: relocation.SymbolTableIndex, Symbol: symbol.Name, Type: relocation.Type,
 			})
 		}

@@ -174,18 +174,24 @@ func TestInspectAMD64REL32LinkRejectsInvalidSpec(t *testing.T) {
 func TestExactREL32RelocationScopesDuplicatesToTheSourceSymbolRange(t *testing.T) {
 	t.Parallel()
 	relocations := []ObjectRelocation{
-		{Section: ".text", VirtualAddress: 4, SymbolIndex: 7, Type: ObjectRelocationAMD64Rel32},
-		{Section: ".text", VirtualAddress: 24, SymbolIndex: 7, Type: ObjectRelocationAMD64Rel32},
+		{SectionIndex: 1, Section: ".text", VirtualAddress: 4, SymbolIndex: 7, Type: ObjectRelocationAMD64Rel32},
+		{SectionIndex: 1, Section: ".text", VirtualAddress: 24, SymbolIndex: 7, Type: ObjectRelocationAMD64Rel32},
 	}
-	relocation, err := exactREL32Relocation(relocations, ".text", 7, 0, 16)
+	relocation, err := exactREL32Relocation(relocations, 1, ".text", 7, 0, 16)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if relocation.VirtualAddress != 4 {
 		t.Fatalf("exactREL32Relocation() = %+v", relocation)
 	}
-	if _, err := exactREL32Relocation(relocations, ".text", 7, 0, 32); err == nil || !strings.Contains(err.Error(), "repeats") {
+	if _, err := exactREL32Relocation(relocations, 1, ".text", 7, 0, 32); err == nil || !strings.Contains(err.Error(), "repeats") {
 		t.Fatalf("exactREL32Relocation() duplicate error = %v", err)
+	}
+	decoy := relocations[0]
+	decoy.SectionIndex = 2
+	relocation, err = exactREL32Relocation([]ObjectRelocation{decoy, relocations[0]}, 1, ".text", 7, 0, 16)
+	if err != nil || relocation.SectionIndex != 1 {
+		t.Fatalf("section-indexed exactREL32Relocation() = %+v, %v", relocation, err)
 	}
 }
 

@@ -104,7 +104,7 @@ func InspectAMD64REL32Link(object, image []byte, spec AMD64REL32LinkSpec) (AMD64
 		return AMD64REL32LinkReport{}, fmt.Errorf("AMD64 REL32 source symbol %q range overflows COFF virtual addresses", source.Name)
 	}
 	relocation, err := exactREL32Relocation(
-		objectReport.RelocationRecords, sourceSectionName, target.TableIndex,
+		objectReport.RelocationRecords, int(source.SectionNumber), sourceSectionName, target.TableIndex,
 		uint32(functionStart), uint32(functionEnd),
 	)
 	if err != nil {
@@ -219,11 +219,11 @@ func exactObjectSymbol(symbols []ObjectSymbol, name string) (ObjectSymbol, error
 	return result, nil
 }
 
-func exactREL32Relocation(relocations []ObjectRelocation, section string, targetIndex, functionStart, functionEnd uint32) (ObjectRelocation, error) {
+func exactREL32Relocation(relocations []ObjectRelocation, sectionIndex int, section string, targetIndex, functionStart, functionEnd uint32) (ObjectRelocation, error) {
 	var result ObjectRelocation
 	found := false
 	for _, relocation := range relocations {
-		if relocation.Section != section || relocation.SymbolIndex != targetIndex || relocation.Type != ObjectRelocationAMD64Rel32 ||
+		if relocation.SectionIndex != sectionIndex || relocation.Section != section || relocation.SymbolIndex != targetIndex || relocation.Type != ObjectRelocationAMD64Rel32 ||
 			relocation.VirtualAddress < functionStart || relocation.VirtualAddress >= functionEnd {
 			continue
 		}

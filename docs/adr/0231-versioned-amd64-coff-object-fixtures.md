@@ -66,9 +66,10 @@ under both profiles.
 
 This is host-side structural evidence, not an object writer, linker implementation, stable public
 Fairy ABI, or serialized product format. ADR 0232 separately proves one linked REL32 calculation,
-and ADR 0233 proves one ordinary archive extraction plus pick-any COMDAT final owner. Whole-object
-MSVC identity, other relocation formulas, broader archive/COMDAT policies, weak externals, bigobj,
-relocation overflow, imports/exports, CodeView/PDB, unwind relocation semantics, independent
+ADR 0233 proves one ordinary archive extraction plus pick-any COMDAT final owner, and ADR 0234
+preserves relocation section indexes while proving one ADDR64 plus one unwind `.pdata` ADDR32NB
+begin calculation. Whole-object MSVC identity, other relocation formulas and unwind fields, broader
+archive/COMDAT policies, weak externals, bigobj, relocation overflow, imports/exports, CodeView/PDB, independent
 producer crossings, and hosted same-commit evidence remain separate gates.
 
 ## External basis

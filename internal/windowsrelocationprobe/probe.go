@@ -4,6 +4,9 @@ package windowsrelocationprobe
 const (
 	SourceSymbol   = "fy_rel32_source"
 	TargetSymbol   = "fy_rel32_target"
+	ReceiptSymbol  = "fy_rel32_receipt"
+	SourceObject   = "caller.obj"
+	TargetObject   = "target.obj"
 	ReceiptSection = ".fyreloc"
 	ExpectedExit   = int32(0)
 )
@@ -17,6 +20,9 @@ type Unit struct {
 	TargetSource   string
 	SourceSymbol   string
 	TargetSymbol   string
+	ReceiptSymbol  string
+	SourceObject   string
+	TargetObject   string
 	ReceiptSection string
 	ReceiptMagic   [16]byte
 	ExpectedExit   int32
@@ -28,6 +34,7 @@ func Generate() Unit {
 	return Unit{
 		CallerSource: callerSource, TargetSource: targetSource,
 		SourceSymbol: SourceSymbol, TargetSymbol: TargetSymbol,
+		ReceiptSymbol: ReceiptSymbol, SourceObject: SourceObject, TargetObject: TargetObject,
 		ReceiptSection: ReceiptSection, ReceiptMagic: ReceiptMagic, ExpectedExit: ExpectedExit,
 	}
 }

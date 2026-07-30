@@ -31,7 +31,7 @@ func TestInspectObjectAcceptsClosedAMD64COFF(t *testing.T) {
 		t.Fatalf("COFF symbol records = %+v", report.SymbolRecords)
 	}
 	if len(report.RelocationRecords) != 1 || report.RelocationRecords[0] != (ObjectRelocation{
-		Section: ".text", Symbol: "sample", Type: ObjectRelocationAMD64Rel32,
+		SectionIndex: 1, Section: ".text", Symbol: "sample", Type: ObjectRelocationAMD64Rel32,
 	}) {
 		t.Fatalf("COFF relocation records = %+v", report.RelocationRecords)
 	}
@@ -57,7 +57,7 @@ func TestInspectObjectReportsExactCOMDATAndRelocationMetadata(t *testing.T) {
 		t.Fatalf("COFF COMDAT symbols = %+v", report.SymbolRecords)
 	}
 	if len(report.RelocationRecords) != 1 || report.RelocationRecords[0] != (ObjectRelocation{
-		Section: ".text$mn", SymbolIndex: 3, Symbol: "callee", Type: ObjectRelocationAMD64Rel32,
+		SectionIndex: 1, Section: ".text$mn", SymbolIndex: 3, Symbol: "callee", Type: ObjectRelocationAMD64Rel32,
 	}) {
 		t.Fatalf("COFF COMDAT relocations = %+v", report.RelocationRecords)
 	}
