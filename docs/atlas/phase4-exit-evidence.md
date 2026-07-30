@@ -16,8 +16,9 @@ Phase 4 ends when four narrow properties are executable:
 4. attributed text cannot grant authority.
 
 Passing this gate does not enable `impact`, semantic `diff`, stable anchors, MCP, structural edits,
-dependency-map joins, a decoder, persistence defaults, model calls, or a stable Atlas CLI. Those need
-real consumer and completeness evidence under the later capability gates.
+workspace query traversal or output, a decoder, persistence defaults, model calls, or a stable Atlas
+CLI. ADR 0225's internal exact call ledger is only a prerequisite; the larger capabilities still
+need real consumer and completeness evidence under the later gates.
 
 ## Evidence matrix
 
@@ -25,7 +26,7 @@ real consumer and completeness evidence under the later capability gates.
 | --- | --- | --- | --- |
 | Compiler semantics do not depend on Atlas | `internal/architecturecontract` | `TestRepositoryKeepsAtlasImportsOneWay` parses every Go file below `cmd/` and `internal/` and permits direct Atlas/export imports only inside the export layer, `internal/cli`, and the Windows evidence harness. `TestAtlasImportBoundaryDetectsForbiddenImportsAndKeepsAllowedAdapters` requires exact violations for injected compiler and MIR imports. | A broken Atlas package can still prevent the statically linked repository from building; package initialization and process/plugin isolation are not covered. |
 | Stale or incompatible maps fail closed | `internal/atlasmap` current-source/query/store lanes | `TestMapStoreRejectsStaleIncompatibleCorruptAndConflictingGenerations`, `TestValidateCurrentRejectsEveryStoredSourceIdentityAxis`, and `TestQueryIndexRejectsInvalidPartitionsSelectorsRequestsAndBudgets` reject exact source, file, line-map, compiler, interface, corruption, and contradictory query state rather than serving a best effort result. | Cross-version migration, remote map acquisition, physical power-cut durability, and a default store policy are absent. |
-| Unknown graph edges remain explicit | `internal/semanticsnapshot`, `internal/atlasmap`, and `internal/contextpack` | Snapshot completeness retains unavailable/partial reasons. `TestQueriesExposeUnjoinedDependencyTargetsWithoutGuessing` requires dependency-map omissions and retained external relations; show/around tests require incoming-package omissions. Context Pack tests preserve those omissions and completeness fields. | Dependency-map joins, workspace-wide reverse callers, indirect-call recovery, or a complete impact graph are not implemented. |
+| Unknown graph edges remain explicit | `internal/semanticsnapshot`, `internal/atlasmap`, and `internal/contextpack` | Snapshot completeness retains unavailable/partial reasons. `TestQueriesExposeUnjoinedDependencyTargetsWithoutGuessing` requires package-local dependency-map omissions and retained external relations; show/around tests require incoming-package omissions. `WorkspaceCallIndex` separately joins only exact compiler-observed calls over a caller-supplied complete exact-current package set and rejects missing or contradictory evidence. Context Pack tests preserve the package-local omissions and completeness fields. | Workspace query traversal and output, persisted reverse callers, indirect-call recovery, unrelated relation joins, or a complete impact graph are not implemented. |
 | Text cannot grant authority | `internal/attributedtext` and `internal/evidencebundle` | Model tests fix every text record to `untrusted-text`; exact-source and documentation fixtures retain printable prompt-like commands only as data. Evidence Bundle tests require wrapper `none`, fact `compiler-fact`, and source/documentation `untrusted-text`, while facts and child bytes stay separate and checksummed. | A downstream host that ignores the labels is outside the compiler boundary; this is not a model-security, authentication, or tool-sandbox proof. |
 
 ## Oracle separation

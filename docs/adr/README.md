@@ -234,6 +234,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0222-retain-explicit-factory-construction.md`: retains ordinary named `T`/`Result<T, E>` factories after a checked SDK/example audit found no constructor syntax worth its extra call model.
 - `0223-defer-static-interfaces-until-generics.md`: closes the current modern-concept queue by deferring static interfaces until implemented user generics and real cross-type duplication provide bounded evidence.
 - `0224-defer-unproven-surface-shorthands.md`: keeps range iteration, narrowing conversions, and expression bodies out until checked source duplication outweighs their extra semantic paths.
+- `0225-bounded-exact-current-workspace-call-join.md`: joins resolved calls to exact dependency SymbolIds and reverse callers under complete exact-current package sets and explicit construction budgets.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

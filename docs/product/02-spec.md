@@ -806,7 +806,8 @@ versioned `fairyc.symbol-id/v1-sha256-128+256` algorithm. Package UID, module, d
 path, zero generic arity, and a canonical structured signature form the hash input. Package
 instances, versions, source positions, bodies, build-local numbers, compiler identity, target, and
 language revision do not. Nominal signature types use package UID and logical path; exact instance
-compatibility now lives in the map header while dependency graph-edge joins remain future work. Each visible 128-bit prefix is
+compatibility now lives in the map header. ADR 0225 joins exact resolved calls separately, while
+other dependency graph-edge families and query traversal remain future work. Each visible 128-bit prefix is
 stored with its full 256-bit digest, and a mismatch or collision rejects the symbol set.
 
 The next in-memory boundary now produces one immutable `fairyc.fymap-logical/v1` partition for every
@@ -839,8 +840,12 @@ implements package-local `overview`, `show`, and deterministic breadth-first `ar
 has explicit record, relation, traversal-depth, and deterministic selection-byte limits. Local
 targets may extend traversal; dependency targets retain exact declaration descriptors without an
 invented SymbolId, and unavailable cross-package incoming calls remain explicit omissions. Results
-contain compiler facts only and are detached from the index. No source excerpt, documentation text,
-dependency join, or stable standalone query transport is enabled.
+contain compiler facts only and are detached from the index. ADR 0225 adds a separate bounded
+in-memory `WorkspaceCallIndex`: it revalidates a complete caller-supplied exact-current partition
+set, joins exact compiler-observed calls by complete declaration key, and exposes detached
+package-qualified outgoing and incoming call ledgers. Package-local query results do not consume
+that ledger. No source excerpt, documentation text, workspace query output, or stable standalone
+query transport is enabled.
 
 The first Context Pack encoder now runs those exact-current queries itself and emits one separately
 byte-bounded compact `fairyc.context-pack-json/v1` envelope. It retains exact package, map,
@@ -912,6 +917,11 @@ import, default store, or safe-change inference. A separate map-publication poli
 additional text origin/kind support, and multi-symbol or neighborhood evidence composition remain
 future work.
 
+The internal workspace call ledger does not change those command omissions. It proves exact direct
+call joins and reverse callers only for one already verified complete workspace set under explicit
+package and call budgets. It does not traverse across packages, persist a reverse index, join other
+relation families, or infer indirect calls, impact, renames, or safe changes.
+
 The configured Windows host smoke separately measures whole-package canonical rewrite cost after
 workspace analysis and map planning. It performs one untimed warmup and nine raw rewrites of every
 fixed quickstart package partition, requires exact byte identity, and reports path-free package,
@@ -928,7 +938,8 @@ plan are specified in `docs/atlas/semantic-snapshot-v0.md`, `docs/atlas/symbol-i
 `docs/atlas/fymap-logical-plan-v1.md`. The implemented transport is specified in
 `docs/atlas/fymap-transport-v1.md`; the implemented store is specified in
 `docs/atlas/fymap-store-v1.md`; the implemented query layer is specified in
-`docs/atlas/fymap-query-v1.md`; compiler-fact pack output is specified in
+`docs/atlas/fymap-query-v1.md`; the internal exact workspace call prerequisite is specified in
+`docs/atlas/workspace-call-join-v0.md`; compiler-fact pack output is specified in
 `docs/atlas/context-pack-v1.md`; the experimental overview command is fixed by ADR 0190, the
 rewrite measurement boundary by ADR 0191, the internal exact symbol catalog by ADR 0192, its
 experimental output command by ADR 0193, and exact-name Symbol Catalog v1 by ADR 0201. ADR 0194

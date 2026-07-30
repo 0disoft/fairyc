@@ -565,14 +565,16 @@ conflicting generations, and requires exact current workspace package/file/line-
 and interface identities before returning spans. The internal query index repeats that freshness
 check, accepts only exact SymbolIds, and implements deterministic caller-bounded `overview`, `show`,
 and package-local `around` queries with explicit filter, depth, byte, dependency-join, and incoming-
-map omissions. `internal/contextpack` now runs those queries directly and emits caller-bounded,
+map omissions. A separate bounded `WorkspaceCallIndex` now revalidates the complete caller-supplied
+package set, joins exact compiler-observed calls to dependency SymbolIds, and exposes detached local
+and cross-package outgoing/incoming ledgers without changing those query results. `internal/contextpack` now runs those queries directly and emits caller-bounded,
 checksummed canonical `fairyc.context-pack-json/v1` with exact package/compatibility/query/budget/
 usage/completeness/fact/relation/omission fields and visibly empty text sections. The first
 `experimental atlas-pack overview` command exposes one explicitly selected package UID with explicit
 record/selection/output limits and no map-store default. Exact SymbolIds obtained from the separate
 catalog command can now drive `experimental atlas-pack show` and `around` with explicit direction,
 relation, record, relation, depth, selection-byte, and output-byte policy. Those commands add no
-default store policy, dependency-map join, source-excerpt output, pack decoder, or text importer. The internal
+default store policy, workspace call-ledger consumption, source-excerpt output, pack decoder, or text importer. The internal
 query index now also provides exact full-SymbolId-ordered catalog pages with exact module/name/kind
 filters, explicit symbol/byte limits, and full-ID-only continuation. Exact-name matches retain every
 same-name declaration across modules rather than guessing one winner. Symbol Catalog v1 exposes

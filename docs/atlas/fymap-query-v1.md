@@ -18,6 +18,10 @@ The index is package-local. It performs no filesystem scan, source read, depende
 network access, process execution, or compiler feedback. All output is detached from the immutable
 index. Symbol selectors accept only canonical visible or full SymbolId v1 text.
 
+`docs/atlas/workspace-call-join-v0.md` defines a separate internal prerequisite that can join exact
+resolved calls across a caller-supplied complete workspace package set. Package-local queries do not
+consume that ledger, so this v1 result shape and its omissions remain unchanged.
+
 ## Query surface
 
 - `overview` returns the exact map header, declaration-kind counts, then relation completeness and
@@ -92,7 +96,8 @@ or safe-change claims.
 - no query-result decoder or standalone stable query wire schema; the output-only compiler-fact
   Context Pack is separately owned by `docs/atlas/context-pack-v1.md`;
 - no source excerpt or documentation import;
-- no dependency-map join or workspace-wide reverse index;
+- no dependency-map join or workspace-wide reverse index inside package-local query results; the
+  separate internal workspace call ledger is not traversal or output;
 - no fuzzy, normalized, prefix, substring, or guessed-rename search;
 - no `impact`, semantic `diff`, LSP, SCIP, MCP, or structural edit behavior;
 - no stable CLI, default map path, or automatic publication; ADR 0190 exposes bounded package-UID

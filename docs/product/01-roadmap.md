@@ -732,8 +732,8 @@ an exact package UID and explicit record/selection/output bounds; it writes cano
 and no map-store path. ADR 0191 now measures nine in-memory canonical rewrites of the complete fixed
 quickstart package set after planning, with source/record/encoded-byte denominators and exact byte
 identity. It makes no format, chunking, compression, incremental-update, or latency decision. No
-default store path, ordinary-command publication, dependency-map join, source-excerpt output in
-those commands, documentation import, or pack decoder exists yet.
+default store path, ordinary-command publication, workspace query join consumption, source-excerpt
+output in those commands, documentation import, or pack decoder exists yet.
 ADR 0192 supplies the internal exact discovery prerequisite: full-SymbolId ordering, exact module
 and kind filters, explicit count/byte bounds, and full-ID stateless cursors all have real-workspace
 regressions without fuzzy name inference. ADR 0193 exposes those pages through bounded canonical
@@ -744,6 +744,12 @@ Symbol Catalog v1 instead of mutating v0.
 ADR 0194 now exposes exact visible/full SymbolId `atlas-pack show` and `around` with mandatory
 direction, relation, record, relation, depth, selection-byte, and output-byte policy. The commands
 preserve package-local join omissions and add no text, decoder, store, or safe-change claim.
+ADR 0225 now supplies the narrower cross-package prerequisite without changing those commands. Its
+bounded in-memory `WorkspaceCallIndex` revalidates the complete caller-supplied package set, joins
+exact compiler-observed calls to dependency SymbolIds, and builds detached outgoing and incoming
+ledgers. Missing dependencies, stale maps, target contradictions, and package or call budget
+exhaustion reject the join. It adds no workspace traversal, output schema, persistence, or impact
+claim.
 ADR 0195 closes the attributed-text origin, exact-current identity, UTF-8/control, atomic fragment
 budget, integrity, omission, and non-authority policy. ADR 0196 implements one workspace-authored
 exact source excerpt from revalidated retained bytes, and ADR 0197 adds its separately bounded
