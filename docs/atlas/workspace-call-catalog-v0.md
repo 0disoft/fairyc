@@ -5,6 +5,7 @@
 - Join prerequisite: `docs/atlas/workspace-call-join-v0.md`
 - Implementation: `internal/workspacecallcatalog/`
 - Experimental command: `internal/cli/atlas_calls.go`
+- Process control: `docs/adr/0227-atlas-call-process-measurement-control.md`
 
 ## Identity
 

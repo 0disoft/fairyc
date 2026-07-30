@@ -85,4 +85,6 @@ This decision adds no decoder, persistent catalog, source text, documentation, m
 workspace traversal, transitive closure, other relation family, indirect call, impact, semantic
 diff, safe-change claim, stable anchor, LSP, SCIP, MCP, embedding, model call, permission, or
 execution authority. Representative time and retained-memory measurements remain required before
-considering traversal or a default budget.
+considering traversal or a default budget. ADR 0227 supplies only a tiny fresh-process Windows
+control whose whole-process peaks and uncontrolled OS caches do not satisfy that representative
+gate.

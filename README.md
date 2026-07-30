@@ -589,6 +589,13 @@ host smoke now also records nine raw whole-package canonical rewrite samples aft
 byte identity, and reports fixed source/record/encoded-byte denominators without choosing chunking,
 compression, incremental updates, or a performance budget.
 
+The Windows host smoke now also drives that exact root `main` call catalog through nine fresh locked
+standalone compiler processes after one untimed warmup. Its path-free
+`fairyc.atlas-call-process-measurement/v0` report preserves raw caller wall time, whole-process peak
+working-set and pagefile bytes, fixed source/call/output denominators, and the explicit construction
+bounds. This is a tiny local control with uncontrolled OS caches, not a reference budget, speedup,
+Atlas-only heap measurement, representative repository result, traversal decision, or impact claim.
+
 ADR 0195 closes the attributed-text policy, ADR 0196 implements its exact retained-source gate, and
 ADR 0197 adds canonical bounded `fairyc.attributed-text-json/v0` output with explicit selection,
 exact subject identity, independent document integrity, and no caller-result forgery. ADR 0198
@@ -689,7 +696,7 @@ or arbitrary link-input option.
 - Runtime and standard library: `docs/runtime/runtime-stdlib-v0.md`
 - Compatibility and versioning: `docs/compatibility/versioning-v0.md`
 - Diagnostic catalog: `docs/diagnostics/catalog-v0.md`
-- Atlas semantic snapshot and documentation sidecar, provisional SymbolId, logical planning, canonical transport, contained current-source-validated store, bounded package-local queries, canonical compiler-fact Context Packs, canonical exact retained-source/documentation attributed-text output, single-symbol Evidence Bundle v0, frontend-owned exact `///` attachment, exact catalog plus overview/show/around/text/evidence CLI, and whole-package rewrite measurement: `docs/atlas/`, `internal/lexer/documentation.go`, `internal/semanticsnapshot/`, `internal/atlasmap/`, `internal/contextpack/`, `internal/attributedtext/`, `internal/evidencebundle/`, `internal/workspaceloader/exact_source.go`, `internal/cli/atlas_pack*.go`, `internal/cli/atlas_text.go`, `internal/cli/atlas_evidence.go`, `internal/buildmeasure/atlas_rewrite.go`
+- Atlas semantic snapshot and documentation sidecar, provisional SymbolId, logical planning, canonical transport, contained current-source-validated store, bounded package-local queries, exact workspace-call catalog, canonical compiler-fact Context Packs, canonical exact retained-source/documentation attributed-text output, single-symbol Evidence Bundle v0, frontend-owned exact `///` attachment, exact catalog plus overview/show/around/calls/text/evidence CLI, whole-package rewrite measurement, and fresh-process workspace-call control: `docs/atlas/`, `internal/lexer/documentation.go`, `internal/semanticsnapshot/`, `internal/atlasmap/`, `internal/workspacecallcatalog/`, `internal/contextpack/`, `internal/attributedtext/`, `internal/evidencebundle/`, `internal/workspaceloader/exact_source.go`, `internal/cli/atlas_pack*.go`, `internal/cli/atlas_calls.go`, `internal/cli/atlas_text.go`, `internal/cli/atlas_evidence.go`, `internal/buildmeasure/atlas_rewrite.go`, `internal/buildmeasure/atlas_call_process.go`
 - CLI contract: `docs/cli/command-contract.md`
 - Workspace ownership: `docs/monorepo/package-ownership.md`
 

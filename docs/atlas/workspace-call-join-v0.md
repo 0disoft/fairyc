@@ -6,6 +6,7 @@
 - Package-local query prerequisite: `docs/atlas/fymap-query-v1.md`
 - Current-source prerequisite: `docs/atlas/fymap-store-v1.md`
 - Output consumer: `docs/atlas/workspace-call-catalog-v0.md`
+- Process control: `docs/adr/0227-atlas-call-process-measurement-control.md`
 
 ## Purpose
 
@@ -67,7 +68,8 @@ empty result.
 The package and call maxima are construction budgets, not defaults or performance promises. The
 implementation sorts the supplied package set, builds one exact-current package index per package,
 and stores one ledger record per resolved call. No latency, retained-memory, representative-project,
-or model-token threshold is currently accepted.
+or model-token threshold is currently accepted. ADR 0227 records only a tiny fresh-process Windows
+control whose whole-process peaks cannot be attributed to this index.
 
 ## Completeness boundary
 

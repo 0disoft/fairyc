@@ -3,7 +3,7 @@
 - Status: Draft
 - Owner: UNASSIGNED
 - Product contract: `docs/product/02-spec.md`
-- Evidence status: Configured local Windows no-cache calibration, two-sample process-cache control-flow receipt, 36-sample edit-class raw distributions, one eight-step standalone session with process-memory peaks, nine paired cold/warm persistent-cache process observations, one nine-process bounded retention staircase, and nine raw whole-package Atlas rewrite observations exist; no reference machine, cache speedup decision, Atlas format decision, default cache policy, or regression threshold exists
+- Evidence status: Configured local Windows no-cache calibration, two-sample process-cache control-flow receipt, 36-sample edit-class raw distributions, one eight-step standalone session with process-memory peaks, nine paired cold/warm persistent-cache process observations, one nine-process bounded retention staircase, nine raw whole-package Atlas rewrite observations, and nine fresh-process exact workspace-call catalog observations with per-process memory peaks exist; no reference machine, cache speedup decision, Atlas format or traversal decision, default cache or Atlas budget, or regression threshold exists
 
 Stage 0 has no numeric performance, storage, or Atlas budget. Proposed millisecond, percentage, MiB, GiB, map-size, and context-size thresholds are removed until a maintained harness produces a baseline. This document fixes what must be measured and how a later budget becomes enforceable.
 
@@ -103,6 +103,17 @@ serialization but excludes workspace analysis, map planning, queries, and disk p
 quickstart is a control fixture, not a representative repository or a numeric budget. Because this
 encoder is target-independent and invokes no C toolchain or libc, its report records OS, architecture,
 and exact running executable identity rather than inventing target or toolchain fields.
+
+ADR 0227 adds a separate end-to-end direct-call catalog control. Standalone compiler construction,
+exact root-main SymbolId discovery, and one warmup happen before measurement. Each of nine first-
+attempt samples starts a fresh locked compiler process and includes process startup, workspace
+loading, semantic and MIR checking, map planning, exact-current joining, selection, canonical output,
+and caller memory-probe overhead through exit. The path-free report records raw caller-monotonic wall
+time, Windows peak working-set and peak pagefile bytes, fixed source/call/output denominators, and
+explicit 8-package, 8-call, and 2 MiB harness bounds. OS caches are uncontrolled; the process
+counters are neither Go live heap nor Atlas-only retained memory. The tiny quickstart control
+establishes measurement plumbing only, not a reference budget, percentile, speedup, default,
+representative repository distribution, traversal decision, impact evidence, or regression gate.
 
 ## Benchmark protocol
 

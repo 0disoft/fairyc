@@ -646,6 +646,13 @@ ADR 0191 adds path-free measurement schema `fairyc.atlas-rewrite-measurement/v0`
 local evidence envelope and exact encode-only denominator, not `.fymap` compatibility, a product
 byte or latency limit, a default path, a format decision, or an incremental-update promise.
 
+ADR 0227 adds path-free measurement schema `fairyc.atlas-call-process-measurement/v0`. It versions
+the local raw process-evidence envelope, exact command-start-through-exit scope, source/call/output
+denominators, Windows peak-memory metric labels, and explicit harness-policy echo. It does not change
+the workspace-call catalog, command behavior, `.fymap`, Context Pack, compiler release, or language;
+nor does it promise a reference budget, percentile, speedup, default, traversal, impact, or
+cross-machine comparability.
+
 ADR 0192 adds an internal exact-current symbol catalog ordered and paged by full SymbolId. Its kind
 filters, cursor, budget accounting, and omission codes are pre-release query policy. No standalone
 wire schema, CLI spelling, name-search behavior, stable anchor, or cross-version cursor is promised.

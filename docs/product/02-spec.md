@@ -929,6 +929,15 @@ source body or host path, and succeeds with an explicit empty call list when app
 not traverse across packages, persist a reverse index, join other relation families, or infer
 indirect calls, impact, renames, or safe changes.
 
+ADR 0227 adds a separate local process control for that exact command. The configured Windows smoke
+builds one standalone compiler outside timing, discovers the root `main` SymbolId and performs one
+untimed warmup, then preserves nine first-attempt fresh locked process observations. Each sample
+includes process startup through exit and reports raw caller wall time, whole-process Windows peak
+working-set/pagefile bytes, canonical output bytes, the fixed two-package/two-source/one-cross-call
+shape, and explicit construction bounds. OS caches remain uncontrolled. These are not live-heap or
+Atlas-only retained-memory values, and the tiny local fixture establishes no reference budget,
+default, percentile, speedup, representative-use, traversal, or impact conclusion.
+
 The configured Windows host smoke separately measures whole-package canonical rewrite cost after
 workspace analysis and map planning. It performs one untimed warmup and nine raw rewrites of every
 fixed quickstart package partition, requires exact byte identity, and reports path-free package,
@@ -957,6 +966,8 @@ policy, ADR 0196 implements its internal exact retained-source gate, ADR 0197 fi
 output-only JSON, ADR 0198 fixes its first experimental source command, ADR 0199 fixes exact
 frontend documentation attachment, and ADR 0200 fixes exact documentation extraction and its
 experimental action without changing compiler-fact transports.
+ADR 0227 separately fixes the path-free local workspace-call process-measurement evidence envelope;
+it changes no compiler, catalog, map, query, or command compatibility surface.
 
 ## Explicit non-goals
 
