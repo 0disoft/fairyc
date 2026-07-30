@@ -435,9 +435,15 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   raw-object manifest for exact primary symbols, REL32, ANY COMDAT, and associative COMDAT parent
   receipts. ADR 0232 adds a separate two-translation-unit MSVC probe that reads the exact object
   addend and preferred-image function addresses, recomputes `S + A - (P + 4)`, compares the linked
-  `CALL rel32` displacement, and executes at low and optimized profiles. The driver still removes
-  every temporary object. This is not a stable product object format, proof of other relocation
-  formulas, final-link COMDAT-selection proof, unwind fixture, or fresh hosted same-commit receipt.
+  `CALL rel32` displacement, and executes at low and optimized profiles. ADR 0233 adds a real
+  two-member Microsoft archive plus one direct pick-any COMDAT competitor. The bounded archive
+  inspector validates both linker members and every contained object; the final proof requires the
+  preferred index, demanded and unused member identities, a non-COMDAT unused sentinel absent from
+  the final map, raw candidate values, exact MSVC map owners, and `.fysel` preferred-image addresses and candidate value to
+  agree across four low/optimized input-order executions. The driver still removes every temporary
+  object, archive, map, and image. This is not
+  a stable product object or library format, proof of other relocation formulas or broader
+  archive/COMDAT policies, unwind fixture, or fresh hosted same-commit receipt.
 - `internal/pecoff` additionally maps the exception directory through `.pdata` and every referenced
   file-backed unwind record. `RUNTIME_FUNCTION` entries must be 12-byte, sorted, nonoverlapping,
   executable-code ranges with DWORD-aligned unwind RVAs. Version 1 prolog operations use their

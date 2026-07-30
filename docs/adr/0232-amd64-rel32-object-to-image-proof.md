@@ -60,10 +60,12 @@ at both profiles before executing them. The object addend, preferred-image sourc
 linked site RVA, actual displacement, and independently computed displacement remain separate report
 fields.
 
-This is one direct `CALL rel32` crossing between two MSVC C translation units. It does not prove
+This is one direct `CALL rel32` crossing between two MSVC C translation units. Archive extraction
+and pick-any COMDAT selection are separately proved by ADR 0233 and do not widen this arithmetic
+proof. This ADR does not prove
 `REL32_1` through `REL32_5`, RIP-relative data addressing, `ADDR64`, `ADDR32NB`, section-relative or
-token relocations, unwind relocations, overflow records, incremental linking, LTCG, archives,
-weak externals, import thunks, final-link COMDAT winner selection, ASLR rebasing at load time,
+token relocations, unwind relocations, overflow records, incremental linking, LTCG, weak externals,
+import thunks, ASLR rebasing at load time,
 independent producer compatibility, linker-map provenance, CodeView/PDB, or a public Fairy ABI.
 
 ## External basis

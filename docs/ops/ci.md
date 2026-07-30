@@ -235,8 +235,8 @@ executes them under both profiles, and requires exact exception payload, ordered
 `RtlVirtualUnwind` frame discovery, and one abnormal `__finally` execution. Before execution, the
 same intent parses the target-neutral product image, both declared-target profile images, all nine
 package-workspace build images, all nine package-workspace run images, the two safe FY File lifecycle
-images, the two safe FY owned-text lifecycle images, both direct run-target temporary images, both exec-target temporary images, and all eighteen raw or generated-Fairy Windows File, Buffer, owned-text, Arena, layout, ABI,
-struct-result, and unwind probe images
+images, the two safe FY owned-text lifecycle images, both direct run-target temporary images, both exec-target temporary images, and all twenty-four raw or generated-Fairy Windows File, Buffer, owned-text, Arena, layout, ABI,
+REL32-link, archive/COMDAT-selection, struct-result, and unwind probe images
 and requires bounded AMD64 PE32+ non-DLL console
 identity, aligned image/header/section ranges, a readable executable `.text`, and an executable
 entry point. This does not inspect object symbols or relocations, unwind/debug payloads, imported
@@ -249,11 +249,16 @@ COMDAT definitions are mandatory; storage-free `.bss` is admitted only with the 
 characteristic. Object bytes are not uploaded or retained. ADR 0231 fixes exact synthetic primary
 symbols, relocation receipts, and COMDAT selection. ADR 0232 additionally recomputes one direct
 cross-object `CALL rel32` from the object addend and final preferred-image addresses at both
-profiles. Other relocation formulas, archive/final-link COMDAT selection, unwind relocations,
+profiles. ADR 0233 parses both Microsoft archive linker members, checks exact demand and unused
+member indexes and raw candidate values, requires the demanded function's final-map owner to be the
+indexed archive member, requires the unused non-COMDAT sentinel to be absent, and binds one pick-any
+COMDAT map owner to its final PE address and value across four low/optimized input-order executions.
+Other relocation formulas, broader archive/COMDAT
+selection and retention modes, unwind relocations,
 debug data, and a fresh hosted same-commit object receipt remain unconfigured.
 The ordinary Go tests include a 154-section positive regression object and reject 4,097 sections;
 the exact section count emitted by a future MSVC version remains unstabilized.
-All forty-nine linked target or probe PE images additionally traverse the Microsoft x64 exception directory before
+All fifty-three linked target or probe PE images additionally traverse the Microsoft x64 exception directory before
 execution. The local gate requires sorted nonoverlapping `.pdata` runtime-function ranges,
 executable code coverage, DWORD-aligned file-backed unwind records, bounded version 1 prolog slots,
 bounded version 2 epilog descriptors, and minimum handler/chained tails. The receipt reports the

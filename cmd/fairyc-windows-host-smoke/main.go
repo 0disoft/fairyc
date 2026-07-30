@@ -33,6 +33,7 @@ import (
 	"github.com/0disoft/fairyc/internal/source"
 	"github.com/0disoft/fairyc/internal/target"
 	"github.com/0disoft/fairyc/internal/windowsabiprobe"
+	"github.com/0disoft/fairyc/internal/windowsarchiveprobe"
 	"github.com/0disoft/fairyc/internal/windowslayoutprobe"
 	"github.com/0disoft/fairyc/internal/windowsrelocationprobe"
 	"github.com/0disoft/fairyc/internal/windowsunwindprobe"
@@ -839,6 +840,10 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	archiveExecutions, err := runWindowsArchiveProbe(toolchain)
+	if err != nil {
+		return err
+	}
 	structResultExecutions, err := runFairyStructResultProbe(toolchain)
 	if err != nil {
 		return err
@@ -847,8 +852,8 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	inspectedPEImages := 1 + targetBuildExecutions + workspaceBuildExecutions + windowsFileSourceExecutions + ownedTextSourceExecutions + targetRunExecutions + workspaceRunExecutions + targetExecExecutions + windowsFileExecutions + bufferProbeExecutions + ownedTextProbeExecutions + arenaProbeExecutions + layoutExecutions + abiExecutions + relocationExecutions + structResultExecutions + unwindExecutions
-	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds, %d package-workspace builds, %d package-workspace runs, %d source-level safe File lifecycle builds, %d source-level safe owned-text lifecycle builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls, checked reads and mutable indexed stores, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, bounded lexical defer, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, stable-run stdin forwarding, bounded allocation-free stdin byte reads with EOF and partial-buffer evidence, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart, output, locked workspace execution, one isolated semantic test, two target-explicit C emissions, nine paired cold/warm persistent-cache process measurements, one nine-process bounded persistent-cache growth staircase, an eight-request editor-shaped workspace session with Windows process-memory peaks, %d fresh locked Atlas workspace-call catalog processes with per-process memory peaks, %d generated Atlas workspace-call scaling shapes, and %d post-GC retained-index batches, 42 run-host outcomes covered fixed arrays, byte-view iteration and slicing, checked indexed stores, assertions and lexical defer in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, Buffer initialization, reserve, self-overlap append, and zeroed-resize allocation rollback passed %d separate-translation-unit MSVC executions, owned-text opaque-storage failure preservation, forced allocation rollback, and repeated drop passed %d separate-translation-unit MSVC executions, Arena zeroing, two-stage allocation rollback, stale Region rejection, and active-drop preservation passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, exact object addend and final-image REL32 displacement passed %d separate-translation-unit MSVC executions, generated-Fairy small and large struct results passed %d separate-translation-unit MSVC executions across C11 and C17 consumer modes, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, workspaceBuildExecutions, workspaceRunExecutions, windowsFileSourceExecutions, ownedTextSourceExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, buildmeasure.AtlasCallProcessIterations, len(atlasCallScaleMeasurement.Shapes), len(atlasCallRetainedMeasurement.Shapes)*buildmeasure.AtlasCallRetainedIterationsPerShape, windowsFileExecutions, bufferProbeExecutions, ownedTextProbeExecutions, arenaProbeExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, relocationExecutions, structResultExecutions, unwindCases, unwindExecutions, inspectedPEImages, toolchain.Version)
+	inspectedPEImages := 1 + targetBuildExecutions + workspaceBuildExecutions + windowsFileSourceExecutions + ownedTextSourceExecutions + targetRunExecutions + workspaceRunExecutions + targetExecExecutions + windowsFileExecutions + bufferProbeExecutions + ownedTextProbeExecutions + arenaProbeExecutions + layoutExecutions + abiExecutions + relocationExecutions + archiveExecutions + structResultExecutions + unwindExecutions
+	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds, %d package-workspace builds, %d package-workspace runs, %d source-level safe File lifecycle builds, %d source-level safe owned-text lifecycle builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, Buffer, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls, checked reads and mutable indexed stores, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, bounded lexical defer, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, stable-run stdin forwarding, bounded allocation-free stdin byte reads with EOF and partial-buffer evidence, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart, output, locked workspace execution, one isolated semantic test, two target-explicit C emissions, nine paired cold/warm persistent-cache process measurements, one nine-process bounded persistent-cache growth staircase, an eight-request editor-shaped workspace session with Windows process-memory peaks, %d fresh locked Atlas workspace-call catalog processes with per-process memory peaks, %d generated Atlas workspace-call scaling shapes, and %d post-GC retained-index batches, 42 run-host outcomes covered fixed arrays, byte-view iteration and slicing, checked indexed stores, assertions and lexical defer in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, Buffer initialization, reserve, self-overlap append, and zeroed-resize allocation rollback passed %d separate-translation-unit MSVC executions, owned-text opaque-storage failure preservation, forced allocation rollback, and repeated drop passed %d separate-translation-unit MSVC executions, Arena zeroing, two-stage allocation rollback, stale Region rejection, and active-drop preservation passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, exact object addend and final-image REL32 displacement passed %d separate-translation-unit MSVC executions, archive extraction and final-image pick-any COMDAT ownership passed %d MSVC input-order executions, generated-Fairy small and large struct results passed %d separate-translation-unit MSVC executions across C11 and C17 consumer modes, %d Windows x64 unwind cases passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, workspaceBuildExecutions, workspaceRunExecutions, windowsFileSourceExecutions, ownedTextSourceExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, buildmeasure.AtlasCallProcessIterations, len(atlasCallScaleMeasurement.Shapes), len(atlasCallRetainedMeasurement.Shapes)*buildmeasure.AtlasCallRetainedIterationsPerShape, windowsFileExecutions, bufferProbeExecutions, ownedTextProbeExecutions, arenaProbeExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, relocationExecutions, archiveExecutions, structResultExecutions, unwindCases, unwindExecutions, inspectedPEImages, toolchain.Version)
 	return nil
 }
 
@@ -2441,6 +2446,62 @@ func runWindowsRelocationProbe(toolchain cdriver.WindowsHostToolchain) (int, err
 			return executions, fmt.Errorf("Windows MSVC REL32 probe with %s returned %d, stdout %q, and stderr %q", profile.Name, outcome.ExitCode, outcome.Stdout, outcome.Stderr)
 		}
 		executions++
+	}
+	return executions, nil
+}
+
+func runWindowsArchiveProbe(toolchain cdriver.WindowsHostToolchain) (int, error) {
+	unit := windowsarchiveprobe.Generate()
+	spec := pecoff.ArchiveCOMDATLinkSpec{
+		ArchiveName: unit.ArchiveName, SelectedMember: unit.SelectedMember,
+		UnusedMember: unit.UnusedMember, DirectObject: unit.DirectObject,
+		DemandSymbol: unit.DemandSymbol, UnusedSymbol: unit.UnusedSymbol,
+		COMDATSymbol: unit.COMDATSymbol, ReceiptSection: unit.ReceiptSection,
+		ReceiptMagic: unit.ReceiptMagic, ArchiveCandidate: unit.ArchiveCandidate,
+		DirectCandidate: unit.DirectCandidate,
+	}
+	executions := 0
+	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+		artifacts, err := cdriver.BuildWindowsMSVCArchiveProbe(
+			toolchain, profile, unit.CallerSource, unit.ChosenSource, unit.UnusedSource, unit.DirectSource,
+		)
+		if err != nil {
+			return executions, fmt.Errorf("build Windows MSVC archive probe with %s: %w", profile.Name, err)
+		}
+		if len(artifacts) != 2 || artifacts[0].Variant != "direct-first" || artifacts[1].Variant != "archive-first" {
+			return executions, fmt.Errorf("Windows MSVC archive probe with %s returned unexpected input-order variants", profile.Name)
+		}
+		for _, artifact := range artifacts {
+			if artifact.ArchiveName != unit.ArchiveName || len(artifact.Objects) != 4 ||
+				artifact.Objects[0].Name != "caller.obj" || artifact.Objects[1].Name != unit.SelectedMember ||
+				artifact.Objects[2].Name != unit.UnusedMember || artifact.Objects[3].Name != unit.DirectObject {
+				return executions, fmt.Errorf("Windows MSVC archive probe %s/%s returned unexpected artifact receipts", profile.Name, artifact.Variant)
+			}
+			if _, err := pecoff.InspectExecutable(artifact.Bytes); err != nil {
+				return executions, fmt.Errorf("inspect Windows MSVC archive probe PE with %s/%s: %w", profile.Name, artifact.Variant, err)
+			}
+			if _, err := pecoff.InspectAMD64Unwind(artifact.Bytes); err != nil {
+				return executions, fmt.Errorf("inspect Windows MSVC archive probe unwind data with %s/%s: %w", profile.Name, artifact.Variant, err)
+			}
+			report, err := pecoff.InspectArchiveCOMDATLink(
+				artifact.Archive, artifact.Objects[3].Bytes, artifact.Bytes, artifact.LinkMap, spec,
+			)
+			if err != nil {
+				return executions, fmt.Errorf("inspect Windows MSVC archive and COMDAT selection with %s/%s: %w", profile.Name, artifact.Variant, err)
+			}
+			if report.ArchiveMembers != 2 || report.ExtractedMember != unit.SelectedMember || report.DemandOwner != "archive" ||
+				(report.COMDATOwner != "archive" && report.COMDATOwner != "direct") || report.TargetRVA == 0 || report.COMDATRVA == 0 {
+				return executions, fmt.Errorf("Windows MSVC archive probe %s/%s returned an incomplete selection receipt", profile.Name, artifact.Variant)
+			}
+			outcome, err := cdriver.ExecuteWindowsMSVCArchiveProbe(artifact)
+			if err != nil {
+				return executions, fmt.Errorf("execute Windows MSVC archive probe with %s/%s: %w", profile.Name, artifact.Variant, err)
+			}
+			if outcome.ExitCode != unit.ExpectedExit || outcome.Stdout != "" || outcome.Stderr != "" {
+				return executions, fmt.Errorf("Windows MSVC archive probe with %s/%s returned %d, stdout %q, and stderr %q", profile.Name, artifact.Variant, outcome.ExitCode, outcome.Stdout, outcome.Stderr)
+			}
+			executions++
+		}
 	}
 	return executions, nil
 }

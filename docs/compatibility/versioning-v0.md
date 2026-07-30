@@ -294,6 +294,10 @@ ADR 0232's REL32 link spec and report are likewise compiler-private validation p
 names, `.fyreloc` receipt, preferred-image addresses, raw addend, and displacement fields may change
 with synchronized inspector, probe, mutation tests, and evidence docs; they do not define a public
 object format, linker API, serialized receipt, or native Fairy calling convention.
+ADR 0233 applies the same rule to the bounded archive report, preferred second-linker-member index,
+MSVC map parser, `.fysel` receipt, input-order variants, and archive/direct candidate values. Those
+identities may evolve with synchronized probes and mutations; they do not stabilize Microsoft
+archive bytes, map syntax, a Fairy library format, or a linker-selection API.
 Microsoft x64 unwind inspection is likewise an internal validation policy. Neither the observed
 runtime-function count nor version-1/version-2 mix is stable. Future semantic epilog, handler,
 or chain fixtures require an explicit unwind-contract decision before they can become target

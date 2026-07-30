@@ -351,8 +351,8 @@ source-level Fairy crossings, and a hosted Windows receipt remain absent. PE/COF
 supported distribution artifacts, and conformance remain later gates. A bounded parser now checks
 the host-smoke product, both declared-target profile products, both safe File and safe owned-text
 profile products, two direct run-target temporary products, two exec-target temporary output
-products, and twenty native probe executables for raw Windows File, raw Buffer, raw owned text,
-raw Arena, layout, ABI, REL32 linking, generated-Fairy struct results, and
+products, and twenty-four native probe executables for raw Windows File, raw Buffer, raw owned text,
+raw Arena, layout, ABI, REL32 linking, archive/COMDAT selection, generated-Fairy struct results, and
 unwind behavior for AMD64
 PE32+ console identity, aligned
 headers/sections, and an executable entry point, but does not inspect CodeView/PDB data.
@@ -361,10 +361,16 @@ before cleanup, including `.text$...`, `.bss`, primary symbols, relocation targe
 and exact COMDAT section-definition selection. ADR 0231 adds two versioned raw-object vectors for
 REL32, ANY, and associative COMDAT behavior. ADR 0232 separately proves one direct cross-object
 `CALL rel32` formula by reading the object addend and comparing the exact final-image displacement at
-both profiles. Whole compiler-produced object identity, other relocation formulas, archive and
-final-link COMDAT selection, unwind relocation records, and a fresh hosted object receipt remain
+both profiles.
+ADR 0233 additionally parses a real two-member Microsoft archive, proves the preferred index maps
+the demanded and unused functions to their exact members, requires the demanded function to be
+owned by the selected archive member in the final map, and requires the unused function to be a
+non-COMDAT sentinel absent from that map. It also reads both candidate object initializers and binds
+one pick-any COMDAT map owner to its final PE address and value across direct-first and
+archive-first links at both profiles. Whole compiler-produced object identity, other relocation
+formulas, broader archive retention and COMDAT selection policies, unwind relocation records, and a fresh hosted object receipt remain
 absent, so the target evidence marker stays fail-closed.
-The forty-nine local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
+The fifty-three local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
 runtime-function ordering and code coverage plus referenced version 1 and version 2 unwind-record
 bounds, including handler/chained minimum tails. A separate three-object probe now raises a private
 noncontinuable exception at both profiles, validates its payload in an outer SEH filter, walks the
@@ -417,7 +423,7 @@ indexing, and safely converts each `u8` to `i32` through a separately built comp
 host smoke also proves maximum-`usize` addition traps under both MSVC profiles. The configured Windows
 smoke therefore covers two retained target builds, four measured experimental plus three stable
 quickstart and two safe `std::io` package-workspace builds, nine package-workspace runs, two safe File builds, two safe owned-text
-builds, two direct target executions, two exec-target executions, and forty-nine total target or
+builds, two direct target executions, two exec-target executions, and fifty-three total target or
 probe PE images. Stable build proof covers development output, failed-build preservation, release
 replacement, a safe `std::io` product with exact separated stdout/stderr and status, and locked replacements from a
 separately built temporary `fairyc.exe`. Direct execution of that product additionally proves EOF,
@@ -819,7 +825,7 @@ non-authority to separate executable oracles and records what each still does no
 ## Later capability gates
 
 - `x86_64-linux-musl`: requires a separate libc, sysroot, startup, loader, and static-distribution profile.
-- `x86_64-windows-msvc`: the TargetSpec, scalar/LLP64 C-emission product builds at both profiles, closed FY-to-project-C SystemHeap, Buffer, Arena/Region lifecycle, and UTF-8 calls, an eight-case local layout probe, 15-case host-independent Microsoft x64 classifier, 12-case same-MSVC native crossing, one generated-Fairy small/large struct-result crossing under C11 and C17 consumer modes, bounded PE32+ executable inspection, structural live-COFF object inspection, versioned exact synthetic COFF symbol/COMDAT/relocation fixtures, one inspected cross-object `CALL rel32` formula, static version-1/version-2 unwind-structure inspection, and a three-case native exception/virtual-walk probe exist, but complete hosted LLP64 and same-commit COFF evidence, broader and bidirectional source-level Fairy crossings, independent or register-inspected calls, other relocation formulas and final-link COMDAT-selection evidence, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, complete UCRT/VCRuntime and deployment evidence, distribution, and debug fixtures remain required.
+- `x86_64-windows-msvc`: the TargetSpec, scalar/LLP64 C-emission product builds at both profiles, closed FY-to-project-C SystemHeap, Buffer, Arena/Region lifecycle, and UTF-8 calls, an eight-case local layout probe, 15-case host-independent Microsoft x64 classifier, 12-case same-MSVC native crossing, one generated-Fairy small/large struct-result crossing under C11 and C17 consumer modes, bounded PE32+ executable inspection, structural live-COFF object/archive inspection, versioned exact synthetic COFF symbol/COMDAT/relocation fixtures, one inspected cross-object `CALL rel32` formula, one exact archive extraction and pick-any COMDAT final-selection proof, static version-1/version-2 unwind-structure inspection, and a three-case native exception/virtual-walk probe exist, but complete hosted LLP64 and same-commit COFF evidence, broader and bidirectional source-level Fairy crossings, independent or register-inspected calls, other relocation formulas and broader archive/COMDAT policies, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, complete UCRT/VCRuntime and deployment evidence, distribution, and debug fixtures remain required.
 - QBE or another fast backend: requires stable internal semantics, interpreter and C oracles, ABI coverage, and measured edit-build benefit.
 - LLVM backend: requires representative workloads that justify optimization and distribution cost after simpler paths are exhausted.
 - Generics and `Vec<T>`: require non-generic stability plus compile-time, code-size, active-payload, and diagnostics fixtures.

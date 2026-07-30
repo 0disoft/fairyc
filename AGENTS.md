@@ -67,6 +67,7 @@ regenerate, or override compiler source.
 - Windows AMD64 PE, COFF object, and x64 unwind structure inspector: internal/pecoff/
 - Versioned exact AMD64 COFF object fixtures and runner: spec/fixtures/coff-object/manifest-v0.json, internal/pecofffixture/, docs/adr/0231-versioned-amd64-coff-object-fixtures.md
 - Exact AMD64 REL32 object-to-image formula proof: internal/pecoff/relocation_link.go, internal/windowsrelocationprobe/, internal/cdriver/, cmd/fairyc-windows-host-smoke/, docs/adr/0232-amd64-rel32-object-to-image-proof.md
+- Exact MSVC archive extraction and pick-any COMDAT final-selection proof: internal/pecoff/archive.go, internal/pecoff/archive_link.go, internal/windowsarchiveprobe/, internal/cdriver/, cmd/fairyc-windows-host-smoke/, docs/adr/0233-msvc-archive-and-comdat-selection-proof.md
 - Resolved package graph fixtures: spec/fixtures/package/manifest-v1.json with historical manifest-v0.json coverage
 - Resolved package graph validation and lookup: internal/packagegraph/
 - Resolved package graph fixture runner: internal/packagefixture/

@@ -65,8 +65,9 @@ configured local Windows smoke applies the strengthened inspector to every compi
 under both profiles.
 
 This is host-side structural evidence, not an object writer, linker implementation, stable public
-Fairy ABI, or serialized product format. Whole-object MSVC identity, relocation formulas and linked
-displacements, archive extraction, final-link COMDAT winner selection, weak externals, bigobj,
+Fairy ABI, or serialized product format. ADR 0232 separately proves one linked REL32 calculation,
+and ADR 0233 proves one ordinary archive extraction plus pick-any COMDAT final owner. Whole-object
+MSVC identity, other relocation formulas, broader archive/COMDAT policies, weak externals, bigobj,
 relocation overflow, imports/exports, CodeView/PDB, unwind relocation semantics, independent
 producer crossings, and hosted same-commit evidence remain separate gates.
 

@@ -41,6 +41,16 @@ type WindowsHostArtifact struct {
 	ConsumerMode ConsumerMode
 }
 
+// WindowsMSVCArchiveArtifact preserves one exact input-order link result together with the
+// inspected archive and linker map that explain archive extraction and COMDAT selection.
+type WindowsMSVCArchiveArtifact struct {
+	WindowsHostArtifact
+	Variant     string
+	ArchiveName string
+	Archive     []byte
+	LinkMap     []byte
+}
+
 // WindowsHostOutcome is one bounded local MSVC execution result. ExitCode preserves the program's i32 bits.
 // Stdout and Stderr preserve stream identity but do not claim ordering across the two OS pipes.
 type WindowsHostOutcome struct {
@@ -203,6 +213,131 @@ func BuildWindowsMSVCRelocationProbe(toolchain WindowsHostToolchain, profile Pro
 	})
 }
 
+// BuildWindowsMSVCArchiveProbe compiles four C11 translation units separately, archives the
+// demanded and unused members with LIB, and links direct-first and archive-first input orders with
+// exact MSVC map files. IMAGE_COMDAT_SELECT_ANY does not promise which candidate wins.
+func BuildWindowsMSVCArchiveProbe(toolchain WindowsHostToolchain, profile Profile, callerSource, chosenSource, unusedSource, directSource string) ([]WindowsMSVCArchiveArtifact, error) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		return nil, fmt.Errorf("MSVC archive probe requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
+	if callerSource == "" || chosenSource == "" || unusedSource == "" || directSource == "" {
+		return nil, fmt.Errorf("MSVC archive probe sources must be non-empty")
+	}
+	if profile != LowProfile && profile != OptimizedProfile {
+		return nil, fmt.Errorf("unsupported C profile %q", profile.Name)
+	}
+	if toolchain.Name != "msvc" || toolchain.Path == "" || toolchain.Version == "" || len(toolchain.Environment) == 0 {
+		return nil, fmt.Errorf("invalid resolved MSVC host toolchain")
+	}
+
+	temporaryRoot, err := os.MkdirTemp("", "fairyc-msvc-archive-")
+	if err != nil {
+		return nil, fmt.Errorf("create MSVC archive temp root: %w", err)
+	}
+	defer os.RemoveAll(temporaryRoot)
+	sources := []windowsMSVCSource{
+		{Name: "caller.c", Contents: callerSource},
+		{Name: "chosen.c", Contents: chosenSource},
+		{Name: "unused.c", Contents: unusedSource},
+		{Name: "direct.c", Contents: directSource},
+	}
+	optimization := "/Od"
+	if profile == OptimizedProfile {
+		optimization = "/O2"
+	}
+	objects := make([]WindowsHostObject, 0, len(sources))
+	objectPaths := make(map[string]string, len(sources))
+	for _, source := range sources {
+		sourcePath := filepath.Join(temporaryRoot, source.Name)
+		if err := os.WriteFile(sourcePath, []byte(source.Contents), 0o600); err != nil {
+			return nil, fmt.Errorf("write MSVC archive source %s: %w", source.Name, err)
+		}
+		objectName := strings.TrimSuffix(source.Name, filepath.Ext(source.Name)) + ".obj"
+		objectPath := filepath.Join(temporaryRoot, objectName)
+		functionPackaging := "/Gy"
+		if source.Name == "unused.c" {
+			// Keep the unused member's sentinel in an ordinary, indivisible code section. Its
+			// absence from the final map then cannot be explained by /OPT:REF collecting a
+			// per-function COMDAT after the archive member had contributed to the image.
+			functionPackaging = "/Gy-"
+		}
+		arguments := []string{
+			"/nologo", "/std:c11", "/TC", "/W4", "/WX", "/MT", optimization, functionPackaging, "/c",
+			sourcePath, "/Fo:" + objectPath,
+		}
+		if _, err := runWindowsHostCommand(toolchain.Path, toolchain.Environment, temporaryRoot, arguments...); err != nil {
+			return nil, fmt.Errorf("compile MSVC archive source %s: %s", source.Name, strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
+		}
+		objectBytes, err := readArtifact(objectPath)
+		if err != nil {
+			return nil, fmt.Errorf("read MSVC archive object %s: %s", objectName, strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
+		}
+		if _, err := pecoff.InspectObject(objectBytes); err != nil {
+			return nil, fmt.Errorf("inspect MSVC archive object %s: %w", objectName, err)
+		}
+		objects = append(objects, WindowsHostObject{Name: objectName, Bytes: objectBytes})
+		objectPaths[objectName] = objectPath
+	}
+
+	librarianPath := filepath.Join(filepath.Dir(toolchain.Path), "lib.exe")
+	if info, err := os.Stat(librarianPath); err != nil || !info.Mode().IsRegular() {
+		return nil, fmt.Errorf("MSVC archive probe requires x64 lib.exe beside cl.exe")
+	}
+	archiveName := "choice.lib"
+	archivePath := filepath.Join(temporaryRoot, archiveName)
+	if _, err := runWindowsHostCommand(librarianPath, toolchain.Environment, temporaryRoot,
+		"/NOLOGO", "/OUT:"+archivePath, "chosen.obj", "unused.obj"); err != nil {
+		return nil, fmt.Errorf("create MSVC archive: %s", strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
+	}
+	archiveBytes, err := readArtifact(archivePath)
+	if err != nil {
+		return nil, fmt.Errorf("read MSVC archive: %s", strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
+	}
+	if _, err := pecoff.InspectArchive(archiveBytes); err != nil {
+		return nil, fmt.Errorf("inspect MSVC archive: %w", err)
+	}
+
+	variants := []struct {
+		name   string
+		inputs []string
+	}{
+		{name: "direct-first", inputs: []string{objectPaths["caller.obj"], objectPaths["direct.obj"], archivePath}},
+		{name: "archive-first", inputs: []string{objectPaths["caller.obj"], archivePath, objectPaths["direct.obj"]}},
+	}
+	artifacts := make([]WindowsMSVCArchiveArtifact, 0, len(variants))
+	for _, variant := range variants {
+		executablePath := filepath.Join(temporaryRoot, variant.name+".exe")
+		mapPath := filepath.Join(temporaryRoot, variant.name+".map")
+		arguments := []string{"/nologo", "/Fe:" + executablePath}
+		arguments = append(arguments, variant.inputs...)
+		arguments = append(arguments, "/link", "/INCREMENTAL:NO", "/OPT:REF", "/OPT:NOICF", "/MAP:"+mapPath)
+		_, err := runWindowsHostCommand(toolchain.Path, toolchain.Environment, temporaryRoot, arguments...)
+		if err != nil {
+			return nil, fmt.Errorf("link MSVC archive variant %s: %s", variant.name, strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
+		}
+		executableBytes, err := readArtifact(executablePath)
+		if err != nil {
+			return nil, fmt.Errorf("read MSVC archive executable %s: %s", variant.name, strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
+		}
+		if _, err := pecoff.InspectExecutable(executableBytes); err != nil {
+			return nil, fmt.Errorf("inspect MSVC archive executable %s: %w", variant.name, err)
+		}
+		mapBytes, err := readArtifact(mapPath)
+		if err != nil {
+			return nil, fmt.Errorf("read MSVC archive map %s: %s", variant.name, strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
+		}
+		artifacts = append(artifacts, WindowsMSVCArchiveArtifact{
+			WindowsHostArtifact: WindowsHostArtifact{
+				Bytes: executableBytes, Objects: slices.Clone(objects), Toolchain: toolchain,
+				Profile: profile, ConsumerMode: C11ConsumerMode,
+			},
+			Variant: variant.name, ArchiveName: archiveName, Archive: slices.Clone(archiveBytes),
+			LinkMap: mapBytes,
+		})
+	}
+	return artifacts, nil
+}
+
 // BuildWindowsMSVCUnwindProbe compiles the catcher, termination frame, and
 // raiser as separate translation units before linking them with local x64 MSVC.
 func BuildWindowsMSVCUnwindProbe(toolchain WindowsHostToolchain, profile Profile, catcherSource, frameSource, raiserSource string) (WindowsHostArtifact, error) {
@@ -355,6 +490,14 @@ func ExecuteWindowsMSVCRelocationProbe(artifact WindowsHostArtifact) (WindowsHos
 		return WindowsHostOutcome{}, fmt.Errorf("MSVC relocation probe execution requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
 	}
 	return executeWindowsMSVCArtifact(artifact, "MSVC relocation probe")
+}
+
+// ExecuteWindowsMSVCArchiveProbe runs one archive input-order variant.
+func ExecuteWindowsMSVCArchiveProbe(artifact WindowsMSVCArchiveArtifact) (WindowsHostOutcome, error) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		return WindowsHostOutcome{}, fmt.Errorf("MSVC archive probe execution requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
+	return executeWindowsMSVCArtifact(artifact.WindowsHostArtifact, "MSVC archive probe "+artifact.Variant)
 }
 
 // ExecuteWindowsMSVCUnwindProbe runs one linked structured-exception fixture.
