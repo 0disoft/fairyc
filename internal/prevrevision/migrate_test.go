@@ -52,6 +52,15 @@ func TestMigrateRejectsRevisionThreeDefer(t *testing.T) {
 	}
 }
 
+func TestMigratePreservesGenericMustUseAttributeForManualPinUpdate(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\n@must_use\nfn i32 status() { return 42; }\nfn i32 main() { return status(); }\n")
+	result, err := Migrate("main.fy", input)
+	if err != nil || result.Changed || !bytes.Equal(result.Source, input) {
+		t.Fatalf("Migrate() = %+v, %v", result, err)
+	}
+}
+
 func TestSpanMapperKeepsHalfOpenBoundariesAroundInsertions(t *testing.T) {
 	t.Parallel()
 	edits := []edit{

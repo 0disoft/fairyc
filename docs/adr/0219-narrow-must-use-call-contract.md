@@ -80,6 +80,21 @@ version, SDK source bytes, and SDK version remain unchanged.
 - MIR, interpreter, and C-emission identity evidence proving handled calls add no executable feature.
 - `/3` compatibility and migration checks proving byte preservation and manual pin separation.
 
+## Implementation evidence
+
+- The semantic unit suite covers eligible internal, method, imported, and foreign declarations;
+  handled calls; transparent ignored-call shapes; and invalid declarations.
+- The 46-case semantic fixture corpus includes `must-use-handled`, `must-use-ignored`, and
+  `must-use-invalid`, with stable `E4201`/`E4202` primary and related spans.
+- Public-interface manifest v3 has ten vectors. Its private-declaration vector preserves the
+  baseline hash while its public `@must_use` vector changes the `fyif3-sha256-` identity.
+- Package-cache manifest v3 consumes `fyif3` inputs while retaining the existing `fycache2`
+  encoding, proving the dependency edge without an unrelated cache-format bump.
+- Interpreter and C-backend coverage execute the handled-call program with the same result and
+  verify that generated C carries no `must_use` runtime marker.
+- Previous-revision migration coverage preserves generic attribute bytes and requires the caller to
+  update the exact language pin from `/3` to `/4`; embedded current source uses `/4` directly.
+
 ## Consequences
 
 Libraries can mark a small set of easy-to-ignore inert results without making ordinary C-shaped

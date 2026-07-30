@@ -3075,6 +3075,86 @@ func TestAnalyzeRejectsNonScalarForHeaderBehavior(t *testing.T) {
 	}
 }
 
+func TestAnalyzePreservesAndHandlesMustUseCalls(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\n@must_use\nfn i32 status() { return 7; }\nfn i32 accept(i32 value) { return value; }\nfn i32 main() { discard status(); let stored = status(); return accept(stored) + status(); }\n",
+	})
+	assertCleanTypeResult(t, result)
+	if len(result.HIR.Modules) != 1 || len(result.HIR.Modules[0].Functions) != 3 {
+		t.Fatalf("HIR = %+v", result.HIR)
+	}
+	if status := result.HIR.Modules[0].Functions[0]; status.Name != "status" || !status.MustUse {
+		t.Fatalf("status = %+v", status)
+	}
+}
+
+func TestAnalyzeRejectsIgnoredMustUseCallShapes(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\n@must_use\nfn i32 status() { return 7; }\nfn i32 main() { status(); (status()); unsafe { status() }; if (true) { status() } else { status() }; return 0; }\n",
+	})
+	if result.FailedPhase != semantic.PhaseFlow || len(result.Unsupported) != 0 || len(result.Diagnostics) != 5 {
+		t.Fatalf("result = %+v", result)
+	}
+	for _, value := range result.Diagnostics {
+		if value.Code != "E4202" || len(value.Related) != 1 || value.Related[0].Role != "must-use-declaration" {
+			t.Fatalf("diagnostic = %+v", value)
+		}
+	}
+}
+
+func TestAnalyzePreservesMustUseOnMethodsAndForeignFunctions(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": "module main;\nstruct Meter { i32 value; }\n@must_use\nfn i32 Meter::read(ref Meter this) { return this.value; }\n@must_use\n@link_name(\"fairyc_raw_status\")\nunsafe extern C fn i32 raw_status();\nfn i32 main() { let Meter meter = Meter { .value = 40 }; return meter.read() + unsafe { raw_status() }; }\n",
+	})
+	assertCleanTypeResult(t, result)
+	module := result.HIR.Modules[0]
+	if len(module.ForeignFunctions) != 1 || !module.ForeignFunctions[0].MustUse {
+		t.Fatalf("foreign functions = %+v", module.ForeignFunctions)
+	}
+	if len(module.Functions) != 2 || !module.Functions[0].MustUse || module.Functions[0].OwnerType == "" {
+		t.Fatalf("functions = %+v", module.Functions)
+	}
+}
+
+func TestAnalyzeEnforcesMustUseAcrossImportedModule(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"api.fy":  "module api;\n@must_use\npub fn i32 status() { return 7; }\n",
+		"main.fy": "module main;\nimport api as api;\nfn i32 main() { api::status(); return 0; }\n",
+	})
+	if result.FailedPhase != semantic.PhaseFlow || len(result.Unsupported) != 0 || len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E4202" {
+		t.Fatalf("result = %+v", result)
+	}
+	if len(result.Diagnostics[0].Related) != 1 || result.Diagnostics[0].Related[0].Span.Source != "api.fy" {
+		t.Fatalf("diagnostic = %+v", result.Diagnostics[0])
+	}
+}
+
+func TestAnalyzeRejectsInvalidMustUseDeclarations(t *testing.T) {
+	t.Parallel()
+	tests := map[string]string{
+		"arguments": "module main;\n@must_use(1)\nfn i32 status() { return 1; }\n",
+		"duplicate": "module main;\n@must_use\n@must_use\nfn i32 status() { return 1; }\n",
+		"void":      "module main;\n@must_use\nfn void notify() {}\n",
+		"result":    "module main;\n@must_use\nfn Result<i32, i32> status() { return .ok(1); }\n",
+		"borrow":    "module main;\n@must_use\nfn ref i32 choose(ref i32 value) { return value; }\n",
+		"struct":    "module main;\n@must_use\nstruct Status { i32 value; }\n",
+	}
+	for name, text := range tests {
+		name, text := name, text
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			result := analyzeText(t, map[string]string{"main.fy": text})
+			if len(result.Diagnostics) == 0 || result.Diagnostics[0].Code != "E4201" {
+				t.Fatalf("result = %+v", result)
+			}
+		})
+	}
+}
+
 func analyzeText(t *testing.T, files map[string]string) semantic.Result {
 	t.Helper()
 	inputs := make([]semantic.File, 0, len(files))

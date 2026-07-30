@@ -270,6 +270,23 @@ discard logger.flush();
 
 Discarding a built-in tagged value runs drop for its active resource payload.
 
+An ordinary internal, associated, method, or raw foreign function may carry one zero-argument
+`@must_use` attribute when its result is an eligible non-`void` inert value:
+
+```fy
+@must_use
+fn usize bytes_written(Writer writer);
+```
+
+The attribute is a call-site contract, not a second ownership system. A resolved annotated call
+must feed a binding, assignment, return, tail return, argument, receiver, operator, condition, cast,
+index, slice, aggregate, or switch, or it must be acknowledged with `discard`. A transparent group,
+`unsafe` block, ordinary block, `if`, or `switch` cannot hide an ignored tail call. Storing the value
+ends this obligation; general unused-local analysis is separate. `Result`, resources, safe borrows,
+`Region`, and `void` use their existing rules and cannot be annotated. Malformed, duplicate,
+misplaced, or ineligible declarations are `E4201`; ignored calls are `E4202`. Type-wide annotations,
+custom messages, and function-value transport remain absent.
+
 ## Region syntax
 
 A lexical region is opened through a compiler-recognized statement:
@@ -348,4 +365,4 @@ A recovered syntax tree is retained for diagnostics only. It cannot silently leg
 
 ## Explicit exclusions
 
-Function overloading, default and named arguments, operator overloading, user implicit conversions, C declarators and casts, preprocessing, textual includes, mutable globals, macros, user generics, dynamic dispatch, closures, async, rich patterns, resource-bearing user enums, source-level uninitialized storage, character literals, raw strings, interpolation, octal literals, numeric suffixes, and hexadecimal floats remain outside Stage 0.
+Function overloading, default and named arguments, operator overloading, user implicit conversions, C declarators and casts, preprocessing, textual includes, mutable globals, macros, user generics, dynamic dispatch, closures, async, rich patterns, type-wide must-use contracts, resource-bearing user enums, source-level uninitialized storage, character literals, raw strings, interpolation, octal literals, numeric suffixes, and hexadecimal floats remain outside Stage 0.

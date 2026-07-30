@@ -60,6 +60,14 @@ remains valid `/3`; the previous-revision parser rejects `defer`, while source m
 byte-identical and manifests require a manual exact-pin update. Runtime ABI, target schemas, C11
 transport, MIR version, diagnostic catalog, SDK version, and SDK source bytes remain unchanged.
 
+ADR 0219 cuts the current exact pin from `fairyc-language/3` to `fairyc-language/4` because the
+previously unsupported `@must_use` callable attribute gains semantic rejection behavior. Valid `/3`
+source remains valid `/4`; the previous parser already preserves generic attribute syntax, while
+the `/3` semantic contract rejects this attribute as unsupported. Migration therefore preserves
+source bytes and exact manifests require a manual pin update. Public callable must-use state changes
+the current public-interface algorithm from v2 to v3. Runtime ABI, target schemas, C11 transport,
+MIR version, SDK version, and SDK source bytes remain unchanged.
+
 For one function contract, removing a declared effect preserves every existing caller accepted by
 the effect checker. Adding an effect or replacing it with another can invalidate callers and is a
 source-compatibility change. Reordering or deduplicating the same set is not a semantic change
@@ -80,6 +88,12 @@ component-algorithm mismatch is a miss. The first bounded store is process-local
 typed-HIR, MIR, and object payloads remain exact-compiler disposable state rather than serialized
 compatibility formats. The bounded persistent storage format and one exact-version experimental
 command now exist; ordinary-command policy and default limits remain undecided.
+
+The current whole-package key encoding remains `fairyc.package-cache-key/v2` with
+`fycache2-sha256-...` text. `fairyc.package-cache-fixtures/v3` supplies current vectors because its
+dependency entries use `fyif3-sha256` public-interface hashes and `fairyc-language/4`; fixture
+manifests v1 and v2 remain historical. A component algorithm change is an intentional cache miss,
+not permission to reinterpret an older key.
 
 ## Target and ABI
 
@@ -411,7 +425,7 @@ exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, o
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
 instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
 `fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.6`, language
-`fairyc-language/3`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
+`fairyc-language/4`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 
 ADR 0148 consumes those independently versioned manifest, lock, package-instance, language, SDK,
@@ -543,12 +557,14 @@ silently inheriting it from its own schema. Changing the digest, canonical bytes
 validation rules requires a new package-identity version. Caches using another version are safe
 misses; contradictory lockfile or map records are corruption.
 
-`fairyc.module-interface-fixtures/v2` independently fixes the public-interface descriptor and
-`fyif2-sha256-...` hash. It excludes ordinary bodies and private implementation while including
-public type shape, callable signatures and effects, foreign link contracts, module paths, and
-dependency nominal identities. A cache records this algorithm explicitly and combines it with its
-own schema and compatibility vector. Changing interface inputs, canonical encoding, stable type
-spelling, digest, or prefix requires a new interface-hash version.
+`fairyc.module-interface-fixtures/v3` independently fixes the current public-interface descriptor
+and `fyif3-sha256-...` hash. It preserves v2 coordinate-based nominal identity and adds public
+internal and foreign callable must-use state. It excludes ordinary bodies, private implementation,
+and private must-use state while including public type shape, callable signatures, effects and
+must-use bits, foreign link contracts, module paths, and dependency nominal identities. V1 and v2
+fixtures remain frozen historical vectors. A cache records the current algorithm explicitly and
+combines it with its own schema and compatibility vector. Changing interface inputs, canonical
+encoding, stable type spelling, digest, or prefix requires a new interface-hash version.
 
 `fairyc.package-source-fixtures/v1` independently fixes the exact package-source graph digest as
 SHA-256 over sorted canonical relative paths and exact source bytes. Its text form is
@@ -563,7 +579,7 @@ zero-based line start, including EOF after a final LF. CR is not normalized. A m
 stored spans for that file; no consumer may guess a remapped position.
 
 ADR 0185 adds the internal `fairyc.fymap-logical/v1` planning model. It requires the exact compiler
-executable identity, exact current package set, one `fyif2-sha256` public-interface hash per package,
+executable identity, exact current package set, one `fyif3-sha256` public-interface hash per package,
 all independent identity-algorithm identifiers, and explicit relation omissions. The model is
 target-independent and immutable. It is not the `.fymap` transport schema and therefore makes no
 promise by itself about encoded bytes, file naming, publication, or reader compatibility.

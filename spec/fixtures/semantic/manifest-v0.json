@@ -25,9 +25,61 @@
     "docs/adr/0213-classic-scalar-for-loop.md",
     "docs/adr/0216-checked-compound-assignment.md",
     "docs/adr/0217-bounded-lexical-defer.md",
+    "docs/adr/0219-narrow-must-use-call-contract.md",
     "docs/diagnostics/catalog-v0.md"
   ],
   "cases": [
+    {
+      "id": "pass.flow.must-use-handled",
+      "sourceRoot": "cases/pass/must-use-handled/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow"
+      }
+    },
+    {
+      "id": "fail.flow.must-use-ignored",
+      "sourceRoot": "cases/fail/must-use-ignored/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "flow",
+        "diagnostics": [
+          {
+            "code": "E4202",
+            "primary": { "source": "main.fy", "startByte": 75, "endByte": 83 },
+            "related": [
+              {
+                "role": "must-use-declaration",
+                "span": { "source": "main.fy", "startByte": 14, "endByte": 23 }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.must-use-invalid",
+      "sourceRoot": "cases/fail/must-use-invalid/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          {
+            "code": "E4201",
+            "primary": { "source": "main.fy", "startByte": 14, "endByte": 23 },
+            "related": [
+              {
+                "role": "result-type",
+                "span": { "source": "main.fy", "startByte": 27, "endByte": 31 }
+              }
+            ]
+          }
+        ]
+      }
+    },
     {
       "id": "pass.resolve.qualified-import",
       "sourceRoot": "cases/pass/qualified-import/src",

@@ -16,6 +16,7 @@ Diagnostic codes are stable identifiers for a semantic category. Exact wording a
 | `E21xx` | Borrowing and return origins |
 | `E31xx` | Regions and arenas |
 | `E41xx` | `Option`, `Result`, and propagation |
+| `E42xx` | Return-value use obligations |
 | `E51xx` | Unsafe and foreign boundaries |
 | `E61xx` | Target layout and ABI |
 | `E71xx` | Effects and external capabilities |
@@ -71,6 +72,8 @@ Diagnostic codes are stable identifiers for a semantic category. Exact wording a
 | `E4101` | `Result` value is not handled, returned, propagated, or explicitly discarded. |
 | `E4102` | `?` is applied to a non-`Result` value. |
 | `E4103` | `?` error type is incompatible with the enclosing return type. |
+| `E4201` | `@must_use` is malformed, duplicated, misplaced, or applied to an ineligible result. |
+| `E4202` | A resolved `@must_use` call result is ignored without explicit `discard`. |
 | `E5101` | Raw-pointer or unchecked operation appears outside an unsafe boundary. |
 | `E5102` | Raw foreign signature contains a safe reference. |
 | `E5103` | Foreign unwind, exception, or `longjmp` may cross a Fairy C frame. |
@@ -109,4 +112,4 @@ The MIR verifier codes are defined in `docs/mir/mir-v0.md`.
 
 ## Compatibility
 
-Codes become release-stable only with an implemented diagnostic and compile-fail fixture. Until then, this catalog reserves meanings for the prototype and may be revised through an ADR plus synchronized fixture plan. The semantic v0 resolver, type, local-borrow, whole-resource, Region v1, and Result v0 diagnostics are implemented as prototype acceptance behavior.
+Codes become release-stable only with an implemented diagnostic and compile-fail fixture. Until then, this catalog reserves meanings for the prototype and may be revised through an ADR plus synchronized fixture plan. The semantic v0 resolver, type, local-borrow, whole-resource, Region v1, Result v0, and narrow return-value-use diagnostics are implemented as prototype acceptance behavior.

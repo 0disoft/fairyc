@@ -71,12 +71,12 @@ regenerate, or override compiler source.
 - PackageInstanceId v1 fixtures: spec/fixtures/package-identity/manifest-v1.json
 - PackageInstanceId v1 encoding and fixture runner: internal/packagegraph/identity.go, internal/packageidentityfixture/
 - PackageCoordinateId v1 encoding and workspace mapping: internal/packagegraph/coordinate.go, internal/workspaceloader/semantic.go, docs/package/package-coordinate-id-v1.md
-- Public-interface hash v2 fixtures: spec/fixtures/module-interface/manifest-v2.json with historical manifest-v1.json coverage
+- Public-interface hash v3 fixtures: spec/fixtures/module-interface/manifest-v3.json with historical manifest-v1.json and manifest-v2.json coverage
 - Public-interface extraction, hashing, and fixture runner: internal/moduleinterface/, internal/moduleinterfacefixture/
 - Package-source digest v1 fixtures: spec/fixtures/package-source/manifest-v1.json
 - Package-source digest and fixture runner: internal/packagecontent/, internal/packagecontentfixture/
 - Source-file content and line-map identities: internal/packagecontent/file_identity.go, docs/package/source-file-identities-v1.md, docs/adr/0184-source-file-integrity-identities-v1.md
-- Whole-package cache-key v2 fixtures: spec/fixtures/package-cache/manifest-v2.json with historical manifest-v1.json coverage
+- Whole-package cache-key v2 fixtures: spec/fixtures/package-cache/manifest-v3.json with historical manifest-v1.json and manifest-v2.json coverage
 - Whole-package cache key, bounded memory store, and fixture runner: internal/packagecache/, internal/packagecachefixture/
 - Exact running-compiler executable identity: internal/buildidentity/, docs/adr/0165-executable-digest-compiler-build-identity.md
 - Experimental persistent workspace-cache CLI and schema: internal/cli/workspace_cache.go, spec/cli/experimental-workspace-cache-check-v0.schema.json, docs/adr/0166-experimental-persistent-workspace-cache-command.md

@@ -246,6 +246,10 @@ func (a *analyzer) prepareStructTypes() {
 			}
 			info := a.structTypes[value.typ]
 			for _, attribute := range structure.Attributes {
+				if attribute.Name == mustUseAttribute {
+					a.addDiagnostic("E4201", span(module.file.Path, attribute.Span), RelatedSpan{Role: "declaration", Span: span(module.file.Path, structure.NameSpan)})
+					continue
+				}
 				if attribute.Name == "repr" && len(attribute.Arguments) == 1 && attribute.Arguments[0].Raw == "C" && !info.reprC {
 					info.reprC = true
 					continue

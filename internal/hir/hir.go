@@ -454,6 +454,7 @@ type ForeignFunction struct {
 	ABI               string
 	Span              Span
 	DocumentationSpan Span
+	MustUse           bool
 	Effects           []Effect
 	Parameters        []ForeignParameter
 	ResultType        Type
@@ -506,6 +507,7 @@ type Function struct {
 	Unsafe            bool
 	Span              Span
 	DocumentationSpan Span
+	MustUse           bool
 	Effects           []Effect
 	Parameters        []Parameter
 	Locals            []Local

@@ -149,7 +149,7 @@ func testRecord(t *testing.T, key Key, data string) Record {
 	t.Helper()
 	return Record{
 		Key:             key,
-		PublicInterface: mustInterface(t, "fyif2-sha256-a5e79db9b105ffac6d57d0ff054b75813344fdf4e9f9a5c1873da8907ae281b9"),
+		PublicInterface: mustInterface(t, "fyif3-sha256-a5e79db9b105ffac6d57d0ff054b75813344fdf4e9f9a5c1873da8907ae281b9"),
 		Artifacts:       []Artifact{{Kind: ArtifactMIR, Data: []byte(data)}},
 	}
 }

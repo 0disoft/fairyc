@@ -23,6 +23,8 @@ type symbol struct {
 	typ          hir.Type
 	effects      []hir.Effect
 	effectsValid bool
+	mustUse      bool
+	mustUseSpan  diagnostic.Span
 	mutable      bool
 	public       bool
 	function     *ast.Function

@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fairyc:package-cache-fixtures:v3",
+  "title": "Fairy C whole-package cache-key fixture manifest v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "contracts", "base", "cases"],
+  "properties": {
+    "$schema": { "type": "string", "minLength": 1 },
+    "schemaVersion": { "const": "fairyc.package-cache-fixtures/v3" },
+    "contracts": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "base": { "$ref": "#/$defs/input" },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "override", "relation"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$" },
+          "override": { "$ref": "#/$defs/override" },
+          "compareTo": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$" },
+          "relation": { "enum": ["baseline", "same", "different"] },
+          "expectKey": { "type": "string", "pattern": "^fycache2-sha256-[0-9a-f]{64}$" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "stringList": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["coordinate", "interface"],
+      "properties": {
+        "coordinate": { "type": "string", "pattern": "^fypc1-sha256-[0-9a-f]{64}$" },
+        "interface": { "type": "string", "pattern": "^fyif3-sha256-[0-9a-f]{64}$" }
+      }
+    },
+    "dependencies": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/dependency" }
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["compilerBuild", "languageRevision", "mirVersion", "targetSchema", "abiProfile", "toolchainFingerprint", "backend", "profileFlags", "runtimeAbi", "standardLibrary", "package", "source", "dependencies", "features"],
+      "properties": {
+        "compilerBuild": { "type": "string", "minLength": 1 },
+        "languageRevision": { "type": "string", "minLength": 1 },
+        "mirVersion": { "type": "string", "minLength": 1 },
+        "targetSchema": { "type": "string", "minLength": 1 },
+        "abiProfile": { "type": "string", "minLength": 1 },
+        "toolchainFingerprint": { "type": "string", "minLength": 1 },
+        "backend": { "type": "string", "minLength": 1 },
+        "profileFlags": { "$ref": "#/$defs/stringList" },
+        "runtimeAbi": { "type": "string", "minLength": 1 },
+        "standardLibrary": { "type": "string", "pattern": "^fypi1-sha256-[0-9a-f]{64}$" },
+        "package": { "type": "string", "pattern": "^fypi1-sha256-[0-9a-f]{64}$" },
+        "source": { "type": "string", "pattern": "^fysrc1-sha256-[0-9a-f]{64}$" },
+        "dependencies": { "$ref": "#/$defs/dependencies" },
+        "features": { "$ref": "#/$defs/stringList" }
+      }
+    },
+    "override": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "compilerBuild": { "type": "string", "minLength": 1 },
+        "languageRevision": { "type": "string", "minLength": 1 },
+        "mirVersion": { "type": "string", "minLength": 1 },
+        "targetSchema": { "type": "string", "minLength": 1 },
+        "abiProfile": { "type": "string", "minLength": 1 },
+        "toolchainFingerprint": { "type": "string", "minLength": 1 },
+        "backend": { "type": "string", "minLength": 1 },
+        "profileFlags": { "$ref": "#/$defs/stringList" },
+        "runtimeAbi": { "type": "string", "minLength": 1 },
+        "standardLibrary": { "type": "string", "pattern": "^fypi1-sha256-[0-9a-f]{64}$" },
+        "package": { "type": "string", "pattern": "^fypi1-sha256-[0-9a-f]{64}$" },
+        "source": { "type": "string", "pattern": "^fysrc1-sha256-[0-9a-f]{64}$" },
+        "dependencies": { "$ref": "#/$defs/dependencies" },
+        "features": { "$ref": "#/$defs/stringList" }
+      }
+    }
+  }
+}

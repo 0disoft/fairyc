@@ -175,6 +175,10 @@ func semanticDiagnosticSummary(code string) string {
 		return "postfix ? requires a Result value"
 	case "E4103":
 		return "propagated Result error type does not match the enclosing return type"
+	case "E4201":
+		return "@must_use must appear once without arguments on a callable with an eligible inert result"
+	case "E4202":
+		return "@must_use call result must be consumed or explicitly discarded"
 	case "E5106":
 		return "@link_name requires exactly one nonempty string and may appear only once"
 	default:

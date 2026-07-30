@@ -1,6 +1,6 @@
 # Public interface hash v2
 
-- Status: Executable prototype contract
+- Status: Historical executable contract; superseded by public-interface hash v3
 - Decision: `docs/adr/0173-public-interface-coordinate-hash-v2.md`
 - Fixture source: `spec/fixtures/module-interface/manifest-v2.json`
 - Implementation source: `internal/moduleinterface/`

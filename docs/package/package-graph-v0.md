@@ -101,7 +101,7 @@ Lockfile schema, workspace loading, source checksums, registry policy, offline a
 version solving, feature unification, package signing, serialized module interfaces, and persistent
 cache storage remain separate decisions. The local-exact human manifest is owned by ADR 0143 and
 package cycles are rejected by ADR 0142. Exact `PackageInstanceId` v1, source-independent
-`PackageCoordinateId` v1, and public-interface hash v2 are fixed independently and do not settle
+`PackageCoordinateId` v1, and public-interface hash v3 are fixed independently and do not settle
 the remaining formats.
 
 `manifest-lockfile-readiness.md` records the accepted local-exact profile. ADR 0143 authorizes the

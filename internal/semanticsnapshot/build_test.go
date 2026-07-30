@@ -352,7 +352,7 @@ func TestBuildCanonicalizesAndRequiresCompleteFileIdentityCoverage(t *testing.T)
 	}
 	input := semanticsnapshot.PackageInput{
 		BuildID: hir.DefaultPackage, UID: identity.PackageUID, Name: "files", Version: identity.VersionIdentity,
-		Language: "fairyc-language/3", Instance: instance, Coordinate: coordinate, Source: digest,
+		Language: "fairyc-language/4", Instance: instance, Coordinate: coordinate, Source: digest,
 		SourceKind: "local", Role: "root", Files: files,
 	}
 	left, err := semanticsnapshot.Build(result.Semantic, result.MIR, []semanticsnapshot.PackageInput{input})
@@ -496,7 +496,7 @@ func packageInput(t *testing.T, id hir.PackageID, uid, name, version, path, text
 	}
 	fileDigest, lineMap := packagecontent.ComputeFileIdentities([]byte(text))
 	return semanticsnapshot.PackageInput{
-		BuildID: id, UID: uid, Name: name, Version: version, Language: "fairyc-language/3",
+		BuildID: id, UID: uid, Name: name, Version: version, Language: "fairyc-language/4",
 		Instance: instance, Coordinate: coordinate, Source: digest, SourceKind: "local", Role: role,
 		Files: []semanticsnapshot.FileInput{{Path: path, Digest: fileDigest, LineMap: lineMap, Kind: semanticsnapshot.FileKindSource}},
 	}

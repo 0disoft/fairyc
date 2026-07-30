@@ -9,11 +9,11 @@ import (
 
 func TestRunModuleInterfaceManifest(t *testing.T) {
 	t.Parallel()
-	report, err := Run(filepath.Join("..", "..", "spec", "fixtures", "module-interface", "manifest-v2.json"))
+	report, err := Run(filepath.Join("..", "..", "spec", "fixtures", "module-interface", "manifest-v3.json"))
 	if err != nil {
 		t.Fatalf("Run() error = %v", err)
 	}
-	if report.CasesRun != 8 || len(report.Failures) != 0 {
+	if report.CasesRun != 10 || len(report.Failures) != 0 {
 		t.Fatalf("Run() report = %+v", report)
 	}
 }
@@ -25,8 +25,8 @@ func TestManifestDecodeRejectsUnknownAndTrailingData(t *testing.T) {
 		name string
 		body string
 	}{
-		{name: "unknown", body: `{"$schema":"schema","schemaVersion":"fairyc.module-interface-fixtures/v2","contracts":["contract"],"identity":{"packageUid":"p","sourceIdentity":"s","versionIdentity":"v","features":[]},"cases":[],"unknown":true}`},
-		{name: "trailing", body: `{"$schema":"schema","schemaVersion":"fairyc.module-interface-fixtures/v2","contracts":["contract"],"identity":{"packageUid":"p","sourceIdentity":"s","versionIdentity":"v","features":[]},"cases":[]} {}`},
+		{name: "unknown", body: `{"$schema":"schema","schemaVersion":"fairyc.module-interface-fixtures/v3","contracts":["contract"],"identity":{"packageUid":"p","sourceIdentity":"s","versionIdentity":"v","features":[]},"cases":[],"unknown":true}`},
+		{name: "trailing", body: `{"$schema":"schema","schemaVersion":"fairyc.module-interface-fixtures/v3","contracts":["contract"],"identity":{"packageUid":"p","sourceIdentity":"s","versionIdentity":"v","features":[]},"cases":[]} {}`},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

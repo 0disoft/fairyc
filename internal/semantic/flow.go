@@ -66,6 +66,7 @@ func (a *analyzer) flowFunction(module *moduleScope, function *ast.Function) {
 	a.collectRegionOriginFacts(module, &inventory, origins)
 	a.resourceFlowFunction(module, function)
 	a.resultFlowFunction(module, function)
+	a.mustUseFlowFunction(module, function)
 }
 
 func (a *analyzer) collectFlowOrigins(module *moduleScope, block *ast.Block, origins map[*symbol]flowOrigin) {

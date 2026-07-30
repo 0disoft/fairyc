@@ -39,7 +39,7 @@ func TestParseCanonicalLocalExactManifest(t *testing.T) {
 uid = "example.tools.app"
 name = "example-app"
 version = "1.2.3-rc.1+build.7"
-language = "fairyc-language/3"
+language = "fairyc-language/4"
 source = "src"
 
 [workspace]
@@ -79,7 +79,7 @@ func TestParseRetainsAbsentWorkspace(t *testing.T) {
 uid = "example.app"
 name = "app"
 version = "1.0.0"
-language = "fairyc-language/3"
+language = "fairyc-language/4"
 source = "src"
 `))
 	if err != nil {
@@ -97,7 +97,7 @@ func TestParseRejectsManifestBoundaryFailures(t *testing.T) {
 uid = "example.app"
 name = "app"
 version = "1.0.0"
-language = "fairyc-language/3"
+language = "fairyc-language/4"
 source = "src"
 `
 	tests := []struct {
@@ -113,7 +113,7 @@ source = "src"
 		{name: "uid", input: strings.Replace(base, "example.app", "Example-", 1), reason: ReasonInvalidPackageUID, field: "package.uid"},
 		{name: "version", input: strings.Replace(base, "1.0.0", "01.0.0", 1), reason: ReasonInvalidVersion, field: "package.version"},
 		{name: "prerelease leading zero", input: strings.Replace(base, "1.0.0", "1.0.0-01", 1), reason: ReasonInvalidVersion, field: "package.version"},
-		{name: "language", input: strings.Replace(base, "fairyc-language/3", "latest", 1), reason: ReasonInvalidLanguage, field: "package.language"},
+		{name: "language", input: strings.Replace(base, "fairyc-language/4", "latest", 1), reason: ReasonInvalidLanguage, field: "package.language"},
 		{name: "source escape", input: strings.Replace(base, "source = \"src\"", "source = \"../src\"", 1), reason: ReasonInvalidPath, field: "package.source"},
 		{name: "source control", input: strings.Replace(base, "source = \"src\"", "source = \"src\\u0001bad\"", 1), reason: ReasonInvalidPath, field: "package.source"},
 		{name: "windows device", input: strings.Replace(base, "source = \"src\"", "source = \"NUL\"", 1), reason: ReasonInvalidPath, field: "package.source"},

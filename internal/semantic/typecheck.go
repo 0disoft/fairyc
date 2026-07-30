@@ -27,6 +27,7 @@ func (a *analyzer) typeCheck() Result {
 	a.prepareResourceTypes()
 	a.prepareStructTypes()
 	a.prepareEnumTypes()
+	a.prepareCallableMustUse()
 	a.prepareCallableEffects()
 	for _, module := range a.moduleOrder {
 		_, sourcePath := hir.SourcePathParts(module.file.Path)
@@ -86,6 +87,10 @@ func (a *analyzer) typeCheck() Result {
 func (a *analyzer) checkEnum(module *moduleScope, enumeration *ast.Enum) hir.Enum {
 	value := a.enums[enumeration]
 	for _, attribute := range enumeration.Attributes {
+		if attribute.Name == mustUseAttribute {
+			a.addDiagnostic("E4201", span(module.file.Path, attribute.Span), RelatedSpan{Role: "declaration", Span: span(module.file.Path, enumeration.NameSpan)})
+			continue
+		}
 		a.addUnsupported(module.file.Path, attribute.Span, "enum attribute @"+attribute.Name)
 	}
 	result := hir.Enum{
@@ -126,7 +131,7 @@ func (a *analyzer) checkForeignFunction(module *moduleScope, function *ast.Forei
 	linkName := function.Name
 	seenLinkName := false
 	for _, attribute := range function.Attributes {
-		if attribute.Name == effectsAttribute {
+		if attribute.Name == effectsAttribute || attribute.Name == mustUseAttribute {
 			continue
 		}
 		if attribute.Name != "link_name" {
@@ -149,6 +154,7 @@ func (a *analyzer) checkForeignFunction(module *moduleScope, function *ast.Forei
 		ResultType:        a.canonicalType(module, function.ResultType),
 	}
 	symbol.typ = result.ResultType
+	result.MustUse = a.finalizeMustUse(module.file.Path, function.ResultType.Span, symbol, result.ResultType)
 	if _, _, borrow := hir.BorrowElement(result.ResultType); borrow {
 		a.addDiagnostic("E5102", span(module.file.Path, function.ResultType.Span), RelatedSpan{Role: "declaration", Span: span(module.file.Path, function.NameSpan)})
 	}
@@ -176,7 +182,21 @@ func (a *analyzer) checkResource(module *moduleScope, resource *ast.Resource) hi
 		if attribute.Name == effectsAttribute {
 			continue
 		}
+		if attribute.Name == mustUseAttribute {
+			a.addDiagnostic("E4201", span(module.file.Path, attribute.Span), RelatedSpan{Role: "declaration", Span: span(module.file.Path, resource.NameSpan)})
+			continue
+		}
 		a.addUnsupported(module.file.Path, attribute.Span, "resource attribute @"+attribute.Name)
+	}
+	if resource.Cleanup != nil {
+		for _, attribute := range resource.Cleanup.Attributes {
+			if attribute.Name == effectsAttribute {
+				continue
+			}
+			if attribute.Name == mustUseAttribute {
+				a.addDiagnostic("E4201", span(module.file.Path, attribute.Span), RelatedSpan{Role: "cleanup-declaration", Span: span(module.file.Path, resource.Cleanup.Span)})
+			}
+		}
 	}
 	result := hir.Resource{
 		Name:              resource.Name,
@@ -220,7 +240,7 @@ func (a *analyzer) checkResource(module *moduleScope, resource *ast.Resource) hi
 func (c *typeChecker) checkFunction() hir.Function {
 	functionSymbol := c.analyzer.functions[c.function]
 	for _, attribute := range c.function.Attributes {
-		if attribute.Name == effectsAttribute {
+		if attribute.Name == effectsAttribute || attribute.Name == mustUseAttribute {
 			continue
 		}
 		c.analyzer.addUnsupported(c.module.file.Path, attribute.Span, "function attribute @"+attribute.Name)
@@ -231,6 +251,7 @@ func (c *typeChecker) checkFunction() hir.Function {
 	}
 	c.resultType = resultType
 	functionSymbol.typ = resultType
+	functionSymbol.mustUse = c.analyzer.finalizeMustUse(c.module.file.Path, c.function.ResultType.Span, functionSymbol, resultType)
 	if errorSpan, ok := resultFailureSpan(c.function.ResultType); ok {
 		functionSymbol.resultError = errorSpan
 	}
@@ -242,6 +263,7 @@ func (c *typeChecker) checkFunction() hir.Function {
 		Span:              span(c.module.file.Path, c.function.Span),
 		DocumentationSpan: optionalSpan(c.module.file.Path, c.function.DocumentationSpan),
 		Effects:           slices.Clone(functionSymbol.effects),
+		MustUse:           functionSymbol.mustUse,
 		ResultType:        resultType,
 	}
 	if c.function.Owner != "" {

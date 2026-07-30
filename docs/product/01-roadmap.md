@@ -46,20 +46,21 @@ ADR 0218 separates ideas worth studying from accepted syntax and implemented beh
 this queue changes the current language revision until it receives its own ADR, grammar and
 diagnostic contract, compatibility decision, and executable fixtures.
 
-1. Implement the accepted ADR 0219 narrow callable `@must_use` contract beyond the existing
-   mandatory `Result` and resource handling. The gate includes zero-argument internal and foreign
-   callable attributes, call-site-only explicit use, `discard`, direct-call-only function transport,
-   `E4201`/`E4202`, public-interface v3, exact language `/4`, and backend-identity evidence without
-   turning all return values into warning noise.
-2. Evaluate bounded pure `const fn` and `static_assert`. The gate must define the admitted operation
+ADR 0219 has now implemented the first admitted item: narrow callable `@must_use` beyond the
+existing mandatory `Result` and resource handling. It includes zero-argument internal and foreign
+callable attributes, call-site-only explicit use, `discard`, direct-call-only function transport,
+`E4201`/`E4202`, public-interface v3, exact language `/4`, and backend-identity evidence without
+turning all return values into warning noise.
+
+1. Evaluate bounded pure `const fn` and `static_assert`. The gate must define the admitted operation
    set, integer and trap semantics, target dependence, recursion and step budgets, deterministic
    failure diagnostics, cache identity, MIR or evaluator ownership, and compile-time resource tests.
-3. Evaluate one caller-source-location intrinsic. The gate must define exact file identity, byte and
+2. Evaluate one caller-source-location intrinsic. The gate must define exact file identity, byte and
    line coordinates, inlining independence, generated-source behavior, reproducible-path policy,
    C transport, and why it does not introduce general default arguments or runtime inspection.
-4. Keep ordinary explicit `T`/`Result<T, E>` factory functions as the construction model and gather
+3. Keep ordinary explicit `T`/`Result<T, E>` factory functions as the construction model and gather
    evidence before considering any additional initialization shorthand.
-5. Revisit static interfaces only after user-defined generics have a separate accepted contract and
+4. Revisit static interfaces only after user-defined generics have a separate accepted contract and
    real source demonstrates duplication. Require explicit implementation, static dispatch first,
    bounded code generation, deterministic resolution, and a no-inheritance rule.
 
@@ -75,7 +76,7 @@ lowering, and parser-fixture-runner portion of the first item exists. Name resol
 now cover the semantic fixture's scalar and safe-borrow subset. Local last-use loans, borrow
   conflicts, single-origin borrow returns, checked matching-type left shift, loop-context diagnostics,
   scalar foreign-call unsafe/signature boundaries, and `@link_name` shape diagnostics execute across
-  all 43 semantic v0 cases, including classic scalar `for`, bounded lexical `defer`, branch- and loop-aware safe-borrow reassignment, exact
+  all 46 semantic v0 cases, including narrow callable `@must_use`, classic scalar `for`, bounded lexical `defer`, branch- and loop-aware safe-borrow reassignment, exact
   interprocedural borrow-return summaries, integer-literal range rejection before MIR, and exact
   transport for all sixteen TargetSpec C scalars. The type phase also canonicalizes the closed
   seven-name `@effects(...)` vocabulary and enforces caller supersets independently from unsafe. General
@@ -438,10 +439,10 @@ SHA-256, exposes one canonical lowercase text form, rejects malformed feature se
 complete tuple before digest-based deduplication. Versioned vectors cover component boundaries and
 feature-set failures. Typed HIR also preserves source `pub` visibility for structs, enums,
 resources, ordinary functions, and foreign functions while keeping compiler-created cleanup glue
-private. A deterministic public-interface v2 projection now sorts modules and public items,
+private. A deterministic public-interface v3 projection now sorts modules and public items,
 normalizes self nominal types independently from build-local numbering, renders dependency nominal
-types through source-independent package coordinates, hashes the canonical bytes with full SHA-256,
-and executes eight source-level invalidation fixtures. This closes package-instance and coordinate
+types through source-independent package coordinates, retains public callable must-use state, hashes
+the canonical bytes with full SHA-256, and executes ten source-level invalidation fixtures. This closes package-instance and coordinate
 encoding plus the current source-interface hash. An independent exact package-source
 digest now sorts canonical relative paths and hashes every source byte, with five versioned cases
 proving order stability plus content, path, and line-ending invalidation. The first whole-package
@@ -653,6 +654,12 @@ ADR 0217 cuts the exact language pin to `fairyc-language/3` and adds bounded lex
 Internal `void` calls with copy-scalar arguments capture those arguments immediately and execute in
 LIFO order on fallthrough, return, Result propagation, break, or continue. Trap paths remain
 non-unwinding; resource, borrow, aggregate, pointer, method, and foreign-call capture stay closed.
+
+ADR 0219 cuts the exact language pin to `fairyc-language/4` and implements narrow callable
+`@must_use`. Eligible internal, method, imported, and foreign call results require consumption or
+explicit `discard`; malformed or ineligible declarations use `E4201` and ignored calls use `E4202`.
+Typed HIR retains the bit, public-interface v3 hashes public changes while excluding private ones,
+and MIR, generated C, and runtime behavior remain unchanged after semantic acceptance.
 
 Exit gate: clean and warm build evidence is reproducible on a declared machine and workload; invalidation fixtures distinguish public interface, inline body, and private implementation; incompatible caches are safe misses.
 

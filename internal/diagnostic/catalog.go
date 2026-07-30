@@ -22,6 +22,7 @@ const (
 	categoryBorrow        = "Borrowing and return origins"
 	categoryRegion        = "Regions and arenas"
 	categoryResult        = "Option, Result, and propagation"
+	categoryUse           = "Return-value use obligations"
 	categoryUnsafe        = "Unsafe and foreign boundaries"
 	categoryABI           = "Target layout and ABI"
 	categoryEffect        = "Effects and external capabilities"
@@ -75,6 +76,8 @@ var catalogEntries = []CatalogEntry{
 	{Code: "E4101", Category: categoryResult, Meaning: "`Result` value is not handled, returned, propagated, or explicitly discarded."},
 	{Code: "E4102", Category: categoryResult, Meaning: "`?` is applied to a non-`Result` value."},
 	{Code: "E4103", Category: categoryResult, Meaning: "`?` error type is incompatible with the enclosing return type."},
+	{Code: "E4201", Category: categoryUse, Meaning: "`@must_use` is malformed, duplicated, misplaced, or applied to an ineligible result."},
+	{Code: "E4202", Category: categoryUse, Meaning: "A resolved `@must_use` call result is ignored without explicit `discard`."},
 	{Code: "E5101", Category: categoryUnsafe, Meaning: "Raw-pointer or unchecked operation appears outside an unsafe boundary."},
 	{Code: "E5102", Category: categoryUnsafe, Meaning: "Raw foreign signature contains a safe reference."},
 	{Code: "E5103", Category: categoryUnsafe, Meaning: "Foreign unwind, exception, or `longjmp` may cross a Fairy C frame."},

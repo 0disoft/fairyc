@@ -23,7 +23,7 @@
 - Resolved package graph fixture manifest: spec/fixtures/package/manifest-v1.json, including historical v0 cases
 - Resolved package graph engine and fixture runner: internal/packagegraph/, internal/packagefixture/
 - PackageInstanceId v1 vectors and runner: spec/fixtures/package-identity/manifest-v1.json, internal/packageidentityfixture/
-- Public-interface hash v2 fixtures and runner: spec/fixtures/module-interface/manifest-v2.json, with historical v1 vectors, internal/moduleinterface/, internal/moduleinterfacefixture/
+- Public-interface hash v3 fixtures and runner: spec/fixtures/module-interface/manifest-v3.json, with historical v1 and v2 vectors, internal/moduleinterface/, internal/moduleinterfacefixture/
 - Package-source digest v1 fixtures and runner: spec/fixtures/package-source/manifest-v1.json, internal/packagecontent/, internal/packagecontentfixture/
 - Source-file content and line-map identities: docs/package/source-file-identities-v1.md, internal/packagecontent/file_identity.go
 - Deterministic per-package Atlas logical map plan: docs/atlas/fymap-logical-plan-v1.md, internal/atlasmap/
@@ -38,7 +38,7 @@
 - Attributed-text origin, integrity, safety, budget, and non-authority policy plus exact retained-workspace source/documentation extraction, canonical output-only JSON, experimental source/documentation commands, and frontend-owned exact `///` attachment: docs/atlas/attributed-text-v0.md, docs/adr/0195-attributed-text-boundary-v0.md, docs/adr/0196-exact-retained-source-excerpt-extraction.md, docs/adr/0197-canonical-attributed-text-json-v0.md, docs/adr/0198-experimental-atlas-text-source-command.md, docs/adr/0199-c-friendly-declaration-documentation-attachment.md, docs/adr/0200-exact-declaration-documentation-attributed-text-command.md, internal/lexer/documentation.go, internal/semanticsnapshot/, internal/attributedtext/, internal/workspaceloader/exact_source.go, internal/cli/atlas_text.go
 - Whole-package Atlas rewrite measurement schema and Windows harness: internal/buildmeasure/atlas_rewrite.go, cmd/fairyc-windows-host-smoke/, docs/adr/0191-atlas-whole-package-rewrite-measurement.md
 - Atlas Phase 4 exit evidence and executable one-way package-import boundary: docs/atlas/phase4-exit-evidence.md, docs/adr/0203-enforced-one-way-atlas-import-boundary.md, internal/architecturecontract/
-- Whole-package cache-key v2 fixtures and bounded store runner: spec/fixtures/package-cache/manifest-v2.json with historical v1, internal/packagecache/, internal/packagecachefixture/
+- Whole-package cache-key v2 fixtures and bounded store runner: spec/fixtures/package-cache/manifest-v3.json with historical v1 and v2, internal/packagecache/, internal/packagecachefixture/
 - Package-stable function IDs, process-local MIR slice reassembly, process-bound codec, and all-hit reuse coordinator: internal/packageartifact/, internal/workspacecompiler/, docs/package/package-function-id-v1.md, docs/package/process-local-mir-artifact-v0.md
 - Bounded workspace check-session CLI and NDJSON schema: internal/cli/workspace_session.go, spec/cli/experimental-workspace-check-session-v0.schema.json, docs/adr/0159-bounded-workspace-check-session.md
 - One-shot persistent workspace-cache CLI and JSON schema: internal/cli/workspace_cache.go, spec/cli/experimental-workspace-cache-check-v0.schema.json, docs/adr/0166-experimental-persistent-workspace-cache-command.md

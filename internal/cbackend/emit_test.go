@@ -58,6 +58,22 @@ func TestEmitScalarControlUnit(t *testing.T) {
 	}
 }
 
+func TestEmitHandledMustUseCallWithoutRuntimeMetadata(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, "module main;\n@must_use\nfn i32 status() { return 42; }\nfn i32 main() { return status(); }\n")
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("interpreter = %+v, %v", outcome, err)
+	}
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	if strings.Contains(unit.Source, "must_use") || len(unit.Functions) != 2 {
+		t.Fatalf("generated C contains source-only must-use metadata or missed the ordinary function set:\n%s", unit.Source)
+	}
+}
+
 func TestEmitRetainedNonEntryFunctionIsReferencedByGeneratedMain(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main;\nfn i32 dormant() { return 7; }\nfn i32 main() { return 42; }\n")

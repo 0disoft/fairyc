@@ -33,8 +33,8 @@ overwrites an existing path.
 The Go Stage 0 compiler now implements immutable source bytes, a lossless lexer, compact recoverable
 syntax, error-free AST lowering, typed HIR, resource and borrow Flow, verified MIR, a bounded
 interpreter, deterministic C11 transport, strict local workspaces, stable new/check/build/run/test/C
-  emission commands, and experimental Atlas fact export. The semantic runner executes all 43 v0 resolve, type,
-and local Flow cases, including integer-literal range rejection, checked compound assignment, branch- and loop-aware safe-borrow reassignment,
+  emission commands, and experimental Atlas fact export. The semantic runner executes all 46 v0 resolve, type,
+and local Flow cases, including narrow callable `@must_use`, integer-literal range rejection, checked compound assignment, branch- and loop-aware safe-borrow reassignment,
 exact interprocedural borrow-return summaries, last-use loans, borrow-return origins, canonical
 `@effects(...)` sets, and caller-superset enforcement. Whole-root resource Flow
   also executes all 12 v0 cases for moves, cleanup obligations, branch joins, normal, break, and continue loop edges,
@@ -664,15 +664,15 @@ or arbitrary link-input option.
 - Windows AMD64 PE, COFF object, and x64 unwind structure inspector: `internal/pecoff/`
 - Resolved acyclic package graph engine, fixture runner, and v1/v0 fixtures: `internal/packagegraph/`, `internal/packagefixture/`, `spec/fixtures/package/manifest-v1.json`
 - PackageInstanceId v1 encoding, vectors, and runner: `internal/packagegraph/identity.go`, `spec/fixtures/package-identity/manifest-v1.json`, `internal/packageidentityfixture/`
-- Public-interface hash v2 extraction, reusable package-set computation, fixtures, and runner: `internal/moduleinterface/`, `spec/fixtures/module-interface/manifest-v2.json`, `internal/moduleinterfacefixture/`
+- Public-interface hash v3 extraction, reusable package-set computation, fixtures, and runner: `internal/moduleinterface/`, `spec/fixtures/module-interface/manifest-v3.json`, `internal/moduleinterfacefixture/`
 - Package-source digest v1 encoding, fixtures, and runner: `internal/packagecontent/`, `spec/fixtures/package-source/manifest-v1.json`, `internal/packagecontentfixture/`
-- Whole-package cache-key v1, bounded memory store, fixtures, and runner: `internal/packagecache/`, `spec/fixtures/package-cache/manifest-v1.json`, `internal/packagecachefixture/`
+- Whole-package cache-key v2, bounded memory store, current v3 fixtures, and runner: `internal/packagecache/`, `spec/fixtures/package-cache/manifest-v3.json`, `internal/packagecachefixture/`; fixture manifests v1 and v2 remain historical
 - Exact-version verified whole-program MIR artifact codec: `internal/mircodec/`
 - Strict local-exact `fairy.toml` v1 parser, fixtures, and runner: `internal/projectmanifest/`, `spec/fixtures/project-manifest/manifest-v1.json`, `internal/projectmanifestfixture/`
 - Filesystem-safe local workspace loader, fixtures, and runner: `internal/workspaceloader/`, `spec/fixtures/workspace-loader/manifest-v1.json`, `internal/workspaceloaderfixture/`
 - Canonical generated `fairy.lock` v1 with strict parsing, stale comparison, and atomic replacement: `internal/lockfile/`
 - MIR and C backend contracts: `docs/mir/`
-- Package identity, visibility, source/interface hashing, per-file integrity, stable function identity, process-local MIR slices, and bounded whole-package cache: `docs/package/package-graph-v0.md`, `docs/package/package-instance-id-v1.md`, `docs/package/package-source-digest-v1.md`, `docs/package/source-file-identities-v1.md`, `docs/package/public-interface-hash-v1.md`, `docs/package/package-function-id-v1.md`, `docs/package/process-local-mir-artifact-v0.md`, `docs/package/whole-package-cache-v1.md`
+- Package identity, visibility, source/interface hashing, per-file integrity, stable function identity, process-local MIR slices, and bounded whole-package cache: `docs/package/package-graph-v0.md`, `docs/package/package-instance-id-v1.md`, `docs/package/package-source-digest-v1.md`, `docs/package/source-file-identities-v1.md`, current `docs/package/public-interface-hash-v3.md`, `docs/package/package-function-id-v1.md`, `docs/package/process-local-mir-artifact-v0.md`, and current `docs/package/whole-package-cache-v2.md`; v1/v2 interface and v1 cache documents remain historical
 - Manifest and lockfile readiness audit: `docs/package/manifest-lockfile-readiness.md`
 - Project manifest v1: `docs/package/project-manifest-v1.md`
 - Local workspace loader v1: `docs/package/workspace-loader-v1.md`

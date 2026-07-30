@@ -221,6 +221,12 @@ func TestExtractTracksPublicShapesEffectsAndForeignLinks(t *testing.T) {
 	if hash := extractHash(t, linkChange, 1, instances); hash == baseHash {
 		t.Fatalf("foreign link change did not invalidate interface: %s", hash)
 	}
+
+	publicMustUseChange := clonePackage(base)
+	publicMustUseChange.Modules[0].ForeignFunctions[0].MustUse = true
+	if hash := extractHash(t, publicMustUseChange, 1, instances); hash == baseHash {
+		t.Fatalf("public must-use change did not invalidate interface: %s", hash)
+	}
 }
 
 func interfacePackage(self, dependency hir.PackageID) hir.Package {

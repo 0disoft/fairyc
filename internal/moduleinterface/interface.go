@@ -17,8 +17,8 @@ import (
 
 const (
 	HashAlgorithm = "sha256"
-	HashEncoding  = "fairyc.public-interface/v2"
-	HashPrefix    = "fyif2-sha256-"
+	HashEncoding  = "fairyc.public-interface/v3"
+	HashPrefix    = "fyif3-sha256-"
 )
 
 const interfaceDomain = "fairyc.public-interface"
@@ -80,6 +80,7 @@ type Item struct {
 	Name       string
 	ReprC      bool
 	Unsafe     bool
+	MustUse    bool
 	ABI        string
 	LinkName   string
 	OwnerType  string
@@ -206,7 +207,7 @@ func extractModule(source hir.Module, packageID hir.PackageID, coordinates map[h
 		}
 		item := Item{
 			Kind: "foreign-function", Name: foreign.Name, Unsafe: true, ABI: foreign.ABI,
-			LinkName: foreign.LinkName, Effects: effects,
+			LinkName: foreign.LinkName, Effects: effects, MustUse: foreign.MustUse,
 		}
 		for _, parameter := range foreign.Parameters {
 			stable, err := stableType(parameter.Type, packageID, coordinates, publicTypes)
@@ -230,7 +231,7 @@ func extractModule(source hir.Module, packageID hir.PackageID, coordinates map[h
 		if err != nil {
 			return Module{}, fmt.Errorf("public function %q: %w", function.Name, err)
 		}
-		item := Item{Kind: "function", Name: function.Name, Unsafe: function.Unsafe, Effects: effects}
+		item := Item{Kind: "function", Name: function.Name, Unsafe: function.Unsafe, MustUse: function.MustUse, Effects: effects}
 		if function.OwnerType != "" {
 			stable, err := stableType(function.OwnerType, packageID, coordinates, publicTypes)
 			if err != nil {
@@ -387,7 +388,7 @@ func stableEffects(values []hir.Effect) ([]string, error) {
 	return result, nil
 }
 
-// Encode returns the deterministic v2 bytes hashed for cache invalidation.
+// Encode returns the deterministic v3 bytes hashed for cache invalidation.
 func Encode(value Descriptor) ([]byte, error) {
 	if err := validateDescriptor(value); err != nil {
 		return nil, err
@@ -395,7 +396,7 @@ func Encode(value Descriptor) ([]byte, error) {
 	var encoded bytes.Buffer
 	encoded.WriteString(interfaceDomain)
 	encoded.WriteByte(0)
-	encoded.WriteByte(2)
+	encoded.WriteByte(3)
 	writeUint64(&encoded, uint64(len(value.Modules)))
 	for _, module := range value.Modules {
 		writeString(&encoded, module.Path)
@@ -476,6 +477,7 @@ func writeItem(buffer *bytes.Buffer, item Item) {
 	writeString(buffer, item.Name)
 	writeBool(buffer, item.ReprC)
 	writeBool(buffer, item.Unsafe)
+	writeBool(buffer, item.MustUse)
 	writeString(buffer, item.ABI)
 	writeString(buffer, item.LinkName)
 	writeString(buffer, item.OwnerType)

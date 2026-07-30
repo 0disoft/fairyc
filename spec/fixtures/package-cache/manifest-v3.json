@@ -1,0 +1,83 @@
+{
+  "$schema": "./schema-v3.json",
+  "schemaVersion": "fairyc.package-cache-fixtures/v3",
+  "contracts": [
+    "docs/adr/0174-coordinate-dependency-cache-key-v2.md",
+    "docs/adr/0219-narrow-must-use-call-contract.md",
+    "docs/package/whole-package-cache-v2.md",
+    "docs/compatibility/versioning-v0.md",
+    "docs/engineering/03-performance-budget.md"
+  ],
+  "base": {
+    "compilerBuild": "compiler:a",
+    "languageRevision": "fairyc-language/4",
+    "mirVersion": "fairyc-mir/0",
+    "targetSchema": "fairyc.target-spec/v0:x86_64-windows-msvc",
+    "abiProfile": "microsoft-x64/v0",
+    "toolchainFingerprint": "msvc:19.44:c11",
+    "backend": "constrained-c/v0",
+    "profileFlags": ["checked", "low"],
+    "runtimeAbi": "fairyc-runtime/0",
+    "standardLibrary": "fypi1-sha256-e8756812ba7956f1f997a35a522b7f1735d8679c99c48b140570f4cd690c1a91",
+    "package": "fypi1-sha256-04fc4400f5e875c5c22ab2d50765d721df38a12a19ef3508deb432c7f4da92f3",
+    "source": "fysrc1-sha256-dd19fc7a8f93795ca7bf1abb70fa2f7bbbb0a8849fe410f6b4c080b55817e9a3",
+    "dependencies": [
+      {
+        "coordinate": "fypc1-sha256-903a7b9974986cccf6166e8978ca9cb26273d4776af6d1a5dd3b04e7060e2f41",
+        "interface": "fyif3-sha256-a5e79db9b105ffac6d57d0ff054b75813344fdf4e9f9a5c1873da8907ae281b9"
+      }
+    ],
+    "features": ["base", "tls"]
+  },
+  "cases": [
+    {
+      "id": "baseline",
+      "override": {},
+      "relation": "baseline",
+      "expectKey": "fycache2-sha256-88341ad7b793577a3c5ab1d68cef66380eade4e99aff0c9ce56a1d6db0b4009d"
+    },
+    {
+      "id": "compiler-build",
+      "override": { "compilerBuild": "compiler:b" },
+      "compareTo": "baseline",
+      "relation": "different"
+    },
+    {
+      "id": "source-digest",
+      "override": { "source": "fysrc1-sha256-ed19fc7a8f93795ca7bf1abb70fa2f7bbbb0a8849fe410f6b4c080b55817e9a3" },
+      "compareTo": "baseline",
+      "relation": "different"
+    },
+    {
+      "id": "dependency-interface",
+      "override": {
+        "dependencies": [
+          {
+            "coordinate": "fypc1-sha256-903a7b9974986cccf6166e8978ca9cb26273d4776af6d1a5dd3b04e7060e2f41",
+            "interface": "fyif3-sha256-b5e79db9b105ffac6d57d0ff054b75813344fdf4e9f9a5c1873da8907ae281b9"
+          }
+        ]
+      },
+      "compareTo": "baseline",
+      "relation": "different"
+    },
+    {
+      "id": "target-schema",
+      "override": { "targetSchema": "fairyc.target-spec/v0:x86_64-linux-gnu" },
+      "compareTo": "baseline",
+      "relation": "different"
+    },
+    {
+      "id": "feature-set",
+      "override": { "features": ["base"] },
+      "compareTo": "baseline",
+      "relation": "different"
+    },
+    {
+      "id": "profile-flags",
+      "override": { "profileFlags": ["checked", "optimized"] },
+      "compareTo": "baseline",
+      "relation": "different"
+    }
+  ]
+}
