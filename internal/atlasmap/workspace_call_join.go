@@ -125,9 +125,11 @@ func NewWorkspaceCallIndex(
 				relation.Provenance != semanticsnapshot.ProvenanceCompilerObserved {
 				return nil, fmt.Errorf("%w: resolved call from package %q lacks exact observed provenance", ErrWorkspaceJoinIncomplete, header.PackageInstance)
 			}
-			if relation.Target.PackageInstance != header.PackageInstance &&
-				!slices.Contains(header.Dependencies, relation.Target.PackageInstance) {
-				return nil, fmt.Errorf("%w: package %q call target %q is not self or a direct dependency", ErrWorkspaceJoinIncomplete, header.PackageInstance, relation.Target.PackageInstance)
+			if relation.Target.PackageInstance != header.PackageInstance {
+				_, directDependency := slices.BinarySearch(header.Dependencies, relation.Target.PackageInstance)
+				if !directDependency {
+					return nil, fmt.Errorf("%w: package %q call target %q is not self or a direct dependency", ErrWorkspaceJoinIncomplete, header.PackageInstance, relation.Target.PackageInstance)
+				}
 			}
 			targetIndex, found := index.packages[relation.Target.PackageInstance]
 			if !found {
