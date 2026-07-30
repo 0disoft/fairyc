@@ -74,6 +74,33 @@ func TestEmitHandledMustUseCallWithoutRuntimeMetadata(t *testing.T) {
 	}
 }
 
+func TestEmitCompileTimeEvaluationAsFoldedRuntimeProgram(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+@const_eval
+fn i32 square(i32 value) { return value * value; }
+const i32 ANSWER = square(6) + 6;
+static_assert(ANSWER == 42);
+fn i32 main() { return ANSWER; }
+`)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("interpreter = %+v, %v", outcome, err)
+	}
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	if !slices.Equal(unit.Functions, []string{"main::main", "main::square"}) {
+		t.Fatalf("Emit() functions = %v", unit.Functions)
+	}
+	for _, sourceOnly := range []string{"const_eval", "static_assert", "ANSWER"} {
+		if strings.Contains(unit.Source, sourceOnly) {
+			t.Fatalf("generated C leaked source-only compile-time spelling %q:\n%s", sourceOnly, unit.Source)
+		}
+	}
+}
+
 func TestEmitRetainedNonEntryFunctionIsReferencedByGeneratedMain(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main;\nfn i32 dormant() { return 7; }\nfn i32 main() { return 42; }\n")

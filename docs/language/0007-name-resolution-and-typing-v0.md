@@ -13,11 +13,20 @@ An error-free AST enters three ordered frontend phases:
 2. `type` assigns canonical Fairy C types and validates calls, operators, conditions, assignments, and returns;
 3. `flow` validates initialization, ownership, loans, borrow origins, regions, must-use results, and cleanup facts.
 
+Within the type phase, ADR 0220 first validates private scalar constant and `@const_eval`
+signatures, rejects dependency cycles, evaluates constants and `static_assert`, then folds constant
+uses to typed HIR scalar literals before ordinary Flow. Fixed-array lengths remain literal-only and
+therefore do not depend on this evaluator.
+
 A failed phase does not manufacture trustworthy facts for later phases. The implementation may continue locally to improve diagnostics, but errors derived only from a poisoned name or type are cascades and are not independent fixture results.
 
 ## Module and lexical names
 
 Each file is one module and each import introduces its explicit alias into that module. Module items and import aliases must be unique within the module declaration scope. Function parameters must be unique, and a lexical block cannot declare the same local name twice in that block.
+
+Private module constants share the module item namespace. Their initializers may refer forward to
+other constants or eligible `@const_eval` functions in the same module, but never to an imported,
+public, ordinary runtime, method, or foreign callable. The combined dependency graph is acyclic.
 
 Qualified `alias::name` first resolves the alias, then resolves a source-visible item in the imported module. Unqualified names resolve from the innermost lexical block through parameters and enclosing blocks, then the current module. There is no implicit prelude, wildcard import, overload set, or fallback search through imported modules.
 
@@ -108,6 +117,14 @@ enclosing function's declared effects to contain the callee's set. These facts a
 independent and are exposed through typed HIR and semantic fixtures. The complete vocabulary and
 compatibility rules are owned by `0008-effects-and-capabilities-v0.md`.
 
+The compile-time evaluator uses the same checked `bool`, `u8`, `i32`, and `u32` operator meanings
+as runtime source. It evaluates only the selected branch of `if`, `&&`, and `||`, limits calls to 32
+frames, and limits evaluated expression nodes to 65,536 per package. Overflow, invalid division,
+remainder, shift, or cast is `E4303`; excluded expressions are `E4302`; cycles or exhausted budgets
+are `E4304`; and a false module assertion is `E4305`. `E4301` owns malformed, public, misplaced, or
+ineligible constant declarations and `@const_eval` attributes. Semantic fixtures may assert the
+constant's module, name, declaration span, exact scalar type, canonical value, and full source span.
+
 For an assignment to a safe-borrow local, Flow evaluates the right-hand side before
 replacing the target origin and retained-loan set. Reachable `if` and `switch` exits join origin
 facts; different origins remain a disjunction and cannot be returned as if one branch had won.
@@ -149,6 +166,11 @@ Within one case, diagnostics sort by source path using unsigned UTF-8 byte order
 - `E1009` return expression does not match the declared return type;
 - `E1010` call arity does not match the declaration.
 - `E1013` integer literal does not fit its selected implemented integer type;
+- `E4301` malformed or ineligible compile-time declaration;
+- `E4302` expression outside the bounded compile-time subset;
+- `E4303` checked compile-time arithmetic, division, shift, or cast trap;
+- `E4304` compile-time dependency cycle or evaluation-budget exhaustion;
+- `E4305` false module-level `static_assert`;
 - `E7101` malformed, duplicate, empty, or unknown effect declaration;
 - `E7102` call requires an effect absent from the enclosing function declaration.
 

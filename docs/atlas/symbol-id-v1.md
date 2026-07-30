@@ -36,6 +36,11 @@ UIDs are valid UTF-8 without control characters. Module and declaration paths ar
 separated Stage 0 identifiers. Declaration kind is exactly `struct`, `enum`, `resource`, `function`,
 or `foreign-function`.
 
+Private module constants admitted by ADR 0220 are compile-time semantic facts, not SymbolId v1
+declarations. They receive no visible or full SymbolId and cannot be relabelled as locals or
+functions. Adding a `constant` declaration kind requires a separately versioned identity and Atlas
+transport decision.
+
 The tuple excludes:
 
 - `PackageInstanceId`, package version, feature set, and source digest;

@@ -175,7 +175,7 @@ func writeStableTestWorkspace(t *testing.T, root string) {
 uid = "example.stable-test.app"
 name = "stable-test-app"
 version = "1.0.0"
-language = "fairyc-language/4"
+language = "fairyc-language/5"
 source = "src"
 `)
 	writeWorkspaceFile(t, root, "src/library.fy", "module library;\npub fn i32 answer() { return 42; }\n")

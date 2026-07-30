@@ -28,7 +28,9 @@
   `var` local from its parameter; parameters have no separate `mut name` spelling.
 - A `let` resource may still be consumed. Binding immutability is not ownership immobility.
 - A by-value position consumes a resource. Stage 0 has no `move` expression or `move` argument keyword.
-- Globals are compile-time `const` only. Mutable globals are excluded.
+- Globals are private compile-time `const` only. The first executable set is `bool`, `u8`, `i32`,
+  and `u32`; public constants, mutable globals, inferred types, aggregate values, and constant array
+  lengths are excluded.
 - Classic counter loops use `for (initializer; condition; post) { ... }`. Each clause is optional;
   an omitted condition is `true`. The initializer owns a lexical scope covering the condition,
   body, and post clause. The admitted v3 header subset is one scalar declaration or assignment,
@@ -42,6 +44,16 @@
   `@effects(clock, console, environment, filesystem, network, process, random)`. Arguments use only
   the effects actually required; omission is the empty set. Exact semantics are owned by
   `0008-effects-and-capabilities-v0.md`.
+
+- A private safe effect-free free function may use one zero-argument `@const_eval` attribute when
+  all parameters and its result are `bool`, `u8`, `i32`, or `u32` and its body is exactly one
+  explicit `return expression;`. Calls outside a constant context remain ordinary runtime calls.
+- Module-level `static_assert(expression);` is contextual item syntax rather than a globally
+  reserved identifier. It requires one compile-time `bool` value and emits no runtime operation.
+- Compile-time expressions are closed to scalar literals, parameters, private module constants,
+  admitted scalar operators and widening casts, conditionals, and eligible `@const_eval` calls.
+  Loops, mutation, recursion, effects, unsafe, foreign calls, resources, borrows, pointers,
+  target-width values, allocation, I/O, and custom assertion messages are excluded.
 
 ## Modules and imports
 

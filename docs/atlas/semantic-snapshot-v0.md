@@ -44,10 +44,14 @@ documentation spans. Map planning deliberately does not consume that sidecar, so
 SymbolId remain attachment-free. File records contain exact package instance,
 canonical relative path, source/test kind, content digest, and byte line-map identity without source
 text. Every file has exactly one typed module and every typed module has exactly one file.
-Declarations preserve source-declared
-visibility, signatures, structured stable types, effects, C ABI/link names, aggregate fields and
-variants, representation, and resource cleanup classification. Compiler-created cleanup functions
-remain private; their source resource owns the corresponding declared facts.
+The declaration set is closed to the current five Atlas families: structs, enums, resources,
+ordinary functions, and foreign functions. Those records preserve source-declared visibility,
+signatures, structured stable types, effects, C ABI/link names, aggregate fields and variants,
+representation, and resource cleanup classification. Module constants accepted by ADR 0220 are
+semantic compile-time facts and are deliberately absent from Semantic Snapshot v0, SymbolId v1,
+and `.fymap` v1; no consumer may reinterpret them as locals or functions. Adding a constant
+declaration kind requires a separate versioned Atlas transport decision. Compiler-created cleanup
+functions remain private; their source resource owns the corresponding declared facts.
 
 Verified function summaries currently retain:
 

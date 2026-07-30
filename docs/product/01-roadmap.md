@@ -52,17 +52,18 @@ callable attributes, call-site-only explicit use, `discard`, direct-call-only fu
 `E4201`/`E4202`, public-interface v3, exact language `/4`, and backend-identity evidence without
 turning all return values into warning noise.
 
-1. Implement accepted ADR 0220. It retains the existing private scalar module-constant syntax,
-   uses `@const_eval` on private straight-line scalar functions rather than importing `const fn`,
-   adds module-level `static_assert`, closes the current AST constant-loss gap, fixes checked trap
-   semantics, rejects cycles, caps depth and evaluated nodes, stays frontend-owned, keeps public-
-   interface v3 unchanged, and advances the exact language pin only when its fixtures pass.
-2. Evaluate one caller-source-location intrinsic. The gate must define exact file identity, byte and
+ADR 0220 has now implemented the second admitted item. It retains private scalar module constants,
+uses `@const_eval` on private straight-line scalar functions rather than importing `const fn`, adds
+module-level `static_assert`, closes the old AST constant-loss gap, rejects cycles and checked traps,
+caps depth and evaluated nodes, stays frontend-owned, keeps public-interface v3 unchanged, and cuts
+the exact language pin to `/5`.
+
+1. Evaluate one caller-source-location intrinsic. The gate must define exact file identity, byte and
    line coordinates, inlining independence, generated-source behavior, reproducible-path policy,
    C transport, and why it does not introduce general default arguments or runtime inspection.
-3. Keep ordinary explicit `T`/`Result<T, E>` factory functions as the construction model and gather
+2. Keep ordinary explicit `T`/`Result<T, E>` factory functions as the construction model and gather
    evidence before considering any additional initialization shorthand.
-4. Revisit static interfaces only after user-defined generics have a separate accepted contract and
+3. Revisit static interfaces only after user-defined generics have a separate accepted contract and
    real source demonstrates duplication. Require explicit implementation, static dispatch first,
    bounded code generation, deterministic resolution, and a no-inheritance rule.
 
@@ -78,7 +79,7 @@ lowering, and parser-fixture-runner portion of the first item exists. Name resol
 now cover the semantic fixture's scalar and safe-borrow subset. Local last-use loans, borrow
   conflicts, single-origin borrow returns, checked matching-type left shift, loop-context diagnostics,
   scalar foreign-call unsafe/signature boundaries, and `@link_name` shape diagnostics execute across
-  all 46 semantic v0 cases, including narrow callable `@must_use`, classic scalar `for`, bounded lexical `defer`, branch- and loop-aware safe-borrow reassignment, exact
+  all 52 semantic v0 cases, including bounded scalar compile-time evaluation, narrow callable `@must_use`, classic scalar `for`, bounded lexical `defer`, branch- and loop-aware safe-borrow reassignment, exact
   interprocedural borrow-return summaries, integer-literal range rejection before MIR, and exact
   transport for all sixteen TargetSpec C scalars. The type phase also canonicalizes the closed
   seven-name `@effects(...)` vocabulary and enforces caller supersets independently from unsafe. General
@@ -444,7 +445,8 @@ resources, ordinary functions, and foreign functions while keeping compiler-crea
 private. A deterministic public-interface v3 projection now sorts modules and public items,
 normalizes self nominal types independently from build-local numbering, renders dependency nominal
 types through source-independent package coordinates, retains public callable must-use state, hashes
-the canonical bytes with full SHA-256, and executes ten source-level invalidation fixtures. This closes package-instance and coordinate
+the canonical bytes with full SHA-256, and executes eleven source-level invalidation fixtures,
+including private-module-constant stability. This closes package-instance and coordinate
 encoding plus the current source-interface hash. An independent exact package-source
 digest now sorts canonical relative paths and hashes every source byte, with five versioned cases
 proving order stability plus content, path, and line-ending invalidation. The first whole-package
@@ -662,6 +664,11 @@ ADR 0219 cuts the exact language pin to `fairyc-language/4` and implements narro
 explicit `discard`; malformed or ineligible declarations use `E4201` and ignored calls use `E4202`.
 Typed HIR retains the bit, public-interface v3 hashes public changes while excluding private ones,
 and MIR, generated C, and runtime behavior remain unchanged after semantic acceptance.
+
+ADR 0220 cuts the exact language pin to `fairyc-language/5` and implements private
+`bool`/`u8`/`i32`/`u32` constants, private straight-line `@const_eval` functions, and contextual
+module `static_assert`. Checked compile-time traps use `E4303`, cycles and budgets use `E4304`,
+runtime references enter HIR as folded scalar literals, and no evaluator state reaches MIR or C.
 
 Exit gate: clean and warm build evidence is reproducible on a declared machine and workload; invalidation fixtures distinguish public interface, inline body, and private implementation; incompatible caches are safe misses.
 

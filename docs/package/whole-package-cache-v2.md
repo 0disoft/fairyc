@@ -2,7 +2,7 @@
 
 - Status: Executable prototype contract
 - Decision: `docs/adr/0174-coordinate-stable-linking-and-cache-key-v2.md`
-- Fixture source: `spec/fixtures/package-cache/manifest-v3.json`
+- Fixture source: `spec/fixtures/package-cache/manifest-v4.json`
 - Implementation: `internal/packagecache/`, `internal/packageartifact/`, `internal/workspacecompiler/`
 
 ## Contract

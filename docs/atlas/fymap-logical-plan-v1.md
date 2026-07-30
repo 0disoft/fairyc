@@ -66,6 +66,10 @@ One partition owns detached immutable views of:
 - complete detached function summaries; and
 - the snapshot's relation-completeness ledger.
 
+This remains the closed five-kind declaration set defined by Semantic Snapshot v0. Private module
+constants admitted by ADR 0220 are omitted rather than reclassified, and `.fymap` v1 contains no
+constant record or binding. Transporting constants requires a new versioned map contract.
+
 The plan counts semantic relation observations from calls, traps, unsafe sites, moves, drops,
 allocations, returned errors, and borrows. It does not yet define transport records for those facts;
 the snapshot remains their semantic source of truth.

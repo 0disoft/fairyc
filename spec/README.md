@@ -31,9 +31,9 @@ This directory contains versioned normative data that future compiler tests can 
 - `fixtures/package/schema-v0.json`: already-resolved package graph expectation schema;
 - `fixtures/package/manifest-v1.json`: historical v0 package identity/visibility cases plus post-deduplication dependency-cycle rejection.
 - `fixtures/package-identity/manifest-v1.json`: canonical resolved-instance bytes, full SHA-256 IDs, component boundaries, and identity validation cases.
-- `fixtures/module-interface/manifest-v3.json`: current coordinate-based source-visible interface digest with public must-use invalidation; historical v1 and v2 remain frozen.
+- `fixtures/module-interface/manifest-v3.json`: current coordinate-based source-visible interface digest with public must-use invalidation and private-module-constant stability; historical v1 and v2 remain frozen.
 - `fixtures/package-source/manifest-v1.json`: exact canonical path/source-byte digest and invalidation cases.
-- `fixtures/package-cache/manifest-v3.json`: current coordinate-based dependency compatibility key with fyif3 inputs; historical v1 and v2 remain frozen.
+- `fixtures/package-cache/manifest-v4.json`: current coordinate-based dependency compatibility key with fyif3 and exact language `/5` inputs; historical v1 through v3 remain frozen.
 - `fixtures/project-manifest/manifest-v1.json`: complete strict `fairy.toml` local-exact parser cases.
 - `fixtures/workspace-loader/manifest-v1.json`: complete local workspace trees for filesystem-safe graph construction.
 

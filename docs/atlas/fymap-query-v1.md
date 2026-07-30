@@ -32,6 +32,10 @@ index. Symbol selectors accept only canonical visible or full SymbolId v1 text.
   and pages only after a full SymbolId present in the same current filtered set. Name matching is
   byte-for-byte and preserves every same-name record across modules and kinds.
 
+All declaration-kind filters remain closed to structs, enums, resources, ordinary functions, and
+foreign functions. Private module constants admitted by ADR 0220 are not indexed or queryable in
+v1; a query cannot reinterpret one as a local or function.
+
 The explicit relation filter supports `allocates`, `borrows-mutable`, `borrows-shared`, `calls`,
 `calls-foreign`, `drops`, `may-trap`, `moves`, `returns-error`, and `uses-unsafe`. An unrequested
 relation family is recorded as a filter omission rather than silently disappearing.

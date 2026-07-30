@@ -54,18 +54,25 @@ standalone previous-revision parser at that cutover accepted `/1` and rejected c
 target schema, C dialect, MIR version, diagnostic catalog, SDK version, and SDK source bytes remain
 unchanged.
 
-ADR 0217 cuts the current exact pin from `fairyc-language/2` to `fairyc-language/3` because it
+ADR 0217 cut the exact pin from `fairyc-language/2` to `fairyc-language/3` because it
 reserves `defer` and adds a statement form with explicit cleanup-edge behavior. Valid `/2` source
 remains valid `/3`; the previous-revision parser rejects `defer`, while source migration remains
 byte-identical and manifests require a manual exact-pin update. Runtime ABI, target schemas, C11
 transport, MIR version, diagnostic catalog, SDK version, and SDK source bytes remain unchanged.
 
-ADR 0219 cuts the current exact pin from `fairyc-language/3` to `fairyc-language/4` because the
+ADR 0219 cut the exact pin from `fairyc-language/3` to `fairyc-language/4` because the
 previously unsupported `@must_use` callable attribute gains semantic rejection behavior. Valid `/3`
 source remains valid `/4`; the previous parser already preserves generic attribute syntax, while
 the `/3` semantic contract rejects this attribute as unsupported. Migration therefore preserves
 source bytes and exact manifests require a manual pin update. Public callable must-use state changes
 the current public-interface algorithm from v2 to v3. Runtime ABI, target schemas, C11 transport,
+MIR version, SDK version, and SDK source bytes remain unchanged.
+
+ADR 0220 cuts the current exact pin from `fairyc-language/4` to `fairyc-language/5` because module
+constants gain semantic values, `@const_eval` gains callable meaning, and contextual module-item
+`static_assert` can reject source. Valid `/4` source without those forms remains valid `/5`.
+Migration preserves existing constant and generic-attribute bytes and requires a manual pin update;
+`static_assert` has no `/4` rewrite. Public-interface v3, runtime ABI, target schemas, C11 transport,
 MIR version, SDK version, and SDK source bytes remain unchanged.
 
 For one function contract, removing a declared effect preserves every existing caller accepted by
@@ -90,9 +97,9 @@ compatibility formats. The bounded persistent storage format and one exact-versi
 command now exist; ordinary-command policy and default limits remain undecided.
 
 The current whole-package key encoding remains `fairyc.package-cache-key/v2` with
-`fycache2-sha256-...` text. `fairyc.package-cache-fixtures/v3` supplies current vectors because its
-dependency entries use `fyif3-sha256` public-interface hashes and `fairyc-language/4`; fixture
-manifests v1 and v2 remain historical. A component algorithm change is an intentional cache miss,
+`fycache2-sha256-...` text. `fairyc.package-cache-fixtures/v4` supplies current vectors because its
+dependency entries use `fyif3-sha256` public-interface hashes and `fairyc-language/5`; fixture
+manifests v1 through v3 remain historical. A component algorithm change is an intentional cache miss,
 not permission to reinterpret an older key.
 
 ## Target and ABI
@@ -425,7 +432,7 @@ exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, o
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
 instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
 `fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.6`, language
-`fairyc-language/4`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
+`fairyc-language/5`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 
 ADR 0148 consumes those independently versioned manifest, lock, package-instance, language, SDK,

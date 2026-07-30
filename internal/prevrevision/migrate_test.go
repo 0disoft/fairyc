@@ -61,6 +61,27 @@ func TestMigratePreservesGenericMustUseAttributeForManualPinUpdate(t *testing.T)
 	}
 }
 
+func TestMigratePreservesConstantAndGenericConstEvalAttributeForManualPinUpdate(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\n@const_eval\nfn i32 square(i32 value) { return value * value; }\nconst i32 ANSWER = square(6) + 6;\nfn i32 main() { return ANSWER; }\n")
+	result, err := Migrate("main.fy", input)
+	if err != nil || result.Changed || !bytes.Equal(result.Source, input) {
+		t.Fatalf("Migrate() = %+v, %v", result, err)
+	}
+}
+
+func TestMigrateRejectsCurrentOnlyStaticAssertWithoutWritableOutput(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nstatic_assert(true);\nfn i32 main() { return 42; }\n")
+	result, err := Migrate("main.fy", input)
+	if err == nil {
+		t.Fatalf("Migrate() result = %+v, want current-only syntax rejection", result)
+	}
+	if result.Source != nil || result.Changed {
+		t.Fatalf("Migrate() returned writable result on error: %+v", result)
+	}
+}
+
 func TestSpanMapperKeepsHalfOpenBoundariesAroundInsertions(t *testing.T) {
 	t.Parallel()
 	edits := []edit{

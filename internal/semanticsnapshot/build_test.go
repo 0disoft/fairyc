@@ -149,6 +149,32 @@ fn i32 run() { return 0; }
 	}
 }
 
+func TestBuildOmitsModuleConstantsWithoutReclassifyingThem(t *testing.T) {
+	t.Parallel()
+	text := `module constants;
+@const_eval
+fn i32 square(i32 value) { return value * value; }
+const i32 ANSWER = square(6) + 6;
+static_assert(ANSWER == 42);
+pub fn i32 answer() { return ANSWER; }
+`
+	result := compileSinglePackage(t, hir.DefaultPackage, "constants.fy", text)
+	input := packageInput(t, hir.DefaultPackage, "example.snapshot.constants", "constants", "1.0.0", "constants.fy", text, "root")
+	snapshot, err := semanticsnapshot.Build(result.Semantic, result.MIR, []semanticsnapshot.PackageInput{input})
+	if err != nil {
+		t.Fatalf("Build() error = %v", err)
+	}
+	declarations := snapshot.Declarations()
+	if len(declarations) != 2 {
+		t.Fatalf("declarations = %+v, want only the two ordinary functions", declarations)
+	}
+	findDeclaration(t, declarations, semanticsnapshot.DeclarationFunction, "square")
+	findDeclaration(t, declarations, semanticsnapshot.DeclarationFunction, "answer")
+	if strings.Contains(strings.Join(snapshotStrings(snapshot), "\n"), "ANSWER") {
+		t.Fatalf("snapshot reclassified or exposed module constant: %+v", declarations)
+	}
+}
+
 func TestBuildMarksForeignCallsOpaqueWithoutDegradingLocalRelations(t *testing.T) {
 	t.Parallel()
 	text := `module main;
@@ -352,7 +378,7 @@ func TestBuildCanonicalizesAndRequiresCompleteFileIdentityCoverage(t *testing.T)
 	}
 	input := semanticsnapshot.PackageInput{
 		BuildID: hir.DefaultPackage, UID: identity.PackageUID, Name: "files", Version: identity.VersionIdentity,
-		Language: "fairyc-language/4", Instance: instance, Coordinate: coordinate, Source: digest,
+		Language: "fairyc-language/5", Instance: instance, Coordinate: coordinate, Source: digest,
 		SourceKind: "local", Role: "root", Files: files,
 	}
 	left, err := semanticsnapshot.Build(result.Semantic, result.MIR, []semanticsnapshot.PackageInput{input})
@@ -496,7 +522,7 @@ func packageInput(t *testing.T, id hir.PackageID, uid, name, version, path, text
 	}
 	fileDigest, lineMap := packagecontent.ComputeFileIdentities([]byte(text))
 	return semanticsnapshot.PackageInput{
-		BuildID: id, UID: uid, Name: name, Version: version, Language: "fairyc-language/4",
+		BuildID: id, UID: uid, Name: name, Version: version, Language: "fairyc-language/5",
 		Instance: instance, Coordinate: coordinate, Source: digest, SourceKind: "local", Role: role,
 		Files: []semanticsnapshot.FileInput{{Path: path, Digest: fileDigest, LineMap: lineMap, Kind: semanticsnapshot.FileKindSource}},
 	}

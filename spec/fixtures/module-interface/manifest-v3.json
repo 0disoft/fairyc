@@ -51,6 +51,12 @@
       "relation": "same"
     },
     {
+      "id": "private-constant",
+      "source": "cases/private-constant/api.fy",
+      "compareTo": "baseline",
+      "relation": "same"
+    },
+    {
       "id": "public-signature",
       "source": "cases/public-signature/api.fy",
       "compareTo": "baseline",

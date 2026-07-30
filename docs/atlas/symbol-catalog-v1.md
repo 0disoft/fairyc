@@ -20,6 +20,10 @@ Every symbol record includes visible and full SymbolId, module, declaration kind
 public/unsafe/foreign flags. It contains no source body, documentation, absolute host path, fuzzy
 score, inferred rename, model text, permission, or executable instruction.
 
+The catalog inherits SymbolId v1's closed five declaration kinds. Private module constants admitted
+by ADR 0220 have no SymbolId and are absent from catalog totals and filters; they are not represented
+as locals or ordinary functions.
+
 ## Exact-name filter
 
 The optional `name` is one ASCII Stage 0 identifier. Matching is exact byte equality and is

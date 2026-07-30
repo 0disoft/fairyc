@@ -1,6 +1,6 @@
 # ADR 0220: Add bounded scalar compile-time evaluation
 
-- Status: Accepted, not implemented
+- Status: Implemented
 - Date: 2026-07-30
 - Product source: `docs/product/02-spec.md`
 - Admission source: `docs/adr/0218-modern-language-concept-admission-boundary.md`
@@ -123,3 +123,18 @@ general-purpose language. The deliberately sharp cost is that the first version 
 compile-time APIs, construct tables or aggregates, loop, recurse, allocate, inspect the target, or
 format custom assertion messages. Those exclusions keep evaluation cheap, portable, cache-honest,
 and removable before MIR.
+
+## Implementation evidence
+
+- The current CST and AST retain module constants and contextual module-item `static_assert`; the
+  previous-revision parser rejects the new item spelling.
+- The 52-case semantic corpus includes one complete compile-time pass and stable `E4301` through
+  `E4305` failures. Semantic facts retain canonical private constant values and typed HIR folds
+  their runtime uses to ordinary scalar literals.
+- The evaluator admits only `bool`, `u8`, `i32`, and `u32`, rejects non-constant operations and
+  dependency cycles, and enforces the fixed 32-call-depth and 65,536-node package budgets.
+- Parser fixtures prove `static_assert` remains contextual, public-interface v3 proves a private
+  constant does not alter the public digest, and package-cache manifest v4 proves the exact `/5`
+  language pin invalidates the unchanged v2 key encoding.
+- Semantic Snapshot and Atlas documentation retain their closed five declaration kinds and state
+  the module-constant omission explicitly rather than relabelling it.
