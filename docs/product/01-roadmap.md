@@ -52,9 +52,11 @@ callable attributes, call-site-only explicit use, `discard`, direct-call-only fu
 `E4201`/`E4202`, public-interface v3, exact language `/4`, and backend-identity evidence without
 turning all return values into warning noise.
 
-1. Evaluate bounded pure `const fn` and `static_assert`. The gate must define the admitted operation
-   set, integer and trap semantics, target dependence, recursion and step budgets, deterministic
-   failure diagnostics, cache identity, MIR or evaluator ownership, and compile-time resource tests.
+1. Implement accepted ADR 0220. It retains the existing private scalar module-constant syntax,
+   uses `@const_eval` on private straight-line scalar functions rather than importing `const fn`,
+   adds module-level `static_assert`, closes the current AST constant-loss gap, fixes checked trap
+   semantics, rejects cycles, caps depth and evaluated nodes, stays frontend-owned, keeps public-
+   interface v3 unchanged, and advances the exact language pin only when its fixtures pass.
 2. Evaluate one caller-source-location intrinsic. The gate must define exact file identity, byte and
    line coordinates, inlining independence, generated-source behavior, reproducible-path policy,
    C transport, and why it does not introduce general default arguments or runtime inspection.

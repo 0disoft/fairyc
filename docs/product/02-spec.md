@@ -81,8 +81,11 @@ expression-bodied function shorthand, and formatter behavior remain follow-up de
 ADR 0218 owns the admission boundary for concepts borrowed from modern C++, Java after 17, Go, and
 other languages. ADR 0219 implements a narrow callable `@must_use` contract with `E4201`/`E4202`,
 direct-call Flow, typed-HIR retention, public-interface v3 invalidation, and no runtime marker.
-Bounded pure `const fn` plus `static_assert` and one
-caller-source-location intrinsic remain candidates rather than current syntax. Construction
+ADR 0220 accepts, but does not yet implement, private `bool`/`u8`/`i32`/`u32` module constants, private
+`@const_eval` straight-line functions, and module-level `static_assert` under deterministic depth
+and step limits. It deliberately avoids the Rust-shaped `const fn` spelling, target-dependent
+execution, public evaluator transport, and any runtime marker. One caller-source-location intrinsic
+remains a candidate rather than current syntax. Construction
 continues through ordinary explicit functions returning `T` or `Result<T, E>`. Static interfaces
 remain blocked behind demonstrated user-generic need and bounded monomorphization. Class inheritance,
 exceptions, implicit conversions, overload sets, unrestricted template metaprogramming, runtime

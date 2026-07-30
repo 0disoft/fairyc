@@ -17,6 +17,7 @@ Diagnostic codes are stable identifiers for a semantic category. Exact wording a
 | `E31xx` | Regions and arenas |
 | `E41xx` | `Option`, `Result`, and propagation |
 | `E42xx` | Return-value use obligations |
+| `E43xx` | Bounded compile-time evaluation |
 | `E51xx` | Unsafe and foreign boundaries |
 | `E61xx` | Target layout and ABI |
 | `E71xx` | Effects and external capabilities |
@@ -74,6 +75,11 @@ Diagnostic codes are stable identifiers for a semantic category. Exact wording a
 | `E4103` | `?` error type is incompatible with the enclosing return type. |
 | `E4201` | `@must_use` is malformed, duplicated, misplaced, or applied to an ineligible result. |
 | `E4202` | A resolved `@must_use` call result is ignored without explicit `discard`. |
+| `E4301` | A module constant or `@const_eval` declaration is malformed, misplaced, public, or otherwise ineligible. |
+| `E4302` | A well-typed expression is outside the admitted compile-time subset. |
+| `E4303` | Compile-time evaluation traps on arithmetic, division, shift, or cast semantics. |
+| `E4304` | A compile-time dependency cycle or deterministic evaluator budget prevents a result. |
+| `E4305` | A module-level `static_assert` evaluates to false. |
 | `E5101` | Raw-pointer or unchecked operation appears outside an unsafe boundary. |
 | `E5102` | Raw foreign signature contains a safe reference. |
 | `E5103` | Foreign unwind, exception, or `longjmp` may cross a Fairy C frame. |
