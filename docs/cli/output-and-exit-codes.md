@@ -187,6 +187,15 @@ selection-byte, or final-output budgets are invocation failure `2`. Zero exact-n
 successful complete output. Workspace/lock failures are `7`, source diagnostics
 are `3`, and compiler invariants or output failures are `4`. No partial catalog is intentionally
 written on pre-output failure; an external writer may retain a prefix when its own write fails.
+`experimental atlas-calls list` writes exactly one canonical
+`fairyc.workspace-call-catalog-json/v0` value with no trailing newline. It requires an exact package
+UID, canonical visible/full SymbolId, outgoing/incoming/both direction, and explicit positive
+package, call, and final-output limits. Invalid or duplicate policy, unknown packages or symbols,
+construction-budget exhaustion, and final-output overflow use code `2`; source diagnostics use `3`;
+manifest, workspace, graph, and lock failures use `7`; internal join contradictions and output
+failures use `4`. A valid zero-call selection is successful complete output. No partial catalog is
+intentionally written before output begins; an external writer may retain a prefix when its own
+write fails.
 `experimental target-spec` writes one deterministic `fairyc.target-spec/v0` JSON document, defined
 by `spec/cli/experimental-target-spec-v0.schema.json`, to stdout. Missing, extra, or unknown target
 IDs produce code `2`, no JSON, and a bounded invocation diagnostic on stderr.

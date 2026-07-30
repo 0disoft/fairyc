@@ -22,6 +22,7 @@ var atlasPackageRoots = []string{
 	modulePath + "/internal/atlasmap",
 	modulePath + "/internal/contextpack",
 	modulePath + "/internal/symbolcatalog",
+	modulePath + "/internal/workspacecallcatalog",
 	modulePath + "/internal/attributedtext",
 	modulePath + "/internal/evidencebundle",
 }

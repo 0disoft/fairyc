@@ -34,6 +34,12 @@ import "github.com/0disoft/fairyc/internal/atlasmap"
 	writeArchitectureFile(t, root, "internal/contextpack/pack.go", `package contextpack
 import "github.com/0disoft/fairyc/internal/semanticsnapshot"
 `)
+	writeArchitectureFile(t, root, "internal/workspacecallcatalog/catalog.go", `package workspacecallcatalog
+import "github.com/0disoft/fairyc/internal/atlasmap"
+`)
+	writeArchitectureFile(t, root, "internal/runtime/atlas.go", `package runtime
+import "github.com/0disoft/fairyc/internal/workspacecallcatalog"
+`)
 	writeArchitectureFile(t, root, "cmd/fairyc-windows-host-smoke/main.go", `package main
 import "github.com/0disoft/fairyc/internal/atlasmap"
 `)
@@ -55,6 +61,11 @@ import "example.com/github.com/0disoft/fairyc/internal/atlasmap"
 			Importer: modulePath + "/internal/mir",
 			Imported: modulePath + "/internal/attributedtext",
 			File:     "internal/mir/mir_test.go",
+		},
+		{
+			Importer: modulePath + "/internal/runtime",
+			Imported: modulePath + "/internal/workspacecallcatalog",
+			File:     "internal/runtime/atlas.go",
 		},
 	}
 	if !reflect.DeepEqual(violations, want) {

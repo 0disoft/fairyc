@@ -48,6 +48,7 @@ type JoinedCall struct {
 // WorkspaceCallIndex is an immutable, bounded reverse-call ledger over a caller-supplied complete
 // exact-current workspace partition set. It does not replace package-local QueryIndex traversal.
 type WorkspaceCallIndex struct {
+	budget   WorkspaceCallBudget
 	usage    WorkspaceCallUsage
 	calls    []JoinedCall
 	outgoing map[WorkspaceSymbol][]int
@@ -77,6 +78,7 @@ func NewWorkspaceCallIndex(
 		return cmp.Compare(left.data.header.PackageInstance, right.data.header.PackageInstance)
 	})
 	index := &WorkspaceCallIndex{
+		budget:   budget,
 		usage:    WorkspaceCallUsage{Packages: len(ordered)},
 		outgoing: make(map[WorkspaceSymbol][]int), incoming: make(map[WorkspaceSymbol][]int),
 		packages: make(map[string]*QueryIndex, len(ordered)),
@@ -173,11 +175,36 @@ func NewWorkspaceCallIndex(
 	return index, nil
 }
 
+func (index *WorkspaceCallIndex) Budget() WorkspaceCallBudget {
+	if index == nil {
+		return WorkspaceCallBudget{}
+	}
+	return index.budget
+}
+
 func (index *WorkspaceCallIndex) Usage() WorkspaceCallUsage {
 	if index == nil {
 		return WorkspaceCallUsage{}
 	}
 	return index.usage
+}
+
+// ResolveSymbol canonicalizes a visible or full SymbolId inside one exact package instance.
+func (index *WorkspaceCallIndex) ResolveSymbol(packageInstance, symbolID string) (WorkspaceSymbol, error) {
+	return index.resolveWorkspaceSymbol(packageInstance, symbolID)
+}
+
+// PackageContext returns detached exact-current identity and completeness facts for one joined
+// package without exposing its mutable implementation index.
+func (index *WorkspaceCallIndex) PackageContext(packageInstance string) (QueryContext, error) {
+	if index == nil {
+		return QueryContext{}, fmt.Errorf("Atlas workspace call index is not initialized")
+	}
+	packageIndex, found := index.packages[packageInstance]
+	if !found {
+		return QueryContext{}, fmt.Errorf("Atlas workspace call package %q is unknown", packageInstance)
+	}
+	return packageIndex.contextFor([]RelationKind{RelationCalls}), nil
 }
 
 func (index *WorkspaceCallIndex) Calls() []JoinedCall {

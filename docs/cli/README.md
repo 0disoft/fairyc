@@ -58,6 +58,14 @@ It emits a checksummed Symbol Catalog v1 page in full-SymbolId order. Optional m
 filters are exact; same-name declarations remain separate and there is no fuzzy search or hidden
 default.
 
+`fairyc experimental atlas-calls list --package-uid <uid> --symbol <symbol-id>
+--direction <outgoing|incoming|both> --max-packages <count> --max-calls <count>
+--max-output-bytes <bytes> [--locked]` consumes the separate exact-current workspace call join. It
+atomically validates the complete manifest workspace under the caller's construction limits, then
+emits one checksummed workspace call catalog v0 for that exact package-qualified symbol and
+direction. It has no default limit, partial join, source text, host path, graph traversal, indirect
+call, or impact claim.
+
 The resulting visible or full ID can drive `fairyc experimental atlas-pack show` or `around`.
 Both require explicit direction, one or more exact relation kinds, record/relation/selection/output
 limits, and an exact package UID; `around` additionally requires a depth from zero through 64. They

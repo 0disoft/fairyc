@@ -844,8 +844,12 @@ contain compiler facts only and are detached from the index. ADR 0225 adds a sep
 in-memory `WorkspaceCallIndex`: it revalidates a complete caller-supplied exact-current partition
 set, joins exact compiler-observed calls by complete declaration key, and exposes detached
 package-qualified outgoing and incoming call ledgers. Package-local query results do not consume
-that ledger. No source excerpt, documentation text, workspace query output, or stable standalone
-query transport is enabled.
+that ledger. ADR 0226 exposes only that direct-call ledger through default-free
+`experimental atlas-calls list`: one exact package UID, one visible/full SymbolId, one explicit
+direction, atomic package/call construction limits, and a final output bound produce the separate
+checksummed `fairyc.workspace-call-catalog-json/v0` value. A zero-call selection is complete and
+successful. No source excerpt, documentation text, workspace graph traversal, transitive impact,
+or stable standalone query transport is enabled.
 
 The first Context Pack encoder now runs those exact-current queries itself and emits one separately
 byte-bounded compact `fairyc.context-pack-json/v1` envelope. It retains exact package, map,
@@ -859,7 +863,7 @@ Atlas exports deterministic, model-neutral facts such as symbols, calls, types, 
 borrows, errors, effects, allocations, unsafe and FFI reachability, source spans, and related tests.
 Unknown or incomplete edges remain explicit rather than being guessed.
 
-ADR 0203 makes the one-way semantic boundary executable. The seven current Atlas/export package
+ADR 0203 makes the one-way semantic boundary executable. The eight current Atlas/export package
 roots may be imported only inside that layer, by `internal/cli` orchestration, or by the Windows
 evidence harness. A repository test parses all `cmd/` and `internal/` Go files, including tests and
 inactive build-tag files, so a new compiler, backend, runtime, or library package cannot consume
@@ -917,10 +921,13 @@ import, default store, or safe-change inference. A separate map-publication poli
 additional text origin/kind support, and multi-symbol or neighborhood evidence composition remain
 future work.
 
-The internal workspace call ledger does not change those command omissions. It proves exact direct
-call joins and reverse callers only for one already verified complete workspace set under explicit
-package and call budgets. It does not traverse across packages, persist a reverse index, join other
-relation families, or infer indirect calls, impact, renames, or safe changes.
+The workspace call ledger does not change those package-local command omissions. ADR 0226 exposes
+only exact direct calls through `experimental atlas-calls list`: package UID, visible/full SymbolId,
+direction, package/call construction budgets, and final output bytes are mandatory. The separate
+canonical workspace call catalog v0 echoes the exact construction budget and usage, writes no
+source body or host path, and succeeds with an explicit empty call list when appropriate. It does
+not traverse across packages, persist a reverse index, join other relation families, or infer
+indirect calls, impact, renames, or safe changes.
 
 The configured Windows host smoke separately measures whole-package canonical rewrite cost after
 workspace analysis and map planning. It performs one untimed warmup and nine raw rewrites of every
@@ -939,7 +946,8 @@ plan are specified in `docs/atlas/semantic-snapshot-v0.md`, `docs/atlas/symbol-i
 `docs/atlas/fymap-transport-v1.md`; the implemented store is specified in
 `docs/atlas/fymap-store-v1.md`; the implemented query layer is specified in
 `docs/atlas/fymap-query-v1.md`; the internal exact workspace call prerequisite is specified in
-`docs/atlas/workspace-call-join-v0.md`; compiler-fact pack output is specified in
+`docs/atlas/workspace-call-join-v0.md`; its experimental direct-call catalog is specified in
+`docs/atlas/workspace-call-catalog-v0.md` and ADR 0226; compiler-fact pack output is specified in
 `docs/atlas/context-pack-v1.md`; the experimental overview command is fixed by ADR 0190, the
 rewrite measurement boundary by ADR 0191, the internal exact symbol catalog by ADR 0192, its
 experimental output command by ADR 0193, and exact-name Symbol Catalog v1 by ADR 0201. ADR 0194

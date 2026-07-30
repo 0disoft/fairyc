@@ -718,6 +718,18 @@ or limit semantics requires an explicit compatibility decision. No decoder, inpu
 cross-version child acceptance, default limit, persistence, authentication, or stable CLI behavior
 is promised.
 
+ADR 0225 adds only an in-memory exact-current workspace call join. Its package-qualified selectors,
+direct-call ledger, and construction budgets are internal query policy rather than a wire format.
+ADR 0226 independently fixes output version `fairyc.workspace-call-catalog/v0`, encoding
+`fairyc.workspace-call-catalog-json/v0`, checksum
+`fairyc.workspace-call-catalog-checksum/v0-sha256`, prefix `fywcall0-sha256-`, exact logical field
+order, direct-call ordering, direction vocabulary, construction budget/usage meanings, and the
+unstable `experimental atlas-calls list` spelling. It changes neither `.fymap` v1 nor Context Pack
+v1. Changing field meaning/order, JSON spelling, checksum input, completion meaning, or selector
+canonicalization requires an explicit compatibility decision. No decoder, cross-version input,
+default budget, persistence, traversal, indirect-call recovery, impact, or stable CLI behavior is
+promised.
+
 Dependency handling is relation-specific:
 
 | Condition | Atlas behavior |

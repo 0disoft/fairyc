@@ -112,6 +112,7 @@ regenerate, or override compiler source.
 - Contained bounded `.fymap` store and current-source validation: internal/atlasmap/store.go, internal/atlasmap/current.go, docs/atlas/fymap-store-v1.md, docs/adr/0187-contained-fymap-store-and-current-source-validation.md
 - Bounded exact-current package-local Atlas queries: internal/atlasmap/query.go, docs/atlas/fymap-query-v1.md, docs/adr/0188-bounded-current-fymap-queries.md
 - Bounded exact-current workspace call join and reverse-call ledger: internal/atlasmap/workspace_call_join.go, docs/atlas/workspace-call-join-v0.md, docs/adr/0225-bounded-exact-current-workspace-call-join.md
+- Canonical workspace call catalog v0 output and experimental CLI: internal/workspacecallcatalog/, internal/cli/atlas_calls.go, docs/atlas/workspace-call-catalog-v0.md, docs/adr/0226-experimental-workspace-call-catalog-command.md
 - Exact-current full-SymbolId-ordered catalog query with optional exact declaration-name filtering: internal/atlasmap/query.go, docs/adr/0192-exact-current-symbol-catalog-query.md, docs/adr/0201-exact-name-symbol-catalog-v1.md
 - Canonical Atlas SymbolId Catalog v1 output and experimental CLI: internal/symbolcatalog/, internal/cli/atlas_symbols.go, docs/atlas/symbol-catalog-v1.md, docs/adr/0193-experimental-symbol-catalog-command.md, docs/adr/0201-exact-name-symbol-catalog-v1.md
 - Canonical compiler-fact-only Atlas Context Pack output: internal/contextpack/, docs/atlas/context-pack-v1.md, docs/adr/0189-canonical-compiler-fact-context-pack-v1.md

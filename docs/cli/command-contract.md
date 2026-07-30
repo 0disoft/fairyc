@@ -98,7 +98,7 @@ form.
 
 ## Implemented experimental compiler surface
 
-The current Go prototype implements twenty-two deliberately unstable developer commands:
+The current Go prototype implements twenty-three deliberately unstable developer commands:
 
 | Command | Purpose | Output |
 | --- | --- | --- |
@@ -111,6 +111,7 @@ The current Go prototype implements twenty-two deliberately unstable developer c
 | `fairyc experimental atlas-pack show --package-uid <uid> --symbol <symbol-id> --direction <outgoing\|incoming\|both> --relation <kind> [--relation <kind>]... --max-records <count> --max-relations <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--locked]` | Compile the manifest-owned workspace, select one exact package and visible/full SymbolId, then retrieve bounded subject facts and filtered relations | Exact canonical `fairyc.context-pack-json/v1` bytes with the same no-newline, compiler-fact-only, no-store, and explicit-limit boundary |
 | `fairyc experimental atlas-pack around --package-uid <uid> --symbol <symbol-id> --direction <outgoing\|incoming\|both> --relation <kind> [--relation <kind>]... --max-records <count> --max-relations <count> --max-depth <depth> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--locked]` | Run deterministic package-local breadth-first traversal from one exact visible/full SymbolId under explicit direction, relation, depth, and size policy | Exact canonical `fairyc.context-pack-json/v1` bytes with explicit incompleteness and no inferred names, dependency joins, free text, or hidden limit |
 | `fairyc experimental atlas-symbols list --package-uid <uid> --kind <kind> [--kind <kind>]... [--module <module>] [--name <identifier>] [--after <full-symbol-id>] --max-symbols <count> --max-selection-bytes <bytes> --max-output-bytes <bytes> [--locked]` | Compile the manifest-owned workspace and page exact current declarations in full-SymbolId order with optional exact module/name filters | One canonical checksummed `fairyc.symbol-catalog-json/v1` value with no newline, source body, fuzzy rank, guessed unique match, map-store path, or hidden limit |
+| `fairyc experimental atlas-calls list --package-uid <uid> --symbol <symbol-id> --direction <outgoing\|incoming\|both> --max-packages <count> --max-calls <count> --max-output-bytes <bytes> [--locked]` | Compile the manifest-owned workspace once, atomically join every exact-current direct call under explicit construction limits, then select one exact package-qualified symbol and direction | One canonical checksummed `fairyc.workspace-call-catalog-json/v0` value with no newline, source body, host path, hidden limit, partial join, traversal, or impact claim |
 | `fairyc experimental atlas-text source --package-uid <uid> --symbol <symbol-id> --origin workspace-authored --max-fragments <count> --max-fragment-bytes <bytes> --max-text-bytes <bytes> --max-output-bytes <bytes> [--locked]` | Compile the manifest-owned workspace, resolve one exact current visible/full SymbolId, and select its workspace-authored declaration bytes under explicit count and byte policy | One canonical checksummed `fairyc.attributed-text-json/v0` value with no newline or host path; a text-budget exclusion is an explicit successful omission, while final-output overflow is atomic failure |
 | `fairyc experimental atlas-text documentation --package-uid <uid> --symbol <symbol-id> --origin workspace-authored --max-fragments <count> --max-fragment-bytes <bytes> --max-text-bytes <bytes> --max-output-bytes <bytes> [--locked]` | Compile the same workspace, resolve one exact current declaration plus its immutable frontend attachment sidecar, and select only exact marker-bearing `///` bytes | The same canonical attributed-text envelope with `declaration-documentation`, or a successful checksummed `kind-unavailable`, safety, or text-budget omission; no source scan, declaration body, map-format change, or host path |
 | `fairyc experimental atlas-evidence show --package-uid <uid> --symbol <symbol-id> --direction <outgoing\|incoming\|both> --relation <kind> [--relation <kind>]... --max-records <count> --max-relations <count> --max-selection-bytes <bytes> --max-fragment-bytes <bytes> --max-text-bytes <bytes> --max-facts-bytes <bytes> --max-text-document-bytes <bytes> --max-output-bytes <bytes> [--locked]` | Compile the manifest-owned workspace once and compose exact-symbol compiler facts, declaration source, and attached documentation from the same retained exact-current state | One canonical checksummed `fairyc.atlas-evidence-json/v0` value whose unchanged independently checksummed children retain `compiler-fact` versus `untrusted-text` authority and explicit component/final bounds |
@@ -176,6 +177,21 @@ successful complete empty catalog. Continuation accepts only a canonical full Sy
 the same module/name/kind-filtered current catalog. The command writes no `.fymap`, cache, or catalog
 file and performs no normalization, prefix, substring, or fuzzy search. Ordinary mode may refresh
 `fairy.lock` before a later filter or budget failure; locked mode is exact and no-write.
+
+`experimental atlas-calls list` prepares that workspace once but consumes the separate exact-current
+`WorkspaceCallIndex`, not the package-local Context Pack query. Package UID, canonical visible or
+full SymbolId, outgoing/incoming/both direction, positive package and call construction limits, and
+a positive final-output limit are mandatory; only `--locked` is optional. Counts are capped at
+65,536 and final bytes at 1,073,741,824. The complete supplied package set must close every direct
+dependency and fit both construction limits before selection; exhaustion is code `2` with no partial
+catalog. A valid subject with no selected calls succeeds with `calls: []` and `complete: true`.
+Output is one canonical no-newline `fairyc.workspace-call-catalog-json/v0` envelope containing only
+package-qualified symbols, exact relative span identity, compiler certainty/provenance, construction
+budget and usage, selected calls, and an integrity checksum. The command writes no map store,
+catalog file, source, cache, artifact, or default path and performs no traversal, indirect-call
+recovery, other relation join, impact analysis, name search, toolchain, process, network request, or
+model call. Ordinary mode may refresh the lock before a later join, selector, or output failure;
+locked mode is exact and no-write.
 
 `experimental atlas-text source` and `documentation` share the exact workspace/compiler/currentness
 preparation but emit the separate attributed-text artifact, never a Context Pack. Package UID,

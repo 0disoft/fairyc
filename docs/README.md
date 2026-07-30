@@ -31,6 +31,7 @@
 - Contained caller-bounded `.fymap` store and current-source reader: docs/atlas/fymap-store-v1.md, internal/atlasmap/store.go, internal/atlasmap/current.go
 - Bounded exact-current package-local `.fymap` queries: docs/atlas/fymap-query-v1.md, internal/atlasmap/query.go
 - Bounded exact-current workspace call join and reverse-call ledger: docs/atlas/workspace-call-join-v0.md, internal/atlasmap/workspace_call_join.go
+- Canonical workspace call catalog v0 output and experimental command: docs/atlas/workspace-call-catalog-v0.md, docs/adr/0226-experimental-workspace-call-catalog-command.md, internal/workspacecallcatalog/, internal/cli/atlas_calls.go
 - Exact-current full-SymbolId-ordered package catalog query with optional exact-name filtering: internal/atlasmap/query.go, docs/adr/0192-exact-current-symbol-catalog-query.md, docs/adr/0201-exact-name-symbol-catalog-v1.md
 - Canonical SymbolId Catalog v1 output and experimental command: docs/atlas/symbol-catalog-v1.md, internal/symbolcatalog/, internal/cli/atlas_symbols.go
 - Canonical compiler-fact-only Context Pack output: docs/atlas/context-pack-v1.md, internal/contextpack/
@@ -75,7 +76,7 @@
 - Planned C-shaped pre-1 source cutover: docs/adr/0136-c-shaped-source-surface.md
 - Constrained C11 transport baseline: docs/adr/0137-c11-transport-baseline.md
 - Diagnostic meanings: docs/diagnostics/catalog-v0.md
-- Atlas semantic snapshot and documentation sidecar, SymbolId, logical package-map plan, transport, contained store, package-local queries, exact-current workspace call join, canonical compiler-fact Context Pack, exact retained-source/documentation attributed text, single-symbol Evidence Bundle, executable one-way import boundary, Phase 4 exit evidence, and exact frontend-owned `///` attachment: docs/atlas/*.md, internal/architecturecontract/, internal/lexer/documentation.go, internal/semanticsnapshot/, internal/symbolidentity/, internal/atlasmap/, internal/contextpack/, internal/attributedtext/, internal/evidencebundle/, internal/workspaceloader/exact_source.go, internal/cli/atlas_text.go, internal/cli/atlas_evidence.go
+- Atlas semantic snapshot and documentation sidecar, SymbolId, logical package-map plan, transport, contained store, package-local queries, exact-current workspace call join and catalog, canonical compiler-fact Context Pack, exact retained-source/documentation attributed text, single-symbol Evidence Bundle, executable one-way import boundary, Phase 4 exit evidence, and exact frontend-owned `///` attachment: docs/atlas/*.md, internal/architecturecontract/, internal/lexer/documentation.go, internal/semanticsnapshot/, internal/symbolidentity/, internal/atlasmap/, internal/workspacecallcatalog/, internal/contextpack/, internal/attributedtext/, internal/evidencebundle/, internal/workspaceloader/exact_source.go, internal/cli/atlas_calls.go, internal/cli/atlas_text.go, internal/cli/atlas_evidence.go
 - Operational standard source: docs/ops/00-operational-contract.md
 - Validation source: VALIDATION.md
 - Agent routing source: .agents/context-map.md

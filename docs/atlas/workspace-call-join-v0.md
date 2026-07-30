@@ -5,6 +5,7 @@
 - Implementation: `internal/atlasmap/workspace_call_join.go`
 - Package-local query prerequisite: `docs/atlas/fymap-query-v1.md`
 - Current-source prerequisite: `docs/atlas/fymap-store-v1.md`
+- Output consumer: `docs/atlas/workspace-call-catalog-v0.md`
 
 ## Purpose
 
@@ -77,11 +78,13 @@ families.
 
 Package-local `show` and `around` still emit `dependency-map-not-joined` and
 `incoming-package-maps-not-joined`, because they do not consume this workspace ledger. Context Pack
-v1 and experimental Atlas commands remain byte-identical and package-local.
+v1 and its package-local experimental commands remain byte-identical. ADR 0226 exposes the joined
+direct-call ledger only through a separate workspace call catalog v0 command.
 
 ## Not enabled
 
-- no workspace `show`, `around`, catalog, Context Pack, Evidence Bundle, or CLI;
+- no workspace `show`, `around`, Context Pack, Evidence Bundle, or graph-traversal CLI; the only
+  output consumer is exact-symbol direct-call catalog v0;
 - no `.fymap` schema or store change;
 - no automatic dependency-map discovery or default budget;
 - no transitive `impact`, semantic `diff`, safe-change, stable anchor, rename, LSP, SCIP, MCP, or

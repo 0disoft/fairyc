@@ -79,62 +79,27 @@ type preparedAtlasQuery struct {
 	snapshot  semanticsnapshot.Snapshot
 }
 
+type preparedAtlasWorkspace struct {
+	workspace    workspaceloader.Workspace
+	snapshot     semanticsnapshot.Snapshot
+	partitions   []atlasmap.Partition
+	expectations map[string]atlasmap.LoadExpectation
+}
+
 func prepareAtlasQuery(
 	sourceRoot, packageUID string,
 	locked bool,
 	stderr io.Writer,
 ) (preparedAtlasQuery, int) {
-	workspace, _, err := loadWorkspaceWithLock(sourceRoot, locked)
-	if err != nil {
-		return preparedAtlasQuery{}, packageFailure(stderr, err)
+	prepared, code := prepareAtlasWorkspace(sourceRoot, locked, stderr)
+	if code != ExitSuccess {
+		return preparedAtlasQuery{}, code
 	}
-	input, err := workspace.SemanticInput()
-	if err != nil {
-		return preparedAtlasQuery{}, packageFailure(stderr, err)
-	}
-	result, err := compiler.CheckPackages(input)
-	if err != nil {
-		return preparedAtlasQuery{}, internalError(stderr)
-	}
-	if len(result.Semantic.Diagnostics) != 0 {
-		if err := writeWorkspaceDiagnostics(stderr, workspace, result.Semantic.Diagnostics); err != nil {
-			return preparedAtlasQuery{}, ExitInternalFailure
-		}
-		return preparedAtlasQuery{}, ExitSourceDiagnostics
-	}
-	if len(result.Semantic.Unsupported) != 0 {
-		if err := writeUnsupportedSemantics(stderr, result.Semantic.Unsupported); err != nil {
-			return preparedAtlasQuery{}, ExitInternalFailure
-		}
-		return preparedAtlasQuery{}, ExitSourceDiagnostics
-	}
-	if !result.Verified {
-		return preparedAtlasQuery{}, internalError(stderr)
-	}
-	compilerBuild, err := buildidentity.Current()
-	if err != nil {
-		return preparedAtlasQuery{}, internalError(stderr)
-	}
-	snapshot, partitions, err := atlasmap.PrepareWorkspace(workspace, result, compilerBuild)
-	if err != nil {
-		return preparedAtlasQuery{}, internalError(stderr)
-	}
-	expectations, err := atlasmap.CurrentWorkspaceExpectations(workspace, result, compilerBuild)
-	if err != nil {
-		return preparedAtlasQuery{}, internalError(stderr)
-	}
-	var selected atlasmap.Partition
-	found := false
-	for _, partition := range partitions {
-		if partition.Header().PackageUID == packageUID {
-			selected, found = partition, true
-			break
-		}
-	}
+	selected, found := selectAtlasPartition(prepared.partitions, packageUID)
 	if !found {
 		return preparedAtlasQuery{}, invocationError(stderr, fmt.Sprintf("workspace has no package UID %q", packageUID))
 	}
-	expectation, found := expectations[selected.Header().PackageInstance]
+	expectation, found := prepared.expectations[selected.Header().PackageInstance]
 	if !found {
 		return preparedAtlasQuery{}, internalError(stderr)
 	}
@@ -142,7 +107,65 @@ func prepareAtlasQuery(
 	if err != nil {
 		return preparedAtlasQuery{}, internalError(stderr)
 	}
-	return preparedAtlasQuery{workspace: workspace, index: index, snapshot: snapshot}, ExitSuccess
+	return preparedAtlasQuery{workspace: prepared.workspace, index: index, snapshot: prepared.snapshot}, ExitSuccess
+}
+
+func prepareAtlasWorkspace(
+	sourceRoot string,
+	locked bool,
+	stderr io.Writer,
+) (preparedAtlasWorkspace, int) {
+	workspace, _, err := loadWorkspaceWithLock(sourceRoot, locked)
+	if err != nil {
+		return preparedAtlasWorkspace{}, packageFailure(stderr, err)
+	}
+	input, err := workspace.SemanticInput()
+	if err != nil {
+		return preparedAtlasWorkspace{}, packageFailure(stderr, err)
+	}
+	result, err := compiler.CheckPackages(input)
+	if err != nil {
+		return preparedAtlasWorkspace{}, internalError(stderr)
+	}
+	if len(result.Semantic.Diagnostics) != 0 {
+		if err := writeWorkspaceDiagnostics(stderr, workspace, result.Semantic.Diagnostics); err != nil {
+			return preparedAtlasWorkspace{}, ExitInternalFailure
+		}
+		return preparedAtlasWorkspace{}, ExitSourceDiagnostics
+	}
+	if len(result.Semantic.Unsupported) != 0 {
+		if err := writeUnsupportedSemantics(stderr, result.Semantic.Unsupported); err != nil {
+			return preparedAtlasWorkspace{}, ExitInternalFailure
+		}
+		return preparedAtlasWorkspace{}, ExitSourceDiagnostics
+	}
+	if !result.Verified {
+		return preparedAtlasWorkspace{}, internalError(stderr)
+	}
+	compilerBuild, err := buildidentity.Current()
+	if err != nil {
+		return preparedAtlasWorkspace{}, internalError(stderr)
+	}
+	snapshot, partitions, err := atlasmap.PrepareWorkspace(workspace, result, compilerBuild)
+	if err != nil {
+		return preparedAtlasWorkspace{}, internalError(stderr)
+	}
+	expectations, err := atlasmap.CurrentWorkspaceExpectations(workspace, result, compilerBuild)
+	if err != nil {
+		return preparedAtlasWorkspace{}, internalError(stderr)
+	}
+	return preparedAtlasWorkspace{
+		workspace: workspace, snapshot: snapshot, partitions: partitions, expectations: expectations,
+	}, ExitSuccess
+}
+
+func selectAtlasPartition(partitions []atlasmap.Partition, packageUID string) (atlasmap.Partition, bool) {
+	for _, partition := range partitions {
+		if partition.Header().PackageUID == packageUID {
+			return partition, true
+		}
+	}
+	return atlasmap.Partition{}, false
 }
 
 func parseAtlasPackOverviewOptions(arguments []string) (atlasPackOverviewOptions, error) {

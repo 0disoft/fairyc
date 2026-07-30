@@ -21,8 +21,8 @@ adapter should require an explicit architecture decision.
 
 1. Treat these module roots as the complete current Atlas/export side of the one-way boundary:
    `internal/semanticsnapshot`, `internal/symbolidentity`, `internal/atlasmap`,
-   `internal/contextpack`, `internal/symbolcatalog`, `internal/attributedtext`, and
-   `internal/evidencebundle`. `semanticsnapshot` belongs on the export side because it consumes
+   `internal/contextpack`, `internal/symbolcatalog`, `internal/workspacecallcatalog`,
+   `internal/attributedtext`, and `internal/evidencebundle`. `semanticsnapshot` belongs on the export side because it consumes
    completed HIR/MIR and must never become a compiler input.
 2. Permit direct imports of those roots only from:
    - the Atlas/export roots themselves;
@@ -49,9 +49,10 @@ adapter should require an explicit architecture decision.
 ## Evidence
 
 - The repository test parses the current `cmd/` and `internal/` trees and requires zero violations.
-- A mutation-sensitive temporary tree introduces `internal/compiler -> internal/contextpack` and
-  `internal/mir test -> internal/attributedtext`; both exact violations are required in canonical
-  order.
+- A mutation-sensitive temporary tree introduces `internal/compiler -> internal/contextpack`,
+  `internal/mir test -> internal/attributedtext`, and
+  `internal/runtime -> internal/workspacecallcatalog`; all exact violations are required in
+  canonical order.
 - The same fixture proves that `internal/cli`, Atlas-to-Atlas imports, and the Windows evidence
   harness remain allowed, while comments and lookalike external paths do not create false matches.
 - A malformed Go file and missing policy root fail closed with a repository-relative diagnostic.
