@@ -15,8 +15,12 @@ func TestGenerateReturnsClosedDeterministicREL32Probe(t *testing.T) {
 	if first.SourceSymbol != SourceSymbol || first.TargetSymbol != TargetSymbol ||
 		first.VariantObject != VariantObject || first.VariantSource != VariantSource || first.VariantTarget != VariantTarget ||
 		first.ReceiptSection != ReceiptSection || first.ReceiptMagic != ReceiptMagic ||
-		first.ExpectedExit != ExpectedExit {
+		first.SourceLine != SourceLine || first.ExpectedExit != ExpectedExit {
 		t.Fatalf("Generate() identity = %+v", first)
+	}
+	lines := strings.Split(first.CallerSource, "\n")
+	if first.SourceLine == 0 || int(first.SourceLine) > len(lines) || !strings.Contains(lines[first.SourceLine-1], "int "+first.SourceSymbol+"(") {
+		t.Fatalf("Generate() source-line contract = %d in %q", first.SourceLine, first.CallerSource)
 	}
 	for _, fragment := range []string{
 		"__declspec(noinline) int fy_rel32_source",

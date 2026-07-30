@@ -357,7 +357,9 @@ unwind behavior for AMD64
 PE32+ console identity, aligned
 headers/sections, and an executable entry point. ADR 0238 additionally validates exact
 function-targeted `.debug$S` SECTION/SECREL object pairs and the final PE RSDS-to-MSF-7-PDB
-GUID/age association, but does not decode full CodeView/PDB records or run a symbolicator canary.
+GUID/age association. ADR 0239 additionally resolves the exact source function and `caller.c` line
+through system DbgHelp at both profiles, but does not decode full CodeView/PDB records or exercise
+broader optimized symbolication.
 Every local MSVC compile in the same lane now also parses its intermediate `.obj` as raw AMD64 COFF
 before cleanup, including `.text$...`, `.bss`, primary symbols, relocation targets and AMD64 types,
 and exact COMDAT section-definition selection. ADR 0231 adds two versioned raw-object vectors for
@@ -378,7 +380,7 @@ contributed ANY-COMDAT function parents with distinct unwind children and proves
 is absent from the final image. ADR 0237 links one exact generated object and proves all six AMD64
 `REL32` through `REL32_5` formulas at low and optimized profiles. Whole compiler-produced object identity, remaining relocation
 formulas and unwind tails, non-unwind and broader archive retention and COMDAT selection policies,
-complete CodeView/PDB records and symbolication, and a fresh hosted object receipt remain
+complete CodeView/PDB records and broader symbolication, and a fresh hosted object receipt remain
 absent, so the target evidence marker stays fail-closed.
 The fifty-three local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
 runtime-function ordering and code coverage plus referenced version 1 and version 2 unwind-record
@@ -835,7 +837,7 @@ non-authority to separate executable oracles and records what each still does no
 ## Later capability gates
 
 - `x86_64-linux-musl`: requires a separate libc, sysroot, startup, loader, and static-distribution profile.
-- `x86_64-windows-msvc`: the TargetSpec, scalar/LLP64 C-emission product builds at both profiles, closed FY-to-project-C SystemHeap, Buffer, Arena/Region lifecycle, and UTF-8 calls, an eight-case local layout probe, 15-case host-independent Microsoft x64 classifier, 12-case same-MSVC native crossing, one generated-Fairy small/large struct-result crossing under C11 and C17 consumer modes, bounded PE32+ executable inspection, structural live-COFF object/archive inspection, versioned exact synthetic COFF symbol/COMDAT/relocation fixtures, inspected cross-object `REL32` through `REL32_5`, `ADDR64`, complete three-field unwind `.pdata` `ADDR32NB`, function-targeted CodeView `SECTION`/`SECREL`, and final PE/PDB identity evidence, one exact archive extraction and pick-any COMDAT final-selection proof, selected-parent retention and discarded-parent elimination proofs for direct associative unwind, static version-1/version-2 unwind-structure inspection, and a three-case native exception/virtual-walk probe exist, but complete hosted LLP64 and same-commit COFF evidence, broader and bidirectional source-level Fairy crossings, independent or register-inspected calls, remaining relocation formulas and unwind tails, non-unwind and broader archive/COMDAT policies, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, complete UCRT/VCRuntime and deployment evidence, distribution, full CodeView/PDB semantics, and debugger/symbolicator fixtures remain required.
+- `x86_64-windows-msvc`: the TargetSpec, scalar/LLP64 C-emission product builds at both profiles, closed FY-to-project-C SystemHeap, Buffer, Arena/Region lifecycle, and UTF-8 calls, an eight-case local layout probe, 15-case host-independent Microsoft x64 classifier, 12-case same-MSVC native crossing, one generated-Fairy small/large struct-result crossing under C11 and C17 consumer modes, bounded PE32+ executable inspection, structural live-COFF object/archive inspection, versioned exact synthetic COFF symbol/COMDAT/relocation fixtures, inspected cross-object `REL32` through `REL32_5`, `ADDR64`, complete three-field unwind `.pdata` `ADDR32NB`, function-targeted CodeView `SECTION`/`SECREL`, final PE/PDB identity, and one system-DbgHelp function/line canary, one exact archive extraction and pick-any COMDAT final-selection proof, selected-parent retention and discarded-parent elimination proofs for direct associative unwind, static version-1/version-2 unwind-structure inspection, and a three-case native exception/virtual-walk probe exist, but complete hosted LLP64 and same-commit COFF evidence, broader and bidirectional source-level Fairy crossings, independent or register-inspected calls, remaining relocation formulas and unwind tails, non-unwind and broader archive/COMDAT policies, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, complete UCRT/VCRuntime and deployment evidence, distribution, full CodeView/PDB semantics, and broader debugger/symbolicator fixtures remain required.
 - QBE or another fast backend: requires stable internal semantics, interpreter and C oracles, ABI coverage, and measured edit-build benefit.
 - LLVM backend: requires representative workloads that justify optimization and distribution cost after simpler paths are exhausted.
 - Generics and `Vec<T>`: require non-generic stability plus compile-time, code-size, active-payload, and diagnostics fixtures.

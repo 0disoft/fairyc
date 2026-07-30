@@ -57,7 +57,8 @@ source, named-stream, DBI, TPI, IPI, global/public-symbol, or frame-data records
 specific object pair became a particular PDB record; retain or publish symbols; provide source-link
 or path remapping; exercise FASTLINK, incremental linking, LTCG, ICF debug attribution, another
 toolchain, or hosted same-commit retrieval; or define a stable public debug-artifact format. A real
-debugger/symbolicator canary remains required before any product debugging claim.
+ADR 0239 adds one independent system-DbgHelp function-and-line canary. Broader debugger,
+symbol-store, source-retrieval, and product debugging claims remain gated.
 
 ## External basis
 

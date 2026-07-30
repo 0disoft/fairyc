@@ -11,6 +11,7 @@ const (
 	VariantSource  = "fy_vsrc"
 	VariantTarget  = "fy_vdst"
 	ReceiptSection = ".fyreloc"
+	SourceLine     = uint32(9)
 	ExpectedExit   = int32(0)
 )
 
@@ -31,6 +32,7 @@ type Unit struct {
 	VariantTarget  string
 	ReceiptSection string
 	ReceiptMagic   [16]byte
+	SourceLine     uint32
 	ExpectedExit   int32
 }
 
@@ -42,7 +44,7 @@ func Generate() Unit {
 		SourceSymbol: SourceSymbol, TargetSymbol: TargetSymbol,
 		ReceiptSymbol: ReceiptSymbol, SourceObject: SourceObject, TargetObject: TargetObject,
 		VariantObject: VariantObject, VariantSource: VariantSource, VariantTarget: VariantTarget,
-		ReceiptSection: ReceiptSection, ReceiptMagic: ReceiptMagic, ExpectedExit: ExpectedExit,
+		ReceiptSection: ReceiptSection, ReceiptMagic: ReceiptMagic, SourceLine: SourceLine, ExpectedExit: ExpectedExit,
 	}
 }
 

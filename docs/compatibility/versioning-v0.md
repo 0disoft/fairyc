@@ -317,6 +317,9 @@ linker interface.
 ADR 0238 applies it to private CodeView pair reports, `/Z7` probe inputs, MSF directory parsing, and
 PE/PDB GUID-age association. This validates local ephemeral evidence only; it does not version or
 publish a PDB format, public debug mode, symbol store, debugger contract, or source-retention policy.
+ADR 0239 keeps the system-DbgHelp function-and-line receipt equally private and ephemeral. Its exact
+probe name and file basename may evolve with synchronized canary and evidence updates; it does not
+stabilize a debugger API, public symbol surface, source path, PDB retention, or product debug mode.
 Microsoft x64 unwind inspection is likewise an internal validation policy. Neither the observed
 runtime-function count nor version-1/version-2 mix is stable. Future semantic epilog, handler,
 or chain fixtures require an explicit unwind-contract decision before they can become target

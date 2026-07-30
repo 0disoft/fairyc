@@ -453,10 +453,12 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   `S + A - (P + 4 + n)` in the low and optimized final images while its trailing marker bytes stay
   unchanged. ADR 0238 compiles the two C inputs with `/Z7`, requires exact function-targeted
   `.debug$S` `SECREL`/`SECTION` pairs and object-level formulas, and binds the final PE RSDS GUID/age
-  to the bounded MSF 7 PDB information stream at both profiles. The driver still removes every temporary
+  to the bounded MSF 7 PDB information stream at both profiles. ADR 0239 then requires system
+  DbgHelp to resolve the exact source-function start to its name and `caller.c` line with zero
+  displacement. The driver still removes every temporary
   object, archive, map, PDB, and image. This is not
   a stable product object or library format, proof of remaining relocation formulas or unwind
-  tails, non-unwind or broader archive/COMDAT policies, complete CodeView/PDB semantics,
+  tails, non-unwind or broader archive/COMDAT policies, complete CodeView/PDB semantics, broader
   symbolication, unwind fixture, or fresh hosted same-commit receipt.
 - `internal/pecoff` additionally maps the exception directory through `.pdata` and every referenced
   file-backed unwind record. `RUNTIME_FUNCTION` entries must be 12-byte, sorted, nonoverlapping,
