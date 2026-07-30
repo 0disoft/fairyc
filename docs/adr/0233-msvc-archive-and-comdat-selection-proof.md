@@ -77,9 +77,10 @@ the preceding probes, the smoke now inspects 53 linked target or probe PE images
 `IMAGE_COMDAT_SELECT_ANY` permits any candidate to win, so input order is an exercised dimension,
 not a promised selection rule. This proof covers one ordinary MSVC archive, one demanded member,
 one unrequested member, one pick-any read-only data COMDAT, and one direct competitor. ADR 0235
-separately binds the selected function parent to its direct associative unwind children. This proof
+separately binds the selected function parent to its direct associative unwind children, and ADR
+0236 proves elimination of one losing ANY-COMDAT function's distinct unwind payload. This proof
 does not prove cyclic archives, rescans, `/WHOLEARCHIVE`, import libraries, weak externals,
-discarded-parent or non-unwind associative retention, `NODUPLICATES`, `SAME_SIZE`, `EXACT_MATCH`, or `LARGEST` final selection,
+non-unwind associative retention, `NODUPLICATES`, `SAME_SIZE`, `EXACT_MATCH`, or `LARGEST` final selection,
 identical-code folding, incremental linking, LTCG, debug provenance, non-MSVC linkers, a stable map
 syntax, a public Fairy library format, or hosted same-commit evidence.
 

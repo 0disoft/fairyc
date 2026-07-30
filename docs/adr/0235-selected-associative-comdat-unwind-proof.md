@@ -51,9 +51,10 @@ object contains a demanded function root plus direct associative `.pdata` and `.
 and all three raw `.pdata` addends plus the exact parent and unwind map symbols reproduce the unique
 final runtime-function entry. All 53 PE images still cross the bounded structural and unwind inspectors.
 
-This proves retention of the selected parent's unwind children. It does not prove that a discarded
-competing parent loses every associative child, nested association chains, non-unwind associative
-data, `NODUPLICATES`, `SAME_SIZE`, `EXACT_MATCH`, or `LARGEST` selection, cyclic archives,
+This proves retention of the selected parent's unwind children. ADR 0236 separately proves that one
+discarded ANY-COMDAT function loses its distinct direct unwind payload. Neither decision proves
+nested association chains, non-unwind associative data, handler or chained children,
+`NODUPLICATES`, `SAME_SIZE`, `EXACT_MATCH`, or `LARGEST` selection, cyclic archives,
 `/WHOLEARCHIVE`, incremental linking, LTCG, non-MSVC linkers, or hosted same-commit evidence.
 
 ## External basis

@@ -306,6 +306,10 @@ ADR 0235 applies that internal-policy boundary to the selected-parent associativ
 direct `.pdata`/`.xdata` section relationships, map-owner check, and final runtime-function binding.
 Those receipts may evolve with synchronized inspectors, probes, mutations, and evidence docs; they
 do not define a public COMDAT policy, unwind artifact, linker API, or serialized Fairy contract.
+ADR 0236 applies the same internal-policy boundary to the two-candidate ANY-COMDAT elimination
+report, candidate-specific unwind digests, raw-section absence scan, and mixed C11/C++20 probe
+inputs. None of those validation identities admits C++ as Fairy C source or versions a public
+linker, object, unwind, or security-setting contract.
 Microsoft x64 unwind inspection is likewise an internal validation policy. Neither the observed
 runtime-function count nor version-1/version-2 mix is stable. Future semantic epilog, handler,
 or chain fixtures require an explicit unwind-contract decision before they can become target

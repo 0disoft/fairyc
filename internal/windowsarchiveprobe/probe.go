@@ -7,6 +7,7 @@ const (
 	UnusedMember     = "unused.obj"
 	DirectObject     = "direct.obj"
 	DemandSymbol     = "fy_archive_target"
+	DiscardSymbol    = "fy_associative_candidate"
 	UnusedSymbol     = "fy_archive_unused"
 	COMDATSymbol     = "fy_pick_any_value"
 	ReceiptSection   = ".fysel"
@@ -28,6 +29,7 @@ type Unit struct {
 	UnusedMember     string
 	DirectObject     string
 	DemandSymbol     string
+	DiscardSymbol    string
 	UnusedSymbol     string
 	COMDATSymbol     string
 	ReceiptSection   string
@@ -44,7 +46,7 @@ func Generate() Unit {
 		CallerSource: callerSource, ChosenSource: chosenSource, UnusedSource: unusedSource,
 		DirectSource: directSource, ArchiveName: ArchiveName, SelectedMember: SelectedMember,
 		UnusedMember: UnusedMember, DirectObject: DirectObject, DemandSymbol: DemandSymbol,
-		UnusedSymbol: UnusedSymbol, COMDATSymbol: COMDATSymbol, ReceiptSection: ReceiptSection,
+		DiscardSymbol: DiscardSymbol, UnusedSymbol: UnusedSymbol, COMDATSymbol: COMDATSymbol, ReceiptSection: ReceiptSection,
 		ReceiptMagic: ReceiptMagic, ArchiveCandidate: ArchiveCandidate,
 		DirectCandidate: DirectCandidate, ExpectedExit: ExpectedExit,
 	}
@@ -56,25 +58,29 @@ const callerSource = `/* fairyc Microsoft archive and COMDAT proof: caller and f
 typedef int (__cdecl *fy_archive_function)(int);
 
 extern int fy_archive_target(int value);
+extern int fy_associative_candidate(int value);
 extern const int fy_pick_any_value;
 
 struct fy_archive_selection_receipt {
     unsigned char magic[16];
     fy_archive_function target;
     const int *selected_value;
+    fy_archive_function selected_parent;
 };
 
 #pragma section(".fysel", read)
 __declspec(allocate(".fysel")) const struct fy_archive_selection_receipt fy_archive_receipt = {
     { 'F', 'Y', 'A', 'R', '-', 'C', 'O', 'M', 'D', 'A', 'T', '-', 'V', '0', '0', '!' },
     fy_archive_target,
-    &fy_pick_any_value
+    &fy_pick_any_value,
+    fy_associative_candidate
 };
 
 int main(void) {
     int selected;
     if (fy_archive_receipt.target != fy_archive_target ||
         fy_archive_receipt.selected_value != &fy_pick_any_value ||
+        fy_archive_receipt.selected_parent != fy_associative_candidate ||
         fy_archive_receipt.magic[0] != 'F' || fy_archive_receipt.magic[15] != '!') {
         return 11;
     }
@@ -82,17 +88,30 @@ int main(void) {
     if (selected != 17 && selected != 23) {
         return 12;
     }
-    return fy_archive_receipt.target(40) == 41 ? 0 : 13;
+    if (fy_archive_receipt.target(40) != 41) {
+        return 13;
+    }
+    return fy_archive_receipt.selected_parent(40) == 42 ? 0 : 14;
 }
 `
 
 const chosenSource = `/* fairyc Microsoft archive and COMDAT proof: demanded archive member */
-extern const __declspec(selectany) int fy_pick_any_value = 17;
+extern "C" const __declspec(selectany) int fy_pick_any_value = 17;
 
-__declspec(noinline) int fy_archive_target(int value) {
+extern "C" __declspec(noinline) inline int fy_associative_candidate(int value) {
+    volatile int discarded_slots[257];
+    discarded_slots[0] = value;
+    return discarded_slots[0] + 2;
+}
+
+extern "C" __declspec(noinline) int fy_archive_target(int value) {
     volatile int unwind_slots[8];
     unwind_slots[0] = value;
     return unwind_slots[0] + 1;
+}
+
+extern "C" __declspec(noinline) int fy_chosen_parent_anchor(int value) {
+    return fy_associative_candidate(value);
 }
 `
 
@@ -103,9 +122,15 @@ __declspec(noinline) int fy_archive_unused(int value) {
 `
 
 const directSource = `/* fairyc Microsoft archive and COMDAT proof: direct competing COMDAT */
-extern const __declspec(selectany) int fy_pick_any_value = 23;
+extern "C" const __declspec(selectany) int fy_pick_any_value = 23;
 
-__declspec(noinline) int fy_direct_anchor(void) {
-    return fy_pick_any_value;
+extern "C" __declspec(noinline) inline int fy_associative_candidate(int value) {
+    volatile int discarded_slots[521];
+    discarded_slots[0] = value;
+    return discarded_slots[0] + 2;
+}
+
+extern "C" __declspec(noinline) int fy_direct_anchor(int value) {
+    return fy_pick_any_value + fy_associative_candidate(value);
 }
 `

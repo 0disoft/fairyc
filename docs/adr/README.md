@@ -245,6 +245,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0233-msvc-archive-and-comdat-selection-proof.md`: binds the preferred Microsoft archive index, exact extracted and unused members, pick-any COMDAT candidates, MSVC map owners, final-image addresses and value, and four low/optimized input-order executions.
 - `0234-amd64-address-and-pdata-relocation-proof.md`: binds one receipt `ADDR64` pointer and all three unwind `.pdata` `ADDR32NB` relocations from exact section-indexed object records and MSVC map symbols to the low/optimized final images.
 - `0235-selected-associative-comdat-unwind-proof.md`: binds a selected archive function COMDAT to its direct associative `.pdata` and `.xdata` children, all three raw `.pdata` addends, exact archive-member map owners, and the final runtime-function entry across the existing four archive links.
+- `0236-discarded-associative-comdat-elimination-proof.md`: proves both exact external ANY-COMDAT function parents reached MSVC LINK, binds the selected unwind children, requires the losing `.xdata` payload to be absent from every runtime-function reference and file-backed final section, and closes `.pdata` outside the exception directory to zero bytes.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

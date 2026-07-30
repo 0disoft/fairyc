@@ -213,7 +213,8 @@ func BuildWindowsMSVCRelocationProbe(toolchain WindowsHostToolchain, profile Pro
 	}, windowsMSVCBuildOptions{CaptureMap: true})
 }
 
-// BuildWindowsMSVCArchiveProbe compiles four C11 translation units separately, archives the
+// BuildWindowsMSVCArchiveProbe compiles one C11 caller, one C11 unused member, and two C++20
+// COMDAT candidates separately, archives the demanded and unused members, then links the
 // demanded and unused members with LIB, and links direct-first and archive-first input orders with
 // exact MSVC map files. IMAGE_COMDAT_SELECT_ANY does not promise which candidate wins.
 func BuildWindowsMSVCArchiveProbe(toolchain WindowsHostToolchain, profile Profile, callerSource, chosenSource, unusedSource, directSource string) ([]WindowsMSVCArchiveArtifact, error) {
@@ -237,9 +238,9 @@ func BuildWindowsMSVCArchiveProbe(toolchain WindowsHostToolchain, profile Profil
 	defer os.RemoveAll(temporaryRoot)
 	sources := []windowsMSVCSource{
 		{Name: "caller.c", Contents: callerSource},
-		{Name: "chosen.c", Contents: chosenSource},
+		{Name: "chosen.cpp", Contents: chosenSource},
 		{Name: "unused.c", Contents: unusedSource},
-		{Name: "direct.c", Contents: directSource},
+		{Name: "direct.cpp", Contents: directSource},
 	}
 	optimization := "/Od"
 	if profile == OptimizedProfile {
@@ -261,8 +262,18 @@ func BuildWindowsMSVCArchiveProbe(toolchain WindowsHostToolchain, profile Profil
 			// per-function COMDAT after the archive member had contributed to the image.
 			functionPackaging = "/Gy-"
 		}
+		languageStandard := "/std:c11"
+		languageMode := "/TC"
+		bufferSecurity := "/GS"
+		if filepath.Ext(source.Name) == ".cpp" {
+			languageStandard = "/std:c++20"
+			languageMode = "/TP"
+			// Keep the competing unwind payloads free of __GSHandlerCheck relocations so
+			// the section-collection oracle compares only self-contained unwind bytes.
+			bufferSecurity = "/GS-"
+		}
 		arguments := []string{
-			"/nologo", "/std:c11", "/TC", "/W4", "/WX", "/MT", optimization, functionPackaging, "/c",
+			"/nologo", languageStandard, languageMode, "/W4", "/WX", "/MT", bufferSecurity, optimization, functionPackaging, "/c",
 			sourcePath, "/Fo:" + objectPath,
 		}
 		if _, err := runWindowsHostCommand(toolchain.Path, toolchain.Environment, temporaryRoot, arguments...); err != nil {

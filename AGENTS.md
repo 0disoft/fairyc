@@ -70,6 +70,7 @@ regenerate, or override compiler source.
 - Exact AMD64 ADDR64 and unwind `.pdata` ADDR32NB object-to-image proof: internal/pecoff/address_link.go, internal/windowsrelocationprobe/, internal/cdriver/, cmd/fairyc-windows-host-smoke/, docs/adr/0234-amd64-address-and-pdata-relocation-proof.md
 - Exact MSVC archive extraction and pick-any COMDAT final-selection proof: internal/pecoff/archive.go, internal/pecoff/archive_link.go, internal/windowsarchiveprobe/, internal/cdriver/, cmd/fairyc-windows-host-smoke/, docs/adr/0233-msvc-archive-and-comdat-selection-proof.md
 - Exact selected-parent associative `.pdata`/`.xdata` COMDAT proof: internal/pecoff/associative_link.go, internal/windowsarchiveprobe/, internal/cdriver/, cmd/fairyc-windows-host-smoke/, docs/adr/0235-selected-associative-comdat-unwind-proof.md
+- Exact discarded-parent associative unwind elimination proof: internal/pecoff/discarded_associative_link.go, internal/windowsarchiveprobe/, internal/cdriver/, cmd/fairyc-windows-host-smoke/, docs/adr/0236-discarded-associative-comdat-elimination-proof.md
 - Resolved package graph fixtures: spec/fixtures/package/manifest-v1.json with historical manifest-v0.json coverage
 - Resolved package graph validation and lookup: internal/packagegraph/
 - Resolved package graph fixture runner: internal/packagefixture/

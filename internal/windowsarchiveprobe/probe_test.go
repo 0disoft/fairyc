@@ -22,12 +22,15 @@ func TestGenerateIsDeterministicAndClosesArchiveSelectionInputs(t *testing.T) {
 	}{
 		{first.CallerSource, `#pragma section(".fysel", read)`},
 		{first.CallerSource, "fy_archive_target"},
+		{first.CallerSource, "fy_associative_candidate"},
 		{first.CallerSource, "&fy_pick_any_value"},
 		{first.ChosenSource, "__declspec(selectany)"},
 		{first.ChosenSource, "= 17"},
+		{first.ChosenSource, "discarded_slots[257]"},
 		{first.UnusedSource, "fy_archive_unused"},
 		{first.DirectSource, "__declspec(selectany)"},
 		{first.DirectSource, "= 23"},
+		{first.DirectSource, "discarded_slots[521]"},
 	}
 	for _, check := range checks {
 		if !strings.Contains(check.text, check.want) {

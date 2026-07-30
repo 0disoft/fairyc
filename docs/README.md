@@ -48,6 +48,7 @@
 - Exact AMD64 REL32 object-to-image formula proof: internal/pecoff/relocation_link.go, internal/windowsrelocationprobe/, docs/adr/0232-amd64-rel32-object-to-image-proof.md
 - Exact MSVC archive extraction and pick-any COMDAT final-selection proof: internal/pecoff/archive.go, internal/pecoff/archive_link.go, internal/windowsarchiveprobe/, docs/adr/0233-msvc-archive-and-comdat-selection-proof.md
 - Exact selected-parent associative `.pdata`/`.xdata` COMDAT proof: internal/pecoff/associative_link.go, internal/windowsarchiveprobe/, docs/adr/0235-selected-associative-comdat-unwind-proof.md
+- Exact discarded-parent associative unwind elimination proof: internal/pecoff/discarded_associative_link.go, internal/windowsarchiveprobe/, docs/adr/0236-discarded-associative-comdat-elimination-proof.md
 - Exact AMD64 ADDR64 and unwind `.pdata` ADDR32NB object-to-image proof: internal/pecoff/address_link.go, internal/windowsrelocationprobe/, docs/adr/0234-amd64-address-and-pdata-relocation-proof.md
 - Whole-package cache-key v2 fixtures and bounded store runner: spec/fixtures/package-cache/manifest-v5.json with historical v1 through v4, internal/packagecache/, internal/packagecachefixture/
 - Package-stable function IDs, process-local MIR slice reassembly, process-bound codec, and all-hit reuse coordinator: internal/packageartifact/, internal/workspacecompiler/, docs/package/package-function-id-v1.md, docs/package/process-local-mir-artifact-v0.md
