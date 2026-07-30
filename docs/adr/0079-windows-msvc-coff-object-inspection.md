@@ -37,9 +37,11 @@ without retaining build debris.
 7. The configured Windows smoke therefore gates `build-host`, all fourteen `run-host` outcomes, and
    both profiles of the layout and ABI probes on COFF object structure. Layout receipts must contain
    `probe.obj`; ABI receipts must contain `caller.obj` followed by `callee.obj`.
-8. This does not clear `pe-coff-object-fixtures`. Exact symbols, section ordering, COMDAT selection,
-   relocation types and addends, `.pdata`/`.xdata`, CodeView/PDB, compiler baselines, and hosted
-   object receipts require separate versioned fixtures.
+8. This decision alone does not clear `pe-coff-object-fixtures`. ADR 0231 later adds versioned local
+   fixtures for exact ordered primary symbols, AMD64 relocation types, and ANY and associative
+   COMDAT selection. Relocation formulas and linked addends, final-link COMDAT winner selection,
+   `.pdata`/`.xdata`, CodeView/PDB, compiler baselines, and a fresh hosted same-commit object receipt
+   remain separate gates.
 
 ## Consequences
 

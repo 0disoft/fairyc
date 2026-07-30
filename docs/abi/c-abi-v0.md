@@ -254,13 +254,15 @@ distribution conformance.
 
 Before returning any linked Windows artifact, the shared C driver now parses every intermediate
 MSVC `.obj` as raw AMD64 COFF. It rejects optional PE headers and linked-image flags; requires
-bounded raw and relocation ranges, readable executable `.text` or `.text$...` code, valid
-relocation symbol indexes, and named symbols; and permits storage-free uninitialized `.bss` only
+bounded raw and relocation ranges, readable executable `.text` or `.text$...` code, valid primary
+relocation symbols and AMD64 types, exact COMDAT section definitions, and named symbols; and permits storage-free uninitialized `.bss` only
 when its section characteristic says so. This covers every `build-host`, `build-target`, `run-host`,
 Windows-File-probe, layout-probe, ABI-probe, generated-Fairy struct-result probe, and unwind-probe
-compilation in the local smoke. It still does not define exact exported/imported
-symbols, COMDAT selection, permitted relocation types, `.pdata`/`.xdata` content, or a hosted
-object-fixture receipt, so `pe-coff-object-fixtures` remains missing.
+compilation in the local smoke. ADR 0231 now freezes exact internal primary-symbol, REL32, ANY
+COMDAT, and associative-COMDAT receipts over two raw AMD64 object vectors, while the same inspector
+validates all local MSVC objects. It still does not define exported/imported product symbols,
+relocation formulas or linked displacements, final-link COMDAT winners, `.pdata`/`.xdata` content,
+or a fresh hosted same-commit object receipt, so `pe-coff-object-fixtures` remains missing.
 
 The executable-image path now follows the Microsoft x64 exception directory as well. It requires a
 readable non-executable `.pdata` table of sorted nonoverlapping 12-byte `RUNTIME_FUNCTION` entries,
@@ -339,7 +341,7 @@ The planned transport matrix uses Clang as the primary compiler and GCC as an in
 
 ## Later profiles
 
-`x86_64-linux-musl` needs a separate libc, startup, sysroot, dynamic-loader, and static-distribution profile even though its CPU ABI is SysV-derived. The declared `x86_64-windows-msvc` TargetSpec still needs complete executable LLP64 layout coverage plus a hosted receipt, independent or register-inspected four-slot call evidence, broader and bidirectional source-level Fairy crossings, versioned exact COFF symbol/COMDAT/relocation fixtures, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, complete UCRT/VCRuntime and deployment evidence, and debug fixtures before any maturity promotion.
+`x86_64-linux-musl` needs a separate libc, startup, sysroot, dynamic-loader, and static-distribution profile even though its CPU ABI is SysV-derived. The declared `x86_64-windows-msvc` TargetSpec still needs complete executable LLP64 layout coverage plus hosted evidence, independent or register-inspected four-slot call evidence, broader and bidirectional source-level Fairy crossings, a fresh hosted receipt for the exact synthetic COFF fixture and strengthened live-object inspector, relocation-formula and final-link COMDAT-selection evidence, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, complete UCRT/VCRuntime and deployment evidence, and debug fixtures before any maturity promotion.
 
 ## External references
 

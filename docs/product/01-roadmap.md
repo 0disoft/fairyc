@@ -355,12 +355,13 @@ products, and eighteen native probe executables for raw Windows File, raw Buffer
 raw Arena, layout, ABI, generated-Fairy struct results, and
 unwind behavior for AMD64
 PE32+ console identity, aligned
-headers/sections, and an executable entry point, but does not inspect `.obj` symbols, relocations,
-unwind payloads, or CodeView/PDB data.
+headers/sections, and an executable entry point, but does not inspect CodeView/PDB data.
 Every local MSVC compile in the same lane now also parses its intermediate `.obj` as raw AMD64 COFF
-before cleanup, including `.text$...`, `.bss`, symbol-table, and relocation-index structure. Exact
-versioned symbol names, COMDAT selection, relocation types, unwind records, and a hosted object
-receipt remain absent, so the target evidence marker stays fail-closed.
+before cleanup, including `.text$...`, `.bss`, primary symbols, relocation targets and AMD64 types,
+and exact COMDAT section-definition selection. ADR 0231 adds two versioned raw-object vectors for
+REL32, ANY, and associative COMDAT behavior. Whole compiler-produced object identity, relocation
+formula and final-link selection evidence, unwind records, and a fresh hosted object receipt remain
+absent, so the target evidence marker stays fail-closed.
 The forty-seven local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
 runtime-function ordering and code coverage plus referenced version 1 and version 2 unwind-record
 bounds, including handler/chained minimum tails. A separate three-object probe now raises a private
@@ -816,7 +817,7 @@ non-authority to separate executable oracles and records what each still does no
 ## Later capability gates
 
 - `x86_64-linux-musl`: requires a separate libc, sysroot, startup, loader, and static-distribution profile.
-- `x86_64-windows-msvc`: the TargetSpec, scalar/LLP64 C-emission product builds at both profiles, closed FY-to-project-C SystemHeap, Buffer, Arena/Region lifecycle, and UTF-8 calls, an eight-case local layout probe, 15-case host-independent Microsoft x64 classifier, 12-case same-MSVC native crossing, one generated-Fairy small/large struct-result crossing under C11 and C17 consumer modes, bounded PE32+ executable inspection, structural live-COFF object inspection, static version-1/version-2 unwind-structure inspection, and a three-case native exception/virtual-walk probe exist, but complete hosted LLP64 layout evidence, broader and bidirectional source-level Fairy crossings, independent or inspected call evidence, versioned exact COFF symbol/COMDAT/relocation fixtures, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, complete UCRT/VCRuntime and deployment evidence, distribution, and debug fixtures remain required.
+- `x86_64-windows-msvc`: the TargetSpec, scalar/LLP64 C-emission product builds at both profiles, closed FY-to-project-C SystemHeap, Buffer, Arena/Region lifecycle, and UTF-8 calls, an eight-case local layout probe, 15-case host-independent Microsoft x64 classifier, 12-case same-MSVC native crossing, one generated-Fairy small/large struct-result crossing under C11 and C17 consumer modes, bounded PE32+ executable inspection, structural live-COFF object inspection, versioned exact synthetic COFF symbol/COMDAT/relocation fixtures, static version-1/version-2 unwind-structure inspection, and a three-case native exception/virtual-walk probe exist, but complete hosted LLP64 and same-commit COFF evidence, broader and bidirectional source-level Fairy crossings, independent or inspected call evidence, relocation-formula and final-link COMDAT-selection evidence, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, complete UCRT/VCRuntime and deployment evidence, distribution, and debug fixtures remain required.
 - QBE or another fast backend: requires stable internal semantics, interpreter and C oracles, ABI coverage, and measured edit-build benefit.
 - LLVM backend: requires representative workloads that justify optimization and distribution cost after simpler paths are exhausted.
 - Generics and `Vec<T>`: require non-generic stability plus compile-time, code-size, active-payload, and diagnostics fixtures.

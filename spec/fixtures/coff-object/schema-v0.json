@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fairyc.dev/spec/fixtures/coff-object/schema-v0.json",
+  "title": "Fairy C exact AMD64 COFF object fixtures v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "target", "contracts", "deferred", "cases"],
+  "properties": {
+    "$schema": { "const": "./schema-v0.json" },
+    "schemaVersion": { "const": "fairyc.coff-object-fixtures/v0" },
+    "target": { "const": "x86_64-windows-msvc" },
+    "contracts": { "$ref": "#/$defs/nonemptyStrings" },
+    "deferred": { "$ref": "#/$defs/nonemptyStrings" },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/case" }
+    }
+  },
+  "$defs": {
+    "nonemptyStrings": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "objectHex", "expect"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^pass\\.[a-z0-9-]+$" },
+        "objectHex": { "type": "string", "pattern": "^[0-9a-f]+$", "minLength": 2 },
+        "expect": { "$ref": "#/$defs/expectation" }
+      }
+    },
+    "expectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sections", "symbols", "relocations"],
+      "properties": {
+        "sections": { "type": "array", "items": { "$ref": "#/$defs/section" } },
+        "symbols": { "type": "array", "items": { "$ref": "#/$defs/symbol" } },
+        "relocations": { "type": "array", "items": { "$ref": "#/$defs/relocation" } }
+      }
+    },
+    "section": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "relocations", "characteristics", "comdatSelection", "associativeSection"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "relocations": { "type": "integer", "minimum": 0 },
+        "characteristics": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+        "comdatSelection": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "associativeSection": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "symbol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tableIndex", "name", "value", "sectionNumber", "type", "storageClass", "auxiliaryRecords"],
+      "properties": {
+        "tableIndex": { "type": "integer", "minimum": 0 },
+        "name": { "type": "string", "minLength": 1 },
+        "value": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+        "sectionNumber": { "type": "integer", "minimum": -32768, "maximum": 32767 },
+        "type": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "storageClass": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "auxiliaryRecords": { "type": "integer", "minimum": 0, "maximum": 255 }
+      }
+    },
+    "relocation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["section", "virtualAddress", "symbolIndex", "symbol", "type"],
+      "properties": {
+        "section": { "type": "string", "minLength": 1 },
+        "virtualAddress": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+        "symbolIndex": { "type": "integer", "minimum": 0 },
+        "symbol": { "type": "string", "minLength": 1 },
+        "type": { "type": "integer", "minimum": 0, "maximum": 65535 }
+      }
+    }
+  }
+}

@@ -284,11 +284,12 @@ a new fixture-contract and applicable target/ABI-profile decision.
 The PE executable inspector is internal validation policy rather than a serialized compatibility
 format. Tightening its admitted image structure requires synchronized synthetic rejection tests and
 Windows smoke evidence, but does not create a stable PE, COFF object, debug, or unwind contract.
-The raw COFF object inspector follows the same internal-policy rule. Its current section, symbol,
-and relocation bounds are validation mechanics; no object byte identity, symbol ordering, COMDAT
-selection, relocation-type set, or serialized receipt is a compatibility promise. Its 4,096-section
-and 64 MiB object budgets bound parser work while admitting current MSVC function-level section
-fanout; the synthetic 154-section regression case is evidence, not a stable output count.
+The raw COFF object inspector follows the same internal-policy rule. ADR 0231's
+`fairyc.coff-object-fixtures/v0` manifest versions internal test inputs and exact structural
+expectations for primary symbols, AMD64 relocation types, and COMDAT selection; it is not a public
+object format, serialized compiler receipt, or compiler-produced whole-object byte promise. Its
+4,096-section and 64 MiB object budgets bound parser work while admitting current MSVC function-level
+section fanout; the synthetic 154-section regression case is evidence, not a stable output count.
 Microsoft x64 unwind inspection is likewise an internal validation policy. Neither the observed
 runtime-function count nor version-1/version-2 mix is stable. Future semantic epilog, handler,
 or chain fixtures require an explicit unwind-contract decision before they can become target

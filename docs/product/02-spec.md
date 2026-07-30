@@ -423,16 +423,19 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   smoke. It requires a bounded AMD64 PE32+ non-DLL console image, large-address awareness, aligned
   image/header/section ranges, a readable executable `.text` section, and an entry point inside
   executable code. It records import and exception-directory presence without treating either as
-  validated content. Exact COFF object symbols and relocation types, complete `.pdata`/`.xdata`
-  semantics, CodeView/PDB, and broad source-level Windows FFI remain separate gates. The generic
+  validated content. Complete `.pdata`/`.xdata` semantics, CodeView/PDB, and broad source-level
+  Windows FFI remain separate gates. The generic
   hosted-receipt marker is closed by ADR 0214; complete object and unwind fixture gates are not.
 - The Windows C driver retains each compiler-produced `.obj` only in its bounded temporary root,
   parses it as raw AMD64 COFF, and fails before returning the linked image when the object has an
   optional PE header, linked-image flags, no `.text`/`.text$...` code, invalid raw or relocation
-  ranges, relocation indexes outside the raw symbol table, or no named symbols. Uninitialized
-  `.bss` may have a nonzero logical size and zero raw pointer. The driver returns isolated object
-  bytes and dense names as an internal receipt, then removes every temporary file. This is not yet
-  a versioned exact symbol, COMDAT, relocation-type, unwind, or hosted object fixture.
+  ranges, relocation indexes outside the raw primary-symbol set, auxiliary relocation targets,
+  unknown AMD64 relocation types, malformed COMDAT definitions, or no named symbols. Uninitialized
+  `.bss` may have a nonzero logical size and zero raw pointer. ADR 0231 adds a versioned internal
+  raw-object manifest for exact primary symbols, REL32, ANY COMDAT, and associative COMDAT parent
+  receipts. The driver still removes every temporary object. This is not a stable product object
+  format, relocation-formula proof, final-link COMDAT-selection proof, unwind fixture, or fresh
+  hosted same-commit object receipt.
 - `internal/pecoff` additionally maps the exception directory through `.pdata` and every referenced
   file-backed unwind record. `RUNTIME_FUNCTION` entries must be 12-byte, sorted, nonoverlapping,
   executable-code ranges with DWORD-aligned unwind RVAs. Version 1 prolog operations use their

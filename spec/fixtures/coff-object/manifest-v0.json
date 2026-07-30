@@ -1,0 +1,56 @@
+{
+  "$schema": "./schema-v0.json",
+  "schemaVersion": "fairyc.coff-object-fixtures/v0",
+  "target": "x86_64-windows-msvc",
+  "contracts": [
+    "docs/product/01-roadmap.md",
+    "docs/product/02-spec.md",
+    "docs/adr/0231-versioned-amd64-coff-object-fixtures.md",
+    "docs/compatibility/versioning-v0.md"
+  ],
+  "deferred": [
+    "whole-object MSVC byte identity, timestamps, compiler-generated section ordering, and string-table layout",
+    "AMD64 relocation formula and displacement execution across independently produced objects",
+    "archive extraction, final-link COMDAT selection, import/export tables, CodeView, and PDB",
+    "bigobj, relocation overflow, weak externals, CLR-only COMDAT selection, and non-AMD64 COFF"
+  ],
+  "cases": [
+    {
+      "id": "pass.associative-comdat-rel32",
+      "objectHex": "64860200000000007000000007000000000000002e74657874246d6e00000000000000000100000064000000660000000000000001000000201000602e726461746124780000000000000000010000006500000000000000000000000000000040100040e82a000000000600000004002e74657874246d6e00000000010000000301010000000100000000000000000002000000746578746b657900000000000100000002002e7264617461247800000000020000000301010000000000000000000000010005000000646174616b6579000000000002000000020063616c6c656500000000000000000000020004000000",
+      "expect": {
+        "sections": [
+          { "name": ".text$mn", "relocations": 1, "characteristics": 1610616864, "comdatSelection": 2, "associativeSection": 0 },
+          { "name": ".rdata$x", "relocations": 0, "characteristics": 1073745984, "comdatSelection": 5, "associativeSection": 1 }
+        ],
+        "symbols": [
+          { "tableIndex": 0, "name": ".text$mn", "value": 0, "sectionNumber": 1, "type": 0, "storageClass": 3, "auxiliaryRecords": 1 },
+          { "tableIndex": 2, "name": "textkey", "value": 0, "sectionNumber": 1, "type": 0, "storageClass": 2, "auxiliaryRecords": 0 },
+          { "tableIndex": 3, "name": ".rdata$x", "value": 0, "sectionNumber": 2, "type": 0, "storageClass": 3, "auxiliaryRecords": 1 },
+          { "tableIndex": 5, "name": "datakey", "value": 0, "sectionNumber": 2, "type": 0, "storageClass": 2, "auxiliaryRecords": 0 },
+          { "tableIndex": 6, "name": "callee", "value": 0, "sectionNumber": 0, "type": 0, "storageClass": 2, "auxiliaryRecords": 0 }
+        ],
+        "relocations": [
+          { "section": ".text$mn", "virtualAddress": 0, "symbolIndex": 6, "symbol": "callee", "type": 4 }
+        ]
+      }
+    },
+    {
+      "id": "pass.basic-any-comdat-rel32",
+      "objectHex": "64860100000000004700000004000000000000002e74657874246d6e0000000000000000010000003c0000003d000000000000000100000020100060e8000000000300000004002e74657874246d6e00000000010000000301010000000100000000000000000002000000746578746b6579000000000001000000020063616c6c656500000000000000000000020004000000",
+      "expect": {
+        "sections": [
+          { "name": ".text$mn", "relocations": 1, "characteristics": 1610616864, "comdatSelection": 2, "associativeSection": 0 }
+        ],
+        "symbols": [
+          { "tableIndex": 0, "name": ".text$mn", "value": 0, "sectionNumber": 1, "type": 0, "storageClass": 3, "auxiliaryRecords": 1 },
+          { "tableIndex": 2, "name": "textkey", "value": 0, "sectionNumber": 1, "type": 0, "storageClass": 2, "auxiliaryRecords": 0 },
+          { "tableIndex": 3, "name": "callee", "value": 0, "sectionNumber": 0, "type": 0, "storageClass": 2, "auxiliaryRecords": 0 }
+        ],
+        "relocations": [
+          { "section": ".text$mn", "virtualAddress": 0, "symbolIndex": 3, "symbol": "callee", "type": 4 }
+        ]
+      }
+    }
+  ]
+}
