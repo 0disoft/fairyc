@@ -227,6 +227,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0215-allocation-free-stage0-i32-output.md`: safe locale-independent decimal `i32` stdout output, an 11-byte stack formatter, SDK stage0.6 identity, and exact full-domain boundary evidence.
 - `0216-checked-compound-assignment.md`: statement-only checked integer compound assignment, single-evaluation mutable places, classic-for post integration, and the exact language `/2` cutover.
 - `0217-bounded-lexical-defer.md`: internal-void-call lexical defer, immediate copy-scalar capture, LIFO cleanup edges, trap skipping, and the exact language `/3` cutover.
+- `0218-modern-language-concept-admission-boundary.md`: evidence-gated adoption rules, ordered `@must_use`, bounded compile-time evaluation, and caller-location candidates, explicit-function construction, delayed static interfaces, and rejected runtime or object-model complexity without a language cutover.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

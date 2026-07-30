@@ -40,6 +40,33 @@ block-exit LIFO order, return and Result-propagation paths, loop-control exits, 
 ordinary-call MIR elimination are executable. Resource or borrow capture, foreign calls, method
 receivers, arbitrary deferred blocks, and abnormal-termination guarantees remain deferred.
 
+### Post-Stage 0 language-concept admission queue
+
+ADR 0218 separates ideas worth studying from accepted syntax and implemented behavior. No item in
+this queue changes the current language revision until it receives its own ADR, grammar and
+diagnostic contract, compatibility decision, and executable fixtures.
+
+1. Evaluate narrow `@must_use` annotation semantics beyond the existing mandatory `Result` and
+   resource handling. The gate must define annotation targets, `discard`, function-value transport,
+   module-interface hashing, diagnostics, and compatibility without turning all return values into
+   warning noise.
+2. Evaluate bounded pure `const fn` and `static_assert`. The gate must define the admitted operation
+   set, integer and trap semantics, target dependence, recursion and step budgets, deterministic
+   failure diagnostics, cache identity, MIR or evaluator ownership, and compile-time resource tests.
+3. Evaluate one caller-source-location intrinsic. The gate must define exact file identity, byte and
+   line coordinates, inlining independence, generated-source behavior, reproducible-path policy,
+   C transport, and why it does not introduce general default arguments or runtime inspection.
+4. Keep ordinary explicit `T`/`Result<T, E>` factory functions as the construction model and gather
+   evidence before considering any additional initialization shorthand.
+5. Revisit static interfaces only after user-defined generics have a separate accepted contract and
+   real source demonstrates duplication. Require explicit implementation, static dispatch first,
+   bounded code generation, deterministic resolution, and a no-inheritance rule.
+
+Exceptions, class inheritance, implicit virtual dispatch, user-defined implicit conversions,
+operator or function overloading, unrestricted template metaprogramming, runtime reflection,
+garbage-collected object roots, and language-owned async, coroutines, virtual threads, or hidden
+executors are outside this queue.
+
 ## Phase 1: first interpreted semantic slice
 
 Current implementation status: the source, lexer, recoverable-syntax, parser-diagnostic, AST
