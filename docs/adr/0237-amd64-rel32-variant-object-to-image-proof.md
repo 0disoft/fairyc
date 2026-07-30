@@ -51,10 +51,10 @@ MSVC 14.51 LINK, prove all six formulas against the low and optimized final imag
 linked `fy_vsrc` path. This adds no PE image to the smoke count.
 
 This is compiler-private validation evidence, not a stable Fairy C object format or permission for
-arbitrary user-supplied objects. It does not prove `SECTION`, `SECREL`, token, base-relocation,
-incremental-link, LTCG, weak-external, overflow-relocation, non-MSVC-linker, CodeView, or PDB
-behavior. `SECTION` and `SECREL` need a separate debug-record and PDB-aware oracle rather than a
-forced final-PE formula claim.
+arbitrary user-supplied objects. ADR 0238 separately proves object-level CodeView `SECTION`/`SECREL`
+pairs and final PE/PDB identity without claiming a resolved object-to-PDB record mapping. This ADR
+does not prove token, base-relocation, incremental-link, LTCG, weak-external, overflow-relocation,
+non-MSVC-linker, or remaining CodeView/PDB record semantics.
 
 ## External basis
 

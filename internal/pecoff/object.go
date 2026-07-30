@@ -332,7 +332,7 @@ func inspectCOFFCOMDAT(file *pe.File, symbols inspectedCOFFSymbols) (map[int]pe.
 			symbols.records[position].AuxiliaryRecords != 1 {
 			return nil, fmt.Errorf("COFF object COMDAT section %q definition is not its first primary symbol", section.Name)
 		}
-		if primaryCountBySection[sectionNumber] < 2 {
+		if result[sectionNumber].Selection != coffCOMDATAssociative && primaryCountBySection[sectionNumber] < 2 {
 			return nil, fmt.Errorf("COFF object COMDAT section %q has no following COMDAT symbol", section.Name)
 		}
 	}

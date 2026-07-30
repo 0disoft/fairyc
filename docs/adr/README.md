@@ -247,6 +247,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0235-selected-associative-comdat-unwind-proof.md`: binds a selected archive function COMDAT to its direct associative `.pdata` and `.xdata` children, all three raw `.pdata` addends, exact archive-member map owners, and the final runtime-function entry across the existing four archive links.
 - `0236-discarded-associative-comdat-elimination-proof.md`: proves both exact external ANY-COMDAT function parents reached MSVC LINK, binds the selected unwind children, requires the losing `.xdata` payload to be absent from every runtime-function reference and file-backed final section, and closes `.pdata` outside the exception directory to zero bytes.
 - `0237-amd64-rel32-variant-object-to-image-proof.md`: links one exact generated AMD64 object through real MSVC LINK and independently proves `REL32` through `REL32_5` as `S + A - (P + 4 + n)` at low and optimized profiles.
+- `0238-msvc-codeview-section-secrel-and-pdb-association.md`: proves exact function-targeted `.debug$S` SECTION/SECREL object pairs under `/Z7` and binds each final PE RSDS GUID/age to its bounded MSF 7 PDB information stream.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

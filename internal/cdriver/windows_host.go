@@ -31,15 +31,17 @@ type WindowsHostObject struct {
 	Bytes []byte
 }
 
-// WindowsHostArtifact is one bounded PE executable plus its validated COFF objects.
+// WindowsHostArtifact is one bounded PE executable plus its validated COFF objects and optional
+// private validation-only linker map and program database.
 // It is not a distributable target artifact or a target-conformance receipt.
 type WindowsHostArtifact struct {
-	Bytes        []byte
-	Objects      []WindowsHostObject
-	LinkMap      []byte
-	Toolchain    WindowsHostToolchain
-	Profile      Profile
-	ConsumerMode ConsumerMode
+	Bytes           []byte
+	Objects         []WindowsHostObject
+	LinkMap         []byte
+	ProgramDatabase []byte
+	Toolchain       WindowsHostToolchain
+	Profile         Profile
+	ConsumerMode    ConsumerMode
 }
 
 // WindowsMSVCArchiveArtifact preserves one exact input-order link result together with the
@@ -214,8 +216,10 @@ func BuildWindowsMSVCRelocationProbe(toolchain WindowsHostToolchain, profile Pro
 		{Name: "caller.c", Contents: callerSource},
 		{Name: "target.c", Contents: targetSource},
 	}, windowsMSVCBuildOptions{
-		CaptureMap:      true,
-		PrebuiltObjects: []WindowsHostObject{{Name: "variants.obj", Bytes: slices.Clone(variantObject)}},
+		CaptureMap:             true,
+		CaptureProgramDatabase: true,
+		EmbeddedCodeView:       true,
+		PrebuiltObjects:        []WindowsHostObject{{Name: "variants.obj", Bytes: slices.Clone(variantObject)}},
 	})
 }
 
@@ -376,8 +380,10 @@ type windowsMSVCSource struct {
 }
 
 type windowsMSVCBuildOptions struct {
-	CaptureMap      bool
-	PrebuiltObjects []WindowsHostObject
+	CaptureMap             bool
+	CaptureProgramDatabase bool
+	EmbeddedCodeView       bool
+	PrebuiltObjects        []WindowsHostObject
 }
 
 func buildWindowsMSVC(toolchain WindowsHostToolchain, profile Profile, consumerMode ConsumerMode, sources []windowsMSVCSource) (WindowsHostArtifact, error) {
@@ -450,10 +456,21 @@ func buildWindowsMSVCWithOptions(toolchain WindowsHostToolchain, profile Profile
 	arguments := []string{
 		"/nologo", standardFlag, "/TC", "/W4", "/WX", "/MT", optimization,
 	}
+	if options.EmbeddedCodeView {
+		arguments = append(arguments, "/Z7")
+	}
 	arguments = append(arguments, sourcePaths...)
 	arguments = append(arguments, "/Fe:"+executablePath, "/link")
 	arguments = append(arguments, prebuiltPaths...)
 	arguments = append(arguments, "/INCREMENTAL:NO")
+	programDatabasePath := ""
+	if options.CaptureProgramDatabase {
+		if !options.EmbeddedCodeView {
+			return WindowsHostArtifact{}, fmt.Errorf("MSVC program database capture requires embedded CodeView input")
+		}
+		programDatabasePath = filepath.Join(temporaryRoot, "program.pdb")
+		arguments = append(arguments, "/DEBUG:FULL", "/PDB:"+programDatabasePath, "/PDBALTPATH:%_PDB%")
+	}
 	mapPath := ""
 	if options.CaptureMap {
 		mapPath = filepath.Join(temporaryRoot, "program.map")
@@ -484,7 +501,17 @@ func buildWindowsMSVCWithOptions(toolchain WindowsHostToolchain, profile Profile
 			return WindowsHostArtifact{}, fmt.Errorf("read MSVC link map: %s", strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
 		}
 	}
-	return WindowsHostArtifact{Bytes: contents, Objects: objects, LinkMap: linkMap, Toolchain: toolchain, Profile: profile, ConsumerMode: consumerMode}, nil
+	var programDatabase []byte
+	if options.CaptureProgramDatabase {
+		programDatabase, err = readArtifact(programDatabasePath)
+		if err != nil {
+			return WindowsHostArtifact{}, fmt.Errorf("read MSVC program database: %s", strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
+		}
+	}
+	return WindowsHostArtifact{
+		Bytes: contents, Objects: objects, LinkMap: linkMap, ProgramDatabase: programDatabase,
+		Toolchain: toolchain, Profile: profile, ConsumerMode: consumerMode,
+	}, nil
 }
 
 func msvcStandardFlag(mode ConsumerMode) (string, error) {

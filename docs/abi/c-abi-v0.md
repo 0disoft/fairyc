@@ -278,10 +278,12 @@ runtime-function entry in those same executions. ADR 0236 adds two contributed A
 parents with distinct unwind children, binds the selected owner, and requires the losing payload to
 be absent from every runtime-function reference and file-backed final section. ADR 0237 adds one
 exact generated object and binds `REL32` through `REL32_5` to their distinct
-`S + A - (P + 4 + n)` final-image formulas at both profiles. It still does not define
+`S + A - (P + 4 + n)` final-image formulas at both profiles. ADR 0238 adds exact `/Z7`
+function-targeted CodeView `SECREL`/`SECTION` pairs and binds each final PE RSDS identity to its
+ephemeral MSF 7 PDB. It still does not define
 exported/imported product symbols, remaining relocation formulas, handler or
 chained-tail relocations, non-unwind or broader archive retention and COMDAT policies, complete `.pdata`/`.xdata`
-content, or a fresh hosted same-commit object receipt, so
+content, complete CodeView/PDB record semantics or symbolication, or a fresh hosted same-commit object receipt, so
 `pe-coff-object-fixtures` remains missing.
 
 The executable-image path now follows the Microsoft x64 exception directory as well. It requires a

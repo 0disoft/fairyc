@@ -314,6 +314,9 @@ ADR 0237 applies it to the generated six-relocation object, marker bytes, map-ow
 private REL32-variant report. These may evolve with synchronized inspector, mutation, native-smoke,
 and evidence updates; they neither admit arbitrary prebuilt-object input nor stabilize an object or
 linker interface.
+ADR 0238 applies it to private CodeView pair reports, `/Z7` probe inputs, MSF directory parsing, and
+PE/PDB GUID-age association. This validates local ephemeral evidence only; it does not version or
+publish a PDB format, public debug mode, symbol store, debugger contract, or source-retention policy.
 Microsoft x64 unwind inspection is likewise an internal validation policy. Neither the observed
 runtime-function count nor version-1/version-2 mix is stable. Future semantic epilog, handler,
 or chain fixtures require an explicit unwind-contract decision before they can become target

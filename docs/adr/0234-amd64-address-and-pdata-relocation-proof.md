@@ -65,8 +65,9 @@ The synthetic tests use the same internal-label alias and `$unwind$...` static-s
 observed from current MSVC objects, including independent nonzero addends and field-specific deaths.
 
 This proof covers one absolute target pointer and one complete three-field runtime-function entry.
-It does not prove handler or chained-tail relocations, `ADDR32`, `REL32_1` through `REL32_5`,
-`SECTION`, `SECREL`, import thunks, base
+ADR 0237 separately proves `REL32_1` through `REL32_5`; ADR 0238 separately proves object-level
+CodeView `SECTION`/`SECREL` pairs and PE/PDB identity. This ADR does not prove handler or chained-tail
+relocations, `ADDR32`, import thunks, base
 relocations, overflow records, incremental linking, LTCG, non-MSVC linkers, or a stable public
 Fairy C object format.
 

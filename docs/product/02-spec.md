@@ -451,10 +451,13 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   runtime-function references and file-backed sections. ADR 0237 adds one exact generated object;
   each of its `REL32` through `REL32_5` records must have one exact target and satisfy
   `S + A - (P + 4 + n)` in the low and optimized final images while its trailing marker bytes stay
-  unchanged. The driver still removes every temporary
-  object, archive, map, and image. This is not
+  unchanged. ADR 0238 compiles the two C inputs with `/Z7`, requires exact function-targeted
+  `.debug$S` `SECREL`/`SECTION` pairs and object-level formulas, and binds the final PE RSDS GUID/age
+  to the bounded MSF 7 PDB information stream at both profiles. The driver still removes every temporary
+  object, archive, map, PDB, and image. This is not
   a stable product object or library format, proof of remaining relocation formulas or unwind
-  tails, non-unwind or broader archive/COMDAT policies, unwind fixture, or fresh hosted same-commit receipt.
+  tails, non-unwind or broader archive/COMDAT policies, complete CodeView/PDB semantics,
+  symbolication, unwind fixture, or fresh hosted same-commit receipt.
 - `internal/pecoff` additionally maps the exception directory through `.pdata` and every referenced
   file-backed unwind record. `RUNTIME_FUNCTION` entries must be 12-byte, sorted, nonoverlapping,
   executable-code ranges with DWORD-aligned unwind RVAs. Version 1 prolog operations use their

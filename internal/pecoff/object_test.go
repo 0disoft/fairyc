@@ -77,6 +77,21 @@ func TestInspectObjectReportsAssociativeCOMDATParent(t *testing.T) {
 	}
 }
 
+func TestInspectObjectAcceptsAssociativeCOMDATWithOnlySectionDefinition(t *testing.T) {
+	t.Parallel()
+	object := associativeCOMDATAMD64COFF()
+	const associativeKey = associativeCOFFSymbolOffset + 5*18
+	binary.LittleEndian.PutUint16(object[associativeKey+12:], 0)
+	report, err := InspectObject(object)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(report.Sections) != 2 || report.Sections[1].COMDATSelection != ObjectCOMDATAssociative ||
+		report.Sections[1].AssociativeSection != 1 {
+		t.Fatalf("COFF associative section = %+v", report.Sections)
+	}
+}
+
 func TestInspectObjectPreservesRelocationVirtualAddress(t *testing.T) {
 	t.Parallel()
 	object := minimalAMD64COFF()
