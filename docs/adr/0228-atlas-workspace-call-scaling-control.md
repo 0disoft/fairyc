@@ -52,7 +52,8 @@ scope, allocation label, sample count, compatibility identities, growing denomin
 output, and absence of policy conclusions. Generator tests compile and measure every generated
 shape. The Windows smoke emits the canonical path-free report after validation.
 
-Useful next evidence requires a declared reference environment and checked-in or otherwise
-reproducible repositories with non-star dependency and call distributions. Traversal, indirect
-calls, other relation families, retained-index profiling, and product defaults remain separate
-decisions.
+ADR 0229 adds deterministic chain, diamond, and fan-in correctness controls, but they remain
+synthetic. Useful representative evidence still requires a declared reference environment and
+checked-in or otherwise reproducible real repositories with broader dependency and call
+distributions. Traversal, indirect calls, other relation families, retained-index profiling, and
+product defaults remain separate decisions.

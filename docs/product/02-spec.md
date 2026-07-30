@@ -946,6 +946,12 @@ wall time, process-wide Go `TotalAlloc`/`Mallocs` deltas, and canonical output b
 shapes and 64 MiB output ceiling are harness controls, not representative workloads, retained-memory
 evidence, complexity proof, defaults, traversal or impact policy, or a regression gate.
 
+ADR 0229 separately adds test-only chain, diamond, and fan-in workspaces. They pass through ordinary
+manifest loading, compilation, verified MIR, Atlas planning, exact-current call joining, and
+canonical catalog encoding, then require exact outgoing, incoming, and both-direction selections.
+They add no output schema, command, default, indirect-call recovery, traversal, impact policy, or
+representative-use claim.
+
 The configured Windows host smoke separately measures whole-package canonical rewrite cost after
 workspace analysis and map planning. It performs one untimed warmup and nine raw rewrites of every
 fixed quickstart package partition, requires exact byte identity, and reports path-free package,
@@ -978,6 +984,7 @@ ADR 0227 separately fixes the path-free local workspace-call process-measurement
 it changes no compiler, catalog, map, query, or command compatibility surface.
 ADR 0228 fixes the separate path-free local workspace-call scaling-measurement evidence envelope;
 it likewise changes no compiler, catalog, map, query, or command compatibility surface.
+ADR 0229 adds only a deterministic test corpus and changes no compatibility surface.
 
 ## Explicit non-goals
 

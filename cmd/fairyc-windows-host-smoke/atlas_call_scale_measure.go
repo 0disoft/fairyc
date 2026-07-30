@@ -18,8 +18,14 @@ import (
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
-type preparedAtlasCallScale struct {
-	definition   buildmeasure.AtlasCallScaleDefinition
+type atlasCallWorkspaceDefinition struct {
+	Name     string
+	Packages int
+	Calls    int
+}
+
+type preparedAtlasCallWorkspace struct {
+	definition   atlasCallWorkspaceDefinition
 	partitions   []atlasmap.Partition
 	expectations map[string]atlasmap.LoadExpectation
 	rootInstance string
@@ -54,7 +60,9 @@ func measureAtlasCallScale(clockResolution int64) (buildmeasure.AtlasCallScaleRe
 		if err := writeAtlasCallScaleWorkspace(shapeRoot, definition); err != nil {
 			return buildmeasure.AtlasCallScaleReport{}, err
 		}
-		prepared, err := prepareAtlasCallScale(shapeRoot, definition, compilerBuild)
+		prepared, err := prepareAtlasCallWorkspace(shapeRoot, atlasCallWorkspaceDefinition{
+			Name: definition.Name, Packages: definition.Packages, Calls: definition.Calls,
+		}, compilerBuild)
 		if err != nil {
 			return buildmeasure.AtlasCallScaleReport{}, err
 		}
@@ -147,35 +155,38 @@ func writeAtlasCallScaleFile(path, contents string) error {
 	return nil
 }
 
-func prepareAtlasCallScale(
+func prepareAtlasCallWorkspace(
 	root string,
-	definition buildmeasure.AtlasCallScaleDefinition,
+	definition atlasCallWorkspaceDefinition,
 	compilerBuild buildidentity.Identity,
-) (preparedAtlasCallScale, error) {
+) (preparedAtlasCallWorkspace, error) {
 	workspace, err := workspaceloader.Load(root)
 	if err != nil {
-		return preparedAtlasCallScale{}, fmt.Errorf("load Atlas call scale shape %q: %w", definition.Name, err)
+		return preparedAtlasCallWorkspace{}, fmt.Errorf("load Atlas call workspace %q: %w", definition.Name, err)
 	}
 	input, err := workspace.SemanticInput()
 	if err != nil {
-		return preparedAtlasCallScale{}, err
+		return preparedAtlasCallWorkspace{}, err
 	}
 	checked, err := compiler.CheckPackages(input)
 	if err != nil {
-		return preparedAtlasCallScale{}, err
+		return preparedAtlasCallWorkspace{}, err
 	}
 	if len(checked.Semantic.Diagnostics) != 0 || len(checked.Semantic.Unsupported) != 0 || !checked.Verified {
-		return preparedAtlasCallScale{}, fmt.Errorf("Atlas call scale shape %q did not produce clean verified MIR", definition.Name)
+		return preparedAtlasCallWorkspace{}, fmt.Errorf("Atlas call workspace %q did not produce clean verified MIR", definition.Name)
 	}
 	_, partitions, err := atlasmap.PrepareWorkspace(workspace, checked, compilerBuild)
 	if err != nil {
-		return preparedAtlasCallScale{}, err
+		return preparedAtlasCallWorkspace{}, err
 	}
 	expectations, err := atlasmap.CurrentWorkspaceExpectations(workspace, checked, compilerBuild)
 	if err != nil {
-		return preparedAtlasCallScale{}, err
+		return preparedAtlasCallWorkspace{}, err
 	}
-	rootUID := "measurement.atlas-call-scale." + definition.Name
+	if len(workspace.Packages) == 0 {
+		return preparedAtlasCallWorkspace{}, fmt.Errorf("Atlas call workspace %q has no root package", definition.Name)
+	}
+	rootUID := workspace.Packages[0].Manifest.Package.UID
 	rootInstance, rootSymbol := "", ""
 	shape := buildmeasure.AtlasCallScaleShape{
 		Name: definition.Name, Packages: len(partitions),
@@ -189,7 +200,7 @@ func prepareAtlasCallScale(
 		for _, file := range loaded.Sources {
 			shape.SourceFiles++
 			if uint64(len(file.Bytes)) > ^uint64(0)-shape.SourceBytes {
-				return preparedAtlasCallScale{}, fmt.Errorf("Atlas call scale source-byte count overflow")
+				return preparedAtlasCallWorkspace{}, fmt.Errorf("Atlas call workspace source-byte count overflow")
 			}
 			shape.SourceBytes += uint64(len(file.Bytes))
 		}
@@ -198,7 +209,7 @@ func prepareAtlasCallScale(
 		header := partition.Header()
 		for _, count := range []int{header.Counts.Files, header.Counts.Modules, header.Counts.Symbols, header.Counts.Functions, header.Counts.Relations, header.Counts.Completeness} {
 			if count < 0 || uint64(count) > ^uint64(0)-shape.MapRecords {
-				return preparedAtlasCallScale{}, fmt.Errorf("Atlas call scale map-record count overflow")
+				return preparedAtlasCallWorkspace{}, fmt.Errorf("Atlas call workspace map-record count overflow")
 			}
 			shape.MapRecords += uint64(count)
 		}
@@ -213,15 +224,15 @@ func prepareAtlasCallScale(
 		}
 	}
 	if rootInstance == "" || rootSymbol == "" || shape.Packages != definition.Packages || shape.SourceFiles != definition.Packages {
-		return preparedAtlasCallScale{}, fmt.Errorf("Atlas call scale shape %q has an incomplete root or package shape", definition.Name)
+		return preparedAtlasCallWorkspace{}, fmt.Errorf("Atlas call workspace %q has an incomplete root or package shape", definition.Name)
 	}
-	return preparedAtlasCallScale{
+	return preparedAtlasCallWorkspace{
 		definition: definition, partitions: partitions, expectations: expectations,
 		rootInstance: rootInstance, rootSymbol: rootSymbol, shape: shape,
 	}, nil
 }
 
-func executeAtlasCallScale(prepared preparedAtlasCallScale) ([]byte, error) {
+func executeAtlasCallScale(prepared preparedAtlasCallWorkspace) ([]byte, error) {
 	index, err := atlasmap.NewWorkspaceCallIndex(
 		prepared.partitions,
 		prepared.expectations,

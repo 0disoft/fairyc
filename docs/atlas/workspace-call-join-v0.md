@@ -8,6 +8,7 @@
 - Output consumer: `docs/atlas/workspace-call-catalog-v0.md`
 - Process control: `docs/adr/0227-atlas-call-process-measurement-control.md`
 - Scaling control: `docs/adr/0228-atlas-workspace-call-scaling-control.md`
+- Topology corpus: `docs/adr/0229-atlas-workspace-call-topology-corpus.md`
 
 ## Purpose
 
@@ -74,6 +75,8 @@ or model-token threshold is currently accepted. ADR 0227 records only a tiny fre
 control whose whole-process peaks cannot be attributed to this index. ADR 0228 adds three generated
 star shapes around index construction plus outgoing encoding, but its process-wide allocation deltas
 are not retained-index memory and its shape growth proves no complexity law.
+ADR 0229 adds generated chain, diamond, and fan-in correctness controls for direct calls, but does
+not promote those synthetic shapes to representative-workload or traversal evidence.
 
 ## Completeness boundary
 

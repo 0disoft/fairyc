@@ -7,6 +7,7 @@
 - Experimental command: `internal/cli/atlas_calls.go`
 - Process control: `docs/adr/0227-atlas-call-process-measurement-control.md`
 - Scaling control: `docs/adr/0228-atlas-workspace-call-scaling-control.md`
+- Topology corpus: `docs/adr/0229-atlas-workspace-call-topology-corpus.md`
 
 ## Identity
 

@@ -604,6 +604,13 @@ and canonical output bytes. The three shapes and 64 MiB fail-closed output ceili
 policy, not representative workloads, complexity evidence, retained-memory attribution, product
 defaults, traversal policy, impact evidence, or regression thresholds.
 
+The Go correctness suite separately generates complete chain, diamond, and fan-in `.fy` workspaces.
+It compiles them to verified MIR, prepares exact-current maps, checks complete cross-package call
+usage plus outgoing/incoming/both selections, and requires repeated canonical catalog bytes. These
+synthetic non-star controls remove one structural blind spot from the star measurement, but they are
+still not representative repositories, indirect-call recovery, traversal, impact, or performance
+evidence.
+
 ADR 0195 closes the attributed-text policy, ADR 0196 implements its exact retained-source gate, and
 ADR 0197 adds canonical bounded `fairyc.attributed-text-json/v0` output with explicit selection,
 exact subject identity, independent document integrity, and no caller-result forgery. ADR 0198
