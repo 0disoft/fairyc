@@ -1,6 +1,6 @@
 # ADR 0221: Add one explicit source-location intrinsic
 
-- Status: Accepted, not implemented
+- Status: Implemented
 - Date: 2026-07-30
 - Product source: `docs/product/02-spec.md`
 - Admission source: `docs/adr/0218-modern-language-concept-admission-boundary.md`
@@ -94,3 +94,16 @@ need machine joins must continue using the versioned source-file and line-map id
 Atlas. The deliberate cost is explicit plumbing through helper parameters and a fixed textual form;
 that cost prevents one convenience feature from importing default arguments, reflection, debug-info
 dependence, or a new public aggregate ABI.
+
+## Implementation evidence
+
+- AST modules retain exact source size and LF-derived line starts without retaining a second copy
+  of source bytes; semantic unit tests cover CRLF and a multibyte UTF-8 prefix.
+- Typed HIR converts the intrinsic to an ordinary static UTF-8 literal with a `Static` borrow
+  origin. Interpreter execution returns the expected result and constrained C11 contains only the
+  existing static-string transport, not an intrinsic marker.
+- The 57-case semantic corpus covers success, reserved-name, non-call, arity, and const-eval
+  rejection. Unit tests additionally reject absent geometry with `E4402`.
+- Public-interface v3 executes twelve variants including private source-location stability.
+  Package-cache fixture v5 proves the unchanged v2 encoding misses across the exact `/5` to `/6`
+  language revision change.

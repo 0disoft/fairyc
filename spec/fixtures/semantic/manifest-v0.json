@@ -27,6 +27,7 @@
     "docs/adr/0217-bounded-lexical-defer.md",
     "docs/adr/0219-narrow-must-use-call-contract.md",
     "docs/adr/0220-bounded-scalar-compile-time-evaluation.md",
+    "docs/adr/0221-explicit-source-location-intrinsic.md",
     "docs/diagnostics/catalog-v0.md"
   ],
   "cases": [
@@ -1108,6 +1109,63 @@
         "phase": "type",
         "diagnostics": [
           { "code": "E4305", "primary": { "source": "main.fy", "startByte": 14, "endByte": 35 }, "related": [] }
+        ]
+      }
+    },
+    {
+      "id": "pass.type.source-location",
+      "sourceRoot": "cases/pass/source-location/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow"
+      }
+    },
+    {
+      "id": "fail.resolve.source-location-reserved",
+      "sourceRoot": "cases/fail/source-location-reserved/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "resolve",
+        "diagnostics": [
+          { "code": "E4401", "primary": { "source": "main.fy", "startByte": 21, "endByte": 36 }, "related": [] }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.source-location-non-call",
+      "sourceRoot": "cases/fail/source-location-non-call/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          { "code": "E4401", "primary": { "source": "main.fy", "startByte": 44, "endByte": 59 }, "related": [] }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.source-location-arity",
+      "sourceRoot": "cases/fail/source-location-arity/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          { "code": "E1010", "primary": { "source": "main.fy", "startByte": 44, "endByte": 62 }, "related": [] }
+        ]
+      }
+    },
+    {
+      "id": "fail.type.source-location-const-eval",
+      "sourceRoot": "cases/fail/source-location-const-eval/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          { "code": "E4302", "primary": { "source": "main.fy", "startByte": 52, "endByte": 73 }, "related": [] }
         ]
       }
     }

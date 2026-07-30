@@ -111,6 +111,14 @@ value. Inside `unsafe`, a direct borrow may erase its pointee to `ptr void` only
 the original owner type. Other borrow and raw-pointer conversions follow their explicit safety
 rules, and `null` never inhabits a safe borrow.
 
+`source_location()` is resolved before ordinary callable lookup and accepts no arguments. Its bare
+name, a declaration, parameter, local, import alias, pattern binding, or Region binding named
+`source_location` is `E4401`. With valid retained source geometry, typing replaces the call with an
+ordinary static `ref str` HIR literal whose bytes encode canonical relative path, one-based line,
+one-based UTF-8 byte column, and zero-based identifier start byte. Invalid path or line geometry is
+`E4402`; no host-path or empty fallback is synthesized. The intrinsic remains outside
+`@const_eval` and creates no new MIR operation or runtime effect.
+
 Before checking bodies, the type phase canonicalizes every ordinary and raw foreign
 `@effects(...)` declaration in the resolved module set. A direct call additionally requires the
 enclosing function's declared effects to contain the callee's set. These facts are source-order
@@ -171,6 +179,8 @@ Within one case, diagnostics sort by source path using unsigned UTF-8 byte order
 - `E4303` checked compile-time arithmetic, division, shift, or cast trap;
 - `E4304` compile-time dependency cycle or evaluation-budget exhaustion;
 - `E4305` false module-level `static_assert`;
+- `E4401` reserved `source_location` name declaration, binding, or non-call use;
+- `E4402` unavailable or inconsistent canonical source-location geometry;
 - `E7101` malformed, duplicate, empty, or unknown effect declaration;
 - `E7102` call requires an effect absent from the enclosing function declaration.
 

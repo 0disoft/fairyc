@@ -82,6 +82,15 @@ func TestMigrateRejectsCurrentOnlyStaticAssertWithoutWritableOutput(t *testing.T
 	}
 }
 
+func TestMigratePreservesGenericSourceLocationCallForManualPinUpdate(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nfn ref str where() { return source_location(); }\n")
+	result, err := Migrate("main.fy", input)
+	if err != nil || result.Changed || !bytes.Equal(result.Source, input) {
+		t.Fatalf("Migrate() = %+v, %v", result, err)
+	}
+}
+
 func TestSpanMapperKeepsHalfOpenBoundariesAroundInsertions(t *testing.T) {
 	t.Parallel()
 	edits := []edit{

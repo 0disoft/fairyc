@@ -299,6 +299,14 @@ ends this obligation; general unused-local analysis is separate. `Result`, resou
 misplaced, or ineligible declarations are `E4201`; ignored calls are `E4202`. Type-wide annotations,
 custom messages, and function-value transport remain absent.
 
+The exact zero-argument contextual intrinsic `source_location()` returns one static `ref str` in
+the canonical form `<relative-path>:<line>:<byte-column>@<start-byte>`. Line and column are
+one-based; the final byte offset is zero-based. The path is source-root-relative with `/`
+separators, and column counts original UTF-8 bytes rather than characters or display cells. The
+caller passes this value explicitly to logging or diagnostic helpers. `source_location` is reserved
+in value namespaces; hidden default arguments, callee propagation, runtime stack inspection,
+absolute paths, and a structured location ABI do not exist.
+
 ## Region syntax
 
 A lexical region is opened through a compiler-recognized statement:

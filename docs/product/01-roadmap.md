@@ -58,16 +58,14 @@ module-level `static_assert`, closes the old AST constant-loss gap, rejects cycl
 caps depth and evaluated nodes, stays frontend-owned, keeps public-interface v3 unchanged, and cuts
 the exact language pin to `/5`.
 
-ADR 0221 now accepts the third admitted item: exact zero-argument `source_location()` expands to a
+ADR 0221 now implements the third admitted item: exact zero-argument `source_location()` expands to a
 static `ref str` containing canonical relative path, byte-based line column, and start-byte
-coordinates. It reserves no default-argument or stack-inspection machinery and changes no language
-revision until its required fixtures pass.
+coordinates. It reserves no default-argument or stack-inspection machinery and cuts the exact
+language pin to `/6` with semantic, HIR, interpreter, C11, migration, interface, and cache evidence.
 
-1. Implement accepted ADR 0221 and cut the exact language pin only after semantic, HIR,
-   interpreter, C11, migration, interface, and cache evidence passes.
-2. Keep ordinary explicit `T`/`Result<T, E>` factory functions as the construction model and gather
+1. Keep ordinary explicit `T`/`Result<T, E>` factory functions as the construction model and gather
    evidence before considering any additional initialization shorthand.
-3. Revisit static interfaces only after user-defined generics have a separate accepted contract and
+2. Revisit static interfaces only after user-defined generics have a separate accepted contract and
    real source demonstrates duplication. Require explicit implementation, static dispatch first,
    bounded code generation, deterministic resolution, and a no-inheritance rule.
 
@@ -83,7 +81,7 @@ lowering, and parser-fixture-runner portion of the first item exists. Name resol
 now cover the semantic fixture's scalar and safe-borrow subset. Local last-use loans, borrow
   conflicts, single-origin borrow returns, checked matching-type left shift, loop-context diagnostics,
   scalar foreign-call unsafe/signature boundaries, and `@link_name` shape diagnostics execute across
-  all 52 semantic v0 cases, including bounded scalar compile-time evaluation, narrow callable `@must_use`, classic scalar `for`, bounded lexical `defer`, branch- and loop-aware safe-borrow reassignment, exact
+  all 57 semantic v0 cases, including explicit source-location expansion, bounded scalar compile-time evaluation, narrow callable `@must_use`, classic scalar `for`, bounded lexical `defer`, branch- and loop-aware safe-borrow reassignment, exact
   interprocedural borrow-return summaries, integer-literal range rejection before MIR, and exact
   transport for all sixteen TargetSpec C scalars. The type phase also canonicalizes the closed
   seven-name `@effects(...)` vocabulary and enforces caller supersets independently from unsafe. General
@@ -449,8 +447,8 @@ resources, ordinary functions, and foreign functions while keeping compiler-crea
 private. A deterministic public-interface v3 projection now sorts modules and public items,
 normalizes self nominal types independently from build-local numbering, renders dependency nominal
 types through source-independent package coordinates, retains public callable must-use state, hashes
-the canonical bytes with full SHA-256, and executes eleven source-level invalidation fixtures,
-including private-module-constant stability. This closes package-instance and coordinate
+the canonical bytes with full SHA-256, and executes twelve source-level invalidation fixtures,
+including private-module-constant and private-source-location stability. This closes package-instance and coordinate
 encoding plus the current source-interface hash. An independent exact package-source
 digest now sorts canonical relative paths and hashes every source byte, with five versioned cases
 proving order stability plus content, path, and line-ending invalidation. The first whole-package

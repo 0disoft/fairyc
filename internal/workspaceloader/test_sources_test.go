@@ -22,7 +22,7 @@ features = []
 `), map[string]string{
 		"src/main.fy": "module main;\npub fn i32 value() { return 42; }\n",
 	})
-	writePackage(t, root, "libs/answer", memberManifest("example.libs.answer", "answer", "1.0.0", "fairyc-language/5", ""), map[string]string{
+	writePackage(t, root, "libs/answer", memberManifest("example.libs.answer", "answer", "1.0.0", "fairyc-language/6", ""), map[string]string{
 		"src/answer.fy": "module answer;\npub fn i32 value() { return 42; }\n",
 	})
 	writeWorkspaceLoaderFile(t, root, "tests/answer.fy", `module tests::answer;
@@ -149,7 +149,7 @@ func TestWithRootTestsRejectsAmbiguousOrOverlappingTrees(t *testing.T) {
 			name: "workspace member overlap", reason: ReasonTestSourceRoot,
 			setup: func(t *testing.T, root string) Workspace {
 				writePackage(t, root, ".", rootManifest("\n[workspace]\nmembers = [\"tests/member\"]\n"), validRootSource())
-				writePackage(t, root, "tests/member", memberManifest("example.tests.member", "member", "1.0.0", "fairyc-language/5", ""), validMemberSource("member"))
+				writePackage(t, root, "tests/member", memberManifest("example.tests.member", "member", "1.0.0", "fairyc-language/6", ""), validMemberSource("member"))
 				workspace, err := Load(root)
 				if err != nil {
 					t.Fatal(err)

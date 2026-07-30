@@ -33,8 +33,8 @@ overwrites an existing path.
 The Go Stage 0 compiler now implements immutable source bytes, a lossless lexer, compact recoverable
 syntax, error-free AST lowering, typed HIR, resource and borrow Flow, verified MIR, a bounded
 interpreter, deterministic C11 transport, strict local workspaces, stable new/check/build/run/test/C
-  emission commands, and experimental Atlas fact export. The semantic runner executes all 52 v0 resolve, type,
-and local Flow cases, including bounded scalar compile-time evaluation, narrow callable `@must_use`, integer-literal range rejection, checked compound assignment, branch- and loop-aware safe-borrow reassignment,
+  emission commands, and experimental Atlas fact export. The semantic runner executes all 57 v0 resolve, type,
+and local Flow cases, including explicit `source_location()`, bounded scalar compile-time evaluation, narrow callable `@must_use`, integer-literal range rejection, checked compound assignment, branch- and loop-aware safe-borrow reassignment,
 exact interprocedural borrow-return summaries, last-use loans, borrow-return origins, canonical
 `@effects(...)` sets, and caller-superset enforcement. Whole-root resource Flow
   also executes all 12 v0 cases for moves, cleanup obligations, branch joins, normal, break, and continue loop edges,
@@ -666,7 +666,7 @@ or arbitrary link-input option.
 - PackageInstanceId v1 encoding, vectors, and runner: `internal/packagegraph/identity.go`, `spec/fixtures/package-identity/manifest-v1.json`, `internal/packageidentityfixture/`
 - Public-interface hash v3 extraction, reusable package-set computation, fixtures, and runner: `internal/moduleinterface/`, `spec/fixtures/module-interface/manifest-v3.json`, `internal/moduleinterfacefixture/`
 - Package-source digest v1 encoding, fixtures, and runner: `internal/packagecontent/`, `spec/fixtures/package-source/manifest-v1.json`, `internal/packagecontentfixture/`
-- Whole-package cache-key v2, bounded memory store, current v4 fixtures, and runner: `internal/packagecache/`, `spec/fixtures/package-cache/manifest-v4.json`, `internal/packagecachefixture/`; fixture manifests v1 through v3 remain historical
+- Whole-package cache-key v2, bounded memory store, current v5 fixtures, and runner: `internal/packagecache/`, `spec/fixtures/package-cache/manifest-v5.json`, `internal/packagecachefixture/`; fixture manifests v1 through v4 remain historical
 - Exact-version verified whole-program MIR artifact codec: `internal/mircodec/`
 - Strict local-exact `fairy.toml` v1 parser, fixtures, and runner: `internal/projectmanifest/`, `spec/fixtures/project-manifest/manifest-v1.json`, `internal/projectmanifestfixture/`
 - Filesystem-safe local workspace loader, fixtures, and runner: `internal/workspaceloader/`, `spec/fixtures/workspace-loader/manifest-v1.json`, `internal/workspaceloaderfixture/`

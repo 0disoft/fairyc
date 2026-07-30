@@ -7,7 +7,7 @@ import (
 
 func TestRunPackageCacheManifest(t *testing.T) {
 	t.Parallel()
-	report, err := Run(filepath.Join("..", "..", "spec", "fixtures", "package-cache", "manifest-v4.json"))
+	report, err := Run(filepath.Join("..", "..", "spec", "fixtures", "package-cache", "manifest-v5.json"))
 	if err != nil {
 		t.Fatalf("Run() error = %v", err)
 	}

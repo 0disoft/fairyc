@@ -4,6 +4,7 @@
   "contracts": [
     "docs/adr/0173-public-interface-coordinate-hash-v2.md",
     "docs/adr/0219-narrow-must-use-call-contract.md",
+    "docs/adr/0221-explicit-source-location-intrinsic.md",
     "docs/package/public-interface-hash-v3.md",
     "docs/compatibility/versioning-v0.md"
   ],
@@ -53,6 +54,12 @@
     {
       "id": "private-constant",
       "source": "cases/private-constant/api.fy",
+      "compareTo": "baseline",
+      "relation": "same"
+    },
+    {
+      "id": "private-source-location",
+      "source": "cases/private-source-location/api.fy",
       "compareTo": "baseline",
       "relation": "same"
     },

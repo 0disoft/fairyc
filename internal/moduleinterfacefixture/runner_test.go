@@ -13,7 +13,7 @@ func TestRunModuleInterfaceManifest(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Run() error = %v", err)
 	}
-	if report.CasesRun != 11 || len(report.Failures) != 0 {
+	if report.CasesRun != 12 || len(report.Failures) != 0 {
 		t.Fatalf("Run() report = %+v", report)
 	}
 }

@@ -68,12 +68,19 @@ source bytes and exact manifests require a manual pin update. Public callable mu
 the current public-interface algorithm from v2 to v3. Runtime ABI, target schemas, C11 transport,
 MIR version, SDK version, and SDK source bytes remain unchanged.
 
-ADR 0220 cuts the current exact pin from `fairyc-language/4` to `fairyc-language/5` because module
+ADR 0220 cut the exact pin from `fairyc-language/4` to `fairyc-language/5` because module
 constants gain semantic values, `@const_eval` gains callable meaning, and contextual module-item
 `static_assert` can reject source. Valid `/4` source without those forms remains valid `/5`.
 Migration preserves existing constant and generic-attribute bytes and requires a manual pin update;
 `static_assert` has no `/4` rewrite. Public-interface v3, runtime ABI, target schemas, C11 transport,
 MIR version, SDK version, and SDK source bytes remain unchanged.
+
+ADR 0221 cuts the current exact pin from `fairyc-language/5` to `fairyc-language/6` because the
+previously unresolved `source_location()` call gains a static `ref str` meaning and its bare name
+becomes reserved across value bindings. Valid `/5` source without that name remains valid `/6`.
+The previous parser already preserves the generic call spelling, so migration preserves source
+bytes and exact manifests require a manual pin update. Public-interface v3, runtime ABI, target
+schemas, C11 transport, MIR version, SDK version, and SDK source bytes remain unchanged.
 
 For one function contract, removing a declared effect preserves every existing caller accepted by
 the effect checker. Adding an effect or replacing it with another can invalidate callers and is a
@@ -97,9 +104,9 @@ compatibility formats. The bounded persistent storage format and one exact-versi
 command now exist; ordinary-command policy and default limits remain undecided.
 
 The current whole-package key encoding remains `fairyc.package-cache-key/v2` with
-`fycache2-sha256-...` text. `fairyc.package-cache-fixtures/v4` supplies current vectors because its
-dependency entries use `fyif3-sha256` public-interface hashes and `fairyc-language/5`; fixture
-manifests v1 through v3 remain historical. A component algorithm change is an intentional cache miss,
+`fycache2-sha256-...` text. `fairyc.package-cache-fixtures/v5` supplies current vectors because its
+dependency entries use `fyif3-sha256` public-interface hashes and `fairyc-language/6`; fixture
+manifests v1 through v4 remain historical. A component algorithm change is an intentional cache miss,
 not permission to reinterpret an older key.
 
 ## Target and ABI
@@ -432,7 +439,7 @@ exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, o
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
 instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
 `fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.6`, language
-`fairyc-language/5`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
+`fairyc-language/6`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 
 ADR 0148 consumes those independently versioned manifest, lock, package-instance, language, SDK,
