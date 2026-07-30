@@ -79,13 +79,16 @@ Classic scalar `for` and bounded lexical `defer` are the separate decisions in A
 expression-bodied function shorthand, and formatter behavior remain follow-up decisions.
 
 ADR 0218 owns the admission boundary for concepts borrowed from modern C++, Java after 17, Go, and
-other languages. A narrow `@must_use` contract, bounded pure `const fn` plus `static_assert`, and one
-caller-source-location intrinsic are ordered candidates rather than current syntax. Construction
+other languages. ADR 0219 accepts the design of a narrow callable `@must_use` contract but does not
+claim implementation until its diagnostic, semantic, interface-hash, compatibility, and backend-
+identity evidence passes. Bounded pure `const fn` plus `static_assert` and one
+caller-source-location intrinsic remain candidates rather than current syntax. Construction
 continues through ordinary explicit functions returning `T` or `Result<T, E>`. Static interfaces
 remain blocked behind demonstrated user-generic need and bounded monomorphization. Class inheritance,
 exceptions, implicit conversions, overload sets, unrestricted template metaprogramming, runtime
 reflection, garbage-collected object roots, and language-owned async or virtual-thread scheduling
-remain non-goals. None of these candidate statements changes `fairyc-language/3` or Stage 0 grammar.
+remain non-goals. ADR 0219 owns its planned `/4` cutover; the remaining candidate statements do not
+change the current implemented language or Stage 0 grammar.
 
 ## Value categories
 

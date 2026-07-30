@@ -46,10 +46,11 @@ ADR 0218 separates ideas worth studying from accepted syntax and implemented beh
 this queue changes the current language revision until it receives its own ADR, grammar and
 diagnostic contract, compatibility decision, and executable fixtures.
 
-1. Evaluate narrow `@must_use` annotation semantics beyond the existing mandatory `Result` and
-   resource handling. The gate must define annotation targets, `discard`, function-value transport,
-   module-interface hashing, diagnostics, and compatibility without turning all return values into
-   warning noise.
+1. Implement the accepted ADR 0219 narrow callable `@must_use` contract beyond the existing
+   mandatory `Result` and resource handling. The gate includes zero-argument internal and foreign
+   callable attributes, call-site-only explicit use, `discard`, direct-call-only function transport,
+   `E4201`/`E4202`, public-interface v3, exact language `/4`, and backend-identity evidence without
+   turning all return values into warning noise.
 2. Evaluate bounded pure `const fn` and `static_assert`. The gate must define the admitted operation
    set, integer and trap semantics, target dependence, recursion and step budgets, deterministic
    failure diagnostics, cache identity, MIR or evaluator ownership, and compile-time resource tests.
