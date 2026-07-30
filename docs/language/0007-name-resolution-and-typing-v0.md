@@ -36,7 +36,12 @@ Fixture coordinates identify a declaration by module path, declaration name, dec
 
 ## Visibility
 
-An item is visible to another module only when declared `pub`. Private fields of a resource remain private outside their defining module. `pub` affects source lookup only; it does not imply native symbol export or ABI stability.
+An item is visible to another module only when declared `pub`. Private fields of a resource remain
+private outside their defining module. Consequently, a resource record literal outside the
+declaring module is `E0103` even when the resource type itself is public; external construction goes
+through a source-visible ordinary function returning that resource or `Result<T, E>`. This does not
+change public inert-struct record literals. `pub` affects source lookup only; it does not imply
+native symbol export or ABI stability.
 
 ## Canonical types
 

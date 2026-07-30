@@ -33,8 +33,9 @@ overwrites an existing path.
 The Go Stage 0 compiler now implements immutable source bytes, a lossless lexer, compact recoverable
 syntax, error-free AST lowering, typed HIR, resource and borrow Flow, verified MIR, a bounded
 interpreter, deterministic C11 transport, strict local workspaces, stable new/check/build/run/test/C
-  emission commands, and experimental Atlas fact export. The semantic runner executes all 57 v0 resolve, type,
-and local Flow cases, including explicit `source_location()`, bounded scalar compile-time evaluation, narrow callable `@must_use`, integer-literal range rejection, checked compound assignment, branch- and loop-aware safe-borrow reassignment,
+  emission commands, and experimental Atlas fact export. The semantic runner executes all 59 v0 resolve, type,
+and local Flow cases, including explicit resource-factory construction with cross-module resource
+representation privacy, explicit `source_location()`, bounded scalar compile-time evaluation, narrow callable `@must_use`, integer-literal range rejection, checked compound assignment, branch- and loop-aware safe-borrow reassignment,
 exact interprocedural borrow-return summaries, last-use loans, borrow-return origins, canonical
 `@effects(...)` sets, and caller-superset enforcement. Whole-root resource Flow
   also executes all 12 v0 cases for moves, cleanup obligations, branch joins, normal, break, and continue loop edges,

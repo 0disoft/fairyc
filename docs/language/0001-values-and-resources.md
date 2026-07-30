@@ -73,6 +73,11 @@ Resource Flow fixtures identify a binding declaration and sample its state immed
 ## Construction and destruction
 
 Construction is an ordinary function that returns a fully initialized value or a `Result`.
+Only the resource's declaring module may spell its record literal. Publishing the resource type
+does not publish its representation; another module must use a source-visible ordinary factory.
+This keeps validation, allocation, external-handle policy, effects, and rollback inside the owner
+module without adding constructor syntax or implicit conversions. Public inert structs remain
+directly constructible when their fields are source-visible.
 Resource cleanup is compiler-invoked, infallible, and runs exactly once for each live resource on
 every normal scope exit. Resource fields drop in reverse initialization order.
 

@@ -88,8 +88,9 @@ execution, public evaluator transport, and any runtime marker. Its first semanti
 outside the closed five-kind Atlas v0 declaration transport rather than forcing an unrelated map
 version. ADR 0221 implements exact zero-argument `source_location()` as a static relative-path and
 byte-coordinate string under `E4401`/`E4402`. It explicitly excludes hidden default arguments,
-callee propagation, runtime stack inspection, absolute paths, and new MIR or ABI surface. Construction
-continues through ordinary explicit functions returning `T` or `Result<T, E>`. Static interfaces
+callee propagation, runtime stack inspection, absolute paths, and new MIR or ABI surface. ADR 0222
+retains ordinary named functions returning `T` or `Result<T, E>` as the complete construction model
+after auditing the SDK/example factory and rollback patterns. Static interfaces
 remain blocked behind demonstrated user-generic need and bounded monomorphization. Class inheritance,
 exceptions, implicit conversions, overload sets, unrestricted template metaprogramming, runtime
 reflection, garbage-collected object roots, and language-owned async or virtual-thread scheduling
@@ -123,7 +124,11 @@ resource-bearing enums are deferred.
 - A fallible `close`-style operation consumes the resource or returns ownership explicitly inside its failure value.
 - Resource partial moves, implicit forgetting, and source-level uninitialized resource slots are rejected.
 
-Construction is performed by ordinary explicit functions such as `File.open`; there is no implicit constructor call. Lifecycle details are defined in `docs/language/0001-values-and-resources.md` and `docs/mir/drop-elaboration-v0.md`.
+Construction is performed by ordinary explicit functions such as `File.open`; there is no implicit
+constructor call. A public resource type does not expose its representation: only its declaring
+module may use a resource record literal, while external modules must call a source-visible factory.
+Public inert structs with source-visible fields remain directly constructible. Lifecycle details are
+defined in `docs/language/0001-values-and-resources.md` and `docs/mir/drop-elaboration-v0.md`.
 
 Whole-root `Live`, `Dead`, and rejected `MaybeLive` transitions, live replacement, dead-slot reinstallation, and cleanup-obligation assertions are versioned in `spec/fixtures/resource/manifest-v0.json`.
 

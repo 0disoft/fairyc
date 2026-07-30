@@ -63,9 +63,12 @@ static `ref str` containing canonical relative path, byte-based line column, and
 coordinates. It reserves no default-argument or stack-inspection machinery and cuts the exact
 language pin to `/6` with semantic, HIR, interpreter, C11, migration, interface, and cache evidence.
 
-1. Keep ordinary explicit `T`/`Result<T, E>` factory functions as the construction model and gather
-   evidence before considering any additional initialization shorthand.
-2. Revisit static interfaces only after user-defined generics have a separate accepted contract and
+ADR 0222 closes the construction candidate without adding syntax. The audited SDK/example corpus
+contains four public fallible resource factories whose names expose copy, conversion, create, and
+open policy; constructor syntax would not remove their explicit rollback work or improve ownership
+evidence. Ordinary named `T`/`Result<T, E>` factories remain the complete construction model.
+
+1. Revisit static interfaces only after user-defined generics have a separate accepted contract and
    real source demonstrates duplication. Require explicit implementation, static dispatch first,
    bounded code generation, deterministic resolution, and a no-inheritance rule.
 
@@ -81,7 +84,8 @@ lowering, and parser-fixture-runner portion of the first item exists. Name resol
 now cover the semantic fixture's scalar and safe-borrow subset. Local last-use loans, borrow
   conflicts, single-origin borrow returns, checked matching-type left shift, loop-context diagnostics,
   scalar foreign-call unsafe/signature boundaries, and `@link_name` shape diagnostics execute across
-  all 57 semantic v0 cases, including explicit source-location expansion, bounded scalar compile-time evaluation, narrow callable `@must_use`, classic scalar `for`, bounded lexical `defer`, branch- and loop-aware safe-borrow reassignment, exact
+  all 59 semantic v0 cases, including explicit resource-factory construction and cross-module
+  resource-literal rejection, explicit source-location expansion, bounded scalar compile-time evaluation, narrow callable `@must_use`, classic scalar `for`, bounded lexical `defer`, branch- and loop-aware safe-borrow reassignment, exact
   interprocedural borrow-return summaries, integer-literal range rejection before MIR, and exact
   transport for all sixteen TargetSpec C scalars. The type phase also canonicalizes the closed
   seven-name `@effects(...)` vocabulary and enforces caller supersets independently from unsafe. General

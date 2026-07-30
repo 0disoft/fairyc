@@ -974,6 +974,13 @@ func (c *typeChecker) checkRecord(expression *ast.Expression, result *hir.Expres
 		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "record constructor that is not an aggregate")
 		return hir.TypeInvalid
 	}
+	if constructor.resource != nil && (constructor.packageID != c.module.key.packageID || constructor.module != c.module.file.Module.Path) {
+		c.analyzer.addDiagnostic("E0103", span(c.module.file.Path, expression.Children[0].Span), RelatedSpan{
+			Role: "declaration",
+			Span: span(constructor.source, constructor.declaration),
+		})
+		return hir.TypeInvalid
+	}
 	fields := map[string]resourceField(nil)
 	if info := c.analyzer.resourceTypes[constructor.typ]; info != nil {
 		fields = info.fields

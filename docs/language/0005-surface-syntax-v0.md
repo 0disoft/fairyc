@@ -225,7 +225,10 @@ pub fn Result<void, CloseError> File::close(File this) {
 The first parameter named `this` is the receiver. Its exact forms are `ref File this`,
 `ref mut File this`, or `File this`, and its owner type must match `File::`. A qualified function
 without `this` is associated but is not a method. Resource fields are private outside the defining
-module. General field extraction from a resource remains forbidden.
+module. A resource record literal is therefore valid only in that defining module; making the
+resource type `pub` does not publish its fields or let another module bypass its ordinary factory
+functions. Public inert structs keep their existing field-by-field record-literal behavior. General
+field extraction from a resource remains forbidden.
 
 Restricted user enums provide typed inert errors:
 
@@ -306,6 +309,12 @@ separators, and column counts original UTF-8 bytes rather than characters or dis
 caller passes this value explicitly to logging or diagnostic helpers. `source_location` is reserved
 in value namespaces; hidden default arguments, callee propagation, runtime stack inspection,
 absolute paths, and a structured location ABI do not exist.
+
+Construction uses the same ordinary call syntax as every other function. Infallible named factories
+return `T`; validation, allocation, handle acquisition, I/O, and other fallible construction return
+`Result<T, E>`. Policy stays visible in names such as `copy`, `from_text`, `open_read`, or
+`create_truncate`. There is no `new` expression, constructor declaration, initializer list,
+constructor overload, implicit conversion constructor, or special copy/move member protocol.
 
 ## Region syntax
 

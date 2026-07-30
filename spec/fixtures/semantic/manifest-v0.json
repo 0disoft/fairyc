@@ -28,6 +28,7 @@
     "docs/adr/0219-narrow-must-use-call-contract.md",
     "docs/adr/0220-bounded-scalar-compile-time-evaluation.md",
     "docs/adr/0221-explicit-source-location-intrinsic.md",
+    "docs/adr/0222-retain-explicit-factory-construction.md",
     "docs/diagnostics/catalog-v0.md"
   ],
   "cases": [
@@ -1166,6 +1167,33 @@
         "phase": "type",
         "diagnostics": [
           { "code": "E4302", "primary": { "source": "main.fy", "startByte": 52, "endByte": 73 }, "related": [] }
+        ]
+      }
+    },
+    {
+      "id": "pass.type.explicit-factory-construction",
+      "sourceRoot": "cases/pass/explicit-factory-construction/src",
+      "sources": ["lib.fy", "main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow"
+      }
+    },
+    {
+      "id": "fail.type.external-resource-construction",
+      "sourceRoot": "cases/fail/external-resource-construction/src",
+      "sources": ["lib.fy", "main.fy"],
+      "expect": {
+        "status": "fail",
+        "phase": "type",
+        "diagnostics": [
+          {
+            "code": "E0103",
+            "primary": { "source": "main.fy", "startByte": 77, "endByte": 87 },
+            "related": [
+              { "role": "declaration", "span": { "source": "lib.fy", "startByte": 26, "endByte": 31 } }
+            ]
+          }
         ]
       }
     }
