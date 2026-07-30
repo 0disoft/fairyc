@@ -251,6 +251,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0239-windows-dbghelp-symbolication-canary.md`: independently resolves the exact relocation-probe function name and `caller.c` source line through system DbgHelp for both low and optimized PE/PDB pairs.
 - `0240-amd64-unwind-handler-relocation-proof.md`: binds the low-profile `__GSHandlerCheck_SEH` and optimized `__C_specific_handler` ADDR32NB tails from raw `frame.obj` through exact MSVC map owners into the final PE before real exception dispatch.
 - `0241-amd64-weak-external-link-proof.md`: proves one missing weak `SEARCH_ALIAS` selects its object-local fallback while one present strong definition overrides a distinct fallback, with exact raw auxiliaries, final REL32 formulas, and low/optimized execution.
+- `0242-amd64-relocation-overflow-link-proof.md`: normalizes the COFF extended-relocation sentinel, rejects malformed count combinations, and proves a 65,535-relocation generated object through real low/optimized MSVC LINK and execution.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

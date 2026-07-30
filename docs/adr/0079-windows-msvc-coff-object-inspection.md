@@ -25,9 +25,9 @@ without retaining build debris.
 3. At least one readable executable code section named `.text` or `.text$...` must exist. The
    subsection form is required because MSVC emits function-level COFF sections before the linker
    merges them.
-4. Relocation tables must be bounded, relocation-overflow encoding remains rejected, and every
-   relocation symbol index must address the raw COFF symbol table. At least one named non-auxiliary
-   symbol is required.
+4. Relocation tables must be bounded, and every relocation symbol index must address the raw COFF
+   symbol table. ADR 0242 admits the exact extended-relocation marker and sentinel while rejecting
+   malformed count combinations. At least one named non-auxiliary symbol is required.
 5. Host-independent tests build a minimal object with one relocation and symbol, admit an MSVC
    `.text$...` subsection and storage-free `.bss`, and mutate image identity, machine, linked flags,
    code characteristics, raw pointers, and symbol references for closed rejection.
@@ -45,7 +45,8 @@ without retaining build debris.
    function parent to its direct associative `.pdata` and `.xdata` children. ADR 0236 proves one
    losing ANY-COMDAT function's distinct unwind payload is absent. ADR 0240 proves one
    profile-specific handler-tail relocation. ADR 0241 proves one weak `SEARCH_ALIAS` fallback and
-   one strong override. Other relocation formulas and weak search modes, non-unwind and broader
+   one strong override. ADR 0242 proves one extended relocation table and its count sentinel
+   through real LINK. Other relocation formulas and weak search modes, non-unwind and broader
    archive/COMDAT policies, chained-tail relocations, complete CodeView/PDB record semantics and symbolication, compiler baselines, and a fresh
    hosted same-commit object receipt remain separate gates.
 

@@ -13,6 +13,7 @@ const (
 	coffSectionHeaderBytes       = 40
 	coffRelocationBytes          = 10
 	maxObjectSections            = 4096
+	maxObjectRelocations         = 1 << 20
 	sectionRelocationOverflow    = 0x01000000
 	sectionLinkCOMDAT            = 0x00001000
 	coffStorageClassStatic       = 3
@@ -104,6 +105,12 @@ type ObjectReport struct {
 	Relocations       int
 }
 
+type rawCOFFRelocation struct {
+	VirtualAddress   uint32
+	SymbolTableIndex uint32
+	Type             uint16
+}
+
 // InspectObject parses and validates one bounded AMD64 COFF object file.
 func InspectObject(object []byte) (ObjectReport, error) {
 	if len(object) < coffFileHeaderBytes || len(object) > maxExecutableBytes {
@@ -148,18 +155,28 @@ func InspectObject(object []byte) (ObjectReport, error) {
 	for _, symbol := range report.SymbolRecords {
 		report.Symbols = append(report.Symbols, symbol.Name)
 	}
-	comdatBySection, err := inspectCOFFCOMDAT(file, primarySymbols)
+	textSectionFound := false
+	rawRanges := make([][2]uint64, 0, len(file.Sections))
+	relocationsBySection := make([][]rawCOFFRelocation, len(file.Sections))
+	totalRelocations := 0
+	for index, section := range file.Sections {
+		relocations, err := inspectCOFFSectionRelocations(object, headerEnd, index, section.Name)
+		if err != nil {
+			return ObjectReport{}, err
+		}
+		if len(relocations) > maxObjectRelocations-totalRelocations {
+			return ObjectReport{}, fmt.Errorf("COFF object has more than %d relocations", maxObjectRelocations)
+		}
+		totalRelocations += len(relocations)
+		relocationsBySection[index] = relocations
+	}
+	comdatBySection, err := inspectCOFFCOMDAT(file, primarySymbols, relocationsBySection)
 	if err != nil {
 		return ObjectReport{}, err
 	}
-	textSectionFound := false
-	rawRanges := make([][2]uint64, 0, len(file.Sections))
 	for index, section := range file.Sections {
 		if section.Name == "" {
 			return ObjectReport{}, fmt.Errorf("COFF object section %d has no name", index)
-		}
-		if section.Characteristics&sectionRelocationOverflow != 0 {
-			return ObjectReport{}, fmt.Errorf("COFF object section %q uses unsupported relocation overflow", section.Name)
 		}
 		if section.Size > 0 {
 			if section.Offset == 0 {
@@ -180,14 +197,8 @@ func InspectObject(object []byte) (ObjectReport, error) {
 				rawRanges = append(rawRanges, [2]uint64{start, end})
 			}
 		}
-		if len(section.Relocs) > 0 {
-			start := uint64(section.PointerToRelocations)
-			end := start + uint64(len(section.Relocs))*coffRelocationBytes
-			if start < headerEnd || end > uint64(len(object)) {
-				return ObjectReport{}, fmt.Errorf("COFF object section %q has an invalid relocation range", section.Name)
-			}
-		}
-		for _, relocation := range section.Relocs {
+		relocations := relocationsBySection[index]
+		for _, relocation := range relocations {
 			if !validAMD64RelocationType(relocation.Type) {
 				return ObjectReport{}, fmt.Errorf("COFF object section %q has unknown AMD64 relocation type %#x", section.Name, relocation.Type)
 			}
@@ -219,20 +230,76 @@ func InspectObject(object []byte) (ObjectReport, error) {
 			Name:            section.Name,
 			RawOffset:       section.Offset,
 			RawSize:         section.Size,
-			Relocations:     len(section.Relocs),
+			Relocations:     len(relocations),
 			Characteristics: section.Characteristics,
 		}
 		if comdat, found := comdatBySection[index+1]; found {
 			sectionReceipt.COMDATSelection = comdat.Selection
 			sectionReceipt.AssociativeSection = int(comdat.SecNum)
 		}
-		report.Relocations += len(section.Relocs)
+		report.Relocations += len(relocations)
 		report.Sections = append(report.Sections, sectionReceipt)
 	}
 	if !textSectionFound {
 		return ObjectReport{}, fmt.Errorf("COFF object has no .text or .text$ code section")
 	}
 	return report, nil
+}
+
+func inspectCOFFSectionRelocations(object []byte, headerEnd uint64, sectionIndex int, sectionName string) ([]rawCOFFRelocation, error) {
+	headerOffset := uint64(coffFileHeaderBytes + sectionIndex*coffSectionHeaderBytes)
+	if headerOffset+coffSectionHeaderBytes > uint64(len(object)) {
+		return nil, fmt.Errorf("COFF object section %q header is out of range", sectionName)
+	}
+	header := object[headerOffset : headerOffset+coffSectionHeaderBytes]
+	pointer := binary.LittleEndian.Uint32(header[24:])
+	headerCount := binary.LittleEndian.Uint16(header[32:])
+	characteristics := binary.LittleEndian.Uint32(header[36:])
+	overflow := characteristics&sectionRelocationOverflow != 0
+	if overflow && headerCount != 0xffff {
+		return nil, fmt.Errorf("COFF object section %q relocation overflow count marker is %#x, want 0xffff", sectionName, headerCount)
+	}
+	if headerCount == 0 {
+		if overflow {
+			return nil, fmt.Errorf("COFF object section %q relocation overflow has no sentinel", sectionName)
+		}
+		return nil, nil
+	}
+	start := uint64(pointer)
+	if start < headerEnd || start+coffRelocationBytes > uint64(len(object)) {
+		return nil, fmt.Errorf("COFF object section %q has an invalid relocation range", sectionName)
+	}
+	storedCount := uint64(headerCount)
+	firstRecord := uint64(0)
+	if overflow {
+		sentinel := object[start : start+coffRelocationBytes]
+		storedCount = uint64(binary.LittleEndian.Uint32(sentinel))
+		if storedCount <= 0xffff {
+			return nil, fmt.Errorf("COFF object section %q relocation overflow count %d does not exceed 0xffff", sectionName, storedCount)
+		}
+		if binary.LittleEndian.Uint32(sentinel[4:]) != 0 || binary.LittleEndian.Uint16(sentinel[8:]) != 0 {
+			return nil, fmt.Errorf("COFF object section %q relocation overflow sentinel has nonzero symbol or type", sectionName)
+		}
+		firstRecord = 1
+	}
+	semanticCount := storedCount - firstRecord
+	if semanticCount > maxObjectRelocations {
+		return nil, fmt.Errorf("COFF object section %q has %d relocations, limit is %d", sectionName, semanticCount, maxObjectRelocations)
+	}
+	end := start + storedCount*coffRelocationBytes
+	if end < start || end > uint64(len(object)) {
+		return nil, fmt.Errorf("COFF object section %q has an invalid relocation range", sectionName)
+	}
+	relocations := make([]rawCOFFRelocation, 0, int(semanticCount))
+	for record := firstRecord; record < storedCount; record++ {
+		offset := start + record*coffRelocationBytes
+		entry := object[offset : offset+coffRelocationBytes]
+		relocations = append(relocations, rawCOFFRelocation{
+			VirtualAddress: binary.LittleEndian.Uint32(entry), SymbolTableIndex: binary.LittleEndian.Uint32(entry[4:]),
+			Type: binary.LittleEndian.Uint16(entry[8:]),
+		})
+	}
+	return relocations, nil
 }
 
 func validAMD64RelocationType(value uint16) bool {
@@ -321,7 +388,7 @@ func inspectPrimaryCOFFSymbols(file *pe.File, object []byte) (inspectedCOFFSymbo
 	return result, nil
 }
 
-func inspectCOFFCOMDAT(file *pe.File, symbols inspectedCOFFSymbols) (map[int]pe.COFFSymbolAuxFormat5, error) {
+func inspectCOFFCOMDAT(file *pe.File, symbols inspectedCOFFSymbols, relocationsBySection [][]rawCOFFRelocation) (map[int]pe.COFFSymbolAuxFormat5, error) {
 	result := make(map[int]pe.COFFSymbolAuxFormat5)
 	firstPrimaryBySection := make(map[int]int, len(file.Sections))
 	primaryCountBySection := make(map[int]int, len(file.Sections))
@@ -349,7 +416,11 @@ func inspectCOFFCOMDAT(file *pe.File, symbols inspectedCOFFSymbols) (map[int]pe.
 		if _, duplicate := result[sectionNumber]; duplicate {
 			return nil, fmt.Errorf("COFF object section %q repeats its section definition", section.Name)
 		}
-		if auxiliary.Size != section.Size || int(auxiliary.NumRelocs) != len(section.Relocs) ||
+		expectedRelocations := len(relocationsBySection[sectionNumber-1])
+		if expectedRelocations > 0xffff {
+			expectedRelocations = 0xffff
+		}
+		if auxiliary.Size != section.Size || int(auxiliary.NumRelocs) != expectedRelocations ||
 			auxiliary.NumLineNumbers != section.NumberOfLineNumbers {
 			return nil, fmt.Errorf("COFF object section %q definition does not match its header", section.Name)
 		}

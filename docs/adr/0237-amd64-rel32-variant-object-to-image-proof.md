@@ -53,8 +53,9 @@ linked `fy_vsrc` path. This adds no PE image to the smoke count.
 This is compiler-private validation evidence, not a stable Fairy C object format or permission for
 arbitrary user-supplied objects. ADR 0238 separately proves object-level CodeView `SECTION`/`SECREL`
 pairs and final PE/PDB identity without claiming a resolved object-to-PDB record mapping. This ADR
-does not prove token, base-relocation, incremental-link, LTCG, weak-external, overflow-relocation,
-non-MSVC-linker, or remaining CodeView/PDB record semantics.
+does not prove token, base-relocation, incremental-link, LTCG, or weak-external behavior. ADR 0242
+separately proves one generated overflow-relocation table, but neither ADR proves a versioned
+overflow fixture, a non-MSVC linker, or remaining CodeView/PDB record semantics.
 
 ## External basis
 

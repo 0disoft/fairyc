@@ -11,6 +11,8 @@ const (
 	VariantSource        = "fy_vsrc"
 	VariantTarget        = "fy_vdst"
 	WeakObject           = "weak.obj"
+	OverflowObject       = "overflow.obj"
+	OverflowSource       = "fy_ovfl"
 	WeakFallbackEntry    = "fy_wfb_e"
 	WeakOverrideEntry    = "fy_wov_e"
 	WeakMissing          = "fy_wmiss"
@@ -38,6 +40,8 @@ type Unit struct {
 	VariantSource        string
 	VariantTarget        string
 	WeakObject           string
+	OverflowObject       string
+	OverflowSource       string
 	WeakFallbackEntry    string
 	WeakOverrideEntry    string
 	WeakMissing          string
@@ -59,6 +63,7 @@ func Generate() Unit {
 		ReceiptSymbol: ReceiptSymbol, SourceObject: SourceObject, TargetObject: TargetObject,
 		VariantObject: VariantObject, VariantSource: VariantSource, VariantTarget: VariantTarget,
 		WeakObject: WeakObject, WeakFallbackEntry: WeakFallbackEntry, WeakOverrideEntry: WeakOverrideEntry,
+		OverflowObject: OverflowObject, OverflowSource: OverflowSource,
 		WeakMissing: WeakMissing, WeakOverride: WeakOverride,
 		WeakMissingFallback: WeakMissingFallback, WeakOverrideFallback: WeakOverrideFallback,
 		ReceiptSection: ReceiptSection, ReceiptMagic: ReceiptMagic, SourceLine: SourceLine, ExpectedExit: ExpectedExit,
@@ -79,6 +84,8 @@ __declspec(noinline) int fy_rel32_source(int value) {
     volatile int observed = fy_rel32_target(value);
     return observed + 1;
 }
+
+extern int fy_ovfl(void);
 
 struct fy_rel32_link_receipt {
     unsigned char magic[16];
@@ -107,7 +114,10 @@ int main(void) {
     if (fy_wfb_e() != 17) {
         return 14;
     }
-    return fy_wov_e() == 29 ? 0 : 15;
+    if (fy_wov_e() != 29) {
+        return 15;
+    }
+    return fy_ovfl() == 42 ? 0 : 16;
 }
 `
 

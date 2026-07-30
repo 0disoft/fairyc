@@ -17,6 +17,7 @@ func TestGenerateReturnsClosedDeterministicREL32Probe(t *testing.T) {
 		first.WeakObject != WeakObject || first.WeakFallbackEntry != WeakFallbackEntry || first.WeakOverrideEntry != WeakOverrideEntry ||
 		first.WeakMissing != WeakMissing || first.WeakOverride != WeakOverride ||
 		first.WeakMissingFallback != WeakMissingFallback || first.WeakOverrideFallback != WeakOverrideFallback ||
+		first.OverflowObject != OverflowObject || first.OverflowSource != OverflowSource ||
 		first.ReceiptSection != ReceiptSection || first.ReceiptMagic != ReceiptMagic ||
 		first.SourceLine != SourceLine || first.ExpectedExit != ExpectedExit {
 		t.Fatalf("Generate() identity = %+v", first)
@@ -33,7 +34,8 @@ func TestGenerateReturnsClosedDeterministicREL32Probe(t *testing.T) {
 		"fy_rel32_source(40) != 42",
 		"fy_vsrc() != 42",
 		"fy_wfb_e() != 17",
-		"fy_wov_e() == 29",
+		"fy_wov_e() != 29",
+		"fy_ovfl() == 42",
 	} {
 		if !strings.Contains(first.CallerSource, fragment) {
 			t.Fatalf("caller source is missing %q", fragment)

@@ -93,7 +93,7 @@ func TestWindowsHostDriverFailsClosedOnIneligibleHost(t *testing.T) {
 	if _, err := BuildWindowsMSVCABIProbe(WindowsHostToolchain{}, LowProfile, "caller", "callee"); err == nil || !strings.Contains(err.Error(), "requires windows/amd64") {
 		t.Fatalf("BuildWindowsMSVCABIProbe() error = %v", err)
 	}
-	if _, err := BuildWindowsMSVCRelocationProbe(WindowsHostToolchain{}, LowProfile, "caller", "target", []byte("variant"), []byte("weak")); err == nil || !strings.Contains(err.Error(), "requires windows/amd64") {
+	if _, err := BuildWindowsMSVCRelocationProbe(WindowsHostToolchain{}, LowProfile, "caller", "target", []byte("variant"), []byte("weak"), []byte("overflow")); err == nil || !strings.Contains(err.Error(), "requires windows/amd64") {
 		t.Fatalf("BuildWindowsMSVCRelocationProbe() error = %v", err)
 	}
 	if _, err := BuildWindowsMSVCArchiveProbe(WindowsHostToolchain{}, LowProfile, "caller", "chosen", "unused", "direct"); err == nil || !strings.Contains(err.Error(), "requires windows/amd64") {

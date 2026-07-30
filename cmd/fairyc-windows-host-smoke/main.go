@@ -2436,6 +2436,10 @@ func runWindowsRelocationProbe(toolchain cdriver.WindowsHostToolchain) (int, err
 	if err != nil {
 		return 0, fmt.Errorf("build AMD64 weak-external object: %w", err)
 	}
+	overflowObject, err := pecoff.BuildAMD64RelocationOverflowProbeObject(unit.OverflowSource)
+	if err != nil {
+		return 0, fmt.Errorf("build AMD64 relocation-overflow object: %w", err)
+	}
 	rel32Spec := pecoff.AMD64REL32LinkSpec{
 		SourceSymbol: unit.SourceSymbol, TargetSymbol: unit.TargetSymbol,
 		ReceiptSection: unit.ReceiptSection, ReceiptMagic: unit.ReceiptMagic,
@@ -2455,14 +2459,15 @@ func runWindowsRelocationProbe(toolchain cdriver.WindowsHostToolchain) (int, err
 		MissingWeak: unit.WeakMissing, OverrideWeak: unit.WeakOverride,
 		MissingFallback: unit.WeakMissingFallback, OverrideFallback: unit.WeakOverrideFallback,
 	}
+	overflowSpec := pecoff.AMD64RelocationOverflowSpec{SourceSymbol: unit.OverflowSource, SourceObject: unit.OverflowObject}
 	executions := 0
 	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
-		artifact, err := cdriver.BuildWindowsMSVCRelocationProbe(toolchain, profile, unit.CallerSource, unit.TargetSource, variantObject, weakObject)
+		artifact, err := cdriver.BuildWindowsMSVCRelocationProbe(toolchain, profile, unit.CallerSource, unit.TargetSource, variantObject, weakObject, overflowObject)
 		if err != nil {
 			return executions, fmt.Errorf("build Windows MSVC REL32 probe with %s: %w", profile.Name, err)
 		}
-		if len(artifact.Objects) != 4 || artifact.Objects[0].Name != "caller.obj" || artifact.Objects[1].Name != "target.obj" ||
-			artifact.Objects[2].Name != unit.VariantObject || artifact.Objects[3].Name != unit.WeakObject {
+		if len(artifact.Objects) != 5 || artifact.Objects[0].Name != "caller.obj" || artifact.Objects[1].Name != "target.obj" ||
+			artifact.Objects[2].Name != unit.VariantObject || artifact.Objects[3].Name != unit.WeakObject || artifact.Objects[4].Name != unit.OverflowObject {
 			return executions, fmt.Errorf("Windows MSVC REL32 probe with %s returned unexpected COFF object receipts", profile.Name)
 		}
 		callerCodeView, err := pecoff.InspectCodeViewRelocations(artifact.Objects[0].Bytes)
@@ -2532,6 +2537,14 @@ func runWindowsRelocationProbe(toolchain cdriver.WindowsHostToolchain) (int, err
 			weakReport.Fallback.LinkedDisplacement != weakReport.Fallback.ExpectedDisplacement ||
 			weakReport.Override.LinkedDisplacement != weakReport.Override.ExpectedDisplacement {
 			return executions, fmt.Errorf("Windows MSVC weak-external probe with %s returned an incomplete receipt", profile.Name)
+		}
+		overflowReport, err := pecoff.InspectAMD64RelocationOverflowLink(artifact.Objects[4].Bytes, artifact.Bytes, artifact.LinkMap, overflowSpec)
+		if err != nil {
+			return executions, fmt.Errorf("inspect Windows MSVC relocation-overflow link with %s: %w", profile.Name, err)
+		}
+		if overflowReport.Relocations != 0xffff || overflowReport.SourceRVA == 0 ||
+			overflowReport.LinkedDisplacement != overflowReport.ExpectedDisplacement {
+			return executions, fmt.Errorf("Windows MSVC relocation-overflow probe with %s returned an incomplete receipt", profile.Name)
 		}
 		outcome, err := cdriver.ExecuteWindowsMSVCRelocationProbe(artifact)
 		if err != nil {

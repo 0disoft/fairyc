@@ -382,9 +382,10 @@ is absent from the final image. ADR 0237 links one exact generated object and pr
 object and proves one missing weak alias selects its local fallback while one strong definition
 overrides a distinct fallback, including final REL32 formulas and execution. ADR 0240 binds the native unwind
 frame's profile-specific handler-tail `ADDR32NB` relocation from raw `frame.obj` through the MSVC
-map into the final PE. Whole compiler-produced object identity, remaining relocation formulas and
+map into the final PE. ADR 0242 normalizes the extended-relocation sentinel and proves a generated
+65,535-relocation object through the same low/optimized LINK executions. Whole compiler-produced object identity, remaining relocation formulas and
 chained unwind tails, non-unwind and broader archive retention and COMDAT selection policies,
-complete CodeView/PDB records and broader symbolication, and a fresh hosted object receipt remain
+complete CodeView/PDB records and broader symbolication, a versioned overflow fixture, bigobj, and a fresh hosted object receipt remain
 absent, so the target evidence marker stays fail-closed.
 The fifty-three local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
 runtime-function ordering and code coverage plus referenced version 1 and version 2 unwind-record

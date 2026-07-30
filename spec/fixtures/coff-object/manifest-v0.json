@@ -12,7 +12,7 @@
     "whole-object MSVC byte identity, timestamps, compiler-generated section ordering, and string-table layout",
     "AMD64 relocation formula and displacement execution across independently produced objects",
     "archive extraction, final-link COMDAT selection, import/export tables, CodeView, and PDB",
-    "bigobj, relocation overflow, weak externals, CLR-only COMDAT selection, and non-AMD64 COFF"
+    "versioned fixtures for bigobj, relocation overflow, weak externals, CLR-only COMDAT selection, and non-AMD64 COFF"
   ],
   "cases": [
     {

@@ -454,7 +454,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   unchanged. ADR 0241 adds a second exact generated object with two weak `SEARCH_ALIAS` records.
   One absent name must select its object-local fallback and one present name must select the strong
   definition in `target.obj`; both final REL32 values and both native return values must agree at
-  low and optimized profiles. ADR 0238 compiles the two C inputs with `/Z7`, requires exact function-targeted
+  low and optimized profiles. ADR 0242 adds a third exact generated object with the smallest
+  extended relocation table: one count sentinel, 65,534 semantic ABSOLUTE records, and one final
+  REL32 record required by its executable result. Its exact map owner, final displacement, and
+  native result must agree at both profiles. ADR 0238 compiles the two C inputs with `/Z7`, requires exact function-targeted
   `.debug$S` `SECREL`/`SECTION` pairs and object-level formulas, and binds the final PE RSDS GUID/age
   to the bounded MSF 7 PDB information stream at both profiles. ADR 0239 then requires system
   DbgHelp to resolve the exact source-function start to its name and `caller.c` line with zero

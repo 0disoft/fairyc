@@ -328,6 +328,9 @@ ADR 0241 keeps the generated weak-object names and bytes, storage class, fallbac
 characteristic, map owners, and selection report private. They may evolve with synchronized
 generator, inspector, mutation, and native evidence; they do not admit source-level weak
 declarations, arbitrary prebuilt objects, or a public object/linker compatibility promise.
+ADR 0242 likewise keeps the generated overflow-object bytes, 1,048,576-record inspection budget,
+map identity, and leaf code private. They may evolve with synchronized parser, mutation, and native
+evidence updates; they do not stabilize a Fairy object writer or public prebuilt-object contract.
 Microsoft x64 unwind inspection is likewise an internal validation policy. Neither the observed
 runtime-function count nor version-1/version-2 mix is stable. Future semantic epilog, handler,
 or chain fixtures require an explicit unwind-contract decision before they can become target

@@ -70,9 +70,11 @@ ADR 0233 proves one ordinary archive extraction plus pick-any COMDAT final owner
 preserves relocation section indexes while proving one ADDR64 plus all three unwind `.pdata`
 ADDR32NB calculations. ADR 0240 separately proves one profile-specific unwind-handler tail, and
 ADR 0241 proves generated weak-alias fallback and strong-override paths through real LINK.
+ADR 0242 proves one generated relocation-overflow sentinel and 65,535 semantic records through
+real LINK, while a versioned raw overflow vector remains absent.
 Whole-object MSVC identity, other relocation formulas and chained unwind tails, broader
 archive/COMDAT policies, versioned weak-external fixtures and other weak search modes, bigobj,
-relocation overflow, imports/exports, CodeView/PDB, independent
+versioned relocation-overflow fixtures, imports/exports, CodeView/PDB, independent
 producer crossings, and hosted same-commit evidence remain separate gates.
 
 ## External basis
