@@ -938,6 +938,14 @@ shape, and explicit construction bounds. OS caches remain uncontrolled. These ar
 Atlas-only retained-memory values, and the tiny local fixture establishes no reference budget,
 default, percentile, speedup, representative-use, traversal, or impact conclusion.
 
+ADR 0228 separately generates closed 2-package/8-call, 8-package/64-call, and
+32-package/512-call star workspaces. Generation, loading, compilation, map planning, and exact
+root-symbol discovery happen before timing; one warmup and nine raw samples per shape cover only
+exact workspace-call index construction plus outgoing catalog encoding. Samples carry raw monotonic
+wall time, process-wide Go `TotalAlloc`/`Mallocs` deltas, and canonical output bytes. The fixed
+shapes and 64 MiB output ceiling are harness controls, not representative workloads, retained-memory
+evidence, complexity proof, defaults, traversal or impact policy, or a regression gate.
+
 The configured Windows host smoke separately measures whole-package canonical rewrite cost after
 workspace analysis and map planning. It performs one untimed warmup and nine raw rewrites of every
 fixed quickstart package partition, requires exact byte identity, and reports path-free package,
@@ -968,6 +976,8 @@ frontend documentation attachment, and ADR 0200 fixes exact documentation extrac
 experimental action without changing compiler-fact transports.
 ADR 0227 separately fixes the path-free local workspace-call process-measurement evidence envelope;
 it changes no compiler, catalog, map, query, or command compatibility surface.
+ADR 0228 fixes the separate path-free local workspace-call scaling-measurement evidence envelope;
+it likewise changes no compiler, catalog, map, query, or command compatibility surface.
 
 ## Explicit non-goals
 

@@ -596,6 +596,14 @@ working-set and pagefile bytes, fixed source/call/output denominators, and the e
 bounds. This is a tiny local control with uncontrolled OS caches, not a reference budget, speedup,
 Atlas-only heap measurement, representative repository result, traversal decision, or impact claim.
 
+A separate in-process scaling control generates fixed star workspaces with 2 packages and 8 calls,
+8 packages and 64 calls, and 32 packages and 512 calls. After generation, loading, compilation, map
+planning, and symbol discovery, it records nine raw `WorkspaceCallIndex` construction plus outgoing
+catalog-encode observations per shape, including process-wide Go `TotalAlloc` and `Mallocs` deltas
+and canonical output bytes. The three shapes and 64 MiB fail-closed output ceiling are harness
+policy, not representative workloads, complexity evidence, retained-memory attribution, product
+defaults, traversal policy, impact evidence, or regression thresholds.
+
 ADR 0195 closes the attributed-text policy, ADR 0196 implements its exact retained-source gate, and
 ADR 0197 adds canonical bounded `fairyc.attributed-text-json/v0` output with explicit selection,
 exact subject identity, independent document integrity, and no caller-result forgery. ADR 0198
@@ -696,7 +704,7 @@ or arbitrary link-input option.
 - Runtime and standard library: `docs/runtime/runtime-stdlib-v0.md`
 - Compatibility and versioning: `docs/compatibility/versioning-v0.md`
 - Diagnostic catalog: `docs/diagnostics/catalog-v0.md`
-- Atlas semantic snapshot and documentation sidecar, provisional SymbolId, logical planning, canonical transport, contained current-source-validated store, bounded package-local queries, exact workspace-call catalog, canonical compiler-fact Context Packs, canonical exact retained-source/documentation attributed-text output, single-symbol Evidence Bundle v0, frontend-owned exact `///` attachment, exact catalog plus overview/show/around/calls/text/evidence CLI, whole-package rewrite measurement, and fresh-process workspace-call control: `docs/atlas/`, `internal/lexer/documentation.go`, `internal/semanticsnapshot/`, `internal/atlasmap/`, `internal/workspacecallcatalog/`, `internal/contextpack/`, `internal/attributedtext/`, `internal/evidencebundle/`, `internal/workspaceloader/exact_source.go`, `internal/cli/atlas_pack*.go`, `internal/cli/atlas_calls.go`, `internal/cli/atlas_text.go`, `internal/cli/atlas_evidence.go`, `internal/buildmeasure/atlas_rewrite.go`, `internal/buildmeasure/atlas_call_process.go`
+- Atlas semantic snapshot and documentation sidecar, provisional SymbolId, logical planning, canonical transport, contained current-source-validated store, bounded package-local queries, exact workspace-call catalog, canonical compiler-fact Context Packs, canonical exact retained-source/documentation attributed-text output, single-symbol Evidence Bundle v0, frontend-owned exact `///` attachment, exact catalog plus overview/show/around/calls/text/evidence CLI, whole-package rewrite measurement, fresh-process workspace-call control, and fixed-shape join-and-encode scaling control: `docs/atlas/`, `internal/lexer/documentation.go`, `internal/semanticsnapshot/`, `internal/atlasmap/`, `internal/workspacecallcatalog/`, `internal/contextpack/`, `internal/attributedtext/`, `internal/evidencebundle/`, `internal/workspaceloader/exact_source.go`, `internal/cli/atlas_pack*.go`, `internal/cli/atlas_calls.go`, `internal/cli/atlas_text.go`, `internal/cli/atlas_evidence.go`, `internal/buildmeasure/atlas_rewrite.go`, `internal/buildmeasure/atlas_call_process.go`, `internal/buildmeasure/atlas_call_scale.go`
 - CLI contract: `docs/cli/command-contract.md`
 - Workspace ownership: `docs/monorepo/package-ownership.md`
 

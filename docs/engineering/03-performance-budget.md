@@ -3,7 +3,7 @@
 - Status: Draft
 - Owner: UNASSIGNED
 - Product contract: `docs/product/02-spec.md`
-- Evidence status: Configured local Windows no-cache calibration, two-sample process-cache control-flow receipt, 36-sample edit-class raw distributions, one eight-step standalone session with process-memory peaks, nine paired cold/warm persistent-cache process observations, one nine-process bounded retention staircase, nine raw whole-package Atlas rewrite observations, and nine fresh-process exact workspace-call catalog observations with per-process memory peaks exist; no reference machine, cache speedup decision, Atlas format or traversal decision, default cache or Atlas budget, or regression threshold exists
+- Evidence status: Configured local Windows no-cache calibration, two-sample process-cache control-flow receipt, 36-sample edit-class raw distributions, one eight-step standalone session with process-memory peaks, nine paired cold/warm persistent-cache process observations, one nine-process bounded retention staircase, nine raw whole-package Atlas rewrite observations, nine fresh-process exact workspace-call catalog observations with per-process memory peaks, and nine raw join-plus-encode observations for each of three generated workspace-call shapes exist; no reference machine, cache speedup decision, Atlas format or traversal decision, default cache or Atlas budget, complexity claim, or regression threshold exists
 
 Stage 0 has no numeric performance, storage, or Atlas budget. Proposed millisecond, percentage, MiB, GiB, map-size, and context-size thresholds are removed until a maintained harness produces a baseline. This document fixes what must be measured and how a later budget becomes enforceable.
 
@@ -114,6 +114,17 @@ explicit 8-package, 8-call, and 2 MiB harness bounds. OS caches are uncontrolled
 counters are neither Go live heap nor Atlas-only retained memory. The tiny quickstart control
 establishes measurement plumbing only, not a reference budget, percentile, speedup, default,
 representative repository distribution, traversal decision, impact evidence, or regression gate.
+
+ADR 0228 adds an isolated scaling control after workspace preparation. It generates fixed star
+workspaces with 2 packages and 8 calls, 8 packages and 64 calls, and 32 packages and 512 calls;
+generation, loading, compilation, map planning, and exact root-symbol discovery remain outside the
+timer. After one warmup per shape, nine first observations measure only exact workspace-call index
+construction plus outgoing catalog encoding. Each sample records monotonic wall time, canonical
+output bytes, and process-wide Go runtime `TotalAlloc` and `Mallocs` deltas. Garbage collection is
+uncontrolled, so these counters do not measure retained or Atlas-owned memory. The increasing fixed
+denominators are a generated control, not representative repository evidence or a Big-O, default,
+traversal, impact, cross-machine, or regression conclusion. The 64 MiB output ceiling is harness
+containment only.
 
 ## Benchmark protocol
 

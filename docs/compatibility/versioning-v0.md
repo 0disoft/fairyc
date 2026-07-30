@@ -653,6 +653,14 @@ the workspace-call catalog, command behavior, `.fymap`, Context Pack, compiler r
 nor does it promise a reference budget, percentile, speedup, default, traversal, impact, or
 cross-machine comparability.
 
+ADR 0228 adds path-free measurement schema `fairyc.atlas-call-scale-measurement/v0`. It versions the
+three closed generated package/call shapes, exact prepared join-plus-outgoing-encode scope, raw
+monotonic-time and process-wide allocation metric labels, nine-sample policy, fixed compatibility
+identities, and harness bounds. It does not change the workspace-call catalog, command behavior,
+`.fymap`, Context Pack, compiler release, or language; nor does it promise a complexity law,
+representative workload, retained-memory attribution, reference budget, default, traversal, impact,
+regression threshold, or cross-machine comparability.
+
 ADR 0192 adds an internal exact-current symbol catalog ordered and paged by full SymbolId. Its kind
 filters, cursor, budget accounting, and omission codes are pre-release query policy. No standalone
 wire schema, CLI spelling, name-search behavior, stable anchor, or cross-version cursor is promised.

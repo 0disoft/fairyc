@@ -237,6 +237,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0225-bounded-exact-current-workspace-call-join.md`: joins resolved calls to exact dependency SymbolIds and reverse callers under complete exact-current package sets and explicit construction budgets.
 - `0226-experimental-workspace-call-catalog-command.md`: exposes one exact package-qualified symbol's direct outgoing, incoming, or bidirectional joined calls through a separately versioned, checksummed, default-free experimental catalog.
 - `0227-atlas-call-process-measurement-control.md`: records nine fresh locked standalone workspace-call catalog processes with raw wall time, Windows process-memory peaks, fixed workload/output denominators, and no product budget or speedup claim.
+- `0228-atlas-workspace-call-scaling-control.md`: generates three fixed package/call shapes and records raw join-plus-encode time, process-wide allocation deltas, and output sizes without a complexity, default, or regression claim.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

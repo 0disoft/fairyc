@@ -4,6 +4,7 @@
 - Date: 2026-07-30
 - Performance source: `docs/engineering/03-performance-budget.md`
 - Command prerequisite: `docs/adr/0226-experimental-workspace-call-catalog-command.md`
+- Scaling-control companion: `docs/adr/0228-atlas-workspace-call-scaling-control.md`
 
 ## Context
 
@@ -50,3 +51,7 @@ classification, absent process-memory peaks, and canonical output-size drift. Th
 builds the standalone compiler once, proves exact symbol discovery and warmup outside timing, starts
 nine fresh locked processes, validates every exact cross-package catalog, records each process peak,
 and emits one compact path-free report.
+
+ADR 0228 complements this end-to-end process boundary with prepared in-process join-plus-encode
+samples over three generated shapes. Neither report upgrades the other into a product budget,
+complexity proof, representative workload, default, traversal decision, or regression gate.
