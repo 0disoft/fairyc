@@ -78,6 +78,13 @@ by that ADR exist.
 The current modern-concept admission queue is closed. New candidates require a new measured problem
 statement under ADR 0218 rather than being appended as syntax ideas.
 
+ADR 0224 separately closes three loose surface follow-ups for the current corpus. One manual
+length-indexed byte-view loop does not justify range iteration, no narrowing use justifies a checked
+conversion matrix, and roughly twenty one-return blocks do not justify a second function-body
+grammar. Classic scalar `for`, explicit `while`, lossless widening casts, and braced bodies remain
+the complete implemented forms. Provider-qualified imports and formatter work retain their own
+package and tooling gates.
+
 Exceptions, class inheritance, implicit virtual dispatch, user-defined implicit conversions,
 operator or function overloading, unrestricted template metaprogramming, runtime reflection,
 garbage-collected object roots, and language-owned async, coroutines, virtual threads, or hidden

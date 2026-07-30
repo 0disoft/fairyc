@@ -75,8 +75,9 @@ immediately preceding revision is accepted only by the separate migration tool; 
 compile-time source rewrites remain forbidden.
 
 Classic scalar `for` and bounded lexical `defer` are the separate decisions in ADR 0213 and ADR
-0217. Range `for`, checked narrowing conversions, provider-qualified package imports, generic iterators,
-expression-bodied function shorthand, and formatter behavior remain follow-up decisions.
+0217. ADR 0224 defers range `for`, checked narrowing conversions, and expression-bodied function
+shorthand after a checked source audit found insufficient demand. Provider-qualified package imports,
+generic iterators, and formatter behavior retain separate follow-up gates.
 
 ADR 0218 owns the admission boundary for concepts borrowed from modern C++, Java after 17, Go, and
 other languages. ADR 0219 implements a narrow callable `@must_use` contract with `E4201`/`E4202`,
@@ -96,7 +97,9 @@ no user-generic declaration model. Static interfaces therefore remain absent unt
 bounded user generics and measured duplication satisfy that ADR's reopening gate. Class inheritance,
 exceptions, implicit conversions, overload sets, unrestricted template metaprogramming, runtime
 reflection, garbage-collected object roots, and language-owned async or virtual-thread scheduling
-remain non-goals. The current modern-concept admission queue is closed. ADR 0221 owns the current implemented `/6` cutover; later candidate statements do
+remain non-goals. The current modern-concept admission queue is closed. ADR 0224 also keeps range
+iteration, checked narrowing, and expression bodies outside `/6` until their exact evidence gates
+reopen. ADR 0221 owns the current implemented `/6` cutover; later candidate statements do
 not change the current language or Stage 0 grammar.
 
 ## Value categories
@@ -126,7 +129,7 @@ resource-bearing enums are deferred.
 - A fallible `close`-style operation consumes the resource or returns ownership explicitly inside its failure value.
 - Resource partial moves, implicit forgetting, and source-level uninitialized resource slots are rejected.
 
-Construction is performed by ordinary explicit functions such as `File.open`; there is no implicit
+Construction is performed by ordinary explicit functions such as `open_read`; there is no implicit
 constructor call. A public resource type does not expose its representation: only its declaring
 module may use a resource record literal, while external modules must call a source-visible factory.
 Public inert structs with source-visible fields remain directly constructible. Lifecycle details are
