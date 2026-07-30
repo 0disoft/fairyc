@@ -90,11 +90,13 @@ version. ADR 0221 implements exact zero-argument `source_location()` as a static
 byte-coordinate string under `E4401`/`E4402`. It explicitly excludes hidden default arguments,
 callee propagation, runtime stack inspection, absolute paths, and new MIR or ABI surface. ADR 0222
 retains ordinary named functions returning `T` or `Result<T, E>` as the complete construction model
-after auditing the SDK/example factory and rollback patterns. Static interfaces
-remain blocked behind demonstrated user-generic need and bounded monomorphization. Class inheritance,
+after auditing the SDK/example factory and rollback patterns. ADR 0223 records that the current
+29-file SDK/example corpus has no cross-type generic-algorithm duplication and that the grammar has
+no user-generic declaration model. Static interfaces therefore remain absent until implemented
+bounded user generics and measured duplication satisfy that ADR's reopening gate. Class inheritance,
 exceptions, implicit conversions, overload sets, unrestricted template metaprogramming, runtime
 reflection, garbage-collected object roots, and language-owned async or virtual-thread scheduling
-remain non-goals. ADR 0221 owns the current implemented `/6` cutover; later candidate statements do
+remain non-goals. The current modern-concept admission queue is closed. ADR 0221 owns the current implemented `/6` cutover; later candidate statements do
 not change the current language or Stage 0 grammar.
 
 ## Value categories

@@ -68,9 +68,15 @@ contains four public fallible resource factories whose names expose copy, conver
 open policy; constructor syntax would not remove their explicit rollback work or improve ownership
 evidence. Ordinary named `T`/`Result<T, E>` factories remain the complete construction model.
 
-1. Revisit static interfaces only after user-defined generics have a separate accepted contract and
-   real source demonstrates duplication. Require explicit implementation, static dispatch first,
-   bounded code generation, deterministic resolution, and a no-inheritance rule.
+ADR 0223 closes the remaining static-interface candidate. The same 29-file corpus contains 82
+function declarations but no algorithm duplicated across different production types, and the
+language has no user-generic declaration or instantiation model for an interface to constrain.
+Static interfaces may return to the queue only after implemented bounded user generics and the
+cross-type duplication, build-cost, code-size, resolution, ownership, and backend evidence required
+by that ADR exist.
+
+The current modern-concept admission queue is closed. New candidates require a new measured problem
+statement under ADR 0218 rather than being appended as syntax ideas.
 
 Exceptions, class inheritance, implicit virtual dispatch, user-defined implicit conversions,
 operator or function overloading, unrestricted template metaprogramming, runtime reflection,
