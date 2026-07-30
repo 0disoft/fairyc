@@ -230,6 +230,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0218-modern-language-concept-admission-boundary.md`: evidence-gated adoption rules, ordered `@must_use`, bounded compile-time evaluation, and caller-location candidates, explicit-function construction, delayed static interfaces, and rejected runtime or object-model complexity without a language cutover.
 - `0219-narrow-must-use-call-contract.md`: zero-argument callable annotation, call-site-only explicit-use semantics, separate `E4201`/`E4202` diagnostics, public-interface v3 participation, and the exact language `/4` cutover contract.
 - `0220-bounded-scalar-compile-time-evaluation.md`: implemented private scalar constants, `@const_eval` functions, module `static_assert`, deterministic evaluator limits, and the exact language `/5` cutover without public compile-time API transport.
+- `0221-explicit-source-location-intrinsic.md`: accepted exact `source_location()` expansion to a reproducible static string without default arguments, absolute paths, or runtime inspection.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

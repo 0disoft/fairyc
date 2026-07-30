@@ -58,9 +58,13 @@ module-level `static_assert`, closes the old AST constant-loss gap, rejects cycl
 caps depth and evaluated nodes, stays frontend-owned, keeps public-interface v3 unchanged, and cuts
 the exact language pin to `/5`.
 
-1. Evaluate one caller-source-location intrinsic. The gate must define exact file identity, byte and
-   line coordinates, inlining independence, generated-source behavior, reproducible-path policy,
-   C transport, and why it does not introduce general default arguments or runtime inspection.
+ADR 0221 now accepts the third admitted item: exact zero-argument `source_location()` expands to a
+static `ref str` containing canonical relative path, byte-based line column, and start-byte
+coordinates. It reserves no default-argument or stack-inspection machinery and changes no language
+revision until its required fixtures pass.
+
+1. Implement accepted ADR 0221 and cut the exact language pin only after semantic, HIR,
+   interpreter, C11, migration, interface, and cache evidence passes.
 2. Keep ordinary explicit `T`/`Result<T, E>` factory functions as the construction model and gather
    evidence before considering any additional initialization shorthand.
 3. Revisit static interfaces only after user-defined generics have a separate accepted contract and

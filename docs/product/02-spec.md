@@ -86,8 +86,9 @@ ADR 0220 implements private `bool`/`u8`/`i32`/`u32` module constants, private
 and step limits. It deliberately avoids the Rust-shaped `const fn` spelling, target-dependent
 execution, public evaluator transport, and any runtime marker. Its first semantic facts also stay
 outside the closed five-kind Atlas v0 declaration transport rather than forcing an unrelated map
-version. One caller-source-location intrinsic
-remains a candidate rather than current syntax. Construction
+version. ADR 0221 accepts, but does not yet implement, exact zero-argument `source_location()` as a
+static relative-path and byte-coordinate string. It explicitly excludes hidden default arguments,
+callee propagation, runtime stack inspection, absolute paths, and new MIR or ABI surface. Construction
 continues through ordinary explicit functions returning `T` or `Result<T, E>`. Static interfaces
 remain blocked behind demonstrated user-generic need and bounded monomorphization. Class inheritance,
 exceptions, implicit conversions, overload sets, unrestricted template metaprogramming, runtime
