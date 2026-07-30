@@ -769,6 +769,11 @@ ADR 0229 closes the immediate star-only correctness blind spot with generated ch
 fan-in workspaces that pass the ordinary manifest, loader, compiler, verified-MIR, map, join, and
 canonical catalog paths. Exact outgoing, incoming, and bidirectional counts are executable, but
 synthetic topology coverage is still not representative repository evidence.
+ADR 0230 adds a separate post-forced-GC live-heap control over batches of 16 retained workspace-call
+indexes for the three generated star shapes. It keeps prepared inputs live and records raw process
+`HeapAlloc`/`HeapObjects` deltas, but process attribution, synthetic inputs, and absent reference-
+environment evidence still prohibit per-index budgets, defaults, traversal, impact, or regression
+claims.
 ADR 0195 closes the attributed-text origin, exact-current identity, UTF-8/control, atomic fragment
 budget, integrity, omission, and non-authority policy. ADR 0196 implements one workspace-authored
 exact source excerpt from revalidated retained bytes, and ADR 0197 adds its separately bounded
@@ -799,7 +804,7 @@ require compiler and MIR imports to fail, closing the previously prose-only depe
 - Preserve the output-only single-symbol Evidence Bundle v0 composition boundary; keep child authority and byte limits explicit and add no decoder or Context Pack text population.
 - Preserve the explicit overview/show/around experimental commands and keep map publication policy separate.
 - Preserve the raw whole-package rewrite harness; require representative failure before adding chunks or compression.
-- Preserve the raw fresh-process, fixed-shape scaling, and non-star correctness controls; require representative real package/call distributions and a declared reference environment before selecting defaults, budgets, or traversal.
+- Preserve the raw fresh-process, fixed-shape scaling, retained-heap batch, and non-star correctness controls; require representative real package/call distributions and a declared reference environment before selecting defaults, budgets, or traversal.
 - Preserve the implemented exact module/name/kind SymbolId Catalog v1 output as the discovery path for experimental `show` and `around`; keep fuzzy ranking and guessed uniqueness out.
 - Preserve the implemented attributed-text v0 model, exact retained source/documentation gates, canonical output-only JSON, explicit experimental source/documentation/evidence commands, and exact `///` frontend attachment sidecar; keep additional origins, multi-record composition, decoding, and rendering behind separate decisions.
 

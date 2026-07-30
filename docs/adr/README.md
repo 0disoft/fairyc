@@ -239,6 +239,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0227-atlas-call-process-measurement-control.md`: records nine fresh locked standalone workspace-call catalog processes with raw wall time, Windows process-memory peaks, fixed workload/output denominators, and no product budget or speedup claim.
 - `0228-atlas-workspace-call-scaling-control.md`: generates three fixed package/call shapes and records raw join-plus-encode time, process-wide allocation deltas, and output sizes without a complexity, default, or regression claim.
 - `0229-atlas-workspace-call-topology-corpus.md`: compiles deterministic chain, diamond, and fan-in workspaces and verifies exact outgoing, incoming, bidirectional, usage, and canonical catalog behavior without calling them representative workloads.
+- `0230-atlas-workspace-call-retained-heap-control.md`: records forced-GC process live-heap deltas for fixed batches of retained workspace-call indexes without claiming exact Atlas ownership or a per-index budget.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

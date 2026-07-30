@@ -9,6 +9,7 @@
 - Process control: `docs/adr/0227-atlas-call-process-measurement-control.md`
 - Scaling control: `docs/adr/0228-atlas-workspace-call-scaling-control.md`
 - Topology corpus: `docs/adr/0229-atlas-workspace-call-topology-corpus.md`
+- Retained-heap control: `docs/adr/0230-atlas-workspace-call-retained-heap-control.md`
 
 ## Purpose
 
@@ -80,6 +81,9 @@ star shapes around index construction plus outgoing encoding, but its process-wi
 are not retained-index memory and its shape growth proves no complexity law.
 ADR 0229 adds generated chain, diamond, and fan-in correctness controls for direct calls, but does
 not promote those synthetic shapes to representative-workload or traversal evidence.
+ADR 0230 adds forced-GC process live-heap deltas for fixed 16-index batches over the same generated
+star shapes. Prepared inputs and runtime state remain in the process, so those observations are not
+exact Atlas ownership, per-index cost, a product budget, or representative evidence.
 
 ## Completeness boundary
 

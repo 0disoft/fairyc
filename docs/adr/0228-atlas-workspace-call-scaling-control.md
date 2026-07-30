@@ -55,5 +55,7 @@ shape. The Windows smoke emits the canonical path-free report after validation.
 ADR 0229 adds deterministic chain, diamond, and fan-in correctness controls, but they remain
 synthetic. Useful representative evidence still requires a declared reference environment and
 checked-in or otherwise reproducible real repositories with broader dependency and call
-distributions. Traversal, indirect calls, other relation families, retained-index profiling, and
-product defaults remain separate decisions.
+distributions. ADR 0230 adds a separate forced-GC process live-heap batch control; it does not turn
+this allocation report into retained-memory evidence or establish exact Atlas ownership. Traversal,
+indirect calls, other relation families, independent retained-index profiling, and product defaults
+remain separate decisions.

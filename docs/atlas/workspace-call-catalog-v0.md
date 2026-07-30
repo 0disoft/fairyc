@@ -8,6 +8,7 @@
 - Process control: `docs/adr/0227-atlas-call-process-measurement-control.md`
 - Scaling control: `docs/adr/0228-atlas-workspace-call-scaling-control.md`
 - Topology corpus: `docs/adr/0229-atlas-workspace-call-topology-corpus.md`
+- Retained-heap control: `docs/adr/0230-atlas-workspace-call-retained-heap-control.md`
 
 ## Identity
 

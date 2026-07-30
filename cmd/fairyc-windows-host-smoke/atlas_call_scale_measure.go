@@ -233,6 +233,20 @@ func prepareAtlasCallWorkspace(
 }
 
 func executeAtlasCallScale(prepared preparedAtlasCallWorkspace) ([]byte, error) {
+	index, err := buildAtlasCallIndex(prepared)
+	if err != nil {
+		return nil, err
+	}
+	return workspacecallcatalog.Encode(
+		index,
+		prepared.rootInstance,
+		prepared.rootSymbol,
+		atlasmap.DirectionOutgoing,
+		buildmeasure.AtlasCallScaleMaxOutputBytes,
+	)
+}
+
+func buildAtlasCallIndex(prepared preparedAtlasCallWorkspace) (*atlasmap.WorkspaceCallIndex, error) {
 	index, err := atlasmap.NewWorkspaceCallIndex(
 		prepared.partitions,
 		prepared.expectations,
@@ -246,11 +260,5 @@ func executeAtlasCallScale(prepared preparedAtlasCallWorkspace) ([]byte, error) 
 		usage.CrossPackageCalls != prepared.definition.Calls {
 		return nil, fmt.Errorf("Atlas call scale shape %q changed joined usage", prepared.definition.Name)
 	}
-	return workspacecallcatalog.Encode(
-		index,
-		prepared.rootInstance,
-		prepared.rootSymbol,
-		atlasmap.DirectionOutgoing,
-		buildmeasure.AtlasCallScaleMaxOutputBytes,
-	)
+	return index, nil
 }

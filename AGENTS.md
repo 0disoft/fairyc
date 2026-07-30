@@ -123,6 +123,7 @@ regenerate, or override compiler source.
 - Atlas workspace-call standalone process measurement: internal/buildmeasure/atlas_call_process.go, cmd/fairyc-windows-host-smoke/atlas_call_process_measure.go, docs/adr/0227-atlas-call-process-measurement-control.md
 - Atlas workspace-call multi-shape scaling measurement: internal/buildmeasure/atlas_call_scale.go, cmd/fairyc-windows-host-smoke/atlas_call_scale_measure.go, docs/adr/0228-atlas-workspace-call-scaling-control.md
 - Atlas workspace-call non-star topology correctness corpus: cmd/fairyc-windows-host-smoke/atlas_call_topology_test.go, docs/adr/0229-atlas-workspace-call-topology-corpus.md
+- Atlas workspace-call retained-heap control: internal/buildmeasure/atlas_call_retained.go, cmd/fairyc-windows-host-smoke/atlas_call_retained_measure.go, docs/adr/0230-atlas-workspace-call-retained-heap-control.md
 - Executable one-way Atlas package-import boundary and Phase 4 exit evidence: internal/architecturecontract/, docs/adr/0203-enforced-one-way-atlas-import-boundary.md, docs/atlas/phase4-exit-evidence.md
 - Validation: VALIDATION.md
 - Agent routing: .agents/context-map.md

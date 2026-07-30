@@ -952,6 +952,12 @@ canonical catalog encoding, then require exact outgoing, incoming, and both-dire
 They add no output schema, command, default, indirect-call recovery, traversal, impact policy, or
 representative-use claim.
 
+ADR 0230 separately records forced-GC process `HeapAlloc` and `HeapObjects` deltas for five
+first-observation batches of 16 retained indexes across ADR 0228's three generated star shapes.
+Prepared partitions and expectations stay live across each baseline and sample. The result is a
+process live-heap control, not exact Atlas ownership, a per-index cost, a product budget, a
+representative workload, traversal policy, or a regression threshold.
+
 The configured Windows host smoke separately measures whole-package canonical rewrite cost after
 workspace analysis and map planning. It performs one untimed warmup and nine raw rewrites of every
 fixed quickstart package partition, requires exact byte identity, and reports path-free package,
@@ -985,6 +991,8 @@ it changes no compiler, catalog, map, query, or command compatibility surface.
 ADR 0228 fixes the separate path-free local workspace-call scaling-measurement evidence envelope;
 it likewise changes no compiler, catalog, map, query, or command compatibility surface.
 ADR 0229 adds only a deterministic test corpus and changes no compatibility surface.
+ADR 0230 fixes a separate path-free retained-heap batch evidence envelope and changes no compiler,
+catalog, map, query, or command compatibility surface.
 
 ## Explicit non-goals
 

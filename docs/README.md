@@ -42,6 +42,7 @@
 - Workspace-call fresh-process time, Windows memory-peak, and output-size control: internal/buildmeasure/atlas_call_process.go, cmd/fairyc-windows-host-smoke/atlas_call_process_measure.go, docs/adr/0227-atlas-call-process-measurement-control.md
 - Workspace-call fixed-shape join-and-encode scaling control: internal/buildmeasure/atlas_call_scale.go, cmd/fairyc-windows-host-smoke/atlas_call_scale_measure.go, docs/adr/0228-atlas-workspace-call-scaling-control.md
 - Workspace-call chain, diamond, and fan-in correctness corpus: cmd/fairyc-windows-host-smoke/atlas_call_topology_test.go, docs/adr/0229-atlas-workspace-call-topology-corpus.md
+- Workspace-call post-GC retained-heap batch control: internal/buildmeasure/atlas_call_retained.go, cmd/fairyc-windows-host-smoke/atlas_call_retained_measure.go, docs/adr/0230-atlas-workspace-call-retained-heap-control.md
 - Atlas Phase 4 exit evidence and executable one-way package-import boundary: docs/atlas/phase4-exit-evidence.md, docs/adr/0203-enforced-one-way-atlas-import-boundary.md, internal/architecturecontract/
 - Whole-package cache-key v2 fixtures and bounded store runner: spec/fixtures/package-cache/manifest-v5.json with historical v1 through v4, internal/packagecache/, internal/packagecachefixture/
 - Package-stable function IDs, process-local MIR slice reassembly, process-bound codec, and all-hit reuse coordinator: internal/packageartifact/, internal/workspacecompiler/, docs/package/package-function-id-v1.md, docs/package/process-local-mir-artifact-v0.md
