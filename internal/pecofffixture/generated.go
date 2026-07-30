@@ -175,6 +175,11 @@ func buildGeneratedObject(generator string, inputs []string) ([]byte, error) {
 			return nil, fmt.Errorf("amd64-weak-external-alias requires exactly six inputs")
 		}
 		return pecoff.BuildAMD64WeakExternalProbeObject(inputs[0], inputs[1], inputs[2], inputs[3], inputs[4], inputs[5])
+	case "amd64-weak-search-modes":
+		if len(inputs) != 6 {
+			return nil, fmt.Errorf("amd64-weak-search-modes requires exactly six inputs")
+		}
+		return pecoff.BuildAMD64WeakSearchProbeObject(inputs[0], inputs[1], inputs[2], inputs[3], inputs[4], inputs[5])
 	default:
 		return nil, fmt.Errorf("unknown generator %q", generator)
 	}

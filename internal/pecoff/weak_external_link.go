@@ -67,12 +67,14 @@ func InspectAMD64WeakExternalLink(object, image, linkMap []byte, spec AMD64WeakE
 		return AMD64WeakExternalReport{}, err
 	}
 	fallback, err := inspectAMD64WeakExternalPath(object, objectReport, objectFile, image, imageReport, mapSymbols, spec.ObjectName,
-		spec.FallbackEntry, spec.MissingWeak, spec.MissingFallback, spec.MissingFallback, spec.ObjectName, true)
+		spec.FallbackEntry, spec.MissingWeak, spec.MissingFallback, spec.MissingFallback, coffWeakSearchAlias,
+		func(owner string) bool { return msvcMapOwnerIsObject(owner, spec.ObjectName) }, spec.ObjectName, true)
 	if err != nil {
 		return AMD64WeakExternalReport{}, fmt.Errorf("AMD64 weak fallback path: %w", err)
 	}
 	override, err := inspectAMD64WeakExternalPath(object, objectReport, objectFile, image, imageReport, mapSymbols, spec.ObjectName,
-		spec.OverrideEntry, spec.OverrideWeak, spec.OverrideFallback, spec.OverrideWeak, spec.TargetObject, false)
+		spec.OverrideEntry, spec.OverrideWeak, spec.OverrideFallback, spec.OverrideWeak, coffWeakSearchAlias,
+		func(owner string) bool { return msvcMapOwnerIsObject(owner, spec.TargetObject) }, spec.TargetObject, false)
 	if err != nil {
 		return AMD64WeakExternalReport{}, fmt.Errorf("AMD64 weak override path: %w", err)
 	}
@@ -80,7 +82,8 @@ func InspectAMD64WeakExternalLink(object, image, linkMap []byte, spec AMD64WeakE
 }
 
 func inspectAMD64WeakExternalPath(object []byte, report ObjectReport, objectFile *pe.File, image []byte, imageReport Report,
-	mapSymbols map[string]msvcMapSymbol, objectName, entryName, weakName, fallbackName, selectedName, selectedObject string, usedFallback bool,
+	mapSymbols map[string]msvcMapSymbol, objectName, entryName, weakName, fallbackName, selectedName string, weakSearch uint32,
+	selectedOwner func(string) bool, selectedOwnerDescription string, usedFallback bool,
 ) (AMD64WeakExternalValue, error) {
 	entry, err := exactObjectSymbol(report.SymbolRecords, entryName)
 	if err != nil {
@@ -94,8 +97,8 @@ func inspectAMD64WeakExternalPath(object []byte, report ObjectReport, objectFile
 		return AMD64WeakExternalValue{}, err
 	}
 	if weak.SectionNumber != 0 || weak.Value != 0 || weak.Type != coffSymbolTypeFunction || weak.StorageClass != coffStorageClassWeakExternal ||
-		weak.AuxiliaryRecords != 1 || weak.WeakFallback != fallbackName || weak.WeakSearch != coffWeakSearchAlias {
-		return AMD64WeakExternalValue{}, fmt.Errorf("weak symbol %q has invalid alias metadata", weakName)
+		weak.AuxiliaryRecords != 1 || weak.WeakFallback != fallbackName || weak.WeakSearch != weakSearch {
+		return AMD64WeakExternalValue{}, fmt.Errorf("weak symbol %q has invalid search metadata", weakName)
 	}
 	fallback, err := exactObjectSymbol(report.SymbolRecords, fallbackName)
 	if err != nil {
@@ -133,8 +136,8 @@ func inspectAMD64WeakExternalPath(object []byte, report ObjectReport, objectFile
 		return AMD64WeakExternalValue{}, fmt.Errorf("MSVC weak entry owner is %q, want %q", entryMap.Owner, objectName)
 	}
 	selectedMap, found := mapSymbols[selectedName]
-	if !found || !msvcMapOwnerIsObject(selectedMap.Owner, selectedObject) {
-		return AMD64WeakExternalValue{}, fmt.Errorf("MSVC weak selected target owner is %q, want %q", selectedMap.Owner, selectedObject)
+	if !found || selectedOwner == nil || !selectedOwner(selectedMap.Owner) {
+		return AMD64WeakExternalValue{}, fmt.Errorf("MSVC weak selected target owner is %q, want %q", selectedMap.Owner, selectedOwnerDescription)
 	}
 	entryRVA, err := preferredAddressRVA(imageReport, entryMap.PreferredAddress, "weak entry")
 	if err != nil {

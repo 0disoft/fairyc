@@ -253,6 +253,8 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0241-amd64-weak-external-link-proof.md`: proves one missing weak `SEARCH_ALIAS` selects its object-local fallback while one present strong definition overrides a distinct fallback, with exact raw auxiliaries, final REL32 formulas, and low/optimized execution.
 - `0242-amd64-relocation-overflow-link-proof.md`: normalizes the COFF extended-relocation sentinel, rejects malformed count combinations, and proves a 65,535-relocation generated object through real low/optimized MSVC LINK and execution.
 - `0243-amd64-bigobj-link-proof.md`: admits a bounded version-2 AMD64 bigobj header and 20-byte symbol path, then proves its internal REL32 through real low/optimized MSVC LINK and execution.
+- `0244-versioned-generated-amd64-coff-object-fixtures.md`: freezes deterministic weak, relocation-overflow, and bigobj generators by explicit inputs, full-byte digests, exact symbols, and complete relocation-run partitions without storing large duplicate object bytes.
+- `0245-amd64-weak-archive-search-modes.md`: proves NOLIBRARY suppresses extraction of an available strong archive member while LIBRARY extracts its separate member, with exact indexes, sentinel absence, final REL32 formulas, and low/optimized execution.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

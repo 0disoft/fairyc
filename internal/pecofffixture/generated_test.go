@@ -15,7 +15,7 @@ func TestRepositoryGeneratedCOFFObjectManifestPasses(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if report.Target != fixtureTarget || report.CasesRun != 3 || report.Passed != 3 || len(report.Failures) != 0 {
+	if report.Target != fixtureTarget || report.CasesRun != 4 || report.Passed != 4 || len(report.Failures) != 0 {
 		t.Fatalf("RunGenerated() report = %+v", report)
 	}
 }

@@ -10,7 +10,7 @@
   ],
   "deferred": [
     "Raw stored copies of the generated objects remain intentionally absent.",
-    "Weak NOLIBRARY and LIBRARY search modes and bigobj auxiliary or COMDAT records remain outside this manifest."
+    "Bigobj auxiliary or COMDAT records remain outside this manifest."
   ],
   "cases": [
     {
@@ -77,6 +77,32 @@
         "relocationRuns": [
           {"start": 0, "count": 1, "sectionIndex": 1, "section": ".text", "virtualAddress": 1, "symbolIndex": 2, "symbol": "fy_wmiss", "type": 4},
           {"start": 1, "count": 1, "sectionIndex": 1, "section": ".text", "virtualAddress": 6, "symbolIndex": 4, "symbol": "fy_wovr", "type": 4}
+        ]
+      }
+    },
+    {
+      "id": "pass.weak-search-modes",
+      "generator": "amd64-weak-search-modes",
+      "inputs": ["fy_nl_e", "fy_lib_e", "fy_nl_w", "fy_lib_w", "fy_nl_f", "fy_lib_f"],
+      "expect": {
+        "byteLength": 250,
+        "sha256": "4b8b623a99e00ad5a366d215c17ecc6ad702d4becf65b049a1791e84cb2bf414",
+        "machine": 34404,
+        "characteristics": 0,
+        "bigObject": false,
+        "bigObjectVersion": 0,
+        "sections": [{"name": ".text", "relocations": 2, "characteristics": 1610612768, "comdatSelection": 0, "associativeSection": 0}],
+        "symbols": [
+          {"tableIndex": 0, "name": "fy_nl_e", "value": 0, "sectionNumber": 1, "type": 32, "storageClass": 2, "auxiliaryRecords": 0, "weakFallbackIndex": 0, "weakFallback": "", "weakSearch": 0},
+          {"tableIndex": 1, "name": "fy_lib_e", "value": 5, "sectionNumber": 1, "type": 32, "storageClass": 2, "auxiliaryRecords": 0, "weakFallbackIndex": 0, "weakFallback": "", "weakSearch": 0},
+          {"tableIndex": 2, "name": "fy_nl_w", "value": 0, "sectionNumber": 0, "type": 32, "storageClass": 105, "auxiliaryRecords": 1, "weakFallbackIndex": 6, "weakFallback": "fy_nl_f", "weakSearch": 1},
+          {"tableIndex": 4, "name": "fy_lib_w", "value": 0, "sectionNumber": 0, "type": 32, "storageClass": 105, "auxiliaryRecords": 1, "weakFallbackIndex": 7, "weakFallback": "fy_lib_f", "weakSearch": 2},
+          {"tableIndex": 6, "name": "fy_nl_f", "value": 10, "sectionNumber": 1, "type": 32, "storageClass": 2, "auxiliaryRecords": 0, "weakFallbackIndex": 0, "weakFallback": "", "weakSearch": 0},
+          {"tableIndex": 7, "name": "fy_lib_f", "value": 16, "sectionNumber": 1, "type": 32, "storageClass": 2, "auxiliaryRecords": 0, "weakFallbackIndex": 0, "weakFallback": "", "weakSearch": 0}
+        ],
+        "relocationRuns": [
+          {"start": 0, "count": 1, "sectionIndex": 1, "section": ".text", "virtualAddress": 1, "symbolIndex": 2, "symbol": "fy_nl_w", "type": 4},
+          {"start": 1, "count": 1, "sectionIndex": 1, "section": ".text", "virtualAddress": 6, "symbolIndex": 4, "symbol": "fy_lib_w", "type": 4}
         ]
       }
     }

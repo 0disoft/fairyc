@@ -47,7 +47,9 @@ without retaining build debris.
    profile-specific handler-tail relocation. ADR 0241 proves one weak `SEARCH_ALIAS` fallback and
    one strong override. ADR 0242 proves one extended relocation table and its count sentinel
    through real LINK. ADR 0243 proves one bounded version-2 bigobj header and 20-byte symbol path
-   through real LINK. Other relocation formulas and weak search modes, high-section and bigobj
+   through real LINK. ADR 0244 versions the generated weak, overflow, and bigobj inputs; ADR 0245
+   proves NOLIBRARY archive suppression and LIBRARY extraction. Other relocation formulas,
+   weak chains/cycles and COMDAT/default-library interactions, high-section and bigobj
    auxiliary/COMDAT layouts, non-unwind and broader
    archive/COMDAT policies, chained-tail relocations, complete CodeView/PDB record semantics and symbolication, compiler baselines, and a fresh
    hosted same-commit object receipt remain separate gates.

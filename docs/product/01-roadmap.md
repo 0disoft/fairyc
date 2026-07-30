@@ -385,12 +385,14 @@ frame's profile-specific handler-tail `ADDR32NB` relocation from raw `frame.obj`
 map into the final PE. ADR 0242 normalizes the extended-relocation sentinel and proves a generated
 65,535-relocation object through the same low/optimized LINK executions. ADR 0243 admits one bounded
 version-2 bigobj header and 20-byte symbol path and proves its internal REL32 through those images.
-Whole compiler-produced object identity, remaining relocation formulas and
+ADR 0244 versions all of those generated objects without storing duplicate raw bytes. ADR 0245
+separately proves NOLIBRARY archive suppression and LIBRARY member extraction. Whole
+compiler-produced object identity, remaining relocation formulas and
 chained unwind tails, non-unwind and broader archive retention and COMDAT selection policies,
-complete CodeView/PDB records and broader symbolication, versioned overflow/bigobj fixtures,
+complete CodeView/PDB records and broader symbolication,
 high-section and bigobj auxiliary/COMDAT evidence, and a fresh hosted object receipt remain
 absent, so the target evidence marker stays fail-closed.
-The fifty-three local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
+The fifty-five local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
 runtime-function ordering and code coverage plus referenced version 1 and version 2 unwind-record
 bounds, including handler/chained minimum tails. A separate three-object probe now raises a private
 noncontinuable exception at both profiles, validates its payload in an outer SEH filter, walks the
@@ -444,7 +446,7 @@ indexing, and safely converts each `u8` to `i32` through a separately built comp
 host smoke also proves maximum-`usize` addition traps under both MSVC profiles. The configured Windows
 smoke therefore covers two retained target builds, four measured experimental plus three stable
 quickstart and two safe `std::io` package-workspace builds, nine package-workspace runs, two safe File builds, two safe owned-text
-builds, two direct target executions, two exec-target executions, and fifty-three total target or
+builds, two direct target executions, two exec-target executions, and fifty-five total target or
 probe PE images. Stable build proof covers development output, failed-build preservation, release
 replacement, a safe `std::io` product with exact separated stdout/stderr and status, and locked replacements from a
 separately built temporary `fairyc.exe`. Direct execution of that product additionally proves EOF,
@@ -846,7 +848,7 @@ non-authority to separate executable oracles and records what each still does no
 ## Later capability gates
 
 - `x86_64-linux-musl`: requires a separate libc, sysroot, startup, loader, and static-distribution profile.
-- `x86_64-windows-msvc`: the TargetSpec, scalar/LLP64 C-emission product builds at both profiles, closed FY-to-project-C SystemHeap, Buffer, Arena/Region lifecycle, and UTF-8 calls, an eight-case local layout probe, 15-case host-independent Microsoft x64 classifier, 12-case same-MSVC native crossing, one generated-Fairy small/large struct-result crossing under C11 and C17 consumer modes, bounded PE32+ executable inspection, structural live-COFF object/archive inspection, versioned exact synthetic COFF symbol/COMDAT/relocation fixtures, inspected cross-object `REL32` through `REL32_5`, one weak-alias fallback and strong override, `ADDR64`, complete three-field unwind `.pdata` `ADDR32NB`, one profile-specific unwind-handler tail, function-targeted CodeView `SECTION`/`SECREL`, final PE/PDB identity, and one system-DbgHelp function/line canary, one exact archive extraction and pick-any COMDAT final-selection proof, selected-parent retention and discarded-parent elimination proofs for direct associative unwind, static version-1/version-2 unwind-structure inspection, and a three-case native exception/virtual-walk probe exist, but complete hosted LLP64 and same-commit COFF evidence, broader and bidirectional source-level Fairy crossings, independent or register-inspected calls, remaining relocation formulas and weak search modes, chained unwind tails, non-unwind and broader archive/COMDAT policies, complete version-2/handler-payload/chain and Fairy/foreign-frame unwind fixtures, complete UCRT/VCRuntime and deployment evidence, distribution, full CodeView/PDB semantics, and broader debugger/symbolicator fixtures remain required.
+- `x86_64-windows-msvc`: the TargetSpec, scalar/LLP64 C-emission product builds at both profiles, closed FY-to-project-C SystemHeap, Buffer, Arena/Region lifecycle, and UTF-8 calls, an eight-case local layout probe, 15-case host-independent Microsoft x64 classifier, 12-case same-MSVC native crossing, one generated-Fairy small/large struct-result crossing under C11 and C17 consumer modes, bounded PE32+ executable inspection, structural live-COFF object/archive inspection, versioned exact synthetic COFF symbol/COMDAT/relocation fixtures, inspected cross-object `REL32` through `REL32_5`, all three weak-external search modes including NOLIBRARY suppression and LIBRARY archive extraction, `ADDR64`, complete three-field unwind `.pdata` `ADDR32NB`, one profile-specific unwind-handler tail, function-targeted CodeView `SECTION`/`SECREL`, final PE/PDB identity, and one system-DbgHelp function/line canary, one exact archive extraction and pick-any COMDAT final-selection proof, selected-parent retention and discarded-parent elimination proofs for direct associative unwind, static version-1/version-2 unwind-structure inspection, and a three-case native exception/virtual-walk probe exist, but complete hosted LLP64 and same-commit COFF evidence, broader and bidirectional source-level Fairy crossings, independent or register-inspected calls, remaining relocation formulas, weak chains/cycles and COMDAT/default-library interactions, chained unwind tails, non-unwind and broader archive/COMDAT policies, complete version-2/handler-payload/chain and Fairy/foreign-frame unwind fixtures, complete UCRT/VCRuntime and deployment evidence, distribution, full CodeView/PDB semantics, and broader debugger/symbolicator fixtures remain required.
 - QBE or another fast backend: requires stable internal semantics, interpreter and C oracles, ABI coverage, and measured edit-build benefit.
 - LLVM backend: requires representative workloads that justify optimization and distribution cost after simpler paths are exhausted.
 - Generics and `Vec<T>`: require non-generic stability plus compile-time, code-size, active-payload, and diagnostics fixtures.

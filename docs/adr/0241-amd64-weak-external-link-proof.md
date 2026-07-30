@@ -54,8 +54,8 @@ profiles. The first attempted class-2 producer failed with `LNK2019`; class 105 
 accepted producer contract for the selected MSVC 14.51 toolchain.
 
 This is a private validation object, not a Fairy C object writer, public linker API, or source-level
-weak declaration. It does not prove `SEARCH_NOLIBRARY`, `SEARCH_LIBRARY`, missing fallbacks, weak
-chains or cycles, archive extraction interactions, COMDAT interaction, imports, incremental link,
+weak declaration. ADR 0245 separately proves `SEARCH_NOLIBRARY` and `SEARCH_LIBRARY` against two
+archive members. Missing fallbacks, weak chains or cycles, COMDAT interaction, imports, incremental link,
 LTCG, non-MSVC linkers, another MSVC release, a versioned raw-object fixture, or hosted same-commit
 evidence. `pe-coff-object-fixtures` remains fail-closed.
 

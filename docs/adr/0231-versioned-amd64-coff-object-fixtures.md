@@ -75,7 +75,7 @@ real LINK, while a versioned raw overflow vector remains absent.
 ADR 0243 proves one generated version-2 bigobj header and 20-byte-symbol REL32 through real LINK,
 while high-section, auxiliary/COMDAT, and versioned raw bigobj vectors remain absent.
 Whole-object MSVC identity, other relocation formulas and chained unwind tails, broader
-archive/COMDAT policies, raw stored weak-external fixtures and other weak search modes,
+archive/COMDAT policies, raw stored weak-external fixtures and weak chains/cycles or COMDAT/default-library interactions,
 high-section and bigobj auxiliary/COMDAT evidence,
 raw stored relocation-overflow fixtures, imports/exports, CodeView/PDB, independent
 producer crossings, and hosted same-commit evidence remain separate gates.

@@ -39,6 +39,33 @@ func TestBuildAMD64WeakExternalProbeObjectEmitsExactAliases(t *testing.T) {
 	}
 }
 
+func TestBuildAMD64WeakSearchProbeObjectEmitsNoLibraryAndLibraryModes(t *testing.T) {
+	t.Parallel()
+	object, err := BuildAMD64WeakSearchProbeObject("fy_nl_e", "fy_lib_e", "fy_nl_w", "fy_lib_w", "fy_nl_f", "fy_lib_f")
+	if err != nil {
+		t.Fatal(err)
+	}
+	report, err := InspectObject(object)
+	if err != nil {
+		t.Fatal(err)
+	}
+	noLibrary, err := exactObjectSymbol(report.SymbolRecords, "fy_nl_w")
+	if err != nil {
+		t.Fatal(err)
+	}
+	library, err := exactObjectSymbol(report.SymbolRecords, "fy_lib_w")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if noLibrary.TableIndex != 2 || noLibrary.WeakFallbackIndex != 6 || noLibrary.WeakFallback != "fy_nl_f" || noLibrary.WeakSearch != ObjectWeakSearchNoLibrary ||
+		library.TableIndex != 4 || library.WeakFallbackIndex != 7 || library.WeakFallback != "fy_lib_f" || library.WeakSearch != ObjectWeakSearchLibrary {
+		t.Fatalf("weak search symbols = %+v, %+v", noLibrary, library)
+	}
+	if len(report.RelocationRecords) != 2 || report.RelocationRecords[0].SymbolIndex != 2 || report.RelocationRecords[1].SymbolIndex != 4 {
+		t.Fatalf("weak search relocations = %+v", report.RelocationRecords)
+	}
+}
+
 func TestInspectAMD64WeakExternalLinkProvesFallbackAndOverride(t *testing.T) {
 	report, err := InspectAMD64WeakExternalLink(testWeakObject(), testWeakImage(), testWeakMap(), testWeakSpec())
 	if err != nil {

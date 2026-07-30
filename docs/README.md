@@ -52,6 +52,7 @@
 - Exact Windows DbgHelp function-and-source-line symbolication canary: cmd/fairyc-windows-host-smoke/symbolication_windows.go, cmd/fairyc-windows-host-smoke/symbolication.go, docs/adr/0239-windows-dbghelp-symbolication-canary.md
 - Exact profile-specific AMD64 unwind-handler ADDR32NB object-to-image proof: internal/pecoff/handler_link.go, internal/windowsunwindprobe/, docs/adr/0240-amd64-unwind-handler-relocation-proof.md
 - Exact AMD64 weak-external SEARCH_ALIAS fallback/strong-override proof: internal/pecoff/weak_external_object.go, internal/pecoff/weak_external_link.go, internal/windowsrelocationprobe/, docs/adr/0241-amd64-weak-external-link-proof.md
+- Exact AMD64 weak-external NOLIBRARY suppression and LIBRARY archive-extraction proof: internal/pecoff/weak_search_link.go, internal/windowsweaksearchprobe/, docs/adr/0245-amd64-weak-archive-search-modes.md
 - Exact AMD64 relocation-overflow sentinel and real-LINK proof: internal/pecoff/relocation_overflow_object.go, internal/pecoff/relocation_overflow_link.go, internal/windowsrelocationprobe/, docs/adr/0242-amd64-relocation-overflow-link-proof.md
 - Exact AMD64 bigobj header/symbol and real-LINK proof: internal/pecoff/big_object.go, internal/pecoff/big_object_probe.go, internal/pecoff/big_object_link.go, internal/windowsrelocationprobe/, docs/adr/0243-amd64-bigobj-link-proof.md
 - Exact MSVC archive extraction and pick-any COMDAT final-selection proof: internal/pecoff/archive.go, internal/pecoff/archive_link.go, internal/windowsarchiveprobe/, docs/adr/0233-msvc-archive-and-comdat-selection-proof.md

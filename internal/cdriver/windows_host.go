@@ -53,6 +53,14 @@ type WindowsMSVCArchiveArtifact struct {
 	Archive     []byte
 }
 
+// WindowsMSVCWeakSearchArtifact preserves the exact archive and link map used to distinguish
+// IMAGE_WEAK_EXTERN_SEARCH_NOLIBRARY from IMAGE_WEAK_EXTERN_SEARCH_LIBRARY.
+type WindowsMSVCWeakSearchArtifact struct {
+	WindowsHostArtifact
+	ArchiveName string
+	Archive     []byte
+}
+
 // WindowsHostOutcome is one bounded local MSVC execution result. ExitCode preserves the program's i32 bits.
 // Stdout and Stderr preserve stream identity but do not claim ordering across the two OS pipes.
 type WindowsHostOutcome struct {
@@ -373,6 +381,113 @@ func BuildWindowsMSVCArchiveProbe(toolchain WindowsHostToolchain, profile Profil
 	return artifacts, nil
 }
 
+// BuildWindowsMSVCWeakSearchProbe compiles one caller and two independent archive members, then
+// links them with one generated weak-search object and captures the exact archive and map.
+func BuildWindowsMSVCWeakSearchProbe(toolchain WindowsHostToolchain, profile Profile, callerSource, noLibrarySource, librarySource string, weakObject []byte) (WindowsMSVCWeakSearchArtifact, error) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		return WindowsMSVCWeakSearchArtifact{}, fmt.Errorf("MSVC weak-search probe requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
+	if callerSource == "" || noLibrarySource == "" || librarySource == "" || len(weakObject) == 0 {
+		return WindowsMSVCWeakSearchArtifact{}, fmt.Errorf("MSVC weak-search probe inputs must be non-empty")
+	}
+	if profile != LowProfile && profile != OptimizedProfile {
+		return WindowsMSVCWeakSearchArtifact{}, fmt.Errorf("unsupported C profile %q", profile.Name)
+	}
+	if toolchain.Name != "msvc" || toolchain.Path == "" || toolchain.Version == "" || len(toolchain.Environment) == 0 {
+		return WindowsMSVCWeakSearchArtifact{}, fmt.Errorf("invalid resolved MSVC host toolchain")
+	}
+	if _, err := pecoff.InspectObject(weakObject); err != nil {
+		return WindowsMSVCWeakSearchArtifact{}, fmt.Errorf("inspect generated MSVC weak-search object: %w", err)
+	}
+	temporaryRoot, err := os.MkdirTemp("", "fairyc-msvc-weak-search-")
+	if err != nil {
+		return WindowsMSVCWeakSearchArtifact{}, fmt.Errorf("create MSVC weak-search temp root: %w", err)
+	}
+	defer os.RemoveAll(temporaryRoot)
+	optimization := "/Od"
+	if profile == OptimizedProfile {
+		optimization = "/O2"
+	}
+	sources := []windowsMSVCSource{
+		{Name: "caller.c", Contents: callerSource},
+		{Name: "nolib.c", Contents: noLibrarySource},
+		{Name: "library.c", Contents: librarySource},
+	}
+	objects := make([]WindowsHostObject, 0, len(sources)+1)
+	objectPaths := make(map[string]string, len(sources)+1)
+	for _, source := range sources {
+		sourcePath := filepath.Join(temporaryRoot, source.Name)
+		if err := os.WriteFile(sourcePath, []byte(source.Contents), 0o600); err != nil {
+			return WindowsMSVCWeakSearchArtifact{}, fmt.Errorf("write MSVC weak-search source %s: %w", source.Name, err)
+		}
+		objectName := strings.TrimSuffix(source.Name, ".c") + ".obj"
+		objectPath := filepath.Join(temporaryRoot, objectName)
+		if _, err := runWindowsHostCommand(toolchain.Path, toolchain.Environment, temporaryRoot,
+			"/nologo", "/std:c11", "/TC", "/W4", "/WX", "/MT", optimization, "/Gy-", "/c", sourcePath, "/Fo:"+objectPath); err != nil {
+			return WindowsMSVCWeakSearchArtifact{}, fmt.Errorf("compile MSVC weak-search source %s: %s", source.Name, strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
+		}
+		objectBytes, err := readArtifact(objectPath)
+		if err != nil {
+			return WindowsMSVCWeakSearchArtifact{}, fmt.Errorf("read MSVC weak-search object %s: %s", objectName, strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
+		}
+		if _, err := pecoff.InspectObject(objectBytes); err != nil {
+			return WindowsMSVCWeakSearchArtifact{}, fmt.Errorf("inspect MSVC weak-search object %s: %w", objectName, err)
+		}
+		objects = append(objects, WindowsHostObject{Name: objectName, Bytes: objectBytes})
+		objectPaths[objectName] = objectPath
+	}
+	weakObjectName := "weakmode.obj"
+	weakObjectPath := filepath.Join(temporaryRoot, weakObjectName)
+	if err := os.WriteFile(weakObjectPath, weakObject, 0o600); err != nil {
+		return WindowsMSVCWeakSearchArtifact{}, fmt.Errorf("write MSVC weak-search object: %w", err)
+	}
+	objects = append(objects, WindowsHostObject{Name: weakObjectName, Bytes: slices.Clone(weakObject)})
+	objectPaths[weakObjectName] = weakObjectPath
+
+	librarianPath := filepath.Join(filepath.Dir(toolchain.Path), "lib.exe")
+	if info, err := os.Stat(librarianPath); err != nil || !info.Mode().IsRegular() {
+		return WindowsMSVCWeakSearchArtifact{}, fmt.Errorf("MSVC weak-search probe requires x64 lib.exe beside cl.exe")
+	}
+	archiveName := "weakmode.lib"
+	archivePath := filepath.Join(temporaryRoot, archiveName)
+	if _, err := runWindowsHostCommand(librarianPath, toolchain.Environment, temporaryRoot,
+		"/NOLOGO", "/OUT:"+archivePath, "nolib.obj", "library.obj"); err != nil {
+		return WindowsMSVCWeakSearchArtifact{}, fmt.Errorf("create MSVC weak-search archive: %s", strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
+	}
+	archiveBytes, err := readArtifact(archivePath)
+	if err != nil {
+		return WindowsMSVCWeakSearchArtifact{}, fmt.Errorf("read MSVC weak-search archive: %s", strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
+	}
+	if _, err := pecoff.InspectArchive(archiveBytes); err != nil {
+		return WindowsMSVCWeakSearchArtifact{}, fmt.Errorf("inspect MSVC weak-search archive: %w", err)
+	}
+	executablePath := filepath.Join(temporaryRoot, "program.exe")
+	mapPath := filepath.Join(temporaryRoot, "program.map")
+	if _, err := runWindowsHostCommand(toolchain.Path, toolchain.Environment, temporaryRoot,
+		"/nologo", "/Fe:"+executablePath, objectPaths["caller.obj"], weakObjectPath, archivePath,
+		"/link", "/INCREMENTAL:NO", "/OPT:REF", "/OPT:NOICF", "/MAP:"+mapPath); err != nil {
+		return WindowsMSVCWeakSearchArtifact{}, fmt.Errorf("link MSVC weak-search probe: %s", strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
+	}
+	executableBytes, err := readArtifact(executablePath)
+	if err != nil {
+		return WindowsMSVCWeakSearchArtifact{}, fmt.Errorf("read MSVC weak-search executable: %s", strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
+	}
+	if _, err := pecoff.InspectExecutable(executableBytes); err != nil {
+		return WindowsMSVCWeakSearchArtifact{}, fmt.Errorf("inspect MSVC weak-search executable: %w", err)
+	}
+	mapBytes, err := readArtifact(mapPath)
+	if err != nil {
+		return WindowsMSVCWeakSearchArtifact{}, fmt.Errorf("read MSVC weak-search map: %s", strings.ReplaceAll(err.Error(), temporaryRoot, "<temporary>"))
+	}
+	return WindowsMSVCWeakSearchArtifact{
+		WindowsHostArtifact: WindowsHostArtifact{
+			Bytes: executableBytes, Objects: objects, LinkMap: mapBytes, Toolchain: toolchain,
+			Profile: profile, ConsumerMode: C11ConsumerMode,
+		},
+		ArchiveName: archiveName, Archive: slices.Clone(archiveBytes),
+	}, nil
+}
+
 // BuildWindowsMSVCUnwindProbe compiles the catcher, termination frame, and
 // raiser as separate translation units before linking them with local x64 MSVC.
 func BuildWindowsMSVCUnwindProbe(toolchain WindowsHostToolchain, profile Profile, catcherSource, frameSource, raiserSource string) (WindowsHostArtifact, error) {
@@ -603,6 +718,14 @@ func ExecuteWindowsMSVCArchiveProbe(artifact WindowsMSVCArchiveArtifact) (Window
 		return WindowsHostOutcome{}, fmt.Errorf("MSVC archive probe execution requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
 	}
 	return executeWindowsMSVCArtifact(artifact.WindowsHostArtifact, "MSVC archive probe "+artifact.Variant)
+}
+
+// ExecuteWindowsMSVCWeakSearchProbe runs one weak archive-search executable.
+func ExecuteWindowsMSVCWeakSearchProbe(artifact WindowsMSVCWeakSearchArtifact) (WindowsHostOutcome, error) {
+	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
+		return WindowsHostOutcome{}, fmt.Errorf("MSVC weak-search probe execution requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
+	}
+	return executeWindowsMSVCArtifact(artifact.WindowsHostArtifact, "MSVC weak-search probe")
 }
 
 // ExecuteWindowsMSVCUnwindProbe runs one linked structured-exception fixture.

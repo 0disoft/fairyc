@@ -238,7 +238,7 @@ for those two shapes only; it
 does not provide an independent compiler or register oracle, aggregate parameters, callbacks,
 exports, nested results, or hosted evidence.
 
-The Windows smoke additionally parses all fifty-three linked target or probe executable images without
+The Windows smoke additionally parses all fifty-five linked target or probe executable images without
 invoking the host loader as the parser. The target-neutral product, both declared-target profile
 products, nine package-workspace build products including two safe `std::io` products, nine package-workspace run products, both safe FY
 File lifecycle products, both safe FY owned-text lifecycle products, two direct run-target temporary
@@ -290,9 +290,10 @@ line through system DbgHelp at both profiles. ADR 0240 additionally binds the na
 low `__GSHandlerCheck_SEH` and optimized `__C_specific_handler` tail relocations through exact map
 rows to executable final RVAs.
 ADR 0243 additionally proves one bounded version-2 bigobj header, 20-byte static-symbol REL32,
-exact map owner, final displacement, and native result at both profiles. It still does not define
-exported/imported product symbols, remaining relocation formulas and weak search modes, versioned
-overflow/bigobj fixtures, high-section or bigobj auxiliary/COMDAT layouts, chained-tail relocations,
+exact map owner, final displacement, and native result at both profiles. ADR 0245 proves the two
+remaining weak search modes by suppressing one available archive member and extracting another.
+It still does not define exported/imported product symbols, remaining relocation formulas,
+high-section or bigobj auxiliary/COMDAT layouts, chained-tail relocations,
 non-unwind or broader archive retention and COMDAT policies, complete `.pdata`/`.xdata`
 content, complete CodeView/PDB record semantics or broader symbolication, or a fresh hosted same-commit object receipt, so
 `pe-coff-object-fixtures` remains missing.

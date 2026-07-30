@@ -8,7 +8,23 @@ import (
 // BuildAMD64WeakExternalProbeObject creates two leaf tail-jump paths: one unresolved weak alias
 // that selects its local fallback and one weak alias intended to be replaced by a strong definition.
 func BuildAMD64WeakExternalProbeObject(fallbackEntry, overrideEntry, missingWeak, overrideWeak, missingFallback, overrideFallback string) ([]byte, error) {
-	names := []string{fallbackEntry, overrideEntry, missingWeak, overrideWeak, missingFallback, overrideFallback}
+	return buildAMD64WeakExternalProbeObject(
+		fallbackEntry, overrideEntry, missingWeak, overrideWeak, missingFallback, overrideFallback,
+		coffWeakSearchAlias, coffWeakSearchAlias,
+	)
+}
+
+// BuildAMD64WeakSearchProbeObject creates two leaf tail-jump paths that differ only in whether
+// LINK may search an archive for the weak symbol before selecting the local fallback.
+func BuildAMD64WeakSearchProbeObject(noLibraryEntry, libraryEntry, noLibraryWeak, libraryWeak, noLibraryFallback, libraryFallback string) ([]byte, error) {
+	return buildAMD64WeakExternalProbeObject(
+		noLibraryEntry, libraryEntry, noLibraryWeak, libraryWeak, noLibraryFallback, libraryFallback,
+		coffWeakSearchNoLibrary, coffWeakSearchLibrary,
+	)
+}
+
+func buildAMD64WeakExternalProbeObject(firstEntry, secondEntry, firstWeak, secondWeak, firstFallback, secondFallback string, firstSearch, secondSearch uint32) ([]byte, error) {
+	names := []string{firstEntry, secondEntry, firstWeak, secondWeak, firstFallback, secondFallback}
 	seen := make(map[string]struct{}, len(names))
 	for _, name := range names {
 		if !validShortCOFFSymbol(name) {
@@ -54,16 +70,16 @@ func BuildAMD64WeakExternalProbeObject(fallbackEntry, overrideEntry, missingWeak
 		binary.LittleEndian.PutUint16(object[relocation+8:], ObjectRelocationAMD64Rel32)
 	}
 
-	emitWeakProbeSymbol(object[symbols:], fallbackEntry, 0, 1, coffSymbolTypeFunction, coffStorageClassExternal, 0)
-	emitWeakProbeSymbol(object[symbols+18:], overrideEntry, 5, 1, coffSymbolTypeFunction, coffStorageClassExternal, 0)
-	emitWeakProbeSymbol(object[symbols+2*18:], missingWeak, 0, 0, coffSymbolTypeFunction, coffStorageClassWeakExternal, 1)
+	emitWeakProbeSymbol(object[symbols:], firstEntry, 0, 1, coffSymbolTypeFunction, coffStorageClassExternal, 0)
+	emitWeakProbeSymbol(object[symbols+18:], secondEntry, 5, 1, coffSymbolTypeFunction, coffStorageClassExternal, 0)
+	emitWeakProbeSymbol(object[symbols+2*18:], firstWeak, 0, 0, coffSymbolTypeFunction, coffStorageClassWeakExternal, 1)
 	binary.LittleEndian.PutUint32(object[symbols+3*18:], 6)
-	binary.LittleEndian.PutUint32(object[symbols+3*18+4:], coffWeakSearchAlias)
-	emitWeakProbeSymbol(object[symbols+4*18:], overrideWeak, 0, 0, coffSymbolTypeFunction, coffStorageClassWeakExternal, 1)
+	binary.LittleEndian.PutUint32(object[symbols+3*18+4:], firstSearch)
+	emitWeakProbeSymbol(object[symbols+4*18:], secondWeak, 0, 0, coffSymbolTypeFunction, coffStorageClassWeakExternal, 1)
 	binary.LittleEndian.PutUint32(object[symbols+5*18:], 7)
-	binary.LittleEndian.PutUint32(object[symbols+5*18+4:], coffWeakSearchAlias)
-	emitWeakProbeSymbol(object[symbols+6*18:], missingFallback, 10, 1, coffSymbolTypeFunction, coffStorageClassExternal, 0)
-	emitWeakProbeSymbol(object[symbols+7*18:], overrideFallback, 16, 1, coffSymbolTypeFunction, coffStorageClassExternal, 0)
+	binary.LittleEndian.PutUint32(object[symbols+5*18+4:], secondSearch)
+	emitWeakProbeSymbol(object[symbols+6*18:], firstFallback, 10, 1, coffSymbolTypeFunction, coffStorageClassExternal, 0)
+	emitWeakProbeSymbol(object[symbols+7*18:], secondFallback, 16, 1, coffSymbolTypeFunction, coffStorageClassExternal, 0)
 	binary.LittleEndian.PutUint32(object[symbols+symbolCount*18:], 4)
 	if _, err := InspectObject(object); err != nil {
 		return nil, fmt.Errorf("validate generated AMD64 weak-external object: %w", err)

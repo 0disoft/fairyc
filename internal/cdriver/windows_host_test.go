@@ -99,6 +99,9 @@ func TestWindowsHostDriverFailsClosedOnIneligibleHost(t *testing.T) {
 	if _, err := BuildWindowsMSVCArchiveProbe(WindowsHostToolchain{}, LowProfile, "caller", "chosen", "unused", "direct"); err == nil || !strings.Contains(err.Error(), "requires windows/amd64") {
 		t.Fatalf("BuildWindowsMSVCArchiveProbe() error = %v", err)
 	}
+	if _, err := BuildWindowsMSVCWeakSearchProbe(WindowsHostToolchain{}, LowProfile, "caller", "nolib", "library", []byte("weak")); err == nil || !strings.Contains(err.Error(), "requires windows/amd64") {
+		t.Fatalf("BuildWindowsMSVCWeakSearchProbe() error = %v", err)
+	}
 	if _, err := BuildWindowsMSVCUnwindProbe(WindowsHostToolchain{}, LowProfile, "catcher", "frame", "raiser"); err == nil || !strings.Contains(err.Error(), "requires windows/amd64") {
 		t.Fatalf("BuildWindowsMSVCUnwindProbe() error = %v", err)
 	}
@@ -116,6 +119,9 @@ func TestWindowsHostDriverFailsClosedOnIneligibleHost(t *testing.T) {
 	}
 	if _, err := ExecuteWindowsMSVCArchiveProbe(WindowsMSVCArchiveArtifact{}); err == nil || !strings.Contains(err.Error(), "requires windows/amd64") {
 		t.Fatalf("ExecuteWindowsMSVCArchiveProbe() error = %v", err)
+	}
+	if _, err := ExecuteWindowsMSVCWeakSearchProbe(WindowsMSVCWeakSearchArtifact{}); err == nil || !strings.Contains(err.Error(), "requires windows/amd64") {
+		t.Fatalf("ExecuteWindowsMSVCWeakSearchProbe() error = %v", err)
 	}
 	if _, err := ExecuteWindowsMSVCUnwindProbe(WindowsHostArtifact{Bytes: []byte("image")}); err == nil || !strings.Contains(err.Error(), "requires windows/amd64") {
 		t.Fatalf("ExecuteWindowsMSVCUnwindProbe() error = %v", err)

@@ -291,7 +291,7 @@ object format, serialized compiler receipt, or compiler-produced whole-object by
 4,096-section and 64 MiB object budgets bound parser work while admitting current MSVC function-level
 section fanout; the synthetic 154-section regression case is evidence, not a stable output count.
 `fairyc.coff-generated-object-fixtures/v0` separately versions explicit inputs and exact byte
-digests for the deterministic weak-external, relocation-overflow, and version-2 bigobj test
+digests for the deterministic weak-external search-mode, relocation-overflow, and version-2 bigobj test
 generators. Its complete symbol receipts and relocation-run partitions are compiler-private
 regression oracles. They do not stabilize Fairy C object output, Microsoft COFF as a public API, or
 arbitrary objects produced outside this closed test corpus. The absence of raw stored duplicates is

@@ -21,7 +21,7 @@
       "required": ["id", "generator", "inputs", "expect"],
       "properties": {
         "id": { "type": "string", "pattern": "^pass\\.[a-z0-9-]+$" },
-        "generator": { "enum": ["amd64-bigobj-v2", "amd64-relocation-overflow", "amd64-weak-external-alias"] },
+        "generator": { "enum": ["amd64-bigobj-v2", "amd64-relocation-overflow", "amd64-weak-external-alias", "amd64-weak-search-modes"] },
         "inputs": { "$ref": "#/$defs/nonemptyStrings" },
         "expect": { "$ref": "#/$defs/expectation" }
       }

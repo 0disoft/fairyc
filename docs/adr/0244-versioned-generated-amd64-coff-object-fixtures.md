@@ -20,7 +20,7 @@ layout to drift while the parser produced the same receipt. The fixture needs bo
 
 ## Decision
 
-1. Add strict manifest `fairyc.coff-generated-object-fixtures/v0` for the three existing AMD64
+1. Add strict manifest `fairyc.coff-generated-object-fixtures/v0` for the existing AMD64
    object generators. Generator identity and every ordered string input are explicit fixture data.
 2. Invoke every generator twice and require byte identity before checking expectations. This makes
    determinism a direct oracle instead of an inference from a committed digest.
@@ -38,14 +38,14 @@ layout to drift while the parser produced the same receipt. The fixture needs bo
 
 ## Evidence and limits
 
-The manifest freezes a 250-byte SEARCH_ALIAS object, a 655,471-byte extended-relocation object,
-and a 161-byte version-2 bigobj. Tests kill generator identity and arity, digest format, byte length,
+The manifest freezes separate 250-byte SEARCH_ALIAS and NOLIBRARY/LIBRARY objects, a 655,471-byte
+extended-relocation object, and a 161-byte version-2 bigobj. Tests kill generator identity and arity, digest format, byte length,
 symbol expectations, relocation partitioning, unknown fields, trailing JSON, and representative
 missing required fields. Existing object tests remain responsible for malformed wire encodings;
 existing Windows smoke remains responsible for MSVC map ownership, final relocation formulas, and
 native result 42 at low and optimized profiles.
 
 This contract versions compiler-private test generators, not Fairy C output stability or a public
-object ABI. Raw stored copies remain intentionally absent. Weak NOLIBRARY and LIBRARY search modes,
-high-section bigobj, bigobj auxiliaries and COMDAT, bigobj relocation overflow, another producer or
+object ABI. Raw stored copies remain intentionally absent. High-section bigobj, bigobj auxiliaries
+and COMDAT, bigobj relocation overflow, another producer or
 linker, and hosted same-commit evidence remain separate gates.
