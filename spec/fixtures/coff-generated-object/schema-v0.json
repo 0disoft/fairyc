@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fairyc.dev/spec/fixtures/coff-generated-object/schema-v0.json",
+  "title": "Fairy C generated AMD64 COFF object fixtures v0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schemaVersion", "target", "contracts", "deferred", "cases"],
+  "properties": {
+    "$schema": { "const": "./schema-v0.json" },
+    "schemaVersion": { "const": "fairyc.coff-generated-object-fixtures/v0" },
+    "target": { "const": "x86_64-windows-msvc" },
+    "contracts": { "$ref": "#/$defs/nonemptyStrings" },
+    "deferred": { "$ref": "#/$defs/nonemptyStrings" },
+    "cases": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/case" } }
+  },
+  "$defs": {
+    "nonemptyStrings": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "generator", "inputs", "expect"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^pass\\.[a-z0-9-]+$" },
+        "generator": { "enum": ["amd64-bigobj-v2", "amd64-relocation-overflow", "amd64-weak-external-alias"] },
+        "inputs": { "$ref": "#/$defs/nonemptyStrings" },
+        "expect": { "$ref": "#/$defs/expectation" }
+      }
+    },
+    "expectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["byteLength", "sha256", "machine", "characteristics", "bigObject", "bigObjectVersion", "sections", "symbols", "relocationRuns"],
+      "properties": {
+        "byteLength": { "type": "integer", "minimum": 1 },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "machine": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "characteristics": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "bigObject": { "type": "boolean" },
+        "bigObjectVersion": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "sections": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/section" } },
+        "symbols": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/symbol" } },
+        "relocationRuns": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/relocationRun" } }
+      }
+    },
+    "section": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "relocations", "characteristics", "comdatSelection", "associativeSection"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 }, "relocations": { "type": "integer", "minimum": 0 },
+        "characteristics": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+        "comdatSelection": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "associativeSection": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "symbol": {
+      "type": "object", "additionalProperties": false,
+      "required": ["tableIndex", "name", "value", "sectionNumber", "type", "storageClass", "auxiliaryRecords", "weakFallbackIndex", "weakFallback", "weakSearch"],
+      "properties": {
+        "tableIndex": { "type": "integer", "minimum": 0 }, "name": { "type": "string", "minLength": 1 },
+        "value": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+        "sectionNumber": { "type": "integer", "minimum": -2147483648, "maximum": 2147483647 },
+        "type": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "storageClass": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "auxiliaryRecords": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "weakFallbackIndex": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+        "weakFallback": { "type": "string" }, "weakSearch": { "type": "integer", "minimum": 0, "maximum": 4294967295 }
+      }
+    },
+    "relocationRun": {
+      "type": "object", "additionalProperties": false,
+      "required": ["start", "count", "sectionIndex", "section", "virtualAddress", "symbolIndex", "symbol", "type"],
+      "properties": {
+        "start": { "type": "integer", "minimum": 0 }, "count": { "type": "integer", "minimum": 1 },
+        "sectionIndex": { "type": "integer", "minimum": 1 }, "section": { "type": "string", "minLength": 1 },
+        "virtualAddress": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+        "symbolIndex": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+        "symbol": { "type": "string", "minLength": 1 }, "type": { "type": "integer", "minimum": 0, "maximum": 65535 }
+      }
+    }
+  }
+}

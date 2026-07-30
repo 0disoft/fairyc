@@ -1,0 +1,84 @@
+{
+  "$schema": "./schema-v0.json",
+  "schemaVersion": "fairyc.coff-generated-object-fixtures/v0",
+  "target": "x86_64-windows-msvc",
+  "contracts": [
+    "Generator inputs and names are versioned test data, not implicit implementation defaults.",
+    "Two independent generator calls must produce identical bytes.",
+    "Byte length and SHA-256 freeze the complete generated object without storing a large hexadecimal duplicate.",
+    "Section and primary-symbol receipts are exact; contiguous relocation runs partition every parsed relocation."
+  ],
+  "deferred": [
+    "Raw stored copies of the generated objects remain intentionally absent.",
+    "Weak NOLIBRARY and LIBRARY search modes and bigobj auxiliary or COMDAT records remain outside this manifest."
+  ],
+  "cases": [
+    {
+      "id": "pass.bigobj-v2",
+      "generator": "amd64-bigobj-v2",
+      "inputs": ["fy_bigob"],
+      "expect": {
+        "byteLength": 161,
+        "sha256": "c8a8e513cf2e263e13e01d48369a04dc73d07eff907c58480ef762212530560a",
+        "machine": 34404,
+        "characteristics": 0,
+        "bigObject": true,
+        "bigObjectVersion": 2,
+        "sections": [{"name": ".text", "relocations": 1, "characteristics": 1610612768, "comdatSelection": 0, "associativeSection": 0}],
+        "symbols": [
+          {"tableIndex": 0, "name": "fy_bigob", "value": 0, "sectionNumber": 1, "type": 32, "storageClass": 2, "auxiliaryRecords": 0, "weakFallbackIndex": 0, "weakFallback": "", "weakSearch": 0},
+          {"tableIndex": 1, "name": "fy_bgdat", "value": 7, "sectionNumber": 1, "type": 0, "storageClass": 3, "auxiliaryRecords": 0, "weakFallbackIndex": 0, "weakFallback": "", "weakSearch": 0}
+        ],
+        "relocationRuns": [{"start": 0, "count": 1, "sectionIndex": 1, "section": ".text", "virtualAddress": 2, "symbolIndex": 1, "symbol": "fy_bgdat", "type": 4}]
+      }
+    },
+    {
+      "id": "pass.relocation-overflow",
+      "generator": "amd64-relocation-overflow",
+      "inputs": ["fy_ovfl"],
+      "expect": {
+        "byteLength": 655471,
+        "sha256": "c40a2b0f808e266932c63a68a0e3def33c081e512dc674faa83db7e6942e9673",
+        "machine": 34404,
+        "characteristics": 0,
+        "bigObject": false,
+        "bigObjectVersion": 0,
+        "sections": [{"name": ".text", "relocations": 65535, "characteristics": 1627389984, "comdatSelection": 0, "associativeSection": 0}],
+        "symbols": [
+          {"tableIndex": 0, "name": "fy_ovfl", "value": 0, "sectionNumber": 1, "type": 32, "storageClass": 2, "auxiliaryRecords": 0, "weakFallbackIndex": 0, "weakFallback": "", "weakSearch": 0},
+          {"tableIndex": 1, "name": "fy_ovdat", "value": 7, "sectionNumber": 1, "type": 0, "storageClass": 3, "auxiliaryRecords": 0, "weakFallbackIndex": 0, "weakFallback": "", "weakSearch": 0}
+        ],
+        "relocationRuns": [
+          {"start": 0, "count": 65534, "sectionIndex": 1, "section": ".text", "virtualAddress": 0, "symbolIndex": 0, "symbol": "fy_ovfl", "type": 0},
+          {"start": 65534, "count": 1, "sectionIndex": 1, "section": ".text", "virtualAddress": 2, "symbolIndex": 1, "symbol": "fy_ovdat", "type": 4}
+        ]
+      }
+    },
+    {
+      "id": "pass.weak-external-alias",
+      "generator": "amd64-weak-external-alias",
+      "inputs": ["fy_wfb_e", "fy_wov_e", "fy_wmiss", "fy_wovr", "fy_mfbk", "fy_ofbk"],
+      "expect": {
+        "byteLength": 250,
+        "sha256": "2d74cc21237549fd7f48df5e1bb8936f87daebab0e434fe9689c2bf39f1c7952",
+        "machine": 34404,
+        "characteristics": 0,
+        "bigObject": false,
+        "bigObjectVersion": 0,
+        "sections": [{"name": ".text", "relocations": 2, "characteristics": 1610612768, "comdatSelection": 0, "associativeSection": 0}],
+        "symbols": [
+          {"tableIndex": 0, "name": "fy_wfb_e", "value": 0, "sectionNumber": 1, "type": 32, "storageClass": 2, "auxiliaryRecords": 0, "weakFallbackIndex": 0, "weakFallback": "", "weakSearch": 0},
+          {"tableIndex": 1, "name": "fy_wov_e", "value": 5, "sectionNumber": 1, "type": 32, "storageClass": 2, "auxiliaryRecords": 0, "weakFallbackIndex": 0, "weakFallback": "", "weakSearch": 0},
+          {"tableIndex": 2, "name": "fy_wmiss", "value": 0, "sectionNumber": 0, "type": 32, "storageClass": 105, "auxiliaryRecords": 1, "weakFallbackIndex": 6, "weakFallback": "fy_mfbk", "weakSearch": 3},
+          {"tableIndex": 4, "name": "fy_wovr", "value": 0, "sectionNumber": 0, "type": 32, "storageClass": 105, "auxiliaryRecords": 1, "weakFallbackIndex": 7, "weakFallback": "fy_ofbk", "weakSearch": 3},
+          {"tableIndex": 6, "name": "fy_mfbk", "value": 10, "sectionNumber": 1, "type": 32, "storageClass": 2, "auxiliaryRecords": 0, "weakFallbackIndex": 0, "weakFallback": "", "weakSearch": 0},
+          {"tableIndex": 7, "name": "fy_ofbk", "value": 16, "sectionNumber": 1, "type": 32, "storageClass": 2, "auxiliaryRecords": 0, "weakFallbackIndex": 0, "weakFallback": "", "weakSearch": 0}
+        ],
+        "relocationRuns": [
+          {"start": 0, "count": 1, "sectionIndex": 1, "section": ".text", "virtualAddress": 1, "symbolIndex": 2, "symbol": "fy_wmiss", "type": 4},
+          {"start": 1, "count": 1, "sectionIndex": 1, "section": ".text", "virtualAddress": 6, "symbolIndex": 4, "symbol": "fy_wovr", "type": 4}
+        ]
+      }
+    }
+  ]
+}

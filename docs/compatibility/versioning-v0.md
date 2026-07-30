@@ -290,6 +290,12 @@ expectations for primary symbols, AMD64 relocation types, and COMDAT selection; 
 object format, serialized compiler receipt, or compiler-produced whole-object byte promise. Its
 4,096-section and 64 MiB object budgets bound parser work while admitting current MSVC function-level
 section fanout; the synthetic 154-section regression case is evidence, not a stable output count.
+`fairyc.coff-generated-object-fixtures/v0` separately versions explicit inputs and exact byte
+digests for the deterministic weak-external, relocation-overflow, and version-2 bigobj test
+generators. Its complete symbol receipts and relocation-run partitions are compiler-private
+regression oracles. They do not stabilize Fairy C object output, Microsoft COFF as a public API, or
+arbitrary objects produced outside this closed test corpus. The absence of raw stored duplicates is
+intentional and does not weaken the whole-byte SHA-256 oracle.
 ADR 0232's REL32 link spec and report are likewise compiler-private validation policy. Its symbol
 names, `.fyreloc` receipt, preferred-image addresses, raw addend, and displacement fields may change
 with synchronized inspector, probe, mutation tests, and evidence docs; they do not define a public

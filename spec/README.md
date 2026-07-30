@@ -36,5 +36,7 @@ This directory contains versioned normative data that future compiler tests can 
 - `fixtures/package-cache/manifest-v5.json`: current coordinate-based dependency compatibility key with fyif3 and exact language `/6` inputs; historical v1 through v4 remain frozen.
 - `fixtures/project-manifest/manifest-v1.json`: complete strict `fairy.toml` local-exact parser cases.
 - `fixtures/workspace-loader/manifest-v1.json`: complete local workspace trees for filesystem-safe graph construction.
+- `fixtures/coff-object/manifest-v0.json`: exact small raw AMD64 COFF symbol, relocation, and COMDAT vectors.
+- `fixtures/coff-generated-object/manifest-v0.json`: deterministic weak-external, relocation-overflow, and bigobj generator inputs, complete-byte digests, and compact structural expectations.
 
 Explanatory language documents may summarize these files but cannot silently change spelling, grouping, module identity, semantic phase ownership, canonical facts, spans, recovery acceptance, or verified MIR observations. A contract change updates the normative data, ADR, diagnostics when applicable, and affected fixtures together.

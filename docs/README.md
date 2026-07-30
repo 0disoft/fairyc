@@ -45,6 +45,7 @@
 - Workspace-call post-GC retained-heap batch control: internal/buildmeasure/atlas_call_retained.go, cmd/fairyc-windows-host-smoke/atlas_call_retained_measure.go, docs/adr/0230-atlas-workspace-call-retained-heap-control.md
 - Atlas Phase 4 exit evidence and executable one-way package-import boundary: docs/atlas/phase4-exit-evidence.md, docs/adr/0203-enforced-one-way-atlas-import-boundary.md, internal/architecturecontract/
 - Versioned exact AMD64 COFF symbol, relocation, and COMDAT fixtures: spec/fixtures/coff-object/manifest-v0.json, internal/pecofffixture/, docs/adr/0231-versioned-amd64-coff-object-fixtures.md
+- Versioned deterministic weak-external, relocation-overflow, and bigobj generator fixtures: spec/fixtures/coff-generated-object/manifest-v0.json, internal/pecofffixture/, docs/adr/0244-versioned-generated-amd64-coff-object-fixtures.md
 - Exact AMD64 REL32 object-to-image formula proof: internal/pecoff/relocation_link.go, internal/windowsrelocationprobe/, docs/adr/0232-amd64-rel32-object-to-image-proof.md
 - Exact AMD64 REL32 through REL32_5 object-to-image formula proof: internal/pecoff/relocation_variants.go, internal/pecoff/relocation_variants_object.go, internal/windowsrelocationprobe/, docs/adr/0237-amd64-rel32-variant-object-to-image-proof.md
 - Exact MSVC CodeView SECTION/SECREL object-pair and final PE/PDB identity proof: internal/pecoff/codeview_relocations.go, internal/pecoff/program_database.go, internal/windowsrelocationprobe/, docs/adr/0238-msvc-codeview-section-secrel-and-pdb-association.md
