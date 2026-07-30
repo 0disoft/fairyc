@@ -7,6 +7,9 @@ const (
 	ReceiptSymbol  = "fy_rel32_receipt"
 	SourceObject   = "caller.obj"
 	TargetObject   = "target.obj"
+	VariantObject  = "variants.obj"
+	VariantSource  = "fy_vsrc"
+	VariantTarget  = "fy_vdst"
 	ReceiptSection = ".fyreloc"
 	ExpectedExit   = int32(0)
 )
@@ -23,6 +26,9 @@ type Unit struct {
 	ReceiptSymbol  string
 	SourceObject   string
 	TargetObject   string
+	VariantObject  string
+	VariantSource  string
+	VariantTarget  string
 	ReceiptSection string
 	ReceiptMagic   [16]byte
 	ExpectedExit   int32
@@ -35,6 +41,7 @@ func Generate() Unit {
 		CallerSource: callerSource, TargetSource: targetSource,
 		SourceSymbol: SourceSymbol, TargetSymbol: TargetSymbol,
 		ReceiptSymbol: ReceiptSymbol, SourceObject: SourceObject, TargetObject: TargetObject,
+		VariantObject: VariantObject, VariantSource: VariantSource, VariantTarget: VariantTarget,
 		ReceiptSection: ReceiptSection, ReceiptMagic: ReceiptMagic, ExpectedExit: ExpectedExit,
 	}
 }
@@ -45,6 +52,7 @@ const callerSource = `/* fairyc Microsoft x64 REL32 link proof: caller and addre
 typedef int (__cdecl *fy_rel32_function)(int);
 
 extern int fy_rel32_target(int value);
+extern int fy_vsrc(void);
 
 __declspec(noinline) int fy_rel32_source(int value) {
     volatile int observed = fy_rel32_target(value);
@@ -69,12 +77,19 @@ int main(void) {
         fy_rel32_receipt.magic[0] != 'F' || fy_rel32_receipt.magic[15] != '!') {
         return 11;
     }
-    return fy_rel32_source(40) == 42 ? 0 : 12;
+    if (fy_rel32_source(40) != 42) {
+        return 12;
+    }
+    return fy_vsrc() == 42 ? 0 : 13;
 }
 `
 
 const targetSource = `/* fairyc Microsoft x64 REL32 link proof: separate target */
 __declspec(noinline) int fy_rel32_target(int value) {
     return value + 1;
+}
+
+__declspec(noinline) int fy_vdst(int value) {
+    return value + 2;
 }
 `

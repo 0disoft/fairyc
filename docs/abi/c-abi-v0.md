@@ -276,8 +276,10 @@ also carries ADR 0235's selected function root through its direct associative `.
 children, all three raw `.pdata` addends, exact archive-member map owners, and unique final
 runtime-function entry in those same executions. ADR 0236 adds two contributed ANY-COMDAT function
 parents with distinct unwind children, binds the selected owner, and requires the losing payload to
-be absent from every runtime-function reference and file-backed final section. It
-still does not define exported/imported product symbols, remaining relocation formulas, handler or
+be absent from every runtime-function reference and file-backed final section. ADR 0237 adds one
+exact generated object and binds `REL32` through `REL32_5` to their distinct
+`S + A - (P + 4 + n)` final-image formulas at both profiles. It still does not define
+exported/imported product symbols, remaining relocation formulas, handler or
 chained-tail relocations, non-unwind or broader archive retention and COMDAT policies, complete `.pdata`/`.xdata`
 content, or a fresh hosted same-commit object receipt, so
 `pe-coff-object-fixtures` remains missing.

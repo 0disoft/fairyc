@@ -200,17 +200,23 @@ func BuildWindowsMSVCABIProbeWithConsumerMode(toolchain WindowsHostToolchain, pr
 
 // BuildWindowsMSVCRelocationProbe compiles one caller and one target translation unit separately
 // before linking them with local x64 MSVC for object-to-image relocation inspection.
-func BuildWindowsMSVCRelocationProbe(toolchain WindowsHostToolchain, profile Profile, callerSource, targetSource string) (WindowsHostArtifact, error) {
+func BuildWindowsMSVCRelocationProbe(toolchain WindowsHostToolchain, profile Profile, callerSource, targetSource string, variantObject []byte) (WindowsHostArtifact, error) {
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		return WindowsHostArtifact{}, fmt.Errorf("MSVC relocation probe requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
 	}
-	if callerSource == "" || targetSource == "" {
-		return WindowsHostArtifact{}, fmt.Errorf("MSVC relocation caller and target sources must be non-empty")
+	if callerSource == "" || targetSource == "" || len(variantObject) == 0 {
+		return WindowsHostArtifact{}, fmt.Errorf("MSVC relocation caller, target, and variant object inputs must be non-empty")
+	}
+	if _, err := pecoff.InspectObject(variantObject); err != nil {
+		return WindowsHostArtifact{}, fmt.Errorf("inspect generated MSVC REL32 variants object: %w", err)
 	}
 	return buildWindowsMSVCWithOptions(toolchain, profile, C11ConsumerMode, []windowsMSVCSource{
 		{Name: "caller.c", Contents: callerSource},
 		{Name: "target.c", Contents: targetSource},
-	}, windowsMSVCBuildOptions{CaptureMap: true})
+	}, windowsMSVCBuildOptions{
+		CaptureMap:      true,
+		PrebuiltObjects: []WindowsHostObject{{Name: "variants.obj", Bytes: slices.Clone(variantObject)}},
+	})
 }
 
 // BuildWindowsMSVCArchiveProbe compiles one C11 caller, one C11 unused member, and two C++20
@@ -370,7 +376,8 @@ type windowsMSVCSource struct {
 }
 
 type windowsMSVCBuildOptions struct {
-	CaptureMap bool
+	CaptureMap      bool
+	PrebuiltObjects []WindowsHostObject
 }
 
 func buildWindowsMSVC(toolchain WindowsHostToolchain, profile Profile, consumerMode ConsumerMode, sources []windowsMSVCSource) (WindowsHostArtifact, error) {
@@ -398,8 +405,9 @@ func buildWindowsMSVCWithOptions(toolchain WindowsHostToolchain, profile Profile
 	defer os.RemoveAll(temporaryRoot)
 	executablePath := filepath.Join(temporaryRoot, "program.exe")
 	sourcePaths := make([]string, 0, len(sources))
+	prebuiltPaths := make([]string, 0, len(options.PrebuiltObjects))
 	objectNames := make([]string, 0, len(sources))
-	seenNames := make(map[string]struct{}, len(sources))
+	seenNames := make(map[string]struct{}, len(sources)+len(options.PrebuiltObjects))
 	for _, source := range sources {
 		if source.Name == "" || filepath.Base(source.Name) != source.Name || filepath.Ext(source.Name) != ".c" || source.Contents == "" {
 			return WindowsHostArtifact{}, fmt.Errorf("MSVC build source is invalid")
@@ -416,6 +424,25 @@ func buildWindowsMSVCWithOptions(toolchain WindowsHostToolchain, profile Profile
 		sourcePaths = append(sourcePaths, path)
 		objectNames = append(objectNames, strings.TrimSuffix(source.Name, filepath.Ext(source.Name))+".obj")
 	}
+	for _, object := range options.PrebuiltObjects {
+		if object.Name == "" || filepath.Base(object.Name) != object.Name || !strings.EqualFold(filepath.Ext(object.Name), ".obj") || len(object.Bytes) == 0 {
+			return WindowsHostArtifact{}, fmt.Errorf("MSVC prebuilt object is invalid")
+		}
+		key := strings.ToLower(strings.TrimSuffix(object.Name, filepath.Ext(object.Name)) + ".c")
+		if _, duplicate := seenNames[key]; duplicate {
+			return WindowsHostArtifact{}, fmt.Errorf("MSVC build repeats object name %q", object.Name)
+		}
+		seenNames[key] = struct{}{}
+		if _, err := pecoff.InspectObject(object.Bytes); err != nil {
+			return WindowsHostArtifact{}, fmt.Errorf("inspect MSVC prebuilt object %s: %w", object.Name, err)
+		}
+		path := filepath.Join(temporaryRoot, object.Name)
+		if err := os.WriteFile(path, object.Bytes, 0o600); err != nil {
+			return WindowsHostArtifact{}, fmt.Errorf("write MSVC prebuilt object %s: %w", object.Name, err)
+		}
+		prebuiltPaths = append(prebuiltPaths, path)
+		objectNames = append(objectNames, object.Name)
+	}
 	optimization := "/Od"
 	if profile == OptimizedProfile {
 		optimization = "/O2"
@@ -424,7 +451,9 @@ func buildWindowsMSVCWithOptions(toolchain WindowsHostToolchain, profile Profile
 		"/nologo", standardFlag, "/TC", "/W4", "/WX", "/MT", optimization,
 	}
 	arguments = append(arguments, sourcePaths...)
-	arguments = append(arguments, "/Fe:"+executablePath, "/link", "/INCREMENTAL:NO")
+	arguments = append(arguments, "/Fe:"+executablePath, "/link")
+	arguments = append(arguments, prebuiltPaths...)
+	arguments = append(arguments, "/INCREMENTAL:NO")
 	mapPath := ""
 	if options.CaptureMap {
 		mapPath = filepath.Join(temporaryRoot, "program.map")

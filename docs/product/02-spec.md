@@ -448,7 +448,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   exact archive-member map owners, and unique final runtime-function entry without adding another
   image. ADR 0236 adds a second contributed ANY-COMDAT function parent with a distinct unwind child;
   the selected owner and bytes must agree while the losing payload occurs zero times in final
-  runtime-function references and file-backed sections. The driver still removes every temporary
+  runtime-function references and file-backed sections. ADR 0237 adds one exact generated object;
+  each of its `REL32` through `REL32_5` records must have one exact target and satisfy
+  `S + A - (P + 4 + n)` in the low and optimized final images while its trailing marker bytes stay
+  unchanged. The driver still removes every temporary
   object, archive, map, and image. This is not
   a stable product object or library format, proof of remaining relocation formulas or unwind
   tails, non-unwind or broader archive/COMDAT policies, unwind fixture, or fresh hosted same-commit receipt.

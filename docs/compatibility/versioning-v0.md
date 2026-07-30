@@ -310,6 +310,10 @@ ADR 0236 applies the same internal-policy boundary to the two-candidate ANY-COMD
 report, candidate-specific unwind digests, raw-section absence scan, and mixed C11/C++20 probe
 inputs. None of those validation identities admits C++ as Fairy C source or versions a public
 linker, object, unwind, or security-setting contract.
+ADR 0237 applies it to the generated six-relocation object, marker bytes, map-owner identities, and
+private REL32-variant report. These may evolve with synchronized inspector, mutation, native-smoke,
+and evidence updates; they neither admit arbitrary prebuilt-object input nor stabilize an object or
+linker interface.
 Microsoft x64 unwind inspection is likewise an internal validation policy. Neither the observed
 runtime-function count nor version-1/version-2 mix is stable. Future semantic epilog, handler,
 or chain fixtures require an explicit unwind-contract decision before they can become target

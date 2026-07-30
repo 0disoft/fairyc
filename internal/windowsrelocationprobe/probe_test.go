@@ -13,6 +13,7 @@ func TestGenerateReturnsClosedDeterministicREL32Probe(t *testing.T) {
 		t.Fatalf("Generate() is not deterministic")
 	}
 	if first.SourceSymbol != SourceSymbol || first.TargetSymbol != TargetSymbol ||
+		first.VariantObject != VariantObject || first.VariantSource != VariantSource || first.VariantTarget != VariantTarget ||
 		first.ReceiptSection != ReceiptSection || first.ReceiptMagic != ReceiptMagic ||
 		first.ExpectedExit != ExpectedExit {
 		t.Fatalf("Generate() identity = %+v", first)
@@ -22,7 +23,8 @@ func TestGenerateReturnsClosedDeterministicREL32Probe(t *testing.T) {
 		"fy_rel32_target(value)",
 		"#pragma section(\".fyreloc\", read)",
 		"__declspec(allocate(\".fyreloc\"))",
-		"fy_rel32_source(40) == 42",
+		"fy_rel32_source(40) != 42",
+		"fy_vsrc() == 42",
 	} {
 		if !strings.Contains(first.CallerSource, fragment) {
 			t.Fatalf("caller source is missing %q", fragment)
@@ -30,5 +32,8 @@ func TestGenerateReturnsClosedDeterministicREL32Probe(t *testing.T) {
 	}
 	if !strings.Contains(first.TargetSource, "__declspec(noinline) int fy_rel32_target") {
 		t.Fatalf("target source lost the cross-object target")
+	}
+	if !strings.Contains(first.TargetSource, "__declspec(noinline) int fy_vdst") {
+		t.Fatal("target source lost the REL32 variant target")
 	}
 }
