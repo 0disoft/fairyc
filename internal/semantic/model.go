@@ -184,6 +184,21 @@ func analyze(files []File, bindings map[packageImportKey]hir.PackageID) Result {
 		ordered[index].Path = hir.QualifiedSourcePath(ordered[index].Package, ordered[index].Path)
 	}
 	analyzer := newAnalyzer(ordered, bindings)
+	for _, file := range ordered {
+		if file.Module == nil {
+			continue
+		}
+		for _, constant := range file.Module.Constants {
+			analyzer.addUnsupported(file.Path, constant.Span, "module constant pending ADR 0220 implementation")
+		}
+		for _, assertion := range file.Module.StaticAssertions {
+			analyzer.addUnsupported(file.Path, assertion.Span, "static_assert pending ADR 0220 implementation")
+		}
+	}
+	if len(analyzer.unsupported) != 0 {
+		analyzer.finish()
+		return Result{Unsupported: analyzer.unsupported}
+	}
 	analyzer.resolve()
 	if len(analyzer.diagnostics) > 0 {
 		analyzer.finish()

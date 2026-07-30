@@ -70,6 +70,32 @@ func TestLowerPreservesExplicitGrouping(t *testing.T) {
 	}
 }
 
+func TestLowerPreservesCompileTimeItemsWithoutAttachingDocumentation(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\n/// remains unattached\n@marker\npub const i32 ANSWER = 40 + 2;\n@check\nstatic_assert(ANSWER == 42);\n")
+	tree := syntax.Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	module, err := Lower(tree)
+	if err != nil {
+		t.Fatalf("Lower() error = %v", err)
+	}
+	if len(module.Constants) != 1 || len(module.StaticAssertions) != 1 {
+		t.Fatalf("compile-time items = constants %+v, assertions %+v", module.Constants, module.StaticAssertions)
+	}
+	constant := module.Constants[0]
+	if constant.Name != "ANSWER" || !constant.Public || constant.Type.Text != "i32" || len(constant.Attributes) != 1 ||
+		constant.Attributes[0].Name != "marker" || NormalizeExpression(constant.Expression) != "(+ 40 2)" {
+		t.Fatalf("constant = %+v", constant)
+	}
+	assertion := module.StaticAssertions[0]
+	if assertion.Public || len(assertion.Attributes) != 1 || assertion.Attributes[0].Name != "check" ||
+		NormalizeExpression(assertion.Expression) != "(== ANSWER 42)" {
+		t.Fatalf("static assertion = %+v", assertion)
+	}
+}
+
 func TestLowerPreservesFixedArrayLiteralForm(t *testing.T) {
 	t.Parallel()
 	input := []byte("module main;\nfn i32 main() { let i32[3] values = [1, 2, 3]; return values[1]; }\n")

@@ -16,6 +16,8 @@ type Module struct {
 	Path             string
 	Span             diagnostic.Span
 	Imports          []Import
+	Constants        []Constant
+	StaticAssertions []StaticAssertion
 	Structs          []Struct
 	Resources        []Resource
 	Enums            []Enum
@@ -23,6 +25,25 @@ type Module struct {
 	Functions        []Function
 	Bindings         []Binding
 	Literals         []Literal
+}
+
+// Constant preserves one module constant before bounded compile-time evaluation.
+type Constant struct {
+	Name       string
+	Public     bool
+	Span       diagnostic.Span
+	NameSpan   diagnostic.Span
+	Attributes []Attribute
+	Type       TypeReference
+	Expression *Expression
+}
+
+// StaticAssertion preserves one module-level compile-time assertion.
+type StaticAssertion struct {
+	Public     bool
+	Span       diagnostic.Span
+	Attributes []Attribute
+	Expression *Expression
 }
 
 // Enum is one restricted inert tagged type declaration.
@@ -223,6 +244,10 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 		switch child.Kind {
 		case syntax.KindImport:
 			module.Imports = append(module.Imports, lowerImport(tree, child))
+		case syntax.KindConst:
+			module.Constants = append(module.Constants, lowerConstant(tree, child))
+		case syntax.KindStaticAssert:
+			module.StaticAssertions = append(module.StaticAssertions, lowerStaticAssertion(tree, child))
 		case syntax.KindStruct:
 			module.Structs = append(module.Structs, lowerStruct(tree, child))
 		case syntax.KindResource:
@@ -266,6 +291,47 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 	}
 	walk(tree.Root)
 	return module, nil
+}
+
+func lowerConstant(tree *syntax.Tree, node syntax.Node) Constant {
+	value := Constant{
+		Name:       node.Text,
+		Public:     containsKeywordBeforeName(tree, node, "pub", node.Text),
+		Span:       node.Span,
+		NameSpan:   node.NameSpan,
+		Attributes: lowerAttributes(tree, node),
+	}
+	for _, childID := range node.Children {
+		child, found := tree.Node(childID)
+		if !found {
+			continue
+		}
+		switch child.Kind {
+		case syntax.KindType:
+			value.Type = lowerType(tree, child)
+		default:
+			if child.Kind != syntax.KindAttribute {
+				value.Expression = lowerExpression(tree, childID)
+			}
+		}
+	}
+	return value
+}
+
+func lowerStaticAssertion(tree *syntax.Tree, node syntax.Node) StaticAssertion {
+	value := StaticAssertion{
+		Public:     containsKeywordBeforeName(tree, node, "pub", "static_assert"),
+		Span:       node.Span,
+		Attributes: lowerAttributes(tree, node),
+	}
+	for _, childID := range node.Children {
+		child, found := tree.Node(childID)
+		if found && child.Kind != syntax.KindAttribute {
+			value.Expression = lowerExpression(tree, childID)
+			break
+		}
+	}
+	return value
 }
 
 func lowerEnum(tree *syntax.Tree, node syntax.Node) Enum {

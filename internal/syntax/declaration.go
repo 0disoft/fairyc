@@ -78,6 +78,10 @@ func (p *parser) parseItem() NodeID {
 	switch p.currentText() {
 	case "const":
 		return p.parseConst(start, children)
+	case "static_assert":
+		if !p.isPreviousRevision() {
+			return p.parseStaticAssert(start, children)
+		}
 	case "struct":
 		return p.parseStruct(start, children)
 	case "resource":
@@ -141,6 +145,16 @@ func (p *parser) parseConst(start int, leading []NodeID) NodeID {
 	p.expect(";")
 	children := append(append([]NodeID(nil), leading...), typeID, expression)
 	return p.addNamedNode(KindConst, start, children, name, "", nameSpan)
+}
+
+func (p *parser) parseStaticAssert(start int, leading []NodeID) NodeID {
+	p.advance()
+	p.expect("(")
+	expression := p.parseExpression(0, true)
+	p.expect(")")
+	p.expect(";")
+	children := append(append([]NodeID(nil), leading...), expression)
+	return p.addNode(KindStaticAssert, start, children, "", "")
 }
 
 func (p *parser) parseStruct(start int, leading []NodeID) NodeID {

@@ -641,6 +641,31 @@ func TestPreviousRevisionAcceptsCompoundAssignment(t *testing.T) {
 	}
 }
 
+func TestParseStaticAssertAsCurrentContextualItem(t *testing.T) {
+	t.Parallel()
+	input := []byte("module main;\nstatic_assert((40 + 2) == 42);\nfn i32 static_assert() { return 42; }\n")
+	tree := Parse(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(tree.Diagnostics) != 0 {
+		t.Fatalf("Parse() diagnostics = %+v", tree.Diagnostics)
+	}
+	assertions := 0
+	for _, node := range tree.Nodes {
+		if node.Kind == KindStaticAssert {
+			assertions++
+		}
+	}
+	if assertions != 1 {
+		t.Fatalf("static assertion nodes = %d, want 1", assertions)
+	}
+	if reconstructed, ok := tree.Reconstruct(); !ok || !slices.Equal(reconstructed, input) {
+		t.Fatalf("Reconstruct() = %q, %v; want exact input", reconstructed, ok)
+	}
+	previous := ParsePreviousRevision(source.NewFile("main.fy", input), source.DefaultLimits())
+	if len(previous.Diagnostics) == 0 {
+		t.Fatal("ParsePreviousRevision() accepted current-only static_assert item")
+	}
+}
+
 func TestParseLexicalDeferLosslessly(t *testing.T) {
 	t.Parallel()
 	input := []byte("module main;\nfn void record(i32 value) {}\nfn i32 main() { defer record(42); return 42; }\n")

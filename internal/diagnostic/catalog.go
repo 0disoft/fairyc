@@ -23,6 +23,7 @@ const (
 	categoryRegion        = "Regions and arenas"
 	categoryResult        = "Option, Result, and propagation"
 	categoryUse           = "Return-value use obligations"
+	categoryCompileTime   = "Bounded compile-time evaluation"
 	categoryUnsafe        = "Unsafe and foreign boundaries"
 	categoryABI           = "Target layout and ABI"
 	categoryEffect        = "Effects and external capabilities"
@@ -78,6 +79,11 @@ var catalogEntries = []CatalogEntry{
 	{Code: "E4103", Category: categoryResult, Meaning: "`?` error type is incompatible with the enclosing return type."},
 	{Code: "E4201", Category: categoryUse, Meaning: "`@must_use` is malformed, duplicated, misplaced, or applied to an ineligible result."},
 	{Code: "E4202", Category: categoryUse, Meaning: "A resolved `@must_use` call result is ignored without explicit `discard`."},
+	{Code: "E4301", Category: categoryCompileTime, Meaning: "A module constant or `@const_eval` declaration is malformed, misplaced, public, or otherwise ineligible."},
+	{Code: "E4302", Category: categoryCompileTime, Meaning: "A well-typed expression is outside the admitted compile-time subset."},
+	{Code: "E4303", Category: categoryCompileTime, Meaning: "Compile-time evaluation traps on arithmetic, division, shift, or cast semantics."},
+	{Code: "E4304", Category: categoryCompileTime, Meaning: "A compile-time dependency cycle or deterministic evaluator budget prevents a result."},
+	{Code: "E4305", Category: categoryCompileTime, Meaning: "A module-level `static_assert` evaluates to false."},
 	{Code: "E5101", Category: categoryUnsafe, Meaning: "Raw-pointer or unchecked operation appears outside an unsafe boundary."},
 	{Code: "E5102", Category: categoryUnsafe, Meaning: "Raw foreign signature contains a safe reference."},
 	{Code: "E5103", Category: categoryUnsafe, Meaning: "Foreign unwind, exception, or `longjmp` may cross a Fairy C frame."},
