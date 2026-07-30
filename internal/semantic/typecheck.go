@@ -629,7 +629,10 @@ func (c *typeChecker) checkExpression(expression *ast.Expression, expected hir.T
 			actual = hir.TypeInvalid
 		}
 	case syntax.KindPath:
-		if symbol := c.analyzer.resolved[expression]; symbol != nil {
+		if expression.Text == sourceLocationPath {
+			c.analyzer.addDiagnostic("E4401", span(c.module.file.Path, expression.Span))
+			actual = hir.TypeInvalid
+		} else if symbol := c.analyzer.resolved[expression]; symbol != nil {
 			if value, constant := c.analyzer.constantValues[symbol]; constant {
 				result.Kind = string(syntax.KindLiteral)
 				result.Value = value.canonical()
@@ -1281,6 +1284,9 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 		return c.checkMethodCall(expression, result)
 	}
 	if calleeExpression != nil && calleeExpression.Kind == syntax.KindPath {
+		if calleeExpression.Text == sourceLocationPath {
+			return c.checkSourceLocation(expression, result)
+		}
 		if variant, ok := resultVariantPath(calleeExpression.Text); ok {
 			return c.checkResultConstructor(expression, result, expected, variant)
 		}

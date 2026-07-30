@@ -84,6 +84,8 @@ var catalogEntries = []CatalogEntry{
 	{Code: "E4303", Category: categoryCompileTime, Meaning: "Compile-time evaluation traps on arithmetic, division, shift, or cast semantics."},
 	{Code: "E4304", Category: categoryCompileTime, Meaning: "A compile-time dependency cycle or deterministic evaluator budget prevents a result."},
 	{Code: "E4305", Category: categoryCompileTime, Meaning: "A module-level `static_assert` evaluates to false."},
+	{Code: "E4401", Category: categoryResolution, Meaning: "The reserved `source_location` intrinsic name is declared, bound, or used without its exact call form."},
+	{Code: "E4402", Category: categorySyntax, Meaning: "A `source_location()` call has no valid canonical source path or exact retained line geometry."},
 	{Code: "E5101", Category: categoryUnsafe, Meaning: "Raw-pointer or unchecked operation appears outside an unsafe boundary."},
 	{Code: "E5102", Category: categoryUnsafe, Meaning: "Raw foreign signature contains a safe reference."},
 	{Code: "E5103", Category: categoryUnsafe, Meaning: "Foreign unwind, exception, or `longjmp` may cross a Fairy C frame."},

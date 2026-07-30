@@ -15,6 +15,8 @@ import (
 type Module struct {
 	Path             string
 	Span             diagnostic.Span
+	SourceSize       int
+	SourceLineStarts []int
 	Imports          []Import
 	Constants        []Constant
 	StaticAssertions []StaticAssertion
@@ -235,7 +237,18 @@ func Lower(tree *syntax.Tree) (*Module, error) {
 	if !found || root.Kind != syntax.KindSource {
 		return nil, errors.New("syntax tree has no source root")
 	}
-	module := &Module{Path: tree.Module, Span: root.Span}
+	lineStarts := []int{0}
+	for index, value := range tree.Source {
+		if value == '\n' {
+			lineStarts = append(lineStarts, index+1)
+		}
+	}
+	module := &Module{
+		Path:             tree.Module,
+		Span:             root.Span,
+		SourceSize:       len(tree.Source),
+		SourceLineStarts: lineStarts,
+	}
 	for _, childID := range root.Children {
 		child, ok := tree.Node(childID)
 		if !ok {

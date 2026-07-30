@@ -172,6 +172,9 @@ func (a *analyzer) declareConstants() {
 	for _, module := range a.moduleOrder {
 		for index := range module.file.Module.Constants {
 			constant := &module.file.Module.Constants[index]
+			if a.rejectSourceLocationName(module.file.Path, constant.Name, constant.NameSpan) {
+				continue
+			}
 			if previous := module.item(constant.Name); previous != nil {
 				a.addDiagnostic("E4301", span(module.file.Path, constant.NameSpan), RelatedSpan{
 					Role: "previous-declaration", Span: span(previous.source, previous.declaration),
@@ -367,6 +370,9 @@ func (a *analyzer) declareCallables() {
 
 func (a *analyzer) declareFunction(module *moduleScope, function *ast.Function) {
 	name := function.Name
+	if function.Owner == "" && a.rejectSourceLocationName(module.file.Path, name, function.NameSpan) {
+		return
+	}
 	if function.Owner != "" {
 		name = function.Owner + "::" + function.Name
 		if a.ownerSymbol(module, function.Owner) == nil {
@@ -402,6 +408,9 @@ func (a *analyzer) declareFunction(module *moduleScope, function *ast.Function) 
 }
 
 func (a *analyzer) declareForeignFunction(module *moduleScope, function *ast.ForeignFunction) {
+	if a.rejectSourceLocationName(module.file.Path, function.Name, function.NameSpan) {
+		return
+	}
 	if previous := module.item(function.Name); previous != nil {
 		code := "E0102"
 		if previous.kind == "constant" {
@@ -423,6 +432,9 @@ func (a *analyzer) declareForeignFunction(module *moduleScope, function *ast.For
 	parameters := make(map[string]diagnostic.Span, len(function.Parameters))
 	for parameterIndex := range function.Parameters {
 		parameter := &function.Parameters[parameterIndex]
+		if a.rejectSourceLocationName(module.file.Path, parameter.Name, parameter.NameSpan) {
+			continue
+		}
 		if previous, duplicate := parameters[parameter.Name]; duplicate {
 			a.addDiagnostic("E0102", span(module.file.Path, parameter.NameSpan), RelatedSpan{
 				Role: "previous-declaration", Span: span(module.file.Path, previous),
@@ -436,6 +448,9 @@ func (a *analyzer) declareForeignFunction(module *moduleScope, function *ast.For
 func (a *analyzer) resolveImports() {
 	for _, module := range a.moduleOrder {
 		for _, imported := range module.file.Module.Imports {
+			if a.rejectSourceLocationName(module.file.Path, imported.Alias, imported.AliasSpan) {
+				continue
+			}
 			if previous := module.item(imported.Alias); previous != nil {
 				a.addDiagnostic("E0102", span(module.file.Path, imported.AliasSpan), RelatedSpan{
 					Role: "previous-declaration",
@@ -470,6 +485,9 @@ func (a *analyzer) resolveFunction(module *moduleScope, function *ast.Function) 
 	parameters := &lexicalScope{names: make(map[string]*symbol)}
 	for index := range function.Parameters {
 		parameter := &function.Parameters[index]
+		if a.rejectSourceLocationName(module.file.Path, parameter.Name, parameter.NameSpan) {
+			continue
+		}
 		if previous, found := parameters.names[parameter.Name]; found {
 			a.addDiagnostic("E0102", span(module.file.Path, parameter.NameSpan), RelatedSpan{
 				Role: "previous-declaration",
@@ -520,6 +538,9 @@ func (a *analyzer) resolveBinding(module *moduleScope, scope *lexicalScope, bind
 		return
 	}
 	a.resolveExpression(module, scope, binding.Expression)
+	if a.rejectSourceLocationName(module.file.Path, binding.Name, binding.NameSpan) {
+		return
+	}
 	if previous, found := scope.names[binding.Name]; found {
 		a.addDiagnostic("E0102", span(module.file.Path, binding.NameSpan), RelatedSpan{
 			Role: "previous-declaration",
@@ -607,6 +628,9 @@ func (a *analyzer) resolveMatch(module *moduleScope, scope *lexicalScope, expres
 					if field == nil || field.Kind != syntax.KindField || field.Cooked == "" {
 						continue
 					}
+					if a.rejectSourceLocationName(module.file.Path, field.Cooked, field.Span) {
+						continue
+					}
 					if previous := armScope.names[field.Cooked]; previous != nil {
 						a.addDiagnostic("E0102", span(module.file.Path, field.Span), RelatedSpan{
 							Role: "previous-declaration", Span: span(previous.source, previous.declaration),
@@ -642,6 +666,10 @@ func (a *analyzer) resolveMatch(module *moduleScope, scope *lexicalScope, expres
 			a.resolveExpression(module, armScope, body)
 			continue
 		}
+		if a.rejectSourceLocationName(module.file.Path, binding.Text, binding.Span) {
+			a.resolveExpression(module, armScope, body)
+			continue
+		}
 		value := &symbol{
 			id:          a.allocateSymbol(),
 			packageID:   module.key.packageID,
@@ -662,6 +690,9 @@ func (a *analyzer) resolveRegion(module *moduleScope, scope *lexicalScope, expre
 		return
 	}
 	a.resolveExpression(module, scope, expression.Children[0])
+	if a.rejectSourceLocationName(module.file.Path, expression.Text, expression.Span) {
+		return
+	}
 	regionScope := &lexicalScope{parent: scope, names: make(map[string]*symbol)}
 	value := &symbol{id: a.allocateSymbol(), packageID: module.key.packageID, kind: "region", name: expression.Text, module: module.file.Module.Path, source: module.file.Path, declaration: expression.Span, typ: hir.TypeRegion}
 	regionScope.names[expression.Text] = value

@@ -35,6 +35,9 @@ func isBorrowedViewConstructorCall(expression *ast.Expression) bool {
 }
 
 func isCompilerBuiltinPath(value string) bool {
+	if value == sourceLocationPath {
+		return true
+	}
 	if isBuiltinVariantPath(value) {
 		return true
 	}

@@ -80,6 +80,8 @@ Diagnostic codes are stable identifiers for a semantic category. Exact wording a
 | `E4303` | Compile-time evaluation traps on arithmetic, division, shift, or cast semantics. |
 | `E4304` | A compile-time dependency cycle or deterministic evaluator budget prevents a result. |
 | `E4305` | A module-level `static_assert` evaluates to false. |
+| `E4401` | The reserved `source_location` intrinsic name is declared, bound, or used without its exact call form. |
+| `E4402` | A `source_location()` call has no valid canonical source path or exact retained line geometry. |
 | `E5101` | Raw-pointer or unchecked operation appears outside an unsafe boundary. |
 | `E5102` | Raw foreign signature contains a safe reference. |
 | `E5103` | Foreign unwind, exception, or `longjmp` may cross a Fairy C frame. |

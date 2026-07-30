@@ -367,7 +367,7 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 	}
 	switch expression.Kind {
 	case syntax.KindLiteral:
-		if isStaticBorrowLiteral(expression) && f.expressionReturnsBorrow(expression) {
+		if isStaticBorrowExpression(expression) && f.expressionReturnsBorrow(expression) {
 			origin := flowOrigin{name: "Static", declaration: span(f.module.file.Path, expression.Span)}
 			return borrowValueState{
 				known: true, origins: []flowOrigin{origin},
@@ -430,6 +430,13 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 	case syntax.KindWhile:
 		return f.evaluateWhile(expression, environment)
 	case syntax.KindCall:
+		if isStaticBorrowExpression(expression) && f.expressionReturnsBorrow(expression) {
+			origin := flowOrigin{name: "Static", declaration: span(f.module.file.Path, expression.Span)}
+			return borrowValueState{
+				known: true, origins: []flowOrigin{origin},
+				pending: []pendingBorrowLoan{{borrow: span(f.module.file.Path, expression.Span), kind: "shared", origin: origin}},
+			}, true
+		}
 		if isBorrowedViewConstructorCall(expression) {
 			if len(expression.Children) != 4 {
 				return borrowValueState{known: false}, true

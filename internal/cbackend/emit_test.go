@@ -101,6 +101,32 @@ fn i32 main() { return ANSWER; }
 	}
 }
 
+func TestEmitSourceLocationAsOrdinaryStaticUTF8Literal(t *testing.T) {
+	t.Parallel()
+	sourceText := `module main;
+fn i32 main() {
+    let ref str location = source_location();
+    return if (location.len == 0) { 42 } else { 1 };
+}
+`
+	start := strings.Index(sourceText, "source_location")
+	lineStart := strings.LastIndex(sourceText[:start], "\n") + 1
+	location := fmt.Sprintf("main.fy:3:%d@%d", start-lineStart+1, start)
+	sourceText = strings.Replace(sourceText, "location.len == 0", fmt.Sprintf("location.len == %d", len(location)), 1)
+	program := lowerSource(t, sourceText)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("interpreter = %+v, %v", outcome, err)
+	}
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	if strings.Contains(unit.Source, "source_location") || !slices.Contains(unit.Features, "static-utf8-string") {
+		t.Fatalf("generated C leaked intrinsic spelling or missed static UTF-8 transport:\n%s", unit.Source)
+	}
+}
+
 func TestEmitRetainedNonEntryFunctionIsReferencedByGeneratedMain(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main;\nfn i32 dormant() { return 7; }\nfn i32 main() { return 42; }\n")

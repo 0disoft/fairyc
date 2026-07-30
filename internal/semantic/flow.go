@@ -105,7 +105,7 @@ func (a *analyzer) expressionOrigins(module *moduleScope, expression *ast.Expres
 	}
 	switch expression.Kind {
 	case syntax.KindLiteral:
-		if isStaticBorrowLiteral(expression) {
+		if isStaticBorrowExpression(expression) {
 			return []flowOrigin{{
 				name:        "Static",
 				declaration: span(module.file.Path, expression.Span),
@@ -141,6 +141,12 @@ func (a *analyzer) expressionOrigins(module *moduleScope, expression *ast.Expres
 		}
 		return compactOrigins(result)
 	case syntax.KindCall:
+		if isStaticBorrowExpression(expression) {
+			return []flowOrigin{{
+				name:        "Static",
+				declaration: span(module.file.Path, expression.Span),
+			}}
+		}
 		if isBorrowedViewConstructorCall(expression) && len(expression.Children) == 4 {
 			return a.expressionOrigins(module, expression.Children[1], origins)
 		}
@@ -290,9 +296,10 @@ func isBorrowExpression(expression *ast.Expression) bool {
 		(expression.Text == "&" || expression.Text == "&mut") && len(expression.Children) == 1
 }
 
-func isStaticBorrowLiteral(expression *ast.Expression) bool {
-	return expression != nil && expression.Kind == syntax.KindLiteral &&
-		(strings.HasPrefix(expression.Text, "\"") || strings.HasPrefix(expression.Text, "b\"") || strings.HasPrefix(expression.Text, "c\""))
+func isStaticBorrowExpression(expression *ast.Expression) bool {
+	return expression != nil && (expression.Kind == syntax.KindLiteral &&
+		(strings.HasPrefix(expression.Text, "\"") || strings.HasPrefix(expression.Text, "b\"") || strings.HasPrefix(expression.Text, "c\"")) ||
+		isSourceLocationCall(expression))
 }
 
 func borrowKind(operator string) string {
