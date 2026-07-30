@@ -3,24 +3,29 @@ package pecoff
 import (
 	"bytes"
 	"debug/pe"
+	"encoding/binary"
 	"fmt"
 	"strings"
 )
 
 const (
-	coffFileHeaderBytes       = 20
-	coffSectionHeaderBytes    = 40
-	coffRelocationBytes       = 10
-	maxObjectSections         = 4096
-	sectionRelocationOverflow = 0x01000000
-	sectionLinkCOMDAT         = 0x00001000
-	coffStorageClassStatic    = 3
-	coffCOMDATNoDuplicates    = 1
-	coffCOMDATAny             = 2
-	coffCOMDATSameSize        = 3
-	coffCOMDATExactMatch      = 4
-	coffCOMDATAssociative     = 5
-	coffCOMDATLargest         = 6
+	coffFileHeaderBytes          = 20
+	coffSectionHeaderBytes       = 40
+	coffRelocationBytes          = 10
+	maxObjectSections            = 4096
+	sectionRelocationOverflow    = 0x01000000
+	sectionLinkCOMDAT            = 0x00001000
+	coffStorageClassStatic       = 3
+	coffStorageClassWeakExternal = 105
+	coffCOMDATNoDuplicates       = 1
+	coffCOMDATAny                = 2
+	coffCOMDATSameSize           = 3
+	coffCOMDATExactMatch         = 4
+	coffCOMDATAssociative        = 5
+	coffCOMDATLargest            = 6
+	coffWeakSearchNoLibrary      = 1
+	coffWeakSearchLibrary        = 2
+	coffWeakSearchAlias          = 3
 )
 
 const (
@@ -47,6 +52,9 @@ const (
 	ObjectCOMDATExactMatch        uint8  = coffCOMDATExactMatch
 	ObjectCOMDATAssociative       uint8  = coffCOMDATAssociative
 	ObjectCOMDATLargest           uint8  = coffCOMDATLargest
+	ObjectWeakSearchNoLibrary     uint32 = coffWeakSearchNoLibrary
+	ObjectWeakSearchLibrary       uint32 = coffWeakSearchLibrary
+	ObjectWeakSearchAlias         uint32 = coffWeakSearchAlias
 )
 
 // ObjectSection is one bounded COFF object section receipt.
@@ -60,16 +68,19 @@ type ObjectSection struct {
 	AssociativeSection int
 }
 
-// ObjectSymbol is one primary COFF symbol receipt. Auxiliary records stay structural metadata and
-// cannot be relocation targets.
+// ObjectSymbol is one primary COFF symbol receipt. Supported auxiliary records contribute bounded
+// metadata to the primary symbol but can never be relocation targets themselves.
 type ObjectSymbol struct {
-	TableIndex       uint32
-	Name             string
-	Value            uint32
-	SectionNumber    int16
-	Type             uint16
-	StorageClass     uint8
-	AuxiliaryRecords uint8
+	TableIndex        uint32
+	Name              string
+	Value             uint32
+	SectionNumber     int16
+	Type              uint16
+	StorageClass      uint8
+	AuxiliaryRecords  uint8
+	WeakFallbackIndex uint32
+	WeakFallback      string
+	WeakSearch        uint32
 }
 
 // ObjectRelocation identifies one object-section relocation and its primary symbol target.
@@ -129,7 +140,7 @@ func InspectObject(object []byte) (ObjectReport, error) {
 		Symbols:         make([]string, 0, len(file.Symbols)),
 		SymbolRecords:   make([]ObjectSymbol, 0, len(file.Symbols)),
 	}
-	primarySymbols, err := inspectPrimaryCOFFSymbols(file)
+	primarySymbols, err := inspectPrimaryCOFFSymbols(file, object)
 	if err != nil {
 		return ObjectReport{}, err
 	}
@@ -233,7 +244,7 @@ type inspectedCOFFSymbols struct {
 	byTableIndex map[uint32]ObjectSymbol
 }
 
-func inspectPrimaryCOFFSymbols(file *pe.File) (inspectedCOFFSymbols, error) {
+func inspectPrimaryCOFFSymbols(file *pe.File, object []byte) (inspectedCOFFSymbols, error) {
 	if len(file.Symbols) == 0 || len(file.COFFSymbols) == 0 {
 		return inspectedCOFFSymbols{}, fmt.Errorf("COFF object has no symbol table")
 	}
@@ -262,6 +273,50 @@ func inspectPrimaryCOFFSymbols(file *pe.File) (inspectedCOFFSymbols, error) {
 		result.records = append(result.records, record)
 		result.byTableIndex[uint32(index)] = record
 		index = auxiliaryEnd
+	}
+	for index := range result.records {
+		record := &result.records[index]
+		if record.StorageClass == coffStorageClassExternal && record.SectionNumber == 0 && record.Value == 0 && record.AuxiliaryRecords != 0 {
+			return inspectedCOFFSymbols{}, fmt.Errorf("COFF object undefined external %q uses unsupported auxiliary records", record.Name)
+		}
+		if record.StorageClass != coffStorageClassWeakExternal {
+			continue
+		}
+		if record.SectionNumber != 0 || record.Value != 0 {
+			return inspectedCOFFSymbols{}, fmt.Errorf("COFF object weak external %q must be undefined with value zero", record.Name)
+		}
+		if record.AuxiliaryRecords != 1 {
+			return inspectedCOFFSymbols{}, fmt.Errorf("COFF object weak external %q has %d auxiliary records, want exactly 1", record.Name, record.AuxiliaryRecords)
+		}
+		auxiliaryOffset := uint64(file.FileHeader.PointerToSymbolTable) + uint64(record.TableIndex+1)*18
+		if auxiliaryOffset+18 > uint64(len(object)) {
+			return inspectedCOFFSymbols{}, fmt.Errorf("COFF object weak external %q auxiliary record is out of range", record.Name)
+		}
+		auxiliary := object[auxiliaryOffset : auxiliaryOffset+18]
+		fallbackIndex := binary.LittleEndian.Uint32(auxiliary)
+		search := binary.LittleEndian.Uint32(auxiliary[4:])
+		if search < coffWeakSearchNoLibrary || search > coffWeakSearchAlias {
+			return inspectedCOFFSymbols{}, fmt.Errorf("COFF object weak external %q has invalid search characteristic %d", record.Name, search)
+		}
+		if !bytes.Equal(auxiliary[8:], make([]byte, 10)) {
+			return inspectedCOFFSymbols{}, fmt.Errorf("COFF object weak external %q has nonzero reserved bytes", record.Name)
+		}
+		fallback, found := result.byTableIndex[fallbackIndex]
+		if !found {
+			if uint64(fallbackIndex) >= uint64(len(file.COFFSymbols)) {
+				return inspectedCOFFSymbols{}, fmt.Errorf("COFF object weak external %q references missing fallback symbol %d", record.Name, fallbackIndex)
+			}
+			return inspectedCOFFSymbols{}, fmt.Errorf("COFF object weak external %q references auxiliary fallback symbol %d", record.Name, fallbackIndex)
+		}
+		if fallback.TableIndex == record.TableIndex {
+			return inspectedCOFFSymbols{}, fmt.Errorf("COFF object weak external %q references itself", record.Name)
+		}
+		record.WeakFallbackIndex = fallbackIndex
+		record.WeakFallback = fallback.Name
+		record.WeakSearch = search
+	}
+	for _, record := range result.records {
+		result.byTableIndex[record.TableIndex] = record
 	}
 	return result, nil
 }

@@ -279,13 +279,15 @@ runtime-function entry in those same executions. ADR 0236 adds two contributed A
 parents with distinct unwind children, binds the selected owner, and requires the losing payload to
 be absent from every runtime-function reference and file-backed final section. ADR 0237 adds one
 exact generated object and binds `REL32` through `REL32_5` to their distinct
-`S + A - (P + 4 + n)` final-image formulas at both profiles. ADR 0238 adds exact `/Z7`
+`S + A - (P + 4 + n)` final-image formulas at both profiles. ADR 0241 adds exact storage-class-105
+weak aliases and proves both an object-local fallback and a `target.obj` strong override through
+their final REL32 values and native results. ADR 0238 adds exact `/Z7`
 function-targeted CodeView `SECREL`/`SECTION` pairs and binds each final PE RSDS identity to its
 ephemeral MSF 7 PDB. ADR 0239 independently resolves that exact source function and its `caller.c`
 line through system DbgHelp at both profiles. ADR 0240 additionally binds the native unwind frame's
 low `__GSHandlerCheck_SEH` and optimized `__C_specific_handler` tail relocations through exact map
 rows to executable final RVAs. It still does not define exported/imported product symbols,
-remaining relocation formulas, chained-tail relocations, non-unwind or broader archive retention and COMDAT policies, complete `.pdata`/`.xdata`
+remaining relocation formulas and weak search modes, chained-tail relocations, non-unwind or broader archive retention and COMDAT policies, complete `.pdata`/`.xdata`
 content, complete CodeView/PDB record semantics or broader symbolication, or a fresh hosted same-commit object receipt, so
 `pe-coff-object-fixtures` remains missing.
 

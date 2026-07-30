@@ -14,6 +14,9 @@ func TestGenerateReturnsClosedDeterministicREL32Probe(t *testing.T) {
 	}
 	if first.SourceSymbol != SourceSymbol || first.TargetSymbol != TargetSymbol ||
 		first.VariantObject != VariantObject || first.VariantSource != VariantSource || first.VariantTarget != VariantTarget ||
+		first.WeakObject != WeakObject || first.WeakFallbackEntry != WeakFallbackEntry || first.WeakOverrideEntry != WeakOverrideEntry ||
+		first.WeakMissing != WeakMissing || first.WeakOverride != WeakOverride ||
+		first.WeakMissingFallback != WeakMissingFallback || first.WeakOverrideFallback != WeakOverrideFallback ||
 		first.ReceiptSection != ReceiptSection || first.ReceiptMagic != ReceiptMagic ||
 		first.SourceLine != SourceLine || first.ExpectedExit != ExpectedExit {
 		t.Fatalf("Generate() identity = %+v", first)
@@ -28,7 +31,9 @@ func TestGenerateReturnsClosedDeterministicREL32Probe(t *testing.T) {
 		"#pragma section(\".fyreloc\", read)",
 		"__declspec(allocate(\".fyreloc\"))",
 		"fy_rel32_source(40) != 42",
-		"fy_vsrc() == 42",
+		"fy_vsrc() != 42",
+		"fy_wfb_e() != 17",
+		"fy_wov_e() == 29",
 	} {
 		if !strings.Contains(first.CallerSource, fragment) {
 			t.Fatalf("caller source is missing %q", fragment)
@@ -39,5 +44,8 @@ func TestGenerateReturnsClosedDeterministicREL32Probe(t *testing.T) {
 	}
 	if !strings.Contains(first.TargetSource, "__declspec(noinline) int fy_vdst") {
 		t.Fatal("target source lost the REL32 variant target")
+	}
+	if !strings.Contains(first.TargetSource, "__declspec(noinline) int fy_wovr") {
+		t.Fatal("target source lost the weak-external strong override")
 	}
 }

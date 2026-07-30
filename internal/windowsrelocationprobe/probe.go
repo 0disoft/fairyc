@@ -2,17 +2,24 @@
 package windowsrelocationprobe
 
 const (
-	SourceSymbol   = "fy_rel32_source"
-	TargetSymbol   = "fy_rel32_target"
-	ReceiptSymbol  = "fy_rel32_receipt"
-	SourceObject   = "caller.obj"
-	TargetObject   = "target.obj"
-	VariantObject  = "variants.obj"
-	VariantSource  = "fy_vsrc"
-	VariantTarget  = "fy_vdst"
-	ReceiptSection = ".fyreloc"
-	SourceLine     = uint32(9)
-	ExpectedExit   = int32(0)
+	SourceSymbol         = "fy_rel32_source"
+	TargetSymbol         = "fy_rel32_target"
+	ReceiptSymbol        = "fy_rel32_receipt"
+	SourceObject         = "caller.obj"
+	TargetObject         = "target.obj"
+	VariantObject        = "variants.obj"
+	VariantSource        = "fy_vsrc"
+	VariantTarget        = "fy_vdst"
+	WeakObject           = "weak.obj"
+	WeakFallbackEntry    = "fy_wfb_e"
+	WeakOverrideEntry    = "fy_wov_e"
+	WeakMissing          = "fy_wmiss"
+	WeakOverride         = "fy_wovr"
+	WeakMissingFallback  = "fy_mfbk"
+	WeakOverrideFallback = "fy_ofbk"
+	ReceiptSection       = ".fyreloc"
+	SourceLine           = uint32(11)
+	ExpectedExit         = int32(0)
 )
 
 var ReceiptMagic = [16]byte{'F', 'Y', 'R', 'E', 'L', '3', '2', '-', 'L', 'I', 'N', 'K', '-', 'V', '0', '!'}
@@ -20,20 +27,27 @@ var ReceiptMagic = [16]byte{'F', 'Y', 'R', 'E', 'L', '3', '2', '-', 'L', 'I', 'N
 // Unit contains separately compiled caller and target translation units plus the link receipt
 // identity consumed by the PE/COFF inspector.
 type Unit struct {
-	CallerSource   string
-	TargetSource   string
-	SourceSymbol   string
-	TargetSymbol   string
-	ReceiptSymbol  string
-	SourceObject   string
-	TargetObject   string
-	VariantObject  string
-	VariantSource  string
-	VariantTarget  string
-	ReceiptSection string
-	ReceiptMagic   [16]byte
-	SourceLine     uint32
-	ExpectedExit   int32
+	CallerSource         string
+	TargetSource         string
+	SourceSymbol         string
+	TargetSymbol         string
+	ReceiptSymbol        string
+	SourceObject         string
+	TargetObject         string
+	VariantObject        string
+	VariantSource        string
+	VariantTarget        string
+	WeakObject           string
+	WeakFallbackEntry    string
+	WeakOverrideEntry    string
+	WeakMissing          string
+	WeakOverride         string
+	WeakMissingFallback  string
+	WeakOverrideFallback string
+	ReceiptSection       string
+	ReceiptMagic         [16]byte
+	SourceLine           uint32
+	ExpectedExit         int32
 }
 
 // Generate returns deterministic C11 sources. The caller retains one direct cross-object call and
@@ -44,6 +58,9 @@ func Generate() Unit {
 		SourceSymbol: SourceSymbol, TargetSymbol: TargetSymbol,
 		ReceiptSymbol: ReceiptSymbol, SourceObject: SourceObject, TargetObject: TargetObject,
 		VariantObject: VariantObject, VariantSource: VariantSource, VariantTarget: VariantTarget,
+		WeakObject: WeakObject, WeakFallbackEntry: WeakFallbackEntry, WeakOverrideEntry: WeakOverrideEntry,
+		WeakMissing: WeakMissing, WeakOverride: WeakOverride,
+		WeakMissingFallback: WeakMissingFallback, WeakOverrideFallback: WeakOverrideFallback,
 		ReceiptSection: ReceiptSection, ReceiptMagic: ReceiptMagic, SourceLine: SourceLine, ExpectedExit: ExpectedExit,
 	}
 }
@@ -55,6 +72,8 @@ typedef int (__cdecl *fy_rel32_function)(int);
 
 extern int fy_rel32_target(int value);
 extern int fy_vsrc(void);
+extern int fy_wfb_e(void);
+extern int fy_wov_e(void);
 
 __declspec(noinline) int fy_rel32_source(int value) {
     volatile int observed = fy_rel32_target(value);
@@ -82,7 +101,13 @@ int main(void) {
     if (fy_rel32_source(40) != 42) {
         return 12;
     }
-    return fy_vsrc() == 42 ? 0 : 13;
+    if (fy_vsrc() != 42) {
+        return 13;
+    }
+    if (fy_wfb_e() != 17) {
+        return 14;
+    }
+    return fy_wov_e() == 29 ? 0 : 15;
 }
 `
 
@@ -93,5 +118,9 @@ __declspec(noinline) int fy_rel32_target(int value) {
 
 __declspec(noinline) int fy_vdst(int value) {
     return value + 2;
+}
+
+__declspec(noinline) int fy_wovr(void) {
+    return 29;
 }
 `

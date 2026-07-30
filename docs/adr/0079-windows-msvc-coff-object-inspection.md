@@ -44,7 +44,8 @@ without retaining build debris.
    three unwind `.pdata` ADDR32NB relocations to final-image values, and ADR 0235 binds one selected
    function parent to its direct associative `.pdata` and `.xdata` children. ADR 0236 proves one
    losing ANY-COMDAT function's distinct unwind payload is absent. ADR 0240 proves one
-   profile-specific handler-tail relocation. Other relocation formulas, non-unwind and broader
+   profile-specific handler-tail relocation. ADR 0241 proves one weak `SEARCH_ALIAS` fallback and
+   one strong override. Other relocation formulas and weak search modes, non-unwind and broader
    archive/COMDAT policies, chained-tail relocations, complete CodeView/PDB record semantics and symbolication, compiler baselines, and a fresh
    hosted same-commit object receipt remain separate gates.
 

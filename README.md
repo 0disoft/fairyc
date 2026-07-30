@@ -377,7 +377,11 @@ hosted API compatibility, signing, installation, or distribution. The same packa
 intermediate MSVC `.obj` before its temporary build root is removed. It requires raw AMD64 COFF,
 bounded section and relocation ranges, readable executable `.text` or `.text$...` code, valid
 relocation symbol indexes, and a nonempty symbol table while admitting raw-storage-free `.bss`.
-This is structural live-object evidence, not a versioned symbol/relocation fixture or unwind proof.
+One exact generated object now adds two storage-class-105 weak `SEARCH_ALIAS` records: the missing
+name selects its object-local fallback, while a strong `target.obj` definition overrides the other
+fallback. Both final REL32 values and native results are checked at low and optimized profiles.
+Other weak search modes and a versioned weak-object fixture remain open. This is structural and
+closed link evidence, not a public object format or source-level weak declaration.
 The linked-image inspector now also follows the exception data directory into `.pdata` and its
 referenced unwind records. It validates sorted nonoverlapping executable `RUNTIME_FUNCTION` ranges,
 DWORD-aligned file-backed unwind RVAs, version/flag/frame/prolog structure, bounded v1 unwind-code

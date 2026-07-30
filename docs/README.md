@@ -50,6 +50,7 @@
 - Exact MSVC CodeView SECTION/SECREL object-pair and final PE/PDB identity proof: internal/pecoff/codeview_relocations.go, internal/pecoff/program_database.go, internal/windowsrelocationprobe/, docs/adr/0238-msvc-codeview-section-secrel-and-pdb-association.md
 - Exact Windows DbgHelp function-and-source-line symbolication canary: cmd/fairyc-windows-host-smoke/symbolication_windows.go, cmd/fairyc-windows-host-smoke/symbolication.go, docs/adr/0239-windows-dbghelp-symbolication-canary.md
 - Exact profile-specific AMD64 unwind-handler ADDR32NB object-to-image proof: internal/pecoff/handler_link.go, internal/windowsunwindprobe/, docs/adr/0240-amd64-unwind-handler-relocation-proof.md
+- Exact AMD64 weak-external SEARCH_ALIAS fallback/strong-override proof: internal/pecoff/weak_external_object.go, internal/pecoff/weak_external_link.go, internal/windowsrelocationprobe/, docs/adr/0241-amd64-weak-external-link-proof.md
 - Exact MSVC archive extraction and pick-any COMDAT final-selection proof: internal/pecoff/archive.go, internal/pecoff/archive_link.go, internal/windowsarchiveprobe/, docs/adr/0233-msvc-archive-and-comdat-selection-proof.md
 - Exact selected-parent associative `.pdata`/`.xdata` COMDAT proof: internal/pecoff/associative_link.go, internal/windowsarchiveprobe/, docs/adr/0235-selected-associative-comdat-unwind-proof.md
 - Exact discarded-parent associative unwind elimination proof: internal/pecoff/discarded_associative_link.go, internal/windowsarchiveprobe/, docs/adr/0236-discarded-associative-comdat-elimination-proof.md

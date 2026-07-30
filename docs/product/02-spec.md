@@ -451,7 +451,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   runtime-function references and file-backed sections. ADR 0237 adds one exact generated object;
   each of its `REL32` through `REL32_5` records must have one exact target and satisfy
   `S + A - (P + 4 + n)` in the low and optimized final images while its trailing marker bytes stay
-  unchanged. ADR 0238 compiles the two C inputs with `/Z7`, requires exact function-targeted
+  unchanged. ADR 0241 adds a second exact generated object with two weak `SEARCH_ALIAS` records.
+  One absent name must select its object-local fallback and one present name must select the strong
+  definition in `target.obj`; both final REL32 values and both native return values must agree at
+  low and optimized profiles. ADR 0238 compiles the two C inputs with `/Z7`, requires exact function-targeted
   `.debug$S` `SECREL`/`SECTION` pairs and object-level formulas, and binds the final PE RSDS GUID/age
   to the bounded MSF 7 PDB information stream at both profiles. ADR 0239 then requires system
   DbgHelp to resolve the exact source-function start to its name and `caller.c` line with zero

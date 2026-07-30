@@ -261,7 +261,9 @@ archive links. ADR 0236 proves both ANY-COMDAT function parents contributed, bin
 requires the losing unwind payload to be absent from every final reference and file-backed section.
 ADR 0240 additionally binds the low `__GSHandlerCheck_SEH` and optimized
 `__C_specific_handler` unwind tails from `frame.obj` through exact MSVC map rows to executable
-final-image RVAs before the native exception probe runs. Other relocation formulas and chained
+final-image RVAs before the native exception probe runs. ADR 0241 reuses the relocation images to
+bind one missing weak alias to its local fallback and one present alias to a strong `target.obj`
+definition, then executes both paths. Other relocation formulas and weak search modes, and chained
 unwind tails, non-unwind and broader archive/COMDAT
 selection and retention modes,
 debug data, and a fresh hosted same-commit object receipt remain unconfigured.

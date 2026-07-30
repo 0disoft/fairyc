@@ -324,6 +324,10 @@ ADR 0240 keeps the profile-specific handler names, raw tail-addend report, MSVC 
 RVA comparison equally private. Those identities may evolve with synchronized probe, inspector,
 mutation, and evidence updates; they do not stabilize a Fairy exception ABI, object format, runtime
 library owner, linker interface, or security-setting contract.
+ADR 0241 keeps the generated weak-object names and bytes, storage class, fallback indexes, search
+characteristic, map owners, and selection report private. They may evolve with synchronized
+generator, inspector, mutation, and native evidence; they do not admit source-level weak
+declarations, arbitrary prebuilt objects, or a public object/linker compatibility promise.
 Microsoft x64 unwind inspection is likewise an internal validation policy. Neither the observed
 runtime-function count nor version-1/version-2 mix is stable. Future semantic epilog, handler,
 or chain fixtures require an explicit unwind-contract decision before they can become target
