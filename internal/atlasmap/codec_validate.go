@@ -300,7 +300,7 @@ func validateTransportHeader(header Header) (map[string]string, map[string]strin
 			selfReferenceFound = reference.Coordinate == header.PackageCoordinate && reference.UID == header.PackageUID
 			continue
 		}
-		if !slices.Contains(header.Dependencies, reference.Instance) {
+		if _, directDependency := slices.BinarySearch(header.Dependencies, reference.Instance); !directDependency {
 			return nil, nil, fmt.Errorf("package reference %q is not a direct dependency", reference.Instance)
 		}
 	}
