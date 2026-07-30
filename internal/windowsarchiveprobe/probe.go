@@ -90,7 +90,9 @@ const chosenSource = `/* fairyc Microsoft archive and COMDAT proof: demanded arc
 extern const __declspec(selectany) int fy_pick_any_value = 17;
 
 __declspec(noinline) int fy_archive_target(int value) {
-    return value + 1;
+    volatile int unwind_slots[8];
+    unwind_slots[0] = value;
+    return unwind_slots[0] + 1;
 }
 `
 

@@ -2508,6 +2508,18 @@ func runWindowsArchiveProbe(toolchain cdriver.WindowsHostToolchain) (int, error)
 				(report.COMDATOwner != "archive" && report.COMDATOwner != "direct") || report.TargetRVA == 0 || report.COMDATRVA == 0 {
 				return executions, fmt.Errorf("Windows MSVC archive probe %s/%s returned an incomplete selection receipt", profile.Name, artifact.Variant)
 			}
+			association, err := pecoff.InspectAssociativeCOMDATUnwindLink(
+				artifact.Objects[1].Bytes, artifact.Bytes, artifact.LinkMap, pecoff.AssociativeCOMDATUnwindSpec{
+					ArchiveName: unit.ArchiveName, SourceMember: unit.SelectedMember, SourceSymbol: unit.DemandSymbol,
+				},
+			)
+			if err != nil {
+				return executions, fmt.Errorf("inspect Windows MSVC associative COMDAT unwind selection with %s/%s: %w", profile.Name, artifact.Variant, err)
+			}
+			if association.ParentSectionIndex <= 0 || association.PDataSectionIndex <= 0 || association.XDataSectionIndex <= 0 ||
+				association.FinalEndRVA <= association.FinalBeginRVA || association.FinalUnwindRVA == 0 {
+				return executions, fmt.Errorf("Windows MSVC archive probe %s/%s returned an incomplete associative COMDAT receipt", profile.Name, artifact.Variant)
+			}
 			outcome, err := cdriver.ExecuteWindowsMSVCArchiveProbe(artifact)
 			if err != nil {
 				return executions, fmt.Errorf("execute Windows MSVC archive probe with %s/%s: %w", profile.Name, artifact.Variant, err)

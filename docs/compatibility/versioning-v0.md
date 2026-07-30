@@ -302,6 +302,10 @@ ADR 0234 likewise keeps relocation section indexes, the private ADDR64/ADDR32NB 
 rows, `$LN...` alias handling, and `.fyreloc` receipt compiler-private. They may change with the
 inspector, probe, mutations, and evidence docs and do not version the target ABI, object format,
 unwind ABI, or any serialized Fairy artifact.
+ADR 0235 applies that internal-policy boundary to the selected-parent associative unwind report,
+direct `.pdata`/`.xdata` section relationships, map-owner check, and final runtime-function binding.
+Those receipts may evolve with synchronized inspectors, probes, mutations, and evidence docs; they
+do not define a public COMDAT policy, unwind artifact, linker API, or serialized Fairy contract.
 Microsoft x64 unwind inspection is likewise an internal validation policy. Neither the observed
 runtime-function count nor version-1/version-2 mix is stable. Future semantic epilog, handler,
 or chain fixtures require an explicit unwind-contract decision before they can become target

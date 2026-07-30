@@ -272,8 +272,11 @@ preferred index to name the demanded and unused members, reads both candidate ob
 requires the unused sentinel to live in a non-COMDAT executable section and remain absent from the
 final map, and binds the exact MSVC map owner for the demanded archive function and one pick-any
 COMDAT to their final PE addresses and candidate value across four input-order executions. It
+also carries ADR 0235's selected function root through its direct associative `.pdata` and `.xdata`
+children, all three raw `.pdata` addends, exact archive-member map owners, and unique final
+runtime-function entry in those same executions. It
 still does not define exported/imported product symbols, remaining relocation formulas, handler or
-chained-tail relocations, broader archive retention or COMDAT policies, complete `.pdata`/`.xdata`
+chained-tail relocations, discarded-parent or broader archive retention and COMDAT policies, complete `.pdata`/`.xdata`
 content, or a fresh hosted same-commit object receipt, so
 `pe-coff-object-fixtures` remains missing.
 
@@ -354,7 +357,7 @@ The planned transport matrix uses Clang as the primary compiler and GCC as an in
 
 ## Later profiles
 
-`x86_64-linux-musl` needs a separate libc, startup, sysroot, dynamic-loader, and static-distribution profile even though its CPU ABI is SysV-derived. The declared `x86_64-windows-msvc` TargetSpec still needs complete executable LLP64 layout coverage plus hosted evidence, independent or register-inspected four-slot call evidence, broader and bidirectional source-level Fairy crossings, a fresh hosted receipt for the exact synthetic COFF fixture and strengthened live-object/archive inspectors, remaining relocation formulas and unwind tails, broader archive/COMDAT policies, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, complete UCRT/VCRuntime and deployment evidence, and debug fixtures before any maturity promotion.
+`x86_64-linux-musl` needs a separate libc, startup, sysroot, dynamic-loader, and static-distribution profile even though its CPU ABI is SysV-derived. The declared `x86_64-windows-msvc` TargetSpec still needs complete executable LLP64 layout coverage plus hosted evidence, independent or register-inspected four-slot call evidence, broader and bidirectional source-level Fairy crossings, a fresh hosted receipt for the exact synthetic COFF fixture and strengthened live-object/archive inspectors, remaining relocation formulas and unwind tails, discarded-parent and broader archive/COMDAT policies, complete version-2/handler/chain and Fairy/foreign-frame unwind fixtures, complete UCRT/VCRuntime and deployment evidence, and debug fixtures before any maturity promotion.
 
 ## External references
 

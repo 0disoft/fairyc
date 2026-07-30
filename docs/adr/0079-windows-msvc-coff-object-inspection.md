@@ -40,9 +40,10 @@ without retaining build debris.
 8. This decision alone does not clear `pe-coff-object-fixtures`. ADR 0231 later adds versioned local
    fixtures for exact ordered primary symbols, AMD64 relocation types, and ANY and associative
    COMDAT selection. ADR 0232 later proves one linked REL32 calculation, ADR 0233 separately proves
-   one archive extraction plus pick-any COMDAT final owner, and ADR 0234 binds one ADDR64 plus all
-   three unwind `.pdata` ADDR32NB relocations to final-image values. Other relocation formulas,
-   broader archive/COMDAT policies, handler and chained-tail relocations, CodeView/PDB, compiler baselines, and a fresh
+   one archive extraction plus pick-any COMDAT final owner, ADR 0234 binds one ADDR64 plus all
+   three unwind `.pdata` ADDR32NB relocations to final-image values, and ADR 0235 binds one selected
+   function parent to its direct associative `.pdata` and `.xdata` children. Other relocation formulas,
+   discarded-parent and broader archive/COMDAT policies, handler and chained-tail relocations, CodeView/PDB, compiler baselines, and a fresh
    hosted same-commit object receipt remain separate gates.
 
 ## Consequences

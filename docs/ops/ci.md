@@ -255,7 +255,9 @@ indexed archive member, requires the unused non-COMDAT sentinel to be absent, an
 COMDAT map owner to its final PE address and value across four low/optimized input-order executions.
 ADR 0234 preserves exact object section indexes, captures the relocation probe's MSVC map, and
 recomputes one receipt `ADDR64` value plus all three unwind `.pdata` `ADDR32NB` RVAs across the same
-two low/optimized executions. Other relocation formulas and unwind tails, broader archive/COMDAT
+two low/optimized executions. ADR 0235 binds the selected archive function root to its direct
+associative `.pdata` and `.xdata` children and final runtime-function entry across the existing four
+archive links. Other relocation formulas and unwind tails, discarded-parent and broader archive/COMDAT
 selection and retention modes,
 debug data, and a fresh hosted same-commit object receipt remain unconfigured.
 The ordinary Go tests include a 154-section positive regression object and reject 4,097 sections;

@@ -443,10 +443,12 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   inspector validates both linker members and every contained object; the final proof requires the
   preferred index, demanded and unused member identities, a non-COMDAT unused sentinel absent from
   the final map, raw candidate values, exact MSVC map owners, and `.fysel` preferred-image addresses and candidate value to
-  agree across four low/optimized input-order executions. The driver still removes every temporary
+  agree across four low/optimized input-order executions. ADR 0235 also binds the selected function
+  COMDAT to its direct associative `.pdata` and `.xdata` children, all three raw `.pdata` addends,
+  exact archive-member map owners, and unique final runtime-function entry without adding another image. The driver still removes every temporary
   object, archive, map, and image. This is not
   a stable product object or library format, proof of remaining relocation formulas or unwind
-  tails, broader archive/COMDAT policies, unwind fixture, or fresh hosted same-commit receipt.
+  tails, discarded-parent or broader archive/COMDAT policies, unwind fixture, or fresh hosted same-commit receipt.
 - `internal/pecoff` additionally maps the exception directory through `.pdata` and every referenced
   file-backed unwind record. `RUNTIME_FUNCTION` entries must be 12-byte, sorted, nonoverlapping,
   executable-code ranges with DWORD-aligned unwind RVAs. Version 1 prolog operations use their
