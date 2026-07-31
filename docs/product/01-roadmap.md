@@ -232,8 +232,10 @@ The Arena storage slice now adds a single-active-Region generation check, failur
 copied byte placement, reset invalidation, stale-use rejection, and active-drop rejection. Its four
 C-only executions and four generated-Fairy source-call executions ran in ADR 0214's hosted receipt.
 The internal caller crosses exact self-linked node, Arena, and Region records, obtains zeroed bytes
-through `void **`, and verifies reset/drop generations; lexical Region lowering, source-level
-`std::alloc` construction, and safe calls remain missing. ADR 0249 now retains the exact Arena owner
+through `void **`, and verifies reset/drop generations. ADR 0250 now exposes runtime-compatible,
+move-only `std::alloc::Arena`, fallible safe creation, exact allocation status, and automatic drop;
+the safe quickstart builds and executes with result 42 under both Windows MSVC profiles. Lexical Region C lowering and safe
+placement calls remain missing. ADR 0249 retains the exact Arena owner
 local and mutable-borrow type on verified `region-enter`, removing the prior source/HIR recovery gap;
 opaque native Region storage and C lowering still remain. Windows target resolution now admits six
 exact Arena/Region calls, including copied placement. The declared target build executes five

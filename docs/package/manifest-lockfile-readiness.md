@@ -41,7 +41,7 @@ Any future manifest/lockfile design must preserve these existing contracts:
 
 | Area | Required decision | Why code cannot guess it |
 | --- | --- | --- |
-| SDK evolution | versioning and capability policy for any surface beyond opaque `std::alloc::Arena` | Bundled bytes cannot silently become a broader public library contract |
+| SDK evolution | versioning and capability policy for every added or changed public `std::*` surface after ADR 0250's Arena creation boundary | Bundled bytes cannot silently broaden the public library contract |
 | Stable lock commands | promotion path from experimental ordinary/`--locked` behavior | Stable spelling, diagnostics, and compatibility need an explicit CLI contract |
 
 ## Recommended Stage 0 local-exact profile

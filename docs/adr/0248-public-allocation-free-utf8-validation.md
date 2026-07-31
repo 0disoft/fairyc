@@ -44,7 +44,7 @@ interpreter and requires the exact target layout and generated C payload type. T
 quickstart validates nonempty multibyte input, observes its exact eight-byte length, rejects one
 invalid byte with status `2`, observes allocation status `0`, and then exercises the existing owned
 String and CString surface. Windows development and release builds execute the safe quickstart;
-the configured MSVC smoke inspects and executes both PE images and finishes with 59 structurally
+the configured MSVC smoke inspects and executes both PE images and finishes with 61 structurally
 inspected images.
 
 Semantic regressions separately prove that the returned `Result` keeps the input owner borrowed

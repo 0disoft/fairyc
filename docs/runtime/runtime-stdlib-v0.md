@@ -75,7 +75,7 @@ std::io     exact stdout/stderr byte writes, decimal i32 output, and one bounded
 std::c      C scalar types and raw wrapper helpers
 ```
 
-The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.9` exports opaque `std::alloc::Arena`, ADR 0246's public safe `std::bytes::Buffer`, ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free `std::text::validate_utf8`, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, ADR 0210's matching immutable byte-view output operations, ADR 0211's bounded mutable-byte-view stdin read, and ADR 0215's allocation-free decimal `i32` output; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
+The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.10` exports ADR 0250's public safe `std::alloc::Arena` creation and cleanup, ADR 0246's public safe `std::bytes::Buffer`, ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free `std::text::validate_utf8`, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, ADR 0210's matching immutable byte-view output operations, ADR 0211's bounded mutable-byte-view stdin read, and ADR 0215's allocation-free decimal `i32` output; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
 
 Built-in `Option`, `Result`, slices, `str`, and `CStr` get compiler-known view semantics; library modules provide operations over them.
 
@@ -166,7 +166,11 @@ first hosted success. Product linkage contains no probe controls.
 
 There is no safe uninitialized byte allocation, generic `alloc<T>` syntax, resource placement, resource-aware reset, or fallible reset.
 
-The bounded Stage 0 fixture surface exports `std::alloc::Arena` as an opaque resource. `region name in expression` accepts an expression of type `ref mut std::alloc::Arena` and holds that exclusive borrow for the lexical block. The fixture defines no constructor, capacity query, growth policy, ordinary allocation method, or representation guarantee; those remain public-library decisions.
+The bounded Region fixture surface still exports its own opaque `std::alloc::Arena` test resource.
+The compiler-bundled SDK separately exposes the move-only runtime-backed Arena accepted by
+`region name in expression`, plus `create() -> Result<Arena, AllocError>` and exact status
+inspection. It exposes no capacity query, growth policy, ordinary allocation method, node format,
+or public representation guarantee.
 
 The provisional C Arena slice now models one active Region per Arena. Begin captures a private mark
 and generation; allocation publishes a tracking node only after both byte storage and node storage
@@ -302,7 +306,7 @@ a private non-null `ref str` sentinel, and preserves the existing pointer-only `
 is superseded as the user-facing entry by ADR 0247's SDK module; it remains independent historical
 evidence and does not define a public layout.
 
-SDK `0.0.0-stage0.9` exposes move-only `String` and `CString` from `std::text`. `copy` and
+SDK `0.0.0-stage0.10` retains move-only `String` and `CString` from `std::text`. `copy` and
 `cstring_from_text` construct canonical owners fallibly; `append` preserves the existing String on
 failure. `string_len`, `string_is_empty`, `cstring_len`, and `cstring_is_empty` expose byte metadata,
 with CString length excluding its required terminator. `string_as_str` and `cstring_as_cstr` return

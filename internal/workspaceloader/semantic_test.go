@@ -156,6 +156,39 @@ func TestBundledStandardLibraryReachesVerifiedCompiler(t *testing.T) {
 	}
 }
 
+func TestBundledStandardLibraryArenaCreationReachesVerifiedCompiler(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writePackage(t, root, ".", rootManifest(""), map[string]string{
+		"src/main.fy": `module main;
+
+import std::alloc as alloc;
+
+fn i32 main() {
+    return switch (alloc::create()) {
+        case .ok(arena): { 42 }
+        case .err(error): { if (alloc::error_status(error) == 0) { 1 } else { 2 } }
+    };
+}
+`,
+	})
+	workspace, err := Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	input, err := workspace.SemanticInput()
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := compiler.CheckPackages(input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !result.Verified {
+		t.Fatalf("Arena creation did not reach verified MIR: phase=%s failed=%s diagnostics=%v unsupported=%v", result.Semantic.CompletedThrough, result.Semantic.FailedPhase, result.Semantic.Diagnostics, result.Semantic.Unsupported)
+	}
+}
+
 func TestBundledStandardLibraryIOReachesVerifiedCompiler(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()

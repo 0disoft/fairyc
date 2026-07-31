@@ -240,6 +240,8 @@ const checkedInWindowsOutputPath = "examples/windows_output/main.fy"
 const checkedInWindowsOutputSupportPath = "examples/windows_output/windows_console.fy"
 const checkedInStdIOManifestPath = "examples/std_io_quickstart/fairy.toml"
 const checkedInStdIOMainPath = "examples/std_io_quickstart/src/main.fy"
+const checkedInStdAllocManifestPath = "examples/std_alloc_quickstart/fairy.toml"
+const checkedInStdAllocMainPath = "examples/std_alloc_quickstart/src/main.fy"
 const checkedInStdBytesManifestPath = "examples/std_bytes_quickstart/fairy.toml"
 const checkedInStdBytesMainPath = "examples/std_bytes_quickstart/src/main.fy"
 const checkedInStdTextManifestPath = "examples/std_text_quickstart/fairy.toml"
@@ -317,6 +319,14 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("read checked-in std::io workspace entry: %w", err)
 	}
+	stdAllocManifest, err := os.ReadFile(filepath.FromSlash(checkedInStdAllocManifestPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in std::alloc workspace manifest: %w", err)
+	}
+	stdAllocMain, err := os.ReadFile(filepath.FromSlash(checkedInStdAllocMainPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in std::alloc workspace entry: %w", err)
+	}
 	stdBytesManifest, err := os.ReadFile(filepath.FromSlash(checkedInStdBytesManifestPath))
 	if err != nil {
 		return fmt.Errorf("read checked-in std::bytes workspace manifest: %w", err)
@@ -389,6 +399,8 @@ func run() error {
 		checkedInWindowsOutputSupportPath: string(windowsOutputSupportSource),
 		checkedInStdIOManifestPath:        string(stdIOManifest),
 		checkedInStdIOMainPath:            string(stdIOMain),
+		checkedInStdAllocManifestPath:     string(stdAllocManifest),
+		checkedInStdAllocMainPath:         string(stdAllocMain),
 		checkedInStdBytesManifestPath:     string(stdBytesManifest),
 		checkedInStdBytesMainPath:         string(stdBytesMain),
 		checkedInStdTextManifestPath:      string(stdTextManifest),
@@ -757,6 +769,11 @@ func run() error {
 	}
 	workspaceRunExecutions++
 	workspaceBuildExecutions++
+	stdAllocBuildExecutions, err := runStdlibQuickstartProof(root, "std_alloc_quickstart", "std-alloc-quickstart", "std::alloc", 42)
+	if err != nil {
+		return err
+	}
+	workspaceBuildExecutions += stdAllocBuildExecutions
 	stdBytesBuildExecutions, err := runStdlibQuickstartProof(root, "std_bytes_quickstart", "std-bytes-quickstart", "std::bytes", 0)
 	if err != nil {
 		return err

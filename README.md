@@ -174,7 +174,7 @@ completed prefix. Its `main` passes `ref str` and `ref u8[]` through safe intern
 byte helper observes the exact NUL and `A` bytes through checked read-only indexing while the entry contains no raw pointer or `unsafe`,
 prints `Fairy C says hi`, and exits 42. That is real
 FY-to-MSVC process output, unsafe containment, and source-effect enforcement for the legacy example.
-The compiler-bundled SDK `0.0.0-stage0.9` exposes safe text
+The compiler-bundled SDK `0.0.0-stage0.10` exposes safe text
 `std::io::write(ref str)` and `std::io::write_stderr(ref str)` operations plus exact binary
 `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` operations. All four return
 `Result<usize, ConsoleError>`. The same module now exposes allocation-free
@@ -192,6 +192,10 @@ reserve, append, zero-grow, truncate, clear, inspect length/capacity/emptiness, 
 initialized prefix as `ref u8[]` or `ref mut u8[]`; raw pointers and all seven runtime symbols stay
 inside the SDK. `examples/std_bytes_quickstart` runs that lifecycle and automatic cleanup in both
 Windows development and release builds without `unsafe` in user code.
+The same SDK exposes move-only `std::alloc::Arena`, fallible `alloc::create()`, and stable
+`AllocError` status inspection. `examples/std_alloc_quickstart` reaches verified MIR, then builds
+and executes with automatic Arena cleanup under both Windows MSVC profiles; lexical Region C
+lowering remains the next gate.
 The same SDK now exposes move-only `std::text::String` and `std::text::CString`. Safe code can
 explicitly validate any `ref u8[]` as UTF-8 and receive an allocation-free
 `Result<ref str, TextError>` view tied to the input borrow. It can also copy UTF-8 text, append to

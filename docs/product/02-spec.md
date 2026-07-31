@@ -592,7 +592,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
-  The compiler-bundled SDK `0.0.0-stage0.9` exposes
+  The compiler-bundled SDK `0.0.0-stage0.10` exposes
   `std::io::write(ref str) -> Result<usize, ConsoleError>` and a matching `write_stderr` operation
   for text, plus `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` for exact binary output.
   All four declare `console`, keep raw pointers and target linkage private, append no newline,
@@ -756,7 +756,8 @@ argument, output, and exit-code contract. It emits no native code.
 
 ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
-version, source digest, and lock fields. SDK `0.0.0-stage0.9` exports opaque `std::alloc::Arena`,
+version, source digest, and lock fields. SDK `0.0.0-stage0.10` exports ADR 0250's move-only,
+fallibly created `std::alloc::Arena` with automatic cleanup and exact allocation status,
 ADR 0246's public safe `std::bytes::Buffer`,
 ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free
 `std::text::validate_utf8`,

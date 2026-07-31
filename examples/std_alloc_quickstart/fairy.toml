@@ -1,0 +1,8 @@
+schema = "fairyc.manifest/v1"
+
+[package]
+uid = "example.std-alloc-quickstart"
+name = "std-alloc-quickstart"
+version = "1.0.0"
+language = "fairyc-language/7"
+source = "src"

@@ -259,6 +259,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0247-public-safe-stage0-owned-text.md`: promotes move-only String/CString ownership, fallible construction and append, exact scalar metadata, owner-bound text/CStr views, and typed errors into public `std::text` at SDK stage0.8 without changing language `/7` or runtime ABI `/0`.
 - `0248-public-allocation-free-utf8-validation.md`: adds explicit allocation-free byte-slice UTF-8 validation with an owner-bound `ref str` Result payload at SDK stage0.9 without implicit conversion or a public view ABI.
 - `0249-retained-arena-owner-in-region-mir.md`: retains the exact Arena owner local and mutable-borrow type on verified `region-enter` so future native lowering cannot recover ownership from source or HIR side data.
+- `0250-public-safe-arena-creation.md`: replaces the SDK Arena placeholder with a runtime-compatible move-only resource, fallible safe creation, exact allocation status, and automatic drop at SDK stage0.10.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 
