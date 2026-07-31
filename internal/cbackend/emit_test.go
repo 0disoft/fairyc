@@ -1953,13 +1953,15 @@ func TestEmitRejectsInvalidReprCStructName(t *testing.T) {
 	}
 }
 
-func TestEmitRejectsNonScalarParameterType(t *testing.T) {
+func TestEmitAcceptsSafeScalarBorrowParameter(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main;\nfn i32 inspect(ref i32 value) { return 0; }\nfn i32 main() { return 0; }\n")
-	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
-	var capability cbackend.CapabilityError
-	if !errors.As(err, &capability) || capability.Feature != "parameter type \"&i32\"" || capability.Function != "main::inspect" {
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
 		t.Fatalf("Emit() error = %v", err)
+	}
+	if !strings.Contains(unit.Source, "static int32_t fy_fn_0(const int32_t * fy_l_") {
+		t.Fatalf("generated C is missing the safe scalar borrow parameter:\n%s", unit.Source)
 	}
 }
 

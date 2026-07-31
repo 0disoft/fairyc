@@ -23,8 +23,9 @@ Internal borrow-return summaries are likewise Flow-only proof metadata. They sel
 call result descriptor and add no runtime table, dispatch, allocation, or library entry point.
 Compiler-known `Region.place(T)` returns `Result<ref T, std::alloc::AllocError>`. MIR retains the
 placed type and complete tagged result; the `.ok` borrow carries Region provenance and `.err` carries
-only allocation status. The interpreter's abstract Region always selects `.ok`. A native backend
-must obtain the tag from the target Arena allocation status and publish no borrow on failure.
+only allocation status. The interpreter's abstract Region always selects `.ok`. The constrained C
+backend obtains the tag from the target Arena allocation status, initializes storage only after
+successful allocation, and publishes no borrow on failure.
 
 Heap allocation, files, UTF-8 validation, strings, buffers, formatting, console access, and environment access are not intrinsics.
 
@@ -183,13 +184,12 @@ Region. A second simultaneous Region, stale post-reset use, or Arena drop during
 fails closed. Zero-size placement validates alignment without allocating. Representation, node
 granularity, and growth policy remain private.
 
-One internal generated Fairy caller now declares exact target-specific node, Arena, and Region
+One internal generated Fairy caller declares exact target-specific node, Arena, and Region
 records, initializes and attaches them through the real helpers, obtains eight initialized zero
 bytes through an exact `void **` output slot, then resets the Region and drops the Arena. Bounded C
 observers check the allocation, generation transitions, active flags, released node chain, and
-invalidated Region. This does not expose those records as the public representation, connect lexical
-`region` lowering, or add safe allocation methods. Product builds now select Arena plus SystemHeap
-for actual admitted calls only.
+invalidated Region. This does not expose those records as the public representation. Product builds
+select Arena plus SystemHeap for actual admitted calls only.
 
 Windows target resolution now admits initialization, begin, zeroed allocation, copied placement,
 reset, and drop. The checked-in `build-target` example exercises the five lifecycle calls other than
@@ -203,7 +203,13 @@ does not inspect zeroed payload bytes. A separate raw C caller supplies Windows 
 and copied bytes, simultaneous and stale Region rejection, and active-drop preservation. Its shared
 probe-only allocator forces payload failure before publication and tracking-node failure after
 payload allocation, requiring unchanged Arena/output state and zero live allocations after rollback.
-Safe lexical `region` lowering and public `std::alloc` construction remain outside this Windows slice.
+The checked-in safe `examples/regions` workspace now crosses the complete source-level path:
+fallible public Arena construction, lexical Region enter, `place(i32)`, `.ok` dereference or `.err`
+handling, reset, and automatic Arena drop. Development and release MSVC builds both execute with
+result 42. Generated placement derives size and alignment from the placed C type and constructs
+`AllocError` from a nonzero runtime status. The product runtime contains no failure-injection control,
+so source-level forced `.err` execution remains unobserved; the separate raw C probe supplies the
+failure-atomic allocator evidence without leaking probe controls into product linkage.
 
 Its four-way C-only native probe is configured for exclusive begin, zeroed allocation, copy, allocation
 rollback, empty normalization, active-drop rejection, reset, stale-use rejection, and final drop,

@@ -510,6 +510,12 @@ already owns `AllocError`, while the changed operation and tagged borrow provena
 MIR contracts. Manifests, generated locks, and whole-package cache keys therefore change even though
 the embedded SDK source digest does not.
 
+ADR 0252 adds constrained-C lowering for the already-versioned language `/8` Region contract. This
+is backend capability and native evidence, not another source-language, SDK, or runtime ABI change:
+language remains `fairyc-language/8`, SDK remains `0.0.0-stage0.10`, and runtime remains
+`fairyc-runtime/0`. A backend that lacks the closed Arena/Region target symbols still rejects the
+program before toolchain invocation.
+
 ## Package formats
 
 Manifest schema, lockfile schema, source archive schema, and any future binary artifact schema are independent. Stage 0 needs manifest and lockfile schemas only. A stable binary package format would falsely imply a stable native Fairy ABI and is deferred.

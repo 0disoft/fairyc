@@ -237,10 +237,13 @@ move-only `std::alloc::Arena`, fallible safe creation, exact allocation status, 
 the safe quickstart builds and executes with result 42 under both Windows MSVC profiles. ADR 0251
 cuts language `/8`, makes `Region.place(T)` return `Result<ref T, AllocError>`, and carries the
 Region origin through tagged Flow, verified MIR, the interpreter, and the checked-in workspace
-example. Lexical Region C lifecycle lowering and native placement-failure execution remain missing.
-ADR 0249 retains the exact Arena owner
-local and mutable-borrow type on verified `region-enter`, removing the prior source/HIR recovery gap;
-opaque native Region storage and C lowering still remain. Windows target resolution now admits six
+example. ADR 0252 adds complete constrained-C lifecycle lowering: retained Arena ownership, private
+Region storage, target-sized zeroed placement, success-borrow dereference, error construction, and
+reset. The safe workspace builds and executes result 42 under both Windows MSVC profiles. A
+source-level forced placement-failure run remains missing because product linkage intentionally has
+no probe controls; the raw C probe still owns failure-atomic allocator evidence. ADR 0249 retains the exact Arena owner
+local and mutable-borrow type on verified `region-enter`, removing the prior source/HIR recovery gap.
+Windows target resolution admits six
 exact Arena/Region calls, including copied placement. The declared target build executes five
 lifecycle calls at both MSVC profiles, observes non-null
 allocation plus node/active/generation state, reset invalidation, and final drop, and closes Arena
@@ -458,9 +461,9 @@ example, requires no output and native result 42, and removes the image. The min
 quickstart iterates two bytes with typed `usize` ordering and checked addition, performs checked byte
 indexing, and safely converts each `u8` to `i32` through a separately built compiler process. The
 host smoke also proves maximum-`usize` addition traps under both MSVC profiles. The configured Windows
-smoke therefore covers two retained target builds, four measured experimental plus three stable
-quickstart and two safe `std::io` package-workspace builds, nine package-workspace runs, two safe File builds, two safe owned-text
-builds, two direct target executions, two exec-target executions, and fifty-nine total target or
+  smoke therefore covers two retained target builds, seventeen package-workspace builds including
+  safe allocation, byte-buffer, text, I/O, and Region quickstarts, nine package-workspace runs, two safe File builds, two safe owned-text
+  builds, two direct target executions, two exec-target executions, and sixty-three total target or
 probe PE images. Stable build proof covers development output, failed-build preservation, release
 replacement, a safe `std::io` product with exact separated stdout/stderr and status, and locked replacements from a
 separately built temporary `fairyc.exe`. Direct execution of that product additionally proves EOF,

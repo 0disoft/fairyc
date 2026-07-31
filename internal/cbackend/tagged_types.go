@@ -108,10 +108,21 @@ func prepareTaggedTypes(
 
 func supportedTaggedPayload(value hir.Type, structByType map[hir.Type]int, resourceByType map[hir.Type]int) bool {
 	value = canonicalCValueType(value)
-	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeU32 || value == hir.TypeUSize {
+	if value == hir.SharedBorrow(hir.TypeStr) {
 		return true
 	}
-	if value == hir.SharedBorrow(hir.TypeStr) {
+	if element, _, borrow := hir.BorrowElement(value); borrow {
+		element = canonicalCValueType(element)
+		if element == hir.TypeU8 || element == hir.TypeI32 || element == hir.TypeU32 || element == hir.TypeUSize {
+			return true
+		}
+		if _, structure := structByType[element]; structure {
+			return true
+		}
+		_, resource := resourceByType[element]
+		return resource
+	}
+	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeU32 || value == hir.TypeUSize {
 		return true
 	}
 	if _, structure := structByType[value]; structure {
@@ -129,9 +140,6 @@ func taggedPayloadLayout(
 	resourceByType map[hir.Type]int,
 ) (layout.Type, bool) {
 	value = canonicalCValueType(value)
-	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeU32 || value == hir.TypeUSize {
-		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(value)}, true
-	}
 	if value == hir.SharedBorrow(hir.TypeStr) {
 		return layout.Type{
 			Kind: layout.KindStruct,
@@ -140,6 +148,12 @@ func taggedPayloadLayout(
 				{Name: "length", Type: layout.Type{Kind: layout.KindLanguageScalar, Name: "usize"}},
 			},
 		}, true
+	}
+	if _, _, borrow := hir.BorrowElement(value); borrow {
+		return layout.Type{Kind: layout.KindPointer}, true
+	}
+	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeU32 || value == hir.TypeUSize {
+		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(value)}, true
 	}
 	if index, found := structByType[value]; found {
 		return structures[index].layoutType, true

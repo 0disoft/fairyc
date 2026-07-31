@@ -165,6 +165,12 @@ inner-resource cleanup, and reset on fallthrough, direct `return`, Result `?` pr
 nested Region exits. `break` and `continue` target the nearest `while` or classic `for` and execute
 scope-indexed resource cleanup and Region reset before their MIR goto; use outside a loop is
 `E1012`. In a classic `for`, `continue` transfers through the post clause while `break` skips it.
+The constrained C backend lowers the same verified Region lifecycle through the closed target
+runtime. It retains the exact Arena owner, uses private lexical Region storage, derives placement
+size and alignment from the target C type, initializes only successful storage, preserves the Region
+origin on the `.ok` borrow, constructs `AllocError` on `.err`, and resets on every verified exit.
+This backend slice admits canonical scalar and supported inert-struct placement; the language rule
+is broader, so unsupported inert array placement remains a fail-closed backend capability boundary.
 
 ## Effects and external capabilities
 
@@ -695,8 +701,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   SystemHeap path fixes its fundamental-alignment ceiling at the documented
   Windows x64 `malloc` guarantee of 16 bytes because MSVC C does not provide `max_align_t` in
   `<stddef.h>`. Every other standard-library or foreign symbol fails before toolchain resolution;
-  foreign companion inputs and user linker arguments remain absent. Lexical `region` lowering, copied
-  placement, source-level FY observation of owned-text byte/terminator contents, stable `std::fs` naming, portable
+  foreign companion inputs and user linker arguments remain absent. Copied byte placement,
+  source-level forced Region allocation failure, source-level FY observation of owned-text byte/terminator contents, stable `std::fs` naming, portable
   paths, general mutable buffers, and stable layouts remain absent. This clears only the missing target
   C-emission-profile evidence; `emittable`, `conformant`, and `supported` remain false.
 - `experimental run-target` reuses that exact Windows target compilation and closed linkage, validates

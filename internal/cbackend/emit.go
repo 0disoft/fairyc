@@ -751,7 +751,8 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 					mir.OperationByteSliceFromRawParts, mir.OperationMutByteSliceFromRawParts,
 					mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice,
-					mir.OperationScalarCast, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex:
+					mir.OperationScalarCast, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex,
+					mir.OperationRegionPlace:
 					inferred = operation.Type
 				}
 				if operation.DestinationLocal == mir.NoLocal || inferred == hir.TypeInvalid || inferred == "" {
@@ -1154,11 +1155,26 @@ func (e *emitter) safeBorrowCType(value hir.Type) (string, bool) {
 		return "", false
 	}
 	pointee := ""
-	if index, found := e.resourceByType[element]; found {
+	canonical := canonicalCValueType(element)
+	if index, found := e.resourceByType[canonical]; found {
 		pointee = fmt.Sprintf("fy_resource_%d", index)
-	} else if index, found := e.arrayByType[element]; found {
+	} else if index, found := e.arrayByType[canonical]; found {
 		pointee = e.arrayCTypeName(index)
+	} else if index, found := e.structByType[canonical]; found {
+		pointee = e.structCTypeName(index)
 	} else {
+		switch canonical {
+		case hir.TypeU8:
+			pointee = "uint8_t"
+		case hir.TypeI32:
+			pointee = "int32_t"
+		case hir.TypeU32:
+			pointee = "uint32_t"
+		case hir.TypeUSize:
+			pointee = "uintptr_t"
+		}
+	}
+	if pointee == "" {
 		return "", false
 	}
 	if mutable {
@@ -1200,11 +1216,8 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 	if len(function.DropFlags) != 0 {
 		return CapabilityError{Function: function.Name, Feature: "partial resource initialization"}
 	}
-	if len(function.Loans) != 0 || len(function.ReturnOrigins) != 0 {
-		return CapabilityError{Function: function.Name, Feature: "safe-borrow values"}
-	}
-	if len(function.RegionValues) != 0 {
-		return CapabilityError{Function: function.Name, Feature: "Region values"}
+	if len(function.ReturnOrigins) != 0 {
+		return CapabilityError{Function: function.Name, Feature: "safe-borrow returns"}
 	}
 	allowedUnsafeEntities := make(map[string]struct{})
 	for blockIndex := range function.Blocks {
@@ -1368,6 +1381,10 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 					return err
 				}
 				e.features["array-index-store"] = struct{}{}
+			case mir.OperationRegionEnter, mir.OperationRegionPlace, mir.OperationRegionReset:
+				if err := e.inspectRegionOperation(functionIndex, *operation); err != nil {
+					return err
+				}
 			case mir.OperationUse:
 			case mir.OperationArithmeticCheck:
 				e.features["checked-arithmetic"] = struct{}{}
@@ -1547,13 +1564,18 @@ func validateOperationShape(function string, operation mir.Operation) error {
 		mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationEnumConstruct, mir.OperationEnumPayload,
 		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice, mir.OperationScalarCast,
-		mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex:
+		mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex,
+		mir.OperationRegionPlace:
 		if operation.DestinationLocal < 0 {
 			return fmt.Errorf("%s operation in %s has no destination local", operation.Kind, function)
 		}
 	case mir.OperationMove, mir.OperationDrop:
 		if operation.Symbol == hir.NoSymbol {
 			return fmt.Errorf("%s operation in %s has no resource symbol", operation.Kind, function)
+		}
+	case mir.OperationRegionEnter, mir.OperationRegionReset:
+		if operation.Symbol == hir.NoSymbol || operation.DestinationLocal != mir.NoLocal {
+			return fmt.Errorf("%s operation in %s has invalid Region identity", operation.Kind, function)
 		}
 	}
 	return nil
@@ -1878,6 +1900,20 @@ func (e *emitter) inspectUnary(functionIndex int, operation mir.Operation) error
 		}
 		return nil
 	}
+	if operation.Operator == "*" {
+		element, _, borrow := hir.BorrowElement(operation.OwnerType)
+		if !borrow || operation.Type != element {
+			return fmt.Errorf("safe dereference in %s has incompatible owner or result type", function.Name)
+		}
+		operandType, err := e.operandType(functionIndex, operand)
+		if err != nil {
+			return fmt.Errorf("safe dereference in %s: %w", function.Name, err)
+		}
+		if operandType != operation.OwnerType {
+			return fmt.Errorf("safe dereference in %s has operand type %q, want %q", function.Name, operandType, operation.OwnerType)
+		}
+		return nil
+	}
 	validShape := false
 	switch operation.Operator {
 	case "!":
@@ -1896,6 +1932,56 @@ func (e *emitter) inspectUnary(functionIndex int, operation mir.Operation) error
 	}
 	if operandType != operation.OwnerType {
 		return fmt.Errorf("typed scalar unary operation in %s has operand type %q, want %q", function.Name, operandType, operation.OwnerType)
+	}
+	return nil
+}
+
+func (e *emitter) inspectRegionOperation(functionIndex int, operation mir.Operation) error {
+	function := &e.functions[functionIndex]
+	switch operation.Kind {
+	case mir.OperationRegionEnter:
+		operand, err := oneOperand(operation.Operands)
+		if err != nil || operand.Kind != mir.OperandLocal {
+			return fmt.Errorf("Region entry in %s has no Arena owner local", function.Name)
+		}
+		ownerType, err := e.operandType(functionIndex, operand)
+		if err != nil || ownerType != operation.OwnerType || operation.Type != hir.MutableBorrow(operation.OwnerType) {
+			return fmt.Errorf("Region entry in %s has incompatible Arena ownership", function.Name)
+		}
+		if _, found := e.resourceByType[operation.OwnerType]; !found {
+			return CapabilityError{Function: function.Name, Feature: "Region Arena type " + strconv.Quote(string(operation.OwnerType))}
+		}
+	case mir.OperationRegionPlace:
+		operand, err := oneOperand(operation.Operands)
+		if err != nil {
+			return fmt.Errorf("Region placement in %s: %w", function.Name, err)
+		}
+		ownerType, err := e.operandType(functionIndex, operand)
+		if err != nil || ownerType != operation.OwnerType || e.supportedNeedsDropType(operation.OwnerType) {
+			return CapabilityError{Function: function.Name, Feature: "Region placement type " + strconv.Quote(string(operation.OwnerType))}
+		}
+		successType, failureType, feature, supported := e.resultCSpec(operation.Type)
+		placedType, mutable, borrow := hir.BorrowElement(successType)
+		errorIndex, errorStruct := e.structByType[failureType]
+		if !supported || !borrow || mutable || placedType != operation.OwnerType || !errorStruct ||
+			len(e.structTypes[errorIndex].definition.Fields) != 1 || e.structTypes[errorIndex].definition.Fields[0].Type != hir.TypeU32 {
+			return CapabilityError{Function: function.Name, Feature: "fallible Region placement result " + strconv.Quote(string(operation.Type))}
+		}
+		e.features[feature] = struct{}{}
+	case mir.OperationRegionReset:
+		if len(operation.Operands) != 0 {
+			return fmt.Errorf("Region reset in %s has operands", function.Name)
+		}
+	default:
+		return fmt.Errorf("inspect Region operation in %s received %q", function.Name, operation.Kind)
+	}
+	e.features["region-lifecycle"] = struct{}{}
+	e.trapCategories["unreachable"] = struct{}{}
+	for _, symbol := range []string{"fy_std_region_begin_v0", "fy_std_region_allocate_zeroed_v0", "fy_std_region_reset_v0"} {
+		if !cstdlibcontract.AdmittedForTarget(symbol, e.targetID) {
+			return CapabilityError{Function: function.Name, Feature: "Region runtime symbol " + strconv.Quote(symbol)}
+		}
+		e.usedForeignSymbols[symbol] = struct{}{}
 	}
 	return nil
 }
@@ -2736,7 +2822,8 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 	fmt.Fprintf(output, "/* fairyc constrained C transport: %s, %s */\n", e.targetID, transportProfile)
 	output.WriteString("#include <stdint.h>\n")
 	_, usesCSizeT := e.features["c-size-t"]
-	if len(e.structTypes) != 0 || len(e.resourceTypes) != 0 || usesCSizeT {
+	_, usesRegion := e.features["region-lifecycle"]
+	if len(e.structTypes) != 0 || len(e.resourceTypes) != 0 || usesCSizeT || usesRegion {
 		output.WriteString("#include <stddef.h>\n")
 	}
 	if usesCSSizeT {
@@ -2746,6 +2833,14 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 		output.WriteString("#include <string.h>\n")
 	}
 	output.WriteByte('\n')
+	if usesRegion {
+		output.WriteString("typedef struct fy_region {\n")
+		output.WriteString("    void *arena;\n    void *mark;\n    uint64_t generation;\n    uint8_t active;\n")
+		output.WriteString("} fy_region;\n")
+		output.WriteString("extern uint32_t fy_std_region_begin_v0(void *arena, void *output);\n")
+		output.WriteString("extern uint32_t fy_std_region_allocate_zeroed_v0(void *region, size_t size, size_t alignment, void **output);\n")
+		output.WriteString("extern uint32_t fy_std_region_reset_v0(void *region);\n\n")
+	}
 	_, usesStaticByteString := e.features["static-byte-string"]
 	_, usesArrayByteView := e.features["array-byte-view-borrow"]
 	if usesStaticByteString || usesArrayByteView || e.needsByteSlice {
@@ -2987,6 +3082,10 @@ func (e *emitter) emitFunction(output *strings.Builder, functionIndex int) error
 		}
 		fmt.Fprintf(output, "    %s fy_l_%d;\n", cType, local)
 		fmt.Fprintf(output, "    (void)&fy_l_%d;\n", local)
+	}
+	for _, symbol := range functionRegionSymbols(*function) {
+		fmt.Fprintf(output, "    fy_region fy_region_%d = {0};\n", symbol)
+		fmt.Fprintf(output, "    (void)&fy_region_%d;\n", symbol)
 	}
 	for _, divisorType := range functionCheckedDivisorTypes(*function) {
 		cType, err := e.cValueType(divisorType)
@@ -3403,6 +3502,45 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		if err := e.emitDropGlue(output, functionIndex, operation); err != nil {
 			return fmt.Errorf("drop glue in %s: %w", function, err)
 		}
+	case mir.OperationRegionEnter:
+		operand, err := oneOperand(operation.Operands)
+		if err != nil || operand.Kind != mir.OperandLocal {
+			return fmt.Errorf("Region entry in %s has invalid Arena owner", function)
+		}
+		fmt.Fprintf(output, "    if (fy_std_region_begin_v0((void *)&fy_l_%d, (void *)&fy_region_%d) != UINT32_C(0)) fy_runtime_trap(FY_TRAP_UNREACHABLE);\n", operand.Local, operation.Symbol)
+	case mir.OperationRegionPlace:
+		operand, err := oneOperand(operation.Operands)
+		if err != nil {
+			return fmt.Errorf("Region placement in %s: %w", function, err)
+		}
+		value, err := cOperand(operand)
+		if err != nil {
+			return fmt.Errorf("Region placement value in %s: %w", function, err)
+		}
+		ownerType, err := e.cValueType(operation.OwnerType)
+		if err != nil {
+			return fmt.Errorf("Region placement owner type in %s: %w", function, err)
+		}
+		taggedIndex, found := e.taggedByType[operation.Type]
+		if !found {
+			return fmt.Errorf("Region placement in %s has no tagged C type", function)
+		}
+		_, failureType, _, _ := e.resultCSpec(operation.Type)
+		errorIndex, found := e.structByType[failureType]
+		if !found {
+			return fmt.Errorf("Region placement in %s has no allocation error C type", function)
+		}
+		errorField := e.structCFieldName(errorIndex, 0)
+		fmt.Fprintf(output, "    void *fy_region_storage_%d = NULL;\n", operation.DestinationLocal)
+		fmt.Fprintf(output, "    uint32_t fy_region_status_%d = fy_std_region_allocate_zeroed_v0((void *)&fy_region_%d, sizeof(%s), _Alignof(%s), &fy_region_storage_%d);\n", operation.DestinationLocal, operation.Symbol, ownerType, ownerType, operation.DestinationLocal)
+		fmt.Fprintf(output, "    if (fy_region_status_%d == UINT32_C(0)) {\n", operation.DestinationLocal)
+		fmt.Fprintf(output, "        *((%s *)fy_region_storage_%d) = %s;\n", ownerType, operation.DestinationLocal, value)
+		fmt.Fprintf(output, "        fy_l_%d = (fy_tagged_%d){ .tag = FY_RESULT_OK, .p_0 = (const %s *)fy_region_storage_%d };\n", operation.DestinationLocal, taggedIndex, ownerType, operation.DestinationLocal)
+		output.WriteString("    } else {\n")
+		fmt.Fprintf(output, "        fy_l_%d = (fy_tagged_%d){ .tag = FY_RESULT_ERR, .p_1 = (%s){ .%s = fy_region_status_%d } };\n", operation.DestinationLocal, taggedIndex, e.structCTypeName(errorIndex), errorField, operation.DestinationLocal)
+		output.WriteString("    }\n")
+	case mir.OperationRegionReset:
+		fmt.Fprintf(output, "    if (fy_std_region_reset_v0((void *)&fy_region_%d) != UINT32_C(0)) fy_runtime_trap(FY_TRAP_UNREACHABLE);\n", operation.Symbol)
 	case mir.OperationUnary:
 		operand, err := oneOperand(operation.Operands)
 		if err != nil {
@@ -3962,6 +4100,25 @@ func collectLocals(function mir.Function) []mir.LocalID {
 	return result
 }
 
+func functionRegionSymbols(function mir.Function) []hir.SymbolID {
+	found := make(map[hir.SymbolID]struct{})
+	for _, block := range function.Blocks {
+		for _, operation := range block.Operations {
+			if operation.Kind == mir.OperationRegionEnter || operation.Kind == mir.OperationRegionPlace || operation.Kind == mir.OperationRegionReset {
+				found[operation.Symbol] = struct{}{}
+			}
+		}
+	}
+	result := make([]hir.SymbolID, 0, len(found))
+	for symbol := range found {
+		if symbol != hir.NoSymbol {
+			result = append(result, symbol)
+		}
+	}
+	slices.Sort(result)
+	return result
+}
+
 func functionCheckedDivisorTypes(function mir.Function) []hir.Type {
 	found := make(map[hir.Type]bool)
 	for _, block := range function.Blocks {
@@ -4223,7 +4380,7 @@ func cTrapSpec(category string) (string, uint32, bool) {
 
 func supportedUnary(operator string) bool {
 	return operator == "+" || operator == "-" || operator == "!" || operator == "~" ||
-		operator == "&" || operator == "&mut"
+		operator == "&" || operator == "&mut" || operator == "*"
 }
 
 func supportedBinary(operator string) bool {

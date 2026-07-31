@@ -132,7 +132,9 @@ type. This opens no foreign safe-borrow ABI and does not permit pointer retentio
 transfer.
 
 Generic `Option` and `Result` values are accepted when each payload is a canonical Fairy copy scalar
-(`bool`, `u8`, `i32`, `u32`, or `usize`), an admitted inert struct, or a direct admitted resource.
+(`bool`, `u8`, `i32`, `u32`, or `usize`), an admitted inert struct, a direct admitted resource, or an
+admitted safe borrow. Scalar, inert-struct, and resource borrows use pointer transport;
+`ref str` retains its bounded data-and-length view transport.
 The compact `Option<i32>` and `Result<i32, i32>` transports remain distinct. Other concrete types
 receive numeric private tagged structs. `Option` has one payload field and `Result` has separate
 success and error fields; inactive fields are aggregate-zero-initialized rather than represented
@@ -141,15 +143,20 @@ Copy-only tags do not need drop; a generic tag needs drop only when a direct pay
 Payload extraction must agree with the MIR move marker. Result propagation reconstructs the
 enclosing function's declared Result type on the error path.
 
-Verified `region-enter` now retains its exact Arena owner local and mutable-borrow type. The current
-emitter deliberately still rejects enter/place/reset rather than deriving an Arena address from
-source or HIR side data; an opaque native storage and fallible operation contract must land first.
+Verified `region-enter` retains its exact Arena owner local and mutable-borrow type. The emitter
+allocates one private Region record per MIR Region symbol, passes the retained Arena owner address to
+the closed target runtime, obtains zeroed storage with the placed type's target `sizeof` and
+`_Alignof`, initializes the value exactly once, and constructs either the owner-bound `.ok` borrow or
+an `AllocError` `.err`. Every verified reset edge calls the target reset helper. Unexpected begin or
+reset rejection is an internal-invariant trap; ordinary placement failure remains Result data. The
+current Region C subset admits canonical scalar and supported inert-struct placement; unsupported
+array placement fails as a backend capability boundary.
 
-The emitter rejects empty, nested-struct/array/C-scalar/borrow/Region/nested-resource or partially
+The emitter rejects empty, nested-struct/array/C-scalar/Region/nested-resource or partially
 initialized resources, and nonempty drops without verifier-matched glue;
 nested tags, user-enum/array/raw-pointer/C-scalar tagged payloads, and other tagged payload
-combinations; Region operations;
-safe-borrow operations other than exact verified array-view construction, owner-bound text
+combinations; returning a safe borrow through the C function boundary;
+safe-borrow operations other than exact verified local borrowing and dereference, array-view construction, owner-bound text
 raw-parts construction, view metadata, borrowed resource field reads, immutable
 byte indexing, and immutable byte slicing; unsafe operations outside the admitted raw-address,
 owner-bound text construction, and scalar foreign-call forms; complete runtime and

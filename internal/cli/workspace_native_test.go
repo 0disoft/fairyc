@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strings"
 	"testing"
 
@@ -276,6 +277,66 @@ func TestStdAllocQuickstartReachesQualifiedWindowsCEmission(t *testing.T) {
 	if unit.Entry != entry || !strings.Contains(unit.Source, "fy_std_arena_initialize_v0") ||
 		!strings.Contains(unit.Source, "fy_std_arena_drop_v0") || !strings.Contains(unit.Source, "int main(void)") {
 		t.Fatalf("std::alloc C unit = entry %q, foreign symbols %v", unit.Entry, unit.ForeignSymbols)
+	}
+}
+
+func TestRegionQuickstartReachesQualifiedWindowsCEmission(t *testing.T) {
+	t.Parallel()
+	repositoryRoot := filepath.Join("..", "..")
+	manifest, err := os.ReadFile(filepath.Join(repositoryRoot, "examples", "regions", "fairy.toml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	entrySource, err := os.ReadFile(filepath.Join(repositoryRoot, "examples", "regions", "src", "main.fy"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := t.TempDir()
+	writeWorkspaceFile(t, root, "fairy.toml", string(manifest))
+	writeWorkspaceFile(t, root, "src/main.fy", string(entrySource))
+	workspace, err := workspaceloader.Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	input, err := workspace.SemanticInput()
+	if err != nil {
+		t.Fatal(err)
+	}
+	checked, err := compiler.CheckPackages(input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !checked.Verified {
+		t.Fatalf("Region quickstart did not reach verified MIR: %+v", checked.Semantic)
+	}
+	entry, err := workspaceEntryName(workspace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	unit, err := cbackend.Emit(checked.MIR, entry, cbackend.Stage0WindowsMSVCProfile())
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantSymbols := []string{
+		"fy_std_arena_drop_v0",
+		"fy_std_arena_initialize_v0",
+		"fy_std_region_allocate_zeroed_v0",
+		"fy_std_region_begin_v0",
+		"fy_std_region_reset_v0",
+	}
+	for _, symbol := range wantSymbols {
+		if !slices.Contains(unit.ForeignSymbols, symbol) {
+			t.Fatalf("Region C unit is missing foreign symbol %q: %v", symbol, unit.ForeignSymbols)
+		}
+	}
+	if unit.Entry != entry ||
+		!strings.Contains(unit.Source, "fy_std_region_begin_v0") ||
+		!strings.Contains(unit.Source, "fy_std_region_allocate_zeroed_v0") ||
+		!strings.Contains(unit.Source, "fy_std_region_reset_v0") ||
+		!strings.Contains(unit.Source, ".tag = FY_RESULT_OK") ||
+		!strings.Contains(unit.Source, ".tag = FY_RESULT_ERR") ||
+		!strings.Contains(unit.Source, "sizeof(int32_t), _Alignof(int32_t)") {
+		t.Fatalf("Region C unit = entry %q, foreign symbols %v", unit.Entry, unit.ForeignSymbols)
 	}
 }
 

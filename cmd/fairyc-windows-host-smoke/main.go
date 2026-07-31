@@ -246,6 +246,8 @@ const checkedInStdBytesManifestPath = "examples/std_bytes_quickstart/fairy.toml"
 const checkedInStdBytesMainPath = "examples/std_bytes_quickstart/src/main.fy"
 const checkedInStdTextManifestPath = "examples/std_text_quickstart/fairy.toml"
 const checkedInStdTextMainPath = "examples/std_text_quickstart/src/main.fy"
+const checkedInRegionsManifestPath = "examples/regions/fairy.toml"
+const checkedInRegionsMainPath = "examples/regions/src/main.fy"
 const checkedInWindowsFilePath = "examples/windows_file/main.fy"
 const checkedInWindowsFileSupportPath = "examples/windows_file/windows_file.fy"
 const checkedInOwnedTextPath = "examples/owned_text/main.fy"
@@ -343,6 +345,14 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("read checked-in std::text workspace entry: %w", err)
 	}
+	regionsManifest, err := os.ReadFile(filepath.FromSlash(checkedInRegionsManifestPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in Region workspace manifest: %w", err)
+	}
+	regionsMain, err := os.ReadFile(filepath.FromSlash(checkedInRegionsMainPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in Region workspace entry: %w", err)
+	}
 	windowsFileSource, err := os.ReadFile(filepath.FromSlash(checkedInWindowsFilePath))
 	if err != nil {
 		return fmt.Errorf("read checked-in Windows File source: %w", err)
@@ -405,6 +415,8 @@ func run() error {
 		checkedInStdBytesMainPath:         string(stdBytesMain),
 		checkedInStdTextManifestPath:      string(stdTextManifest),
 		checkedInStdTextMainPath:          string(stdTextMain),
+		checkedInRegionsManifestPath:      string(regionsManifest),
+		checkedInRegionsMainPath:          string(regionsMain),
 		checkedInWindowsFilePath:          string(windowsFileSource),
 		checkedInWindowsFileSupportPath:   string(windowsFileSupportSource),
 		checkedInOwnedTextPath:            string(ownedTextSource),
@@ -784,6 +796,11 @@ func run() error {
 		return err
 	}
 	workspaceBuildExecutions += stdTextBuildExecutions
+	regionBuildExecutions, err := runStdlibQuickstartProof(root, "regions", "regions", "Region", 42)
+	if err != nil {
+		return err
+	}
+	workspaceBuildExecutions += regionBuildExecutions
 	var atlasCallProcessMeasurement buildmeasure.AtlasCallProcessReport
 	standaloneCompilerBytes, err := runStandaloneCompiler(repositoryRoot, root, clockResolution, &atlasCallProcessMeasurement)
 	if err != nil {
