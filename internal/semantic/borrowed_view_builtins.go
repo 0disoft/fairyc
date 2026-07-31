@@ -7,18 +7,34 @@ import (
 )
 
 const (
-	strFromRawPartsPath  = "str::from_raw_parts"
-	cstrFromRawPartsPath = "CStr::from_raw_parts"
+	strFromRawPartsPath              = "str::from_raw_parts"
+	cstrFromRawPartsPath             = "CStr::from_raw_parts"
+	byteSliceFromRawPartsPath        = "byte_slice::from_raw_parts"
+	mutableByteSliceFromRawPartsPath = "byte_slice::from_raw_parts_mut"
 )
 
-func borrowedViewConstructorPath(value string) (hir.Type, bool) {
+type borrowedViewConstructor struct {
+	viewType       hir.Type
+	ownerMustBeMut bool
+	dataMustBeMut  bool
+}
+
+func borrowedViewConstructorPath(value string) (borrowedViewConstructor, bool) {
 	switch value {
 	case strFromRawPartsPath:
-		return hir.SharedBorrow(hir.TypeStr), true
+		return borrowedViewConstructor{viewType: hir.SharedBorrow(hir.TypeStr)}, true
 	case cstrFromRawPartsPath:
-		return hir.SharedBorrow(hir.TypeCStr), true
+		return borrowedViewConstructor{viewType: hir.SharedBorrow(hir.TypeCStr)}, true
+	case byteSliceFromRawPartsPath:
+		return borrowedViewConstructor{viewType: hir.SharedBorrow(hir.TypeByteSlice)}, true
+	case mutableByteSliceFromRawPartsPath:
+		return borrowedViewConstructor{
+			viewType:       hir.MutableBorrow(hir.TypeByteSlice),
+			ownerMustBeMut: true,
+			dataMustBeMut:  true,
+		}, true
 	default:
-		return hir.TypeInvalid, false
+		return borrowedViewConstructor{}, false
 	}
 }
 
@@ -49,7 +65,7 @@ func (c *typeChecker) checkBorrowedViewConstructor(
 	expression *ast.Expression,
 	result *hir.Expression,
 	path string,
-	viewType hir.Type,
+	constructor borrowedViewConstructor,
 ) hir.Type {
 	result.Kind = "borrowed-view-from-raw-parts"
 	result.Operator = path
@@ -73,14 +89,18 @@ func (c *typeChecker) checkBorrowedViewConstructor(
 	valid := len(argumentTypes) == 3
 	if len(argumentTypes) > 0 {
 		_, mutable, borrowed := hir.BorrowElement(argumentTypes[0])
-		if !borrowed || mutable {
-			c.analyzer.addUnsupported(c.module.file.Path, arguments[0].Span, "raw-parts owner that is not a shared safe borrow")
+		if !borrowed || mutable != constructor.ownerMustBeMut {
+			expected := "shared"
+			if constructor.ownerMustBeMut {
+				expected = "exclusive"
+			}
+			c.analyzer.addUnsupported(c.module.file.Path, arguments[0].Span, "raw-parts owner that is not an "+expected+" safe borrow")
 			valid = false
 		}
 	}
 	if len(argumentTypes) > 1 {
-		element, _, pointer := hir.RawPointerElement(argumentTypes[1])
-		if !pointer || element != hir.TypeU8 && element != hir.TypeVoid {
+		element, mutable, pointer := hir.RawPointerElement(argumentTypes[1])
+		if !pointer || element != hir.TypeU8 && element != hir.TypeVoid || constructor.dataMustBeMut && !mutable {
 			c.analyzer.addUnsupported(c.module.file.Path, arguments[1].Span, "raw-parts data that is not a byte or opaque raw pointer")
 			valid = false
 		}
@@ -105,5 +125,5 @@ func (c *typeChecker) checkBorrowedViewConstructor(
 	if !valid {
 		return hir.TypeInvalid
 	}
-	return viewType
+	return constructor.viewType
 }

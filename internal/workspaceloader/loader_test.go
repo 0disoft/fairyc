@@ -29,7 +29,7 @@ path = "libs/net"
 version = "1.2.0"
 features = []
 `), map[string]string{"src/main.fy": "module main;\n"})
-	writePackage(t, root, "libs/net", memberManifest("example.libs.net", "net", "1.2.0", "fairyc-language/6", ""), map[string]string{"src/net.fy": "module net;\n"})
+	writePackage(t, root, "libs/net", memberManifest("example.libs.net", "net", "1.2.0", "fairyc-language/7", ""), map[string]string{"src/net.fy": "module net;\n"})
 
 	workspace, err := Load(root)
 	if err != nil {
@@ -74,8 +74,8 @@ func TestLoadInjectsExactCompilerBundledStandardLibrary(t *testing.T) {
 	if !found || standardLibrary.SourceKind != SourceKindSDK || standardLibrary.SDKIdentity != sdkstdlib.SDKIdentity ||
 		standardLibrary.RuntimeABI != sdkstdlib.RuntimeABI || standardLibrary.Directory != "" || standardLibrary.SourceRoot != "" ||
 		standardLibrary.Manifest.Package.UID != sdkstdlib.PackageUID || standardLibrary.Manifest.Package.Version != sdkstdlib.Version ||
-		len(standardLibrary.Sources) != 2 || standardLibrary.Sources[0].Module.Path != "std::alloc" ||
-		standardLibrary.Sources[1].Module.Path != "std::io" {
+		len(standardLibrary.Sources) != 3 || standardLibrary.Sources[0].Module.Path != "std::alloc" ||
+		standardLibrary.Sources[1].Module.Path != "std::bytes" || standardLibrary.Sources[2].Module.Path != "std::io" {
 		t.Fatalf("standard library = %+v, found = %v", standardLibrary, found)
 	}
 	if workspace.Graph.Nodes[1].Role != packagegraph.RoleStandardLibrary || workspace.Graph.Nodes[1].Identity.SourceIdentity != sdkstdlib.SourceIdentity(sdkstdlib.SDKIdentity, sdkstdlib.RuntimeABI, standardLibrary.Digest) {
@@ -101,21 +101,21 @@ func TestLoadRejectsWorkspaceContractFailures(t *testing.T) {
 			name: "dependency version", reason: ReasonDependencyVersion,
 			setup: func(t *testing.T, root string) {
 				writePackage(t, root, ".", rootManifest("\n[workspace]\nmembers = [\"libs/net\"]\n\n[dependencies.net]\npath = \"libs/net\"\nversion = \"9.0.0\"\nfeatures = []\n"), validRootSource())
-				writePackage(t, root, "libs/net", memberManifest("example.libs.net", "net", "1.0.0", "fairyc-language/6", ""), validMemberSource("net"))
+				writePackage(t, root, "libs/net", memberManifest("example.libs.net", "net", "1.0.0", "fairyc-language/7", ""), validMemberSource("net"))
 			},
 		},
 		{
 			name: "duplicate uid", reason: ReasonDuplicatePackageUID,
 			setup: func(t *testing.T, root string) {
 				writePackage(t, root, ".", rootManifest("\n[workspace]\nmembers = [\"libs/net\"]\n"), validRootSource())
-				writePackage(t, root, "libs/net", memberManifest("example.app", "net", "1.0.0", "fairyc-language/6", ""), validMemberSource("net"))
+				writePackage(t, root, "libs/net", memberManifest("example.app", "net", "1.0.0", "fairyc-language/7", ""), validMemberSource("net"))
 			},
 		},
 		{
 			name: "nested workspace", reason: ReasonNestedWorkspace,
 			setup: func(t *testing.T, root string) {
 				writePackage(t, root, ".", rootManifest("\n[workspace]\nmembers = [\"libs/net\"]\n"), validRootSource())
-				writePackage(t, root, "libs/net", memberManifest("example.libs.net", "net", "1.0.0", "fairyc-language/6", "\n[workspace]\nmembers = []\n"), validMemberSource("net"))
+				writePackage(t, root, "libs/net", memberManifest("example.libs.net", "net", "1.0.0", "fairyc-language/7", "\n[workspace]\nmembers = []\n"), validMemberSource("net"))
 			},
 		},
 		{
@@ -147,7 +147,7 @@ func TestLoadRejectsWorkspaceContractFailures(t *testing.T) {
 			name: "member path case", reason: ReasonPathCase,
 			setup: func(t *testing.T, root string) {
 				writePackage(t, root, ".", rootManifest("\n[workspace]\nmembers = [\"libs/NET\"]\n"), validRootSource())
-				writePackage(t, root, "libs/net", memberManifest("example.libs.net", "net", "1.0.0", "fairyc-language/6", ""), validMemberSource("net"))
+				writePackage(t, root, "libs/net", memberManifest("example.libs.net", "net", "1.0.0", "fairyc-language/7", ""), validMemberSource("net"))
 			},
 		},
 		{
@@ -166,7 +166,7 @@ func TestLoadRejectsWorkspaceContractFailures(t *testing.T) {
 			name: "reserved standard library dependency binding", reason: ReasonStandardLibrary,
 			setup: func(t *testing.T, root string) {
 				writePackage(t, root, ".", rootManifest("\n[workspace]\nmembers = [\"libs/net\"]\n\n[dependencies.stdlib]\npath = \"libs/net\"\nversion = \"1.0.0\"\nfeatures = []\n"), validRootSource())
-				writePackage(t, root, "libs/net", memberManifest("example.libs.net", "net", "1.0.0", "fairyc-language/6", ""), validMemberSource("net"))
+				writePackage(t, root, "libs/net", memberManifest("example.libs.net", "net", "1.0.0", "fairyc-language/7", ""), validMemberSource("net"))
 			},
 		},
 		{
@@ -178,7 +178,7 @@ func TestLoadRejectsWorkspaceContractFailures(t *testing.T) {
 		{
 			name: "missing standard library module", reason: ReasonPackageGraph,
 			setup: func(t *testing.T, root string) {
-				writePackage(t, root, ".", rootManifest(""), map[string]string{"src/main.fy": "module main;\nimport std::bytes as bytes;\n"})
+				writePackage(t, root, ".", rootManifest(""), map[string]string{"src/main.fy": "module main;\nimport std::missing as missing;\n"})
 			},
 		},
 	}
@@ -201,8 +201,8 @@ func TestLoadRejectsReachableDependencyCycle(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()
 	writePackage(t, root, ".", rootManifest("\n[workspace]\nmembers = [\"libs/a\", \"libs/b\"]\n\n[dependencies.a]\npath = \"libs/a\"\nversion = \"1.0.0\"\nfeatures = []\n"), validRootSource())
-	writePackage(t, root, "libs/a", memberManifest("example.libs.a", "a", "1.0.0", "fairyc-language/6", "\n[dependencies.b]\npath = \"libs/b\"\nversion = \"1.0.0\"\nfeatures = []\n"), validMemberSource("a"))
-	writePackage(t, root, "libs/b", memberManifest("example.libs.b", "b", "1.0.0", "fairyc-language/6", "\n[dependencies.a]\npath = \"libs/a\"\nversion = \"1.0.0\"\nfeatures = []\n"), validMemberSource("b"))
+	writePackage(t, root, "libs/a", memberManifest("example.libs.a", "a", "1.0.0", "fairyc-language/7", "\n[dependencies.b]\npath = \"libs/b\"\nversion = \"1.0.0\"\nfeatures = []\n"), validMemberSource("a"))
+	writePackage(t, root, "libs/b", memberManifest("example.libs.b", "b", "1.0.0", "fairyc-language/7", "\n[dependencies.a]\npath = \"libs/a\"\nversion = \"1.0.0\"\nfeatures = []\n"), validMemberSource("b"))
 	_, err := Load(root)
 	var loadError *LoadError
 	if !errors.As(err, &loadError) || loadError.Reason != ReasonPackageGraph || !strings.Contains(loadError.Detail, "package-dependency-cycle") {
@@ -215,7 +215,7 @@ func TestLoadRejectsSymlinkMember(t *testing.T) {
 	root := t.TempDir()
 	target := t.TempDir()
 	writePackage(t, root, ".", rootManifest("\n[workspace]\nmembers = [\"linked\"]\n"), validRootSource())
-	writePackage(t, target, ".", memberManifest("example.libs.linked", "linked", "1.0.0", "fairyc-language/6", ""), validMemberSource("linked"))
+	writePackage(t, target, ".", memberManifest("example.libs.linked", "linked", "1.0.0", "fairyc-language/7", ""), validMemberSource("linked"))
 	if err := os.Symlink(target, filepath.Join(root, "linked")); err != nil {
 		t.Skipf("host cannot create directory symlink: %v", err)
 	}
@@ -232,7 +232,7 @@ func rootManifest(extra string) string {
 uid = "example.app"
 name = "app"
 version = "1.0.0"
-language = "fairyc-language/6"
+language = "fairyc-language/7"
 source = "src"
 ` + extra
 }

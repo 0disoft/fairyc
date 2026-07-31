@@ -2743,6 +2743,77 @@ fn ref str relay(ref String value) { return as_str(value); }
 	}
 }
 
+func TestAnalyzeBindsRawPartsByteViewsToMatchingOwnerBorrow(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+resource Buffer {
+    ptr mut void data;
+    usize length;
+    cleanup {}
+}
+fn ref u8[] view(ref Buffer value) {
+    return unsafe { byte_slice::from_raw_parts(value, value.data, value.length) };
+}
+fn ref mut u8[] view_mut(ref mut Buffer value) {
+    return unsafe { byte_slice::from_raw_parts_mut(value, value.data, value.length) };
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+
+	want := map[string]struct {
+		operator string
+		typeName hir.Type
+	}{
+		"view":     {operator: "byte_slice::from_raw_parts", typeName: hir.SharedBorrow(hir.TypeByteSlice)},
+		"view_mut": {operator: "byte_slice::from_raw_parts_mut", typeName: hir.MutableBorrow(hir.TypeByteSlice)},
+	}
+	for functionIndex := range result.HIR.Modules[0].Functions {
+		function := &result.HIR.Modules[0].Functions[functionIndex]
+		expected, found := want[function.Name]
+		if !found {
+			continue
+		}
+		returned := soleReturnExpression(t, *function)
+		if len(returned.Children) != 1 || returned.Children[0].Block == nil {
+			t.Fatalf("%s return = %+v", function.Name, returned)
+		}
+		constructor := returned.Children[0].Block.Tail
+		if constructor == nil || constructor.Kind != "borrowed-view-from-raw-parts" || constructor.Type != expected.typeName ||
+			constructor.Operator != expected.operator || constructor.UnsafeScope == nil || len(constructor.Children) != 3 {
+			t.Fatalf("%s constructor = %+v", function.Name, constructor)
+		}
+		delete(want, function.Name)
+	}
+	if len(want) != 0 {
+		t.Fatalf("missing functions = %v", want)
+	}
+}
+
+func TestAnalyzeRejectsMutableRawPartsByteViewWithoutExclusiveOwnerAndData(t *testing.T) {
+	t.Parallel()
+	for _, source := range []string{
+		`module main;
+resource Buffer { ptr mut void data; usize length; cleanup {} }
+fn ref mut u8[] view_mut(ref Buffer value) {
+    return unsafe { byte_slice::from_raw_parts_mut(value, value.data, value.length) };
+}
+`,
+		`module main;
+resource Buffer { ptr u8 data; usize length; cleanup {} }
+fn ref mut u8[] view_mut(ref mut Buffer value) {
+    return unsafe { byte_slice::from_raw_parts_mut(value, value.data, value.length) };
+}
+`,
+	} {
+		result := analyzeText(t, map[string]string{"main.fy": source})
+		if len(result.Unsupported) == 0 {
+			t.Fatalf("result = %+v", result)
+		}
+	}
+}
+
 func TestAnalyzeRejectsRawPartsBorrowedViewOutsideUnsafe(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{

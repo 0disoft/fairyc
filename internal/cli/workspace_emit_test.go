@@ -186,7 +186,7 @@ func writeEmitWorkspace(t *testing.T, root string, withEntry bool) {
 uid = "example.emit.app"
 name = "emit-app"
 version = "1.0.0"
-language = "fairyc-language/6"
+language = "fairyc-language/7"
 source = "src"
 `)
 	entry := "fn i32 not_main() { return 42; }"

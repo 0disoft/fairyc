@@ -1181,6 +1181,12 @@ func (l *functionLowerer) lowerBorrowedViewFromRawParts(expression *hir.Expressi
 	case expression.Operator == "CStr::from_raw_parts" && expression.Type == hir.SharedBorrow(hir.TypeCStr):
 		operationKind = OperationCStrFromRawParts
 		entityKind = "cstr-from-raw-parts"
+	case expression.Operator == "byte_slice::from_raw_parts" && expression.Type == hir.SharedBorrow(hir.TypeByteSlice):
+		operationKind = OperationByteSliceFromRawParts
+		entityKind = "byte-slice-from-raw-parts"
+	case expression.Operator == "byte_slice::from_raw_parts_mut" && expression.Type == hir.MutableBorrow(hir.TypeByteSlice):
+		operationKind = OperationMutByteSliceFromRawParts
+		entityKind = "mut-byte-slice-from-raw-parts"
 	default:
 		return Operand{}, fmt.Errorf("unsupported borrowed-view raw-parts constructor %q with result %q", expression.Operator, expression.Type)
 	}

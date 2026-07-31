@@ -221,8 +221,10 @@ overlap-safe append across relocation, overflow rollback, zeroed growth, truncat
 Its four C-only native probe executions and four generated-Fairy source-call executions are included
 in the hosted run recorded by ADR 0214. The internal caller uses the exact nested SystemHeap-block record and
 reaches initialize, zeroed resize, and drop. Used-symbol product linkage now supplies the exact
-Buffer/SystemHeap closure, but public `std::bytes` and safe ownership methods remain missing. A raw
-Buffer caller now executes against an instrumented target-specific closure at both MSVC profiles.
+Buffer/SystemHeap closure. ADR 0246 closes the source-facing gap with public move-only
+`std::bytes::Buffer`, fallible construction and mutation, scalar metadata, and owner-bound shared
+and exclusive initialized-prefix views. A raw Buffer caller still executes against an instrumented
+target-specific closure at both MSVC profiles.
 It forces initialization, reserve, relocating self-overlap append, and zeroed-resize allocation
 failure, preserves exact storage state and initialized bytes, proves recovery zeroing, and returns
 the live-allocation count to zero after drop.

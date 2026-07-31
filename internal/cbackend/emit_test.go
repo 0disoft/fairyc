@@ -685,7 +685,6 @@ fn i32 main() {
 	for _, required := range []string{
 		").length) { fy_pending_trap = FY_TRAP_BOUNDS;",
 		"(fy_byte_slice){ .data = ",
-		".data + (",
 		".length = (",
 	} {
 		if !strings.Contains(unit.Source, required) {
@@ -694,6 +693,9 @@ fn i32 main() {
 	}
 	if strings.Contains(unit.Source, "((uintptr_t)UINT64_C(0))) >") {
 		t.Fatalf("generated C retains an always-false unsigned zero-start comparison:\n%s", unit.Source)
+	}
+	if strings.Contains(unit.Source, ".data + (") || strings.Contains(unit.Source, ".data +=") {
+		t.Fatalf("generated C performs pointer arithmetic for a whole zero-start slice:\n%s", unit.Source)
 	}
 }
 
@@ -2440,6 +2442,73 @@ fn i32 main() {
 		if !strings.Contains(unit.Source, required) {
 			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
 		}
+	}
+}
+
+func TestEmitBorrowedByteViewsFromRawParts(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+resource Buffer {
+    ptr mut void data;
+    usize length;
+    cleanup {}
+}
+fn ref u8[] view(ref Buffer value) {
+    return unsafe { byte_slice::from_raw_parts(value, value.data, value.length) };
+}
+fn ref mut u8[] view_mut(ref mut Buffer value) {
+    return unsafe { byte_slice::from_raw_parts_mut(value, value.data, value.length) };
+}
+fn i32 main() {
+    var Buffer value = Buffer { .data = null, .length = 0 };
+    let ref mut u8[] writable = view_mut(ref mut value);
+    let bool writable_empty = writable.len == 0;
+    let ref u8[] readable = view(ref value);
+    return if (writable_empty && readable.is_empty) { 0 } else { 1 };
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0WindowsMSVCProfile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	for _, feature := range []string{"byte-slice-view", "mutable-byte-slice-view"} {
+		if !slices.Contains(unit.Features, feature) {
+			t.Errorf("features %v are missing %q", unit.Features, feature)
+		}
+	}
+	for _, required := range []string{
+		"(fy_byte_slice){ .data = (const uint8_t *)",
+		"(fy_mut_byte_slice){ .data = (uint8_t *)",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
+		}
+	}
+}
+
+func TestEmitEmptyBorrowedByteViewSliceAvoidsNullPointerArithmetic(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+resource Buffer {
+    ptr mut void data;
+    usize length;
+    cleanup {}
+}
+fn ref u8[] view(ref Buffer value) {
+    return unsafe { byte_slice::from_raw_parts(value, value.data, value.length) };
+}
+fn i32 main() {
+    let Buffer value = Buffer { .data = null, .length = 0 };
+    let ref u8[] whole = view(ref value)[..];
+    return if (whole.is_empty) { 0 } else { 1 };
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0WindowsMSVCProfile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	if strings.Contains(unit.Source, ".data + (") || strings.Contains(unit.Source, ".data +=") {
+		t.Fatalf("generated C performs pointer arithmetic for an empty whole slice:\n%s", unit.Source)
 	}
 }
 

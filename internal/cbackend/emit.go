@@ -748,6 +748,7 @@ func (e *emitter) inferLocalTypes(functionIndex int) (map[mir.LocalID]hir.Type, 
 					mir.OperationResultPayload, mir.OperationOptionPayload,
 					mir.OperationEnumConstruct, mir.OperationEnumPayload,
 					mir.OperationRawAddress, mir.OperationRawBorrowPointer, mir.OperationStrFromRawParts, mir.OperationCStrFromRawParts,
+					mir.OperationByteSliceFromRawParts, mir.OperationMutByteSliceFromRawParts,
 					mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 					mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice,
 					mir.OperationScalarCast, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex:
@@ -1241,15 +1242,19 @@ func (e *emitter) inspectFunction(functionIndex int) error {
 				}
 				allowedUnsafeEntities[operation.Entity] = struct{}{}
 				e.features["raw-borrow-pointer"] = struct{}{}
-			case mir.OperationStrFromRawParts, mir.OperationCStrFromRawParts:
+			case mir.OperationStrFromRawParts, mir.OperationCStrFromRawParts, mir.OperationByteSliceFromRawParts, mir.OperationMutByteSliceFromRawParts:
 				if err := e.inspectBorrowedViewFromRawParts(functionIndex, *operation); err != nil {
 					return err
 				}
 				allowedUnsafeEntities[operation.Entity] = struct{}{}
 				if operation.Kind == mir.OperationStrFromRawParts {
 					e.features["utf8-string-view"] = struct{}{}
-				} else {
+				} else if operation.Kind == mir.OperationCStrFromRawParts {
 					e.features["c-string-view"] = struct{}{}
+				} else if operation.Kind == mir.OperationByteSliceFromRawParts {
+					e.features["byte-slice-view"] = struct{}{}
+				} else {
+					e.features["mutable-byte-slice-view"] = struct{}{}
 				}
 			case mir.OperationStrDataAddress:
 				if err := e.inspectStrDataAddress(functionIndex, *operation); err != nil {
@@ -1538,6 +1543,7 @@ func validateOperationShape(function string, operation mir.Operation) error {
 	switch operation.Kind {
 	case mir.OperationAssign, mir.OperationInitialize, mir.OperationUnary, mir.OperationBinary,
 		mir.OperationRawAddress, mir.OperationRawBorrowPointer, mir.OperationStrFromRawParts, mir.OperationCStrFromRawParts,
+		mir.OperationByteSliceFromRawParts, mir.OperationMutByteSliceFromRawParts,
 		mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationEnumConstruct, mir.OperationEnumPayload,
 		mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice, mir.OperationScalarCast,
@@ -2003,11 +2009,21 @@ func (e *emitter) inspectBorrowedViewFromRawParts(functionIndex int, operation m
 	_, ownerMutable, ownerBorrow := hir.BorrowElement(operation.OwnerType)
 	wantType := hir.SharedBorrow(hir.TypeStr)
 	wantOperator := "str::from_raw_parts"
+	wantOwnerMutable := false
+	wantDataMutable := false
 	if operation.Kind == mir.OperationCStrFromRawParts {
 		wantType = hir.SharedBorrow(hir.TypeCStr)
 		wantOperator = "CStr::from_raw_parts"
+	} else if operation.Kind == mir.OperationByteSliceFromRawParts {
+		wantType = hir.SharedBorrow(hir.TypeByteSlice)
+		wantOperator = "byte_slice::from_raw_parts"
+	} else if operation.Kind == mir.OperationMutByteSliceFromRawParts {
+		wantType = hir.MutableBorrow(hir.TypeByteSlice)
+		wantOperator = "byte_slice::from_raw_parts_mut"
+		wantOwnerMutable = true
+		wantDataMutable = true
 	}
-	if !ownerBorrow || ownerMutable || operation.Type != wantType || operation.Operator != wantOperator {
+	if !ownerBorrow || ownerMutable != wantOwnerMutable || operation.Type != wantType || operation.Operator != wantOperator {
 		return fmt.Errorf("borrowed-view raw-parts construction in %s has incompatible owner or result type", function.Name)
 	}
 	ownerType, err := e.operandType(functionIndex, operation.Operands[0])
@@ -2018,8 +2034,8 @@ func (e *emitter) inspectBorrowedViewFromRawParts(functionIndex int, operation m
 	if err != nil {
 		return fmt.Errorf("borrowed-view raw-parts data in %s: %w", function.Name, err)
 	}
-	dataElement, _, dataPointer := hir.RawPointerElement(dataType)
-	if !dataPointer || dataElement != hir.TypeU8 && dataElement != hir.TypeVoid {
+	dataElement, dataMutable, dataPointer := hir.RawPointerElement(dataType)
+	if !dataPointer || dataElement != hir.TypeU8 && dataElement != hir.TypeVoid || wantDataMutable && !dataMutable {
 		return fmt.Errorf("borrowed-view raw-parts data in %s has incompatible type %q", function.Name, dataType)
 	}
 	lengthType, err := e.operandType(functionIndex, operation.Operands[2])
@@ -3031,7 +3047,7 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 			return fmt.Errorf("raw borrow pointer in %s has invalid local operand", function)
 		}
 		fmt.Fprintf(output, "    fy_l_%d = fy_l_%d;\n", operation.DestinationLocal, operand.Local)
-	case mir.OperationStrFromRawParts, mir.OperationCStrFromRawParts:
+	case mir.OperationStrFromRawParts, mir.OperationCStrFromRawParts, mir.OperationByteSliceFromRawParts, mir.OperationMutByteSliceFromRawParts:
 		if len(operation.Operands) != 3 {
 			return fmt.Errorf("borrowed-view raw-parts construction in %s has invalid operands", function)
 		}
@@ -3050,9 +3066,13 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		fmt.Fprintf(output, "    (void)%s;\n", owner)
 		if operation.Kind == mir.OperationStrFromRawParts {
 			fmt.Fprintf(output, "    fy_l_%d = (fy_str){ .data = ((const uint8_t *)(%s) != (const uint8_t *)0 ? (const uint8_t *)(%s) : (const uint8_t *)\"\"), .length = %s };\n", operation.DestinationLocal, data, data, length)
-		} else {
+		} else if operation.Kind == mir.OperationCStrFromRawParts {
 			fmt.Fprintf(output, "    (void)%s;\n", length)
 			fmt.Fprintf(output, "    fy_l_%d = (const uint8_t *)(%s);\n", operation.DestinationLocal, data)
+		} else if operation.Kind == mir.OperationByteSliceFromRawParts {
+			fmt.Fprintf(output, "    fy_l_%d = (fy_byte_slice){ .data = (const uint8_t *)(%s), .length = %s };\n", operation.DestinationLocal, data, length)
+		} else {
+			fmt.Fprintf(output, "    fy_l_%d = (fy_mut_byte_slice){ .data = (uint8_t *)(%s), .length = %s };\n", operation.DestinationLocal, data, length)
 		}
 	case mir.OperationStrDataAddress:
 		operand, err := oneOperand(operation.Operands)
@@ -3348,7 +3368,15 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 		if err != nil {
 			return fmt.Errorf("immutable byte-view slice end in %s: %w", function, err)
 		}
-		fmt.Fprintf(output, "    fy_l_%d = (fy_byte_slice){ .data = (%s).data + (%s), .length = (%s) - (%s) };\n", operation.DestinationLocal, receiverValue, startValue, endValue, startValue)
+		switch {
+		case start.Kind == mir.OperandUSize && start.U64 == 0:
+			fmt.Fprintf(output, "    fy_l_%d = (fy_byte_slice){ .data = (%s).data, .length = (%s) };\n", operation.DestinationLocal, receiverValue, endValue)
+		case start.Kind == mir.OperandUSize:
+			fmt.Fprintf(output, "    fy_l_%d = (fy_byte_slice){ .data = (%s).data + (%s), .length = (%s) - (%s) };\n", operation.DestinationLocal, receiverValue, startValue, endValue, startValue)
+		default:
+			fmt.Fprintf(output, "    fy_l_%d = (fy_byte_slice){ .data = (%s).data, .length = (%s) - (%s) };\n", operation.DestinationLocal, receiverValue, endValue, startValue)
+			fmt.Fprintf(output, "    if ((%s) != ((uintptr_t)UINT64_C(0))) { fy_l_%d.data += (%s); }\n", startValue, operation.DestinationLocal, startValue)
+		}
 	case mir.OperationScalarCast:
 		operand, err := oneOperand(operation.Operands)
 		if err != nil {
@@ -3957,6 +3985,7 @@ func operationHasDestination(kind mir.OperationKind) bool {
 		mir.OperationOptionConstruct, mir.OperationOptionPayload,
 		mir.OperationEnumConstruct, mir.OperationEnumPayload,
 		mir.OperationRawAddress, mir.OperationRawBorrowPointer, mir.OperationStrFromRawParts, mir.OperationCStrFromRawParts,
+		mir.OperationByteSliceFromRawParts, mir.OperationMutByteSliceFromRawParts,
 		mir.OperationStrDataAddress, mir.OperationByteSliceDataAddress, mir.OperationCStrDataAddress,
 		mir.OperationStructConstruct, mir.OperationResourceConstruct, mir.OperationFieldRead, mir.OperationViewLength, mir.OperationViewEmpty, mir.OperationViewIndex, mir.OperationViewSlice,
 		mir.OperationScalarCast, mir.OperationArrayConstruct, mir.OperationArrayBorrowView, mir.OperationArrayLength, mir.OperationArrayIndex, mir.OperationRegionPlace:

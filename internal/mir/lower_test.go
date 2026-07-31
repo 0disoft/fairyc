@@ -2064,6 +2064,52 @@ fn ref str as_str(ref String value) {
 	}
 }
 
+func TestLowerVerifiesBorrowedByteViewRawPartsMutability(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+resource Buffer {
+    ptr mut void data;
+    usize length;
+    cleanup {}
+}
+fn ref u8[] view(ref Buffer value) {
+    return unsafe { byte_slice::from_raw_parts(value, value.data, value.length) };
+}
+fn ref mut u8[] view_mut(ref mut Buffer value) {
+    return unsafe { byte_slice::from_raw_parts_mut(value, value.data, value.length) };
+}
+`)
+	seen := map[OperationKind]bool{}
+	mutableFunction := -1
+	mutableBlock := -1
+	mutableOperation := -1
+	for functionIndex := range program.Functions {
+		for blockIndex := range program.Functions[functionIndex].Blocks {
+			for operationIndex := range program.Functions[functionIndex].Blocks[blockIndex].Operations {
+				operation := &program.Functions[functionIndex].Blocks[blockIndex].Operations[operationIndex]
+				if operation.Kind != OperationByteSliceFromRawParts && operation.Kind != OperationMutByteSliceFromRawParts {
+					continue
+				}
+				seen[operation.Kind] = true
+				if operation.Kind == OperationMutByteSliceFromRawParts {
+					mutableFunction, mutableBlock, mutableOperation = functionIndex, blockIndex, operationIndex
+				}
+			}
+		}
+	}
+	if !seen[OperationByteSliceFromRawParts] || !seen[OperationMutByteSliceFromRawParts] || mutableFunction < 0 {
+		t.Fatalf("raw-parts operations = %v", seen)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+	mutated := Clone(program)
+	mutated.Functions[mutableFunction].Blocks[mutableBlock].Operations[mutableOperation].OwnerType = hir.SharedBorrow(hir.Type("main::Buffer"))
+	if failures := Verify(mutated); len(failures) == 0 || failures[0].Code != "V1001" {
+		t.Fatalf("Verify() shared-owner mutation failures = %+v", failures)
+	}
+}
+
 func TestLowerMovesResourceThroughBlockTailInOptionArm(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;

@@ -21,7 +21,7 @@ func TestExperimentalWorkspaceCheckUpdatesAndVerifiesLock(t *testing.T) {
 uid = "example.workspace.app"
 name = "app"
 version = "1.0.0"
-language = "fairyc-language/6"
+language = "fairyc-language/7"
 source = "src"
 [workspace]
 members = ["libs/net"]
@@ -36,7 +36,7 @@ features = []
 uid = "example.workspace.net"
 name = "net"
 version = "1.0.0"
-language = "fairyc-language/6"
+language = "fairyc-language/7"
 source = "src"
 `)
 	writeWorkspaceFile(t, root, "libs/net/src/net.fy", "module net;\npub fn i32 value() { return 1; }\n")
@@ -72,7 +72,7 @@ func TestStableCheckOwnsTheCurrentWorkspaceAndLockContract(t *testing.T) {
 uid = "example.stable-check.app"
 name = "app"
 version = "1.0.0"
-language = "fairyc-language/6"
+language = "fairyc-language/7"
 source = "src"
 `)
 	writeWorkspaceFile(t, root, "src/main.fy", "module main;\nfn i32 answer() { return 42; }\n")
@@ -129,7 +129,7 @@ func TestStableCheckPreservesPackageAndSourceFailureCategories(t *testing.T) {
 uid = "example.stable-check.invalid"
 name = "invalid"
 version = "1.0.0"
-language = "fairyc-language/6"
+language = "fairyc-language/7"
 source = "src"
 `)
 	writeWorkspaceFile(t, root, "src/main.fy", "module main;\nfn i32 broken( { return 0; }\n")
@@ -167,13 +167,13 @@ func TestExperimentalWorkspaceCheckLocksBundledStandardLibrary(t *testing.T) {
 uid = "example.workspace.app"
 name = "app"
 version = "1.0.0"
-language = "fairyc-language/6"
+language = "fairyc-language/7"
 source = "src"
 `)
 	writeWorkspaceFile(t, root, "src/main.fy", "module main;\n\nimport std::alloc as alloc;\n\nfn i32 inspect(ref mut alloc::Arena arena) {\n    return 1;\n}\n")
 
 	code, stdout, stderr := runForTest([]string{"experimental", "check-workspace"}, root)
-	if code != ExitSuccess || !strings.Contains(stdout, "2 instance(s), 3 source file(s)") || !strings.HasSuffix(stdout, "lock updated\n") || stderr != "" {
+	if code != ExitSuccess || !strings.Contains(stdout, "2 instance(s), 4 source file(s)") || !strings.HasSuffix(stdout, "lock updated\n") || stderr != "" {
 		t.Fatalf("workspace check = (%d, %q, %q)", code, stdout, stderr)
 	}
 	document, _, err := lockfile.Read(filepath.Join(root, lockfile.FileName))

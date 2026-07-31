@@ -75,7 +75,7 @@ std::io     exact stdout/stderr byte writes, decimal i32 output, and one bounded
 std::c      C scalar types and raw wrapper helpers
 ```
 
-The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.6` exports opaque `std::alloc::Arena`, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, ADR 0210's matching immutable byte-view output operations, ADR 0211's bounded mutable-byte-view stdin read, and ADR 0215's allocation-free decimal `i32` output; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
+The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.7` exports opaque `std::alloc::Arena`, ADR 0246's public safe `std::bytes::Buffer`, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, ADR 0210's matching immutable byte-view output operations, ADR 0211's bounded mutable-byte-view stdin read, and ADR 0215's allocation-free decimal `i32` output; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
 
 Built-in `Option`, `Result`, slices, `str`, and `CStr` get compiler-known view semantics; library modules provide operations over them.
 
@@ -131,9 +131,20 @@ and verifies normalized release through bounded C observers. Windows `build-targ
 initialize, zeroed-resize, and drop, selects Buffer plus its SystemHeap dependency exactly once,
 observes capacity eight and length four, then observes normalized drop state under both MSVC
 profiles. That Windows path does not read the initialized bytes, while the Linux C-only and source
-probes retain byte-level zeroing evidence. These remain closed source-to-C transports; no
-source-visible `std::bytes::Buffer`, safe constructor, borrow surface, or ownership-aware resource
-wrapper exists.
+probes retain byte-level zeroing evidence. Those earlier paths remain closed source-to-C
+transports. ADR 0246 now connects the complete seven-operation runtime slice to a source-visible move-only
+`std::bytes::Buffer`. `with_capacity` and `copy` construct canonical owned state; `reserve`,
+`append`, `resize_zeroed`, `truncate`, and `clear` return `Result<usize, BufferError>` and preserve
+the prior valid state on failure. `len`, `capacity`, and `is_empty` expose scalar metadata. `view`
+returns an owner-bound shared view of exactly the initialized prefix, while `view_mut` returns an
+exclusive view of the same prefix without exposing capacity or changing length. Cleanup invokes
+drop once and leaves no source-visible error path.
+
+`examples/std_bytes_quickstart` uses only safe source. Its local Windows development and release
+builds execute copy, reserve, append, zeroed growth, checked exclusive stores, checked shared reads,
+truncate, clear, and implicit cleanup with result zero. Private layout, spare capacity,
+uninitialized bytes, allocator selection, generic element storage, and a foreign slice ABI remain
+outside the public contract.
 
 The closed C-only native probe configures four Clang/GCC low/optimized executions for construction,
 ordinary and self-overlap append, overflow rollback, no-op reserve, zeroed growth, truncate, clear,

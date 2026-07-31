@@ -17,7 +17,7 @@ The target must not already exist as a file, directory, or symbolic link. The co
 destination path, current-directory mode, template, version, language, force, merge, target,
   toolchain, config, environment, network, stdin, or prompt surface. It writes exactly `.gitignore`,
   `README.md`, `fairy.toml`, `src/main.fy`, and `tests/main.fy` under the new directory. The manifest
-  fixes version `0.1.0`, language `fairyc-language/6`, and source root `src`; public `answer()` returns
+  fixes version `0.1.0`, language `fairyc-language/7`, and source root `src`; public `answer()` returns
   42, private `main()` returns `answer() - 42`, and the semantic test imports and checks `answer`.
   `.gitignore` excludes only `/build/`.
 
@@ -386,7 +386,9 @@ programs and target C-scalar declarations that the Windows profile actually prov
 `c::long` assertions require the four-byte LLP64 layout while `c::ssize_t` fails as unavailable
 before C is emitted. Exact `fy_std_system_heap_allocate_v0`,
 `fy_std_system_heap_deallocate_v0`, `fy_std_buffer_initialize_v0`,
-`fy_std_buffer_resize_zeroed_v0`, `fy_std_buffer_drop_v0`,
+`fy_std_buffer_reserve_v0`, `fy_std_buffer_append_v0`,
+`fy_std_buffer_resize_zeroed_v0`, `fy_std_buffer_truncate_v0`,
+`fy_std_buffer_clear_v0`, `fy_std_buffer_drop_v0`,
 `fy_std_arena_initialize_v0`, `fy_std_region_begin_v0`,
 `fy_std_region_allocate_zeroed_v0`, `fy_std_region_copy_bytes_v0`,
 `fy_std_region_reset_v0`, `fy_std_arena_drop_v0`, and

@@ -174,7 +174,7 @@ completed prefix. Its `main` passes `ref str` and `ref u8[]` through safe intern
 byte helper observes the exact NUL and `A` bytes through checked read-only indexing while the entry contains no raw pointer or `unsafe`,
 prints `Fairy C says hi`, and exits 42. That is real
 FY-to-MSVC process output, unsafe containment, and source-effect enforcement for the legacy example.
-The compiler-bundled SDK `0.0.0-stage0.6` exposes safe text
+The compiler-bundled SDK `0.0.0-stage0.7` exposes safe text
 `std::io::write(ref str)` and `std::io::write_stderr(ref str)` operations plus exact binary
 `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` operations. All four return
 `Result<usize, ConsoleError>`. The same module now exposes allocation-free
@@ -187,6 +187,11 @@ stable build produces the same inspected Windows PE for direct execution. Direct
 EOF, a short input echo, and an eight-byte bounded prefix. Stable `fairyc run` forwards the short
 input after successful compilation, and a separately built `fairyc.exe` repeats that path plus the
 locked build and artifact execution.
+The same SDK now exposes a move-only `std::bytes::Buffer`. Safe code can construct or copy one,
+reserve, append, zero-grow, truncate, clear, inspect length/capacity/emptiness, and borrow the
+initialized prefix as `ref u8[]` or `ref mut u8[]`; raw pointers and all seven runtime symbols stay
+inside the SDK. `examples/std_bytes_quickstart` runs that lifecycle and automatic cleanup in both
+Windows development and release builds without `unsafe` in user code.
 Linux owns a POSIX adapter and four native probes covering all three process streams. The first
 hosted Linux receipt in ADR 0214 executed that configured lane successfully. Byte input and output perform no UTF-8
 validation. General formatting, implicit newlines, text or line input, terminal encoding, live output
@@ -204,14 +209,14 @@ A second provisional slice implements Buffer-owned initialized bytes, failure-at
 relocating self-overlap append, length-overflow rollback, zeroed growth, truncate, clear, and drop.
 Its closed C-only probe and an internal generated FY caller using the exact nested SystemHeap-block
 plus `size_t` record each have four Clang/GCC low/optimized executions in that hosted receipt.
-Three exact Buffer helpers are now admitted by the constrained source
-backend and exercised by the closed native fixture. Used-symbol product linkage selects the Buffer
-plus SystemHeap dependency closure; the public standard-library package remains absent. An
-independent raw caller now links the target-specific Buffer closure as a separate MSVC translation
-unit at both profiles. Its probe-only allocator forces initialization, reserve, relocating
-self-overlap append, and zeroed-resize allocation failures, requires exact pointer/metadata/byte
-preservation, proves normal recovery and zeroed growth, and returns live allocations to zero after
-drop. Product linkage retains the ordinary allocator.
+All seven Buffer helpers are admitted by the constrained source backend. Used-symbol product
+linkage selects the Buffer plus SystemHeap dependency closure, and ADR 0246's bundled
+`std::bytes` module contains the raw boundary behind a move-only safe resource. An independent raw
+caller still links the target-specific Buffer closure as a separate MSVC translation unit at both
+profiles. Its probe-only allocator forces initialization, reserve, relocating self-overlap append,
+and zeroed-resize allocation failures, requires exact pointer/metadata/byte preservation, proves
+normal recovery and zeroed growth, and returns live allocations to zero after drop. Product linkage
+retains the ordinary allocator.
 A third slice implements Arena-owned byte nodes with one active generation-checked Region,
 failure-atomic zeroed or copied placement, reset invalidation, stale-use rejection, and active-drop
 rejection. Its closed C-only probe and an internal generated FY caller using the exact self-linked

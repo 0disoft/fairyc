@@ -82,6 +82,12 @@ The previous parser already preserves the generic call spelling, so migration pr
 bytes and exact manifests require a manual pin update. Public-interface v3, runtime ABI, target
 schemas, C11 transport, MIR version, SDK version, and SDK source bytes remain unchanged.
 
+ADR 0246 cuts the exact pin from `fairyc-language/6` to `fairyc-language/7` because
+`byte_slice::from_raw_parts` and `byte_slice::from_raw_parts_mut` gain compiler-known owner-bound
+meaning. Valid `/6` source that does not claim those paths remains valid `/7`; migration preserves
+source bytes and requires an exact manifest pin update. Public-interface v3, runtime ABI, target
+schemas, C11 transport, and MIR version remain unchanged.
+
 For one function contract, removing a declared effect preserves every existing caller accepted by
 the effect checker. Adding an effect or replacing it with another can invalidate callers and is a
 source-compatibility change. Reordering or deduplicating the same set is not a semantic change
@@ -105,7 +111,7 @@ command now exist; ordinary-command policy and default limits remain undecided.
 
 The current whole-package key encoding remains `fairyc.package-cache-key/v2` with
 `fycache2-sha256-...` text. `fairyc.package-cache-fixtures/v5` supplies current vectors because its
-dependency entries use `fyif3-sha256` public-interface hashes and `fairyc-language/6`; fixture
+dependency entries use `fyif3-sha256` public-interface hashes and `fairyc-language/7`; fixture
 manifests v1 through v4 remain historical. A component algorithm change is an intentional cache miss,
 not permission to reinterpret an older key.
 
@@ -148,9 +154,10 @@ compatibility data; allocator resize, forced OOM, over-aligned allocation, hoste
 and the public `std::alloc` API remain outside the admitted slice.
 ADR 0085 adds exact Buffer initialize, zeroed-resize, and drop linkage. The nested 32-byte record,
 Buffer-to-SystemHeap component closure, deterministic single emission, capacity/length
-observations, and normalized drop state are prototype compatibility data. Zeroed byte observation,
-append/reserve/truncate/clear, safe ownership, and the public `std::bytes` API remain outside the
-Windows slice.
+observations, and normalized drop state are prototype compatibility data. ADR 0246 admits
+reserve/append/truncate/clear linkage and the public source `std::bytes::Buffer` contract on both
+implemented target profiles. The four-field storage remains private implementation data rather
+than a Fairy native or foreign ABI.
 ADR 0086 adds exact Arena initialize, Region begin, zeroed allocation, Region reset, and Arena drop
 linkage. The private 32/24/32-byte node/Arena/Region layouts, target-width generation transport,
 Arena-to-SystemHeap closure, single emission, non-null allocation/node state, active flags, and
@@ -469,6 +476,12 @@ ADR 0215 moves the SDK to `0.0.0-stage0.6` because it adds public
 interface hash, dependent identities, and generated lock bytes change. The language revision,
 runtime ABI identity, output result layout, and numeric status meanings remain unchanged.
 
+ADR 0246 moves the SDK to `0.0.0-stage0.7` because it adds public `std::bytes::Buffer`,
+`BufferError`, and the complete safe constructor, mutation, metadata, and borrow surface. The SDK
+source digest, package instance, public-interface hash, dependent identities, generated locks, and
+whole-package cache keys change. The runtime ABI stays `fairyc-runtime/0`; the previously private
+Buffer C entry points retain their signatures while the target allowlist admits all seven.
+
 ## Package formats
 
 Manifest schema, lockfile schema, source archive schema, and any future binary artifact schema are independent. Stage 0 needs manifest and lockfile schemas only. A stable binary package format would falsely imply a stable native Fairy ABI and is deferred.
@@ -490,8 +503,8 @@ ADR 0144 fixes the first loader behavior for this manifest schema: explicit root
 exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, one language revision,
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
 instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
-`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.6`, language
-`fairyc-language/6`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
+`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.7`, language
+`fairyc-language/7`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 
 ADR 0148 consumes those independently versioned manifest, lock, package-instance, language, SDK,

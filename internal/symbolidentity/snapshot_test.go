@@ -215,7 +215,7 @@ func snapshotPackage(t *testing.T, packageID hir.PackageID, uid, version string,
 		})
 	}
 	return semanticsnapshot.PackageInput{
-		BuildID: packageID, UID: uid, Name: "fixture", Version: version, Language: "fairyc-language/6",
+		BuildID: packageID, UID: uid, Name: "fixture", Version: version, Language: "fairyc-language/7",
 		Instance: instance, Coordinate: coordinate, Source: digest, SourceKind: "local", Role: "root",
 		Files: fileInputs,
 	}

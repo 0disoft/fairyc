@@ -1300,8 +1300,8 @@ func (c *typeChecker) checkCall(expression *ast.Expression, result *hir.Expressi
 		if variant, ok := optionVariantPath(calleeExpression.Text); ok {
 			return c.checkOptionConstructor(expression, result, expected, variant)
 		}
-		if viewType, ok := borrowedViewConstructorPath(calleeExpression.Text); ok {
-			return c.checkBorrowedViewConstructor(expression, result, calleeExpression.Text, viewType)
+		if constructor, ok := borrowedViewConstructorPath(calleeExpression.Text); ok {
+			return c.checkBorrowedViewConstructor(expression, result, calleeExpression.Text, constructor)
 		}
 	}
 	if isRegionPlaceCall(expression) {

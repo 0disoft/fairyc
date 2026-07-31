@@ -6,13 +6,14 @@
     "docs/adr/0219-narrow-must-use-call-contract.md",
     "docs/adr/0220-bounded-scalar-compile-time-evaluation.md",
     "docs/adr/0221-explicit-source-location-intrinsic.md",
+    "docs/adr/0246-public-safe-stage0-byte-buffer.md",
     "docs/package/whole-package-cache-v2.md",
     "docs/compatibility/versioning-v0.md",
     "docs/engineering/03-performance-budget.md"
   ],
   "base": {
     "compilerBuild": "compiler:a",
-    "languageRevision": "fairyc-language/6",
+    "languageRevision": "fairyc-language/7",
     "mirVersion": "fairyc-mir/0",
     "targetSchema": "fairyc.target-spec/v0:x86_64-windows-msvc",
     "abiProfile": "microsoft-x64/v0",
@@ -36,7 +37,7 @@
       "id": "baseline",
       "override": {},
       "relation": "baseline",
-      "expectKey": "fycache2-sha256-5e65c63f4362d75f5d2aced18ed3a7814f1525327ce96bc40206d815d072d6a9"
+      "expectKey": "fycache2-sha256-44fb13dc634451c83efcbd76fe13ea375855f59b7aff52fc31da01df9de95538"
     },
     {
       "id": "compiler-build",

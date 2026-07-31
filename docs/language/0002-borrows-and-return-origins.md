@@ -108,7 +108,7 @@ exception.
 
 ## Raw and foreign boundaries
 
-Raw pointers do not acquire a safe origin automatically. Foreign signatures expose raw pointers and scalar ABI values. The two exact owner-bound text built-ins are the only current raw-parts reconstruction path: they take provenance from their separate safe owner argument and still require the unsafe wrapper to establish non-nullness or the admitted empty-string case, extent, alignment, aliasing, UTF-8 or CStr invariants, and lifetime for the duration promised by its API.
+Raw pointers do not acquire a safe origin automatically. Foreign signatures expose raw pointers and scalar ABI values. Four exact owner-bound built-ins are the only current raw-parts reconstruction path: the two text forms return shared `str` or `CStr` views, while the two byte-slice forms return shared or exclusive `u8[]` views. They take provenance from their separate safe owner argument. The exclusive form additionally requires exclusive owner provenance and mutable data. Every unsafe wrapper must still establish the permitted null-and-zero case, extent, alignment, aliasing, initialization, text invariants where applicable, and lifetime for the duration promised by its safe API.
 
 The C backend must not emit `restrict`, LLVM `noalias`, or related alias promises merely because a pointer came from safe-looking source syntax. Such attributes require proof from the final borrow analysis and are disabled for the Stage 0 reference backend.
 

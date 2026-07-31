@@ -600,19 +600,29 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 					failures = append(failures, VerificationError{Code: "V1701", Entity: entity, Detail: "raw borrow pointer lacks matching unsafe provenance"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
-			case OperationStrFromRawParts, OperationCStrFromRawParts:
+			case OperationStrFromRawParts, OperationCStrFromRawParts, OperationByteSliceFromRawParts, OperationMutByteSliceFromRawParts:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
 				_, ownerMutable, ownerBorrow := hir.BorrowElement(operation.OwnerType)
 				wantType := hir.SharedBorrow(hir.TypeStr)
 				wantOperator := "str::from_raw_parts"
 				entityKind := "str-from-raw-parts"
+				wantOwnerMutable := false
 				if operation.Kind == OperationCStrFromRawParts {
 					wantType = hir.SharedBorrow(hir.TypeCStr)
 					wantOperator = "CStr::from_raw_parts"
 					entityKind = "cstr-from-raw-parts"
+				} else if operation.Kind == OperationByteSliceFromRawParts {
+					wantType = hir.SharedBorrow(hir.TypeByteSlice)
+					wantOperator = "byte_slice::from_raw_parts"
+					entityKind = "byte-slice-from-raw-parts"
+				} else if operation.Kind == OperationMutByteSliceFromRawParts {
+					wantType = hir.MutableBorrow(hir.TypeByteSlice)
+					wantOperator = "byte_slice::from_raw_parts_mut"
+					entityKind = "mut-byte-slice-from-raw-parts"
+					wantOwnerMutable = true
 				}
 				shapeValid := operation.DestinationLocal != NoLocal && len(operation.Operands) == 3 &&
-					operation.Operands[0].Kind == OperandLocal && ownerBorrow && !ownerMutable &&
+					operation.Operands[0].Kind == OperandLocal && ownerBorrow && ownerMutable == wantOwnerMutable &&
 					operation.Type == wantType && operation.Operator == wantOperator
 				if !shapeValid {
 					failures = append(failures, VerificationError{Code: "V1001", Entity: entity, Detail: "borrowed-view raw-parts shape is invalid"})
