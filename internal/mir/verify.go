@@ -796,9 +796,19 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
 			case OperationRegionEnter:
-				if operation.Symbol == hir.NoSymbol || len(operation.Operands) != 0 || operation.DestinationLocal != NoLocal {
+				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
+				arenaType, mutable, borrow := hir.BorrowElement(operation.Type)
+				shapeValid := operation.Symbol != hir.NoSymbol && len(operation.Operands) == 1 &&
+					operation.Operands[0].Kind == OperandLocal && operation.DestinationLocal == NoLocal &&
+					borrow && mutable && operation.Operator == "&mut" && operation.OwnerType == arenaType &&
+					resourceTypes[arenaType] != nil
+				if !shapeValid {
 					failures = append(failures, VerificationError{Code: "V1403", Entity: entity, Detail: "region enter shape is invalid"})
-				} else if _, active := state.regions[operation.Symbol]; active {
+				}
+				if operation.Symbol == hir.NoSymbol {
+					break
+				}
+				if _, active := state.regions[operation.Symbol]; active {
 					failures = append(failures, VerificationError{Code: "V1403", Entity: entity, Detail: "region is entered while already active"})
 				} else {
 					state.regions[operation.Symbol] = entity

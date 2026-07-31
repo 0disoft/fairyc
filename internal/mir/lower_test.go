@@ -94,6 +94,58 @@ fn i32 main() {
 	}
 }
 
+func TestLowerLexicalRegionRetainsArenaOwnerOperand(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSourceAtPath(t, "std/alloc.fy", `module std::alloc;
+pub resource Arena {
+    i32 opaque;
+    cleanup {}
+}
+fn i32 main() {
+    var Arena arena = Arena { .opaque = 0 };
+    region scratch in ref mut arena {
+        let ref i32 stored = scratch.place(42);
+    }
+    return 42;
+}
+`)
+	var enter *Operation
+	for functionIndex := range program.Functions {
+		for blockIndex := range program.Functions[functionIndex].Blocks {
+			operations := program.Functions[functionIndex].Blocks[blockIndex].Operations
+			for operationIndex := range operations {
+				if operations[operationIndex].Kind == OperationRegionEnter {
+					enter = &operations[operationIndex]
+				}
+			}
+		}
+	}
+	arenaType := hir.Type("std::alloc::Arena")
+	if enter == nil || len(enter.Operands) != 1 || enter.Operands[0].Kind != OperandLocal ||
+		enter.OwnerType != arenaType || enter.Type != hir.MutableBorrow(arenaType) || enter.Operator != "&mut" {
+		t.Fatalf("region enter = %+v", enter)
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+
+	mutated := Clone(program)
+	for functionIndex := range mutated.Functions {
+		for blockIndex := range mutated.Functions[functionIndex].Blocks {
+			operations := mutated.Functions[functionIndex].Blocks[blockIndex].Operations
+			for operationIndex := range operations {
+				if operations[operationIndex].Kind == OperationRegionEnter {
+					operations[operationIndex].Operands = nil
+				}
+			}
+		}
+	}
+	failures := Verify(mutated)
+	if len(failures) != 1 || failures[0].Code != "V1403" || failures[0].Detail != "region enter shape is invalid" {
+		t.Fatalf("Verify(mutated) failures = %+v", failures)
+	}
+}
+
 func TestLowerPreservesResourceDropEffectsOnDefinitionAndGlue(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
@@ -2314,14 +2366,19 @@ fn i32 main() {
 
 func lowerTestSource(t *testing.T, text string) Program {
 	t.Helper()
-	parsed, err := frontend.AnalyzeSyntax(source.NewFile("main.fy", []byte(text)), source.DefaultLimits())
+	return lowerTestSourceAtPath(t, "main.fy", text)
+}
+
+func lowerTestSourceAtPath(t *testing.T, path, text string) Program {
+	t.Helper()
+	parsed, err := frontend.AnalyzeSyntax(source.NewFile(path, []byte(text)), source.DefaultLimits())
 	if err != nil {
 		t.Fatalf("AnalyzeSyntax() error = %v", err)
 	}
 	if len(parsed.Tree.Diagnostics) != 0 || parsed.AST == nil {
 		t.Fatalf("AnalyzeSyntax() diagnostics = %+v, AST = %+v", parsed.Tree.Diagnostics, parsed.AST)
 	}
-	result := semantic.Analyze([]semantic.File{{Path: "main.fy", Module: parsed.AST}})
+	result := semantic.Analyze([]semantic.File{{Path: path, Module: parsed.AST}})
 	if result.CompletedThrough != semantic.PhaseFlow || len(result.Diagnostics) != 0 || len(result.Unsupported) != 0 {
 		t.Fatalf("Analyze() result = %+v", result)
 	}

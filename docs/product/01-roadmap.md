@@ -233,7 +233,9 @@ copied byte placement, reset invalidation, stale-use rejection, and active-drop 
 C-only executions and four generated-Fairy source-call executions ran in ADR 0214's hosted receipt.
 The internal caller crosses exact self-linked node, Arena, and Region records, obtains zeroed bytes
 through `void **`, and verifies reset/drop generations; lexical Region lowering, source-level
-`std::alloc` construction, and safe calls remain missing. Windows target resolution now admits six
+`std::alloc` construction, and safe calls remain missing. ADR 0249 now retains the exact Arena owner
+local and mutable-borrow type on verified `region-enter`, removing the prior source/HIR recovery gap;
+opaque native Region storage and C lowering still remain. Windows target resolution now admits six
 exact Arena/Region calls, including copied placement. The declared target build executes five
 lifecycle calls at both MSVC profiles, observes non-null
 allocation plus node/active/generation state, reset invalidation, and final drop, and closes Arena

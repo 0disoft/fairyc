@@ -1235,11 +1235,22 @@ func (l *functionLowerer) lowerRegion(expression *hir.Expression) (Operand, erro
 	if _, active := l.regions[expression.Symbol]; active {
 		return Operand{}, fmt.Errorf("region %d is entered twice", expression.Symbol)
 	}
+	arenaOwner, err := l.lowerExpression(&arena.Children[0])
+	if err != nil {
+		return Operand{}, err
+	}
+	if arenaOwner.Kind != OperandLocal {
+		return Operand{}, fmt.Errorf("executable lexical region source must name one Arena local")
+	}
 	factIndex := len(l.result.RegionScopes)
 	l.result.RegionScopes = append(l.result.RegionScopes, RegionScopeFact{Region: expression.Span})
 	l.regions[expression.Symbol] = factIndex
 	l.regionStack = append(l.regionStack, activeRegion{symbol: expression.Symbol, span: expression.Span, factIndex: factIndex})
-	l.appendOperation(Operation{Kind: OperationRegionEnter, Span: expression.Span, Symbol: expression.Symbol, DestinationLocal: NoLocal})
+	l.appendOperation(Operation{
+		Kind: OperationRegionEnter, Span: expression.Span, Symbol: expression.Symbol,
+		DestinationLocal: NoLocal, Operands: []Operand{arenaOwner},
+		OwnerType: arena.Children[0].Type, Type: arena.Type, Operator: "&mut",
+	})
 	_, terminated, err := l.lowerNestedBlock(*expression.Block)
 	if err != nil {
 		return Operand{}, err

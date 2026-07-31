@@ -12,7 +12,10 @@ const (
 	valueSymbol  hir.SymbolID = 1
 	tokenSymbol  hir.SymbolID = 2
 	regionSymbol hir.SymbolID = 3
+	arenaSymbol  hir.SymbolID = 4
 )
+
+var seedArenaType = hir.Type("seed::Arena")
 
 func constructSeed(id string) (mir.Program, error) {
 	var function mir.Function
@@ -30,8 +33,10 @@ func constructSeed(id string) (mir.Program, error) {
 		function = borrowReturnSeed()
 	case "plain-region":
 		function = plainRegionSeed()
+		resourceTypes = []mir.ResourceType{seedArenaResourceType()}
 	case "break-region-control":
 		function = breakRegionControlSeed()
+		resourceTypes = []mir.ResourceType{seedArenaResourceType()}
 	case "checked-division":
 		function = checkedDivisionSeed()
 	case "checked-arithmetic":
@@ -46,6 +51,14 @@ func constructSeed(id string) (mir.Program, error) {
 		return mir.Program{}, fmt.Errorf("unknown seed %q", id)
 	}
 	return mir.Program{ResourceTypes: resourceTypes, Functions: []mir.Function{function}}, nil
+}
+
+func seedArenaResourceType() mir.ResourceType {
+	return mir.ResourceType{
+		Type: seedArenaType, Entity: "resource-type:seed-arena",
+		Fields:   []mir.ResourceField{{Name: "opaque", Type: hir.TypeI32}},
+		DropKind: hir.ResourceDropEmpty, DropSymbol: hir.NoSymbol,
+	}
 }
 
 func scalarReturnSeed() mir.Function {
@@ -115,8 +128,9 @@ func borrowReturnSeed() mir.Function {
 
 func plainRegionSeed() mir.Function {
 	return mir.Function{
-		Name:  "seed::plain-region",
-		Entry: 0,
+		Name:      "seed::plain-region",
+		Entry:     0,
+		Resources: []mir.ResourceLocal{{Symbol: arenaSymbol, Type: seedArenaType, Parameter: true, Entity: "local:arena"}},
 		Entities: []string{
 			"local:inert-value", "local:resource-value", "operation:place-inert", "operation:region-reset", "region:scratch", "terminator:return",
 		},
@@ -126,9 +140,12 @@ func plainRegionSeed() mir.Function {
 		Blocks: []mir.Block{{
 			ID: 0,
 			Operations: []mir.Operation{
-				{Kind: mir.OperationRegionEnter, Entity: "region:scratch", Symbol: regionSymbol, DestinationLocal: mir.NoLocal},
+				{Kind: mir.OperationRegionEnter, Entity: "region:scratch", Symbol: regionSymbol, DestinationLocal: mir.NoLocal,
+					Operands: []mir.Operand{{Kind: mir.OperandLocal, Local: mir.LocalID(arenaSymbol)}}, OwnerType: seedArenaType,
+					Type: hir.MutableBorrow(seedArenaType), Operator: "&mut"},
 				{Kind: mir.OperationRegionPlace, Entity: "operation:place-inert", Symbol: regionSymbol, DestinationLocal: mir.LocalID(valueSymbol), Operands: []mir.Operand{{Kind: mir.OperandI32, I32: 1}}, Type: hir.TypeI32},
 				{Kind: mir.OperationRegionReset, Entity: "operation:region-reset", Symbol: regionSymbol, DestinationLocal: mir.NoLocal, ExitKind: "fallthrough"},
+				{Kind: mir.OperationMove, Symbol: arenaSymbol},
 			},
 			Terminator: mir.Terminator{Kind: mir.TerminatorReturn, Entity: "terminator:return", UnwindSuccessor: mir.NoBlock, ReturnValue: mir.Operand{Kind: mir.OperandI32, I32: 0}},
 		}},
@@ -140,6 +157,7 @@ func breakRegionControlSeed() mir.Function {
 		Name:       "seed::break-region-control",
 		ResultType: hir.TypeI32,
 		Entry:      0,
+		Resources:  []mir.ResourceLocal{{Symbol: arenaSymbol, Type: seedArenaType, Parameter: true, Entity: "local:arena"}},
 		Entities: []string{
 			"block:break-body", "block:loop-exit", "local:placed", "operation:discard-placement",
 			"operation:place-inert", "operation:region-reset", "region:scratch", "terminator:return",
@@ -151,7 +169,9 @@ func breakRegionControlSeed() mir.Function {
 			{
 				ID: 0, Entity: "block:break-body",
 				Operations: []mir.Operation{
-					{Kind: mir.OperationRegionEnter, Entity: "region:scratch", Symbol: regionSymbol, DestinationLocal: mir.NoLocal},
+					{Kind: mir.OperationRegionEnter, Entity: "region:scratch", Symbol: regionSymbol, DestinationLocal: mir.NoLocal,
+						Operands: []mir.Operand{{Kind: mir.OperandLocal, Local: mir.LocalID(arenaSymbol)}}, OwnerType: seedArenaType,
+						Type: hir.MutableBorrow(seedArenaType), Operator: "&mut"},
 					{Kind: mir.OperationRegionPlace, Entity: "operation:place-inert", Symbol: regionSymbol, DestinationLocal: mir.LocalID(valueSymbol), Operands: []mir.Operand{{Kind: mir.OperandI32, I32: 1}}, Type: hir.TypeI32},
 					{Kind: mir.OperationMove, Entity: "operation:discard-placement", Symbol: valueSymbol},
 					{Kind: mir.OperationRegionReset, Entity: "operation:region-reset", Symbol: regionSymbol, DestinationLocal: mir.NoLocal, ExitKind: "break"},
@@ -160,6 +180,7 @@ func breakRegionControlSeed() mir.Function {
 			},
 			{
 				ID: 1, Entity: "block:loop-exit",
+				Operations: []mir.Operation{{Kind: mir.OperationMove, Symbol: arenaSymbol}},
 				Terminator: mir.Terminator{Kind: mir.TerminatorReturn, Entity: "terminator:return", UnwindSuccessor: mir.NoBlock, ReturnValue: mir.Operand{Kind: mir.OperandI32, I32: 0}},
 			},
 		},

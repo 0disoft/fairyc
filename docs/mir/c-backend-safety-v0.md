@@ -141,6 +141,10 @@ Copy-only tags do not need drop; a generic tag needs drop only when a direct pay
 Payload extraction must agree with the MIR move marker. Result propagation reconstructs the
 enclosing function's declared Result type on the error path.
 
+Verified `region-enter` now retains its exact Arena owner local and mutable-borrow type. The current
+emitter deliberately still rejects enter/place/reset rather than deriving an Arena address from
+source or HIR side data; an opaque native storage and fallible operation contract must land first.
+
 The emitter rejects empty, nested-struct/array/C-scalar/borrow/Region/nested-resource or partially
 initialized resources, and nonempty drops without verifier-matched glue;
 nested tags, user-enum/array/raw-pointer/C-scalar tagged payloads, and other tagged payload

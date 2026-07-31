@@ -575,6 +575,7 @@ type callCompletion struct {
 
 type runtimeRegion struct {
 	span       hir.Span
+	owner      *resourceState
 	placements []runtimeValue
 }
 
@@ -906,7 +907,15 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 				if _, active := regions[operation.Symbol]; active {
 					return callCompletion{}, fmt.Errorf("region enter in %q reuses active region %d", function.Name, operation.Symbol)
 				}
-				regions[operation.Symbol] = &runtimeRegion{span: operation.Span}
+				owner, err := evaluateOne(locals, operation.Operands)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("region enter in %q: %w", function.Name, err)
+				}
+				if owner.kind != valueResource || owner.resource == nil || owner.resource.definition == nil ||
+					owner.resource.definition.Type != operation.OwnerType || operation.Type != hir.MutableBorrow(operation.OwnerType) {
+					return callCompletion{}, fmt.Errorf("region enter in %q has incompatible Arena owner", function.Name)
+				}
+				regions[operation.Symbol] = &runtimeRegion{span: operation.Span, owner: owner.resource}
 			case mir.OperationRegionPlace:
 				region := regions[operation.Symbol]
 				if region == nil {

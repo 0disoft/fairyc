@@ -195,7 +195,7 @@ carries the same exact operand type through its marker, switch, and continuation
 
 ### Statements
 
-Statements include local storage markers, assignment, drop-flag update, `Drop`, region mark or reset, and explicit provenance markers for unsafe operations. Assignments consume already-evaluated operands; they do not contain nested side effects.
+Statements include local storage markers, assignment, drop-flag update, `Drop`, region mark or reset, and explicit provenance markers for unsafe operations. A `region-enter` retains one live Arena owner local plus the exact owner and mutable-borrow types; later consumers may not recover that identity from source or HIR side data. Assignments consume already-evaluated operands; they do not contain nested side effects.
 
 ### Terminators
 
@@ -279,7 +279,7 @@ The verifier runs before every interpreter or backend handoff.
 | `V1302` | A safe-borrow return has exactly one permitted origin. |
 | `V1401` | A region-derived value does not escape its region. |
 | `V1402` | Plain-region allocation never receives a `NeedsDrop` type. |
-| `V1403` | Normal control flow enters, places into, and resets each lexical Region exactly once. |
+| `V1403` | Normal control flow enters each lexical Region from one verified live mutable Arena owner, places into it, and resets it exactly once. |
 | `V1501` | Every potentially trapping operation has one complete checked predecessor with matching marker, operands, operator, categories, success edge, and non-returning trap edge. |
 | `V1502` | A Stage 0 call has no unwind successor. |
 | `V1601` | `?`, implicit drop, source short-circuiting, and nested side effects do not remain. |
@@ -295,7 +295,7 @@ The source cases do not test malformed graphs. `spec/fixtures/mir-verifier/manif
 
 ## Interpreter
 
-The first semantic oracle is a small MIR interpreter supporting scalars, tagged `Option` and `Result`, restricted inert user enums, borrowed UTF-8 and byte views with byte-length reads, moves, drop traces, region mark and reset, branches, and traps. It constructs user enums, selects declaration-ordered variants, extracts named payload fields, and also constructs inert structs and resources and resolves field reads from their distinct verified program-level definitions; only the resource definition participates in reverse-field cleanup. Empty and nonempty drop classifications execute; the latter invokes verifier-linked private glue in a distinct `dropping` state before field cleanup. Resource effect sets and their exact glue match are verified, but the interpreter does not emulate host capabilities. Its options-only fixture harness may intercept explicitly bound call symbols as bounded in-memory stdout/stderr byte sinks; those hooks are not MIR operations, source-name conventions, standard-library APIs, or host I/O. The interpreter is not required to emulate a complete operating system or C ABI.
+The first semantic oracle is a small MIR interpreter supporting scalars, tagged `Option` and `Result`, restricted inert user enums, borrowed UTF-8 and byte views with byte-length reads, moves, drop traces, region mark and reset, branches, and traps. Region entry evaluates and retains the exact verified Arena resource identity but does not emulate its storage or allocator. It constructs user enums, selects declaration-ordered variants, extracts named payload fields, and also constructs inert structs and resources and resolves field reads from their distinct verified program-level definitions; only the resource definition participates in reverse-field cleanup. Empty and nonempty drop classifications execute; the latter invokes verifier-linked private glue in a distinct `dropping` state before field cleanup. Resource effect sets and their exact glue match are verified, but the interpreter does not emulate host capabilities. Its options-only fixture harness may intercept explicitly bound call symbols as bounded in-memory stdout/stderr byte sinks; those hooks are not MIR operations, source-name conventions, standard-library APIs, or host I/O. The interpreter is not required to emulate a complete operating system or C ABI.
 
 The interpreter precedes a second native backend. Differential fixtures compare interpreter outcomes with generated C compiled at multiple optimization levels and, where the target fixture declares them, more than one independent C compiler.
 

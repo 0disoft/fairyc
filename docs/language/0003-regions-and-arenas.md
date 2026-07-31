@@ -62,7 +62,9 @@ Normal lexical exit resets the region after ordinary inner-scope resource cleanu
 The current executable prototype proves fallthrough, direct `return`, Result `?` propagation,
 nearest-loop `break` and `continue`, and nested Region exits with explicit MIR enter, place, drop,
 and reset operations. Its trace records the exit kind, placement count, and how many resource drops
-completed before reset without exposing addresses or offsets. Executable lowering currently requires the Arena source to be a direct `ref mut` local; a
+completed before reset without exposing addresses or offsets. The verified `region-enter` retains
+that exact Arena owner local, owner resource type, and mutable-borrow type; it does not retain or
+reconstruct a raw address. Executable lowering currently requires the Arena source to be a direct `ref mut` local; a
 side-effecting borrow-producing expression is rejected rather than skipped.
 
 ## Concurrency

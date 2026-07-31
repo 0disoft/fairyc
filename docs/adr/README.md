@@ -258,6 +258,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0246-public-safe-stage0-byte-buffer.md`: adds public move-only `std::bytes::Buffer`, complete safe mutation and owner-bound byte views, language `/7`, SDK stage0.7, closed runtime linkage, and two-profile native execution.
 - `0247-public-safe-stage0-owned-text.md`: promotes move-only String/CString ownership, fallible construction and append, exact scalar metadata, owner-bound text/CStr views, and typed errors into public `std::text` at SDK stage0.8 without changing language `/7` or runtime ABI `/0`.
 - `0248-public-allocation-free-utf8-validation.md`: adds explicit allocation-free byte-slice UTF-8 validation with an owner-bound `ref str` Result payload at SDK stage0.9 without implicit conversion or a public view ABI.
+- `0249-retained-arena-owner-in-region-mir.md`: retains the exact Arena owner local and mutable-borrow type on verified `region-enter` so future native lowering cannot recover ownership from source or HIR side data.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 
