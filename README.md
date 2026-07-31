@@ -174,7 +174,7 @@ completed prefix. Its `main` passes `ref str` and `ref u8[]` through safe intern
 byte helper observes the exact NUL and `A` bytes through checked read-only indexing while the entry contains no raw pointer or `unsafe`,
 prints `Fairy C says hi`, and exits 42. That is real
 FY-to-MSVC process output, unsafe containment, and source-effect enforcement for the legacy example.
-The compiler-bundled SDK `0.0.0-stage0.7` exposes safe text
+The compiler-bundled SDK `0.0.0-stage0.8` exposes safe text
 `std::io::write(ref str)` and `std::io::write_stderr(ref str)` operations plus exact binary
 `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` operations. All four return
 `Result<usize, ConsoleError>`. The same module now exposes allocation-free
@@ -192,6 +192,12 @@ reserve, append, zero-grow, truncate, clear, inspect length/capacity/emptiness, 
 initialized prefix as `ref u8[]` or `ref mut u8[]`; raw pointers and all seven runtime symbols stay
 inside the SDK. `examples/std_bytes_quickstart` runs that lifecycle and automatic cleanup in both
 Windows development and release builds without `unsafe` in user code.
+The same SDK now exposes move-only `std::text::String` and `std::text::CString`. Safe code can copy
+UTF-8 text, append to String, inspect byte lengths and emptiness, borrow owner-bound `ref str` or
+`ref CStr`, and observe typed text/allocation status on failure. `examples/std_text_quickstart`
+executes nonempty and empty construction, append, interior-NUL rejection, views, and implicit cleanup
+in both Windows development and release builds without raw pointers, foreign declarations, or
+`unsafe` in user code.
 Linux owns a POSIX adapter and four native probes covering all three process streams. The first
 hosted Linux receipt in ADR 0214 executed that configured lane successfully. Byte input and output perform no UTF-8
 validation. General formatting, implicit newlines, text or line input, terminal encoding, live output
@@ -294,9 +300,9 @@ observers require exact bytes, repeated append, one terminator, and normalized r
 internal transports. A separate checked-in example now wraps opaque storage bridges in move-only
 Fairy `String` and `CString` resources, maps operation failures into source `Result`, exposes scalar
 metadata plus owner-bound `ref str` and `ref CStr` views, and runs its C release through verified resource
-drop glue. Exact unsafe raw-parts built-ins remain private to the support module, and Flow rejects
-moving an owner before the derived view's last use. This is an example-level safe boundary, not a
-stable public `std::text` module, layout, or foreign borrowed-view ABI.
+drop glue. Exact unsafe raw-parts built-ins remain inside the SDK, and Flow rejects moving an owner
+before the derived view's last use. ADR 0247 promotes this boundary to public `std::text` while
+keeping private layout, raw symbols, mutable bytes, and any foreign borrowed-view ABI excluded.
 Windows `build-target` now admits the exact owned-text, CStr, and opaque storage-bridge entry points. A compiler-owned
 five-byte UTF-8 literal is copied into String, viewed at length five, appended to length ten, and
 dropped to normalized storage; the same input becomes a six-byte terminated CString whose view has
@@ -358,7 +364,8 @@ unimplemented.
 The C emitter records only foreign link names used by actual calls. `experimental build` uses one
 exact-symbol contract to link the minimal provisional standard-library dependency closure; unused
 declarations pull in nothing, while arbitrary foreign libraries and linker arguments remain closed.
-This enables raw internal calls, not yet a public `std::*` programming surface.
+These raw calls remain closed implementation details; public `std::bytes`, `std::text`, and
+`std::io` wrappers expose only their audited safe subsets.
 A deterministic native C11 plus explicit POSIX-typedef probe now translates the eleven valid layout cases into private numeric
 types for Clang/GCC at `-O0` and `-O2`. This Windows host cannot execute those four probe runs, but
 ADR 0214 records their first hosted success, so `c-layout-probes` is no longer missing for Linux.
@@ -370,8 +377,8 @@ exception, virtual-walks raiser, termination, and catcher frames, and requires o
 `__finally` execution under both profiles. The target marker remains missing until broader layout
 and independent/source-level/hosted ABI and unwind evidence exists. A host-independent PE parser
 now validates the host-smoke product, both declared-target profile products, both safe File and
-safe owned-text profile products, nine package-workspace build products including four measured
-experimental, three stable quickstart builds, and two safe `std::io` builds, nine package-workspace run
+safe owned-text profile products, 13 package-workspace build products including public `std::bytes`
+and `std::text` development/release quickstarts, and nine package-workspace run
 products, two direct run-target temporary products, two exec-target output products, and all
 eighteen raw or generated-Fairy Windows File, Buffer, owned-text, Arena, layout,
 ABI, struct-result, and unwind probe images as bounded

@@ -242,6 +242,8 @@ const checkedInStdIOManifestPath = "examples/std_io_quickstart/fairy.toml"
 const checkedInStdIOMainPath = "examples/std_io_quickstart/src/main.fy"
 const checkedInStdBytesManifestPath = "examples/std_bytes_quickstart/fairy.toml"
 const checkedInStdBytesMainPath = "examples/std_bytes_quickstart/src/main.fy"
+const checkedInStdTextManifestPath = "examples/std_text_quickstart/fairy.toml"
+const checkedInStdTextMainPath = "examples/std_text_quickstart/src/main.fy"
 const checkedInWindowsFilePath = "examples/windows_file/main.fy"
 const checkedInWindowsFileSupportPath = "examples/windows_file/windows_file.fy"
 const checkedInOwnedTextPath = "examples/owned_text/main.fy"
@@ -323,6 +325,14 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("read checked-in std::bytes workspace entry: %w", err)
 	}
+	stdTextManifest, err := os.ReadFile(filepath.FromSlash(checkedInStdTextManifestPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in std::text workspace manifest: %w", err)
+	}
+	stdTextMain, err := os.ReadFile(filepath.FromSlash(checkedInStdTextMainPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in std::text workspace entry: %w", err)
+	}
 	windowsFileSource, err := os.ReadFile(filepath.FromSlash(checkedInWindowsFilePath))
 	if err != nil {
 		return fmt.Errorf("read checked-in Windows File source: %w", err)
@@ -381,6 +391,8 @@ func run() error {
 		checkedInStdIOMainPath:            string(stdIOMain),
 		checkedInStdBytesManifestPath:     string(stdBytesManifest),
 		checkedInStdBytesMainPath:         string(stdBytesMain),
+		checkedInStdTextManifestPath:      string(stdTextManifest),
+		checkedInStdTextMainPath:          string(stdTextMain),
 		checkedInWindowsFilePath:          string(windowsFileSource),
 		checkedInWindowsFileSupportPath:   string(windowsFileSupportSource),
 		checkedInOwnedTextPath:            string(ownedTextSource),
@@ -745,11 +757,16 @@ func run() error {
 	}
 	workspaceRunExecutions++
 	workspaceBuildExecutions++
-	stdBytesBuildExecutions, err := runStdBytesQuickstartProof(root)
+	stdBytesBuildExecutions, err := runStdlibQuickstartProof(root, "std_bytes_quickstart", "std-bytes-quickstart", "std::bytes", 0)
 	if err != nil {
 		return err
 	}
 	workspaceBuildExecutions += stdBytesBuildExecutions
+	stdTextBuildExecutions, err := runStdlibQuickstartProof(root, "std_text_quickstart", "std-text-quickstart", "std::text", 42)
+	if err != nil {
+		return err
+	}
+	workspaceBuildExecutions += stdTextBuildExecutions
 	var atlasCallProcessMeasurement buildmeasure.AtlasCallProcessReport
 	standaloneCompilerBytes, err := runStandaloneCompiler(repositoryRoot, root, clockResolution, &atlasCallProcessMeasurement)
 	if err != nil {
@@ -960,9 +977,9 @@ func runStableWorkspaceBuildProof(root string) (int, error) {
 	return 2, nil
 }
 
-func runStdBytesQuickstartProof(root string) (int, error) {
-	workspaceRoot := filepath.Join(root, "examples", "std_bytes_quickstart")
-	artifactPath := filepath.Join(workspaceRoot, "build", "std-bytes-quickstart.exe")
+func runStdlibQuickstartProof(root string, directory string, artifactBase string, module string, expectedResult int32) (int, error) {
+	workspaceRoot := filepath.Join(root, "examples", directory)
+	artifactPath := filepath.Join(workspaceRoot, "build", artifactBase+".exe")
 	profiles := []struct {
 		name       string
 		arguments  []string
@@ -975,22 +992,22 @@ func runStdBytesQuickstartProof(root string) (int, error) {
 		var stdout bytes.Buffer
 		var stderr bytes.Buffer
 		code := cli.Run(profile.arguments, workspaceRoot, &stdout, &stderr)
-		want := fmt.Sprintf("built: build/std-bytes-quickstart.exe (x86_64-windows-msvc, %s, %s)\n", profile.name, profile.lockStatus)
+		want := fmt.Sprintf("built: build/%s.exe (x86_64-windows-msvc, %s, %s)\n", artifactBase, profile.name, profile.lockStatus)
 		if code != cli.ExitSuccess || stderr.Len() != 0 || stdout.String() != want {
-			return 0, fmt.Errorf("std::bytes %s build returned code %d, stdout %q, stderr %q", profile.name, code, stdout.String(), stderr.String())
+			return 0, fmt.Errorf("%s %s build returned code %d, stdout %q, stderr %q", module, profile.name, code, stdout.String(), stderr.String())
 		}
 		artifact, err := os.ReadFile(artifactPath)
 		if err != nil {
-			return 0, fmt.Errorf("read std::bytes %s artifact: %w", profile.name, err)
+			return 0, fmt.Errorf("read %s %s artifact: %w", module, profile.name, err)
 		}
 		if _, err := pecoff.InspectExecutable(artifact); err != nil {
-			return 0, fmt.Errorf("inspect std::bytes %s PE image: %w", profile.name, err)
+			return 0, fmt.Errorf("inspect %s %s PE image: %w", module, profile.name, err)
 		}
 		if _, err := pecoff.InspectAMD64Unwind(artifact); err != nil {
-			return 0, fmt.Errorf("inspect std::bytes %s unwind data: %w", profile.name, err)
+			return 0, fmt.Errorf("inspect %s %s unwind data: %w", module, profile.name, err)
 		}
-		if err := executeExpectResult(artifactPath, 0); err != nil {
-			return 0, fmt.Errorf("execute std::bytes %s artifact: %w", profile.name, err)
+		if err := executeExpectResult(artifactPath, expectedResult); err != nil {
+			return 0, fmt.Errorf("execute %s %s artifact: %w", module, profile.name, err)
 		}
 	}
 	return len(profiles), nil

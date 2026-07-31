@@ -191,6 +191,50 @@ func TestPackageWorkspaceReachesQualifiedWindowsCEmission(t *testing.T) {
 	}
 }
 
+func TestStdTextQuickstartReachesQualifiedWindowsCEmission(t *testing.T) {
+	t.Parallel()
+	repositoryRoot := filepath.Join("..", "..")
+	manifest, err := os.ReadFile(filepath.Join(repositoryRoot, "examples", "std_text_quickstart", "fairy.toml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	entrySource, err := os.ReadFile(filepath.Join(repositoryRoot, "examples", "std_text_quickstart", "src", "main.fy"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := t.TempDir()
+	writeWorkspaceFile(t, root, "fairy.toml", string(manifest))
+	writeWorkspaceFile(t, root, "src/main.fy", string(entrySource))
+	workspace, err := workspaceloader.Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	input, err := workspace.SemanticInput()
+	if err != nil {
+		t.Fatal(err)
+	}
+	checked, err := compiler.CheckPackages(input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !checked.Verified {
+		t.Fatalf("std::text quickstart did not reach verified MIR: %+v", checked.Semantic)
+	}
+	entry, err := workspaceEntryName(workspace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	unit, err := cbackend.Emit(checked.MIR, entry, cbackend.Stage0WindowsMSVCProfile())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if unit.Entry != entry || !strings.Contains(unit.Source, "fy_std_string_copy_storage_v0") ||
+		!strings.Contains(unit.Source, "fy_std_cstring_from_text_storage_v0") ||
+		!strings.Contains(unit.Source, "int main(void)") {
+		t.Fatalf("std::text C unit = entry %q, foreign symbols %v", unit.Entry, unit.ForeignSymbols)
+	}
+}
+
 func TestExperimentalWorkspaceBuildRejectsMissingRootEntryBeforeToolchain(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()

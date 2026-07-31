@@ -208,9 +208,9 @@ linker options remain absent. Its receipt is target-emission and one-way closed-
 complete ABI/runtime conformance, zeroed Arena-byte or owned-text byte/terminator observation,
 owned-text failure behavior, hosted support, a distributable
 artifact promise, or self-hosting.
-The checked-in `examples/owned_text/` pair uses those storage bridges only behind safe move-only FY
-resources and is built and executed at both MSVC profiles by the configured smoke. This does not
-stabilize a `std::text` package, resource layout, or owned-to-borrowed view API.
+The checked-in `examples/owned_text/` pair remains independent evidence for those storage bridges.
+ADR 0247 now exposes the same audited ownership and owner-bound view shape through compiler-bundled
+`std::text`; it does not stabilize resource layout or a foreign owned-to-borrowed view ABI.
 `experimental run-target` shares that exact target compilation and support-link contract, validates
 the temporary PE and x64 unwind structure, executes it with bounded captured output, and removes it.
 Success writes `native result: <i32> (x86_64-windows-msvc, msvc <version>, <profile>)`; a product

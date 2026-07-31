@@ -2160,7 +2160,7 @@ func (l *functionLowerer) lowerShortCircuit(expression *hir.Expression) (Operand
 	destination := l.newTemporary()
 	l.current = shortBlock
 	l.live = cloneLive(branchLive)
-	l.appendOperation(Operation{Kind: OperationAssign, Span: expression.Children[0].Span, DestinationLocal: destination, Operands: []Operand{{Kind: OperandI32, I32: shortValue}}})
+	l.appendOperation(Operation{Kind: OperationAssign, Span: expression.Children[0].Span, DestinationLocal: destination, Operands: []Operand{{Kind: OperandI32, I32: shortValue, Type: hir.TypeBool}}})
 	l.terminate(Terminator{Kind: TerminatorGoto, Span: expression.Span, Successors: []BlockID{joinBlock}, UnwindSuccessor: NoBlock})
 	shortLive := cloneLive(l.live)
 

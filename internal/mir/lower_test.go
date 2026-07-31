@@ -776,6 +776,31 @@ fn i32 main() {
 	}
 }
 
+func TestLowerShortCircuitMaterializesTypedBoolForUnaryNot(t *testing.T) {
+	t.Parallel()
+	program := lowerTestSource(t, `module main;
+fn i32 main() {
+    let bool ready = true && false;
+    return if (!ready) { 42 } else { 1 };
+}
+`)
+	typedShortValue := false
+	for _, block := range program.Functions[0].Blocks {
+		for _, operation := range block.Operations {
+			if operation.Kind == OperationAssign && len(operation.Operands) == 1 &&
+				operation.Operands[0].Kind == OperandI32 && operation.Operands[0].Type == hir.TypeBool {
+				typedShortValue = true
+			}
+		}
+	}
+	if !typedShortValue {
+		t.Fatal("short-circuit lowering did not materialize a typed bool literal")
+	}
+	if failures := Verify(program); len(failures) != 0 {
+		t.Fatalf("Verify() failures = %+v", failures)
+	}
+}
+
 func TestLowerPreservesCStringDataAddressUnsafeProvenance(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;

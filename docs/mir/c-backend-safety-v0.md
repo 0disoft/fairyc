@@ -250,7 +250,7 @@ symbols for SystemHeap allocate/deallocate, Buffer initialize/zeroed-resize/drop
 Region begin/zeroed-allocation/reset, Arena drop, text validation/output initialization, bounded
 CStr validation, String copy/view/append/drop, CString from-text/view/drop, and Linux File
 open/read/write-all/sync/close. The Windows target additionally admits the five opaque String/CString
-storage bridges used by the safe owned-text example and separately admits File
+storage bridges used by the safe owned-text example and public SDK wrapper, and separately admits File
 open/read/write-all/sync/close/drop; its single-write helper retains internal C linkage. Direct
 Linux File write/drop and the rest of the prefix remain closed.
 Typed null, an exact or opaque direct-local borrow-to-raw-pointer cast, and opaque erasure of one

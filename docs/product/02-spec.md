@@ -592,7 +592,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
-  The compiler-bundled SDK `0.0.0-stage0.7` exposes
+  The compiler-bundled SDK `0.0.0-stage0.8` exposes
   `std::io::write(ref str) -> Result<usize, ConsoleError>` and a matching `write_stderr` operation
   for text, plus `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` for exact binary output.
   All four declare `console`, keep raw pointers and target linkage private, append no newline,
@@ -613,6 +613,12 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   pointer and runtime symbol. The checked-in safe quickstart executes that full lifecycle under
   Windows development and release builds; private layout, spare-capacity access, and generic
   element storage remain excluded.
+  ADR 0247 additionally exposes move-only `std::text::String` and `CString`, explicit fallible
+  construction and append, byte length and emptiness metadata, owner-bound immutable `ref str` and
+  `ref CStr` views, and separate text/allocation status fields. The checked-in safe quickstart
+  executes nonempty and empty owners, append, interior-NUL rejection, views, and cleanup under both
+  Windows profiles. Private storage, capacity, mutable text bytes, implicit conversion, formatting,
+  locale, and Unicode algorithms remain excluded.
   ADR 0133 strengthens the existing `arenaExecutions` success condition with deterministic
   first-stage and second-stage allocation failure plus live-allocation cleanup. ADR 0134 strengthens
   `bufferExecutions` with deterministic construction and three growth-allocation failures, exact
@@ -743,8 +749,9 @@ argument, output, and exit-code contract. It emits no native code.
 
 ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
-version, source digest, and lock fields. SDK `0.0.0-stage0.7` exports opaque `std::alloc::Arena`,
+version, source digest, and lock fields. SDK `0.0.0-stage0.8` exports opaque `std::alloc::Arena`,
 ADR 0246's public safe `std::bytes::Buffer`,
+ADR 0247's public safe `std::text::String` and `CString`,
 ADR 0205's `std::io::write(ref str) -> Result<usize, ConsoleError>`, and ADR 0209's matching
 `write_stderr` operation, ADR 0210's matching immutable byte-view output operations, and ADR 0211's
 `read_stdin(ref mut u8[]) -> Result<usize, ConsoleReadError>`, plus ADR 0215's allocation-free

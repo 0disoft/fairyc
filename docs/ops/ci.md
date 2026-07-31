@@ -233,7 +233,7 @@ both profiles, and inspects both objects plus each linked image. It also compile
 termination frame, and private exception raiser as three separate translation units, links and
 executes them under both profiles, and requires exact exception payload, ordered
 `RtlVirtualUnwind` frame discovery, and one abnormal `__finally` execution. Before execution, the
-same intent parses the target-neutral product image, both declared-target profile images, all nine
+same intent parses the target-neutral product image, both declared-target profile images, all thirteen
 package-workspace build images, all nine package-workspace run images, the two safe FY File lifecycle
 images, the two safe FY owned-text lifecycle images, both direct run-target temporary images, both exec-target temporary images, and all twenty-four raw or generated-Fairy Windows File, Buffer, owned-text, Arena, layout, ABI,
 REL32-link, archive/COMDAT-selection, struct-result, and unwind probe images
@@ -276,7 +276,7 @@ selection and retention modes,
 debug data, and a fresh hosted same-commit object receipt remain unconfigured.
 The ordinary Go tests include a 154-section positive regression object and reject 4,097 sections;
 the exact section count emitted by a future MSVC version remains unstabilized.
-All fifty-five linked target or probe PE images additionally traverse the Microsoft x64 exception directory before
+All fifty-nine linked target or probe PE images additionally traverse the Microsoft x64 exception directory before
 execution. The local gate requires sorted nonoverlapping `.pdata` runtime-function ranges,
 executable code coverage, DWORD-aligned file-backed unwind records, bounded version 1 prolog slots,
 bounded version 2 epilog descriptors, and minimum handler/chained tails. The receipt reports the

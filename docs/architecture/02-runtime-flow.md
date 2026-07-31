@@ -197,17 +197,18 @@ target-specific owned-text callee at both MSVC profiles and supplies byte, termi
 storage, failure-preservation, self-overlap, size-overflow, and repeated-drop evidence. A probe-only
 adapter overrides the SystemHeap allocation macros in that callee, forces initial and append
 reallocation failures, and observes live allocations returning to zero. The ordinary target support
-source retains CRT allocation and no probe controls. This does not add safe source ownership or a
-public text API.
-An independent checked-in safe owned-text module now keeps those raw declarations and opaque casts
-behind move-only FY resources. Its storage bridges use `memcpy` over `void *`, and low/optimized
-source builds execute Result mapping, length reads, interior-NUL rejection, and verified cleanup.
-It still cannot reconstruct safe borrowed text views and therefore remains an example boundary.
+source retains CRT allocation and no probe controls. Those raw paths do not themselves define safe
+source ownership or a public text API.
+ADR 0247's compiler-bundled `std::text` module now keeps those raw declarations and opaque casts
+behind move-only FY resources. Its storage bridges use `memcpy` over `void *`, and development plus
+release source builds execute Result mapping, length and emptiness reads, interior-NUL rejection,
+owner-bound `ref str`/`ref CStr` views, and verified cleanup. Layout and foreign view ABI remain
+private.
 `internal/cstdlibcontract` owns the exact-symbol/component maps used by backend admission and
 target-specific product linking. The emitted C unit records only actually called foreign names;
 `experimental build` and `build-target` link only the permitted minimal dependency-closed C source
-plus the scalar runtime. No public standard-library API exists. This does not
-broaden the thin runtime or complete the standard library.
+plus the scalar runtime. Public `std::bytes`, `std::text`, and `std::io` remain source wrappers over
+that closed boundary; this does not broaden the thin runtime or complete the standard library.
 
 The implemented slice emits deterministic C11 for verified scalar-payload MIR, including
 private `Option<i32>` and `Result<i32, i32>` transport, copy-only built-in tags over canonical Fairy

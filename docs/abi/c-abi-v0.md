@@ -122,10 +122,10 @@ transport from the separately compiled C unit for String and CString operations 
 That is one closed same-toolchain source crossing, not a stable record ABI, broad aggregate-return
 conformance, byte-content proof, or permission for by-value aggregate parameters.
 
-The safe owned-text example uses a separate opaque storage bridge rather than passing those records
-as public Fairy types. C loads and stores the private record bytes with `memcpy`; the bridge proves
-the current example-private layout crossing but does not assign a C effective type to generated
-resource storage or stabilize that storage as ABI.
+The safe owned-text example and ADR 0247's public SDK wrapper use a separate opaque storage bridge
+rather than passing those records as public Fairy types. C loads and stores the private record bytes
+with `memcpy`; the bridge proves the current implementation-private layout crossing but does not
+assign a C effective type to generated resource storage or stabilize that storage as ABI.
 
 The implemented foreign-result slice admits those same nonempty acyclic `@repr(C)` records by value.
 Generated C emits the exact public struct return type and ordinary assignment. A generated Fairy
@@ -238,9 +238,10 @@ for those two shapes only; it
 does not provide an independent compiler or register oracle, aggregate parameters, callbacks,
 exports, nested results, or hosted evidence.
 
-The Windows smoke additionally parses all fifty-five linked target or probe executable images without
+The Windows smoke additionally parses all fifty-nine linked target or probe executable images without
 invoking the host loader as the parser. The target-neutral product, both declared-target profile
-products, nine package-workspace build products including two safe `std::io` products, nine package-workspace run products, both safe FY
+products, thirteen package-workspace build products including safe `std::io`, `std::bytes`, and
+`std::text` products, nine package-workspace run products, both safe FY
 File lifecycle products, both safe FY owned-text lifecycle products, two direct run-target temporary
 products, two exec-target temporary output products, both profiles of the raw Windows File, raw Buffer, raw owned-text, raw Arena, layout, ABI, REL32-link, generated-Fairy
 struct-result, and unwind probes, plus four archive/COMDAT input-order variants must be

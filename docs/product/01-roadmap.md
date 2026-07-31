@@ -261,9 +261,8 @@ non-owning descriptors. One new emission case
 executes both borrowed-view parameter families through the interpreter and deterministic C backend.
 Immutable `ref u8[]` now supports read-only `usize` indexing to `u8` and explicit or omitted-bound,
 end-exclusive slicing through verified MIR bounds checks, interpreter `bounds` outcomes, and
-generated-C checked loads or pointer derivation. Inclusive ranges, text
-indexing or slicing, public CStr operations, Unicode counting, safe text operations, and stable
-slice or string ABIs remain missing.
+generated-C checked loads or pointer derivation. Inclusive ranges, text indexing or slicing,
+arbitrary byte-to-text validation, Unicode counting, and stable slice or string ABIs remain missing.
 Mutable fixed `u8[N]` places now contextually borrow as `ref mut u8[]` for exact internal parameters.
 The view preserves its exclusive origin, exposes canonical length, emits a private writable
 descriptor, supports checked `u8` reads and indexed stores, and may derive `ptr mut u8` only inside
@@ -275,16 +274,19 @@ successful-only Buffer moves, failure ownership preservation, self-source append
 rejection, and exact termination. Four Linux C-only native runs remain configured and locally
 unobserved; the same probe now executes as two separate-translation-unit x64 MSVC runs. Separate
 generated-Fairy crossings call the real bounded CStr validator and exact raw String/CString records.
-An additional example-level safe FY module now confines five opaque storage bridges behind move-only
-`String`/`CString` resources, source `Result` errors, scalar lengths, owner-bound `ref str`/`ref CStr`
-views, and verified nonempty drop glue. Its low and optimized Windows target builds cover borrowed
-view calls, append, empty CString, interior-NUL rejection, and implicit cleanup with result 42. The existing raw Windows target lifecycle still observes lengths,
+ADR 0247 promotes the proven wrapper shape into compiler-bundled SDK `0.0.0-stage0.8` as public
+`std::text`. It confines five opaque storage bridges behind move-only `String`/`CString` resources,
+source `Result` errors, scalar lengths and emptiness, owner-bound `ref str`/`ref CStr` views, and
+verified nonempty drop glue. The safe quickstart's development and release Windows builds cover
+borrowed-view calls, append, empty String/CString, interior-NUL rejection, and implicit cleanup with
+result 42. The existing raw Windows target lifecycle still observes lengths,
 pointers, alignment, statuses, and normalized drops. The raw Windows probe additionally observes
 exact bytes, terminator contents, invalid UTF-8, self-overlap, null/malformed storage, failure
 preservation, size overflow, and repeated drop. A probe-only allocator now deterministically forces
 initial String/CString allocation and String append reallocation failures, proves preservation, and
-returns its live-allocation count to zero. Stable `std::text`, public layouts, and general
-user-defined raw-parts reconstruction remain later gates.
+returns its live-allocation count to zero. Public layouts, mutable text bytes, consuming Buffer
+conversion, arbitrary byte validation, Unicode algorithms, and general user-defined raw-parts
+reconstruction remain later gates.
 The Linux File C slice now also covers partial read/write, write-all progress, sync, and consuming
 close including forced close failure. ADR 0214 records its four C-only native runs.
 A second four-way generated-Fairy crossing uses exact result, File, and open-option records to call
@@ -394,7 +396,7 @@ chained unwind tails, non-unwind and broader archive retention and COMDAT select
 complete CodeView/PDB records and broader symbolication,
 high-section and bigobj auxiliary/COMDAT evidence, and a fresh hosted object receipt remain
 absent, so the target evidence marker stays fail-closed.
-The fifty-five local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
+The fifty-nine local target or probe PE images now also cross a static Microsoft x64 unwind parser. It validates `.pdata`
 runtime-function ordering and code coverage plus referenced version 1 and version 2 unwind-record
 bounds, including handler/chained minimum tails. A separate three-object probe now raises a private
 noncontinuable exception at both profiles, validates its payload in an outer SEH filter, walks the
@@ -448,7 +450,7 @@ indexing, and safely converts each `u8` to `i32` through a separately built comp
 host smoke also proves maximum-`usize` addition traps under both MSVC profiles. The configured Windows
 smoke therefore covers two retained target builds, four measured experimental plus three stable
 quickstart and two safe `std::io` package-workspace builds, nine package-workspace runs, two safe File builds, two safe owned-text
-builds, two direct target executions, two exec-target executions, and fifty-five total target or
+builds, two direct target executions, two exec-target executions, and fifty-nine total target or
 probe PE images. Stable build proof covers development output, failed-build preservation, release
 replacement, a safe `std::io` product with exact separated stdout/stderr and status, and locked replacements from a
 separately built temporary `fairyc.exe`. Direct execution of that product additionally proves EOF,
