@@ -17,7 +17,7 @@ The target must not already exist as a file, directory, or symbolic link. The co
 destination path, current-directory mode, template, version, language, force, merge, target,
   toolchain, config, environment, network, stdin, or prompt surface. It writes exactly `.gitignore`,
   `README.md`, `fairy.toml`, `src/main.fy`, and `tests/main.fy` under the new directory. The manifest
-  fixes version `0.1.0`, language `fairyc-language/7`, and source root `src`; public `answer()` returns
+  fixes version `0.1.0`, language `fairyc-language/8`, and source root `src`; public `answer()` returns
   42, private `main()` returns `answer() - 42`, and the semantic test imports and checks `answer`.
   `.gitignore` excludes only `/build/`.
 

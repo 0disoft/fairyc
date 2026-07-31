@@ -111,7 +111,7 @@ command now exist; ordinary-command policy and default limits remain undecided.
 
 The current whole-package key encoding remains `fairyc.package-cache-key/v2` with
 `fycache2-sha256-...` text. `fairyc.package-cache-fixtures/v5` supplies current vectors because its
-dependency entries use `fyif3-sha256` public-interface hashes and `fairyc-language/7`; fixture
+dependency entries use `fyif3-sha256` public-interface hashes and `fairyc-language/8`; fixture
 manifests v1 through v4 remain historical. A component algorithm change is an intentional cache miss,
 not permission to reinterpret an older key.
 
@@ -503,6 +503,13 @@ placeholder with a runtime-compatible move-only resource, adds fallible `create(
 and runtime ABI remains `fairyc-runtime/0`; this does not yet stabilize Region placement or a
 public Arena C ABI.
 
+ADR 0251 cuts the language revision to `fairyc-language/8` because compiler-known
+`Region.place(T)` now returns `Result<ref T, std::alloc::AllocError>` instead of a direct borrow.
+The SDK remains `0.0.0-stage0.10` and runtime ABI remains `fairyc-runtime/0`: the embedded SDK
+already owns `AllocError`, while the changed operation and tagged borrow provenance are language and
+MIR contracts. Manifests, generated locks, and whole-package cache keys therefore change even though
+the embedded SDK source digest does not.
+
 ## Package formats
 
 Manifest schema, lockfile schema, source archive schema, and any future binary artifact schema are independent. Stage 0 needs manifest and lockfile schemas only. A stable binary package format would falsely imply a stable native Fairy ABI and is deferred.
@@ -525,7 +532,7 @@ exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, o
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
 instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
 `fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.10`, language
-`fairyc-language/7`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
+`fairyc-language/8`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 
 ADR 0148 consumes those independently versioned manifest, lock, package-instance, language, SDK,

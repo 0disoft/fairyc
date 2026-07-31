@@ -3434,6 +3434,8 @@ func (e *emitter) emitOperation(output *strings.Builder, functionIndex int, oper
 				return fmt.Errorf("safe borrow in %s has invalid local operand", function)
 			}
 			fmt.Fprintf(output, "    fy_l_%d = &fy_l_%d;\n", operation.DestinationLocal, operand.Local)
+		case "*":
+			fmt.Fprintf(output, "    fy_l_%d = *(%s);\n", operation.DestinationLocal, value)
 		}
 	case mir.OperationBinary:
 		left, right, err := twoOperands(operation.Operands)

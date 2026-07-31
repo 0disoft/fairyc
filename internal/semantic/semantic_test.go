@@ -2411,8 +2411,12 @@ func TestAnalyzeMapsCalleeRegionReturnParameterToExactArgument(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{
 		"main.fy": `module main;
-fn ref i32 relay(Region scratch, i32 value) { return store(scratch, value); }
-fn ref i32 store(Region scratch, i32 value) { return scratch.place(value); }
+import std::alloc as alloc;
+fn Result<ref i32, alloc::AllocError> relay(Region scratch, i32 value) { return store(scratch, value); }
+fn Result<ref i32, alloc::AllocError> store(Region scratch, i32 value) { return scratch.place(value); }
+`,
+		"std/alloc.fy": `module std::alloc;
+pub struct AllocError { u32 status; }
 `,
 	})
 	assertCleanTypeResult(t, result)

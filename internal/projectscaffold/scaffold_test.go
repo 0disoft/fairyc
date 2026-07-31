@@ -45,7 +45,7 @@ func TestCreateWritesExactGuideManifestSourceTestAndIgnoreFiles(t *testing.T) {
 uid = "example.hello-fairy"
 name = "hello-fairy"
 version = "0.1.0"
-language = "fairyc-language/7"
+language = "fairyc-language/8"
 source = "src"
 `
 	if manifest != wantManifest {

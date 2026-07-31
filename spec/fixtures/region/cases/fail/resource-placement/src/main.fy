@@ -7,6 +7,6 @@ resource Token {
 }
 
 fn i32 invalid(Region scratch, Token token) {
-    let ref Token stored = scratch.place(token);
-    return stored.value;
+    discard scratch.place(token);
+    return 0;
 }

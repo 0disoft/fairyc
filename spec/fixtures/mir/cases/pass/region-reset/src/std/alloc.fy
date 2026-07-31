@@ -6,6 +6,10 @@ pub resource Arena {
     cleanup {}
 }
 
+pub struct AllocError {
+    u32 status;
+}
+
 resource Token {
     i32 value;
 
@@ -23,7 +27,7 @@ fn i32 main() {
     region scratch in ref mut arena {
         kept = Token { .value = 9 };
         let Token inner = Token { .value = 7 };
-        let ref i32 stored = scratch.place(42);
+        discard scratch.place(42);
     }
     return kept.value;
 }

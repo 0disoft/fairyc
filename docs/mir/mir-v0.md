@@ -295,7 +295,21 @@ The source cases do not test malformed graphs. `spec/fixtures/mir-verifier/manif
 
 ## Interpreter
 
-The first semantic oracle is a small MIR interpreter supporting scalars, tagged `Option` and `Result`, restricted inert user enums, borrowed UTF-8 and byte views with byte-length reads, moves, drop traces, region mark and reset, branches, and traps. Region entry evaluates and retains the exact verified Arena resource identity but does not emulate its storage or allocator. It constructs user enums, selects declaration-ordered variants, extracts named payload fields, and also constructs inert structs and resources and resolves field reads from their distinct verified program-level definitions; only the resource definition participates in reverse-field cleanup. Empty and nonempty drop classifications execute; the latter invokes verifier-linked private glue in a distinct `dropping` state before field cleanup. Resource effect sets and their exact glue match are verified, but the interpreter does not emulate host capabilities. Its options-only fixture harness may intercept explicitly bound call symbols as bounded in-memory stdout/stderr byte sinks; those hooks are not MIR operations, source-name conventions, standard-library APIs, or host I/O. The interpreter is not required to emulate a complete operating system or C ABI.
+The first semantic oracle is a small MIR interpreter supporting scalars, safe borrow and dereference
+transport, tagged `Option` and `Result`, restricted inert user enums, borrowed UTF-8 and byte views
+with byte-length reads, moves, drop traces, region mark and reset, branches, and traps. Region entry
+evaluates and retains the exact verified Arena resource identity but does not emulate its storage or
+allocator. `region-place` retains the placed owner type plus `Result<ref T, AllocError>` and the
+abstract interpreter constructs `.ok`; native allocation failure remains a backend/runtime oracle.
+It constructs user enums, selects declaration-ordered variants, extracts named payload fields, and
+also constructs inert structs and resources and resolves field reads from their distinct verified
+program-level definitions; only the resource definition participates in reverse-field cleanup.
+Empty and nonempty drop classifications execute; the latter invokes verifier-linked private glue in
+a distinct `dropping` state before field cleanup. Resource effect sets and their exact glue match are
+verified, but the interpreter does not emulate host capabilities. Its options-only fixture harness
+may intercept explicitly bound call symbols as bounded in-memory stdout/stderr byte sinks; those
+hooks are not MIR operations, source-name conventions, standard-library APIs, or host I/O. The
+interpreter is not required to emulate a complete operating system or C ABI.
 
 The interpreter precedes a second native backend. Differential fixtures compare interpreter outcomes with generated C compiled at multiple optimization levels and, where the target fixture declares them, more than one independent C compiler.
 

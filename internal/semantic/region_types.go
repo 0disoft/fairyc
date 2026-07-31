@@ -32,7 +32,30 @@ func (c *typeChecker) checkRegionPlace(expression *ast.Expression, result *hir.E
 	if valueType == hir.TypeInvalid {
 		return hir.TypeInvalid
 	}
-	return hir.SharedBorrow(valueType)
+	errorType, ok := c.analyzer.allocErrorType()
+	if !ok {
+		c.analyzer.addUnsupported(c.module.file.Path, expression.Span, "Region.place without one public std::alloc::AllocError type")
+		return hir.TypeInvalid
+	}
+	return hir.Result(hir.SharedBorrow(valueType), errorType)
+}
+
+func (a *analyzer) allocErrorType() (hir.Type, bool) {
+	var result hir.Type
+	for _, module := range a.moduleOrder {
+		if module.file.Module.Path != "std::alloc" {
+			continue
+		}
+		value := module.structs["AllocError"]
+		if value == nil || !value.public || value.typ == hir.TypeInvalid {
+			continue
+		}
+		if result != "" && result != value.typ {
+			return hir.TypeInvalid, false
+		}
+		result = value.typ
+	}
+	return result, result != ""
 }
 
 func (c *typeChecker) checkRegion(expression *ast.Expression, expectedTail hir.Type) (*hir.Expression, bool) {

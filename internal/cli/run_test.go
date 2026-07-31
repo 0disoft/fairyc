@@ -748,6 +748,10 @@ pub resource Arena {
     cleanup {}
 }
 
+pub struct AllocError {
+    u32 status;
+}
+
 resource Token {
     i32 value;
     cleanup {}
@@ -757,7 +761,7 @@ fn i32 main() {
     var Arena arena = Arena { .opaque = 0 };
     region scratch in ref mut arena {
         let Token token = Token { .value = 7 };
-        let ref i32 stored = scratch.place(42);
+        discard scratch.place(42);
     }
     return 42;
 }
@@ -778,6 +782,10 @@ pub resource Arena {
     cleanup {}
 }
 
+pub struct AllocError {
+    u32 status;
+}
+
 resource Token {
     i32 value;
     cleanup {}
@@ -788,7 +796,7 @@ fn i32 main() {
     let Token outside = Token { .value = 20 };
     region scratch in ref mut arena {
         let Token inner = Token { .value = 22 };
-        let ref i32 stored = scratch.place(1);
+        discard scratch.place(1);
         return outside.value + inner.value;
     }
 }
@@ -856,12 +864,17 @@ func TestRepositoryResourceExampleStaysRunnable(t *testing.T) {
 }
 
 func TestRepositoryRegionExampleStaysRunnable(t *testing.T) {
-	root := filepath.Clean(filepath.Join("..", ".."))
-	code, stdout, stderr := runForTest(
-		[]string{"experimental", "check-semantics", "examples/regions/main.fy"},
-		root,
-	)
-	if code != ExitSuccess || stdout != "semantics ok: examples/regions/main.fy (typed HIR: 1 function(s))\n" || stderr != "" {
+	repositoryRoot := filepath.Clean(filepath.Join("..", ".."))
+	root := t.TempDir()
+	for _, path := range []string{"fairy.toml", "src/main.fy"} {
+		content, err := os.ReadFile(filepath.Join(repositoryRoot, "examples", "regions", filepath.FromSlash(path)))
+		if err != nil {
+			t.Fatalf("read region example %q: %v", path, err)
+		}
+		writeWorkspaceFile(t, root, path, string(content))
+	}
+	code, stdout, stderr := runForTest([]string{"check"}, root)
+	if code != ExitSuccess || !strings.HasPrefix(stdout, "check ok: 2 instance(s), ") || !strings.HasSuffix(stdout, " lock updated\n") || stderr != "" {
 		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
 	}
 }

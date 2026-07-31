@@ -815,7 +815,12 @@ func verifyFunction(function *Function, structTypes map[hir.Type]*StructType, en
 				}
 			case OperationRegionPlace:
 				failures = append(failures, verifyOperands(state, operation.Operands, entity)...)
-				if _, active := state.regions[operation.Symbol]; !active || len(operation.Operands) != 1 || operation.DestinationLocal == NoLocal || operation.Type == hir.TypeInvalid {
+				successType, failureType, result := hir.ResultElements(operation.Type)
+				placedType, mutable, borrow := hir.BorrowElement(successType)
+				shapeValid := result && borrow && !mutable && placedType == operation.OwnerType &&
+					failureType != hir.TypeInvalid && failureType != "" && len(operation.Operands) == 1 &&
+					operation.DestinationLocal != NoLocal && operation.OwnerType != hir.TypeInvalid && operation.OwnerType != ""
+				if _, active := state.regions[operation.Symbol]; !active || !shapeValid {
 					failures = append(failures, VerificationError{Code: "V1403", Entity: entity, Detail: "region placement does not name one active region and value"})
 				}
 				state.live[hir.SymbolID(operation.DestinationLocal)] = true
@@ -1231,6 +1236,9 @@ func validUnaryShape(operation Operation) bool {
 		return operation.Type == hir.SharedBorrow(operation.OwnerType)
 	case "&mut":
 		return operation.Type == hir.MutableBorrow(operation.OwnerType)
+	case "*":
+		element, _, borrow := hir.BorrowElement(operation.OwnerType)
+		return borrow && operation.Type == element
 	case "!":
 		return operation.OwnerType == hir.TypeBool && operation.Type == hir.TypeBool
 	case "+", "-":
@@ -1630,11 +1638,13 @@ func mergeVerificationState(previous, incoming verificationState, resources map[
 }
 
 func sameLiveState(left, right map[hir.SymbolID]bool) bool {
-	if len(left) != len(right) {
-		return false
-	}
 	for symbol, live := range left {
 		if right[symbol] != live {
+			return false
+		}
+	}
+	for symbol, live := range right {
+		if left[symbol] != live {
 			return false
 		}
 	}

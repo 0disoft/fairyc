@@ -5,3 +5,7 @@ pub resource Arena {
 
     cleanup {}
 }
+
+pub struct AllocError {
+    u32 status;
+}

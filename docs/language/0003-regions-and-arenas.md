@@ -23,11 +23,25 @@ A region capability:
 exclusive borrow covers the lexical block, while `scratch` is a distinct compiler-owned capability
 so repeated allocations do not create overlapping ordinary borrows.
 
-The Stage 0 allocation surface is limited to zero-initialized bytes, copied bytes, and `place(value)` for a fully initialized inert value whose type is inferred from the expression. There is no user generic `alloc<T>` syntax, safe uninitialized byte view, or resource placement.
+The Stage 0 allocation surface is limited to zero-initialized bytes, copied bytes, and `place(value)`
+for a fully initialized inert value whose type is inferred from the expression. The exact source type
+is `Region.place(T) -> Result<ref T, std::alloc::AllocError>`. A caller handles the Result with
+`switch`, propagates it with `?` from a compatible function, or explicitly `discard`s it. Allocation
+failure is an ordinary `.err` value, not an implicit unwrap or trap. There is no user generic
+`alloc<T>` syntax, safe uninitialized byte view, or resource placement.
 
 ## Allocation and escape
 
-Allocation returns a safe borrow whose origin is the region. The referent cannot be moved out as an owned value unless the type and operation explicitly copy it. A region-derived borrow cannot be stored anywhere that outlives the region or returned unless the region is itself a declared input origin of the current function.
+Successful allocation returns a safe borrow whose origin is the region. That origin remains attached
+to the `.ok` payload through a Result local, payload binding, internal call, or `?`; `.err` carries no
+borrow origin. The referent cannot be moved out as an owned value unless the type and operation
+explicitly copy it. A region-derived borrow cannot be stored anywhere that outlives the region or
+returned unless the region is itself a declared input origin of the current function.
+
+The value expression is evaluated exactly once. The native allocator must publish no success borrow
+when storage or tracking-node allocation fails. The bounded MIR interpreter always constructs `.ok`
+because its Region is an abstract lifetime oracle rather than a host allocator; this is not native
+failure evidence.
 
 The compiler reports both the allocation span and the attempted escape span.
 
@@ -64,7 +78,9 @@ nearest-loop `break` and `continue`, and nested Region exits with explicit MIR e
 and reset operations. Its trace records the exit kind, placement count, and how many resource drops
 completed before reset without exposing addresses or offsets. The verified `region-enter` retains
 that exact Arena owner local, owner resource type, and mutable-borrow type; it does not retain or
-reconstruct a raw address. Executable lowering currently requires the Arena source to be a direct `ref mut` local; a
+reconstruct a raw address. Verified `region-place` retains the placed owner type and the complete
+`Result<ref T, AllocError>` type, so a backend cannot recover fallibility from source text.
+Executable lowering currently requires the Arena source to be a direct `ref mut` local; a
 side-effecting borrow-producing expression is rejected rather than skipped.
 
 ## Concurrency

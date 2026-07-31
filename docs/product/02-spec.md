@@ -150,7 +150,11 @@ The Stage 0 borrow model uses local last-use loans and whole-root overlap. It do
 
 ### Regions and arenas
 
-`Region` is a compiler-known lexical capability, not an ordinary mutable arena object. It cannot be stored or returned. Allocations derived from it carry the region origin, and a derived safe borrow cannot outlive the lexical region.
+`Region` is a compiler-known lexical capability, not an ordinary mutable arena object. It cannot be
+stored or returned. `Region.place(T)` returns `Result<ref T, std::alloc::AllocError>`; the `.ok`
+payload carries the region origin through tagged flow, and a derived safe borrow cannot outlive the
+lexical region. Allocation failure is handled or propagated as data rather than converted into a
+trap or implicit unwrap.
 
 An ordinary region may contain only values that do not need drop. A resource-aware arena would require a drop list, partial-construction rules, reverse-order cleanup, and reset failure semantics; it is deferred until those contracts and tests exist.
 
@@ -758,6 +762,7 @@ ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive 
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
 version, source digest, and lock fields. SDK `0.0.0-stage0.10` exports ADR 0250's move-only,
 fallibly created `std::alloc::Arena` with automatic cleanup and exact allocation status,
+while ADR 0251 makes compiler-known placement return `Result<ref T, AllocError>` under language `/8`.
 ADR 0246's public safe `std::bytes::Buffer`,
 ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free
 `std::text::validate_utf8`,

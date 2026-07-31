@@ -6,6 +6,10 @@ pub resource Arena {
     cleanup {}
 }
 
+pub struct AllocError {
+    u32 status;
+}
+
 resource Token {
     i32 value;
 
@@ -17,7 +21,7 @@ fn i32 return_from_region() {
     let Token outside = Token { .value = 20 };
     region scratch in ref mut arena {
         let Token inner = Token { .value = 22 };
-        let ref i32 stored = scratch.place(1);
+        discard scratch.place(1);
         return outside.value + inner.value;
     }
 }
@@ -27,7 +31,7 @@ fn Result<i32, i32> propagate_from_region(Result<i32, i32> input) {
     let Token outside = Token { .value = 10 };
     region scratch in ref mut arena {
         let Token inner = Token { .value = 32 };
-        let ref i32 stored = scratch.place(2);
+        discard scratch.place(2);
         let i32 value = input?;
         return .ok(value + outside.value + inner.value);
     }
@@ -46,10 +50,10 @@ fn i32 nested_return() {
     let Token function_token = Token { .value = 2 };
     region outer in ref mut outer_arena {
         let Token outer_token = Token { .value = 10 };
-        let ref i32 outer_stored = outer.place(3);
+        discard outer.place(3);
         region inner in ref mut inner_arena {
             let Token inner_token = Token { .value = 30 };
-            let ref i32 inner_stored = inner.place(4);
+            discard inner.place(4);
             return function_token.value + outer_token.value + inner_token.value;
         }
     }
@@ -63,7 +67,7 @@ fn i32 conditional_region(bool flag) {
         if (flag) {
             return outside.value + inner.value;
         };
-        let ref i32 stored = scratch.place(5);
+        discard scratch.place(5);
     }
     return outside.value;
 }

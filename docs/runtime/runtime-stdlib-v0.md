@@ -21,6 +21,10 @@ Safe-borrow reassignment is compiler-owned local descriptor transport after Flow
 loop-edge provenance and loans; it adds no runtime allocation, phi object, or library entry point.
 Internal borrow-return summaries are likewise Flow-only proof metadata. They select an existing
 call result descriptor and add no runtime table, dispatch, allocation, or library entry point.
+Compiler-known `Region.place(T)` returns `Result<ref T, std::alloc::AllocError>`. MIR retains the
+placed type and complete tagged result; the `.ok` borrow carries Region provenance and `.err` carries
+only allocation status. The interpreter's abstract Region always selects `.ok`. A native backend
+must obtain the tag from the target Arena allocation status and publish no borrow on failure.
 
 Heap allocation, files, UTF-8 validation, strings, buffers, formatting, console access, and environment access are not intrinsics.
 

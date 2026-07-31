@@ -101,21 +101,28 @@ pub resource Arena {
     i32 opaque;
     cleanup {}
 }
+pub struct AllocError {
+    u32 status;
+}
 fn i32 main() {
     var Arena arena = Arena { .opaque = 0 };
     region scratch in ref mut arena {
-        let ref i32 stored = scratch.place(42);
+        discard scratch.place(42);
     }
     return 42;
 }
 `)
 	var enter *Operation
+	var place *Operation
 	for functionIndex := range program.Functions {
 		for blockIndex := range program.Functions[functionIndex].Blocks {
 			operations := program.Functions[functionIndex].Blocks[blockIndex].Operations
 			for operationIndex := range operations {
 				if operations[operationIndex].Kind == OperationRegionEnter {
 					enter = &operations[operationIndex]
+				}
+				if operations[operationIndex].Kind == OperationRegionPlace {
+					place = &operations[operationIndex]
 				}
 			}
 		}
@@ -124,6 +131,10 @@ fn i32 main() {
 	if enter == nil || len(enter.Operands) != 1 || enter.Operands[0].Kind != OperandLocal ||
 		enter.OwnerType != arenaType || enter.Type != hir.MutableBorrow(arenaType) || enter.Operator != "&mut" {
 		t.Fatalf("region enter = %+v", enter)
+	}
+	wantPlaceType := hir.Result(hir.SharedBorrow(hir.TypeI32), hir.Type("std::alloc::AllocError"))
+	if place == nil || place.OwnerType != hir.TypeI32 || place.Type != wantPlaceType {
+		t.Fatalf("region place = %+v", place)
 	}
 	if failures := Verify(program); len(failures) != 0 {
 		t.Fatalf("Verify() failures = %+v", failures)

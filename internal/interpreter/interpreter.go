@@ -926,7 +926,11 @@ func (r *runtime) call(function *mir.Function, arguments []runtimeValue, depth i
 					return callCompletion{}, fmt.Errorf("region place in %q: %w", function.Name, err)
 				}
 				region.placements = append(region.placements, value)
-				locals[operation.DestinationLocal] = value
+				placed, err := resultValue("ok", value)
+				if err != nil {
+					return callCompletion{}, fmt.Errorf("region place result in %q: %w", function.Name, err)
+				}
+				locals[operation.DestinationLocal] = placed
 			case mir.OperationRegionReset:
 				region := regions[operation.Symbol]
 				if region == nil {
@@ -1207,6 +1211,25 @@ func evaluateUnary(locals map[mir.LocalID]runtimeValue, operation mir.Operation)
 	value, err := evaluate(locals, operation.Operands[0])
 	if err != nil {
 		return runtimeValue{}, "", err
+	}
+	if operation.Operator == "&" || operation.Operator == "&mut" {
+		wantType := hir.SharedBorrow(operation.OwnerType)
+		if operation.Operator == "&mut" {
+			wantType = hir.MutableBorrow(operation.OwnerType)
+		}
+		if operation.Type != wantType || value.typ != operation.OwnerType {
+			return runtimeValue{}, "", capabilityError("safe borrow has incompatible operand or result type")
+		}
+		value.typ = operation.Type
+		return value, "", nil
+	}
+	if operation.Operator == "*" {
+		element, _, borrow := hir.BorrowElement(operation.OwnerType)
+		if !borrow || operation.Type != element || value.typ != operation.OwnerType {
+			return runtimeValue{}, "", capabilityError("safe dereference has incompatible operand or result type")
+		}
+		value.typ = element
+		return value, "", nil
 	}
 	if operation.Operator == "~" && operation.OwnerType != hir.TypeI32 {
 		if !hir.BitwiseNotType(operation.OwnerType) || operation.Type != operation.OwnerType ||

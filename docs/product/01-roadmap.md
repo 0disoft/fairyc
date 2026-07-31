@@ -234,8 +234,11 @@ C-only executions and four generated-Fairy source-call executions ran in ADR 021
 The internal caller crosses exact self-linked node, Arena, and Region records, obtains zeroed bytes
 through `void **`, and verifies reset/drop generations. ADR 0250 now exposes runtime-compatible,
 move-only `std::alloc::Arena`, fallible safe creation, exact allocation status, and automatic drop;
-the safe quickstart builds and executes with result 42 under both Windows MSVC profiles. Lexical Region C lowering and safe
-placement calls remain missing. ADR 0249 retains the exact Arena owner
+the safe quickstart builds and executes with result 42 under both Windows MSVC profiles. ADR 0251
+cuts language `/8`, makes `Region.place(T)` return `Result<ref T, AllocError>`, and carries the
+Region origin through tagged Flow, verified MIR, the interpreter, and the checked-in workspace
+example. Lexical Region C lifecycle lowering and native placement-failure execution remain missing.
+ADR 0249 retains the exact Arena owner
 local and mutable-borrow type on verified `region-enter`, removing the prior source/HIR recovery gap;
 opaque native Region storage and C lowering still remain. Windows target resolution now admits six
 exact Arena/Region calls, including copied placement. The declared target build executes five

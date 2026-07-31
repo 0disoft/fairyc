@@ -289,17 +289,17 @@
           {
             "kind": "region-scope",
             "function": "std::alloc::main",
-            "region": { "source": "std/alloc.fy", "startByte": 330, "endByte": 502 },
+            "region": { "source": "std/alloc.fy", "startByte": 373, "endByte": 532 },
             "placements": [
-              { "source": "std/alloc.fy", "startByte": 478, "endByte": 495 }
+              { "source": "std/alloc.fy", "startByte": 508, "endByte": 525 }
             ],
             "cleanupBeforeReset": [
               {
                 "kind": "drop",
-                "binding": { "source": "std/alloc.fy", "startByte": 419, "endByte": 424 }
+                "binding": { "source": "std/alloc.fy", "startByte": 462, "endByte": 467 }
               }
             ],
-            "reset": { "source": "std/alloc.fy", "startByte": 330, "endByte": 502 }
+            "reset": { "source": "std/alloc.fy", "startByte": 373, "endByte": 532 }
           }
         ]
       }
@@ -315,66 +315,66 @@
           {
             "kind": "region-early-reset",
             "function": "std::alloc::return_from_region",
-            "region": { "source": "std/alloc.fy", "startByte": 253, "endByte": 432 },
+            "region": { "source": "std/alloc.fy", "startByte": 296, "endByte": 462 },
             "placements": [
-              { "source": "std/alloc.fy", "startByte": 365, "endByte": 381 }
+              { "source": "std/alloc.fy", "startByte": 395, "endByte": 411 }
             ],
-            "exit": { "source": "std/alloc.fy", "startByte": 398, "endByte": 425 },
+            "exit": { "source": "std/alloc.fy", "startByte": 428, "endByte": 455 },
             "exitKind": "return",
             "cleanupBeforeReset": [
               {
                 "kind": "drop",
-                "binding": { "source": "std/alloc.fy", "startByte": 305, "endByte": 310 }
+                "binding": { "source": "std/alloc.fy", "startByte": 348, "endByte": 353 }
               }
             ],
-            "reset": { "source": "std/alloc.fy", "startByte": 253, "endByte": 432 }
+            "reset": { "source": "std/alloc.fy", "startByte": 296, "endByte": 462 }
           },
           {
             "kind": "cleanup-path",
             "function": "std::alloc::return_from_region",
-            "exit": { "source": "std/alloc.fy", "startByte": 398, "endByte": 425 },
+            "exit": { "source": "std/alloc.fy", "startByte": 428, "endByte": 455 },
             "exitKind": "return",
             "actions": [
               {
                 "kind": "drop",
-                "binding": { "source": "std/alloc.fy", "startByte": 305, "endByte": 310 }
+                "binding": { "source": "std/alloc.fy", "startByte": 348, "endByte": 353 }
               },
               {
                 "kind": "region-reset",
-                "binding": { "source": "std/alloc.fy", "startByte": 253, "endByte": 432 }
+                "binding": { "source": "std/alloc.fy", "startByte": 296, "endByte": 462 }
               },
               {
                 "kind": "drop",
-                "binding": { "source": "std/alloc.fy", "startByte": 216, "endByte": 223 }
+                "binding": { "source": "std/alloc.fy", "startByte": 259, "endByte": 266 }
               },
               {
                 "kind": "drop",
-                "binding": { "source": "std/alloc.fy", "startByte": 171, "endByte": 176 }
+                "binding": { "source": "std/alloc.fy", "startByte": 214, "endByte": 219 }
               }
             ]
           },
           {
             "kind": "region-early-reset",
             "function": "std::alloc::propagate_from_region",
-            "region": { "source": "std/alloc.fy", "startByte": 600, "endByte": 824 },
+            "region": { "source": "std/alloc.fy", "startByte": 630, "endByte": 841 },
             "placements": [
-              { "source": "std/alloc.fy", "startByte": 712, "endByte": 728 }
+              { "source": "std/alloc.fy", "startByte": 729, "endByte": 745 }
             ],
-            "exit": { "source": "std/alloc.fy", "startByte": 754, "endByte": 760 },
+            "exit": { "source": "std/alloc.fy", "startByte": 771, "endByte": 777 },
             "exitKind": "propagate",
             "cleanupBeforeReset": [
               {
                 "kind": "drop",
-                "binding": { "source": "std/alloc.fy", "startByte": 652, "endByte": 657 }
+                "binding": { "source": "std/alloc.fy", "startByte": 682, "endByte": 687 }
               }
             ],
-            "reset": { "source": "std/alloc.fy", "startByte": 600, "endByte": 824 }
+            "reset": { "source": "std/alloc.fy", "startByte": 630, "endByte": 841 }
           },
           {
             "kind": "result-branch",
             "function": "std::alloc::propagate_from_region",
-            "question": { "source": "std/alloc.fy", "startByte": 759, "endByte": 760 },
-            "resultExpression": { "source": "std/alloc.fy", "startByte": 754, "endByte": 759 },
+            "question": { "source": "std/alloc.fy", "startByte": 776, "endByte": 777 },
+            "resultExpression": { "source": "std/alloc.fy", "startByte": 771, "endByte": 776 },
             "evaluationCount": 1,
             "successPayload": "Move",
             "errorPayload": "Move",
@@ -382,123 +382,123 @@
             "errorCleanupActions": [
               {
                 "kind": "drop",
-                "binding": { "source": "std/alloc.fy", "startByte": 652, "endByte": 657 }
+                "binding": { "source": "std/alloc.fy", "startByte": 682, "endByte": 687 }
               },
               {
                 "kind": "region-reset",
-                "binding": { "source": "std/alloc.fy", "startByte": 600, "endByte": 824 }
+                "binding": { "source": "std/alloc.fy", "startByte": 630, "endByte": 841 }
               },
               {
                 "kind": "drop",
-                "binding": { "source": "std/alloc.fy", "startByte": 563, "endByte": 570 }
+                "binding": { "source": "std/alloc.fy", "startByte": 593, "endByte": 600 }
               },
               {
                 "kind": "drop",
-                "binding": { "source": "std/alloc.fy", "startByte": 518, "endByte": 523 }
+                "binding": { "source": "std/alloc.fy", "startByte": 548, "endByte": 553 }
               }
             ]
           },
           {
             "kind": "region-early-reset",
             "function": "std::alloc::nested_return",
-            "region": { "source": "std/alloc.fy", "startByte": 1328, "endByte": 1570 },
+            "region": { "source": "std/alloc.fy", "startByte": 1326, "endByte": 1549 },
             "placements": [
-              { "source": "std/alloc.fy", "startByte": 1464, "endByte": 1478 }
+              { "source": "std/alloc.fy", "startByte": 1443, "endByte": 1457 }
             ],
-            "exit": { "source": "std/alloc.fy", "startByte": 1499, "endByte": 1559 },
+            "exit": { "source": "std/alloc.fy", "startByte": 1478, "endByte": 1538 },
             "exitKind": "return",
             "cleanupBeforeReset": [
               {
                 "kind": "drop",
-                "binding": { "source": "std/alloc.fy", "startByte": 1388, "endByte": 1399 }
+                "binding": { "source": "std/alloc.fy", "startByte": 1386, "endByte": 1397 }
               }
             ],
-            "reset": { "source": "std/alloc.fy", "startByte": 1328, "endByte": 1570 }
+            "reset": { "source": "std/alloc.fy", "startByte": 1326, "endByte": 1549 }
           },
           {
             "kind": "region-early-reset",
             "function": "std::alloc::nested_return",
-            "region": { "source": "std/alloc.fy", "startByte": 1176, "endByte": 1576 },
+            "region": { "source": "std/alloc.fy", "startByte": 1193, "endByte": 1555 },
             "placements": [
-              { "source": "std/alloc.fy", "startByte": 1304, "endByte": 1318 }
+              { "source": "std/alloc.fy", "startByte": 1302, "endByte": 1316 }
             ],
-            "exit": { "source": "std/alloc.fy", "startByte": 1499, "endByte": 1559 },
+            "exit": { "source": "std/alloc.fy", "startByte": 1478, "endByte": 1538 },
             "exitKind": "return",
             "cleanupBeforeReset": [
               {
                 "kind": "drop",
-                "binding": { "source": "std/alloc.fy", "startByte": 1232, "endByte": 1243 }
+                "binding": { "source": "std/alloc.fy", "startByte": 1249, "endByte": 1260 }
               }
             ],
-            "reset": { "source": "std/alloc.fy", "startByte": 1176, "endByte": 1576 }
+            "reset": { "source": "std/alloc.fy", "startByte": 1193, "endByte": 1555 }
           },
           {
             "kind": "cleanup-path",
             "function": "std::alloc::nested_return",
-            "exit": { "source": "std/alloc.fy", "startByte": 1499, "endByte": 1559 },
+            "exit": { "source": "std/alloc.fy", "startByte": 1478, "endByte": 1538 },
             "exitKind": "return",
             "actions": [
               {
                 "kind": "drop",
-                "binding": { "source": "std/alloc.fy", "startByte": 1388, "endByte": 1399 }
+                "binding": { "source": "std/alloc.fy", "startByte": 1386, "endByte": 1397 }
               },
               {
                 "kind": "region-reset",
-                "binding": { "source": "std/alloc.fy", "startByte": 1328, "endByte": 1570 }
+                "binding": { "source": "std/alloc.fy", "startByte": 1326, "endByte": 1549 }
               },
               {
                 "kind": "drop",
-                "binding": { "source": "std/alloc.fy", "startByte": 1232, "endByte": 1243 }
+                "binding": { "source": "std/alloc.fy", "startByte": 1249, "endByte": 1260 }
               },
               {
                 "kind": "region-reset",
-                "binding": { "source": "std/alloc.fy", "startByte": 1176, "endByte": 1576 }
+                "binding": { "source": "std/alloc.fy", "startByte": 1193, "endByte": 1555 }
               },
               {
                 "kind": "drop",
-                "binding": { "source": "std/alloc.fy", "startByte": 1133, "endByte": 1147 }
+                "binding": { "source": "std/alloc.fy", "startByte": 1150, "endByte": 1164 }
               },
               {
                 "kind": "drop",
-                "binding": { "source": "std/alloc.fy", "startByte": 1082, "endByte": 1093 }
+                "binding": { "source": "std/alloc.fy", "startByte": 1099, "endByte": 1110 }
               },
               {
                 "kind": "drop",
-                "binding": { "source": "std/alloc.fy", "startByte": 1031, "endByte": 1042 }
+                "binding": { "source": "std/alloc.fy", "startByte": 1048, "endByte": 1059 }
               }
             ]
           },
           {
             "kind": "region-early-reset",
             "function": "std::alloc::conditional_region",
-            "region": { "source": "std/alloc.fy", "startByte": 1715, "endByte": 1928 },
+            "region": { "source": "std/alloc.fy", "startByte": 1694, "endByte": 1894 },
             "placements": [
-              { "source": "std/alloc.fy", "startByte": 1905, "endByte": 1921 }
+              { "source": "std/alloc.fy", "startByte": 1871, "endByte": 1887 }
             ],
-            "exit": { "source": "std/alloc.fy", "startByte": 1836, "endByte": 1863 },
+            "exit": { "source": "std/alloc.fy", "startByte": 1815, "endByte": 1842 },
             "exitKind": "return",
             "cleanupBeforeReset": [
               {
                 "kind": "drop",
-                "binding": { "source": "std/alloc.fy", "startByte": 1767, "endByte": 1772 }
+                "binding": { "source": "std/alloc.fy", "startByte": 1746, "endByte": 1751 }
               }
             ],
-            "reset": { "source": "std/alloc.fy", "startByte": 1715, "endByte": 1928 }
+            "reset": { "source": "std/alloc.fy", "startByte": 1694, "endByte": 1894 }
           },
           {
             "kind": "region-scope",
             "function": "std::alloc::conditional_region",
-            "region": { "source": "std/alloc.fy", "startByte": 1715, "endByte": 1928 },
+            "region": { "source": "std/alloc.fy", "startByte": 1694, "endByte": 1894 },
             "placements": [
-              { "source": "std/alloc.fy", "startByte": 1905, "endByte": 1921 }
+              { "source": "std/alloc.fy", "startByte": 1871, "endByte": 1887 }
             ],
             "cleanupBeforeReset": [
               {
                 "kind": "drop",
-                "binding": { "source": "std/alloc.fy", "startByte": 1767, "endByte": 1772 }
+                "binding": { "source": "std/alloc.fy", "startByte": 1746, "endByte": 1751 }
               }
             ],
-            "reset": { "source": "std/alloc.fy", "startByte": 1715, "endByte": 1928 }
+            "reset": { "source": "std/alloc.fy", "startByte": 1694, "endByte": 1894 }
           }
         ]
       }
@@ -573,51 +573,51 @@
           {
             "kind": "region-early-reset",
             "function": "std::alloc::break_from_region",
-            "region": { "source": "std/alloc.fy", "startByte": 350, "endByte": 599 },
+            "region": { "source": "std/alloc.fy", "startByte": 393, "endByte": 629 },
             "placements": [
-              { "source": "std/alloc.fy", "startByte": 469, "endByte": 489 }
+              { "source": "std/alloc.fy", "startByte": 499, "endByte": 519 }
             ],
-            "exit": { "source": "std/alloc.fy", "startByte": 568, "endByte": 574 },
+            "exit": { "source": "std/alloc.fy", "startByte": 598, "endByte": 604 },
             "exitKind": "break",
             "cleanupBeforeReset": [
-              { "kind": "drop", "binding": { "source": "std/alloc.fy", "startByte": 406, "endByte": 411 } }
+              { "kind": "drop", "binding": { "source": "std/alloc.fy", "startByte": 449, "endByte": 454 } }
             ],
-            "reset": { "source": "std/alloc.fy", "startByte": 350, "endByte": 599 }
+            "reset": { "source": "std/alloc.fy", "startByte": 393, "endByte": 629 }
           },
           {
             "kind": "cleanup-path",
             "function": "std::alloc::break_from_region",
-            "exit": { "source": "std/alloc.fy", "startByte": 568, "endByte": 574 },
+            "exit": { "source": "std/alloc.fy", "startByte": 598, "endByte": 604 },
             "exitKind": "break",
             "actions": [
-              { "kind": "drop", "binding": { "source": "std/alloc.fy", "startByte": 406, "endByte": 411 } },
-              { "kind": "region-reset", "binding": { "source": "std/alloc.fy", "startByte": 350, "endByte": 599 } },
-              { "kind": "drop", "binding": { "source": "std/alloc.fy", "startByte": 313, "endByte": 317 } }
+              { "kind": "drop", "binding": { "source": "std/alloc.fy", "startByte": 449, "endByte": 454 } },
+              { "kind": "region-reset", "binding": { "source": "std/alloc.fy", "startByte": 393, "endByte": 629 } },
+              { "kind": "drop", "binding": { "source": "std/alloc.fy", "startByte": 356, "endByte": 360 } }
             ]
           },
           {
             "kind": "region-early-reset",
             "function": "std::alloc::continue_from_region",
-            "region": { "source": "std/alloc.fy", "startByte": 869, "endByte": 1072 },
+            "region": { "source": "std/alloc.fy", "startByte": 899, "endByte": 1089 },
             "placements": [
-              { "source": "std/alloc.fy", "startByte": 988, "endByte": 1008 }
+              { "source": "std/alloc.fy", "startByte": 1005, "endByte": 1025 }
             ],
-            "exit": { "source": "std/alloc.fy", "startByte": 1053, "endByte": 1062 },
+            "exit": { "source": "std/alloc.fy", "startByte": 1070, "endByte": 1079 },
             "exitKind": "continue",
             "cleanupBeforeReset": [
-              { "kind": "drop", "binding": { "source": "std/alloc.fy", "startByte": 925, "endByte": 930 } }
+              { "kind": "drop", "binding": { "source": "std/alloc.fy", "startByte": 955, "endByte": 960 } }
             ],
-            "reset": { "source": "std/alloc.fy", "startByte": 869, "endByte": 1072 }
+            "reset": { "source": "std/alloc.fy", "startByte": 899, "endByte": 1089 }
           },
           {
             "kind": "cleanup-path",
             "function": "std::alloc::continue_from_region",
-            "exit": { "source": "std/alloc.fy", "startByte": 1053, "endByte": 1062 },
+            "exit": { "source": "std/alloc.fy", "startByte": 1070, "endByte": 1079 },
             "exitKind": "continue",
             "actions": [
-              { "kind": "drop", "binding": { "source": "std/alloc.fy", "startByte": 925, "endByte": 930 } },
-              { "kind": "region-reset", "binding": { "source": "std/alloc.fy", "startByte": 869, "endByte": 1072 } },
-              { "kind": "drop", "binding": { "source": "std/alloc.fy", "startByte": 832, "endByte": 836 } }
+              { "kind": "drop", "binding": { "source": "std/alloc.fy", "startByte": 955, "endByte": 960 } },
+              { "kind": "region-reset", "binding": { "source": "std/alloc.fy", "startByte": 899, "endByte": 1089 } },
+              { "kind": "drop", "binding": { "source": "std/alloc.fy", "startByte": 862, "endByte": 866 } }
             ]
           }
         ]

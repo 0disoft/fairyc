@@ -15,7 +15,10 @@ const (
 	arenaSymbol  hir.SymbolID = 4
 )
 
-var seedArenaType = hir.Type("seed::Arena")
+var (
+	seedArenaType      = hir.Type("seed::Arena")
+	seedAllocErrorType = hir.Type("seed::AllocError")
+)
 
 func constructSeed(id string) (mir.Program, error) {
 	var function mir.Function
@@ -143,7 +146,7 @@ func plainRegionSeed() mir.Function {
 				{Kind: mir.OperationRegionEnter, Entity: "region:scratch", Symbol: regionSymbol, DestinationLocal: mir.NoLocal,
 					Operands: []mir.Operand{{Kind: mir.OperandLocal, Local: mir.LocalID(arenaSymbol)}}, OwnerType: seedArenaType,
 					Type: hir.MutableBorrow(seedArenaType), Operator: "&mut"},
-				{Kind: mir.OperationRegionPlace, Entity: "operation:place-inert", Symbol: regionSymbol, DestinationLocal: mir.LocalID(valueSymbol), Operands: []mir.Operand{{Kind: mir.OperandI32, I32: 1}}, Type: hir.TypeI32},
+				{Kind: mir.OperationRegionPlace, Entity: "operation:place-inert", Symbol: regionSymbol, DestinationLocal: mir.LocalID(valueSymbol), Operands: []mir.Operand{{Kind: mir.OperandI32, I32: 1}}, OwnerType: hir.TypeI32, Type: hir.Result(hir.SharedBorrow(hir.TypeI32), seedAllocErrorType)},
 				{Kind: mir.OperationRegionReset, Entity: "operation:region-reset", Symbol: regionSymbol, DestinationLocal: mir.NoLocal, ExitKind: "fallthrough"},
 				{Kind: mir.OperationMove, Symbol: arenaSymbol},
 			},
@@ -172,7 +175,7 @@ func breakRegionControlSeed() mir.Function {
 					{Kind: mir.OperationRegionEnter, Entity: "region:scratch", Symbol: regionSymbol, DestinationLocal: mir.NoLocal,
 						Operands: []mir.Operand{{Kind: mir.OperandLocal, Local: mir.LocalID(arenaSymbol)}}, OwnerType: seedArenaType,
 						Type: hir.MutableBorrow(seedArenaType), Operator: "&mut"},
-					{Kind: mir.OperationRegionPlace, Entity: "operation:place-inert", Symbol: regionSymbol, DestinationLocal: mir.LocalID(valueSymbol), Operands: []mir.Operand{{Kind: mir.OperandI32, I32: 1}}, Type: hir.TypeI32},
+					{Kind: mir.OperationRegionPlace, Entity: "operation:place-inert", Symbol: regionSymbol, DestinationLocal: mir.LocalID(valueSymbol), Operands: []mir.Operand{{Kind: mir.OperandI32, I32: 1}}, OwnerType: hir.TypeI32, Type: hir.Result(hir.SharedBorrow(hir.TypeI32), seedAllocErrorType)},
 					{Kind: mir.OperationMove, Entity: "operation:discard-placement", Symbol: valueSymbol},
 					{Kind: mir.OperationRegionReset, Entity: "operation:region-reset", Symbol: regionSymbol, DestinationLocal: mir.NoLocal, ExitKind: "break"},
 				},

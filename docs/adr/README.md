@@ -260,6 +260,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0248-public-allocation-free-utf8-validation.md`: adds explicit allocation-free byte-slice UTF-8 validation with an owner-bound `ref str` Result payload at SDK stage0.9 without implicit conversion or a public view ABI.
 - `0249-retained-arena-owner-in-region-mir.md`: retains the exact Arena owner local and mutable-borrow type on verified `region-enter` so future native lowering cannot recover ownership from source or HIR side data.
 - `0250-public-safe-arena-creation.md`: replaces the SDK Arena placeholder with a runtime-compatible move-only resource, fallible safe creation, exact allocation status, and automatic drop at SDK stage0.10.
+- `0251-fallible-region-placement.md`: changes `Region.place` to an explicit `Result<ref T, AllocError>`, preserves Region provenance through tagged flow, and cuts language revision `/8`.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

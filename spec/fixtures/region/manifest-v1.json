@@ -17,7 +17,7 @@
     {
       "id": "pass.flow.param-local-use",
       "sourceRoot": "cases/pass/param-local-use/src",
-      "sources": ["main.fy"],
+      "sources": ["main.fy", "std/alloc.fy"],
       "expect": {
         "status": "pass",
         "completedThrough": "flow",
@@ -26,15 +26,10 @@
             "operation": "place",
             "allocation": {
               "source": "main.fy",
-              "startByte": 80,
-              "endByte": 100
+              "startByte": 74,
+              "endByte": 94
             },
             "origin": "RegionParam(0)",
-            "lastUse": {
-              "source": "main.fy",
-              "startByte": 114,
-              "endByte": 120
-            },
             "escapes": false
           }
         ]
@@ -43,7 +38,7 @@
     {
       "id": "pass.flow.param-return",
       "sourceRoot": "cases/pass/param-return/src",
-      "sources": ["main.fy"],
+      "sources": ["main.fy", "std/alloc.fy"],
       "expect": {
         "status": "pass",
         "completedThrough": "flow",
@@ -52,8 +47,8 @@
             "operation": "place",
             "allocation": {
               "source": "main.fy",
-              "startByte": 71,
-              "endByte": 91
+              "startByte": 127,
+              "endByte": 147
             },
             "origin": "RegionParam(0)",
             "escapes": true
@@ -78,16 +73,16 @@
             "code": "E3101",
             "primary": {
               "source": "main.fy",
-              "startByte": 199,
-              "endByte": 205
+              "startByte": 175,
+              "endByte": 195
             },
             "related": [
               {
                 "role": "allocation",
                 "span": {
                   "source": "main.fy",
-                  "startByte": 162,
-                  "endByte": 182
+                  "startByte": 175,
+                  "endByte": 195
                 }
               }
             ]
@@ -98,7 +93,7 @@
     {
       "id": "fail.flow.resource-placement",
       "sourceRoot": "cases/fail/resource-placement/src",
-      "sources": ["main.fy"],
+      "sources": ["main.fy", "std/alloc.fy"],
       "expect": {
         "status": "fail",
         "phase": "flow",
@@ -107,8 +102,8 @@
             "code": "E3102",
             "primary": {
               "source": "main.fy",
-              "startByte": 138,
-              "endByte": 158
+              "startByte": 123,
+              "endByte": 143
             },
             "related": [
               {

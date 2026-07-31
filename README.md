@@ -457,7 +457,9 @@ go run ./cmd/fairyc experimental check-syntax examples/syntax/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/syntax/main.fy
 go run ./cmd/fairyc experimental check-semantics examples/semantic/main.fy examples/semantic/math.fy
 go run ./cmd/fairyc experimental check-semantics examples/resources/main.fy
-go run ./cmd/fairyc experimental check-semantics examples/regions/main.fy
+Push-Location examples/regions
+go run ../../cmd/fairyc check
+Pop-Location
 go run ./cmd/fairyc experimental check-semantics examples/results/main.fy
 go run ./cmd/fairyc experimental check examples/run/modules/main.fy --source examples/run/modules/math.fy
 go run ./cmd/fairyc experimental check-workspace

@@ -6,6 +6,10 @@ pub resource Arena {
     cleanup {}
 }
 
+pub struct AllocError {
+    u32 status;
+}
+
 resource Token {
     i32 value;
 
@@ -20,7 +24,7 @@ fn i32 break_from_region() {
         let Token body = Token { .value = 1 };
         region scratch in ref mut arena {
             let Token inner = Token { .value = 1 };
-            let ref i32 stored = scratch.place(count);
+            discard scratch.place(count);
             count = count + 1;
             if (count == 1) {
                 break;
@@ -38,7 +42,7 @@ fn i32 continue_from_region() {
         let Token body = Token { .value = 1 };
         region scratch in ref mut arena {
             let Token inner = Token { .value = 1 };
-            let ref i32 stored = scratch.place(count);
+            discard scratch.place(count);
             count = count + 1;
             continue;
         }

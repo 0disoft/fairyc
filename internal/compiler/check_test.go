@@ -10,6 +10,7 @@ import (
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/frontend"
 	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/sdkstdlib"
 	"github.com/0disoft/fairyc/internal/semantic"
 	"github.com/0disoft/fairyc/internal/source"
 )
@@ -33,6 +34,30 @@ func TestCheckProducesVerifiedMIRForOwnedTextExample(t *testing.T) {
 		parseCompilerFileFromPath(t, filepath.Join("..", "..", "examples", "owned_text", "main.fy")),
 		parseCompilerFileFromPath(t, filepath.Join("..", "..", "examples", "owned_text", "owned_text.fy")),
 	})
+	if err != nil {
+		t.Fatalf("Check() error = %v", err)
+	}
+	if !result.Verified || result.Semantic.CompletedThrough != semantic.PhaseFlow {
+		t.Fatalf("Check() result = %+v", result)
+	}
+}
+
+func TestCheckProducesVerifiedMIRForFallibleRegionPlacement(t *testing.T) {
+	t.Parallel()
+	stdlib, err := sdkstdlib.Load()
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+	files := make([]semantic.File, 0, len(stdlib.Sources)+1)
+	for _, value := range stdlib.Sources {
+		files = append(files, semantic.File{Package: hir.DefaultPackage, Path: value.Path, Module: value.Module})
+	}
+	regionSource, err := os.ReadFile(filepath.Join("..", "..", "examples", "regions", "src", "main.fy"))
+	if err != nil {
+		t.Fatalf("ReadFile(region example) error = %v", err)
+	}
+	files = append(files, parseCompilerFile(t, hir.DefaultPackage, "main.fy", string(regionSource)))
+	result, err := compiler.Check(files)
 	if err != nil {
 		t.Fatalf("Check() error = %v", err)
 	}

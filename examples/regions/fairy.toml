@@ -1,0 +1,8 @@
+schema = "fairyc.manifest/v1"
+
+[package]
+uid = "example.regions"
+name = "regions"
+version = "1.0.0"
+language = "fairyc-language/8"
+source = "src"

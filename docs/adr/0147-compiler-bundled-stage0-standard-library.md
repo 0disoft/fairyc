@@ -26,7 +26,7 @@ surface without changing the package-discovery boundary established here.
    compiler. Loading performs no filesystem search, environment lookup, network access, or source
    generation.
 2. The current SDK identity is `fairyc-sdk-stdlib/0`; it requires language
-   `fairyc-language/7`, runtime ABI `fairyc-runtime/0`, package UID `fairyc.std`, and version
+   `fairyc-language/8`, runtime ABI `fairyc-runtime/0`, package UID `fairyc.std`, and version
    `0.0.0-stage0.10` after ADR 0250. Earlier SDK and language-pin cutovers remain recorded by their
    owning ADRs.
 3. The workspace loader injects one `standard-library` node only when a root-reachable package

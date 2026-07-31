@@ -106,7 +106,7 @@ func writeAtlasCallScaleWorkspace(root string, definition buildmeasure.AtlasCall
 	}
 	libraryCount := definition.Packages - 1
 	var manifest strings.Builder
-	fmt.Fprintf(&manifest, "schema = \"fairyc.manifest/v1\"\n[package]\nuid = \"measurement.atlas-call-scale.%s\"\nname = \"%s\"\nversion = \"1.0.0\"\nlanguage = \"fairyc-language/7\"\nsource = \"src\"\n[workspace]\nmembers = [\n", definition.Name, definition.Name)
+	fmt.Fprintf(&manifest, "schema = \"fairyc.manifest/v1\"\n[package]\nuid = \"measurement.atlas-call-scale.%s\"\nname = \"%s\"\nversion = \"1.0.0\"\nlanguage = \"fairyc-language/8\"\nsource = \"src\"\n[workspace]\nmembers = [\n", definition.Name, definition.Name)
 	for index := 1; index <= libraryCount; index++ {
 		fmt.Fprintf(&manifest, "  \"libs/p%03d\",\n", index)
 	}
@@ -133,7 +133,7 @@ func writeAtlasCallScaleWorkspace(root string, definition buildmeasure.AtlasCall
 	}
 	for index := 1; index <= libraryCount; index++ {
 		name := fmt.Sprintf("p%03d", index)
-		memberManifest := fmt.Sprintf("schema = \"fairyc.manifest/v1\"\n[package]\nuid = \"measurement.atlas-call-scale.%s.%s\"\nname = \"%s\"\nversion = \"1.0.0\"\nlanguage = \"fairyc-language/7\"\nsource = \"src\"\n", definition.Name, name, name)
+		memberManifest := fmt.Sprintf("schema = \"fairyc.manifest/v1\"\n[package]\nuid = \"measurement.atlas-call-scale.%s.%s\"\nname = \"%s\"\nversion = \"1.0.0\"\nlanguage = \"fairyc-language/8\"\nsource = \"src\"\n", definition.Name, name, name)
 		if err := writeAtlasCallScaleFile(filepath.Join(root, "libs", name, "fairy.toml"), memberManifest); err != nil {
 			return err
 		}

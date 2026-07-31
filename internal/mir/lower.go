@@ -1289,7 +1289,7 @@ func (l *functionLowerer) lowerRegionPlace(expression *hir.Expression) (Operand,
 	destination := l.newTemporary()
 	l.appendOperation(Operation{
 		Kind: OperationRegionPlace, Span: expression.Span, Symbol: receiver.Symbol,
-		DestinationLocal: destination, Operands: []Operand{value}, Type: valueExpression.Type,
+		DestinationLocal: destination, Operands: []Operand{value}, Type: expression.Type, OwnerType: valueExpression.Type,
 	})
 	l.result.RegionScopes[factIndex].Placements = append(l.result.RegionScopes[factIndex].Placements, expression.Span)
 	regionEntity := fmt.Sprintf("region:%d", receiver.Symbol)

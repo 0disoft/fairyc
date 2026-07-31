@@ -13,7 +13,7 @@
   ],
   "base": {
     "compilerBuild": "compiler:a",
-    "languageRevision": "fairyc-language/7",
+    "languageRevision": "fairyc-language/8",
     "mirVersion": "fairyc-mir/0",
     "targetSchema": "fairyc.target-spec/v0:x86_64-windows-msvc",
     "abiProfile": "microsoft-x64/v0",
@@ -37,7 +37,7 @@
       "id": "baseline",
       "override": {},
       "relation": "baseline",
-      "expectKey": "fycache2-sha256-44fb13dc634451c83efcbd76fe13ea375855f59b7aff52fc31da01df9de95538"
+      "expectKey": "fycache2-sha256-236ca4812da84ba01478c54ee568b7abe4189cd598fb07e94ce9e396c04ec449"
     },
     {
       "id": "compiler-build",
