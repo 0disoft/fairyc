@@ -2093,6 +2093,52 @@ fn i32 main() {
 	}
 }
 
+func TestEmitCopyResultWithBorrowedText(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+struct TextError {
+    u32 status;
+}
+fn Result<ref str, TextError> validate(ref str value, bool accept) {
+    return if (accept) {
+        .ok(value)
+    } else {
+        .err(TextError { .status = 1 })
+    };
+}
+fn i32 main() {
+    return switch (validate("Fairy", true)) {
+        case .ok(value) : { if (value.len == 5) { 42 } else { 0 } }
+        case .err(_) : { 0 }
+    };
+}
+`)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("interpreter = %+v, %v", outcome, err)
+	}
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	wantFeatures := []string{"copy-result", "inert-struct", "scalar-call", "scalar-comparison", "scalar-control-flow", "static-utf8-string", "trap", "view-length"}
+	if !slices.Equal(unit.Features, wantFeatures) {
+		t.Fatalf("Emit() features = %v, want %v", unit.Features, wantFeatures)
+	}
+	for _, required := range []string{
+		"fy_str p_0;",
+		"_Static_assert(sizeof(fy_tagged_0) == UINT64_C(32)",
+		"offsetof(fy_tagged_0, p_0) == UINT64_C(8)",
+		"offsetof(fy_tagged_0, p_1) == UINT64_C(24)",
+		"(fy_tagged_0){ .tag = FY_RESULT_OK, .p_0 =",
+		".p_0;",
+	} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q", required)
+		}
+	}
+}
+
 func TestEmitRejectsResultWithEnumError(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;

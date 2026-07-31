@@ -69,13 +69,13 @@ The initial library surface is:
 ```text
 std::alloc  SystemHeap, Arena, AllocError
 std::bytes  Buffer
-std::text   String, CStr, CString; arbitrary byte-to-text validation remains planned
+std::text   String, CStr, CString, and explicit allocation-free UTF-8 validation
 std::fs     Linux File and open options
 std::io     exact stdout/stderr byte writes, decimal i32 output, and one bounded stdin byte read
 std::c      C scalar types and raw wrapper helpers
 ```
 
-The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.8` exports opaque `std::alloc::Arena`, ADR 0246's public safe `std::bytes::Buffer`, ADR 0247's public safe `std::text::String` and `CString`, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, ADR 0210's matching immutable byte-view output operations, ADR 0211's bounded mutable-byte-view stdin read, and ADR 0215's allocation-free decimal `i32` output; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
+The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.9` exports opaque `std::alloc::Arena`, ADR 0246's public safe `std::bytes::Buffer`, ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free `std::text::validate_utf8`, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, ADR 0210's matching immutable byte-view output operations, ADR 0211's bounded mutable-byte-view stdin read, and ADR 0215's allocation-free decimal `i32` output; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
 
 Built-in `Option`, `Result`, slices, `str`, and `CStr` get compiler-known view semantics; library modules provide operations over them.
 
@@ -219,9 +219,10 @@ but ADR 0214 records its first hosted Linux execution. Its canonical validator a
 `fy_std_text_utf8_valid_v0` and `fy_std_text_validate_utf8_v0`. One Fairy source fixture calls the
 empty-input predicate through raw FFI; another constructs the exact flat `@repr(C)` view record,
 passes its verified direct-local raw address, and observes the C helper replace sentinel length 99
-with zero. Those raw fixtures are not themselves the public safe `std::text` API and do not
-implement a borrowed `str` result from arbitrary bytes, nonempty input storage, Unicode normalization,
-grapheme segmentation, case conversion, or locale behavior.
+with zero. Those raw fixtures are not themselves the public safe `std::text` API. ADR 0248
+separately exposes the predicate through an owner-bound borrowed `str` Result over arbitrary input
+storage. Neither path implements Unicode normalization, grapheme segmentation, case conversion, or
+locale behavior.
 
 `String` is a resource owning a UTF-8 `Buffer`. The public SDK can copy from `ref str`, expose
 `ref str`, and append fallibly. The runtime also has a consuming Buffer conversion with
@@ -301,16 +302,20 @@ a private non-null `ref str` sentinel, and preserves the existing pointer-only `
 is superseded as the user-facing entry by ADR 0247's SDK module; it remains independent historical
 evidence and does not define a public layout.
 
-SDK `0.0.0-stage0.8` exposes move-only `String` and `CString` from `std::text`. `copy` and
+SDK `0.0.0-stage0.9` exposes move-only `String` and `CString` from `std::text`. `copy` and
 `cstring_from_text` construct canonical owners fallibly; `append` preserves the existing String on
 failure. `string_len`, `string_is_empty`, `cstring_len`, and `cstring_is_empty` expose byte metadata,
 with CString length excluding its required terminator. `string_as_str` and `cstring_as_cstr` return
 shared views tied to the exact owner borrow. `TextError` preserves separate text and allocation
-status fields. Raw storage, capacity, mutable text bytes, implicit conversions, formatting, locale,
-Unicode normalization, and general byte-to-text validation remain outside the public surface.
+status fields. ADR 0248 additionally exposes
+`validate_utf8(ref u8[]) -> Result<ref str, TextError>`: success borrows the exact input bytes with
+no allocation or copy, while invalid input reports text status `2` and allocation status `0`. Raw
+storage, capacity, mutable text bytes, implicit conversions, formatting, locale, Unicode
+normalization, lossy decoding, and streaming validation remain outside the public surface.
 
 `examples/std_text_quickstart` imports only that safe module. Its Windows development and release
-builds execute String copy and append, empty String, nonempty and empty CString, owner-bound views,
+builds execute valid nonempty multibyte validation, invalid-byte rejection with zero allocation
+status, String copy and append, empty String, nonempty and empty CString, owner-bound views,
 interior-NUL rejection, and implicit cleanup with native result 42.
 
 A `c"..."` literal provides allocation-free immutable `ref CStr` storage with one compiler-appended trailing NUL and rejects a decoded interior NUL. The implemented C path emits exact `static const uint8_t[]` bytes, deduplicates equal storage, and permits only an explicit unsafe conversion to immutable `ptr u8` for the direct-literal raw FFI form. It is source syntax, not a runtime constructor.

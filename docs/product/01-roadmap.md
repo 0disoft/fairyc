@@ -245,8 +245,9 @@ allocations, and rechecks stale Region and active-drop rejection.
 The allocation-free text-view slice now checks canonical UTF-8 and code-point byte boundaries,
 including overlong, surrogate, out-of-range, truncated, and obsolete forms. ADR 0214 records its
 four native runs. A separate four-way Fairy-source crossing now calls the actual
-empty-input UTF-8 validator in the text-view C unit; the public borrowed text result, nonempty
-source pointer path, and full wrapper remain missing.
+empty-input UTF-8 validator in the text-view C unit. ADR 0248 now exposes the same complete
+predicate as `validate_utf8(ref u8[]) -> Result<ref str, TextError>`, including nonempty input,
+retained borrow origin, and explicit invalid-byte handling without allocation or copy.
 Compiler-owned `c"..."` storage now crosses semantic typing with `Static` origin, MIR as exact
 terminated bytes, and generated C as deduplicated immutable static storage. The direct literal can
 expose only an immutable `ptr u8` address through an explicit unsafe operation. Compiler-owned
@@ -262,7 +263,7 @@ executes both borrowed-view parameter families through the interpreter and deter
 Immutable `ref u8[]` now supports read-only `usize` indexing to `u8` and explicit or omitted-bound,
 end-exclusive slicing through verified MIR bounds checks, interpreter `bounds` outcomes, and
 generated-C checked loads or pointer derivation. Inclusive ranges, text indexing or slicing,
-arbitrary byte-to-text validation, Unicode counting, and stable slice or string ABIs remain missing.
+Unicode counting, normalization, lossy decoding, and stable slice or string ABIs remain missing.
 Mutable fixed `u8[N]` places now contextually borrow as `ref mut u8[]` for exact internal parameters.
 The view preserves its exclusive origin, exposes canonical length, emits a private writable
 descriptor, supports checked `u8` reads and indexed stores, and may derive `ptr mut u8` only inside
@@ -285,8 +286,10 @@ exact bytes, terminator contents, invalid UTF-8, self-overlap, null/malformed st
 preservation, size overflow, and repeated drop. A probe-only allocator now deterministically forces
 initial String/CString allocation and String append reallocation failures, proves preservation, and
 returns its live-allocation count to zero. Public layouts, mutable text bytes, consuming Buffer
-conversion, arbitrary byte validation, Unicode algorithms, and general user-defined raw-parts
-reconstruction remain later gates.
+conversion, Unicode algorithms, and general user-defined raw-parts reconstruction remain later
+gates. ADR 0248 moves the SDK to `0.0.0-stage0.9` and adds explicit allocation-free arbitrary
+byte-view validation. Its success payload is an owner-bound `ref str`; invalid input returns text
+status `2` with allocation status `0`. It adds no implicit conversion or public view ABI.
 The Linux File C slice now also covers partial read/write, write-all progress, sync, and consuming
 close including forced close failure. ADR 0214 records its four C-only native runs.
 A second four-way generated-Fairy crossing uses exact result, File, and open-option records to call

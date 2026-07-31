@@ -230,6 +230,7 @@ func TestStdTextQuickstartReachesQualifiedWindowsCEmission(t *testing.T) {
 	}
 	if unit.Entry != entry || !strings.Contains(unit.Source, "fy_std_string_copy_storage_v0") ||
 		!strings.Contains(unit.Source, "fy_std_cstring_from_text_storage_v0") ||
+		!strings.Contains(unit.Source, "fy_std_text_utf8_valid_v0") ||
 		!strings.Contains(unit.Source, "int main(void)") {
 		t.Fatalf("std::text C unit = entry %q, foreign symbols %v", unit.Entry, unit.ForeignSymbols)
 	}

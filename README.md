@@ -174,7 +174,7 @@ completed prefix. Its `main` passes `ref str` and `ref u8[]` through safe intern
 byte helper observes the exact NUL and `A` bytes through checked read-only indexing while the entry contains no raw pointer or `unsafe`,
 prints `Fairy C says hi`, and exits 42. That is real
 FY-to-MSVC process output, unsafe containment, and source-effect enforcement for the legacy example.
-The compiler-bundled SDK `0.0.0-stage0.8` exposes safe text
+The compiler-bundled SDK `0.0.0-stage0.9` exposes safe text
 `std::io::write(ref str)` and `std::io::write_stderr(ref str)` operations plus exact binary
 `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` operations. All four return
 `Result<usize, ConsoleError>`. The same module now exposes allocation-free
@@ -192,10 +192,13 @@ reserve, append, zero-grow, truncate, clear, inspect length/capacity/emptiness, 
 initialized prefix as `ref u8[]` or `ref mut u8[]`; raw pointers and all seven runtime symbols stay
 inside the SDK. `examples/std_bytes_quickstart` runs that lifecycle and automatic cleanup in both
 Windows development and release builds without `unsafe` in user code.
-The same SDK now exposes move-only `std::text::String` and `std::text::CString`. Safe code can copy
-UTF-8 text, append to String, inspect byte lengths and emptiness, borrow owner-bound `ref str` or
+The same SDK now exposes move-only `std::text::String` and `std::text::CString`. Safe code can
+explicitly validate any `ref u8[]` as UTF-8 and receive an allocation-free
+`Result<ref str, TextError>` view tied to the input borrow. It can also copy UTF-8 text, append to
+String, inspect byte lengths and emptiness, borrow owner-bound `ref str` or
 `ref CStr`, and observe typed text/allocation status on failure. `examples/std_text_quickstart`
-executes nonempty and empty construction, append, interior-NUL rejection, views, and implicit cleanup
+executes valid multibyte and invalid-byte validation, nonempty and empty construction, append,
+interior-NUL rejection, views, and implicit cleanup
 in both Windows development and release builds without raw pointers, foreign declarations, or
 `unsafe` in user code.
 Linux owns a POSIX adapter and four native probes covering all three process streams. The first
@@ -264,8 +267,8 @@ evaluated. Mutable integer locals and admitted indexed scalar places support sta
 `+=`, `-=`, `*=`, `/=`, `%=`, `<<=`, `>>=`, `&=`, `^=`, and `|=` with the existing traps and no
 promotions. Bounded `defer` captures copy-scalar arguments immediately and executes internal `void`
 calls in LIFO order when their lexical block exits; traps do not unwind through those calls. Text
-indexing or slicing, a stable public string ABI, and the general safe text API still
-do not exist.
+indexing or slicing, Unicode algorithms, lossy decoding, implicit byte-to-text conversion, and a
+stable public string ABI still do not exist.
 Fixed arrays of `bool`, `i32`, `u8`, `u32`, or `usize` with `1 <= N <= 4096` now construct from
 nonempty list literals, cross internal calls and returns as inert copy values, expose exact
 zero-cost `usize` `.len`, and support checked read-only `usize` indexing. A direct shared borrow of

@@ -40,6 +40,20 @@ fn i32 check_cstring(text::CString value, usize expected, bool empty) {
 }
 
 fn i32 main() {
+    let i32 valid_utf8_code = switch (text::validate_utf8(b"Fairy \xce\xbb")) {
+        case .ok(value) : { if (value.len == 8 && !value.is_empty) { 0 } else { 8 } }
+        case .err(_) : { 9 }
+    };
+    let i32 invalid_utf8_code = switch (text::validate_utf8(b"\xff")) {
+        case .ok(_) : { 13 }
+        case .err(error) : {
+            if (text::error_status(error) == 2 && text::error_allocation_status(error) == 0) {
+                0
+            } else {
+                14
+            }
+        }
+    };
     let i32 string_code = switch (text::copy("Fairy")) {
         case .ok(value) : { check_string(value) }
         case .err(_) : { 1 }
@@ -66,7 +80,11 @@ fn i32 main() {
             }
         }
     };
-    return if (string_code != 0) {
+    return if (valid_utf8_code != 0) {
+        valid_utf8_code
+    } else if (invalid_utf8_code != 0) {
+        invalid_utf8_code
+    } else if (string_code != 0) {
         string_code
     } else if (empty_string_code != 0) {
         empty_string_code

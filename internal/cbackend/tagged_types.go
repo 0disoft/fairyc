@@ -111,6 +111,9 @@ func supportedTaggedPayload(value hir.Type, structByType map[hir.Type]int, resou
 	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeU32 || value == hir.TypeUSize {
 		return true
 	}
+	if value == hir.SharedBorrow(hir.TypeStr) {
+		return true
+	}
 	if _, structure := structByType[value]; structure {
 		return true
 	}
@@ -128,6 +131,15 @@ func taggedPayloadLayout(
 	value = canonicalCValueType(value)
 	if value == hir.TypeU8 || value == hir.TypeI32 || value == hir.TypeU32 || value == hir.TypeUSize {
 		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(value)}, true
+	}
+	if value == hir.SharedBorrow(hir.TypeStr) {
+		return layout.Type{
+			Kind: layout.KindStruct,
+			Fields: []layout.Field{
+				{Name: "data", Type: layout.Type{Kind: layout.KindPointer}},
+				{Name: "length", Type: layout.Type{Kind: layout.KindLanguageScalar, Name: "usize"}},
+			},
+		}, true
 	}
 	if index, found := structByType[value]; found {
 		return structures[index].layoutType, true

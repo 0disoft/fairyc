@@ -49,6 +49,9 @@ pub resource CString {
 @link_name("fy_std_string_copy_storage_v0")
 unsafe extern C fn raw_text_result string_copy_storage_raw(ptr raw_text_view input, ptr mut void output) ;
 
+@link_name("fy_std_text_utf8_valid_v0")
+unsafe extern C fn u32 utf8_valid_raw(ptr u8 data, usize length) ;
+
 @link_name("fy_std_string_append_storage_v0")
 unsafe extern C fn raw_text_result string_append_storage_raw(ptr mut void value, ptr raw_text_view suffix) ;
 
@@ -72,6 +75,13 @@ fn TextError text_error(raw_text_result result) {
     return TextError {
         .status = result.status,
         .allocation_status = result.allocation_status,
+    };
+}
+
+fn TextError invalid_utf8_error() {
+    return TextError {
+        .status = 2,
+        .allocation_status = 0,
     };
 }
 
@@ -99,6 +109,20 @@ fn i32 discard_string(String value) {
 
 fn i32 discard_cstring(CString value) {
     return 0;
+}
+
+/// Validates bytes as UTF-8 and returns an allocation-free view with the source borrow origin.
+pub fn Result<ref str, TextError> validate_utf8(ref u8[] value) {
+    let u32 valid = unsafe {
+        utf8_valid_raw(value as ptr u8, value.len)
+    };
+    return if (valid == 1) {
+        .ok(unsafe {
+            str::from_raw_parts(value, value as ptr u8, value.len)
+        })
+    } else {
+        .err(invalid_utf8_error())
+    };
 }
 
 /// Copies valid UTF-8 text into a newly owned String.
