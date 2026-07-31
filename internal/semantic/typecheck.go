@@ -162,13 +162,13 @@ func (a *analyzer) checkForeignFunction(module *moduleScope, function *ast.Forei
 	}
 	symbol.typ = result.ResultType
 	result.MustUse = a.finalizeMustUse(module.file.Path, function.ResultType.Span, symbol, result.ResultType)
-	if _, _, borrow := hir.BorrowElement(result.ResultType); borrow {
+	if containsSafeBorrow(result.ResultType) {
 		a.addDiagnostic("E5102", span(module.file.Path, function.ResultType.Span), RelatedSpan{Role: "declaration", Span: span(module.file.Path, function.NameSpan)})
 	}
 	for index := range function.Parameters {
 		parameter := &function.Parameters[index]
 		parameterType := a.canonicalType(module, parameter.Type)
-		if _, _, borrow := hir.BorrowElement(parameterType); borrow {
+		if containsSafeBorrow(parameterType) {
 			a.addDiagnostic("E5102", span(module.file.Path, parameter.Type.Span), RelatedSpan{Role: "declaration", Span: span(module.file.Path, function.NameSpan)})
 		}
 		parameterSpan := span(module.file.Path, parameter.NameSpan)
@@ -264,6 +264,9 @@ func (c *typeChecker) checkFunction() hir.Function {
 	}
 	c.resultType = resultType
 	functionSymbol.typ = resultType
+	if _, _, borrowLeaves := safeBorrowLeaf(resultType); borrowLeaves > 1 {
+		c.analyzer.addUnsupported(c.module.file.Path, c.function.ResultType.Span, "function result with more than one safe-borrow leaf")
+	}
 	functionSymbol.mustUse = c.analyzer.finalizeMustUse(c.module.file.Path, c.function.ResultType.Span, functionSymbol, resultType)
 	if errorSpan, ok := resultFailureSpan(c.function.ResultType); ok {
 		functionSymbol.resultError = errorSpan

@@ -37,20 +37,26 @@ provenance.
    continue to carry their original loan generation.
 6. Summaries do not weaken the single-origin return rule. Multiple reachable return origins remain
    `E2103`; local and local-region escapes remain `E2102` and `E3101`.
-7. Typed HIR, MIR, the interpreter, and generated C need no new operation. The summary proves which
+7. The one admitted safe-borrow leaf may be the direct result or occur inside `Option` or `Result`.
+   Contextual constructors preserve the selected payload proof, `switch` installs it only in the
+   matching payload binding, and `?` carries success provenance forward while checking a borrowing
+   failure payload as an implicit return. A non-borrowing variant is a known empty proof, not an
+   unknown origin.
+8. Typed HIR, MIR, the interpreter, and generated C need no new operation. The summary proves which
    already-lowered non-owning result descriptor the ordinary call transports.
 
 ## Consequences
 
 - Multi-argument helpers can return one selected borrow without false owner conflicts at callers.
+- `Option<ref T>` and `Result<ref T, E>` wrappers cannot hide an active owner loan from Flow.
 - Static-returning helpers no longer inherit irrelevant argument provenance.
 - Recursive borrow-return inference remains deliberately incomplete rather than guessing.
 
 ## Verification
 
-- semantic unit tests cover positional remapping, static returns, selected-owner protection, and
-  unselected-owner release;
-- the semantic fixture contract grows from 25 to 27 cases with exact `Param(i)` summaries and a
-  selected-owner conflict;
+- semantic unit tests cover positional remapping, static returns, selected-owner protection,
+  unselected-owner release, tagged wrapper liveness, payload binding, non-borrowing variants,
+  local and multiple-origin rejection, and success/failure `?` propagation;
+- the semantic fixture contract covers exact `Param(i)` summaries and a selected-owner conflict;
 - the WSL-free Windows quickstart mutates an unselected fixed-array argument after the call and
   reads the selected result through the generated C and x64 MSVC path.

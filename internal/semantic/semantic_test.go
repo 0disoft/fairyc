@@ -2493,6 +2493,223 @@ fn i32 main() {
 	}
 }
 
+func TestAnalyzeTaggedBorrowWrapperProtectsOwnerUntilWrapperLastUse(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+resource Token { i32 value; cleanup {} }
+fn Result<ref Token, i32> wrap(ref Token token) { return .ok(token); }
+fn i32 consume(Token token) { return token.value; }
+fn i32 main() {
+    let Token token = Token { .value = 42 };
+    let Result<ref Token, i32> wrapped = wrap(ref token);
+    let i32 moved = consume(token);
+    return switch (wrapped) {
+        case .ok(view): { view.value }
+        case .err(_): { moved }
+    };
+}
+`,
+	})
+	if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E2105" {
+		t.Fatalf("diagnostics = %+v", result.Diagnostics)
+	}
+}
+
+func TestAnalyzeTaggedBorrowSwitchBindingProtectsOwner(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn Result<ref u8[], i32> wrap(ref u8[] bytes) { return .ok(bytes); }
+fn i32 main() {
+    var u8[1] bytes = [42];
+    return switch (wrap(ref bytes)) {
+        case .ok(view): {
+            bytes = [0];
+            view[0] as i32
+        }
+        case .err(_): { 0 }
+    };
+}
+`,
+	})
+	if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E2101" {
+		t.Fatalf("diagnostics = %+v", result.Diagnostics)
+	}
+}
+
+func TestAnalyzeOptionBorrowWrapperProtectsOwner(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+resource Token { i32 value; cleanup {} }
+fn i32 consume(Token token) { return token.value; }
+fn i32 main() {
+    let Token token = Token { .value = 42 };
+    let Option<ref Token> wrapped = .some(ref token);
+    let i32 moved = consume(token);
+    return switch (wrapped) {
+        case .some(view): { view.value }
+        case .none: { moved }
+    };
+}
+`,
+	})
+	if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E2105" {
+		t.Fatalf("diagnostics = %+v", result.Diagnostics)
+	}
+}
+
+func TestAnalyzeQuestionMarkPreservesTaggedBorrowOrigin(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+resource Token { i32 value; cleanup {} }
+fn Result<ref Token, i32> wrap(ref Token token) { return .ok(token); }
+fn i32 consume(Token token) { return token.value; }
+fn Result<i32, i32> main() {
+    let Token token = Token { .value = 42 };
+    let ref Token view = wrap(ref token)?;
+    let i32 moved = consume(token);
+    return .ok(view.value + moved);
+}
+`,
+	})
+	if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E2105" {
+		t.Fatalf("diagnostics = %+v", result.Diagnostics)
+	}
+}
+
+func TestAnalyzeTaggedBorrowLoanEndsAfterWrapperLastUse(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+resource Token { i32 value; cleanup {} }
+fn Result<ref Token, i32> wrap(ref Token token) { return .ok(token); }
+fn i32 consume(Token token) { return token.value; }
+fn i32 main() {
+    let Token token = Token { .value = 40 };
+    let Result<ref Token, i32> wrapped = wrap(ref token);
+    let i32 observed = switch (wrapped) {
+        case .ok(view): { view.value }
+        case .err(_): { 0 }
+    };
+    let i32 moved = consume(token);
+    return observed + moved;
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+}
+
+func TestAnalyzeTaggedBorrowSummaryAllowsNonBorrowVariant(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn Result<ref u8[], i32> validate(ref u8[] bytes, bool accept) {
+    return if (accept) { .ok(bytes) } else { .err(1) };
+}
+fn i32 main() {
+    let u8[1] bytes = [42];
+    let Result<ref u8[], i32> checked = validate(ref bytes, true);
+    return switch (checked) {
+        case .ok(view): { view[0] as i32 }
+        case .err(_): { 0 }
+    };
+}
+`,
+	})
+	assertCleanTypeResult(t, result)
+}
+
+func TestAnalyzeRejectsLocalBorrowInsideResultReturn(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn Result<ref u8[], i32> invalid() {
+    let u8[1] bytes = [42];
+    return .ok(ref bytes);
+}
+`,
+	})
+	if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E2102" {
+		t.Fatalf("diagnostics = %+v", result.Diagnostics)
+	}
+}
+
+func TestAnalyzeRejectsMultipleOriginsInsideResultReturn(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn Result<ref u8[], i32> select(bool use_left, ref u8[] left, ref u8[] right) {
+    return if (use_left) { .ok(left) } else { .ok(right) };
+}
+`,
+	})
+	if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E2103" {
+		t.Fatalf("diagnostics = %+v", result.Diagnostics)
+	}
+}
+
+func TestAnalyzeRejectsMoreThanOneSafeBorrowLeafInReturnType(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+fn Result<ref u8[], ref u8[]> invalid(ref u8[] value) {
+    return .ok(value);
+}
+`,
+	})
+	if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "function result with more than one safe-borrow leaf" {
+		t.Fatalf("result = %+v", result)
+	}
+}
+
+func TestAnalyzeRejectsNestedSafeBorrowAtForeignBoundary(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+unsafe extern C fn Result<ref u8[], i32> inspect(Option<ref u8[]> value) ;
+fn i32 main() { return 0; }
+`,
+	})
+	if result.FailedPhase != semantic.PhaseType || len(result.Diagnostics) != 2 {
+		t.Fatalf("result = %+v", result)
+	}
+	for _, diagnostic := range result.Diagnostics {
+		if diagnostic.Code != "E5102" {
+			t.Fatalf("diagnostics = %+v", result.Diagnostics)
+		}
+	}
+}
+
+func TestAnalyzeQuestionMarkPropagatesBorrowingFailure(t *testing.T) {
+	t.Parallel()
+	result := analyzeText(t, map[string]string{
+		"main.fy": `module main;
+resource Token { i32 value; cleanup {} }
+fn Result<i32, ref Token> fail(ref Token token) { return .err(token); }
+fn Result<i32, ref Token> relay(ref Token token) {
+    let i32 value = fail(token)?;
+    return .ok(value);
+}
+fn i32 consume(Token token) { return token.value; }
+fn i32 main() {
+    let Token token = Token { .value = 42 };
+    let Result<i32, ref Token> wrapped = relay(ref token);
+    let i32 moved = consume(token);
+    return switch (wrapped) {
+        case .ok(value): { value + moved }
+        case .err(view): { view.value }
+    };
+}
+`,
+	})
+	if len(result.Diagnostics) != 1 || result.Diagnostics[0].Code != "E2105" {
+		t.Fatalf("diagnostics = %+v", result.Diagnostics)
+	}
+}
+
 func TestAnalyzeEndsReassignedArrayViewLoanBeforeNewOrigin(t *testing.T) {
 	t.Parallel()
 	result := analyzeText(t, map[string]string{

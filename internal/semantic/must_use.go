@@ -61,7 +61,7 @@ func (a *analyzer) finalizeMustUse(source string, typeSpan diagnostic.Span, valu
 		return false
 	}
 	eligible := resultType != hir.TypeInvalid && resultType != hir.TypeVoid && resultType != hir.TypeRegion && !a.isResource(resultType)
-	if _, _, borrow := hir.BorrowElement(resultType); borrow {
+	if containsSafeBorrow(resultType) {
 		eligible = false
 	}
 	if _, _, result := hir.ResultElements(resultType); result {

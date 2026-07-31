@@ -113,7 +113,7 @@ var catalogEntries = []CatalogEntry{
 	{Code: "V1302", Category: categoryVerifier, Meaning: "A safe-borrow return has exactly one permitted origin."},
 	{Code: "V1401", Category: categoryVerifier, Meaning: "A region-derived value does not escape its region."},
 	{Code: "V1402", Category: categoryVerifier, Meaning: "Plain-region allocation never receives a `NeedsDrop` type."},
-	{Code: "V1403", Category: categoryVerifier, Meaning: "Normal control flow enters, places into, and resets each lexical Region exactly once."},
+	{Code: "V1403", Category: categoryVerifier, Meaning: "Normal control flow enters each lexical Region from one verified live mutable Arena owner, places into it, and resets it exactly once."},
 	{Code: "V1501", Category: categoryVerifier, Meaning: "Every potentially trapping operation has one complete checked predecessor with matching marker, operands, operator, categories, success edge, and non-returning trap edge."},
 	{Code: "V1502", Category: categoryVerifier, Meaning: "A Stage 0 call has no unwind successor."},
 	{Code: "V1601", Category: categoryVerifier, Meaning: "`?`, implicit drop, source short-circuiting, and nested side effects do not remain."},

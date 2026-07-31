@@ -47,6 +47,11 @@ String and CString surface. Windows development and release builds execute the s
 the configured MSVC smoke inspects and executes both PE images and finishes with 59 structurally
 inspected images.
 
+Semantic regressions separately prove that the returned `Result` keeps the input owner borrowed
+while either the wrapper or its `.ok` payload binding remains live, releases the loan after the last
+use, rejects a local view hidden inside `.ok`, and preserves the same origin through `?`. These are
+Flow guarantees; successful native transport alone is not treated as lifetime proof.
+
 This decision does not add text indexing or slicing, Unicode scalar or grapheme counting,
 normalization, case conversion, lossy decoding, streaming validation, mutable text, implicit
 conversion, public view layout, or a foreign borrowed-view ABI. The native evidence is local; it

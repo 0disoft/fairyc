@@ -77,6 +77,14 @@ argument contributes its origin and retained loans; unselected borrow arguments 
 call-bounded. A static summary borrows no argument. A recursive dependency whose result origin
 cannot be completely proven remains unsupported instead of inventing provenance.
 
+The same proof follows the single safe-borrow leaf through `Option` and `Result`. Constructing
+`.some`, `.ok`, or `.err` retains the selected payload's origin only when that payload contains the
+leaf; a payload-free `.none` and the non-borrowing variant retain no loan. A local tagged value keeps
+its owner borrowed until that value's last use. `switch` transfers the proof only to the matching
+payload binding and removes the binding at the arm boundary. For `?`, the success proof continues
+as the expression value while a borrowing failure proof is checked as the implicit early return.
+No source-level lifetime or tag-specific annotation is required.
+
 ## Return rule
 
 A function may return a safe borrow only when every successful return derives from one origin:

@@ -114,7 +114,7 @@ func (a *analyzer) inferBorrowReturnSummaries() {
 			if value == nil {
 				continue
 			}
-			if _, _, returnsBorrow := hir.BorrowElement(value.typ); !returnsBorrow {
+			if !containsSafeBorrow(value.typ) {
 				continue
 			}
 			a.borrowReturns[value] = borrowReturnSummary{}
@@ -376,6 +376,11 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 		}
 		return borrowValueState{}, true
 	case syntax.KindPath:
+		if variant, ok := optionVariantPath(expression.Text); ok && variant == optionVariantNone {
+			if _, option := hir.OptionElement(f.analyzer.expressionTypes[expression]); option {
+				return borrowValueState{known: true}, true
+			}
+		}
 		value := f.analyzer.resolved[expression]
 		if !isSafeBorrowSymbol(value) {
 			return borrowValueState{}, true
@@ -429,6 +434,8 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 		return f.evaluateMatch(expression, environment)
 	case syntax.KindWhile:
 		return f.evaluateWhile(expression, environment)
+	case syntax.KindPropagate:
+		return f.evaluatePropagate(expression, environment)
 	case syntax.KindCall:
 		if isStaticBorrowExpression(expression) && f.expressionReturnsBorrow(expression) {
 			origin := flowOrigin{name: "Static", declaration: span(f.module.file.Path, expression.Span)}
@@ -458,6 +465,16 @@ func (f *borrowFlowAnalyzer) evaluateExpression(expression *ast.Expression, envi
 				}
 			}
 			return f.regionBorrowValue(expression), true
+		}
+		if payload, payloadType, tagged := f.taggedConstructorPayload(expression); tagged {
+			value, reachable := f.evaluateExpression(payload, environment)
+			if !reachable {
+				return borrowValueState{}, false
+			}
+			if containsSafeBorrow(payloadType) {
+				return value, true
+			}
+			return borrowValueState{known: true}, true
 		}
 		if len(expression.Children) == 0 {
 			return borrowValueState{known: false}, true
@@ -509,8 +526,11 @@ func (f *borrowFlowAnalyzer) callBorrowValue(call *ast.Expression, arguments []*
 	}
 	callee := f.analyzer.callableForCall(call)
 	summary, found := f.analyzer.borrowReturns[callee]
-	if !found || !summary.known || len(summary.sources) == 0 {
+	if !found || !summary.known {
 		return borrowValueState{known: false}
+	}
+	if len(summary.sources) == 0 {
+		return borrowValueState{known: true}
 	}
 
 	selected := make([]borrowValueState, 0, len(summary.sources))
@@ -602,9 +622,12 @@ func (f *borrowFlowAnalyzer) evaluateMatch(expression *ast.Expression, environme
 	if len(expression.Children) < 2 {
 		return borrowValueState{known: false}, true
 	}
-	if _, reachable := f.evaluateExpression(expression.Children[0], environment); !reachable {
+	scrutinee := expression.Children[0]
+	scrutineeValue, reachable := f.evaluateExpression(scrutinee, environment)
+	if !reachable {
 		return borrowValueState{}, false
 	}
+	scrutineeType := f.analyzer.expressionTypes[scrutinee]
 	base := cloneBorrowEnvironment(environment)
 	var branchValues []borrowValueState
 	var branchEnvironments []borrowEnvironment
@@ -613,7 +636,20 @@ func (f *borrowFlowAnalyzer) evaluateMatch(expression *ast.Expression, environme
 			continue
 		}
 		branchEnvironment := cloneBorrowEnvironment(base)
+		binding, bindingType := f.matchPayloadBinding(arm, scrutineeType)
+		if binding != nil && containsSafeBorrow(bindingType) {
+			if !scrutineeValue.known {
+				if !f.summarizing && !f.probing() {
+					f.analyzer.addUnsupported(f.module.file.Path, arm.Children[0].Span, "safe-borrow match binding with unknown origin")
+				}
+			} else {
+				branchEnvironment[binding] = f.materialize(scrutineeValue, binding)
+			}
+		}
 		value, reachable := f.evaluateExpression(arm.Children[len(arm.Children)-1], branchEnvironment)
+		if binding != nil {
+			delete(branchEnvironment, binding)
+		}
 		if reachable {
 			branchValues = append(branchValues, value)
 			branchEnvironments = append(branchEnvironments, branchEnvironment)
@@ -627,6 +663,88 @@ func (f *borrowFlowAnalyzer) evaluateMatch(expression *ast.Expression, environme
 		return borrowValueState{}, true
 	}
 	return mergeBorrowValues(branchValues), true
+}
+
+func (f *borrowFlowAnalyzer) taggedConstructorPayload(expression *ast.Expression) (*ast.Expression, hir.Type, bool) {
+	if expression == nil || expression.Kind != syntax.KindCall || len(expression.Children) != 2 {
+		return nil, hir.TypeInvalid, false
+	}
+	callee := expression.Children[0]
+	if callee == nil {
+		return nil, hir.TypeInvalid, false
+	}
+	resultType := f.analyzer.expressionTypes[expression]
+	if variant, ok := resultVariantPath(callee.Text); ok {
+		success, failure, result := hir.ResultElements(resultType)
+		if !result {
+			return nil, hir.TypeInvalid, false
+		}
+		if variant == resultVariantErr {
+			return expression.Children[1], failure, true
+		}
+		return expression.Children[1], success, true
+	}
+	if variant, ok := optionVariantPath(callee.Text); ok && variant == optionVariantSome {
+		payload, option := hir.OptionElement(resultType)
+		if option {
+			return expression.Children[1], payload, true
+		}
+	}
+	return nil, hir.TypeInvalid, false
+}
+
+func (f *borrowFlowAnalyzer) matchPayloadBinding(arm *ast.Expression, scrutineeType hir.Type) (*symbol, hir.Type) {
+	if arm == nil || arm.Kind != syntax.KindPattern || len(arm.Children) != 2 {
+		return nil, hir.TypeInvalid
+	}
+	pattern := arm.Children[0]
+	if pattern == nil || pattern.Kind != syntax.KindPattern {
+		return nil, hir.TypeInvalid
+	}
+	if success, failure, ok := hir.ResultElements(scrutineeType); ok {
+		if len(pattern.Children) != 2 {
+			return nil, hir.TypeInvalid
+		}
+		variant, valid := resultVariantPath(pattern.Text)
+		if !valid {
+			return nil, hir.TypeInvalid
+		}
+		payloadType := success
+		if variant == resultVariantErr {
+			payloadType = failure
+		}
+		return f.analyzer.resolved[pattern.Children[1]], payloadType
+	}
+	if payloadType, ok := hir.OptionElement(scrutineeType); ok {
+		variant, valid := optionVariantPath(pattern.Text)
+		if !valid || variant != optionVariantSome || len(pattern.Children) != 2 {
+			return nil, hir.TypeInvalid
+		}
+		return f.analyzer.resolved[pattern.Children[1]], payloadType
+	}
+	return nil, hir.TypeInvalid
+}
+
+func (f *borrowFlowAnalyzer) evaluatePropagate(expression *ast.Expression, environment borrowEnvironment) (borrowValueState, bool) {
+	if expression == nil || len(expression.Children) != 1 {
+		return borrowValueState{known: false}, true
+	}
+	operand := expression.Children[0]
+	value, reachable := f.evaluateExpression(operand, environment)
+	if !reachable {
+		return value, false
+	}
+	success, failure, ok := hir.ResultElements(f.analyzer.expressionTypes[operand])
+	if !ok {
+		return borrowValueState{known: false}, true
+	}
+	if containsSafeBorrow(failure) {
+		f.checkReturn(expression, value)
+	}
+	if containsSafeBorrow(success) {
+		return value, true
+	}
+	return borrowValueState{known: true}, true
 }
 
 func (f *borrowFlowAnalyzer) evaluateWhile(expression *ast.Expression, environment borrowEnvironment) (borrowValueState, bool) {
@@ -869,7 +987,8 @@ func (f *borrowFlowAnalyzer) checkReturn(expression *ast.Expression, value borro
 	if expression == nil {
 		return
 	}
-	if _, _, returnsBorrow := hir.BorrowElement(f.analyzer.functions[f.function].typ); !returnsBorrow {
+	returnType := f.analyzer.functions[f.function].typ
+	if !containsSafeBorrow(returnType) {
 		return
 	}
 	if f.probing() {
@@ -881,8 +1000,12 @@ func (f *borrowFlowAnalyzer) checkReturn(expression *ast.Expression, value borro
 	}
 	returnSpan := span(f.module.file.Path, expression.Span)
 	candidates := compactOrigins(value.origins)
-	if !value.known || len(candidates) == 0 {
+	_, _, directBorrow := hir.BorrowElement(returnType)
+	if !value.known || (directBorrow && len(candidates) == 0) {
 		f.analyzer.addUnsupported(f.module.file.Path, expression.Span, "safe-borrow return with unknown origin")
+		return
+	}
+	if len(candidates) == 0 {
 		return
 	}
 	if len(candidates) > 1 {
@@ -926,7 +1049,7 @@ func (f *borrowFlowAnalyzer) checkReturn(expression *ast.Expression, value borro
 	}
 	if !marked {
 		kind := "shared"
-		if _, mutable, _ := hir.BorrowElement(f.analyzer.functions[f.function].typ); mutable {
+		if _, mutable, _ := safeBorrowLeaf(returnType); mutable {
 			kind = "mutable"
 		}
 		copy := returnSpan
@@ -938,8 +1061,14 @@ func (f *borrowFlowAnalyzer) checkReturn(expression *ast.Expression, value borro
 
 func (f *borrowFlowAnalyzer) recordSummaryReturn(value borrowValueState) {
 	f.returnSeen = true
-	if !value.known || len(value.origins) == 0 {
+	if !value.known {
 		f.returnKnown = false
+		return
+	}
+	if len(value.origins) == 0 {
+		if _, _, directBorrow := hir.BorrowElement(f.analyzer.functions[f.function].typ); directBorrow {
+			f.returnKnown = false
+		}
 		return
 	}
 	for _, origin := range compactOrigins(value.origins) {
@@ -1011,16 +1140,14 @@ func (f *borrowFlowAnalyzer) expressionReturnsBorrow(expression *ast.Expression)
 	if expression == nil {
 		return false
 	}
-	_, _, borrow := hir.BorrowElement(f.analyzer.expressionTypes[expression])
-	return borrow
+	return containsSafeBorrow(f.analyzer.expressionTypes[expression])
 }
 
 func isSafeBorrowSymbol(value *symbol) bool {
 	if value == nil {
 		return false
 	}
-	_, _, borrow := hir.BorrowElement(value.typ)
-	return borrow
+	return containsSafeBorrow(value.typ)
 }
 
 func cloneBorrowValue(value borrowValueState) borrowValueState {
@@ -1263,7 +1390,16 @@ func (f *borrowFlowAnalyzer) liveExpression(expression *ast.Expression, liveOut 
 		var branchLive []borrowLiveMap
 		for _, arm := range expression.Children[1:] {
 			if arm != nil && len(arm.Children) > 1 {
-				branchLive = append(branchLive, f.liveExpression(arm.Children[len(arm.Children)-1], liveOut, context))
+				live := f.liveExpression(arm.Children[len(arm.Children)-1], liveOut, context)
+				pattern := arm.Children[0]
+				if pattern != nil {
+					for _, bindingExpression := range pattern.Children[1:] {
+						if binding := f.analyzer.resolved[bindingExpression]; isSafeBorrowSymbol(binding) {
+							delete(live, binding)
+						}
+					}
+				}
+				branchLive = append(branchLive, live)
 			}
 		}
 		return f.liveExpression(expression.Children[0], mergeBorrowLive(branchLive...), context)
