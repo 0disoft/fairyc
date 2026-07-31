@@ -169,8 +169,9 @@ The constrained C backend lowers the same verified Region lifecycle through the 
 runtime. It retains the exact Arena owner, uses private lexical Region storage, derives placement
 size and alignment from the target C type, initializes only successful storage, preserves the Region
 origin on the `.ok` borrow, constructs `AllocError` on `.err`, and resets on every verified exit.
-This backend slice admits canonical scalar and supported inert-struct placement; the language rule
-is broader, so unsupported inert array placement remains a fail-closed backend capability boundary.
+This backend slice admits canonical scalar, supported inert-struct, and scalar fixed-array
+placement. The checked-in safe workspace executes all three placement shapes under both Windows
+MSVC profiles.
 
 ## Effects and external capabilities
 

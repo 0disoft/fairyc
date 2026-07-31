@@ -28,13 +28,13 @@ contract.
 5. `region-reset` calls the target reset helper on every verified lexical exit. Begin or reset
    rejection after verification is an internal invariant failure and uses the existing unreachable
    trap category; placement failure remains ordinary Result data.
-6. Safe scalar and admitted struct/resource borrows use private C pointer transport. The current
-   Region placement subset is canonical scalars plus supported inert structs; unsupported inert
-   arrays fail as a backend capability boundary. This does not create a public borrow ABI, permit
-   borrow retention, or allow a safe borrow to cross the emitted function-return boundary.
+6. Safe scalar, admitted struct/resource, and scalar fixed-array borrows use private C pointer
+   transport. Region placement admits canonical scalars, supported inert structs, and scalar fixed
+   arrays. This does not create a public borrow ABI, permit borrow retention, or allow a safe borrow
+   to cross the emitted function-return boundary.
 7. The checked-in `examples/regions` workspace is compiled and executed under development and
-   release x64 MSVC profiles. Both must return 42 after Arena creation, Region entry, placement,
-   dereference, reset, and automatic Arena drop.
+   release x64 MSVC profiles. Both must return 42 after Arena creation; scalar, fixed-array, and
+   inert-struct placement and dereference; Region reset; and automatic Arena drop.
 
 ## Consequences
 

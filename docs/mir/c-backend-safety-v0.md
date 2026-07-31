@@ -133,7 +133,7 @@ transfer.
 
 Generic `Option` and `Result` values are accepted when each payload is a canonical Fairy copy scalar
 (`bool`, `u8`, `i32`, `u32`, or `usize`), an admitted inert struct, a direct admitted resource, or an
-admitted safe borrow. Scalar, inert-struct, and resource borrows use pointer transport;
+admitted safe borrow. Scalar, inert-struct, resource, and fixed-array borrows use pointer transport;
 `ref str` retains its bounded data-and-length view transport.
 The compact `Option<i32>` and `Result<i32, i32>` transports remain distinct. Other concrete types
 receive numeric private tagged structs. `Option` has one payload field and `Result` has separate
@@ -149,8 +149,8 @@ the closed target runtime, obtains zeroed storage with the placed type's target 
 `_Alignof`, initializes the value exactly once, and constructs either the owner-bound `.ok` borrow or
 an `AllocError` `.err`. Every verified reset edge calls the target reset helper. Unexpected begin or
 reset rejection is an internal-invariant trap; ordinary placement failure remains Result data. The
-current Region C subset admits canonical scalar and supported inert-struct placement; unsupported
-array placement fails as a backend capability boundary.
+current Region C subset admits canonical scalar, supported inert-struct, and scalar fixed-array
+placement.
 
 The emitter rejects empty, nested-struct/array/C-scalar/Region/nested-resource or partially
 initialized resources, and nonempty drops without verifier-matched glue;

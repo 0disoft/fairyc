@@ -239,7 +239,8 @@ cuts language `/8`, makes `Region.place(T)` return `Result<ref T, AllocError>`, 
 Region origin through tagged Flow, verified MIR, the interpreter, and the checked-in workspace
 example. ADR 0252 adds complete constrained-C lifecycle lowering: retained Arena ownership, private
 Region storage, target-sized zeroed placement, success-borrow dereference, error construction, and
-reset. The safe workspace builds and executes result 42 under both Windows MSVC profiles. A
+reset. Scalar fixed-array Result transport is included, and the safe workspace places and reads a
+scalar, fixed array, and inert struct before executing result 42 under both Windows MSVC profiles. A
 source-level forced placement-failure run remains missing because product linkage intentionally has
 no probe controls; the raw C probe still owns failure-atomic allocator evidence. ADR 0249 retains the exact Arena owner
 local and mutable-borrow type on verified `region-enter`, removing the prior source/HIR recovery gap.

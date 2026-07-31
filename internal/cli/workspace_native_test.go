@@ -335,7 +335,9 @@ func TestRegionQuickstartReachesQualifiedWindowsCEmission(t *testing.T) {
 		!strings.Contains(unit.Source, "fy_std_region_reset_v0") ||
 		!strings.Contains(unit.Source, ".tag = FY_RESULT_OK") ||
 		!strings.Contains(unit.Source, ".tag = FY_RESULT_ERR") ||
-		!strings.Contains(unit.Source, "sizeof(int32_t), _Alignof(int32_t)") {
+		!strings.Contains(unit.Source, "sizeof(int32_t), _Alignof(int32_t)") ||
+		!strings.Contains(unit.Source, "sizeof(fy_array_") ||
+		!strings.Contains(unit.Source, "sizeof(fy_struct_") {
 		t.Fatalf("Region C unit = entry %q, foreign symbols %v", unit.Entry, unit.ForeignSymbols)
 	}
 }

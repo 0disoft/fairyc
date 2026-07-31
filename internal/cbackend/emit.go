@@ -261,17 +261,17 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	if err != nil {
 		return Unit{}, err
 	}
-	taggedTypes, taggedByType, err := prepareTaggedTypes(
-		program, structTypes, structByType, resourceTypes, resourceByType, layoutEngine,
-	)
-	if err != nil {
-		return Unit{}, err
-	}
 	functions := slices.Clone(program.Functions)
 	slices.SortFunc(functions, func(left, right mir.Function) int {
 		return strings.Compare(left.Name, right.Name)
 	})
 	arrayTypes, arrayByType, err := prepareScalarArrayTypes(functions)
+	if err != nil {
+		return Unit{}, err
+	}
+	taggedTypes, taggedByType, err := prepareTaggedTypes(
+		program, structTypes, structByType, resourceTypes, resourceByType, arrayByType, layoutEngine,
+	)
 	if err != nil {
 		return Unit{}, err
 	}

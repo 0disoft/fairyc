@@ -206,7 +206,8 @@ payload allocation, requiring unchanged Arena/output state and zero live allocat
 The checked-in safe `examples/regions` workspace now crosses the complete source-level path:
 fallible public Arena construction, lexical Region enter, `place(i32)`, `.ok` dereference or `.err`
 handling, reset, and automatic Arena drop. Development and release MSVC builds both execute with
-result 42. Generated placement derives size and alignment from the placed C type and constructs
+result 42 after independently placing and dereferencing an `i32`, a scalar fixed array, and an inert
+struct. Generated placement derives size and alignment from each placed C type and constructs
 `AllocError` from a nonzero runtime status. The product runtime contains no failure-injection control,
 so source-level forced `.err` execution remains unobserved; the separate raw C probe supplies the
 failure-atomic allocator evidence without leaking probe controls into product linkage.

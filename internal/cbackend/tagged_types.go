@@ -29,12 +29,13 @@ func prepareTaggedTypes(
 	structByType map[hir.Type]int,
 	resources []resourceCType,
 	resourceByType map[hir.Type]int,
+	arrayByType map[hir.Type]int,
 	engine *layout.Engine,
 ) ([]taggedCType, map[hir.Type]int, error) {
 	candidates := make(map[hir.Type]taggedCType)
 	consider := func(value hir.Type) {
 		if element, option := hir.OptionElement(value); option {
-			if isOptionI32(value) || !supportedTaggedPayload(element, structByType, resourceByType) {
+			if isOptionI32(value) || !supportedTaggedPayload(element, structByType, resourceByType, arrayByType) {
 				return
 			}
 			_, needsDrop := resourceByType[element]
@@ -47,8 +48,8 @@ func prepareTaggedTypes(
 		if !result || isResultI32I32(value) {
 			return
 		}
-		if !supportedTaggedPayload(success, structByType, resourceByType) ||
-			!supportedTaggedPayload(failure, structByType, resourceByType) {
+		if !supportedTaggedPayload(success, structByType, resourceByType, arrayByType) ||
+			!supportedTaggedPayload(failure, structByType, resourceByType, arrayByType) {
 			return
 		}
 		_, successNeedsDrop := resourceByType[success]
@@ -106,7 +107,7 @@ func prepareTaggedTypes(
 	return result, byType, nil
 }
 
-func supportedTaggedPayload(value hir.Type, structByType map[hir.Type]int, resourceByType map[hir.Type]int) bool {
+func supportedTaggedPayload(value hir.Type, structByType map[hir.Type]int, resourceByType map[hir.Type]int, arrayByType map[hir.Type]int) bool {
 	value = canonicalCValueType(value)
 	if value == hir.SharedBorrow(hir.TypeStr) {
 		return true
@@ -117,6 +118,9 @@ func supportedTaggedPayload(value hir.Type, structByType map[hir.Type]int, resou
 			return true
 		}
 		if _, structure := structByType[element]; structure {
+			return true
+		}
+		if _, array := arrayByType[element]; array {
 			return true
 		}
 		_, resource := resourceByType[element]
