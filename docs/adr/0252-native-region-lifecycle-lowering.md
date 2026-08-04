@@ -41,8 +41,11 @@ contract.
 - Target component selection follows the three used Region symbols and closes over Arena and
   SystemHeap through the existing standard-library contract.
 - Generated C contains both `.ok` and `.err` construction. Product linkage deliberately exposes no
-  allocator failure-injection control, so the safe workspace proves the native success path while
-  the separate raw C Arena probe continues to prove both allocation-failure rollback stages.
+  allocator failure-injection control. ADR 0255 wraps only the generated entry in the Windows test
+  harness and links the existing probe-only allocator closure, executing payload and tracking-node
+  failure through the generated Fairy `.err` arm at both MSVC profiles while retaining zero live
+  allocations. The separate raw C Arena probe continues to own the broader byte and lifecycle
+  failure matrix.
 - Language stays `fairyc-language/8`, SDK stays `0.0.0-stage0.10`, and runtime ABI stays
   `fairyc-runtime/0`; this decision adds backend capability and evidence rather than a new public
   version boundary.

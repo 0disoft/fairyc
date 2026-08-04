@@ -208,9 +208,13 @@ fallible public Arena construction, lexical Region enter, `place(i32)`, `.ok` de
 handling, reset, and automatic Arena drop. Development and release MSVC builds both execute with
 result 42 after independently placing and dereferencing an `i32`, a scalar fixed array, and an inert
 struct. Generated placement derives size and alignment from each placed C type and constructs
-`AllocError` from a nonzero runtime status. The product runtime contains no failure-injection control,
-so source-level forced `.err` execution remains unobserved; the separate raw C probe supplies the
-failure-atomic allocator evidence without leaking probe controls into product linkage.
+`AllocError` from a nonzero runtime status. A separate Windows host-smoke workspace now compiles the
+same source-level operation through verified MIR and constrained C, then a test-only outer C entry
+links the existing probe allocator without changing the generated function body. Payload allocation
+and tracking-node allocation fail independently at both MSVC profiles; all four generated-Fairy
+executions select `.err`, observe status 1, complete lexical reset and automatic Arena drop, and
+finish with zero live probe allocations. The product runtime and public SDK still contain no
+failure-injection control. The raw C probe retains the broader failure-atomic and byte-level matrix.
 
 Its four-way C-only native probe is configured for exclusive begin, zeroed allocation, copy, allocation
 rollback, empty normalization, active-drop rejection, reset, stale-use rejection, and final drop,

@@ -703,7 +703,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   Windows x64 `malloc` guarantee of 16 bytes because MSVC C does not provide `max_align_t` in
   `<stddef.h>`. Every other standard-library or foreign symbol fails before toolchain resolution;
   foreign companion inputs and user linker arguments remain absent. Copied byte placement,
-  source-level forced Region allocation failure, source-level FY observation of owned-text byte/terminator contents, stable `std::fs` naming, portable
+  source-level FY observation of owned-text byte/terminator contents, stable `std::fs` naming, portable
   paths, general mutable buffers, and stable layouts remain absent. This clears only the missing target
   C-emission-profile evidence; `emittable`, `conformant`, and `supported` remain false.
 - `experimental run-target` reuses that exact Windows target compilation and closed linkage, validates
