@@ -79,3 +79,5 @@ of optimization profile unless the compiler proves the same condition statically
 - Fairy C borrows Ada's value-domain discipline without adopting Ada or Pascal surface grammar,
   exception handling, tasking, or file-structure machinery.
 - `docs/product/02-spec.md` remains unchanged until a candidate becomes accepted language behavior.
+- ADR 0254 audits the current SDK/example corpus and keeps nominal scalars evidence-blocked; token
+  frequency in storage and unsafe FFI wrappers is not sufficient acceptance evidence.

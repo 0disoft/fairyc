@@ -83,6 +83,14 @@ optimization-independent checking behavior. Bounded side-effect-free function co
 later candidate after assertion, effect, borrow, and source-location use demonstrates a concrete
 gap. Example spellings such as `distinct`, `range`, `requires`, and `ensures` are not reserved.
 
+ADR 0254 audits the four compiler-bundled SDK files and thirty checked-in non-fixture examples before
+promoting the first candidate. The SDK has 40 `u32` and 26 `usize` declaration/signature occurrences,
+but safe errors already use distinct structs and `Result`, public counts are separated by named
+operations, and the strongest size/alignment collisions remain inside explicit unsafe C wrappers.
+No application-level same-representation domain pair currently demonstrates an accidental swap.
+Nominal scalars therefore remain evidence-blocked until a representative application supplies a
+real caller/callee mistake and shows why ordinary structs or functions are materially worse.
+
 Exhaustive tagged `switch` is already implemented policy rather than a new Ada/Pascal candidate.
 Exceptions, tasking, protected objects, `with`, capturing nested routines, `begin`/`end`,
 case-insensitive identifiers, representation clauses, and interface/implementation file pairs stay
