@@ -75,8 +75,19 @@ Static interfaces may return to the queue only after implemented bounded user ge
 cross-type duplication, build-cost, code-size, resolution, ownership, and backend evidence required
 by that ADR exist.
 
-The current modern-concept admission queue is closed. New candidates require a new measured problem
-statement under ADR 0218 rather than being appended as syntax ideas.
+ADR 0253 reopens the post-Stage 0 queue without accepting syntax. Nominal scalar types are the first
+candidate because they can prevent accidental interchange of IDs, counts, offsets, and other values
+that share one machine representation. Constrained scalar ranges follow, provided a feature ADR
+defines construction, mutation, arithmetic-result, conversion-failure, compile-time, ABI, and
+optimization-independent checking behavior. Bounded side-effect-free function contracts remain a
+later candidate after assertion, effect, borrow, and source-location use demonstrates a concrete
+gap. Example spellings such as `distinct`, `range`, `requires`, and `ensures` are not reserved.
+
+Exhaustive tagged `switch` is already implemented policy rather than a new Ada/Pascal candidate.
+Exceptions, tasking, protected objects, `with`, capturing nested routines, `begin`/`end`,
+case-insensitive identifiers, representation clauses, and interface/implementation file pairs stay
+outside the queue. New additions still require a measured problem statement under ADR 0218 rather
+than a list of attractive syntax.
 
 ADR 0224 separately closes three loose surface follow-ups for the current corpus. One manual
 length-indexed byte-view loop does not justify range iteration, no narrowing use justifies a checked

@@ -66,6 +66,10 @@ otherwise a roadmap mention can be mistaken for accepted syntax or implemented b
 7. This decision changes no Stage 0 grammar or implementation. It reserves no spelling, does not
    increment `fairyc-language/3`, and does not authorize implementation without a feature-specific
    ADR and fixtures.
+8. ADR 0253 applies the same admission boundary to Ada- and Pascal-derived ideas. Nominal scalar
+   types and constrained scalar ranges enter the post-Stage 0 queue as candidates, while bounded
+   function contracts remain a later candidate. No candidate spelling is reserved. Existing
+   exhaustive tagged switching is retained rather than counted as a new feature.
 
 ## External concept references
 

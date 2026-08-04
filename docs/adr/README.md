@@ -262,6 +262,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0250-public-safe-arena-creation.md`: replaces the SDK Arena placeholder with a runtime-compatible move-only resource, fallible safe creation, exact allocation status, and automatic drop at SDK stage0.10.
 - `0251-fallible-region-placement.md`: changes `Region.place` to an explicit `Result<ref T, AllocError>`, preserves Region provenance through tagged flow, and cuts language revision `/8`.
 - `0252-native-region-lifecycle-lowering.md`: lowers verified Region enter, fallible inert placement, safe-borrow dereference, and reset through closed target runtime symbols with two-profile Windows execution.
+- `0253-ada-pascal-concept-admission.md`: classifies nominal scalars and constrained ranges as post-Stage 0 candidates, defers bounded contracts, retains exhaustive switching, and rejects imported Ada/Pascal runtime or surface complexity without a language cutover.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 
