@@ -227,10 +227,11 @@ Windows call/ABI conformance. The same intent also emits one generated-Fairy cal
 and a 20-byte `@repr(C)` result, compiles its hand-written C callee separately, and requires exit 42
 at both profiles under both C11 and C17 consumer modes. That is one same-MSVC source-level result crossing plus focused C17 compatibility evidence, not broad or bidirectional
 Fairy FFI. It separately compiles the project-owned
-Windows File implementation and its caller probe, then executes create/write/position/absolute-seek,
+Windows File implementation and its caller probe, then executes create/write/size/position/absolute-seek,
 overflow rejection with cursor preservation, sync/close/reopen, partial read, EOF, forced close
-failure, and repeated drop under both profiles. A separate checked-in FY source pair and the public
-SDK quickstart execute safe write/position/seek/sync/read/EOF, consuming close, and implicit-drop
+failure, exact invalid-handle size reporting, and repeated drop under both profiles. A separate
+checked-in FY source pair and the public SDK quickstart execute safe shared size observation,
+write/position/seek/sync/read/EOF, consuming close, and implicit-drop
 release at both profiles. It also compiles the raw owned-text caller and target-specific implementation as
 separate translation units, exercises the failure-preservation and repeated-lifecycle matrix under
 both profiles, and inspects both objects plus each linked image. It also compiles the catcher, stack-owning

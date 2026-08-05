@@ -15,6 +15,13 @@ struct raw_file_position_result {
 }
 
 @repr(C)
+struct raw_file_size_result {
+    u32 status;
+    u32 os_code;
+    usize size;
+}
+
+@repr(C)
 struct raw_open_options {
     u8 read;
     u8 write;
@@ -55,6 +62,10 @@ unsafe extern C fn raw_file_result file_read_raw(ptr mut void file, ptr mut u8 b
 unsafe extern C fn raw_file_position_result file_position_raw(ptr mut void file) ;
 
 @effects(filesystem)
+@link_name("fy_std_windows_file_size_v0")
+unsafe extern C fn raw_file_size_result file_size_raw(ptr void file) ;
+
+@effects(filesystem)
 @link_name("fy_std_windows_file_seek_start_v0")
 unsafe extern C fn raw_file_position_result file_seek_start_raw(ptr mut void file, usize offset) ;
 
@@ -83,6 +94,14 @@ fn FileError file_error(raw_file_result result) {
 }
 
 fn FileError position_error(raw_file_position_result result) {
+    return FileError {
+        .status = result.status,
+        .os_code = result.os_code,
+        .completed = 0,
+    };
+}
+
+fn FileError size_error(raw_file_size_result result) {
     return FileError {
         .status = result.status,
         .os_code = result.os_code,
@@ -171,6 +190,19 @@ pub fn Result<usize, FileError> position(ref mut File file) {
         .ok(result.position)
     } else {
         .err(position_error(result))
+    };
+}
+
+/// Returns the file length in bytes without changing its current position.
+@effects(filesystem)
+pub fn Result<usize, FileError> size(ref File file) {
+    let raw_file_size_result result = unsafe {
+        file_size_raw(file as ptr void)
+    };
+    return if (result.status == 0) {
+        .ok(result.size)
+    } else {
+        .err(size_error(result))
     };
 }
 

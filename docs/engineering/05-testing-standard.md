@@ -241,18 +241,19 @@ safe SDK wrapper and package integration are proved separately by Go tests and t
 workspace smoke; ADR 0214 records the corresponding Linux hosted execution.
 
 The Windows File probe keeps its production component in a separate translation unit and executes
-both local MSVC profiles. It creates and truncates a file, writes all nine bytes, observes the
+both local MSVC profiles. It creates and truncates a file, writes all nine bytes, observes size and
 cursor, rejects an overflowing absolute seek without moving it, seeks to byte 5 and back to zero,
 syncs, consumes close, rejects repeated close, reopens, seeks and reads the final four bytes, returns
 to zero, reads in three-byte chunks, observes EOF, and compares the bytes. It then steals and closes
-the underlying handle so explicit close must return
-`ERROR_INVALID_HANDLE` while still normalizing ownership, and finally checks best-effort and
+the underlying handle so size and explicit close must return `ERROR_INVALID_HANDLE` while close
+still normalizes ownership, and finally checks best-effort and
 repeated drop. Both objects, the linked PE, and its unwind records must pass the same structural
 inspectors before execution. A distinct two-module FY example then exercises typed open errors,
-safe resource borrows and `read(ref mut u8[])` over a fixed array, write/position/absolute-seek,
-sync/read/EOF, consuming close, and implicit drop at both profiles. ADR 0264 promotes the ownership
-and I/O slice to compiler-bundled public `std::fs`; ADR 0269 adds the positioning path with a second
-public SDK quickstart proof. Portable paths, relative/end-based seek, Linux public linkage, general
+safe resource borrows and `read(ref mut u8[])` over a fixed array, shared size observation,
+write/position/absolute-seek, sync/read/EOF, consuming close, and implicit drop at both profiles.
+ADR 0264 promotes the ownership and I/O slice to compiler-bundled public `std::fs`; ADRs 0269 and
+0270 add positioning and size with a second public SDK quickstart proof. Portable paths,
+relative/end-based seek, Linux public linkage, general
 mutable buffers, and hosted evidence remain open.
 
 The standard-library product-build smoke is distinct from source-call companion probes. Its `.fy`

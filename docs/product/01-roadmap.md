@@ -771,7 +771,7 @@ ADR 0264 extends the SDK to `0.0.0-stage0.14` with the first public `std::fs` sl
 create/truncate and read opens, bounded read, write-all, explicit sync, consuming close, and
 automatic drop. The checked-in safe quickstart executes invalid-path failure, write/read/EOF,
 explicit close, and implicit-drop reopen under development and optimized MSVC. Portable Unicode
-paths, Linux public linkage, relative/end-based seek, metadata, directories, removal, and a supported Windows target
+paths, Linux public linkage, relative/end-based seek, general metadata, directories, removal, and a supported Windows target
 remain later gates.
 
 ADR 0269 extends the SDK to `0.0.0-stage0.15` with allocation-free
@@ -780,6 +780,13 @@ ADR 0269 extends the SDK to `0.0.0-stage0.15` with allocation-free
 quickstart paths all observe write/read cursor movement, return to the start, and reject an offset
 above `INT64_MAX` without moving the cursor under low and optimized MSVC. Relative/end-based seek,
 truncation, sparse-file guarantees, portable offsets, and Linux public linkage remain later gates.
+
+ADR 0270 extends the SDK to `0.0.0-stage0.16` with allocation-free
+`size(ref File) -> Result<usize, FileError>`. The raw probe observes size 9 before and after cursor
+movement, rejects closed and invalid handles, and the private/public generated-Fairy paths observe
+both 9-byte and empty-file sizes through shared owner borrows under low and optimized MSVC. General
+metadata records, timestamps, file kinds, path-based queries, concurrent external-write snapshots,
+and Linux public linkage remain later gates.
 
 ADR 0268 closes the discovery side of exact test selection with
 `fairyc test --list [--locked]`. The command compiler-admits the complete root test overlay and

@@ -25,6 +25,12 @@ struct fy_std_windows_file_position_result_v0 {
     uint64_t position;
 };
 
+struct fy_std_windows_file_size_result_v0 {
+    uint32_t status;
+    uint32_t os_code;
+    uint64_t size;
+};
+
 struct fy_std_windows_file_v0 {
     void *handle;
     uint8_t open;
@@ -57,6 +63,19 @@ static struct fy_std_windows_file_position_result_v0 fy_std_windows_file_positio
         status,
         (uint32_t)os_code,
         position
+    };
+    return result;
+}
+
+static struct fy_std_windows_file_size_result_v0 fy_std_windows_file_size_result_v0(
+    uint32_t status,
+    DWORD os_code,
+    uint64_t size
+) {
+    struct fy_std_windows_file_size_result_v0 result = {
+        status,
+        (uint32_t)os_code,
+        size
     };
     return result;
 }
@@ -247,6 +266,39 @@ struct fy_std_windows_file_position_result_v0 fy_std_windows_file_position_v0(
         FY_STD_WINDOWS_FILE_OK_V0,
         ERROR_SUCCESS,
         (uint64_t)position.QuadPart
+    );
+}
+
+struct fy_std_windows_file_size_result_v0 fy_std_windows_file_size_v0(
+    const void *file_storage
+) {
+    struct fy_std_windows_file_v0 file;
+    if (!fy_std_windows_file_load_v0(file_storage, &file)) {
+        return fy_std_windows_file_size_result_v0(
+            FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0,
+            ERROR_SUCCESS,
+            UINT64_C(0)
+        );
+    }
+    if (file.open == UINT8_C(0)) {
+        return fy_std_windows_file_size_result_v0(
+            FY_STD_WINDOWS_FILE_CLOSED_V0,
+            ERROR_SUCCESS,
+            UINT64_C(0)
+        );
+    }
+    LARGE_INTEGER size;
+    if (!GetFileSizeEx((HANDLE)file.handle, &size)) {
+        return fy_std_windows_file_size_result_v0(
+            FY_STD_WINDOWS_FILE_IO_ERROR_V0,
+            GetLastError(),
+            UINT64_C(0)
+        );
+    }
+    return fy_std_windows_file_size_result_v0(
+        FY_STD_WINDOWS_FILE_OK_V0,
+        ERROR_SUCCESS,
+        (uint64_t)size.QuadPart
     );
 }
 

@@ -75,13 +75,21 @@ fn i32 write_then_close(fs::File input) {
     let ref u8[] bytes = b"FairyFile";
     let i32 operation_code = switch (fs::write_all(ref mut file, bytes)) {
         case .ok(written) : { if (written == 9) {
-            let i32 position_code = write_position_probe(ref mut file);
-            if (position_code != 0) {
-                position_code
+            let i32 size_code = switch (fs::size(ref file)) {
+                case .ok(size) : { if (size == 9) { 0 } else { 46 } }
+                case .err(_) : { 47 }
+            };
+            if (size_code != 0) {
+                size_code
             } else {
-                switch (fs::sync(ref mut file)) {
-                    case .ok(_) : { 0 }
-                    case .err(_) : { 12 }
+                let i32 position_code = write_position_probe(ref mut file);
+                if (position_code != 0) {
+                    position_code
+                } else {
+                    switch (fs::sync(ref mut file)) {
+                        case .ok(_) : { 0 }
+                        case .err(_) : { 12 }
+                    }
                 }
             }
         } else {
@@ -107,23 +115,31 @@ fn i32 read_then_close(fs::File input) {
         0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
     ];
-    let i32 position_code = read_position_probe(ref mut file, ref mut buffer);
-    let i32 operation_code = if (position_code != 0) {
-        position_code
+    let i32 size_code = switch (fs::size(ref file)) {
+        case .ok(size) : { if (size == 9) { 0 } else { 50 } }
+        case .err(_) : { 51 }
+    };
+    let i32 operation_code = if (size_code != 0) {
+        size_code
     } else {
-        switch (fs::read(ref mut file, ref mut buffer)) {
-            case .ok(read) : { if (read == 9 &&
-                buffer[0] == 70 && buffer[1] == 97 && buffer[2] == 105 &&
-                buffer[3] == 114 && buffer[4] == 121 && buffer[5] == 70 &&
-                buffer[6] == 105 && buffer[7] == 108 && buffer[8] == 101) {
-                switch (fs::read(ref mut file, ref mut buffer)) {
-                    case .ok(eof) : { if (eof == 0) { 0 } else { 23 } }
-                    case .err(_) : { 22 }
-                }
-            } else {
-                21
-            } }
-            case .err(_) : { 20 }
+        let i32 position_code = read_position_probe(ref mut file, ref mut buffer);
+        if (position_code != 0) {
+            position_code
+        } else {
+            switch (fs::read(ref mut file, ref mut buffer)) {
+                case .ok(read) : { if (read == 9 &&
+                    buffer[0] == 70 && buffer[1] == 97 && buffer[2] == 105 &&
+                    buffer[3] == 114 && buffer[4] == 121 && buffer[5] == 70 &&
+                    buffer[6] == 105 && buffer[7] == 108 && buffer[8] == 101) {
+                    switch (fs::read(ref mut file, ref mut buffer)) {
+                        case .ok(eof) : { if (eof == 0) { 0 } else { 23 } }
+                        case .err(_) : { 22 }
+                    }
+                } else {
+                    21
+                } }
+                case .err(_) : { 20 }
+            }
         }
     };
     let i32 close_code = switch (fs::close(file)) {
@@ -139,7 +155,10 @@ fn i32 read_then_close(fs::File input) {
 
 @effects(filesystem)
 fn i32 implicit_drop_probe(fs::File file) {
-    return 0;
+    return switch (fs::size(ref file)) {
+        case .ok(size) : { if (size == 0) { 0 } else { 54 } }
+        case .err(_) : { 55 }
+    };
 }
 
 @effects(filesystem)
