@@ -343,6 +343,59 @@ fn i32 read_then_close(fs::File input) {
 }
 
 @effects(filesystem)
+fn i32 read_exact_then_close(fs::File input) {
+    var fs::File file = input;
+    var u8[9] exact = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    let i32 exact_code = switch (fs::read_exact(ref mut file, ref mut exact)) {
+        case .ok(read) : { if (read == 9 &&
+            exact[0] == 70 && exact[1] == 97 && exact[2] == 105 &&
+            exact[3] == 114 && exact[4] == 121 && exact[5] == 67 &&
+            exact[6] == 111 && exact[7] == 100 && exact[8] == 101) {
+            0
+        } else {
+            148
+        } }
+        case .err(_) : { 149 }
+    };
+    let i32 seek_code = if (exact_code != 0) {
+        exact_code
+    } else { switch (fs::seek_start(ref mut file, 0)) {
+        case .ok(position) : { if (position == 0) { 0 } else { 150 } }
+        case .err(_) : { 151 }
+    } };
+    var u8[12] oversized = [
+        170, 170, 170, 170, 170, 170,
+        170, 170, 170, 170, 170, 170,
+    ];
+    let i32 incomplete_code = if (seek_code != 0) {
+        seek_code
+    } else { switch (fs::read_exact(ref mut file, ref mut oversized)) {
+        case .ok(_) : { 152 }
+        case .err(error) : { if (fs::error_status(error) == 7 &&
+            fs::error_os_code(error) == 0 && fs::error_completed(error) == 9 &&
+            oversized[0] == 70 && oversized[1] == 97 && oversized[2] == 105 &&
+            oversized[3] == 114 && oversized[4] == 121 && oversized[5] == 67 &&
+            oversized[6] == 111 && oversized[7] == 100 && oversized[8] == 101 &&
+            oversized[9] == 170 && oversized[10] == 170 && oversized[11] == 170) {
+            0
+        } else {
+            153
+        } }
+    } };
+    let i32 position_code = if (incomplete_code != 0) {
+        incomplete_code
+    } else { switch (fs::position(ref mut file)) {
+        case .ok(position) : { if (position == 9) { 0 } else { 154 } }
+        case .err(_) : { 155 }
+    } };
+    let i32 close_code = switch (fs::close(file)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 156 }
+    };
+    return if (position_code != 0) { position_code } else { close_code };
+}
+
+@effects(filesystem)
 fn i32 implicit_drop_probe(fs::File file) {
     return switch (fs::size(ref file)) {
         case .ok(size) : { if (size == 0) { 0 } else { 61 } }
@@ -656,26 +709,34 @@ fn i32 main() {
         if (update_code != 0) {
             update_code
         } else {
-            let i32 read_code = switch (fs::open_read(data_path)) {
-                case .ok(file) : { read_then_close(file) }
-                case .err(_) : { 31 }
+            let i32 exact_code = switch (fs::open_read(data_path)) {
+                case .ok(file) : { read_exact_then_close(file) }
+                case .err(_) : { 157 }
             };
-            if (read_code != 0) {
-                read_code
+            if (exact_code != 0) {
+                exact_code
             } else {
-                let i32 drop_code = switch (fs::create_truncate(drop_path)) {
-                    case .ok(file) : { implicit_drop_probe(file) }
-                    case .err(_) : { 32 }
+                let i32 read_code = switch (fs::open_read(data_path)) {
+                    case .ok(file) : { read_then_close(file) }
+                    case .err(_) : { 31 }
                 };
-                if (drop_code != 0) {
-                    drop_code
+                if (read_code != 0) {
+                    read_code
                 } else {
-                    switch (fs::create_truncate(drop_path)) {
-                        case .ok(file) : { switch (fs::close(file)) {
-                            case .ok(_) : { 42 }
-                            case .err(_) : { 34 }
-                        } }
-                        case .err(_) : { 33 }
+                    let i32 drop_code = switch (fs::create_truncate(drop_path)) {
+                        case .ok(file) : { implicit_drop_probe(file) }
+                        case .err(_) : { 32 }
+                    };
+                    if (drop_code != 0) {
+                        drop_code
+                    } else {
+                        switch (fs::create_truncate(drop_path)) {
+                            case .ok(file) : { switch (fs::close(file)) {
+                                case .ok(_) : { 42 }
+                                case .err(_) : { 34 }
+                            } }
+                            case .err(_) : { 33 }
+                        }
                     }
                 }
             }

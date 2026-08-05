@@ -295,8 +295,9 @@ ADR 0271 reuses the existing open symbol for existing-file read/write access wit
 while ADR 0272 adds one target-bound cursor-preserving length-change symbol, ADR 0274 reuses the
 existing open symbol for non-truncating open-or-create, ADR 0275 reuses it with one
 compiler-private exclusive flag for atomic no-clobber creation, and ADR 0276 reuses it with one
-compiler-private append flag selecting `FILE_APPEND_DATA`, and ADR 0277 adds one target-bound
-same-handle file-kind symbol without exposing Win32 constants. Portable paths, relative/end-based
+compiler-private append flag selecting `FILE_APPEND_DATA`, ADR 0277 adds one target-bound
+same-handle file-kind symbol without exposing Win32 constants, and ADR 0278 adds one target-bound
+exact-read symbol with completed-prefix failures. Portable paths, relative/end-based
 seek, general metadata, Linux public linkage, general
 mutable-buffer operations, retained pointers, and public layout remain outside this boundary.
 The sole nested-pointer exception is exactly source `ptr mut ptr mut void`, so source

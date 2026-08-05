@@ -247,11 +247,11 @@ rewrites the unspecified extended bytes, observes size and
 cursor, rejects an overflowing absolute seek without moving it, seeks to byte 5 and back to zero,
 syncs, consumes close, rejects repeated close, reopens, seeks and reads the final four bytes, returns
 to zero, reads in three-byte chunks, observes EOF, and compares the bytes. It then steals and closes
-the underlying handle so size, kind, and explicit close must return `ERROR_INVALID_HANDLE` while close
+the underlying handle so size, kind, exact read, and explicit close must return `ERROR_INVALID_HANDLE` while close
 still normalizes ownership, and finally checks best-effort and
 repeated drop. Both objects, the linked PE, and its unwind records must pass the same structural
 inspectors before execution. A distinct two-module FY example then exercises typed open errors,
-safe resource borrows and `read(ref mut u8[])` over a fixed array, shared size and kind observation,
+safe resource borrows and partial/exact reads over fixed arrays, shared size and kind observation,
 write/position/absolute-seek, open-or-create creation/preservation, exclusive create/collision/unchanged reopen, seek-resistant append, existing-file read/write update, cursor-preserving length change,
 sync/read/EOF, consuming close, and implicit drop at both profiles.
 ADR 0264 promotes the ownership and I/O slice to compiler-bundled public `std::fs`; ADRs 0269 and
@@ -260,7 +260,8 @@ adds non-truncating open-or-create, and ADR 0275 adds exclusive create with exac
 unchanged-reopen evidence in the same raw and public generated-Fairy proofs. ADR 0276 adds
 missing-file append creation and repeated exact EOF writes after explicit repositioning. ADR 0277
 adds same-handle disk/character classification, including `NUL`, plus closed/invalid-handle raw
-failures. Portable
+failures. ADR 0278 adds complete fill, unexpected-EOF completed-prefix and untouched-suffix
+evidence, empty success, and exact-read closed/invalid-handle failures. Portable
 paths, relative/end-based seek, Linux public linkage, general
 mutable buffers, and hosted evidence remain open.
 

@@ -10,7 +10,8 @@ enum fy_std_windows_file_status_v0 {
     FY_STD_WINDOWS_FILE_CLOSED_V0 = 3,
     FY_STD_WINDOWS_FILE_NO_PROGRESS_V0 = 4,
     FY_STD_WINDOWS_FILE_PATH_ENCODING_V0 = 5,
-    FY_STD_WINDOWS_FILE_PATH_TOO_LONG_V0 = 6
+    FY_STD_WINDOWS_FILE_PATH_TOO_LONG_V0 = 6,
+    FY_STD_WINDOWS_FILE_UNEXPECTED_EOF_V0 = 7
 };
 
 struct fy_std_windows_file_result_v0 {
@@ -57,6 +58,11 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_open_v0(
     void *
 );
 struct fy_std_windows_file_result_v0 fy_std_windows_file_read_v0(void *, uint8_t *, size_t);
+struct fy_std_windows_file_result_v0 fy_std_windows_file_read_exact_v0(
+    void *,
+    uint8_t *,
+    size_t
+);
 struct fy_std_windows_file_position_result_v0 fy_std_windows_file_position_v0(void *);
 struct fy_std_windows_file_size_result_v0 fy_std_windows_file_size_v0(const void *);
 struct fy_std_windows_file_kind_result_v0 fy_std_windows_file_kind_v0(const void *);
@@ -212,7 +218,34 @@ int main(void) {
     if (result.status != FY_STD_WINDOWS_FILE_OK_V0 || result.count != 0) return 8;
     if (total != sizeof final_payload ||
         memcmp(received, final_payload, sizeof final_payload) != 0) return 9;
+    position = fy_std_windows_file_seek_start_v0(&file, UINT64_C(0));
+    if (position.status != FY_STD_WINDOWS_FILE_OK_V0 || position.position != UINT64_C(0)) return 77;
+    uint8_t exact[sizeof final_payload] = {0};
+    result = fy_std_windows_file_read_exact_v0(&file, exact, sizeof exact);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 || result.count != sizeof exact ||
+        memcmp(exact, final_payload, sizeof exact) != 0) return 78;
+    position = fy_std_windows_file_seek_start_v0(&file, UINT64_C(0));
+    if (position.status != FY_STD_WINDOWS_FILE_OK_V0 || position.position != UINT64_C(0)) return 79;
+    uint8_t oversized[12] = {
+        UINT8_C(0xa5), UINT8_C(0xa5), UINT8_C(0xa5), UINT8_C(0xa5),
+        UINT8_C(0xa5), UINT8_C(0xa5), UINT8_C(0xa5), UINT8_C(0xa5),
+        UINT8_C(0xa5), UINT8_C(0xa5), UINT8_C(0xa5), UINT8_C(0xa5)
+    };
+    result = fy_std_windows_file_read_exact_v0(&file, oversized, sizeof oversized);
+    if (result.status != FY_STD_WINDOWS_FILE_UNEXPECTED_EOF_V0 ||
+        result.os_code != (uint32_t)ERROR_SUCCESS ||
+        result.count != sizeof final_payload ||
+        memcmp(oversized, final_payload, sizeof final_payload) != 0 ||
+        oversized[9] != UINT8_C(0xa5) || oversized[10] != UINT8_C(0xa5) ||
+        oversized[11] != UINT8_C(0xa5)) return 80;
+    result = fy_std_windows_file_read_exact_v0(&file, NULL, 0);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 || result.count != 0) return 81;
+    position = fy_std_windows_file_position_v0(&file);
+    if (position.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        position.position != (uint64_t)sizeof final_payload) return 82;
     if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 10;
+    if (fy_std_windows_file_read_exact_v0(&file, NULL, 0).status !=
+        FY_STD_WINDOWS_FILE_CLOSED_V0) return 83;
 
     result = fy_std_windows_file_open_v0(path, &read_options, &file);
     if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 11;
@@ -225,6 +258,11 @@ int main(void) {
     if (kind.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
         kind.os_code != (uint32_t)ERROR_INVALID_HANDLE ||
         kind.kind != (uint32_t)FILE_TYPE_UNKNOWN) return 73;
+    uint8_t invalid_read = UINT8_C(0xa5);
+    result = fy_std_windows_file_read_exact_v0(&file, &invalid_read, 1);
+    if (result.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
+        result.os_code != (uint32_t)ERROR_INVALID_HANDLE || result.count != 0 ||
+        invalid_read != UINT8_C(0xa5)) return 84;
     size = fy_std_windows_file_set_len_v0(&file, UINT64_C(0));
     if (size.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
         size.os_code != (uint32_t)ERROR_INVALID_HANDLE || size.size != UINT64_C(0)) return 48;

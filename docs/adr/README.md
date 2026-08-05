@@ -287,6 +287,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0275-public-windows-file-exclusive-create.md`: exposes atomic no-clobber Windows `std::fs::create_new`, proving exact existing-path failure and unchanged bytes under both MSVC profiles with SDK `0.0.0-stage0.20`.
 - `0276-public-windows-file-append-open.md`: exposes write-only Windows `std::fs::open_append`, proving missing creation and seek-resistant EOF writes under both MSVC profiles with SDK `0.0.0-stage0.21`.
 - `0277-public-windows-file-kind.md`: exposes same-handle target-neutral Windows `std::fs::FileKind` observation, proving disk and `NUL` character handles plus closed and invalid-handle failures under both MSVC profiles with SDK `0.0.0-stage0.22`.
+- `0278-public-windows-file-read-exact.md`: exposes allocation-free Windows `std::fs::read_exact`, proving complete fill, unexpected-EOF prefix preservation, untouched suffix bytes, and closed/invalid-handle failures under both MSVC profiles with SDK `0.0.0-stage0.23`.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

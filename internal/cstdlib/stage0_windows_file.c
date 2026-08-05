@@ -10,7 +10,8 @@ enum fy_std_windows_file_status_v0 {
     FY_STD_WINDOWS_FILE_CLOSED_V0 = 3,
     FY_STD_WINDOWS_FILE_NO_PROGRESS_V0 = 4,
     FY_STD_WINDOWS_FILE_PATH_ENCODING_V0 = 5,
-    FY_STD_WINDOWS_FILE_PATH_TOO_LONG_V0 = 6
+    FY_STD_WINDOWS_FILE_PATH_TOO_LONG_V0 = 6,
+    FY_STD_WINDOWS_FILE_UNEXPECTED_EOF_V0 = 7
 };
 
 struct fy_std_windows_file_result_v0 {
@@ -262,6 +263,70 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_read_v0(
         FY_STD_WINDOWS_FILE_OK_V0,
         ERROR_SUCCESS,
         (size_t)completed
+    );
+}
+
+struct fy_std_windows_file_result_v0 fy_std_windows_file_read_exact_v0(
+    void *file_storage,
+    uint8_t *buffer,
+    size_t length
+) {
+    struct fy_std_windows_file_result_v0 result = fy_std_windows_file_read_v0(
+        file_storage,
+        buffer,
+        length
+    );
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 || length == 0) {
+        return result;
+    }
+    if (result.count == 0) {
+        return fy_std_windows_file_result_v0(
+            FY_STD_WINDOWS_FILE_UNEXPECTED_EOF_V0,
+            ERROR_SUCCESS,
+            0
+        );
+    }
+    if (result.count > length) {
+        return fy_std_windows_file_result_v0(
+            FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0,
+            ERROR_SUCCESS,
+            0
+        );
+    }
+    size_t total = result.count;
+    while (total < length) {
+        result = fy_std_windows_file_read_v0(
+            file_storage,
+            buffer + total,
+            length - total
+        );
+        if (result.status != FY_STD_WINDOWS_FILE_OK_V0) {
+            return fy_std_windows_file_result_v0(
+                result.status,
+                (DWORD)result.os_code,
+                total + result.count
+            );
+        }
+        if (result.count == 0) {
+            return fy_std_windows_file_result_v0(
+                FY_STD_WINDOWS_FILE_UNEXPECTED_EOF_V0,
+                ERROR_SUCCESS,
+                total
+            );
+        }
+        if (result.count > length - total) {
+            return fy_std_windows_file_result_v0(
+                FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0,
+                ERROR_SUCCESS,
+                total
+            );
+        }
+        total += result.count;
+    }
+    return fy_std_windows_file_result_v0(
+        FY_STD_WINDOWS_FILE_OK_V0,
+        ERROR_SUCCESS,
+        total
     );
 }
 

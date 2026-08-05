@@ -72,6 +72,10 @@ unsafe extern C fn raw_file_result file_open_raw(ptr u8 path, ptr raw_open_optio
 unsafe extern C fn raw_file_result file_read_raw(ptr mut void file, ptr mut u8 buffer, usize length) ;
 
 @effects(filesystem)
+@link_name("fy_std_windows_file_read_exact_v0")
+unsafe extern C fn raw_file_result file_read_exact_raw(ptr mut void file, ptr mut u8 buffer, usize length) ;
+
+@effects(filesystem)
 @link_name("fy_std_windows_file_position_v0")
 unsafe extern C fn raw_file_position_result file_position_raw(ptr mut void file) ;
 
@@ -259,6 +263,19 @@ pub fn Result<usize, FileError> write_all(ref mut File file, ref u8[] bytes) {
 pub fn Result<usize, FileError> read(ref mut File file, ref mut u8[] buffer) {
     let raw_file_result result = unsafe {
         file_read_raw(file as ptr mut void, buffer as ptr mut u8, buffer.len)
+    };
+    return if (result.status == 0) {
+        .ok(result.count)
+    } else {
+        .err(file_error(result))
+    };
+}
+
+/// Fills buffer or reports an incomplete prefix as status 7.
+@effects(filesystem)
+pub fn Result<usize, FileError> read_exact(ref mut File file, ref mut u8[] buffer) {
+    let raw_file_result result = unsafe {
+        file_read_exact_raw(file as ptr mut void, buffer as ptr mut u8, buffer.len)
     };
     return if (result.status == 0) {
         .ok(result.count)

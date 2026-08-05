@@ -470,6 +470,7 @@ func TestWindowsFileSourcesConsumeCloseAndExposePartialIO(t *testing.T) {
 		"fy_std_windows_file_set_len_v0(&file, UINT64_MAX)",
 		"size.os_code != (uint32_t)ERROR_ACCESS_DENIED",
 		"fy_std_windows_file_read_v0(&file, received + total, requested)",
+		"fy_std_windows_file_read_exact_v0(&file, exact, sizeof exact)",
 		"fy_std_windows_file_drop_v0(&file)",
 	} {
 		if !strings.Contains(probe, required) {
@@ -485,7 +486,7 @@ func TestWindowsMSVCSourceForSymbolsSelectsOnlyWindowsFile(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, required := range []string{
-		"fy_std_windows_file_open_v0", "fy_std_windows_file_read_v0",
+		"fy_std_windows_file_open_v0", "fy_std_windows_file_read_v0", "fy_std_windows_file_read_exact_v0",
 		"fy_std_windows_file_position_v0", "fy_std_windows_file_seek_start_v0",
 		"fy_std_windows_file_size_v0", "fy_std_windows_file_kind_v0", "fy_std_windows_file_set_len_v0",
 		"fy_std_windows_file_write_all_v0", "fy_std_windows_file_sync_v0",
