@@ -13,7 +13,7 @@ preservation without compiler-private inheritance. Lexer and parser fuzz targets
 during ordinary Go tests and assert lossless reconstruction, stable output, valid spans, bounded
   exhaustion, and error-free AST lowering. Stable project-creation tests freeze the exact five-file
   starter bytes, manifest reparsing, portable identity rejection, no-overwrite behavior, path-clean
-  errors, and a generated project's ordinary check, locked check, lock publication, semantic test,
+  errors, the starter-v4 semantic/native guide distinction, and a generated project's ordinary check, locked check, lock publication, semantic test,
   and semantic checking of the actual README console source fence.
 The Windows smoke repeats new/duplicate/check/test/run through a separately built compiler process,
 checks the package-specific guide paths, safe source fence, and stable run warning, and requires

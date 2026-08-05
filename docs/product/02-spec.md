@@ -521,7 +521,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   starter workspace with explicit durable UID, manifest v1, public `answer()` returning 42, a private
   entry returning zero when that answer is correct, one semantic test, a build-only ignore rule, and
   one compiler-owned README. The README labels its commands as manual, explains lock refresh and
-  stable run v2's stream/process-status boundary, and carries
+  stable run v2's stream/process-status boundary, distinguishes the default semantic test from the
+  explicit isolated Windows native-test command, and carries
   one complete safe `std::io::write` source replacement plus the package-specific retained Windows
   executable path. The command never guesses identity, merges or upgrades an existing path,
   generates a lockfile, accepts an arbitrary destination, or uses a selectable template, prompt,

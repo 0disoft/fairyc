@@ -129,16 +129,20 @@ fairyc check
 fairyc test --locked
 `+"```"+`
 
+The default test command uses the fast semantic interpreter.
+
 ## Run on Windows
 
 With x64 MSVC and a Windows SDK installed:
 
 `+"```text"+`
+fairyc test --native --locked
 fairyc run --locked
 fairyc build --release --locked
 .\build\%s.exe
 `+"```"+`
 
+`+"`fairyc test --native`"+` compiles every test into a separate temporary Windows image.
 `+"`fairyc run`"+` forwards program output and returns `+"`main`"+`'s `+"`i32`"+` as the process status.
 The generated starter returns zero after checking that `+"`answer()`"+` is 42.
 

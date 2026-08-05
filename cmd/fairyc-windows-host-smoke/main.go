@@ -2051,6 +2051,8 @@ func runStandaloneCompiler(
 	}
 	const starterExecutableCommand = `.\build\starter-smoke.exe`
 	if bytes.Count(starterReadme, []byte(starterExecutableCommand)) != 1 ||
+		bytes.Count(starterReadme, []byte("fairyc test --native --locked")) != 1 ||
+		!bytes.Contains(starterReadme, []byte("The default test command uses the fast semantic interpreter.")) ||
 		!bytes.Contains(starterReadme, []byte("```fairyc\nmodule main;\n\nimport std::io as io;\n")) ||
 		!bytes.Contains(starterReadme, []byte("`fairyc run` forwards program output and returns `main`'s `i32` as the process status.")) {
 		return 0, fmt.Errorf("standalone compiler generated an invalid starter guide: %q", starterReadme)

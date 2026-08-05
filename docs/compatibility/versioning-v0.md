@@ -660,6 +660,12 @@ stay at 42, private `main()` now returns `answer() - 42`, and the exact README d
 direct locked safe-output execution. Existing projects are not rewritten, and no template choice or
 upgrade surface is added.
 
+ADR 0266 moves the same five-file set to starter project v4 by changing only the generated README.
+It labels `fairyc test --locked` as the fast semantic lane and adds the explicit Windows
+`fairyc test --native --locked` step plus its one-temporary-image-per-test explanation. Manifest,
+source/test bytes, package identity, lock behavior, project command, no-overwrite containment,
+success line, exit codes, and existing projects remain unchanged.
+
 ADR 0182 introduces the independently identified in-memory
 `fairyc.semantic-snapshot/v0` model. It removes build-local package and symbol numbering from
 detached compiler facts and fixes provenance plus relation-specific completeness behavior, but it

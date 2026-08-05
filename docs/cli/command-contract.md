@@ -6,7 +6,7 @@
 
 This document owns planned `fairyc` command semantics. It does not claim that a command is implemented. Implemented commands must be marked with tests and a language revision before release.
 
-## Stable starter project creation v3
+## Stable starter project creation v4
 
 `fairyc new <package-name> --uid <package-uid>` creates one starter project as a direct child of the
 current process source root. The name must be one portable lowercase kebab-case manifest name and
@@ -23,8 +23,9 @@ destination path, current-directory mode, template, version, language, force, me
 
 The generated README is exact compiler-owned starter content, not a selectable template. It labels
 its commands as manual steps, explains first-check lock publication and stable run v2's stream and
-process-status behavior, substitutes the validated package name into the retained Windows executable
-path, and includes one complete safe `std::io::write` source replacement. The source handles both
+process-status behavior, distinguishes fast semantic testing from explicit isolated Windows native
+testing, substitutes the validated package name into the retained Windows executable path, and
+includes one complete safe `std::io::write` source replacement. The source handles both
 Result variants and returns zero only after the complete message was written. It directs the user to
 run an ordinary check before locked release execution because changing source makes the old lock stale.
 

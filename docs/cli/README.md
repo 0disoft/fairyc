@@ -19,6 +19,9 @@ Stable `new`, `check`, the minimal Windows `build` and `run`, compiler inspectio
 semantic or isolated Windows-native test execution now have Stage 0 contracts. The remaining command families are product
 commitments only after their own contracts and implementations exist.
 
+New starter v4 projects keep the same manifest and Fairy sources as v3, while their exact generated
+README distinguishes fast `fairyc test --locked` from isolated Windows `fairyc test --native --locked`.
+
 ## Current prototype
 
 The Go frontend currently exposes stable starter creation

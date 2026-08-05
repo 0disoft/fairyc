@@ -705,7 +705,7 @@ quarantines, without selecting a default policy or making a speed claim.
   declared reference environment, and an accepted decision rule justify an ordinary-command cache
   path and defaults. The crash/power-interruption safety boundary and configured local cold/warm
   distributions now exist; physical media retention remains storage-stack-specific.
-- Keep the implemented no-overwrite `fairyc new <package-name> --uid <package-uid>` starter v3 bootstrap,
+- Keep the implemented no-overwrite `fairyc new <package-name> --uid <package-uid>` starter v4 bootstrap,
   `fairyc check [--locked]`, Windows-local
   `fairyc build [--release] [--locked]`, and Windows-local
   `fairyc run [--release] [--locked] [-- <program-args...>]` v4 contract narrow: caller stdin after
