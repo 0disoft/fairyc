@@ -510,6 +510,35 @@ func TestWindowsMSVCSourceForSymbolsSelectsOnlyWindowsFile(t *testing.T) {
 	}
 }
 
+func TestWindowsMSVCSourceForSymbolsClosesOwnedBufferReadDependencies(t *testing.T) {
+	t.Parallel()
+	source, err := WindowsMSVCSourceForSymbols([]string{"fy_std_windows_file_read_append_v0"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, required := range []string{
+		"fy_std_windows_file_read_v0", "fy_std_system_heap_allocate_v0",
+		"fy_std_buffer_reserve_v0", "fy_std_windows_file_read_append_v0",
+		"buffer->length = old_length + file_result.count",
+	} {
+		if !strings.Contains(source, required) {
+			t.Errorf("owned-buffer read closure is missing %q", required)
+		}
+	}
+	if strings.Index(source, "fy_std_windows_file_read_v0") > strings.Index(source, "fy_std_windows_file_read_append_v0") ||
+		strings.Index(source, "fy_std_buffer_reserve_v0") > strings.Index(source, "fy_std_windows_file_read_append_v0") {
+		t.Fatal("owned-buffer adapter precedes one of its C dependencies")
+	}
+	for _, forbidden := range []string{
+		"fy_std_windows_stdout_write_all_v0", "fy_std_process_arg_count_v0",
+		"fy_std_arena_initialize_v0", "fy_std_string_copy_storage_v0",
+	} {
+		if strings.Contains(source, forbidden) {
+			t.Errorf("owned-buffer read closure unexpectedly contains %q", forbidden)
+		}
+	}
+}
+
 func TestWindowsMSVCSourceForSymbolsSelectsOnlyProcessArgs(t *testing.T) {
 	t.Parallel()
 	source, err := WindowsMSVCSourceForSymbols([]string{"fy_std_process_arg_count_v0"})
@@ -634,6 +663,7 @@ func TestWindowsMSVCSourceForSymbolsKeepsClosedRuntimeSlice(t *testing.T) {
 		"fy_std_windows_stdout_write_all_v0",
 		"fy_std_windows_file_open_v0",
 		"fy_std_windows_file_read_v0",
+		"fy_std_windows_file_read_append_v0",
 		"fy_std_windows_file_write_v0",
 		"fy_std_windows_file_write_all_v0",
 		"fy_std_windows_file_sync_v0",
@@ -678,6 +708,7 @@ func TestWindowsMSVCSourceForSymbolsKeepsClosedRuntimeSlice(t *testing.T) {
 		"STD_INPUT_HANDLE", "STD_OUTPUT_HANDLE", "STD_ERROR_HANDLE", "ReadFile", "WriteFile", "GetStdHandle",
 		"UINT32_MAX", "ERROR_BROKEN_PIPE", "ERROR_HANDLE_EOF", "ERROR_INVALID_HANDLE",
 		"fy_std_windows_file_open_v0", "fy_std_windows_file_read_v0",
+		"fy_std_windows_file_read_append_v0",
 		"fy_std_windows_file_write_v0",
 		"fy_std_windows_file_write_all_v0", "fy_std_windows_file_sync_v0",
 		"fy_std_windows_file_close_v0", "fy_std_windows_file_drop_v0", "CreateFileW",

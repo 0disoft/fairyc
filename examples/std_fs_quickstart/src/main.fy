@@ -1,5 +1,6 @@
 module main;
 
+import std::bytes as bytes;
 import std::fs as fs;
 
 @effects(filesystem)
@@ -749,6 +750,106 @@ fn i32 check_append(ref CStr path) {
     } };
 }
 
+fn bool owned_read_bytes_match(ref bytes::Buffer buffer) {
+    let ref u8[] value = bytes::view(buffer);
+    return value.len == 12 &&
+        value[0] == 112 && value[1] == 114 && value[2] == 101 &&
+        value[3] == 70 && value[4] == 97 && value[5] == 105 &&
+        value[6] == 114 && value[7] == 121 && value[8] == 67 &&
+        value[9] == 111 && value[10] == 100 && value[11] == 101;
+}
+
+@effects(filesystem)
+fn i32 close_after_owned_read_setup_error(fs::File file, i32 code) {
+    return switch (fs::close(file)) {
+        case .ok(_) : { code }
+        case .err(_) : { 185 }
+    };
+}
+
+@effects(filesystem)
+fn i32 read_append_owned(fs::File input, bytes::Buffer initial) {
+    var fs::File file = input;
+    var bytes::Buffer buffer = initial;
+    let i32 empty_code = switch (fs::read_append(ref mut file, ref mut buffer, 0)) {
+        case .ok(read) : { if (read == 0 && bytes::len(ref buffer) == 3) { 0 } else { 186 } }
+        case .err(_) : { 187 }
+    };
+    if (empty_code != 0) {
+        return empty_code;
+    }
+    let i32 first_code = switch (fs::read_append(ref mut file, ref mut buffer, 5)) {
+        case .ok(read) : { if (read == 5 && bytes::len(ref buffer) == 8) { 0 } else { 171 } }
+        case .err(_) : { 172 }
+    };
+    if (first_code != 0) {
+        return first_code;
+    }
+    let i32 second_code = switch (fs::read_append(ref mut file, ref mut buffer, 8)) {
+        case .ok(read) : { if (read == 4 && owned_read_bytes_match(ref buffer)) { 0 } else { 173 } }
+        case .err(_) : { 174 }
+    };
+    if (second_code != 0) {
+        return second_code;
+    }
+    let i32 eof_code = switch (fs::read_append(ref mut file, ref mut buffer, 8)) {
+        case .ok(read) : { if (read == 0 && owned_read_bytes_match(ref buffer)) { 0 } else { 175 } }
+        case .err(_) : { 176 }
+    };
+    if (eof_code != 0) {
+        return eof_code;
+    }
+    return switch (fs::close(file)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 177 }
+    };
+}
+
+@effects(filesystem)
+fn i32 read_append_then_close(fs::File input) {
+    return switch (bytes::copy(b"pre")) {
+        case .ok(buffer) : { read_append_owned(input, buffer) }
+        case .err(_) : { close_after_owned_read_setup_error(input, 178) }
+    };
+}
+
+fn bool preserved_error_buffer(ref bytes::Buffer buffer) {
+    let ref u8[] value = bytes::view(buffer);
+    return value.len == 4 && value[0] == 107 && value[1] == 101 &&
+        value[2] == 101 && value[3] == 112;
+}
+
+@effects(filesystem)
+fn i32 read_append_error_owned(fs::File input, bytes::Buffer initial) {
+    var fs::File file = input;
+    var bytes::Buffer buffer = initial;
+    let i32 read_code = switch (fs::read_append(ref mut file, ref mut buffer, 8)) {
+        case .ok(_) : { 179 }
+        case .err(error) : {
+            if (fs::read_append_error_file_status(error) == 1 &&
+                fs::read_append_error_os_code(error) != 0 &&
+                fs::read_append_error_allocation_status(error) == 0 &&
+                preserved_error_buffer(ref buffer)) { 0 } else { 180 }
+        }
+    };
+    let i32 close_code = switch (fs::close(file)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 181 }
+    };
+    return if (read_code != 0) { read_code } else { close_code };
+}
+
+@effects(filesystem)
+fn i32 check_read_append_error(ref CStr path) {
+    return switch (fs::create_truncate(path)) {
+        case .ok(file) : { switch (bytes::copy(b"keep")) {
+            case .ok(buffer) : { read_append_error_owned(file, buffer) }
+            case .err(_) : { close_after_owned_read_setup_error(file, 182) }
+        } }
+        case .err(_) : { 183 }
+    };
+}
+
 @effects(filesystem)
 fn i32 main() {
     let ref CStr data_path = c"fairyc-std-fs-data.tmp";
@@ -756,6 +857,7 @@ fn i32 main() {
     let ref CStr open_or_create_path = c"fairyc-std-fs-open-or-create.tmp";
     let ref CStr create_new_path = c"fairyc-std-fs-create-new.tmp";
     let ref CStr append_path = c"fairyc-std-fs-append.tmp";
+    let ref CStr read_append_error_path = c"fairyc-std-fs-read-append-error.tmp";
     let i32 invalid_code = check_invalid_path();
     let i32 missing_update_code = check_missing_update();
     let i32 character_code = switch (fs::open_read(c"NUL")) {
@@ -774,6 +876,7 @@ fn i32 main() {
     } };
     let i32 create_new_code = check_create_new(create_new_path);
     let i32 append_code = check_append(append_path);
+    let i32 read_append_error_code = check_read_append_error(read_append_error_path);
     let i32 write_code = switch (fs::create_truncate(data_path)) {
         case .ok(file) : { write_then_close(file) }
         case .err(_) : { 30 }
@@ -790,6 +893,8 @@ fn i32 main() {
         create_new_code
     } else if (append_code != 0) {
         append_code
+    } else if (read_append_error_code != 0) {
+        read_append_error_code
     } else if (write_code != 0) {
         write_code
     } else {
@@ -807,33 +912,41 @@ fn i32 main() {
             if (exact_code != 0) {
                 exact_code
             } else {
-                let i32 identity_code = switch (fs::open_read(data_path)) {
-                    case .ok(file) : { verify_file_id_reopen(file, data_path, drop_path) }
-                    case .err(_) : { 168 }
+                let i32 read_append_code = switch (fs::open_read(data_path)) {
+                    case .ok(file) : { read_append_then_close(file) }
+                    case .err(_) : { 184 }
                 };
-                if (identity_code != 0) {
-                    identity_code
+                if (read_append_code != 0) {
+                    read_append_code
                 } else {
-                    let i32 read_code = switch (fs::open_read(data_path)) {
-                        case .ok(file) : { read_then_close(file) }
-                        case .err(_) : { 31 }
+                    let i32 identity_code = switch (fs::open_read(data_path)) {
+                        case .ok(file) : { verify_file_id_reopen(file, data_path, drop_path) }
+                        case .err(_) : { 168 }
                     };
-                    if (read_code != 0) {
-                        read_code
+                    if (identity_code != 0) {
+                        identity_code
                     } else {
-                        let i32 drop_code = switch (fs::create_truncate(drop_path)) {
-                            case .ok(file) : { implicit_drop_probe(file) }
-                            case .err(_) : { 32 }
+                        let i32 read_code = switch (fs::open_read(data_path)) {
+                            case .ok(file) : { read_then_close(file) }
+                            case .err(_) : { 31 }
                         };
-                        if (drop_code != 0) {
-                            drop_code
+                        if (read_code != 0) {
+                            read_code
                         } else {
-                            switch (fs::create_truncate(drop_path)) {
-                                case .ok(file) : { switch (fs::close(file)) {
-                                    case .ok(_) : { 42 }
-                                    case .err(_) : { 34 }
-                                } }
-                                case .err(_) : { 33 }
+                            let i32 drop_code = switch (fs::create_truncate(drop_path)) {
+                                case .ok(file) : { implicit_drop_probe(file) }
+                                case .err(_) : { 32 }
+                            };
+                            if (drop_code != 0) {
+                                drop_code
+                            } else {
+                                switch (fs::create_truncate(drop_path)) {
+                                    case .ok(file) : { switch (fs::close(file)) {
+                                        case .ok(_) : { 42 }
+                                        case .err(_) : { 34 }
+                                    } }
+                                    case .err(_) : { 33 }
+                                }
                             }
                         }
                     }

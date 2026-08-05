@@ -1,5 +1,7 @@
 module std::fs;
 
+import std::bytes as bytes;
+
 @repr(C)
 struct raw_file_result {
     u32 status;
@@ -29,6 +31,14 @@ struct raw_file_kind_result {
 }
 
 @repr(C)
+struct raw_file_buffer_result {
+    u32 file_status;
+    u32 os_code;
+    u32 allocation_status;
+    usize count;
+}
+
+@repr(C)
 struct raw_file_id {
     u32 volume_low;
     u32 volume_high;
@@ -53,6 +63,13 @@ pub struct FileError {
     u32 status;
     u32 os_code;
     usize completed;
+}
+
+/// Reports the independent file and allocation statuses from an owned-buffer read.
+pub struct ReadAppendError {
+    u32 file_status;
+    u32 os_code;
+    u32 allocation_status;
 }
 
 /// Classifies the object behind one open file handle without exposing target constants.
@@ -97,6 +114,10 @@ unsafe extern C fn raw_file_result file_read_raw(ptr mut void file, ptr mut u8 b
 @effects(filesystem)
 @link_name("fy_std_windows_file_read_exact_v0")
 unsafe extern C fn raw_file_result file_read_exact_raw(ptr mut void file, ptr mut u8 buffer, usize length) ;
+
+@effects(filesystem)
+@link_name("fy_std_windows_file_read_append_v0")
+unsafe extern C fn raw_file_buffer_result file_read_append_raw(ptr mut void file, ptr mut void buffer, usize maximum) ;
 
 @effects(filesystem)
 @link_name("fy_std_windows_file_position_v0")
@@ -171,6 +192,14 @@ fn FileError kind_error(raw_file_kind_result result) {
         .status = result.status,
         .os_code = result.os_code,
         .completed = 0,
+    };
+}
+
+fn ReadAppendError read_append_error(raw_file_buffer_result result) {
+    return ReadAppendError {
+        .file_status = result.file_status,
+        .os_code = result.os_code,
+        .allocation_status = result.allocation_status,
     };
 }
 
@@ -325,6 +354,24 @@ pub fn Result<usize, FileError> read_exact(ref mut File file, ref mut u8[] buffe
         .ok(result.count)
     } else {
         .err(file_error(result))
+    };
+}
+
+/// Reads at most maximum bytes once and appends only the initialized result to buffer.
+/// End-of-file succeeds with zero and leaves the initialized prefix unchanged.
+@effects(filesystem)
+pub fn Result<usize, ReadAppendError> read_append(
+    ref mut File file,
+    ref mut bytes::Buffer buffer,
+    usize maximum
+) {
+    let raw_file_buffer_result result = unsafe {
+        file_read_append_raw(file as ptr mut void, buffer as ptr mut void, maximum)
+    };
+    return if (result.file_status == 0 && result.allocation_status == 0) {
+        .ok(result.count)
+    } else {
+        .err(read_append_error(result))
     };
 }
 
@@ -519,4 +566,19 @@ pub fn u32 error_os_code(FileError error) {
 /// Returns the bytes completed before error.
 pub fn usize error_completed(FileError error) {
     return error.completed;
+}
+
+/// Returns the stable file status from an owned-buffer read failure, or zero otherwise.
+pub fn u32 read_append_error_file_status(ReadAppendError error) {
+    return error.file_status;
+}
+
+/// Returns the target operating-system status from an owned-buffer read failure.
+pub fn u32 read_append_error_os_code(ReadAppendError error) {
+    return error.os_code;
+}
+
+/// Returns the stable allocation status from an owned-buffer read failure, or zero otherwise.
+pub fn u32 read_append_error_allocation_status(ReadAppendError error) {
+    return error.allocation_status;
 }

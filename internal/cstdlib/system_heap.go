@@ -60,6 +60,9 @@ var stage0WindowsConsole string
 //go:embed stage0_windows_file.c
 var stage0WindowsFile string
 
+//go:embed stage0_windows_file_buffer.c
+var stage0WindowsFileBuffer string
+
 //go:embed stage0_windows_file_probe.c
 var stage0WindowsFileProbe string
 
@@ -335,6 +338,8 @@ func componentSource(component cstdlibcontract.Component) (string, string, error
 		return "Windows console", stage0WindowsConsole, nil
 	case cstdlibcontract.ComponentWindowsFile:
 		return "Windows File", stage0WindowsFile, nil
+	case cstdlibcontract.ComponentWindowsFileBuffer:
+		return "Windows File Buffer adapter", stage0WindowsFileBuffer, nil
 	case cstdlibcontract.ComponentWindowsProcessArgs:
 		return "Windows process args", stage0WindowsProcessArgs, nil
 	case cstdlibcontract.ComponentSystemHeap:

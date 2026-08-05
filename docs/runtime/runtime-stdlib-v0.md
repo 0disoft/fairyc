@@ -81,7 +81,7 @@ std::process effect-free argument count and exact UTF-8 argument copy
 std::c      C scalar types and raw wrapper helpers
 ```
 
-The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.26` exports ADR 0250's public safe `std::alloc::Arena` creation and cleanup, ADR 0246's public safe `std::bytes::Buffer`, ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free `std::text::validate_utf8`, ADR 0263's zero-copy `std::text::from_buffer` with the original Buffer returned on invalid UTF-8, ADR 0264's Windows MSVC `std::fs::File` ownership and byte-I/O surface, ADR 0269's absolute position and start-based seek operations, ADR 0270's shared file-size observation, ADR 0271's existing-file read/write open, ADR 0272's cursor-preserving file-length change, ADR 0274's non-truncating open-or-create, ADR 0275's exclusive create, ADR 0276's append-only open, ADR 0277's same-handle file-kind observation, ADR 0278's exact-read operation, ADR 0279's bounded file-identity observation, ADR 0281's exhaustive target-neutral `FileKind` enum, ADR 0285's one-call partial Windows file write, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, ADR 0210's matching immutable byte-view output operations, ADR 0211's bounded mutable-byte-view stdin read, ADR 0215's allocation-free decimal `i32` output, ADR 0262's allocation-free decimal `u32`/`usize` and ASCII `bool` output, and ADR 0261's effect-free `std::process` argument surface; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
+The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.27` exports ADR 0250's public safe `std::alloc::Arena` creation and cleanup, ADR 0246's public safe `std::bytes::Buffer`, ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free `std::text::validate_utf8`, ADR 0263's zero-copy `std::text::from_buffer` with the original Buffer returned on invalid UTF-8, ADR 0264's Windows MSVC `std::fs::File` ownership and byte-I/O surface, ADR 0269's absolute position and start-based seek operations, ADR 0270's shared file-size observation, ADR 0271's existing-file read/write open, ADR 0272's cursor-preserving file-length change, ADR 0274's non-truncating open-or-create, ADR 0275's exclusive create, ADR 0276's append-only open, ADR 0277's same-handle file-kind observation, ADR 0278's exact-read operation, ADR 0279's bounded file-identity observation, ADR 0281's exhaustive target-neutral `FileKind` enum, ADR 0285's one-call partial Windows file write, ADR 0288's bounded owned-Buffer read append, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, ADR 0210's matching immutable byte-view output operations, ADR 0211's bounded mutable-byte-view stdin read, ADR 0215's allocation-free decimal `i32` output, ADR 0262's allocation-free decimal `u32`/`usize` and ASCII `bool` output, and ADR 0261's effect-free `std::process` argument surface; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
 
 Built-in `Option`, `Result`, slices, `str`, and `CStr` get compiler-known view semantics; library modules provide operations over them.
 
@@ -336,7 +336,7 @@ a private non-null `ref str` sentinel, and preserves the existing pointer-only `
 is superseded as the user-facing entry by ADR 0247's SDK module; it remains independent historical
 evidence and does not define a public layout.
 
-SDK `0.0.0-stage0.26` retains move-only `String` and `CString` from `std::text`. `copy` and
+SDK `0.0.0-stage0.27` retains move-only `String` and `CString` from `std::text`. `copy` and
 `cstring_from_text` construct canonical owners fallibly; `append` preserves the existing String on
 failure. `string_len`, `string_is_empty`, `cstring_len`, and `cstring_is_empty` expose byte metadata,
 with CString length excluding its required terminator. `string_as_str` and `cstring_as_cstr` return
@@ -644,7 +644,11 @@ underlying write begins at the then-current EOF after any seek; ADR 0277 extends
 `0.0.0-stage0.23` with exact-fill reads and explicit unexpected EOF; ADR 0279 extends it in SDK
 `0.0.0-stage0.24` with same-handle 128-bit file identity plus volume comparison; ADR 0281 moves it to
 `0.0.0-stage0.25` by promoting `FileKind` to an exhaustive public enum; ADR 0285 extends it to
-`0.0.0-stage0.26` with one-call partial `write`. The public slice remains specific to
+`0.0.0-stage0.26` with one-call partial `write`; ADR 0288 extends it to `0.0.0-stage0.27` with
+one-call `read_append(ref mut File, ref mut bytes::Buffer, usize)` that reserves spare capacity but
+commits only successfully initialized bytes. Allocation failure precedes I/O and preserves the
+complete Buffer; file failure preserves bytes and length while allowing reusable capacity growth.
+The public slice remains specific to
 `x86_64-windows-msvc`; it is not a portable Unicode path, Linux public linkage, general
 mutable-slice operation set, retained-pointer contract, or public resource-layout contract.
 
@@ -655,7 +659,9 @@ resolve only exact `fy_std_*_v0` members through the shared standard-library con
 component dependencies, and combine those C sources with the scalar runtime. Unused foreign
 declarations do not select a component. Buffer and Arena require SystemHeap; owned text requires
 SystemHeap, Buffer, and text view. Linux console, Linux File, Windows console, and Windows File are
-target-specific independent components; POSIX components are ordered before portable sources so
+target-specific components. The Windows File-to-Buffer adapter closes over Windows File,
+SystemHeap, and Buffer and is ordered after all three; POSIX components are ordered before portable
+sources so
 their feature-test macros precede system headers.
 
 This is a closed implementation link, not package discovery. Other foreign names receive no source,

@@ -16,6 +16,7 @@ const (
 	ComponentLinuxFile          Component = "linux-file"
 	ComponentWindowsConsole     Component = "windows-console"
 	ComponentWindowsFile        Component = "windows-file"
+	ComponentWindowsFileBuffer  Component = "windows-file-buffer"
 	ComponentWindowsProcessArgs Component = "windows-process-args"
 	ComponentSystemHeap         Component = "system-heap"
 	ComponentBuffer             Component = "buffer"
@@ -74,6 +75,7 @@ var windowsOnlySymbolComponents = map[string]Component{
 	"fy_std_windows_file_open_v0":        ComponentWindowsFile,
 	"fy_std_windows_file_read_v0":        ComponentWindowsFile,
 	"fy_std_windows_file_read_exact_v0":  ComponentWindowsFile,
+	"fy_std_windows_file_read_append_v0": ComponentWindowsFileBuffer,
 	"fy_std_windows_file_position_v0":    ComponentWindowsFile,
 	"fy_std_windows_file_size_v0":        ComponentWindowsFile,
 	"fy_std_windows_file_kind_v0":        ComponentWindowsFile,
@@ -100,6 +102,7 @@ var windowsMSVCSymbolComponents = map[string]Component{
 	"fy_std_windows_file_open_v0":          ComponentWindowsFile,
 	"fy_std_windows_file_read_v0":          ComponentWindowsFile,
 	"fy_std_windows_file_read_exact_v0":    ComponentWindowsFile,
+	"fy_std_windows_file_read_append_v0":   ComponentWindowsFileBuffer,
 	"fy_std_windows_file_position_v0":      ComponentWindowsFile,
 	"fy_std_windows_file_size_v0":          ComponentWindowsFile,
 	"fy_std_windows_file_kind_v0":          ComponentWindowsFile,
@@ -153,6 +156,7 @@ var componentLinkOrder = []Component{
 	ComponentWindowsProcessArgs,
 	ComponentSystemHeap,
 	ComponentBuffer,
+	ComponentWindowsFileBuffer,
 	ComponentArena,
 	ComponentTextView,
 	ComponentOwnedText,
@@ -242,6 +246,10 @@ func addComponentClosure(required map[Component]struct{}, component Component) {
 	switch component {
 	case ComponentBuffer:
 		required[ComponentSystemHeap] = struct{}{}
+	case ComponentWindowsFileBuffer:
+		required[ComponentWindowsFile] = struct{}{}
+		required[ComponentSystemHeap] = struct{}{}
+		required[ComponentBuffer] = struct{}{}
 	case ComponentArena:
 		required[ComponentSystemHeap] = struct{}{}
 	case ComponentOwnedText:

@@ -1124,6 +1124,7 @@ func run() error {
 		"fairyc-std-fs-open-or-create.tmp",
 		"fairyc-std-fs-create-new.tmp",
 		"fairyc-std-fs-append.tmp",
+		"fairyc-std-fs-read-append-error.tmp",
 	)
 	if err != nil {
 		return err
@@ -1257,6 +1258,10 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	readAppendFailureProbeImages, readAppendFailureCases, err := runGeneratedFairyReadAppendFailureProbe(repositoryRoot, root, toolchain)
+	if err != nil {
+		return err
+	}
 	stringAppendFailureProbeImages, stringAppendFailureCases, err := runGeneratedFairyStringAppendFailureProbe(repositoryRoot, root, toolchain)
 	if err != nil {
 		return err
@@ -1313,14 +1318,15 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	inspectedPEImages := 1 + targetBuildExecutions + workspaceBuildExecutions + windowsFileSourceExecutions + ownedTextSourceExecutions + targetRunExecutions + workspaceRunExecutions + targetExecExecutions + windowsFileExecutions + bufferProbeExecutions + ownedTextProbeExecutions + arenaProbeExecutions + regionFailureProbeImages + bufferFailureProbeImages + stringAppendFailureProbeImages + cstringFailureProbeImages + stringCopyFailureProbeImages + stringFromBufferProbeImages + processArgsBuildImages + processArgsDecodeImages + layoutExecutions + abiExecutions + relocationExecutions + weakSearchExecutions + archiveExecutions + structResultExecutions + cIntCastExecutions + unwindExecutions
+	inspectedPEImages := 1 + targetBuildExecutions + workspaceBuildExecutions + windowsFileSourceExecutions + ownedTextSourceExecutions + targetRunExecutions + workspaceRunExecutions + targetExecExecutions + windowsFileExecutions + bufferProbeExecutions + ownedTextProbeExecutions + arenaProbeExecutions + regionFailureProbeImages + bufferFailureProbeImages + readAppendFailureProbeImages + stringAppendFailureProbeImages + cstringFailureProbeImages + stringCopyFailureProbeImages + stringFromBufferProbeImages + processArgsBuildImages + processArgsDecodeImages + layoutExecutions + abiExecutions + relocationExecutions + weakSearchExecutions + archiveExecutions + structResultExecutions + cIntCastExecutions + unwindExecutions
 	fmt.Printf("Generated-Fairy Region failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering payload-allocation failure, node-allocation rollback, exact status 1, lexical reset, automatic Arena drop, and zero retained probe allocations\n", regionFailureCases, regionFailureProbeImages)
 	fmt.Printf("Generated-Fairy Buffer failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering with_capacity initial-allocation failure and resize_zeroed growth failure with preserved len/capacity, exact status 1, and zero retained probe allocations\n", bufferFailureCases, bufferFailureProbeImages)
+	fmt.Printf("Generated-Fairy read_append failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering growth-allocation failure before I/O, exact file/allocation statuses 0/1, preserved Buffer len/capacity, consuming File close, automatic Buffer drop, and zero retained probe allocations\n", readAppendFailureCases, readAppendFailureProbeImages)
 	fmt.Printf("Generated-Fairy String append failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering successful copy allocation, append growth-allocation failure with preserved owner and len/is_empty/view, exact statuses 1/1, automatic String drop, and zero retained probe allocations\n", stringAppendFailureCases, stringAppendFailureProbeImages)
 	fmt.Printf("Generated-Fairy CString failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering cstring_from_text initial-allocation failure, exact statuses 1/1, automatic CString drop, and zero retained probe allocations\n", cstringFailureCases, cstringFailureProbeImages)
 	fmt.Printf("Generated-Fairy String copy failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering text::copy initial-allocation failure, exact statuses 1/1, automatic String drop, and zero retained probe allocations\n", stringCopyFailureCases, stringCopyFailureProbeImages)
 	fmt.Printf("Generated-Fairy Buffer-to-String conversion proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering zero-copy valid UTF-8 transfer under a fail-after-two schedule, invalid UTF-8 ownership return with preserved len/capacity/bytes, empty String success, automatic String and Buffer drop, and zero retained probe allocations\n", stringFromBufferProbeCases, stringFromBufferProbeImages)
-	fmt.Printf("Generated-Fairy std::fs one-call write, creation, append, file-kind, exact-read, and file-identity proof passed: %d native executions across %d inspected low/optimized MSVC images, covering one-call prefix success, read-only write failure with zero progress, write-all completion, open-or-create preservation, exclusive create collision, write-only append creation, seek-resistant EOF writes, exact retained bytes, disk files, the NUL character device, complete reads, unexpected-EOF prefix preservation, same-file handles, and distinct live files\n", stdFSBuildExecutions, stdFSBuildExecutions)
+	fmt.Printf("Generated-Fairy std::fs one-call write, owned-Buffer read append, creation, append, file-kind, exact-read, and file-identity proof passed: %d native executions across %d inspected low/optimized MSVC images, covering one-call prefix success, read-only write failure with zero progress, write-all completion, initialized-prefix Buffer append, short read, EOF, write-only read failure with preserved bytes, open-or-create preservation, exclusive create collision, write-only append creation, seek-resistant EOF writes, exact retained bytes, disk files, the NUL character device, complete reads, unexpected-EOF prefix preservation, same-file handles, and distinct live files\n", stdFSBuildExecutions, stdFSBuildExecutions)
 	fmt.Printf("Stable run program-argument forwarding proof passed: %d native executions across %d inspected low/optimized MSVC images, covering argv[0] inclusion and ordering, empty, flag-looking, space/quote/trailing-backslash, and non-ASCII UTF-8 argument round-trips, out-of-range status 1, too-small status 3 with exact needed and an unchanged caller buffer, CLI embedded-NUL and delimiter rejection, and low-level invalid-surrogate status 2 with an unchanged buffer\n", processArgsExecutions+processArgsDecodeExecutions, processArgsBuildImages+processArgsDecodeImages)
 	fmt.Printf("std::io scalar output proof passed: %d native executions across %d inspected low/optimized MSVC images, covering u32 0/1/max, usize 0/1/max, and bool true/false exact ASCII bytes with exact written counts and empty stderr\n", stdIoScalarBuildExecutions, stdIoScalarBuildExecutions)
 	fmt.Println("Generated-Fairy user-enum Result proof passed: 4 native executions across low/optimized MSVC, covering .ok enum construction, enum payload extraction, exhaustive enum switching, .err inert-struct extraction, and ? propagation of enum errors")

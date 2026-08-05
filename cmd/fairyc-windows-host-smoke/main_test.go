@@ -345,6 +345,25 @@ func TestGeneratedFairyStringFromBufferProbeRejectsIncompleteGeneratedC(t *testi
 	}
 }
 
+func TestGeneratedFairyReadAppendFailureProbeRejectsIncompleteGeneratedC(t *testing.T) {
+	t.Parallel()
+	completeCalls := []string{
+		"int fy_std_windows_file_open_v0(void) { return 0; }",
+		"int fy_std_windows_file_read_append_v0(void) { return 0; }",
+		"int fy_std_windows_file_close_v0(void) { return 0; }",
+		"int fy_std_buffer_initialize_v0(void) { return 0; }",
+		"int fy_std_buffer_drop_v0(void) { return 0; }",
+	}
+	for index, name := range []string{"open", "read_append", "close", "initialize", "drop"} {
+		calls := append([]string(nil), completeCalls...)
+		calls = append(calls[:index], calls[index+1:]...)
+		generated := strings.Join(calls, "\n") + "\nint main(void) { return 42; }\n"
+		if _, err := generatedFairyReadAppendFailureProbeSource(generated); err == nil {
+			t.Fatalf("read_append failure probe accepted generated C missing %s", name)
+		}
+	}
+}
+
 func TestGeneratedFairyStdlibSourcesPassFullPipeline(t *testing.T) {
 	t.Parallel()
 	fromBufferMain, err := os.ReadFile(filepath.Join("..", "..", "examples", "std_text_from_buffer_quickstart", "src", "main.fy"))
@@ -366,6 +385,19 @@ func TestGeneratedFairyStdlibSourcesPassFullPipeline(t *testing.T) {
 			name: "with_capacity initial allocation failure", manifest: "std_bytes_quickstart", source: generatedFairyBufferInitialFailureSource,
 			expect:         []string{"fy_std_buffer_initialize_v0", "fy_std_buffer_drop_v0"},
 			foreignSymbols: []string{"fy_std_buffer_drop_v0", "fy_std_buffer_initialize_v0"},
+		},
+		{
+			name: "read_append growth allocation failure", manifest: "std_fs_quickstart", source: generatedFairyReadAppendFailureSource,
+			expect: []string{
+				"fy_std_buffer_drop_v0", "fy_std_buffer_initialize_v0",
+				"fy_std_windows_file_close_v0", "fy_std_windows_file_drop_v0",
+				"fy_std_windows_file_open_v0", "fy_std_windows_file_read_append_v0",
+			},
+			foreignSymbols: []string{
+				"fy_std_buffer_drop_v0", "fy_std_buffer_initialize_v0",
+				"fy_std_windows_file_close_v0", "fy_std_windows_file_drop_v0",
+				"fy_std_windows_file_open_v0", "fy_std_windows_file_read_append_v0",
+			},
 		},
 		{
 			name: "resize_zeroed growth failure", manifest: "std_bytes_quickstart", source: generatedFairyBufferResizeFailureSource,
@@ -405,13 +437,16 @@ func TestGeneratedFairyStdlibSourcesPassFullPipeline(t *testing.T) {
 		{
 			name: "windows std fs used", manifest: "std_fs_quickstart", source: string(fsMain),
 			expect: []string{
+				"fy_std_buffer_append_v0", "fy_std_buffer_drop_v0", "fy_std_buffer_initialize_v0",
 				"fy_std_windows_file_open_v0", "fy_std_windows_file_read_v0", "fy_std_windows_file_read_exact_v0", "fy_std_windows_file_position_v0",
+				"fy_std_windows_file_read_append_v0",
 				"fy_std_windows_file_seek_start_v0", "fy_std_windows_file_size_v0", "fy_std_windows_file_kind_v0", "fy_std_windows_file_id_v0", "fy_std_windows_file_set_len_v0", "fy_std_windows_file_write_all_v0", "fy_std_windows_file_write_v0",
 				"fy_std_windows_file_sync_v0", "fy_std_windows_file_close_v0", "fy_std_windows_file_drop_v0",
 			},
 			foreignSymbols: []string{
+				"fy_std_buffer_append_v0", "fy_std_buffer_drop_v0", "fy_std_buffer_initialize_v0",
 				"fy_std_windows_file_close_v0", "fy_std_windows_file_drop_v0", "fy_std_windows_file_id_v0", "fy_std_windows_file_kind_v0", "fy_std_windows_file_open_v0",
-				"fy_std_windows_file_position_v0", "fy_std_windows_file_read_exact_v0", "fy_std_windows_file_read_v0", "fy_std_windows_file_seek_start_v0",
+				"fy_std_windows_file_position_v0", "fy_std_windows_file_read_append_v0", "fy_std_windows_file_read_exact_v0", "fy_std_windows_file_read_v0", "fy_std_windows_file_seek_start_v0",
 				"fy_std_windows_file_set_len_v0", "fy_std_windows_file_size_v0", "fy_std_windows_file_sync_v0", "fy_std_windows_file_write_all_v0", "fy_std_windows_file_write_v0",
 			},
 		},

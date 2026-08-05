@@ -609,7 +609,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
-  The compiler-bundled SDK `0.0.0-stage0.26` exposes
+  The compiler-bundled SDK `0.0.0-stage0.27` exposes
   `std::io::write(ref str) -> Result<usize, ConsoleError>` and a matching `write_stderr` operation
   for text, plus `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` for exact binary output.
   All four declare `console`, keep raw pointers and target linkage private, append no newline,
@@ -682,6 +682,12 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   multiple underlying writes and is not a transactional record append. The current share policy
   does not admit a concurrent writer.
   `read(ref mut File, ref mut u8[])` returns one exact partial count including zero at EOF.
+  `read_append(ref mut File, ref mut bytes::Buffer, usize maximum)` performs at most one read into
+  Buffer spare capacity and increases its initialized length only by the successful completed
+  count. EOF returns zero without changing length. Allocation failure precedes file I/O and
+  preserves cursor, allocation, bytes, capacity, and length. File failure preserves bytes and
+  length but may retain capacity grown by the successful reserve. `ReadAppendError` separates exact
+  file status and Windows code from allocation status; only one failure domain is nonzero.
   `read_exact(ref mut File, ref mut u8[])` loops on that same handle until it fills the complete
   buffer or fails. Unexpected EOF is status `7`, OS code `0`, and the exact initialized prefix in
   `completed`; the unread suffix keeps its prior bytes. Empty input on an open File succeeds with
@@ -710,7 +716,9 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   position/seek including overflow preservation, existing-file in-place
   update, shrink/extend with cursor preservation and explicit rewrite,
   oversized and read-only length-change failures, nonempty and empty size observation, disk and
-  `NUL` character kinds, explicit close, and implicit-drop reopen under both Windows
+  `NUL` character kinds, owned-Buffer prefix append, short read, EOF, write-only failure,
+  forced growth-allocation failure with zero retained allocations, explicit close, and implicit-drop
+  reopen under both Windows
   profiles. The path is
   still bounded ASCII bootstrap input; portable Unicode paths and Linux public linkage remain
   excluded.
@@ -846,7 +854,7 @@ argument, output, and exit-code contract. It emits no native code.
 
 ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
-version, source digest, and lock fields. SDK `0.0.0-stage0.26` exports ADR 0250's move-only,
+version, source digest, and lock fields. SDK `0.0.0-stage0.27` exports ADR 0250's move-only,
 fallibly created `std::alloc::Arena` with automatic cleanup and exact allocation status,
 while ADR 0251 makes compiler-known placement return `Result<ref T, AllocError>` under language `/8`.
 ADR 0246's public safe `std::bytes::Buffer`,
@@ -857,7 +865,7 @@ shared file-size observation, ADR 0271's existing-file read/write open, ADR 0272
 file-length change, ADR 0274's non-truncating open-or-create, ADR 0275's exclusive create,
 ADR 0276's append-only open, ADR 0277's same-handle file-kind observation, ADR 0278's exact read,
 ADR 0279's bounded same-handle file identity, ADR 0281's exhaustive public file-kind enum,
-ADR 0285's one-call partial file write,
+ADR 0285's one-call partial file write, ADR 0288's bounded owned-Buffer file read append,
 ADR 0205's `std::io::write(ref str) -> Result<usize, ConsoleError>`, and ADR 0209's matching
 `write_stderr` operation, ADR 0210's matching immutable byte-view output operations, and ADR 0211's
 `read_stdin(ref mut u8[]) -> Result<usize, ConsoleReadError>`, plus ADR 0215's allocation-free

@@ -129,6 +129,7 @@ func TestAdmittedForTargetKeepsWindowsFileTargetBound(t *testing.T) {
 		"fy_std_windows_file_open_v0",
 		"fy_std_windows_file_read_v0",
 		"fy_std_windows_file_read_exact_v0",
+		"fy_std_windows_file_read_append_v0",
 		"fy_std_windows_file_position_v0",
 		"fy_std_windows_file_size_v0",
 		"fy_std_windows_file_kind_v0",
@@ -181,6 +182,7 @@ func TestWindowsMSVCComponentsForSymbolsAdmitsOnlyProvenRuntimeSlice(t *testing.
 		"fy_std_windows_stdout_write_all_v0",
 		"fy_std_windows_file_open_v0",
 		"fy_std_windows_file_read_v0",
+		"fy_std_windows_file_read_append_v0",
 		"fy_std_windows_file_set_len_v0",
 		"fy_std_windows_file_write_v0",
 		"fy_std_windows_file_write_all_v0",
@@ -224,7 +226,7 @@ func TestWindowsMSVCComponentsForSymbolsAdmitsOnlyProvenRuntimeSlice(t *testing.
 	if err != nil {
 		t.Fatal(err)
 	}
-	if want := []Component{ComponentWindowsConsole, ComponentWindowsFile, ComponentWindowsProcessArgs, ComponentSystemHeap, ComponentBuffer, ComponentArena, ComponentTextView, ComponentOwnedText}; !slices.Equal(components, want) {
+	if want := []Component{ComponentWindowsConsole, ComponentWindowsFile, ComponentWindowsProcessArgs, ComponentSystemHeap, ComponentBuffer, ComponentWindowsFileBuffer, ComponentArena, ComponentTextView, ComponentOwnedText}; !slices.Equal(components, want) {
 		t.Fatalf("components = %v, want %v", components, want)
 	}
 	for _, test := range []struct {
