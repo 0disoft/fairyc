@@ -504,6 +504,8 @@ const checkedInStdBytesManifestPath = "examples/std_bytes_quickstart/fairy.toml"
 const checkedInStdBytesMainPath = "examples/std_bytes_quickstart/src/main.fy"
 const checkedInStdTextManifestPath = "examples/std_text_quickstart/fairy.toml"
 const checkedInStdTextMainPath = "examples/std_text_quickstart/src/main.fy"
+const checkedInStdTextFromBufferManifestPath = "examples/std_text_from_buffer_quickstart/fairy.toml"
+const checkedInStdTextFromBufferMainPath = "examples/std_text_from_buffer_quickstart/src/main.fy"
 const checkedInRegionsManifestPath = "examples/regions/fairy.toml"
 const checkedInRegionsMainPath = "examples/regions/src/main.fy"
 const checkedInProcessArgsManifestPath = "examples/process_args_quickstart/fairy.toml"
@@ -617,6 +619,14 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("read checked-in std::text workspace entry: %w", err)
 	}
+	stdTextFromBufferManifest, err := os.ReadFile(filepath.FromSlash(checkedInStdTextFromBufferManifestPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in std::text from-buffer workspace manifest: %w", err)
+	}
+	stdTextFromBufferMain, err := os.ReadFile(filepath.FromSlash(checkedInStdTextFromBufferMainPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in std::text from-buffer workspace entry: %w", err)
+	}
 	regionsManifest, err := os.ReadFile(filepath.FromSlash(checkedInRegionsManifestPath))
 	if err != nil {
 		return fmt.Errorf("read checked-in Region workspace manifest: %w", err)
@@ -675,55 +685,57 @@ func run() error {
 	}
 	defer os.RemoveAll(root)
 	for name, source := range map[string]string{
-		workspaceManifestPath:             string(workspaceManifest),
-		workspaceMainPath:                 string(workspaceMain),
-		workspaceMemberManifestPath:       string(workspaceMemberManifest),
-		workspaceMemberSourcePath:         string(workspaceMemberSource),
-		workspaceTestPath:                 string(workspaceTest),
-		checkedInSuccessPath:              string(successSource),
-		checkedInModuleMainPath:           string(moduleMainSource),
-		checkedInModuleSupportPath:        string(moduleSupportSource),
-		checkedInWindowsTargetPath:        string(windowsTargetSource),
-		checkedInWindowsQuickstartPath:    string(windowsQuickstartSource),
-		checkedInWindowsOutputPath:        string(windowsOutputSource),
-		checkedInWindowsOutputSupportPath: string(windowsOutputSupportSource),
-		checkedInStdIOManifestPath:        string(stdIOManifest),
-		checkedInStdIOMainPath:            string(stdIOMain),
-		checkedInStdIoScalarManifestPath:  string(stdIoScalarManifest),
-		checkedInStdIoScalarMainPath:      string(stdIoScalarMain),
-		checkedInStdAllocManifestPath:     string(stdAllocManifest),
-		checkedInStdAllocMainPath:         string(stdAllocMain),
-		checkedInStdBytesManifestPath:     string(stdBytesManifest),
-		checkedInStdBytesMainPath:         string(stdBytesMain),
-		checkedInStdTextManifestPath:      string(stdTextManifest),
-		checkedInStdTextMainPath:          string(stdTextMain),
-		checkedInRegionsManifestPath:      string(regionsManifest),
-		checkedInRegionsMainPath:          string(regionsMain),
-		checkedInProcessArgsManifestPath:  string(processArgsManifest),
-		checkedInProcessArgsMainPath:      string(processArgsMain),
-		checkedInWindowsFilePath:          string(windowsFileSource),
-		checkedInWindowsFileSupportPath:   string(windowsFileSupportSource),
-		checkedInOwnedTextPath:            string(ownedTextSource),
-		checkedInOwnedTextSupportPath:     string(ownedTextSupportSource),
-		"negative.fy":                     negativeSource,
-		"division_by_zero.fy":             divisionByZeroSource,
-		"remainder_by_zero.fy":            remainderByZeroSource,
-		"signed_division_overflow.fy":     signedDivisionOverflowSource,
-		"integer_overflow.fy":             integerOverflowSource,
-		"usize_overflow.fy":               usizeOverflowSource,
-		"unsigned_division.fy":            unsignedDivisionSource,
-		"unsigned_division_zero.fy":       unsignedDivisionZeroSource,
-		"unsigned_bitwise_shift.fy":       unsignedBitwiseShiftSource,
-		"unsigned_invalid_shift.fy":       unsignedInvalidShiftSource,
-		"left_shift.fy":                   leftShiftSource,
-		"left_shift_overflow.fy":          leftShiftOverflowSource,
-		"invalid_shift.fy":                invalidShiftSource,
-		"bounds.fy":                       boundsSource,
-		"array_bounds.fy":                 arrayBoundsSource,
-		"array_store_bounds.fy":           arrayStoreBoundsSource,
-		"slice_bounds.fy":                 sliceBoundsSource,
-		"assertion_failure.fy":            assertionFailureSource,
-		"lexical_defer.fy":                lexicalDeferSource,
+		workspaceManifestPath:                  string(workspaceManifest),
+		workspaceMainPath:                      string(workspaceMain),
+		workspaceMemberManifestPath:            string(workspaceMemberManifest),
+		workspaceMemberSourcePath:              string(workspaceMemberSource),
+		workspaceTestPath:                      string(workspaceTest),
+		checkedInSuccessPath:                   string(successSource),
+		checkedInModuleMainPath:                string(moduleMainSource),
+		checkedInModuleSupportPath:             string(moduleSupportSource),
+		checkedInWindowsTargetPath:             string(windowsTargetSource),
+		checkedInWindowsQuickstartPath:         string(windowsQuickstartSource),
+		checkedInWindowsOutputPath:             string(windowsOutputSource),
+		checkedInWindowsOutputSupportPath:      string(windowsOutputSupportSource),
+		checkedInStdIOManifestPath:             string(stdIOManifest),
+		checkedInStdIOMainPath:                 string(stdIOMain),
+		checkedInStdIoScalarManifestPath:       string(stdIoScalarManifest),
+		checkedInStdIoScalarMainPath:           string(stdIoScalarMain),
+		checkedInStdAllocManifestPath:          string(stdAllocManifest),
+		checkedInStdAllocMainPath:              string(stdAllocMain),
+		checkedInStdBytesManifestPath:          string(stdBytesManifest),
+		checkedInStdBytesMainPath:              string(stdBytesMain),
+		checkedInStdTextManifestPath:           string(stdTextManifest),
+		checkedInStdTextMainPath:               string(stdTextMain),
+		checkedInStdTextFromBufferManifestPath: string(stdTextFromBufferManifest),
+		checkedInStdTextFromBufferMainPath:     string(stdTextFromBufferMain),
+		checkedInRegionsManifestPath:           string(regionsManifest),
+		checkedInRegionsMainPath:               string(regionsMain),
+		checkedInProcessArgsManifestPath:       string(processArgsManifest),
+		checkedInProcessArgsMainPath:           string(processArgsMain),
+		checkedInWindowsFilePath:               string(windowsFileSource),
+		checkedInWindowsFileSupportPath:        string(windowsFileSupportSource),
+		checkedInOwnedTextPath:                 string(ownedTextSource),
+		checkedInOwnedTextSupportPath:          string(ownedTextSupportSource),
+		"negative.fy":                          negativeSource,
+		"division_by_zero.fy":                  divisionByZeroSource,
+		"remainder_by_zero.fy":                 remainderByZeroSource,
+		"signed_division_overflow.fy":          signedDivisionOverflowSource,
+		"integer_overflow.fy":                  integerOverflowSource,
+		"usize_overflow.fy":                    usizeOverflowSource,
+		"unsigned_division.fy":                 unsignedDivisionSource,
+		"unsigned_division_zero.fy":            unsignedDivisionZeroSource,
+		"unsigned_bitwise_shift.fy":            unsignedBitwiseShiftSource,
+		"unsigned_invalid_shift.fy":            unsignedInvalidShiftSource,
+		"left_shift.fy":                        leftShiftSource,
+		"left_shift_overflow.fy":               leftShiftOverflowSource,
+		"invalid_shift.fy":                     invalidShiftSource,
+		"bounds.fy":                            boundsSource,
+		"array_bounds.fy":                      arrayBoundsSource,
+		"array_store_bounds.fy":                arrayStoreBoundsSource,
+		"slice_bounds.fy":                      sliceBoundsSource,
+		"assertion_failure.fy":                 assertionFailureSource,
+		"lexical_defer.fy":                     lexicalDeferSource,
 	} {
 		destination := filepath.Join(root, filepath.FromSlash(name))
 		if err := os.MkdirAll(filepath.Dir(destination), 0o700); err != nil {
@@ -1080,6 +1092,11 @@ func run() error {
 		return err
 	}
 	workspaceBuildExecutions += stdTextBuildExecutions
+	stdTextFromBufferBuildExecutions, err := runStdlibQuickstartProof(root, "std_text_from_buffer_quickstart", "std-text-from-buffer-quickstart", "std::bytes", 42)
+	if err != nil {
+		return err
+	}
+	workspaceBuildExecutions += stdTextFromBufferBuildExecutions
 	stdIoScalarBuildExecutions, err := runStdIoScalarQuickstartProof(root)
 	if err != nil {
 		return err
@@ -1206,6 +1223,10 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	stringFromBufferProbeImages, stringFromBufferProbeCases, err := runGeneratedFairyStringFromBufferProbe(repositoryRoot, root, toolchain)
+	if err != nil {
+		return err
+	}
 	processArgsBuildImages, processArgsExecutions, err := runProcessArgsQuickstartProof(root)
 	if err != nil {
 		return err
@@ -1242,12 +1263,13 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	inspectedPEImages := 1 + targetBuildExecutions + workspaceBuildExecutions + windowsFileSourceExecutions + ownedTextSourceExecutions + targetRunExecutions + workspaceRunExecutions + targetExecExecutions + windowsFileExecutions + bufferProbeExecutions + ownedTextProbeExecutions + arenaProbeExecutions + regionFailureProbeImages + bufferFailureProbeImages + stringAppendFailureProbeImages + cstringFailureProbeImages + stringCopyFailureProbeImages + processArgsBuildImages + processArgsDecodeImages + layoutExecutions + abiExecutions + relocationExecutions + weakSearchExecutions + archiveExecutions + structResultExecutions + unwindExecutions
+	inspectedPEImages := 1 + targetBuildExecutions + workspaceBuildExecutions + windowsFileSourceExecutions + ownedTextSourceExecutions + targetRunExecutions + workspaceRunExecutions + targetExecExecutions + windowsFileExecutions + bufferProbeExecutions + ownedTextProbeExecutions + arenaProbeExecutions + regionFailureProbeImages + bufferFailureProbeImages + stringAppendFailureProbeImages + cstringFailureProbeImages + stringCopyFailureProbeImages + stringFromBufferProbeImages + processArgsBuildImages + processArgsDecodeImages + layoutExecutions + abiExecutions + relocationExecutions + weakSearchExecutions + archiveExecutions + structResultExecutions + unwindExecutions
 	fmt.Printf("Generated-Fairy Region failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering payload-allocation failure, node-allocation rollback, exact status 1, lexical reset, automatic Arena drop, and zero retained probe allocations\n", regionFailureCases, regionFailureProbeImages)
 	fmt.Printf("Generated-Fairy Buffer failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering with_capacity initial-allocation failure and resize_zeroed growth failure with preserved len/capacity, exact status 1, and zero retained probe allocations\n", bufferFailureCases, bufferFailureProbeImages)
 	fmt.Printf("Generated-Fairy String append failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering successful copy allocation, append growth-allocation failure with preserved owner and len/is_empty/view, exact statuses 1/1, automatic String drop, and zero retained probe allocations\n", stringAppendFailureCases, stringAppendFailureProbeImages)
 	fmt.Printf("Generated-Fairy CString failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering cstring_from_text initial-allocation failure, exact statuses 1/1, automatic CString drop, and zero retained probe allocations\n", cstringFailureCases, cstringFailureProbeImages)
 	fmt.Printf("Generated-Fairy String copy failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering text::copy initial-allocation failure, exact statuses 1/1, automatic String drop, and zero retained probe allocations\n", stringCopyFailureCases, stringCopyFailureProbeImages)
+	fmt.Printf("Generated-Fairy Buffer-to-String conversion proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering zero-copy valid UTF-8 transfer under a fail-after-two schedule, invalid UTF-8 ownership return with preserved len/capacity/bytes, empty String success, automatic String and Buffer drop, and zero retained probe allocations\n", stringFromBufferProbeCases, stringFromBufferProbeImages)
 	fmt.Printf("Stable run program-argument forwarding proof passed: %d native executions across %d inspected low/optimized MSVC images, covering argv[0] inclusion and ordering, empty, flag-looking, space/quote/trailing-backslash, and non-ASCII UTF-8 argument round-trips, out-of-range status 1, too-small status 3 with exact needed and an unchanged caller buffer, CLI embedded-NUL and delimiter rejection, and low-level invalid-surrogate status 2 with an unchanged buffer\n", processArgsExecutions+processArgsDecodeExecutions, processArgsBuildImages+processArgsDecodeImages)
 	fmt.Printf("std::io scalar output proof passed: %d native executions across %d inspected low/optimized MSVC images, covering u32 0/1/max, usize 0/1/max, and bool true/false exact ASCII bytes with exact written counts and empty stderr\n", stdIoScalarBuildExecutions, stdIoScalarBuildExecutions)
 	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds, %d package-workspace builds, %d package-workspace runs, %d source-level safe File lifecycle builds, %d source-level safe owned-text lifecycle builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, public safe std::bytes Buffer ownership and views, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls, checked reads and mutable indexed stores, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, bounded lexical defer, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, stable-run stdin forwarding, bounded allocation-free stdin byte reads with EOF and partial-buffer evidence, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart, output, locked workspace execution, one isolated semantic test, two target-explicit C emissions, nine paired cold/warm persistent-cache process measurements, one nine-process bounded persistent-cache growth staircase, an eight-request editor-shaped workspace session with Windows process-memory peaks, %d fresh locked Atlas workspace-call catalog processes with per-process memory peaks, %d generated Atlas workspace-call scaling shapes, and %d post-GC retained-index batches, 42 run-host outcomes covered fixed arrays, byte-view iteration and slicing, checked indexed stores, assertions and lexical defer in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, Buffer initialization, reserve, self-overlap append, and zeroed-resize allocation rollback passed %d separate-translation-unit MSVC executions, owned-text opaque-storage failure preservation, forced allocation rollback, and repeated drop passed %d separate-translation-unit MSVC executions, Arena zeroing, two-stage allocation rollback, stale Region rejection, and active-drop preservation passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, exact object addends and final-image REL32 through REL32_5, weak-alias fallback/strong override, ADDR64, and unwind ADDR32NB values plus CodeView SECTION/SECREL pairs, PE/PDB identity, and exact DbgHelp function/line symbolication passed %d separate-translation-unit MSVC executions, weak NOLIBRARY suppression and LIBRARY extraction passed %d separate-translation-unit MSVC executions, archive extraction, pick-any ownership, selected-child retention, and discarded-child elimination passed %d MSVC input-order executions, generated-Fairy small and large struct results passed %d separate-translation-unit MSVC executions across C11 and C17 consumer modes, %d Windows x64 unwind cases plus exact profile-specific handler-tail ADDR32NB binding passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, workspaceBuildExecutions, workspaceRunExecutions, windowsFileSourceExecutions, ownedTextSourceExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, buildmeasure.AtlasCallProcessIterations, len(atlasCallScaleMeasurement.Shapes), len(atlasCallRetainedMeasurement.Shapes)*buildmeasure.AtlasCallRetainedIterationsPerShape, windowsFileExecutions, bufferProbeExecutions, ownedTextProbeExecutions, arenaProbeExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, relocationExecutions, weakSearchExecutions, archiveExecutions, structResultExecutions, unwindCases, unwindExecutions, inspectedPEImages, toolchain.Version)
@@ -3352,6 +3374,104 @@ size_t fy_std_system_heap_probe_live_allocations_v0(void);
 int main(void) {
     fy_std_system_heap_probe_fail_after_allocations_v0(0);
     if (fy_generated_string_copy_failure_main() != 42) {
+        return 10;
+    }
+    if (fy_std_system_heap_probe_live_allocations_v0() != 0) {
+        return 11;
+    }
+    return 0;
+}
+`, nil
+}
+
+func runGeneratedFairyStringFromBufferProbe(repositoryRoot, sourceRoot string, toolchain cdriver.WindowsHostToolchain) (int, int, error) {
+	manifest, err := os.ReadFile(filepath.Join(sourceRoot, filepath.FromSlash(checkedInStdTextFromBufferManifestPath)))
+	if err != nil {
+		return 0, 0, fmt.Errorf("read generated-Fairy Buffer-to-String conversion manifest: %w", err)
+	}
+	checkedInMain, err := os.ReadFile(filepath.Join(sourceRoot, filepath.FromSlash(checkedInStdTextFromBufferMainPath)))
+	if err != nil {
+		return 0, 0, fmt.Errorf("read generated-Fairy Buffer-to-String conversion entry: %w", err)
+	}
+	workspaceRoot, err := os.MkdirTemp("", "fairyc-string-from-buffer-probe-")
+	if err != nil {
+		return 0, 0, fmt.Errorf("create generated-Fairy Buffer-to-String conversion workspace: %w", err)
+	}
+	defer os.RemoveAll(workspaceRoot)
+	for name, contents := range map[string][]byte{
+		"fairy.toml":  manifest,
+		"src/main.fy": checkedInMain,
+	} {
+		destination := filepath.Join(workspaceRoot, filepath.FromSlash(name))
+		if err := os.MkdirAll(filepath.Dir(destination), 0o700); err != nil {
+			return 0, 0, fmt.Errorf("create generated-Fairy Buffer-to-String conversion path %s: %w", name, err)
+		}
+		if err := os.WriteFile(destination, contents, 0o600); err != nil {
+			return 0, 0, fmt.Errorf("write generated-Fairy Buffer-to-String conversion path %s: %w", name, err)
+		}
+	}
+	workspace, err := workspaceloader.Load(workspaceRoot)
+	if err != nil {
+		return 0, 0, fmt.Errorf("load generated-Fairy Buffer-to-String conversion workspace: %w", err)
+	}
+	input, err := workspace.SemanticInput()
+	if err != nil {
+		return 0, 0, fmt.Errorf("prepare generated-Fairy Buffer-to-String conversion semantic input: %w", err)
+	}
+	checked, err := compiler.CheckPackages(input)
+	if err != nil {
+		return 0, 0, fmt.Errorf("compile generated-Fairy Buffer-to-String conversion source: %w", err)
+	}
+	if !checked.Verified || checked.Semantic.CompletedThrough != semantic.PhaseFlow || checked.Semantic.FailedPhase != semantic.PhaseNone ||
+		len(checked.Semantic.Diagnostics) != 0 || len(checked.Semantic.Unsupported) != 0 {
+		return 0, 0, fmt.Errorf("generated-Fairy Buffer-to-String conversion source did not produce clean verified MIR: phase=%q failed=%q diagnostics=%+v unsupported=%+v", checked.Semantic.CompletedThrough, checked.Semantic.FailedPhase, checked.Semantic.Diagnostics, checked.Semantic.Unsupported)
+	}
+	rootPackage, err := workspace.RootPackageID()
+	if err != nil {
+		return 0, 0, fmt.Errorf("resolve generated-Fairy Buffer-to-String conversion root package: %w", err)
+	}
+	entry := hir.QualifiedModulePath(rootPackage, "main") + "::main"
+	unit, err := cbackend.Emit(checked.MIR, entry, cbackend.Stage0WindowsMSVCProfile())
+	if err != nil {
+		return 0, 0, fmt.Errorf("emit generated-Fairy Buffer-to-String conversion C: %w", err)
+	}
+	probeSource, err := generatedFairyStringFromBufferProbeSource(unit.Source)
+	if err != nil {
+		return 0, 0, err
+	}
+	implementation, err := generatedFairyProbeImplementation(repositoryRoot, unit.ForeignSymbols)
+	if err != nil {
+		return 0, 0, err
+	}
+	images, err := runWindowsSeparateTranslationUnitProbe(toolchain, "generated-Fairy Buffer-to-String conversion", probeSource, implementation, 0, cdriver.C11ConsumerMode)
+	if err != nil {
+		return images, images, err
+	}
+	return images, images, nil
+}
+
+func generatedFairyStringFromBufferProbeSource(generated string) (string, error) {
+	if generated == "" || !strings.Contains(generated, "int main(void)") {
+		return "", fmt.Errorf("generated-Fairy Buffer-to-String conversion C must contain a main wrapper")
+	}
+	for _, required := range []string{
+		"fy_std_string_from_buffer_storage_v0(",
+		"fy_std_string_drop_storage_v0(",
+		"fy_std_buffer_drop_v0(",
+	} {
+		if strings.Count(generated, required) < 2 {
+			return "", fmt.Errorf("generated-Fairy Buffer-to-String conversion C lost a required call to %s (expected prototype and body call)", strings.TrimSuffix(required, "("))
+		}
+	}
+	return "#define main fy_generated_string_from_buffer_main\n" + generated + `
+#undef main
+
+void fy_std_system_heap_probe_fail_after_allocations_v0(size_t successful_allocations);
+size_t fy_std_system_heap_probe_live_allocations_v0(void);
+
+int main(void) {
+    fy_std_system_heap_probe_fail_after_allocations_v0(2);
+    if (fy_generated_string_from_buffer_main() != 42) {
         return 10;
     }
     if (fy_std_system_heap_probe_live_allocations_v0() != 0) {

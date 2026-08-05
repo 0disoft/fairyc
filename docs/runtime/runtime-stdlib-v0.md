@@ -74,14 +74,14 @@ The initial library surface is:
 ```text
 std::alloc  SystemHeap, Arena, AllocError
 std::bytes  Buffer
-std::text   String, CStr, CString, and explicit allocation-free UTF-8 validation
+std::text   String, CStr, CString, explicit allocation-free UTF-8 validation, and zero-copy Buffer-to-String conversion
 std::fs     Linux File and open options
 std::io     exact stdout/stderr byte writes, decimal i32 output, and one bounded stdin byte read
 std::process effect-free argument count and exact UTF-8 argument copy
 std::c      C scalar types and raw wrapper helpers
 ```
 
-The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.12` exports ADR 0250's public safe `std::alloc::Arena` creation and cleanup, ADR 0246's public safe `std::bytes::Buffer`, ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free `std::text::validate_utf8`, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, ADR 0210's matching immutable byte-view output operations, ADR 0211's bounded mutable-byte-view stdin read, ADR 0215's allocation-free decimal `i32` output, ADR 0262's allocation-free decimal `u32`/`usize` and ASCII `bool` output, and ADR 0261's effect-free `std::process` argument surface; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
+The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.13` exports ADR 0250's public safe `std::alloc::Arena` creation and cleanup, ADR 0246's public safe `std::bytes::Buffer`, ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free `std::text::validate_utf8`, ADR 0263's zero-copy `std::text::from_buffer` with the original Buffer returned on invalid UTF-8, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, ADR 0210's matching immutable byte-view output operations, ADR 0211's bounded mutable-byte-view stdin read, ADR 0215's allocation-free decimal `i32` output, ADR 0262's allocation-free decimal `u32`/`usize` and ASCII `bool` output, and ADR 0261's effect-free `std::process` argument surface; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
 
 Built-in `Option`, `Result`, slices, `str`, and `CStr` get compiler-known view semantics; library modules provide operations over them.
 
@@ -336,7 +336,7 @@ a private non-null `ref str` sentinel, and preserves the existing pointer-only `
 is superseded as the user-facing entry by ADR 0247's SDK module; it remains independent historical
 evidence and does not define a public layout.
 
-SDK `0.0.0-stage0.12` retains move-only `String` and `CString` from `std::text`. `copy` and
+SDK `0.0.0-stage0.13` retains move-only `String` and `CString` from `std::text`. `copy` and
 `cstring_from_text` construct canonical owners fallibly; `append` preserves the existing String on
 failure. `string_len`, `string_is_empty`, `cstring_len`, and `cstring_is_empty` expose byte metadata,
 with CString length excluding its required terminator. `string_as_str` and `cstring_as_cstr` return
@@ -346,6 +346,14 @@ status fields. ADR 0248 additionally exposes
 no allocation or copy, while invalid input reports text status `2` and allocation status `0`. Raw
 storage, capacity, mutable text bytes, implicit conversions, formatting, locale, Unicode
 normalization, lossy decoding, and streaming validation remain outside the public surface.
+
+`from_buffer` converts an owned `std::bytes::Buffer` into a `String` without allocation or copy
+when the initialized bytes are valid UTF-8: the same allocation ownership moves into the String.
+Invalid UTF-8 returns the original Buffer unchanged as the `Result` err payload, and an empty
+Buffer converts to an empty String. The SDK-internal raw storage wrapper rejects null, aliasing,
+and nonempty-output calls without touching either caller storage, and commits both storages only
+after the existing UTF-8 validation succeeds. `text::copy` remains the copy-required borrowed-text
+path.
 
 `examples/std_text_quickstart` imports only that safe module. Its Windows development and release
 builds execute valid nonempty multibyte validation, invalid-byte rejection with zero allocation

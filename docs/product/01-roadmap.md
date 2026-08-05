@@ -752,6 +752,13 @@ back-to-front decimal helper per target, and `write_bool` reuses the existing `w
 new raw symbol. Floating-point conversion, padding, bases, locale, implicit newlines, `u64`/`i64`
 output, and stderr numeric helpers remain separate decisions.
 
+ADR 0263 extends the SDK to `0.0.0-stage0.13` with
+`std::text::from_buffer(bytes::Buffer) -> Result<String, bytes::Buffer>`. Valid UTF-8 moves the
+same allocation into the String without allocation or copy; invalid UTF-8 returns the original
+Buffer unchanged; an empty Buffer becomes an empty String. Generic conversions, implicit
+byte-to-text conversion, text indexing or slicing, and a public view ABI remain separate
+decisions.
+
 ADR 0216 cuts the exact language pin to `fairyc-language/2` and adds statement-only checked integer
 compound assignment. All ten arithmetic, division, remainder, shift, and bitwise forms reuse the
 existing exact-type trap semantics; mutable local and indexed places evaluate once and store only

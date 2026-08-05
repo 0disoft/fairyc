@@ -36,6 +36,12 @@ struct fy_std_cstr_view_v0 { const uint8_t *data; size_t length; };
 struct fy_std_cstring_v0 { struct fy_std_buffer_v0 bytes; };
 struct fy_std_string_storage_v0 { void *data; size_t capacity; size_t alignment; size_t length; };
 struct fy_std_cstring_storage_v0 { void *data; size_t capacity; size_t alignment; size_t storage_length; };
+struct fy_std_buffer_storage_v0 { void *data; size_t capacity; size_t alignment; size_t length; };
+
+_Static_assert(sizeof(struct fy_std_buffer_storage_v0) == sizeof(struct fy_std_buffer_v0),
+               "buffer storage layout must match the runtime buffer record");
+_Static_assert(sizeof(struct fy_std_string_storage_v0) == sizeof(struct fy_std_string_v0),
+               "string storage layout must match the runtime string record");
 
 uint32_t fy_std_buffer_initialize_v0(size_t capacity, struct fy_std_buffer_v0 *output);
 uint32_t fy_std_buffer_append_v0(struct fy_std_buffer_v0 *buffer, const uint8_t *source, size_t count);
@@ -52,6 +58,7 @@ struct fy_std_owned_text_result_v0 fy_std_cstring_drop_v0(struct fy_std_cstring_
 struct fy_std_owned_text_result_v0 fy_std_string_copy_storage_v0(const struct fy_std_text_view_v0 *input, void *output_storage);
 struct fy_std_owned_text_result_v0 fy_std_string_append_storage_v0(void *value_storage, const struct fy_std_text_view_v0 *suffix);
 struct fy_std_owned_text_result_v0 fy_std_string_drop_storage_v0(void *value_storage);
+struct fy_std_owned_text_result_v0 fy_std_string_from_buffer_storage_v0(void *input_storage, void *output_storage);
 struct fy_std_owned_text_result_v0 fy_std_cstring_from_text_storage_v0(const struct fy_std_text_view_v0 *input, void *output_storage);
 struct fy_std_owned_text_result_v0 fy_std_cstring_drop_storage_v0(void *value_storage);
 void fy_std_system_heap_probe_fail_after_allocations_v0(size_t successful_allocations);
@@ -95,6 +102,19 @@ static int cstring_storage_equal(
 ) {
     return left->data == right->data && left->capacity == right->capacity &&
            left->alignment == right->alignment && left->storage_length == right->storage_length;
+}
+
+static int buffer_storage_empty(const struct fy_std_buffer_storage_v0 *storage) {
+    return storage->data == NULL && storage->capacity == 0 && storage->alignment == 0 &&
+           storage->length == 0;
+}
+
+static int buffer_storage_equal(
+    const struct fy_std_buffer_storage_v0 *left,
+    const struct fy_std_buffer_storage_v0 *right
+) {
+    return left->data == right->data && left->capacity == right->capacity &&
+           left->alignment == right->alignment && left->length == right->length;
 }
 
 int main(void) {
@@ -295,6 +315,86 @@ int main(void) {
     if (!invalid_argument(fy_std_cstring_drop_storage_v0(&malformed_cstring)) ||
         !cstring_storage_equal(&malformed_cstring, &preserved_cstring)) {
         return 28;
+    }
+
+    struct fy_std_buffer_storage_v0 buffer_storage = {NULL, 0, 0, 0};
+    struct fy_std_string_storage_v0 from_buffer_output = {NULL, 0, 0, 0};
+    if (!invalid_argument(fy_std_string_from_buffer_storage_v0(NULL, &from_buffer_output)) ||
+        !invalid_argument(fy_std_string_from_buffer_storage_v0(&buffer_storage, NULL)) ||
+        !invalid_argument(fy_std_string_from_buffer_storage_v0(&buffer_storage, &buffer_storage)) ||
+        !buffer_storage_empty(&buffer_storage)) {
+        return 37;
+    }
+    struct fy_std_buffer_storage_v0 preserved_nonempty_input = {(void *)(uintptr_t)1, 7, 1, 7};
+    struct fy_std_buffer_storage_v0 preserved_nonempty_from_buffer_input = preserved_nonempty_input;
+    from_buffer_output = (struct fy_std_string_storage_v0){(void *)(uintptr_t)1, 7, 1, 7};
+    struct fy_std_string_storage_v0 preserved_nonempty_from_buffer_output = from_buffer_output;
+    conversion = fy_std_string_from_buffer_storage_v0(&preserved_nonempty_input, &from_buffer_output);
+    if (!invalid_argument(conversion) ||
+        !buffer_storage_equal(&preserved_nonempty_input, &preserved_nonempty_from_buffer_input) ||
+        !string_storage_equal(&from_buffer_output, &preserved_nonempty_from_buffer_output)) {
+        return 45;
+    }
+    struct fy_std_buffer_v0 invalid_utf8_buffer = {{NULL, 0, 0}, 0};
+    if (fy_std_buffer_initialize_v0(sizeof invalid_utf8, &invalid_utf8_buffer) != FY_STD_ALLOC_OK_V0 ||
+        fy_std_buffer_append_v0(&invalid_utf8_buffer, invalid_utf8, sizeof invalid_utf8) != FY_STD_ALLOC_OK_V0) {
+        return 38;
+    }
+    memcpy(&buffer_storage, &invalid_utf8_buffer, sizeof buffer_storage);
+    memset(&invalid_utf8_buffer, 0, sizeof invalid_utf8_buffer);
+    void *invalid_buffer_data = buffer_storage.data;
+    struct fy_std_buffer_storage_v0 preserved_buffer_storage = buffer_storage;
+    from_buffer_output = (struct fy_std_string_storage_v0){NULL, 0, 0, 0};
+    conversion = fy_std_string_from_buffer_storage_v0(&buffer_storage, &from_buffer_output);
+    if (conversion.status != FY_STD_OWNED_TEXT_INVALID_UTF8_V0 ||
+        conversion.allocation_status != FY_STD_ALLOC_OK_V0 ||
+        !buffer_storage_equal(&buffer_storage, &preserved_buffer_storage) ||
+        buffer_storage.data != invalid_buffer_data ||
+        !string_storage_empty(&from_buffer_output) ||
+        fy_std_system_heap_probe_live_allocations_v0() != 1) {
+        return 39;
+    }
+    memcpy(&invalid_utf8_buffer, &buffer_storage, sizeof invalid_utf8_buffer);
+    memset(&buffer_storage, 0, sizeof buffer_storage);
+    if (fy_std_buffer_drop_v0(&invalid_utf8_buffer) != FY_STD_ALLOC_OK_V0 ||
+        !buffer_storage_empty(&buffer_storage) ||
+        fy_std_system_heap_probe_live_allocations_v0() != 0) {
+        return 40;
+    }
+
+    struct fy_std_buffer_v0 transfer_buffer = {{NULL, 0, 0}, 0};
+    if (fy_std_buffer_initialize_v0(sizeof hello, &transfer_buffer) != FY_STD_ALLOC_OK_V0 ||
+        fy_std_buffer_append_v0(&transfer_buffer, hello, sizeof hello) != FY_STD_ALLOC_OK_V0) {
+        return 41;
+    }
+    memcpy(&buffer_storage, &transfer_buffer, sizeof buffer_storage);
+    memset(&transfer_buffer, 0, sizeof transfer_buffer);
+    void *transfer_data = buffer_storage.data;
+    fy_std_system_heap_probe_fail_after_allocations_v0(0);
+    from_buffer_output = (struct fy_std_string_storage_v0){NULL, 0, 0, 0};
+    conversion = fy_std_string_from_buffer_storage_v0(&buffer_storage, &from_buffer_output);
+    if (!ok(conversion) || !buffer_storage_empty(&buffer_storage) ||
+        from_buffer_output.data != transfer_data ||
+        from_buffer_output.capacity != sizeof hello ||
+        from_buffer_output.length != sizeof hello ||
+        fy_std_system_heap_probe_live_allocations_v0() != 1) {
+        return 42;
+    }
+    if (!ok(fy_std_string_drop_storage_v0(&from_buffer_output)) ||
+        !string_storage_empty(&from_buffer_output) ||
+        fy_std_system_heap_probe_live_allocations_v0() != 0 ||
+        !ok(fy_std_string_drop_storage_v0(&from_buffer_output)) ||
+        !string_storage_empty(&from_buffer_output)) {
+        return 43;
+    }
+
+    struct fy_std_buffer_storage_v0 empty_buffer_storage = {NULL, 0, 0, 0};
+    from_buffer_output = (struct fy_std_string_storage_v0){NULL, 0, 0, 0};
+    if (!ok(fy_std_string_from_buffer_storage_v0(&empty_buffer_storage, &from_buffer_output)) ||
+        !buffer_storage_empty(&empty_buffer_storage) ||
+        !string_storage_empty(&from_buffer_output) ||
+        !ok(fy_std_string_drop_storage_v0(&from_buffer_output))) {
+        return 44;
     }
 
     if (fy_std_system_heap_probe_live_allocations_v0() != 0) {

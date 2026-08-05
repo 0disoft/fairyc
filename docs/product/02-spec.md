@@ -603,7 +603,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
-  The compiler-bundled SDK `0.0.0-stage0.12` exposes
+  The compiler-bundled SDK `0.0.0-stage0.13` exposes
   `std::io::write(ref str) -> Result<usize, ConsoleError>` and a matching `write_stderr` operation
   for text, plus `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` for exact binary output.
   All four declare `console`, keep raw pointers and target linkage private, append no newline,
@@ -652,6 +652,12 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   nonempty multibyte success and invalid-byte failure under both Windows profiles. Implicit
   byte-to-text conversion, lossy decoding, text indexing or slicing, and a public view ABI remain
   excluded.
+  ADR 0263 additionally exposes `std::text::from_buffer(bytes::Buffer) ->
+  Result<String, bytes::Buffer>` zero-copy ownership transfer. Valid UTF-8 moves the same
+  allocation into the String without allocation or copy; invalid UTF-8 returns the original Buffer
+  unchanged as the `Result` err payload; an empty Buffer becomes an empty String. The checked-in
+  safe quickstart executes the valid, invalid, and empty arms under both Windows profiles.
+  `text::copy` remains the copy-required borrowed-text path.
   ADR 0133 strengthens the existing `arenaExecutions` success condition with deterministic
   first-stage and second-stage allocation failure plus live-allocation cleanup. ADR 0134 strengthens
   `bufferExecutions` with deterministic construction and three growth-allocation failures, exact
@@ -784,12 +790,12 @@ argument, output, and exit-code contract. It emits no native code.
 
 ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
-version, source digest, and lock fields. SDK `0.0.0-stage0.12` exports ADR 0250's move-only,
+version, source digest, and lock fields. SDK `0.0.0-stage0.13` exports ADR 0250's move-only,
 fallibly created `std::alloc::Arena` with automatic cleanup and exact allocation status,
 while ADR 0251 makes compiler-known placement return `Result<ref T, AllocError>` under language `/8`.
 ADR 0246's public safe `std::bytes::Buffer`,
 ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free
-`std::text::validate_utf8`,
+`std::text::validate_utf8`, ADR 0263's zero-copy `std::text::from_buffer`,
 ADR 0205's `std::io::write(ref str) -> Result<usize, ConsoleError>`, and ADR 0209's matching
 `write_stderr` operation, ADR 0210's matching immutable byte-view output operations, and ADR 0211's
 `read_stdin(ref mut u8[]) -> Result<usize, ConsoleReadError>`, plus ADR 0215's allocation-free

@@ -86,7 +86,11 @@ func TestLoadInjectsExactCompilerBundledStandardLibrary(t *testing.T) {
 	if edge.Owner != "pkg:root[]" || edge.Binding != "stdlib" || edge.Target != "sdk:stdlib[]" {
 		t.Fatalf("standard library edge = %+v", edge)
 	}
-	if len(workspace.Resolution.Lookups) != 1 || workspace.Resolution.Lookups[0].ImportPath != "std::alloc" || !slices.Equal(workspace.Resolution.Lookups[0].ProviderMembers, []string{"sdk:stdlib[]"}) {
+	if len(workspace.Resolution.Lookups) != 2 ||
+		workspace.Resolution.Lookups[0].ImportPath != "std::alloc" ||
+		!slices.Equal(workspace.Resolution.Lookups[0].ProviderMembers, []string{"sdk:stdlib[]"}) ||
+		workspace.Resolution.Lookups[1].ImportPath != "std::bytes" ||
+		!slices.Equal(workspace.Resolution.Lookups[1].ProviderMembers, []string{"sdk:stdlib[]"}) {
 		t.Fatalf("standard library lookups = %+v", workspace.Resolution.Lookups)
 	}
 }

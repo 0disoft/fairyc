@@ -107,6 +107,22 @@ func TestScalarOutputExcludesBoolRawSymbol(t *testing.T) {
 	}
 }
 
+func TestFromBufferStorageAdmitsOnlyThePublicStorageSymbol(t *testing.T) {
+	t.Parallel()
+	const symbol = "fy_std_string_from_buffer_storage_v0"
+	if !Admitted(symbol) || !AdmittedForTarget(symbol, target.X8664LinuxGNU) ||
+		!AdmittedForTarget(symbol, target.X8664WindowsMSVC) {
+		t.Fatal("from-buffer storage symbol is not admitted for both implemented targets")
+	}
+	if Admitted("fy_std_string_from_buffer_v0") {
+		t.Fatal("probe-only fy_std_string_from_buffer_v0 leaked into the public symbol contract")
+	}
+	components, err := ComponentsForSymbols([]string{symbol})
+	if err != nil || !slices.Equal(components, []Component{ComponentSystemHeap, ComponentBuffer, ComponentTextView, ComponentOwnedText}) {
+		t.Fatalf("ComponentsForSymbols(from-buffer storage) = %v, %v", components, err)
+	}
+}
+
 func TestAdmittedForTargetKeepsWindowsFileTargetBound(t *testing.T) {
 	t.Parallel()
 	for _, symbol := range []string{
@@ -194,6 +210,7 @@ func TestWindowsMSVCComponentsForSymbolsAdmitsOnlyProvenRuntimeSlice(t *testing.
 		"fy_std_string_copy_storage_v0",
 		"fy_std_string_append_storage_v0",
 		"fy_std_string_drop_storage_v0",
+		"fy_std_string_from_buffer_storage_v0",
 		"fy_std_cstring_from_text_storage_v0",
 		"fy_std_cstring_drop_storage_v0",
 		"fy_std_system_heap_deallocate_v0",

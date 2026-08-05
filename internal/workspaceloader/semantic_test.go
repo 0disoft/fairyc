@@ -89,7 +89,7 @@ func TestBundledStandardLibraryReachesVerifiedCompiler(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(input.Files) != 6 || len(input.Imports) != 1 {
+	if len(input.Files) != 6 || len(input.Imports) != 2 {
 		t.Fatalf("semantic input has %d files and %d imports", len(input.Files), len(input.Imports))
 	}
 	result, err := compiler.CheckPackages(input)
@@ -218,7 +218,7 @@ fn i32 main() {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(input.Files) != 6 || len(input.Imports) != 1 {
+	if len(input.Files) != 6 || len(input.Imports) != 2 {
 		t.Fatalf("semantic input has %d files and %d imports", len(input.Files), len(input.Imports))
 	}
 	result, err := compiler.CheckPackages(input)

@@ -534,6 +534,14 @@ source digest, package instance, public-interface hash, dependent identities, ge
 whole-package cache keys change. Language remains `fairyc-language/8` and runtime ABI remains
 `fairyc-runtime/0`; `write_bool` reuses the existing stdout write-all symbol and adds no new C ABI.
 
+ADR 0263 moves the SDK to `0.0.0-stage0.13` because it adds the public
+`std::text::from_buffer(bytes::Buffer) -> Result<String, bytes::Buffer>` zero-copy ownership
+transfer, plus the private `fy_std_string_from_buffer_storage_v0` target support symbol, and makes
+`std::text` import `std::bytes`. The SDK source digest, package instance, public-interface hash,
+dependent identities, generated locks, and whole-package cache keys change. Language remains
+`fairyc-language/8` and runtime ABI remains `fairyc-runtime/0`; the new storage symbol is pre-1
+implementation compatibility data rather than a public C or Fairy native ABI.
+
 ## Package formats
 
 Manifest schema, lockfile schema, source archive schema, and any future binary artifact schema are independent. Stage 0 needs manifest and lockfile schemas only. A stable binary package format would falsely imply a stable native Fairy ABI and is deferred.
@@ -555,7 +563,7 @@ ADR 0144 fixes the first loader behavior for this manifest schema: explicit root
 exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, one language revision,
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
 instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
-`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.12`, language
+`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.13`, language
 `fairyc-language/8`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 

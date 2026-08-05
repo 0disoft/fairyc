@@ -290,8 +290,67 @@ func TestGeneratedFairyStringCopyFailureProbeRejectsIncompleteGeneratedC(t *test
 	}
 }
 
+func TestGeneratedFairyStringFromBufferProbeWrapsOnlyTheGeneratedEntry(t *testing.T) {
+	t.Parallel()
+	generated := `#include <stddef.h>
+int fy_std_string_from_buffer_storage_v0(void);
+int fy_std_string_drop_storage_v0(void);
+int fy_std_buffer_drop_v0(void);
+int main(void) {
+    int converted = fy_std_string_from_buffer_storage_v0();
+    int dropped = fy_std_string_drop_storage_v0();
+    int buffer_dropped = fy_std_buffer_drop_v0();
+    return 42;
+}
+`
+
+	probe, err := generatedFairyStringFromBufferProbeSource(generated)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, fragment := range []string{
+		"#define main fy_generated_string_from_buffer_main",
+		generated,
+		"fy_generated_string_from_buffer_main() != 42",
+		"fy_std_system_heap_probe_fail_after_allocations_v0(2)",
+		"fy_std_system_heap_probe_live_allocations_v0() != 0",
+	} {
+		if !strings.Contains(probe, fragment) {
+			t.Fatalf("probe source lost required fragment %q", fragment)
+		}
+	}
+	if strings.Count(probe, "int main(void)") != 2 {
+		t.Fatalf("probe source must contain the renamed generated entry and one test entry: %q", probe)
+	}
+}
+
+func TestGeneratedFairyStringFromBufferProbeRejectsIncompleteGeneratedC(t *testing.T) {
+	t.Parallel()
+	for _, tc := range []struct {
+		name      string
+		generated string
+	}{
+		{name: "empty", generated: ""},
+		{name: "missing main", generated: "int fy_std_string_from_buffer_storage_v0(void);\nint fy_std_string_drop_storage_v0(void);\nint fy_std_buffer_drop_v0(void);\n"},
+		{name: "missing from-buffer", generated: "int main(void) { return 0; }\nint fy_std_string_drop_storage_v0(void);\nint fy_std_buffer_drop_v0(void);\n"},
+		{name: "missing string drop", generated: "int main(void) { return 0; }\nint fy_std_string_from_buffer_storage_v0(void);\nint fy_std_buffer_drop_v0(void);\n"},
+		{name: "missing buffer drop", generated: "int main(void) { return 0; }\nint fy_std_string_from_buffer_storage_v0(void);\nint fy_std_string_drop_storage_v0(void);\n"},
+		{name: "from-buffer prototype only", generated: "#include <stddef.h>\nint fy_std_string_from_buffer_storage_v0(void);\nint fy_std_string_drop_storage_v0(void);\nint fy_std_buffer_drop_v0(void);\nint main(void) { int dropped = fy_std_string_drop_storage_v0(); int buffer_dropped = fy_std_buffer_drop_v0(); return 42; }\n"},
+		{name: "string drop prototype only", generated: "#include <stddef.h>\nint fy_std_string_from_buffer_storage_v0(void);\nint fy_std_string_drop_storage_v0(void);\nint fy_std_buffer_drop_v0(void);\nint main(void) { int converted = fy_std_string_from_buffer_storage_v0(); int buffer_dropped = fy_std_buffer_drop_v0(); return 42; }\n"},
+		{name: "buffer drop prototype only", generated: "#include <stddef.h>\nint fy_std_string_from_buffer_storage_v0(void);\nint fy_std_string_drop_storage_v0(void);\nint fy_std_buffer_drop_v0(void);\nint main(void) { int converted = fy_std_string_from_buffer_storage_v0(); int dropped = fy_std_string_drop_storage_v0(); return 42; }\n"},
+	} {
+		if _, err := generatedFairyStringFromBufferProbeSource(tc.generated); err == nil {
+			t.Fatalf("incomplete generated C %q was accepted for %s", tc.generated, tc.name)
+		}
+	}
+}
+
 func TestGeneratedFairyBufferFailureSourcesPassFullPipeline(t *testing.T) {
 	t.Parallel()
+	fromBufferMain, err := os.ReadFile(filepath.Join("..", "..", "examples", "std_text_from_buffer_quickstart", "src", "main.fy"))
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, tc := range []struct {
 		name           string
 		manifest       string
@@ -328,6 +387,16 @@ func TestGeneratedFairyBufferFailureSourcesPassFullPipeline(t *testing.T) {
 			name: "string copy initial allocation failure", manifest: "std_text_quickstart", source: generatedFairyStringCopyFailureSource,
 			expect:         []string{"fy_std_string_copy_storage_v0", "fy_std_string_drop_storage_v0", "fy_runtime_trap("},
 			foreignSymbols: []string{"fy_std_string_copy_storage_v0", "fy_std_string_drop_storage_v0"},
+		},
+		{
+			name: "string from buffer zero-copy used", manifest: "std_text_from_buffer_quickstart", source: string(fromBufferMain),
+			expect:         []string{"fy_std_string_from_buffer_storage_v0", "fy_std_string_drop_storage_v0", "fy_std_buffer_drop_v0"},
+			foreignSymbols: []string{"fy_std_buffer_append_v0", "fy_std_buffer_drop_v0", "fy_std_buffer_initialize_v0", "fy_std_string_drop_storage_v0", "fy_std_string_from_buffer_storage_v0"},
+		},
+		{
+			name: "string from buffer unused", manifest: "std_text_from_buffer_quickstart", source: "module main;\nfn i32 main() { return 42; }\n",
+			expect:         []string{},
+			foreignSymbols: []string{},
 		},
 		{
 			name: "process args used", manifest: "process_args_quickstart", source: generatedFairyProcessArgsSource,

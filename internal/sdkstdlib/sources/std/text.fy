@@ -1,5 +1,7 @@
 module std::text;
 
+import std::bytes as bytes;
+
 @repr(C)
 struct raw_text_view {
     ptr u8 data;
@@ -58,6 +60,9 @@ unsafe extern C fn raw_text_result string_append_storage_raw(ptr mut void value,
 @link_name("fy_std_string_drop_storage_v0")
 unsafe extern C fn raw_text_result string_drop_storage_raw(ptr mut void value) ;
 
+@link_name("fy_std_string_from_buffer_storage_v0")
+unsafe extern C fn raw_text_result string_from_buffer_storage_raw(ptr mut void input, ptr mut void output) ;
+
 @link_name("fy_std_cstring_from_text_storage_v0")
 unsafe extern C fn raw_text_result cstring_from_text_storage_raw(ptr raw_text_view input, ptr mut void output) ;
 
@@ -111,6 +116,10 @@ fn i32 discard_cstring(CString value) {
     return 0;
 }
 
+fn i32 discard_bytes_buffer(bytes::Buffer value) {
+    return 0;
+}
+
 /// Validates bytes as UTF-8 and returns an allocation-free view with the source borrow origin.
 pub fn Result<ref str, TextError> validate_utf8(ref u8[] value) {
     let u32 valid = unsafe {
@@ -137,6 +146,23 @@ pub fn Result<String, TextError> copy(ref str value) {
     } else {
         let i32 discarded = discard_string(output);
         .err(text_error(result))
+    };
+}
+
+/// Converts an owned Buffer into a String without copying when its bytes are valid UTF-8.
+/// Invalid UTF-8 returns the original Buffer unchanged with its storage intact.
+pub fn Result<String, bytes::Buffer> from_buffer(bytes::Buffer value) {
+    var bytes::Buffer owned = value;
+    var String output = empty_string();
+    let raw_text_result result = unsafe {
+        string_from_buffer_storage_raw(ref mut owned as ptr mut void, ref mut output as ptr mut void)
+    };
+    return if (result.status == 0) {
+        let i32 discarded = discard_bytes_buffer(owned);
+        .ok(output)
+    } else {
+        let i32 discarded = discard_string(output);
+        .err(owned)
     };
 }
 
