@@ -48,8 +48,9 @@ remaining public resource family without a generated-Fairy failure execution.
 - The raw C owned-text probe remains responsible for pointer, capacity, alignment, and byte
   `memcmp` preservation, NUL and UTF-8 rejection, malformed and null storage, deterministic size
   overflow, and repeated drop. The new proof does not replace that matrix.
-- `text::copy` initial-allocation failure and `CString` allocation failure remain deferred to
-  later generated-Fairy executions; the raw probe continues to cover their byte-level behavior.
+- `text::copy` initial-allocation failure remains deferred to a later generated-Fairy execution;
+  the raw probe continues to cover its byte-level behavior. `CString` allocation failure is now
+  executed by ADR 0259.
 - This is test and evidence hardening only. Language remains `fairyc-language/8`, SDK remains
   `0.0.0-stage0.10`, and runtime ABI remains `fairyc-runtime/0`.
 - Native proof remains Windows x64 MSVC evidence, not a portable backend or support claim.
