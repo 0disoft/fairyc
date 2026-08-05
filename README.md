@@ -19,6 +19,7 @@ fairyc new hello-fairy --uid example.hello-fairy
 cd hello-fairy
 fairyc check
 fairyc test --list --json --locked
+fairyc test --json --locked
 fairyc test --locked
 fairyc test --native --locked
 ```
@@ -449,7 +450,7 @@ persistent cache, or stable editor protocol. Program commands use one entry plus
 `fairyc check [--locked]` and the Windows/amd64-local
 `fairyc build [--release] [--locked]`, and the Windows/amd64-local
 `fairyc run [--release] [--locked]`, and the semantic-by-default or Windows-native
-`fairyc test [--native [--release]] [--exact <test-identity>]... [--locked]` and the execution-free
+`fairyc test [--json] [--native [--release]] [--exact <test-identity>]... [--locked]` and the execution-free
 `fairyc test --list [--json] [--locked]`, plus source-independent
 `fairyc explain <diagnostic-code>` and `fairyc targets`, and target-explicit
 `fairyc emit c --target <target-id> [--locked]`. Stable run forwards caller stdin, bounded Windows
@@ -582,7 +583,7 @@ standard-library support unit is intentionally absent, so redirected output is i
 input rather than a promised standalone C package. Ordinary mode maintains `fairy.lock`;
 `--locked` verifies it without writing.
 
-The stable `fairyc test [--native [--release]] [--exact <test-identity>]... [--locked]` command keeps tests out of ordinary compilation. It overlays
+The stable `fairyc test [--json] [--native [--release]] [--exact <test-identity>]... [--locked]` command keeps tests out of ordinary compilation. It overlays
 only the root package's optional lowercase `tests/` directory after the production lock is handled;
 `tests/answer.fy` therefore declares `module tests::answer;`. Mark a private safe zero-argument
 `void` function with argument-free `@test`. Without `--native`, each discovered test runs in
@@ -593,8 +594,10 @@ stdin and no arguments; `--release` selects optimized MSVC. Repeatable `--exact`
 canonical `<module>::<function>` identities byte-for-byte while retaining canonical report order;
 the complete test overlay is still compiled. `fairyc test --list [--locked]` performs that complete
 compiler admission and prints the canonical identities without running the interpreter, backend,
-toolchain, or test process. Adding `--json` emits the stable `fairyc.test-list/v1` schema with the
-canonical identity array, count, and lock state. A trap fails an executed test and later selected
+toolchain, or test process. Listing with `--json` emits the stable `fairyc.test-list/v1` schema with
+the canonical identity array, count, and lock state. Execution with `--json` emits the stable
+`fairyc.test-report/v1` schema with canonical outcomes, engine/target/profile identity, totals,
+aggregate status, and lock state. A trap fails an executed test and later selected
 tests still run in fresh processes. Native program output, portable targets, benchmarks,
 fuzzy/tag/file filters, and workspace-member discovery remain separate contracts.
 

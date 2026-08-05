@@ -83,6 +83,53 @@ func TestStableTestListReportMatchesSchema(t *testing.T) {
 	assertJSONFieldsMatchSchema(t, reportBytes, schema.Properties, schema.Required)
 }
 
+func TestStableTestExecutionReportMatchesSchema(t *testing.T) {
+	t.Parallel()
+	schemaBytes, err := os.ReadFile(filepath.Join("..", "..", "spec", "cli", "stable-test-report-v1.schema.json"))
+	if err != nil {
+		t.Fatalf("read schema: %v", err)
+	}
+	var schema struct {
+		Properties map[string]json.RawMessage `json:"properties"`
+		Required   []string                   `json:"required"`
+		Defs       struct {
+			Outcome struct {
+				Properties map[string]json.RawMessage `json:"properties"`
+				Required   []string                   `json:"required"`
+			} `json:"outcome"`
+		} `json:"$defs"`
+	}
+	if err := json.Unmarshal(schemaBytes, &schema); err != nil {
+		t.Fatalf("decode schema contract: %v", err)
+	}
+	target := "x86_64-windows-msvc"
+	profile := "release"
+	category := "assertion-failed"
+	outcome := stableTestExecutionOutcome{
+		Identity: "tests::main::fails", Outcome: "failed", TrapCategory: &category,
+	}
+	reportBytes, err := json.Marshal(stableTestExecutionReport{
+		SchemaVersion: stableTestReportSchema,
+		Engine:        "native",
+		Target:        &target,
+		Profile:       &profile,
+		Tests:         []stableTestExecutionOutcome{outcome},
+		Count:         1,
+		Failed:        1,
+		Status:        "failed",
+		Lock:          "verified",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertJSONFieldsMatchSchema(t, reportBytes, schema.Properties, schema.Required)
+	outcomeBytes, err := json.Marshal(outcome)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertJSONFieldsMatchSchema(t, outcomeBytes, schema.Defs.Outcome.Properties, schema.Defs.Outcome.Required)
+}
+
 func TestTargetSpecTopLevelMatchesSchema(t *testing.T) {
 	t.Parallel()
 	schemaBytes, err := os.ReadFile(filepath.Join("..", "..", "spec", "cli", "experimental-target-spec-v0.schema.json"))

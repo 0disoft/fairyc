@@ -36,7 +36,7 @@ Usage:
   fairyc check [--locked]
   fairyc build [--release] [--locked]
   fairyc run [--release] [--locked] [-- <program-args...>]
-  fairyc test [--native [--release]] [--exact <test-identity>]... [--locked]
+  fairyc test [--json] [--native [--release]] [--exact <test-identity>]... [--locked]
   fairyc test --list [--json] [--locked]
   fairyc emit c --target <target-id> [--locked]
   fairyc explain <diagnostic-code>
@@ -76,7 +76,7 @@ Windows image, forwards caller stdin, bounded program output, and any arguments 
 program's process arguments, preserves ordinary program status, and retains no artifact.
 "fairyc test" checks the root package plus isolated tests/ sources, lists canonical test identities,
 or runs all or exact identities through the semantic interpreter or as isolated Windows images with
---native. "fairyc emit c" writes one
+--native; --json selects a stable machine report for listing or execution. "fairyc emit c" writes one
 explicitly targeted C11 application unit to stdout without invoking a toolchain. Pass --release to
 build, run, or native test for optimization. All five workspace commands read fairy.toml and refresh fairy.lock
 unless --locked is supplied.

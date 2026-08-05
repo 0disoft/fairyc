@@ -771,6 +771,13 @@ consumers must use the schema names rather than parse the text listing. Existing
 test execution remain byte-for-byte unchanged. Language, SDK, runtime ABI, manifest, lockfile,
 package, interface, target, and generated-code versions remain unchanged.
 
+ADR 0287 additively admits `fairyc test --json [--native [--release]]
+[--exact <test-identity>]... [--locked]` with schema `fairyc.test-report/v1`. Existing invocations
+without execution-mode `--json` retain exact text bytes and codes. The JSON report freezes canonical
+per-test outcomes, engine, nullable target/profile, totals, aggregate status, and lock state; a
+complete trapped suite still returns code 5 after writing the report. Language, SDK, runtime ABI,
+manifest, lockfile, package, interface, target, MIR, and generated-code versions remain unchanged.
+
 ADR 0204 stabilizes `fairyc new <package-name> --uid <package-uid>`, its explicit non-derived UID,
 single direct-child destination, exact four-file starter, no-overwrite behavior, absence of an
 initial lockfile, success line, and codes 0, 2, 4, and 7. Adding templates, flags, merge behavior, an

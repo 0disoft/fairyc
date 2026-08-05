@@ -1327,7 +1327,7 @@ func run() error {
 	fmt.Println("Generated-Fairy user-enum Option proof passed: 2 native executions across low/optimized MSVC, covering Some enum construction, payload extraction, exhaustive enum switching, and None")
 	fmt.Println("Generated-Fairy copy fixed-array Option/Result proof passed: 2 native executions across low/optimized MSVC, covering Some and None, Ok and Err, indexed payload reads, and success/error propagation")
 	fmt.Printf("Generated-Fairy c::int cast proof passed: %d native executions across low/optimized MSVC, covering imported negative-capable C int identity, explicit c::int-to-i32 conversion, exact value round-trip, explicit i32-to-c::int conversion, and a separate C consumer\n", cIntCastExecutions)
-	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds, %d package-workspace builds, %d package-workspace runs, %d source-level safe File lifecycle builds, %d source-level safe owned-text lifecycle builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, public safe std::bytes Buffer ownership and views, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls, checked reads and mutable indexed stores, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, bounded lexical defer, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, stable-run stdin forwarding, bounded allocation-free stdin byte reads with EOF and partial-buffer evidence, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart, output, locked workspace execution, one isolated semantic test, three isolated native-test executions across low/optimized MSVC, two target-explicit C emissions, nine paired cold/warm persistent-cache process measurements, one nine-process bounded persistent-cache growth staircase, an eight-request editor-shaped workspace session with Windows process-memory peaks, %d fresh locked Atlas workspace-call catalog processes with per-process memory peaks, %d generated Atlas workspace-call scaling shapes, and %d post-GC retained-index batches, 42 run-host outcomes covered fixed arrays, byte-view iteration and slicing, checked indexed stores, assertions and lexical defer in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, Buffer initialization, reserve, self-overlap append, and zeroed-resize allocation rollback passed %d separate-translation-unit MSVC executions, owned-text opaque-storage failure preservation, forced allocation rollback, and repeated drop passed %d separate-translation-unit MSVC executions, Arena zeroing, two-stage allocation rollback, stale Region rejection, and active-drop preservation passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, exact object addends and final-image REL32 through REL32_5, weak-alias fallback/strong override, ADDR64, and unwind ADDR32NB values plus CodeView SECTION/SECREL pairs, PE/PDB identity, and exact DbgHelp function/line symbolication passed %d separate-translation-unit MSVC executions, weak NOLIBRARY suppression and LIBRARY extraction passed %d separate-translation-unit MSVC executions, archive extraction, pick-any ownership, selected-child retention, and discarded-child elimination passed %d MSVC input-order executions, generated-Fairy small and large struct results passed %d separate-translation-unit MSVC executions across C11 and C17 consumer modes, %d Windows x64 unwind cases plus exact profile-specific handler-tail ADDR32NB binding passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, workspaceBuildExecutions, workspaceRunExecutions, windowsFileSourceExecutions, ownedTextSourceExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, buildmeasure.AtlasCallProcessIterations, len(atlasCallScaleMeasurement.Shapes), len(atlasCallRetainedMeasurement.Shapes)*buildmeasure.AtlasCallRetainedIterationsPerShape, windowsFileExecutions, bufferProbeExecutions, ownedTextProbeExecutions, arenaProbeExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, relocationExecutions, weakSearchExecutions, archiveExecutions, structResultExecutions, unwindCases, unwindExecutions, inspectedPEImages, toolchain.Version)
+	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds, %d package-workspace builds, %d package-workspace runs, %d source-level safe File lifecycle builds, %d source-level safe owned-text lifecycle builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, public safe std::bytes Buffer ownership and views, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls, checked reads and mutable indexed stores, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, bounded lexical defer, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, stable-run stdin forwarding, bounded allocation-free stdin byte reads with EOF and partial-buffer evidence, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart, output, locked workspace execution, semantic text/JSON tests, four isolated native-test commands covering six executions across low/optimized MSVC including optimized JSON trap continuation, two target-explicit C emissions, nine paired cold/warm persistent-cache process measurements, one nine-process bounded persistent-cache growth staircase, an eight-request editor-shaped workspace session with Windows process-memory peaks, %d fresh locked Atlas workspace-call catalog processes with per-process memory peaks, %d generated Atlas workspace-call scaling shapes, and %d post-GC retained-index batches, 42 run-host outcomes covered fixed arrays, byte-view iteration and slicing, checked indexed stores, assertions and lexical defer in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, Buffer initialization, reserve, self-overlap append, and zeroed-resize allocation rollback passed %d separate-translation-unit MSVC executions, owned-text opaque-storage failure preservation, forced allocation rollback, and repeated drop passed %d separate-translation-unit MSVC executions, Arena zeroing, two-stage allocation rollback, stale Region rejection, and active-drop preservation passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, exact object addends and final-image REL32 through REL32_5, weak-alias fallback/strong override, ADDR64, and unwind ADDR32NB values plus CodeView SECTION/SECREL pairs, PE/PDB identity, and exact DbgHelp function/line symbolication passed %d separate-translation-unit MSVC executions, weak NOLIBRARY suppression and LIBRARY extraction passed %d separate-translation-unit MSVC executions, archive extraction, pick-any ownership, selected-child retention, and discarded-child elimination passed %d MSVC input-order executions, generated-Fairy small and large struct results passed %d separate-translation-unit MSVC executions across C11 and C17 consumer modes, %d Windows x64 unwind cases plus exact profile-specific handler-tail ADDR32NB binding passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, workspaceBuildExecutions, workspaceRunExecutions, windowsFileSourceExecutions, ownedTextSourceExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, buildmeasure.AtlasCallProcessIterations, len(atlasCallScaleMeasurement.Shapes), len(atlasCallRetainedMeasurement.Shapes)*buildmeasure.AtlasCallRetainedIterationsPerShape, windowsFileExecutions, bufferProbeExecutions, ownedTextProbeExecutions, arenaProbeExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, relocationExecutions, weakSearchExecutions, archiveExecutions, structResultExecutions, unwindCases, unwindExecutions, inspectedPEImages, toolchain.Version)
 	return nil
 }
 
@@ -2051,7 +2051,7 @@ func runStandaloneCompiler(
 		!strings.Contains(helpStdout, "fairyc check [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc build [--release] [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc run [--release] [--locked]") ||
-		!strings.Contains(helpStdout, "fairyc test [--native [--release]] [--exact <test-identity>]... [--locked]") ||
+		!strings.Contains(helpStdout, "fairyc test [--json] [--native [--release]] [--exact <test-identity>]... [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc test --list [--json] [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc emit c --target <target-id> [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc experimental run-target") ||
@@ -2163,6 +2163,34 @@ fn void second_passes() { assert(true); }
 	if starterJSONListCode != cli.ExitSuccess || starterJSONListStderr != "" || starterJSONListStdout != wantStarterJSONList {
 		return 0, fmt.Errorf("standalone compiler starter JSON test list returned code %d, stdout %q, stderr %q", starterJSONListCode, starterJSONListStdout, starterJSONListStderr)
 	}
+	starterJSONTestCode, starterJSONTestStdout, starterJSONTestStderr, err := runStandaloneCommand(
+		starterRoot,
+		executablePath,
+		"test", "--json",
+		"--exact", "tests::main::second_passes",
+		"--exact", "tests::main::first_fails",
+		"--locked",
+	)
+	if err != nil {
+		return 0, fmt.Errorf("execute standalone compiler generated starter JSON semantic test: %w", err)
+	}
+	wantStarterJSONTest := `{"schemaVersion":"fairyc.test-report/v1","engine":"interpreter","target":null,"profile":null,"tests":[{"identity":"tests::main::first_fails","outcome":"failed","trapCategory":"assertion-failed"},{"identity":"tests::main::second_passes","outcome":"passed","trapCategory":null}],"count":2,"passed":1,"failed":1,"status":"failed","lock":"verified"}` + "\n"
+	if starterJSONTestCode != cli.ExitProgramTrap || starterJSONTestStderr != "" || starterJSONTestStdout != wantStarterJSONTest {
+		return 0, fmt.Errorf("standalone compiler starter JSON semantic test returned code %d, stdout %q, stderr %q", starterJSONTestCode, starterJSONTestStdout, starterJSONTestStderr)
+	}
+	starterNativeRuntimeTestSource := `module tests::main;
+
+import std::process as process;
+
+@test
+fn void first_fails() { assert(process::arg_count() == 0); }
+
+@test
+fn void second_passes() { assert(process::arg_count() >= 1); }
+`
+	if err := os.WriteFile(filepath.Join(starterRoot, "tests", "main.fy"), []byte(starterNativeRuntimeTestSource), 0o600); err != nil {
+		return 0, fmt.Errorf("write standalone compiler runtime-dependent native trap-isolation test: %w", err)
+	}
 	starterNativeCode, starterNativeStdout, starterNativeStderr, err := runStandaloneCommand(
 		starterRoot,
 		executablePath,
@@ -2179,6 +2207,21 @@ fn void second_passes() { assert(true); }
 		"test result: FAILED. 1 passed; 1 failed; lock verified\n"
 	if starterNativeCode != cli.ExitProgramTrap || starterNativeStderr != "" || starterNativeStdout != wantStarterNative {
 		return 0, fmt.Errorf("standalone compiler native trap-isolation test returned code %d, stdout %q, stderr %q", starterNativeCode, starterNativeStdout, starterNativeStderr)
+	}
+	starterNativeJSONCode, starterNativeJSONStdout, starterNativeJSONStderr, err := runStandaloneCommand(
+		starterRoot,
+		executablePath,
+		"test", "--json", "--native", "--release",
+		"--exact", "tests::main::second_passes",
+		"--exact", "tests::main::first_fails",
+		"--locked",
+	)
+	if err != nil {
+		return 0, fmt.Errorf("execute standalone compiler native JSON test: %w", err)
+	}
+	wantStarterNativeJSON := `{"schemaVersion":"fairyc.test-report/v1","engine":"native","target":"x86_64-windows-msvc","profile":"release","tests":[{"identity":"tests::main::first_fails","outcome":"failed","trapCategory":"assertion-failed"},{"identity":"tests::main::second_passes","outcome":"passed","trapCategory":null}],"count":2,"passed":1,"failed":1,"status":"failed","lock":"verified"}` + "\n"
+	if starterNativeJSONCode != cli.ExitProgramTrap || starterNativeJSONStderr != "" || starterNativeJSONStdout != wantStarterNativeJSON {
+		return 0, fmt.Errorf("standalone compiler native JSON test returned code %d, stdout %q, stderr %q", starterNativeJSONCode, starterNativeJSONStdout, starterNativeJSONStderr)
 	}
 	starterRunCode, starterRunStdout, starterRunStderr, err := runStandaloneCommand(
 		starterRoot,

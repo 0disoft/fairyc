@@ -718,7 +718,7 @@ quarantines, without selecting a default policy or making a speed claim.
   `fairyc explain <diagnostic-code>` and `fairyc targets` v1 contracts separate from catalog and
   TargetSpec data lifecycle. Keep target-explicit `fairyc emit c --target <target-id> [--locked]`
   separate from private generated-C bytes and support units. Keep implemented semantic-by-default
-  and explicit Windows-native `fairyc test [--native [--release]] [--exact <test-identity>]... [--locked]`
+  and explicit Windows-native `fairyc test [--json] [--native [--release]] [--exact <test-identity>]... [--locked]`
   plus compiler-admitted `fairyc test --list [--locked]` discovery with canonical exact selection
   separate from workspace-member recursion, fuzzy/tag/file filters,
   shared fixtures, portable targets, program streams,
@@ -880,6 +880,13 @@ prints canonical identities without running the interpreter, backend, toolchain,
 ADR 0273 adds compact stable `fairyc.test-list/v1` output through `--json`, containing only the
 canonical identity array, count, and lock state. Workspace-member recursion, source locations,
 metadata, fuzzy matching, tags, and file selection remain later decisions.
+
+ADR 0287 closes the machine-report gap for execution with atomic `fairyc.test-report/v1` output.
+Semantic and native reports retain canonical outcome order, existing trap-continuation and exit-code
+semantics, and exact lock state while naming engine plus nullable target/profile. Optimized isolated
+MSVC trap-plus-pass execution proves that JSON is produced from real native outcomes rather than a
+text-report reparse. Durations, retries, output attachments, skipped states, member recursion, and
+portable native targets remain later decisions.
 
 ADR 0216 cuts the exact language pin to `fairyc-language/2` and adds statement-only checked integer
 compound assignment. All ten arithmetic, division, remainder, shift, and bitwise forms reuse the

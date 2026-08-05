@@ -922,7 +922,10 @@ identity selection to both engines without hiding syntax or compiler failures in
 overlay. ADR 0268 adds `fairyc test --list [--locked]`, which exposes those same canonical
 identities after complete compiler admission without executing a test or target toolchain. ADR 0273
 adds `--json` for the versioned identity array, count, and lock state without changing discovery or
-execution. Member recursion, fuzzy/tag/file filters, setup/teardown, portable native targets,
+execution. ADR 0287 additionally admits execution-mode `--json` and freezes
+`fairyc.test-report/v1` with canonical semantic/native outcomes, engine/target/profile identity,
+totals, status, and lock state while preserving text bytes and exit codes. Member recursion,
+fuzzy/tag/file filters, setup/teardown, portable native targets,
 program streams, benchmarks, and host-environment policy remain separate contracts.
 
 ADR 0146 rejects speculative persistent caching at this point. ADR 0149 supplies deterministic,

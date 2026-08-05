@@ -20,6 +20,7 @@ import (
 
 const testAttribute = "test"
 const stableTestListSchema = "fairyc.test-list/v1"
+const stableTestReportSchema = "fairyc.test-report/v1"
 
 type stableTestOptions struct {
 	locked  bool
@@ -35,6 +36,25 @@ type stableTestListReport struct {
 	Tests         []string `json:"tests"`
 	Count         int      `json:"count"`
 	Lock          string   `json:"lock"`
+}
+
+type stableTestExecutionOutcome struct {
+	Identity     string  `json:"identity"`
+	Outcome      string  `json:"outcome"`
+	TrapCategory *string `json:"trapCategory"`
+}
+
+type stableTestExecutionReport struct {
+	SchemaVersion string                       `json:"schemaVersion"`
+	Engine        string                       `json:"engine"`
+	Target        *string                      `json:"target"`
+	Profile       *string                      `json:"profile"`
+	Tests         []stableTestExecutionOutcome `json:"tests"`
+	Count         int                          `json:"count"`
+	Passed        int                          `json:"passed"`
+	Failed        int                          `json:"failed"`
+	Status        string                       `json:"status"`
+	Lock          string                       `json:"lock"`
 }
 
 type workspaceTest struct {
@@ -129,6 +149,9 @@ func runStableTest(arguments []string, sourceRoot string, stdout, stderr io.Writ
 	if code != ExitSuccess {
 		return code
 	}
+	if options.json {
+		return writeStableTestReportJSON(outcomes, lockState, options, stdout, stderr)
+	}
 	return writeStableTestReport(outcomes, lockState, stdout, stderr)
 }
 
@@ -181,6 +204,65 @@ func writeStableTestReport(outcomes []workspaceTestOutcome, lockState string, st
 	}
 	fmt.Fprintf(&report, "test result: %s. %d passed; %d failed; lock %s\n", status, passed, failed, lockState)
 	if _, err := io.WriteString(stdout, report.String()); err != nil {
+		return outputError(stderr)
+	}
+	if failed != 0 {
+		return ExitProgramTrap
+	}
+	return ExitSuccess
+}
+
+func writeStableTestReportJSON(
+	outcomes []workspaceTestOutcome,
+	lockState string,
+	options stableTestOptions,
+	stdout, stderr io.Writer,
+) int {
+	tests := make([]stableTestExecutionOutcome, 0, len(outcomes))
+	passed := 0
+	failed := 0
+	for _, outcome := range outcomes {
+		result := stableTestExecutionOutcome{Identity: outcome.display, Outcome: "passed"}
+		if outcome.trapCategory == "" {
+			passed++
+		} else {
+			failed++
+			result.Outcome = "failed"
+			category := outcome.trapCategory
+			result.TrapCategory = &category
+		}
+		tests = append(tests, result)
+	}
+	status := "ok"
+	if failed != 0 {
+		status = "failed"
+	}
+	report := stableTestExecutionReport{
+		SchemaVersion: stableTestReportSchema,
+		Engine:        "interpreter",
+		Tests:         tests,
+		Count:         len(tests),
+		Passed:        passed,
+		Failed:        failed,
+		Status:        status,
+		Lock:          lockState,
+	}
+	if options.native {
+		target := "x86_64-windows-msvc"
+		profile := "development"
+		if options.release {
+			profile = "release"
+		}
+		report.Engine = "native"
+		report.Target = &target
+		report.Profile = &profile
+	}
+	encoded, err := json.Marshal(report)
+	if err != nil {
+		return internalError(stderr)
+	}
+	encoded = append(encoded, '\n')
+	if _, err := stdout.Write(encoded); err != nil {
 		return outputError(stderr)
 	}
 	if failed != 0 {
@@ -260,9 +342,6 @@ func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 		case "--json":
 			options.json = true
 		}
-	}
-	if options.json && !options.list {
-		return stableTestOptions{}, fmt.Errorf(`command "test" requires --list when --json is supplied`)
 	}
 	if options.list && (options.native || options.release || len(options.exact) != 0) {
 		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --list with --native, --release, or --exact`)

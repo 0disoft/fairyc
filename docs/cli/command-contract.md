@@ -541,9 +541,9 @@ execution, a nonzero program status, or a program trap follows. `--locked` perfo
 compiler-output write failure after program execution returns code 4 but cannot undo earlier bytes
 or program effects; no executable is retained.
 
-## Stable workspace test v4
+## Stable workspace test v5
 
-`fairyc test [--native [--release]] [--exact <test-identity>]... [--locked]` first loads and locks the ordinary production workspace, then overlays only
+`fairyc test [--json] [--native [--release]] [--exact <test-identity>]... [--locked]` first loads and locks the ordinary production workspace, then overlays only
 the root package's optional exact-lowercase `tests/` tree in memory. Ordinary check, build, run,
 emit, lock, interface, and cache inputs never include those files. The tree may not be a symlink or
 overlap the production source or a workspace member, shares the workspace source budgets, and maps
@@ -575,11 +575,11 @@ interpreter, backend, MSVC, PE inspector, or a test process. Its final line is
 `test list: <count> discovered; lock <updated|unchanged|verified>`. Zero tests emit only that line.
 With `--json`, stdout is one compact newline-terminated `fairyc.test-list/v1` object containing
 `schemaVersion`, the canonical `tests` string array, matching `count`, and `lock`; the text form is
-unchanged. `--json` without `--list` and duplicate `--json` are invocation errors.
+unchanged. Duplicate `--json` is an invocation error.
 Listing succeeds with code 0, shares source/package/internal/output failure classifications, and
 cannot produce execution trap code 5 or native build code 6.
 
-Completed lines are `test <identity> ... ok` or
+Without `--json`, completed lines are `test <identity> ... ok` or
 `test <identity> ... FAILED (<trap-category>)`. The final line is
 `test result: <ok|FAILED>. <passed> passed; <failed> failed; lock <updated|unchanged|verified>`.
 Zero tests succeed with only the final line. Codes are 0 for all
@@ -591,6 +591,16 @@ Windows x64 MSVC but never WSL or network and retains no artifact. A report writ
 prefix before code 4; ordinary lock maintenance and earlier native test effects may precede later
 failure, while `--locked` writes nothing.
 
+Execution-mode `--json` replaces only the complete report bytes with one compact newline-terminated
+`fairyc.test-report/v1` object. It preserves canonical outcome order and process codes while adding
+the exact engine, nullable target/profile, per-test passed/failed outcome and nullable trap category,
+matching count/passed/failed totals, aggregate status, and lock state. Interpreter reports use null
+target/profile; native reports identify `x86_64-windows-msvc` and `development` or `release`.
+Compilation, capability, toolchain, inspection, execution-infrastructure, and package failures emit
+no JSON report. Paths, source, timings, host inventory, toolchain versions, program streams, and
+temporary harness or artifact identities are absent. Text execution output remains byte-for-byte
+unchanged when `--json` is omitted.
+
 ## Stage 0 surface
 
 | Command | Purpose | Code generation |
@@ -599,7 +609,7 @@ failure, while `--locked` writes nothing.
 | `fairyc check [--locked]` | Check the current manifest-owned workspace through verified MIR | No |
 | `fairyc build [--release] [--locked]` | Build or replace the current root package's one Windows executable | Yes |
 | `fairyc run [--release] [--locked] [-- <program-args...>]` | Build and run the current workspace as one temporary Windows image, forwarding arguments after `--` to the program | Yes |
-| `fairyc test [--native [--release]] [--exact <test-identity>]... [--locked]` | Run all or exact canonical root-package `@test fn void` entries through the semantic interpreter or one temporary Windows MSVC image per selected test | Optional temporary native images |
+| `fairyc test [--json] [--native [--release]] [--exact <test-identity>]... [--locked]` | Run all or exact canonical root-package `@test fn void` entries through the semantic interpreter or one temporary Windows MSVC image per selected test, with human or stable JSON output | Optional temporary native images |
 | `fairyc test --list [--json] [--locked]` | Compile-admit the complete root-package test overlay and list canonical exact-selector identities as text or stable JSON without execution | No |
 | `fairyc emit c --target <target-id> [--locked]` | Emit the current executable workspace's target-selected C11 application unit | C only, stdout |
 | `fairyc explain <diagnostic-code>` | Explain a stable diagnostic code | No |

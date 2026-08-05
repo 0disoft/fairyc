@@ -296,6 +296,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0284-copy-fixed-array-tagged-values.md`: cuts language revision `/9` and carries bounded copy-scalar fixed arrays through private Option/Result transport, including propagation, deterministic emission, cache-key invalidation, and low/optimized Windows MSVC execution without changing SDK source/API or runtime ABI.
 - `0285-public-windows-file-partial-write.md`: exposes one-call safe Windows `std::fs::write`, preserves caller-owned retry policy and exact successful short counts, and proves success plus read-only failure under low/optimized MSVC with SDK `0.0.0-stage0.26`.
 - `0286-explicit-c-int-i32-casts.md`: cuts language revision `/10` and admits only exact explicit signed 32-bit `c::int` and `i32` conversion through typed MIR, interpreter execution, deterministic C emission, cache invalidation, and low/optimized separate-C MSVC crossing.
+- `0287-stable-json-test-execution-report.md`: adds atomic stable `fairyc.test-report/v1` semantic and native execution output with canonical outcomes, engine/target/profile identity, unchanged text reports, and real optimized MSVC trap continuation evidence.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

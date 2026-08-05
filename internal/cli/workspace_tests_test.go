@@ -95,6 +95,24 @@ fn void second_passes() { assert(true); }
 	}
 }
 
+func TestStableWorkspaceTestWritesCanonicalJSONExecutionReport(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeStableTestWorkspace(t, root)
+	writeWorkspaceFile(t, root, "tests/outcomes.fy", `module tests::outcomes;
+@test
+fn void first_fails() { assert(false); }
+@test
+fn void second_passes() { assert(true); }
+`)
+
+	code, stdout, stderr := runForTest([]string{"test", "--json"}, root)
+	want := `{"schemaVersion":"fairyc.test-report/v1","engine":"interpreter","target":null,"profile":null,"tests":[{"identity":"tests::outcomes::first_fails","outcome":"failed","trapCategory":"assertion-failed"},{"identity":"tests::outcomes::second_passes","outcome":"passed","trapCategory":null}],"count":2,"passed":1,"failed":1,"status":"failed","lock":"updated"}` + "\n"
+	if code != ExitProgramTrap || stdout != want || stderr != "" {
+		t.Fatalf("JSON test = (%d, %q, %q), want stdout %q", code, stdout, stderr, want)
+	}
+}
+
 func TestStableWorkspaceTestValidatesHarnessOwnedDeclarations(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -155,10 +173,19 @@ func TestStableWorkspaceTestHandlesZeroTestsInvocationAndOutputFailure(t *testin
 	if code != ExitSuccess || stdout != `{"schemaVersion":"fairyc.test-list/v1","tests":[],"count":0,"lock":"verified"}`+"\n" || stderr != "" {
 		t.Fatalf("zero JSON test list = (%d, %q, %q)", code, stdout, stderr)
 	}
+	code, stdout, stderr = runForTest([]string{"test", "--json", "--locked"}, root)
+	if code != ExitSuccess || stdout != `{"schemaVersion":"fairyc.test-report/v1","engine":"interpreter","target":null,"profile":null,"tests":[],"count":0,"passed":0,"failed":0,"status":"ok","lock":"verified"}`+"\n" || stderr != "" {
+		t.Fatalf("zero JSON test report = (%d, %q, %q)", code, stdout, stderr)
+	}
 	var outputError bytes.Buffer
 	code = Run([]string{"test", "--list", "--json", "--locked"}, root, failingWriter{}, &outputError)
 	if code != ExitInternalFailure || !strings.Contains(outputError.String(), "write output failed") {
 		t.Fatalf("output failure = (%d, %q)", code, outputError.String())
+	}
+	outputError.Reset()
+	code = Run([]string{"test", "--json", "--locked"}, root, failingWriter{}, &outputError)
+	if code != ExitInternalFailure || !strings.Contains(outputError.String(), "write output failed") {
+		t.Fatalf("JSON execution output failure = (%d, %q)", code, outputError.String())
 	}
 	for _, arguments := range [][]string{
 		{"test", "--release"},
@@ -166,7 +193,6 @@ func TestStableWorkspaceTestHandlesZeroTestsInvocationAndOutputFailure(t *testin
 		{"test", "--native", "--native"},
 		{"test", "--list", "--list"},
 		{"test", "--list", "--json", "--json"},
-		{"test", "--json"},
 		{"test", "--list", "--native"},
 		{"test", "--list", "--release"},
 		{"test", "--list", "--exact", "tests::missing::test"},
@@ -219,13 +245,35 @@ fn void broken() { missing(); }
 
 func TestStableWorkspaceTestNativeOptionsRequireExplicitNativeMode(t *testing.T) {
 	t.Parallel()
-	options, err := parseStableTestOptions([]string{"--release", "--exact", "tests::answer::is_42", "--locked", "--native"})
-	if err != nil || !options.native || !options.release || !options.locked ||
+	options, err := parseStableTestOptions([]string{"--release", "--exact", "tests::answer::is_42", "--json", "--locked", "--native"})
+	if err != nil || !options.native || !options.release || !options.json || !options.locked ||
 		len(options.exact) != 1 || options.exact[0] != "tests::answer::is_42" {
 		t.Fatalf("native options = %+v, %v", options, err)
 	}
 	if _, err := parseStableTestOptions([]string{"--release"}); err == nil || !strings.Contains(err.Error(), "requires --native") {
 		t.Fatalf("release-only options error = %v", err)
+	}
+}
+
+func TestStableWorkspaceTestWritesNativeJSONExecutionIdentity(t *testing.T) {
+	t.Parallel()
+	category := "assertion-failed"
+	outcomes := []workspaceTestOutcome{
+		{display: "tests::native::fails", trapCategory: category},
+		{display: "tests::native::passes"},
+	}
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	code := writeStableTestReportJSON(
+		outcomes,
+		"verified",
+		stableTestOptions{native: true, release: true, json: true},
+		&stdout,
+		&stderr,
+	)
+	want := `{"schemaVersion":"fairyc.test-report/v1","engine":"native","target":"x86_64-windows-msvc","profile":"release","tests":[{"identity":"tests::native::fails","outcome":"failed","trapCategory":"assertion-failed"},{"identity":"tests::native::passes","outcome":"passed","trapCategory":null}],"count":2,"passed":1,"failed":1,"status":"failed","lock":"verified"}` + "\n"
+	if code != ExitProgramTrap || stdout.String() != want || stderr.String() != "" {
+		t.Fatalf("native JSON report = (%d, %q, %q), want stdout %q", code, stdout.String(), stderr.String(), want)
 	}
 }
 
