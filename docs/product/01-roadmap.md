@@ -704,9 +704,10 @@ quarantines, without selecting a default policy or making a speed claim.
 - Keep the implemented no-overwrite `fairyc new <package-name> --uid <package-uid>` starter v3 bootstrap,
   `fairyc check [--locked]`, Windows-local
   `fairyc build [--release] [--locked]`, and Windows-local
-  `fairyc run [--release] [--locked]` v3 contract narrow: caller stdin after successful compilation,
-  bounded stdout/stderr, and program status, but no arguments, input routing for other native
-  commands, target selection, retained artifact, or cache policy. Keep the source-independent
+  `fairyc run [--release] [--locked] [-- <program-args...>]` v4 contract narrow: caller stdin after
+  successful compilation, bounded stdout/stderr, program status, and ADR 0261's program-argument
+  forwarding after `--`, but no input routing for other native commands, target selection, retained
+  artifact, or cache policy. Keep the source-independent
   `fairyc explain <diagnostic-code>` and `fairyc targets` v1 contracts separate from catalog and
   TargetSpec data lifecycle. Keep target-explicit `fairyc emit c --target <target-id> [--locked]`
   separate from private generated-C bytes and support units. Keep implemented semantic
@@ -734,7 +735,9 @@ arguments, terminal policy, and owned stream handles remain separate decisions.
 ADR 0212 promotes caller stdin forwarding into stable run v3 without changing its spelling. Input is
 attached only after compilation, linking, and image inspection, is neither pre-read nor retained by
 the compiler, and remains governed by the existing process timeout. Program arguments, input routing
-for other native commands, live output interleaving, and terminal policy remain separate decisions.
+for other native commands, live output interleaving, and terminal policy remain separate decisions;
+ADR 0261 later implements program arguments over the same `--` delimiter and adds the effect-free
+`std::process` surface under SDK `0.0.0-stage0.11` without changing the generated C entry.
 
 ADR 0215 extends the SDK to `0.0.0-stage0.6` with
 `write_i32(i32) -> Result<usize, ConsoleError>`. It emits canonical locale-independent decimal ASCII

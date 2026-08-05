@@ -173,7 +173,7 @@ source = "src"
 	writeWorkspaceFile(t, root, "src/main.fy", "module main;\n\nimport std::alloc as alloc;\n\nfn i32 inspect(ref mut alloc::Arena arena) {\n    return 1;\n}\n")
 
 	code, stdout, stderr := runForTest([]string{"experimental", "check-workspace"}, root)
-	if code != ExitSuccess || !strings.Contains(stdout, "2 instance(s), 5 source file(s)") || !strings.HasSuffix(stdout, "lock updated\n") || stderr != "" {
+	if code != ExitSuccess || !strings.Contains(stdout, "2 instance(s), 6 source file(s)") || !strings.HasSuffix(stdout, "lock updated\n") || stderr != "" {
 		t.Fatalf("workspace check = (%d, %q, %q)", code, stdout, stderr)
 	}
 	document, _, err := lockfile.Read(filepath.Join(root, lockfile.FileName))

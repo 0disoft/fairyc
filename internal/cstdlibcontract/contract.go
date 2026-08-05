@@ -12,15 +12,16 @@ import (
 type Component string
 
 const (
-	ComponentLinuxConsole   Component = "linux-console"
-	ComponentLinuxFile      Component = "linux-file"
-	ComponentWindowsConsole Component = "windows-console"
-	ComponentWindowsFile    Component = "windows-file"
-	ComponentSystemHeap     Component = "system-heap"
-	ComponentBuffer         Component = "buffer"
-	ComponentArena          Component = "arena"
-	ComponentTextView       Component = "text-view"
-	ComponentOwnedText      Component = "owned-text"
+	ComponentLinuxConsole       Component = "linux-console"
+	ComponentLinuxFile          Component = "linux-file"
+	ComponentWindowsConsole     Component = "windows-console"
+	ComponentWindowsFile        Component = "windows-file"
+	ComponentWindowsProcessArgs Component = "windows-process-args"
+	ComponentSystemHeap         Component = "system-heap"
+	ComponentBuffer             Component = "buffer"
+	ComponentArena              Component = "arena"
+	ComponentTextView           Component = "text-view"
+	ComponentOwnedText          Component = "owned-text"
 )
 
 var symbolComponents = map[string]Component{
@@ -73,6 +74,8 @@ var windowsOnlySymbolComponents = map[string]Component{
 	"fy_std_windows_file_sync_v0":        ComponentWindowsFile,
 	"fy_std_windows_file_close_v0":       ComponentWindowsFile,
 	"fy_std_windows_file_drop_v0":        ComponentWindowsFile,
+	"fy_std_process_arg_count_v0":        ComponentWindowsProcessArgs,
+	"fy_std_process_arg_v0":              ComponentWindowsProcessArgs,
 }
 
 var windowsMSVCSymbolComponents = map[string]Component{
@@ -87,6 +90,8 @@ var windowsMSVCSymbolComponents = map[string]Component{
 	"fy_std_windows_file_sync_v0":         ComponentWindowsFile,
 	"fy_std_windows_file_close_v0":        ComponentWindowsFile,
 	"fy_std_windows_file_drop_v0":         ComponentWindowsFile,
+	"fy_std_process_arg_count_v0":         ComponentWindowsProcessArgs,
+	"fy_std_process_arg_v0":               ComponentWindowsProcessArgs,
 	"fy_std_system_heap_allocate_v0":      ComponentSystemHeap,
 	"fy_std_system_heap_deallocate_v0":    ComponentSystemHeap,
 	"fy_std_buffer_initialize_v0":         ComponentBuffer,
@@ -123,6 +128,7 @@ var componentLinkOrder = []Component{
 	ComponentLinuxFile,
 	ComponentWindowsConsole,
 	ComponentWindowsFile,
+	ComponentWindowsProcessArgs,
 	ComponentSystemHeap,
 	ComponentBuffer,
 	ComponentArena,

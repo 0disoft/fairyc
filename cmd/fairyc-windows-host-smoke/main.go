@@ -193,6 +193,118 @@ fn i32 main() {
 }
 `
 
+const generatedFairyProcessArgsSource = `module main;
+
+import std::process as process;
+
+fn i32 main() {
+    var u8[8] buffer = [0, 0, 0, 0, 0, 0, 0, 0];
+    let bool called = switch (process::arg(0, ref mut buffer)) {
+        case .ok(read) : { read <= buffer.len && process::arg_count() >= 1 }
+        case .err(_) : { false }
+    };
+    return if (called) { 42 } else { 1 };
+}
+`
+
+var processArgsProofArguments = []string{"", "Fairy", "--locked", "a b\"c\\d\\", "한글λ"}
+
+var processArgsDecodeRoundTripArguments = []string{"Fairy", "a b\"c\\d\\", "한글λ", ""}
+
+const windowsProcessArgsDecodeProbeMain = `
+#include <stdint.h>
+#include <process.h>
+#include <string.h>
+
+int main(void) {
+    const wchar_t *arguments[4] = { L"probe", L"Fairy", L"bad\xD800" L"arg", L"" };
+    uint8_t buffer[8] = {
+        UINT8_C(0x11), UINT8_C(0x22), UINT8_C(0x33), UINT8_C(0x44),
+        UINT8_C(0x55), UINT8_C(0x66), UINT8_C(0x77), UINT8_C(0x88)
+    };
+    struct fy_std_process_args_result_v0 result;
+
+    result = fy_std_process_arg_wide_v0(1, 4, arguments, buffer, sizeof(buffer));
+    if (result.status != FY_STD_PROCESS_ARGS_OK_V0 || result.needed != (size_t)5 ||
+        buffer[0] != UINT8_C('F') || buffer[1] != UINT8_C('a') || buffer[2] != UINT8_C('i') ||
+        buffer[3] != UINT8_C('r') || buffer[4] != UINT8_C('y')) {
+        return 1;
+    }
+    result = fy_std_process_arg_wide_v0(2, 4, arguments, buffer, sizeof(buffer));
+    if (result.status != FY_STD_PROCESS_ARGS_INVALID_ENCODING_V0 || result.needed != (size_t)0 ||
+        buffer[0] != UINT8_C('F') || buffer[1] != UINT8_C('a') || buffer[2] != UINT8_C('i') ||
+        buffer[3] != UINT8_C('r') || buffer[4] != UINT8_C('y') ||
+        buffer[5] != UINT8_C(0x66) || buffer[6] != UINT8_C(0x77) || buffer[7] != UINT8_C(0x88)) {
+        return 2;
+    }
+    result = fy_std_process_arg_wide_v0(3, 4, arguments, buffer, sizeof(buffer));
+    if (result.status != FY_STD_PROCESS_ARGS_OK_V0 || result.needed != (size_t)0) {
+        return 3;
+    }
+    result = fy_std_process_arg_wide_v0(4, 4, arguments, buffer, sizeof(buffer));
+    if (result.status != FY_STD_PROCESS_ARGS_INDEX_OUT_OF_RANGE_V0) {
+        return 4;
+    }
+    /* Process-global UCRT argv under int main(void) with static /MT. The probe
+       runs once with no explicit program arguments (argc == 1) and once with four
+       explicit arguments (argc == 5). The narrow mainCRTStartup policy must leave
+       *__p___wargv() NULL; _configure_wide_argv then populates it, which is the
+       minimal safe fix under test here. */
+    int *process_argc = __p___argc();
+    wchar_t ***process_wargv = __p___wargv();
+    if (process_argc == NULL || (*process_argc != 1 && *process_argc != 5)) {
+        return 5;
+    }
+    if (process_wargv == NULL) {
+        return 9;
+    }
+    if (*process_wargv != NULL) {
+        return 10;
+    }
+    if (_configure_wide_argv(_crt_argv_unexpanded_arguments) != 0) {
+        return 11;
+    }
+    if (*process_wargv == NULL) {
+        return 12;
+    }
+    result = fy_std_process_arg_v0(0, buffer, sizeof(buffer));
+    if (result.status == FY_STD_PROCESS_ARGS_INDEX_OUT_OF_RANGE_V0 ||
+        result.status == FY_STD_PROCESS_ARGS_INVALID_ENCODING_V0) {
+        return 6;
+    }
+    if (result.status != FY_STD_PROCESS_ARGS_OK_V0 &&
+        result.status != FY_STD_PROCESS_ARGS_BUFFER_TOO_SMALL_V0) {
+        return 7;
+    }
+    if (result.needed == (size_t)0) {
+        return 8;
+    }
+    if (*process_argc == 5) {
+        uint8_t round_buffer[64] = { 0 };
+        static const uint8_t expected[4][8] = {
+            { UINT8_C('F'), UINT8_C('a'), UINT8_C('i'), UINT8_C('r'), UINT8_C('y'), 0, 0, 0 },
+            { UINT8_C('a'), UINT8_C(' '), UINT8_C('b'), UINT8_C('"'), UINT8_C('c'), UINT8_C('\\'), UINT8_C('d'), UINT8_C('\\') },
+            { UINT8_C(0xED), UINT8_C(0x95), UINT8_C(0x9C), UINT8_C(0xEA), UINT8_C(0xB8), UINT8_C(0x80), UINT8_C(0xCE), UINT8_C(0xBB) },
+            { 0, 0, 0, 0, 0, 0, 0, 0 }
+        };
+        static const size_t expected_length[4] = { (size_t)5, (size_t)8, (size_t)8, (size_t)0 };
+        size_t index;
+        for (index = 1; index <= 4; index++) {
+            result = fy_std_process_arg_v0(index, round_buffer, sizeof(round_buffer));
+            if (result.status != FY_STD_PROCESS_ARGS_OK_V0 ||
+                result.needed != expected_length[index - 1]) {
+                return 13;
+            }
+            if (result.needed != (size_t)0 &&
+                memcmp(round_buffer, expected[index - 1], result.needed) != 0) {
+                return 14;
+            }
+        }
+    }
+    return 0;
+}
+`
+
 const divisionByZeroSource = `module division_by_zero;
 
 fn i32 main() {
@@ -392,6 +504,8 @@ const checkedInStdTextManifestPath = "examples/std_text_quickstart/fairy.toml"
 const checkedInStdTextMainPath = "examples/std_text_quickstart/src/main.fy"
 const checkedInRegionsManifestPath = "examples/regions/fairy.toml"
 const checkedInRegionsMainPath = "examples/regions/src/main.fy"
+const checkedInProcessArgsManifestPath = "examples/process_args_quickstart/fairy.toml"
+const checkedInProcessArgsMainPath = "examples/process_args_quickstart/src/main.fy"
 const checkedInWindowsFilePath = "examples/windows_file/main.fy"
 const checkedInWindowsFileSupportPath = "examples/windows_file/windows_file.fy"
 const checkedInOwnedTextPath = "examples/owned_text/main.fy"
@@ -501,6 +615,14 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("read checked-in Region workspace entry: %w", err)
 	}
+	processArgsManifest, err := os.ReadFile(filepath.FromSlash(checkedInProcessArgsManifestPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in process args workspace manifest: %w", err)
+	}
+	processArgsMain, err := os.ReadFile(filepath.FromSlash(checkedInProcessArgsMainPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in process args workspace entry: %w", err)
+	}
 	windowsFileSource, err := os.ReadFile(filepath.FromSlash(checkedInWindowsFilePath))
 	if err != nil {
 		return fmt.Errorf("read checked-in Windows File source: %w", err)
@@ -565,6 +687,8 @@ func run() error {
 		checkedInStdTextMainPath:          string(stdTextMain),
 		checkedInRegionsManifestPath:      string(regionsManifest),
 		checkedInRegionsMainPath:          string(regionsMain),
+		checkedInProcessArgsManifestPath:  string(processArgsManifest),
+		checkedInProcessArgsMainPath:      string(processArgsMain),
 		checkedInWindowsFilePath:          string(windowsFileSource),
 		checkedInWindowsFileSupportPath:   string(windowsFileSupportSource),
 		checkedInOwnedTextPath:            string(ownedTextSource),
@@ -1065,6 +1189,14 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	processArgsBuildImages, processArgsExecutions, err := runProcessArgsQuickstartProof(root)
+	if err != nil {
+		return err
+	}
+	processArgsDecodeImages, processArgsDecodeExecutions, err := runWindowsProcessArgsDecodeProbe(toolchain)
+	if err != nil {
+		return err
+	}
 	layoutExecutions, layoutCases, err := runWindowsLayoutProbe(toolchain)
 	if err != nil {
 		return err
@@ -1093,12 +1225,13 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	inspectedPEImages := 1 + targetBuildExecutions + workspaceBuildExecutions + windowsFileSourceExecutions + ownedTextSourceExecutions + targetRunExecutions + workspaceRunExecutions + targetExecExecutions + windowsFileExecutions + bufferProbeExecutions + ownedTextProbeExecutions + arenaProbeExecutions + regionFailureProbeImages + bufferFailureProbeImages + stringAppendFailureProbeImages + cstringFailureProbeImages + stringCopyFailureProbeImages + layoutExecutions + abiExecutions + relocationExecutions + weakSearchExecutions + archiveExecutions + structResultExecutions + unwindExecutions
+	inspectedPEImages := 1 + targetBuildExecutions + workspaceBuildExecutions + windowsFileSourceExecutions + ownedTextSourceExecutions + targetRunExecutions + workspaceRunExecutions + targetExecExecutions + windowsFileExecutions + bufferProbeExecutions + ownedTextProbeExecutions + arenaProbeExecutions + regionFailureProbeImages + bufferFailureProbeImages + stringAppendFailureProbeImages + cstringFailureProbeImages + stringCopyFailureProbeImages + processArgsBuildImages + processArgsDecodeImages + layoutExecutions + abiExecutions + relocationExecutions + weakSearchExecutions + archiveExecutions + structResultExecutions + unwindExecutions
 	fmt.Printf("Generated-Fairy Region failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering payload-allocation failure, node-allocation rollback, exact status 1, lexical reset, automatic Arena drop, and zero retained probe allocations\n", regionFailureCases, regionFailureProbeImages)
 	fmt.Printf("Generated-Fairy Buffer failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering with_capacity initial-allocation failure and resize_zeroed growth failure with preserved len/capacity, exact status 1, and zero retained probe allocations\n", bufferFailureCases, bufferFailureProbeImages)
 	fmt.Printf("Generated-Fairy String append failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering successful copy allocation, append growth-allocation failure with preserved owner and len/is_empty/view, exact statuses 1/1, automatic String drop, and zero retained probe allocations\n", stringAppendFailureCases, stringAppendFailureProbeImages)
 	fmt.Printf("Generated-Fairy CString failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering cstring_from_text initial-allocation failure, exact statuses 1/1, automatic CString drop, and zero retained probe allocations\n", cstringFailureCases, cstringFailureProbeImages)
 	fmt.Printf("Generated-Fairy String copy failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering text::copy initial-allocation failure, exact statuses 1/1, automatic String drop, and zero retained probe allocations\n", stringCopyFailureCases, stringCopyFailureProbeImages)
+	fmt.Printf("Stable run program-argument forwarding proof passed: %d native executions across %d inspected low/optimized MSVC images, covering argv[0] inclusion and ordering, empty, flag-looking, space/quote/trailing-backslash, and non-ASCII UTF-8 argument round-trips, out-of-range status 1, too-small status 3 with exact needed and an unchanged caller buffer, CLI embedded-NUL and delimiter rejection, and low-level invalid-surrogate status 2 with an unchanged buffer\n", processArgsExecutions+processArgsDecodeExecutions, processArgsBuildImages+processArgsDecodeImages)
 	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds, %d package-workspace builds, %d package-workspace runs, %d source-level safe File lifecycle builds, %d source-level safe owned-text lifecycle builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, public safe std::bytes Buffer ownership and views, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls, checked reads and mutable indexed stores, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, bounded lexical defer, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, stable-run stdin forwarding, bounded allocation-free stdin byte reads with EOF and partial-buffer evidence, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart, output, locked workspace execution, one isolated semantic test, two target-explicit C emissions, nine paired cold/warm persistent-cache process measurements, one nine-process bounded persistent-cache growth staircase, an eight-request editor-shaped workspace session with Windows process-memory peaks, %d fresh locked Atlas workspace-call catalog processes with per-process memory peaks, %d generated Atlas workspace-call scaling shapes, and %d post-GC retained-index batches, 42 run-host outcomes covered fixed arrays, byte-view iteration and slicing, checked indexed stores, assertions and lexical defer in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, Buffer initialization, reserve, self-overlap append, and zeroed-resize allocation rollback passed %d separate-translation-unit MSVC executions, owned-text opaque-storage failure preservation, forced allocation rollback, and repeated drop passed %d separate-translation-unit MSVC executions, Arena zeroing, two-stage allocation rollback, stale Region rejection, and active-drop preservation passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, exact object addends and final-image REL32 through REL32_5, weak-alias fallback/strong override, ADDR64, and unwind ADDR32NB values plus CodeView SECTION/SECREL pairs, PE/PDB identity, and exact DbgHelp function/line symbolication passed %d separate-translation-unit MSVC executions, weak NOLIBRARY suppression and LIBRARY extraction passed %d separate-translation-unit MSVC executions, archive extraction, pick-any ownership, selected-child retention, and discarded-child elimination passed %d MSVC input-order executions, generated-Fairy small and large struct results passed %d separate-translation-unit MSVC executions across C11 and C17 consumer modes, %d Windows x64 unwind cases plus exact profile-specific handler-tail ADDR32NB binding passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, workspaceBuildExecutions, workspaceRunExecutions, windowsFileSourceExecutions, ownedTextSourceExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, buildmeasure.AtlasCallProcessIterations, len(atlasCallScaleMeasurement.Shapes), len(atlasCallRetainedMeasurement.Shapes)*buildmeasure.AtlasCallRetainedIterationsPerShape, windowsFileExecutions, bufferProbeExecutions, ownedTextProbeExecutions, arenaProbeExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, relocationExecutions, weakSearchExecutions, archiveExecutions, structResultExecutions, unwindCases, unwindExecutions, inspectedPEImages, toolchain.Version)
 	return nil
 }
@@ -1218,6 +1351,76 @@ func runStdlibQuickstartProof(root string, directory string, artifactBase string
 		}
 	}
 	return len(profiles), nil
+}
+
+func runProcessArgsQuickstartProof(root string) (int, int, error) {
+	workspaceRoot := filepath.Join(root, "examples", "process_args_quickstart")
+	artifactPath := filepath.Join(workspaceRoot, "build", "process-args-quickstart.exe")
+	profiles := []struct {
+		name       string
+		arguments  []string
+		lockStatus string
+	}{
+		{name: "development", arguments: []string{"build"}, lockStatus: "lock updated"},
+		{name: "release", arguments: []string{"build", "--release", "--locked"}, lockStatus: "lock verified"},
+	}
+	executions := 0
+	for _, profile := range profiles {
+		var stdout bytes.Buffer
+		var stderr bytes.Buffer
+		code := cli.Run(profile.arguments, workspaceRoot, &stdout, &stderr)
+		want := fmt.Sprintf("built: build/process-args-quickstart.exe (x86_64-windows-msvc, %s, %s)\n", profile.name, profile.lockStatus)
+		if code != cli.ExitSuccess || stderr.Len() != 0 || stdout.String() != want {
+			return 0, 0, fmt.Errorf("%s process-args build returned code %d, stdout %q, stderr %q", profile.name, code, stdout.String(), stderr.String())
+		}
+		artifact, err := os.ReadFile(artifactPath)
+		if err != nil {
+			return 0, 0, fmt.Errorf("read %s process-args artifact: %w", profile.name, err)
+		}
+		if _, err := pecoff.InspectExecutable(artifact); err != nil {
+			return 0, 0, fmt.Errorf("inspect %s process-args PE image: %w", profile.name, err)
+		}
+		if _, err := pecoff.InspectAMD64Unwind(artifact); err != nil {
+			return 0, 0, fmt.Errorf("inspect %s process-args unwind data: %w", profile.name, err)
+		}
+		if err := executeExpectResultWithArgs(artifactPath, 42, processArgsProofArguments...); err != nil {
+			return 0, 0, fmt.Errorf("execute %s process-args artifact: %w", profile.name, err)
+		}
+		executions++
+	}
+	runArguments := append([]string{"run", "--"}, processArgsProofArguments...)
+	var developmentStdout bytes.Buffer
+	var developmentStderr bytes.Buffer
+	developmentCode := cli.RunWithInput(runArguments, workspaceRoot, strings.NewReader(""), &developmentStdout, &developmentStderr)
+	if developmentCode != 42 || developmentStdout.Len() != 0 || developmentStderr.Len() != 0 {
+		return 0, 0, fmt.Errorf("stable development run with program arguments returned code %d, stdout %q, stderr %q", developmentCode, developmentStdout.String(), developmentStderr.String())
+	}
+	executions++
+	releaseRunArguments := append([]string{"run", "--release", "--locked", "--"}, processArgsProofArguments...)
+	var releaseStdout bytes.Buffer
+	var releaseStderr bytes.Buffer
+	releaseCode := cli.RunWithInput(releaseRunArguments, workspaceRoot, strings.NewReader(""), &releaseStdout, &releaseStderr)
+	if releaseCode != 42 || releaseStdout.Len() != 0 || releaseStderr.Len() != 0 {
+		return 0, 0, fmt.Errorf("stable release run with program arguments returned code %d, stdout %q, stderr %q", releaseCode, releaseStdout.String(), releaseStderr.String())
+	}
+	executions++
+	for _, rejection := range []struct {
+		name      string
+		arguments []string
+		contains  string
+	}{
+		{name: "embedded NUL", arguments: []string{"run", "--", "a\x00b"}, contains: "NUL byte"},
+		{name: "unknown flag before delimiter", arguments: []string{"run", "--bogus", "--", "x"}, contains: "accepts only optional --release and --locked"},
+		{name: "build delimiter", arguments: []string{"build", "--", "x"}, contains: "accepts only optional --release and --locked"},
+	} {
+		var stdout bytes.Buffer
+		var stderr bytes.Buffer
+		code := cli.Run(rejection.arguments, workspaceRoot, &stdout, &stderr)
+		if code != cli.ExitInvalidInvocation || stdout.Len() != 0 || !strings.Contains(stderr.String(), rejection.contains) {
+			return 0, 0, fmt.Errorf("%s rejection returned code %d, stdout %q, stderr %q", rejection.name, code, stdout.String(), stderr.String())
+		}
+	}
+	return len(profiles), executions, nil
 }
 
 func runStableWorkspaceRunProof(root string) (int, error) {
@@ -3218,6 +3421,47 @@ func runWindowsLayoutProbe(toolchain cdriver.WindowsHostToolchain) (int, int, er
 	return executions, len(unit.Cases), nil
 }
 
+func runWindowsProcessArgsDecodeProbe(toolchain cdriver.WindowsHostToolchain) (int, int, error) {
+	implementation, err := cstdlib.WindowsProcessArgsSource()
+	if err != nil {
+		return 0, 0, fmt.Errorf("load Windows process args implementation: %w", err)
+	}
+	probeSource := implementation + "\n" + windowsProcessArgsDecodeProbeMain
+	executions := 0
+	for _, profile := range []cdriver.Profile{cdriver.LowProfile, cdriver.OptimizedProfile} {
+		artifact, err := cdriver.BuildWindowsMSVCProbe(toolchain, profile, probeSource)
+		if err != nil {
+			return executions, 0, fmt.Errorf("build Windows process args decode probe with %s: %w", profile.Name, err)
+		}
+		if len(artifact.Objects) != 1 || artifact.Objects[0].Name != "probe.obj" {
+			return executions, 0, fmt.Errorf("Windows process args decode probe with %s returned unexpected COFF object receipts", profile.Name)
+		}
+		if _, err := pecoff.InspectExecutable(artifact.Bytes); err != nil {
+			return executions, 0, fmt.Errorf("inspect Windows process args decode probe PE executable image with %s: %w", profile.Name, err)
+		}
+		if _, err := pecoff.InspectAMD64Unwind(artifact.Bytes); err != nil {
+			return executions, 0, fmt.Errorf("inspect Windows process args decode probe unwind data with %s: %w", profile.Name, err)
+		}
+		outcome, err := cdriver.ExecuteWindowsMSVCProbe(artifact)
+		if err != nil {
+			return executions, 0, fmt.Errorf("execute Windows process args decode probe with %s: %w", profile.Name, err)
+		}
+		if outcome.ExitCode != 0 || outcome.Stdout != "" || outcome.Stderr != "" {
+			return executions, 0, fmt.Errorf("Windows process args decode probe with %s returned %d, stdout %q, stderr %q", profile.Name, outcome.ExitCode, outcome.Stdout, outcome.Stderr)
+		}
+		executions++
+		outcomeWithArgs, err := cdriver.ExecuteWindowsMSVCTargetWithInputAndArgs(artifact, strings.NewReader(""), processArgsDecodeRoundTripArguments)
+		if err != nil {
+			return executions, 0, fmt.Errorf("execute Windows process args decode probe with arguments with %s: %w", profile.Name, err)
+		}
+		if outcomeWithArgs.ExitCode != 0 || outcomeWithArgs.Stdout != "" || outcomeWithArgs.Stderr != "" {
+			return executions, 0, fmt.Errorf("Windows process args decode probe with arguments with %s returned %d, stdout %q, stderr %q", profile.Name, outcomeWithArgs.ExitCode, outcomeWithArgs.Stdout, outcomeWithArgs.Stderr)
+		}
+		executions++
+	}
+	return executions, executions, nil
+}
+
 func runWindowsABIProbe(toolchain cdriver.WindowsHostToolchain) (int, int, error) {
 	unit, err := windowsabiprobe.Generate(filepath.FromSlash(windowsABIManifestPath))
 	if err != nil {
@@ -3595,6 +3839,39 @@ func executeExpectResult(path string, expected int32) error {
 			exitCode = command.ProcessState.ExitCode()
 		}
 		return fmt.Errorf("build-host artifact returned error %v, exit %d (i32 %d), output %q", err, exitCode, actual, output.String())
+	}
+	return nil
+}
+
+func executeExpectResultWithArgs(path string, expected int32, args ...string) error {
+	contextValue, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	command := exec.CommandContext(contextValue, path)
+	command.Args = append([]string{path}, args...)
+	command.Dir = filepath.Dir(path)
+	command.Stdin = nil
+	var output bytes.Buffer
+	command.Stdout = &output
+	command.Stderr = &output
+	err := command.Run()
+	if errors.Is(contextValue.Err(), context.DeadlineExceeded) {
+		return fmt.Errorf("build-host artifact with arguments exceeded execution timeout")
+	}
+	exitCode := 0
+	if err != nil {
+		var exitError *exec.ExitError
+		if !errors.As(err, &exitError) {
+			return fmt.Errorf("build-host artifact with arguments execution failed: %w", err)
+		}
+		exitCode = exitError.ExitCode()
+	}
+	actual := int32(uint32(exitCode))
+	if actual != expected || output.Len() != 0 {
+		exitCode := -1
+		if command.ProcessState != nil {
+			exitCode = command.ProcessState.ExitCode()
+		}
+		return fmt.Errorf("build-host artifact with arguments returned error %v, exit %d (i32 %d), output %q", err, exitCode, actual, output.String())
 	}
 	return nil
 }

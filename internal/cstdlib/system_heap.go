@@ -63,6 +63,9 @@ var stage0WindowsFile string
 //go:embed stage0_windows_file_probe.c
 var stage0WindowsFileProbe string
 
+//go:embed stage0_windows_process_args.c
+var stage0WindowsProcessArgs string
+
 // SystemHeapSource returns the provisional x86_64-linux-gnu SystemHeap implementation.
 func SystemHeapSource() (string, error) {
 	return canonicalSource("SystemHeap", stage0SystemHeap)
@@ -236,6 +239,11 @@ func WindowsFileProbeSource() (string, error) {
 	return canonicalSource("Windows File probe", stage0WindowsFileProbe)
 }
 
+// WindowsProcessArgsSource returns the target-specific UTF-8 process argument implementation.
+func WindowsProcessArgsSource() (string, error) {
+	return canonicalSource("Windows process args", stage0WindowsProcessArgs)
+}
+
 // SourceForSymbols returns the minimal dependency-closed Stage 0 C implementation for the exact
 // standard-library symbols called by one generated unit. An empty result needs no stdlib object.
 func SourceForSymbols(symbols []string) (string, error) {
@@ -326,6 +334,8 @@ func componentSource(component cstdlibcontract.Component) (string, string, error
 		return "Windows console", stage0WindowsConsole, nil
 	case cstdlibcontract.ComponentWindowsFile:
 		return "Windows File", stage0WindowsFile, nil
+	case cstdlibcontract.ComponentWindowsProcessArgs:
+		return "Windows process args", stage0WindowsProcessArgs, nil
 	case cstdlibcontract.ComponentSystemHeap:
 		return "SystemHeap", stage0SystemHeap, nil
 	case cstdlibcontract.ComponentBuffer:

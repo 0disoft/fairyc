@@ -499,22 +499,31 @@ Success is exactly `built: <path> (x86_64-windows-msvc, <development|release>, l
 stability does not promote the target's independent `emittable`, `conformant`, or `supported`
 status and does not select persistent-cache defaults.
 
-## Stable workspace run v3
+## Stable workspace run v4
 
-`fairyc run [--release] [--locked]` compiles and executes the current workspace through the same
-manifest, lock, root `main::main`, development/release profile, and closed local Windows pipeline as
-stable build. The complete PE and unwind image is inspected before execution, exists only in
-compiler-owned temporary storage, and is removed afterward. It does not create, replace, read, or
-execute the retained `build/<package-name>.exe` artifact.
+`fairyc run [--release] [--locked] [-- <program-args...>]` compiles and executes the current
+workspace through the same manifest, lock, root `main::main`, development/release profile, and
+closed local Windows pipeline as stable build. The complete PE and unwind image is inspected before
+execution, exists only in compiler-owned temporary storage, and is removed afterward. It does not
+create, replace, read, or execute the retained `build/<package-name>.exe` artifact.
 
 The command accepts no positional source, output, target, compiler, linker, profile value, cache,
-JSON, configuration, network, program argument, or program-stream delimiter. After compilation,
-linking, and PE/unwind inspection succeed, the caller's stdin is attached directly to the temporary
-program without compiler-side pre-reading, decoding, retention, logging, replay, or a separate byte
-ceiling. Pre-launch failures consume no program input. Bounded program stdout and stderr are
-forwarded to their matching compiler streams without a success banner. Capture uses separate OS
-pipes under one shared 64 KiB ceiling, so stream identity is preserved but cross-stream order is
-unspecified. Input liveness remains bounded by the existing process timeout.
+JSON, configuration, or network input. The first `--` separates compiler options from program
+arguments: every argument after it becomes the temporary program's process argument in order, the
+delimiter itself is excluded, and `build` and other stable commands still reject the delimiter.
+`run -- --locked` passes `--locked` to the program, while `run --locked -- x` keeps the compiler
+option and passes `x`; an unknown flag before the delimiter is the existing invocation error, and a
+NUL byte in any program argument is rejected before compilation. The generated C entry remains
+`int main(void)`; the program reads its arguments through the effect-free `std::process` surface
+against the UCRT wide argv, which the stdlib adapter materializes once with
+`_configure_wide_argv(_crt_argv_unexpanded_arguments)` before strict UTF-8 conversion. After
+compilation, linking, and PE/unwind inspection succeed, the caller's stdin is attached directly to
+the temporary program without
+compiler-side pre-reading, decoding, retention, logging, replay, or a separate byte ceiling.
+Pre-launch failures consume no program input. Bounded program stdout and stderr are forwarded to
+their matching compiler streams without a success banner. Capture uses separate OS pipes under one
+shared 64 KiB ceiling, so stream identity is preserved but cross-stream order is unspecified.
+Input liveness remains bounded by the existing process timeout.
 
 A normal return across the full `i32` range becomes the `fairyc` process status. After launch, a
 status numerically equal to 2, 3, 4, 5, 6, or 7 is still program-owned. A compiler-private run-only
@@ -565,14 +574,14 @@ may precede later failure, while `--locked` writes nothing.
 | `fairyc new <package-name> --uid <package-uid>` | Create one exact no-overwrite starter project below the current directory | Fairy C source only |
 | `fairyc check [--locked]` | Check the current manifest-owned workspace through verified MIR | No |
 | `fairyc build [--release] [--locked]` | Build or replace the current root package's one Windows executable | Yes |
-| `fairyc run [--release] [--locked]` | Build and run the current workspace as one temporary Windows image | Yes |
+| `fairyc run [--release] [--locked] [-- <program-args...>]` | Build and run the current workspace as one temporary Windows image, forwarding arguments after `--` to the program | Yes |
 | `fairyc test [--locked]` | Run isolated root-package `@test fn void` entries through verified MIR and the semantic interpreter | No |
 | `fairyc emit c --target <target-id> [--locked]` | Emit the current executable workspace's target-selected C11 application unit | C only, stdout |
 | `fairyc explain <diagnostic-code>` | Explain a stable diagnostic code | No |
 | `fairyc targets` | Report known target profiles, status, evidence, and unavailable requirements | No |
 
 Alternate package/workspace selection, test filtering and native execution, target triples beyond
-  the declared emit profiles and build/run's fixed local Windows path, program arguments and
+  the declared emit profiles and build/run's fixed local Windows path,
 additional program-input routing beyond stable run,
 feature flags, and configuration precedence
 remain UNDECIDED. The implemented `experimental` spellings do not settle those decisions.

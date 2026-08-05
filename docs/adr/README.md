@@ -270,6 +270,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0258-entry-reachable-c-emission.md`: emits only functions, drop glue, and foreign declarations reachable from the selected entry, keeping dead code out of generated C and `unit.ForeignSymbols` without changing MIR, language, SDK, or ABI.
 - `0259-generated-fairy-cstring-failure-execution.md`: executes generated Fairy `CString` construction-allocation failure `.err` handling at low and optimized MSVC profiles without adding product failure controls.
 - `0260-generated-fairy-string-copy-failure-execution.md`: executes generated Fairy `text::copy` initial-allocation failure `.err` handling at low and optimized MSVC profiles without adding product failure controls.
+- `0261-stable-run-program-argument-forwarding.md`: forwards `fairyc run -- <program-args...>` to the temporary Windows program and adds the effect-free `std::process` argument surface without changing the generated C entry, language, runtime ABI, or product linkage.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

@@ -1,0 +1,8 @@
+schema = "fairyc.manifest/v1"
+
+[package]
+uid = "example.process-args-quickstart.app"
+name = "process-args-quickstart"
+version = "1.0.0"
+language = "fairyc-language/8"
+source = "src"

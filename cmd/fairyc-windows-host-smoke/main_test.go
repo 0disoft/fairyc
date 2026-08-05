@@ -329,6 +329,16 @@ func TestGeneratedFairyBufferFailureSourcesPassFullPipeline(t *testing.T) {
 			expect:         []string{"fy_std_string_copy_storage_v0", "fy_std_string_drop_storage_v0", "fy_runtime_trap("},
 			foreignSymbols: []string{"fy_std_string_copy_storage_v0", "fy_std_string_drop_storage_v0"},
 		},
+		{
+			name: "process args used", manifest: "process_args_quickstart", source: generatedFairyProcessArgsSource,
+			expect:         []string{"fy_std_process_arg_count_v0", "fy_std_process_arg_v0"},
+			foreignSymbols: []string{"fy_std_process_arg_count_v0", "fy_std_process_arg_v0"},
+		},
+		{
+			name: "process args unused", manifest: "process_args_quickstart", source: "module main;\nfn i32 main() { return 42; }\n",
+			expect:         []string{},
+			foreignSymbols: []string{},
+		},
 	} {
 		manifestPath := filepath.Join("..", "..", "examples", tc.manifest, "fairy.toml")
 		manifest, err := os.ReadFile(manifestPath)
@@ -432,6 +442,31 @@ func TestGeneratedFairyProbeImplementationJoinsScalarRuntime(t *testing.T) {
 				t.Fatalf("%s product implementation must not define the scalar runtime trap", name)
 			}
 		}
+	}
+}
+
+func TestGeneratedFairyProbeImplementationAcceptsProcessArgsSymbols(t *testing.T) {
+	t.Parallel()
+	closure, err := generatedFairyProbeImplementation(filepath.Join("..", ".."), []string{
+		"fy_std_process_arg_count_v0",
+		"fy_std_process_arg_v0",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, fragment := range []string{
+		"fy_std_process_arg_count_v0",
+		"fy_std_process_arg_v0",
+		"fy_std_system_heap_probe_fail_after_allocations_v0",
+		"fy_std_system_heap_probe_live_allocations_v0",
+		"void fy_runtime_trap(uint32_t category)",
+	} {
+		if !strings.Contains(closure, fragment) {
+			t.Fatalf("process args closure lost required fragment %q", fragment)
+		}
+	}
+	if strings.Count(closure, "void fy_runtime_trap(") != 1 {
+		t.Fatalf("process args closure must define fy_runtime_trap exactly once")
 	}
 }
 

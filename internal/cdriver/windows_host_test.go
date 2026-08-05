@@ -14,6 +14,10 @@ func TestExecuteWindowsMSVCTargetWithInputRejectsNilInput(t *testing.T) {
 		!strings.Contains(err.Error(), "input must not be nil") {
 		t.Fatalf("ExecuteWindowsMSVCTargetWithInput(nil) error = %v", err)
 	}
+	if _, err := ExecuteWindowsMSVCTargetWithInputAndArgs(WindowsHostArtifact{}, nil, []string{"x"}); err == nil ||
+		!strings.Contains(err.Error(), "input must not be nil") {
+		t.Fatalf("ExecuteWindowsMSVCTargetWithInputAndArgs(nil) error = %v", err)
+	}
 }
 
 func TestLatestWindowsSDKVersionRequiresCompleteHighestVersion(t *testing.T) {
@@ -125,6 +129,9 @@ func TestWindowsHostDriverFailsClosedOnIneligibleHost(t *testing.T) {
 	}
 	if _, err := ExecuteWindowsMSVCUnwindProbe(WindowsHostArtifact{Bytes: []byte("image")}); err == nil || !strings.Contains(err.Error(), "requires windows/amd64") {
 		t.Fatalf("ExecuteWindowsMSVCUnwindProbe() error = %v", err)
+	}
+	if _, err := ExecuteWindowsMSVCTargetWithInputAndArgs(WindowsHostArtifact{Bytes: []byte("image")}, strings.NewReader(""), []string{"x"}); err == nil || !strings.Contains(err.Error(), "requires windows/amd64") {
+		t.Fatalf("ExecuteWindowsMSVCTargetWithInputAndArgs() error = %v", err)
 	}
 }
 

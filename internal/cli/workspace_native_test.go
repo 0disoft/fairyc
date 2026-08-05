@@ -83,6 +83,76 @@ func TestParseStableNativeOptions(t *testing.T) {
 	}
 }
 
+func TestSplitStableRunArgumentsSeparatesProgramArguments(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name              string
+		arguments         []string
+		compilerArguments []string
+		programArguments  []string
+	}{
+		{name: "no delimiter", arguments: []string{"--release", "--locked"}, compilerArguments: []string{"--release", "--locked"}},
+		{name: "bare delimiter", arguments: []string{"--"}, programArguments: []string{}},
+		{name: "option then delimiter", arguments: []string{"--release", "--", "x"}, compilerArguments: []string{"--release"}, programArguments: []string{"x"}},
+		{name: "flag-looking program argument", arguments: []string{"--", "--locked"}, programArguments: []string{"--locked"}},
+		{name: "empty program argument", arguments: []string{"--", ""}, programArguments: []string{""}},
+		{name: "multiple program arguments", arguments: []string{"--", "a", "b", "c"}, programArguments: []string{"a", "b", "c"}},
+	}
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			compilerArguments, programArguments, err := splitStableRunArguments(test.arguments)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !slices.Equal(compilerArguments, test.compilerArguments) {
+				t.Errorf("compiler arguments = %v, want %v", compilerArguments, test.compilerArguments)
+			}
+			if !slices.Equal(programArguments, test.programArguments) {
+				t.Errorf("program arguments = %v, want %v", programArguments, test.programArguments)
+			}
+		})
+	}
+}
+
+func TestSplitStableRunArgumentsRejectsEmbeddedNUL(t *testing.T) {
+	t.Parallel()
+	for _, arguments := range [][]string{
+		{"--", "a\x00b"},
+		{"--locked", "--", "ok", "\x00"},
+	} {
+		_, _, err := splitStableRunArguments(arguments)
+		if err == nil || !strings.Contains(err.Error(), "NUL byte") {
+			t.Errorf("splitStableRunArguments(%q) error = %v; want NUL rejection", arguments, err)
+		}
+	}
+}
+
+func TestStableRunRejectsEmbeddedNULBeforeCompilation(t *testing.T) {
+	t.Parallel()
+	code, stdout, stderr := runForTest([]string{"run", "--", "a\x00b"}, t.TempDir())
+	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "NUL byte") {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
+func TestStableRunRejectsUnknownFlagBeforeDelimiter(t *testing.T) {
+	t.Parallel()
+	code, stdout, stderr := runForTest([]string{"run", "--bogus", "--", "x"}, t.TempDir())
+	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "accepts only optional --release and --locked") {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
+func TestStableBuildRejectsProgramDelimiter(t *testing.T) {
+	t.Parallel()
+	code, stdout, stderr := runForTest([]string{"build", "--", "x"}, t.TempDir())
+	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "accepts only optional --release and --locked") {
+		t.Fatalf("Run() = code %d, stdout %q, stderr %q", code, stdout, stderr)
+	}
+}
+
 func TestClassifyStableRunOutcomeSeparatesProgramStreamsAndReservedResultFromTrap(t *testing.T) {
 	t.Parallel()
 	normalResult := int32(productTrapExitBase + 3)

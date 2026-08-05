@@ -83,7 +83,11 @@ func runStableBuild(arguments []string, sourceRoot string, stdout, stderr io.Wri
 }
 
 func runStableRun(arguments []string, sourceRoot string, stdin io.Reader, stdout, stderr io.Writer) int {
-	options, err := parseStableNativeOptions("run", arguments)
+	compilerArguments, programArguments, err := splitStableRunArguments(arguments)
+	if err != nil {
+		return invocationError(stderr, err.Error())
+	}
+	options, err := parseStableNativeOptions("run", compilerArguments)
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
@@ -99,7 +103,7 @@ func runStableRun(arguments []string, sourceRoot string, stdin io.Reader, stdout
 	if code != ExitSuccess {
 		return code
 	}
-	outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInput(compiled.artifact, stdin)
+	outcome, err := cdriver.ExecuteWindowsMSVCTargetWithInputAndArgs(compiled.artifact, stdin, programArguments)
 	if err != nil {
 		return buildFailure(stderr, err)
 	}
@@ -114,6 +118,25 @@ func runStableRun(arguments []string, sourceRoot string, stdin io.Reader, stdout
 		return ExitProgramTrap
 	}
 	return int(uint32(outcome.ExitCode))
+}
+
+// splitStableRunArguments separates the first "--" and everything after it as program arguments.
+// The delimiter itself is not passed to the program. Program arguments are part of the stable run
+// command line, so an embedded NUL byte is rejected before compilation.
+func splitStableRunArguments(arguments []string) (compilerArguments, programArguments []string, err error) {
+	for index, argument := range arguments {
+		if argument != "--" {
+			continue
+		}
+		programArguments = arguments[index+1:]
+		for _, programArgument := range programArguments {
+			if strings.ContainsRune(programArgument, '\x00') {
+				return nil, nil, fmt.Errorf(`command "run" rejects program arguments containing a NUL byte`)
+			}
+		}
+		return arguments[:index], programArguments, nil
+	}
+	return arguments, nil, nil
 }
 
 func parseStableNativeOptions(command string, arguments []string) (stableNativeOptions, error) {

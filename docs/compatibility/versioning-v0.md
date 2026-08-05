@@ -516,6 +516,16 @@ language remains `fairyc-language/8`, SDK remains `0.0.0-stage0.10`, and runtime
 `fairyc-runtime/0`. A backend that lacks the closed Arena/Region target symbols still rejects the
 program before toolchain invocation.
 
+ADR 0261 moves the SDK to `0.0.0-stage0.11` because it adds the public `std::process` module with
+`arg_count() -> usize` and
+`arg(usize index, ref mut u8[] buffer) -> Result<usize, ProcessArgError>`, plus the private
+`fy_std_process_arg_count_v0` and `fy_std_process_arg_v0` Windows target support symbols. The SDK
+source digest, package instance, public-interface hash, dependent identities, generated locks, and
+whole-package cache keys change. Language remains `fairyc-language/8` and runtime ABI remains
+`fairyc-runtime/0`; stable `fairyc run` forwards arguments after `--` without changing the generated
+C entry, and the program-argument status/`needed` contract is pre-1 implementation compatibility
+data rather than a public C or Fairy native ABI.
+
 ## Package formats
 
 Manifest schema, lockfile schema, source archive schema, and any future binary artifact schema are independent. Stage 0 needs manifest and lockfile schemas only. A stable binary package format would falsely imply a stable native Fairy ABI and is deferred.
@@ -537,7 +547,7 @@ ADR 0144 fixes the first loader behavior for this manifest schema: explicit root
 exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, one language revision,
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
 instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
-`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.10`, language
+`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.11`, language
 `fairyc-language/8`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 

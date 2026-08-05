@@ -487,6 +487,35 @@ func TestWindowsMSVCSourceForSymbolsSelectsOnlyWindowsFile(t *testing.T) {
 	}
 }
 
+func TestWindowsMSVCSourceForSymbolsSelectsOnlyProcessArgs(t *testing.T) {
+	t.Parallel()
+	source, err := WindowsMSVCSourceForSymbols([]string{"fy_std_process_arg_count_v0"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, required := range []string{
+		"fy_std_process_arg_count_v0", "fy_std_process_arg_v0",
+		"__p___argc", "__p___wargv", "WideCharToMultiByte",
+		"CP_UTF8", "WC_ERR_INVALID_CHARS", "ERROR_NO_UNICODE_TRANSLATION",
+		"_configure_wide_argv(_crt_argv_unexpanded_arguments)",
+		"written != needed",
+		"FY_STD_PROCESS_ARGS_OK_V0", "FY_STD_PROCESS_ARGS_INDEX_OUT_OF_RANGE_V0",
+		"FY_STD_PROCESS_ARGS_INVALID_ENCODING_V0", "FY_STD_PROCESS_ARGS_BUFFER_TOO_SMALL_V0",
+	} {
+		if !strings.Contains(source, required) {
+			t.Errorf("Windows process args source is missing %q", required)
+		}
+	}
+	for _, forbidden := range []string{
+		"fy_std_windows_stdout_write_all_v0", "GetStdHandle", "WriteFile",
+		"fy_std_system_heap_allocate_v0", "shell32", "_POSIX_C_SOURCE",
+	} {
+		if strings.Contains(source, forbidden) {
+			t.Errorf("Windows process args source unexpectedly contains %q", forbidden)
+		}
+	}
+}
+
 func TestSourceForSymbolsSelectsMinimalDependencyClosure(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -586,6 +615,8 @@ func TestWindowsMSVCSourceForSymbolsKeepsClosedRuntimeSlice(t *testing.T) {
 		"fy_std_windows_file_sync_v0",
 		"fy_std_windows_file_close_v0",
 		"fy_std_windows_file_drop_v0",
+		"fy_std_process_arg_count_v0",
+		"fy_std_process_arg_v0",
 		"fy_std_text_utf8_valid_v0",
 		"fy_std_buffer_initialize_v0",
 		"fy_std_buffer_resize_zeroed_v0",
@@ -625,6 +656,7 @@ func TestWindowsMSVCSourceForSymbolsKeepsClosedRuntimeSlice(t *testing.T) {
 		"fy_std_windows_file_open_v0", "fy_std_windows_file_read_v0",
 		"fy_std_windows_file_write_all_v0", "fy_std_windows_file_sync_v0",
 		"fy_std_windows_file_close_v0", "fy_std_windows_file_drop_v0", "CreateFileW",
+		"fy_std_process_arg_count_v0", "fy_std_process_arg_v0", "WideCharToMultiByte",
 		"fy_std_system_heap_allocate_v0", "fy_std_system_heap_deallocate_v0",
 		"fy_std_buffer_initialize_v0", "fy_std_buffer_resize_zeroed_v0", "fy_std_buffer_drop_v0",
 		"fy_std_arena_initialize_v0", "fy_std_region_begin_v0",

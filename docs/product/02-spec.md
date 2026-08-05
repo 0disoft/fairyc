@@ -603,7 +603,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
-  The compiler-bundled SDK `0.0.0-stage0.10` exposes
+  The compiler-bundled SDK `0.0.0-stage0.11` exposes
   `std::io::write(ref str) -> Result<usize, ConsoleError>` and a matching `write_stderr` operation
   for text, plus `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` for exact binary output.
   All four declare `console`, keep raw pointers and target linkage private, append no newline,
@@ -618,6 +618,18 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   short-input, and eight-byte-prefix evidence through a separately built compiler. Stable run now
   forwards the short input after successful compilation; Linux native execution remains configured
   but unobserved on this host.
+  ADR 0261 additionally exposes the effect-free `std::process` surface:
+  `arg_count() -> usize` includes the executable name at index 0, and
+  `arg(usize index, ref mut u8[] buffer) -> Result<usize, ProcessArgError>` copies one argument's
+  exact UTF-8 bytes with statuses 1 (out of range), 2 (invalid encoding, or argv that could not be
+  materialized as valid UTF-16), and 3 (buffer too small, whose `needed` also serves as the length
+  query). Stable `fairyc run` forwards arguments after `--` to the temporary program; `build`
+  rejects the delimiter. The generated C entry remains `int main(void)`; because narrow startup
+  leaves the UCRT wide argv NULL, the Windows adapter materializes it once with
+  `_configure_wide_argv(_crt_argv_unexpanded_arguments)` before strict two-pass
+  `WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, ...)`, and the checked-in quickstart proves
+  argv[0], empty, flag-looking, quoted, trailing-backslash, and non-ASCII round-trips plus both
+  error paths under Windows development and release profiles.
   ADR 0246 additionally exposes a move-only `std::bytes::Buffer` with explicit fallible
   construction, exact copy, reserve, append, zeroed resize, truncate, clear, scalar metadata, and
   owner-bound shared/exclusive views of only the initialized prefix. The SDK contains every raw
@@ -769,7 +781,7 @@ argument, output, and exit-code contract. It emits no native code.
 
 ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
-version, source digest, and lock fields. SDK `0.0.0-stage0.10` exports ADR 0250's move-only,
+version, source digest, and lock fields. SDK `0.0.0-stage0.11` exports ADR 0250's move-only,
 fallibly created `std::alloc::Arena` with automatic cleanup and exact allocation status,
 while ADR 0251 makes compiler-known placement return `Result<ref T, AllocError>` under language `/8`.
 ADR 0246's public safe `std::bytes::Buffer`,
@@ -778,7 +790,8 @@ ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-
 ADR 0205's `std::io::write(ref str) -> Result<usize, ConsoleError>`, and ADR 0209's matching
 `write_stderr` operation, ADR 0210's matching immutable byte-view output operations, and ADR 0211's
 `read_stdin(ref mut u8[]) -> Result<usize, ConsoleReadError>`, plus ADR 0215's allocation-free
-canonical decimal `write_i32`; it performs no host installation lookup. The I/O wrapper keeps raw
+canonical decimal `write_i32` and ADR 0261's effect-free `std::process` argument surface; it
+performs no host installation lookup. The I/O wrapper keeps raw
 pointers and target linkage private while the remaining planned
 standard-library API remains unsettled.
 
@@ -807,7 +820,8 @@ keeps canonical trap reporting, and still admits no program arguments or stdin f
 ADR 0212 supersedes run v2 with stable run v3. It attaches caller stdin only after compilation,
 linking, and PE/unwind inspection succeed, performs no compiler-side pre-read or retention, preserves
 the existing timeout/output/status/trap rules, and still admits no program arguments or input
-forwarding for other native commands.
+forwarding for other native commands. ADR 0261 later adds program arguments after `--` to stable
+run without changing the generated C entry.
 
 ADR 0178 stabilizes the source-independent `fairyc explain <diagnostic-code>` lookup, its exact
 three-line human shape, and codes 0, 2, and 4. It keeps catalog lifecycle, wording improvement,

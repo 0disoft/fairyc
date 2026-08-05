@@ -77,10 +77,11 @@ std::bytes  Buffer
 std::text   String, CStr, CString, and explicit allocation-free UTF-8 validation
 std::fs     Linux File and open options
 std::io     exact stdout/stderr byte writes, decimal i32 output, and one bounded stdin byte read
+std::process effect-free argument count and exact UTF-8 argument copy
 std::c      C scalar types and raw wrapper helpers
 ```
 
-The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.10` exports ADR 0250's public safe `std::alloc::Arena` creation and cleanup, ADR 0246's public safe `std::bytes::Buffer`, ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free `std::text::validate_utf8`, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, ADR 0210's matching immutable byte-view output operations, ADR 0211's bounded mutable-byte-view stdin read, and ADR 0215's allocation-free decimal `i32` output; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
+The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.11` exports ADR 0250's public safe `std::alloc::Arena` creation and cleanup, ADR 0246's public safe `std::bytes::Buffer`, ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free `std::text::validate_utf8`, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, ADR 0210's matching immutable byte-view output operations, ADR 0211's bounded mutable-byte-view stdin read, ADR 0215's allocation-free decimal `i32` output, and ADR 0261's effect-free `std::process` argument surface; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
 
 Built-in `Option`, `Result`, slices, `str`, and `CStr` get compiler-known view semantics; library modules provide operations over them.
 
@@ -335,7 +336,7 @@ a private non-null `ref str` sentinel, and preserves the existing pointer-only `
 is superseded as the user-facing entry by ADR 0247's SDK module; it remains independent historical
 evidence and does not define a public layout.
 
-SDK `0.0.0-stage0.10` retains move-only `String` and `CString` from `std::text`. `copy` and
+SDK `0.0.0-stage0.11` retains move-only `String` and `CString` from `std::text`. `copy` and
 `cstring_from_text` construct canonical owners fallibly; `append` preserves the existing String on
 failure. `string_len`, `string_is_empty`, `cstring_len`, and `cstring_is_empty` expose byte metadata,
 with CString length excluding its required terminator. `string_as_str` and `cstring_as_cstr` return
@@ -422,6 +423,49 @@ Linux Clang/GCC low/optimized executions are configured through the native repor
 `linuxConsoleExecutions` field and exercise stdin, stdout, stderr, and the full-domain `i32` decimal
 boundaries, but remain unobserved on this
 Windows host.
+
+## Process arguments v0
+
+The compiler-bundled `std::process` module exposes
+`arg_count() -> usize` and
+`arg(usize index, ref mut u8[] buffer) -> Result<usize, ProcessArgError>`. Both functions are
+effect-free and read only the process-startup argument data captured when the program launched;
+they do not access the environment, the current directory, console streams, or any mutable host
+state. `arg_count` includes the executable name at index 0. `arg` copies one argument's exact UTF-8
+bytes into the caller buffer and returns the byte count; an empty argument succeeds with zero and
+writes nothing.
+
+`ProcessArgError` has numeric `status` and `needed` fields. Status 1 is index out of range, status 2
+is invalid encoding (including an unpaired UTF-16 surrogate, or argv that could not be materialized
+as valid UTF-16), and status 3 is buffer too small; status 3's `needed` carries the full UTF-8 byte
+length and doubles as the length query, so there is no separate `arg_len` API. Every failure leaves
+the caller buffer byte-for-byte unchanged because the C implementation computes the exact byte
+length and completes all validation before the second conversion pass writes. The private raw
+declarations, `@repr(C)` result transport, and
+`fy_std_process_arg_count_v0`/`fy_std_process_arg_v0` symbols remain inside the SDK and the
+Windows-only target support unit.
+
+The Windows adapter reads the UCRT wide argv through `__p___argc()` and `__p___wargv()`; the narrow
+argv is ANSI-code-page encoded and is never used. Because the `mainCRTStartup` narrow policy under
+the unchanged `int main(void)` entry leaves `*__p___wargv()` NULL, the adapter materializes the
+wide argv lazily with `_configure_wide_argv(_crt_argv_unexpanded_arguments)` — the same unexpanded
+mode the `wmain` startup would use, so no wildcard expansion is introduced. If materialization
+fails or the wide argv is still NULL, `arg` fails closed with status 2 and `needed == 0` without
+touching the caller buffer; `arg_count` still reports the same startup argument set. UTF-16 to
+UTF-8 conversion uses `WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, ...)` in a strict two-pass
+form, and an unpaired UTF-16 surrogate reports status 2. No `wmain`, environment side channel,
+shell32 dependency, or ANSI fallback exists.
+
+The checked-in `examples/process_args_quickstart` contains no unsafe code or platform symbol. The
+Windows smoke builds it at both profiles, executes the retained images directly with a five-argument
+set covering empty, flag-looking, space/quote/trailing-backslash, and non-ASCII UTF-8 values, and
+runs stable `fairyc run -- <args>` and `fairyc run --release --locked -- <args>`; the program
+returns 42 only after verifying argv[0] presence, count, ordering, exact byte round-trips,
+out-of-range status 1, and too-small status 3 with exact `needed` and unchanged sentinel bytes. A
+host-smoke-only C decode probe at low and optimized profiles proves the narrow-startup NULL wide
+argv, successful lazy `_configure_wide_argv` materialization, exact quote, trailing-backslash,
+Korean, and empty argument round-trips, and status 2 with an unchanged buffer for an unpaired
+surrogate.
 
 ### Legacy Windows example symbol
 

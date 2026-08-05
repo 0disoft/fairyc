@@ -118,6 +118,25 @@ func TestAdmittedForTargetKeepsWindowsFileTargetBound(t *testing.T) {
 	}
 }
 
+func TestAdmittedForTargetKeepsProcessArgsTargetBound(t *testing.T) {
+	t.Parallel()
+	for _, symbol := range []string{"fy_std_process_arg_count_v0", "fy_std_process_arg_v0"} {
+		if !Admitted(symbol) || !AdmittedForTarget(symbol, target.X8664WindowsMSVC) {
+			t.Fatalf("%s is not admitted for Windows", symbol)
+		}
+		if AdmittedForTarget(symbol, target.X8664LinuxGNU) {
+			t.Fatalf("%s leaked into the Linux target contract", symbol)
+		}
+		if _, err := ComponentsForSymbols([]string{symbol}); err == nil || !strings.Contains(err.Error(), "no x86_64-linux-gnu source contract") {
+			t.Fatalf("ComponentsForSymbols(%q) error = %v", symbol, err)
+		}
+	}
+	components, err := WindowsMSVCComponentsForSymbols([]string{"fy_std_process_arg_count_v0", "fy_std_process_arg_v0"})
+	if err != nil || !slices.Equal(components, []Component{ComponentWindowsProcessArgs}) {
+		t.Fatalf("WindowsMSVCComponentsForSymbols(process args) = %v, %v", components, err)
+	}
+}
+
 func TestWindowsMSVCComponentsForSymbolsAdmitsOnlyProvenRuntimeSlice(t *testing.T) {
 	t.Parallel()
 	components, err := WindowsMSVCComponentsForSymbols([]string{
@@ -132,6 +151,8 @@ func TestWindowsMSVCComponentsForSymbolsAdmitsOnlyProvenRuntimeSlice(t *testing.
 		"fy_std_windows_file_sync_v0",
 		"fy_std_windows_file_close_v0",
 		"fy_std_windows_file_drop_v0",
+		"fy_std_process_arg_count_v0",
+		"fy_std_process_arg_v0",
 		"fy_std_text_utf8_valid_v0",
 		"fy_std_buffer_reserve_v0",
 		"fy_std_buffer_append_v0",
@@ -166,7 +187,7 @@ func TestWindowsMSVCComponentsForSymbolsAdmitsOnlyProvenRuntimeSlice(t *testing.
 	if err != nil {
 		t.Fatal(err)
 	}
-	if want := []Component{ComponentWindowsConsole, ComponentWindowsFile, ComponentSystemHeap, ComponentBuffer, ComponentArena, ComponentTextView, ComponentOwnedText}; !slices.Equal(components, want) {
+	if want := []Component{ComponentWindowsConsole, ComponentWindowsFile, ComponentWindowsProcessArgs, ComponentSystemHeap, ComponentBuffer, ComponentArena, ComponentTextView, ComponentOwnedText}; !slices.Equal(components, want) {
 		t.Fatalf("components = %v, want %v", components, want)
 	}
 	for _, test := range []struct {
