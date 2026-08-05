@@ -342,8 +342,9 @@ separate-translation-unit MSVC probes cover create/truncate, exact data, three-b
 repeated close, forced `ERROR_INVALID_HANDLE`, drop, and repeated drop after COFF, PE, and unwind
 inspection. An example-level safe FY module now adds move-only ownership, typed errors, filesystem
 effects, consuming close, implicit drop, and `read(ref mut u8[])`; low and optimized `.fy` builds fill
-the caller's fixed array and return 42 through local MSVC without WSL. A stable `std::fs`, portable
-Unicode path, hosted receipt, general mutable-buffer operations, and public layout remain later gates.
+the caller's fixed array and return 42 through local MSVC without WSL. ADR 0264 promotes that exact
+Windows ownership and I/O slice to public `std::fs`; portable Unicode paths, Linux public linkage,
+hosted receipts, general mutable-buffer operations, and public layout remain later gates.
 
 The product build path now records sorted unique foreign symbols used by MIR calls and resolves the
 project-owned subset through one shared symbol/component contract. It links only the minimal
@@ -758,6 +759,14 @@ same allocation into the String without allocation or copy; invalid UTF-8 return
 Buffer unchanged; an empty Buffer becomes an empty String. Generic conversions, implicit
 byte-to-text conversion, text indexing or slicing, and a public view ABI remain separate
 decisions.
+
+ADR 0264 extends the SDK to `0.0.0-stage0.14` with the first public `std::fs` slice on
+`x86_64-windows-msvc`: move-only File ownership, typed status/OS-code/completed-byte failures,
+create/truncate and read opens, bounded read, write-all, explicit sync, consuming close, and
+automatic drop. The checked-in safe quickstart executes invalid-path failure, write/read/EOF,
+explicit close, and implicit-drop reopen under development and optimized MSVC. Portable Unicode
+paths, Linux public linkage, seek, metadata, directories, removal, and a supported Windows target
+remain later gates.
 
 ADR 0216 cuts the exact language pin to `fairyc-language/2` and adds statement-only checked integer
 compound assignment. All ten arithmetic, division, remainder, shift, and bitwise forms reuse the

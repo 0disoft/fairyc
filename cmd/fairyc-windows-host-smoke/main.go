@@ -506,6 +506,8 @@ const checkedInStdTextManifestPath = "examples/std_text_quickstart/fairy.toml"
 const checkedInStdTextMainPath = "examples/std_text_quickstart/src/main.fy"
 const checkedInStdTextFromBufferManifestPath = "examples/std_text_from_buffer_quickstart/fairy.toml"
 const checkedInStdTextFromBufferMainPath = "examples/std_text_from_buffer_quickstart/src/main.fy"
+const checkedInStdFSManifestPath = "examples/std_fs_quickstart/fairy.toml"
+const checkedInStdFSMainPath = "examples/std_fs_quickstart/src/main.fy"
 const checkedInRegionsManifestPath = "examples/regions/fairy.toml"
 const checkedInRegionsMainPath = "examples/regions/src/main.fy"
 const checkedInProcessArgsManifestPath = "examples/process_args_quickstart/fairy.toml"
@@ -627,6 +629,14 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("read checked-in std::text from-buffer workspace entry: %w", err)
 	}
+	stdFSManifest, err := os.ReadFile(filepath.FromSlash(checkedInStdFSManifestPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in std::fs workspace manifest: %w", err)
+	}
+	stdFSMain, err := os.ReadFile(filepath.FromSlash(checkedInStdFSMainPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in std::fs workspace entry: %w", err)
+	}
 	regionsManifest, err := os.ReadFile(filepath.FromSlash(checkedInRegionsManifestPath))
 	if err != nil {
 		return fmt.Errorf("read checked-in Region workspace manifest: %w", err)
@@ -709,6 +719,8 @@ func run() error {
 		checkedInStdTextMainPath:               string(stdTextMain),
 		checkedInStdTextFromBufferManifestPath: string(stdTextFromBufferManifest),
 		checkedInStdTextFromBufferMainPath:     string(stdTextFromBufferMain),
+		checkedInStdFSManifestPath:             string(stdFSManifest),
+		checkedInStdFSMainPath:                 string(stdFSMain),
 		checkedInRegionsManifestPath:           string(regionsManifest),
 		checkedInRegionsMainPath:               string(regionsMain),
 		checkedInProcessArgsManifestPath:       string(processArgsManifest),
@@ -1097,6 +1109,11 @@ func run() error {
 		return err
 	}
 	workspaceBuildExecutions += stdTextFromBufferBuildExecutions
+	stdFSBuildExecutions, err := runStdlibQuickstartProof(root, "std_fs_quickstart", "std-fs-quickstart", "std::fs", 42)
+	if err != nil {
+		return err
+	}
+	workspaceBuildExecutions += stdFSBuildExecutions
 	stdIoScalarBuildExecutions, err := runStdIoScalarQuickstartProof(root)
 	if err != nil {
 		return err

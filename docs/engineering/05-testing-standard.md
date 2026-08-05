@@ -241,8 +241,8 @@ bytes. It then steals and closes the underlying handle so explicit close must re
 repeated drop. Both objects, the linked PE, and its unwind records must pass the same structural
 inspectors before execution. A distinct two-module FY example then exercises typed open errors,
   safe resource borrows and `read(ref mut u8[])` over a fixed array, write/sync/read/EOF, consuming close, and implicit drop at
-both profiles. This proves the checked Stage 0 example boundary while stable `std::fs`, portable
-paths, general mutable buffers, and hosted evidence remain open.
+both profiles. ADR 0264 promotes that exact Windows slice to compiler-bundled public `std::fs` while
+portable paths, Linux public linkage, general mutable buffers, and hosted evidence remain open.
 
 The standard-library product-build smoke is distinct from source-call companion probes. Its `.fy`
 source calls the real empty-input UTF-8 predicate without companion C, so success requires emitted

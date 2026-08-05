@@ -89,7 +89,7 @@ func TestBundledStandardLibraryReachesVerifiedCompiler(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(input.Files) != 6 || len(input.Imports) != 2 {
+	if len(input.Files) != 7 || len(input.Imports) != 2 {
 		t.Fatalf("semantic input has %d files and %d imports", len(input.Files), len(input.Imports))
 	}
 	result, err := compiler.CheckPackages(input)
@@ -127,7 +127,7 @@ func TestBundledStandardLibraryReachesVerifiedCompiler(t *testing.T) {
 	if err != nil {
 		t.Fatalf("SemanticFiles() error = %v", err)
 	}
-	if len(files) != 6 {
+	if len(files) != 7 {
 		t.Fatalf("SemanticFiles() = %+v", files)
 	}
 	for index, file := range files {
@@ -218,7 +218,7 @@ fn i32 main() {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(input.Files) != 6 || len(input.Imports) != 2 {
+	if len(input.Files) != 7 || len(input.Imports) != 2 {
 		t.Fatalf("semantic input has %d files and %d imports", len(input.Files), len(input.Imports))
 	}
 	result, err := compiler.CheckPackages(input)
@@ -279,5 +279,74 @@ SETUP
 				t.Fatalf("missing-console-effect result = %+v", result.Semantic)
 			}
 		})
+	}
+}
+
+func TestBundledStandardLibraryFSReachesVerifiedCompiler(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writePackage(t, root, ".", rootManifest(""), map[string]string{
+		"src/main.fy": `module main;
+
+import std::fs as fs;
+
+@effects(filesystem)
+fn i32 main() {
+    return switch (fs::open_read(c"fairyc-input.tmp")) {
+        case .ok(file) : { switch (fs::close(file)) {
+            case .ok(_) : { 0 }
+            case .err(error) : { if (fs::error_completed(error) == 0) { 1 } else { 2 } }
+        } }
+        case .err(error) : { if (fs::error_status(error) == 0 || fs::error_os_code(error) == 0) { 3 } else { 4 } }
+    };
+}
+`,
+	})
+	workspace, err := Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	input, err := workspace.SemanticInput()
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := compiler.CheckPackages(input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !result.Verified {
+		t.Fatalf("std::fs workspace did not reach verified MIR: phase=%s failed=%s diagnostics=%v unsupported=%v", result.Semantic.CompletedThrough, result.Semantic.FailedPhase, result.Semantic.Diagnostics, result.Semantic.Unsupported)
+	}
+}
+
+func TestBundledStandardLibraryFSRequiresFilesystemEffect(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writePackage(t, root, ".", rootManifest(""), map[string]string{
+		"src/main.fy": `module main;
+
+import std::fs as fs;
+
+fn i32 main() {
+    discard fs::open_read(c"fairyc-input.tmp");
+    return 0;
+}
+`,
+	})
+	workspace, err := Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	input, err := workspace.SemanticInput()
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := compiler.CheckPackages(input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Verified || len(result.Semantic.Diagnostics) != 1 || result.Semantic.Diagnostics[0].Code != "E7102" ||
+		len(result.Semantic.Diagnostics[0].Related) != 1 || result.Semantic.Diagnostics[0].Related[0].Role != "effect-declaration" {
+		t.Fatalf("missing-filesystem-effect result = %+v", result.Semantic)
 	}
 }

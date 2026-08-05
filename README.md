@@ -344,8 +344,9 @@ move-only `File`, preserves status, Win32 code, and completed bytes in `FileErro
 `filesystem` effects, writes and synchronizes `FairyFile`, reads it through `read(ref mut u8[])`
 backed by a mutable fixed array, observes EOF, consumes explicit close, and proves implicit drop by
 successfully reopening a path whose live write handle would deny sharing. Low and optimized MSVC builds both
-return 42 after object, PE, and unwind inspection. This is usable Stage 0 source evidence, not yet a
-stable `std::fs`, portable Unicode path, general mutable-buffer, hosted, or public-layout contract.
+return 42 after object, PE, and unwind inspection. ADR 0264 now promotes that safe ownership and
+I/O contract into compiler-bundled `std::fs`; the public slice remains Windows MSVC-only and does
+not claim portable Unicode paths, general mutable buffers, a supported target, or public layout.
 The source FFI slice accepts `i32`, `u8`, `u32`, `usize`, all sixteen exact transport-only TargetSpec
 C scalars, admitted raw-pointer parameters or results, and nonempty acyclic `@repr(C)` struct
 results. A declaration may keep its Fairy name or use one nonempty `@link_name("external_symbol")`;

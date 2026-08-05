@@ -345,9 +345,13 @@ func TestGeneratedFairyStringFromBufferProbeRejectsIncompleteGeneratedC(t *testi
 	}
 }
 
-func TestGeneratedFairyBufferFailureSourcesPassFullPipeline(t *testing.T) {
+func TestGeneratedFairyStdlibSourcesPassFullPipeline(t *testing.T) {
 	t.Parallel()
 	fromBufferMain, err := os.ReadFile(filepath.Join("..", "..", "examples", "std_text_from_buffer_quickstart", "src", "main.fy"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	fsMain, err := os.ReadFile(filepath.Join("..", "..", "examples", "std_fs_quickstart", "src", "main.fy"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -395,6 +399,22 @@ func TestGeneratedFairyBufferFailureSourcesPassFullPipeline(t *testing.T) {
 		},
 		{
 			name: "string from buffer unused", manifest: "std_text_from_buffer_quickstart", source: "module main;\nfn i32 main() { return 42; }\n",
+			expect:         []string{},
+			foreignSymbols: []string{},
+		},
+		{
+			name: "windows std fs used", manifest: "std_fs_quickstart", source: string(fsMain),
+			expect: []string{
+				"fy_std_windows_file_open_v0", "fy_std_windows_file_read_v0", "fy_std_windows_file_write_all_v0",
+				"fy_std_windows_file_sync_v0", "fy_std_windows_file_close_v0", "fy_std_windows_file_drop_v0",
+			},
+			foreignSymbols: []string{
+				"fy_std_windows_file_close_v0", "fy_std_windows_file_drop_v0", "fy_std_windows_file_open_v0",
+				"fy_std_windows_file_read_v0", "fy_std_windows_file_sync_v0", "fy_std_windows_file_write_all_v0",
+			},
+		},
+		{
+			name: "windows std fs unused", manifest: "std_fs_quickstart", source: "module main;\nfn i32 main() { return 42; }\n",
 			expect:         []string{},
 			foreignSymbols: []string{},
 		},
