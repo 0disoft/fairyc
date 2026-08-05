@@ -269,6 +269,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0257-generated-fairy-string-append-failure-execution.md`: executes generated Fairy `String.append` growth-allocation failure `.err` handling at low and optimized MSVC profiles without adding product failure controls.
 - `0258-entry-reachable-c-emission.md`: emits only functions, drop glue, and foreign declarations reachable from the selected entry, keeping dead code out of generated C and `unit.ForeignSymbols` without changing MIR, language, SDK, or ABI.
 - `0259-generated-fairy-cstring-failure-execution.md`: executes generated Fairy `CString` construction-allocation failure `.err` handling at low and optimized MSVC profiles without adding product failure controls.
+- `0260-generated-fairy-string-copy-failure-execution.md`: executes generated Fairy `text::copy` initial-allocation failure `.err` handling at low and optimized MSVC profiles without adding product failure controls.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

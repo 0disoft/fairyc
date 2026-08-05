@@ -47,8 +47,8 @@ owned-text construction path without a generated-Fairy failure execution.
 - The raw C probe remains responsible for interior-NUL rejection, the exact NUL terminator byte,
   empty and overflow CString storage, malformed-state negatives, and repeated drop. The new proof
   does not replace that byte-level matrix; it executes only the generated-Fairy `.err` surface.
-- `text::copy` initial-allocation failure remains deferred to a later generated-Fairy execution;
-  the raw probe continues to cover its byte-level behavior.
+- `text::copy` initial-allocation failure is now executed by ADR 0260; the raw probe continues to
+  cover its byte-level behavior.
 - This is test and evidence hardening only. Language remains `fairyc-language/8`, SDK remains
   `0.0.0-stage0.10`, and runtime ABI remains `fairyc-runtime/0`. No API or ABI changed.
 - Native proof remains Windows x64 MSVC evidence, not a portable backend or support claim.

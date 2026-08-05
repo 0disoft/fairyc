@@ -239,6 +239,57 @@ func TestGeneratedFairyCStringFailureProbeRejectsIncompleteGeneratedC(t *testing
 	}
 }
 
+func TestGeneratedFairyStringCopyFailureProbeWrapsOnlyTheGeneratedEntry(t *testing.T) {
+	t.Parallel()
+	generated := `#include <stddef.h>
+int fy_std_string_copy_storage_v0(void);
+int fy_std_string_drop_storage_v0(void);
+int main(void) {
+    int copied = fy_std_string_copy_storage_v0();
+    int dropped = fy_std_string_drop_storage_v0();
+    return 42;
+}
+`
+
+	probe, err := generatedFairyStringCopyFailureProbeSource(generated)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, fragment := range []string{
+		"#define main fy_generated_string_copy_failure_main",
+		generated,
+		"fy_generated_string_copy_failure_main() != 42",
+		"fy_std_system_heap_probe_fail_after_allocations_v0(0)",
+		"fy_std_system_heap_probe_live_allocations_v0() != 0",
+	} {
+		if !strings.Contains(probe, fragment) {
+			t.Fatalf("probe source lost required fragment %q", fragment)
+		}
+	}
+	if strings.Count(probe, "int main(void)") != 2 {
+		t.Fatalf("probe source must contain the renamed generated entry and one test entry: %q", probe)
+	}
+}
+
+func TestGeneratedFairyStringCopyFailureProbeRejectsIncompleteGeneratedC(t *testing.T) {
+	t.Parallel()
+	for _, tc := range []struct {
+		name      string
+		generated string
+	}{
+		{name: "empty", generated: ""},
+		{name: "missing main", generated: "int fy_std_string_copy_storage_v0(void);\nint fy_std_string_drop_storage_v0(void);\n"},
+		{name: "missing copy", generated: "int main(void) { return 0; }\nint fy_std_string_drop_storage_v0(void);\n"},
+		{name: "missing drop", generated: "int main(void) { return 0; }\nint fy_std_string_copy_storage_v0(void);\n"},
+		{name: "copy prototype only", generated: "#include <stddef.h>\nint fy_std_string_copy_storage_v0(void);\nint fy_std_string_drop_storage_v0(void);\nint main(void) { int dropped = fy_std_string_drop_storage_v0(); return 42; }\n"},
+		{name: "drop prototype only", generated: "#include <stddef.h>\nint fy_std_string_copy_storage_v0(void);\nint fy_std_string_drop_storage_v0(void);\nint main(void) { int copied = fy_std_string_copy_storage_v0(); return 42; }\n"},
+	} {
+		if _, err := generatedFairyStringCopyFailureProbeSource(tc.generated); err == nil {
+			t.Fatalf("incomplete generated C %q was accepted for %s", tc.generated, tc.name)
+		}
+	}
+}
+
 func TestGeneratedFairyBufferFailureSourcesPassFullPipeline(t *testing.T) {
 	t.Parallel()
 	for _, tc := range []struct {
@@ -272,6 +323,11 @@ func TestGeneratedFairyBufferFailureSourcesPassFullPipeline(t *testing.T) {
 			name: "cstring from-text initial allocation failure", manifest: "std_text_quickstart", source: generatedFairyCStringFailureSource,
 			expect:         []string{"fy_std_cstring_from_text_storage_v0", "fy_std_cstring_drop_storage_v0", "fy_runtime_trap("},
 			foreignSymbols: []string{"fy_std_cstring_drop_storage_v0", "fy_std_cstring_from_text_storage_v0"},
+		},
+		{
+			name: "string copy initial allocation failure", manifest: "std_text_quickstart", source: generatedFairyStringCopyFailureSource,
+			expect:         []string{"fy_std_string_copy_storage_v0", "fy_std_string_drop_storage_v0", "fy_runtime_trap("},
+			foreignSymbols: []string{"fy_std_string_copy_storage_v0", "fy_std_string_drop_storage_v0"},
 		},
 	} {
 		manifestPath := filepath.Join("..", "..", "examples", tc.manifest, "fairy.toml")

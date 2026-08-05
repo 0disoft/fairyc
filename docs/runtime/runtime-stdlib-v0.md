@@ -301,7 +301,10 @@ view before the automatic String drop returns live probe allocations to zero at 
 ADR 0259 additionally executes the generated-Fairy `CString` construction-failure `.err` arm:
 `text::cstring_from_text("Fairy")` fails on the first probe allocation, the source arm observes
 statuses 1/1, and the automatic CString drop returns live probe allocations to zero at both MSVC
-profiles. The raw C probe retains the byte-level failure matrix including interior-NUL rejection,
+profiles. ADR 0260 additionally executes the generated-Fairy `text::copy` initial-allocation
+failure `.err` arm: the first String storage allocation fails, the source arm observes statuses
+1/1, and the automatic String drop returns live probe allocations to zero at both MSVC profiles.
+The raw C probe retains the byte-level failure matrix including interior-NUL rejection,
 the exact terminator byte, empty and overflow storage, and repeated drop.
 
 Windows `build-target` now admits the exact CStr validator plus String copy/view/append/drop and
