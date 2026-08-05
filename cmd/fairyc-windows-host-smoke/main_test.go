@@ -364,6 +364,26 @@ func TestGeneratedFairyReadAppendFailureProbeRejectsIncompleteGeneratedC(t *test
 	}
 }
 
+func TestGeneratedFairyReadToEndFailureProbeRejectsIncompleteGeneratedC(t *testing.T) {
+	t.Parallel()
+	completeCalls := []string{
+		"int fy_std_windows_file_open_v0(void) { return 0; }",
+		"int fy_std_windows_file_read_append_v0(void) { return 0; }",
+		"int fy_std_windows_file_position_v0(void) { return 0; }",
+		"int fy_std_windows_file_close_v0(void) { return 0; }",
+		"int fy_std_buffer_initialize_v0(void) { return 0; }",
+		"int fy_std_buffer_drop_v0(void) { return 0; }",
+	}
+	for index, name := range []string{"open", "read_append", "position", "close", "initialize", "drop"} {
+		calls := append([]string(nil), completeCalls...)
+		calls = append(calls[:index], calls[index+1:]...)
+		generated := strings.Join(calls, "\n") + "\nint main(void) { return 42; }\n"
+		if _, err := generatedFairyReadToEndFailureProbeSource(generated); err == nil {
+			t.Fatalf("read_to_end failure probe accepted generated C missing %s", name)
+		}
+	}
+}
+
 func TestGeneratedFairyStdlibSourcesPassFullPipeline(t *testing.T) {
 	t.Parallel()
 	fromBufferMain, err := os.ReadFile(filepath.Join("..", "..", "examples", "std_text_from_buffer_quickstart", "src", "main.fy"))
@@ -397,6 +417,21 @@ func TestGeneratedFairyStdlibSourcesPassFullPipeline(t *testing.T) {
 				"fy_std_buffer_drop_v0", "fy_std_buffer_initialize_v0",
 				"fy_std_windows_file_close_v0", "fy_std_windows_file_drop_v0",
 				"fy_std_windows_file_open_v0", "fy_std_windows_file_read_append_v0",
+			},
+		},
+		{
+			name: "read_to_end partial allocation failure", manifest: "std_fs_quickstart", source: generatedFairyReadToEndFailureSource,
+			expect: []string{
+				"fy_std_buffer_drop_v0", "fy_std_buffer_initialize_v0",
+				"fy_std_windows_file_close_v0", "fy_std_windows_file_drop_v0",
+				"fy_std_windows_file_open_v0", "fy_std_windows_file_position_v0",
+				"fy_std_windows_file_read_append_v0",
+			},
+			foreignSymbols: []string{
+				"fy_std_buffer_drop_v0", "fy_std_buffer_initialize_v0",
+				"fy_std_windows_file_close_v0", "fy_std_windows_file_drop_v0",
+				"fy_std_windows_file_open_v0", "fy_std_windows_file_position_v0",
+				"fy_std_windows_file_read_append_v0",
 			},
 		},
 		{

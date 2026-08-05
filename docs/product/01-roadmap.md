@@ -883,6 +883,15 @@ automatic Buffer drop, and zero retained probe allocations. Hidden read-to-end l
 uninitialized views, portable paths, Linux linkage, cancellation, and asynchronous I/O remain later
 gates.
 
+ADR 0290 extends the SDK to `0.0.0-stage0.28` with
+`read_to_end(ref mut File, ref mut bytes::Buffer)`. The Fairy-source helper starts at the current
+cursor, appends through EOF in bounded 65,536-byte growth windows, and returns only the newly
+appended count. Generated-Fairy low/optimized MSVC execution proves a nonempty Buffer and nonzero
+cursor on success, plus a forced second-window allocation failure after exactly 65,536 committed
+bytes with matching cursor, preserved boundary bytes, consuming File close, automatic Buffer drop,
+and zero retained allocations. Total-size limits, cancellation, asynchronous I/O, portable paths,
+and Linux public linkage remain later gates.
+
 ADR 0268 closes the discovery side of exact test selection with
 `fairyc test --list [--locked]`. The command compiler-admits the complete selected-package test overlay and
 prints canonical identities without running the interpreter, backend, toolchain, or a test process.

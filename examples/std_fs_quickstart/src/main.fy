@@ -813,6 +813,51 @@ fn i32 read_append_then_close(fs::File input) {
     };
 }
 
+fn bool read_to_end_bytes_match(ref bytes::Buffer buffer) {
+    let ref u8[] value = bytes::view(buffer);
+    return value.len == 8 &&
+        value[0] == 112 && value[1] == 114 && value[2] == 101 &&
+        value[3] == 121 && value[4] == 67 && value[5] == 111 &&
+        value[6] == 100 && value[7] == 101;
+}
+
+@effects(filesystem)
+fn i32 read_to_end_owned(fs::File input, bytes::Buffer initial) {
+    var fs::File file = input;
+    var bytes::Buffer buffer = initial;
+    let i32 seek_code = switch (fs::seek_start(ref mut file, 4)) {
+        case .ok(position) : { if (position == 4) { 0 } else { 188 } }
+        case .err(_) : { 189 }
+    };
+    let i32 read_code = if (seek_code != 0) {
+        seek_code
+    } else { switch (fs::read_to_end(ref mut file, ref mut buffer)) {
+        case .ok(read) : {
+            if (read == 5 && read_to_end_bytes_match(ref buffer)) { 0 } else { 190 }
+        }
+        case .err(_) : { 191 }
+    } };
+    let i32 position_code = if (read_code != 0) {
+        read_code
+    } else { switch (fs::position(ref mut file)) {
+        case .ok(position) : { if (position == 9) { 0 } else { 192 } }
+        case .err(_) : { 193 }
+    } };
+    let i32 close_code = switch (fs::close(file)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 194 }
+    };
+    return if (position_code != 0) { position_code } else { close_code };
+}
+
+@effects(filesystem)
+fn i32 read_to_end_then_close(fs::File input) {
+    return switch (bytes::copy(b"pre")) {
+        case .ok(buffer) : { read_to_end_owned(input, buffer) }
+        case .err(_) : { close_after_owned_read_setup_error(input, 195) }
+    };
+}
+
 fn bool preserved_error_buffer(ref bytes::Buffer buffer) {
     let ref u8[] value = bytes::view(buffer);
     return value.len == 4 && value[0] == 107 && value[1] == 101 &&
@@ -919,33 +964,41 @@ fn i32 main() {
                 if (read_append_code != 0) {
                     read_append_code
                 } else {
-                    let i32 identity_code = switch (fs::open_read(data_path)) {
-                        case .ok(file) : { verify_file_id_reopen(file, data_path, drop_path) }
-                        case .err(_) : { 168 }
+                    let i32 read_to_end_code = switch (fs::open_read(data_path)) {
+                        case .ok(file) : { read_to_end_then_close(file) }
+                        case .err(_) : { 196 }
                     };
-                    if (identity_code != 0) {
-                        identity_code
+                    if (read_to_end_code != 0) {
+                        read_to_end_code
                     } else {
-                        let i32 read_code = switch (fs::open_read(data_path)) {
-                            case .ok(file) : { read_then_close(file) }
-                            case .err(_) : { 31 }
+                        let i32 identity_code = switch (fs::open_read(data_path)) {
+                            case .ok(file) : { verify_file_id_reopen(file, data_path, drop_path) }
+                            case .err(_) : { 168 }
                         };
-                        if (read_code != 0) {
-                            read_code
+                        if (identity_code != 0) {
+                            identity_code
                         } else {
-                            let i32 drop_code = switch (fs::create_truncate(drop_path)) {
-                                case .ok(file) : { implicit_drop_probe(file) }
-                                case .err(_) : { 32 }
+                            let i32 read_code = switch (fs::open_read(data_path)) {
+                                case .ok(file) : { read_then_close(file) }
+                                case .err(_) : { 31 }
                             };
-                            if (drop_code != 0) {
-                                drop_code
+                            if (read_code != 0) {
+                                read_code
                             } else {
-                                switch (fs::create_truncate(drop_path)) {
-                                    case .ok(file) : { switch (fs::close(file)) {
-                                        case .ok(_) : { 42 }
-                                        case .err(_) : { 34 }
-                                    } }
-                                    case .err(_) : { 33 }
+                                let i32 drop_code = switch (fs::create_truncate(drop_path)) {
+                                    case .ok(file) : { implicit_drop_probe(file) }
+                                    case .err(_) : { 32 }
+                                };
+                                if (drop_code != 0) {
+                                    drop_code
+                                } else {
+                                    switch (fs::create_truncate(drop_path)) {
+                                        case .ok(file) : { switch (fs::close(file)) {
+                                            case .ok(_) : { 42 }
+                                            case .err(_) : { 34 }
+                                        } }
+                                        case .err(_) : { 33 }
+                                    }
                                 }
                             }
                         }

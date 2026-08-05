@@ -375,6 +375,30 @@ pub fn Result<usize, ReadAppendError> read_append(
     };
 }
 
+/// Reads from the current position through end-of-file and appends every initialized byte.
+/// A failure preserves the prefix appended by earlier completed reads.
+@effects(filesystem)
+pub fn Result<usize, ReadAppendError> read_to_end(
+    ref mut File file,
+    ref mut bytes::Buffer buffer
+) {
+    var usize total = 0;
+    var usize maximum = 65536;
+    while (true) {
+        let usize count = read_append(file, buffer, maximum)?;
+        total += count;
+        if (count == 0) {
+            return .ok(total);
+        }
+        if (count < maximum) {
+            maximum -= count;
+        } else {
+            maximum = 65536;
+        }
+    }
+    return .ok(total);
+}
+
 /// Returns the current absolute byte position.
 @effects(filesystem)
 pub fn Result<usize, FileError> position(ref mut File file) {

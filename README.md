@@ -359,8 +359,9 @@ truncation, ADR 0275 adds atomic no-clobber `create_new`, ADR 0276 adds seek-res
 write-only `open_append`, ADR 0277 adds same-handle target-neutral file-kind observation, ADR 0278
 adds exact-fill reads with explicit unexpected-EOF prefixes, ADR 0279 adds opaque same-handle
 file identity comparison, ADR 0281 promotes target-neutral file kinds to an exhaustive public
-enum, ADR 0285 exposes one-call partial `write`, and ADR 0288 appends one bounded read directly into
-owned Buffer spare capacity under SDK `0.0.0-stage0.27`. The public slice remains
+enum, ADR 0285 exposes one-call partial `write`, ADR 0288 appends one bounded read directly into
+owned Buffer spare capacity, and ADR 0290 reads from the current cursor through EOF into that Buffer
+with bounded growth windows under SDK `0.0.0-stage0.28`. The public slice remains
 Windows MSVC-only and does
 not claim portable Unicode paths, general uninitialized-memory access, a supported target, or public layout.
 The source FFI slice accepts `i32`, `u8`, `u32`, `usize`, all sixteen exact transport-only TargetSpec
