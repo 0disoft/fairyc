@@ -152,7 +152,13 @@ func TestStableWorkspaceTestHandlesZeroTestsInvocationAndOutputFailure(t *testin
 	if code != ExitInternalFailure || !strings.Contains(outputError.String(), "write output failed") {
 		t.Fatalf("output failure = (%d, %q)", code, outputError.String())
 	}
-	for _, arguments := range [][]string{{"test", "--release"}, {"test", "--locked", "--locked"}, {"test", "--native", "--native"}} {
+	for _, arguments := range [][]string{
+		{"test", "--release"},
+		{"test", "--locked", "--locked"},
+		{"test", "--native", "--native"},
+		{"test", "--exact"},
+		{"test", "--exact", "tests::missing::test", "--exact", "tests::missing::test"},
+	} {
 		code, stdout, stderr = runForTest(arguments, root)
 		if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, `command "test"`) {
 			t.Fatalf("invalid invocation %v = (%d, %q, %q)", arguments, code, stdout, stderr)
@@ -162,12 +168,51 @@ func TestStableWorkspaceTestHandlesZeroTestsInvocationAndOutputFailure(t *testin
 
 func TestStableWorkspaceTestNativeOptionsRequireExplicitNativeMode(t *testing.T) {
 	t.Parallel()
-	options, err := parseStableTestOptions([]string{"--release", "--locked", "--native"})
-	if err != nil || !options.native || !options.release || !options.locked {
+	options, err := parseStableTestOptions([]string{"--release", "--exact", "tests::answer::is_42", "--locked", "--native"})
+	if err != nil || !options.native || !options.release || !options.locked ||
+		len(options.exact) != 1 || options.exact[0] != "tests::answer::is_42" {
 		t.Fatalf("native options = %+v, %v", options, err)
 	}
 	if _, err := parseStableTestOptions([]string{"--release"}); err == nil || !strings.Contains(err.Error(), "requires --native") {
 		t.Fatalf("release-only options error = %v", err)
+	}
+}
+
+func TestStableWorkspaceTestSelectsRepeatedExactIdentitiesInCanonicalOrder(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeStableTestWorkspace(t, root)
+	writeWorkspaceFile(t, root, "tests/selection.fy", `module tests::selection;
+@test
+fn void alpha() { assert(true); }
+@test
+fn void middle() { assert(false); }
+@test
+fn void zeta() { assert(true); }
+`)
+
+	code, stdout, stderr := runForTest([]string{
+		"test",
+		"--exact", "tests::selection::zeta",
+		"--exact", "tests::selection::alpha",
+	}, root)
+	want := "test tests::selection::alpha ... ok\n" +
+		"test tests::selection::zeta ... ok\n" +
+		"test result: ok. 2 passed; 0 failed; lock updated\n"
+	if code != ExitSuccess || stdout != want || stderr != "" {
+		t.Fatalf("exact test selection = (%d, %q, %q), want stdout %q", code, stdout, stderr, want)
+	}
+
+	code, stdout, stderr = runForTest([]string{"test", "--exact", "tests::selection::missing", "--locked"}, root)
+	if code != ExitInvalidInvocation || stdout != "" ||
+		!strings.Contains(stderr, `exact test selection was not found: "tests::selection::missing"`) {
+		t.Fatalf("missing exact test selection = (%d, %q, %q)", code, stdout, stderr)
+	}
+
+	code, stdout, stderr = runForTest([]string{"test", "--exact", "missing\nidentity", "--locked"}, root)
+	if code != ExitInvalidInvocation || stdout != "" || strings.Contains(stderr, "missing\nidentity") ||
+		!strings.Contains(stderr, `"missing\nidentity"`) {
+		t.Fatalf("escaped exact test selection = (%d, %q, %q)", code, stdout, stderr)
 	}
 }
 

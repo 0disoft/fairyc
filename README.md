@@ -436,7 +436,7 @@ persistent cache, or stable editor protocol. Program commands use one entry plus
 `fairyc check [--locked]` and the Windows/amd64-local
 `fairyc build [--release] [--locked]`, and the Windows/amd64-local
 `fairyc run [--release] [--locked]`, and the semantic-by-default or Windows-native
-`fairyc test [--native [--release]] [--locked]`, plus source-independent
+`fairyc test [--native [--release]] [--exact <test-identity>]... [--locked]`, plus source-independent
 `fairyc explain <diagnostic-code>` and `fairyc targets`, and target-explicit
 `fairyc emit c --target <target-id> [--locked]`. Stable run forwards caller stdin, bounded Windows
 program output, arguments, and status without pre-reading input. Native tests compile each selected
@@ -568,15 +568,17 @@ standard-library support unit is intentionally absent, so redirected output is i
 input rather than a promised standalone C package. Ordinary mode maintains `fairy.lock`;
 `--locked` verifies it without writing.
 
-The stable `fairyc test [--native [--release]] [--locked]` command keeps tests out of ordinary compilation. It overlays
+The stable `fairyc test [--native [--release]] [--exact <test-identity>]... [--locked]` command keeps tests out of ordinary compilation. It overlays
 only the root package's optional lowercase `tests/` directory after the production lock is handled;
 `tests/answer.fy` therefore declares `module tests::answer;`. Mark a private safe zero-argument
 `void` function with argument-free `@test`. Without `--native`, each discovered test runs in
 canonical name order through a fresh verified-MIR interpreter state without a toolchain or artifact.
 With `--native`, the compiler appends one private verified `fn() -> i32` harness per test, emits its
 reachable closure, compiles and inspects one temporary Windows MSVC image, and executes it with EOF
-stdin and no arguments; `--release` selects optimized MSVC. A trap fails that test and later tests
-still run in fresh processes. Native program output, portable targets, benchmarks, filters,
+stdin and no arguments; `--release` selects optimized MSVC. Repeatable `--exact` values select
+canonical `<module>::<function>` identities byte-for-byte while retaining canonical report order;
+the complete test overlay is still compiled. A trap fails that test and later selected tests still
+run in fresh processes. Native program output, portable targets, benchmarks, fuzzy/tag/file filters,
 workspace-member discovery, and machine-readable reports remain separate contracts.
 
 Phase 4 now has its first executable boundary: `internal/semanticsnapshot` turns successful typed

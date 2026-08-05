@@ -642,6 +642,14 @@ and code 6 build failures are stable CLI behavior. Harness names/symbols, genera
 temporary paths, MSVC installation identity, language revision, SDK, runtime ABI, manifests, locks,
 and package/interface identities are not changed or newly stabilized.
 
+ADR 0267 additively extends both engines with repeatable
+`--exact <test-identity>` selection. Values reuse the existing canonical report identity
+byte-for-byte, retain canonical order independent of flag order, and reject missing, duplicate, or
+unknown selectors with code 2. Existing all-test invocations, report grammar, lock behavior,
+language, SDK, runtime ABI, manifest, and package/interface identities remain unchanged. No
+substring, prefix, glob, regex, tag, file, line, skip, ignore, or random-order compatibility is
+implied.
+
 ADR 0204 stabilizes `fairyc new <package-name> --uid <package-uid>`, its explicit non-derived UID,
 single direct-child destination, exact four-file starter, no-overwrite behavior, absence of an
 initial lockfile, success line, and codes 0, 2, 4, and 7. Adding templates, flags, merge behavior, an

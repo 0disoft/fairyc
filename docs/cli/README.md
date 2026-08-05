@@ -28,7 +28,7 @@ The Go frontend currently exposes stable starter creation
 `fairyc new <package-name> --uid <package-uid>`, stable current-workspace commands
 `fairyc check [--locked]`, `fairyc build [--release] [--locked]`, and
 `fairyc run [--release] [--locked]`, the stable semantic-by-default or Windows-native
-`fairyc test [--native [--release]] [--locked]`, plus the stable source-independent
+`fairyc test [--native [--release]] [--exact <test-identity>]... [--locked]`, plus the stable source-independent
 `fairyc explain <diagnostic-code>` lookup and stable host-independent `fairyc targets` maturity
 report, and stable target-explicit
 `fairyc emit c --target <target-id> [--locked]`, plus `fairyc experimental parse <file.fy>`,
@@ -280,15 +280,17 @@ stderr is preserved, and the canonical trap line uses code 5. The two captured s
 64 KiB ceiling and retain no cross-stream ordering promise. Program arguments, a `--` delimiter,
 retained build output, input forwarding for other native commands, and cache policy remain absent.
 
-`fairyc test [--native [--release]] [--locked]` overlays only the root package's optional exact-lowercase `tests/` tree
+`fairyc test [--native [--release]] [--exact <test-identity>]... [--locked]` overlays only the root package's optional exact-lowercase `tests/` tree
 after maintaining or verifying the production lock. Paths keep their `tests/` prefix for module
 identity, and argument-free `@test` selects private safe zero-argument `void` functions. Default
 execution keeps the canonical fresh verified-MIR interpreter runtime. `--native` instead appends a
 private reverified i32 harness for each test, compiles its reachable closure as one temporary
 `x86_64-windows-msvc` PE, inspects PE/unwind structure, and executes it in a fresh process and
-temporary directory; `--release` selects optimized MSVC. Traps are reported per test and do not
-stop later tests. Native program streams, member recursion, filters, setup/teardown, benchmarks,
-portable targets, and machine output remain outside this contract.
+temporary directory; `--release` selects optimized MSVC. Repeatable `--exact` values select known
+canonical test identities byte-for-byte and never reorder them; unknown and duplicate selectors
+fail instead of broadening or silently selecting nothing. Traps are reported per test and do not
+stop later selected tests. Native program streams, member recursion, fuzzy/tag/file selection,
+setup/teardown, benchmarks, portable targets, and machine output remain outside this contract.
 
 `fairyc emit c --target <target-id> [--locked]` accepts exactly the `c` form and one mandatory
 `x86_64-linux-gnu` or `x86_64-windows-msvc` target. It loads the current manifest-owned workspace,

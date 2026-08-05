@@ -866,9 +866,10 @@ each selected entry in a fresh deterministic interpreter state. ADR 0265 extends
 `fairyc test [--native [--release]] [--locked]`: native mode preserves the same discovery and report,
 but appends one private verified i32 harness per test, compiles its reachable closure into an
 inspected temporary Windows MSVC image, and runs every test in a fresh process and directory. Test
-traps continue to later tests in either engine. Member recursion, filters, setup/teardown, portable
-native targets, program streams, benchmarks, host-environment policy, and machine output remain
-separate contracts.
+traps continue to later tests in either engine. ADR 0267 adds repeatable exact canonical test-
+identity selection to both engines without hiding syntax or compiler failures in the complete
+overlay. Member recursion, fuzzy/tag/file filters, setup/teardown, portable native targets, program
+streams, benchmarks, host-environment policy, and machine output remain separate contracts.
 
 ADR 0146 rejects speculative persistent caching at this point. ADR 0149 supplies deterministic,
 bounded, verifier-checked bytes for a complete MIR program, but the workspace path still produces

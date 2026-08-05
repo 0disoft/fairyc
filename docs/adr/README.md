@@ -276,6 +276,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0264-public-windows-stage0-files.md`: publishes the existing safe move-only Windows File lifecycle as `std::fs` under SDK `0.0.0-stage0.14`, with exact effects, typed failures, consuming close, automatic drop, and two-profile generated-Fairy execution without claiming portable paths or Linux public linkage.
 - `0265-stable-isolated-windows-native-tests.md`: extends stable `fairyc test` with explicit low/optimized Windows MSVC execution, one verified private harness and temporary PE per test, exact trap continuation, closed linkage, unchanged reports, and no retained artifacts.
 - `0266-starter-guide-native-test-v4.md`: updates only the generated starter README to distinguish fast semantic testing from explicit isolated Windows native testing while preserving the exact five-file source, identity, and no-overwrite contract.
+- `0267-stable-exact-test-selection.md`: makes canonical test identities repeatable exact CLI selectors for semantic and native execution, preserving canonical report order and full-overlay validation while reducing unrelated native builds.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

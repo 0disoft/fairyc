@@ -2007,7 +2007,7 @@ func runStandaloneCompiler(
 		!strings.Contains(helpStdout, "fairyc check [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc build [--release] [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc run [--release] [--locked]") ||
-		!strings.Contains(helpStdout, "fairyc test [--native [--release]] [--locked]") ||
+		!strings.Contains(helpStdout, "fairyc test [--native [--release]] [--exact <test-identity>]... [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc emit c --target <target-id> [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc experimental run-target") ||
 		!strings.Contains(helpStdout, "fairyc experimental exec-target") ||
@@ -2095,7 +2095,10 @@ fn void second_passes() { assert(true); }
 	starterNativeCode, starterNativeStdout, starterNativeStderr, err := runStandaloneCommand(
 		starterRoot,
 		executablePath,
-		"test", "--native", "--locked",
+		"test", "--native",
+		"--exact", "tests::main::second_passes",
+		"--exact", "tests::main::first_fails",
+		"--locked",
 	)
 	if err != nil {
 		return 0, fmt.Errorf("execute standalone compiler native trap-isolation test: %w", err)
@@ -2192,8 +2195,8 @@ fn void second_passes() { assert(true); }
 		return 0, fmt.Errorf("standalone compiler stable test returned code %d, stdout %q, stderr %q", testCode, testStdout, testStderr)
 	}
 	for _, nativeArguments := range [][]string{
-		{"test", "--native", "--locked"},
-		{"test", "--native", "--release", "--locked"},
+		{"test", "--native", "--exact", "tests::answer::dependency_answer_is_42", "--locked"},
+		{"test", "--native", "--release", "--exact", "tests::answer::dependency_answer_is_42", "--locked"},
 	} {
 		nativeTestCode, nativeTestStdout, nativeTestStderr, err := runStandaloneCommand(
 			sourceRoot,

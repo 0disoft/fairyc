@@ -54,7 +54,8 @@ trap, lock behavior, report grammar, exit codes, output failure, zero-test succe
 retained build artifacts. Native harness tests additionally require a collision-free private symbol,
 MIR re-verification, one reachable i32 C entry, preserved order, and continuation after an exact trap
 receipt. The standalone Windows smoke runs the checked-in semantic test, an actual failing-then-
-passing native pair, and the checked-in passing native test at low and optimized profiles through a
+passing native pair selected by reverse-ordered exact identities, and the checked-in exact selected
+native test at low and optimized profiles through a
 separately built compiler; each native image passes PE and unwind inspection before execution.
 Target-description tests separately cover structural validation, power-of-two layouts, closed and
 sorted scalar and feature sets, immutable lookup copies, unknown-target rejection, deterministic

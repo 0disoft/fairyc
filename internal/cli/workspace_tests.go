@@ -23,6 +23,7 @@ type stableTestOptions struct {
 	locked  bool
 	native  bool
 	release bool
+	exact   []string
 }
 
 type workspaceTest struct {
@@ -63,6 +64,10 @@ func runStableTest(arguments []string, sourceRoot string, stdout, stderr io.Writ
 	tests, code := prepareWorkspaceTests(&workspace, stderr)
 	if code != ExitSuccess {
 		return code
+	}
+	tests, err = selectWorkspaceTests(tests, options.exact)
+	if err != nil {
+		return invocationError(stderr, err.Error())
 	}
 	input, err := workspace.SemanticInput()
 	if err != nil {
@@ -170,9 +175,24 @@ func writeStableTestReport(outcomes []workspaceTestOutcome, lockState string, st
 func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 	options := stableTestOptions{}
 	seen := make(map[string]bool, 3)
-	for _, argument := range arguments {
+	exact := make(map[string]bool)
+	for index := 0; index < len(arguments); index++ {
+		argument := arguments[index]
+		if argument == "--exact" {
+			if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
+				return stableTestOptions{}, fmt.Errorf(`command "test" requires a test identity after --exact`)
+			}
+			identity := arguments[index+1]
+			if exact[identity] {
+				return stableTestOptions{}, fmt.Errorf(`command "test" received exact test %q more than once`, identity)
+			}
+			exact[identity] = true
+			options.exact = append(options.exact, identity)
+			index++
+			continue
+		}
 		if argument != "--locked" && argument != "--native" && argument != "--release" {
-			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --native, --release, and --locked`)
+			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --native, --release, --exact <test-identity>, and --locked`)
 		}
 		if seen[argument] {
 			return stableTestOptions{}, fmt.Errorf(`command "test" received %s more than once`, argument)
@@ -191,6 +211,36 @@ func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 		return stableTestOptions{}, fmt.Errorf(`command "test" requires --native when --release is supplied`)
 	}
 	return options, nil
+}
+
+func selectWorkspaceTests(tests []workspaceTest, exact []string) ([]workspaceTest, error) {
+	if len(exact) == 0 {
+		return tests, nil
+	}
+	wanted := make(map[string]struct{}, len(exact))
+	for _, identity := range exact {
+		wanted[identity] = struct{}{}
+	}
+	selected := make([]workspaceTest, 0, len(exact))
+	for _, test := range tests {
+		if _, found := wanted[test.display]; !found {
+			continue
+		}
+		selected = append(selected, test)
+		delete(wanted, test.display)
+	}
+	if len(wanted) != 0 {
+		missing := make([]string, 0, len(wanted))
+		for identity := range wanted {
+			missing = append(missing, identity)
+		}
+		slices.Sort(missing)
+		for index := range missing {
+			missing[index] = fmt.Sprintf("%q", missing[index])
+		}
+		return nil, fmt.Errorf(`command "test" exact test selection was not found: %s`, strings.Join(missing, ", "))
+	}
+	return selected, nil
 }
 
 func prepareWorkspaceTests(workspace *workspaceloader.Workspace, stderr io.Writer) ([]workspaceTest, int) {

@@ -133,7 +133,7 @@ manifest, workspace, graph, and lock failures use code `7`. The command writes n
 but ordinary lock maintenance may precede emission or an output failure. `--locked` verifies the
 lock without writing.
 
-`fairyc test [--native [--release]] [--locked]` buffers one deterministic human report after compilation and capability
+`fairyc test [--native [--release]] [--exact <test-identity>]... [--locked]` buffers one deterministic human report after compilation and capability
 admission. Completed tests use `test <module>::<function> ... ok` or `test
 <module>::<function> ... FAILED (<trap-category>)`, followed by `test result:
 <ok|FAILED>. <passed> passed; <failed> failed; lock <updated|unchanged|verified>`. Zero tests emit
@@ -144,7 +144,9 @@ output is rejected instead of mixed into it. Success uses code `0`; invocation, 
 capability, or native-program-output rejection uses `2`; source and `E9001` test-declaration
 diagnostics use `3`; internal and output failures use `4`; one or more language traps use `5`;
 native toolchain/build/inspection/execution failure uses `6`; workspace, test-source, graph, and lock
-failures use `7`. A trap does not stop later tests. Compilation/capability failure emits no report;
+failures use `7`. Exact selectors preserve canonical report order; missing, duplicate, or unknown
+selectors use code `2` with no report. A trap does not stop later selected tests.
+Compilation/capability failure emits no report;
 an external writer may still accept a report prefix before returning code `4`. Ordinary lock
 maintenance can precede later failure, while `--locked` is the no-write form.
 

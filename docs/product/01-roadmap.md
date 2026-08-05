@@ -715,8 +715,9 @@ quarantines, without selecting a default policy or making a speed claim.
   `fairyc explain <diagnostic-code>` and `fairyc targets` v1 contracts separate from catalog and
   TargetSpec data lifecycle. Keep target-explicit `fairyc emit c --target <target-id> [--locked]`
   separate from private generated-C bytes and support units. Keep implemented semantic-by-default
-  and explicit Windows-native `fairyc test [--native [--release]] [--locked]` separate from
-  workspace-member recursion, filters, shared fixtures, portable targets, program streams,
+  and explicit Windows-native `fairyc test [--native [--release]] [--exact <test-identity>]... [--locked]`
+  with canonical exact selection separate from workspace-member recursion, fuzzy/tag/file filters,
+  shared fixtures, portable targets, program streams,
   benchmarks, and host-environment policy.
 - Move to function-level reuse only when measured package rebuild or storage evidence justifies the complexity.
 
