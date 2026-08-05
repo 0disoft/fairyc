@@ -686,6 +686,13 @@ test execution bytes and statuses remain unchanged. The mode adds no language, S
 manifest, lockfile, package, interface, target, or generated-code version change; machine-readable
 listing and additional discovery semantics are not implied.
 
+ADR 0273 adds `fairyc test --list --json [--locked]` with schema
+`fairyc.test-list/v1`. The required fields are `schemaVersion`, canonical `tests`, matching
+`count`, and `lock`; field order and compact serialization are deterministic output bytes, while
+consumers must use the schema names rather than parse the text listing. Existing text listing and
+test execution remain byte-for-byte unchanged. Language, SDK, runtime ABI, manifest, lockfile,
+package, interface, target, and generated-code versions remain unchanged.
+
 ADR 0204 stabilizes `fairyc new <package-name> --uid <package-uid>`, its explicit non-derived UID,
 single direct-child destination, exact four-file starter, no-overwrite behavior, absence of an
 initial lockfile, success line, and codes 0, 2, 4, and 7. Adding templates, flags, merge behavior, an

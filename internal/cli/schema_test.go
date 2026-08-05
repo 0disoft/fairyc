@@ -58,6 +58,31 @@ func TestParseReportTopLevelMatchesSchema(t *testing.T) {
 	}
 }
 
+func TestStableTestListReportMatchesSchema(t *testing.T) {
+	t.Parallel()
+	schemaBytes, err := os.ReadFile(filepath.Join("..", "..", "spec", "cli", "stable-test-list-v1.schema.json"))
+	if err != nil {
+		t.Fatalf("read schema: %v", err)
+	}
+	var schema struct {
+		Properties map[string]json.RawMessage `json:"properties"`
+		Required   []string                   `json:"required"`
+	}
+	if err := json.Unmarshal(schemaBytes, &schema); err != nil {
+		t.Fatalf("decode schema contract: %v", err)
+	}
+	reportBytes, err := json.Marshal(stableTestListReport{
+		SchemaVersion: stableTestListSchema,
+		Tests:         []string{"tests::main::passes"},
+		Count:         1,
+		Lock:          "verified",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertJSONFieldsMatchSchema(t, reportBytes, schema.Properties, schema.Required)
+}
+
 func TestTargetSpecTopLevelMatchesSchema(t *testing.T) {
 	t.Parallel()
 	schemaBytes, err := os.ReadFile(filepath.Join("..", "..", "spec", "cli", "experimental-target-spec-v0.schema.json"))

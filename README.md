@@ -18,7 +18,7 @@ directory to create one explicit-identity starter:
 fairyc new hello-fairy --uid example.hello-fairy
 cd hello-fairy
 fairyc check
-fairyc test --list --locked
+fairyc test --list --json --locked
 fairyc test --locked
 fairyc test --native --locked
 ```
@@ -444,7 +444,7 @@ persistent cache, or stable editor protocol. Program commands use one entry plus
 `fairyc build [--release] [--locked]`, and the Windows/amd64-local
 `fairyc run [--release] [--locked]`, and the semantic-by-default or Windows-native
 `fairyc test [--native [--release]] [--exact <test-identity>]... [--locked]` and the execution-free
-`fairyc test --list [--locked]`, plus source-independent
+`fairyc test --list [--json] [--locked]`, plus source-independent
 `fairyc explain <diagnostic-code>` and `fairyc targets`, and target-explicit
 `fairyc emit c --target <target-id> [--locked]`. Stable run forwards caller stdin, bounded Windows
 program output, arguments, and status without pre-reading input. Native tests compile each selected
@@ -587,9 +587,10 @@ stdin and no arguments; `--release` selects optimized MSVC. Repeatable `--exact`
 canonical `<module>::<function>` identities byte-for-byte while retaining canonical report order;
 the complete test overlay is still compiled. `fairyc test --list [--locked]` performs that complete
 compiler admission and prints the canonical identities without running the interpreter, backend,
-toolchain, or test process. A trap fails an executed test and later selected tests still run in fresh
-processes. Native program output, portable targets, benchmarks, fuzzy/tag/file filters,
-workspace-member discovery, and machine-readable reports remain separate contracts.
+toolchain, or test process. Adding `--json` emits the stable `fairyc.test-list/v1` schema with the
+canonical identity array, count, and lock state. A trap fails an executed test and later selected
+tests still run in fresh processes. Native program output, portable targets, benchmarks,
+fuzzy/tag/file filters, and workspace-member discovery remain separate contracts.
 
 Phase 4 now has its first executable boundary: `internal/semanticsnapshot` turns successful typed
 HIR, semantic facts, verified MIR, and exact package metadata into detached, path-free compiler

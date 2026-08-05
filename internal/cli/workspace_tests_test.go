@@ -151,8 +151,12 @@ func TestStableWorkspaceTestHandlesZeroTestsInvocationAndOutputFailure(t *testin
 	if code != ExitSuccess || stdout != "test list: 0 discovered; lock verified\n" || stderr != "" {
 		t.Fatalf("zero test list = (%d, %q, %q)", code, stdout, stderr)
 	}
+	code, stdout, stderr = runForTest([]string{"test", "--list", "--json", "--locked"}, root)
+	if code != ExitSuccess || stdout != `{"schemaVersion":"fairyc.test-list/v1","tests":[],"count":0,"lock":"verified"}`+"\n" || stderr != "" {
+		t.Fatalf("zero JSON test list = (%d, %q, %q)", code, stdout, stderr)
+	}
 	var outputError bytes.Buffer
-	code = Run([]string{"test", "--list", "--locked"}, root, failingWriter{}, &outputError)
+	code = Run([]string{"test", "--list", "--json", "--locked"}, root, failingWriter{}, &outputError)
 	if code != ExitInternalFailure || !strings.Contains(outputError.String(), "write output failed") {
 		t.Fatalf("output failure = (%d, %q)", code, outputError.String())
 	}
@@ -161,6 +165,8 @@ func TestStableWorkspaceTestHandlesZeroTestsInvocationAndOutputFailure(t *testin
 		{"test", "--locked", "--locked"},
 		{"test", "--native", "--native"},
 		{"test", "--list", "--list"},
+		{"test", "--list", "--json", "--json"},
+		{"test", "--json"},
 		{"test", "--list", "--native"},
 		{"test", "--list", "--release"},
 		{"test", "--list", "--exact", "tests::missing::test"},
@@ -191,6 +197,11 @@ fn void alpha_passes() { assert(true); }
 		"test list: 2 discovered; lock updated\n"
 	if code != ExitSuccess || stdout != want || stderr != "" {
 		t.Fatalf("test list = (%d, %q, %q), want stdout %q", code, stdout, stderr, want)
+	}
+	code, stdout, stderr = runForTest([]string{"test", "--json", "--list", "--locked"}, root)
+	want = `{"schemaVersion":"fairyc.test-list/v1","tests":["tests::list::alpha_passes","tests::list::zeta_traps_if_run"],"count":2,"lock":"verified"}` + "\n"
+	if code != ExitSuccess || stdout != want || stderr != "" {
+		t.Fatalf("JSON test list = (%d, %q, %q), want stdout %q", code, stdout, stderr, want)
 	}
 	if matches, err := filepath.Glob(filepath.Join(root, "build", "*")); err != nil || len(matches) != 0 {
 		t.Fatalf("test list build artifacts = %v, %v", matches, err)

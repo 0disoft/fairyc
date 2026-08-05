@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -18,13 +19,22 @@ import (
 )
 
 const testAttribute = "test"
+const stableTestListSchema = "fairyc.test-list/v1"
 
 type stableTestOptions struct {
 	locked  bool
 	native  bool
 	release bool
 	list    bool
+	json    bool
 	exact   []string
+}
+
+type stableTestListReport struct {
+	SchemaVersion string   `json:"schemaVersion"`
+	Tests         []string `json:"tests"`
+	Count         int      `json:"count"`
+	Lock          string   `json:"lock"`
 }
 
 type workspaceTest struct {
@@ -100,6 +110,9 @@ func runStableTest(arguments []string, sourceRoot string, stdout, stderr io.Writ
 		return internalError(stderr)
 	}
 	if options.list {
+		if options.json {
+			return writeStableTestListJSON(tests, lockState, stdout, stderr)
+		}
 		return writeStableTestList(tests, lockState, stdout, stderr)
 	}
 
@@ -188,9 +201,30 @@ func writeStableTestList(tests []workspaceTest, lockState string, stdout, stderr
 	return ExitSuccess
 }
 
+func writeStableTestListJSON(tests []workspaceTest, lockState string, stdout, stderr io.Writer) int {
+	identities := make([]string, 0, len(tests))
+	for _, test := range tests {
+		identities = append(identities, test.display)
+	}
+	report, err := json.Marshal(stableTestListReport{
+		SchemaVersion: stableTestListSchema,
+		Tests:         identities,
+		Count:         len(identities),
+		Lock:          lockState,
+	})
+	if err != nil {
+		return internalError(stderr)
+	}
+	report = append(report, '\n')
+	if _, err := stdout.Write(report); err != nil {
+		return outputError(stderr)
+	}
+	return ExitSuccess
+}
+
 func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 	options := stableTestOptions{}
-	seen := make(map[string]bool, 4)
+	seen := make(map[string]bool, 5)
 	exact := make(map[string]bool)
 	for index := 0; index < len(arguments); index++ {
 		argument := arguments[index]
@@ -207,8 +241,8 @@ func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 			index++
 			continue
 		}
-		if argument != "--locked" && argument != "--native" && argument != "--release" && argument != "--list" {
-			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --list, --native, --release, --exact <test-identity>, and --locked`)
+		if argument != "--locked" && argument != "--native" && argument != "--release" && argument != "--list" && argument != "--json" {
+			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --list, --json, --native, --release, --exact <test-identity>, and --locked`)
 		}
 		if seen[argument] {
 			return stableTestOptions{}, fmt.Errorf(`command "test" received %s more than once`, argument)
@@ -223,7 +257,12 @@ func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 			options.release = true
 		case "--list":
 			options.list = true
+		case "--json":
+			options.json = true
 		}
+	}
+	if options.json && !options.list {
+		return stableTestOptions{}, fmt.Errorf(`command "test" requires --list when --json is supplied`)
 	}
 	if options.list && (options.native || options.release || len(options.exact) != 0) {
 		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --list with --native, --release, or --exact`)

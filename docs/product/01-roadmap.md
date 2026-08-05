@@ -806,8 +806,9 @@ coordination, and Linux public linkage remain later gates.
 ADR 0268 closes the discovery side of exact test selection with
 `fairyc test --list [--locked]`. The command compiler-admits the complete root test overlay and
 prints canonical identities without running the interpreter, backend, toolchain, or a test process.
-Machine-readable listing, workspace-member recursion, source locations, metadata, fuzzy matching,
-tags, and file selection remain later decisions.
+ADR 0273 adds compact stable `fairyc.test-list/v1` output through `--json`, containing only the
+canonical identity array, count, and lock state. Workspace-member recursion, source locations,
+metadata, fuzzy matching, tags, and file selection remain later decisions.
 
 ADR 0216 cuts the exact language pin to `fairyc-language/2` and adds statement-only checked integer
 compound assignment. All ten arithmetic, division, remainder, shift, and bitwise forms reuse the

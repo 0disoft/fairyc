@@ -37,7 +37,7 @@ Usage:
   fairyc build [--release] [--locked]
   fairyc run [--release] [--locked] [-- <program-args...>]
   fairyc test [--native [--release]] [--exact <test-identity>]... [--locked]
-  fairyc test --list [--locked]
+  fairyc test --list [--json] [--locked]
   fairyc emit c --target <target-id> [--locked]
   fairyc explain <diagnostic-code>
   fairyc targets

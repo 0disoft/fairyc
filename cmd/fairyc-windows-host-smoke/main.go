@@ -2008,7 +2008,7 @@ func runStandaloneCompiler(
 		!strings.Contains(helpStdout, "fairyc build [--release] [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc run [--release] [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc test [--native [--release]] [--exact <test-identity>]... [--locked]") ||
-		!strings.Contains(helpStdout, "fairyc test --list [--locked]") ||
+		!strings.Contains(helpStdout, "fairyc test --list [--json] [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc emit c --target <target-id> [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc experimental run-target") ||
 		!strings.Contains(helpStdout, "fairyc experimental exec-target") ||
@@ -2106,6 +2106,18 @@ fn void second_passes() { assert(true); }
 		"test list: 2 discovered; lock verified\n"
 	if starterListCode != cli.ExitSuccess || starterListStderr != "" || starterListStdout != wantStarterList {
 		return 0, fmt.Errorf("standalone compiler starter test list returned code %d, stdout %q, stderr %q", starterListCode, starterListStdout, starterListStderr)
+	}
+	starterJSONListCode, starterJSONListStdout, starterJSONListStderr, err := runStandaloneCommand(
+		starterRoot,
+		executablePath,
+		"test", "--list", "--json", "--locked",
+	)
+	if err != nil {
+		return 0, fmt.Errorf("execute standalone compiler generated starter JSON test list: %w", err)
+	}
+	wantStarterJSONList := `{"schemaVersion":"fairyc.test-list/v1","tests":["tests::main::first_fails","tests::main::second_passes"],"count":2,"lock":"verified"}` + "\n"
+	if starterJSONListCode != cli.ExitSuccess || starterJSONListStderr != "" || starterJSONListStdout != wantStarterJSONList {
+		return 0, fmt.Errorf("standalone compiler starter JSON test list returned code %d, stdout %q, stderr %q", starterJSONListCode, starterJSONListStdout, starterJSONListStderr)
 	}
 	starterNativeCode, starterNativeStdout, starterNativeStderr, err := runStandaloneCommand(
 		starterRoot,

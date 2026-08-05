@@ -150,7 +150,7 @@ Compilation/capability failure emits no report;
 an external writer may still accept a report prefix before returning code `4`. Ordinary lock
 maintenance can precede later failure, while `--locked` is the no-write form.
 
-`fairyc test --list [--locked]` buffers one `test <module>::<function>` line per admitted test in
+`fairyc test --list [--json] [--locked]` buffers one `test <module>::<function>` line per admitted test in
 canonical order, followed by `test list: <count> discovered; lock
 <updated|unchanged|verified>`. Zero tests emit only the final line. Listing performs the complete
 test-overlay compiler admission but executes no test, backend, toolchain, or subprocess and writes
@@ -159,7 +159,10 @@ rejection use code `2`; source and `E9001` diagnostics use code `3`; internal an
 use code `4`; workspace, test-source, graph, and lock failures use code `7`. Codes `5` and `6` are
 unreachable because listing has no language-test or native-build outcome. Compilation failure emits
 no list report; ordinary lock maintenance may already have completed, while `--locked` writes
-nothing.
+nothing. `--json` replaces only the success bytes with one compact newline-terminated
+`fairyc.test-list/v1` object: `schemaVersion`, canonical `tests`, matching `count`, and
+`lock` (`updated`, `unchanged`, or `verified`). It adds no ANSI escapes, paths, source text,
+metadata, or host inventory. The text form remains byte-for-byte unchanged.
 
 `experimental parse` writes one `fairyc.experimental.parse/v0` JSON document, defined by
 `spec/cli/experimental-parse-v0.schema.json`, to stdout even when source diagnostics exist.
@@ -273,7 +276,8 @@ absolute paths. The target JSON schema excludes local compiler, SDK, and sysroot
 workspace-session schema excludes source text, source paths, artifacts, and toolchain paths while
 reporting bounded cache and compiler decisions. These reports can therefore describe structure,
 target semantics, or sequential check outcomes without becoming a second source copy or host
-inventory. Stable `--json` behavior remains UNDECIDED.
+inventory. Stable `--json` behavior is defined only for `fairyc test --list --json` by
+`spec/cli/stable-test-list-v1.schema.json`; other stable JSON surfaces remain UNDECIDED.
 
 ## Review Blockers
 
