@@ -218,3 +218,104 @@ pub fn i32 check_rename_file(ref CStr source, ref CStr destination) {
         case .err(_) : { 234 }
     } };
 }
+
+@effects(filesystem)
+fn i32 close_directory_file(fs::File file, i32 close_error) {
+    return switch (fs::close(file)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { close_error }
+    };
+}
+
+@effects(filesystem)
+pub fn i32 check_directory_lifecycle(
+    ref CStr directory,
+    ref CStr child,
+    ref CStr file_collision,
+    ref CStr missing_parent
+) {
+    let i32 missing_parent_code = switch (fs::create_dir(missing_parent)) {
+        case .ok(_) : { 235 }
+        case .err(error) : {
+            if (fs::error_status(error) == 1 &&
+                fs::error_os_code(error) == 3 &&
+                fs::error_completed(error) == 0) { 0 } else { 236 }
+        }
+    };
+    let i32 file_setup_code = if (missing_parent_code != 0) {
+        missing_parent_code
+    } else { switch (fs::create_truncate(file_collision)) {
+        case .ok(file) : { close_directory_file(file, 237) }
+        case .err(_) : { 238 }
+    } };
+    let i32 file_collision_code = if (file_setup_code != 0) {
+        file_setup_code
+    } else { switch (fs::create_dir(file_collision)) {
+        case .ok(_) : { 239 }
+        case .err(error) : {
+            if (fs::error_status(error) == 1 &&
+                fs::error_os_code(error) == 183 &&
+                fs::error_completed(error) == 0) { 0 } else { 240 }
+        }
+    } };
+    let i32 file_cleanup_code = if (file_collision_code != 0) {
+        file_collision_code
+    } else { switch (fs::remove_file(file_collision)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 241 }
+    } };
+    let i32 create_code = if (file_cleanup_code != 0) {
+        file_cleanup_code
+    } else { switch (fs::create_dir(directory)) {
+        case .ok(value) : { if (value == 0) { 0 } else { 242 } }
+        case .err(_) : { 243 }
+    } };
+    let i32 collision_code = if (create_code != 0) {
+        create_code
+    } else { switch (fs::create_dir(directory)) {
+        case .ok(_) : { 244 }
+        case .err(error) : {
+            if (fs::error_status(error) == 1 &&
+                fs::error_os_code(error) == 183 &&
+                fs::error_completed(error) == 0) { 0 } else { 245 }
+        }
+    } };
+    let i32 child_code = if (collision_code != 0) {
+        collision_code
+    } else { switch (fs::create_truncate(child)) {
+        case .ok(file) : { close_directory_file(file, 246) }
+        case .err(_) : { 247 }
+    } };
+    let i32 nonempty_code = if (child_code != 0) {
+        child_code
+    } else { switch (fs::remove_dir(directory)) {
+        case .ok(_) : { 248 }
+        case .err(error) : {
+            if (fs::error_status(error) == 1 &&
+                fs::error_os_code(error) == 145 &&
+                fs::error_completed(error) == 0) { 0 } else { 249 }
+        }
+    } };
+    let i32 child_cleanup_code = if (nonempty_code != 0) {
+        nonempty_code
+    } else { switch (fs::remove_file(child)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 250 }
+    } };
+    let i32 remove_code = if (child_cleanup_code != 0) {
+        child_cleanup_code
+    } else { switch (fs::remove_dir(directory)) {
+        case .ok(value) : { if (value == 0) { 0 } else { 251 } }
+        case .err(_) : { 252 }
+    } };
+    return if (remove_code != 0) {
+        remove_code
+    } else { switch (fs::remove_dir(directory)) {
+        case .ok(_) : { 253 }
+        case .err(error) : {
+            if (fs::error_status(error) == 1 &&
+                fs::error_os_code(error) == 2 &&
+                fs::error_completed(error) == 0) { 0 } else { 254 }
+        }
+    } };
+}

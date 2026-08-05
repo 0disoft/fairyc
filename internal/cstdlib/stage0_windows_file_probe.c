@@ -67,6 +67,8 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_open_v0(
     void *
 );
 struct fy_std_windows_file_result_v0 fy_std_windows_file_remove_v0(const uint8_t *);
+struct fy_std_windows_file_result_v0 fy_std_windows_directory_create_v0(const uint8_t *);
+struct fy_std_windows_file_result_v0 fy_std_windows_directory_remove_v0(const uint8_t *);
 struct fy_std_windows_file_result_v0 fy_std_windows_file_rename_v0(
     const uint8_t *,
     const uint8_t *
@@ -561,5 +563,50 @@ int main(void) {
     if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 130;
     result = fy_std_windows_file_remove_v0(rename_destination);
     if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 131;
+
+    static const uint8_t directory_path[] = "fairyc-windows-directory-probe";
+    static const uint8_t directory_child_path[] =
+        "fairyc-windows-directory-probe\\child.tmp";
+    static const uint8_t directory_missing_parent_path[] =
+        "fairyc-windows-directory-missing-parent\\child";
+    static const uint8_t directory_file_collision_path[] =
+        "fairyc-windows-directory-file-collision.tmp";
+    result = fy_std_windows_directory_create_v0(NULL);
+    if (result.status != FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0 ||
+        result.os_code != (uint32_t)ERROR_SUCCESS || result.count != 0) return 132;
+    result = fy_std_windows_directory_remove_v0(non_ascii_path);
+    if (result.status != FY_STD_WINDOWS_FILE_PATH_ENCODING_V0 ||
+        result.os_code != (uint32_t)ERROR_SUCCESS || result.count != 0) return 133;
+    result = fy_std_windows_directory_create_v0(directory_missing_parent_path);
+    if (result.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
+        result.os_code != (uint32_t)ERROR_PATH_NOT_FOUND || result.count != 0) return 134;
+    result = fy_std_windows_file_open_v0(directory_file_collision_path, &write_options, &file);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 135;
+    if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 136;
+    result = fy_std_windows_directory_create_v0(directory_file_collision_path);
+    if (result.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
+        result.os_code != (uint32_t)ERROR_ALREADY_EXISTS || result.count != 0) return 137;
+    result = fy_std_windows_file_remove_v0(directory_file_collision_path);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 138;
+    result = fy_std_windows_directory_create_v0(directory_path);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        result.os_code != (uint32_t)ERROR_SUCCESS || result.count != 0) return 139;
+    result = fy_std_windows_directory_create_v0(directory_path);
+    if (result.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
+        result.os_code != (uint32_t)ERROR_ALREADY_EXISTS || result.count != 0) return 140;
+    result = fy_std_windows_file_open_v0(directory_child_path, &write_options, &file);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 141;
+    if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 142;
+    result = fy_std_windows_directory_remove_v0(directory_path);
+    if (result.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
+        result.os_code != (uint32_t)ERROR_DIR_NOT_EMPTY || result.count != 0) return 143;
+    result = fy_std_windows_file_remove_v0(directory_child_path);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 144;
+    result = fy_std_windows_directory_remove_v0(directory_path);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        result.os_code != (uint32_t)ERROR_SUCCESS || result.count != 0) return 145;
+    result = fy_std_windows_directory_remove_v0(directory_path);
+    if (result.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
+        result.os_code != (uint32_t)ERROR_FILE_NOT_FOUND || result.count != 0) return 146;
     return 0;
 }

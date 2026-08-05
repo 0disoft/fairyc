@@ -361,8 +361,9 @@ adds exact-fill reads with explicit unexpected-EOF prefixes, ADR 0279 adds opaqu
 file identity comparison, ADR 0281 promotes target-neutral file kinds to an exhaustive public
 enum, ADR 0285 exposes one-call partial `write`, ADR 0288 appends one bounded read directly into
 owned Buffer spare capacity, ADR 0290 reads from the current cursor through EOF into that Buffer,
-ADR 0291 removes one closed file path with exact missing and sharing failures, and ADR 0292 adds a
-file-only no-replace rename without cross-volume copy under SDK `0.0.0-stage0.30`. The public slice remains
+ADR 0291 removes one closed file path with exact missing and sharing failures, ADR 0292 adds a
+file-only no-replace rename without cross-volume copy, and ADR 0293 adds non-recursive one-level
+directory creation plus empty-directory removal under SDK `0.0.0-stage0.31`. The public slice remains
 Windows MSVC-only and does
 not claim portable Unicode paths, general uninitialized-memory access, a supported target, or public layout.
 The source FFI slice accepts `i32`, `u8`, `u32`, `usize`, all sixteen exact transport-only TargetSpec

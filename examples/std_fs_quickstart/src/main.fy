@@ -907,6 +907,10 @@ fn i32 main() {
     let ref CStr remove_path = c"fairyc-std-fs-remove.tmp";
     let ref CStr rename_source_path = c"fairyc-std-fs-rename-source.tmp";
     let ref CStr rename_destination_path = c"fairyc-std-fs-rename-destination.tmp";
+    let ref CStr directory_path = c"fairyc-std-fs-directory";
+    let ref CStr directory_child_path = c"fairyc-std-fs-directory\\child.tmp";
+    let ref CStr directory_file_collision_path = c"fairyc-std-fs-directory-file.tmp";
+    let ref CStr directory_missing_parent_path = c"fairyc-std-fs-missing-parent\\child";
     let i32 invalid_code = check_invalid_path();
     let i32 missing_update_code = check_missing_update();
     let i32 character_code = switch (fs::open_read(c"NUL")) {
@@ -928,6 +932,12 @@ fn i32 main() {
     let i32 read_append_error_code = check_read_append_error(read_append_error_path);
     let i32 remove_code = paths::check_remove_file(remove_path);
     let i32 rename_code = paths::check_rename_file(rename_source_path, rename_destination_path);
+    let i32 directory_code = paths::check_directory_lifecycle(
+        directory_path,
+        directory_child_path,
+        directory_file_collision_path,
+        directory_missing_parent_path
+    );
     let i32 write_code = switch (fs::create_truncate(data_path)) {
         case .ok(file) : { write_then_close(file) }
         case .err(_) : { 30 }
@@ -950,6 +960,8 @@ fn i32 main() {
         remove_code
     } else if (rename_code != 0) {
         rename_code
+    } else if (directory_code != 0) {
+        directory_code
     } else if (write_code != 0) {
         write_code
     } else {

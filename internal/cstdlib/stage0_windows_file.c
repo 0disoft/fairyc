@@ -251,6 +251,42 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_remove_v0(
     return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_OK_V0, ERROR_SUCCESS, 0);
 }
 
+struct fy_std_windows_file_result_v0 fy_std_windows_directory_create_v0(
+    const uint8_t *path
+) {
+    WCHAR wide_path[FY_STD_WINDOWS_PATH_CAPACITY_V0];
+    uint32_t status = fy_std_windows_path_v0(path, wide_path);
+    if (status != FY_STD_WINDOWS_FILE_OK_V0) {
+        return fy_std_windows_file_result_v0(status, ERROR_SUCCESS, 0);
+    }
+    if (!CreateDirectoryW(wide_path, NULL)) {
+        return fy_std_windows_file_result_v0(
+            FY_STD_WINDOWS_FILE_IO_ERROR_V0,
+            GetLastError(),
+            0
+        );
+    }
+    return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_OK_V0, ERROR_SUCCESS, 0);
+}
+
+struct fy_std_windows_file_result_v0 fy_std_windows_directory_remove_v0(
+    const uint8_t *path
+) {
+    WCHAR wide_path[FY_STD_WINDOWS_PATH_CAPACITY_V0];
+    uint32_t status = fy_std_windows_path_v0(path, wide_path);
+    if (status != FY_STD_WINDOWS_FILE_OK_V0) {
+        return fy_std_windows_file_result_v0(status, ERROR_SUCCESS, 0);
+    }
+    if (!RemoveDirectoryW(wide_path)) {
+        return fy_std_windows_file_result_v0(
+            FY_STD_WINDOWS_FILE_IO_ERROR_V0,
+            GetLastError(),
+            0
+        );
+    }
+    return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_OK_V0, ERROR_SUCCESS, 0);
+}
+
 struct fy_std_windows_file_result_v0 fy_std_windows_file_rename_v0(
     const uint8_t *source,
     const uint8_t *destination

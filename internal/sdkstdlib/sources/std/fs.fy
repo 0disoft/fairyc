@@ -112,6 +112,14 @@ unsafe extern C fn raw_file_result file_open_raw(ptr u8 path, ptr raw_open_optio
 unsafe extern C fn raw_file_result file_remove_raw(ptr u8 path) ;
 
 @effects(filesystem)
+@link_name("fy_std_windows_directory_create_v0")
+unsafe extern C fn raw_file_result directory_create_raw(ptr u8 path) ;
+
+@effects(filesystem)
+@link_name("fy_std_windows_directory_remove_v0")
+unsafe extern C fn raw_file_result directory_remove_raw(ptr u8 path) ;
+
+@effects(filesystem)
 @link_name("fy_std_windows_file_rename_v0")
 unsafe extern C fn raw_file_result file_rename_raw(ptr u8 source, ptr u8 destination) ;
 
@@ -318,6 +326,32 @@ pub fn Result<File, FileError> open_update(ref CStr path) {
 pub fn Result<i32, FileError> remove_file(ref CStr path) {
     let raw_file_result result = unsafe {
         file_remove_raw(path as ptr u8)
+    };
+    return if (result.status == 0) {
+        .ok(0)
+    } else {
+        .err(file_error(result))
+    };
+}
+
+/// Creates exactly one new directory without creating missing parents.
+@effects(filesystem)
+pub fn Result<i32, FileError> create_dir(ref CStr path) {
+    let raw_file_result result = unsafe {
+        directory_create_raw(path as ptr u8)
+    };
+    return if (result.status == 0) {
+        .ok(0)
+    } else {
+        .err(file_error(result))
+    };
+}
+
+/// Removes exactly one existing empty directory without recursion.
+@effects(filesystem)
+pub fn Result<i32, FileError> remove_dir(ref CStr path) {
+    let raw_file_result result = unsafe {
+        directory_remove_raw(path as ptr u8)
     };
     return if (result.status == 0) {
         .ok(0)
