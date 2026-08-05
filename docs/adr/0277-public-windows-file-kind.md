@@ -47,8 +47,9 @@ classification or a failure, distinguished by the thread last-error value.
 - `FileKind` is an opaque value plus predicates instead of a public enum because the current C
   backend does not yet support a user enum carried inside a built-in `Result` payload. This keeps
   the slice executable without broadening the language/backend in the same change.
-- Timestamps, attributes, directories, links, path-based metadata, portable Unicode paths, Linux
-  public linkage, and snapshot guarantees remain separate work.
+- ADR 0279 later adds bounded same-handle file identity. Timestamps, attributes, directories,
+  link counts, path-based metadata, portable Unicode paths, Linux public linkage, and snapshot
+  guarantees remain separate work.
 
 ## Evidence
 

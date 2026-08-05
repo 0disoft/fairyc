@@ -604,7 +604,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
-  The compiler-bundled SDK `0.0.0-stage0.23` exposes
+  The compiler-bundled SDK `0.0.0-stage0.24` exposes
   `std::io::write(ref str) -> Result<usize, ConsoleError>` and a matching `write_stderr` operation
   for text, plus `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` for exact binary output.
   All four declare `console`, keep raw pointers and target linkage private, append no newline,
@@ -686,6 +686,11 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   `kind(ref File)` observes the already-open object without path lookup, allocation, or cursor
   movement and returns an opaque target-neutral `FileKind`. `kind_is_disk`, `kind_is_character`,
   `kind_is_pipe`, and `kind_is_unknown` classify that value without exposing Win32 constants.
+  `file_id(ref File)` observes the same open handle and returns opaque `FileId` containing the
+  complete Windows volume serial and 128-bit target identifier. `file_id_equal(ref FileId,
+  ref FileId)` compares every bit without consuming either value. The identity is bounded to one
+  computer and observation interval; it is not serialized, ordered, hashed, persisted, or accepted
+  as authorization, and filesystem providers may reject or later reuse/change identifiers.
   `set_len(ref mut File, usize)` truncates or extends through an exclusive borrow, returns the new
   length, rejects values above `INT64_MAX`, and does not move the cursor. Bytes added by extension
   have unspecified contents until explicitly written. `FileError` exposes
@@ -693,6 +698,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   executes invalid-path and missing-update failure, missing-file open-or-create plus preserving
   second open, exclusive create plus exact collision and unchanged reopen, missing-file append plus
   repeated seek-resistant exact concatenation, write/read/EOF, complete and unexpected-EOF exact reads,
+  same-file live-handle identity equality and distinct-live-file inequality,
   position/seek including overflow preservation, existing-file in-place
   update, shrink/extend with cursor preservation and explicit rewrite,
   oversized and read-only length-change failures, nonempty and empty size observation, disk and
@@ -832,7 +838,7 @@ argument, output, and exit-code contract. It emits no native code.
 
 ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
-version, source digest, and lock fields. SDK `0.0.0-stage0.23` exports ADR 0250's move-only,
+version, source digest, and lock fields. SDK `0.0.0-stage0.24` exports ADR 0250's move-only,
 fallibly created `std::alloc::Arena` with automatic cleanup and exact allocation status,
 while ADR 0251 makes compiler-known placement return `Result<ref T, AllocError>` under language `/8`.
 ADR 0246's public safe `std::bytes::Buffer`,
@@ -842,6 +848,7 @@ ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-
 shared file-size observation, ADR 0271's existing-file read/write open, ADR 0272's cursor-preserving
 file-length change, ADR 0274's non-truncating open-or-create, ADR 0275's exclusive create,
 ADR 0276's append-only open, ADR 0277's same-handle file-kind observation, ADR 0278's exact read,
+ADR 0279's bounded same-handle file identity,
 ADR 0205's `std::io::write(ref str) -> Result<usize, ConsoleError>`, and ADR 0209's matching
 `write_stderr` operation, ADR 0210's matching immutable byte-view output operations, and ADR 0211's
 `read_stdin(ref mut u8[]) -> Result<usize, ConsoleReadError>`, plus ADR 0215's allocation-free

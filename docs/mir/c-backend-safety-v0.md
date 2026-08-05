@@ -297,7 +297,8 @@ existing open symbol for non-truncating open-or-create, ADR 0275 reuses it with 
 compiler-private exclusive flag for atomic no-clobber creation, and ADR 0276 reuses it with one
 compiler-private append flag selecting `FILE_APPEND_DATA`, ADR 0277 adds one target-bound
 same-handle file-kind symbol without exposing Win32 constants, and ADR 0278 adds one target-bound
-exact-read symbol with completed-prefix failures. Portable paths, relative/end-based
+exact-read symbol with completed-prefix failures. ADR 0279 adds one target-bound file-identity
+symbol whose 24-byte caller output is written only after success. Portable paths, relative/end-based
 seek, general metadata, Linux public linkage, general
 mutable-buffer operations, retained pointers, and public layout remain outside this boundary.
 The sole nested-pointer exception is exactly source `ptr mut ptr mut void`, so source

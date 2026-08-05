@@ -396,6 +396,66 @@ fn i32 read_exact_then_close(fs::File input) {
 }
 
 @effects(filesystem)
+fn i32 compare_file_id_then_close(
+    fs::File input,
+    ref fs::FileId expected,
+    bool should_equal,
+    i32 mismatch_code,
+    i32 observe_error_code,
+    i32 close_error_code
+) {
+    var fs::File file = input;
+    let i32 operation_code = switch (fs::file_id(ref file)) {
+        case .ok(observed) : {
+            if (fs::file_id_equal(ref observed, expected) == should_equal) {
+                0
+            } else {
+                mismatch_code
+            }
+        }
+        case .err(_) : { observe_error_code }
+    };
+    let i32 close_code = switch (fs::close(file)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { close_error_code }
+    };
+    return if (operation_code != 0) { operation_code } else { close_code };
+}
+
+@effects(filesystem)
+fn i32 verify_file_id_reopen(
+    fs::File input,
+    ref CStr same_path,
+    ref CStr other_path
+) {
+    var fs::File file = input;
+    let i32 operation_code = switch (fs::file_id(ref file)) {
+        case .err(_) : { 158 }
+        case .ok(original) : {
+            let i32 same_code = switch (fs::open_read(same_path)) {
+                case .ok(reopened) : {
+                    compare_file_id_then_close(reopened, ref original, true, 160, 161, 162)
+                }
+                case .err(_) : { 163 }
+            };
+            if (same_code != 0) {
+                same_code
+            } else { switch (fs::create_truncate(other_path)) {
+                case .ok(other) : {
+                    compare_file_id_then_close(other, ref original, false, 164, 165, 166)
+                }
+                case .err(_) : { 167 }
+            } }
+        }
+    };
+    let i32 close_code = switch (fs::close(file)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 159 }
+    };
+    return if (operation_code != 0) { operation_code } else { close_code };
+}
+
+@effects(filesystem)
 fn i32 implicit_drop_probe(fs::File file) {
     return switch (fs::size(ref file)) {
         case .ok(size) : { if (size == 0) { 0 } else { 61 } }
@@ -716,26 +776,34 @@ fn i32 main() {
             if (exact_code != 0) {
                 exact_code
             } else {
-                let i32 read_code = switch (fs::open_read(data_path)) {
-                    case .ok(file) : { read_then_close(file) }
-                    case .err(_) : { 31 }
+                let i32 identity_code = switch (fs::open_read(data_path)) {
+                    case .ok(file) : { verify_file_id_reopen(file, data_path, drop_path) }
+                    case .err(_) : { 168 }
                 };
-                if (read_code != 0) {
-                    read_code
+                if (identity_code != 0) {
+                    identity_code
                 } else {
-                    let i32 drop_code = switch (fs::create_truncate(drop_path)) {
-                        case .ok(file) : { implicit_drop_probe(file) }
-                        case .err(_) : { 32 }
+                    let i32 read_code = switch (fs::open_read(data_path)) {
+                        case .ok(file) : { read_then_close(file) }
+                        case .err(_) : { 31 }
                     };
-                    if (drop_code != 0) {
-                        drop_code
+                    if (read_code != 0) {
+                        read_code
                     } else {
-                        switch (fs::create_truncate(drop_path)) {
-                            case .ok(file) : { switch (fs::close(file)) {
-                                case .ok(_) : { 42 }
-                                case .err(_) : { 34 }
-                            } }
-                            case .err(_) : { 33 }
+                        let i32 drop_code = switch (fs::create_truncate(drop_path)) {
+                            case .ok(file) : { implicit_drop_probe(file) }
+                            case .err(_) : { 32 }
+                        };
+                        if (drop_code != 0) {
+                            drop_code
+                        } else {
+                            switch (fs::create_truncate(drop_path)) {
+                                case .ok(file) : { switch (fs::close(file)) {
+                                    case .ok(_) : { 42 }
+                                    case .err(_) : { 34 }
+                                } }
+                                case .err(_) : { 33 }
+                            }
                         }
                     }
                 }

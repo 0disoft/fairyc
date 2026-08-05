@@ -38,6 +38,15 @@ struct fy_std_windows_file_kind_result_v0 {
     uint32_t kind;
 };
 
+struct fy_std_windows_file_id_v0 {
+    uint32_t volume_low;
+    uint32_t volume_high;
+    uint32_t file_low_0;
+    uint32_t file_low_1;
+    uint32_t file_high_0;
+    uint32_t file_high_1;
+};
+
 struct fy_std_windows_file_v0 {
     void *handle;
     uint8_t open;
@@ -433,6 +442,50 @@ struct fy_std_windows_file_kind_result_v0 fy_std_windows_file_kind_v0(
         ERROR_SUCCESS,
         kind
     );
+}
+
+struct fy_std_windows_file_result_v0 fy_std_windows_file_id_v0(
+    const void *file_storage,
+    struct fy_std_windows_file_id_v0 *output
+) {
+    struct fy_std_windows_file_v0 file;
+    if (!fy_std_windows_file_load_v0(file_storage, &file) || output == NULL) {
+        return fy_std_windows_file_result_v0(
+            FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0,
+            ERROR_SUCCESS,
+            0
+        );
+    }
+    if (file.open == UINT8_C(0)) {
+        return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_CLOSED_V0, ERROR_SUCCESS, 0);
+    }
+    FILE_ID_INFO information;
+    if (!GetFileInformationByHandleEx(
+            (HANDLE)file.handle,
+            FileIdInfo,
+            &information,
+            sizeof information
+        )) {
+        return fy_std_windows_file_result_v0(
+            FY_STD_WINDOWS_FILE_IO_ERROR_V0,
+            GetLastError(),
+            0
+        );
+    }
+    struct fy_std_windows_file_id_v0 value = {
+        (uint32_t)(information.VolumeSerialNumber & UINT64_C(0xffffffff)),
+        (uint32_t)(information.VolumeSerialNumber >> 32),
+        UINT32_C(0),
+        UINT32_C(0),
+        UINT32_C(0),
+        UINT32_C(0)
+    };
+    memcpy(&value.file_low_0, &information.FileId.Identifier[0], sizeof value.file_low_0);
+    memcpy(&value.file_low_1, &information.FileId.Identifier[4], sizeof value.file_low_1);
+    memcpy(&value.file_high_0, &information.FileId.Identifier[8], sizeof value.file_high_0);
+    memcpy(&value.file_high_1, &information.FileId.Identifier[12], sizeof value.file_high_1);
+    memcpy(output, &value, sizeof value);
+    return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_OK_V0, ERROR_SUCCESS, 0);
 }
 
 struct fy_std_windows_file_size_result_v0 fy_std_windows_file_set_len_v0(

@@ -38,6 +38,15 @@ struct fy_std_windows_file_kind_result_v0 {
     uint32_t kind;
 };
 
+struct fy_std_windows_file_id_v0 {
+    uint32_t volume_low;
+    uint32_t volume_high;
+    uint32_t file_low_0;
+    uint32_t file_low_1;
+    uint32_t file_high_0;
+    uint32_t file_high_1;
+};
+
 struct fy_std_windows_file_v0 {
     void *handle;
     uint8_t open;
@@ -66,6 +75,10 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_read_exact_v0(
 struct fy_std_windows_file_position_result_v0 fy_std_windows_file_position_v0(void *);
 struct fy_std_windows_file_size_result_v0 fy_std_windows_file_size_v0(const void *);
 struct fy_std_windows_file_kind_result_v0 fy_std_windows_file_kind_v0(const void *);
+struct fy_std_windows_file_result_v0 fy_std_windows_file_id_v0(
+    const void *,
+    struct fy_std_windows_file_id_v0 *
+);
 struct fy_std_windows_file_size_result_v0 fy_std_windows_file_set_len_v0(void *, uint64_t);
 struct fy_std_windows_file_position_result_v0 fy_std_windows_file_seek_start_v0(
     void *,
@@ -82,6 +95,18 @@ uint32_t fy_std_windows_file_drop_v0(void *);
 
 static int fy_std_windows_file_closed_v0(const struct fy_std_windows_file_v0 *file) {
     return file->handle == NULL && file->open == UINT8_C(0);
+}
+
+static int fy_std_windows_file_ids_equal_v0(
+    const struct fy_std_windows_file_id_v0 *left,
+    const struct fy_std_windows_file_id_v0 *right
+) {
+    return left->volume_low == right->volume_low &&
+           left->volume_high == right->volume_high &&
+           left->file_low_0 == right->file_low_0 &&
+           left->file_low_1 == right->file_low_1 &&
+           left->file_high_0 == right->file_high_0 &&
+           left->file_high_1 == right->file_high_1;
 }
 
 int main(void) {
@@ -125,6 +150,10 @@ int main(void) {
     if (kind.status != FY_STD_WINDOWS_FILE_OK_V0 ||
         kind.os_code != (uint32_t)ERROR_SUCCESS ||
         kind.kind != (uint32_t)FILE_TYPE_DISK) return 71;
+    struct fy_std_windows_file_id_v0 original_id = {0};
+    result = fy_std_windows_file_id_v0(&file, &original_id);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        result.os_code != (uint32_t)ERROR_SUCCESS || result.count != 0) return 85;
     struct fy_std_windows_file_position_result_v0 position =
         fy_std_windows_file_position_v0(&file);
     if (position.status != FY_STD_WINDOWS_FILE_OK_V0 ||
@@ -175,6 +204,15 @@ int main(void) {
     if (fy_std_windows_file_position_v0(&file).status != FY_STD_WINDOWS_FILE_CLOSED_V0) return 24;
     if (fy_std_windows_file_size_v0(&file).status != FY_STD_WINDOWS_FILE_CLOSED_V0) return 33;
     if (fy_std_windows_file_kind_v0(&file).status != FY_STD_WINDOWS_FILE_CLOSED_V0) return 72;
+    struct fy_std_windows_file_id_v0 closed_id = {
+        UINT32_C(1), UINT32_C(2), UINT32_C(3),
+        UINT32_C(4), UINT32_C(5), UINT32_C(6)
+    };
+    const struct fy_std_windows_file_id_v0 closed_id_expected = closed_id;
+    result = fy_std_windows_file_id_v0(&file, &closed_id);
+    if (result.status != FY_STD_WINDOWS_FILE_CLOSED_V0 ||
+        result.os_code != (uint32_t)ERROR_SUCCESS || result.count != 0 ||
+        !fy_std_windows_file_ids_equal_v0(&closed_id, &closed_id_expected)) return 86;
     if (fy_std_windows_file_set_len_v0(&file, UINT64_C(0)).status !=
         FY_STD_WINDOWS_FILE_CLOSED_V0) return 45;
     if (fy_std_windows_file_seek_start_v0(&file, UINT64_C(0)).status !=
@@ -183,6 +221,24 @@ int main(void) {
 
     result = fy_std_windows_file_open_v0(path, &read_options, &file);
     if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 6;
+    struct fy_std_windows_file_id_v0 reopened_id = {0};
+    result = fy_std_windows_file_id_v0(&file, &reopened_id);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        !fy_std_windows_file_ids_equal_v0(&original_id, &reopened_id)) return 87;
+    result = fy_std_windows_file_id_v0(&file, NULL);
+    if (result.status != FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0 ||
+        result.os_code != (uint32_t)ERROR_SUCCESS || result.count != 0) return 88;
+    static const uint8_t other_path[] = "fairyc-windows-file-id-other-probe.tmp";
+    struct fy_std_windows_file_v0 other_file = {NULL, UINT8_C(0)};
+    result = fy_std_windows_file_open_v0(other_path, &write_options, &other_file);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 89;
+    struct fy_std_windows_file_id_v0 other_id = {0};
+    result = fy_std_windows_file_id_v0(&other_file, &other_id);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        fy_std_windows_file_ids_equal_v0(&original_id, &other_id)) return 90;
+    if (fy_std_windows_file_close_v0(&other_file).status !=
+        FY_STD_WINDOWS_FILE_OK_V0) return 91;
+    if (!DeleteFileW(L"fairyc-windows-file-id-other-probe.tmp")) return 92;
     size = fy_std_windows_file_size_v0(&file);
     if (size.status != FY_STD_WINDOWS_FILE_OK_V0 ||
         size.size != (uint64_t)sizeof payload) return 34;
@@ -258,6 +314,11 @@ int main(void) {
     if (kind.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
         kind.os_code != (uint32_t)ERROR_INVALID_HANDLE ||
         kind.kind != (uint32_t)FILE_TYPE_UNKNOWN) return 73;
+    struct fy_std_windows_file_id_v0 invalid_id = original_id;
+    result = fy_std_windows_file_id_v0(&file, &invalid_id);
+    if (result.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
+        result.os_code != (uint32_t)ERROR_INVALID_HANDLE || result.count != 0 ||
+        !fy_std_windows_file_ids_equal_v0(&invalid_id, &original_id)) return 93;
     uint8_t invalid_read = UINT8_C(0xa5);
     result = fy_std_windows_file_read_exact_v0(&file, &invalid_read, 1);
     if (result.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||

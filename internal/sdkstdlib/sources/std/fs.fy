@@ -29,6 +29,16 @@ struct raw_file_kind_result {
 }
 
 @repr(C)
+struct raw_file_id {
+    u32 volume_low;
+    u32 volume_high;
+    u32 file_low_0;
+    u32 file_low_1;
+    u32 file_high_0;
+    u32 file_high_1;
+}
+
+@repr(C)
 struct raw_open_options {
     u8 read;
     u8 write;
@@ -48,6 +58,16 @@ pub struct FileError {
 /// Classifies the object behind one open file handle without exposing target constants.
 pub struct FileKind {
     u32 value;
+}
+
+/// Identifies one observed file on its Windows volume for bounded equality checks.
+pub struct FileId {
+    u32 volume_low;
+    u32 volume_high;
+    u32 file_low_0;
+    u32 file_low_1;
+    u32 file_high_0;
+    u32 file_high_1;
 }
 
 /// Owns one Windows file handle and closes it automatically at scope exit.
@@ -86,6 +106,10 @@ unsafe extern C fn raw_file_size_result file_size_raw(ptr void file) ;
 @effects(filesystem)
 @link_name("fy_std_windows_file_kind_v0")
 unsafe extern C fn raw_file_kind_result file_kind_raw(ptr void file) ;
+
+@effects(filesystem)
+@link_name("fy_std_windows_file_id_v0")
+unsafe extern C fn raw_file_result file_id_raw(ptr void file, ptr mut raw_file_id output) ;
 
 @effects(filesystem)
 @link_name("fy_std_windows_file_set_len_v0")
@@ -346,6 +370,45 @@ pub fn bool kind_is_pipe(FileKind kind) {
 /// Reports whether the target could not classify kind more specifically.
 pub fn bool kind_is_unknown(FileKind kind) {
     return kind.value == 0;
+}
+
+/// Observes the opened file's volume and 128-bit target identifier.
+/// The value is for bounded equality checks, not persistence or authorization.
+@effects(filesystem)
+pub fn Result<FileId, FileError> file_id(ref File file) {
+    var raw_file_id value = raw_file_id {
+        .volume_low = 0,
+        .volume_high = 0,
+        .file_low_0 = 0,
+        .file_low_1 = 0,
+        .file_high_0 = 0,
+        .file_high_1 = 0,
+    };
+    let raw_file_result result = unsafe {
+        file_id_raw(file as ptr void, ref mut value as ptr mut raw_file_id)
+    };
+    return if (result.status != 0) {
+        .err(file_error(result))
+    } else {
+        .ok(FileId {
+            .volume_low = value.volume_low,
+            .volume_high = value.volume_high,
+            .file_low_0 = value.file_low_0,
+            .file_low_1 = value.file_low_1,
+            .file_high_0 = value.file_high_0,
+            .file_high_1 = value.file_high_1,
+        })
+    };
+}
+
+/// Reports whether two bounded observations identify the same file on one computer.
+pub fn bool file_id_equal(ref FileId left, ref FileId right) {
+    return left.volume_low == right.volume_low &&
+        left.volume_high == right.volume_high &&
+        left.file_low_0 == right.file_low_0 &&
+        left.file_low_1 == right.file_low_1 &&
+        left.file_high_0 == right.file_high_0 &&
+        left.file_high_1 == right.file_high_1;
 }
 
 /// Changes the file length without changing its current position.

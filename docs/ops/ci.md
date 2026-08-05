@@ -228,14 +228,16 @@ Windows call/ABI conformance. The same intent also emits one generated-Fairy cal
 and a 20-byte `@repr(C)` result, compiles its hand-written C callee separately, and requires exit 42
 at both profiles under both C11 and C17 consumer modes. That is one same-MSVC source-level result crossing plus focused C17 compatibility evidence, not broad or bidirectional
 Fairy FFI. It separately compiles the project-owned
-Windows File implementation and its caller probe, then executes create/write/partial-read/exact-read/size/kind/position/absolute-seek/cursor-preserving-length-change,
+Windows File implementation and its caller probe, then executes create/write/partial-read/exact-read/size/kind/identity/position/absolute-seek/cursor-preserving-length-change,
 overflow rejection with cursor preservation, sync/close/reopen, partial read, EOF, forced close
 failure, exact invalid-handle size reporting, repeated drop, exclusive-create collision with
 unchanged-byte reopening, seek-resistant append concatenation, disk/`NUL` character kinds, and
 closed/invalid-handle kind failures, complete exact reads, unexpected-EOF prefix preservation,
-untouched suffix bytes, and exact-read closed/invalid-handle failures under both profiles. A
+untouched suffix bytes, exact-read closed/invalid-handle failures, equal same-file identities,
+unequal distinct-live-file identities, null-output rejection, and unchanged identity failure output
+under both profiles. A
 separate checked-in FY source pair and the public SDK quickstart execute safe partial/exact reads
-and shared size and kind observation,
+and shared size, kind, and identity observation,
 write/position/seek, missing-file open-or-create plus preserving reopen, exclusive create plus exact
 existing-path failure and unchanged reopen, append creation plus exact EOF concatenation after
 repositioning, existing-file update-open, shrink/extend with explicit rewrite, oversized and
