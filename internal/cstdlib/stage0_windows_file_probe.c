@@ -31,6 +31,12 @@ struct fy_std_windows_file_size_result_v0 {
     uint64_t size;
 };
 
+struct fy_std_windows_file_kind_result_v0 {
+    uint32_t status;
+    uint32_t os_code;
+    uint32_t kind;
+};
+
 struct fy_std_windows_file_v0 {
     void *handle;
     uint8_t open;
@@ -53,6 +59,7 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_open_v0(
 struct fy_std_windows_file_result_v0 fy_std_windows_file_read_v0(void *, uint8_t *, size_t);
 struct fy_std_windows_file_position_result_v0 fy_std_windows_file_position_v0(void *);
 struct fy_std_windows_file_size_result_v0 fy_std_windows_file_size_v0(const void *);
+struct fy_std_windows_file_kind_result_v0 fy_std_windows_file_kind_v0(const void *);
 struct fy_std_windows_file_size_result_v0 fy_std_windows_file_set_len_v0(void *, uint64_t);
 struct fy_std_windows_file_position_result_v0 fy_std_windows_file_seek_start_v0(
     void *,
@@ -108,6 +115,10 @@ int main(void) {
     struct fy_std_windows_file_size_result_v0 size = fy_std_windows_file_size_v0(&file);
     if (size.status != FY_STD_WINDOWS_FILE_OK_V0 ||
         size.size != (uint64_t)sizeof payload) return 31;
+    struct fy_std_windows_file_kind_result_v0 kind = fy_std_windows_file_kind_v0(&file);
+    if (kind.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        kind.os_code != (uint32_t)ERROR_SUCCESS ||
+        kind.kind != (uint32_t)FILE_TYPE_DISK) return 71;
     struct fy_std_windows_file_position_result_v0 position =
         fy_std_windows_file_position_v0(&file);
     if (position.status != FY_STD_WINDOWS_FILE_OK_V0 ||
@@ -157,6 +168,7 @@ int main(void) {
         !fy_std_windows_file_closed_v0(&file)) return 4;
     if (fy_std_windows_file_position_v0(&file).status != FY_STD_WINDOWS_FILE_CLOSED_V0) return 24;
     if (fy_std_windows_file_size_v0(&file).status != FY_STD_WINDOWS_FILE_CLOSED_V0) return 33;
+    if (fy_std_windows_file_kind_v0(&file).status != FY_STD_WINDOWS_FILE_CLOSED_V0) return 72;
     if (fy_std_windows_file_set_len_v0(&file, UINT64_C(0)).status !=
         FY_STD_WINDOWS_FILE_CLOSED_V0) return 45;
     if (fy_std_windows_file_seek_start_v0(&file, UINT64_C(0)).status !=
@@ -209,6 +221,10 @@ int main(void) {
     size = fy_std_windows_file_size_v0(&file);
     if (size.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
         size.os_code != (uint32_t)ERROR_INVALID_HANDLE || size.size != UINT64_C(0)) return 35;
+    kind = fy_std_windows_file_kind_v0(&file);
+    if (kind.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
+        kind.os_code != (uint32_t)ERROR_INVALID_HANDLE ||
+        kind.kind != (uint32_t)FILE_TYPE_UNKNOWN) return 73;
     size = fy_std_windows_file_set_len_v0(&file, UINT64_C(0));
     if (size.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
         size.os_code != (uint32_t)ERROR_INVALID_HANDLE || size.size != UINT64_C(0)) return 48;
@@ -290,5 +306,14 @@ int main(void) {
         memcmp(append_received, append_expected, sizeof append_expected) != 0) return 68;
     if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 69;
     if (!DeleteFileW(L"fairyc-windows-file-append-probe.tmp")) return 70;
+
+    static const uint8_t character_path[] = "NUL";
+    result = fy_std_windows_file_open_v0(character_path, &read_options, &file);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 74;
+    kind = fy_std_windows_file_kind_v0(&file);
+    if (kind.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        kind.os_code != (uint32_t)ERROR_SUCCESS ||
+        kind.kind != (uint32_t)FILE_TYPE_CHAR) return 75;
+    if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 76;
     return 0;
 }

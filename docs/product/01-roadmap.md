@@ -785,7 +785,7 @@ ADR 0270 extends the SDK to `0.0.0-stage0.16` with allocation-free
 `size(ref File) -> Result<usize, FileError>`. The raw probe observes size 9 before and after cursor
 movement, rejects closed and invalid handles, and the private/public generated-Fairy paths observe
 both 9-byte and empty-file sizes through shared owner borrows under low and optimized MSVC. General
-metadata records, timestamps, file kinds, path-based queries, concurrent external-write snapshots,
+metadata records, timestamps, path-based queries, concurrent external-write snapshots,
 and Linux public linkage remain later gates.
 
 ADR 0271 extends the SDK to `0.0.0-stage0.17` with
@@ -826,6 +826,14 @@ write therefore begins at the then-current EOF even after an explicit seek; `wri
 possibly multi-call operation rather than a transactional record append. Raw C and safe
 generated-Fairy probes prove missing creation, repeated seek-resistant writes, exact concatenation,
 and cleanup under low and optimized MSVC. Concurrent-writer sharing, record framing, portable
+Unicode paths, and Linux public linkage remain later gates.
+
+ADR 0277 extends the SDK to `0.0.0-stage0.22` with
+`kind(ref File) -> Result<FileKind, FileError>` and target-neutral predicates for disk, character,
+pipe, and unknown handles. The query uses the already-open handle, exposes no Win32 constants, and
+does not move the cursor or allocate. Raw C and safe generated-Fairy probes distinguish an ordinary
+disk file from the `NUL` character device under low and optimized MSVC; the raw probe also covers
+closed and forced invalid handles. Timestamps, attribute records, path-based metadata, portable
 Unicode paths, and Linux public linkage remain later gates.
 
 ADR 0268 closes the discovery side of exact test selection with

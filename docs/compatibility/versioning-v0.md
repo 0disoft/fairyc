@@ -602,6 +602,14 @@ symbol changes. The compiler-private open-options record grows from five bytes t
 existing Windows File open operation can select `FILE_APPEND_DATA`. That pre-1 record is not a
 stable public native ABI.
 
+ADR 0277 moves the SDK to `0.0.0-stage0.22` because it adds public
+`std::fs::FileKind`, `std::fs::kind(ref File) -> Result<FileKind, FileError>`, and the four
+target-neutral kind predicates, plus the private `fy_std_windows_file_kind_v0` target-support
+symbol. The SDK source digest, package instance, public-interface hash, dependent identities,
+generated locks, and whole-package cache keys change. Language remains `fairyc-language/8` and
+runtime ABI remains `fairyc-runtime/0`; the fixed private C result and symbol are Windows x86-64
+MSVC-only pre-1 implementation compatibility data rather than a stable native ABI.
+
 ## Package formats
 
 Manifest schema, lockfile schema, source archive schema, and any future binary artifact schema are independent. Stage 0 needs manifest and lockfile schemas only. A stable binary package format would falsely imply a stable native Fairy ABI and is deferred.
@@ -623,7 +631,7 @@ ADR 0144 fixes the first loader behavior for this manifest schema: explicit root
 exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, one language revision,
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
 instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
-`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.21`, language
+`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.22`, language
 `fairyc-language/8`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 

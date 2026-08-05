@@ -22,6 +22,13 @@ struct raw_file_size_result {
 }
 
 @repr(C)
+struct raw_file_kind_result {
+    u32 status;
+    u32 os_code;
+    u32 kind;
+}
+
+@repr(C)
 struct raw_open_options {
     u8 read;
     u8 write;
@@ -36,6 +43,11 @@ pub struct FileError {
     u32 status;
     u32 os_code;
     usize completed;
+}
+
+/// Classifies the object behind one open file handle without exposing target constants.
+pub struct FileKind {
+    u32 value;
 }
 
 /// Owns one Windows file handle and closes it automatically at scope exit.
@@ -66,6 +78,10 @@ unsafe extern C fn raw_file_position_result file_position_raw(ptr mut void file)
 @effects(filesystem)
 @link_name("fy_std_windows_file_size_v0")
 unsafe extern C fn raw_file_size_result file_size_raw(ptr void file) ;
+
+@effects(filesystem)
+@link_name("fy_std_windows_file_kind_v0")
+unsafe extern C fn raw_file_kind_result file_kind_raw(ptr void file) ;
 
 @effects(filesystem)
 @link_name("fy_std_windows_file_set_len_v0")
@@ -108,6 +124,14 @@ fn FileError position_error(raw_file_position_result result) {
 }
 
 fn FileError size_error(raw_file_size_result result) {
+    return FileError {
+        .status = result.status,
+        .os_code = result.os_code,
+        .completed = 0,
+    };
+}
+
+fn FileError kind_error(raw_file_kind_result result) {
     return FileError {
         .status = result.status,
         .os_code = result.os_code,
@@ -267,6 +291,44 @@ pub fn Result<usize, FileError> size(ref File file) {
     } else {
         .err(size_error(result))
     };
+}
+
+/// Returns the target-neutral kind of the object behind this open handle.
+@effects(filesystem)
+pub fn Result<FileKind, FileError> kind(ref File file) {
+    let raw_file_kind_result result = unsafe {
+        file_kind_raw(file as ptr void)
+    };
+    return if (result.status != 0) {
+        .err(kind_error(result))
+    } else {
+        let u32 value = if (result.kind == 1 || result.kind == 2 || result.kind == 3) {
+            result.kind
+        } else {
+            0
+        };
+        .ok(FileKind { .value = value })
+    };
+}
+
+/// Reports whether kind names an ordinary disk file.
+pub fn bool kind_is_disk(FileKind kind) {
+    return kind.value == 1;
+}
+
+/// Reports whether kind names a character device such as a console.
+pub fn bool kind_is_character(FileKind kind) {
+    return kind.value == 2;
+}
+
+/// Reports whether kind names a socket, named pipe, or anonymous pipe.
+pub fn bool kind_is_pipe(FileKind kind) {
+    return kind.value == 3;
+}
+
+/// Reports whether the target could not classify kind more specifically.
+pub fn bool kind_is_unknown(FileKind kind) {
+    return kind.value == 0;
 }
 
 /// Changes the file length without changing its current position.

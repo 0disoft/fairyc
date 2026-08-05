@@ -219,10 +219,39 @@ fn i32 update_then_close(fs::File input) {
 }
 
 @effects(filesystem)
+fn i32 expect_disk(ref fs::File file) {
+    return switch (fs::kind(file)) {
+        case .ok(kind) : { if (fs::kind_is_disk(kind) &&
+            !fs::kind_is_character(kind) && !fs::kind_is_pipe(kind) &&
+            !fs::kind_is_unknown(kind)) { 0 } else { 138 } }
+        case .err(_) : { 141 }
+    };
+}
+
+@effects(filesystem)
+fn i32 verify_character_then_close(fs::File input) {
+    var fs::File file = input;
+    let i32 operation_code = switch (fs::kind(ref file)) {
+        case .ok(kind) : { if (!fs::kind_is_disk(kind) &&
+            fs::kind_is_character(kind) && !fs::kind_is_pipe(kind) &&
+            !fs::kind_is_unknown(kind)) { 0 } else { 142 } }
+        case .err(_) : { 145 }
+    };
+    let i32 close_code = switch (fs::close(file)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 146 }
+    };
+    return if (operation_code != 0) { operation_code } else { close_code };
+}
+
+@effects(filesystem)
 fn i32 write_then_close(fs::File input) {
     var fs::File file = input;
     let ref u8[] bytes = b"FairyFile";
-    let i32 operation_code = switch (fs::write_all(ref mut file, bytes)) {
+    let i32 kind_code = expect_disk(ref file);
+    let i32 operation_code = if (kind_code != 0) {
+        kind_code
+    } else { switch (fs::write_all(ref mut file, bytes)) {
         case .ok(written) : { if (written == 9) {
             let i32 size_code = switch (fs::size(ref file)) {
                 case .ok(size) : { if (size == 9) { 0 } else { 53 } }
@@ -245,7 +274,7 @@ fn i32 write_then_close(fs::File input) {
             11
         } }
         case .err(_) : { 10 }
-    };
+    } };
     let i32 close_code = switch (fs::close(file)) {
         case .ok(_) : { 0 }
         case .err(_) : { 13 }
@@ -585,6 +614,10 @@ fn i32 main() {
     let ref CStr append_path = c"fairyc-std-fs-append.tmp";
     let i32 invalid_code = check_invalid_path();
     let i32 missing_update_code = check_missing_update();
+    let i32 character_code = switch (fs::open_read(c"NUL")) {
+        case .ok(file) : { verify_character_then_close(file) }
+        case .err(_) : { 147 }
+    };
     let i32 create_code = switch (fs::open_or_create(open_or_create_path)) {
         case .ok(file) : { initialize_open_or_create(file) }
         case .err(_) : { 108 }
@@ -605,6 +638,8 @@ fn i32 main() {
         invalid_code
     } else if (missing_update_code != 0) {
         missing_update_code
+    } else if (character_code != 0) {
+        character_code
     } else if (preserve_code != 0) {
         preserve_code
     } else if (create_new_code != 0) {
