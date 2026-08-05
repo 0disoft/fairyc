@@ -897,8 +897,17 @@ ADR 0291 extends the SDK to `0.0.0-stage0.29` with
 calls `DeleteFileW` once without closing or mutating a File owner. Raw and generated-Fairy
 low/optimized MSVC execution proves invalid path rejection, exact open-sharing failure, explicit
 close followed by successful removal, failed reopen, and repeated missing-path failure. Directory
-removal, recursion, rename/replacement, portable Unicode paths, and Linux public linkage remain
+removal, recursion, replacement rename, directory rename, portable Unicode paths, and Linux public linkage remain
 later gates.
+
+ADR 0292 extends the SDK to `0.0.0-stage0.30` with
+`rename_file(ref CStr, ref CStr) -> Result<i32, FileError>`. It validates both bounded ASCII paths,
+rejects an observed directory source, and invokes `MoveFileExW` without replacement, cross-volume
+copy, or write-through flags. Raw and generated-Fairy low/optimized MSVC execution proves missing
+source, destination collision with both byte sequences preserved, live-source sharing failure,
+explicit close followed by success, old-path disappearance, and exact bytes at the new path.
+Replacement, directory rename, cross-volume move, metadata durability, portable Unicode paths, and
+Linux public linkage remain later gates.
 
 ADR 0268 closes the discovery side of exact test selection with
 `fairyc test --list [--locked]`. The command compiler-admits the complete selected-package test overlay and

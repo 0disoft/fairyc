@@ -112,6 +112,10 @@ unsafe extern C fn raw_file_result file_open_raw(ptr u8 path, ptr raw_open_optio
 unsafe extern C fn raw_file_result file_remove_raw(ptr u8 path) ;
 
 @effects(filesystem)
+@link_name("fy_std_windows_file_rename_v0")
+unsafe extern C fn raw_file_result file_rename_raw(ptr u8 source, ptr u8 destination) ;
+
+@effects(filesystem)
 @link_name("fy_std_windows_file_read_v0")
 unsafe extern C fn raw_file_result file_read_raw(ptr mut void file, ptr mut u8 buffer, usize length) ;
 
@@ -314,6 +318,19 @@ pub fn Result<File, FileError> open_update(ref CStr path) {
 pub fn Result<i32, FileError> remove_file(ref CStr path) {
     let raw_file_result result = unsafe {
         file_remove_raw(path as ptr u8)
+    };
+    return if (result.status == 0) {
+        .ok(0)
+    } else {
+        .err(file_error(result))
+    };
+}
+
+/// Renames one existing file without replacing the destination or copying across volumes.
+@effects(filesystem)
+pub fn Result<i32, FileError> rename_file(ref CStr source, ref CStr destination) {
+    let raw_file_result result = unsafe {
+        file_rename_raw(source as ptr u8, destination as ptr u8)
     };
     return if (result.status == 0) {
         .ok(0)

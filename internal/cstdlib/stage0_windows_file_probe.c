@@ -67,6 +67,10 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_open_v0(
     void *
 );
 struct fy_std_windows_file_result_v0 fy_std_windows_file_remove_v0(const uint8_t *);
+struct fy_std_windows_file_result_v0 fy_std_windows_file_rename_v0(
+    const uint8_t *,
+    const uint8_t *
+);
 struct fy_std_windows_file_result_v0 fy_std_windows_file_read_v0(void *, uint8_t *, size_t);
 struct fy_std_windows_file_result_v0 fy_std_windows_file_read_exact_v0(
     void *,
@@ -443,5 +447,119 @@ int main(void) {
     result = fy_std_windows_file_remove_v0(remove_path);
     if (result.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
         result.os_code != (uint32_t)ERROR_FILE_NOT_FOUND || result.count != 0) return 101;
+
+    static const uint8_t rename_source[] = "fairyc-windows-file-rename-source-probe.tmp";
+    static const uint8_t rename_destination[] =
+        "fairyc-windows-file-rename-destination-probe.tmp";
+    static const uint8_t rename_missing[] = "fairyc-windows-file-rename-missing-probe.tmp";
+    static const uint8_t rename_directory[] = "fairyc-windows-file-rename-directory-probe";
+    static const uint8_t rename_directory_destination[] =
+        "fairyc-windows-file-rename-directory-destination-probe";
+    static const uint8_t rename_source_payload[] = {
+        UINT8_C(83), UINT8_C(111), UINT8_C(117), UINT8_C(114), UINT8_C(99), UINT8_C(101)
+    };
+    static const uint8_t rename_destination_payload[] = {
+        UINT8_C(68), UINT8_C(101), UINT8_C(115), UINT8_C(116)
+    };
+    result = fy_std_windows_file_rename_v0(NULL, rename_destination);
+    if (result.status != FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0 ||
+        result.os_code != (uint32_t)ERROR_SUCCESS || result.count != 0) return 102;
+    result = fy_std_windows_file_rename_v0(rename_missing, non_ascii_path);
+    if (result.status != FY_STD_WINDOWS_FILE_PATH_ENCODING_V0 ||
+        result.os_code != (uint32_t)ERROR_SUCCESS || result.count != 0) return 103;
+    if (!CreateDirectoryW(L"fairyc-windows-file-rename-directory-probe", NULL)) return 104;
+    result = fy_std_windows_file_rename_v0(rename_directory, rename_directory_destination);
+    if (result.status != FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0 ||
+        result.os_code != (uint32_t)ERROR_SUCCESS || result.count != 0) return 105;
+    if (!RemoveDirectoryW(L"fairyc-windows-file-rename-directory-probe")) return 106;
+    result = fy_std_windows_file_rename_v0(rename_missing, rename_destination);
+    if (result.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
+        result.os_code != (uint32_t)ERROR_FILE_NOT_FOUND || result.count != 0) return 107;
+    result = fy_std_windows_file_open_v0(rename_source, &write_options, &file);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 108;
+    result = fy_std_windows_file_write_all_v0(
+        &file,
+        rename_source_payload,
+        sizeof rename_source_payload
+    );
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        result.count != sizeof rename_source_payload) return 109;
+    if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 110;
+    result = fy_std_windows_file_open_v0(rename_destination, &write_options, &file);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 111;
+    result = fy_std_windows_file_write_all_v0(
+        &file,
+        rename_destination_payload,
+        sizeof rename_destination_payload
+    );
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        result.count != sizeof rename_destination_payload) return 112;
+    if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 113;
+    result = fy_std_windows_file_rename_v0(rename_source, rename_destination);
+    if (result.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
+        result.os_code != (uint32_t)ERROR_ALREADY_EXISTS || result.count != 0) return 114;
+    result = fy_std_windows_file_open_v0(rename_source, &read_options, &file);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 115;
+    uint8_t rename_source_received[sizeof rename_source_payload] = {0};
+    result = fy_std_windows_file_read_exact_v0(
+        &file,
+        rename_source_received,
+        sizeof rename_source_received
+    );
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        result.count != sizeof rename_source_received ||
+        memcmp(rename_source_received, rename_source_payload, sizeof rename_source_payload) != 0) {
+        return 116;
+    }
+    result = fy_std_windows_file_rename_v0(rename_source, rename_destination);
+    if (result.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
+        result.os_code != (uint32_t)ERROR_SHARING_VIOLATION || result.count != 0) return 117;
+    if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 118;
+    result = fy_std_windows_file_open_v0(rename_destination, &read_options, &file);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 119;
+    uint8_t rename_destination_received[sizeof rename_destination_payload] = {0};
+    result = fy_std_windows_file_read_exact_v0(
+        &file,
+        rename_destination_received,
+        sizeof rename_destination_received
+    );
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        result.count != sizeof rename_destination_received ||
+        memcmp(
+            rename_destination_received,
+            rename_destination_payload,
+            sizeof rename_destination_payload
+        ) != 0) return 120;
+    if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 121;
+    result = fy_std_windows_file_remove_v0(rename_destination);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 122;
+    result = fy_std_windows_file_open_v0(rename_source, &read_options, &file);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 123;
+    result = fy_std_windows_file_rename_v0(rename_source, rename_destination);
+    if (result.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
+        result.os_code != (uint32_t)ERROR_SHARING_VIOLATION || result.count != 0) return 124;
+    if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 125;
+    result = fy_std_windows_file_rename_v0(rename_source, rename_destination);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        result.os_code != (uint32_t)ERROR_SUCCESS || result.count != 0) return 126;
+    result = fy_std_windows_file_rename_v0(rename_source, rename_destination);
+    if (result.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
+        result.os_code != (uint32_t)ERROR_FILE_NOT_FOUND || result.count != 0) return 127;
+    result = fy_std_windows_file_open_v0(rename_destination, &read_options, &file);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 128;
+    uint8_t rename_final_received[sizeof rename_source_payload] = {0};
+    result = fy_std_windows_file_read_exact_v0(
+        &file,
+        rename_final_received,
+        sizeof rename_final_received
+    );
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        result.count != sizeof rename_final_received ||
+        memcmp(rename_final_received, rename_source_payload, sizeof rename_source_payload) != 0) {
+        return 129;
+    }
+    if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 130;
+    result = fy_std_windows_file_remove_v0(rename_destination);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 131;
     return 0;
 }
