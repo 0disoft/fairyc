@@ -787,6 +787,14 @@ per-test outcomes, engine, nullable target/profile, totals, aggregate status, an
 complete trapped suite still returns code 5 after writing the report. Language, SDK, runtime ABI,
 manifest, lockfile, package, interface, target, MIR, and generated-code versions remain unchanged.
 
+ADR 0289 additively admits singular `--package <package-uid>` for stable test execution and listing.
+The exact local manifest UID selects one root-reachable resolved package and its isolated test
+overlay; omission preserves the existing root-only bytes. Canonical test identities and both JSON
+v1 schemas remain unchanged because one invocation admits one package. Recursive aggregation,
+multi-package selection, and feature-instance selection are not implied. Language, SDK, runtime
+ABI, manifest, lockfile, package, interface, target, MIR, and generated-code versions remain
+unchanged.
+
 ADR 0204 stabilizes `fairyc new <package-name> --uid <package-uid>`, its explicit non-derived UID,
 single direct-child destination, exact four-file starter, no-overwrite behavior, absence of an
 initial lockfile, success line, and codes 0, 2, 4, and 7. Adding templates, flags, merge behavior, an

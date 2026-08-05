@@ -95,6 +95,80 @@ fn void second_passes() { assert(true); }
 	}
 }
 
+func TestStableWorkspaceTestSelectsOneReachableMemberByPackageUID(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeWorkspaceFile(t, root, "fairy.toml", `schema = "fairyc.manifest/v1"
+[package]
+uid = "example.member-test.app"
+name = "member-test-app"
+version = "1.0.0"
+language = "fairyc-language/10"
+source = "src"
+[workspace]
+members = ["libs/answer", "libs/unused"]
+[dependencies.answer]
+path = "libs/answer"
+version = "1.0.0"
+features = []
+`)
+	writeWorkspaceFile(t, root, "src/main.fy", "module main;\nimport answer as answer;\nfn i32 value() { return answer::value(); }\n")
+	writeWorkspaceFile(t, root, "libs/answer/fairy.toml", `schema = "fairyc.manifest/v1"
+[package]
+uid = "example.member-test.answer"
+name = "answer"
+version = "1.0.0"
+language = "fairyc-language/10"
+source = "src"
+`)
+	writeWorkspaceFile(t, root, "libs/answer/src/answer.fy", "module answer;\npub fn i32 value() { return 42; }\n")
+	writeWorkspaceFile(t, root, "libs/unused/fairy.toml", `schema = "fairyc.manifest/v1"
+[package]
+uid = "example.member-test.unused"
+name = "unused"
+version = "1.0.0"
+language = "fairyc-language/10"
+source = "src"
+`)
+	writeWorkspaceFile(t, root, "libs/unused/src/unused.fy", "module unused;\npub fn i32 value() { return 7; }\n")
+	writeWorkspaceFile(t, root, "libs/unused/tests/unused.fy", "module tests::unused;\n@test\nfn void unused_passes() { assert(true); }\n")
+	writeWorkspaceFile(t, root, "tests/root.fy", "module tests::root;\n@test\nfn void root_passes() { assert(true); }\n")
+	writeWorkspaceFile(t, root, "libs/answer/tests/member.fy", `module tests::member;
+import answer as answer;
+@test
+fn void member_passes() { assert(answer::value() == 42); }
+`)
+
+	code, stdout, stderr := runForTest([]string{"test"}, root)
+	if code != ExitSuccess || stdout != "test tests::root::root_passes ... ok\ntest result: ok. 1 passed; 0 failed; lock updated\n" || stderr != "" {
+		t.Fatalf("default root test = (%d, %q, %q)", code, stdout, stderr)
+	}
+	code, stdout, stderr = runForTest([]string{"test", "--package", "example.member-test.answer", "--json", "--locked"}, root)
+	want := `{"schemaVersion":"fairyc.test-report/v1","engine":"interpreter","target":null,"profile":null,"tests":[{"identity":"tests::member::member_passes","outcome":"passed","trapCategory":null}],"count":1,"passed":1,"failed":0,"status":"ok","lock":"verified"}` + "\n"
+	if code != ExitSuccess || stdout != want || stderr != "" {
+		t.Fatalf("selected member test = (%d, %q, %q), want stdout %q", code, stdout, stderr, want)
+	}
+	code, stdout, stderr = runForTest([]string{"test", "--list", "--package", "example.member-test.answer", "--locked"}, root)
+	if code != ExitSuccess || stdout != "test tests::member::member_passes\ntest list: 1 discovered; lock verified\n" || stderr != "" {
+		t.Fatalf("selected member list = (%d, %q, %q)", code, stdout, stderr)
+	}
+
+	for _, arguments := range [][]string{
+		{"test", "--package"},
+		{"test", "--package", "missing.package"},
+		{"test", "--package", "example.member-test.answer", "--package", "example.member-test.answer"},
+	} {
+		code, stdout, stderr = runForTest(arguments, root)
+		if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "package") {
+			t.Fatalf("invalid package selection %v = (%d, %q, %q)", arguments, code, stdout, stderr)
+		}
+	}
+	code, stdout, stderr = runForTest([]string{"test", "--package", "example.member-test.unused", "--locked"}, root)
+	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "not root-reachable") {
+		t.Fatalf("unreachable package selection = (%d, %q, %q)", code, stdout, stderr)
+	}
+}
+
 func TestStableWorkspaceTestWritesCanonicalJSONExecutionReport(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()

@@ -334,6 +334,29 @@ func (workspace Workspace) RootPackageID() (hir.PackageID, error) {
 	return hir.DefaultPackage, fmt.Errorf("workspace root graph node has no instance class")
 }
 
+// PackageID returns the disposable semantic package number for one exact local package path. A
+// package used through multiple resolved feature instances is intentionally ambiguous.
+func (workspace Workspace) PackageID(packagePath string) (hir.PackageID, error) {
+	var result hir.PackageID
+	for index, class := range workspace.Resolution.InstanceClasses {
+		if len(class.Members) == 0 {
+			return hir.DefaultPackage, fmt.Errorf("workspace has an empty package instance class")
+		}
+		mapping, found := workspace.instance(class.Members[0])
+		if !found || mapping.PackagePath != packagePath {
+			continue
+		}
+		if result != hir.DefaultPackage {
+			return hir.DefaultPackage, fmt.Errorf("workspace package %q has multiple resolved instances", packagePath)
+		}
+		result = hir.PackageID(index + 1)
+	}
+	if result == hir.DefaultPackage {
+		return hir.DefaultPackage, fmt.Errorf("workspace package %q is not root-reachable", packagePath)
+	}
+	return result, nil
+}
+
 // DiagnosticSource resolves one build-local semantic span back to a host-path-free workspace path
 // and immutable source bytes.
 func (workspace Workspace) DiagnosticSource(packageID hir.PackageID, sourcePath string) (string, []byte, bool) {

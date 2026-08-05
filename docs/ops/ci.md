@@ -141,11 +141,13 @@ and compiles its root-to-dependency call through package-aware verified MIR. Low
 `build-workspace` products are retained long enough for independent PE/unwind inspection and native
 result 42. `run-workspace` then returns 42 once through the in-process CLI boundary and once through
 the separately built `fairyc.exe`, retaining no target image. The same standalone compiler runs the
-root-only `tests/answer.fy` through stable `test --locked`, requires its exact one-pass report, then
+root `tests/answer.fy` through stable `test --locked`, requires its exact one-pass report, then
 runs text and `test --list --json --locked` discovery and requires their canonical identities,
 schema, count, and verified lock state without executing them, then runs a
 failing-then-passing native pair selected by reverse-ordered exact identities and the
-checked-in exact selected test at low and optimized MSVC profiles. Every native test uses a separate inspected temporary image and the
+checked-in exact selected test at low and optimized MSVC profiles. It also selects the local answer
+package by manifest UID, requires its semantic JSON report, and runs its member-owned test under
+low and optimized MSVC. Every native test uses a separate inspected temporary image and the
 retained stable build remains byte-identical. The semantic lane invokes no target toolchain; the
 native lane adds no registry, solver, network, WSL, persistent cache, or retained artifact path.
 The owned-text path closes over SystemHeap, Buffer, and text view once. Compiler-owned `"Fairy"`

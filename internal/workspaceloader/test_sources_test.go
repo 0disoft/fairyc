@@ -108,6 +108,53 @@ func TestWithRootTestsLeavesAnAbsentOrEmptyTreeOutOfTheWorkspace(t *testing.T) {
 	}
 }
 
+func TestWithPackageTestsAddsOnlyTheSelectedMemberTestTree(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writePackage(t, root, ".", rootManifest(`
+[workspace]
+members = ["libs/answer"]
+
+[dependencies.answer]
+path = "libs/answer"
+version = "1.0.0"
+features = []
+`), validRootSource())
+	writePackage(t, root, "libs/answer", memberManifest("example.libs.answer", "answer", "1.0.0", "fairyc-language/10", ""), map[string]string{
+		"src/answer.fy": "module answer;\npub fn i32 value() { return 42; }\n",
+	})
+	writeWorkspaceLoaderFile(t, root, "tests/root.fy", "module tests::root;\n@test\nfn void root_test() {}\n")
+	writeWorkspaceLoaderFile(t, root, "libs/answer/tests/member.fy", `module tests::member;
+import answer as answer;
+@test
+fn void member_test() { assert(answer::value() == 42); }
+`)
+
+	production, err := Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	withTests, err := WithPackageTests(production, "libs/answer")
+	if err != nil {
+		t.Fatalf("WithPackageTests() error = %v", err)
+	}
+	rootPackage, _ := withTests.Package(".")
+	memberPackage, _ := withTests.Package("libs/answer")
+	if len(rootPackage.Sources) != 1 || rootPackage.Sources[0].Test {
+		t.Fatalf("root sources = %+v", rootPackage.Sources)
+	}
+	if len(memberPackage.Sources) != 2 || memberPackage.Sources[1].Path != "tests/member.fy" || !memberPackage.Sources[1].Test {
+		t.Fatalf("member sources = %+v", memberPackage.Sources)
+	}
+	memberID, err := withTests.PackageID("libs/answer")
+	if err != nil || memberID == 0 {
+		t.Fatalf("PackageID(member) = %d, %v", memberID, err)
+	}
+	if _, err := withTests.PackageID("missing"); err == nil || !strings.Contains(err.Error(), "not root-reachable") {
+		t.Fatalf("PackageID(missing) error = %v", err)
+	}
+}
+
 func TestOrdinaryLoadIgnoresInvalidTestSourceButTestLoadingRejectsIt(t *testing.T) {
 	t.Parallel()
 	root := t.TempDir()

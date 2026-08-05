@@ -541,14 +541,18 @@ execution, a nonzero program status, or a program trap follows. `--locked` perfo
 compiler-output write failure after program execution returns code 4 but cannot undo earlier bytes
 or program effects; no executable is retained.
 
-## Stable workspace test v5
+## Stable workspace test v6
 
-`fairyc test [--json] [--native [--release]] [--exact <test-identity>]... [--locked]` first loads and locks the ordinary production workspace, then overlays only
-the root package's optional exact-lowercase `tests/` tree in memory. Ordinary check, build, run,
+`fairyc test [--json] [--native [--release]] [--package <package-uid>] [--exact <test-identity>]... [--locked]` first loads and locks the ordinary production workspace, then overlays only
+the root package's optional exact-lowercase `tests/` tree in memory. `--package` instead selects one
+exact local manifest package UID that has exactly one root-reachable resolved instance and overlays
+only that package's tree. Unknown, unreachable, SDK, or feature-instance-ambiguous selections are
+code-2 invocation failures with no report. Ordinary check, build, run,
 emit, lock, interface, and cache inputs never include those files. The tree may not be a symlink or
-overlap the production source or a workspace member, shares the workspace source budgets, and maps
+overlap the selected package's production source; the default root tree also may not overlap an
+explicit workspace member path. It shares the workspace source budgets and maps
 `tests/path.fy` to `module tests::path;`. An absent or empty tree is valid. Member test trees are not
-recursively discovered.
+recursively discovered; each member requires its own explicit `--package` invocation.
 
 Argument-free `@test` selects exactly private safe zero-argument free functions returning `void`;
 invalid placements or shapes are `E9001`. Other functions in test modules are ordinary private
@@ -562,13 +566,14 @@ Development uses low MSVC; `--native --release` uses optimized MSVC. A trap fail
 tests continue. Interpreter or backend capability rejection aborts as code 2 rather than becoming a
 false test failure.
 
-Repeatable `--exact` values select canonical `<module>::<function>` identities byte-for-byte. The
+Repeatable `--exact` values select canonical `<module>::<function>` identities byte-for-byte within
+the one selected package. The
 selector order does not affect canonical execution/report order. Duplicate selectors, missing
 values, and identities absent from the complete discovered set are code-2 invocation errors with no
 report. Selection happens after test declaration validation and limits execution only: syntax,
 semantic, Flow, MIR, and verifier admission still cover the complete test overlay.
 
-`fairyc test --list [--json] [--locked]` is a separate discovery mode and does not combine with `--native`,
+`fairyc test --list [--json] [--package <package-uid>] [--locked]` is a separate discovery mode and does not combine with `--native`,
 `--release`, or `--exact`. It retains the complete overlay's syntax, declaration, semantic, Flow,
 MIR, and verifier admission, then emits `test <identity>` in canonical order without invoking the
 interpreter, backend, MSVC, PE inspector, or a test process. Its final line is
@@ -609,13 +614,13 @@ unchanged when `--json` is omitted.
 | `fairyc check [--locked]` | Check the current manifest-owned workspace through verified MIR | No |
 | `fairyc build [--release] [--locked]` | Build or replace the current root package's one Windows executable | Yes |
 | `fairyc run [--release] [--locked] [-- <program-args...>]` | Build and run the current workspace as one temporary Windows image, forwarding arguments after `--` to the program | Yes |
-| `fairyc test [--json] [--native [--release]] [--exact <test-identity>]... [--locked]` | Run all or exact canonical root-package `@test fn void` entries through the semantic interpreter or one temporary Windows MSVC image per selected test, with human or stable JSON output | Optional temporary native images |
-| `fairyc test --list [--json] [--locked]` | Compile-admit the complete root-package test overlay and list canonical exact-selector identities as text or stable JSON without execution | No |
+| `fairyc test [--json] [--native [--release]] [--package <package-uid>] [--exact <test-identity>]... [--locked]` | Run all or exact canonical root-package or explicitly selected local-package `@test fn void` entries through the semantic interpreter or one temporary Windows MSVC image per selected test, with human or stable JSON output | Optional temporary native images |
+| `fairyc test --list [--json] [--package <package-uid>] [--locked]` | Compile-admit the complete selected-package test overlay and list canonical exact-selector identities as text or stable JSON without execution | No |
 | `fairyc emit c --target <target-id> [--locked]` | Emit the current executable workspace's target-selected C11 application unit | C only, stdout |
 | `fairyc explain <diagnostic-code>` | Explain a stable diagnostic code | No |
 | `fairyc targets` | Report known target profiles, status, evidence, and unavailable requirements | No |
 
-Alternate package/workspace selection, fuzzy/tag/file test filtering, portable native-test targets, target triples beyond
+Multi-package or recursive workspace test selection, fuzzy/tag/file test filtering, portable native-test targets, target triples beyond
   the declared emit profiles and build/run's fixed local Windows path,
 additional program-input routing beyond stable run,
 feature flags, and configuration precedence

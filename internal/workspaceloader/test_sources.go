@@ -23,31 +23,40 @@ const (
 )
 
 // WithRootTests returns an ephemeral workspace whose root package additionally owns the contained
-// tests/ source tree. The production workspace is not mutated, and its canonical lock remains
-// based only on manifest-owned production sources.
+// tests/ source tree. It preserves the original root-only API while WithPackageTests owns the
+// package-selectable implementation.
 func WithRootTests(workspace Workspace) (Workspace, error) {
-	rootPackage, found := workspace.Package(".")
-	if !found || rootPackage.SourceKind != SourceKindLocal {
-		return Workspace{}, &LoadError{Reason: ReasonTestSourceRoot, Detail: "workspace root package is missing"}
+	return WithPackageTests(workspace, ".")
+}
+
+// WithPackageTests returns an ephemeral workspace whose selected local package additionally owns
+// its contained tests/ source tree. The production workspace is not mutated, and its canonical
+// lock remains based only on manifest-owned production sources.
+func WithPackageTests(workspace Workspace, packagePath string) (Workspace, error) {
+	selectedPackage, found := workspace.Package(packagePath)
+	if !found || selectedPackage.SourceKind != SourceKindLocal {
+		return Workspace{}, &LoadError{Reason: ReasonTestSourceRoot, Path: packagePath, Detail: "selected local package is missing"}
 	}
-	if portableDirectoriesOverlap(rootPackage.Manifest.Package.Source, TestSourceDirectory) {
+	if portableDirectoriesOverlap(selectedPackage.Manifest.Package.Source, TestSourceDirectory) {
 		return Workspace{}, &LoadError{
 			Reason: ReasonTestSourceRoot,
 			Path:   TestSourceDirectory,
 			Detail: "test sources must not overlap the production source root",
 		}
 	}
-	for _, member := range rootPackage.Manifest.Workspace.Members {
-		if portableDirectoriesOverlap(member, TestSourceDirectory) {
-			return Workspace{}, &LoadError{
-				Reason: ReasonTestSourceRoot,
-				Path:   TestSourceDirectory,
-				Detail: fmt.Sprintf("test sources must not overlap workspace member %q", member),
+	if packagePath == "." {
+		for _, member := range selectedPackage.Manifest.Workspace.Members {
+			if portableDirectoriesOverlap(member, TestSourceDirectory) {
+				return Workspace{}, &LoadError{
+					Reason: ReasonTestSourceRoot,
+					Path:   TestSourceDirectory,
+					Detail: fmt.Sprintf("test sources must not overlap workspace member %q", member),
+				}
 			}
 		}
 	}
 
-	testRoot, present, err := optionalExactDirectory(rootPackage.Directory, TestSourceDirectory)
+	testRoot, present, err := optionalExactDirectory(selectedPackage.Directory, TestSourceDirectory)
 	if err != nil {
 		return Workspace{}, err
 	}
@@ -81,7 +90,7 @@ func WithRootTests(workspace Workspace) (Workspace, error) {
 		}
 		loaded.Sources = slices.Clone(loaded.Sources)
 		loaded.Modules = slices.Clone(loaded.Modules)
-		if loaded.Path == "." {
+		if loaded.Path == packagePath {
 			if err := appendTestSources(&loaded, testSources, testModules); err != nil {
 				return Workspace{}, err
 			}

@@ -31,10 +31,11 @@ its explicit local workspace closure. They do not search parent directories, rea
 override, or consult another configuration file. All five maintain the canonical `fairy.lock` in
 ordinary mode and verify it without writing under `--locked`.
 
-`test` alone overlays the root package's conventional exact-lowercase `tests/` directory after the
-production lock boundary. There is no manifest test-root field, environment override, member
-recursion, filter, target, profile, runner, or native-toolchain setting in v1. Test bytes are not
-production lock inputs.
+`test` overlays the root package's conventional exact-lowercase `tests/` directory after the
+production lock boundary. Explicit `--package <package-uid>` selects one root-reachable local
+package by its manifest UID and overlays that package instead. There is no manifest test-root field,
+environment override, recursive or multi-package aggregation, filter, target configuration, runner,
+or native-toolchain setting. Test bytes are not production lock inputs.
 
 `build` and `run` alone accept `--release`; their v1 target remains the fixed local
 `x86_64-windows-msvc` path. `emit c` instead requires one explicit `--target` value and accepts the

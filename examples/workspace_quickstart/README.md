@@ -23,6 +23,17 @@ artifact. Build and run then require those exact production manifest, source, de
 lock identities, compile the verified package graph through C11 and local x64 MSVC, and return 42.
 The native program is Fairy C; the compiler itself remains the Go Stage 0 implementation.
 
+The member package owns a separate `libs/answer/tests/answer.fy`. Select it by its manifest UID
+without changing the default root suite:
+
+```powershell
+..\..\build\fairyc.exe test --package example.workspace-quickstart.answer --locked
+..\..\build\fairyc.exe test --package example.workspace-quickstart.answer --native --locked
+```
+
+Only that selected package's complete overlay is admitted. Its canonical test identities remain
+`<module>::<function>` because one invocation selects at most one package.
+
 The stable build retains `build/workspace-quickstart.exe`. To select an explicit experimental output
 path instead, use:
 

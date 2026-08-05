@@ -54,12 +54,15 @@ search exists.
 ## Isolated semantic-test overlay
 
 ADR 0181 adds an explicit in-memory overlay after an ordinary production workspace is already
-loaded and its lock is maintained or verified. Only the root package's exact-lowercase `tests/`
-directory is considered. Ordinary `Load`, check, build, run, emit, package identity, public
+loaded and its lock is maintained or verified. The root package's exact-lowercase `tests/`
+directory is the default. ADR 0289 permits the CLI to name one root-reachable local package by its
+manifest UID; the loader then considers only that package's exact-lowercase `tests/` directory.
+Ordinary `Load`, check, build, run, emit, package identity, public
 interface, cache, and lock paths never read that directory.
 
-The optional directory is contained, non-symlink, disjoint from the production source root and
-workspace members, and shares the same aggregate source budgets. Each test path retains its
+The optional directory is contained, non-symlink, disjoint from the selected package's production
+source root, and shares the same aggregate source budgets. The default root overlay is additionally
+disjoint from every explicit workspace member path. Each test path retains its
 `tests/` prefix before syntax analysis, so `tests/net/http.fy` declares
 `module tests::net::http;`. Test sources are marked in the ephemeral catalog, sorted with production
 sources, included in an ephemeral source digest, and used to rebuild module lookup and exact
@@ -69,6 +72,6 @@ dependency visibility. That digest is compile-local test evidence and is never w
 ## Deferred boundary
 
 This loader does not access a registry, solve ranges, fetch sources, link target standard-library C
-objects, persist a cache, recursively discover member test trees, or choose test declarations. The
+objects, persist a cache, recursively discover or aggregate member test trees, or choose test declarations. The
 CLI harness owns `@test` validation. The separate lockfile library projects production local and SDK
 source origins, but absolute paths and test overlays remain unserialized.

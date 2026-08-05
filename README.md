@@ -451,8 +451,8 @@ persistent cache, or stable editor protocol. Program commands use one entry plus
 `fairyc check [--locked]` and the Windows/amd64-local
 `fairyc build [--release] [--locked]`, and the Windows/amd64-local
 `fairyc run [--release] [--locked]`, and the semantic-by-default or Windows-native
-`fairyc test [--json] [--native [--release]] [--exact <test-identity>]... [--locked]` and the execution-free
-`fairyc test --list [--json] [--locked]`, plus source-independent
+`fairyc test [--json] [--native [--release]] [--package <package-uid>] [--exact <test-identity>]... [--locked]` and the execution-free
+`fairyc test --list [--json] [--package <package-uid>] [--locked]`, plus source-independent
 `fairyc explain <diagnostic-code>` and `fairyc targets`, and target-explicit
 `fairyc emit c --target <target-id> [--locked]`. Stable run forwards caller stdin, bounded Windows
 program output, arguments, and status without pre-reading input. Native tests compile each selected
@@ -584,8 +584,9 @@ standard-library support unit is intentionally absent, so redirected output is i
 input rather than a promised standalone C package. Ordinary mode maintains `fairy.lock`;
 `--locked` verifies it without writing.
 
-The stable `fairyc test [--json] [--native [--release]] [--exact <test-identity>]... [--locked]` command keeps tests out of ordinary compilation. It overlays
-only the root package's optional lowercase `tests/` directory after the production lock is handled;
+The stable `fairyc test [--json] [--native [--release]] [--package <package-uid>] [--exact <test-identity>]... [--locked]` command keeps tests out of ordinary compilation. It overlays
+the root package's optional lowercase `tests/` directory after the production lock is handled, or
+exactly one root-reachable local member when its manifest UID is selected with `--package`;
 `tests/answer.fy` therefore declares `module tests::answer;`. Mark a private safe zero-argument
 `void` function with argument-free `@test`. Without `--native`, each discovered test runs in
 canonical name order through a fresh verified-MIR interpreter state without a toolchain or artifact.
@@ -593,14 +594,14 @@ With `--native`, the compiler appends one private verified `fn() -> i32` harness
 reachable closure, compiles and inspects one temporary Windows MSVC image, and executes it with EOF
 stdin and no arguments; `--release` selects optimized MSVC. Repeatable `--exact` values select
 canonical `<module>::<function>` identities byte-for-byte while retaining canonical report order;
-the complete test overlay is still compiled. `fairyc test --list [--locked]` performs that complete
+the complete selected-package test overlay is still compiled. `fairyc test --list [--package <package-uid>] [--locked]` performs that complete
 compiler admission and prints the canonical identities without running the interpreter, backend,
 toolchain, or test process. Listing with `--json` emits the stable `fairyc.test-list/v1` schema with
 the canonical identity array, count, and lock state. Execution with `--json` emits the stable
 `fairyc.test-report/v1` schema with canonical outcomes, engine/target/profile identity, totals,
 aggregate status, and lock state. A trap fails an executed test and later selected
 tests still run in fresh processes. Native program output, portable targets, benchmarks,
-fuzzy/tag/file filters, and workspace-member discovery remain separate contracts.
+fuzzy/tag/file filters, recursive all-member discovery, multi-package aggregation, and feature-instance selection remain separate contracts.
 
 Phase 4 now has its first executable boundary: `internal/semanticsnapshot` turns successful typed
 HIR, semantic facts, verified MIR, and exact package metadata into detached, path-free compiler

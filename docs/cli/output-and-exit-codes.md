@@ -133,7 +133,7 @@ manifest, workspace, graph, and lock failures use code `7`. The command writes n
 but ordinary lock maintenance may precede emission or an output failure. `--locked` verifies the
 lock without writing.
 
-`fairyc test [--json] [--native [--release]] [--exact <test-identity>]... [--locked]` buffers one deterministic report after compilation and capability
+`fairyc test [--json] [--native [--release]] [--package <package-uid>] [--exact <test-identity>]... [--locked]` buffers one deterministic report after compilation and capability
 admission. Completed tests use `test <module>::<function> ... ok` or `test
 <module>::<function> ... FAILED (<trap-category>)`, followed by `test result:
 <ok|FAILED>. <passed> passed; <failed> failed; lock <updated|unchanged|verified>`. Zero tests emit
@@ -145,7 +145,8 @@ capability, or native-program-output rejection uses `2`; source and `E9001` test
 diagnostics use `3`; internal and output failures use `4`; one or more language traps use `5`;
 native toolchain/build/inspection/execution failure uses `6`; workspace, test-source, graph, and lock
 failures use `7`. Exact selectors preserve canonical report order; missing, duplicate, or unknown
-selectors use code `2` with no report. A trap does not stop later selected tests.
+selectors use code `2` with no report. Missing, duplicate, unknown, unreachable, or
+feature-instance-ambiguous package selection also uses code `2` with no report. A trap does not stop later selected tests.
 Compilation/capability failure emits no report;
 an external writer may still accept a report prefix before returning code `4`. Ordinary lock
 maintenance can precede later failure, while `--locked` is the no-write form.
@@ -158,7 +159,7 @@ is `x86_64-windows-msvc` with `development` or `release`. All-passing still exit
 language traps writes the complete JSON and exits 5. Failures that previously produced no human
 report likewise produce no JSON report, and writer failure remains code 4 after a possible prefix.
 
-`fairyc test --list [--json] [--locked]` buffers one `test <module>::<function>` line per admitted test in
+`fairyc test --list [--json] [--package <package-uid>] [--locked]` buffers one `test <module>::<function>` line per admitted test in
 canonical order, followed by `test list: <count> discovered; lock
 <updated|unchanged|verified>`. Zero tests emit only the final line. Listing performs the complete
 test-overlay compiler admission but executes no test, backend, toolchain, or subprocess and writes

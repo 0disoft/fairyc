@@ -19,9 +19,10 @@ This repository type owns workspace boundaries, package ownership, dependency po
 - Detailed ownership and import direction live in `docs/monorepo/package-ownership.md` and `docs/monorepo/workspace-boundaries.md`.
 - Internal Go packages are not public APIs before a stable language revision. Public contracts are the documented CLI, language revision, explicit C ABI, runtime ABI, standard-library APIs, and emitted schema families.
 - Internal MIR and caches use exact compatibility and are discarded rather than migrated. Runtime, standard-library, package, target, and Atlas formats follow `docs/compatibility/versioning-v0.md`.
-- `internal/workspaceloader` owns local-exact graph construction and the explicit root-only
+- `internal/workspaceloader` owns local-exact graph construction and the explicit singular-package
   semantic-test overlay. Stable check/build/run/emit consume only the production graph; stable test
-  alone overlays package-local `tests/` before verified-MIR interpretation. Experimental
+  overlays root `tests/` by default or one root-reachable local package selected by manifest UID
+  before verified-MIR interpretation. Experimental
   build-workspace and run-workspace consume the production graph through the closed Windows native
   path without creating a general monorepo task runner.
 

@@ -936,6 +936,11 @@ totals, status, and lock state while preserving text bytes and exit codes. Membe
 fuzzy/tag/file filters, setup/teardown, portable native targets,
 program streams, benchmarks, and host-environment policy remain separate contracts.
 
+ADR 0289 adds singular `--package <package-uid>` selection to execution and listing. The UID must
+name one local package with exactly one root-reachable resolved instance; only that package's
+contained `tests/` tree is overlaid. Existing invocations remain root-only and byte-for-byte
+unchanged, while recursive or multi-package aggregation remains separate.
+
 ADR 0146 rejects speculative persistent caching at this point. ADR 0149 supplies deterministic,
 bounded, verifier-checked bytes for a complete MIR program, but the workspace path still produces
 no independently reusable per-package MIR/object artifact and has no configured comparable

@@ -23,12 +23,13 @@ const stableTestListSchema = "fairyc.test-list/v1"
 const stableTestReportSchema = "fairyc.test-report/v1"
 
 type stableTestOptions struct {
-	locked  bool
-	native  bool
-	release bool
-	list    bool
-	json    bool
-	exact   []string
+	locked     bool
+	native     bool
+	release    bool
+	list       bool
+	json       bool
+	packageUID string
+	exact      []string
 }
 
 type stableTestListReport struct {
@@ -85,14 +86,18 @@ func runStableTest(arguments []string, sourceRoot string, stdout, stderr io.Writ
 		}
 		return packageFailure(stderr, err)
 	}
-	workspace, err = workspaceloader.WithRootTests(workspace)
+	testPackage, err := selectWorkspaceTestPackage(workspace, options.packageUID)
+	if err != nil {
+		return invocationError(stderr, err.Error())
+	}
+	workspace, err = workspaceloader.WithPackageTests(workspace, testPackage.Path)
 	if err != nil {
 		if code, handled := stableWorkspaceLoadFailure(stderr, err); handled {
 			return code
 		}
 		return packageFailure(stderr, err)
 	}
-	tests, code := prepareWorkspaceTests(&workspace, stderr)
+	tests, code := prepareWorkspaceTests(&workspace, testPackage.Path, stderr)
 	if code != ExitSuccess {
 		return code
 	}
@@ -310,6 +315,18 @@ func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 	exact := make(map[string]bool)
 	for index := 0; index < len(arguments); index++ {
 		argument := arguments[index]
+		if argument == "--package" {
+			if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
+				return stableTestOptions{}, fmt.Errorf(`command "test" requires a package UID after --package`)
+			}
+			if seen[argument] {
+				return stableTestOptions{}, fmt.Errorf(`command "test" received --package more than once`)
+			}
+			seen[argument] = true
+			options.packageUID = arguments[index+1]
+			index++
+			continue
+		}
 		if argument == "--exact" {
 			if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
 				return stableTestOptions{}, fmt.Errorf(`command "test" requires a test identity after --exact`)
@@ -324,7 +341,7 @@ func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 			continue
 		}
 		if argument != "--locked" && argument != "--native" && argument != "--release" && argument != "--list" && argument != "--json" {
-			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --list, --json, --native, --release, --exact <test-identity>, and --locked`)
+			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --list, --json, --native, --release, --package <package-uid>, --exact <test-identity>, and --locked`)
 		}
 		if seen[argument] {
 			return stableTestOptions{}, fmt.Errorf(`command "test" received %s more than once`, argument)
@@ -350,6 +367,30 @@ func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 		return stableTestOptions{}, fmt.Errorf(`command "test" requires --native when --release is supplied`)
 	}
 	return options, nil
+}
+
+func selectWorkspaceTestPackage(workspace workspaceloader.Workspace, packageUID string) (workspaceloader.Package, error) {
+	packagePath := "."
+	if packageUID != "" {
+		packagePath = ""
+		for _, loaded := range workspace.Packages {
+			if loaded.SourceKind == workspaceloader.SourceKindLocal && loaded.Manifest.Package.UID == packageUID {
+				packagePath = loaded.Path
+				break
+			}
+		}
+		if packagePath == "" {
+			return workspaceloader.Package{}, fmt.Errorf(`command "test" package %q was not found in the local workspace`, packageUID)
+		}
+	}
+	loaded, found := workspace.Package(packagePath)
+	if !found || loaded.SourceKind != workspaceloader.SourceKindLocal {
+		return workspaceloader.Package{}, fmt.Errorf(`command "test" selected local package is missing`)
+	}
+	if _, err := workspace.PackageID(packagePath); err != nil {
+		return workspaceloader.Package{}, fmt.Errorf(`command "test" cannot select package %q: %w`, loaded.Manifest.Package.UID, err)
+	}
+	return loaded, nil
 }
 
 func selectWorkspaceTests(tests []workspaceTest, exact []string) ([]workspaceTest, error) {
@@ -382,18 +423,18 @@ func selectWorkspaceTests(tests []workspaceTest, exact []string) ([]workspaceTes
 	return selected, nil
 }
 
-func prepareWorkspaceTests(workspace *workspaceloader.Workspace, stderr io.Writer) ([]workspaceTest, int) {
-	rootPackageID, err := workspace.RootPackageID()
+func prepareWorkspaceTests(workspace *workspaceloader.Workspace, packagePath string, stderr io.Writer) ([]workspaceTest, int) {
+	packageID, err := workspace.PackageID(packagePath)
 	if err != nil {
 		return nil, packageFailure(stderr, err)
 	}
-	rootPackage, found := workspace.Package(".")
+	testPackage, found := workspace.Package(packagePath)
 	if !found {
-		return nil, packageFailure(stderr, fmt.Errorf("workspace root package is missing"))
+		return nil, packageFailure(stderr, fmt.Errorf("workspace test package %q is missing", packagePath))
 	}
 	var tests []workspaceTest
 	var sourceDiagnostics []testSourceDiagnostics
-	for _, file := range rootPackage.Sources {
+	for _, file := range testPackage.Sources {
 		if !file.Test {
 			continue
 		}
@@ -436,7 +477,7 @@ func prepareWorkspaceTests(workspace *workspaceloader.Workspace, stderr io.Write
 			display := file.Module.Path + "::" + function.Name
 			tests = append(tests, workspaceTest{
 				display: display,
-				entry:   hir.QualifiedModulePath(rootPackageID, file.Module.Path) + "::" + function.Name,
+				entry:   hir.QualifiedModulePath(packageID, file.Module.Path) + "::" + function.Name,
 			})
 		}
 		if len(diagnostics) != 0 {

@@ -298,6 +298,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0286-explicit-c-int-i32-casts.md`: cuts language revision `/10` and admits only exact explicit signed 32-bit `c::int` and `i32` conversion through typed MIR, interpreter execution, deterministic C emission, cache invalidation, and low/optimized separate-C MSVC crossing.
 - `0287-stable-json-test-execution-report.md`: adds atomic stable `fairyc.test-report/v1` semantic and native execution output with canonical outcomes, engine/target/profile identity, unchanged text reports, and real optimized MSVC trap continuation evidence.
 - `0288-public-windows-file-buffer-read-append.md`: adds one-call Windows `std::fs::read_append` into `std::bytes::Buffer` spare capacity, committing only initialized bytes and proving success, EOF, file failure, and forced allocation failure under low/optimized MSVC with SDK `0.0.0-stage0.27`.
+- `0289-stable-package-selected-workspace-tests.md`: adds singular manifest-UID `--package` selection to stable test execution and listing, preserving root defaults and JSON identities while proving selected-member semantic and low/optimized native execution.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 
