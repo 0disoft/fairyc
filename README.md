@@ -19,11 +19,13 @@ fairyc new hello-fairy --uid example.hello-fairy
 cd hello-fairy
 fairyc check
 fairyc test --locked
+fairyc test --native --locked
 ```
 
 The first check validates the generated source and publishes `fairy.lock`. On Windows/amd64 with
-local x64 MSVC, `fairyc run --locked` then compiles the `.fy` program through generated C and runs
-the temporary native image with the caller's stdin attached after successful compilation. The
+local x64 MSVC, `fairyc test --native --locked` compiles each generated test into an isolated
+temporary image, while `fairyc run --locked` compiles the `.fy` program through generated C and runs
+its temporary native image with the caller's stdin attached after successful compilation. The
 generated `README.md` contains the exact next steps and a safe
 `std::io::write` example for direct stable execution. `fairyc new` never merges, upgrades, or
 overwrites an existing path.
@@ -433,12 +435,12 @@ persistent cache, or stable editor protocol. Program commands use one entry plus
 `fairyc new <package-name> --uid <package-uid>`. The stable workspace commands are
 `fairyc check [--locked]` and the Windows/amd64-local
 `fairyc build [--release] [--locked]`, and the Windows/amd64-local
-`fairyc run [--release] [--locked]`, the target-independent semantic
-`fairyc test [--locked]`, plus source-independent
+`fairyc run [--release] [--locked]`, and the semantic-by-default or Windows-native
+`fairyc test [--native [--release]] [--locked]`, plus source-independent
 `fairyc explain <diagnostic-code>` and `fairyc targets`, and target-explicit
 `fairyc emit c --target <target-id> [--locked]`. Stable run forwards caller stdin, bounded Windows
-program output, and status without pre-reading input; native test execution, program arguments,
-input forwarding for other native commands,
+program output, arguments, and status without pre-reading input. Native tests compile each selected
+entry into a separate temporary Windows image; input forwarding for other native commands,
 a complete runtime, safe standard library, package manager, supported
 target, release-stable CLI as a whole, and a stable language revision do not exist yet.
 
@@ -473,6 +475,8 @@ go run ../../cmd/fairyc build --release --locked
 & ./build/workspace-quickstart.exe
 go run ../../cmd/fairyc run --release --locked
 go run ../../cmd/fairyc test --locked
+go run ../../cmd/fairyc test --native --locked
+go run ../../cmd/fairyc test --native --release --locked
 go run ../../cmd/fairyc emit c --target x86_64-windows-msvc --locked
 go run ../../cmd/fairyc emit c --target x86_64-linux-gnu --locked
 go run ../../cmd/fairyc experimental check-workspace
@@ -509,7 +513,7 @@ explicit example inputs; they are not product defaults or tuning recommendations
 
 For repeated Windows use, `DEVELOPMENT.md` gives the WSL-free manual bootstrap that creates ignored
 `build/fairyc.exe`. The configured Windows smoke separately builds a temporary standalone compiler
-process, requires it to create a no-overwrite starter, check it, run its semantic test, and compile
+process, requires it to create a no-overwrite starter, check it, run its semantic and native tests, and compile
 its generated source through MSVC with conventional program status zero. The same executable runs
 `examples/windows_quickstart/main.fy` through MSVC with
 native result 42 by iterating two bytes with checked `usize` arithmetic and safely converting each
@@ -519,8 +523,9 @@ then execute `examples/windows_output/main.fy` with exact stdout and process sta
 two-package `examples/workspace_quickstart` graph through an exact generated lock with native result
 42, and runs the safe `std::io` workspace with exact text and byte-view lines on separated
 stdout/stderr and status zero. The same standalone
-compiler runs the isolated semantic test and emits locked Windows and Linux C11 application units without
-changing the retained executable. It then measures nine fresh-cache cold/warm pairs with one new compiler process per sample,
+compiler runs the isolated semantic test, a real native trap followed by a passing native test, and
+the checked-in native test at both MSVC profiles without changing the retained executable. It also
+emits locked Windows and Linux C11 application units, then measures nine fresh-cache cold/warm pairs with one new compiler process per sample,
 sends eight editor-shaped workspace checks to one compiler process, validates the cold, no-op,
 private-root, private-dependency, and public-dependency cache paths, and records Windows
 process-memory peaks. Raw paired timings are local observations with zero retries, not a speedup or
@@ -563,14 +568,16 @@ standard-library support unit is intentionally absent, so redirected output is i
 input rather than a promised standalone C package. Ordinary mode maintains `fairy.lock`;
 `--locked` verifies it without writing.
 
-The stable `fairyc test [--locked]` command keeps tests out of ordinary compilation. It overlays
+The stable `fairyc test [--native [--release]] [--locked]` command keeps tests out of ordinary compilation. It overlays
 only the root package's optional lowercase `tests/` directory after the production lock is handled;
 `tests/answer.fy` therefore declares `module tests::answer;`. Mark a private safe zero-argument
-`void` function with argument-free `@test`. Each discovered test runs in canonical name order through
-a fresh verified-MIR interpreter state, so it needs no C compiler, MSVC, WSL, subprocess, or build
-artifact. A trap fails that test and later tests still run. This is the fast semantic lane, not a
-claim that native ABI, foreign calls, host I/O, benchmarks, filters, or workspace-member test
-discovery exist.
+`void` function with argument-free `@test`. Without `--native`, each discovered test runs in
+canonical name order through a fresh verified-MIR interpreter state without a toolchain or artifact.
+With `--native`, the compiler appends one private verified `fn() -> i32` harness per test, emits its
+reachable closure, compiles and inspects one temporary Windows MSVC image, and executes it with EOF
+stdin and no arguments; `--release` selects optimized MSVC. A trap fails that test and later tests
+still run in fresh processes. Native program output, portable targets, benchmarks, filters,
+workspace-member discovery, and machine-readable reports remain separate contracts.
 
 Phase 4 now has its first executable boundary: `internal/semanticsnapshot` turns successful typed
 HIR, semantic facts, verified MIR, and exact package metadata into detached, path-free compiler

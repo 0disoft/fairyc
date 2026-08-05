@@ -45,14 +45,17 @@ Stable emit tests run one manifest-owned workspace through both declared targets
 byte identity, LP64/LLP64 `long` assertions, raw C11 stdout, canonical lock update/verification,
 stable source/package/capability/output failure separation, no experimental wording, and no build
 directory. Backend and fixture tests continue to own the translation-unit contents and safety rules.
-Stable semantic-test coverage separates its oracles: loader tests own production/test source
+Stable workspace-test coverage separates its oracles: loader tests own production/test source
 isolation, exact `tests/` path identity, overlap/case/symlink containment, rebuilt dependency lookup,
 and ephemeral digest behavior; declaration tests own `E9001`; compiler tests own verified-MIR
 admission; interpreter tests own fresh zero-argument `void` execution, comparison result typing,
 trap categories, and entry rejection; CLI tests own canonical ordering, continued execution after a
 trap, lock behavior, report grammar, exit codes, output failure, zero-test success, and absence of
-build artifacts. The standalone Windows smoke runs the checked-in semantic test through a separately
-built compiler without treating that host process as native-test or target-conformance evidence.
+retained build artifacts. Native harness tests additionally require a collision-free private symbol,
+MIR re-verification, one reachable i32 C entry, preserved order, and continuation after an exact trap
+receipt. The standalone Windows smoke runs the checked-in semantic test, an actual failing-then-
+passing native pair, and the checked-in passing native test at low and optimized profiles through a
+separately built compiler; each native image passes PE and unwind inspection before execution.
 Target-description tests separately cover structural validation, power-of-two layouts, closed and
 sorted scalar and feature sets, immutable lookup copies, unknown-target rejection, deterministic
 host-independent JSON, false maturity claims, and top-level JSON-schema synchronization.

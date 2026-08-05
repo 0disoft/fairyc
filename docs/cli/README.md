@@ -16,7 +16,7 @@
 - semantic navigation: `atlas`.
 
 Stable `new`, `check`, the minimal Windows `build` and `run`, compiler inspection, C emission, and
-semantic test execution now have Stage 0 contracts. The remaining command families are product
+semantic or isolated Windows-native test execution now have Stage 0 contracts. The remaining command families are product
 commitments only after their own contracts and implementations exist.
 
 ## Current prototype
@@ -24,8 +24,8 @@ commitments only after their own contracts and implementations exist.
 The Go frontend currently exposes stable starter creation
 `fairyc new <package-name> --uid <package-uid>`, stable current-workspace commands
 `fairyc check [--locked]`, `fairyc build [--release] [--locked]`, and
-`fairyc run [--release] [--locked]`, the stable target-independent semantic
-`fairyc test [--locked]`, plus the stable source-independent
+`fairyc run [--release] [--locked]`, the stable semantic-by-default or Windows-native
+`fairyc test [--native [--release]] [--locked]`, plus the stable source-independent
 `fairyc explain <diagnostic-code>` lookup and stable host-independent `fairyc targets` maturity
 report, and stable target-explicit
 `fairyc emit c --target <target-id> [--locked]`, plus `fairyc experimental parse <file.fy>`,
@@ -277,13 +277,15 @@ stderr is preserved, and the canonical trap line uses code 5. The two captured s
 64 KiB ceiling and retain no cross-stream ordering promise. Program arguments, a `--` delimiter,
 retained build output, input forwarding for other native commands, and cache policy remain absent.
 
-`fairyc test [--locked]` overlays only the root package's optional exact-lowercase `tests/` tree
+`fairyc test [--native [--release]] [--locked]` overlays only the root package's optional exact-lowercase `tests/` tree
 after maintaining or verifying the production lock. Paths keep their `tests/` prefix for module
-identity, and argument-free `@test` selects private safe zero-argument `void` functions. Each test
-runs in canonical identity order through a fresh verified-MIR interpreter runtime. Traps are
-reported per test and do not stop later tests. The command invokes no target backend, toolchain,
-WSL, subprocess, network, or host I/O and creates no build artifact. Native tests, member recursion,
-filters, setup/teardown, benchmarks, and machine output remain outside v1.
+identity, and argument-free `@test` selects private safe zero-argument `void` functions. Default
+execution keeps the canonical fresh verified-MIR interpreter runtime. `--native` instead appends a
+private reverified i32 harness for each test, compiles its reachable closure as one temporary
+`x86_64-windows-msvc` PE, inspects PE/unwind structure, and executes it in a fresh process and
+temporary directory; `--release` selects optimized MSVC. Traps are reported per test and do not
+stop later tests. Native program streams, member recursion, filters, setup/teardown, benchmarks,
+portable targets, and machine output remain outside this contract.
 
 `fairyc emit c --target <target-id> [--locked]` accepts exactly the `c` form and one mandatory
 `x86_64-linux-gnu` or `x86_64-windows-msvc` target. It loads the current manifest-owned workspace,
@@ -319,7 +321,7 @@ examples do not grant agent command authority.
 `DEVELOPMENT.md` also documents the manual WSL-free build of ignored `build/fairyc.exe` for repeated
 Windows use. The configured Windows smoke independently builds and removes a temporary compiler
 executable, verifies its help surface, drives the scalar quickstart through that separate process,
-executes the checked-in isolated semantic test without changing the retained build artifact,
+executes the checked-in isolated semantic test, native trap-isolation test, and both native MSVC profiles without changing the retained build artifact,
 emits locked Windows and Linux C11 application units without changing the retained executable,
 invokes the persistent cache command in nine fresh cold/warm process pairs and preserves raw durations,
 and sends eight editor-shaped workspace checks through one stdin/stdout session while recording

@@ -572,9 +572,12 @@ now exposes that bounded current-workspace policy as stable `fairyc check [--loc
 crosses the existing Windows C/MSVC path, both profiles produce and execute the checked-in
 two-package quickstart, and a separately built compiler performs a locked run. ADRs 0176 and 0177
 stabilize the narrow Windows-local build and run spellings; ADR 0180 separately stabilizes
-target-explicit C application-unit emission. ADR 0181 now adds the root-only semantic test lane:
+target-explicit C application-unit emission. ADR 0181 adds the root-only semantic test lane:
 production loading excludes `tests/`, the test overlay validates `@test fn void`, and each entry
-runs in a fresh interpreter state without a target toolchain or artifact.
+runs in a fresh interpreter state without a target toolchain or artifact. ADR 0265 adds an explicit
+Windows native lane that builds one private verified harness and inspected temporary PE per test,
+continues after exact runtime traps, and executes both low and optimized MSVC profiles without
+retaining artifacts or changing the report grammar.
 ADR 0204 closes the first-project bootstrap gap with stable
 `fairyc new <package-name> --uid <package-uid>`: one explicit identity, one exclusive child
 directory, exact manifest/source/test bytes, ordinary-failure rollback, and generated-project
@@ -711,9 +714,10 @@ quarantines, without selecting a default policy or making a speed claim.
   artifact, or cache policy. Keep the source-independent
   `fairyc explain <diagnostic-code>` and `fairyc targets` v1 contracts separate from catalog and
   TargetSpec data lifecycle. Keep target-explicit `fairyc emit c --target <target-id> [--locked]`
-  separate from private generated-C bytes and support units. Keep implemented semantic
-  `fairyc test [--locked]` separate from future native tests, workspace-member recursion, filters,
-  fixtures, benchmarks, and host I/O.
+  separate from private generated-C bytes and support units. Keep implemented semantic-by-default
+  and explicit Windows-native `fairyc test [--native [--release]] [--locked]` separate from
+  workspace-member recursion, filters, shared fixtures, portable targets, program streams,
+  benchmarks, and host-environment policy.
 - Move to function-level reuse only when measured package rebuild or storage evidence justifies the complexity.
 
 ADR 0209 extends the compiler-bundled SDK to `0.0.0-stage0.3` with safe exact-byte

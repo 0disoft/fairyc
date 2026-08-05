@@ -634,6 +634,14 @@ fresh semantic-interpreter execution, human result grammar, production-lock isol
 codes 0, 2, 3, 4, 5, and 7. Target-native execution, member recursion, filters, setup/teardown,
 benchmarks, host I/O, machine output, and test bytes in release package identities remain outside v1.
 
+ADR 0265 additively extends that command to `fairyc test [--native [--release]] [--locked]` while
+leaving existing interpreter invocations byte-for-byte unchanged. Native low/optimized profile
+selection, one compiler-private verified harness and temporary Windows image per test, closed
+support linkage, exact trap continuation, native program-output rejection, no-artifact behavior,
+and code 6 build failures are stable CLI behavior. Harness names/symbols, generated C and PE bytes,
+temporary paths, MSVC installation identity, language revision, SDK, runtime ABI, manifests, locks,
+and package/interface identities are not changed or newly stabilized.
+
 ADR 0204 stabilizes `fairyc new <package-name> --uid <package-uid>`, its explicit non-derived UID,
 single direct-child destination, exact four-file starter, no-overwrite behavior, absence of an
 initial lockfile, success line, and codes 0, 2, 4, and 7. Adding templates, flags, merge behavior, an

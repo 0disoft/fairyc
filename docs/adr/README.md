@@ -274,6 +274,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0262-scalar-and-bool-stdout-output.md`: adds allocation-free `write_u32`/`write_usize` decimal and ASCII `write_bool` stdout output under SDK `0.0.0-stage0.12` without changing language, runtime ABI, or product linkage.
 - `0263-generated-fairy-buffer-to-string-conversion.md`: adds `std::text::from_buffer` zero-copy owned Buffer-to-String conversion with invalid UTF-8 returning the original Buffer, executed natively at both MSVC profiles under SDK `0.0.0-stage0.13` without changing language, runtime ABI, or product linkage.
 - `0264-public-windows-stage0-files.md`: publishes the existing safe move-only Windows File lifecycle as `std::fs` under SDK `0.0.0-stage0.14`, with exact effects, typed failures, consuming close, automatic drop, and two-profile generated-Fairy execution without claiming portable paths or Linux public linkage.
+- `0265-stable-isolated-windows-native-tests.md`: extends stable `fairyc test` with explicit low/optimized Windows MSVC execution, one verified private harness and temporary PE per test, exact trap continuation, closed linkage, unchanged reports, and no retained artifacts.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

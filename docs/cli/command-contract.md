@@ -540,9 +540,9 @@ execution, a nonzero program status, or a program trap follows. `--locked` perfo
 compiler-output write failure after program execution returns code 4 but cannot undo earlier bytes
 or program effects; no executable is retained.
 
-## Stable workspace semantic test v1
+## Stable workspace test v2
 
-`fairyc test [--locked]` first loads and locks the ordinary production workspace, then overlays only
+`fairyc test [--native [--release]] [--locked]` first loads and locks the ordinary production workspace, then overlays only
 the root package's optional exact-lowercase `tests/` tree in memory. Ordinary check, build, run,
 emit, lock, interface, and cache inputs never include those files. The tree may not be a symlink or
 overlap the production source or a workspace member, shares the workspace source budgets, and maps
@@ -552,20 +552,26 @@ recursively discovered.
 Argument-free `@test` selects exactly private safe zero-argument free functions returning `void`;
 invalid placements or shapes are `E9001`. Other functions in test modules are ordinary private
 helpers. After removing only validated harness markers from the in-memory AST, the command runs the
-package-aware semantic, Flow, MIR lowering, and verifier pipeline. Each test then executes by
-canonical `<module>::<function>` order in a fresh deterministic interpreter state. A trap fails that
-test and later tests continue. An interpreter capability or resource-limit rejection aborts as code
-2 rather than becoming a false test failure.
+package-aware semantic, Flow, MIR lowering, and verifier pipeline. Default execution runs each test
+by canonical `<module>::<function>` order in a fresh deterministic interpreter state. `--native`
+instead clones the verified MIR per test, appends and verifies one private i32 harness that calls
+the selected void entry, emits only its reachable Windows closure, compiles and inspects a temporary
+PE, and runs it with EOF stdin and no arguments in a fresh process and temporary directory.
+Development uses low MSVC; `--native --release` uses optimized MSVC. A trap fails that test and later
+tests continue. Interpreter or backend capability rejection aborts as code 2 rather than becoming a
+false test failure.
 
 Completed lines are `test <identity> ... ok` or
 `test <identity> ... FAILED (<trap-category>)`. The final line is
 `test result: <ok|FAILED>. <passed> passed; <failed> failed; lock <updated|unchanged|verified>`.
 Zero tests succeed with only the final line. Codes are 0 for all
-passing, 2 for invocation/capability rejection, 3 for source or declaration diagnostics, 4 for
-internal/output failure, 5 for one or more trapped tests, and 7 for workspace/test-source/lock
-failure. The command invokes no target backend, toolchain, WSL, process, network, or host I/O and
-creates no artifact. A report writer may accept a prefix before code 4; ordinary lock maintenance
-may precede later failure, while `--locked` writes nothing.
+passing, 2 for invocation/capability/native-program-output rejection, 3 for source or declaration
+diagnostics, 4 for internal/output failure, 5 for one or more trapped tests, 6 for native
+toolchain/build/inspection/execution failure, and 7 for workspace/test-source/lock failure. Default
+mode invokes no target backend, toolchain, process, network, or host I/O. Native mode requires local
+Windows x64 MSVC but never WSL or network and retains no artifact. A report writer may accept a
+prefix before code 4; ordinary lock maintenance and earlier native test effects may precede later
+failure, while `--locked` writes nothing.
 
 ## Stage 0 surface
 
@@ -575,12 +581,12 @@ may precede later failure, while `--locked` writes nothing.
 | `fairyc check [--locked]` | Check the current manifest-owned workspace through verified MIR | No |
 | `fairyc build [--release] [--locked]` | Build or replace the current root package's one Windows executable | Yes |
 | `fairyc run [--release] [--locked] [-- <program-args...>]` | Build and run the current workspace as one temporary Windows image, forwarding arguments after `--` to the program | Yes |
-| `fairyc test [--locked]` | Run isolated root-package `@test fn void` entries through verified MIR and the semantic interpreter | No |
+| `fairyc test [--native [--release]] [--locked]` | Run isolated root-package `@test fn void` entries through the semantic interpreter or one temporary Windows MSVC image per test | Optional temporary native images |
 | `fairyc emit c --target <target-id> [--locked]` | Emit the current executable workspace's target-selected C11 application unit | C only, stdout |
 | `fairyc explain <diagnostic-code>` | Explain a stable diagnostic code | No |
 | `fairyc targets` | Report known target profiles, status, evidence, and unavailable requirements | No |
 
-Alternate package/workspace selection, test filtering and native execution, target triples beyond
+Alternate package/workspace selection, test filtering, portable native-test targets, target triples beyond
   the declared emit profiles and build/run's fixed local Windows path,
 additional program-input routing beyond stable run,
 feature flags, and configuration precedence

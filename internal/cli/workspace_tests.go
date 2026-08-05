@@ -8,22 +8,31 @@ import (
 	"strings"
 
 	"github.com/0disoft/fairyc/internal/ast"
+	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/compiler"
 	"github.com/0disoft/fairyc/internal/diagnostic"
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/interpreter"
+	"github.com/0disoft/fairyc/internal/mir"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
 const testAttribute = "test"
 
 type stableTestOptions struct {
-	locked bool
+	locked  bool
+	native  bool
+	release bool
 }
 
 type workspaceTest struct {
 	display string
 	entry   string
+}
+
+type workspaceTestOutcome struct {
+	display      string
+	trapCategory string
 }
 
 type testSourceDiagnostics struct {
@@ -85,35 +94,64 @@ func runStableTest(arguments []string, sourceRoot string, stdout, stderr io.Writ
 		return internalError(stderr)
 	}
 
-	var report strings.Builder
-	passed := 0
-	failed := 0
-	for _, test := range tests {
-		entry, found := programEntry(checked.MIR, test.entry)
-		if !found || len(entry.Parameters) != 0 || entry.ResultType != hir.TypeVoid {
-			return internalError(stderr)
+	var outcomes []workspaceTestOutcome
+	if options.native {
+		profile := cdriver.LowProfile
+		if options.release {
+			profile = cdriver.OptimizedProfile
 		}
-		outcome, err := interpreter.ExecuteVoid(checked.MIR, test.entry)
+		outcomes, code = runNativeWorkspaceTests(checked.MIR, tests, profile, stderr)
+	} else {
+		outcomes, code = runInterpreterWorkspaceTests(checked.MIR, tests, stderr)
+	}
+	if code != ExitSuccess {
+		return code
+	}
+	return writeStableTestReport(outcomes, lockState, stdout, stderr)
+}
+
+func runInterpreterWorkspaceTests(program mir.Program, tests []workspaceTest, stderr io.Writer) ([]workspaceTestOutcome, int) {
+	outcomes := make([]workspaceTestOutcome, 0, len(tests))
+	for _, test := range tests {
+		entry, found := programEntry(program, test.entry)
+		if !found || len(entry.Parameters) != 0 || entry.ResultType != hir.TypeVoid {
+			return nil, internalError(stderr)
+		}
+		outcome, err := interpreter.ExecuteVoid(program, test.entry)
 		if err != nil {
 			var capability interpreter.CapabilityError
 			if errors.As(err, &capability) {
-				return workspaceSubsetCapabilityError(
+				return nil, workspaceSubsetCapabilityError(
 					workspaceCompilePolicy{stableDiagnostics: true}, stderr, "semantic test interpreter",
 					fmt.Errorf("%s: %w", test.display, err),
 				)
 			}
-			return internalError(stderr)
+			return nil, internalError(stderr)
 		}
 		switch outcome.Kind {
 		case interpreter.OutcomeReturn:
-			passed++
-			fmt.Fprintf(&report, "test %s ... ok\n", test.display)
+			outcomes = append(outcomes, workspaceTestOutcome{display: test.display})
 		case interpreter.OutcomeTrap:
-			failed++
-			fmt.Fprintf(&report, "test %s ... FAILED (%s)\n", test.display, outcome.TrapCategory)
+			outcomes = append(outcomes, workspaceTestOutcome{display: test.display, trapCategory: outcome.TrapCategory})
 		default:
-			return internalError(stderr)
+			return nil, internalError(stderr)
 		}
+	}
+	return outcomes, ExitSuccess
+}
+
+func writeStableTestReport(outcomes []workspaceTestOutcome, lockState string, stdout, stderr io.Writer) int {
+	var report strings.Builder
+	passed := 0
+	failed := 0
+	for _, outcome := range outcomes {
+		if outcome.trapCategory == "" {
+			passed++
+			fmt.Fprintf(&report, "test %s ... ok\n", outcome.display)
+			continue
+		}
+		failed++
+		fmt.Fprintf(&report, "test %s ... FAILED (%s)\n", outcome.display, outcome.trapCategory)
 	}
 	status := "ok"
 	if failed != 0 {
@@ -131,14 +169,26 @@ func runStableTest(arguments []string, sourceRoot string, stdout, stderr io.Writ
 
 func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 	options := stableTestOptions{}
+	seen := make(map[string]bool, 3)
 	for _, argument := range arguments {
-		if argument != "--locked" {
-			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --locked`)
+		if argument != "--locked" && argument != "--native" && argument != "--release" {
+			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --native, --release, and --locked`)
 		}
-		if options.locked {
-			return stableTestOptions{}, fmt.Errorf(`command "test" received --locked more than once`)
+		if seen[argument] {
+			return stableTestOptions{}, fmt.Errorf(`command "test" received %s more than once`, argument)
 		}
-		options.locked = true
+		seen[argument] = true
+		switch argument {
+		case "--locked":
+			options.locked = true
+		case "--native":
+			options.native = true
+		case "--release":
+			options.release = true
+		}
+	}
+	if options.release && !options.native {
+		return stableTestOptions{}, fmt.Errorf(`command "test" requires --native when --release is supplied`)
 	}
 	return options, nil
 }
