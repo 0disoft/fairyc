@@ -508,6 +508,7 @@ const checkedInStdTextFromBufferManifestPath = "examples/std_text_from_buffer_qu
 const checkedInStdTextFromBufferMainPath = "examples/std_text_from_buffer_quickstart/src/main.fy"
 const checkedInStdFSManifestPath = "examples/std_fs_quickstart/fairy.toml"
 const checkedInStdFSMainPath = "examples/std_fs_quickstart/src/main.fy"
+const checkedInStdFSPathOpsPath = "examples/std_fs_quickstart/src/path_ops.fy"
 const checkedInRegionsManifestPath = "examples/regions/fairy.toml"
 const checkedInRegionsMainPath = "examples/regions/src/main.fy"
 const checkedInProcessArgsManifestPath = "examples/process_args_quickstart/fairy.toml"
@@ -639,6 +640,10 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("read checked-in std::fs workspace entry: %w", err)
 	}
+	stdFSPathOps, err := os.ReadFile(filepath.FromSlash(checkedInStdFSPathOpsPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in std::fs path operations: %w", err)
+	}
 	regionsManifest, err := os.ReadFile(filepath.FromSlash(checkedInRegionsManifestPath))
 	if err != nil {
 		return fmt.Errorf("read checked-in Region workspace manifest: %w", err)
@@ -728,6 +733,7 @@ func run() error {
 		checkedInStdTextFromBufferMainPath:     string(stdTextFromBufferMain),
 		checkedInStdFSManifestPath:             string(stdFSManifest),
 		checkedInStdFSMainPath:                 string(stdFSMain),
+		checkedInStdFSPathOpsPath:              string(stdFSPathOps),
 		checkedInRegionsManifestPath:           string(regionsManifest),
 		checkedInRegionsMainPath:               string(regionsMain),
 		checkedInProcessArgsManifestPath:       string(processArgsManifest),

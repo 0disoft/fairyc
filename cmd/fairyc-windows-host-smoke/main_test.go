@@ -394,10 +394,15 @@ func TestGeneratedFairyStdlibSourcesPassFullPipeline(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	fsPathOps, err := os.ReadFile(filepath.Join("..", "..", "examples", "std_fs_quickstart", "src", "path_ops.fy"))
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, tc := range []struct {
 		name           string
 		manifest       string
 		source         string
+		extraSources   map[string][]byte
 		expect         []string
 		foreignSymbols []string
 	}{
@@ -471,6 +476,7 @@ func TestGeneratedFairyStdlibSourcesPassFullPipeline(t *testing.T) {
 		},
 		{
 			name: "windows std fs used", manifest: "std_fs_quickstart", source: string(fsMain),
+			extraSources: map[string][]byte{"src/path_ops.fy": fsPathOps},
 			expect: []string{
 				"fy_std_buffer_append_v0", "fy_std_buffer_drop_v0", "fy_std_buffer_initialize_v0",
 				"fy_std_windows_file_open_v0", "fy_std_windows_file_read_v0", "fy_std_windows_file_read_exact_v0", "fy_std_windows_file_position_v0",
@@ -532,10 +538,14 @@ func TestGeneratedFairyStdlibSourcesPassFullPipeline(t *testing.T) {
 			t.Fatalf("%s: read manifest: %v", tc.name, err)
 		}
 		workspaceRoot := t.TempDir()
-		for name, contents := range map[string][]byte{
+		sources := map[string][]byte{
 			"fairy.toml":  manifest,
 			"src/main.fy": []byte(tc.source),
-		} {
+		}
+		for name, contents := range tc.extraSources {
+			sources[name] = contents
+		}
+		for name, contents := range sources {
 			destination := filepath.Join(workspaceRoot, filepath.FromSlash(name))
 			if err := os.MkdirAll(filepath.Dir(destination), 0o700); err != nil {
 				t.Fatalf("%s: create pipeline path %s: %v", tc.name, name, err)
