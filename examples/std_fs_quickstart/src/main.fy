@@ -354,11 +354,94 @@ fn i32 check_missing_update() {
 }
 
 @effects(filesystem)
+fn i32 initialize_open_or_create(fs::File input) {
+    var fs::File file = input;
+    let ref u8[] seed = b"Seed";
+    let i32 size_code = switch (fs::size(ref file)) {
+        case .ok(size) : { if (size == 0) { 0 } else { 94 } }
+        case .err(_) : { 95 }
+    };
+    let i32 operation_code = if (size_code != 0) {
+        size_code
+    } else {
+        let i32 position_code = switch (fs::position(ref mut file)) {
+            case .ok(position) : { if (position == 0) { 0 } else { 96 } }
+            case .err(_) : { 97 }
+        };
+        if (position_code != 0) {
+            position_code
+        } else {
+            switch (fs::write_all(ref mut file, seed)) {
+                case .ok(written) : { if (written == 4) { 0 } else { 98 } }
+                case .err(_) : { 99 }
+            }
+        }
+    };
+    let i32 close_code = switch (fs::close(file)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 100 }
+    };
+    return if (operation_code != 0) {
+        operation_code
+    } else {
+        close_code
+    };
+}
+
+@effects(filesystem)
+fn i32 verify_open_or_create_preserves(fs::File input) {
+    var fs::File file = input;
+    var u8[4] buffer = [0, 0, 0, 0];
+    let i32 size_code = switch (fs::size(ref file)) {
+        case .ok(size) : { if (size == 4) { 0 } else { 101 } }
+        case .err(_) : { 102 }
+    };
+    let i32 operation_code = if (size_code != 0) {
+        size_code
+    } else {
+        let i32 position_code = switch (fs::position(ref mut file)) {
+            case .ok(position) : { if (position == 0) { 0 } else { 103 } }
+            case .err(_) : { 104 }
+        };
+        if (position_code != 0) {
+            position_code
+        } else {
+            switch (fs::read(ref mut file, ref mut buffer)) {
+                case .ok(read) : { if (read == 4 &&
+                    buffer[0] == 83 && buffer[1] == 101 &&
+                    buffer[2] == 101 && buffer[3] == 100) { 0 } else { 105 } }
+                case .err(_) : { 106 }
+            }
+        }
+    };
+    let i32 close_code = switch (fs::close(file)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 107 }
+    };
+    return if (operation_code != 0) {
+        operation_code
+    } else {
+        close_code
+    };
+}
+
+@effects(filesystem)
 fn i32 main() {
     let ref CStr data_path = c"fairyc-std-fs-data.tmp";
     let ref CStr drop_path = c"fairyc-std-fs-drop.tmp";
+    let ref CStr open_or_create_path = c"fairyc-std-fs-open-or-create.tmp";
     let i32 invalid_code = check_invalid_path();
     let i32 missing_update_code = check_missing_update();
+    let i32 create_code = switch (fs::open_or_create(open_or_create_path)) {
+        case .ok(file) : { initialize_open_or_create(file) }
+        case .err(_) : { 108 }
+    };
+    let i32 preserve_code = if (create_code != 0) {
+        create_code
+    } else { switch (fs::open_or_create(open_or_create_path)) {
+        case .ok(file) : { verify_open_or_create_preserves(file) }
+        case .err(_) : { 109 }
+    } };
     let i32 write_code = switch (fs::create_truncate(data_path)) {
         case .ok(file) : { write_then_close(file) }
         case .err(_) : { 30 }
@@ -367,6 +450,8 @@ fn i32 main() {
         invalid_code
     } else if (missing_update_code != 0) {
         missing_update_code
+    } else if (preserve_code != 0) {
+        preserve_code
     } else if (write_code != 0) {
         write_code
     } else {

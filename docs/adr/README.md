@@ -283,6 +283,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0271-public-windows-file-update-open.md`: adds existing-file read/write open to public Windows `std::fs`, without create or truncate, with exact missing-file failure and low/optimized generated-Fairy in-place update execution under SDK `0.0.0-stage0.17`.
 - `0272-public-windows-file-length-change.md`: adds cursor-preserving `set_len` to public Windows `std::fs`, with shrink/extend execution, unspecified-extension handling, exact failure evidence, and SDK `0.0.0-stage0.18`.
 - `0273-stable-json-test-identity-listing.md`: adds compact versioned JSON to compiler-admitted stable test discovery without changing text output, execution, language, SDK, runtime ABI, or package contracts.
+- `0274-public-windows-file-open-or-create.md`: exposes atomic non-truncating Windows `std::fs::open_or_create`, proving missing creation and existing-byte preservation under both MSVC profiles with SDK `0.0.0-stage0.19`.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

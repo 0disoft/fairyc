@@ -147,6 +147,17 @@ pub fn Result<File, FileError> create_truncate(ref CStr path) {
     });
 }
 
+/// Opens a file for reading and writing, creating it when missing without truncating it.
+@effects(filesystem)
+pub fn Result<File, FileError> open_or_create(ref CStr path) {
+    return open_with(path, raw_open_options {
+        .read = 1,
+        .write = 1,
+        .create = 1,
+        .truncate = 0,
+    });
+}
+
 /// Opens an existing file for reading.
 @effects(filesystem)
 pub fn Result<File, FileError> open_read(ref CStr path) {
