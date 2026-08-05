@@ -56,8 +56,11 @@ pub struct FileError {
 }
 
 /// Classifies the object behind one open file handle without exposing target constants.
-pub struct FileKind {
-    u32 value;
+pub enum FileKind {
+    Unknown;
+    Disk;
+    Character;
+    Pipe;
 }
 
 /// Identifies one observed file on its Windows volume for bounded equality checks.
@@ -342,34 +345,55 @@ pub fn Result<FileKind, FileError> kind(ref File file) {
     };
     return if (result.status != 0) {
         .err(kind_error(result))
+    } else if (result.kind == 1) {
+        .ok(.Disk)
+    } else if (result.kind == 2) {
+        .ok(.Character)
+    } else if (result.kind == 3) {
+        .ok(.Pipe)
     } else {
-        let u32 value = if (result.kind == 1 || result.kind == 2 || result.kind == 3) {
-            result.kind
-        } else {
-            0
-        };
-        .ok(FileKind { .value = value })
+        .ok(.Unknown)
     };
 }
 
 /// Reports whether kind names an ordinary disk file.
 pub fn bool kind_is_disk(FileKind kind) {
-    return kind.value == 1;
+    return switch (kind) {
+        case .Unknown : { false }
+        case .Disk : { true }
+        case .Character : { false }
+        case .Pipe : { false }
+    };
 }
 
 /// Reports whether kind names a character device such as a console.
 pub fn bool kind_is_character(FileKind kind) {
-    return kind.value == 2;
+    return switch (kind) {
+        case .Unknown : { false }
+        case .Disk : { false }
+        case .Character : { true }
+        case .Pipe : { false }
+    };
 }
 
 /// Reports whether kind names a socket, named pipe, or anonymous pipe.
 pub fn bool kind_is_pipe(FileKind kind) {
-    return kind.value == 3;
+    return switch (kind) {
+        case .Unknown : { false }
+        case .Disk : { false }
+        case .Character : { false }
+        case .Pipe : { true }
+    };
 }
 
 /// Reports whether the target could not classify kind more specifically.
 pub fn bool kind_is_unknown(FileKind kind) {
-    return kind.value == 0;
+    return switch (kind) {
+        case .Unknown : { true }
+        case .Disk : { false }
+        case .Character : { false }
+        case .Pipe : { false }
+    };
 }
 
 /// Observes the opened file's volume and 128-bit target identifier.

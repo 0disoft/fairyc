@@ -8,6 +8,9 @@ import (
 
 func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	t.Parallel()
+	if Version != "0.0.0-stage0.25" {
+		t.Fatalf("Version = %q", Version)
+	}
 	definition, err := Load()
 	if err != nil {
 		t.Fatal(err)
@@ -29,5 +32,33 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	}
 	if !strings.HasPrefix(definition.SourceIdentity, SDKIdentity+";"+RuntimeABI+";fysrc1-sha256-") {
 		t.Fatalf("source identity = %q", definition.SourceIdentity)
+	}
+	var fileKindVariants []string
+	for _, source := range definition.Sources {
+		if source.Path != "std/fs.fy" {
+			continue
+		}
+		for _, structure := range source.Module.Structs {
+			if structure.Name == "FileKind" {
+				t.Fatal("FileKind remains a struct")
+			}
+		}
+		for _, enumeration := range source.Module.Enums {
+			if enumeration.Name != "FileKind" {
+				continue
+			}
+			if !enumeration.Public {
+				t.Fatal("FileKind enum is not public")
+			}
+			for _, variant := range enumeration.Variants {
+				if len(variant.Fields) != 0 {
+					t.Fatalf("FileKind variant %q has payload fields", variant.Name)
+				}
+				fileKindVariants = append(fileKindVariants, variant.Name)
+			}
+		}
+	}
+	if !slices.Equal(fileKindVariants, []string{"Unknown", "Disk", "Character", "Pipe"}) {
+		t.Fatalf("FileKind variants = %v", fileKindVariants)
 	}
 }

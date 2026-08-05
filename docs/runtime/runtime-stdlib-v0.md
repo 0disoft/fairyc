@@ -81,7 +81,7 @@ std::process effect-free argument count and exact UTF-8 argument copy
 std::c      C scalar types and raw wrapper helpers
 ```
 
-The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.24` exports ADR 0250's public safe `std::alloc::Arena` creation and cleanup, ADR 0246's public safe `std::bytes::Buffer`, ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free `std::text::validate_utf8`, ADR 0263's zero-copy `std::text::from_buffer` with the original Buffer returned on invalid UTF-8, ADR 0264's Windows MSVC `std::fs::File` ownership and byte-I/O surface, ADR 0269's absolute position and start-based seek operations, ADR 0270's shared file-size observation, ADR 0271's existing-file read/write open, ADR 0272's cursor-preserving file-length change, ADR 0274's non-truncating open-or-create, ADR 0275's exclusive create, ADR 0276's append-only open, ADR 0277's same-handle file-kind observation, ADR 0278's exact-read operation, ADR 0279's bounded file-identity observation, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, ADR 0210's matching immutable byte-view output operations, ADR 0211's bounded mutable-byte-view stdin read, ADR 0215's allocation-free decimal `i32` output, ADR 0262's allocation-free decimal `u32`/`usize` and ASCII `bool` output, and ADR 0261's effect-free `std::process` argument surface; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
+The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.25` exports ADR 0250's public safe `std::alloc::Arena` creation and cleanup, ADR 0246's public safe `std::bytes::Buffer`, ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free `std::text::validate_utf8`, ADR 0263's zero-copy `std::text::from_buffer` with the original Buffer returned on invalid UTF-8, ADR 0264's Windows MSVC `std::fs::File` ownership and byte-I/O surface, ADR 0269's absolute position and start-based seek operations, ADR 0270's shared file-size observation, ADR 0271's existing-file read/write open, ADR 0272's cursor-preserving file-length change, ADR 0274's non-truncating open-or-create, ADR 0275's exclusive create, ADR 0276's append-only open, ADR 0277's same-handle file-kind observation, ADR 0278's exact-read operation, ADR 0279's bounded file-identity observation, ADR 0281's exhaustive target-neutral `FileKind` enum, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, ADR 0210's matching immutable byte-view output operations, ADR 0211's bounded mutable-byte-view stdin read, ADR 0215's allocation-free decimal `i32` output, ADR 0262's allocation-free decimal `u32`/`usize` and ASCII `bool` output, and ADR 0261's effect-free `std::process` argument surface; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
 
 Built-in `Option`, `Result`, slices, `str`, and `CStr` get compiler-known view semantics; library modules provide operations over them.
 
@@ -336,7 +336,7 @@ a private non-null `ref str` sentinel, and preserves the existing pointer-only `
 is superseded as the user-facing entry by ADR 0247's SDK module; it remains independent historical
 evidence and does not define a public layout.
 
-SDK `0.0.0-stage0.24` retains move-only `String` and `CString` from `std::text`. `copy` and
+SDK `0.0.0-stage0.25` retains move-only `String` and `CString` from `std::text`. `copy` and
 `cstring_from_text` construct canonical owners fallibly; `append` preserves the existing String on
 failure. `string_len`, `string_is_empty`, `cstring_len`, and `cstring_is_empty` expose byte metadata,
 with CString length excluding its required terminator. `string_as_str` and `cstring_as_cstr` return
@@ -580,8 +580,9 @@ queries, and external-write snapshot guarantees remain outside the slice.
 
 File-kind observation uses `GetFileType` through the same shared File handle and does not move the
 cursor or allocate. The private result is `{ status: u32, os_code: u32, kind: u32 }`; the public
-opaque `FileKind` normalizes target results to disk, character, pipe, or unknown and exposes only
-target-neutral predicate functions. `FILE_TYPE_UNKNOWN` is distinguished from failure by clearing
+`FileKind` enum normalizes target results to exhaustive `.Disk`, `.Character`, `.Pipe`, or `.Unknown`
+variants. Compatibility predicates remain available without exposing target constants.
+`FILE_TYPE_UNKNOWN` is distinguished from failure by clearing
 and then reading the thread last-error value around the call. Closed storage reports status 3;
 kernel rejection reports status 1 and the exact Win32 code.
 
@@ -640,7 +641,8 @@ at byte zero; ADR 0275 extends it in SDK `0.0.0-stage0.20` with write-only `crea
 underlying write begins at the then-current EOF after any seek; ADR 0277 extends it in SDK
 `0.0.0-stage0.22` with same-handle target-neutral file-kind observation; ADR 0278 extends it in SDK
 `0.0.0-stage0.23` with exact-fill reads and explicit unexpected EOF; ADR 0279 extends it in SDK
-`0.0.0-stage0.24` with same-handle 128-bit file identity plus volume comparison. The public slice remains specific to
+`0.0.0-stage0.24` with same-handle 128-bit file identity plus volume comparison; ADR 0281 moves it to
+`0.0.0-stage0.25` by promoting `FileKind` to an exhaustive public enum. The public slice remains specific to
 `x86_64-windows-msvc`; it is not a portable Unicode path, Linux public linkage, general
 mutable-slice operation set, retained-pointer contract, or public resource-layout contract.
 

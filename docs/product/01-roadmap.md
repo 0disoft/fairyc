@@ -856,6 +856,12 @@ value is not a persistent key, authorization token, cross-machine identity, or g
 filesystem-specific change/reuse. Timestamps, attributes, link counts, directories, portable
 Unicode paths, and Linux public linkage remain later gates.
 
+ADR 0281 extends the SDK to `0.0.0-stage0.25` by promoting `FileKind` from an opaque private-field
+struct to the exhaustive target-neutral variants `.Unknown`, `.Disk`, `.Character`, and `.Pipe`.
+The four predicate helpers remain available for existing supported callers. The generated-Fairy
+quickstart switches directly over disk and character results and still executes under low and
+optimized MSVC without exposing Win32 constants or changing the private target symbol.
+
 ADR 0268 closes the discovery side of exact test selection with
 `fairyc test --list [--locked]`. The command compiler-admits the complete root test overlay and
 prints canonical identities without running the interpreter, backend, toolchain, or a test process.

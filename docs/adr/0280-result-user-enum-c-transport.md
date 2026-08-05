@@ -43,6 +43,8 @@ to model the existing private union representation directly.
   weakening deterministic layout or copying active payloads through an unrelated representation.
 - Existing opaque `std::fs::FileKind` does not change automatically. Migrating a published SDK type
   requires a separate compatibility decision and SDK revision.
+- ADR 0281 later makes that decision, retains the predicate helpers, and promotes `FileKind` to an
+  exhaustive enum under SDK `0.0.0-stage0.25`.
 - The private enum union can be larger than its active variant, as ordinary C union layout requires,
   while inactive Result payload fields remain aggregate-zero-initialized.
 - General nested tags, user-enum Option payloads, recursive enums, and resource-bearing user enums

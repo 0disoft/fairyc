@@ -221,9 +221,14 @@ fn i32 update_then_close(fs::File input) {
 @effects(filesystem)
 fn i32 expect_disk(ref fs::File file) {
     return switch (fs::kind(file)) {
-        case .ok(kind) : { if (fs::kind_is_disk(kind) &&
-            !fs::kind_is_character(kind) && !fs::kind_is_pipe(kind) &&
-            !fs::kind_is_unknown(kind)) { 0 } else { 138 } }
+        case .ok(kind) : { switch (kind) {
+            case .Unknown : { 138 }
+            case .Disk : { if (fs::kind_is_disk(kind) &&
+                !fs::kind_is_character(kind) && !fs::kind_is_pipe(kind) &&
+                !fs::kind_is_unknown(kind)) { 0 } else { 139 } }
+            case .Character : { 140 }
+            case .Pipe : { 143 }
+        } }
         case .err(_) : { 141 }
     };
 }
@@ -232,9 +237,14 @@ fn i32 expect_disk(ref fs::File file) {
 fn i32 verify_character_then_close(fs::File input) {
     var fs::File file = input;
     let i32 operation_code = switch (fs::kind(ref file)) {
-        case .ok(kind) : { if (!fs::kind_is_disk(kind) &&
-            fs::kind_is_character(kind) && !fs::kind_is_pipe(kind) &&
-            !fs::kind_is_unknown(kind)) { 0 } else { 142 } }
+        case .ok(kind) : { switch (kind) {
+            case .Unknown : { 142 }
+            case .Disk : { 143 }
+            case .Character : { if (!fs::kind_is_disk(kind) &&
+                fs::kind_is_character(kind) && !fs::kind_is_pipe(kind) &&
+                !fs::kind_is_unknown(kind)) { 0 } else { 144 } }
+            case .Pipe : { 146 }
+        } }
         case .err(_) : { 145 }
     };
     let i32 close_code = switch (fs::close(file)) {
