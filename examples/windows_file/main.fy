@@ -32,6 +32,49 @@ fn i32 write_position_probe(ref mut fs::File file) {
 }
 
 @effects(filesystem)
+fn i32 resize_round_trip(ref mut fs::File file, ref u8[] replacement) {
+    let i32 shrink_code = switch (fs::set_len(file, 5)) {
+        case .ok(size) : { if (size == 5) { 0 } else { 72 } }
+        case .err(_) : { 73 }
+    };
+    if (shrink_code != 0) {
+        return shrink_code;
+    }
+    let i32 shrink_position_code = switch (fs::position(file)) {
+        case .ok(position) : { if (position == 9) { 0 } else { 74 } }
+        case .err(_) : { 75 }
+    };
+    if (shrink_position_code != 0) {
+        return shrink_position_code;
+    }
+    let i32 extend_code = switch (fs::set_len(file, 9)) {
+        case .ok(size) : { if (size == 9) { 0 } else { 76 } }
+        case .err(_) : { 77 }
+    };
+    if (extend_code != 0) {
+        return extend_code;
+    }
+    let i32 extend_position_code = switch (fs::position(file)) {
+        case .ok(position) : { if (position == 9) { 0 } else { 78 } }
+        case .err(_) : { 79 }
+    };
+    if (extend_position_code != 0) {
+        return extend_position_code;
+    }
+    let i32 seek_code = switch (fs::seek_start(file, 5)) {
+        case .ok(position) : { if (position == 5) { 0 } else { 80 } }
+        case .err(_) : { 81 }
+    };
+    if (seek_code != 0) {
+        return seek_code;
+    }
+    return switch (fs::write_all(file, replacement)) {
+        case .ok(written) : { if (written == 4) { 0 } else { 82 } }
+        case .err(_) : { 83 }
+    };
+}
+
+@effects(filesystem)
 fn i32 read_position_probe(ref mut fs::File file, ref mut u8[] buffer) {
     let i32 initial_code = switch (fs::position(file)) {
         case .ok(position) : { if (position == 0) { 0 } else { 35 } }
@@ -98,20 +141,47 @@ fn i32 update_then_close(fs::File input) {
             if (size_code != 0) {
                 size_code
             } else {
-                let i32 position_code = write_position_probe(ref mut file);
-                if (position_code != 0) {
-                    position_code
+                let usize invalid_length = 18446744073709551615;
+                let i32 invalid_length_code = switch (fs::set_len(ref mut file, invalid_length)) {
+                    case .ok(_) : { 68 }
+                    case .err(error) : { if (fs::error_status(error) == 2 &&
+                        fs::error_os_code(error) == 0 && fs::error_completed(error) == 0) {
+                        0
+                    } else {
+                        69
+                    } }
+                };
+                if (invalid_length_code != 0) {
+                    invalid_length_code
                 } else {
-                    switch (fs::read(ref mut file, ref mut buffer)) {
-                        case .ok(read) : { if (read == 9 &&
-                            buffer[0] == 70 && buffer[1] == 97 && buffer[2] == 105 &&
-                            buffer[3] == 114 && buffer[4] == 121 && buffer[5] == 67 &&
-                            buffer[6] == 111 && buffer[7] == 100 && buffer[8] == 101) {
-                            0
+                    let i32 preserved_size_code = switch (fs::size(ref file)) {
+                        case .ok(size) : { if (size == 9) { 0 } else { 70 } }
+                        case .err(_) : { 71 }
+                    };
+                    if (preserved_size_code != 0) {
+                        preserved_size_code
+                    } else {
+                        let i32 resize_code = resize_round_trip(ref mut file, patch);
+                        if (resize_code != 0) {
+                            resize_code
                         } else {
-                            62
-                        } }
-                        case .err(_) : { 63 }
+                            let i32 position_code = write_position_probe(ref mut file);
+                            if (position_code != 0) {
+                                position_code
+                            } else {
+                                switch (fs::read(ref mut file, ref mut buffer)) {
+                                    case .ok(read) : { if (read == 9 &&
+                                        buffer[0] == 70 && buffer[1] == 97 && buffer[2] == 105 &&
+                                        buffer[3] == 114 && buffer[4] == 121 && buffer[5] == 67 &&
+                                        buffer[6] == 111 && buffer[7] == 100 && buffer[8] == 101) {
+                                        0
+                                    } else {
+                                        62
+                                    } }
+                                    case .err(_) : { 63 }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -174,10 +244,21 @@ fn i32 read_then_close(fs::File input) {
         0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
     ];
-    let i32 size_code = switch (fs::size(ref file)) {
+    let i32 read_only_length_code = switch (fs::set_len(ref mut file, 9)) {
+        case .ok(_) : { 84 }
+        case .err(error) : { if (fs::error_status(error) == 1 &&
+            fs::error_os_code(error) == 5 && fs::error_completed(error) == 0) {
+            0
+        } else {
+            85
+        } }
+    };
+    let i32 size_code = if (read_only_length_code != 0) {
+        read_only_length_code
+    } else { switch (fs::size(ref file)) {
         case .ok(size) : { if (size == 9) { 0 } else { 50 } }
         case .err(_) : { 51 }
-    };
+    } };
     let i32 operation_code = if (size_code != 0) {
         size_code
     } else {

@@ -792,8 +792,16 @@ ADR 0271 extends the SDK to `0.0.0-stage0.17` with
 `open_update(ref CStr) -> Result<File, FileError>`. It opens an existing file for read/write
 without create or truncate. The private and public generated-Fairy paths update `FairyFile` to
 `FairyCode`, verify the same handle and a read-only reopen, and require exact no-create missing-file
-failure under low and optimized MSVC. Create-without-truncate, explicit resize or truncation,
-append policy, portable Unicode paths, and Linux public linkage remain later gates.
+failure under low and optimized MSVC. Create-without-truncate, append policy, portable Unicode
+paths, and Linux public linkage remain later gates.
+
+ADR 0272 extends the SDK to `0.0.0-stage0.18` with
+`set_len(ref mut File, usize) -> Result<usize, FileError>`. It rejects values above `INT64_MAX`,
+shrinks and extends without moving the cursor, and makes no promise about bytes added by extension.
+The raw C probe and private/public generated-Fairy paths rewrite the extended region before reading,
+observe exact `FairyCode`, and cover read-only, closed, and invalid-handle failures under low and
+optimized MSVC. Zero-filled extension, sparse-file guarantees, allocation-size control, mapped-file
+coordination, and Linux public linkage remain later gates.
 
 ADR 0268 closes the discovery side of exact test selection with
 `fairyc test --list [--locked]`. The command compiler-admits the complete root test overlay and

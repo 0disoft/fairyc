@@ -241,7 +241,9 @@ safe SDK wrapper and package integration are proved separately by Go tests and t
 workspace smoke; ADR 0214 records the corresponding Linux hosted execution.
 
 The Windows File probe keeps its production component in a separate translation unit and executes
-both local MSVC profiles. It creates and truncates a file, writes all nine bytes, observes size and
+both local MSVC profiles. It creates and truncates a file, writes all nine bytes, rejects an
+oversized length without mutation, shrinks to five and extends to nine without moving the cursor,
+rewrites the unspecified extended bytes, observes size and
 cursor, rejects an overflowing absolute seek without moving it, seeks to byte 5 and back to zero,
 syncs, consumes close, rejects repeated close, reopens, seeks and reads the final four bytes, returns
 to zero, reads in three-byte chunks, observes EOF, and compares the bytes. It then steals and closes
@@ -250,11 +252,11 @@ still normalizes ownership, and finally checks best-effort and
 repeated drop. Both objects, the linked PE, and its unwind records must pass the same structural
 inspectors before execution. A distinct two-module FY example then exercises typed open errors,
 safe resource borrows and `read(ref mut u8[])` over a fixed array, shared size observation,
-write/position/absolute-seek, existing-file read/write update without create or truncate,
+write/position/absolute-seek, existing-file read/write update, cursor-preserving length change,
 sync/read/EOF, consuming close, and implicit drop at both profiles.
 ADR 0264 promotes the ownership and I/O slice to compiler-bundled public `std::fs`; ADRs 0269 and
-0270 add positioning and size, and ADR 0271 adds update-open with the same private and public
-generated-Fairy proofs. Portable paths,
+0270 add positioning and size, ADR 0271 adds update-open, and ADR 0272 adds length change with the
+same private and public generated-Fairy proofs. Portable paths,
 relative/end-based seek, Linux public linkage, general
 mutable buffers, and hosted evidence remain open.
 

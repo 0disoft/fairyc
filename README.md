@@ -343,7 +343,7 @@ drop a silent one-attempt fallback. A separate-translation-unit probe creates, w
 closes, reopens, reads in three-byte chunks, observes EOF, inspects size and absolute position,
 rejects an overflowing offset without moving the cursor, reports `ERROR_INVALID_HANDLE` for size
 and close after an externally closed handle, and checks repeated close and drop at low and optimized
-local MSVC profiles. The nine raw calls are target-bound
+local MSVC profiles. The ten raw calls are target-bound
 through the closed resolver. A checked-in two-module FY example now wraps that exact component in a
 move-only `File`, preserves status, Win32 code, and completed bytes in `FileError`, carries
 `filesystem` effects, writes and synchronizes `FairyFile`, observes its size and resets its absolute cursor,
@@ -352,8 +352,8 @@ backed by a mutable fixed array, observes EOF, consumes explicit close, and prov
 successfully reopening a path whose live write handle would deny sharing. Low and optimized MSVC builds both
 return 42 after object, PE, and unwind inspection. ADR 0264 now promotes that safe ownership and
 I/O contract into compiler-bundled `std::fs`; ADR 0269 adds allocation-free `position` and absolute
-`seek_start`, ADR 0270 adds shared `size`, and ADR 0271 adds existing-file read/write
-`open_update` without create or truncate under SDK `0.0.0-stage0.17`. The public slice remains
+`seek_start`, ADR 0270 adds shared `size`, ADR 0271 adds existing-file read/write `open_update`,
+and ADR 0272 adds cursor-preserving `set_len` under SDK `0.0.0-stage0.18`. The public slice remains
 Windows MSVC-only and does
 not claim portable Unicode paths, general mutable buffers, a supported target, or public layout.
 The source FFI slice accepts `i32`, `u8`, `u32`, `usize`, all sixteen exact transport-only TargetSpec

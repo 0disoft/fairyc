@@ -302,6 +302,53 @@ struct fy_std_windows_file_size_result_v0 fy_std_windows_file_size_v0(
     );
 }
 
+struct fy_std_windows_file_size_result_v0 fy_std_windows_file_set_len_v0(
+    void *file_storage,
+    uint64_t size
+) {
+    struct fy_std_windows_file_v0 file;
+    if (!fy_std_windows_file_load_v0(file_storage, &file)) {
+        return fy_std_windows_file_size_result_v0(
+            FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0,
+            ERROR_SUCCESS,
+            UINT64_C(0)
+        );
+    }
+    if (file.open == UINT8_C(0)) {
+        return fy_std_windows_file_size_result_v0(
+            FY_STD_WINDOWS_FILE_CLOSED_V0,
+            ERROR_SUCCESS,
+            UINT64_C(0)
+        );
+    }
+    if (size > (uint64_t)INT64_MAX) {
+        return fy_std_windows_file_size_result_v0(
+            FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0,
+            ERROR_SUCCESS,
+            UINT64_C(0)
+        );
+    }
+    FILE_END_OF_FILE_INFO information;
+    information.EndOfFile.QuadPart = (LONGLONG)size;
+    if (!SetFileInformationByHandle(
+            (HANDLE)file.handle,
+            FileEndOfFileInfo,
+            &information,
+            (DWORD)sizeof information
+        )) {
+        return fy_std_windows_file_size_result_v0(
+            FY_STD_WINDOWS_FILE_IO_ERROR_V0,
+            GetLastError(),
+            UINT64_C(0)
+        );
+    }
+    return fy_std_windows_file_size_result_v0(
+        FY_STD_WINDOWS_FILE_OK_V0,
+        ERROR_SUCCESS,
+        size
+    );
+}
+
 struct fy_std_windows_file_position_result_v0 fy_std_windows_file_seek_start_v0(
     void *file_storage,
     uint64_t offset

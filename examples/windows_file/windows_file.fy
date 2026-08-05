@@ -64,6 +64,10 @@ unsafe extern C fn fy_std_windows_file_position_result_v0 file_position_raw(ptr 
 unsafe extern C fn fy_std_windows_file_size_result_v0 file_size_raw(ptr void file) ;
 
 @effects(filesystem)
+@link_name("fy_std_windows_file_set_len_v0")
+unsafe extern C fn fy_std_windows_file_size_result_v0 file_set_len_raw(ptr mut void file, usize size) ;
+
+@effects(filesystem)
 @link_name("fy_std_windows_file_seek_start_v0")
 unsafe extern C fn fy_std_windows_file_position_result_v0 file_seek_start_raw(ptr mut void file, usize offset) ;
 
@@ -200,6 +204,18 @@ pub fn Result<usize, FileError> position(ref mut File file) {
 pub fn Result<usize, FileError> size(ref File file) {
     let fy_std_windows_file_size_result_v0 result = unsafe {
         file_size_raw(file as ptr void)
+    };
+    return if (result.status == 0) {
+        .ok(result.size)
+    } else {
+        .err(size_error(result))
+    };
+}
+
+@effects(filesystem)
+pub fn Result<usize, FileError> set_len(ref mut File file, usize length) {
+    let fy_std_windows_file_size_result_v0 result = unsafe {
+        file_set_len_raw(file as ptr mut void, length)
     };
     return if (result.status == 0) {
         .ok(result.size)
