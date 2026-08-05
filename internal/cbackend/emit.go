@@ -3040,7 +3040,7 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 	output.WriteString("#include <stdint.h>\n")
 	_, usesCSizeT := e.features["c-size-t"]
 	_, usesRegion := e.features["region-lifecycle"]
-	if len(e.structTypes) != 0 || len(e.resourceTypes) != 0 || usesCSizeT || usesRegion {
+	if len(e.structTypes) != 0 || len(e.enumTypes) != 0 || len(e.resourceTypes) != 0 || len(e.taggedTypes) != 0 || usesCSizeT || usesRegion {
 		output.WriteString("#include <stddef.h>\n")
 	}
 	if usesCSSizeT {

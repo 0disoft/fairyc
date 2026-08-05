@@ -568,7 +568,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   restricted user-enum tags
   whose payload fields are admitted scalars, raw pointers, or admitted inert structs. User enums
   inside `Option`, nested user enums, and built-in tags inside a user-enum payload remain C-backend
-  capability boundaries. No public
+  capability boundaries. `Result<T, UserEnum>` propagation preserves and reconstructs the exact
+  error enum on the enclosing return path. No public
   tagged or resource ABI is claimed.
   Nonempty admitted `@repr(C)` structs preserve public tags and field names; their layout and private
   resource layout are computed from the target description and guarded by generated C11 size,

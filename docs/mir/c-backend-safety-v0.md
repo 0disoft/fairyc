@@ -144,7 +144,8 @@ success and error fields; inactive fields are aggregate-zero-initialized rather 
 with an uncontracted C union. Size, alignment, and offsets come from the target layout engine.
 Copy-only tags do not need drop; a generic tag needs drop only when a direct payload is a resource.
 Payload extraction must agree with the MIR move marker. Result propagation reconstructs the
-enclosing function's declared Result type on the error path.
+enclosing function's declared Result type on the error path, including restricted inert user-enum
+errors without converting the enum into a scalar or target constant.
 
 Verified `region-enter` retains its exact Arena owner local and mutable-borrow type. The emitter
 allocates one private Region record per MIR Region symbol, passes the retained Arena owner address to
@@ -168,7 +169,7 @@ standard-library lowering; malformed
 destinations; and non-canonical block shapes. Empty-drop discharge produces no invented cleanup
 call. Nonempty direct and admitted active tagged payloads invoke verified private glue before field
 cleanup. This is private transport, not public Fairy ABI.
-`spec/fixtures/c-emission/manifest-v0.json` currently proves 39 source-to-emission cases and
+`spec/fixtures/c-emission/manifest-v0.json` currently proves 40 source-to-emission cases and
 repeated byte identity. No C parser, compiler, object writer, assembler, linker, executable,
 sanitizer, layout probe, or ABI probe runs in that fixture lane.
 
@@ -210,7 +211,9 @@ semantics, and it is emitted only in functions containing checked division or re
   over `u8`, `i32`, `u32`, `usize`, exact C scalars, admitted raw pointers, and acyclic nested
   `@repr(C)` records. It emits dependencies before their users plus `_Static_assert` checks for
   `sizeof`, `_Alignof`, and every `offsetof`; public C records preserve their declared tag and field
-  names. General nested resources and the remaining contracted `@repr(C)` field families fail closed.
+  names. Any emitted struct, enum, resource, or generic tagged record owns the required
+  `<stddef.h>` include directly rather than depending on another feature. General nested resources
+  and the remaining contracted `@repr(C)` field families fail closed.
 - Bit reinterpretation and potentially unaligned access use a `memcpy`-style transport rather than incompatible lvalue access.
 - `Option<i32>` and `Result<i32, i32>` currently use distinct private structs with a `uint32_t` tag
   and `int32_t` payload. Generated C extracts payload only in the selected variant block and traps

@@ -33,6 +33,9 @@ aliasing bug into generated C.
 6. `c::ssize_t` remains excluded by this decision. ADR 0054 later adds it as a distinct POSIX
    target-library type requiring `<sys/types.h>` and signed return/error transport, not as the
    signed counterpart of an ISO C `size_t` language type.
+7. ADR 0282 later makes the shared header rule explicit: structs, enums, resources, and generic
+   tagged records also require `<stddef.h>` whenever they emit `offsetof` assertions. The
+   `c::size_t` mapping and transport contract remain unchanged.
 
 ## Consequences
 

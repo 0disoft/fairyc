@@ -291,6 +291,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0279-public-windows-file-identity.md`: exposes opaque Windows `std::fs::FileId` comparison from the same open handle, proving equal same-file and unequal distinct-live-file observations plus failure-output preservation under both MSVC profiles with SDK `0.0.0-stage0.24`.
 - `0280-result-user-enum-c-transport.md`: admits restricted inert user enums as private built-in `Result` payloads with target-owned union and outer-tag layout, deterministic emission, and low/optimized Windows MSVC execution without changing language, SDK, or runtime ABI revisions.
 - `0281-public-windows-file-kind-enum.md`: promotes `std::fs::FileKind` to four exhaustive target-neutral variants while retaining compatibility predicates, with direct generated-Fairy switching under low/optimized MSVC and SDK `0.0.0-stage0.25`.
+- `0282-generated-user-enum-result-propagation.md`: proves `Result<T, UserEnum>` success and `?` error propagation through deterministic C emission and low/optimized Windows MSVC execution without changing language, SDK, runtime ABI, or public API revisions.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

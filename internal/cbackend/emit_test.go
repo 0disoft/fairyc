@@ -2187,7 +2187,7 @@ fn i32 main() {
 	if !slices.Equal(unit.Features, wantFeatures) {
 		t.Fatalf("Emit() features = %v, want %v", unit.Features, wantFeatures)
 	}
-	for _, required := range []string{"typedef union", "fy_enum_0 p_1;", "fy_enum_1 p_0;", "_Static_assert(sizeof(fy_enum_0)", "_Static_assert(sizeof(fy_tagged_0)"} {
+	for _, required := range []string{"#include <stddef.h>", "typedef union", "fy_enum_0 p_1;", "fy_enum_1 p_0;", "_Static_assert(sizeof(fy_enum_0)", "_Static_assert(sizeof(fy_tagged_0)"} {
 		if !strings.Contains(unit.Source, required) {
 			t.Errorf("generated C is missing %q", required)
 		}
