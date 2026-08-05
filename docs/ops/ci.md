@@ -231,7 +231,7 @@ Windows File implementation and its caller probe, then executes create/write/siz
 overflow rejection with cursor preservation, sync/close/reopen, partial read, EOF, forced close
 failure, exact invalid-handle size reporting, and repeated drop under both profiles. A separate
 checked-in FY source pair and the public SDK quickstart execute safe shared size observation,
-write/position/seek/sync/read/EOF, consuming close, and implicit-drop
+write/position/seek, existing-file update-open and exact missing-file rejection, sync/read/EOF, consuming close, and implicit-drop
 release at both profiles. It also compiles the raw owned-text caller and target-specific implementation as
 separate translation units, exercises the failure-preservation and repeated-lifecycle matrix under
 both profiles, and inspects both objects plus each linked image. It also compiles the catcher, stack-owning

@@ -604,7 +604,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
-  The compiler-bundled SDK `0.0.0-stage0.16` exposes
+  The compiler-bundled SDK `0.0.0-stage0.17` exposes
   `std::io::write(ref str) -> Result<usize, ConsoleError>` and a matching `write_stderr` operation
   for text, plus `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` for exact binary output.
   All four declare `console`, keep raw pointers and target linkage private, append no newline,
@@ -660,16 +660,18 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   safe quickstart executes the valid, invalid, and empty arms under both Windows profiles.
   `text::copy` remains the copy-required borrowed-text path.
   ADR 0264 additionally exposes the Windows MSVC `std::fs` slice. `File` is move-only, carries
-  `filesystem` cleanup authority, and is constructed only through `create_truncate(ref CStr)` or
-  `open_read(ref CStr)`. `read(ref mut File, ref mut u8[])` returns one exact partial count including
+  `filesystem` cleanup authority, and is constructed only through `create_truncate(ref CStr)`,
+  `open_read(ref CStr)`, or `open_update(ref CStr)`. The update constructor opens only an existing
+  file with read/write access, does not create or truncate it, and starts at byte zero.
+  `read(ref mut File, ref mut u8[])` returns one exact partial count including
   zero at EOF; `write_all`, explicit `sync`, consuming `close`, and automatic drop preserve the
   closed target component's ownership rules. `position(ref mut File)` observes the absolute byte
   cursor and `seek_start(ref mut File, usize)` moves it from the file start; both return the resulting
   position and reject offsets above `INT64_MAX` without moving the cursor. `size(ref File)` observes
   the exact byte length through a shared owner borrow without changing position. `FileError` exposes
   stable status, Windows OS code, and completed-byte accessors. The checked-in safe quickstart
-  executes invalid-path failure, write/read/EOF, position/seek including overflow preservation,
-  nonempty and empty size observation, explicit close, and implicit-drop reopen under both Windows
+  executes invalid-path and missing-update failure, write/read/EOF, position/seek including overflow preservation,
+  existing-file in-place update, nonempty and empty size observation, explicit close, and implicit-drop reopen under both Windows
   profiles. The path is
   still bounded ASCII bootstrap input; portable Unicode paths and Linux public linkage remain
   excluded.
@@ -805,14 +807,14 @@ argument, output, and exit-code contract. It emits no native code.
 
 ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
-version, source digest, and lock fields. SDK `0.0.0-stage0.16` exports ADR 0250's move-only,
+version, source digest, and lock fields. SDK `0.0.0-stage0.17` exports ADR 0250's move-only,
 fallibly created `std::alloc::Arena` with automatic cleanup and exact allocation status,
 while ADR 0251 makes compiler-known placement return `Result<ref T, AllocError>` under language `/8`.
 ADR 0246's public safe `std::bytes::Buffer`,
 ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free
 `std::text::validate_utf8`, ADR 0263's zero-copy `std::text::from_buffer`, ADR 0264's Windows MSVC
 `std::fs::File` ownership and byte-I/O surface, ADR 0269's absolute position/seek surface, ADR 0270's
-shared file-size observation,
+shared file-size observation, ADR 0271's existing-file read/write open,
 ADR 0205's `std::io::write(ref str) -> Result<usize, ConsoleError>`, and ADR 0209's matching
 `write_stderr` operation, ADR 0210's matching immutable byte-view output operations, and ADR 0211's
 `read_stdin(ref mut u8[]) -> Result<usize, ConsoleReadError>`, plus ADR 0215's allocation-free

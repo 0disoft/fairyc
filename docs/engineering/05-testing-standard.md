@@ -250,9 +250,11 @@ still normalizes ownership, and finally checks best-effort and
 repeated drop. Both objects, the linked PE, and its unwind records must pass the same structural
 inspectors before execution. A distinct two-module FY example then exercises typed open errors,
 safe resource borrows and `read(ref mut u8[])` over a fixed array, shared size observation,
-write/position/absolute-seek, sync/read/EOF, consuming close, and implicit drop at both profiles.
+write/position/absolute-seek, existing-file read/write update without create or truncate,
+sync/read/EOF, consuming close, and implicit drop at both profiles.
 ADR 0264 promotes the ownership and I/O slice to compiler-bundled public `std::fs`; ADRs 0269 and
-0270 add positioning and size with a second public SDK quickstart proof. Portable paths,
+0270 add positioning and size, and ADR 0271 adds update-open with the same private and public
+generated-Fairy proofs. Portable paths,
 relative/end-based seek, Linux public linkage, general
 mutable buffers, and hosted evidence remain open.
 

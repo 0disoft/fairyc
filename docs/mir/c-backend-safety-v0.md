@@ -290,7 +290,8 @@ consumed by both C-emission admission and product-build source selection.
 Windows File names are rejected for Linux and select one independent inline-handle component only
 for `x86_64-windows-msvc`. ADRs 0124 and 0125 established an example-level safe FY wrapper plus a
 length-generic fixed-array byte view; ADR 0264 publishes that exact Windows slice as `std::fs`, and
-ADR 0269 adds two target-bound absolute-position symbols and ADR 0270 adds one shared size symbol,
+ADR 0269 adds two target-bound absolute-position symbols, ADR 0270 adds one shared size symbol, and
+ADR 0271 reuses the existing open symbol for existing-file read/write access without create or truncate,
 while portable paths, relative/end-based seek, general metadata, Linux public linkage, general
 mutable-buffer operations, retained pointers, and public layout remain outside this boundary.
 The sole nested-pointer exception is exactly source `ptr mut ptr mut void`, so source

@@ -151,6 +151,16 @@ pub fn Result<File, FileError> open_read(ref CStr path) {
 }
 
 @effects(filesystem)
+pub fn Result<File, FileError> open_update(ref CStr path) {
+    return open_with(path, fy_std_windows_open_options_v0 {
+        .read = 1,
+        .write = 1,
+        .create = 0,
+        .truncate = 0,
+    });
+}
+
+@effects(filesystem)
 pub fn Result<usize, FileError> write_all(ref mut File file, ref u8[] bytes) {
     let fy_std_windows_file_result_v0 result = unsafe {
         file_write_all_raw(file as ptr mut void, bytes as ptr u8, bytes.len)
@@ -233,4 +243,16 @@ pub fn Result<i32, FileError> close(File input) {
     } else {
         .err(to_error(result))
     };
+}
+
+pub fn u32 error_status(FileError error) {
+    return error.status;
+}
+
+pub fn u32 error_os_code(FileError error) {
+    return error.os_code;
+}
+
+pub fn usize error_completed(FileError error) {
+    return error.completed;
 }

@@ -280,6 +280,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0268-stable-test-identity-listing.md`: adds a compiler-admitted, execution-free stable listing mode for discovering the canonical identities accepted by exact semantic and native test selection.
 - `0269-public-windows-file-positioning.md`: adds allocation-free current-position observation and absolute start-based seek to public Windows `std::fs`, with overflow rejection, unchanged-position failure evidence, and low/optimized generated-Fairy execution under SDK `0.0.0-stage0.15`.
 - `0270-public-windows-file-size.md`: adds allocation-free shared file-size observation to public Windows `std::fs`, with cursor preservation, closed/invalid-handle failures, empty-file coverage, and low/optimized generated-Fairy execution under SDK `0.0.0-stage0.16`.
+- `0271-public-windows-file-update-open.md`: adds existing-file read/write open to public Windows `std::fs`, without create or truncate, with exact missing-file failure and low/optimized generated-Fairy in-place update execution under SDK `0.0.0-stage0.17`.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

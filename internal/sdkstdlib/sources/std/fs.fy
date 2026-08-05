@@ -154,6 +154,17 @@ pub fn Result<File, FileError> open_read(ref CStr path) {
     });
 }
 
+/// Opens an existing file for reading and writing without truncating it.
+@effects(filesystem)
+pub fn Result<File, FileError> open_update(ref CStr path) {
+    return open_with(path, raw_open_options {
+        .read = 1,
+        .write = 1,
+        .create = 0,
+        .truncate = 0,
+    });
+}
+
 /// Writes every byte or reports how many bytes completed before failure.
 @effects(filesystem)
 pub fn Result<usize, FileError> write_all(ref mut File file, ref u8[] bytes) {
