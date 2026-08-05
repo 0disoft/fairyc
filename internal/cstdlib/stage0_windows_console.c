@@ -99,6 +99,48 @@ struct fy_std_console_write_result_v0 fy_std_stdout_write_i32_v0(int32_t value) 
     );
 }
 
+/*
+ * Shared back-to-front unsigned decimal formatter. The 64-bit magnitude covers
+ * both u32 (at most 10 digits for 4294967295) and the pointer-width usize on
+ * this LLP64 x64 target (at most 20 digits for 18446744073709551615); callers
+ * size the buffer to the exact maximum digit count of their declared width.
+ */
+static struct fy_std_console_write_result_v0 fy_std_windows_write_unsigned_decimal_v0(
+    uint64_t magnitude,
+    uint8_t *buffer,
+    size_t buffer_size
+) {
+    size_t position = buffer_size;
+    do {
+        uint64_t digit = magnitude % UINT64_C(10);
+        buffer[--position] = (uint8_t)(UINT8_C(48) + (uint8_t)digit);
+        magnitude /= UINT64_C(10);
+    } while (magnitude != UINT64_C(0));
+    return fy_std_windows_write_all_impl_v0(
+        STD_OUTPUT_HANDLE,
+        buffer + position,
+        buffer_size - position
+    );
+}
+
+struct fy_std_console_write_result_v0 fy_std_stdout_write_u32_v0(uint32_t value) {
+    uint8_t buffer[10];
+    return fy_std_windows_write_unsigned_decimal_v0(
+        (uint64_t)value,
+        buffer,
+        sizeof(buffer)
+    );
+}
+
+struct fy_std_console_write_result_v0 fy_std_stdout_write_usize_v0(uintptr_t value) {
+    uint8_t buffer[20];
+    return fy_std_windows_write_unsigned_decimal_v0(
+        (uint64_t)value,
+        buffer,
+        sizeof(buffer)
+    );
+}
+
 struct fy_std_console_write_result_v0 fy_std_stderr_write_all_v0(
     const uint8_t *data,
     size_t length

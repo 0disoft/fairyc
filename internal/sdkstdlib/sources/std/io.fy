@@ -33,6 +33,14 @@ unsafe extern C fn raw_console_write_result stdout_write_all_raw(ptr u8 data, us
 unsafe extern C fn raw_console_write_result stdout_write_i32_raw(i32 value) ;
 
 @effects(console)
+@link_name("fy_std_stdout_write_u32_v0")
+unsafe extern C fn raw_console_write_result stdout_write_u32_raw(u32 value) ;
+
+@effects(console)
+@link_name("fy_std_stdout_write_usize_v0")
+unsafe extern C fn raw_console_write_result stdout_write_usize_raw(usize value) ;
+
+@effects(console)
 @link_name("fy_std_stderr_write_all_v0")
 unsafe extern C fn raw_console_write_result stderr_write_all_raw(ptr u8 data, usize length) ;
 
@@ -87,6 +95,34 @@ pub fn Result<usize, ConsoleError> write_i32(i32 value) {
         stdout_write_i32_raw(value)
     };
     return checked_write_result(result.status, result.written);
+}
+
+/// Writes value as locale-independent decimal ASCII to stdout without adding a newline.
+@effects(console)
+pub fn Result<usize, ConsoleError> write_u32(u32 value) {
+    let raw_console_write_result result = unsafe {
+        stdout_write_u32_raw(value)
+    };
+    return checked_write_result(result.status, result.written);
+}
+
+/// Writes value as locale-independent decimal ASCII to stdout without adding a newline.
+@effects(console)
+pub fn Result<usize, ConsoleError> write_usize(usize value) {
+    let raw_console_write_result result = unsafe {
+        stdout_write_usize_raw(value)
+    };
+    return checked_write_result(result.status, result.written);
+}
+
+/// Writes the exact ASCII text true or false to stdout without adding a newline.
+@effects(console)
+pub fn Result<usize, ConsoleError> write_bool(bool value) {
+    return if (value) {
+        write("true")
+    } else {
+        write("false")
+    };
 }
 
 /// Writes the exact UTF-8 bytes in text to stderr without adding a newline.

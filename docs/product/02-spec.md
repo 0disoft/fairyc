@@ -603,7 +603,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
-  The compiler-bundled SDK `0.0.0-stage0.11` exposes
+  The compiler-bundled SDK `0.0.0-stage0.12` exposes
   `std::io::write(ref str) -> Result<usize, ConsoleError>` and a matching `write_stderr` operation
   for text, plus `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` for exact binary output.
   All four declare `console`, keep raw pointers and target linkage private, append no newline,
@@ -613,7 +613,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   allocation-free bounded read, treats a successful zero count as EOF, and leaves text decoding,
   line handling, buffering, and retry-to-fill to later APIs. It also exposes canonical decimal
   `write_i32(i32) -> Result<usize, ConsoleError>` output without allocation, locale, or an implicit
-  newline. The checked-in safe workspace has exact
+  newline. It also exposes canonical decimal `write_u32(u32) -> Result<usize, ConsoleError>` and
+  `write_usize(usize) -> Result<usize, ConsoleError>` output covering the full unsigned domain in
+  at most 10/20 bytes and ASCII `write_bool(bool) -> Result<usize, ConsoleError>` output, all
+  without allocation, locale, or an implicit newline. The checked-in safe workspace has exact
   text, byte-view, and `INT32_MIN` Windows output evidence through stable build/run plus direct-artifact EOF,
   short-input, and eight-byte-prefix evidence through a separately built compiler. Stable run now
   forwards the short input after successful compilation; Linux native execution remains configured
@@ -781,7 +784,7 @@ argument, output, and exit-code contract. It emits no native code.
 
 ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
-version, source digest, and lock fields. SDK `0.0.0-stage0.11` exports ADR 0250's move-only,
+version, source digest, and lock fields. SDK `0.0.0-stage0.12` exports ADR 0250's move-only,
 fallibly created `std::alloc::Arena` with automatic cleanup and exact allocation status,
 while ADR 0251 makes compiler-known placement return `Result<ref T, AllocError>` under language `/8`.
 ADR 0246's public safe `std::bytes::Buffer`,
@@ -790,7 +793,8 @@ ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-
 ADR 0205's `std::io::write(ref str) -> Result<usize, ConsoleError>`, and ADR 0209's matching
 `write_stderr` operation, ADR 0210's matching immutable byte-view output operations, and ADR 0211's
 `read_stdin(ref mut u8[]) -> Result<usize, ConsoleReadError>`, plus ADR 0215's allocation-free
-canonical decimal `write_i32` and ADR 0261's effect-free `std::process` argument surface; it
+canonical decimal `write_i32`, ADR 0262's allocation-free decimal `write_u32`/`write_usize` and
+ASCII `write_bool`, and ADR 0261's effect-free `std::process` argument surface; it
 performs no host installation lookup. The I/O wrapper keeps raw
 pointers and target linkage private while the remaining planned
 standard-library API remains unsettled.

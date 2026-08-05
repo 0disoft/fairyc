@@ -496,6 +496,8 @@ const checkedInWindowsOutputPath = "examples/windows_output/main.fy"
 const checkedInWindowsOutputSupportPath = "examples/windows_output/windows_console.fy"
 const checkedInStdIOManifestPath = "examples/std_io_quickstart/fairy.toml"
 const checkedInStdIOMainPath = "examples/std_io_quickstart/src/main.fy"
+const checkedInStdIoScalarManifestPath = "examples/std_io_scalar_quickstart/fairy.toml"
+const checkedInStdIoScalarMainPath = "examples/std_io_scalar_quickstart/src/main.fy"
 const checkedInStdAllocManifestPath = "examples/std_alloc_quickstart/fairy.toml"
 const checkedInStdAllocMainPath = "examples/std_alloc_quickstart/src/main.fy"
 const checkedInStdBytesManifestPath = "examples/std_bytes_quickstart/fairy.toml"
@@ -582,6 +584,14 @@ func run() error {
 	stdIOMain, err := os.ReadFile(filepath.FromSlash(checkedInStdIOMainPath))
 	if err != nil {
 		return fmt.Errorf("read checked-in std::io workspace entry: %w", err)
+	}
+	stdIoScalarManifest, err := os.ReadFile(filepath.FromSlash(checkedInStdIoScalarManifestPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in std::io scalar workspace manifest: %w", err)
+	}
+	stdIoScalarMain, err := os.ReadFile(filepath.FromSlash(checkedInStdIoScalarMainPath))
+	if err != nil {
+		return fmt.Errorf("read checked-in std::io scalar workspace entry: %w", err)
 	}
 	stdAllocManifest, err := os.ReadFile(filepath.FromSlash(checkedInStdAllocManifestPath))
 	if err != nil {
@@ -679,6 +689,8 @@ func run() error {
 		checkedInWindowsOutputSupportPath: string(windowsOutputSupportSource),
 		checkedInStdIOManifestPath:        string(stdIOManifest),
 		checkedInStdIOMainPath:            string(stdIOMain),
+		checkedInStdIoScalarManifestPath:  string(stdIoScalarManifest),
+		checkedInStdIoScalarMainPath:      string(stdIoScalarMain),
 		checkedInStdAllocManifestPath:     string(stdAllocManifest),
 		checkedInStdAllocMainPath:         string(stdAllocMain),
 		checkedInStdBytesManifestPath:     string(stdBytesManifest),
@@ -1068,6 +1080,11 @@ func run() error {
 		return err
 	}
 	workspaceBuildExecutions += stdTextBuildExecutions
+	stdIoScalarBuildExecutions, err := runStdIoScalarQuickstartProof(root)
+	if err != nil {
+		return err
+	}
+	workspaceBuildExecutions += stdIoScalarBuildExecutions
 	regionBuildExecutions, err := runStdlibQuickstartProof(root, "regions", "regions", "Region", 42)
 	if err != nil {
 		return err
@@ -1232,6 +1249,7 @@ func run() error {
 	fmt.Printf("Generated-Fairy CString failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering cstring_from_text initial-allocation failure, exact statuses 1/1, automatic CString drop, and zero retained probe allocations\n", cstringFailureCases, cstringFailureProbeImages)
 	fmt.Printf("Generated-Fairy String copy failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering text::copy initial-allocation failure, exact statuses 1/1, automatic String drop, and zero retained probe allocations\n", stringCopyFailureCases, stringCopyFailureProbeImages)
 	fmt.Printf("Stable run program-argument forwarding proof passed: %d native executions across %d inspected low/optimized MSVC images, covering argv[0] inclusion and ordering, empty, flag-looking, space/quote/trailing-backslash, and non-ASCII UTF-8 argument round-trips, out-of-range status 1, too-small status 3 with exact needed and an unchanged caller buffer, CLI embedded-NUL and delimiter rejection, and low-level invalid-surrogate status 2 with an unchanged buffer\n", processArgsExecutions+processArgsDecodeExecutions, processArgsBuildImages+processArgsDecodeImages)
+	fmt.Printf("std::io scalar output proof passed: %d native executions across %d inspected low/optimized MSVC images, covering u32 0/1/max, usize 0/1/max, and bool true/false exact ASCII bytes with exact written counts and empty stderr\n", stdIoScalarBuildExecutions, stdIoScalarBuildExecutions)
 	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds, %d package-workspace builds, %d package-workspace runs, %d source-level safe File lifecycle builds, %d source-level safe owned-text lifecycle builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, public safe std::bytes Buffer ownership and views, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls, checked reads and mutable indexed stores, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, bounded lexical defer, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, stable-run stdin forwarding, bounded allocation-free stdin byte reads with EOF and partial-buffer evidence, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart, output, locked workspace execution, one isolated semantic test, two target-explicit C emissions, nine paired cold/warm persistent-cache process measurements, one nine-process bounded persistent-cache growth staircase, an eight-request editor-shaped workspace session with Windows process-memory peaks, %d fresh locked Atlas workspace-call catalog processes with per-process memory peaks, %d generated Atlas workspace-call scaling shapes, and %d post-GC retained-index batches, 42 run-host outcomes covered fixed arrays, byte-view iteration and slicing, checked indexed stores, assertions and lexical defer in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, Buffer initialization, reserve, self-overlap append, and zeroed-resize allocation rollback passed %d separate-translation-unit MSVC executions, owned-text opaque-storage failure preservation, forced allocation rollback, and repeated drop passed %d separate-translation-unit MSVC executions, Arena zeroing, two-stage allocation rollback, stale Region rejection, and active-drop preservation passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, exact object addends and final-image REL32 through REL32_5, weak-alias fallback/strong override, ADDR64, and unwind ADDR32NB values plus CodeView SECTION/SECREL pairs, PE/PDB identity, and exact DbgHelp function/line symbolication passed %d separate-translation-unit MSVC executions, weak NOLIBRARY suppression and LIBRARY extraction passed %d separate-translation-unit MSVC executions, archive extraction, pick-any ownership, selected-child retention, and discarded-child elimination passed %d MSVC input-order executions, generated-Fairy small and large struct results passed %d separate-translation-unit MSVC executions across C11 and C17 consumer modes, %d Windows x64 unwind cases plus exact profile-specific handler-tail ADDR32NB binding passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, workspaceBuildExecutions, workspaceRunExecutions, windowsFileSourceExecutions, ownedTextSourceExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, buildmeasure.AtlasCallProcessIterations, len(atlasCallScaleMeasurement.Shapes), len(atlasCallRetainedMeasurement.Shapes)*buildmeasure.AtlasCallRetainedIterationsPerShape, windowsFileExecutions, bufferProbeExecutions, ownedTextProbeExecutions, arenaProbeExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, relocationExecutions, weakSearchExecutions, archiveExecutions, structResultExecutions, unwindCases, unwindExecutions, inspectedPEImages, toolchain.Version)
 	return nil
 }
@@ -1348,6 +1366,43 @@ func runStdlibQuickstartProof(root string, directory string, artifactBase string
 		}
 		if err := executeExpectResult(artifactPath, expectedResult); err != nil {
 			return 0, fmt.Errorf("execute %s %s artifact: %w", module, profile.name, err)
+		}
+	}
+	return len(profiles), nil
+}
+
+func runStdIoScalarQuickstartProof(root string) (int, error) {
+	workspaceRoot := filepath.Join(root, "examples", "std_io_scalar_quickstart")
+	artifactPath := filepath.Join(workspaceRoot, "build", "std-io-scalar-quickstart.exe")
+	expectedStdout := "0\n1\n4294967295\n0\n1\n18446744073709551615\ntrue\nfalse\n"
+	profiles := []struct {
+		name       string
+		arguments  []string
+		lockStatus string
+	}{
+		{name: "development", arguments: []string{"build"}, lockStatus: "lock updated"},
+		{name: "release", arguments: []string{"build", "--release", "--locked"}, lockStatus: "lock verified"},
+	}
+	for _, profile := range profiles {
+		var stdout bytes.Buffer
+		var stderr bytes.Buffer
+		code := cli.Run(profile.arguments, workspaceRoot, &stdout, &stderr)
+		want := fmt.Sprintf("built: build/std-io-scalar-quickstart.exe (x86_64-windows-msvc, %s, %s)\n", profile.name, profile.lockStatus)
+		if code != cli.ExitSuccess || stderr.Len() != 0 || stdout.String() != want {
+			return 0, fmt.Errorf("std::io scalar %s build returned code %d, stdout %q, stderr %q", profile.name, code, stdout.String(), stderr.String())
+		}
+		artifact, err := os.ReadFile(artifactPath)
+		if err != nil {
+			return 0, fmt.Errorf("read std::io scalar %s artifact: %w", profile.name, err)
+		}
+		if _, err := pecoff.InspectExecutable(artifact); err != nil {
+			return 0, fmt.Errorf("inspect std::io scalar %s PE image: %w", profile.name, err)
+		}
+		if _, err := pecoff.InspectAMD64Unwind(artifact); err != nil {
+			return 0, fmt.Errorf("inspect std::io scalar %s unwind data: %w", profile.name, err)
+		}
+		if err := executeExpectOutput(artifactPath, 0, expectedStdout, ""); err != nil {
+			return 0, fmt.Errorf("execute std::io scalar %s artifact: %w", profile.name, err)
 		}
 	}
 	return len(profiles), nil

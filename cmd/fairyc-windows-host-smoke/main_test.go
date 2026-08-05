@@ -339,6 +339,29 @@ func TestGeneratedFairyBufferFailureSourcesPassFullPipeline(t *testing.T) {
 			expect:         []string{},
 			foreignSymbols: []string{},
 		},
+		{
+			name: "io scalar u32 used", manifest: "std_io_scalar_quickstart",
+			source:         "module main;\nimport std::io as io;\n@effects(console)\nfn i32 check() {\n    return switch (io::write_u32(7)) {\n        case .ok(written) : { if (written == 1) { 0 } else { 1 } }\n        case .err(_) : { 1 }\n    };\n}\n@effects(console)\nfn i32 main() { return check(); }\n",
+			expect:         []string{"fy_std_stdout_write_u32_v0"},
+			foreignSymbols: []string{"fy_std_stdout_write_u32_v0"},
+		},
+		{
+			name: "io scalar usize used", manifest: "std_io_scalar_quickstart",
+			source:         "module main;\nimport std::io as io;\n@effects(console)\nfn i32 check() {\n    return switch (io::write_usize(7)) {\n        case .ok(written) : { if (written == 1) { 0 } else { 1 } }\n        case .err(_) : { 1 }\n    };\n}\n@effects(console)\nfn i32 main() { return check(); }\n",
+			expect:         []string{"fy_std_stdout_write_usize_v0"},
+			foreignSymbols: []string{"fy_std_stdout_write_usize_v0"},
+		},
+		{
+			name: "io scalar bool used", manifest: "std_io_scalar_quickstart",
+			source:         "module main;\nimport std::io as io;\n@effects(console)\nfn i32 check() {\n    return switch (io::write_bool(true)) {\n        case .ok(written) : { if (written == 4) { 0 } else { 1 } }\n        case .err(_) : { 1 }\n    };\n}\n@effects(console)\nfn i32 main() { return check(); }\n",
+			expect:         []string{"fy_std_stdout_write_all_v0"},
+			foreignSymbols: []string{"fy_std_stdout_write_all_v0"},
+		},
+		{
+			name: "io scalar unused", manifest: "std_io_scalar_quickstart", source: "module main;\nfn i32 main() { return 42; }\n",
+			expect:         []string{},
+			foreignSymbols: []string{},
+		},
 	} {
 		manifestPath := filepath.Join("..", "..", "examples", tc.manifest, "fairy.toml")
 		manifest, err := os.ReadFile(manifestPath)

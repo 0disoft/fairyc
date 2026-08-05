@@ -76,7 +76,14 @@ func TestAdmittedForTargetKeepsWindowsConsoleTargetBound(t *testing.T) {
 
 func TestTargetNeutralConsoleIOSelectsOneTargetOwnedComponent(t *testing.T) {
 	t.Parallel()
-	symbols := []string{"fy_std_stdout_write_all_v0", "fy_std_stdout_write_i32_v0", "fy_std_stderr_write_all_v0", "fy_std_stdin_read_v0"}
+	symbols := []string{
+		"fy_std_stdout_write_all_v0",
+		"fy_std_stdout_write_i32_v0",
+		"fy_std_stdout_write_u32_v0",
+		"fy_std_stdout_write_usize_v0",
+		"fy_std_stderr_write_all_v0",
+		"fy_std_stdin_read_v0",
+	}
 	for _, symbol := range symbols {
 		if !Admitted(symbol) || !AdmittedForTarget(symbol, target.X8664LinuxGNU) ||
 			!AdmittedForTarget(symbol, target.X8664WindowsMSVC) {
@@ -90,6 +97,13 @@ func TestTargetNeutralConsoleIOSelectsOneTargetOwnedComponent(t *testing.T) {
 	windows, err := WindowsMSVCComponentsForSymbols(symbols)
 	if err != nil || !slices.Equal(windows, []Component{ComponentWindowsConsole}) {
 		t.Fatalf("Windows components = %v, %v", windows, err)
+	}
+}
+
+func TestScalarOutputExcludesBoolRawSymbol(t *testing.T) {
+	t.Parallel()
+	if Admitted("fy_std_stdout_write_bool_v0") {
+		t.Fatal("bool raw output symbol is admitted; write_bool must reuse stdout_write_all")
 	}
 }
 
@@ -142,6 +156,8 @@ func TestWindowsMSVCComponentsForSymbolsAdmitsOnlyProvenRuntimeSlice(t *testing.
 	components, err := WindowsMSVCComponentsForSymbols([]string{
 		"fy_std_stdout_write_all_v0",
 		"fy_std_stdout_write_i32_v0",
+		"fy_std_stdout_write_u32_v0",
+		"fy_std_stdout_write_usize_v0",
 		"fy_std_stderr_write_all_v0",
 		"fy_std_stdin_read_v0",
 		"fy_std_windows_stdout_write_all_v0",

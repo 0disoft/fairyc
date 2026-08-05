@@ -745,6 +745,13 @@ through the existing stdout progress contract, uses one 11-byte stack buffer, an
 `INT32_MIN` through unsigned magnitude arithmetic. General formatting, floating-point conversion,
 other integer widths, padding, bases, locale, and implicit newlines remain separate decisions.
 
+ADR 0262 extends the SDK to `0.0.0-stage0.12` with
+`write_u32(u32) -> Result<usize, ConsoleError>`, `write_usize(usize) -> Result<usize, ConsoleError>`,
+and `write_bool(bool) -> Result<usize, ConsoleError>`. The unsigned widths reuse one private
+back-to-front decimal helper per target, and `write_bool` reuses the existing `write` path with no
+new raw symbol. Floating-point conversion, padding, bases, locale, implicit newlines, `u64`/`i64`
+output, and stderr numeric helpers remain separate decisions.
+
 ADR 0216 cuts the exact language pin to `fairyc-language/2` and adds statement-only checked integer
 compound assignment. All ten arithmetic, division, remainder, shift, and bitwise forms reuse the
 existing exact-type trap semantics; mutable local and indexed places evaluate once and store only
