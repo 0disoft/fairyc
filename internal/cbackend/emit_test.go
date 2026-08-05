@@ -91,7 +91,7 @@ fn i32 main() { return ANSWER; }
 	if err != nil {
 		t.Fatalf("Emit() error = %v", err)
 	}
-	if !slices.Equal(unit.Functions, []string{"main::main", "main::square"}) {
+	if !slices.Equal(unit.Functions, []string{"main::main"}) {
 		t.Fatalf("Emit() functions = %v", unit.Functions)
 	}
 	for _, sourceOnly := range []string{"const_eval", "static_assert", "ANSWER"} {
@@ -127,21 +127,18 @@ fn i32 main() {
 	}
 }
 
-func TestEmitRetainedNonEntryFunctionIsReferencedByGeneratedMain(t *testing.T) {
+func TestEmitDormantFunctionIsPrunedFromUnitAndSource(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, "module main;\nfn i32 dormant() { return 7; }\nfn i32 main() { return 42; }\n")
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil {
 		t.Fatalf("Emit() error = %v", err)
 	}
-	for _, required := range []string{
-		"static int32_t fy_fn_0(void);",
-		"static int32_t fy_fn_0(void) {",
-		"int main(void) {\n    (void)&fy_fn_0;\n    return (int)fy_fn_1();",
-	} {
-		if !strings.Contains(unit.Source, required) {
-			t.Errorf("generated C is missing %q:\n%s", required, unit.Source)
-		}
+	if !slices.Equal(unit.Functions, []string{"main::main"}) {
+		t.Fatalf("Emit() functions = %v, want only the entry", unit.Functions)
+	}
+	if strings.Contains(unit.Source, "fy_fn_1") || strings.Contains(unit.Source, "(void)&fy_fn_") {
+		t.Fatalf("generated C retained the dormant function:\n%s", unit.Source)
 	}
 }
 
@@ -179,8 +176,11 @@ func TestEmitWindowsMSVCProfileUsesLLP64TargetFacts(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 @link_name("fairyc_unused_long")
-unsafe extern C fn c::long unused_long(c::long value) ;
-fn i32 main() { return 42; }
+unsafe extern C fn c::long unused_long() ;
+fn i32 main() {
+    let c::long unused = unsafe { unused_long() };
+    return 42;
+}
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0WindowsMSVCProfile())
 	if err != nil {
@@ -193,7 +193,7 @@ fn i32 main() { return 42; }
 		"/* fairyc constrained C transport: x86_64-windows-msvc, ISO C11 */",
 		"_Static_assert(sizeof(long) == UINT64_C(4), \"fairyc target c.long size\");",
 		"_Static_assert(_Alignof(long) == UINT64_C(4), \"fairyc target c.long alignment\");",
-		"extern long fairyc_unused_long(long fy_a_0);",
+		"extern long fairyc_unused_long(void);",
 	} {
 		if !strings.Contains(unit.Source, required) {
 			t.Errorf("Windows MSVC generated C is missing %q:\n%s", required, unit.Source)
@@ -208,8 +208,11 @@ func TestEmitWindowsMSVCProfileRejectsUnavailablePOSIXScalar(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
 @link_name("fairyc_unused_ssize")
-unsafe extern C fn c::ssize_t unused_ssize(c::ssize_t value) ;
-fn i32 main() { return 42; }
+unsafe extern C fn c::ssize_t unused_ssize() ;
+fn i32 main() {
+    let c::ssize_t unused = unsafe { unused_ssize() };
+    return 42;
+}
 `)
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0WindowsMSVCProfile())
 	var capability cbackend.CapabilityError
@@ -566,31 +569,35 @@ func TestEmitDeclaresViewTransportUsedOnlyByInternalFunctionSignature(t *testing
 		declaration string
 		parameter   string
 		source      string
+		main        string
 	}{
 		{
 			name:        "immutable byte view",
 			declaration: "typedef struct fy_byte_slice {",
 			parameter:   "fy_byte_slice fy_l_",
 			source:      "fn usize byte_count(ref u8[] value) { return value.len; }",
+			main:        "fn i32 main() { return if (byte_count(b\"fairy\") == 5) { 42 } else { 1 }; }",
 		},
 		{
 			name:        "mutable byte view",
 			declaration: "typedef struct fy_mut_byte_slice {",
 			parameter:   "fy_mut_byte_slice fy_l_",
 			source:      "fn usize byte_count_mut(ref mut u8[] value) { return value.len; }",
+			main:        "fn i32 main() { var u8[3] values = [1, 2, 3]; return if (byte_count_mut(ref mut values) == 3) { 42 } else { 1 }; }",
 		},
 		{
 			name:        "UTF-8 string view",
 			declaration: "typedef struct fy_str {",
 			parameter:   "fy_str fy_l_",
 			source:      "fn usize text_count(ref str value) { return value.len; }",
+			main:        "fn i32 main() { return if (text_count(\"fairy\") == 5) { 42 } else { 1 }; }",
 		},
 	}
 	for _, test := range tests {
 		test := test
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
-			program := lowerSource(t, "module main;\n"+test.source+"\nfn i32 main() { return 42; }\n")
+			program := lowerSource(t, "module main;\n"+test.source+"\n"+test.main+"\n")
 			unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 			if err != nil {
 				t.Fatalf("Emit() error = %v", err)
@@ -1955,7 +1962,7 @@ func TestEmitRejectsInvalidReprCStructName(t *testing.T) {
 
 func TestEmitAcceptsSafeScalarBorrowParameter(t *testing.T) {
 	t.Parallel()
-	program := lowerSource(t, "module main;\nfn i32 inspect(ref i32 value) { return 0; }\nfn i32 main() { return 0; }\n")
+	program := lowerSource(t, "module main;\nfn i32 inspect(ref i32 value) { return 0; }\nfn i32 main() { var i32 value = 0; return inspect(ref value); }\n")
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil {
 		t.Fatalf("Emit() error = %v", err)
@@ -2597,6 +2604,204 @@ fn i32 main() { defer record(42); return 42; }
 	}
 	if !slices.Contains(unit.Features, "scalar-call") || !strings.Contains(unit.Source, "fy_l_1 = INT32_C(42);\n    fy_fn_1(fy_l_1);") {
 		t.Fatalf("generated C does not preserve deferred call:\n%s", unit.Source)
+	}
+}
+
+func TestEmitReachableTransitiveCalleesAreRetained(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, "module main;\nfn i32 leaf() { return 42; }\nfn i32 helper() { return leaf(); }\nfn i32 main() { return helper(); }\n")
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	if !slices.Equal(unit.Functions, []string{"main::helper", "main::leaf", "main::main"}) {
+		t.Fatalf("Emit() functions = %v", unit.Functions)
+	}
+	for _, required := range []string{"fy_fn_0", "fy_fn_1", "fy_fn_2"} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing reachable %q:\n%s", required, unit.Source)
+		}
+	}
+}
+
+func TestEmitUnreachableForeignDeclarationIsPruned(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+@link_name("fairyc_fixture_dead_foreign")
+unsafe extern C fn i32 dead_foreign(i32 value) ;
+fn i32 dormant() { return unsafe { dead_foreign(1) }; }
+fn i32 main() { return 42; }
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	if len(unit.ForeignSymbols) != 0 {
+		t.Fatalf("Emit() foreign symbols = %v, want none", unit.ForeignSymbols)
+	}
+	if strings.Contains(unit.Source, "fairyc_fixture_dead_foreign") || strings.Contains(unit.Source, "fy_fn_1") {
+		t.Fatalf("generated C leaked the unreachable foreign declaration or dormant function:\n%s", unit.Source)
+	}
+}
+
+func TestEmitSelfRecursionTerminatesAndRetainsCycle(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn i32 countdown(i32 value) {
+    return if (value == 0) { 0 } else { countdown(value - 1) };
+}
+fn i32 main() { return countdown(0) + 42; }
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	if !slices.Equal(unit.Functions, []string{"main::countdown", "main::main"}) {
+		t.Fatalf("Emit() functions = %v", unit.Functions)
+	}
+}
+
+func TestEmitMutualRecursionTerminatesAndRetainsCycle(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+fn i32 even(i32 value) { return if (value == 0) { 42 } else { odd(value - 1) }; }
+fn i32 odd(i32 value) { return if (value == 0) { 1 } else { even(value - 1) }; }
+fn i32 main() { return even(10); }
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	if !slices.Equal(unit.Functions, []string{"main::even", "main::main", "main::odd"}) {
+		t.Fatalf("Emit() functions = %v", unit.Functions)
+	}
+}
+
+func TestEmitDeterministicAcrossInputFunctionOrder(t *testing.T) {
+	t.Parallel()
+	source := "module main;\nfn i32 helper() { return 7; }\nfn i32 main() { return helper(); }\n"
+	forward := lowerSource(t, source)
+	reversed := lowerSource(t, source)
+	slices.Reverse(reversed.Functions)
+	first, err := cbackend.Emit(forward, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit(forward) error = %v", err)
+	}
+	second, err := cbackend.Emit(reversed, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit(reversed) error = %v", err)
+	}
+	if second.Source != first.Source || !slices.Equal(second.Functions, first.Functions) {
+		t.Fatalf("reversed input changed emission: functions %v -> %v", first.Functions, second.Functions)
+	}
+}
+
+func TestEmitUnknownInternalCalleeFailsClosed(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, "module main;\nfn i32 main() { return 42; }\n")
+	program.Functions[0].Blocks[0].Terminator.Kind = mir.TerminatorCall
+	program.Functions[0].Blocks[0].Terminator.Callee = hir.SymbolID(9001)
+	if failures := mir.Verify(program); len(failures) == 0 {
+		t.Fatalf("verified MIR accepted an unknown internal callee")
+	} else if failures[0].Code != "V1001" {
+		t.Fatalf("verification failure = %+v", failures[0])
+	}
+}
+
+func TestEmitMissingEntryFailsClosed(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, "module main;\nfn i32 not_entry() { return 42; }\n")
+	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err == nil || !strings.Contains(err.Error(), `C entry function "main::main" is missing`) {
+		t.Fatalf("Emit() error = %v", err)
+	}
+}
+
+func TestEmitDeadUnsupportedConstructDoesNotBlockReachableEmission(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, "module main;\nfn i32 main() { return 42; }\n")
+	dormant := program.Functions[0]
+	dormant.Name = "main::dormant"
+	dormant.Symbol = hir.SymbolID(7001)
+	dormant.ParameterTypes = []hir.Type{hir.FixedArray(hir.TypeU8, hir.MaxExecutableFixedArrayElements+1)}
+	program.Functions = append(program.Functions, dormant)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	if !slices.Equal(unit.Functions, []string{"main::main"}) {
+		t.Fatalf("Emit() functions = %v", unit.Functions)
+	}
+}
+
+func TestEmitPrunesTaggedTransportUsedOnlyByDormantFunction(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+resource Token {
+    i32 value;
+    cleanup {}
+}
+fn Option<Token> dormant_choose(bool present) {
+    return if (present) { .some(Token { .value = 41 }) } else { .none };
+}
+fn i32 main() { return 42; }
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	if !slices.Equal(unit.Functions, []string{"main::main"}) {
+		t.Fatalf("Emit() functions = %v", unit.Functions)
+	}
+	if slices.Contains(unit.Features, "resource-option") {
+		t.Fatalf("features retained dormant tagged transport: %v", unit.Features)
+	}
+	if strings.Contains(unit.Source, "fy_tagged_") || strings.Contains(unit.Source, "FY_OPTION_SOME") {
+		t.Fatalf("generated C retained dormant tagged transport:\n%s", unit.Source)
+	}
+}
+
+func TestEmitRetainsTaggedTransportUsedByReachableFunction(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+resource Token {
+    i32 value;
+    cleanup {}
+}
+fn Option<Token> choose(bool present) {
+    return if (present) { .some(Token { .value = 41 }) } else { .none };
+}
+fn i32 main() {
+    let Option<Token> wrapped = choose(true);
+    return 42;
+}
+`)
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	if !slices.Contains(unit.Features, "resource-option") || !strings.Contains(unit.Source, "fy_tagged_") {
+		t.Fatalf("generated C lost reachable tagged transport:\nfeatures=%v\n%s", unit.Features, unit.Source)
+	}
+}
+
+func TestEmitRejectsForeignDeclarationCollidingWithInternalSymbol(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, "module main;\nfn i32 main() { return 42; }\n")
+	program.ForeignFunctions = append(program.ForeignFunctions, mir.ForeignFunction{
+		Symbol:     program.Functions[0].Symbol,
+		Name:       "colliding_foreign",
+		LinkName:   "fairyc_fixture_colliding",
+		ABI:        "C",
+		ResultType: hir.TypeI32,
+	})
+	failures := mir.Verify(program)
+	if len(failures) == 0 || !strings.Contains(failures[0].Detail, "both internal and foreign") {
+		t.Fatalf("verified MIR accepted an internal/foreign symbol collision: %+v", failures)
+	}
+	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err == nil || !strings.Contains(err.Error(), "C emission requires verified MIR") {
+		t.Fatalf("Emit() error = %v", err)
 	}
 }
 

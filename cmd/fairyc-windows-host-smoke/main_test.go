@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -190,17 +191,32 @@ func TestGeneratedFairyStringAppendFailureProbeRejectsIncompleteGeneratedC(t *te
 func TestGeneratedFairyBufferFailureSourcesPassFullPipeline(t *testing.T) {
 	t.Parallel()
 	for _, tc := range []struct {
-		name     string
-		manifest string
-		source   string
-		expect   []string
+		name           string
+		manifest       string
+		source         string
+		expect         []string
+		foreignSymbols []string
 	}{
-		{name: "with_capacity initial allocation failure", manifest: "std_bytes_quickstart", source: generatedFairyBufferInitialFailureSource, expect: []string{"fy_std_buffer_initialize_v0", "fy_std_buffer_drop_v0"}},
-		{name: "resize_zeroed growth failure", manifest: "std_bytes_quickstart", source: generatedFairyBufferResizeFailureSource, expect: []string{"fy_std_buffer_initialize_v0", "fy_std_buffer_resize_zeroed_v0", "fy_std_buffer_drop_v0"}},
-		{name: "region failure", manifest: "regions", source: generatedFairyRegionFailureSource, expect: []string{"fy_std_region_allocate_zeroed_v0", "fy_std_region_reset_v0", "fy_std_arena_drop_v0", "fy_runtime_trap("}},
-		// The emitter lowers the whole SDK unit, so only required-symbol presence is checked here;
-		// exact ForeignSymbols set freezing is out of scope for this probe.
-		{name: "string append growth failure", manifest: "std_text_quickstart", source: generatedFairyStringAppendFailureSource, expect: []string{"fy_std_string_copy_storage_v0", "fy_std_string_append_storage_v0", "fy_std_string_drop_storage_v0", "fy_runtime_trap("}},
+		{
+			name: "with_capacity initial allocation failure", manifest: "std_bytes_quickstart", source: generatedFairyBufferInitialFailureSource,
+			expect:         []string{"fy_std_buffer_initialize_v0", "fy_std_buffer_drop_v0"},
+			foreignSymbols: []string{"fy_std_buffer_drop_v0", "fy_std_buffer_initialize_v0"},
+		},
+		{
+			name: "resize_zeroed growth failure", manifest: "std_bytes_quickstart", source: generatedFairyBufferResizeFailureSource,
+			expect:         []string{"fy_std_buffer_initialize_v0", "fy_std_buffer_resize_zeroed_v0", "fy_std_buffer_drop_v0"},
+			foreignSymbols: []string{"fy_std_buffer_drop_v0", "fy_std_buffer_initialize_v0", "fy_std_buffer_resize_zeroed_v0"},
+		},
+		{
+			name: "region failure", manifest: "regions", source: generatedFairyRegionFailureSource,
+			expect:         []string{"fy_std_region_allocate_zeroed_v0", "fy_std_region_reset_v0", "fy_std_arena_drop_v0", "fy_runtime_trap("},
+			foreignSymbols: []string{"fy_std_arena_drop_v0", "fy_std_arena_initialize_v0", "fy_std_region_allocate_zeroed_v0", "fy_std_region_begin_v0", "fy_std_region_reset_v0"},
+		},
+		{
+			name: "string append growth failure", manifest: "std_text_quickstart", source: generatedFairyStringAppendFailureSource,
+			expect:         []string{"fy_std_string_copy_storage_v0", "fy_std_string_append_storage_v0", "fy_std_string_drop_storage_v0", "fy_runtime_trap("},
+			foreignSymbols: []string{"fy_std_string_append_storage_v0", "fy_std_string_copy_storage_v0", "fy_std_string_drop_storage_v0"},
+		},
 	} {
 		manifestPath := filepath.Join("..", "..", "examples", tc.manifest, "fairy.toml")
 		manifest, err := os.ReadFile(manifestPath)
@@ -244,6 +260,9 @@ func TestGeneratedFairyBufferFailureSourcesPassFullPipeline(t *testing.T) {
 		unit, err := cbackend.Emit(checked.MIR, entry, cbackend.Stage0WindowsMSVCProfile())
 		if err != nil {
 			t.Fatalf("%s: emit C: %v", tc.name, err)
+		}
+		if !slices.Equal(unit.ForeignSymbols, tc.foreignSymbols) {
+			t.Fatalf("%s: ForeignSymbols = %v, want the entry-reachable minimal set %v", tc.name, unit.ForeignSymbols, tc.foreignSymbols)
 		}
 		for _, fragment := range tc.expect {
 			if !strings.Contains(unit.Source, fragment) {

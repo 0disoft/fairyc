@@ -24,7 +24,7 @@ type taggedCType struct {
 }
 
 func prepareTaggedTypes(
-	program mir.Program,
+	functions []mir.Function,
 	structures []structCType,
 	structByType map[hir.Type]int,
 	resources []resourceCType,
@@ -59,7 +59,7 @@ func prepareTaggedTypes(
 			needsDrop: successNeedsDrop || failureNeedsDrop,
 		}
 	}
-	for _, function := range program.Functions {
+	for _, function := range functions {
 		consider(function.ResultType)
 		for _, value := range function.ParameterTypes {
 			consider(value)

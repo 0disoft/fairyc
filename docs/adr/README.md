@@ -267,6 +267,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0255-generated-fairy-region-failure-execution.md`: executes generated Fairy Region `.err` handling for both allocation rollback stages at low and optimized MSVC profiles without adding product failure controls.
 - `0256-generated-fairy-buffer-failure-execution.md`: executes generated Fairy Buffer `.err` handling for `with_capacity` and `resize_zeroed` allocation failure at low and optimized MSVC profiles without adding product failure controls.
 - `0257-generated-fairy-string-append-failure-execution.md`: executes generated Fairy `String.append` growth-allocation failure `.err` handling at low and optimized MSVC profiles without adding product failure controls.
+- `0258-entry-reachable-c-emission.md`: emits only functions, drop glue, and foreign declarations reachable from the selected entry, keeping dead code out of generated C and `unit.ForeignSymbols` without changing MIR, language, SDK, or ABI.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

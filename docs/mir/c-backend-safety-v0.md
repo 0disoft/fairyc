@@ -220,11 +220,11 @@ semantics, and it is emitted only in functions containing checked division or re
 - A bounded scalar fixed array emits as a private struct containing one exact C array so ordinary
   internal assignments, parameters, and results preserve Fairy value semantics. Raw C arrays,
   field embedding, foreign signatures, and layout stability are not inferred from this wrapper.
-- The deterministic C unit retains every verified internal function, including functions not
-  reachable from the selected entry. The generated C `main` takes and immediately discards each
-  non-entry function address without calling it. This portable C11 reference preserves the complete
-  unit contract and internal linkage while keeping warnings-as-errors builds free of false unused-
-  function diagnostics.
+- The deterministic C unit emits only the functions reachable from the selected entry through
+  internal calls and resource drop glue. The generated C `main` keeps `(void)&fy_fn_N` only for
+  reachable non-entry functions so warnings-as-errors builds stay free of false unused-function
+  diagnostics. Dead functions and dead foreign declarations contribute no functions, prototypes,
+  macro guards, or scalar features to the emitted unit. See ADR 0258.
 - Stage 0 emits no `restrict` and makes no speculative `noalias` promise.
 - Padding bytes are never treated as initialized semantic data.
 - Immutable byte-view slicing emits both `start > end` and `end > length` checks before any C

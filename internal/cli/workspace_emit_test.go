@@ -191,7 +191,7 @@ source = "src"
 `)
 	entry := "fn i32 not_main() { return 42; }"
 	if withEntry {
-		entry = "fn i32 main() { return 42; }"
+		entry = "fn i32 main() { let c::long inspected = unsafe { inspect_c_long() }; return 42; }"
 	}
 	writeWorkspaceFile(
 		t,

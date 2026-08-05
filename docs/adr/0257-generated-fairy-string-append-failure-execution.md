@@ -36,10 +36,9 @@ remaining public resource family without a generated-Fairy failure execution.
    contract, ordinary product linkage, checked-in user example, or generated Fairy source. The
    existing `generatedFairyProbeImplementation(repositoryRoot, unit.ForeignSymbols)` closure is
    reused without a new linker or closure abstraction.
-6. The constrained-C emitter lowers the whole SDK unit, so `unit.ForeignSymbols` is not frozen to
-   an exact owned-text set by this probe; the test checks only that the required copy, append, and
-   drop symbols and the scalar trap are present. Unnecessary SDK symbol emission is out of scope
-   for this decision.
+6. ADR 0258 narrows emission to the entry-reachable closure, so this probe's `unit.ForeignSymbols`
+   is the exact minimal set of copy, append, and drop storage symbols; the host-smoke unit test
+   freezes that set. Unnecessary SDK symbol emission is closed by that decision, not by this probe.
 
 ## Consequences
 

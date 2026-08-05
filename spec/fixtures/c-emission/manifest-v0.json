@@ -580,7 +580,7 @@
       }
     },
     {
-      "id": "pass.c-emission.fixed-array",
+  "id": "pass.c-emission.fixed-array",
       "sourceRoot": "cases/pass/fixed-array/src",
       "sources": ["main.fy"],
       "entry": "main::main",
@@ -591,13 +591,45 @@
         "value": 42,
         "target": "x86_64-linux-gnu",
         "dialect": "c11",
-        "functions": ["main::bounds_trap", "main::main", "main::pick", "main::view_pick"],
+        "functions": ["main::main", "main::pick", "main::view_pick"],
         "features": ["array-byte-view-borrow", "array-index", "array-length", "scalar-call", "scalar-cast", "scalar-comparison", "scalar-control-flow", "scalar-fixed-array", "trap", "view-index"]
       }
     },
     {
-      "id": "pass.c-emission.fixed-array-bounds",
-      "sourceRoot": "cases/pass/fixed-array/src",
+  "id": "pass.c-emission.fixed-array-bounds",
+  "sourceRoot": "cases/pass/fixed-array/src",
+  "sources": ["main.fy"],
+  "entry": "main::bounds_trap",
+  "expect": {
+    "status": "pass",
+    "completedThrough": "c-emission",
+    "outcome": "trap",
+    "category": "bounds",
+    "target": "x86_64-linux-gnu",
+    "dialect": "c11",
+    "functions": ["main::bounds_trap"],
+    "features": ["array-index", "scalar-control-flow", "scalar-fixed-array", "trap"]
+      }
+    },
+    {
+  "id": "pass.c-emission.mutable-fixed-array-byte-view",
+  "sourceRoot": "cases/pass/mutable-fixed-array-byte-view/src",
+  "sources": ["main.fy"],
+  "entry": "main::main",
+  "expect": {
+    "status": "pass",
+    "completedThrough": "c-emission",
+    "outcome": "return",
+    "value": 42,
+    "target": "x86_64-linux-gnu",
+    "dialect": "c11",
+    "functions": ["main::main", "main::update"],
+    "features": ["array-index", "array-index-store", "mutable-array-byte-view-borrow", "mutable-view-index-store", "scalar-call", "scalar-comparison", "scalar-control-flow", "scalar-fixed-array", "trap", "view-index"]
+      }
+    },
+    {
+  "id": "pass.c-emission.mutable-fixed-array-byte-view-bounds",
+      "sourceRoot": "cases/pass/mutable-fixed-array-byte-view/src",
       "sources": ["main.fy"],
       "entry": "main::bounds_trap",
       "expect": {
@@ -607,40 +639,8 @@
         "category": "bounds",
         "target": "x86_64-linux-gnu",
         "dialect": "c11",
-        "functions": ["main::bounds_trap", "main::main", "main::pick", "main::view_pick"],
-        "features": ["array-byte-view-borrow", "array-index", "array-length", "scalar-call", "scalar-cast", "scalar-comparison", "scalar-control-flow", "scalar-fixed-array", "trap", "view-index"]
-      }
-    },
-    {
-      "id": "pass.c-emission.mutable-fixed-array-byte-view",
-      "sourceRoot": "cases/pass/mutable-fixed-array-byte-view/src",
-      "sources": ["main.fy"],
-      "entry": "main::main",
-      "expect": {
-        "status": "pass",
-        "completedThrough": "c-emission",
-        "outcome": "return",
-        "value": 42,
-        "target": "x86_64-linux-gnu",
-        "dialect": "c11",
-        "functions": ["main::bounds_trap", "main::main", "main::update"],
-        "features": ["array-index", "array-index-store", "mutable-array-byte-view-borrow", "mutable-view-index-store", "scalar-call", "scalar-comparison", "scalar-control-flow", "scalar-fixed-array", "trap", "view-index"]
-      }
-    },
-    {
-      "id": "pass.c-emission.mutable-fixed-array-byte-view-bounds",
-      "sourceRoot": "cases/pass/mutable-fixed-array-byte-view/src",
-      "sources": ["main.fy"],
-      "entry": "main::bounds_trap",
-      "expect": {
-        "status": "pass",
-        "completedThrough": "c-emission",
-        "outcome": "trap",
-        "category": "bounds",
-        "target": "x86_64-linux-gnu",
-        "dialect": "c11",
-        "functions": ["main::bounds_trap", "main::main", "main::update"],
-        "features": ["array-index", "array-index-store", "mutable-array-byte-view-borrow", "mutable-view-index-store", "scalar-call", "scalar-comparison", "scalar-control-flow", "scalar-fixed-array", "trap", "view-index"]
+        "functions": ["main::bounds_trap"],
+        "features": ["array-index", "array-index-store", "scalar-control-flow", "scalar-fixed-array", "trap"]
       }
     },
     {
