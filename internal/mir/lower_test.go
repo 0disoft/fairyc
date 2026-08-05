@@ -1197,31 +1197,43 @@ fn i32 main() {
 func TestLowerPreservesValuePreservingIntegerCast(t *testing.T) {
 	t.Parallel()
 	program := lowerTestSource(t, `module main;
-fn i32 main() { return b"*"[0] as i32; }
+fn i32 main() {
+    let i32 value = b"*"[0] as i32;
+    let c::int foreign = value as c::int;
+    return foreign as i32;
+}
 `)
 	function := &program.Functions[0]
-	var cast *Operation
+	var casts []*Operation
 	for blockIndex := range function.Blocks {
 		for operationIndex := range function.Blocks[blockIndex].Operations {
 			operation := &function.Blocks[blockIndex].Operations[operationIndex]
 			if operation.Kind == OperationScalarCast {
-				cast = operation
+				casts = append(casts, operation)
 			}
 		}
 	}
-	if cast == nil || cast.OwnerType != hir.TypeU8 || cast.Type != hir.TypeI32 || cast.Operator != "as" ||
-		cast.DestinationLocal == NoLocal || len(cast.Operands) != 1 || cast.Operands[0].Kind != OperandLocal {
-		t.Fatalf("scalar cast = %+v", cast)
+	if len(casts) != 3 || casts[0].OwnerType != hir.TypeU8 || casts[0].Type != hir.TypeI32 ||
+		casts[1].OwnerType != hir.TypeI32 || casts[1].Type != hir.TypeCInt ||
+		casts[2].OwnerType != hir.TypeCInt || casts[2].Type != hir.TypeI32 {
+		t.Fatalf("scalar casts = %+v", casts)
+	}
+	for _, cast := range casts {
+		if cast.Operator != "as" || cast.DestinationLocal == NoLocal || len(cast.Operands) != 1 || cast.Operands[0].Kind != OperandLocal {
+			t.Fatalf("scalar cast = %+v", cast)
+		}
 	}
 	if failures := Verify(program); len(failures) != 0 {
 		t.Fatalf("Verify() failures = %+v", failures)
 	}
 	mutated := Clone(program)
+	mutatedOne := false
 	for blockIndex := range mutated.Functions[0].Blocks {
 		for operationIndex := range mutated.Functions[0].Blocks[blockIndex].Operations {
 			operation := &mutated.Functions[0].Blocks[blockIndex].Operations[operationIndex]
-			if operation.Kind == OperationScalarCast {
+			if operation.Kind == OperationScalarCast && !mutatedOne {
 				operation.OwnerType = hir.TypeU32
+				mutatedOne = true
 			}
 		}
 	}

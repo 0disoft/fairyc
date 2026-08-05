@@ -1198,7 +1198,9 @@ func scalarCastOperandMatches(operand Operand, sourceType hir.Type) bool {
 	if operand.Kind == OperandLocal {
 		return true
 	}
-	return sourceType == hir.TypeU8 && operand.Kind == OperandU8 || sourceType == hir.TypeU32 && operand.Kind == OperandU32
+	return sourceType == hir.TypeI32 && operand.Kind == OperandI32 ||
+		sourceType == hir.TypeU8 && operand.Kind == OperandU8 ||
+		sourceType == hir.TypeU32 && operand.Kind == OperandU32
 }
 
 func validBinaryShape(operation Operation) bool {

@@ -1578,7 +1578,9 @@ fn i32 main() {
     let u32 word = byte as u32;
     let usize byte_size = byte as usize;
     let usize word_size = word as usize;
-    return signed;
+    let c::int foreign = signed as c::int;
+    let i32 restored = foreign as i32;
+    return restored;
 }
 `,
 	})
@@ -1593,6 +1595,8 @@ fn i32 main() {
 		{statement: 2, source: hir.TypeU8, target: hir.TypeU32},
 		{statement: 3, source: hir.TypeU8, target: hir.TypeUSize},
 		{statement: 4, source: hir.TypeU32, target: hir.TypeUSize},
+		{statement: 5, source: hir.TypeI32, target: hir.TypeCInt},
+		{statement: 6, source: hir.TypeCInt, target: hir.TypeI32},
 	}
 	for _, expectation := range want {
 		expression := statements[expectation.statement].Expression
@@ -1605,11 +1609,32 @@ fn i32 main() {
 
 func TestAnalyzeRejectsNonValuePreservingIntegerCast(t *testing.T) {
 	t.Parallel()
-	result := analyzeText(t, map[string]string{
-		"main.fy": "module main;\nfn i32 main() { let u32 word = 42; return word as i32; }\n",
-	})
-	if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != "cast from u32 to i32" {
-		t.Fatalf("result = %+v", result)
+	for _, test := range []struct {
+		name    string
+		source  string
+		feature string
+	}{
+		{
+			name:    "narrowing Fairy integer",
+			source:  "module main;\nfn i32 main() { let u32 word = 42; return word as i32; }\n",
+			feature: "cast from u32 to i32",
+		},
+		{
+			name: "other C scalar",
+			source: `module main;
+unsafe extern C fn c::uint read() ;
+fn i32 main() { let c::uint value = unsafe { read() }; return value as i32; }
+`,
+			feature: "cast from c::uint to i32",
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			result := analyzeText(t, map[string]string{"main.fy": test.source})
+			if len(result.Unsupported) != 1 || result.Unsupported[0].Feature != test.feature {
+				t.Fatalf("result = %+v", result)
+			}
+		})
 	}
 }
 

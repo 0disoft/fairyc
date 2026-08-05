@@ -175,8 +175,10 @@ build profile and is neither a C macro nor an unsafe optimizer assumption.
 
 The current executable C-scalar source slice recognizes all sixteen C scalars declared by the
 selected TargetSpec, preserves every one as an exact identity distinct from coincidentally sized
-Fairy scalars, and permits them only as transported foreign-call results, locals, and arguments.
-Their literals, operators, comparisons, casts, and raw pointers remain deferred. Exact C-scalar
+Fairy scalars, and permits them as transported foreign-call results, locals, and arguments. The
+exact signed 32-bit `c::int` additionally converts explicitly in both directions with `i32` on
+targets whose declared `c.int` range matches `i32`. Other C-scalar literals, operators,
+comparisons, casts, and raw pointers remain deferred. Exact C-scalar
 fields are admitted only in the current nonempty `@repr(C)` struct slice, which also admits acyclic
 nested `@repr(C)` records but not arrays or enum fields. Those admitted records may be foreign-call
 results by value. Foreign aggregate parameters remain deferred.
@@ -352,9 +354,11 @@ still rejects names outside its C11 and private-namespace policy.
 
 There is no parallel `extern C {}` block syntax. C-layout types use `@repr(C)`. Pointer casts and raw
 dereferences require unsafe code. Safe integer `as` currently admits exactly `u8` to `i32`, `u32`, or
-`usize`, plus `u32` to `usize`; all four preserve every source value on every admitted target.
-Narrowing, signedness-changing, C-scalar, pointer/integer, and other numeric conversions remain
-rejected and require a later explicit fallible conversion contract.
+`usize`, plus `u32` to `usize`; all four preserve every source value on every admitted target. It
+also admits the exact representation-preserving pairs `i32 -> c::int` and `c::int -> i32` when the
+target declares `c.int` as signed 32-bit. Narrowing, signedness-changing, other C-scalar,
+pointer/integer, and other numeric conversions remain rejected and require a later explicit
+fallible conversion contract.
 
 Binary `+`, `-`, and `*` accept exactly matching `i32`, `u8`, `u32`, or `usize` operands and return
 that same type. Their ordinary source meaning is checked: overflow and unsigned underflow trap as

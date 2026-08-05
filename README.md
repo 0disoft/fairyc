@@ -36,7 +36,7 @@ overwrites an existing path.
 The Go Stage 0 compiler now implements immutable source bytes, a lossless lexer, compact recoverable
 syntax, error-free AST lowering, typed HIR, resource and borrow Flow, verified MIR, a bounded
 interpreter, deterministic C11 transport, strict local workspaces, stable new/check/build/run/test/C
-  emission commands, and experimental Atlas fact export. The semantic runner executes all 60 v0 resolve, type,
+  emission commands, and experimental Atlas fact export. The semantic runner executes all 61 v0 resolve, type,
 and local Flow cases, including explicit resource-factory construction with cross-module resource
 representation privacy, explicit `source_location()`, bounded scalar compile-time evaluation, narrow callable `@must_use`, integer-literal range rejection, checked compound assignment, branch- and loop-aware safe-borrow reassignment,
 exact interprocedural borrow-return summaries, last-use loans, borrow-return origins, canonical
@@ -79,7 +79,7 @@ scalars or raw pointers with empty or pure nonempty drop bodies, copy-scalar/ine
 built-in `Option` and `Result` values,
 borrowed-view byte lengths, checked
 immutable byte-slice indexing and end-exclusive slicing, the target-independent value-preserving integer casts `u8 as i32`,
-`u8 as u32`, `u8 as usize`, and `u32 as usize`, checked `u8`, `u32`, and `usize` addition,
+`u8 as u32`, `u8 as usize`, and `u32 as usize`, plus exact explicit `i32 <-> c::int` casts, checked `u8`, `u32`, and `usize` addition,
 subtraction, multiplication, division, remainder, bitwise operations, and checked right shift,
 typed equality across `bool` and the four Fairy integer scalars,
 typed ordering across those integer scalars, borrowed UTF-8/byte-slice internal calls, and private
@@ -372,9 +372,10 @@ unwind attributes. Typed `null` crosses a closed pointer/target-scalar native pr
 opaque safe-borrow-to-raw-pointer cast may form the address of a direct local place inside `unsafe`.
 An existing resource or fixed-array safe borrow may erase only to `void` and forwards its referent
 pointer unchanged; neither path permits mutability strengthening.
-Those C scalar types remain distinct from coincidentally represented Fairy scalars, emit their exact
-C spellings with target and provider assertions, and currently have no source literal, operator,
-cast, raw-pointer, or interpreter support. Nonempty `@repr(C)` records may use exact C-scalar fields,
+Those C scalar types remain distinct from coincidentally represented Fairy scalars and emit their
+exact C spellings with target and provider assertions. Signed 32-bit `c::int` alone has explicit
+bidirectional conversion with `i32` and pure interpreter support; other C scalars have no source
+literal, operator, cast, raw-pointer, or interpreter support. Nonempty `@repr(C)` records may use exact C-scalar fields,
 opaque `void` pointers, and acyclic nested `@repr(C)` records; generated definitions are ordered by
 dependency and guarded by target-derived nested layout assertions. One pointer-to-opaque-pointer
 output-slot shape is admitted for Arena allocation. A generated FY caller now receives both an

@@ -11,7 +11,7 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	if Version != "0.0.0-stage0.26" {
 		t.Fatalf("Version = %q", Version)
 	}
-	if LanguageRevision != "fairyc-language/9" {
+	if LanguageRevision != "fairyc-language/10" {
 		t.Fatalf("LanguageRevision = %q", LanguageRevision)
 	}
 	definition, err := Load()

@@ -2040,6 +2040,8 @@ func (e *emitter) inspectScalarCast(functionIndex int, operation mir.Operation) 
 	if _, err := e.cValueType(operation.Type); err != nil {
 		return fmt.Errorf("value-preserving integer cast result in %s: %w", function.Name, err)
 	}
+	e.recordCScalarFeature(operation.OwnerType)
+	e.recordCScalarFeature(operation.Type)
 	return nil
 }
 

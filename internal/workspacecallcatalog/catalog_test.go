@@ -92,7 +92,7 @@ func workspaceCallCatalogFixture(t *testing.T) (string, *atlasmap.WorkspaceCallI
 uid = "test.workspace-call.app"
 name = "app"
 version = "1.0.0"
-language = "fairyc-language/9"
+language = "fairyc-language/10"
 source = "src"
 [workspace]
 members = ["libs/answer"]
@@ -107,7 +107,7 @@ features = []
 uid = "test.workspace-call.answer"
 name = "answer"
 version = "1.0.0"
-language = "fairyc-language/9"
+language = "fairyc-language/10"
 source = "src"
 `)
 	writeCatalogFixture(t, filepath.Join(root, "libs", "answer", "src", "answer.fy"), "module answer;\npub fn i32 value() { return 42; }\n")

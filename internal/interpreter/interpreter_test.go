@@ -373,7 +373,11 @@ func TestExecuteImmutableByteViewSliceBoundsTraps(t *testing.T) {
 func TestExecuteValuePreservingIntegerCast(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-fn i32 main() { return b"*"[0] as i32; }
+fn i32 main() {
+    let i32 value = b"*"[0] as i32;
+    let c::int foreign = value as c::int;
+    return foreign as i32;
+}
 `)
 	outcome, err := interpreter.Execute(program, "main::main")
 	if err != nil {

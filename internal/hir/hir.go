@@ -152,13 +152,17 @@ func Option(element Type) Type {
 	return Type("Option<" + string(element) + ">")
 }
 
-// ValuePreservingIntegerCast reports the closed Stage 0 widening conversion subset.
+// ValuePreservingIntegerCast reports the closed Stage 0 widening and exact-representation subset.
 func ValuePreservingIntegerCast(sourceType, targetType Type) bool {
 	switch sourceType {
 	case TypeU8:
 		return targetType == TypeI32 || targetType == TypeU32 || targetType == TypeUSize
+	case TypeI32:
+		return targetType == TypeCInt
 	case TypeU32:
 		return targetType == TypeUSize
+	case TypeCInt:
+		return targetType == TypeI32
 	default:
 		return false
 	}

@@ -709,7 +709,11 @@ fn i32 main() {
 func TestEmitValuePreservingIntegerCast(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-fn i32 main() { return b"*"[0] as i32; }
+fn i32 main() {
+    let i32 value = b"*"[0] as i32;
+    let c::int foreign = value as c::int;
+    return foreign as i32;
+}
 `)
 	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	if err != nil {
@@ -722,6 +726,12 @@ fn i32 main() { return b"*"[0] as i32; }
 	}
 	if !strings.Contains(unit.Source, "= (int32_t)(fy_l_") {
 		t.Fatalf("generated C is missing the value-preserving uint8_t-to-int32_t cast:\n%s", unit.Source)
+	}
+	if !strings.Contains(unit.Source, "= (int)(fy_l_") {
+		t.Fatalf("generated C is missing the exact i32-to-c::int cast:\n%s", unit.Source)
+	}
+	if !slices.Contains(unit.Features, "c-int") {
+		t.Fatalf("generated C features are missing c-int: %v", unit.Features)
 	}
 }
 

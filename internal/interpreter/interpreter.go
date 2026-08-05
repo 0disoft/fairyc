@@ -1420,10 +1420,15 @@ func comparisonRuntimeMatches(value runtimeValue, ownerType hir.Type) bool {
 }
 
 func valuePreservingIntegerCast(value runtimeValue, sourceType, targetType hir.Type) (runtimeValue, error) {
-	if !hir.ValuePreservingIntegerCast(sourceType, targetType) || value.typ != sourceType {
+	sourceMatches := value.typ == sourceType || sourceType == hir.TypeI32 && value.kind == valueI32 && value.typ == ""
+	if !hir.ValuePreservingIntegerCast(sourceType, targetType) || !sourceMatches {
 		return runtimeValue{}, capabilityError("integer cast has incompatible source or target type")
 	}
 	switch sourceType {
+	case hir.TypeI32:
+		if value.kind == valueI32 && targetType == hir.TypeCInt {
+			return runtimeValue{kind: valueI32, i32: value.i32, typ: hir.TypeCInt}, nil
+		}
 	case hir.TypeU8:
 		if value.kind != valueU8 || value.u64 > math.MaxUint8 {
 			return runtimeValue{}, capabilityError("integer cast received an invalid u8 value")
@@ -1439,6 +1444,10 @@ func valuePreservingIntegerCast(value runtimeValue, sourceType, targetType hir.T
 	case hir.TypeU32:
 		if value.kind == valueU32 && value.u64 <= math.MaxUint32 && targetType == hir.TypeUSize {
 			return runtimeValue{kind: valueUSize, u64: value.u64, typ: hir.TypeUSize}, nil
+		}
+	case hir.TypeCInt:
+		if value.kind == valueI32 && value.typ == hir.TypeCInt && targetType == hir.TypeI32 {
+			return i32Value(value.i32), nil
 		}
 	}
 	return runtimeValue{}, capabilityError("integer cast is outside the executable widening subset")

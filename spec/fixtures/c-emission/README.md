@@ -12,7 +12,7 @@ output, LF-only text, and no absolute fixture path. It also creates a determinis
 `drop-trace-v0` unit, proves every interpreter-observed drop has a source/type/span site, and keeps
 that unit separate from the production translation unit.
 
-These 42 cases are emission evidence, not native-code evidence. They cover scalar control,
+These 43 cases are emission evidence, not native-code evidence. They cover scalar control,
 checked arithmetic, direct `i32` minimum emission as `INT32_MIN`, always-checked assertion control, `Option<i32>` Some and None, and `Result<i32, i32>` propagation success and
 failure, copy-only `Result<usize, inert-struct>`, user-enum-bearing `Result` transport and
 propagation, user-enum-bearing `Option` Some and None, and copy fixed-array `Option` Some/None plus
@@ -27,7 +27,8 @@ contextual zero-copy immutable and mutable byte-view borrowing, internal value c
 observation, checked reads and fixed-array or mutable-view indexed stores, zero-cost
 byte-length reads, checked explicit
 and omitted-bound end-exclusive immutable byte-view slicing, and internal
-function transport for borrowed UTF-8 and byte-string views. Generated resource and resource-tagged structs use target-layout assertions, but this
+function transport for borrowed UTF-8 and byte-string views, plus exact explicit `i32 <-> c::int`
+casts with target C-scalar assertions. Generated resource and resource-tagged structs use target-layout assertions, but this
 lane does not ask a C compiler to evaluate them. No C parser, Clang, GCC, sysroot,
 glibc, assembler, linker, executable, sanitizer, object metadata, or ABI probe runs in this lane.
 Those boundaries do not become emission evidence even when a separate native command consumes the

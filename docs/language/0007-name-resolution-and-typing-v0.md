@@ -106,10 +106,11 @@ and produce `bool`. Two matching raw-pointer types may use equality for null or 
 There is no comparison-time promotion or coercion. Aggregate, borrow, and C-scalar equality plus
 pointer ordering and boolean ordering remain unsupported.
 
-The current source C-scalar slice deliberately has no contextual literals. Its only value origin is
-a typed foreign-call result, which may be relayed through locals and later matching foreign-call
-arguments. Arithmetic, comparison, conversion, boolean normalization, and floating-point behavior
-remain unsupported rather than inheriting Fairy scalar rules or C promotion rules.
+The current source C-scalar slice deliberately has no contextual literals. A typed foreign-call
+result may be relayed through locals and later matching foreign-call arguments. The exact signed
+32-bit `c::int` may also convert explicitly in either direction with `i32`; semantic analysis
+admits no other C-scalar cast and never infers this conversion. C-scalar arithmetic, comparison,
+boolean normalization, floating-point behavior, and C promotion rules remain unsupported.
 
 Boolean conditions are exact: `if`, `while`, `&&`, `||`, and `!` require `bool`. Integer truthiness
 is rejected. Both branches of an `if` expression must have one compatible type. A non-`void`

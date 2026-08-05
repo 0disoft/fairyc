@@ -116,10 +116,11 @@ lowering, and parser-fixture-runner portion of the first item exists. Name resol
 now cover the semantic fixture's scalar and safe-borrow subset. Local last-use loans, borrow
   conflicts, single-origin borrow returns, checked matching-type left shift, loop-context diagnostics,
   scalar foreign-call unsafe/signature boundaries, and `@link_name` shape diagnostics execute across
-  all 60 semantic v0 cases, including explicit resource-factory construction and cross-module
+  all 61 semantic v0 cases, including explicit resource-factory construction and cross-module
   resource-literal rejection, explicit source-location expansion, bounded scalar compile-time evaluation, narrow callable `@must_use`, classic scalar `for`, bounded lexical `defer`, branch- and loop-aware safe-borrow reassignment, exact
   interprocedural borrow-return summaries, integer-literal range rejection before MIR, and exact
-  transport for all sixteen TargetSpec C scalars. The type phase also canonicalizes the closed
+  transport for all sixteen TargetSpec C scalars and exact explicit `c::int <-> i32` conversion.
+  The type phase also canonicalizes the closed
   seven-name `@effects(...)` vocabulary and enforces caller supersets independently from unsafe. General
   whole-root resource Flow now executes all 12 resource v0 cases, including branch, normal-loop,
   break-edge, and continue-edge state rejection. Result Flow executes all 24 result v0 cases, including contextual leading-dot scalar construction,
@@ -359,8 +360,10 @@ opaque `void`, and raw pointers to nonempty acyclic `@repr(C)` records whose fie
 exact C scalars or nested `@repr(C)` records. The same nonempty acyclic records may now be foreign
 results by value, while aggregate parameters remain closed. A single
 `@link_name("symbol")` may separate the Fairy lookup name from the external C symbol. Unsafe call,
-link identity, and raw-address provenance survive AST, typed HIR, and MIR verification; the C
-backend emits unannotated prototypes, exact record tags/fields/layout assertions, and `&local` only
+link identity, and raw-address provenance survive AST, typed HIR, and MIR verification. Exact signed
+32-bit `c::int` values may cross explicit casts to and from `i32` without opening C promotions or
+other C-scalar operations. The C backend emits unannotated prototypes, exact record
+tags/fields/layout assertions, and `&local` only
 for an exact unsafe borrow-to-pointer cast. The native lane plans four scalar, four typed-null
 pointer/target-scalar, four individual exact C-scalar, four remaining twelve-type C-scalar-family,
 four register/hidden-memory struct-result, four real SystemHeap block, four real nested Buffer, four real Arena/Region, four real UTF-8 validation, and four real text-view output-record

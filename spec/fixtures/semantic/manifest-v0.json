@@ -977,6 +977,15 @@
       }
     },
     {
+      "id": "pass.type.c-int-explicit-cast",
+      "sourceRoot": "cases/pass/c-int-explicit-cast/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow"
+      }
+    },
+    {
       "id": "fail.type.immutable-parameter-assignment",
       "sourceRoot": "cases/fail/immutable-parameter-assignment/src",
       "sources": ["main.fy"],

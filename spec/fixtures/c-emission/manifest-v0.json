@@ -165,6 +165,22 @@
       }
     },
     {
+      "id": "pass.c-emission.c-int-explicit-cast",
+      "sourceRoot": "cases/pass/c-int-explicit-cast/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::main"],
+        "features": ["c-int", "scalar-cast"]
+      }
+    },
+    {
       "id": "pass.c-emission.scalar-control-call",
       "sourceRoot": "cases/pass/scalar-control-call/src",
       "sources": ["main.fy"],

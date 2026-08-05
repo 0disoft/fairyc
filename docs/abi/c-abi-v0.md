@@ -60,9 +60,9 @@ observation are wired. Source struct construction and field reads reach verified
 interpreter for its executable scalar subset, and generated C. Inside an explicit unsafe boundary,
 an exact `ref T -> ptr T`, `ref mut T -> ptr T`, or `ref mut T -> ptr mut T` cast may take the address of a direct
 local place without inventing alias promises. Raw dereference, pointer arithmetic, integer-pointer
-conversion, mutability strengthening, and other raw-pointer or C-scalar casts remain unsupported.
-The safe language-level value-preserving integer subset is defined separately by ADR 0098 and does
-not broaden this FFI surface. The exact source-to-C
+conversion, mutability strengthening, and other raw-pointer casts remain unsupported. ADR 0286
+adds only explicit `i32 <-> c::int` conversion when the selected target declares signed 32-bit
+`c.int`; it does not add implicit promotion or broaden any other C-scalar conversion. The exact source-to-C
 mapping is closed:
 
 | Fairy C | TargetSpec key | C spelling | Provider |
@@ -86,9 +86,10 @@ mapping is closed:
 
 Generated C asserts target-derived size and alignment for every used C scalar and signedness for
 signed and unsigned integer families. Target-specific `c::ssize_t` also defines
-`_POSIX_C_SOURCE 200809L`. Their only current value path is foreign return to typed local to matching
-foreign argument; they have no source literal, arithmetic, comparison, cast, interpreter behavior,
-or raw-pointer support. Exact C-scalar fields may appear directly or through admitted nested
+`_POSIX_C_SOURCE 200809L`. Every C scalar supports foreign return to typed local to matching foreign
+argument. Exact `c::int` additionally supports explicit bidirectional conversion with `i32` and
+pure interpreter execution without a foreign call. C scalars otherwise have no source literal,
+arithmetic, comparison, cast, interpreter behavior, or raw-pointer support. Exact C-scalar fields may appear directly or through admitted nested
 `@repr(C)` records. Raw pointers to C scalars remain outside the admitted backend slice. This is not
 implementation of exports, callbacks, array or enum `@repr(C)` fields, or by-value aggregate
 parameters. The interpreter remains fail-closed on every foreign call.

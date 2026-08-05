@@ -7,13 +7,14 @@
     "docs/adr/0220-bounded-scalar-compile-time-evaluation.md",
     "docs/adr/0221-explicit-source-location-intrinsic.md",
     "docs/adr/0246-public-safe-stage0-byte-buffer.md",
+    "docs/adr/0286-explicit-c-int-i32-casts.md",
     "docs/package/whole-package-cache-v2.md",
     "docs/compatibility/versioning-v0.md",
     "docs/engineering/03-performance-budget.md"
   ],
   "base": {
     "compilerBuild": "compiler:a",
-    "languageRevision": "fairyc-language/9",
+    "languageRevision": "fairyc-language/10",
     "mirVersion": "fairyc-mir/0",
     "targetSchema": "fairyc.target-spec/v0:x86_64-windows-msvc",
     "abiProfile": "microsoft-x64/v0",
@@ -37,7 +38,7 @@
       "id": "baseline",
       "override": {},
       "relation": "baseline",
-      "expectKey": "fycache2-sha256-57c8c2632f7afd69ae7de2c0d1e89761e0aa6b90bfa18ab261c9e705c18b542e"
+      "expectKey": "fycache2-sha256-aaf18a00b9c9e334685fa4f7e708df127972b20ec7556864bb9be231a81d7195"
     },
     {
       "id": "compiler-build",

@@ -103,9 +103,11 @@ and parameters. HIR and MIR keep those types distinct from coincidentally repres
 scalars; one ordered backend table maps them to exact C spellings, TargetSpec keys, features, and
 optional providers. Generated C asserts target size and alignment for every used scalar and
 signedness for signed and unsigned integer families. `ssize_t` selects `_POSIX_C_SOURCE 200809L`
-before every header rather than silently relying on the host's default feature namespace. This
-slice deliberately creates no immediate C-scalar MIR operand: a foreign producer result local may
-be passed to a matching foreign consumer, while literals, operators, comparisons, casts,
+before every header rather than silently relying on the host's default feature namespace. A foreign
+producer result local may be passed to a matching foreign consumer. The exact signed 32-bit
+`c::int` additionally crosses an explicit `scalar-cast` with `i32` in either direction; verified
+MIR keeps the source and result identities, the pure interpreter round-trips the value, and emitted
+C uses explicit `int32_t` or `int` casts. Other literals, operators, comparisons, casts,
 interpreter execution, and raw pointers to C scalars remain closed. Exact C-scalar fields are
 accepted only in nonempty `@repr(C)` structs and share the same transport table and assertions.
 An admitted struct may contain another acyclic nonempty `@repr(C)` struct by value. The backend
@@ -169,7 +171,7 @@ standard-library lowering; malformed
 destinations; and non-canonical block shapes. Empty-drop discharge produces no invented cleanup
 call. Nonempty direct and admitted active tagged payloads invoke verified private glue before field
 cleanup. This is private transport, not public Fairy ABI.
-`spec/fixtures/c-emission/manifest-v0.json` currently proves 42 source-to-emission cases and
+`spec/fixtures/c-emission/manifest-v0.json` currently proves 43 source-to-emission cases and
 repeated byte identity. No C parser, compiler, object writer, assembler, linker, executable,
 sanitizer, layout probe, or ABI probe runs in that fixture lane.
 
@@ -192,7 +194,7 @@ Nested MIR effects are emitted as separate C statements and temporaries. Functio
 | Checked arithmetic | Return an explicit tagged result without invoking C undefined behavior. |
 | Division and remainder | Check zero and signed-minimum divided by negative one before the C operation. Materialize the verified divisor through a function-local volatile C transport slot so a host C compiler cannot reject or fold an otherwise unreachable constant-undefined expression. |
 | Shift | Check the amount against the exact operand width before any C shift. Right shift uses the bit-preserving arithmetic helper for `i32` and exact unsigned C operations otherwise. Left shift then checks mathematical representability, reports overflow only after a valid amount, performs signed transport through `uint32_t`, and reconstructs `i32` from bits. |
-| Value-preserving integer cast | Verify one admitted source/result pair, then emit an explicit C cast to `int32_t`, `uint32_t`, or `uintptr_t`. Every source value is representable, so no trap, truncation, wrapping, or implementation-defined signed conversion occurs. |
+| Value-preserving integer cast | Verify one admitted source/result pair, then emit an explicit C cast to `int32_t`, `uint32_t`, `uintptr_t`, or the target-asserted exact `int` spelling for `c::int`. The `i32 <-> c::int` pairs are admitted only because every current target declares signed 32-bit `c.int`; every admitted source value is representable, so no trap, truncation, wrapping, or implementation-defined signed conversion occurs. |
 | Typed scalar and raw-pointer comparison | Verify two matching operands and the exact `bool` result before emission. Scalar equality is limited to `bool`, `i32`, `u8`, `u32`, and `usize`; scalar ordering excludes `bool`. Matching raw pointers admit equality only, with no dereference or ordering. Generated C normalizes the result to `INT32_C(0)` or `INT32_C(1)`. |
 | Scalar fixed-array construction, byte-view borrowing, length, indexing, and stores | Verify one canonical length inside the provisional `1..=4096` executable bound and the exact copy-scalar element type. Emit a private assignable struct wrapper, materialize list elements left to right, construct a `const` shared or writable mutable byte view only from the matching verified source `u8[N]` local using its generated `.data` address and canonical `N`, emit `.len` from canonical `N` rather than `sizeof` or storage, and check every read or store against that same length. Access or assignment to `.data[index]` occurs only on the success edge; store indices are materialized so a host C frontend cannot reject an always-trapping source before the checked edge runs. The borrow allocates and copies nothing; mutable slicing remains absent; the bound, wrapper, and descriptors are private implementation guards, not a public Fairy or C ABI. |
 | Assert | Verify one exact `bool` operand and canonical failure edge, compare with zero in every profile, and dispatch `FY_TRAP_ASSERTION_FAILED` through the trap runtime. Never emit or include the C library `assert` macro. |

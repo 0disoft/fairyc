@@ -243,9 +243,10 @@ Optimization level and backend must not change the meaning of safe code. Express
   `signed-division-overflow`.
 - Unary `~` and binary `&`, `^`, and `|` accept the same four integer types and return that exact
   type without promotion, signedness conversion, or a trap. Binary operands must match.
-- Source `as` integer conversion is currently limited to the target-independent, value-preserving
-  pairs `u8 -> i32`, `u8 -> u32`, `u8 -> usize`, and `u32 -> usize`. Narrowing, signedness-changing,
-  C-scalar, pointer/integer, and other numeric conversions require a later explicit contract.
+- Source `as` integer conversion admits the target-independent, value-preserving pairs `u8 -> i32`,
+  `u8 -> u32`, `u8 -> usize`, and `u32 -> usize`, plus explicit `i32 <-> c::int` when the selected
+  target declares signed 32-bit `c.int`. Narrowing, signedness-changing, other C-scalar,
+  pointer/integer, and other numeric conversions require a later explicit contract.
 - `==` and `!=` accept matching `bool`, `i32`, `u8`, `u32`, or `usize` operands. `<`, `<=`, `>`, and
   `>=` accept matching operands from the four Fairy integer types. Matching raw-pointer equality is
   also retained for null/state checks without dereference. No implicit numeric promotion,
@@ -265,8 +266,9 @@ C is a boundary contract rather than the default internal representation.
 - C-layout types use `@repr(C)` and exported or imported symbols use explicit `unsafe extern C fn` declarations.
 - Platform-dependent C types use a distinct `c.*` namespace.
 - The executable source C-scalar slice transports all sixteen exact TargetSpec C scalars. They are
-  distinct from coincidentally represented Fairy scalars; C-scalar literals, operators,
-  conversions, and raw pointers remain deferred. Exact C-scalar fields are admitted only in
+  distinct from coincidentally represented Fairy scalars; only signed 32-bit `c::int` has explicit
+  bidirectional conversion with `i32`. C-scalar literals, operators, other conversions, and raw
+  pointers remain deferred. Exact C-scalar fields are admitted only in
   nonempty `@repr(C)` structs; an acyclic nested field is admitted only when its type is also
   `@repr(C)`. Opaque `ptr void` and `ptr mut void` are admitted without dereference or conversion
   semantics. One pointer-to-opaque-pointer output-slot shape is admitted without opening arbitrary

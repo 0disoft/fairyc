@@ -80,7 +80,7 @@ func TestLockRejectsContradictionsAndStaleness(t *testing.T) {
 	})
 	t.Run("stale", func(t *testing.T) {
 		mutated := document
-		mutated.Language = "fairyc-language/99"
+		mutated.Language = "fairyc-language/109"
 		if err := MatchesWorkspace(mutated, workspace); err == nil || !strings.Contains(err.Error(), "stale") {
 			t.Fatalf("MatchesWorkspace() error = %v", err)
 		}
@@ -175,7 +175,7 @@ func writeSDKWorkspace(t *testing.T, root string) {
 uid = "example.app"
 name = "app"
 version = "1.0.0"
-language = "fairyc-language/9"
+language = "fairyc-language/10"
 source = "src"
 `
 	source := `module main;
