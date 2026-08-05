@@ -66,6 +66,7 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_open_v0(
     const struct fy_std_windows_open_options_v0 *,
     void *
 );
+struct fy_std_windows_file_result_v0 fy_std_windows_file_remove_v0(const uint8_t *);
 struct fy_std_windows_file_result_v0 fy_std_windows_file_read_v0(void *, uint8_t *, size_t);
 struct fy_std_windows_file_result_v0 fy_std_windows_file_read_exact_v0(
     void *,
@@ -421,5 +422,26 @@ int main(void) {
         kind.os_code != (uint32_t)ERROR_SUCCESS ||
         kind.kind != (uint32_t)FILE_TYPE_CHAR) return 75;
     if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 76;
+
+    static const uint8_t remove_path[] = "fairyc-windows-file-remove-probe.tmp";
+    static const uint8_t non_ascii_path[] = {UINT8_C(0x80), UINT8_C(0)};
+    result = fy_std_windows_file_remove_v0(NULL);
+    if (result.status != FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0 ||
+        result.os_code != (uint32_t)ERROR_SUCCESS || result.count != 0) return 95;
+    result = fy_std_windows_file_remove_v0(non_ascii_path);
+    if (result.status != FY_STD_WINDOWS_FILE_PATH_ENCODING_V0 ||
+        result.os_code != (uint32_t)ERROR_SUCCESS || result.count != 0) return 96;
+    result = fy_std_windows_file_open_v0(remove_path, &write_options, &file);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 97;
+    result = fy_std_windows_file_remove_v0(remove_path);
+    if (result.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
+        result.os_code != (uint32_t)ERROR_SHARING_VIOLATION || result.count != 0) return 98;
+    if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 99;
+    result = fy_std_windows_file_remove_v0(remove_path);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        result.os_code != (uint32_t)ERROR_SUCCESS || result.count != 0) return 100;
+    result = fy_std_windows_file_remove_v0(remove_path);
+    if (result.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
+        result.os_code != (uint32_t)ERROR_FILE_NOT_FOUND || result.count != 0) return 101;
     return 0;
 }

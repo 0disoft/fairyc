@@ -108,6 +108,10 @@ pub resource File {
 unsafe extern C fn raw_file_result file_open_raw(ptr u8 path, ptr raw_open_options options, ptr mut void output) ;
 
 @effects(filesystem)
+@link_name("fy_std_windows_file_remove_v0")
+unsafe extern C fn raw_file_result file_remove_raw(ptr u8 path) ;
+
+@effects(filesystem)
 @link_name("fy_std_windows_file_read_v0")
 unsafe extern C fn raw_file_result file_read_raw(ptr mut void file, ptr mut u8 buffer, usize length) ;
 
@@ -303,6 +307,19 @@ pub fn Result<File, FileError> open_update(ref CStr path) {
         .exclusive = 0,
         .append = 0,
     });
+}
+
+/// Removes one existing file path without closing or changing any open File owner.
+@effects(filesystem)
+pub fn Result<i32, FileError> remove_file(ref CStr path) {
+    let raw_file_result result = unsafe {
+        file_remove_raw(path as ptr u8)
+    };
+    return if (result.status == 0) {
+        .ok(0)
+    } else {
+        .err(file_error(result))
+    };
 }
 
 /// Performs at most one underlying write and returns its exact completed byte count.

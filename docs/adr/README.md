@@ -300,6 +300,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0288-public-windows-file-buffer-read-append.md`: adds one-call Windows `std::fs::read_append` into `std::bytes::Buffer` spare capacity, committing only initialized bytes and proving success, EOF, file failure, and forced allocation failure under low/optimized MSVC with SDK `0.0.0-stage0.27`.
 - `0289-stable-package-selected-workspace-tests.md`: adds singular manifest-UID `--package` selection to stable test execution and listing, preserving root defaults and JSON identities while proving selected-member semantic and low/optimized native execution.
 - `0290-public-windows-file-read-to-end.md`: adds source-level Windows `std::fs::read_to_end` with bounded growth windows, current-position semantics, committed-prefix failure preservation, and low/optimized generated-Fairy evidence under SDK `0.0.0-stage0.28` without a new target symbol or runtime ABI change.
+- `0291-public-windows-file-removal.md`: adds one-call Windows `std::fs::remove_file`, preserving the bounded path contract and proving open-sharing failure, exact removal, and repeated missing-path failure under low/optimized raw and generated-Fairy execution with SDK `0.0.0-stage0.29`.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

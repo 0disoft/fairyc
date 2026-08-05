@@ -609,7 +609,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
-  The compiler-bundled SDK `0.0.0-stage0.28` exposes
+  The compiler-bundled SDK `0.0.0-stage0.29` exposes
   `std::io::write(ref str) -> Result<usize, ConsoleError>` and a matching `write_stderr` operation
   for text, plus `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` for exact binary output.
   All four declare `console`, keep raw pointers and target linkage private, append no newline,
@@ -681,6 +681,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   write and returns its exact successful count, including a short count. `write_all` may contain
   multiple underlying writes and is not a transactional record append. The current share policy
   does not admit a concurrent writer.
+  `remove_file(ref CStr)` removes one existing file path through exactly one target operation and
+  returns zero on success. It treats a missing path as `FileError`, does not close or mutate a live
+  File owner, and therefore reports the current Windows sharing violation until that owner is
+  explicitly closed. It is not recursive and does not remove directories.
   `read(ref mut File, ref mut u8[])` returns one exact partial count including zero at EOF.
   `read_append(ref mut File, ref mut bytes::Buffer, usize maximum)` performs at most one read into
   Buffer spare capacity and increases its initialized length only by the successful completed
@@ -860,7 +864,7 @@ argument, output, and exit-code contract. It emits no native code.
 
 ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
-version, source digest, and lock fields. SDK `0.0.0-stage0.28` exports ADR 0250's move-only,
+version, source digest, and lock fields. SDK `0.0.0-stage0.29` exports ADR 0250's move-only,
 fallibly created `std::alloc::Arena` with automatic cleanup and exact allocation status,
 while ADR 0251 makes compiler-known placement return `Result<ref T, AllocError>` under language `/8`.
 ADR 0246's public safe `std::bytes::Buffer`,
@@ -872,7 +876,7 @@ file-length change, ADR 0274's non-truncating open-or-create, ADR 0275's exclusi
 ADR 0276's append-only open, ADR 0277's same-handle file-kind observation, ADR 0278's exact read,
 ADR 0279's bounded same-handle file identity, ADR 0281's exhaustive public file-kind enum,
 ADR 0285's one-call partial file write, ADR 0288's bounded owned-Buffer file read append, ADR 0290's
-source-level read from the current cursor through EOF,
+source-level read from the current cursor through EOF, ADR 0291's exact one-file removal,
 ADR 0205's `std::io::write(ref str) -> Result<usize, ConsoleError>`, and ADR 0209's matching
 `write_stderr` operation, ADR 0210's matching immutable byte-view output operations, and ADR 0211's
 `read_stdin(ref mut u8[]) -> Result<usize, ConsoleReadError>`, plus ADR 0215's allocation-free

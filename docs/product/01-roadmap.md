@@ -774,7 +774,7 @@ ADR 0264 extends the SDK to `0.0.0-stage0.14` with the first public `std::fs` sl
 create/truncate and read opens, bounded read, write-all, explicit sync, consuming close, and
 automatic drop. The checked-in safe quickstart executes invalid-path failure, write/read/EOF,
 explicit close, and implicit-drop reopen under development and optimized MSVC. Portable Unicode
-paths, Linux public linkage, relative/end-based seek, general metadata, directories, removal, and a supported Windows target
+paths, Linux public linkage, relative/end-based seek, general metadata, directories, and a supported Windows target
 remain later gates.
 
 ADR 0269 extends the SDK to `0.0.0-stage0.15` with allocation-free
@@ -891,6 +891,14 @@ cursor on success, plus a forced second-window allocation failure after exactly 
 bytes with matching cursor, preserved boundary bytes, consuming File close, automatic Buffer drop,
 and zero retained allocations. Total-size limits, cancellation, asynchronous I/O, portable paths,
 and Linux public linkage remain later gates.
+
+ADR 0291 extends the SDK to `0.0.0-stage0.29` with
+`remove_file(ref CStr) -> Result<i32, FileError>`. It reuses the bounded ASCII path conversion and
+calls `DeleteFileW` once without closing or mutating a File owner. Raw and generated-Fairy
+low/optimized MSVC execution proves invalid path rejection, exact open-sharing failure, explicit
+close followed by successful removal, failed reopen, and repeated missing-path failure. Directory
+removal, recursion, rename/replacement, portable Unicode paths, and Linux public linkage remain
+later gates.
 
 ADR 0268 closes the discovery side of exact test selection with
 `fairyc test --list [--locked]`. The command compiler-admits the complete selected-package test overlay and

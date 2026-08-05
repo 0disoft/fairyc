@@ -233,6 +233,24 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_open_v0(
     return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_OK_V0, ERROR_SUCCESS, 0);
 }
 
+struct fy_std_windows_file_result_v0 fy_std_windows_file_remove_v0(
+    const uint8_t *path
+) {
+    WCHAR wide_path[FY_STD_WINDOWS_PATH_CAPACITY_V0];
+    uint32_t path_status = fy_std_windows_path_v0(path, wide_path);
+    if (path_status != FY_STD_WINDOWS_FILE_OK_V0) {
+        return fy_std_windows_file_result_v0(path_status, ERROR_SUCCESS, 0);
+    }
+    if (!DeleteFileW(wide_path)) {
+        return fy_std_windows_file_result_v0(
+            FY_STD_WINDOWS_FILE_IO_ERROR_V0,
+            GetLastError(),
+            0
+        );
+    }
+    return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_OK_V0, ERROR_SUCCESS, 0);
+}
+
 struct fy_std_windows_file_result_v0 fy_std_windows_file_read_v0(
     void *file_storage,
     uint8_t *buffer,

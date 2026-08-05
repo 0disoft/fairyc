@@ -896,6 +896,58 @@ fn i32 check_read_append_error(ref CStr path) {
 }
 
 @effects(filesystem)
+fn i32 remove_while_open_then_close(fs::File input, ref CStr path) {
+    var fs::File file = input;
+    let i32 sharing_code = switch (fs::remove_file(path)) {
+        case .ok(_) : { 197 }
+        case .err(error) : {
+            if (fs::error_status(error) == 1 &&
+                fs::error_os_code(error) == 32 &&
+                fs::error_completed(error) == 0) { 0 } else { 198 }
+        }
+    };
+    let i32 close_code = switch (fs::close(file)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 199 }
+    };
+    return if (sharing_code != 0) { sharing_code } else { close_code };
+}
+
+@effects(filesystem)
+fn i32 check_remove_file(ref CStr path) {
+    let i32 create_code = switch (fs::create_truncate(path)) {
+        case .ok(file) : { remove_while_open_then_close(file, path) }
+        case .err(_) : { 200 }
+    };
+    let i32 remove_code = if (create_code != 0) {
+        create_code
+    } else { switch (fs::remove_file(path)) {
+        case .ok(value) : { if (value == 0) { 0 } else { 201 } }
+        case .err(_) : { 202 }
+    } };
+    let i32 open_code = if (remove_code != 0) {
+        remove_code
+    } else { switch (fs::open_read(path)) {
+        case .ok(file) : { close_after_owned_read_setup_error(file, 203) }
+        case .err(error) : {
+            if (fs::error_status(error) == 1 &&
+                fs::error_os_code(error) == 2 &&
+                fs::error_completed(error) == 0) { 0 } else { 204 }
+        }
+    } };
+    return if (open_code != 0) {
+        open_code
+    } else { switch (fs::remove_file(path)) {
+        case .ok(_) : { 205 }
+        case .err(error) : {
+            if (fs::error_status(error) == 1 &&
+                fs::error_os_code(error) == 2 &&
+                fs::error_completed(error) == 0) { 0 } else { 206 }
+        }
+    } };
+}
+
+@effects(filesystem)
 fn i32 main() {
     let ref CStr data_path = c"fairyc-std-fs-data.tmp";
     let ref CStr drop_path = c"fairyc-std-fs-drop.tmp";
@@ -903,6 +955,7 @@ fn i32 main() {
     let ref CStr create_new_path = c"fairyc-std-fs-create-new.tmp";
     let ref CStr append_path = c"fairyc-std-fs-append.tmp";
     let ref CStr read_append_error_path = c"fairyc-std-fs-read-append-error.tmp";
+    let ref CStr remove_path = c"fairyc-std-fs-remove.tmp";
     let i32 invalid_code = check_invalid_path();
     let i32 missing_update_code = check_missing_update();
     let i32 character_code = switch (fs::open_read(c"NUL")) {
@@ -922,6 +975,7 @@ fn i32 main() {
     let i32 create_new_code = check_create_new(create_new_path);
     let i32 append_code = check_append(append_path);
     let i32 read_append_error_code = check_read_append_error(read_append_error_path);
+    let i32 remove_code = check_remove_file(remove_path);
     let i32 write_code = switch (fs::create_truncate(data_path)) {
         case .ok(file) : { write_then_close(file) }
         case .err(_) : { 30 }
@@ -940,6 +994,8 @@ fn i32 main() {
         append_code
     } else if (read_append_error_code != 0) {
         read_append_error_code
+    } else if (remove_code != 0) {
+        remove_code
     } else if (write_code != 0) {
         write_code
     } else {

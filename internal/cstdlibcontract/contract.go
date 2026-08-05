@@ -73,6 +73,7 @@ var symbolComponents = map[string]Component{
 var windowsOnlySymbolComponents = map[string]Component{
 	"fy_std_windows_stdout_write_all_v0": ComponentWindowsConsole,
 	"fy_std_windows_file_open_v0":        ComponentWindowsFile,
+	"fy_std_windows_file_remove_v0":      ComponentWindowsFile,
 	"fy_std_windows_file_read_v0":        ComponentWindowsFile,
 	"fy_std_windows_file_read_exact_v0":  ComponentWindowsFile,
 	"fy_std_windows_file_read_append_v0": ComponentWindowsFileBuffer,
@@ -100,6 +101,7 @@ var windowsMSVCSymbolComponents = map[string]Component{
 	"fy_std_stdin_read_v0":                 ComponentWindowsConsole,
 	"fy_std_windows_stdout_write_all_v0":   ComponentWindowsConsole,
 	"fy_std_windows_file_open_v0":          ComponentWindowsFile,
+	"fy_std_windows_file_remove_v0":        ComponentWindowsFile,
 	"fy_std_windows_file_read_v0":          ComponentWindowsFile,
 	"fy_std_windows_file_read_exact_v0":    ComponentWindowsFile,
 	"fy_std_windows_file_read_append_v0":   ComponentWindowsFileBuffer,
