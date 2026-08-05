@@ -684,7 +684,9 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   reset generation 2 with invalidated Region state, and drop generation 3. Private Windows generation
   fields use target-width `usize` only as a layout-compatible transport, not a public representation.
   Neither Buffer nor Arena reads the zeroed bytes on this FY path. Separate raw Buffer and Arena
-  probes supply Windows byte-level and allocation-failure evidence. Owned text copies a compiler-owned
+  probes supply Windows byte-level evidence, while ADR 0255, ADR 0256, and ADR 0257 execute
+  generated-Fairy Arena, Buffer, and String.append allocation-failure `.err` arms at both MSVC
+  profiles. Owned text copies a compiler-owned
   five-byte UTF-8 literal, observes String length five then ten after append, normalized drop,
   six-byte CString storage with logical CStr length five, normalized drop, and direct validation of
   compiler-owned terminated storage. It observes only status, length, alignment, and pointer state,

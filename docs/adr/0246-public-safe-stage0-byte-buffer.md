@@ -48,7 +48,10 @@ owner mutability. The complete Go suite passes.
 The checked-in quickstart contains no `unsafe` or raw pointer. On Windows it executes copy,
 reserve, append, zeroed growth, checked mutable-view stores, checked shared-view reads, truncate,
 clear, and implicit drop in both development and release builds. The configured MSVC 14.51 smoke
-inspects and executes both resulting PE images and finishes with 57 structurally inspected images.
+inspects and executes both resulting PE images.
+ADR 0256 now also executes the generated-Fairy `with_capacity` and `resize_zeroed` `.err` arms at
+both MSVC profiles with the probe-only allocator; the raw Buffer probe retains the byte-level
+failure matrix.
 
 This does not stabilize the private four-field layout as a foreign ABI, expose uninitialized spare
 capacity, permit resizing while a view is live, add generic element storage, define iterator or

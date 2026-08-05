@@ -246,7 +246,9 @@ and exclusive initialized-prefix views. A raw Buffer caller still executes again
 target-specific closure at both MSVC profiles.
 It forces initialization, reserve, relocating self-overlap append, and zeroed-resize allocation
 failure, preserves exact storage state and initialized bytes, proves recovery zeroing, and returns
-the live-allocation count to zero after drop.
+the live-allocation count to zero after drop. ADR 0256 now additionally executes generated-Fairy
+`with_capacity` and `resize_zeroed` `.err` arms at both MSVC profiles; the raw caller retains the
+byte-level failure matrix.
 The Arena storage slice now adds a single-active-Region generation check, failure-atomic zeroed and
 copied byte placement, reset invalidation, stale-use rejection, and active-drop rejection. Its four
 C-only executions and four generated-Fairy source-call executions ran in ADR 0214's hosted receipt.
@@ -307,6 +309,9 @@ successful-only Buffer moves, failure ownership preservation, self-source append
 rejection, and exact termination. Four Linux C-only native runs remain configured and locally
 unobserved; the same probe now executes as two separate-translation-unit x64 MSVC runs. Separate
 generated-Fairy crossings call the real bounded CStr validator and exact raw String/CString records.
+ADR 0257 additionally executes a generated-Fairy `String.append` growth-failure `.err` arm at both
+MSVC profiles: copy succeeds on the first probe allocation, append growth fails on the second, and
+the automatic String drop returns live probe allocations to zero.
 ADR 0247 promotes the proven wrapper shape into compiler-bundled SDK `0.0.0-stage0.8` as public
 `std::text`. It confines five opaque storage bridges behind move-only `String`/`CString` resources,
 source `Result` errors, scalar lengths and emptiness, owner-bound `ref str`/`ref CStr` views, and

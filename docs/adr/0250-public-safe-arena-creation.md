@@ -38,8 +38,8 @@ that placeholder would corrupt adjacent memory. Users also had no safe way to ob
 
 The bundled SDK is parsed, package-resolved, semantically checked, lowered, and verified with a
 safe `alloc::create` caller. The checked-in quickstart requires exact initialize and drop symbols,
-then builds and executes with result 42 under low and optimized MSVC profiles. The complete smoke
-finishes with 61 structurally inspected PE images. Existing raw Arena probes retain the
+then builds and executes with result 42 under low and optimized MSVC profiles. Existing raw Arena
+probes retain the
 allocation-failure, rollback, generation, stale-use, active-drop, and cleanup evidence.
 
 Only the current x86_64 target profiles have a proven source-storage match; adding a narrower

@@ -53,8 +53,10 @@ before unary `!` C emission.
 The checked-in quickstart contains no raw pointer, foreign declaration, or `unsafe`. Windows
 development and release builds execute String copy, append, immutable owner-bound view, empty
 String, nonempty and empty CString, CStr view, interior-NUL error mapping, and implicit cleanup. The
-configured MSVC 14.51 smoke inspects and executes both resulting PE images and finishes with 59
-structurally inspected images.
+configured MSVC 14.51 smoke inspects and executes both resulting PE images.
+ADR 0257 now also executes the generated-Fairy `String.append` growth-allocation failure `.err`
+arm at both MSVC profiles with the probe-only allocator; the raw owned-text probe retains the
+byte-level failure matrix.
 
 This does not stabilize the private four-field storage as a foreign ABI, expose String capacity or
 mutable bytes, add consuming Buffer-to-String conversion, validate arbitrary byte slices into text,

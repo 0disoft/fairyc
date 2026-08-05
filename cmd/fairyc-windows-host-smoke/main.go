@@ -22,6 +22,7 @@ import (
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/cli"
 	"github.com/0disoft/fairyc/internal/compiler"
+	"github.com/0disoft/fairyc/internal/cruntime"
 	"github.com/0disoft/fairyc/internal/cstdlib"
 	"github.com/0disoft/fairyc/internal/foreignstructprobe"
 	"github.com/0disoft/fairyc/internal/frontend"
@@ -71,6 +72,79 @@ fn i32 main() {
     return switch (alloc::create()) {
         case .ok(arena): { exercise_region_failure(arena) }
         case .err(_): { 5 }
+    };
+}
+`
+
+const generatedFairyBufferInitialFailureSource = `module main;
+
+import std::bytes as bytes;
+
+fn i32 discard_buffer(bytes::Buffer value) {
+    return 0;
+}
+
+fn i32 main() {
+    return switch (bytes::with_capacity(16)) {
+        case .ok(buffer) : { discard_buffer(buffer) }
+        case .err(error) : {
+            if (bytes::error_status(error) == 1) { 42 } else { 4 }
+        }
+    };
+}
+`
+
+const generatedFairyBufferResizeFailureSource = `module main;
+
+import std::bytes as bytes;
+
+fn i32 discard_buffer(bytes::Buffer value) {
+    return 0;
+}
+
+fn i32 check_resize_failure(bytes::Buffer input) {
+    var bytes::Buffer buffer = input;
+    let bool failed = switch (bytes::resize_zeroed(ref mut buffer, 16)) {
+        case .ok(_) : { false }
+        case .err(error) : { bytes::error_status(error) == 1 }
+    };
+    let bool preserved = bytes::len(ref buffer) == 0 &&
+        bytes::capacity(ref buffer) == 0;
+    return if (failed && preserved) { 42 } else { 4 };
+}
+
+fn i32 main() {
+    return switch (bytes::with_capacity(0)) {
+        case .ok(buffer) : { check_resize_failure(buffer) }
+        case .err(_) : { 5 }
+    };
+}
+`
+
+const generatedFairyStringAppendFailureSource = `module main;
+
+import std::text as text;
+
+fn i32 exercise_append_failure(text::String input) {
+    var text::String value = input;
+    return switch (text::append(ref mut value, "Fairy")) {
+        case .ok(_) : { 4 }
+        case .err(error) : {
+            let ref str view = text::string_as_str(ref value);
+            let bool ok_status = text::error_status(error) == 1 &&
+                text::error_allocation_status(error) == 1;
+            let bool preserved = text::string_len(ref value) == 5 &&
+                !text::string_is_empty(ref value) &&
+                view.len == 5;
+            if (ok_status && preserved) { 42 } else { 5 }
+        }
+    };
+}
+
+fn i32 main() {
+    return switch (text::copy("Fairy")) {
+        case .ok(value) : { exercise_append_failure(value) }
+        case .err(_) : { 6 }
     };
 }
 `
@@ -292,6 +366,10 @@ const stableWorkspaceOutputPath = "build/workspace-quickstart.exe"
 const windowsLayoutManifestPath = "spec/fixtures/layout/manifest-windows-msvc-v0.json"
 const windowsABIManifestPath = "spec/fixtures/c-abi/manifest-windows-msvc-v0.json"
 const subprocessOutputLimit = 64 * 1024
+
+// generatedFairyProbeTrapExitBase matches the Windows product trap base in internal/cli/build.go
+// so generated-Fairy probe closures keep the same bounded process-status meaning as product runs.
+const generatedFairyProbeTrapExitBase = 128
 
 const (
 	processCacheMaxEntries       = 8
@@ -923,7 +1001,15 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	regionFailureProbeImages, regionFailureCases, err := runGeneratedFairyRegionFailureProbe(root, toolchain)
+	regionFailureProbeImages, regionFailureCases, err := runGeneratedFairyRegionFailureProbe(repositoryRoot, root, toolchain)
+	if err != nil {
+		return err
+	}
+	bufferFailureProbeImages, bufferFailureCases, err := runGeneratedFairyBufferFailureProbe(repositoryRoot, root, toolchain)
+	if err != nil {
+		return err
+	}
+	stringAppendFailureProbeImages, stringAppendFailureCases, err := runGeneratedFairyStringAppendFailureProbe(repositoryRoot, root, toolchain)
 	if err != nil {
 		return err
 	}
@@ -955,8 +1041,10 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	inspectedPEImages := 1 + targetBuildExecutions + workspaceBuildExecutions + windowsFileSourceExecutions + ownedTextSourceExecutions + targetRunExecutions + workspaceRunExecutions + targetExecExecutions + windowsFileExecutions + bufferProbeExecutions + ownedTextProbeExecutions + arenaProbeExecutions + regionFailureProbeImages + layoutExecutions + abiExecutions + relocationExecutions + weakSearchExecutions + archiveExecutions + structResultExecutions + unwindExecutions
+	inspectedPEImages := 1 + targetBuildExecutions + workspaceBuildExecutions + windowsFileSourceExecutions + ownedTextSourceExecutions + targetRunExecutions + workspaceRunExecutions + targetExecExecutions + windowsFileExecutions + bufferProbeExecutions + ownedTextProbeExecutions + arenaProbeExecutions + regionFailureProbeImages + bufferFailureProbeImages + stringAppendFailureProbeImages + layoutExecutions + abiExecutions + relocationExecutions + weakSearchExecutions + archiveExecutions + structResultExecutions + unwindExecutions
 	fmt.Printf("Generated-Fairy Region failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering payload-allocation failure, node-allocation rollback, exact status 1, lexical reset, automatic Arena drop, and zero retained probe allocations\n", regionFailureCases, regionFailureProbeImages)
+	fmt.Printf("Generated-Fairy Buffer failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering with_capacity initial-allocation failure and resize_zeroed growth failure with preserved len/capacity, exact status 1, and zero retained probe allocations\n", bufferFailureCases, bufferFailureProbeImages)
+	fmt.Printf("Generated-Fairy String append failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering successful copy allocation, append growth-allocation failure with preserved owner and len/is_empty/view, exact statuses 1/1, automatic String drop, and zero retained probe allocations\n", stringAppendFailureCases, stringAppendFailureProbeImages)
 	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds, %d package-workspace builds, %d package-workspace runs, %d source-level safe File lifecycle builds, %d source-level safe owned-text lifecycle builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, public safe std::bytes Buffer ownership and views, Arena/Region, String/CString/CStr, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls, checked reads and mutable indexed stores, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, bounded lexical defer, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, stable-run stdin forwarding, bounded allocation-free stdin byte reads with EOF and partial-buffer evidence, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart, output, locked workspace execution, one isolated semantic test, two target-explicit C emissions, nine paired cold/warm persistent-cache process measurements, one nine-process bounded persistent-cache growth staircase, an eight-request editor-shaped workspace session with Windows process-memory peaks, %d fresh locked Atlas workspace-call catalog processes with per-process memory peaks, %d generated Atlas workspace-call scaling shapes, and %d post-GC retained-index batches, 42 run-host outcomes covered fixed arrays, byte-view iteration and slicing, checked indexed stores, assertions and lexical defer in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, Buffer initialization, reserve, self-overlap append, and zeroed-resize allocation rollback passed %d separate-translation-unit MSVC executions, owned-text opaque-storage failure preservation, forced allocation rollback, and repeated drop passed %d separate-translation-unit MSVC executions, Arena zeroing, two-stage allocation rollback, stale Region rejection, and active-drop preservation passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, exact object addends and final-image REL32 through REL32_5, weak-alias fallback/strong override, ADDR64, and unwind ADDR32NB values plus CodeView SECTION/SECREL pairs, PE/PDB identity, and exact DbgHelp function/line symbolication passed %d separate-translation-unit MSVC executions, weak NOLIBRARY suppression and LIBRARY extraction passed %d separate-translation-unit MSVC executions, archive extraction, pick-any ownership, selected-child retention, and discarded-child elimination passed %d MSVC input-order executions, generated-Fairy small and large struct results passed %d separate-translation-unit MSVC executions across C11 and C17 consumer modes, %d Windows x64 unwind cases plus exact profile-specific handler-tail ADDR32NB binding passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, workspaceBuildExecutions, workspaceRunExecutions, windowsFileSourceExecutions, ownedTextSourceExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, buildmeasure.AtlasCallProcessIterations, len(atlasCallScaleMeasurement.Shapes), len(atlasCallRetainedMeasurement.Shapes)*buildmeasure.AtlasCallRetainedIterationsPerShape, windowsFileExecutions, bufferProbeExecutions, ownedTextProbeExecutions, arenaProbeExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, relocationExecutions, weakSearchExecutions, archiveExecutions, structResultExecutions, unwindCases, unwindExecutions, inspectedPEImages, toolchain.Version)
 	return nil
 }
@@ -2417,7 +2505,54 @@ func runArenaFailureProbe(toolchain cdriver.WindowsHostToolchain) (int, error) {
 	return runWindowsSeparateTranslationUnitProbe(toolchain, "Arena failure", probe, implementation, 0, cdriver.C11ConsumerMode)
 }
 
-func runGeneratedFairyRegionFailureProbe(sourceRoot string, toolchain cdriver.WindowsHostToolchain) (int, int, error) {
+// generatedFairyProbeImplementation builds the test-only standard-library closure for a
+// generated-Fairy probe: the existing probe-only SystemHeap allocator adapter, the exact
+// standard-library components selected for the emitted C foreign symbols, and the canonical
+// scalar runtime for emitted trap calls. No product source, symbol contract, or ordinary
+// product linkage is changed.
+func generatedFairyProbeImplementation(repositoryRoot string, symbols []string) (string, error) {
+	if len(symbols) == 0 {
+		return "", fmt.Errorf("generated-Fairy probe closure requires at least one referenced symbol")
+	}
+	implementation, err := cstdlib.WindowsMSVCSourceForSymbols(symbols)
+	if err != nil {
+		return "", fmt.Errorf("select generated-Fairy probe standard-library closure: %w", err)
+	}
+	adapterPath := filepath.Join(repositoryRoot, filepath.FromSlash("internal/cstdlib/stage0_system_heap_probe_allocator.c"))
+	adapterBytes, err := os.ReadFile(adapterPath)
+	if err != nil {
+		return "", fmt.Errorf("read generated-Fairy probe SystemHeap adapter: %w", err)
+	}
+	adapter := string(adapterBytes)
+	runtimeSource, err := cruntime.ScalarSource(generatedFairyProbeTrapExitBase)
+	if err != nil {
+		return "", fmt.Errorf("render generated-Fairy probe scalar runtime: %w", err)
+	}
+	return generatedFairyProbeClosureSource(adapter, implementation, runtimeSource)
+}
+
+// generatedFairyProbeClosureSource joins the three canonical C sources and rejects incomplete or
+// duplicated closures before they reach the native toolchain.
+func generatedFairyProbeClosureSource(adapter, implementation, runtimeSource string) (string, error) {
+	if adapter == "" || strings.Contains(adapter, "\r") || !strings.HasSuffix(adapter, "\n") ||
+		implementation == "" || strings.Contains(implementation, "\r") || !strings.HasSuffix(implementation, "\n") ||
+		runtimeSource == "" || strings.Contains(runtimeSource, "\r") || !strings.HasSuffix(runtimeSource, "\n") {
+		return "", fmt.Errorf("generated-Fairy probe closure source is empty or non-canonical")
+	}
+	if !strings.Contains(adapter, "fy_std_system_heap_probe_fail_after_allocations_v0") ||
+		!strings.Contains(adapter, "fy_std_system_heap_probe_live_allocations_v0") {
+		return "", fmt.Errorf("generated-Fairy probe SystemHeap adapter lost its failure controls")
+	}
+	if strings.Contains(adapter+implementation, "void fy_runtime_trap(") {
+		return "", fmt.Errorf("generated-Fairy probe closure already defines fy_runtime_trap")
+	}
+	if !strings.Contains(runtimeSource, "void fy_runtime_trap(") {
+		return "", fmt.Errorf("generated-Fairy probe scalar runtime lost its trap definition")
+	}
+	return adapter + "\n" + implementation + "\n" + runtimeSource, nil
+}
+
+func runGeneratedFairyRegionFailureProbe(repositoryRoot, sourceRoot string, toolchain cdriver.WindowsHostToolchain) (int, int, error) {
 	manifest, err := os.ReadFile(filepath.Join(sourceRoot, filepath.FromSlash(checkedInRegionsManifestPath)))
 	if err != nil {
 		return 0, 0, fmt.Errorf("read generated-Fairy Region failure manifest: %w", err)
@@ -2468,9 +2603,9 @@ func runGeneratedFairyRegionFailureProbe(sourceRoot string, toolchain cdriver.Wi
 	if err != nil {
 		return 0, 0, err
 	}
-	implementation, err := cstdlib.WindowsMSVCArenaProbeImplementationSource()
+	implementation, err := generatedFairyProbeImplementation(repositoryRoot, unit.ForeignSymbols)
 	if err != nil {
-		return 0, 0, fmt.Errorf("load generated-Fairy Region failure implementation: %w", err)
+		return 0, 0, err
 	}
 	images, err := runWindowsSeparateTranslationUnitProbe(toolchain, "generated-Fairy Region failure", probe, implementation, 0, cdriver.C11ConsumerMode)
 	if err != nil {
@@ -2509,6 +2644,228 @@ int main(void) {
     }
     if (fy_std_system_heap_probe_live_allocations_v0() != 0) {
         return 13;
+    }
+    return 0;
+}
+`, nil
+}
+
+func runGeneratedFairyBufferFailureProbe(repositoryRoot, sourceRoot string, toolchain cdriver.WindowsHostToolchain) (int, int, error) {
+	manifest, err := os.ReadFile(filepath.Join(sourceRoot, filepath.FromSlash(checkedInStdBytesManifestPath)))
+	if err != nil {
+		return 0, 0, fmt.Errorf("read generated-Fairy Buffer failure manifest: %w", err)
+	}
+	totalImages := 0
+	totalExecutions := 0
+	for _, probe := range []struct {
+		name   string
+		source string
+		wrap   func(string) (string, error)
+	}{
+		{name: "with_capacity initial allocation failure", source: generatedFairyBufferInitialFailureSource, wrap: generatedFairyBufferInitialFailureProbeSource},
+		{name: "resize_zeroed growth failure", source: generatedFairyBufferResizeFailureSource, wrap: generatedFairyBufferResizeFailureProbeSource},
+	} {
+		workspaceRoot, err := os.MkdirTemp("", "fairyc-buffer-failure-probe-")
+		if err != nil {
+			return totalImages, totalExecutions, fmt.Errorf("create generated-Fairy Buffer failure workspace: %w", err)
+		}
+		for name, contents := range map[string][]byte{
+			"fairy.toml":  manifest,
+			"src/main.fy": []byte(probe.source),
+		} {
+			destination := filepath.Join(workspaceRoot, filepath.FromSlash(name))
+			if err := os.MkdirAll(filepath.Dir(destination), 0o700); err != nil {
+				os.RemoveAll(workspaceRoot)
+				return totalImages, totalExecutions, fmt.Errorf("create generated-Fairy Buffer failure path %s: %w", name, err)
+			}
+			if err := os.WriteFile(destination, contents, 0o600); err != nil {
+				os.RemoveAll(workspaceRoot)
+				return totalImages, totalExecutions, fmt.Errorf("write generated-Fairy Buffer failure path %s: %w", name, err)
+			}
+		}
+		workspace, err := workspaceloader.Load(workspaceRoot)
+		os.RemoveAll(workspaceRoot)
+		if err != nil {
+			return totalImages, totalExecutions, fmt.Errorf("load generated-Fairy Buffer failure workspace: %w", err)
+		}
+		input, err := workspace.SemanticInput()
+		if err != nil {
+			return totalImages, totalExecutions, fmt.Errorf("prepare generated-Fairy Buffer failure semantic input: %w", err)
+		}
+		checked, err := compiler.CheckPackages(input)
+		if err != nil {
+			return totalImages, totalExecutions, fmt.Errorf("compile generated-Fairy Buffer failure source: %w", err)
+		}
+		if !checked.Verified || checked.Semantic.CompletedThrough != semantic.PhaseFlow || checked.Semantic.FailedPhase != semantic.PhaseNone ||
+			len(checked.Semantic.Diagnostics) != 0 || len(checked.Semantic.Unsupported) != 0 {
+			return totalImages, totalExecutions, fmt.Errorf("generated-Fairy Buffer failure source did not produce clean verified MIR: phase=%q failed=%q diagnostics=%+v unsupported=%+v", checked.Semantic.CompletedThrough, checked.Semantic.FailedPhase, checked.Semantic.Diagnostics, checked.Semantic.Unsupported)
+		}
+		rootPackage, err := workspace.RootPackageID()
+		if err != nil {
+			return totalImages, totalExecutions, fmt.Errorf("resolve generated-Fairy Buffer failure root package: %w", err)
+		}
+		entry := hir.QualifiedModulePath(rootPackage, "main") + "::main"
+		unit, err := cbackend.Emit(checked.MIR, entry, cbackend.Stage0WindowsMSVCProfile())
+		if err != nil {
+			return totalImages, totalExecutions, fmt.Errorf("emit generated-Fairy Buffer failure C: %w", err)
+		}
+		probeSource, err := probe.wrap(unit.Source)
+		if err != nil {
+			return totalImages, totalExecutions, err
+		}
+		implementation, err := generatedFairyProbeImplementation(repositoryRoot, unit.ForeignSymbols)
+		if err != nil {
+			return totalImages, totalExecutions, err
+		}
+		images, err := runWindowsSeparateTranslationUnitProbe(toolchain, "generated-Fairy Buffer "+probe.name, probeSource, implementation, 0, cdriver.C11ConsumerMode)
+		if err != nil {
+			return totalImages + images, totalExecutions + images, err
+		}
+		totalImages += images
+		totalExecutions += images
+	}
+	return totalImages, totalExecutions, nil
+}
+
+func generatedFairyBufferInitialFailureProbeSource(generated string) (string, error) {
+	if generated == "" || !strings.Contains(generated, "int main(void)") {
+		return "", fmt.Errorf("generated-Fairy Buffer initial-failure C must contain a main wrapper")
+	}
+	if !strings.Contains(generated, "fy_std_buffer_initialize_v0") ||
+		!strings.Contains(generated, "fy_std_buffer_drop_v0") {
+		return "", fmt.Errorf("generated-Fairy Buffer initial-failure C lost required initialize or drop calls")
+	}
+	return "#define main fy_generated_buffer_initial_failure_main\n" + generated + `
+#undef main
+
+void fy_std_system_heap_probe_fail_after_allocations_v0(size_t successful_allocations);
+size_t fy_std_system_heap_probe_live_allocations_v0(void);
+
+int main(void) {
+    fy_std_system_heap_probe_fail_after_allocations_v0(0);
+    if (fy_generated_buffer_initial_failure_main() != 42) {
+        return 10;
+    }
+    if (fy_std_system_heap_probe_live_allocations_v0() != 0) {
+        return 11;
+    }
+    return 0;
+}
+`, nil
+}
+
+func generatedFairyBufferResizeFailureProbeSource(generated string) (string, error) {
+	if generated == "" || !strings.Contains(generated, "int main(void)") {
+		return "", fmt.Errorf("generated-Fairy Buffer resize-failure C must contain a main wrapper")
+	}
+	if !strings.Contains(generated, "fy_std_buffer_initialize_v0") ||
+		!strings.Contains(generated, "fy_std_buffer_resize_zeroed_v0") ||
+		!strings.Contains(generated, "fy_std_buffer_drop_v0") {
+		return "", fmt.Errorf("generated-Fairy Buffer resize-failure C lost required initialize, resize, or drop calls")
+	}
+	return "#define main fy_generated_buffer_resize_failure_main\n" + generated + `
+#undef main
+
+void fy_std_system_heap_probe_fail_after_allocations_v0(size_t successful_allocations);
+size_t fy_std_system_heap_probe_live_allocations_v0(void);
+
+int main(void) {
+    fy_std_system_heap_probe_fail_after_allocations_v0(0);
+    if (fy_generated_buffer_resize_failure_main() != 42) {
+        return 12;
+    }
+    if (fy_std_system_heap_probe_live_allocations_v0() != 0) {
+        return 13;
+    }
+    return 0;
+}
+`, nil
+}
+
+func runGeneratedFairyStringAppendFailureProbe(repositoryRoot, sourceRoot string, toolchain cdriver.WindowsHostToolchain) (int, int, error) {
+	manifest, err := os.ReadFile(filepath.Join(sourceRoot, filepath.FromSlash(checkedInStdTextManifestPath)))
+	if err != nil {
+		return 0, 0, fmt.Errorf("read generated-Fairy String append failure manifest: %w", err)
+	}
+	workspaceRoot, err := os.MkdirTemp("", "fairyc-string-append-failure-probe-")
+	if err != nil {
+		return 0, 0, fmt.Errorf("create generated-Fairy String append failure workspace: %w", err)
+	}
+	defer os.RemoveAll(workspaceRoot)
+	for name, contents := range map[string][]byte{
+		"fairy.toml":  manifest,
+		"src/main.fy": []byte(generatedFairyStringAppendFailureSource),
+	} {
+		destination := filepath.Join(workspaceRoot, filepath.FromSlash(name))
+		if err := os.MkdirAll(filepath.Dir(destination), 0o700); err != nil {
+			return 0, 0, fmt.Errorf("create generated-Fairy String append failure path %s: %w", name, err)
+		}
+		if err := os.WriteFile(destination, contents, 0o600); err != nil {
+			return 0, 0, fmt.Errorf("write generated-Fairy String append failure path %s: %w", name, err)
+		}
+	}
+	workspace, err := workspaceloader.Load(workspaceRoot)
+	if err != nil {
+		return 0, 0, fmt.Errorf("load generated-Fairy String append failure workspace: %w", err)
+	}
+	input, err := workspace.SemanticInput()
+	if err != nil {
+		return 0, 0, fmt.Errorf("prepare generated-Fairy String append failure semantic input: %w", err)
+	}
+	checked, err := compiler.CheckPackages(input)
+	if err != nil {
+		return 0, 0, fmt.Errorf("compile generated-Fairy String append failure source: %w", err)
+	}
+	if !checked.Verified || checked.Semantic.CompletedThrough != semantic.PhaseFlow || checked.Semantic.FailedPhase != semantic.PhaseNone ||
+		len(checked.Semantic.Diagnostics) != 0 || len(checked.Semantic.Unsupported) != 0 {
+		return 0, 0, fmt.Errorf("generated-Fairy String append failure source did not produce clean verified MIR: phase=%q failed=%q diagnostics=%+v unsupported=%+v", checked.Semantic.CompletedThrough, checked.Semantic.FailedPhase, checked.Semantic.Diagnostics, checked.Semantic.Unsupported)
+	}
+	rootPackage, err := workspace.RootPackageID()
+	if err != nil {
+		return 0, 0, fmt.Errorf("resolve generated-Fairy String append failure root package: %w", err)
+	}
+	entry := hir.QualifiedModulePath(rootPackage, "main") + "::main"
+	unit, err := cbackend.Emit(checked.MIR, entry, cbackend.Stage0WindowsMSVCProfile())
+	if err != nil {
+		return 0, 0, fmt.Errorf("emit generated-Fairy String append failure C: %w", err)
+	}
+	probeSource, err := generatedFairyStringAppendFailureProbeSource(unit.Source)
+	if err != nil {
+		return 0, 0, err
+	}
+	implementation, err := generatedFairyProbeImplementation(repositoryRoot, unit.ForeignSymbols)
+	if err != nil {
+		return 0, 0, err
+	}
+	images, err := runWindowsSeparateTranslationUnitProbe(toolchain, "generated-Fairy String append failure", probeSource, implementation, 0, cdriver.C11ConsumerMode)
+	if err != nil {
+		return images, images, err
+	}
+	return images, images, nil
+}
+
+func generatedFairyStringAppendFailureProbeSource(generated string) (string, error) {
+	if generated == "" || !strings.Contains(generated, "int main(void)") {
+		return "", fmt.Errorf("generated-Fairy String append-failure C must contain a main wrapper")
+	}
+	if !strings.Contains(generated, "fy_std_string_copy_storage_v0") ||
+		!strings.Contains(generated, "fy_std_string_append_storage_v0") ||
+		!strings.Contains(generated, "fy_std_string_drop_storage_v0") {
+		return "", fmt.Errorf("generated-Fairy String append-failure C lost required copy, append, or drop calls")
+	}
+	return "#define main fy_generated_string_append_failure_main\n" + generated + `
+#undef main
+
+void fy_std_system_heap_probe_fail_after_allocations_v0(size_t successful_allocations);
+size_t fy_std_system_heap_probe_live_allocations_v0(void);
+
+int main(void) {
+    fy_std_system_heap_probe_fail_after_allocations_v0(1);
+    if (fy_generated_string_append_failure_main() != 42) {
+        return 10;
+    }
+    if (fy_std_system_heap_probe_live_allocations_v0() != 0) {
+        return 11;
     }
     return 0;
 }

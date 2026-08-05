@@ -1,8 +1,18 @@
 package main
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/0disoft/fairyc/internal/cbackend"
+	"github.com/0disoft/fairyc/internal/compiler"
+	"github.com/0disoft/fairyc/internal/cruntime"
+	"github.com/0disoft/fairyc/internal/cstdlib"
+	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/semantic"
+	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
 func TestBoundedBufferStoresPrefixWithoutShortWrite(t *testing.T) {
@@ -66,6 +76,271 @@ func TestGeneratedFairyRegionFailureProbeRejectsIncompleteGeneratedC(t *testing.
 	for _, generated := range []string{"", "int main(void) { return 0; }\n"} {
 		if _, err := generatedFairyRegionFailureProbeSource(generated); err == nil {
 			t.Fatalf("incomplete generated C %q was accepted", generated)
+		}
+	}
+}
+
+func TestGeneratedFairyBufferInitialFailureProbeWrapsOnlyTheGeneratedEntry(t *testing.T) {
+	t.Parallel()
+	generated := "#include <stddef.h>\nint fy_std_buffer_initialize_v0(void);\nint fy_std_buffer_drop_v0(void);\nint main(void) { return 42; }\n"
+
+	probe, err := generatedFairyBufferInitialFailureProbeSource(generated)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, fragment := range []string{
+		"#define main fy_generated_buffer_initial_failure_main",
+		generated,
+		"fy_std_system_heap_probe_fail_after_allocations_v0(0)",
+		"fy_std_system_heap_probe_live_allocations_v0() != 0",
+	} {
+		if !strings.Contains(probe, fragment) {
+			t.Fatalf("probe source lost required fragment %q", fragment)
+		}
+	}
+	if strings.Count(probe, "int main(void)") != 2 {
+		t.Fatalf("probe source must contain the renamed generated entry and one test entry: %q", probe)
+	}
+}
+
+func TestGeneratedFairyBufferResizeFailureProbeWrapsOnlyTheGeneratedEntry(t *testing.T) {
+	t.Parallel()
+	generated := "#include <stddef.h>\nint fy_std_buffer_initialize_v0(void);\nint fy_std_buffer_resize_zeroed_v0(void);\nint fy_std_buffer_drop_v0(void);\nint main(void) { return 42; }\n"
+
+	probe, err := generatedFairyBufferResizeFailureProbeSource(generated)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, fragment := range []string{
+		"#define main fy_generated_buffer_resize_failure_main",
+		generated,
+		"fy_std_system_heap_probe_fail_after_allocations_v0(0)",
+		"fy_std_system_heap_probe_live_allocations_v0() != 0",
+	} {
+		if !strings.Contains(probe, fragment) {
+			t.Fatalf("probe source lost required fragment %q", fragment)
+		}
+	}
+	if strings.Count(probe, "int main(void)") != 2 {
+		t.Fatalf("probe source must contain the renamed generated entry and one test entry: %q", probe)
+	}
+}
+
+func TestGeneratedFairyBufferFailureProbeRejectsIncompleteGeneratedC(t *testing.T) {
+	t.Parallel()
+	for _, tc := range []struct {
+		name      string
+		generated string
+		wrap      func(string) (string, error)
+	}{
+		{name: "initial empty", generated: "", wrap: generatedFairyBufferInitialFailureProbeSource},
+		{name: "initial missing entry", generated: "int fy_std_buffer_initialize_v0(void);\n", wrap: generatedFairyBufferInitialFailureProbeSource},
+		{name: "initial missing Buffer calls", generated: "int main(void) { return 0; }\n", wrap: generatedFairyBufferInitialFailureProbeSource},
+		{name: "resize empty", generated: "", wrap: generatedFairyBufferResizeFailureProbeSource},
+		{name: "resize missing entry", generated: "int fy_std_buffer_resize_zeroed_v0(void);\n", wrap: generatedFairyBufferResizeFailureProbeSource},
+		{name: "resize missing Buffer calls", generated: "int main(void) { return 0; }\n", wrap: generatedFairyBufferResizeFailureProbeSource},
+	} {
+		if _, err := tc.wrap(tc.generated); err == nil {
+			t.Fatalf("incomplete generated C %q was accepted for %s", tc.generated, tc.name)
+		}
+	}
+}
+
+func TestGeneratedFairyStringAppendFailureProbeWrapsOnlyTheGeneratedEntry(t *testing.T) {
+	t.Parallel()
+	generated := "#include <stddef.h>\nint fy_std_string_copy_storage_v0(void);\nint fy_std_string_append_storage_v0(void);\nint fy_std_string_drop_storage_v0(void);\nint main(void) { return 42; }\n"
+
+	probe, err := generatedFairyStringAppendFailureProbeSource(generated)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, fragment := range []string{
+		"#define main fy_generated_string_append_failure_main",
+		generated,
+		"fy_std_system_heap_probe_fail_after_allocations_v0(1)",
+		"fy_std_system_heap_probe_live_allocations_v0() != 0",
+	} {
+		if !strings.Contains(probe, fragment) {
+			t.Fatalf("probe source lost required fragment %q", fragment)
+		}
+	}
+	if strings.Count(probe, "int main(void)") != 2 {
+		t.Fatalf("probe source must contain the renamed generated entry and one test entry: %q", probe)
+	}
+}
+
+func TestGeneratedFairyStringAppendFailureProbeRejectsIncompleteGeneratedC(t *testing.T) {
+	t.Parallel()
+	for _, tc := range []struct {
+		name      string
+		generated string
+	}{
+		{name: "empty", generated: ""},
+		{name: "missing main", generated: "int fy_std_string_copy_storage_v0(void);\nint fy_std_string_append_storage_v0(void);\nint fy_std_string_drop_storage_v0(void);\n"},
+		{name: "missing copy", generated: "int main(void) { return 0; }\nint fy_std_string_append_storage_v0(void);\nint fy_std_string_drop_storage_v0(void);\n"},
+		{name: "missing append", generated: "int main(void) { return 0; }\nint fy_std_string_copy_storage_v0(void);\nint fy_std_string_drop_storage_v0(void);\n"},
+		{name: "missing drop", generated: "int main(void) { return 0; }\nint fy_std_string_copy_storage_v0(void);\nint fy_std_string_append_storage_v0(void);\n"},
+	} {
+		if _, err := generatedFairyStringAppendFailureProbeSource(tc.generated); err == nil {
+			t.Fatalf("incomplete generated C %q was accepted for %s", tc.generated, tc.name)
+		}
+	}
+}
+
+func TestGeneratedFairyBufferFailureSourcesPassFullPipeline(t *testing.T) {
+	t.Parallel()
+	for _, tc := range []struct {
+		name     string
+		manifest string
+		source   string
+		expect   []string
+	}{
+		{name: "with_capacity initial allocation failure", manifest: "std_bytes_quickstart", source: generatedFairyBufferInitialFailureSource, expect: []string{"fy_std_buffer_initialize_v0", "fy_std_buffer_drop_v0"}},
+		{name: "resize_zeroed growth failure", manifest: "std_bytes_quickstart", source: generatedFairyBufferResizeFailureSource, expect: []string{"fy_std_buffer_initialize_v0", "fy_std_buffer_resize_zeroed_v0", "fy_std_buffer_drop_v0"}},
+		{name: "region failure", manifest: "regions", source: generatedFairyRegionFailureSource, expect: []string{"fy_std_region_allocate_zeroed_v0", "fy_std_region_reset_v0", "fy_std_arena_drop_v0", "fy_runtime_trap("}},
+		// The emitter lowers the whole SDK unit, so only required-symbol presence is checked here;
+		// exact ForeignSymbols set freezing is out of scope for this probe.
+		{name: "string append growth failure", manifest: "std_text_quickstart", source: generatedFairyStringAppendFailureSource, expect: []string{"fy_std_string_copy_storage_v0", "fy_std_string_append_storage_v0", "fy_std_string_drop_storage_v0", "fy_runtime_trap("}},
+	} {
+		manifestPath := filepath.Join("..", "..", "examples", tc.manifest, "fairy.toml")
+		manifest, err := os.ReadFile(manifestPath)
+		if err != nil {
+			t.Fatalf("%s: read manifest: %v", tc.name, err)
+		}
+		workspaceRoot := t.TempDir()
+		for name, contents := range map[string][]byte{
+			"fairy.toml":  manifest,
+			"src/main.fy": []byte(tc.source),
+		} {
+			destination := filepath.Join(workspaceRoot, filepath.FromSlash(name))
+			if err := os.MkdirAll(filepath.Dir(destination), 0o700); err != nil {
+				t.Fatalf("%s: create pipeline path %s: %v", tc.name, name, err)
+			}
+			if err := os.WriteFile(destination, contents, 0o600); err != nil {
+				t.Fatalf("%s: write pipeline path %s: %v", tc.name, name, err)
+			}
+		}
+		workspace, err := workspaceloader.Load(workspaceRoot)
+		if err != nil {
+			t.Fatalf("%s: load workspace: %v", tc.name, err)
+		}
+		input, err := workspace.SemanticInput()
+		if err != nil {
+			t.Fatalf("%s: prepare semantic input: %v", tc.name, err)
+		}
+		checked, err := compiler.CheckPackages(input)
+		if err != nil {
+			t.Fatalf("%s: compile: %v", tc.name, err)
+		}
+		if !checked.Verified || checked.Semantic.CompletedThrough != semantic.PhaseFlow || checked.Semantic.FailedPhase != semantic.PhaseNone ||
+			len(checked.Semantic.Diagnostics) != 0 || len(checked.Semantic.Unsupported) != 0 {
+			t.Fatalf("%s: no clean verified MIR: phase=%q failed=%q diagnostics=%+v unsupported=%+v", tc.name, checked.Semantic.CompletedThrough, checked.Semantic.FailedPhase, checked.Semantic.Diagnostics, checked.Semantic.Unsupported)
+		}
+		rootPackage, err := workspace.RootPackageID()
+		if err != nil {
+			t.Fatalf("%s: resolve root package: %v", tc.name, err)
+		}
+		entry := hir.QualifiedModulePath(rootPackage, "main") + "::main"
+		unit, err := cbackend.Emit(checked.MIR, entry, cbackend.Stage0WindowsMSVCProfile())
+		if err != nil {
+			t.Fatalf("%s: emit C: %v", tc.name, err)
+		}
+		for _, fragment := range tc.expect {
+			if !strings.Contains(unit.Source, fragment) {
+				t.Fatalf("%s: emitted C lost required fragment %q", tc.name, fragment)
+			}
+		}
+	}
+}
+
+func TestGeneratedFairyProbeImplementationJoinsScalarRuntime(t *testing.T) {
+	t.Parallel()
+	repoRoot := filepath.Join("..", "..")
+	for _, name := range []string{"Region and Buffer closure"} {
+		closure, err := generatedFairyProbeImplementation(repoRoot, []string{
+			"fy_std_region_allocate_zeroed_v0",
+			"fy_std_buffer_initialize_v0",
+			"fy_std_string_copy_storage_v0",
+			"fy_std_string_append_storage_v0",
+			"fy_std_string_drop_storage_v0",
+			"fy_std_stdout_write_all_v0",
+			"fy_std_text_utf8_valid_v0",
+		})
+		if err != nil {
+			t.Fatalf("%s: join scalar runtime: %v", name, err)
+		}
+		for _, fragment := range []string{
+			"UINT32_C(128)",
+			"void fy_runtime_trap(uint32_t category)",
+			"fy_std_system_heap_probe_fail_after_allocations_v0",
+			"fy_std_system_heap_probe_live_allocations_v0",
+			"fy_std_region_allocate_zeroed_v0",
+			"fy_std_buffer_initialize_v0",
+			"fy_std_string_copy_storage_v0",
+			"fy_std_string_append_storage_v0",
+			"fy_std_string_drop_storage_v0",
+			"fy_std_stdout_write_all_v0",
+			"fy_std_text_utf8_valid_v0",
+		} {
+			if !strings.Contains(closure, fragment) {
+				t.Fatalf("%s closure lost required fragment %q", name, fragment)
+			}
+		}
+		if strings.Count(closure, "void fy_runtime_trap(") != 1 {
+			t.Fatalf("%s closure must define fy_runtime_trap exactly once", name)
+		}
+		for _, load := range []func() (string, error){
+			cstdlib.WindowsMSVCArenaProbeImplementationSource,
+			cstdlib.WindowsMSVCBufferProbeImplementationSource,
+		} {
+			productImplementation, err := load()
+			if err != nil {
+				t.Fatalf("%s: load product implementation: %v", name, err)
+			}
+			if strings.Contains(productImplementation, "void fy_runtime_trap(") {
+				t.Fatalf("%s product implementation must not define the scalar runtime trap", name)
+			}
+		}
+	}
+}
+
+func TestGeneratedFairyProbeImplementationRejectsIncompleteOrDuplicate(t *testing.T) {
+	t.Parallel()
+	runtimeSource, err := cruntime.ScalarSource(generatedFairyProbeTrapExitBase)
+	if err != nil {
+		t.Fatal(err)
+	}
+	repoRoot := filepath.Join("..", "..")
+	for _, tc := range []struct {
+		name       string
+		sourceRoot string
+		symbols    []string
+	}{
+		{name: "empty symbols", sourceRoot: repoRoot, symbols: []string{}},
+		{name: "missing adapter source", sourceRoot: filepath.Join(repoRoot, "missing"), symbols: []string{"fy_std_buffer_initialize_v0"}},
+	} {
+		if _, err := generatedFairyProbeImplementation(tc.sourceRoot, tc.symbols); err == nil {
+			t.Fatalf("incomplete or duplicate closure was accepted for %s", tc.name)
+		}
+	}
+	adapterBytes, err := os.ReadFile(filepath.Join(repoRoot, "internal", "cstdlib", "stage0_system_heap_probe_allocator.c"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	adapter := string(adapterBytes)
+	for _, tc := range []struct {
+		name           string
+		adapter        string
+		implementation string
+		runtimeSource  string
+	}{
+		{name: "non-canonical adapter", adapter: "int x;\r\n", implementation: "int y;\n", runtimeSource: runtimeSource},
+		{name: "adapter without failure controls", adapter: "int x;\n", implementation: "int y;\n", runtimeSource: runtimeSource},
+		{name: "duplicate trap definition", adapter: adapter, implementation: runtimeSource, runtimeSource: runtimeSource},
+		{name: "runtime without trap definition", adapter: adapter, implementation: "int y;\n", runtimeSource: "int z;\n"},
+	} {
+		if _, err := generatedFairyProbeClosureSource(tc.adapter, tc.implementation, tc.runtimeSource); err == nil {
+			t.Fatalf("incomplete or duplicate closure was accepted for %s", tc.name)
 		}
 	}
 }

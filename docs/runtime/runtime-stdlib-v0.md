@@ -158,7 +158,9 @@ nonempty construction, reserve, self-overlap append growth, and zeroed-resize gr
 growth failure must preserve pointer, capacity, alignment, initialized length, bytes, and one live
 allocation; recovery plus final drop must return the live count to zero. The raw caller and
 target-specific implementation execute as separate translation units at low and optimized x64 MSVC
-profiles. The four Linux executions cannot run on this Windows host, but ADR 0214 records their
+profiles. ADR 0256 additionally executes generated-Fairy `with_capacity` and `resize_zeroed`
+failure arms at both x64 MSVC profiles; the raw caller retains the byte-level failure matrix.
+The four Linux executions cannot run on this Windows host, but ADR 0214 records their
 first hosted success. Product linkage contains no probe controls.
 
 ## `Arena` and `Region`
@@ -292,6 +294,11 @@ into compiler-bundled `std::text`, owning source resources, `Result` mapping, an
 borrowed views. A source `c"..."` literal now has a
 verified `Static` origin and compiler-owned C storage. Product build linkage is now automatic only for actual calls to the closed
 internal symbols; that raw link transport does not itself define the public safe API.
+ADR 0257 additionally executes a generated-Fairy `String.append` growth-failure `.err` arm:
+`text::copy("Fairy")` succeeds on the first probe allocation, the second append-growth allocation
+fails, and the source arm observes statuses 1/1, `len == 5`, non-empty, and a five-byte borrowed
+view before the automatic String drop returns live probe allocations to zero at both MSVC profiles.
+The raw C probe retains the byte-level failure matrix.
 
 Windows `build-target` now admits the exact CStr validator plus String copy/view/append/drop and
 CString from-text/view/drop entry points. Its checked-in FY program uses private target-width

@@ -265,6 +265,8 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0253-ada-pascal-concept-admission.md`: classifies nominal scalars and constrained ranges as post-Stage 0 candidates, defers bounded contracts, retains exhaustive switching, and rejects imported Ada/Pascal runtime or surface complexity without a language cutover.
 - `0254-defer-nominal-scalars-pending-user-domain-evidence.md`: audits current SDK/example scalar roles and keeps nominal scalar syntax evidence-blocked until a representative application demonstrates a real same-representation interchange.
 - `0255-generated-fairy-region-failure-execution.md`: executes generated Fairy Region `.err` handling for both allocation rollback stages at low and optimized MSVC profiles without adding product failure controls.
+- `0256-generated-fairy-buffer-failure-execution.md`: executes generated Fairy Buffer `.err` handling for `with_capacity` and `resize_zeroed` allocation failure at low and optimized MSVC profiles without adding product failure controls.
+- `0257-generated-fairy-string-append-failure-execution.md`: executes generated Fairy `String.append` growth-allocation failure `.err` handling at low and optimized MSVC profiles without adding product failure controls.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 
