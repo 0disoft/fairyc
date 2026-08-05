@@ -340,15 +340,18 @@ Windows now has an independent File C slice over inline `HANDLE` state with no h
 It accepts a bounded ASCII bootstrap path, preserves partial read and write-all progress, syncs
 explicitly, consumes state before one `CloseHandle` attempt on both success and failure, and makes
 drop a silent one-attempt fallback. A separate-translation-unit probe creates, writes, syncs,
-closes, reopens, reads in three-byte chunks, observes EOF, forces `ERROR_INVALID_HANDLE`, and checks
-repeated close and drop at low and optimized local MSVC profiles. The six raw calls are target-bound
+closes, reopens, reads in three-byte chunks, observes EOF, inspects and changes absolute position,
+rejects an overflowing offset without moving the cursor, forces `ERROR_INVALID_HANDLE`, and checks
+repeated close and drop at low and optimized local MSVC profiles. The eight raw calls are target-bound
 through the closed resolver. A checked-in two-module FY example now wraps that exact component in a
 move-only `File`, preserves status, Win32 code, and completed bytes in `FileError`, carries
-`filesystem` effects, writes and synchronizes `FairyFile`, reads it through `read(ref mut u8[])`
+`filesystem` effects, writes and synchronizes `FairyFile`, observes and resets its absolute cursor,
+reads it through `read(ref mut u8[])`
 backed by a mutable fixed array, observes EOF, consumes explicit close, and proves implicit drop by
 successfully reopening a path whose live write handle would deny sharing. Low and optimized MSVC builds both
 return 42 after object, PE, and unwind inspection. ADR 0264 now promotes that safe ownership and
-I/O contract into compiler-bundled `std::fs`; the public slice remains Windows MSVC-only and does
+I/O contract into compiler-bundled `std::fs`; ADR 0269 adds allocation-free `position` and absolute
+`seek_start` under SDK `0.0.0-stage0.15`. The public slice remains Windows MSVC-only and does
 not claim portable Unicode paths, general mutable buffers, a supported target, or public layout.
 The source FFI slice accepts `i32`, `u8`, `u32`, `usize`, all sixteen exact transport-only TargetSpec
 C scalars, admitted raw-pointer parameters or results, and nonempty acyclic `@repr(C)` struct

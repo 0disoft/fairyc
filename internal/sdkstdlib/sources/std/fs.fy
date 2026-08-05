@@ -8,6 +8,13 @@ struct raw_file_result {
 }
 
 @repr(C)
+struct raw_file_position_result {
+    u32 status;
+    u32 os_code;
+    usize position;
+}
+
+@repr(C)
 struct raw_open_options {
     u8 read;
     u8 write;
@@ -44,6 +51,14 @@ unsafe extern C fn raw_file_result file_open_raw(ptr u8 path, ptr raw_open_optio
 unsafe extern C fn raw_file_result file_read_raw(ptr mut void file, ptr mut u8 buffer, usize length) ;
 
 @effects(filesystem)
+@link_name("fy_std_windows_file_position_v0")
+unsafe extern C fn raw_file_position_result file_position_raw(ptr mut void file) ;
+
+@effects(filesystem)
+@link_name("fy_std_windows_file_seek_start_v0")
+unsafe extern C fn raw_file_position_result file_seek_start_raw(ptr mut void file, usize offset) ;
+
+@effects(filesystem)
 @link_name("fy_std_windows_file_write_all_v0")
 unsafe extern C fn raw_file_result file_write_all_raw(ptr mut void file, ptr u8 data, usize length) ;
 
@@ -64,6 +79,14 @@ fn FileError file_error(raw_file_result result) {
         .status = result.status,
         .os_code = result.os_code,
         .completed = result.count,
+    };
+}
+
+fn FileError position_error(raw_file_position_result result) {
+    return FileError {
+        .status = result.status,
+        .os_code = result.os_code,
+        .completed = 0,
     };
 }
 
@@ -135,6 +158,32 @@ pub fn Result<usize, FileError> read(ref mut File file, ref mut u8[] buffer) {
         .ok(result.count)
     } else {
         .err(file_error(result))
+    };
+}
+
+/// Returns the current absolute byte position.
+@effects(filesystem)
+pub fn Result<usize, FileError> position(ref mut File file) {
+    let raw_file_position_result result = unsafe {
+        file_position_raw(file as ptr mut void)
+    };
+    return if (result.status == 0) {
+        .ok(result.position)
+    } else {
+        .err(position_error(result))
+    };
+}
+
+/// Moves to one absolute byte position from the start and returns that position.
+@effects(filesystem)
+pub fn Result<usize, FileError> seek_start(ref mut File file, usize offset) {
+    let raw_file_position_result result = unsafe {
+        file_seek_start_raw(file as ptr mut void, offset)
+    };
+    return if (result.status == 0) {
+        .ok(result.position)
+    } else {
+        .err(position_error(result))
     };
 }
 

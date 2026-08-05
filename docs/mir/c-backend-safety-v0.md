@@ -289,9 +289,10 @@ The exact standard-library namespace and component dependency mapping live in on
 consumed by both C-emission admission and product-build source selection.
 Windows File names are rejected for Linux and select one independent inline-handle component only
 for `x86_64-windows-msvc`. ADRs 0124 and 0125 established an example-level safe FY wrapper plus a
-length-generic fixed-array byte view; ADR 0264 publishes that exact Windows slice as `std::fs` while
-portable paths, Linux public linkage, general mutable-buffer operations, retained pointers, and public
-layout remain outside this boundary.
+length-generic fixed-array byte view; ADR 0264 publishes that exact Windows slice as `std::fs`, and
+ADR 0269 adds two target-bound absolute-position symbols while portable paths, relative/end-based
+seek, Linux public linkage, general mutable-buffer operations, retained pointers, and public layout
+remain outside this boundary.
 The sole nested-pointer exception is exactly source `ptr mut ptr mut void`, so source
 `ref mut ptr mut void` can become a C
 `void **` output slot. Immutable outer or inner layers fail closed instead of risking incorrect C

@@ -128,6 +128,8 @@ func TestAdmittedForTargetKeepsWindowsFileTargetBound(t *testing.T) {
 	for _, symbol := range []string{
 		"fy_std_windows_file_open_v0",
 		"fy_std_windows_file_read_v0",
+		"fy_std_windows_file_position_v0",
+		"fy_std_windows_file_seek_start_v0",
 		"fy_std_windows_file_write_all_v0",
 		"fy_std_windows_file_sync_v0",
 		"fy_std_windows_file_close_v0",

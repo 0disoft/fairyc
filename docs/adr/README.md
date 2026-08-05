@@ -278,6 +278,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0266-starter-guide-native-test-v4.md`: updates only the generated starter README to distinguish fast semantic testing from explicit isolated Windows native testing while preserving the exact five-file source, identity, and no-overwrite contract.
 - `0267-stable-exact-test-selection.md`: makes canonical test identities repeatable exact CLI selectors for semantic and native execution, preserving canonical report order and full-overlay validation while reducing unrelated native builds.
 - `0268-stable-test-identity-listing.md`: adds a compiler-admitted, execution-free stable listing mode for discovering the canonical identities accepted by exact semantic and native test selection.
+- `0269-public-windows-file-positioning.md`: adds allocation-free current-position observation and absolute start-based seek to public Windows `std::fs`, with overflow rejection, unchanged-position failure evidence, and low/optimized generated-Fairy execution under SDK `0.0.0-stage0.15`.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

@@ -550,6 +550,14 @@ remains `fairyc-runtime/0`; no C symbol changes because the module consumes the 
 Windows File target-support symbols. Native linkage is currently Windows MSVC only and does not
 promise portable paths or Linux public support.
 
+ADR 0269 moves the SDK to `0.0.0-stage0.15` because it adds public
+`std::fs::position(ref mut File) -> Result<usize, FileError>` and
+`std::fs::seek_start(ref mut File, usize) -> Result<usize, FileError>`, plus the two private
+Windows target-support symbols that implement them. The SDK source digest, package instance,
+public-interface hash, dependent identities, generated locks, and whole-package cache keys change.
+Language remains `fairyc-language/8` and runtime ABI remains `fairyc-runtime/0`; the surface is
+still Windows x86-64 MSVC-only and does not promise portable offsets or richer seek origins.
+
 ## Package formats
 
 Manifest schema, lockfile schema, source archive schema, and any future binary artifact schema are independent. Stage 0 needs manifest and lockfile schemas only. A stable binary package format would falsely imply a stable native Fairy ABI and is deferred.
@@ -571,7 +579,7 @@ ADR 0144 fixes the first loader behavior for this manifest schema: explicit root
 exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, one language revision,
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
 instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
-`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.14`, language
+`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.15`, language
 `fairyc-language/8`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 

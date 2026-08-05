@@ -19,6 +19,12 @@ struct fy_std_windows_file_result_v0 {
     size_t count;
 };
 
+struct fy_std_windows_file_position_result_v0 {
+    uint32_t status;
+    uint32_t os_code;
+    uint64_t position;
+};
+
 struct fy_std_windows_file_v0 {
     void *handle;
     uint8_t open;
@@ -37,6 +43,11 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_open_v0(
     void *
 );
 struct fy_std_windows_file_result_v0 fy_std_windows_file_read_v0(void *, uint8_t *, size_t);
+struct fy_std_windows_file_position_result_v0 fy_std_windows_file_position_v0(void *);
+struct fy_std_windows_file_position_result_v0 fy_std_windows_file_seek_start_v0(
+    void *,
+    uint64_t
+);
 struct fy_std_windows_file_result_v0 fy_std_windows_file_write_all_v0(
     void *,
     const uint8_t *,
@@ -71,13 +82,45 @@ int main(void) {
     if (result.status != FY_STD_WINDOWS_FILE_OK_V0 || file.open != UINT8_C(1)) return 1;
     result = fy_std_windows_file_write_all_v0(&file, payload, sizeof payload);
     if (result.status != FY_STD_WINDOWS_FILE_OK_V0 || result.count != sizeof payload) return 2;
+    struct fy_std_windows_file_position_result_v0 position =
+        fy_std_windows_file_position_v0(&file);
+    if (position.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        position.position != (uint64_t)sizeof payload) return 18;
+    position = fy_std_windows_file_seek_start_v0(&file, UINT64_MAX);
+    if (position.status != FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0 ||
+        position.os_code != (uint32_t)ERROR_SUCCESS || position.position != UINT64_C(0)) return 19;
+    position = fy_std_windows_file_position_v0(&file);
+    if (position.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        position.position != (uint64_t)sizeof payload) return 20;
+    position = fy_std_windows_file_seek_start_v0(&file, UINT64_C(5));
+    if (position.status != FY_STD_WINDOWS_FILE_OK_V0 || position.position != UINT64_C(5)) return 21;
+    position = fy_std_windows_file_position_v0(&file);
+    if (position.status != FY_STD_WINDOWS_FILE_OK_V0 || position.position != UINT64_C(5)) return 22;
+    position = fy_std_windows_file_seek_start_v0(&file, UINT64_C(0));
+    if (position.status != FY_STD_WINDOWS_FILE_OK_V0 || position.position != UINT64_C(0)) return 23;
     if (fy_std_windows_file_sync_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 3;
     if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0 ||
         !fy_std_windows_file_closed_v0(&file)) return 4;
+    if (fy_std_windows_file_position_v0(&file).status != FY_STD_WINDOWS_FILE_CLOSED_V0) return 24;
+    if (fy_std_windows_file_seek_start_v0(&file, UINT64_C(0)).status !=
+        FY_STD_WINDOWS_FILE_CLOSED_V0) return 25;
     if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_CLOSED_V0) return 5;
 
     result = fy_std_windows_file_open_v0(path, &read_options, &file);
     if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 6;
+    position = fy_std_windows_file_position_v0(&file);
+    if (position.status != FY_STD_WINDOWS_FILE_OK_V0 || position.position != UINT64_C(0)) return 26;
+    position = fy_std_windows_file_seek_start_v0(&file, UINT64_C(5));
+    if (position.status != FY_STD_WINDOWS_FILE_OK_V0 || position.position != UINT64_C(5)) return 27;
+    uint8_t tail[4] = {0};
+    result = fy_std_windows_file_read_v0(&file, tail, sizeof tail);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 || result.count != sizeof tail ||
+        memcmp(tail, payload + 5, sizeof tail) != 0) return 28;
+    position = fy_std_windows_file_position_v0(&file);
+    if (position.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        position.position != (uint64_t)sizeof payload) return 29;
+    position = fy_std_windows_file_seek_start_v0(&file, UINT64_C(0));
+    if (position.status != FY_STD_WINDOWS_FILE_OK_V0 || position.position != UINT64_C(0)) return 30;
     uint8_t received[sizeof payload] = {0};
     size_t total = 0;
     while (total < sizeof received) {

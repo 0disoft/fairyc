@@ -241,15 +241,19 @@ safe SDK wrapper and package integration are proved separately by Go tests and t
 workspace smoke; ADR 0214 records the corresponding Linux hosted execution.
 
 The Windows File probe keeps its production component in a separate translation unit and executes
-both local MSVC profiles. It creates and truncates a file, writes all nine bytes, syncs, consumes
-close, rejects repeated close, reopens, reads in three-byte chunks, observes EOF, and compares the
-bytes. It then steals and closes the underlying handle so explicit close must return
+both local MSVC profiles. It creates and truncates a file, writes all nine bytes, observes the
+cursor, rejects an overflowing absolute seek without moving it, seeks to byte 5 and back to zero,
+syncs, consumes close, rejects repeated close, reopens, seeks and reads the final four bytes, returns
+to zero, reads in three-byte chunks, observes EOF, and compares the bytes. It then steals and closes
+the underlying handle so explicit close must return
 `ERROR_INVALID_HANDLE` while still normalizing ownership, and finally checks best-effort and
 repeated drop. Both objects, the linked PE, and its unwind records must pass the same structural
 inspectors before execution. A distinct two-module FY example then exercises typed open errors,
-  safe resource borrows and `read(ref mut u8[])` over a fixed array, write/sync/read/EOF, consuming close, and implicit drop at
-both profiles. ADR 0264 promotes that exact Windows slice to compiler-bundled public `std::fs` while
-portable paths, Linux public linkage, general mutable buffers, and hosted evidence remain open.
+safe resource borrows and `read(ref mut u8[])` over a fixed array, write/position/absolute-seek,
+sync/read/EOF, consuming close, and implicit drop at both profiles. ADR 0264 promotes the ownership
+and I/O slice to compiler-bundled public `std::fs`; ADR 0269 adds the positioning path with a second
+public SDK quickstart proof. Portable paths, relative/end-based seek, Linux public linkage, general
+mutable buffers, and hosted evidence remain open.
 
 The standard-library product-build smoke is distinct from source-call companion probes. Its `.fy`
 source calls the real empty-input UTF-8 predicate without companion C, so success requires emitted

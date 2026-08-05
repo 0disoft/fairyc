@@ -450,7 +450,7 @@ func TestWindowsFileSourcesConsumeCloseAndExposePartialIO(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, required := range []string{
-		"CreateFileW", "ReadFile", "WriteFile", "FlushFileBuffers", "CloseHandle",
+		"CreateFileW", "ReadFile", "WriteFile", "SetFilePointerEx", "FILE_BEGIN", "FILE_CURRENT", "FlushFileBuffers", "CloseHandle",
 		"FY_STD_WINDOWS_FILE_PATH_ENCODING_V0", "FY_STD_WINDOWS_FILE_PATH_TOO_LONG_V0",
 		"static struct fy_std_windows_file_result_v0 fy_std_windows_file_write_v0(",
 		"memcpy(file, storage, sizeof *file)", "memcpy(storage, file, sizeof *file)",
@@ -463,6 +463,8 @@ func TestWindowsFileSourcesConsumeCloseAndExposePartialIO(t *testing.T) {
 	}
 	for _, required := range []string{
 		"result.os_code != (uint32_t)ERROR_INVALID_HANDLE",
+		"fy_std_windows_file_seek_start_v0(&file, UINT64_MAX)",
+		"fy_std_windows_file_position_v0(&file)",
 		"fy_std_windows_file_read_v0(&file, received + total, requested)",
 		"fy_std_windows_file_drop_v0(&file)",
 	} {
@@ -480,6 +482,7 @@ func TestWindowsMSVCSourceForSymbolsSelectsOnlyWindowsFile(t *testing.T) {
 	}
 	for _, required := range []string{
 		"fy_std_windows_file_open_v0", "fy_std_windows_file_read_v0",
+		"fy_std_windows_file_position_v0", "fy_std_windows_file_seek_start_v0",
 		"fy_std_windows_file_write_all_v0", "fy_std_windows_file_sync_v0",
 		"fy_std_windows_file_close_v0", "fy_std_windows_file_drop_v0",
 	} {
