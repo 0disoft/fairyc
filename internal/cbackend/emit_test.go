@@ -2194,22 +2194,45 @@ fn i32 main() {
 	}
 }
 
-func TestEmitStillRejectsOptionWithEnumPayload(t *testing.T) {
+func TestEmitOptionWithEnumPayload(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-enum Kind { Unknown; }
-fn i32 main() {
-    let Option<Kind> kind = .some(.Unknown);
+enum Kind { Unknown; Value { i32 amount; }; }
+
+fn Option<Kind> choose(bool present) {
+    return if (present) { .some(.Value { .amount = 20 }) } else { .none };
+}
+
+fn i32 score(Option<Kind> kind) {
     return switch (kind) {
-        case .some(_) : { 42 }
-        case .none : { 0 }
+        case .some(value) : { switch (value) {
+            case .Unknown : { 0 }
+            case .Value { .amount = amount } : { amount }
+        } }
+        case .none : { 22 }
     };
 }
+
+fn i32 main() {
+    return score(choose(true)) + score(choose(false));
+}
 `)
-	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
-	var capability cbackend.CapabilityError
-	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "Option construction type") {
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("interpreter = %+v, %v", outcome, err)
+	}
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
 		t.Fatalf("Emit() error = %v", err)
+	}
+	wantFeatures := []string{"checked-arithmetic", "copy-option", "inert-enum", "scalar-call", "scalar-control-flow", "trap"}
+	if !slices.Equal(unit.Features, wantFeatures) {
+		t.Fatalf("Emit() features = %v, want %v", unit.Features, wantFeatures)
+	}
+	for _, required := range []string{"#include <stddef.h>", "fy_enum_0 p_0;", "FY_OPTION_NONE", "FY_OPTION_SOME", "_Static_assert(sizeof(fy_tagged_0)"} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q", required)
+		}
 	}
 }
 

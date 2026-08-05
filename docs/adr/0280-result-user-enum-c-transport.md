@@ -47,14 +47,15 @@ to model the existing private union representation directly.
   exhaustive enum under SDK `0.0.0-stage0.25`.
 - The private enum union can be larger than its active variant, as ordinary C union layout requires,
   while inactive Result payload fields remain aggregate-zero-initialized.
-- General nested tags, user-enum Option payloads, recursive enums, and resource-bearing user enums
-  remain outside the admitted C subset.
+- ADR 0283 later admits restricted user enums inside `Option`; general nested tags, recursive enums,
+  and resource-bearing user enums remain outside the admitted C subset.
 
 ## Evidence
 
 - `internal/layout/layout.go` owns target-independent union size, alignment, and offset calculation.
 - `internal/cbackend/emit.go` computes and asserts private user-enum layout.
-- `internal/cbackend/tagged_types.go` admits only Result-contained user enums.
+- `internal/cbackend/tagged_types.go` admitted only Result-contained user enums at this decision;
+  ADR 0283 later extends the same classifier to Option.
 - `spec/fixtures/c-emission/cases/pass/copy-result-enum-success/src/main.fy` covers interpreter and
   deterministic source-to-C behavior for success and failure branches.
 - `fairyc_windows_host_smoke` compiles, links, inspects, and executes the generated C at low and

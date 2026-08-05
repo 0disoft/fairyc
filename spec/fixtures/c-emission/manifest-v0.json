@@ -132,6 +132,22 @@
       }
     },
     {
+      "id": "pass.c-emission.copy-option-enum",
+      "sourceRoot": "cases/pass/copy-option-enum/src",
+      "sources": ["main.fy"],
+      "entry": "main::main",
+      "expect": {
+        "status": "pass",
+        "completedThrough": "c-emission",
+        "outcome": "return",
+        "value": 42,
+        "target": "x86_64-linux-gnu",
+        "dialect": "c11",
+        "functions": ["main::choose", "main::main", "main::score"],
+        "features": ["checked-arithmetic", "copy-option", "inert-enum", "scalar-call", "scalar-control-flow", "trap"]
+      }
+    },
+    {
       "id": "pass.c-emission.scalar-control-call",
       "sourceRoot": "cases/pass/scalar-control-call/src",
       "sources": ["main.fy"],

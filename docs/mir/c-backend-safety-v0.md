@@ -132,9 +132,9 @@ type. This opens no foreign safe-borrow ABI and does not permit pointer retentio
 transfer.
 
 Generic `Option` and `Result` values are accepted when each payload is a canonical Fairy copy scalar
-(`bool`, `u8`, `i32`, `u32`, or `usize`), an admitted inert struct, a direct admitted resource, or an
-admitted safe borrow. `Result` additionally accepts restricted inert user-enum payloads; the enum's
-private tag-plus-union representation and the outer Result record are both computed by the target
+(`bool`, `u8`, `i32`, `u32`, or `usize`), an admitted inert struct, a restricted inert user enum, a
+direct admitted resource, or an admitted safe borrow. A user enum's
+private tag-plus-union representation and the outer built-in tagged record are both computed by the target
 layout engine and guarded by generated C size, alignment, and offset assertions. Scalar,
 inert-struct, resource, and fixed-array borrows use pointer transport;
 `ref str` retains its bounded data-and-length view transport.
@@ -158,7 +158,7 @@ placement.
 
 The emitter rejects empty, nested-struct/array/C-scalar/Region/nested-resource or partially
 initialized resources, and nonempty drops without verifier-matched glue;
-nested tags, user-enum `Option` payloads, array/raw-pointer/C-scalar tagged payloads, nested or
+nested tags, array/raw-pointer/C-scalar tagged payloads, nested or
 resource-bearing user enums, and other tagged payload
 combinations; returning a safe borrow through the C function boundary;
 safe-borrow operations other than exact verified local borrowing and dereference, array-view construction, owner-bound text
@@ -169,7 +169,7 @@ standard-library lowering; malformed
 destinations; and non-canonical block shapes. Empty-drop discharge produces no invented cleanup
 call. Nonempty direct and admitted active tagged payloads invoke verified private glue before field
 cleanup. This is private transport, not public Fairy ABI.
-`spec/fixtures/c-emission/manifest-v0.json` currently proves 40 source-to-emission cases and
+`spec/fixtures/c-emission/manifest-v0.json` currently proves 41 source-to-emission cases and
 repeated byte identity. No C parser, compiler, object writer, assembler, linker, executable,
 sanitizer, layout probe, or ABI probe runs in that fixture lane.
 

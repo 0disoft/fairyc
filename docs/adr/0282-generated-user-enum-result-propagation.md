@@ -45,8 +45,8 @@ compilation, linking, and execution at both Windows optimization levels.
   integer code or target-specific constant.
 - Enum-only and generic-tag-only generated units no longer depend on an unrelated aggregate to make
   `offsetof` available.
-- User-enum Option payloads, nested enums, resource-bearing user enums, and mismatched propagation
-  error types remain outside the admitted boundary.
+- ADR 0283 later admits restricted user enums inside `Option`; nested enums, resource-bearing user
+  enums, and mismatched propagation error types remain outside the admitted boundary.
 - The Windows smoke source constants move to a focused Go file so this proof does not add another
   full embedded Fairy program to the existing oversized runner entry file.
 

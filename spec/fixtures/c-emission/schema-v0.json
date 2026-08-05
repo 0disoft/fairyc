@@ -47,6 +47,7 @@
         "checked-arithmetic",
         "checked-division",
         "checked-shift",
+        "copy-option",
         "copy-result",
         "flat-copy-resource",
         "flat-i32-resource",

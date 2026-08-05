@@ -37,7 +37,7 @@ func prepareTaggedTypes(
 	candidates := make(map[hir.Type]taggedCType)
 	consider := func(value hir.Type) {
 		if element, option := hir.OptionElement(value); option {
-			if isOptionI32(value) || !supportedTaggedPayload(element, false, structByType, enumByType, resourceByType, arrayByType) {
+			if isOptionI32(value) || !supportedTaggedPayload(element, true, structByType, enumByType, resourceByType, arrayByType) {
 				return
 			}
 			_, needsDrop := resourceByType[element]
