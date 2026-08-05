@@ -150,6 +150,17 @@ Compilation/capability failure emits no report;
 an external writer may still accept a report prefix before returning code `4`. Ordinary lock
 maintenance can precede later failure, while `--locked` is the no-write form.
 
+`fairyc test --list [--locked]` buffers one `test <module>::<function>` line per admitted test in
+canonical order, followed by `test list: <count> discovered; lock
+<updated|unchanged|verified>`. Zero tests emit only the final line. Listing performs the complete
+test-overlay compiler admission but executes no test, backend, toolchain, or subprocess and writes
+no artifact. Success uses code `0`; incompatible or duplicate flags and compiler capability
+rejection use code `2`; source and `E9001` diagnostics use code `3`; internal and writer failures
+use code `4`; workspace, test-source, graph, and lock failures use code `7`. Codes `5` and `6` are
+unreachable because listing has no language-test or native-build outcome. Compilation failure emits
+no list report; ordinary lock maintenance may already have completed, while `--locked` writes
+nothing.
+
 `experimental parse` writes one `fairyc.experimental.parse/v0` JSON document, defined by
 `spec/cli/experimental-parse-v0.schema.json`, to stdout even when source diagnostics exist.
 `experimental check-syntax` writes human diagnostics to stderr and does not emit a machine result.

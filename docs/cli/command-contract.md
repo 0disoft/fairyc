@@ -541,7 +541,7 @@ execution, a nonzero program status, or a program trap follows. `--locked` perfo
 compiler-output write failure after program execution returns code 4 but cannot undo earlier bytes
 or program effects; no executable is retained.
 
-## Stable workspace test v3
+## Stable workspace test v4
 
 `fairyc test [--native [--release]] [--exact <test-identity>]... [--locked]` first loads and locks the ordinary production workspace, then overlays only
 the root package's optional exact-lowercase `tests/` tree in memory. Ordinary check, build, run,
@@ -568,6 +568,14 @@ values, and identities absent from the complete discovered set are code-2 invoca
 report. Selection happens after test declaration validation and limits execution only: syntax,
 semantic, Flow, MIR, and verifier admission still cover the complete test overlay.
 
+`fairyc test --list [--locked]` is a separate discovery mode and does not combine with `--native`,
+`--release`, or `--exact`. It retains the complete overlay's syntax, declaration, semantic, Flow,
+MIR, and verifier admission, then emits `test <identity>` in canonical order without invoking the
+interpreter, backend, MSVC, PE inspector, or a test process. Its final line is
+`test list: <count> discovered; lock <updated|unchanged|verified>`. Zero tests emit only that line.
+Listing succeeds with code 0, shares source/package/internal/output failure classifications, and
+cannot produce execution trap code 5 or native build code 6.
+
 Completed lines are `test <identity> ... ok` or
 `test <identity> ... FAILED (<trap-category>)`. The final line is
 `test result: <ok|FAILED>. <passed> passed; <failed> failed; lock <updated|unchanged|verified>`.
@@ -589,6 +597,7 @@ failure, while `--locked` writes nothing.
 | `fairyc build [--release] [--locked]` | Build or replace the current root package's one Windows executable | Yes |
 | `fairyc run [--release] [--locked] [-- <program-args...>]` | Build and run the current workspace as one temporary Windows image, forwarding arguments after `--` to the program | Yes |
 | `fairyc test [--native [--release]] [--exact <test-identity>]... [--locked]` | Run all or exact canonical root-package `@test fn void` entries through the semantic interpreter or one temporary Windows MSVC image per selected test | Optional temporary native images |
+| `fairyc test --list [--locked]` | Compile-admit the complete root-package test overlay and list canonical exact-selector identities without execution | No |
 | `fairyc emit c --target <target-id> [--locked]` | Emit the current executable workspace's target-selected C11 application unit | C only, stdout |
 | `fairyc explain <diagnostic-code>` | Explain a stable diagnostic code | No |
 | `fairyc targets` | Report known target profiles, status, evidence, and unavailable requirements | No |

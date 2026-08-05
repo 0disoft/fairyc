@@ -868,7 +868,9 @@ but appends one private verified i32 harness per test, compiles its reachable cl
 inspected temporary Windows MSVC image, and runs every test in a fresh process and directory. Test
 traps continue to later tests in either engine. ADR 0267 adds repeatable exact canonical test-
 identity selection to both engines without hiding syntax or compiler failures in the complete
-overlay. Member recursion, fuzzy/tag/file filters, setup/teardown, portable native targets, program
+overlay. ADR 0268 adds `fairyc test --list [--locked]`, which exposes those same canonical
+identities after complete compiler admission without executing a test or target toolchain. Member
+recursion, fuzzy/tag/file filters, setup/teardown, portable native targets, program
 streams, benchmarks, host-environment policy, and machine output remain separate contracts.
 
 ADR 0146 rejects speculative persistent caching at this point. ADR 0149 supplies deterministic,

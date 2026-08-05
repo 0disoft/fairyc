@@ -650,6 +650,13 @@ language, SDK, runtime ABI, manifest, and package/interface identities remain un
 substring, prefix, glob, regex, tag, file, line, skip, ignore, or random-order compatibility is
 implied.
 
+ADR 0268 adds the separate `fairyc test --list [--locked]` discovery mode. It reuses the canonical
+identity and complete compiler-admission boundary, emits deterministic `test <identity>` lines plus
+one count/lock summary, and rejects combination with execution or exact-selection flags. Existing
+test execution bytes and statuses remain unchanged. The mode adds no language, SDK, runtime ABI,
+manifest, lockfile, package, interface, target, or generated-code version change; machine-readable
+listing and additional discovery semantics are not implied.
+
 ADR 0204 stabilizes `fairyc new <package-name> --uid <package-uid>`, its explicit non-derived UID,
 single direct-child destination, exact four-file starter, no-overwrite behavior, absence of an
 initial lockfile, success line, and codes 0, 2, 4, and 7. Adding templates, flags, merge behavior, an

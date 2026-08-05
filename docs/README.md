@@ -79,7 +79,7 @@
 - Stable diagnostic explanation v1: internal/cli/run.go, internal/diagnostic/catalog.go, docs/adr/0178-stable-diagnostic-explain-v1.md
 - Stable target maturity report v1: internal/cli/target.go, internal/target/spec.go, docs/adr/0179-stable-target-maturity-report-v1.md
 - Stable workspace C emission v1: internal/cli/workspace_emit.go, internal/cbackend/, docs/adr/0180-stable-workspace-c-emission-v1.md
-- Stable isolated workspace semantic and Windows native tests with exact selection: internal/workspaceloader/test_sources.go, internal/cli/workspace_tests.go, internal/cli/workspace_native_tests.go, internal/interpreter/, internal/cbackend/, internal/cdriver/, docs/adr/0181-stable-workspace-semantic-test-v1.md, docs/adr/0265-stable-isolated-windows-native-tests.md, docs/adr/0267-stable-exact-test-selection.md
+- Stable isolated workspace semantic and Windows native tests with identity listing and exact selection: internal/workspaceloader/test_sources.go, internal/cli/workspace_tests.go, internal/cli/workspace_native_tests.go, internal/interpreter/, internal/cbackend/, internal/cdriver/, docs/adr/0181-stable-workspace-semantic-test-v1.md, docs/adr/0265-stable-isolated-windows-native-tests.md, docs/adr/0267-stable-exact-test-selection.md, docs/adr/0268-stable-test-identity-listing.md
 - Package-aware Windows quickstart: examples/workspace_quickstart/
 - Windows MSVC layout fixture manifest: spec/fixtures/layout/manifest-windows-msvc-v0.json
 - Windows MSVC C ABI fixture manifest: spec/fixtures/c-abi/manifest-windows-msvc-v0.json

@@ -147,8 +147,12 @@ func TestStableWorkspaceTestHandlesZeroTestsInvocationAndOutputFailure(t *testin
 	if code != ExitSuccess || stdout != "test result: ok. 0 passed; 0 failed; lock updated\n" || stderr != "" {
 		t.Fatalf("zero tests = (%d, %q, %q)", code, stdout, stderr)
 	}
+	code, stdout, stderr = runForTest([]string{"test", "--list", "--locked"}, root)
+	if code != ExitSuccess || stdout != "test list: 0 discovered; lock verified\n" || stderr != "" {
+		t.Fatalf("zero test list = (%d, %q, %q)", code, stdout, stderr)
+	}
 	var outputError bytes.Buffer
-	code = Run([]string{"test", "--locked"}, root, failingWriter{}, &outputError)
+	code = Run([]string{"test", "--list", "--locked"}, root, failingWriter{}, &outputError)
 	if code != ExitInternalFailure || !strings.Contains(outputError.String(), "write output failed") {
 		t.Fatalf("output failure = (%d, %q)", code, outputError.String())
 	}
@@ -156,6 +160,10 @@ func TestStableWorkspaceTestHandlesZeroTestsInvocationAndOutputFailure(t *testin
 		{"test", "--release"},
 		{"test", "--locked", "--locked"},
 		{"test", "--native", "--native"},
+		{"test", "--list", "--list"},
+		{"test", "--list", "--native"},
+		{"test", "--list", "--release"},
+		{"test", "--list", "--exact", "tests::missing::test"},
 		{"test", "--exact"},
 		{"test", "--exact", "tests::missing::test", "--exact", "tests::missing::test"},
 	} {
@@ -163,6 +171,38 @@ func TestStableWorkspaceTestHandlesZeroTestsInvocationAndOutputFailure(t *testin
 		if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, `command "test"`) {
 			t.Fatalf("invalid invocation %v = (%d, %q, %q)", arguments, code, stdout, stderr)
 		}
+	}
+}
+
+func TestStableWorkspaceTestListsCanonicalIdentitiesWithoutExecution(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeStableTestWorkspace(t, root)
+	writeWorkspaceFile(t, root, "tests/list.fy", `module tests::list;
+@test
+fn void zeta_traps_if_run() { assert(false); }
+@test
+fn void alpha_passes() { assert(true); }
+`)
+
+	code, stdout, stderr := runForTest([]string{"test", "--list"}, root)
+	want := "test tests::list::alpha_passes\n" +
+		"test tests::list::zeta_traps_if_run\n" +
+		"test list: 2 discovered; lock updated\n"
+	if code != ExitSuccess || stdout != want || stderr != "" {
+		t.Fatalf("test list = (%d, %q, %q), want stdout %q", code, stdout, stderr, want)
+	}
+	if matches, err := filepath.Glob(filepath.Join(root, "build", "*")); err != nil || len(matches) != 0 {
+		t.Fatalf("test list build artifacts = %v, %v", matches, err)
+	}
+
+	writeWorkspaceFile(t, root, "tests/broken.fy", `module tests::broken;
+@test
+fn void broken() { missing(); }
+`)
+	code, stdout, stderr = runForTest([]string{"test", "--list", "--locked"}, root)
+	if code != ExitSourceDiagnostics || stdout != "" || !strings.Contains(stderr, "tests/broken.fy") {
+		t.Fatalf("test list semantic failure = (%d, %q, %q)", code, stdout, stderr)
 	}
 }
 

@@ -23,6 +23,7 @@ type stableTestOptions struct {
 	locked  bool
 	native  bool
 	release bool
+	list    bool
 	exact   []string
 }
 
@@ -98,6 +99,9 @@ func runStableTest(arguments []string, sourceRoot string, stdout, stderr io.Writ
 	if !checked.Verified {
 		return internalError(stderr)
 	}
+	if options.list {
+		return writeStableTestList(tests, lockState, stdout, stderr)
+	}
 
 	var outcomes []workspaceTestOutcome
 	if options.native {
@@ -172,9 +176,21 @@ func writeStableTestReport(outcomes []workspaceTestOutcome, lockState string, st
 	return ExitSuccess
 }
 
+func writeStableTestList(tests []workspaceTest, lockState string, stdout, stderr io.Writer) int {
+	var report strings.Builder
+	for _, test := range tests {
+		fmt.Fprintf(&report, "test %s\n", test.display)
+	}
+	fmt.Fprintf(&report, "test list: %d discovered; lock %s\n", len(tests), lockState)
+	if _, err := io.WriteString(stdout, report.String()); err != nil {
+		return outputError(stderr)
+	}
+	return ExitSuccess
+}
+
 func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 	options := stableTestOptions{}
-	seen := make(map[string]bool, 3)
+	seen := make(map[string]bool, 4)
 	exact := make(map[string]bool)
 	for index := 0; index < len(arguments); index++ {
 		argument := arguments[index]
@@ -191,8 +207,8 @@ func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 			index++
 			continue
 		}
-		if argument != "--locked" && argument != "--native" && argument != "--release" {
-			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --native, --release, --exact <test-identity>, and --locked`)
+		if argument != "--locked" && argument != "--native" && argument != "--release" && argument != "--list" {
+			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --list, --native, --release, --exact <test-identity>, and --locked`)
 		}
 		if seen[argument] {
 			return stableTestOptions{}, fmt.Errorf(`command "test" received %s more than once`, argument)
@@ -205,7 +221,12 @@ func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 			options.native = true
 		case "--release":
 			options.release = true
+		case "--list":
+			options.list = true
 		}
+	}
+	if options.list && (options.native || options.release || len(options.exact) != 0) {
+		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --list with --native, --release, or --exact`)
 	}
 	if options.release && !options.native {
 		return stableTestOptions{}, fmt.Errorf(`command "test" requires --native when --release is supplied`)

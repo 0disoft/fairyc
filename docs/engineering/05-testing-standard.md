@@ -51,10 +51,13 @@ and ephemeral digest behavior; declaration tests own `E9001`; compiler tests own
 admission; interpreter tests own fresh zero-argument `void` execution, comparison result typing,
 trap categories, and entry rejection; CLI tests own canonical ordering, continued execution after a
 trap, lock behavior, report grammar, exit codes, output failure, zero-test success, and absence of
-retained build artifacts. Native harness tests additionally require a collision-free private symbol,
+retained build artifacts. Listing tests separately require canonical identity output, no execution,
+complete-overlay compiler admission, incompatible-option rejection, zero-test output, and writer
+failure. Native harness tests additionally require a collision-free private symbol,
 MIR re-verification, one reachable i32 C entry, preserved order, and continuation after an exact trap
 receipt. The standalone Windows smoke runs the checked-in semantic test, an actual failing-then-
-passing native pair selected by reverse-ordered exact identities, and the checked-in exact selected
+passing native pair selected by reverse-ordered exact identities, the checked-in compiler-admitted
+test list, and the checked-in exact selected
 native test at low and optimized profiles through a
 separately built compiler; each native image passes PE and unwind inspection before execution.
 Target-description tests separately cover structural validation, power-of-two layouts, closed and

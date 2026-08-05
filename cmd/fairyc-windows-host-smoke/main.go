@@ -2008,6 +2008,7 @@ func runStandaloneCompiler(
 		!strings.Contains(helpStdout, "fairyc build [--release] [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc run [--release] [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc test [--native [--release]] [--exact <test-identity>]... [--locked]") ||
+		!strings.Contains(helpStdout, "fairyc test --list [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc emit c --target <target-id> [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc experimental run-target") ||
 		!strings.Contains(helpStdout, "fairyc experimental exec-target") ||
@@ -2091,6 +2092,20 @@ fn void second_passes() { assert(true); }
 `
 	if err := os.WriteFile(filepath.Join(starterRoot, "tests", "main.fy"), []byte(starterNativeTestSource), 0o600); err != nil {
 		return 0, fmt.Errorf("write standalone compiler native trap-isolation test: %w", err)
+	}
+	starterListCode, starterListStdout, starterListStderr, err := runStandaloneCommand(
+		starterRoot,
+		executablePath,
+		"test", "--list", "--locked",
+	)
+	if err != nil {
+		return 0, fmt.Errorf("execute standalone compiler generated starter test list: %w", err)
+	}
+	wantStarterList := "test tests::main::first_fails\n" +
+		"test tests::main::second_passes\n" +
+		"test list: 2 discovered; lock verified\n"
+	if starterListCode != cli.ExitSuccess || starterListStderr != "" || starterListStdout != wantStarterList {
+		return 0, fmt.Errorf("standalone compiler starter test list returned code %d, stdout %q, stderr %q", starterListCode, starterListStdout, starterListStderr)
 	}
 	starterNativeCode, starterNativeStdout, starterNativeStderr, err := runStandaloneCommand(
 		starterRoot,

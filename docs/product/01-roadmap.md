@@ -716,7 +716,8 @@ quarantines, without selecting a default policy or making a speed claim.
   TargetSpec data lifecycle. Keep target-explicit `fairyc emit c --target <target-id> [--locked]`
   separate from private generated-C bytes and support units. Keep implemented semantic-by-default
   and explicit Windows-native `fairyc test [--native [--release]] [--exact <test-identity>]... [--locked]`
-  with canonical exact selection separate from workspace-member recursion, fuzzy/tag/file filters,
+  plus compiler-admitted `fairyc test --list [--locked]` discovery with canonical exact selection
+  separate from workspace-member recursion, fuzzy/tag/file filters,
   shared fixtures, portable targets, program streams,
   benchmarks, and host-environment policy.
 - Move to function-level reuse only when measured package rebuild or storage evidence justifies the complexity.
@@ -772,6 +773,12 @@ automatic drop. The checked-in safe quickstart executes invalid-path failure, wr
 explicit close, and implicit-drop reopen under development and optimized MSVC. Portable Unicode
 paths, Linux public linkage, seek, metadata, directories, removal, and a supported Windows target
 remain later gates.
+
+ADR 0268 closes the discovery side of exact test selection with
+`fairyc test --list [--locked]`. The command compiler-admits the complete root test overlay and
+prints canonical identities without running the interpreter, backend, toolchain, or a test process.
+Machine-readable listing, workspace-member recursion, source locations, metadata, fuzzy matching,
+tags, and file selection remain later decisions.
 
 ADR 0216 cuts the exact language pin to `fairyc-language/2` and adds statement-only checked integer
 compound assignment. All ten arithmetic, division, remainder, shift, and bitwise forms reuse the

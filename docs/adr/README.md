@@ -277,6 +277,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0265-stable-isolated-windows-native-tests.md`: extends stable `fairyc test` with explicit low/optimized Windows MSVC execution, one verified private harness and temporary PE per test, exact trap continuation, closed linkage, unchanged reports, and no retained artifacts.
 - `0266-starter-guide-native-test-v4.md`: updates only the generated starter README to distinguish fast semantic testing from explicit isolated Windows native testing while preserving the exact five-file source, identity, and no-overwrite contract.
 - `0267-stable-exact-test-selection.md`: makes canonical test identities repeatable exact CLI selectors for semantic and native execution, preserving canonical report order and full-overlay validation while reducing unrelated native builds.
+- `0268-stable-test-identity-listing.md`: adds a compiler-admitted, execution-free stable listing mode for discovering the canonical identities accepted by exact semantic and native test selection.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 
