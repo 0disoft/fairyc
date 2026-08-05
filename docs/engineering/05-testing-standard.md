@@ -252,13 +252,14 @@ still normalizes ownership, and finally checks best-effort and
 repeated drop. Both objects, the linked PE, and its unwind records must pass the same structural
 inspectors before execution. A distinct two-module FY example then exercises typed open errors,
 safe resource borrows and `read(ref mut u8[])` over a fixed array, shared size observation,
-write/position/absolute-seek, open-or-create creation/preservation, exclusive create/collision/unchanged reopen, existing-file read/write update, cursor-preserving length change,
+write/position/absolute-seek, open-or-create creation/preservation, exclusive create/collision/unchanged reopen, seek-resistant append, existing-file read/write update, cursor-preserving length change,
 sync/read/EOF, consuming close, and implicit drop at both profiles.
 ADR 0264 promotes the ownership and I/O slice to compiler-bundled public `std::fs`; ADRs 0269 and
 0270 add positioning and size, ADR 0271 adds update-open, ADR 0272 adds length change, ADR 0274
 adds non-truncating open-or-create, and ADR 0275 adds exclusive create with exact collision and
-unchanged-reopen evidence in the same raw and public generated-Fairy proofs. Portable paths,
-relative/end-based seek, Linux public linkage, general
+unchanged-reopen evidence in the same raw and public generated-Fairy proofs. ADR 0276 adds
+missing-file append creation and repeated exact EOF writes after explicit repositioning. Portable
+paths, relative/end-based seek, Linux public linkage, general
 mutable buffers, and hosted evidence remain open.
 
 The standard-library product-build smoke is distinct from source-call companion probes. Its `.fy`

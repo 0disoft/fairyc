@@ -604,7 +604,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
-  The compiler-bundled SDK `0.0.0-stage0.20` exposes
+  The compiler-bundled SDK `0.0.0-stage0.21` exposes
   `std::io::write(ref str) -> Result<usize, ConsoleError>` and a matching `write_stderr` operation
   for text, plus `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` for exact binary output.
   All four declare `console`, keep raw pointers and target linkage private, append no newline,
@@ -661,7 +661,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   `text::copy` remains the copy-required borrowed-text path.
   ADR 0264 additionally exposes the Windows MSVC `std::fs` slice. `File` is move-only, carries
   `filesystem` cleanup authority, and is constructed only through `create_truncate(ref CStr)`,
-  `create_new(ref CStr)`, `open_or_create(ref CStr)`, `open_read(ref CStr)`, or
+  `create_new(ref CStr)`, `open_or_create(ref CStr)`, `open_append(ref CStr)`,
+  `open_read(ref CStr)`, or
   `open_update(ref CStr)`. The update
   constructor opens only an existing file with read/write access, does not create or truncate it,
   and starts at byte zero. The open-or-create constructor atomically opens or creates through one
@@ -669,6 +670,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   The create-new constructor atomically creates only a missing path as an empty write-only file at
   byte zero; an existing path returns status `1`, Windows code `80`, and completed bytes `0`
   without changing that file.
+  The append constructor creates a missing file or preserves an existing file, grants write-only
+  `FILE_APPEND_DATA`, and makes every underlying write begin at the then-current EOF regardless of
+  a caller-selected position. `write_all` may contain multiple underlying writes and is not a
+  transactional record append. The current share policy does not admit a concurrent writer.
   `read(ref mut File, ref mut u8[])` returns one exact partial count including
   zero at EOF; `write_all`, explicit `sync`, consuming `close`, and automatic drop preserve the
   closed target component's ownership rules. `position(ref mut File)` observes the absolute byte
@@ -680,7 +685,8 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   have unspecified contents until explicitly written. `FileError` exposes
   stable status, Windows OS code, and completed-byte accessors. The checked-in safe quickstart
   executes invalid-path and missing-update failure, missing-file open-or-create plus preserving
-  second open, exclusive create plus exact collision and unchanged reopen, write/read/EOF,
+  second open, exclusive create plus exact collision and unchanged reopen, missing-file append plus
+  repeated seek-resistant exact concatenation, write/read/EOF,
   position/seek including overflow preservation, existing-file in-place
   update, shrink/extend with cursor preservation and explicit rewrite,
   oversized and read-only length-change failures, nonempty and empty size observation, explicit close, and implicit-drop reopen under both Windows
@@ -819,7 +825,7 @@ argument, output, and exit-code contract. It emits no native code.
 
 ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
-version, source digest, and lock fields. SDK `0.0.0-stage0.20` exports ADR 0250's move-only,
+version, source digest, and lock fields. SDK `0.0.0-stage0.21` exports ADR 0250's move-only,
 fallibly created `std::alloc::Arena` with automatic cleanup and exact allocation status,
 while ADR 0251 makes compiler-known placement return `Result<ref T, AllocError>` under language `/8`.
 ADR 0246's public safe `std::bytes::Buffer`,
@@ -828,6 +834,7 @@ ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-
 `std::fs::File` ownership and byte-I/O surface, ADR 0269's absolute position/seek surface, ADR 0270's
 shared file-size observation, ADR 0271's existing-file read/write open, ADR 0272's cursor-preserving
 file-length change, ADR 0274's non-truncating open-or-create, ADR 0275's exclusive create,
+ADR 0276's append-only open,
 ADR 0205's `std::io::write(ref str) -> Result<usize, ConsoleError>`, and ADR 0209's matching
 `write_stderr` operation, ADR 0210's matching immutable byte-view output operations, and ADR 0211's
 `read_stdin(ref mut u8[]) -> Result<usize, ConsoleReadError>`, plus ADR 0215's allocation-free

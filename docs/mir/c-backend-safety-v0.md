@@ -293,8 +293,9 @@ length-generic fixed-array byte view; ADR 0264 publishes that exact Windows slic
 ADR 0269 adds two target-bound absolute-position symbols, ADR 0270 adds one shared size symbol, and
 ADR 0271 reuses the existing open symbol for existing-file read/write access without create or truncate,
 while ADR 0272 adds one target-bound cursor-preserving length-change symbol, ADR 0274 reuses the
-existing open symbol for non-truncating open-or-create, and ADR 0275 reuses it with one
-compiler-private exclusive flag for atomic no-clobber creation,
+existing open symbol for non-truncating open-or-create, ADR 0275 reuses it with one
+compiler-private exclusive flag for atomic no-clobber creation, and ADR 0276 reuses it with one
+compiler-private append flag selecting `FILE_APPEND_DATA`,
 while portable paths, relative/end-based seek, general metadata, Linux public linkage, general
 mutable-buffer operations, retained pointers, and public layout remain outside this boundary.
 The sole nested-pointer exception is exactly source `ptr mut ptr mut void`, so source

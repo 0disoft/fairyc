@@ -500,11 +500,89 @@ fn i32 check_create_new(ref CStr path) {
 }
 
 @effects(filesystem)
+fn i32 append_with_reposition(fs::File input, usize expected_size, ref u8[] bytes) {
+    var fs::File file = input;
+    let i32 size_code = switch (fs::size(ref file)) {
+        case .ok(size) : { if (size == expected_size) { 0 } else { 124 } }
+        case .err(_) : { 125 }
+    };
+    let i32 operation_code = if (size_code != 0) {
+        size_code
+    } else {
+        let i32 seek_code = switch (fs::seek_start(ref mut file, 0)) {
+            case .ok(position) : { if (position == 0) { 0 } else { 126 } }
+            case .err(_) : { 127 }
+        };
+        if (seek_code != 0) {
+            seek_code
+        } else { switch (fs::write_all(ref mut file, bytes)) {
+            case .ok(written) : { if (written == bytes.len) { 0 } else { 128 } }
+            case .err(_) : { 129 }
+        } }
+    };
+    let i32 close_code = switch (fs::close(file)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 130 }
+    };
+    return if (operation_code != 0) { operation_code } else { close_code };
+}
+
+@effects(filesystem)
+fn i32 verify_append_file(fs::File input) {
+    var fs::File file = input;
+    var u8[7] buffer = [0, 0, 0, 0, 0, 0, 0];
+    let i32 operation_code = switch (fs::read(ref mut file, ref mut buffer)) {
+        case .ok(read) : {
+            if (read == 7 &&
+                buffer[0] == 79 && buffer[1] == 110 && buffer[2] == 101 &&
+                buffer[3] == 84 && buffer[4] == 119 && buffer[5] == 111 &&
+                buffer[6] == 33) { 0 } else { 131 }
+        }
+        case .err(_) : { 132 }
+    };
+    let i32 close_code = switch (fs::close(file)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 133 }
+    };
+    return if (operation_code != 0) { operation_code } else { close_code };
+}
+
+@effects(filesystem)
+fn i32 check_append(ref CStr path) {
+    let ref u8[] first = b"One";
+    let ref u8[] second = b"Two";
+    let ref u8[] third = b"!";
+    let i32 first_code = switch (fs::open_append(path)) {
+        case .ok(file) : { append_with_reposition(file, 0, first) }
+        case .err(_) : { 134 }
+    };
+    let i32 second_code = if (first_code != 0) {
+        first_code
+    } else { switch (fs::open_append(path)) {
+        case .ok(file) : { append_with_reposition(file, 3, second) }
+        case .err(_) : { 135 }
+    } };
+    let i32 third_code = if (second_code != 0) {
+        second_code
+    } else { switch (fs::open_append(path)) {
+        case .ok(file) : { append_with_reposition(file, 6, third) }
+        case .err(_) : { 136 }
+    } };
+    return if (third_code != 0) {
+        third_code
+    } else { switch (fs::open_read(path)) {
+        case .ok(file) : { verify_append_file(file) }
+        case .err(_) : { 137 }
+    } };
+}
+
+@effects(filesystem)
 fn i32 main() {
     let ref CStr data_path = c"fairyc-std-fs-data.tmp";
     let ref CStr drop_path = c"fairyc-std-fs-drop.tmp";
     let ref CStr open_or_create_path = c"fairyc-std-fs-open-or-create.tmp";
     let ref CStr create_new_path = c"fairyc-std-fs-create-new.tmp";
+    let ref CStr append_path = c"fairyc-std-fs-append.tmp";
     let i32 invalid_code = check_invalid_path();
     let i32 missing_update_code = check_missing_update();
     let i32 create_code = switch (fs::open_or_create(open_or_create_path)) {
@@ -518,6 +596,7 @@ fn i32 main() {
         case .err(_) : { 109 }
     } };
     let i32 create_new_code = check_create_new(create_new_path);
+    let i32 append_code = check_append(append_path);
     let i32 write_code = switch (fs::create_truncate(data_path)) {
         case .ok(file) : { write_then_close(file) }
         case .err(_) : { 30 }
@@ -530,6 +609,8 @@ fn i32 main() {
         preserve_code
     } else if (create_new_code != 0) {
         create_new_code
+    } else if (append_code != 0) {
+        append_code
     } else if (write_code != 0) {
         write_code
     } else {

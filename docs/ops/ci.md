@@ -230,11 +230,12 @@ at both profiles under both C11 and C17 consumer modes. That is one same-MSVC so
 Fairy FFI. It separately compiles the project-owned
 Windows File implementation and its caller probe, then executes create/write/size/position/absolute-seek/cursor-preserving-length-change,
 overflow rejection with cursor preservation, sync/close/reopen, partial read, EOF, forced close
-failure, exact invalid-handle size reporting, repeated drop, and exclusive-create collision with
-unchanged-byte reopening under both profiles. A separate
+failure, exact invalid-handle size reporting, repeated drop, exclusive-create collision with
+unchanged-byte reopening, and seek-resistant append concatenation under both profiles. A separate
 checked-in FY source pair and the public SDK quickstart execute safe shared size observation,
 write/position/seek, missing-file open-or-create plus preserving reopen, exclusive create plus exact
-existing-path failure and unchanged reopen, existing-file update-open, shrink/extend with explicit rewrite, oversized and
+existing-path failure and unchanged reopen, append creation plus exact EOF concatenation after
+repositioning, existing-file update-open, shrink/extend with explicit rewrite, oversized and
 read-only length failure, exact missing-file rejection, sync/read/EOF, consuming close, and implicit-drop
 release at both profiles. It also compiles the raw owned-text caller and target-specific implementation as
 separate translation units, exercises the failure-preservation and repeated-lifecycle matrix under

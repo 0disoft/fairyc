@@ -28,6 +28,7 @@ struct raw_open_options {
     u8 create;
     u8 truncate;
     u8 exclusive;
+    u8 append;
 }
 
 /// Reports a stable file status, the target OS code, and bytes completed before failure.
@@ -146,6 +147,7 @@ pub fn Result<File, FileError> create_truncate(ref CStr path) {
         .create = 1,
         .truncate = 1,
         .exclusive = 0,
+        .append = 0,
     });
 }
 
@@ -158,6 +160,7 @@ pub fn Result<File, FileError> create_new(ref CStr path) {
         .create = 1,
         .truncate = 0,
         .exclusive = 1,
+        .append = 0,
     });
 }
 
@@ -170,6 +173,21 @@ pub fn Result<File, FileError> open_or_create(ref CStr path) {
         .create = 1,
         .truncate = 0,
         .exclusive = 0,
+        .append = 0,
+    });
+}
+
+/// Opens a write-only append file, creating it when missing.
+/// Every underlying write starts at the then-current end of file.
+@effects(filesystem)
+pub fn Result<File, FileError> open_append(ref CStr path) {
+    return open_with(path, raw_open_options {
+        .read = 0,
+        .write = 1,
+        .create = 1,
+        .truncate = 0,
+        .exclusive = 0,
+        .append = 1,
     });
 }
 
@@ -182,6 +200,7 @@ pub fn Result<File, FileError> open_read(ref CStr path) {
         .create = 0,
         .truncate = 0,
         .exclusive = 0,
+        .append = 0,
     });
 }
 
@@ -194,6 +213,7 @@ pub fn Result<File, FileError> open_update(ref CStr path) {
         .create = 0,
         .truncate = 0,
         .exclusive = 0,
+        .append = 0,
     });
 }
 

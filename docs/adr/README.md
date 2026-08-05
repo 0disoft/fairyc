@@ -285,6 +285,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0273-stable-json-test-identity-listing.md`: adds compact versioned JSON to compiler-admitted stable test discovery without changing text output, execution, language, SDK, runtime ABI, or package contracts.
 - `0274-public-windows-file-open-or-create.md`: exposes atomic non-truncating Windows `std::fs::open_or_create`, proving missing creation and existing-byte preservation under both MSVC profiles with SDK `0.0.0-stage0.19`.
 - `0275-public-windows-file-exclusive-create.md`: exposes atomic no-clobber Windows `std::fs::create_new`, proving exact existing-path failure and unchanged bytes under both MSVC profiles with SDK `0.0.0-stage0.20`.
+- `0276-public-windows-file-append-open.md`: exposes write-only Windows `std::fs::open_append`, proving missing creation and seek-resistant EOF writes under both MSVC profiles with SDK `0.0.0-stage0.21`.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

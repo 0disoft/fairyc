@@ -42,6 +42,7 @@ struct fy_std_windows_open_options_v0 {
     uint8_t create;
     uint8_t truncate;
     uint8_t exclusive;
+    uint8_t append;
 };
 
 struct fy_std_windows_file_result_v0 fy_std_windows_file_open_v0(
@@ -77,13 +78,16 @@ int main(void) {
         UINT8_C(70), UINT8_C(105), UINT8_C(108), UINT8_C(101)
     };
     struct fy_std_windows_open_options_v0 write_options = {
-        UINT8_C(0), UINT8_C(1), UINT8_C(1), UINT8_C(1), UINT8_C(0)
+        UINT8_C(0), UINT8_C(1), UINT8_C(1), UINT8_C(1), UINT8_C(0), UINT8_C(0)
     };
     struct fy_std_windows_open_options_v0 read_options = {
-        UINT8_C(1), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0)
+        UINT8_C(1), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0)
     };
     struct fy_std_windows_open_options_v0 exclusive_options = {
-        UINT8_C(0), UINT8_C(1), UINT8_C(1), UINT8_C(0), UINT8_C(1)
+        UINT8_C(0), UINT8_C(1), UINT8_C(1), UINT8_C(0), UINT8_C(1), UINT8_C(0)
+    };
+    struct fy_std_windows_open_options_v0 append_options = {
+        UINT8_C(0), UINT8_C(1), UINT8_C(1), UINT8_C(0), UINT8_C(0), UINT8_C(1)
     };
     static const uint8_t replacement[] = {
         UINT8_C(67), UINT8_C(111), UINT8_C(100), UINT8_C(101)
@@ -246,5 +250,45 @@ int main(void) {
         memcmp(exclusive_received, exclusive_payload, sizeof exclusive_payload) != 0) return 55;
     if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 56;
     if (!DeleteFileW(L"fairyc-windows-file-create-new-probe.tmp")) return 57;
+
+    static const uint8_t append_path[] = "fairyc-windows-file-append-probe.tmp";
+    static const uint8_t append_first[] = {
+        UINT8_C(79), UINT8_C(110), UINT8_C(101)
+    };
+    static const uint8_t append_second[] = {
+        UINT8_C(84), UINT8_C(119), UINT8_C(111)
+    };
+    static const uint8_t append_expected[] = {
+        UINT8_C(79), UINT8_C(110), UINT8_C(101),
+        UINT8_C(84), UINT8_C(119), UINT8_C(111), UINT8_C(33)
+    };
+    result = fy_std_windows_file_open_v0(append_path, &append_options, &file);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 || file.open != UINT8_C(1)) return 58;
+    result = fy_std_windows_file_write_all_v0(&file, append_first, sizeof append_first);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        result.count != sizeof append_first) return 59;
+    position = fy_std_windows_file_seek_start_v0(&file, UINT64_C(0));
+    if (position.status != FY_STD_WINDOWS_FILE_OK_V0 || position.position != UINT64_C(0)) return 60;
+    result = fy_std_windows_file_write_all_v0(&file, append_second, sizeof append_second);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        result.count != sizeof append_second) return 61;
+    if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 62;
+    result = fy_std_windows_file_open_v0(append_path, &append_options, &file);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 63;
+    position = fy_std_windows_file_seek_start_v0(&file, UINT64_C(1));
+    if (position.status != FY_STD_WINDOWS_FILE_OK_V0 || position.position != UINT64_C(1)) return 64;
+    static const uint8_t exclamation[] = {UINT8_C(33)};
+    result = fy_std_windows_file_write_all_v0(&file, exclamation, sizeof exclamation);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 || result.count != 1) return 65;
+    if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 66;
+    result = fy_std_windows_file_open_v0(append_path, &read_options, &file);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 67;
+    uint8_t append_received[sizeof append_expected] = {0};
+    result = fy_std_windows_file_read_v0(&file, append_received, sizeof append_received);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        result.count != sizeof append_expected ||
+        memcmp(append_received, append_expected, sizeof append_expected) != 0) return 68;
+    if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 69;
+    if (!DeleteFileW(L"fairyc-windows-file-append-probe.tmp")) return 70;
     return 0;
 }

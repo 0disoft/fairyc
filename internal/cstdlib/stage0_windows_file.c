@@ -42,6 +42,7 @@ struct fy_std_windows_open_options_v0 {
     uint8_t create;
     uint8_t truncate;
     uint8_t exclusive;
+    uint8_t append;
 };
 
 enum { FY_STD_WINDOWS_PATH_CAPACITY_V0 = 4096 };
@@ -132,12 +133,15 @@ static int fy_std_windows_open_options_valid_v0(
 ) {
     return options != NULL && options->read <= UINT8_C(1) && options->write <= UINT8_C(1) &&
            options->create <= UINT8_C(1) && options->truncate <= UINT8_C(1) &&
-           options->exclusive <= UINT8_C(1) &&
+           options->exclusive <= UINT8_C(1) && options->append <= UINT8_C(1) &&
            (options->read != UINT8_C(0) || options->write != UINT8_C(0)) &&
            (options->truncate == UINT8_C(0) || options->write != UINT8_C(0)) &&
            (options->exclusive == UINT8_C(0) ||
             (options->write != UINT8_C(0) && options->create != UINT8_C(0) &&
-             options->truncate == UINT8_C(0)));
+             options->truncate == UINT8_C(0))) &&
+           (options->append == UINT8_C(0) ||
+            (options->write != UINT8_C(0) && options->truncate == UINT8_C(0) &&
+             options->exclusive == UINT8_C(0)));
 }
 
 static DWORD fy_std_windows_creation_disposition_v0(
@@ -176,7 +180,7 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_open_v0(
         access |= GENERIC_READ;
     }
     if (options->write != UINT8_C(0)) {
-        access |= GENERIC_WRITE;
+        access |= options->append != UINT8_C(0) ? FILE_APPEND_DATA : GENERIC_WRITE;
     }
     HANDLE handle = CreateFileW(
         wide_path,
