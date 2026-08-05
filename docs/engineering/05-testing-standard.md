@@ -241,7 +241,8 @@ safe SDK wrapper and package integration are proved separately by Go tests and t
 workspace smoke; ADR 0214 records the corresponding Linux hosted execution.
 
 The Windows File probe keeps its production component in a separate translation unit and executes
-both local MSVC profiles. It creates and truncates a file, writes all nine bytes, rejects an
+both local MSVC profiles. It creates and truncates a file, writes a five-byte prefix once and the
+remaining four bytes through write-all, rejects an
 oversized length without mutation, shrinks to five and extends to nine without moving the cursor,
 rewrites the unspecified extended bytes, observes size and
 cursor, rejects an overflowing absolute seek without moving it, seeks to byte 5 and back to zero,
@@ -252,7 +253,7 @@ still normalizes ownership, and finally checks best-effort and
 repeated drop. Both objects, the linked PE, and its unwind records must pass the same structural
 inspectors before execution. A distinct two-module FY example then exercises typed open errors,
 safe resource borrows and partial/exact reads over fixed arrays, shared size, kind, and identity observation,
-write/position/absolute-seek, open-or-create creation/preservation, exclusive create/collision/unchanged reopen, seek-resistant append, existing-file read/write update, cursor-preserving length change,
+one-call write success and read-only failure, write-all/position/absolute-seek, open-or-create creation/preservation, exclusive create/collision/unchanged reopen, seek-resistant append, existing-file read/write update, cursor-preserving length change,
 sync/read/EOF, consuming close, and implicit drop at both profiles.
 ADR 0264 promotes the ownership and I/O slice to compiler-bundled public `std::fs`; ADRs 0269 and
 0270 add positioning and size, ADR 0271 adds update-open, ADR 0272 adds length change, ADR 0274

@@ -337,13 +337,13 @@ descriptor record. This is raw internal transport; safe File ownership, source e
 errors, and hosted execution evidence remain absent. Product builds now select the Linux File C
 unit only when one of the five admitted calls is actually present.
 Windows now has an independent File C slice over inline `HANDLE` state with no hidden allocation.
-It accepts a bounded ASCII bootstrap path, preserves partial read and write-all progress, syncs
+It accepts a bounded ASCII bootstrap path, preserves one-call partial read/write counts and write-all progress, syncs
 explicitly, consumes state before one `CloseHandle` attempt on both success and failure, and makes
 drop a silent one-attempt fallback. A separate-translation-unit probe creates, writes, syncs,
 closes, reopens, reads in three-byte chunks, observes EOF, inspects size and absolute position,
 rejects an overflowing offset without moving the cursor, reports `ERROR_INVALID_HANDLE` for size
 and close after an externally closed handle, and checks repeated close and drop at low and optimized
-local MSVC profiles. The ten raw calls are target-bound
+local MSVC profiles. The closed raw call set is target-bound
 through the closed resolver. A checked-in two-module FY example now wraps that exact component in a
 move-only `File`, preserves status, Win32 code, and completed bytes in `FileError`, carries
 `filesystem` effects, writes and synchronizes `FairyFile`, observes its size and resets its absolute cursor,
@@ -357,8 +357,8 @@ ADR 0272 adds cursor-preserving `set_len`, ADR 0274 adds atomic read/write `open
 truncation, ADR 0275 adds atomic no-clobber `create_new`, ADR 0276 adds seek-resistant
 write-only `open_append`, ADR 0277 adds same-handle target-neutral file-kind observation, ADR 0278
 adds exact-fill reads with explicit unexpected-EOF prefixes, ADR 0279 adds opaque same-handle
-file identity comparison, and ADR 0281 promotes target-neutral file kinds to an exhaustive public
-enum under SDK `0.0.0-stage0.25`. The public slice remains
+file identity comparison, ADR 0281 promotes target-neutral file kinds to an exhaustive public
+enum, and ADR 0285 exposes one-call partial `write` under SDK `0.0.0-stage0.26`. The public slice remains
 Windows MSVC-only and does
 not claim portable Unicode paths, general mutable buffers, a supported target, or public layout.
 The source FFI slice accepts `i32`, `u8`, `u32`, `usize`, all sixteen exact transport-only TargetSpec

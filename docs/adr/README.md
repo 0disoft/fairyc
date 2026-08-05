@@ -294,6 +294,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0282-generated-user-enum-result-propagation.md`: proves `Result<T, UserEnum>` success and `?` error propagation through deterministic C emission and low/optimized Windows MSVC execution without changing language, SDK, runtime ABI, or public API revisions.
 - `0283-user-enum-option-c-transport.md`: admits restricted inert user enums inside private built-in `Option`, proving Some payload preservation, exhaustive switching, and None under deterministic emission and low/optimized Windows MSVC without changing language, SDK, runtime ABI, or public API revisions.
 - `0284-copy-fixed-array-tagged-values.md`: cuts language revision `/9` and carries bounded copy-scalar fixed arrays through private Option/Result transport, including propagation, deterministic emission, cache-key invalidation, and low/optimized Windows MSVC execution without changing SDK source/API or runtime ABI.
+- `0285-public-windows-file-partial-write.md`: exposes one-call safe Windows `std::fs::write`, preserves caller-owned retry policy and exact successful short counts, and proves success plus read-only failure under low/optimized MSVC with SDK `0.0.0-stage0.26`.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

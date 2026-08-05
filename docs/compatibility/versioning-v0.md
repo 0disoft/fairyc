@@ -641,6 +641,14 @@ requires an exact manifest pin update. SDK source and public API remain `0.0.0-s
 language requirement, package instance, dependent lock entries, and whole-package cache keys change.
 Runtime ABI, target schemas, C dialect, MIR version, and public native ABI remain unchanged.
 
+ADR 0285 moves the SDK to `0.0.0-stage0.26` because it adds public
+`std::fs::write(ref mut File, ref u8[]) -> Result<usize, FileError>` and admits the private
+`fy_std_windows_file_write_v0` target-support symbol. Existing public operations remain
+source-compatible. The SDK source digest, public-interface hash, package instance, dependent
+identities, generated locks, and whole-package cache keys change. Language remains
+`fairyc-language/9`, runtime ABI remains `fairyc-runtime/0`, and the raw result layout and target
+symbol remain Windows x86-64 MSVC-only pre-1 implementation compatibility data.
+
 ## Package formats
 
 Manifest schema, lockfile schema, source archive schema, and any future binary artifact schema are independent. Stage 0 needs manifest and lockfile schemas only. A stable binary package format would falsely imply a stable native Fairy ABI and is deferred.
@@ -662,7 +670,7 @@ ADR 0144 fixes the first loader behavior for this manifest schema: explicit root
 exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, one language revision,
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
 instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
-`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.25`, language
+`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.26`, language
 `fairyc-language/9`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 

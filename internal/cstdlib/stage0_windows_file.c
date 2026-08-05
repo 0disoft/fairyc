@@ -578,7 +578,7 @@ struct fy_std_windows_file_position_result_v0 fy_std_windows_file_seek_start_v0(
     );
 }
 
-static struct fy_std_windows_file_result_v0 fy_std_windows_file_write_v0(
+struct fy_std_windows_file_result_v0 fy_std_windows_file_write_v0(
     void *file_storage,
     const uint8_t *buffer,
     size_t length

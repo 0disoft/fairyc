@@ -123,6 +123,10 @@ unsafe extern C fn raw_file_size_result file_set_len_raw(ptr mut void file, usiz
 unsafe extern C fn raw_file_position_result file_seek_start_raw(ptr mut void file, usize offset) ;
 
 @effects(filesystem)
+@link_name("fy_std_windows_file_write_v0")
+unsafe extern C fn raw_file_result file_write_raw(ptr mut void file, ptr u8 data, usize length) ;
+
+@effects(filesystem)
 @link_name("fy_std_windows_file_write_all_v0")
 unsafe extern C fn raw_file_result file_write_all_raw(ptr mut void file, ptr u8 data, usize length) ;
 
@@ -270,6 +274,19 @@ pub fn Result<File, FileError> open_update(ref CStr path) {
         .exclusive = 0,
         .append = 0,
     });
+}
+
+/// Performs at most one underlying write and returns its exact completed byte count.
+@effects(filesystem)
+pub fn Result<usize, FileError> write(ref mut File file, ref u8[] bytes) {
+    let raw_file_result result = unsafe {
+        file_write_raw(file as ptr mut void, bytes as ptr u8, bytes.len)
+    };
+    return if (result.status == 0) {
+        .ok(result.count)
+    } else {
+        .err(file_error(result))
+    };
 }
 
 /// Writes every byte or reports how many bytes completed before failure.

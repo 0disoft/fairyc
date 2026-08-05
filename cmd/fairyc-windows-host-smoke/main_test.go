@@ -406,13 +406,13 @@ func TestGeneratedFairyStdlibSourcesPassFullPipeline(t *testing.T) {
 			name: "windows std fs used", manifest: "std_fs_quickstart", source: string(fsMain),
 			expect: []string{
 				"fy_std_windows_file_open_v0", "fy_std_windows_file_read_v0", "fy_std_windows_file_read_exact_v0", "fy_std_windows_file_position_v0",
-				"fy_std_windows_file_seek_start_v0", "fy_std_windows_file_size_v0", "fy_std_windows_file_kind_v0", "fy_std_windows_file_id_v0", "fy_std_windows_file_set_len_v0", "fy_std_windows_file_write_all_v0",
+				"fy_std_windows_file_seek_start_v0", "fy_std_windows_file_size_v0", "fy_std_windows_file_kind_v0", "fy_std_windows_file_id_v0", "fy_std_windows_file_set_len_v0", "fy_std_windows_file_write_all_v0", "fy_std_windows_file_write_v0",
 				"fy_std_windows_file_sync_v0", "fy_std_windows_file_close_v0", "fy_std_windows_file_drop_v0",
 			},
 			foreignSymbols: []string{
 				"fy_std_windows_file_close_v0", "fy_std_windows_file_drop_v0", "fy_std_windows_file_id_v0", "fy_std_windows_file_kind_v0", "fy_std_windows_file_open_v0",
 				"fy_std_windows_file_position_v0", "fy_std_windows_file_read_exact_v0", "fy_std_windows_file_read_v0", "fy_std_windows_file_seek_start_v0",
-				"fy_std_windows_file_set_len_v0", "fy_std_windows_file_size_v0", "fy_std_windows_file_sync_v0", "fy_std_windows_file_write_all_v0",
+				"fy_std_windows_file_set_len_v0", "fy_std_windows_file_size_v0", "fy_std_windows_file_sync_v0", "fy_std_windows_file_write_all_v0", "fy_std_windows_file_write_v0",
 			},
 		},
 		{

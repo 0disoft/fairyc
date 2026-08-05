@@ -862,6 +862,15 @@ The four predicate helpers remain available for existing supported callers. The 
 quickstart switches directly over disk and character results and still executes under low and
 optimized MSVC without exposing Win32 constants or changing the private target symbol.
 
+ADR 0285 extends the SDK to `0.0.0-stage0.26` with
+`write(ref mut File, ref u8[]) -> Result<usize, FileError>`. It exposes the existing one-call
+Windows primitive so safe callers can own short-write retry and backpressure policy while
+`write_all` remains the explicit retry-to-completion operation. Raw C and safe generated-Fairy
+probes write a prefix once, complete its suffix, verify the final bytes, and preserve a read-only
+handle error with completed zero under low and optimized MSVC. Overlapped I/O, cancellation,
+vectored writes, buffering, record framing, portable paths, and Linux public linkage remain later
+gates.
+
 ADR 0268 closes the discovery side of exact test selection with
 `fairyc test --list [--locked]`. The command compiler-admits the complete root test overlay and
 prints canonical identities without running the interpreter, backend, toolchain, or a test process.

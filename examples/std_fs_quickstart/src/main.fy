@@ -258,25 +258,35 @@ fn i32 verify_character_then_close(fs::File input) {
 fn i32 write_then_close(fs::File input) {
     var fs::File file = input;
     let ref u8[] bytes = b"FairyFile";
+    let ref u8[] prefix = bytes[..5];
+    let ref u8[] suffix = bytes[5..];
     let i32 kind_code = expect_disk(ref file);
     let i32 operation_code = if (kind_code != 0) {
         kind_code
-    } else { switch (fs::write_all(ref mut file, bytes)) {
-        case .ok(written) : { if (written == 9) {
-            let i32 size_code = switch (fs::size(ref file)) {
-                case .ok(size) : { if (size == 9) { 0 } else { 53 } }
-                case .err(_) : { 54 }
+    } else { switch (fs::write(ref mut file, prefix)) {
+        case .ok(written) : { if (written == 5) {
+            let i32 suffix_code = switch (fs::write_all(ref mut file, suffix)) {
+                case .ok(suffix_written) : { if (suffix_written == 4) { 0 } else { 171 } }
+                case .err(_) : { 172 }
             };
-            if (size_code != 0) {
-                size_code
+            if (suffix_code != 0) {
+                suffix_code
             } else {
-                let i32 position_code = write_position_probe(ref mut file);
-                if (position_code != 0) {
-                    position_code
+                let i32 size_code = switch (fs::size(ref file)) {
+                    case .ok(size) : { if (size == 9) { 0 } else { 53 } }
+                    case .err(_) : { 54 }
+                };
+                if (size_code != 0) {
+                    size_code
                 } else {
-                    switch (fs::sync(ref mut file)) {
-                        case .ok(_) : { 0 }
-                        case .err(_) : { 12 }
+                    let i32 position_code = write_position_probe(ref mut file);
+                    if (position_code != 0) {
+                        position_code
+                    } else {
+                        switch (fs::sync(ref mut file)) {
+                            case .ok(_) : { 0 }
+                            case .err(_) : { 12 }
+                        }
                     }
                 }
             }
@@ -303,7 +313,18 @@ fn i32 read_then_close(fs::File input) {
         0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
     ];
-    let i32 read_only_length_code = switch (fs::set_len(ref mut file, 9)) {
+    let i32 read_only_write_code = switch (fs::write(ref mut file, b"x")) {
+        case .ok(_) : { 169 }
+        case .err(error) : { if (fs::error_status(error) == 1 &&
+            fs::error_os_code(error) == 5 && fs::error_completed(error) == 0) {
+            0
+        } else {
+            170
+        } }
+    };
+    let i32 read_only_length_code = if (read_only_write_code != 0) {
+        read_only_write_code
+    } else { switch (fs::set_len(ref mut file, 9)) {
         case .ok(_) : { 92 }
         case .err(error) : { if (fs::error_status(error) == 1 &&
             fs::error_os_code(error) == 5 && fs::error_completed(error) == 0) {
@@ -311,7 +332,7 @@ fn i32 read_then_close(fs::File input) {
         } else {
             93
         } }
-    };
+    } };
     let i32 size_code = if (read_only_length_code != 0) {
         read_only_length_code
     } else { switch (fs::size(ref file)) {

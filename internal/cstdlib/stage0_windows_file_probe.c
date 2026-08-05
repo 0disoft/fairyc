@@ -84,6 +84,11 @@ struct fy_std_windows_file_position_result_v0 fy_std_windows_file_seek_start_v0(
     void *,
     uint64_t
 );
+struct fy_std_windows_file_result_v0 fy_std_windows_file_write_v0(
+    void *,
+    const uint8_t *,
+    size_t
+);
 struct fy_std_windows_file_result_v0 fy_std_windows_file_write_all_v0(
     void *,
     const uint8_t *,
@@ -141,8 +146,10 @@ int main(void) {
         &file
     );
     if (result.status != FY_STD_WINDOWS_FILE_OK_V0 || file.open != UINT8_C(1)) return 1;
-    result = fy_std_windows_file_write_all_v0(&file, payload, sizeof payload);
-    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 || result.count != sizeof payload) return 2;
+    result = fy_std_windows_file_write_v0(&file, payload, UINT64_C(5));
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 || result.count != UINT64_C(5)) return 2;
+    result = fy_std_windows_file_write_all_v0(&file, payload + 5, sizeof payload - 5);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 || result.count != sizeof payload - 5) return 94;
     struct fy_std_windows_file_size_result_v0 size = fy_std_windows_file_size_v0(&file);
     if (size.status != FY_STD_WINDOWS_FILE_OK_V0 ||
         size.size != (uint64_t)sizeof payload) return 31;

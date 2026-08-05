@@ -135,6 +135,7 @@ func TestAdmittedForTargetKeepsWindowsFileTargetBound(t *testing.T) {
 		"fy_std_windows_file_id_v0",
 		"fy_std_windows_file_set_len_v0",
 		"fy_std_windows_file_seek_start_v0",
+		"fy_std_windows_file_write_v0",
 		"fy_std_windows_file_write_all_v0",
 		"fy_std_windows_file_sync_v0",
 		"fy_std_windows_file_close_v0",
@@ -146,12 +147,6 @@ func TestAdmittedForTargetKeepsWindowsFileTargetBound(t *testing.T) {
 		if AdmittedForTarget(symbol, target.X8664LinuxGNU) {
 			t.Errorf("%s leaked into the Linux target contract", symbol)
 		}
-	}
-	if Admitted("fy_std_windows_file_write_v0") {
-		t.Fatal("component-private Windows single-write symbol unexpectedly admitted")
-	}
-	if _, err := WindowsMSVCComponentsForSymbols([]string{"fy_std_windows_file_write_v0"}); err == nil || !strings.Contains(err.Error(), "unrecognized Stage 0 standard-library symbol") {
-		t.Fatalf("WindowsMSVCComponentsForSymbols(private write) error = %v", err)
 	}
 }
 
@@ -187,6 +182,7 @@ func TestWindowsMSVCComponentsForSymbolsAdmitsOnlyProvenRuntimeSlice(t *testing.
 		"fy_std_windows_file_open_v0",
 		"fy_std_windows_file_read_v0",
 		"fy_std_windows_file_set_len_v0",
+		"fy_std_windows_file_write_v0",
 		"fy_std_windows_file_write_all_v0",
 		"fy_std_windows_file_sync_v0",
 		"fy_std_windows_file_close_v0",
