@@ -808,8 +808,15 @@ ADR 0274 extends the SDK to `0.0.0-stage0.19` with
 `CreateFileW` call with `OPEN_ALWAYS`, read/write access, and no truncation: a missing path becomes
 an empty file, an existing file preserves its bytes, and both start at byte zero. The safe
 quickstart proves missing-file creation and a second preserving open under low and optimized MSVC.
-Exclusive create, append policy, portable Unicode paths, and Linux public linkage remain later
-gates.
+Append policy, portable Unicode paths, and Linux public linkage remain later gates.
+
+ADR 0275 extends the SDK to `0.0.0-stage0.20` with
+`create_new(ref CStr) -> Result<File, FileError>`. It maps one compiler-private exclusive flag to a
+single `CreateFileW` call with `CREATE_NEW`: an absent path becomes an empty write-only file at byte
+zero, while an existing path fails with `ERROR_FILE_EXISTS` and keeps its bytes. Raw C and safe
+generated-Fairy probes prove create, collision, canonical closed failure storage, and unchanged
+reopen under low and optimized MSVC. Unique-name generation, append policy, portable Unicode paths,
+and Linux public linkage remain later gates.
 
 ADR 0268 closes the discovery side of exact test selection with
 `fairyc test --list [--locked]`. The command compiler-admits the complete root test overlay and

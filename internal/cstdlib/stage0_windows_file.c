@@ -41,6 +41,7 @@ struct fy_std_windows_open_options_v0 {
     uint8_t write;
     uint8_t create;
     uint8_t truncate;
+    uint8_t exclusive;
 };
 
 enum { FY_STD_WINDOWS_PATH_CAPACITY_V0 = 4096 };
@@ -131,14 +132,21 @@ static int fy_std_windows_open_options_valid_v0(
 ) {
     return options != NULL && options->read <= UINT8_C(1) && options->write <= UINT8_C(1) &&
            options->create <= UINT8_C(1) && options->truncate <= UINT8_C(1) &&
+           options->exclusive <= UINT8_C(1) &&
            (options->read != UINT8_C(0) || options->write != UINT8_C(0)) &&
-           (options->truncate == UINT8_C(0) || options->write != UINT8_C(0));
+           (options->truncate == UINT8_C(0) || options->write != UINT8_C(0)) &&
+           (options->exclusive == UINT8_C(0) ||
+            (options->write != UINT8_C(0) && options->create != UINT8_C(0) &&
+             options->truncate == UINT8_C(0)));
 }
 
 static DWORD fy_std_windows_creation_disposition_v0(
     const struct fy_std_windows_open_options_v0 *options
 ) {
     if (options->create != UINT8_C(0)) {
+        if (options->exclusive != UINT8_C(0)) {
+            return CREATE_NEW;
+        }
         return options->truncate != UINT8_C(0) ? CREATE_ALWAYS : OPEN_ALWAYS;
     }
     return options->truncate != UINT8_C(0) ? TRUNCATE_EXISTING : OPEN_EXISTING;

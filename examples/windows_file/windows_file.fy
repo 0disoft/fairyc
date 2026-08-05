@@ -27,6 +27,7 @@ struct fy_std_windows_open_options_v0 {
     u8 write;
     u8 create;
     u8 truncate;
+    u8 exclusive;
 }
 
 pub struct FileError {
@@ -141,6 +142,7 @@ pub fn Result<File, FileError> create_truncate(ref CStr path) {
         .write = 1,
         .create = 1,
         .truncate = 1,
+        .exclusive = 0,
     });
 }
 
@@ -151,6 +153,7 @@ pub fn Result<File, FileError> open_read(ref CStr path) {
         .write = 0,
         .create = 0,
         .truncate = 0,
+        .exclusive = 0,
     });
 }
 
@@ -161,6 +164,7 @@ pub fn Result<File, FileError> open_update(ref CStr path) {
         .write = 1,
         .create = 0,
         .truncate = 0,
+        .exclusive = 0,
     });
 }
 

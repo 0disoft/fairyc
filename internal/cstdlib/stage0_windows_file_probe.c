@@ -41,6 +41,7 @@ struct fy_std_windows_open_options_v0 {
     uint8_t write;
     uint8_t create;
     uint8_t truncate;
+    uint8_t exclusive;
 };
 
 struct fy_std_windows_file_result_v0 fy_std_windows_file_open_v0(
@@ -76,10 +77,13 @@ int main(void) {
         UINT8_C(70), UINT8_C(105), UINT8_C(108), UINT8_C(101)
     };
     struct fy_std_windows_open_options_v0 write_options = {
-        UINT8_C(0), UINT8_C(1), UINT8_C(1), UINT8_C(1)
+        UINT8_C(0), UINT8_C(1), UINT8_C(1), UINT8_C(1), UINT8_C(0)
     };
     struct fy_std_windows_open_options_v0 read_options = {
-        UINT8_C(1), UINT8_C(0), UINT8_C(0), UINT8_C(0)
+        UINT8_C(1), UINT8_C(0), UINT8_C(0), UINT8_C(0), UINT8_C(0)
+    };
+    struct fy_std_windows_open_options_v0 exclusive_options = {
+        UINT8_C(0), UINT8_C(1), UINT8_C(1), UINT8_C(0), UINT8_C(1)
     };
     static const uint8_t replacement[] = {
         UINT8_C(67), UINT8_C(111), UINT8_C(100), UINT8_C(101)
@@ -215,5 +219,32 @@ int main(void) {
         !fy_std_windows_file_closed_v0(&file)) return 15;
     if (fy_std_windows_file_drop_v0(&file) != UINT32_C(0)) return 16;
     if (!DeleteFileW(L"fairyc-windows-file-probe.tmp")) return 17;
+
+    static const uint8_t exclusive_path[] = "fairyc-windows-file-create-new-probe.tmp";
+    static const uint8_t exclusive_payload[] = {
+        UINT8_C(78), UINT8_C(101), UINT8_C(119)
+    };
+    result = fy_std_windows_file_open_v0(exclusive_path, &exclusive_options, &file);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 || result.os_code != ERROR_SUCCESS ||
+        result.count != 0 || file.open != UINT8_C(1)) return 49;
+    position = fy_std_windows_file_position_v0(&file);
+    if (position.status != FY_STD_WINDOWS_FILE_OK_V0 || position.position != UINT64_C(0)) return 50;
+    result = fy_std_windows_file_write_all_v0(&file, exclusive_payload, sizeof exclusive_payload);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        result.count != sizeof exclusive_payload) return 51;
+    if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 52;
+    result = fy_std_windows_file_open_v0(exclusive_path, &exclusive_options, &file);
+    if (result.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
+        result.os_code != (uint32_t)ERROR_FILE_EXISTS || result.count != 0 ||
+        !fy_std_windows_file_closed_v0(&file)) return 53;
+    result = fy_std_windows_file_open_v0(exclusive_path, &read_options, &file);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 54;
+    uint8_t exclusive_received[sizeof exclusive_payload] = {0};
+    result = fy_std_windows_file_read_v0(&file, exclusive_received, sizeof exclusive_received);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        result.count != sizeof exclusive_payload ||
+        memcmp(exclusive_received, exclusive_payload, sizeof exclusive_payload) != 0) return 55;
+    if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 56;
+    if (!DeleteFileW(L"fairyc-windows-file-create-new-probe.tmp")) return 57;
     return 0;
 }

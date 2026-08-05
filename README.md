@@ -353,8 +353,8 @@ successfully reopening a path whose live write handle would deny sharing. Low an
 return 42 after object, PE, and unwind inspection. ADR 0264 now promotes that safe ownership and
 I/O contract into compiler-bundled `std::fs`; ADR 0269 adds allocation-free `position` and absolute
 `seek_start`, ADR 0270 adds shared `size`, ADR 0271 adds existing-file read/write `open_update`,
-ADR 0272 adds cursor-preserving `set_len`, and ADR 0274 adds atomic read/write
-`open_or_create` without truncation under SDK `0.0.0-stage0.19`. The public slice remains
+ADR 0272 adds cursor-preserving `set_len`, ADR 0274 adds atomic read/write `open_or_create` without
+truncation, and ADR 0275 adds atomic no-clobber `create_new` under SDK `0.0.0-stage0.20`. The public slice remains
 Windows MSVC-only and does
 not claim portable Unicode paths, general mutable buffers, a supported target, or public layout.
 The source FFI slice accepts `i32`, `u8`, `u32`, `usize`, all sixteen exact transport-only TargetSpec
