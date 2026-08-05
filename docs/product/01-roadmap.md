@@ -116,7 +116,7 @@ lowering, and parser-fixture-runner portion of the first item exists. Name resol
 now cover the semantic fixture's scalar and safe-borrow subset. Local last-use loans, borrow
   conflicts, single-origin borrow returns, checked matching-type left shift, loop-context diagnostics,
   scalar foreign-call unsafe/signature boundaries, and `@link_name` shape diagnostics execute across
-  all 59 semantic v0 cases, including explicit resource-factory construction and cross-module
+  all 60 semantic v0 cases, including explicit resource-factory construction and cross-module
   resource-literal rejection, explicit source-location expansion, bounded scalar compile-time evaluation, narrow callable `@must_use`, classic scalar `for`, bounded lexical `defer`, branch- and loop-aware safe-borrow reassignment, exact
   interprocedural borrow-return summaries, integer-literal range rejection before MIR, and exact
   transport for all sixteen TargetSpec C scalars. The type phase also canonicalizes the closed

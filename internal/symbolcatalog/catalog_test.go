@@ -100,7 +100,7 @@ func catalogFixture(t *testing.T) (string, *atlasmap.QueryIndex) {
 uid = "test.symbol-catalog"
 name = "symbol-catalog"
 version = "1.0.0"
-language = "fairyc-language/8"
+language = "fairyc-language/9"
 source = "src"
 `)
 	writeCatalogFile(t, filepath.Join(root, "src", "main.fy"), `module main;

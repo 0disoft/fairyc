@@ -78,6 +78,12 @@ they remain distinct from the contextual unsized views. The mutable view current
 transport and `.len`, not safe element mutation, slicing, resizing, foreign references, or public
 ABI use.
 
+Language revision `/9` additionally admits one bounded scalar fixed array as a direct payload of
+compiler-known `Option` or either payload of compiler-known `Result`. Construction, parameter and
+return transfer, exhaustive switching, and compatible Result `?` propagation retain ordinary
+fixed-array value-copy semantics. This does not admit nested fixed arrays, arrays of resources or
+aggregates, array fields, raw C arrays, public tagged layout, or foreign tagged ABI.
+
 The implemented safe integer `as` subset is closed to `u8 -> i32`, `u8 -> u32`, `u8 -> usize`, and
 `u32 -> usize`. Each target contains the complete mathematical source range, so no value changes or
 traps. Other integer pairs are not inferred, truncated, wrapped, or sign-reinterpreted; they remain

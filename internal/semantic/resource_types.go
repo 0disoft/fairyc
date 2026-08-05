@@ -377,7 +377,7 @@ func (a *analyzer) canonicalNamedType(module *moduleScope, reference ast.TypeRef
 		if len(reference.Arguments) != 1 {
 			return hir.TypeInvalid, false
 		}
-		element, ok := a.canonicalTypeReference(module, reference.Arguments[0], false)
+		element, ok := a.canonicalTypeReference(module, reference.Arguments[0], true)
 		if !ok {
 			return hir.TypeInvalid, false
 		}
@@ -387,8 +387,8 @@ func (a *analyzer) canonicalNamedType(module *moduleScope, reference ast.TypeRef
 		if len(reference.Arguments) != 2 {
 			return hir.TypeInvalid, false
 		}
-		success, successOK := a.canonicalTypeReference(module, reference.Arguments[0], false)
-		failure, failureOK := a.canonicalTypeReference(module, reference.Arguments[1], false)
+		success, successOK := a.canonicalTypeReference(module, reference.Arguments[0], true)
+		failure, failureOK := a.canonicalTypeReference(module, reference.Arguments[1], true)
 		if !successOK || !failureOK {
 			return hir.TypeInvalid, false
 		}

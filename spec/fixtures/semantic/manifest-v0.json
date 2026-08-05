@@ -968,6 +968,15 @@
       }
     },
     {
+      "id": "pass.type.copy-tagged-fixed-array",
+      "sourceRoot": "cases/pass/copy-tagged-fixed-array/src",
+      "sources": ["main.fy"],
+      "expect": {
+        "status": "pass",
+        "completedThrough": "flow"
+      }
+    },
+    {
       "id": "fail.type.immutable-parameter-assignment",
       "sourceRoot": "cases/fail/immutable-parameter-assignment/src",
       "sources": ["main.fy"],

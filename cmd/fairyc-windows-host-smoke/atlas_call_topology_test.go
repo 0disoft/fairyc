@@ -149,7 +149,7 @@ func writeAtlasCallTopologyWorkspace(root string, definition atlasCallTopologyDe
 		return fmt.Errorf("Atlas call topology %q has an invalid package order", definition.name)
 	}
 	var manifest strings.Builder
-	fmt.Fprintf(&manifest, "schema = \"fairyc.manifest/v1\"\n[package]\nuid = \"measurement.atlas-call-topology.%s\"\nname = \"%s\"\nversion = \"1.0.0\"\nlanguage = \"fairyc-language/8\"\nsource = \"src\"\n[workspace]\nmembers = [\n", definition.name, definition.name)
+	fmt.Fprintf(&manifest, "schema = \"fairyc.manifest/v1\"\n[package]\nuid = \"measurement.atlas-call-topology.%s\"\nname = \"%s\"\nversion = \"1.0.0\"\nlanguage = \"fairyc-language/9\"\nsource = \"src\"\n[workspace]\nmembers = [\n", definition.name, definition.name)
 	members := make([]string, 0, len(definition.packages)-1)
 	for _, packageValue := range definition.packages[1:] {
 		members = append(members, "libs/"+packageValue.name)
@@ -170,7 +170,7 @@ func writeAtlasCallTopologyWorkspace(root string, definition atlasCallTopologyDe
 	}
 	for _, packageValue := range definition.packages[1:] {
 		var memberManifest strings.Builder
-		fmt.Fprintf(&memberManifest, "schema = \"fairyc.manifest/v1\"\n[package]\nuid = \"measurement.atlas-call-topology.%s.%s\"\nname = \"%s\"\nversion = \"1.0.0\"\nlanguage = \"fairyc-language/8\"\nsource = \"src\"\n", definition.name, packageValue.name, packageValue.name)
+		fmt.Fprintf(&memberManifest, "schema = \"fairyc.manifest/v1\"\n[package]\nuid = \"measurement.atlas-call-topology.%s.%s\"\nname = \"%s\"\nversion = \"1.0.0\"\nlanguage = \"fairyc-language/9\"\nsource = \"src\"\n", definition.name, packageValue.name, packageValue.name)
 		for _, dependency := range packageValue.dependencies {
 			fmt.Fprintf(&memberManifest, "[dependencies.%s]\npath = \"libs/%s\"\nversion = \"1.0.0\"\nfeatures = []\n", dependency, dependency)
 		}

@@ -92,7 +92,7 @@ func prepareTaggedTypes(
 			Type: layout.Type{Kind: layout.KindLanguageScalar, Name: "u32"},
 		}}
 		for index, payload := range candidate.payloads {
-			payloadType, ok := taggedPayloadLayout(payload, structures, structByType, enumerations, enumByType, resources, resourceByType)
+			payloadType, ok := taggedPayloadLayout(payload, structures, structByType, enumerations, enumByType, resources, resourceByType, arrayByType)
 			if !ok {
 				return nil, nil, fmt.Errorf("tagged type %q has unsupported payload %q", value, payload)
 			}
@@ -137,6 +137,9 @@ func supportedTaggedPayload(value hir.Type, allowEnum bool, structByType map[hir
 	if _, enumeration := enumByType[value]; allowEnum && enumeration {
 		return true
 	}
+	if _, array := arrayByType[value]; array {
+		return true
+	}
 	_, resource := resourceByType[value]
 	return resource
 }
@@ -149,6 +152,7 @@ func taggedPayloadLayout(
 	enumByType map[hir.Type]int,
 	resources []resourceCType,
 	resourceByType map[hir.Type]int,
+	arrayByType map[hir.Type]int,
 ) (layout.Type, bool) {
 	value = canonicalCValueType(value)
 	if value == hir.SharedBorrow(hir.TypeStr) {
@@ -171,6 +175,9 @@ func taggedPayloadLayout(
 	}
 	if index, found := enumByType[value]; found {
 		return enumerations[index].layoutType, true
+	}
+	if _, found := arrayByType[value]; found {
+		return scalarArrayLayoutType(value)
 	}
 	index, found := resourceByType[value]
 	if !found {
