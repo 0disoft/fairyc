@@ -140,6 +140,8 @@ type resourceCType struct {
 
 type enumCType struct {
 	definition   mir.EnumType
+	layout       layout.Result
+	layoutType   layout.Type
 	variantIndex map[string]int
 	fieldIndex   []map[string]int
 }
@@ -253,7 +255,7 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 	if err != nil {
 		return Unit{}, err
 	}
-	enumTypes, enumByType, err := prepareEnumTypes(program.EnumTypes)
+	enumTypes, enumByType, err := prepareEnumTypes(program.EnumTypes, structTypes, structByType, layoutEngine)
 	if err != nil {
 		return Unit{}, err
 	}
@@ -279,7 +281,7 @@ func Emit(program mir.Program, entry string, profile Profile) (Unit, error) {
 		return Unit{}, err
 	}
 	taggedTypes, taggedByType, err := prepareTaggedTypes(
-		functions, structTypes, structByType, resourceTypes, resourceByType, arrayByType, layoutEngine,
+		functions, structTypes, structByType, enumTypes, enumByType, resourceTypes, resourceByType, arrayByType, layoutEngine,
 	)
 	if err != nil {
 		return Unit{}, err
@@ -590,7 +592,7 @@ func orderStructDefinitions(definitions []mir.StructType) ([]mir.StructType, err
 	return ordered, nil
 }
 
-func prepareEnumTypes(definitions []mir.EnumType) ([]enumCType, map[hir.Type]int, error) {
+func prepareEnumTypes(definitions []mir.EnumType, structures []structCType, structByType map[hir.Type]int, engine *layout.Engine) ([]enumCType, map[hir.Type]int, error) {
 	ordered := slices.Clone(definitions)
 	slices.SortFunc(ordered, func(left, right mir.EnumType) int {
 		return strings.Compare(string(left.Type), string(right.Type))
@@ -608,17 +610,54 @@ func prepareEnumTypes(definitions []mir.EnumType) ([]enumCType, map[hir.Type]int
 			definition: definition, variantIndex: make(map[string]int, len(definition.Variants)),
 			fieldIndex: make([]map[string]int, len(definition.Variants)),
 		}
+		unionFields := []layout.Field{{Name: "unused", Type: layout.Type{Kind: layout.KindLanguageScalar, Name: "u8"}}}
 		for variantIndex, variant := range definition.Variants {
 			value.variantIndex[variant.Name] = variantIndex
 			value.fieldIndex[variantIndex] = make(map[string]int, len(variant.Fields))
 			for fieldIndex, field := range variant.Fields {
 				value.fieldIndex[variantIndex][field.Name] = fieldIndex
 			}
+			if len(variant.Fields) != 0 {
+				fields := make([]layout.Field, 0, len(variant.Fields))
+				for fieldIndex, field := range variant.Fields {
+					fieldType, err := enumFieldLayoutType(field.Type, structures, structByType)
+					if err != nil {
+						return nil, nil, CapabilityError{Feature: "enum type " + strconv.Quote(string(definition.Type)) + " variant " + strconv.Quote(variant.Name) + " field " + strconv.Quote(field.Name) + " of type " + strconv.Quote(string(field.Type))}
+					}
+					fields = append(fields, layout.Field{Name: fmt.Sprintf("f_%d", fieldIndex), Type: fieldType})
+				}
+				unionFields = append(unionFields, layout.Field{Name: fmt.Sprintf("v_%d", variantIndex), Type: layout.Type{Kind: layout.KindStruct, Fields: fields}})
+			}
 		}
+		value.layoutType = layout.Type{Kind: layout.KindStruct, Fields: []layout.Field{
+			{Name: "tag", Type: layout.Type{Kind: layout.KindLanguageScalar, Name: "u32"}},
+			{Name: "payload", Type: layout.Type{Kind: layout.KindUnion, Fields: unionFields}},
+		}}
+		computed, err := engine.Of(value.layoutType)
+		if err != nil {
+			return nil, nil, fmt.Errorf("compute C transport layout for enum %q: %w", definition.Type, err)
+		}
+		value.layout = computed
 		byType[definition.Type] = len(result)
 		result = append(result, value)
 	}
 	return result, byType, nil
+}
+
+func enumFieldLayoutType(value hir.Type, structures []structCType, structByType map[hir.Type]int) (layout.Type, error) {
+	value = canonicalCValueType(value)
+	if index, found := structByType[value]; found {
+		return structures[index].layoutType, nil
+	}
+	switch value {
+	case hir.TypeU8, hir.TypeI32, hir.TypeU32, hir.TypeUSize:
+		return layout.Type{Kind: layout.KindLanguageScalar, Name: string(value)}, nil
+	default:
+		if _, _, pointer := hir.RawPointerElement(value); pointer {
+			return layout.Type{Kind: layout.KindPointer}, nil
+		}
+		return layout.Type{}, fmt.Errorf("unsupported enum field type %q", value)
+	}
 }
 
 func structFieldLayoutType(value hir.Type, reprC bool, structures []structCType, byType map[hir.Type]int) (layout.Type, error) {
@@ -3108,7 +3147,13 @@ func (e *emitter) emitPreamble(output *strings.Builder) error {
 			fmt.Fprintf(output, "    } v_%d;\n", variantIndex)
 		}
 		fmt.Fprintf(output, "} fy_enum_payload_%d;\n", enumIndex)
-		fmt.Fprintf(output, "typedef struct { uint32_t tag; fy_enum_payload_%d payload; } fy_enum_%d;\n\n", enumIndex, enumIndex)
+		fmt.Fprintf(output, "typedef struct { uint32_t tag; fy_enum_payload_%d payload; } fy_enum_%d;\n", enumIndex, enumIndex)
+		fmt.Fprintf(output, "_Static_assert(sizeof(fy_enum_%d) == UINT64_C(%d), \"fairyc enum %d size\");\n", enumIndex, enumeration.layout.SizeBytes, enumIndex)
+		fmt.Fprintf(output, "_Static_assert(_Alignof(fy_enum_%d) == UINT64_C(%d), \"fairyc enum %d alignment\");\n", enumIndex, enumeration.layout.AlignmentBytes, enumIndex)
+		for fieldIndex, field := range enumeration.layout.Fields {
+			fmt.Fprintf(output, "_Static_assert(offsetof(fy_enum_%d, %s) == UINT64_C(%d), \"fairyc enum %d field %d offset\");\n", enumIndex, field.Name, field.OffsetBytes, enumIndex, fieldIndex)
+		}
+		output.WriteByte('\n')
 	}
 	for index, resource := range e.resourceTypes {
 		output.WriteString("typedef struct {\n")

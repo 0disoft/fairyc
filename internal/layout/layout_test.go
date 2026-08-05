@@ -54,6 +54,28 @@ func TestArrayLayoutRejectsOverflowAndZeroLength(t *testing.T) {
 	}
 }
 
+func TestUnionLayoutUsesLargestAlignedField(t *testing.T) {
+	t.Parallel()
+	engine := testEngine(t)
+	result, err := engine.Of(Type{Kind: KindUnion, Fields: []Field{
+		{Name: "small", Type: Type{Kind: KindLanguageScalar, Name: "u8"}},
+		{Name: "pair", Type: Type{Kind: KindStruct, Fields: []Field{
+			{Name: "left", Type: Type{Kind: KindLanguageScalar, Name: "i32"}},
+			{Name: "right", Type: Type{Kind: KindLanguageScalar, Name: "i32"}},
+		}}},
+	}})
+	if err != nil {
+		t.Fatalf("Of() error = %v", err)
+	}
+	wantFields := []FieldResult{
+		{Name: "small", OffsetBytes: 0, SizeBytes: 1, AlignmentBytes: 1},
+		{Name: "pair", OffsetBytes: 0, SizeBytes: 8, AlignmentBytes: 4},
+	}
+	if result.SizeBytes != 8 || result.AlignmentBytes != 4 || !slices.Equal(result.Fields, wantFields) || len(result.Padding) != 0 {
+		t.Fatalf("Of() = %+v", result)
+	}
+}
+
 func TestLayoutRejectsUnknownScalarAndDuplicateField(t *testing.T) {
 	t.Parallel()
 	engine := testEngine(t)

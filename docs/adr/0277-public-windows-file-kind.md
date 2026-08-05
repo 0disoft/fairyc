@@ -50,6 +50,8 @@ classification or a failure, distinguished by the thread last-error value.
 - ADR 0279 later adds bounded same-handle file identity. Timestamps, attributes, directories,
   link counts, path-based metadata, portable Unicode paths, Linux public linkage, and snapshot
   guarantees remain separate work.
+- ADR 0280 later closes the cited C-backend `Result` payload limitation. `FileKind` remains opaque
+  because changing an already published SDK type is a separate source-compatibility decision.
 
 ## Evidence
 

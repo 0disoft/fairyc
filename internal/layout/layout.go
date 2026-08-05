@@ -21,6 +21,7 @@ const (
 	KindFunctionPtr    Kind = "function-pointer"
 	KindArray          Kind = "array"
 	KindStruct         Kind = "struct"
+	KindUnion          Kind = "union"
 	KindCEnum          Kind = "c-enum"
 )
 
@@ -187,9 +188,51 @@ func (e *Engine) layout(value Type, depth int) (Result, error) {
 			return Result{}, Error{Code: ErrorEmptyAggregate, Detail: "Stage 0 does not lay out empty structs"}
 		}
 		return e.layoutStruct(value.Fields, depth)
+	case KindUnion:
+		if value.Name != "" || value.Element != nil || value.Length != 0 {
+			return Result{}, Error{Code: ErrorInvalidType, Detail: "union must contain only fields"}
+		}
+		if len(value.Fields) == 0 {
+			return Result{}, Error{Code: ErrorEmptyAggregate, Detail: "Stage 0 does not lay out empty unions"}
+		}
+		return e.layoutUnion(value.Fields, depth)
 	default:
 		return Result{}, Error{Code: ErrorInvalidType, Detail: fmt.Sprintf("unknown layout kind %q", value.Kind)}
 	}
+}
+
+func (e *Engine) layoutUnion(fields []Field, depth int) (Result, error) {
+	result := emptyResult(0, 1)
+	result.Fields = make([]FieldResult, 0, len(fields))
+	seen := make(map[string]struct{}, len(fields))
+	for _, field := range fields {
+		if field.Name == "" {
+			return Result{}, Error{Code: ErrorInvalidType, Detail: "union field name is empty"}
+		}
+		if _, duplicate := seen[field.Name]; duplicate {
+			return Result{}, Error{Code: ErrorDuplicateField, Detail: fmt.Sprintf("union field %q is repeated", field.Name)}
+		}
+		seen[field.Name] = struct{}{}
+		fieldLayout, err := e.layout(field.Type, depth+1)
+		if err != nil {
+			return Result{}, fmt.Errorf("layout union field %q: %w", field.Name, err)
+		}
+		result.Fields = append(result.Fields, FieldResult{
+			Name: field.Name, OffsetBytes: 0,
+			SizeBytes: fieldLayout.SizeBytes, AlignmentBytes: fieldLayout.AlignmentBytes,
+		})
+		result.SizeBytes = max(result.SizeBytes, fieldLayout.SizeBytes)
+		result.AlignmentBytes = max(result.AlignmentBytes, fieldLayout.AlignmentBytes)
+	}
+	size, err := alignUp(result.SizeBytes, result.AlignmentBytes)
+	if err != nil {
+		return Result{}, err
+	}
+	if size > result.SizeBytes {
+		result.Padding = append(result.Padding, Padding{OffsetBytes: result.SizeBytes, SizeBytes: size - result.SizeBytes})
+	}
+	result.SizeBytes = size
+	return result, nil
 }
 
 func (e *Engine) layoutStruct(fields []Field, depth int) (Result, error) {

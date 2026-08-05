@@ -2148,21 +2148,67 @@ fn i32 main() {
 	}
 }
 
-func TestEmitRejectsResultWithEnumError(t *testing.T) {
+func TestEmitResultWithEnumPayloads(t *testing.T) {
 	t.Parallel()
 	program := lowerSource(t, `module main;
-enum Failure { Denied; }
-fn i32 main() {
-    let Result<i32, Failure> result = .err(.Denied);
+enum Kind { Unknown; Value { i32 amount; }; }
+enum Failure { Denied; Code { i32 status; }; }
+
+fn Result<Kind, Failure> choose(bool accept) {
+    return if (accept) { .ok(.Value { .amount = 20 }) } else { .err(.Code { .status = 22 }) };
+}
+
+fn i32 score(Result<Kind, Failure> result) {
     return switch (result) {
-        case .ok(value) : { value }
-        case .err(_) : { 42 }
+        case .ok(kind) : { switch (kind) {
+            case .Unknown : { 0 }
+            case .Value { .amount = amount } : { amount }
+        } }
+        case .err(failure) : { switch (failure) {
+            case .Denied : { 0 }
+            case .Code { .status = status } : { status }
+        } }
+    };
+}
+
+fn i32 main() {
+    return score(choose(true)) + score(choose(false));
+}
+`)
+	outcome, err := interpreter.Execute(program, "main::main")
+	if err != nil || outcome.Kind != interpreter.OutcomeReturn || outcome.Value != 42 {
+		t.Fatalf("interpreter = %+v, %v", outcome, err)
+	}
+	unit, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
+	if err != nil {
+		t.Fatalf("Emit() error = %v", err)
+	}
+	wantFeatures := []string{"checked-arithmetic", "copy-result", "inert-enum", "scalar-call", "scalar-control-flow", "trap"}
+	if !slices.Equal(unit.Features, wantFeatures) {
+		t.Fatalf("Emit() features = %v, want %v", unit.Features, wantFeatures)
+	}
+	for _, required := range []string{"typedef union", "fy_enum_0 p_1;", "fy_enum_1 p_0;", "_Static_assert(sizeof(fy_enum_0)", "_Static_assert(sizeof(fy_tagged_0)"} {
+		if !strings.Contains(unit.Source, required) {
+			t.Errorf("generated C is missing %q", required)
+		}
+	}
+}
+
+func TestEmitStillRejectsOptionWithEnumPayload(t *testing.T) {
+	t.Parallel()
+	program := lowerSource(t, `module main;
+enum Kind { Unknown; }
+fn i32 main() {
+    let Option<Kind> kind = .some(.Unknown);
+    return switch (kind) {
+        case .some(_) : { 42 }
+        case .none : { 0 }
     };
 }
 `)
 	_, err := cbackend.Emit(program, "main::main", cbackend.Stage0Profile())
 	var capability cbackend.CapabilityError
-	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "Result construction type") {
+	if !errors.As(err, &capability) || !strings.Contains(capability.Feature, "Option construction type") {
 		t.Fatalf("Emit() error = %v", err)
 	}
 }

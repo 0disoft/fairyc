@@ -12,9 +12,10 @@ output, LF-only text, and no absolute fixture path. It also creates a determinis
 `drop-trace-v0` unit, proves every interpreter-observed drop has a source/type/span site, and keeps
 that unit separate from the production translation unit.
 
-These 36 cases are emission evidence, not native-code evidence. They cover scalar control,
+These 39 cases are emission evidence, not native-code evidence. They cover scalar control,
 checked arithmetic, direct `i32` minimum emission as `INT32_MIN`, always-checked assertion control, `Option<i32>` Some and None, and `Result<i32, i32>` propagation success and
-failure, copy-only `Result<usize, inert-struct>` transport, restricted inert user-enum construction,
+failure, copy-only `Result<usize, inert-struct>` and `Result<user-enum, inert-struct>` transport,
+restricted inert user-enum construction,
 named payload extraction, and exhaustive switch,
 plus flat move-only resource construction over Fairy copy scalars or raw pointers, field access,
 whole-root call move, empty-drop and compiler-private typed nonempty-drop
