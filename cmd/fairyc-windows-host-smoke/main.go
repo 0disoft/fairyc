@@ -2,11 +2,8 @@ package main
 
 import (
 	"bytes"
-	"context"
-	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -30,231 +27,16 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("resolve repository root: %w", err)
 	}
-	successSource, err := os.ReadFile(filepath.FromSlash(checkedInSuccessPath))
+	sources, err := loadHostSmokeSources()
 	if err != nil {
-		return fmt.Errorf("read checked-in Windows smoke source: %w", err)
-	}
-	moduleMainSource, err := os.ReadFile(filepath.FromSlash(checkedInModuleMainPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in multi-source entry: %w", err)
-	}
-	moduleSupportSource, err := os.ReadFile(filepath.FromSlash(checkedInModuleSupportPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in multi-source support: %w", err)
-	}
-	windowsTargetSource, err := os.ReadFile(filepath.FromSlash(checkedInWindowsTargetPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in Windows target source: %w", err)
-	}
-	windowsQuickstartSource, err := os.ReadFile(filepath.FromSlash(checkedInWindowsQuickstartPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in Windows quickstart source: %w", err)
-	}
-	windowsOutputSource, err := os.ReadFile(filepath.FromSlash(checkedInWindowsOutputPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in Windows output source: %w", err)
-	}
-	windowsOutputSupportSource, err := os.ReadFile(filepath.FromSlash(checkedInWindowsOutputSupportPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in Windows output support source: %w", err)
-	}
-	stdIOManifest, err := os.ReadFile(filepath.FromSlash(checkedInStdIOManifestPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in std::io workspace manifest: %w", err)
-	}
-	stdIOMain, err := os.ReadFile(filepath.FromSlash(checkedInStdIOMainPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in std::io workspace entry: %w", err)
-	}
-	stdIoScalarManifest, err := os.ReadFile(filepath.FromSlash(checkedInStdIoScalarManifestPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in std::io scalar workspace manifest: %w", err)
-	}
-	stdIoScalarMain, err := os.ReadFile(filepath.FromSlash(checkedInStdIoScalarMainPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in std::io scalar workspace entry: %w", err)
-	}
-	stdAllocManifest, err := os.ReadFile(filepath.FromSlash(checkedInStdAllocManifestPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in std::alloc workspace manifest: %w", err)
-	}
-	stdAllocMain, err := os.ReadFile(filepath.FromSlash(checkedInStdAllocMainPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in std::alloc workspace entry: %w", err)
-	}
-	stdBytesManifest, err := os.ReadFile(filepath.FromSlash(checkedInStdBytesManifestPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in std::bytes workspace manifest: %w", err)
-	}
-	stdBytesMain, err := os.ReadFile(filepath.FromSlash(checkedInStdBytesMainPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in std::bytes workspace entry: %w", err)
-	}
-	stdTextManifest, err := os.ReadFile(filepath.FromSlash(checkedInStdTextManifestPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in std::text workspace manifest: %w", err)
-	}
-	stdTextMain, err := os.ReadFile(filepath.FromSlash(checkedInStdTextMainPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in std::text workspace entry: %w", err)
-	}
-	stdTextFromBufferManifest, err := os.ReadFile(filepath.FromSlash(checkedInStdTextFromBufferManifestPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in std::text from-buffer workspace manifest: %w", err)
-	}
-	stdTextFromBufferMain, err := os.ReadFile(filepath.FromSlash(checkedInStdTextFromBufferMainPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in std::text from-buffer workspace entry: %w", err)
-	}
-	stdFSManifest, err := os.ReadFile(filepath.FromSlash(checkedInStdFSManifestPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in std::fs workspace manifest: %w", err)
-	}
-	stdFSMain, err := os.ReadFile(filepath.FromSlash(checkedInStdFSMainPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in std::fs workspace entry: %w", err)
-	}
-	stdFSPathOps, err := os.ReadFile(filepath.FromSlash(checkedInStdFSPathOpsPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in std::fs path operations: %w", err)
-	}
-	stdFSPositioning, err := os.ReadFile(filepath.FromSlash(checkedInStdFSPositioningPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in std::fs positioning operations: %w", err)
-	}
-	stdFSMetadata, err := os.ReadFile(filepath.FromSlash(checkedInStdFSMetadataPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in std::fs metadata operations: %w", err)
-	}
-	stdFSLinkOps, err := os.ReadFile(filepath.FromSlash(checkedInStdFSLinkOpsPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in std::fs hard-link operations: %w", err)
-	}
-	regionsManifest, err := os.ReadFile(filepath.FromSlash(checkedInRegionsManifestPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in Region workspace manifest: %w", err)
-	}
-	regionsMain, err := os.ReadFile(filepath.FromSlash(checkedInRegionsMainPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in Region workspace entry: %w", err)
-	}
-	processArgsManifest, err := os.ReadFile(filepath.FromSlash(checkedInProcessArgsManifestPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in process args workspace manifest: %w", err)
-	}
-	processArgsMain, err := os.ReadFile(filepath.FromSlash(checkedInProcessArgsMainPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in process args workspace entry: %w", err)
-	}
-	windowsFileSource, err := os.ReadFile(filepath.FromSlash(checkedInWindowsFilePath))
-	if err != nil {
-		return fmt.Errorf("read checked-in Windows File source: %w", err)
-	}
-	windowsFileSupportSource, err := os.ReadFile(filepath.FromSlash(checkedInWindowsFileSupportPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in Windows File support source: %w", err)
-	}
-	ownedTextSource, err := os.ReadFile(filepath.FromSlash(checkedInOwnedTextPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in owned-text source: %w", err)
-	}
-	ownedTextSupportSource, err := os.ReadFile(filepath.FromSlash(checkedInOwnedTextSupportPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in owned-text support source: %w", err)
-	}
-	workspaceManifest, err := os.ReadFile(filepath.FromSlash(checkedInWorkspaceManifestPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in workspace manifest: %w", err)
-	}
-	workspaceMain, err := os.ReadFile(filepath.FromSlash(checkedInWorkspaceMainPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in workspace entry: %w", err)
-	}
-	workspaceMemberManifest, err := os.ReadFile(filepath.FromSlash(checkedInWorkspaceMemberManifestPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in workspace member manifest: %w", err)
-	}
-	workspaceMemberSource, err := os.ReadFile(filepath.FromSlash(checkedInWorkspaceMemberSourcePath))
-	if err != nil {
-		return fmt.Errorf("read checked-in workspace member source: %w", err)
-	}
-	workspaceMemberTest, err := os.ReadFile(filepath.FromSlash(checkedInWorkspaceMemberTestPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in workspace member test: %w", err)
-	}
-	workspaceTest, err := os.ReadFile(filepath.FromSlash(checkedInWorkspaceTestPath))
-	if err != nil {
-		return fmt.Errorf("read checked-in workspace test: %w", err)
+		return err
 	}
 	root, err := os.MkdirTemp("", "fairyc-windows-host-smoke-")
 	if err != nil {
 		return fmt.Errorf("create temporary source root: %w", err)
 	}
 	defer os.RemoveAll(root)
-	for name, source := range map[string]string{
-		workspaceManifestPath:                  string(workspaceManifest),
-		workspaceMainPath:                      string(workspaceMain),
-		workspaceMemberManifestPath:            string(workspaceMemberManifest),
-		workspaceMemberSourcePath:              string(workspaceMemberSource),
-		workspaceMemberTestPath:                string(workspaceMemberTest),
-		workspaceTestPath:                      string(workspaceTest),
-		checkedInSuccessPath:                   string(successSource),
-		checkedInModuleMainPath:                string(moduleMainSource),
-		checkedInModuleSupportPath:             string(moduleSupportSource),
-		checkedInWindowsTargetPath:             string(windowsTargetSource),
-		checkedInWindowsQuickstartPath:         string(windowsQuickstartSource),
-		checkedInWindowsOutputPath:             string(windowsOutputSource),
-		checkedInWindowsOutputSupportPath:      string(windowsOutputSupportSource),
-		checkedInStdIOManifestPath:             string(stdIOManifest),
-		checkedInStdIOMainPath:                 string(stdIOMain),
-		checkedInStdIoScalarManifestPath:       string(stdIoScalarManifest),
-		checkedInStdIoScalarMainPath:           string(stdIoScalarMain),
-		checkedInStdAllocManifestPath:          string(stdAllocManifest),
-		checkedInStdAllocMainPath:              string(stdAllocMain),
-		checkedInStdBytesManifestPath:          string(stdBytesManifest),
-		checkedInStdBytesMainPath:              string(stdBytesMain),
-		checkedInStdTextManifestPath:           string(stdTextManifest),
-		checkedInStdTextMainPath:               string(stdTextMain),
-		checkedInStdTextFromBufferManifestPath: string(stdTextFromBufferManifest),
-		checkedInStdTextFromBufferMainPath:     string(stdTextFromBufferMain),
-		checkedInStdFSManifestPath:             string(stdFSManifest),
-		checkedInStdFSMainPath:                 string(stdFSMain),
-		checkedInStdFSPathOpsPath:              string(stdFSPathOps),
-		checkedInStdFSPositioningPath:          string(stdFSPositioning),
-		checkedInStdFSMetadataPath:             string(stdFSMetadata),
-		checkedInStdFSLinkOpsPath:              string(stdFSLinkOps),
-		checkedInRegionsManifestPath:           string(regionsManifest),
-		checkedInRegionsMainPath:               string(regionsMain),
-		checkedInProcessArgsManifestPath:       string(processArgsManifest),
-		checkedInProcessArgsMainPath:           string(processArgsMain),
-		checkedInWindowsFilePath:               string(windowsFileSource),
-		checkedInWindowsFileSupportPath:        string(windowsFileSupportSource),
-		checkedInOwnedTextPath:                 string(ownedTextSource),
-		checkedInOwnedTextSupportPath:          string(ownedTextSupportSource),
-		"negative.fy":                          negativeSource,
-		"division_by_zero.fy":                  divisionByZeroSource,
-		"remainder_by_zero.fy":                 remainderByZeroSource,
-		"signed_division_overflow.fy":          signedDivisionOverflowSource,
-		"integer_overflow.fy":                  integerOverflowSource,
-		"usize_overflow.fy":                    usizeOverflowSource,
-		"unsigned_division.fy":                 unsignedDivisionSource,
-		"unsigned_division_zero.fy":            unsignedDivisionZeroSource,
-		"unsigned_bitwise_shift.fy":            unsignedBitwiseShiftSource,
-		"unsigned_invalid_shift.fy":            unsignedInvalidShiftSource,
-		"left_shift.fy":                        leftShiftSource,
-		"left_shift_overflow.fy":               leftShiftOverflowSource,
-		"invalid_shift.fy":                     invalidShiftSource,
-		"bounds.fy":                            boundsSource,
-		"array_bounds.fy":                      arrayBoundsSource,
-		"array_store_bounds.fy":                arrayStoreBoundsSource,
-		"slice_bounds.fy":                      sliceBoundsSource,
-		"assertion_failure.fy":                 assertionFailureSource,
-		"lexical_defer.fy":                     lexicalDeferSource,
-		"enum_result.fy":                       enumResultSource,
-		"enum_result_propagation.fy":           enumResultPropagationSource,
-		"enum_option.fy":                       enumOptionSource,
-		"tagged_array.fy":                      taggedArraySource,
-	} {
+	for name, source := range sources {
 		destination := filepath.Join(root, filepath.FromSlash(name))
 		if err := os.MkdirAll(filepath.Dir(destination), 0o700); err != nil {
 			return fmt.Errorf("create %s smoke source directory: %w", name, err)
@@ -850,140 +632,60 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	inspectedPEImages := 1 + targetBuildExecutions + workspaceBuildExecutions + windowsFileSourceExecutions + ownedTextSourceExecutions + targetRunExecutions + workspaceRunExecutions + targetExecExecutions + windowsFileExecutions + bufferProbeExecutions + ownedTextProbeExecutions + arenaProbeExecutions + regionFailureProbeImages + bufferFailureProbeImages + readAppendFailureProbeImages + readToEndFailureProbeImages + stringAppendFailureProbeImages + cstringFailureProbeImages + stringCopyFailureProbeImages + stringFromBufferProbeImages + processArgsBuildImages + processArgsDecodeImages + layoutExecutions + abiExecutions + relocationExecutions + weakSearchExecutions + archiveExecutions + structResultExecutions + cIntCastExecutions + unwindExecutions
-	fmt.Printf("Generated-Fairy Region failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering payload-allocation failure, node-allocation rollback, exact status 1, lexical reset, automatic Arena drop, and zero retained probe allocations\n", regionFailureCases, regionFailureProbeImages)
-	fmt.Printf("Generated-Fairy Buffer failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering with_capacity initial-allocation failure plus resize_zeroed and append_byte growth failures with preserved len/capacity, exact status 1, and zero retained probe allocations\n", bufferFailureCases, bufferFailureProbeImages)
-	fmt.Printf("Generated-Fairy read_append failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering growth-allocation failure before I/O, exact file/allocation statuses 0/1, preserved Buffer len/capacity, consuming File close, automatic Buffer drop, and zero retained probe allocations\n", readAppendFailureCases, readAppendFailureProbeImages)
-	fmt.Printf("Generated-Fairy read_to_end failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering one committed 65536-byte prefix, second-window allocation failure before I/O, exact file/allocation statuses 0/1, preserved cursor and Buffer bytes, consuming File close, automatic Buffer drop, and zero retained probe allocations\n", readToEndFailureCases, readToEndFailureProbeImages)
-	fmt.Printf("Generated-Fairy String append failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering successful copy allocation, append growth-allocation failure with preserved owner and len/is_empty/view, exact statuses 1/1, automatic String drop, and zero retained probe allocations\n", stringAppendFailureCases, stringAppendFailureProbeImages)
-	fmt.Printf("Generated-Fairy CString failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering cstring_from_text initial-allocation failure, exact statuses 1/1, automatic CString drop, and zero retained probe allocations\n", cstringFailureCases, cstringFailureProbeImages)
-	fmt.Printf("Generated-Fairy String copy failure proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering text::copy initial-allocation failure, exact statuses 1/1, automatic String drop, and zero retained probe allocations\n", stringCopyFailureCases, stringCopyFailureProbeImages)
-	fmt.Printf("Generated-Fairy Buffer-to-String conversion proof passed: %d forced .err executions across %d inspected low/optimized MSVC images, covering zero-copy valid UTF-8 transfer under a fail-after-two schedule, invalid UTF-8 ownership return with preserved len/capacity/bytes, empty String success, automatic String and Buffer drop, and zero retained probe allocations\n", stringFromBufferProbeCases, stringFromBufferProbeImages)
-	fmt.Printf("Generated-Fairy std::fs one-call write, owned-Buffer read append/read-to-end, file and directory creation/removal/no-replace rename, recursive parent creation, no-replace byte copy and hard-link creation, path-kind snapshot, absolute/current/end seek, same-handle read-only observation/mutation, hard-link, and allocated-size metadata, append, file-kind, exact-read, and file-identity proof passed: %d native executions across %d inspected low/optimized MSVC images, covering one-call prefix success, read-only write failure with zero progress, write-all completion, initialized-prefix Buffer append, current-position read-to-end, short read, EOF, write-only read failure with preserved bytes, open-or-create preservation, exclusive create collision, exact file remove success plus missing-path and open-sharing failures, no-replace file rename collision preservation plus open-sharing failure and exact final bytes, exact byte-copy completion plus collision preservation and missing-source no-create behavior, no-replace hard-link collision plus missing-source no-create behavior, shared identity, link-count and bytes, source-name removal, and surviving destination alias, path-level ordinary file and directory classification plus exact missing failure, one-level and nested directory creation, existing-directory success, missing-parent and file/directory collision failures, partial-prefix preservation after a later invalid-name failure, non-empty removal failure, child cleanup, exact empty-directory removal, no-replace directory rename collision, moved-child preservation, old-path disappearance, bounded negative seek, start-preserving failure, beyond-EOF cursor movement with unchanged size, write-capable read-only true/false mutation, exact read-only-handle access denial with unchanged metadata, ordinary and host-created read-only metadata plus both names of a host-created two-link file with filesystem-reported allocation at least logical size and unchanged cursor/size, write-only append creation, seek-resistant EOF writes, exact retained bytes, disk files, the NUL character device, complete reads, unexpected-EOF prefix preservation, same-file handles, and distinct live files\n", stdFSBuildExecutions, stdFSBuildExecutions)
-	fmt.Printf("std::fs recursive removal proof covered generated-Fairy exact four-object success, missing-path storage, open-child sharing failure with zero progress, read-only preservation, raw actual junction-leaf target survival, and retry cleanup across the same %d native executions\n", stdFSBuildExecutions)
-	fmt.Printf("Stable run program-argument forwarding proof passed: %d native executions across %d inspected low/optimized MSVC images, covering argv[0] inclusion and ordering, empty, flag-looking, space/quote/trailing-backslash, and non-ASCII UTF-8 argument round-trips, out-of-range status 1, too-small status 3 with exact needed and an unchanged caller buffer, CLI embedded-NUL and delimiter rejection, and low-level invalid-surrogate status 2 with an unchanged buffer\n", processArgsExecutions+processArgsDecodeExecutions, processArgsBuildImages+processArgsDecodeImages)
-	fmt.Printf("std::io scalar output proof passed: %d native executions across %d inspected low/optimized MSVC images, covering stdout u32 0/1/max, usize 0/1/max, bool true/false, plus stderr i32 0/negative/min/max, u32 0/max, usize 0/max, and bool true/false exact ASCII bytes with exact written counts\n", stdIoScalarBuildExecutions, stdIoScalarBuildExecutions)
-	fmt.Println("Generated-Fairy user-enum Result proof passed: 4 native executions across low/optimized MSVC, covering .ok enum construction, enum payload extraction, exhaustive enum switching, .err inert-struct extraction, and ? propagation of enum errors")
-	fmt.Println("Generated-Fairy user-enum Option proof passed: 2 native executions across low/optimized MSVC, covering Some enum construction, payload extraction, exhaustive enum switching, and None")
-	fmt.Println("Generated-Fairy copy fixed-array Option/Result proof passed: 2 native executions across low/optimized MSVC, covering Some and None, Ok and Err, indexed payload reads, and success/error propagation")
-	fmt.Printf("Generated-Fairy c::int cast proof passed: %d native executions across low/optimized MSVC, covering imported negative-capable C int identity, explicit c::int-to-i32 conversion, exact value round-trip, explicit i32-to-c::int conversion, and a separate C consumer\n", cIntCastExecutions)
-	fmt.Printf("Windows host smoke passed: build-host PE %d bytes with %d validated sections, %d runtime-function records, and %d version-2 unwind records, %d source-level Windows target builds, %d package-workspace builds, %d package-workspace runs, %d source-level safe File lifecycle builds, %d source-level safe owned-text lifecycle builds, %d direct run-target executions, and %d exec-target executions checked LLP64 c.long emission, move-only pointer-width resource transport, closed SystemHeap, public safe std::bytes Buffer ownership and views, Arena/Region, String/CString/CStr, allocation-free owner-bound text-to-byte views, UTF-8 crossings, safe borrowed-view internal calls, byte lengths, typed scalar comparisons, scalar fixed-array calls, checked reads and mutable indexed stores, checked byte indexing and explicit or omitted-bound slicing, always-checked assertions, bounded lexical defer, value-preserving integer casts, checked unsigned arithmetic, division, remainder, bitwise operations, and left/right shifts, exact stdout bytes, stable-run stdin forwarding, bounded allocation-free stdin byte reads with EOF and partial-buffer evidence, and native result 42, including one %d-byte standalone Go-built fairyc.exe quickstart, output, locked workspace execution, semantic text/JSON tests, ten isolated native-test commands covering fourteen executions across low/optimized MSVC including exact portable test-file and recursive test-directory selection, exact-current source anchors, and optimized JSON trap continuation, selected workspace-member tests, and package-qualified workspace aggregation, two target-explicit C emissions, nine paired cold/warm persistent-cache process measurements, one nine-process bounded persistent-cache growth staircase, an eight-request editor-shaped workspace session with Windows process-memory peaks, %d fresh locked Atlas workspace-call catalog processes with per-process memory peaks, %d generated Atlas workspace-call scaling shapes, and %d post-GC retained-index batches, 42 run-host outcomes covered fixed arrays, byte-view iteration and slicing, checked indexed stores, assertions and lexical defer in low and optimized profiles, usize arithmetic and overflow, unsigned division and zero traps, typed bitwise operations, checked shift-width and left-shift overflow traps, signed results, and six trap categories, Windows File partial I/O and consuming-close passed %d separate-translation-unit MSVC executions, Buffer initialization, reserve, self-overlap append, and zeroed-resize allocation rollback passed %d separate-translation-unit MSVC executions, owned-text opaque-storage failure preservation, forced allocation rollback, and repeated drop passed %d separate-translation-unit MSVC executions, Arena zeroing, two-stage allocation rollback, stale Region rejection, and active-drop preservation passed %d separate-translation-unit MSVC executions, %d LLP64 layout cases passed %d MSVC probe executions, %d Microsoft x64 ABI cases passed %d separate-translation-unit MSVC probe executions, exact object addends and final-image REL32 through REL32_5, weak-alias fallback/strong override, ADDR64, and unwind ADDR32NB values plus CodeView SECTION/SECREL pairs, PE/PDB identity, and exact DbgHelp function/line symbolication passed %d separate-translation-unit MSVC executions, weak NOLIBRARY suppression and LIBRARY extraction passed %d separate-translation-unit MSVC executions, archive extraction, pick-any ownership, selected-child retention, and discarded-child elimination passed %d MSVC input-order executions, generated-Fairy small and large struct results passed %d separate-translation-unit MSVC executions across C11 and C17 consumer modes, %d Windows x64 unwind cases plus exact profile-specific handler-tail ADDR32NB binding passed %d actual exception-dispatch and virtual-unwind executions, %d PE32+ target or probe images passed structural and unwind inspection, and every MSVC compilation object passed COFF inspection across low/optimized with msvc %s\n", len(artifact), len(peReport.Sections), unwindReport.RuntimeFunctions, unwindReport.Version2Infos, targetBuildExecutions, workspaceBuildExecutions, workspaceRunExecutions, windowsFileSourceExecutions, ownedTextSourceExecutions, targetRunExecutions, targetExecExecutions, standaloneCompilerBytes, buildmeasure.AtlasCallProcessIterations, len(atlasCallScaleMeasurement.Shapes), len(atlasCallRetainedMeasurement.Shapes)*buildmeasure.AtlasCallRetainedIterationsPerShape, windowsFileExecutions, bufferProbeExecutions, ownedTextProbeExecutions, arenaProbeExecutions, layoutCases, layoutExecutions, abiCases, abiExecutions, relocationExecutions, weakSearchExecutions, archiveExecutions, structResultExecutions, unwindCases, unwindExecutions, inspectedPEImages, toolchain.Version)
-	return nil
-}
-
-func runHostCase(root, name, source, support, profile string, wantCode int, wantStdoutPrefix, wantStderr string) error {
-	var stdout bytes.Buffer
-	var stderr bytes.Buffer
-	arguments := []string{"experimental", "run-host", source}
-	if support != "" {
-		arguments = append(arguments, "--source", support)
-	}
-	arguments = append(arguments, "--profile", profile)
-	code := cli.Run(arguments, root, &stdout, &stderr)
-	stdoutMatches := stdout.Len() == 0
-	if wantStdoutPrefix != "" {
-		stdoutMatches = strings.HasPrefix(stdout.String(), wantStdoutPrefix)
-	}
-	if code != wantCode || stderr.String() != wantStderr || !stdoutMatches {
-		return fmt.Errorf("%s run-host returned code %d, stdout %q, stderr %q", name, code, stdout.String(), stderr.String())
-	}
-	return nil
-}
-
-func executeExpectResult(path string, expected int32) error {
-	contextValue, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	command := exec.CommandContext(contextValue, path)
-	command.Dir = filepath.Dir(path)
-	command.Stdin = nil
-	var output bytes.Buffer
-	command.Stdout = &output
-	command.Stderr = &output
-	err := command.Run()
-	if errors.Is(contextValue.Err(), context.DeadlineExceeded) {
-		return fmt.Errorf("build-host artifact exceeded execution timeout")
-	}
-	exitCode := 0
-	if err != nil {
-		var exitError *exec.ExitError
-		if !errors.As(err, &exitError) {
-			return fmt.Errorf("build-host artifact execution failed: %w", err)
-		}
-		exitCode = exitError.ExitCode()
-	}
-	actual := int32(uint32(exitCode))
-	if actual != expected || output.Len() != 0 {
-		exitCode := -1
-		if command.ProcessState != nil {
-			exitCode = command.ProcessState.ExitCode()
-		}
-		return fmt.Errorf("build-host artifact returned error %v, exit %d (i32 %d), output %q", err, exitCode, actual, output.String())
-	}
-	return nil
-}
-
-func executeExpectResultWithArgs(path string, expected int32, args ...string) error {
-	contextValue, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	command := exec.CommandContext(contextValue, path)
-	command.Args = append([]string{path}, args...)
-	command.Dir = filepath.Dir(path)
-	command.Stdin = nil
-	var output bytes.Buffer
-	command.Stdout = &output
-	command.Stderr = &output
-	err := command.Run()
-	if errors.Is(contextValue.Err(), context.DeadlineExceeded) {
-		return fmt.Errorf("build-host artifact with arguments exceeded execution timeout")
-	}
-	exitCode := 0
-	if err != nil {
-		var exitError *exec.ExitError
-		if !errors.As(err, &exitError) {
-			return fmt.Errorf("build-host artifact with arguments execution failed: %w", err)
-		}
-		exitCode = exitError.ExitCode()
-	}
-	actual := int32(uint32(exitCode))
-	if actual != expected || output.Len() != 0 {
-		exitCode := -1
-		if command.ProcessState != nil {
-			exitCode = command.ProcessState.ExitCode()
-		}
-		return fmt.Errorf("build-host artifact with arguments returned error %v, exit %d (i32 %d), output %q", err, exitCode, actual, output.String())
-	}
-	return nil
-}
-
-func executeExpectOutput(path string, expected int32, expectedStdout, expectedStderr string) error {
-	return executeExpectOutputWithInput(path, "", expected, expectedStdout, expectedStderr)
-}
-
-func executeExpectOutputWithInput(path, input string, expected int32, expectedStdout, expectedStderr string) error {
-	contextValue, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	command := exec.CommandContext(contextValue, path)
-	command.Dir = filepath.Dir(path)
-	command.Stdin = strings.NewReader(input)
-	var stdout bytes.Buffer
-	var stderr bytes.Buffer
-	command.Stdout = &stdout
-	command.Stderr = &stderr
-	err := command.Run()
-	if errors.Is(contextValue.Err(), context.DeadlineExceeded) {
-		return fmt.Errorf("artifact exceeded execution timeout")
-	}
-	exitCode := 0
-	if err != nil {
-		var exitError *exec.ExitError
-		if !errors.As(err, &exitError) {
-			return fmt.Errorf("artifact execution failed: %w", err)
-		}
-		exitCode = exitError.ExitCode()
-	}
-	actual := int32(uint32(exitCode))
-	if actual != expected || stdout.String() != expectedStdout || stderr.String() != expectedStderr {
-		return fmt.Errorf("artifact returned error %v, exit %d (i32 %d), stdout %q, stderr %q", err, exitCode, actual, stdout.String(), stderr.String())
-	}
+	reportHostSmokeSuccess(hostSmokeReceipt{
+		artifactBytes:                  len(artifact),
+		validatedSections:              len(peReport.Sections),
+		runtimeFunctions:               unwindReport.RuntimeFunctions,
+		version2Infos:                  unwindReport.Version2Infos,
+		targetBuildExecutions:          targetBuildExecutions,
+		workspaceBuildExecutions:       workspaceBuildExecutions,
+		workspaceRunExecutions:         workspaceRunExecutions,
+		windowsFileSourceExecutions:    windowsFileSourceExecutions,
+		ownedTextSourceExecutions:      ownedTextSourceExecutions,
+		targetRunExecutions:            targetRunExecutions,
+		targetExecExecutions:           targetExecExecutions,
+		windowsFileExecutions:          windowsFileExecutions,
+		bufferProbeExecutions:          bufferProbeExecutions,
+		ownedTextProbeExecutions:       ownedTextProbeExecutions,
+		arenaProbeExecutions:           arenaProbeExecutions,
+		regionFailureProbeImages:       regionFailureProbeImages,
+		regionFailureCases:             regionFailureCases,
+		bufferFailureProbeImages:       bufferFailureProbeImages,
+		bufferFailureCases:             bufferFailureCases,
+		readAppendFailureProbeImages:   readAppendFailureProbeImages,
+		readAppendFailureCases:         readAppendFailureCases,
+		readToEndFailureProbeImages:    readToEndFailureProbeImages,
+		readToEndFailureCases:          readToEndFailureCases,
+		stringAppendFailureProbeImages: stringAppendFailureProbeImages,
+		stringAppendFailureCases:       stringAppendFailureCases,
+		cstringFailureProbeImages:      cstringFailureProbeImages,
+		cstringFailureCases:            cstringFailureCases,
+		stringCopyFailureProbeImages:   stringCopyFailureProbeImages,
+		stringCopyFailureCases:         stringCopyFailureCases,
+		stringFromBufferProbeImages:    stringFromBufferProbeImages,
+		stringFromBufferProbeCases:     stringFromBufferProbeCases,
+		stdFSBuildExecutions:           stdFSBuildExecutions,
+		processArgsExecutions:          processArgsExecutions,
+		processArgsDecodeExecutions:    processArgsDecodeExecutions,
+		processArgsBuildImages:         processArgsBuildImages,
+		processArgsDecodeImages:        processArgsDecodeImages,
+		stdIoScalarBuildExecutions:     stdIoScalarBuildExecutions,
+		cIntCastExecutions:             cIntCastExecutions,
+		atlasCallProcessIterations:     buildmeasure.AtlasCallProcessIterations,
+		atlasCallScaleShapes:           len(atlasCallScaleMeasurement.Shapes),
+		atlasCallRetainedBatches:       len(atlasCallRetainedMeasurement.Shapes) * buildmeasure.AtlasCallRetainedIterationsPerShape,
+		layoutCases:                    layoutCases,
+		layoutExecutions:               layoutExecutions,
+		abiCases:                       abiCases,
+		abiExecutions:                  abiExecutions,
+		relocationExecutions:           relocationExecutions,
+		weakSearchExecutions:           weakSearchExecutions,
+		archiveExecutions:              archiveExecutions,
+		structResultExecutions:         structResultExecutions,
+		unwindCases:                    unwindCases,
+		unwindExecutions:               unwindExecutions,
+		standaloneCompilerBytes:        standaloneCompilerBytes,
+		toolchainVersion:               toolchain.Version,
+	})
 	return nil
 }
