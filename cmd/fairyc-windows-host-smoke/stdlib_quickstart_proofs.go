@@ -14,11 +14,20 @@ import (
 
 var processArgsProofArguments = []string{"", "Fairy", "--locked", "a b\"c\\d\\", "한글λ"}
 
+type hardLinkFixture struct {
+	path  string
+	alias string
+}
+
 func runStdlibQuickstartProof(root string, directory string, artifactBase string, module string, expectedResult int32, freshFiles ...string) (int, error) {
 	return runStdlibQuickstartProofWithReadOnly(root, directory, artifactBase, module, expectedResult, nil, freshFiles...)
 }
 
 func runStdlibQuickstartProofWithReadOnly(root string, directory string, artifactBase string, module string, expectedResult int32, readOnlyFiles []string, freshFiles ...string) (int, error) {
+	return runStdlibQuickstartProofWithFixtures(root, directory, artifactBase, module, expectedResult, readOnlyFiles, nil, freshFiles...)
+}
+
+func runStdlibQuickstartProofWithFixtures(root string, directory string, artifactBase string, module string, expectedResult int32, readOnlyFiles []string, hardLinks []hardLinkFixture, freshFiles ...string) (int, error) {
 	workspaceRoot := filepath.Join(root, "examples", directory)
 	artifactPath := filepath.Join(workspaceRoot, "build", artifactBase+".exe")
 	profiles := []struct {
@@ -68,6 +77,22 @@ func runStdlibQuickstartProofWithReadOnly(root string, directory string, artifac
 				return 0, fmt.Errorf("mark %s %s fixture %q read-only: %w", module, profile.name, name, err)
 			}
 		}
+		for _, fixture := range hardLinks {
+			path := filepath.Join(filepath.Dir(artifactPath), fixture.path)
+			alias := filepath.Join(filepath.Dir(artifactPath), fixture.alias)
+			for _, candidate := range []string{alias, path} {
+				if err := os.Remove(candidate); err != nil && !errors.Is(err, os.ErrNotExist) {
+					return 0, fmt.Errorf("remove %s %s hard-link fixture %q: %w", module, profile.name, candidate, err)
+				}
+			}
+			if err := os.WriteFile(path, []byte("metadata"), 0o666); err != nil {
+				return 0, fmt.Errorf("create %s %s hard-link fixture %q: %w", module, profile.name, fixture.path, err)
+			}
+			if err := os.Link(path, alias); err != nil {
+				_ = os.Remove(path)
+				return 0, fmt.Errorf("link %s %s fixture %q to %q: %w", module, profile.name, fixture.alias, fixture.path, err)
+			}
+		}
 		executeErr := executeExpectResult(artifactPath, expectedResult)
 		var cleanupErr error
 		for _, name := range readOnlyFiles {
@@ -78,6 +103,14 @@ func runStdlibQuickstartProofWithReadOnly(root string, directory string, artifac
 			}
 			if err := os.Remove(path); err != nil && cleanupErr == nil {
 				cleanupErr = fmt.Errorf("remove %s %s read-only fixture %q after execution: %w", module, profile.name, name, err)
+			}
+		}
+		for _, fixture := range hardLinks {
+			for _, name := range []string{fixture.alias, fixture.path} {
+				path := filepath.Join(filepath.Dir(artifactPath), name)
+				if err := os.Remove(path); err != nil && cleanupErr == nil {
+					cleanupErr = fmt.Errorf("remove %s %s hard-link fixture %q after execution: %w", module, profile.name, name, err)
+				}
 			}
 		}
 		if executeErr != nil {

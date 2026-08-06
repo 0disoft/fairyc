@@ -316,6 +316,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0304-stable-test-directory-selection.md`: adds repeatable exact recursive `--dir <portable-test-directory>` selection without filesystem re-observation, preserving complete-overlay admission and report bytes with low/optimized isolated native evidence.
 - `0305-public-windows-relative-end-seek.md`: adds bounded `i32` current- and end-relative Windows File seek with same-handle low/optimized raw plus generated-Fairy evidence and SDK `0.0.0-stage0.39`.
 - `0306-public-windows-file-read-only-metadata.md`: adds target-neutral same-handle read-only metadata observation with low/optimized raw plus generated-Fairy evidence and SDK `0.0.0-stage0.40`.
+- `0307-public-windows-file-hard-link-count.md`: adds target-neutral same-handle hard-link count observation with real-link low/optimized raw plus generated-Fairy evidence and SDK `0.0.0-stage0.41`.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

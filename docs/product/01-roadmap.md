@@ -814,6 +814,14 @@ dedicated raw probe plus public generated-Fairy normal/read-only fixtures run un
 optimized MSVC while proving cursor and size preservation. Timestamps, compound metadata records,
 attribute mutation, writable-access guarantees, ACLs, and Linux public linkage remain later gates.
 
+ADR 0307 closes the next bounded same-handle metadata gap in SDK `0.0.0-stage0.41` with
+`hard_link_count(ref File) -> Result<usize, FileError>`. The Windows target queries
+`FileStandardInfo.NumberOfLinks` through the live handle. A dedicated raw probe observes a real
+one-to-two link transition, and public generated-Fairy paths observe count two through both names
+of a host-created hard-link pair under low and optimized MSVC while preserving cursor and size.
+Hard-link mutation, path enumeration, allocation size, timestamps, compound metadata records, and
+Linux public linkage remain later gates.
+
 ADR 0270 extends the SDK to `0.0.0-stage0.16` with allocation-free
 `size(ref File) -> Result<usize, FileError>`. The raw probe observes size 9 before and after cursor
 movement, rejects closed and invalid handles, and the private/public generated-Fairy paths observe

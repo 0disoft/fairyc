@@ -387,6 +387,11 @@ ADR 0306 moves the SDK to `0.0.0-stage0.40` with
 movement, or length change. The boolean is observed metadata rather than a guarantee that a write
 will succeed; handle access, ACLs, sharing, filesystem policy, and later external changes remain
 independent.
+ADR 0307 moves the SDK to `0.0.0-stage0.41` with
+`std::fs::hard_link_count(ref File) -> Result<usize, FileError>`. It observes
+`FILE_STANDARD_INFO.NumberOfLinks` through the same live handle without path lookup, allocation,
+cursor movement, or length change. The value is a momentary count rather than path enumeration,
+authorization, or persistent identity.
 The path-kind query distinguishes ordinary files, directories, and other observed attributes without opening
 an owner, but its snapshot is not stable identity, authorization, containment, or a race-free
 precheck. `std::fs::copy_file_bytes` holds exclusive source and `CREATE_NEW` destination handles,

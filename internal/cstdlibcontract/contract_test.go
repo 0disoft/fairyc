@@ -146,6 +146,7 @@ func TestAdmittedForTargetKeepsWindowsFileTargetBound(t *testing.T) {
 		"fy_std_windows_file_size_v0",
 		"fy_std_windows_file_kind_v0",
 		"fy_std_windows_file_read_only_v0",
+		"fy_std_windows_file_link_count_v0",
 		"fy_std_windows_file_path_kind_v0",
 		"fy_std_windows_file_id_v0",
 		"fy_std_windows_file_set_len_v0",
