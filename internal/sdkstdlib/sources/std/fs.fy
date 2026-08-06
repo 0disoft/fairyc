@@ -183,6 +183,14 @@ unsafe extern C fn raw_file_size_result file_set_len_raw(ptr mut void file, usiz
 unsafe extern C fn raw_file_position_result file_seek_start_raw(ptr mut void file, usize offset) ;
 
 @effects(filesystem)
+@link_name("fy_std_windows_file_seek_current_v0")
+unsafe extern C fn raw_file_position_result file_seek_current_raw(ptr mut void file, i32 offset) ;
+
+@effects(filesystem)
+@link_name("fy_std_windows_file_seek_end_v0")
+unsafe extern C fn raw_file_position_result file_seek_end_raw(ptr mut void file, i32 offset) ;
+
+@effects(filesystem)
 @link_name("fy_std_windows_file_write_v0")
 unsafe extern C fn raw_file_result file_write_raw(ptr mut void file, ptr u8 data, usize length) ;
 
@@ -692,6 +700,33 @@ pub fn Result<usize, FileError> set_len(ref mut File file, usize length) {
 pub fn Result<usize, FileError> seek_start(ref mut File file, usize offset) {
     let raw_file_position_result result = unsafe {
         file_seek_start_raw(file as ptr mut void, offset)
+    };
+    return if (result.status == 0) {
+        .ok(result.position)
+    } else {
+        .err(position_error(result))
+    };
+}
+
+/// Moves by one signed byte delta from the current position and returns the absolute position.
+@effects(filesystem)
+pub fn Result<usize, FileError> seek_current(ref mut File file, i32 offset) {
+    let raw_file_position_result result = unsafe {
+        file_seek_current_raw(file as ptr mut void, offset)
+    };
+    return if (result.status == 0) {
+        .ok(result.position)
+    } else {
+        .err(position_error(result))
+    };
+}
+
+/// Moves by one signed byte delta from the current end of file and returns the absolute position.
+/// Moving beyond the end changes only the cursor until a later write or length change.
+@effects(filesystem)
+pub fn Result<usize, FileError> seek_end(ref mut File file, i32 offset) {
+    let raw_file_position_result result = unsafe {
+        file_seek_end_raw(file as ptr mut void, offset)
     };
     return if (result.status == 0) {
         .ok(result.position)

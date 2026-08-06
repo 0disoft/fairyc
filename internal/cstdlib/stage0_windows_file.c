@@ -968,9 +968,11 @@ struct fy_std_windows_file_size_result_v0 fy_std_windows_file_set_len_v0(
     );
 }
 
-struct fy_std_windows_file_position_result_v0 fy_std_windows_file_seek_start_v0(
+static struct fy_std_windows_file_position_result_v0 fy_std_windows_file_seek_v0(
     void *file_storage,
-    uint64_t offset
+    LONGLONG offset,
+    DWORD origin,
+    int offset_valid
 ) {
     struct fy_std_windows_file_v0 file;
     if (!fy_std_windows_file_load_v0(file_storage, &file)) {
@@ -987,7 +989,7 @@ struct fy_std_windows_file_position_result_v0 fy_std_windows_file_seek_start_v0(
             UINT64_C(0)
         );
     }
-    if (offset > (uint64_t)INT64_MAX) {
+    if (!offset_valid) {
         return fy_std_windows_file_position_result_v0(
             FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0,
             ERROR_SUCCESS,
@@ -996,8 +998,8 @@ struct fy_std_windows_file_position_result_v0 fy_std_windows_file_seek_start_v0(
     }
     LARGE_INTEGER distance;
     LARGE_INTEGER position;
-    distance.QuadPart = (LONGLONG)offset;
-    if (!SetFilePointerEx((HANDLE)file.handle, distance, &position, FILE_BEGIN)) {
+    distance.QuadPart = offset;
+    if (!SetFilePointerEx((HANDLE)file.handle, distance, &position, origin)) {
         return fy_std_windows_file_position_result_v0(
             FY_STD_WINDOWS_FILE_IO_ERROR_V0,
             GetLastError(),
@@ -1009,6 +1011,29 @@ struct fy_std_windows_file_position_result_v0 fy_std_windows_file_seek_start_v0(
         ERROR_SUCCESS,
         (uint64_t)position.QuadPart
     );
+}
+
+struct fy_std_windows_file_position_result_v0 fy_std_windows_file_seek_start_v0(
+    void *file_storage,
+    uint64_t offset
+) {
+    const int offset_valid = offset <= (uint64_t)INT64_MAX;
+    const LONGLONG distance = offset_valid ? (LONGLONG)offset : 0;
+    return fy_std_windows_file_seek_v0(file_storage, distance, FILE_BEGIN, offset_valid);
+}
+
+struct fy_std_windows_file_position_result_v0 fy_std_windows_file_seek_current_v0(
+    void *file_storage,
+    int32_t offset
+) {
+    return fy_std_windows_file_seek_v0(file_storage, (LONGLONG)offset, FILE_CURRENT, 1);
+}
+
+struct fy_std_windows_file_position_result_v0 fy_std_windows_file_seek_end_v0(
+    void *file_storage,
+    int32_t offset
+) {
+    return fy_std_windows_file_seek_v0(file_storage, (LONGLONG)offset, FILE_END, 1);
 }
 
 struct fy_std_windows_file_result_v0 fy_std_windows_file_write_v0(

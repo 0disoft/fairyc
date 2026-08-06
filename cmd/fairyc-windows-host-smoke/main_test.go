@@ -424,6 +424,10 @@ func TestGeneratedFairyStdlibSourcesPassFullPipeline(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	fsPositioning, err := os.ReadFile(filepath.Join("..", "..", "examples", "std_fs_quickstart", "src", "positioning.fy"))
+	if err != nil {
+		t.Fatal(err)
+	}
 	for _, tc := range []struct {
 		name           string
 		manifest       string
@@ -507,7 +511,7 @@ func TestGeneratedFairyStdlibSourcesPassFullPipeline(t *testing.T) {
 		},
 		{
 			name: "windows std fs used", manifest: "std_fs_quickstart", source: string(fsMain),
-			extraSources: map[string][]byte{"src/path_ops.fy": fsPathOps},
+			extraSources: map[string][]byte{"src/path_ops.fy": fsPathOps, "src/positioning.fy": fsPositioning},
 			expect: []string{
 				"fy_std_buffer_append_v0", "fy_std_buffer_drop_v0", "fy_std_buffer_initialize_v0",
 				"fy_std_windows_directory_create_v0", "fy_std_windows_directory_ensure_v0", "fy_std_windows_directory_remove_v0", "fy_std_windows_directory_rename_v0",
@@ -516,14 +520,14 @@ func TestGeneratedFairyStdlibSourcesPassFullPipeline(t *testing.T) {
 				"fy_std_windows_file_copy_bytes_v0",
 				"fy_std_windows_file_rename_v0",
 				"fy_std_windows_file_read_append_v0",
-				"fy_std_windows_file_seek_start_v0", "fy_std_windows_file_size_v0", "fy_std_windows_file_kind_v0", "fy_std_windows_file_path_kind_v0", "fy_std_windows_file_id_v0", "fy_std_windows_file_set_len_v0", "fy_std_windows_file_write_all_v0", "fy_std_windows_file_write_v0",
+				"fy_std_windows_file_seek_current_v0", "fy_std_windows_file_seek_end_v0", "fy_std_windows_file_seek_start_v0", "fy_std_windows_file_size_v0", "fy_std_windows_file_kind_v0", "fy_std_windows_file_path_kind_v0", "fy_std_windows_file_id_v0", "fy_std_windows_file_set_len_v0", "fy_std_windows_file_write_all_v0", "fy_std_windows_file_write_v0",
 				"fy_std_windows_file_sync_v0", "fy_std_windows_file_close_v0", "fy_std_windows_file_drop_v0",
 			},
 			foreignSymbols: []string{
 				"fy_std_buffer_append_v0", "fy_std_buffer_drop_v0", "fy_std_buffer_initialize_v0",
 				"fy_std_windows_directory_create_v0", "fy_std_windows_directory_ensure_v0", "fy_std_windows_directory_remove_v0", "fy_std_windows_directory_rename_v0",
 				"fy_std_windows_file_close_v0", "fy_std_windows_file_copy_bytes_v0", "fy_std_windows_file_drop_v0", "fy_std_windows_file_id_v0", "fy_std_windows_file_kind_v0", "fy_std_windows_file_open_v0", "fy_std_windows_file_path_kind_v0",
-				"fy_std_windows_file_position_v0", "fy_std_windows_file_read_append_v0", "fy_std_windows_file_read_exact_v0", "fy_std_windows_file_read_v0", "fy_std_windows_file_remove_v0", "fy_std_windows_file_rename_v0", "fy_std_windows_file_seek_start_v0",
+				"fy_std_windows_file_position_v0", "fy_std_windows_file_read_append_v0", "fy_std_windows_file_read_exact_v0", "fy_std_windows_file_read_v0", "fy_std_windows_file_remove_v0", "fy_std_windows_file_rename_v0", "fy_std_windows_file_seek_current_v0", "fy_std_windows_file_seek_end_v0", "fy_std_windows_file_seek_start_v0",
 				"fy_std_windows_file_set_len_v0", "fy_std_windows_file_size_v0", "fy_std_windows_file_sync_v0", "fy_std_windows_file_write_all_v0", "fy_std_windows_file_write_v0",
 			},
 		},

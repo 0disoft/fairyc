@@ -451,7 +451,8 @@ func TestWindowsFileSourcesConsumeCloseAndExposePartialIO(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, required := range []string{
-		"CreateFileW", "ReadFile", "WriteFile", "GetFileSizeEx", "GetFileInformationByHandleEx", "FileIdInfo", "SetFileInformationByHandle", "FileEndOfFileInfo", "SetFilePointerEx", "FILE_BEGIN", "FILE_CURRENT", "FlushFileBuffers", "CloseHandle",
+		"CreateFileW", "ReadFile", "WriteFile", "GetFileSizeEx", "GetFileInformationByHandleEx", "FileIdInfo", "SetFileInformationByHandle", "FileEndOfFileInfo", "SetFilePointerEx", "FILE_BEGIN", "FILE_CURRENT", "FILE_END", "FlushFileBuffers", "CloseHandle",
+		"fy_std_windows_file_seek_current_v0", "fy_std_windows_file_seek_end_v0",
 		"fy_std_windows_file_path_kind_v0", "GetFileAttributesW", "FILE_ATTRIBUTE_REPARSE_POINT", "FY_STD_WINDOWS_PATH_KIND_OTHER_V0",
 		"FY_STD_WINDOWS_FILE_PATH_ENCODING_V0", "FY_STD_WINDOWS_FILE_PATH_TOO_LONG_V0",
 		"struct fy_std_windows_file_result_v0 fy_std_windows_file_write_v0(",
@@ -466,6 +467,9 @@ func TestWindowsFileSourcesConsumeCloseAndExposePartialIO(t *testing.T) {
 	for _, required := range []string{
 		"result.os_code != (uint32_t)ERROR_INVALID_HANDLE",
 		"fy_std_windows_file_seek_start_v0(&file, UINT64_MAX)",
+		"fy_std_windows_file_seek_start_v0(&file, UINT64_MAX).status !=",
+		"fy_std_windows_file_seek_current_v0(&file, INT32_C(-4))",
+		"fy_std_windows_file_seek_end_v0(&file, INT32_C(-9))",
 		"fy_std_windows_file_position_v0(&file)",
 		"fy_std_windows_file_size_v0(&file)",
 		"fy_std_windows_file_kind_v0(&file)",
@@ -556,6 +560,41 @@ func TestWindowsFilePathKindProbeHasDedicatedSourceOwner(t *testing.T) {
 	}
 }
 
+func TestWindowsFileSeekProbeHasDedicatedSourceOwner(t *testing.T) {
+	t.Parallel()
+
+	mainProbe, err := os.ReadFile("stage0_windows_file_probe.c")
+	if err != nil {
+		t.Fatal(err)
+	}
+	seekProbe, err := os.ReadFile("stage0_windows_file_seek_probe.c")
+	if err != nil {
+		t.Fatal(err)
+	}
+	mainText := string(mainProbe)
+	seekText := string(seekProbe)
+	if strings.Contains(mainText, "fy_std_windows_file_seek_current_v0") ||
+		strings.Contains(mainText, "fy_std_windows_file_seek_end_v0") {
+		t.Fatal("main Windows File probe retained relative seek proof ownership")
+	}
+	if strings.Count(mainText, "int fy_std_windows_file_seek_probe_v0(void);") != 1 ||
+		strings.Count(mainText, "fy_std_windows_file_seek_probe_v0();") != 1 {
+		t.Fatal("main Windows File probe must declare and invoke the seek proof exactly once")
+	}
+	if strings.Count(seekText, "int fy_std_windows_file_seek_probe_v0(void)") != 1 ||
+		!strings.Contains(seekText, "fy_std_windows_file_seek_current_v0") ||
+		!strings.Contains(seekText, "fy_std_windows_file_seek_end_v0") {
+		t.Fatal("dedicated Windows File seek probe lost its definition or proof body")
+	}
+	combined, err := WindowsFileProbeSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Count(combined, "int fy_std_windows_file_seek_probe_v0(void)") != 2 {
+		t.Fatal("combined Windows File probe must contain one seek declaration and one definition")
+	}
+}
+
 func TestWindowsMSVCSourceForSymbolsSelectsOnlyWindowsFile(t *testing.T) {
 	t.Parallel()
 	source, err := WindowsMSVCSourceForSymbols([]string{"fy_std_windows_file_open_v0"})
@@ -564,7 +603,7 @@ func TestWindowsMSVCSourceForSymbolsSelectsOnlyWindowsFile(t *testing.T) {
 	}
 	for _, required := range []string{
 		"fy_std_windows_file_open_v0", "fy_std_windows_file_read_v0", "fy_std_windows_file_read_exact_v0",
-		"fy_std_windows_file_position_v0", "fy_std_windows_file_seek_start_v0",
+		"fy_std_windows_file_position_v0", "fy_std_windows_file_seek_current_v0", "fy_std_windows_file_seek_end_v0", "fy_std_windows_file_seek_start_v0",
 		"fy_std_windows_file_size_v0", "fy_std_windows_file_kind_v0", "fy_std_windows_file_path_kind_v0", "fy_std_windows_file_set_len_v0",
 		"fy_std_windows_file_id_v0",
 		"fy_std_windows_file_write_v0",

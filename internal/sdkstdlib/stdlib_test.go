@@ -8,7 +8,7 @@ import (
 
 func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	t.Parallel()
-	if Version != "0.0.0-stage0.38" {
+	if Version != "0.0.0-stage0.39" {
 		t.Fatalf("Version = %q", Version)
 	}
 	if LanguageRevision != "fairyc-language/10" {
@@ -41,6 +41,7 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	createDirAllPublic := false
 	copyFileBytesPublic := false
 	pathKindPublic := false
+	seekFunctions := make(map[string]bool)
 	appendBytePublic := false
 	asBytesPublic := false
 	stderrScalarFunctions := make(map[string]bool)
@@ -100,6 +101,10 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 			}
 		}
 		for _, function := range source.Module.Functions {
+			switch function.Name {
+			case "seek_current", "seek_end":
+				seekFunctions[function.Name] = function.Public
+			}
 			if function.Name == "create_dir_all" {
 				createDirAllPublic = function.Public
 			}
@@ -125,6 +130,11 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	}
 	if !pathKindPublic {
 		t.Fatal("std::fs::path_kind is not public")
+	}
+	for _, name := range []string{"seek_current", "seek_end"} {
+		if !seekFunctions[name] {
+			t.Errorf("std::fs::%s is not public", name)
+		}
 	}
 	if !appendBytePublic {
 		t.Fatal("std::bytes::append_byte is not public")

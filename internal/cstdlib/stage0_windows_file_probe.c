@@ -117,6 +117,7 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_close_v0(void *);
 uint32_t fy_std_windows_file_drop_v0(void *);
 int fy_std_windows_file_copy_probe_v0(void);
 int fy_std_windows_file_path_kind_probe_v0(void);
+int fy_std_windows_file_seek_probe_v0(void);
 
 static int fy_std_windows_file_closed_v0(const struct fy_std_windows_file_v0 *file) {
     return file->handle == NULL && file->open == UINT8_C(0);
@@ -244,6 +245,8 @@ int main(void) {
         FY_STD_WINDOWS_FILE_CLOSED_V0) return 45;
     if (fy_std_windows_file_seek_start_v0(&file, UINT64_C(0)).status !=
         FY_STD_WINDOWS_FILE_CLOSED_V0) return 25;
+    if (fy_std_windows_file_seek_start_v0(&file, UINT64_MAX).status !=
+        FY_STD_WINDOWS_FILE_CLOSED_V0) return 219;
     if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_CLOSED_V0) return 5;
 
     result = fy_std_windows_file_open_v0(path, &read_options, &file);
@@ -712,5 +715,7 @@ int main(void) {
     if (!RemoveDirectoryW(L"fy-dir-partial")) return 177;
     int path_kind_code = fy_std_windows_file_path_kind_probe_v0();
     if (path_kind_code != 0) return path_kind_code;
+    int seek_code = fy_std_windows_file_seek_probe_v0();
+    if (seek_code != 0) return seek_code;
     return fy_std_windows_file_copy_probe_v0();
 }

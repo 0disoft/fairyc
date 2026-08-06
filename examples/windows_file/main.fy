@@ -11,6 +11,53 @@ fn i32 write_position_probe(ref mut fs::File file) {
     if (current_code != 0) {
         return current_code;
     }
+    let i32 relative_code = switch (fs::seek_current(file, -4)) {
+        case .ok(position) : { if (position == 5) { 0 } else { 85 } }
+        case .err(_) : { 86 }
+    };
+    if (relative_code != 0) {
+        return relative_code;
+    }
+    let i32 from_end_code = switch (fs::seek_end(file, -9)) {
+        case .ok(position) : { if (position == 0) { 0 } else { 87 } }
+        case .err(_) : { 88 }
+    };
+    if (from_end_code != 0) {
+        return from_end_code;
+    }
+    let i32 negative_code = switch (fs::seek_current(file, -1)) {
+        case .ok(_) : { 89 }
+        case .err(error) : { if (fs::error_status(error) == 1 &&
+            fs::error_os_code(error) != 0 && fs::error_completed(error) == 0) {
+            0
+        } else {
+            90
+        } }
+    };
+    if (negative_code != 0) {
+        return negative_code;
+    }
+    let i32 negative_preserved_code = switch (fs::position(file)) {
+        case .ok(position) : { if (position == 0) { 0 } else { 91 } }
+        case .err(_) : { 92 }
+    };
+    if (negative_preserved_code != 0) {
+        return negative_preserved_code;
+    }
+    let i32 beyond_end_code = switch (fs::seek_end(file, 3)) {
+        case .ok(position) : { if (position == 12) { 0 } else { 93 } }
+        case .err(_) : { 94 }
+    };
+    if (beyond_end_code != 0) {
+        return beyond_end_code;
+    }
+    let i32 reset_from_end_code = switch (fs::seek_end(file, -9)) {
+        case .ok(position) : { if (position == 0) { 0 } else { 97 } }
+        case .err(_) : { 98 }
+    };
+    if (reset_from_end_code != 0) {
+        return reset_from_end_code;
+    }
     let i32 seek_code = switch (fs::seek_start(file, 5)) {
         case .ok(position) : { if (position == 5) { 0 } else { 16 } }
         case .err(_) : { 17 }
@@ -169,16 +216,24 @@ fn i32 update_then_close(fs::File input) {
                             if (position_code != 0) {
                                 position_code
                             } else {
-                                switch (fs::read(ref mut file, ref mut buffer)) {
-                                    case .ok(read) : { if (read == 9 &&
-                                        buffer[0] == 70 && buffer[1] == 97 && buffer[2] == 105 &&
-                                        buffer[3] == 114 && buffer[4] == 121 && buffer[5] == 67 &&
-                                        buffer[6] == 111 && buffer[7] == 100 && buffer[8] == 101) {
-                                        0
-                                    } else {
-                                        62
-                                    } }
-                                    case .err(_) : { 63 }
+                                let i32 seek_size_code = switch (fs::size(ref file)) {
+                                    case .ok(size) : { if (size == 9) { 0 } else { 95 } }
+                                    case .err(_) : { 96 }
+                                };
+                                if (seek_size_code != 0) {
+                                    seek_size_code
+                                } else {
+                                    switch (fs::read(ref mut file, ref mut buffer)) {
+                                        case .ok(read) : { if (read == 9 &&
+                                            buffer[0] == 70 && buffer[1] == 97 && buffer[2] == 105 &&
+                                            buffer[3] == 114 && buffer[4] == 121 && buffer[5] == 67 &&
+                                            buffer[6] == 111 && buffer[7] == 100 && buffer[8] == 101) {
+                                            0
+                                        } else {
+                                            62
+                                        } }
+                                        case .err(_) : { 63 }
+                                    }
                                 }
                             }
                         }

@@ -799,6 +799,14 @@ quickstart paths all observe write/read cursor movement, return to the start, an
 above `INT64_MAX` without moving the cursor under low and optimized MSVC. Relative/end-based seek,
 truncation, sparse-file guarantees, portable offsets, and Linux public linkage remain later gates.
 
+ADR 0305 closes the bounded relative/end positioning gap in SDK `0.0.0-stage0.39` with
+`seek_current(ref mut File, i32)` and `seek_end(ref mut File, i32)`. Both reuse the live handle and
+existing position-result layout, return the resulting absolute `usize`, reject movement before byte
+zero without changing the cursor, and do not extend file size merely by seeking beyond EOF. A
+dedicated raw probe plus private-wrapper and public generated-Fairy paths run under low and
+optimized MSVC. Wider signed offsets, sparse-gap content guarantees, portable offsets, and Linux
+public linkage remain later gates.
+
 ADR 0270 extends the SDK to `0.0.0-stage0.16` with allocation-free
 `size(ref File) -> Result<usize, FileError>`. The raw probe observes size 9 before and after cursor
 movement, rejects closed and invalid handles, and the private/public generated-Fairy paths observe

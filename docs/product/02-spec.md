@@ -609,7 +609,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
-  The compiler-bundled SDK `0.0.0-stage0.38` exposes
+  The compiler-bundled SDK `0.0.0-stage0.39` exposes
   `std::io::write(ref str) -> Result<usize, ConsoleError>` and a matching `write_stderr` operation
   for text, plus `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` for exact binary output.
   All four declare `console`, keep raw pointers and target linkage private, append no newline,
@@ -740,7 +740,10 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   zero. `write_all`, explicit `sync`, consuming `close`, and automatic drop preserve the
   closed target component's ownership rules. `position(ref mut File)` observes the absolute byte
   cursor and `seek_start(ref mut File, usize)` moves it from the file start; both return the resulting
-  position and reject offsets above `INT64_MAX` without moving the cursor. `size(ref File)` observes
+  position and reject offsets above `INT64_MAX` without moving the cursor. Bounded
+  `seek_current(ref mut File, i32)` and `seek_end(ref mut File, i32)` reuse the same live handle and
+  return an absolute `usize`; a negative resulting position fails without cursor movement, and an
+  EOF-relative position beyond current size does not extend the file by itself. `size(ref File)` observes
   the exact byte length through a shared owner borrow without changing position.
   `kind(ref File)` observes the already-open object without path lookup, allocation, or cursor
   movement and returns target-neutral public enum `FileKind` with exhaustive `.Unknown`, `.Disk`,
@@ -907,14 +910,15 @@ argument, output, and exit-code contract. It emits no native code.
 
 ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
-version, source digest, and lock fields. SDK `0.0.0-stage0.38` exports ADR 0250's move-only,
+version, source digest, and lock fields. SDK `0.0.0-stage0.39` exports ADR 0250's move-only,
 fallibly created `std::alloc::Arena` with automatic cleanup and exact allocation status,
 while ADR 0251 makes compiler-known placement return `Result<ref T, AllocError>` under language `/8`.
 ADR 0246's public safe `std::bytes::Buffer` and ADR 0299's fallible single-byte append,
 ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free
 `std::text::validate_utf8`, ADR 0302's allocation-free immutable `std::text::as_bytes`, ADR 0263's
 zero-copy `std::text::from_buffer`, and ADR 0264's Windows MSVC
-`std::fs::File` ownership and byte-I/O surface, ADR 0269's absolute position/seek surface, ADR 0270's
+`std::fs::File` ownership and byte-I/O surface, ADR 0269's absolute position/seek surface, ADR 0305's
+bounded current- and end-relative seek surface, ADR 0270's
 shared file-size observation, ADR 0271's existing-file read/write open, ADR 0272's cursor-preserving
 file-length change, ADR 0274's non-truncating open-or-create, ADR 0275's exclusive create,
 ADR 0276's append-only open, ADR 0277's same-handle file-kind observation, ADR 0278's exact read,
@@ -935,6 +939,14 @@ ASCII `write_bool`, ADR 0303's matching scalar stderr output, and ADR 0261's eff
 performs no host installation lookup. The I/O wrapper keeps raw
 pointers and target linkage private while the remaining planned
 standard-library API remains unsettled.
+
+ADR 0305 adds allocation-free `std::fs::seek_current(ref mut File, i32)` and
+`std::fs::seek_end(ref mut File, i32)` on the existing Windows File owner. Each operation returns
+the resulting absolute `usize` position through the existing result layout and performs no path
+lookup or ownership transfer. A negative resulting position fails with exact target error storage
+and an unchanged cursor. Moving beyond EOF does not change file size until a later write or
+`set_len`. The `i32` delta is intentionally bounded; wider signed offsets, sparse-gap promises,
+portable offsets, and Linux public linkage remain separate gates.
 
 ADR 0148 adds the first package-aware native project path. `experimental build-workspace` and
 `run-workspace` load the current `fairy.toml`, apply ordinary or exact no-write `--locked` policy,

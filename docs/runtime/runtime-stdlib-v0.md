@@ -81,7 +81,7 @@ std::process effect-free argument count and exact UTF-8 argument copy
 std::c      C scalar types and raw wrapper helpers
 ```
 
-The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.38` exports ADR 0250's public safe `std::alloc::Arena` creation and cleanup, ADR 0246's public safe `std::bytes::Buffer`, ADR 0299's fallible `std::bytes::append_byte`, ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free `std::text::validate_utf8`, ADR 0302's allocation-free immutable `std::text::as_bytes`, ADR 0263's zero-copy `std::text::from_buffer` with the original Buffer returned on invalid UTF-8, ADR 0264's Windows MSVC `std::fs::File` ownership and byte-I/O surface, ADR 0269's absolute position and start-based seek operations, ADR 0270's shared file-size observation, ADR 0271's existing-file read/write open, ADR 0272's cursor-preserving file-length change, ADR 0274's non-truncating open-or-create, ADR 0275's exclusive create, ADR 0276's append-only open, ADR 0277's same-handle file-kind observation, ADR 0278's exact-read operation, ADR 0279's bounded file-identity observation, ADR 0281's exhaustive target-neutral `FileKind` enum, ADR 0285's one-call partial Windows file write, ADR 0288's bounded owned-Buffer read append, ADR 0290's source-level read through EOF, ADR 0291's exact one-file removal, ADR 0292's file-only no-replace rename, ADR 0293's one-level directory lifecycle, ADR 0294's directory-only no-replace rename, ADR 0296's recursive parent creation, ADR 0297's exclusive no-replace file byte copy, ADR 0298's path-kind snapshot, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, ADR 0210's matching immutable byte-view output operations, ADR 0211's bounded mutable-byte-view stdin read, ADR 0215's allocation-free decimal `i32` output, ADR 0262's allocation-free decimal `u32`/`usize` and ASCII `bool` output, ADR 0303's matching allocation-free scalar stderr output, and ADR 0261's effect-free `std::process` argument surface; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
+The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.39` exports ADR 0250's public safe `std::alloc::Arena` creation and cleanup, ADR 0246's public safe `std::bytes::Buffer`, ADR 0299's fallible `std::bytes::append_byte`, ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free `std::text::validate_utf8`, ADR 0302's allocation-free immutable `std::text::as_bytes`, ADR 0263's zero-copy `std::text::from_buffer` with the original Buffer returned on invalid UTF-8, ADR 0264's Windows MSVC `std::fs::File` ownership and byte-I/O surface, ADR 0269's absolute position and start-based seek operations, ADR 0305's bounded current- and end-relative seek operations, ADR 0270's shared file-size observation, ADR 0271's existing-file read/write open, ADR 0272's cursor-preserving file-length change, ADR 0274's non-truncating open-or-create, ADR 0275's exclusive create, ADR 0276's append-only open, ADR 0277's same-handle file-kind observation, ADR 0278's exact-read operation, ADR 0279's bounded file-identity observation, ADR 0281's exhaustive target-neutral `FileKind` enum, ADR 0285's one-call partial Windows file write, ADR 0288's bounded owned-Buffer read append, ADR 0290's source-level read through EOF, ADR 0291's exact one-file removal, ADR 0292's file-only no-replace rename, ADR 0293's one-level directory lifecycle, ADR 0294's directory-only no-replace rename, ADR 0296's recursive parent creation, ADR 0297's exclusive no-replace file byte copy, ADR 0298's path-kind snapshot, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, ADR 0210's matching immutable byte-view output operations, ADR 0211's bounded mutable-byte-view stdin read, ADR 0215's allocation-free decimal `i32` output, ADR 0262's allocation-free decimal `u32`/`usize` and ASCII `bool` output, ADR 0303's matching allocation-free scalar stderr output, and ADR 0261's effect-free `std::process` argument surface; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
 
 Built-in `Option`, `Result`, slices, `str`, and `CStr` get compiler-known view semantics; library modules provide operations over them.
 
@@ -336,7 +336,7 @@ a private non-null `ref str` sentinel, and preserves the existing pointer-only `
 is superseded as the user-facing entry by ADR 0247's SDK module; it remains independent historical
 evidence and does not define a public layout.
 
-SDK `0.0.0-stage0.38` retains move-only `String` and `CString` from `std::text`. `copy` and
+SDK `0.0.0-stage0.39` retains move-only `String` and `CString` from `std::text`. `copy` and
 `cstring_from_text` construct canonical owners fallibly; `append` preserves the existing String on
 failure. `string_len`, `string_is_empty`, `cstring_len`, and `cstring_is_empty` expose byte metadata,
 with CString length excluding its required terminator. `string_as_str` and `cstring_as_cstr` return
@@ -582,8 +582,11 @@ Positioning uses `SetFilePointerEx` without allocation. `position` observes the 
 offset with `FILE_CURRENT`; `seek_start` moves to one `usize` offset with `FILE_BEGIN` and returns
 the resulting offset. Because the admitted target is Windows x86-64, `usize` carries the complete
 64-bit component result. Values above `INT64_MAX` reject before an OS call with status 2, OS code
-0, completed 0, and an unchanged cursor. Relative/end-based seek, truncation, and sparse-file
-content promises remain outside the slice.
+0, completed 0, and an unchanged cursor. ADR 0305 adds `seek_current` and `seek_end` with signed
+`i32` deltas and the same absolute `usize` result. A negative resulting position fails with the
+exact Windows error and leaves the cursor unchanged. Moving beyond EOF changes only the cursor;
+the file length remains unchanged until a later write or `set_len`. Wider signed deltas, sparse-gap
+content promises, portable offsets, and Linux public linkage remain outside the slice.
 
 Size observation uses `GetFileSizeEx` through a shared File borrow and does not move the cursor.
 It returns the exact byte length as `usize` on the admitted 64-bit target, status 3 for a closed
@@ -628,12 +631,14 @@ admits only `fy_std_windows_file_open_v0`, `fy_std_windows_file_remove_v0`,
 `fy_std_windows_file_write_all_v0`, `fy_std_windows_file_sync_v0`,
 `fy_std_windows_file_close_v0`, `fy_std_windows_file_drop_v0`,
 `fy_std_windows_file_position_v0`, `fy_std_windows_file_seek_start_v0`,
+`fy_std_windows_file_seek_current_v0`, `fy_std_windows_file_seek_end_v0`,
 `fy_std_windows_file_size_v0`, `fy_std_windows_file_kind_v0`,
 `fy_std_windows_file_id_v0`, and
 `fy_std_windows_file_set_len_v0`. A separate-translation-unit probe
 executes create/truncate, write-all, cursor-preserving length shrink/extend, sync, normal and repeated close, three-byte reads, EOF, forced
-`ERROR_INVALID_HANDLE` close and size failures, absolute position/seek, size 9, overflow rejection
-with cursor preservation, disk and `NUL` character kinds, bounded same/distinct disk identities,
+`ERROR_INVALID_HANDLE` close and size failures, absolute/current/end position changes, size 9,
+overflow and negative-result rejection with cursor preservation, beyond-EOF movement with unchanged
+size, disk and `NUL` character kinds, bounded same/distinct disk identities,
 closed and invalid-handle kind and identity failures,
 drop, and repeated drop at both local MSVC profiles.
 
@@ -646,7 +651,8 @@ resource storage through an incompatible struct type. Low and optimized source b
 read nine bytes, observe EOF, execute explicit close, and prove implicit drop by reopening a path
 whose write handle would otherwise deny sharing. ADR 0264 promotes the same ownership and I/O
 contract into SDK `0.0.0-stage0.14` as public `std::fs`; ADR 0269 extends it in SDK
-`0.0.0-stage0.15` with `position` and absolute `seek_start`; ADR 0270 extends it in SDK
+`0.0.0-stage0.15` with `position` and absolute `seek_start`; ADR 0305 later extends it in SDK
+`0.0.0-stage0.39` with bounded `seek_current` and `seek_end`; ADR 0270 extends it in SDK
 `0.0.0-stage0.16` with shared `size`; ADR 0271 extends it in SDK `0.0.0-stage0.17` with
 existing-file read/write `open_update`; ADR 0272 extends it in SDK `0.0.0-stage0.18` with
 cursor-preserving `set_len`; ADR 0274 extends it in SDK `0.0.0-stage0.19` with read/write
@@ -722,6 +728,13 @@ allocation policy, implicit growth promise, byte conversion, or `push`-style lan
 The checked-in quickstart executes the generated-Fairy success path, while low and optimized MSVC
 failure probes force growth allocation failure and require unchanged zero length/capacity plus zero
 live allocations after automatic cleanup.
+
+ADR 0305 extends it to `0.0.0-stage0.39` with
+`seek_current(ref mut File, i32)` and `seek_end(ref mut File, i32)`. The target shares one
+same-handle seek helper across `FILE_BEGIN`, `FILE_CURRENT`, and `FILE_END`; public results expose
+only the resulting absolute `usize`. Negative movement before byte zero fails without moving the
+cursor, while movement beyond EOF does not change file length until a later write or `set_len`.
+The bounded signed delta adds no wider integer type, allocation, path lookup, or runtime ABI layout.
 
 The public slice remains specific to
 `x86_64-windows-msvc`; it is not a portable Unicode path, Linux public linkage, general
