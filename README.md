@@ -392,6 +392,10 @@ ADR 0307 moves the SDK to `0.0.0-stage0.41` with
 `FILE_STANDARD_INFO.NumberOfLinks` through the same live handle without path lookup, allocation,
 cursor movement, or length change. The value is a momentary count rather than path enumeration,
 authorization, or persistent identity.
+ADR 0308 moves the SDK to `0.0.0-stage0.42` with
+`std::fs::hard_link(ref CStr, ref CStr) -> Result<i32, FileError>`. It performs one bounded,
+no-replace `CreateHardLinkW` operation, copies no bytes, and preserves exact collision and missing
+source errors. Both names share identity and bytes; removing one name leaves the other alive.
 The path-kind query distinguishes ordinary files, directories, and other observed attributes without opening
 an owner, but its snapshot is not stable identity, authorization, containment, or a race-free
 precheck. `std::fs::copy_file_bytes` holds exclusive source and `CREATE_NEW` destination handles,

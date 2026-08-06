@@ -696,6 +696,13 @@ source digest, public-interface hash, package instance, dependent identities, ge
 whole-package cache keys change. Language remains `fairyc-language/10` and runtime ABI remains
 `fairyc-runtime/0`.
 
+ADR 0308 moves the SDK to `0.0.0-stage0.42` because it adds public
+`std::fs::hard_link(ref CStr, ref CStr) -> Result<i32, FileError>`. Existing SDK calls remain
+source-compatible. The function adds the private Windows-only `fy_std_windows_file_hard_link_v0`
+symbol and reuses the private file-result layout. The SDK source digest, public-interface hash,
+package instance, dependent identities, generated locks, and whole-package cache keys change.
+Language remains `fairyc-language/10` and runtime ABI remains `fairyc-runtime/0`.
+
 ADR 0286 cuts the exact language pin from `fairyc-language/9` to `fairyc-language/10` because the
 previously unsupported explicit pairs `i32 -> c::int` and `c::int -> i32` become valid when the
 selected target declares signed 32-bit `c.int`. Existing `/9` source remains valid; migration
@@ -806,7 +813,7 @@ ADR 0144 fixes the first loader behavior for this manifest schema: explicit root
 exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, one language revision,
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
 instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
-`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.41`, language
+`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.42`, language
 `fairyc-language/10`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 

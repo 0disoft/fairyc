@@ -822,6 +822,14 @@ of a host-created hard-link pair under low and optimized MSVC while preserving c
 Hard-link mutation, path enumeration, allocation size, timestamps, compound metadata records, and
 Linux public linkage remain later gates.
 
+ADR 0308 closes the paired bounded mutation gap in SDK `0.0.0-stage0.42` with
+`hard_link(ref CStr source, ref CStr destination) -> Result<i32, FileError>`. The Windows target
+validates both bounded paths before one no-replace `CreateHardLinkW` effect. Dedicated raw and
+public generated-Fairy paths under low and optimized MSVC prove success, exact collision and
+missing-source failures, shared identity, link-count and byte preservation, and destination-alias
+survival after source-name removal. Cross-volume behavior, filesystem support, authorization,
+reparse-point containment, race freedom, durability, and Linux public linkage remain later gates.
+
 ADR 0270 extends the SDK to `0.0.0-stage0.16` with allocation-free
 `size(ref File) -> Result<usize, FileError>`. The raw probe observes size 9 before and after cursor
 movement, rejects closed and invalid handles, and the private/public generated-Fairy paths observe

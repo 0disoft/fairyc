@@ -90,6 +90,10 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_rename_v0(
     const uint8_t *,
     const uint8_t *
 );
+struct fy_std_windows_file_result_v0 fy_std_windows_file_hard_link_v0(
+    const uint8_t *,
+    const uint8_t *
+);
 struct fy_std_windows_file_result_v0 fy_std_windows_file_read_v0(void *, uint8_t *, size_t);
 struct fy_std_windows_file_result_v0 fy_std_windows_file_read_exact_v0(
     void *,
@@ -126,6 +130,7 @@ int fy_std_windows_file_path_kind_probe_v0(void);
 int fy_std_windows_file_seek_probe_v0(void);
 int fy_std_windows_file_metadata_probe_v0(void);
 int fy_std_windows_file_directory_probe_v0(void);
+int fy_std_windows_file_link_probe_v0(void);
 
 static int fy_std_windows_file_closed_v0(const struct fy_std_windows_file_v0 *file) {
     return file->handle == NULL && file->open == UINT8_C(0);
@@ -590,6 +595,8 @@ int main(void) {
 
     int directory_code = fy_std_windows_file_directory_probe_v0();
     if (directory_code != 0) return directory_code;
+    int link_code = fy_std_windows_file_link_probe_v0();
+    if (link_code != 0) return link_code;
     int path_kind_code = fy_std_windows_file_path_kind_probe_v0();
     if (path_kind_code != 0) return path_kind_code;
     int seek_code = fy_std_windows_file_seek_probe_v0();

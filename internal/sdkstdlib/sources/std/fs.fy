@@ -146,6 +146,10 @@ unsafe extern C fn raw_file_result directory_rename_raw(ptr u8 source, ptr u8 de
 unsafe extern C fn raw_file_result file_rename_raw(ptr u8 source, ptr u8 destination) ;
 
 @effects(filesystem)
+@link_name("fy_std_windows_file_hard_link_v0")
+unsafe extern C fn raw_file_result file_hard_link_raw(ptr u8 source, ptr u8 destination) ;
+
+@effects(filesystem)
 @link_name("fy_std_windows_file_copy_bytes_v0")
 unsafe extern C fn raw_file_result file_copy_bytes_raw(ptr u8 source, ptr u8 destination) ;
 
@@ -446,6 +450,19 @@ pub fn Result<i32, FileError> rename_dir(ref CStr source, ref CStr destination) 
 pub fn Result<i32, FileError> rename_file(ref CStr source, ref CStr destination) {
     let raw_file_result result = unsafe {
         file_rename_raw(source as ptr u8, destination as ptr u8)
+    };
+    return if (result.status == 0) {
+        .ok(0)
+    } else {
+        .err(file_error(result))
+    };
+}
+
+/// Creates a second name for one existing file without replacing the destination.
+@effects(filesystem)
+pub fn Result<i32, FileError> hard_link(ref CStr source, ref CStr destination) {
+    let raw_file_result result = unsafe {
+        file_hard_link_raw(source as ptr u8, destination as ptr u8)
     };
     return if (result.status == 0) {
         .ok(0)

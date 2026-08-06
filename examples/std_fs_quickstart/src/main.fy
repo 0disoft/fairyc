@@ -3,6 +3,7 @@ module main;
 import std::bytes as bytes;
 import std::fs as fs;
 import path_ops as paths;
+import link_ops as links;
 import positioning as positions;
 import metadata as metadata;
 
@@ -915,6 +916,7 @@ fn i32 main() {
     let i32 read_append_error_code = check_read_append_error(read_append_error_path);
     let i32 remove_code = paths::check_remove_file(remove_path);
     let i32 rename_code = paths::check_rename_file(rename_source_path, rename_destination_path);
+    let i32 hard_link_code = links::check_hard_link();
     let i32 copy_code = paths::check_copy_file_bytes(
         copy_source_path,
         copy_destination_path,
@@ -980,6 +982,8 @@ fn i32 main() {
         remove_code
     } else if (rename_code != 0) {
         rename_code
+    } else if (hard_link_code != 0) {
+        hard_link_code
     } else if (copy_code != 0) {
         copy_code
     } else if (path_kind_code != 0) {

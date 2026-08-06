@@ -97,6 +97,7 @@
 - Bounded Windows File current/end seek route: internal/sdkstdlib/sources/std/fs.fy, internal/cstdlib/stage0_windows_file.c, internal/cstdlib/stage0_windows_file_seek_probe.c, internal/cstdlibcontract/, examples/windows_file/, examples/std_fs_quickstart/, cmd/fairyc-windows-host-smoke/, docs/adr/0305-public-windows-relative-end-seek.md
 - Same-handle Windows File read-only metadata route: internal/sdkstdlib/sources/std/fs.fy, internal/cstdlib/stage0_windows_file.c, internal/cstdlib/stage0_windows_file_metadata.c, internal/cstdlib/stage0_windows_file_metadata_probe.c, internal/cstdlibcontract/, examples/std_fs_quickstart/, cmd/fairyc-windows-host-smoke/, docs/adr/0306-public-windows-file-read-only-metadata.md
 - Same-handle Windows File hard-link count route: internal/sdkstdlib/sources/std/fs.fy, internal/cstdlib/stage0_windows_file_metadata.c, internal/cstdlib/stage0_windows_file_metadata_probe.c, internal/cstdlibcontract/, examples/std_fs_quickstart/, cmd/fairyc-windows-host-smoke/, docs/adr/0307-public-windows-file-hard-link-count.md
+- No-replace Windows File hard-link creation route: internal/sdkstdlib/sources/std/fs.fy, internal/cstdlib/stage0_windows_file_link.c, internal/cstdlib/stage0_windows_file_link_probe.c, internal/cstdlibcontract/, examples/std_fs_quickstart/src/link_ops.fy, cmd/fairyc-windows-host-smoke/, docs/adr/0308-public-windows-file-hard-link-creation.md
 - Documentation update route: docs/README.md
 - CLI tool route: .agents/skills/cli-tool/SKILL.md
 - Monorepo route: .agents/skills/monorepo/SKILL.md

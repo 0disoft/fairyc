@@ -455,6 +455,7 @@ func TestWindowsFileSourcesConsumeCloseAndExposePartialIO(t *testing.T) {
 		"fy_std_windows_file_seek_current_v0", "fy_std_windows_file_seek_end_v0",
 		"fy_std_windows_file_read_only_v0", "FILE_ATTRIBUTE_READONLY",
 		"fy_std_windows_file_link_count_v0", "NumberOfLinks",
+		"fy_std_windows_file_hard_link_v0", "CreateHardLinkW",
 		"fy_std_windows_file_path_kind_v0", "GetFileAttributesW", "FILE_ATTRIBUTE_REPARSE_POINT", "FY_STD_WINDOWS_PATH_KIND_OTHER_V0",
 		"FY_STD_WINDOWS_FILE_PATH_ENCODING_V0", "FY_STD_WINDOWS_FILE_PATH_TOO_LONG_V0",
 		"struct fy_std_windows_file_result_v0 fy_std_windows_file_write_v0(",
@@ -564,6 +565,42 @@ func TestWindowsFileDirectoryProbeHasDedicatedSourceOwner(t *testing.T) {
 	}
 	if strings.Count(combined, "int fy_std_windows_file_directory_probe_v0(void)") != 2 {
 		t.Fatal("combined Windows File probe must contain one directory declaration and one definition")
+	}
+}
+
+func TestWindowsFileLinkProbeHasDedicatedSourceOwner(t *testing.T) {
+	t.Parallel()
+
+	mainProbe, err := os.ReadFile("stage0_windows_file_probe.c")
+	if err != nil {
+		t.Fatal(err)
+	}
+	linkProbe, err := os.ReadFile("stage0_windows_file_link_probe.c")
+	if err != nil {
+		t.Fatal(err)
+	}
+	mainText := string(mainProbe)
+	linkText := string(linkProbe)
+	if strings.Contains(mainText, "fairyc-windows-file-link-source-probe.tmp") {
+		t.Fatal("main Windows File probe retained hard-link proof ownership")
+	}
+	if strings.Count(mainText, "int fy_std_windows_file_link_probe_v0(void);") != 1 ||
+		strings.Count(mainText, "fy_std_windows_file_link_probe_v0();") != 1 {
+		t.Fatal("main Windows File probe must declare and invoke the hard-link proof exactly once")
+	}
+	if strings.Count(linkText, "int fy_std_windows_file_link_probe_v0(void)") != 1 ||
+		!strings.Contains(linkText, "fy_std_windows_file_hard_link_v0") ||
+		!strings.Contains(linkText, "ERROR_ALREADY_EXISTS") ||
+		!strings.Contains(linkText, "fy_std_windows_file_ids_equal_v0") ||
+		!strings.Contains(linkText, "memcmp(received, payload, sizeof payload)") {
+		t.Fatal("dedicated Windows File hard-link probe lost its definition or proof body")
+	}
+	combined, err := WindowsFileProbeSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Count(combined, "int fy_std_windows_file_link_probe_v0(void)") != 2 {
+		t.Fatal("combined Windows File probe must contain one hard-link declaration and one definition")
 	}
 }
 
@@ -713,6 +750,38 @@ func TestWindowsFileMetadataImplementationHasDedicatedSourceOwner(t *testing.T) 
 	}
 }
 
+func TestWindowsFileHardLinkImplementationHasDedicatedSourceOwner(t *testing.T) {
+	t.Parallel()
+
+	mainSource, err := os.ReadFile("stage0_windows_file.c")
+	if err != nil {
+		t.Fatal(err)
+	}
+	linkSource, err := os.ReadFile("stage0_windows_file_link.c")
+	if err != nil {
+		t.Fatal(err)
+	}
+	mainText := string(mainSource)
+	linkText := string(linkSource)
+	if strings.Contains(mainText, "fy_std_windows_file_hard_link_v0") ||
+		strings.Contains(mainText, "CreateHardLinkW") {
+		t.Fatal("main Windows File source retained hard-link implementation ownership")
+	}
+	if strings.Count(linkText, "fy_std_windows_file_hard_link_v0(") != 1 ||
+		!strings.Contains(linkText, "CreateHardLinkW(wide_destination, wide_source, NULL)") ||
+		strings.Count(linkText, "fy_std_windows_path_v0(") != 2 {
+		t.Fatal("dedicated Windows File hard-link source lost validation or no-replace creation")
+	}
+	combined, err := WindowsFileSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Count(combined, "fy_std_windows_file_hard_link_v0(") != 1 ||
+		!strings.Contains(combined, "static uint32_t fy_std_windows_path_v0(") {
+		t.Fatal("combined Windows File source lost exact hard-link ownership or shared path validation")
+	}
+}
+
 func TestWindowsMSVCSourceForSymbolsSelectsOnlyWindowsFile(t *testing.T) {
 	t.Parallel()
 	source, err := WindowsMSVCSourceForSymbols([]string{"fy_std_windows_file_open_v0"})
@@ -722,7 +791,7 @@ func TestWindowsMSVCSourceForSymbolsSelectsOnlyWindowsFile(t *testing.T) {
 	for _, required := range []string{
 		"fy_std_windows_file_open_v0", "fy_std_windows_file_read_v0", "fy_std_windows_file_read_exact_v0",
 		"fy_std_windows_file_position_v0", "fy_std_windows_file_seek_current_v0", "fy_std_windows_file_seek_end_v0", "fy_std_windows_file_seek_start_v0",
-		"fy_std_windows_file_size_v0", "fy_std_windows_file_kind_v0", "fy_std_windows_file_read_only_v0", "fy_std_windows_file_link_count_v0", "fy_std_windows_file_path_kind_v0", "fy_std_windows_file_set_len_v0",
+		"fy_std_windows_file_size_v0", "fy_std_windows_file_kind_v0", "fy_std_windows_file_read_only_v0", "fy_std_windows_file_link_count_v0", "fy_std_windows_file_hard_link_v0", "fy_std_windows_file_path_kind_v0", "fy_std_windows_file_set_len_v0",
 		"fy_std_windows_file_id_v0",
 		"fy_std_windows_file_write_v0",
 		"fy_std_windows_file_write_all_v0", "fy_std_windows_file_sync_v0",

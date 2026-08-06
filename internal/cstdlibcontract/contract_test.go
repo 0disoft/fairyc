@@ -139,6 +139,7 @@ func TestAdmittedForTargetKeepsWindowsFileTargetBound(t *testing.T) {
 		"fy_std_windows_directory_remove_v0",
 		"fy_std_windows_directory_rename_v0",
 		"fy_std_windows_file_rename_v0",
+		"fy_std_windows_file_hard_link_v0",
 		"fy_std_windows_file_read_v0",
 		"fy_std_windows_file_read_exact_v0",
 		"fy_std_windows_file_read_append_v0",

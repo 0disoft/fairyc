@@ -63,6 +63,9 @@ var stage0WindowsFile string
 //go:embed stage0_windows_file_metadata.c
 var stage0WindowsFileMetadata string
 
+//go:embed stage0_windows_file_link.c
+var stage0WindowsFileLink string
+
 //go:embed stage0_windows_file_buffer.c
 var stage0WindowsFileBuffer string
 
@@ -71,6 +74,9 @@ var stage0WindowsFileProbe string
 
 //go:embed stage0_windows_file_directory_probe.c
 var stage0WindowsFileDirectoryProbe string
+
+//go:embed stage0_windows_file_link_probe.c
+var stage0WindowsFileLinkProbe string
 
 //go:embed stage0_windows_file_copy_probe.c
 var stage0WindowsFileCopyProbe string
@@ -260,7 +266,11 @@ func WindowsFileSource() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return implementation + "\n" + metadata, nil
+	link, err := canonicalSource("Windows File hard link", stage0WindowsFileLink)
+	if err != nil {
+		return "", err
+	}
+	return implementation + "\n" + metadata + "\n" + link, nil
 }
 
 // WindowsFileProbeSource returns the closed native conformance probe for Windows File.
@@ -270,6 +280,10 @@ func WindowsFileProbeSource() (string, error) {
 		return "", err
 	}
 	directoryProbe, err := canonicalSource("Windows File directory probe", stage0WindowsFileDirectoryProbe)
+	if err != nil {
+		return "", err
+	}
+	linkProbe, err := canonicalSource("Windows File hard-link probe", stage0WindowsFileLinkProbe)
 	if err != nil {
 		return "", err
 	}
@@ -289,7 +303,7 @@ func WindowsFileProbeSource() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return probe + "\n" + directoryProbe + "\n" + pathKindProbe + "\n" + seekProbe + "\n" + metadataProbe + "\n" + copyProbe, nil
+	return probe + "\n" + directoryProbe + "\n" + linkProbe + "\n" + pathKindProbe + "\n" + seekProbe + "\n" + metadataProbe + "\n" + copyProbe, nil
 }
 
 // WindowsProcessArgsSource returns the target-specific UTF-8 process argument implementation.
