@@ -138,6 +138,10 @@ unsafe extern C fn raw_file_result directory_create_all_raw(ptr u8 path) ;
 unsafe extern C fn raw_file_result directory_remove_raw(ptr u8 path) ;
 
 @effects(filesystem)
+@link_name("fy_std_windows_dir_remove_all_v0")
+unsafe extern C fn raw_file_result directory_remove_all_raw(ptr u8 path) ;
+
+@effects(filesystem)
 @link_name("fy_std_windows_directory_rename_v0")
 unsafe extern C fn raw_file_result directory_rename_raw(ptr u8 source, ptr u8 destination) ;
 
@@ -435,6 +439,20 @@ pub fn Result<i32, FileError> remove_dir(ref CStr path) {
     };
     return if (result.status == 0) {
         .ok(0)
+    } else {
+        .err(file_error(result))
+    };
+}
+
+/// Recursively removes one directory tree without traversing observed reparse-point children.
+/// Success and failure report the number of filesystem objects already removed, including root.
+@effects(filesystem)
+pub fn Result<usize, FileError> remove_dir_all(ref CStr path) {
+    let raw_file_result result = unsafe {
+        directory_remove_all_raw(path as ptr u8)
+    };
+    return if (result.status == 0) {
+        .ok(result.count)
     } else {
         .err(file_error(result))
     };

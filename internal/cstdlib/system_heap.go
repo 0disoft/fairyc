@@ -66,6 +66,9 @@ var stage0WindowsFileMetadata string
 //go:embed stage0_windows_file_link.c
 var stage0WindowsFileLink string
 
+//go:embed stage0_windows_file_remove_tree.c
+var stage0WindowsFileRemoveTree string
+
 //go:embed stage0_windows_file_buffer.c
 var stage0WindowsFileBuffer string
 
@@ -74,6 +77,9 @@ var stage0WindowsFileProbe string
 
 //go:embed stage0_windows_file_directory_probe.c
 var stage0WindowsFileDirectoryProbe string
+
+//go:embed stage0_windows_file_remove_tree_probe.c
+var stage0WindowsFileRemoveTreeProbe string
 
 //go:embed stage0_windows_file_link_probe.c
 var stage0WindowsFileLinkProbe string
@@ -270,7 +276,11 @@ func WindowsFileSource() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return implementation + "\n" + metadata + "\n" + link, nil
+	removeTree, err := canonicalSource("Windows directory recursive removal", stage0WindowsFileRemoveTree)
+	if err != nil {
+		return "", err
+	}
+	return implementation + "\n" + metadata + "\n" + link + "\n" + removeTree, nil
 }
 
 // WindowsFileProbeSource returns the closed native conformance probe for Windows File.
@@ -280,6 +290,10 @@ func WindowsFileProbeSource() (string, error) {
 		return "", err
 	}
 	directoryProbe, err := canonicalSource("Windows File directory probe", stage0WindowsFileDirectoryProbe)
+	if err != nil {
+		return "", err
+	}
+	removeTreeProbe, err := canonicalSource("Windows directory recursive-removal probe", stage0WindowsFileRemoveTreeProbe)
 	if err != nil {
 		return "", err
 	}
@@ -303,7 +317,7 @@ func WindowsFileProbeSource() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return probe + "\n" + directoryProbe + "\n" + linkProbe + "\n" + pathKindProbe + "\n" + seekProbe + "\n" + metadataProbe + "\n" + copyProbe, nil
+	return probe + "\n" + directoryProbe + "\n" + removeTreeProbe + "\n" + linkProbe + "\n" + pathKindProbe + "\n" + seekProbe + "\n" + metadataProbe + "\n" + copyProbe, nil
 }
 
 // WindowsProcessArgsSource returns the target-specific UTF-8 process argument implementation.

@@ -8,7 +8,7 @@ import (
 
 func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	t.Parallel()
-	if Version != "0.0.0-stage0.44" {
+	if Version != "0.0.0-stage0.45" {
 		t.Fatalf("Version = %q", Version)
 	}
 	if LanguageRevision != "fairyc-language/10" {
@@ -39,6 +39,7 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	var fileKindVariants []string
 	var pathKindVariants []string
 	createDirAllPublic := false
+	removeDirAllPublic := false
 	copyFileBytesPublic := false
 	pathKindPublic := false
 	seekFunctions := make(map[string]bool)
@@ -113,6 +114,9 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 			if function.Name == "create_dir_all" {
 				createDirAllPublic = function.Public
 			}
+			if function.Name == "remove_dir_all" {
+				removeDirAllPublic = function.Public
+			}
 			if function.Name == "copy_file_bytes" {
 				copyFileBytesPublic = function.Public
 			}
@@ -144,6 +148,9 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	}
 	if !createDirAllPublic {
 		t.Fatal("std::fs::create_dir_all is not public")
+	}
+	if !removeDirAllPublic {
+		t.Fatal("std::fs::remove_dir_all is not public")
 	}
 	if !copyFileBytesPublic {
 		t.Fatal("std::fs::copy_file_bytes is not public")

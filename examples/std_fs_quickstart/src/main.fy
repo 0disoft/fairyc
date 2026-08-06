@@ -950,6 +950,7 @@ fn i32 main() {
         directory_all_partial_prefix_path,
         directory_all_partial_root_path
     );
+    let i32 directory_remove_all_code = paths::check_remove_dir_all();
     let i32 write_code = switch (fs::create_truncate(data_path)) {
         case .ok(file) : { write_then_close(file) }
         case .err(_) : { 30 }
@@ -994,6 +995,8 @@ fn i32 main() {
         directory_rename_code
     } else if (directory_all_code != 0) {
         directory_all_code
+    } else if (directory_remove_all_code != 0) {
+        directory_remove_all_code
     } else if (write_code != 0) {
         write_code
     } else if (metadata_code != 0) {

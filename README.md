@@ -406,6 +406,11 @@ ADR 0310 moves the SDK to `0.0.0-stage0.44` with
 read-only attribute through the same live handle, preserves unrelated attributes and timestamps,
 and exposes insufficient handle access as an exact target error. Read-only metadata remains
 distinct from ACL, sharing, filesystem policy, and later write authorization.
+ADR 0311 moves the SDK to `0.0.0-stage0.45` with
+`std::fs::remove_dir_all(ref CStr) -> Result<usize, FileError>`. It rejects filesystem roots and
+ambiguous bounded paths before effects, removes observed directory reparse points as leaves, and
+reports exact removed-object progress on success or failure. Traversal order is filesystem-defined;
+the operation is not atomic, rollback-capable, containment proof, or race-free authorization.
 The path-kind query distinguishes ordinary files, directories, and other observed attributes without opening
 an owner, but its snapshot is not stable identity, authorization, containment, or a race-free
 precheck. `std::fs::copy_file_bytes` holds exclusive source and `CREATE_NEW` destination handles,

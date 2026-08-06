@@ -845,6 +845,14 @@ closed and invalid storage, invalid boolean rejection, and exact `ERROR_ACCESS_D
 read-only handle with unchanged metadata. ACLs, ownership, general attributes, directory promises,
 portable Unicode paths, and Linux public linkage remain later gates.
 
+ADR 0311 closes the bounded recursive-removal gap in SDK `0.0.0-stage0.45` with
+`remove_dir_all(ref CStr) -> Result<usize, FileError>`. The Windows target rejects roots and
+ambiguous paths before effects, removes observed reparse directories as leaves, and reports exact
+completed-object progress through success or failure. Raw and generated-Fairy low/optimized paths
+prove a four-object tree, sharing and read-only failures, preserved failure storage, partial
+progress, and retry cleanup. Stable traversal order, rollback, atomicity, race-free containment,
+portable Unicode paths, and Linux public linkage remain later gates.
+
 ADR 0270 extends the SDK to `0.0.0-stage0.16` with allocation-free
 `size(ref File) -> Result<usize, FileError>`. The raw probe observes size 9 before and after cursor
 movement, rejects closed and invalid handles, and the private/public generated-Fairy paths observe

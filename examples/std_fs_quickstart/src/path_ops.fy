@@ -491,6 +491,122 @@ pub fn i32 check_create_dir_all(
 }
 
 @effects(filesystem)
+fn i32 remove_all_while_child_open(fs::File input, ref CStr root) {
+    var fs::File file = input;
+    let i32 remove_code = switch (fs::remove_dir_all(root)) {
+        case .ok(_) : { 436 }
+        case .err(error) : {
+            if (fs::error_status(error) == 1 && fs::error_os_code(error) == 32 &&
+                fs::error_completed(error) == 0) { 0 } else { 437 }
+        }
+    };
+    let i32 close_code = switch (fs::close(file)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 438 }
+    };
+    return if (remove_code != 0) { remove_code } else { close_code };
+}
+
+@effects(filesystem)
+pub fn i32 check_remove_dir_all() {
+    let ref CStr root = c"fairyc-std-fs-remove-all";
+    let ref CStr nested = c"fairyc-std-fs-remove-all\\nested";
+    let ref CStr root_file = c"fairyc-std-fs-remove-all\\a.tmp";
+    let ref CStr nested_file = c"fairyc-std-fs-remove-all\\nested\\b.tmp";
+    let ref CStr blocked = c"fairyc-std-fs-remove-all-blocked";
+    let ref CStr blocked_file = c"fairyc-std-fs-remove-all-blocked\\child.tmp";
+    let ref CStr collision = c"fairyc-std-fs-remove-all-file.tmp";
+    let i32 root_code = switch (fs::remove_dir_all(c"/")) {
+        case .ok(_) : { 439 }
+        case .err(error) : {
+            if (fs::error_status(error) == 2 && fs::error_os_code(error) == 0 &&
+                fs::error_completed(error) == 0) { 0 } else { 440 }
+        }
+    };
+    let i32 trailing_code = if (root_code != 0) {
+        root_code
+    } else { switch (fs::remove_dir_all(c"fairyc-std-fs-remove-all\\")) {
+        case .ok(_) : { 441 }
+        case .err(error) : {
+            if (fs::error_status(error) == 2 && fs::error_os_code(error) == 0 &&
+                fs::error_completed(error) == 0) { 0 } else { 442 }
+        }
+    } };
+    let i32 collision_setup_code = if (trailing_code != 0) {
+        trailing_code
+    } else { switch (fs::create_truncate(collision)) {
+        case .ok(file) : { close_directory_file(file, 443) }
+        case .err(_) : { 444 }
+    } };
+    let i32 collision_code = if (collision_setup_code != 0) {
+        collision_setup_code
+    } else { switch (fs::remove_dir_all(collision)) {
+        case .ok(_) : { 445 }
+        case .err(error) : {
+            if (fs::error_status(error) == 1 && fs::error_os_code(error) == 267 &&
+                fs::error_completed(error) == 0) { 0 } else { 446 }
+        }
+    } };
+    let i32 collision_cleanup_code = if (collision_code != 0) {
+        collision_code
+    } else { switch (fs::remove_file(collision)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 447 }
+    } };
+    let i32 create_code = if (collision_cleanup_code != 0) {
+        collision_cleanup_code
+    } else { switch (fs::create_dir_all(nested)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 448 }
+    } };
+    let i32 root_file_code = if (create_code != 0) {
+        create_code
+    } else { switch (fs::create_truncate(root_file)) {
+        case .ok(file) : { close_directory_file(file, 449) }
+        case .err(_) : { 450 }
+    } };
+    let i32 nested_file_code = if (root_file_code != 0) {
+        root_file_code
+    } else { switch (fs::create_truncate(nested_file)) {
+        case .ok(file) : { close_directory_file(file, 451) }
+        case .err(_) : { 452 }
+    } };
+    let i32 success_code = if (nested_file_code != 0) {
+        nested_file_code
+    } else { switch (fs::remove_dir_all(root)) {
+        case .ok(completed) : { if (completed == 4) { 0 } else { 453 } }
+        case .err(_) : { 454 }
+    } };
+    let i32 missing_code = if (success_code != 0) {
+        success_code
+    } else { switch (fs::remove_dir_all(root)) {
+        case .ok(_) : { 455 }
+        case .err(error) : {
+            if (fs::error_status(error) == 1 && fs::error_os_code(error) == 2 &&
+                fs::error_completed(error) == 0) { 0 } else { 456 }
+        }
+    } };
+    let i32 blocked_setup_code = if (missing_code != 0) {
+        missing_code
+    } else { switch (fs::create_dir_all(blocked)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 457 }
+    } };
+    let i32 blocked_code = if (blocked_setup_code != 0) {
+        blocked_setup_code
+    } else { switch (fs::create_truncate(blocked_file)) {
+        case .ok(file) : { remove_all_while_child_open(file, blocked) }
+        case .err(_) : { 458 }
+    } };
+    return if (blocked_code != 0) {
+        blocked_code
+    } else { switch (fs::remove_dir_all(blocked)) {
+        case .ok(completed) : { if (completed == 2) { 0 } else { 459 } }
+        case .err(_) : { 460 }
+    } };
+}
+
+@effects(filesystem)
 fn i32 seed_copy_source(fs::File input) {
     var fs::File file = input;
     let ref u8[] bytes = b"Copy bytes";
