@@ -319,3 +319,88 @@ pub fn i32 check_directory_lifecycle(
         }
     } };
 }
+
+@effects(filesystem)
+pub fn i32 check_rename_dir(
+    ref CStr source,
+    ref CStr destination,
+    ref CStr source_child,
+    ref CStr destination_child
+) {
+    let i32 source_code = switch (fs::create_dir(source)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 255 }
+    };
+    let i32 child_code = if (source_code != 0) {
+        source_code
+    } else { switch (fs::create_truncate(source_child)) {
+        case .ok(file) : { close_directory_file(file, 256) }
+        case .err(_) : { 257 }
+    } };
+    let i32 destination_code = if (child_code != 0) {
+        child_code
+    } else { switch (fs::create_dir(destination)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 258 }
+    } };
+    let i32 collision_code = if (destination_code != 0) {
+        destination_code
+    } else { switch (fs::rename_dir(source, destination)) {
+        case .ok(_) : { 259 }
+        case .err(error) : {
+            if (fs::error_status(error) == 1 &&
+                fs::error_os_code(error) == 183 &&
+                fs::error_completed(error) == 0) { 0 } else { 260 }
+        }
+    } };
+    let i32 destination_cleanup_code = if (collision_code != 0) {
+        collision_code
+    } else { switch (fs::remove_dir(destination)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 261 }
+    } };
+    let i32 rename_code = if (destination_cleanup_code != 0) {
+        destination_cleanup_code
+    } else { switch (fs::rename_dir(source, destination)) {
+        case .ok(value) : { if (value == 0) { 0 } else { 262 } }
+        case .err(_) : { 263 }
+    } };
+    let i32 old_missing_code = if (rename_code != 0) {
+        rename_code
+    } else { switch (fs::remove_dir(source)) {
+        case .ok(_) : { 264 }
+        case .err(error) : {
+            if (fs::error_status(error) == 1 &&
+                fs::error_os_code(error) == 2 &&
+                fs::error_completed(error) == 0) { 0 } else { 265 }
+        }
+    } };
+    let i32 child_preserved_code = if (old_missing_code != 0) {
+        old_missing_code
+    } else { switch (fs::open_read(destination_child)) {
+        case .ok(file) : { close_directory_file(file, 266) }
+        case .err(_) : { 267 }
+    } };
+    let i32 child_cleanup_code = if (child_preserved_code != 0) {
+        child_preserved_code
+    } else { switch (fs::remove_file(destination_child)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 268 }
+    } };
+    let i32 directory_cleanup_code = if (child_cleanup_code != 0) {
+        child_cleanup_code
+    } else { switch (fs::remove_dir(destination)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 269 }
+    } };
+    return if (directory_cleanup_code != 0) {
+        directory_cleanup_code
+    } else { switch (fs::rename_dir(source, destination)) {
+        case .ok(_) : { 270 }
+        case .err(error) : {
+            if (fs::error_status(error) == 1 &&
+                fs::error_os_code(error) == 2 &&
+                fs::error_completed(error) == 0) { 0 } else { 271 }
+        }
+    } };
+}

@@ -303,6 +303,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0291-public-windows-file-removal.md`: adds one-call Windows `std::fs::remove_file`, preserving the bounded path contract and proving open-sharing failure, exact removal, and repeated missing-path failure under low/optimized raw and generated-Fairy execution with SDK `0.0.0-stage0.29`.
 - `0292-public-windows-file-no-replace-rename.md`: adds file-only Windows `std::fs::rename_file` without destination replacement or cross-volume copy fallback, proving directory rejection, collision preservation, live-handle failure, and final exact bytes under low/optimized raw and generated-Fairy execution with SDK `0.0.0-stage0.30`.
 - `0293-public-windows-directory-lifecycle.md`: adds one-level Windows `std::fs::create_dir` and exact empty `remove_dir`, proving missing-parent, collision, non-empty, cleanup, success, and repeated-missing behavior under low/optimized raw and generated-Fairy execution with SDK `0.0.0-stage0.31`.
+- `0294-public-windows-directory-no-replace-rename.md`: adds directory-only Windows `std::fs::rename_dir` without destination replacement or cross-volume copy fallback, proving kind rejection, collision, moved-child preservation, old-path disappearance, cleanup, and repeated-missing behavior under low/optimized raw and generated-Fairy execution with SDK `0.0.0-stage0.32`.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

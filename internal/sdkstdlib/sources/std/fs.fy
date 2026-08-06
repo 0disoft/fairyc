@@ -120,6 +120,10 @@ unsafe extern C fn raw_file_result directory_create_raw(ptr u8 path) ;
 unsafe extern C fn raw_file_result directory_remove_raw(ptr u8 path) ;
 
 @effects(filesystem)
+@link_name("fy_std_windows_directory_rename_v0")
+unsafe extern C fn raw_file_result directory_rename_raw(ptr u8 source, ptr u8 destination) ;
+
+@effects(filesystem)
 @link_name("fy_std_windows_file_rename_v0")
 unsafe extern C fn raw_file_result file_rename_raw(ptr u8 source, ptr u8 destination) ;
 
@@ -352,6 +356,19 @@ pub fn Result<i32, FileError> create_dir(ref CStr path) {
 pub fn Result<i32, FileError> remove_dir(ref CStr path) {
     let raw_file_result result = unsafe {
         directory_remove_raw(path as ptr u8)
+    };
+    return if (result.status == 0) {
+        .ok(0)
+    } else {
+        .err(file_error(result))
+    };
+}
+
+/// Renames one existing directory without replacing the destination or copying across volumes.
+@effects(filesystem)
+pub fn Result<i32, FileError> rename_dir(ref CStr source, ref CStr destination) {
+    let raw_file_result result = unsafe {
+        directory_rename_raw(source as ptr u8, destination as ptr u8)
     };
     return if (result.status == 0) {
         .ok(0)

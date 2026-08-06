@@ -69,6 +69,10 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_open_v0(
 struct fy_std_windows_file_result_v0 fy_std_windows_file_remove_v0(const uint8_t *);
 struct fy_std_windows_file_result_v0 fy_std_windows_directory_create_v0(const uint8_t *);
 struct fy_std_windows_file_result_v0 fy_std_windows_directory_remove_v0(const uint8_t *);
+struct fy_std_windows_file_result_v0 fy_std_windows_directory_rename_v0(
+    const uint8_t *,
+    const uint8_t *
+);
 struct fy_std_windows_file_result_v0 fy_std_windows_file_rename_v0(
     const uint8_t *,
     const uint8_t *
@@ -608,5 +612,78 @@ int main(void) {
     result = fy_std_windows_directory_remove_v0(directory_path);
     if (result.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
         result.os_code != (uint32_t)ERROR_FILE_NOT_FOUND || result.count != 0) return 146;
+
+    static const uint8_t directory_rename_source[] =
+        "fairyc-windows-directory-rename-source-probe";
+    static const uint8_t directory_rename_destination[] =
+        "fairyc-windows-directory-rename-destination-probe";
+    static const uint8_t directory_rename_missing[] =
+        "fairyc-windows-directory-rename-missing-probe";
+    static const uint8_t directory_rename_child_source[] =
+        "fairyc-windows-directory-rename-source-probe\\child.tmp";
+    static const uint8_t directory_rename_child_destination[] =
+        "fairyc-windows-directory-rename-destination-probe\\child.tmp";
+    static const uint8_t directory_rename_file[] =
+        "fairyc-windows-directory-rename-file-probe.tmp";
+    result = fy_std_windows_directory_rename_v0(NULL, directory_rename_destination);
+    if (result.status != FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0 ||
+        result.os_code != (uint32_t)ERROR_SUCCESS || result.count != 0) return 147;
+    result = fy_std_windows_directory_rename_v0(directory_rename_missing, non_ascii_path);
+    if (result.status != FY_STD_WINDOWS_FILE_PATH_ENCODING_V0 ||
+        result.os_code != (uint32_t)ERROR_SUCCESS || result.count != 0) return 148;
+    result = fy_std_windows_directory_rename_v0(
+        directory_rename_missing,
+        directory_rename_destination
+    );
+    if (result.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
+        result.os_code != (uint32_t)ERROR_FILE_NOT_FOUND || result.count != 0) return 149;
+    result = fy_std_windows_file_open_v0(directory_rename_file, &write_options, &file);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 150;
+    if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 151;
+    result = fy_std_windows_directory_rename_v0(
+        directory_rename_file,
+        directory_rename_destination
+    );
+    if (result.status != FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0 ||
+        result.os_code != (uint32_t)ERROR_SUCCESS || result.count != 0) return 152;
+    result = fy_std_windows_file_remove_v0(directory_rename_file);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 153;
+    result = fy_std_windows_directory_create_v0(directory_rename_source);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 154;
+    result = fy_std_windows_file_open_v0(directory_rename_child_source, &write_options, &file);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 155;
+    if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 156;
+    result = fy_std_windows_directory_create_v0(directory_rename_destination);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 157;
+    result = fy_std_windows_directory_rename_v0(
+        directory_rename_source,
+        directory_rename_destination
+    );
+    if (result.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
+        result.os_code != (uint32_t)ERROR_ALREADY_EXISTS || result.count != 0) return 158;
+    result = fy_std_windows_directory_remove_v0(directory_rename_destination);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 159;
+    result = fy_std_windows_directory_rename_v0(
+        directory_rename_source,
+        directory_rename_destination
+    );
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0 ||
+        result.os_code != (uint32_t)ERROR_SUCCESS || result.count != 0) return 160;
+    result = fy_std_windows_directory_remove_v0(directory_rename_source);
+    if (result.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
+        result.os_code != (uint32_t)ERROR_FILE_NOT_FOUND || result.count != 0) return 161;
+    result = fy_std_windows_file_open_v0(directory_rename_child_destination, &read_options, &file);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 162;
+    if (fy_std_windows_file_close_v0(&file).status != FY_STD_WINDOWS_FILE_OK_V0) return 163;
+    result = fy_std_windows_file_remove_v0(directory_rename_child_destination);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 164;
+    result = fy_std_windows_directory_remove_v0(directory_rename_destination);
+    if (result.status != FY_STD_WINDOWS_FILE_OK_V0) return 165;
+    result = fy_std_windows_directory_rename_v0(
+        directory_rename_source,
+        directory_rename_destination
+    );
+    if (result.status != FY_STD_WINDOWS_FILE_IO_ERROR_V0 ||
+        result.os_code != (uint32_t)ERROR_FILE_NOT_FOUND || result.count != 0) return 166;
     return 0;
 }

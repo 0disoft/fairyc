@@ -81,7 +81,7 @@ std::process effect-free argument count and exact UTF-8 argument copy
 std::c      C scalar types and raw wrapper helpers
 ```
 
-The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.31` exports ADR 0250's public safe `std::alloc::Arena` creation and cleanup, ADR 0246's public safe `std::bytes::Buffer`, ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free `std::text::validate_utf8`, ADR 0263's zero-copy `std::text::from_buffer` with the original Buffer returned on invalid UTF-8, ADR 0264's Windows MSVC `std::fs::File` ownership and byte-I/O surface, ADR 0269's absolute position and start-based seek operations, ADR 0270's shared file-size observation, ADR 0271's existing-file read/write open, ADR 0272's cursor-preserving file-length change, ADR 0274's non-truncating open-or-create, ADR 0275's exclusive create, ADR 0276's append-only open, ADR 0277's same-handle file-kind observation, ADR 0278's exact-read operation, ADR 0279's bounded file-identity observation, ADR 0281's exhaustive target-neutral `FileKind` enum, ADR 0285's one-call partial Windows file write, ADR 0288's bounded owned-Buffer read append, ADR 0290's source-level read through EOF, ADR 0291's exact one-file removal, ADR 0292's file-only no-replace rename, ADR 0293's one-level directory lifecycle, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, ADR 0210's matching immutable byte-view output operations, ADR 0211's bounded mutable-byte-view stdin read, ADR 0215's allocation-free decimal `i32` output, ADR 0262's allocation-free decimal `u32`/`usize` and ASCII `bool` output, and ADR 0261's effect-free `std::process` argument surface; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
+The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.32` exports ADR 0250's public safe `std::alloc::Arena` creation and cleanup, ADR 0246's public safe `std::bytes::Buffer`, ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free `std::text::validate_utf8`, ADR 0263's zero-copy `std::text::from_buffer` with the original Buffer returned on invalid UTF-8, ADR 0264's Windows MSVC `std::fs::File` ownership and byte-I/O surface, ADR 0269's absolute position and start-based seek operations, ADR 0270's shared file-size observation, ADR 0271's existing-file read/write open, ADR 0272's cursor-preserving file-length change, ADR 0274's non-truncating open-or-create, ADR 0275's exclusive create, ADR 0276's append-only open, ADR 0277's same-handle file-kind observation, ADR 0278's exact-read operation, ADR 0279's bounded file-identity observation, ADR 0281's exhaustive target-neutral `FileKind` enum, ADR 0285's one-call partial Windows file write, ADR 0288's bounded owned-Buffer read append, ADR 0290's source-level read through EOF, ADR 0291's exact one-file removal, ADR 0292's file-only no-replace rename, ADR 0293's one-level directory lifecycle, ADR 0294's directory-only no-replace rename, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, ADR 0210's matching immutable byte-view output operations, ADR 0211's bounded mutable-byte-view stdin read, ADR 0215's allocation-free decimal `i32` output, ADR 0262's allocation-free decimal `u32`/`usize` and ASCII `bool` output, and ADR 0261's effect-free `std::process` argument surface; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
 
 Built-in `Option`, `Result`, slices, `str`, and `CStr` get compiler-known view semantics; library modules provide operations over them.
 
@@ -336,7 +336,7 @@ a private non-null `ref str` sentinel, and preserves the existing pointer-only `
 is superseded as the user-facing entry by ADR 0247's SDK module; it remains independent historical
 evidence and does not define a public layout.
 
-SDK `0.0.0-stage0.31` retains move-only `String` and `CString` from `std::text`. `copy` and
+SDK `0.0.0-stage0.32` retains move-only `String` and `CString` from `std::text`. `copy` and
 `cstring_from_text` construct canonical owners fallibly; `append` preserves the existing String on
 failure. `string_len`, `string_is_empty`, `cstring_len`, and `cstring_is_empty` expose byte metadata,
 with CString length excluding its required terminator. `string_as_str` and `cstring_as_cstr` return
@@ -608,7 +608,10 @@ The I/O raw result record is `{ status: u32, os_code: u32, count: usize }`; posi
 `{ status: u32, os_code: u32, size: uint64 }`; kind observation returns
 `{ status: u32, os_code: u32, kind: uint32 }`; identity observation writes a private six-`u32`
 record only after success and returns the ordinary I/O result. The closed target contract
-admits only `fy_std_windows_file_open_v0`, `fy_std_windows_file_read_v0`,
+admits only `fy_std_windows_file_open_v0`, `fy_std_windows_file_remove_v0`,
+`fy_std_windows_directory_create_v0`, `fy_std_windows_directory_remove_v0`,
+`fy_std_windows_directory_rename_v0`, `fy_std_windows_file_rename_v0`,
+`fy_std_windows_file_read_v0`,
 `fy_std_windows_file_read_exact_v0`, `fy_std_windows_file_write_v0`,
 `fy_std_windows_file_write_all_v0`, `fy_std_windows_file_sync_v0`,
 `fy_std_windows_file_close_v0`, `fy_std_windows_file_drop_v0`,
@@ -668,6 +671,13 @@ ADR 0293 extends it to `0.0.0-stage0.31` with `create_dir(ref CStr)` and
 `remove_dir(ref CStr)`. The target operations create only the final path component and remove only
 an existing empty directory. They reuse exact path/error transport, do not enumerate or delete
 children, do not change the current directory, and make no explicit ACL or durability promise.
+ADR 0294 extends it to `0.0.0-stage0.32` with
+`rename_dir(ref CStr, ref CStr)`. The Windows target first admits only an existing directory source
+and then calls `MoveFileExW` with flags `0`: an existing destination is never replaced and a
+cross-volume copy/delete fallback is never requested. A nonempty directory moves with its children;
+the adapter does not enumerate, copy, or delete them. It returns exact Win32 failures, performs no
+implicit close, and makes no metadata-durability claim. The attribute gate is path-based rather than
+handle-pinned, so concurrent external replacement and reparse-point behavior remain target-defined.
 The public slice remains specific to
 `x86_64-windows-msvc`; it is not a portable Unicode path, Linux public linkage, general
 mutable-slice operation set, retained-pointer contract, or public resource-layout contract.
@@ -714,6 +724,7 @@ Hidden allocation, infallible heap allocation, generic allocator vtables, public
 - Linux `write(2)`: <https://man7.org/linux/man-pages/man2/write.2.html>
 - Linux `close(2)`: <https://man7.org/linux/man-pages/man2/close.2.html>
 - Windows `CreateFileW`: <https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew>
+- Windows `MoveFileExW`: <https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-movefileexw>
 - Windows `ReadFile`: <https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-readfile>
 - Windows `CloseHandle`: <https://learn.microsoft.com/en-us/windows/win32/api/handleapi/nf-handleapi-closehandle>
 

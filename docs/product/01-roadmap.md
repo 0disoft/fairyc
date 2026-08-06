@@ -917,6 +917,14 @@ failures, non-empty removal failure, child cleanup, exact removal, and repeated 
 Parent creation, recursive deletion, directory rename, iteration, explicit permissions, durability,
 portable Unicode paths, and Linux public linkage remain later gates.
 
+ADR 0294 extends the SDK to `0.0.0-stage0.32` with
+`rename_dir(ref CStr, ref CStr)`. The Windows target rejects a non-directory source and calls
+`MoveFileExW` without replacement, cross-volume copy, or write-through flags. Raw and
+generated-Fairy low/optimized MSVC execution proves missing and wrong-kind rejection, destination
+collision, successful nonempty rename, old-path disappearance, moved-child preservation, cleanup,
+and repeated missing failure. Destination replacement, cross-volume movement, atomic exchange,
+portable Unicode paths, durability, and Linux public linkage remain later gates.
+
 ADR 0268 closes the discovery side of exact test selection with
 `fairyc test --list [--locked]`. The command compiler-admits the complete selected-package test overlay and
 prints canonical identities without running the interpreter, backend, toolchain, or a test process.
