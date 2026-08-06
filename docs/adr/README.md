@@ -324,6 +324,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0312-stable-native-test-program-arguments.md`: forwards arguments after the first `--` to every selected isolated native test, rejects semantic/list and NUL misuse, preserves report schemas, and proves exact low/optimized generated-Fairy `std::process` bytes.
 - `0313-stable-single-native-test-stdin.md`: explicitly attaches caller stdin to exactly one selected isolated native test after complete compiler admission and PE inspection, preserves default EOF and report schemas, and proves binary low/optimized generated-Fairy `std::io` input.
 - `0314-stable-native-test-output-attachments.md`: adds opt-in native JSON v4 stdout/stderr base64 attachments with exact binary preservation, trap-receipt stripping, unchanged legacy reports, and low/optimized generated-Fairy evidence.
+- `0315-stable-native-test-stdin-file-replay.md`: replays one bounded contained workspace file from byte zero into every isolated native test.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

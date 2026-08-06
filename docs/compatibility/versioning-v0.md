@@ -999,6 +999,12 @@ all text plus v1/v2/v3 JSON bytes. V4 is a new opt-in schema rather than an in-p
 addition. Language, SDK, runtime ABI, manifest, lockfile, package, interface, target, MIR, and
 generated-code versions remain unchanged.
 
+ADR 0315 additively admits native-only `--stdin-file` with one canonical contained workspace path,
+a 65,536-byte regular-file limit, and fresh byte-zero replay for every isolated selected test.
+Omission preserves EOF or explicit caller stdin, and all report schemas and bytes remain unchanged.
+Language, SDK, runtime ABI, manifest, lockfile, package, interface, target, MIR, and generated-code
+versions remain unchanged.
+
 ADR 0204 stabilizes `fairyc new <package-name> --uid <package-uid>`, its explicit non-derived UID,
 single direct-child destination, exact four-file starter, no-overwrite behavior, absence of an
 initial lockfile, success line, and codes 0, 2, 4, and 7. Adding templates, flags, merge behavior, an

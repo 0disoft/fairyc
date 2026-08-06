@@ -334,6 +334,7 @@ const checkedInNativeTestArgsTestPath = "examples/native_test_args_quickstart/te
 const checkedInNativeTestStdinManifestPath = "examples/native_test_stdin_quickstart/fairy.toml"
 const checkedInNativeTestStdinMainPath = "examples/native_test_stdin_quickstart/src/main.fy"
 const checkedInNativeTestStdinTestPath = "examples/native_test_stdin_quickstart/tests/stdin.fy"
+const checkedInNativeTestStdinFixturePath = "examples/native_test_stdin_quickstart/tests/fixtures/input.txt"
 const checkedInNativeTestOutputManifestPath = "examples/native_test_output_quickstart/fairy.toml"
 const checkedInNativeTestOutputMainPath = "examples/native_test_output_quickstart/src/main.fy"
 const checkedInNativeTestOutputTestPath = "examples/native_test_output_quickstart/tests/output.fy"

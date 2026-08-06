@@ -35,6 +35,7 @@ type stableTestOptions struct {
 	native        bool
 	release       bool
 	stdin         bool
+	stdinFile     string
 	captureOutput bool
 	list          bool
 	json          bool
@@ -225,9 +226,17 @@ func runStableTest(arguments []string, sourceRoot string, stdin io.Reader, stdou
 		if options.release {
 			profile = cdriver.OptimizedProfile
 		}
-		nativeInput := io.Reader(strings.NewReader(""))
+		nativeInput := nativeWorkspaceTestInput{}
 		if options.stdin {
-			nativeInput = stdin
+			nativeInput.caller = stdin
+		}
+		if options.stdinFile != "" {
+			contents, err := readStableNativeTestInput(sourceRoot, options.stdinFile)
+			if err != nil {
+				return packageFailure(stderr, err)
+			}
+			nativeInput.replay = contents
+			nativeInput.replayEach = true
 		}
 		outcomes, code = runNativeWorkspaceTests(checked.MIR, tests, profile, nativeInput, options.programArgs, options.captureOutput, stderr)
 	} else {
@@ -477,6 +486,18 @@ func parseStableTestCompilerOptions(arguments []string) (stableTestOptions, erro
 			index++
 			continue
 		}
+		if argument == "--stdin-file" {
+			if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
+				return stableTestOptions{}, fmt.Errorf(`command "test" requires a portable workspace file after --stdin-file`)
+			}
+			if seen[argument] {
+				return stableTestOptions{}, fmt.Errorf(`command "test" received --stdin-file more than once`)
+			}
+			seen[argument] = true
+			options.stdinFile = arguments[index+1]
+			index++
+			continue
+		}
 		if argument == "--exact" {
 			if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
 				return stableTestOptions{}, fmt.Errorf(`command "test" requires a test identity after --exact`)
@@ -517,7 +538,7 @@ func parseStableTestCompilerOptions(arguments []string) (stableTestOptions, erro
 			continue
 		}
 		if argument != "--locked" && argument != "--native" && argument != "--release" && argument != "--stdin" && argument != "--capture-output" && argument != "--list" && argument != "--json" && argument != "--locations" && argument != "--workspace" {
-			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --list, --json, --locations, --native, --release, --stdin, --capture-output, --workspace, --package <package-uid>, --dir <portable-test-directory>, --file <portable-test-path>, --exact <test-identity>, and --locked`)
+			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --list, --json, --locations, --native, --release, --stdin, --stdin-file <portable-workspace-file>, --capture-output, --workspace, --package <package-uid>, --dir <portable-test-directory>, --file <portable-test-path>, --exact <test-identity>, and --locked`)
 		}
 		if seen[argument] {
 			return stableTestOptions{}, fmt.Errorf(`command "test" received %s more than once`, argument)
@@ -553,14 +574,20 @@ func parseStableTestCompilerOptions(arguments []string) (stableTestOptions, erro
 	if len(options.directories) != 0 && (len(options.files) != 0 || len(options.exact) != 0) {
 		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --dir with --file or --exact`)
 	}
-	if options.list && (options.native || options.release || options.stdin || options.captureOutput || len(options.exact) != 0) {
-		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --list with --native, --release, --stdin, --capture-output, or --exact`)
+	if options.list && (options.native || options.release || options.stdin || options.stdinFile != "" || options.captureOutput || len(options.exact) != 0) {
+		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --list with --native, --release, --stdin, --stdin-file, --capture-output, or --exact`)
 	}
 	if options.release && !options.native {
 		return stableTestOptions{}, fmt.Errorf(`command "test" requires --native when --release is supplied`)
 	}
 	if options.stdin && !options.native {
 		return stableTestOptions{}, fmt.Errorf(`command "test" requires --native when --stdin is supplied`)
+	}
+	if options.stdinFile != "" && !options.native {
+		return stableTestOptions{}, fmt.Errorf(`command "test" requires --native when --stdin-file is supplied`)
+	}
+	if options.stdin && options.stdinFile != "" {
+		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --stdin with --stdin-file`)
 	}
 	if options.captureOutput && !options.native {
 		return stableTestOptions{}, fmt.Errorf(`command "test" requires --native when --capture-output is supplied`)

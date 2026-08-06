@@ -1049,8 +1049,25 @@ func TestExplainOutputFailureReturnsInternalFailure(t *testing.T) {
 func TestHelpAndInvocationErrorsAreSeparated(t *testing.T) {
 	t.Parallel()
 	helpCode, helpOut, helpErr := runForTest([]string{"--help"}, t.TempDir())
-	if helpCode != ExitSuccess || !strings.Contains(helpOut, "fairyc check [--locked]") || !strings.Contains(helpOut, "fairyc build [--release] [--locked]") || !strings.Contains(helpOut, "fairyc run [--release] [--locked]") || !strings.Contains(helpOut, "fairyc test [--json] [--locations] [--native [--release] [--stdin] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]") || !strings.Contains(helpOut, "fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]") || !strings.Contains(helpOut, "every\nunambiguous root-reachable local package with --workspace") || !strings.Contains(helpOut, "exact-current portable source anchors") || !strings.Contains(helpOut, "native tests receive any process arguments") || !strings.Contains(helpOut, "Explicit --stdin attaches caller input only when exactly one") || !strings.Contains(helpOut, "Explicit --capture-output requires") || !strings.Contains(helpOut, "fairyc emit c --target <target-id> [--locked]") || !strings.Contains(helpOut, "fairyc explain") || !strings.Contains(helpOut, "experimental parse") || !strings.Contains(helpOut, "experimental check <primary.fy>") || !strings.Contains(helpOut, "experimental check-workspace") || !strings.Contains(helpOut, "experimental check-workspace-session") || !strings.Contains(helpOut, "experimental build-workspace") || !strings.Contains(helpOut, "experimental run-workspace") || !strings.Contains(helpOut, "experimental target-spec") || !strings.Contains(helpOut, "experimental emit-c") || !strings.Contains(helpOut, "experimental build") || !strings.Contains(helpOut, "experimental build-target") || !strings.Contains(helpOut, "experimental run-target") || !strings.Contains(helpOut, "experimental exec-target") || !strings.Contains(helpOut, "experimental build-host") || !strings.Contains(helpOut, "experimental run-host") || helpErr != "" {
+	wants := []string{
+		"fairyc check [--locked]", "fairyc build [--release] [--locked]", "fairyc run [--release] [--locked]",
+		"fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>]",
+		"fairyc test --list [--json] [--locations]", "every\nunambiguous root-reachable local package with --workspace",
+		"exact-current portable source anchors", "native tests receive any process arguments",
+		"Explicit --stdin attaches caller input only when exactly one", "Explicit --stdin-file replays one bounded",
+		"Explicit --capture-output requires", "fairyc emit c --target <target-id> [--locked]", "fairyc explain",
+		"experimental parse", "experimental check <primary.fy>", "experimental check-workspace",
+		"experimental check-workspace-session", "experimental build-workspace", "experimental run-workspace",
+		"experimental target-spec", "experimental emit-c", "experimental build", "experimental build-target",
+		"experimental run-target", "experimental exec-target", "experimental build-host", "experimental run-host",
+	}
+	if helpCode != ExitSuccess || helpErr != "" {
 		t.Fatalf("help = code %d, stdout %q, stderr %q", helpCode, helpOut, helpErr)
+	}
+	for _, want := range wants {
+		if !strings.Contains(helpOut, want) {
+			t.Fatalf("help is missing %q: %q", want, helpOut)
+		}
 	}
 	errorCode, errorOut, errorErr := runForTest(nil, t.TempDir())
 	if errorCode != ExitInvalidInvocation || errorOut != "" || !strings.Contains(errorErr, "a command is required") {

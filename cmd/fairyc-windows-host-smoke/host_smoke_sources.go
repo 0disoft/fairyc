@@ -147,6 +147,10 @@ func loadHostSmokeSources() (map[string]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("read checked-in native-test stdin test: %w", err)
 	}
+	nativeTestStdinFixture, err := os.ReadFile(filepath.FromSlash(checkedInNativeTestStdinFixturePath))
+	if err != nil {
+		return nil, fmt.Errorf("read checked-in native-test stdin fixture: %w", err)
+	}
 	nativeTestOutputManifest, err := os.ReadFile(filepath.FromSlash(checkedInNativeTestOutputManifestPath))
 	if err != nil {
 		return nil, fmt.Errorf("read checked-in native-test output workspace manifest: %w", err)
@@ -241,6 +245,7 @@ func loadHostSmokeSources() (map[string]string, error) {
 		checkedInNativeTestStdinManifestPath:   string(nativeTestStdinManifest),
 		checkedInNativeTestStdinMainPath:       string(nativeTestStdinMain),
 		checkedInNativeTestStdinTestPath:       string(nativeTestStdinTest),
+		checkedInNativeTestStdinFixturePath:    string(nativeTestStdinFixture),
 		checkedInNativeTestOutputManifestPath:  string(nativeTestOutputManifest),
 		checkedInNativeTestOutputMainPath:      string(nativeTestOutputMain),
 		checkedInNativeTestOutputTestPath:      string(nativeTestOutputTest),

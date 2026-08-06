@@ -28,7 +28,7 @@ The Go frontend currently exposes stable starter creation
 `fairyc new <package-name> --uid <package-uid>`, stable current-workspace commands
 `fairyc check [--locked]`, `fairyc build [--release] [--locked]`, and
 `fairyc run [--release] [--locked]`, the stable semantic-by-default or Windows-native
-`fairyc test [--json] [--locations] [--native [--release] [--stdin] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` and execution-free
+`fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` and execution-free
 `fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]`, plus the stable source-independent
 `fairyc explain <diagnostic-code>` lookup and stable host-independent `fairyc targets` maturity
 report, and stable target-explicit
@@ -281,7 +281,7 @@ stderr is preserved, and the canonical trap line uses code 5. The two captured s
 64 KiB ceiling and retain no cross-stream ordering promise. Program arguments, a `--` delimiter,
 retained build output, input forwarding for other native commands, and cache policy remain absent.
 
-`fairyc test [--json] [--locations] [--native [--release] [--stdin] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` overlays the root package's optional exact-lowercase `tests/` tree
+`fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` overlays the root package's optional exact-lowercase `tests/` tree
 after maintaining or verifying the production lock. `--package` instead selects exactly one
 root-reachable local package by its manifest UID and overlays only that package. Paths keep their `tests/` prefix for module
 identity, and argument-free `@test` selects private safe zero-argument `void` functions. Default

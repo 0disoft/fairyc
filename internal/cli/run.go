@@ -36,7 +36,7 @@ Usage:
   fairyc check [--locked]
   fairyc build [--release] [--locked]
   fairyc run [--release] [--locked] [-- <program-args...>]
-  fairyc test [--json] [--locations] [--native [--release] [--stdin] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]
+  fairyc test [--json] [--locations] [--native [--release] [--stdin | --stdin-file <portable-workspace-file>] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]
   fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]
   fairyc emit c --target <target-id> [--locked]
   fairyc explain <diagnostic-code>
@@ -82,6 +82,7 @@ isolated Windows images with --native; --json selects a stable machine report fo
 after "--" in every isolated execution. Explicit --stdin attaches caller input only when exactly one
 native test is selected; native tests otherwise receive EOF. Explicit --capture-output requires
 native JSON execution and adds exact base64 process streams to each outcome.
+Explicit --stdin-file replays one bounded workspace-contained file from byte zero to every native test.
 "fairyc emit c" writes one
 explicitly targeted C11 application unit to stdout without invoking a toolchain. Pass --release to
 build, run, or native test for optimization. All five workspace commands read fairy.toml and refresh fairy.lock

@@ -1,8 +1,10 @@
 package cli
 
 import (
+	"bytes"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/hir"
@@ -21,11 +23,27 @@ type nativeWorkspaceTestCompiler func(
 
 type nativeWorkspaceTestExecutor func(cdriver.WindowsHostArtifact, io.Reader, []string) (cdriver.WindowsHostOutcome, error)
 
+type nativeWorkspaceTestInput struct {
+	caller     io.Reader
+	replay     []byte
+	replayEach bool
+}
+
+func (input nativeWorkspaceTestInput) reader() io.Reader {
+	if input.replayEach {
+		return bytes.NewReader(input.replay)
+	}
+	if input.caller != nil {
+		return input.caller
+	}
+	return strings.NewReader("")
+}
+
 func runNativeWorkspaceTests(
 	program mir.Program,
 	tests []workspaceTest,
 	profile cdriver.Profile,
-	stdin io.Reader,
+	input nativeWorkspaceTestInput,
 	programArguments []string,
 	captureOutput bool,
 	stderr io.Writer,
@@ -34,7 +52,7 @@ func runNativeWorkspaceTests(
 		program,
 		tests,
 		profile,
-		stdin,
+		input,
 		programArguments,
 		captureOutput,
 		stderr,
@@ -47,7 +65,7 @@ func runNativeWorkspaceTestsWith(
 	program mir.Program,
 	tests []workspaceTest,
 	profile cdriver.Profile,
-	stdin io.Reader,
+	input nativeWorkspaceTestInput,
 	programArguments []string,
 	captureOutput bool,
 	stderr io.Writer,
@@ -64,7 +82,7 @@ func runNativeWorkspaceTestsWith(
 		if code != ExitSuccess {
 			return nil, code
 		}
-		outcome, err := execute(artifact, stdin, programArguments)
+		outcome, err := execute(artifact, input.reader(), programArguments)
 		if err != nil {
 			return nil, buildFailure(stderr, fmt.Errorf("execute native test %s: %w", test.display, err))
 		}

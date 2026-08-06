@@ -1131,6 +1131,11 @@ only the private receipt suffix. The flag requires `--native --json`, composes w
 Without it, native program output remains code-2 rejection and all text/v1-v3 JSON bytes remain
 unchanged. SDK, language, runtime ABI, and generated C remain unchanged.
 
+ADR 0315 adds native-only `--stdin-file <portable-workspace-file>`. After complete compiler
+admission, the compiler opens one canonical workspace-contained regular file, rejects inputs above
+65,536 bytes, and gives every selected isolated process a fresh byte-zero reader. It does not combine
+with caller-owned `--stdin` or listing; file failures launch no process and reports remain unchanged.
+
 ADR 0146 rejects speculative persistent caching at this point. ADR 0149 supplies deterministic,
 bounded, verifier-checked bytes for a complete MIR program, but the workspace path still produces
 no independently reusable per-package MIR/object artifact and has no configured comparable
