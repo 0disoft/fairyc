@@ -1,6 +1,7 @@
 package cstdlib
 
 import (
+	"os"
 	"strings"
 	"testing"
 )
@@ -477,6 +478,45 @@ func TestWindowsFileSourcesConsumeCloseAndExposePartialIO(t *testing.T) {
 		if !strings.Contains(probe, required) {
 			t.Errorf("Windows File probe is missing %q", required)
 		}
+	}
+}
+
+func TestWindowsFileCopyProbeHasDedicatedSourceOwner(t *testing.T) {
+	t.Parallel()
+
+	mainProbe, err := os.ReadFile("stage0_windows_file_probe.c")
+	if err != nil {
+		t.Fatal(err)
+	}
+	copyProbe, err := os.ReadFile("stage0_windows_file_copy_probe.c")
+	if err != nil {
+		t.Fatal(err)
+	}
+	const maximumProbeBytes = 40 * 1024
+	if len(mainProbe) > maximumProbeBytes {
+		t.Fatalf("main Windows File probe is %d bytes, want at most %d", len(mainProbe), maximumProbeBytes)
+	}
+	mainText := string(mainProbe)
+	copyText := string(copyProbe)
+	if strings.Contains(mainText, "fy_std_windows_file_copy_bytes_v0") ||
+		strings.Contains(mainText, "copy_payload") {
+		t.Fatal("main Windows File probe retained byte-copy proof ownership")
+	}
+	if strings.Count(mainText, "int fy_std_windows_file_copy_probe_v0(void);") != 1 ||
+		strings.Count(mainText, "return fy_std_windows_file_copy_probe_v0();") != 1 {
+		t.Fatal("main Windows File probe must declare and invoke the copy proof exactly once")
+	}
+	if strings.Count(copyText, "int fy_std_windows_file_copy_probe_v0(void)") != 1 ||
+		!strings.Contains(copyText, "fy_std_windows_file_copy_bytes_v0") ||
+		!strings.Contains(copyText, "copy_payload") {
+		t.Fatal("dedicated Windows File copy probe lost its definition or proof body")
+	}
+	combined, err := WindowsFileProbeSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Count(combined, "int fy_std_windows_file_copy_probe_v0(void)") != 2 {
+		t.Fatal("combined Windows File probe must contain one declaration and one definition")
 	}
 }
 

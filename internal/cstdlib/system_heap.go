@@ -66,6 +66,9 @@ var stage0WindowsFileBuffer string
 //go:embed stage0_windows_file_probe.c
 var stage0WindowsFileProbe string
 
+//go:embed stage0_windows_file_copy_probe.c
+var stage0WindowsFileCopyProbe string
+
 //go:embed stage0_windows_process_args.c
 var stage0WindowsProcessArgs string
 
@@ -239,7 +242,15 @@ func WindowsFileSource() (string, error) {
 
 // WindowsFileProbeSource returns the closed native conformance probe for Windows File.
 func WindowsFileProbeSource() (string, error) {
-	return canonicalSource("Windows File probe", stage0WindowsFileProbe)
+	probe, err := canonicalSource("Windows File probe", stage0WindowsFileProbe)
+	if err != nil {
+		return "", err
+	}
+	copyProbe, err := canonicalSource("Windows File copy probe", stage0WindowsFileCopyProbe)
+	if err != nil {
+		return "", err
+	}
+	return probe + "\n" + copyProbe, nil
 }
 
 // WindowsProcessArgsSource returns the target-specific UTF-8 process argument implementation.
