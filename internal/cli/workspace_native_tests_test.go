@@ -1,0 +1,136 @@
+package cli
+
+import (
+	"bytes"
+	"io"
+	"slices"
+	"strconv"
+	"strings"
+	"testing"
+
+	"github.com/0disoft/fairyc/internal/cbackend"
+	"github.com/0disoft/fairyc/internal/cdriver"
+	"github.com/0disoft/fairyc/internal/cruntime"
+	"github.com/0disoft/fairyc/internal/hir"
+	"github.com/0disoft/fairyc/internal/mir"
+)
+
+func TestNativeWorkspaceTestProgramAddsVerifiedI32Harness(t *testing.T) {
+	t.Parallel()
+	program := nativeTestFixtureProgram()
+	native, entry, err := nativeWorkspaceTestProgram(program, "tests::native::passes")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if entry != nativeWorkspaceTestEntry || len(native.Functions) != len(program.Functions)+1 {
+		t.Fatalf("native test program entry=%q functions=%d", entry, len(native.Functions))
+	}
+	if failures := mir.Verify(native); len(failures) != 0 {
+		t.Fatalf("native test MIR failures = %v", failures)
+	}
+	unit, err := cbackend.Emit(native, entry, cbackend.Stage0WindowsMSVCProfile())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if unit.Entry != nativeWorkspaceTestEntry || !strings.Contains(unit.Source, "int main(void)") ||
+		!strings.Contains(unit.Source, "fy_fn_0();") {
+		t.Fatalf("native test C unit = entry %q, functions %v", unit.Entry, unit.Functions)
+	}
+}
+
+func TestNativeWorkspaceTestsContinueAfterTrapsAndPreserveOrder(t *testing.T) {
+	t.Parallel()
+	program := nativeTestFixtureProgram()
+	tests := []workspaceTest{
+		{display: "tests::native::fails", entry: "tests::native::fails"},
+		{display: "tests::native::passes", entry: "tests::native::passes"},
+	}
+	compiled := 0
+	compile := func(program mir.Program, entry string, profile cdriver.Profile, stderr io.Writer) (cdriver.WindowsHostArtifact, int) {
+		if entry != nativeWorkspaceTestEntry || profile != cdriver.OptimizedProfile || len(mir.Verify(program)) != 0 {
+			t.Fatalf("compile native test entry=%q profile=%+v", entry, profile)
+		}
+		compiled++
+		return cdriver.WindowsHostArtifact{Bytes: []byte{byte(compiled)}}, ExitSuccess
+	}
+	programArguments := []string{"--flag", "", "한글λ"}
+	execute := func(artifact cdriver.WindowsHostArtifact, arguments []string) (cdriver.WindowsHostOutcome, error) {
+		if !slices.Equal(arguments, programArguments) {
+			t.Fatalf("native test program arguments = %q, want %q", arguments, programArguments)
+		}
+		if artifact.Bytes[0] == 1 {
+			code, found := cbackend.TrapCode("assertion-failed")
+			if !found {
+				t.Fatal("assertion-failed trap code is missing")
+			}
+			return cdriver.WindowsHostOutcome{
+				ExitCode: int32(productTrapExitBase + code),
+				Stderr:   cruntime.RunTrapReceiptPrefix + strconv.Itoa(int(code)),
+			}, nil
+		}
+		return cdriver.WindowsHostOutcome{}, nil
+	}
+	var stderr bytes.Buffer
+	outcomes, code := runNativeWorkspaceTestsWith(
+		program, tests, cdriver.OptimizedProfile, programArguments, &stderr, compile, execute,
+	)
+	if code != ExitSuccess || stderr.String() != "" || compiled != 2 || len(outcomes) != 2 ||
+		outcomes[0].display != tests[0].display || outcomes[0].trapCategory != "assertion-failed" ||
+		outcomes[1].display != tests[1].display || outcomes[1].trapCategory != "" {
+		t.Fatalf("native outcomes=%+v code=%d stderr=%q compiled=%d", outcomes, code, stderr.String(), compiled)
+	}
+}
+
+func TestNativeWorkspaceTestsRejectProgramOutputAndUnreceiptedExit(t *testing.T) {
+	t.Parallel()
+	program := nativeTestFixtureProgram()
+	tests := []workspaceTest{{display: "tests::native::passes", entry: "tests::native::passes"}}
+	compile := func(program mir.Program, entry string, profile cdriver.Profile, stderr io.Writer) (cdriver.WindowsHostArtifact, int) {
+		return cdriver.WindowsHostArtifact{Bytes: []byte{1}}, ExitSuccess
+	}
+	for _, test := range []struct {
+		name     string
+		outcome  cdriver.WindowsHostOutcome
+		wantCode int
+		contains string
+	}{
+		{name: "stdout", outcome: cdriver.WindowsHostOutcome{Stdout: "unexpected"}, wantCode: ExitInvalidInvocation, contains: "produced program output"},
+		{name: "unreceipted exit", outcome: cdriver.WindowsHostOutcome{ExitCode: 42}, wantCode: ExitBuildFailure, contains: "without a valid trap receipt"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			var stderr bytes.Buffer
+			outcomes, code := runNativeWorkspaceTestsWith(
+				program,
+				tests,
+				cdriver.LowProfile,
+				nil,
+				&stderr,
+				compile,
+				func(cdriver.WindowsHostArtifact, []string) (cdriver.WindowsHostOutcome, error) {
+					return test.outcome, nil
+				},
+			)
+			if outcomes != nil || code != test.wantCode || !strings.Contains(stderr.String(), test.contains) {
+				t.Fatalf("native failure outcomes=%+v code=%d stderr=%q", outcomes, code, stderr.String())
+			}
+		})
+	}
+}
+
+func nativeTestFixtureProgram() mir.Program {
+	makeTest := func(symbol hir.SymbolID, name string) mir.Function {
+		return mir.Function{
+			Symbol: symbol, Name: name, ResultType: hir.TypeVoid, Entry: 0,
+			Blocks: []mir.Block{{
+				ID: 0,
+				Terminator: mir.Terminator{
+					Kind: mir.TerminatorReturn, UnwindSuccessor: mir.NoBlock, DestinationLocal: mir.NoLocal,
+				},
+			}},
+		}
+	}
+	return mir.Program{Functions: []mir.Function{
+		makeTest(1, "tests::native::passes"),
+		makeTest(2, "tests::native::fails"),
+	}}
+}
