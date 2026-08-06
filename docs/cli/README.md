@@ -28,8 +28,8 @@ The Go frontend currently exposes stable starter creation
 `fairyc new <package-name> --uid <package-uid>`, stable current-workspace commands
 `fairyc check [--locked]`, `fairyc build [--release] [--locked]`, and
 `fairyc run [--release] [--locked]`, the stable semantic-by-default or Windows-native
-`fairyc test [--json] [--native [--release]] [--package <package-uid>] [--exact <test-identity>]... [--locked]` and execution-free
-`fairyc test --list [--json] [--package <package-uid>] [--locked]`, plus the stable source-independent
+`fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--exact <test-identity>]... [--locked]` and execution-free
+`fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--locked]`, plus the stable source-independent
 `fairyc explain <diagnostic-code>` lookup and stable host-independent `fairyc targets` maturity
 report, and stable target-explicit
 `fairyc emit c --target <target-id> [--locked]`, plus `fairyc experimental parse <file.fy>`,
@@ -281,7 +281,7 @@ stderr is preserved, and the canonical trap line uses code 5. The two captured s
 64 KiB ceiling and retain no cross-stream ordering promise. Program arguments, a `--` delimiter,
 retained build output, input forwarding for other native commands, and cache policy remain absent.
 
-`fairyc test [--json] [--native [--release]] [--package <package-uid>] [--exact <test-identity>]... [--locked]` overlays the root package's optional exact-lowercase `tests/` tree
+`fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--exact <test-identity>]... [--locked]` overlays the root package's optional exact-lowercase `tests/` tree
 after maintaining or verifying the production lock. `--package` instead selects exactly one
 root-reachable local package by its manifest UID and overlays only that package. Paths keep their `tests/` prefix for module
 identity, and argument-free `@test` selects private safe zero-argument `void` functions. Default
@@ -297,6 +297,11 @@ listing `--json` selects the compact versioned `fairyc.test-list/v1` report, whi
 `--json` selects `fairyc.test-report/v1` with engine/target/profile identity, canonical outcomes,
 totals, status, and lock. `--native`, `--release`, and `--exact` do not combine with listing. Native program streams, recursive member aggregation,
 fuzzy/tag/file selection, setup/teardown, benchmarks, and portable targets remain outside this contract.
+`--locations` is valid in listing or execution and preserves canonical identity and selection
+semantics. Text lines gain `at <workspace-relative-path>:<line>:<byte-column>` only when requested.
+JSON switches to `fairyc.test-list/v3` or `fairyc.test-report/v3` and includes package UID, portable
+path, exact function-name byte span, and exact `fyfile1`/`fylm1` identities. It includes no source
+text, host root, timestamp, or reopened-path observation.
 
 `fairyc emit c --target <target-id> [--locked]` accepts exactly the `c` form and one mandatory
 `x86_64-linux-gnu` or `x86_64-windows-msvc` target. It loads the current manifest-owned workspace,

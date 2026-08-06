@@ -13,6 +13,7 @@ import (
 
 	"github.com/0disoft/fairyc/internal/buildmeasure"
 	"github.com/0disoft/fairyc/internal/cli"
+	"github.com/0disoft/fairyc/internal/packagecontent"
 	"github.com/0disoft/fairyc/internal/pecoff"
 )
 
@@ -68,8 +69,8 @@ func runStandaloneCompiler(
 		!strings.Contains(helpStdout, "fairyc check [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc build [--release] [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc run [--release] [--locked]") ||
-		!strings.Contains(helpStdout, "fairyc test [--json] [--native [--release]] [--workspace | --package <package-uid>] [--exact <test-identity>]... [--locked]") ||
-		!strings.Contains(helpStdout, "fairyc test --list [--json] [--workspace | --package <package-uid>] [--locked]") ||
+		!strings.Contains(helpStdout, "fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--exact <test-identity>]... [--locked]") ||
+		!strings.Contains(helpStdout, "fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--locked]") ||
 		!strings.Contains(helpStdout, "every\nunambiguous root-reachable local package with --workspace") ||
 		!strings.Contains(helpStdout, "fairyc emit c --target <target-id> [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc experimental run-target") ||
@@ -212,7 +213,7 @@ fn void second_passes() { assert(process::arg_count() >= 1); }
 	starterNativeCode, starterNativeStdout, starterNativeStderr, err := runStandaloneCommand(
 		starterRoot,
 		executablePath,
-		"test", "--native",
+		"test", "--native", "--locations",
 		"--exact", "tests::main::second_passes",
 		"--exact", "tests::main::first_fails",
 		"--locked",
@@ -220,8 +221,8 @@ fn void second_passes() { assert(process::arg_count() >= 1); }
 	if err != nil {
 		return 0, fmt.Errorf("execute standalone compiler native trap-isolation test: %w", err)
 	}
-	wantStarterNative := "test tests::main::first_fails ... FAILED (assertion-failed)\n" +
-		"test tests::main::second_passes ... ok\n" +
+	wantStarterNative := "test tests::main::first_fails at tests/main.fy:6:9 ... FAILED (assertion-failed)\n" +
+		"test tests::main::second_passes at tests/main.fy:9:9 ... ok\n" +
 		"test result: FAILED. 1 passed; 1 failed; lock verified\n"
 	if starterNativeCode != cli.ExitProgramTrap || starterNativeStderr != "" || starterNativeStdout != wantStarterNative {
 		return 0, fmt.Errorf("standalone compiler native trap-isolation test returned code %d, stdout %q, stderr %q", starterNativeCode, starterNativeStdout, starterNativeStderr)
@@ -229,7 +230,7 @@ fn void second_passes() { assert(process::arg_count() >= 1); }
 	starterNativeJSONCode, starterNativeJSONStdout, starterNativeJSONStderr, err := runStandaloneCommand(
 		starterRoot,
 		executablePath,
-		"test", "--json", "--native", "--release",
+		"test", "--json", "--locations", "--native", "--release",
 		"--exact", "tests::main::second_passes",
 		"--exact", "tests::main::first_fails",
 		"--locked",
@@ -237,7 +238,14 @@ fn void second_passes() { assert(process::arg_count() >= 1); }
 	if err != nil {
 		return 0, fmt.Errorf("execute standalone compiler native JSON test: %w", err)
 	}
-	wantStarterNativeJSON := `{"schemaVersion":"fairyc.test-report/v1","engine":"native","target":"x86_64-windows-msvc","profile":"release","tests":[{"identity":"tests::main::first_fails","outcome":"failed","trapCategory":"assertion-failed"},{"identity":"tests::main::second_passes","outcome":"passed","trapCategory":null}],"count":2,"passed":1,"failed":1,"status":"failed","lock":"verified"}` + "\n"
+	starterNativeFileIdentity, starterNativeLineMapIdentity := packagecontent.ComputeFileIdentities([]byte(starterNativeRuntimeTestSource))
+	firstStart := strings.Index(starterNativeRuntimeTestSource, "first_fails")
+	secondStart := strings.Index(starterNativeRuntimeTestSource, "second_passes")
+	wantStarterNativeJSON := fmt.Sprintf(
+		`{"schemaVersion":"fairyc.test-report/v3","engine":"native","target":"x86_64-windows-msvc","profile":"release","tests":[{"identity":"tests::main::first_fails","outcome":"failed","trapCategory":"assertion-failed","source":{"packageUid":"smoke.starter","path":"tests/main.fy","line":6,"byteColumn":9,"startByte":%d,"endByte":%d,"fileIdentity":"%s","lineMapIdentity":"%s"}},{"identity":"tests::main::second_passes","outcome":"passed","trapCategory":null,"source":{"packageUid":"smoke.starter","path":"tests/main.fy","line":9,"byteColumn":9,"startByte":%d,"endByte":%d,"fileIdentity":"%s","lineMapIdentity":"%s"}}],"count":2,"passed":1,"failed":1,"status":"failed","lock":"verified"}`+"\n",
+		firstStart, firstStart+len("first_fails"), starterNativeFileIdentity, starterNativeLineMapIdentity,
+		secondStart, secondStart+len("second_passes"), starterNativeFileIdentity, starterNativeLineMapIdentity,
+	)
 	if starterNativeJSONCode != cli.ExitProgramTrap || starterNativeJSONStderr != "" || starterNativeJSONStdout != wantStarterNativeJSON {
 		return 0, fmt.Errorf("standalone compiler native JSON test returned code %d, stdout %q, stderr %q", starterNativeJSONCode, starterNativeJSONStdout, starterNativeJSONStderr)
 	}

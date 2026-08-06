@@ -133,7 +133,7 @@ manifest, workspace, graph, and lock failures use code `7`. The command writes n
 but ordinary lock maintenance may precede emission or an output failure. `--locked` verifies the
 lock without writing.
 
-`fairyc test [--json] [--native [--release]] [--workspace | --package <package-uid>] [--exact <test-identity>]... [--locked]` buffers one deterministic report after compilation and capability
+`fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--exact <test-identity>]... [--locked]` buffers one deterministic report after compilation and capability
 admission. Default and singular-package identities are `<module>::<function>`; workspace identities
 are `<package-uid>::<module>::<function>`. Completed tests use `test <identity> ... ok` or `test
 <identity> ... FAILED (<trap-category>)`, followed by `test result:
@@ -160,8 +160,10 @@ classified. Default and `--package` use `fairyc.test-report/v1`; `--workspace` u
 is `x86_64-windows-msvc` with `development` or `release`. All-passing still exits 0; one or more
 language traps writes the complete JSON and exits 5. Failures that previously produced no human
 report likewise produce no JSON report, and writer failure remains code 4 after a possible prefix.
+With `--locations`, JSON uses `fairyc.test-report/v3` and every outcome adds the exact-current
+portable source anchor. Without it, root/package v1 and workspace v2 bytes remain unchanged.
 
-`fairyc test --list [--json] [--workspace | --package <package-uid>] [--locked]` buffers one `test <identity>` line per admitted test in
+`fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--locked]` buffers one `test <identity>` line per admitted test in
 canonical order, followed by `test list: <count> discovered; lock
 <updated|unchanged|verified>`. Zero tests emit only the final line. Listing performs the complete
 test-overlay compiler admission but executes no test, backend, toolchain, or subprocess and writes
@@ -173,8 +175,11 @@ no list report; ordinary lock maintenance may already have completed, while `--l
 nothing. `--json` replaces only the success bytes with one compact newline-terminated object:
 default and `--package` use `fairyc.test-list/v1`, while `--workspace` uses
 `fairyc.test-list/v2`. Both contain `schemaVersion`, canonical `tests`, matching `count`, and
-`lock` (`updated`, `unchanged`, or `verified`). It adds no ANSI escapes, paths, source text,
-metadata, or host inventory. The text form remains byte-for-byte unchanged.
+`lock` (`updated`, `unchanged`, or `verified`). Without `--locations` it adds no ANSI escapes,
+paths, source text, metadata, or host inventory and retains exact text/JSON bytes. With
+`--locations`, text appends the portable path and 1-based position, while JSON uses
+`fairyc.test-list/v3` and adds the equally ordered exact-current `locations` array. Neither form
+emits source text or an absolute host path.
 
 `experimental parse` writes one `fairyc.experimental.parse/v0` JSON document, defined by
 `spec/cli/experimental-parse-v0.schema.json`, to stdout even when source diagnostics exist.

@@ -541,9 +541,9 @@ execution, a nonzero program status, or a program trap follows. `--locked` perfo
 compiler-output write failure after program execution returns code 4 but cannot undo earlier bytes
 or program effects; no executable is retained.
 
-## Stable workspace test v7
+## Stable workspace test v8
 
-`fairyc test [--json] [--native [--release]] [--workspace | --package <package-uid>] [--exact <test-identity>]... [--locked]` first loads and locks the ordinary production workspace, then overlays only
+`fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--exact <test-identity>]... [--locked]` first loads and locks the ordinary production workspace, then overlays only
 the root package's optional exact-lowercase `tests/` tree in memory. `--package` instead selects one
 exact local manifest package UID that has exactly one root-reachable resolved instance and overlays
 only that package's tree. Unknown, unreachable, SDK, or feature-instance-ambiguous selections are
@@ -577,7 +577,7 @@ values, and identities absent from the complete discovered set are code-2 invoca
 report. Selection happens after test declaration validation and limits execution only: syntax,
 semantic, Flow, MIR, and verifier admission still cover the complete test overlay.
 
-`fairyc test --list [--json] [--workspace | --package <package-uid>] [--locked]` is a separate discovery mode and does not combine with `--native`,
+`fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--locked]` is a separate discovery mode and does not combine with `--native`,
 `--release`, or `--exact`. It retains the complete overlay's syntax, declaration, semantic, Flow,
 MIR, and verifier admission, then emits `test <identity>` in canonical order without invoking the
 interpreter, backend, MSVC, PE inspector, or a test process. Its final line is
@@ -608,9 +608,22 @@ the exact engine, nullable target/profile, per-test passed/failed outcome and nu
 matching count/passed/failed totals, aggregate status, and lock state. Interpreter reports use null
 target/profile; native reports identify `x86_64-windows-msvc` and `development` or `release`.
 Compilation, capability, toolchain, inspection, execution-infrastructure, and package failures emit
-no JSON report. Paths, source, timings, host inventory, toolchain versions, program streams, and
-temporary harness or artifact identities are absent. Text execution output remains byte-for-byte
-unchanged when `--json` is omitted.
+no JSON report. Timings, host inventory, toolchain versions, program streams, and temporary harness
+or artifact identities are absent. Text execution output remains byte-for-byte unchanged when both
+`--json` and `--locations` are omitted.
+
+`--locations` is an additive explicit source-anchor mode for listing and execution. It does not
+change discovery, canonical test identities, `--exact`, ordering, compilation, execution, exit
+codes, or locking. Text test lines insert
+` at <portable-workspace-relative-path>:<one-based-line>:<one-based-byte-column>` immediately after
+the identity. JSON uses `fairyc.test-list/v3` or `fairyc.test-report/v3` in root, selected-package,
+and workspace modes. Located list reports retain the canonical `tests` array and add an equally
+ordered `locations` array. Located execution outcomes add `source`. Every source record contains
+the owning manifest package UID, portable workspace-relative test path, function-name line and byte
+column, exact half-open name byte span, and the validated source's `fairyc.source-file/v1` plus
+`fairyc.source-line-map/v1` identities. The command derives all fields from the already-contained
+validated bytes; it does not reopen a path or emit absolute paths, source text, timestamps, or host
+separators. Consumers must match both identities before treating a retained span as current.
 
 ## Stage 0 surface
 
@@ -620,8 +633,8 @@ unchanged when `--json` is omitted.
 | `fairyc check [--locked]` | Check the current manifest-owned workspace through verified MIR | No |
 | `fairyc build [--release] [--locked]` | Build or replace the current root package's one Windows executable | Yes |
 | `fairyc run [--release] [--locked] [-- <program-args...>]` | Build and run the current workspace as one temporary Windows image, forwarding arguments after `--` to the program | Yes |
-| `fairyc test [--json] [--native [--release]] [--workspace | --package <package-uid>] [--exact <test-identity>]... [--locked]` | Run all or exact canonical root, selected-package, or root-reachable workspace `@test fn void` entries through the semantic interpreter or one temporary Windows MSVC image per selected test, with human or stable JSON output | Optional temporary native images |
-| `fairyc test --list [--json] [--workspace | --package <package-uid>] [--locked]` | Compile-admit the complete selected test overlay and list canonical exact-selector identities as text or stable JSON without execution | No |
+| `fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--exact <test-identity>]... [--locked]` | Run all or exact canonical root, selected-package, or root-reachable workspace `@test fn void` entries through the semantic interpreter or one temporary Windows MSVC image per selected test, with human or stable JSON output and optional exact-current source anchors | Optional temporary native images |
+| `fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--locked]` | Compile-admit the complete selected test overlay and list canonical exact-selector identities as text or stable JSON, optionally with exact-current source anchors, without execution | No |
 | `fairyc emit c --target <target-id> [--locked]` | Emit the current executable workspace's target-selected C11 application unit | C only, stdout |
 | `fairyc explain <diagnostic-code>` | Explain a stable diagnostic code | No |
 | `fairyc targets` | Report known target profiles, status, evidence, and unavailable requirements | No |

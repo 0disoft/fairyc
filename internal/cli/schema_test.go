@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 
 	"github.com/0disoft/fairyc/internal/target"
@@ -108,6 +109,48 @@ func TestStableWorkspaceTestListReportMatchesSchema(t *testing.T) {
 	assertJSONFieldsMatchSchema(t, reportBytes, schema.Properties, schema.Required)
 }
 
+func TestStableLocatedTestListReportMatchesSchema(t *testing.T) {
+	t.Parallel()
+	schemaBytes, err := os.ReadFile(filepath.Join("..", "..", "spec", "cli", "stable-test-list-v3.schema.json"))
+	if err != nil {
+		t.Fatalf("read schema: %v", err)
+	}
+	var schema struct {
+		Properties map[string]json.RawMessage `json:"properties"`
+		Required   []string                   `json:"required"`
+		Defs       struct {
+			Location struct {
+				Properties map[string]json.RawMessage `json:"properties"`
+				Required   []string                   `json:"required"`
+			} `json:"location"`
+			Source struct {
+				Properties map[string]json.RawMessage `json:"properties"`
+				Required   []string                   `json:"required"`
+			} `json:"source"`
+		} `json:"$defs"`
+	}
+	if err := json.Unmarshal(schemaBytes, &schema); err != nil {
+		t.Fatalf("decode schema contract: %v", err)
+	}
+	source := schemaTestSource()
+	location := stableTestLocation{Identity: "tests::main::passes", Source: source}
+	reportBytes, err := json.Marshal(stableTestListReport{
+		SchemaVersion: stableLocatedTestListSchema,
+		Tests:         []string{location.Identity},
+		Locations:     &[]stableTestLocation{location},
+		Count:         1,
+		Lock:          "verified",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertJSONFieldsMatchSchema(t, reportBytes, schema.Properties, schema.Required)
+	locationBytes, _ := json.Marshal(location)
+	assertJSONFieldsMatchSchema(t, locationBytes, schema.Defs.Location.Properties, schema.Defs.Location.Required)
+	sourceBytes, _ := json.Marshal(source)
+	assertJSONFieldsMatchSchema(t, sourceBytes, schema.Defs.Source.Properties, schema.Defs.Source.Required)
+}
+
 func TestStableTestExecutionReportMatchesSchema(t *testing.T) {
 	t.Parallel()
 	schemaBytes, err := os.ReadFile(filepath.Join("..", "..", "spec", "cli", "stable-test-report-v1.schema.json"))
@@ -196,6 +239,65 @@ func TestStableWorkspaceTestExecutionReportMatchesSchema(t *testing.T) {
 		t.Fatal(err)
 	}
 	assertJSONFieldsMatchSchema(t, outcomeBytes, schema.Defs.Outcome.Properties, schema.Defs.Outcome.Required)
+}
+
+func TestStableLocatedTestExecutionReportMatchesSchema(t *testing.T) {
+	t.Parallel()
+	schemaBytes, err := os.ReadFile(filepath.Join("..", "..", "spec", "cli", "stable-test-report-v3.schema.json"))
+	if err != nil {
+		t.Fatalf("read schema: %v", err)
+	}
+	var schema struct {
+		Properties map[string]json.RawMessage `json:"properties"`
+		Required   []string                   `json:"required"`
+		Defs       struct {
+			Outcome struct {
+				Properties map[string]json.RawMessage `json:"properties"`
+				Required   []string                   `json:"required"`
+			} `json:"outcome"`
+			Source struct {
+				Properties map[string]json.RawMessage `json:"properties"`
+				Required   []string                   `json:"required"`
+			} `json:"source"`
+		} `json:"$defs"`
+	}
+	if err := json.Unmarshal(schemaBytes, &schema); err != nil {
+		t.Fatalf("decode schema contract: %v", err)
+	}
+	source := schemaTestSource()
+	outcome := stableTestExecutionOutcome{
+		Identity: "tests::main::passes", Outcome: "passed", Source: &source,
+	}
+	reportBytes, err := json.Marshal(stableTestExecutionReport{
+		SchemaVersion: stableLocatedTestReportSchema,
+		Engine:        "interpreter",
+		Tests:         []stableTestExecutionOutcome{outcome},
+		Count:         1,
+		Passed:        1,
+		Status:        "ok",
+		Lock:          "verified",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertJSONFieldsMatchSchema(t, reportBytes, schema.Properties, schema.Required)
+	outcomeBytes, _ := json.Marshal(outcome)
+	assertJSONFieldsMatchSchema(t, outcomeBytes, schema.Defs.Outcome.Properties, schema.Defs.Outcome.Required)
+	sourceBytes, _ := json.Marshal(source)
+	assertJSONFieldsMatchSchema(t, sourceBytes, schema.Defs.Source.Properties, schema.Defs.Source.Required)
+}
+
+func schemaTestSource() stableTestSource {
+	return stableTestSource{
+		PackageUID:      "example.app",
+		Path:            "tests/main.fy",
+		Line:            3,
+		ByteColumn:      9,
+		StartByte:       32,
+		EndByte:         38,
+		FileIdentity:    "fyfile1-sha256-" + strings.Repeat("0", 64),
+		LineMapIdentity: "fylm1-sha256-" + strings.Repeat("1", 64),
+	}
 }
 
 func TestTargetSpecTopLevelMatchesSchema(t *testing.T) {

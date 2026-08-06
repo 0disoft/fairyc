@@ -996,6 +996,14 @@ as `<package-uid>::<module>::<function>`, accepts those exact strings through `-
 Catalog-only unreachable members, ambiguous feature instances, parallel scheduling, caching,
 durations, retries, and output attachments remain separate.
 
+ADR 0300 adds explicit `--locations` to listing and execution. It preserves every existing
+identity, selector, text byte, and v1/v2 JSON byte when omitted. When requested, text reports a
+portable workspace-relative path with 1-based line and byte column; JSON uses
+`fairyc.test-list/v3` or `fairyc.test-report/v3` and binds each function-name span to package UID,
+exact byte offsets, `fairyc.source-file/v1`, and `fairyc.source-line-map/v1`. These anchors come
+from the validated in-memory test source and disclose neither source text nor an absolute host path.
+Consumers must verify both identities before trusting a retained span as current.
+
 ADR 0146 rejects speculative persistent caching at this point. ADR 0149 supplies deterministic,
 bounded, verifier-checked bytes for a complete MIR program, but the workspace path still produces
 no independently reusable per-package MIR/object artifact and has no configured comparable

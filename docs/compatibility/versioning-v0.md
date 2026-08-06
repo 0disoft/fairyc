@@ -883,6 +883,14 @@ remain unchanged. Catalog-unreachable members, multiple feature instances, paral
 and portable native targets are not implied. Language, SDK, runtime ABI, manifest, lockfile,
 package, interface, target, MIR, and generated-code versions remain unchanged.
 
+ADR 0300 additively admits `--locations` for stable test listing and execution. Omission preserves
+all v1/v2 JSON and text bytes. Located JSON uses `fairyc.test-list/v3` or
+`fairyc.test-report/v3`; the new source record freezes package UID, portable workspace-relative
+path, 1-based line and byte column, half-open function-name byte span, and exact `fyfile1`/`fylm1`
+identities. Canonical test identity, `--exact`, ordering, locking, exit codes, engine behavior, and
+artifacts remain unchanged. Language, SDK, runtime ABI, manifest, lockfile, package, interface,
+target, MIR, and generated-code versions remain unchanged.
+
 ADR 0204 stabilizes `fairyc new <package-name> --uid <package-uid>`, its explicit non-derived UID,
 single direct-child destination, exact four-file starter, no-overwrite behavior, absence of an
 initial lockfile, success line, and codes 0, 2, 4, and 7. Adding templates, flags, merge behavior, an

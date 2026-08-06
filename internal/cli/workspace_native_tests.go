@@ -75,7 +75,7 @@ func runNativeWorkspaceTestsWith(
 				fmt.Errorf("native test %s exited with status %d without a valid trap receipt", test.display, outcome.ExitCode),
 			)
 		}
-		outcomes = append(outcomes, workspaceTestOutcome{display: test.display, trapCategory: category})
+		outcomes = append(outcomes, workspaceTestOutcome{display: test.display, trapCategory: category, source: test.source})
 	}
 	return outcomes, ExitSuccess
 }

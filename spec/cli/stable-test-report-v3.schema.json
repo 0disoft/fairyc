@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fairyc:test-report:v3",
+  "title": "Fairy C stable located test execution report v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "engine",
+    "target",
+    "profile",
+    "tests",
+    "count",
+    "passed",
+    "failed",
+    "status",
+    "lock"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "fairyc.test-report/v3" },
+    "engine": { "enum": ["interpreter", "native"] },
+    "target": {
+      "type": ["string", "null"],
+      "enum": ["x86_64-windows-msvc", null]
+    },
+    "profile": {
+      "type": ["string", "null"],
+      "enum": ["development", "release", null]
+    },
+    "tests": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/outcome" }
+    },
+    "count": { "type": "integer", "minimum": 0 },
+    "passed": { "type": "integer", "minimum": 0 },
+    "failed": { "type": "integer", "minimum": 0 },
+    "status": { "enum": ["ok", "failed"] },
+    "lock": { "enum": ["updated", "unchanged", "verified"] }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "engine": { "const": "interpreter" },
+        "target": { "const": null },
+        "profile": { "const": null }
+      }
+    },
+    {
+      "properties": {
+        "engine": { "const": "native" },
+        "target": { "const": "x86_64-windows-msvc" },
+        "profile": { "enum": ["development", "release"] }
+      }
+    }
+  ],
+  "$defs": {
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identity", "outcome", "trapCategory", "source"],
+      "properties": {
+        "identity": { "type": "string", "minLength": 1 },
+        "outcome": { "enum": ["passed", "failed"] },
+        "trapCategory": { "type": ["string", "null"], "minLength": 1 },
+        "source": { "$ref": "#/$defs/source" }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "outcome": { "const": "passed" },
+            "trapCategory": { "const": null }
+          }
+        },
+        {
+          "properties": {
+            "outcome": { "const": "failed" },
+            "trapCategory": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "packageUid",
+        "path",
+        "line",
+        "byteColumn",
+        "startByte",
+        "endByte",
+        "fileIdentity",
+        "lineMapIdentity"
+      ],
+      "properties": {
+        "packageUid": { "type": "string", "minLength": 1 },
+        "path": { "type": "string", "pattern": "^(?!/)(?!.*\\\\)(?!.*(?:^|/)\\.\\.(?:/|$)).+\\.fy$" },
+        "line": { "type": "integer", "minimum": 1 },
+        "byteColumn": { "type": "integer", "minimum": 1 },
+        "startByte": { "type": "integer", "minimum": 0 },
+        "endByte": { "type": "integer", "minimum": 0 },
+        "fileIdentity": { "type": "string", "pattern": "^fyfile1-sha256-[0-9a-f]{64}$" },
+        "lineMapIdentity": { "type": "string", "pattern": "^fylm1-sha256-[0-9a-f]{64}$" }
+      }
+    }
+  }
+}

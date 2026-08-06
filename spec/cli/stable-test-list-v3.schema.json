@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fairyc:test-list:v3",
+  "title": "Fairy C stable located test list report v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "tests", "locations", "count", "lock"],
+  "properties": {
+    "schemaVersion": {
+      "const": "fairyc.test-list/v3"
+    },
+    "tests": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "locations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/location"
+      }
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "lock": {
+      "enum": ["updated", "unchanged", "verified"]
+    }
+  },
+  "$defs": {
+    "location": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identity", "source"],
+      "properties": {
+        "identity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "$ref": "#/$defs/source"
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "packageUid",
+        "path",
+        "line",
+        "byteColumn",
+        "startByte",
+        "endByte",
+        "fileIdentity",
+        "lineMapIdentity"
+      ],
+      "properties": {
+        "packageUid": { "type": "string", "minLength": 1 },
+        "path": { "type": "string", "pattern": "^(?!/)(?!.*\\\\)(?!.*(?:^|/)\\.\\.(?:/|$)).+\\.fy$" },
+        "line": { "type": "integer", "minimum": 1 },
+        "byteColumn": { "type": "integer", "minimum": 1 },
+        "startByte": { "type": "integer", "minimum": 0 },
+        "endByte": { "type": "integer", "minimum": 0 },
+        "fileIdentity": { "type": "string", "pattern": "^fyfile1-sha256-[0-9a-f]{64}$" },
+        "lineMapIdentity": { "type": "string", "pattern": "^fylm1-sha256-[0-9a-f]{64}$" }
+      }
+    }
+  }
+}

@@ -15,6 +15,7 @@ import (
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/interpreter"
 	"github.com/0disoft/fairyc/internal/mir"
+	"github.com/0disoft/fairyc/internal/packagecontent"
 	"github.com/0disoft/fairyc/internal/workspaceloader"
 )
 
@@ -23,6 +24,8 @@ const stableTestListSchema = "fairyc.test-list/v1"
 const stableTestReportSchema = "fairyc.test-report/v1"
 const stableWorkspaceTestListSchema = "fairyc.test-list/v2"
 const stableWorkspaceTestReportSchema = "fairyc.test-report/v2"
+const stableLocatedTestListSchema = "fairyc.test-list/v3"
+const stableLocatedTestReportSchema = "fairyc.test-report/v3"
 
 type stableTestOptions struct {
 	locked     bool
@@ -30,22 +33,41 @@ type stableTestOptions struct {
 	release    bool
 	list       bool
 	json       bool
+	locations  bool
 	workspace  bool
 	packageUID string
 	exact      []string
 }
 
 type stableTestListReport struct {
-	SchemaVersion string   `json:"schemaVersion"`
-	Tests         []string `json:"tests"`
-	Count         int      `json:"count"`
-	Lock          string   `json:"lock"`
+	SchemaVersion string                `json:"schemaVersion"`
+	Tests         []string              `json:"tests"`
+	Locations     *[]stableTestLocation `json:"locations,omitempty"`
+	Count         int                   `json:"count"`
+	Lock          string                `json:"lock"`
+}
+
+type stableTestSource struct {
+	PackageUID      string `json:"packageUid"`
+	Path            string `json:"path"`
+	Line            int    `json:"line"`
+	ByteColumn      int    `json:"byteColumn"`
+	StartByte       int    `json:"startByte"`
+	EndByte         int    `json:"endByte"`
+	FileIdentity    string `json:"fileIdentity"`
+	LineMapIdentity string `json:"lineMapIdentity"`
+}
+
+type stableTestLocation struct {
+	Identity string           `json:"identity"`
+	Source   stableTestSource `json:"source"`
 }
 
 type stableTestExecutionOutcome struct {
-	Identity     string  `json:"identity"`
-	Outcome      string  `json:"outcome"`
-	TrapCategory *string `json:"trapCategory"`
+	Identity     string            `json:"identity"`
+	Outcome      string            `json:"outcome"`
+	TrapCategory *string           `json:"trapCategory"`
+	Source       *stableTestSource `json:"source,omitempty"`
 }
 
 type stableTestExecutionReport struct {
@@ -64,11 +86,13 @@ type stableTestExecutionReport struct {
 type workspaceTest struct {
 	display string
 	entry   string
+	source  stableTestSource
 }
 
 type workspaceTestOutcome struct {
 	display      string
 	trapCategory string
+	source       stableTestSource
 }
 
 type testSourceDiagnostics struct {
@@ -114,7 +138,7 @@ func runStableTest(arguments []string, sourceRoot string, stdout, stderr io.Writ
 			}
 			packageUID = loaded.Manifest.Package.UID
 		}
-		packageTests, prepareCode := prepareWorkspaceTests(&workspace, packagePath, packageUID, stderr)
+		packageTests, prepareCode := prepareWorkspaceTests(&workspace, packagePath, packageUID, options.locations, stderr)
 		if prepareCode != ExitSuccess {
 			return prepareCode
 		}
@@ -159,7 +183,7 @@ func runStableTest(arguments []string, sourceRoot string, stdout, stderr io.Writ
 		if options.json {
 			return writeStableTestListJSON(tests, lockState, options, stdout, stderr)
 		}
-		return writeStableTestList(tests, lockState, stdout, stderr)
+		return writeStableTestList(tests, lockState, options, stdout, stderr)
 	}
 
 	var outcomes []workspaceTestOutcome
@@ -178,7 +202,7 @@ func runStableTest(arguments []string, sourceRoot string, stdout, stderr io.Writ
 	if options.json {
 		return writeStableTestReportJSON(outcomes, lockState, options, stdout, stderr)
 	}
-	return writeStableTestReport(outcomes, lockState, stdout, stderr)
+	return writeStableTestReport(outcomes, lockState, options, stdout, stderr)
 }
 
 func runInterpreterWorkspaceTests(program mir.Program, tests []workspaceTest, stderr io.Writer) ([]workspaceTestOutcome, int) {
@@ -201,9 +225,9 @@ func runInterpreterWorkspaceTests(program mir.Program, tests []workspaceTest, st
 		}
 		switch outcome.Kind {
 		case interpreter.OutcomeReturn:
-			outcomes = append(outcomes, workspaceTestOutcome{display: test.display})
+			outcomes = append(outcomes, workspaceTestOutcome{display: test.display, source: test.source})
 		case interpreter.OutcomeTrap:
-			outcomes = append(outcomes, workspaceTestOutcome{display: test.display, trapCategory: outcome.TrapCategory})
+			outcomes = append(outcomes, workspaceTestOutcome{display: test.display, trapCategory: outcome.TrapCategory, source: test.source})
 		default:
 			return nil, internalError(stderr)
 		}
@@ -211,18 +235,22 @@ func runInterpreterWorkspaceTests(program mir.Program, tests []workspaceTest, st
 	return outcomes, ExitSuccess
 }
 
-func writeStableTestReport(outcomes []workspaceTestOutcome, lockState string, stdout, stderr io.Writer) int {
+func writeStableTestReport(outcomes []workspaceTestOutcome, lockState string, options stableTestOptions, stdout, stderr io.Writer) int {
 	var report strings.Builder
 	passed := 0
 	failed := 0
 	for _, outcome := range outcomes {
+		location := ""
+		if options.locations {
+			location = fmt.Sprintf(" at %s:%d:%d", safeDisplayPath(outcome.source.Path), outcome.source.Line, outcome.source.ByteColumn)
+		}
 		if outcome.trapCategory == "" {
 			passed++
-			fmt.Fprintf(&report, "test %s ... ok\n", outcome.display)
+			fmt.Fprintf(&report, "test %s%s ... ok\n", outcome.display, location)
 			continue
 		}
 		failed++
-		fmt.Fprintf(&report, "test %s ... FAILED (%s)\n", outcome.display, outcome.trapCategory)
+		fmt.Fprintf(&report, "test %s%s ... FAILED (%s)\n", outcome.display, location, outcome.trapCategory)
 	}
 	status := "ok"
 	if failed != 0 {
@@ -249,6 +277,10 @@ func writeStableTestReportJSON(
 	failed := 0
 	for _, outcome := range outcomes {
 		result := stableTestExecutionOutcome{Identity: outcome.display, Outcome: "passed"}
+		if options.locations {
+			source := outcome.source
+			result.Source = &source
+		}
 		if outcome.trapCategory == "" {
 			passed++
 		} else {
@@ -297,10 +329,14 @@ func writeStableTestReportJSON(
 	return ExitSuccess
 }
 
-func writeStableTestList(tests []workspaceTest, lockState string, stdout, stderr io.Writer) int {
+func writeStableTestList(tests []workspaceTest, lockState string, options stableTestOptions, stdout, stderr io.Writer) int {
 	var report strings.Builder
 	for _, test := range tests {
-		fmt.Fprintf(&report, "test %s\n", test.display)
+		if options.locations {
+			fmt.Fprintf(&report, "test %s at %s:%d:%d\n", test.display, safeDisplayPath(test.source.Path), test.source.Line, test.source.ByteColumn)
+		} else {
+			fmt.Fprintf(&report, "test %s\n", test.display)
+		}
 	}
 	fmt.Fprintf(&report, "test list: %d discovered; lock %s\n", len(tests), lockState)
 	if _, err := io.WriteString(stdout, report.String()); err != nil {
@@ -311,12 +347,21 @@ func writeStableTestList(tests []workspaceTest, lockState string, stdout, stderr
 
 func writeStableTestListJSON(tests []workspaceTest, lockState string, options stableTestOptions, stdout, stderr io.Writer) int {
 	identities := make([]string, 0, len(tests))
+	locations := make([]stableTestLocation, 0, len(tests))
 	for _, test := range tests {
 		identities = append(identities, test.display)
+		if options.locations {
+			locations = append(locations, stableTestLocation{Identity: test.display, Source: test.source})
+		}
+	}
+	var locationReport *[]stableTestLocation
+	if options.locations {
+		locationReport = &locations
 	}
 	report, err := json.Marshal(stableTestListReport{
 		SchemaVersion: stableTestListSchemaFor(options),
 		Tests:         identities,
+		Locations:     locationReport,
 		Count:         len(identities),
 		Lock:          lockState,
 	})
@@ -331,6 +376,9 @@ func writeStableTestListJSON(tests []workspaceTest, lockState string, options st
 }
 
 func stableTestListSchemaFor(options stableTestOptions) string {
+	if options.locations {
+		return stableLocatedTestListSchema
+	}
 	if options.workspace {
 		return stableWorkspaceTestListSchema
 	}
@@ -338,6 +386,9 @@ func stableTestListSchemaFor(options stableTestOptions) string {
 }
 
 func stableTestReportSchemaFor(options stableTestOptions) string {
+	if options.locations {
+		return stableLocatedTestReportSchema
+	}
 	if options.workspace {
 		return stableWorkspaceTestReportSchema
 	}
@@ -375,8 +426,8 @@ func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 			index++
 			continue
 		}
-		if argument != "--locked" && argument != "--native" && argument != "--release" && argument != "--list" && argument != "--json" && argument != "--workspace" {
-			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --list, --json, --native, --release, --workspace, --package <package-uid>, --exact <test-identity>, and --locked`)
+		if argument != "--locked" && argument != "--native" && argument != "--release" && argument != "--list" && argument != "--json" && argument != "--locations" && argument != "--workspace" {
+			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --list, --json, --locations, --native, --release, --workspace, --package <package-uid>, --exact <test-identity>, and --locked`)
 		}
 		if seen[argument] {
 			return stableTestOptions{}, fmt.Errorf(`command "test" received %s more than once`, argument)
@@ -393,6 +444,8 @@ func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 			options.list = true
 		case "--json":
 			options.json = true
+		case "--locations":
+			options.locations = true
 		case "--workspace":
 			options.workspace = true
 		}
@@ -481,7 +534,7 @@ func selectWorkspaceTests(tests []workspaceTest, exact []string) ([]workspaceTes
 	return selected, nil
 }
 
-func prepareWorkspaceTests(workspace *workspaceloader.Workspace, packagePath, packageUID string, stderr io.Writer) ([]workspaceTest, int) {
+func prepareWorkspaceTests(workspace *workspaceloader.Workspace, packagePath, packageUID string, includeLocations bool, stderr io.Writer) ([]workspaceTest, int) {
 	packageID, err := workspace.PackageID(packagePath)
 	if err != nil {
 		return nil, packageFailure(stderr, err)
@@ -497,6 +550,16 @@ func prepareWorkspaceTests(workspace *workspaceloader.Workspace, packagePath, pa
 			continue
 		}
 		var diagnostics []diagnostic.Diagnostic
+		var fileIdentity packagecontent.FileDigest
+		var lineMapIdentity packagecontent.LineMapID
+		locationPath := ""
+		if includeLocations {
+			fileIdentity, lineMapIdentity = packagecontent.ComputeFileIdentities(file.Bytes)
+			locationPath = file.Path
+			if packagePath != "." {
+				locationPath = packagePath + "/" + file.Path
+			}
+		}
 		collectInvalidTestAttributes(file.Module.Structs, func(value ast.Struct) []ast.Attribute { return value.Attributes }, &diagnostics)
 		collectInvalidTestAttributes(file.Module.Enums, func(value ast.Enum) []ast.Attribute { return value.Attributes }, &diagnostics)
 		collectInvalidTestAttributes(file.Module.Resources, func(value ast.Resource) []ast.Attribute { return value.Attributes }, &diagnostics)
@@ -536,9 +599,20 @@ func prepareWorkspaceTests(workspace *workspaceloader.Workspace, packagePath, pa
 			if packageUID != "" {
 				display = packageUID + "::" + display
 			}
+			var source stableTestSource
+			if includeLocations {
+				line, byteColumn := bytePosition(file.Bytes, function.NameSpan.StartByte)
+				source = stableTestSource{
+					PackageUID: testPackage.Manifest.Package.UID, Path: locationPath,
+					Line: line, ByteColumn: byteColumn,
+					StartByte: function.NameSpan.StartByte, EndByte: function.NameSpan.EndByte,
+					FileIdentity: fileIdentity.String(), LineMapIdentity: lineMapIdentity.String(),
+				}
+			}
 			tests = append(tests, workspaceTest{
 				display: display,
 				entry:   hir.QualifiedModulePath(packageID, file.Module.Path) + "::" + function.Name,
+				source:  source,
 			})
 		}
 		if len(diagnostics) != 0 {

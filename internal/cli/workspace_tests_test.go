@@ -2,9 +2,11 @@ package cli
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -16,6 +18,7 @@ import (
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/lockfile"
 	"github.com/0disoft/fairyc/internal/mir"
+	"github.com/0disoft/fairyc/internal/packagecontent"
 )
 
 func TestStableWorkspaceTestRunsIsolatedVoidTestsInCanonicalOrder(t *testing.T) {
@@ -162,6 +165,26 @@ fn void member_passes() { assert(answer::value() == 42); }
 	if code != ExitSuccess || stdout != want || stderr != "" {
 		t.Fatalf("workspace aggregate list = (%d, %q, %q), want stdout %q", code, stdout, stderr, want)
 	}
+	code, stdout, stderr = runForTest([]string{"test", "--workspace", "--list", "--json", "--locations", "--locked"}, root)
+	if code != ExitSuccess || stderr != "" {
+		t.Fatalf("located workspace list = (%d, %q, %q)", code, stdout, stderr)
+	}
+	var locatedWorkspace struct {
+		SchemaVersion string `json:"schemaVersion"`
+		Locations     []stableTestLocation
+	}
+	if err := json.Unmarshal([]byte(stdout), &locatedWorkspace); err != nil {
+		t.Fatal(err)
+	}
+	if locatedWorkspace.SchemaVersion != "fairyc.test-list/v3" || len(locatedWorkspace.Locations) != 2 ||
+		locatedWorkspace.Locations[0].Identity != "example.member-test.answer::tests::member::member_passes" ||
+		locatedWorkspace.Locations[0].Source.PackageUID != "example.member-test.answer" ||
+		locatedWorkspace.Locations[0].Source.Path != "libs/answer/tests/member.fy" ||
+		locatedWorkspace.Locations[1].Identity != "example.member-test.app::tests::root::root_passes" ||
+		locatedWorkspace.Locations[1].Source.PackageUID != "example.member-test.app" ||
+		locatedWorkspace.Locations[1].Source.Path != "tests/root.fy" {
+		t.Fatalf("located workspace list = %+v", locatedWorkspace)
+	}
 	code, stdout, stderr = runForTest([]string{
 		"test", "--workspace", "--exact", "example.member-test.answer::tests::member::member_passes", "--locked",
 	}, root)
@@ -218,6 +241,68 @@ fn void second_passes() { assert(true); }
 	want := `{"schemaVersion":"fairyc.test-report/v1","engine":"interpreter","target":null,"profile":null,"tests":[{"identity":"tests::outcomes::first_fails","outcome":"failed","trapCategory":"assertion-failed"},{"identity":"tests::outcomes::second_passes","outcome":"passed","trapCategory":null}],"count":2,"passed":1,"failed":1,"status":"failed","lock":"updated"}` + "\n"
 	if code != ExitProgramTrap || stdout != want || stderr != "" {
 		t.Fatalf("JSON test = (%d, %q, %q), want stdout %q", code, stdout, stderr, want)
+	}
+}
+
+func TestStableWorkspaceTestReportsExactSourceLocationsOnRequest(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeStableTestWorkspace(t, root)
+	source := `module tests::location;
+
+@test
+fn void passes() { assert(true); }
+`
+	writeWorkspaceFile(t, root, "tests/location.fy", source)
+	wantFile, wantLineMap := packagecontent.ComputeFileIdentities([]byte(source))
+	wantStart := strings.Index(source, "passes")
+
+	code, stdout, stderr := runForTest([]string{"test", "--list", "--locations", "--json"}, root)
+	if code != ExitSuccess || stderr != "" {
+		t.Fatalf("located JSON list = (%d, %q, %q)", code, stdout, stderr)
+	}
+	var listed struct {
+		SchemaVersion string `json:"schemaVersion"`
+		Tests         []string
+		Locations     []stableTestLocation `json:"locations"`
+	}
+	if err := json.Unmarshal([]byte(stdout), &listed); err != nil {
+		t.Fatal(err)
+	}
+	if listed.SchemaVersion != "fairyc.test-list/v3" ||
+		!slices.Equal(listed.Tests, []string{"tests::location::passes"}) || len(listed.Locations) != 1 {
+		t.Fatalf("located list = %+v", listed)
+	}
+	location := listed.Locations[0]
+	if location.Identity != "tests::location::passes" || location.Source.PackageUID != "example.stable-test.app" ||
+		location.Source.Path != "tests/location.fy" || location.Source.Line != 4 || location.Source.ByteColumn != 9 ||
+		location.Source.StartByte != wantStart || location.Source.EndByte != wantStart+len("passes") ||
+		location.Source.FileIdentity != wantFile.String() || location.Source.LineMapIdentity != wantLineMap.String() {
+		t.Fatalf("located list source = %+v", location)
+	}
+
+	code, stdout, stderr = runForTest([]string{"test", "--locations", "--json", "--locked"}, root)
+	if code != ExitSuccess || stderr != "" {
+		t.Fatalf("located JSON execution = (%d, %q, %q)", code, stdout, stderr)
+	}
+	var executed struct {
+		SchemaVersion string `json:"schemaVersion"`
+		Tests         []stableTestExecutionOutcome
+	}
+	if err := json.Unmarshal([]byte(stdout), &executed); err != nil {
+		t.Fatal(err)
+	}
+	if executed.SchemaVersion != "fairyc.test-report/v3" || len(executed.Tests) != 1 ||
+		executed.Tests[0].Identity != location.Identity || executed.Tests[0].Source == nil ||
+		*executed.Tests[0].Source != location.Source {
+		t.Fatalf("located execution = %+v", executed)
+	}
+
+	code, stdout, stderr = runForTest([]string{"test", "--list", "--locations", "--locked"}, root)
+	wantText := "test tests::location::passes at tests/location.fy:4:9\n" +
+		"test list: 1 discovered; lock verified\n"
+	if code != ExitSuccess || stdout != wantText || stderr != "" {
+		t.Fatalf("located text list = (%d, %q, %q), want stdout %q", code, stdout, stderr, wantText)
 	}
 }
 
@@ -281,9 +366,17 @@ func TestStableWorkspaceTestHandlesZeroTestsInvocationAndOutputFailure(t *testin
 	if code != ExitSuccess || stdout != `{"schemaVersion":"fairyc.test-list/v1","tests":[],"count":0,"lock":"verified"}`+"\n" || stderr != "" {
 		t.Fatalf("zero JSON test list = (%d, %q, %q)", code, stdout, stderr)
 	}
+	code, stdout, stderr = runForTest([]string{"test", "--list", "--json", "--locations", "--locked"}, root)
+	if code != ExitSuccess || stdout != `{"schemaVersion":"fairyc.test-list/v3","tests":[],"locations":[],"count":0,"lock":"verified"}`+"\n" || stderr != "" {
+		t.Fatalf("zero located JSON test list = (%d, %q, %q)", code, stdout, stderr)
+	}
 	code, stdout, stderr = runForTest([]string{"test", "--json", "--locked"}, root)
 	if code != ExitSuccess || stdout != `{"schemaVersion":"fairyc.test-report/v1","engine":"interpreter","target":null,"profile":null,"tests":[],"count":0,"passed":0,"failed":0,"status":"ok","lock":"verified"}`+"\n" || stderr != "" {
 		t.Fatalf("zero JSON test report = (%d, %q, %q)", code, stdout, stderr)
+	}
+	code, stdout, stderr = runForTest([]string{"test", "--json", "--locations", "--locked"}, root)
+	if code != ExitSuccess || stdout != `{"schemaVersion":"fairyc.test-report/v3","engine":"interpreter","target":null,"profile":null,"tests":[],"count":0,"passed":0,"failed":0,"status":"ok","lock":"verified"}`+"\n" || stderr != "" {
+		t.Fatalf("zero located JSON test report = (%d, %q, %q)", code, stdout, stderr)
 	}
 	var outputError bytes.Buffer
 	code = Run([]string{"test", "--list", "--json", "--locked"}, root, failingWriter{}, &outputError)
@@ -301,6 +394,7 @@ func TestStableWorkspaceTestHandlesZeroTestsInvocationAndOutputFailure(t *testin
 		{"test", "--native", "--native"},
 		{"test", "--list", "--list"},
 		{"test", "--list", "--json", "--json"},
+		{"test", "--locations", "--locations"},
 		{"test", "--list", "--native"},
 		{"test", "--list", "--release"},
 		{"test", "--list", "--exact", "tests::missing::test"},
