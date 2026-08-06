@@ -722,6 +722,24 @@ pub fn Result<PathKind, FileError> path_kind(ref CStr path) {
     };
 }
 
+/// Reports whether kind names an ordinary file path.
+pub fn bool path_kind_is_file(PathKind kind) {
+    return switch (kind) {
+        case .File : { true }
+        case .Directory : { false }
+        case .Other : { false }
+    };
+}
+
+/// Reports whether kind names a directory path.
+pub fn bool path_kind_is_directory(PathKind kind) {
+    return switch (kind) {
+        case .File : { false }
+        case .Directory : { true }
+        case .Other : { false }
+    };
+}
+
 /// Reports whether kind names an ordinary disk file.
 pub fn bool kind_is_disk(FileKind kind) {
     return switch (kind) {

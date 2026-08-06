@@ -8,7 +8,7 @@ import (
 
 func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	t.Parallel()
-	if Version != "0.0.0-stage0.45" {
+	if Version != "0.0.0-stage0.46" {
 		t.Fatalf("Version = %q", Version)
 	}
 	if LanguageRevision != "fairyc-language/10" {
@@ -42,6 +42,7 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	removeDirAllPublic := false
 	copyFileBytesPublic := false
 	pathKindPublic := false
+	pathKindPredicates := make(map[string]bool)
 	seekFunctions := make(map[string]bool)
 	readOnlyPublic := false
 	setReadOnlyPublic := false
@@ -123,6 +124,9 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 			if function.Name == "path_kind" {
 				pathKindPublic = function.Public
 			}
+			if function.Name == "path_kind_is_file" || function.Name == "path_kind_is_directory" {
+				pathKindPredicates[function.Name] = function.Public
+			}
 			if function.Name == "is_read_only" {
 				readOnlyPublic = function.Public
 			}
@@ -157,6 +161,11 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	}
 	if !pathKindPublic {
 		t.Fatal("std::fs::path_kind is not public")
+	}
+	for _, name := range []string{"path_kind_is_file", "path_kind_is_directory"} {
+		if !pathKindPredicates[name] {
+			t.Errorf("std::fs::%s is not public", name)
+		}
 	}
 	if !readOnlyPublic {
 		t.Fatal("std::fs::is_read_only is not public")

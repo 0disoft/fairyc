@@ -411,6 +411,9 @@ ADR 0311 moves the SDK to `0.0.0-stage0.45` with
 ambiguous bounded paths before effects, removes observed directory reparse points as leaves, and
 reports exact removed-object progress on success or failure. Traversal order is filesystem-defined;
 the operation is not atomic, rollback-capable, containment proof, or race-free authorization.
+ADR 0317 moves the SDK to `0.0.0-stage0.46` with effect-free
+`path_kind_is_file(PathKind)` and `path_kind_is_directory(PathKind)`. Both are exhaustive and keep
+`.Other` false without turning a path snapshot into authorization or a race-free precheck.
 The path-kind query distinguishes ordinary files, directories, and other observed attributes without opening
 an owner, but its snapshot is not stable identity, authorization, containment, or a race-free
 precheck. `std::fs::copy_file_bytes` holds exclusive source and `CREATE_NEW` destination handles,

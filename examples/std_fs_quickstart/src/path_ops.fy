@@ -718,19 +718,11 @@ fn i32 close_path_kind_file(fs::File file) {
 }
 
 fn i32 expect_file_path_kind(fs::PathKind kind) {
-    return switch (kind) {
-        case .File : { 0 }
-        case .Directory : { 307 }
-        case .Other : { 308 }
-    };
+    return if (fs::path_kind_is_file(kind) && !fs::path_kind_is_directory(kind)) { 0 } else { 307 };
 }
 
 fn i32 expect_directory_path_kind(fs::PathKind kind) {
-    return switch (kind) {
-        case .File : { 309 }
-        case .Directory : { 0 }
-        case .Other : { 310 }
-    };
+    return if (!fs::path_kind_is_file(kind) && fs::path_kind_is_directory(kind)) { 0 } else { 309 };
 }
 
 @effects(filesystem)

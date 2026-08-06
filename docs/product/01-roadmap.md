@@ -845,6 +845,10 @@ closed and invalid storage, invalid boolean rejection, and exact `ERROR_ACCESS_D
 read-only handle with unchanged metadata. ACLs, ownership, general attributes, directory promises,
 portable Unicode paths, and Linux public linkage remain later gates.
 
+ADR 0317 closes the PathKind predicate gap in SDK `0.0.0-stage0.46` with effect-free
+`path_kind_is_file` and `path_kind_is_directory`. Existing low/optimized generated-Fairy filesystem
+proof now consumes both helpers while retaining missing-path errors and cleanup behavior.
+
 ADR 0311 closes the bounded recursive-removal gap in SDK `0.0.0-stage0.45` with
 `remove_dir_all(ref CStr) -> Result<usize, FileError>`. The Windows target rejects roots and
 ambiguous paths before effects, removes observed reparse directories as leaves, and reports exact

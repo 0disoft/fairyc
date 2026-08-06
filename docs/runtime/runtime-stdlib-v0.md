@@ -83,7 +83,7 @@ std::c      C scalar types and raw wrapper helpers
 
 The standard library is supplied as an explicit package instance under
 `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the
-compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.45` exports
+compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.46` exports
 the accepted public `std::alloc`, `std::bytes`, `std::text`, Windows MSVC `std::fs`, console I/O,
 scalar output, and effect-free `std::process` argument slices recorded by ADRs 0205 through 0311.
 The current Windows filesystem slice includes owned File I/O and metadata, bounded path mutation,
@@ -345,7 +345,7 @@ a private non-null `ref str` sentinel, and preserves the existing pointer-only `
 is superseded as the user-facing entry by ADR 0247's SDK module; it remains independent historical
 evidence and does not define a public layout.
 
-SDK `0.0.0-stage0.45` retains move-only `String` and `CString` from `std::text`. `copy` and
+SDK `0.0.0-stage0.46` retains move-only `String` and `CString` from `std::text`. `copy` and
 `cstring_from_text` construct canonical owners fallibly; `append` preserves the existing String on
 failure. `string_len`, `string_is_empty`, `cstring_len`, and `cstring_is_empty` expose byte metadata,
 with CString length excluding its required terminator. `string_as_str` and `cstring_as_cstr` return
@@ -680,7 +680,7 @@ contract into SDK `0.0.0-stage0.14` as public `std::fs`; ADR 0269 extends it in 
 `0.0.0-stage0.42` with no-replace `hard_link`; ADR 0309 later extends it in SDK
 `0.0.0-stage0.43` with same-handle `allocated_size`; ADR 0310 later extends it in SDK
 `0.0.0-stage0.44` with same-handle `set_read_only`; ADR 0311 later extends it in SDK
-`0.0.0-stage0.45` with bounded recursive `remove_dir_all`; ADR 0270 extends it in SDK
+`0.0.0-stage0.46` with bounded recursive `remove_dir_all`; ADR 0270 extends it in SDK
 `0.0.0-stage0.16` with shared `size`; ADR 0271 extends it in SDK `0.0.0-stage0.17` with
 existing-file read/write `open_update`; ADR 0272 extends it in SDK `0.0.0-stage0.18` with
 cursor-preserving `set_len`; ADR 0274 extends it in SDK `0.0.0-stage0.19` with read/write
@@ -808,6 +808,10 @@ reparse points as leaves, and returns the exact number of already removed object
 and generated-Fairy low/optimized paths cover a four-object tree, missing, sharing, and read-only
 failures, partial progress, preserved error storage, and retry cleanup. Enumeration order is
 filesystem-defined, and this is not an atomic, rollback-capable, race-free containment boundary.
+
+ADR 0317 extends it to `0.0.0-stage0.46` with effect-free `path_kind_is_file` and
+`path_kind_is_directory`. Both predicates exhaust all three `PathKind` variants and return false
+for `.Other`; they add no C symbol and do not strengthen the underlying snapshot semantics.
 
 The public slice remains specific to
 `x86_64-windows-msvc`; it is not a portable Unicode path, Linux public linkage, general
