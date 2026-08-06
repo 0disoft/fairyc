@@ -318,6 +318,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0306-public-windows-file-read-only-metadata.md`: adds target-neutral same-handle read-only metadata observation with low/optimized raw plus generated-Fairy evidence and SDK `0.0.0-stage0.40`.
 - `0307-public-windows-file-hard-link-count.md`: adds target-neutral same-handle hard-link count observation with real-link low/optimized raw plus generated-Fairy evidence and SDK `0.0.0-stage0.41`.
 - `0308-public-windows-file-hard-link-creation.md`: adds no-replace Windows hard-link creation with exact collision/missing failures, shared identity and bytes, alias-survival proof, and SDK `0.0.0-stage0.42`.
+- `0309-public-windows-file-allocated-size.md`: adds same-handle filesystem-reported allocation length with cursor/size preservation, closed/invalid evidence, and SDK `0.0.0-stage0.43`.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

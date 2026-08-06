@@ -455,6 +455,7 @@ func TestWindowsFileSourcesConsumeCloseAndExposePartialIO(t *testing.T) {
 		"fy_std_windows_file_seek_current_v0", "fy_std_windows_file_seek_end_v0",
 		"fy_std_windows_file_read_only_v0", "FILE_ATTRIBUTE_READONLY",
 		"fy_std_windows_file_link_count_v0", "NumberOfLinks",
+		"fy_std_windows_file_alloc_size_v0", "AllocationSize",
 		"fy_std_windows_file_hard_link_v0", "CreateHardLinkW",
 		"fy_std_windows_file_path_kind_v0", "GetFileAttributesW", "FILE_ATTRIBUTE_REPARSE_POINT", "FY_STD_WINDOWS_PATH_KIND_OTHER_V0",
 		"FY_STD_WINDOWS_FILE_PATH_ENCODING_V0", "FY_STD_WINDOWS_FILE_PATH_TOO_LONG_V0",
@@ -689,6 +690,7 @@ func TestWindowsFileMetadataProbeHasDedicatedSourceOwner(t *testing.T) {
 	metadataText := string(metadataProbe)
 	if strings.Contains(mainText, "fy_std_windows_file_read_only_v0") ||
 		strings.Contains(mainText, "fy_std_windows_file_link_count_v0") ||
+		strings.Contains(mainText, "fy_std_windows_file_alloc_size_v0") ||
 		strings.Contains(mainText, "metadata_read_only") {
 		t.Fatal("main Windows File probe retained metadata proof ownership")
 	}
@@ -700,6 +702,8 @@ func TestWindowsFileMetadataProbeHasDedicatedSourceOwner(t *testing.T) {
 		!strings.Contains(metadataText, "fy_std_windows_file_read_only_v0") ||
 		!strings.Contains(metadataText, "FILE_ATTRIBUTE_READONLY") ||
 		!strings.Contains(metadataText, "fy_std_windows_file_link_count_v0") ||
+		!strings.Contains(metadataText, "fy_std_windows_file_alloc_size_v0") ||
+		!strings.Contains(metadataText, "allocated.size < sizeof payload") ||
 		!strings.Contains(metadataText, "CreateHardLinkW") {
 		t.Fatal("dedicated Windows File metadata probe lost its definition or proof body")
 	}
@@ -727,7 +731,8 @@ func TestWindowsFileMetadataImplementationHasDedicatedSourceOwner(t *testing.T) 
 	metadataText := string(metadataSource)
 	if strings.Contains(mainText, "fy_std_windows_file_attribute_result_v0") ||
 		strings.Contains(mainText, "fy_std_windows_file_read_only_v0") ||
-		strings.Contains(mainText, "fy_std_windows_file_link_count_v0") {
+		strings.Contains(mainText, "fy_std_windows_file_link_count_v0") ||
+		strings.Contains(mainText, "fy_std_windows_file_alloc_size_v0") {
 		t.Fatal("main Windows File source retained metadata implementation ownership")
 	}
 	if strings.Count(metadataText, "struct fy_std_windows_file_attribute_result_v0") != 4 ||
@@ -736,7 +741,9 @@ func TestWindowsFileMetadataImplementationHasDedicatedSourceOwner(t *testing.T) 
 		!strings.Contains(metadataText, "FILE_ATTRIBUTE_READONLY") ||
 		strings.Count(metadataText, "fy_std_windows_file_link_count_v0(") != 1 ||
 		!strings.Contains(metadataText, "FileStandardInfo") ||
-		!strings.Contains(metadataText, "NumberOfLinks") {
+		!strings.Contains(metadataText, "NumberOfLinks") ||
+		strings.Count(metadataText, "fy_std_windows_file_alloc_size_v0(") != 1 ||
+		!strings.Contains(metadataText, "AllocationSize") {
 		t.Fatal("dedicated Windows File metadata source lost its result or query implementation")
 	}
 	combined, err := WindowsFileSource()
@@ -745,6 +752,7 @@ func TestWindowsFileMetadataImplementationHasDedicatedSourceOwner(t *testing.T) 
 	}
 	if strings.Count(combined, "fy_std_windows_file_read_only_v0(") != 1 ||
 		strings.Count(combined, "fy_std_windows_file_link_count_v0(") != 1 ||
+		strings.Count(combined, "fy_std_windows_file_alloc_size_v0(") != 1 ||
 		!strings.Contains(combined, "static int fy_std_windows_file_load_v0(") {
 		t.Fatal("combined Windows File source lost exact metadata ownership or shared handle loading")
 	}
@@ -791,7 +799,7 @@ func TestWindowsMSVCSourceForSymbolsSelectsOnlyWindowsFile(t *testing.T) {
 	for _, required := range []string{
 		"fy_std_windows_file_open_v0", "fy_std_windows_file_read_v0", "fy_std_windows_file_read_exact_v0",
 		"fy_std_windows_file_position_v0", "fy_std_windows_file_seek_current_v0", "fy_std_windows_file_seek_end_v0", "fy_std_windows_file_seek_start_v0",
-		"fy_std_windows_file_size_v0", "fy_std_windows_file_kind_v0", "fy_std_windows_file_read_only_v0", "fy_std_windows_file_link_count_v0", "fy_std_windows_file_hard_link_v0", "fy_std_windows_file_path_kind_v0", "fy_std_windows_file_set_len_v0",
+		"fy_std_windows_file_size_v0", "fy_std_windows_file_kind_v0", "fy_std_windows_file_read_only_v0", "fy_std_windows_file_link_count_v0", "fy_std_windows_file_alloc_size_v0", "fy_std_windows_file_hard_link_v0", "fy_std_windows_file_path_kind_v0", "fy_std_windows_file_set_len_v0",
 		"fy_std_windows_file_id_v0",
 		"fy_std_windows_file_write_v0",
 		"fy_std_windows_file_write_all_v0", "fy_std_windows_file_sync_v0",

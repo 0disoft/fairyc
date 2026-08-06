@@ -396,6 +396,11 @@ ADR 0308 moves the SDK to `0.0.0-stage0.42` with
 `std::fs::hard_link(ref CStr, ref CStr) -> Result<i32, FileError>`. It performs one bounded,
 no-replace `CreateHardLinkW` operation, copies no bytes, and preserves exact collision and missing
 source errors. Both names share identity and bytes; removing one name leaves the other alive.
+ADR 0309 moves the SDK to `0.0.0-stage0.43` with
+`std::fs::allocated_size(ref File) -> Result<usize, FileError>`. It observes the allocation length
+reported through the same live handle without allocation, cursor movement, or length change. The
+momentary value is not a portable physical-disk, compression, sparse-extent, quota, or billing
+promise.
 The path-kind query distinguishes ordinary files, directories, and other observed attributes without opening
 an owner, but its snapshot is not stable identity, authorization, containment, or a race-free
 precheck. `std::fs::copy_file_bytes` holds exclusive source and `CREATE_NEW` destination handles,

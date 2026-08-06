@@ -29,21 +29,27 @@ fn i32 inspect_then_close(fs::File input, bool expected_read_only, usize expecte
         case .ok(count) : { if (count == expected_links) { 0 } else { base + 4 } }
         case .err(_) : { base + 5 }
     } };
-    let i32 position_code = if (link_count_code != 0) {
+    let i32 allocated_size_code = if (link_count_code != 0) {
         link_count_code
-    } else { switch (fs::position(ref mut file)) {
-        case .ok(position) : { if (position == before_position) { 0 } else { base + 6 } }
+    } else { switch (fs::allocated_size(ref file)) {
+        case .ok(allocated) : { if (allocated >= before_size) { 0 } else { base + 6 } }
         case .err(_) : { base + 7 }
+    } };
+    let i32 position_code = if (allocated_size_code != 0) {
+        allocated_size_code
+    } else { switch (fs::position(ref mut file)) {
+        case .ok(position) : { if (position == before_position) { 0 } else { base + 8 } }
+        case .err(_) : { base + 9 }
     } };
     let i32 size_code = if (position_code != 0) {
         position_code
     } else { switch (fs::size(ref file)) {
-        case .ok(size) : { if (size == before_size) { 0 } else { base + 8 } }
-        case .err(_) : { base + 9 }
+        case .ok(size) : { if (size == before_size) { 0 } else { base + 10 } }
+        case .err(_) : { base + 11 }
     } };
     return switch (fs::close(file)) {
         case .ok(_) : { size_code }
-        case .err(_) : { base + 10 }
+        case .err(_) : { base + 12 }
     };
 }
 

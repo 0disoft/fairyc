@@ -92,3 +92,48 @@ struct fy_std_windows_file_size_result_v0 fy_std_windows_file_link_count_v0(
         (uint64_t)information.NumberOfLinks
     );
 }
+
+struct fy_std_windows_file_size_result_v0 fy_std_windows_file_alloc_size_v0(
+    const void *file_storage
+) {
+    struct fy_std_windows_file_v0 file;
+    if (!fy_std_windows_file_load_v0(file_storage, &file)) {
+        return fy_std_windows_file_size_result_v0(
+            FY_STD_WINDOWS_FILE_INVALID_ARGUMENT_V0,
+            ERROR_SUCCESS,
+            UINT64_C(0)
+        );
+    }
+    if (file.open == UINT8_C(0)) {
+        return fy_std_windows_file_size_result_v0(
+            FY_STD_WINDOWS_FILE_CLOSED_V0,
+            ERROR_SUCCESS,
+            UINT64_C(0)
+        );
+    }
+    FILE_STANDARD_INFO information;
+    if (!GetFileInformationByHandleEx(
+            (HANDLE)file.handle,
+            FileStandardInfo,
+            &information,
+            sizeof information
+        )) {
+        return fy_std_windows_file_size_result_v0(
+            FY_STD_WINDOWS_FILE_IO_ERROR_V0,
+            GetLastError(),
+            UINT64_C(0)
+        );
+    }
+    if (information.AllocationSize.QuadPart < 0) {
+        return fy_std_windows_file_size_result_v0(
+            FY_STD_WINDOWS_FILE_IO_ERROR_V0,
+            ERROR_ARITHMETIC_OVERFLOW,
+            UINT64_C(0)
+        );
+    }
+    return fy_std_windows_file_size_result_v0(
+        FY_STD_WINDOWS_FILE_OK_V0,
+        ERROR_SUCCESS,
+        (uint64_t)information.AllocationSize.QuadPart
+    );
+}

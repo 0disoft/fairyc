@@ -186,6 +186,10 @@ unsafe extern C fn raw_file_attribute_result file_read_only_raw(ptr void file) ;
 unsafe extern C fn raw_file_size_result file_hard_link_count_raw(ptr void file) ;
 
 @effects(filesystem)
+@link_name("fy_std_windows_file_alloc_size_v0")
+unsafe extern C fn raw_file_size_result file_allocated_size_raw(ptr void file) ;
+
+@effects(filesystem)
 @link_name("fy_std_windows_file_path_kind_v0")
 unsafe extern C fn raw_file_kind_result file_path_kind_raw(ptr u8 path) ;
 
@@ -642,6 +646,20 @@ pub fn Result<bool, FileError> is_read_only(ref File file) {
 pub fn Result<usize, FileError> hard_link_count(ref File file) {
     let raw_file_size_result result = unsafe {
         file_hard_link_count_raw(file as ptr void)
+    };
+    return if (result.status == 0) {
+        .ok(result.size)
+    } else {
+        .err(size_error(result))
+    };
+}
+
+/// Returns the file-system-reported allocation length for the object behind this open handle.
+/// This momentary value is not a portable physical-disk-usage or compression accounting promise.
+@effects(filesystem)
+pub fn Result<usize, FileError> allocated_size(ref File file) {
+    let raw_file_size_result result = unsafe {
+        file_allocated_size_raw(file as ptr void)
     };
     return if (result.status == 0) {
         .ok(result.size)

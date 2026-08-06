@@ -830,6 +830,13 @@ missing-source failures, shared identity, link-count and byte preservation, and 
 survival after source-name removal. Cross-volume behavior, filesystem support, authorization,
 reparse-point containment, race freedom, durability, and Linux public linkage remain later gates.
 
+ADR 0309 closes the next bounded same-handle storage diagnostic in SDK `0.0.0-stage0.43` with
+`allocated_size(ref File) -> Result<usize, FileError>`. The Windows target maps nonnegative
+`FileStandardInfo.AllocationSize` into `usize`. Raw and generated-Fairy low/optimized paths cover
+ordinary, read-only, and two-link files, closed and invalid storage, and cursor/logical-size
+preservation. Physical usage, block shape, compression, sparse extents, quotas, timestamps,
+allocation mutation, and Linux public linkage remain later gates.
+
 ADR 0270 extends the SDK to `0.0.0-stage0.16` with allocation-free
 `size(ref File) -> Result<usize, FileError>`. The raw probe observes size 9 before and after cursor
 movement, rejects closed and invalid handles, and the private/public generated-Fairy paths observe

@@ -609,7 +609,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
-  The compiler-bundled SDK `0.0.0-stage0.42` exposes
+  The compiler-bundled SDK `0.0.0-stage0.43` exposes
   `std::io::write(ref str) -> Result<usize, ConsoleError>` and a matching `write_stderr` operation
   for text, plus `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` for exact binary output.
   All four declare `console`, keep raw pointers and target linkage private, append no newline,
@@ -775,7 +775,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   update, shrink/extend with cursor preservation and explicit rewrite,
   oversized and read-only length-change failures, nonempty and empty size observation, disk and
   `NUL` character kinds, ordinary and read-only metadata plus host-created two-name hard-link
-  counts with cursor/size preservation, no-replace hard-link creation with collision and
+  counts and filesystem-reported allocation length with cursor/size preservation, no-replace hard-link creation with collision and
   missing-source preservation, shared identity and bytes, and a surviving destination alias,
   owned-Buffer prefix append, short read, EOF, write-only failure,
   forced growth-allocation failure with zero retained allocations, explicit close, implicit-drop
@@ -917,7 +917,7 @@ argument, output, and exit-code contract. It emits no native code.
 
 ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
-version, source digest, and lock fields. SDK `0.0.0-stage0.42` exports ADR 0250's move-only,
+version, source digest, and lock fields. SDK `0.0.0-stage0.43` exports ADR 0250's move-only,
 fallibly created `std::alloc::Arena` with automatic cleanup and exact allocation status,
 while ADR 0251 makes compiler-known placement return `Result<ref T, AllocError>` under language `/8`.
 ADR 0246's public safe `std::bytes::Buffer` and ADR 0299's fallible single-byte append,
@@ -926,7 +926,8 @@ ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-
 zero-copy `std::text::from_buffer`, and ADR 0264's Windows MSVC
 `std::fs::File` ownership and byte-I/O surface, ADR 0269's absolute position/seek surface, ADR 0305's
 bounded current- and end-relative seek surface, ADR 0306's same-handle read-only metadata, ADR 0307's
-same-handle hard-link count, ADR 0308's no-replace hard-link creation, ADR 0270's shared file-size
+same-handle hard-link count, ADR 0308's no-replace hard-link creation, ADR 0309's same-handle
+allocated size, ADR 0270's shared file-size
 observation, ADR 0271's existing-file read/write open, ADR 0272's cursor-preserving
 file-length change, ADR 0274's non-truncating open-or-create, ADR 0275's exclusive create,
 ADR 0276's append-only open, ADR 0277's same-handle file-kind observation, ADR 0278's exact read,
@@ -982,6 +983,13 @@ collision and missing-source failures, shared file identity and bytes, link-coun
 destination survival after source-name removal. Cross-volume behavior, filesystem support,
 authorization, reparse-point containment, race freedom, durability, and Linux public linkage remain
 separate gates.
+
+ADR 0309 adds allocation-free
+`std::fs::allocated_size(ref File) -> Result<usize, FileError>` on the existing Windows File owner.
+It queries nonnegative `FileStandardInfo.AllocationSize` through the same live handle. Low and
+optimized raw plus generated-Fairy paths cover ordinary, read-only, and two-link files, closed and
+invalid storage, and cursor/logical-size preservation. The value is not portable physical usage,
+block shape, compression, sparse-extent, quota, billing, or concurrent-stability evidence.
 
 ADR 0148 adds the first package-aware native project path. `experimental build-workspace` and
 `run-workspace` load the current `fairy.toml`, apply ordinary or exact no-write `--locked` policy,
