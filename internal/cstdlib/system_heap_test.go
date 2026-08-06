@@ -631,6 +631,39 @@ func TestWindowsFileMetadataProbeHasDedicatedSourceOwner(t *testing.T) {
 	}
 }
 
+func TestWindowsFileMetadataImplementationHasDedicatedSourceOwner(t *testing.T) {
+	t.Parallel()
+
+	mainSource, err := os.ReadFile("stage0_windows_file.c")
+	if err != nil {
+		t.Fatal(err)
+	}
+	metadataSource, err := os.ReadFile("stage0_windows_file_metadata.c")
+	if err != nil {
+		t.Fatal(err)
+	}
+	mainText := string(mainSource)
+	metadataText := string(metadataSource)
+	if strings.Contains(mainText, "fy_std_windows_file_attribute_result_v0") ||
+		strings.Contains(mainText, "fy_std_windows_file_read_only_v0") {
+		t.Fatal("main Windows File source retained metadata implementation ownership")
+	}
+	if strings.Count(metadataText, "struct fy_std_windows_file_attribute_result_v0") != 4 ||
+		strings.Count(metadataText, "fy_std_windows_file_read_only_v0(") != 1 ||
+		!strings.Contains(metadataText, "FileBasicInfo") ||
+		!strings.Contains(metadataText, "FILE_ATTRIBUTE_READONLY") {
+		t.Fatal("dedicated Windows File metadata source lost its result or query implementation")
+	}
+	combined, err := WindowsFileSource()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Count(combined, "fy_std_windows_file_read_only_v0(") != 1 ||
+		!strings.Contains(combined, "static int fy_std_windows_file_load_v0(") {
+		t.Fatal("combined Windows File source lost exact metadata ownership or shared handle loading")
+	}
+}
+
 func TestWindowsMSVCSourceForSymbolsSelectsOnlyWindowsFile(t *testing.T) {
 	t.Parallel()
 	source, err := WindowsMSVCSourceForSymbols([]string{"fy_std_windows_file_open_v0"})

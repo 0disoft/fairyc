@@ -40,6 +40,8 @@ One explicit boolean query closes a demonstrated metadata gap without those comm
 
 - SDK and closed-symbol tests require the public function, exact private symbol, Windows-only
   linkage, component closure, and SDK `0.0.0-stage0.40`.
+- `internal/cstdlib/stage0_windows_file_metadata.c` owns the attribute result and same-handle
+  adapter while reusing the main Windows File source's storage validation in one combined C unit.
 - A dedicated raw C probe runs low and optimized MSVC and observes normal then read-only metadata
   on one live handle, unchanged cursor and size, and exact closed plus invalid-storage results.
 - The public quickstart receives one host-created read-only file and one ordinary file under each
