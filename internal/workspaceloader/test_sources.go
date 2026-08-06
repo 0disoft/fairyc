@@ -29,6 +29,24 @@ func WithRootTests(workspace Workspace) (Workspace, error) {
 	return WithPackageTests(workspace, ".")
 }
 
+// WithWorkspaceTests returns an ephemeral workspace containing the tests/ trees of every
+// unambiguous root-reachable local package in the production graph. Catalog-only unreachable
+// members remain excluded, and the production workspace and lock inputs are not mutated.
+func WithWorkspaceTests(workspace Workspace) (Workspace, error) {
+	packagePaths, err := workspace.RootReachableLocalPackagePaths()
+	if err != nil {
+		return Workspace{}, &LoadError{Reason: ReasonTestSourceRoot, Detail: err.Error()}
+	}
+	withTests := workspace
+	for _, packagePath := range packagePaths {
+		withTests, err = WithPackageTests(withTests, packagePath)
+		if err != nil {
+			return Workspace{}, err
+		}
+	}
+	return withTests, nil
+}
+
 // WithPackageTests returns an ephemeral workspace whose selected local package additionally owns
 // its contained tests/ source tree. The production workspace is not mutated, and its canonical
 // lock remains based only on manifest-owned production sources.

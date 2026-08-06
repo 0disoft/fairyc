@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:fairyc:test-report:v2",
+  "title": "Fairy C stable workspace test execution report v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "engine",
+    "target",
+    "profile",
+    "tests",
+    "count",
+    "passed",
+    "failed",
+    "status",
+    "lock"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "fairyc.test-report/v2"
+    },
+    "engine": {
+      "enum": ["interpreter", "native"]
+    },
+    "target": {
+      "type": ["string", "null"],
+      "enum": ["x86_64-windows-msvc", null]
+    },
+    "profile": {
+      "type": ["string", "null"],
+      "enum": ["development", "release", null]
+    },
+    "tests": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/outcome"
+      }
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "passed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "failed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "status": {
+      "enum": ["ok", "failed"]
+    },
+    "lock": {
+      "enum": ["updated", "unchanged", "verified"]
+    }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "engine": { "const": "interpreter" },
+        "target": { "const": null },
+        "profile": { "const": null }
+      }
+    },
+    {
+      "properties": {
+        "engine": { "const": "native" },
+        "target": { "const": "x86_64-windows-msvc" },
+        "profile": { "enum": ["development", "release"] }
+      }
+    }
+  ],
+  "$defs": {
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identity", "outcome", "trapCategory"],
+      "properties": {
+        "identity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "outcome": {
+          "enum": ["passed", "failed"]
+        },
+        "trapCategory": {
+          "type": ["string", "null"],
+          "minLength": 1
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "outcome": { "const": "passed" },
+            "trapCategory": { "const": null }
+          }
+        },
+        {
+          "properties": {
+            "outcome": { "const": "failed" },
+            "trapCategory": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    }
+  }
+}

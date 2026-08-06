@@ -962,14 +962,19 @@ identities after complete compiler admission without executing a test or target 
 adds `--json` for the versioned identity array, count, and lock state without changing discovery or
 execution. ADR 0287 additionally admits execution-mode `--json` and freezes
 `fairyc.test-report/v1` with canonical semantic/native outcomes, engine/target/profile identity,
-totals, status, and lock state while preserving text bytes and exit codes. Member recursion,
+totals, status, and lock state while preserving text bytes and exit codes. Catalog-wide member recursion,
 fuzzy/tag/file filters, setup/teardown, portable native targets,
 program streams, benchmarks, and host-environment policy remain separate contracts.
 
 ADR 0289 adds singular `--package <package-uid>` selection to execution and listing. The UID must
 name one local package with exactly one root-reachable resolved instance; only that package's
 contained `tests/` tree is overlaid. Existing invocations remain root-only and byte-for-byte
-unchanged, while recursive or multi-package aggregation remains separate.
+unchanged. ADR 0295 adds mutually exclusive `--workspace` aggregation over every unambiguous
+root-reachable local package in the production graph. Only that mode qualifies canonical identities
+as `<package-uid>::<module>::<function>`, accepts those exact strings through `--exact`, and emits
+`fairyc.test-list/v2` or `fairyc.test-report/v2` for JSON while preserving the v1 field sets.
+Catalog-only unreachable members, ambiguous feature instances, parallel scheduling, caching,
+durations, retries, and output attachments remain separate.
 
 ADR 0146 rejects speculative persistent caching at this point. ADR 0149 supplies deterministic,
 bounded, verifier-checked bytes for a complete MIR program, but the workspace path still produces

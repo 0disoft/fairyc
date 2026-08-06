@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -152,6 +153,82 @@ fn void member_test() { assert(answer::value() == 42); }
 	}
 	if _, err := withTests.PackageID("missing"); err == nil || !strings.Contains(err.Error(), "not root-reachable") {
 		t.Fatalf("PackageID(missing) error = %v", err)
+	}
+}
+
+func TestWithWorkspaceTestsAddsEveryRootReachableLocalTestTree(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writePackage(t, root, ".", rootManifest(`
+[workspace]
+members = ["libs/answer", "libs/unused"]
+
+[dependencies.answer]
+path = "libs/answer"
+version = "1.0.0"
+features = []
+`), validRootSource())
+	writePackage(t, root, "libs/answer", memberManifest("example.libs.answer", "answer", "1.0.0", "fairyc-language/10", ""), map[string]string{
+		"src/answer.fy": "module answer;\npub fn i32 value() { return 42; }\n",
+	})
+	writePackage(t, root, "libs/unused", memberManifest("example.libs.unused", "unused", "1.0.0", "fairyc-language/10", ""), validMemberSource("unused"))
+	writeWorkspaceLoaderFile(t, root, "tests/root.fy", "module tests::root;\n@test\nfn void root_test() {}\n")
+	writeWorkspaceLoaderFile(t, root, "libs/answer/tests/member.fy", "module tests::member;\n@test\nfn void member_test() {}\n")
+	writeWorkspaceLoaderFile(t, root, "libs/unused/tests/unused.fy", "module tests::unused;\n@test\nfn void unused_test() {}\n")
+
+	production, err := Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	packagePaths, err := production.RootReachableLocalPackagePaths()
+	if err != nil || !slices.Equal(packagePaths, []string{".", "libs/answer"}) {
+		t.Fatalf("RootReachableLocalPackagePaths() = %v, %v", packagePaths, err)
+	}
+	withTests, err := WithWorkspaceTests(production)
+	if err != nil {
+		t.Fatalf("WithWorkspaceTests() error = %v", err)
+	}
+	rootPackage, _ := withTests.Package(".")
+	answerPackage, _ := withTests.Package("libs/answer")
+	unusedPackage, _ := withTests.Package("libs/unused")
+	if len(rootPackage.Sources) != 2 || !rootPackage.Sources[1].Test || rootPackage.Sources[1].Path != "tests/root.fy" {
+		t.Fatalf("root sources = %+v", rootPackage.Sources)
+	}
+	if len(answerPackage.Sources) != 2 || !answerPackage.Sources[1].Test || answerPackage.Sources[1].Path != "tests/member.fy" {
+		t.Fatalf("answer sources = %+v", answerPackage.Sources)
+	}
+	if len(unusedPackage.Sources) != 1 || unusedPackage.Sources[0].Test {
+		t.Fatalf("unreachable sources = %+v", unusedPackage.Sources)
+	}
+}
+
+func TestWithWorkspaceTestsRejectsFeatureInstanceAmbiguity(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writePackage(t, root, ".", rootManifest(`
+[workspace]
+members = ["libs/answer"]
+
+[dependencies.answer-default]
+path = "libs/answer"
+version = "1.0.0"
+features = []
+
+[dependencies.answer-extra]
+path = "libs/answer"
+version = "1.0.0"
+features = ["extra"]
+`), validRootSource())
+	writePackage(t, root, "libs/answer", memberManifest("example.libs.answer", "answer", "1.0.0", "fairyc-language/10", ""), validMemberSource("answer"))
+	workspace, err := Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := workspace.RootReachableLocalPackagePaths(); err == nil || !strings.Contains(err.Error(), `workspace package "libs/answer" has multiple resolved instances`) {
+		t.Fatalf("RootReachableLocalPackagePaths() error = %v", err)
+	}
+	if _, err := WithWorkspaceTests(workspace); err == nil || !strings.Contains(err.Error(), `workspace package "libs/answer" has multiple resolved instances`) {
+		t.Fatalf("WithWorkspaceTests() error = %v", err)
 	}
 }
 

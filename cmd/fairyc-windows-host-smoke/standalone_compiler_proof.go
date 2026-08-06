@@ -371,6 +371,49 @@ fn void second_passes() { assert(process::arg_count() >= 1); }
 			return 0, fmt.Errorf("standalone compiler native workspace-member test %v returned code %d, stdout %q, stderr %q", nativeArguments, memberNativeCode, memberNativeStdout, memberNativeStderr)
 		}
 	}
+	workspaceJSONCode, workspaceJSONStdout, workspaceJSONStderr, err := runStandaloneCommand(
+		sourceRoot,
+		executablePath,
+		"test", "--workspace", "--json", "--locked",
+	)
+	if err != nil {
+		return 0, fmt.Errorf("execute standalone compiler semantic workspace aggregate test: %w", err)
+	}
+	wantWorkspaceJSON := `{"schemaVersion":"fairyc.test-report/v2","engine":"interpreter","target":null,"profile":null,"tests":[{"identity":"example.workspace-quickstart.answer::tests::answer::member_answer_is_42","outcome":"passed","trapCategory":null},{"identity":"example.workspace-quickstart.app::tests::answer::dependency_answer_is_42","outcome":"passed","trapCategory":null}],"count":2,"passed":2,"failed":0,"status":"ok","lock":"verified"}` + "\n"
+	if workspaceJSONCode != cli.ExitSuccess || workspaceJSONStderr != "" || workspaceJSONStdout != wantWorkspaceJSON {
+		return 0, fmt.Errorf("standalone compiler semantic workspace aggregate test returned code %d, stdout %q, stderr %q", workspaceJSONCode, workspaceJSONStdout, workspaceJSONStderr)
+	}
+	workspaceListCode, workspaceListStdout, workspaceListStderr, err := runStandaloneCommand(
+		sourceRoot,
+		executablePath,
+		"test", "--workspace", "--list", "--json", "--locked",
+	)
+	if err != nil {
+		return 0, fmt.Errorf("execute standalone compiler workspace aggregate test list: %w", err)
+	}
+	wantWorkspaceList := `{"schemaVersion":"fairyc.test-list/v2","tests":["example.workspace-quickstart.answer::tests::answer::member_answer_is_42","example.workspace-quickstart.app::tests::answer::dependency_answer_is_42"],"count":2,"lock":"verified"}` + "\n"
+	if workspaceListCode != cli.ExitSuccess || workspaceListStderr != "" || workspaceListStdout != wantWorkspaceList {
+		return 0, fmt.Errorf("standalone compiler workspace aggregate test list returned code %d, stdout %q, stderr %q", workspaceListCode, workspaceListStdout, workspaceListStderr)
+	}
+	for _, nativeArguments := range [][]string{
+		{"test", "--workspace", "--native", "--locked"},
+		{"test", "--workspace", "--native", "--release", "--locked"},
+	} {
+		workspaceNativeCode, workspaceNativeStdout, workspaceNativeStderr, err := runStandaloneCommand(
+			sourceRoot,
+			executablePath,
+			nativeArguments...,
+		)
+		if err != nil {
+			return 0, fmt.Errorf("execute standalone compiler native workspace aggregate test %v: %w", nativeArguments, err)
+		}
+		wantWorkspaceNative := "test example.workspace-quickstart.answer::tests::answer::member_answer_is_42 ... ok\n" +
+			"test example.workspace-quickstart.app::tests::answer::dependency_answer_is_42 ... ok\n" +
+			"test result: ok. 2 passed; 0 failed; lock verified\n"
+		if workspaceNativeCode != cli.ExitSuccess || workspaceNativeStderr != "" || workspaceNativeStdout != wantWorkspaceNative {
+			return 0, fmt.Errorf("standalone compiler native workspace aggregate test %v returned code %d, stdout %q, stderr %q", nativeArguments, workspaceNativeCode, workspaceNativeStdout, workspaceNativeStderr)
+		}
+	}
 	stableArtifactAfterTest, err := os.ReadFile(stableArtifactPath)
 	if err != nil {
 		return 0, fmt.Errorf("read stable build artifact after standalone test: %w", err)

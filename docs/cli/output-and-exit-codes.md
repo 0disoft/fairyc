@@ -133,9 +133,10 @@ manifest, workspace, graph, and lock failures use code `7`. The command writes n
 but ordinary lock maintenance may precede emission or an output failure. `--locked` verifies the
 lock without writing.
 
-`fairyc test [--json] [--native [--release]] [--package <package-uid>] [--exact <test-identity>]... [--locked]` buffers one deterministic report after compilation and capability
-admission. Completed tests use `test <module>::<function> ... ok` or `test
-<module>::<function> ... FAILED (<trap-category>)`, followed by `test result:
+`fairyc test [--json] [--native [--release]] [--workspace | --package <package-uid>] [--exact <test-identity>]... [--locked]` buffers one deterministic report after compilation and capability
+admission. Default and singular-package identities are `<module>::<function>`; workspace identities
+are `<package-uid>::<module>::<function>`. Completed tests use `test <identity> ... ok` or `test
+<identity> ... FAILED (<trap-category>)`, followed by `test result:
 <ok|FAILED>. <passed> passed; <failed> failed; lock <updated|unchanged|verified>`. Zero tests emit
 only the successful final line. Without `--json`, the command writes no ANSI escape, absolute path,
 source text, artifact, JSON, or native program stream. Default mode uses the semantic interpreter. `--native`
@@ -151,15 +152,16 @@ Compilation/capability failure emits no report;
 an external writer may still accept a report prefix before returning code `4`. Ordinary lock
 maintenance can precede later failure, while `--locked` is the no-write form.
 
-Execution-mode `--json` emits one compact newline-terminated `fairyc.test-report/v1` object after
-every selected outcome is classified. It contains the exact `engine`, nullable `target` and
+Execution-mode `--json` emits one compact newline-terminated object after every selected outcome is
+classified. Default and `--package` use `fairyc.test-report/v1`; `--workspace` uses
+`fairyc.test-report/v2`. It contains the exact `engine`, nullable `target` and
 `profile`, canonical `tests` outcomes with nullable trap categories, matching `count`, `passed`, and
 `failed` totals, aggregate `status`, and `lock`. Interpreter target/profile are null; native target
 is `x86_64-windows-msvc` with `development` or `release`. All-passing still exits 0; one or more
 language traps writes the complete JSON and exits 5. Failures that previously produced no human
 report likewise produce no JSON report, and writer failure remains code 4 after a possible prefix.
 
-`fairyc test --list [--json] [--package <package-uid>] [--locked]` buffers one `test <module>::<function>` line per admitted test in
+`fairyc test --list [--json] [--workspace | --package <package-uid>] [--locked]` buffers one `test <identity>` line per admitted test in
 canonical order, followed by `test list: <count> discovered; lock
 <updated|unchanged|verified>`. Zero tests emit only the final line. Listing performs the complete
 test-overlay compiler admission but executes no test, backend, toolchain, or subprocess and writes
@@ -168,8 +170,9 @@ rejection use code `2`; source and `E9001` diagnostics use code `3`; internal an
 use code `4`; workspace, test-source, graph, and lock failures use code `7`. Codes `5` and `6` are
 unreachable because listing has no language-test or native-build outcome. Compilation failure emits
 no list report; ordinary lock maintenance may already have completed, while `--locked` writes
-nothing. `--json` replaces only the success bytes with one compact newline-terminated
-`fairyc.test-list/v1` object: `schemaVersion`, canonical `tests`, matching `count`, and
+nothing. `--json` replaces only the success bytes with one compact newline-terminated object:
+default and `--package` use `fairyc.test-list/v1`, while `--workspace` uses
+`fairyc.test-list/v2`. Both contain `schemaVersion`, canonical `tests`, matching `count`, and
 `lock` (`updated`, `unchanged`, or `verified`). It adds no ANSI escapes, paths, source text,
 metadata, or host inventory. The text form remains byte-for-byte unchanged.
 

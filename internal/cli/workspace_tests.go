@@ -21,6 +21,8 @@ import (
 const testAttribute = "test"
 const stableTestListSchema = "fairyc.test-list/v1"
 const stableTestReportSchema = "fairyc.test-report/v1"
+const stableWorkspaceTestListSchema = "fairyc.test-list/v2"
+const stableWorkspaceTestReportSchema = "fairyc.test-report/v2"
 
 type stableTestOptions struct {
 	locked     bool
@@ -28,6 +30,7 @@ type stableTestOptions struct {
 	release    bool
 	list       bool
 	json       bool
+	workspace  bool
 	packageUID string
 	exact      []string
 }
@@ -86,21 +89,39 @@ func runStableTest(arguments []string, sourceRoot string, stdout, stderr io.Writ
 		}
 		return packageFailure(stderr, err)
 	}
-	testPackage, err := selectWorkspaceTestPackage(workspace, options.packageUID)
+	packagePaths, err := selectWorkspaceTestPackagePaths(workspace, options)
 	if err != nil {
 		return invocationError(stderr, err.Error())
 	}
-	workspace, err = workspaceloader.WithPackageTests(workspace, testPackage.Path)
+	if options.workspace {
+		workspace, err = workspaceloader.WithWorkspaceTests(workspace)
+	} else {
+		workspace, err = workspaceloader.WithPackageTests(workspace, packagePaths[0])
+	}
 	if err != nil {
 		if code, handled := stableWorkspaceLoadFailure(stderr, err); handled {
 			return code
 		}
 		return packageFailure(stderr, err)
 	}
-	tests, code := prepareWorkspaceTests(&workspace, testPackage.Path, stderr)
-	if code != ExitSuccess {
-		return code
+	var tests []workspaceTest
+	for _, packagePath := range packagePaths {
+		packageUID := ""
+		if options.workspace {
+			loaded, found := workspace.Package(packagePath)
+			if !found {
+				return internalError(stderr)
+			}
+			packageUID = loaded.Manifest.Package.UID
+		}
+		packageTests, prepareCode := prepareWorkspaceTests(&workspace, packagePath, packageUID, stderr)
+		if prepareCode != ExitSuccess {
+			return prepareCode
+		}
+		tests = append(tests, packageTests...)
 	}
+	slices.SortFunc(tests, func(left, right workspaceTest) int { return strings.Compare(left.display, right.display) })
+	code := ExitSuccess
 	tests, err = selectWorkspaceTests(tests, options.exact)
 	if err != nil {
 		return invocationError(stderr, err.Error())
@@ -136,7 +157,7 @@ func runStableTest(arguments []string, sourceRoot string, stdout, stderr io.Writ
 	}
 	if options.list {
 		if options.json {
-			return writeStableTestListJSON(tests, lockState, stdout, stderr)
+			return writeStableTestListJSON(tests, lockState, options, stdout, stderr)
 		}
 		return writeStableTestList(tests, lockState, stdout, stderr)
 	}
@@ -243,7 +264,7 @@ func writeStableTestReportJSON(
 		status = "failed"
 	}
 	report := stableTestExecutionReport{
-		SchemaVersion: stableTestReportSchema,
+		SchemaVersion: stableTestReportSchemaFor(options),
 		Engine:        "interpreter",
 		Tests:         tests,
 		Count:         len(tests),
@@ -288,13 +309,13 @@ func writeStableTestList(tests []workspaceTest, lockState string, stdout, stderr
 	return ExitSuccess
 }
 
-func writeStableTestListJSON(tests []workspaceTest, lockState string, stdout, stderr io.Writer) int {
+func writeStableTestListJSON(tests []workspaceTest, lockState string, options stableTestOptions, stdout, stderr io.Writer) int {
 	identities := make([]string, 0, len(tests))
 	for _, test := range tests {
 		identities = append(identities, test.display)
 	}
 	report, err := json.Marshal(stableTestListReport{
-		SchemaVersion: stableTestListSchema,
+		SchemaVersion: stableTestListSchemaFor(options),
 		Tests:         identities,
 		Count:         len(identities),
 		Lock:          lockState,
@@ -307,6 +328,20 @@ func writeStableTestListJSON(tests []workspaceTest, lockState string, stdout, st
 		return outputError(stderr)
 	}
 	return ExitSuccess
+}
+
+func stableTestListSchemaFor(options stableTestOptions) string {
+	if options.workspace {
+		return stableWorkspaceTestListSchema
+	}
+	return stableTestListSchema
+}
+
+func stableTestReportSchemaFor(options stableTestOptions) string {
+	if options.workspace {
+		return stableWorkspaceTestReportSchema
+	}
+	return stableTestReportSchema
 }
 
 func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
@@ -340,8 +375,8 @@ func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 			index++
 			continue
 		}
-		if argument != "--locked" && argument != "--native" && argument != "--release" && argument != "--list" && argument != "--json" {
-			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --list, --json, --native, --release, --package <package-uid>, --exact <test-identity>, and --locked`)
+		if argument != "--locked" && argument != "--native" && argument != "--release" && argument != "--list" && argument != "--json" && argument != "--workspace" {
+			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --list, --json, --native, --release, --workspace, --package <package-uid>, --exact <test-identity>, and --locked`)
 		}
 		if seen[argument] {
 			return stableTestOptions{}, fmt.Errorf(`command "test" received %s more than once`, argument)
@@ -358,7 +393,12 @@ func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 			options.list = true
 		case "--json":
 			options.json = true
+		case "--workspace":
+			options.workspace = true
 		}
+	}
+	if options.workspace && options.packageUID != "" {
+		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --workspace with --package`)
 	}
 	if options.list && (options.native || options.release || len(options.exact) != 0) {
 		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --list with --native, --release, or --exact`)
@@ -367,6 +407,24 @@ func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 		return stableTestOptions{}, fmt.Errorf(`command "test" requires --native when --release is supplied`)
 	}
 	return options, nil
+}
+
+func selectWorkspaceTestPackagePaths(workspace workspaceloader.Workspace, options stableTestOptions) ([]string, error) {
+	if options.workspace {
+		packagePaths, err := workspace.RootReachableLocalPackagePaths()
+		if err != nil {
+			return nil, fmt.Errorf(`command "test" cannot select workspace packages: %w`, err)
+		}
+		if len(packagePaths) == 0 {
+			return nil, fmt.Errorf(`command "test" workspace has no root-reachable local packages`)
+		}
+		return packagePaths, nil
+	}
+	loaded, err := selectWorkspaceTestPackage(workspace, options.packageUID)
+	if err != nil {
+		return nil, err
+	}
+	return []string{loaded.Path}, nil
 }
 
 func selectWorkspaceTestPackage(workspace workspaceloader.Workspace, packageUID string) (workspaceloader.Package, error) {
@@ -423,7 +481,7 @@ func selectWorkspaceTests(tests []workspaceTest, exact []string) ([]workspaceTes
 	return selected, nil
 }
 
-func prepareWorkspaceTests(workspace *workspaceloader.Workspace, packagePath string, stderr io.Writer) ([]workspaceTest, int) {
+func prepareWorkspaceTests(workspace *workspaceloader.Workspace, packagePath, packageUID string, stderr io.Writer) ([]workspaceTest, int) {
 	packageID, err := workspace.PackageID(packagePath)
 	if err != nil {
 		return nil, packageFailure(stderr, err)
@@ -475,6 +533,9 @@ func prepareWorkspaceTests(workspace *workspaceloader.Workspace, packagePath str
 				continue
 			}
 			display := file.Module.Path + "::" + function.Name
+			if packageUID != "" {
+				display = packageUID + "::" + display
+			}
 			tests = append(tests, workspaceTest{
 				display: display,
 				entry:   hir.QualifiedModulePath(packageID, file.Module.Path) + "::" + function.Name,
@@ -482,8 +543,12 @@ func prepareWorkspaceTests(workspace *workspaceloader.Workspace, packagePath str
 		}
 		if len(diagnostics) != 0 {
 			slices.SortFunc(diagnostics, diagnostic.Compare)
+			displayPath := file.Path
+			if packageUID != "" && packagePath != "." {
+				displayPath = packagePath + "/" + file.Path
+			}
 			sourceDiagnostics = append(sourceDiagnostics, testSourceDiagnostics{
-				path: file.Path, contents: slices.Clone(file.Bytes), diagnostics: diagnostics,
+				path: displayPath, contents: slices.Clone(file.Bytes), diagnostics: diagnostics,
 			})
 		}
 	}

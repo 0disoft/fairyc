@@ -933,11 +933,20 @@ canonical identity array, count, and lock state. ADR 0289 adds singular root-rea
 selection by manifest UID. Recursive or multi-package aggregation, source locations,
 metadata, fuzzy matching, tags, and file selection remain later decisions.
 
+ADR 0295 closes the opt-in root-reachable multi-package gap with `fairyc test --workspace` for
+execution and listing. Every unambiguous local package in the production graph receives its isolated
+test overlay; canonical identities become `<package-uid>::<module>::<function>` only in this mode and
+remain globally sorted and exact-selectable. Workspace JSON uses `fairyc.test-list/v2` and
+`fairyc.test-report/v2`, while default root and singular `--package` reports remain byte-for-byte v1.
+Standalone semantic/list JSON plus low/optimized native execution covers the checked-in root and
+member tests. Catalog-unreachable aggregation, feature-instance selection, parallelism, caching,
+durations, retries, output attachments, and portable native targets remain later decisions.
+
 ADR 0287 closes the machine-report gap for execution with atomic `fairyc.test-report/v1` output.
 Semantic and native reports retain canonical outcome order, existing trap-continuation and exit-code
 semantics, and exact lock state while naming engine plus nullable target/profile. Optimized isolated
 MSVC trap-plus-pass execution proves that JSON is produced from real native outcomes rather than a
-text-report reparse. Durations, retries, output attachments, skipped states, recursive aggregation, and
+text-report reparse. Durations, retries, output attachments, skipped states, and catalog-wide aggregation of unreachable members and
 portable native targets remain later decisions.
 
 ADR 0216 cuts the exact language pin to `fairyc-language/2` and adds statement-only checked integer

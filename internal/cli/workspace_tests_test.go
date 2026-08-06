@@ -152,6 +152,28 @@ fn void member_passes() { assert(answer::value() == 42); }
 	if code != ExitSuccess || stdout != "test tests::member::member_passes\ntest list: 1 discovered; lock verified\n" || stderr != "" {
 		t.Fatalf("selected member list = (%d, %q, %q)", code, stdout, stderr)
 	}
+	code, stdout, stderr = runForTest([]string{"test", "--workspace", "--json", "--locked"}, root)
+	want = `{"schemaVersion":"fairyc.test-report/v2","engine":"interpreter","target":null,"profile":null,"tests":[{"identity":"example.member-test.answer::tests::member::member_passes","outcome":"passed","trapCategory":null},{"identity":"example.member-test.app::tests::root::root_passes","outcome":"passed","trapCategory":null}],"count":2,"passed":2,"failed":0,"status":"ok","lock":"verified"}` + "\n"
+	if code != ExitSuccess || stdout != want || stderr != "" {
+		t.Fatalf("workspace aggregate test = (%d, %q, %q), want stdout %q", code, stdout, stderr, want)
+	}
+	code, stdout, stderr = runForTest([]string{"test", "--workspace", "--list", "--json", "--locked"}, root)
+	want = `{"schemaVersion":"fairyc.test-list/v2","tests":["example.member-test.answer::tests::member::member_passes","example.member-test.app::tests::root::root_passes"],"count":2,"lock":"verified"}` + "\n"
+	if code != ExitSuccess || stdout != want || stderr != "" {
+		t.Fatalf("workspace aggregate list = (%d, %q, %q), want stdout %q", code, stdout, stderr, want)
+	}
+	code, stdout, stderr = runForTest([]string{
+		"test", "--workspace", "--exact", "example.member-test.answer::tests::member::member_passes", "--locked",
+	}, root)
+	want = "test example.member-test.answer::tests::member::member_passes ... ok\n" +
+		"test result: ok. 1 passed; 0 failed; lock verified\n"
+	if code != ExitSuccess || stdout != want || stderr != "" {
+		t.Fatalf("workspace exact test = (%d, %q, %q), want stdout %q", code, stdout, stderr, want)
+	}
+	code, stdout, stderr = runForTest([]string{"test", "--workspace", "--exact", "tests::member::member_passes", "--locked"}, root)
+	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, `exact test selection was not found: "tests::member::member_passes"`) {
+		t.Fatalf("unqualified workspace exact test = (%d, %q, %q)", code, stdout, stderr)
+	}
 
 	for _, arguments := range [][]string{
 		{"test", "--package"},
@@ -161,6 +183,18 @@ fn void member_passes() { assert(answer::value() == 42); }
 		code, stdout, stderr = runForTest(arguments, root)
 		if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, "package") {
 			t.Fatalf("invalid package selection %v = (%d, %q, %q)", arguments, code, stdout, stderr)
+		}
+	}
+	for _, testCase := range []struct {
+		arguments []string
+		wantError string
+	}{
+		{arguments: []string{"test", "--workspace", "--workspace"}, wantError: "received --workspace more than once"},
+		{arguments: []string{"test", "--workspace", "--package", "example.member-test.answer"}, wantError: "does not combine --workspace with --package"},
+	} {
+		code, stdout, stderr = runForTest(testCase.arguments, root)
+		if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, testCase.wantError) {
+			t.Fatalf("invalid workspace selection %v = (%d, %q, %q)", testCase.arguments, code, stdout, stderr)
 		}
 	}
 	code, stdout, stderr = runForTest([]string{"test", "--package", "example.member-test.unused", "--locked"}, root)

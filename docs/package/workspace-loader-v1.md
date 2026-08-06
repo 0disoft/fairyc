@@ -57,6 +57,10 @@ ADR 0181 adds an explicit in-memory overlay after an ordinary production workspa
 loaded and its lock is maintained or verified. The root package's exact-lowercase `tests/`
 directory is the default. ADR 0289 permits the CLI to name one root-reachable local package by its
 manifest UID; the loader then considers only that package's exact-lowercase `tests/` directory.
+ADR 0295 permits one ephemeral aggregate over every local package that contributes exactly one
+resolved instance to the root-reachable production graph. The loader applies the same test-root
+rules and one cumulative source budget to each selected package; SDK and catalog-only unreachable
+packages remain outside the aggregate.
 Ordinary `Load`, check, build, run, emit, package identity, public
 interface, cache, and lock paths never read that directory.
 
@@ -72,6 +76,6 @@ dependency visibility. That digest is compile-local test evidence and is never w
 ## Deferred boundary
 
 This loader does not access a registry, solve ranges, fetch sources, link target standard-library C
-objects, persist a cache, recursively discover or aggregate member test trees, or choose test declarations. The
+objects, persist a cache, aggregate catalog-unreachable or feature-instance-ambiguous member test trees, or choose test declarations. The
 CLI harness owns `@test` validation. The separate lockfile library projects production local and SDK
 source origins, but absolute paths and test overlays remain unserialized.

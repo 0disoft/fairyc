@@ -36,8 +36,8 @@ Usage:
   fairyc check [--locked]
   fairyc build [--release] [--locked]
   fairyc run [--release] [--locked] [-- <program-args...>]
-  fairyc test [--json] [--native [--release]] [--package <package-uid>] [--exact <test-identity>]... [--locked]
-  fairyc test --list [--json] [--package <package-uid>] [--locked]
+  fairyc test [--json] [--native [--release]] [--workspace | --package <package-uid>] [--exact <test-identity>]... [--locked]
+  fairyc test --list [--json] [--workspace | --package <package-uid>] [--locked]
   fairyc emit c --target <target-id> [--locked]
   fairyc explain <diagnostic-code>
   fairyc targets

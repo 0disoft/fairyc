@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/0disoft/fairyc/internal/hir"
 	"github.com/0disoft/fairyc/internal/packagecontent"
@@ -355,6 +356,48 @@ func (workspace Workspace) PackageID(packagePath string) (hir.PackageID, error) 
 		return hir.DefaultPackage, fmt.Errorf("workspace package %q is not root-reachable", packagePath)
 	}
 	return result, nil
+}
+
+// RootReachableLocalPackagePaths returns every exact local package path that contributes one
+// unambiguous resolved instance to the current production graph. Paths are ordered by stable
+// manifest package UID so callers do not inherit loader or graph traversal order.
+func (workspace Workspace) RootReachableLocalPackagePaths() ([]string, error) {
+	counts := make(map[string]int)
+	for _, class := range workspace.Resolution.InstanceClasses {
+		if len(class.Members) == 0 {
+			return nil, fmt.Errorf("workspace has an empty package instance class")
+		}
+		mapping, found := workspace.instance(class.Members[0])
+		if !found {
+			return nil, fmt.Errorf("workspace instance class %q has no package mapping", class.ID)
+		}
+		loaded, found := workspace.Package(mapping.PackagePath)
+		if !found {
+			return nil, fmt.Errorf("workspace package %q is missing", mapping.PackagePath)
+		}
+		if loaded.SourceKind == SourceKindLocal {
+			counts[mapping.PackagePath]++
+		}
+	}
+	paths := make([]string, 0, len(counts))
+	for packagePath, count := range counts {
+		if count != 1 {
+			return nil, fmt.Errorf("workspace package %q has multiple resolved instances", packagePath)
+		}
+		paths = append(paths, packagePath)
+	}
+	slices.SortFunc(paths, func(left, right string) int {
+		leftPackage, leftFound := workspace.Package(left)
+		rightPackage, rightFound := workspace.Package(right)
+		if !leftFound || !rightFound {
+			return strings.Compare(left, right)
+		}
+		if compared := strings.Compare(leftPackage.Manifest.Package.UID, rightPackage.Manifest.Package.UID); compared != 0 {
+			return compared
+		}
+		return strings.Compare(left, right)
+	})
+	return paths, nil
 }
 
 // DiagnosticSource resolves one build-local semantic span back to a host-path-free workspace path

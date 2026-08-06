@@ -839,6 +839,15 @@ multi-package selection, and feature-instance selection are not implied. Languag
 ABI, manifest, lockfile, package, interface, target, MIR, and generated-code versions remain
 unchanged.
 
+ADR 0295 additively admits mutually exclusive `--workspace` aggregation over every unambiguous
+root-reachable local package in the production graph. Only this mode qualifies exact identities as
+`<package-uid>::<module>::<function>` and uses `fairyc.test-list/v2` or
+`fairyc.test-report/v2`; the v2 schemas retain their v1 field sets but change the identity domain.
+Default root and singular `--package` discovery, text and JSON bytes, codes, locking, and artifacts
+remain unchanged. Catalog-unreachable members, multiple feature instances, parallel scheduling,
+and portable native targets are not implied. Language, SDK, runtime ABI, manifest, lockfile,
+package, interface, target, MIR, and generated-code versions remain unchanged.
+
 ADR 0204 stabilizes `fairyc new <package-name> --uid <package-uid>`, its explicit non-derived UID,
 single direct-child destination, exact four-file starter, no-overwrite behavior, absence of an
 initial lockfile, success line, and codes 0, 2, 4, and 7. Adding templates, flags, merge behavior, an

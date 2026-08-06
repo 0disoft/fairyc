@@ -541,24 +541,28 @@ execution, a nonzero program status, or a program trap follows. `--locked` perfo
 compiler-output write failure after program execution returns code 4 but cannot undo earlier bytes
 or program effects; no executable is retained.
 
-## Stable workspace test v6
+## Stable workspace test v7
 
-`fairyc test [--json] [--native [--release]] [--package <package-uid>] [--exact <test-identity>]... [--locked]` first loads and locks the ordinary production workspace, then overlays only
+`fairyc test [--json] [--native [--release]] [--workspace | --package <package-uid>] [--exact <test-identity>]... [--locked]` first loads and locks the ordinary production workspace, then overlays only
 the root package's optional exact-lowercase `tests/` tree in memory. `--package` instead selects one
 exact local manifest package UID that has exactly one root-reachable resolved instance and overlays
 only that package's tree. Unknown, unreachable, SDK, or feature-instance-ambiguous selections are
-code-2 invocation failures with no report. Ordinary check, build, run,
+code-2 invocation failures with no report. `--workspace` is mutually exclusive with `--package` and
+overlays every local package that contributes exactly one instance to the root-reachable production
+graph. It excludes SDK and catalog-only unreachable packages and rejects an ambiguous feature
+instance before a report. Ordinary check, build, run,
 emit, lock, interface, and cache inputs never include those files. The tree may not be a symlink or
 overlap the selected package's production source; the default root tree also may not overlap an
 explicit workspace member path. It shares the workspace source budgets and maps
-`tests/path.fy` to `module tests::path;`. An absent or empty tree is valid. Member test trees are not
-recursively discovered; each member requires its own explicit `--package` invocation.
+`tests/path.fy` to `module tests::path;`. An absent or empty tree is valid.
 
 Argument-free `@test` selects exactly private safe zero-argument free functions returning `void`;
 invalid placements or shapes are `E9001`. Other functions in test modules are ordinary private
 helpers. After removing only validated harness markers from the in-memory AST, the command runs the
-package-aware semantic, Flow, MIR lowering, and verifier pipeline. Default execution runs each test
-by canonical `<module>::<function>` order in a fresh deterministic interpreter state. `--native`
+package-aware semantic, Flow, MIR lowering, and verifier pipeline. Default and `--package` execution
+runs each test by canonical `<module>::<function>` order. Workspace mode uses the globally ordered
+`<package-uid>::<module>::<function>` identity. Each semantic test receives a fresh deterministic
+interpreter state. `--native`
 instead clones the verified MIR per test, appends and verifies one private i32 harness that calls
 the selected void entry, emits only its reachable Windows closure, compiles and inspects a temporary
 PE, and runs it with EOF stdin and no arguments in a fresh process and temporary directory.
@@ -566,21 +570,22 @@ Development uses low MSVC; `--native --release` uses optimized MSVC. A trap fail
 tests continue. Interpreter or backend capability rejection aborts as code 2 rather than becoming a
 false test failure.
 
-Repeatable `--exact` values select canonical `<module>::<function>` identities byte-for-byte within
-the one selected package. The
+Repeatable `--exact` values select the active mode's canonical identities byte-for-byte. Default and
+`--package` use `<module>::<function>`; `--workspace` requires the package-qualified form. The
 selector order does not affect canonical execution/report order. Duplicate selectors, missing
 values, and identities absent from the complete discovered set are code-2 invocation errors with no
 report. Selection happens after test declaration validation and limits execution only: syntax,
 semantic, Flow, MIR, and verifier admission still cover the complete test overlay.
 
-`fairyc test --list [--json] [--package <package-uid>] [--locked]` is a separate discovery mode and does not combine with `--native`,
+`fairyc test --list [--json] [--workspace | --package <package-uid>] [--locked]` is a separate discovery mode and does not combine with `--native`,
 `--release`, or `--exact`. It retains the complete overlay's syntax, declaration, semantic, Flow,
 MIR, and verifier admission, then emits `test <identity>` in canonical order without invoking the
 interpreter, backend, MSVC, PE inspector, or a test process. Its final line is
 `test list: <count> discovered; lock <updated|unchanged|verified>`. Zero tests emit only that line.
-With `--json`, stdout is one compact newline-terminated `fairyc.test-list/v1` object containing
-`schemaVersion`, the canonical `tests` string array, matching `count`, and `lock`; the text form is
-unchanged. Duplicate `--json` is an invocation error.
+With `--json`, stdout is one compact newline-terminated object containing `schemaVersion`, the
+canonical `tests` string array, matching `count`, and `lock`. Default and `--package` use
+`fairyc.test-list/v1`; `--workspace` uses `fairyc.test-list/v2` for the qualified identity domain.
+The field set and text form are otherwise unchanged. Duplicate `--json` is an invocation error.
 Listing succeeds with code 0, shares source/package/internal/output failure classifications, and
 cannot produce execution trap code 5 or native build code 6.
 
@@ -597,7 +602,8 @@ prefix before code 4; ordinary lock maintenance and earlier native test effects 
 failure, while `--locked` writes nothing.
 
 Execution-mode `--json` replaces only the complete report bytes with one compact newline-terminated
-`fairyc.test-report/v1` object. It preserves canonical outcome order and process codes while adding
+object. Default and `--package` use `fairyc.test-report/v1`; `--workspace` uses
+`fairyc.test-report/v2` for qualified identities. Both preserve canonical outcome order and process codes while adding
 the exact engine, nullable target/profile, per-test passed/failed outcome and nullable trap category,
 matching count/passed/failed totals, aggregate status, and lock state. Interpreter reports use null
 target/profile; native reports identify `x86_64-windows-msvc` and `development` or `release`.
@@ -614,13 +620,13 @@ unchanged when `--json` is omitted.
 | `fairyc check [--locked]` | Check the current manifest-owned workspace through verified MIR | No |
 | `fairyc build [--release] [--locked]` | Build or replace the current root package's one Windows executable | Yes |
 | `fairyc run [--release] [--locked] [-- <program-args...>]` | Build and run the current workspace as one temporary Windows image, forwarding arguments after `--` to the program | Yes |
-| `fairyc test [--json] [--native [--release]] [--package <package-uid>] [--exact <test-identity>]... [--locked]` | Run all or exact canonical root-package or explicitly selected local-package `@test fn void` entries through the semantic interpreter or one temporary Windows MSVC image per selected test, with human or stable JSON output | Optional temporary native images |
-| `fairyc test --list [--json] [--package <package-uid>] [--locked]` | Compile-admit the complete selected-package test overlay and list canonical exact-selector identities as text or stable JSON without execution | No |
+| `fairyc test [--json] [--native [--release]] [--workspace | --package <package-uid>] [--exact <test-identity>]... [--locked]` | Run all or exact canonical root, selected-package, or root-reachable workspace `@test fn void` entries through the semantic interpreter or one temporary Windows MSVC image per selected test, with human or stable JSON output | Optional temporary native images |
+| `fairyc test --list [--json] [--workspace | --package <package-uid>] [--locked]` | Compile-admit the complete selected test overlay and list canonical exact-selector identities as text or stable JSON without execution | No |
 | `fairyc emit c --target <target-id> [--locked]` | Emit the current executable workspace's target-selected C11 application unit | C only, stdout |
 | `fairyc explain <diagnostic-code>` | Explain a stable diagnostic code | No |
 | `fairyc targets` | Report known target profiles, status, evidence, and unavailable requirements | No |
 
-Multi-package or recursive workspace test selection, fuzzy/tag/file test filtering, portable native-test targets, target triples beyond
+Catalog-unreachable or feature-instance-ambiguous workspace test aggregation, fuzzy/tag/file test filtering, parallel scheduling, portable native-test targets, target triples beyond
   the declared emit profiles and build/run's fixed local Windows path,
 additional program-input routing beyond stable run,
 feature flags, and configuration precedence
