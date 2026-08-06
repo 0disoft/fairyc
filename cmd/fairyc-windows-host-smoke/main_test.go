@@ -320,10 +320,12 @@ func TestGeneratedFairyStringFromBufferProbeWrapsOnlyTheGeneratedEntry(t *testin
 	t.Parallel()
 	generated := `#include <stddef.h>
 int fy_std_string_from_buffer_storage_v0(void);
+int fy_std_string_into_buffer_storage_v0(void);
 int fy_std_string_drop_storage_v0(void);
 int fy_std_buffer_drop_v0(void);
 int main(void) {
     int converted = fy_std_string_from_buffer_storage_v0();
+    int returned = fy_std_string_into_buffer_storage_v0();
     int dropped = fy_std_string_drop_storage_v0();
     int buffer_dropped = fy_std_buffer_drop_v0();
     return 42;
@@ -357,8 +359,9 @@ func TestGeneratedFairyStringFromBufferProbeRejectsIncompleteGeneratedC(t *testi
 		generated string
 	}{
 		{name: "empty", generated: ""},
-		{name: "missing main", generated: "int fy_std_string_from_buffer_storage_v0(void);\nint fy_std_string_drop_storage_v0(void);\nint fy_std_buffer_drop_v0(void);\n"},
+		{name: "missing main", generated: "int fy_std_string_from_buffer_storage_v0(void);\nint fy_std_string_into_buffer_storage_v0(void);\nint fy_std_string_drop_storage_v0(void);\nint fy_std_buffer_drop_v0(void);\n"},
 		{name: "missing from-buffer", generated: "int main(void) { return 0; }\nint fy_std_string_drop_storage_v0(void);\nint fy_std_buffer_drop_v0(void);\n"},
+		{name: "missing into-buffer", generated: "int main(void) { return 0; }\nint fy_std_string_from_buffer_storage_v0(void);\nint fy_std_string_drop_storage_v0(void);\nint fy_std_buffer_drop_v0(void);\n"},
 		{name: "missing string drop", generated: "int main(void) { return 0; }\nint fy_std_string_from_buffer_storage_v0(void);\nint fy_std_buffer_drop_v0(void);\n"},
 		{name: "missing buffer drop", generated: "int main(void) { return 0; }\nint fy_std_string_from_buffer_storage_v0(void);\nint fy_std_string_drop_storage_v0(void);\n"},
 		{name: "from-buffer prototype only", generated: "#include <stddef.h>\nint fy_std_string_from_buffer_storage_v0(void);\nint fy_std_string_drop_storage_v0(void);\nint fy_std_buffer_drop_v0(void);\nint main(void) { int dropped = fy_std_string_drop_storage_v0(); int buffer_dropped = fy_std_buffer_drop_v0(); return 42; }\n"},
@@ -508,9 +511,9 @@ func TestGeneratedFairyStdlibSourcesPassFullPipeline(t *testing.T) {
 			foreignSymbols: []string{"fy_std_string_copy_storage_v0", "fy_std_string_drop_storage_v0"},
 		},
 		{
-			name: "string from buffer zero-copy used", manifest: "std_text_from_buffer_quickstart", source: string(fromBufferMain),
-			expect:         []string{"fy_std_string_from_buffer_storage_v0", "fy_std_string_drop_storage_v0", "fy_std_buffer_drop_v0"},
-			foreignSymbols: []string{"fy_std_buffer_append_v0", "fy_std_buffer_drop_v0", "fy_std_buffer_initialize_v0", "fy_std_string_drop_storage_v0", "fy_std_string_from_buffer_storage_v0"},
+			name: "string and buffer zero-copy round trip used", manifest: "std_text_from_buffer_quickstart", source: string(fromBufferMain),
+			expect:         []string{"fy_std_string_from_buffer_storage_v0", "fy_std_string_into_buffer_storage_v0", "fy_std_string_drop_storage_v0", "fy_std_buffer_drop_v0"},
+			foreignSymbols: []string{"fy_std_buffer_append_v0", "fy_std_buffer_drop_v0", "fy_std_buffer_initialize_v0", "fy_std_string_drop_storage_v0", "fy_std_string_from_buffer_storage_v0", "fy_std_string_into_buffer_storage_v0"},
 		},
 		{
 			name: "string from buffer unused", manifest: "std_text_from_buffer_quickstart", source: "module main;\nfn i32 main() { return 42; }\n",

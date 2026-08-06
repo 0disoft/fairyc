@@ -327,6 +327,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0315-stable-native-test-stdin-file-replay.md`: replays one bounded contained workspace file from byte zero into every isolated native test.
 - `0316-stable-native-test-timeout.md`: bounds each isolated native test process with canonical explicit seconds and proves fail-closed low/optimized termination.
 - `0317-public-path-kind-predicates.md`: adds effect-free public file/directory predicates for `PathKind` with SDK `0.0.0-stage0.46` and low/optimized generated-Fairy proof.
+- `0318-zero-copy-string-to-buffer-transfer.md`: adds an allocation-free empty Buffer constructor and zero-copy String-to-mutable-Buffer ownership transfer with SDK `0.0.0-stage0.47` and low/optimized generated-Fairy proof.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

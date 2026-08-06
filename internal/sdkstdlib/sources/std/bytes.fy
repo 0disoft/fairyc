@@ -57,6 +57,11 @@ fn i32 discard_buffer(Buffer value) {
     return 0;
 }
 
+/// Creates an empty buffer without allocating.
+pub fn Buffer empty() {
+    return empty_buffer();
+}
+
 /// Creates an empty buffer with at least the requested capacity.
 pub fn Result<Buffer, BufferError> with_capacity(usize capacity) {
     var Buffer output = empty_buffer();

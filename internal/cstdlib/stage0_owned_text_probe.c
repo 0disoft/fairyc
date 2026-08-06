@@ -48,6 +48,7 @@ uint32_t fy_std_buffer_append_v0(struct fy_std_buffer_v0 *buffer, const uint8_t 
 uint32_t fy_std_buffer_drop_v0(struct fy_std_buffer_v0 *buffer);
 struct fy_std_owned_text_result_v0 fy_std_string_copy_v0(const struct fy_std_text_view_v0 *input, struct fy_std_string_v0 *output);
 struct fy_std_owned_text_result_v0 fy_std_string_from_buffer_v0(struct fy_std_buffer_v0 *input, struct fy_std_string_v0 *output);
+struct fy_std_owned_text_result_v0 fy_std_string_into_buffer_v0(struct fy_std_string_v0 *input, struct fy_std_buffer_v0 *output);
 struct fy_std_owned_text_result_v0 fy_std_string_as_view_v0(const struct fy_std_string_v0 *input, struct fy_std_text_view_v0 *output);
 struct fy_std_owned_text_result_v0 fy_std_string_append_v0(struct fy_std_string_v0 *value, const struct fy_std_text_view_v0 *suffix);
 struct fy_std_owned_text_result_v0 fy_std_string_drop_v0(struct fy_std_string_v0 *value);
@@ -59,6 +60,7 @@ struct fy_std_owned_text_result_v0 fy_std_string_copy_storage_v0(const struct fy
 struct fy_std_owned_text_result_v0 fy_std_string_append_storage_v0(void *value_storage, const struct fy_std_text_view_v0 *suffix);
 struct fy_std_owned_text_result_v0 fy_std_string_drop_storage_v0(void *value_storage);
 struct fy_std_owned_text_result_v0 fy_std_string_from_buffer_storage_v0(void *input_storage, void *output_storage);
+struct fy_std_owned_text_result_v0 fy_std_string_into_buffer_storage_v0(void *input_storage, void *output_storage);
 struct fy_std_owned_text_result_v0 fy_std_cstring_from_text_storage_v0(const struct fy_std_text_view_v0 *input, void *output_storage);
 struct fy_std_owned_text_result_v0 fy_std_cstring_drop_storage_v0(void *value_storage);
 void fy_std_system_heap_probe_fail_after_allocations_v0(size_t successful_allocations);
@@ -380,12 +382,22 @@ int main(void) {
         fy_std_system_heap_probe_live_allocations_v0() != 1) {
         return 42;
     }
-    if (!ok(fy_std_string_drop_storage_v0(&from_buffer_output)) ||
-        !string_storage_empty(&from_buffer_output) ||
-        fy_std_system_heap_probe_live_allocations_v0() != 0 ||
-        !ok(fy_std_string_drop_storage_v0(&from_buffer_output)) ||
-        !string_storage_empty(&from_buffer_output)) {
+    if (!invalid_argument(fy_std_string_into_buffer_storage_v0(NULL, &buffer_storage)) ||
+        !invalid_argument(fy_std_string_into_buffer_storage_v0(&from_buffer_output, NULL)) ||
+        !invalid_argument(fy_std_string_into_buffer_storage_v0(&from_buffer_output, &from_buffer_output))) {
         return 43;
+    }
+    conversion = fy_std_string_into_buffer_storage_v0(&from_buffer_output, &buffer_storage);
+    if (!ok(conversion) || !string_storage_empty(&from_buffer_output) ||
+        buffer_storage.data != transfer_data || buffer_storage.capacity != sizeof hello ||
+        buffer_storage.length != sizeof hello || fy_std_system_heap_probe_live_allocations_v0() != 1) {
+        return 46;
+    }
+    memcpy(&transfer_buffer, &buffer_storage, sizeof transfer_buffer);
+    memset(&buffer_storage, 0, sizeof buffer_storage);
+    if (fy_std_buffer_drop_v0(&transfer_buffer) != FY_STD_ALLOC_OK_V0 ||
+        fy_std_system_heap_probe_live_allocations_v0() != 0) {
+        return 47;
     }
 
     struct fy_std_buffer_storage_v0 empty_buffer_storage = {NULL, 0, 0, 0};
@@ -393,7 +405,8 @@ int main(void) {
     if (!ok(fy_std_string_from_buffer_storage_v0(&empty_buffer_storage, &from_buffer_output)) ||
         !buffer_storage_empty(&empty_buffer_storage) ||
         !string_storage_empty(&from_buffer_output) ||
-        !ok(fy_std_string_drop_storage_v0(&from_buffer_output))) {
+        !ok(fy_std_string_into_buffer_storage_v0(&from_buffer_output, &empty_buffer_storage)) ||
+        !string_storage_empty(&from_buffer_output) || !buffer_storage_empty(&empty_buffer_storage)) {
         return 44;
     }
 

@@ -360,6 +360,7 @@ func ownedTextStorageBridgeSymbols() []string {
 		"fy_std_string_append_storage_v0",
 		"fy_std_string_drop_storage_v0",
 		"fy_std_string_from_buffer_storage_v0",
+		"fy_std_string_into_buffer_storage_v0",
 		"fy_std_cstring_from_text_storage_v0",
 		"fy_std_cstring_drop_storage_v0",
 	}

@@ -64,6 +64,7 @@ var symbolComponents = map[string]Component{
 	"fy_std_string_append_storage_v0":      ComponentOwnedText,
 	"fy_std_string_drop_storage_v0":        ComponentOwnedText,
 	"fy_std_string_from_buffer_storage_v0": ComponentOwnedText,
+	"fy_std_string_into_buffer_storage_v0": ComponentOwnedText,
 	"fy_std_cstring_from_text_storage_v0":  ComponentOwnedText,
 	"fy_std_cstring_drop_storage_v0":       ComponentOwnedText,
 	"fy_std_linux_file_open_v0":            ComponentLinuxFile,
@@ -182,6 +183,7 @@ var windowsMSVCSymbolComponents = map[string]Component{
 	"fy_std_string_append_storage_v0":      ComponentOwnedText,
 	"fy_std_string_drop_storage_v0":        ComponentOwnedText,
 	"fy_std_string_from_buffer_storage_v0": ComponentOwnedText,
+	"fy_std_string_into_buffer_storage_v0": ComponentOwnedText,
 	"fy_std_cstring_from_text_storage_v0":  ComponentOwnedText,
 	"fy_std_cstring_drop_storage_v0":       ComponentOwnedText,
 }

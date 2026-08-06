@@ -186,6 +186,7 @@ func generatedFairyStringFromBufferProbeSource(generated string) (string, error)
 	}
 	for _, required := range []string{
 		"fy_std_string_from_buffer_storage_v0(",
+		"fy_std_string_into_buffer_storage_v0(",
 		"fy_std_string_drop_storage_v0(",
 		"fy_std_buffer_drop_v0(",
 	} {

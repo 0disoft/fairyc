@@ -414,6 +414,10 @@ the operation is not atomic, rollback-capable, containment proof, or race-free a
 ADR 0317 moves the SDK to `0.0.0-stage0.46` with effect-free
 `path_kind_is_file(PathKind)` and `path_kind_is_directory(PathKind)`. Both are exhaustive and keep
 `.Other` false without turning a path snapshot into authorization or a race-free precheck.
+ADR 0318 moves the SDK to `0.0.0-stage0.47` with allocation-free `std::bytes::empty()` and
+`std::text::into_buffer(String) -> bytes::Buffer`. The latter transfers the exact String allocation
+without copying, returns mutable bytes, and requires `from_buffer` to validate UTF-8 again after any
+mutation.
 The path-kind query distinguishes ordinary files, directories, and other observed attributes without opening
 an owner, but its snapshot is not stable identity, authorization, containment, or a race-free
 precheck. `std::fs::copy_file_bytes` holds exclusive source and `CREATE_NEW` destination handles,

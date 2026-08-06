@@ -3,9 +3,12 @@ module main;
 import std::bytes as bytes;
 import std::text as text;
 
-fn i32 check_string(text::String value) {
-    let ref str view = text::string_as_str(ref value);
-    return if (view.len == 5 && !view.is_empty && text::string_len(ref value) == 5) {
+fn i32 check_round_trip(text::String value) {
+    var bytes::Buffer buffer = text::into_buffer(value);
+    let ref mut u8[] mutable = bytes::view_mut(ref mut buffer);
+    mutable[0] = 0x66;
+    let ref u8[] changed = bytes::view(ref buffer);
+    return if (changed.len == 5 && changed[0] == 0x66 && changed[4] == 0x79) {
         0
     } else {
         10
@@ -22,17 +25,28 @@ fn i32 check_returned_buffer(bytes::Buffer value) {
     };
 }
 
-fn i32 main() {
-    let i32 valid_code = switch (bytes::copy(b"Fairy")) {
+fn i32 check_empty_buffer(bytes::Buffer value) {
+    return if (bytes::is_empty(ref value) && bytes::capacity(ref value) == 0) {
+        0
+    } else {
+        5
+    };
+}
+
+fn i32 check_valid_round_trip() {
+    return switch (bytes::copy(b"Fairy")) {
         case .ok(value) : {
             switch (text::from_buffer(value)) {
-                case .ok(string) : { check_string(string) }
+                case .ok(string) : { check_round_trip(string) }
                 case .err(_) : { 1 }
             }
         }
         case .err(_) : { 2 }
     };
-    let i32 invalid_code = switch (bytes::copy(b"\xff")) {
+}
+
+fn i32 check_invalid_return() {
+    return switch (bytes::copy(b"\xff")) {
         case .ok(value) : {
             switch (text::from_buffer(value)) {
                 case .ok(_) : { 3 }
@@ -41,15 +55,24 @@ fn i32 main() {
         }
         case .err(_) : { 4 }
     };
-    let i32 empty_code = switch (bytes::copy(b"")) {
+}
+
+fn i32 check_empty_round_trip() {
+    return switch (bytes::copy(b"")) {
         case .ok(value) : {
             switch (text::from_buffer(value)) {
-                case .ok(string) : { if (text::string_is_empty(ref string)) { 0 } else { 5 } }
+                case .ok(string) : { check_empty_buffer(text::into_buffer(string)) }
                 case .err(_) : { 6 }
             }
         }
         case .err(_) : { 7 }
     };
+}
+
+fn i32 main() {
+    let i32 valid_code = check_valid_round_trip();
+    let i32 invalid_code = check_invalid_return();
+    let i32 empty_code = check_empty_round_trip();
     return if (valid_code != 0) {
         valid_code
     } else if (invalid_code != 0) {

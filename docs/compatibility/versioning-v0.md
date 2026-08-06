@@ -834,7 +834,7 @@ ADR 0144 fixes the first loader behavior for this manifest schema: explicit root
 exact on-disk case, no symlinks, complete `.fy` source discovery, unique UIDs, one language revision,
 exact member versions, package-source-digest local identity, and per-edge feature-distinct graph
 instances. ADR 0147 adds one exact compiler-bundled SDK source origin with package UID
-`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.46`, language
+`fairyc.std`, SDK identity `fairyc-sdk-stdlib/0`, current version `0.0.0-stage0.47`, language
 `fairyc-language/10`, and runtime ABI `fairyc-runtime/0`. Absolute host paths and implementation
 guard values are not serialized compatibility data.
 
@@ -1013,6 +1013,12 @@ remain unchanged.
 ADR 0317 advances the compiler-bundled SDK to `0.0.0-stage0.46` by adding effect-free public
 `path_kind_is_file` and `path_kind_is_directory`. Existing PathKind variants, `path_kind` errors,
 target C symbols, language `fairyc-language/10`, and runtime ABI `fairyc-runtime/0` remain unchanged.
+
+ADR 0318 advances the compiler-bundled SDK to `0.0.0-stage0.47` with additive effect-free
+`std::bytes::empty` and `std::text::into_buffer`. The latter moves exact String storage into a mutable
+Buffer without allocation or copy. Language `fairyc-language/10`, runtime ABI `fairyc-runtime/0`,
+resource layouts, and prior APIs remain unchanged; the new private target symbol participates only
+when reachable from generated code.
 
 ADR 0204 stabilizes `fairyc new <package-name> --uid <package-uid>`, its explicit non-derived UID,
 single direct-child destination, exact four-file starter, no-overwrite behavior, absence of an

@@ -279,6 +279,8 @@ func TestOwnedTextSourcesPreserveOwnershipAndNULTermination(t *testing.T) {
 	}
 	for _, required := range []string{
 		"fy_std_string_from_buffer_v0",
+		"fy_std_string_into_buffer_v0",
+		"input == NULL || !fy_std_buffer_valid_v0(&input->bytes) || output == NULL",
 		"FY_STD_OWNED_TEXT_INVALID_UTF8_V0",
 		"fy_std_string_append_v0",
 		"fy_std_cstr_validate_v0",
@@ -288,6 +290,7 @@ func TestOwnedTextSourcesPreserveOwnershipAndNULTermination(t *testing.T) {
 		"fy_std_string_append_storage_v0",
 		"fy_std_string_drop_storage_v0",
 		"fy_std_string_from_buffer_storage_v0",
+		"fy_std_string_into_buffer_storage_v0",
 		"input_storage == output_storage",
 		"memcpy(input_storage, &input, sizeof input)",
 		"fy_std_cstring_from_text_storage_v0",
@@ -308,6 +311,7 @@ func TestOwnedTextSourcesPreserveOwnershipAndNULTermination(t *testing.T) {
 		"fy_std_string_append_storage_v0",
 		"fy_std_string_drop_storage_v0",
 		"fy_std_string_from_buffer_storage_v0",
+		"fy_std_string_into_buffer_storage_v0",
 		"fy_std_cstring_from_text_storage_v0",
 		"fy_std_cstring_drop_storage_v0",
 		"preserved_string_bytes",
@@ -316,6 +320,7 @@ func TestOwnedTextSourcesPreserveOwnershipAndNULTermination(t *testing.T) {
 		"preserved_nonempty_from_buffer_input",
 		"preserved_nonempty_from_buffer_output",
 		"from_buffer_output.data != transfer_data",
+		"buffer_storage.data != transfer_data",
 		"empty_buffer_storage",
 		"invalid_buffer_data",
 		"storage_self_prefix",
@@ -353,6 +358,7 @@ func TestOwnedTextSourcesPreserveOwnershipAndNULTermination(t *testing.T) {
 			"#define FY_STD_SYSTEM_HEAP_FREE_V0(data) fy_std_system_heap_probe_free_v0(data)",
 			"fy_std_string_copy_storage_v0",
 			"fy_std_string_from_buffer_storage_v0",
+			"fy_std_string_into_buffer_storage_v0",
 			"fy_std_cstring_from_text_storage_v0",
 		} {
 			if !strings.Contains(candidate.source, required) {

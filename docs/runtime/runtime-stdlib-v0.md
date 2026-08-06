@@ -83,7 +83,7 @@ std::c      C scalar types and raw wrapper helpers
 
 The standard library is supplied as an explicit package instance under
 `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the
-compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.46` exports
+compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.47` exports
 the accepted public `std::alloc`, `std::bytes`, `std::text`, Windows MSVC `std::fs`, console I/O,
 scalar output, and effect-free `std::process` argument slices recorded by ADRs 0205 through 0311.
 The current Windows filesystem slice includes owned File I/O and metadata, bounded path mutation,
@@ -345,7 +345,7 @@ a private non-null `ref str` sentinel, and preserves the existing pointer-only `
 is superseded as the user-facing entry by ADR 0247's SDK module; it remains independent historical
 evidence and does not define a public layout.
 
-SDK `0.0.0-stage0.46` retains move-only `String` and `CString` from `std::text`. `copy` and
+SDK `0.0.0-stage0.47` retains move-only `String` and `CString` from `std::text`. `copy` and
 `cstring_from_text` construct canonical owners fallibly; `append` preserves the existing String on
 failure. `string_len`, `string_is_empty`, `cstring_len`, and `cstring_is_empty` expose byte metadata,
 with CString length excluding its required terminator. `string_as_str` and `cstring_as_cstr` return
@@ -368,7 +368,11 @@ Invalid UTF-8 returns the original Buffer unchanged as the `Result` err payload,
 Buffer converts to an empty String. The SDK-internal raw storage wrapper rejects null, aliasing,
 and nonempty-output calls without touching either caller storage, and commits both storages only
 after the existing UTF-8 validation succeeds. `text::copy` remains the copy-required borrowed-text
-path.
+path. `bytes::empty()` constructs canonical empty storage without allocation. `into_buffer`
+transfers a String's exact allocation, capacity, alignment, and initialized length into a mutable
+Buffer in constant time without allocation, copy, or redundant UTF-8 validation, then stores
+canonical empty state into the consumed String.
+Mutation removes the valid-UTF-8 invariant; a later `from_buffer` call validates it again.
 
 `examples/std_text_quickstart` imports only that safe module. Its Windows development and release
 builds execute valid nonempty multibyte validation, invalid-byte rejection with zero allocation
@@ -680,7 +684,7 @@ contract into SDK `0.0.0-stage0.14` as public `std::fs`; ADR 0269 extends it in 
 `0.0.0-stage0.42` with no-replace `hard_link`; ADR 0309 later extends it in SDK
 `0.0.0-stage0.43` with same-handle `allocated_size`; ADR 0310 later extends it in SDK
 `0.0.0-stage0.44` with same-handle `set_read_only`; ADR 0311 later extends it in SDK
-`0.0.0-stage0.46` with bounded recursive `remove_dir_all`; ADR 0270 extends it in SDK
+`0.0.0-stage0.45` with bounded recursive `remove_dir_all`; ADR 0270 extends it in SDK
 `0.0.0-stage0.16` with shared `size`; ADR 0271 extends it in SDK `0.0.0-stage0.17` with
 existing-file read/write `open_update`; ADR 0272 extends it in SDK `0.0.0-stage0.18` with
 cursor-preserving `set_len`; ADR 0274 extends it in SDK `0.0.0-stage0.19` with read/write

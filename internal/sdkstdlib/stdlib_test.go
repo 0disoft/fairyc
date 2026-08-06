@@ -8,7 +8,7 @@ import (
 
 func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	t.Parallel()
-	if Version != "0.0.0-stage0.46" {
+	if Version != "0.0.0-stage0.47" {
 		t.Fatalf("Version = %q", Version)
 	}
 	if LanguageRevision != "fairyc-language/10" {
@@ -50,7 +50,9 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	allocatedSizePublic := false
 	hardLinkPublic := false
 	appendBytePublic := false
+	emptyBufferPublic := false
 	asBytesPublic := false
+	intoBufferPublic := false
 	stderrScalarFunctions := make(map[string]bool)
 	for _, source := range definition.Sources {
 		if source.Path == "std/bytes.fy" {
@@ -58,12 +60,18 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 				if function.Name == "append_byte" {
 					appendBytePublic = function.Public
 				}
+				if function.Name == "empty" {
+					emptyBufferPublic = function.Public
+				}
 			}
 		}
 		if source.Path == "std/text.fy" {
 			for _, function := range source.Module.Functions {
 				if function.Name == "as_bytes" {
 					asBytesPublic = function.Public
+				}
+				if function.Name == "into_buffer" {
+					intoBufferPublic = function.Public
 				}
 			}
 		}
@@ -189,6 +197,12 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	}
 	if !appendBytePublic {
 		t.Fatal("std::bytes::append_byte is not public")
+	}
+	if !emptyBufferPublic {
+		t.Fatal("std::bytes::empty is not public")
+	}
+	if !intoBufferPublic {
+		t.Fatal("std::text::into_buffer is not public")
 	}
 	if !asBytesPublic {
 		t.Fatal("std::text::as_bytes is not public")

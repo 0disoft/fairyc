@@ -63,6 +63,9 @@ unsafe extern C fn raw_text_result string_drop_storage_raw(ptr mut void value) ;
 @link_name("fy_std_string_from_buffer_storage_v0")
 unsafe extern C fn raw_text_result string_from_buffer_storage_raw(ptr mut void input, ptr mut void output) ;
 
+@link_name("fy_std_string_into_buffer_storage_v0")
+unsafe extern C fn raw_text_result string_into_buffer_storage_raw(ptr mut void input, ptr mut void output) ;
+
 @link_name("fy_std_cstring_from_text_storage_v0")
 unsafe extern C fn raw_text_result cstring_from_text_storage_raw(ptr raw_text_view input, ptr mut void output) ;
 
@@ -171,6 +174,17 @@ pub fn Result<String, bytes::Buffer> from_buffer(bytes::Buffer value) {
         let i32 discarded = discard_string(output);
         .err(owned)
     };
+}
+
+/// Converts an owned String into a mutable Buffer in constant time without allocating or copying.
+pub fn bytes::Buffer into_buffer(String value) {
+    var String owned = value;
+    var bytes::Buffer output = bytes::empty();
+    let raw_text_result transferred = unsafe {
+        string_into_buffer_storage_raw(ref mut owned as ptr mut void, ref mut output as ptr mut void)
+    };
+    let i32 discarded = discard_string(owned);
+    return output;
 }
 
 /// Appends valid UTF-8 text and returns the new byte length.

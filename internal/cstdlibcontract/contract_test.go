@@ -112,19 +112,22 @@ func TestScalarOutputExcludesBoolRawSymbol(t *testing.T) {
 	}
 }
 
-func TestFromBufferStorageAdmitsOnlyThePublicStorageSymbol(t *testing.T) {
+func TestStringBufferStorageTransfersAdmitOnlyPublicStorageSymbols(t *testing.T) {
 	t.Parallel()
-	const symbol = "fy_std_string_from_buffer_storage_v0"
-	if !Admitted(symbol) || !AdmittedForTarget(symbol, target.X8664LinuxGNU) ||
-		!AdmittedForTarget(symbol, target.X8664WindowsMSVC) {
-		t.Fatal("from-buffer storage symbol is not admitted for both implemented targets")
+	for _, symbol := range []string{"fy_std_string_from_buffer_storage_v0", "fy_std_string_into_buffer_storage_v0"} {
+		if !Admitted(symbol) || !AdmittedForTarget(symbol, target.X8664LinuxGNU) ||
+			!AdmittedForTarget(symbol, target.X8664WindowsMSVC) {
+			t.Fatalf("storage transfer symbol %q is not admitted for both implemented targets", symbol)
+		}
 	}
-	if Admitted("fy_std_string_from_buffer_v0") {
-		t.Fatal("probe-only fy_std_string_from_buffer_v0 leaked into the public symbol contract")
+	for _, symbol := range []string{"fy_std_string_from_buffer_v0", "fy_std_string_into_buffer_v0"} {
+		if Admitted(symbol) {
+			t.Fatalf("probe-only symbol %q leaked into the public symbol contract", symbol)
+		}
 	}
-	components, err := ComponentsForSymbols([]string{symbol})
+	components, err := ComponentsForSymbols([]string{"fy_std_string_from_buffer_storage_v0", "fy_std_string_into_buffer_storage_v0"})
 	if err != nil || !slices.Equal(components, []Component{ComponentSystemHeap, ComponentBuffer, ComponentTextView, ComponentOwnedText}) {
-		t.Fatalf("ComponentsForSymbols(from-buffer storage) = %v, %v", components, err)
+		t.Fatalf("ComponentsForSymbols(String/Buffer storage transfers) = %v, %v", components, err)
 	}
 }
 
@@ -248,6 +251,7 @@ func TestWindowsMSVCComponentsForSymbolsAdmitsOnlyProvenRuntimeSlice(t *testing.
 		"fy_std_string_append_storage_v0",
 		"fy_std_string_drop_storage_v0",
 		"fy_std_string_from_buffer_storage_v0",
+		"fy_std_string_into_buffer_storage_v0",
 		"fy_std_cstring_from_text_storage_v0",
 		"fy_std_cstring_drop_storage_v0",
 		"fy_std_system_heap_deallocate_v0",

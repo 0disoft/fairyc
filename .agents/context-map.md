@@ -104,6 +104,7 @@
 - Same-handle Windows File read-only mutation route: internal/sdkstdlib/sources/std/fs.fy, internal/cstdlib/stage0_windows_file_metadata.c, internal/cstdlib/stage0_windows_file_metadata_probe.c, internal/cstdlibcontract/, examples/std_fs_quickstart/src/metadata.fy, cmd/fairyc-windows-host-smoke/, docs/adr/0310-public-windows-file-read-only-mutation.md
 - Root-protected Windows recursive directory removal route: internal/sdkstdlib/sources/std/fs.fy, internal/cstdlib/stage0_windows_file_remove_tree.c, internal/cstdlib/stage0_windows_file_remove_tree_probe.c, internal/cstdlibcontract/, examples/std_fs_quickstart/src/path_ops.fy, cmd/fairyc-windows-host-smoke/, docs/adr/0311-public-windows-recursive-directory-removal.md
 - Public PathKind predicate route: internal/sdkstdlib/sources/std/fs.fy, examples/std_fs_quickstart/src/path_ops.fy, cmd/fairyc-windows-host-smoke/, docs/adr/0317-public-path-kind-predicates.md
+- Zero-copy String-to-Buffer route: internal/sdkstdlib/sources/std/bytes.fy, internal/sdkstdlib/sources/std/text.fy, internal/cstdlib/stage0_owned_text.c, internal/cstdlibcontract/, examples/std_text_from_buffer_quickstart/, cmd/fairyc-windows-host-smoke/, docs/adr/0318-zero-copy-string-to-buffer-transfer.md
 - Documentation update route: docs/README.md
 - CLI tool route: .agents/skills/cli-tool/SKILL.md
 - Monorepo route: .agents/skills/monorepo/SKILL.md

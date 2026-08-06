@@ -849,6 +849,11 @@ ADR 0317 closes the PathKind predicate gap in SDK `0.0.0-stage0.46` with effect-
 `path_kind_is_file` and `path_kind_is_directory`. Existing low/optimized generated-Fairy filesystem
 proof now consumes both helpers while retaining missing-path errors and cleanup behavior.
 
+ADR 0318 closes the owned-text reverse-transfer gap in SDK `0.0.0-stage0.47` with allocation-free
+`bytes::empty` and zero-copy `text::into_buffer`. Closed C and generated-Fairy low/optimized proofs
+retain the exact allocation through Buffer-to-String-to-Buffer, mutate the returned bytes, preserve
+invalid UTF-8 ownership, cover empty storage, and finish with zero live allocations.
+
 ADR 0311 closes the bounded recursive-removal gap in SDK `0.0.0-stage0.45` with
 `remove_dir_all(ref CStr) -> Result<usize, FileError>`. The Windows target rejects roots and
 ambiguous paths before effects, removes observed reparse directories as leaves, and reports exact

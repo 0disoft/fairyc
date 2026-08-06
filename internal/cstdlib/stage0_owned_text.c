@@ -95,6 +95,21 @@ struct fy_std_owned_text_result_v0 fy_std_string_from_buffer_v0(
     return fy_std_owned_text_ok_v0();
 }
 
+struct fy_std_owned_text_result_v0 fy_std_string_into_buffer_v0(
+    struct fy_std_string_v0 *input,
+    struct fy_std_buffer_v0 *output
+) {
+    if (input == NULL || !fy_std_buffer_valid_v0(&input->bytes) || output == NULL) {
+        return fy_std_owned_text_error_v0(FY_STD_OWNED_TEXT_INVALID_ARGUMENT_V0, FY_STD_ALLOC_OK_V0);
+    }
+    *output = input->bytes;
+    input->bytes.block.data = NULL;
+    input->bytes.block.size = 0;
+    input->bytes.block.alignment = 0;
+    input->bytes.length = 0;
+    return fy_std_owned_text_ok_v0();
+}
+
 struct fy_std_owned_text_result_v0 fy_std_string_as_view_v0(
     const struct fy_std_string_v0 *input,
     struct fy_std_text_view_v0 *output
@@ -298,6 +313,28 @@ struct fy_std_owned_text_result_v0 fy_std_string_from_buffer_storage_v0(
         return fy_std_owned_text_error_v0(FY_STD_OWNED_TEXT_INVALID_ARGUMENT_V0, FY_STD_ALLOC_OK_V0);
     }
     struct fy_std_owned_text_result_v0 result = fy_std_string_from_buffer_v0(&input, &output);
+    if (result.status == FY_STD_OWNED_TEXT_OK_V0) {
+        memcpy(input_storage, &input, sizeof input);
+        memcpy(output_storage, &output, sizeof output);
+    }
+    return result;
+}
+
+struct fy_std_owned_text_result_v0 fy_std_string_into_buffer_storage_v0(
+    void *input_storage,
+    void *output_storage
+) {
+    if (input_storage == NULL || output_storage == NULL || input_storage == output_storage) {
+        return fy_std_owned_text_error_v0(FY_STD_OWNED_TEXT_INVALID_ARGUMENT_V0, FY_STD_ALLOC_OK_V0);
+    }
+    struct fy_std_string_v0 input;
+    struct fy_std_buffer_v0 output;
+    memcpy(&input, input_storage, sizeof input);
+    memcpy(&output, output_storage, sizeof output);
+    if (!fy_std_owned_text_buffer_empty_v0(&output)) {
+        return fy_std_owned_text_error_v0(FY_STD_OWNED_TEXT_INVALID_ARGUMENT_V0, FY_STD_ALLOC_OK_V0);
+    }
+    struct fy_std_owned_text_result_v0 result = fy_std_string_into_buffer_v0(&input, &output);
     if (result.status == FY_STD_OWNED_TEXT_OK_V0) {
         memcpy(input_storage, &input, sizeof input);
         memcpy(output_storage, &output, sizeof output);
