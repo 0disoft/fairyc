@@ -718,10 +718,10 @@ quarantines, without selecting a default policy or making a speed claim.
   `fairyc explain <diagnostic-code>` and `fairyc targets` v1 contracts separate from catalog and
   TargetSpec data lifecycle. Keep target-explicit `fairyc emit c --target <target-id> [--locked]`
   separate from private generated-C bytes and support units. Keep implemented semantic-by-default
-  and explicit Windows-native `fairyc test [--json] [--locations] [--native [--release] [--stdin] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]`
+  and explicit Windows-native `fairyc test [--json] [--locations] [--native [--release] [--stdin] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]`
   plus compiler-admitted `fairyc test --list [--package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]` discovery with canonical exact selection
   and singular root-reachable member selection separate from catalog-unreachable aggregation, fuzzy/tag/glob filters,
-  shared fixtures, portable targets, multi-test/shared-input and native-test output streams,
+  shared fixtures, portable targets, multi-test/shared-input and live native-test output streams,
   benchmarks, and host-environment policy.
 - Move to function-level reuse only when measured package rebuild or storage evidence justifies the complexity.
 
@@ -1062,6 +1062,12 @@ after complete compiler admission without consuming input. The selected low/opti
 Fairy process directly reads binary bytes including NUL through `std::io`, preserves untouched
 caller storage, and observes EOF without compiler-side buffering or replay.
 
+ADR 0314 closes exact opt-in native-test output attachments for machines. `--capture-output`
+requires native JSON execution and emits v4 outcomes with padded base64 stdout/stderr, preserving
+binary and pre-trap bytes while stripping only the private receipt. Low and optimized generated-
+Fairy pass/trap continuation proves both streams and unchanged lock behavior. Text rendering, live
+streaming, cross-stream ordering, per-test limits, truncation reports, and richer attachments remain later.
+
 ADR 0295 closes the opt-in root-reachable multi-package gap with `fairyc test --workspace` for
 execution and listing. Every unambiguous local package in the production graph receives its isolated
 test overlay; canonical identities become `<package-uid>::<module>::<function>` only in this mode and
@@ -1069,7 +1075,7 @@ remain globally sorted and exact-selectable. Workspace JSON uses `fairyc.test-li
 `fairyc.test-report/v2`, while default root and singular `--package` reports remain byte-for-byte v1.
 Standalone semantic/list JSON plus low/optimized native execution covers the checked-in root and
 member tests. Catalog-unreachable aggregation, feature-instance selection, parallelism, caching,
-durations, retries, output attachments, and portable native targets remain later decisions.
+durations, retries, live output streaming, richer attachments, and portable native targets remain later decisions.
 
 ADR 0300 closes the explicit source-location gap with `fairyc test --locations` in list and
 execution modes. Existing output remains byte-for-byte unchanged when omitted. Located text names
@@ -1083,7 +1089,7 @@ ADR 0287 closes the machine-report gap for execution with atomic `fairyc.test-re
 Semantic and native reports retain canonical outcome order, existing trap-continuation and exit-code
 semantics, and exact lock state while naming engine plus nullable target/profile. Optimized isolated
 MSVC trap-plus-pass execution proves that JSON is produced from real native outcomes rather than a
-text-report reparse. Durations, retries, output attachments, skipped states, and catalog-wide aggregation of unreachable members and
+text-report reparse. Durations, retries, v4 output attachments, skipped states, and catalog-wide aggregation of unreachable members and
 portable native targets remain later decisions.
 
 ADR 0216 cuts the exact language pin to `fairyc-language/2` and adds statement-only checked integer

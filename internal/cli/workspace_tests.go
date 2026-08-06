@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -27,21 +28,23 @@ const stableWorkspaceTestListSchema = "fairyc.test-list/v2"
 const stableWorkspaceTestReportSchema = "fairyc.test-report/v2"
 const stableLocatedTestListSchema = "fairyc.test-list/v3"
 const stableLocatedTestReportSchema = "fairyc.test-report/v3"
+const stableCapturedTestReportSchema = "fairyc.test-report/v4"
 
 type stableTestOptions struct {
-	locked      bool
-	native      bool
-	release     bool
-	stdin       bool
-	list        bool
-	json        bool
-	locations   bool
-	workspace   bool
-	packageUID  string
-	files       []string
-	directories []string
-	exact       []string
-	programArgs []string
+	locked        bool
+	native        bool
+	release       bool
+	stdin         bool
+	captureOutput bool
+	list          bool
+	json          bool
+	locations     bool
+	workspace     bool
+	packageUID    string
+	files         []string
+	directories   []string
+	exact         []string
+	programArgs   []string
 }
 
 type stableTestListReport struct {
@@ -73,6 +76,8 @@ type stableTestExecutionOutcome struct {
 	Outcome      string            `json:"outcome"`
 	TrapCategory *string           `json:"trapCategory"`
 	Source       *stableTestSource `json:"source,omitempty"`
+	StdoutBase64 *string           `json:"stdoutBase64,omitempty"`
+	StderrBase64 *string           `json:"stderrBase64,omitempty"`
 }
 
 type stableTestExecutionReport struct {
@@ -99,6 +104,8 @@ type workspaceTestOutcome struct {
 	display      string
 	trapCategory string
 	source       stableTestSource
+	stdout       string
+	stderr       string
 }
 
 type testSourceDiagnostics struct {
@@ -222,7 +229,7 @@ func runStableTest(arguments []string, sourceRoot string, stdin io.Reader, stdou
 		if options.stdin {
 			nativeInput = stdin
 		}
-		outcomes, code = runNativeWorkspaceTests(checked.MIR, tests, profile, nativeInput, options.programArgs, stderr)
+		outcomes, code = runNativeWorkspaceTests(checked.MIR, tests, profile, nativeInput, options.programArgs, options.captureOutput, stderr)
 	} else {
 		outcomes, code = runInterpreterWorkspaceTests(checked.MIR, tests, stderr)
 	}
@@ -318,6 +325,12 @@ func writeStableTestReportJSON(
 			result.Outcome = "failed"
 			category := outcome.trapCategory
 			result.TrapCategory = &category
+		}
+		if options.captureOutput {
+			stdout := base64.StdEncoding.EncodeToString([]byte(outcome.stdout))
+			stderr := base64.StdEncoding.EncodeToString([]byte(outcome.stderr))
+			result.StdoutBase64 = &stdout
+			result.StderrBase64 = &stderr
 		}
 		tests = append(tests, result)
 	}
@@ -416,6 +429,9 @@ func stableTestListSchemaFor(options stableTestOptions) string {
 }
 
 func stableTestReportSchemaFor(options stableTestOptions) string {
+	if options.captureOutput {
+		return stableCapturedTestReportSchema
+	}
 	if options.locations {
 		return stableLocatedTestReportSchema
 	}
@@ -443,7 +459,7 @@ func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 
 func parseStableTestCompilerOptions(arguments []string) (stableTestOptions, error) {
 	options := stableTestOptions{}
-	seen := make(map[string]bool, 6)
+	seen := make(map[string]bool, 7)
 	files := make(map[string]bool)
 	directories := make(map[string]bool)
 	exact := make(map[string]bool)
@@ -500,8 +516,8 @@ func parseStableTestCompilerOptions(arguments []string) (stableTestOptions, erro
 			index++
 			continue
 		}
-		if argument != "--locked" && argument != "--native" && argument != "--release" && argument != "--stdin" && argument != "--list" && argument != "--json" && argument != "--locations" && argument != "--workspace" {
-			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --list, --json, --locations, --native, --release, --stdin, --workspace, --package <package-uid>, --dir <portable-test-directory>, --file <portable-test-path>, --exact <test-identity>, and --locked`)
+		if argument != "--locked" && argument != "--native" && argument != "--release" && argument != "--stdin" && argument != "--capture-output" && argument != "--list" && argument != "--json" && argument != "--locations" && argument != "--workspace" {
+			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --list, --json, --locations, --native, --release, --stdin, --capture-output, --workspace, --package <package-uid>, --dir <portable-test-directory>, --file <portable-test-path>, --exact <test-identity>, and --locked`)
 		}
 		if seen[argument] {
 			return stableTestOptions{}, fmt.Errorf(`command "test" received %s more than once`, argument)
@@ -516,6 +532,8 @@ func parseStableTestCompilerOptions(arguments []string) (stableTestOptions, erro
 			options.release = true
 		case "--stdin":
 			options.stdin = true
+		case "--capture-output":
+			options.captureOutput = true
 		case "--list":
 			options.list = true
 		case "--json":
@@ -535,14 +553,20 @@ func parseStableTestCompilerOptions(arguments []string) (stableTestOptions, erro
 	if len(options.directories) != 0 && (len(options.files) != 0 || len(options.exact) != 0) {
 		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --dir with --file or --exact`)
 	}
-	if options.list && (options.native || options.release || options.stdin || len(options.exact) != 0) {
-		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --list with --native, --release, --stdin, or --exact`)
+	if options.list && (options.native || options.release || options.stdin || options.captureOutput || len(options.exact) != 0) {
+		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --list with --native, --release, --stdin, --capture-output, or --exact`)
 	}
 	if options.release && !options.native {
 		return stableTestOptions{}, fmt.Errorf(`command "test" requires --native when --release is supplied`)
 	}
 	if options.stdin && !options.native {
 		return stableTestOptions{}, fmt.Errorf(`command "test" requires --native when --stdin is supplied`)
+	}
+	if options.captureOutput && !options.native {
+		return stableTestOptions{}, fmt.Errorf(`command "test" requires --native when --capture-output is supplied`)
+	}
+	if options.captureOutput && !options.json {
+		return stableTestOptions{}, fmt.Errorf(`command "test" requires --json when --capture-output is supplied`)
 	}
 	return options, nil
 }

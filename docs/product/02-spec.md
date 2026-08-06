@@ -1068,7 +1068,7 @@ execution. ADR 0287 additionally admits execution-mode `--json` and freezes
 `fairyc.test-report/v1` with canonical semantic/native outcomes, engine/target/profile identity,
 totals, status, and lock state while preserving text bytes and exit codes. Catalog-wide member recursion,
 fuzzy/tag/glob filters, setup/teardown, portable native targets,
-shared or replayed multi-test input, native-test output streams, benchmarks, and host-environment
+shared or replayed multi-test input, live native-test output streaming, benchmarks, and host-environment
 policy remain separate contracts.
 
 ADR 0289 adds singular `--package <package-uid>` selection to execution and listing. The UID must
@@ -1079,7 +1079,7 @@ root-reachable local package in the production graph. Only that mode qualifies c
 as `<package-uid>::<module>::<function>`, accepts those exact strings through `--exact`, and emits
 `fairyc.test-list/v2` or `fairyc.test-report/v2` for JSON while preserving the v1 field sets.
 Catalog-only unreachable members, ambiguous feature instances, parallel scheduling, caching,
-durations, retries, and output attachments remain separate.
+durations, retries, live output streaming, and richer attachments remain separate.
 
 ADR 0300 adds explicit `--locations` to listing and execution. It preserves every existing
 identity, selector, text byte, and v1/v2 JSON byte when omitted. When requested, text reports a
@@ -1122,6 +1122,14 @@ decoding, or a separate byte limit. Native tests retain EOF by default; semantic
 rejects the flag, and zero or multiple selections fail as code 2 without consuming input or launching
 a process. Program arguments, output rejection, text/JSON report bytes and schemas, SDK, language,
 runtime ABI, and generated C remain unchanged.
+
+ADR 0314 advances native JSON execution to explicit `--capture-output` and
+`fairyc.test-report/v4`. Each canonical outcome requires padded base64 stdout/stderr so arbitrary
+binary and pre-trap bytes survive without UTF-8 decoding; recognized trap classification removes
+only the private receipt suffix. The flag requires `--native --json`, composes with optional
+`--locations`, and preserves the shared bounded-capture ceiling without claiming cross-stream order.
+Without it, native program output remains code-2 rejection and all text/v1-v3 JSON bytes remain
+unchanged. SDK, language, runtime ABI, and generated C remain unchanged.
 
 ADR 0146 rejects speculative persistent caching at this point. ADR 0149 supplies deterministic,
 bounded, verifier-checked bytes for a complete MIR program, but the workspace path still produces

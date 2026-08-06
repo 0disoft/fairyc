@@ -541,9 +541,9 @@ execution, a nonzero program status, or a program trap follows. `--locked` perfo
 compiler-output write failure after program execution returns code 4 but cannot undo earlier bytes
 or program effects; no executable is retained.
 
-## Stable workspace test v12
+## Stable workspace test v13
 
-`fairyc test [--json] [--locations] [--native [--release] [--stdin] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` first loads and locks the ordinary production workspace, then overlays only
+`fairyc test [--json] [--locations] [--native [--release] [--stdin] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` first loads and locks the ordinary production workspace, then overlays only
 the root package's optional exact-lowercase `tests/` tree in memory. `--package` instead selects one
 exact local manifest package UID that has exactly one root-reachable resolved instance and overlays
 only that package's tree. Unknown, unreachable, SDK, or feature-instance-ambiguous selections are
@@ -604,7 +604,7 @@ complete-overlay test declaration and compiler admission. Text and v1/v2/v3 JSON
 unchanged.
 
 `fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]` is a separate discovery mode and does not combine with `--native`,
-`--release`, or `--exact`. It retains the complete overlay's syntax, declaration, semantic, Flow,
+`--release`, `--stdin`, `--capture-output`, or `--exact`. It retains the complete overlay's syntax, declaration, semantic, Flow,
 MIR, and verifier admission, then emits `test <identity>` in canonical order without invoking the
 interpreter, backend, MSVC, PE inspector, or a test process. Its final line is
 `test list: <count> discovered; lock <updated|unchanged|verified>`. Zero tests emit only that line.
@@ -619,7 +619,7 @@ Without `--json`, completed lines are `test <identity> ... ok` or
 `test <identity> ... FAILED (<trap-category>)`. The final line is
 `test result: <ok|FAILED>. <passed> passed; <failed> failed; lock <updated|unchanged|verified>`.
 Zero tests succeed with only the final line. Codes are 0 for all
-passing, 2 for invocation/capability/native-program-output rejection, 3 for source or declaration
+passing, 2 for invocation/capability/default native-program-output rejection, 3 for source or declaration
 diagnostics, 4 for internal/output failure, 5 for one or more trapped tests, 6 for native
 toolchain/build/inspection/execution failure, and 7 for workspace/test-source/lock failure. Default
 mode invokes no target backend, toolchain, process, network, or host I/O. Native mode requires local
@@ -635,15 +635,25 @@ Flag-looking, empty, and non-ASCII UTF-8 arguments are preserved, while an embed
 invocation failure before workspace loading. Semantic execution and `--list` reject the delimiter.
 Arguments and stdin are process input and do not alter text reports or stable JSON schemas.
 
-Execution-mode `--json` replaces only the complete report bytes with one compact newline-terminated
+Explicit `--capture-output` is accepted only with native JSON execution. Before the delimiter it
+selects `fairyc.test-report/v4`; after the delimiter it is an ordinary program argument. Every v4
+outcome requires canonical padded base64 `stdoutBase64` and `stderrBase64` strings, including empty
+strings for empty streams. Exact process bytes are encoded without UTF-8 decoding. A recognized trap
+removes only the private receipt suffix from stderr before encoding and preserves preceding bytes.
+`source` remains opt-in through `--locations`. The existing shared 64 KiB capture ceiling remains
+fail-closed and the report does not claim cross-stream ordering. Without the flag, native output
+remains a code-2 capability rejection and all text plus v1-v3 JSON bytes remain unchanged.
+
+Execution-mode `--json` without output capture replaces only the complete report bytes with one compact newline-terminated
 object. Default and `--package` use `fairyc.test-report/v1`; `--workspace` uses
 `fairyc.test-report/v2` for qualified identities. Both preserve canonical outcome order and process codes while adding
 the exact engine, nullable target/profile, per-test passed/failed outcome and nullable trap category,
 matching count/passed/failed totals, aggregate status, and lock state. Interpreter reports use null
 target/profile; native reports identify `x86_64-windows-msvc` and `development` or `release`.
 Compilation, capability, toolchain, inspection, execution-infrastructure, and package failures emit
-no JSON report. Timings, host inventory, toolchain versions, program streams, and temporary harness
-or artifact identities are absent. Text execution output remains byte-for-byte unchanged when both
+no JSON report. Timings, host inventory, toolchain versions, program streams in v1-v3, and temporary
+harness or artifact identities are absent. V4 adds only the two base64 stream fields defined above.
+Text execution output remains byte-for-byte unchanged when both
 `--json` and `--locations` are omitted.
 
 `--locations` is an additive explicit source-anchor mode for listing and execution. It does not
@@ -667,7 +677,7 @@ separators. Consumers must match both identities before treating a retained span
 | `fairyc check [--locked]` | Check the current manifest-owned workspace through verified MIR | No |
 | `fairyc build [--release] [--locked]` | Build or replace the current root package's one Windows executable | Yes |
 | `fairyc run [--release] [--locked] [-- <program-args...>]` | Build and run the current workspace as one temporary Windows image, forwarding arguments after `--` to the program | Yes |
-| `fairyc test [--json] [--locations] [--native [--release] [--stdin] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` | Run all, exact portable test directories, exact portable test files, or exact canonical root, selected-package, or root-reachable workspace `@test fn void` entries through the semantic interpreter or one temporary Windows MSVC image per selected test, with human or stable JSON output, optional exact-current source anchors, native process arguments after `--`, and explicit caller stdin for exactly one selected native test | Optional temporary native images |
+| `fairyc test [--json] [--locations] [--native [--release] [--stdin] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` | Run all, exact portable test directories, exact portable test files, or exact canonical root, selected-package, or root-reachable workspace `@test fn void` entries through the semantic interpreter or one temporary Windows MSVC image per selected test, with human or stable JSON output, optional exact-current source anchors, native process arguments after `--`, explicit caller stdin for exactly one selected native test, and opt-in exact binary output attachments in native JSON v4 | Optional temporary native images |
 | `fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]` | Compile-admit the complete selected test overlay and list all or exact-directory/file canonical identities as text or stable JSON, optionally with exact-current source anchors, without execution | No |
 | `fairyc emit c --target <target-id> [--locked]` | Emit the current executable workspace's target-selected C11 application unit | C only, stdout |
 | `fairyc explain <diagnostic-code>` | Explain a stable diagnostic code | No |

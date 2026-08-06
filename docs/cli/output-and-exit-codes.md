@@ -133,7 +133,7 @@ manifest, workspace, graph, and lock failures use code `7`. The command writes n
 but ordinary lock maintenance may precede emission or an output failure. `--locked` verifies the
 lock without writing.
 
-`fairyc test [--json] [--locations] [--native [--release] [--stdin] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` buffers one deterministic report after compilation and capability
+`fairyc test [--json] [--locations] [--native [--release] [--stdin] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` buffers one deterministic report after compilation and capability
 admission. Default and singular-package identities are `<module>::<function>`; workspace identities
 are `<package-uid>::<module>::<function>`. Completed tests use `test <identity> ... ok` or `test
 <identity> ... FAILED (<trap-category>)`, followed by `test result:
@@ -163,6 +163,13 @@ containing only admitted zero-test files succeeds; an empty filesystem directory
 Compilation/capability failure emits no report;
 an external writer may still accept a report prefix before returning code `4`. Ordinary lock
 maintenance can precede later failure, while `--locked` is the no-write form.
+
+Native `--json --capture-output` selects `fairyc.test-report/v4` and accepts bounded program output.
+Every outcome requires `stdoutBase64` and `stderrBase64`; canonical padded base64 preserves arbitrary
+binary bytes and empty streams are empty strings. Recognized trap classification strips only the
+private receipt suffix before encoding stderr. `source` remains conditional on `--locations`.
+Without the flag, output is still rejected as code `2`. Capture-limit or execution-infrastructure
+failure emits no JSON report, and no report represents cross-stream ordering.
 
 Execution-mode `--json` emits one compact newline-terminated object after every selected outcome is
 classified. Default and `--package` use `fairyc.test-report/v1`; `--workspace` uses

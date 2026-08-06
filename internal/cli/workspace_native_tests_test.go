@@ -76,7 +76,7 @@ func TestNativeWorkspaceTestsContinueAfterTrapsAndPreserveOrder(t *testing.T) {
 	}
 	var stderr bytes.Buffer
 	outcomes, code := runNativeWorkspaceTestsWith(
-		program, tests, cdriver.OptimizedProfile, strings.NewReader(""), programArguments, &stderr, compile, execute,
+		program, tests, cdriver.OptimizedProfile, strings.NewReader(""), programArguments, false, &stderr, compile, execute,
 	)
 	if code != ExitSuccess || stderr.String() != "" || compiled != 2 || len(outcomes) != 2 ||
 		outcomes[0].display != tests[0].display || outcomes[0].trapCategory != "assertion-failed" ||
@@ -110,12 +110,50 @@ func TestNativeWorkspaceTestForwardsCallerInputToSelectedProcess(t *testing.T) {
 		cdriver.LowProfile,
 		strings.NewReader("Fairy input\n"),
 		programArguments,
+		false,
 		&stderr,
 		compile,
 		execute,
 	)
 	if code != ExitSuccess || stderr.String() != "" || len(outcomes) != 1 || outcomes[0].display != tests[0].display {
 		t.Fatalf("native input outcomes=%+v code=%d stderr=%q", outcomes, code, stderr.String())
+	}
+}
+
+func TestNativeWorkspaceTestsCaptureExactProgramStreamsAndStripTrapReceipt(t *testing.T) {
+	t.Parallel()
+	program := nativeTestFixtureProgram()
+	tests := []workspaceTest{
+		{display: "tests::native::fails", entry: "tests::native::fails"},
+		{display: "tests::native::passes", entry: "tests::native::passes"},
+	}
+	compile := func(program mir.Program, entry string, profile cdriver.Profile, stderr io.Writer) (cdriver.WindowsHostArtifact, int) {
+		return cdriver.WindowsHostArtifact{Bytes: []byte(entry)}, ExitSuccess
+	}
+	executions := 0
+	execute := func(cdriver.WindowsHostArtifact, io.Reader, []string) (cdriver.WindowsHostOutcome, error) {
+		executions++
+		if executions == 1 {
+			code, found := cbackend.TrapCode("assertion-failed")
+			if !found {
+				t.Fatal("assertion-failed trap code is missing")
+			}
+			return cdriver.WindowsHostOutcome{
+				ExitCode: int32(productTrapExitBase + code),
+				Stdout:   string([]byte{0, 0xff}),
+				Stderr:   string([]byte{0x80}) + cruntime.RunTrapReceiptPrefix + strconv.Itoa(int(code)),
+			}, nil
+		}
+		return cdriver.WindowsHostOutcome{Stdout: "pass", Stderr: "warn"}, nil
+	}
+	var stderr bytes.Buffer
+	outcomes, code := runNativeWorkspaceTestsWith(
+		program, tests, cdriver.LowProfile, strings.NewReader(""), nil, true, &stderr, compile, execute,
+	)
+	if code != ExitSuccess || stderr.String() != "" || len(outcomes) != 2 ||
+		outcomes[0].trapCategory != "assertion-failed" || outcomes[0].stdout != string([]byte{0, 0xff}) ||
+		outcomes[0].stderr != string([]byte{0x80}) || outcomes[1].stdout != "pass" || outcomes[1].stderr != "warn" {
+		t.Fatalf("captured native outcomes=%+v code=%d stderr=%q", outcomes, code, stderr.String())
 	}
 }
 
@@ -143,6 +181,7 @@ func TestNativeWorkspaceTestsRejectProgramOutputAndUnreceiptedExit(t *testing.T)
 				cdriver.LowProfile,
 				strings.NewReader(""),
 				nil,
+				false,
 				&stderr,
 				compile,
 				func(cdriver.WindowsHostArtifact, io.Reader, []string) (cdriver.WindowsHostOutcome, error) {

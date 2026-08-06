@@ -147,6 +147,18 @@ func loadHostSmokeSources() (map[string]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("read checked-in native-test stdin test: %w", err)
 	}
+	nativeTestOutputManifest, err := os.ReadFile(filepath.FromSlash(checkedInNativeTestOutputManifestPath))
+	if err != nil {
+		return nil, fmt.Errorf("read checked-in native-test output workspace manifest: %w", err)
+	}
+	nativeTestOutputMain, err := os.ReadFile(filepath.FromSlash(checkedInNativeTestOutputMainPath))
+	if err != nil {
+		return nil, fmt.Errorf("read checked-in native-test output workspace entry: %w", err)
+	}
+	nativeTestOutputTest, err := os.ReadFile(filepath.FromSlash(checkedInNativeTestOutputTestPath))
+	if err != nil {
+		return nil, fmt.Errorf("read checked-in native-test output test: %w", err)
+	}
 	windowsFileSource, err := os.ReadFile(filepath.FromSlash(checkedInWindowsFilePath))
 	if err != nil {
 		return nil, fmt.Errorf("read checked-in Windows File source: %w", err)
@@ -229,6 +241,9 @@ func loadHostSmokeSources() (map[string]string, error) {
 		checkedInNativeTestStdinManifestPath:   string(nativeTestStdinManifest),
 		checkedInNativeTestStdinMainPath:       string(nativeTestStdinMain),
 		checkedInNativeTestStdinTestPath:       string(nativeTestStdinTest),
+		checkedInNativeTestOutputManifestPath:  string(nativeTestOutputManifest),
+		checkedInNativeTestOutputMainPath:      string(nativeTestOutputMain),
+		checkedInNativeTestOutputTestPath:      string(nativeTestOutputTest),
 		checkedInWindowsFilePath:               string(windowsFileSource),
 		checkedInWindowsFileSupportPath:        string(windowsFileSupportSource),
 		checkedInOwnedTextPath:                 string(ownedTextSource),

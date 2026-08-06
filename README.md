@@ -504,14 +504,15 @@ persistent cache, or stable editor protocol. Program commands use one entry plus
 `fairyc check [--locked]` and the Windows/amd64-local
 `fairyc build [--release] [--locked]`, and the Windows/amd64-local
 `fairyc run [--release] [--locked]`, and the semantic-by-default or Windows-native
-`fairyc test [--json] [--locations] [--native [--release] [--stdin] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` and the execution-free
+`fairyc test [--json] [--locations] [--native [--release] [--stdin] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` and the execution-free
 `fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]`, plus source-independent
 `fairyc explain <diagnostic-code>` and `fairyc targets`, and target-explicit
 `fairyc emit c --target <target-id> [--locked]`. Stable run forwards caller stdin, bounded Windows
 program output, arguments, and status without pre-reading input. Native tests compile each selected
 entry into a separate temporary Windows image, forward values after `--` to every isolated test,
-and explicitly attach caller stdin to exactly one selected test with `--stdin`; shared or replayed
-multi-test input, native-test output forwarding, and input forwarding for other native commands,
+and explicitly attach caller stdin to exactly one selected test with `--stdin`, and retain exact
+binary stdout/stderr in native JSON v4 with `--capture-output`; shared or replayed multi-test input,
+live native-test output streaming, and input forwarding for other native commands,
 a complete runtime, safe standard library, package manager, supported
 target, release-stable CLI as a whole, and a stable language revision do not exist yet.
 
@@ -639,7 +640,7 @@ standard-library support unit is intentionally absent, so redirected output is i
 input rather than a promised standalone C package. Ordinary mode maintains `fairy.lock`;
 `--locked` verifies it without writing.
 
-The stable `fairyc test [--json] [--locations] [--native [--release] [--stdin] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` command keeps tests out of ordinary compilation. It overlays
+The stable `fairyc test [--json] [--locations] [--native [--release] [--stdin] [--capture-output] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` command keeps tests out of ordinary compilation. It overlays
 the root package's optional lowercase `tests/` directory after the production lock is handled, or
 exactly one root-reachable local member when its manifest UID is selected with `--package`;
 `tests/answer.fy` therefore declares `module tests::answer;`. Mark a private safe zero-argument
@@ -669,8 +670,11 @@ aggregate status, and lock state. A trap fails an executed test and later select
 tests still run in fresh processes. `--locations` adds an exact-current source anchor to text and
 selects `fairyc.test-list/v3` or `fairyc.test-report/v3` for JSON. Each anchor contains package UID,
 portable workspace-relative path, 1-based line and byte column, exact name byte span, and matching
-`fyfile1`/`fylm1` identities without exposing an absolute path or source text. Shared multi-test
-input, native program output,
+`fyfile1`/`fylm1` identities without exposing an absolute path or source text. Native JSON
+`--capture-output` uses `fairyc.test-report/v4` and adds required canonical base64 stdout/stderr to
+every outcome, preserving binary and pre-trap bytes without exposing the private trap receipt.
+Without that flag, native output remains rejected and legacy report bytes do not change. Shared
+multi-test input, live output streaming,
 portable targets, benchmarks, fuzzy/tag/glob filters, catalog-wide unreachable aggregation, and
 feature-instance selection remain separate contracts.
 

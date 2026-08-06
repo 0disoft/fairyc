@@ -27,6 +27,7 @@ func runNativeWorkspaceTests(
 	profile cdriver.Profile,
 	stdin io.Reader,
 	programArguments []string,
+	captureOutput bool,
 	stderr io.Writer,
 ) ([]workspaceTestOutcome, int) {
 	return runNativeWorkspaceTestsWith(
@@ -35,6 +36,7 @@ func runNativeWorkspaceTests(
 		profile,
 		stdin,
 		programArguments,
+		captureOutput,
 		stderr,
 		compileNativeWorkspaceTest,
 		executeNativeWorkspaceTest,
@@ -47,6 +49,7 @@ func runNativeWorkspaceTestsWith(
 	profile cdriver.Profile,
 	stdin io.Reader,
 	programArguments []string,
+	captureOutput bool,
 	stderr io.Writer,
 	compile nativeWorkspaceTestCompiler,
 	execute nativeWorkspaceTestExecutor,
@@ -66,7 +69,7 @@ func runNativeWorkspaceTestsWith(
 			return nil, buildFailure(stderr, fmt.Errorf("execute native test %s: %w", test.display, err))
 		}
 		programStderr, category := classifyStableRunOutcome(outcome)
-		if outcome.Stdout != "" || programStderr != "" {
+		if !captureOutput && (outcome.Stdout != "" || programStderr != "") {
 			return nil, workspaceSubsetCapabilityError(
 				workspaceCompilePolicy{stableDiagnostics: true},
 				stderr,
@@ -80,7 +83,10 @@ func runNativeWorkspaceTestsWith(
 				fmt.Errorf("native test %s exited with status %d without a valid trap receipt", test.display, outcome.ExitCode),
 			)
 		}
-		outcomes = append(outcomes, workspaceTestOutcome{display: test.display, trapCategory: category, source: test.source})
+		outcomes = append(outcomes, workspaceTestOutcome{
+			display: test.display, trapCategory: category, source: test.source,
+			stdout: outcome.Stdout, stderr: programStderr,
+		})
 	}
 	return outcomes, ExitSuccess
 }

@@ -323,6 +323,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0311-public-windows-recursive-directory-removal.md`: adds root-protected recursive directory removal with reparse-leaf handling, exact partial progress, low/optimized native evidence, and SDK `0.0.0-stage0.45`.
 - `0312-stable-native-test-program-arguments.md`: forwards arguments after the first `--` to every selected isolated native test, rejects semantic/list and NUL misuse, preserves report schemas, and proves exact low/optimized generated-Fairy `std::process` bytes.
 - `0313-stable-single-native-test-stdin.md`: explicitly attaches caller stdin to exactly one selected isolated native test after complete compiler admission and PE inspection, preserves default EOF and report schemas, and proves binary low/optimized generated-Fairy `std::io` input.
+- `0314-stable-native-test-output-attachments.md`: adds opt-in native JSON v4 stdout/stderr base64 attachments with exact binary preservation, trap-receipt stripping, unchanged legacy reports, and low/optimized generated-Fairy evidence.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

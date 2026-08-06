@@ -977,6 +977,28 @@ canonical ordering and complete-overlay compiler admission, adds no output field
 v1/v2/v3 text and JSON bytes unchanged. Language, SDK, runtime ABI, manifest, lockfile, package,
 interface, target, MIR, and generated-code versions remain unchanged.
 
+ADR 0312 additively admits the first `--` delimiter only for native test execution and forwards
+every following value unchanged to each selected isolated process. Semantic execution and listing
+reject the delimiter; embedded NUL fails before workspace loading. Omission preserves program
+arguments, text and v1/v2/v3 JSON bytes, schemas, codes, locking, and artifacts. Language, SDK,
+runtime ABI, manifest, lockfile, package, interface, target, MIR, and generated-code versions remain
+unchanged.
+
+ADR 0313 additively admits native-only `--stdin` for exactly one selected test after complete
+compiler admission. Omission preserves EOF. Zero or multiple selections fail before input
+consumption or process launch; the successful path attaches caller input directly only after PE
+inspection without compiler buffering or replay. Text and v1/v2/v3 JSON bytes, schemas, codes,
+locking, and artifacts remain unchanged. Language, SDK, runtime ABI, manifest, lockfile, package,
+interface, target, MIR, and generated-code versions remain unchanged.
+
+ADR 0314 additively admits `--capture-output` only with native JSON execution and introduces
+`fairyc.test-report/v4`. Every v4 outcome requires canonical padded base64 `stdoutBase64` and
+`stderrBase64`; arbitrary binary and pre-trap bytes are exact, the private trap receipt is excluded,
+and `source` remains conditional on `--locations`. Omission preserves native-output rejection and
+all text plus v1/v2/v3 JSON bytes. V4 is a new opt-in schema rather than an in-place v1-v3 field
+addition. Language, SDK, runtime ABI, manifest, lockfile, package, interface, target, MIR, and
+generated-code versions remain unchanged.
+
 ADR 0204 stabilizes `fairyc new <package-name> --uid <package-uid>`, its explicit non-derived UID,
 single direct-child destination, exact four-file starter, no-overwrite behavior, absence of an
 initial lockfile, success line, and codes 0, 2, 4, and 7. Adding templates, flags, merge behavior, an

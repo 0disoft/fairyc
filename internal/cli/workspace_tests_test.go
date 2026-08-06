@@ -595,6 +595,9 @@ func TestStableWorkspaceTestHandlesZeroTestsInvocationAndOutputFailure(t *testin
 		{"test", "--list", "--release"},
 		{"test", "--stdin"},
 		{"test", "--list", "--stdin"},
+		{"test", "--capture-output"},
+		{"test", "--native", "--capture-output"},
+		{"test", "--list", "--capture-output"},
 		{"test", "--list", "--exact", "tests::missing::test"},
 		{"test", "--exact"},
 		{"test", "--exact", "tests::missing::test", "--exact", "tests::missing::test"},
@@ -603,6 +606,28 @@ func TestStableWorkspaceTestHandlesZeroTestsInvocationAndOutputFailure(t *testin
 		if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, `command "test"`) {
 			t.Fatalf("invalid invocation %v = (%d, %q, %q)", arguments, code, stdout, stderr)
 		}
+	}
+}
+
+func TestStableWorkspaceTestWritesCapturedNativeJSONExecutionReport(t *testing.T) {
+	t.Parallel()
+	category := "assertion-failed"
+	outcomes := []workspaceTestOutcome{
+		{display: "tests::native::fails", trapCategory: category, stdout: string([]byte{0, 0xff}), stderr: string([]byte{0x80})},
+		{display: "tests::native::passes", stdout: "pass", stderr: "warn"},
+	}
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	code := writeStableTestReportJSON(
+		outcomes,
+		"verified",
+		stableTestOptions{native: true, release: true, json: true, captureOutput: true},
+		&stdout,
+		&stderr,
+	)
+	want := `{"schemaVersion":"fairyc.test-report/v4","engine":"native","target":"x86_64-windows-msvc","profile":"release","tests":[{"identity":"tests::native::fails","outcome":"failed","trapCategory":"assertion-failed","stdoutBase64":"AP8=","stderrBase64":"gA=="},{"identity":"tests::native::passes","outcome":"passed","trapCategory":null,"stdoutBase64":"cGFzcw==","stderrBase64":"d2Fybg=="}],"count":2,"passed":1,"failed":1,"status":"failed","lock":"verified"}` + "\n"
+	if code != ExitProgramTrap || stdout.String() != want || stderr.String() != "" {
+		t.Fatalf("captured native JSON report = (%d, %q, %q), want stdout %q", code, stdout.String(), stderr.String(), want)
 	}
 }
 
@@ -645,10 +670,10 @@ fn void broken() { missing(); }
 
 func TestStableWorkspaceTestNativeOptionsRequireExplicitNativeMode(t *testing.T) {
 	t.Parallel()
-	options, err := parseStableTestOptions([]string{"--release", "--stdin", "--exact", "tests::answer::is_42", "--json", "--locked", "--native", "--", "--stdin", "", "한글λ"})
-	if err != nil || !options.native || !options.release || !options.stdin || !options.json || !options.locked ||
+	options, err := parseStableTestOptions([]string{"--release", "--stdin", "--capture-output", "--exact", "tests::answer::is_42", "--json", "--locked", "--native", "--", "--capture-output", "", "한글λ"})
+	if err != nil || !options.native || !options.release || !options.stdin || !options.captureOutput || !options.json || !options.locked ||
 		len(options.exact) != 1 || options.exact[0] != "tests::answer::is_42" ||
-		!slices.Equal(options.programArgs, []string{"--stdin", "", "한글λ"}) {
+		!slices.Equal(options.programArgs, []string{"--capture-output", "", "한글λ"}) {
 		t.Fatalf("native options = %+v, %v", options, err)
 	}
 	if _, err := parseStableTestOptions([]string{"--release"}); err == nil || !strings.Contains(err.Error(), "requires --native") {

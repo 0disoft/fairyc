@@ -287,6 +287,59 @@ func TestStableLocatedTestExecutionReportMatchesSchema(t *testing.T) {
 	assertJSONFieldsMatchSchema(t, sourceBytes, schema.Defs.Source.Properties, schema.Defs.Source.Required)
 }
 
+func TestStableCapturedTestExecutionReportMatchesSchema(t *testing.T) {
+	t.Parallel()
+	schemaBytes, err := os.ReadFile(filepath.Join("..", "..", "spec", "cli", "stable-test-report-v4.schema.json"))
+	if err != nil {
+		t.Fatalf("read schema: %v", err)
+	}
+	var schema struct {
+		Properties map[string]json.RawMessage `json:"properties"`
+		Required   []string                   `json:"required"`
+		Defs       struct {
+			Outcome struct {
+				Properties map[string]json.RawMessage `json:"properties"`
+				Required   []string                   `json:"required"`
+			} `json:"outcome"`
+			Source struct {
+				Properties map[string]json.RawMessage `json:"properties"`
+				Required   []string                   `json:"required"`
+			} `json:"source"`
+		} `json:"$defs"`
+	}
+	if err := json.Unmarshal(schemaBytes, &schema); err != nil {
+		t.Fatalf("decode schema contract: %v", err)
+	}
+	source := schemaTestSource()
+	stdout := "AP8="
+	stderr := "gA=="
+	outcome := stableTestExecutionOutcome{
+		Identity: "tests::main::passes", Outcome: "passed", Source: &source,
+		StdoutBase64: &stdout, StderrBase64: &stderr,
+	}
+	target := "x86_64-windows-msvc"
+	profile := "release"
+	reportBytes, err := json.Marshal(stableTestExecutionReport{
+		SchemaVersion: stableCapturedTestReportSchema,
+		Engine:        "native",
+		Target:        &target,
+		Profile:       &profile,
+		Tests:         []stableTestExecutionOutcome{outcome},
+		Count:         1,
+		Passed:        1,
+		Status:        "ok",
+		Lock:          "verified",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertJSONFieldsMatchSchema(t, reportBytes, schema.Properties, schema.Required)
+	outcomeBytes, _ := json.Marshal(outcome)
+	assertJSONFieldsAllowedBySchema(t, outcomeBytes, schema.Defs.Outcome.Properties, schema.Defs.Outcome.Required)
+	sourceBytes, _ := json.Marshal(source)
+	assertJSONFieldsMatchSchema(t, sourceBytes, schema.Defs.Source.Properties, schema.Defs.Source.Required)
+}
+
 func schemaTestSource() stableTestSource {
 	return stableTestSource{
 		PackageUID:      "example.app",
@@ -443,6 +496,24 @@ func assertJSONFieldsMatchSchema(t *testing.T, encoded []byte, properties map[st
 	slices.Sort(required)
 	if !slices.Equal(required, schemaFields) {
 		t.Fatalf("required fields = %v, schema fields = %v", required, schemaFields)
+	}
+}
+
+func assertJSONFieldsAllowedBySchema(t *testing.T, encoded []byte, properties map[string]json.RawMessage, required []string) {
+	t.Helper()
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(encoded, &fields); err != nil {
+		t.Fatal(err)
+	}
+	for field := range fields {
+		if _, found := properties[field]; !found {
+			t.Fatalf("encoded field %q is absent from schema properties", field)
+		}
+	}
+	for _, field := range required {
+		if _, found := fields[field]; !found {
+			t.Fatalf("required schema field %q is absent from encoded object", field)
+		}
 	}
 }
 
