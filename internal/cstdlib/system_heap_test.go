@@ -613,6 +613,8 @@ func TestWindowsDirectoryRemoveTreeHasDedicatedSourceOwners(t *testing.T) {
 	for _, required := range []string{
 		"int fy_std_windows_file_remove_tree_probe_v0(void)",
 		"ERROR_SHARING_VIOLATION", "result.count != 1", "FILE_ATTRIBUTE_READONLY",
+		"FSCTL_SET_REPARSE_POINT", "IO_REPARSE_TAG_MOUNT_POINT",
+		"fy-remove-tree-target\\\\marker.tmp", "junction_attributes & FILE_ATTRIBUTE_REPARSE_POINT",
 	} {
 		if !strings.Contains(removeProbeText, required) {
 			t.Errorf("recursive-removal probe is missing %q", required)

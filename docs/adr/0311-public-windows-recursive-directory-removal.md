@@ -50,8 +50,9 @@ observed as such, but cannot promise race-free identity without a future handle-
   implementation/probe owners, and SDK `0.0.0-stage0.45`.
 - The raw probe covers null, encoding, root, trailing-separator, dot-segment, missing, file-input,
   four-object success, deterministic one-object partial progress before an open-root sharing
-  failure, read-only-child failure with zero progress, preservation, and cleanup under low and
-  optimized MSVC.
+  failure, read-only-child failure with zero progress, and an actual mount-point reparse directory
+  whose external target and marker survive removal of the containing root. It verifies cleanup
+  under low and optimized MSVC.
 - The generated-Fairy quickstart covers root/trailing/file rejection, exact four-object success,
   exact missing failure, one-open-child sharing failure with zero progress, close, retry, and exact
   two-object cleanup under low and optimized MSVC.
