@@ -489,3 +489,106 @@ pub fn i32 check_create_dir_all(
         case .err(_) : { 287 }
     } };
 }
+
+@effects(filesystem)
+fn i32 seed_copy_source(fs::File input) {
+    var fs::File file = input;
+    let ref u8[] bytes = b"Copy bytes";
+    let i32 write_code = switch (fs::write_all(ref mut file, bytes)) {
+        case .ok(written) : { if (written == 10) { 0 } else { 288 } }
+        case .err(_) : { 289 }
+    };
+    let i32 close_code = switch (fs::close(file)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 290 }
+    };
+    return if (write_code != 0) { write_code } else { close_code };
+}
+
+@effects(filesystem)
+fn i32 verify_copy_destination(fs::File input) {
+    var fs::File file = input;
+    var u8[10] buffer = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    let i32 read_code = switch (fs::read_exact(ref mut file, ref mut buffer)) {
+        case .ok(read) : {
+            if (read == 10 &&
+                buffer[0] == 67 && buffer[1] == 111 && buffer[2] == 112 &&
+                buffer[3] == 121 && buffer[4] == 32 && buffer[5] == 98 &&
+                buffer[6] == 121 && buffer[7] == 116 && buffer[8] == 101 &&
+                buffer[9] == 115) { 0 } else { 291 }
+        }
+        case .err(_) : { 292 }
+    };
+    let i32 close_code = switch (fs::close(file)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 293 }
+    };
+    return if (read_code != 0) { read_code } else { close_code };
+}
+
+@effects(filesystem)
+pub fn i32 check_copy_file_bytes(
+    ref CStr source,
+    ref CStr destination,
+    ref CStr missing_source,
+    ref CStr missing_destination
+) {
+    let i32 seed_code = switch (fs::create_truncate(source)) {
+        case .ok(file) : { seed_copy_source(file) }
+        case .err(_) : { 294 }
+    };
+    let i32 copy_code = if (seed_code != 0) {
+        seed_code
+    } else { switch (fs::copy_file_bytes(source, destination)) {
+        case .ok(copied) : { if (copied == 10) { 0 } else { 295 } }
+        case .err(_) : { 296 }
+    } };
+    let i32 collision_code = if (copy_code != 0) {
+        copy_code
+    } else { switch (fs::copy_file_bytes(source, destination)) {
+        case .ok(_) : { 297 }
+        case .err(error) : {
+            if (fs::error_status(error) == 1 &&
+                fs::error_os_code(error) == 80 &&
+                fs::error_completed(error) == 0) { 0 } else { 298 }
+        }
+    } };
+    let i32 bytes_code = if (collision_code != 0) {
+        collision_code
+    } else { switch (fs::open_read(destination)) {
+        case .ok(file) : { verify_copy_destination(file) }
+        case .err(_) : { 299 }
+    } };
+    let i32 missing_code = if (bytes_code != 0) {
+        bytes_code
+    } else { switch (fs::copy_file_bytes(missing_source, missing_destination)) {
+        case .ok(_) : { 300 }
+        case .err(error) : {
+            if (fs::error_status(error) == 1 &&
+                fs::error_os_code(error) == 2 &&
+                fs::error_completed(error) == 0) { 0 } else { 301 }
+        }
+    } };
+    let i32 missing_destination_code = if (missing_code != 0) {
+        missing_code
+    } else { switch (fs::open_read(missing_destination)) {
+        case .ok(file) : { close_after_path_open_error(file, 302) }
+        case .err(error) : {
+            if (fs::error_status(error) == 1 &&
+                fs::error_os_code(error) == 2 &&
+                fs::error_completed(error) == 0) { 0 } else { 303 }
+        }
+    } };
+    let i32 destination_cleanup_code = if (missing_destination_code != 0) {
+        missing_destination_code
+    } else { switch (fs::remove_file(destination)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 304 }
+    } };
+    return if (destination_cleanup_code != 0) {
+        destination_cleanup_code
+    } else { switch (fs::remove_file(source)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 305 }
+    } };
+}

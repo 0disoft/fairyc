@@ -933,6 +933,14 @@ collision, exact later invalid-name failure, retained partial prefixes, and expl
 Recursive deletion, rollback, device namespaces, drive-relative paths, explicit permissions,
 portable Unicode paths, durability, and Linux public linkage remain later gates.
 
+ADR 0297 extends the SDK to `0.0.0-stage0.34` with
+`copy_file_bytes(ref CStr, ref CStr) -> Result<usize, FileError>`. It validates both paths before
+effects, opens the source and a `CREATE_NEW` destination exclusively, and copies only bytes through
+a fixed 65,536-byte buffer. Raw and generated-Fairy low/optimized MSVC execution proves exact
+multi-window completion, destination-collision preservation, missing-source no-create behavior,
+live-source sharing failure, exact bytes, and cleanup. Metadata copy, atomic publication,
+cancellation, portable links and paths, durability, and Linux public linkage remain later gates.
+
 ADR 0268 closes the discovery side of exact test selection with
 `fairyc test --list [--locked]`. The command compiler-admits the complete selected-package test overlay and
 prints canonical identities without running the interpreter, backend, toolchain, or a test process.

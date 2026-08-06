@@ -366,6 +366,12 @@ file-only no-replace rename without cross-volume copy, and ADR 0293 adds non-rec
 directory creation plus empty-directory removal under SDK `0.0.0-stage0.31`. The public slice remains
 Windows MSVC-only and does
 not claim portable Unicode paths, general uninitialized-memory access, a supported target, or public layout.
+
+ADR 0294 adds directory-only no-replace rename, ADR 0296 adds recursive parent creation with
+pre-effect lexical validation, and ADR 0297 moves the SDK to `0.0.0-stage0.34` with
+`std::fs::copy_file_bytes`. The copy holds exclusive source and `CREATE_NEW` destination handles,
+never replaces an existing destination, returns exact copied bytes, and preserves any completed
+destination prefix on a later failure without implying metadata copy, atomicity, or durability.
 The source FFI slice accepts `i32`, `u8`, `u32`, `usize`, all sixteen exact transport-only TargetSpec
 C scalars, admitted raw-pointer parameters or results, and nonempty acyclic `@repr(C)` struct
 results. A declaration may keep its Fairy name or use one nonempty `@link_name("external_symbol")`;

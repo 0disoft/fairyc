@@ -132,6 +132,10 @@ unsafe extern C fn raw_file_result directory_rename_raw(ptr u8 source, ptr u8 de
 unsafe extern C fn raw_file_result file_rename_raw(ptr u8 source, ptr u8 destination) ;
 
 @effects(filesystem)
+@link_name("fy_std_windows_file_copy_bytes_v0")
+unsafe extern C fn raw_file_result file_copy_bytes_raw(ptr u8 source, ptr u8 destination) ;
+
+@effects(filesystem)
 @link_name("fy_std_windows_file_read_v0")
 unsafe extern C fn raw_file_result file_read_raw(ptr mut void file, ptr mut u8 buffer, usize length) ;
 
@@ -403,6 +407,20 @@ pub fn Result<i32, FileError> rename_file(ref CStr source, ref CStr destination)
     };
     return if (result.status == 0) {
         .ok(0)
+    } else {
+        .err(file_error(result))
+    };
+}
+
+/// Copies one existing file's bytes into a newly created destination without replacing it.
+/// A later failure preserves the completed destination prefix reported by FileError.
+@effects(filesystem)
+pub fn Result<usize, FileError> copy_file_bytes(ref CStr source, ref CStr destination) {
+    let raw_file_result result = unsafe {
+        file_copy_bytes_raw(source as ptr u8, destination as ptr u8)
+    };
+    return if (result.status == 0) {
+        .ok(result.count)
     } else {
         .err(file_error(result))
     };

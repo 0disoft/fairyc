@@ -525,6 +525,111 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_rename_v0(
     return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_OK_V0, ERROR_SUCCESS, 0);
 }
 
+struct fy_std_windows_file_result_v0 fy_std_windows_file_copy_bytes_v0(
+    const uint8_t *source,
+    const uint8_t *destination
+) {
+    WCHAR wide_source[FY_STD_WINDOWS_PATH_CAPACITY_V0];
+    uint32_t source_status = fy_std_windows_path_v0(source, wide_source);
+    if (source_status != FY_STD_WINDOWS_FILE_OK_V0) {
+        return fy_std_windows_file_result_v0(source_status, ERROR_SUCCESS, 0);
+    }
+    WCHAR wide_destination[FY_STD_WINDOWS_PATH_CAPACITY_V0];
+    uint32_t destination_status = fy_std_windows_path_v0(destination, wide_destination);
+    if (destination_status != FY_STD_WINDOWS_FILE_OK_V0) {
+        return fy_std_windows_file_result_v0(destination_status, ERROR_SUCCESS, 0);
+    }
+    HANDLE source_handle = CreateFileW(
+        wide_source,
+        GENERIC_READ,
+        0,
+        NULL,
+        OPEN_EXISTING,
+        FILE_ATTRIBUTE_NORMAL,
+        NULL
+    );
+    if (source_handle == INVALID_HANDLE_VALUE) {
+        return fy_std_windows_file_result_v0(
+            FY_STD_WINDOWS_FILE_IO_ERROR_V0,
+            GetLastError(),
+            0
+        );
+    }
+    HANDLE destination_handle = CreateFileW(
+        wide_destination,
+        GENERIC_WRITE,
+        0,
+        NULL,
+        CREATE_NEW,
+        FILE_ATTRIBUTE_NORMAL,
+        NULL
+    );
+    if (destination_handle == INVALID_HANDLE_VALUE) {
+        DWORD error = GetLastError();
+        (void)CloseHandle(source_handle);
+        return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_IO_ERROR_V0, error, 0);
+    }
+    uint8_t buffer[UINT32_C(65536)];
+    size_t total = 0;
+    for (;;) {
+        DWORD read = 0;
+        if (!ReadFile(source_handle, buffer, (DWORD)sizeof buffer, &read, NULL)) {
+            DWORD error = GetLastError();
+            (void)CloseHandle(destination_handle);
+            (void)CloseHandle(source_handle);
+            return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_IO_ERROR_V0, error, total);
+        }
+        if (read == 0) {
+            break;
+        }
+        DWORD offset = 0;
+        while (offset < read) {
+            DWORD written = 0;
+            if (!WriteFile(
+                    destination_handle,
+                    buffer + offset,
+                    read - offset,
+                    &written,
+                    NULL
+                )) {
+                DWORD error = GetLastError();
+                total += (size_t)written;
+                (void)CloseHandle(destination_handle);
+                (void)CloseHandle(source_handle);
+                return fy_std_windows_file_result_v0(
+                    FY_STD_WINDOWS_FILE_IO_ERROR_V0,
+                    error,
+                    total
+                );
+            }
+            if (written == 0) {
+                (void)CloseHandle(destination_handle);
+                (void)CloseHandle(source_handle);
+                return fy_std_windows_file_result_v0(
+                    FY_STD_WINDOWS_FILE_NO_PROGRESS_V0,
+                    ERROR_SUCCESS,
+                    total
+                );
+            }
+            offset += written;
+            total += (size_t)written;
+        }
+    }
+    if (!CloseHandle(destination_handle)) {
+        DWORD error = GetLastError();
+        (void)CloseHandle(source_handle);
+        return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_IO_ERROR_V0, error, total);
+    }
+    if (!CloseHandle(source_handle)) {
+        return fy_std_windows_file_result_v0(
+            FY_STD_WINDOWS_FILE_IO_ERROR_V0,
+            GetLastError(),
+            total
+        );
+    }
+    return fy_std_windows_file_result_v0(FY_STD_WINDOWS_FILE_OK_V0, ERROR_SUCCESS, total);
+}
+
 struct fy_std_windows_file_result_v0 fy_std_windows_file_read_v0(
     void *file_storage,
     uint8_t *buffer,

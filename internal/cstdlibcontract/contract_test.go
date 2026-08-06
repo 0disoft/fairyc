@@ -128,6 +128,7 @@ func TestAdmittedForTargetKeepsWindowsFileTargetBound(t *testing.T) {
 	for _, symbol := range []string{
 		"fy_std_windows_file_open_v0",
 		"fy_std_windows_file_remove_v0",
+		"fy_std_windows_file_copy_bytes_v0",
 		"fy_std_windows_directory_create_v0",
 		"fy_std_windows_directory_ensure_v0",
 		"fy_std_windows_directory_remove_v0",
@@ -188,6 +189,7 @@ func TestWindowsMSVCComponentsForSymbolsAdmitsOnlyProvenRuntimeSlice(t *testing.
 		"fy_std_windows_stdout_write_all_v0",
 		"fy_std_windows_file_open_v0",
 		"fy_std_windows_file_remove_v0",
+		"fy_std_windows_file_copy_bytes_v0",
 		"fy_std_windows_directory_create_v0",
 		"fy_std_windows_directory_ensure_v0",
 		"fy_std_windows_directory_remove_v0",

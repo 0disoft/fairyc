@@ -609,7 +609,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
-  The compiler-bundled SDK `0.0.0-stage0.33` exposes
+  The compiler-bundled SDK `0.0.0-stage0.34` exposes
   `std::io::write(ref str) -> Result<usize, ConsoleError>` and a matching `write_stderr` operation
   for text, plus `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` for exact binary output.
   All four declare `console`, keep raw pointers and target linkage private, append no newline,
@@ -690,6 +690,12 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   observed directory source, returns exact target failures, and does not close a live File owner.
   The attribute observation is not a handle-pinned identity or authorization check against external
   concurrent path replacement. Success does not claim a final-directory durability barrier.
+  `copy_file_bytes(ref CStr source, ref CStr destination)` holds one exclusive source handle and
+  one exclusive newly created destination handle, copies only bytes through a fixed 65,536-byte
+  stack buffer, and returns the exact copied count. It validates both paths before effects and never
+  replaces an existing destination. A later read, write, or close failure preserves the completed
+  destination prefix reported in `FileError.completed`. It does not copy metadata, flush storage,
+  publish atomically, follow a portable link policy, or claim directory-entry durability.
   `create_dir(ref CStr path)` creates exactly one final directory component without creating missing
   parents. `remove_dir(ref CStr path)` removes exactly one existing empty directory without
   enumerating or deleting children. Both return zero on success, preserve exact target failures,
@@ -887,7 +893,7 @@ argument, output, and exit-code contract. It emits no native code.
 
 ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
-version, source digest, and lock fields. SDK `0.0.0-stage0.33` exports ADR 0250's move-only,
+version, source digest, and lock fields. SDK `0.0.0-stage0.34` exports ADR 0250's move-only,
 fallibly created `std::alloc::Arena` with automatic cleanup and exact allocation status,
 while ADR 0251 makes compiler-known placement return `Result<ref T, AllocError>` under language `/8`.
 ADR 0246's public safe `std::bytes::Buffer`,
@@ -903,6 +909,7 @@ source-level read from the current cursor through EOF, ADR 0291's exact one-file
 file-only no-replace rename without cross-volume copy fallback, ADR 0293's one-level directory
 creation and exact empty-directory removal, ADR 0294's directory-only no-replace rename, ADR 0296's
 pre-effect validation and recursive parent creation with explicit partial-prefix preservation,
+ADR 0297's exclusive no-replace file byte copy with explicit completed-prefix preservation,
 ADR 0205's `std::io::write(ref str) -> Result<usize, ConsoleError>`, and ADR 0209's matching
 `write_stderr` operation, ADR 0210's matching immutable byte-view output operations, and ADR 0211's
 `read_stdin(ref mut u8[]) -> Result<usize, ConsoleReadError>`, plus ADR 0215's allocation-free
