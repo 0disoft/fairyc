@@ -609,7 +609,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
-  The compiler-bundled SDK `0.0.0-stage0.36` exposes
+  The compiler-bundled SDK `0.0.0-stage0.37` exposes
   `std::io::write(ref str) -> Result<usize, ConsoleError>` and a matching `write_stderr` operation
   for text, plus `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` for exact binary output.
   All four declare `console`, keep raw pointers and target linkage private, append no newline,
@@ -664,6 +664,13 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   unchanged as the `Result` err payload; an empty Buffer becomes an empty String. The checked-in
   safe quickstart executes the valid, invalid, and empty arms under both Windows profiles.
   `text::copy` remains the copy-required borrowed-text path.
+  ADR 0302 additionally exposes
+  `std::text::as_bytes(ref str) -> ref u8[]`. It constructs an immutable byte view in constant time
+  without allocation, copy, validation, or a runtime call, and retains the exact input borrow
+  origin. The checked-in safe quickstart covers ASCII, multibyte UTF-8, appended String, and empty
+  views under both Windows profiles; package-aware Flow rejects moving the owning String before a
+  derived view's last use. Mutable bytes, capacity, raw parts, implicit conversion, and a public
+  view ABI remain excluded.
   ADR 0264 additionally exposes the Windows MSVC `std::fs` slice. `File` is move-only, carries
   `filesystem` cleanup authority, and is constructed only through `create_truncate(ref CStr)`,
   `create_new(ref CStr)`, `open_or_create(ref CStr)`, `open_append(ref CStr)`,
@@ -898,12 +905,13 @@ argument, output, and exit-code contract. It emits no native code.
 
 ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
-version, source digest, and lock fields. SDK `0.0.0-stage0.36` exports ADR 0250's move-only,
+version, source digest, and lock fields. SDK `0.0.0-stage0.37` exports ADR 0250's move-only,
 fallibly created `std::alloc::Arena` with automatic cleanup and exact allocation status,
 while ADR 0251 makes compiler-known placement return `Result<ref T, AllocError>` under language `/8`.
 ADR 0246's public safe `std::bytes::Buffer` and ADR 0299's fallible single-byte append,
 ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free
-`std::text::validate_utf8`, ADR 0263's zero-copy `std::text::from_buffer`, ADR 0264's Windows MSVC
+`std::text::validate_utf8`, ADR 0302's allocation-free immutable `std::text::as_bytes`, ADR 0263's
+zero-copy `std::text::from_buffer`, and ADR 0264's Windows MSVC
 `std::fs::File` ownership and byte-I/O surface, ADR 0269's absolute position/seek surface, ADR 0270's
 shared file-size observation, ADR 0271's existing-file read/write open, ADR 0272's cursor-preserving
 file-length change, ADR 0274's non-truncating open-or-create, ADR 0275's exclusive create,

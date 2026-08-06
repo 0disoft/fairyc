@@ -11,6 +11,7 @@ import (
 	"github.com/0disoft/fairyc/internal/packagecontent"
 	"github.com/0disoft/fairyc/internal/packagegraph"
 	"github.com/0disoft/fairyc/internal/sdkstdlib"
+	"github.com/0disoft/fairyc/internal/semantic"
 )
 
 func TestSemanticInputReachesVerifiedCompiler(t *testing.T) {
@@ -227,6 +228,41 @@ fn i32 main() {
 	}
 	if !result.Verified {
 		t.Fatalf("std::io workspace did not reach verified MIR: phase=%s failed=%s diagnostics=%v unsupported=%v", result.Semantic.CompletedThrough, result.Semantic.FailedPhase, result.Semantic.Diagnostics, result.Semantic.Unsupported)
+	}
+}
+
+func TestBundledStandardLibraryTextByteViewRetainsOwnerLoan(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writePackage(t, root, ".", rootManifest(""), map[string]string{
+		"src/main.fy": `module main;
+
+import std::text as text;
+
+fn i32 consume(text::String value) { return 0; }
+
+fn i32 reject_move(text::String value) {
+    let ref str view = text::string_as_str(ref value);
+    let ref u8[] bytes = text::as_bytes(view);
+    let i32 consumed = consume(value);
+    return if (bytes[0] == 70) { consumed } else { 1 };
+}
+`,
+	})
+	workspace, err := Load(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	input, err := workspace.SemanticInput()
+	if err != nil {
+		t.Fatal(err)
+	}
+	result, err := compiler.CheckPackages(input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Semantic.FailedPhase != semantic.PhaseFlow || len(result.Semantic.Diagnostics) != 1 || result.Semantic.Diagnostics[0].Code != "E2105" {
+		t.Fatalf("std::text byte-view owner move = %+v", result.Semantic)
 	}
 }
 

@@ -74,14 +74,14 @@ The initial library surface is:
 ```text
 std::alloc  SystemHeap, Arena, AllocError
 std::bytes  Buffer with fallible bulk and single-byte append
-std::text   String, CStr, CString, explicit allocation-free UTF-8 validation, and zero-copy Buffer-to-String conversion
+std::text   String, CStr, CString, allocation-free UTF-8 validation and immutable text-byte views, and zero-copy Buffer-to-String conversion
 std::fs     Windows MSVC File ownership, partial/exact byte I/O, owned-Buffer append/read-through-EOF, file/directory create/open/remove and file rename, existing-file updates, length changes, size, kind, identity, absolute positioning, sync, and close
 std::io     exact stdout/stderr byte writes, decimal i32 output, and one bounded stdin byte read
 std::process effect-free argument count and exact UTF-8 argument copy
 std::c      C scalar types and raw wrapper helpers
 ```
 
-The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.36` exports ADR 0250's public safe `std::alloc::Arena` creation and cleanup, ADR 0246's public safe `std::bytes::Buffer`, ADR 0299's fallible `std::bytes::append_byte`, ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free `std::text::validate_utf8`, ADR 0263's zero-copy `std::text::from_buffer` with the original Buffer returned on invalid UTF-8, ADR 0264's Windows MSVC `std::fs::File` ownership and byte-I/O surface, ADR 0269's absolute position and start-based seek operations, ADR 0270's shared file-size observation, ADR 0271's existing-file read/write open, ADR 0272's cursor-preserving file-length change, ADR 0274's non-truncating open-or-create, ADR 0275's exclusive create, ADR 0276's append-only open, ADR 0277's same-handle file-kind observation, ADR 0278's exact-read operation, ADR 0279's bounded file-identity observation, ADR 0281's exhaustive target-neutral `FileKind` enum, ADR 0285's one-call partial Windows file write, ADR 0288's bounded owned-Buffer read append, ADR 0290's source-level read through EOF, ADR 0291's exact one-file removal, ADR 0292's file-only no-replace rename, ADR 0293's one-level directory lifecycle, ADR 0294's directory-only no-replace rename, ADR 0296's recursive parent creation, ADR 0297's exclusive no-replace file byte copy, ADR 0298's path-kind snapshot, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, ADR 0210's matching immutable byte-view output operations, ADR 0211's bounded mutable-byte-view stdin read, ADR 0215's allocation-free decimal `i32` output, ADR 0262's allocation-free decimal `u32`/`usize` and ASCII `bool` output, and ADR 0261's effect-free `std::process` argument surface; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
+The standard library is supplied as an explicit package instance under `docs/package/package-graph-v0.md`. ADR 0147 embeds the current Stage 0 source package in the compiler and injects it only for actual `std` or `std::*` imports. SDK `0.0.0-stage0.37` exports ADR 0250's public safe `std::alloc::Arena` creation and cleanup, ADR 0246's public safe `std::bytes::Buffer`, ADR 0299's fallible `std::bytes::append_byte`, ADR 0247's public safe `std::text::String` and `CString`, ADR 0248's allocation-free `std::text::validate_utf8`, ADR 0302's allocation-free immutable `std::text::as_bytes`, ADR 0263's zero-copy `std::text::from_buffer` with the original Buffer returned on invalid UTF-8, ADR 0264's Windows MSVC `std::fs::File` ownership and byte-I/O surface, ADR 0269's absolute position and start-based seek operations, ADR 0270's shared file-size observation, ADR 0271's existing-file read/write open, ADR 0272's cursor-preserving file-length change, ADR 0274's non-truncating open-or-create, ADR 0275's exclusive create, ADR 0276's append-only open, ADR 0277's same-handle file-kind observation, ADR 0278's exact-read operation, ADR 0279's bounded file-identity observation, ADR 0281's exhaustive target-neutral `FileKind` enum, ADR 0285's one-call partial Windows file write, ADR 0288's bounded owned-Buffer read append, ADR 0290's source-level read through EOF, ADR 0291's exact one-file removal, ADR 0292's file-only no-replace rename, ADR 0293's one-level directory lifecycle, ADR 0294's directory-only no-replace rename, ADR 0296's recursive parent creation, ADR 0297's exclusive no-replace file byte copy, ADR 0298's path-kind snapshot, ADR 0205's exact `std::io::write` surface, ADR 0209's matching `write_stderr` surface, ADR 0210's matching immutable byte-view output operations, ADR 0211's bounded mutable-byte-view stdin read, ADR 0215's allocation-free decimal `i32` output, ADR 0262's allocation-free decimal `u32`/`usize` and ASCII `bool` output, and ADR 0261's effect-free `std::process` argument surface; the rest of the list remains a planned boundary backed in parts by provisional target C components and examples. The `std::*` module prefix does not create an implicit prelude or authorize host installation discovery.
 
 Built-in `Option`, `Result`, slices, `str`, and `CStr` get compiler-known view semantics; library modules provide operations over them.
 
@@ -336,7 +336,7 @@ a private non-null `ref str` sentinel, and preserves the existing pointer-only `
 is superseded as the user-facing entry by ADR 0247's SDK module; it remains independent historical
 evidence and does not define a public layout.
 
-SDK `0.0.0-stage0.36` retains move-only `String` and `CString` from `std::text`. `copy` and
+SDK `0.0.0-stage0.37` retains move-only `String` and `CString` from `std::text`. `copy` and
 `cstring_from_text` construct canonical owners fallibly; `append` preserves the existing String on
 failure. `string_len`, `string_is_empty`, `cstring_len`, and `cstring_is_empty` expose byte metadata,
 with CString length excluding its required terminator. `string_as_str` and `cstring_as_cstr` return
@@ -346,6 +346,12 @@ status fields. ADR 0248 additionally exposes
 no allocation or copy, while invalid input reports text status `2` and allocation status `0`. Raw
 storage, capacity, mutable text bytes, implicit conversions, formatting, locale, Unicode
 normalization, lossy decoding, and streaming validation remain outside the public surface.
+
+`as_bytes(ref str) -> ref u8[]` reinterprets the same valid UTF-8 storage as immutable bytes in
+constant time. It allocates, copies, scans, and calls no runtime symbol. The result retains the
+input borrow origin, so a view derived from `string_as_str(ref owner)` keeps that String shared-
+borrowed until its last use. Empty text uses the existing private non-null sentinel normalization.
+The operation exposes neither capacity nor mutable bytes and performs no lifetime extension.
 
 `from_buffer` converts an owned `std::bytes::Buffer` into a `String` without allocation or copy
 when the initialized bytes are valid UTF-8: the same allocation ownership moves into the String.
@@ -357,7 +363,7 @@ path.
 
 `examples/std_text_quickstart` imports only that safe module. Its Windows development and release
 builds execute valid nonempty multibyte validation, invalid-byte rejection with zero allocation
-status, String copy and append, empty String, nonempty and empty CString, owner-bound views,
+status, exact ASCII/multibyte/appended/empty immutable byte views, String copy and append, empty String, nonempty and empty CString, owner-bound views,
 interior-NUL rejection, and implicit cleanup with native result 42.
 
 A `c"..."` literal provides allocation-free immutable `ref CStr` storage with one compiler-appended trailing NUL and rejects a decoded interior NUL. The implemented C path emits exact `static const uint8_t[]` bytes, deduplicates equal storage, and permits only an explicit unsafe conversion to immutable `ptr u8` for the direct-literal raw FFI form. It is source syntax, not a runtime constructor.

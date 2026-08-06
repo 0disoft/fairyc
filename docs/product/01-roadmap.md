@@ -769,6 +769,14 @@ Buffer unchanged; an empty Buffer becomes an empty String. Generic conversions, 
 byte-to-text conversion, text indexing or slicing, and a public view ABI remain separate
 decisions.
 
+ADR 0302 extends the SDK to `0.0.0-stage0.37` with
+`std::text::as_bytes(ref str) -> ref u8[]`. The free function reuses the compiler-known immutable
+raw-parts view, retains the exact text borrow origin, and performs no allocation, copy, validation,
+scan, effect, or runtime call. The safe quickstart proves exact ASCII, multibyte UTF-8, appended
+String, and empty views under low and optimized MSVC; a package-aware negative proves `E2105` when
+the owning String moves before the byte view's last use. Mutable text bytes, implicit conversions,
+Unicode indexing, and public view ABI remain separate.
+
 ADR 0264 extends the SDK to `0.0.0-stage0.14` with the first public `std::fs` slice on
 `x86_64-windows-msvc`: move-only File ownership, typed status/OS-code/completed-byte failures,
 create/truncate and read opens, bounded read, write-all, explicit sync, consuming close, and

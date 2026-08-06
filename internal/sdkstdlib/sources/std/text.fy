@@ -131,6 +131,13 @@ pub fn Result<ref str, TextError> validate_utf8(ref u8[] value) {
         })
     } else {
         .err(invalid_utf8_error())
+};
+}
+
+/// Borrows valid UTF-8 text as the same immutable bytes without allocation or copying.
+pub fn ref u8[] as_bytes(ref str value) {
+    return unsafe {
+        byte_slice::from_raw_parts(value, value as ptr u8, value.len)
     };
 }
 

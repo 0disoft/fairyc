@@ -311,6 +311,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0299-public-buffer-single-byte-append.md`: adds C-friendly `std::bytes::append_byte` by reusing the existing fallible Buffer append primitive, with generated-Fairy success and forced low/optimized MSVC allocation-failure evidence under SDK `0.0.0-stage0.36` and no runtime ABI change.
 - `0300-stable-test-source-locations.md`: adds opt-in exact-current source anchors to stable test listing and execution, with portable paths, package and byte identities, v3 JSON schemas, unchanged legacy bytes, and low/optimized native evidence.
 - `0301-stable-test-file-selection.md`: adds exact portable workspace-relative test-file selection to listing and execution, including zero-test files, strict fail-closed matching, complete-overlay admission, and low/optimized native evidence.
+- `0302-public-allocation-free-text-byte-view.md`: adds `std::text::as_bytes(ref str) -> ref u8[]` with exact owner-bound immutable bytes, no allocation/copy/runtime symbol, `E2105` owner protection, low/optimized native evidence, and SDK `0.0.0-stage0.37`.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

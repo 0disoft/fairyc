@@ -8,7 +8,7 @@ import (
 
 func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	t.Parallel()
-	if Version != "0.0.0-stage0.36" {
+	if Version != "0.0.0-stage0.37" {
 		t.Fatalf("Version = %q", Version)
 	}
 	if LanguageRevision != "fairyc-language/10" {
@@ -42,11 +42,19 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	copyFileBytesPublic := false
 	pathKindPublic := false
 	appendBytePublic := false
+	asBytesPublic := false
 	for _, source := range definition.Sources {
 		if source.Path == "std/bytes.fy" {
 			for _, function := range source.Module.Functions {
 				if function.Name == "append_byte" {
 					appendBytePublic = function.Public
+				}
+			}
+		}
+		if source.Path == "std/text.fy" {
+			for _, function := range source.Module.Functions {
+				if function.Name == "as_bytes" {
+					asBytesPublic = function.Public
 				}
 			}
 		}
@@ -111,5 +119,8 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	}
 	if !appendBytePublic {
 		t.Fatal("std::bytes::append_byte is not public")
+	}
+	if !asBytesPublic {
+		t.Fatal("std::text::as_bytes is not public")
 	}
 }
