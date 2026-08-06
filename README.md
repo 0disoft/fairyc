@@ -374,6 +374,9 @@ pre-effect lexical validation, ADR 0297 adds no-replace byte copy, and ADR 0298 
 ADR 0302 moves the SDK to `0.0.0-stage0.37` with
 `std::text::as_bytes(ref str) -> ref u8[]`, an allocation-free immutable byte view that preserves
 the exact input borrow origin and UTF-8 bytes without exposing raw storage.
+ADR 0303 moves the SDK to `0.0.0-stage0.38` with allocation-free
+`std::io::write_stderr_i32`/`write_stderr_u32`/`write_stderr_usize` and ASCII
+`write_stderr_bool`, preserving exact completed-prefix failures and adding no bool-specific symbol.
 The query distinguishes ordinary files, directories, and other observed attributes without opening
 an owner, but its snapshot is not stable identity, authorization, containment, or a race-free
 precheck. `std::fs::copy_file_bytes` holds exclusive source and `CREATE_NEW` destination handles,

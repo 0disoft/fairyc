@@ -27,7 +27,7 @@ surface without changing the package-discovery boundary established here.
    generation.
 2. The current SDK identity is `fairyc-sdk-stdlib/0`; it requires language
    `fairyc-language/10`, runtime ABI `fairyc-runtime/0`, package UID `fairyc.std`, and version
-   `0.0.0-stage0.37` after ADR 0302. Earlier SDK and language-pin cutovers remain recorded by their
+   `0.0.0-stage0.38` after ADR 0303. Earlier SDK and language-pin cutovers remain recorded by their
    owning ADRs.
 3. The workspace loader injects one `standard-library` node only when a root-reachable package
    imports `std` or `std::*`. Each such package receives a direct dependency with the reserved
@@ -42,7 +42,8 @@ surface without changing the package-discovery boundary established here.
    0211's `read_stdin(ref mut u8[]) -> Result<usize, ConsoleReadError>` and ADR 0215's
    allocation-free decimal `write_i32(i32) -> Result<usize, ConsoleError>`, ADR 0246's safe byte
    Buffer, ADR 0247's owned text, ADR 0248's allocation-free byte-to-text validation, and ADR 0302's
-   allocation-free immutable text-to-byte view. It does
+   allocation-free immutable text-to-byte view, and ADR 0303's allocation-free scalar stderr
+   output. It does
    not expose `SystemHeap`, Region allocation methods, public layouts, general formatting,
    text or line input, or generic collection APIs.
 6. `fairy.lock` records `sourceKind: "sdk"`, empty `localPath`, exact `sdkIdentity`, exact

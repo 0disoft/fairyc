@@ -759,8 +759,15 @@ ADR 0262 extends the SDK to `0.0.0-stage0.12` with
 `write_u32(u32) -> Result<usize, ConsoleError>`, `write_usize(usize) -> Result<usize, ConsoleError>`,
 and `write_bool(bool) -> Result<usize, ConsoleError>`. The unsigned widths reuse one private
 back-to-front decimal helper per target, and `write_bool` reuses the existing `write` path with no
-new raw symbol. Floating-point conversion, padding, bases, locale, implicit newlines, `u64`/`i64`
-output, and stderr numeric helpers remain separate decisions.
+new raw symbol. Floating-point conversion, padding, bases, locale, implicit newlines, and `u64`/`i64`
+output remain separate decisions.
+
+ADR 0303 extends the SDK to `0.0.0-stage0.38` with target-neutral
+`write_stderr_i32`, `write_stderr_u32`, `write_stderr_usize`, and `write_stderr_bool`. Numeric
+operations reuse the corresponding stack-only decimal formatter with the stderr stream selected;
+bool reuses `write_stderr` and adds no raw symbol. Exact completed-prefix failures remain visible
+through `ConsoleError`, and the generated-Fairy quickstart executes exact stdout and stderr bytes at
+both Windows MSVC profiles.
 
 ADR 0263 extends the SDK to `0.0.0-stage0.13` with
 `std::text::from_buffer(bytes::Buffer) -> Result<String, bytes::Buffer>`. Valid UTF-8 moves the

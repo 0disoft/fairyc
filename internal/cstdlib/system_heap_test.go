@@ -417,7 +417,7 @@ func TestLinuxConsoleSourcesPreserveWriteProgressAndReadEOF(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, required := range []string{
-		"fy_std_stdout_write_all_v0", "fy_std_stdout_write_i32_v0", "fy_std_stderr_write_all_v0", "STDOUT_FILENO", "STDERR_FILENO",
+		"fy_std_stdout_write_all_v0", "fy_std_stdout_write_i32_v0", "fy_std_stderr_write_all_v0", "fy_std_stderr_write_i32_v0", "fy_std_stderr_write_u32_v0", "fy_std_stderr_write_usize_v0", "STDOUT_FILENO", "STDERR_FILENO",
 		"fy_std_stdin_read_v0", "read(STDIN_FILENO, data, requested)",
 		"SSIZE_MAX", "errno == EINTR", "errno == EBADF",
 		"result.written += (size_t)completed",
@@ -432,7 +432,7 @@ func TestLinuxConsoleSourcesPreserveWriteProgressAndReadEOF(t *testing.T) {
 		"close(descriptor)", "STDOUT_FILENO", "STDERR_FILENO",
 		"pipe(pipe_descriptors)", "memcmp(buffer, payload, sizeof(payload))",
 		"end.read != (size_t)0", "unavailable.status != UINT32_C(2)",
-		"fy_std_stdout_write_i32_v0(INT32_MIN)", "memcmp(observed, expected, sizeof(observed))",
+		"fy_std_stdout_write_i32_v0(INT32_MIN)", "fy_std_stderr_write_i32_v0(INT32_MIN)", "fy_std_stderr_write_usize_v0((uintptr_t)UINT64_MAX)", "memcmp(observed, expected, sizeof(observed))",
 	} {
 		if !strings.Contains(probe, required) {
 			t.Errorf("Linux console probe is missing %q", required)
@@ -659,9 +659,9 @@ func TestSourceForSymbolsSelectsMinimalDependencyClosure(t *testing.T) {
 		},
 		{
 			name:     "Linux console only",
-			symbols:  []string{"fy_std_stdout_write_all_v0", "fy_std_stdout_write_i32_v0", "fy_std_stderr_write_all_v0", "fy_std_stdin_read_v0"},
+			symbols:  []string{"fy_std_stdout_write_all_v0", "fy_std_stdout_write_i32_v0", "fy_std_stderr_write_all_v0", "fy_std_stderr_write_i32_v0", "fy_std_stderr_write_u32_v0", "fy_std_stderr_write_usize_v0", "fy_std_stdin_read_v0"},
 			prefix:   "#define _POSIX_C_SOURCE 200809L\n",
-			required: []string{"fy_std_stdout_write_all_v0", "fy_std_stdout_write_i32_v0", "fy_std_stderr_write_all_v0", "fy_std_stdin_read_v0", "write(descriptor", "read(STDIN_FILENO"},
+			required: []string{"fy_std_stdout_write_all_v0", "fy_std_stdout_write_i32_v0", "fy_std_stderr_write_all_v0", "fy_std_stderr_write_i32_v0", "fy_std_stderr_write_u32_v0", "fy_std_stderr_write_usize_v0", "fy_std_stdin_read_v0", "write(descriptor", "read(STDIN_FILENO"},
 			forbidden: []string{
 				"fy_std_linux_file_open_v0", "fy_std_system_heap_allocate_v0",
 			},

@@ -60,6 +60,7 @@ func runStdIoScalarQuickstartProof(root string) (int, error) {
 	workspaceRoot := filepath.Join(root, "examples", "std_io_scalar_quickstart")
 	artifactPath := filepath.Join(workspaceRoot, "build", "std-io-scalar-quickstart.exe")
 	expectedStdout := "0\n1\n4294967295\n0\n1\n18446744073709551615\ntrue\nfalse\n"
+	expectedStderr := "0\n-42\n-2147483648\n2147483647\n0\n4294967295\n0\n18446744073709551615\ntrue\nfalse\n"
 	profiles := []struct {
 		name       string
 		arguments  []string
@@ -86,7 +87,7 @@ func runStdIoScalarQuickstartProof(root string) (int, error) {
 		if _, err := pecoff.InspectAMD64Unwind(artifact); err != nil {
 			return 0, fmt.Errorf("inspect std::io scalar %s unwind data: %w", profile.name, err)
 		}
-		if err := executeExpectOutput(artifactPath, 0, expectedStdout, ""); err != nil {
+		if err := executeExpectOutput(artifactPath, 0, expectedStdout, expectedStderr); err != nil {
 			return 0, fmt.Errorf("execute std::io scalar %s artifact: %w", profile.name, err)
 		}
 	}

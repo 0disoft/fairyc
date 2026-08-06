@@ -561,6 +561,30 @@ func TestGeneratedFairyStdlibSourcesPassFullPipeline(t *testing.T) {
 			foreignSymbols: []string{"fy_std_stdout_write_all_v0"},
 		},
 		{
+			name: "io stderr scalar i32 used", manifest: "std_io_scalar_quickstart",
+			source:         "module main;\nimport std::io as io;\n@effects(console)\nfn i32 main() {\n    return switch (io::write_stderr_i32(-7)) {\n        case .ok(written) : { if (written == 2) { 0 } else { 1 } }\n        case .err(_) : { 1 }\n    };\n}\n",
+			expect:         []string{"fy_std_stderr_write_i32_v0"},
+			foreignSymbols: []string{"fy_std_stderr_write_i32_v0"},
+		},
+		{
+			name: "io stderr scalar u32 used", manifest: "std_io_scalar_quickstart",
+			source:         "module main;\nimport std::io as io;\n@effects(console)\nfn i32 main() {\n    return switch (io::write_stderr_u32(7)) {\n        case .ok(written) : { if (written == 1) { 0 } else { 1 } }\n        case .err(_) : { 1 }\n    };\n}\n",
+			expect:         []string{"fy_std_stderr_write_u32_v0"},
+			foreignSymbols: []string{"fy_std_stderr_write_u32_v0"},
+		},
+		{
+			name: "io stderr scalar usize used", manifest: "std_io_scalar_quickstart",
+			source:         "module main;\nimport std::io as io;\n@effects(console)\nfn i32 main() {\n    return switch (io::write_stderr_usize(7)) {\n        case .ok(written) : { if (written == 1) { 0 } else { 1 } }\n        case .err(_) : { 1 }\n    };\n}\n",
+			expect:         []string{"fy_std_stderr_write_usize_v0"},
+			foreignSymbols: []string{"fy_std_stderr_write_usize_v0"},
+		},
+		{
+			name: "io stderr scalar bool used", manifest: "std_io_scalar_quickstart",
+			source:         "module main;\nimport std::io as io;\n@effects(console)\nfn i32 main() {\n    return switch (io::write_stderr_bool(true)) {\n        case .ok(written) : { if (written == 4) { 0 } else { 1 } }\n        case .err(_) : { 1 }\n    };\n}\n",
+			expect:         []string{"fy_std_stderr_write_all_v0"},
+			foreignSymbols: []string{"fy_std_stderr_write_all_v0"},
+		},
+		{
 			name: "io scalar unused", manifest: "std_io_scalar_quickstart", source: "module main;\nfn i32 main() { return 42; }\n",
 			expect:         []string{},
 			foreignSymbols: []string{},

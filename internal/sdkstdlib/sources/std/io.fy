@@ -45,6 +45,18 @@ unsafe extern C fn raw_console_write_result stdout_write_usize_raw(usize value) 
 unsafe extern C fn raw_console_write_result stderr_write_all_raw(ptr u8 data, usize length) ;
 
 @effects(console)
+@link_name("fy_std_stderr_write_i32_v0")
+unsafe extern C fn raw_console_write_result stderr_write_i32_raw(i32 value) ;
+
+@effects(console)
+@link_name("fy_std_stderr_write_u32_v0")
+unsafe extern C fn raw_console_write_result stderr_write_u32_raw(u32 value) ;
+
+@effects(console)
+@link_name("fy_std_stderr_write_usize_v0")
+unsafe extern C fn raw_console_write_result stderr_write_usize_raw(usize value) ;
+
+@effects(console)
 @link_name("fy_std_stdin_read_v0")
 unsafe extern C fn raw_console_read_result stdin_read_raw(ptr mut u8 data, usize length) ;
 
@@ -141,6 +153,43 @@ pub fn Result<usize, ConsoleError> write_stderr_bytes(ref u8[] data) {
         stderr_write_all_raw(data as ptr u8, data.len)
     };
     return checked_write_result(result.status, result.written);
+}
+
+/// Writes value as locale-independent decimal ASCII to stderr without adding a newline.
+@effects(console)
+pub fn Result<usize, ConsoleError> write_stderr_i32(i32 value) {
+    let raw_console_write_result result = unsafe {
+        stderr_write_i32_raw(value)
+    };
+    return checked_write_result(result.status, result.written);
+}
+
+/// Writes value as locale-independent decimal ASCII to stderr without adding a newline.
+@effects(console)
+pub fn Result<usize, ConsoleError> write_stderr_u32(u32 value) {
+    let raw_console_write_result result = unsafe {
+        stderr_write_u32_raw(value)
+    };
+    return checked_write_result(result.status, result.written);
+}
+
+/// Writes value as locale-independent decimal ASCII to stderr without adding a newline.
+@effects(console)
+pub fn Result<usize, ConsoleError> write_stderr_usize(usize value) {
+    let raw_console_write_result result = unsafe {
+        stderr_write_usize_raw(value)
+    };
+    return checked_write_result(result.status, result.written);
+}
+
+/// Writes the exact ASCII text true or false to stderr without adding a newline.
+@effects(console)
+pub fn Result<usize, ConsoleError> write_stderr_bool(bool value) {
+    return if (value) {
+        write_stderr("true")
+    } else {
+        write_stderr("false")
+    };
 }
 
 /// Reads at most buffer.len exact bytes from stdin; a successful zero count is end-of-file.

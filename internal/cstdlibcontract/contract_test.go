@@ -82,6 +82,9 @@ func TestTargetNeutralConsoleIOSelectsOneTargetOwnedComponent(t *testing.T) {
 		"fy_std_stdout_write_u32_v0",
 		"fy_std_stdout_write_usize_v0",
 		"fy_std_stderr_write_all_v0",
+		"fy_std_stderr_write_i32_v0",
+		"fy_std_stderr_write_u32_v0",
+		"fy_std_stderr_write_usize_v0",
 		"fy_std_stdin_read_v0",
 	}
 	for _, symbol := range symbols {
@@ -102,8 +105,10 @@ func TestTargetNeutralConsoleIOSelectsOneTargetOwnedComponent(t *testing.T) {
 
 func TestScalarOutputExcludesBoolRawSymbol(t *testing.T) {
 	t.Parallel()
-	if Admitted("fy_std_stdout_write_bool_v0") {
-		t.Fatal("bool raw output symbol is admitted; write_bool must reuse stdout_write_all")
+	for _, symbol := range []string{"fy_std_stdout_write_bool_v0", "fy_std_stderr_write_bool_v0"} {
+		if Admitted(symbol) {
+			t.Errorf("bool raw output symbol %q is admitted; bool output must reuse stream write_all", symbol)
+		}
 	}
 }
 
@@ -186,6 +191,9 @@ func TestWindowsMSVCComponentsForSymbolsAdmitsOnlyProvenRuntimeSlice(t *testing.
 		"fy_std_stdout_write_u32_v0",
 		"fy_std_stdout_write_usize_v0",
 		"fy_std_stderr_write_all_v0",
+		"fy_std_stderr_write_i32_v0",
+		"fy_std_stderr_write_u32_v0",
+		"fy_std_stderr_write_usize_v0",
 		"fy_std_stdin_read_v0",
 		"fy_std_windows_stdout_write_all_v0",
 		"fy_std_windows_file_open_v0",

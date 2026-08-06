@@ -8,7 +8,7 @@ import (
 
 func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	t.Parallel()
-	if Version != "0.0.0-stage0.37" {
+	if Version != "0.0.0-stage0.38" {
 		t.Fatalf("Version = %q", Version)
 	}
 	if LanguageRevision != "fairyc-language/10" {
@@ -43,6 +43,7 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	pathKindPublic := false
 	appendBytePublic := false
 	asBytesPublic := false
+	stderrScalarFunctions := make(map[string]bool)
 	for _, source := range definition.Sources {
 		if source.Path == "std/bytes.fy" {
 			for _, function := range source.Module.Functions {
@@ -55,6 +56,14 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 			for _, function := range source.Module.Functions {
 				if function.Name == "as_bytes" {
 					asBytesPublic = function.Public
+				}
+			}
+		}
+		if source.Path == "std/io.fy" {
+			for _, function := range source.Module.Functions {
+				switch function.Name {
+				case "write_stderr_i32", "write_stderr_u32", "write_stderr_usize", "write_stderr_bool":
+					stderrScalarFunctions[function.Name] = function.Public
 				}
 			}
 		}
@@ -122,5 +131,10 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	}
 	if !asBytesPublic {
 		t.Fatal("std::text::as_bytes is not public")
+	}
+	for _, name := range []string{"write_stderr_i32", "write_stderr_u32", "write_stderr_usize", "write_stderr_bool"} {
+		if !stderrScalarFunctions[name] {
+			t.Errorf("std::io::%s is not public", name)
+		}
 	}
 }

@@ -148,6 +148,8 @@ regenerate, or override compiler source.
 - Agent routing: .agents/context-map.md
 - Repository hygiene: .editorconfig, .gitattributes, .gitignore
 
+- Allocation-free scalar stderr output, target-neutral numeric symbols, shared stack formatting, and low/optimized generated-Fairy evidence: internal/sdkstdlib/sources/std/io.fy, internal/cstdlib/stage0_linux_console.c, internal/cstdlib/stage0_windows_console.c, internal/cstdlibcontract/, examples/std_io_scalar_quickstart/, cmd/fairyc-windows-host-smoke/, docs/adr/0303-allocation-free-scalar-stderr-output.md
+
 ## Hard Rules
 
 - Do not infer language behavior from scaffold prose or implementation accidents. Compiler source

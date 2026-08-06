@@ -77,7 +77,10 @@ struct fy_std_console_write_result_v0 fy_std_stdout_write_all_v0(
     return fy_std_windows_write_all_impl_v0(STD_OUTPUT_HANDLE, data, length);
 }
 
-struct fy_std_console_write_result_v0 fy_std_stdout_write_i32_v0(int32_t value) {
+static struct fy_std_console_write_result_v0 fy_std_windows_write_i32_v0(
+    DWORD standard_handle,
+    int32_t value
+) {
     uint8_t buffer[11];
     size_t position = sizeof(buffer);
     uint32_t magnitude = value < INT32_C(0)
@@ -93,10 +96,14 @@ struct fy_std_console_write_result_v0 fy_std_stdout_write_i32_v0(int32_t value) 
         buffer[--position] = UINT8_C(45);
     }
     return fy_std_windows_write_all_impl_v0(
-        STD_OUTPUT_HANDLE,
+        standard_handle,
         buffer + position,
         sizeof(buffer) - position
     );
+}
+
+struct fy_std_console_write_result_v0 fy_std_stdout_write_i32_v0(int32_t value) {
+    return fy_std_windows_write_i32_v0(STD_OUTPUT_HANDLE, value);
 }
 
 /*
@@ -106,6 +113,7 @@ struct fy_std_console_write_result_v0 fy_std_stdout_write_i32_v0(int32_t value) 
  * size the buffer to the exact maximum digit count of their declared width.
  */
 static struct fy_std_console_write_result_v0 fy_std_windows_write_unsigned_decimal_v0(
+    DWORD standard_handle,
     uint64_t magnitude,
     uint8_t *buffer,
     size_t buffer_size
@@ -117,7 +125,7 @@ static struct fy_std_console_write_result_v0 fy_std_windows_write_unsigned_decim
         magnitude /= UINT64_C(10);
     } while (magnitude != UINT64_C(0));
     return fy_std_windows_write_all_impl_v0(
-        STD_OUTPUT_HANDLE,
+        standard_handle,
         buffer + position,
         buffer_size - position
     );
@@ -126,6 +134,7 @@ static struct fy_std_console_write_result_v0 fy_std_windows_write_unsigned_decim
 struct fy_std_console_write_result_v0 fy_std_stdout_write_u32_v0(uint32_t value) {
     uint8_t buffer[10];
     return fy_std_windows_write_unsigned_decimal_v0(
+        STD_OUTPUT_HANDLE,
         (uint64_t)value,
         buffer,
         sizeof(buffer)
@@ -135,6 +144,7 @@ struct fy_std_console_write_result_v0 fy_std_stdout_write_u32_v0(uint32_t value)
 struct fy_std_console_write_result_v0 fy_std_stdout_write_usize_v0(uintptr_t value) {
     uint8_t buffer[20];
     return fy_std_windows_write_unsigned_decimal_v0(
+        STD_OUTPUT_HANDLE,
         (uint64_t)value,
         buffer,
         sizeof(buffer)
@@ -146,6 +156,30 @@ struct fy_std_console_write_result_v0 fy_std_stderr_write_all_v0(
     size_t length
 ) {
     return fy_std_windows_write_all_impl_v0(STD_ERROR_HANDLE, data, length);
+}
+
+struct fy_std_console_write_result_v0 fy_std_stderr_write_i32_v0(int32_t value) {
+    return fy_std_windows_write_i32_v0(STD_ERROR_HANDLE, value);
+}
+
+struct fy_std_console_write_result_v0 fy_std_stderr_write_u32_v0(uint32_t value) {
+    uint8_t buffer[10];
+    return fy_std_windows_write_unsigned_decimal_v0(
+        STD_ERROR_HANDLE,
+        (uint64_t)value,
+        buffer,
+        sizeof(buffer)
+    );
+}
+
+struct fy_std_console_write_result_v0 fy_std_stderr_write_usize_v0(uintptr_t value) {
+    uint8_t buffer[20];
+    return fy_std_windows_write_unsigned_decimal_v0(
+        STD_ERROR_HANDLE,
+        (uint64_t)value,
+        buffer,
+        sizeof(buffer)
+    );
 }
 
 struct fy_std_console_read_result_v0 fy_std_stdin_read_v0(
