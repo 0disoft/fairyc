@@ -837,6 +837,14 @@ ordinary, read-only, and two-link files, closed and invalid storage, and cursor/
 preservation. Physical usage, block shape, compression, sparse extents, quotas, timestamps,
 allocation mutation, and Linux public linkage remain later gates.
 
+ADR 0310 closes the paired same-handle attribute mutation gap in SDK `0.0.0-stage0.44` with
+`set_read_only(ref mut File, bool) -> Result<bool, FileError>`. The Windows target preserves
+unrelated attributes and timestamps while toggling only `FILE_ATTRIBUTE_READONLY`. Raw and
+generated-Fairy low/optimized paths prove true/false transitions, cursor/size preservation,
+closed and invalid storage, invalid boolean rejection, and exact `ERROR_ACCESS_DENIED` through a
+read-only handle with unchanged metadata. ACLs, ownership, general attributes, directory promises,
+portable Unicode paths, and Linux public linkage remain later gates.
+
 ADR 0270 extends the SDK to `0.0.0-stage0.16` with allocation-free
 `size(ref File) -> Result<usize, FileError>`. The raw probe observes size 9 before and after cursor
 movement, rejects closed and invalid handles, and the private/public generated-Fairy paths observe

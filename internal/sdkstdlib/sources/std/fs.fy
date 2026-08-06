@@ -182,6 +182,10 @@ unsafe extern C fn raw_file_kind_result file_kind_raw(ptr void file) ;
 unsafe extern C fn raw_file_attribute_result file_read_only_raw(ptr void file) ;
 
 @effects(filesystem)
+@link_name("fy_std_windows_file_set_readonly_v0")
+unsafe extern C fn raw_file_attribute_result file_set_read_only_raw(ptr mut void file, u32 enabled) ;
+
+@effects(filesystem)
 @link_name("fy_std_windows_file_link_count_v0")
 unsafe extern C fn raw_file_size_result file_hard_link_count_raw(ptr void file) ;
 
@@ -633,6 +637,20 @@ pub fn Result<FileKind, FileError> kind(ref File file) {
 pub fn Result<bool, FileError> is_read_only(ref File file) {
     let raw_file_attribute_result result = unsafe {
         file_read_only_raw(file as ptr void)
+    };
+    return if (result.status == 0) {
+        .ok(result.enabled != 0)
+    } else {
+        .err(attribute_error(result))
+    };
+}
+
+/// Changes only the read-only attribute of the object behind this open handle.
+/// The handle must have target permission to write file attributes.
+@effects(filesystem)
+pub fn Result<bool, FileError> set_read_only(ref mut File file, bool enabled) {
+    let raw_file_attribute_result result = unsafe {
+        file_set_read_only_raw(file as ptr mut void, if (enabled) { 1 } else { 0 })
     };
     return if (result.status == 0) {
         .ok(result.enabled != 0)

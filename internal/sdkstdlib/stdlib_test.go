@@ -8,7 +8,7 @@ import (
 
 func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	t.Parallel()
-	if Version != "0.0.0-stage0.43" {
+	if Version != "0.0.0-stage0.44" {
 		t.Fatalf("Version = %q", Version)
 	}
 	if LanguageRevision != "fairyc-language/10" {
@@ -43,6 +43,7 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	pathKindPublic := false
 	seekFunctions := make(map[string]bool)
 	readOnlyPublic := false
+	setReadOnlyPublic := false
 	hardLinkCountPublic := false
 	allocatedSizePublic := false
 	hardLinkPublic := false
@@ -121,6 +122,9 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 			if function.Name == "is_read_only" {
 				readOnlyPublic = function.Public
 			}
+			if function.Name == "set_read_only" {
+				setReadOnlyPublic = function.Public
+			}
 			if function.Name == "hard_link_count" {
 				hardLinkCountPublic = function.Public
 			}
@@ -149,6 +153,9 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	}
 	if !readOnlyPublic {
 		t.Fatal("std::fs::is_read_only is not public")
+	}
+	if !setReadOnlyPublic {
+		t.Fatal("std::fs::set_read_only is not public")
 	}
 	if !hardLinkCountPublic {
 		t.Fatal("std::fs::hard_link_count is not public")

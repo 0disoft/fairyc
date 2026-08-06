@@ -401,6 +401,11 @@ ADR 0309 moves the SDK to `0.0.0-stage0.43` with
 reported through the same live handle without allocation, cursor movement, or length change. The
 momentary value is not a portable physical-disk, compression, sparse-extent, quota, or billing
 promise.
+ADR 0310 moves the SDK to `0.0.0-stage0.44` with
+`std::fs::set_read_only(ref mut File, bool) -> Result<bool, FileError>`. It changes only the
+read-only attribute through the same live handle, preserves unrelated attributes and timestamps,
+and exposes insufficient handle access as an exact target error. Read-only metadata remains
+distinct from ACL, sharing, filesystem policy, and later write authorization.
 The path-kind query distinguishes ordinary files, directories, and other observed attributes without opening
 an owner, but its snapshot is not stable identity, authorization, containment, or a race-free
 precheck. `std::fs::copy_file_bytes` holds exclusive source and `CREATE_NEW` destination handles,
