@@ -20,18 +20,20 @@ type nativeWorkspaceTestCompiler func(
 	stderr io.Writer,
 ) (cdriver.WindowsHostArtifact, int)
 
-type nativeWorkspaceTestExecutor func(cdriver.WindowsHostArtifact) (cdriver.WindowsHostOutcome, error)
+type nativeWorkspaceTestExecutor func(cdriver.WindowsHostArtifact, []string) (cdriver.WindowsHostOutcome, error)
 
 func runNativeWorkspaceTests(
 	program mir.Program,
 	tests []workspaceTest,
 	profile cdriver.Profile,
+	programArguments []string,
 	stderr io.Writer,
 ) ([]workspaceTestOutcome, int) {
 	return runNativeWorkspaceTestsWith(
 		program,
 		tests,
 		profile,
+		programArguments,
 		stderr,
 		compileNativeWorkspaceTest,
 		executeNativeWorkspaceTest,
@@ -42,6 +44,7 @@ func runNativeWorkspaceTestsWith(
 	program mir.Program,
 	tests []workspaceTest,
 	profile cdriver.Profile,
+	programArguments []string,
 	stderr io.Writer,
 	compile nativeWorkspaceTestCompiler,
 	execute nativeWorkspaceTestExecutor,
@@ -56,7 +59,7 @@ func runNativeWorkspaceTestsWith(
 		if code != ExitSuccess {
 			return nil, code
 		}
-		outcome, err := execute(artifact)
+		outcome, err := execute(artifact, programArguments)
 		if err != nil {
 			return nil, buildFailure(stderr, fmt.Errorf("execute native test %s: %w", test.display, err))
 		}
@@ -96,8 +99,8 @@ func compileNativeWorkspaceTest(
 	)
 }
 
-func executeNativeWorkspaceTest(artifact cdriver.WindowsHostArtifact) (cdriver.WindowsHostOutcome, error) {
-	return cdriver.ExecuteWindowsMSVCTargetWithInput(artifact, strings.NewReader(""))
+func executeNativeWorkspaceTest(artifact cdriver.WindowsHostArtifact, programArguments []string) (cdriver.WindowsHostOutcome, error) {
+	return cdriver.ExecuteWindowsMSVCTargetWithInputAndArgs(artifact, strings.NewReader(""), programArguments)
 }
 
 func nativeWorkspaceTestProgram(input mir.Program, testEntry string) (mir.Program, string, error) {

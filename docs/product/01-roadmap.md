@@ -718,10 +718,10 @@ quarantines, without selecting a default policy or making a speed claim.
   `fairyc explain <diagnostic-code>` and `fairyc targets` v1 contracts separate from catalog and
   TargetSpec data lifecycle. Keep target-explicit `fairyc emit c --target <target-id> [--locked]`
   separate from private generated-C bytes and support units. Keep implemented semantic-by-default
-  and explicit Windows-native `fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]`
+  and explicit Windows-native `fairyc test [--json] [--locations] [--native [--release] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]`
   plus compiler-admitted `fairyc test --list [--package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]` discovery with canonical exact selection
   and singular root-reachable member selection separate from catalog-unreachable aggregation, fuzzy/tag/glob filters,
-  shared fixtures, portable targets, program streams,
+  shared fixtures, portable targets, native-test stdin/output streams,
   benchmarks, and host-environment policy.
 - Move to function-level reuse only when measured package rebuild or storage evidence justifies the complexity.
 
@@ -1050,6 +1050,11 @@ directories form a union, admitted zero-test directories succeed, and `--dir` is
 with `--file` and `--exact`. Complete-overlay compiler admission and report bytes remain unchanged;
 low and optimized isolated MSVC evidence selects one directory while excluding another admitted
 failing directory. Fuzzy/tag/glob selection remains later.
+
+ADR 0312 closes native-test program argument forwarding with the first `--` delimiter. Each
+selected isolated test receives the same exact argument list; flag-looking, empty, and non-ASCII
+UTF-8 values are preserved, embedded NUL fails before loading, and semantic/list modes reject the
+delimiter. Low and optimized generated-Fairy evidence reads the values through `std::process`.
 
 ADR 0295 closes the opt-in root-reachable multi-package gap with `fairyc test --workspace` for
 execution and listing. Every unambiguous local package in the production graph receives its isolated

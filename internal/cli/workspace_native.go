@@ -124,6 +124,11 @@ func runStableRun(arguments []string, sourceRoot string, stdin io.Reader, stdout
 // The delimiter itself is not passed to the program. Program arguments are part of the stable run
 // command line, so an embedded NUL byte is rejected before compilation.
 func splitStableRunArguments(arguments []string) (compilerArguments, programArguments []string, err error) {
+	compilerArguments, programArguments, _, err = splitStableProgramArguments("run", arguments)
+	return compilerArguments, programArguments, err
+}
+
+func splitStableProgramArguments(command string, arguments []string) (compilerArguments, programArguments []string, found bool, err error) {
 	for index, argument := range arguments {
 		if argument != "--" {
 			continue
@@ -131,12 +136,12 @@ func splitStableRunArguments(arguments []string) (compilerArguments, programArgu
 		programArguments = arguments[index+1:]
 		for _, programArgument := range programArguments {
 			if strings.ContainsRune(programArgument, '\x00') {
-				return nil, nil, fmt.Errorf(`command "run" rejects program arguments containing a NUL byte`)
+				return nil, nil, false, fmt.Errorf(`command %q rejects program arguments containing a NUL byte`, command)
 			}
 		}
-		return arguments[:index], programArguments, nil
+		return arguments[:index], programArguments, true, nil
 	}
-	return arguments, nil, nil
+	return arguments, nil, false, nil
 }
 
 func parseStableNativeOptions(command string, arguments []string) (stableNativeOptions, error) {

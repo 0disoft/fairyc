@@ -650,13 +650,23 @@ fn void broken() { missing(); }
 
 func TestStableWorkspaceTestNativeOptionsRequireExplicitNativeMode(t *testing.T) {
 	t.Parallel()
-	options, err := parseStableTestOptions([]string{"--release", "--exact", "tests::answer::is_42", "--json", "--locked", "--native"})
+	options, err := parseStableTestOptions([]string{"--release", "--exact", "tests::answer::is_42", "--json", "--locked", "--native", "--", "--locked", "", "한글λ"})
 	if err != nil || !options.native || !options.release || !options.json || !options.locked ||
-		len(options.exact) != 1 || options.exact[0] != "tests::answer::is_42" {
+		len(options.exact) != 1 || options.exact[0] != "tests::answer::is_42" ||
+		!slices.Equal(options.programArgs, []string{"--locked", "", "한글λ"}) {
 		t.Fatalf("native options = %+v, %v", options, err)
 	}
 	if _, err := parseStableTestOptions([]string{"--release"}); err == nil || !strings.Contains(err.Error(), "requires --native") {
 		t.Fatalf("release-only options error = %v", err)
+	}
+	if _, err := parseStableTestOptions([]string{"--", "argument"}); err == nil || !strings.Contains(err.Error(), "requires --native before --") {
+		t.Fatalf("semantic program arguments error = %v", err)
+	}
+	if _, err := parseStableTestOptions([]string{"--list", "--native", "--", "argument"}); err == nil || !strings.Contains(err.Error(), "does not combine --list with --native") {
+		t.Fatalf("list program arguments error = %v", err)
+	}
+	if _, err := parseStableTestOptions([]string{"--native", "--", "bad\x00argument"}); err == nil || !strings.Contains(err.Error(), `command "test" rejects program arguments containing a NUL byte`) {
+		t.Fatalf("native NUL program argument error = %v", err)
 	}
 }
 
@@ -758,7 +768,11 @@ func TestNativeWorkspaceTestsContinueAfterTrapsAndPreserveOrder(t *testing.T) {
 		compiled++
 		return cdriver.WindowsHostArtifact{Bytes: []byte{byte(compiled)}}, ExitSuccess
 	}
-	execute := func(artifact cdriver.WindowsHostArtifact) (cdriver.WindowsHostOutcome, error) {
+	programArguments := []string{"--flag", "", "한글λ"}
+	execute := func(artifact cdriver.WindowsHostArtifact, arguments []string) (cdriver.WindowsHostOutcome, error) {
+		if !slices.Equal(arguments, programArguments) {
+			t.Fatalf("native test program arguments = %q, want %q", arguments, programArguments)
+		}
 		if artifact.Bytes[0] == 1 {
 			code, found := cbackend.TrapCode("assertion-failed")
 			if !found {
@@ -773,7 +787,7 @@ func TestNativeWorkspaceTestsContinueAfterTrapsAndPreserveOrder(t *testing.T) {
 	}
 	var stderr bytes.Buffer
 	outcomes, code := runNativeWorkspaceTestsWith(
-		program, tests, cdriver.OptimizedProfile, &stderr, compile, execute,
+		program, tests, cdriver.OptimizedProfile, programArguments, &stderr, compile, execute,
 	)
 	if code != ExitSuccess || stderr.String() != "" || compiled != 2 || len(outcomes) != 2 ||
 		outcomes[0].display != tests[0].display || outcomes[0].trapCategory != "assertion-failed" ||
@@ -804,9 +818,12 @@ func TestNativeWorkspaceTestsRejectProgramOutputAndUnreceiptedExit(t *testing.T)
 				program,
 				tests,
 				cdriver.LowProfile,
+				nil,
 				&stderr,
 				compile,
-				func(cdriver.WindowsHostArtifact) (cdriver.WindowsHostOutcome, error) { return test.outcome, nil },
+				func(cdriver.WindowsHostArtifact, []string) (cdriver.WindowsHostOutcome, error) {
+					return test.outcome, nil
+				},
 			)
 			if outcomes != nil || code != test.wantCode || !strings.Contains(stderr.String(), test.contains) {
 				t.Fatalf("native failure outcomes=%+v code=%d stderr=%q", outcomes, code, stderr.String())

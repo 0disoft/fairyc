@@ -1068,7 +1068,7 @@ execution. ADR 0287 additionally admits execution-mode `--json` and freezes
 `fairyc.test-report/v1` with canonical semantic/native outcomes, engine/target/profile identity,
 totals, status, and lock state while preserving text bytes and exit codes. Catalog-wide member recursion,
 fuzzy/tag/glob filters, setup/teardown, portable native targets,
-program streams, benchmarks, and host-environment policy remain separate contracts.
+native-test stdin/output streams, benchmarks, and host-environment policy remain separate contracts.
 
 ADR 0289 adds singular `--package <package-uid>` selection to execution and listing. The UID must
 name one local package with exactly one root-reachable resolved instance; only that package's
@@ -1105,6 +1105,13 @@ host-separated, dot-segment, trailing-slash, or otherwise uncataloged values fai
 `--dir` is mutually exclusive with `--file` and `--exact`. Selection performs no filesystem walk,
 does not weaken complete-overlay compiler admission, and leaves text and v1/v2/v3 JSON bytes
 unchanged.
+
+ADR 0312 advances only native execution to
+`fairyc test --native [--release] ... -- <program-args...>`. The first delimiter is excluded and the
+remaining values are forwarded unchanged to every selected isolated test process. Flag-looking,
+empty, and non-ASCII UTF-8 arguments are preserved; embedded NUL is rejected before workspace
+loading. Semantic execution and listing reject the delimiter. Discovery, selection, lock behavior,
+text and JSON report bytes, schemas, SDK, language, runtime ABI, and generated C remain unchanged.
 
 ADR 0146 rejects speculative persistent caching at this point. ADR 0149 supplies deterministic,
 bounded, verifier-checked bytes for a complete MIR program, but the workspace path still produces

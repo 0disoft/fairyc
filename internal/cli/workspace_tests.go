@@ -40,6 +40,7 @@ type stableTestOptions struct {
 	files       []string
 	directories []string
 	exact       []string
+	programArgs []string
 }
 
 type stableTestListReport struct {
@@ -213,7 +214,7 @@ func runStableTest(arguments []string, sourceRoot string, stdout, stderr io.Writ
 		if options.release {
 			profile = cdriver.OptimizedProfile
 		}
-		outcomes, code = runNativeWorkspaceTests(checked.MIR, tests, profile, stderr)
+		outcomes, code = runNativeWorkspaceTests(checked.MIR, tests, profile, options.programArgs, stderr)
 	} else {
 		outcomes, code = runInterpreterWorkspaceTests(checked.MIR, tests, stderr)
 	}
@@ -417,6 +418,22 @@ func stableTestReportSchemaFor(options stableTestOptions) string {
 }
 
 func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
+	compilerArguments, programArguments, hasDelimiter, err := splitStableProgramArguments("test", arguments)
+	if err != nil {
+		return stableTestOptions{}, err
+	}
+	options, err := parseStableTestCompilerOptions(compilerArguments)
+	if err != nil {
+		return stableTestOptions{}, err
+	}
+	if hasDelimiter && !options.native {
+		return stableTestOptions{}, fmt.Errorf(`command "test" requires --native before --`)
+	}
+	options.programArgs = programArguments
+	return options, nil
+}
+
+func parseStableTestCompilerOptions(arguments []string) (stableTestOptions, error) {
 	options := stableTestOptions{}
 	seen := make(map[string]bool, 5)
 	files := make(map[string]bool)
