@@ -80,6 +80,13 @@ pub enum FileKind {
     Pipe;
 }
 
+/// Classifies one observed filesystem path without exposing target attributes.
+pub enum PathKind {
+    File;
+    Directory;
+    Other;
+}
+
 /// Identifies one observed file on its Windows volume for bounded equality checks.
 pub struct FileId {
     u32 volume_low;
@@ -158,6 +165,10 @@ unsafe extern C fn raw_file_size_result file_size_raw(ptr void file) ;
 @effects(filesystem)
 @link_name("fy_std_windows_file_kind_v0")
 unsafe extern C fn raw_file_kind_result file_kind_raw(ptr void file) ;
+
+@effects(filesystem)
+@link_name("fy_std_windows_file_path_kind_v0")
+unsafe extern C fn raw_file_kind_result file_path_kind_raw(ptr u8 path) ;
 
 @effects(filesystem)
 @link_name("fy_std_windows_file_id_v0")
@@ -562,6 +573,24 @@ pub fn Result<FileKind, FileError> kind(ref File file) {
         .ok(.Pipe)
     } else {
         .ok(.Unknown)
+    };
+}
+
+/// Observes whether one bounded path currently names a file, directory, or other object.
+/// This snapshot is not a persistent identity, authorization decision, or race-free precheck.
+@effects(filesystem)
+pub fn Result<PathKind, FileError> path_kind(ref CStr path) {
+    let raw_file_kind_result result = unsafe {
+        file_path_kind_raw(path as ptr u8)
+    };
+    return if (result.status != 0) {
+        .err(kind_error(result))
+    } else if (result.kind == 1) {
+        .ok(.File)
+    } else if (result.kind == 2) {
+        .ok(.Directory)
+    } else {
+        .ok(.Other)
     };
 }
 

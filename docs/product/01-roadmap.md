@@ -941,6 +941,16 @@ multi-window completion, destination-collision preservation, missing-source no-c
 live-source sharing failure, exact bytes, and cleanup. Metadata copy, atomic publication,
 cancellation, portable links and paths, durability, and Linux public linkage remain later gates.
 
+ADR 0298 extends the SDK to `0.0.0-stage0.35` with public exhaustive `PathKind` variants `.File`,
+`.Directory`, and `.Other`, plus `path_kind(ref CStr) -> Result<PathKind, FileError>`. The Windows
+target reuses bounded ASCII conversion and one path-attribute observation, classifies reparse and
+device attributes conservatively as `.Other`, and preserves exact missing-path errors. Raw and
+generated-Fairy low/optimized MSVC execution proves invalid input, ordinary file and directory
+classification, exhaustive switching, exact missing failure, and cleanup. The snapshot is not
+handle-pinned identity, authorization, containment, or a race-free precheck. General metadata,
+timestamps, permissions, reparse details, portable Unicode/link policy, and Linux public linkage
+remain later gates.
+
 ADR 0268 closes the discovery side of exact test selection with
 `fairyc test --list [--locked]`. The command compiler-admits the complete selected-package test overlay and
 prints canonical identities without running the interpreter, backend, toolchain, or a test process.

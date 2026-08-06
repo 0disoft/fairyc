@@ -911,6 +911,9 @@ fn i32 main() {
     let ref CStr copy_destination_path = c"fairyc-std-fs-copy-destination.tmp";
     let ref CStr copy_missing_source_path = c"fairyc-std-fs-copy-missing-source.tmp";
     let ref CStr copy_missing_destination_path = c"fairyc-std-fs-copy-missing-destination.tmp";
+    let ref CStr path_kind_file_path = c"fairyc-std-fs-path-kind-file.tmp";
+    let ref CStr path_kind_directory_path = c"fairyc-std-fs-path-kind-directory";
+    let ref CStr path_kind_missing_path = c"fairyc-std-fs-path-kind-missing";
     let ref CStr directory_path = c"fairyc-std-fs-directory";
     let ref CStr directory_child_path = c"fairyc-std-fs-directory\\child.tmp";
     let ref CStr directory_file_collision_path = c"fairyc-std-fs-directory-file.tmp";
@@ -953,6 +956,11 @@ fn i32 main() {
         copy_destination_path,
         copy_missing_source_path,
         copy_missing_destination_path
+    );
+    let i32 path_kind_code = paths::check_path_kind(
+        path_kind_file_path,
+        path_kind_directory_path,
+        path_kind_missing_path
     );
     let i32 directory_code = paths::check_directory_lifecycle(
         directory_path,
@@ -1000,6 +1008,8 @@ fn i32 main() {
         rename_code
     } else if (copy_code != 0) {
         copy_code
+    } else if (path_kind_code != 0) {
+        path_kind_code
     } else if (directory_code != 0) {
         directory_code
     } else if (directory_rename_code != 0) {

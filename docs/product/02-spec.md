@@ -609,7 +609,7 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   eight UTF-8 bytes and length of `Fairy λ` before C reads the data, and
   `utf8StringLiteralBuildSmokeExecutions` when the ordinary product build carries the same text-view
   path into an executed binary.
-  The compiler-bundled SDK `0.0.0-stage0.34` exposes
+  The compiler-bundled SDK `0.0.0-stage0.35` exposes
   `std::io::write(ref str) -> Result<usize, ConsoleError>` and a matching `write_stderr` operation
   for text, plus `write_bytes(ref u8[])` and `write_stderr_bytes(ref u8[])` for exact binary output.
   All four declare `console`, keep raw pointers and target linkage private, append no newline,
@@ -737,6 +737,11 @@ The complete prototype boundary is in `docs/runtime/runtime-stdlib-v0.md`.
   movement and returns target-neutral public enum `FileKind` with exhaustive `.Unknown`, `.Disk`,
   `.Character`, and `.Pipe` variants. `kind_is_disk`, `kind_is_character`, `kind_is_pipe`, and
   `kind_is_unknown` remain compatibility helpers; neither surface exposes Win32 constants.
+  `path_kind(ref CStr)` observes one bounded path and returns exhaustive public `PathKind` variants
+  `.File`, `.Directory`, or `.Other`. Device and reparse attributes map to `.Other`; missing or
+  inaccessible names retain exact `FileError`. The result is a momentary name snapshot, not an
+  opened-object identity, authorization or containment decision, or race-free precondition for a
+  later operation.
   `file_id(ref File)` observes the same open handle and returns opaque `FileId` containing the
   complete Windows volume serial and 128-bit target identifier. `file_id_equal(ref FileId,
   ref FileId)` compares every bit without consuming either value. The identity is bounded to one
@@ -893,7 +898,7 @@ argument, output, and exit-code contract. It emits no native code.
 
 ADR 0147 fixes the first real SDK selection: `std` and `std::*` imports receive one direct
 compiler-bundled `fairyc.std` package with exact SDK identity, language revision, runtime ABI,
-version, source digest, and lock fields. SDK `0.0.0-stage0.34` exports ADR 0250's move-only,
+version, source digest, and lock fields. SDK `0.0.0-stage0.35` exports ADR 0250's move-only,
 fallibly created `std::alloc::Arena` with automatic cleanup and exact allocation status,
 while ADR 0251 makes compiler-known placement return `Result<ref T, AllocError>` under language `/8`.
 ADR 0246's public safe `std::bytes::Buffer`,
@@ -909,7 +914,8 @@ source-level read from the current cursor through EOF, ADR 0291's exact one-file
 file-only no-replace rename without cross-volume copy fallback, ADR 0293's one-level directory
 creation and exact empty-directory removal, ADR 0294's directory-only no-replace rename, ADR 0296's
 pre-effect validation and recursive parent creation with explicit partial-prefix preservation,
-ADR 0297's exclusive no-replace file byte copy with explicit completed-prefix preservation,
+ADR 0297's exclusive no-replace file byte copy with explicit completed-prefix preservation, ADR
+0298's exhaustive path-kind snapshot with explicit TOCTOU limits,
 ADR 0205's `std::io::write(ref str) -> Result<usize, ConsoleError>`, and ADR 0209's matching
 `write_stderr` operation, ADR 0210's matching immutable byte-view output operations, and ADR 0211's
 `read_stdin(ref mut u8[]) -> Result<usize, ConsoleReadError>`, plus ADR 0215's allocation-free

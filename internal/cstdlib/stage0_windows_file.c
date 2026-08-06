@@ -38,6 +38,12 @@ struct fy_std_windows_file_kind_result_v0 {
     uint32_t kind;
 };
 
+enum fy_std_windows_path_kind_v0 {
+    FY_STD_WINDOWS_PATH_KIND_FILE_V0 = 1,
+    FY_STD_WINDOWS_PATH_KIND_DIRECTORY_V0 = 2,
+    FY_STD_WINDOWS_PATH_KIND_OTHER_V0 = 3
+};
+
 struct fy_std_windows_file_id_v0 {
     uint32_t volume_low;
     uint32_t volume_high;
@@ -833,6 +839,36 @@ struct fy_std_windows_file_kind_result_v0 fy_std_windows_file_kind_v0(
                 FILE_TYPE_UNKNOWN
             );
         }
+    }
+    return fy_std_windows_file_kind_result_v0(
+        FY_STD_WINDOWS_FILE_OK_V0,
+        ERROR_SUCCESS,
+        kind
+    );
+}
+
+struct fy_std_windows_file_kind_result_v0 fy_std_windows_file_path_kind_v0(
+    const uint8_t *path
+) {
+    WCHAR wide_path[FY_STD_WINDOWS_PATH_CAPACITY_V0];
+    uint32_t status = fy_std_windows_path_v0(path, wide_path);
+    if (status != FY_STD_WINDOWS_FILE_OK_V0) {
+        return fy_std_windows_file_kind_result_v0(status, ERROR_SUCCESS, 0);
+    }
+    DWORD attributes = GetFileAttributesW(wide_path);
+    if (attributes == INVALID_FILE_ATTRIBUTES) {
+        return fy_std_windows_file_kind_result_v0(
+            FY_STD_WINDOWS_FILE_IO_ERROR_V0,
+            GetLastError(),
+            0
+        );
+    }
+    DWORD kind = FY_STD_WINDOWS_PATH_KIND_FILE_V0;
+    if ((attributes & FILE_ATTRIBUTE_REPARSE_POINT) != 0 ||
+        (attributes & FILE_ATTRIBUTE_DEVICE) != 0) {
+        kind = FY_STD_WINDOWS_PATH_KIND_OTHER_V0;
+    } else if ((attributes & FILE_ATTRIBUTE_DIRECTORY) != 0) {
+        kind = FY_STD_WINDOWS_PATH_KIND_DIRECTORY_V0;
     }
     return fy_std_windows_file_kind_result_v0(
         FY_STD_WINDOWS_FILE_OK_V0,

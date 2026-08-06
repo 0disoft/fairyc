@@ -116,6 +116,7 @@ struct fy_std_windows_file_result_v0 fy_std_windows_file_sync_v0(void *);
 struct fy_std_windows_file_result_v0 fy_std_windows_file_close_v0(void *);
 uint32_t fy_std_windows_file_drop_v0(void *);
 int fy_std_windows_file_copy_probe_v0(void);
+int fy_std_windows_file_path_kind_probe_v0(void);
 
 static int fy_std_windows_file_closed_v0(const struct fy_std_windows_file_v0 *file) {
     return file->handle == NULL && file->open == UINT8_C(0);
@@ -709,5 +710,7 @@ int main(void) {
     if (!fy_result_is(result, FY_STD_WINDOWS_FILE_IO_ERROR_V0, ERROR_INVALID_NAME)) return 175;
     if (!RemoveDirectoryW(L"fy-dir-partial\\created")) return 176;
     if (!RemoveDirectoryW(L"fy-dir-partial")) return 177;
+    int path_kind_code = fy_std_windows_file_path_kind_probe_v0();
+    if (path_kind_code != 0) return path_kind_code;
     return fy_std_windows_file_copy_probe_v0();
 }

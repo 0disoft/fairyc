@@ -368,8 +368,11 @@ Windows MSVC-only and does
 not claim portable Unicode paths, general uninitialized-memory access, a supported target, or public layout.
 
 ADR 0294 adds directory-only no-replace rename, ADR 0296 adds recursive parent creation with
-pre-effect lexical validation, and ADR 0297 moves the SDK to `0.0.0-stage0.34` with
-`std::fs::copy_file_bytes`. The copy holds exclusive source and `CREATE_NEW` destination handles,
+pre-effect lexical validation, ADR 0297 adds no-replace byte copy, and ADR 0298 moves the SDK to
+`0.0.0-stage0.35` with `std::fs::PathKind` and `path_kind`.
+The query distinguishes ordinary files, directories, and other observed attributes without opening
+an owner, but its snapshot is not stable identity, authorization, containment, or a race-free
+precheck. `std::fs::copy_file_bytes` holds exclusive source and `CREATE_NEW` destination handles,
 never replaces an existing destination, returns exact copied bytes, and preserves any completed
 destination prefix on a later failure without implying metadata copy, atomicity, or durability.
 The source FFI slice accepts `i32`, `u8`, `u32`, `usize`, all sixteen exact transport-only TargetSpec

@@ -592,3 +592,75 @@ pub fn i32 check_copy_file_bytes(
         case .err(_) : { 305 }
     } };
 }
+
+@effects(filesystem)
+fn i32 close_path_kind_file(fs::File file) {
+    return switch (fs::close(file)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 306 }
+    };
+}
+
+fn i32 expect_file_path_kind(fs::PathKind kind) {
+    return switch (kind) {
+        case .File : { 0 }
+        case .Directory : { 307 }
+        case .Other : { 308 }
+    };
+}
+
+fn i32 expect_directory_path_kind(fs::PathKind kind) {
+    return switch (kind) {
+        case .File : { 309 }
+        case .Directory : { 0 }
+        case .Other : { 310 }
+    };
+}
+
+@effects(filesystem)
+pub fn i32 check_path_kind(ref CStr file, ref CStr directory, ref CStr missing) {
+    let i32 file_setup_code = switch (fs::create_truncate(file)) {
+        case .ok(owner) : { close_path_kind_file(owner) }
+        case .err(_) : { 311 }
+    };
+    let i32 directory_setup_code = if (file_setup_code != 0) {
+        file_setup_code
+    } else { switch (fs::create_dir(directory)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 312 }
+    } };
+    let i32 file_kind_code = if (directory_setup_code != 0) {
+        directory_setup_code
+    } else { switch (fs::path_kind(file)) {
+        case .ok(kind) : { expect_file_path_kind(kind) }
+        case .err(_) : { 313 }
+    } };
+    let i32 directory_kind_code = if (file_kind_code != 0) {
+        file_kind_code
+    } else { switch (fs::path_kind(directory)) {
+        case .ok(kind) : { expect_directory_path_kind(kind) }
+        case .err(_) : { 314 }
+    } };
+    let i32 missing_code = if (directory_kind_code != 0) {
+        directory_kind_code
+    } else { switch (fs::path_kind(missing)) {
+        case .ok(_) : { 315 }
+        case .err(error) : {
+            if (fs::error_status(error) == 1 &&
+                fs::error_os_code(error) == 2 &&
+                fs::error_completed(error) == 0) { 0 } else { 316 }
+        }
+    } };
+    let i32 directory_cleanup_code = if (missing_code != 0) {
+        missing_code
+    } else { switch (fs::remove_dir(directory)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 317 }
+    } };
+    return if (directory_cleanup_code != 0) {
+        directory_cleanup_code
+    } else { switch (fs::remove_file(file)) {
+        case .ok(_) : { 0 }
+        case .err(_) : { 318 }
+    } };
+}

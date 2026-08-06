@@ -8,7 +8,7 @@ import (
 
 func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 	t.Parallel()
-	if Version != "0.0.0-stage0.34" {
+	if Version != "0.0.0-stage0.35" {
 		t.Fatalf("Version = %q", Version)
 	}
 	if LanguageRevision != "fairyc-language/10" {
@@ -37,8 +37,10 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 		t.Fatalf("source identity = %q", definition.SourceIdentity)
 	}
 	var fileKindVariants []string
+	var pathKindVariants []string
 	createDirAllPublic := false
 	copyFileBytesPublic := false
+	pathKindPublic := false
 	for _, source := range definition.Sources {
 		if source.Path != "std/fs.fy" {
 			continue
@@ -49,17 +51,27 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 			}
 		}
 		for _, enumeration := range source.Module.Enums {
-			if enumeration.Name != "FileKind" {
-				continue
-			}
-			if !enumeration.Public {
-				t.Fatal("FileKind enum is not public")
-			}
-			for _, variant := range enumeration.Variants {
-				if len(variant.Fields) != 0 {
-					t.Fatalf("FileKind variant %q has payload fields", variant.Name)
+			switch enumeration.Name {
+			case "FileKind":
+				if !enumeration.Public {
+					t.Fatal("FileKind enum is not public")
 				}
-				fileKindVariants = append(fileKindVariants, variant.Name)
+				for _, variant := range enumeration.Variants {
+					if len(variant.Fields) != 0 {
+						t.Fatalf("FileKind variant %q has payload fields", variant.Name)
+					}
+					fileKindVariants = append(fileKindVariants, variant.Name)
+				}
+			case "PathKind":
+				if !enumeration.Public {
+					t.Fatal("PathKind enum is not public")
+				}
+				for _, variant := range enumeration.Variants {
+					if len(variant.Fields) != 0 {
+						t.Fatalf("PathKind variant %q has payload fields", variant.Name)
+					}
+					pathKindVariants = append(pathKindVariants, variant.Name)
+				}
 			}
 		}
 		for _, function := range source.Module.Functions {
@@ -69,15 +81,24 @@ func TestEmbeddedStandardLibraryIdentity(t *testing.T) {
 			if function.Name == "copy_file_bytes" {
 				copyFileBytesPublic = function.Public
 			}
+			if function.Name == "path_kind" {
+				pathKindPublic = function.Public
+			}
 		}
 	}
 	if !slices.Equal(fileKindVariants, []string{"Unknown", "Disk", "Character", "Pipe"}) {
 		t.Fatalf("FileKind variants = %v", fileKindVariants)
+	}
+	if !slices.Equal(pathKindVariants, []string{"File", "Directory", "Other"}) {
+		t.Fatalf("PathKind variants = %v", pathKindVariants)
 	}
 	if !createDirAllPublic {
 		t.Fatal("std::fs::create_dir_all is not public")
 	}
 	if !copyFileBytesPublic {
 		t.Fatal("std::fs::copy_file_bytes is not public")
+	}
+	if !pathKindPublic {
+		t.Fatal("std::fs::path_kind is not public")
 	}
 }
