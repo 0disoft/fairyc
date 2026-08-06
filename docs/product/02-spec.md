@@ -983,7 +983,7 @@ adds `--json` for the versioned identity array, count, and lock state without ch
 execution. ADR 0287 additionally admits execution-mode `--json` and freezes
 `fairyc.test-report/v1` with canonical semantic/native outcomes, engine/target/profile identity,
 totals, status, and lock state while preserving text bytes and exit codes. Catalog-wide member recursion,
-fuzzy/tag/file filters, setup/teardown, portable native targets,
+fuzzy/tag/glob/directory filters, setup/teardown, portable native targets,
 program streams, benchmarks, and host-environment policy remain separate contracts.
 
 ADR 0289 adds singular `--package <package-uid>` selection to execution and listing. The UID must
@@ -1003,6 +1003,14 @@ portable workspace-relative path with 1-based line and byte column; JSON uses
 exact byte offsets, `fairyc.source-file/v1`, and `fairyc.source-line-map/v1`. These anchors come
 from the validated in-memory test source and disclose neither source text nor an absolute host path.
 Consumers must verify both identities before trusting a retained span as current.
+
+ADR 0301 adds repeatable `--file <portable-test-path>` to execution and listing. The selector uses
+the same exact portable workspace-relative path domain as `--locations`; member paths include their
+workspace prefix and matching is case- and separator-sensitive. Distinct values form a union;
+missing, duplicate, or unknown values fail as code 2, while an admitted file with zero tests
+succeeds. `--file` is mutually exclusive with `--exact`. Selection limits only listing or execution:
+the complete selected test overlay still passes declaration, semantic, Flow, MIR, and verifier
+admission. Existing text and v1/v2/v3 JSON bytes remain unchanged.
 
 ADR 0146 rejects speculative persistent caching at this point. ADR 0149 supplies deterministic,
 bounded, verifier-checked bytes for a complete MIR program, but the workspace path still produces

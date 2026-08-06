@@ -186,6 +186,22 @@ fn void member_passes() { assert(answer::value() == 42); }
 		t.Fatalf("located workspace list = %+v", locatedWorkspace)
 	}
 	code, stdout, stderr = runForTest([]string{
+		"test", "--package", "example.member-test.answer", "--file", "libs/answer/tests/member.fy", "--locked",
+	}, root)
+	if code != ExitSuccess || stdout != "test tests::member::member_passes ... ok\ntest result: ok. 1 passed; 0 failed; lock verified\n" || stderr != "" {
+		t.Fatalf("selected member file = (%d, %q, %q)", code, stdout, stderr)
+	}
+	code, stdout, stderr = runForTest([]string{"test", "--workspace", "--file", "tests/root.fy", "--locked"}, root)
+	if code != ExitSuccess || stdout != "test example.member-test.app::tests::root::root_passes ... ok\ntest result: ok. 1 passed; 0 failed; lock verified\n" || stderr != "" {
+		t.Fatalf("workspace root file = (%d, %q, %q)", code, stdout, stderr)
+	}
+	code, stdout, stderr = runForTest([]string{
+		"test", "--package", "example.member-test.answer", "--file", "tests/member.fy", "--locked",
+	}, root)
+	if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, `test file selection was not found: "tests/member.fy"`) {
+		t.Fatalf("package-relative selected member file = (%d, %q, %q)", code, stdout, stderr)
+	}
+	code, stdout, stderr = runForTest([]string{
 		"test", "--workspace", "--exact", "example.member-test.answer::tests::member::member_passes", "--locked",
 	}, root)
 	want = "test example.member-test.answer::tests::member::member_passes ... ok\n" +
@@ -303,6 +319,92 @@ fn void passes() { assert(true); }
 		"test list: 1 discovered; lock verified\n"
 	if code != ExitSuccess || stdout != wantText || stderr != "" {
 		t.Fatalf("located text list = (%d, %q, %q), want stdout %q", code, stdout, stderr, wantText)
+	}
+}
+
+func TestStableWorkspaceTestSelectsExactPortableFiles(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeStableTestWorkspace(t, root)
+	writeWorkspaceFile(t, root, "tests/alpha.fy", `module tests::alpha;
+@test
+fn void first() { assert(true); }
+@test
+fn void second() { assert(true); }
+`)
+	writeWorkspaceFile(t, root, "tests/beta.fy", `module tests::beta;
+@test
+fn void excluded_failure() { assert(false); }
+`)
+	writeWorkspaceFile(t, root, "tests/helpers.fy", `module tests::helpers;
+fn bool helper() { return true; }
+`)
+
+	code, stdout, stderr := runForTest([]string{"test", "--file", "tests/alpha.fy"}, root)
+	want := "test tests::alpha::first ... ok\n" +
+		"test tests::alpha::second ... ok\n" +
+		"test result: ok. 2 passed; 0 failed; lock updated\n"
+	if code != ExitSuccess || stdout != want || stderr != "" {
+		t.Fatalf("file-selected test = (%d, %q, %q), want stdout %q", code, stdout, stderr, want)
+	}
+
+	code, stdout, stderr = runForTest([]string{"test", "--list", "--json", "--locations", "--file", "tests/beta.fy", "--locked"}, root)
+	if code != ExitSuccess || stderr != "" {
+		t.Fatalf("file-selected located list = (%d, %q, %q)", code, stdout, stderr)
+	}
+	var listed struct {
+		SchemaVersion string `json:"schemaVersion"`
+		Tests         []string
+		Locations     []stableTestLocation
+	}
+	if err := json.Unmarshal([]byte(stdout), &listed); err != nil {
+		t.Fatal(err)
+	}
+	if listed.SchemaVersion != "fairyc.test-list/v3" ||
+		!slices.Equal(listed.Tests, []string{"tests::beta::excluded_failure"}) ||
+		len(listed.Locations) != 1 || listed.Locations[0].Source.Path != "tests/beta.fy" {
+		t.Fatalf("file-selected located list = %+v", listed)
+	}
+
+	code, stdout, stderr = runForTest([]string{
+		"test", "--list", "--file", "tests/beta.fy", "--file", "tests/alpha.fy", "--locked",
+	}, root)
+	want = "test tests::alpha::first\n" +
+		"test tests::alpha::second\n" +
+		"test tests::beta::excluded_failure\n" +
+		"test list: 3 discovered; lock verified\n"
+	if code != ExitSuccess || stdout != want || stderr != "" {
+		t.Fatalf("multi-file selected list = (%d, %q, %q), want stdout %q", code, stdout, stderr, want)
+	}
+
+	code, stdout, stderr = runForTest([]string{"test", "--file", "tests/helpers.fy", "--locked"}, root)
+	if code != ExitSuccess || stdout != "test result: ok. 0 passed; 0 failed; lock verified\n" || stderr != "" {
+		t.Fatalf("empty admitted test file = (%d, %q, %q)", code, stdout, stderr)
+	}
+
+	for _, testCase := range []struct {
+		arguments []string
+		wantError string
+	}{
+		{arguments: []string{"test", "--file"}, wantError: "requires a test path after --file"},
+		{arguments: []string{"test", "--file", "tests/missing.fy"}, wantError: `test file selection was not found: "tests/missing.fy"`},
+		{arguments: []string{"test", "--file", `tests\\alpha.fy`}, wantError: `test file selection was not found: "tests\\\\alpha.fy"`},
+		{arguments: []string{"test", "--file", "tests/alpha.fy", "--file", "tests/alpha.fy"}, wantError: `received test file "tests/alpha.fy" more than once`},
+		{arguments: []string{"test", "--file", "tests/alpha.fy", "--exact", "tests::alpha::first"}, wantError: "does not combine --file with --exact"},
+	} {
+		code, stdout, stderr = runForTest(testCase.arguments, root)
+		if code != ExitInvalidInvocation || stdout != "" || !strings.Contains(stderr, testCase.wantError) {
+			t.Fatalf("invalid file selection %v = (%d, %q, %q), want %q", testCase.arguments, code, stdout, stderr, testCase.wantError)
+		}
+	}
+
+	writeWorkspaceFile(t, root, "tests/beta.fy", `module tests::beta;
+@test
+fn void invalid_unselected_file() { missing(); }
+`)
+	code, stdout, stderr = runForTest([]string{"test", "--file", "tests/alpha.fy", "--locked"}, root)
+	if code != ExitSourceDiagnostics || stdout != "" || stderr == "" {
+		t.Fatalf("selected file with invalid unselected overlay = (%d, %q, %q)", code, stdout, stderr)
 	}
 }
 

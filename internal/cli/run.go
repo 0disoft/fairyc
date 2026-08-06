@@ -36,8 +36,8 @@ Usage:
   fairyc check [--locked]
   fairyc build [--release] [--locked]
   fairyc run [--release] [--locked] [-- <program-args...>]
-  fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--exact <test-identity>]... [--locked]
-  fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--locked]
+  fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]
+  fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--file <portable-test-path>]... [--locked]
   fairyc emit c --target <target-id> [--locked]
   fairyc explain <diagnostic-code>
   fairyc targets
@@ -76,7 +76,7 @@ Windows image, forwards caller stdin, bounded program output, and any arguments 
 program's process arguments, preserves ordinary program status, and retains no artifact.
 "fairyc test" checks the root package, one explicitly selected root-reachable local package, or every
 unambiguous root-reachable local package with --workspace plus their isolated tests/ sources. It lists
-canonical test identities or runs all or exact identities through the semantic interpreter or as
+canonical test identities or runs all, exact portable test files, or exact identities through the semantic interpreter or as
 isolated Windows images with --native; --json selects a stable machine report for listing or execution,
 and --locations adds exact-current portable source anchors.
 "fairyc emit c" writes one

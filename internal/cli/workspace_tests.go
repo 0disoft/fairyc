@@ -36,6 +36,7 @@ type stableTestOptions struct {
 	locations  bool
 	workspace  bool
 	packageUID string
+	files      []string
 	exact      []string
 }
 
@@ -86,6 +87,7 @@ type stableTestExecutionReport struct {
 type workspaceTest struct {
 	display string
 	entry   string
+	file    string
 	source  stableTestSource
 }
 
@@ -129,6 +131,7 @@ func runStableTest(arguments []string, sourceRoot string, stdout, stderr io.Writ
 		return packageFailure(stderr, err)
 	}
 	var tests []workspaceTest
+	var testFiles []string
 	for _, packagePath := range packagePaths {
 		packageUID := ""
 		if options.workspace {
@@ -138,14 +141,20 @@ func runStableTest(arguments []string, sourceRoot string, stdout, stderr io.Writ
 			}
 			packageUID = loaded.Manifest.Package.UID
 		}
-		packageTests, prepareCode := prepareWorkspaceTests(&workspace, packagePath, packageUID, options.locations, stderr)
+		packageTests, packageTestFiles, prepareCode := prepareWorkspaceTests(&workspace, packagePath, packageUID, options.locations, stderr)
 		if prepareCode != ExitSuccess {
 			return prepareCode
 		}
 		tests = append(tests, packageTests...)
+		testFiles = append(testFiles, packageTestFiles...)
 	}
 	slices.SortFunc(tests, func(left, right workspaceTest) int { return strings.Compare(left.display, right.display) })
+	slices.Sort(testFiles)
 	code := ExitSuccess
+	tests, err = selectWorkspaceTestFiles(tests, testFiles, options.files)
+	if err != nil {
+		return invocationError(stderr, err.Error())
+	}
 	tests, err = selectWorkspaceTests(tests, options.exact)
 	if err != nil {
 		return invocationError(stderr, err.Error())
@@ -398,6 +407,7 @@ func stableTestReportSchemaFor(options stableTestOptions) string {
 func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 	options := stableTestOptions{}
 	seen := make(map[string]bool, 5)
+	files := make(map[string]bool)
 	exact := make(map[string]bool)
 	for index := 0; index < len(arguments); index++ {
 		argument := arguments[index]
@@ -426,8 +436,21 @@ func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 			index++
 			continue
 		}
+		if argument == "--file" {
+			if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
+				return stableTestOptions{}, fmt.Errorf(`command "test" requires a test path after --file`)
+			}
+			path := arguments[index+1]
+			if files[path] {
+				return stableTestOptions{}, fmt.Errorf(`command "test" received test file %q more than once`, path)
+			}
+			files[path] = true
+			options.files = append(options.files, path)
+			index++
+			continue
+		}
 		if argument != "--locked" && argument != "--native" && argument != "--release" && argument != "--list" && argument != "--json" && argument != "--locations" && argument != "--workspace" {
-			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --list, --json, --locations, --native, --release, --workspace, --package <package-uid>, --exact <test-identity>, and --locked`)
+			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --list, --json, --locations, --native, --release, --workspace, --package <package-uid>, --file <portable-test-path>, --exact <test-identity>, and --locked`)
 		}
 		if seen[argument] {
 			return stableTestOptions{}, fmt.Errorf(`command "test" received %s more than once`, argument)
@@ -452,6 +475,9 @@ func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 	}
 	if options.workspace && options.packageUID != "" {
 		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --workspace with --package`)
+	}
+	if len(options.files) != 0 && len(options.exact) != 0 {
+		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --file with --exact`)
 	}
 	if options.list && (options.native || options.release || len(options.exact) != 0) {
 		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --list with --native, --release, or --exact`)
@@ -534,31 +560,71 @@ func selectWorkspaceTests(tests []workspaceTest, exact []string) ([]workspaceTes
 	return selected, nil
 }
 
-func prepareWorkspaceTests(workspace *workspaceloader.Workspace, packagePath, packageUID string, includeLocations bool, stderr io.Writer) ([]workspaceTest, int) {
+func selectWorkspaceTestFiles(tests []workspaceTest, available, requested []string) ([]workspaceTest, error) {
+	if len(requested) == 0 {
+		return tests, nil
+	}
+	known := make(map[string]struct{}, len(available))
+	for _, path := range available {
+		known[path] = struct{}{}
+	}
+	wanted := make(map[string]struct{}, len(requested))
+	var missing []string
+	for _, path := range requested {
+		if _, found := known[path]; !found {
+			missing = append(missing, path)
+			continue
+		}
+		wanted[path] = struct{}{}
+	}
+	if len(missing) != 0 {
+		slices.Sort(missing)
+		for index := range missing {
+			missing[index] = fmt.Sprintf("%q", missing[index])
+		}
+		return nil, fmt.Errorf(`command "test" test file selection was not found: %s`, strings.Join(missing, ", "))
+	}
+	selected := make([]workspaceTest, 0, len(tests))
+	for _, test := range tests {
+		if _, found := wanted[test.file]; found {
+			selected = append(selected, test)
+		}
+	}
+	return selected, nil
+}
+
+func workspaceTestSourcePath(packagePath, filePath string) string {
+	if packagePath == "." {
+		return filePath
+	}
+	return packagePath + "/" + filePath
+}
+
+func prepareWorkspaceTests(workspace *workspaceloader.Workspace, packagePath, packageUID string, includeLocations bool, stderr io.Writer) ([]workspaceTest, []string, int) {
 	packageID, err := workspace.PackageID(packagePath)
 	if err != nil {
-		return nil, packageFailure(stderr, err)
+		return nil, nil, packageFailure(stderr, err)
 	}
 	testPackage, found := workspace.Package(packagePath)
 	if !found {
-		return nil, packageFailure(stderr, fmt.Errorf("workspace test package %q is missing", packagePath))
+		return nil, nil, packageFailure(stderr, fmt.Errorf("workspace test package %q is missing", packagePath))
 	}
 	var tests []workspaceTest
+	var testFiles []string
 	var sourceDiagnostics []testSourceDiagnostics
 	for _, file := range testPackage.Sources {
 		if !file.Test {
 			continue
 		}
+		portablePath := workspaceTestSourcePath(packagePath, file.Path)
+		testFiles = append(testFiles, portablePath)
 		var diagnostics []diagnostic.Diagnostic
 		var fileIdentity packagecontent.FileDigest
 		var lineMapIdentity packagecontent.LineMapID
 		locationPath := ""
 		if includeLocations {
 			fileIdentity, lineMapIdentity = packagecontent.ComputeFileIdentities(file.Bytes)
-			locationPath = file.Path
-			if packagePath != "." {
-				locationPath = packagePath + "/" + file.Path
-			}
+			locationPath = portablePath
 		}
 		collectInvalidTestAttributes(file.Module.Structs, func(value ast.Struct) []ast.Attribute { return value.Attributes }, &diagnostics)
 		collectInvalidTestAttributes(file.Module.Enums, func(value ast.Enum) []ast.Attribute { return value.Attributes }, &diagnostics)
@@ -612,6 +678,7 @@ func prepareWorkspaceTests(workspace *workspaceloader.Workspace, packagePath, pa
 			tests = append(tests, workspaceTest{
 				display: display,
 				entry:   hir.QualifiedModulePath(packageID, file.Module.Path) + "::" + function.Name,
+				file:    portablePath,
 				source:  source,
 			})
 		}
@@ -629,13 +696,14 @@ func prepareWorkspaceTests(workspace *workspaceloader.Workspace, packagePath, pa
 	if len(sourceDiagnostics) != 0 {
 		for _, source := range sourceDiagnostics {
 			if err := writeDiagnostics(stderr, source.path, source.contents, source.diagnostics); err != nil {
-				return nil, ExitInternalFailure
+				return nil, nil, ExitInternalFailure
 			}
 		}
-		return nil, ExitSourceDiagnostics
+		return nil, nil, ExitSourceDiagnostics
 	}
 	slices.SortFunc(tests, func(left, right workspaceTest) int { return strings.Compare(left.display, right.display) })
-	return tests, ExitSuccess
+	slices.Sort(testFiles)
+	return tests, testFiles, ExitSuccess
 }
 
 func collectInvalidTestAttributes[T any](values []T, attributes func(T) []ast.Attribute, diagnostics *[]diagnostic.Diagnostic) {

@@ -69,8 +69,8 @@ func runStandaloneCompiler(
 		!strings.Contains(helpStdout, "fairyc check [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc build [--release] [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc run [--release] [--locked]") ||
-		!strings.Contains(helpStdout, "fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--exact <test-identity>]... [--locked]") ||
-		!strings.Contains(helpStdout, "fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--locked]") ||
+		!strings.Contains(helpStdout, "fairyc test [--json] [--locations] [--native [--release]] [--workspace | --package <package-uid>] [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]") ||
+		!strings.Contains(helpStdout, "fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--file <portable-test-path>]... [--locked]") ||
 		!strings.Contains(helpStdout, "every\nunambiguous root-reachable local package with --workspace") ||
 		!strings.Contains(helpStdout, "fairyc emit c --target <target-id> [--locked]") ||
 		!strings.Contains(helpStdout, "fairyc experimental run-target") ||
@@ -210,12 +210,19 @@ fn void second_passes() { assert(process::arg_count() >= 1); }
 	if err := os.WriteFile(filepath.Join(starterRoot, "tests", "main.fy"), []byte(starterNativeRuntimeTestSource), 0o600); err != nil {
 		return 0, fmt.Errorf("write standalone compiler runtime-dependent native trap-isolation test: %w", err)
 	}
+	const starterExcludedNativeTestSource = `module tests::excluded;
+
+@test
+fn void excluded_fails() { assert(false); }
+`
+	if err := os.WriteFile(filepath.Join(starterRoot, "tests", "excluded.fy"), []byte(starterExcludedNativeTestSource), 0o600); err != nil {
+		return 0, fmt.Errorf("write standalone compiler excluded native test file: %w", err)
+	}
 	starterNativeCode, starterNativeStdout, starterNativeStderr, err := runStandaloneCommand(
 		starterRoot,
 		executablePath,
 		"test", "--native", "--locations",
-		"--exact", "tests::main::second_passes",
-		"--exact", "tests::main::first_fails",
+		"--file", "tests/main.fy",
 		"--locked",
 	)
 	if err != nil {
@@ -231,8 +238,7 @@ fn void second_passes() { assert(process::arg_count() >= 1); }
 		starterRoot,
 		executablePath,
 		"test", "--json", "--locations", "--native", "--release",
-		"--exact", "tests::main::second_passes",
-		"--exact", "tests::main::first_fails",
+		"--file", "tests/main.fy",
 		"--locked",
 	)
 	if err != nil {

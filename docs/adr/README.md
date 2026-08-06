@@ -310,6 +310,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0298-public-windows-path-kind.md`: adds Windows `std::fs::PathKind` and `path_kind` as a read-only path snapshot with conservative reparse/device classification, exact failures, explicit TOCTOU limits, and low/optimized raw plus generated-Fairy evidence with SDK `0.0.0-stage0.35`.
 - `0299-public-buffer-single-byte-append.md`: adds C-friendly `std::bytes::append_byte` by reusing the existing fallible Buffer append primitive, with generated-Fairy success and forced low/optimized MSVC allocation-failure evidence under SDK `0.0.0-stage0.36` and no runtime ABI change.
 - `0300-stable-test-source-locations.md`: adds opt-in exact-current source anchors to stable test listing and execution, with portable paths, package and byte identities, v3 JSON schemas, unchanged legacy bytes, and low/optimized native evidence.
+- `0301-stable-test-file-selection.md`: adds exact portable workspace-relative test-file selection to listing and execution, including zero-test files, strict fail-closed matching, complete-overlay admission, and low/optimized native evidence.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

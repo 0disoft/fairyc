@@ -891,6 +891,14 @@ identities. Canonical test identity, `--exact`, ordering, locking, exit codes, e
 artifacts remain unchanged. Language, SDK, runtime ABI, manifest, lockfile, package, interface,
 target, MIR, and generated-code versions remain unchanged.
 
+ADR 0301 additively admits repeatable `--file <portable-test-path>` for stable test listing and
+execution. Values match the `--locations` portable workspace-relative test-source path domain
+byte-for-byte; unknown, duplicate, missing, host-separated, and case-mismatched values fail closed.
+A known zero-test file succeeds. `--file` is mutually exclusive with `--exact`, preserves canonical
+ordering and complete-overlay compiler admission, adds no output field, and leaves all v1/v2/v3
+text and JSON bytes unchanged. Language, SDK, runtime ABI, manifest, lockfile, package, interface,
+target, MIR, and generated-code versions remain unchanged.
+
 ADR 0204 stabilizes `fairyc new <package-name> --uid <package-uid>`, its explicit non-derived UID,
 single direct-child destination, exact four-file starter, no-overwrite behavior, absence of an
 initial lockfile, success line, and codes 0, 2, 4, and 7. Adding templates, flags, merge behavior, an
