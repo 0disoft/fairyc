@@ -541,9 +541,9 @@ execution, a nonzero program status, or a program trap follows. `--locked` perfo
 compiler-output write failure after program execution returns code 4 but cannot undo earlier bytes
 or program effects; no executable is retained.
 
-## Stable workspace test v11
+## Stable workspace test v12
 
-`fairyc test [--json] [--locations] [--native [--release] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` first loads and locks the ordinary production workspace, then overlays only
+`fairyc test [--json] [--locations] [--native [--release] [--stdin] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` first loads and locks the ordinary production workspace, then overlays only
 the root package's optional exact-lowercase `tests/` tree in memory. `--package` instead selects one
 exact local manifest package UID that has exactly one root-reachable resolved instance and overlays
 only that package's tree. Unknown, unreachable, SDK, or feature-instance-ambiguous selections are
@@ -565,8 +565,12 @@ runs each test by canonical `<module>::<function>` order. Workspace mode uses th
 interpreter state. `--native`
 instead clones the verified MIR per test, appends and verifies one private i32 harness that calls
 the selected void entry, emits only its reachable Windows closure, compiles and inspects a temporary
-PE, and runs it with EOF stdin in a fresh process and temporary directory. Without a delimiter the
-program argument list is empty; native values after the first `--` are forwarded unchanged.
+PE, and runs it in a fresh process and temporary directory. Native stdin is EOF by default. Explicit
+`--stdin` requires exactly one selected test after complete compiler admission, then attaches caller
+input directly only after compilation, linking, and PE/unwind inspection. It does not pre-read,
+buffer, replay, retain, decode, or impose a separate byte limit. Zero or multiple selected tests fail
+as code 2 without consuming input or launching a process. Without a delimiter the program argument
+list is empty; native values after the first `--` are forwarded unchanged.
 Development uses low MSVC; `--native --release` uses optimized MSVC. A trap fails that test and later
 tests continue. Interpreter or backend capability rejection aborts as code 2 rather than becoming a
 false test failure.
@@ -623,11 +627,13 @@ Windows x64 MSVC but never WSL or network and retains no artifact. A report writ
 prefix before code 4; ordinary lock maintenance and earlier native test effects may precede later
 failure, while `--locked` writes nothing.
 
-Only native execution accepts the first `--` as a compiler/program delimiter. Every following value
+Only native execution accepts `--stdin` and the first `--` as a compiler/program delimiter. Semantic
+execution and `--list` reject `--stdin`. Before the delimiter it opts one selected native process
+into direct caller input; after the delimiter it is an ordinary program argument. Every following value
 is forwarded unchanged to each selected isolated test process; the delimiter itself is excluded.
 Flag-looking, empty, and non-ASCII UTF-8 arguments are preserved, while an embedded NUL is a code-2
 invocation failure before workspace loading. Semantic execution and `--list` reject the delimiter.
-Arguments are process input and do not alter text reports or stable JSON schemas.
+Arguments and stdin are process input and do not alter text reports or stable JSON schemas.
 
 Execution-mode `--json` replaces only the complete report bytes with one compact newline-terminated
 object. Default and `--package` use `fairyc.test-report/v1`; `--workspace` uses
@@ -661,7 +667,7 @@ separators. Consumers must match both identities before treating a retained span
 | `fairyc check [--locked]` | Check the current manifest-owned workspace through verified MIR | No |
 | `fairyc build [--release] [--locked]` | Build or replace the current root package's one Windows executable | Yes |
 | `fairyc run [--release] [--locked] [-- <program-args...>]` | Build and run the current workspace as one temporary Windows image, forwarding arguments after `--` to the program | Yes |
-| `fairyc test [--json] [--locations] [--native [--release] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` | Run all, exact portable test directories, exact portable test files, or exact canonical root, selected-package, or root-reachable workspace `@test fn void` entries through the semantic interpreter or one temporary Windows MSVC image per selected test, with human or stable JSON output, optional exact-current source anchors, and native process arguments after `--` | Optional temporary native images |
+| `fairyc test [--json] [--locations] [--native [--release] [--stdin] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` | Run all, exact portable test directories, exact portable test files, or exact canonical root, selected-package, or root-reachable workspace `@test fn void` entries through the semantic interpreter or one temporary Windows MSVC image per selected test, with human or stable JSON output, optional exact-current source anchors, native process arguments after `--`, and explicit caller stdin for exactly one selected native test | Optional temporary native images |
 | `fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]` | Compile-admit the complete selected test overlay and list all or exact-directory/file canonical identities as text or stable JSON, optionally with exact-current source anchors, without execution | No |
 | `fairyc emit c --target <target-id> [--locked]` | Emit the current executable workspace's target-selected C11 application unit | C only, stdout |
 | `fairyc explain <diagnostic-code>` | Explain a stable diagnostic code | No |
@@ -669,7 +675,7 @@ separators. Consumers must match both identities before treating a retained span
 
 Catalog-unreachable or feature-instance-ambiguous workspace test aggregation, fuzzy/tag/glob test filtering, parallel scheduling, portable native-test targets, target triples beyond
   the declared emit profiles and build/run's fixed local Windows path,
-additional program-input routing beyond stable run and native-test arguments,
+additional program-input routing beyond stable run and explicit single-native-test stdin,
 feature flags, and configuration precedence
 remain UNDECIDED. The implemented `experimental` spellings do not settle those decisions.
 

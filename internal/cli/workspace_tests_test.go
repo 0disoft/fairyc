@@ -593,6 +593,8 @@ func TestStableWorkspaceTestHandlesZeroTestsInvocationAndOutputFailure(t *testin
 		{"test", "--locations", "--locations"},
 		{"test", "--list", "--native"},
 		{"test", "--list", "--release"},
+		{"test", "--stdin"},
+		{"test", "--list", "--stdin"},
 		{"test", "--list", "--exact", "tests::missing::test"},
 		{"test", "--exact"},
 		{"test", "--exact", "tests::missing::test", "--exact", "tests::missing::test"},
@@ -643,14 +645,17 @@ fn void broken() { missing(); }
 
 func TestStableWorkspaceTestNativeOptionsRequireExplicitNativeMode(t *testing.T) {
 	t.Parallel()
-	options, err := parseStableTestOptions([]string{"--release", "--exact", "tests::answer::is_42", "--json", "--locked", "--native", "--", "--locked", "", "한글λ"})
-	if err != nil || !options.native || !options.release || !options.json || !options.locked ||
+	options, err := parseStableTestOptions([]string{"--release", "--stdin", "--exact", "tests::answer::is_42", "--json", "--locked", "--native", "--", "--stdin", "", "한글λ"})
+	if err != nil || !options.native || !options.release || !options.stdin || !options.json || !options.locked ||
 		len(options.exact) != 1 || options.exact[0] != "tests::answer::is_42" ||
-		!slices.Equal(options.programArgs, []string{"--locked", "", "한글λ"}) {
+		!slices.Equal(options.programArgs, []string{"--stdin", "", "한글λ"}) {
 		t.Fatalf("native options = %+v, %v", options, err)
 	}
 	if _, err := parseStableTestOptions([]string{"--release"}); err == nil || !strings.Contains(err.Error(), "requires --native") {
 		t.Fatalf("release-only options error = %v", err)
+	}
+	if _, err := parseStableTestOptions([]string{"--stdin"}); err == nil || !strings.Contains(err.Error(), "requires --native") {
+		t.Fatalf("stdin-only options error = %v", err)
 	}
 	if _, err := parseStableTestOptions([]string{"--", "argument"}); err == nil || !strings.Contains(err.Error(), "requires --native before --") {
 		t.Fatalf("semantic program arguments error = %v", err)
@@ -660,6 +665,31 @@ func TestStableWorkspaceTestNativeOptionsRequireExplicitNativeMode(t *testing.T)
 	}
 	if _, err := parseStableTestOptions([]string{"--native", "--", "bad\x00argument"}); err == nil || !strings.Contains(err.Error(), `command "test" rejects program arguments containing a NUL byte`) {
 		t.Fatalf("native NUL program argument error = %v", err)
+	}
+}
+
+func TestStableWorkspaceTestRequiresOneSelectedTestForCallerInput(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeStableTestWorkspace(t, root)
+	writeWorkspaceFile(t, root, "tests/input.fy", `module tests::input;
+@test
+fn void first() { assert(true); }
+@test
+fn void second() { assert(true); }
+`)
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	code := RunWithInput(
+		[]string{"test", "--native", "--stdin"},
+		root,
+		strings.NewReader("caller input"),
+		&stdout,
+		&stderr,
+	)
+	if code != ExitInvalidInvocation || stdout.String() != "" ||
+		!strings.Contains(stderr.String(), "requires exactly one selected test when --stdin is supplied") {
+		t.Fatalf("multi-test stdin = (%d, %q, %q)", code, stdout.String(), stderr.String())
 	}
 }
 

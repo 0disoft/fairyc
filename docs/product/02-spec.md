@@ -1068,7 +1068,8 @@ execution. ADR 0287 additionally admits execution-mode `--json` and freezes
 `fairyc.test-report/v1` with canonical semantic/native outcomes, engine/target/profile identity,
 totals, status, and lock state while preserving text bytes and exit codes. Catalog-wide member recursion,
 fuzzy/tag/glob filters, setup/teardown, portable native targets,
-native-test stdin/output streams, benchmarks, and host-environment policy remain separate contracts.
+shared or replayed multi-test input, native-test output streams, benchmarks, and host-environment
+policy remain separate contracts.
 
 ADR 0289 adds singular `--package <package-uid>` selection to execution and listing. The UID must
 name one local package with exactly one root-reachable resolved instance; only that package's
@@ -1112,6 +1113,15 @@ remaining values are forwarded unchanged to every selected isolated test process
 empty, and non-ASCII UTF-8 arguments are preserved; embedded NUL is rejected before workspace
 loading. Semantic execution and listing reject the delimiter. Discovery, selection, lock behavior,
 text and JSON report bytes, schemas, SDK, language, runtime ABI, and generated C remain unchanged.
+
+ADR 0313 advances native execution to explicit
+`fairyc test --native [--release] --stdin ...` only when selection resolves to exactly one test after
+complete overlay compiler admission. The caller-owned reader is attached directly after compilation,
+linking, and PE/unwind inspection without compiler-side pre-reading, buffering, replay, retention,
+decoding, or a separate byte limit. Native tests retain EOF by default; semantic/list execution
+rejects the flag, and zero or multiple selections fail as code 2 without consuming input or launching
+a process. Program arguments, output rejection, text/JSON report bytes and schemas, SDK, language,
+runtime ABI, and generated C remain unchanged.
 
 ADR 0146 rejects speculative persistent caching at this point. ADR 0149 supplies deterministic,
 bounded, verifier-checked bytes for a complete MIR program, but the workspace path still produces

@@ -322,6 +322,7 @@ It is intentionally a scaffold and should be filled with project-specific decisi
 - `0310-public-windows-file-read-only-mutation.md`: adds same-handle read-only attribute mutation with exact access-denied failure, attribute preservation, and SDK `0.0.0-stage0.44`.
 - `0311-public-windows-recursive-directory-removal.md`: adds root-protected recursive directory removal with reparse-leaf handling, exact partial progress, low/optimized native evidence, and SDK `0.0.0-stage0.45`.
 - `0312-stable-native-test-program-arguments.md`: forwards arguments after the first `--` to every selected isolated native test, rejects semantic/list and NUL misuse, preserves report schemas, and proves exact low/optimized generated-Fairy `std::process` bytes.
+- `0313-stable-single-native-test-stdin.md`: explicitly attaches caller stdin to exactly one selected isolated native test after complete compiler admission and PE inspection, preserves default EOF and report schemas, and proves binary low/optimized generated-Fairy `std::io` input.
 
 Product scope remains owned by `docs/product/02-spec.md`. Validation names are owned by `VALIDATION.md`.
 

@@ -28,7 +28,7 @@ The Go frontend currently exposes stable starter creation
 `fairyc new <package-name> --uid <package-uid>`, stable current-workspace commands
 `fairyc check [--locked]`, `fairyc build [--release] [--locked]`, and
 `fairyc run [--release] [--locked]`, the stable semantic-by-default or Windows-native
-`fairyc test [--json] [--locations] [--native [--release] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` and execution-free
+`fairyc test [--json] [--locations] [--native [--release] [--stdin] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` and execution-free
 `fairyc test --list [--json] [--locations] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]`, plus the stable source-independent
 `fairyc explain <diagnostic-code>` lookup and stable host-independent `fairyc targets` maturity
 report, and stable target-explicit
@@ -281,7 +281,7 @@ stderr is preserved, and the canonical trap line uses code 5. The two captured s
 64 KiB ceiling and retain no cross-stream ordering promise. Program arguments, a `--` delimiter,
 retained build output, input forwarding for other native commands, and cache policy remain absent.
 
-`fairyc test [--json] [--locations] [--native [--release] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` overlays the root package's optional exact-lowercase `tests/` tree
+`fairyc test [--json] [--locations] [--native [--release] [--stdin] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` overlays the root package's optional exact-lowercase `tests/` tree
 after maintaining or verifying the production lock. `--package` instead selects exactly one
 root-reachable local package by its manifest UID and overlays only that package. Paths keep their `tests/` prefix for module
 identity, and argument-free `@test` selects private safe zero-argument `void` functions. Default
@@ -302,11 +302,15 @@ rejects alternate dot-segment or trailing-slash spellings. `--dir`, `--file`, an
 mutually exclusive, and none hides complete-overlay compiler failures. Only native execution accepts
 the first `--`; every later value is passed unchanged to each isolated test process, while semantic
 execution and listing reject the delimiter and embedded NUL fails before workspace loading.
+Native stdin remains EOF unless explicit `--stdin` is supplied. That flag is native-only, requires
+exactly one selected test after complete compiler admission, and attaches caller input directly only
+after compilation and PE inspection without pre-reading, buffering, replay, retention, or an extra
+byte ceiling. Zero or multiple selections fail without consuming input or launching a process.
 `fairyc test --list [--package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--locked]` runs the same complete compiler admission,
 then reports every canonical identity without invoking an execution engine or target toolchain;
 listing `--json` selects the compact versioned `fairyc.test-list/v1` report, while execution
 `--json` selects `fairyc.test-report/v1` with engine/target/profile identity, canonical outcomes,
-totals, status, and lock. `--native`, `--release`, and `--exact` do not combine with listing. Native stdin/output streams, catalog-unreachable member aggregation,
+totals, status, and lock. `--native`, `--release`, `--stdin`, and `--exact` do not combine with listing. Shared multi-test input, native output streams, catalog-unreachable member aggregation,
 fuzzy/tag/glob selection, setup/teardown, benchmarks, and portable targets remain outside this contract.
 `--locations` is valid in listing or execution and preserves canonical identity and selection
 semantics. Text lines gain `at <workspace-relative-path>:<line>:<byte-column>` only when requested.

@@ -133,7 +133,7 @@ manifest, workspace, graph, and lock failures use code `7`. The command writes n
 but ordinary lock maintenance may precede emission or an output failure. `--locked` verifies the
 lock without writing.
 
-`fairyc test [--json] [--locations] [--native [--release] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` buffers one deterministic report after compilation and capability
+`fairyc test [--json] [--locations] [--native [--release] [--stdin] [-- <program-args>...]] [--workspace | --package <package-uid>] [--dir <portable-test-directory>]... [--file <portable-test-path>]... [--exact <test-identity>]... [--locked]` buffers one deterministic report after compilation and capability
 admission. Default and singular-package identities are `<module>::<function>`; workspace identities
 are `<package-uid>::<module>::<function>`. Completed tests use `test <identity> ... ok` or `test
 <identity> ... FAILED (<trap-category>)`, followed by `test result:
@@ -142,7 +142,9 @@ only the successful final line. Without `--json`, the command writes no ANSI esc
 source text, artifact, JSON, or native program stream. Default mode uses the semantic interpreter. `--native`
 uses one inspected temporary Windows image per test but retains the same report; native program
 output is rejected instead of mixed into it. Arguments after the first `--` are forwarded only in
-native mode and do not appear in the report. Success uses code `0`; invocation, interpreter/backend
+native mode and do not appear in the report. Explicit native-only `--stdin` requires exactly one
+selected test after complete compiler admission and attaches caller input directly after PE
+inspection; default input remains EOF, and stdin bytes do not appear in the report. Success uses code `0`; invocation, interpreter/backend
 capability, or native-program-output rejection uses `2`; source and `E9001` test-declaration
 diagnostics use `3`; internal and output failures use `4`; one or more language traps use `5`;
 native toolchain/build/inspection/execution failure uses `6`; workspace, test-source, graph, and lock

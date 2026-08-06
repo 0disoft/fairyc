@@ -32,6 +32,7 @@ type stableTestOptions struct {
 	locked      bool
 	native      bool
 	release     bool
+	stdin       bool
 	list        bool
 	json        bool
 	locations   bool
@@ -106,7 +107,7 @@ type testSourceDiagnostics struct {
 	diagnostics []diagnostic.Diagnostic
 }
 
-func runStableTest(arguments []string, sourceRoot string, stdout, stderr io.Writer) int {
+func runStableTest(arguments []string, sourceRoot string, stdin io.Reader, stdout, stderr io.Writer) int {
 	options, err := parseStableTestOptions(arguments)
 	if err != nil {
 		return invocationError(stderr, err.Error())
@@ -201,6 +202,9 @@ func runStableTest(arguments []string, sourceRoot string, stdout, stderr io.Writ
 	if !checked.Verified {
 		return internalError(stderr)
 	}
+	if options.stdin && len(tests) != 1 {
+		return invocationError(stderr, `command "test" requires exactly one selected test when --stdin is supplied`)
+	}
 	if options.list {
 		if options.json {
 			return writeStableTestListJSON(tests, lockState, options, stdout, stderr)
@@ -214,7 +218,11 @@ func runStableTest(arguments []string, sourceRoot string, stdout, stderr io.Writ
 		if options.release {
 			profile = cdriver.OptimizedProfile
 		}
-		outcomes, code = runNativeWorkspaceTests(checked.MIR, tests, profile, options.programArgs, stderr)
+		nativeInput := io.Reader(strings.NewReader(""))
+		if options.stdin {
+			nativeInput = stdin
+		}
+		outcomes, code = runNativeWorkspaceTests(checked.MIR, tests, profile, nativeInput, options.programArgs, stderr)
 	} else {
 		outcomes, code = runInterpreterWorkspaceTests(checked.MIR, tests, stderr)
 	}
@@ -435,7 +443,7 @@ func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 
 func parseStableTestCompilerOptions(arguments []string) (stableTestOptions, error) {
 	options := stableTestOptions{}
-	seen := make(map[string]bool, 5)
+	seen := make(map[string]bool, 6)
 	files := make(map[string]bool)
 	directories := make(map[string]bool)
 	exact := make(map[string]bool)
@@ -492,8 +500,8 @@ func parseStableTestCompilerOptions(arguments []string) (stableTestOptions, erro
 			index++
 			continue
 		}
-		if argument != "--locked" && argument != "--native" && argument != "--release" && argument != "--list" && argument != "--json" && argument != "--locations" && argument != "--workspace" {
-			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --list, --json, --locations, --native, --release, --workspace, --package <package-uid>, --dir <portable-test-directory>, --file <portable-test-path>, --exact <test-identity>, and --locked`)
+		if argument != "--locked" && argument != "--native" && argument != "--release" && argument != "--stdin" && argument != "--list" && argument != "--json" && argument != "--locations" && argument != "--workspace" {
+			return stableTestOptions{}, fmt.Errorf(`command "test" accepts only optional --list, --json, --locations, --native, --release, --stdin, --workspace, --package <package-uid>, --dir <portable-test-directory>, --file <portable-test-path>, --exact <test-identity>, and --locked`)
 		}
 		if seen[argument] {
 			return stableTestOptions{}, fmt.Errorf(`command "test" received %s more than once`, argument)
@@ -506,6 +514,8 @@ func parseStableTestCompilerOptions(arguments []string) (stableTestOptions, erro
 			options.native = true
 		case "--release":
 			options.release = true
+		case "--stdin":
+			options.stdin = true
 		case "--list":
 			options.list = true
 		case "--json":
@@ -525,11 +535,14 @@ func parseStableTestCompilerOptions(arguments []string) (stableTestOptions, erro
 	if len(options.directories) != 0 && (len(options.files) != 0 || len(options.exact) != 0) {
 		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --dir with --file or --exact`)
 	}
-	if options.list && (options.native || options.release || len(options.exact) != 0) {
-		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --list with --native, --release, or --exact`)
+	if options.list && (options.native || options.release || options.stdin || len(options.exact) != 0) {
+		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --list with --native, --release, --stdin, or --exact`)
 	}
 	if options.release && !options.native {
 		return stableTestOptions{}, fmt.Errorf(`command "test" requires --native when --release is supplied`)
+	}
+	if options.stdin && !options.native {
+		return stableTestOptions{}, fmt.Errorf(`command "test" requires --native when --stdin is supplied`)
 	}
 	return options, nil
 }

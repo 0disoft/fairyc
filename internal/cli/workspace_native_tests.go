@@ -3,7 +3,6 @@ package cli
 import (
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/hir"
@@ -20,12 +19,13 @@ type nativeWorkspaceTestCompiler func(
 	stderr io.Writer,
 ) (cdriver.WindowsHostArtifact, int)
 
-type nativeWorkspaceTestExecutor func(cdriver.WindowsHostArtifact, []string) (cdriver.WindowsHostOutcome, error)
+type nativeWorkspaceTestExecutor func(cdriver.WindowsHostArtifact, io.Reader, []string) (cdriver.WindowsHostOutcome, error)
 
 func runNativeWorkspaceTests(
 	program mir.Program,
 	tests []workspaceTest,
 	profile cdriver.Profile,
+	stdin io.Reader,
 	programArguments []string,
 	stderr io.Writer,
 ) ([]workspaceTestOutcome, int) {
@@ -33,6 +33,7 @@ func runNativeWorkspaceTests(
 		program,
 		tests,
 		profile,
+		stdin,
 		programArguments,
 		stderr,
 		compileNativeWorkspaceTest,
@@ -44,6 +45,7 @@ func runNativeWorkspaceTestsWith(
 	program mir.Program,
 	tests []workspaceTest,
 	profile cdriver.Profile,
+	stdin io.Reader,
 	programArguments []string,
 	stderr io.Writer,
 	compile nativeWorkspaceTestCompiler,
@@ -59,7 +61,7 @@ func runNativeWorkspaceTestsWith(
 		if code != ExitSuccess {
 			return nil, code
 		}
-		outcome, err := execute(artifact, programArguments)
+		outcome, err := execute(artifact, stdin, programArguments)
 		if err != nil {
 			return nil, buildFailure(stderr, fmt.Errorf("execute native test %s: %w", test.display, err))
 		}
@@ -99,8 +101,8 @@ func compileNativeWorkspaceTest(
 	)
 }
 
-func executeNativeWorkspaceTest(artifact cdriver.WindowsHostArtifact, programArguments []string) (cdriver.WindowsHostOutcome, error) {
-	return cdriver.ExecuteWindowsMSVCTargetWithInputAndArgs(artifact, strings.NewReader(""), programArguments)
+func executeNativeWorkspaceTest(artifact cdriver.WindowsHostArtifact, stdin io.Reader, programArguments []string) (cdriver.WindowsHostOutcome, error) {
+	return cdriver.ExecuteWindowsMSVCTargetWithInputAndArgs(artifact, stdin, programArguments)
 }
 
 func nativeWorkspaceTestProgram(input mir.Program, testEntry string) (mir.Program, string, error) {
