@@ -1136,6 +1136,10 @@ admission, the compiler opens one canonical workspace-contained regular file, re
 65,536 bytes, and gives every selected isolated process a fresh byte-zero reader. It does not combine
 with caller-owned `--stdin` or listing; file failures launch no process and reports remain unchanged.
 
+ADR 0316 adds native-only canonical `--timeout-seconds <1..60>`. The selected duration bounds each
+test process after compilation and PE inspection; omission preserves 60 seconds. Timeout is code 6,
+emits no completed report, stops later execution, and retains no artifact.
+
 ADR 0146 rejects speculative persistent caching at this point. ADR 0149 supplies deterministic,
 bounded, verifier-checked bytes for a complete MIR program, but the workspace path still produces
 no independently reusable per-package MIR/object artifact and has no configured comparable

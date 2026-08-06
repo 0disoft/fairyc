@@ -1,0 +1,8 @@
+schema = "fairyc.manifest/v1"
+
+[package]
+uid = "example.native-test-timeout-quickstart.app"
+name = "native-test-timeout-quickstart"
+version = "1.0.0"
+language = "fairyc-language/10"
+source = "src"

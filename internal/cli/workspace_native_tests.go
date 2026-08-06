@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
 
 	"github.com/0disoft/fairyc/internal/cdriver"
 	"github.com/0disoft/fairyc/internal/hir"
@@ -21,7 +22,7 @@ type nativeWorkspaceTestCompiler func(
 	stderr io.Writer,
 ) (cdriver.WindowsHostArtifact, int)
 
-type nativeWorkspaceTestExecutor func(cdriver.WindowsHostArtifact, io.Reader, []string) (cdriver.WindowsHostOutcome, error)
+type nativeWorkspaceTestExecutor func(cdriver.WindowsHostArtifact, io.Reader, []string, time.Duration) (cdriver.WindowsHostOutcome, error)
 
 type nativeWorkspaceTestInput struct {
 	caller     io.Reader
@@ -45,6 +46,7 @@ func runNativeWorkspaceTests(
 	profile cdriver.Profile,
 	input nativeWorkspaceTestInput,
 	programArguments []string,
+	timeout time.Duration,
 	captureOutput bool,
 	stderr io.Writer,
 ) ([]workspaceTestOutcome, int) {
@@ -54,6 +56,7 @@ func runNativeWorkspaceTests(
 		profile,
 		input,
 		programArguments,
+		timeout,
 		captureOutput,
 		stderr,
 		compileNativeWorkspaceTest,
@@ -67,6 +70,7 @@ func runNativeWorkspaceTestsWith(
 	profile cdriver.Profile,
 	input nativeWorkspaceTestInput,
 	programArguments []string,
+	timeout time.Duration,
 	captureOutput bool,
 	stderr io.Writer,
 	compile nativeWorkspaceTestCompiler,
@@ -82,7 +86,7 @@ func runNativeWorkspaceTestsWith(
 		if code != ExitSuccess {
 			return nil, code
 		}
-		outcome, err := execute(artifact, input.reader(), programArguments)
+		outcome, err := execute(artifact, input.reader(), programArguments, timeout)
 		if err != nil {
 			return nil, buildFailure(stderr, fmt.Errorf("execute native test %s: %w", test.display, err))
 		}
@@ -125,8 +129,8 @@ func compileNativeWorkspaceTest(
 	)
 }
 
-func executeNativeWorkspaceTest(artifact cdriver.WindowsHostArtifact, stdin io.Reader, programArguments []string) (cdriver.WindowsHostOutcome, error) {
-	return cdriver.ExecuteWindowsMSVCTargetWithInputAndArgs(artifact, stdin, programArguments)
+func executeNativeWorkspaceTest(artifact cdriver.WindowsHostArtifact, stdin io.Reader, programArguments []string, timeout time.Duration) (cdriver.WindowsHostOutcome, error) {
+	return cdriver.ExecuteWindowsMSVCTargetWithInputArgsAndTimeout(artifact, stdin, programArguments, timeout)
 }
 
 func nativeWorkspaceTestProgram(input mir.Program, testEntry string) (mir.Program, string, error) {

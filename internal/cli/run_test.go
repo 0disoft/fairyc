@@ -1055,6 +1055,7 @@ func TestHelpAndInvocationErrorsAreSeparated(t *testing.T) {
 		"fairyc test --list [--json] [--locations]", "every\nunambiguous root-reachable local package with --workspace",
 		"exact-current portable source anchors", "native tests receive any process arguments",
 		"Explicit --stdin attaches caller input only when exactly one", "Explicit --stdin-file replays one bounded",
+		"Explicit --timeout-seconds bounds each native test process",
 		"Explicit --capture-output requires", "fairyc emit c --target <target-id> [--locked]", "fairyc explain",
 		"experimental parse", "experimental check <primary.fy>", "experimental check-workspace",
 		"experimental check-workspace-session", "experimental build-workspace", "experimental run-workspace",

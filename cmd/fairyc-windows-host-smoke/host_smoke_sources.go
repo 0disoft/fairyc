@@ -163,6 +163,18 @@ func loadHostSmokeSources() (map[string]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("read checked-in native-test output test: %w", err)
 	}
+	nativeTestTimeoutManifest, err := os.ReadFile(filepath.FromSlash(checkedInNativeTestTimeoutManifestPath))
+	if err != nil {
+		return nil, fmt.Errorf("read checked-in native-test timeout workspace manifest: %w", err)
+	}
+	nativeTestTimeoutMain, err := os.ReadFile(filepath.FromSlash(checkedInNativeTestTimeoutMainPath))
+	if err != nil {
+		return nil, fmt.Errorf("read checked-in native-test timeout workspace entry: %w", err)
+	}
+	nativeTestTimeoutTest, err := os.ReadFile(filepath.FromSlash(checkedInNativeTestTimeoutTestPath))
+	if err != nil {
+		return nil, fmt.Errorf("read checked-in native-test timeout test: %w", err)
+	}
 	windowsFileSource, err := os.ReadFile(filepath.FromSlash(checkedInWindowsFilePath))
 	if err != nil {
 		return nil, fmt.Errorf("read checked-in Windows File source: %w", err)
@@ -249,6 +261,9 @@ func loadHostSmokeSources() (map[string]string, error) {
 		checkedInNativeTestOutputManifestPath:  string(nativeTestOutputManifest),
 		checkedInNativeTestOutputMainPath:      string(nativeTestOutputMain),
 		checkedInNativeTestOutputTestPath:      string(nativeTestOutputTest),
+		checkedInNativeTestTimeoutManifestPath: string(nativeTestTimeoutManifest),
+		checkedInNativeTestTimeoutMainPath:     string(nativeTestTimeoutMain),
+		checkedInNativeTestTimeoutTestPath:     string(nativeTestTimeoutTest),
 		checkedInWindowsFilePath:               string(windowsFileSource),
 		checkedInWindowsFileSupportPath:        string(windowsFileSupportSource),
 		checkedInOwnedTextPath:                 string(ownedTextSource),

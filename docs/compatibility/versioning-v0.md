@@ -1005,6 +1005,11 @@ Omission preserves EOF or explicit caller stdin, and all report schemas and byte
 Language, SDK, runtime ABI, manifest, lockfile, package, interface, target, MIR, and generated-code
 versions remain unchanged.
 
+ADR 0316 additively admits native-only canonical `--timeout-seconds` from 1 through 60 and applies
+it only to each test process after build and inspection. Omission preserves 60 seconds; reports and
+all SDK, language, runtime ABI, manifest, lockfile, package, target, MIR, and generated-code versions
+remain unchanged.
+
 ADR 0204 stabilizes `fairyc new <package-name> --uid <package-uid>`, its explicit non-derived UID,
 single direct-child destination, exact four-file starter, no-overwrite behavior, absence of an
 initial lockfile, success line, and codes 0, 2, 4, and 7. Adding templates, flags, merge behavior, an

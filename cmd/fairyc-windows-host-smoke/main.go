@@ -612,6 +612,10 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	nativeTestTimeoutExecutions, err := runStableNativeTestTimeoutProof(root)
+	if err != nil {
+		return err
+	}
 	layoutExecutions, layoutCases, err := runWindowsLayoutProbe(toolchain)
 	if err != nil {
 		return err
@@ -684,6 +688,7 @@ func run() error {
 		nativeTestArgsExecutions:       nativeTestArgsExecutions,
 		nativeTestStdinExecutions:      nativeTestStdinExecutions,
 		nativeTestOutputExecutions:     nativeTestOutputExecutions,
+		nativeTestTimeoutExecutions:    nativeTestTimeoutExecutions,
 		stdIoScalarBuildExecutions:     stdIoScalarBuildExecutions,
 		cIntCastExecutions:             cIntCastExecutions,
 		atlasCallProcessIterations:     buildmeasure.AtlasCallProcessIterations,

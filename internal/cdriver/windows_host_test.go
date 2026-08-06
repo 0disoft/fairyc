@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestExecuteWindowsMSVCTargetWithInputRejectsNilInput(t *testing.T) {
@@ -17,6 +18,14 @@ func TestExecuteWindowsMSVCTargetWithInputRejectsNilInput(t *testing.T) {
 	if _, err := ExecuteWindowsMSVCTargetWithInputAndArgs(WindowsHostArtifact{}, nil, []string{"x"}); err == nil ||
 		!strings.Contains(err.Error(), "input must not be nil") {
 		t.Fatalf("ExecuteWindowsMSVCTargetWithInputAndArgs(nil) error = %v", err)
+	}
+	if _, err := ExecuteWindowsMSVCTargetWithInputArgsAndTimeout(WindowsHostArtifact{}, strings.NewReader(""), nil, 0); err == nil ||
+		!strings.Contains(err.Error(), "greater than zero") {
+		t.Fatalf("zero target timeout error = %v", err)
+	}
+	if _, err := ExecuteWindowsMSVCTargetWithInputArgsAndTimeout(WindowsHostArtifact{}, strings.NewReader(""), nil, 61*time.Second); err == nil ||
+		!strings.Contains(err.Error(), "at most 1m0s") {
+		t.Fatalf("oversized target timeout error = %v", err)
 	}
 }
 

@@ -12,6 +12,7 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/0disoft/fairyc/internal/pecoff"
 )
@@ -686,13 +687,22 @@ func ExecuteWindowsMSVCTargetWithInput(artifact WindowsHostArtifact, stdin io.Re
 // input stream and exact program arguments after argv[0]. The driver does not pre-read or retain
 // input bytes.
 func ExecuteWindowsMSVCTargetWithInputAndArgs(artifact WindowsHostArtifact, stdin io.Reader, programArgs []string) (WindowsHostOutcome, error) {
+	return ExecuteWindowsMSVCTargetWithInputArgsAndTimeout(artifact, stdin, programArgs, commandTimeout)
+}
+
+// ExecuteWindowsMSVCTargetWithInputArgsAndTimeout runs one temporary target PE with an explicit
+// bounded execution timeout. The timeout applies only to the program process, not compilation.
+func ExecuteWindowsMSVCTargetWithInputArgsAndTimeout(artifact WindowsHostArtifact, stdin io.Reader, programArgs []string, timeout time.Duration) (WindowsHostOutcome, error) {
 	if stdin == nil {
 		return WindowsHostOutcome{}, fmt.Errorf("MSVC target execution input must not be nil")
+	}
+	if timeout <= 0 || timeout > commandTimeout {
+		return WindowsHostOutcome{}, fmt.Errorf("MSVC target execution timeout must be greater than zero and at most %s", commandTimeout)
 	}
 	if runtime.GOOS != "windows" || runtime.GOARCH != "amd64" {
 		return WindowsHostOutcome{}, fmt.Errorf("MSVC target execution requires windows/amd64, got %s/%s", runtime.GOOS, runtime.GOARCH)
 	}
-	return executeWindowsMSVCArtifactWithInputAndArgs(artifact, "MSVC target", stdin, programArgs)
+	return executeWindowsMSVCArtifactWithInputArgsAndTimeout(artifact, "MSVC target", stdin, programArgs, timeout)
 }
 
 // ExecuteWindowsMSVCProbe runs one locally compiled target-evidence probe.
@@ -752,6 +762,10 @@ func executeWindowsMSVCArtifactWithInput(artifact WindowsHostArtifact, label str
 }
 
 func executeWindowsMSVCArtifactWithInputAndArgs(artifact WindowsHostArtifact, label string, stdin io.Reader, programArgs []string) (WindowsHostOutcome, error) {
+	return executeWindowsMSVCArtifactWithInputArgsAndTimeout(artifact, label, stdin, programArgs, commandTimeout)
+}
+
+func executeWindowsMSVCArtifactWithInputArgsAndTimeout(artifact WindowsHostArtifact, label string, stdin io.Reader, programArgs []string, timeout time.Duration) (WindowsHostOutcome, error) {
 	if len(artifact.Bytes) == 0 || len(artifact.Bytes) > maxArtifactBytes {
 		return WindowsHostOutcome{}, fmt.Errorf("%s executable has invalid size %d", label, len(artifact.Bytes))
 	}
@@ -764,7 +778,7 @@ func executeWindowsMSVCArtifactWithInputAndArgs(artifact WindowsHostArtifact, la
 	if err := os.WriteFile(executablePath, artifact.Bytes, 0o700); err != nil {
 		return WindowsHostOutcome{}, fmt.Errorf("materialize MSVC host executable: %w", err)
 	}
-	contextValue, cancel := context.WithTimeout(context.Background(), commandTimeout)
+	contextValue, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 	command := exec.CommandContext(contextValue, executablePath)
 	if len(programArgs) != 0 {
@@ -777,7 +791,7 @@ func executeWindowsMSVCArtifactWithInputAndArgs(artifact WindowsHostArtifact, la
 	command.Stderr = output.stderrWriter()
 	err = command.Run()
 	if errors.Is(contextValue.Err(), context.DeadlineExceeded) {
-		return WindowsHostOutcome{}, fmt.Errorf("%s executable exceeded %s", label, commandTimeout)
+		return WindowsHostOutcome{}, fmt.Errorf("%s executable exceeded %s", label, timeout)
 	}
 	stdout, stderr, truncated := output.values()
 	if truncated {

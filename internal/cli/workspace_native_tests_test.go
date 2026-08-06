@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/0disoft/fairyc/internal/cbackend"
 	"github.com/0disoft/fairyc/internal/cdriver"
@@ -54,7 +55,10 @@ func TestNativeWorkspaceTestsContinueAfterTrapsAndPreserveOrder(t *testing.T) {
 		return cdriver.WindowsHostArtifact{Bytes: []byte{byte(compiled)}}, ExitSuccess
 	}
 	programArguments := []string{"--flag", "", "한글λ"}
-	execute := func(artifact cdriver.WindowsHostArtifact, stdin io.Reader, arguments []string) (cdriver.WindowsHostOutcome, error) {
+	execute := func(artifact cdriver.WindowsHostArtifact, stdin io.Reader, arguments []string, timeout time.Duration) (cdriver.WindowsHostOutcome, error) {
+		if timeout != time.Minute {
+			t.Fatalf("timeout = %s", timeout)
+		}
 		input, err := io.ReadAll(stdin)
 		if err != nil || len(input) != 0 {
 			t.Fatalf("native test default input = %q, %v", input, err)
@@ -76,7 +80,7 @@ func TestNativeWorkspaceTestsContinueAfterTrapsAndPreserveOrder(t *testing.T) {
 	}
 	var stderr bytes.Buffer
 	outcomes, code := runNativeWorkspaceTestsWith(
-		program, tests, cdriver.OptimizedProfile, nativeWorkspaceTestInput{}, programArguments, false, &stderr, compile, execute,
+		program, tests, cdriver.OptimizedProfile, nativeWorkspaceTestInput{}, programArguments, time.Minute, false, &stderr, compile, execute,
 	)
 	if code != ExitSuccess || stderr.String() != "" || compiled != 2 || len(outcomes) != 2 ||
 		outcomes[0].display != tests[0].display || outcomes[0].trapCategory != "assertion-failed" ||
@@ -93,7 +97,7 @@ func TestNativeWorkspaceTestForwardsCallerInputToSelectedProcess(t *testing.T) {
 		return cdriver.WindowsHostArtifact{Bytes: []byte{1}}, ExitSuccess
 	}
 	programArguments := []string{"--flag"}
-	execute := func(_ cdriver.WindowsHostArtifact, stdin io.Reader, arguments []string) (cdriver.WindowsHostOutcome, error) {
+	execute := func(_ cdriver.WindowsHostArtifact, stdin io.Reader, arguments []string, _ time.Duration) (cdriver.WindowsHostOutcome, error) {
 		input, err := io.ReadAll(stdin)
 		if err != nil {
 			return cdriver.WindowsHostOutcome{}, err
@@ -110,6 +114,7 @@ func TestNativeWorkspaceTestForwardsCallerInputToSelectedProcess(t *testing.T) {
 		cdriver.LowProfile,
 		nativeWorkspaceTestInput{caller: strings.NewReader("Fairy input\n")},
 		programArguments,
+		time.Minute,
 		false,
 		&stderr,
 		compile,
@@ -131,7 +136,7 @@ func TestNativeWorkspaceTestsReplayFixtureInputFromByteZero(t *testing.T) {
 		return cdriver.WindowsHostArtifact{Bytes: []byte(entry)}, ExitSuccess
 	}
 	executions := 0
-	execute := func(_ cdriver.WindowsHostArtifact, stdin io.Reader, _ []string) (cdriver.WindowsHostOutcome, error) {
+	execute := func(_ cdriver.WindowsHostArtifact, stdin io.Reader, _ []string, _ time.Duration) (cdriver.WindowsHostOutcome, error) {
 		contents, err := io.ReadAll(stdin)
 		if err != nil || string(contents) != "fixture\x00bytes" {
 			t.Fatalf("execution %d stdin = %q, %v", executions, contents, err)
@@ -143,7 +148,7 @@ func TestNativeWorkspaceTestsReplayFixtureInputFromByteZero(t *testing.T) {
 	outcomes, code := runNativeWorkspaceTestsWith(
 		program, tests, cdriver.LowProfile,
 		nativeWorkspaceTestInput{replay: []byte("fixture\x00bytes"), replayEach: true},
-		nil, false, &stderr, compile, execute,
+		nil, time.Minute, false, &stderr, compile, execute,
 	)
 	if code != ExitSuccess || stderr.String() != "" || len(outcomes) != 2 || executions != 2 {
 		t.Fatalf("replayed native outcomes=%+v executions=%d code=%d stderr=%q", outcomes, executions, code, stderr.String())
@@ -161,7 +166,7 @@ func TestNativeWorkspaceTestsCaptureExactProgramStreamsAndStripTrapReceipt(t *te
 		return cdriver.WindowsHostArtifact{Bytes: []byte(entry)}, ExitSuccess
 	}
 	executions := 0
-	execute := func(cdriver.WindowsHostArtifact, io.Reader, []string) (cdriver.WindowsHostOutcome, error) {
+	execute := func(cdriver.WindowsHostArtifact, io.Reader, []string, time.Duration) (cdriver.WindowsHostOutcome, error) {
 		executions++
 		if executions == 1 {
 			code, found := cbackend.TrapCode("assertion-failed")
@@ -178,7 +183,7 @@ func TestNativeWorkspaceTestsCaptureExactProgramStreamsAndStripTrapReceipt(t *te
 	}
 	var stderr bytes.Buffer
 	outcomes, code := runNativeWorkspaceTestsWith(
-		program, tests, cdriver.LowProfile, nativeWorkspaceTestInput{}, nil, true, &stderr, compile, execute,
+		program, tests, cdriver.LowProfile, nativeWorkspaceTestInput{}, nil, time.Minute, true, &stderr, compile, execute,
 	)
 	if code != ExitSuccess || stderr.String() != "" || len(outcomes) != 2 ||
 		outcomes[0].trapCategory != "assertion-failed" || outcomes[0].stdout != string([]byte{0, 0xff}) ||
@@ -211,10 +216,11 @@ func TestNativeWorkspaceTestsRejectProgramOutputAndUnreceiptedExit(t *testing.T)
 				cdriver.LowProfile,
 				nativeWorkspaceTestInput{},
 				nil,
+				time.Minute,
 				false,
 				&stderr,
 				compile,
-				func(cdriver.WindowsHostArtifact, io.Reader, []string) (cdriver.WindowsHostOutcome, error) {
+				func(cdriver.WindowsHostArtifact, io.Reader, []string, time.Duration) (cdriver.WindowsHostOutcome, error) {
 					return test.outcome, nil
 				},
 			)

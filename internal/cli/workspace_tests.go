@@ -8,7 +8,9 @@ import (
 	"io"
 	"path"
 	"slices"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/0disoft/fairyc/internal/ast"
 	"github.com/0disoft/fairyc/internal/cdriver"
@@ -29,23 +31,26 @@ const stableWorkspaceTestReportSchema = "fairyc.test-report/v2"
 const stableLocatedTestListSchema = "fairyc.test-list/v3"
 const stableLocatedTestReportSchema = "fairyc.test-report/v3"
 const stableCapturedTestReportSchema = "fairyc.test-report/v4"
+const stableNativeTestTimeoutSeconds = 60
 
 type stableTestOptions struct {
-	locked        bool
-	native        bool
-	release       bool
-	stdin         bool
-	stdinFile     string
-	captureOutput bool
-	list          bool
-	json          bool
-	locations     bool
-	workspace     bool
-	packageUID    string
-	files         []string
-	directories   []string
-	exact         []string
-	programArgs   []string
+	locked          bool
+	native          bool
+	release         bool
+	stdin           bool
+	stdinFile       string
+	timeoutSeconds  int
+	timeoutExplicit bool
+	captureOutput   bool
+	list            bool
+	json            bool
+	locations       bool
+	workspace       bool
+	packageUID      string
+	files           []string
+	directories     []string
+	exact           []string
+	programArgs     []string
 }
 
 type stableTestListReport struct {
@@ -238,7 +243,7 @@ func runStableTest(arguments []string, sourceRoot string, stdin io.Reader, stdou
 			nativeInput.replay = contents
 			nativeInput.replayEach = true
 		}
-		outcomes, code = runNativeWorkspaceTests(checked.MIR, tests, profile, nativeInput, options.programArgs, options.captureOutput, stderr)
+		outcomes, code = runNativeWorkspaceTests(checked.MIR, tests, profile, nativeInput, options.programArgs, time.Duration(options.timeoutSeconds)*time.Second, options.captureOutput, stderr)
 	} else {
 		outcomes, code = runInterpreterWorkspaceTests(checked.MIR, tests, stderr)
 	}
@@ -467,7 +472,7 @@ func parseStableTestOptions(arguments []string) (stableTestOptions, error) {
 }
 
 func parseStableTestCompilerOptions(arguments []string) (stableTestOptions, error) {
-	options := stableTestOptions{}
+	options := stableTestOptions{timeoutSeconds: stableNativeTestTimeoutSeconds}
 	seen := make(map[string]bool, 7)
 	files := make(map[string]bool)
 	directories := make(map[string]bool)
@@ -495,6 +500,24 @@ func parseStableTestCompilerOptions(arguments []string) (stableTestOptions, erro
 			}
 			seen[argument] = true
 			options.stdinFile = arguments[index+1]
+			index++
+			continue
+		}
+		if argument == "--timeout-seconds" {
+			if index+1 >= len(arguments) || strings.HasPrefix(arguments[index+1], "--") {
+				return stableTestOptions{}, fmt.Errorf(`command "test" requires canonical seconds after --timeout-seconds`)
+			}
+			if seen[argument] {
+				return stableTestOptions{}, fmt.Errorf(`command "test" received --timeout-seconds more than once`)
+			}
+			value := arguments[index+1]
+			seconds, err := strconv.Atoi(value)
+			if err != nil || strconv.Itoa(seconds) != value || seconds < 1 || seconds > stableNativeTestTimeoutSeconds {
+				return stableTestOptions{}, fmt.Errorf(`command "test" requires --timeout-seconds in canonical range 1 through %d`, stableNativeTestTimeoutSeconds)
+			}
+			seen[argument] = true
+			options.timeoutSeconds = seconds
+			options.timeoutExplicit = true
 			index++
 			continue
 		}
@@ -574,7 +597,7 @@ func parseStableTestCompilerOptions(arguments []string) (stableTestOptions, erro
 	if len(options.directories) != 0 && (len(options.files) != 0 || len(options.exact) != 0) {
 		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --dir with --file or --exact`)
 	}
-	if options.list && (options.native || options.release || options.stdin || options.stdinFile != "" || options.captureOutput || len(options.exact) != 0) {
+	if options.list && (options.native || options.release || options.stdin || options.stdinFile != "" || options.timeoutExplicit || options.captureOutput || len(options.exact) != 0) {
 		return stableTestOptions{}, fmt.Errorf(`command "test" does not combine --list with --native, --release, --stdin, --stdin-file, --capture-output, or --exact`)
 	}
 	if options.release && !options.native {
@@ -582,6 +605,9 @@ func parseStableTestCompilerOptions(arguments []string) (stableTestOptions, erro
 	}
 	if options.stdin && !options.native {
 		return stableTestOptions{}, fmt.Errorf(`command "test" requires --native when --stdin is supplied`)
+	}
+	if options.timeoutExplicit && !options.native {
+		return stableTestOptions{}, fmt.Errorf(`command "test" requires --native when --timeout-seconds is supplied`)
 	}
 	if options.stdinFile != "" && !options.native {
 		return stableTestOptions{}, fmt.Errorf(`command "test" requires --native when --stdin-file is supplied`)
